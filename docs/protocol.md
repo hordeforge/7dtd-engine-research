@@ -385,7 +385,7 @@ Any Zig clone should pass the same golden sizes for PosAndRot / RelPos / AliveFl
 | [network.md](network.md) | Interest + scale |
 | [closed-gaps.md](closed-gaps.md) | Package band thresholds |
 | [engine-limitations.md](engine-limitations.md) | Net ceilings |
-| [inventory-netpackages.md](inventory-netpackages.md) | All type names |
+| [inventories/netpackages.md](inventories/netpackages.md) | All type names |
 | DEDI_COMPLETE auto §3 | Full package name list |
 | loadgen PackageCodec | Golden implementations |
 

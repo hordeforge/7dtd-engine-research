@@ -1,13 +1,13 @@
 # Manager-like types with Update* methods
 
 **Kind:** inventory table (not primary narrative).  
-**Prefer:** [`managers.md`](managers.md) (manager Update table).  
-**Hub:** [`INDEX.md`](INDEX.md) · Inventories section.
+**Prefer:** [`managers.md`](../managers.md) (manager Update table).  
+**Hub:** [`INDEX.md`](../INDEX.md) · Inventories section.
 
 
 **Owns:** raw inventory of types with `Update*` (auto-style list).  
-**Prefer narrative:** [`managers.md`](managers.md) for dedi-relevant Update ILs + ModEvents.  
-**Hub:** [`INDEX.md`](INDEX.md).
+**Prefer narrative:** [`managers.md`](../managers.md) for dedi-relevant Update ILs + ModEvents.  
+**Hub:** [`INDEX.md`](../INDEX.md).
 
 
 - `AchievementManager::UpdateAchievement(EnumAchievementDataStat,Single)` IL=34 MB=False

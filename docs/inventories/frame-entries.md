@@ -1,8 +1,8 @@
 # All MonoBehaviour-like Update/LateUpdate/FixedUpdate (V3.0.1)
 
 **Kind:** inventory table (not primary narrative).  
-**Prefer:** [`loop.md`](loop.md) §1.  
-**Raw:** [`../il/frame-entries-v3.0.1/`](../il/frame-entries-v3.0.1/).
+**Prefer:** [`loop.md`](../loop.md) §1.  
+**Raw:** [`../il/frame-entries-v3.0.1/`](../../il/frame-entries-v3.0.1/).
 
 | Type | Base | Method | IL |
 |---|---|---|---:|

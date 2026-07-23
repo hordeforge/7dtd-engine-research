@@ -8,8 +8,10 @@
 
 ```text
 docs/              generic engine narratives (this folder)
-il/                regenerable Mono.Cecil dumps only
-7days-realworld/     RealEarth product docs (private companion, not published)
+docs/inventories/  raw method/call inventories backing the narratives
+il/                regenerable Mono.Cecil dumps only (local; not in git)
+oss-tools/         survey notes on third-party server tools/mods
+7days-realworld/   RealEarth product docs (private companion, not published)
 ```
 
 ---
@@ -45,7 +47,7 @@ flowchart LR
 | **Stock ceilings (any dedi)** | [engine-limitations.md](engine-limitations.md) → measured-scaling → loop |
 | **Zig / custom dedi clone** | [zig-clone.md](zig-clone.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
 | Wire / join / golden packages | protocol → **protocol-frames** → network → loadgen PackageCodec |
-| Frame / gmUpdate | loop → loop-gmupdate → inventory-gmupdate-calls |
+| Frame / gmUpdate | loop → loop-gmupdate → inventories/gmupdate-calls |
 | Entities / AI / path | entity-ai → closed-gaps → aidirector |
 | World / chunks / save | world-chunks → save-region → terrain-height |
 | Net | network → closed-gaps |
@@ -142,14 +144,14 @@ Product Streamed state machines (tiles, inject gate, SoloSlide): see product ``r
 
 | Doc | Prefer instead |
 |---|---|
-| [inventory-frame-entries.md](inventory-frame-entries.md) | loop.md |
-| [inventory-gmupdate-calls.md](inventory-gmupdate-calls.md) | loop-gmupdate.md |
-| [inventory-manager-updates.md](inventory-manager-updates.md) | managers.md |
-| [inventory-loop-complete.md](inventory-loop-complete.md) | loop.md, save-region.md |
-| [inventory-deeper.md](inventory-deeper.md) | entity-ai.md |
-| [inventory-gaps.md](inventory-gaps.md) | closed-gaps.md |
-| [inventory-opt-scan.md](inventory-opt-scan.md) | optim OPTIMIZATION_CANDIDATES |
-| [inventory-netpackages.md](inventory-netpackages.md) | protocol.md, network.md |
+| [inventories/frame-entries.md](inventories/frame-entries.md) | loop.md |
+| [inventories/gmupdate-calls.md](inventories/gmupdate-calls.md) | loop-gmupdate.md |
+| [inventories/manager-updates.md](inventories/manager-updates.md) | managers.md |
+| [inventories/loop-complete.md](inventories/loop-complete.md) | loop.md, save-region.md |
+| [inventories/deeper.md](inventories/deeper.md) | entity-ai.md |
+| [inventories/gaps.md](inventories/gaps.md) | closed-gaps.md |
+| [inventories/opt-scan.md](inventories/opt-scan.md) | optim OPTIMIZATION_CANDIDATES |
+| [inventories/netpackages.md](inventories/netpackages.md) | protocol.md, network.md |
 
 ---
 

@@ -1,7 +1,7 @@
 # Managers and ModEvents (dedicated V3.0.1)
 
 **Owns:** gmUpdate-relevant manager Update ILs + full `ModEvents` field list.  
-**Raw inventory (all Update* names):** [`inventory-manager-updates.md`](inventory-manager-updates.md).  
+**Raw inventory (all Update* names):** [`inventories/manager-updates.md`](inventories/manager-updates.md).  
 **Dumps:** [`../il/dedi-complete-v3.0.1/`](../il/dedi-complete-v3.0.1/) §2, §11; [`../il/loop-complete-v3.0.1/`](../il/loop-complete-v3.0.1/).  
 **Loop context:** [`loop.md`](loop.md) §10.
 

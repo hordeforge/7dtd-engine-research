@@ -1,9 +1,9 @@
 # NetPackage type inventory (V3.0.1 dedicated)
 
 **Kind:** inventory table (not primary narrative).  
-**Prefer:** [`protocol.md`](protocol.md), [`protocol-frames.md`](protocol-frames.md) (visual), [`network.md`](network.md).  
-**Raw:** [`../il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md`](../il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md) §3.  
-**Hub:** [`INDEX.md`](INDEX.md).
+**Prefer:** [`protocol.md`](../protocol.md), [`protocol-frames.md`](../protocol-frames.md) (visual), [`network.md`](../network.md).  
+**Raw:** [`../il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md`](../../il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md) §3.  
+**Hub:** [`INDEX.md`](../INDEX.md).
 
 Count: **194** types with `NetPackage` name prefix in live dedi dump.
 

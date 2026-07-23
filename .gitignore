@@ -1,18 +1,5 @@
 # Regenerable Mono.Cecil dumps - may contain game IL excerpts; never distribute.
-il/
-# Third-party upstream clones (have their own git histories); our analysis of
-# them lives in docs/ and oss-tools/NOTES.md.
-7dtd-ServerTools/
-oss-BackupMod/
-oss-CSMM/
-oss-discord-log-hook/
-oss-IceCoffee-ServerKit/
-oss-lag-shield/
-oss-MVirus/
-oss-OCB-Electricity/
-oss-OCB-StopFuel/
-oss-SphereII/
-oss-Allocs/
-naiwazi/
-# Binary payloads inside our own notes dirs
+il/*
+!il/README.md
+# Binary payloads
 *.zip

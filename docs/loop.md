@@ -56,7 +56,7 @@ Confirmed **server-relevant** peers (have `Update`/`LateUpdate`/`FixedUpdate` an
 | Entity* hierarchy | Update / FixedUpdate | various | Transform / physics cosmetics if GO active (see §3.3) |
 | Turret / trap controllers | Update | 100-467 | If powered TE entities present in world |
 
-**Hundreds** of other MonoBehaviour Updates exist (avatars, UI, vp_*, NGUI, lights, demos). Treat as **client/editor/test** unless a dedicated world spawns those components. Full inventory: [`inventory-frame-entries.md`](inventory-frame-entries.md) (242 MB methods).
+**Hundreds** of other MonoBehaviour Updates exist (avatars, UI, vp_*, NGUI, lights, demos). Treat as **client/editor/test** unless a dedicated world spawns those components. Full inventory: [`inventories/frame-entries.md`](inventories/frame-entries.md) (242 MB methods).
 
 ### 1.2 Frame order (logical, not Unity script-order absolute)
 
@@ -95,7 +95,7 @@ flowchart TB
 
 ## 2. `gmUpdate` phases (631 IL, 6× IsDedicatedServer)
 
-Full ordered call list: [`inventory-gmupdate-calls.md`](inventory-gmupdate-calls.md) (182 calls).  
+Full ordered call list: [`inventories/gmupdate-calls.md`](inventories/gmupdate-calls.md) (182 calls).  
 Detailed phase narrative: [`loop-gmupdate.md`](loop-gmupdate.md).
 
 | Phase | Work | Dedicated notes | Cost scale |
@@ -337,7 +337,7 @@ ProtocolManager.Update → server: ProcessPackages (× clients × channels), Flu
 | Twitch* | - | waste if constructed |
 | ThreadManager.UpdateMainThreadTasks | 64 | Drains main queue |
 
-Full manager Update inventory: [`inventory-manager-updates.md`](inventory-manager-updates.md).
+Full manager Update inventory: [`inventories/manager-updates.md`](inventories/manager-updates.md).
 
 ---
 
@@ -432,7 +432,7 @@ GameManager.LateUpdate
   └─ MeshDataManager.LateUpdate
 ```
 
-Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.Update`, `SdtdConsole.Update`, … See loop and [`inventory-frame-entries.md`](inventory-frame-entries.md).
+Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.Update`, `SdtdConsole.Update`, … See loop and [`inventories/frame-entries.md`](inventories/frame-entries.md).
 ## Related docs
 
 | Doc | Role |

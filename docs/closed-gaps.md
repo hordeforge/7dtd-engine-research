@@ -1,11 +1,11 @@
 # Gap-closing synthesis (V3.0.1)
 
 **Owns:** closed IL-solvable gaps (timer 20 Hz, AIDirector install, ASP→A*, net bands).
-**Loop:** [`loop.md`](loop.md). **Auto:** [`inventory-gaps.md`](inventory-gaps.md).
+**Loop:** [`loop.md`](loop.md). **Auto:** [`inventories/gaps.md`](inventories/gaps.md).
 **Hub:** [`INDEX.md`](INDEX.md).
 
 Closes several **IL-solvable** open items from [`loop.md`](loop.md) §14.  
-Raw notes: [`inventory-gaps.md`](inventory-gaps.md). Tool: `tools/DumpGaps.cs`.
+Raw notes: [`inventories/gaps.md`](inventories/gaps.md). Tool: `tools/DumpGaps.cs`.
 
 ---
 
@@ -125,7 +125,7 @@ From annotated `NetEntityDistributionEntry.updatePlayerList` (509 IL):
 |---|---|
 | `Entity.Update` / `EntityAlive.Update` | **No** `IsDedicatedServer` check in method bodies |
 | Contents | Transform, network stats, progression, model fade (not AI) |
-| Spawn `set_enabled` / `SetActive` | Few hits in factory/spawn paths (see inventory-gaps §5b); **not** a clear “disable all MB on dedi” pattern |
+| Spawn `set_enabled` / `SetActive` | Few hits in factory/spawn paths (see inventories/gaps.md §5b); **not** a clear “disable all MB on dedi” pattern |
 
 **Still open (runtime):** whether remote zombie GOs keep `enabled=true` on pure dedicated. IL does not prove cull. Dual-path cost remains a **measure** item.
 
@@ -149,7 +149,7 @@ From name hints on 242 MB Update types:
 
 - **Likely dedicated-relevant:** ~33 (GameManager, ConnectionManager, DynamicMeshManager, Entity*, turrets/traps, Origin, …)  
 - **Likely client/editor:** majority (vp_*, UI, Avatar, Camera, LocalPlayer, …)  
-- **Unclassified:** remainder (see inventory-gaps §8)
+- **Unclassified:** remainder (see inventories/gaps.md §8)
 
 Heuristic only; presence still depends on whether component exists in dedicated scene/world.
 

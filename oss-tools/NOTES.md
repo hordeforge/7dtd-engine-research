@@ -1,15 +1,15 @@
 # Open-source 7DTD tools survey (optimizer lens)
 
 **Date:** 2026-07-16  
-**Scope:** public GitHub (and related) tools cloned under `research/oss-*`, plus prior notes on ServerTools and NAIWAZI.  
+**Scope:** public GitHub (and related) tools cloned locally (not tracked here; see source links below), plus prior notes on ServerTools and NAIWAZI.  
 **Purpose:** extract **architecture and performance lessons** for EfficientServer / APM / loadgen, not a product catalog or install guide.
 
 **Already covered in dedicated notes:**
 
 | Topic | Path |
 |---|---|
-| NAIWAZI ServerKit (paid GS+Gateway, free AC/Bot) | [`../naiwazi/NOTES.md`](../naiwazi/NOTES.md) |
-| ServerTools (dmustanger / ObsessiveCoder) | [`../7dtd-ServerTools/NOTES.md`](../7dtd-ServerTools/NOTES.md) |
+| NAIWAZI ServerKit (paid GS+Gateway, free AC/Bot) | [`naiwazi.md`](naiwazi.md) |
+| ServerTools (dmustanger / ObsessiveCoder) | [`servertools.md`](servertools.md) |
 
 **Local clones (this survey):**
 
@@ -420,7 +420,7 @@ Threading / extract-sim / full hot-path catalog: [`../../7dtd-optimizer/docs/SIM
 
 ## 13. Clone hygiene
 
-- Trees under `research/oss-*` are **research mirrors**; do not install wholesale onto measurement dedicated.  
+- Cloned trees are **research mirrors** (kept outside this repo); do not install wholesale onto measurement dedicated.  
 - Expect API rot (lag-shield A20, BackupMod 2022, ServerTools GH 2023). SphereII and IceCoffee are fresher but still not V3.0.1-certified here.  
 - Do not redistribute game assemblies from any `References/` or `sdk/` folders.  
 - Paid NAIWAZI packages remain out of scope (see naiwazi NOTES).

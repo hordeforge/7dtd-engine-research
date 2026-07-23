@@ -1,7 +1,7 @@
 # `gmUpdate` structure (V3.0.1 dedicated RE)
 
 **Owns:** gmUpdate phase narrative (detail under [`loop.md`](loop.md) §2).  
-**Call list:** [`inventory-gmupdate-calls.md`](inventory-gmupdate-calls.md).  
+**Call list:** [`inventories/gmupdate-calls.md`](inventories/gmupdate-calls.md).  
 **Dump set:** [`../il/gmUpdate-v3.0.1/`](../il/gmUpdate-v3.0.1/).  
 **Hub:** [`INDEX.md`](INDEX.md).
 

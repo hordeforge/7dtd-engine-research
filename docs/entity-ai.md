@@ -3,7 +3,7 @@
 **Owns:** authority entity tick chain, AI/path onion, thresholds (merged deep + deeper synthesis).  
 **Loop context:** [`loop.md`](loop.md), [`loop-gmupdate.md`](loop-gmupdate.md).  
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md) §4 (AI volume, path ≤8, dual paths).  
-**Auto inventory:** [`inventory-deeper.md`](inventory-deeper.md).  
+**Auto inventory:** [`inventories/deeper.md`](inventories/deeper.md).  
 **Dumps:** `il/deep-v3.0.1/`, `il/deeper-v3.0.1/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
@@ -401,7 +401,7 @@ Graded optim candidates + APM probe list: [`../../7dtd-optimizer/docs/OPTIMIZATI
 
 # Deeper synthesis (thresholds and scale)
 
-Companion detail formerly in entity-ai. Raw auto: [`inventory-deeper.md`](inventory-deeper.md).
+Companion detail formerly in entity-ai. Raw auto: [`inventories/deeper.md`](inventories/deeper.md).
 
 
 ## 1. Per-entity cost onion (when a zombie is ticked)
@@ -649,7 +649,7 @@ Graded candidates and experiment order live in the optimizer project (not under 
 
 ## 14. File map in this dump
 
-- `inventory-deeper.md`, auto narrative + lists  
+- `inventories/deeper.md`, auto narrative + lists  
 - `*_il.txt` / `*_calls.md`, per-method  
 - `SYNTHESIS.md`, this file  
 - Parent index: [`INDEX.md`](INDEX.md)  

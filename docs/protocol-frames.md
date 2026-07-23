@@ -639,7 +639,7 @@ Details: [network.md](network.md) §2.
 |---|---|
 | [protocol.md](protocol.md) | Join SM, narrative |
 | [network.md](network.md) | Interest / scaling |
-| [inventory-netpackages.md](inventory-netpackages.md) | Type census |
+| [inventories/netpackages.md](inventories/netpackages.md) | Type census |
 | loadgen PackageCodec | Golden builders |
 
 ## Changelog

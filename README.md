@@ -23,6 +23,16 @@ Start at [`docs/INDEX.md`](docs/INDEX.md).
 - **Network, protocol, GC/runtime tuning, aggressive-optimization catalog** -
   each with measurements and refutations.
 
+## Layout
+
+```text
+docs/              engine narratives (loop, entities/AI, network, protocol, ...)
+docs/INDEX.md      hub: reading paths, one-home-per-topic table
+docs/inventories/  raw method/call inventories backing the narratives
+oss-tools/         survey notes on third-party server tools and mods
+il/                regenerable IL dump output (local only, never committed)
+```
+
 Companion projects (the tooling and mod the research fed): a Harmony
 optimization mod, an APM/profiling suite, and a load generator.
 
