@@ -1,7 +1,7 @@
 # Light, stability, mesh, water, deco (dedicated V3.0.1)
 
 **Owns:** light/stability/mesh/water/deco method maps + stock 255 ceilings (generic engine).  
-**Product expand checklist:** [`../../7days-realworld/docs/realearth-surfaces.md`](../../7days-realworld/docs/realearth-surfaces.md) §7.1.  
+**Product expand checklist:** `7days-realworld/docs/realearth-surfaces.md` §7.1.  
 **Dumps:** `../il/dedi-complete-v3.0.1/` §7, `../il/realearth-surfaces-v3.0.1/` SAVE_LIGHT.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
@@ -50,7 +50,7 @@ stateDiagram-v2
 | `MeshGeneratorMC2` light helpers | 255 |
 | `Chunk.ResetStability*` | 256 |
 
-Full scan list: `../../7days-realworld/docs/realearth-surfaces.md` §7.1.
+Full scan list: `7days-realworld/docs/realearth-surfaces.md` §7.1.
 
 ---
 
@@ -109,7 +109,7 @@ Full scan list: `../../7days-realworld/docs/realearth-surfaces.md` §7.1.
 
 | Doc | Role |
 |---|---|
-| [realearth-surfaces.md](../../7days-realworld/docs/realearth-surfaces.md) | Expand checklist |
+| `realearth-surfaces.md` | Expand checklist |
 | [terrain-height.md](terrain-height.md) | YDim context |
 
 ## Changelog

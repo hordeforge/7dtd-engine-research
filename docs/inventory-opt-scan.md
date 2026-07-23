@@ -5,7 +5,7 @@
 **Raw IL:** [`../il/opt-scan-v3.0.1/`](../il/opt-scan-v3.0.1/).
 
 Generated: 2026-07-16 10:19:44Z
-Assembly: `/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`
+Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`
 
 
 ## Largest methods (IL count): scan selected type name prefixes

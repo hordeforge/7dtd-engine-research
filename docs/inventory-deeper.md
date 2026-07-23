@@ -9,7 +9,7 @@
 # Deeper RE notes (V3.0.1 dedicated)
 
 Generated UTC: 2026-07-18 04:55:06Z
-Assembly: `/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`
+Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`
 
 Documentation only. No game IL redistribution as product.
 

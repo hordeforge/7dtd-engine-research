@@ -3,7 +3,7 @@
 **Owns:** world tick, generateTerrain trampoline, load/send, SetBlock path (generic engine).  
 **Index math:** §2 below + [`terrain-height.md`](terrain-height.md).  
 **Save path:** [`save-region.md`](save-region.md).  
-**Product Streamed inject:** [`../../7days-realworld/docs/realearth-runtime.md`](../../7days-realworld/docs/realearth-runtime.md).  
+**Product Streamed inject:** `7days-realworld/docs/realearth-runtime.md`.  
 **Dumps:** `../il/loop-complete-v3.0.1/`, `../il/realearth-surfaces-v3.0.1/`, `../il/dedi-complete-v3.0.1/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
@@ -38,7 +38,7 @@ flowchart LR
 
 ## 2. Chunk storage model
 
-Summary (product-oriented deep write-up: [`realearth-surfaces.md`](../../7days-realworld/docs/realearth-surfaces.md)):
+Summary (product-oriented deep write-up: ``realearth-surfaces.md``):
 
 ```mermaid
 flowchart TB
@@ -149,7 +149,7 @@ stateDiagram-v2
 |---|---|
 | [save-region.md](save-region.md) | Chunk write/read |
 | [terrain-height.md](terrain-height.md) | YDim / height |
-| [realearth-surfaces.md](../../7days-realworld/docs/realearth-surfaces.md) | Product surfaces |
+| `realearth-surfaces.md` | Product surfaces |
 
 ## Changelog
 

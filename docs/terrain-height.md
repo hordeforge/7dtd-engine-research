@@ -2,8 +2,8 @@
 
 **Owns:** WorldConstants YDim, height API inventory, stock vs expand pin (generic engine).  
 **Chunk index / save-64:** [`world-chunks.md`](world-chunks.md), [`save-region.md`](save-region.md).  
-**Product height policy:** [`../../7days-realworld/docs/HEIGHT_LIMITS.md`](../../7days-realworld/docs/HEIGHT_LIMITS.md).  
-**Product Streamed inject:** [`../../7days-realworld/docs/realearth-runtime.md`](../../7days-realworld/docs/realearth-runtime.md).  
+**Product height policy:** `7days-realworld/docs/HEIGHT_LIMITS.md`.  
+**Product Streamed inject:** `7days-realworld/docs/realearth-runtime.md`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 ---
@@ -95,14 +95,14 @@ RealEarth Streamed product path: postfix/replace **provider GenerateTerrain** + 
 | Doc | Role |
 |---|---|
 | [`loop.md`](loop.md) | Dedicated frame/sim loop (entities, managers) |
-| [`../../7days-realworld/docs/realearth-runtime.md`](../../7days-realworld/docs/realearth-runtime.md) | Streamed inject/session lessons (tall crust, fail-closed, expand+inject) |
-| [`../../7days-realworld/docs/realearth-review.md`](../../7days-realworld/docs/realearth-review.md) | Adversarial failure classes (uint8 stamp, dual-fill hang, inject gate) |
+| `7days-realworld/docs/realearth-runtime.md` | Streamed inject/session lessons (tall crust, fail-closed, expand+inject) |
+| `7days-realworld/docs/realearth-review.md` | Adversarial failure classes (uint8 stamp, dual-fill hang, inject gate) |
 | [`../il/README.md`](../il/README.md) | Dump policy |
-| [`../../7days-realworld/docs/HEIGHT_LIMITS.md`](../../7days-realworld/docs/HEIGHT_LIMITS.md) | Product vertical policy |
-| [`../../7days-realworld/docs/MODIFICATIONS.md`](../../7days-realworld/docs/MODIFICATIONS.md) | All mod classes beyond YDim |
-| [`../../7days-realworld/docs/ENGINE_LIMITATIONS.md`](../../7days-realworld/docs/ENGINE_LIMITATIONS.md) | RealEarth 1:1 Earth limit map |
+| `7days-realworld/docs/HEIGHT_LIMITS.md` | Product vertical policy |
+| `7days-realworld/docs/MODIFICATIONS.md` | All mod classes beyond YDim |
+| `7days-realworld/docs/ENGINE_LIMITATIONS.md` | RealEarth 1:1 Earth limit map |
 | [engine-limitations.md](engine-limitations.md) | Generic dedi ceilings (height + others) |
-| [`../../7days-realworld/DESIGN.md`](../../7days-realworld/DESIGN.md) | 1:1 product design |
+| `7days-realworld/DESIGN.md` | 1:1 product design |
 
 ## Managed RE status (height family)
 
@@ -111,10 +111,10 @@ Non-IL residuals only: [`residuals.md`](residuals.md). Product soak/ops items ar
 
 | Item | Status |
 |---|---|
-| Chunk GetBlock / density Y index | **CLOSED**, § Chunk indexing; [`../../7days-realworld/docs/realearth-surfaces.md`](../../7days-realworld/docs/realearth-surfaces.md) §1 |
+| Chunk GetBlock / density Y index | **CLOSED**, § Chunk indexing; `7days-realworld/docs/realearth-surfaces.md` §1 |
 | Chunk write/read layer loop bound | **CLOSED**, hardcoded **64**; `World.toBlockY` = `y & 255` |
 | Height API inventory (byte vs float) | **CLOSED**, this doc + TERRAIN dumps |
-| Light/sun/mesh sites loading **255** | **CLOSED** inventory, [`light-mesh-water.md`](light-mesh-water.md), [realearth-surfaces.md](../../7days-realworld/docs/realearth-surfaces.md) §7.1 |
+| Light/sun/mesh sites loading **255** | **CLOSED** inventory, [`light-mesh-water.md`](light-mesh-water.md), `realearth-surfaces.md` §7.1 |
 | RegionFileRaw type map + header constants | **CLOSED**, [`save-region.md`](save-region.md) |
 | WorldState.SaveLoad managed structure | **CLOSED**, save-region (IL=884) |
 
@@ -123,7 +123,7 @@ Non-IL residuals only: [`residuals.md`](residuals.md). Product soak/ops items ar
 | Item | Class |
 |---|---|
 | Live inject soak under expand (H500 → Everest) | Product verification |
-| SoloSlide full chunk voxel reinject | Product residual ([`../../7days-realworld/docs/realearth-review.md`](../../7days-realworld/docs/realearth-review.md)) |
+| SoloSlide full chunk voxel reinject | Product residual (`7days-realworld/docs/realearth-review.md`) |
 | Stock Origin vs SoloSlide session policy | Product (pure dedi Origin FixedUpdate is no-op) |
 | Expand patcher regression after TFP update | Process residual (post-patch IL drift) |
 | Optional sector payload hand-annotation | [`residuals.md`](residuals.md) |
@@ -151,10 +151,10 @@ Expand must grow `m_BlockLayers` length (`ChunkBlockLayers`) with YDim; XZ formu
 
 | Doc | Why |
 |---|---|
-| [realearth-surfaces.md](../../7days-realworld/docs/realearth-surfaces.md) | GetBlock index, save-64, light 255 sites |
+| `realearth-surfaces.md` | GetBlock index, save-64, light 255 sites |
 | [save-region.md](save-region.md) | Chunk write/read, WorldState |
 | [world-chunks.md](world-chunks.md) | Gen trampoline, dirty lifecycle |
-| [realearth-runtime.md](../../7days-realworld/docs/realearth-runtime.md) | Product inject + tall fill policy |
+| `realearth-runtime.md` | Product inject + tall fill policy |
 
 ## Product inject lessons (from runtime work)
 
@@ -168,7 +168,7 @@ Not pure engine RE, but closed several "height looks wrong" classes:
 | Gen-thread sync load | Inject path may sync-load tiles; miss TTL must not block allowSyncLoad |
 | Stamp surface Y | int32 only; uint8 wraps and buries H500+ |
 
-Full catalog: [`../../7days-realworld/docs/realearth-review.md`](../../7days-realworld/docs/realearth-review.md).
+Full catalog: `7days-realworld/docs/realearth-review.md`.
 
 ## Changelog
 

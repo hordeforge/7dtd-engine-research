@@ -48,14 +48,14 @@ flowchart TD
 | Chunk write/read layer bound 64 | save-region.md |
 | WorldState.SaveLoad structure | save-region.md + dedi-complete §5 |
 | Origin.FixedUpdate on dedicated | **No-op:** `IsDedicatedServer` → early `ret` (loop.md) |
-| Land claims / PPL accessor | dedi-complete + product [realearth-surfaces.md](../../7days-realworld/docs/realearth-surfaces.md) (product SoloSlide) |
+| Land claims / PPL accessor | dedi-complete + product `realearth-surfaces.md` (product SoloSlide) |
 | ModEvents field inventory | managers.md |
 | NetPackage type census (~196) | network.md + dedi-complete §3 |
 | Light/stability/mesh/water method map | light-mesh-water.md |
 | Manager Update IL table | managers.md |
 | ChunkBlockChannel Read/Write | dedi-complete §12 (IL=151/120) |
-| Prefab.CopyIntoLocal entry | product [realearth-surfaces](../../7days-realworld/docs/realearth-surfaces.md) / dump IL=680 |
-| Entity/ChunkManager OriginChanged bodies | product [realearth-surfaces](../../7days-realworld/docs/realearth-surfaces.md) (Origin section) |
+| Prefab.CopyIntoLocal entry | product `realearth-surfaces` / dump IL=680 |
+| Entity/ChunkManager OriginChanged bodies | product `realearth-surfaces` (Origin section) |
 
 ---
 
@@ -81,8 +81,8 @@ brtrue → ret    // dedicated: return immediately
 | [protocol.md](protocol.md) | Wire residuals vs closed golden packages |
 | [zig-clone.md](zig-clone.md) | Clone readiness matrix |
 | [INDEX.md](INDEX.md) | Research hub |
-| Product status (not residuals) | [`../../7days-realworld/docs/MODIFICATIONS.md`](../../7days-realworld/docs/MODIFICATIONS.md) |
-| Product failure catalog | [`../../7days-realworld/docs/realearth-review.md`](../../7days-realworld/docs/realearth-review.md) |
+| Product status (not residuals) | `7days-realworld/docs/MODIFICATIONS.md` |
+| Product failure catalog | `7days-realworld/docs/realearth-review.md` |
 
 ## Changelog
 

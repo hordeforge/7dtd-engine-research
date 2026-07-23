@@ -1,7 +1,7 @@
 # Stock dedicated engine limitations (V3.0.1)
 
 **Owns:** generic stock engine ceilings and structural limits for dedicated multiplayer (sim, net, world, memory, process).  
-**Not:** RealEarth product attack plan ([product ENGINE_LIMITATIONS](../../7days-realworld/docs/ENGINE_LIMITATIONS.md)), optim backlog ([OPTIMIZATION_CANDIDATES](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)), permanent non-IL residuals only ([residuals.md](residuals.md)).  
+**Not:** RealEarth product attack plan (`product ENGINE_LIMITATIONS`), optim backlog ([OPTIMIZATION_CANDIDATES](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)), permanent non-IL residuals only ([residuals.md](residuals.md)).  
 **Hub:** [INDEX.md](INDEX.md).  
 **Live scale numbers:** [measured-scaling.md](measured-scaling.md).  
 **Loop map:** [loop.md](loop.md).
@@ -107,7 +107,7 @@ Combat across chunks **already works** if coordinates are shared. Per-player pri
 | **256 means Y and XZ map area** | patcher notes | Blind replace corrupts 16×16 maps | **Hard** | Vertical-only site list |
 | **Chunk write/read layer loop `i < 64`** | [save-region.md](save-region.md) IL hardcoded | Expand must rewrite save/load loops, not only WorldConstants | **Hard** | Patcher sites + soak |
 | **`World.toBlockY` = `y & 255`** | light-mesh-water / surfaces | Mask clips tall Y | **Hard** | Expand Y-bound methods |
-| **Light / stability / mesh start at 255/256** | [light-mesh-water.md](light-mesh-water.md) | Tall columns wrong sun/mesh without expand | **Hard** | Expand checklist ([realearth-surfaces](../../7days-realworld/docs/realearth-surfaces.md) §7.1) |
+| **Light / stability / mesh start at 255/256** | [light-mesh-water.md](light-mesh-water.md) | Tall columns wrong sun/mesh without expand | **Hard** | Expand checklist (`realearth-surfaces` §7.1) |
 | **Static full-column RAM** | design | Tall expand × many chunks = RAM death | **Hard** | Near-term accept cost; long-term sparse Y |
 | **Practical loaded edge ~8k-16k** | ops + engine practice | Not a planet; gen/save weight | **Hard** | Stream / small host (RealEarth) or finite bake |
 | **Flat rectangle world** | no sphere topology | No over-pole paths | **Soft** | Equirectangular policy (product LON_LAT) |
@@ -175,11 +175,11 @@ Combat across chunks **already works** if coordinates are shared. Per-player pri
 
 | Concern | Generic (this doc) | RealEarth product |
 |---|---|---|
-| YDim / byte height | §5 | [ENGINE_LIMITATIONS](../../7days-realworld/docs/ENGINE_LIMITATIONS.md) §1, [HEIGHT_LIMITS](../../7days-realworld/docs/HEIGHT_LIMITS.md) |
+| YDim / byte height | §5 | `ENGINE_LIMITATIONS` §1, `HEIGHT_LIMITS` |
 | Planet XZ / stream | Practical 8k-16k | Stream absolute + LocalWindow |
 | Player O(N²) | §2 | Density caps still required in cities |
 | Origin slide | Dedi Origin no-op | SoloSlide / SharedFixed product policy |
-| Status Done/Partial | Never here | [MODIFICATIONS](../../7days-realworld/docs/MODIFICATIONS.md) only |
+| Status Done/Partial | Never here | `MODIFICATIONS` only |
 
 ```text
 Generic ceilings (this file)
@@ -204,7 +204,7 @@ Generic ceilings (this file)
 | [measured-scaling.md](measured-scaling.md) | Live O(N) laws |
 | [runtime-tuning.md](runtime-tuning.md) | GC / FPS knobs |
 | [residuals.md](residuals.md) | Non-IL permanent gaps |
-| [product ENGINE_LIMITATIONS](../../7days-realworld/docs/ENGINE_LIMITATIONS.md) | 1:1 Earth blockers + attack path |
+| `product ENGINE_LIMITATIONS` | 1:1 Earth blockers + attack path |
 | [protocol.md](protocol.md) | Wire framing (clone / custom dedi) |
 | [zig-clone.md](zig-clone.md) | Zig redesign that avoids these walls |
 | [HOST_TUNING](../../7dtd-optimizer/docs/HOST_TUNING.md) | CCD / NUMA / disk |

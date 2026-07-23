@@ -1,15 +1,15 @@
 # 7DTD dedicated RE documentation (generic engine)
 
 **Owns:** hub for **generic** dedicated engine RE narratives + dump index.  
-**Not:** RealEarth product status/lessons (`7days-realworld/docs/`).  
+**Not:** RealEarth product status/lessons (`7days-realworld`, private companion project, not published).  
 **Game:** V3.0.1 dedicated `Assembly-CSharp.dll`.  
 **Policy:** research only. Do not redistribute game IL or managed DLLs.  
 **Coverage bar:** dedicated-relevant **managed** surfaces. Open leftovers: [`residuals.md`](residuals.md).
 
 ```text
-research/docs/              generic engine narratives (this folder)
-research/il/                regenerable Mono.Cecil dumps only
-7days-realworld/docs/       RealEarth product docs (runtime, surfaces, review, …)
+docs/              generic engine narratives (this folder)
+il/                regenerable Mono.Cecil dumps only
+7days-realworld/     RealEarth product docs (private companion, not published)
 ```
 
 ---
@@ -30,7 +30,7 @@ research/il/                regenerable Mono.Cecil dumps only
 flowchart LR
   A[coverage] --> B[loop]
   B --> C[generic family docs]
-  C --> D[research/il dumps]
+  C --> D[il/ dumps]
   B --> E[residuals]
   C -.->|product only| RE[7days-realworld/docs]
 ```
@@ -54,8 +54,8 @@ flowchart LR
 | Live APM scale | measured-scaling |
 | What's slow + why (ranked) | bottlenecks |
 | Process / GC / FPS knobs | runtime-tuning |
-| **RealEarth product limits** | [`../../7days-realworld/docs/ENGINE_LIMITATIONS.md`](../../7days-realworld/docs/ENGINE_LIMITATIONS.md) |
-| **RealEarth product hub** | [`../../7days-realworld/docs/INDEX.md`](../../7days-realworld/docs/INDEX.md) |
+| **RealEarth product limits** | `7days-realworld/docs/ENGINE_LIMITATIONS.md` |
+| **RealEarth product hub** | `7days-realworld/docs/INDEX.md` |
 | EfficientServer optim | [`../../7dtd-optimizer/docs/`](../../7dtd-optimizer/docs/) |
 
 ### Key engine state machines (generic)
@@ -70,7 +70,7 @@ flowchart LR
 | World save/load | [save-region.md](save-region.md) §1 |
 | Origin FixedUpdate (dedi no-op) | [loop.md](loop.md) §1 / §12 |
 
-Product Streamed state machines (tiles, inject gate, SoloSlide): see product [`realearth-runtime.md`](../../7days-realworld/docs/realearth-runtime.md).
+Product Streamed state machines (tiles, inject gate, SoloSlide): see product ``realearth-runtime.md``.
 
 ---
 
@@ -98,15 +98,15 @@ Product Streamed state machines (tiles, inject gate, SoloSlide): see product [`r
 | APM scaling measurements | measured-scaling.md |
 | Runtime / GC / FPS knobs | runtime-tuning.md |
 
-| Topic | File (product `7days-realworld/docs/`) |
+| Topic | File (product `7days-realworld/docs/`, private, not published) |
 |---|---|
-| Streamed runtime lessons | [realearth-runtime.md](../../7days-realworld/docs/realearth-runtime.md) |
-| Engine surfaces used by RealEarth | [realearth-surfaces.md](../../7days-realworld/docs/realearth-surfaces.md) |
-| Adversarial review catalog | [realearth-review.md](../../7days-realworld/docs/realearth-review.md) |
-| Product status Done/Partial | [MODIFICATIONS.md](../../7days-realworld/docs/MODIFICATIONS.md) |
-| Lon/lat dual coords | [LON_LAT.md](../../7days-realworld/docs/LON_LAT.md) |
-| Absolute → inject path | [ABSOLUTE_STREAMING.md](../../7days-realworld/docs/ABSOLUTE_STREAMING.md) |
-| Product hub | [INDEX.md](../../7days-realworld/docs/INDEX.md) |
+| Streamed runtime lessons | `realearth-runtime.md` |
+| Engine surfaces used by RealEarth | `realearth-surfaces.md` |
+| Adversarial review catalog | `realearth-review.md` |
+| Product status Done/Partial | `MODIFICATIONS.md` |
+| Lon/lat dual coords | `LON_LAT.md` |
+| Absolute → inject path | `ABSOLUTE_STREAMING.md` |
+| Product hub | `INDEX.md` |
 
 ---
 
@@ -153,7 +153,7 @@ Product Streamed state machines (tiles, inject gate, SoloSlide): see product [`r
 
 ---
 
-## Dump sets (`research/il/`)
+## Dump sets (`il/`)
 
 Generic engine dumps plus surfaces dump consumed by RealEarth product docs.
 
@@ -169,7 +169,7 @@ Policy: [`../il/README.md`](../il/README.md).
 
 ## Tools
 
-Mono.Cecil dumpers live under `7dtd-optimizer/tools/` (regenerate into `research/il/`):
+Mono.Cecil dumpers live under `7dtd-optimizer/tools/` (regenerate into `il/`):
 
 ```text
 DumpGmUpdate  DumpFrameEntries  DumpDeep  DumpDeeper  DumpGaps
@@ -181,7 +181,7 @@ DumpRealEarthSurfaces  DumpDediComplete  DumpSaveLight
 # Example (paths on this machine; stop game first if targeting live Managed)
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 cd 7dtd-optimizer/tools
-mono DumpDediComplete.exe "$ASM" ../../research/il/dedi-complete-v3.0.1
+mono DumpDediComplete.exe "$ASM" ../../7dtd-research/il/dedi-complete-v3.0.1
 ```
 
 Structural gate: `uv run python 7dtd-optimizer/tools/tests/test_dedi_coverage_docs.py`  
