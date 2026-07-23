@@ -314,7 +314,7 @@ Deco (330) + vehicle/drone managers are non-trivial even with few players.
 
 ---
 
-## 11. Cost model (for optim / conductor)
+## 11. Per-entity / per-frame cost model (structure)
 
 Per **ticked** AI entity roughly:
 
@@ -340,23 +340,22 @@ gmUpdate manager fan-out (power, vehicles, drones, twitch, …)
 
 ---
 
-## 12. EfficientServer / conductor hooks (refined)
+## 12. Interception points and path-queue RE notes
 
-| Hook | What you control | Stock already |
-|---|---|---|
-| `EntityActivityUpdate` / scale writes | Who gets 1.0 / 0.3 / 0.1 | Bands above |
-| `updateTasks` Prefix | Skip all AI+nav for far (stronger than scale) | ES far skip |
-| `EAIManager.Update` / `EAITaskList` | Decision frequency only | Delay scale inside list |
-| `EntityAlive.FindPath` / `PathFinderThread.FindPath` | **Admission** on enqueue | Queue per entity id (last write wins in dict) |
-| `TickEntities` / slice count | Who enters TickEntity at all | EMA slice |
-| `AddFallingBlock` / `LetBlocksFall` | Collapse storms | Queue + entities |
-| `NetEntityDistribution.OnUpdateEntities` | Interest CPU (high risk) | Angle/distance filters |
-| `DecoManager.UpdateTick` | Always-on 330 IL | ES may skip music; deco separate |
-| Peer `ConnectionManager` / `DynamicMeshManager` | Not under gmUpdate | Own Updates |
+Where a patcher/clone could hook, and what stock already does there, is a
+structural fact; which of these is worth a lever (and its measured payoff/risk) is
+optimizer-owned: see [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)
+and [`../../7dtd-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-optimizer/docs/SIM_PARALLELISM.md).
 
-**Path queue note:** `finishedPaths[entityId] = …` means repeated FindPath for same entity **replaces** pending work (natural coalesce by id). Admission still needed when **many entities** each request once per EAI pulse.
+RE facts relevant to any such hook:
 
-**ASP vs AStar:** production uses **ASP + coroutine**. Do not assume `ThreadManager` path workers unless RE shows AStar installed (mods/old versions).
+**Path queue:** `finishedPaths[entityId] = …` means a repeated FindPath for the same
+entity **replaces** pending work (natural coalesce by id). Many distinct entities
+each requesting once per EAI pulse still all enqueue.
+
+**ASP vs AStar:** production uses **ASP + coroutine** (`ASPPathFinderThread`). Do not
+assume `ThreadManager` path workers unless RE shows AStar installed (mods/old
+versions).
 
 ---
 
@@ -374,37 +373,28 @@ Stock `EAITaskList.OnUpdateTasks` is exactly the serial loop IceCoffee wrapped i
 | [closed-gaps.md](closed-gaps.md) | Timer, path ASP, net bands |
 | [aidirector.md](aidirector.md) | Component inventory |
 | [network.md](network.md) | Entity replication cost |
-| [measured-scaling.md](measured-scaling.md) | Live AI vs player exponents |
+| [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) | Live AI vs player exponents |
+
+Graded optim candidates + APM probe list: [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md).
 
 ## 15. Regenerate
 
 ```bash
-cd 7dtd-optimizer/tools
-mcs -r:Mono.Cecil.dll -out:DumpDeep.exe DumpDeep.cs
-mono DumpDeep.exe "$DS/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll" \
-  ../../research/il/deep-VERSION
+cd tools && ./build.sh
+mono bin/legacy/DumpDeep.exe "$DS/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll" \
+  ../il/deep-v3.0.1
 ```
 
-Also keep [`../il/gmUpdate-v3.0.1/`](../il/gmUpdate-v3.0.1/) for frame-level dump.
+Also keep [`../il/gmUpdate-v3.0.1/`](../il/gmUpdate-v3.0.1) for frame-level dump.
 
 ---
 
-## See also
-
-Graded optim candidates + APM probe list: [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md).
-
-## Changelog
-- **2026-07-16:** Link opt-scan candidates.
-- **2026-07-16:** Deep dump: updateTasks LOD vs always-on nav; EAITaskList; ASPPathFinderThread production path; LetBlocksFall; NetEntityDistribution; manager IL sizes; optim hook table.
-
----
-
-# Deeper synthesis (thresholds and scale)
+## Deeper synthesis (thresholds and scale)
 
 Companion detail formerly in entity-ai. Raw auto: [`inventories/deeper.md`](inventories/deeper.md).
 
 
-## 1. Per-entity cost onion (when a zombie is ticked)
+## D1. Per-entity cost onion (when a zombie is ticked)
 
 ```text
 TickEntity
@@ -441,7 +431,7 @@ Most zombies use **base** `EntityAlive` paths (not a fat zombie-specific updateT
 
 ---
 
-## 2. EAI task cost ranking (method size)
+## D2. EAI task cost ranking (method size)
 
 Top decision tasks (when EAI Update runs):
 
@@ -465,9 +455,9 @@ UAI package path also present (`UAIBase`, considerations, MoveToTarget, etc.).
 
 ---
 
-## 3. Documented thresholds (from IL constants)
+## D3. Documented thresholds (from IL constants)
 
-### 3.1 AI LOD (`EntityActivityUpdate`)
+### D3.1 AI LOD (`EntityActivityUpdate`)
 
 | Constant | Meaning (research interpretation) |
 |---|---|
@@ -478,14 +468,14 @@ UAI package path also present (`UAIBase`, considerations, MoveToTarget, etc.).
 | dist² **625** / **3025** | Cloth sim radii (~25 m / ~55 m) |
 | ints **20**, **60**, **4** | Related to `aiClosest` list sizing / FastClamp (player-count aware) |
 
-### 3.2 Path request (`EntityAlive.FindPath`)
+### D3.2 Path request (`EntityAlive.FindPath`)
 
 | Constant | Meaning |
 |---|---|
 | xz dist² **1225** (~35 m) | Below: skip vertical clamp; **still always enqueues** path |
 | **±45** m Y | Clamp target height when far horizontally |
 
-### 3.3 EAI timing
+### D3.3 EAI timing
 
 | Constant | Where | Meaning |
 |---|---|---|
@@ -493,11 +483,11 @@ UAI package path also present (`UAIBase`, considerations, MoveToTarget, etc.).
 | **1.0** | `updateTasks` | Reset `aiActiveDelay` after EAI/UAI runs |
 | **10** / **0.008333334** | `EAIManager.Update` | `interestDistance` ease toward 10 |
 
-### 3.4 Path follow (`ASPPathNavigate.pathFollow`, 160 IL)
+### D3.4 Path follow (`ASPPathNavigate.pathFollow`, 160 IL)
 
 Floats seen: **0.04, 0.15, 0.2, 0.33, 0.49, 0.6, 0.7, 0.9, 2** (waypoint / progress thresholds; exact semantics need line-level read of dump).
 
-### 3.5 Net interest (`NetEntityDistributionEntry.updatePlayerList`)
+### D3.5 Net interest (`NetEntityDistributionEntry.updatePlayerList`)
 
 | Constant | Likely role (hypothesis from encode context) |
 |---|---|
@@ -506,11 +496,11 @@ Floats seen: **0.04, 0.15, 0.2, 0.33, 0.49, 0.6, 0.7, 0.9, 2** (waypoint / progr
 | **128 / 192 / 256** | Encoded pos/rot quantize ranges |
 | Package set | RelPosAndRot, PosAndRot, Teleport, Rotation, Velocity, AliveFlags, PlayerStats, TwitchStats, Equipment |
 
-### 3.6 Spawn (`SpawnUpdate`)
+### D3.6 Spawn (`SpawnUpdate`)
 
 Floats **1, 2.5, 4, 40, 80** (ranges / multipliers). Many GameStats/Prefs int ids in method.
 
-### 3.7 Path worker budget (critical)
+### D3.7 Path worker budget (critical)
 
 `ASPPathFinderThread/<FindPaths>d__8.MoveNext`:
 
@@ -529,7 +519,7 @@ Under blood moon, queue depth grows; main still enqueues unbounded FindPaths.
 
 ---
 
-## 4. MoveHelper anatomy (why 1236 IL matters)
+## D4. MoveHelper anatomy (why 1236 IL matters)
 
 Call breakdown themes:
 
@@ -546,7 +536,7 @@ Any far entity still running `updateTasks` pays this. Far skip of updateTasks av
 
 ---
 
-## 5. Path system fields (ASP vs AStar)
+## D5. Path system fields (ASP vs AStar)
 
 Both concrete types share:
 
@@ -560,7 +550,7 @@ AStar also: `threadInfo`, `writerThreadWaitHandle`
 
 ---
 
-## 6. GameTimer (authoritative ticks)
+## D6. GameTimer (authoritative ticks)
 
 `updateTimer(bool)`:
 
@@ -572,7 +562,7 @@ AStar also: `threadInfo`, `writerThreadWaitHandle`
 
 ---
 
-## 7. Spatial query surface (optim relevance)
+## D7. Spatial query surface (optim relevance)
 
 ### GetClosestPlayer callers (few but hot)
 
@@ -588,7 +578,7 @@ Push physics, turrets, traps, EAI target find, break block, falling entities, sp
 
 ---
 
-## 8. Falling / sleeper / deco (world systems)
+## D8. Falling / sleeper / deco (world systems)
 
 | System | Notes |
 |---|---|
@@ -601,7 +591,7 @@ Push physics, turrets, traps, EAI target find, break block, falling entities, sp
 
 ---
 
-## 9. Manager chain sizes (gmUpdate every frame if instance)
+## D9. Manager chain sizes (gmUpdate every frame if instance)
 
 | Manager | Update IL |
 |---|---:|
@@ -615,26 +605,26 @@ Push physics, turrets, traps, EAI target find, break block, falling entities, sp
 
 ---
 
-## 10. Dynamic mesh server
+## D10. Dynamic mesh server
 
 `DynamicMeshServer.Update` (452): concurrent queues, client count, `NetPackageDynamicMesh`, send, connection map. Separate from entity AI; competes for main frame with gmUpdate peer order.
 
 ---
 
-## 11. Chunk load determination
+## D11. Chunk load determination
 
 `DetermineChunksToLoad` (448): bucket hash sets, locks, union/except chunk key sets, unload, free chunk GOs. Driven by player positions / view. Ops lever: view distance. Harmony rare.
 
 ---
 
-## 12. Optim ideas derived here
+## D12. Optim ideas derived here
 
-Graded candidates and experiment order live in the optimizer project (not under `research/docs/` or `research/il/`):  
+Graded candidates and experiment order live in the optimizer project (not under `docs/` or `il/`):  
 [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)
 
 ---
 
-## 13. APM / loadgen scenarios to pair with dumps
+## D13. APM / loadgen scenarios to pair with dumps
 
 | Scenario | Expect stacks |
 |---|---|
@@ -647,19 +637,16 @@ Graded candidates and experiment order live in the optimizer project (not under 
 
 ---
 
-## 14. File map in this dump
+## D14. File map in this dump
 
 - `inventories/deeper.md`, auto narrative + lists  
 - `*_il.txt` / `*_calls.md`, per-method  
-- `SYNTHESIS.md`, this file  
+- this file  
 - Parent index: [`INDEX.md`](INDEX.md)  
 
-Regenerate: `tools/DumpDeeper.cs`.
+Regenerate: `tools/legacy/DumpDeeper.cs` (build via [`../tools/`](../tools/)).
 
 ---
-
-## Changelog (merged source 2)
-- **2026-07-16:** Initial deeper synthesis: onion costs, EAI rank, thresholds, path drain 8, MoveHelper themes, net packages, scenarios.
 
 ## Addendum (2026-07-21): server-side zombie animators
 
@@ -669,9 +656,9 @@ both, so every server zombie runs a real `AvatarZombieController` with enabled
 animators at `AlwaysAnimate` (plus a forced `SetVisible(true)`). Gameplay reads the
 animator three ways (root-motion displacement into `Entity.motion`, attack-cadence
 tag-hash in `IsAnimationAttackPlaying`, stun state), so the strip cannot simply be
-extended - the viable lever is animator LOD (manual low-rate `Animator.Update` for
-calm/distant zombies). Engine-side cost hides in unsymbolized UnityPlayer.so CPU
-(~22% all-thread at heavy load); sizing via the `es animoff/animon` diagnostic.
+extended (any mitigation, e.g. animator LOD, is an optimizer lever, not stock RE).
+Engine-side cost hides in unsymbolized UnityPlayer.so CPU (~22% all-thread at heavy
+load; sized via the optimizer's `es animoff/animon` diagnostic).
 Zombie anim params are never netsynced (`SyncAnimParameters` is player-only) -
 clients animate zombies locally.
 
@@ -681,15 +668,48 @@ frame is additionally WAIT-bound: the main thread is only ~52% busy at 166 ms
 frames (~550 voluntary switch-outs/s = engine job-fence ping-pong), and disabling
 animators sends it to 95% busy - the animation jobs' FENCES, not just their
 compute, dominate the 64p engine mass. GC stop-the-world is exonerated (179 ms per
-120 s window). The animator-LOD lever (v1.15.0) helps only dispersed populations:
-during clustered sieges the correctness exemptions (near/attacking) cover the
-horde. See `7dtd-optimizer/docs/RESULTS.md` §3m-3o.
+120 s window). Lever status (which mitigations help, and when) is optimizer-owned:
+see [`../../7dtd-optimizer/docs/RESULTS.md`](../../7dtd-optimizer/docs/RESULTS.md) §3m-3o.
 
 **Per-zombie tick cost, fully attributed (2026-07-21, 8p + ~224z):** OnUpdateLive
 is 22.1 us/zombie/tick (vs 36 at 64p - the delta is player-linked fence share):
 **MoveEntityHeaded (movement + collision integration) 54%**, updateTasks (EAI +
-path follow) 27%, CanSee 6%, block-pos 6%, stats 4%. The biggest reducible piece
-is the collision/movement integration - crowd-collision LOD is the ranked next
-lever. At 8 players there is NO CPU ceiling: frame pinned at 50 ms through ~250
+path follow) 27%, CanSee 6%, block-pos 6%, stats 4%. The largest single piece is the
+collision/movement integration. At 8 players there is NO CPU ceiling: frame pinned at 50 ms through ~250
 standing zombies (93.7% headroom); the horde caps at spawn equilibrium (exploder
 chains), not the server. See RESULTS §3q.
+
+---
+
+## Addendum (2026-07-23): root-motion delivery + the enabled-toggle wedge
+
+Measured live (`es animstate` probe, optimizer RESULTS 3s):
+
+- **Server zombie locomotion is root-motion-driven.** The chain is
+  `AvatarRootMotion.OnAnimatorMove` (MonoBehaviour beside the Animator) ->
+  `AvatarController.NotifyAnimatorMove` -> `EntityAlive.NotifyRootMotion`
+  (`accumulatedRootMotion += animator.deltaPosition`). With the animator dead a
+  zombie only shuffles on the supplementary displacement path.
+- **`Animator.enabled` off->on permanently kills the delta on these rigs.** The
+  state machine resumes (state hash advances, `applyRootMotion=true`, forwarder
+  enabled) but `deltaPosition` reads 0.0000 forever (healthy: 0.17-0.28 per
+  eval). `Rebind()` + re-pushing one-shot params (`SetAlive`,
+  `SetWalkType`/`TurnIntoCrawler`) does not revive it.
+- **One-shot animator params:** `WalkType` (per-class 1-8) and `IsAlive` are
+  written at spawn only; the AI rewrites `MovementState` continuously. `Rebind`
+  wipes all of them; only the one-shots stay wrong afterward.
+- **Culling correction:** live healthy zombies sit at `cullingMode =
+  CullUpdateTransforms` (the earlier "forced AlwaysAnimate" note is not the
+  steady state), and the wight class runs `applyRootMotion=false` entirely.
+- **Corpses stay in `world.Entities.list`** with death-disabled animators -
+  any naive animator sweep must skip `IsDead()` entities or dead bodies pose
+  back upright as statues.
+
+---
+
+## Changelog
+
+- **2026-07-23:** Root-motion delivery chain + enabled-toggle wedge addendum.
+- **2026-07-16:** Link opt-scan candidates.
+- **2026-07-16:** Deep dump: updateTasks LOD vs always-on nav; EAITaskList; ASPPathFinderThread production path; LetBlocksFall; NetEntityDistribution; manager IL sizes; optim hook table.
+- **2026-07-16:** Initial deeper synthesis: onion costs, EAI rank, thresholds, path drain 8, MoveHelper themes, net packages, scenarios.
