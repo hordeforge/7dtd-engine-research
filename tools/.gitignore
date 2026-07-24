@@ -1,0 +1,16 @@
+# Build artifacts and the third-party Cecil binary (regenerable via build.sh).
+bin/
+Mono.Cecil.dll
+*.exe
+tests/_out/
+
+# Raw IL dump trees (game IL excerpts; never distribute - regenerable, kept local).
+*.il.txt
+BiomeWeather/
+SkyManager/
+WeatherGroup/
+WeatherManager/
+WeatherPackage/
+WeatherParams/
+WeatherSurvivalParametersFromXml/
+NetPackageWeather/
