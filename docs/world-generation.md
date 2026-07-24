@@ -422,6 +422,53 @@ itself carries no world data; the generated world is entirely the §5 artifacts.
 
 ---
 
+## Prefab/decoration data leaves
+
+Small prefab/decoration types adjacent to this doc (inventoried in
+[`inventories/dedicated-leaves.md`](inventories/dedicated-leaves.md)). Notably,
+none of them are RWG-time: the first three are runtime server logic, the last
+three are client render/UI and out of scope here.
+
+- **`BiomeBlockDecoration`** (base `Object`) is one parsed `biomes.xml`
+  decoration/resource rule: `blockValues`, `prob`, `clusterProb`,
+  `randomRotateMax`, `checkResourceOffsetY`. `WorldBiomes.parseBiome` builds it
+  into `BiomeDefinition` deco lists and `BiomeLayer` resources; it is consumed
+  at runtime chunk decoration, not RWG, by
+  `WorldDecoratorBlocksFromBiome.decorateSingleBlockTryPlaceDeco` and
+  `WorldBlockFiller.fillLevel` ([`chunk-providers.md`](chunk-providers.md)).
+  `GetRandomRotation` scales a random float into a rotation byte and folds
+  values 4..7 up by +24 into the extended-rotation range (`ldc.i4.4 / sub` then
+  `ldc.i4.s 24 / add`); `BlockModelTree.OnBlockPlaced` reuses it.
+- **`PrefabListData`** (nested `QuestEventManager/PrefabListData`, base
+  `Object`) is runtime quest data, not RWG placement: a
+  `Dictionary<int, List<PrefabInstance>>` (`TierData`) bucketing placed POIs by
+  `Prefab.DifficultyTier`. `AddPOI` inserts by tier and `ShuffleDifficulty`
+  shuffles one tier's list with a `GameRandom`;
+  `QuestEventManager.SetupTraderPrefabList` builds one per trader area for
+  quest-POI selection. Server-side.
+- **`GorePrefab`** (base `RootTransformRefEntity`, a MonoBehaviour) rides on
+  gore GameObjects spawned by the `Avatar*Controller.SpawnLimbGore`
+  dismemberment paths; its `Start` plays the `Sound` one-shot on the owning
+  entity unless `_restoreState` is set. Client render/audio effect; irrelevant
+  on dedicated.
+- **`PrefabGroupEntry`** (nested `XUiC_PrefabGroupList/PrefabGroupEntry`, base
+  `XUiListEntry<T>`) is a prefab-browser list row (`name`, `filterString`) with
+  `CompareTo` ordering and substring `MatchesSearch` for the in-game prefab
+  editor UI. Client XUi, out of scope.
+- **`PrefabGameObject`** (one nested in `PrefabLODManager`, a second in
+  `PrefabPreviewManager`, fields only: `meshPath`, `prefabInstance`, `go`,
+  `isAllShown`, `signDatas`) holds an instantiated POI imposter mesh for
+  `PrefabLODManager.BuildGameObjectFromMeshInfo` / `LoadImposterSigns`. Client
+  distant-POI rendering, out of scope.
+- **`EventPrefabsClient`** (base `Object`) is the client-side receiver for
+  server-announced game-event prefabs: constructed in `World.LoadWorld` over
+  the local `PrefabCache` + `DynamicPrefabDecorator`, with `TryAdd`/`Remove`
+  driven by `NetPackageEventPrefab.ProcessPackage` and
+  `NetPackageWorldInitInfo.ProcessPackage`. Client-only mirror of server prefab
+  state, out of scope.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -436,3 +483,7 @@ itself carries no world data; the generated world is entirely the §5 artifacts.
 ## Changelog
 
 - **2026-07-23:** Initial `WorldGenerationEngineFinal` reversal: entry chain, stage pipeline, run lifecycle + threading, output formats, PrefabVolumes markers, SDF settings format.
+- **2026-07-24:** Added prefab/decoration data leaves: `BiomeBlockDecoration`,
+  `QuestEventManager/PrefabListData` (both runtime, not RWG), and the
+  client-only `GorePrefab`, `PrefabGroupEntry`, `PrefabGameObject`,
+  `EventPrefabsClient`.

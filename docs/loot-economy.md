@@ -312,6 +312,46 @@ package as NPC traders, so the server stays authoritative over the machine's inv
 
 ---
 
+## Loot-entry requirement + trader-stage leaves
+
+Per-entry `<requirement class="...">` elements in `loot.xml` attach a
+`List<BaseLootEntryRequirement>` to a `LootContainer.LootEntry`:
+`LootFromXml.ParseLootEntryRequirement` resolves the type from the prefix
+`"LootEntryRequirement"` + class and calls its `Init(XElement)`. At roll time
+`LootEntry.HasRequirements(EntityPlayer)` ANDs every `CheckRequirement(player)`; it is
+called from `LootContainer.SpawnAllItemsFromList` and `getProbability`, i.e. inside the
+server-side generation path of section 2, so these predicates run on the dedicated
+server with the opening player as input. The base `CheckRequirement` defaults to true.
+Numeric leaves derive from the intermediate `BaseOperationLootEntryRequirement`, whose
+`CheckRequirement` compares `LeftSide(player)` against `RightSide(player)` under an
+`operation` attribute (enum with `Equals`/`NotEquals`/`Less`/`Greater`/`LTE`/`GTE`
+aliases; an unrecognized operation passes). A sixth sibling,
+`LootEntryRequirementSandboxOption`, exists in the same family but is outside this
+doc's scope.
+
+| Leaf | Predicate (key method, from IL) |
+|---|---|
+| `LootEntryRequirementBiome` | `CheckRequirement`: the comma-split `biomes` attribute contains `player.biomeStandingOn.m_sBiomeName` (case-insensitive `ContainsCaseInsensitive`). Missing attribute means an empty array, so it never passes |
+| `LootEntryRequirementCVar` | `LeftSide` = `player.Buffs.GetCustomVar(cvar)` (0 if player is null); `RightSide` = float-parsed `value`. Compared via `operation` |
+| `LootEntryRequirementProgression` | `LeftSide` = `player.Progression.GetProgressionValue(name).GetCalculatedLevel(player)` (0 if player or value missing); `RightSide` = float-parsed `value` |
+| `LootEntryRequirementQuestTags` | `CheckRequirement`: false with no `QuestJournal.ActiveQuest`, else `ActiveQuest.QuestTags.Test_AnySet(quest_tags)` (any-overlap, not all) |
+| `LootEntryRequirementRandomRoll` | `LeftSide` = `Mathf.Lerp(minMax.x, minMax.y, GameEventManager.Current.Random.RandomFloat)`; `RightSide` = `GameEventManager.GetFloatValue(player, value, 0)`, so the threshold can reference game-event variables |
+
+**Trader stage templates.** `TraderStageTemplate` is a plain `{Min, Max, Quality}`
+record whose `IsWithin(traderStage, quality)` passes when the stage sits inside
+`[Min, Max]` and the quality equals `Quality`, with `-1` meaning "unbounded/any" for
+each field. `TraderStageTemplateGroup` is a named list of those records; its
+`IsWithin` is a plain OR over members. `TradersFromXml.ParseTraderStageTemplate` loads
+`<traderstage_template name="...">` with `<entry min/max/quality>` children from
+`traders.xml` into the static `Dictionary<string, TraderStageTemplateGroup>
+TraderManager.TraderStageTemplates`. **Client-only in practice:** the only evaluators
+are `XUiC_TraderWindow.FilterByName` and `XUiC_CategoryList.SetupCategoriesBasedOnItems`,
+which filter the displayed trader stock by the player's trader stage and item quality.
+The dedicated server parses the templates but never calls `IsWithin`; they do not gate
+what `TraderManager.HandleFullReset` puts in stock.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -327,3 +367,7 @@ package as NPC traders, so the server stays authoritative over the machine's inv
 ## Changelog
 
 - **2026-07-23:** Initial loot/trader/economy reversal: server loot generation lifecycle (`LootContainer` + `TEFeatureStorage` + `LootManager`, touched flags, respawn timer, quest reset), trader restock interval and pricing (`TraderManager`, `XUiM_Trader`), open-hour presets and the physical `TraderArea`, and rentable vending machines, with state machines.
+- **2026-07-24:** Added leaf narration for the `BaseLootEntryRequirement` family (biome,
+  cvar, progression, quest-tag, random-roll predicates gating `LootEntry` rolls) and the
+  `TraderStageTemplate` / `TraderStageTemplateGroup` stock-filter records (client-only
+  evaluation).

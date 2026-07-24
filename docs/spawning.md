@@ -377,6 +377,46 @@ sleeper population enters the world through prefab placement here, then through
 
 ---
 
+## Spawn config leaves
+
+Small config/state types that orbit the spawners above (inventoried in
+[`inventories/dedicated-leaves.md`](inventories/dedicated-leaves.md)); all five
+run or fire on the dedicated server.
+
+- **`EntitySpawnerClassForDay`** (base `Object`) is the day-indexed schedule of
+  wave classes parsed from `spawning.xml`: a sparse `List<EntitySpawnerClass>`
+  (`days`, null-padded by `AddForDay`) that `Day(int)` resolves for the current
+  game day, with `bWrapDays` cycling past the end via modulo over `Count - 1`
+  and `bClampDays` holding the last entry. `EntitySpawner` (§4) calls `Day` in
+  its constructor, `Spawn`, and `SpawnManually` to pick the active wave class.
+- **`SpawnEntry`** (nested `GameEventManager/SpawnEntry`, base `Object`) tracks
+  one entity spawned by a game-event action sequence (`SpawnedEntity`, `Target`,
+  `Requester`, owning `GameEvent`, `IsAggressive`). Its only method,
+  `HandleUpdate`, enforces aggression: when `IsAggressive` and the entity has no
+  player attack target, it calls `World.GetClosestPlayer(entity, 500f, false)`
+  and `SetAttackTarget(target, 1000)`. Server-side game-event bookkeeping
+  ([`game-events.md`](game-events.md)).
+- **`SupplyCrateSpawn`** (nested `AIAirDrop/SupplyCrateSpawn`, base `Object`,
+  fields only: `Delay`, `SpawnPos`, `ChunkRef`) is one pending air-drop crate:
+  `AIAirDrop.CreateFlightPaths` queues it per flight path and `AIAirDrop.Tick`
+  counts down `Delay` then spawns the crate and removes the entry; `ChunkRef` is
+  the `ChunkObserver` that keeps the drop chunk loaded until then. Part of the
+  air-drop director component ([`aidirector.md`](aidirector.md)).
+- **`SPlayerSpawningData`** (nested `ModEvents/SPlayerSpawningData`, a
+  `ValueType`) is the payload struct for the `ModEvents.PlayerSpawning` hook:
+  `ClientInfo`, `ChunkViewDim`, `PlayerProfile`. `GameManager.RequestToSpawnPlayer`
+  constructs it and invokes the event by ref. This is an in-process mod-hook
+  data struct ([`managers.md`](managers.md) §2), not a wire format; nothing
+  serializes it.
+- **`SPlayerSpawnedInWorldData`** (nested `ModEvents/SPlayerSpawnedInWorldData`,
+  a `ValueType`) is the matching payload for `ModEvents.PlayerSpawnedInWorld`:
+  `ClientInfo`, `IsLocalPlayer`, `EntityId`, `RespawnType`, `Position`
+  (`Vector3i`). Fired by `GameManager.PlayerSpawnedInWorld` once the player
+  entity exists; consumed in-assembly by `DiscordManager`. Also in-process only,
+  not a wire struct.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -399,3 +439,6 @@ sleeper population enters the world through prefab placement here, then through
   decision cycle, per-chunk-area caps/cooldown/kill-attrition, wave/static/sleeper
   spawner, chunk-heat scout and screamer horde lifecycles, spawn-to-client
   replication path, and prefab-placement context, with state machines.
+- **2026-07-24:** Added spawn config leaves: `EntitySpawnerClassForDay`,
+  `GameEventManager/SpawnEntry`, `AIAirDrop/SupplyCrateSpawn`, and the two
+  `ModEvents` player-spawn payload structs.

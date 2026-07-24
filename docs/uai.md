@@ -381,6 +381,39 @@ naming a type `UAI.UAITaskFoo` / `UAI.UAIConsiderationFoo`.
 
 ---
 
+## Consideration leaves
+
+Per-leaf narration of the built-in scorers (raw-score formulas tabulated in §6;
+every raw score is then shaped by the response curve, §4). Each is a
+`UAI.UAIConsideration*` deriving `UAIConsiderationBase` with one
+`GetScore(Context, object)` override, instantiated once at XML parse and shared
+by all entities; none run in stock (dormant, §9), all are hot per candidate per
+decision once `AIPackages` is enabled.
+
+- **`UAIConsiderationSelfHealth`**: scores own vitality,
+  `(Health - min) / (max - min)`; `max` defaults to NaN and `GetScore` lazily
+  replaces it with `GetMaxHealth()` on first call (the §8 sentinel).
+- **`UAIConsiderationSelfVisible`**: scores own exposure to the candidate,
+  `(1 - headDistSq / GetSeeDistance()^2)` gated to 0 unless the *target* can see
+  self (`target.CanEntityBeSeen(self)`); 0 for non-entity candidates.
+- **`UAIConsiderationTargetDistance`**: linear ramp over squared distance,
+  `clamp01(max(0, distSq - min) / (max - min))` (Init squares `min`/`max`, ctor
+  default max 9126 ~ 95.5 m); near = 0, far = 1. Handles entity and Vector3
+  waypoint candidates, else 0.
+- **`UAIConsiderationTargetHealth`**: entity candidate: `Health / GetMaxHealth`;
+  Vector3 candidate: remaining hitpoint fraction of the block at that position,
+  `(MaxDamage - damage) / MaxDamage`; else 0.
+- **`UAIConsiderationTargetType`**: binary type filter; `Init` splits the
+  `type` parameter on commas, `GetScore` returns 1 if any listed type
+  (`Type.GetType` + `IsAssignableFrom`) matches the candidate's class (Vector3:
+  the `Block` subtype at that position), else 0.
+- **`UAIConsiderationTargetVisible`**: binary line of sight,
+  `CanEntityBeSeen(target)` for entities, `CanSee(pos)` for Vector3 waypoints
+  (helper internals are a §9 residual); a per-candidate LOS check every scored
+  decision.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -400,4 +433,5 @@ MONO_PATH=bin mono bin/DumpAll.exe "$ASM" ../il/full-v3.0.1 UAI
 
 ## Changelog
 
+- **2026-07-24:** Per-leaf consideration narration (`UAIConsideration*` GetScore mechanics).
 - **2026-07-23:** Initial `UAI.*` reversal: registry + context architecture, two-rate decision cadence, scoring pipeline (integer-division compensation quirk, last-positive-package selection quirk), response-curve formulas, task lifecycle state machine, PathBlocked waypoint injection, XML pipeline, stock-dormant status.

@@ -707,8 +707,53 @@ Measured live (`es animstate` probe, optimizer RESULTS 3s):
 
 ---
 
+## Focus + target-selection leaves
+
+Small leaf types orbiting the EAI stack, reversed from IL. The `AIFocus*`
+structs live in per-priority arrays inside the generic holder `AIFocus<T>`
+(`FocusTargets[]` indexed by `FocusPriority`: Highest=0, Gameplay, Move,
+Default); the Get methods scan from index 0, so the highest-priority live
+entry wins.
+
+- **`AIFocusAim`** (struct in `AIFocus<AIFocusAim>`): resolves a world-space
+  **aim point**. `GetActiveFocus` walks the priority slots, skips entries whose
+  `Target` is gone or whose distance condition fires, and returns the target's
+  belly/chest/head position (or raw `position`) per its `AIAimFocusOffset`
+  switch. Consumed only by `EntityBandit` (`GetAimTarget`, `GetHeadLookTarget`,
+  `updateTasks`).
+- **`AIFocusBody`** (struct in `AIFocus<AIFocusBody>`): resolves a **body yaw**
+  (float). `TryGetValue` returns a fixed `TargetYaw` if set, else
+  `EntityAlive.YawForTarget(TargetYawEntity)`; `GetActiveFocus` runs the same
+  priority scan. Consumed by `EntityBandit.CalcStrafeYawOffset`, set by the
+  debug task `EAIPathTest`.
+- **`AIFocusConditionDistance`** (struct embedded in both focus entries): an
+  expiry condition. `IsFocusDisabled` returns true when the entity is farther
+  from the anchor (stored `Vector3`, entity, or `Transform`) than
+  `ConditionalDistanceSq` (ctors square the passed distance); 0 disables the
+  check, and a dead anchor never disables.
+- **`EAIBlockingTargetTask`** (EAIBase, `MutexBits=1`, 16 IL total): a no-op
+  latch in the target-task list; `CanExecute`/`Continue` just return its
+  `canExecute` field. `EAIApproachAndAttackTarget.Update` sets it true when the
+  chase gives up (`homeTimeout` expiry: attack target cleared, give-up sound)
+  and false when the target damages the entity again. While latched it holds
+  the mutex above `SetNearestEntityAsTarget` (stock lists slot it at
+  `AITarget-2`), suppressing instant re-acquisition during the walk home.
+- **`EAISetNearestEntityAsTargetSorter`** (`IComparer<Entity>`, 22 IL):
+  `Compare` orders candidates ascending by `GetDistanceSq` from the owner, so
+  index 0 is nearest. Built in `EAISetNearestEntityAsTarget.Init`,
+  `EAISetNearestCorpseAsTarget.Init`, and `EntityVulture.SetSleeper`.
+
+Server relevance: the latch task and the sorter run for every stock
+zombie/animal (`entityclasses.xml` wires `BlockingTargetTask` +
+`SetNearestEntityAsTarget` into the AITarget lists). The `AIFocus*` trio is
+bandit-only (plus `EAIPathTest`), so like UAI ([`uai.md`](uai.md) §9) it is
+live code but dormant in stock content; NPC mods exercise it.
+
+---
+
 ## Changelog
 
+- **2026-07-24:** Focus + target-selection leaf narration (`AIFocus*` structs, `EAIBlockingTargetTask` give-up latch, nearest-entity sorter).
 - **2026-07-23:** Root-motion delivery chain + enabled-toggle wedge addendum.
 - **2026-07-16:** Link opt-scan candidates.
 - **2026-07-16:** Deep dump: updateTasks LOD vs always-on nav; EAITaskList; ASPPathFinderThread production path; LetBlocksFall; NetEntityDistribution; manager IL sizes; optim hook table.

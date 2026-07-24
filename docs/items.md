@@ -444,6 +444,44 @@ which is the anti-dupe / anti-cheat gate for inventory. Requests arrive as
 
 **Leaf catalog:** every instance is enumerated in [`inventories/item-actions.md`](inventories/item-actions.md) (the 38 `ItemAction` leaves).
 
+## Item leaf types (action-data, armor, world)
+
+Per-leaf narration for the remaining item-family leaves: four concrete
+runtime-state (`ItemActionData`) subclasses from section 4.1, the armor item
+class, and two small support types. Each action-data leaf is nested inside its
+owning action and instantiated by that action's
+`CreateModifierData(ItemInventoryData, actionIdx)` (section 4).
+
+| Leaf | Base | Owner | Extra runtime state and role |
+|---|---|---|---|
+| `ItemActionDataVomit` | `ItemActionDataLauncher` | `ItemActionVomit` | The AI vomit/spit projectile attack (cop-style). Adds telegraph state: `warningTime`, `numWarningsPlayed`, `numVomits`, `bAttackStarted`, `isActive`. `ExecuteAction` plays randomized warning sounds (`Entity.PlayOneShot`, `GameRandom` timing) before flagging the attack started, then counts vomits until `resetAttack`. Runs server-side for AI wielders. |
+| `ItemActionDynamicData` | `ItemActionAttackData` | `ItemActionDynamic` | Animation-driven melee sweep state: the cast `ray`/`rayStartPos`, `alreadyHitEnts`/`alreadyHitBlocks`/`alreadyHitProps` dedupe lists so one swing damages each target once, `lastWeaponHeadPosition` for the sweep trace, `IsHarvesting`, `attackTime`, plus a `CollisionParticleController` for water splashes (client cosmetic). Animator states (`AnimatorMeleeAttackState`, `AnimatorStateRaycast`) feed it into `ItemActionDynamic.Raycast`/`GrazeCast`. |
+| `ItemActionDynamicMeleeData` | `ItemActionDynamicData` | `ItemActionDynamicMelee` | Adds the player swing phase machine: `StaminaUsage`, `Attacking`, `HasReleased`, `HasFinished`; consumed by `canStartAttack`, `hitTarget`, and `harvestOnCompletion` (section 4.2's dynamic melee). |
+| `ItemActionReplaceBlockData` | `ItemActionDataRanged` | `ItemActionReplaceBlock` | Block replace/paint tool state: a `Nullable<BlockValue>` target block, `TextureFullArray PaintTextures`, `Density`, and `EnumReplaceMode`/`EnumReplacePaintMode`. `fireShotLater`/`replace` walk the `ChunkCluster` and emit one `BlockChangeInfo` per block via `replaceSingleBlock`, so the world edit itself is server-authoritative. |
+
+The non-action leaves:
+
+- **`ItemClassArmor`** (base `ItemClass`): the armor/clothing item class. `Init`
+  parses `EquipSlot` (an `EquipmentSlots` enum via `EnumUtils.Parse`),
+  `ArmorGroup`, `IsCosmetic` (with a `CosmeticID`), `KeepOnDeath`,
+  `AllowUnEquip`, `AutoEquip`, and `ReplaceByTag` from the item's
+  `DynamicProperties`; `CanEquip` and `KeepOnDeath` gate slot placement in the
+  `Equipment` container (section 6) and death-drop behavior.
+- **`ItemId`** (struct, nested `AIDirectorPlayerInventory/ItemId`): a compact
+  `(id, count)` pair whose `Read`/`Write` serialize both fields as `Int16`
+  (`kNetworkSize`). It is the AI director's tracked-item record, built by
+  `TrackedItemsFromBag`/`TrackedItemsFromInventory` and compared
+  order-independently to detect inventory changes
+  ([aidirector.md](aidirector.md)). Not the general item id, which lives in
+  `ItemValue.type` (section 2).
+- **`ItemWorldData`** (base `Object`): the context object for an item dropped
+  into the world; holds `gameManager`, `world`, the backing `EntityItem`, and
+  `belongsEntityId` (the dropper). Created by `ItemClass.CreateWorldData` in
+  `EntityItem.PostInit` and threaded through the `ItemClass.OnDroppedUpdate`,
+  `OnDamagedByExplosion`, and `OnMeshCreated` hooks, letting an `ItemClass`
+  customize its dropped-entity behavior.
+
 ## Changelog
 
+- **2026-07-24:** Leaf narration: the four concrete `ItemActionData` leaves (vomit, dynamic, dynamic melee, replace block), `ItemClassArmor`, the AI director's `ItemId`, and `ItemWorldData`.
 - **2026-07-23:** Initial item-framework reversal (ItemValue packing + ItemStack, ItemClass and the Actions array, the ItemAction contract and category tree, holding/use flow with primary/secondary interlock, toolbelt/bag/equipment containers, durability and permanent degradation, item to buff/MinEvent linkage) with state machines.

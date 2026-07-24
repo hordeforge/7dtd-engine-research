@@ -389,6 +389,34 @@ completion and the intro flow.
 
 ---
 
+## Quest criteria + reward leaves
+
+Small leaf types orbiting the quest engine that the main flow (§1-§5) only
+touches in passing:
+
+- **`BaseQuestCriteria`**: base class for the per-quest availability checks
+  that `QuestClass.CheckCriteriaQuestGiver` / `CheckCriteriaOffer` iterate
+  before a trader lists a quest; carries `ID` / `Value` / `CriteriaType` from
+  `quests.xml`, and its own `CheckForQuestGiver` / `CheckForPlayer` are
+  `return true` stubs (subclasses do the real gating).
+- **`QuestCriteriaPOIWithinDistance`**: the "matching POI within range"
+  criteria; in V3.0.1 its `CheckForQuestGiver` override merely `TryParse`s
+  `Value` and then returns a hardcoded false, so any quest definition using
+  this criteria is never offered (dead in this build).
+- **`QuestTierReward`**: a `Tier` int plus a `List<BaseReward>` parsed by
+  `QuestsFromXml.ParseQuestTierRewards`; `QuestEventManager.HandleNewCompletedQuest`
+  compares the player's faction quest tier before/after a completion and calls
+  `GiveRewards` (a loop over `BaseReward.GiveReward`) only when the tier
+  actually rose, making it the one-time tier-up bonus payout.
+- **`SharedQuestEntry`**: one party-shared quest offer in the recipient's
+  `QuestJournal` (`QuestCode`, `QuestID`, POI name/position/size, `ReturnPos`,
+  `SharedByPlayerID`, `QuestGiverID`, plus a `Clone` for journal copies);
+  entries are built from `NetPackageSharedQuest.SharedQuestData` in
+  `QuestJournal.AddSharedQuestEntry`, and the server's `Party.ServerHandle*`
+  leave/kick/disconnect paths purge them via `RemoveSharedQuestEntryByOwner`.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -413,3 +441,6 @@ completion and the intro flow.
   vs client quest object, challenge lifecycle (Active -> Completed -> Redeemed via
   `GameEvent` reward), `RequirementGroupPhase` stages, and `ChallengeGroup`
   daily/tiered rotation, with state diagrams for each machine.
+- **2026-07-24:** Added criteria/reward leaf narration (`BaseQuestCriteria`,
+  `QuestCriteriaPOIWithinDistance` dead-return, `QuestTierReward` tier-up payout,
+  `SharedQuestEntry` party-share entry).

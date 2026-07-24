@@ -108,6 +108,39 @@ the server validates and applies them uniformly.
 
 ---
 
+## Combat leaf types
+
+Leaf types on the edges of the damage flow above:
+
+- **`AttackHitInfo`** (nested in `ItemActionAttack`): the mutable hit-result
+  carrier an attack fills in as it resolves, with a block half
+  (`blockBeingDamaged`, `hitRef`, `bBlockHit`, `hardnessScale`, `itemsToDrop`,
+  `bHarvestTool`) and an entity half (`entityHit`, `damageGiven`, `bKilled`,
+  `isCriticalHit`), plus `materialCategory` / `WeaponTypeTag` for surface
+  effects; it is threaded through `Block.DamageBlock` / `OnBlockDamaged`, so
+  traps (`BlockBarbed`, `BlockBladeTrap`, `BlockMine`) report through the same
+  struct the server damage path reads.
+- **`BodyParts`** (nested in `BodyAnimator`): a two-field holder (`BodyObj`
+  model root + `RightHandT` transform) the avatar controllers use to attach
+  held items and locate the active model
+  (`AvatarMultiBodyController.GetRightHandTransform`); pure render-rig
+  plumbing, **client-only** in practice.
+- **`ApplyExplosionForce`**: a MonoBehaviour whose `Explode(pos, power, radius)`
+  runs `Physics.OverlapSphereNonAlloc` (1024-collider cap) and applies
+  `Rigidbody.AddExplosionForce` with power x20, radius x1.75, upwards
+  modifier 3; its only caller is `GameManager.ExplosionClient`, so it is the
+  cosmetic debris/ragdoll knockback, **client-only** (explosion damage itself
+  is the server path in §2).
+- **`StunBeamWeapon`** (nested in `DroneWeapons`, subclass of
+  `DroneWeapons.Weapon`, not an `EModel` type): the robotic drone's stun-beam
+  mod, constructed in `EntityDrone.LoadMods`; `Fire(target)` writes the
+  target's `_droneStunDamage` cvar from the mod item's Quality and applies
+  `buffShocked` (the server-relevant gameplay effect, resolved through
+  [buffs.md](buffs.md)), then spawns muzzle flash/smoke particles and audio
+  (the client render half).
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -122,3 +155,4 @@ the server validates and applies them uniformly.
 ## Changelog
 
 - **2026-07-23:** Initial combat/damage reversal (DamageSource, DamageEntity apply, death/kill path) consolidating the cross-system damage flow, with state machines.
+- **2026-07-24:** Added combat leaf narration (`AttackHitInfo`, `BodyParts`, `ApplyExplosionForce`, `StunBeamWeapon`), flagging the client-only pieces.
