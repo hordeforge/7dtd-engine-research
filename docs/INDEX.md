@@ -130,6 +130,7 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 | [full-surface.md](full-surface.md) | Whole-assembly map (all 87 namespaces) + coverage ledger toward 100% |
 | [experimental-delta.md](experimental-delta.md) | V3.0.1 -> latest_experimental diff: wire + new code (held entities, wild chicken) |
 | [residuals.md](residuals.md) | What managed IL cannot close (the only open-item list) |
+| [out-of-scope-surface.md](out-of-scope-surface.md) | Reached-but-out-of-scope types classified by category (the boundary map) |
 | [engine-limitations.md](engine-limitations.md) | Generic stock ceilings (sim, net, AI, height, GC, ops) |
 | [re-methodology.md](re-methodology.md) | How to RE: toolchain, dumping, reading IL into wire layouts |
 
@@ -141,6 +142,9 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 | [loop-gmupdate.md](loop-gmupdate.md) | gmUpdate phase narrative (detail under loop.md §2) |
 | [managers.md](managers.md) | Manager Update ILs + ModEvents fields |
 | [sandbox-options.md](sandbox-options.md) | Sandbox/game-option type system + sandbox-code codec |
+| [npc-dialog.md](npc-dialog.md) | Trader/NPC dialog tree + requirement gating + quest-data records |
+| [signs.md](signs.md) | Writable signs (AuthoredText) + layered drawing model + moderation |
+| [map-objects.md](map-objects.md) | Map/compass markers: MapObject + NavObject registries (client-derived) |
 | [server-browser-prefabs.md](server-browser-prefabs.md) | GameServerInfo advertisement + prefab-instance persistence |
 
 ### C. Entities, AI and pathing
@@ -149,6 +153,8 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 |---|---|
 | [entity-ai.md](entity-ai.md) | TickEntity → AI → path + thresholds |
 | [raycast-pathing.md](raycast-pathing.md) | Raycast path generator + steering (junk-drone travel; A* handoff) |
+| [dedicated-misc-systems.md](dedicated-misc-systems.md) | Grab-bag of small dedicated systems (gamestage groups, water apply, boss/companion, admin users, entitlements, AI tasks, ...) |
+| [dedicated-leftovers.md](dedicated-leftovers.md) | Final leftovers batch (inventory manager, search paths, prefab volumes, physics bodies, infra types; AuthAndLoginManager verdict) |
 | [aidirector.md](aidirector.md) | AIDirector type inventory |
 | [closed-gaps.md](closed-gaps.md) | Timer 20 Hz, AIDirector install, ASP→A*, net bands |
 | [uai.md](uai.md) | Utility AI (UseAIPackages branch): packages, considerations, tasks, decision cycle |
@@ -258,6 +264,8 @@ live with the mod that ships them.
 | [inventories/coverage-report.md](inventories/coverage-report.md) | coverage.md (auto-generated reachability vs doc-mention coverage) |
 | [inventories/te-features.md](inventories/te-features.md) | tile-entities-power.md (11 TEFeatureAbs leaves) |
 | [inventories/challenge-objectives.md](inventories/challenge-objectives.md) | challenges (28 objective leaves; client-tracked) |
+| [inventories/sequence-actions.md](inventories/sequence-actions.md) | game-events.md (123 SequenceAction leaves) |
+| [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) | small dedicated leaf types attributed to their owning subsystem (88) |
 | [inventories/block-behaviors.md](inventories/block-behaviors.md) | blocks.md (65 Block leaves) |
 | [inventories/item-actions.md](inventories/item-actions.md) | items.md (38 ItemAction leaves) |
 | [inventories/minevent-actions.md](inventories/minevent-actions.md) | minevents.md (71 triggered-effect leaves) |

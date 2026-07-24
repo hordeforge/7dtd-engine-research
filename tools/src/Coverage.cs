@@ -20,7 +20,9 @@ class Coverage {
 
   static bool Generated(TypeDefinition t) {
     string n = t.Name;
-    return n.Contains("<") || n.Contains("$") || n.StartsWith("__") || n.StartsWith("<");
+    // '#'-named types are obfuscated/mangled compiler artifacts (no stable identity).
+    return n.Contains("<") || n.Contains("$") || n.StartsWith("__") || n.StartsWith("<") ||
+           n.StartsWith("#") || NsOf(t).StartsWith("#");
   }
 
   // Third-party / BCL namespaces: reachability picks these up (the game calls into
@@ -45,6 +47,12 @@ class Coverage {
     string top = ns.Split('.')[0];
     foreach (var p in LibNs) if (top == p) return true;
     return false;
+  }
+  // Simple name without the generic-arity backtick suffix (List`1 -> List), which is
+  // how a type is written in docs and tokenized from them.
+  static string BaseName(TypeDefinition t) {
+    string n = t.Name; int i = n.IndexOf('`');
+    return i >= 0 ? n.Substring(0, i) : n;
   }
 
   static void Main(string[] a) {
@@ -85,13 +93,20 @@ class Coverage {
     var libReached = nonGen.Where(IsLibrary).ToList();
     var gameReached = nonGen.Where(t => !IsLibrary(t)).ToList();
 
-    // Build the doc-mention set: every whole-word token that looks like a type name
-    // appearing in any docs/*.md. A reached type is "documented" if its simple name
-    // appears as a whole word anywhere in the docs tree.
-    var mentioned = new HashSet<string>();
+    // Build two mention sets: "narrated" = named in any subsystem doc; "classified" =
+    // named only in the out-of-scope classification doc. A type is "accounted for" if
+    // it is narrated OR classified. This keeps the narrated % meaningful while letting
+    // the accounted-for % reach 100 once the out-of-scope surface is enumerated.
+    var narrated = new HashSet<string>();
+    var classified = new HashSet<string>();
     foreach (var f in Directory.GetFiles(a[1], "*.md", SearchOption.AllDirectories)) {
+      string fn = Path.GetFileName(f);
+      // Never count the tool's OWN outputs as narration: coverage-report.md's gap
+      // list would otherwise feed back and inflate the narrated set.
+      if (fn == "coverage-report.md") continue;
+      var target = (fn == "out-of-scope-surface.md") ? classified : narrated;
       string text = File.ReadAllText(f);
-      foreach (Match mt in Regex.Matches(text, "[A-Za-z_][A-Za-z0-9_]+")) mentioned.Add(mt.Value);
+      foreach (Match mt in Regex.Matches(text, "[A-Za-z_][A-Za-z0-9_]+")) target.Add(mt.Value);
     }
 
     // Bucket by namespace (top-level segment; <global> for no namespace).
@@ -101,8 +116,10 @@ class Coverage {
       List<TypeDefinition> l; if (!byNs.TryGetValue(ns, out l)) { l = new List<TypeDefinition>(); byNs[ns] = l; } l.Add(t);
     }
 
-    int docd = gameReached.Count(t => mentioned.Contains(t.Name));
-    int undoc = gameReached.Count - docd;
+    int docd = gameReached.Count(t => narrated.Contains(BaseName(t)));
+    int classd = gameReached.Count(t => !narrated.Contains(BaseName(t)) && classified.Contains(BaseName(t)));
+    int accounted = gameReached.Count(t => narrated.Contains(BaseName(t)) || classified.Contains(BaseName(t)));
+    int undoc = gameReached.Count - accounted;
 
     var sb = new StringBuilder();
     sb.AppendLine("# RE coverage report (V3.0.1, auto-generated)");
@@ -112,11 +129,11 @@ class Coverage {
     sb.AppendLine("against docs name-mentions. Regenerate:");
     sb.AppendLine("`mono bin/Coverage.exe \"$ASM\" ../docs coverage-report.md`.");
     sb.AppendLine();
-    sb.AppendLine("**\"Documented\" = the type's simple name appears as a whole word in any");
-    sb.AppendLine("`docs/*.md`.** This is an *upper bound* on narrative coverage (a type named in");
-    sb.AppendLine("passing counts as documented), so treat the undocumented-reached list as the");
-    sb.AppendLine("honest floor of what still needs attention. Reachability is the ground truth for");
-    sb.AppendLine("\"executes on a dedicated server\".");
+    sb.AppendLine("Each reached game type is **narrated** (named in a subsystem doc),");
+    sb.AppendLine("**classified** out-of-scope ([out-of-scope-surface.md](../out-of-scope-surface.md)),");
+    sb.AppendLine("or **unaccounted** (the honest gap). Name-mention is an upper bound on narration");
+    sb.AppendLine("(a type named in passing counts). Third-party/BCL and obfuscated `#`-types are");
+    sb.AppendLine("excluded from the base. Reachability is the ground truth for \"runs on a dedicated server\".");
     sb.AppendLine();
     sb.AppendLine("## Totals");
     sb.AppendLine();
@@ -127,11 +144,14 @@ class Coverage {
     sb.AppendLine("| Reached, non-generated | " + nonGen.Count + " |");
     sb.AppendLine("| ...third-party / BCL (System, Unity, Newtonsoft, ...) | " + libReached.Count + " (excluded from %) |");
     sb.AppendLine("| ...**game types** (the RE surface) | **" + gameReached.Count + "** |");
-    sb.AppendLine("| ...game types name-mentioned in docs | **" + docd + " (" + (100 * docd / Math.Max(1, gameReached.Count)) + "%)** |");
-    sb.AppendLine("| ...game types not mentioned (gap floor) | " + undoc + " |");
+    sb.AppendLine("| ...**narrated** in a subsystem doc | **" + docd + " (" + (100 * docd / Math.Max(1, gameReached.Count)) + "%)** |");
+    sb.AppendLine("| ...**classified** out-of-scope ([out-of-scope-surface.md](../out-of-scope-surface.md)) | " + classd + " |");
+    sb.AppendLine("| ...**accounted for** (narrated + classified) | **" + accounted + " (" + (100 * accounted / Math.Max(1, gameReached.Count)) + "%)** |");
+    sb.AppendLine("| ...still unaccounted (gap floor) | " + undoc + " |");
     sb.AppendLine();
-    sb.AppendLine("The **game-type documented %** is the headline coverage number. Third-party/BCL");
-    sb.AppendLine("code the game calls into is reached but out of scope (never reverse-engineered).");
+    sb.AppendLine("**Narrated %** = reverse-engineered in a subsystem doc (the real depth metric).");
+    sb.AppendLine("**Accounted-for %** = narrated OR explicitly classified as out-of-scope, i.e. no");
+    sb.AppendLine("reached type is silently ignored. Third-party/BCL code is excluded from the base.");
     sb.AppendLine();
 
     sb.AppendLine("## Per-namespace coverage (reached game types)");
@@ -139,7 +159,7 @@ class Coverage {
     sb.AppendLine("| Namespace | reached | documented | undocumented | % |");
     sb.AppendLine("|---|---:|---:|---:|---:|");
     foreach (var kv in byNs.OrderByDescending(x => x.Value.Count)) {
-      int d = kv.Value.Count(t => mentioned.Contains(t.Name));
+      int d = kv.Value.Count(t => narrated.Contains(BaseName(t)) || classified.Contains(BaseName(t)));
       int u = kv.Value.Count - d;
       sb.AppendLine("| `" + kv.Key + "` | " + kv.Value.Count + " | " + d + " | " + u + " | " + (100 * d / kv.Value.Count) + "% |");
     }
@@ -153,7 +173,7 @@ class Coverage {
     sb.AppendLine();
     sb.AppendLine("| Type | Namespace | methods (reached-set) |");
     sb.AppendLine("|---|---|---:|");
-    foreach (var t in gameReached.Where(t => !mentioned.Contains(t.Name))
+    foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
                                  .OrderByDescending(t => t.Methods.Count(x => x.HasBody)).Take(60)) {
       sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     }
@@ -164,7 +184,7 @@ class Coverage {
     // Full undocumented-reached list (sidecar TSV): methods, namespace, type.
     var tsv = new StringBuilder();
     tsv.AppendLine("methods\tnamespace\ttype");
-    foreach (var t in gameReached.Where(t => !mentioned.Contains(t.Name))
+    foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
                                  .OrderByDescending(t => t.Methods.Count(x => x.HasBody)))
       tsv.AppendLine(t.Methods.Count(x => x.HasBody) + "\t" + (string.IsNullOrEmpty(NsOf(t)) ? "<global>" : NsOf(t)) + "\t" + t.Name);
     File.WriteAllText(a[2] + ".gaps.tsv", tsv.ToString());

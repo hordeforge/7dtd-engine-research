@@ -1,0 +1,295 @@
+# Dedicated misc systems (V3.0.1)
+
+**Owns:** a grab-bag of small dedicated systems each too small for its own doc:
+gamestage groups, water-sim apply, boss/companion groups, admin users,
+entitlements, XML loaders, chunk/block access interfaces, damage detail types,
+player persistence bits, startup helper, nav object classes, multi-block
+tracking, EAI tasks, block placement helpers, and drone weapons.
+**Not:** the owning systems themselves (each section cross-links its family doc);
+client UI, rendering, and Twitch client internals (see the out-of-scope list).
+**Evidence:** `GameStageGroup`, `WaterSimulationApplyChanges`, `WaterUtils`,
+`BossGroup`, `CompanionGroup`, `AdminUsers`, `EntitlementManager`,
+`EntityClassesFromXml`, `EventsFromXml`, `IChunkAccess`, `IBlockAccess`,
+`ChunkKey`, `WaterSimulationNative/ChunkHandle`, `DamageSourceEntity`,
+`DamageMultiplier`, `HitInfoDetails`, `PersistentPlayerName`,
+`EntityBedrollPositionList`, `GameStartupHelper`, `NavObjectClass`,
+`MultiBlockManager/TrackedDataMap`, `OversizedBlockUtils`, `EAIRunawayWhenHurt`,
+`EAIItemTask`, `BlockTracker`, `BlockPlacement`, `DroneWeapons` IL (dump locally
+with `tools/src/DumpMethod`, git-ignored). **Hub:** [`INDEX.md`](INDEX.md).
+**Method:** [`re-methodology.md`](re-methodology.md).
+
+Every type below was confirmed dedicated-relevant by walking its callers
+(`FindCallers`) back to server-side systems (world/managers/net packages), not
+just by existing in the assembly. Types whose entire caller set is UI, avatar,
+or render code are listed at the end instead.
+
+---
+
+## GameStageGroup
+
+Static registry of named gamestage groups (`AddGameStageGroup`, `TryGet`,
+`Groups`), populated by `GameStagesFromXml` from `gamestages.xml` during
+`WorldStaticData` load. `CleanName`/`MakeDisplayName` normalize names for the
+editor, but the runtime consumers are server spawn systems: `SleeperVolume` and
+`PrefabVolumes.PrefabSleeperVolumeList` resolve a volume's gamestage group via
+`TryGet` when deciding which sleeper spawn list applies at the players' current
+gamestage. Complements [spawning.md](spawning.md) (sleeper volumes) and the
+gamestage math there.
+
+## Water sim apply: WaterSimulationApplyChanges, WaterUtils, ChunkHandle
+
+`WaterSimulationApplyChanges` is the write-back stage of the server water
+simulation (one per `ChunkCluster`, own thread via `ThreadLoop`). The sim
+records per-chunk water changes through `ChangesForChunk/Writer.RecordChange`,
+then `ApplyChanges(Chunk, ...)` commits them to chunk water data and
+`SendUpdateToClients` ships a `NetPackageWaterSimChunkUpdate`;
+`HasNetWorkLimitBeenReached` throttles the per-tick network budget, and
+`RegionFileManager`/`NetPackageDeleteChunkData` call `DiscardChangesForChunks`
+when chunks unload or reset. `WaterUtils` is the shared helper set:
+`CanWaterFlowThrough(BlockValue)`, `GetWaterLevel`, voxel keys, and
+`TryOpenChunkForUpdate` (safe chunk locking for the sim thread).
+
+`ChunkHandle` is not a chunk-access type: it is
+`WaterSimulationNative/ChunkHandle`, the per-chunk handle a `Chunk` gets via
+`AssignWaterSimHandle` into the native water sim (`SetVoxelSolid`,
+`SetWaterMass`, `WakeNeighbours`). All three complement the water pipeline in
+[light-mesh-water.md](light-mesh-water.md).
+
+## BossGroup
+
+Server-side container for a boss encounter: one boss entity plus minions,
+created by the game-event actions `ActionSetupBossGroup` /
+`ActionUpdateBossGroup` and driven by
+`GameEventManager.HandleBossGroupUpdates`, which calls `BossGroup.ServerUpdate`
+each tick. Key methods: `HandleAutoPull` and `HandleTeleportList` (keep the
+group near players), `IsPlayerWithinServerRange`, `RefreshStats`,
+`RemoveMinion`, `DespawnAll`. State is mirrored to clients through
+`NetPackageBossEvent`; `GetBossNavClass`/`GetMinionNavClass` name the compass
+icon classes clients display (see NavObjectClass below). Complements
+[game-events.md](game-events.md).
+
+## CompanionGroup
+
+Thin list wrapper (`Add`, `Remove`, `IndexOf`, indexer) held by
+`EntityPlayer.Companions`, which lazily constructs it. Since `EntityPlayer`
+instances live on the server for every connected player, the group is the
+server's record of which allied entities (companions/minions) belong to a
+player; the `XUiC_CompanionEntry*` callers are only the client view of it.
+Complements the entity ownership notes in [spawning.md](spawning.md).
+
+## AdminUsers
+
+Sub-store of `AdminTools` (the `serveradmin.xml` state): user entries
+(`UserPermission`: platform id + permission level) and group entries
+(`GroupPermission`, e.g. Steam groups with normal/moderator levels), with
+`AddUser`/`AddGroup`/`Remove*`, XML round-trip (`ParseElement`, `Save`), and
+the central query `GetUserPermissionLevel(ClientInfo)`. Callers show exactly
+who enforces it: `ConsoleCmdAdmin`, the webserver session/permission handlers,
+`PlayerSlotsAuthorizer`, `BansAndWhitelistAuthorizer`, and
+`Platform.Steam.SteamGroupsAuthorizer` during login. Complements
+[console-commands.md](console-commands.md) (command permission levels) and
+[webserver.md](webserver.md) (web session permissions).
+
+## EntitlementManager
+
+Singleton gating DLC/cosmetic entitlement sets (`HasEntitlement`,
+`GetSetForAsset`, `IsAvailableOnPlatform`, `CheckOverride`). Dedicated-relevant
+because two server-side paths consult it: `XmlPatchConditionEvaluator`
+implements a `has_entitlement` condition used while patching game XMLs (the
+server patches and ships configs), and `Equipment.HasCosmeticUnlocked`
+validates cosmetics on player equipment. Store/purchase methods (`OpenStore`)
+are client-only paths. Complements [mod-loading.md](mod-loading.md) (XML
+patching) and [platform-auth.md](platform-auth.md).
+
+## EntityClassesFromXml
+
+Loader that parses `entityclasses.xml` into the `EntityClass` registry
+(`LoadMain` for base defs, `LoadAppend` for extends-append,
+`ReplaceProperty` for token substitution), invoked from `WorldStaticData`
+during server boot. Everything the server spawns (zombies, animals, vehicles,
+drones) is typed by this table, including the reflective `EAIManager
+.CreateInstance` AI task wiring (see EAI tasks below). Complements
+[spawning.md](spawning.md) and [entity-stats.md](entity-stats.md).
+
+## EventsFromXml
+
+Seasonal calendar loader (`events.xml`): parses `EventDefinition` date windows
+and computes moving holidays in code (`EasterSunday`, `FirstSundayOfAdvent`,
+`ThanksgivingDate`). `EventDefinition.Active` compares against `Now`, and the
+consumers are server systems: `GameEventsFromXml`, the game-event requirement
+`RequirementEventActive`, `XmlPatchConditionEvaluator` (seasonal XML patches),
+and `ConsoleCmdForceEventDate` to override the date for testing. Complements
+[game-events.md](game-events.md).
+
+## Chunk/block access interfaces: IChunkAccess, IBlockAccess, ChunkKey
+
+`IChunkAccess` exposes `GetChunkFromWorldPos`/`GetChunkSync` with static
+`Default*` helper implementations so `WorldBase`, `ChunkCluster`, and `Prefab`
+share one lookup path; `IBlockAccess` layers `GetBlock`/`GetProp` on top.
+Server-side callers include `LightProcessor`, `DynamicMeshChunkProcessor`,
+game-event area actions (`ActionFillArea`, `ActionDestroySafeZone`), the A*
+voxel grid, and `UAI.UAIConsiderationPathBlocked`. `ChunkKey` is the small
+equatable (x,z) key struct used alongside the packed `Int64` keys from
+`WorldChunkCache.MakeChunkKey` in chunk dictionaries. Complements
+[world-chunks.md](world-chunks.md).
+
+## Damage detail: DamageSourceEntity, DamageMultiplier, HitInfoDetails
+
+Three carriers on the server damage path. `DamageSourceEntity` extends the
+damage source with the attacker entity id plus hit transform name/position and
+hit UV, flowing through `NetPackageDamageEntity` /
+`NetPackageRangeCheckDamageEntity` into `EntityPlayer`/`Explosion`/
+`BlockDamage`. `DamageMultiplier` is the per-item material-tag multiplier map
+parsed from item `DynamicProperties`, net-serialized (`Read`/`Write`) and
+consulted by `ItemActionAttack`, melee/ranged actions, turret and drone fire
+controllers. `HitInfoDetails` is the voxel-accurate hit record (block value,
+water value, prop ref via nested `VoxelData`/`PropData`) filled by the `Voxel`
+raycast and copied through attack, placement, and vehicle code. All complement
+[combat-damage.md](combat-damage.md) and [raycast-pathing.md](raycast-pathing.md).
+
+## PersistentPlayerName
+
+Wrapper around a player's `AuthoredText` name inside `PersistentPlayerData`:
+`Update(name, PlatformUserIdentifierAbs)` on login, `SetCollisionSuffix` to
+disambiguate duplicate names, and `SafeDisplayName` for sanitized output.
+Server callers are `PersistentPlayerList` and `GameManager` (login/rename
+paths); the many `XUiC_*` callers are just display. Complements
+[server-lifecycle.md](server-lifecycle.md) and
+[save-persistence.md](save-persistence.md).
+
+## EntityBedrollPositionList
+
+Per-player list of bedroll positions that writes through to
+`PersistentPlayerData` (`Set` fetches `GetData()` first, so the position
+persists with the player record). Server consumers: `EntitySpawner` and
+`World`/`GameManager` respawn logic (spawn-near-bedroll),
+`PlayerDataFile`, and `DynamicMeshManager` (bedroll chunk protection).
+Complements [save-persistence.md](save-persistence.md) and
+[spawning.md](spawning.md).
+
+## GameStartupHelper
+
+Dedicated boot-time helper: `ParseCommandLine`/`parseRawCommandline`,
+`LoadConfigFile` (the `serverconfig.xml` path), `InitGamePrefs` +
+`ApplyParsedGamePrefs`, and `SetDedicatedServerSettings` (logs level, game
+name, max players from `GamePrefs`). Linux-specific checks (`checkLinuxLimits`,
+`checkOpenFilesLimit`, `checkMaxMapCount`) verify ulimits and
+`vm.max_map_count` before world load, shelling out via
+`tryExecuteProcessTerminal`. Called from `GameEntrypoint` and
+`Platform.PlatformApplicationManager`. Complements
+[server-lifecycle.md](server-lifecycle.md) and
+[sandbox-options.md](sandbox-options.md).
+
+## NavObjectClass
+
+Registry of compass/map/on-screen icon classes loaded from `nav_objects.xml`
+(`NavObjectClassesFromXml.Load`, in the `WorldStaticData` table, so the
+dedicated server parses it as part of config load/sync). Rendering is client
+work, but server systems reference classes by name: `BossGroup` exposes
+`GetBossNavClass`/`GetMinionNavClass` for `NetPackageBossEvent`, and
+`AIDirectorAirDropComponent.RefreshCrates` registers supply-crate nav objects
+through `NavObjectManager.RegisterNavObject`. Documented here for the name
+flow only; the visual side is out of scope. Complements
+[aidirector.md](aidirector.md) (air drops) and
+[game-events.md](game-events.md).
+
+## TrackedDataMap (MultiBlockManager)
+
+Nested map inside `MultiBlockManager`: `Vector3i -> TrackedBlockData` with
+`AddOrMergeTrackedData(pos, blockValue, bounds, TrackingTypeFlags)` and typed
+subset accessors (`OversizedBlocks`, `CrossChunkMultiBlocks`, `PoiMultiBlocks`,
+`TerrainAlignedBlocks`). Oversized blocks are additionally binned per chunk
+(`AddOversizedBlockToChunkBins`) so chunk load/unload can restore or drop
+their tracking. This is the server's authority on which placed blocks span
+chunks or exceed one cell. Complements [blocks.md](blocks.md) and
+[block-shapes.md](block-shapes.md).
+
+## OversizedBlockUtils
+
+Pure geometry helpers for oversized/rotated block bounds: world/local matrix
+from position + rotation, world-aligned extents, corner enumeration, and
+`EnumerateOverlappingCells` yielding every grid cell an oversized block's
+bounds touch. Server callers: `MultiBlockManager` (tracking above),
+`AstarManager`/`AstarVoxelGrid` (pathing blockers), and `DecoUtils`
+(decoration clearance). Complements [blocks.md](blocks.md) and
+[raycast-pathing.md](raycast-pathing.md).
+
+## EAI tasks: EAIRunawayWhenHurt, EAIItemTask
+
+Two entity AI tasks that run in the server-side EAI tick.
+`EAIRunawayWhenHurt` extends `EAIRunAway` with a `lowHealthPercent` threshold
+(`SetData` from entityclasses props); it has no direct callers because EAI
+tasks are instantiated reflectively via `EAIManager.CreateInstance(String)`
+from `ai_task` properties and dispatched virtually (`CanExecute`/`Update`).
+`EAIItemTask` is the base for item-using AI, subclassed by `EAIDroneItemTask`
+for drone behavior. Complements [entity-ai.md](entity-ai.md).
+
+## BlockTracker and BlockLimitTracker
+
+`BlockTracker` is a bounded position set (`CanAdd`, `TryAddBlock`,
+`RemoveBlock`) with `PooledBinaryReader/Writer` persistence. Its only consumer
+is `BlockLimitTracker`, the server enforcement of per-type placed-block limits:
+initialized in `GameManager.StartAsServer`, checked in `Chunk` and
+`BlockToolSelection` via `CanAddBlock(..., eSetBlockResponse&)`, persisted with
+its own save thread, and mirrored to clients through
+`NetPackageBlockLimitTracking`. Complements [blocks.md](blocks.md).
+
+## BlockPlacement
+
+Strategy base class resolving where and how a block lands when placed:
+`OnPlaceBlock(...)` returns a `Result` (position, face, rotated `BlockValue`)
+and `LimitRotation` clamps rotation modes (45-degree support check included).
+Subclasses (`BlockPlacementDoor`, `BlockPlacementTowardsPlacer*`, etc.) are
+selected per block; callers include `Block`, `ItemActionPlaceAsBlock`,
+`GameUtils`, and the placement console commands, so the same resolution code
+runs wherever a block is placed, including server-driven paths. Complements
+[blocks.md](blocks.md).
+
+## Drone weapons: HealBeamWeapon, MachineGunWeapon
+
+Nested classes of `DroneWeapons`, driven by `EntityDrone`, which the server
+simulates like other entities (see
+[vehicles-drones-turrets.md](vehicles-drones-turrets.md)).
+`HealBeamWeapon` is the medic module: `findNeededHealType` inspects the target
+(`isTargetBleeding`, `isTargetInNeedOfMedical`), `getHealingItemStack` consumes
+matching healing items from the drone's inventory, `Fire(EntityAlive)` applies
+the heal. `MachineGunWeapon` is the gun module: `Fire`/`_fireWeapon` with
+`GetDamageEntity`/`GetDamageBlock` computing damage from the installed weapon
+item, feeding the standard damage path in
+[combat-damage.md](combat-damage.md).
+
+---
+
+## Out of scope (verified client-only)
+
+- **WireManager**: pooled wire visuals, not the electrical graph. It
+  instantiates `Prefabs/WireNode` GameObjects, handles wire pulse effects for
+  `ItemActionConnectPower` holding and camera windows. `GameManager.createWorld`
+  does call `WireManager.Init()` unguarded on the dedicated server (pool
+  allocation only), but the sole gameplay caller `TileEntityPowered.DrawWires`
+  early-outs when the block has no render transform, which is the dedicated
+  case. The actual wiring graph is the `PowerItem` parent/child net in
+  [tile-entities-power.md](tile-entities-power.md).
+- **DismemberedPart**: detached-limb visual (prefab spawn, fade, transform
+  follow); all callers are `Avatar*Controller` render classes via
+  `DismembermentManager`. The authoritative body damage flags stay on
+  `EntityAlive` ([combat-damage.md](combat-damage.md)).
+- **RaidEvent, BitsUsedEvent**: Twitch EventSub payload DTOs consumed only by
+  `Twitch.TwitchManager`, which runs in the streamer's client
+  ([twitch-integration.md](twitch-integration.md); the server side is just the
+  `NetPackageTwitchAccess` permission check).
+- **WorldStats**: prefab mesh complexity stats (triangles/vertices/lights).
+  `FromProperties` does execute during server prefab load via `PrefabData.Init`,
+  but the numbers are editor telemetry (`CaptureWorldStats`, `XUiC_Editor*`);
+  nothing server-side reads them.
+- **BaseItemActionEntry** and **ItemActionEntryRepair/Scrap/Craft/Use/Assemble**:
+  these are the client craft-menu UI actions (constructed from
+  `XUiController`, activated by `XUiC_ItemActionList`), not server crafting
+  logic. They mutate the local crafting queue/inventory UI; the server sees
+  only the resulting inventory/recipe traffic
+  ([crafting-recipes.md](crafting-recipes.md), [items.md](items.md)).
+
+## Changelog
+
+- **2026-07-24:** Initial batch reversal of small dedicated systems (19
+  sections, caller-verified); client-only reclassifications listed above.
