@@ -62,7 +62,7 @@
 
 ---
 
-## 2. IceCoffee 7DaysToDie-ServerKit — **highest optim research value**
+## 2. IceCoffee 7DaysToDie-ServerKit - **highest optim research value**
 
 **What it is:** open-source dedicated **web panel + REST + SQLite + admin functions** (TianYi / LSTY lineage). MIT, actively maintained into late 2025. Depends on TFP Harmony + Allocs-style map/web pieces.
 
@@ -173,7 +173,7 @@ All under `src/SdtdServerKit/HarmonyPatchers/PerformanceTuning/`. **Every file i
 
 ---
 
-## 3. SphereII Mods — **content giant, dedi stubs**
+## 3. SphereII Mods - **content giant, dedi stubs**
 
 **What it is:** large multi-mod collection (SCore, NPCs, winter, challenges, …) still landing **3.0** commits (tip 2026-07). Primary value is **gameplay/content Harmony**, not dedicated FPS.
 
@@ -201,7 +201,7 @@ Source is essentially a **stub**:
 
 ---
 
-## 4. Allocs server_fixes — **ops foundation, not sim**
+## 4. Allocs server_fixes - **ops foundation, not sim**
 
 **Local:** binary mods (`Allocs_CommandExtensions`, `Allocs_CommonFunc`, `Allocs_WebAndMapRendering`) + `server_fixes.tar.gz`. No full C# source in this clone.
 
@@ -215,7 +215,7 @@ Source is essentially a **stub**:
 
 ---
 
-## 5. CSMM (Catalysm Server Manager) — **out-of-process ops**
+## 5. CSMM (Catalysm Server Manager) - **out-of-process ops**
 
 **What it is:** Node.js Sails app + workers + MySQL/MariaDB + Discord. Self-host web manager.
 
@@ -234,7 +234,7 @@ Source is essentially a **stub**:
 
 ---
 
-## 6. MVirus — **mod content delivery, net bandwidth class**
+## 6. MVirus - **mod content delivery, net bandwidth class**
 
 **What it is:** server→client **mod file transfer** (HTTP internal server, external HTTP, or in-band net streams). Custom `NetPackageMVirus*` packages + stream pool.
 
@@ -254,7 +254,7 @@ Source is essentially a **stub**:
 
 ---
 
-## 7. OCB Electricity Overhaul — **tile-entity / power tick cost**
+## 7. OCB Electricity Overhaul - **tile-entity / power tick cost**
 
 **What it is:** deeper power grid sim (multi-source, batteries, solar curve). Author states it is **not optimized**, recalculates a lot per tick, and extra fields sync MP.
 
@@ -306,19 +306,19 @@ if (watch.Elapsed.TotalMilliseconds > 20)
 
 | Tool | Layer | Sim CPU | Net | I/O | Steal for EfficientServer? |
 |---|---|---|---|---|---|
-| **IceCoffee (live)** | Admin + flags | Falling-block, zombie cap | — | backups | Falling-block research; main-thread sync |
+| **IceCoffee (live)** | Admin + flags | Falling-block, zombie cap | - | backups | Falling-block research; main-thread sync |
 | **IceCoffee (commented PT)** | Experimental | Path/EAI parallel sketches | Parallel send | Async PDF save | Study + reject default ship |
 | **ServerTools** | Admin mega | Falling-block, entity cleanup | package AC | autosave | Same as NOTES.md |
 | **NAIWAZI** | Gateway + closed optim | claimed thread split | claimed BW cut | GW-held saves | Architecture fantasy; no free optim DLL |
-| **SphereII Dedi** | Stub | maybe asset skip | — | — | Almost nothing live |
+| **SphereII Dedi** | Stub | maybe asset skip | - | - | Almost nothing live |
 | **Allocs** | Map/web | map tiles | web | map disk | Keep off during APM |
-| **CSMM** | External panel | — | telnet poll | DB | Control plane split |
-| **MVirus** | Mod CDN | — | join bulk | HTTP | Scenario isolation |
+| **CSMM** | External panel | - | telnet poll | DB | Control plane split |
+| **MVirus** | Mod CDN | - | join bulk | HTTP | Scenario isolation |
 | **OCB Electricity** | Content TE | power Update budget | TE sync | power save | Subsystem Stopwatch pattern; baseline risk |
-| **OCB StopFuel** | Content TE | skip idle fuel | — | — | “Skip work when idle” pattern |
-| **lag-shield** | Ops net | indirect (kick laggy) | kick | — | Ops only |
-| **BackupMod** | Ops I/O | hitch windows | — | zip saves | Schedule vs APM |
-| **discord-log-hook** | Ops obs | — | webhooks | — | Non-blocking logs |
+| **OCB StopFuel** | Content TE | skip idle fuel | - | - | “Skip work when idle” pattern |
+| **lag-shield** | Ops net | indirect (kick laggy) | kick | - | Ops only |
+| **BackupMod** | Ops I/O | hitch windows | - | zip saves | Schedule vs APM |
+| **discord-log-hook** | Ops obs | - | webhooks | - | Non-blocking logs |
 
 ---
 
@@ -366,7 +366,7 @@ Our split remains better: **APM owns measurement**, EfficientServer stays free o
 ## 11. What to add to EfficientServer / research backlog
 
 Evidence-gated only (same rules as `OPTIMIZATION_IDEAS.md`).  
-Threading / extract-sim / full hot-path catalog: [`../../7dtd-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-optimizer/docs/SIM_PARALLELISM.md) §5–7.
+Threading / extract-sim / full hot-path catalog: [`../../7dtd-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-optimizer/docs/SIM_PARALLELISM.md) §5-7.
 
 ### Promote for **measurement experiments**
 
@@ -429,5 +429,5 @@ Threading / extract-sim / full hot-path catalog: [`../../7dtd-optimizer/docs/SIM
 
 ## Changelog
 
-- **2026-07-16:** Link SIM_PARALLELISM §5–7 for extract/threading/hot-path home.
+- **2026-07-16:** Link SIM_PARALLELISM §5-7 for extract/threading/hot-path home.
 - **2026-07-16:** Survey IceCoffee PerformanceTuning (commented), live falling-block/zombie-cap/main-thread sync; SphereII Dedicated Tweaks stub; Allocs binaries; CSMM; MVirus; OCB Electricity + StopFuel; lag-shield; BackupMod; discord-log-hook. Cross-matrix and EfficientServer backlog notes.

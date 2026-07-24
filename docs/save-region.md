@@ -170,6 +170,14 @@ Protection margins (cull): land claim / bedroll / offline / backpack / vehicle /
 | [terrain-height.md](terrain-height.md) | YDim pin vs byte heightmaps |
 | [loop.md](loop.md) | When SaveWorldState is invoked |
 
+## Save-data file layer (`SaveDataManager`)
+
+Above the world/region byte format documented here, `SaveDataManager` (with the
+`Sd*` file abstraction: `SdFile`/`SdDirectoryInfo`/`SdFileInfo`) is the platform-abstracted
+save-file I/O layer (local disk and, on console/platform, cloud/managed save slots). It
+owns paths and file lifecycle; the on-disk byte formats (WorldState, region, player) are
+the sections above. The platform cloud-save backend is native (residual).
+
 ## Changelog
 
 - **2026-07-18:** Save state machine + see also.  

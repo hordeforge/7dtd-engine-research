@@ -2,7 +2,8 @@
 
 **Kind:** inventory table (not primary narrative).  
 **Prefer:** [`loop.md`](../loop.md) §1.  
-**Raw:** [`../il/frame-entries-v3.0.1/`](../../il/frame-entries-v3.0.1/).
+**Raw:** [`../il/frame-entries-v3.0.1/`](../../il/frame-entries-v3.0.1/).  
+**Count:** 244 zero-arg `Update`/`LateUpdate`/`FixedUpdate` bodies over the transitive `MonoBehaviour` closure (including 2 nested types, marked). Almost all are client/render/UI; the loop doc owns the dedicated-relevant ones.
 
 | Type | Base | Method | IL |
 |---|---|---|---:|
@@ -136,6 +137,7 @@
 | `Origin` | MonoBehaviour | `FixedUpdate` | 256 |
 | `PanWithMouse` | MonoBehaviour | `Update` | 81 |
 | `ParticleLifetimeSwitch` | MonoBehaviour | `Update` | 88 |
+| `PerformanceProfiler/FrameTimeCapture` (nested) | MonoBehaviour | `LateUpdate` | 25 |
 | `PlayerMoveController` | MonoBehaviour | `Update` | 2706 |
 | `PlayerReflectionProbe` | MonoBehaviour | `Update` | 181 |
 | `PlayIdleAnimations` | MonoBehaviour | `Update` | 77 |
@@ -246,5 +248,6 @@
 | `WireNode` | MonoBehaviour | `FixedUpdate` | 3 |
 | `WireNode` | MonoBehaviour | `LateUpdate` | 3 |
 | `WorldEnvironment` | MonoBehaviour | `Update` | 83 |
+| `XUiC_ItemActionEntry/TimedAction` (nested) | MonoBehaviour | `Update` | 17 |
 | `XUi_FallThrough` | MonoBehaviour | `Update` | 213 |
 | `XUiUpdateHelper` | MonoBehaviour | `LateUpdate` | 2 |

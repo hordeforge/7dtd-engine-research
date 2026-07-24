@@ -1,7 +1,7 @@
 # 7dtd-ServerTools research notes (optimizer lens)
 
 **Repo:** https://github.com/dmustanger/7dtd-ServerTools  
-**Local clone:** `research/7dtd-ServerTools` (GitHub tip as of clone; README last touch **2023-10-04**)  
+Clone location: external, not tracked in this repo. (GitHub tip as of clone; README last touch **2023-10-04**)  
 **Upstream status:** README says project **moved to Bitbucket** (`obsessive-coder/sevendaystodie-servertools`). GitHub is a frozen mirror / historical tree.  
 **Target:** dedicated server admin mega-mod (net48, Harmony, Fody/Costura).  
 **Purpose of this note:** what still matters for **EfficientServer / sim performance research**, not a full feature catalog.
@@ -95,7 +95,7 @@ Also `AddFallingBlocks` (plural list) implemented in `Injections` (bulk path).
 
 Ranked for EfficientServer / dedicated load research.
 
-### 3.1 Falling block remover — **high relevance**
+### 3.1 Falling block remover - **high relevance**
 
 **Files:** `Tools/FallingBlocks/FallingBlocks.cs`, `Injections.AddFallingBlock(s)_Prefix`
 
@@ -112,7 +112,7 @@ Ranked for EfficientServer / dedicated load research.
 
 **Risk:** changes building collapse / trap gameplay; must be optional and evidence-gated.
 
-### 3.2 Entity cleanup — **medium relevance (ops)**
+### 3.2 Entity cleanup - **medium relevance (ops)**
 
 **File:** `Tools/EntityCleanup/EntityCleanup.cs`
 
@@ -129,7 +129,7 @@ Ranked for EfficientServer / dedicated load research.
 
 **Not** something to bake into EfficientServer without explicit product scope. Good as a **loadgen scenario lever** (“spawn junk entities, measure, cleanup”).
 
-### 3.3 FPS target — **low / diagnostic**
+### 3.3 FPS target - **low / diagnostic**
 
 **File:** `Tools/FPS/Fps.cs`
 
@@ -143,7 +143,7 @@ Ranked for EfficientServer / dedicated load research.
 
 EfficientServer should not fight this; APM should measure tick time, not chat FPS claims.
 
-### 3.4 Auto save world — **medium (I/O hitch)**
+### 3.4 Auto save world - **medium (I/O hitch)**
 
 **File:** `Tools/AutoSaveWorld/*`
 
@@ -151,7 +151,7 @@ EfficientServer should not fight this; APM should measure tick time, not chat FP
 
 **Relevance:** save spikes are on ARCHITECTURE lag list. Coordinated save intervals matter for APM baselines (don’t compare mid-save vs quiet). Not Harmony AI work.
 
-### 3.5 High ping kicker — **ops / net quality**
+### 3.5 High ping kicker - **ops / net quality**
 
 **File:** `Tools/HighPingKicker/*`
 
@@ -159,7 +159,7 @@ EfficientServer should not fight this; APM should measure tick time, not chat FP
 
 **Relevance:** reduces **bandwidth and far-player sim pressure** by removing bad connections. Product/ops decision, not sim optim. Loadgen bots often need immunity.
 
-### 3.6 Hordes tool — **anti-pattern for optim**
+### 3.6 Hordes tool - **anti-pattern for optim**
 
 **File:** `Tools/Hordes/Hordes.cs`
 
@@ -167,17 +167,17 @@ EfficientServer should not fight this; APM should measure tick time, not chat FP
 
 **Relevance:** **increases** AI load. Useful only as a **stressor** for APM/loadgen, never as an EfficientServer feature.
 
-### 3.7 Chunk / region reset — **world management**
+### 3.7 Chunk / region reset - **world management**
 
 **Files:** `ChunkReset`, `RegionReset`, load-time reset during login kick  
 
 **Relevance:** can reduce long-term world bloat (saves, TE, sleeper density in abandoned areas). Orthogonal to runtime AI LOD; ops-heavy, save-destructive.
 
-### 3.8 World radius — **bounds geography**
+### 3.8 World radius - **bounds geography**
 
 Timer-driven; keeps players inside a radius (reduces **chunk union** if enforced). Aligns with scale notes (bounded hot geography). Ops/game-design, not Harmony AI.
 
-### 3.9 Blood moon tools / warrior / moans — **gameplay**
+### 3.9 Blood moon tools / warrior / moans - **gameplay**
 
 Mostly events and chat; not sim optim.
 

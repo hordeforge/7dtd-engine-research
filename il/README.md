@@ -1,6 +1,6 @@
 # Raw dedicated-server IL dumps
 
-Regenerable Mono.Cecil output from `7dtd-optimizer/tools/Dump*.cs` against the local dedicated `Assembly-CSharp.dll`.
+Regenerable Mono.Cecil output from this repo's `tools/src/` + `tools/legacy/` dumpers (see [`../tools/README.md`](../tools/README.md)) against the local dedicated `Assembly-CSharp.dll`.
 
 **Do not start here.** Human docs: [`../docs/INDEX.md`](../docs/INDEX.md) → [`../docs/coverage.md`](../docs/coverage.md).
 

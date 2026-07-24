@@ -2,7 +2,7 @@
 
 **Owns:** gmUpdate-relevant manager Update ILs + full `ModEvents` field list.  
 **Raw inventory (all Update* names):** [`inventories/manager-updates.md`](inventories/manager-updates.md).  
-**Dumps:** [`../il/dedi-complete-v3.0.1/`](../il/dedi-complete-v3.0.1/) §2, §11; [`../il/loop-complete-v3.0.1/`](../il/loop-complete-v3.0.1/).  
+**Dumps:** [`../il/dedi-complete-v3.0.1/`](../il/dedi-complete-v3.0.1) §2, §11; [`../il/loop-complete-v3.0.1/`](../il/loop-complete-v3.0.1).  
 **Loop context:** [`loop.md`](loop.md) §10.
 
 ---
@@ -21,11 +21,13 @@ flowchart TB
   GM --> N[NavObject / Faction / Turret …]
 ```
 
-Called when instance non-null (null skip). Live sizes:
+Called when instance non-null (null skip). The **Update IL** column is each
+manager's `Update`/`UpdateTick` method instruction count from the dump (e.g.
+`TwitchManager` IL=1585, the largest):
 
 | Manager | Update IL | Notes |
 |---|---:|---|
-| `TwitchManager` | **1585** (IL=1585) | Large; waste if constructed without Twitch |
+| `TwitchManager` | **1585** | Large; waste if constructed without Twitch |
 | `DroneManager` | **305** | Waypoints |
 | `VehicleManager` | **297** | Waypoints |
 | `TriggerEffectManager` | 216 | |
@@ -39,12 +41,12 @@ Called when instance non-null (null skip). Live sizes:
 | `NavObjectManager` | 42 | Map/claim pins |
 | `GameEventManager` | 25 | + HandleSpawnUpdates 148 etc. |
 | `TriggerManager` | 23 | |
-| `EntityAsyncManager` | 22 | Async entity create complete |
+| `EntityAsyncManager` | 22 | Async entity create complete (**phase F**: called after the game-started gate, not the phase-B chain; see [loop-gmupdate.md](loop-gmupdate.md) §2) |
 | `RaycastPathManager` | 5 | |
 | `PartyManager` | 4 | |
 | `ThreadManager.UpdateMainThreadTasks` | 64 | Main queue drain (name may not be bare `Update`) |
 
-Also from peers / LateUpdate: `MeshDataManager`, `ConnectionManager`, `DynamicMeshManager`, `SdtdConsole`, `LoadManager`, `PlatformManager`, `AstarManager.UpdateGraphs` (185). The last is player-following and the top measured CPU + heap allocator at load: [`measured-scaling.md`](measured-scaling.md) §1/§4b.
+Also from peers / LateUpdate: `MeshDataManager`, `ConnectionManager`, `DynamicMeshManager`, `SdtdConsole`, `LoadManager`, `PlatformManager`, `AstarManager.UpdateGraphs` (185). The last is player-following and the top measured CPU + heap allocator at load: [`measured-scaling.md`](../../7dtd-optimizer/docs/measured-scaling.md) §1/§4b.
 
 ---
 
@@ -112,9 +114,6 @@ Type `ModEvents` static fields (complete inventory from dump):
 | `FPS` | - | Counter |
 | `GameObjectPool.FrameUpdate` | - | Pool |
 
-## Changelog
-
-- **2026-07-18:** Managers + full ModEvents field inventory from dedi-complete dump.
 ## Related docs
 
 | Doc | Role |
@@ -125,3 +124,4 @@ Type `ModEvents` static fields (complete inventory from dump):
 ## Changelog
 
 - **2026-07-19:** Related docs table.
+- **2026-07-18:** Managers + full ModEvents field inventory from dedi-complete dump.

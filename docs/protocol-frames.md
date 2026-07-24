@@ -3,7 +3,7 @@
 **Owns:** left-to-right byte/field strips for envelope + golden packages (classic protocol style).  
 **Companion:** narrative join/policy in [protocol.md](protocol.md).  
 **Evidence:** loadgen `PackageCodec` · dedi-complete census.  
-**Clone:** [`../../zdtd/`](../../zdtd/).
+**Clone:** [`../../zdtd/`](../../zdtd).
 
 ## How to read these diagrams
 
@@ -517,7 +517,7 @@ Fixed head through `blockPos` (then variable string + tail; see protocol.md for 
 |---:|---:|---|---|
 | 0 | 4 | entityId | target |
 | 4 | 1 | damageSource | 0 External, 1 Internal |
-| 5 | 1 | damageType | 3 Bash, 16 Drown, 26 Suicide, … |
+| 5 | 1 | damageType | 3 Bash, 16 Suffocation (drown), 26 Suicide, … |
 | 6 | 2 | strength | u16 |
 | 8 | 1 | hitDirection | |
 | 9 | 2 | hitBodyPart | i16 |

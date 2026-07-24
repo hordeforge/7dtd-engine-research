@@ -1,12 +1,13 @@
 # Dedicated wire protocol (V3.0.1 managed + live golden)
 
 **Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, golden package body layouts.  
-**Not:** full 194 package body catalog (in progress); native LiteNet internals (residual); EAC wire (residual).  
+**Not:** the exhaustive per-package body catalog + protocol-wide metadata census (that is [`protocol-packages.md`](protocol-packages.md)); native LiteNet internals (residual); EAC wire (residual).  
 **Hub:** [INDEX.md](INDEX.md).  
 **Visual frames (RFC bars + Mermaid):** [`protocol-frames.md`](protocol-frames.md).  
-**Clone use:** [zig-clone.md](zig-clone.md) · implementation [`../../zdtd/`](../../zdtd/).  
+**Full package bodies + census (channels, compress, pre-auth, encryption handshake):** [`protocol-packages.md`](protocol-packages.md).  
+**Clone use:** [zig-clone.md](../../zdtd/docs/zig-clone.md) · implementation [`../../zdtd/`](../../zdtd).  
 **Replication policy:** [network.md](network.md).  
-**Evidence:** `7dtd-loadgen` `PackageCodec.cs` / `JoinStateMachine.cs` / `GameJoinClient.cs` (live joins); `research/il/dedi-complete-v3.0.1/` NetPackage census; ConnectionManager dumps.
+**Evidence:** `7dtd-loadgen` `PackageCodec.cs` / `JoinStateMachine.cs` / `GameJoinClient.cs` (live joins); `il/dedi-complete-v3.0.1/` NetPackage census; ConnectionManager dumps.
 
 **Endianness:** little-endian (BinaryWriter / .NET). Strings: length-prefixed UTF-8 as .NET `BinaryWriter.Write(string)`.
 
@@ -42,7 +43,7 @@ flowchart LR
 ## 2. Pre-auth challenge
 
 Before normal packages, server sends **raw** 17 bytes (not the channel envelope).  
-**Frame diagram:** [protocol-frames.md §1](protocol-frames.md#1-challenge-pre-auth-raw-no-envelope).
+**Frame diagram:** [protocol-frames.md §1](protocol-frames.md#1-challenge-raw-before-game-envelope).
 
 ```text
 [0]    = 0xCA   // PackageCodec.ChallengeChannelMarker = 202
@@ -55,7 +56,7 @@ Client **echoes** the same 17 bytes. Constants: `ChallengeSize = 17`.
 
 ## 3. Game message envelope (after challenge)
 
-**Frame diagram:** [protocol-frames.md §2](protocol-frames.md#2-channel-envelope-every-game-message-after-challenge).
+**Frame diagram:** [protocol-frames.md §2](protocol-frames.md#2-game-channel-envelope--package-stream).
 
 From `NetConnectionSimple` / `NetworkServerLiteNetLib` RE (loadgen comments + golden assert):
 
@@ -122,7 +123,10 @@ hasHostUserAndToken:bool (+ optional platform user blobs)
 
 Client must use **server-advertised** ids for all later packages. Do not hard-code ids across game versions.
 
-DLL census: **~194** `NetPackage*` types (dedi-complete). One live map had **189** entries.
+DLL census (V3.0.1, `tools/bin/Census.exe`): **194** `NetPackage*`-prefixed types =
+**193 + `NetPackageManager`** (the registry). The **189** in the live id-map are the
+actual registered wire packages; the remaining ~4-6 of the 193 are name-prefixed
+helpers (`NetPackageDirection` [enum], `Logger`, `Metrics`, ...), not wire packages.
 
 ### Family counts (census)
 
@@ -139,7 +143,7 @@ DLL census: **~194** `NetPackage*` types (dedi-complete). One live map had **189
 
 Largest maxIL (complexity signal, not wire size): Metrics, SharedQuest, QuestEvent, QuestGotoPoint, WireToolActions, PartyData, RangeCheckDamageEntity, GameEventRequest, TurretSpawn, Audio, DynamicMesh, …
 
-Full name list: `research/il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md` §3.
+Full name list: `il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md` §3.
 
 ---
 
@@ -203,7 +207,7 @@ nearEntityId:i32
 
 ## 6. Entity motion packages (golden sizes)
 
-**Visual layouts (RFC + Mermaid):** [protocol-frames.md §8](protocol-frames.md#8-entity-packages-golden-fixed-bodies).
+**Visual layouts (RFC + Mermaid):** [protocol-frames.md §7-§12](protocol-frames.md#7-entityposandrot-body-buseq--30-bytes).
 
 ### 6.1 NetPackageEntityPosAndRot (!bUseQRotation)
 
@@ -331,17 +335,28 @@ Replication path: [network.md](network.md) §4b (per-player rebuild vs broadcast
 
 | Flag | Bot path | Full server |
 |---|---|---|
-| compressed | 0 | May set; codec not golden-tested here |
-| encrypted | 0 | `NetPackageEncryption*` family present |
+| compressed | 0 | Set per-package: **8 packages** force `get_Compress = 1` (bulk terrain/map/config), see [protocol-packages.md](protocol-packages.md) §1.2 |
+| encrypted | 0 | Public-key handshake decoded: [protocol-packages.md](protocol-packages.md) §2 |
 
-Clone M1: uncompressed, unencrypted only. Password servers need encryption RE next.
+Clone M1: uncompressed, unencrypted only. The join handshake packets are
+uncompressed, but chunk/map/config packages are LZ-compressed even on the bot
+path (they set `get_Compress` themselves). The encryption handshake
+(`EncryptionRequest -> EncryptionPublicKey -> EncryptionSharedKey ->
+KeyExchangeComplete`) is now mapped; the cipher/KDF primitives remain native
+(residual).
 
 ---
 
 ## 9. Channels
 
-Loadgen uses **channel 0** for game packages. Challenge is **outside** the envelope (raw 0xCA).  
-Dynamic mesh / other systems may use other channels; treat as later.
+Loadgen uses **channel 0** for game packages. Challenge is **outside** the envelope (raw 0xCA).
+
+Most packages inherit **channel 0**, but exactly **6 override to channel 1** (the
+bulk/terrain/map band): `NetPackageChunk`, `NetPackageChunkRemove`,
+`NetPackageMapChunks`, `NetPackageDynamicMesh`, `NetPackagePOIAround`,
+`NetPackageWorldFolder`. These carry the heaviest bodies and several are
+compressed (`get_Compress = 1`). A clone must route both channels. Full census
+and per-package channel/compress/direction/auth: [`protocol-packages.md`](protocol-packages.md) §1.
 
 ---
 
@@ -360,19 +375,21 @@ Any Zig clone should pass the same golden sizes for PosAndRot / RelPos / AliveFl
 
 ## 11. RE backlog (protocol)
 
-| Priority | Item | Why |
-|---:|---|---|
-| P0 | NetPackageChunk body | Client terrain |
-| P0 | EntitySpawn / SpawnResponse | Visible zombies/players |
-| P0 | WorldInfo / WorldTime / WorldInit* | Client world ready |
-| P1 | SetBlock / SetBlockResponse | Building |
-| P1 | PlayerInventory / HoldingItem | Play loop |
-| P1 | ChunkRemove* | Unload |
-| P2 | Encryption + password | Public servers |
-| P2 | TileEntity / vehicles | Features |
-| P3 | Quest/Party/Twitch | Completeness |
-| residual | EAC | Out of scope |
-| residual | LiteNet native | Black box |
+Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23):
+
+| Priority | Item | Why | Status |
+|---:|---|---|---|
+| P0 | NetPackageChunk body | Client terrain | **Done** ([protocol-packages.md](protocol-packages.md) §3.1) |
+| P0 | EntitySpawn / SpawnResponse | Visible zombies/players | Header done; class tail partial (§5.1-5.2) |
+| P0 | WorldInfo / WorldTime / WorldInit* | Client world ready | WorldInfo/WorldTime **done**; WorldInitInfo partial (§4) |
+| P1 | SetBlock / SetBlockResponse | Building | **Done** (§6) |
+| P1 | PlayerInventory / HoldingItem | Play loop | **Done** (§5.3-5.4) |
+| P1 | ChunkRemove* | Unload | **Done** (§3.2) |
+| P2 | Encryption handshake | Public servers | **Done** (§2); cipher/KDF native (residual) |
+| P2 | TileEntity / vehicles | Features | Open |
+| P3 | Quest/Party/Twitch | Completeness | Open |
+| residual | EAC | Out of scope | Residual |
+| residual | LiteNet native | Black box | Residual |
 
 ---
 
@@ -381,7 +398,9 @@ Any Zig clone should pass the same golden sizes for PosAndRot / RelPos / AliveFl
 | Doc | Role |
 |---|---|
 | **[protocol-frames.md](protocol-frames.md)** | **Visual frame catalog (RFC + Mermaid)** |
-| [zig-clone.md](zig-clone.md) | Clone architecture |
+| **[protocol-packages.md](protocol-packages.md)** | **Per-package body catalog + metadata census + encryption handshake** |
+| [re-methodology.md](re-methodology.md) | How the bodies were derived from IL |
+| [zig-clone.md](../../zdtd/docs/zig-clone.md) | Clone architecture |
 | [network.md](network.md) | Interest + scale |
 | [closed-gaps.md](closed-gaps.md) | Package band thresholds |
 | [engine-limitations.md](engine-limitations.md) | Net ceilings |
@@ -391,5 +410,6 @@ Any Zig clone should pass the same golden sizes for PosAndRot / RelPos / AliveFl
 
 ## Changelog
 
+- **2026-07-23:** §11 backlog status updated after the protocol-packages.md body pass.
 - **2026-07-20:** Link visual protocol-frames catalog (RFC bars + Mermaid block-beta).
 - **2026-07-20:** Initial protocol narrative from loadgen golden wire + dedi-complete census.

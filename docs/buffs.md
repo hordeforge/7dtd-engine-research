@@ -1,0 +1,118 @@
+# Buffs and effects (dedicated V3.0.1)
+
+**Owns:** the buff system that runs on server entities: `EntityBuffs` (per-entity
+container + tick), `BuffValue` (a running instance), `BuffClass` (XML definition),
+duration/stack/removal lifecycle, stat modifiers, and net sync.
+**Not:** the individual buff/effect XML content (data); the `MinEvent` action
+framework that triggers buffs (own doc / residual); stat math internals
+(`EntityStats`).
+**Evidence:** `EntityBuffs`, `BuffValue`, `BuffClass` IL (dump locally with
+`tools/src/DumpMethod`, git-ignored). **Hub:** [`INDEX.md`](INDEX.md).
+**Method:** [`re-methodology.md`](re-methodology.md).
+
+Buffs tick on every alive server entity (players and zombies), so this is a
+per-tick dedicated codepath ([entity-ai.md](entity-ai.md) calls into it via the
+entity update).
+
+---
+
+## 1. Model
+
+| Type | Role |
+|---|---|
+| `BuffClass` | The definition loaded from `buffs.xml`: `DurationMax`, effects/modifiers, tags, stack rule |
+| `BuffValue` | A running instance on an entity: remaining `DurationInTicks`, `Update`/`Remove` flags, instigator |
+| `EntityBuffs` | Per-`EntityAlive` container: the active `BuffValue` list, add/remove/query, and the `Tick` |
+| custom vars | Named float variables (`AddCustomVar`/`GetCustomVar`) that buffs and MinEvents read/write (the "cvar" system) |
+
+Each `EntityAlive` owns one `EntityBuffs`. Stat modifiers from active buffs are
+applied through `GetModifiedValueData` (passive effects by `ValueSourceType` /
+`PassiveEffects` + `FastTags`), which the stat system queries.
+
+---
+
+## 2. Buff instance lifecycle (state machine)
+
+`EntityBuffs.AddBuff(name, instigator, netSync, ..., duration)` creates or refreshes
+a `BuffValue`. Each server tick, `EntityBuffs.Tick` advances every instance
+(`BuffValue.DurationTick`/`Tick`), and when an instance is flagged `Remove`
+(expired, or explicitly removed) it is dropped from the list and
+`EntityStats.EntityBuffRemoved` is called. On the base `EntityStats` this is a
+**no-op** (`ret`); the real work is in the `PlayerEntityStats` override, which
+fans the removal out to every registered `IEntityBuffsChanged` in
+`buffChangedDelegates` (which is where stat/UI recompute is driven).
+
+```mermaid
+stateDiagram-v2
+  [*] --> Added: AddBuff(name, duration)
+  Added --> Active: BuffValue created, effects applied
+  Added --> Refreshed: buff already present -> refresh duration / stack
+  Refreshed --> Active
+  Active --> Active: Tick -> DurationTick (remaining -= 1)
+  Active --> Expired: DurationInTicks reaches 0
+  Active --> Marked: RemoveBuff / RemoveBuffsByTag / RemoveDeathBuffs
+  Expired --> Marked: set Remove = true
+  Marked --> Removed: EntityBuffs.Tick drops it -> EntityBuffRemoved (PlayerEntityStats fans to buffChangedDelegates; base is a no-op)
+  Removed --> [*]
+```
+
+- **Instant buffs** apply their effect and expire immediately (zero/short
+  duration); **timed buffs** count down `DurationInTicks` at the sim rate.
+- **Death handling:** `OnDeath` runs `RemoveDeathBuffs(excludeTags)`, clearing
+  buffs not tagged to persist through death.
+- **Tag queries:** `HasBuffByTag` / `RemoveBuffsByTag` operate on `FastTags`, so
+  effects and removals are tag-driven, not just name-driven.
+
+---
+
+## 3. Network sync
+
+Buffs that matter to other clients are synced. `AddBuff`/`RemoveBuff` take a
+`netSync` flag. **`AddBuffNetwork`/`RemoveBuffNetwork` are the send side, not the
+receive side:** each builds a `NetPackageAddRemoveBuff` (`Setup(...)`) and calls
+`ConnectionManager.SendPackage`/`SendToServer` on channel 192 without touching the
+buff list itself (`EntityBuffs.AddBuffNetwork` IL=34). The **receive** path is
+`NetPackageAddRemoveBuff.ProcessPackage`, which on the server **re-broadcasts** the
+package to observers and then applies it via `AddBuff`/`RemoveBuff` with
+`netSync=false` (so applying does not re-emit). So the server is authoritative: it
+applies locally and relays to observers.
+
+```mermaid
+sequenceDiagram
+  participant SRC as Instigator (server logic / item / trap)
+  participant EB as EntityBuffs (server)
+  participant PP as NetPackageAddRemoveBuff.ProcessPackage
+  participant CL as Observing clients
+  SRC->>EB: AddBuff(name, netSync=true, duration)
+  EB->>EB: create BuffValue, apply effects
+  EB->>EB: AddBuffNetwork -> Setup + SendPackage (ch 192)
+  EB->>PP: NetPackageAddRemoveBuff to server/observers
+  PP->>CL: re-broadcast to observers
+  PP->>PP: AddBuff / RemoveBuff (netSync=false, apply without re-emit)
+  Note over EB: Tick expires it -> RemoveBuff(netSync=true) -> RemoveBuffNetwork sends the remove package
+```
+
+---
+
+## 4. Dedicated relevance and residuals
+
+- **Per-tick dedicated path:** every alive entity's `EntityBuffs.Tick` runs on the
+  server; buff-driven stat changes are server-authoritative.
+- **Residual / content:** `buffs.xml` effect definitions (data); the `MinEvent`
+  action framework (`MinEventActionBuffModifierBase` and siblings) that triggers
+  buffs from items/blocks/attacks (candidate for its own doc); `EntityStats` math.
+
+---
+
+## Related docs
+
+| Doc | Role |
+|---|---|
+| [entity-ai.md](entity-ai.md) | The entity update that ticks buffs |
+| [server-lifecycle.md](server-lifecycle.md) | Player persistence (buffs saved with the profile) |
+| [protocol-packages.md](protocol-packages.md) | Buff add/remove packages on the wire |
+| [full-surface.md](full-surface.md) | Whole-assembly map |
+
+## Changelog
+
+- **2026-07-23:** Initial buff-system reversal (EntityBuffs tick, BuffValue lifecycle, tag/death removal, net sync) with state machines.

@@ -107,10 +107,6 @@ flowchart TB
 
 ## AIDirectorZombieState : Object
 
-# IsDedicatedServer references in Entity* Update methods
-
-- `EntityFallingBlock::Update` calls `get_IsDedicatedServer`
-- `EntityFallingBlocks::Update` calls `get_IsDedicatedServer`
 ## Related docs
 
 | Doc | Role |

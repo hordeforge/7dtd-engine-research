@@ -5,7 +5,7 @@
 **Visual frames:** [`protocol-frames.md`](protocol-frames.md).  
 **Companion:** [`closed-gaps.md`](closed-gaps.md) §4 (threshold decode).  
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md) §2-3 (player O(N²), packages).  
-**Clone design:** [`zig-clone.md`](zig-clone.md).  
+**Clone design:** [`zig-clone.md`](../../zdtd/docs/zig-clone.md).  
 **Loop:** [`loop.md`](loop.md) §6.  
 **Dumps:** `il/gaps-v3.0.1/`, `il/dedi-complete-v3.0.1/` §3-4.
 
@@ -70,7 +70,7 @@ Encode helpers: `NetEntityDistributionEntry.EncodePos` / `EncodeRot`.
 
 ## 3. NetPackage type inventory
 
-Live census: **~196** types named `NetPackage*` (base `NetPackage` or specialized).
+Live census (tools/bin/Census.exe): **194** types with the `NetPackage*` name prefix = **193 + `NetPackageManager`**. Of those 193, the **189** in the live id-map are the actual registered wire packages; the remaining ~4-6 are name-prefixed helpers (e.g. `NetPackageDirection` [enum], `Logger`, `Metrics`), not wire packages.
 
 Representative dedi-relevant packages (from inventory dump):
 
@@ -87,7 +87,7 @@ Representative dedi-relevant packages (from inventory dump):
 | `NetPackagePlayer*` family | Player data |
 | Encryption packages | Auth handshake |
 
-Full name list: `research/il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md` §3.  
+Full name list: `il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md` §3.  
 Join + envelope + golden entity package bodies: [protocol.md](protocol.md).
 
 ---
@@ -134,39 +134,31 @@ there is no per-player package-build loop to hoist. `updatePlayerEntity` (IL 222
 the separate, lighter per-(player,entity) **interest add/remove** pass (distSq +
 `HashSet<EntityPlayer>.Contains`, early-return in steady state).
 
-**Where the ~15 MB/s at 128p actually comes from:** the same broadcast package is
+**How broadcast serialization scales (RE fact):** the same broadcast package is
 enqueued to each recipient connection, and each connection's **writer thread**
 (`NetConnectionSimple.taskSerialize`, double-buffered `writerListFilling`/`Processing`)
 **serializes it independently** into that connection's byte stream. So it is
-serialized N times - but **off the main sim thread** (does not cost `ms_per_tick`)
-and it is the **#4** allocator, not #1. A true serialize-once (encode once, memcpy
-per connection) needs a thread-safe shared buffer across N writer threads: modest
-reward, real risk - deprioritized. The worthwhile network levers are the send-path
-scan (shipped, `FastSendPatch`) and a spatial index for the O(N^2) interest all-pairs.
-`SendPackage` signature: `ConnectionManager.SendPackage(NetPackage, bool, int, int,
-int, Vector3?, int, bool)`.
+serialized N times, but **off the main sim thread** (does not cost `ms_per_tick`).
+A serialize-once (encode once, memcpy per connection) would need a thread-safe
+shared buffer across N writer threads. `SendPackage` signature:
+`ConnectionManager.SendPackage(NetPackage, bool, int, int, int, Vector3?, int, bool)`.
+
+The measured egress share (bytes/s at load), the allocator ranking, and whether
+any of this is worth a lever are optimizer-owned measurements/decisions:
+[`measured-scaling.md`](../../7dtd-optimizer/docs/measured-scaling.md),
+[`bottlenecks.md`](../../7dtd-optimizer/docs/bottlenecks.md).
 
 ## 5. See also
 
 | Doc | Why |
 |---|---|
-| [loop.md](loop.md) | UpdateTick placement of replication |
-| [closed-gaps.md](closed-gaps.md) | Threshold decode evidence |
-| [measured-scaling.md](measured-scaling.md) | Super-linear player-axis cost |
+| [loop.md](loop.md) | UpdateTick placement of replication; frame peers |
+| [closed-gaps.md](closed-gaps.md) | Distance-band threshold decode evidence |
 | [entity-ai.md](entity-ai.md) | What is being replicated |
-
-## Changelog
-
-- **2026-07-18:** Package-band state machine; see also.  
-- **2026-07-18:** Network family narrative + package census link.
-## Related docs
-
-| Doc | Role |
-|---|---|
-| [closed-gaps.md](closed-gaps.md) | Distance bands |
-| [measured-scaling.md](measured-scaling.md) | Player-axis O(N^2) |
-| [loop.md](loop.md) | Frame peers |
+| [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) | Super-linear player-axis cost (optimizer) |
 
 ## Changelog
 
 - **2026-07-19:** Related docs table.
+- **2026-07-18:** Package-band state machine; see also.  
+- **2026-07-18:** Network family narrative + package census link.

@@ -5,7 +5,7 @@
 **Hub:** [`INDEX.md`](INDEX.md).
 
 Closes several **IL-solvable** open items from [`loop.md`](loop.md) §14.  
-Raw notes: [`inventories/gaps.md`](inventories/gaps.md). Tool: `tools/DumpGaps.cs`.
+Raw notes: [`inventories/gaps.md`](inventories/gaps.md). Tool: `tools/legacy/DumpGaps.cs` (build via [`../tools/`](../tools/)).
 
 ---
 
@@ -157,7 +157,7 @@ Heuristic only; presence still depends on whether component exists in dedicated 
 
 ## 8. Optim map updates from this pass
 
-Merged into the optimizer project (do not keep optim narrative under `research/docs/` or `research/il/`):  
+Merged into the optimizer project (do not keep optim narrative under `docs/` or `il/`):  
 [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)
 
 | Idea | New RE detail folded there |
@@ -171,18 +171,20 @@ Merged into the optimizer project (do not keep optim narrative under `research/d
 
 ## 9. Remaining open (still)
 
+Canonical open-item list is [`residuals.md`](residuals.md); this is a pointer for
+the gap-closing context only. All items here are **non-IL** residuals:
+
 1. Unity **script execution order** among peers (not in IL).  
 2. Runtime **entity Behaviour.enabled** population on dedi (needs runtime or deeper spawn).  
 3. Full line-by-line **AstarPath** library (third-party; treat as black box).  
-4. **Region/WorldState** binary formats.  
+4. **Region sector payload byte codec** only. The WorldState/Region **managed
+   structure is CLOSED** ([`save-region.md`](save-region.md), `WorldState.SaveLoad` IL=884);
+   just the compressed sector payload is left un-annotated ([`residuals.md`](residuals.md)).  
 5. ModEvents subscriber sets.  
 6. Post-V3.0.1 IL drift.
 
 ---
 
-## Changelog
-
-- **2026-07-16:** Closed GameTimer=20, AIDirector CreateComponents list, ASP→AstarPath path body, net package thresholds, MB classification, EAC/LiteNet type map.
 ## Related docs
 
 | Doc | Role |
@@ -194,3 +196,4 @@ Merged into the optimizer project (do not keep optim narrative under `research/d
 ## Changelog
 
 - **2026-07-19:** Related docs table.
+- **2026-07-16:** Closed GameTimer=20, AIDirector CreateComponents list, ASP→AstarPath path body, net package thresholds, MB classification, EAC/LiteNet type map.

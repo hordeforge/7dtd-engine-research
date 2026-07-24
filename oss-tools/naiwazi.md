@@ -27,7 +27,7 @@ Author branding: **NAIWAZI_Rainyeve** (ModInfo). Site: naiwazi.com / cn.naiwazi.
 
 Marketing claims (treat as **vendor claims**, not measured here):
 
-- Fix dedicated stutter / “frame drops” and “stuck gun” lag at 20–30+ players  
+- Fix dedicated stutter / “frame drops” and “stuck gun” lag at 20-30+ players  
 - ~**2×** player capacity vs stock (vanilla reference)  
 - Bandwidth ~**1/3** of stock; **60 players ≤ ~20 Mbps**  
 - **Gateway split**: restart GS without kicking players; seamless restart **&lt;1 s** perceived  
@@ -115,7 +115,7 @@ Plugin-only mode: **no gateway** → classic single-process optim DLL only (V1-s
 | Older AntiCheat / Bot tags | same GitHub repos |
 | ServerKit Standard/Plugin zips | **Not public** (purchase + authtoken); **not** found on Wayback as free zip |
 
-Local copies under `research/naiwazi/` (gitignored recommended if large).
+Clone location: external, not tracked in this repo.
 
 ### Packaging pattern (AntiCheat + Bot)
 
@@ -171,7 +171,7 @@ Readable types / symbols:
 | Restart without kick | GW holds sessions; swap/restart GS process | **Yes** (docs + dual-GS seamless option) |
 | Lower bandwidth | Package rate limits / compression / interest (closed); marketing “1/3” | **Claim only** |
 | Higher player count | Combination of optim + net offload + CN hosting practices | **Claim only** (105 peak self-report) |
-| Fix 20–30p stutter / gun lag | GS helper Harmony on hot sim/net send paths | **Plausible**; closed DLL |
+| Fix 20-30p stutter / gun lag | GS helper Harmony on hot sim/net send paths | **Plausible**; closed DLL |
 | Entity threads | “内测” on Standard; **not** in Plugin edition | **Claim / beta** only |
 | Anti-cheat package reject | Prefix on package handlers + world APIs | **Yes** (symbols + README) |
 | EAC real | Explicitly weak/incomplete in V2 docs | **Docs admit incomplete** |

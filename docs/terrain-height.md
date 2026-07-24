@@ -12,21 +12,20 @@
 
 | Directory | Assembly | Role |
 |---|---|---|
-| [`../il/terrain-stock-v3.0.1/`](../il/terrain-stock-v3.0.1/) | Dedicated `.re_stock_bak` | **Stock** vertical constants (pre-expand) |
-| [`../il/terrain-v3.0.1/`](../il/terrain-v3.0.1/) | Dedicated live | **Expanded** on this machine (RealEarth YDim) |
-| [`../il/terrain-client-v3.0.1/`](../il/terrain-client-v3.0.1/) | Client live | Expanded client (this machine) |
+| [`../il/terrain-stock-v3.0.1/`](../il/terrain-stock-v3.0.1) | Dedicated `.re_stock_bak` | **Stock** vertical constants (pre-expand) |
+| [`../il/terrain-v3.0.1/`](../il/terrain-v3.0.1) | Dedicated, expanded snapshot | **Historical** expanded YDim (RealEarth); live dedi is stock again, see [`coverage.md`](coverage.md) live pin |
+| [`../il/terrain-client-v3.0.1/`](../il/terrain-client-v3.0.1) | Client, expanded snapshot | Historical expanded client dump |
 
 Auto narrative: `TERRAIN_auto.md` in each dump dir.  
-Tool: `7dtd-optimizer/tools/DumpTerrain.cs`.
+Tool: `tools/legacy/DumpTerrain.cs` (build via [`../tools/`](../tools/)).
 
 ```bash
 DS="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
 ASM="$DS/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
-cd 7dtd-optimizer/tools
-mcs -r:Mono.Cecil.dll -out:DumpTerrain.exe DumpTerrain.cs
-mono DumpTerrain.exe "$ASM" ../../research/il/terrain-v3.0.1
+cd tools && ./build.sh
+mono bin/legacy/DumpTerrain.exe "$ASM" ../il/terrain-v3.0.1
 # stock backup:
-mono DumpTerrain.exe "$ASM.re_stock_bak" ../../research/il/terrain-stock-v3.0.1
+mono bin/legacy/DumpTerrain.exe "$ASM.re_stock_bak" ../il/terrain-stock-v3.0.1
 ```
 
 ## Stock vs expanded constants (Measured)
@@ -147,28 +146,17 @@ m_TerrainHeight[x + z*16] → byte
 
 Expand must grow `m_BlockLayers` length (`ChunkBlockLayers`) with YDim; XZ formulas stay 16-wide.
 
-## See also
+## See also (stock RE)
 
 | Doc | Why |
 |---|---|
-| `realearth-surfaces.md` | GetBlock index, save-64, light 255 sites |
 | [save-region.md](save-region.md) | Chunk write/read, WorldState |
 | [world-chunks.md](world-chunks.md) | Gen trampoline, dirty lifecycle |
-| `realearth-runtime.md` | Product inject + tall fill policy |
+| `7days-realworld/docs/realearth-surfaces.md` | Product: GetBlock index, save-64, light 255 sites |
 
-## Product inject lessons (from runtime work)
-
-Not pure engine RE, but closed several "height looks wrong" classes:
-
-| Lesson | Detail |
-|---|---|
-| Byte APIs stay lossy | Even with YDim=16384, `GetTerrainHeight → byte` cannot store Everest |
-| Tall fill policy | Dual-fill hardMax for solid; above that crust+plug+air (no full Reflect hang) |
-| Sample fail-closed | Missing tiles → ocean / refuse product height, never invent DEM |
-| Gen-thread sync load | Inject path may sync-load tiles; miss TTL must not block allowSyncLoad |
-| Stamp surface Y | int32 only; uint8 wraps and buries H500+ |
-
-Full catalog: `7days-realworld/docs/realearth-review.md`.
+**Product inject lessons** (byte-API lossiness, tall-fill policy, fail-closed
+sampling, int32 surface stamp) are RealEarth product knowledge, not stock RE:
+see `7days-realworld/docs/realearth-review.md`.
 
 ## Changelog
 

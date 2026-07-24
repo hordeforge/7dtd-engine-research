@@ -2,11 +2,11 @@
 
 **Owns:** gmUpdate phase narrative (detail under [`loop.md`](loop.md) §2).  
 **Call list:** [`inventories/gmupdate-calls.md`](inventories/gmupdate-calls.md).  
-**Dump set:** [`../il/gmUpdate-v3.0.1/`](../il/gmUpdate-v3.0.1/).  
+**Dump set:** [`../il/gmUpdate-v3.0.1/`](../il/gmUpdate-v3.0.1).  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 **Assembly:** dedicated `Assembly-CSharp.dll` V3.0.1  
-**Tool:** `7dtd-optimizer/tools/DumpGmUpdate.cs`  
+**Tool:** `tools/legacy/DumpGmUpdate.cs` (pre-corrupted; use `tools/src/DumpMethod` instead, see §10)  
 **Optim summary:** [`../../7dtd-optimizer/docs/ARCHITECTURE.md`](../../7dtd-optimizer/docs/ARCHITECTURE.md)
 
 ---
@@ -281,7 +281,7 @@ When any players online:
 - Per-entity-ish work uses **`GetClosestPlayer`** and sqr magnitude  
 - **`aiActiveScale` stores (from IL constants):**  
   - If closest dist² **&lt; 64** (~8 m): scale **`1.0`**  
-  - Else if dist² **&lt; 225** (~15 m): scale **`0.3`** or **`0.1`** (branch picks 0.1 vs 0.3)  
+  - Else if dist² **&lt; 225** (~15 m): scale **`0.3`**; else **`0.1`**  
   - (Matches prior ARCHITECTURE band story; EfficientServer tightens further)  
 - Cloth / jiggle toggles at larger radii (IL uses **625** and **3025** among other constants), presentation cost on non-dedicated; still walks structures on dedicated unless skipped downstream  
 
@@ -340,33 +340,41 @@ Harmony `Prefix` on `gmUpdate` runs **before** both.
 
 ---
 
-## 9. Implications for EfficientServer / “conductor”
+## 9. Interception points (what each covers)
 
-| Approach | Captures |
+A structural fact useful to any patcher or clone: where you hook determines what
+you intercept. Lever *selection* and patch strategy are optimizer-owned
+([`../../7dtd-optimizer/docs/ARCHITECTURE.md`](../../7dtd-optimizer/docs/ARCHITECTURE.md),
+[`../../7dtd-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-optimizer/docs/SIM_PARALLELISM.md) §5.6.1);
+this table is only the RE-derived coverage of each interception point.
+
+| Interception point | Covers |
 |---|---|
-| Leaf patches (`updateTasks`, mesh settings, deco skip) | Local, low risk |
+| Leaf (`updateTasks`, mesh settings, deco) | Local sub-steps only |
 | Prefix **`UpdateTick`** | Entity + world tick + fall + server entity/chunk distribute |
 | Prefix **`gmUpdate`** | Managers + timer + UpdateTick + GC/save side; **not** ConnectionManager/DynamicMesh |
-| Full frame control | Must also patch or reorder **`ConnectionManager.Update`** and **`DynamicMeshManager.Update`**, and understand Unity execution order |
-| Worker threads calling `TickEntity` / `OnUpdateEntity` | Unsafe without snapshot/intents (see SIM_PARALLELISM §5.6.1) |
+| Full frame | Also needs **`ConnectionManager.Update`** + **`DynamicMeshManager.Update`** (separate Unity Update order) |
+| Worker threads on `TickEntity`/`OnUpdateEntity` | Shared mutable world state; not safe without snapshot/intents |
 
-**Best conductor target for sim admission:** own or filter around **`TickEntities` / `TickEntitiesSlice` / `TickEntity`**, not a blind full `gmUpdate` rewrite.
-
-**Slice model:** any “run all entities every frame” change fights stock design (EMA + sliceCount + flush). Measure before removing.
+**Slice model (RE fact):** the entity tick is amortized across frames (EMA +
+sliceCount + flush), not parallel; a "run all entities every frame" change fights
+stock design.
 
 ---
 
 ## 10. Regenerate dump
 
+The legacy `tools/legacy/DumpGmUpdate.cs` is pre-corrupted and does not build; use
+the general `DumpMethod` (see [`../tools/README.md`](../tools/README.md)):
+
 ```bash
-cd 7dtd-optimizer/tools
-mcs -r:Mono.Cecil.dll -out:DumpGmUpdate.exe DumpGmUpdate.cs
-mono DumpGmUpdate.exe \
-  "$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll" \
-  /path/to/out   # e.g. research/il/gmUpdate-v3.0.1 (gitignored preferred)
+cd tools && ./build.sh
+ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
+mono bin/DumpMethod.exe "$ASM" GameManager gmUpdate   # + gmUpdate call ordering
 ```
 
-After every game update, re-dump and diff `GameManager_gmUpdate_calls.md` ordered sequence.
+After every game update, re-dump and diff the ordered `gmUpdate` call sequence
+(inventory in [`inventories/gmupdate-calls.md`](inventories/gmupdate-calls.md)).
 
 ---
 

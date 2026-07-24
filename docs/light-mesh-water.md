@@ -102,9 +102,6 @@ Full scan list: `7days-realworld/docs/realearth-surfaces.md` §7.1.
 | `ChunkProviderGenerateWorld.updateDecosAllowedForChunk` | | 306 |
 | `UpdateDecorations` / `updateDecorationsWherePossible` | | 4 / 42 |
 
-## Changelog
-
-- **2026-07-18:** Light/stability/mesh/water family from dedi-complete dump.
 ## Related docs
 
 | Doc | Role |
@@ -115,3 +112,4 @@ Full scan list: `7days-realworld/docs/realearth-surfaces.md` §7.1.
 ## Changelog
 
 - **2026-07-19:** Related docs table.
+- **2026-07-18:** Light/stability/mesh/water family from dedi-complete dump.

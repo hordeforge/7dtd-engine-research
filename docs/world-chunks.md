@@ -140,9 +140,6 @@ stateDiagram-v2
 | `AddFallingBlock` / `LetBlocksFall` | 38 / 220 | Collapse storms |
 | `EntityFallingBlock` OnUpdateEntity | 300+ | Entity cost |
 
-## Changelog
-
-- **2026-07-18:** Chunk/world family narrative consolidating loop + surfaces RE.
 ## Related docs
 
 | Doc | Role |
@@ -154,3 +151,4 @@ stateDiagram-v2
 ## Changelog
 
 - **2026-07-19:** Related docs table.
+- **2026-07-18:** Chunk/world family narrative consolidating loop + surfaces RE.

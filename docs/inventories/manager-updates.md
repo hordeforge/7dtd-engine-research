@@ -5,11 +5,6 @@
 **Hub:** [`INDEX.md`](../INDEX.md) · Inventories section.
 
 
-**Owns:** raw inventory of types with `Update*` (auto-style list).  
-**Prefer narrative:** [`managers.md`](../managers.md) for dedi-relevant Update ILs + ModEvents.  
-**Hub:** [`INDEX.md`](../INDEX.md).
-
-
 - `AchievementManager::UpdateAchievement(EnumAchievementDataStat,Single)` IL=34 MB=False
 - `AchievementManager::UpdateAchievement(EnumAchievementDataStat,Int32)` IL=34 MB=False
 - `AIDirector::UpdatePlayerInventory(EntityPlayerLocal)` IL=5 MB=False
