@@ -197,10 +197,13 @@ The request form `NetPackageWorldInitInfoRequest` has an empty body (`write` IL=
 ## 5. Entity + gameplay band
 
 ### 5.1 NetPackageEntitySpawn (ToClient)
-Body is a single `EntityCreationData.write(writer, true)`.
+Body is a single `EntityCreationData.write(writer, networkWrite=true)`. The body is
+**three ordered sections**: an unconditional header, an `entityClass`-switched
+middle, and a convergence tail. The middle switch is the part a clone gets wrong
+most easily (verified against the `write` IL branch structure, not the flat
+catalog).
 
-**EntityCreationData** stable header (from `write`, before class-conditional
-tail):
+**(1) Unconditional header (every entity, ends at `spawnerSource`):**
 ```text
 readFileVersion : byte
 entityClass     : i32
@@ -215,29 +218,46 @@ deathTime       : i16
 bag present     : bool  (+ Bag.Write if present)
 homePosition.x,y,z : i32 x3
 homeRange       : i16
-spawnerSource   : byte   // EnumSpawnerSource 0..4
-belongsPlayerId : i32
-clientEntityId  : i32
-itemStack       : ItemStack.Write
+spawnerSource   : byte   // EnumSpawnerSource 0..4  <- header ENDS here
 ```
-**Class-conditional tail (now fully extracted).** After the header the body
-branches on entity kind. The complete 56-field `EntityCreationData.write` sequence
-is in [`inventories/netpackage-bodies.md`](inventories/netpackage-bodies.md) (under
-"Nested serializers"). The tail groups:
 
-| Branch | Fields (in emit order) |
-|---|---|
-| **Falling-block / block-shaped** | `i8` flag, `BlockValue.rawData:u32`, `TextureFullArray.Write`, `blockValues` count + `rawData:u32` each, `blockPositions` (`StreamUtils.Write`), `blockPos`/`fallTreeDir` (`StreamUtils.Write`) |
-| **EntityAlive common** | `holdingItem` (`ItemValue.Write`), `teamNumber:u8`, `entityName:string`, `skinTexture:string` |
-| **Player** | `playerProfile` present:`bool` (+ `PlayerProfile.Write`) |
-| **Generic entity blob** | `entityData`: `u16` count + `bytes[]` |
-| **Trader** | `traderData` present:`bool` (+ `TraderData.Write`) |
-| **Sleeper / misc tail** | `sleeperPose:u8`, `isSleeper:bool`, `spawnById:i32`, `spawnByName:string`, `spawnByAllowShare:bool`, `headState:u8`, `overrideSize:f32`, `overrideHeadSize:f32`, `isDancing:bool`, `isSleeperPassive:bool`, `belongsPlayerId:i32` |
+**(2) `entityClass`-switched middle (mutually exclusive; a plain zombie/NPC/animal
+writes NONE of these).** The switch compares `entityClass` (an int, the
+`EntityClass.list` hash) against static class ids:
 
-The branch points are `brfalse` flag checks (nullable/optional sections), so a clone
-should read each optional section's presence flag and skip when unset. Verify a
-specific class against `EntityCreationData.write` IL before relying on the exact
-gating.
+| If `entityClass ==` | Writes | Note |
+|---|---|---|
+| `EntityClass.itemClass` | `belongsPlayerId:i32`, `clientEntityId:i32`, `itemStack.Write`, `sbyte(0)` | dropped-item entity, then **jumps straight to the tail** (skips all rows below) |
+| `EntityClass.fallingBlockClass` | `blockValues[0].rawData:u32`, `textureFullArrays[0].Write` | single falling block |
+| `EntityClass.fallingBlocksClass` | `blockValues.Length:i32` + per-block `rawData:u32`, `blockPositions` (`StreamUtils.Write`), `textureFullArrays` (`TextureFullArray.Write`) | multi-block |
+| `EntityClass.fallingTreeClass` | `blockPos:Vector3i` (`StreamUtils.Write`), `fallTreeDir:Vector3` (`StreamUtils.Write`) | falling tree |
+| `EntityClass.playerMaleClass` or `playerFemaleClass` | `holdingItem` (`ItemValue.Write`), `teamNumber:u8`, `entityName:string`, `skinTexture:string`, `playerProfile` present:`bool` (+ `PlayerProfile.Write`) | player character |
+| anything else (zombie, animal, NPC, vehicle, ...) | nothing | goes straight to the tail |
+
+**(3) Convergence tail (every entity):**
+```text
+entityData    : u16 length + bytes[]     // serialized extra blob (usually empty)
+traderData present : bool  (+ TraderData.Write)
+if networkWrite:                          // true for NetPackageEntitySpawn
+    sleeperPose : byte
+    isSleeper   : bool
+    spawnById   : i32
+    spawnByName : string
+    spawnByAllowShare : bool
+    headState   : byte
+    overrideSize / overrideHeadSize : f32 x2
+    isDancing   : bool
+    isSleeperPassive : bool
+    belongsPlayerId  : i32
+```
+
+So `belongsPlayerId`/`clientEntityId`/`itemStack` are **item-entity fields, not
+header fields**; a zombie spawn writes header + tail with the middle empty. The flat
+per-write sequence in
+[`inventories/netpackage-bodies.md`](inventories/netpackage-bodies.md) is the union
+of all branches; use the switch above for the real per-class body. (Cross-checked
+against the [zdtd](../../zdtd/docs/) clone's zombie spawn, which correctly writes the
+empty middle.)
 
 ### 5.2 NetPackageEntitySpawnResponse (ToServer)
 ```text
