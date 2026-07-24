@@ -20,8 +20,8 @@ honest floor of what still needs attention. Reachability is the ground truth for
 | Reached, non-generated | 4204 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 1495 (excluded from %) |
 | ...**game types** (the RE surface) | **2709** |
-| ...game types name-mentioned in docs | **1301 (48%)** |
-| ...game types not mentioned (gap floor) | 1408 |
+| ...game types name-mentioned in docs | **1425 (52%)** |
+| ...game types not mentioned (gap floor) | 1284 |
 
 The **game-type documented %** is the headline coverage number. Third-party/BCL
 code the game calls into is reached but out of scope (never reverse-engineered).
@@ -30,22 +30,22 @@ code the game calls into is reached but out of scope (never reverse-engineered).
 
 | Namespace | reached | documented | undocumented | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2195 | 1067 | 1128 | 48% |
-| `GameEvent` | 180 | 118 | 62 | 65% |
+| `<global>` | 2195 | 1143 | 1052 | 52% |
+| `GameEvent` | 180 | 119 | 61 | 66% |
 | `Twitch` | 78 | 13 | 65 | 16% |
-| `Challenges` | 46 | 14 | 32 | 30% |
-| `Platform` | 43 | 12 | 31 | 27% |
-| `Discord` | 25 | 5 | 20 | 20% |
+| `Challenges` | 46 | 45 | 1 | 97% |
+| `Platform` | 43 | 14 | 29 | 32% |
+| `Discord` | 25 | 4 | 21 | 16% |
 | `UAI` | 24 | 18 | 6 | 75% |
 | `PrefabVolumes` | 16 | 9 | 7 | 56% |
 | `WorldGenerationEngineFinal` | 12 | 10 | 2 | 83% |
 | `DynamicMusic` | 11 | 4 | 7 | 36% |
-| `SandboxOptions` | 10 | 1 | 9 | 10% |
+| `SandboxOptions` | 10 | 10 | 0 | 100% |
 | `SDF` | 10 | 4 | 6 | 40% |
 | `GamePath` | 9 | 9 | 0 | 100% |
 | `Audio` | 8 | 5 | 3 | 62% |
 | `Quests` | 7 | 7 | 0 | 100% |
-| `RaycastPathing` | 7 | 1 | 6 | 14% |
+| `RaycastPathing` | 7 | 7 | 0 | 100% |
 | `XMLData` | 5 | 2 | 3 | 40% |
 | `GearVariants` | 4 | 0 | 4 | 0% |
 | `Services` | 3 | 1 | 2 | 33% |
@@ -67,64 +67,64 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
+| `XUiView` | <global> | 171 |
+| `UILabel` | <global> | 136 |
+| `NGUITools` | <global> | 111 |
+| `XUiC_ItemStack` | <global> | 101 |
+| `XUiController` | <global> | 98 |
+| `XUiC_WorldGenerationWindow` | <global> | 92 |
+| `XUiC_TextInput` | <global> | 89 |
+| `UIPanel` | <global> | 82 |
+| `UIWidget` | <global> | 78 |
+| `XUiC_SignEditorWindow` | <global> | 77 |
+| `UICamera` | <global> | 75 |
+| `DiscordUser` | <global> | 72 |
 | `XUiC_List`1` | <global> | 71 |
+| `XUiC_ComboBoxBase` | <global> | 67 |
+| `XUiC_MapArea` | <global> | 65 |
+| `XUiC_OptionsTwitch` | <global> | 61 |
+| `NGUIFont` | <global> | 61 |
+| `SDCSUtils` | <global> | 59 |
+| `XUiC_LightEditor` | <global> | 55 |
+| `UIInput` | <global> | 53 |
+| `NGUIMath` | <global> | 53 |
+| `UIPopupList` | <global> | 50 |
+| `XUiC_RecipeList` | <global> | 49 |
+| `XUiC_ServerBrowserGamePrefSelectorCombo` | <global> | 47 |
+| `XUiC_DropDown` | <global> | 46 |
+| `DiscordSettings` | <global> | 46 |
+| `XUiC_CustomCharacterWindowGroup` | <global> | 45 |
 | `ObservableDictionary`2` | <global> | 44 |
+| `XUiC_Radial` | <global> | 44 |
+| `XUiC_WoPropsPOIMarker` | <global> | 44 |
+| `XUiC_WoPropsSleeperVolume` | <global> | 44 |
+| `UIDrawCall` | <global> | 44 |
+| `XUiC_NewsWindow` | <global> | 43 |
+| `XUiC_RecipeStack` | <global> | 43 |
+| `XUiM_PlayerInventory` | <global> | 43 |
+| `XUiV_LabelBase` | <global> | 43 |
+| `NGUIText` | <global> | 43 |
+| `DynamicMeshUnity` | <global> | 41 |
+| `XUiC_SaveManagementPrompt` | <global> | 41 |
+| `TwitchViewerData` | Twitch | 40 |
+| `XUiV_Button` | <global> | 40 |
+| `vp_ComponentPreset` | <global> | 40 |
+| `XUiC_BasePartStack` | <global> | 39 |
+| `ProfileSDF` | <global> | 38 |
+| `XUiC_TwitchEntryListWindow` | <global> | 38 |
+| `XUiC_GamePrefSelector` | <global> | 37 |
+| `XUiC_AdvancedColorPicker` | <global> | 37 |
 | `XUiC_ComboBoxList`1` | <global> | 37 |
-| `BlockValueV3` | <global> | 37 |
-| `StringSpan` | <global> | 36 |
-| `XUiC_SaveSpaceNeeded` | <global> | 36 |
-| `XUiC_SignLayerGrid` | <global> | 36 |
-| `XUiC_TriggerProperties` | <global> | 36 |
-| `UIRect` | <global> | 36 |
-| `NGuiAction` | <global> | 35 |
-| `XUiV_Label` | <global> | 35 |
-| `UIScrollView` | <global> | 35 |
-| `XUiC_SandboxOptions` | <global> | 34 |
+| `XUiV_Video` | <global> | 37 |
+| `UISprite` | <global> | 37 |
+| `Activity` | Discord.Sdk | 37 |
 | `XUiC_ComboBoxEnum`1` | <global> | 34 |
-| `AuthAndLoginManager` | <global> | 34 |
-| `DynamicMusicManager` | <global> | 33 |
 | `ConcurrentHashSet`1` | ConcurrentCollections | 33 |
-| `UIBasicSprite` | <global> | 33 |
-| `XUiC_BagContainer` | <global> | 32 |
-| `XUiV_Window` | <global> | 32 |
-| `XUiM_Recipes` | <global> | 32 |
-| `ChunkProviderAbstract` | <global> | 32 |
-| `SaveDataManagedPath` | <global> | 31 |
-| `WaterDataHandle` | <global> | 31 |
-| `SignCanvas` | <global> | 31 |
-| `XUiC_OptionsDialogBase` | <global> | 31 |
-| `XUiC_OptionsGeneral` | <global> | 31 |
-| `XUiC_TraderWindow` | <global> | 31 |
-| `XUiC_Paging` | <global> | 31 |
-| `vp_Utility` | <global> | 31 |
-| `XUiC_PlayersListEntry` | <global> | 31 |
-| `EventDelegate` | <global> | 31 |
 | `StringSpanDictionary`1` | <global> | 31 |
-| `XUiM_Player` | <global> | 30 |
 | `DynamicMeshChunkDataStorage`1` | <global> | 30 |
-| `BaseSandboxOption` | SandboxOptions | 30 |
-| `XUiC_CategoryList` | <global> | 30 |
-| `ItemClassBlock` | <global> | 29 |
-| `TwitchEventPreset` | Twitch | 29 |
-| `XUiC_ServersList` | <global> | 29 |
-| `XUiC_SkillList` | <global> | 29 |
-| `XUiC_SpawnSelectionWindow` | <global> | 29 |
-| `MeshDescription` | <global> | 29 |
-| `MapObject` | <global> | 29 |
-| `SaveInfoProvider` | <global> | 29 |
-| `XUiV_TextureBased` | <global> | 29 |
-| `XUiC_WindowSelector` | <global> | 28 |
-| `XUiC_CreatePoi` | <global> | 28 |
-| `XUiC_Creative2Window` | <global> | 28 |
-| `XUiC_EquipmentStack` | <global> | 28 |
-| `UITweener` | <global> | 28 |
-| `XUiV_Grid` | <global> | 28 |
-| `RaycastPathWorldUtils` | RaycastPathing | 27 |
-| `XUiC_DiscordLogin` | <global> | 27 |
-| `XUiC_LevelToolsGenericWindow` | <global> | 27 |
-| `XUiC_SignGalleryWindow` | <global> | 27 |
-| `XUiC_ItemInfoWindow` | <global> | 27 |
-| `XUiC_SDCSPreviewWindow` | <global> | 27 |
-| `UIProgressBar` | <global> | 27 |
-| `MessageButton` | <global> | 26 |
+| `XUiC_PrefabList` | <global> | 26 |
+| `XUiC_SignLayer` | <global> | 26 |
+| `XUiV_ScrollView` | <global> | 26 |
+| `XUiV_Sprite` | <global> | 26 |
+| `XUiC_DataManagementBar` | <global> | 25 |
 

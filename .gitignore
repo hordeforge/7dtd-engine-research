@@ -3,3 +3,6 @@ il/*
 !il/README.md
 # Binary payloads
 *.zip
+
+# Regenerable coverage gap sidecar (from tools/src/Coverage)
+docs/inventories/*.gaps.tsv

@@ -1,0 +1,350 @@
+# Raycast pathing and drone steering (dedicated V3.0.1)
+
+**Owns:** the `RaycastPathing` namespace (`RaycastPath`, `FloodFillPath`,
+`RaycastNode`, `RaycastNodeHierarcy` (sic), `FloodFillNode`, `RaycastPathUtils`,
+`RaycastPathWorldUtils`, `cPathNodeType`), the generators built on it
+(`RaycastEntityPathGenerator`, `FloodFillEntityPathGenerator`), the
+`RaycastPathManager` singleton, and the junk drone steering layer
+(`EntityDrone.SteeringMan`, `EntityDrone.EntitySteering`) plus the drone
+methods that consume both (`GetPath`, `DoMoveIntoFollowPos`,
+`followPlannedPath`, `steerFollow`, the state machine).
+**Not:** the production voxel A* the rest of the AI uses
+(`GamePath.PathFinderThread` / ASP, owned by [`entity-ai.md`](entity-ai.md));
+drone persistence, streaming, and sync (owned by
+[`vehicles-drones-turrets.md`](vehicles-drones-turrets.md)); the Aron Granberg
+A* library internals (third-party residual, see
+[`closed-gaps.md`](closed-gaps.md)).
+**Evidence:** IL of every type above (`RaycastPathWorldUtils` 27 methods,
+`EntityDrone` 250, `FloodFillEntityPathGenerator` 8, `RaycastPathManager` 9,
+`EAIDroneItemTask` 18); dump locally with `tools/src/DumpMethod`, git-ignored.
+**Hub:** [`INDEX.md`](INDEX.md). **Method:** [`re-methodology.md`](re-methodology.md).
+
+Do not redistribute game IL.
+
+---
+
+## 1. What this system is, and who actually uses it
+
+7DTD ships **two pathfinders**. The main one is the voxel A* behind
+`GamePath.PathFinderThread` (ASP coroutine driver, [`entity-ai.md`](entity-ai.md)
+§6). The second is this one: a physics-raycast block scanner plus an A*-flavored
+flood fill, living in the `RaycastPathing` namespace. Caller analysis over the
+whole assembly shows its consumer set is exactly:
+
+| Caller | What it uses | Context |
+|---|---|---|
+| `EntityDrone` (junk drone) | everything | state machine, movement, debug |
+| `EAIDroneItemTask` | `RaycastPathUtils` draw/blocked checks via drone helpers | drone weapon-mod attack task |
+| `EntityDrone.PathTracker` | `RaycastPathUtils.IsPositionBlocked` | stuck detection |
+| `GameManager` | `RaycastPathManager.Init` / `.Update` | `StartAsServer` + `gmUpdate` tick |
+
+No zombie, animal, NPC, or vehicle touches it. It is the **junk drone's private
+navigation toolkit**, and the flood-fill path *generator* itself turns out to be
+debug-only (§4). What runs in production is the raycast *query* layer (blocked
+checks, volume scans) and the steering layer, glued to A* paths.
+
+## 2. Type map
+
+```
+RaycastPathing (namespace)
+  RaycastPath          Nodes: List<RaycastNode>, ProjectedPoints, Info
+    FloodFillPath      + open/closed lists (A* frontier)
+  RaycastNode          composition: RaycastNodeInfo (pos/scale/depth)
+    FloodFillNode      + RaycastNodeHierarcy, cPathNodeType
+  RaycastNodeHierarcy  parent, neighbors, children, childAirBlocks,
+                       childSolidBlocks, waypoint, flowToWaypoint
+  RaycastNodeInfo      position, scale, depth (0.5-scale quarter children)
+  FloodFillNodeScore   G, H; F = G + H
+  RaycastPathUtils     static Physics.Raycast wrappers + debug draw
+  RaycastPathWorldUtils static block/volume scanners over World + Physics
+  cPathNodeType        Unassigned=0 Air=1 Solid=2 Door=3 Half=4
+  dColor               debug palette
+
+<global>
+  RaycastEntityPathGenerator      lifecycle shell (coroutine on GameManager)
+    FloodFillEntityPathGenerator  the actual search (EntityDrone.pathMan)
+  RaycastPathManager              singleton path registry + debug draw
+  EntityDrone/SteeringMan         pure-math steering primitives
+  EntityDrone/EntitySteering      SteeringMan + physics probes
+```
+
+`RaycastNode` is not a subclass of `RaycastNodeHierarcy`; it *contains* one
+(`info` + `hierarchy` + `nodeType` fields) and forwards `AddChild` /
+`AddNeighbor` / `SetParent` / `SetWaypoint` / `GetNeighbor` to it. The
+misspelling `RaycastNodeHierarcy` is the shipped type name.
+
+### Block classification
+
+`RaycastPathWorldUtils.getBlockType` maps a world position to `cPathNodeType`:
+
+- `BlockShape.IsSolidSpace || IsSolidCube` → **Solid**
+- `BlockValue.isair` → **Air**
+- block has the Door tag (`Block.HasTag(2)`) → **Door**
+- otherwise, if `HasSubBlocks` (quarter-block child probes find geometry) →
+  **Half**, else Solid/Air per overload
+
+**Half** nodes get four 0.5-scale children at `quarterBlockOffsets`, each
+classified Air/Solid by a point raycast (`IsPointBlocked`). This is the "node
+hierarchy": one block node, quarter-block children, `childAirBlocks` /
+`childSolidBlocks` partitions. It lets the search thread paths through
+partially-occupied blocks (poles, plates, bars) that a whole-block grid would
+reject.
+
+### Physics masks
+
+All occupancy tests are Unity `Physics.Raycast` calls, not block-store reads
+(block reads are only used for the Air/Solid/Door pre-classification):
+
+| Mask | Bits | Used by |
+|---|---|---|
+| `0x40010000` | 16 + 30 | drone movement/LOS probes, ground projection, quarter-child probes |
+| `0x10000` | 16 | altitude/ceiling, flood-fill clearance, recon click ray |
+| `0x10010000` | 16 + 28 | `IsUnderground` (short down-ray from above the target) |
+
+Layer names live in Unity project settings, not in IL; bit 16 is the collider
+layer every world-geometry probe here uses. Water is special-cased by block
+type id `240` (`isPosUnderWater`), not by raycast.
+
+## 3. The flood-fill raycast path build
+
+`RaycastEntityPathGenerator` is a lifecycle shell: `CreatePath(start, end,
+speed, canBreakBlocks, yOffset)` → `cleanupPath` (abort coroutine, `Destruct`
+old path, which also unregisters it from `RaycastPathManager`) → `InitPath`
+(`new RaycastPath(start,end)`, which self-registers with the manager and
+computes `RaycastPathInfo` start/end-indoors flags via `IsUnderground` rays) →
+`beginPathProc` (`isBuildingPath = true`, start `BuildPathProc()` as a
+coroutine **on `GameManager.Instance`**). The base `BuildPathProc` does nothing
+but `finalizePathProc` (`isPathReady = true`); the real search is the
+`FloodFillEntityPathGenerator` override, which the drone instantiates into its
+`pathMan` field in `OnAddedToWorld`.
+
+The override is a textbook time-sliced A* over block positions:
+
+1. Seed `FloodFillPath.open` with a node at `Start`.
+2. Loop: `getLowestScore()` picks the open node with lowest `F = G + H`
+   (heuristic as tiebreak), moves it to `closed`.
+3. Stop if its `BlockPos == TargetBlockPos`.
+4. `AddNeighborNodes` → `ScanNeighborNodes`: build a `FloodFillNode` for each
+   of the 6 `mainBlockAxis` neighbors (plus `diagonalBlockAxis` neighbors when
+   enabled, each gated by two 1.5 m clearance raycasts), classify it, spawn
+   quarter children for Half blocks, set `G = current.G + 1` and
+   `H = getH` (Manhattan distance, all three axes).
+5. `IsValidNeighbor` admits: Air; Solid only if it *is* the target block; Door
+   only if physically blocking (raycast hit) **and** its
+   `TileEntityComposite`/`TEFeatureDoor` reports `IsOpen()`; Half via its air
+   children (`ProcNeighborNodes` picks reachable child air blocks, merges their
+   bounds into a waypoint node).
+6. Nodes already on open/closed (`IsPosOpen`/`IsPosClosed`) are skipped.
+7. Hard cap: if `closed.Count > 1536` it logs `"Search Exausted."` (sic) and
+   bails with the best-so-far node.
+8. Backtrack the `Parent` chain from the last closed node, `AddNode` each into
+   `Path.Nodes`, then finalize. `pathToList()` reverses node positions into a
+   start→end `List<Vector3>`.
+
+Each search iteration yields `WaitForSeconds(debugTick)`, so a build spreads
+across frames on the main thread; there is no worker thread, unlike ASP.
+
+```mermaid
+flowchart TB
+  subgraph debug["Debug only (recon mode, client)"]
+    LU[EntityDrone.LateUpdate] -->|mouse click| CP[pathMan.CreatePath]
+  end
+  CP --> IP[InitPath: new FloodFillPath<br/>registers in RaycastPathManager]
+  IP --> CO[BuildPathProc coroutine on GameManager]
+  CO --> FF{open list empty /<br/>target reached /<br/>closed > 1536?}
+  FF -->|no| NB[ScanNeighborNodes: 6 axes + diagonals<br/>getBlockType + quarter-child raycasts<br/>G+1, Manhattan H]
+  NB --> FF
+  FF -->|yes| BT[backtrack Parent chain into Path.Nodes]
+  BT --> FIN[finalizePathProc: isPathReady]
+
+  subgraph prod["Production (server entity tick)"]
+    ST[updateState: idle/follow/sentry/attack/heal] --> DM[DoMoveIntoFollowPos]
+    DM -->|no currentPath| GP[GetPath]
+    GP --> PROJ[GetProjectedGroundPoint<br/>raycast down 100 m]
+    PROJ --> ASP[PathFinderThread.FindPath / GetPath<br/>voxel A*, async]
+    ASP --> POST[raise +1y, raycast-validate legs, prune]
+    POST --> FPP[followPlannedPath: RotateTo + Move,<br/>pop waypoint in radius,<br/>PathTracker stuck -> teleport]
+    DM -->|target visible + near| STR[steerFollow: SteeringMan.Seek/Flee<br/>+ EntitySteering probes]
+    FPP --> MOT[motion += dir * speed * 0.05]
+    STR --> MOT
+  end
+```
+
+## 4. Production reality: the generator is debug-only
+
+`FindCallers` over the whole assembly finds exactly **one** call site for
+`RaycastEntityPathGenerator.CreatePath`: `EntityDrone.LateUpdate`, inside a
+branch gated on `DroneManager.Debug_LocalControl`. That flag is flipped only by
+`EntityDrone.Debug_ToggleReconMode`, reached from the `ConsoleCmdJunkDrone`
+(`jd debugrecon` / `drc`) console command, and the branch drives a recon
+camera with `Input.GetAxis` mouse look; a left click raycasts through
+`Camera.ScreenPointToRay` and builds a flood-fill path from the owner to the
+clicked block:
+
+```il
+IL_0110: ldfld  FloodFillEntityPathGenerator EntityDrone::pathMan
+IL_013E: callvirt System.Void RaycastEntityPathGenerator::CreatePath(...)
+```
+
+That is a developer path-visualization tool, **client-only by construction**
+(camera, mouse, local player) and dead on a dedicated server. The same flag
+gates the WASD manual-drone-flying branch at the top of
+`EntityDrone.updateTasks`. Nothing in the shipped assembly ever consumes
+`isPathReady`/`pathToList` output for movement.
+
+What the dedicated server *does* run from this namespace, every drone tick:
+
+- `RaycastPathUtils.IsPositionBlocked` / `IsPointBlocked` /
+  `CheckPositionBlocked`: thin `Physics.Raycast` wrappers used for every drone
+  LOS, obstacle, and teleport-spot test.
+- `RaycastPathWorldUtils.ScanVolume` + `FindNodeType(Air)` in
+  `GetGroupPositions`: validates the five candidate hover points around the
+  owner (behind, flanks) against real air blocks.
+- `pathMan.IsConfinedSpace(position, 3)` in `OnUpdateEntity` on an
+  `areaScanTimer` cadence while idle/following/sentry: flood-scans blocks
+  around the drone (`ScanBlocksAround`) and reports confinement when the air
+  count is below `dist²`. The result field `isInConfinedSpace` is written but
+  **never read** in V3.0.1, a vestigial output.
+- `RaycastPathManager`: `Init` in the `GameManager.StartAsServer` coroutine,
+  `Update` from `gmUpdate` ([`loop-gmupdate.md`](loop-gmupdate.md) peer list).
+  It only holds the registry of live `RaycastPath` objects and debug-draws them
+  when its `DebugModeEnabled` static is set; on a dedicated server the tick is
+  an effective no-op.
+
+## 5. The real drone path: A* handoff
+
+When the drone needs to travel (follow beyond seek range, sentry return,
+attack positioning via `EAIDroneItemTask`), `followState`/`sentryState` first
+check `PathFinderThread.Instance` and call `DoMoveIntoFollowPos`:
+
+1. **No `currentPath` yet** → `GetPath`. Start and end are projected to the
+   ground with a 100 m down-raycast (`GetProjectedGroundPoint`, mask
+   `0x40010000`, `blockHeightOffset` lift). `GetProjectedPath` then talks to
+   the **standard voxel A***: `PathFinderThread.GetPath(entityId)` for a
+   finished `PathEntity`, else `FindPath(...)` to enqueue and return false
+   (retry next tick, classic async pattern from
+   [`entity-ai.md`](entity-ai.md) §2). Returned `PathPoint.projectedLocation`
+   waypoints are raised one block, then each leg is re-validated with
+   raycasts; blocked legs get their endpoints nudged from the hit data and
+   unusable head segments pruned (`RemoveAt`/`RemoveRange`).
+2. **Path exists** → if the target is raycast-visible and close, steer
+   directly (`RotateTo` + `Move`); otherwise `followPlannedPath`: rotate and
+   `Move` toward `currentPath[0]`, pop it inside `pointRadius`, and if
+   `PathTracker.IsStuck` (position barely changed for a window, or embedded in
+   a block per `IsPositionBlocked`), **teleport** to the next waypoint and drop
+   the consumed ones.
+3. `clearCurrentPath`/`OnPathInterupted` clears the list, stops
+   `EntityMoveHelper`, clears `PathNavigate`, and calls
+   `PathFinderThread.RemovePathsFor(entityId)`, the same cleanup contract every
+   A* client honors.
+
+`EntityDrone.updateTasks` also gates the base `EntityAlive.updateTasks` (the
+normal EAI/UAI task tick that `EAIDroneItemTask` runs under) on
+`PathFinderThread.Instance` being non-null. So the drone's "planned path" is
+the shared A* system end to end; `RaycastPathing` contributes only the raycast
+projection and validation around it.
+
+## 6. Steering layer
+
+`SteeringMan` is stateless vector math:
+
+- `Seek(pos, target, radius)`: direction to target, linearly damped by
+  `dist/radius` inside the arrival radius (`doSeek`); `Flee` = `-Seek`;
+  `Seek2D`/`Flee2D` zero the y component; `GetPointAround` =
+  `Cross(dir, up) * radius * 0.5` (a sideways offset).
+
+`EntitySteering` (constructed in `EntityDrone.Awake`, holds the entity and a
+`SteeringMan`) adds physics awareness:
+
+- `getAltitude`/`getCeiling`: 1000 m down/up raycast on mask `0x10000`,
+  distance or -1.
+- `doHover(pos, height, radius)`: up/down unit vector toward the target
+  altitude, proportionally damped inside `radius`.
+- `doAvoidArc`: if the drone sits within `degrees/2` of the observer's view
+  direction, compute a lateral escape point (`GetPointAround`) and `Flee` from
+  the projected view line; `AvoidTargetView` / `pursueAvoidOwnerView` /
+  `FollowTarget` compose `Seek` toward the target with `AvoidArc2D` so the
+  drone approaches while staying out of the owner's or enemy's aim cone.
+
+The state machine (`updateState`, 0.05 s cadence: idle / sentry / follow /
+heal / attack, plus teleport and underwater interrupts) feeds these into
+`move()`: forward probe at `physColHeight` on mask `0x40010000`, and if clear
+(or `ignoreObsticles`, or owner on a vehicle) `Entity.motion += dir * speed *
+0.05`, one overload clamping the step to the remaining distance. Notable
+behaviors, all raycast-driven:
+
+- `steerFollow`: accelerate toward `max(15, dist)` while beyond 10 m of the
+  owner (lerp over `accelerationTime/SpeedFlying`), decelerate inside;
+  half-weight `Flee` off the owner's chest when 5-24 m away, inside a 45
+  degree cone of the owner's look vector, with clear LOS (get out of the
+  player's face); 0.75-weight upward `Seek` when altitude < a third of the
+  distance and the block above is clear.
+- `onUnderWaterState`: if the target chest position resolves to water block
+  type 240, drop any path and `Seek` to `findOpenBlockAbove` (scan up to 256
+  blocks up).
+- `teleportState`: candidate spots from `GetGroupPositions` (validated by
+  `ScanVolume` air nodes), two-way `IsPositionBlocked` visibility check per
+  spot, fall back to the raycast hit block center, then `SetPosition`, the
+  out-of-range recovery documented in
+  [`vehicles-drones-turrets.md`](vehicles-drones-turrets.md).
+- `EAIDroneItemTask` (the attack task for weapon-modded drones) reuses the
+  same helpers: `DoMoveIntoAtkPos`, `DoFleeFromTargetEntity`,
+  `FollowPlannedPath`, and `GetPath` all delegate to the `EntityDrone`
+  methods above.
+
+## 7. Dedicated vs client
+
+Confirmed by callers and gating flags:
+
+| Piece | Dedicated server | Client |
+|---|---|---|
+| State machine + steering + `move` (`OnUpdateEntity`/`updateTasks` in the entity tick) | yes (authority; drone is server-simulated, [`vehicles-drones-turrets.md`](vehicles-drones-turrets.md)) | remote copy interpolates |
+| A* `GetPath` / `followPlannedPath` | yes | no |
+| `RaycastPathUtils`/`WorldUtils` probes, `ScanVolume`, `IsConfinedSpace` scan | yes | only under debug |
+| `RaycastPathManager` Init + `gmUpdate` tick | yes (draw-only body, no-op headless) | yes |
+| **`FloodFillEntityPathGenerator.CreatePath` flood fill** | **never** (needs `Debug_LocalControl` recon mode) | debug console only |
+| Recon camera / WASD manual control (`LateUpdate`, `updateTasks` head) | never | debug console only |
+| `focusBoxNode` nudge (drone moves out of the block you aim at) | never (`Owner is EntityPlayerLocal` gate) | yes, owner's client |
+| `drone_idle_hover` audio loop | never (explicit `IsDedicatedServer` check) | yes |
+
+Physics raycasts on the server hit the server-side chunk colliders; that is
+the whole reason this system works headless at all.
+
+## 8. Costs and limits
+
+- Every neighbor expansion in the flood fill and every Half classification is
+  one or more `Physics.Raycast` calls on the main thread; the 1536-closed-node
+  cap and the `WaitForSeconds` slicing are the only brakes. This, plus the
+  recon-mode gate, is consistent with the generator being a shelved
+  experiment: 3D volumetric pathing for a flying entity that shipping code
+  replaces with ground A* plus altitude steering.
+- The steering fallback needs no path data at all: it degrades to Seek/Flee
+  plus single raycasts, which is why a drone still follows through open
+  terrain if the pathfinder is saturated (blood moon admission pressure,
+  [`entity-ai.md`](entity-ai.md) §3).
+- `RaycastPath` objects self-register in `RaycastPathManager` on construction
+  and only leave via `Destruct()`; the drone's `cleanupPath` honors this, so
+  the registry stays bounded at one live path per generator.
+
+## Related docs
+
+| Doc | Role |
+|---|---|
+| [entity-ai.md](entity-ai.md) | The production A* (`PathFinderThread`/ASP) this system hands off to |
+| [vehicles-drones-turrets.md](vehicles-drones-turrets.md) | Drone manager, streaming, teleport-to-owner, sync |
+| [closed-gaps.md](closed-gaps.md) | ASP→A* residual status; third-party Granberg internals |
+| [loop-gmupdate.md](loop-gmupdate.md) | `gmUpdate` peer list including the `RaycastPathManager` tick |
+| [full-surface.md](full-surface.md) | Namespace coverage row for `RaycastPathing` |
+| [console-commands.md](console-commands.md) | Console command surface (the `jd`/`jds` drone debug command lives in `ConsoleCmdJunkDrone`) |
+| [re-methodology.md](re-methodology.md) | How this was reversed |
+
+## Changelog
+
+- **2026-07-24:** Initial reversal: full `RaycastPathing` type map and block
+  classification (quarter-block Half hierarchy, door handling), the
+  `FloodFillEntityPathGenerator` time-sliced A*-over-raycasts build and its
+  1536-node cap, proof via caller analysis that `CreatePath` is reachable only
+  through the client recon debug mode (`jd debugrecon`), the production drone
+  flow (A* `PathFinderThread` waypoints + raycast ground projection +
+  `followPlannedPath` + stuck-teleport), the `SteeringMan`/`EntitySteering`
+  primitive set, and the dedicated-vs-client split table.

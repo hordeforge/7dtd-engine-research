@@ -140,12 +140,15 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 | [loop.md](loop.md) | Peers, gmUpdate, UpdateTick, subsystem scale |
 | [loop-gmupdate.md](loop-gmupdate.md) | gmUpdate phase narrative (detail under loop.md §2) |
 | [managers.md](managers.md) | Manager Update ILs + ModEvents fields |
+| [sandbox-options.md](sandbox-options.md) | Sandbox/game-option type system + sandbox-code codec |
+| [server-browser-prefabs.md](server-browser-prefabs.md) | GameServerInfo advertisement + prefab-instance persistence |
 
 ### C. Entities, AI and pathing
 
 | Doc | Role |
 |---|---|
 | [entity-ai.md](entity-ai.md) | TickEntity → AI → path + thresholds |
+| [raycast-pathing.md](raycast-pathing.md) | Raycast path generator + steering (junk-drone travel; A* handoff) |
 | [aidirector.md](aidirector.md) | AIDirector type inventory |
 | [closed-gaps.md](closed-gaps.md) | Timer 20 Hz, AIDirector install, ASP→A*, net bands |
 | [uai.md](uai.md) | Utility AI (UseAIPackages branch): packages, considerations, tasks, decision cycle |
@@ -159,9 +162,12 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 | [world-chunks.md](world-chunks.md) | Gen, load/send, SetBlock, chunk flags |
 | [terrain-height.md](terrain-height.md) | WorldConstants, height APIs, expand pin |
 | [save-region.md](save-region.md) | WorldState, chunk write/read (incl. 64-layer loop), RegionFile* |
+| [save-persistence.md](save-persistence.md) | Save path/slot model + SaveInfoProvider (dedicated runs the System.IO placeholder) |
+| [chunk-providers.md](chunk-providers.md) | ChunkProvider* (dedicated = GenerateWorldFromRaw) + decoration layer |
 | [light-mesh-water.md](light-mesh-water.md) | Light, stability, mesh, water, deco |
 | [world-generation.md](world-generation.md) | RWG world create pipeline: WorldBuilder stages, threading, outputs |
 | [blocks.md](blocks.md) | Block framework: BlockValue bitfield, virtual surface, damage/upgrade, block-change flow |
+| [block-shapes.md](block-shapes.md) | BlockShape rotation model + BlockTrigger firing chain |
 | [dynamic-mesh.md](dynamic-mesh.md) | Dynamic mesh: destroyed-geometry regen, threading, DynamicMeshes/ persistence, channel-1 streaming |
 
 ### E. Networking and wire protocol
@@ -250,6 +256,8 @@ live with the mod that ships them.
 | [inventories/netpackages.md](inventories/netpackages.md) | protocol.md, network.md |
 | [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) | protocol-packages.md (auto-extracted wire bodies: 183 packages + 60 nested serializers) |
 | [inventories/coverage-report.md](inventories/coverage-report.md) | coverage.md (auto-generated reachability vs doc-mention coverage) |
+| [inventories/te-features.md](inventories/te-features.md) | tile-entities-power.md (11 TEFeatureAbs leaves) |
+| [inventories/challenge-objectives.md](inventories/challenge-objectives.md) | challenges (28 objective leaves; client-tracked) |
 | [inventories/block-behaviors.md](inventories/block-behaviors.md) | blocks.md (65 Block leaves) |
 | [inventories/item-actions.md](inventories/item-actions.md) | items.md (38 ItemAction leaves) |
 | [inventories/minevent-actions.md](inventories/minevent-actions.md) | minevents.md (71 triggered-effect leaves) |
