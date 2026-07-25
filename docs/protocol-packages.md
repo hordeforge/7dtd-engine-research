@@ -229,10 +229,20 @@ writes NONE of these).** The switch compares `entityClass` (an int, the
 |---|---|---|
 | `EntityClass.itemClass` | `belongsPlayerId:i32`, `clientEntityId:i32`, `itemStack.Write`, `sbyte(0)` | dropped-item entity, then **jumps straight to the tail** (skips all rows below) |
 | `EntityClass.fallingBlockClass` | `blockValues[0].rawData:u32`, `textureFullArrays[0].Write` | single falling block |
-| `EntityClass.fallingBlocksClass` | `blockValues.Length:i32` + per-block `rawData:u32`, `blockPositions` (`StreamUtils.Write`), `textureFullArrays` (`TextureFullArray.Write`) | multi-block |
+| `EntityClass.fallingBlocksClass` | `blockValues.Length:i32`, then `count x rawData:u32`, then `count x Vector3i`, then `count x TextureFullArray` | multi-block, see the shared-count note below |
 | `EntityClass.fallingTreeClass` | `blockPos:Vector3i` (`StreamUtils.Write`), `fallTreeDir:Vector3` (`StreamUtils.Write`) | falling tree |
 | `EntityClass.playerMaleClass` or `playerFemaleClass` | `holdingItem` (`ItemValue.Write`), `teamNumber:u8`, `entityName:string`, `skinTexture:string`, `playerProfile` present:`bool` (+ `PlayerProfile.Write`) | player character |
 | anything else (zombie, animal, NPC, vehicle, ...) | nothing | goes straight to the tail |
+
+**Shared-count trap (fallingBlocks).** The multi-block branch writes **one**
+`i32` length and then **three** arrays: `blockValues` (`u32` each),
+`blockPositions` (`Vector3i` = 3x `i32` each), and `textureFullArrays`
+(`TextureFullArray.Write` = exactly one `i64` each, its loop bound is the literal
+1). No second length is emitted, and `EntityCreationData.read` allocates all three
+arrays from that same value without reading another `Int32`. A clone must treat the
+three arrays as the same length; writing a length before the positions or textures
+desyncs the stream. The single-block `fallingBlockClass` branch has no count at all:
+it is just `rawData:u32` then one `i64`.
 
 **(3) Convergence tail (every entity):**
 ```text
