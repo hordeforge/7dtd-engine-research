@@ -7,6 +7,16 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 class DumpFrameEntries {
+  // Frame entries live on nested types too (e.g. PerformanceProfiler/FrameTimeCapture,
+  // XUiC_ItemActionEntry/TimedAction), so the sweep must recurse. Enumerating only
+  // MainModule.Types undercounts by those.
+  static void AllTypes(IEnumerable<TypeDefinition> src, List<TypeDefinition> into) {
+    foreach (var t in src) {
+      into.Add(t);
+      if (t.HasNestedTypes) AllTypes(t.NestedTypes, into);
+    }
+  }
+
   static bool IsMB(TypeDefinition t) {
     TypeReference b = t.BaseType;
     int guard = 0;
@@ -38,14 +48,17 @@ class DumpFrameEntries {
     sb.AppendLine("|---|---|---|---:|");
 
     int count = 0;
-    foreach (var t in asm.MainModule.Types.OrderBy(x => x.Name)) {
+    var allTypes = new List<TypeDefinition>();
+    AllTypes(asm.MainModule.Types, allTypes);
+    foreach (var t in allTypes.OrderBy(x => x.Name)) {
       if (!IsMB(t)) continue;
       foreach (var m in t.Methods) {
         if (!m.HasBody) continue;
         if (m.Name != "Update" && m.Name != "LateUpdate" && m.Name != "FixedUpdate") continue;
         if (m.Parameters.Count != 0) continue;
         string bas = t.BaseType != null ? t.BaseType.Name : "?";
-        sb.AppendLine("| `" + t.Name + "` | " + bas + " | `" + m.Name + "` | " + m.Body.Instructions.Count + " |");
+        string nm = t.DeclaringType != null ? t.DeclaringType.Name + "/" + t.Name + " (nested)" : t.Name;
+        sb.AppendLine("| `" + nm + "` | " + bas + " | `" + m.Name + "` | " + m.Body.Instructions.Count + " |");
         count++;
       }
     }

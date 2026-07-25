@@ -8,6 +8,11 @@ spawning, quests, combat) also get full prose in their owning doc; a few rows ar
 **client-only** (reachable but their work is client-side), marked and cross-narrated.  
 **Basis:** base + fingerprint are IL-derived (`tools/src/LeafInfo`); roles are IL-verified
 for the narrated groups, else the humanized name. Verify a leaf against its IL first.  
+**Maintenance:** tool-assisted but **hand-maintained**, not push-button. The base
+and fingerprint columns come from `tools/src/LeafInfo`, and the promoted section was
+derived with `tools/src/RefScan`, but the roles and the owner grouping were written
+by hand. Regenerate the *columns* if the game updates; do not regenerate the file
+wholesale, or the referrer-verified promotions and the IL-verified roles are lost.  
 **Hub:** [`../INDEX.md`](../INDEX.md). **Method:** [`../re-methodology.md`](../re-methodology.md).
 
 **88 leaf types**, grouped by owning subsystem.
