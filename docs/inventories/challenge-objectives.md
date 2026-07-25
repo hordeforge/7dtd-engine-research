@@ -52,7 +52,8 @@
   `Player.biomeStandingOn`. Save format is minimal: `Read`/`Write` persist only
   the `current` int (plus extra state in overrides such as
   `ChallengeObjectiveTime`).
-- **`ChallengeBaseTrackedItemObjective`** (abstract, 5 subclasses) adds item
+- **`ChallengeBaseTrackedItemObjective`** (never instantiated directly, though not
+  IL-abstract; 5 subclasses) adds item
   resolution (`SetupItem`) and world tracking: on tracking start it registers a
   `TrackingEntry` with the challenge's `ChallengeTrackingHandler`, which scans
   chunks (`HandleTrack(Chunk)`, `Current_BlockChange`) to push nav markers for
@@ -68,7 +69,8 @@
 
 ## Leaves
 
-**28 leaves** (plus the abstract intermediate `ChallengeBaseTrackedItemObjective`).
+**28 leaves** (plus the intermediate `ChallengeBaseTrackedItemObjective`, which is
+never instantiated directly but carries no IL abstract flag).
 `ChallengeObjectiveType` enumerates 27 concrete verbs (`HarvestByTag` reuses the
 `Harvest` id).
 

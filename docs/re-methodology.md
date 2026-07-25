@@ -234,6 +234,37 @@ Some things are genuinely not in the managed method bodies. Keep these in
   is a candidate gap. This found `PlayerStealth` after the name sweeps missed it.
 - Dumps stay in `il/` (git-ignored). Tooling and narratives are tracked.
 
+### 8b. Caller sweeps: the two failure modes
+
+"Is this type server-side or client-side?" is usually answered with a caller sweep,
+and that answer is only as good as the sweep. Two traps, both of which produced
+wrong claims in this corpus before being caught by audit:
+
+1. **Method-call sweeps miss field access.** A type can be load-bearing on the
+   server purely through a field that someone reads. `WorldStats` was classified
+   "nothing server-side reads them" on a call sweep, but `PrefabData.Init` stores
+   `DensityScore = (WorldStats.TotalVertices + 50000) / 100000`, and RWG prefab
+   placement reads that field. Use `tools/src/Xref --field` for field access.
+2. **Hits inside closures belong to the outer method.** Lambdas and iterators
+   compile into `<>c__DisplayClass*` / `<...>d__*` types, so a naive sweep credits
+   the closure, not the real owner, and the site looks like nothing. `Xref` walks
+   out to the outermost declaring type and prints it.
+
+A third, tool-specific trap: the retired `FindCallers.exe` **ignored its method
+argument entirely** and substring-matched only the type name against callee
+signatures, so it also reported calls where the type merely appeared as a parameter
+or return type. Any classification made with it is weak evidence; re-check with
+`tools/src/Xref`, which matches the member exactly:
+
+```bash
+mono bin/Xref.exe "$ASM" EntityBuffs AddBuffNetwork          # exact call sites
+mono bin/Xref.exe "$ASM" PrefabData DensityScore --field     # field reads/writes
+```
+
+Rule of thumb: **a negative result ("no server callers") is a much stronger claim
+than a positive one, so it needs the stronger tool.** Before writing "client-only",
+run both the call and the field form.
+
 ---
 
 ## Related docs

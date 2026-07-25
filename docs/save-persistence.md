@@ -92,7 +92,8 @@ flowchart TD
 
 Derived members: `Type`, `SlotPath` (e.g. `Saves/Navezgane/MyGame`),
 `PathRelativeToSlot` (remainder, e.g. `Region/r.0.0.7rg`), `IsParentOf`/`GetChildPath`/
-`TryGetParentPath` (string-segment operations on the normalized form, IL=42/9/33), and
+`TryGetParentPath` (string-segment operations on the normalized form; `IsParentOf`
+itself is IL=6, the 42 belongs to its compiler-generated local helper), and
 `GetOriginalPath()` IL=6 = `Path.Combine(s_saveDataRootPathPrefix, PathRelativeToRoot)`
 normalized, which converts back to an absolute OS path. Comparison operators order by
 the relative string, so paths are usable as sorted dictionary keys.

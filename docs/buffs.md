@@ -70,7 +70,9 @@ stateDiagram-v2
 Buffs that matter to other clients are synced. `AddBuff`/`RemoveBuff` take a
 `netSync` flag. **`AddBuffNetwork`/`RemoveBuffNetwork` are the send side, not the
 receive side:** each builds a `NetPackageAddRemoveBuff` (`Setup(...)`) and calls
-`ConnectionManager.SendPackage`/`SendToServer` on channel 192 without touching the
+`ConnectionManager.SendPackage`/`SendToServer` (the literal `192` is the `_range`
+argument, not a channel: the package has no `get_Channel` override so it rides
+channel 0) without touching the
 buff list itself (`EntityBuffs.AddBuffNetwork` IL=34). The **receive** path is
 `NetPackageAddRemoveBuff.ProcessPackage`, which on the server **re-broadcasts** the
 package to observers and then applies it via `AddBuff`/`RemoveBuff` with
@@ -85,7 +87,7 @@ sequenceDiagram
   participant CL as Observing clients
   SRC->>EB: AddBuff(name, netSync=true, duration)
   EB->>EB: create BuffValue, apply effects
-  EB->>EB: AddBuffNetwork -> Setup + SendPackage (ch 192)
+  EB->>EB: AddBuffNetwork -> Setup + SendPackage (channel 0, _range 192)
   EB->>PP: NetPackageAddRemoveBuff to server/observers
   PP->>CL: re-broadcast to observers
   PP->>PP: AddBuff / RemoveBuff (netSync=false, apply without re-emit)

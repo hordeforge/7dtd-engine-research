@@ -71,11 +71,11 @@ icon classes clients display (see NavObjectClass below). Complements
 ## CompanionGroup
 
 Thin list wrapper (`Add`, `Remove`, `IndexOf`, indexer) held by
-`EntityPlayer.Companions`, which lazily constructs it. Since `EntityPlayer`
-instances live on the server for every connected player, the group is the
-server's record of which allied entities (companions/minions) belong to a
-player; the `XUiC_CompanionEntry*` callers are only the client view of it.
-Complements the entity ownership notes in [spawning.md](spawning.md).
+`EntityPlayer.Companions`, which lazily constructs it. **In V3.0.1 it is an
+unpopulated stub:** `Add` and `Remove` have zero call sites anywhere in the
+assembly, so the list is never filled and the only readers are
+`XUiC_CompanionEntry*` (client view of an always-empty group). Treat it as
+reserved surface for a companion feature, not as live server state.
 
 ## AdminUsers
 
@@ -260,6 +260,33 @@ item, feeding the standard damage path in
 
 ---
 
+## WorldStats (prefab density budget)
+
+`WorldStats` carries a prefab's mesh-complexity stats (triangles, vertices,
+lights), parsed from the prefab's `DynamicProperties` by
+`WorldStats.FromProperties`. It looks like editor telemetry, and most of its
+consumers are (`CaptureWorldStats`, the editor XUi windows), but one number is
+load-bearing on a dedicated server: `PrefabData.Init` computes
+
+```text
+DensityScore = (WorldStats.TotalVertices + 50000) / 100000
+```
+
+and `DensityScore` is read by the RWG placement code
+(`WorldGenerationEngineFinal.PrefabManager` prefab-by-district selection and
+`WorldGenerationEngineFinal.StreetTile.SpawnMarkerPartsAndPrefabs`, which carries a
+`totalDensityLeft` budget). Since a dedicated server runs RWG at world creation
+([world-generation.md](world-generation.md)), prefab vertex counts do influence
+which POIs get placed and how many fit in a tile's budget.
+
+Worth noting as a **method caveat**: these are *field* reads inside lambda
+closures, so a caller sweep over method calls does not surface them (see
+[re-methodology.md](re-methodology.md) on the limits of caller-based
+classification). They were found by scanning the disassembly for
+`ldfld ... PrefabData::DensityScore`.
+
+---
+
 ## Out of scope (verified client-only)
 
 - **WireManager**: pooled wire visuals, not the electrical graph. It
@@ -278,10 +305,8 @@ item, feeding the standard damage path in
   `Twitch.TwitchManager`, which runs in the streamer's client
   ([twitch-integration.md](twitch-integration.md); the server side is just the
   `NetPackageTwitchAccess` permission check).
-- **WorldStats**: prefab mesh complexity stats (triangles/vertices/lights).
-  `FromProperties` does execute during server prefab load via `PrefabData.Init`,
-  but the numbers are editor telemetry (`CaptureWorldStats`, `XUiC_Editor*`);
-  nothing server-side reads them.
+- **WorldStats**: see the dedicated section above. (Previously listed here as
+  client-only; that was wrong, its vertex count feeds an RWG density budget.)
 - **BaseItemActionEntry** and **ItemActionEntryRepair/Scrap/Craft/Use/Assemble**:
   these are the client craft-menu UI actions (constructed from
   `XUiController`, activated by `XUiC_ItemActionList`), not server crafting

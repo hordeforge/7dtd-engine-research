@@ -168,7 +168,8 @@ The server decides what a trader offers each player. Entry points:
 `NetPackageQuestEvent.ProcessPackage`, both calling
 `SetupActiveQuestsForPlayer` -> `PopulateActiveQuests` -> cached via
 `QuestEventManager.SetupQuestList` -> mirrored to the client by
-`NetPackageNPCQuestList` (channel 192).
+`NetPackageNPCQuestList` (sent with `_range` 192; the package has no `get_Channel`
+override, so it rides channel 0).
 
 `EntityTrader.PopulateActiveQuests(player, tier, factionPoints)` per player:
 

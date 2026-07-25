@@ -89,7 +89,8 @@ Observed per-family behavior (all from IL):
   band; rotating in play only spins the yaw within it.
 - **`BlockShapeNew`** owns the full 24-orientation model (4 yaw x 6 up-axis
   directions). `RotateY` is a table lookup, `rotations[n-1, rotation]`;
-  `Rotate` clamps to 0..23; `CalcRotation` treats rotation >= 24 as the free
+  `Rotate` **wraps** around the 0..23 cycle (`>23 -> 0`, `<0 -> 23`, not a clamp);
+  `CalcRotation` treats rotation >= 24 as the free
   45-degree band and cycles 24..27. A static `Quaternion[32]`
   (`rotationsToQuats`) maps every rotation value to its quaternion
   (`GetRotationStatic`), and `convertRotationCached[rotation, face]` backs

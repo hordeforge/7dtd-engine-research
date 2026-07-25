@@ -219,7 +219,7 @@ plus a few side effects:
   sequences ([game-events.md](game-events.md)).
 
 When running as server (not client), the pass also mirrors six values into the
-**legacy `GamePrefs`** (`DayNightLength`, `BlockDamagePlayer`, `BlockDamageAI`,
+**legacy `GamePrefs`** (`XPMultiplier`, `BlockDamagePlayer`, `BlockDamageAI`,
 `BlockDamageAIBM`, `LootAbundance`, `LootRespawnDays`, `XPMultiplier`) and the
 matching `GameStats`, which keeps the server browser and old consumers coherent.
 
@@ -340,8 +340,10 @@ Operator-facing facts:
   `getsandboxoptions` / `gso` (permission 1000, "Gets the current game's
   Sandbox Options") reads `GameStats.SandboxCode`, decodes it into a scratch
   preset, and prints per category
-  `Option <enum>: <value>/<text> (default: <value>/<text>)`; an optional bool
-  argument routes output to the log instead of the console.
+  `Option <enum>: <value>/<text> (default: <value>/<text>)`. The optional bool
+  argument is a **show-all flag** (print every option, not just the changed ones);
+  the command hardcodes `_logToConsole = true`, so it never routes to the log. Log
+  routing exists only on the `startGameCo` startup dump path.
 - **Web dashboard** ([webserver.md](webserver.md)): REST `SandboxSettings`
   endpoint (`?code=&onlyChanged=&detailed=`) decodes the given code (default:
   the live `GameStats` code) and returns the option list as JSON.

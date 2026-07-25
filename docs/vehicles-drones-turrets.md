@@ -129,7 +129,7 @@ flowchart TB
   FILT --> LOCAL
   LOCAL -->|yes host| DIRECT[WaypointCollection.Set...FromManager<br/>no network]
   LOCAL -->|no| PKG[NetPackageEntityWaypointList.Setup<br/>eWayPointListType Vehicle=0 / Drone=1]
-  PKG --> SEND[ConnectionManager.SendPackage to that player<br/>channel 192]
+  PKG --> SEND[ConnectionManager.SendPackage to that player<br/>_range 192, channel 0]
 ```
 
 The filter differs by subsystem:

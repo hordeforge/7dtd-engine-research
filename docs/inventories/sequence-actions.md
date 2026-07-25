@@ -5,9 +5,11 @@
 **Regenerate:** hint extractor over transitive subclasses of `GameEvent.SequenceActions.BaseAction`.
 **Hub:** [`../INDEX.md`](../INDEX.md).
 
-Every concrete `GameEvent.SequenceActions.BaseAction` subclass, the effect side of the game-event sequence system (gates live in [sequence-requirements.md](sequence-requirements.md)). Actions are parsed from `gameevents.xml` properties (`ParseProperties`), cloned per running sequence (`CloneChildSettings`), and driven per phase by `GameEventActionSequence`.
+Every concrete `BaseAction` subclass **in the `GameEvent.SequenceActions` namespace**, the effect side of the game-event sequence system (gates live in [sequence-requirements.md](sequence-requirements.md)). Actions are parsed from `gameevents.xml` properties (`ParseProperties`), cloned per running sequence (`CloneChildSettings`), and driven per phase by `GameEventActionSequence`.
 
-**123 actions** (132 types transitively: the root `BaseAction`, 8 shared intermediate bases, and 123 concrete leaves; `ActionBlockReplace`, `ActionRemoveEntities`, and `ActionSpawnEntity` are concrete leaves that also parent one subclass each).
+**123 actions in the `GameEvent.SequenceActions` namespace** (132 types there: the root `BaseAction`, 8 shared intermediate bases, and 123 concrete leaves; `ActionBlockReplace`, `ActionRemoveEntities`, and `ActionSpawnEntity` are concrete leaves that also parent one subclass each).
+
+**Scope caveat:** the full transitive closure of `BaseAction` is **137** types, not 132. The extra 5 live in sibling namespaces and are **not** listed below: `GameEvent.SequenceDecisions.BaseDecision` + `DecisionIf`, and `GameEvent.SequenceLoops.BaseLoop` + `LoopFor` + `LoopWhile`. Those three concrete leaves are real, XML-wired control-flow verbs (`GameEventsFromXml.ParseGameEventSequenceDecision` / `ParseGameEventSequenceLoop`) that wrap child actions with an if-condition or a for/while loop, so a sequence implementation needs them even though they are not `SequenceActions.*`.
 
 ## Dispatch contract
 

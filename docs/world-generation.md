@@ -437,7 +437,8 @@ three are client render/UI and out of scope here.
   `WorldDecoratorBlocksFromBiome.decorateSingleBlockTryPlaceDeco` and
   `WorldBlockFiller.fillLevel` ([`chunk-providers.md`](chunk-providers.md)).
   `GetRandomRotation` scales a random float into a rotation byte and folds
-  values 4..7 up by +24 into the extended-rotation range (`ldc.i4.4 / sub` then
+  values 4..7 into the 24..27 extended-rotation range (rebase at 24, a net +20;
+  `ldc.i4.4 / sub` then
   `ldc.i4.s 24 / add`); `BlockModelTree.OnBlockPlaced` reuses it.
 - **`PrefabListData`** (nested `QuestEventManager/PrefabListData`, base
   `Object`) is runtime quest data, not RWG placement: a

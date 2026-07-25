@@ -737,7 +737,8 @@ entry wins.
   chase gives up (`homeTimeout` expiry: attack target cleared, give-up sound)
   and false when the target damages the entity again. While latched it holds
   the mutex above `SetNearestEntityAsTarget` (stock lists slot it at
-  `AITarget-2`), suppressing instant re-acquisition during the walk home.
+  `AITarget-2`, and `AITarget-3` or a pipe-separated task list on others),
+  suppressing instant re-acquisition during the walk home.
 - **`EAISetNearestEntityAsTargetSorter`** (`IComparer<Entity>`, 22 IL):
   `Compare` orders candidates ascending by `GetDistanceSq` from the owner, so
   index 0 is nearest. Built in `EAISetNearestEntityAsTarget.Init`,

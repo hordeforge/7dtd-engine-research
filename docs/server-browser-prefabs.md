@@ -260,7 +260,8 @@ state; reached from `QuestEventManager.QuestLockPOI`,
 ### 3.3 `PrefabInsideDataFile`: the `.ins` sidecar
 
 A bit-set marking which prefab-local positions are "inside" the building
-(index `x + z*size.x + y*size.x*size.z`, one bit each, allocated lazily).
+(index **`x + y*size.x + z*size.x*size.y`**, one bit each, allocated lazily; both
+`Add` and `Contains` compute it that way, so y is the middle stride, not z).
 Loaded by `Prefab.loadBlockData` from `<prefab>.ins` next to the block data and
 queried by `Prefab.IsInsidePrefab`; `Prefab.RecalcInsideDevices` regenerates
 it, `saveBlockData` writes it back. On-disk format: version byte (current 2),
@@ -275,7 +276,8 @@ normal serving.
 Despite the name this is a **server-side** manager (the name means "manages
 prefab instances *for* clients"). `GameManager.createWorld` calls
 `StartAsServer()` when `ConnectionManager.IsServer`, else `StartAsClient()`
-(a no-op). `StartAsServer` subscribes to `DynamicPrefabDecorator`
+(which only clears `clientPrefabs`, so it is near-inert but not literally empty).
+`StartAsServer` subscribes to `DynamicPrefabDecorator`
 `OnPrefabLoaded/Changed/Removed`, `PrefabEditModeManager.OnPrefabChanged` and
 `GameManager.OnClientSpawned`:
 

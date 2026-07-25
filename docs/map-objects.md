@@ -157,8 +157,11 @@ parses each class into a static registry queried by name via
   `GetOnScreenSettings(bool)` (map icon, compass icon with hot-zone settings,
   on-screen 3D sprite).
 - `Init` parses `requirement_type` into `NavObjectClass/RequirementTypes`
-  (`None, CVar, QuestBounds, Tracking, NoTag, InParty, IsAlly, IsPlayer,
-  IsVehicleOwner`), plus `requirement_name`, `tag`, `use_override_icon`.
+  (all **14** members: `None=0, CVar=1, QuestBounds=2, Tracking=3, NoTag=4,
+  InParty=5, IsAlly=6, IsPlayer=7, IsVehicleOwner=8, IsOwner=9, NoActiveQuests=10,
+  MinimumTreasureRadius=11, IsTwitchSpawnedSelf=12, IsTwitchSpawnedOther=13`), plus
+  `requirement_name`, `tag`, `use_override_icon`. `NavObject.IsValidEntity` switches
+  over 13 of them (the Twitch cases match on `spawnByName`).
 
 ## 6. NavObject: a tracked thing wearing classes
 

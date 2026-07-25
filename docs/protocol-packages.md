@@ -247,9 +247,22 @@ if networkWrite:                          // true for NetPackageEntitySpawn
     headState   : byte
     overrideSize / overrideHeadSize : f32 x2
     isDancing   : bool
-    isSleeperPassive : bool
-    belongsPlayerId  : i32
+    if isSleeper:                         // ONLY when isSleeper is true
+        isSleeperPassive : bool
+// the junk-drone extras are OUTSIDE the networkWrite guard:
+if entityClass == EntityClass.junkDroneClass:
+    belongsPlayerId : i32
+    orderState      : i32
 ```
+
+Two gating details a clone must honour (both cost stream sync if missed):
+`isSleeperPassive` is written **only when `isSleeper` is true** (`brfalse` at
+IL_03B2 skips it), and the trailing `belongsPlayerId` + `orderState` pair is
+**junk-drone-only and sits after the `networkWrite` block**, not inside it (the
+`networkWrite` guard at IL_033F jumps to the same junk-drone test at IL_03C5).
+Writing `isSleeperPassive` unconditionally adds a phantom byte to every non-sleeper
+spawn; writing `belongsPlayerId` for every entity adds four, and omitting
+`orderState` truncates drone spawns.
 
 So `belongsPlayerId`/`clientEntityId`/`itemStack` are **item-entity fields, not
 header fields**; a zombie spawn writes header + tail with the middle empty. The flat

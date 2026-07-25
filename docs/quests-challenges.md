@@ -49,7 +49,7 @@ singleton ticked once per frame from `GameManager.gmUpdate`
 | `Quest` / `Challenge` | Per-player runtime clone in a journal; carries state, current phase, and live objective / reward instances |
 | `QuestJournal` / `ChallengeJournal` | Per-player containers (`OwnerPlayer` / `Player` are `EntityPlayerLocal`); own the active-quest / tracked-quest pointers and save/load |
 | `BaseObjective` (+ 45 `Objective*`) | Quest objective verbs (fetch, kill, goto, clear, ...); track progress via event hooks or a 1 Hz update loop |
-| `BaseChallengeObjective` (+ 29 `ChallengeObjective*`) | Challenge objective verbs; count `current` toward `MaxCount` |
+| `BaseChallengeObjective` (+ 28 `ChallengeObjective*` leaves and the `ChallengeBaseTrackedItemObjective` intermediate) | Challenge objective verbs; count `current` toward `MaxCount` |
 | `BaseReward` (+ 12 `Reward*`) | Quest rewards (`RewardExp`, `RewardItem`, `RewardSkill`, `RewardQuest` chain, ...) with a `ReceiveStages` schedule |
 | `BaseQuestAction` (+ 9 `QuestAction*`) | Side effects run at a quest phase (`QuestActionSpawnEnemy`, `QuestActionGameEvent`, `QuestActionUnlockPOI`, `QuestActionTrackChallenge`, ...) |
 | `Quests.Requirements.BaseRequirement` (+ `RequirementLevel` / `Buff` / `Holding` / `Wearing` / `Group`) | Quest-offer gates (can this player receive / advance the quest) |
@@ -312,7 +312,7 @@ stateDiagram-v2
 (`needsPrerequisites`); `ChallengeObjectiveChallengeComplete` /
 `ChallengeObjectiveQuestComplete` hook the hub's `ChallengeComplete` /
 `QuestComplete` events, so a challenge can require finishing other challenges or
-quests. The 29 `ChallengeObjective*` verbs mirror the quest objective families
+quests. The 28 `ChallengeObjective*` verbs mirror the quest objective families
 (`Kill`, `KillByTag`, `Craft`, `Gather`, `Harvest`, `BlockPlace`, `BlockUpgrade`,
 `Bloodmoon`, `Survive`, `Time`, `EnterBiome`, `MeetTrader`, `LootContainer`,
 `SpendSkillPoint`, `Wear`, `Hold`, `Use`, `CureDebuff`, `Twitch`, ...).

@@ -233,7 +233,9 @@ stateDiagram-v2
 
 ### 4.1 ChunkProviderGenerateWorldFromRaw (id 4, the dedicated one)
 
-`Init` (coroutine `<Init>d__17`, calling base Init at the end) is the world
+`Init` (coroutine `<Init>d__17`, which yields **base `Init` first**, as state 0 via
+`<>n__0`, before its own work; the GenerateChunks thread's `m_RegionFileManager == null`
+guard corroborates that ordering) is the world
 load path a dedicated server runs at startup:
 
 - `GameUtils.WorldInfo.LoadWorldInfo` from the world folder
@@ -282,8 +284,10 @@ dedicated server only uses it for fixed-size worlds that ship regions.
 ### 4.4 ChunkProviderGenerateFlat (id 7)
 
 Playtest flat world: generates uniform flat chunks (plus optional playtest
-prefab), deletes any stale save region dir and `decoration.7dt` on Init, and
-implements `RebuildTerrain` directly (IL=210) without a region manager.
+prefab) and implements `RebuildTerrain` directly (IL=210) without a region
+manager. On Init it deletes only the stale **`decoration.7dt`**; the save region
+directory is merely `Exists`-checked (to gate the playtest-prefab branch), never
+deleted.
 
 ### 4.5 ChunkProviderDummy (id 3, client-only)
 
@@ -307,8 +311,12 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   `WorldChunkCache.MakeChunkKey(World.toChunkXZ(pos))`. That per-chunk bucket
   is exactly how decorations attach to chunks.
 - `DecoObject` is `{Vector3i pos, float realYPos, BlockValue bv, DecoState
-  state}` (`Write` serializes pos as packed uint64, raw block data, state byte,
-  and registers the block in the save's `NameIdMapping`). `DecoState`:
+  state}`. Its `decoration.7dt` record is, in `Write` order:
+  **`packedPos:u64`** (`GameUtils.Vector3iToUInt64(pos)`), **`realYPos:f32`**,
+  **`bv.rawData:u32`**, **`state:u8`**, after which the block is registered in the
+  save's `NameIdMapping` (bookkeeping, no bytes). The `realYPos` float is easy to
+  miss: a parser that skips it misaligns by 4 bytes from the second field on.
+  `DecoState`:
   `GeneratedActive`, `GeneratedInactive` (block currently realized in a loaded
   chunk, model hidden), `Dynamic` (player-placed).
 - `DecoManager.OnWorldLoaded(w, h, world, chunkProvider)` (from
