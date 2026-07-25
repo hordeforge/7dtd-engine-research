@@ -194,12 +194,146 @@ for the narrated groups, else the humanized name. Verify a leaf against its IL f
 | Leaf | Role | Base | Key methods |
 |---|---|---|---|
 | `BiomeBlockDecoration` | biomes.xml runtime chunk deco/resource rule | `Object` | GetRandomRotation |
-| `EventPrefabsClient` | **client-only**: client receiver applying prefab-add net packages | `Object` | Remove, TryAdd |
+| `EventPrefabsClient` | **client-effect only** (allocated server-side): `World.LoadWorld` constructs it on both sides, but `TryAdd`/`Remove` are called only from the ToClient `NetPackageEventPrefab` / `NetPackageWorldInitInfo` handlers, so it stays empty on a dedicated server | `Object` | Remove, TryAdd |
 | `GorePrefab` | **client-only**: gore object spawn-sound MonoBehaviour | `RootTransformRefEntity` | Start |
 | `PrefabGameObject` | **client-only**: POI imposter mesh holder (LOD) | `Object` | (fields only) |
 | `PrefabGroupEntry` | **client-only**: prefab-editor UI list row | `XUiListEntry`1` | CompareTo, MatchesSearch |
 | `PrefabListData` | QuestEventManager runtime POI-by-difficulty-tier bucketing | `Object` | AddPOI, ShuffleDifficulty |
 
+
+---
+
+## Promoted from out-of-scope (referrer-verified)
+
+These were first classified out-of-scope by a **name heuristic** and later found to
+have server-only referrers by a batch reverse-reference scan (`tools/src/RefScan`).
+Name is a poor signal here: `ClientAmmoData` is turret state on a server tile
+entity, `StreamReadSizeMarker` is wire-framing infrastructure, and `ClientLobbyManager`
+sits in the server authorizer path. Referrers are the evidence column.
+
+### aidirector / spawning (2)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `ManagedZombie` | `Object` | (fields only) | `AIDirectorBloodMoonParty` |
+| `SupplyCrateCache` | `Object` | (fields only) | `AIDirectorAirDropComponent`, `RegionFileManager` |
+
+### dynamic-mesh (1)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `DynamicMeshChunkDataStorage` | `(not found)` | (fields only) | `NetPackageDynamicMesh` |
+
+### entity-ai / entities (6)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `AIFocus` | `(not found)` | (fields only) | `EntityBandit` |
+| `AttachedToEntitySlotInfo` | `Object` | (fields only) | `Entity`, `EntityAlive`, `EntityVehicle` |
+| `FallBehavior` | `Object` | (fields only) | `EntityAlive`, `EntityHuman` |
+| `NetworkStatChange` | `Object` | (fields only) | `EntityAlive` |
+| `SEntityKilledData` | `ValueType` | (fields only) | `EntityAlive` |
+| `ServerHelper` | `Object` | SetupForServer | `EntityAlive` |
+
+### entity-stats (1)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `ModifierValuesAndSources` | `Object` | (fields only) | `EntityStats`, `PassiveEffect`, `PlayerEntityStats` |
+
+### items (10)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `ChannelMask` | `ValueType` | ToggleChannel, IncludesChannel, SetExclusiveChannel | `ItemActionTextureBlock` |
+| `CollectWaterActionData` | `ItemActionAttackData` | (fields only) | `ItemActionCollectWater` |
+| `CollectWaterUtils` | `Object` | CollectWater, GenerateCollectionPositions | `ItemActionCollectWater` |
+| `ConnectPowerData` | `ItemActionAttackData` | (fields only) | `ItemActionConnectPower`, `ItemActionDisconnectPower`, `NetPackageWireToolActions` |
+| `DumpWaterActionData` | `ItemActionAttackData` | (fields only) | `ItemActionDumpWater` |
+| `FeedInventoryData` | `ItemActionAttackData` | (fields only) | `ItemActionUseOther` |
+| `InventoryDataMelee` | `ItemActionAttackData` | (fields only) | `ItemActionMelee` |
+| `InventoryDataRepair` | `ItemActionAttackData` | (fields only) | `ItemActionRepair` |
+| `OnActivateItemGameObjectReference` | `MonoBehaviour` | IsActivated, ActivateItem | `ItemClassTimeBomb`, `ItemClassTorch` |
+| `PerlinNoise` | `Object` | Noise, Noise, Lattice, FBM | `ItemActionRanged` |
+
+### managers / loop (4)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `EntityItemLifetimeComparer` | `Object` | Compare | `GameManager` |
+| `ExplodeGroup` | `Object` | (fields only) | `GameManager` |
+| `SChatMessageData` | `ValueType` | (fields only) | `GameManager` |
+| `SGameMessageData` | `ValueType` | (fields only) | `GameManager` |
+
+### platform-auth (2)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `ClientAuthenticateServerContext` | `Object` | DisconnectNoCrossplay, DisconnectNoCrossplay, Success | `ConnectionManager` |
+| `ClientLobbyManager` | `Object` | RegisterLobbyClient, OnClientDisconnected, TryGetLobbyId | `AuthorizationManager`, `NetPackageLobbyRegisterClient` |
+
+### save-region / server-lifecycle (4)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `LongSetGroups` | `Object` | RemoveGroupedKeys, MergeOrCreateGroup, Clear, TryGetGroup | `RegionFileManager` |
+| `ProtectedBackpack` | `ValueType` | (fields only) | `PersistentPlayerData`, `RegionFileManager` |
+| `ProtectedPositionCache` | `Object` | ClearAll | `RegionFileManager` |
+| `RegionExtensions` | `Dictionary`2` | (fields only) | `RegionFileAccessMultipleChunks` |
+
+### spawning (1)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `PList` | `(not found)` | (fields only) | `EntitySpawner` |
+
+### tile-entities-power (1)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `LegacyState` | `ValueType` | (fields only) | `TileEntityComposite`, `TileEntityLegacyUtils` |
+
+### vehicles-drones-turrets (5)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `ClientAmmoData` | `Object` | (fields only) | `AutoTurretFireController`, `TileEntityPoweredRangedTrap` |
+| `ClientTriggerData` | `Object` | (fields only) | `TileEntityPoweredTrigger` |
+| `FireControllerUtils` | `Object` | SpawnParticleEffect | `AutoTurretFireController` |
+| `Motor` | `Object` | (fields only) | `EntityVehicle` |
+| `Wheel` | `Object` | (fields only) | `EntityVGyroCopter`, `EntityVHelicopter`, `EntityVJeep` |
+
+### wire / serialization (protocol-packages) (6)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `BitConverterLE` | `Object` | GetULongBytes, UIntFromBytes, GetUIntBytes, ULongFromBytes | `PooledBinaryReader`, `PooledBinaryWriter` |
+| `ByteLengthUtils` | `Object` | GetBinaryWriter7BitEncodedIntLength, GetBinaryWriterLength | `NetPackagePlayerLoginAnswer` |
+| `NetPackageInformation` | `(not found)` | (fields only) | `NetPackageManager` |
+| `StreamReadSizeMarker` | `ValueType` | (fields only) | `PooledBinaryReader`, `TileEntityComposite` |
+| `StreamWriteSizeMarker` | `ValueType` | (fields only) | `PooledBinaryWriter` |
+| `UnknownNetPackageException` | `Exception` | (fields only) | `NetPackageManager` |
+
+### world-chunks (2)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `GroupBounds` | `ValueType` | IsWithinSize | `World` |
+| `VolumeKey` | `ValueType` | (fields only) | `World` |
+
+### world-generation (1)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `MinHeapBinned` | `ValueType` | Add, ExtractFirst, Reset, Init | `WorldGenerationEngineFinal.PathingUtils` |
+
+### world-generation / chunk-providers (2)
+
+| Leaf | Base | Key methods | Server referrers |
+|---|---|---|---|
+| `PlaceholderTarget` | `ValueType` | (fields only) | `BlockPlaceholderMap` |
+| `PrefabVolumeListAbs` | `Object` | (fields only) | `DynamicPrefabDecorator`, `EntityPlayer`, `PrefabData` |
 ## Changelog
 
+- **2026-07-24:** Added 48 types promoted out of the out-of-scope classification after a referrer scan (`tools/src/RefScan`) showed server-only referrers; name-based classification had put them in the wrong bucket.
 - **2026-07-24:** Promoted to a full per-leaf reference (IL-derived base + fingerprint via `tools/src/LeafInfo`); substantive groups (AI/loot/items/spawning/quests/combat) narrated in prose in their owning docs, client-only leaves marked.

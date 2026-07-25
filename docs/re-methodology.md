@@ -265,6 +265,21 @@ Rule of thumb: **a negative result ("no server callers") is a much stronger clai
 than a positive one, so it needs the stronger tool.** Before writing "client-only",
 run both the call and the field form.
 
+**Do not classify by name.** An out-of-scope sweep done by type-name heuristic put 48
+server types in the wrong bucket, because the name lies often enough to matter:
+`ClientAmmoData` is turret state on a server tile entity, `StreamReadSizeMarker` is
+wire-framing infrastructure, `ClientLobbyManager` sits in the server authorizer
+chain, and `ClientTriggerData` belongs to `TileEntityPoweredTrigger`. The reliable
+signal is **who references it**: `tools/src/RefScan` takes a list of type names and
+reports every referencing site attributed to its outermost owner, in one assembly
+pass. A type whose referrers are all `XUiC_*`/render/editor is genuinely client; a
+type referenced only from `GameManager`/`World`/`NetPackage*`/`TileEntity*` is not,
+whatever it is called.
+
+```bash
+mono bin/RefScan.exe "$ASM" types.txt refs.tsv    # batch reverse references
+```
+
 ---
 
 ## Related docs

@@ -7,9 +7,13 @@ layer tree (`SignLayer`, `TextSignLayer`, `PolygonSignLayer`, `NoiseSignLayer`,
 `SignLibraryMigrations`, `SignDataManager`), the sign-data download protocol
 (`NetPackageSignDataRequest/Response`), and the authored-text moderation stack
 (`AuthoredText`, `GeneratedTextManager` + `AuthoredTextDetails`). Also maps the
-client-only render pipeline (`SignCanvas`, `SignRenderer`, `SignPrioritizer`,
+client-only render pipeline (`SignRenderer`, `SignPrioritizer`,
 `SignTextureManager/Store`, `BakeScheduler`, `ImposterSignFactory`) far enough to
-show it is not server work.
+show it is not server work. **`SignCanvas` straddles the line:** the MonoBehaviour
+and its decal rendering are client, but its nested **`SignCanvas.CanvasState` is
+server-persisted state** (`TEFeatureCanvas.Read`/`Write` call
+`CanvasState.Read`/`Write` directly, see §6), so do not treat the whole type as
+client-only.
 **Not:** the tile-entity features that carry this data on a block
 (`TEFeatureSignable`, `TEFeatureCanvas`, inventoried in
 [inventories/te-features.md](inventories/te-features.md)); tile-entity

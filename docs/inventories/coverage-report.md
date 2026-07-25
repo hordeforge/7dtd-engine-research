@@ -20,8 +20,8 @@ excluded from the base. Reachability is the ground truth for "runs on a dedicate
 | Reached, non-generated | 4196 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 1493 (excluded from %) |
 | ...**game types** (the RE surface) | **2703** |
-| ...**narrated** in a subsystem doc | **1754 (64%)** |
-| ...**classified** out-of-scope ([out-of-scope-surface.md](../out-of-scope-surface.md)) | 949 |
+| ...**narrated** in a subsystem doc | **1799 (66%)** |
+| ...**classified** out-of-scope ([out-of-scope-surface.md](../out-of-scope-surface.md)) | 904 |
 | ...**accounted for** (narrated + classified) | **2703 (100%)** |
 | ...still unaccounted (gap floor) | 0 |
 
