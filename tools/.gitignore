@@ -4,13 +4,10 @@ Mono.Cecil.dll
 *.exe
 tests/_out/
 
-# Raw IL dump trees (game IL excerpts; never distribute - regenerable, kept local).
+# Raw IL dump trees. POLICY: bulk game IL lives ONLY under the repo-root il/
+# tree, which is git-ignored wholesale. Nothing under tools/ should ever contain
+# dumped game IL; if a tool run lands output here, move it to il/ rather than
+# adding another name to this file. The catch-all below is a backstop, not a
+# licence to keep dumps in tools/.
 *.il.txt
-BiomeWeather/
-SkyManager/
-WeatherGroup/
-WeatherManager/
-WeatherPackage/
-WeatherParams/
-WeatherSurvivalParametersFromXml/
-NetPackageWeather/
+*/*.il.txt

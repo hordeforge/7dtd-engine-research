@@ -61,7 +61,11 @@ class Coverage {
     var asm = AssemblyDefinition.ReadAssembly(a[0], new ReaderParameters { AssemblyResolver = r });
     var mod = asm.MainModule; var all = mod.GetTypes().ToList();
 
-    // override map for callvirt devirtualization
+    // Devirtualization map for callvirt. Two edge kinds:
+    //  (a) class overrides, by walking BaseType chains
+    //  (b) INTERFACE implementations. Without (b) whole families that dispatch through
+    //      an interface are invisible: the ~187 ConsoleCmdAbstract commands all run via
+    //      IConsoleCommand.Execute, and only one of them was reached before this was added.
     foreach (var t in all) foreach (var m in t.Methods.Where(x => x.IsVirtual && x.HasBody)) {
       var bt = t.BaseType;
       while (bt != null) { var btd = bt.Resolve(); if (btd == null) break;
@@ -69,6 +73,20 @@ class Coverage {
         if (bm != null) { var k = btd.FullName + "::" + m.Name + "/" + m.Parameters.Count; List<MethodDefinition> l;
           if (!overrides.TryGetValue(k, out l)) { l = new List<MethodDefinition>(); overrides[k] = l; } l.Add(m); }
         bt = btd.BaseType; }
+    }
+    foreach (var t in all) {
+      if (!t.HasInterfaces) continue;
+      foreach (var ii in t.Interfaces) {
+        TypeDefinition itd = null; try { itd = ii.InterfaceType.Resolve(); } catch { }
+        if (itd == null) continue;
+        foreach (var im in itd.Methods) {
+          var impl = t.Methods.FirstOrDefault(x => x.HasBody && x.Name == im.Name && x.Parameters.Count == im.Parameters.Count);
+          if (impl == null) continue;
+          var k = itd.FullName + "::" + im.Name + "/" + im.Parameters.Count; List<MethodDefinition> l;
+          if (!overrides.TryGetValue(k, out l)) { l = new List<MethodDefinition>(); overrides[k] = l; }
+          if (!l.Contains(impl)) l.Add(impl);
+        }
+      }
     }
 
     var visited = new HashSet<MethodDefinition>(); var work = new Queue<MethodDefinition>();
@@ -97,17 +115,25 @@ class Coverage {
     // named only in the out-of-scope classification doc. A type is "accounted for" if
     // it is narrated OR classified. This keeps the narrated % meaningful while letting
     // the accounted-for % reach 100 once the out-of-scope surface is enumerated.
+    // Three DISTINCT signals, deliberately not merged:
+    //   narrated   = backtick-quoted mention in a hand-written narrative doc (docs/*.md)
+    //   catalogued = backtick-quoted mention only in a generated catalog (docs/inventories/)
+    //   classified = listed in out-of-scope-surface.md
+    // Backticks are required so prose words and markdown table headers ("| Field |",
+    // "| Role |", "Entry points") cannot credit real types named Field/Entry/Data.
     var narrated = new HashSet<string>();
+    var catalogued = new HashSet<string>();
     var classified = new HashSet<string>();
     foreach (var f in Directory.GetFiles(a[1], "*.md", SearchOption.AllDirectories)) {
       string fn = Path.GetFileName(f);
-      // Never count the tool's OWN outputs as narration: coverage-report.md's gap
-      // list would otherwise feed back and inflate the narrated set.
-      if (fn == "coverage-report.md") continue;
-      var target = (fn == "out-of-scope-surface.md") ? classified : narrated;
+      if (fn == "coverage-report.md") continue;   // never let the tool read its own output
+      bool isInventory = f.Replace('\\','/').Contains("/inventories/");
+      var target = (fn == "out-of-scope-surface.md") ? classified : (isInventory ? catalogued : narrated);
       string text = File.ReadAllText(f);
-      foreach (Match mt in Regex.Matches(text, "[A-Za-z_][A-Za-z0-9_]+")) target.Add(mt.Value);
+      foreach (Match mt in Regex.Matches(text, "`([A-Za-z_][A-Za-z0-9_]*)`"))
+        target.Add(mt.Groups[1].Value);
     }
+    catalogued.ExceptWith(narrated);   // narrated wins over merely-catalogued
 
     // Bucket by namespace (top-level segment; <global> for no namespace).
     var byNs = new Dictionary<string, List<TypeDefinition>>();
@@ -116,10 +142,13 @@ class Coverage {
       List<TypeDefinition> l; if (!byNs.TryGetValue(ns, out l)) { l = new List<TypeDefinition>(); byNs[ns] = l; } l.Add(t);
     }
 
-    int docd = gameReached.Count(t => narrated.Contains(BaseName(t)));
-    int classd = gameReached.Count(t => !narrated.Contains(BaseName(t)) && classified.Contains(BaseName(t)));
-    int accounted = gameReached.Count(t => narrated.Contains(BaseName(t)) || classified.Contains(BaseName(t)));
+    int docd  = gameReached.Count(t => narrated.Contains(BaseName(t)));
+    int catd  = gameReached.Count(t => !narrated.Contains(BaseName(t)) && catalogued.Contains(BaseName(t)));
+    int classd = gameReached.Count(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && classified.Contains(BaseName(t)));
+    int accounted = docd + catd + classd;
     int undoc = gameReached.Count - accounted;
+    int uiInBase = gameReached.Count(t => BaseName(t).StartsWith("XUiC_") || BaseName(t).StartsWith("XUi"));
+    int cmdInBase = gameReached.Count(t => BaseName(t).StartsWith("ConsoleCmd"));
 
     var sb = new StringBuilder();
     sb.AppendLine("# RE coverage report (V3.0.1, auto-generated)");
@@ -127,13 +156,39 @@ class Coverage {
     sb.AppendLine("**Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the");
     sb.AppendLine("dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced");
     sb.AppendLine("against docs name-mentions. Regenerate:");
-    sb.AppendLine("`mono bin/Coverage.exe \"$ASM\" ../docs coverage-report.md`.");
+    sb.AppendLine("`mono tools/bin/Coverage.exe \"$ASM\" docs docs/inventories/coverage-report.md` (from the repo root, matching the other generated inventories).");
     sb.AppendLine();
-    sb.AppendLine("Each reached game type is **narrated** (named in a subsystem doc),");
-    sb.AppendLine("**classified** out-of-scope ([out-of-scope-surface.md](../out-of-scope-surface.md)),");
-    sb.AppendLine("or **unaccounted** (the honest gap). Name-mention is an upper bound on narration");
-    sb.AppendLine("(a type named in passing counts). Third-party/BCL and obfuscated `#`-types are");
-    sb.AppendLine("excluded from the base. Reachability is the ground truth for \"runs on a dedicated server\".");
+    sb.AppendLine("## What this measures, and what it does not");
+    sb.AppendLine();
+    sb.AppendLine("**This is not a coverage metric.** It is *documentation-mention overlap on a static");
+    sb.AppendLine("call graph*, and both sides of the ratio are approximations. Read the caveats before");
+    sb.AppendLine("quoting any number here.");
+    sb.AppendLine();
+    sb.AppendLine("**The base (denominator) is wrong in both directions, by construction:**");
+    sb.AppendLine();
+    sb.AppendLine("- *Over-approximation:* `callvirt` is devirtualized to every override regardless of");
+    sb.AppendLine("  whether the receiver is ever instantiated on a server, so client-only trees get");
+    sb.AppendLine("  pulled in. This run has **" + uiInBase + " XUi/XUiC_ client-UI types** inside the base even");
+    sb.AppendLine("  though a headless server renders nothing.");
+    sb.AppendLine("- *Under-approximation:* code reached only by **reflection** (XML-instantiated");
+    sb.AppendLine("  classes) is invisible. Interface dispatch IS devirtualized as of this version");
+    sb.AppendLine("  (that fix brought the console-command family in: **" + cmdInBase + " `ConsoleCmd*` types**");
+    sb.AppendLine("  are now in the base, against 1 before).");
+    sb.AppendLine();
+    sb.AppendLine("**The signal (numerator) is a mention, not an explanation.** A type counts as");
+    sb.AppendLine("*narrated* only if its name appears **backtick-quoted** in a hand-written narrative");
+    sb.AppendLine("doc. Backticks are required so prose and markdown table headers (`| Field |`,");
+    sb.AppendLine("`| Role |`, \"Entry points\") cannot credit real types named `Field`/`Entry`/`Data`.");
+    sb.AppendLine("Even so, one backticked cross-reference scores the same as a dedicated section.");
+    sb.AppendLine();
+    sb.AppendLine("The tiers are reported separately and deliberately **not summed into a headline**:");
+    sb.AppendLine();
+    sb.AppendLine("| Tier | Meaning |");
+    sb.AppendLine("|---|---|");
+    sb.AppendLine("| **narrated** | backticked in a narrative subsystem doc (the closest thing to real documentation) |");
+    sb.AppendLine("| **catalogued only** | backticked only in a generated `inventories/` catalog: enumerated, not explained |");
+    sb.AppendLine("| **classified** | listed in [out-of-scope-surface.md](../out-of-scope-surface.md) as not dedicated work |");
+    sb.AppendLine("| **unaccounted** | appears nowhere: the honest gap list |");
     sb.AppendLine();
     sb.AppendLine("## Totals");
     sb.AppendLine();
@@ -144,22 +199,25 @@ class Coverage {
     sb.AppendLine("| Reached, non-generated | " + nonGen.Count + " |");
     sb.AppendLine("| ...third-party / BCL (System, Unity, Newtonsoft, ...) | " + libReached.Count + " (excluded from %) |");
     sb.AppendLine("| ...**game types** (the RE surface) | **" + gameReached.Count + "** |");
-    sb.AppendLine("| ...**narrated** in a subsystem doc | **" + docd + " (" + (100 * docd / Math.Max(1, gameReached.Count)) + "%)** |");
-    sb.AppendLine("| ...**classified** out-of-scope ([out-of-scope-surface.md](../out-of-scope-surface.md)) | " + classd + " |");
-    sb.AppendLine("| ...**accounted for** (narrated + classified) | **" + accounted + " (" + (100 * accounted / Math.Max(1, gameReached.Count)) + "%)** |");
-    sb.AppendLine("| ...still unaccounted (gap floor) | " + undoc + " |");
+    sb.AppendLine("| ...**narrated** (backticked in a narrative doc) | **" + docd + " (" + (100 * docd / Math.Max(1, gameReached.Count)) + "%)** |");
+    sb.AppendLine("| ...**catalogued only** (generated inventory, not narrated) | " + catd + " |");
+    sb.AppendLine("| ...**classified** out-of-scope | " + classd + " |");
+    sb.AppendLine("| ...**unaccounted** (appears nowhere) | " + undoc + " |");
+    sb.AppendLine("| of the base: XUi/XUiC_ client-UI types (over-approximation) | " + uiInBase + " |");
+    sb.AppendLine("| of the base: `ConsoleCmd*` (recovered by interface devirt) | " + cmdInBase + " |");
     sb.AppendLine();
-    sb.AppendLine("**Narrated %** = reverse-engineered in a subsystem doc (the real depth metric).");
-    sb.AppendLine("**Accounted-for %** = narrated OR explicitly classified as out-of-scope, i.e. no");
-    sb.AppendLine("reached type is silently ignored. Third-party/BCL code is excluded from the base.");
+    sb.AppendLine("Third-party/BCL and obfuscated `#`-named types are excluded from the base.");
+    sb.AppendLine("**Do not add these rows together and present the sum as coverage.** \"Narrated\"");
+    sb.AppendLine("and \"classified\" are different epistemic states (reverse engineered vs judged");
+    sb.AppendLine("out of scope), and the base itself is the approximation described above.");
     sb.AppendLine();
 
     sb.AppendLine("## Per-namespace coverage (reached game types)");
     sb.AppendLine();
-    sb.AppendLine("| Namespace | reached | documented | undocumented | % |");
+    sb.AppendLine("| Namespace | reached | narrated+catalogued+classified | remaining | % |");
     sb.AppendLine("|---|---:|---:|---:|---:|");
     foreach (var kv in byNs.OrderByDescending(x => x.Value.Count)) {
-      int d = kv.Value.Count(t => narrated.Contains(BaseName(t)) || classified.Contains(BaseName(t)));
+      int d = kv.Value.Count(t => narrated.Contains(BaseName(t)) || catalogued.Contains(BaseName(t)) || classified.Contains(BaseName(t)));
       int u = kv.Value.Count - d;
       sb.AppendLine("| `" + kv.Key + "` | " + kv.Value.Count + " | " + d + " | " + u + " | " + (100 * d / kv.Value.Count) + "% |");
     }
@@ -173,7 +231,7 @@ class Coverage {
     sb.AppendLine();
     sb.AppendLine("| Type | Namespace | methods (reached-set) |");
     sb.AppendLine("|---|---|---:|");
-    foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
+    foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
                                  .OrderByDescending(t => t.Methods.Count(x => x.HasBody)).Take(60)) {
       sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     }
@@ -184,12 +242,12 @@ class Coverage {
     // Full undocumented-reached list (sidecar TSV): methods, namespace, type.
     var tsv = new StringBuilder();
     tsv.AppendLine("methods\tnamespace\ttype");
-    foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
+    foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
                                  .OrderByDescending(t => t.Methods.Count(x => x.HasBody)))
       tsv.AppendLine(t.Methods.Count(x => x.HasBody) + "\t" + (string.IsNullOrEmpty(NsOf(t)) ? "<global>" : NsOf(t)) + "\t" + t.Name);
     File.WriteAllText(a[2] + ".gaps.tsv", tsv.ToString());
 
-    Console.Error.WriteLine("reached methods=" + visited.Count + " game types=" + gameReached.Count + " documented=" + docd + " (" + (100 * docd / Math.Max(1, gameReached.Count)) + "%)");
+    Console.Error.WriteLine("reached methods=" + visited.Count + " game types=" + gameReached.Count + " narrated=" + docd + " catalogued=" + catd + " classified=" + classd + " unaccounted=" + undoc);
     Console.WriteLine("wrote " + a[2] + " (+ " + a[2] + ".gaps.tsv, " + undoc + " undocumented)");
   }
 }

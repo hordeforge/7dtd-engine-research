@@ -5,59 +5,99 @@ dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced
 against docs name-mentions. Regenerate:
 `mono bin/Coverage.exe "$ASM" ../docs coverage-report.md`.
 
-Each reached game type is **narrated** (named in a subsystem doc),
-**classified** out-of-scope ([out-of-scope-surface.md](../out-of-scope-surface.md)),
-or **unaccounted** (the honest gap). Name-mention is an upper bound on narration
-(a type named in passing counts). Third-party/BCL and obfuscated `#`-types are
-excluded from the base. Reachability is the ground truth for "runs on a dedicated server".
+## What this measures, and what it does not
+
+**This is not a coverage metric.** It is *documentation-mention overlap on a static
+call graph*, and both sides of the ratio are approximations. Read the caveats before
+quoting any number here.
+
+**The base (denominator) is wrong in both directions, by construction:**
+
+- *Over-approximation:* `callvirt` is devirtualized to every override regardless of
+  whether the receiver is ever instantiated on a server, so client-only trees get
+  pulled in. This run has **498 XUi/XUiC_ client-UI types** inside the base even
+  though a headless server renders nothing.
+- *Under-approximation:* code reached only by **reflection** (XML-instantiated
+  classes) is invisible. Interface dispatch IS devirtualized as of this version
+  (that fix brought the console-command family in: **178 `ConsoleCmd*` types**
+  are now in the base, against 1 before).
+
+**The signal (numerator) is a mention, not an explanation.** A type counts as
+*narrated* only if its name appears **backtick-quoted** in a hand-written narrative
+doc. Backticks are required so prose and markdown table headers (`| Field |`,
+`| Role |`, "Entry points") cannot credit real types named `Field`/`Entry`/`Data`.
+Even so, one backticked cross-reference scores the same as a dedicated section.
+
+The tiers are reported separately and deliberately **not summed into a headline**:
+
+| Tier | Meaning |
+|---|---|
+| **narrated** | backticked in a narrative subsystem doc (the closest thing to real documentation) |
+| **catalogued only** | backticked only in a generated `inventories/` catalog: enumerated, not explained |
+| **classified** | listed in [out-of-scope-surface.md](../out-of-scope-surface.md) as not dedicated work |
+| **unaccounted** | appears nowhere: the honest gap list |
 
 ## Totals
 
 | Metric | Value |
 |---|---:|
-| Reached methods (with body) | 28374 |
-| Reached types (incl. compiler-generated) | 4516 |
-| Reached, non-generated | 4196 |
-| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 1493 (excluded from %) |
-| ...**game types** (the RE surface) | **2703** |
-| ...**narrated** in a subsystem doc | **1799 (66%)** |
-| ...**classified** out-of-scope ([out-of-scope-surface.md](../out-of-scope-surface.md)) | 904 |
-| ...**accounted for** (narrated + classified) | **2703 (100%)** |
-| ...still unaccounted (gap floor) | 0 |
+| Reached methods (with body) | 45236 |
+| Reached types (incl. compiler-generated) | 7179 |
+| Reached, non-generated | 6043 |
+| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2268 (excluded from %) |
+| ...**game types** (the RE surface) | **3775** |
+| ...**narrated** (backticked in a narrative doc) | **1120 (29%)** |
+| ...**catalogued only** (generated inventory, not narrated) | 562 |
+| ...**classified** out-of-scope | 900 |
+| ...**unaccounted** (appears nowhere) | 1193 |
+| of the base: XUi/XUiC_ client-UI types (over-approximation) | 498 |
+| of the base: `ConsoleCmd*` (recovered by interface devirt) | 178 |
 
-**Narrated %** = reverse-engineered in a subsystem doc (the real depth metric).
-**Accounted-for %** = narrated OR explicitly classified as out-of-scope, i.e. no
-reached type is silently ignored. Third-party/BCL code is excluded from the base.
+Third-party/BCL and obfuscated `#`-named types are excluded from the base.
+**Do not add these rows together and present the sum as coverage.** "Narrated"
+and "classified" are different epistemic states (reverse engineered vs judged
+out of scope), and the base itself is the approximation described above.
 
 ## Per-namespace coverage (reached game types)
 
-| Namespace | reached | documented | undocumented | % |
+| Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2195 | 2195 | 0 | 100% |
-| `GameEvent` | 180 | 180 | 0 | 100% |
-| `Twitch` | 78 | 78 | 0 | 100% |
-| `Challenges` | 46 | 46 | 0 | 100% |
-| `Platform` | 43 | 43 | 0 | 100% |
-| `Discord` | 25 | 25 | 0 | 100% |
-| `UAI` | 24 | 24 | 0 | 100% |
+| `<global>` | 2926 | 2071 | 855 | 70% |
+| `GameEvent` | 180 | 179 | 1 | 99% |
+| `Platform` | 147 | 50 | 97 | 34% |
+| `Twitch` | 109 | 76 | 33 | 69% |
+| `LiteNetLib` | 53 | 0 | 53 | 0% |
+| `DynamicMusic` | 47 | 9 | 38 | 19% |
+| `Challenges` | 47 | 47 | 0 | 100% |
+| `WorldGenerationEngineFinal` | 39 | 24 | 15 | 61% |
+| `Discord` | 25 | 21 | 4 | 84% |
+| `UAI` | 24 | 15 | 9 | 62% |
+| `Antlr` | 21 | 0 | 21 | 0% |
 | `PrefabVolumes` | 16 | 16 | 0 | 100% |
-| `WorldGenerationEngineFinal` | 12 | 12 | 0 | 100% |
-| `DynamicMusic` | 11 | 11 | 0 | 100% |
-| `SandboxOptions` | 10 | 10 | 0 | 100% |
-| `SDF` | 10 | 10 | 0 | 100% |
-| `GamePath` | 9 | 9 | 0 | 100% |
-| `Audio` | 8 | 8 | 0 | 100% |
-| `Quests` | 7 | 7 | 0 | 100% |
-| `RaycastPathing` | 7 | 7 | 0 | 100% |
-| `XMLData` | 5 | 5 | 0 | 100% |
+| `GamePath` | 13 | 6 | 7 | 46% |
+| `SandboxOptions` | 13 | 11 | 2 | 84% |
+| `NCalc` | 13 | 0 | 13 | 0% |
+| `Audio` | 12 | 5 | 7 | 41% |
+| `SDF` | 11 | 11 | 0 | 100% |
+| `RaycastPathing` | 10 | 8 | 2 | 80% |
+| `Webserver` | 10 | 6 | 4 | 60% |
+| `XMLData` | 7 | 5 | 2 | 71% |
+| `Quests` | 7 | 6 | 1 | 85% |
+| `Services` | 6 | 3 | 3 | 50% |
+| `ZXing` | 6 | 0 | 6 | 0% |
+| `MapRendering` | 6 | 0 | 6 | 0% |
+| `MusicUtils` | 5 | 3 | 2 | 60% |
+| `BhvrAnalyticsServices` | 5 | 0 | 5 | 0% |
 | `GearVariants` | 4 | 4 | 0 | 100% |
-| `Services` | 3 | 3 | 0 | 100% |
-| `ConcurrentCollections` | 3 | 3 | 0 | 100% |
-| `MusicUtils` | 3 | 3 | 0 | 100% |
-| `SystemInformation` | 1 | 1 | 0 | 100% |
+| `ConcurrentCollections` | 3 | 2 | 1 | 66% |
+| `mumblelib` | 2 | 0 | 2 | 0% |
+| `Force` | 2 | 0 | 2 | 0% |
 | `WaterClippingTool` | 1 | 1 | 0 | 100% |
-| `GUI_2` | 1 | 1 | 0 | 100% |
+| `XMLEditing` | 1 | 0 | 1 | 0% |
+| `SystemInformation` | 1 | 1 | 0 | 100% |
 | `UnityEngineInternal` | 1 | 1 | 0 | 100% |
+| `TriggerEffects` | 1 | 0 | 1 | 0% |
+| `GUI_2` | 1 | 1 | 0 | 100% |
 
 ## Top undocumented reached types (by method count) - the gap list
 
@@ -67,4 +107,64 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
+| `Client` | Discord.Sdk | 158 |
+| `NetManager` | LiteNetLib | 113 |
+| `Utils` | <global> | 110 |
+| `NetDataReader` | LiteNetLib.Utils | 105 |
+| `Manager` | Audio | 69 |
+| `Client` | <global> | 64 |
+| `PrefabEditModeManager` | <global> | 62 |
+| `Extensions` | <global> | 62 |
+| `BaseRecognizer` | Antlr.Runtime | 59 |
+| `TList`1` | <global> | 58 |
+| `NetPeer` | LiteNetLib | 58 |
+| `PrefabChunk` | <global> | 54 |
+| `NetDataWriter` | LiteNetLib.Utils | 53 |
+| `UIFont` | <global> | 52 |
+| `NCalcLexer` | <global> | 52 |
+| `SaveDataMergedPlatformSaveGameIOProvider` | <global> | 47 |
+| `BindingNcalcFunctions` | <global> | 47 |
+| `DynamicMeshChunkData` | <global> | 45 |
+| `EventBasedNetListener` | LiteNetLib | 41 |
+| `Localization` | <global> | 40 |
+| `MeshGenerator` | <global> | 40 |
+| `LogicalExpression` | NCalc.Domain | 40 |
+| `XUiC_OptionsVideo` | <global> | 39 |
+| `GameOptionsManager` | <global> | 38 |
+| `GameSenseManager` | <global> | 37 |
+| `DistantTerrain` | <global> | 37 |
+| `CursorControllerAbs` | <global> | 37 |
+| `NtpPacket` | LiteNetLib.Utils | 37 |
+| `BaseTreeAdaptor` | Antlr.Runtime.Tree | 36 |
+| `NGuiAction` | <global> | 35 |
+| `BufferedTokenStream` | Antlr.Runtime | 35 |
+| `NetworkServerSteam` | Platform.Steam | 33 |
+| `NetworkServerEos` | Platform.EOS | 33 |
+| `XUiFromXml` | <global> | 33 |
+| `PlatformUserManager` | Platform | 32 |
+| `XUiM_Recipes` | <global> | 32 |
+| `Call` | Discord.Sdk | 32 |
+| `GameObjectPool` | <global> | 31 |
+| `WaterDataHandle` | <global> | 31 |
+| `ChunkBlockLayer` | <global> | 31 |
+| `EventDelegate` | <global> | 31 |
+| `RecognitionException` | Antlr.Runtime | 31 |
+| `PerformanceProfiler` | <global> | 30 |
+| `SessionsHost` | Platform.EOS | 30 |
+| `Stat` | <global> | 30 |
+| `EvaluationVisitor` | NCalc.Domain | 30 |
+| `Lexer` | Antlr.Runtime | 30 |
+| `NCalcParser` | <global> | 29 |
+| `UserBase` | Platform.EOS | 28 |
+| `XUiC_InGameDebugMenu` | <global> | 28 |
+| `GameRenderManager` | <global> | 28 |
+| `BitSet` | Antlr.Runtime | 28 |
+| `LightManager` | <global> | 27 |
+| `FastWireNode` | <global> | 27 |
+| `Expression` | NCalc | 27 |
+| `MessageButton` | <global> | 26 |
+| `NetworkClientSteam` | Platform.Steam | 26 |
+| `LightLOD` | <global> | 26 |
+| `PubSubSubscriptionRedemptionMessage` | Twitch.PubSub | 26 |
+| `EAIManager` | <global> | 25 |
 

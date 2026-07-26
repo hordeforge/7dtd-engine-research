@@ -15,7 +15,7 @@ by hand. Regenerate the *columns* if the game updates; do not regenerate the fil
 wholesale, or the referrer-verified promotions and the IL-verified roles are lost.  
 **Hub:** [`../INDEX.md`](../INDEX.md). **Method:** [`../re-methodology.md`](../re-methodology.md).
 
-**88 leaf types**, grouped by owning subsystem.
+**88 leaf types** in the base catalog below, plus the promoted sections further down (the file's total row count is higher; see those sections for provenance).
 
 ## blocks / block-shapes (11)
 
@@ -338,7 +338,83 @@ sits in the server authorizer path. Referrers are the evidence column.
 |---|---|---|---|
 | `PlaceholderTarget` | `ValueType` | (fields only) | `BlockPlaceholderMap` |
 | `PrefabVolumeListAbs` | `Object` | (fields only) | `DynamicPrefabDecorator`, `EntityPlayer`, `PrefabData` |
+
+---
+
+## Promoted from out-of-scope, round 2 (dominance rule)
+
+An independent review found the out-of-scope bucket had never been referrer-verified
+and named `ClientPowerData` as a counter-example. Re-sweeping with `tools/src/RefScan`
+confirmed it (14 `TileEntityPowerSource` referrers including `read`/`write`) and
+exposed a flaw in the earlier promotion rule: it required **zero** client referrers, so
+a type that is overwhelmingly server-side but touched once by a UI window stayed
+misclassified. The rule is now **dominance** (server referrers outnumber client ones).
+
+### dynamic-mesh (7)
+
+| Leaf | Server referrers |
+|---|---|
+| `DisabledImposterChunkManager` | DynamicMeshManager |
+| `DyMeshRegionLoadRequest` | DynamicMeshManager, DynamicMeshRegionDataStorage |
+| `DynamicMeshChunkDataStorage` | DynamicMeshBuilderManager, DynamicMeshChunkProcessor |
+| `DynamicMeshChunkDataWrapper` | DynamicMeshChunkDataStorage, DynamicMeshChunkProcessor |
+| `DynamicMeshVoxelLoad` | DynamicMeshChunkProcessor, DynamicMeshItem |
+| `MeshCalculations` | DynamicMeshChunkProcessor, DynamicMeshVoxelRegionLoad |
+| `TerrainSubMesh` | DynamicMeshChunkProcessor, DynamicMeshFile |
+
+### entity-ai / uai (1)
+
+| Leaf | Server referrers |
+|---|---|
+| `AIFocus` | EntityBandit |
+
+### managers (1)
+
+| Leaf | Server referrers |
+|---|---|
+| `ModEvent` | ConnectionManager, EntityAlive, GameManager |
+
+### protocol-packages (1)
+
+| Leaf | Server referrers |
+|---|---|
+| `NetPackageInformation` | NetPackageManager |
+
+### spawning (1)
+
+| Leaf | Server referrers |
+|---|---|
+| `PList` | EntitySpawner |
+
+### tile-entities-power (2)
+
+| Leaf | Server referrers |
+|---|---|
+| `ClientPowerData` | TileEntityPowerSource (ctor, read, write) |
+| `TileEntityExtensions` | EntityMoveHelper, GameManager, NetPackageLandClaimRepair |
+
+### vehicles-drones-turrets (1)
+
+| Leaf | Server referrers |
+|---|---|
+| `CollisionCallForward` | EntityTurret, EntityVehicle |
+
+### world-chunks / chunk-providers (1)
+
+| Leaf | Server referrers |
+|---|---|
+| `WorldGridCompressedData` | ChunkProviderGenerateWorldFromRaw, World |
+
+### world-generation / chunk-providers (4)
+
+| Leaf | Server referrers |
+|---|---|
+| `Cell` | Prefab |
+| `PrefabVolumeAbs` | DynamicPrefabDecorator, Prefab, NetPackageEditorUpdateVolume |
+| `PrefabVolumeListAbs` | DynamicPrefabDecorator, EntityPlayer, Prefab |
+| `SimpleBitStream` | Prefab |
 ## Changelog
 
+- **2026-07-26:** Round-2 promotion of 19 gameplay types out of the out-of-scope bucket after an independent review showed it was never referrer-verified; promotion rule changed from zero-client-referrers to server-dominance.
 - **2026-07-24:** Added 48 types promoted out of the out-of-scope classification after a referrer scan (`tools/src/RefScan`) showed server-only referrers; name-based classification had put them in the wrong bucket.
 - **2026-07-24:** Promoted to a full per-leaf reference (IL-derived base + fingerprint via `tools/src/LeafInfo`); substantive groups (AI/loot/items/spawning/quests/combat) narrated in prose in their owning docs, client-only leaves marked.

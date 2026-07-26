@@ -1,0 +1,67 @@
+# Types promoted OUT of the name-based out-of-scope classification after a
+# referrer sweep (tools/src/RefScan) showed server-dominant referrers.
+# This file is the tool INPUT that makes the hand-correction reproducible:
+# any regeneration of docs/out-of-scope-surface.md must exclude these names.
+# Rule: promote when server referrers outnumber client referrers.
+AIFocus
+AttachedToEntitySlotInfo
+BitConverterLE
+ByteLengthUtils
+Cell
+ChannelMask
+ClientAmmoData
+ClientAuthenticateServerContext
+ClientLobbyManager
+ClientPowerData
+ClientTriggerData
+CollectWaterActionData
+CollectWaterUtils
+CollisionCallForward
+ConnectPowerData
+DisabledImposterChunkManager
+DumpWaterActionData
+DyMeshRegionLoadRequest
+DynamicMeshChunkDataStorage
+DynamicMeshChunkDataWrapper
+DynamicMeshVoxelLoad
+EntityItemLifetimeComparer
+ExplodeGroup
+FallBehavior
+FeedInventoryData
+FireControllerUtils
+GroupBounds
+InventoryDataMelee
+InventoryDataRepair
+LegacyState
+LongSetGroups
+ManagedZombie
+MeshCalculations
+MinHeapBinned
+ModEvent
+ModifierValuesAndSources
+Motor
+NetPackageInformation
+NetworkStatChange
+OnActivateItemGameObjectReference
+PList
+PerlinNoise
+PlaceholderTarget
+PrefabVolumeAbs
+PrefabVolumeListAbs
+ProtectedBackpack
+ProtectedPositionCache
+RegionExtensions
+SChatMessageData
+SEntityKilledData
+SGameMessageData
+ServerHelper
+SimpleBitStream
+StreamReadSizeMarker
+StreamWriteSizeMarker
+SupplyCrateCache
+TerrainSubMesh
+TileEntityExtensions
+UnknownNetPackageException
+VolumeKey
+Wheel
+WorldGridCompressedData

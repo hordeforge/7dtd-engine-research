@@ -121,13 +121,23 @@ progression, game events, quests/challenges, MinEvent effects, utility AI, world
 generation, and the server slice of Twitch. See the ledger table above (23 new
 narratives this pass, 158 diagrams corpus-wide).
 
-**Caveat (not "every method"):** the reachability pass reaches ~28k methods /
-~4.5k types, more than any per-method narration could cover. Server-side **support
-and utility** code that the reachable set includes but no narrative singles out
-(e.g. `Configuration.*` parsing, `StringParsers`, `TEFeatureAbs` helpers, the
-`DiscordManager` integration) is captured at the framework/enumeration level, not
-with a dedicated section each. "Complete" here means **subsystem + leaf coverage**,
-not a line-by-line narration of all reachable IL.
+**Caveat (not "every method"), with the honest numbers.** The reachability pass
+reaches ~45k methods / 3,775 game types, far more than any per-method narration could
+cover. As of the current [coverage report](inventories/coverage-report.md):
+**1,120 (29%) are narrated** in a narrative doc, 548 are catalogued only, 913 are
+classified out of scope, and **1,194 are unaccounted**. Server-side support and
+utility code that the reachable set includes but no narrative singles out
+(e.g. `Configuration.*` parsing, `StringParsers`, `TEFeatureAbs` helpers) is
+captured at the framework level, not with a dedicated section each.
+
+Read those numbers with the report's own caveats: the base over-includes client UI
+(devirtualization is instantiation-blind) and under-includes reflection-instantiated
+code, and "narrated" means a backticked mention, not necessarily an explanation. So
+"complete" here means **the dedicated subsystems are narrated and their leaves
+enumerated**, which is a much narrower claim than "the reachable surface is
+documented". Earlier revisions of this file quoted a "100% accounted for" figure;
+that number summed narration with out-of-scope triage over a distorted base and has
+been withdrawn.
 
 Individual leaf **blocks** (e.g. `BlockMine`, `BlockLiquidSource`, `BlockSpawnEntity`) and **tile-entity features** (`TEFeatureLandClaim`, ...) are instances of the documented `Block.UpdateTick` surface ([blocks.md](blocks.md)) and the tile-entity feature framework ([tile-entities-power.md](tile-entities-power.md)); the frameworks own them, so they are covered without a doc each.
 

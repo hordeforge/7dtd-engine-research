@@ -112,7 +112,7 @@ reference by emitting a single `0` byte, which is why a null and an empty
 | Order | Field | Width | Note |
 |---|---|---|---|
 | 1 | count | `u16` | clamped to `65535` |
-| 2 | itemValue | `ItemValue.Write` | **only if count > 0**; a zero-count stack writes no value and reads back `ItemValue.None` |
+| 2 | itemValue | `ItemValue.Write` | gated on the **raw `count` field being non-zero** (`brfalse` on the field, not on the clamped u16 written above), so a zero-count stack writes no value and reads back `ItemValue.None` |
 
 This packing is shared by the save path and the wire: `ItemStack` and `ItemValue`
 appear inside `NetPackageHoldingItem`, `NetPackagePlayerInventory`,

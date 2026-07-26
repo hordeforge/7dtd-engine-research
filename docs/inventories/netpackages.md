@@ -2,7 +2,7 @@
 
 **Kind:** inventory table (not primary narrative).  
 **Prefer:** [`protocol.md`](../protocol.md), [`protocol-frames.md`](../protocol-frames.md) (visual), [`network.md`](../network.md).  
-**Wire bodies:** ordered `write()` field sequence per package in [`netpackage-bodies.md`](netpackage-bodies.md) (auto-extracted, 183 packages + 60 nested serializers).  
+**Wire bodies:** ordered `write()` field sequence per package in [`netpackage-bodies.md`](netpackage-bodies.md) (auto-extracted, 183 packages + 61 nested serializers).  
 **Raw:** [`../il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md`](../../il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md) §3.  
 **Hub:** [`INDEX.md`](../INDEX.md).
 
