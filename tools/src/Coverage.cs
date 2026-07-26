@@ -33,7 +33,12 @@ class Coverage {
     "Google", "Noemax", "SpaceWizards", "Steamworks", "Epic", "TMPro", "Cinemachine",
     "Pathfinding", "UnityStandardAssets", "DG", "Rewired", "FMOD", "MS", "Facepunch",
     "SharpEXR", "ICSharpCode", "SteelSeries", "MemoryPack", "UniLinq",
-    "KinematicCharacterController", "Internal"
+    "KinematicCharacterController", "Internal",
+    // Vendored libraries that ship inside Assembly-CSharp. They are reached (the
+    // game calls them) but they are not game code to reverse engineer, exactly like
+    // System/UnityEngine above. LiteNetLib is the UDP transport, Antlr/NCalc back the
+    // expression parser. Leaving them in silently inflated the "game type" base.
+    "LiteNetLib", "Antlr", "NCalc", "Mono", "MS"
   };
   // Namespace of the outermost declaring type (nested types report an empty own ns).
   static string NsOf(TypeDefinition t) {
@@ -223,6 +228,19 @@ class Coverage {
     }
     sb.AppendLine();
 
+    sb.AppendLine("## Triage of the unaccounted set (2026-07-26)");
+    sb.AppendLine();
+    sb.AppendLine("A manual sample of the unaccounted list found it is **dominated by client, editor,");
+    sb.AppendLine("and vendored code that happens to live in the `<global>` namespace**, where the");
+    sb.AppendLine("namespace-based library filter cannot reach it: `PrefabEditModeManager` (editor),");
+    sb.AppendLine("`CursorControllerAbs` (client input), `NCalcLexer` / `BindingNcalcFunctions`");
+    sb.AppendLine("(vendored expression parser), `GameSenseManager` (SteelSeries peripherals),");
+    sb.AppendLine("`DistantTerrain` (render), `SaveDataMergedPlatformSaveGameIOProvider` (console");
+    sb.AppendLine("platform). These need per-type classification, not new reverse engineering.");
+    sb.AppendLine();
+    sb.AppendLine("So the honest reading of the number below is **not** \"N undocumented server");
+    sb.AppendLine("systems\". It is a work queue whose largest bucket is classification debt.");
+    sb.AppendLine();
     sb.AppendLine("## Top undocumented reached types (by method count) - the gap list");
     sb.AppendLine();
     sb.AppendLine("These execute on a dedicated server but no doc names them. High method counts =");

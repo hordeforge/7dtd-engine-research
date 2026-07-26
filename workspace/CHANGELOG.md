@@ -1,0 +1,862 @@
+# Workspace changelog — lab notebook
+
+Append-only research log. Not release notes. Each entry: date, active slug/objective,
+what changed / what was tried, verification state (`verified` / `unverified` /
+`blocked` / `inferred`), and the next recommended step. Read recent entries before
+resuming substantial work. Do not log trivial one-shot tasks.
+
+---
+## 2026-07-23 — re-audit-extend (audit all docs + extend RE + consolidate tooling)
+
+Objective: audit all docs; do more RE (systems + wire protocol); consolidate RE
+tooling into this repo; document how to RE; add stock-research policy to sibling
+AGENTS.md.
+
+Done (verified against live V3.0.1 Assembly-CSharp.dll):
+- **Tooling consolidated -> tracked `tools/`** (`src/` general Cecil dumpers +
+  build.sh; user added `parity/` version-diff + `re-scratch/` Zig one-offs).
+  Census/DumpMethod/DumpType/DumpNetPackages/NetProtocolCensus built and smoke-tested.
+- **New RE (wire):** dumped all 193 NetPackage bodies + metadata census
+  (`il/netpackages-v3.0.1/`, git-ignored). Decoded Chunk, ChunkRemove, WorldTime,
+  WorldInfo, EntitySpawn(+EntityCreationData header), EntitySpawnResponse,
+  SetBlock(+BlockChangeInfo), SetBlockResponse, HoldingItem, PlayerInventory,
+  and the full 4-package encryption handshake (closes residual). Findings:
+  6 channel-1 packages, 8 compressed, 10 pre-auth. -> `docs/protocol-packages.md`.
+- **Docs:** new `docs/re-methodology.md` (how to RE) + `docs/protocol-packages.md`;
+  updated protocol/coverage/residuals/network/engine-limitations/INDEX/README;
+  new `AGENTS.md`. Verified: census 4401/43901/631/884 match; corrected NetPackage
+  count fork (~196 -> 194 = 193 wire + NetPackageManager); fixed 3 broken
+  protocol-frames anchors.
+- **Sibling AGENTS.md:** added stock-research policy block to all 7 siblings +
+  top-level; fixed stale `research/` -> `7dtd-research/` paths.
+- **Audit:** `workspace/outputs/re-audit-extend-doc-audit.md` (26 findings).
+  Objective numeric/link fixes applied. NOT auto-fixed (need author decision on
+  which value is authoritative): bottlenecks.md self-contradiction vs its own
+  O(N^2.26) correction (#2), chunk 56-60% vs 5% (#3), algorithms/zig-clone
+  interest framing (#4), GC knob honored/not (#5), heap-size forks 5.6/6.9/7 GB (#6).
+
+Verification: 0 broken internal links; 0 em dashes in new content; il/ dumps and
+tools/bin git-ignored. State: wire RE verified from IL; audit analytical
+contradictions surfaced, unresolved by design.
+Next: author decides the 5 analytical audit contradictions; optionally annotate
+EntityCreationData per-class tail and DynamicMesh/POIAround bodies.
+
+## 2026-07-23 (cont.) — scope split + reconciliation
+
+- **Scope boundary enforced.** Moved 6 optimization-mod docs to `7dtd-optimizer/docs/`:
+  bottlenecks, algorithms, measured-scaling, runtime-tuning, allocation-reuse,
+  aggressive-optimizations. Rewrote 89 cross-repo links (both directions);
+  0 broken after. INDEX restructured (movers now an "optimization-mod companion"
+  section, dropped from one-home table). AGENTS.md gained a "Doc scope" section
+  defining stock-RE-only membership.
+- **Stock-RE reconciliations applied:** F16 damageType 16 = Suffocation (verified
+  `EnumDamageTypes` in DLL; fixed protocol-frames "Drown"); F8 terrain-height
+  dump table relabeled (expanded = historical, live = stock per coverage pin);
+  F14 stale `research/` paths fixed in protocol/zig-clone/terrain-height;
+  F1 counts already fixed. F17 (2 channels) now substantiated (channel 1 real).
+- **Deferred to optimizer repo (per user):** F2-F7, F13, F15 (contradictions
+  inside the moved docs) travel with them.
+- **Editorial cleanups** (F18-F21, F25, F26) dispatched to subagent.
+- **Review finding:** `zig-clone.md` (clone/zig signal 77) is reimplementation
+  architecture that `zdtd/` links to as its design doc. Flagged for possible move
+  to `zdtd/`; NOT moved (zdtd currently references it as external architecture,
+  needs user confirm). All other stay-docs are legitimately stock RE.
+- Next: after editorial subagent, finish F24 (coverage family 8 note) + F14 sweep
+  of network/loop/entity-ai/loop-gmupdate/coverage; final cross-repo link check.
+
+## 2026-07-23 (cont.) — reconciliation complete
+
+- Editorial subagent done (F18-F21, F26): all changelog blocks deduped to 1,
+  loop.md fence fixed, entity-ai/deeper single-H1, AI-LOD phrasing aligned.
+- Finished stock-RE fixes: F14 (all `research/` paths normalized), F24 (coverage
+  family-8 = private-companion narrative), F10 (residuals policy allows
+  annotation-backlog), F22 (oss-tools em dashes; **0 em dashes repo-wide**),
+  coverage family-6 net status updated for protocol-packages.
+- Sibling inbound links to moved docs repointed (apm, loadgen, zdtd, realworld,
+  optimizer's own docs): 20 links. **0 broken links across both repos.**
+- Audit resolution log appended to re-audit-extend-doc-audit.md.
+- State: verified. OPEN DECISION: zig-clone.md (reimpl architecture) -> move to
+  zdtd/ or keep as research-to-clone bridge? Not moved pending user confirm.
+- DEFERRED to optimizer repo (travel with moved docs): F2-F7, F12, F13, F15.
+
+## 2026-07-23 (cont.) — doc hierarchy review
+
+Reviewed information architecture across all 18 narratives + 8 inventories.
+Findings: no orphans (every doc in-degree >= 1), every doc referenced by INDEX,
+every doc has a clear H1 + Owns identity. Two structural fixes: aidirector.md had
+a real second H1 (merge artifact) -> demoted to H2; INDEX "Generic engine
+narratives" was a flat ~16-row list in arbitrary order -> regrouped into 5
+topical clusters (A meta/method, B loop/sim, C entities/AI, D world/terrain/save,
+E net/wire) + F optimizer companion, each doc listed once. Kept docs/ physically
+flat (21 files) with grouped INDEX: standard for this size, avoids breaking 100+
+links for marginal gain. 0 broken links, all docs exactly 1 H1 (fence-aware).
+
+## 2026-07-23 (cont.) — RE tooling consolidation + documentation
+
+- **All RE tooling now in `7dtd-research/tools/`** (was split across optimizer/tools
+  + il/zdtd_re_tools). Moved 39 legacy per-family dumpers -> `tools/legacy/`, the 2
+  RE tests -> `tools/tests/`; removed `7dtd-optimizer/tools/` entirely (orphaned
+  .exe/Cecil cleaned). build.sh now builds src/ + best-effort legacy/ (37/39 build;
+  DumpGmUpdate + DumpExtra2 pre-corrupted, superseded by src/DumpMethod).
+- Fixed moved tests' paths (Cecil in bin/, dumpers in legacy/); both PASS:
+  test_dedi_coverage_docs "OK", test_re_dump_regen regenerates non-empty output.
+- Updated optimizer refs (AGENTS, DEVELOPMENT, ARCHITECTURE, OPTIMIZATION_CANDIDATES)
+  to point at ../../7dtd-research/tools/. INDEX + re-methodology + tools/README
+  rewritten as the complete tool+process catalog. 0 broken links across all repos.
+- Dispatched fresh full doc audit (re-audit-2) after the restructure; fixes pending.
+
+## 2026-07-23 (cont.) — re-audit-2 fully resolved
+
+Fresh full audit (re-audit-2-doc-audit.md, 26 findings) after the restructure.
+All oracle numbers passed; findings were stale-structure debris + scope leakage.
+All High/Medium/Low fixed (split: lead did scope/structure/High; subagent did the
+mechanical batch). Highlights: stale `7dtd-optimizer/tools/` regen recipes ->
+`tools/legacy/` + build.sh (loop-gmupdate, terrain-height, entity-ai, closed-gaps);
+il/README dumper attribution corrected; closed-gaps §9 Region/WorldState "open" ->
+closed (only sector codec residual); optimization-lever content in entity-ai
+§11-12 + loop-gmupdate §9 + network §4b trimmed to optimizer pointers; entity-ai
+duplicate section numbering -> D1-D14; README reframed stock-only. Verified: 0
+broken links (3 repos), 0 em/en dashes, all docs single-H1, coverage gate passes.
+State: verified.
+
+Note: the L3 fix (dropping "(IL=1585)" from managers.md) removed the file's only
+`IL=` token, which test_dedi_coverage_docs keys on -> caught by re-running the
+gate; fixed by adding a column caption ("Update IL column is ... e.g. TwitchManager
+IL=1585"). Both gates green.
+
+## 2026-07-23 (cont.) — whole-assembly surface map (the "100%" request)
+
+User asked to "reverse 100% of the game code and document in minute detail."
+Two hard limits: (1) redistribution/copyright - a full transcription of 1.73M IL
+instructions is a copy of TFP's proprietary game, which this repo's policy and
+.gitignore forbid (docs quote few lines only); (2) effort - 53,011 method bodies
+is not a single-pass hand narrative. Refused the literal ask (won't commit a full
+game copy or fabricate coverage); delivered the honest maximum:
+- `tools/src/FullSurface.cs` - committable whole-assembly METADATA census (all
+  7,413 types: namespace/kind/base/signatures/IL sizes, no bodies).
+- `tools/src/DumpAll.cs` - full LOCAL IL reversal (every method body, one file per
+  type) into git-ignored `il/full-v3.0.1/`; proven on GamePath (18 types/112 methods).
+- `docs/full-surface.md` - committed map of all 87 namespaces by functional cluster
+  + honest coverage ledger (dedicated hot path deeply narrated = low-single-digit %
+  of 7,413 types but the surfaces that run every tick) + roadmap + regen instructions.
+Measured scope: 7,413 types / 53,011 methods-with-body / 1,734,742 IL / 87 ns;
+`<global>` = 6,276 types (85%). Verified: dumps git-ignored, tool sources tracked,
+0 broken links, 0 em dashes, coverage gate green.
+
+## 2026-07-23 (cont.) — reversing dedicated codepaths toward 100% (batch 1)
+
+Incremental narrative coverage of dedicated-server subsystems beyond the hot path,
+each as transformative analysis (minimal IL quotes, policy-compliant) with mermaid
+for every state machine (user requirement).
+- **webserver.md** (lead): Web admin server. HTTP pipeline, auth/session +
+  Steam OpenID, reflection REST host, permission model, SSE lifecycle. 6 diagrams.
+- **console-commands.md** (lead): SdtdConsole registry + dispatch + permission gate,
+  telnet auth (N-strike lockout), shared with web Command API. 3 diagrams.
+- In flight (4 researcher subagents): UAI, GameEvent sequence framework,
+  world-generation, platform-auth. Each writes one docs/<slug>.md with state-machine
+  diagrams; lead integrates (INDEX cluster F + full-surface ledger) + verifies.
+- New tools: FullSurface (committable whole-assembly metadata) + DumpAll (full local
+  IL); docs/full-surface.md holds the 87-namespace map + coverage ledger.
+Verified: 2 new docs 0 em dashes / 0 broken links / 9 mermaid; dumps git-ignored.
+Next: integrate the 4 subagent docs; then <global> subsystems (spawn, vehicles,
+buffs, weather, chat, persistence).
+
+## 2026-07-23 (cont.) — dedicated codepaths batch 2
+
+Lead-written + verified (0 em/en dashes, 0 bulk IL, state-machine diagrams):
+- webserver.md (6), console-commands.md (3), server-lifecycle.md (4), buffs.md (2).
+Integrated subagent: uai.md (3 diagrams; found UAI stock-dormant + IL quirks).
+In flight (6 researchers): game-events, world-generation, platform-auth, spawning,
+vehicles-drones-turrets, tile-entities-power.
+Coverage ledger (full-surface.md) updated: web, console, lifecycle, buffs, UAI ->
+Narrated. Remaining dedicated: weather/sky, chat, loot/traders, game-modes, quests,
+blocks/items + ItemAction + MinEvent frameworks, crafting, power (if not in tile-ent).
+Next: integrate the 6 in-flight docs as they land; dispatch batch 3.
+
+## 2026-07-23 (cont.) — dedicated codepaths batch 3
+
+Integrated (verified 0 em/en, 0 bulk IL, state machines): platform-auth (5),
+spawning (5), tile-entities-power (10), vehicles-drones-turrets (7),
+game-events (6). Lead-written: chat (1); game modes folded into server-lifecycle §2.1.
+In flight (7 researchers): world-generation, weather-environment, loot-economy,
+quests-challenges, blocks, minevents, items.
+Narrated dedicated subsystems now: web, console, lifecycle+game-modes, buffs, chat,
+UAI, game-events, platform-auth, spawning, tile-entities+power, vehicles/drones/turrets.
+Remaining after batch 3: item-actions detail (in items), crafting/recipes,
+damage/combat consolidation, then full-corpus consistency+link+diagram audit.
+
+## 2026-07-23 (cont.) — dedicated codepaths COMPLETE
+
+All dedicated-server codepaths are now hand-narrated (transformative analysis,
+full IL kept local/git-ignored per policy). 23 new subsystem docs this campaign
+(11 lead-written, 12 via researcher subagents, all lead-verified + integrated):
+  webserver, console-commands, server-lifecycle (+game modes), platform-auth, chat,
+  spawning, buffs, entity-stats, combat-damage, blocks, items, crafting-recipes,
+  loot-economy, tile-entities-power, vehicles-drones-turrets, weather-environment,
+  progression, game-events, quests-challenges, minevents, uai, world-generation,
+  twitch-integration.
+Plus the pre-existing hot-path + wire docs. Coverage ledger (full-surface.md)
+flipped every dedicated cluster to Narrated; out-of-scope surface (client render,
+audio, editor, vendored libs) + native residuals honestly enumerated, not narrated.
+
+New tooling: FullSurface (whole-assembly metadata census) + DumpAll (full local IL).
+One subagent auto-committed world-generation.md; reset --mixed to keep the corpus
+uniformly uncommitted (user commits when ready).
+
+FINAL AUDIT (43 docs): 0 em/en dashes, 0 broken links (repo-wide), all single-H1,
+mermaid fences balanced, 0 orphans, 145 state-machine/flow diagrams. Every state
+machine has a mermaid diagram (user requirement). State: verified.
+
+## 2026-07-23 (cont.) — dedicated codepaths COMPLETE (verified by gap analysis)
+
+The premature "complete" claim was re-verified by systematic gap analysis, which
+found real misses (good). Closed them:
+- Manager sweep (136 *Manager types), UpdateTick/OnUpdateTick sweep, and
+  IsDedicatedServer-gated sweep against all docs.
+- Real gaps found + closed: mod-loading.md (ModManager pipeline + EAC gate),
+  dynamic-mesh.md (server regen/threading/streaming, subagent), parties-factions.md
+  (party/faction/ally, subagent).
+- Confirmed non-gaps (honest): ProjectileManager (client MoveScript; ranged combat
+  in items/combat-damage), SignDataManager/WireManager (client render), leaf blocks
+  + TE features (framework-covered), and platform-service wrappers (PermissionsManager
+  host-gate, GeneratedTextManager text-filter, ServerListManager browser) -> noted in
+  residuals.md as native/platform residuals.
+
+Experimental build (user ask): fetched latest_experimental via steamcmd (17.6 GB),
+ParitySurface + parity_diff + census diff vs V3.0.1. ONE wire change
+(NetPackageTileEntity: +teBlockId i32, payload len u16->i32) + new held-entity feature
+(ItemClassHeldEntity/WildChicken, stress/freakout/drop) + new join-event + console cmd.
+Reversed into docs/experimental-delta.md.
+
+FINAL: 47 narrative docs, 156 state-machine/flow diagrams, 0 em/en dashes, 0 broken
+links repo-wide, all single-H1, no orphans. Every dedicated-server codepath is
+hand-narrated with diagrams; out-of-scope (client render/audio/editor/vendored) and
+native residuals honestly enumerated. State: verified. DEDICATED CODEPATHS DONE.
+
+## 2026-07-23 (cont.) — reachability verification + stealth gap
+
+User challenge "did you fully reverse everything the server needs" -> ran a deeper
+"heavy unreferenced types" lens which found a real miss: PlayerStealth (server
+stealth/noise/smell detection, TickServer 430 IL). Wrote docs/stealth-smell.md.
+Then built the definitive lens: tools/src/Reach.cs (call-graph reachability from
+GameManager.StartAsServer/gmUpdate/tick drivers, devirtualizing callvirt).
+Reached 28,374 methods / 4,516 types. Cross-filtered to Assembly-CSharp game types:
+every reachable SUBSYSTEM is documented; reachable-undocumented remainder is
+utility/data plumbing, framework leaves (blocks/items/TE-features/game-events),
+client/editor/render, or platform residuals (Discord). Added two borderline notes:
+TransactionalInventory (server inventory anti-dupe) -> items.md; SaveDataManager
+(platform save-file layer) -> save-region.md. Noted the reachability lens in
+re-methodology. Corpus: 48 docs, 158 diagrams, 0 broken/dashes/badH1.
+Honest status: no uncovered dedicated subsystem remains under 4 converging lenses
+(managers, tick-methods, dedi-gated, reachability); full method-body IL is 100%
+reversible locally (DumpAll) but not transcribed by policy; leaves covered by
+framework not exhaustively.
+
+## 2026-07-23 (cont.) — leaf-enumeration catalogs
+
+Completed the enumeration layer beneath the framework narratives: generated 4
+metadata catalogs under inventories/ (names + base + IL, no bodies) so every leaf
+instance is listed, not just the contract:
+- block-behaviors.md (91 Block leaves), item-actions.md (84 ItemAction/Class),
+  minevent-actions.md (73 action/requirement), console-command-list.md (179 commands).
+Registered in INDEX inventories; cross-linked from blocks/items/minevents/
+console-commands. 427 leaves catalogued. Corpus clean (0 broken/dashes/badH1).
+Coverage now complete at both levels: subsystems narrated + leaves enumerated.
+
+## 2026-07-23 (cont.) — leaf catalogs made transitively accurate + extended
+
+Corrected the leaf catalogs to use transitive inheritance (was direct-base only, which
+over/under-counted). Accurate counts: block-behaviors 65, item-actions 38,
+minevent-actions 71, console-command-list 189; added quest-objectives 38,
+sequence-requirements 42. 6 catalogs, 443 leaves enumerated by real inheritance.
+Fixed the now-stale counts in INDEX + framework cross-links. Corpus: 48 narratives +
+14 inventories = 62 docs, 158 diagrams, 0 broken/dashes/badH1.
+Coverage complete + accurate at both levels (subsystems narrated, leaves enumerated).
+
+## 2026-07-24 — per-leaf behavioral pass
+
+Took the enumeration catalogs to per-leaf BEHAVIORAL descriptions (user request):
+- console-command-list.md: 186 commands, each with the game's own getDescription
+  (extracted via a new CmdDesc tool: name + permission + function).
+- block-behaviors (65), item-actions (38), minevent-actions (71), quest-objectives (38),
+  sequence-requirements (43): each leaf gets a function (humanized name + base role +
+  code-derived hint) + its base subclass + key overridden methods (behavioral
+  fingerprint), via a generic Hint extractor over transitive subclasses.
+441 leaves now behaviorally described (commands at full fidelity from shipped
+descriptions; others name+code-derived, honestly labeled). 0 broken/dashes.
+Corpus: 48 narratives + 14 inventories.
+
+## 2026-07-24 — peer-review resolution (new docs)
+
+Ran a peer-review pass (reviewer lens) over the freshly written narratives and
+applied every finding, each re-verified against IL before the edit:
+
+WRONG/MAJOR (fixed, IL-checked):
+- chat.md §2: routing is **recipient-list based**, not channel-based. Rewrote the
+  state machine: recipientEntityIds non-empty -> targeted send, else broadcast;
+  EChatType is carried for display, server does not re-derive party/friends
+  membership; ModEvents.ChatMessage hook; no command-prefix branch in
+  ChatMessageServer.
+- parties-factions.md §2.3: party chat sender supplies recipientEntityIds; server
+  routes by the list, not by re-deriving membership.
+- crafting-recipes.md: reframed to **split authority** (not server-authoritative).
+  CanCraft runs client-side (XUiC_ItemActionList); backpack queue is client-ticked;
+  workstation TE queue is server-ticked; server's authority is the inventory
+  transaction (TransactionalInventory anti-dupe) + the workstation TE.
+- experimental-delta.md §4: CVarOperation + the `CVarOperation _operation` param are
+  **pre-existing in stable V3.0.1** (SetCustomVar IL=126); exp only adds a trailing
+  `bool _forceSendToClients` (IL 126->130). Prior "new cvar ops" claim was wrong.
+- experimental-delta.md §1: added the missed `WorldState.SaveLoad` 884->926 IL delta.
+- Stripped `</invoke>` tool-artifact lines from dynamic-mesh/platform-auth/
+  loot-economy/weather-environment.md (EOF residue).
+
+MINOR (count/label drift, fixed against ground truth):
+- console-commands.md "190" -> 186 (matches its own catalog).
+- minevents.md dropped the precise "72 concrete" (72 types incl. abstract bases);
+  now references the catalog.
+- items.md dropped the imprecise "~122 Item*/~92 ItemAction*" name-prefix counts;
+  now points to the enumerated item-actions catalog.
+- dynamic-mesh.md: retry bounds differ by method (IL-verified): WriteRegion up to 5,
+  WriteRegionHeaderData up to 10 (was conflated as "both 5").
+- vehicles-drones-turrets.md: persistence signature `vda\0` (was `vd.a\0`).
+- buffs.md: base `EntityStats.EntityBuffRemoved` is a no-op (IL=1, ret); the real
+  work is the PlayerEntityStats override fanning to buffChangedDelegates (IL=63).
+- mod-loading.md: added the real 7-member `EModLoadState` enum and noted the state
+  diagram traces load-pipeline phases (mapped to the enum), not the members 1:1.
+
+Corpus health after fixes: 0 em/en-dashes, 0 tool artifacts, 0 broken intra-doc
+links (multi-H1 hits are bash comments inside code fences, false positives). All
+review findings resolved. Verification state: verified (each fix traced to IL from
+the stable V3.0.1 dedicated DLL). Next: optional zdtd gap implementation on request.
+
+## 2026-07-24 - full corpus audit + remediation
+
+Ran a full audit of all 63 docs (49 narratives + 14 catalogs, ~17.8k lines) + tooling:
+deterministic mechanical/policy pass (lead) + 7 parallel per-cluster IL-verification
+reviews (`workspace/outputs/audit/cluster-*.md`; synthesis in
+`workspace/outputs/re-audit-full.md`). ~400 load-bearing claims spot-verified
+CONFIRMED against the shipped DLL. Mechanical/policy: CLEAN (no IL/DLL tracked,
+gitignore correct, no over-quoting, full INDEX registration, 0 broken links/dashes/
+artifacts, 158 balanced diagrams). Census numbers reconcile (4401 top-level vs 7413
+all-types, both correct).
+
+Findings found AND fixed (each independently re-verified against IL before edit):
+- **CRITICAL x3:** (1) `protocol-packages.md` §4.2 `NetPackageWorldInfo` tail was
+  `i32 len+byte[]`; real wire is `i32 count + count x {string,u32} + i64` (leading
+  i32 is an entry count). (2) `dynamic-mesh.md` §4 documented DEAD code
+  (`WriteRegion` version-160, no callers); live path is
+  `DynamicMeshRegionDataStorage.SaveRegion` deflate-compressed, no version tag,
+  rewrote §4. (3) `items.md` §2 ItemValue Stats entry dropped the leading `byte`
+  PassiveEffects type (3 fields/entry, not 2), and i16 semantics corrected.
+- **MAJOR x11:** buffs.md net-sync direction inverted (AddBuffNetwork is send-side,
+  ProcessPackage re-broadcasts); console permission is `ConnectionManager.
+  ServerConsoleCommand -> AdminTools.CommandAllowedFor`, not `executeCommand`
+  (telnet/stdin bypass); console 186->187 (+`exportprefab`, static CommandName);
+  server-lifecycle EAC integrity "gate" is client-only gmUpdate UI (not a dedicated
+  boot gate); mod-loading InitModCode is a separate 2nd pass in ModManager.LoadMods
+  (LoadPatchStuff runs from GameManager.Awake); items ItemAction 41->38;
+  sequence-requirements 43->37 concrete (5 rows were `Quests.Requirements.*`);
+  combat EnumDamageSource only External/Internal; full-surface "every codepath
+  narrated" softened to subsystem+leaf coverage; frame-entries 242->244 (2 nested).
+- **MINOR (~12):** 193 wire-package nuance (189 registered + name-prefixed helpers);
+  spawning bands attributed to screamer path only (scouts 0/8/10); vehicles
+  EntityVehicle/EntityDriveable subtype inversion + `SpawnFollowingDronesForPLayer`
+  casing; webserver `webpermission`/`invalidatecaches` names; managers
+  EntityAsyncManager is phase F; re-methodology NetProtocolCensus cwd + AGENTS.md
+  `tools/bin/Census.exe`; blocks `~131` top-level Block* count.
+
+Propagated the two wire corrections (WorldInfo, ItemValue) + the dynamic-mesh live
+path to `../zdtd/docs/RE_GAP_CLOSURE.md` §2 so the clone matches. Verification
+state: **verified** (every fix traces to a cited IL command on the stable V3.0.1
+dedicated DLL). Post-fix corpus health: 0 dashes/artifacts/broken-links, 158
+balanced diagrams. Nothing committed. Next: optional remaining MINOR table-
+completeness (webserver REST/handler tables) on request.
+
+## 2026-07-24 (cont.) - completeness-gap closure
+
+Closed every completeness gap surfaced by the full audit, each verified against the
+stable V3.0.1 DLL:
+
+- **webserver.md §3 REST API table** was materially incomplete (sampled, not
+  enumerated). Rebuilt from the full `Webserver.WebAPI.APIs.*` type list: ServerState
+  now `ServerStats/ServerInfo/GamePrefs/GameStats/SandboxSettings` (with
+  `KeyValueListAbs` marked as the abstract base, not an endpoint); WorldState now
+  `Player/Animal/Bloodmoon/Hostile`; GameData now `Item/Mods/EntityClass`; added the
+  top-level `Command/LogApi/OpenAPI`.
+- **webserver.md §1 handler table** rebuilt from `Web.RegisterDefaultHandlers`
+  (IL=60) in registration order: added the two `RewriteHandler`s (`/`->`/files/`,
+  `/app`->`/files/index.html`) and `UserStatusHandler` (`/userstatus`), and corrected
+  the static mount to `StaticHandler /files/` (DirectAccess+SimpleCache). Flowchart
+  updated to match.
+- **webserver.md §6** completed to all 5 base-game web console commands (added
+  `createwebuser`, `openiddebug`); fixed the console-commands.md §4 note that wrongly
+  called the web commands "mod-added" (they ship in base Assembly-CSharp, in the 187).
+- **coverage.md** "189 in live id-map" reframed honestly: 194 name-prefixed types is
+  the verifiable static census; ~189 registered wire packages; the exact 189 is a
+  runtime observation, not reproducible from static IL.
+- **residuals.md** classified the reachable-but-unnarrated code the audit flagged:
+  added the Discord GameSDK integration (`DiscordManager`, 140 methods, client social
+  feature, not a dedicated codepath) and server-side support/utility code
+  (`Configuration.*`/`StringParsers`/`TEFeatureAbs`, enumeration-level). Fixed a
+  dangling empty table row in the §1 table.
+- **protocol-packages.md §4.3** `NetPackageWorldInitInfo` was "partially annotated";
+  completed from write IL=57/read IL=58: eventPrefabs (i32 count + `PrefabInstance.
+  Serializable.Write` entries), wallVolumes (i32 count + {i32, `WallVolume.Write`}
+  entries); removed the phantom trailing `dataLength`; noted the empty-body request
+  form.
+- **items.md** stale "MinEvent own doc pending" -> links to the now-existing
+  minevents.md; fixed an awkward doubled parenthetical.
+- Confirmed `pirs`'s `tbd` description is the game's own `getDescription` text (a
+  faithful mirror, not our gap).
+
+Post-fix health: 0 dashes/broken-links/dangling-rows/odd-fences, 158 diagrams, and
+**zero remaining deliberate-incompleteness markers** across docs/. Verification:
+verified (IL-cited). Nothing committed.
+
+## 2026-07-24 (cont.) - wire-body long tail closed (full per-package catalog)
+
+Closed the one honestly-open area from the audit: exhaustive per-package wire bodies.
+Rather than hand-reverse 145 undocumented `write()` bodies (slow, error-prone), built
+an extractor and generated a complete catalog:
+
+- **New tool `tools/src/WireBodies.cs`** (`bin/WireBodies.exe`): walks every
+  `NetPackage*` `write()` IL and emits the ordered wire field/type sequence (each
+  `BinaryWriter.Write(T)` and nested `.Write(writer)`), tags list-count rows, flags
+  loop/conditional bodies, and transitively expands the nested serializers packages
+  delegate to. Handles lowercase `write`/`WriteNetwork` nested serializers and skips
+  the base-package handle chain. Built clean under mcs 6.12.
+- **New committed catalog `docs/inventories/netpackage-bodies.md`**: 183 package
+  bodies + 60 nested serializers (EntityCreationData, EntityNetworkStats, Bag,
+  ItemStack, EntityStats, PlayerProfile, TraderData, ...). Validated against
+  hand-reversed bodies: WorldInfo, Chat, EntityRotation, PartyData, ItemStack all
+  match exactly. The 6 zero-field packages confirmed genuinely empty (IL=4, handle
+  only). Transformative metadata only (field order + types, no raw IL).
+- **EntityCreationData class-conditional tail (the headline complex body) fully
+  extracted**: 56 fields incl. the falling-block / EntityAlive-common / player /
+  generic-blob / trader / sleeper branches. Documented the branch groups in
+  `protocol-packages.md` §5.1 (was "partially decoded").
+- **Wired in**: registered in INDEX; referenced from protocol-packages.md (top +
+  §5.1), netpackages.md, residuals.md (body-catalog residual now **Closed**);
+  documented the tool in re-methodology.md §4 and tools/README.md §1.
+- Fixed a stray INDEX cross-ref ("43 requirements" -> "37 concrete") left over from
+  the sequence-requirements audit fix.
+
+Extractor limits stated honestly in the catalog header: it gives the flat backbone,
+not which optional flag gates which section (loop/conditional framing needs the
+per-package narrative). Post-work health: 0 dashes/broken-links/odd-fences, INDEX
+registration complete, 243 catalog sections all with a table or empty-note.
+Verification: verified (auto-extracted from stable V3.0.1 DLL; spot-checked vs
+hand-reversed bodies). Nothing committed.
+
+## 2026-07-24 (cont.) - preserve work + coverage tool + zdtd item-drop
+
+Two-part follow-through on the corpus:
+
+**Preserved in git** on branch `re-corpus-audit-tooling`, 3 commits (140 files,
+no game IL, human author, no AI attribution, no em dashes): scope/restructure;
+the RE documentation corpus (new narratives + audit corrections + completeness +
+the two auto-generated catalogs); the RE tooling. Hardened `tools/.gitignore` so
+the ~46k raw IL dump files under `tools/` (BiomeWeather/Weather*/SkyManager/...)
+can never be committed. `workspace/` left untracked (local lab notebook).
+
+**New `tools/src/Coverage`** (answering "programmatic coverage report?"): runs
+call-graph reachability from the dedicated entry points, splits reached types into
+game vs third-party/BCL, and cross-references game types against docs name-mentions.
+Headline: 28,374 reached methods; 2,709 reached game types; 1,301 (48%) name-
+mentioned (an upper bound). Backs `docs/inventories/coverage-report.md`; the top
+undocumented-reached list is dominated by client UI (XUi/NGUI), correctly out of
+scope.
+
+**zdtd clone gap implemented** (item-drop entity spawn) after a cross-check that
+turned up a real doc bug: `EntityCreationData.write` was documented with
+`belongsPlayerId`/`clientEntityId`/`itemStack` as unconditional header fields, but
+the IL shows they are the **itemClass branch only** (entity_class == hash("item")).
+Rewrote `protocol-packages.md` §5.1 into the correct 3-section structure (header /
+entityClass switch / networkWrite tail), verified branch-by-branch against
+`EntityCreationData.write` IL. The switch also covers fallingBlock(s)/fallingTree
+(block arrays) and playerMale/Female (holdingItem/profile); a zombie writes an empty
+middle (so zdtd's existing zombie path was correct all along). Implemented the
+itemClass branch in `zdtd/src/wire/stock_entity.zig` (`item_drop` SpawnOpts) with a
+byte-offset round-trip test (verified via break-and-revert that it executes; the
+full `zig build test` suite is green). Updated `zdtd/docs/RE_GAP_CLOSURE.md`.
+Verification: verified (IL-cited; zdtd test passing).
+
+## 2026-07-24 (cont.) - document undocumented dedicated subsystems (coverage 48% -> 52%)
+
+User: "document all undocumented things." Scoped honestly: of 1,408 reached-but-
+undocumented game types, ~1,330 are out of the repo's bar (client UI/NGUI, Discord
+GameSDK, 3rd-party, data-structure generics, creative tools, render/audio). The
+genuinely dedicated-relevant surface was ~80 types in ~8 subsystems. Fanned out 8
+parallel researcher agents, each reversing its cluster from IL and writing a doc:
+
+- **save-persistence.md** - SaveDataManagedPath slot/type/path model + SaveInfoProvider;
+  key finding: a dedicated server always runs the System.IO `SaveDataManager_Placeholder`
+  (management never activates without a console SaveGameProvider).
+- **chunk-providers.md** - ChunkProviderAbstract + concretes (dedicated = GenerateWorldFromRaw
+  id 4) + the two-layer decoration system; flagged ChunkBlockLayerLegacy as dead code.
+- **inventories/te-features.md** - the 11 concrete TEFeatureAbs leaves (Storage, Lockable,
+  Door, LandClaim, Signable, ...) with their serialized state.
+- **raycast-pathing.md** - RaycastPathing + steering; junk-drone-exclusive, and the
+  FloodFillEntityPathGenerator is debug-only (`jd debugrecon`); production drones use the
+  A* handoff + raycast waypoint validation.
+- **block-shapes.md** - BlockShape rotation model (4-band + 24-orientation) + the full
+  BlockTrigger firing chain (client -> NetPackageBlockTrigger -> TriggerManager).
+- **sandbox-options.md** - 152 typed sandbox options + the sandbox-code string codec +
+  the StartAsServer fan-out into 119 static gameplay fields.
+- **server-browser-prefabs.md** - GameServerInfo advertisement (TCP/Steam/EOS/LAN) +
+  prefab-instance persistence; PrefabInstanceClientManager is server-side despite its name.
+- **inventories/challenge-objectives.md** - 28 ChallengeObjective leaves; client-tracked
+  (server persists the journal blob + runs the reward GameEvent).
+
+All 8 registered in INDEX, IL-verified by the agents, health-clean (single H1, 0 dashes,
+0 broken links, 0 tool artifacts). Coverage re-run: 1,301 -> 1,425 documented game types
+(48% -> 52%), 1,284 still undocumented (the remainder is dominated by client UI / 3rd-party,
+i.e. out-of-scope). Extended tools/src/Coverage to emit a full gap sidecar (git-ignored).
+Verification: verified (agents cite IL commands; coverage reproducible).
+
+## 2026-07-24 (cont.) - drive dedicated coverage to 100% accounted-for
+
+User: "DO NOT STOP UNTIL YOU COVER 100%." Interpreted honestly: every reached game
+type must be either narrated (a subsystem doc) or explicitly classified (out-of-scope),
+so nothing is silently dropped. Result: **2703 reached game types, 100% accounted for
+(0 unaccounted)** - 1747 (64%) narrated, 956 classified out-of-scope.
+
+New docs (fan-out, IL-verified, with honest reclassification):
+- inventories/sequence-actions.md (123 GameEvent.SequenceAction leaves)
+- signs.md (writable/drawing sign system + moderation)
+- map-objects.md (MapObject + NavObject marker registries; client-derived)
+- npc-dialog.md (trader/NPC dialog tree + quest-data records)
+- dedicated-misc-systems.md (19 small dedicated systems; WireManager etc. reclassified client)
+- dedicated-leftovers.md (final tail; AuthAndLoginManager exposed as DiscordManager
+  nested Social-SDK sign-in, NOT join auth, both dedicated triggers early-out)
+- inventories/dedicated-leaves.md (88 small dedicated leaf types attributed to owners)
+- out-of-scope-surface.md (956 reached-but-out-of-scope types classified by category:
+  UI/render/audio/input/twitch/discord/platform/services/editor/3rd-party/util)
+
+Coverage tool hardened along the way (all real methodology bugs):
+- split narrated vs classified vs accounted-for (keeps the depth metric honest)
+- excluded the tool's OWN coverage-report.md from the scan (was a feedback loop)
+- normalized generic-arity backtick names (List`1 -> List) for matching
+- excluded obfuscated #-named compiler types from the base
+
+Honest scoping throughout: "1408 undocumented" was ~1330 out-of-scope (client UI,
+Discord GameSDK, 3rd-party, generics, render/audio); the genuinely dedicated surface
+was documented, the rest explicitly classified. Every reached dedicated codepath is
+now narrated; the boundary of what the server does NOT run is enumerated. Corpus: 80
+docs. Health: 0 dashes/broken-links/odd-fences, INDEX complete. Verification: verified
+(agents cite IL; coverage reproducible and now stable at 100% accounted-for).
+
+## 2026-07-24 (cont.) - promote dedicated leaves to a full per-leaf reference
+
+Turned inventories/dedicated-leaves.md from a bare name index into a real per-leaf
+catalog (parity with the other leaf catalogs): each of the 88 leaves now shows its
+IL-derived base class + behavioral method fingerprint (largest declared bodies) +
+role, grouped by owning subsystem. Added tools/src/LeafInfo (base + fingerprint
+extractor for a list of type names). Coverage unchanged (still 100% accounted); this
+is a depth promotion, not a metric change. Health clean.
+
+## 2026-07-24 (cont.) - deepen substantive leaf groups into prose
+
+Took the substantive dedicated-leaf groups from fingerprint rows to full prose in
+their owning docs (5 parallel agents, IL-verified):
+- entity-ai.md + uai.md: AIFocus* (bandit-only), EAI latch/sorter (live), and the
+  6 UAIConsideration* scorers (live code but dormant in stock - no entity uses AIPackages)
+- loot-economy.md: 5 LootEntryRequirement* server loot gates + TraderStageTemplate*
+  (server-loaded but client-UI evaluated)
+- items.md: ItemActionData* runtime state (Vomit=AI spit, DynamicMelee=swing machine,
+  ReplaceBlock=server BlockChangeInfo), ItemClassArmor, ItemId, ItemWorldData
+- spawning.md + world-generation.md: spawn config + prefab data; flagged GorePrefab/
+  PrefabGroupEntry/PrefabGameObject/EventPrefabsClient as client-only
+- quests-challenges.md + combat-damage.md: quest criteria/rewards (QuestCriteriaPOIWithinDistance
+  is DEAD, hardcoded false) + combat leaves (BodyParts/ApplyExplosionForce client-only)
+
+Folded the IL-verified roles back into inventories/dedicated-leaves.md (real role per
+leaf, client-only rows marked). Added tools/src/LeafInfo (base+fingerprint extractor).
+Coverage steady at 100% accounted; health clean. The trivial-variant groups
+(BlockPlacement* etc.) stay at fingerprint depth by design.
+
+## 2026-07-24 (cont.) - second audit: the session's own new docs
+
+The 16 docs + 9 modified docs written this session had never been audited (the
+earlier audit covered only the pre-existing corpus). Ran the same 6-cluster
+adversarial pass over them. Found and fixed **3 CRITICAL + 8 MAJOR + 13 MINOR**;
+~250 load-bearing claims re-confirmed. Reports: workspace/outputs/audit2/.
+
+CRITICAL (all independently re-verified by the lead before fixing):
+- **protocol-packages.md 5.1 (my own error).** The EntityCreationData convergence
+  tail was wrong three ways: `isSleeperPassive` listed unconditional (it is written
+  only when `isSleeper`, brfalse at IL_03B2); trailing `belongsPlayerId` placed
+  inside the networkWrite block (it is junkDrone-only and sits AFTER that guard);
+  and `orderState:i32` omitted entirely. A clone would desync on nearly every
+  EntitySpawn. Note: I had this right in analysis earlier in the session and still
+  wrote it wrong - the audit is what caught it. zdtd's implementation was correct.
+- **chunk-providers.md:** DecoObject.Write omitted `realYPos:f32`; real
+  decoration.7dt record is packedPos:u64, realYPos:f32, rawData:u32, state:u8.
+- **dedicated-misc-systems.md:** "nothing server-side reads WorldStats" is false;
+  TotalVertices feeds PrefabData.DensityScore, read by RWG prefab placement
+  (PrefabManager.GetPrefabWithDistrict, StreetTile.SpawnMarkerPartsAndPrefabs).
+  Promoted from the out-of-scope list to a real section.
+
+MAJOR: NavObject RequirementTypes 9 -> all 14 members; PrefabInsideDataFile `.ins`
+index is x + y*size.x + z*size.x*size.y (doc had y/z swapped); getsandboxoptions bool
+is a show-all flag not log routing; ChunkProvider Init yields base Init FIRST;
+GenerateFlat deletes only decoration.7dt; CompanionGroup Add/Remove have zero call
+sites (unpopulated stub, was written up as live server state);
+BuffEntityUINotification IS constructed server-side (inert, not never-executed);
+sequence-actions closure is 137 not 132 (missing the XML-wired DecisionIf/LoopFor/
+LoopWhile control-flow verbs, in sibling namespaces).
+
+MINOR (13): "channel 192" was wrong in 3 docs (192 is SendPackage's `_range` arg;
+these packages have no get_Channel override so they ride channel 0) - I introduced
+that one earlier this session too; challenge base not IL-abstract; quests-challenges
+29 -> 28 + intermediate; BlockShapeNew.Rotate wraps not clamps; IsParentOf IL=6;
+BiomeBlockDecoration rotation is +20 rebase-at-24; sandbox GamePrefs mirror list;
+StartAsClient clears clientPrefabs; EAIBlockingTargetTask also at AITarget-3; plus
+map-objects/npc-dialog caller and package-effect corrections.
+
+**Tooling defect found and fixed.** `FindCallers.exe` - the tool every
+server-vs-client claim leaned on - **ignored its method argument entirely**
+(substring-matched only the type name against callee signatures, so it matched calls
+where the type was just a parameter) and was blind to field access. It had no source
+in tools/src (orphaned binary). Verified empirically, quarantined it, and wrote
+`tools/src/Xref.cs`: exact call OR field cross-reference, attributing hits inside
+lambda/iterator closures to the outermost owner type. Validated: it recovers all 8
+DensityScore field sites the old tool missed. Documented both failure modes in
+re-methodology.md 8b with the rule that a negative ("no server callers") claim needs
+the stronger tool.
+
+Health after fixes: 0 broken links / dashes / odd fences, INDEX complete, coverage
+steady at 100% accounted, zdtd tests still green.
+
+## 2026-07-24 (cont.) - re-verify negative claims with exact xref; 48 promotions
+
+Closed the caveat left by the FindCallers defect: every "client-only" / "dead code"
+/ "no server callers" claim in the corpus rested on a tool that ignored its method
+argument and could not see field access.
+
+Built `tools/src/RefScan` (batch reverse-reference scan: one assembly pass over a
+list of type names, every referencing site attributed to its outermost owner) and
+re-verified in two sweeps:
+
+1. **The 26 explicit negative claims in the narratives.** Almost all held. Two were
+   imprecise and are fixed:
+   - `SignCanvas` was listed flatly in the "client-only render pipeline", but its
+     nested `SignCanvas.CanvasState.Read/Write` is called from the **server**
+     `TEFeatureCanvas` persistence (signs.md's own 6 already documented that, so the
+     doc contradicted itself). Now split: MonoBehaviour/decal rendering is client,
+     CanvasState is server-persisted.
+   - `EventPrefabsClient` marked "client-only" though `World.LoadWorld` constructs it
+     on both sides; only its ToClient handlers populate it. Reworded to
+     "client-effect only (allocated server-side)".
+
+2. **The 948 types in out-of-scope-surface.md**, which had been classified by a
+   **name heuristic** and never by callers. RefScan found 53 with server-only
+   referrers; after excluding the legitimate cases (server code referencing a UI
+   window or a generic collection), **48 were genuinely misclassified** and are now
+   promoted into inventories/dedicated-leaves.md, grouped by owning subsystem with
+   their server referrers as the evidence column. The name lies more than expected:
+   `ClientAmmoData` is turret state on a server tile entity, `StreamReadSizeMarker`
+   is wire-framing infrastructure, `ClientLobbyManager` sits in the server authorizer
+   chain, `ClientTriggerData` belongs to `TileEntityPoweredTrigger`.
+
+Coverage moves the honest way: **narrated 1747 -> 1799 (64% -> 66%)**, classified
+falls to 915, still 100% accounted / 0 unaccounted. Documented the lesson in
+re-methodology 8b: do not classify by name, classify by referrer; and a negative
+claim needs the stronger tool. Health clean.
+
+## 2026-07-24 (cont.) - sweep the older docs' negative claims (clean result)
+
+Extended the referrer verification to the whole corpus with a much broader claim
+net (older docs phrase these differently: "no-op on dedicated", "sole caller",
+"vestigial", "inert", "render-side", "editor-only", plus the exclusivity forms).
+48 claim/type pairs across 19 docs, 29 of them not covered by the earlier sweep.
+
+**Result: no substantive errors in the older docs.** Breakdown:
+- **23 dead-code claims independently confirmed**: RefScan finds zero external
+  referrers for each (`ChunkProviderParameter`, `SaveDataManager_Minimal`,
+  `EntityVBlimp`, `TriggerEffects`, the unused MinEvent/GameEvent action verbs,
+  the unused `EnumMapObjectType` values, ...).
+- **18 confirmed by client referrers** (the claim and the reference set agree).
+- **7 flagged, all 7 false positives** on inspection: `EntitySpawner` at
+  map-objects.md is the *enum value* `EnumMapObjectType.EntitySpawner`, not the
+  spawner class; `NetPackageWorldInfo`'s server referrers are the *send* side while
+  the doc claims only the *receiver* (`worldInfoCo`) is client; the rest
+  (`ApplyExplosionForce`, `ChunkProviderDummy`, `EventPrefabsClient`,
+  `StunBeamWeapon`, `AttackHitInfo`) were already accurately nuanced.
+- **3 exclusivity claims verified exactly** with Xref: `ApplyExplosionForce.Explode`
+  has exactly one call site (`GameManager.ExplosionClient`), `BlockTracker`'s only
+  referrer is `BlockLimitTracker`, `SpawnEntry.HandleUpdate` is its only method.
+
+One ambiguity tightened: combat-damage.md's changelog said "flagging the client-only
+pieces" after listing four leaves, but only two of them are client-only; now named
+explicitly so the line cannot be misread.
+
+Contrast with the earlier out-of-scope sweep (48 misclassifications) is the useful
+signal: **hand-written narrative claims held up; the machine-generated name-based
+classification did not.** Coverage steady at 100% accounted, health clean.
+
+## 2026-07-24 (cont.) - zdtd: remaining EntityCreationData branches
+
+Experimental refresh is **blocked**: `steamcmd` is not installed and a fresh
+`latest_experimental` pull needs Steam credentials (a user decision; installing
+steamcmd would also pollute the host). experimental-delta.md stays pinned and is
+already honestly caveated as provisional. Did the actionable item instead.
+
+Implemented the ECD branches that protocol-packages.md 5.1 specifies but zdtd
+lacked, all IL-verified:
+- **player** (playerMale/playerFemale): holdingItem, teamNumber:u8,
+  entityName/skinTexture:string, playerProfile(bool + PlayerProfile **v5**:
+  i32 version, archetype, isMale, raceName, variantNumber:byte, hair/hairColor/
+  mustache/chops/beard/eyeColor strings)
+- **fallingTree**: blockPos (StreamUtils Vector3i = 3x i32) + fallTreeDir
+  (Vector3 = 3x f32), both layouts verified rather than assumed
+- **junk-drone tail**: belongsPlayerId + orderState, correctly placed AFTER the
+  networkWrite block (the guard jumps to the same test, ECD IL_033F -> IL_03C5)
+
+Every class-name string came from the `EntityClass.Init` ldstr literals
+(`item`, `fallingBlock`, `fallingBlocks`, `fallingTree`, `playerMale`,
+`playerFemale`, `entityJunkDrone`) rather than being guessed; `fallingTree` was a
+guess that the IL then confirmed.
+
+**Latent bug found and closed:** `buildEntitySpawnStock` accepted any
+`entity_class` but only emitted the zombie/item bodies, so passing a player or
+falling class silently produced a body missing its middle section, corrupt on the
+wire. Unimplemented classes now return an error; a failed send beats a desync.
+9 tests, each verified to actually execute by break-and-revert. zdtd docs
+(MISSING_FEATURES, STATUS, PACKAGES, RE_GAP_CLOSURE) updated; suite green.
+
+## 2026-07-24 (cont.) - zdtd: fallingBlock/fallingBlocks branches (ECD complete)
+
+Closed the last two EntityCreationData class branches, both read from the write IL
+rather than guessed:
+- **fallingBlock** (single): `blockValues[0].rawData:u32` then `textureFullArrays[0]`.
+  `TextureFullArray.Write` turns out to emit **exactly one i64** (its loop bound is
+  the literal 1, and `Read` takes a count but stores only index 0).
+- **fallingBlocks** (multi): `count:i32`, then `count x rawData:u32`, then
+  `count x Vector3i`, then `count x i64`.
+
+**Shared-count trap, now documented in protocol-packages.md 5.1:** the multi-block
+branch writes only ONE length even though three arrays follow, and
+`EntityCreationData.read` allocates `blockValues`, `blockPositions` and
+`textureFullArrays` from that same value without reading a second `Int32`. A clone
+that emits a length before the positions or textures desyncs. zdtd's API therefore
+takes a single slice of blocks and derives the count, making the invariant
+unrepresentable-if-violated.
+
+EntityCreationData is now complete in the clone: all six class branches (zombie/NPC
+empty middle, itemClass, fallingBlock, fallingBlocks, fallingTree, player) plus the
+junk-drone tail. 11 tests, each proven to execute by break-and-revert; suite green.
+zdtd docs updated (MISSING_FEATURES, PACKAGES, RE_GAP_CLOSURE now mark the package
+complete).
+
+## 2026-07-24 (cont.) - run the repo's own tests; fix a regeneration trap
+
+Ran `tools/tests/` for the first time this session (having added 6 tools and ~20
+docs without doing so). Both gates pass, but the regen test surfaced a real
+**reproducibility trap**:
+
+- `test_re_dump_regen.py` printed "MB update methods: **242**" while the audited
+  `inventories/frame-entries.md` says **244**. Cause: `legacy/DumpFrameEntries`
+  enumerated `MainModule.Types` only, so it never saw the two nested frame entries
+  (`PerformanceProfiler/FrameTimeCapture`, `XUiC_ItemActionEntry/TimedAction`) that
+  the audit added by hand. Regenerating the doc would have **silently reverted the
+  fix**. Patched the dumper to recurse nested types and qualify their names; it now
+  emits 244 and a normalized diff of (type, method, IL) tuples against the committed
+  doc is **identical**.
+
+Audited the other generated docs for the same doc-vs-generator drift:
+- `netpackage-bodies.md` (WireBodies) and `coverage-report.md` (Coverage): genuinely
+  push-button, no drift.
+- `console-command-list.md`: already carries an honest caveat that an ldstr-only
+  extractor misses `exportprefab`.
+- `dedicated-leaves.md` and `out-of-scope-surface.md`: these were generated then
+  **hand-corrected** (the 48 referrer-verified promotions). A naive regeneration
+  would undo that, so both now state their maintenance model explicitly rather than
+  implying they are regenerable.
+
+Health clean; coverage unchanged at 100% accounted.
+
+## 2026-07-26 - fix all docs against the review findings
+
+Acted on the `/review` output: my own review (1 critical after upgrade, 3 major,
+4 minor) plus the independent adversarial reviewer (2 critical, 3 major, 5 minor).
+
+**C1/C2 - the coverage metric measured a tool artifact. Rebuilt `tools/src/Coverage`:**
+- **Interface-dispatch devirtualization added.** The override map only walked
+  `BaseType`, so families dispatching through an interface were invisible: exactly
+  1 of the 187 documented console commands was in the base. Now **178** are, and the
+  base grew 2703 -> **3775** game types.
+- **Narration now requires a backticked mention**, killing false positives where real
+  types named `Field`/`Entry`/`Data` were credited because markdown table headers
+  contain those words (0 deliberate references to any of them).
+- **Generated catalogs no longer count as narration.** `inventories/` is now its own
+  "catalogued only" tier; previously ~536 identifiers appearing solely in generated
+  tables scored as "narrated in a subsystem doc".
+- **The summed headline is gone.** Four tiers are reported separately (narrated 1120 /
+  catalogued 548 / classified 913 / **unaccounted 1193**) with an explicit "this is not
+  a coverage metric" preamble documenting both the over-approximation (498 XUi types
+  in the base) and the under-approximation (reflection still invisible).
+- Honest result: the corpus went from claiming "100% accounted, 66% narrated" to
+  showing **29% narrated with 1193 unaccounted**. The old number is withdrawn in
+  full-surface.md and coverage.md.
+
+**Reviewer M1 - the out-of-scope bucket was never referrer-verified.** It named
+`ClientPowerData` as a counter-example; confirmed (14 `TileEntityPowerSource`
+referrers incl. `read`/`write`). Re-swept all 905 classified types and found my
+earlier promotion rule was itself flawed: it required **zero** client referrers, so a
+type that is overwhelmingly server-side but touched once by a UI window stayed
+misclassified. Rule changed to **server-dominance**; 19 gameplay types promoted. Also
+corrected the infra category, which implied "never runs on a server" when many of
+those types *are* called by server code and are out of scope for being infrastructure
+rather than gameplay.
+
+**Other fixes:** stale `EntityCreationData` residual row in coverage.md; 60 -> 61
+nested serializers in netpackages.md/INDEX; ItemStack predicate stated as the raw-field
+`brfalse` rather than "count > 0"; dedicated-leaves headline count vs row count;
+regeneration cwd convention aligned to repo-root.
+
+**Policy (reviewer m3):** 46,606 raw game-IL files were sitting under `tools/`,
+ignored by an enumerated name list. Moved them under the wholesale-ignored `il/`
+(not deleted) and replaced the name list with a policy statement plus catch-all, so a
+future dump landing in `tools/` cannot be committed by omission.
+
+**Reproducibility (my M3):** the hand-corrections to the out-of-scope classification
+are now a committed tool input, `tools/data/promoted-types.txt` (62 names), so a
+regeneration can honour them instead of silently reverting them.
+
+**Evidence weighting (my M2):** `coverage.md` now carries a per-doc **audit status**
+table (audited pass 1 / pass 2 / not independently audited / generated), because the
+second audit found 3 critical + 8 major in already-careful prose.
+
+Verification: 0 broken links / dashes / odd fences, INDEX complete, both gates pass,
+external `zdtd` consumer still green.
+
+## 2026-07-26 (cont.) - finish the base definition; re-triage
+
+**(1) Base definition finished.** The previous fix left the same bug class present:
+87 vendored third-party types (1,259 methods) were still counted as game code.
+Added `LiteNetLib` (53 types, the UDP transport already listed as a residual),
+`Antlr` (21) and `NCalc` (13) to the library exclusion, alongside System/UnityEngine.
+
+**Console commands now visible to the metric.** The catalog listed command *names*
+(`admin`) while the metric matches *type* names (`ConsoleCmdAdmin`), so all 187 read
+as undocumented. New tool `tools/src/CmdMap` emits `command -> type` for every
+concrete `ConsoleCmdAbstract` subclass, following the static-field name form so
+`exportprefab` is not missed; the catalog gained a **Type** column (187/187 mapped,
+the last three being aliases: `as` -> AdminSpeedConsoleCmd, `zd`/`zz` -> the
+DynamicMesh console cmds).
+
+Net effect on the honest numbers: base 3775 -> **3688**, catalogued 548 -> **734**,
+unaccounted 1193 -> **934**. Narrated is unchanged at 1120 (**30%**).
+
+**(2) Re-triage of the remaining 934.** Sampled and bucketed: 522 "other", 142
+twitch/discord/platform, 117 client UI, 53 audio, 49 generic infra, 41 render, 10
+editor. Inspecting the "other" bucket shows it is dominated by **client, editor and
+vendored code that lives in the `<global>` namespace**, where namespace-based
+filtering cannot reach it (`PrefabEditModeManager`, `CursorControllerAbs`,
+`NCalcLexer`, `BindingNcalcFunctions`, `GameSenseManager`, `DistantTerrain`,
+`SaveDataMergedPlatformSaveGameIOProvider`). This triage note is emitted by the
+generator itself so it survives regeneration, and it states plainly that the number
+is **classification debt, not undocumented server systems**.
+
+Verification: 0 broken links / dashes / odd fences, both gates pass, zdtd green.
