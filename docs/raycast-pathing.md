@@ -292,6 +292,57 @@ behaviors, all raycast-driven:
   `FollowPlannedPath`, and `GetPath` all delegate to the `EntityDrone`
   methods above.
 
+## 6b. The drone state machine
+
+The drone is a real state machine and the steering above is its motor. `EntityDrone`
+holds a nested `State` enum and **`SetState(State next, bool sync)` is the single
+mutator** (verified: `EntityDrone::state` has no other `stfld`, and `SetState` has 15
+call sites). `updateState` runs on a 0.05 s cadence and advances `stateTime`.
+
+| State | Value | Meaning |
+|---|---:|---|
+| `Idle` | 0 | parked near the owner, area scan on the `areaScanTimer` cadence |
+| `Sentry` | 1 | holding a guard post (`SentryMode`) |
+| `Follow` | 2 | travelling to the owner's follow position (`FollowMode`) |
+| `Heal` | 3 | ally-heal behaviour (`AllyHealMode.HealAllies`) |
+| `Attack` | 4 | engaging, driven by `EAIDroneItemTask` |
+| `Shutdown` | 5 | powered down (`setShutdown`) |
+| `NoClip` | 6 | collision-free reposition |
+| `Teleport` | 7 | recovery hop (`teleportState`) when travel fails |
+| `None` | 8 | unset sentinel |
+
+```mermaid
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> Follow: FollowMode, owner moves out of seek range
+  Idle --> Sentry: SentryMode, player issues a stay order
+  Follow --> Idle: followState, arrived within range
+  Sentry --> Follow: order changed to Follow
+  Follow --> Attack: EAIDroneItemTask acquires a target
+  Sentry --> Attack: EAIDroneItemTask acquires a target
+  Attack --> Follow: target lost or dead
+  Idle --> Heal: AllyHealMode HealAllies and an ally needs healing
+  Heal --> Idle: heal finished
+  Follow --> Teleport: teleportState, path blocked or owner unreachable
+  Teleport --> Idle: teleportState completes the hop
+  Idle --> NoClip: collision-free reposition
+  NoClip --> Idle: reposition done
+  Idle --> Shutdown: setShutdown, powered down or destroyed
+  Follow --> Shutdown: setShutdown
+  Sentry --> Shutdown: setShutdown
+  Shutdown --> Idle: powered back on
+  Shutdown --> [*]
+```
+
+**Read the edges as the transition drivers, not as exhaustive guards.** Each edge is
+named for the method that performs the `SetState` (`FollowMode`, `SentryMode`,
+`followState`, `teleportState`, `setShutdown`, `onInterruptState`,
+`updateTransitionState`); the precise condition each one tests lives in that method's
+IL. `onInterruptState` and `updateTransitionState` can return the drone to `Idle`
+from several states, which is why `Idle` is the hub.
+
+---
+
 ## 7. Dedicated vs client
 
 Confirmed by callers and gating flags:
@@ -340,6 +391,7 @@ the whole reason this system works headless at all.
 
 ## Changelog
 
+- **2026-07-26:** Added the drone `State` machine diagram (9-member nested enum, `SetState` as sole mutator with 15 call sites) which the doc previously described in prose only.
 - **2026-07-24:** Initial reversal: full `RaycastPathing` type map and block
   classification (quarter-block Half hierarchy, door handling), the
   `FloodFillEntityPathGenerator` time-sliced A*-over-raycasts build and its

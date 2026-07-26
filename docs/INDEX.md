@@ -264,6 +264,7 @@ live with the mod that ships them.
 | [inventories/netpackages.md](inventories/netpackages.md) | protocol.md, network.md |
 | [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) | protocol-packages.md (auto-extracted wire bodies: 183 packages + 61 nested serializers) |
 | [inventories/coverage-report.md](inventories/coverage-report.md) | coverage.md (auto-generated reachability vs doc-mention coverage) |
+| [inventories/state-machines.md](inventories/state-machines.md) | index of all 74 modelled lifecycles, grouped by cluster (generated) |
 | [inventories/te-features.md](inventories/te-features.md) | tile-entities-power.md (11 TEFeatureAbs leaves) |
 | [inventories/challenge-objectives.md](inventories/challenge-objectives.md) | challenges (28 objective leaves; client-tracked) |
 | [inventories/sequence-actions.md](inventories/sequence-actions.md) | game-events.md (123 SequenceAction leaves) |

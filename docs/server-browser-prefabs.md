@@ -116,7 +116,9 @@ flowchart TB
   A --> EO[EOS SessionsHost\nsession GameHost + attributes]
   A --> LA[LAN LANMasterServerAnnouncer\nUDP multicast reply]
   A -->|GameServerInitialized| AUTH[ServerStateAuthorizer allows logins]
-  U[updateTimeOfDay -> UpdateGameTimePlayers] -->|OnChanged events| ST & EO & T
+  U[updateTimeOfDay to UpdateGameTimePlayers] -->|OnChanged events| ST
+  U -->|OnChanged events| EO
+  U -->|OnChanged events| T
 ```
 
 ### 2.1 Steam (`Platform.Steam.MasterServerAnnouncer`)

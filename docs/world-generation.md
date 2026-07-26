@@ -295,7 +295,7 @@ stateDiagram-v2
   Init --> Generating: Task(GenerateTask).Start()
   Generating --> Generating: poll 0.1 s +<br/>TaskMessageUpdate (600 ms throttle)
   Generating --> Faulted: task.IsFaulted -> log + IsCanceled
-  Generating --> Canceled: IsCanceled (UI cancel; server never)
+  Generating --> Canceled: IsCanceled (UI cancel, server never)
   Generating --> Serializing: task.IsCompleted -> GC collect
   Serializing --> Serializing: one Task per output buffer,<br/>message lists pending outputs
   Serializing --> Saving: all buffers done -> SaveData
@@ -353,7 +353,15 @@ flowchart LR
   PS[playerSpawns] --> SX[spawnpoints.xml]
   WS[empty WorldState] --> TTW[main.ttw]
   DP[thisWorldProperties] --> MI[map_info.xml]
-  DTM & SP4 & BPNG & RPNG & SP3 & PX & SX & TTW & MI --> DIR[GeneratedWorlds/WorldName/]
+  DTM --> DIR[GeneratedWorlds/WorldName/]
+  SP4 --> DIR
+  BPNG --> DIR
+  RPNG --> DIR
+  SP3 --> DIR
+  PX --> DIR
+  SX --> DIR
+  TTW --> DIR
+  MI --> DIR
   DIR --> RT[runtime: ChunkProviderGenerateWorldFromRaw<br/>world-chunks.md / terrain-height.md]
 ```
 

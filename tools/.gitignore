@@ -11,3 +11,6 @@ tests/_out/
 # licence to keep dumps in tools/.
 *.il.txt
 */*.il.txt
+
+# Python bytecode from the test scripts.
+__pycache__/

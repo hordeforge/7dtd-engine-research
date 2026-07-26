@@ -255,14 +255,14 @@ stateDiagram-v2
   Dislike --> Neutral: value crosses 400
   Neutral --> Like: value crosses 600
   Like --> Love: value crosses 800
-  Love --> Leader: SetAlly sets 1000; value reaches 1001
+  Love --> Leader: SetAlly sets 1000, value reaches 1001
   Love --> Like: ModifyRelationship(-d)
   Like --> Neutral: value drops below 600
   Neutral --> Dislike: value drops below 400
   Dislike --> Hate: value drops below 200
   note right of Neutral
     standings are a continuous 0..1000 float
-    per (faction, faction) cell; the tiers above
+    per (faction, faction) cell, the tiers above
     are just named thresholds on that value
   end note
 ```

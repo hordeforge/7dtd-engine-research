@@ -85,7 +85,9 @@ graph TD
     SD --> L3[NoiseSignLayer<br/>seeded noise fill]
     SD --> G[GroupSignLayer]
     G --> L4[nested layers...]
-    L1 & L2 & L3 --> C[common: SignTransform,<br/>SignRenderSettings, SignWarp list]
+    L1 --> C[common: SignTransform,<br/>SignRenderSettings, SignWarp list]
+  L2 --> C
+  L3 --> C
 ```
 
 `TextSignLayer.text` is static library content typed in the editor tool. It is

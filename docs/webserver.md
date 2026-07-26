@@ -112,7 +112,7 @@ sequenceDiagram
   W->>S: OpenID.Validate: check_authentication (verify assertion)
   S->>W: is_valid:true/false
   W->>W: steamIdUrlMatcher regex -> steamID64
-  W->>B: valid -> LogIn + sid cookie; else login-failed page
+  W->>B: valid gives LogIn + sid cookie, else login-failed page
 ```
 
 `OpenID` pins Steam's CA + intermediate `X509Certificate2` and matches the

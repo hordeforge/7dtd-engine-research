@@ -301,7 +301,7 @@ with `RedeemAlways` redeem automatically; others wait for the player to claim.
 ```mermaid
 stateDiagram-v2
   [*] --> Active: ChallengeClass.Clone -> StartChallenge<br/>(auto-complete qualifying objectives, add hooks)
-  Active --> Active: hook increments current;<br/>CheckObjectiveComplete
+  Active --> Active: hook increments current,<br/>CheckObjectiveComplete
   Active --> Completed: all objectives complete -><br/>HandleComplete -> EndChallenge<br/>+ QuestEventManager.ChallengeCompleted
   Completed --> Redeemed: Redeem -> GameEventManager.HandleAction(RewardEvent)<br/>-> ChallengeJournal.HandleChallengeRedeemed
   Completed --> Redeemed: RedeemAlways (auto)

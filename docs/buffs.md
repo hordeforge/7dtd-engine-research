@@ -52,7 +52,7 @@ stateDiagram-v2
   Active --> Expired: DurationInTicks reaches 0
   Active --> Marked: RemoveBuff / RemoveBuffsByTag / RemoveDeathBuffs
   Expired --> Marked: set Remove = true
-  Marked --> Removed: EntityBuffs.Tick drops it -> EntityBuffRemoved (PlayerEntityStats fans to buffChangedDelegates; base is a no-op)
+  Marked --> Removed: EntityBuffs.Tick drops it, EntityBuffRemoved (PlayerEntityStats fans to buffChangedDelegates, base is a no-op)
   Removed --> [*]
 ```
 

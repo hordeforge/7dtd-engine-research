@@ -263,7 +263,7 @@ sequenceDiagram
   SV->>SV: ItemValue.FireEvent -> ItemClass.Effects (MinEvents)
   SV->>OBS: NetPackageHoldingItem / entity anim / buff-add packages
   SV->>CL: authoritative inventory + entity state
-  Note over CL: client also predicted the swing locally (feel);<br/>server result reconciles
+  Note over CL: client also predicted the swing locally (feel),<br/>server result reconciles
 ```
 
 The primary-action lifecycle for one use, driven by `ExecuteAction` (press then

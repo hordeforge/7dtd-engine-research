@@ -71,17 +71,17 @@ instantiated, so mods can add verbs by class name.
 ```mermaid
 flowchart TD
     Open["XUiC_DialogWindowGroup.OnOpen (client UI)"] --> RS["Dialog.RestartDialog(player)"]
-    RS --> GFS["GetFirstStatment: for each DialogPhase,\nif ALL phase requirements pass,\noverride start statement"]
+    RS --> GFS["GetFirstStatment: for each DialogPhase,<br/>if ALL phase requirements pass,<br/>override start statement"]
     GFS --> CS["CurrentStatement"]
     CS --> GR["DialogStatement.GetResponses"]
     GR -->|"ResponseTypes.Response"| RESP["lookup DialogResponse by ID"]
-    GR -->|"ResponseTypes.QuestAdd"| DRQ["new DialogResponseQuest per matching\nEntityTrader.activeQuests entry; drop if !IsValid"]
+    GR -->|"ResponseTypes.QuestAdd"| DRQ["new DialogResponseQuest per matching<br/>EntityTrader.activeQuests entry, drop if not IsValid"]
     GR -->|"no entries, NextStatementID set"| CONT["static [Continue...] response"]
-    RESP --> GATE["XUiC_DialogResponseEntry:\nCheckRequirement per response.\nHide, or AlternateText via\nGetRequiredDescription"]
+    RESP --> GATE["XUiC_DialogResponseEntry:<br/>CheckRequirement per response.<br/>Hide, or AlternateText via<br/>GetRequiredDescription"]
     DRQ --> GATE
     GATE --> SEL["Dialog.SelectResponse"]
     SEL --> ACT["PerformAction for every response action"]
-    ACT -->|"DialogResponseQuest"| SYNTH["synthesize statement from\nQuestClass.StatementText via Quest.GetParsedText"]
+    ACT -->|"DialogResponseQuest"| SYNTH["synthesize statement from<br/>QuestClass.StatementText via Quest.GetParsedText"]
     ACT -->|"else"| NEXT["CurrentStatement = GetStatement(NextStatementID)"]
 ```
 

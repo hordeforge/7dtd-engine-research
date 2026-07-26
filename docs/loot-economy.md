@@ -57,7 +57,7 @@ generates its loot exactly once until it is re-armed by the respawn timer.
 stateDiagram-v2
   [*] --> Unlooted: block placed / prefab spawned<br/>bTouched=false, items empty
   Unlooted --> Generating: LootContainerOpened (server only)<br/>set bTouched=true, worldTimeTouched=now
-  Generating --> Filled: container empty -> LootContainer.Spawn<br/>roll count, items, quality; clone into items[]
+  Generating --> Filled: container empty, LootContainer.Spawn<br/>roll count, items, quality, clone into items[]
   Generating --> Filled: container already had items -> skip roll
   Filled --> Looted: player removes items -> IsEmpty()
   Looted --> Cooldown: UpdateTick, LootRespawnDays>0, not player-placed
@@ -105,10 +105,10 @@ sequenceDiagram
   P->>TE: activate block (Search) -> lock request
   TE->>LM: PopulateTE -> LootContainerOpened(te, playerId, tags)
   LM->>LM: IsServer? bTouched? empty? (gates)
-  LM->>LM: set bTouched, worldTimeTouched; fire MinEvent 101
+  LM->>LM: set bTouched and worldTimeTouched, fire MinEvent 101
   LM->>LC: Spawn(random, slots, lootStage, tags, ...)
   LC-->>LM: List<ItemStack>
-  LM->>TE: clone stacks into items[]; fire MinEvent 100
+  LM->>TE: clone stacks into items[], fire MinEvent 100
   TE-->>P: synced container contents
 ```
 
