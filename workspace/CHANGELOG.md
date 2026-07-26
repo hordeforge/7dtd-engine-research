@@ -883,3 +883,24 @@ directory (a stray `cd` earlier in the same shell), so the research repo had **n
 backup** despite the command reporting success. Recreated from the correct cwd and
 verified by listing refs (main + re-corpus-audit-tooling). Removed a stray 2.2 MB
 `MethodList` dump written to a mistyped filename in the repo root.
+
+## 2026-07-26 (cont.) - mermaid 8.6 compatibility fix
+
+The architecture map failed to render in a viewer pinned to **mermaid 8.6** (reported
+against the Wire sequence diagram). Root cause was newer-mermaid syntax throughout:
+
+- `Note over S: authorizer chain; failure -> PlayerDenied ...` used a **semicolon**
+  (a statement separator in mermaid 8.x) *and* a bare `->` inside note text (parsed
+  as an arrow). This was the reported failure.
+- `<-->` bidirectional edges (3 uses), `A & B --> C & D` multi-node edges (3 uses),
+  and 10 `click` directives: all newer-mermaid features.
+- Bare `->` inside three more labels (two stateDiagram transitions, one flowchart
+  node) had the same arrow-parsing hazard as the note.
+
+All rewritten to conservative syntax that parses on 8.6: explicit single edges,
+no `&` fan-out, no `click`, and prose instead of arrows inside labels. Verified by
+sweeping the extracted mermaid blocks for every risky construct (all now 0).
+
+Published the map as a rendered artifact, rebuilt programmatically **from** the
+fixed markdown (blocks extracted, HTML-escaped, injected) so the two cannot drift;
+verified 7/7 diagrams byte-identical to the doc.

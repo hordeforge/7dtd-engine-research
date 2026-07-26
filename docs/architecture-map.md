@@ -49,20 +49,25 @@ flowchart TB
     AUX[decoration.7dt, power.dat, factions.dat,<br/>players, prefabs.xml, dynamic mesh .group]
   end
 
-  CL <-->|UDP| LNL --> AUTH --> CONN
+  CL -->|UDP| LNL
+  LNL --> AUTH
+  AUTH --> CONN
   PLAT -.identity / tickets.-> AUTH
-  CONN <--> PKG
+  CONN --> PKG
+  PKG --> CONN
   ENC -.before auth.-> PKG
-  PKG <--> GM
+  PKG --> GM
+  GM --> PKG
   ADM --> CONS[SdtdConsole + Webserver]
   CONS --> GM
-  GM --> TICK --> WORLD & ENT & SUBS
-  WORLD & ENT & SUBS --> REG & AUX
-
-  click GM "loop-gmupdate.md"
-  click PKG "protocol-packages.md"
-  click AUTH "platform-auth.md"
-  click REG "save-region.md"
+  GM --> TICK
+  TICK --> WORLD
+  TICK --> ENT
+  TICK --> SUBS
+  WORLD --> REG
+  ENT --> REG
+  SUBS --> AUX
+  WORLD --> AUX
 ```
 
 **The one-line summary:** clients speak a versioned package protocol over
@@ -80,8 +85,8 @@ stateDiagram-v2
   Boot --> EacAdvisory: startGameCo reads GameServerInfo.EACEnabled (advisory log only)
   EacAdvisory --> StartAsServer
   StartAsServer --> Config: load XML config, mods (ModManager two-pass), sandbox options
-  Config --> WorldLoad: createWorld -> ChunkCluster.Init -> provider (dedicated = GenerateWorldFromRaw)
-  WorldLoad --> Advertise: PrepareLocalServerInfo -> TCP + Steam/EOS/LAN announce
+  Config --> WorldLoad: createWorld then ChunkCluster.Init picks the provider (dedicated uses GenerateWorldFromRaw)
+  WorldLoad --> Advertise: PrepareLocalServerInfo then TCP plus Steam/EOS/LAN announce
   Advertise --> Started: GameStateManager.InitGame(server)
   Started --> Frame: frame loop drives gmUpdate
   Frame --> Frame: players join, sim ticks
@@ -135,14 +140,13 @@ flowchart LR
   ENTS --> BUFF["Buffs tick<br/>duration, stat recalc"]
   ENTS --> STAT["Survival stats"]
   WT --> TE["Tile entities<br/>+ PowerManager 6.25 Hz"]
-  WT --> SPAWN["Spawning: 5 sources<br/>-> World.SpawnEntityInWorld"]
+  WT --> SPAWN["Spawning: 5 sources<br/>into World.SpawnEntityInWorld"]
   WT --> GE["Game events / quests / challenges"]
-  CH & ENTS & TE & SPAWN --> ND["NetEntityDistribution<br/>observer-gated replication"]
+  CH --> ND["NetEntityDistribution<br/>observer-gated replication"]
+  ENTS --> ND
+  TE --> ND
+  SPAWN --> ND
   ND --> OUT["ToClient packages"]
-
-  click ENTS "entity-ai.md"
-  click TE "tile-entities-power.md"
-  click SPAWN "spawning.md"
 ```
 
 The **authority rule**: the server owns block state, entity state, damage, loot, and
@@ -168,7 +172,7 @@ sequenceDiagram
     C->>S: KeyExchangeComplete
   end
   C->>S: PlayerLogin (identity, platform tokens, version)
-  Note over S: authorizer chain; failure -> PlayerDenied + EKickReason
+  Note over S: authorizer chain runs. On failure the server sends PlayerDenied with an EKickReason
   S->>C: PlayerLoginAnswer, WorldInfo, ConfigFile
   C->>S: RequestToEnterGame / RequestToSpawnPlayer
   S->>C: PlayerSpawnedInWorld, chunks (channel 1, compressed), entity spawns
@@ -198,10 +202,6 @@ flowchart LR
   SIM --> PLR["player files<br/>profile, inventory, journal"]
   SIM --> PRE["prefabs.xml<br/>POI decorations"]
   SIM --> DM["dynamic mesh .group<br/>deflate-compressed"]
-
-  click WS "save-region.md"
-  click PWR "tile-entities-power.md"
-  click DM "dynamic-mesh.md"
 ```
 
 Note the trap the corpus documents: the dynamic-mesh `.group` writer people expect
