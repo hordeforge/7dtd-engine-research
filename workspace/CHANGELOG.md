@@ -860,3 +860,26 @@ generator itself so it survives regeneration, and it states plainly that the num
 is **classification debt, not undocumented server systems**.
 
 Verification: 0 broken links / dashes / odd fences, both gates pass, zdtd green.
+
+## 2026-07-26 (cont.) - whole-system visual map
+
+Added `docs/architecture-map.md`: the top-level view the corpus lacked. It had 176
+per-subsystem diagrams but no single picture of how the pieces connect, so a reader
+had to assemble the system mentally from 60 docs.
+
+Seven diagrams, all drawn from existing IL-derived narratives (nothing new asserted):
+five-layer system map (transport / wire / sim / persistence / external), boot
+lifecycle, the gmUpdate A-J frame with the dedicated skip over phase C marked, the
+sim core fan-out, the join conversation as a sequence, the persistence fan-out, and
+a subsystem-ownership index. Clickable nodes route into the owning doc.
+
+It also carries the corpus's hard-won corrections rather than an idealised picture:
+no managed EAC boot gate, crafting is split authority, client inventory is
+client-authoritative, and the dynamic-mesh writer people expect is dead code.
+Registered as entry 0 in INDEX ("start here").
+
+Also fixed during backup verification: both `git bundle` calls had run from the zdtd
+directory (a stray `cd` earlier in the same shell), so the research repo had **no
+backup** despite the command reporting success. Recreated from the correct cwd and
+verified by listing refs (main + re-corpus-audit-tooling). Removed a stray 2.2 MB
+`MethodList` dump written to a mistyped filename in the repo root.

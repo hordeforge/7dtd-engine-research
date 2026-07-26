@@ -20,6 +20,7 @@ oss-tools/         survey notes on third-party server tools/mods
 
 | # | Doc | Use when |
 |---|---|---|
+| 0 | [`architecture-map.md`](architecture-map.md) | **Start here.** Whole-system visual map: layers, boot, frame phases, sim core, wire, persistence |
 | 1 | [`coverage.md`](coverage.md) | Is engine family X documented? Which dump? |
 | 2 | [`engine-limitations.md`](engine-limitations.md) | What stock ceilings bind any dedicated server? |
 | 3 | [`loop.md`](loop.md) | How the dedicated frame/sim runs |
@@ -126,6 +127,7 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 
 | Doc | Role |
 |---|---|
+| [architecture-map.md](architecture-map.md) | Whole-system visual map and subsystem ownership index |
 | [coverage.md](coverage.md) | Family → narrative → dump map; census numbers |
 | [full-surface.md](full-surface.md) | Whole-assembly map (all 87 namespaces) + coverage ledger toward 100% |
 | [experimental-delta.md](experimental-delta.md) | V3.0.1 -> latest_experimental diff: wire + new code (held entities, wild chicken) |
