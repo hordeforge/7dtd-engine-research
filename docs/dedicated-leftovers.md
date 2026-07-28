@@ -190,7 +190,8 @@ the client's platform public key, ships them in
 then invoked per message by `NetConnectionAbs.Encrypt/Decrypt`, which is why
 direct callers of `EncryptStream` do not appear: it is pure interface dispatch.
 Complements [protocol-packages.md](protocol-packages.md) §2 and
-[platform-auth.md](platform-auth.md) §4.4 (handshake sequencing).
+[platform-auth.md](platform-auth.md) §4.4 (handshake sequencing) and
+[network.md](network.md) §4.5 (EncryptStream/DecryptStream layout).
 
 ## 8. EnumBodyPartHitExtensions
 

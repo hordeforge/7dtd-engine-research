@@ -1,6 +1,6 @@
 # Dedicated networking (V3.0.1 managed)
 
-**Owns:** ConnectionManager peer pump, NetEntity package bands, NetPackage census.  
+**Owns:** ConnectionManager peer pump, per-connection reader/writer threads, encrypt/compress framing, NetEntity package bands, NetPackage census.  
 **Wire framing / join / golden bodies:** [`protocol.md`](protocol.md).  
 **Visual frames:** [`protocol-frames.md`](protocol-frames.md).  
 **Companion:** [`closed-gaps.md`](closed-gaps.md) §4 (threshold decode).  
@@ -111,8 +111,108 @@ Port: LiteNet often **ServerPort+2** (26902). Details and binary layouts: [proto
 |---|---|---|
 | NetPackage process/serialize | Yes | Inventoried |
 | ConnectionManager / ProtocolManager | Yes | Update graphs dumped |
+| `NetConnectionAbs` + Simple/Steam | Yes | reader/writer threads, compress, encrypt (this section) |
+| `AesEncryptAndMac` (`IEncryptionModule`) | Yes (AES + HMACSHA256) | stream layout below; handshake packages in [protocol-packages.md](protocol-packages.md) §2 |
 | LiteNetLib **managed** wrappers | Partial type map | Present where named |
 | LiteNetLib **native** plugin | No | **Residual** ([`residuals.md`](residuals.md)) |
+
+### 4.1 Connection hierarchy
+
+```text
+NetConnectionAbs
+  ├─ NetConnectionSimple   // UNET-style / generic INetworkClient path
+  └─ NetConnectionSteam    // Steam / platform path used on stock dedi often
+```
+
+Both start **two worker threads** in the ctor (`ThreadManager.StartThread`):
+
+| Impl | Reader thread name | Writer thread name | Inbound queue | Outbound queue |
+|---|---|---|---|---|
+| Steam | `NCSteam_Reader_*` | `NCSteam_Writer_*` | `BlockingQueue<ArrayListMP<byte>>` | `Queue<NetPackage>` + `ManualResetEvent` |
+| Simple | `NCS_Reader_*` | `NCS_Writer_*` | `Queue<RecvBuffer>` | double-buffer lists `writerListFilling` / `writerListProcessing` |
+
+`InitStreams` (Steam IL=131, Simple IL=190) allocates large memory streams (capacity literal **2097152**) plus Deflate zip streams and pooled binary writers/readers. Copy buffers are **4096** bytes.
+
+`ConnectionManager.Update` (IL=215, peer MB) drains each connection via `GetPackages` → `ProcessPackages` (IL=116) and flushes send queues. Xref: `ProcessPackages` is only called from that Update path (4 sites).
+
+### 4.2 Steam path (`NetConnectionSteam`)
+
+```mermaid
+flowchart LR
+  subgraph writer [Task_CommWriter IL=251]
+    WQ[packagesToSend Queue] --> WW[NetPackage.write]
+    WW --> WC{Compress flag?}
+    WC -->|yes| WZ[DeflateOutputStream]
+    WC -->|no| WE
+    WZ --> WE[NetConnectionAbs.Encrypt]
+    WE --> WS[INetworkServer/Client.SendData]
+  end
+  subgraph reader [Task_CommReader IL=213]
+    RQ[BlockingQueue raw bytes] --> RD[Decrypt]
+    RD --> RZ[Decompress]
+    RZ --> RP[NetPackageManager.ParsePackage]
+    RP --> RL[receivedPackages list]
+  end
+  CM[ConnectionManager.Update] --> RL
+  CM --> WQ
+```
+
+**Writer order (verified):** package body write → optional compress (`NetPackage.Compress`) → `Encrypt` → stats (`RegisterSentPackage` / `RegisterSentData`) → platform `SendData` with `ReliableDelivery` flag → `SendQueueHandled`.
+
+**Reader order (verified):** wait on trigger → dequeue raw buffer → stats received data → optional `Decrypt` → optional `Decompress` → `ParsePackage` → lock + append `receivedPackages`. Unknown package id logs and drops.
+
+`AddToSendQueue` enqueues under monitor and `Set`s the writer event. `AppendToReaderStream` is what the platform receive callback uses to feed the reader queue.
+
+### 4.3 Simple path (`NetConnectionSimple`)
+
+Heavier framing and batching (this is the path named in the O(N) serialize note below).
+
+**Serialize (`taskSerialize` IL=392):**
+
+1. Wait on writer event (timeout **500** ms appears in backoff paths).
+2. Swap filling/processing package lists under lock.
+3. Batch packages into reliable vs unreliable streams via `WriteToStream` (IL=435): writes **Int32** length prefix, `NetPackage.write`, rewrites length, registers stats, may requeue on failure.
+4. `StreamToBuffer` (IL=194): compress (optional) → encrypt → build wire buffer with header fields written as `Int32` + two `Byte` flags + `UInt16` + payload copy.
+5. `sendBuffersFromQueue` / `splitSendBuffer` respect `maxPacketSize` / `INetworkServer.GetMaximumPacketSize`.
+
+**Deserialize (`taskDeserialize` IL=437):**
+
+1. Dequeue `RecvBuffer`.
+2. Read framed header (`ReadInt32` size, flag bytes, `UInt16`).
+3. Decrypt → decompress → loop `ParsePackage` until stream consumed.
+4. Size mismatch between parsed and expected length is logged; packages still registered in stats.
+
+Double-buffer detail: main/sim thread only touches `writerListFilling`; the writer thread drains `writerListProcessing`. That is why broadcast packages are still **serialized once per connection** off the sim thread.
+
+### 4.4 Encrypt / compress module (`NetConnectionAbs`)
+
+| Method | IL | Behavior |
+|---|---:|---|
+| `Compress` | 59 | copy uncompressed → `DeflateOutputStream.Restart` + write; fails if compressed capacity too small |
+| `Decompress` | 22 | `DeflateInputStream.Restart` + copy into target |
+| `EnableEncryptData` | 12 | gate used by send path once module armed |
+| `ExpectEncryptedData` | 14 | gate used by recv path after login |
+| `Encrypt` | 16 | if enabled, `IEncryptionModule.EncryptStream(cInfo, stream)` |
+| `Decrypt` | 65 | if expecting encryption and packet unmarked encrypted: **drop** with log `Client logged in but sent unencrypted message`; else `DecryptStream` |
+| `SetEncryptionModule` | 4 | install per-client module (from handshake) |
+
+**Send transform order:** package bytes → **compress** → **encrypt**.  
+**Recv transform order:** raw → **decrypt** → **decompress** → parse.
+
+### 4.5 `AesEncryptAndMac` stream layout (managed)
+
+Implements `IEncryptionModule` for the post-handshake session (constructed in `AntiCheatEncryptionAuthServer.SendSharedKey` with the two key blobs from `NetPackageEncryptionSharedKey`; see [dedicated-leftovers.md](dedicated-leftovers.md) §7 and [protocol-packages.md](protocol-packages.md) §2).
+
+| Direction | IL | Layout / steps |
+|---|---:|---|
+| `EncryptStream` | 102 | under lock: random IV via `RandomNumberGenerator` → write IV → write payload length → AES transform of plaintext → write ciphertext → HMAC over protected region → rewrite stream with MAC+body |
+| `DecryptStream` | 148 | under lock: read IV / lengths → HMAC verify (fail logs `MAC did not match` / length mismatch) → AES decrypt into stream |
+
+Uses `System.Security.Cryptography.Aes` + `HMAC` (integrity key). **Not** a native cipher residual anymore for the session transform; what remains residual is anything below this managed module (platform transport, and any OS crypto providers Aes may call).
+
+### 4.6 Stats
+
+`NetConnectionStatistics` (on every connection): volatile byte/package counters, per-type histograms, `RingBuffer` of recent packages, and `GetStats(interval, ...)` derived rates. Writer/reader paths call `RegisterSent*` / `RegisterReceived*` around each package and bulk buffer.
 
 ## 4b. Replication send path (RE 2026-07-18): the O(players×entities) allocation
 
@@ -156,9 +256,12 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 | [closed-gaps.md](closed-gaps.md) | Distance-band threshold decode evidence |
 | [entity-ai.md](entity-ai.md) | What is being replicated |
 | [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) | Super-linear player-axis cost (optimizer) |
+| [protocol-packages.md](protocol-packages.md) | Encryption handshake package bodies |
+| [dedicated-leftovers.md](dedicated-leftovers.md) | AesEncryptAndMac install from SendSharedKey |
 
 ## Changelog
 
+- **2026-07-28:** NetConnectionSteam/Simple reader-writer pipelines, compress-then-encrypt order, Simple framing, AesEncryptAndMac stream layout.
 - **2026-07-19:** Related docs table.
 - **2026-07-18:** Package-band state machine; see also.  
 - **2026-07-18:** Network family narrative + package census link.

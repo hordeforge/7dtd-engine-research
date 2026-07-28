@@ -1081,3 +1081,17 @@ Fourth depth round.
 
 Coverage still unaccounted **0**.
 
+## 2026-07-28 - connection transport threads + session crypto layout
+
+Fifth depth round.
+
+- Expanded `network.md` §4: `NetConnectionSteam` vs `NetConnectionSimple` reader/writer
+  threads, queue types, 2 MiB streams, 4 KiB copy buffers.
+- Documented transform order: send compress-then-encrypt; recv decrypt-then-decompress.
+- Simple path framing (Int32 length + flags + UInt16) and double-buffer serialize lists.
+- `AesEncryptAndMac` EncryptStream/DecryptStream layout (IV, AES, HMAC verify).
+- Tightened `residuals.md` encryption row: session transform is managed; residual is
+  RSA wrap / crypto providers below BCL.
+
+Coverage: narrated **1280 (34%)**, unaccounted **0**.
+
