@@ -1,6 +1,6 @@
 # AIDirector component types (V3.0.1)
 
-**Owns:** AIDirector type inventory.  
+**Owns:** AIDirector type inventory + player-state/horde targeting/chunk-event heat pipeline.  
 **Tick path:** [`entity-ai.md`](entity-ai.md), [`loop.md`](loop.md) §5.  
 **Install order detail:** [`closed-gaps.md`](closed-gaps.md).  
 **Hub:** [`INDEX.md`](INDEX.md).
@@ -29,10 +29,23 @@ flowchart TB
 ```
 
 ## AIDirector : Object
-- `Tick(Double)` IL=6
+
+- `Tick(Double)` IL=6 → `ComponentsTick` IL=21 (plus `DebugTick` IL=7)
+- `CreateComponents()` IL=31 (fixed install order, verified)
 - `CanSpawn(Single)` IL=10
 - `UpdatePlayerInventory(EntityPlayerLocal)` IL=5
 - `UpdatePlayerInventory(Int32,AIDirectorPlayerInventory)` IL=6
+
+**Caller:** `World.OnUpdateTick` → `AIDirector.Tick` (Xref=1, server path).
+
+### CreateComponents order (IL=31, verified)
+
+1. `AIDirectorMarkerManagementComponent`
+2. `AIDirectorPlayerManagementComponent` (cached on `playerManagementComponent`)
+3. `AIDirectorWanderingHordeComponent`
+4. `AIDirectorAirDropComponent`
+5. `AIDirectorChunkEventComponent` (cached on `chunkEventComponent`)
+6. `AIDirectorBloodMoonComponent` (cached on `bloodMoonComponent`)
 
 ## AIDirectorAirDropComponent : AIDirectorComponent
 - `Tick(Double)` IL=75
@@ -48,24 +61,64 @@ flowchart TB
 - `CalcSpawnPos(World,Vector3,Vector3,Vector3&)` IL=28
 
 ## AIDirectorChunkData : Object
-- `Tick(Single)` IL=23
+
+Per-chunk heat / event bag used by the chunk-event horde path.
+
+**Fields:** `activityLevel` (single), `events` (`List<AIDirectorChunkEvent>`),
+`cooldownDelay`, plus static delay constants (`cDataDelay`, `cDataLongDelay`,
+`cDataNeighborDelay`, `cDataNeighborLongDelay`), `cVersion`.
+
+- `Tick(Single)` IL=23 (returns whether still alive in the map)
+- Persistence: `Write` emits version **2**, `activityLevel`, event count + each
+  `AIDirectorChunkEvent.Write`, then `cooldownDelay`.
 
 ## `AIDirectorChunkEvent` : Object
 
+**Fields:** `EventType` (`EnumAIDirectorChunkEvent`), `Position` (`Vector3i`),
+`Value`, `Duration`, `cVersion`.
+
+**Wire (`Write` IL=32 / `Read` IL=39):**
+
+| Order | Field | Type |
+|---|---|---|
+| 1 | version | `Int32` (**2** on write) |
+| 2-4 | Position x,y,z | `Int32` each |
+| 5 | Value | `Single` |
+| 6 | EventType | `Byte` (enum) |
+| 7 | Duration | `Single` |
+
 ## AIDirectorChunkEventComponent : `AIDirectorHordeComponent`
+
+Scout / activity-driven hordes (see also [spawning.md](spawning.md)).
+
 - `Tick(Double)` IL=79
 - `TickActiveSpawns(Single)` IL=66
-- `get_HasAnySpawns()` IL=6
-- `CheckToSpawn()` IL=18
-- `CheckToSpawn(AIDirectorChunkData)` IL=46
+- `CheckToSpawn()` IL=18 / `CheckToSpawn(AIDirectorChunkData)` IL=46
 - `SpawnScouts(Vector3)` IL=76
+- nested `Horde` helper type (7 methods in method list)
+
+**`Tick` body (verified):**
+
+1. Base `AIDirectorComponent.Tick`.
+2. Every **5 s** accumulated: `CheckToSpawn()`.
+3. Walk `Dictionary<Int64, AIDirectorChunkData>`; `AIDirectorChunkData.Tick(dt)`;
+   remove entries that expire.
+4. `TickActiveSpawns(dt)`.
 
 ## AIDirectorComponent : Object
-- `Tick(Double)` IL=1
+- `Tick(Double)` IL=1 (virtual base)
 
 ## AIDirectorConstants : Object
 
 ## `AIDirectorData` : Object
+
+Static noise table for smell / sound attraction.
+
+**Fields:** `Dictionary<String, AIDirectorData/Noise> noisySounds`.
+
+- `InitStatic()` IL=3
+- `AddNoisySound(String, Noise)` IL=5
+- `FindNoise(String, Noise&)` IL=11 (`TryGetValue`)
 
 ## AIDirectorEventsFromXml : MonoBehaviour
 - `Update()` IL=1
@@ -73,23 +126,58 @@ flowchart TB
 ## AIDirectorGameStagePartySpawner : Object
 - `Tick(Double)` IL=52
 - `CalcStageSpawnMax()` IL=30
-- `IncSpawnCount()` IL=7
-- `DecSpawnCount(Int32)` IL=15
+- `IncSpawnCount()` / `DecSpawnCount` IL=7 / 15
 - `get_canSpawn()` IL=11
 
+Used by `AIHordeSpawner` and blood-moon party logic for stage-scaled counts.
+
 ## `AIDirectorHordeComponent` : AIDirectorComponent
+
+Shared placement helpers for scout/wandering/chunk hordes.
+
+| Method | IL | Role |
+|---|---:|---|
+| `FindTargets` | **459** | pick living `AIDirectorPlayerState` targets; compute start / pitStop / end; ground checks via `FindOnGroundPos` + `Chunk.CanMobsSpawnAtPos` |
+| `FindScoutStartPos` | 192 | back-away start from end position |
+| `FindOnGroundPos` | 131 | snap candidate to spawnable ground |
+
+`FindTargets` pulls the player list exclusively from
+`AIDirectorPlayerManagementComponent` (not a raw world player scan).
 
 ## AIDirectorMarkerManagementComponent : AIDirectorComponent
 - `Tick(Double)` IL=7
 
 ## AIDirectorPlayerInventory : ValueType
 
+**Fields:** `List bag`, `List belt` (item id lists used for director interest).
+
+Mirrored from clients via `AIDirector.UpdatePlayerInventory` /
+`AIDirectorPlayerManagementComponent.UpdatePlayerInventory`.
+
 ## AIDirectorPlayerManagementComponent : AIDirectorComponent
-- `Tick(Double)` IL=7
-- `UpdatePlayerInventory(Int32,AIDirectorPlayerInventory)` IL=11
+
+- `Tick(Double)` IL=7 → `TickPlayerStates` IL=24 → per-state `TickPlayerState` IL=6
+- `UpdatePlayerInventory(Int32, AIDirectorPlayerInventory)` IL=11
 - `UpdatePlayerInventory(EntityPlayerLocal)` IL=7
 
+Owns the live `List<AIDirectorPlayerState>` that horde targeting reads.
+
 ## `AIDirectorPlayerState` : Object
+
+**Fields:** `EntityPlayer Player`, `AIDirectorPlayerInventory m_inventory`,
+`Boolean m_dead`, plus underground-check constants
+(`kCheckUndergroundTime`, `kNumBlocksUnderground`).
+
+| Method | IL |
+|---|---:|
+| `Construct(EntityPlayer)` | 8 |
+| `Reset` | 4 |
+| `Cleanup` | 1 |
+| `get/set Inventory` | 3 / 4 |
+| `get/set Dead` | 3 / 4 |
+
+`Dead` is consulted repeatedly inside `FindTargets` when building the living
+target list.
 
 ## AIDirectorPooledMarker : MonoBehaviour
 - `Update()` IL=1
@@ -98,12 +186,24 @@ flowchart TB
 
 ## AIDirectorSmellMarker : Object
 - `Tick(Double)` IL=71
+- 22 methods in the type surface (pathing/smell bookkeeping); static noise names resolve through `AIDirectorData.FindNoise`
 
 ## AIDirectorWanderingHordeComponent : `AIDirectorHordeComponent`
 - `Tick(Double)` IL=17
 - `TickActiveSpawns(Single)` IL=43
+- `TickNextTime(UInt64&, SpawnType)` IL=74
 - `StartSpawning(SpawnType)` IL=124
 - `get_HasAnySpawns()` IL=6
+
+## AIHordeSpawner : Object
+
+Screamer / event horde runner (not an `AIDirectorComponent`, but driven from
+director/spawn paths; see [spawning.md](spawning.md)).
+
+- `Tick(Double)` IL=**210**
+- Uses `AIDirector.CanSpawn`, builds `AIDirectorGameStagePartySpawner` members
+  from world players, `GetMobRandomSpawnPosWithWater` with radii **45..55**,
+  `World.SpawnEntityInWorld`, marks `EnumSpawnerSource`, `IncSpawnCount`.
 
 ## AIDirectorZombieState : Object
 
@@ -113,7 +213,9 @@ flowchart TB
 |---|---|
 | [entity-ai.md](entity-ai.md) | AI throttle |
 | [closed-gaps.md](closed-gaps.md) | Default components |
+| [spawning.md](spawning.md) | Scout/screamer horde lifecycle |
 
 ## Changelog
 
+- **2026-07-28:** CreateComponents order from IL; player state fields; chunk-event tick cadence; chunk-event wire; FindTargets; AIHordeSpawner radii; AIDirectorData noise map.
 - **2026-07-19:** Related docs table.

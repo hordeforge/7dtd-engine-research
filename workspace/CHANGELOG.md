@@ -1025,3 +1025,31 @@ from `dedicated-misc-systems.md`. Coverage still **unaccounted=0** after regen.
 **Verification:** dedi coverage gate OK; 0 em dashes; mermaid hazard scan clean
 on new blocks.
 
+## 2026-07-28 - region runtime path + AIDirector depth
+
+Second depth round after water.
+
+### Region / ticker (`save-region.md` §3)
+- `RegionFileManager`: no `Update` call sites; save is task-driven from
+  `cacheChunk` / world save into `DoSaveChunks` (IL=292).
+- Load ladder in `GetChunkSync` (IL=178): live cache → pending snapshot →
+  pending dirty chunk → save dir → load dir.
+- Snapshot blob: magic bytes `ttc\0` (116,116,99,0) + `UInt32` version **47**
+  + `Chunk.save`; writer path Deflate via `Noemax.GZip.DeflateOutputStream`.
+- `RegionFileRaw.WriteData` re-confirms `sectorsStartOffset` **779**.
+- `WorldBlockTicker.Tick` dual path: `tickScheduled` (cap 100/call) +
+  `tickRandom` (`max(n/100,1)` chunks/frame, 1200-tick per-chunk gate).
+- `WorldBlockTickerEntry` wire: u8x3 local pos, u16 blockId, u64 time, trailing
+  u16 written and discarded on read.
+
+### AIDirector (`aidirector.md`)
+- `CreateComponents` order verified from IL (Marker, Player, WanderingHorde,
+  AirDrop, ChunkEvent, BloodMoon) with cached fields.
+- `AIDirectorPlayerState` fields + dead/inventory accessors; management ticks
+  the state list that `FindTargets` (IL=459) reads.
+- Chunk-event component: 5 s `CheckToSpawn`, per-chunk `AIDirectorChunkData`
+  map, active spawns; chunk-event wire version 2.
+- `AIDirectorData` noise dictionary; `AIHordeSpawner.Tick` radii 45..55.
+
+Coverage after regen: narrated **1269 (34%)**, unaccounted **0**. Gates green.
+
