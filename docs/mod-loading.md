@@ -2,9 +2,10 @@
 
 **Owns:** how the dedicated server discovers and loads mods at boot: `ModManager`
 (scan + load pipeline), `Mod` (per-mod load state, assembly load, `InitModCode`),
-the EAC gate for code mods, and the `ModEvents` hook lifecycle.
+the EAC gate for code mods, the `ModEvents` hook lifecycle, and the stock/mod
+XML load+xpath patch pipeline (`WorldStaticData`, `XmlFile`, `XmlPatcher`).
 **Not:** the `ModEvents` field inventory ([managers.md](managers.md) owns that);
-individual mod behavior; XML/atlas/localization content patched by mods.
+individual mod behavior; the semantics of each game XML (blocks/items/loot/...).
 **Evidence:** `ModManager`, `Mod`, `ModInfo` IL (dump locally with
 `tools/src/DumpMethod`, git-ignored). **Hub:** [`INDEX.md`](INDEX.md).
 **Method:** [`re-methodology.md`](re-methodology.md).
@@ -111,9 +112,115 @@ extension surface across the dedicated systems.
 - **Dedicated boot path:** the server loads mods at startup and fires ModEvents
   hooks throughout its runtime.
 - **EAC coupling:** code mods force EAC-off; XML-only mods do not.
-- **Residual / content:** `ModInfo.xml`, XML/atlas/localization patches, and each
-  mod's own behavior are outside this repo (the companion optimizer/RealEarth mods
-  document themselves).
+- **Residual / content:** per-mod behavior and the *gameplay meaning* of each
+  `Data/Config/*.xml` live with their subsystem docs; this section owns the
+  load/patch *machinery*.
+
+---
+
+## 5. Config XML load and xpath patching
+
+Stock config and mod XML patches share one managed pipeline.
+
+### 5.1 Call graph (verified)
+
+| Caller | Callee | Role |
+|---|---|---|
+| `GameManager.StartAsServer` coroutine | `WorldStaticData.LoadAllXmlsCo` | full stock config table at dedi boot |
+| `WorldStaticData.Init` / `ReloadAllXmlsSync` | `LoadAllXmlsCo` | init + admin reload |
+| `GameManager.Awake` / `startGameCo` | `ModManager.LoadPatchStuff` | mod Config XML merge (coroutine, IL=6 state-machine entry) |
+| `XmlPatcher.LoadAndPatchConfig` / `XmlPatchMethods.Conditional` / `Include` | `XmlPatcher.PatchXml` | apply a patch file's child elements |
+
+```mermaid
+flowchart TB
+  Boot[GameManager.StartAsServer] --> WSD[WorldStaticData.LoadAllXmlsCo]
+  WSD --> Loaders["*FromXml loaders via XmlFile"]
+  Awake[GameManager.Awake / startGameCo] --> LPS[ModManager.LoadPatchStuff]
+  LPS --> PatchFiles[per-mod Config XML patches]
+  PatchFiles --> PX[XmlPatcher.PatchXml]
+  PX --> SP[XmlPatcher.singlePatch per child element]
+  SP --> Meth[XmlPatchMethods.* by element name]
+  Meth --> XF[XmlFile XDocument + XPathEvaluate]
+```
+
+### 5.2 `XmlFile`
+
+Thin owner of one loaded config document.
+
+**Fields:** `Directory`, `Filename`, `Loaded`, `XmlDoc` (`XDocument`),
+`tempXpathMatchList`.
+
+| Method | IL | Behavior |
+|---|---:|---|
+| `load(directory,file)` | 35 | `GameIO.GetDirectory` `*.xml`, `SdFile.OpenRead`, stream load |
+| `load(stream,name)` | 38 | `XDocument.Load(TextReader)`; sets `Loaded` |
+| `toXml(string)` | 28 | `XDocument.Parse` |
+| `GetXpathResultsInList` | 29 | `XPathEvaluate` on `XmlDoc`, cast to `XObject`, fill list |
+| `SerializeToString` / `SerializeToStream` | 32 / 23 | write `XmlDoc` via `XmlWriter` |
+
+Default ctor path uses directory **`Data/Config`** and appends `.xml`.
+
+Every `*FromXml` loader (blocks, items, loot, buffs, entity classes, dialogs,
+game stages, ...) takes or constructs `XmlFile` instances (RefScan: 60+ outer
+types). That is the stock config surface the dedicated always runs.
+
+### 5.3 `XmlPatcher`
+
+Static-ish registry of named patch operations + apply loop.
+
+**Fields:** `Dictionary<String, PatchMethodDefinition> XpathPatchMethods`.
+
+**Registration:** cctor reflection discovers methods tagged with
+`XmlPatchMethodAttribute` whose signature matches `XpathDelegate`
+`(XmlFile, String xpath, XElement, XmlFile patchFile, Mod) -> int`, then
+`addXmlFilePatchMethod`. Redeclarations log a warning.
+
+**`PatchXml` (IL=71):** foreach child `XElement` of the patch container, call
+`singlePatch`; on failure log mod name, element string, line/pos.
+
+**`singlePatch` (IL=120):**
+
+1. Look up element **local name** in `XpathPatchMethods` (unknown name -> error).
+2. If the method requires xpath, demand attribute `xpath`.
+3. Invoke the registered `XpathDelegate` with target `XmlFile`, xpath string,
+   patch element, patch file, patching `Mod`.
+4. XPath failures become structured log lines (`XML.Patch (...): XPath evaluation failed`).
+
+**Built-in operations (`XmlPatchMethods`, verified method list):**
+
+| Element name (method) | Effect class |
+|---|---|
+| `SetByXPath` / `SetAttributeByXPath` | replace node or attribute text |
+| `AppendByXPath` / `PrependByXPath` | insert children |
+| `InsertAfterByXPath` / `InsertBeforeByXPath` | sibling insert |
+| `RemoveByXPath` / `RemoveAttributeByXPath` | delete |
+| `CsvOperationsByXPath` | list-field edits |
+| `Conditional` | nested `PatchXml` when condition holds |
+| `Include` | pull another patch file (`@modfolder:` path rewrite via `ReadPatchXmlWithFixedModFolders`) |
+
+`ReadPatchXmlWithFixedModFolders` rewrites `@modfolder:` / `@modfolder(Name):`
+tokens to the patching mod's path before load.
+
+`XmlPatchException.buildMessage` formats patch element + method + message for
+throw sites.
+
+### 5.4 `MapVisitor` (console AABB walk)
+
+Not part of mod load, but it is the other high-method "visitor" leaf that was
+only catalogued. **Sole external referrer:** `ConsoleCmdVisitMap`.
+
+**Fields:** `OnVisitChunk` / `OnVisitMapDone` delegates, coroutine, `ChunkObserver`,
+chunk AABB (`chunkPos1`/`chunkPos2`), `hasBeenStarted`.
+
+| Method | IL | Behavior |
+|---|---:|---|
+| ctor(worldPos1, worldPos2) | 51 | convert corners with `World.toChunkXZ` |
+| `Start` | 12 | `ThreadManager.StartCoroutine(visitCo)` |
+| `Stop` | 20 | stop coroutine; `GameManager.RemoveChunkObserver` |
+| `chunkXZtoBlockXZ` / pos getters | small | coordinate helpers |
+
+Used by admins/tools to force-load and iterate a world rectangle (e.g. pregen /
+scan), not by the steady sim loop.
 
 ---
 
@@ -125,7 +232,10 @@ extension surface across the dedicated systems.
 | [server-lifecycle.md](server-lifecycle.md) | Boot (mods load) + shutdown (mods cleanup) |
 | [platform-auth.md](platform-auth.md) | EAC gate that code mods force off |
 | [full-surface.md](full-surface.md) | Whole-assembly map |
+| [dedicated-misc-systems.md](dedicated-misc-systems.md) | Individual *FromXml loaders (entity classes, events, ...) |
+| [console-commands.md](console-commands.md) | `visitmap` host for MapVisitor |
 
 ## Changelog
 
+- **2026-07-28:** XmlFile/XmlPatcher xpath pipeline, XmlPatchMethods catalog, WorldStaticData/LoadPatchStuff callers, MapVisitor console visitor.
 - **2026-07-23:** Initial mod-loading reversal (ModManager pipeline, Mod load-state, EAC gate, ModEvents lifecycle) with state machines.

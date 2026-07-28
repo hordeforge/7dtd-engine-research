@@ -1068,3 +1068,16 @@ Third depth round.
 
 Coverage: narrated **1273 (34%)**, unaccounted **0**.
 
+## 2026-07-28 - config XML xpath patch pipeline + MapVisitor
+
+Fourth depth round.
+
+- Expanded `mod-loading.md` §5: `WorldStaticData.LoadAllXmlsCo` and
+  `ModManager.LoadPatchStuff` callers; `XmlFile` load/xpath/serialize surface;
+  `XmlPatcher.singlePatch` method registry; full `XmlPatchMethods` operation
+  catalog (set/append/insert/remove/csv/conditional/include) with
+  `@modfolder:` rewrite.
+- Documented `MapVisitor` as console-only AABB chunk walk (`ConsoleCmdVisitMap`).
+
+Coverage still unaccounted **0**.
+
