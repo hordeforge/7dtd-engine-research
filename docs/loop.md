@@ -173,7 +173,7 @@ stateDiagram-v2
 
 **If !IsServer:** return.
 
-**Server:** WorldBlockTicker.Tick → (every **20** game ticks) area-master biome **SpawnUpdate** → AIDirector.Tick → TickSleeperVolumes.
+**Server:** `WorldBlockTicker`.Tick → (every **20** game ticks) area-master biome **SpawnUpdate** → `AIDirector`.Tick → TickSleeperVolumes.
 
 ### 3.3 Dual entity simulation paths
 
@@ -245,18 +245,18 @@ Deep detail: [`entity-ai.md`](entity-ai.md), path/net gaps: [`closed-gaps.md`](c
 
 ---
 
-## 5. Spawn / sleeper / AIDirector
+## 5. Spawn / sleeper / `AIDirector`
 
 | Piece | Method | IL | Scale |
 |---|---|---:|---|
 | Biome spawn | SpawnManagerBiomes.SpawnUpdate | **441** | Every ~20 ticks × area-master chunks |
 | Sleeper | SleeperVolume.Tick | 137 | All volumes |
 | Sleeper touch | UpdatePlayerTouched / CheckTouching | 172 / 165 | Players near POI |
-| AIDirector | ComponentsTick | 21 | Always-on components (see below) |
+| `AIDirector` | ComponentsTick | 21 | Always-on components (see below) |
 | Blood moon | AIDirectorBloodMoonComponent.Tick | **170** | Start/End BM, parties.Tick, KillPartyZombies |
 | Wandering/scout horde | AI*HordeSpawner Update* | 100-229 | When active |
 
-**AIDirector.CreateComponents always installs (fixed order):** MarkerManagement, PlayerManagement, WanderingHorde, AirDrop, ChunkEvent, BloodMoon. Constructed from `WorldState.SetFrom` → `new AIDirector()`.
+**`AIDirector`.CreateComponents always installs (fixed order):** MarkerManagement, PlayerManagement, WanderingHorde, AirDrop, ChunkEvent, BloodMoon. Constructed from `WorldState.SetFrom` → `new `AIDirector`()`.
 
 **Scale:** spawn ∝ active area-master chunks × prefs; BM ∝ parties × enemy counts (GameStats).
 
@@ -316,7 +316,7 @@ ProtocolManager.Update → server: ProcessPackages (× clients × channels), Flu
 | WaterSplashCubes.Update | **185** | Dedi skip candidate |
 | MultiBlockManager.MainThreadUpdate | 5 | Thin; stability helpers larger |
 | DynamicMusic.Conductor | - | ES optional skip |
-| WorldBlockTicker.tickScheduled / tickRandom | 151 / 97 | Block schedules + random chunk ticks |
+| `WorldBlockTicker`.tickScheduled / tickRandom | 151 / 97 | Block schedules + random chunk ticks |
 | BlockLiquidv2.UpdateTime | - | From gmUpdate |
 
 ---
@@ -403,7 +403,7 @@ Coverage of managed families: [`coverage.md`](coverage.md).
 | ModEvents subscribers | content-dependent |
 | Dump drift after patches | regenerate |
 
-Managed closures worth remembering: GameTimer 20 Hz, AIDirector install list, ASP→AstarPath, net package bands, Origin **no-op on dedicated**, chunk save layer loop **64**, WorldState.SaveLoad field set.
+Managed closures worth remembering: GameTimer 20 Hz, `AIDirector` install list, ASP→AstarPath, net package bands, Origin **no-op on dedicated**, chunk save layer loop **64**, WorldState.SaveLoad field set.
 
 ---
 
@@ -443,5 +443,5 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 - **2026-07-18:** Origin + region type map partially closed via RealEarth surfaces dump; link new research docs.
 - **2026-07-16:** Relocated with other research narratives to `docs/` (IL dumps stay in `il/`).
 - **2026-07-16:** Optim narrative moved to `7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`; §13 is a pointer only.
-- **2026-07-16:** Gap-close pass: ticks/sec=20, AIDirector CreateComponents list, ASP→AstarPath, net package thresholds, MB classification; update §14.
+- **2026-07-16:** Gap-close pass: ticks/sec=20, `AIDirector` CreateComponents list, ASP→AstarPath, net package thresholds, MB classification; update §14.
 - **2026-07-16:** Initial complete dedicated loop map: peers, phases, dual entity paths, all subsystem families, optim anchors, open gaps.

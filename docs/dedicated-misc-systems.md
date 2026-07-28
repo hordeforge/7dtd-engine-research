@@ -53,7 +53,8 @@ when chunks unload or reset. `WaterUtils` is the shared helper set:
 `WaterSimulationNative/ChunkHandle`, the per-chunk handle a `Chunk` gets via
 `AssignWaterSimHandle` into the native water sim (`SetVoxelSolid`,
 `SetWaterMass`, `WakeNeighbours`). All three complement the water pipeline in
-[light-mesh-water.md](light-mesh-water.md).
+[light-mesh-water.md](light-mesh-water.md) §4 (job graph, flow rules, net
+backpressure, mass constants).
 
 ## BossGroup
 

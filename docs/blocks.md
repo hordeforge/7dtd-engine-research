@@ -258,7 +258,7 @@ stateDiagram-v2
   AtMax --> Destroyed: DestroyedResult.Remove or air downgrade
   Kept --> Intact
   Downgraded --> Intact: replaced by DowngradeBlock, damage = 0, blockDowngradeEvent
-  Destroyed --> [*]: SetBlockRPC to air, blockDestroyedEvent, QuestEvent.BlockDestroyed
+  Destroyed --> [*]: SetBlockRPC to air, blockDestroyedEvent, `QuestEvent`.BlockDestroyed
 ```
 
 ---

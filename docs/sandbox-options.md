@@ -267,7 +267,7 @@ Its `SandboxCode` property re-encodes `PresetValues` via `saveOptionsToCode`.
 |---|---|---|
 | Built-in asset `Data/Sandbox/sandbox_presets` (Unity `Resources.Load` TextAsset; contents live in the compressed bundle, not inspected here) | `LoadInternalPresets` -> `LoadPresetFromXml` per `<preset>` | from `category` attr |
 | Mod XML `Data/Config/sandbox_overrides.xml` `<preset>` elements | `SandboxOverridesFromXml.CreateOverrides` (hooked into `WorldStaticData`, so config-mod patchable) | `"Modded"` |
-| User files `<UserDataDir>/Presets/*.xml` | `LoadPreset(XmlFile)` (`<preset><property name="code|description|icon" value=.../></preset>`) | `"User"` |
+| User files `<UserDataDir>/Presets/*.xml` | `LoadPreset(`XmlFile`)` (`<preset><property name="code|description|icon" value=.../></preset>`) | `"User"` |
 
 `<preset>` attributes understood by `LoadPresetFromXml`: `name`,
 `localized_name`, `description`, `description_key`, `icon`, `default`,

@@ -418,3 +418,293 @@ misclassified. The rule is now **dominance** (server referrers outnumber client 
 - **2026-07-26:** Round-2 promotion of 19 gameplay types out of the out-of-scope bucket after an independent review showed it was never referrer-verified; promotion rule changed from zero-client-referrers to server-dominance.
 - **2026-07-24:** Added 48 types promoted out of the out-of-scope classification after a referrer scan (`tools/src/RefScan`) showed server-only referrers; name-based classification had put them in the wrong bucket.
 - **2026-07-24:** Promoted to a full per-leaf reference (IL-derived base + fingerprint via `tools/src/LeafInfo`); substantive groups (AI/loot/items/spawning/quests/combat) narrated in prose in their owning docs, client-only leaves marked.
+
+## Promoted unaccounted server surface (2026-07-28)
+
+Types that were in the Coverage unaccounted set, confirmed **server-dominant** (or
+reflection/XML-reached) by `tools/src/RefScan`, and not already in the leaf catalog.
+Fingerprints from `tools/src/LeafInfo`. Roles are name-derived; verify against IL
+before treating a row as a behavioral claim. Infra collections are classified in
+[`out-of-scope-surface.md`](../out-of-scope-surface.md) instead.
+
+### aidirector / spawning (5)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `AIDirectorPlayerState` | AIDirector Player State | `Object` | Construct, Reset, Cleanup |
+| `Horde` | Horde | `Object` | SpawnMore, Tick, Destroy, SetSpawnPos |
+| `AIDirectorData` | AIDirector Data | `Object` | FindNoise, Cleanup, AddNoisySound, InitStatic |
+| `AIDirectorChunkEvent` | AIDirector Chunk Event | `Object` | Read, Write |
+| `AIDirectorHordeComponent` | AIDirector Horde Component | `AIDirectorComponent` | FindTargets, FindScoutStartPos, FindOnGroundPos |
+
+### blocks (11)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `BlockNodeMap` | Block Node Map | `Object` | Refresh, PopulateFromFile, TryGetValue, PopulateFromRoot |
+| `BlockSwitchController` | Block Switch Controller | `MonoBehaviour` | UpdateLights, SetState, Start |
+| `ShapeCategory` | Shape Category | `Object` | CompareTo, CompareTo |
+| `BlockSwitchSingleController` | Block Switch Single Controller | `MonoBehaviour` | SetState, SetState, Start |
+| `BlockingQueue` | Blocking Queue | `Object` | (generic/nested; see IL) |
+| `POIBoundsSideHelper` | POIBounds Side Helper | `MonoBehaviour` | SetSize, OnTriggerEnter, OnTriggerExit, Setup |
+| `BlockActivationCommand` | Block Activation Command | `ValueType` | (fields only) |
+| `BlockPlacementDrawBridge` | Block Placement Draw Bridge | `BlockPlacementTowardsPlacer` | LimitRotation |
+| `BlockPlacementTowardsPlacer` | Block Placement Towards Placer | `BlockPlacement` | OnPlaceBlock |
+| `BlockData` | Block Data | `Object` | (fields only) |
+| `BlockData` | Block Data | `Object` | (fields only) |
+
+### entities (11)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `EntityLockContext` | Entity Lock Context | `Object` | Write, Read |
+| `EntityInstanceAssets` | Entity Instance Assets | `Object` | Load, WaitForComplete, Release, OnPrefabLoaded |
+| `EntityCreateHandle` | Entity Create Handle | `Object` | TryComplete, WaitForComplete |
+| `AutoMove` | Auto Move | `Object` | Update, StartOrbit, StartLine, StartRelative |
+| `EntityTraderLockContext` | Entity Trader Lock Context | `Object` | Read, Write |
+| `PhysicsBodyColliderConfiguration` | Physics Body Collider Configuration | `Object` | Read, Write, vecFromString, vecToString |
+| `PhysicsBodyInstance` | Physics Body Instance | `Object` | bindCollider, GetTransformForColliderTag, SetColliderMode, BindColliders |
+| `VendingMachineLockContext` | Vending Machine Lock Context | `Object` | Read, Write |
+| `EntityFlying` | Entity Flying | `EntityEnemy` | MoveEntityHeaded, IsAirBorne |
+| `EntityZombie` | Entity Zombie | `EntityHuman` | (fields only) |
+| `EAITaskEntry` | EAITask Entry | `Object` | (fields only) |
+
+### items / traders (22)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `PreviewData` | Preview Data | `Object` | GetDisplayValues |
+| `Bonuses` | Bonuses | `ValueType` | (fields only) |
+| `FuelType` | Fuel Type | `Object` | (fields only) |
+| `InventoryBase` | Inventory Base | `Object` | (fields only) |
+| `ItemActionDataCatapult` | Item Action Data Catapult | `ItemActionDataLauncher` | (fields only) |
+| `ItemActionDataSpawnEntity` | Item Action Data Spawn Entity | `ItemActionAttackData` | (fields only) |
+| `ItemActionDataZoom` | Item Action Data Zoom | `ItemActionData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `MyInventoryData` | My Inventory Data | `ItemActionAttackData` | (fields only) |
+| `TierItemGroup` | Tier Item Group | `Object` | (fields only) |
+| `TraderItem` | Trader Item | `Object` | (fields only) |
+| `TraderItemEntry` | Trader Item Entry | `Object` | (fields only) |
+| `TraderItemGroup` | Trader Item Group | `Object` | (fields only) |
+| `WorkstationData` | Workstation Data | `Object` | (fields only) |
+
+### light-mesh-water (6)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `WaterSimulationCalcFlows` | Water Simulation Calc Flows | `ValueType` | ProcessFlows, ProcessFlowSide, ProcessFlowBelow, ProcessGroundWaterFlowSide |
+| `WaterNeighborCacheNative` | Water Neighbor Cache Native | `ValueType` | TryGetNeighbor, SetChunk, SetVoxel, InitializeCache |
+| `WaterSimulationPreProcess` | Water Simulation Pre Process | `ValueType` | Execute, WakeNeighbor, WakeNeighbor, TryTrackChunk |
+| `WaterSimulationApplyFlows` | Water Simulation Apply Flows | `ValueType` | Execute, WakeNeighbor, WakeNeighbor |
+| `WaterConstants` | Water Constants | `Object` | GetStableMassBelow |
+| `WaterSimulationPostProcess` | Water Simulation Post Process | `ValueType` | Execute |
+
+### mixed server surface (52)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `PrefabChunk` | Prefab Chunk | `Object` | checkCoordinates, IsAir, GetTerrainHeight, GetBlockFaceTexture |
+| `PrefabHelpers` | Prefab Helpers | `Object` | smoothChunk, SimplifyPrefab, mergePrefab, combine |
+| `Vector2i` | Vector2i | `ValueType` | Normalize, Distance, DistanceSqr, DistanceSqrInt |
+| `ProfilerUtils` | Profiler Utils | `Object` | GetAvailableMetricsCsv, AppendLastValue, CalculateTextureSizeBytes, CalculateUnsafeParallelHashMapBytes |
+| `EnumDecoAllowedExtensions` | Enum Deco Allowed Extensions | `Object` | ToStringInternal, ToStringFriendlyCached, WithStreetOnly, IsNothing |
+| `SmartArray` | Smart Array | `Object` | set, get, clear, read |
+| `RingBuffer` | Ring Buffer | `Object` | (generic/nested; see IL) |
+| `ArrayWithOffset` | Array With Offset | `Object` | (generic/nested; see IL) |
+| `ProceduralGridMover` | Procedural Grid Mover | `Object` | UpdateGraph, PointToGraphSpace, UpdateGraphCoroutine |
+| `UnsafeBitArraySetIndicesEnumerator` | Unsafe Bit Array Set Indices Enumerator | `ValueType` | MoveNext, Reset, Dispose |
+| `UpdatePhysics` | Update Physics | `Object` | MoveNext, Dispose, Reset |
+| `Contextual` | Contextual | `Object` | DoesWorldExist, FindWorld, FindActiveWorld, FindDownloadedRemoteWorld |
+| `ReadOnlyListWrapper` | Read Only List Wrapper | `Object` | (generic/nested; see IL) |
+| `RegionData` | Region Data | `Object` | Load, Save, SetChunkData, GetChunkData |
+| `ThreadInfo` | Thread Info | `Object` | WaitForEnd, RequestTermination, TerminationRequested, HasTerminated |
+| `VoxelNode` | Voxel Node | `LevelGridNode` | UpdateRecursiveG, ClearCustomConnections, Reset, Cleanup |
+| `HitLocation` | Hit Location | `TargetedCompareRequirementBase` | ParseXAttribute, IsValid, GetInfoStrings |
+| `IOUtils` | IOUtils | `Object` | HashUint, CalcHashSync, CalcHashCoroutine, CalcCrcCoroutine |
+| `NoThreadingSemantics` | No Threading Semantics | `Object` | InterlockedAdd, Synchronize, Synchronize |
+| `ProfilerGameUtils` | Profiler Game Utils | `Object` | TryGetFlyingPlayer, WaitForSingleChunkToLoad, WaitForSingleChunkToLoad, WaitForChunksAroundObserverToLoad |
+| `WaveReader` | Wave Reader | `Object` | Read, Cleanup |
+| `BackedArrays` | Backed Arrays | `Object` | CreateSingleView, Create |
+| `CompareItemMetaFloat` | Compare Item Meta Float | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute |
+| `RegionItemData` | Region Item Data | `Object` | Update, Update |
+| `CatalystConvert` | Catalyst Convert | `Object` | Convert |
+| `ColorMappingData` | Color Mapping Data | `Object` | (fields only) |
+| `LNLAuthConnectionState` | LNLAuth Connection State | `Object` | (fields only) |
+| `ParsingMethodData` | Parsing Method Data | `Object` | TryGetDelegateForSourceType |
+| `TaskGroup` | Task Group | `Object` | (fields only) |
+| `TierSpec` | Tier Spec | `ValueType` | (fields only) |
+| `TraderComparer` | Trader Comparer | `Object` | Compare |
+| `Trajectory` | Trajectory | `Object` | Calculate, SuggestVelocity_CustomArc |
+| `UnlockData` | Unlock Data | `Object` | (fields only) |
+| `VoxeChunkInfo` | Voxe Chunk Info | `Object` | IsEmpty |
+| `Arrays` | Arrays | `Object` | (fields only) |
+| `AsyncItem` | Async Item | `Object` | (fields only) |
+| `FunctionDefinition` | Function Definition | `Object` | (fields only) |
+| `GroupOffsets` | Group Offsets | `ValueType` | WithOffsets |
+| `ILockable` | ILockable | `` | GetHashForPassword |
+| `Location` | Location | `Object` | (fields only) |
+| `Node` | Node | `Object` | (fields only) |
+| `ProfilerCaptureUtils` | Profiler Capture Utils | `Object` | CreateMemoryProfiler |
+| `SBlockPosValue` | SBlock Pos Value | `ValueType` | (fields only) |
+| `SEnts` | SEnts | `ValueType` | (fields only) |
+| `SGameStartingData` | SGame Starting Data | `ValueType` | (fields only) |
+| `SItemDropProb` | SItem Drop Prob | `ValueType` | (fields only) |
+| `SNetPackageInfo` | SNet Package Info | `ValueType` | (fields only) |
+| `SPlayerJoinedGameData` | SPlayer Joined Game Data | `ValueType` | (fields only) |
+| `SpawnGroup` | Spawn Group | `Object` | (fields only) |
+| `ThreadRegeneratingData` | Thread Regenerating Data | `Object` | (fields only) |
+| `TrackedBlockData` | Tracked Block Data | `ValueType` | (fields only) |
+| `Triangle` | Triangle | `ValueType` | (fields only) |
+
+### network / protocol (6)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `NetConnectionStatistics` | Net Connection Statistics | `Object` | GetPackageTypes, RegisterReceivedPackage, RegisterSentPackage, GetStats |
+| `NetConnectionSteam` | Net Connection Steam | `NetConnectionAbs` | Task_CommWriter, Task_CommReader, InitStreams, AppendToReaderStream |
+| `NetPackageLight` | Net Package Light | `NetPackage` | ProcessPackage, write, read, Setup |
+| `NetPackageTreeFade` | Net Package Tree Fade | `NetPackage` | ProcessPackage, write, Setup, read |
+| `NetPackageDroneParticleEffect` | Net Package Drone Particle Effect | `NetPackage` | ProcessPackage, read, write, Setup |
+| `NetEntityPackageQueue` | Net Entity Package Queue | `Object` | Cleanup, ProcessPackagesForEntity, EnqueueNetPackageForEntity, HasPackagesForEntity |
+
+### quests / dialog (4)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `QuestEvent` | Quest Event | `Object` | Clone, HandleEvent, ParseProperties |
+| `TrackingHandler` | Tracking Handler | `Object` | HandleTracking, Update, RemoveTrackingEntry, AddTrackingEntry |
+| `PlayerQuestData` | Player Quest Data | `Object` | (fields only) |
+| `DialogResponseEntry` | Dialog Response Entry | `BaseResponseEntry` | (fields only) |
+
+### requirements / predicates (26)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `StatCompareAbs` | Stat Compare Abs | `TargetedCompareRequirementBase` | ParseXAttribute, GetInfoStrings, IsValid |
+| `ArmorGroupCount` | Armor Group Count | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `ArmorGroupLowestQuality` | Armor Group Lowest Quality | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `BlockHasTags` | Block Has Tags | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `BlockStandingOn` | Block Standing On | `TargetedCompareRequirementBase` | ParseXAttribute, IsValid, GetInfoStrings |
+| `CVarCompare` | CVar Compare | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `HasAttachedPrefab` | Has Attached Prefab | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `HoldingItemHasTags` | Holding Item Has Tags | `TargetedCompareRequirementBase` | ParseXAttribute, IsValid, GetInfoStrings |
+| `IsLookingAtBlock` | Is Looking At Block | `RequirementBase` | ParseXAttribute, IsValid, raycast |
+| `ItemHasTags` | Item Has Tags | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `NotHasBuff` | Not Has Buff | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `PerksUnlocked` | Perks Unlocked | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `PlayerItemCount` | Player Item Count | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `ProgressionLevel` | Progression Level | `TargetedCompareRequirementBase` | IsValid, GetInfoStrings, ParseXAttribute |
+| `RecipeUnlocked` | Recipe Unlocked | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `RequirementItemModTier` | Requirement Item Mod Tier | `RequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `TriggerHasTags` | Trigger Has Tags | `TargetedCompareRequirementBase` | ParseXAttribute, IsValid, GetInfoStrings |
+| `WornItemMods` | Worn Item Mods | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `WornItems` | Worn Items | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute, GetInfoStrings |
+| `EntityHasMovementTag` | Entity Has Movement Tag | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute |
+| `EntityHasStanceTag` | Entity Has Stance Tag | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute |
+| `EntityTagCompare` | Entity Tag Compare | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute |
+| `IsStatAtMax` | Is Stat At Max | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute |
+| `PlayerItemCountByTags` | Player Item Count By Tags | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute |
+| `ProjectileHasTags` | Projectile Has Tags | `TargetedCompareRequirementBase` | IsValid, ParseXAttribute |
+| `IsLookingAtEntity` | Is Looking At Entity | `IsLookingAtBlock` | ParseXAttribute |
+
+### save / chunks (15)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `MapVisitor` | Map Visitor | `Object` | Stop, chunkXZtoBlockXZ, Start, chunkPosToBlockPos |
+| `CachedStream` | Cached Stream | `Object` | EnterLock, ExitLock, Commit, Dispose |
+| `SlotSizeData` | Slot Size Data | `Object` | UpdateLargestPriorityFileSize, SetFileSize, RemoveFileSize, RemoveFileSizes |
+| `RegionFileSectorBased` | Region File Sector Based | `RegionFile` | Get, GetLocationInfo, SetLocationInfo, GetOffsetFromXz |
+| `RegionFile` | Region File | `Object` | ConstructFullFilePath, ToShort, GetPositionAndPath, FromShort |
+| `WorldBlockTickerEntry` | World Block Ticker Entry | `Object` | Write, Read, GetChunkKey, ToHashCode |
+| `ChunkSnapshotUtil` | Chunk Snapshot Util | `Object` | LoadChunk, Free, TakeSnapshot, WriteSnapshot |
+| `RegionFileChunkSnapshot` | Region File Chunk Snapshot | `Object` | Update, Write, Reset, Cleanup |
+| `RegionFileFactoryRaw` | Region File Factory Raw | `Object` | CreateSnapshotUtil, CreateRegionFileAccess, CreateDebugUtil |
+| `RegionFileFactorySectorBased` | Region File Factory Sector Based | `Object` | CreateSnapshotUtil, CreateRegionFileAccess, CreateDebugUtil |
+| `SharedChunkObserverCache` | Shared Chunk Observer Cache | `Object` | removeChunkObserver, GetSharedObserverForChunk |
+| `RegionFileChunkReader` | Region File Chunk Reader | `Object` | readIntoLoadStream, WriteBackup |
+| `ScopedChunkAccess` | Scoped Chunk Access | `Object` | GetChunkReadAccess, GetChunkWriteAccess, GetChunkWriteAccess |
+| `RegionFileChunkWriter` | Region File Chunk Writer | `Object` | WriteStreamCompressed |
+| `RegionFilePlatform` | Region File Platform | `Object` | CreateFactory |
+
+### uai / pathing (8)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `TraversalProvider` | Traversal Provider | `Object` | CanTraverse, CanTraverseConnection, GetTraversalCost |
+| `TraversalProviderNoBreak` | Traversal Provider No Break | `Object` | CanTraverseConnection, CanTraverse, GetTraversalCost |
+| `Context` | Context | `Object` | (fields only) |
+| `FloodFillNodeScore` | Flood Fill Node Score | `Object` | (fields only) |
+| `NearestEntitySorter` | Nearest Entity Sorter | `Object` | Compare |
+| `PathNode` | Path Node | `ValueType` | Set |
+| `RaycastNodeInfo` | Raycast Node Info | `Object` | (fields only) |
+| `PathInfoSingleTarget` | Path Info Single Target | `PathInfo` | (fields only) |
+
+### worldgen / sandbox / ops (35)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `FlatArea` | Flat Area | `Object` | IsValid, GetPositions, GetRandomPosition, IsInArea |
+| `Builder` | Builder | `Object` | Build, SetPropId, SetPosition, SetRotation |
+| `SandboxOptionValueSetBool` | Sandbox Option Value Set Bool | `SandboxOptionValueSet` | GetBoolIndex, GetBoolValue, GetDisplayAtIndex, IsValidIndex |
+| `SandboxOptionValueSetInt` | Sandbox Option Value Set Int | `SandboxOptionValueSet` | GetDisplayAtIndex, GetIntIndex, GetIntValue, IsValidIndex |
+| `WebCommandResult` | Web Command Result | `Object` | SendLines, GetDescription, SendLine, SendLog |
+| `IntRange` | Int Range | `ValueType` | IsSet, RandomInclusive, Random |
+| `Param` | Param | `Object` | FrameUpdate, SetTarget, Clamp, Set |
+| `PoiMapElement` | Poi Map Element | `Object` | GetRandomDecal, GetRandomBlockOnTop, GetDecal |
+| `ServerDateTimeRequest` | Server Date Time Request | `Object` | SwapEndianness, FetchNtpTimeAsync, GetNtpTimeAsync |
+| `Stage` | Stage | `Object` | GetSpawnGroup, AddSpawnGroup |
+| `District` | District | `Object` | Init |
+| `Writer` | Writer | `ValueType` | Dispose, RecordChange |
+| `IBiomeProvider` | IBiome Provider | `` | GetBiomeOrSubAt, Cleanup |
+| `OutputType` | Output Type | `Object` | safeParseInt |
+| `PlayerSpawn` | Player Spawn | `ValueType` | IsTooClose |
+| `RandomCountyNameGenerator` | Random County Name Generator | `Object` | GetName |
+| `TranslationData` | Translation Data | `ValueType` | (fields only) |
+| `WorldCreationData` | World Creation Data | `Object` | Apply |
+| `BiomePrefabDecoration` | Biome Prefab Decoration | `Object` | (fields only) |
+| `BiomeStats` | Biome Stats | `Object` | (fields only) |
+| `BiomeTypeData` | Biome Type Data | `Object` | (fields only) |
+| `Config` | Config | `ValueType` | (fields only) |
+| `ExitConnection` | Exit Connection | `Object` | (fields only) |
+| `Force` | Force | `Object` | (fields only) |
+| `LoadingStats` | Loading Stats | `Object` | (fields only) |
+| `Noise` | Noise | `ValueType` | (fields only) |
+| `OperationData` | Operation Data | `Object` | (fields only) |
+| `POIWeightData` | POIWeight Data | `Object` | (fields only) |
+| `PoiMapBlock` | Poi Map Block | `Object` | (fields only) |
+| `PoiMapDecal` | Poi Map Decal | `Object` | (fields only) |
+| `Sample` | Sample | `ValueType` | (fields only) |
+| `TileGroup` | Tile Group | `Object` | (fields only) |
+| `TownshipData` | Township Data | `Object` | (fields only) |
+| `TownshipSpawnInfo` | Township Spawn Info | `Object` | (fields only) |
+| `WildernessPathInfo` | Wilderness Path Info | `Object` | (fields only) |
+
+### xml loaders (15)
+
+| Leaf | Role | Base | Key methods |
+|---|---|---|---|
+| `XmlFile` | Xml File | `Object` | load, load, SerializeToString, GetXpathResultsInList |
+| `XmlPatcher` | Xml Patcher | `Object` | singlePatch, PatchXml, ReadPatchXmlWithFixedModFolders, redeclarationLog |
+| `BiomeImageLoader` | Biome Image Loader | `ValueType` | BiomeIdToColor32, GetBiomeId, BiomeValueFromARGB32, BiomeValueFromRGBA32 |
+| `EntityGroupsFromXml` | Entity Groups From Xml | `Object` | parseGroup, parseTextBasedList, parseElementBased, addEntity |
+| `SoundsFromXml` | Sounds From Xml | `Object` | Parse, ParseSubtitleNode, ParseNode, CreateSounds |
+| `BuffsFromXml` | Buffs From Xml | `Object` | ParseBuff, clearBuffValueLinks, CreateBuffs, Reload |
+| `ItemModificationsFromXml` | Item Modifications From Xml | `Object` | parseItem, ParseModifier, ParseNode, Load |
+| `XmlPatchException` | Xml Patch Exception | `Exception` | buildMessage |
+| `BiomeSpawningFromXml` | Biome Spawning From Xml | `Object` | Load |
+| `EntitySpawnerClassesFromXml` | Entity Spawner Classes From Xml | `Object` | LoadEntitySpawnerClasses |
+| `MaterialsFromXml` | Materials From Xml | `Object` | CreateMaterials |
+| `MusicDataFromXml` | Music Data From Xml | `Object` | Load |
+| `WeatherSurvivalParametersFromXml` | Weather Survival Parameters From Xml | `Object` | Load |
+| `XmlLoadInfo` | Xml Load Info | `Object` | XmlFileExists |
+| `MiscFromXml` | Misc From Xml | `Object` | Create |
+

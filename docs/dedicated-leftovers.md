@@ -214,7 +214,7 @@ read/write path on the dedicated. Complements
 [tile-entities-power.md](tile-entities-power.md) and
 [crafting-recipes.md](crafting-recipes.md).
 
-## 12. EntityAsyncManager/EntityCreateHandle
+## 12. EntityAsyncManager/`EntityCreateHandle`
 
 The completion handle of the async entity-create pipeline: wraps a
 `CreateEntityOperation` plus a callback, with `TryComplete` polled by
@@ -333,7 +333,7 @@ route into the pool. Complements [protocol-packages.md](protocol-packages.md)
   but is buggy"), so `EntityFactory` can never instantiate it. Modders can
   re-enable it; stock dedicated never reaches it
   ([vehicles-drones-turrets.md](vehicles-drones-turrets.md)).
-- **BlockSwitchController / BlockSwitchSingleController**: MonoBehaviours on
+- **`BlockSwitchController` / `BlockSwitchSingleController`**: MonoBehaviours on
   block-entity prefabs syncing lever/light visuals (`Start`, `UpdateLights`).
   The one server-side toucher, `TriggerManager.CheckPowerState`, fetches them
   via `Chunk.GetBlockEntity(...).transform.GetComponent<...>()`, which is

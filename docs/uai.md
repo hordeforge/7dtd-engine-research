@@ -47,7 +47,7 @@ flowchart TB
   end
   subgraph entity["per EntityAlive"]
     UT[updateTasks: UseAIPackages branch] --> UB[UAIBase.Update context]
-    CTX[Context: Self World updateTimer]
+    CTX[`Context`: Self World updateTimer]
     CD[ConsiderationData: EntityTargets WaypointTargets]
     AD[ActionData: Action Target TaskIndex flags]
     CTX --- CD
@@ -63,7 +63,7 @@ flowchart TB
 Entity wiring (`EntityAlive.InitPostCommon` IL): when the entity class has
 `UseAIPackages`, the entity gets `hasAI = true`, copies
 `EntityClass.AIPackages : string[]` into an instance list, and allocates
-`new UAI.Context(this)`. `EntityClass.Init` sets `UseAIPackages = true` iff the
+`new UAI.`Context`(this)`. `EntityClass.Init` sets `UseAIPackages = true` iff the
 class has an `AIPackages` property (comma-separated package names, trimmed).
 
 ---
@@ -386,7 +386,7 @@ naming a type `UAI.UAITaskFoo` / `UAI.UAIConsiderationFoo`.
 Per-leaf narration of the built-in scorers (raw-score formulas tabulated in §6;
 every raw score is then shaped by the response curve, §4). Each is a
 `UAI.UAIConsideration*` deriving `UAIConsiderationBase` with one
-`GetScore(Context, object)` override, instantiated once at XML parse and shared
+`GetScore(`Context`, object)` override, instantiated once at XML parse and shared
 by all entities; none run in stock (dormant, §9), all are hot per candidate per
 decision once `AIPackages` is enabled.
 

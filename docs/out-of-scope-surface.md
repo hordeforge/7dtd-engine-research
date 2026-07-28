@@ -17,7 +17,7 @@ them back in, so treat this file as hand-maintained and re-verify with RefScan
 (referrer, not name) before changing any classification.  
 **Hub:** [`INDEX.md`](INDEX.md). **Method:** [`re-methodology.md`](re-methodology.md).
 
-Total out-of-scope reached types classified: **684**.
+Total out-of-scope reached types classified: **1178** (base lists + 2026-07-28 supplement).
 
 | Category | Count |
 |---|---:|
@@ -106,6 +106,54 @@ Compiler-generated or name-obfuscated types.
 
 `#6f`, `#Cd`, `#Ge`, `#Pe`, `#qe`, `#xe`
 
+
+## Supplementary classification (2026-07-28)
+
+Types that remained in the Coverage unaccounted set after the Type.Member mention fix.
+Classified by name/namespace plus a RefScan dominance pass; **not** re-merged into the
+hand-curated lists above so those lists stay byte-stable. Server-dominant types from the
+same pass are in [`inventories/dedicated-leaves.md`](inventories/dedicated-leaves.md)
+(Promoted unaccounted server surface), not here.
+
+Supplement count: **494** (corpus classified total becomes **1178** with the base lists).
+
+### Audio / music (supplement) (43)
+
+`AbstractConfiguration`, `AbstractDayTimeTracker`, `AbstractFilter`, `AbstractMusicTimeTracker`, `Adventure`, `AmbientAudioController`, `AudioGroup`, `BloodmoonClipSet`, `BloodmoonConfiguration`, `BloodmoonLayerMixer`, `ClipAdapter`, `ClipPairAdapter`, `ClipSet`, `ClipSourceMap`, `ClipUtils`, `Combat`, `CombatLayerMixer`, `Conductor`, `Content`, `ContentLoader`, `ContentPlayer`, `Curve`, `DynamicMusicSystemPassArbiter`, `FixedConfiguration`, `FixedConfigurationLayerData`, `FixedLayerMixer`, `FrequencyLimiter`, `LayerMixer`, `LayerState`, `LayeredSection`, `MixerController`, `MusicGroup`, `Section`, `SectionSelector`, `SingleClip`, `SingleClipPlayer`, `Song`, `StepSound`, `SubtitleData`, `SubtitleSpeakerColor`, `Theme`, `ThreatLevel`, `TransitionManager`
+
+### Client UI / NGUI (supplement) (208)
+
+`AssetBundles`, `AssetMappings`, `AutoBindCache`, `AutoBindTypeCache`, `BaseItemActionEntry`, `BindComponentInfo`, `BindEventInfo`, `BindingInfo`, `BindingInfoNcalc`, `BindingItem`, `BindingItemCvar`, `BindingItemNcalc`, `BindingItemStandard`, `BindingMethodCache`, `BindingMethodData`, `BindingMethodTypeCache`, `BindingsGroup`, `BitsUsedEvent`, `BuffEntityUINotification`, `CachedStringFormatter`, `Call`, `CamPositionsListEntryController`, `ChatTarget`, `Client`, `ControllerGroup`, `ControllerLabelMapping`, `ControlsGroup`, `CraftingCategoryDisplayEntry`, `DefaultSignData`, `DiscordBlockedUsersListEntryController`, `DiscordFriendsListEntryController`, `DiscordPendingListEntryController`, `DisplayInfoEntry`, `DropSource`, `DropSourceRfs`, `DropSourceWww`, `EffectDisplayValue`, `EffectGroupDescription`, `EntryComparer`, `EntryController`, `Event`, `EventDelegate`, `EventSubMessage`, `EventSubMetadata`, `Field`, `FriendEntry`, `GUIButtonPrompt`, `GUIUtils`, `GUIWindowConsoleComponents`, `GameOptionValue`, `GameOptionsControls`, `GameOptionsPlatforms`, `GameOptionsReset`, `GenderKey`, `GlobalAssets`, `GraphicsGroup`, `HotZoneSettings`, `ILaunchPrefExtensions`, `InGameService`, `ItemActionEntryRepair`, `ItemDisplayEntry`, `KeyCollection`, `LaunchPref`, `LevelRequirement`, `LightValues`, `LocalPlayer`, `LocalPlayerManager`, `MessageButton`, `NGUIAtlas`, `NGuiAction`, `NavObjectSettings`, `OnScreenIcon`, `ParsingMethodCache`, `ParsingMethodTypeCache`, `PlayerActionsGUI`, `PlayerActionsPermanent`, `PlayerActionsVehicle`, `PlayerData`, `PoiSizeInfo`, `Pref`, `PrefabMarkerEntry`, `RaidEvent`, `Reward`, `SMainMenuOpeningData`, `SandboxOptionValue`, `SandboxPresetGroupData`, `SandboxPresetInfo`, `SaveDataLimit`, `SaveDataLimitUIHelper`, `Server`, `SlotData`, `SpawnNearFriendsListEntryController`, `StackPanel`, `StackSortUtil`, `StyleData`, `StyleEntryData`, `ThreadContainer`, `ThreadContainerPool`, `TimerEventData`, `TraderDisplayInfo`, `TwitchActionGroup`, `UIAtlas`, `UIAtlasFromFolder`, `UIDisplayInfoFromXml`, `UIFont`, `UISpriteData`, `UITexture`, `UiServerFilter`, `UpscalerMode`, `View`, `VisibilityData`, `WorldMove`, `XUiC_AddWarpSettings`, `XUiC_ArcWarpSettings`, `XUiC_BulgeWarpSettings`, `XUiC_Button`, `XUiC_CollectedItem`, `XUiC_CompanionEntry`, `XUiC_DMBaseList`, `XUiC_DeathBar`, `XUiC_DiscordBlockedUsers`, `XUiC_DiscordLobbyControl`, `XUiC_DiscordVoiceControls`, `XUiC_EditingTools`, `XUiC_EditingToolsPoiEditor`, `XUiC_GridWarpSettings`, `XUiC_InGameDebugMenu`, `XUiC_InGameHUD`, `XUiC_IngredientEntry`, `XUiC_InteractionPrompt`, `XUiC_ItemDronePartStackGrid`, `XUiC_KaleidoWarpSettings`, `XUiC_LevelTools3Window`, `XUiC_LevelToolsHelpers`, `XUiC_LoginBase`, `XUiC_MainMenuButtons`, `XUiC_MapEnterWaypoint`, `XUiC_MapPopupList`, `XUiC_MapStats`, `XUiC_MapSubPopupList`, `XUiC_MapWaypoint`, `XUiC_MultiplayerWindows`, `XUiC_OptionEntryGamePrefAbs`, `XUiC_OptionsVideo`, `XUiC_PerspectiveWarpSettings`, `XUiC_PrefabEditorHelp`, `XUiC_PrefabGroupsEditorList`, `XUiC_PrefabQuestTags`, `XUiC_PrefabTagList`, `XUiC_PrefabThemeTagList`, `XUiC_PrefabZonesEditorList`, `XUiC_QuestDescriptionWindow`, `XUiC_QuestObjectiveEntry`, `XUiC_QuestObjectivesWindow`, `XUiC_QuestRewardEntry`, `XUiC_QuestRewardList`, `XUiC_QuestRewardsWindow`, `XUiC_ServerBrowserGameOptionInputAdvanced`, `XUiC_ServerBrowserGameOptionInputRange`, `XUiC_ServerBrowserGameOptionInputSimple`, `XUiC_ServerBrowserGamePrefInfo`, `XUiC_ServerBrowserGamePrefSelector`, `XUiC_ServerInfo`, `XUiC_SignColorSettings`, `XUiC_SignEditorControl`, `XUiC_SignGroupSettings`, `XUiC_SignLayerDragAndDropIcon`, `XUiC_SignLayerSettings`, `XUiC_SignLayerType`, `XUiC_SignNewLayerPanel`, `XUiC_SignNoiseSettings`, `XUiC_SignPolygonSettings`, `XUiC_SignTextSettings`, `XUiC_SignTransformSettings`, `XUiC_SignWarpSettings`, `XUiC_SkewWarpSettings`, `XUiC_SkillAttributeLevel`, `XUiC_SkillBookLevel`, `XUiC_SkillCraftingInfoEntry`, `XUiC_SkillPerkLevel`, `XUiC_SkillSkillMilestone`, `XUiC_SpawnBlockEditor`, `XUiC_StretchWarpSettings`, `XUiC_TargetBar`, `XUiC_TwirlWarpSettings`, `XUiC_TwitchCommandEntry`, `XUiC_TwitchVoteEntry`, `XUiC_UnlockByEntry`, `XUiC_UnlockByList`, `XUiC_WorkstationOutputWindow`, `XUiC_WorldGenerationWindowGroup`, `XUiFromXml`, `XUiM_Dialog`, `XUiM_InGameService`, `XUiM_LootContainer`, `XUiM_PlayerBuffs`, `XUiSideSizes`, `XUiTweenAbs`, `XUiTweenAlpha`, `XUiTweenColor`, `XUiTweenFill`, `XUiTweenHeight`, `XUiTweenPosition`, `XUiTweenRotation`, `XUiTweenScale`, `XUiTweenWidth`, `XUiV_FilledSprite`, `XUiV_ImageBased`
+
+### Client render / mesh (supplement) (43)
+
+`AnimationDelayData`, `AnimationDelays`, `AnimationGunjointOffsetData`, `AnimationGunjointOffsets`, `AtlasManagerEntry`, `AtmosphereEffect`, `AvatarCharacterController`, `AvatarHumanController`, `BaseAtlas`, `BlockParticleCreationData`, `CameraPerspectives`, `Color32Renderer`, `ColorSpectrum`, `DChunkSquareMeshPool`, `DismemberedPart`, `DistantTerrain`, `EModelPlayer`, `FastWireNode`, `GenerateVoxelCubeSurface`, `HSVUtil`, `HasParticle`, `LightLOD`, `LightingAround`, `MapRenderBlockBuffer`, `MapRenderer`, `MapTileCache`, `MeshDataUtils`, `MeshDescriptionCollection`, `MeshTiming`, `OccludeeZone`, `SDCSArchetypesFromXml`, `TGALoader`, `TerrainAndWater`, `TextureAtlas`, `TextureAtlasBlocks`, `TextureAtlasExternalModels`, `TextureAtlasTerrain`, `TextureScale`, `VideoData`, `VideoFromXML`, `VideoManager`, `WaterDebugRenderer`, `WaterDebugRendererLayer`
+
+### Editor / tools (supplement) (3)
+
+`AutomationRunner`, `AutomationScript`, `ChunkPreviewData`
+
+### Input (supplement) (8)
+
+`CursorControllerAbs`, `NativeDefault`, `PlayerInputRecordingSystem`, `TotalTrackedPS5`, `TriggerEffectDualsensePC`, `TriggerEffectDualsenseParsers`, `TriggerEffectXboxParsers`, `VirtualKeyboard`
+
+### Platform SDK (supplement) (78)
+
+`AchievementCacheEntry`, `AchievementData`, `AchievementUtils`, `AntiCheatClientCS`, `AntiCheatClientManager`, `AntiCheatClientP2P`, `ApplicationStateController`, `AuthClient`, `AuthenticationClient`, `ConnectionInformation`, `DownloadableContentValidator`, `EOSSanction`, `ESaveGameProviderStatusExtensions`, `EnumAchievementDataStatExtensions`, `EosConnectionTestInfo`, `EosUserIdMapper`, `FavoriteServers`, `ILobbyHost`, `IPlatformUserBlockedResults`, `JoinSessionGameInviteListener`, `LANMasterServerAnnouncer`, `LoadSaveGame`, `LobbyHost`, `LobbyListAbs`, `LobbyListFriends`, `LobbyListInternet`, `LocalServerDetect`, `MappedAccountRequest`, `MasterServerAnnouncer`, `MasterServerList`, `MultiplayerInvitationDialogSteam`, `NetworkClientEos`, `NetworkClientSteam`, `NetworkServerEos`, `NetworkServerSteam`, `NetworkUtils`, `PlatformApplicationStandalone`, `PlatformConfiguration`, `PlayerInteraction`, `PlayerInteractionsRecorderMulti`, `PlayerReportCategory`, `PlayerReporting`, `ReadRequestDetails`, `RemoteFileStorage`, `RemotePlayerFileStorage`, `RequestDetails`, `RichPresence`, `SanctionsCheck`, `SanctionsCheckResult`, `SaveDataMergedPlatformSaveGameIOProvider`, `SaveGameIOProvider`, `SaveGameIOProviderFixedRoot`, `SaveGameProvider`, `SaveGameProviderHelper`, `SendInfo`, `ServerFilter`, `ServerListAnnouncer`, `SessionModificationCallbackArgs`, `SessionSearchArgs`, `SessionsHost`, `StatCacheEntry`, `StorageOperation`, `TextCensor`, `UdpClientReceiveHandler`, `UdpClientSendHandler`, `UserBase`, `UserDataRoaming`, `UserDataRoamingAbs`, `UserDataRoamingGameCore`, `UserDataRoamingMultiPlatform`, `UserDataRoamingPS5`, `UserDetailsRequest`, `UserDetailsServiceEos`, `UserIdentifierPSN`, `UserIdentifierXbl`, `UserServer`, `WriteRequestDetails`, `XblPlatformApi`
+
+### Third-party / analytics (supplement) (38)
+
+`AnalyticsServiceFactory`, `BarcodeWriter`, `BarcodeWriterGeneric`, `BhvrAnalyticsSettings`, `BindingNcalcFunctions`, `Crc32Algorithm`, `EmptyAnalyticsService`, `EncodingOptions`, `HardwareInfoEventData`, `KrakenAnalyticsMicroservice`, `LoginEventData`, `MultiFormatWriter`, `NCalcLexer`, `NCalcParser`, `QrCodeEncodingOptions`, `SafeProxy`, `ServerStartEventData`, `ServiceConfiguration`, `UnixLinkFile`, `WindowsLinkFile`, `additiveExpression_return`, `arguments_return`, `bitwiseAndExpression_return`, `bitwiseOrExpression_return`, `bitwiseXOrExpression_return`, `booleanAndExpression_return`, `conditionalExpression_return`, `equalityExpression_return`, `expressionList_return`, `identifier_return`, `logicalExpression_return`, `multiplicativeExpression_return`, `ncalcExpression_return`, `primaryExpression_return`, `relationalExpression_return`, `shiftExpression_return`, `unaryExpression_return`, `value_return`
+
+### Twitch (supplement) (29)
+
+`ActionCategory`, `AuthenticationValues`, `BasePubSubMessage`, `CommandModel`, `ConfigContent`, `ConfigModel`, `Entitlement`, `ExtensionDeleteBitActionsRequestData`, `FulfillmentPayload`, `GoalData`, `PubSubBitRedemptionMessage`, `PubSubChannelPointMessage`, `PubSubGoalMessage`, `PubSubListenData`, `PubSubListenMessage`, `PubSubStatusMessage`, `PubSubStatusRequestData`, `PubSubSubscriptionRedemptionMessage`, `SetConfigRequestData`, `SetDevConfigRequestData`, `TwitchActionCooldownAddition`, `TwitchActionCooldownModifier`, `TwitchCooldownEntry`, `TwitchEntitlementManager`, `TwitchHypeTrainEventEntry`, `TwitchRandomActionGroup`, `TwitchTopic`, `TwitchVotePreset`, `UpdateMessage`
+
+### Utility / infra (supplement) (44)
+
+`AIDirectorSmellMarker`, `AIDirectorZombieState`, `AtomicCounter`, `AtomicSafeHandleScope`, `BackedArrayHandleModeExtensions`, `BackedArraySingleView`, `CC`, `CallbackMetric`, `CharSplitEnumerator`, `ChunkCache`, `ChunkVertexLayer`, `ConstantValueMetric`, `DebugWrapper`, `DebugWrapperException`, `DummyHandle`, `DummyScope`, `EnumerableDebugWrapper`, `FileBackedArrayHandle`, `FileBackedArrayMemoryManager`, `GlobalCultureInfo`, `LiteNetLibAuthWrapperClient`, `LiteNetLibAuthWrapperServer`, `MemoryBackedArray`, `MemoryBackedArrayHandle`, `MemoryBackedArrayUnsafeHandle`, `MemoryBackedArrayView`, `PinnedBufferRef`, `Pool`, `PooledMemoryStream`, `ProfilerPlatformCorrections`, `ProfilerRecorderMetric`, `ProfilingMetricCapture`, `ReadWriteScope`, `ScopedChunkReadAccess`, `SharedChunkObserver`, `StockFileHashes`, `TList`, `TQueue`, `ThreadSafeSemantics`, `TileArea`, `TileAreaUtils`, `TileFile`, `WorldBiomeProviderFromHeight`, `XmlLoadException`
+
 ## Changelog
 
 - **2026-07-24:** Initial classification of the out-of-scope reached surface.
+- **2026-07-28:** Added supplementary classification for remaining unaccounted reached types after Coverage Type.Member mention fix; server-dominant remainder goes to dedicated-leaves.

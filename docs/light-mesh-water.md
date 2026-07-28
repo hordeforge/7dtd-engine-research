@@ -1,6 +1,6 @@
 # Light, stability, mesh, water, deco (dedicated V3.0.1)
 
-**Owns:** light/stability/mesh/water/deco method maps + stock 255 ceilings (generic engine).  
+**Owns:** light/stability/mesh/water/deco method maps + stock 255 ceilings (generic engine); water section includes the jobified sim pipeline.  
 **Product expand checklist:** `7days-realworld/docs/realearth-surfaces.md` §7.1.  
 **Dumps:** `../il/dedi-complete-v3.0.1/` §7, `../il/realearth-surfaces-v3.0.1/` SAVE_LIGHT.  
 **Hub:** [`INDEX.md`](INDEX.md).
@@ -85,12 +85,192 @@ Full scan list: `7days-realworld/docs/realearth-surfaces.md` §7.1.
 
 ## 4. Water
 
-| Type | Method | IL |
-|---|---|---:|
-| `WaterSimulationNative.Update` | | **229** |
-| | `InitializeChunk` / `Step` | 51 / 16 |
-| `WaterEvaporationManager.UpdateEvaporation` | | **317** |
-| `WaterSplashCubes.Update` | | **185** (always-path OnUpdateTick; skip candidate) |
+Server water is a **jobified mass-flow sim** owned by singleton `WaterSimulationNative`,
+not a per-block script. The apply stage runs on a **worker thread** and ships
+`NetPackageWaterSimChunkUpdate` to nearby clients under a byte budget. Evaporation
+is a separate scheduled-block path. Splash cubes are client-facing particles.
+
+### 4.1 Call sites (verified)
+
+| Caller | Callee | Notes |
+|---|---|---|
+| `GameManager.gmUpdate` | `WaterSimulationNative.Step` | IL offset in gmUpdate ~0x3F9 (`tools/src/Xref`) |
+| `GameManager.gmUpdate` | `WaterEvaporationManager.UpdateEvaporation` | IL ~0x408 |
+| `WaterSimulationNative.Step` | `WaterSimulationNative.Update` | only when currently paused (single-step) |
+| `WaterSimulationApplyChanges.ThreadLoop` | `ApplyChanges` | worker thread |
+
+`Step` is a pause toggle helper: if not paused, set paused and return; if paused,
+clear pause, run one `Update`, re-pause. The steady dedicated path is the
+gmUpdate call into `Step`/`Update` depending on pause state (live server is
+normally unpaused, so `Update` runs from the same peer path as other managers;
+see [loop-gmupdate.md](loop-gmupdate.md)).
+
+### 4.2 Data model
+
+| Type | Kind | Role |
+|---|---|---|
+| `WaterValue` | struct | one `UInt16 mass`; wire `Write`/`Read` as u16 |
+| `WaterDataHandle` | struct (native-ish) | per-chunk sim state: mass grid, solid flags, active bits, flow map, cross-chunk queues |
+| `WaterVoxelState` | struct | `Byte stateBits` solid faces (Y+/Y-/XZ) |
+| `WaterNeighborCacheNative` | helper | resolve neighbor chunk handles by `int2` offset |
+| `WaterConstants` | static | mass thresholds (`MIN_MASS`, `MAX_MASS`, `OVERFULL_MAX`, `MIN_FLOW`, `FLOW_SPEED`, `MIN_MASS_SIDE_SPREAD`) |
+| `WaterSimulationNative/ChunkHandle` | nested | `Chunk.AssignWaterSimHandle` facade: `SetVoxelSolid`, `SetWaterMass`, `WakeNeighbours` |
+| `WaterSimulationApplyChanges` | class | change queue + **ThreadLoop** write-back + net send |
+| `NetPackageWaterSimChunkUpdate` | wire | per-chunk packed voxel mass updates |
+
+**Mass semantics (from `WaterValue` / `WaterUtils` IL):**
+
+- Storage is `UInt16 mass` (field).
+- `GetMass()` returns that field.
+- Display/level: `GetMassPercent` treats mass `<= 195` as empty (0%), `>= 15600` as full (1%), else `(mass - 195) / 15405`.
+- `WaterUtils.GetWaterLevel` is a binary "has visible water" gate: mass `> 195` -> 1 else 0.
+- Column stability helper `WaterConstants.GetStableMassBelow(mass, massBelow)` = `min(mass + massBelow, 19500)`.
+- Flow "full cell" constant used in calc/overfull paths: **19500** (same scale as stable max).
+
+**Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
+
+**`WaterDataHandle` fields (metadata):** `voxelData` (mass), `voxelState`, `groundWaterHeights`, `activeVoxels`, `flowVoxels`, `flowsFromOtherChunks`, `activationsFromOtherChunks`, `voxelsToWakeup`.
+
+### 4.3 Pipeline (one `WaterSimulationNative.Update`)
+
+```mermaid
+flowchart TD
+  U[WaterSimulationNative.Update IL=229]
+  U --> InitCheck{IsInitialized?}
+  InitCheck -->|no| Ret1[ret]
+  InitCheck -->|yes| Rem1[ProcessPendingRemoves]
+  Rem1 --> Copy[CopyInitializedChunksToNative]
+  Copy --> Pause{isPaused?}
+  Pause -->|yes| Ret2[ret]
+  Pause -->|no| Net{changeApplier.HasNetWorkLimitBeenReached?}
+  Net -->|yes| Ret3[ret early: backpressure]
+  Net -->|no| Empty{modified and active empty?}
+  Empty -->|both empty| Rem2[ProcessPendingRemoves + profile]
+  Empty -->|work| Pre[IJob Run WaterSimulationPreProcess]
+  Pre --> ActiveEmpty{activeHandles empty?}
+  ActiveEmpty -->|yes| Rem2
+  ActiveEmpty -->|no| Calc[IJobParallelFor Schedule WaterSimulationCalcFlows]
+  Calc --> Apply[IJobParallelFor Schedule WaterSimulationApplyFlows]
+  Apply --> Post[IJob Schedule WaterSimulationPostProcess]
+  Post --> Complete[JobHandle.Complete]
+  Complete --> Harvest[for each handle with HasFlows: RecordChange]
+  Harvest --> Rem2
+```
+
+**Early exits (verified in Update IL):**
+
+1. Not initialized.
+2. `isPaused`.
+3. `WaterSimulationApplyChanges.HasNetWorkLimitBeenReached` (server, clients present, `networkMeasure.totalSent > networkMaxBytesPerSecond`).
+4. Both `modifiedChunks` and `activeHandles` empty (still runs trailing remove/profile path).
+
+**Job chain (verified):**
+
+| Stage | Job API | Type | IL | Work |
+|---|---|---|---:|---|
+| Pre | `IJobExtensions.Run` (main, sync) | `WaterSimulationPreProcess` | 173 | promote wakeups into `activeHandles`, `TryTrackChunk` for 4-neighbors of modified set, clear `modifiedChunks` |
+| Calc | `IJobParallelFor.Schedule` | `WaterSimulationCalcFlows` | Execute 26 / ProcessFlows **265** | per active chunk, for each active voxel: gravity below, overfull up, 4-side spread, groundwater sides |
+| Apply | `IJobParallelFor.Schedule` (depends on Calc) | `WaterSimulationApplyFlows` | 133 | `ApplyEnqueuedFlows`, wake neighbors, mark non-flowing chunks |
+| Post | `IJob.Schedule` (depends on Apply) | `WaterSimulationPostProcess` | 67 | drop non-flowing from active set; apply cross-chunk activations |
+
+Batch size for parallel jobs: `chunkCount / JobWorkerCount + 1`.
+
+After jobs complete, main thread walks every `waterDataHandles` entry with `HasFlows`, builds a `ChangesForChunk.Writer` via `changeApplier.GetChangeWriter(MakeChunkKey)`, and `RecordChange(voxelIndex, WaterValue(mass))` for each flow voxel, then clears `flowVoxels`.
+
+### 4.4 Flow rules (`WaterSimulationCalcFlows.ProcessFlows`)
+
+Per active voxel (active bitset enumerator):
+
+1. Read mass; if solid (`WaterVoxelState.IsSolid`) -> deactivate.
+2. If in groundwater column (`IsInGroundWater`): four `ProcessGroundWaterFlowSide` calls, then maybe deactivate.
+3. Else surface/free water:
+   - `ProcessFlowBelow` (IL=105): blocked by solid Y- / neighbor solid Y+; uses `GetStableMassBelow`; applies mass delta via `ApplyFlow`.
+   - `ProcessOverfull` (IL=85): if mass above **19500**, push excess upward when Y+ free (const 255 appears as a face/level helper in the same method).
+   - Four `ProcessFlowSide` (IL=168): XZ solid mask, `WaterNeighborCacheNative.TryGetNeighbor` for cross-chunk, may `EnqueueFlow` into neighbor handle when `ChunkKey` differs.
+
+Cross-chunk mass moves are deferred through `flowsFromOtherChunks` / `EnqueueFlow` and applied in the ApplyFlows stage (`ApplyEnqueuedFlows` drains the fixed buffer into `ApplyFlow`).
+
+### 4.5 Chunk registration
+
+`InitializeChunk` / `Init` (IL=51 / long init path):
+
+1. Require initialized + chunk in world bounds.
+2. Reuse or `WaterDataHandle.AllocateNew`.
+3. `InitializeFromChunk(Chunk, GroundWaterHeightMap)` (IL=154): walk **16x16x256** local voxels, `GetBlockNoDamage` -> solid flags, `GetWater` -> mass, optional groundwater column bounds via `GroundWaterHeightMap.TryGetWaterHeightAt` + `FindGroundWaterBottom`.
+4. Queue handle init, `Chunk.AssignWaterSimHandle(ChunkHandle)`.
+5. If handle has active water, add chunk key to `activeHandles`.
+
+### 4.6 Apply thread and wire
+
+`WaterSimulationApplyChanges` owns a dedicated **ThreadLoop** (server only for net measure):
+
+```mermaid
+stateDiagram-v2
+  [*] --> WaitWork
+  WaitWork --> Apply: TryFindChangeToApply
+  WaitWork --> Sleep: no work (return 15)
+  Apply --> WriteChunk: Chunk.SetWaterSimUpdate per voxel
+  WriteChunk --> NetSend: NetPackageWaterSimChunkUpdate
+  NetSend --> ClearFlag: InProgressWaterSim = false
+  ClearFlag --> WaitWork
+  WaitWork --> [*]: TerminationRequested
+```
+
+`ApplyChanges` (IL=254):
+
+1. `SetupForSend(Chunk)` -> package.
+2. For each changed voxel: decode coords, `Chunk.SetWaterSimUpdate` (writes channel, may `World.HandleWaterLevelChanged`, respects `CanWaterFlowThrough`), `NetPackageWaterSimChunkUpdate.AddChange(UInt16, WaterValue)`.
+3. `FinalizeSend` + `SendUpdateToClients` (register queue, send to `clientsNearChunkBuffer`, sum lengths, `SendQueueHandled`).
+4. Mark this chunk and 4-neighbors `NeedsRegenerationOrBits`.
+5. `NetPackageMeasure.AddSample`.
+
+`Chunk.SetWaterSimUpdate` (IL=75): refuses flow into non-flow-through blocks; stores via `ChunkBlockChannel.GetSet` of `WaterValue.RawData`; fires `HandleWaterLevelChanged` when mass changes.
+
+**Client/listen apply path:** `NetPackageWaterSimChunkUpdate.ProcessPackage` re-enters the same `GetChangeWriter`/`RecordChange` path on the local `WaterSimulationNative.Instance` (so remote updates merge into the same apply queue). `read` copies a length-prefixed blob into a pooled memory stream (body payload is stream-copied, not field-decoded in `read` itself).
+
+**Related packages:** `NetPackageWaterSet` (manual/console set path via `WaterSetInfo` + `WaterValue.Write`) is separate from the sim stream; catalogued in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md).
+
+### 4.7 Evaporation and splash
+
+| Type | Method | IL | Role |
+|---|---|---:|---|
+| `WaterEvaporationManager.UpdateEvaporation` | from gmUpdate | **317** | locked walk of evap + rest lists; schedules `WorldBlockTicker.AddScheduledBlockUpdate` when timers elapse |
+| `WaterSplashCubes.Update` | OnUpdateTick path | **185** | particle placements; always-path cost on dedicated (skip candidate for optim, not a sim correctness path) |
+
+Evaporation does **not** call into `WaterSimulationNative` jobs directly; it schedules block updates that eventually change water/block state through the normal ticker.
+
+### 4.8 Method map (this pass)
+
+| Type | Method | IL | Status |
+|---|---|---:|---|
+| `WaterSimulationNative` | `Update` | **229** | verified job graph + harvest |
+| `WaterSimulationNative` | `Step` | 16 | verified pause single-step |
+| `WaterSimulationNative` | `InitializeChunk` | 51 | verified |
+| `WaterSimulationNative` | `Init` | (large) | handle map setup |
+| `WaterSimulationPreProcess` | `Execute` | 173 | verified |
+| `WaterSimulationCalcFlows` | `ProcessFlows` | **265** | verified order of rules |
+| `WaterSimulationCalcFlows` | `ProcessFlowBelow` / `Side` / `Overfull` | 105 / 168 / 85 | verified callees |
+| `WaterSimulationApplyFlows` | `Execute` | 133 | verified |
+| `WaterSimulationPostProcess` | `Execute` | 67 | verified |
+| `WaterSimulationApplyChanges` | `ThreadLoop` / `ApplyChanges` / `SendUpdateToClients` | 56 / **254** / 30 | verified |
+| `WaterSimulationApplyChanges` | `HasNetWorkLimitBeenReached` | 37 | verified backpressure |
+| `WaterDataHandle` | `InitializeFromChunk` / `ApplyEnqueuedFlows` | 154 / 29 | verified |
+| `WaterValue` | mass u16 + percent | 3 / 20 | verified |
+| `WaterUtils` | `CanWaterFlowThrough` / `GetWaterLevel` | 14 / 8 | verified |
+| `WaterConstants` | `GetStableMassBelow` | 6 | verified min(..., 19500) |
+| `WaterEvaporationManager` | `UpdateEvaporation` | **317** | verified ticker scheduling |
+| `WaterSplashCubes` | `Update` | 185 | mapped (client particles) |
+
+Apply-stage prose also in [dedicated-misc-systems.md](dedicated-misc-systems.md) (`WaterSimulationApplyChanges`, `WaterUtils`, `ChunkHandle`). Leaves for the job structs are in [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) (light-mesh-water group).
+
+### 4.9 Residuals / not closed here
+
+| Item | Why |
+|---|---|
+| Exact numeric values of all `WaterConstants` static fields beyond 19500 / 195 / 15600 | need static ctor / literal dump per field (only `GetStableMassBelow` and percent math closed) |
+| Full bit layout of `WaterVoxelState.stateBits` | methods `IsSolidYNeg` etc. named; bit indices not fully tabulated this pass |
+| Native Burst/job safety details | Unity Jobs black box below managed schedule calls |
+| `WaterSplashCubes` particle content | client VFX |
 
 ---
 
@@ -108,8 +288,13 @@ Full scan list: `7days-realworld/docs/realearth-surfaces.md` §7.1.
 |---|---|
 | `realearth-surfaces.md` | Expand checklist |
 | [terrain-height.md](terrain-height.md) | YDim context |
+| [dedicated-misc-systems.md](dedicated-misc-systems.md) | ApplyChanges / ChunkHandle short form |
+| [loop-gmupdate.md](loop-gmupdate.md) | gmUpdate call order |
+| [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) | `NetPackageWaterSimChunkUpdate` / `WaterValue` wire |
+| [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) | job struct leaf rows |
 
 ## Changelog
 
+- **2026-07-28:** Full water-sim pipeline from IL (`WaterSimulationNative.Update` job graph, flow rules, apply thread, mass constants, net backpressure).
 - **2026-07-19:** Related docs table.
 - **2026-07-18:** Light/stability/mesh/water family from dedi-complete dump.

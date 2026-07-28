@@ -46,10 +46,10 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached, non-generated | 6043 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2355 (excluded from %) |
 | ...**game types** (the RE surface) | **3688** |
-| ...**narrated** (backticked in a narrative doc) | **1120 (30%)** |
-| ...**catalogued only** (generated inventory, not narrated) | 734 |
-| ...**classified** out-of-scope | 900 |
-| ...**unaccounted** (appears nowhere) | 934 |
+| ...**narrated** (backticked in a narrative doc) | **1260 (34%)** |
+| ...**catalogued only** (generated inventory, not narrated) | 1019 |
+| ...**classified** out-of-scope | 1409 |
+| ...**unaccounted** (appears nowhere) | 0 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 498 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 178 |
 
@@ -62,52 +62,48 @@ out of scope), and the base itself is the approximation described above.
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2926 | 2239 | 687 | 76% |
-| `GameEvent` | 180 | 179 | 1 | 99% |
-| `Platform` | 147 | 50 | 97 | 34% |
-| `Twitch` | 109 | 76 | 33 | 69% |
-| `DynamicMusic` | 47 | 9 | 38 | 19% |
+| `<global>` | 2926 | 2926 | 0 | 100% |
+| `GameEvent` | 180 | 180 | 0 | 100% |
+| `Platform` | 147 | 147 | 0 | 100% |
+| `Twitch` | 109 | 109 | 0 | 100% |
+| `DynamicMusic` | 47 | 47 | 0 | 100% |
 | `Challenges` | 47 | 47 | 0 | 100% |
-| `WorldGenerationEngineFinal` | 39 | 24 | 15 | 61% |
-| `Discord` | 25 | 21 | 4 | 84% |
-| `UAI` | 24 | 15 | 9 | 62% |
+| `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100% |
+| `Discord` | 25 | 25 | 0 | 100% |
+| `UAI` | 24 | 24 | 0 | 100% |
 | `PrefabVolumes` | 16 | 16 | 0 | 100% |
-| `GamePath` | 13 | 6 | 7 | 46% |
-| `SandboxOptions` | 13 | 11 | 2 | 84% |
-| `Audio` | 12 | 5 | 7 | 41% |
+| `GamePath` | 13 | 13 | 0 | 100% |
+| `SandboxOptions` | 13 | 13 | 0 | 100% |
+| `Audio` | 12 | 12 | 0 | 100% |
 | `SDF` | 11 | 11 | 0 | 100% |
-| `RaycastPathing` | 10 | 8 | 2 | 80% |
-| `Webserver` | 10 | 8 | 2 | 80% |
-| `XMLData` | 7 | 5 | 2 | 71% |
-| `Quests` | 7 | 6 | 1 | 85% |
-| `Services` | 6 | 3 | 3 | 50% |
-| `ZXing` | 6 | 0 | 6 | 0% |
-| `MapRendering` | 6 | 2 | 4 | 33% |
-| `MusicUtils` | 5 | 3 | 2 | 60% |
-| `BhvrAnalyticsServices` | 5 | 0 | 5 | 0% |
+| `RaycastPathing` | 10 | 10 | 0 | 100% |
+| `Webserver` | 10 | 10 | 0 | 100% |
+| `XMLData` | 7 | 7 | 0 | 100% |
+| `Quests` | 7 | 7 | 0 | 100% |
+| `Services` | 6 | 6 | 0 | 100% |
+| `ZXing` | 6 | 6 | 0 | 100% |
+| `MapRendering` | 6 | 6 | 0 | 100% |
+| `MusicUtils` | 5 | 5 | 0 | 100% |
+| `BhvrAnalyticsServices` | 5 | 5 | 0 | 100% |
 | `GearVariants` | 4 | 4 | 0 | 100% |
-| `ConcurrentCollections` | 3 | 2 | 1 | 66% |
-| `mumblelib` | 2 | 0 | 2 | 0% |
-| `Force` | 2 | 0 | 2 | 0% |
+| `ConcurrentCollections` | 3 | 3 | 0 | 100% |
+| `mumblelib` | 2 | 2 | 0 | 100% |
+| `Force` | 2 | 2 | 0 | 100% |
 | `WaterClippingTool` | 1 | 1 | 0 | 100% |
-| `XMLEditing` | 1 | 0 | 1 | 0% |
+| `XMLEditing` | 1 | 1 | 0 | 100% |
 | `SystemInformation` | 1 | 1 | 0 | 100% |
 | `UnityEngineInternal` | 1 | 1 | 0 | 100% |
-| `TriggerEffects` | 1 | 0 | 1 | 0% |
+| `TriggerEffects` | 1 | 1 | 0 | 100% |
 | `GUI_2` | 1 | 1 | 0 | 100% |
 
-## Triage of the unaccounted set (2026-07-26)
+## Triage of the unaccounted set
 
-A manual sample of the unaccounted list found it is **dominated by client, editor,
-and vendored code that happens to live in the `<global>` namespace**, where the
-namespace-based library filter cannot reach it: `PrefabEditModeManager` (editor),
-`CursorControllerAbs` (client input), `NCalcLexer` / `BindingNcalcFunctions`
-(vendored expression parser), `GameSenseManager` (SteelSeries peripherals),
-`DistantTerrain` (render), `SaveDataMergedPlatformSaveGameIOProvider` (console
-platform). These need per-type classification, not new reverse engineering.
-
-So the honest reading of the number below is **not** "N undocumented server
-systems". It is a work queue whose largest bucket is classification debt.
+As of 2026-07-28 the unaccounted tier is driven to **zero** by (1) crediting
+`Type.Member` backtick forms as type mentions, (2) a supplementary out-of-scope
+classification for client/platform/vendored/infra types that live in `<global>`,
+and (3) leaf-cataloguing the RefScan server-dominant remainder. A zero here means
+every reached game type is narrated, catalogued, or classified - **not** that every
+type has a full behavioral narrative. Read the four tiers separately.
 
 ## Top undocumented reached types (by method count) - the gap list
 
@@ -117,64 +113,4 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
-| `Client` | Discord.Sdk | 158 |
-| `Utils` | <global> | 110 |
-| `Manager` | Audio | 69 |
-| `Client` | <global> | 64 |
-| `PrefabEditModeManager` | <global> | 62 |
-| `Extensions` | <global> | 62 |
-| `TList`1` | <global> | 58 |
-| `PrefabChunk` | <global> | 54 |
-| `UIFont` | <global> | 52 |
-| `NCalcLexer` | <global> | 52 |
-| `SaveDataMergedPlatformSaveGameIOProvider` | <global> | 47 |
-| `BindingNcalcFunctions` | <global> | 47 |
-| `DynamicMeshChunkData` | <global> | 45 |
-| `Localization` | <global> | 40 |
-| `MeshGenerator` | <global> | 40 |
-| `XUiC_OptionsVideo` | <global> | 39 |
-| `GameOptionsManager` | <global> | 38 |
-| `GameSenseManager` | <global> | 37 |
-| `DistantTerrain` | <global> | 37 |
-| `CursorControllerAbs` | <global> | 37 |
-| `NGuiAction` | <global> | 35 |
-| `NetworkServerSteam` | Platform.Steam | 33 |
-| `NetworkServerEos` | Platform.EOS | 33 |
-| `XUiFromXml` | <global> | 33 |
-| `PlatformUserManager` | Platform | 32 |
-| `XUiM_Recipes` | <global> | 32 |
-| `Call` | Discord.Sdk | 32 |
-| `GameObjectPool` | <global> | 31 |
-| `WaterDataHandle` | <global> | 31 |
-| `ChunkBlockLayer` | <global> | 31 |
-| `EventDelegate` | <global> | 31 |
-| `PerformanceProfiler` | <global> | 30 |
-| `SessionsHost` | Platform.EOS | 30 |
-| `Stat` | <global> | 30 |
-| `NCalcParser` | <global> | 29 |
-| `UserBase` | Platform.EOS | 28 |
-| `XUiC_InGameDebugMenu` | <global> | 28 |
-| `GameRenderManager` | <global> | 28 |
-| `LightManager` | <global> | 27 |
-| `FastWireNode` | <global> | 27 |
-| `MessageButton` | <global> | 26 |
-| `NetworkClientSteam` | Platform.Steam | 26 |
-| `LightLOD` | <global> | 26 |
-| `PubSubSubscriptionRedemptionMessage` | Twitch.PubSub | 26 |
-| `EAIManager` | <global> | 25 |
-| `AchievementData` | Platform | 25 |
-| `Vector2i` | <global> | 24 |
-| `PrefabHelpers` | <global> | 24 |
-| `BaseItemActionEntry` | <global> | 24 |
-| `NetworkClientEos` | Platform.EOS | 24 |
-| `Handle` | <global> | 24 |
-| `ParticleEffect` | <global> | 23 |
-| `XmlFile` | <global> | 23 |
-| `HeightMapUtils` | <global> | 23 |
-| `AIDirectorSmellMarker` | <global> | 22 |
-| `UIAtlas` | <global> | 22 |
-| `PrefabVolumeManager` | <global> | 22 |
-| `Log` | <global> | 21 |
-| `ActionTarget` | <global> | 21 |
-| `LobbyHost` | Platform.Steam | 21 |
 

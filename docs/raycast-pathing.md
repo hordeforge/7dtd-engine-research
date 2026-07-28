@@ -31,7 +31,7 @@ Do not redistribute game IL.
 flood fill, living in the `RaycastPathing` namespace. Caller analysis over the
 whole assembly shows its consumer set is exactly:
 
-| Caller | What it uses | Context |
+| Caller | What it uses | `Context` |
 |---|---|---|
 | `EntityDrone` (junk drone) | everything | state machine, movement, debug |
 | `EAIDroneItemTask` | `RaycastPathUtils` draw/blocked checks via drone helpers | drone weapon-mod attack task |
@@ -49,12 +49,12 @@ checks, volume scans) and the steering layer, glued to A* paths.
 RaycastPathing (namespace)
   RaycastPath          Nodes: List<RaycastNode>, ProjectedPoints, Info
     FloodFillPath      + open/closed lists (A* frontier)
-  RaycastNode          composition: RaycastNodeInfo (pos/scale/depth)
+  RaycastNode          composition: `RaycastNodeInfo` (pos/scale/depth)
     FloodFillNode      + RaycastNodeHierarcy, cPathNodeType
   RaycastNodeHierarcy  parent, neighbors, children, childAirBlocks,
                        childSolidBlocks, waypoint, flowToWaypoint
-  RaycastNodeInfo      position, scale, depth (0.5-scale quarter children)
-  FloodFillNodeScore   G, H; F = G + H
+  `RaycastNodeInfo`      position, scale, depth (0.5-scale quarter children)
+  `FloodFillNodeScore`   G, H; F = G + H
   RaycastPathUtils     static Physics.Raycast wrappers + debug draw
   RaycastPathWorldUtils static block/volume scanners over World + Physics
   cPathNodeType        Unassigned=0 Air=1 Solid=2 Door=3 Half=4

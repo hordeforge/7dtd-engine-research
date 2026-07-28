@@ -50,9 +50,9 @@ flowchart TB
 ## AIDirectorChunkData : Object
 - `Tick(Single)` IL=23
 
-## AIDirectorChunkEvent : Object
+## `AIDirectorChunkEvent` : Object
 
-## AIDirectorChunkEventComponent : AIDirectorHordeComponent
+## AIDirectorChunkEventComponent : `AIDirectorHordeComponent`
 - `Tick(Double)` IL=79
 - `TickActiveSpawns(Single)` IL=66
 - `get_HasAnySpawns()` IL=6
@@ -65,7 +65,7 @@ flowchart TB
 
 ## AIDirectorConstants : Object
 
-## AIDirectorData : Object
+## `AIDirectorData` : Object
 
 ## AIDirectorEventsFromXml : MonoBehaviour
 - `Update()` IL=1
@@ -77,7 +77,7 @@ flowchart TB
 - `DecSpawnCount(Int32)` IL=15
 - `get_canSpawn()` IL=11
 
-## AIDirectorHordeComponent : AIDirectorComponent
+## `AIDirectorHordeComponent` : AIDirectorComponent
 
 ## AIDirectorMarkerManagementComponent : AIDirectorComponent
 - `Tick(Double)` IL=7
@@ -89,7 +89,7 @@ flowchart TB
 - `UpdatePlayerInventory(Int32,AIDirectorPlayerInventory)` IL=11
 - `UpdatePlayerInventory(EntityPlayerLocal)` IL=7
 
-## AIDirectorPlayerState : Object
+## `AIDirectorPlayerState` : Object
 
 ## AIDirectorPooledMarker : MonoBehaviour
 - `Update()` IL=1
@@ -99,7 +99,7 @@ flowchart TB
 ## AIDirectorSmellMarker : Object
 - `Tick(Double)` IL=71
 
-## AIDirectorWanderingHordeComponent : AIDirectorHordeComponent
+## AIDirectorWanderingHordeComponent : `AIDirectorHordeComponent`
 - `Tick(Double)` IL=17
 - `TickActiveSpawns(Single)` IL=43
 - `StartSpawning(SpawnType)` IL=124

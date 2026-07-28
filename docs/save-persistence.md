@@ -181,12 +181,12 @@ Member surface (from all call sites): `Init`, `Cleanup`, `CommitAsync`, `CommitS
 - **Backup/restore mapping** lives in `SaveDataUtils`:
   `GetBackupPath(p)` (IL=6) appends the literal suffix `.bup` to the relative path;
   `GetRestorePath(p)` (IL=24) strips it (throws if the suffix is missing). Writers
-  (`SaveDataManager.CachedStream..ctor`) create the `.bup` sibling before overwriting
+  (`SaveDataManager.`CachedStream`..ctor`) create the `.bup` sibling before overwriting
   when `provider.ShouldBackup()`; `InitRestoreBackups` (IL=67) scans `SaveDataType.User`
   recursively for `*.bup`, deletes the half-written original and moves the backup back
   (crash-safe write-then-swap). `ManagedFileDelete` also removes the paired `.bup`.
 - **Size tracking:** `InitFileSizeTracking` (IL=70) folds every file into
-  `fileSizesBySlot: Dictionary<SaveDataSlot, SlotSizeData>`;
+  `fileSizesBySlot: Dictionary<SaveDataSlot, `SlotSizeData`>`;
   `TryGetTrackedSize` answers per-file size plus an `isPriorityFile` flag.
   `IsPriorityFilePath` (IL=17): type is `Saves` and `PathRelativeToSlot` starts with
   `Region`, i.e. region files ([save-region.md](save-region.md) §3) are the priority
@@ -256,7 +256,7 @@ flowchart TD
   name, level, distance walked). Platform display names resolve asynchronously via
   `PlayerEntryInfoPlatformDataResolver`.
 - **Remote saves** (`ProcessRemoteWorldSaves` IL=276): walks `SavesLocal/<guid>` dirs,
-  reading `RemoteWorldInfo.xml` and `PathAbstractions.Contextual.FindDownloadedRemoteWorld`.
+  reading `RemoteWorldInfo.xml` and `PathAbstractions.`Contextual`.FindDownloadedRemoteWorld`.
   This is the **client-side** store for worlds joined on servers (the dedicated server
   is the origin of that data, not a consumer); orphaned entries surface under a
   localized `[Remote Worlds]` group.

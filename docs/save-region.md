@@ -1,6 +1,6 @@
 # Save, WorldState, and region files (dedicated V3.0.1)
 
-**Owns:** WorldState, Chunk write/read, RegionFile* managed layout (generic engine).  
+**Owns:** WorldState, Chunk write/read, `RegionFile`* managed layout (generic engine).  
 **Product expand/inject notes:** `7days-realworld/docs/realearth-surfaces.md`.  
 **Dumps:** `../il/loop-complete-v3.0.1/`, `../il/realearth-surfaces-v3.0.1/`, `../il/dedi-complete-v3.0.1/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
@@ -115,15 +115,15 @@ flowchart LR
 ### Type hierarchy
 
 ```text
-RegionFile
-  ├─ RegionFileRaw          (CurrentVersion=1, 8×8 chunks)
-  └─ RegionFileSectorBased → V1 / V2
+`RegionFile`
+  ├─ `RegionFileRaw`          (CurrentVersion=1, 8×8 chunks)
+  └─ `RegionFileSectorBased` → V1 / V2
 
 RegionFileAccessAbstract → MultipleChunks → Raw | SectorBased
 RegionFileManager : WorldChunkCache  (cache, cull, claim protect)
 ```
 
-### RegionFileRaw constants
+### `RegionFileRaw` constants
 
 | Constant | Value |
 |---|---|
@@ -144,7 +144,7 @@ Protection margins (cull): land claim / bedroll / offline / backpack / vehicle /
 
 | Question | Answer |
 |---|---|
-| How chunks enter disk? | RegionFileRaw/Sector WriteData + RegionFileManager save thread fields |
+| How chunks enter disk? | `RegionFileRaw`/Sector WriteData + RegionFileManager save thread fields |
 | Header layout constants? | Measured above |
 | Exact compressed blob codec of sector payload? | Method bodies present in dump; full byte-level codec not hand-annotated (optional deep dive; not required for sim-loop understanding) |
 

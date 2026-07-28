@@ -135,7 +135,14 @@ class Coverage {
       bool isInventory = f.Replace('\\','/').Contains("/inventories/");
       var target = (fn == "out-of-scope-surface.md") ? classified : (isInventory ? catalogued : narrated);
       string text = File.ReadAllText(f);
-      foreach (Match mt in Regex.Matches(text, "`([A-Za-z_][A-Za-z0-9_]*)`"))
+      // Credit the leading type identifier in any backticked token:
+      //   `EAIManager`              -> EAIManager
+      //   `EAIManager.Update`       -> EAIManager   (Type.Member form used throughout)
+      //   `EAIManager::Update`      -> EAIManager   (IL-style Type::Member)
+      //   `List`1` is not matched as a whole by this; BaseName strips arity on the type side.
+      // Still requires a backtick so bare prose and markdown table headers cannot credit
+      // real types named Field/Entry/Data.
+      foreach (Match mt in Regex.Matches(text, "`([A-Za-z_][A-Za-z0-9_]*)(?:[./:][^`]*)?`"))
         target.Add(mt.Groups[1].Value);
     }
     catalogued.ExceptWith(narrated);   // narrated wins over merely-catalogued
@@ -228,18 +235,14 @@ class Coverage {
     }
     sb.AppendLine();
 
-    sb.AppendLine("## Triage of the unaccounted set (2026-07-26)");
+    sb.AppendLine("## Triage of the unaccounted set");
     sb.AppendLine();
-    sb.AppendLine("A manual sample of the unaccounted list found it is **dominated by client, editor,");
-    sb.AppendLine("and vendored code that happens to live in the `<global>` namespace**, where the");
-    sb.AppendLine("namespace-based library filter cannot reach it: `PrefabEditModeManager` (editor),");
-    sb.AppendLine("`CursorControllerAbs` (client input), `NCalcLexer` / `BindingNcalcFunctions`");
-    sb.AppendLine("(vendored expression parser), `GameSenseManager` (SteelSeries peripherals),");
-    sb.AppendLine("`DistantTerrain` (render), `SaveDataMergedPlatformSaveGameIOProvider` (console");
-    sb.AppendLine("platform). These need per-type classification, not new reverse engineering.");
-    sb.AppendLine();
-    sb.AppendLine("So the honest reading of the number below is **not** \"N undocumented server");
-    sb.AppendLine("systems\". It is a work queue whose largest bucket is classification debt.");
+    sb.AppendLine("As of 2026-07-28 the unaccounted tier is driven to **zero** by (1) crediting");
+    sb.AppendLine("`Type.Member` backtick forms as type mentions, (2) a supplementary out-of-scope");
+    sb.AppendLine("classification for client/platform/vendored/infra types that live in `<global>`,");
+    sb.AppendLine("and (3) leaf-cataloguing the RefScan server-dominant remainder. A zero here means");
+    sb.AppendLine("every reached game type is narrated, catalogued, or classified - **not** that every");
+    sb.AppendLine("type has a full behavioral narrative. Read the four tiers separately.");
     sb.AppendLine();
     sb.AppendLine("## Top undocumented reached types (by method count) - the gap list");
     sb.AppendLine();

@@ -904,3 +904,124 @@ sweeping the extracted mermaid blocks for every risky construct (all now 0).
 Published the map as a rendered artifact, rebuilt programmatically **from** the
 fixed markdown (blocks extracted, HTML-escaped, injected) so the two cannot drift;
 verified 7/7 diagrams byte-identical to the doc.
+
+## 2026-07-26 - state-machine mapping + corpus-wide mermaid 8.6 sweep
+
+**Objective:** "make sure all state machines are mapped and visualized", then finish
+the 8.6 compatibility fix beyond the architecture map.
+
+**State machines.** Inventoried every `stateDiagram` in the corpus and found one gap:
+`raycast-pathing.md` named the drone state machine in prose with no diagram. Recovered
+the real `EntityDrone/State` enum from IL (`Idle=0, Sentry=1, Follow=2, Heal=3,
+Attack=4, Shutdown=5, NoClip=6, Teleport=7, None=8`) and established that
+`SetState(State next, bool sync)` is the sole mutator (15 call sites), so the
+transition set is closed rather than sampled. Added as §6b.
+
+New tool `tools/src/StateMachines.cs` indexes every state diagram with its owning
+doc + section + state count and emits `docs/inventories/state-machines.md`:
+**74 state machines across 42 docs**, grouped into 6 clusters (Gameplay 27, Ops 15,
+Entities 14, World 10, Frame 4, Wire 4). Registered in INDEX; overview added as
+`architecture-map.md` §7b. Regeneration is byte-stable (verified: md5 unchanged).
+
+**Mermaid 8.6 sweep beyond the map.** The earlier fix covered `architecture-map.md`
+only. A corpus-wide scan of all 185 diagrams found 17 further `;` hits, which
+triage split into two classes:
+
+- *Legitimate, left untouched:* `;` inside `classDiagram` bodies (valid syntax,
+  `sandbox-options.md`), `;` terminating HTML entities (`&lt;` etc.), `;` used as a
+  deliberate flowchart statement separator, and `&` inside quoted labels.
+- *Real breakages, fixed:* `;` inside **unquoted** label/note text in 11 lines
+  (buffs, items, loot-economy x3, parties-factions x2, quests-challenges, webserver,
+  world-generation) - the same class as the reported failure; three `A & B -->`
+  fan-outs (server-browser-prefabs, signs, world-generation) rewritten as explicit
+  single edges; and four labels in `npc-dialog.md` containing a literal `\n`
+  (not valid in a mermaid label) converted to `<br/>`.
+
+Discipline note: the earlier instinct was to mass-strip `->` from labels. The
+evidence did not support it - dozens of diagrams carry `->` inside labels and render
+fine, and the one reported failure carried a `;`. The semicolon was the breaker.
+Scoped the edit to what the evidence justified.
+
+**Verification:** corpus-wide risky-construct sweep over all 185 diagrams now
+reports 0 hazards. Both repo gates green (`test_dedi_coverage_docs.py` OK, 11 docs /
+8 dump sets / 8 tools; `test_re_dump_regen.py` OK, 244 MB update methods, matching
+the audited count after the nested-type recursion patch). Doc health: 82 docs, 0 em
+dashes, 0 odd fences, 0 docs missing from INDEX, 0 real broken links (the single
+regex hit in `save-persistence.md:109` is a regex in backticks, not a link).
+Also removed 16 empty leftover directories under `tools/` from the earlier IL move.
+
+**Next:** experimental-delta refresh remains BLOCKED (needs `steamcmd` plus the
+user's Steam credentials for a `latest_experimental` pull); `experimental-delta.md`
+stays pinned/provisional. Push remains BLOCKED (no remote on either repo; creating
+one is the user's call given the content). Local bundle backups at
+`~/.cache/7dtd-backups/`.
+
+## 2026-07-28 - close classification debt (unaccounted -> 0)
+
+Continued the RE completeness push after the state-machine map.
+
+**Coverage mention matcher fixed.** `tools/src/Coverage` only credited bare
+`` `TypeName` `` tokens, so forms used throughout the corpus (`EAIManager.Update`,
+`ChunkBlockLayer.Write`, `NetEntityDistributionEntry.updatePlayerList`) never
+counted as narration. Expanded the regex to credit the leading identifier in
+`` `Type.Member` `` / `` `Type::Member` `` / `` `Type/Nested` `` backtick forms.
+Effect on the honest tiers: narrated **1120 -> 1248 (33%)**, catalogued
+**734 -> 1029**, unaccounted **934 -> 731** before any new classification.
+
+**Classification debt closed.** Remaining unaccounted types were triaged with
+`tools/src/RefScan` (server vs client dominance) and split:
+
+- **494** client/platform/vendored/infra types appended as a *supplementary*
+  section in `docs/out-of-scope-surface.md` (base hand-curated lists left
+  byte-stable; earlier in-place rewrite attempt corrupted arity markers and was
+  reverted).
+- **216** server-dominant / reflection-XML types leaf-catalogued under
+  `docs/inventories/dedicated-leaves.md` ("Promoted unaccounted server surface"),
+  fingerprinted with `tools/src/LeafInfo`.
+- A handful of already-narrated bare mentions (`AIDirectorPlayerState`,
+  `RegionFileRaw`, `WorldBlockTicker`, ...) backticked in their owning docs.
+
+**Result (Coverage report):** game types 3688; narrated **1248 (33%)**;
+catalogued 1029; classified 1411; **unaccounted 0**. Zero unaccounted means every
+reached game type is narrated, catalogued, or classified - **not** that every
+type has a full behavioral narrative. The four tiers remain separate; the old
+"100% accounted" headline stays withdrawn.
+
+Also updated the generator triage note and the stale numbers in `full-surface.md`.
+
+**Verification:** `test_dedi_coverage_docs.py` OK; `test_re_dump_regen.py` OK
+(244 MB update methods); 0 em dashes; INDEX complete.
+
+**Still blocked:** experimental-delta refresh (steamcmd + credentials);
+push (no remotes).
+
+## 2026-07-28 - water sim pipeline narrative
+
+Picked the highest-value remaining server surface after classification closed:
+the jobified water simulation (only a one-table stub in `light-mesh-water.md`
+plus a short apply-stage note in `dedicated-misc-systems.md`).
+
+**IL pass (DumpMethod + Xref, V3.0.1 dedi):**
+- Callers: `GameManager.gmUpdate` -> `WaterSimulationNative.Step` and
+  `WaterEvaporationManager.UpdateEvaporation`; apply via
+  `WaterSimulationApplyChanges.ThreadLoop` -> `ApplyChanges`.
+- `WaterSimulationNative.Update` (IL=229): early exits (init/pause/net budget),
+  then `IJob` PreProcess -> `IJobParallelFor` CalcFlows -> ApplyFlows ->
+  `IJob` PostProcess, `JobHandle.Complete`, harvest `HasFlows` into
+  `ChangesForChunk.Writer.RecordChange`.
+- Flow rules in `ProcessFlows` (IL=265): solid deactivate, groundwater sides,
+  `ProcessFlowBelow` / `ProcessOverfull` (const **19500**) / four
+  `ProcessFlowSide` with cross-chunk `EnqueueFlow`.
+- Mass model: `WaterValue` is `UInt16 mass`; percent uses 195 / 15600 / 15405;
+  `GetStableMassBelow` = min(sum, 19500); flow-through when
+  `Block.WaterFlowMask != 63`.
+- Net: `HasNetWorkLimitBeenReached` compares `NetPackageMeasure.totalSent` to
+  `networkMaxBytesPerSecond`; send path builds `NetPackageWaterSimChunkUpdate`
+  for `clientsNearChunkBuffer`.
+
+Expanded `docs/light-mesh-water.md` §4 with diagrams + method map; cross-linked
+from `dedicated-misc-systems.md`. Coverage still **unaccounted=0** after regen.
+
+**Verification:** dedi coverage gate OK; 0 em dashes; mermaid hazard scan clean
+on new blocks.
+
