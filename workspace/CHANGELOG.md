@@ -1053,3 +1053,18 @@ Second depth round after water.
 
 Coverage after regen: narrated **1269 (34%)**, unaccounted **0**. Gates green.
 
+## 2026-07-28 - lock contexts, async spawn queue, PrefabChunk
+
+Third depth round.
+
+- **ILockContext bags** in `dedicated-leftovers.md` §2.1: `EntityLockContext`
+  (command + bag + firstTouch), `EntityTraderLockContext` (command + TraderData),
+  `VendingMachineLockContext` (TraderData). Server `OnLockedServer` paths open
+  loot/trader inventory and clone trader data; wire shapes from Write/Read IL.
+- **EntityCreateHandle + NetEntityPackageQueue**: early entity-targeted packages
+  queue (cap 10) until `OnCreateEntityRequestFinalized` drains via
+  `ProcessPackagesForEntity`.
+- **Prefab/PrefabChunk**: IChunk view over prefab templates, cached by chunk key.
+
+Coverage: narrated **1273 (34%)**, unaccounted **0**.
+

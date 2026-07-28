@@ -6,7 +6,8 @@ item-framework leaves that run server-side (`ItemClassBlock`, `ItemClassQuest`,
 `ItemClassWaterContainer`), the `PrefabVolumes.*` list types, the
 `PathAbstractions` search-path family, `BlockValueV3`, `AesEncryptAndMac`,
 `EnumBodyPartHitExtensions`, `BaseOperationLootEntryRequirement`,
-`PlayerInteractions`, `CraftCompleteData`, `EntityAsyncManager/EntityCreateHandle`,
+`PlayerInteractions`, `CraftCompleteData`, `EntityAsyncManager/EntityCreateHandle`, `NetEntityPackageQueue`,
+entity/trader/vending `*LockContext` wire bags, `Prefab/PrefabChunk`,
 `ShapesFromXml/ShapeCategory`, `DynamicPropertiesCache`, the `PhysicsBody*`
 collider layout family, and the infra types `SdFileSystemInfo`,
 `TrackedDataMap/SubsetAccessor`, `UpdateListenerMap`, `DynamicObserver`,
@@ -86,6 +87,32 @@ versioning). Its wire endpoints run in server package handlers:
 per-target access locks (vending machines, workstations, power blocks; trading
 uses a shared lock, [loot-economy.md](loot-economy.md)). `ConnectionManager`
 releases a client's locks on disconnect.
+
+### 2.1 `ILockContext` bags (entity / trader / vending)
+
+`LockManager` does not serialize locks as opaque tokens only: successful lock
+acquisition carries a typed **`ILockContext`** payload that rides the lock
+request/response path and is applied in `OnLockedServer` / `OnLockedLocal`.
+
+| Nested type | Owner | Fields | Wire (`Write`/`Read`) |
+|---|---|---|---|
+| `Entity/EntityLockContext` | `Entity` | `Command` (string), `Bag`, `FirstTimeTouched` | string command; bool firstTouch; bool hasBag + optional `Bag.Write`/`Bag.Read` |
+| `EntityTrader/EntityTraderLockContext` | `EntityTrader` | `Command`, `TraderData` (cloned on construct) | string command; bool hasTraderData + optional `TraderData.Write`/`Read` |
+| `TileEntityVendingMachine/VendingMachineLockContext` | vending TE | `TraderData` only | always `TraderData.Write`/`Read` (construct clones) |
+
+**Server apply (`OnLockedServer`, verified call patterns):**
+
+- Generic entity: set `FirstTimeTouched`, attach `Bag`, `LootManager.LootBagOpened`.
+- `EntityTrader`: `SetupActiveQuestsForPlayer`, `NetPackageNPCQuestList.SendQuestPacketsToPlayer`, `TraderManager.TraderInventoryRequested`, clone `TraderData` into the context.
+- `TileEntityVendingMachine`: same trader-inventory request + clone into context.
+
+**Local apply (`OnLockedLocal`)** opens client UI (`XUiC_BagStorageWindowGroup`,
+trader window transitions, drone/vehicle `StartInteraction`) and always ends in
+`LockManager.UnlockRequestLocal` when the interaction closes. Dedicated care is
+the server half + the wire shape of the context; the UI open is client-only.
+
+Complements [items.md](items.md) (bag), [loot-economy.md](loot-economy.md)
+(trader lock), [npc-dialog.md](npc-dialog.md) (quest list on trader open).
 
 ## 3. ItemClass leaves: ItemClassBlock, ItemClassQuest, ItemClassWaterContainer
 
@@ -214,7 +241,7 @@ read/write path on the dedicated. Complements
 [tile-entities-power.md](tile-entities-power.md) and
 [crafting-recipes.md](crafting-recipes.md).
 
-## 12. EntityAsyncManager/`EntityCreateHandle`
+## 12. EntityAsyncManager/`EntityCreateHandle` + `NetEntityPackageQueue`
 
 The completion handle of the async entity-create pipeline: wraps a
 `CreateEntityOperation` plus a callback, with `TryComplete` polled by
@@ -224,7 +251,43 @@ blocking `WaitForComplete` for teardown. Server producers: `Chunk.SpawnEntityAsy
 tracks a `HashSet` of pending handles per chunk and `Chunk.OnUnload` drains
 them via `WaitForComplete` so unload never races creation; `SleeperVolume`
 spawns sleepers through it; `NetPackageEntitySpawn.ProcessPackage` uses it for
-package-driven spawns. Complements [spawning.md](spawning.md).
+package-driven spawns.
+
+**Create path (verified):** `StartCreateEntity(EntityCreationData, onComplete)`
+builds `EntityFactory.CreateEntityAsync`, allocates `EntityCreateHandle`, stores
+it in a pending `Dictionary<Int32, EntityCreateHandle>` by entity id, and enqueues
+the handle for `Update` polling.
+
+**Package hold-back:** entity-targeted packages can arrive before the entity
+exists. `NetPackageEntityTargeted.ShouldProcess` asks
+`NetEntityPackageQueue.HasPackagesForEntity`; if the entity is still pending,
+`HandleSkipped` calls `EnqueueNetPackageForEntity`. When create finishes,
+`EntityAsyncManager.OnCreateEntityRequestFinalized(id)` removes the handle and
+calls `NetEntityPackageQueue.ProcessPackagesForEntity(id)`, which dequeues each
+held `NetPackage`, runs `ProcessPackage(world, GameManager)`, and
+`NetPackageManager.FreePackage`.
+
+`NetEntityPackageQueue` itself:
+
+| Method | IL | Behavior |
+|---|---:|---|
+| ctor | 10 | `Dictionary<int, Queue<NetPackage>>(64)` |
+| `EnqueueNetPackageForEntity` | 18 | create per-entity queue capacity **10** if missing |
+| `ProcessPackagesForEntity` | 20 | remove queue, drain + process + free |
+| `Cleanup` | 28 | free all queued packages (world cleanup / load) |
+
+```mermaid
+flowchart LR
+  Spawn[StartCreateEntity] --> H[EntityCreateHandle]
+  H --> Pend[pending dict by id]
+  Early[NetPackageEntityTargeted early] --> Q[NetEntityPackageQueue]
+  Pend --> Done[OnCreateEntityRequestFinalized]
+  Done --> Drain[ProcessPackagesForEntity]
+  Q --> Drain
+  Drain --> Proc[NetPackage.ProcessPackage]
+```
+
+Complements [spawning.md](spawning.md) and [network.md](network.md).
 
 ## 13. ShapesFromXml/ShapeCategory
 
@@ -312,6 +375,25 @@ crypto buffers, `ChunkAreaBiomeSpawnData`, `NameIdMapping`, `FactionManager`,
 buffer to the pool instead of freeing, and `Close`/`Dispose` are overridden to
 route into the pool. Complements [protocol-packages.md](protocol-packages.md)
 (package serialization) and [network.md](network.md).
+
+---
+
+## 21. Prefab/PrefabChunk
+
+`PrefabChunk` is a nested **`IChunk`-shaped view** over a loaded `Prefab`
+template (not a world chunk). `Prefab.GetChunk(x,z)` caches
+`Dictionary<Int64, PrefabChunk>` keyed by `WorldChunkCache.MakeChunkKey`;
+`GetChunks` materializes the full list for placement/copy paths.
+
+Surface (54 methods): `GetBlock` / `GetWater` / `GetDensity` / `IsAir` /
+`IsWater` / `GetTerrainHeight` / `GetBlockFaceTexture` / `GetTextureFull` /
+`GetBlockColumn`, with `checkCoordinates` clamping local indices. Used when the
+server copies prefab volumes into the world (`CopyIntoLocal` and friends in the
+prefab/chunk provider path; see [chunk-providers.md](chunk-providers.md) and
+[server-browser-prefabs.md](server-browser-prefabs.md)).
+
+Complements [world-chunks.md](world-chunks.md) (real chunks) by making clear
+this type is **template addressing**, not region persistence.
 
 ---
 
@@ -416,6 +498,8 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   used during RWG road/path routing ([world-generation.md](world-generation.md)).
 
 ## Changelog
+
+- **2026-07-28:** ILockContext bags; EntityCreateHandle + NetEntityPackageQueue hold-back; PrefabChunk IChunk view.
 
 - **2026-07-24:** Final leftovers batch: 19 dedicated sections covering ~30
   types (caller-verified), `AuthAndLoginManager` investigated and reclassified as
