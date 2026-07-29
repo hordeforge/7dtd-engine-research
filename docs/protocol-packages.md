@@ -346,6 +346,7 @@ response : u16    // eSetBlockResponse: 0 Success, 1 PowerBlockLimitExceeded,
 **EKickReason** (35 values; deny reasons in `NetPackagePlayerDenied`). Notable:
 4 VersionMismatch, 5 PlayerLimitExceeded, 6 Banned, 7 NotOnWhitelist,
 11 EacViolation, 18 UnknownNetPackage, 19 EncryptionFailure,
+26 BadMTUPackets (ConnectionManager bad-packet threshold 3/s), 
 33 EncryptionAgreementInvalidSignature, 34 EncryptionAgreementError. Full list in
 `il/netpackages-v3.0.1/` enum dump.
 

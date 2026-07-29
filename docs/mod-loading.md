@@ -204,6 +204,33 @@ tokens to the patching mod's path before load.
 `XmlPatchException.buildMessage` formats patch element + method + message for
 throw sites.
 
+
+### 5.5 Stock load table (`WorldStaticData.xmlsToLoad`)
+
+The dedicated boot path does not hard-code each XML file at the call site. It
+walks a static table of **49** `XmlLoadInfo` records built in
+`WorldStaticData..cctor` (IL=**871**). Full flag/delegate census:
+[inventories/xmlsToLoad.md](inventories/xmlsToLoad.md).
+
+**`XmlLoadInfo` fields (metadata):** `XmlName`, `LoadStepLocalizationKey`,
+`LoadAtStartup`, `SendToClients`, `IgnoreMissingFile`, `AllowReloadDuringGame`,
+`LoadMethod`, `CleanupMethod`, `ExecuteAfterLoad`, `ReloadDuringGameMethod`,
+`CompressedXmlData`, `LoadClientFile`, `WasReceivedFromServer`.
+
+| Flag | Dedi meaning |
+|---|---|
+| `LoadAtStartup` | early boot subset (`events`, `rwgmixer`, `archetypes`, loading UI, `sandbox_overrides`, ...) |
+| `SendToClients` | eligible for compressed S2C config shipping after join |
+| `AllowReloadDuringGame` | `ReloadInGameXML` / console-style reload without full restart |
+| `LoadClientFile` | dual client-file semantics (only `archetypes` in this build) |
+
+Notable **server-loaded, not S2C** rows: `gamestages`, `spawning`, `signs`
+(flags all false for send/startup except they still load in the full pass).
+`rwgmixer` is **boot** but not S2C (worldgen mixer stays server-local).
+
+`ExecuteAfterLoad` hooks used on stock: materials → `LoadTextureAtlases`;
+item_modifiers → `LateInitItems`.
+
 ### 5.4 `MapVisitor` (console AABB walk)
 
 Not part of mod load, but it is the other high-method "visitor" leaf that was
@@ -234,8 +261,10 @@ scan), not by the steady sim loop.
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 | [dedicated-misc-systems.md](dedicated-misc-systems.md) | Individual *FromXml loaders (entity classes, events, ...) |
 | [console-commands.md](console-commands.md) | `visitmap` host for MapVisitor |
+| [inventories/xmlsToLoad.md](inventories/xmlsToLoad.md) | 49-entry stock config table |
 
 ## Changelog
 
+- **2026-07-28:** `xmlsToLoad` 49-entry census (flags + load/cleanup/reload delegates).
 - **2026-07-28:** XmlFile/XmlPatcher xpath pipeline, XmlPatchMethods catalog, WorldStaticData/LoadPatchStuff callers, MapVisitor console visitor.
 - **2026-07-23:** Initial mod-loading reversal (ModManager pipeline, Mod load-state, EAC gate, ModEvents lifecycle) with state machines.

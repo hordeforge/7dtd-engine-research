@@ -1095,3 +1095,20 @@ Fifth depth round.
 
 Coverage: narrated **1280 (34%)**, unaccounted **0**.
 
+## 2026-07-28 - WorldStaticData xmlsToLoad census + ConnectionManager.Update
+
+Sixth depth round.
+
+- New inventory `docs/inventories/xmlsToLoad.md`: **49** `XmlLoadInfo` rows from
+  `WorldStaticData..cctor` (IL=871) with boot/S2C/reload/clientFile flags and
+  load/cleanup/after/reload delegates. Counts: boot 7, S2C 42, reload 19, clientFile 1.
+- `mod-loading.md` §5.5 points at the table; notes server-only rows
+  (`gamestages`, `spawning`, `signs`) and after-hooks (materials atlases,
+  item LateInit).
+- `network.md` §1.1-1.3: `ConnectionManager.Update` order, bad-packet kick when
+  `GetBadPacketCount >= 3` → `EKickReason.BadMTUPackets` (26), dual-channel
+  `ProcessPackages` (disallow ToClient), `DisconnectClient` highlights.
+- `protocol-packages.md` EKickReason notables gain BadMTUPackets=26.
+
+Coverage: narrated **1281 (34%)**, unaccounted **0**.
+

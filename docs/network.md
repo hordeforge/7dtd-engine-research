@@ -26,6 +26,59 @@ flowchart TD
 
 These run as **peer MonoBehaviours** relative to `GameManager.Update` (script order = Unity residual).
 
+### 1.1 `ConnectionManager.Update` (IL=215, server path)
+
+Verified body order when `IsServer`:
+
+1. `ProtocolManager.Update()`.
+2. **Bad-packet scan** at most once per second (`Time.time - lastBadPacketCheck > 1`):
+   for each `ClientInfo` with a live channel-0 connection, non-`-1` `entityId`,
+   and not already `disconnecting`, if
+   `INetworkServer.GetBadPacketCount(cInfo) >= **3**` then
+   `GameUtils.KickPlayerForClientInfo` with
+   `EKickReason.BadMTUPackets` (**26**), custom reason empty.
+3. For each client, `ProcessPackages` on **channel 0** and **channel 1**
+   (disallowed direction = `ToClient` / value **2**, i.e. drop packets that are
+   only legal server→client).
+4. `FlushClientSendQueues()`.
+5. When `updateClientInfo` countdown elapses and world exists and
+   `ClientCount > 0`: `UpdatePings()`, rebuild/send `NetPackageClientInfo`
+   (`Setup(world, clientList)`).
+
+Client (non-server) half of the same method processes `connectionToServer[]`
+channels and flushes those queues (same `ProcessPackages` helper).
+
+```mermaid
+flowchart TD
+  U[ConnectionManager.Update] --> P[ProtocolManager.Update]
+  P --> Bad{1s elapsed?}
+  Bad -->|yes| Scan[per client GetBadPacketCount]
+  Scan -->|count >= 3| Kick[Kick BadMTUPackets=26]
+  Bad -->|no| Pack
+  Scan --> Pack[ProcessPackages ch0 + ch1]
+  Kick --> Pack
+  Pack --> Flush[FlushClientSendQueues]
+  Flush --> Ping{clientInfo timer?}
+  Ping -->|yes| CI[UpdatePings + NetPackageClientInfo]
+```
+
+### 1.2 `ProcessPackages` (IL=116)
+
+Per connection:
+
+1. `INetConnection.GetPackages` into a temp list (null guards log and return).
+2. For each package: reject wrong `PackageDirection` (warn); reject
+   `!AllowedBeforeAuth` before login (warn); if `ShouldProcess` then
+   `ProcessPackage` + `FreePackage`, else `HandleSkipped` (entity hold-back;
+   see [dedicated-leftovers.md](dedicated-leftovers.md) §12).
+
+### 1.3 `DisconnectClient` (IL=184, highlights)
+
+On remove: `OnClientDisconnected` / `ModEvents` player-disconnected; optional
+`PlayerDataFile.Save`; `INetConnection.Disconnect` both channels;
+`AuthorizationManager.Disconnect`; party/quest disconnect handlers;
+`LockManager.ForceUnlockByPlayer`; remove chunk observer; `World.RemoveEntity`.
+
 ---
 
 ## 2. Entity replication (from UpdateTick)
@@ -261,6 +314,7 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 
 ## Changelog
 
+- **2026-07-28:** ConnectionManager.Update order, BadMTUPackets>=3 kick, ProcessPackages gates, DisconnectClient highlights.
 - **2026-07-28:** NetConnectionSteam/Simple reader-writer pipelines, compress-then-encrypt order, Simple framing, AesEncryptAndMac stream layout.
 - **2026-07-19:** Related docs table.
 - **2026-07-18:** Package-band state machine; see also.  
