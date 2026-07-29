@@ -309,6 +309,9 @@ Client sends after the enter-game batch. Package process is a thin forwarder to
 16. `ModEvents.PlayerSpawning` (`SPlayerSpawningData`).
 
 **Note:** `GameManager.PlayerSpawnedInWorld` is **not** called from this method.
+Chunk terrain for the new observer is **not** sent inside this method either:
+steady `UpdateTick` -> `SendChunksToClients` streams `NetPackageChunk` on channel 1
+([world-chunks.md](world-chunks.md) section 4.0).
 It runs later when the client (or local controller) sends
 `NetPackagePlayerSpawnedInWorld` (server validates `ValidEntityIdForSender`,
 runs `PlayerSpawnedInWorld`, rebroadcasts the package).

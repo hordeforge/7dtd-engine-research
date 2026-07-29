@@ -108,7 +108,10 @@ stateDiagram-v2
   Idle --> [*]
 ```
 
-Also: `SendChunksToClients` (IL=216) after entity packages.
+Also: `SendChunksToClients` (IL=216) after entity packages: per
+`ChunkObserver` sends `ChunkRemove` / `Chunk` (channel 1, compressed) / map
+packages to `entityIdToSendChunksTo` (3 first-load packages per tick cap).
+Detail: [world-chunks.md](world-chunks.md) section 4.0.
 
 ### Package selection thresholds (decoded IL)
 
@@ -320,6 +323,7 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 ## Changelog
 
 - **2026-07-28:** ProtocolManager as thin INetworkServer/Client pump.
+- **2026-07-28:** SendChunksToClients pointer to world-chunks observer pipeline.
 - **2026-07-28:** ConnectionManager.Update order, BadMTUPackets>=3 kick, ProcessPackages gates, DisconnectClient highlights.
 - **2026-07-28:** NetConnectionSteam/Simple reader-writer pipelines, compress-then-encrypt order, Simple framing, AesEncryptAndMac stream layout.
 - **2026-07-19:** Related docs table.

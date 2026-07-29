@@ -1,6 +1,6 @@
 # World and chunk pipeline (dedicated V3.0.1)
 
-**Owns:** world tick, generateTerrain trampoline, load/send, SetBlock path (generic engine).  
+**Owns:** world tick, generateTerrain trampoline, load/send (observer streaming), SetBlock path (generic engine).  
 **Index math:** §2 below + [`terrain-height.md`](terrain-height.md).  
 **Save path:** [`save-region.md`](save-region.md).  
 **Product Streamed inject:** `7days-realworld/docs/realearth-runtime.md`.  
@@ -72,13 +72,86 @@ Interfaces are unpatchable; patch concrete generators / provider.
 
 | Surface | IL / note |
 |---|---|
-| `DetermineChunksToLoad` | **448** (bucket sets, locks, unload) |
-| `SendChunksToClients` | **216** |
+| `DetermineChunksToLoad` | **448** (per-observer buckets, unload set) |
+| `SendChunksToClients` | **216** (per-observer remove/load/reload/map packages) |
+| `AddChunkObserver` | **15** (player join attaches stream target) |
+| `ResendChunksToClients` | **55** (queue reload keys for remote observers) |
 | `doCopyChunksToUnity` | 252; **skipped on dedicated** in gmUpdate |
 | `SaveRandomChunks` | 99 |
 | `ChunkCluster.AddChunkSync` / `UnloadChunk` / `RemoveChunk` | pipeline |
 | `Chunk.OnLoad` / `OnUnload` | 97 / 188 |
 | `RegionFileManager` | cache + cull + claim protect |
+
+### 4.0 Client chunk streaming (verified)
+
+**When:** every full `UpdateTick`, after `NetEntityDistribution.OnUpdateEntities`
+(Xref: sole caller of `SendChunksToClients` is `GameManager.UpdateTick`).
+
+**Observer model (`ChunkManager/ChunkObserver`):** created by
+`AddChunkObserver(pos, bBuildVisualMeshAround, viewDim, entityIdToSendChunksTo)`
+and stored in `m_ObservedEntities`. Join path sets
+`entityIdToSendChunksTo = player.entityId` and `viewDim` from the clamped
+client value ([protocol.md](protocol.md) section 5).
+
+| Field | Role |
+|---|---|
+| `entityIdToSendChunksTo` | target client entity id; **`-1`** skips network send |
+| `viewDim` | observation radius; bucket lists sized `viewDim + 2` |
+| `bBuildVisualMeshAround` | local/visual observer (not a remote stream target for resend) |
+| `chunksLoaded` | keys already sent |
+| `chunksToLoad` | `BucketHashSetList` of keys still needed |
+| `chunksToReload` | keys that must be resent with overwrite |
+| `chunksToRemove` | keys to unload on the client |
+| `chunksAround` | current around-set from `DetermineChunksToLoad` |
+| `mapDatabase` | optional mini-map package source |
+
+`DetermineChunksToLoad` (IL=448) refreshes per-observer around-sets and
+populate/diff `chunksToLoad` / unload candidates (bucket hash sets + locks). It
+does not itself send packages.
+
+**`SendChunksToClients` per observer with `entityIdToSendChunksTo != -1`:**
+
+1. **Removes:** for each key in `chunksToRemove`, queue
+   `NetPackageChunkRemove.Setup(key)`; drop from `chunksLoaded` and
+   `chunksToReload`; clear `chunksToRemove`. If any, `ConnectionManager.SendPackage`
+   list to that entity id (arg literal **192** on the bulk send path, same as other
+   join S2C bulk).
+2. **First-time loads:** walk `chunksToLoad.list`; `GetChunkSync`; **skip** while
+   `Chunk.NeedsLightCalculation`; else `NetPackageChunk.Setup(chunk, bOverwrite=false)`,
+   mark loaded, remove from to-load. **Stop filling when pending packages >= 3**
+   (per-tick throttle for first loads).
+3. **Reloads:** reverse-walk `chunksToReload`; same light gate;
+   `Setup(chunk, bOverwrite=true)`; remove from reload list.
+4. **Map:** if `mapDatabase` set, append
+   `IMapChunkDatabase.GetMapChunkPackagesToSend()` when non-null.
+5. Send any remaining packages to the same entity id (again bulk flags **192**).
+
+```mermaid
+flowchart TD
+  UT[UpdateTick] --> DCL[DetermineChunksToLoad]
+  DCL --> Obs[per ChunkObserver buckets]
+  UT --> SCT[SendChunksToClients]
+  Obs --> SCT
+  SCT --> Rem[ChunkRemove for chunksToRemove]
+  SCT --> Load[Chunk Setup overwrite=false for toLoad]
+  SCT --> Rel[Chunk Setup overwrite=true for toReload]
+  SCT --> Map[optional map packages]
+  Rem --> Send[SendPackage to entityId]
+  Load --> Send
+  Rel --> Send
+  Map --> Send
+```
+
+**`NetPackageChunk` (channel 1, compressed):** `Setup` runs `Chunk.write` into a
+pooled stream; `write` emits `bOverwriteExisting`, optional i16 x/y/z when
+overwrite, i32 dataLen, blob. Client `ProcessPackage` either adds a new chunk or
+unload/reset/re-read/re-add when overwriting. Codec shared with region save
+([save-region.md](save-region.md), [protocol-packages.md](protocol-packages.md) section 3.1).
+
+**`ResendChunksToClients(HashSetLong)`:** for each observer that is **not** a local
+player visual mesh builder, append the given keys to `chunksToReload` so the next
+`SendChunksToClients` re-pushes with overwrite (terrain rebuild paths call
+`NetPackageChunk.Setup` directly as well).
 
 ### 4.1 Chunk progress flags (stock `InProgress*` volatiles)
 
@@ -144,11 +217,16 @@ stateDiagram-v2
 
 | Doc | Role |
 |---|---|
-| [save-region.md](save-region.md) | Chunk write/read |
+| [protocol-packages.md](protocol-packages.md) | `NetPackageChunk` / `WorldInfo` wire |
+| [protocol.md](protocol.md) | join path that attaches chunk observers |
+| [network.md](network.md) | UpdateTick placement of SendChunks |
+| [save-region.md](save-region.md) | Chunk write/read; blob codec shared with NetPackageChunk |
 | [terrain-height.md](terrain-height.md) | YDim / height |
 | `realearth-surfaces.md` | Product surfaces |
 
 ## Changelog
+
+- **2026-07-28:** `SendChunksToClients` per-observer remove/load/reload/map pipeline; ChunkObserver fields; 3-package first-load throttle.
 
 - **2026-07-19:** Related docs table.
 - **2026-07-18:** Chunk/world family narrative consolidating loop + surfaces RE.

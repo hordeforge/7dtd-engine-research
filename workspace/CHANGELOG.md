@@ -1156,3 +1156,15 @@ Ninth depth round.
 
 Coverage: narrated **1294 (35%)**; unaccounted **0**.
 
+## 2026-07-28 - client chunk streaming pipeline
+
+Tenth depth round.
+
+- `world-chunks.md` section 4.0: `ChunkObserver` fields; `SendChunksToClients`
+  remove/load/reload/map order; skip while `NeedsLightCalculation`; **3** first-load
+  packages per observer per tick; `ResendChunksToClients` reload queue.
+- `network.md` / `protocol.md` cross-links: join attaches observer; steady
+  UpdateTick streams channel-1 compressed chunks.
+
+Coverage: narrated **1295 (35%)**, unaccounted **0**.
+
