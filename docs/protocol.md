@@ -1,6 +1,6 @@
 # Dedicated wire protocol (V3.0.1 managed + live golden)
 
-**Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, golden package body layouts.  
+**Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, RequestToSpawnPlayer/PlayerId/PlayerSpawnedInWorld, golden package body layouts.  
 **Not:** the exhaustive per-package body catalog + protocol-wide metadata census (that is [`protocol-packages.md`](protocol-packages.md)); native LiteNet internals (residual); EAC wire (residual).  
 **Hub:** [INDEX.md](INDEX.md).  
 **Visual frames (RFC bars + Mermaid):** [`protocol-frames.md`](protocol-frames.md).  
@@ -262,6 +262,104 @@ flowchart TD
 On the client, `ProcessPackage` calls `ConnectionManager.PlayerAllowed(...)` when
 `bAllowed`, else `PlayerDenied(data)`.
 
+### Post-spawn request: `RequestToSpawnPlayer` (server, IL=496)
+
+Client sends after the enter-game batch. Package process is a thin forwarder to
+`GameManager.RequestToSpawnPlayer(cInfo, chunkViewDim, playerProfile, nearEntityId)`.
+
+**Wire (C2S):**
+
+| Order | Field |
+|---|---|
+| 1 | base header |
+| 2 | `chunkViewDim` : i16 |
+| 3 | `PlayerProfile.Write` (v5 layout, see above) |
+| 4 | `nearEntityId` : i32 |
+
+**Server work (verified):**
+
+1. Clamp `chunkViewDim` to `[max(4, pref190), min(12, pref190)]` where pref190 is
+   `GamePrefs.GetInt(190)` itself clamped to 4..12, then clamp the client value into that range.
+2. `PlayerDataFile.Load` under `getPersistentPlayerID` / `CombinedString`; clear
+   `lastSpawnPosition` to `Undef`.
+3. Entity id: reuse `PlayerDataFile.id` if loaded and not `-1` and free; else
+   allocate `EntityFactory.nextEntityID` (and reallocate if that id is already live).
+4. Spawn position selection (first success wins):
+   - If `GameStats` bool **25**: for each same-`TeamNumber` player, try
+     `FindRandomSpawnPointNearPlayer(..., radius 15, ...)`.
+   - Else if `nearEntityId != -1` and spawn-near-friend mode != 0:
+     up to 15 tries of `GetRandomSpawnPositionMinMaxToPosition` (min **40**, max **150**,
+     land-claim aware); mode **2** rejects forest/pine forest biome results
+     (`BiomeType` 2..3).
+   - Else if still undef: `SpawnPointList.GetRandomSpawnPosition`.
+5. Build `EntityCreationData` (class from profile, id, team, pos/rot); copy saved
+   `entityData` stream when `bLoaded`.
+6. `EntityFactory.CreateEntity` -> `EntityPlayer`; `isEntityRemote = true`.
+7. `Respawn(EnterMultiplayer=4)` if new file, else `Respawn(JoinMultiplayer=5)`.
+8. `PlayerDataFile.ToPlayer`.
+9. Persistent player: get or `CreatePlayerData` / `Update`, set `LastLogin` +
+   `EntityId`, `MapPlayer`, `SavePersistentPlayerData`.
+10. `ConnectionManager.SetClientEntityId` + **`NetPackagePlayerId`** to the client
+    (`id`, `teamNumber` i16, `PlayerDataFile.WriteNetwork`, `chunkViewDim`).
+11. `AIDirectorAirDropComponent.RefreshCrates(entityId)`.
+12. `World.SpawnEntityInWorld(player)`.
+13. `ChunkManager.AddChunkObserver(pos, false, chunkViewDim, entityId)` on the player.
+14. `IMapChunkDatabase.TryCreateOrLoad` for the player's map DB.
+15. `DispatchPlayerEvent` + broadcast `NetPackagePersistentPlayerState` (reason **0** new / **1** update).
+16. `ModEvents.PlayerSpawning` (`SPlayerSpawningData`).
+
+**Note:** `GameManager.PlayerSpawnedInWorld` is **not** called from this method.
+It runs later when the client (or local controller) sends
+`NetPackagePlayerSpawnedInWorld` (server validates `ValidEntityIdForSender`,
+runs `PlayerSpawnedInWorld`, rebroadcasts the package).
+
+```mermaid
+flowchart TD
+  Req[RequestToSpawnPlayer] --> Load[PlayerDataFile.Load]
+  Load --> Id[allocate or reuse entity id]
+  Id --> Pos[spawn position selection]
+  Pos --> Create[CreateEntity EntityPlayer remote]
+  Create --> Respawn[Respawn Enter/Join Multiplayer]
+  Respawn --> ToP[PlayerDataFile.ToPlayer]
+  ToP --> PPL[PersistentPlayerList map/save]
+  PPL --> Pid[NetPackagePlayerId]
+  Pid --> World[SpawnEntityInWorld]
+  World --> Obs[AddChunkObserver + map DB]
+  Obs --> Hook[ModEvents.PlayerSpawning]
+  Hook --> Later[later: PlayerSpawnedInWorld package]
+```
+
+### `NetPackagePlayerId` body (S2C write, IL=21)
+
+| Order | Field |
+|---|---|
+| 1 | base header |
+| 2 | `id` : i32 |
+| 3 | `teamNumber` : i16 |
+| 4 | `PlayerDataFile.WriteNetwork` |
+| 5 | `chunkViewDim` : i32 |
+
+Client `ProcessPackage` -> `GameManager.PlayerId(...)`.
+
+### `NetPackagePlayerSpawnedInWorld` body (IL=16)
+
+| Order | Field |
+|---|---|
+| 1 | base header |
+| 2 | `respawnReason` : i32 (`RespawnType`) |
+| 3 | `position` : `Vector3i` via `StreamUtils.Write` |
+| 4 | `entityId` : i32 |
+
+`RespawnType`: 0 NewGame, 1 LoadedGame, 2 Died, 3 Teleport, 4 EnterMultiplayer,
+5 JoinMultiplayer, 6 Unknown.
+
+Server `PlayerSpawnedInWorld` (IL=127): require live `EntityPlayer`; on
+`Died`+remote call `SetAlive`; join/enter multiplayer may
+`DisplayGameMessage`; `PlayerInteractions.PlayerSpawnedInMultiplayerServer`;
+on server for join/enter/new/loaded paths refresh vehicle/drone waypoints and
+`SpawnFollowingDronesForPLayer`; fire `ModEvents.PlayerSpawnedInWorld`;
+`OnClientSpawned` action; log.
+
 ---
 
 ## 6. Entity motion packages (golden sizes)
@@ -468,6 +566,8 @@ Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23
 | loadgen PackageCodec | Golden implementations |
 
 ## Changelog
+
+- **2026-07-28:** `RequestToSpawnPlayer` server path, `PlayerId`/`PlayerSpawnedInWorld` bodies, RespawnType.
 
 - **2026-07-28:** `RequestToEnterGame` package sequence, deny reasons 10/31, `PlayerLoginAnswer` write fields.
 

@@ -402,17 +402,25 @@ run or fire on the dedicated server.
   counts down `Delay` then spawns the crate and removes the entry; `ChunkRef` is
   the `ChunkObserver` that keeps the drop chunk loaded until then. Part of the
   air-drop director component ([`aidirector.md`](aidirector.md)).
+- **`RequestToSpawnPlayer` join path (IL=496):** server creates the remote
+  `EntityPlayer` and sends `NetPackagePlayerId` before `SpawnEntityInWorld`.
+  Spawn position order: team-near (GameStats 25) -> friend-near (`nearEntityId`,
+  40..150) -> `SpawnPointList`. New vs returning file chooses
+  `RespawnType.EnterMultiplayer` (4) vs `JoinMultiplayer` (5). Full sequence and
+  wire bodies: [protocol.md](protocol.md) section 5. `PlayerSpawnedInWorld` is a
+  **later** client-driven package, not part of this method.
 - **`SPlayerSpawningData`** (nested `ModEvents/SPlayerSpawningData`, a
   `ValueType`) is the payload struct for the `ModEvents.PlayerSpawning` hook:
   `ClientInfo`, `ChunkViewDim`, `PlayerProfile`. `GameManager.RequestToSpawnPlayer`
-  constructs it and invokes the event by ref. This is an in-process mod-hook
-  data struct ([`managers.md`](managers.md) §2), not a wire format; nothing
-  serializes it.
+  constructs it and invokes the event by ref at the end of the spawn method.
+  This is an in-process mod-hook data struct ([`managers.md`](managers.md)
+  section 2), not a wire format; nothing serializes it.
 - **`SPlayerSpawnedInWorldData`** (nested `ModEvents/SPlayerSpawnedInWorldData`,
   a `ValueType`) is the matching payload for `ModEvents.PlayerSpawnedInWorld`:
   `ClientInfo`, `IsLocalPlayer`, `EntityId`, `RespawnType`, `Position`
-  (`Vector3i`). Fired by `GameManager.PlayerSpawnedInWorld` once the player
-  entity exists; consumed in-assembly by `DiscordManager`. Also in-process only,
+  (`Vector3i`). Fired by `GameManager.PlayerSpawnedInWorld` when
+  `NetPackagePlayerSpawnedInWorld` is processed (after the entity is already
+  world-spawned); consumed in-assembly by `DiscordManager`. Also in-process only,
   not a wire struct.
 
 ---
@@ -434,6 +442,8 @@ run or fire on the dedicated server.
 | [residuals.md](residuals.md) | Content and native residuals |
 
 ## Changelog
+
+- **2026-07-28:** Documented RequestToSpawnPlayer join path vs PlayerSpawnedInWorld timing.
 
 - **2026-07-23:** Initial entity-spawning reversal: five spawn sources, the biome
   decision cycle, per-chunk-area caps/cooldown/kill-attrition, wave/static/sleeper

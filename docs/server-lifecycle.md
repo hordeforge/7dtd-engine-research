@@ -95,10 +95,12 @@ entirely the `GamePrefs` it applies in `Init`.
 
 ## 3. Player join and persistence (state machine)
 
-A joining client (after the wire handshake, [protocol.md](protocol.md) §5) is
-spawned by `GameManager.PlayerSpawnedInWorld(cInfo, respawnReason, pos, entityId)`.
-Player state lives in a per-player `PlayerDataFile` on disk; `PersistentPlayerList`
-is the cross-session registry (identity, allies, land claims).
+A joining client (after the wire handshake and enter-game batch,
+[protocol.md](protocol.md) section 5) is created by
+`GameManager.RequestToSpawnPlayer` (IL=496) and only later marked fully present
+via `GameManager.PlayerSpawnedInWorld` when `NetPackagePlayerSpawnedInWorld`
+arrives. Player state lives in a per-player `PlayerDataFile` on disk;
+`PersistentPlayerList` is the cross-session registry (identity, allies, land claims).
 
 ```mermaid
 stateDiagram-v2
@@ -108,7 +110,9 @@ stateDiagram-v2
   LoadData --> DataLoaded: file ok
   LoadData --> BackupOrNew: primary load fails -> backup, else fresh profile
   BackupOrNew --> DataLoaded
-  DataLoaded --> Spawned: PlayerSpawnedInWorld -> ToPlayer(entity)
+  DataLoaded --> EntityCreated: RequestToSpawnPlayer -> CreateEntity + ToPlayer
+  EntityCreated --> IdSent: NetPackagePlayerId + SpawnEntityInWorld
+  IdSent --> Spawned: NetPackagePlayerSpawnedInWorld -> PlayerSpawnedInWorld
   Spawned --> Active: entity ticks (entity-ai.md)
   Active --> Saving: FromPlayer(entity) -> PlayerDataFile.Save(dir, playerId)
   Saving --> Active: periodic / on change
@@ -172,5 +176,7 @@ flowchart TB
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 
 ## Changelog
+
+- **2026-07-28:** Join spawn path: RequestToSpawnPlayer vs PlayerSpawnedInWorld split.
 
 - **2026-07-23:** Initial server lifecycle / game-state / player-persistence reversal (boot, rounds, join+persistence, shutdown) with state machines.

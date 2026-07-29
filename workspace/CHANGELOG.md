@@ -1140,3 +1140,19 @@ Eighth depth round.
 
 Coverage still unaccounted **0**.
 
+## 2026-07-28 - RequestToSpawnPlayer join path
+
+Ninth depth round.
+
+- `protocol.md`: full `RequestToSpawnPlayer` server path (IL=496): view-dim clamp,
+  PDF load, entity id reuse/alloc, spawn position order (team-near / friend-near
+  40..150 / SpawnPointList), CreateEntity, RespawnType 4 vs 5, PlayerId package,
+  SpawnEntityInWorld, chunk observer, PPL broadcast, PlayerSpawning mod event.
+  Documented that `PlayerSpawnedInWorld` is a **later** client package (IL=127),
+  not called from RequestToSpawnPlayer. Added PlayerId and PlayerSpawnedInWorld
+  wire bodies + RespawnType enum.
+- `server-lifecycle.md`: state machine split EntityCreated -> IdSent -> Spawned.
+- `spawning.md`: join-path bullet clarifying timing vs ModEvents payloads.
+
+Coverage: narrated **1294 (35%)**; unaccounted **0**.
+
