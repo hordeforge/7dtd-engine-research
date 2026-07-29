@@ -26,6 +26,11 @@ flowchart TD
 
 These run as **peer MonoBehaviours** relative to `GameManager.Update` (script order = Unity residual).
 
+`ProtocolManager.Update` / `LateUpdate` (IL=35 each) only walk
+`List` of `INetworkServer` and `INetworkClient` calling `Update` /
+`LateUpdate` on each transport backend (LiteNet/Steam/etc.). Package
+decode/dispatch stays in `ConnectionManager` (section 1.1).
+
 ### 1.1 `ConnectionManager.Update` (IL=215, server path)
 
 Verified body order when `IsServer`:
@@ -314,6 +319,7 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 
 ## Changelog
 
+- **2026-07-28:** ProtocolManager as thin INetworkServer/Client pump.
 - **2026-07-28:** ConnectionManager.Update order, BadMTUPackets>=3 kick, ProcessPackages gates, DisconnectClient highlights.
 - **2026-07-28:** NetConnectionSteam/Simple reader-writer pipelines, compress-then-encrypt order, Simple framing, AesEncryptAndMac stream layout.
 - **2026-07-19:** Related docs table.

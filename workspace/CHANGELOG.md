@@ -1126,3 +1126,17 @@ Seventh depth round.
 
 Coverage still unaccounted **0**.
 
+## 2026-07-28 - playerAllowed + RequestToEnterGame package sequence
+
+Eighth depth round.
+
+- `platform-auth.md`: full `playerAllowed` (IL=156) steps; dedicated empty
+  identity tuples; `UpgradeToFullConnection` = `InitStreams(true)` +
+  `allowCompression`; Accepted/Denied callbacks.
+- `protocol.md`: post-login `RequestToEnterGame` ordered S2C batch (block check
+  ManualKick=10, PPL cap 100 -> reason 31, IdMapping, localization, configs,
+  WorldInfo, cluster, spawns, areas, GameStats); `PlayerLoginAnswer` write layout.
+- `network.md`: `ProtocolManager` as thin INetworkServer/Client pump only.
+
+Coverage still unaccounted **0**.
+

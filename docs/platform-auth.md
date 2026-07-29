@@ -190,12 +190,45 @@ stateDiagram-v2
   Kicked --> [*]: PlayerDenied / kick packet
 ```
 
-`playerAllowed` is the terminal accept: it flips `ClientInfo.loginDone`, calls
-`INetConnection.UpgradeToFullConnection()` on every connection, sends a final
-`NetPackageAuthState` (the combined id), and sends `NetPackagePlayerLoginAnswer`
-with `bAllowed = 1` (the server sends empty user/token tuples when it is a
-dedicated server, real ones on a listen host). That answer is exactly the `Answer`
-transition in the [`protocol.md`](protocol.md) §5 join state machine.
+`playerAllowed` is the terminal accept (IL=**156**, verified). Steps:
+
+1. Remove the client from `clientsInAuthorization` (disconnect-safe).
+2. If `ClientInfo.loginDone` already true, return (idempotent).
+3. Set `loginDone = true`.
+4. For **every** entry in `ClientInfo.netConnection[]`, call
+   `INetConnection.UpgradeToFullConnection()` (see below).
+5. Log `Allowing player with id` + `InternalId.CombinedString`.
+6. Send `NetPackageAuthState.Setup("authstate_authenticated")`.
+7. Resolve `PlatformLobbyId`: prefer native lobby host when the player's
+   platform matches native and `IsInLobby`; else
+   `ClientLobbyManager.TryGetLobbyId` for the player's platform; else `None`.
+8. Build platform/crossplatform `(user, ticket)` tuples:
+   - **Dedicated:** both tuples empty (`initobj` ValueTuple).
+   - **Listen host:** native + crossplatform user ids and auth tickets from
+     `PlatformManager` clients.
+9. Send `NetPackagePlayerLoginAnswer.Setup(bAllowed=1, data=LocalServerInfo.ToString(),
+   platformLobbyId, platformTuple, crossplatformTuple)`.
+10. On exception: log `Exception in playerAllowed:` and
+    `ConnectionManager.DisconnectClient(cInfo, false, false)`.
+
+`AuthorizationAccepted` (IL=24): log success, `IndexOfKey` the authorizer, if the
+client is still in the set call `tryAuthorizer(index+1, client)`.
+`AuthorizationDenied` (IL=17): log failure, remove from set,
+`KickPlayerForClientInfo`.
+
+That `PlayerLoginAnswer` is exactly the `Answer` transition in the
+[`protocol.md`](protocol.md) section 5 join state machine.
+
+### 3.3 `UpgradeToFullConnection` (IL=7)
+
+`NetConnectionAbs.UpgradeToFullConnection`:
+
+1. `InitStreams(true)` -- allocate the full 2 MiB post-auth stream set
+   ([network.md](network.md) section 4.1).
+2. `allowCompression = true` -- enables the compress step on the writer path.
+
+Until this runs, the connection is the pre-auth / limited stream mode used for
+handshake packages.
 
 ### 3.1 The chain, in order
 
@@ -480,6 +513,8 @@ and the exact cipher. Those are third-party binaries, not game logic.
 | [INDEX.md](INDEX.md) | Hub |
 
 ## Changelog
+
+- **2026-07-28:** `playerAllowed` step list + `UpgradeToFullConnection` (full streams + compression).
 
 - **2026-07-28:** Re-verified all authorizer Order literals from IL; Init reflection details.
 

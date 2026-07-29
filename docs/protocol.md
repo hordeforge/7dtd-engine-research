@@ -1,6 +1,6 @@
 # Dedicated wire protocol (V3.0.1 managed + live golden)
 
-**Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, golden package body layouts.  
+**Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, golden package body layouts.  
 **Not:** the exhaustive per-package body catalog + protocol-wide metadata census (that is [`protocol-packages.md`](protocol-packages.md)); native LiteNet internals (residual); EAC wire (residual).  
 **Hub:** [INDEX.md](INDEX.md).  
 **Visual frames (RFC bars + Mermaid):** [`protocol-frames.md`](protocol-frames.md).  
@@ -202,6 +202,65 @@ nearEntityId:i32
 |---|---|
 | AuthConfirmation | empty (id only) |
 | RequestToEnterGame | empty |
+
+### Post-login: `RequestToEnterGame` server sequence (IL=248)
+
+Client sends empty `NetPackageRequestToEnterGame` after accepting
+`PlayerLoginAnswer`. Server entry is a thin coroutine wrapper
+(`GameManager.RequestToEnterGame` IL=9 -> `MoveNext` IL=**248**). Ordered work
+(verified call sequence):
+
+1. `ModEvents` `SPlayerJoinedGameData` (mod hook).
+2. Yield `PlatformUserManager.ResolveUserBlockedCoroutine` for the player.
+3. If platform-blocked: `NetPackagePlayerDenied` with
+   `EKickReason.ManualKick` (**10**), empty custom reason; stop.
+4. If `persistentPlayerCount + 1 > **100**`: `PlayerDenied` with
+   `EKickReason.PersistentPlayerDataExceeded` (**31**); stop.
+5. `PersistentPlayerList.NetworkCloneRelevantForPlayer`.
+6. Two `NetPackageIdMapping` sends (`"blocks"`, `"items"` string keys + byte maps).
+7. Yield `NetPackageLocalization.StartSendingPacketsToClient`.
+8. `WorldStaticData.SendXmlsToClient` (config S2C; [mod-loading.md](mod-loading.md) section 5.6).
+9. `NetPackageWorldInfo` (world name/seed/guid + relevant PPL + time bits).
+10. `NetPackageChunkClusterInfo` for the primary `ChunkCluster`.
+11. `NetPackageWorldSpawnPoints` (`GameManager.GetSpawnPointList`).
+12. `NetPackageWorldAreas` (`World.TraderAreas`).
+13. `NetPackageGameStats` (`GameStats.Instance`).
+
+After this batch the client proceeds to `RequestToSpawnPlayer` / in-world
+streaming (state machine above). Auth terminal steps that precede this request
+are in [platform-auth.md](platform-auth.md) section 3 (`playerAllowed`).
+
+```mermaid
+flowchart TD
+  PLA[PlayerLoginAnswer allowed] --> RTEG[RequestToEnterGame empty]
+  RTEG --> Block{platform blocked?}
+  Block -->|yes| Deny1[PlayerDenied ManualKick=10]
+  Block -->|no| Cap{PPL count > 100?}
+  Cap -->|yes| Deny2[PlayerDenied PersistentPlayerDataExceeded=31]
+  Cap -->|no| Maps[IdMapping blocks+items]
+  Maps --> Loc[Localization packets]
+  Loc --> Xml[SendXmlsToClient]
+  Xml --> WI[WorldInfo]
+  WI --> CC[ChunkClusterInfo]
+  CC --> SP[SpawnPoints]
+  SP --> Areas[WorldAreas traders]
+  Areas --> GS[GameStats]
+  GS --> SpawnReq[RequestToSpawnPlayer]
+```
+
+### `PlayerLoginAnswer` body (server write, IL=46)
+
+| Order | Field |
+|---|---|
+| 1 | base package header |
+| 2 | `bAllowed` : bool |
+| 3 | `data` : string (`LocalServerInfo.ToString()` when allowed) |
+| 4 | `platformLobbyId` : `PlatformLobbyId.Write` |
+| 5 | platform user : `PlatformUserIdentifier.ToStream` + ticket string |
+| 6 | crossplatform user : same |
+
+On the client, `ProcessPackage` calls `ConnectionManager.PlayerAllowed(...)` when
+`bAllowed`, else `PlayerDenied(data)`.
 
 ---
 
@@ -409,6 +468,8 @@ Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23
 | loadgen PackageCodec | Golden implementations |
 
 ## Changelog
+
+- **2026-07-28:** `RequestToEnterGame` package sequence, deny reasons 10/31, `PlayerLoginAnswer` write fields.
 
 - **2026-07-23:** §11 backlog status updated after the protocol-packages.md body pass.
 - **2026-07-20:** Link visual protocol-frames catalog (RFC bars + Mermaid block-beta).
