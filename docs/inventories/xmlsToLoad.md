@@ -113,6 +113,10 @@ server-side, not sent). Pure client UI rows (`XUi_*`, `loadingscreen`,
 
 Patching after stock load: [`../mod-loading.md`](../mod-loading.md) §5 (`XmlPatcher`).
 
+**S2C shipping detail:** [`../mod-loading.md`](../mod-loading.md) §5.6
+(`RequestToEnterGame` → `SendXmlsToClient` → `NetPackageConfigFile`; Deflate cache).
+
 ## Changelog
 
 - **2026-07-28:** Initial table from `WorldStaticData..cctor` (49 `XmlLoadInfo` entries).
+- **2026-07-28:** Link §5.6 S2C send path.

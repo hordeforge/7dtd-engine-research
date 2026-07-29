@@ -142,7 +142,9 @@ and once for `CrossplatformId`, matching the `PlayerLogin` body in
 The server does not validate a join inline. It runs a **chain of authorizers**,
 each an `IAuthorizer` (base `AuthorizerAbs`) discovered by reflection at startup
 (`AuthorizationManager.Init` -> `ReflectionHelpers.FindTypesImplementingBase`)
-and kept in a `SortedList` ordered by `IAuthorizer.Order` (`AuthorizerComparer`).
+and kept in a `SortedList<IAuthorizer,int>` ordered by `IAuthorizer.Order`
+(`AuthorizerComparer`; `Init` uses `ReflectionHelpers.FindTypesImplementingBase(IAuthorizer)`
+then `IAuthorizer.Init(this)` on each).
 `AuthorizationManager` is a singleton wired from `GameManager.PlayerLoginRPC`,
 which itself is invoked by `NetPackagePlayerLogin.ProcessPackage` on the server.
 
@@ -197,7 +199,9 @@ transition in the [`protocol.md`](protocol.md) §5 join state machine.
 
 ### 3.1 The chain, in order
 
-Authorizers run ascending by `Order` (values are literals in each `get_Order`):
+Authorizers run ascending by `Order` (values are literals in each `get_Order`;
+**IL-verified 2026-07-28** for all 19 concrete authorizers, including
+`SteamOwnerAuthorizer`=430 and `SteamGroupsAuthorizer`=470):
 
 | Order | Authorizer | Role | Result style |
 |---:|---|---|---|
@@ -476,5 +480,7 @@ and the exact cipher. Those are third-party binaries, not game logic.
 | [INDEX.md](INDEX.md) | Hub |
 
 ## Changelog
+
+- **2026-07-28:** Re-verified all authorizer Order literals from IL; Init reflection details.
 
 - **2026-07-23:** Initial `Platform.*` + `AuthorizationManager` reversal: identity model, the ordered authorizer chain state machine, the Steam / EOS / EAC managed wrappers, the encryption-agreement glue, and the managed/native boundary, with join-auth sequence and EAC message-pump diagrams.

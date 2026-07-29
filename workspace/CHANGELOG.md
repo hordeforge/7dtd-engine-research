@@ -1112,3 +1112,17 @@ Sixth depth round.
 
 Coverage: narrated **1281 (34%)**, unaccounted **0**.
 
+## 2026-07-28 - config S2C ship path + authorizer Order re-verify
+
+Seventh depth round.
+
+- `mod-loading.md` §5.6: Deflate cache via `cacheSingleXml` (minified serialize +
+  `DeflateOutputStream`), `SendXmlsToClient` from `RequestToEnterGame` (after
+  localization packets), `NetPackageConfigFile` wire (ToClient, Compress=true,
+  name + length-prefixed bytes or -1), client `ReceivedConfigFile` /
+  `EClientFileState`.
+- Re-verified all 19 authorizer `get_Order` literals from IL (incl. Steam 430/470);
+  noted `Init` reflection + `SortedList` wiring in `platform-auth.md`.
+
+Coverage still unaccounted **0**.
+

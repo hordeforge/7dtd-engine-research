@@ -231,6 +231,75 @@ Notable **server-loaded, not S2C** rows: `gamestages`, `spawning`, `signs`
 `ExecuteAfterLoad` hooks used on stock: materials → `LoadTextureAtlases`;
 item_modifiers → `LateInitItems`.
 
+
+### 5.6 Config S2C (`SendXmlsToClient` / `NetPackageConfigFile`)
+
+After stock load + mod xpath patch, the server keeps a **Deflate-compressed**
+byte cache per table row and ships S2C-eligible configs during join.
+
+**Cache build (server only):**
+
+| Step | Method | IL | Behavior |
+|---|---|---:|---|
+| Entry | `CachePatchedXml` | 21 | coroutine wrapper; no-op if not `ConnectionManager.IsServer` |
+| Compress | `cacheSingleXml` MoveNext | **65** | `XmlFile.SerializeToStream` into `DeflateOutputStream` (minified=`true`); respects `Constants.cMaxLoadTimePerFrameMillis` yield; stores `MemoryStream.ToArray()` into `XmlLoadInfo.CompressedXmlData` |
+
+**Send (join path):**
+
+Caller (Xref=1): `GameManager.RequestToEnterGame` coroutine, **after**
+`NetPackageLocalization.StartSendingPacketsToClient` and **before**
+`NetPackageWorldInfo` / chunk-cluster / spawn points.
+
+`SendXmlsToClient(ClientInfo)` IL=41 walks `xmlsToLoad`:
+
+1. Skip unless `SendToClients`.
+2. If not `LoadClientFile` and `CompressedXmlData` is null, skip.
+3. `NetPackageConfigFile.Setup(XmlName, data)` where `data` is
+   `CompressedXmlData`, or **null** when `LoadClientFile` (client loads its own
+   file; only the name is signalled).
+4. `ClientInfo.SendPackage`.
+
+**Wire (`NetPackageConfigFile`):**
+
+| Property | Value (IL) |
+|---|---|
+| `PackageDirection` | **2** = `ToClient` |
+| `Compress` | **true** (package-level compress flag; payload is already Deflate-cached) |
+
+| write order | Field |
+|---|---|
+| 1 | base `NetPackage.write` |
+| 2 | `name` : string (`XmlName`) |
+| 3 | `data` : Int32 length + bytes, or length **`-1`** for null |
+
+`ProcessPackage` (client): `WorldStaticData.ReceivedConfigFile(name, data)`.
+
+**Client receive (`ReceivedConfigFile` IL=42):**
+
+1. Log length or "from local files" if data null.
+2. `getLoadInfoForName`; unknown name → warning return.
+3. Store `CompressedXmlData`; set `WasReceivedFromServer` to
+   `EClientFileState.Received` (1) if bytes present, else `LoadLocal` (2).
+4. Bump `highestReceivedIndex`.
+
+`handleReceivedConfigs` is a coroutine entry (IL=3) that applies the received
+cache into live tables once the join batch is complete (`WaitForConfigsFromServer`
+gates client progress).
+
+```mermaid
+flowchart LR
+  Load[LoadAllXmlsCo + XmlPatcher] --> Cache[cacheSingleXml Deflate]
+  Cache --> Blob[XmlLoadInfo.CompressedXmlData]
+  Join[RequestToEnterGame] --> Send[SendXmlsToClient]
+  Blob --> Send
+  Send --> Pkg[NetPackageConfigFile]
+  Pkg --> Recv[ReceivedConfigFile]
+  Recv --> Apply[handleReceivedConfigs]
+```
+
+Ties to the S2C column in [inventories/xmlsToLoad.md](inventories/xmlsToLoad.md):
+only rows with **S2C** are candidates; `LoadClientFile` rows send name-only.
+
 ### 5.4 `MapVisitor` (console AABB walk)
 
 Not part of mod load, but it is the other high-method "visitor" leaf that was
@@ -265,6 +334,7 @@ scan), not by the steady sim loop.
 
 ## Changelog
 
+- **2026-07-28:** Config S2C path (`SendXmlsToClient`, Deflate cache, `NetPackageConfigFile`).
 - **2026-07-28:** `xmlsToLoad` 49-entry census (flags + load/cleanup/reload delegates).
 - **2026-07-28:** XmlFile/XmlPatcher xpath pipeline, XmlPatchMethods catalog, WorldStaticData/LoadPatchStuff callers, MapVisitor console visitor.
 - **2026-07-23:** Initial mod-loading reversal (ModManager pipeline, Mod load-state, EAC gate, ModEvents lifecycle) with state machines.
