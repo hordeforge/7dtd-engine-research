@@ -177,8 +177,8 @@ invitedEntityID   : i32
 voiceLobbyId      : string  // empty string when null
 ```
 
-(The `partyMembers` field on the class is not serialized.) `ProcessPackage` runs the
-dispatch table in §2.2.
+(The `partyMembers` field on the class is not serialized; re-verified write IL=25.)
+`ProcessPackage` runs the dispatch table in section 2.2.
 
 **`NetPackagePartyData`** (`PackageDirection` ToClient, `get_PackageDirection` returns 2).
 `write` order:
@@ -426,6 +426,8 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 | [`residuals.md`](residuals.md) | External / native / content residuals |
 
 ## Changelog
+
+- **2026-07-28:** PartyActions write IL re-verify (no members on wire).
 
 - **2026-07-23:** Initial party + faction + ally reversal. Party model (`PartyManager` /
   `Party`, max 8, server command dispatch via `NetPackagePartyActions`, authoritative

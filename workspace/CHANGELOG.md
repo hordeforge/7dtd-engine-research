@@ -1254,3 +1254,18 @@ Sixteenth depth round (four leaves concurrent).
 
 Coverage: narrated **1309 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - chat/console/lock packages and region free-list
+
+Seventeenth depth round (four residual leaves concurrent).
+
+- `save-region.md`: RegionFileRaw.FindBestFreeSpace exact-fit then best-fit over
+  usedSectors from offset 779; residual table closed.
+- `dedicated-leftovers.md` 2.2: NetPackageLockRequest/Response wire;
+  ForceUnlockByPlayer.
+- `console-commands.md` section 3: ConsoleCmdServer/Client package bodies.
+- `protocol-packages.md` 6.17: chat, console, lock, party re-verify,
+  QuestEntitySpawn.
+- `chat.md` / `parties-factions.md`: IL cross-links.
+
+Coverage: narrated **1318 (35%)**, unaccounted **0**.
+

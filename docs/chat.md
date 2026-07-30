@@ -16,7 +16,7 @@ the `NetPackageChat` package, so this is a compact but genuine dedicated codepat
 
 ## 1. Wire body (`NetPackageChat`)
 
-`write` order (little-endian; see [protocol-packages.md](protocol-packages.md) for
+`write` order (IL=63, little-endian; see [protocol-packages.md](protocol-packages.md) section 6.17 for
 conventions):
 
 ```text
@@ -106,5 +106,7 @@ and delivered through the same client message path.
 | [server-lifecycle.md](server-lifecycle.md) | Join/leave system messages |
 
 ## Changelog
+
+- **2026-07-28:** write IL=63 cross-link to protocol-packages 6.17.
 
 - **2026-07-23:** Initial chat reversal (NetPackageChat wire body, server channel routing, system messages) with state machine.

@@ -111,6 +111,42 @@ trader window transitions, drone/vehicle `StartInteraction`) and always ends in
 `LockManager.UnlockRequestLocal` when the interaction closes. Dedicated care is
 the server half + the wire shape of the context; the UI open is client-only.
 
+### 2.2 Lock packages (verified)
+
+**`NetPackageLockRequest` (ToServer, write IL=62):**
+
+```text
+locking : bool              // true=lock, false=unlock
+channel : u16
+targetCount : i32
+// targetCount x ILockTarget.WriteIdentifyingInfo
+contextTypeFullName : string  // empty if no context
+// if non-empty: ILockContext.Write body
+```
+
+`ProcessPackage` (IL=24): if locking →
+`LockManager.LockRequestServer(targets, sender.entityId, context, channel)`;
+else `UnlockRequestServer(sender.entityId, force=false)`.
+
+**`NetPackageLockResponse` (ToClient, write IL=74):**
+
+```text
+locking : bool
+success : bool
+errorMsg : string
+isForceUnlocked : bool
+channel : u16
+targetCount : i32 + targets as above
+contextTypeFullName : string + optional ILockContext.Write
+```
+
+Client `ProcessPackage`: unlock path → `UnlockResponse`; lock path →
+`LockResponse` then local UI/open via existing `OnLockedLocal` table.
+
+**`ForceUnlockByPlayer` (IL=11):** server-only; calls
+`UnlockRequestServer(playerId, force=true)` (used after failed inventory
+transactions and disconnect cleanup).
+
 Complements [items.md](items.md) (bag), [loot-economy.md](loot-economy.md)
 (trader lock), [npc-dialog.md](npc-dialog.md) (quest list on trader open).
 
@@ -499,6 +535,8 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   used during RWG road/path routing ([world-generation.md](world-generation.md)).
 
 ## Changelog
+
+- **2026-07-28:** NetPackageLockRequest/Response wire + ForceUnlockByPlayer.
 
 - **2026-07-28:** ILockContext bags; EntityCreateHandle + NetEntityPackageQueue hold-back; PrefabChunk IChunk view.
 

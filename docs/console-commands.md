@@ -122,6 +122,33 @@ gates the command loop.
 
 ---
 
+## 3. Network packages (verified)
+
+Admin commands over the game connection (not telnet) use two packages.
+
+**`NetPackageConsoleCmdServer` (ToServer, write IL=8):**
+
+```text
+cmd : string
+```
+
+`ProcessPackage` → `ConnectionManager.ServerConsoleCommand(Sender, cmd)` which
+runs `AdminTools.CommandAllowedFor` then `SdtdConsole.executeCommand`.
+
+**`NetPackageConsoleCmdClient` (ToClient, write IL=31):**
+
+```text
+lineCount : i32
+// lineCount x string
+bExecute : bool
+```
+
+`ProcessPackage` (client): if `bExecute`, `SdtdConsole.ExecuteSync(lines[0])` and
+show results; else only `GUIWindowConsole.AddLines(lines)` (server pushing
+output).
+
+Telnet/stdin bypass these packages (section 2).
+
 ## 4. The command contract (`ConsoleCmdAbstract`)
 
 Every command subclasses `ConsoleCmdAbstract` and provides:
@@ -168,5 +195,7 @@ framework, not each leaf command.
 **Leaf catalog:** every instance is enumerated in [`inventories/console-command-list.md`](inventories/console-command-list.md) (all 187 commands with descriptions).
 
 ## Changelog
+
+- **2026-07-28:** NetPackageConsoleCmdServer/Client wire bodies.
 
 - **2026-07-23:** Initial console/telnet command-system reversal (registry, dispatch + permission gate, telnet auth) with state machines.

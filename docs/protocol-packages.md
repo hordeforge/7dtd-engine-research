@@ -817,6 +817,53 @@ EntityNetworkStats.write(...)
 `Setup` fills `EntityNetworkStats` from entity. Server may stamp sender player
 name, `ToEntity` + `EnqueueNetworkStats`, rebroadcast excluding sender (192).
 
+### 6.17 Social / admin / lock / quest spawn packages
+
+Cross-links to family docs; wire verified this pass.
+
+#### `NetPackageChat`
+
+```text
+chatType : u8
+senderEntityId : i32
+msg : string
+msgSender : u8
+bbMode : u8
+recipientCount : i32
+// recipientCount x i32 entity ids
+```
+
+Server `ProcessPackage` → `ChatMessageServer`; client → `ChatMessageClient`.
+Routing is recipient-list based ([chat.md](chat.md)).
+
+#### `NetPackageConsoleCmdServer` / `Client`
+
+See [console-commands.md](console-commands.md) section 3: server carries a single
+`cmd` string; client carries `lineCount` strings + `bExecute`.
+
+#### `NetPackageLockRequest` / `Response`
+
+See [dedicated-leftovers.md](dedicated-leftovers.md) section 2.2: locking bool,
+channel u16, target identifying infos, context type name + body.
+
+#### `NetPackagePartyActions` / `PartyData`
+
+Already in [parties-factions.md](parties-factions.md) section 3. Re-verified:
+Actions write is `op:u8, invitedBy:i32, invited:i32, voiceLobbyId:string` (no
+member array). Data write includes member id array.
+
+#### `NetPackageQuestEntitySpawn` (ToServer)
+
+```text
+entityType : i32          // -1 means resolve from gamestageGroup
+gamestageGroup : string
+entityIDQuestHolder : i32
+```
+
+`ProcessPackage`: if `entityType == -1`, resolve random class from
+`GameStageDefinition` using quest holder's `PartyGameStage`; then
+`QuestActionSpawnEnemy.SpawnQuestEntity(type, holderId, null)`.
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -868,6 +915,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** Chat/console/lock/quest-spawn package wire summaries; party re-verify.
 
 - **2026-07-28:** Inventory transaction wire + server apply; explosion initiate/client; stat/buff/playerstats packages.
 

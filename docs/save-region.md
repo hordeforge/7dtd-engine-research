@@ -291,6 +291,23 @@ read header/version → **`DeflateInputStream`** → pooled load stream for
 `RegionFileRaw.WriteData` IL=229:
 
 1. `GetLocationInfo` / `FindBestFreeSpace` / `SetLocationInfo` / `SetTimestampInfo`.
+
+**`FindBestFreeSpace(requiredLength)` (IL=77, verified):** under lock on the
+region file object, walk `usedSectors` (`SortedDictionary<int,int>` of
+start→length) in order. Maintain a free-gap cursor starting at
+`sectorsStartOffset` (**779**). For each used sector starting at `key` with
+length `val`:
+
+- gap size before this sector = `key - cursor`
+- if gap size **exactly** equals `requiredLength`, return `cursor` (perfect fit)
+- if gap size **>** required and residual waste
+  `(gap - required)` is **strictly smaller** than the best waste seen so far,
+  remember this `cursor` as best-fit
+- advance cursor to `key + val` (end of this used run)
+
+After the walk: return the best-fit start if any, else append at the final
+cursor (end of last used sector / still 779 if empty). Exact-fit wins over
+best-fit; append is last resort.
 2. Open file (`SdFile.Open`), seek to sector payload (`sectorsStartOffset` **779**
    appears on the free-space path).
 3. Write length (`StreamUtils.Write` Int32) + payload bytes + compression byte.
@@ -344,7 +361,7 @@ Read reconstructs world XZ as `local + chunk*16`.
 | How chunks enter disk? | Snapshot (`ttc\0` + ver 47 + `Chunk.save`) → Deflate → `RegionFile.WriteData` via access layer |
 | Header layout constants? | Measured above; sectorsStartOffset 779 re-hit in WriteData IL |
 | Who drives save? | `cacheChunk` / world save → `DoSaveChunks` (no `RegionFileManager.Update`) |
-| Exact sector free-list algorithm? | `FindBestFreeSpace` body present; not fully narrated beyond call order |
+| Exact sector free-list algorithm? | **Closed:** best-fit with exact-fit short-circuit over `usedSectors` (above) |
 | Random tick interval? | 1200 game ticks between per-chunk random passes |
 
 ---
@@ -380,6 +397,8 @@ owns paths and file lifecycle; the on-disk byte formats (WorldState, region, pla
 the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
+
+- **2026-07-28:** RegionFileRaw.FindBestFreeSpace best-fit / exact-fit algorithm.
 
 - **2026-07-28:** PlayerDataFile ttp\0 magic, version 59, WriteNetwork = Write+meta.
 
