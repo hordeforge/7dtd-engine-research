@@ -1181,3 +1181,20 @@ Eleventh depth round.
 
 Coverage: narrated **1295 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - entity spawn, map tiles, chunk provide
+
+Twelfth depth round (all three deferred leaves).
+
+- `protocol-packages.md` section 3.3: `NetPackageMapChunks` wire (entityId, u16
+  count, 256x u16 colors), invalid-size rewind, channel 1 compressed.
+- `MapChunkDatabase.GetMapChunkPackagesToSend`: 17x17 window after map-middle
+  update; ByRegion variant under lock.
+- section 5.1.1: EntitySpawn envelope via EntityTargeted; async
+  `EntityAsyncManager.StartCreateEntity`; clientEntityId remap branch.
+- section 5.2: SpawnResponse client inventory ack (vehicle/drone/turret).
+- `chunk-providers.md`: `GetNextChunkToProvide` snapshot under lock, ring-order
+  miss, pop last requested, Int64.MaxValue sentinel; thread sleep 15/0.
+- `world-chunks.md`: map producer pointer from SendChunksToClients.
+
+Coverage: narrated **1299 (35%)**, unaccounted **0**.
+

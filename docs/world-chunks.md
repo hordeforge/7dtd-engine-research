@@ -124,7 +124,10 @@ section 4.0.1.
 3. **Reloads:** reverse-walk `chunksToReload`; same light gate;
    `Setup(chunk, bOverwrite=true)`; remove from reload list.
 4. **Map:** if `mapDatabase` set, append
-   `IMapChunkDatabase.GetMapChunkPackagesToSend()` when non-null.
+   `IMapChunkDatabase.GetMapChunkPackagesToSend()` when non-null
+   (`MapChunkDatabase`: 17x17 window around client map middle after a
+   position update; channel-1 compressed `NetPackageMapChunks`,
+   [protocol-packages.md](protocol-packages.md) section 3.3).
 5. Send any remaining packages to the same entity id (again bulk flags **192**).
 
 ```mermaid
@@ -321,6 +324,7 @@ stateDiagram-v2
 
 ## Changelog
 
+- **2026-07-28:** Map package producer pointer (MapChunkDatabase 17x17 window).
 - **2026-07-28:** `DetermineChunksToLoad` full algorithm: 15 hollow rings, per-observer diffs, global unions, unload budget 8.
 - **2026-07-28:** `SendChunksToClients` per-observer remove/load/reload/map pipeline; ChunkObserver fields; 3-package first-load throttle.
 

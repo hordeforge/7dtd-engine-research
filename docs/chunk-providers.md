@@ -112,14 +112,29 @@ written ([`save-region.md`](save-region.md)).
 `m_ChunkQueue` under its sync root and sets `m_WaitHandle`; in `bClientMode` it
 returns immediately. Almost nothing calls it: the only external caller is
 `TerrainMapGenerator.GenerateTerrain` (map rendering). The real demand signal
-is player-position streaming: `ChunkManager.GetNextChunkToProvide` first scans
-its own `m_AllChunkPositions` bucket list (filled by `DetermineChunksToLoad`,
-see [`world-chunks.md`](world-chunks.md) §4) for a key not yet in the cache,
-then falls back to the provider's `GetRequestedChunks()` queue.
+is player-position streaming via `ChunkManager.GetNextChunkToProvide` (IL=102),
+not `RequestChunk`. Algorithm (verified):
 
-`GenerateChunksThread` (thread loop): pull `World.GetNextChunkToProvide()`,
-else `DynamicMeshThread.GetNextChunkToLoad()`, else sleep 15 ms. Each key goes
-to `GenerateSingleChunk(cc, key, _forceRebuild=false)`:
+1. Under `lockObject`, copy `m_AllChunkPositions.list` into
+   `allChunkPositionsCopy` and capture count (list is the ring-flattened order
+   from `DetermineChunksToLoad`, [world-chunks.md](world-chunks.md) section 4.0.1).
+2. Walk that snapshot in order; return the first key where
+   `!ChunkCache.ContainsChunkSync(key)` (nearest rings first because
+   `BucketHashSetList.Recalc` walks buckets 0..n).
+3. Else, if the provider exposes `GetRequestedChunks()` as a non-null
+   `HashSetList<long>`, under that list's lock: if non-empty, **pop the last**
+   element (`Remove` + return), else fall through.
+4. Else return sentinel `Int64.MaxValue` (`0x7FFFFFFFFFFFFFFF`).
+
+`World.GetNextChunkToProvide` (IL=4) is a one-liner trampoline to the manager.
+
+`GenerateChunksThread` (IL=36): until termination, call
+`World.GetNextChunkToProvide()`; if sentinel, try
+`DynamicMeshThread.GetNextChunkToLoad()`; if still sentinel, **return 15**
+(ms sleep). Otherwise `GenerateSingleChunk(cc, key, forceRebuild=false)` and
+return **0** (no sleep). Missing `m_RegionFileManager` also returns 15.
+
+Each key goes to `GenerateSingleChunk(cc, key, _forceRebuild=false)` (IL=171):
 
 1. Skip if the cluster already has the chunk.
 2. If `m_RegionFileManager` has it parked, take that instance (region-loaded
@@ -435,6 +450,8 @@ and `FlatAreaManager` consult the map at runtime; console `decomgr` dumps it.
 | [`light-mesh-water.md`](light-mesh-water.md) | Lighting/water stages that follow decoration |
 
 ## Changelog
+
+- **2026-07-28:** `GetNextChunkToProvide` lock/snapshot/sentinel and GenerateChunksThread sleep codes.
 
 - 2026-07-24: initial version. Provider hierarchy and selection, GenerateChunks
   thread and decoration pipeline, per-provider Init paths, distant-deco

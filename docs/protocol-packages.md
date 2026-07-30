@@ -146,6 +146,58 @@ serializedData.Length. `ProcessPackage` either overwrites an existing chunk
 chunkKey : i64      // WorldChunkCache key (packed x,z)
 ```
 
+
+### 3.3 NetPackageMapChunks (ToClient, channel 1, compressed)
+
+Minimap color tiles, not terrain. Produced by
+`IMapChunkDatabase.GetMapChunkPackagesToSend` and appended in
+`SendChunksToClients` when the observer has a `mapDatabase`
+([world-chunks.md](world-chunks.md) section 4.0).
+
+**Metadata:** channel **1**, `Compress=true`, direction **ToClient** (2).
+
+**`write` order (IL=109):**
+```text
+entityId     : i32
+count        : u16   // number of map pieces that will follow
+// per piece (only pieces whose UInt16[] length == 256 are written):
+  chunkDbKey : i32   // IMapChunkDatabase.ToChunkDBKey
+  colors     : u16 x 256
+```
+
+If any piece has length != 256, the writer logs a warning, decrements the planned
+count, and **rewinds** the stream to rewrite the `u16` count after the loop
+(so a bad piece is omitted without leaving a stale count).
+
+**`GetLength` (IL=24):** `4 + 8*chunkCount + 512*pieceCount` (entityId +
+per-chunk key+pad estimate + 256 u16 colors). Not an exact wire length after
+invalid-piece filtering.
+
+**`Setup(entityId, List<int> chunks, List<ushort[]> mapPieces)`** copies both
+lists.
+
+**`ProcessPackage` (client, IL=26):** resolve `entityId` to `EntityPlayer`; if
+that player has `ChunkObserver.mapDatabase`, call
+`mapDatabase.Add(chunks, mapPieces)`.
+
+**Producer (`MapChunkDatabase.GetMapChunkPackagesToSend`, IL=96):**
+
+1. No-op (`null`) unless `bClientMapMiddlePositionUpdated` (set by map-position
+   C2S path); then clear the flag.
+2. Clear send lists. Convert `clientMapMiddlePosition` via `toChunkXZ`.
+3. Scan a **17x17** window: offsets `dx,dz in [-8..+8]` (literal radius **8**).
+4. For each key not yet in `chunksSent` and present in the fixed datastore:
+   add db key + `UInt16[256]` colors; mark sent.
+5. If any queued, `NetPackageMapChunks.Setup(playerId, toSendList, mapPiecesList)`.
+
+`MapChunkDatabaseByRegion` (IL=123) is the same window under `m_regionsLock`,
+looking up region+offset storage instead of the fixed DS.
+
+**Related C2S:** `NetPackageMapPosition` (direction ToServer) carries
+`entityId` + `mapMiddlePosition` and drives the middle-position update that
+arms the next map send.
+
+
 ---
 
 ## 4. World state band
@@ -282,11 +334,49 @@ of all branches; use the switch above for the real per-class body. (Cross-checke
 against the [zdtd](../../zdtd/docs/) clone's zombie spawn, which correctly writes the
 empty middle.)
 
+### 5.1.1 Wire envelope and client process
+
+`NetPackageEntitySpawn` extends `NetPackageEntityTargeted`:
+
+```text
+// NetPackageEntityTargeted.write then ECD:
+entityId : i32     // Setup copies EntityCreationData.id
+// then EntityCreationData.write(_bw, networkWrite=true)  // full body in 5.1
+```
+
+- Direction **ToClient** (2). Channel inherits base **0** (not channel 1).
+- `Setup(EntityCreationData)`: `NetPackageEntityTargeted.Setup(es.id)` + store `es`.
+- Sole Setup caller: `NetEntityDistributionEntry.getSpawnPacket` (entity
+  replication first-seen path).
+
+**`ProcessPackage` (IL=60):**
+
+1. No-op if world null.
+2. If **not** server and `es.clientEntityId != 0`: for each local player whose
+   `entityId == es.belongsPlayerId`, call
+   `World.ChangeClientEntityIdToServer(clientEntityId, es.id)` and **return**
+   (id remap only; no second create).
+3. Else: `world.entityAsyncManager.StartCreateEntity(es, callback)` (async
+   factory; callback owned by a display-class closure).
+
+So S2C spawn is **async create**, not a synchronous `EntityFactory.CreateEntity`
+on the package thread. The ECD body layout remains the clone-critical surface
+(section 5.1 header/middle/tail).
+
 ### 5.2 NetPackageEntitySpawnResponse (ToServer)
 ```text
 success   : bool
 itemValue : ItemValue.Read/Write
 ```
+
+**Client `ProcessPackage` (IL=153)** (local player only): tags the item as
+`vehicle` / `drone` / `turretRanged|turretMelee`. On **success**: clear the
+matching `ItemActionSpawnVehicle` / `ItemActionSpawnTurret` preview when the
+holding item matches, `Inventory.DecItem` by 1, play `placeblock`. On
+**failure**: tooltip `uiCannotAddVehicle` / `uiCannotAddDrone` /
+`uiCannotAddTurret`. Server authority for the place still lives on the
+placement / `RequestToSpawnEntity` path; this package is the client inventory
+ack.
 
 ### 5.3 NetPackageHoldingItem (ToClient)
 ```text
@@ -383,3 +473,7 @@ customReason    : string
 | [network.md](network.md) | Interest / replication / bands |
 | [residuals.md](residuals.md) | Non-IL residuals |
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
+
+## Changelog
+
+- **2026-07-28:** MapChunks + EntitySpawn process paths.
