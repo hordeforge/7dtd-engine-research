@@ -123,11 +123,22 @@ Each subclass chains to the base then appends its own body (inventories, owner,
 flags, power data). `TileEntityLegacyUtils.TryReadLegacyType` is consulted first
 during instantiate so older saves upgrade cleanly.
 
-Replication uses `NetPackageTileEntity`: `Setup(te, streamMode)` serializes the
-tile entity in **network** stream mode into the package; `ProcessPackage` on the
-receiver resolves the target chunk and applies the update. Because the write is
-mode-aware, the network form omits the disk-only fields and can add the live
-`isPowered` bit (see below).
+Replication uses `NetPackageTileEntity` (write IL=23):
+
+```text
+handle : u8              // default 255
+teWorldPos : Vector3i
+payloadLen : u16
+payload : TileEntity.write(streamMode) bytes
+```
+
+`Setup(te, streamMode[, handle])` writes the TE into a pooled stream in the
+requested mode. `ProcessPackage` (IL=90): lookup by world pos, `SetHandle`,
+`te.read` with StreamModeRead **1** (remote) or **2** (local/server),
+`NotifyListeners`; on server mark chunk modified and **rebroadcast** the package
+(flags 192) so other clients converge. Because write is mode-aware, the network
+form omits disk-only heat-map time and can include live `isPowered` (subclass
+bodies; see composite features inventory).
 
 ```mermaid
 flowchart LR
@@ -433,5 +444,7 @@ the matching `PowerItem` by world position and links the two.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
 ## Changelog
+
+- **2026-07-28:** NetPackageTileEntity wire + server rebroadcast path.
 
 - **2026-07-23:** Initial tile-entity and power-system reversal (TileEntity model + type factory, chunk-owned serialization, PowerManager tick and greedy source-to-consumer distribution, workstation/forge crafting lifecycle, trigger and powered-trap state machines).

@@ -4,8 +4,9 @@
 descriptor), `EntityAlive.DamageEntity` (armor mitigation, modifiers, health,
 crit/dismember), and the death/kill path. This consolidates the damage threads
 that touch items, blocks, stats, buffs, and progression.
-**Not:** the wire package ([protocol-packages.md](protocol-packages.md) §6.5,
-`NetPackageDamageEntity`); item attack authoring ([items.md](items.md)); block
+**Not:** the wire package body layout ([protocol-packages.md](protocol-packages.md)
+section 6.11 / [protocol.md](protocol.md) section 6.5, `NetPackageDamageEntity`
+write IL=172); item attack authoring ([items.md](items.md)); block
 damage ([blocks.md](blocks.md)); the ragdoll/hit VFX (client).
 **Evidence:** `DamageSource`, `EntityAlive.DamageEntity` /
 `ProcessDamageResponse` IL (dump locally with `tools/src/DumpMethod`, git-ignored).
@@ -153,6 +154,8 @@ Leaf types on the edges of the damage flow above:
 | [blocks.md](blocks.md) | Block damage (separate but parallel) |
 
 ## Changelog
+
+- **2026-07-28:** Wire pointer to protocol-packages 6.11; ProcessPackage apply entry.
 
 - **2026-07-23:** Initial combat/damage reversal (DamageSource, DamageEntity apply, death/kill path) consolidating the cross-system damage flow, with state machines.
 - **2026-07-24:** Added combat leaf narration (`AttackHitInfo`, `BodyParts`, `ApplyExplosionForce`, `StunBeamWeapon`); of these only `BodyParts` and `ApplyExplosionForce` are client-only (`AttackHitInfo` is server damage state and `StunBeamWeapon` applies a server buff).

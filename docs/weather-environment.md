@@ -262,11 +262,17 @@ from the same clock and the received weather snapshot.
 ## 6. Save/load and dedicated relevance
 
 - **Persistence.** Weather is part of the world header: `WorldState` calls
-  `WeatherManager.Save` / `Load`, and `ReadWriteData` serializes, per biome, the
-  current weather group, `stormWorldTime` / `stormDuration` / `nextRandWorldTime`,
-  the 5 params, and rain/snow, versioned by `cVersion` (4). `Load` buffers into a
-  `MemoryStream` and `ApplyLoad` replays it once biomes exist. See
-  [save-region.md](save-region.md) for the surrounding world header.
+  `WeatherManager.Save` / `Load`. `Load(RW, size)` (IL=19) only copies `size`
+  bytes into static `loadData` MemoryStream; `ApplyLoad` (IL=22) later runs
+  `ReadWriteData(reader, load=true)`. `Save` either re-emits buffered `loadData`
+  or live `ReadWriteData(writer, load=false)`.
+
+  **`ReadWriteData` (IL=193):** version u16 (**4**); on load abort if version &lt; 4.
+  Next byte must match `GamePrefs` int **60** (gate) or load returns. Then biome
+  count (u8) and per biome: biome id (u8), weather group (u8), `stormWorldTime`
+  (i32), `stormDuration` (i16), `nextRandWorldTime` (i32), **5** param floats,
+  rain float, snow float. See [save-region.md](save-region.md) for the surrounding
+  world header.
 - **Core dedicated path:** the biome storm state machine, weather rerolls, grace
   period, save/load, and the per-tick `NetPackageWeather` broadcast all run on
   the headless server.
@@ -293,5 +299,7 @@ from the same clock and the received weather snapshot.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
 ## Changelog
+
+- **2026-07-28:** WeatherManager.ReadWriteData IL layout; Load buffer vs ApplyLoad.
 
 - **2026-07-23:** Initial weather/sky/environment reversal (WeatherManager biome state machine, storm scheduling, 5-slot param model, NetPackageWeather sync, temperature/survival client-server split, SkyManager clock vs rendering) with state machines.

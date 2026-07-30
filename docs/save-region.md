@@ -108,6 +108,44 @@ Ctor defaults: `providerId = Disc (1)`, `saveDataLimit = -1`, empty
 
 ---
 
+### 1.3 PlayerDataFile (per-player `*.ttp`)
+
+Path: `{playerDir}/{playerId}.{EXT}` with atomic `*.tmp` write and `*.bak` backup
+(Save IL=129). Separate `*.meta` via `PlayerMetaInfo.Write`.
+
+**On-disk header (verified):**
+
+```text
+'t' 't' 'p' 0x00     // magic ttp\0
+version : u8         // written as literal 59 on current Save
+// then PlayerDataFile.Write body
+```
+
+Load (IL=223) checks magic; on failure rolls to `*.bak`. Network form used by
+`NetPackagePlayerData` / join `PlayerId`:
+
+```text
+PlayerDataFile.Write  +  PlayerMetaInfo.Write     // WriteNetwork IL=8
+ReadNetwork: Read(version=-1) + PlayerMetaInfo.FromStream
+```
+
+**`Write` body (IL=372) major sections** (order; nested codecs own details):
+
+1. `EntityCreationData.write(networkWrite=false)` (disk ECD)
+2. inventory `ItemStack[]`, selected slot, `Bag`, drag-and-drop stack
+3. already-crafted name set (u16 count + strings)
+4. spawn selection key / last spawn / loaded flag
+5. entity id, kills, deaths, score
+6. `Equipment.Write`
+7. unlocked + favorite recipe lists
+8. map marker, crouched lock, `CraftingData`
+9. craft totals, distance walked, lives, game-stage birth time
+10. `WaypointCollection`, `QuestJournal`, `ChallengeJournal`
+11. death/life flags, rented VM position, further progression fields
+
+`FromPlayer` / `ToPlayer` (IL=300 / 463) bridge live `EntityPlayer` and this blob
+(join path in [protocol.md](protocol.md) section 5).
+
 ## 2. Chunk binary format (stock IL)
 
 | Method | IL | Bound |
@@ -342,6 +380,8 @@ owns paths and file lifecycle; the on-disk byte formats (WorldState, region, pla
 the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
+
+- **2026-07-28:** PlayerDataFile ttp\0 magic, version 59, WriteNetwork = Write+meta.
 
 - **2026-07-28:** main.ttw magic ttw\0; SaveLoad version gate; Load backup cascade (.bak / .ext.bak).
 

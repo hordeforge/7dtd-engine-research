@@ -538,8 +538,9 @@ PlayerDataFile.WriteNetwork(writer)   // full player file network codec
 - `ProcessPackage`: `ValidEntityIdForSender(playerDataFile.id)`; then
   `GameManager.SavePlayerData(Sender, playerDataFile)`.
 
-Disk layout of `PlayerDataFile` is owned by save docs; this package is the C2S
-transport only.
+Disk layout of `PlayerDataFile` (`ttp\0` + version **59**) is in
+[save-region.md](save-region.md) section 1.3; this package is the C2S transport
+only (`WriteNetwork` = `Write` + `PlayerMetaInfo`).
 
 
 ---
@@ -622,6 +623,74 @@ count          : u16
 
 ---
 
+### 6.11 NetPackageDamageEntity
+
+Authoritative damage event for clients (and some C2S external paths). Full field
+order also in [protocol.md](protocol.md) section 6.5; re-verified against
+`write` IL=172.
+
+```text
+entityId : i32
+damageSrc : u8          // EnumDamageSource
+damageTyp : u8          // EnumDamageTypes
+strength : u16
+hitDirection : u8
+hitBodyPart : i16
+movementState : u8
+bPainHit, bFatal, bCritical : bool x3
+attackerEntityId : i32
+dirV : f32 x3
+blockPos : Vector3i
+hitTransformName : string
+hitTransformPosition : f32 x3
+uvHit : f32 x2
+damageMultiplier : f32
+random : f32
+bIgnoreConsecutiveDamages, bIsDamageTransfer : bool x2
+bDismember, bCrippleLegs, bTurnIntoCrawler : bool x3
+bonusDamageType : u8
+StunType : u8
+StunDuration : f32
+bFromBuff : bool
+ArmorSlot : u8
+ArmorSlotGroup : u8
+ArmorDamage : u16
+attackingItem present : bool (+ ItemValue.Write if true)
+```
+
+`Setup(targetId, DamageResponse)` (IL=141) flattens `DamageResponse` + nested
+`DamageSource` into those fields. `ProcessPackage` (IL=168): rebuild
+`DamageSource`/`DamageResponse`, `FireAttackedEvents`, `ProcessDamageResponse`
+on the target entity (apply path owned by [combat-damage.md](combat-damage.md)).
+
+### 6.12 NetPackageTileEntity
+
+Live TE replication (not the chunk-blob type+body list).
+
+```text
+handle : u8             // Setup default 255 when omitted
+teWorldPos : Vector3i
+payloadLen : u16
+payload : payloadLen bytes   // TileEntity.write(network stream mode)
+```
+
+`Setup(te, streamMode[, handle])` (IL=27): `te.ToWorldPos()`, write TE into pooled
+stream via `TileEntity.write(writer, streamMode)`.
+
+`ProcessPackage` (IL=90):
+
+1. `World.GetTileEntity(teWorldPos)`; no-op if missing.
+2. `SetHandle(handle)`.
+3. Under lock on package stream: `te.read(reader, StreamModeRead)` with mode
+   **2** if not remote world else **1**.
+4. `NotifyListeners()`.
+5. If server: `SetChunkModified()`; rebroadcast `NetPackageTileEntity.Setup(te,
+   StreamModeWrite=2, handle)` with bulk flags **192** and optional world-center
+   position for interest.
+
+Base TE network write omits disk-only heat-map time; see
+[tile-entities-power.md](tile-entities-power.md) section 2.
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -673,6 +742,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** NetPackageDamageEntity full wire; NetPackageTileEntity handle/pos/payload + server rebroadcast.
 
 - **2026-07-28:** Entity motion family (PosAndRot/Teleport/Rel/Rot/Velocity/AliveFlags); PlayerData C2S.
 

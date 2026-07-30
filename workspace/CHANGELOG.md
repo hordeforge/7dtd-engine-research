@@ -1226,3 +1226,18 @@ Fourteenth depth round (four leaves in one pass).
 
 Coverage: narrated **1302 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - PlayerDataFile, damage wire, TE package, weather blob
+
+Fifteenth depth round (four leaves concurrent).
+
+- `save-region.md` 1.3: PlayerDataFile `ttp\0` + version **59**, tmp/bak save,
+  WriteNetwork = Write + PlayerMetaInfo; major Write sections.
+- `protocol-packages.md` 6.11: NetPackageDamageEntity full field order (IL=172)
+  + ProcessPackage apply entry; 6.12 NetPackageTileEntity handle/pos/u16 payload
+  + server rebroadcast flags 192.
+- `tile-entities-power.md` / `combat-damage.md`: cross-links.
+- `weather-environment.md`: ReadWriteData IL=193 (v4, GamePrefs 60 gate, per-biome
+  storm/params); Load buffer vs ApplyLoad.
+
+Coverage: narrated **1303 (35%)**, unaccounted **0**.
+
