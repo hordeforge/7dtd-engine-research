@@ -89,6 +89,17 @@ server-side stat container and the food/water/stamina/health over-time model.
 
 ---
 
+## 5. Network sync (verified)
+
+| Package | Role |
+|---|---|
+| `NetPackageEntityStatChanged` | single stat value/baseMax/maxModifier + instigator |
+| `NetPackageEntityStatsBuff` | full `EntityBuffs` blob for one entity |
+| `NetPackagePlayerStats` | `EntityNetworkStats` snapshot (NED dirty path) |
+
+Wire bodies: [protocol-packages.md](protocol-packages.md) section 6.16. Server
+rebroadcasts stats/buffs/playerstats with bulk flags **192** after accept.
+
 ## Related docs
 
 | Doc | Role |
@@ -100,5 +111,7 @@ server-side stat container and the food/water/stamina/health over-time model.
 | [server-lifecycle.md](server-lifecycle.md) | Stats persisted with the profile; death/respawn |
 
 ## Changelog
+
+- **2026-07-28:** Stat/buff/playerstats network package pointers.
 
 - **2026-07-23:** Initial entity/survival stats reversal (EntityStats tick, food/water/stamina/health over-time, client/server split) with state machine.

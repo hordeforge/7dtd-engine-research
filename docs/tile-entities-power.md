@@ -270,14 +270,36 @@ and the battery bank both charges (`TickPowerGeneration`) and discharges
 
 ### 3.5 Graph persistence
 
-`PowerManager.Write` emits the `FileVersion` byte, the root count, then per root a
-type byte and a recursive `PowerItem.write` (block id, position, a `hasParent`
-bool plus parent position, child count, then each child's type byte and subtree).
-`Read` rebuilds it with `CreateItem` per node and `AddPowerNode`, which registers
+Path `{SaveGameDir}/power.dat`. `SavePowerManager` (IL=41) serializes via `Write`
+into a pooled stream and starts thread `powerDataSave`; the worker copies any
+existing file to `power.dat.bak` then `StreamUtils.WriteStreamToFile`.
+`LoadPowerManager` (IL=70) opens `power.dat`, else `power.dat.bak`.
+
+**`PowerManager.Write` (IL=35) / `Read` (IL=34):**
+
+```text
+fileVersion : u8          // PowerManager.FileVersion
+rootCount : i32           // Circuits.Count
+// per root:
+  powerItemType : u8
+  PowerItem.write / read (recursive)
+```
+
+**`PowerItem.write` (IL=55) recursive:**
+
+```text
+blockId : u16
+position : Vector3i
+hasParent : bool
+if hasParent: parentPos : Vector3i
+childCount : u8
+// per child: powerItemType:u8 + PowerItem.write
+```
+
+`Read` rebuilds with `CreateItem` per node and `AddPowerNode`, which registers
 the node in `Circuits`, in `PowerSources` / `PowerTriggers` if applicable, and in
 `PowerItemDictionary`; `SetParent` enforces no cycles via `CircularParentCheck` and
-pulls a re-parented node out of the roots list. `LoadPowerManager` falls back to
-`power.dat.bak` if the primary file fails to read.
+pulls a re-parented node out of the roots list.
 
 ---
 
@@ -444,6 +466,8 @@ the matching `PowerItem` by world position and links the two.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
 ## Changelog
+
+- **2026-07-28:** power.dat field-level Write/Read tree codec + threaded save.
 
 - **2026-07-28:** NetPackageTileEntity wire + server rebroadcast path.
 

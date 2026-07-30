@@ -426,8 +426,12 @@ flowchart LR
 Item moves between containers go through `TransactionalInventory`: the server
 validates each transaction (source/destination slots, counts) before applying it,
 which is the anti-dupe / anti-cheat gate for inventory. Requests arrive as
-`NetPackageInventoryTransactionRequest` and are answered with
-`NetPackageInventoryTransactionResponse` (see [protocol-packages.md](protocol-packages.md)).
+`NetPackageInventoryTransactionRequest` whose body is
+`InventoryTransaction.Write` (per-inventory Guid + initial/final hash + ops).
+Server `TransactionRequestServer` applies with `secretToken`, runs
+`ValidateFinalHashes`, force-unlocks the player on failure, and acks remote
+clients via `NetPackageInventoryTransactionResponse` (see
+[protocol-packages.md](protocol-packages.md) section 6.13).
 
 ## Related docs
 
@@ -482,6 +486,8 @@ The non-action leaves:
   customize its dropped-entity behavior.
 
 ## Changelog
+
+- **2026-07-28:** InventoryTransaction hash-validated server apply path.
 
 - **2026-07-24:** Leaf narration: the four concrete `ItemActionData` leaves (vomit, dynamic, dynamic melee, replace block), `ItemClassArmor`, the AI director's `ItemId`, and `ItemWorldData`.
 - **2026-07-23:** Initial item-framework reversal (ItemValue packing + ItemStack, ItemClass and the Actions array, the ItemAction contract and category tree, holding/use flow with primary/secondary interlock, toolbelt/bag/equipment containers, durability and permanent degradation, item to buff/MinEvent linkage) with state machines.

@@ -691,6 +691,132 @@ stream via `TileEntity.write(writer, streamMode)`.
 Base TE network write omits disk-only heat-map time; see
 [tile-entities-power.md](tile-entities-power.md) section 2.
 
+### 6.13 Inventory transaction packages
+
+Server-authoritative container moves ([items.md](items.md)).
+
+#### Request (ToServer)
+
+```text
+// body:
+InventoryTransaction.Write(tx)
+```
+
+`ProcessPackage` (IL=8): `InventoryManager.TransactionRequestServer(tx, Sender.entityId)`.
+
+**`InventoryTransaction.Write` (IL=75):**
+
+```text
+inventoryCount : i32
+// per inventory:
+  inventoryKey : Guid
+  initialHash : i32
+  finalHash : i32
+  opCount : i32
+  // opCount x InventoryOperation.Write
+```
+
+**`TransactionRequestServer` (IL=46):** must be server; `tx.Apply(secretToken)`;
+on success `ValidateFinalHashes`; on failure log + `LockManager.ForceUnlockByPlayer`;
+on success for non-primary player send `NetPackageInventoryTransactionResponse`
+(flags 192) with success=true and null inventory lists (minimal ack).
+
+#### Response (ToClient)
+
+```text
+// empty keys/inventories fast path:
+success=false implied path: bool false, count 0
+// full:
+success : bool
+count : i32
+// count times:
+  key : Guid
+  hasStacks : bool
+  if hasStacks: ItemStack.WriteArray
+```
+
+Client `ProcessPackage` is currently a no-op (`ret` IL=1) on this build; server
+still emits the ack for remote players.
+
+#### Data request / response (related)
+
+`NetPackageInventoryDataRequest`: `KeyHashPair` + `managerToken` Guid.
+`NetPackageInventoryDataResponse`: success, errorMsg, inventoryKey Guid,
+`ItemStack[]`, managerToken; client updates `TransactionalInventory` on success.
+
+### 6.14 NetPackageExplosionInitiate (ToServer)
+
+Client/server-placed explosives. `ProcessPackage` → `IGameManager.ExplosionServer(...)`.
+
+```text
+worldPos : Vector3          // StreamUtils
+blockPos : Vector3i
+rotation : Quaternion       // StreamUtils
+explosionBlobLen : u16
+explosionBlob : bytes       // ExplosionData.ToByteArray()
+entityId : i32
+delay : f32
+bRemoveBlockAtExplPosition : bool
+item present : bool (+ ItemValue.Write)
+```
+
+Also summarized in [protocol.md](protocol.md) section 6.6.
+
+### 6.15 NetPackageExplosionClient (ToClient)
+
+Authoritative blast FX + block change list for clients.
+
+```text
+center : Vector3
+rotation : Quaternion
+expType : i16
+blastPower : u16
+blastRadius : u16
+blockDamage : u16
+entityId : i32
+changeCount : u16
+// changeCount x BlockChangeInfo.Write
+```
+
+`ProcessPackage` → `IGameManager.ExplosionClient(...)`.
+
+### 6.16 Stat / buff sync packages
+
+#### `NetPackageEntityStatChanged` (extends EntityTargeted)
+
+```text
+entityId : i32
+instigatorId : i32
+enumStat : u8
+value : f32
+baseMax : f32
+maxModifier : f32
+```
+
+`ProcessPackage`: apply to `Stat` via `GetStat`; optional MinEvent on health;
+server re-sends to tracked players via `NetEntityDistribution`.
+
+#### `NetPackageEntityStatsBuff`
+
+```text
+entityId : i32
+dataLen : i32
+data : dataLen bytes     // EntityBuffs.Write / Read blob
+```
+
+`Setup` can serialize live buffs if data null. Client remote entities apply
+`EntityBuffs.Read`; server rebroadcasts (flags 192, exclude self).
+
+#### `NetPackagePlayerStats` (extends EntityTargeted)
+
+```text
+entityId : i32
+EntityNetworkStats.write(...)
+```
+
+`Setup` fills `EntityNetworkStats` from entity. Server may stamp sender player
+name, `ToEntity` + `EnqueueNetworkStats`, rebroadcast excluding sender (192).
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -742,6 +868,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** Inventory transaction wire + server apply; explosion initiate/client; stat/buff/playerstats packages.
 
 - **2026-07-28:** NetPackageDamageEntity full wire; NetPackageTileEntity handle/pos/payload + server rebroadcast.
 

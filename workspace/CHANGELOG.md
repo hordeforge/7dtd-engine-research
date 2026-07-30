@@ -1241,3 +1241,16 @@ Fifteenth depth round (four leaves concurrent).
 
 Coverage: narrated **1303 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - inventory tx, power.dat, explosions, stat sync
+
+Sixteenth depth round (four leaves concurrent).
+
+- `protocol-packages.md` 6.13-6.16: InventoryTransaction wire + server apply;
+  ExplosionInitiate/Client; EntityStatChanged / StatsBuff / PlayerStats.
+- `items.md`: hash-validated TransactionRequestServer path.
+- `tile-entities-power.md` 3.5: power.dat field-level tree codec + threaded save.
+- `entity-stats.md` / `buffs.md`: network package pointers.
+- `protocol.md` 6.6: explosion layout pointer.
+
+Coverage: narrated **1309 (35%)**, unaccounted **0**.
+

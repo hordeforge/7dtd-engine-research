@@ -106,6 +106,12 @@ sequenceDiagram
 
 ---
 
+## Network
+
+Live buff replication uses `NetPackageEntityStatsBuff` (EntityBuffs.Write blob);
+see [protocol-packages.md](protocol-packages.md) section 6.16 and
+[entity-stats.md](entity-stats.md) section 5.
+
 ## Related docs
 
 | Doc | Role |
@@ -116,5 +122,7 @@ sequenceDiagram
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 
 ## Changelog
+
+- **2026-07-28:** NetPackageEntityStatsBuff pointer.
 
 - **2026-07-23:** Initial buff-system reversal (EntityBuffs tick, BuffValue lifecycle, tag/death removal, net sync) with state machines.

@@ -470,7 +470,8 @@ attackingItem present:bool (+ item if true)
 
 ### 6.6 NetPackageExplosionInitiate (dynamite)
 
-worldPos 3×f32, blockPos 3×i32, rotation quat 4×f32, nested explosion blob (particle index, radii, damages, …), entityId, delaySeconds, removeBlocks, optional ItemValue.
+worldPos 3xf32, blockPos Vector3i, rotation quat, nested `ExplosionData.ToByteArray` (u16 len + bytes), entityId, delay, removeBlock flag, optional ItemValue.
+Full layout: [protocol-packages.md](protocol-packages.md) sections 6.14-6.15.
 
 ---
 
