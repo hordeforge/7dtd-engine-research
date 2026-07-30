@@ -422,6 +422,126 @@ equipment present: bool  (+ Equipment: slot count i32 + unlockedCosmetics list .
 dragAndDropItem  : ItemStack.Write
 ```
 
+
+### 5.5 Entity motion package family (ToClient / Both)
+
+Selection thresholds live in [network.md](network.md) section 2 (encoded
+`EncodePos` space). Inheritance:
+
+```text
+NetPackageEntityTargeted
+  NetPackageEntityPosAndRot          // absolute float pos/rot
+    NetPackageEntityTeleport         // same wire; different ProcessPackage
+  NetPackageEntityRotation           // encoded rot or quaternion
+    NetPackageEntityRelPosAndRot     // rotation + i16 dPos + onGround + steps
+  NetPackageEntityVelocity           // bAdd + motion f32x3
+  NetPackageEntityAliveFlags         // u16 bitfield
+```
+
+#### 5.5.1 `NetPackageEntityPosAndRot` (write IL=76)
+
+```text
+entityId : i32          // EntityTargeted
+pos.x,y,z : f32 x3      // absolute world position
+bUseQRotation : bool
+if !bUseQRotation:
+  rot.x,y,z : f32 x3    // euler degrees
+else:
+  qrot.x,y,z,w : f32 x4
+onGround : bool
+```
+
+`Setup(Entity)` copies `position`, `rotation`, `qrotation`, `onGround`,
+`IsQRotationUsed()`.
+
+`ProcessPackage` (IL=61): `ValidEntityIdForSender`; skip if attached main entity
+is local primary player; set `entity.serverPos = EncodePos(pos)`;
+`SetPosAndRotFromNetwork` / `SetPosAndQRotFromNetwork` with **3** update steps;
+set `onGround`.
+
+#### 5.5.2 `NetPackageEntityTeleport` (extends PosAndRot)
+
+- **No own `write`**: inherits PosAndRot body (`Setup` calls base Setup).
+- `GetLength` returns literal **20** (hint only; actual length follows PosAndRot).
+- `ProcessPackage` (IL=60): same id checks; `serverPos = EncodePos(pos)`;
+  `SetPosAndRotFromNetwork(pos, rot, steps=0)`; then hard
+  `SetPosition(pos,true)`, `SetRotation(rot)`, `SetLastTickPos(pos)`,
+  `onGround`. Missing entity logs `Discarding ... for entity Id=`.
+
+Use for large encoded jumps (±256+); client snaps rather than interpolates.
+
+#### 5.5.3 `NetPackageEntityRotation` (write IL=54)
+
+```text
+entityId : i32
+bUseQRotation : bool
+if !bUseQRotation:
+  rot.x,y,z : i16 x3    // EncodeRot units (rot*256/360)
+else:
+  qrot.x,y,z,w : f32 x4
+```
+
+#### 5.5.4 `NetPackageEntityRelPosAndRot` (write IL=30)
+
+Extends Rotation write, then:
+
+```text
+// after Rotation body:
+dPos.x,y,z : i16 x3     // encoded delta (1/32 block)
+onGround : bool
+updateSteps : i16
+```
+
+`ProcessPackage` (IL=94): `serverPos += dPos`; world pos = `serverPos / 32`;
+decode rot as `(rot_i * 360) / 256`; apply with `updateSteps` via
+`SetPosAndRotFromNetwork` / Q variant; set `onGround`. Same attached-primary skip.
+
+#### 5.5.5 `NetPackageEntityVelocity` (write IL=23)
+
+```text
+entityId : i32
+bAdd : bool
+motion.x,y,z : f32 x3   // Setup clamps each axis to [-8, 8]
+```
+
+#### 5.5.6 `NetPackageEntityAliveFlags` (write IL=8)
+
+```text
+entityId : i32
+flags : u16
+```
+
+Bit packing from `Setup` (IL=91), OR into flags:
+
+| Bit | Value | Source |
+|---:|---:|---|
+| 2 | 4 | `AimingGun` |
+| 3 | 8 | `Spawned` |
+| 4 | 16 | `Jumping` |
+| 5 | 32 | `IsBreakingBlocks` |
+| 6 | 64 | `IsAlert` |
+| 7 | 128 | inventory flashlight on |
+| 8 | 256 | `IsGodMode` |
+| 9 | 512 | `IsCrouching` |
+
+### 5.6 `NetPackagePlayerData` (ToServer)
+
+Periodic client save of local player blob (not the join ECD).
+
+```text
+// body:
+PlayerDataFile.WriteNetwork(writer)   // full player file network codec
+```
+
+- Direction **ToServer** (1).
+- `Setup(EntityPlayer)`: `new PlayerDataFile().FromPlayer(player)`.
+- `ProcessPackage`: `ValidEntityIdForSender(playerDataFile.id)`; then
+  `GameManager.SavePlayerData(Sender, playerDataFile)`.
+
+Disk layout of `PlayerDataFile` is owned by save docs; this package is the C2S
+transport only.
+
+
 ---
 
 ## 6. Building band
@@ -553,6 +673,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** Entity motion family (PosAndRot/Teleport/Rel/Rot/Velocity/AliveFlags); PlayerData C2S.
 
 - **2026-07-28:** RequestToSpawnEntity server create; WaterSimChunkUpdate inner payload; WaterSet rebroadcast.
 

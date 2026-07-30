@@ -221,18 +221,37 @@ Both queue work off the caller; **AStar** is classic OS thread; **ASP** is Unity
 
 ### 6.2 `EntityAlive.FindPath` (49 IL)
 
-Distance / throttle checks (subtract positions, several `ble`/`bge` thresholds), then:
+Verified clamps before enqueue:
+
+1. Horizontal distSq = dx*dx + dz*dz. If **&gt; 1225** (35²):
+   - if dy &gt; **45**: clamp target.y to `position.y + 45`
+   - if dy &lt; **-45**: clamp target.y to `position.y - 45`
+2. Then:
 
 ```text
 PathFinderThread.Instance.FindPath(this, target, speed, canBreak, aiTask)
 ```
 
+Base `PathFinderThread.FindPath` is a **no-op** (`ret` IL=1). Production instance
+is `ASPPathFinderThread` (or legacy `AStarPathFinderThread`).
+
 ### 6.3 Enqueue (`ASPPathFinderThread.FindPath`)
+
+Single-target (IL=17) and start+target (IL=22) both:
 
 ```text
 entityWaitQueue.Add(entityId)
-finishedPaths[entityId] = new PathInfoSingleTarget(...)
+finishedPaths[entityId] = new PathInfoSingleTarget(entity, target, canBreak, speed, aiTask)
+// start+target overload also PathInfo.SetStartPos(start)
 ```
+
+Same entity id **replaces** any prior `finishedPaths` entry (coalesce). Optional
+`FindPath(PathInfo)` overload stores a prebuilt info (multi-target path).
+
+`AStarPathFinderThread.FindPath` (IL=42) is the older worker-queue variant: under
+`finishedPaths` lock, add to wait queue if new, set dict entry, pulse
+`writerThreadWaitHandle`. Prefer documenting ASP as production
+([closed-gaps.md](closed-gaps.md) path narrative).
 
 ### 6.4 Dequeue on main (`GetPath` from `updateTasks`)
 
@@ -757,6 +776,8 @@ live code but dormant in stock content; NPC mods exercise it.
 ---
 
 ## Changelog
+
+- **2026-07-28:** FindPath distSq 1225 / Y ±45 clamps; ASP enqueue coalesce; base FindPath no-op.
 
 - **2026-07-24:** Focus + target-selection leaf narration (`AIFocus*` structs, `EAIBlockingTargetTask` give-up latch, nearest-entity sorter).
 - **2026-07-23:** Root-motion delivery chain + enabled-toggle wedge addendum.

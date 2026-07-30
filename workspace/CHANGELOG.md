@@ -1212,3 +1212,17 @@ Thirteenth depth round (all four deferred leaves).
 
 Coverage: narrated **1301 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - motion packages, PlayerData, path clamps, main.ttw
+
+Fourteenth depth round (four leaves in one pass).
+
+- `protocol-packages.md` 5.5: PosAndRot / Teleport / Rotation / RelPosAndRot /
+  Velocity / AliveFlags wire and process; 5.6 PlayerData C2S SavePlayerData.
+- `network.md`: decode notes (serverPos/32, rot*360/256).
+- `entity-ai.md` 6.2-6.3: FindPath distSq 1225 and Y ±45 clamps; ASP coalesce;
+  base PathFinderThread.FindPath no-op.
+- `save-region.md` 1.1-1.2: main.ttw magic ttw\0; version gate; Load
+  .bak / .ext.bak cascade; Save .bak pre-write.
+
+Coverage: narrated **1302 (35%)**, unaccounted **0**.
+

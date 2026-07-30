@@ -65,7 +65,46 @@ stateDiagram-v2
 | `saveDataLimit` | long | |
 | `Guid` | string | world identity |
 
-`SetFrom(World, EnumChunkProviderId)` (IL=164) snapshots water level (`WorldConstants.WaterLevel`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock).
+`SetFrom(World, EnumChunkProviderId)` (IL=164) snapshots water level (`WorldConstants.WaterLevel`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
+
+### 1.1 `main.ttw` header codec (`SaveLoad(Stream)`, IL=884)
+
+Symmetric reader/writer via `IBinaryReaderOrWriter` under a lock on `this`.
+
+**Magic (verified):** three chars + trailing byte:
+
+```text
+'t' 't' 'w' 0x00     // ASCII "ttw\0"  (filename main.ttw)
+```
+
+On save, those four values are written first. On load, four reads are compared to
+`116,116,119,0`; mismatch logs `Invalid magic bytes in world header` and fails.
+
+**Then (high level, version-gated):**
+
+| Stage | Contents |
+|---|---|
+| Version | `uint version` vs `CurrentSaveVersion`; reject newer; if version &gt; 11 read `gameVersionString` |
+| Chunk geometry | `chunkSizeX/Y/Z`, `chunkCount` |
+| World scalars | `waterLevel`, `providerId`, `seed`, `worldTime`, `timeInTicks`, game mode, … |
+| Spawns | `SpawnPointList.Read/Write` |
+| Entity id | `nextEntityID` |
+| Limits | `saveDataLimit` (long) |
+| Nested blobs | length-prefixed byte arrays for dynamic spawner, AIDirector, sleeper/trigger/wall volumes (each with save-version int where applicable) |
+| Weather | `WeatherManager.Load/Save` (try/catch; warn on failure) |
+| Guid | string world identity; generate if empty |
+
+Ctor defaults: `providerId = Disc (1)`, `saveDataLimit = -1`, empty
+`SpawnPointList`, new Guid.
+
+### 1.2 File path helpers
+
+| Method | IL | Behavior |
+|---|---:|---|
+| `Save(string)` | 21 | if file exists and size &gt; 0, copy to `*.bak`; then `SaveLoad(path, load=false)` |
+| `Save(Stream)` | 7 | `SaveLoad(stream, load=false)` |
+| `Load(string, …)` | 102 | try primary; on fail copy to `*.loadFailed`, try `*.bak`, then `*.ext.bak` (last successful load extra backup) |
+| `SaveLoad(string,…)` | 76 | lock; open read or buffered create; call stream `SaveLoad` |
 
 ---
 
@@ -303,6 +342,8 @@ owns paths and file lifecycle; the on-disk byte formats (WorldState, region, pla
 the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
+
+- **2026-07-28:** main.ttw magic ttw\0; SaveLoad version gate; Load backup cascade (.bak / .ext.bak).
 
 - **2026-07-28:** Region runtime path (DoSaveChunks/GetChunkSync), snapshot magic `ttc\0`+v47, Deflate writer/reader, WorldBlockTicker dual path + entry wire.
 - **2026-07-18:** Save state machine + see also.  

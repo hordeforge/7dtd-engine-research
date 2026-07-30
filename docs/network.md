@@ -125,6 +125,10 @@ Detail: [world-chunks.md](world-chunks.md) section 4.0.
 | Motion Δ² &gt; **0.04** | velocity package |
 | Dirty flags | AliveFlags / PlayerStats / equipment |
 
+Wire bodies for these packages: [protocol-packages.md](protocol-packages.md)
+section 5.5. Decode on client: rel pos uses `serverPos += dPos` then `/32`;
+rot decode `(i16 * 360) / 256`.
+
 Encode helpers (verified IL):
 
 | Helper | Formula | Unit |
