@@ -115,14 +115,17 @@ stateDiagram-v2
   Closed --> [*]
 ```
 
-`handleReading` accumulates input; `submitInput` sends a completed line to the
+`HandlerThread` (IL=66) loops while usable: `handleReading` then
+`handleWriting`, returns **25** (ms sleep) on success or **-1** to stop.
+`handleReading` (IL=60) drains `TcpClient.Available` into a char buffer; CR/LF
+ends a line via `submitInput`. `submitInput` sends the completed line to the
 dispatcher (so a telnet client and the web Command API reach the exact same
 `executeCommand`). `LoginMessage` emits the password prompt; `IsAuthenticated`
 gates the command loop.
 
 ---
 
-## 3. Network packages (verified)
+## 4. Network packages (verified)
 
 Admin commands over the game connection (not telnet) use two packages.
 
@@ -132,8 +135,12 @@ Admin commands over the game connection (not telnet) use two packages.
 cmd : string
 ```
 
-`ProcessPackage` → `ConnectionManager.ServerConsoleCommand(Sender, cmd)` which
-runs `AdminTools.CommandAllowedFor` then `SdtdConsole.executeCommand`.
+`ProcessPackage` → `ConnectionManager.ServerConsoleCommand(Sender, cmd)` (IL=125):
+length-guard long commands (log first 20 chars); resolve command; if missing or
+not `CanExecuteForDevice`, push error lines via `NetPackageConsoleCmdClient`;
+if `IsExecuteOnClient`, forward the cmd string to the client with `bExecute=true`;
+else `AdminTools.CommandAllowedFor` then `SdtdConsole.ExecuteSync` and return
+output lines with `bExecute=false`.
 
 **`NetPackageConsoleCmdClient` (ToClient, write IL=31):**
 
@@ -149,7 +156,7 @@ output).
 
 Telnet/stdin bypass these packages (section 2).
 
-## 4. The command contract (`ConsoleCmdAbstract`)
+## 5. The command contract (`ConsoleCmdAbstract`)
 
 Every command subclasses `ConsoleCmdAbstract` and provides:
 
@@ -171,7 +178,7 @@ framework, not each leaf command.
 
 ---
 
-## 5. Dedicated relevance and residuals
+## 6. Dedicated relevance and residuals
 
 - **Core dedicated surface:** stdin, telnet, and the web Command API all dispatch
   through `SdtdConsole.executeCommand` on the server.
@@ -195,6 +202,8 @@ framework, not each leaf command.
 **Leaf catalog:** every instance is enumerated in [`inventories/console-command-list.md`](inventories/console-command-list.md) (all 187 commands with descriptions).
 
 ## Changelog
+
+- **2026-07-28:** Telnet HandlerThread 25ms loop; ServerConsoleCommand permission/client-exec path.
 
 - **2026-07-28:** NetPackageConsoleCmdServer/Client wire bodies.
 

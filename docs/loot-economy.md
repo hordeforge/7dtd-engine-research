@@ -252,6 +252,20 @@ the actual purchase removes currency from the player inventory and the inventory
 is carried by `NetPackageTraderData` (which `Setup`s from an `EntityTrader` or a
 `TileEntityVendingMachine`), keeping the server authoritative over stock.
 
+**`NetPackageTraderData` wire (write IL=38, ToServer):**
+
+```text
+isEntity : bool              // true if entityId != -1
+if isEntity: entityId : i32
+else: tePosition : Vector3i
+hasTraderData : bool
+if hasTraderData: TraderData.Write
+```
+
+`ProcessPackage` (IL=50, server only): `TraderData.CopyFrom` onto the live
+`EntityTrader` or `TileEntityVendingMachine` at that key; vending also
+`NotifyListeners`.
+
 ---
 
 ## 6. Vending machines
@@ -365,6 +379,8 @@ what `TraderManager.HandleFullReset` puts in stock.
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
 ## Changelog
+
+- **2026-07-28:** NetPackageTraderData wire (entity vs TE key) + server CopyFrom.
 
 - **2026-07-23:** Initial loot/trader/economy reversal: server loot generation lifecycle (`LootContainer` + `TEFeatureStorage` + `LootManager`, touched flags, respawn timer, quest reset), trader restock interval and pricing (`TraderManager`, `XUiM_Trader`), open-hour presets and the physical `TraderArea`, and rentable vending machines, with state machines.
 - **2026-07-24:** Added leaf narration for the `BaseLootEntryRequirement` family (biome,

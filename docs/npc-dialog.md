@@ -202,7 +202,9 @@ cached list after 24000 world-time ticks (one in-game day) or a trader reset,
 so offers reroll daily. `ClearQuestListForPlayer` / `ClearQuestList` drop
 entries.
 
-`NetPackageNPCQuestList` is the round trip. `NPCQuestEventTypes`: `FetchList`
+`NetPackageNPCQuestList` is the round trip (write IL=99). Header is always
+`npcEntityID:i32`, `playerEntityID:i32`, `eventType:u8`. `NPCQuestEventTypes`:
+`FetchList`
 0, `RemoveQuest` 1, `ResetQuests` 2, `AddUsedPOI` 3, `ClearUsedPOI` 4. The
 server answers `FetchList` with `QuestPacketEntry[]` (`QuestID`,
 `QuestLocation`, `QuestSize`, `POIName`, `TraderPos`), which the client applies
@@ -306,6 +308,8 @@ objective's lifetime:
 | [`re-methodology.md`](re-methodology.md) | How this was reversed |
 
 ## Changelog
+
+- **2026-07-28:** NetPackageNPCQuestList write IL=99 header note.
 
 - **2026-07-24:** Initial reversal: dialog tree model (phases, statements,
   response entries, quest-offer expansion), requirement verb semantics

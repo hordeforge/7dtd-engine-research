@@ -417,6 +417,55 @@ touches in passing:
 
 ---
 
+## 8. Quest net packages (verified)
+
+### `NetPackageQuestObjectiveUpdate` (write IL=21)
+
+```text
+senderEntityID : i32
+questCode : i32
+eventType : u8          // QuestObjectiveEventTypes
+blockPos : Vector3i
+```
+
+`ProcessPackage` (IL=180): party fan-out / `HandlePlayer` for local; treasure
+finish via `QuestEventManager.FinishTreasureQuest` on some event types; server
+rebroadcasts to party members.
+
+### `NetPackageQuestEvent` (write IL=205)
+
+Envelope always starts:
+
+```text
+entityID : i32
+prefabPos : Vector3
+eventType : u8          // QuestEventTypes
+// type-dependent tail: questCode, SubscribeTo, FetchModeType, SharedWithList,
+// blockIndex, eventName, activateList, extraData, questID, factionPointOverride, ...
+```
+
+`ProcessPackage` (IL=368) is a large switch on `eventType` (rally markers, POI
+lock/unlock, sleeper clear, shared list updates). Full per-type field gates are
+in the write IL; clone work should dump `write`/`read` for the specific
+`QuestEventTypes` used.
+
+### `NetPackageNPCQuestList`
+
+Owned by [npc-dialog.md](npc-dialog.md). Header:
+
+```text
+npcEntityID : i32
+playerEntityID : i32
+eventType : u8          // NPCQuestEventTypes
+// FetchList(0): tierLevel:i32 + count:i32 + QuestPacketEntry[]
+// Remove(1): tierLevel:i32 + removeIndex:u8
+// AddPOI(3): tierLevel + questGiverPos Vector2 + prefabPos Vector2
+// Clear(4): tierLevel + questGiverPos Vector2
+```
+
+Also `NetPackageQuestEntitySpawn` in [protocol-packages.md](protocol-packages.md)
+section 6.17.
+
 ## Related docs
 
 | Doc | Role |
@@ -433,6 +482,8 @@ touches in passing:
 **Leaf catalog:** every instance in [`inventories/quest-objectives.md`](inventories/quest-objectives.md) (the 38 objective leaves).
 
 ## Changelog
+
+- **2026-07-28:** QuestObjectiveUpdate / QuestEvent envelope / NPCQuestList type tails.
 
 - **2026-07-23:** Initial quest + challenge reversal: quest state machine
   (NotStarted -> InProgress -> ReadyForTurnIn -> Completed/Failed with phase

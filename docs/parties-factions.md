@@ -348,7 +348,7 @@ client: it `SetStatus`es the pair and invokes `OnAllyChangeEvent` once for each 
 
 ### 5.2 Ally wire
 
-**`NetPackageAllyRequest`** (`PackageDirection` ToServer):
+**`NetPackageAllyRequest`** (`PackageDirection` ToServer, write IL=18):
 
 ```text
 source  : PlatformUserIdentifierAbs   // platform id blob (PlatformUserIdentifierExtensions.ToStream)
@@ -358,7 +358,7 @@ addAlly : bool
 
 `ProcessPackage` calls `GameManager.persistentPlayers.Allies.ProcessAllyRequest`.
 
-**`NetPackageAllyResponse`** (`PackageDirection` ToClient):
+**`NetPackageAllyResponse`** (`PackageDirection` ToClient, write IL=26):
 
 ```text
 source          : PlatformUserIdentifierAbs
@@ -426,6 +426,8 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 | [`residuals.md`](residuals.md) | External / native / content residuals |
 
 ## Changelog
+
+- **2026-07-28:** Ally package write IL numbers.
 
 - **2026-07-28:** PartyActions write IL re-verify (no members on wire).
 

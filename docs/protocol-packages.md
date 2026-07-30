@@ -864,6 +864,53 @@ entityIDQuestHolder : i32
 `GameStageDefinition` using quest holder's `PartyGameStage`; then
 `QuestActionSpawnEnemy.SpawnQuestEntity(type, holderId, null)`.
 
+### 6.18 Trader / quest packages
+
+#### `NetPackageTraderData` (ToServer)
+
+```text
+isEntity : bool
+if isEntity: entityId : i32 else tePosition : Vector3i
+hasTraderData : bool (+ TraderData.Write)
+```
+
+Server `CopyFrom` onto trader NPC or vending TE ([loot-economy.md](loot-economy.md)).
+
+#### `NetPackageQuestObjectiveUpdate`
+
+```text
+senderEntityID : i32
+questCode : i32
+eventType : u8
+blockPos : Vector3i
+```
+
+#### `NetPackageQuestEvent`
+
+```text
+entityID : i32
+prefabPos : Vector3
+eventType : u8
+// + type-dependent tail (write IL=205 / Process IL=368)
+```
+
+#### `NetPackageNPCQuestList`
+
+```text
+npcEntityID : i32
+playerEntityID : i32
+eventType : u8
+// type-dependent: FetchList entries / removeIndex / POI vectors
+```
+
+Detail: [quests-challenges.md](quests-challenges.md) section 8,
+[npc-dialog.md](npc-dialog.md).
+
+#### Ally packages
+
+Already in [parties-factions.md](parties-factions.md) section 5.2 (platform ids +
+status/events).
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -915,6 +962,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** TraderData / quest objective-event / NPCQuestList package summaries.
 
 - **2026-07-28:** Chat/console/lock/quest-spawn package wire summaries; party re-verify.
 

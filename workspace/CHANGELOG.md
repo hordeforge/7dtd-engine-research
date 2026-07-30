@@ -1269,3 +1269,17 @@ Seventeenth depth round (four residual leaves concurrent).
 
 Coverage: narrated **1318 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - trader/quest packages and telnet console path
+
+Eighteenth depth round (four residual leaves concurrent).
+
+- `loot-economy.md`: NetPackageTraderData wire (entity vs TE) + server CopyFrom.
+- `quests-challenges.md` section 8: QuestObjectiveUpdate, QuestEvent envelope,
+  NPCQuestList type tails.
+- `npc-dialog.md` / `parties-factions.md`: NPCQuestList write IL; ally write ILs.
+- `console-commands.md`: Telnet HandlerThread 25ms + handleReading; ServerConsoleCommand
+  permission/client-exec branches.
+- `protocol-packages.md` 6.18: trader/quest package summaries.
+
+Coverage: narrated **1319 (35%)**, unaccounted **0**.
+
