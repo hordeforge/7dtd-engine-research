@@ -226,9 +226,21 @@ stateDiagram-v2
 
 `Chunk.SetWaterSimUpdate` (IL=75): refuses flow into non-flow-through blocks; stores via `ChunkBlockChannel.GetSet` of `WaterValue.RawData`; fires `HandleWaterLevelChanged` when mass changes.
 
-**Client/listen apply path:** `NetPackageWaterSimChunkUpdate.ProcessPackage` re-enters the same `GetChangeWriter`/`RecordChange` path on the local `WaterSimulationNative.Instance` (so remote updates merge into the same apply queue). `read` copies a length-prefixed blob into a pooled memory stream (body payload is stream-copied, not field-decoded in `read` itself).
+**Client/listen apply path:** `NetPackageWaterSimChunkUpdate.ProcessPackage` re-enters the same `GetChangeWriter`/`RecordChange` path on the local `WaterSimulationNative.Instance` (so remote updates merge into the same apply queue). Package `read` copies a length-prefixed blob into a pooled memory stream; `ProcessPackage` then decodes the **inner** layout:
 
-**Related packages:** `NetPackageWaterSet` (manual/console set path via `WaterSetInfo` + `WaterValue.Write`) is separate from the sim stream; catalogued in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md).
+```text
+// outer write: sendLength:i32 + sendBytes
+// inner (sendBytes):
+chunkX:i32, chunkZ:i32, count:i32
+count x { voxelIndex:u16, mass:u16 }
+```
+
+`WaterValue` on the wire is **mass only** (`Write`/`Read` = u16). Full wire note:
+[protocol-packages.md](protocol-packages.md) section 6.9.
+
+**Related packages:** `NetPackageWaterSet` (manual/console): `senderEntityId` +
+u16 count of `{ worldPos, WaterValue }`; server rebroadcasts (flags 192) then
+`SetWater` + `HandleWaterLevelChanged` (section 6.10).
 
 ### 4.7 Evaporation and splash
 
@@ -294,6 +306,8 @@ Apply-stage prose also in [dedicated-misc-systems.md](dedicated-misc-systems.md)
 | [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) | job struct leaf rows |
 
 ## Changelog
+
+- **2026-07-28:** WaterSimChunkUpdate outer/inner wire; WaterValue mass-only; WaterSet rebroadcast.
 
 - **2026-07-28:** Full water-sim pipeline from IL (`WaterSimulationNative.Update` job graph, flow rules, apply thread, mass constants, net backpressure).
 - **2026-07-19:** Related docs table.

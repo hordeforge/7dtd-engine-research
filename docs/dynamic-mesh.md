@@ -128,7 +128,7 @@ come up, then loops `while (!RequestThreadStop) GenerationThread()`.
 paused, and 300 ms when every queue is empty, otherwise it runs one pipeline pass:
 
 1. `HandleRegionLoads`, then `DynamicMeshBuilderManager.CheckBuilders`.
-2. If a builder thread is available and there is queued work: `SetNextChunkToLoad`,
+2. If a builder thread is available and there is queued work: `SetNextChunkToLoad` (feeds `nextChunks` for `GetNextChunkToLoad` / GenerateChunksThread),
    `ProcessRegionRegenRequests`, `ProcessMeshGenerationRequests`.
 3. Drain `PrimaryQueue` then `SecondaryQueue` via `ProcessQueue`
    (`ConcurrentDictionary<Int64, DynamicMeshItem>` each), staging chunks for build.
@@ -359,6 +359,8 @@ stateDiagram-v2
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
 ## Changelog
+
+- **2026-07-28:** `GetNextChunkToLoad` queue sentinel contract for GenerateChunksThread.
 
 - **2026-07-23:** Initial dynamic mesh reversal: the item/region model, the
   `DynamicMeshManager.Update` main-thread marshalling peer, the single generation

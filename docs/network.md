@@ -125,7 +125,40 @@ Detail: [world-chunks.md](world-chunks.md) section 4.0.
 | Motion Δ² &gt; **0.04** | velocity package |
 | Dirty flags | AliveFlags / PlayerStats / equipment |
 
-Encode helpers: `NetEntityDistributionEntry.EncodePos` / `EncodeRot`.
+Encode helpers (verified IL):
+
+| Helper | Formula | Unit |
+|---|---|---|
+| `EncodePos` | `Vector3i(x*32+0.5, y*32+0.5, z*32+0.5)` | **1/32 block** fixed point |
+| `EncodeRot` | `Vector3i(rot * 256 / 360)` | **1/256 turn** (degrees scaled) |
+
+Relative packages carry encoded **deltas** of those integers. Thresholds in the
+table above are in that encoded space (e.g. ±256 encoded = ±8 blocks).
+
+### 2.1 `OnUpdateEntities` interest + priority (IL=322)
+
+Server-only each full tick. Entries live in an `IntHashMap` keyed by entity id
+(constructed only from `NetEntityDistribution..ctor`).
+
+1. Clear working enemy/player lists; walk distribution entries, bucket tracked
+   entities into enemies vs players.
+2. Optional **network prioritization** (`GameManager.enableNetworkdPrioritization`):
+   for airborne enemies, find nearest player with view-cone filter
+   (`Vector3.Angle`, distSq gates **16384** = 128^2); set
+   `NetEntityDistributionEntry.priorityLevel`:
+   - distSq &lt; **25** (5 m) → priority **0**
+   - distSq &gt; **625** (25 m) → priority **3**
+   - distSq &gt; **324** (18 m) → priority **2**
+   - else leave default
+3. For each distribution entry: `updatePlayerList(players)` (motion packages).
+4. For each player × each entry: `updatePlayerEntity(player)` (interest enter/exit,
+   spawn/unload).
+
+`getSpawnPacket` (IL=7): `NetPackageEntitySpawn.Setup(new EntityCreationData(entity, networkWrite=true))`.
+
+Detail on spawn body: [protocol-packages.md](protocol-packages.md) section 5.1.
+Placement request path: section 5.0 below is in protocol-packages; server create is
+`GameManager.RequestToSpawnEntityServer`.
 
 ---
 
@@ -321,6 +354,8 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 | [dedicated-leftovers.md](dedicated-leftovers.md) | AesEncryptAndMac install from SendSharedKey |
 
 ## Changelog
+
+- **2026-07-28:** EncodePos/EncodeRot formulas; OnUpdateEntities priority bands.
 
 - **2026-07-28:** ProtocolManager as thin INetworkServer/Client pump.
 - **2026-07-28:** SendChunksToClients pointer to world-chunks observer pipeline.

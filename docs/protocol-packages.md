@@ -248,6 +248,35 @@ The request form `NetPackageWorldInitInfoRequest` has an empty body (`write` IL=
 
 ## 5. Entity + gameplay band
 
+### 5.0 NetPackageRequestToSpawnEntity (ToServer)
+
+Client-authored spawn request (vehicle/turret/item place, falling tree, etc.).
+
+```text
+// body is only:
+EntityCreationData.write(_bw, networkWrite=true)   // same codec as 5.1
+```
+
+- Direction **ToServer** (1). Channel base **0**.
+- `Setup` stores `ecd`; `ProcessPackage` calls
+  `IGameManager.RequestToSpawnEntityServer(ecd)` when world non-null.
+
+**`GameManager.RequestToSpawnEntityServer` (IL=101):**
+
+1. If **not** server: re-wrap as this package and `SendToServer` (host client
+   path).
+2. If `entityClass` hash equals `"fallingTree"`: scan live entities for an
+   existing `EntityFallingTree` at the same `blockPos`; **return without spawn**
+   if found (dedupe).
+3. `EntityFactory.CreateEntity(ecd)`.
+4. If result is `EntityBackpack`: find matching `PersistentPlayerData` by
+   `RefPlayerId`, `AddDroppedBackpack(entityId, pos, worldMinutes)`.
+5. `World.SpawnEntityInWorld(entity)` (registers + NetEntityDistribution tracks;
+   clients later get `NetPackageEntitySpawn` via interest).
+
+This is the **C2S place/create** path. The S2C visual/create for remote clients
+is still `NetPackageEntitySpawn` (5.1), not a direct echo of this package.
+
 ### 5.1 NetPackageEntitySpawn (ToClient)
 Body is a single `EntityCreationData.write(writer, networkWrite=true)`. The body is
 **three ordered sections**: an unconditional header, an `entityClass`-switched
@@ -424,6 +453,55 @@ response : u16    // eSetBlockResponse: 0 Success, 1 PowerBlockLimitExceeded,
 
 ---
 
+### 6.9 NetPackageWaterSimChunkUpdate (ToClient)
+
+Jobified water sim stream ([light-mesh-water.md](light-mesh-water.md) section 4).
+Direction **ToClient** (2).
+
+**Outer wire (`write` IL=15):**
+```text
+sendLength : i32
+sendBytes  : sendLength bytes   // prebuilt payload
+```
+
+**Inner payload** (built by Setup/AddChange/Finalize, then copied to `sendBytes`):
+```text
+chunkX : i32
+chunkZ : i32
+count  : i32                    // rewritten in FinalizeSend at lengthStreamPos
+// count times:
+  voxelIndex : u16              // local packed index
+  mass       : u16              // WaterValue.Write = mass only
+```
+
+Pipeline:
+
+1. `SetupForSend(Chunk)`: pool stream+writer; write X/Z; reserve count=0.
+2. `AddChange(u16, WaterValue)`: write index + mass; `numVoxelUpdates++`.
+3. `FinalizeSend`: seek to count slot, write `numVoxelUpdates`; copy stream to
+   pooled `sendBytes`; free writer/stream.
+4. `ProcessPackage` (client): read X/Z/count from pooled stream; for each entry
+   `changeApplier.GetChangeWriter(key).RecordChange(index, WaterValue)`.
+
+### 6.10 NetPackageWaterSet
+
+Manual/console multi-cell set (not the continuous sim stream).
+
+```text
+senderEntityId : i32
+count          : u16
+// count times WaterSetInfo:
+  worldPos     : Vector3i (via WaterSetInfo.Write)
+  waterData    : WaterValue (mass u16)
+```
+
+**`ProcessPackage` (IL=29):** if server, rebroadcast package with bulk flags
+**192** excluding sender (`SendPackage` entity exclude = senderEntityId); then
+`ApplyChanges(ChunkCache)`: delayed regen start, per cell
+`ChunkCluster.SetWater` + `World.HandleWaterLevelChanged`, delayed regen stop.
+
+---
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -475,5 +553,7 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** RequestToSpawnEntity server create; WaterSimChunkUpdate inner payload; WaterSet rebroadcast.
 
 - **2026-07-28:** MapChunks + EntitySpawn process paths.

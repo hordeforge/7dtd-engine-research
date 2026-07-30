@@ -322,6 +322,12 @@ stateDiagram-v2
   Accounting --> [*]
 ```
 
+Client place requests arrive as `NetPackageRequestToSpawnEntity` →
+`GameManager.RequestToSpawnEntityServer` (falling-tree dedupe, backpack
+persistent record, then `EntityFactory.CreateEntity` +
+`World.SpawnEntityInWorld`). See [protocol-packages.md](protocol-packages.md)
+section 5.0.
+
 `World.SpawnEntityInWorld` registers the entity (world map, alive list, per-type
 trackers, `AIDirector.AddEntity`) and calls `NetEntityDistribution.Add`. It does
 **not** broadcast a spawn. The replication layer (`NetEntityDistribution`,
@@ -442,6 +448,8 @@ run or fire on the dedicated server.
 | [residuals.md](residuals.md) | Content and native residuals |
 
 ## Changelog
+
+- **2026-07-28:** RequestToSpawnEntityServer place path.
 
 - **2026-07-28:** Documented RequestToSpawnPlayer join path vs PlayerSpawnedInWorld timing.
 

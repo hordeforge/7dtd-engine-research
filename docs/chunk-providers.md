@@ -130,9 +130,13 @@ not `RequestChunk`. Algorithm (verified):
 
 `GenerateChunksThread` (IL=36): until termination, call
 `World.GetNextChunkToProvide()`; if sentinel, try
-`DynamicMeshThread.GetNextChunkToLoad()`; if still sentinel, **return 15**
+`DynamicMeshThread.GetNextChunkToLoad()` (IL=18): if `RequestThreadStop` or
+`nextChunks` empty / dequeue fail → same `Int64.MaxValue` sentinel; else
+`ConcurrentQueue<long>.TryDequeue`. If still sentinel, **return 15**
 (ms sleep). Otherwise `GenerateSingleChunk(cc, key, forceRebuild=false)` and
 return **0** (no sleep). Missing `m_RegionFileManager` also returns 15.
+DynamicMesh enqueues into `nextChunks` from its generation thread
+([dynamic-mesh.md](dynamic-mesh.md) `SetNextChunkToLoad`).
 
 Each key goes to `GenerateSingleChunk(cc, key, _forceRebuild=false)` (IL=171):
 

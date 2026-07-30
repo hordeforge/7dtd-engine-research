@@ -1198,3 +1198,17 @@ Twelfth depth round (all three deferred leaves).
 
 Coverage: narrated **1299 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - NED interest, place-spawn, water wire, DM queue
+
+Thirteenth depth round (all four deferred leaves).
+
+- `network.md` 2.1: EncodePos (*32+0.5) / EncodeRot (*256/360); priority bands
+  25/324/625 with 16384 view gate; `IntHashMap` entry store.
+- `protocol-packages.md` 5.0: `RequestToSpawnEntity` + server create (falling-tree
+  dedupe, backpack persist, SpawnEntityInWorld).
+- 6.9/6.10: WaterSimChunkUpdate outer/inner payload; WaterSet rebroadcast+Apply.
+- `light-mesh-water.md`, `spawning.md`, `entity-ai.md`, `chunk-providers.md`,
+  `dynamic-mesh.md`: cross-links and GetNextChunkToLoad sentinel queue.
+
+Coverage: narrated **1301 (35%)**, unaccounted **0**.
+

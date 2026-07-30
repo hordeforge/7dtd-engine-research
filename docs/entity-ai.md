@@ -287,12 +287,16 @@ Spawn into world…
 
 Server-only from `UpdateTick`. Heavy list/enumerator work:
 
-- Clear working lists  
-- Walk enemies/players, `IntHashMap` lookup of distribution entries  
-- Distance / **view angle** (`Vector3.Angle` with player forward) to decide tracking sets  
-- `NetEntityDistributionEntry.updatePlayerList` / `updatePlayerEntity`  
+- Clear working lists; partition distribution entries (`IntHashMap` by entity id) into enemies vs players
+- Optional prioritization (`enableNetworkdPrioritization`): airborne enemies get
+  `priorityLevel` from nearest-player distSq bands (**25** / **324** / **625**)
+  with a **16384** (128^2) view-cone gate; see [network.md](network.md) section 2.1
+- Per entry: `updatePlayerList` (motion package state machine, IL=509)
+- Per player × entry: `updatePlayerEntity` (interest enter → spawn packet)
 
-This is **interest management for entity replication**, already local-ish. Cost scales with **players × tracked entities** density. Separate from LiteNetLib `ConnectionManager.Update` package pump.
+Encode: pos `*32+0.5`, rot `*256/360` (network.md). Cost scales with
+**players × tracked entities**. Separate from LiteNetLib
+`ConnectionManager.Update` package pump.
 
 ---
 
