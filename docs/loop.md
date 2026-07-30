@@ -286,7 +286,7 @@ ProtocolManager.Update → server: ProcessPackages (× clients × channels), Flu
 
 | Method | IL | Notes |
 |---|---:|---|
-| DetermineChunksToLoad | **448** | Bucket sets, locks, unload |
+| DetermineChunksToLoad | **448** | gmUpdate: hollow rings viewDim+2, load/remove diffs, cull (world-chunks 4.0.1) |
 | SendChunksToClients | 216 | Server streaming |
 | doCopyChunksToUnity | 252 | **Skipped on dedicated** via gmUpdate branch |
 | SaveRandomChunks | 99 | Optional in UpdateTick |

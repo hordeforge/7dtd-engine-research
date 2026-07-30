@@ -72,7 +72,7 @@ Interfaces are unpatchable; patch concrete generators / provider.
 
 | Surface | IL / note |
 |---|---|
-| `DetermineChunksToLoad` | **448** (per-observer buckets, unload set) |
+| `DetermineChunksToLoad` | **448** (gmUpdate; rings, diffs, cull; section 4.0.1) |
 | `SendChunksToClients` | **216** (per-observer remove/load/reload/map packages) |
 | `AddChunkObserver` | **15** (player join attaches stream target) |
 | `ResendChunksToClients` | **55** (queue reload keys for remote observers) |
@@ -105,9 +105,10 @@ client value ([protocol.md](protocol.md) section 5).
 | `chunksAround` | current around-set from `DetermineChunksToLoad` |
 | `mapDatabase` | optional mini-map package source |
 
-`DetermineChunksToLoad` (IL=448) refreshes per-observer around-sets and
-populate/diff `chunksToLoad` / unload candidates (bucket hash sets + locks). It
-does not itself send packages.
+`DetermineChunksToLoad` (IL=448) is called from **`gmUpdate`** (not from
+`UpdateTick`; sole Xref). It refreshes per-observer around-sets and diffs
+`chunksToLoad` / `chunksToRemove`. It does **not** send packages. Full algorithm:
+section 4.0.1.
 
 **`SendChunksToClients` per observer with `entityIdToSendChunksTo != -1`:**
 
@@ -128,9 +129,9 @@ does not itself send packages.
 
 ```mermaid
 flowchart TD
-  UT[UpdateTick] --> DCL[DetermineChunksToLoad]
+  GMu[gmUpdate] --> DCL[DetermineChunksToLoad]
   DCL --> Obs[per ChunkObserver buckets]
-  UT --> SCT[SendChunksToClients]
+  UT[UpdateTick full] --> SCT[SendChunksToClients]
   Obs --> SCT
   SCT --> Rem[ChunkRemove for chunksToRemove]
   SCT --> Load[Chunk Setup overwrite=false for toLoad]
@@ -153,7 +154,101 @@ player visual mesh builder, append the given keys to `chunksToReload` so the nex
 `SendChunksToClients` re-pushes with overwrite (terrain rebuild paths call
 `NetPackageChunk.Setup` directly as well).
 
+### 4.0.1 `DetermineChunksToLoad` algorithm (verified)
+
+**Caller:** `GameManager.gmUpdate` only (IL offset in inventory). Runs every
+frame, before the full-tick path that may later call `SendChunksToClients`.
+
+**Phase 0 - drain unloads (budget 8):**
+`removeChunksToUnload(8)` walks `chunksToUnload` reverse under lock. For each
+chunk: `EnterWriteLock`, set `InProgressUnloading`, skip if
+`IsLockedExceptUnloading`, else remove from list, optional
+`FreeChunkGameObject` when `IsDisplayed`, then `ChunkCluster.UnloadChunk`. Stops
+after 8 successful free/unloads. Return count feeds phase-end CGO reclaim.
+
+**Phase 1 - per observer, only when needed:**
+
+Trigger if `isInternalForceUpdate` **or** `isChunkClusterChanged` **or** this
+observer's chunk cell changed:
+
+```text
+cx = World.toChunkXZ(Fastfloor(position.x))   // >> 4
+cz = World.toChunkXZ(Fastfloor(position.z))
+curChunkPos = (cx, 0, cz)
+```
+
+When the cell (or force flags) changed:
+
+1. **Rebuild `chunksAround`:** clear; for ring index `r = 0 .. viewDim+1`
+   (exclusive upper bound `viewDim + 2`), for each offset in
+   `rectanglesAroundPlayers[r]`, add key
+   `MakeChunkKey(cx + ox, cz + oy)` into bucket `r`.
+2. `RecalcHashSetList()` on `chunksAround` (flatten buckets to ordered `list`).
+3. **Server only:**
+   - `chunksToLoad` = per-bucket copy of `chunksAround` minus `chunksLoaded`
+     (`ExceptWithHashSetLong` per bucket), then recalc.
+   - `chunksToRemove` = `chunksLoaded` minus anything still in `chunksAround`
+     (`UnionWith` loaded, then `ExceptTarget` around buckets).
+   - Stamp `chunkGenerationTimestamps[key] = UtcNow` for every key now in
+     `chunksToLoad.list`.
+
+`rectanglesAroundPlayers` is built once in `ChunkManager.Init` (IL=104): array
+length **15** (rings 0..14). Ring `r` holds the **hollow square** border offsets
+where `max(|x|,|y|) == r` (both loops run `[-r..r]`; an offset is kept only if
+it lies on the perimeter). That caps max useful `viewDim` near 13 for full ring
+coverage (`viewDim+2 <= 15`). Manager-level
+`m_ViewingChunkPositions` / `m_AllChunkPositions` / `m_CollisionChunkPositions`
+are also 15-bucket `BucketHashSetList`s (ctor).
+
+**Phase 2 - global union when any observer dirty (`loc.1`):**
+
+Under `lockObject`:
+
+1. Set volatile flags
+   `isViewingOrCollisionPositionsChanged_threadCalc` and
+   `_threadReg` so worker threads re-read positions.
+2. Clear `m_AllChunkPositions` and `m_ViewingChunkPositions`.
+3. For each bucket index and each observer with `viewDim+2` covering that
+   bucket: union that observer's `chunksAround` bucket into `m_AllChunkPositions`;
+   if `bBuildVisualMeshAround`, also union into `m_ViewingChunkPositions`.
+4. Recalc both manager lists. Copy `m_AllChunkPositions.list` into
+   `activeChunkSetArr`.
+5. **Server:** rebuild `m_CollisionChunkPositions` =
+   `m_All - m_Viewing` (per-bucket union then except), recalc.
+6. **Server, non-fixed-size cluster:** under `chunksToUnload` lock, for every
+   live cache key not in `m_AllChunkPositions` and not in DynamicMesh process/load
+   queues: mark `InProgressUnloading`, queue into `chunksToUnload`, then
+   `ChunkCluster.RemoveChunk` for each queued chunk.
+7. If unload budget remaining (`8 - drained`),
+   `recalcFreeChunkGameObjects(remaining, false)`.
+
+**Always at end:** clear force/cluster flags; `calcThreadWaitHandle.Set()` to
+wake `ChunkCalc` / related workers.
+
+```mermaid
+flowchart TD
+  GMu[gmUpdate] --> Drain[removeChunksToUnload budget 8]
+  Drain --> ObsLoop[per observer]
+  ObsLoop --> Cell{chunk cell or force?}
+  Cell -->|no| Next[next observer]
+  Cell -->|yes| Rings[rebuild chunksAround from rings 0..viewDim+1]
+  Rings --> Diff[server: toLoad and toRemove diffs]
+  Diff --> Next
+  Next --> Dirty{any dirty?}
+  Dirty -->|yes| Union[lock: m_All and m_Viewing unions]
+  Union --> Coll[collision = all - viewing]
+  Coll --> Cull[queue out-of-range RemoveChunk]
+  Dirty -->|no| Wake
+  Cull --> Wake[calcThreadWaitHandle.Set]
+```
+
+**`BucketHashSetList`:** distance-ringed `HashSetLong` buckets plus a flattened
+`list` rebuilt by `RecalcHashSetList` (bucket order 0..n, dedupe via
+`elementsInList`). `SendChunksToClients` walks that flat `list` for first loads,
+so nearer rings tend to stream first when buckets were filled ring-first.
+
 ### 4.1 Chunk progress flags (stock `InProgress*` volatiles)
+
 
 Measured fields on `Chunk`: `InProgressCopying`, `Decorating`, `Lighting`, `Regeneration`, `Unloading`, `Saving`, `Networking`. Conceptual lifecycle (flags can overlap; not a single exclusive enum):
 
@@ -226,6 +321,7 @@ stateDiagram-v2
 
 ## Changelog
 
+- **2026-07-28:** `DetermineChunksToLoad` full algorithm: 15 hollow rings, per-observer diffs, global unions, unload budget 8.
 - **2026-07-28:** `SendChunksToClients` per-observer remove/load/reload/map pipeline; ChunkObserver fields; 3-package first-load throttle.
 
 - **2026-07-19:** Related docs table.

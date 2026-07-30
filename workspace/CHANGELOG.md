@@ -1168,3 +1168,16 @@ Tenth depth round.
 
 Coverage: narrated **1295 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - DetermineChunksToLoad around-set algorithm
+
+Eleventh depth round.
+
+- `world-chunks.md` section 4.0.1: `gmUpdate` caller; unload budget **8**;
+  hollow-square rings via `rectanglesAroundPlayers[0..14]`; per-observer
+  `chunksAround` / `chunksToLoad` / `chunksToRemove` diffs; manager
+  `m_All` / `m_Viewing` / `m_Collision` unions; out-of-range `RemoveChunk`.
+- Corrected streaming diagram: DCL is **not** under `UpdateTick`.
+- `loop.md` table points at section 4.0.1.
+
+Coverage: narrated **1295 (35%)**, unaccounted **0**.
+
