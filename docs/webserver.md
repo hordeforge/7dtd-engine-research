@@ -151,7 +151,7 @@ enumerated from the type list, not sampled):
 | `WorldState` | `Player`, `Animal`, `Bloodmoon`, `Hostile` (online players / animals / blood-moon state / hostiles; `LiveData.Animals` and `LiveData.Hostiles` feed these) |
 | `GameData` | `Item`, `Mods`, `EntityClass` |
 | `Permissions` | `WebUsers`, `WebModules`, `WebApiTokens`, `UserPermissions`, `CommandPermissions`, `Whitelist`, `Blacklist`, `RegisterUser` |
-| (top-level) | `Command` (run a console command over HTTP), `LogApi` (recent log lines from `LogBuffer`), `OpenAPI` (serves the OpenAPI/Swagger spec) |
+| (top-level) | `Command` (run a console command over HTTP; `Webserver.WebAPI.APIs.Command`), `LogApi` (recent log lines from `LogBuffer`), `OpenAPI` (serves the OpenAPI/Swagger spec) |
 
 ---
 
@@ -212,6 +212,26 @@ subscriptions; `Shutdown` drains the thread. Concrete events subclass `AbsEvent`
 
 ## 6. Console commands (`Webserver.Commands` + others)
 
+### 6.0 HTTP Command API (`Webserver.WebAPI.APIs.Command`)
+
+REST surface for the same `SdtdConsole` dispatcher used by telnet/stdin
+([console-commands.md](console-commands.md)):
+
+| Method | Handler | Role |
+|---|---|---|
+| GET | `HandleRestGet` | list known commands / metadata (`writeCommandJson`) |
+| POST | `HandleRestPost` | execute a command line under the session's permission level |
+
+Session identity is a `Webserver.WebConnection` (username, endpoint IP, platform
+user ids) produced by `Web.DoAuthentication` / `ConnectionHandler.LogIn`. Output
+returns through `WebCommandResult` (`SendLine` / `SendLines` / `SendLog`), which
+implements the console connection contract so permission gating matches
+`AdminTools.CommandAllowedFor` for the bound web user.
+
+Cross-check: in-game package path is `NetPackageConsoleCmdServer` →
+`ConnectionManager.ServerConsoleCommand`; web path never uses those packages.
+
+
 | Command | Type | Role |
 |---|---|---|
 | `webtokens` | `Webserver.Commands.WebTokens` | Manage web tokens |
@@ -250,5 +270,7 @@ the browser.
 | [residuals.md](residuals.md) | Native/external residuals |
 
 ## Changelog
+
+- **2026-07-28:** WebAPI Command GET/POST + WebConnection session note.
 
 - **2026-07-23:** Initial `Webserver.*` reversal (request pipeline, auth/session + Steam OpenID, REST host, permission model, SSE lifecycle) with state machines.

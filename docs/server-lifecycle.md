@@ -165,6 +165,43 @@ flowchart TB
 
 ---
 
+## 4. Land-claim and persistent-player packages (verified)
+
+Land claims live on `PersistentPlayerList` / `PersistentPlayerData` (section 3).
+Wire packages that touch claim/repair and player registry:
+
+### `NetPackageLandClaimRepair`
+
+```text
+blockPos.x,y,z : i64 each   // Vector3i components written as Int64
+beginRepair : bool
+```
+
+`ProcessPackage` (IL=33): resolve `TEFeatureAreaRepair` at position. If
+`beginRepair` and server: `RepairAll(world, pos, sender.entityId)`. If ending
+repair and local owner matches, `IsRepairing=false`.
+
+### `NetPackagePersistentPlayerState`
+
+```text
+reason : u8    // EnumPersistentPlayerDataReason
+PersistentPlayerData.Write(...)
+```
+
+`ProcessPackage` → `GameManager.PersistentPlayerLogin(ppData)` (IL=5).
+
+### `NetPackagePersistentPlayerPositions`
+
+```text
+count : i32
+// count x:
+  platformUserId : PlatformUserIdentifierAbs.ToStream
+  position : Vector3i
+```
+
+Used for map/claim marker sync of offline/online players (also referenced from
+gmUpdate when clients present).
+
 ## Related docs
 
 | Doc | Role |
@@ -176,6 +213,8 @@ flowchart TB
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 
 ## Changelog
+
+- **2026-07-28:** LandClaimRepair + PersistentPlayerState/Positions packages.
 
 - **2026-07-28:** Join spawn path: RequestToSpawnPlayer vs PlayerSpawnedInWorld split.
 

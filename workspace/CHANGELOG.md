@@ -1283,3 +1283,17 @@ Eighteenth depth round (four residual leaves concurrent).
 
 Coverage: narrated **1319 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - QuestEvent tails, web Command, claims, sleeper/BM packages
+
+Nineteenth depth round (four residual leaves concurrent).
+
+- `quests-challenges.md` section 8: full QuestEventTypes 0..16 wire tails from
+  write IL switch (header + per-type extras).
+- `webserver.md` 6.0: WebAPI.APIs.Command GET/POST + WebConnection session.
+- `server-lifecycle.md` section 4: LandClaimRepair, PersistentPlayerState/Positions.
+- `aidirector.md`: AIDirector.Save v10; BloodMoonComponent fields; sleeper wake/
+  pose/passive + BloodmoonMusic + GameStats packages.
+- `protocol-packages.md` 6.19: package summaries; console WebAPI cross-link.
+
+Coverage: narrated **1326 (35%)**, unaccounted **0**.
+

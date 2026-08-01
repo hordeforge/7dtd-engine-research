@@ -11,7 +11,8 @@ the telnet TCP socket internals (native).
 **Hub:** [`INDEX.md`](INDEX.md). **Method:** [`re-methodology.md`](re-methodology.md).
 
 The console is the primary way to administer a headless server (stdin, telnet, or
-the web dashboard's Command API), so it is a core dedicated codepath.
+the web dashboard's Command API (`Webserver.WebAPI.APIs.Command`;
+[webserver.md](webserver.md) section 6.0), so it is a core dedicated codepath.
 
 ---
 
@@ -202,6 +203,8 @@ framework, not each leaf command.
 **Leaf catalog:** every instance is enumerated in [`inventories/console-command-list.md`](inventories/console-command-list.md) (all 187 commands with descriptions).
 
 ## Changelog
+
+- **2026-07-28:** WebAPI Command endpoint cross-link.
 
 - **2026-07-28:** Telnet HandlerThread 25ms loop; ServerConsoleCommand permission/client-exec path.
 

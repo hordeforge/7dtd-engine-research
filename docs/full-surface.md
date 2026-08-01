@@ -124,8 +124,8 @@ narratives this pass, 158 diagrams corpus-wide).
 **Caveat (not "every method"), with the honest numbers.** The reachability pass
 reaches ~45k methods / 3,775 game types, far more than any per-method narration could
 cover. As of the current [coverage report](inventories/coverage-report.md):
-**1,319 (35%) are narrated** in a narrative doc, 973 are catalogued only, 1,396 are
-classified out of scope, and **0 are unaccounted**................. Server-side support and
+**1,326 (35%) are narrated** in a narrative doc, 966 are catalogued only, 1,396 are
+classified out of scope, and **0 are unaccounted**.................. Server-side support and
 utility code that the reachable set includes but no narrative singles out
 (e.g. `Configuration.*` parsing, `StringParsers`, `TEFeatureAbs` helpers) is
 captured at the framework level, not with a dedicated section each.

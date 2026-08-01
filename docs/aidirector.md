@@ -207,6 +207,27 @@ director/spawn paths; see [spawning.md](spawning.md)).
 
 ## AIDirectorZombieState : Object
 
+## Network and save surfaces (verified)
+
+### AIDirector save blob
+
+`AIDirector.Save` (IL=7): writes version int **10**, then
+`ComponentsSave` walks installed components and calls each `Write`.
+
+`AIDirectorBloodMoonComponent.Write` (IL=20): base component write, then
+`bmDayLast:i32`, `bmDay:i32`, `BloodMoonFrequency:i16`, `BloodMoonRange:i16`.
+This blob rides `WorldState` nested `aiDirectorState` ([save-region.md](save-region.md)).
+
+### Sleeper / bloodmoon packages
+
+| Package | Wire | Process |
+|---|---|---|
+| `NetPackageSleeperWakeup` | `targetId:i32` | remote client: `EntityAlive.ConditionalTriggerSleeperWakeUp` |
+| `NetPackageSleeperPose` | `targetId:i32`, `pose:u8` | sleeper pose sync |
+| `NetPackageSleeperPassiveChange` | EntityTargeted id only (`Setup(targetId)`) | remote: `IsSleeperPassive=false` |
+| `NetPackageBloodmoonMusic` | `IsBloodMoonMusicEligible:bool` | sets `World.dmsConductor.IsBloodmoonMusicEligible` |
+| `NetPackageGameStats` | `len:i16` + `GameStats.Write` blob of **persistent** property decls (int/float/string/base64-string/bool) | client `readStatsCo` coroutine |
+
 ## Related docs
 
 | Doc | Role |
@@ -216,6 +237,8 @@ director/spawn paths; see [spawning.md](spawning.md)).
 | [spawning.md](spawning.md) | Scout/screamer horde lifecycle |
 
 ## Changelog
+
+- **2026-07-28:** AIDirector save v10; bloodmoon/sleeper/GameStats packages.
 
 - **2026-07-28:** CreateComponents order from IL; player state fields; chunk-event tick cadence; chunk-event wire; FindTargets; AIHordeSpawner radii; AIDirectorData noise map.
 - **2026-07-19:** Related docs table.

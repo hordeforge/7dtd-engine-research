@@ -911,6 +911,45 @@ Detail: [quests-challenges.md](quests-challenges.md) section 8,
 Already in [parties-factions.md](parties-factions.md) section 5.2 (platform ids +
 status/events).
 
+### 6.19 Land claim, persistent players, sleeper, bloodmoon, GameStats
+
+#### `NetPackageLandClaimRepair`
+
+```text
+blockPos.x,y,z : i64 x3
+beginRepair : bool
+```
+
+Server `TEFeatureAreaRepair.RepairAll` when begin; owner-local end clears
+`IsRepairing`. Detail: [server-lifecycle.md](server-lifecycle.md) section 4.
+
+#### `NetPackagePersistentPlayerState` / `Positions`
+
+State: `reason:u8` + `PersistentPlayerData.Write`. Positions: count + platform id
++ Vector3i map.
+
+#### `NetPackageSleeperWakeup` / `Pose` / `PassiveChange`
+
+Wakeup: `entityId:i32`. Pose: `entityId` + `pose:u8`. PassiveChange: EntityTargeted
+id; client clears `IsSleeperPassive`.
+
+#### `NetPackageBloodmoonMusic`
+
+```text
+IsBloodMoonMusicEligible : bool
+```
+
+#### `NetPackageGameStats`
+
+```text
+payloadLen : i16
+payload : GameStats.Write of bPersistent PropertyDecls only
+```
+
+#### QuestEvent type tails
+
+Full 0..16 table: [quests-challenges.md](quests-challenges.md) section 8.
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -962,6 +1001,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** LandClaimRepair, PersistentPlayer*, sleeper/bloodmoon/GameStats packages; QuestEvent tail table link.
 
 - **2026-07-28:** TraderData / quest objective-event / NPCQuestList package summaries.
 

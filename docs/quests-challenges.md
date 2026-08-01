@@ -432,22 +432,45 @@ blockPos : Vector3i
 finish via `QuestEventManager.FinishTreasureQuest` on some event types; server
 rebroadcasts to party members.
 
-### `NetPackageQuestEvent` (write IL=205)
+### `NetPackageQuestEvent` (write IL=205) type-dependent tails
 
-Envelope always starts:
+**Common header (always):**
 
 ```text
 entityID : i32
 prefabPos : Vector3
-eventType : u8          // QuestEventTypes
-// type-dependent tail: questCode, SubscribeTo, FetchModeType, SharedWithList,
-// blockIndex, eventName, activateList, extraData, questID, factionPointOverride, ...
+eventType : u8          // QuestEventTypes 0..16
+questTags : string      // FastTags.ToString()
+questCode : i32
 ```
 
-`ProcessPackage` (IL=368) is a large switch on `eventType` (rally markers, POI
-lock/unlock, sleeper clear, shared list updates). Full per-type field gates are
-in the write IL; clone work should dump `write`/`read` for the specific
-`QuestEventTypes` used.
+**Enum (`QuestEventTypes`):**
+
+| Value | Name | Extra after header |
+|---:|---|---|
+| 0 | TryRallyMarker | (none) |
+| 1 | ConfirmRallyMarker | (none) |
+| 2 | RallyMarkerActivated | (none) |
+| 3 | RallyMarkerLocked | `extraData : u64` |
+| 4 | RallyMarker_PlayerLocked | (none) |
+| 5 | RallyMarker_BedrollLocked | (none) |
+| 6 | RallyMarker_LandClaimLocked | (none) |
+| 7 | LockPOI | `questID : string` + `SharedWithList` (u8 count + i32 ids) |
+| 8 | UnlockPOI | (none) |
+| 9 | ClearSleeper | `SubscribeTo : bool` |
+| 10 | ShowSleeperVolume | (none) |
+| 11 | HideSleeperVolume | (none) |
+| 12 | SetupFetch | `FetchModeType : u8` + `SharedWithList` |
+| 13 | SetupRestorePower | `blockIndex : string`, `eventName : string`, `SharedWithList`, `activateList` (u8 count + Vector3i[]) |
+| 14 | FinishManagedQuest | `questID : string` + `SharedWithList` |
+| 15 | POILocked | (none) |
+| 16 | ResetTraderQuests | `factionPointOverride : i32` |
+
+Switch mapping verified against write IL (case 3 exact; cases 7..13 via
+`eventType-7` jump table; case 16 exact). `ProcessPackage` (IL=368) dispatches to
+`QuestEventManager` / `QuestJournal` (rally activation, `QuestLockPOI` /
+`QuestUnlockPOI`, sleeper subscribe, fetch/restore-power MP setup,
+`FinishManagedQuest`, trader quest reset).
 
 ### `NetPackageNPCQuestList`
 
@@ -482,6 +505,8 @@ section 6.17.
 **Leaf catalog:** every instance in [`inventories/quest-objectives.md`](inventories/quest-objectives.md) (the 38 objective leaves).
 
 ## Changelog
+
+- **2026-07-28:** QuestEventTypes 0..16 wire tails from write IL switch.
 
 - **2026-07-28:** QuestObjectiveUpdate / QuestEvent envelope / NPCQuestList type tails.
 
