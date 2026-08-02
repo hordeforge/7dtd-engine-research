@@ -1297,3 +1297,18 @@ Nineteenth depth round (four residual leaves concurrent).
 
 Coverage: narrated **1326 (35%)**, unaccounted **0**.
 
+## 2026-07-28 - GameStats census, PPD write, sector V1/V2, map/sign/deco
+
+Twentieth depth round (four residual leaves concurrent).
+
+- `sandbox-options.md` 6.1: EnumGameStats 0..81; GameStats.Write persistent typed
+  stream (no per-field ids).
+- `server-lifecycle.md` 4.1: PersistentPlayerData.Write binary order (ids, LP
+  blocks, backpacks, bedroll, quest positions, vending).
+- `save-region.md` 3.4: RegionFileV1/V2 WriteData (4096 sectors, headers
+  8196/12288, free alloc).
+- `protocol-packages.md` 6.20: Weather, MapMarkerRemove, POIWaypoint, SignData*,
+  DecoUpdate; map-objects/signs IL notes.
+
+Coverage: narrated **1328 (36%)**, unaccounted **0**.
+

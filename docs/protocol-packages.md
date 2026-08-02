@@ -950,6 +950,68 @@ payload : GameStats.Write of bPersistent PropertyDecls only
 
 Full 0..16 table: [quests-challenges.md](quests-challenges.md) section 8.
 
+### 6.20 Map, sign, deco, weather packages
+
+#### `NetPackageWeather` (ToClient, write IL=53)
+
+No count prefix. Both sides size the array from
+`WeatherManager.biomeWeather.Count`. Per entry:
+
+```text
+biomeId : u8
+groupIndex : u8
+remainingSeconds : u8
+param[0..n) : f32     // WeatherPackage.param length (5 finals on server path)
+```
+
+`ProcessPackage` is empty on dedicated (`ret`). Detail:
+[weather-environment.md](weather-environment.md) section 3.
+
+#### `NetPackageEntityMapMarkerRemove` (ToClient, write IL=24)
+
+```text
+removeByType : i32       // 0=by entityId, else by position
+if removeByType==0: entityId : i32
+else: position : Vector3
+mapObjectType : i32      // EnumMapObjectType
+```
+
+`ProcessPackage` → `World.ObjectOnMapRemove` by id or position
+([map-objects.md](map-objects.md)).
+
+#### `NetPackagePOIWaypoint` (ToClient, write IL=31)
+
+```text
+operation : u8           // 0 Set, 1 Remove, 2 ClearAll
+entityId : i32
+// op 0: prefabInstanceId:i32, hiddenOnCompass:bool
+// op 1: prefabInstanceId:i32
+// op 2: (none)
+```
+
+#### `NetPackageSignDataRequest` / `Response`
+
+Request body empty (write IL=4). Response:
+
+```text
+isLastBatch : bool
+dataLen : i32
+data : dataLen bytes     // compressed library batch
+```
+
+`ProcessPackage` → `SignDataManager.ProcessSignDataBatchReceived`
+([signs.md](signs.md) section 4). Response is compressed.
+
+#### `NetPackageDecoUpdate` (ToClient, write IL=19)
+
+```text
+firstPackage : bool
+payloadLen : i32
+payload : bytes          // DecoManager.Read stream
+```
+
+Client applies under lock via `DecoManager.Read(reader, int.MaxValue, firstPackage)`.
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -1001,6 +1063,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** Weather/map/POI/sign/deco package wire summaries.
 
 - **2026-07-28:** LandClaimRepair, PersistentPlayer*, sleeper/bloodmoon/GameStats packages; QuestEvent tail table link.
 

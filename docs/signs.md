@@ -152,7 +152,7 @@ Sign drawings are distributed like static content, not like tile entities:
 sequenceDiagram
     participant C as Client (connect: GameManager.worldInfoCo)
     participant S as Server (SignDataManager)
-    C->>S: NetPackageSignDataRequest (empty body)
+    C->>S: NetPackageSignDataRequest (empty body, write IL=4)
     S->>S: EnumeratePublicSignLibraries: [D] + prefab libs
     S->>C: NetPackageSignDataResponse batch (compressed)
     S->>C: ... more batches, ~1 MiB payload each
@@ -165,7 +165,7 @@ flow (`worldInfoCo`); it refuses to run on the server and refuses re-entry
 while a download is in progress. `SendSignDataToClient` refuses to run on a
 client, flattens all public libraries into `(libraryId, SignData)` pairs, and
 packs them into size-markered batches cut at `1048576` bytes; each batch ships
-as a `NetPackageSignDataResponse` (`Compress` = true) carrying `isLastBatch`,
+as a `NetPackageSignDataResponse` (`Compress` = true; write IL=28) carrying `isLastBatch`,
 a length, and the raw bytes. The receiving client replays
 `SignData.Read` per entry into its local library map, and on failure falls
 back to registering only the `[I]` error sign.
@@ -277,5 +277,7 @@ entities, and answer `NetPackageSignDataRequest` with batched compressed
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
 ## Changelog
+
+- **2026-07-28:** SignDataRequest/Response write IL re-verify.
 
 - **2026-07-24:** Initial reversal of the sign/authored-text/drawing system (SignData layer + warp model with binary/XML formats, GlobalSignId + library map with v0-v2 migrations, one-way batched sign download protocol, AuthoredText per-viewer moderation, server/client split with the bake pipeline flagged client-only).

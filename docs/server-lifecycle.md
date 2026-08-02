@@ -202,6 +202,39 @@ count : i32
 Used for map/claim marker sync of offline/online players (also referenced from
 gmUpdate when clients present).
 
+### 4.1 `PersistentPlayerData.Write` binary (IL=205)
+
+Used by `NetPackagePersistentPlayerState` and list save. Order:
+
+```text
+primaryId : PlatformUserIdentifierAbs.ToStream(..., includeExtra=true)
+nativeId  : PlatformUserIdentifierAbs.ToStream(..., includeExtra=true)
+playGroup : u8
+playerName : AuthoredText.ToStream
+lastLoginTicks : i64          // DateTime.Ticks
+position.x,y,z : i32 x3       // after UpdatePositionFromEntity
+entityId : i32
+lpBlockCount : i32
+backpackCount : i32
+// lpBlockCount x Vector3i (i32 x3)     // land protection blocks
+// backpackCount x:
+  backpackEntityId : i32
+  pos.x,y,z : i32 x3
+  timestamp : u32
+bedroll.x,y,z : i32 x3
+questPosCount : i32
+// questPosCount x QuestPositionData.Write:
+  questCode : i32
+  positionDataType : i32
+  blockPosition : Vector3i
+vendingCount : i32
+// vendingCount x Vector3i              // owned vending machines
+```
+
+XML twin (`Write(XmlElement)`, IL=313) emits the same logical fields as elements
+(`player`/`native`/`lpblock`/`backpack`/`bedroll`/...).
+
+
 ## Related docs
 
 | Doc | Role |
@@ -213,6 +246,8 @@ gmUpdate when clients present).
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 
 ## Changelog
+
+- **2026-07-28:** PersistentPlayerData.Write binary field order (claims, backpacks, bedroll, quests, vending).
 
 - **2026-07-28:** LandClaimRepair + PersistentPlayerState/Positions packages.
 

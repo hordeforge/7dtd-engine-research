@@ -253,6 +253,34 @@ name mismatches special-cased: `EnumGameStats.BlockDamagePlayer` maps to
 
 ---
 
+
+### 6.1 `GameStats` property table and net blob (verified)
+
+`EnumGameStats` runs **0 .. 81** with sentinel `Last=81` (**82** named values
+including `Last`). `GameStats.initPropertyDecl` (IL=702) builds
+`propertyList: PropertyDecl[]` (one row per stat the engine tracks).
+
+`GameStats.Write` (IL=60) walks `propertyList` and emits **only** rows with
+`bPersistent=true`, typed by `PropertyDecl.type`:
+
+| EnumType switch | Wire |
+|---|---|
+| 0 | `i32` (`GetInt`) |
+| 1 | `f32` (`GetFloat`) |
+| 2 | `string` (`GetString`) |
+| 3 | `bool` (`GetBool`) |
+| 4 | `string` base64 of `GetString` (`Utils.ToBase64`) |
+
+There is **no** name/id prefix per field: reader must use the same
+`propertyList` order and `bPersistent` filter. That blob is what
+`NetPackageGameStats.Setup` captures into a pooled stream; the package wire is
+`i16 length` + bytes ([protocol-packages.md](protocol-packages.md) section 6.19,
+[aidirector.md](aidirector.md) network table).
+
+`SetupSandboxReferences` (IL=65) maps each `PropertyDecl.name` to a
+`SandboxOptions` entry by enum name parse, with special cases stats **59** and
+**75** (BlockDamagePlayer / LootAbundance name mismatches already noted above).
+
 ## 7. Presets
 
 `SandboxOptionPreset` is a named bag of changed options:
@@ -387,6 +415,8 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
 ## Changelog
+
+- **2026-07-28:** EnumGameStats 0..81 census; GameStats.Write persistent typed stream.
 
 - **2026-07-24:** Initial sandbox-options reversal: typed option system (152
   options, discrete value sets, membership validation with default fallback,

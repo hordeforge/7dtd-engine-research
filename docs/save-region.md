@@ -320,6 +320,36 @@ Factories: `RegionFileFactoryRaw.CreateRegionFileAccess` and
 `RegionFileFactorySectorBased.CreateRegionFileAccess` are 2-IL wrappers;
 `RegionFilePlatform.CreateFactory` selects the platform default.
 
+### 3.4 Sector-based region files (V1 / V2)
+
+`RegionFileSectorBased` is the abstract parent of **V1** and **V2** (platform
+default often sector-based rather than Raw). Shared ideas: **4096-byte** sectors,
+location table via `GetLocationInfo` / `SetLocationInfo` (i16 sector index + u8
+sector count style fields), optional header flush through `SaveHeaderData`.
+
+| | **RegionFileV1** | **RegionFileV2** |
+|---|---|---|
+| ctor header buffer | **8196** bytes | **12288** bytes |
+| free space | reuse existing location when fits; else grow | `findFreeSectorOfSize` + `usedSectors` map |
+| WriteData IL | **180** | **244** |
+| payload write | length Int32 + compression byte + data + pad byte | length Int32 + data; validates sector offset **>= 3** and write-end vs file size |
+| SaveHeaderData IL | 46 | 48 |
+
+**V1 WriteData (IL=180):** if existing allocation has enough sectors, overwrite
+in place (seek `sectorIndex * 4096`); else allocate new sector run, update
+location, seek, write `StreamUtils.Write(Int32 length)`, compression byte,
+payload, trailing byte, optional `SaveHeaderData`.
+
+**V2 WriteData (IL=244):** always consult free-sector allocator
+(`findFreeSectorOfSize`); maintains `usedSectors` for layout; logs
+`Sector offset < 3` and `Wrong write end` if layout invariants break; writes
+length + payload (compression handled in access layer / header differently from
+V1's inline compression byte path).
+
+Raw vs sector: Raw uses byte-offset free list from **779** (section 3.3);
+sector formats use **4 KiB** sector indices and larger per-region headers.
+
+
 ### 3.4 WorldBlockTicker (scheduled + random block ticks)
 
 Not a region-file type, but it is the other persistence-adjacent world tick that
@@ -397,6 +427,8 @@ owns paths and file lifecycle; the on-disk byte formats (WorldState, region, pla
 the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
+
+- **2026-07-28:** RegionFileV1/V2 WriteData (4096 sectors, header sizes 8196/12288, free alloc).
 
 - **2026-07-28:** RegionFileRaw.FindBestFreeSpace best-fit / exact-fit algorithm.
 

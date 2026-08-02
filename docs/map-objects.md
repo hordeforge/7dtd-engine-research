@@ -213,8 +213,8 @@ self-cleaning list.
 | Bedroll, land claim, backpack, vehicle, drone, trader | client-derived from synced state | `PersistentPlayerData.ShowBedrollOnMap`, `PersistentPlayerList.PlaceLandProtectionBlock`, `Entity*.HandleNavObject` register nav objects locally once the underlying data replicates |
 | Air-drop crate | server push | `AIDirectorAirDropComponent.RefreshCrates` registers locally *and* sends `NetPackageNavObject` (`PackageDirection = ToClient`); removal via `Setup(int)` |
 | Game-event displays (e.g. Homerun score) | server push | `NetPackageNavObject` color overload |
-| Land claim deactivate/destroy, bedroll clear, crate death | server push (remove) | `NetPackageEntityMapMarkerRemove` (`ToClient`), processed by `World.ObjectOnMapRemove` + `NavObjectManager.UnRegister*` |
-| Waypoints | client-owned, server-relayed | `Waypoint`/`WaypointCollection` persist in the player profile (`Read`/`Write`); invites relay through `GameManager.WaypointInviteServer` -> `NetPackageWaypoint`; POI waypoints via `NetPackagePOIWaypoint` (`ToClient`); drone/vehicle waypoint lists pushed by `DroneManager`/`VehicleManager` via `NetPackageEntityWaypointList` |
+| Land claim deactivate/destroy, bedroll clear, crate death | server push (remove) | `NetPackageEntityMapMarkerRemove` (`ToClient`): `removeByType` i32, entityId **or** Vector3, `EnumMapObjectType` i32; `World.ObjectOnMapRemove` |
+| Waypoints | client-owned, server-relayed | `Waypoint`/`WaypointCollection` persist in the player profile (`Read`/`Write`); invites relay through `GameManager.WaypointInviteServer` -> `NetPackageWaypoint`; POI waypoints via `NetPackagePOIWaypoint` (`ToClient`; op Set/Remove/ClearAll + prefab id); drone/vehicle waypoint lists pushed by `DroneManager`/`VehicleManager` via `NetPackageEntityWaypointList` |
 
 `NetPackageNavObject.ProcessPackage` opens with `WorldBase.IsRemote()` and
 returns immediately when false, so even a misdirected package cannot mutate
@@ -238,6 +238,8 @@ listed above.
 - [dynamic-mesh.md](dynamic-mesh.md): `DynamicMeshConsoleCmd` debug waypoint.
 
 ## Changelog
+
+- **2026-07-28:** MapMarkerRemove / POIWaypoint wire fields.
 
 - 2026-07-24: initial RE of MapObject/NavObject marker system from V3.0.1 dedi
   IL: subclass/enum table, manager lifecycles, nav_objects.xml registry,
