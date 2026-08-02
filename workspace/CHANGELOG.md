@@ -1386,3 +1386,13 @@ structured VersionInformation (v>14), sleeper/trigger/wall `*VolumesSaveVersion`
 (v>=23), weatherManagerState blob (v>=22). No new top-level WorldState fields
 beyond those gates. save-region.md §1.1 updated.
 
+## 2026-08-02 - V3.1.0 follow-ups closed
+
+1. **zdtd TE wire** (`ef97257`): outer NetPackageTileEntity teBlockId:i32 +
+   payloadLen:i32 in stock_te.zig; 197/197 tests pass.
+2. **WorldState.SaveLoad** (`f6647ef`): IL=926, CurrentSaveVersion=23, volume
+   save-version ints + weather/VersionInformation gates documented.
+3. **loadgen PackageIds** (`loadgen`): dual live head fixtures 3.0.1 + 3.1.0
+   (captured maps=189, minor=10 build=14). golden-wire PASS.
+
+Subagents with forced anthropic models failed (no API key); executed in-session.

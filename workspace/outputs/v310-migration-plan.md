@@ -44,6 +44,11 @@ Already RE'd when experimental; re-verify on live 3.1.0:
 
 ## 4. Execution order
 
+**Status 2026-08-02: executed** (research `ac50495`, loadgen `bfeada1`, optimizer
+`18cd59a`, zdtd `79a1b06`, apm `f6aa9fd`). EfficientServer rebuild OK on 3.1.0 ASM.
+Coverage unaccounted 0. Loadgen tests 12/12 + golden-wire PASS.
+
+
 A. Research pin + migration doc + promote experimental-delta  
 B. Fix TE package narrative + held-entity / analytics cross-links  
 C. Close unaccounted 5; regen coverage + inventories  
@@ -57,3 +62,11 @@ G. Commits per repo
 - Keep `il/*-v3.0.1/` labels as **historical** evidence names where already cited.
 - New regenerable dumps: `il/*-v3.1.0/` when bulk-regenerated (git-ignored).
 - Narratives pin **V3.1.0** as current target.
+
+## 6. Follow-ups (closed 2026-08-02)
+
+| Item | Status | Commit |
+|---|---|---|
+| zdtd TE teBlockId/i32 len | done | zdtd `ef97257` |
+| WorldState.SaveLoad field re-diff | done | research `f6647ef` |
+| PackageIds V3.1.0 golden | done | loadgen dual fixture |
