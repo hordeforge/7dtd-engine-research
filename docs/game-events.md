@@ -437,6 +437,30 @@ cvars, or variables at evaluation time.
 
 ---
 
+
+## Boss / request packages (verified)
+
+### `NetPackageBossEvent` (write IL=53)
+
+```text
+bossGroupID : i32
+eventType : u8
+bossGroupType : u8
+entityID : i32
+bossIcon1 : string
+// if eventType == SetupClient (1):
+  minionCount : i32
+  minionIDs : i32 x count
+```
+
+Process switch: SendBossGroups, SetupClientBossGroup, UpdateBossGroupType, remove/add nav, etc.
+
+### `NetPackageGameEventRequest` / `Response`
+
+Request write IL=83, Process IL=211 (server approve/start sequences).
+Response write IL=102, Process IL=135 (client sequence/entity spawn feedback).
+Full field lists in inventories/netpackage-bodies.md; tick pipeline above.
+
 ## Related docs
 
 | Doc | Role |
@@ -452,6 +476,8 @@ cvars, or variables at evaluation time.
 **Leaf catalog:** every instance in [`inventories/sequence-requirements.md`](inventories/sequence-requirements.md) (all 37 concrete requirement leaves).
 
 ## Changelog
+
+- **2026-07-28:** BossEvent wire; GameEventRequest/Response pointers.
 
 - **2026-07-23:** Initial `GameEvent.*` reversal: manager driver + template
   registry, sequence phase machine, `ActionCompleteStates` action protocol,

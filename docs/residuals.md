@@ -64,7 +64,23 @@ flowchart TD
 
 ---
 
-## 3. Origin dedicated gate (correction)
+## 3. Managed RE corpus status (2026-07-28)
+
+For **dedicated managed** surfaces under the coverage bar (families 1-11 in
+[coverage.md](coverage.md)):
+
+- Unaccounted reached game types: **0**
+- All **193** `NetPackage*` census names appear in narrative docs
+- High-traffic package bodies + bulk residual catalog: [protocol-packages.md](protocol-packages.md) 1-6.22
+- Flat write sequences for every package: [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md)
+
+What remains open is **only** the non-IL residual table in section 1 (Unity order,
+native plugins, EAC/EOS wire, A* library internals, content XML, client UI, optional
+per-flag framing / bit packing). Those cannot be closed by further Assembly-CSharp
+narrative alone.
+
+## 4. Origin dedicated gate (correction)
+
 
 Earlier notes that Origin “still repositions on dedicated” are **wrong**. Measured prologue:
 

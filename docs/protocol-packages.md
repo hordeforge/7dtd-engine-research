@@ -1156,6 +1156,17 @@ usingLocalizationId : bool
 entityId : i32
 ```
 
+#### `NetPackageBossEvent`
+
+```text
+bossGroupID : i32
+eventType : u8
+bossGroupType : u8
+entityID : i32
+bossIcon1 : string
+// SetupClient: minionCount + minionIDs
+```
+
 #### `NetPackageEntityWaypointList`
 
 ```text

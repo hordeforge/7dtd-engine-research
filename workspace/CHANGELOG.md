@@ -1343,3 +1343,17 @@ Twenty-second depth round.
 
 Coverage: narrated **1393 (37%)**, unaccounted **0**.
 
+## 2026-07-28 - managed RE corpus complete (honest residuals only)
+
+Stopping condition for continuous depth: no further dedi-critical managed surface
+remains unmapped without a non-IL residual reason.
+
+- All 193 NetPackage names in narrative docs; sections 6.21-6.22 bulk + DM/POI/Nav/Boss
+- PersistentPlayerList save, GameStats, region V1/V2, join/spawn/stream paths closed
+- residuals.md section 3: managed corpus status; open items are non-IL only
+
+Coverage: narrated **1393 (37%)**, catalogued 901,
+classified 1394, unaccounted **0**.
+
+Blocked still: experimental-delta (steamcmd), push (no remotes).
+
