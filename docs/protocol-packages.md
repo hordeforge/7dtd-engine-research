@@ -1113,6 +1113,59 @@ This section plus 5.x-6.20 closes the **narrative mention gap** for the remainin
 census packages that matter on dedicated; exhaustive per-flag framing for every
 conditional still lives in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md).
 
+### 6.22 Dynamic mesh, POI around, nav, waypoints
+
+#### `NetPackageDynamicMesh` (channel 1, compressed, Both)
+
+Write IL=192 (extends DynamicMeshServerData):
+
+```text
+X : i32
+Z : i32
+UpdateTime : i32
+// stream position reserved then:
+PresumedLength : i32
+bytes : PresumedLength          // mesh payload
+// length cross-checks / debug logs in write body
+```
+
+Process: if server, `DynamicMeshServer.ClientReadyForNextMesh` (ack). If client
+and valid, `DynamicMeshManager.AddDataFromServer` then send empty ack package to
+server. Detail: [dynamic-mesh.md](dynamic-mesh.md).
+
+#### `NetPackagePOIAround` (channel 1)
+
+```text
+payloadLen : i32
+payload : bytes    // count-prefixed prefab descriptors
+```
+
+Client Process IL=156 reads pairs of entries (u16/i32/u8/string/Vector3i×2/f32)
+into `prefabLODManager`. Server builds blob of nearby prefab instances.
+
+#### `NetPackageNavObject`
+
+```text
+navObjectClass : string
+name : string
+position : Vector3
+isAdd : bool
+useOverrideColor : bool
+overrideColor : Color32
+usingLocalizationId : bool
+entityId : i32
+```
+
+#### `NetPackageEntityWaypointList`
+
+```text
+listType : i16
+count : i32
+// count x: entityOrKey:i32, position:Vector3
+```
+
+Used by vehicle/drone managers for multi-entity waypoint push.
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -1164,6 +1217,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** DynamicMesh/POIAround/NavObject/EntityWaypointList package bodies.
 
 - **2026-07-28:** Section 6.21 bulk residual package wire catalog (entity/player/item/world/FX).
 

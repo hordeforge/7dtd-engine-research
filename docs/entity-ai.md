@@ -326,7 +326,7 @@ Encode: pos `*32+0.5`, rot `*256/360` (network.md). Cost scales with
 | `WorldBlockTicker.Tick` | 20 | If not remote: `tickScheduled` + `tickRandom(activeChunks)` |
 | `AIDirector.Tick` | 6 | `ComponentsTick` + `DebugTick` |
 | `World.TickSleeperVolumes` | 34 | Iterates sleeper volumes |
-| `SleeperVolume.Tick` | (dumped) | Per-volume logic |
+| `SleeperVolume.Tick` | **137** | MinScript, UpdateSpawn, respawn map, player touch, Despawn |
 | `DecoManager.UpdateTick` | **330** | Significant always-on world work before server gate |
 | `PowerManager.Update` | 106 | From gmUpdate manager chain |
 | `VehicleManager.Update` | **297** | Waypoints etc. |

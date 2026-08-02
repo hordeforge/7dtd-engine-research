@@ -235,6 +235,28 @@ XML twin (`Write(XmlElement)`, IL=313) emits the same logical fields as elements
 (`player`/`native`/`lpblock`/`backpack`/`bedroll`/...).
 
 
+
+### 4.2 `PersistentPlayerList` save formats (verified)
+
+**Binary `Write(BinaryWriter)` IL=73** (also used when embedding):
+
+```text
+playerCount : i32
+// playerCount x PersistentPlayerData.Write (section 4.1)
+lpMapCount : i32
+// lpMapCount x:
+  blockPos.x,y,z : i32
+  ownerPrimaryId : PlatformUserIdentifierAbs.ToStream(..., false)
+Allies.Write(stream)                  // AllyStore binary
+```
+
+**XML `Write(path)` IL=44** (live save path): only if server and not edit mode.
+`SavePersistentPlayerData` writes `{SaveGameDir}/players.xml` with root
+`persistentplayerdata version=1`, each player element via
+`PersistentPlayerData.Write(XmlElement)`, then `AllyStore.WriteXml`.
+
+`Read` / `ReadXML` rebuild Players dict, `MapPlayer`, lp block map, allies.
+
 ## Related docs
 
 | Doc | Role |
@@ -246,6 +268,8 @@ XML twin (`Write(XmlElement)`, IL=313) emits the same logical fields as elements
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 
 ## Changelog
+
+- **2026-07-28:** PersistentPlayerList binary/XML save layout + players.xml path.
 
 - **2026-07-28:** PersistentPlayerData.Write binary field order (claims, backpacks, bedroll, quests, vending).
 

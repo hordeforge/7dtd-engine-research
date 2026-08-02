@@ -372,6 +372,11 @@ allyEventTarget : u8   // AllyEvent
 
 ### 5.3 Ally persistence
 
+`AllyStore.Write(BinaryWriter)` (IL=101): count of persisted pairs, then each
+`a` id, `b` id (`ToStream`), status **u8** (Allies / pending only).
+`WriteXml` emits `<allies><ally a= b= status=allies|pending>`.
+
+
 `AllyStore` writes into the world save alongside land claims
 ([`server-lifecycle.md`](server-lifecycle.md) §3). `WriteXml` / `ReadXml` emit an
 `<allies>` block of `<ally a=... b=... status="allies"|"pending">` rows (deduplicated by

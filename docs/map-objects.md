@@ -237,7 +237,14 @@ listed above.
 - [aidirector.md](aidirector.md): air-drop component that pushes crate markers.
 - [dynamic-mesh.md](dynamic-mesh.md): `DynamicMeshConsoleCmd` debug waypoint.
 
+## NavObject package
+
+`NetPackageNavObject` (protocol-packages 6.22): class name, display name, position,
+add/remove, override color, localization flag, entityId.
+
 ## Changelog
+
+- **2026-07-28:** NetPackageNavObject field list.
 
 - **2026-07-28:** MapMarkerRemove / POIWaypoint wire fields.
 

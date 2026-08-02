@@ -1329,3 +1329,17 @@ All **193** census package type names now appear in narrative docs (0 missing).
 Coverage: narrated **1393 (37%)**, catalogued 901,
 classified 1394, unaccounted **0**.
 
+## 2026-07-28 - PPL list save, DM/POI/Nav packages, ally binary
+
+Twenty-second depth round.
+
+- `server-lifecycle.md` 4.2: PersistentPlayerList binary (players + lp map +
+  Allies) and players.xml path.
+- `protocol-packages.md` 6.22: DynamicMesh, POIAround, NavObject,
+  EntityWaypointList bodies.
+- `parties-factions.md`: AllyStore.Write pair layout.
+- `entity-ai.md`: SleeperVolume.Tick IL=137.
+- `map-objects.md`: NetPackageNavObject fields.
+
+Coverage: narrated **1393 (37%)**, unaccounted **0**.
+
