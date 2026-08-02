@@ -59,6 +59,7 @@ flowchart LR
 | **RealEarth product limits** | `7days-realworld/docs/ENGINE_LIMITATIONS.md` |
 | **RealEarth product hub** | `7days-realworld/docs/INDEX.md` |
 | EfficientServer optim | [`../../7dtd-optimizer/docs/`](../../7dtd-optimizer/docs) |
+| **Perf research → optim backlog** | [`../../7dtd-optimizer/docs/PERF_RESEARCH_BRIEF.md`](../../7dtd-optimizer/docs/PERF_RESEARCH_BRIEF.md) |
 
 ### Key engine state machines (generic)
 
