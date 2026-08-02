@@ -16,7 +16,7 @@ flowchart TD
   WS --> PID[provider.GetProviderId]
   PID --> SF[WorldState.SetFrom IL=164]
   SF --> SAVE[WorldState.Save path IL=21]
-  SAVE --> SL[SaveLoad Stream IL=884]
+  SAVE --> SL[SaveLoad Stream IL=926 (V3.1.0; was 884 on V3.0.1)]
   SL --> MON[Monitor.Enter]
   MON --> RW[~59× ReadWrite fields]
   RW --> BLOB[AIDirector / spawner / sleeper streams]
@@ -67,7 +67,7 @@ stateDiagram-v2
 
 `SetFrom(World, EnumChunkProviderId)` (IL=164) snapshots water level (`WorldConstants.WaterLevel`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
 
-### 1.1 `main.ttw` header codec (`SaveLoad(Stream)`, IL=884)
+### 1.1 `main.ttw` header codec (`SaveLoad(Stream)`, IL=926 on V3.1.0)
 
 Symmetric reader/writer via `IBinaryReaderOrWriter` under a lock on `this`.
 
@@ -80,19 +80,36 @@ Symmetric reader/writer via `IBinaryReaderOrWriter` under a lock on `this`.
 On save, those four values are written first. On load, four reads are compared to
 `116,116,119,0`; mismatch logs `Invalid magic bytes in world header` and fails.
 
-**Then (high level, version-gated):**
+**Then (high level, version-gated; verified V3.1.0 IL=926):**
 
-| Stage | Contents |
-|---|---|
-| Version | `uint version` vs `CurrentSaveVersion`; reject newer; if version &gt; 11 read `gameVersionString` |
-| Chunk geometry | `chunkSizeX/Y/Z`, `chunkCount` |
-| World scalars | `waterLevel`, `providerId`, `seed`, `worldTime`, `timeInTicks`, game mode, … |
-| Spawns | `SpawnPointList.Read/Write` |
-| Entity id | `nextEntityID` |
-| Limits | `saveDataLimit` (long) |
-| Nested blobs | length-prefixed byte arrays for dynamic spawner, AIDirector, sleeper/trigger/wall volumes (each with save-version int where applicable) |
-| Weather | `WeatherManager.Load/Save` (try/catch; warn on failure) |
-| Guid | string world identity; generate if empty |
+`WorldState.CurrentSaveVersion` = **23** (`0x17`, cctor). File `version:u32` is
+compared to that on load (reject newer).
+
+| Stage | Gate (file version) | Contents |
+|---|---|---|
+| Version | always | `uint version` vs `CurrentSaveVersion` |
+| Game version string | version &gt; 11 | `gameVersionString` + warn if != `Constants.cVersionInformation.LongString` |
+| Structured `VersionInformation` | version &gt; 14 | ReleaseType, Major, Minor, Build as i32s (else legacy string parse) |
+| Active game mode | version &gt; 6 | `activeGameMode:i32` |
+| Water + chunk geometry | always after mode pad | `waterLevel`, `chunkSizeX`, then Y/Z **swapped on store** (Y field written from Z read and vice versa - stock quirk), `chunkCount`, `providerId`, `seed`, `worldTime` |
+| `timeInTicks` | version &gt; 8 | u64 |
+| Spawn points | version &gt; 5 (modern path) | `SpawnPointList.Read` |
+| `nextEntityID` | version &gt; 3 | i32; on load FastMax with 171 |
+| `saveDataLimit` | version &gt;= 21 | i64; else -1 |
+| Dynamic spawner blob | version &gt; 7 | len:i32 + bytes -> `dynamicSpawnerState` |
+| AIDirector blob | version &gt; 10 | len:i32 + bytes -> `aiDirectorState` |
+| Sleeper volumes | version &gt; 12 | if version &gt;= 23: `sleeperVolumesSaveVersion:i32`; then len+bytes blob |
+| Trigger volumes | version &gt;= 19 | if version &gt;= 23: `triggerVolumesSaveVersion:i32`; then blob |
+| Wall volumes | version &gt;= 20 | if version &gt;= 23: `wallVolumesSaveVersion:i32`; then blob |
+| Weather manager | version &gt; 11 | if version &gt; 15: size prefix; if version &gt;= 22: `weatherManagerState` blob (try/catch; seek-recover on fail) |
+| Guid | version &gt; 13 (and weather ok / version &gt; 15) | string; generate if empty on load |
+
+**V3.1.0 vs V3.0.1 growth (884 -> 926 IL):** not a new top-level field list, but
+tighter **version-23** gates that serialize per-subsystem
+`sleeper/trigger/wallVolumesSaveVersion` integers before those blobs, plus the
+structured VersionInformation path (version &gt; 14) and weather size-prefix /
+blob path (versions 15/22). Field inventory on the type is unchanged
+(`weatherManagerState` already present).
 
 Ctor defaults: `providerId = Disc (1)`, `saveDataLimit = -1`, empty
 `SpawnPointList`, new Guid.
@@ -427,6 +444,8 @@ owns paths and file lifecycle; the on-disk byte formats (WorldState, region, pla
 the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
+
+- **2026-08-02:** V3.1.0 SaveLoad Stream IL=926; CurrentSaveVersion=23; volume save-version ints + weather blob gates.
 
 - **2026-07-28:** RegionFileV1/V2 WriteData (4096 sectors, header sizes 8196/12288, free alloc).
 

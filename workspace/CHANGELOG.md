@@ -1379,3 +1379,10 @@ experimental-delta provisional numbers.
 **Next:** rebuild EfficientServer against 3.1.0 ASM; stress APM optional; zdtd TE
 reader must accept teBlockId.
 
+## 2026-08-02 - WorldState.SaveLoad V3.1.0 field re-diff
+
+IL=926 on live ASM; `CurrentSaveVersion=23`. Documented version gates for
+structured VersionInformation (v>14), sleeper/trigger/wall `*VolumesSaveVersion`
+(v>=23), weatherManagerState blob (v>=22). No new top-level WorldState fields
+beyond those gates. save-region.md §1.1 updated.
+

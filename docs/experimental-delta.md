@@ -34,9 +34,10 @@ mono EnumList.exe   <asm> out; comm ...                  # 4) enum member diff
 existing types and **29 removed** (the remainder of the net is on new types and
 compiler-generated code, so the filtered counts do not sum to the net +193). Most
 raw "new types" are Burst-job trampolines and compiler closures (ignored). The real
-changes are below. **`WorldState.SaveLoad(Stream)` also grew 884 -> 926 IL** (a
-save-format change in exp; re-check the save layout in
-[save-region.md](save-region.md) when it ships).
+changes are below. **`WorldState.SaveLoad(Stream)` also grew 884 -> 926 IL.** Re-verified on live
+V3.1.0: `CurrentSaveVersion=23`; growth is version-gate depth (per-volume
+save-version ints at v>=23, structured VersionInformation at v>14, weather blob
+at v>=22), not a new free-floating field. See [save-region.md](save-region.md) §1.1.
 
 ---
 
