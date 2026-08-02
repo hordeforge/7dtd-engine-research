@@ -1,4 +1,4 @@
-# Chat and system messages (dedicated V3.0.1)
+# Chat and system messages (dedicated V3.1.0)
 
 **Owns:** the chat path on the server: the `NetPackageChat` wire body, channel
 routing in `GameManager.ChatMessageServer`, the `EChatType` channels, and the

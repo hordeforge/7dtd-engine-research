@@ -1,4 +1,4 @@
-# Sequence action catalog (V3.0.1)
+# Sequence action catalog (V3.1.0)
 
 **Kind:** per-action reference (name -> effect, derived from class name/base/fields/key-method IL; no bodies).
 **Framework:** [`../game-events.md`](../game-events.md) owns the contract; this describes each `BaseAction` leaf.

@@ -1,4 +1,4 @@
-# MinEvent triggered-effect framework (dedicated V3.0.1)
+# MinEvent triggered-effect framework (dedicated V3.1.0)
 
 **Owns:** the `MinEvent*` surface, the data-driven trigger/effect engine that lets
 items, entities, buffs, progression, and challenges react to named in-game

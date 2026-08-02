@@ -1,4 +1,4 @@
-# Loot, traders and economy (dedicated V3.0.1)
+# Loot, traders and economy (dedicated V3.1.0)
 
 **Owns:** the server-authoritative loot and trade subsystem: how a placed container
 rolls its contents on first open (`LootContainer` definitions + `TEFeatureStorage`

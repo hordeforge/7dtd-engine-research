@@ -1,4 +1,4 @@
-# Block shapes and block triggers (dedicated V3.0.1)
+# Block shapes and block triggers (dedicated V3.1.0)
 
 **Owns:** the `BlockShape` delegate family (the per-block geometry object that
 answers rotation, bounds, movement blocking, and mesh-emission questions for a

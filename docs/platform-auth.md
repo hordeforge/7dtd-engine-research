@@ -1,4 +1,4 @@
-# Platform, identity and server join auth (dedicated V3.0.1)
+# Platform, identity and server join auth (dedicated V3.1.0)
 
 **Owns:** the managed `Platform.*` surface and the server-side join validation it
 feeds: the platform abstraction (`IPlatform` / `AbsPlatform` / `PlatformManager`),

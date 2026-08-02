@@ -1,4 +1,4 @@
-# AIDirector component types (V3.0.1)
+# AIDirector component types (V3.1.0)
 
 **Owns:** AIDirector type inventory + player-state/horde targeting/chunk-event heat pipeline.  
 **Tick path:** [`entity-ai.md`](entity-ai.md), [`loop.md`](loop.md) §5.  

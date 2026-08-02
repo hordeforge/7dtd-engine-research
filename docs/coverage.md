@@ -1,4 +1,6 @@
-# Dedicated-server engine coverage map (V3.0.1)
+# Dedicated-server engine coverage map (V3.1.0)
+
+**Current pin:** V **3.1.0 (b14)** Henpocalypse (Major=3 Minor=10 Build=14). Prior corpus was V3.0.1 (b4). Delta: [experimental-delta.md](experimental-delta.md).
 
 **Owns:** family → narrative → dump checklist.  
 **Hub:** [`INDEX.md`](INDEX.md).  
@@ -8,7 +10,7 @@
 **Bar:** 100% of dedicated-relevant **managed** surfaces in `Assembly-CSharp.dll`.  
 **Not in bar:** Unity native, native net plugins, EAC wire protocol, client-only UI.
 
-**Live pin (2026-07-18 dedi):** stock `ChunkBlockYDim=256`, `ChunkBlockLayers=64`. Expanded dumps in `terrain-v3.0.1` are historical.  
+**Live pin (2026-08-02 dedi V3.1.0):** stock `ChunkBlockYDim=256`, `ChunkBlockLayers=64`. Expanded dumps in `terrain-v3.0.1` are historical.  
 **Runtime pin:** Unity 2022 Mono (Boehm `libmonobdwgc-2.0.so`, conservative non-generational STW GC), sim target 20 TPS. GC / FPS / lifecycle knobs: [`runtime-tuning.md`](../../7dtd-optimizer/docs/runtime-tuning.md).
 
 ```mermaid

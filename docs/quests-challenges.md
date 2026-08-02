@@ -1,4 +1,4 @@
-# Quest and challenge systems (dedicated V3.0.1)
+# Quest and challenge systems (dedicated V3.1.0)
 
 **Owns:** the two player-progression scripting systems: the quest engine
 (`Quest`, `QuestClass`, `QuestJournal`, `BaseObjective` + objective verbs,

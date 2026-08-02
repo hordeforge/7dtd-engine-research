@@ -1,4 +1,4 @@
-# Terrain and height engine map (V3.0.1)
+# Terrain and height engine map (V3.1.0)
 
 **Owns:** WorldConstants YDim, height API inventory, stock vs expand pin (generic engine).  
 **Chunk index / save-64:** [`world-chunks.md`](world-chunks.md), [`save-region.md`](save-region.md).  

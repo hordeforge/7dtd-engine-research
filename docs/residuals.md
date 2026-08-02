@@ -1,6 +1,7 @@
 # Residuals: what cannot be closed from dedicated managed IL
 
 **Owns:** non-IL residual list (only place for permanent open items).  
+**Pin:** V3.1.0 (b14) dedicated.  
 **Coverage of managed families:** [`coverage.md`](coverage.md).  
 **Hub:** [`INDEX.md`](INDEX.md).
 

@@ -1357,3 +1357,25 @@ classified 1394, unaccounted **0**.
 
 Blocked still: experimental-delta (steamcmd), push (no remotes).
 
+## 2026-08-02 - V3.1.0 (b14) Henpocalypse research retarget
+
+**Verified pin:** Constants Major=3 Minor=10 Build=14 -> `V 3.1.0 (b14)`.
+Steam dedicated buildid 24436799. Official: Henpocalypse release notes.
+
+**Census (live ASM):** types 4414, methods-with-body 44107, gmUpdate IL=631
+(unchanged), WorldState.SaveLoad=926, NetPackage wire=193. Matches former
+experimental-delta provisional numbers.
+
+**Docs:**
+- Promoted experimental-delta to **shipped V3.1.0** status.
+- NetPackageTileEntity wire: teBlockId:i32 + payloadLen i32 (was u16).
+- Held-entity / grab notes on items + entity-ai; join analytics on server-lifecycle.
+- Classified 4 new XUi leaves OOS; unaccounted **0**.
+- Bulk narrative pin V3.0.1 -> V3.1.0 (historical il/*-v3.0.1 dump names kept).
+- Workspace AGENTS + MODDING_BEST_PRACTICES + sibling pins.
+
+**Coverage:** narrated 1400 (37%), catalogued 901, classified 1398, unaccounted 0.
+
+**Next:** rebuild EfficientServer against 3.1.0 ASM; stress APM optional; zdtd TE
+reader must accept teBlockId.
+

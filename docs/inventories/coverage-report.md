@@ -1,4 +1,4 @@
-# RE coverage report (V3.0.1, auto-generated)
+# RE coverage report (V3.1.0, auto-generated)
 
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
 dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced
@@ -15,11 +15,11 @@ quoting any number here.
 
 - *Over-approximation:* `callvirt` is devirtualized to every override regardless of
   whether the receiver is ever instantiated on a server, so client-only trees get
-  pulled in. This run has **498 XUi/XUiC_ client-UI types** inside the base even
+  pulled in. This run has **502 XUi/XUiC_ client-UI types** inside the base even
   though a headless server renders nothing.
 - *Under-approximation:* code reached only by **reflection** (XML-instantiated
   classes) is invisible. Interface dispatch IS devirtualized as of this version
-  (that fix brought the console-command family in: **178 `ConsoleCmd*` types**
+  (that fix brought the console-command family in: **179 `ConsoleCmd*` types**
   are now in the base, against 1 before).
 
 **The signal (numerator) is a mention, not an explanation.** A type counts as
@@ -41,17 +41,17 @@ The tiers are reported separately and deliberately **not summed into a headline*
 
 | Metric | Value |
 |---|---:|
-| Reached methods (with body) | 45236 |
-| Reached types (incl. compiler-generated) | 7179 |
-| Reached, non-generated | 6043 |
-| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2355 (excluded from %) |
-| ...**game types** (the RE surface) | **3688** |
-| ...**narrated** (backticked in a narrative doc) | **1393 (37%)** |
+| Reached methods (with body) | 45217 |
+| Reached types (incl. compiler-generated) | 7177 |
+| Reached, non-generated | 6040 |
+| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2341 (excluded from %) |
+| ...**game types** (the RE surface) | **3699** |
+| ...**narrated** (backticked in a narrative doc) | **1400 (37%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 901 |
-| ...**classified** out-of-scope | 1394 |
+| ...**classified** out-of-scope | 1398 |
 | ...**unaccounted** (appears nowhere) | 0 |
-| of the base: XUi/XUiC_ client-UI types (over-approximation) | 498 |
-| of the base: `ConsoleCmd*` (recovered by interface devirt) | 178 |
+| of the base: XUi/XUiC_ client-UI types (over-approximation) | 502 |
+| of the base: `ConsoleCmd*` (recovered by interface devirt) | 179 |
 
 Third-party/BCL and obfuscated `#`-named types are excluded from the base.
 **Do not add these rows together and present the sum as coverage.** "Narrated"
@@ -62,7 +62,7 @@ out of scope), and the base itself is the approximation described above.
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2926 | 2926 | 0 | 100% |
+| `<global>` | 2934 | 2934 | 0 | 100% |
 | `GameEvent` | 180 | 180 | 0 | 100% |
 | `Platform` | 147 | 147 | 0 | 100% |
 | `Twitch` | 109 | 109 | 0 | 100% |
@@ -78,13 +78,13 @@ out of scope), and the base itself is the approximation described above.
 | `SDF` | 11 | 11 | 0 | 100% |
 | `RaycastPathing` | 10 | 10 | 0 | 100% |
 | `Webserver` | 10 | 10 | 0 | 100% |
+| `Services` | 9 | 9 | 0 | 100% |
 | `XMLData` | 7 | 7 | 0 | 100% |
 | `Quests` | 7 | 7 | 0 | 100% |
-| `Services` | 6 | 6 | 0 | 100% |
 | `ZXing` | 6 | 6 | 0 | 100% |
 | `MapRendering` | 6 | 6 | 0 | 100% |
-| `MusicUtils` | 5 | 5 | 0 | 100% |
 | `BhvrAnalyticsServices` | 5 | 5 | 0 | 100% |
+| `MusicUtils` | 5 | 5 | 0 | 100% |
 | `GearVariants` | 4 | 4 | 0 | 100% |
 | `ConcurrentCollections` | 3 | 3 | 0 | 100% |
 | `mumblelib` | 2 | 2 | 0 | 100% |

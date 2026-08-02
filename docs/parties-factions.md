@@ -1,4 +1,4 @@
-# Party and faction systems (dedicated V3.0.1)
+# Party and faction systems (dedicated V3.1.0)
 
 **Owns:** the two social/relationship systems on the server: the **party** engine
 (`PartyManager`, `Party`, the `PartyActions` command set, party leader / membership,

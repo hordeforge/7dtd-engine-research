@@ -1,4 +1,4 @@
-# State machine index (V3.0.1)
+# State machine index (V3.1.0)
 
 **Kind:** generated catalog of every lifecycle modelled as a mermaid
 `stateDiagram` in this corpus, grouped by subsystem cluster, with the section

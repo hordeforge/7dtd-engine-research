@@ -1,16 +1,21 @@
-# Experimental build delta (vs V3.0.1)
+# Experimental build delta (vs V3.0.1) - **SHIPPED as V3.1.0**
 
-**Owns:** the complete reverse-engineered diff between shipped **V3.0.1** and the
-current **`latest_experimental`** dedicated-server build: wire, new/changed/removed
-managed code, and enum changes.
+**Owns:** the reverse-engineered diff between **V3.0.1 (b4)** and what became
+stable **V3.1.0 (b14) Henpocalypse**: wire, new/changed/removed managed code, enums.
 **Not:** a re-narration of unchanged systems (their own docs); client-only new UI.
-**Evidence:** parity + census + method-level + enum diff of both builds via
-[`../tools/parity/`](../tools/parity/) and `tools/src/Census`/`FullSurface`; both
-DLLs local, git-ignored. **Hub:** [`INDEX.md`](INDEX.md). **Method:**
-[`re-methodology.md`](re-methodology.md) §5b.
+**Evidence:** parity + census + method-level + enum diff (when experimental), then
+re-verified on the live V3.1.0 dedicated `Assembly-CSharp.dll` (2026-08-02).
+**Hub:** [`INDEX.md`](INDEX.md). **Method:** [`re-methodology.md`](re-methodology.md) §5b.
 
-The experimental branch moves; this captures the delta at diff time. Provisional
-until it ships to stable.
+**Status (2026-08-02):** the former `latest_experimental` surface **shipped as
+stable V3.1.0**. Live census matches this doc (types **4414**, SaveLoad IL **926**,
+gmUpdate still **631**, 193 wire packages). Version pin: Major=3 Minor=10 Build=14
+-> display `V 3.1.0 (b14)`. Official notes:
+https://7daystodie.com/v3-1-0-henpocalypse-release-notes/
+
+This file remains the **delta narrative** (3.0.1 -> 3.1.0). Day-to-day stock RE
+docs are retargeted to V3.1.0 as current.
+
 
 ---
 
@@ -174,5 +179,7 @@ Full added/removed method lists were computed with the per-method signature diff
 | [re-methodology.md](re-methodology.md) | §5b cross-version parity method |
 
 ## Changelog
+
+- **2026-08-02:** Promoted from provisional experimental to **shipped V3.1.0 (b14)**; live census re-check.
 
 - **2026-07-23:** Full V3.0.1 -> experimental delta via four diff lenses (wire, census, per-method signature, enum): NetPackageTileEntity wire widening; grab/held-entity feature (activation-command refactor to EntityAlive + chicken); SetCustomVar +forceSendToClients param; WorldState.SaveLoad 884->926; player-join analytics; GamePrefs/ELogType/entitlement enum changes; EOS session filters. With state machine.

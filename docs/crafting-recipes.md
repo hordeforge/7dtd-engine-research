@@ -1,4 +1,4 @@
-# Crafting and recipes (dedicated V3.0.1)
+# Crafting and recipes (dedicated V3.1.0)
 
 **Owns:** the recipe model: `Recipe` (ingredients, output, crafting tier, unlock),
 `CanCraft` validation, the `RecipeQueueItem` craft queue, and recipe unlock

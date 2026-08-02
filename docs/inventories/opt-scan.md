@@ -1,4 +1,4 @@
-# Optimization scan RE (V3.0.1)
+# Optimization scan RE (V3.1.0)
 
 **Kind:** auto dump notes (not primary narrative).  
 **Prefer:** [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md).  

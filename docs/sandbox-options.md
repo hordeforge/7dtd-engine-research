@@ -1,4 +1,4 @@
-# Sandbox options and presets (dedicated V3.0.1)
+# Sandbox options and presets (dedicated V3.1.0)
 
 **Owns:** the `SandboxOptions` namespace: `BaseSandboxOption` and its typed
 subclasses (`SandboxOptionFloat` / `SandboxOptionInt` / `SandboxOptionBoolean`),

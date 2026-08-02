@@ -172,7 +172,7 @@ block-beta
      1         4              4              4
 ```
 
-Golden live: `rel=1, major=3, minor=1, build=4` → display **`V 3.0.1`**.
+Golden live (V3.1.0): `major=3, minor=10, build=14` → display **`V 3.1.0 (b14)`**. Prior V3.0.1 golden used minor=1 build=4.
 
 ```mermaid
 block-beta

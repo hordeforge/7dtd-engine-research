@@ -2,7 +2,7 @@
 
 **Owns:** hub for **generic** dedicated engine RE narratives + dump index.  
 **Not:** RealEarth product status/lessons (`7days-realworld`, private companion project, not published).  
-**Game:** V3.0.1 dedicated `Assembly-CSharp.dll`.  
+**Game:** V3.1.0 (b14) dedicated `Assembly-CSharp.dll`.  
 **Policy:** research only. Do not redistribute game IL or managed DLLs.  
 **Coverage bar:** dedicated-relevant **managed** surfaces. Open leftovers: [`residuals.md`](residuals.md).
 
@@ -131,7 +131,7 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 | [architecture-map.md](architecture-map.md) | Whole-system visual map and subsystem ownership index |
 | [coverage.md](coverage.md) | Family → narrative → dump map; census numbers |
 | [full-surface.md](full-surface.md) | Whole-assembly map (all 87 namespaces) + coverage ledger toward 100% |
-| [experimental-delta.md](experimental-delta.md) | V3.0.1 -> latest_experimental diff: wire + new code (held entities, wild chicken) |
+| [experimental-delta.md](experimental-delta.md) | **V3.0.1 -> V3.1.0** shipped delta (TE wire, held entities, analytics) |
 | [residuals.md](residuals.md) | What managed IL cannot close (the only open-item list) |
 | [out-of-scope-surface.md](out-of-scope-surface.md) | Reached-but-out-of-scope types classified by category (the boundary map) |
 | [engine-limitations.md](engine-limitations.md) | Generic stock ceilings (sim, net, AI, height, GC, ops) |
@@ -326,6 +326,8 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
 ---
 
 ## Changelog
+
+- **2026-08-02:** Retarget hub to V3.1.0 (b14) Henpocalypse; experimental-delta promoted to shipped.
 
 - **2026-07-23:** Narratives regrouped into topical clusters (A meta/method, B loop, C entities/AI, D world/terrain/save, E net/wire); fixed aidirector second H1.
 - **2026-07-23:** zig-clone.md moved to `zdtd/docs/` (reimplementation design, not stock RE).

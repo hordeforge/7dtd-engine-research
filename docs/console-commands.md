@@ -1,4 +1,4 @@
-# Console and telnet command system (dedicated V3.0.1)
+# Console and telnet command system (dedicated V3.1.0)
 
 **Owns:** the server admin command surface: `SdtdConsole` (command registry +
 dispatch), `ConsoleCmdAbstract` (the 187-command contract), the connection sources

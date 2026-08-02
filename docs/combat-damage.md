@@ -1,4 +1,4 @@
-# Combat and damage application (dedicated V3.0.1)
+# Combat and damage application (dedicated V3.1.0)
 
 **Owns:** the server-authoritative damage pipeline: `DamageSource` (the damage
 descriptor), `EntityAlive.DamageEntity` (armor mitigation, modifiers, health,

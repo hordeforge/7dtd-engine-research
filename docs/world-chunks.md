@@ -1,4 +1,4 @@
-# World and chunk pipeline (dedicated V3.0.1)
+# World and chunk pipeline (dedicated V3.1.0)
 
 **Owns:** world tick, generateTerrain trampoline, load/send (observer streaming), SetBlock path (generic engine).  
 **Index math:** §2 below + [`terrain-height.md`](terrain-height.md).  

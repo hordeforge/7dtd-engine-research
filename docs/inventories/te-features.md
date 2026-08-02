@@ -1,4 +1,4 @@
-# Tile-entity feature catalog (V3.0.1)
+# Tile-entity feature catalog (V3.1.0)
 
 **Kind:** per-feature reference (name -> code-derived role, base, serialized state and behavior fingerprint).
 **Framework:** [`../tile-entities-power.md`](../tile-entities-power.md) owns the TE model + power; this enumerates the `TEFeatureAbs` leaves.

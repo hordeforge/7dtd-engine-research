@@ -1,4 +1,4 @@
-# Block framework (dedicated V3.0.1)
+# Block framework (dedicated V3.1.0)
 
 **Owns:** the `Block` base contract (the virtual-call surface every block type
 overrides), the `BlockValue` packed voxel word, the block-change / damage /

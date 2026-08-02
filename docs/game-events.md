@@ -1,4 +1,4 @@
-# GameEvent sequence framework (dedicated V3.0.1)
+# GameEvent sequence framework (dedicated V3.1.0)
 
 **Owns:** the `GameEvent.*` surface, the server-side scripted-event engine that
 runs XML-defined action sequences against players and the world: the

@@ -1,4 +1,4 @@
-# Buffs and effects (dedicated V3.0.1)
+# Buffs and effects (dedicated V3.1.0)
 
 **Owns:** the buff system that runs on server entities: `EntityBuffs` (per-entity
 container + tick), `BuffValue` (a running instance), `BuffClass` (XML definition),

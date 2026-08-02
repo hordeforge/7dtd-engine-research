@@ -1,4 +1,4 @@
-# World generation / RWG (dedicated V3.0.1)
+# World generation / RWG (dedicated V3.1.0)
 
 **Owns:** the `WorldGenerationEngineFinal.*` surface: the random world generation
 (RWG) pipeline a dedicated server runs at world creation. Generator driver

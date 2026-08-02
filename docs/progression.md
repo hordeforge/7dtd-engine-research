@@ -1,4 +1,4 @@
-# Progression: levels, skills, perks (dedicated V3.0.1)
+# Progression: levels, skills, perks (dedicated V3.1.0)
 
 **Owns:** the server-authoritative player progression: `Progression` (per-player
 level + XP + skill points + owned skills/perks), `ProgressionValue` (a skill /

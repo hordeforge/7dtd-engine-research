@@ -1,4 +1,4 @@
-# Item framework (dedicated V3.0.1)
+# Item framework (dedicated V3.1.0)
 
 **Owns:** the item system core that runs on the server: `ItemValue` (the packed
 item instance), `ItemStack` (value plus count), `ItemClass` (the definition and
@@ -437,6 +437,14 @@ clients via `NetPackageInventoryTransactionResponse` (see
 
 `NetPackageItemDrop`, `NetPackageDropItemsContainer`, `NetPackageItemActionEffects`,
 `NetPackageItemReload`, `NetPackagePickupBlock` ([protocol-packages.md](protocol-packages.md) 6.21).
+
+
+## Held entities (V3.1.0 Henpocalypse)
+
+New item classes: `ItemClassHeldEntity` (base), `ItemClassWildChicken`, plus
+`ItemStackGrid` for 2D stacks. Grab activation lives on `EntityAlive`
+(`InitLocalActivationCommands` / `OnEntityActivated("grab")`). Full feature
+state machine: [experimental-delta.md](experimental-delta.md) §3.
 
 ## Related docs
 

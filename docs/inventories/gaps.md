@@ -1,4 +1,4 @@
-# Gap-closing RE notes (V3.0.1)
+# Gap-closing RE notes (V3.1.0)
 
 **Kind:** auto dump notes (not primary narrative).  
 **Prefer:** [`closed-gaps.md`](../closed-gaps.md).  

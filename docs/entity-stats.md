@@ -1,4 +1,4 @@
-# Entity and survival stats (dedicated V3.0.1)
+# Entity and survival stats (dedicated V3.1.0)
 
 **Owns:** the stat container and survival tick: `EntityStats` (base entity stats +
 `Tick`), `PlayerEntityStats` (food / water / stamina / health over-time), and how

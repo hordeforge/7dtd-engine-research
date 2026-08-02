@@ -1,4 +1,4 @@
-# Chunk providers and decoration (dedicated V3.0.1)
+# Chunk providers and decoration (dedicated V3.1.0)
 
 **Owns:** the `ChunkProviderAbstract` hierarchy (provider selection, the
 GenerateChunks thread, chunk generate/decorate/save/unload driving) and the

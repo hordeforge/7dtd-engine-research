@@ -1,4 +1,4 @@
-# Tile entities and the power system (dedicated V3.0.1)
+# Tile entities and the power system (dedicated V3.1.0)
 
 **Owns:** the `TileEntity` model (the per-block state objects a chunk carries),
 the `TileEntityType` registry and `InstantiateFromRead` factory, per-tick update
@@ -123,7 +123,7 @@ Each subclass chains to the base then appends its own body (inventories, owner,
 flags, power data). `TileEntityLegacyUtils.TryReadLegacyType` is consulted first
 during instantiate so older saves upgrade cleanly.
 
-Replication uses `NetPackageTileEntity` (write IL=23):
+Replication uses `NetPackageTileEntity (V3.1.0: teBlockId+i32 len; protocol-packages §6.12)` (write IL=23):
 
 ```text
 handle : u8              // default 255

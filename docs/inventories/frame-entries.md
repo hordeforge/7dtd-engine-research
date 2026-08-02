@@ -1,4 +1,4 @@
-# All MonoBehaviour-like Update/LateUpdate/FixedUpdate (V3.0.1)
+# All MonoBehaviour-like Update/LateUpdate/FixedUpdate (V3.1.0)
 
 **Kind:** inventory table (not primary narrative).  
 **Prefer:** [`loop.md`](../loop.md) §1.  

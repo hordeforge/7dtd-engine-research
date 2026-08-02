@@ -1,4 +1,4 @@
-# Server advertisement + prefab instance data (dedicated V3.0.1)
+# Server advertisement + prefab instance data (dedicated V3.1.0)
 
 **Owns:** the server-info data layer a dedicated server publishes (`GameServerInfo`,
 `ConnectionManager.LocalServerInfo`, the Steam/EOS/LAN announcers, the TCP info

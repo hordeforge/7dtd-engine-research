@@ -1,7 +1,7 @@
 # AGENTS.md - 7dtd-research
 
 This repo is the **home of stock-game reverse-engineering** for the 7 Days to Die
-dedicated server (V3.0.1). Everything that studies the shipped
+dedicated server (V3.1.0). Everything that studies the shipped
 `Assembly-CSharp.dll` lives here: RE narratives, dump tooling, wire/protocol
 analysis, engine cost/loop RE. Reimplementation code and mods live in their own
 sibling repos and link back here for RE facts (see

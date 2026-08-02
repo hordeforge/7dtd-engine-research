@@ -1,4 +1,4 @@
-# Raycast pathing and drone steering (dedicated V3.0.1)
+# Raycast pathing and drone steering (dedicated V3.1.0)
 
 **Owns:** the `RaycastPathing` namespace (`RaycastPath`, `FloodFillPath`,
 `RaycastNode`, `RaycastNodeHierarcy` (sic), `FloodFillNode`, `RaycastPathUtils`,

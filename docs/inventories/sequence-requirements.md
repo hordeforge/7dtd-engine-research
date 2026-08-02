@@ -1,4 +1,4 @@
-# Sequence requirement catalog (V3.0.1)
+# Sequence requirement catalog (V3.1.0)
 
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name/base/code signals; no bodies).  
 **Framework:** [`../game-events.md`](../game-events.md) owns the contract; this describes each `BaseRequirement` leaf.  

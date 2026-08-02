@@ -1,4 +1,4 @@
-# Out-of-scope reached surface (V3.0.1)
+# Out-of-scope reached surface (V3.1.0)
 
 **Owns:** the reached types a headless server touches that are **not** dedicated
 gameplay/sim/wire, classified by category with why each is out of scope. With
@@ -153,7 +153,19 @@ Supplement count: **494** (corpus classified total becomes **1178** with the bas
 
 `AIDirectorSmellMarker`, `AIDirectorZombieState`, `AtomicCounter`, `AtomicSafeHandleScope`, `BackedArrayHandleModeExtensions`, `BackedArraySingleView`, `CC`, `CallbackMetric`, `CharSplitEnumerator`, `ChunkCache`, `ChunkVertexLayer`, `ConstantValueMetric`, `DebugWrapper`, `DebugWrapperException`, `DummyHandle`, `DummyScope`, `EnumerableDebugWrapper`, `FileBackedArrayHandle`, `FileBackedArrayMemoryManager`, `GlobalCultureInfo`, `LiteNetLibAuthWrapperClient`, `LiteNetLibAuthWrapperServer`, `MemoryBackedArray`, `MemoryBackedArrayHandle`, `MemoryBackedArrayUnsafeHandle`, `MemoryBackedArrayView`, `PinnedBufferRef`, `Pool`, `PooledMemoryStream`, `ProfilerPlatformCorrections`, `ProfilerRecorderMetric`, `ProfilingMetricCapture`, `ReadWriteScope`, `ScopedChunkReadAccess`, `SharedChunkObserver`, `StockFileHashes`, `TList`, `TQueue`, `ThreadSafeSemantics`, `TileArea`, `TileAreaUtils`, `TileFile`, `WorldBiomeProviderFromHeight`, `XmlLoadException`
 
+
+### V3.1.0 client UI reached by call-graph (not dedicated work)
+
+These appear in the Coverage reachability base via `callvirt` over-approx but
+only implement client XUi; headless dedicated does not present them:
+
+- `XUiC_ItemStackSlot` / `XUiC_ItemStackSlotGrid` (held-entity / inventory grid UI)
+- `XUiC_CollectorFuelWindow`
+- `XUiC_ServerBrowserGamePrefSelectorComboSandboxOption`
+
 ## Changelog
+
+- **2026-08-02:** Classify V3.1.0 XUi held-item/browser leaves OOS.
 
 - **2026-07-24:** Initial classification of the out-of-scope reached surface.
 - **2026-07-28:** Added supplementary classification for remaining unaccounted reached types after Coverage Type.Member mention fix; server-dominant remainder goes to dedicated-leaves.

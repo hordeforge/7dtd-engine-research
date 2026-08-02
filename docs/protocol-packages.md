@@ -663,18 +663,24 @@ attackingItem present : bool (+ ItemValue.Write if true)
 `DamageSource`/`DamageResponse`, `FireAttackedEvents`, `ProcessDamageResponse`
 on the target entity (apply path owned by [combat-damage.md](combat-damage.md)).
 
-### 6.12 NetPackageTileEntity
+### 6.12 NetPackageTileEntity (V3.1.0 wire)
 
 Live TE replication (not the chunk-blob type+body list).
+
+**V3.1.0 change (from 3.0.1):** added `teBlockId:i32` after world pos; payload
+length widened from **u16** to **i32** so TE blobs can exceed 64 KiB. Fields
+`MaxPackageSize`, `teBlockId` on the package type. Verified IL write=27 / read=24
+on live 3.1.0.
 
 ```text
 handle : u8             // Setup default 255 when omitted
 teWorldPos : Vector3i
-payloadLen : u16
+teBlockId : i32         // NEW in V3.1.0 (was absent)
+payloadLen : i32        // V3.1.0 (was u16 on V3.0.1)
 payload : payloadLen bytes   // TileEntity.write(network stream mode)
 ```
 
-`Setup(te, streamMode[, handle])` (IL=27): `te.ToWorldPos()`, write TE into pooled
+`Setup(te, streamMode[, handle])`: `te.ToWorldPos()`, write TE into pooled
 stream via `TileEntity.write(writer, streamMode)`.
 
 `ProcessPackage` (IL=90):
@@ -1228,6 +1234,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-08-02:** NetPackageTileEntity V3.1.0 wire (teBlockId + i32 length).
 
 - **2026-07-28:** DynamicMesh/POIAround/NavObject/EntityWaypointList package bodies.
 

@@ -1,4 +1,4 @@
-# NPC dialog trees and quest-data records (dedicated V3.0.1)
+# NPC dialog trees and quest-data records (dedicated V3.1.0)
 
 **Owns:** the trader/NPC dialog tree model (`Dialog`, `DialogPhase`,
 `BaseDialogItem` / `BaseStatement` / `DialogStatement`, `DialogResponse` +

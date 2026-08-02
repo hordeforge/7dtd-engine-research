@@ -1,4 +1,4 @@
-# Whole-assembly surface map and coverage ledger (V3.0.1)
+# Whole-assembly surface map and coverage ledger (V3.1.0)
 
 **Owns:** the 100%-of-the-assembly structural map (every namespace, with type /
 method / IL counts) and the honest ledger of how much has a hand-written narrative.
@@ -106,7 +106,7 @@ core + wire protocol, a small but load-bearing slice of the 7,413 types.
 | Combat / damage | [combat-damage.md](combat-damage.md) | Deep (DamageSource, apply pipeline, death/kill) |
 | Twitch integration | [twitch-integration.md](twitch-integration.md) | Server slice (action/vote execution via game events); connection client residual |
 | Mod loading / ModEvents | [mod-loading.md](mod-loading.md) | Deep (load pipeline, EAC gate, hook lifecycle) |
-| Experimental delta (vs V3.0.1) | [experimental-delta.md](experimental-delta.md) | NetPackageTileEntity wire change + held-entity feature |
+| V3.1.0 delta (from V3.0.1) | [experimental-delta.md](experimental-delta.md) | TE wire + held entities + analytics (shipped) |
 | Dynamic mesh | [dynamic-mesh.md](dynamic-mesh.md) | Deep (server regen threading, persistence, channel-1 flow control) |
 | Parties / factions / allies | [parties-factions.md](parties-factions.md) | Deep (party lifecycle, faction standing matrix, ally handshake) |
 
@@ -124,8 +124,8 @@ narratives this pass, 158 diagrams corpus-wide).
 **Caveat (not "every method"), with the honest numbers.** The reachability pass
 reaches ~45k methods / 3,775 game types, far more than any per-method narration could
 cover. As of the current [coverage report](inventories/coverage-report.md):
-**1,393 (37%) are narrated** in a narrative doc, 901 are catalogued only, 1,394 are
-classified out of scope, and **0 are unaccounted**...................... Server-side support and
+**1,400 (37%) are narrated** in a narrative doc, 901 are catalogued only, 1,398 are
+classified out of scope, and **0 are unaccounted**....................... Server-side support and
 utility code that the reachable set includes but no narrative singles out
 (e.g. `Configuration.*` parsing, `StringParsers`, `TEFeatureAbs` helpers) is
 captured at the framework level, not with a dedicated section each.

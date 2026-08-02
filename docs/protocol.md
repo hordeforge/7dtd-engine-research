@@ -103,7 +103,7 @@ version: release=1 major=3 minor=1 build=4
 map count: 0xBD = 189
 ```
 
-Display version packing: `VersionLongString` → **`V 3.0.1`** for Minor packed mid/patch (see loadgen).
+Display version packing: `VersionLongString` → **`V 3.1.0`** for Minor=10 Build=14 (see loadgen; Constants.cVersion*).
 
 ---
 

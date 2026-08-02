@@ -1,4 +1,4 @@
-# MinEvent action catalog (V3.0.1)
+# MinEvent action catalog (V3.1.0)
 
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name/base/code signals; no bodies).  
 **Framework:** [`../minevents.md`](../minevents.md) owns the contract; this describes each `MinEventActionBase` leaf.  

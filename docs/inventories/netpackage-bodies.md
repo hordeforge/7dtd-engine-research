@@ -1,4 +1,4 @@
-# NetPackage wire-body catalog (V3.0.1)
+# NetPackage wire-body catalog (V3.1.0)
 
 **Kind:** auto-extracted per-package wire-body reference (ordered `write()` field
 sequence). Not a hand-narrative; complements the annotated bodies in

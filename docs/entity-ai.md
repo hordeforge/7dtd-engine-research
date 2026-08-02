@@ -1,4 +1,4 @@
-# Entity, AI, and path (dedicated V3.0.1)
+# Entity, AI, and path (dedicated V3.1.0)
 
 **Owns:** authority entity tick chain, AI/path onion, thresholds (merged deep + deeper synthesis).  
 **Loop context:** [`loop.md`](loop.md), [`loop-gmupdate.md`](loop-gmupdate.md).  
@@ -782,7 +782,16 @@ Also on the wire (see [protocol-packages.md](protocol-packages.md) section 6.21)
 `NetPackageEntityRagdoll`, `NetPackageEntityCollect`, `NetPackageSetAttackTarget`,
 `NetPackageOwnedEntitySync`, `NetPackageEntitySpeeds`, `NetPackageEntityStealth`.
 
+
+## Activation / grab (V3.1.0)
+
+`EntityAlive.InitLocalActivationCommands` registers `"grab"` / `"hand"` on the
+base class (moved up from rabbit-only on 3.0.1). Full held-entity feature:
+[experimental-delta.md](experimental-delta.md) §3.
+
 ## Changelog
+
+- **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 
 - **2026-07-28:** FindPath distSq 1225 / Y ±45 clamps; ASP enqueue coalesce; base FindPath no-op.
 

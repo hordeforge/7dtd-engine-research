@@ -1,4 +1,4 @@
-# Map objects and nav objects (dedicated V3.0.1)
+# Map objects and nav objects (dedicated V3.1.0)
 
 **Owns:** the two map/compass marker registries: the legacy `MapObject` family
 (`MapObject` + 16 subclasses, `MapObjectManager`, `EnumMapObjectType`) and the

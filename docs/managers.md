@@ -1,4 +1,4 @@
-# Managers and ModEvents (dedicated V3.0.1)
+# Managers and ModEvents (dedicated V3.1.0)
 
 **Owns:** gmUpdate-relevant manager Update ILs + full `ModEvents` field list.  
 **Raw inventory (all Update* names):** [`inventories/manager-updates.md`](inventories/manager-updates.md).  

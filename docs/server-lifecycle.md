@@ -1,4 +1,4 @@
-# Server lifecycle, game state, and player persistence (dedicated V3.0.1)
+# Server lifecycle, game state, and player persistence (dedicated V3.1.0)
 
 **Owns:** the dedicated process lifecycle (boot -> world create/load -> run ->
 save + shutdown), the `GameStateManager` game-mode/round tick, and player
@@ -257,6 +257,16 @@ Allies.Write(stream)                  // AllyStore binary
 
 `Read` / `ReadXML` rebuild Players dict, `MapPlayer`, lp block map, allies.
 
+
+## Join analytics (V3.1.0)
+
+On player join the dedicated server may emit platform analytics via
+`GameManager.LogPlayerJoinServerEventAnalyticsCoroutine` into
+`Services.Analytics.Events.PlayerJoinServerEventData` (fields include ServerId,
+SaveId, OnlinePlayers, LocalMods, HasModifiedXML, character/game-stage stats).
+This is **telemetry**, not gameplay sim; transport is the platform analytics
+service (residual). See [experimental-delta.md](experimental-delta.md) §5.
+
 ## Related docs
 
 | Doc | Role |
@@ -268,6 +278,8 @@ Allies.Write(stream)                  // AllyStore binary
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 
 ## Changelog
+
+- **2026-08-02:** V3.1.0 join analytics (`PlayerJoinServerEventData`).
 
 - **2026-07-28:** PersistentPlayerList binary/XML save layout + players.xml path.
 

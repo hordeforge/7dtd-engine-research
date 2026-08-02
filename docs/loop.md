@@ -1,4 +1,4 @@
-# Dedicated server game / sim loop (V3.0.1)
+# Dedicated server game / sim loop (V3.1.0)
 
 **Owns:** dedicated frame/sim loop narrative (peers, phases, subsystem scale).  
 **Coverage map:** [`coverage.md`](coverage.md).  
@@ -11,7 +11,7 @@
 
 **Scope:** headless dedicated tick under `-dedicated -batchmode -nographics`.  
 **Not in scope:** client-only UI/camera/rendering (unless proven on dedi); RealEarth product status.  
-**Pin:** Steam dedicated `Assembly-CSharp.dll` V3.0.1.
+**Pin:** Steam dedicated `Assembly-CSharp.dll` V3.1.0 (b14).
 
 **Optim product (not this folder):**  
 [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md) · [`../../7dtd-optimizer/docs/ARCHITECTURE.md`](../../7dtd-optimizer/docs/ARCHITECTURE.md)
