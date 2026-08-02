@@ -1012,6 +1012,107 @@ payload : bytes          // DecoManager.Read stream
 
 Client applies under lock via `DecoManager.Read(reader, int.MaxValue, firstPackage)`.
 
+### 6.21 Remaining wire packages (bulk residual close)
+
+All packages below were missing from narrative docs while present in the
+193-package census / [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md).
+Fields verified from `write` IL this pass unless noted. Direction uses
+`NetPackageDirection` (0 Both, 1 ToServer, 2 ToClient) where re-checked.
+
+#### Join spawn (name pin)
+
+`NetPackageRequestToSpawnPlayer` (write IL=17): `chunkViewDim` i16 + `PlayerProfile.Write`.
+Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPlayer narrative.
+
+#### Entity lifecycle / motion extras
+
+| Package | IL write | Wire (after base) | Process / notes |
+|---|---:|---|---|
+| `NetPackageEntityRemove` | 8 | `reason` (EnumRemoveEntityReason) | ToClient; `World.RemoveEntity(id, reason)` |
+| `NetPackageEntityCollect` | 12 | `entityId`, `playerId` | Server validates, may rebroadcast; `OnCollectServer` / local |
+| `NetPackageEntityPhysics` | 77 | flags + entityId + pos f32x3 + quat f32x4 + vel f32x3 + angVel f32x3 | Physics master broadcast |
+| `NetPackageTeleportPlayer` | 56 | pos f32x3, rot f32x3, `onlyIfNotFlying` | Local player `TeleportToPosition` |
+| `NetPackageEntityAttach` | 21 | `attachType`, `riderId`, `vehicleId`, `slot` | Mount/dismount attach |
+| `NetPackageEntityRagdoll` | 59 | entityId, flags, duration, bodyPart, forceVec, forceWorldPos, hipPos, mode/state | Ragdoll sync |
+| `NetPackageEntityAddVelocity` | 12 | entityId, addVelocity Vector3 | Impulse |
+| `NetPackageEntitySpeeds` | 17 | movementState, speedForward, speedStrafe | Locomotion |
+| `NetPackageEntityStealth` | 12 | id, data | Stealth byte/blob |
+| `NetPackageEntityAnimationData` | 29 | animationParameterData | Animator params |
+| `NetPackageEntitySetPartActive` | 20 | id, active, partName | Multi-part entities |
+| `NetPackageEntityPrimeDetonator` | 8 | id | Explosive prime |
+| `NetPackageSetAttackTarget` | 8 | m_targetId | AI target |
+| `NetPackageOwnedEntitySync` | 20 | ownerId, entityId, entityClassId, syncType | Add/remove owned entity on EntityAlive |
+
+#### Player / inventory / items
+
+| Package | IL write | Wire | Notes |
+|---|---:|---|---|
+| `NetPackagePlayerEquipment` | 8 | `Equipment` blob | Apply + server rebroadcast 192 |
+| `NetPackagePlayerSetBackpackPosition` | 39 | playerId, positions list | `SetDroppedBackpackPositions` |
+| `NetPackagePlayerQuestPositions` | 30 | entityId, questPositions | Quest map markers |
+| `NetPackagePlayerTwitchStats` | 26 | twitchEnabled, twitchSafe, twitchVoteLock, twitchVisionDisabled, twitchActionsEnabled | Twitch integration flags |
+| `NetPackagePlayerVendingMachine` | 28 | userId, x,y,z, removing | Vending access |
+| `NetPackagePlayerLaserSight` | 19 | entityId, laserSightActive, laserSightPosition | Cosmetic aim |
+| `NetPackageItemDrop` | 37 | itemStack, dropPos, initialMotion, randomPosAdd, lifetime, entityId, clientInstanceId, bDropPosIsRelativeToHead | `ItemDropServer` |
+| `NetPackageDropItemsContainer` | 42 | droppedByID, containerEntity, worldPos, items | Multi-item drop container |
+| `NetPackageItemActionEffects` | 52 | entityId, slotIdx, actionIdx, firingState, startPos, direction, userData | Attack FX |
+| `NetPackageItemReload` | 8 | entityId | Reload anim/state |
+| `NetPackageModifyCVar` | 21 | m_entityId, cvarName, value, operation | Buff/cvar sync |
+| `NetPackageEntityAddExpClient` | 30 | entityId, xp, xpType, usedItem | Client XP notify (server write empty/inherit) |
+| `NetPackageEntitySetSkillLevelClient` | 16 | entityId, skill, level | Skill level display |
+| `NetPackageEntityAwardKillServer` | 12 | EntityId, KilledEntityId | Kill award |
+| `NetPackageEntityAddScoreClient` | 27 | entityId, zombieKills i16, playerKills i16, otherTeamNumber i16, conditions i32 | Client `EntityAlive.AddScore` |
+| `NetPackageEntityAddScoreServer` | (inherit client fields) | same fields | `IGameManager.AddScoreServer` (write via client base) |
+
+#### World / blocks / volumes / power wires
+
+| Package | IL write | Wire | Notes |
+|---|---:|---|---|
+| `NetPackageSetBlockTexture` | 24 | blockPos, blockFace, idx, playerIdThatChanged, channel | Texture paint |
+| `NetPackageAnimateBlock` | 24 | blockPosition, animParamater, animType, animationInteger, animationBool | Block animator |
+| `NetPackagePickupBlock` | 22 | blockPos, rawData, playerId, persistentPlayerId | Pickup |
+| `NetPackageWallVolume` | 12 | id, wallVolume | Wall volume add/update |
+| `NetPackageWallVolumeRemove` | 8 | index | Remove wall volume |
+| `NetPackageChunkRemoveAll` | 4 | (base only) | Clear all streamed chunks on client |
+| `NetPackageBiomeIntensity` | 8 | (base / small payload) | Biome intensity |
+| `NetPackageWireActions` | 45 | currentOperation, tileEntityPosition, wireChildren list, wiringEntityID | Power wire graph edits (Process IL=163) |
+| `NetPackageWireToolActions` | 17 | currentOperation, tileEntityPosition, entityID | Wire tool |
+| `NetPackageSetProp` | 37 | m_persistentPlayerId, m_propChanges, m_localPlayerThatChanged | Prop/land edits |
+| `NetPackageRegionMetaData` | 43 | X, Z, ChunksWithData pairs | Dynamic mesh region meta |
+| `NetPackageHordeEvent` | 31 | m_event, m_maxDist | Client `HandleHordeEvent` if in range |
+
+#### Chat / UI / audio / FX / misc
+
+| Package | IL write | Wire | Notes |
+|---|---:|---|---|
+| `NetPackageSimpleRPC` | 12 | entityId, type (SimpleRPCType) | `GameManager.SimpleRPC` |
+| `NetPackageSimpleChat` | 44 | msg, recipientEntityIds | Lightweight chat variant |
+| `NetPackageGameMessage` | 17 | msgType, mainEntityId, secondaryEntityId | System/game messages |
+| `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | HUD toolbelt toast |
+| `NetPackageCloseAllWindows` | 8 | _playerIdToClose | Force-close UI |
+| `NetPackageSoundAtPosition` | 25 | pos, audioClipName, mode, distance, entityId | 3D sound |
+| `NetPackageAudioPlayInHead` | 12 | soundName, isUnique | Local head audio |
+| `Audio.NetPackageAudio` | 53 | soundGroupName, play, pos, playOnEntity, occlusion, volumeScale, signalOnly | Full audio group package |
+| `NetPackageParticleEffect` | 20 | pe, entityThatCausedIt, forceCreation, worldSpawn | Particles |
+| `NetPackageEmitSmell` | 17 | EntityId, SmellName | AI smell marker |
+| `NetPackageQuestGotoPoint` | 52 | playerId, questCode, GotoType, x,y, size, difficulty, biomeFilterType, biomeFilter | Quest goto objective |
+| `NetPackageDebug` | 34 | type, entityId, data | Debug channel |
+| `NetPackageNetMetrics` | 28 | enable, duration, loop, content, csv | Net metrics capture |
+| `NetPackageLobbyJoin` | 8 | serverLobbyId | Lobby join |
+| `NetPackageLobbyRegisterClient` | 12 | lobbyId, overwriteExistingLobby | Lobby register |
+| `NetPackageDiscordLobbySecret` | 12 | lobbyType, lobbySecret | Discord lobby (client social) |
+| `NetPackageEditorAddVolumeFromClient` | 31 | addType, volumeType, startPos, size, prefabInstanceId, existingIndex | Prefab editor volume (editor) |
+
+Packages with **empty or inherit-only** `write` on this assembly (body in base or
+unused on dedi): `NetPackageEntityAddExpServer`, `NetPackageEntitySetSkillLevelServer`,
+`NetPackageInventoryKeepOpen`, `NetPackagePlayerDisconnect` (extends PlayerData),
+`NetPackageInfo`, `NetPackageMetrics`, `NetPackageLogger`, `NetPackageEntry`. Treat
+inventory body dump as authoritative when present.
+
+This section plus 5.x-6.20 closes the **narrative mention gap** for the remaining
+census packages that matter on dedicated; exhaustive per-flag framing for every
+conditional still lives in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md).
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -1063,6 +1164,8 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-07-28:** Section 6.21 bulk residual package wire catalog (entity/player/item/world/FX).
 
 - **2026-07-28:** Weather/map/POI/sign/deco package wire summaries.
 

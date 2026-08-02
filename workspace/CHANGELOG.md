@@ -1312,3 +1312,20 @@ Twentieth depth round (four residual leaves concurrent).
 
 Coverage: narrated **1328 (36%)**, unaccounted **0**.
 
+## 2026-07-28 - bulk residual package catalog (all 193 named)
+
+Twenty-first depth round: close remaining NetPackage narrative gaps.
+
+- `protocol-packages.md` section 6.21: entity/player/item/world/FX/misc package
+  wire table (EntityRemove, Physics, ItemDrop, WireActions, HordeEvent, scores,
+  RequestToSpawnPlayer name pin, ...).
+- Cross-links: entity-ai, items, tile-entities-power, aidirector, managers.
+- `residuals.md`: package narrative residual reduced; region sector residual
+  narrowed to optional bit packing.
+- `coverage.md`: networking residual text points at 6.21 + body inventory.
+
+All **193** census package type names now appear in narrative docs (0 missing).
+
+Coverage: narrated **1393 (37%)**, catalogued 901,
+classified 1394, unaccounted **0**.
+

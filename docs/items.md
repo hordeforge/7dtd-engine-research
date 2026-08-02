@@ -433,6 +433,11 @@ Server `TransactionRequestServer` applies with `secretToken`, runs
 clients via `NetPackageInventoryTransactionResponse` (see
 [protocol-packages.md](protocol-packages.md) section 6.13).
 
+## Item net packages (extras)
+
+`NetPackageItemDrop`, `NetPackageDropItemsContainer`, `NetPackageItemActionEffects`,
+`NetPackageItemReload`, `NetPackagePickupBlock` ([protocol-packages.md](protocol-packages.md) 6.21).
+
 ## Related docs
 
 | Doc | Role |

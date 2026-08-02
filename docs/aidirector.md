@@ -226,6 +226,7 @@ This blob rides `WorldState` nested `aiDirectorState` ([save-region.md](save-reg
 | `NetPackageSleeperPose` | `targetId:i32`, `pose:u8` | sleeper pose sync |
 | `NetPackageSleeperPassiveChange` | EntityTargeted id only (`Setup(targetId)`) | remote: `IsSleeperPassive=false` |
 | `NetPackageBloodmoonMusic` | `IsBloodMoonMusicEligible:bool` | sets `World.dmsConductor.IsBloodmoonMusicEligible` |
+| `NetPackageHordeEvent` | `m_event`, `m_maxDist` | client `HandleHordeEvent` if in range |
 | `NetPackageGameStats` | `len:i16` + `GameStats.Write` blob of **persistent** property decls (int/float/string/base64-string/bool) | client `readStatsCo` coroutine |
 
 ## Related docs

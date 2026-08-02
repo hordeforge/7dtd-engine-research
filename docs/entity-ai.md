@@ -775,6 +775,13 @@ live code but dormant in stock content; NPC mods exercise it.
 
 ---
 
+## Entity net packages (extras)
+
+Also on the wire (see [protocol-packages.md](protocol-packages.md) section 6.21):
+`NetPackageEntityRemove`, `NetPackageEntityPhysics`, `NetPackageEntityAttach`,
+`NetPackageEntityRagdoll`, `NetPackageEntityCollect`, `NetPackageSetAttackTarget`,
+`NetPackageOwnedEntitySync`, `NetPackageEntitySpeeds`, `NetPackageEntityStealth`.
+
 ## Changelog
 
 - **2026-07-28:** FindPath distSq 1225 / Y ±45 clamps; ASP enqueue coalesce; base FindPath no-op.

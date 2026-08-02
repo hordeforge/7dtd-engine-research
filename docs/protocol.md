@@ -1,6 +1,6 @@
 # Dedicated wire protocol (V3.0.1 managed + live golden)
 
-**Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, RequestToSpawnPlayer/PlayerId/PlayerSpawnedInWorld, golden package body layouts.  
+**Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, `NetPackageRequestToSpawnPlayer` / RequestToSpawnPlayer/PlayerId/PlayerSpawnedInWorld, golden package body layouts.  
 **Not:** the exhaustive per-package body catalog + protocol-wide metadata census (that is [`protocol-packages.md`](protocol-packages.md)); native LiteNet internals (residual); EAC wire (residual).  
 **Hub:** [INDEX.md](INDEX.md).  
 **Visual frames (RFC bars + Mermaid):** [`protocol-frames.md`](protocol-frames.md).  

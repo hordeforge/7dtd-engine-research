@@ -114,6 +114,8 @@ Type `ModEvents` static fields (complete inventory from dump):
 | `FPS` | - | Counter |
 | `GameObjectPool.FrameUpdate` | - | Pool |
 
+Core types include `GameEventManager` and `GameEventAction` sequences (content-driven).
+
 ## Related docs
 
 | Doc | Role |

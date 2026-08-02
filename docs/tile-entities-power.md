@@ -453,6 +453,11 @@ the matching `PowerItem` by world position and links the two.
 
 ---
 
+## Wire tool packages
+
+`NetPackageWireActions` / `NetPackageWireToolActions` edit the power wire graph
+(protocol-packages 6.21; Process IL=163 on WireActions).
+
 ## Related docs
 
 | Doc | Role |

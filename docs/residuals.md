@@ -28,9 +28,9 @@ flowchart TD
 | **Aron Granberg A\* library internals** | `AstarPath.StartPath` / `Pathfinding.*` third-party; 7DTD ASP wrapper closed |
 | **ModEvents subscriber sets** | Who registers handlers is mod/content dependent; **hook names closed** in [managers.md](managers.md) |
 | **Post-patch IL drift** | TFP updates move offsets; regenerate dumps (process residual) |
-| **Region sector payload byte codec detail** | Managed methods exist and are dumped; hand-annotated full compression layout optional (not required for loop understanding) |
+| **Region sector payload byte codec detail** | **Mostly closed:** Raw free-list + V1/V2 WriteData narrated ([save-region.md](save-region.md) 3.3-3.4). Residual: optional bit-level location-table packing for every header field |
 | **Client-only UI / avatar / NGUI / camera** | Out of dedicated scope (non-goal) |
-| **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census (channel/compress/direction/auth) for all 193, P0/P1 bodies hand-annotated ([protocol-packages.md](protocol-packages.md)), and the **complete** ordered `write()` field sequence for every package + nested serializer auto-extracted in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) (incl. the `EntityCreationData` per-class tail). Residual: for loop/conditional-heavy bodies the flat sequence is the backbone; exact framing (which optional flag gates which section) is per-package narrative work where it matters |
+| **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.21. Residual: only optional per-flag framing for rare conditional-heavy packages |
 | **Encryption cipher / KDF primitives** | Handshake package bodies decoded ([protocol-packages.md](protocol-packages.md) §2). Session transform is managed `AesEncryptAndMac` (AES + HMAC; [network.md](network.md) §4.5). Residual: RSA key wrap / platform RNG quality and anything below `System.Security.Cryptography` providers |
 | **XML content semantics** | Blocks/items/biomes/prefabs are data, not loop IL |
 | **Discord GameSDK integration (`DiscordManager`, 140 methods)** | Rich presence, lobbies, invites, voice device list (`inGameUpdate`, `updateAudioDeviceList`, `EDiscordStatus`, `UserAuthorizationResult`); needs a local Discord client, so it is a **client** social feature, not a dedicated codepath. Reachable in the assembly but never active on a headless server |
@@ -90,6 +90,10 @@ brtrue → ret    // dedicated: return immediately
 | Product failure catalog | `7days-realworld/docs/realearth-review.md` |
 
 ## Changelog
+
+- **2026-07-28:** Region sector residual narrowed; package narrative residual closed (6.21).
+
+- **2026-07-28:** Package narrative residual reduced to optional per-flag framing (section 6.21).
 
 - **2026-07-18:** Product surface links as full paths; related docs table.  
 - **2026-07-18:** Renamed residuals.md; closed-list paths updated after doc reorg.  
