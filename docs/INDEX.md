@@ -18,6 +18,9 @@ oss-tools/         survey notes on third-party server tools/mods
 
 ## Start here
 
+Campaign audit (V3.1.0 evidence + residual map): [`../workspace/outputs/docs-research-audit-20260803.md`](../workspace/outputs/docs-research-audit-20260803.md).
+
+
 | # | Doc | Use when |
 |---|---|---|
 | 0 | [`architecture-map.md`](architecture-map.md) | **Start here.** Whole-system visual map: layers, boot, frame phases, sim core, wire, persistence |

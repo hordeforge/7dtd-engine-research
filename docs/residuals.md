@@ -106,8 +106,23 @@ brtrue → ret    // dedicated: return immediately
 | Product status (not residuals) | `7days-realworld/docs/MODIFICATIONS.md` |
 | Product failure catalog | `7days-realworld/docs/realearth-review.md` |
 
+
+## 5. Product / sibling residuals (not IL residuals)
+
+These are **not** stock RE open items. They live in sibling TODO lists. Pointed here so research freeze is unambiguous.
+
+| Sibling | Residual class | Hub |
+|---|---|---|
+| `zdtd` | Demo playtest fail=8 (dig pad, block dmg, loot pickup, craft/trader); deco AssignIds; M11 scale | `zdtd/TODO.md`, `zdtd/docs/PLAYTEST_V310_20260803.md` |
+| `7dtd-optimizer` | AnimatorEmergency human soak before default-on; packaging tests; optional BM re-sweep on 3.1 | `7dtd-optimizer/TODO.md` |
+| `7dtd-loadgen` | H500 expanded-world validate; EAC unsupported | `7dtd-loadgen/TODO.md` |
+| `7dtd-apm` | Absolute forensic budgets under spawn (expected fail); disk ops | `7dtd-apm/TODO.md` |
+
+Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
+
 ## Changelog
 
+- **2026-08-03:** V3.1.0 pin confirmed live; product residual pointer §5; managed corpus still stop-closed.
 - **2026-07-28:** Region sector residual narrowed; package narrative residual closed (6.21).
 
 - **2026-07-28:** Package narrative residual reduced to optional per-flag framing (section 6.21).
