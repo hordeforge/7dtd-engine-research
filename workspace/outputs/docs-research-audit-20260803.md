@@ -120,3 +120,17 @@
 ## Changelog
 
 - **2026-08-03:** Initial campaign audit after V3.1 retarget + ES A/B + zdtd playtest.
+
+## Leftover cleanup (2026-08-04)
+
+| Leftover | Action |
+|---|---|
+| Stale unit-test counts 197 | Updated to **239/239** in STATUS/TODO/MISSING/PLAYTEST |
+| Admin version `V3.x` | Now `V3.1.0 wire` |
+| Dig/place no solid under feet | **spawnSurface** snaps join/respawn to DTM + terrDirt fill |
+| STATUS full-playable overclaim | Already softened in prior audit |
+| Playtest orch fixtures stock-only | Already fixed on disk (`want_fixtures` includes zdtd) |
+| Economy residual 4 (food/craft/trader/loot VFX) | Still open product depth; not closed by spawn pad |
+| Block damage residual | Still open; server SetBlock damage path present; needs re-measure after pad fix |
+
+zdtd commit: `d5bfc77` Snap spawn to DTM surface.
