@@ -52,6 +52,7 @@ flowchart LR
 | **Zig / custom dedi clone** | [zig-clone.md](../../zdtd/docs/zig-clone.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
 | Wire / join / golden packages | protocol → **protocol-frames** → **protocol-packages** → network → loadgen PackageCodec |
 | How to reverse-engineer | **re-methodology** → [`../tools/`](../tools) → coverage |
+- **Stock hardcode pin:** [`../tools/stock-sync.sh`](../tools/stock-sync.sh) → [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) (see re-methodology §5c)
 | Frame / gmUpdate | loop → loop-gmupdate → inventories/gmupdate-calls |
 | Entities / AI / path | entity-ai → closed-gaps → aidirector |
 | World / chunks / save | world-chunks → save-region → terrain-height |

@@ -43,6 +43,7 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 
 | Tool | Purpose |
 |---|---|
+| `StockFacts.exe <asm> [out.json]` | Small JSON of stock hardcodes (version, TPS, chunk dims, save version, NetPackage count). Feeds `data/stock_facts.json` + pin check. |
 | `Census.exe <asm>` | Whole-assembly ground-truth counts (types, methods-with-body, gmUpdate IL, WorldState.SaveLoad IL). Re-run after a game patch to re-check `docs/coverage.md`. |
 | `DumpMethod.exe <asm> <typeFilter> <methodFilter> [out]` | IL for any method by case-insensitive substring filters (nested types included). The workhorse; replaces most one-off legacy dumpers. |
 | `DumpType.exe <asm> <outDir> <Type>...` | Fields + `read/write/Read/Write` bodies for wire payload structs (`EntityCreationData`, `BlockChangeInfo`, `ItemValue`, ...). |
@@ -66,6 +67,18 @@ mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.0.1/META.md
 mono bin/DumpType.exe "$ASM" ../il/netpackages-v3.0.1 EntityCreationData BlockChangeInfo
 mono bin/DumpMethod.exe "$ASM" GameManager gmUpdate
 ```
+
+## 1b. Stock facts sync (cross-repo pins)
+
+```bash
+./stock-sync.sh                 # extract live DLL → data/stock_facts.json + check pins
+./stock-sync.sh --check-only    # verify committed JSON vs docs/loadgen/zdtd
+python3 tests/check_stock_facts.py --require-live
+```
+
+Commit `data/stock_facts.json` when the game pin changes. The checker fails if
+`docs/coverage.md`, loadgen `GameVersion`, or zdtd `stock_wire` / challenge /
+ticks disagree with the JSON. See [`../docs/re-methodology.md`](../docs/re-methodology.md) §5c.
 
 ## 2. Legacy per-family dumpers (`legacy/`)
 

@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "generated_by": "tools/src/StockFacts.cs",
+  "asm": "Assembly-CSharp.dll",
+  "extracted_utc": "2026-08-04T09:03:34.9552790Z",
+  "version": {
+    "release_type": 1,
+    "major": 3,
+    "minor": 10,
+    "build": 14,
+    "display": "V 3.1.0",
+    "stock_wire": "V3.1.0 b14",
+    "product": "7 Days To Die",
+    "game_reset_revision": 13
+  },
+  "sim": {
+    "constants_ticks_per_second": 20,
+    "tick_duration_sec": 0.05,
+    "gametimer_instance_tps": 20
+  },
+  "network": {
+    "default_port": 26900,
+    "max_mp_players_constant": 8,
+    "netpackage_top_level_count": 193,
+    "challenge_marker": 202,
+    "challenge_size": 17,
+    "challenge_marker_hex": "0xCA",
+    "challenge_note": "0xCA not a Constants field; wire/loadgen pin (ConnectionManager pre-auth)"
+  },
+  "chunk": {
+    "block_x_dim": 16,
+    "block_y_dim": 256,
+    "block_z_dim": 16,
+    "block_layers": 64,
+    "layer_height": 4
+  },
+  "save": {
+    "current_save_version": 23,
+    "worldstate_saveload_stream_il": 926
+  },
+  "census": {
+    "top_level_types": 4414,
+    "methods_with_body_top_level": 44107,
+    "gmupdate_il": 631
+  },
+  "tile_entity_package": {
+    "present": true,
+    "write_il": 27,
+    "write_i32_count": 2,
+    "write_u16_count": 0,
+    "write_i16_count": 0,
+    "payload_len_likely_i32": true
+  },
+  "consumers": {
+    "research_docs": ["docs/coverage.md", "docs/protocol.md", "docs/closed-gaps.md", "docs/save-region.md"],
+    "loadgen": ["src/LoadGen/PackageCodec.cs GameVersion", "tests golden-wire"],
+    "zdtd": ["src/version.zig stock_wire", "src/protocol.zig challenge/ticks"]
+  }
+}

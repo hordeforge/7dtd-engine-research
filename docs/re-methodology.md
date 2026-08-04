@@ -186,6 +186,37 @@ catches new/removed methods on existing types) and an **enum-member** diff (emit
 held-entity feature and analytics changes in [experimental-delta.md](experimental-delta.md)
 were only visible through those two lenses, not the package parity alone.
 
+## 5c. Stock facts pin (hardcodes across docs + products)
+
+Hardcoded stock values (version triple, TPS, challenge `0xCA`, chunk YDim,
+`CurrentSaveVersion`, NetPackage count, …) must not drift independently in
+research narratives, loadgen, and zdtd. Single regenerable table:
+
+```bash
+cd tools
+./build.sh --skip-legacy
+./stock-sync.sh                 # StockFacts.exe → data/stock_facts.json + pin check
+./stock-sync.sh --check-only    # CI / pre-commit without touching the DLL
+```
+
+| Piece | Role |
+|---|---|
+| `tools/src/StockFacts.cs` | Cecil extract from live `Assembly-CSharp.dll` |
+| `tools/data/stock_facts.json` | **Committed** facts table (schema 1) |
+| `tools/tests/check_stock_facts.py` | Greps research docs + sibling pins against JSON |
+| `tools/stock-sync.sh` | extract + check wrapper |
+
+After a game update: run `stock-sync.sh`, fix any FAIL pin sites, commit the new
+JSON together with doc/code pin edits. Pair with §5b `drift-check.sh` for full
+surface drift; stock-sync is the **small constant** gate, not a replacement for
+parity dumps.
+
+Product rules (still enforced in those repos):
+
+- loadgen: `PackageCodec.GameVersion` + golden-wire fixtures
+- zdtd: `version.zig stock_wire`, `protocol.zig` challenge/ticks, AssignIds embed tests
+- never bare NetPackage **numeric** ids on production send paths (`lint-wire.sh`)
+
 ## 6. Cost / loop RE (non-protocol systems)
 
 Same tools, different questions. For hot-path anatomy:

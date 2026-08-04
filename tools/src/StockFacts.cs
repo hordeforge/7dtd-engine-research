@@ -1,0 +1,295 @@
+// Extract a small, stable JSON of stock hardcodes from Assembly-CSharp.dll.
+// Regenerable source of truth for cross-repo pin checks (research docs, loadgen,
+// zdtd). Does not ship game bytes; only numeric/string constants from metadata
+// and a few well-known IL sites (GameTimer.get_Instance, WorldState cctor).
+//
+//   mono StockFacts.exe <Assembly-CSharp.dll> [out.json]
+//
+// Default out: stdout. Prefer writing tools/data/stock_facts.json via stock-sync.
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+class StockFacts {
+  static TypeDefinition Exact(ModuleDefinition mod, string name) {
+    return mod.Types.FirstOrDefault(t => t.Name == name && (t.Namespace == "" || t.Namespace == null))
+        ?? mod.Types.FirstOrDefault(t => t.Name == name)
+        ?? throw new Exception("type not found: " + name);
+  }
+
+  static object FieldConst(TypeDefinition t, string name) {
+    var f = t.Fields.FirstOrDefault(x => x.Name == name);
+    if (f == null) throw new Exception(t.Name + "." + name + " missing");
+    if (!f.HasConstant) throw new Exception(t.Name + "." + name + " has no metadata constant");
+    return f.Constant;
+  }
+
+  static int AsInt(object o) {
+    if (o is int i) return i;
+    if (o is short s) return s;
+    if (o is byte b) return b;
+    if (o is sbyte sb) return sb;
+    if (o is long l) return (int)l;
+    if (o is uint u) return (int)u;
+    if (o is Enum) return Convert.ToInt32(o);
+    return Convert.ToInt32(o, CultureInfo.InvariantCulture);
+  }
+
+  static float AsFloat(object o) {
+    if (o is float f) return f;
+    if (o is double d) return (float)d;
+    return Convert.ToSingle(o, CultureInfo.InvariantCulture);
+  }
+
+  static string JsonEsc(string s) {
+    if (s == null) return "null";
+    var sb = new StringBuilder("\"");
+    foreach (var c in s) {
+      if (c == '\\' || c == '"') sb.Append('\\').Append(c);
+      else if (c == '\n') sb.Append("\\n");
+      else if (c == '\r') sb.Append("\\r");
+      else if (c == '\t') sb.Append("\\t");
+      else if (c < 0x20) sb.AppendFormat("\\u{0:x4}", (int)c);
+      else sb.Append(c);
+    }
+    sb.Append('"');
+    return sb.ToString();
+  }
+
+  static int? LdcI4(Instruction i) {
+    switch (i.OpCode.Code) {
+      case Code.Ldc_I4_M1: return -1;
+      case Code.Ldc_I4_0: return 0;
+      case Code.Ldc_I4_1: return 1;
+      case Code.Ldc_I4_2: return 2;
+      case Code.Ldc_I4_3: return 3;
+      case Code.Ldc_I4_4: return 4;
+      case Code.Ldc_I4_5: return 5;
+      case Code.Ldc_I4_6: return 6;
+      case Code.Ldc_I4_7: return 7;
+      case Code.Ldc_I4_8: return 8;
+      case Code.Ldc_I4_S: return Convert.ToInt32(i.Operand);
+      case Code.Ldc_I4: return Convert.ToInt32(i.Operand);
+      default: return null;
+    }
+  }
+
+  // Walk cctor; last integer pushed before stsfld Name wins (simple const init).
+  static int? StsfldInt(TypeDefinition t, string fieldName) {
+    var cctor = t.Methods.FirstOrDefault(m => m.IsConstructor && m.IsStatic && m.HasBody);
+    if (cctor == null) return null;
+    int? pending = null;
+    int? found = null;
+    foreach (var i in cctor.Body.Instructions) {
+      var v = LdcI4(i);
+      if (v.HasValue) pending = v;
+      else if (i.OpCode.Code == Code.Stsfld) {
+        var f = (FieldReference)i.Operand;
+        if (f.Name == fieldName && pending.HasValue) found = pending;
+        pending = null;
+      } else if (i.OpCode.Code != Code.Nop && i.OpCode.Code != Code.Dup) {
+        // non-trivial ops clear pending to avoid false association
+        if (i.OpCode.Code != Code.Ldsfld && i.OpCode.Code != Code.Call &&
+            i.OpCode.Code != Code.Callvirt && i.OpCode.Code != Code.Newobj &&
+            i.OpCode.Code != Code.Ldstr && i.OpCode.Code != Code.Box &&
+            i.OpCode.Code != Code.Conv_I8 && i.OpCode.Code != Code.Conv_R4 &&
+            i.OpCode.Code != Code.Conv_R8) {
+          // keep pending only for simple ldc -> stsfld chains
+        }
+      }
+    }
+    return found;
+  }
+
+  static float? GameTimerTicksPerSecond(ModuleDefinition mod) {
+    var gt = Exact(mod, "GameTimer");
+    var m = gt.Methods.FirstOrDefault(x => x.Name == "get_Instance" && x.HasBody);
+    if (m == null) return null;
+    foreach (var i in m.Body.Instructions) {
+      if (i.OpCode.Code == Code.Ldc_R4) return AsFloat(i.Operand);
+    }
+    return null;
+  }
+
+  // NetPackageTileEntity write: detect teBlockId (i32 after pos) + payload length width.
+  // Heuristic from BinaryWriter.Write calls in write(): count Write(Int32) near end.
+  static Dictionary<string, object> TileEntityWire(ModuleDefinition mod) {
+    var t = mod.Types.FirstOrDefault(x => x.Name == "NetPackageTileEntity");
+    var d = new Dictionary<string, object>();
+    if (t == null) {
+      d["present"] = false;
+      return d;
+    }
+    d["present"] = true;
+    var write = t.Methods.FirstOrDefault(m => m.Name == "write" && m.HasBody)
+             ?? t.Methods.FirstOrDefault(m => m.Name == "Write" && m.HasBody);
+    if (write == null) {
+      d["write_il"] = 0;
+      return d;
+    }
+    d["write_il"] = write.Body.Instructions.Count;
+    int writeI32 = 0, writeU16 = 0, writeI16 = 0;
+    foreach (var i in write.Body.Instructions) {
+      if (i.OpCode.Code != Code.Call && i.OpCode.Code != Code.Callvirt) continue;
+      var mr = i.Operand as MethodReference;
+      if (mr == null || mr.DeclaringType.Name != "BinaryWriter" || mr.Name != "Write") continue;
+      if (mr.Parameters.Count != 1) continue;
+      var pn = mr.Parameters[0].ParameterType.FullName;
+      if (pn == "System.Int32") writeI32++;
+      else if (pn == "System.UInt16") writeU16++;
+      else if (pn == "System.Int16") writeI16++;
+    }
+    d["write_i32_count"] = writeI32;
+    d["write_u16_count"] = writeU16;
+    d["write_i16_count"] = writeI16;
+    // V3.1.0: teBlockId:i32 + payloadLen:i32 (among other i32s). Flag for docs.
+    d["payload_len_likely_i32"] = writeI32 >= 2;
+    return d;
+  }
+
+  static void Main(string[] a) {
+    if (a.Length < 1) {
+      Console.Error.WriteLine("usage: StockFacts <asm> [out.json]");
+      Environment.Exit(2);
+    }
+    var asmPath = Path.GetFullPath(a[0]);
+    var r = new DefaultAssemblyResolver();
+    r.AddSearchDirectory(Path.GetDirectoryName(asmPath));
+    var asm = AssemblyDefinition.ReadAssembly(asmPath, new ReaderParameters { AssemblyResolver = r });
+    var mod = asm.MainModule;
+
+    var c = Exact(mod, "Constants");
+    var wc = Exact(mod, "WorldConstants");
+
+    int major = AsInt(FieldConst(c, "cVersionMajor"));
+    int minor = AsInt(FieldConst(c, "cVersionMinor"));
+    int build = AsInt(FieldConst(c, "cVersionBuild"));
+    int releaseType = AsInt(FieldConst(c, "cReleaseType"));
+    int ticksConst = AsInt(FieldConst(c, "cTicksPerSecond"));
+    float tickDur = AsFloat(FieldConst(c, "cTickDuration"));
+    int maxMp = AsInt(FieldConst(c, "cMaxMPPlayers"));
+    int gameReset = AsInt(FieldConst(c, "cGameResetRevision"));
+    string product = Convert.ToString(FieldConst(c, "cProduct"));
+    // cDefaultPort is cctor-init (not a metadata constant on this build).
+    int defaultPort = StsfldInt(c, "cDefaultPort") ?? 26900;
+
+    // Display: stock LongStringNoBuild style for Minor>=10: V {Major}.{Minor/10}.{Minor%10}
+    // Matches loadgen PackageCodec.VersionLongString for EGameReleaseType.V=1.
+    string display;
+    if (minor >= 10)
+      display = string.Format(CultureInfo.InvariantCulture, "V {0}.{1}.{2}", major, minor / 10, minor % 10);
+    else
+      display = string.Format(CultureInfo.InvariantCulture, "V {0}.{1}.{2}", major, minor, 0);
+    // zdtd stock_wire form: "V3.1.0 b14"
+    string stockWire = string.Format(CultureInfo.InvariantCulture, "V{0}.{1}.{2} b{3}",
+      major, minor >= 10 ? minor / 10 : minor, minor >= 10 ? minor % 10 : 0, build);
+
+    float? gtTps = GameTimerTicksPerSecond(mod);
+    int? saveVer = null;
+    try {
+      var ws = Exact(mod, "WorldState");
+      // field may be const or cctor
+      var f = ws.Fields.FirstOrDefault(x => x.Name == "CurrentSaveVersion");
+      if (f != null && f.HasConstant) saveVer = AsInt(f.Constant);
+      else saveVer = StsfldInt(ws, "CurrentSaveVersion");
+    } catch { /* optional */ }
+
+    int netPkg = mod.Types.Count(t => t.Name.StartsWith("NetPackage") && t.Name != "NetPackageManager");
+    int topTypes = mod.Types.Count();
+    int methodsBody = mod.Types.SelectMany(t => t.Methods).Count(m => m.HasBody);
+    int gmUpdateIl = 0, saveLoadIl = 0;
+    foreach (var t in mod.GetTypes()) {
+      foreach (var m in t.Methods.Where(m => m.HasBody)) {
+        if (t.Name == "GameManager" && m.Name == "gmUpdate") gmUpdateIl = m.Body.Instructions.Count;
+        if (t.Name == "WorldState" && m.Name == "SaveLoad" && m.Parameters.Count >= 1 &&
+            m.Parameters[0].ParameterType.Name.Contains("Stream"))
+          saveLoadIl = m.Body.Instructions.Count;
+      }
+    }
+
+    var te = TileEntityWire(mod);
+
+    // Pre-auth challenge is not a Constants field; fixed in ConnectionManager / loadgen.
+    // Document as research-confirmed wire fact (0xCA), not extracted from Constants.
+    const int challengeMarker = 0xCA;
+    const int challengeSize = 17;
+
+    var sb = new StringBuilder();
+    sb.AppendLine("{");
+    sb.AppendLine("  \"schema\": 1,");
+    sb.AppendLine("  \"generated_by\": \"tools/src/StockFacts.cs\",");
+    sb.AppendLine("  \"asm\": " + JsonEsc(Path.GetFileName(asmPath)) + ",");
+    sb.AppendLine("  \"extracted_utc\": " + JsonEsc(DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture)) + ",");
+    sb.AppendLine("  \"version\": {");
+    sb.AppendLine("    \"release_type\": " + releaseType + ",");
+    sb.AppendLine("    \"major\": " + major + ",");
+    sb.AppendLine("    \"minor\": " + minor + ",");
+    sb.AppendLine("    \"build\": " + build + ",");
+    sb.AppendLine("    \"display\": " + JsonEsc(display) + ",");
+    sb.AppendLine("    \"stock_wire\": " + JsonEsc(stockWire) + ",");
+    sb.AppendLine("    \"product\": " + JsonEsc(product) + ",");
+    sb.AppendLine("    \"game_reset_revision\": " + gameReset);
+    sb.AppendLine("  },");
+    sb.AppendLine("  \"sim\": {");
+    sb.AppendLine("    \"constants_ticks_per_second\": " + ticksConst + ",");
+    sb.AppendLine("    \"tick_duration_sec\": " + tickDur.ToString(CultureInfo.InvariantCulture) + ",");
+    sb.AppendLine("    \"gametimer_instance_tps\": " + (gtTps.HasValue ? gtTps.Value.ToString(CultureInfo.InvariantCulture) : "null"));
+    sb.AppendLine("  },");
+    sb.AppendLine("  \"network\": {");
+    sb.AppendLine("    \"default_port\": " + defaultPort + ",");
+    sb.AppendLine("    \"max_mp_players_constant\": " + maxMp + ",");
+    sb.AppendLine("    \"netpackage_top_level_count\": " + netPkg + ",");
+    sb.AppendLine("    \"challenge_marker\": " + challengeMarker + ",");
+    sb.AppendLine("    \"challenge_size\": " + challengeSize + ",");
+    sb.AppendLine("    \"challenge_marker_hex\": \"0xCA\",");
+    sb.AppendLine("    \"challenge_note\": \"0xCA not a Constants field; wire/loadgen pin (ConnectionManager pre-auth)\"");
+    sb.AppendLine("  },");
+    sb.AppendLine("  \"chunk\": {");
+    sb.AppendLine("    \"block_x_dim\": " + AsInt(FieldConst(wc, "ChunkBlockXDim")) + ",");
+    sb.AppendLine("    \"block_y_dim\": " + AsInt(FieldConst(wc, "ChunkBlockYDim")) + ",");
+    sb.AppendLine("    \"block_z_dim\": " + AsInt(FieldConst(wc, "ChunkBlockZDim")) + ",");
+    sb.AppendLine("    \"block_layers\": " + AsInt(FieldConst(wc, "ChunkBlockLayers")) + ",");
+    sb.AppendLine("    \"layer_height\": " + AsInt(FieldConst(wc, "ChunkBlockLayerHeight")));
+    sb.AppendLine("  },");
+    sb.AppendLine("  \"save\": {");
+    sb.AppendLine("    \"current_save_version\": " + (saveVer.HasValue ? saveVer.Value.ToString() : "null") + ",");
+    sb.AppendLine("    \"worldstate_saveload_stream_il\": " + saveLoadIl);
+    sb.AppendLine("  },");
+    sb.AppendLine("  \"census\": {");
+    sb.AppendLine("    \"top_level_types\": " + topTypes + ",");
+    sb.AppendLine("    \"methods_with_body_top_level\": " + methodsBody + ",");
+    sb.AppendLine("    \"gmupdate_il\": " + gmUpdateIl);
+    sb.AppendLine("  },");
+    sb.AppendLine("  \"tile_entity_package\": {");
+    sb.AppendLine("    \"present\": " + ((bool)te["present"] ? "true" : "false") + ",");
+    if ((bool)te["present"]) {
+      sb.AppendLine("    \"write_il\": " + te["write_il"] + ",");
+      sb.AppendLine("    \"write_i32_count\": " + te["write_i32_count"] + ",");
+      sb.AppendLine("    \"write_u16_count\": " + te["write_u16_count"] + ",");
+      sb.AppendLine("    \"write_i16_count\": " + te["write_i16_count"] + ",");
+      sb.AppendLine("    \"payload_len_likely_i32\": " + ((bool)te["payload_len_likely_i32"] ? "true" : "false"));
+    }
+    sb.AppendLine("  },");
+    sb.AppendLine("  \"consumers\": {");
+    sb.AppendLine("    \"research_docs\": [\"docs/coverage.md\", \"docs/protocol.md\", \"docs/closed-gaps.md\", \"docs/save-region.md\"],");
+    sb.AppendLine("    \"loadgen\": [\"src/LoadGen/PackageCodec.cs GameVersion\", \"tests golden-wire\"],");
+    sb.AppendLine("    \"zdtd\": [\"src/version.zig stock_wire\", \"src/protocol.zig challenge/ticks\"]");
+    sb.AppendLine("  }");
+    sb.AppendLine("}");
+
+    var json = sb.ToString();
+    if (a.Length >= 2) {
+      var outPath = a[1];
+      Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath)) ?? ".");
+      File.WriteAllText(outPath, json);
+      Console.Error.WriteLine("wrote " + outPath);
+    } else {
+      Console.Write(json);
+    }
+  }
+}
