@@ -6,3 +6,16 @@ il/*
 
 # Regenerable coverage gap sidecar (from tools/src/Coverage)
 docs/inventories/*.gaps.tsv
+
+# Accidental type-name dumps at repo root (DumpMethod without outDir)
+/AvatarZombieController
+/Constants
+/EKickReason
+/EntityAlive
+/GamePath.ASPPathFinderThread
+/ItemClassHeldEntity
+/ItemClassWildChicken
+/PlayerJoinServerEventData
+/VersionInformation
+.pi-subagents/
+.pytest_cache/
