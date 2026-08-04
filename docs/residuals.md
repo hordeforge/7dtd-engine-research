@@ -113,7 +113,7 @@ These are **not** stock RE open items. They live in sibling TODO lists. Pointed 
 
 | Sibling | Residual class | Hub |
 |---|---|---|
-| `zdtd` | Demo playtest fail=8 (dig pad, block dmg, loot pickup, craft/trader); deco AssignIds; M11 scale | `zdtd/TODO.md`, `zdtd/docs/PLAYTEST_V310_20260803.md` |
+| `zdtd` | Demo playtest **pass=83 fail=0** (20260804p strict eat + hard generator_fuel); residual depth (full MinEvents eat, deco AssignIds, M11 scale) | `zdtd/TODO.md`, `zdtd/docs/PLAYTEST_V310_20260803.md` |
 | `7dtd-optimizer` | AnimatorEmergency human soak before default-on; packaging tests; optional BM re-sweep on 3.1 | `7dtd-optimizer/TODO.md` |
 | `7dtd-loadgen` | H500 expanded-world validate; EAC unsupported | `7dtd-loadgen/TODO.md` |
 | `7dtd-apm` | Absolute forensic budgets under spawn (expected fail); disk ops | `7dtd-apm/TODO.md` |
