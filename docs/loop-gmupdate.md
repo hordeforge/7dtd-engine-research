@@ -1,11 +1,11 @@
-# `gmUpdate` structure (V3.0.1 dedicated RE)
+# `gmUpdate` structure (V3.1.0 dedicated RE)
 
 **Owns:** gmUpdate phase narrative (detail under [`loop.md`](loop.md) §2).  
 **Call list:** [`inventories/gmupdate-calls.md`](inventories/gmupdate-calls.md).  
-**Dump set:** [`../il/gmUpdate-v3.0.1/`](../il/gmUpdate-v3.0.1).  
+**Dump set:** [`../il/gmUpdate-v3.0.1/`](../il/gmUpdate-v3.0.1) (historical path name; IL size still 631 on V3.1.0).  
 **Hub:** [`INDEX.md`](INDEX.md).
 
-**Assembly:** dedicated `Assembly-CSharp.dll` V3.0.1  
+**Assembly:** dedicated `Assembly-CSharp.dll` V **3.1.0 (b14)** (gmUpdate IL=631 unchanged from V3.0.1)  
 **Tool:** `tools/legacy/DumpGmUpdate.cs` (pre-corrupted; use `tools/src/DumpMethod` instead, see §10)  
 **Optim summary:** [`../../7dtd-optimizer/docs/ARCHITECTURE.md`](../../7dtd-optimizer/docs/ARCHITECTURE.md)
 

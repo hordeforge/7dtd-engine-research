@@ -1,6 +1,7 @@
-# Wire frames (visual) · 7DTD V3.0.1
+# Wire frames (visual) · 7DTD V3.1.0
 
 **Owns:** left-to-right byte/field strips for envelope + golden packages (classic protocol style).  
+**Pin:** V **3.1.0 (b14)** (golden live: major=3, minor=10, build=14).  
 **Companion:** narrative join/policy in [protocol.md](protocol.md).  
 **Evidence:** loadgen `PackageCodec` · dedi-complete census.  
 **Clone:** [`../../zdtd/`](../../zdtd).

@@ -6,6 +6,28 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-05 — stock-re-corpus audit fixes
+
+Objective: fix all problems surfaced by `workspace/outputs/stock-re-corpus-audit.md`
+(paper/code audit of our RE corpus vs tools/consumers/live ASM).
+
+Done (verified):
+- **Critical wire:** `docs/tile-entities-power.md` NetPackageTileEntity layout
+  now teBlockId:i32 + payloadLen:i32, write IL=27 / read IL=24 (matches
+  protocol-packages §6.12 + live DumpMethod).
+- **High census drift:** `docs/coverage.md` live census table → 4414 / 44107 /
+  SaveLoad 926 / CurrentSaveVersion 23 (was stale 4401/43901/884 under 3.1 banner).
+- **Framing:** README, protocol-packages, protocol-frames, loop-gmupdate titles/pins
+  to V3.1.0 (b14); re-methodology §1 shows live vs historical V3.0.1 columns.
+- **Gate:** `tools/tests/check_stock_facts.py` now fails on stale coverage census
+  numbers, README pin, and TE layout (teBlockId/i32 + rejects u16-only TE fence).
+
+Verification: `make stock-check` exit 0; `make test` exit 0 (dedi coverage docs +
+stock-check --require-live). Live DumpMethod TE write still IL=27 (prior audit).
+
+State: verified. Next: optional commit of doc+gate fixes; re-run Coverage.exe only
+if unaccounted tier needs a fresh cite.
+---
 ## 2026-07-23 — re-audit-extend (audit all docs + extend RE + consolidate tooling)
 
 Objective: audit all docs; do more RE (systems + wire protocol); consolidate RE

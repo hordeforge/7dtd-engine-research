@@ -45,19 +45,22 @@ visible:
 mono bin/Census.exe "$ASM"
 ```
 
-V3.0.1 baseline (regenerate after any game update):
+**Live pin (V3.1.0 b14)** from `tools/data/stock_facts.json` / `Census.exe`
+(regenerate after any game update with `make stock-sync`):
 
-| Metric | Value |
-|---|---:|
-| Top-level types | 4401 |
-| Methods with body (top-level) | 43901 |
-| All types (incl nested) | 7413 |
-| `NetPackage*` types (excl `NetPackageManager`) | 193 |
-| `GameManager.gmUpdate` IL | 631 |
-| `WorldState.SaveLoad(Stream)` IL | 884 |
-| Sim rate (`GameTimer`) | 20 Hz |
+| Metric | V3.1.0 live | V3.0.1 baseline (historical) |
+|---|---:|---:|
+| Top-level types | **4414** | 4401 |
+| Methods with body (top-level) | **44107** | 43901 |
+| All types (incl nested) | **7432** | 7413 |
+| `NetPackage*` types (excl `NetPackageManager`) | **193** | 193 |
+| `GameManager.gmUpdate` IL | **631** | 631 |
+| `WorldState.SaveLoad(Stream)` IL | **926** | 884 |
+| Sim rate (`GameTimer`) | **20 Hz** | 20 Hz |
+| `CurrentSaveVersion` | **23** | (see save-region) |
 
 A changed count is the first signal that a doc, not the game, is now wrong.
+Do not quote the historical V3.0.1 column as "live dedi" after the 3.1 retarget.
 
 ---
 

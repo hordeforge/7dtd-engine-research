@@ -123,13 +123,14 @@ Each subclass chains to the base then appends its own body (inventories, owner,
 flags, power data). `TileEntityLegacyUtils.TryReadLegacyType` is consulted first
 during instantiate so older saves upgrade cleanly.
 
-Replication uses `NetPackageTileEntity (V3.1.0: teBlockId+i32 len; protocol-packages §6.12)` (write IL=23):
+Replication uses `NetPackageTileEntity` (V3.1.0 wire; [protocol-packages.md](protocol-packages.md) §6.12; write IL=27 / read IL=24):
 
 ```text
-handle : u8              // default 255
+handle : u8              // Setup default 255 when omitted
 teWorldPos : Vector3i
-payloadLen : u16
-payload : TileEntity.write(streamMode) bytes
+teBlockId : i32          // V3.1.0 (absent on V3.0.1)
+payloadLen : i32         // V3.1.0 (was u16 on V3.0.1)
+payload : payloadLen bytes   // TileEntity.write(network stream mode)
 ```
 
 `Setup(te, streamMode[, handle])` writes the TE into a pooled stream in the

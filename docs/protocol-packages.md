@@ -1,13 +1,15 @@
-# Wire package body catalog (V3.0.1, IL-derived)
+# Wire package body catalog (V3.1.0 pin; IL-derived)
 
 **Owns:** per-`NetPackage` wire metadata (channel/compress/direction/auth) and
 hand-annotated `read`/`write` byte layouts beyond the join-critical set in
 [`protocol.md`](protocol.md).
+**Pin:** dedicated V **3.1.0 (b14)**; dump set dir name `il/netpackages-v3.0.1/`
+is historical (regenerate against live ASM).
 **Not:** framing/join/challenge (that is [`protocol.md`](protocol.md)); visual
 frames ([`protocol-frames.md`](protocol-frames.md)).
 **Evidence:** dumped from the live `Assembly-CSharp.dll` with
 [`../tools/`](../tools) (`DumpNetPackages`, `NetProtocolCensus`, `DumpType`);
-raw output `il/netpackages-v3.0.1/` (git-ignored). Every field below traces to a
+raw output under `il/` (git-ignored). Every field below traces to a
 specific `BinaryWriter::Write`/`BinaryReader::Read` in the method body.
 **Method:** [`re-methodology.md`](re-methodology.md) §4-5.
 

@@ -103,6 +103,85 @@ def check_research(facts: dict, errors: list[str]) -> None:
         if str(npkg) not in inv:
             errors.append(f"research docs: NetPackage count {npkg} not mentioned in coverage/protocol/protocol-packages")
 
+    # Live census table under coverage.md must not keep V3.0.1 counts as "live"
+    census = facts.get("census") or {}
+    top = census.get("top_level_types")
+    methods = census.get("methods_with_body_top_level")
+    saveload = facts.get("save", {}).get("worldstate_saveload_stream_il")
+    if top is not None:
+        must_match(
+            "docs/coverage.md live top-level types",
+            cov,
+            rf"Top-level types\s*\|\s*{top}\b",
+            errors,
+        )
+    if methods is not None:
+        must_match(
+            "docs/coverage.md live methods with body",
+            cov,
+            rf"Methods with body\s*\|\s*{methods}\b",
+            errors,
+        )
+    if saveload is not None:
+        must_match(
+            "docs/coverage.md live SaveLoad IL",
+            cov,
+            rf"WorldState\.SaveLoad\(Stream\)\s*IL\s*\|\s*{saveload}\b",
+            errors,
+        )
+
+    # README must pin current display version (not a stale V3.0.1-only banner)
+    readme = read(ROOT / "README.md")
+    pin_display = display.replace("V ", "")  # e.g. 3.1.0
+    must_match(
+        "README.md version pin",
+        readme,
+        rf"V\s*\*\*{re.escape(pin_display)}\s*\(b{build}\)\*\*|"
+        rf"V\s*{re.escape(pin_display)}\s*\(b{build}\)|"
+        rf"\(V\s*\*\*{re.escape(pin_display)}",
+        errors,
+    )
+
+    # TE package layout: V3.1+ must document teBlockId + i32 payload length
+    te = facts.get("tile_entity_package") or {}
+    if te.get("payload_len_likely_i32") or te.get("present"):
+        te_doc = read(ROOT / "docs" / "tile-entities-power.md")
+        pkg_doc = read(ROOT / "docs" / "protocol-packages.md")
+        must_match(
+            "docs/tile-entities-power.md teBlockId",
+            te_doc,
+            r"teBlockId\s*:\s*i32",
+            errors,
+        )
+        must_match(
+            "docs/tile-entities-power.md payloadLen i32",
+            te_doc,
+            r"payloadLen\s*:\s*i32",
+            errors,
+        )
+        # Stale V3.0.1-only layout block (u16 length, no teBlockId in the same fence)
+        if re.search(
+            r"```text\s*\nhandle\s*:\s*u8[^`]*payloadLen\s*:\s*u16",
+            te_doc,
+            re.M,
+        ):
+            errors.append(
+                "docs/tile-entities-power.md: stale NetPackageTileEntity layout "
+                "(payloadLen:u16 without V3.1 teBlockId/i32)"
+            )
+        must_match(
+            "docs/protocol-packages.md §6.12 teBlockId",
+            pkg_doc,
+            r"teBlockId\s*:\s*i32",
+            errors,
+        )
+        must_match(
+            "docs/protocol-packages.md §6.12 payloadLen i32",
+            pkg_doc,
+            r"payloadLen\s*:\s*i32",
+            errors,
+        )
+
 
 def check_loadgen(facts: dict, errors: list[str]) -> None:
     path = WS / "7dtd-loadgen" / "src" / "LoadGen" / "PackageCodec.cs"
