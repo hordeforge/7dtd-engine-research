@@ -230,6 +230,38 @@ already-serialized dictionary bytes via `BinaryWriter.Write(byte[])`, but the co
 prefix is inside that blob, so on the wire it reads as count + entries.) A clone that
 treats the `i32` as a byte length desyncs the stream and misparses `worldDataSize`.
 
+#### `fixedSizeCC` and client chunk provider (critical for terrain textures)
+
+`fixedSizeCC` is applied to `ChunkCluster.IsFixedSize`. On the **client**
+(`ChunkCluster/<Init>d__45`, provider id `NetworkClient=3`):
+
+| `fixedSizeCC` | Client `IChunkProvider` | Local world data |
+|---|---|---|
+| **true** | `ChunkProviderDummy` | **No** DTM/splat load; chunks only from net |
+| **false** | `ChunkProviderGenerateWorldFromRaw(bClientMode=true)` | Loads `dtm.raw`, `biomes.png`, **`splat*.png`** from local `Data/Worlds/<levelName>` |
+
+**MicroSplat terrain floor:** when `World.IsSplatMapAvailable` (levelName not
+empty/`Playtesting`), `VoxelMeshTerrain.ConfigureTerrainMaterial` binds
+`_CustomControl0/1` from `FromRaw.splats[]`. With **Dummy**, those textures stay
+null and the whole terrain mesh samples empty controls → **uniform grey clay**,
+even when block type ids and density are correct.
+
+**Spawn overlay (`XUiC_SpawnSelectionWindow.updateLoadState`):**
+
+- `fixedSizeCC=true` → required CGO threshold **0** (overlay closes immediately).
+- `fixedSizeCC=false` → required CGO ≥ `viewDist² − 10` (e.g. viewDist 7 → **39**).
+
+Only **displayed** chunk game objects count (`GetDisplayedChunkGameObjectsCount`),
+not chunks merely received. Mesh needs a ~2-chunk neighbor halo, so a stream
+radius of 4 yields at most an inner **5×5 = 25** CGO and wedges the overlay at
+25/39. Stream radius must be **≥6** (prefer match client viewDim, cap 8) so the
+meshable core clears the gate.
+
+**Clone guidance (Navezgane / stock maps with splats):** send `fixedSizeCC=false`
+and stream a hole-free disk large enough for the CGO gate. Do **not** set
+`fixedSizeCC=true` only to dodge the overlay: that kills splat loading and greys
+the floor.
+
 ### 4.3 NetPackageWorldInitInfo (ToClient)
 `write` order (both lists are count-prefixed; verified against `write` IL=57 /
 `read` IL=58):

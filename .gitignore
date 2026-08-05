@@ -19,3 +19,6 @@ docs/inventories/*.gaps.tsv
 /VersionInformation
 .pi-subagents/
 .pytest_cache/
+
+# Runtime scenario/save worlds (local only)
+worlds/

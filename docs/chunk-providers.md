@@ -310,10 +310,22 @@ deleted.
 
 ### 4.5 ChunkProviderDummy (id 3, client-only)
 
-The network-client receiver for fixed-size clusters: no generation at all,
-`UnloadChunk` frees to the pool, chunks arrive via net packages. Together with
-`bClientMode=true` FromRaw (the non-fixed-size client case) this branch never
-executes on a dedicated server; flagged here instead of documented further.
+The network-client receiver for **fixed-size** clusters (`ChunkCluster.IsFixedSize`
+from WorldInfo `fixedSizeCC=true`): no generation at all, `UnloadChunk` frees to
+the pool, chunks arrive via net packages only. **Does not** load DTM, biomes, or
+**splat control textures**. Together with `bClientMode=true` FromRaw (the
+non-fixed-size client case) this branch never executes on a dedicated server.
+
+**Terrain MicroSplat implication (zdtd 2026-08 playtest, V3.1.0 client):** if a
+clone advertises `fixedSizeCC=true` for Navezgane, the client installs Dummy and
+never fills `ChunkProviderGenerateWorldFromRaw.splats[]`.
+`VoxelMeshTerrain.ConfigureTerrainMaterial` still runs when
+`World.IsSplatMapAvailable` (level name set), binds null `_CustomControl0/1`, and
+the terrain floor renders **uniform grey clay** despite correct block ids on the
+wire. Stock maps with `splat*.png` under `Data/Worlds/<name>` need
+`fixedSizeCC=false` so NetworkClient selects FromRaw(bClientMode) and loads
+splats locally (client log: `GenWorldFromRaw splats took …ms`). See
+`protocol-packages.md` §4.2 `fixedSizeCC`.
 
 ---
 
