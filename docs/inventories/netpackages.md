@@ -1,12 +1,13 @@
-# NetPackage type inventory (V3.0.1 dedicated)
+# NetPackage type inventory (V3.1.0 dedicated)
 
 **Kind:** inventory table (not primary narrative).  
-**Prefer:** [`protocol.md`](../protocol.md), [`protocol-frames.md`](../protocol-frames.md) (visual), [`network.md`](../network.md).  
-**Wire bodies:** ordered `write()` field sequence per package in [`netpackage-bodies.md`](netpackage-bodies.md) (auto-extracted, 183 packages + 61 nested serializers).  
-**Raw:** [`../il/dedi-complete-v3.1.0/DEDI_COMPLETE_auto.md`](../../il/dedi-complete-v3.1.0/DEDI_COMPLETE_auto.md) §3.  
+**Pin:** V **3.1.0 (b14)**; static top-level `NetPackage*` census **193** (+ `NetPackageManager` → 194 name-prefixed; see [coverage.md](../coverage.md)).  
+**Prefer:** [`protocol.md`](../protocol.md), [`protocol-packages.md`](../protocol-packages.md), [`protocol-frames.md`](../protocol-frames.md) (visual), [`network.md`](../network.md).  
+**Wire bodies:** ordered `write()` field sequence per package in [`netpackage-bodies.md`](netpackage-bodies.md) (auto-extracted).  
+**Raw:** [`../../il/netpackages-v3.1.0/`](../../il/netpackages-v3.1.0/), [`../../il/dedi-complete-v3.1.0/`](../../il/dedi-complete-v3.1.0/).  
 **Hub:** [`INDEX.md`](../INDEX.md).
 
-Count: **194** types with `NetPackage` name prefix in live dedi dump.
+Count: **194** types with `NetPackage` name prefix in live dedi dump (193 wire-oriented types + manager/helpers as named in the table).
 
 | Type | Base | Methods | Max method IL |
 |---|---|---:|---:|

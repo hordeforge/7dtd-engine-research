@@ -1,8 +1,9 @@
-# GameManager.gmUpdate ordered calls (full, V3.0.1)
+# GameManager.gmUpdate ordered calls (full, V3.1.0)
 
 **Kind:** inventory table (not primary narrative).  
+**Pin:** V **3.1.0 (b14)**; gmUpdate IL size still **631** (unchanged from V3.0.1).  
 **Prefer:** [`loop-gmupdate.md`](../loop-gmupdate.md) (gmUpdate call chain).  
-**Raw:** [`../il/loop-complete-v3.1.0/`](../../il/loop-complete-v3.1.0/) or frame-entries dump.  
+**Raw:** [`../../il/loop-complete-v3.1.0/`](../../il/loop-complete-v3.1.0/) or [`../../il/frame-entries-v3.1.0/`](../../il/frame-entries-v3.1.0/).  
 **Hub:** [`INDEX.md`](../INDEX.md) · Inventories section.
 
 1. IL_0000 `Time::get_frameCount`

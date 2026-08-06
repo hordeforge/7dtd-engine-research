@@ -38,6 +38,23 @@ between releases, what a prior corpus measured), not stale pins. Line numbers
 written before 2026-08-06 may still be V3.0.1 numbers, which drift from the
 V3.1.0 dump by roughly 3500 lines in the NetPackage region.
 
+### V3.1.0 shipped delta map
+
+The standalone `experimental-delta.md` doc was **retired** once Henpocalypse
+shipped as stable V3.1.0 (b14). Facts live in the topic docs (not a separate
+delta file):
+
+| Topic | Home |
+|---|---|
+| Machine pin (version, TPS, census, TE widths) | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json), [coverage.md](coverage.md), [re-methodology.md](re-methodology.md) §1 |
+| NetPackageTileEntity `teBlockId` + i32 length | [protocol-packages.md](protocol-packages.md) §6.12, [tile-entities-power.md](tile-entities-power.md) |
+| Held entities / wild chicken grab | [items.md](items.md) § Held entities, [entity-ai.md](entity-ai.md) |
+| WorldState.SaveLoad IL=926 / CurrentSaveVersion=23 | [save-region.md](save-region.md) |
+| Join analytics `PlayerJoinServerEventData` | [server-lifecycle.md](server-lifecycle.md) |
+| Sandbox day/night density+respawn, chicken coop knobs, infection/hunger/thirst/stack | [sandbox-options.md](sandbox-options.md) §2 |
+| EOS/browse filters, GSI sandbox fields | [server-browser-prefabs.md](server-browser-prefabs.md), [network.md](network.md) |
+| Official product notes (content, not IL) | https://7daystodie.com/v3-1-0-henpocalypse-release-notes/ |
+
 ## Start here
 
 Campaign audit (V3.1.0 evidence + residual map): [`../workspace/outputs/docs-research-audit-20260803.md`](../workspace/outputs/docs-research-audit-20260803.md).
@@ -288,8 +305,8 @@ live with the mod that ships them.
 | [inventories/deeper.md](inventories/deeper.md) | entity-ai.md |
 | [inventories/gaps.md](inventories/gaps.md) | closed-gaps.md |
 | [inventories/opt-scan.md](inventories/opt-scan.md) | optim [OPTIMIZATION_CANDIDATES.md](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md) |
-| [inventories/netpackages.md](inventories/netpackages.md) | protocol.md, network.md |
-| [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) | protocol-packages.md (auto-extracted wire bodies: 183 packages + 61 nested serializers) |
+| [inventories/netpackages.md](inventories/netpackages.md) | protocol.md, protocol-packages.md, network.md |
+| [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) | protocol-packages.md (auto-extracted wire bodies; regenerate with WireBodies.exe) |
 | [inventories/coverage-report.md](inventories/coverage-report.md) | coverage.md (auto-generated reachability vs doc-mention coverage) |
 | [inventories/state-machines.md](inventories/state-machines.md) | index of all 74 modelled lifecycles, grouped by cluster (generated) |
 | [inventories/te-features.md](inventories/te-features.md) | tile-entities-power.md (11 TEFeatureAbs leaves) |
@@ -366,7 +383,12 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
   format). Line numbers in those sections are from the 2026-08-05 dump and drift
   from the tracked `il/` V3.1.0 sets.
 
-- **2026-08-02:** Retarget hub to V3.1.0 (b14) Henpocalypse; experimental-delta promoted to shipped.
+- **2026-08-06:** Corpus hygiene pass after research-docs-corpus audit: inventory titles
+  (gmupdate-calls, netpackages) retitled to V3.1.0; vague "delta removed" pointers
+  replaced by this § V3.1.0 shipped delta map + topic links; sandbox catalog names
+  day/night density + chicken coop knobs; dynamic-mesh WriteRegion dead path re-closed
+  with Xref (self-retry only).
+- **2026-08-02:** Retarget hub to V3.1.0 (b14) Henpocalypse; experimental-delta promoted to shipped (later retired into topic docs + delta map above).
 
 - **2026-07-23:** Narratives regrouped into topical clusters (A meta/method, B loop, C entities/AI, D world/terrain/save, E net/wire); fixed aidirector second H1.
 - **2026-07-23:** zig-clone.md moved to `zdtd/docs/` (reimplementation design, not stock RE).

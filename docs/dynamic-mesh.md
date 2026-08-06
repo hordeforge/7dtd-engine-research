@@ -227,13 +227,16 @@ a trailing `i64`, and `ChunkNeighbourData.Write`.
 Adding for regen`" log is `DynamicMeshRegion.OnCorrupted`. On a headless server the
 byte-level load is what matters, the actual `Mesh`/GameObject build is client render.
 
-**Dead legacy path (not executed).** `DynamicMeshFile.WriteRegion` /
-`WriteRegionHeaderData` / `Write16BitVoxelMeshes` / `LoadRegionGameObjectSync` have
-**no callers** in this DLL (only retry self-recursion); they are an older
-version-`160` region format the shipped server never runs. Do not implement a clone
-against them. (For the record the dead `WriteRegion` body writes `x,z` per chunk
-plus `CreateDate.Ticks:i64` to a discarded `MemoryStream`, never touching disk; its
-`tryCount` retry guards are 5 / 10 respectively, but the whole path is dead.)
+**Dead legacy path (not executed from live producers).** `DynamicMeshFile.WriteRegion`
+(IL=159) / `WriteRegionHeaderData` (IL=133) / `Write16BitVoxelMeshes` /
+`LoadRegionGameObjectSync` are an older version-`160` region format. On V3.1.0 b14,
+`tools/bin/Xref.exe` reports **exactly one** call site for `WriteRegion` and for
+`WriteRegionHeaderData`: each method's own catch-path **self-retry** (`tryCount++`,
+`Thread.Sleep`, recurse). There is **no external caller** from
+`RegenerateRegion` / `SaveRegion` / manager Update. Live persistence is only the
+`SaveRegion` deflate path above. Do not implement a clone against the version-160
+writers. (For the record the dead `WriteRegion` body still contains the old field
+layout and retry guards 5 / 10, but nothing outside the method invokes it.)
 
 ---
 

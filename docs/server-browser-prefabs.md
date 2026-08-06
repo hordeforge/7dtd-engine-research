@@ -357,7 +357,7 @@ surface is exactly sections 1 and 2.
 | [world-generation.md](world-generation.md) | Writes `prefabs.xml`; authors the `PrefabVolumes` model consumed here |
 | [world-chunks.md](world-chunks.md) | Chunk lifecycle around `DecorateChunk` |
 | [webserver.md](webserver.md) | HTTP admin surface that mirrors server prefs |
-| the V3.1.0 release delta (removed; content folded into the topic docs) | `SessionsClient.matchesFilters` (experimental-only browse filter) |
+| this doc § EOS filters / [server-lifecycle.md](server-lifecycle.md) | `SessionsClient.matchesFilters` (client browse filter; not a dedicated sim path) |
 | [game-events.md](game-events.md) | `EventPrefabs` consumers of `PrefabInstance.Serializable` |
 | [protocol-packages.md](protocol-packages.md) | NetPackage inventory incl. the editor/world-init packages |
 

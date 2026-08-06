@@ -117,11 +117,11 @@ member: **74 float, 46 int, 32 boolean**, grouped by `CategoryName` into
 
 | Category | Representative options (enum names) |
 |---|---|
-| General | `RangedDamage`/`MeleeDamage`/`BlockDamage`/`TerrainDamage`, `HeadshotMultiplier`, `IncomingDamage`, walk/run/crouch/jump speeds, `StaminaUsage`/`StaminaRegen`, `XPMultiplier`, `SkillGainRate`, `SkillPointsPerLevel`, `DeathPenalty` + drop/degrade-on-death suite, `InfectionRate`, `EncumbranceModifier`, `NewbieCoat`, `JarRefund` |
-| Entities | `EnemySpawnMode`, `MaxEnemyTier`, `BiomeEnemyDensity`, biome respawn rates, `EntityDamage`/`EntityIncomingDamage`, `BlockDamageAI`/`BlockDamageAIBM`, `HeadshotMode`, zombie day/night/feral/BM speeds, `ZombieFeralSense`, `AISmellMode`, `ZombieRageChance`, `AllowZombieDigging`, `ZombiesEatAnimals`, health bars |
+| General | `RangedDamage`/`MeleeDamage`/`BlockDamage`/`TerrainDamage`, `HeadshotMultiplier`, `IncomingDamage`, walk/run/crouch/jump speeds, `StaminaUsage`/`StaminaRegen`, `XPMultiplier`, `SkillGainRate`, `SkillPointsPerLevel`, `DeathPenalty` + drop/degrade-on-death suite, `InfectionRate` / **`InfectionChance`**, **`HungerMultiplier`**, **`ThirstMultiplier`**, **`StackSizeMultiplier`** (hard cap 30000 on item stacks; see [items.md](items.md)), `EncumbranceModifier`, `NewbieCoat`, `JarRefund` |
+| Entities | `EnemySpawnMode`, `MaxEnemyTier`, **day/night density+respawn split** (`BiomeDayEnemyDensity`, `BiomeNightEnemyDensity`, `BiomeDayAnimalDensity`, `BiomeNightAnimalDensity`, `BiomeDayZombieRespawn`, `BiomeNightZombieRespawn`, `BiomeDayAnimalRespawn`, `BiomeNightAnimalRespawn`; V3.1 replaces a single `BiomeEnemyDensity` knob), `EntityDamage`/`EntityIncomingDamage`, `BlockDamageAI`/`BlockDamageAIBM`, `HeadshotMode`, zombie day/night/feral/BM speeds, `ZombieFeralSense`, `AISmellMode`, `ZombieRageChance`, `AllowZombieDigging`, `ZombiesEatAnimals`, health bars |
 | World | `GlobalGSModifier`/`BiomeGSModifier`, `BiomeProgression`, `TemperatureSurvival`, `MaxTechType`, blood moon frequency/range/count/warning, air drops, `StormFreq`/`StormWarning`, `HeatMapSensitivity`, `DayNightLength`/`DayLightLength`, map/compass/markers/location-info toggles |
 | Resources | `LootMaxTier`, loot/game/trader-stage modifiers, `LootRespawnDays`, `LootTimer`, `LootBagChance`, the 13 per-class abundance floats (food, drink, medical, ammo, ...), `TreasureMapChance`, mining/crop/seed/harvest outputs, `CropGrowthSpeed` |
-| Crafting | `CraftingProgression`, `CraftingMaxTier`, `PointsPerMagazine`, `BackpackCrafting`, `WorkstationCrafting`, `SmeltingType`, crafting time/input/output, scrapping, dew collector and apiary time/input/output, `ItemDegradation`, `RepairTypes`, `MaxDegradationAmount` |
+| Crafting | `CraftingProgression`, `CraftingMaxTier`, `PointsPerMagazine`, `BackpackCrafting`, `WorkstationCrafting`, `SmeltingType`, crafting time/input/output, scrapping, dew collector and apiary time/input/output, **Chicken coop** (`ChickenCoopTime`, `ChickenCoopOutput`, `ChickenCoopInput`, `ChickenStressEvent`; held-entity chickens in [items.md](items.md)), `ItemDegradation`, `RepairTypes`, `MaxDegradationAmount` |
 | Traders | `TradersEnabled`, `VendingEnabled`, `TraderHours`, `TraderProtection`, `TraderDialog`, `GlobalTSModifier`, `TraderMaxTier`, item abundance and reset intervals, buy/sell prices, `TraderBuyLimit` |
 | Tasks | `ChallengesEnabled`, `QuestsEnabled`, intro quest/challenge toggles, `TraderToTraderQuestsEnabled`, `BuriedQuestsEnabled`, `POIQuestsEnabled`, `QuestsPerTier`, `QuestProgressionDailyLimit`, `StarterSkillPoints` |
 | Misc | vehicle fuel/entity/block/self damage, `ElectricalOutput`, and the silly suite: `SillyCelebrate`, `SillyBigHeads`, `SillyTinyZombies`, `SillySounds`, `SillyLowGravity` (drives `Physics.gravity` scaling), `SillyBlackandWhite` (client rendering) |
@@ -404,7 +404,7 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
 | [server-lifecycle.md](server-lifecycle.md) | `StartAsServer` sequence that loads and applies the code |
 | [console-commands.md](console-commands.md) | Command registry hosting `getsandboxoptions`/`gso` |
 | [webserver.md](webserver.md) | REST `SandboxSettings` endpoint |
-| the V3.1.0 release delta (removed; content folded into the topic docs) | `GetOptionNameValueDictionaryFromPreset` (experimental-only) |
+| [server-lifecycle.md](server-lifecycle.md) / this doc §4 | `GetOptionNameValueDictionaryFromPreset` (preset → name/value dict; used by admin/UI paths) |
 | [loot-economy.md](loot-economy.md) | Loot abundance/tier consumers |
 | [combat-damage.md](combat-damage.md) | Damage-percent consumers |
 | [entity-ai.md](entity-ai.md) / [aidirector.md](aidirector.md) | Zombie speed, feral sense, blood moon consumers |

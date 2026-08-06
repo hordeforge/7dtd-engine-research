@@ -186,8 +186,10 @@ cross-version diff also run a per-method **signature** diff (emit
 `Type::Method(params)` for every method-with-body in each build and `comm` them:
 catches new/removed methods on existing types) and an **enum-member** diff (emit
 `Enum.Member=value` and `comm`: catches inserted/renumbered enum values). The
-held-entity feature and analytics changes in the V3.1.0 release delta (removed; content folded into the topic docs)
-were only visible through those two lenses, not the package parity alone.
+held-entity feature ([items.md](items.md) § Held entities) and join analytics
+([server-lifecycle.md](server-lifecycle.md) `PlayerJoinServerEventData`) in the V3.1.0
+shipped surface were only visible through those two lenses, not the package parity alone.
+Full delta map: [INDEX.md](INDEX.md) § V3.1.0 shipped delta map.
 
 ## 5c. Stock facts pin (hardcodes across docs + products)
 

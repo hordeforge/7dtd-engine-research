@@ -1,6 +1,6 @@
 # Dedicated-server engine coverage map (V3.1.0)
 
-**Current pin:** V **3.1.0 (b14)** Henpocalypse (Major=3 Minor=10 Build=14). Prior corpus was V3.0.1 (b4). Delta: the V3.1.0 release delta (removed; content folded into the topic docs).
+**Current pin:** V **3.1.0 (b14)** Henpocalypse (Major=3 Minor=10 Build=14). Prior corpus was V3.0.1 (b4). Shipped-delta map (where V3.1 facts live after `experimental-delta.md` was retired): [INDEX.md](INDEX.md) § V3.1.0 shipped delta map.
 
 **Owns:** family → narrative → dump checklist.  
 **Hub:** [`INDEX.md`](INDEX.md).  
@@ -124,7 +124,7 @@ should be re-checked against IL before you rely on it.
 | [engine-limitations.md](engine-limitations.md) | audited (pass 1) |
 | [entity-ai.md](entity-ai.md) | audited (pass 1) |
 | [entity-stats.md](entity-stats.md) | audited (pass 1) |
-| the V3.1.0 release delta (removed; content folded into the topic docs) | audited (pass 1) |
+| [INDEX.md](INDEX.md) V3.1.0 shipped delta map (replaces retired experimental-delta) | audited (pass 1; map refreshed 2026-08-06) |
 | [full-surface.md](full-surface.md) | audited (pass 1) |
 | [game-events.md](game-events.md) | audited (pass 1) |
 | [items.md](items.md) | audited (pass 1) |

@@ -6,6 +6,26 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-06 — research-docs-corpus hygiene + structure
+
+Objective: fix all open findings from `workspace/outputs/research-docs-corpus-audit.md`
+and improve hub structure for V3.1.0 (b14).
+
+Done (verified):
+- Inventory titles: gmupdate-calls.md, netpackages.md → V3.1.0 pins + correct il paths.
+- INDEX: new **V3.1.0 shipped delta map** (replaces retired experimental-delta prose).
+- Replaced vague "delta removed" pointers in network, coverage, re-methodology,
+  sandbox-options, server-browser-prefabs with concrete topic links.
+- sandbox-options §2: day/night Biome*Density/Respawn + ChickenCoop* / InfectionChance /
+  Hunger/Thirst/StackSize multipliers (string-confirmed in live ASM).
+- dynamic-mesh WriteRegion: Xref re-closed as self-retry only (no external callers).
+- residuals closed-items row for WriteRegion; INDEX inventories prefer protocol-packages.
+
+Verification: `make stock-check` exit 0; `make test` exit 0; INDEX orphans 0;
+broken links in touched files 0; em dashes 0.
+
+State: verified. Next: optional commit.
+---
 ## 2026-08-05 — stock-re-corpus audit fixes
 
 Objective: fix all problems surfaced by `workspace/outputs/stock-re-corpus-audit.md`

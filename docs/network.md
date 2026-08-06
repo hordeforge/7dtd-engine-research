@@ -1,6 +1,6 @@
-# Dedicated networking (V3.1.0 pin; corpus from V3.0.1 + delta)
+# Dedicated networking (V3.1.0 pin)
 
-**Current pin:** V3.1.0 (b14). Managed net architecture below was RE'd on V3.0.1 and re-verified where delta docs say so. See the V3.1.0 release delta (removed; content folded into the topic docs).
+**Current pin:** V **3.1.0 (b14)**. Managed net architecture was first RE'd on V3.0.1 and re-checked on the live 3.1.0 assembly. V3.1 wire/join deltas live in topic docs: TE outer wire in [protocol-packages.md](protocol-packages.md) §6.12; PackageIds version minor=10 build=14 in [protocol.md](protocol.md) / loadgen fixtures; GSI / sandbox browser fields in [server-browser-prefabs.md](server-browser-prefabs.md). Hub map: [INDEX.md](INDEX.md) § V3.1.0 shipped delta map.
 
 
 **Owns:** ConnectionManager peer pump, per-connection reader/writer threads, encrypt/compress framing, NetEntity package bands, NetPackage census.  
