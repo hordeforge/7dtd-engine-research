@@ -30,3 +30,10 @@ worlds/
 /PathFinderThread
 /PathInfo
 /RegionFile
+/BodyAnimator
+/EModelBase
+/EnumRemoveEntityReason
+/NetEntityDistribution
+/NetEntityDistributionEntry
+/AvatarController
+/Chunk

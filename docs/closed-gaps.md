@@ -78,7 +78,9 @@ ASPPathFinderThread.FindPaths (≤8 / yield)
 
 **pathFollow (160 IL):** waypoint advance, ground project, segment closest point, elevator handling, `EntityMoveHelper.SetMoveTo`.
 
-**Optim:** admission still at enqueue; compute cost is A\* graph search (harder to Harmony cheaply than skipping FindPath).
+**Drain re-pin (2026-08-07):** ASP `<FindPaths>d__8.MoveNext` IL=87: FIFO `entityWaitQueue.list[0]`, hard cap **`ldc.i4.8`**, yield, no priority sort ([entity-ai.md](entity-ai.md) §D3.7).
+
+**Optim:** admission still at enqueue; compute cost is A* graph search (harder to Harmony cheaply than skipping FindPath). Measured BM-ish A/B with cap+far-drop did not improve lag (optimizer V310 baseline); keep admission default-off unless path-queue telemetry shows a different regime.
 
 ---
 

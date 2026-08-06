@@ -92,6 +92,31 @@ re-push overwrite chunks. There is no side-thread `write` of the package body
 outside the normal NetPackage serialize path (Xref `write` = 0 direct callers;
 serialization is virtual dispatch from the connection writer).
 
+### Chunk dirty / save invalidation (blob-cache input)
+
+**`Chunk.get_NeedsSaving` IL=20** returns true if any of:
+
+| Condition | Field |
+|---|---|
+| Block/light/etc. dirty | `isModified == true` |
+| Entities present | volatile `hasEntities == true` |
+| Tile entities non-empty | `tileEntities.Count > 0` |
+| Block triggers non-empty | `triggerData.Count > 0` |
+
+So a chunk with **any TE or trigger** always needs saving, even if `isModified`
+is false. Pure air + no entities can be clean.
+
+**`isModified` writers (field Xref, V3.1.0 b14 sample):** set true (or cleared)
+from block/light/water/texture mutators (`SetBlockRaw`, `SetLight`, `SetWater*`,
+`SetTextureFull`, `FillBlockRaw`, …), TE add/remove, entity tracking adjust,
+load/save/reset/ctor paths, and biome spawn count helpers. A network chunk blob
+cache keyed only on "block version" is incomplete unless it also invalidates on
+**TE / trigger / entity occupancy** changes that flip `NeedsSaving` or change
+serialized TE payload inside `Chunk.write` / snapshot.
+
+**Region snapshot gate** (save-region): `RegionFileChunkSnapshot.Update` skips
+unless `saveIfUnchanged` or `Chunk.NeedsSaving` - same predicate as above.
+
 **Observer model (`ChunkManager/ChunkObserver`):** created by
 `AddChunkObserver(pos, bBuildVisualMeshAround, viewDim, entityIdToSendChunksTo)`
 and stored in `m_ObservedEntities`. Join path sets
@@ -421,6 +446,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** `Chunk.get_NeedsSaving` predicate (isModified | hasEntities | TE | triggers) for blob-cache invalidation notes.
 - **2026-08-06:** ChunkStabilityEnabled is non-persistent with default true, so
   clients keep stability on regardless of the server; ChunkCluster::Init builds a
   StabilityCalculator on clients too and LightChunk recomputes the plane (why

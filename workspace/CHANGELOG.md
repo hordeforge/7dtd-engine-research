@@ -6,6 +6,21 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — research: path drain, interest exit, chunk dirty, animator culling init
+
+Objective: continue stock RE only (no zdtd). Close optim-facing research gaps
+from PERF brief §7 without inventing levers.
+
+Done (verified live V3.1.0 b14 ASM):
+- entity-ai §D3.7: ASP FindPaths MoveNext re-pin (FIFO list[0], ldc.i4.8, no priority).
+- network §2.2: interest exit = NetPackageEntityRemove reason Unloaded (ldc.i4.1).
+- world-chunks: Chunk.get_NeedsSaving = isModified|hasEntities|TE|triggers.
+- entity-ai addendum: BodyAnimator defaultCullingMode=AlwaysAnimate vs live CullUpdateTransforms.
+- closed-gaps path section: drain re-pin + pointer to path BM measure (default-off).
+
+Verification: DumpMethod FindPaths>d__8 MoveNext; updatePlayerEntity; get_NeedsSaving;
+BodyAnimator.initBodyAnimator; EnumRemoveEntityReason DumpType.
+---
 ## 2026-08-06 — hygiene + optim evidence handoff
 
 - residuals §5: optimizer residual pointer notes Clone/chunk ownership closed.

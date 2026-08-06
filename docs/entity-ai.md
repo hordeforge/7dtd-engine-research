@@ -525,20 +525,39 @@ Floats **1, 2.5, 4, 40, 80** (ranges / multipliers). Many GameStats/Prefs int id
 
 ### D3.7 Path worker budget (critical)
 
-`ASPPathFinderThread/<FindPaths>d__8.MoveNext`:
+**Re-pinned V3.1.0 b14** (`DumpMethod` filter `FindPaths>d__8` / `MoveNext`, IL=87).
+
+`GamePath.ASPPathFinderThread/<FindPaths>d__8.MoveNext`:
 
 ```text
-for i in 0 .. 7:          // ldc.i4.8  → at most 8 paths
-  pop entityWaitQueue
-  navigator.GetPathTo(pathInfo)
-  maybe remove unfinished from finishedPaths
-yield return null         // resume next coroutine step
-loop forever
+// state 0 entry:
+counter = 0
+while counter < 8:                    // IL_00C0..00C2: ldloc.2; ldc.i4.8; blt
+  if entityWaitQueue.list.Count == 0: break
+  id = entityWaitQueue.list[0]        // FIFO head (index 0), not priority
+  entityWaitQueue.Remove(id)
+  if !finishedPaths.TryGetValue(id, out pathInfo):
+    Log.Warning("{0} path dup id {1}", frameCount, id)
+  else:
+    pathInfo.entity.navigator.GetPathTo(pathInfo)
+    if pathInfo.state == 0: finishedPaths.Remove(id)
+  counter++
+yield return null                     // <>1__state = 1; next resume loops again
+// state 1: reset to state -1 and jump back to counter=0 loop
 ```
+
+| Fact | Evidence |
+|---|---|
+| Drain cap | **`ldc.i4.8`** only bound; no distance/priority sort in this method |
+| Queue order | **FIFO** via `list[0]` + `HashSetList.Remove` |
+| Coalesce | Enqueue path (elsewhere) keys `finishedPaths` by entityId; drain pops wait list |
+| Yield | After ≤8 starts, coroutine yields; infinite outer loop |
 
 **Production pathfinder drains ≤ 8 path computations per coroutine slice**, then yields.  
 Under blood moon, queue depth grows; main still enqueues unbounded FindPaths.  
-**Admission on enqueue complements this fixed drain of 8.**
+**Admission on enqueue complements this fixed drain of 8.** There is **no** priority
+queue in the drain: combat pathing is preserved only if admission prefixes keep
+alert/attack enqueues (or the wait list happens to still hold them when FIFO reaches them).
 
 ---
 
@@ -724,6 +743,16 @@ Measured live (`es animstate` probe, optimizer RESULTS 3s):
 - **Culling correction:** live healthy zombies sit at `cullingMode =
   CullUpdateTransforms` (the earlier "forced AlwaysAnimate" note is not the
   steady state), and the wight class runs `applyRootMotion=false` entirely.
+- **Spawn init (IL, V3.1.0 b14):** `BodyAnimator.initBodyAnimator` stores
+  `defaultCullingMode = ldc.i4.0` (**Unity `AnimatorCullingMode.AlwaysAnimate`**)
+  and grabs the child `Animator` from `BodyParts.BodyObj`. That is the **stored
+  default field**, not proof of the live runtime mode. Three call sites write
+  `Animator.set_cullingMode` (Xref): `AvatarController.ResetAnimations`,
+  `BodyAnimator.set_RagdollActive`, `EModelBase.StartRagdoll`. Steady-state
+  `CullUpdateTransforms` is therefore applied on a **later** path (ragdoll/
+  reset/runtime), consistent with live `es animstate` probes. EfficientServer
+  CullCompletely enter/exit must save/restore the **live** `animator.cullingMode`,
+  not assume AlwaysAnimate from `defaultCullingMode` alone.
 - **Corpses stay in `world.Entities.list`** with death-disabled animators -
   any naive animator sweep must skip `IsDead()` entities or dead bodies pose
   back upright as statues.
@@ -791,6 +820,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 
 - **2026-07-28:** FindPath distSq 1225 / Y ±45 clamps; ASP enqueue coalesce; base FindPath no-op.

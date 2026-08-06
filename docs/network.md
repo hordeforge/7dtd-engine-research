@@ -167,6 +167,56 @@ Detail on spawn body: [protocol-packages.md](protocol-packages.md) section 5.1.
 Placement request path: section 5.0 below is in protocol-packages; server create is
 `GameManager.RequestToSpawnEntityServer`.
 
+### 2.2 Interest enter / exit packages (spatial-grid critical)
+
+**Re-pinned V3.1.0 b14** (`NetEntityDistributionEntry.updatePlayerEntity` IL=222).
+
+Per full tick, for each tracked entity entry × each player:
+
+1. Compute planar distSq between the **player** and the entity's last
+   `encodedPos` (encoded ints ÷ 32 → block-ish floats; Y ignored in this check).
+2. In range when `distSq <= trackingDistanceThreshold²` (unsigned compare pattern
+   in IL ends as "inside" branch).
+
+**Enter (was out, now in):**
+
+```text
+trackedPlayers.Add(player)
+SendPackage(getSpawnPacket(), ..., player.entityId, flags=192)
+// if tracked entity is EntityAlive:
+SendPackage(NetPackageEntityAliveFlags.Setup(alive), ...)
+// if also EntityPlayer: PlayerStats / Equipment / TwitchStats as applicable
+// may send NetPackageEntityVelocity Setup(id, motion, ...)
+```
+
+**Exit (was in, now out) - the package a spatial grid must not skip:**
+
+```text
+// IL_0228 when outside threshold AND player still in trackedPlayers:
+trackedPlayers.Remove(player)
+SendPackage(
+  NetPackageEntityRemove.Setup(trackedEntity.entityId, reason=ldc.i4.1),
+  to player.entityId, flags=192)
+```
+
+`NetPackageEntityRemove.Setup(Int32, EnumRemoveEntityReason)` stores reason as
+**u8**. Enum field order on the type (DumpType): `Undef`, `Unloaded`, `Killed`,
+`Despawned`, `Captured` → **`ldc.i4.1` = `Unloaded`** (interest unload, not kill).
+
+```mermaid
+flowchart TD
+  PE[updatePlayerEntity player] --> D{planar distSq <= thresh²?}
+  D -->|yes, not tracked| Enter[Add + EntitySpawn + flags...]
+  D -->|yes, already tracked| Steady[ret / motion path elsewhere]
+  D -->|no, was tracked| Exit[Remove + EntityRemove reason=Unloaded]
+  D -->|no, not tracked| Skip[ret]
+```
+
+**Spatial-grid implication:** any interest redesign must emit the same
+**`NetPackageEntityRemove` / Unloaded** when a player leaves an entity's set.
+Omitting it leaves the client with a ghost entity; using `Killed`/`Despawned`
+would play the wrong client teardown.
+
 ---
 
 ## 3. NetPackage type inventory
@@ -520,6 +570,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-07:** Interest exit path documented: `updatePlayerEntity` sends `NetPackageEntityRemove` with `EnumRemoveEntityReason.Unloaded` (ldc.i4.1) when a player leaves tracking range.
 - **2026-08-06:** Package registry is reflection over 189 concrete NetPackage
   subclasses keyed on short type name (abstracts excluded), with id 0 pinned to
   PackageIds and an unknown name being a hard EKickReason 18 disconnect; the
