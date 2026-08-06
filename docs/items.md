@@ -301,6 +301,10 @@ stateDiagram-v2
   ClearSlot --> NoActiveItem: no replacement (bare hands)
 ```
 
+Wire mirror struct: `EntityNetworkHoldingData` carries `m_HoldingItemStack` +
+`m_HoldingItemIndex` for the S2C `NetPackageHoldingItem` body (same fields as
+[protocol-packages.md](protocol-packages.md) §5.3).
+
 `DecHoldingItem` is the server-authoritative depletion: it lowers the held
 `ItemStack.count`, and when the stack hits zero it clears the slot and quick-swaps
 to the best remaining slot (`GetBestQuickSwapSlot`) so a used-up stack of thrown

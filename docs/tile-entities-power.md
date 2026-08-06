@@ -156,6 +156,42 @@ flowchart LR
 
 ---
 
+### 2.1 `ClientPowerData` and `TileEntityPowerSource` stream modes
+
+`TileEntityPowerSource` (TE type 16) holds a nested `ClientPowerData` mirror used
+for network and UI fuel/slot sync. Fields (DumpType):
+
+| Field | Width | Role |
+|---|---|---|
+| `IsOn` | bool | generator/panel powered state |
+| `MaxFuel` / `CurrentFuel` | u16 | generator only (`PowerItemTypes.Generator` = 5) |
+| `SolarInput` | u16 | solar only (`PowerItemTypes.SolarPanel` = 6); maps from `PowerSolarPanel.InputFromSun` |
+| `MaxOutput` / `LastOutput` | u16 | `PowerSource.MaxOutput` / `LastPowerUsed` |
+| `AddedFuel` | u16 | client→server fuel add; cleared after apply |
+| `SendSlots` | bool | whether `ItemSlots` follow on ToServer |
+| `ItemSlots` | `ItemStack[]` | fuel/battery inventory slots |
+
+`StreamModeWrite` / `StreamModeRead` enum order: **Persistency=0**, **ToServer/FromClient=1**,
+**ToClient/FromServer=2** (DumpType field order).
+
+**`TileEntityPowerSource.write` IL=98** (after base `TileEntityPowered.write`):
+
+| Mode | Payload |
+|---|---|
+| **Persistency (0)** | `u16` **18** (local version stamp when not network) |
+| **ToServer (1)** | `bUserAccessing:bool`, `AddedFuel:u16` (then zeroed), `SendSlots:bool`, if true `GameUtils.WriteItemStack(ItemSlots)` and clear `SendSlots` |
+| **ToClient (2)** | `hasPowerSource:bool`; if true: `IsOn:bool`; if Generator: `MaxFuel:u16`, `CurrentFuel:u16`; if Solar: `InputFromSun:u16`; `WriteItemStack(Stacks)`; `MaxOutput:u16`; `LastPowerUsed:u16` |
+
+**`read` IL=158** mirrors: ensures `ClientData` non-null; **FromClient (1)** applies
+`AddedFuel` into `PowerGenerator.CurrentFuel` (clamped to `MaxFuel`), may
+`SetSlots` from `ItemSlots`, `SetModified()`; **FromServer (2)** fills `ClientData`
+IsOn/fuel/solar/slots/MaxOutput/LastOutput for UI. Disk path uses base TE versioning.
+
+This is the wire shape inside `NetPackageTileEntity` payloads for power sources,
+not a separate NetPackage type.
+
+---
+
 ## 3. The power graph and PowerManager
 
 Electricity is a **separate global structure** from the chunk store. `PowerManager`
@@ -473,6 +509,8 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-07:** `ClientPowerData` field table + `TileEntityPowerSource` write/read by
+  StreamMode (Persistency / ToServer / ToClient) from IL=98/158.
 - **2026-07-28:** power.dat field-level Write/Read tree codec + threaded save.
 
 - **2026-07-28:** NetPackageTileEntity wire + server rebroadcast path.

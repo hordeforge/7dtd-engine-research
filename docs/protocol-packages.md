@@ -448,6 +448,10 @@ holdingItemStack : ItemStack.Write
 holdingItemIndex : byte
 ```
 
+Server-side carrier for the same three fields (not a NetPackage): 
+`EntityNetworkHoldingData` holds `m_HoldingItemStack` + `m_HoldingItemIndex` on the
+entity before `NetPackageHoldingItem.Setup` fans them to observers.
+
 ### 5.4 NetPackagePlayerInventory
 ```text
 toolbelt present : bool  (+ ItemStack[] count-prefixed if present)
@@ -1131,8 +1135,11 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | HUD toolbelt toast |
 | `NetPackageCloseAllWindows` | 8 | _playerIdToClose | Force-close UI |
 | `NetPackageSoundAtPosition` | 25 | pos, audioClipName, mode, distance, entityId | 3D sound |
-| `NetPackageAudioPlayInHead` | 12 | soundName, isUnique | Local head audio |
-| `Audio.NetPackageAudio` | 53 | soundGroupName, play, pos, playOnEntity, occlusion, volumeScale, signalOnly | Full audio group package |
+| `NetPackageAudioPlayInHead` | 12 | `soundName:string`, `isUnique:bool` | Local head audio |
+| `Audio.NetPackageAudio` | 53 | after EntityTargeted id: `soundGroupName:string` (empty if null), `play:bool`, `position:3xf32`, `playOnEntity:bool`, `occlusion:f32`, `volumeScale:f32`, `signalOnly:bool` | World/entity audio group |
+| `LightManager/NetPackageLight` | 12 | `entityId:i32`, `lightLevel:f32` | Held/entity light level |
+| `EntityFallingTree/NetPackageTreeFade` | 8 | `entityId:i32` | Tree fade/remove FX |
+| `DroneWeapons/NetPackageDroneParticleEffect` | 12 | `ParticleEffect.Write` + `entityThatCausedIt:i32` | Drone beam/particle FX |
 | `NetPackageParticleEffect` | 20 | pe, entityThatCausedIt, forceCreation, worldSpawn | Particles |
 | `NetPackageEmitSmell` | 17 | EntityId, SmellName | AI smell marker |
 | `NetPackageQuestGotoPoint` | 52 | playerId, questCode, GotoType, x,y, size, difficulty, biomeFilterType, biomeFilter | Quest goto objective |

@@ -23,11 +23,25 @@ entity update).
 | `BuffClass` | The definition loaded from `buffs.xml`: `DurationMax`, effects/modifiers, tags, stack rule |
 | `BuffValue` | A running instance on an entity: remaining `DurationInTicks`, `Update`/`Remove` flags, instigator |
 | `EntityBuffs` | Per-`EntityAlive` container: the active `BuffValue` list, add/remove/query, and the `Tick` |
+| `BuffManager` | Process-wide registry of `BuffClass` by name (case-insensitive) |
 | custom vars | Named float variables (`AddCustomVar`/`GetCustomVar`) that buffs and MinEvents read/write (the "cvar" system) |
 
 Each `EntityAlive` owns one `EntityBuffs`. Stat modifiers from active buffs are
 applied through `GetModifiedValueData` (passive effects by `ValueSourceType` /
 `PassiveEffects` + `FastTags`), which the stat system queries.
+
+### 1.1 `BuffManager` (global definition table)
+
+Static `BuffManager.Buffs` is a `CaseInsensitiveStringDictionary<BuffClass>`.
+
+| Method | IL | Behaviour |
+|---|---:|---|
+| `AddBuff(BuffClass)` | 6 | `Buffs[buffClass.Name] = buffClass` |
+| `GetBuff(String)` | 7 | `TryGetValue`; returns null if missing (pop success flag) |
+| `Cleanup()` | 7 | `Clear` + null the static dictionary |
+
+XML load (`BuffsFromXml`) fills this table; entity code resolves names through
+`GetBuff` before constructing `BuffValue`s. Not per-entity; not per-tick.
 
 ---
 
@@ -123,6 +137,7 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
+- **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.
 - **2026-07-28:** NetPackageEntityStatsBuff pointer.
 
 - **2026-07-23:** Initial buff-system reversal (EntityBuffs tick, BuffValue lifecycle, tag/death removal, net sync) with state machines.

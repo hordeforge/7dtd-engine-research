@@ -64,6 +64,26 @@ full console-command prose beyond the catalog, TE subclass tick minutiae.
 `TruncateStringSerializerConverter` classified OOS (client analytics; dedicated
 skips heartbeat); `ConsoleCmdLogEnvironment` (`logenv`) added to console catalog.
 
+### Tier-C depth progress (ongoing, never complete)
+
+Closed in recent sessions (still optional, not required for A+B):
+
+| Topic | Doc |
+|---|---|
+| ASP FindPaths FIFO + `ldc.i4.8` drain | entity-ai §D3.7 |
+| Interest exit = `NetPackageEntityRemove` / Unloaded | network §2.2 |
+| `Chunk.NeedsSaving` predicate | world-chunks |
+| BodyAnimator `defaultCullingMode` vs live cull | entity-ai addendum |
+| Raw + sector region headers (`7rr` / `7rg`) | save-region §3.4-3.5 |
+| `BuffManager` registry | buffs §1.1 |
+| `ClientPowerData` stream modes | tile-entities-power §2.1 |
+| Audio/Light/TreeFade/DroneParticle wire fields | protocol-packages §6.21 |
+| Explosion Initiate/Client full field lists | protocol-packages §6.14-6.15 (already) |
+
+Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
+Quest/Action leaves (inventories), client-shared helpers, and dormant UAI. Promote
+only when a clone or optim lever needs the behaviour.
+
 ---
 
 ## 4. Why literal "every behaviour" is impossible

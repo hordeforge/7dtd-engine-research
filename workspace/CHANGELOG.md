@@ -6,6 +6,20 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C depth: power ClientData, sector 7rg, BuffManager, audio fields
+
+Objective: continue optional annotation depth after A+B complete (unaccounted=0).
+
+Done (verified live V3.1.0 b14 IL):
+- tile-entities-power §2.1: ClientPowerData + StreamMode write/read tables.
+- save-region §3.4: sector 7rg open/version byte/V1 header 8196 layout.
+- buffs §1.1: BuffManager registry.
+- protocol-packages: HoldingItem carrier EntityNetworkHoldingData; Audio/Light/
+  TreeFade/DroneParticle field detail in §6.21.
+- items: EntityNetworkHoldingData pointer; completion-bar tier-C progress table.
+
+Coverage unaccounted remains 0. stock-check green.
+---
 ## 2026-08-07 — completion bar + unaccounted=0 + Raw 11-byte header
 
 Objective: drive Coverage unaccounted to 0 and define honest "100%" (tiers A+B).

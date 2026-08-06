@@ -343,10 +343,38 @@ Factories: `RegionFileFactoryRaw.CreateRegionFileAccess` and
 default often sector-based rather than Raw). Shared ideas: **4096-byte** sectors,
 location table via `GetLocationInfo` / `SetLocationInfo` (i16 sector index + u8
 sector count style fields), optional header flush through `SaveHeaderData`.
+Magic: `FileHeaderMagicBytes` = ASCII **`7rg`** (`.cctor`).
+
+#### On-disk header (closed 2026-08-07)
+
+`RegionFileSectorBased.Get` (IL=77) opens or creates the file:
+
+1. If missing: create empty file, construct **`RegionFileV2`** with version **1**.
+2. If present: read **3** magic bytes, must equal `"7rg"` else throw
+   `Incorrect region file header!` + path.
+3. Read **1** version byte (`Stream.ReadByte` → u8).
+4. **`version < 1` → `RegionFileV1`**, else **`RegionFileV2`** (same stream).
+
+`RegionFileV1.SaveHeaderData` (IL=46) / empty-file ctor path:
+
+```text
+offset 0..2 : magic "7rg"
+offset 3    : version:u8 = 0 for V1 writes (WriteByte(0))
+offset 4    : regionLocationHeader  4096 bytes  (1024 chunks × 4-byte slots)
+offset 4100 : regionTimestampHeader 4096 bytes  (1024 × u32 via BitConverter base)
+offset 8196 : first payload sector (sector index 0 would be inside header;
+              WriteData validates sector offset >= 3 on V2)
+```
+
+`3 + 1 + 4096 + 4096 = 8196` matches the V1 ctor header buffer size. V2 ctor
+allocates **12288** bytes for its working header buffer (extra room beyond the
+8196 on-disk prefix used at open); location/timestamp still use 4096-byte tables
+in the Get/SetLocationInfo packing (§3.5).
 
 | | **RegionFileV1** | **RegionFileV2** |
 |---|---|---|
 | ctor header buffer | **8196** bytes | **12288** bytes |
+| file version byte | **0** | **>= 1** (new files use 1) |
 | free space | reuse existing location when fits; else grow | `findFreeSectorOfSize` + `usedSectors` map |
 | WriteData IL | **180** | **244** |
 | payload write | length Int32 + compression byte + data + pad byte | length Int32 + data; validates sector offset **>= 3** and write-end vs file size |
@@ -534,8 +562,8 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
-- **2026-08-07:** Raw 11-byte file header field layout closed (`7rr` + version:i32 +
-  paddingBytes:i32) from `New`/`Load` IL.
+- **2026-08-07:** Sector `7rg` open path + V1 header layout (magic+version byte +
+  4096+4096 tables); Raw 11-byte header (`7rr` + version:i32 + paddingBytes:i32).
 - **2026-08-06:** §3.5 location/timestamp header packing closed (Raw i32 pairs + on-disk
   11/512/256/779 layout; sector LE u16 + unused byte + u8 length; ToShort/FromShort).
 
