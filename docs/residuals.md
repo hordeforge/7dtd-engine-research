@@ -116,7 +116,7 @@ These are **not** stock RE open items. They live in sibling TODO lists. Pointed 
 | Sibling | Residual class | Hub |
 |---|---|---|
 | `zdtd` | Demo **pass=83 fail=0** (20260804q stackDrop + Food ≥+5; power TE hard). Residual: full chili +15 Food S2C, IsSpawned lag, empty deco S2C, M11 scale | `zdtd/TODO.md`, `zdtd/docs/PLAYTEST_V310_20260803.md` |
-| `7dtd-optimizer` | AnimatorEmergency human soak before default-on; packaging tests; optional BM re-sweep on 3.1 | `7dtd-optimizer/TODO.md` |
+| `7dtd-optimizer` | AnimatorEmergency **human soak** before default-on; path-admission BM measure; packaging tests. Clone triage + chunk encode ownership **closed in research** (2026-08-06) | `7dtd-optimizer/TODO.md`, `PERF_RESEARCH_BRIEF.md` |
 | `7dtd-loadgen` | H500 expanded-world validate; EAC unsupported | `7dtd-loadgen/TODO.md` |
 | `7dtd-apm` | Absolute forensic budgets under spawn (expected fail); disk ops | `7dtd-apm/TODO.md` |
 

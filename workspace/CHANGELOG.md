@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-06 — hygiene + optim evidence handoff
+
+- residuals §5: optimizer residual pointer notes Clone/chunk ownership closed.
+- Sibling hygiene (separate trees): apm/loadgen measured-scaling + zig-clone link
+  text/href fixed to optimizer/zdtd homes; optimizer PERF brief consumed research
+  triage; optimizer .gitignore ignores local /server/ drop.
+---
 ## 2026-08-06 — RE annotation + optim evidence (research-only)
 
 Objective: close the location-table bit-packing residual and record stock IL
