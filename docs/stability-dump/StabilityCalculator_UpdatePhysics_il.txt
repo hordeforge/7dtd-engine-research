@@ -1,0 +1,159 @@
+// StabilityCalculator/UpdatePhysics::.ctor(StabilityCalculator _sp) IL=9
+IL_0000: ldarg.0
+IL_0001: call System.Void System.Object::.ctor()
+IL_0006: ldarg.0
+IL_0007: ldarg.1
+IL_0008: stfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_000D: ldarg.0
+IL_000E: call MicroStopwatch MicroStopwatch::a()
+IL_0013: stfld MicroStopwatch UpdatePhysics::sw
+IL_0018: ret
+
+// StabilityCalculator/UpdatePhysics::System.Collections.Generic.IEnumerator<System.Object>.get_Current() IL=3
+IL_0000: ldarg.0
+IL_0001: ldfld Object UpdatePhysics::myEnumerator
+IL_0006: ret
+
+// StabilityCalculator/UpdatePhysics::System.Collections.IEnumerator.get_Current() IL=3
+IL_0000: ldarg.0
+IL_0001: ldfld Object UpdatePhysics::myEnumerator
+IL_0006: ret
+
+// StabilityCalculator/UpdatePhysics::MoveNext() IL=126
+IL_0000: ldarg.0
+IL_0001: ldfld Int32 UpdatePhysics::state
+IL_0006: stloc.0
+IL_0007: ldarg.0
+IL_0008: ldc.i4.m1
+IL_0009: stfld Int32 UpdatePhysics::state
+IL_000E: ldloc.0
+IL_000F: ldc.i4.1
+IL_0010: ble.un.s IL_0014
+IL_0012: ldc.i4.0
+IL_0013: ret
+IL_0014: ldc.i4.s 55
+IL_0016: call System.Boolean GameStats::GetBool(EnumGameStats)
+IL_001B: brtrue.s IL_003C
+IL_001D: ldarg.0
+IL_001E: ldarg.0
+IL_001F: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_0024: ldfld Single StabilityCalculator::updatePeriod
+IL_0029: newobj System.Void UnityEngine.WaitForSeconds::.ctor(System.Single)
+IL_002E: stfld Object UpdatePhysics::myEnumerator
+IL_0033: ldarg.0
+IL_0034: ldc.i4.1
+IL_0035: stfld Int32 UpdatePhysics::state
+IL_003A: ldc.i4.1
+IL_003B: ret
+IL_003C: ldarg.0
+IL_003D: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_0042: ldfld Boolean StabilityCalculator::bRunning
+IL_0047: brtrue.s IL_0052
+IL_0049: ldarg.0
+IL_004A: ldc.i4.m1
+IL_004B: stfld Int32 UpdatePhysics::state
+IL_0050: ldc.i4.0
+IL_0051: ret
+IL_0052: ldarg.0
+IL_0053: ldfld MicroStopwatch UpdatePhysics::sw
+IL_0058: callvirt System.Void MicroStopwatch::ResetAndRestart()
+IL_005D: br.s IL_00CB
+IL_005F: ldarg.0
+IL_0060: ldarg.0
+IL_0061: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_0066: ldfld Queue`1 StabilityCalculator::queueStabilityEmpty
+IL_006B: callvirt !0 System.Collections.Generic.Queue`1<Vector3i>::Dequeue()
+IL_0070: stfld Vector3i UpdatePhysics::curPosition
+IL_0075: ldarg.0
+IL_0076: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_007B: ldarg.0
+IL_007C: ldfld Vector3i UpdatePhysics::curPosition
+IL_0081: callvirt System.Void StabilityCalculator::physicsIsolation(Vector3i)
+IL_0086: ldarg.0
+IL_0087: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_008C: ldfld HashSet`1 StabilityCalculator::hashSetIsolation
+IL_0091: callvirt System.Collections.Generic.HashSet`1/Enumerator<!0> System.Collections.Generic.HashSet`1<Vector3i>::GetEnumerator()
+IL_0096: stloc.1
+IL_0097: br.s IL_00B2
+IL_0099: ldloca.s V_1
+IL_009B: call !0 System.Collections.Generic.HashSet`1/Enumerator<Vector3i>::get_Current()
+IL_00A0: stloc.2
+IL_00A1: ldsfld WorldBase StabilityCalculator::world
+IL_00A6: castclass World
+IL_00AB: ldloc.2
+IL_00AC: ldc.i4.0
+IL_00AD: callvirt System.Void World::AddFallingBlock(Vector3i,System.Boolean)
+IL_00B2: ldloca.s V_1
+IL_00B4: call System.Boolean System.Collections.Generic.HashSet`1/Enumerator<Vector3i>::MoveNext()
+IL_00B9: brtrue.s IL_0099
+IL_00BB: leave.s IL_00CB
+IL_00BD: ldloca.s V_1
+IL_00BF: constrained. System.Collections.Generic.HashSet`1/Enumerator<Vector3i>
+IL_00C5: callvirt System.Void System.IDisposable::Dispose()
+IL_00CA: endfinally
+IL_00CB: ldarg.0
+IL_00CC: ldfld MicroStopwatch UpdatePhysics::sw
+IL_00D1: callvirt System.Int64 MicroStopwatch::get_ElapsedMicroseconds()
+IL_00D6: ldarg.0
+IL_00D7: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_00DC: ldfld Int32 StabilityCalculator::updateTimeLimit
+IL_00E1: conv.i8
+IL_00E2: bge.s IL_0130
+IL_00E4: ldarg.0
+IL_00E5: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_00EA: ldfld Queue`1 StabilityCalculator::queueStabilityEmpty
+IL_00EF: callvirt System.Int32 System.Collections.Generic.Queue`1<Vector3i>::get_Count()
+IL_00F4: ldc.i4.0
+IL_00F5: bgt IL_005F
+IL_00FA: br.s IL_0130
+IL_00FC: ldarg.0
+IL_00FD: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_0102: ldfld Queue`1 StabilityCalculator::queueStabilityAvail
+IL_0107: callvirt !0 System.Collections.Generic.Queue`1<Vector3i>::Dequeue()
+IL_010C: stloc.3
+IL_010D: ldarg.0
+IL_010E: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_0113: ldloc.3
+IL_0114: ldc.i4.s 20
+IL_0116: ldloca.s V_5
+IL_0118: callvirt System.Collections.Generic.List`1<Vector3i> StabilityCalculator::CalcPhysicsStabilityToFall(Vector3i,System.Int32,System.Single&)
+IL_011D: stloc.s V_4
+IL_011F: ldloc.s V_4
+IL_0121: brfalse.s IL_0130
+IL_0123: ldarg.0
+IL_0124: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_0129: ldloc.s V_4
+IL_012B: callvirt System.Void StabilityCalculator::addToFallingBlocks(System.Collections.Generic.IList`1<Vector3i>)
+IL_0130: ldarg.0
+IL_0131: ldfld MicroStopwatch UpdatePhysics::sw
+IL_0136: callvirt System.Int64 MicroStopwatch::get_ElapsedMicroseconds()
+IL_013B: ldarg.0
+IL_013C: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_0141: ldfld Int32 StabilityCalculator::updateTimeLimit
+IL_0146: conv.i8
+IL_0147: bge.s IL_015C
+IL_0149: ldarg.0
+IL_014A: ldfld StabilityCalculator UpdatePhysics::physicsCalculator
+IL_014F: ldfld Queue`1 StabilityCalculator::queueStabilityAvail
+IL_0154: callvirt System.Int32 System.Collections.Generic.Queue`1<Vector3i>::get_Count()
+IL_0159: ldc.i4.0
+IL_015A: bgt.s IL_00FC
+IL_015C: ldarg.0
+IL_015D: ldfld MicroStopwatch UpdatePhysics::sw
+IL_0162: callvirt System.Void System.Diagnostics.Stopwatch::Stop()
+IL_0167: ldarg.0
+IL_0168: ldc.i4.1
+IL_0169: stfld Int32 UpdatePhysics::state
+IL_016E: ldc.i4.1
+IL_016F: ret
+
+// StabilityCalculator/UpdatePhysics::Dispose() IL=4
+IL_0000: ldarg.0
+IL_0001: ldc.i4.m1
+IL_0002: stfld Int32 UpdatePhysics::state
+IL_0007: ret
+
+// StabilityCalculator/UpdatePhysics::Reset() IL=2
+IL_0000: newobj System.Void System.NotSupportedException::.ctor()
+IL_0005: throw
+

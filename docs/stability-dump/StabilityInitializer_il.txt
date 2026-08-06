@@ -1,0 +1,1071 @@
+// StabilityInitializer::.ctor(WorldBase _world) IL=6
+IL_0000: ldarg.0
+IL_0001: call System.Void System.Object::.ctor()
+IL_0006: ldarg.0
+IL_0007: ldarg.1
+IL_0008: stfld WorldBase StabilityInitializer::world
+IL_000D: ret
+
+// StabilityInitializer::DistributeStability(Chunk _chunk) IL=72
+IL_0000: ldarg.1
+IL_0001: callvirt System.Byte Chunk::GetMaxHeight()
+IL_0006: stloc.0
+IL_0007: ldc.i4.0
+IL_0008: stloc.1
+IL_0009: br.s IL_0074
+IL_000B: ldc.i4.0
+IL_000C: stloc.2
+IL_000D: br.s IL_006B
+IL_000F: ldc.i4.0
+IL_0010: stloc.3
+IL_0011: br.s IL_0063
+IL_0013: ldarg.1
+IL_0014: ldloc.2
+IL_0015: ldloc.3
+IL_0016: ldloc.1
+IL_0017: callvirt System.Int32 Chunk::GetBlockId(System.Int32,System.Int32,System.Int32)
+IL_001C: stloc.s V_4
+IL_001E: ldloc.s V_4
+IL_0020: brfalse.s IL_005F
+IL_0022: ldsfld Block[] Block::list
+IL_0027: ldloc.s V_4
+IL_0029: ldelem.ref
+IL_002A: stloc.s V_5
+IL_002C: ldloc.s V_5
+IL_002E: ldfld MaterialBlock Block::blockMaterial
+IL_0033: ldfld Boolean MaterialBlock::IsLiquid
+IL_0038: brtrue.s IL_005F
+IL_003A: ldloc.s V_5
+IL_003C: ldfld Boolean Block::StabilityIgnore
+IL_0041: brtrue.s IL_005F
+IL_0043: ldarg.1
+IL_0044: ldloc.2
+IL_0045: ldloc.3
+IL_0046: ldloc.1
+IL_0047: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_004C: stloc.s V_6
+IL_004E: ldloc.s V_6
+IL_0050: ldc.i4.1
+IL_0051: ble.s IL_005F
+IL_0053: ldarg.0
+IL_0054: ldarg.1
+IL_0055: ldloc.2
+IL_0056: ldloc.3
+IL_0057: ldloc.1
+IL_0058: ldloc.s V_6
+IL_005A: call System.Void StabilityInitializer::spreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_005F: ldloc.3
+IL_0060: ldc.i4.1
+IL_0061: add
+IL_0062: stloc.3
+IL_0063: ldloc.3
+IL_0064: ldloc.0
+IL_0065: ble.s IL_0013
+IL_0067: ldloc.2
+IL_0068: ldc.i4.1
+IL_0069: add
+IL_006A: stloc.2
+IL_006B: ldloc.2
+IL_006C: ldc.i4.s 16
+IL_006E: blt.s IL_000F
+IL_0070: ldloc.1
+IL_0071: ldc.i4.1
+IL_0072: add
+IL_0073: stloc.1
+IL_0074: ldloc.1
+IL_0075: ldc.i4.s 16
+IL_0077: blt.s IL_000B
+IL_0079: ldarg.1
+IL_007A: ldc.i4.0
+IL_007B: callvirt System.Void Chunk::set_StopStabilityCalculation(System.Boolean)
+IL_0080: ret
+
+// StabilityInitializer::BlockRemovedAt(Int32 _worldX,Int32 _worldY,Int32 _worldZ) IL=106
+IL_0000: ldarg.0
+IL_0001: ldfld WorldBase StabilityInitializer::world
+IL_0006: ldarg.1
+IL_0007: ldarg.2
+IL_0008: ldarg.3
+IL_0009: callvirt IChunk WorldBase::GetChunkFromWorldPos(System.Int32,System.Int32,System.Int32)
+IL_000E: castclass Chunk
+IL_0013: stloc.0
+IL_0014: ldloc.0
+IL_0015: brfalse IL_0102
+IL_001A: ldarg.1
+IL_001B: call System.Int32 World::toBlockXZ(System.Int32)
+IL_0020: stloc.1
+IL_0021: ldarg.3
+IL_0022: call System.Int32 World::toBlockXZ(System.Int32)
+IL_0027: stloc.2
+IL_0028: ldloc.0
+IL_0029: ldloc.1
+IL_002A: ldarg.2
+IL_002B: ldloc.2
+IL_002C: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_0031: stloc.3
+IL_0032: ldloc.0
+IL_0033: ldloc.1
+IL_0034: ldarg.2
+IL_0035: ldloc.2
+IL_0036: ldc.i4.0
+IL_0037: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_003C: newobj System.Void System.Collections.Generic.HashSet`1<Vector3i>::.ctor()
+IL_0041: stloc.s V_4
+IL_0043: ldarg.0
+IL_0044: ldloc.0
+IL_0045: ldloc.1
+IL_0046: ldarg.2
+IL_0047: ldloc.2
+IL_0048: ldloc.3
+IL_0049: ldloc.s V_4
+IL_004B: call System.Void StabilityInitializer::unspreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32,System.Collections.Generic.HashSet`1<Vector3i>)
+IL_0050: ldarg.0
+IL_0051: ldloc.0
+IL_0052: ldloc.1
+IL_0053: ldarg.2
+IL_0054: ldloc.2
+IL_0055: ldloc.3
+IL_0056: ldloc.s V_4
+IL_0058: call System.Void StabilityInitializer::unspreadVertical(Chunk,System.Int32,System.Int32,System.Int32,System.Int32,System.Collections.Generic.HashSet`1<Vector3i>)
+IL_005D: ldloc.s V_4
+IL_005F: callvirt System.Collections.Generic.HashSet`1/Enumerator<!0> System.Collections.Generic.HashSet`1<Vector3i>::GetEnumerator()
+IL_0064: stloc.s V_5
+IL_0066: br.s IL_00E6
+IL_0068: ldloca.s V_5
+IL_006A: call !0 System.Collections.Generic.HashSet`1/Enumerator<Vector3i>::get_Current()
+IL_006F: stloc.s V_6
+IL_0071: ldarg.0
+IL_0072: ldfld WorldBase StabilityInitializer::world
+IL_0077: ldloc.s V_6
+IL_0079: ldfld Int32 Vector3i::x
+IL_007E: ldloc.s V_6
+IL_0080: ldfld Int32 Vector3i::y
+IL_0085: ldloc.s V_6
+IL_0087: ldfld Int32 Vector3i::z
+IL_008C: callvirt IChunk WorldBase::GetChunkFromWorldPos(System.Int32,System.Int32,System.Int32)
+IL_0091: castclass Chunk
+IL_0096: stloc.0
+IL_0097: ldloc.0
+IL_0098: brfalse.s IL_00E6
+IL_009A: ldloc.s V_6
+IL_009C: ldfld Int32 Vector3i::x
+IL_00A1: call System.Int32 World::toBlockXZ(System.Int32)
+IL_00A6: stloc.1
+IL_00A7: ldloc.s V_6
+IL_00A9: ldfld Int32 Vector3i::z
+IL_00AE: call System.Int32 World::toBlockXZ(System.Int32)
+IL_00B3: stloc.2
+IL_00B4: ldloc.0
+IL_00B5: ldloc.1
+IL_00B6: ldloc.s V_6
+IL_00B8: ldfld Int32 Vector3i::y
+IL_00BD: ldloc.2
+IL_00BE: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_00C3: stloc.3
+IL_00C4: ldarg.0
+IL_00C5: ldloc.0
+IL_00C6: ldloc.1
+IL_00C7: ldloc.s V_6
+IL_00C9: ldfld Int32 Vector3i::y
+IL_00CE: ldloc.2
+IL_00CF: ldloc.3
+IL_00D0: call System.Void StabilityInitializer::spreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_00D5: ldarg.0
+IL_00D6: ldloc.0
+IL_00D7: ldloc.1
+IL_00D8: ldloc.s V_6
+IL_00DA: ldfld Int32 Vector3i::y
+IL_00DF: ldloc.2
+IL_00E0: ldloc.3
+IL_00E1: call System.Void StabilityInitializer::spreadVertical(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_00E6: ldloca.s V_5
+IL_00E8: call System.Boolean System.Collections.Generic.HashSet`1/Enumerator<Vector3i>::MoveNext()
+IL_00ED: brtrue IL_0068
+IL_00F2: leave.s IL_0102
+IL_00F4: ldloca.s V_5
+IL_00F6: constrained. System.Collections.Generic.HashSet`1/Enumerator<Vector3i>
+IL_00FC: callvirt System.Void System.IDisposable::Dispose()
+IL_0101: endfinally
+IL_0102: ret
+
+// StabilityInitializer::unspreadVertical(Chunk _chunk,Int32 _blockX,Int32 _y,Int32 _blockZ,Int32 _stab,HashSet`1 _list) IL=154
+IL_0000: ldarg.3
+IL_0001: ldc.i4.1
+IL_0002: add
+IL_0003: stloc.1
+IL_0004: br IL_0095
+IL_0009: ldarg.1
+IL_000A: ldarg.2
+IL_000B: ldloc.1
+IL_000C: ldarg.s _blockZ
+IL_000E: callvirt BlockValue Chunk::GetBlockNoDamage(System.Int32,System.Int32,System.Int32)
+IL_0013: stloc.2
+IL_0014: ldloca.s V_2
+IL_0016: call Block BlockValue::get_Block()
+IL_001B: stloc.3
+IL_001C: ldloca.s V_2
+IL_001E: call System.Boolean BlockValue::get_isair()
+IL_0023: brtrue.s IL_00A0
+IL_0025: ldloc.3
+IL_0026: ldfld Boolean Block::StabilitySupport
+IL_002B: brfalse.s IL_00A0
+IL_002D: ldloc.3
+IL_002E: ldfld MaterialBlock Block::blockMaterial
+IL_0033: ldfld Boolean MaterialBlock::IsLiquid
+IL_0038: brtrue.s IL_00A0
+IL_003A: ldloc.3
+IL_003B: ldfld Boolean Block::StabilityIgnore
+IL_0040: brtrue.s IL_00A0
+IL_0042: ldarg.1
+IL_0043: ldarg.2
+IL_0044: ldloc.1
+IL_0045: ldarg.s _blockZ
+IL_0047: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_004C: stloc.s V_4
+IL_004E: ldloc.s V_4
+IL_0050: brfalse.s IL_00A0
+IL_0052: ldloc.s V_4
+IL_0054: ldarg.s _stab
+IL_0056: ble.s IL_0077
+IL_0058: ldarg.s _list
+IL_005A: ldarg.1
+IL_005B: ldarg.2
+IL_005C: callvirt System.Int32 Chunk::GetBlockWorldPosX(System.Int32)
+IL_0061: ldloc.1
+IL_0062: ldarg.1
+IL_0063: ldarg.s _blockZ
+IL_0065: callvirt System.Int32 Chunk::GetBlockWorldPosZ(System.Int32)
+IL_006A: newobj System.Void Vector3i::.ctor(System.Int32,System.Int32,System.Int32)
+IL_006F: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Add(!0)
+IL_0074: pop
+IL_0075: br.s IL_00A0
+IL_0077: ldarg.1
+IL_0078: ldarg.2
+IL_0079: ldloc.1
+IL_007A: ldarg.s _blockZ
+IL_007C: ldc.i4.0
+IL_007D: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_0082: ldarg.0
+IL_0083: ldarg.1
+IL_0084: ldarg.2
+IL_0085: ldloc.1
+IL_0086: ldarg.s _blockZ
+IL_0088: ldarg.s _stab
+IL_008A: ldarg.s _list
+IL_008C: call System.Void StabilityInitializer::unspreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32,System.Collections.Generic.HashSet`1<Vector3i>)
+IL_0091: ldloc.1
+IL_0092: ldc.i4.1
+IL_0093: add
+IL_0094: stloc.1
+IL_0095: ldloc.1
+IL_0096: ldc.i4 256
+IL_009B: blt IL_0009
+IL_00A0: ldarg.s _stab
+IL_00A2: ldc.i4.1
+IL_00A3: sub
+IL_00A4: stloc.0
+IL_00A5: ldarg.3
+IL_00A6: ldc.i4.1
+IL_00A7: sub
+IL_00A8: stloc.s V_5
+IL_00AA: br IL_0152
+IL_00AF: ldloc.0
+IL_00B0: ldc.i4.0
+IL_00B1: ble IL_015A
+IL_00B6: ldarg.1
+IL_00B7: ldarg.2
+IL_00B8: ldloc.s V_5
+IL_00BA: ldarg.s _blockZ
+IL_00BC: callvirt BlockValue Chunk::GetBlockNoDamage(System.Int32,System.Int32,System.Int32)
+IL_00C1: stloc.s V_6
+IL_00C3: ldloca.s V_6
+IL_00C5: call Block BlockValue::get_Block()
+IL_00CA: stloc.s V_7
+IL_00CC: ldloca.s V_6
+IL_00CE: call System.Boolean BlockValue::get_isair()
+IL_00D3: brtrue IL_015A
+IL_00D8: ldloc.s V_7
+IL_00DA: ldfld Boolean Block::StabilitySupport
+IL_00DF: brfalse.s IL_015A
+IL_00E1: ldloc.s V_7
+IL_00E3: ldfld MaterialBlock Block::blockMaterial
+IL_00E8: ldfld Boolean MaterialBlock::IsLiquid
+IL_00ED: brtrue.s IL_015A
+IL_00EF: ldloc.s V_7
+IL_00F1: ldfld Boolean Block::StabilityIgnore
+IL_00F6: brtrue.s IL_015A
+IL_00F8: ldarg.1
+IL_00F9: ldarg.2
+IL_00FA: ldloc.s V_5
+IL_00FC: ldarg.s _blockZ
+IL_00FE: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_0103: stloc.s V_8
+IL_0105: ldloc.s V_8
+IL_0107: brfalse.s IL_015A
+IL_0109: ldloc.s V_8
+IL_010B: ldloc.0
+IL_010C: ble.s IL_012D
+IL_010E: ldarg.s _list
+IL_0110: ldarg.1
+IL_0111: ldarg.2
+IL_0112: callvirt System.Int32 Chunk::GetBlockWorldPosX(System.Int32)
+IL_0117: ldloc.s V_5
+IL_0119: ldarg.1
+IL_011A: ldarg.s _blockZ
+IL_011C: callvirt System.Int32 Chunk::GetBlockWorldPosZ(System.Int32)
+IL_0121: newobj System.Void Vector3i::.ctor(System.Int32,System.Int32,System.Int32)
+IL_0126: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Add(!0)
+IL_012B: pop
+IL_012C: ret
+IL_012D: ldarg.1
+IL_012E: ldarg.2
+IL_012F: ldloc.s V_5
+IL_0131: ldarg.s _blockZ
+IL_0133: ldc.i4.0
+IL_0134: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_0139: ldarg.0
+IL_013A: ldarg.1
+IL_013B: ldarg.2
+IL_013C: ldloc.s V_5
+IL_013E: ldarg.s _blockZ
+IL_0140: ldloc.0
+IL_0141: ldarg.s _list
+IL_0143: call System.Void StabilityInitializer::unspreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32,System.Collections.Generic.HashSet`1<Vector3i>)
+IL_0148: ldloc.0
+IL_0149: ldc.i4.1
+IL_014A: sub
+IL_014B: stloc.0
+IL_014C: ldloc.s V_5
+IL_014E: ldc.i4.1
+IL_014F: sub
+IL_0150: stloc.s V_5
+IL_0152: ldloc.s V_5
+IL_0154: ldc.i4.0
+IL_0155: bgt IL_00AF
+IL_015A: ret
+
+// StabilityInitializer::unspreadHorizontal(Chunk _chunk,Int32 _blockX,Int32 _y,Int32 _blockZ,Int32 _stab,HashSet`1 _list) IL=136
+IL_0000: ldarg.s _stab
+IL_0002: ldc.i4.0
+IL_0003: bgt.s IL_0006
+IL_0005: ret
+IL_0006: ldarg.s _stab
+IL_0008: ldc.i4.1
+IL_0009: sub
+IL_000A: starg.s _stab
+IL_000C: ldc.i4.0
+IL_000D: stloc.0
+IL_000E: br IL_011C
+IL_0013: ldarg.2
+IL_0014: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_0019: ldloc.0
+IL_001A: ldelema Vector3i
+IL_001F: ldfld Int32 Vector3i::x
+IL_0024: add
+IL_0025: stloc.1
+IL_0026: ldarg.s _blockZ
+IL_0028: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_002D: ldloc.0
+IL_002E: ldelema Vector3i
+IL_0033: ldfld Int32 Vector3i::z
+IL_0038: add
+IL_0039: stloc.2
+IL_003A: ldarg.1
+IL_003B: stloc.3
+IL_003C: ldloc.1
+IL_003D: ldc.i4.0
+IL_003E: blt.s IL_004E
+IL_0040: ldloc.1
+IL_0041: ldc.i4.s 16
+IL_0043: bge.s IL_004E
+IL_0045: ldloc.2
+IL_0046: ldc.i4.0
+IL_0047: blt.s IL_004E
+IL_0049: ldloc.2
+IL_004A: ldc.i4.s 16
+IL_004C: blt.s IL_007C
+IL_004E: ldarg.0
+IL_004F: ldfld WorldBase StabilityInitializer::world
+IL_0054: ldarg.1
+IL_0055: ldloc.1
+IL_0056: callvirt System.Int32 Chunk::GetBlockWorldPosX(System.Int32)
+IL_005B: ldarg.3
+IL_005C: ldarg.1
+IL_005D: ldloc.2
+IL_005E: callvirt System.Int32 Chunk::GetBlockWorldPosZ(System.Int32)
+IL_0063: callvirt IChunk WorldBase::GetChunkFromWorldPos(System.Int32,System.Int32,System.Int32)
+IL_0068: castclass Chunk
+IL_006D: stloc.3
+IL_006E: ldloc.1
+IL_006F: call System.Int32 World::toBlockXZ(System.Int32)
+IL_0074: stloc.1
+IL_0075: ldloc.2
+IL_0076: call System.Int32 World::toBlockXZ(System.Int32)
+IL_007B: stloc.2
+IL_007C: ldloc.3
+IL_007D: brfalse IL_0118
+IL_0082: ldloc.3
+IL_0083: ldloc.1
+IL_0084: ldarg.3
+IL_0085: ldloc.2
+IL_0086: callvirt BlockValue Chunk::GetBlockNoDamage(System.Int32,System.Int32,System.Int32)
+IL_008B: stloc.s V_4
+IL_008D: ldloca.s V_4
+IL_008F: call Block BlockValue::get_Block()
+IL_0094: stloc.s V_5
+IL_0096: ldloca.s V_4
+IL_0098: call System.Boolean BlockValue::get_isair()
+IL_009D: brtrue.s IL_0118
+IL_009F: ldloc.s V_5
+IL_00A1: ldfld Boolean Block::StabilitySupport
+IL_00A6: brfalse.s IL_0118
+IL_00A8: ldloc.s V_5
+IL_00AA: ldfld MaterialBlock Block::blockMaterial
+IL_00AF: ldfld Boolean MaterialBlock::IsLiquid
+IL_00B4: brtrue.s IL_0118
+IL_00B6: ldloc.s V_5
+IL_00B8: ldfld Boolean Block::StabilityIgnore
+IL_00BD: brtrue.s IL_0118
+IL_00BF: ldloc.3
+IL_00C0: ldloc.1
+IL_00C1: ldarg.3
+IL_00C2: ldloc.2
+IL_00C3: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_00C8: stloc.s V_6
+IL_00CA: ldloc.s V_6
+IL_00CC: brfalse.s IL_0118
+IL_00CE: ldloc.s V_6
+IL_00D0: ldarg.s _stab
+IL_00D2: ble.s IL_00F2
+IL_00D4: ldarg.s _list
+IL_00D6: ldloc.3
+IL_00D7: ldloc.1
+IL_00D8: callvirt System.Int32 Chunk::GetBlockWorldPosX(System.Int32)
+IL_00DD: ldarg.3
+IL_00DE: ldloc.3
+IL_00DF: ldloc.2
+IL_00E0: callvirt System.Int32 Chunk::GetBlockWorldPosZ(System.Int32)
+IL_00E5: newobj System.Void Vector3i::.ctor(System.Int32,System.Int32,System.Int32)
+IL_00EA: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Add(!0)
+IL_00EF: pop
+IL_00F0: br.s IL_0118
+IL_00F2: ldloc.3
+IL_00F3: ldloc.1
+IL_00F4: ldarg.3
+IL_00F5: ldloc.2
+IL_00F6: ldc.i4.0
+IL_00F7: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_00FC: ldarg.0
+IL_00FD: ldloc.3
+IL_00FE: ldloc.1
+IL_00FF: ldarg.3
+IL_0100: ldloc.2
+IL_0101: ldarg.s _stab
+IL_0103: ldarg.s _list
+IL_0105: call System.Void StabilityInitializer::unspreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32,System.Collections.Generic.HashSet`1<Vector3i>)
+IL_010A: ldarg.0
+IL_010B: ldloc.3
+IL_010C: ldloc.1
+IL_010D: ldarg.3
+IL_010E: ldloc.2
+IL_010F: ldarg.s _stab
+IL_0111: ldarg.s _list
+IL_0113: call System.Void StabilityInitializer::unspreadVertical(Chunk,System.Int32,System.Int32,System.Int32,System.Int32,System.Collections.Generic.HashSet`1<Vector3i>)
+IL_0118: ldloc.0
+IL_0119: ldc.i4.1
+IL_011A: add
+IL_011B: stloc.0
+IL_011C: ldloc.0
+IL_011D: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_0122: ldlen
+IL_0123: conv.i4
+IL_0124: blt IL_0013
+IL_0129: ret
+
+// StabilityInitializer::BlockPlacedAt(Int32 _worldX,Int32 _worldY,Int32 _worldZ,BlockValue _blockValue) IL=125
+IL_0000: ldc.i4.0
+IL_0001: stloc.0
+IL_0002: ldc.i4.0
+IL_0003: stloc.s V_4
+IL_0005: br.s IL_0046
+IL_0007: ldarg.0
+IL_0008: ldfld WorldBase StabilityInitializer::world
+IL_000D: ldarg.1
+IL_000E: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_0013: ldloc.s V_4
+IL_0015: ldelema Vector3i
+IL_001A: ldfld Int32 Vector3i::x
+IL_001F: add
+IL_0020: ldarg.2
+IL_0021: ldarg.3
+IL_0022: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_0027: ldloc.s V_4
+IL_0029: ldelema Vector3i
+IL_002E: ldfld Int32 Vector3i::z
+IL_0033: add
+IL_0034: callvirt System.Byte WorldBase::GetStability(System.Int32,System.Int32,System.Int32)
+IL_0039: ldloc.0
+IL_003A: call System.Int32 System.Math::Max(System.Int32,System.Int32)
+IL_003F: stloc.0
+IL_0040: ldloc.s V_4
+IL_0042: ldc.i4.1
+IL_0043: add
+IL_0044: stloc.s V_4
+IL_0046: ldloc.s V_4
+IL_0048: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_004D: ldlen
+IL_004E: conv.i4
+IL_004F: blt.s IL_0007
+IL_0051: ldloc.0
+IL_0052: ldc.i4.1
+IL_0053: sub
+IL_0054: stloc.0
+IL_0055: ldarg.0
+IL_0056: ldfld WorldBase StabilityInitializer::world
+IL_005B: ldarg.1
+IL_005C: ldarg.2
+IL_005D: ldc.i4.1
+IL_005E: sub
+IL_005F: ldarg.3
+IL_0060: callvirt System.Byte WorldBase::GetStability(System.Int32,System.Int32,System.Int32)
+IL_0065: stloc.1
+IL_0066: ldarg.0
+IL_0067: ldfld WorldBase StabilityInitializer::world
+IL_006C: ldarg.1
+IL_006D: ldarg.2
+IL_006E: ldc.i4.1
+IL_006F: add
+IL_0070: ldarg.3
+IL_0071: callvirt System.Byte WorldBase::GetStability(System.Int32,System.Int32,System.Int32)
+IL_0076: stloc.2
+IL_0077: ldarg.0
+IL_0078: ldfld WorldBase StabilityInitializer::world
+IL_007D: ldarg.1
+IL_007E: ldarg.2
+IL_007F: ldarg.3
+IL_0080: callvirt IChunk WorldBase::GetChunkFromWorldPos(System.Int32,System.Int32,System.Int32)
+IL_0085: castclass Chunk
+IL_008A: stloc.3
+IL_008B: ldloc.3
+IL_008C: brfalse.s IL_010A
+IL_008E: ldarg.1
+IL_008F: call System.Int32 World::toBlockXZ(System.Int32)
+IL_0094: stloc.s V_5
+IL_0096: ldarg.3
+IL_0097: call System.Int32 World::toBlockXZ(System.Int32)
+IL_009C: stloc.s V_6
+IL_009E: ldc.i4.s 15
+IL_00A0: ldloc.1
+IL_00A1: bne.un.s IL_00A8
+IL_00A3: ldc.i4.s 15
+IL_00A5: stloc.1
+IL_00A6: br.s IL_00AC
+IL_00A8: ldloc.1
+IL_00A9: ldc.i4.1
+IL_00AA: sub
+IL_00AB: stloc.1
+IL_00AC: ldloc.2
+IL_00AD: ldc.i4.1
+IL_00AE: sub
+IL_00AF: stloc.2
+IL_00B0: ldloc.2
+IL_00B1: ldloc.1
+IL_00B2: call System.Int32 System.Math::Max(System.Int32,System.Int32)
+IL_00B7: stloc.s V_7
+IL_00B9: ldloc.0
+IL_00BA: ldloc.s V_7
+IL_00BC: call System.Int32 System.Math::Max(System.Int32,System.Int32)
+IL_00C1: ldc.i4.s 15
+IL_00C3: call System.Int32 System.Math::Min(System.Int32,System.Int32)
+IL_00C8: ldc.i4.0
+IL_00C9: call System.Int32 System.Math::Max(System.Int32,System.Int32)
+IL_00CE: stloc.s V_8
+IL_00D0: ldloc.3
+IL_00D1: ldloc.s V_5
+IL_00D3: ldarg.2
+IL_00D4: ldloc.s V_6
+IL_00D6: ldloc.s V_8
+IL_00D8: conv.u1
+IL_00D9: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_00DE: ldloc.s V_8
+IL_00E0: ldc.i4.0
+IL_00E1: ble.s IL_0100
+IL_00E3: ldarg.0
+IL_00E4: ldloc.3
+IL_00E5: ldloc.s V_5
+IL_00E7: ldarg.2
+IL_00E8: ldloc.s V_6
+IL_00EA: ldloc.s V_8
+IL_00EC: call System.Void StabilityInitializer::spreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_00F1: ldarg.0
+IL_00F2: ldloc.3
+IL_00F3: ldloc.s V_5
+IL_00F5: ldarg.2
+IL_00F6: ldloc.s V_6
+IL_00F8: ldloc.s V_8
+IL_00FA: call System.Void StabilityInitializer::spreadVertical(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_00FF: ret
+IL_0100: ldstr Unbalanced
+IL_0105: call System.Void Log::Out(System.String)
+IL_010A: ret
+
+// StabilityInitializer::spreadVertical(Chunk _chunk,Int32 _blockX,Int32 _y,Int32 _blockZ,Int32 _stab) IL=152
+IL_0000: ldarg.s _stab
+IL_0002: stloc.0
+IL_0003: ldarg.3
+IL_0004: ldc.i4.1
+IL_0005: add
+IL_0006: stloc.2
+IL_0007: br IL_008E
+IL_000C: ldarg.1
+IL_000D: ldarg.2
+IL_000E: ldloc.2
+IL_000F: ldarg.s _blockZ
+IL_0011: callvirt System.Int32 Chunk::GetBlockId(System.Int32,System.Int32,System.Int32)
+IL_0016: stloc.3
+IL_0017: ldloc.3
+IL_0018: brfalse.s IL_0099
+IL_001A: ldsfld Block[] Block::list
+IL_001F: ldloc.3
+IL_0020: ldelem.ref
+IL_0021: stloc.s V_4
+IL_0023: ldloc.s V_4
+IL_0025: ldfld MaterialBlock Block::blockMaterial
+IL_002A: ldfld Boolean MaterialBlock::IsLiquid
+IL_002F: brtrue.s IL_0099
+IL_0031: ldloc.s V_4
+IL_0033: ldfld Boolean Block::StabilityIgnore
+IL_0038: brtrue.s IL_0099
+IL_003A: ldloc.0
+IL_003B: ldc.i4.s 15
+IL_003D: call System.Int32 System.Math::Min(System.Int32,System.Int32)
+IL_0042: stloc.s V_5
+IL_0044: ldloc.s V_5
+IL_0046: ldc.i4.1
+IL_0047: ble.s IL_0055
+IL_0049: ldloc.s V_4
+IL_004B: ldfld Boolean Block::StabilitySupport
+IL_0050: brtrue.s IL_0055
+IL_0052: ldc.i4.1
+IL_0053: stloc.s V_5
+IL_0055: ldarg.1
+IL_0056: ldarg.2
+IL_0057: ldloc.2
+IL_0058: ldarg.s _blockZ
+IL_005A: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_005F: stloc.s V_6
+IL_0061: ldloc.s V_5
+IL_0063: ldloc.s V_6
+IL_0065: ble.s IL_0099
+IL_0067: ldarg.1
+IL_0068: ldarg.2
+IL_0069: ldloc.2
+IL_006A: ldarg.s _blockZ
+IL_006C: ldloc.s V_5
+IL_006E: conv.u1
+IL_006F: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_0074: ldloc.s V_4
+IL_0076: ldfld Boolean Block::StabilitySupport
+IL_007B: brfalse.s IL_008A
+IL_007D: ldarg.0
+IL_007E: ldarg.1
+IL_007F: ldarg.2
+IL_0080: ldloc.2
+IL_0081: ldarg.s _blockZ
+IL_0083: ldloc.s V_5
+IL_0085: call System.Void StabilityInitializer::spreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_008A: ldloc.2
+IL_008B: ldc.i4.1
+IL_008C: add
+IL_008D: stloc.2
+IL_008E: ldloc.2
+IL_008F: ldc.i4 256
+IL_0094: blt IL_000C
+IL_0099: ldarg.s _stab
+IL_009B: ldc.i4.1
+IL_009C: sub
+IL_009D: stloc.1
+IL_009E: ldarg.3
+IL_009F: ldc.i4.1
+IL_00A0: sub
+IL_00A1: stloc.s V_7
+IL_00A3: br IL_0141
+IL_00A8: ldloc.1
+IL_00A9: ldc.i4.0
+IL_00AA: ble IL_0149
+IL_00AF: ldarg.1
+IL_00B0: ldarg.2
+IL_00B1: ldloc.s V_7
+IL_00B3: ldarg.s _blockZ
+IL_00B5: callvirt System.Int32 Chunk::GetBlockId(System.Int32,System.Int32,System.Int32)
+IL_00BA: stloc.s V_8
+IL_00BC: ldloc.s V_8
+IL_00BE: brfalse IL_0149
+IL_00C3: ldsfld Block[] Block::list
+IL_00C8: ldloc.s V_8
+IL_00CA: ldelem.ref
+IL_00CB: stloc.s V_9
+IL_00CD: ldloc.s V_9
+IL_00CF: ldfld MaterialBlock Block::blockMaterial
+IL_00D4: ldfld Boolean MaterialBlock::IsLiquid
+IL_00D9: brtrue.s IL_0149
+IL_00DB: ldloc.s V_9
+IL_00DD: ldfld Boolean Block::StabilityIgnore
+IL_00E2: brtrue.s IL_0149
+IL_00E4: ldloc.1
+IL_00E5: ldc.i4.s 15
+IL_00E7: call System.Int32 System.Math::Min(System.Int32,System.Int32)
+IL_00EC: stloc.s V_10
+IL_00EE: ldloc.s V_10
+IL_00F0: ldc.i4.1
+IL_00F1: ble.s IL_00FF
+IL_00F3: ldloc.s V_9
+IL_00F5: ldfld Boolean Block::StabilitySupport
+IL_00FA: brtrue.s IL_00FF
+IL_00FC: ldc.i4.1
+IL_00FD: stloc.s V_10
+IL_00FF: ldarg.1
+IL_0100: ldarg.2
+IL_0101: ldloc.s V_7
+IL_0103: ldarg.s _blockZ
+IL_0105: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_010A: stloc.s V_11
+IL_010C: ldloc.s V_10
+IL_010E: ldloc.s V_11
+IL_0110: ble.s IL_0149
+IL_0112: ldarg.1
+IL_0113: ldarg.2
+IL_0114: ldloc.s V_7
+IL_0116: ldarg.s _blockZ
+IL_0118: ldloc.s V_10
+IL_011A: conv.u1
+IL_011B: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_0120: ldloc.s V_9
+IL_0122: ldfld Boolean Block::StabilitySupport
+IL_0127: brfalse.s IL_0137
+IL_0129: ldarg.0
+IL_012A: ldarg.1
+IL_012B: ldarg.2
+IL_012C: ldloc.s V_7
+IL_012E: ldarg.s _blockZ
+IL_0130: ldloc.s V_10
+IL_0132: call System.Void StabilityInitializer::spreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_0137: ldloc.1
+IL_0138: ldc.i4.1
+IL_0139: sub
+IL_013A: stloc.1
+IL_013B: ldloc.s V_7
+IL_013D: ldc.i4.1
+IL_013E: sub
+IL_013F: stloc.s V_7
+IL_0141: ldloc.s V_7
+IL_0143: ldc.i4.0
+IL_0144: bgt IL_00A8
+IL_0149: ret
+
+// StabilityInitializer::spreadHorizontal(Chunk _chunk,Int32 _blockX,Int32 _y,Int32 _blockZ,Int32 _stab) IL=127
+IL_0000: ldarg.s _stab
+IL_0002: ldc.i4.1
+IL_0003: bgt.s IL_0006
+IL_0005: ret
+IL_0006: ldarg.s _stab
+IL_0008: ldc.i4.1
+IL_0009: sub
+IL_000A: starg.s _stab
+IL_000C: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_0011: ldlen
+IL_0012: conv.i4
+IL_0013: ldc.i4.1
+IL_0014: sub
+IL_0015: stloc.0
+IL_0016: br IL_0109
+IL_001B: ldarg.2
+IL_001C: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_0021: ldloc.0
+IL_0022: ldelema Vector3i
+IL_0027: ldfld Int32 Vector3i::x
+IL_002C: add
+IL_002D: stloc.1
+IL_002E: ldarg.s _blockZ
+IL_0030: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_0035: ldloc.0
+IL_0036: ldelema Vector3i
+IL_003B: ldfld Int32 Vector3i::z
+IL_0040: add
+IL_0041: stloc.2
+IL_0042: ldarg.1
+IL_0043: stloc.3
+IL_0044: ldloc.1
+IL_0045: ldc.i4.s 16
+IL_0047: bge.un.s IL_004E
+IL_0049: ldloc.2
+IL_004A: ldc.i4.s 16
+IL_004C: blt.un.s IL_0082
+IL_004E: ldarg.0
+IL_004F: ldfld WorldBase StabilityInitializer::world
+IL_0054: ldarg.1
+IL_0055: ldloc.1
+IL_0056: callvirt System.Int32 Chunk::GetBlockWorldPosX(System.Int32)
+IL_005B: ldarg.3
+IL_005C: ldarg.1
+IL_005D: ldloc.2
+IL_005E: callvirt System.Int32 Chunk::GetBlockWorldPosZ(System.Int32)
+IL_0063: callvirt IChunk WorldBase::GetChunkFromWorldPos(System.Int32,System.Int32,System.Int32)
+IL_0068: castclass Chunk
+IL_006D: stloc.3
+IL_006E: ldloc.3
+IL_006F: brfalse IL_0105
+IL_0074: ldloc.1
+IL_0075: call System.Int32 World::toBlockXZ(System.Int32)
+IL_007A: stloc.1
+IL_007B: ldloc.2
+IL_007C: call System.Int32 World::toBlockXZ(System.Int32)
+IL_0081: stloc.2
+IL_0082: ldloc.3
+IL_0083: ldloc.1
+IL_0084: ldarg.3
+IL_0085: ldloc.2
+IL_0086: callvirt System.Int32 Chunk::GetBlockId(System.Int32,System.Int32,System.Int32)
+IL_008B: stloc.s V_4
+IL_008D: ldloc.s V_4
+IL_008F: brfalse.s IL_0105
+IL_0091: ldsfld Block[] Block::list
+IL_0096: ldloc.s V_4
+IL_0098: ldelem.ref
+IL_0099: stloc.s V_5
+IL_009B: ldloc.s V_5
+IL_009D: ldfld MaterialBlock Block::blockMaterial
+IL_00A2: ldfld Boolean MaterialBlock::IsLiquid
+IL_00A7: brtrue.s IL_0105
+IL_00A9: ldloc.s V_5
+IL_00AB: ldfld Boolean Block::StabilityIgnore
+IL_00B0: brtrue.s IL_0105
+IL_00B2: ldarg.s _stab
+IL_00B4: stloc.s V_6
+IL_00B6: ldloc.s V_6
+IL_00B8: ldc.i4.1
+IL_00B9: ble.s IL_00C7
+IL_00BB: ldloc.s V_5
+IL_00BD: ldfld Boolean Block::StabilitySupport
+IL_00C2: brtrue.s IL_00C7
+IL_00C4: ldc.i4.1
+IL_00C5: stloc.s V_6
+IL_00C7: ldloc.3
+IL_00C8: ldloc.1
+IL_00C9: ldarg.3
+IL_00CA: ldloc.2
+IL_00CB: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_00D0: stloc.s V_7
+IL_00D2: ldloc.s V_6
+IL_00D4: ldloc.s V_7
+IL_00D6: ble.s IL_0105
+IL_00D8: ldloc.3
+IL_00D9: ldloc.1
+IL_00DA: ldarg.3
+IL_00DB: ldloc.2
+IL_00DC: ldloc.s V_6
+IL_00DE: conv.u1
+IL_00DF: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_00E4: ldloc.s V_5
+IL_00E6: ldfld Boolean Block::StabilitySupport
+IL_00EB: brfalse.s IL_0105
+IL_00ED: ldarg.0
+IL_00EE: ldloc.3
+IL_00EF: ldloc.1
+IL_00F0: ldarg.3
+IL_00F1: ldloc.2
+IL_00F2: ldloc.s V_6
+IL_00F4: call System.Void StabilityInitializer::spreadHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_00F9: ldarg.0
+IL_00FA: ldloc.3
+IL_00FB: ldloc.1
+IL_00FC: ldarg.3
+IL_00FD: ldloc.2
+IL_00FE: ldloc.s V_6
+IL_0100: call System.Void StabilityInitializer::spreadVertical(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_0105: ldloc.0
+IL_0106: ldc.i4.1
+IL_0107: sub
+IL_0108: stloc.0
+IL_0109: ldloc.0
+IL_010A: ldc.i4.0
+IL_010B: bge IL_001B
+IL_0110: ret
+
+// StabilityInitializer::clearDown(Chunk _chunk,Int32 _blockX,Int32 _y,Int32 _blockZ,Int32 _stabStop) IL=59
+IL_0000: ldarg.3
+IL_0001: ldc.i4.1
+IL_0002: sub
+IL_0003: stloc.0
+IL_0004: br.s IL_006E
+IL_0006: ldarg.1
+IL_0007: ldarg.2
+IL_0008: ldloc.0
+IL_0009: ldarg.s _blockZ
+IL_000B: callvirt BlockValue Chunk::GetBlockNoDamage(System.Int32,System.Int32,System.Int32)
+IL_0010: stloc.1
+IL_0011: ldloca.s V_1
+IL_0013: call Block BlockValue::get_Block()
+IL_0018: stloc.2
+IL_0019: ldloca.s V_1
+IL_001B: call System.Boolean BlockValue::get_isair()
+IL_0020: brtrue.s IL_0072
+IL_0022: ldloc.2
+IL_0023: ldfld Boolean Block::StabilitySupport
+IL_0028: brfalse.s IL_0072
+IL_002A: ldloc.2
+IL_002B: ldfld MaterialBlock Block::blockMaterial
+IL_0030: ldfld Boolean MaterialBlock::IsLiquid
+IL_0035: brtrue.s IL_0072
+IL_0037: ldloc.2
+IL_0038: ldfld Boolean Block::StabilityIgnore
+IL_003D: brtrue.s IL_0072
+IL_003F: ldarg.1
+IL_0040: ldarg.2
+IL_0041: ldloc.0
+IL_0042: ldarg.s _blockZ
+IL_0044: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_0049: stloc.3
+IL_004A: ldloc.3
+IL_004B: brfalse.s IL_0072
+IL_004D: ldloc.3
+IL_004E: ldarg.s _stabStop
+IL_0050: bge.s IL_0072
+IL_0052: ldarg.1
+IL_0053: ldarg.2
+IL_0054: ldloc.0
+IL_0055: ldarg.s _blockZ
+IL_0057: ldc.i4.0
+IL_0058: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_005D: ldarg.0
+IL_005E: ldarg.1
+IL_005F: ldarg.2
+IL_0060: ldloc.0
+IL_0061: ldarg.s _blockZ
+IL_0063: ldarg.s _stabStop
+IL_0065: call System.Void StabilityInitializer::clearHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_006A: ldloc.0
+IL_006B: ldc.i4.1
+IL_006C: sub
+IL_006D: stloc.0
+IL_006E: ldloc.0
+IL_006F: ldc.i4.0
+IL_0070: bgt.s IL_0006
+IL_0072: ret
+
+// StabilityInitializer::clearHorizontal(Chunk _chunk,Int32 _blockX,Int32 _y,Int32 _blockZ,Int32 _stabStop) IL=114
+IL_0000: ldc.i4.0
+IL_0001: stloc.0
+IL_0002: br IL_00EB
+IL_0007: ldarg.2
+IL_0008: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_000D: ldloc.0
+IL_000E: ldelema Vector3i
+IL_0013: ldfld Int32 Vector3i::x
+IL_0018: add
+IL_0019: stloc.1
+IL_001A: ldarg.s _blockZ
+IL_001C: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_0021: ldloc.0
+IL_0022: ldelema Vector3i
+IL_0027: ldfld Int32 Vector3i::z
+IL_002C: add
+IL_002D: stloc.2
+IL_002E: ldarg.1
+IL_002F: stloc.3
+IL_0030: ldloc.1
+IL_0031: ldc.i4.0
+IL_0032: blt.s IL_0042
+IL_0034: ldloc.1
+IL_0035: ldc.i4.s 16
+IL_0037: bge.s IL_0042
+IL_0039: ldloc.2
+IL_003A: ldc.i4.0
+IL_003B: blt.s IL_0042
+IL_003D: ldloc.2
+IL_003E: ldc.i4.s 16
+IL_0040: blt.s IL_0070
+IL_0042: ldarg.0
+IL_0043: ldfld WorldBase StabilityInitializer::world
+IL_0048: ldarg.1
+IL_0049: ldloc.1
+IL_004A: callvirt System.Int32 Chunk::GetBlockWorldPosX(System.Int32)
+IL_004F: ldarg.3
+IL_0050: ldarg.1
+IL_0051: ldloc.2
+IL_0052: callvirt System.Int32 Chunk::GetBlockWorldPosZ(System.Int32)
+IL_0057: callvirt IChunk WorldBase::GetChunkFromWorldPos(System.Int32,System.Int32,System.Int32)
+IL_005C: castclass Chunk
+IL_0061: stloc.3
+IL_0062: ldloc.1
+IL_0063: call System.Int32 World::toBlockXZ(System.Int32)
+IL_0068: stloc.1
+IL_0069: ldloc.2
+IL_006A: call System.Int32 World::toBlockXZ(System.Int32)
+IL_006F: stloc.2
+IL_0070: ldloc.3
+IL_0071: brfalse.s IL_00E7
+IL_0073: ldloc.3
+IL_0074: ldloc.1
+IL_0075: ldarg.3
+IL_0076: ldloc.2
+IL_0077: callvirt BlockValue Chunk::GetBlockNoDamage(System.Int32,System.Int32,System.Int32)
+IL_007C: stloc.s V_4
+IL_007E: ldloca.s V_4
+IL_0080: call Block BlockValue::get_Block()
+IL_0085: stloc.s V_5
+IL_0087: ldloca.s V_4
+IL_0089: call System.Boolean BlockValue::get_isair()
+IL_008E: brtrue.s IL_00E7
+IL_0090: ldloc.s V_5
+IL_0092: ldfld Boolean Block::StabilitySupport
+IL_0097: brfalse.s IL_00E7
+IL_0099: ldloc.s V_5
+IL_009B: ldfld MaterialBlock Block::blockMaterial
+IL_00A0: ldfld Boolean MaterialBlock::IsLiquid
+IL_00A5: brtrue.s IL_00E7
+IL_00A7: ldloc.s V_5
+IL_00A9: ldfld Boolean Block::StabilityIgnore
+IL_00AE: brtrue.s IL_00E7
+IL_00B0: ldloc.3
+IL_00B1: ldloc.1
+IL_00B2: ldarg.3
+IL_00B3: ldloc.2
+IL_00B4: callvirt System.Byte Chunk::GetStability(System.Int32,System.Int32,System.Int32)
+IL_00B9: stloc.s V_6
+IL_00BB: ldloc.s V_6
+IL_00BD: brfalse.s IL_00E7
+IL_00BF: ldloc.s V_6
+IL_00C1: ldarg.s _stabStop
+IL_00C3: bge.s IL_00E7
+IL_00C5: ldloc.3
+IL_00C6: ldloc.1
+IL_00C7: ldarg.3
+IL_00C8: ldloc.2
+IL_00C9: ldc.i4.0
+IL_00CA: callvirt System.Void Chunk::SetStability(System.Int32,System.Int32,System.Int32,System.Byte)
+IL_00CF: ldarg.0
+IL_00D0: ldloc.3
+IL_00D1: ldloc.1
+IL_00D2: ldarg.3
+IL_00D3: ldloc.2
+IL_00D4: ldarg.s _stabStop
+IL_00D6: call System.Void StabilityInitializer::clearHorizontal(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_00DB: ldarg.0
+IL_00DC: ldloc.3
+IL_00DD: ldloc.1
+IL_00DE: ldarg.3
+IL_00DF: ldloc.2
+IL_00E0: ldarg.s _stabStop
+IL_00E2: call System.Void StabilityInitializer::clearDown(Chunk,System.Int32,System.Int32,System.Int32,System.Int32)
+IL_00E7: ldloc.0
+IL_00E8: ldc.i4.1
+IL_00E9: add
+IL_00EA: stloc.0
+IL_00EB: ldloc.0
+IL_00EC: ldsfld Vector3i[] Vector3i::HORIZONTAL_DIRECTIONS
+IL_00F1: ldlen
+IL_00F2: conv.i4
+IL_00F3: blt IL_0007
+IL_00F8: ret
+

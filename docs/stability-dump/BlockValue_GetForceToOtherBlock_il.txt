@@ -1,0 +1,12 @@
+// BlockValue::GetForceToOtherBlock(BlockValue _other) IL=10
+IL_0000: ldarg.0
+IL_0001: call Block BlockValue::get_Block()
+IL_0006: ldfld MaterialBlock Block::blockMaterial
+IL_000B: ldfld Int32 MaterialBlock::StabilityGlue
+IL_0010: ldarga.s _other
+IL_0012: call Block BlockValue::get_Block()
+IL_0017: ldfld MaterialBlock Block::blockMaterial
+IL_001C: ldfld Int32 MaterialBlock::StabilityGlue
+IL_0021: call System.Int32 Utils::FastMin(System.Int32,System.Int32)
+IL_0026: ret
+

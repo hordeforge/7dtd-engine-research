@@ -1,0 +1,60 @@
+// World::AddFallingBlocks(IList`1 _list) IL=18
+IL_0000: ldc.i4.0
+IL_0001: stloc.0
+IL_0002: br.s IL_0016
+IL_0004: ldarg.0
+IL_0005: ldarg.1
+IL_0006: ldloc.0
+IL_0007: callvirt !0 System.Collections.Generic.IList`1<Vector3i>::get_Item(System.Int32)
+IL_000C: ldc.i4.0
+IL_000D: call System.Void World::AddFallingBlock(Vector3i,System.Boolean)
+IL_0012: ldloc.0
+IL_0013: ldc.i4.1
+IL_0014: add
+IL_0015: stloc.0
+IL_0016: ldloc.0
+IL_0017: ldarg.1
+IL_0018: callvirt System.Int32 System.Collections.Generic.ICollection`1<Vector3i>::get_Count()
+IL_001D: blt.s IL_0004
+IL_001F: ret
+
+// World::AddFallingBlock(Vector3i _blockPos,Boolean includeOversized) IL=38
+IL_0000: ldarg.0
+IL_0001: ldfld HashSet`1 World::fallingBlockSet
+IL_0006: ldarg.1
+IL_0007: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Contains(!0)
+IL_000C: brtrue.s IL_0067
+IL_000E: ldarg.0
+IL_000F: ldarg.1
+IL_0010: call BlockValue WorldBase::GetBlock(Vector3i)
+IL_0015: stloc.0
+IL_0016: ldloca.s V_0
+IL_0018: call System.Boolean BlockValue::get_ischild()
+IL_001D: brtrue.s IL_0047
+IL_001F: ldloca.s V_0
+IL_0021: call Block BlockValue::get_Block()
+IL_0026: ldfld Boolean Block::StabilityIgnore
+IL_002B: brtrue.s IL_0047
+IL_002D: ldloca.s V_0
+IL_002F: call System.Boolean BlockValue::get_isair()
+IL_0034: brtrue.s IL_0047
+IL_0036: ldarg.2
+IL_0037: brtrue.s IL_0048
+IL_0039: ldloca.s V_0
+IL_003B: call Block BlockValue::get_Block()
+IL_0040: ldfld Boolean Block::isOversized
+IL_0045: brfalse.s IL_0048
+IL_0047: ret
+IL_0048: ldarg.1
+IL_0049: call System.Void DynamicMeshManager::AddFallingBlockObserver(Vector3i)
+IL_004E: ldarg.0
+IL_004F: ldfld Queue`1 World::fallingBlocks
+IL_0054: ldarg.1
+IL_0055: callvirt System.Void System.Collections.Generic.Queue`1<Vector3i>::Enqueue(!0)
+IL_005A: ldarg.0
+IL_005B: ldfld HashSet`1 World::fallingBlockSet
+IL_0060: ldarg.1
+IL_0061: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Add(!0)
+IL_0066: pop
+IL_0067: ret
+

@@ -1,0 +1,222 @@
+// World::LetBlocksFall() IL=220
+IL_0000: ldarg.0
+IL_0001: ldfld Queue`1 World::fallingBlocks
+IL_0006: callvirt System.Int32 System.Collections.Generic.Queue`1<Vector3i>::get_Count()
+IL_000B: brtrue.s IL_000E
+IL_000D: ret
+IL_000E: ldsfld Boolean EntityFallingBlocks::Enabled
+IL_0013: brfalse.s IL_001B
+IL_0015: ldarg.0
+IL_0016: call System.Void World::GroupFallingBlocks()
+IL_001B: ldc.i4.0
+IL_001C: stloc.0
+IL_001D: ldsfld Vector3i Vector3i::zero
+IL_0022: stloc.1
+IL_0023: br.s IL_0084
+IL_0025: ldarg.0
+IL_0026: ldfld Queue`1 World::fallingGroups
+IL_002B: callvirt !0 System.Collections.Generic.Queue`1<System.Collections.Generic.List`1<Vector3i>>::Dequeue()
+IL_0030: stloc.3
+IL_0031: ldarg.0
+IL_0032: ldloc.3
+IL_0033: call System.Void World::CreateFallingBlockGroup(System.Collections.Generic.List`1<Vector3i>)
+IL_0038: ldloc.0
+IL_0039: ldc.i4.1
+IL_003A: add
+IL_003B: stloc.0
+IL_003C: ldloc.3
+IL_003D: callvirt System.Collections.Generic.List`1/Enumerator<!0> System.Collections.Generic.List`1<Vector3i>::GetEnumerator()
+IL_0042: stloc.s V_4
+IL_0044: br.s IL_006B
+IL_0046: ldloca.s V_4
+IL_0048: call !0 System.Collections.Generic.List`1/Enumerator<Vector3i>::get_Current()
+IL_004D: stloc.s V_5
+IL_004F: ldarg.0
+IL_0050: ldfld HashSet`1 World::processedBlocks
+IL_0055: ldloc.s V_5
+IL_0057: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Add(!0)
+IL_005C: pop
+IL_005D: ldarg.0
+IL_005E: ldfld HashSet`1 World::fallingBlockSet
+IL_0063: ldloc.s V_5
+IL_0065: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Remove(!0)
+IL_006A: pop
+IL_006B: ldloca.s V_4
+IL_006D: call System.Boolean System.Collections.Generic.List`1/Enumerator<Vector3i>::MoveNext()
+IL_0072: brtrue.s IL_0046
+IL_0074: leave.s IL_0084
+IL_0076: ldloca.s V_4
+IL_0078: constrained. System.Collections.Generic.List`1/Enumerator<Vector3i>
+IL_007E: callvirt System.Void System.IDisposable::Dispose()
+IL_0083: endfinally
+IL_0084: ldarg.0
+IL_0085: ldfld Queue`1 World::fallingGroups
+IL_008A: callvirt System.Int32 System.Collections.Generic.Queue`1<System.Collections.Generic.List`1<Vector3i>>::get_Count()
+IL_008F: ldc.i4.0
+IL_0090: ble IL_024C
+IL_0095: ldloc.0
+IL_0096: ldc.i4.2
+IL_0097: blt.s IL_0025
+IL_0099: br IL_024C
+IL_009E: ldarg.0
+IL_009F: ldfld Queue`1 World::fallingBlocks
+IL_00A4: callvirt !0 System.Collections.Generic.Queue`1<Vector3i>::Dequeue()
+IL_00A9: stloc.2
+IL_00AA: ldarg.0
+IL_00AB: ldfld HashSet`1 World::processedBlocks
+IL_00B0: ldloc.2
+IL_00B1: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Contains(!0)
+IL_00B6: brtrue IL_024C
+IL_00BB: ldarg.0
+IL_00BC: ldfld HashSet`1 World::groupedBlocks
+IL_00C1: ldloc.2
+IL_00C2: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Contains(!0)
+IL_00C7: brtrue IL_024C
+IL_00CC: ldloca.s V_1
+IL_00CE: ldloc.2
+IL_00CF: call System.Boolean Vector3i::Equals(Vector3i)
+IL_00D4: brfalse.s IL_00E7
+IL_00D6: ldarg.0
+IL_00D7: ldfld Queue`1 World::fallingBlocks
+IL_00DC: ldloc.2
+IL_00DD: callvirt System.Void System.Collections.Generic.Queue`1<Vector3i>::Enqueue(!0)
+IL_00E2: br IL_0261
+IL_00E7: ldarg.0
+IL_00E8: ldfld HashSet`1 World::fallingBlockSet
+IL_00ED: ldloc.2
+IL_00EE: callvirt System.Boolean System.Collections.Generic.HashSet`1<Vector3i>::Remove(!0)
+IL_00F3: pop
+IL_00F4: ldarg.0
+IL_00F5: ldloc.2
+IL_00F6: ldfld Int32 Vector3i::x
+IL_00FB: ldloc.2
+IL_00FC: ldfld Int32 Vector3i::y
+IL_0101: ldloc.2
+IL_0102: ldfld Int32 Vector3i::z
+IL_0107: callvirt BlockValue WorldBase::GetBlock(System.Int32,System.Int32,System.Int32)
+IL_010C: stloc.s V_6
+IL_010E: ldloca.s V_6
+IL_0110: call System.Boolean BlockValue::get_isair()
+IL_0115: brtrue IL_024C
+IL_011A: ldarg.0
+IL_011B: ldloc.2
+IL_011C: ldfld Int32 Vector3i::x
+IL_0121: ldloc.2
+IL_0122: ldfld Int32 Vector3i::y
+IL_0127: ldloc.2
+IL_0128: ldfld Int32 Vector3i::z
+IL_012D: call TextureFullArray World::GetTextureFullArray(System.Int32,System.Int32,System.Int32)
+IL_0132: stloc.s V_7
+IL_0134: ldnull
+IL_0135: stloc.s V_8
+IL_0137: ldarg.0
+IL_0138: ldloc.2
+IL_0139: callvirt TileEntity WorldBase::GetTileEntity(Vector3i)
+IL_013E: stloc.s V_9
+IL_0140: ldloc.s V_9
+IL_0142: brfalse.s IL_0171
+IL_0144: ldloc.s V_9
+IL_0146: ldloca.s V_10
+IL_0148: call System.Boolean TileEntityExtensions::TryGetSelfOrFeature<TEFeatureCanvas>(ITileEntity,T&)
+IL_014D: brfalse.s IL_0171
+IL_014F: ldloc.s V_10
+IL_0151: callvirt SignCanvas TEFeatureCanvas::get_Canvas()
+IL_0156: ldnull
+IL_0157: call System.Boolean UnityEngine.Object::op_Inequality(UnityEngine.Object,UnityEngine.Object)
+IL_015C: brfalse.s IL_0171
+IL_015E: ldloc.s V_10
+IL_0160: callvirt SignCanvas TEFeatureCanvas::get_Canvas()
+IL_0165: callvirt SignCanvas/CanvasState SignCanvas::get_State()
+IL_016A: callvirt SignCanvas/CanvasState SignCanvas/CanvasState::Clone()
+IL_016F: stloc.s V_8
+IL_0171: ldloca.s V_6
+IL_0173: call Block BlockValue::get_Block()
+IL_0178: dup
+IL_0179: ldarg.0
+IL_017A: ldloc.2
+IL_017B: ldloc.s V_6
+IL_017D: callvirt System.Void Block::OnBlockStartsToFall(WorldBase,Vector3i,BlockValue)
+IL_0182: ldloc.2
+IL_0183: ldc.i4.m1
+IL_0184: ldloca.s V_6
+IL_0186: call System.Int32 BlockValue::get_type()
+IL_018B: call System.Void DynamicMeshManager::ChunkChanged(Vector3i,System.Int32,System.Int32)
+IL_0190: callvirt System.Boolean Block::ShowModelOnFall()
+IL_0195: brfalse IL_024C
+IL_019A: ldloca.s V_11
+IL_019C: ldloc.2
+IL_019D: ldfld Int32 Vector3i::x
+IL_01A2: conv.r4
+IL_01A3: ldc.r4 0.5
+IL_01A8: add
+IL_01A9: ldarg.0
+IL_01AA: ldc.r4 -0.1
+IL_01AF: ldc.r4 0.1
+IL_01B4: call System.Single World::RandomRange(System.Single,System.Single)
+IL_01B9: add
+IL_01BA: ldloc.2
+IL_01BB: ldfld Int32 Vector3i::y
+IL_01C0: conv.r4
+IL_01C1: ldc.r4 0.5
+IL_01C6: add
+IL_01C7: ldloc.2
+IL_01C8: ldfld Int32 Vector3i::z
+IL_01CD: conv.r4
+IL_01CE: ldc.r4 0.5
+IL_01D3: add
+IL_01D4: ldarg.0
+IL_01D5: ldc.r4 -0.1
+IL_01DA: ldc.r4 0.1
+IL_01DF: call System.Single World::RandomRange(System.Single,System.Single)
+IL_01E4: add
+IL_01E5: call System.Void UnityEngine.Vector3::.ctor(System.Single,System.Single,System.Single)
+IL_01EA: ldstr fallingBlock
+IL_01EF: call System.Int32 EntityClass::FromString(System.String)
+IL_01F4: ldc.i4.m1
+IL_01F5: ldc.i4.1
+IL_01F6: newarr BlockValue
+IL_01FB: dup
+IL_01FC: ldc.i4.0
+IL_01FD: ldloc.s V_6
+IL_01FF: stelem.any BlockValue
+IL_0204: ldc.i4.1
+IL_0205: newarr TextureFullArray
+IL_020A: dup
+IL_020B: ldc.i4.0
+IL_020C: ldloc.s V_7
+IL_020E: stelem.any TextureFullArray
+IL_0213: ldc.i4.1
+IL_0214: ldloc.s V_11
+IL_0216: call UnityEngine.Vector3 UnityEngine.Vector3::get_zero()
+IL_021B: ldc.r4 -1
+IL_0220: ldc.i4.m1
+IL_0221: ldc.i4.m1
+IL_0222: ldstr
+IL_0227: call Entity EntityFactory::CreateEntity(System.Int32,System.Int32,BlockValue[],TextureFullArray[],System.Int32,UnityEngine.Vector3,UnityEngine.Vector3,System.Single,System.Int32,System.Int32,System.String)
+IL_022C: castclass EntityFallingBlock
+IL_0231: stloc.s V_12
+IL_0233: ldloc.s V_8
+IL_0235: brfalse.s IL_0240
+IL_0237: ldloc.s V_12
+IL_0239: ldloc.s V_8
+IL_023B: callvirt System.Void EntityFallingBlock::SetCanvasState(SignCanvas/CanvasState)
+IL_0240: ldarg.0
+IL_0241: ldloc.s V_12
+IL_0243: call System.Void World::SpawnEntityInWorld(Entity)
+IL_0248: ldloc.0
+IL_0249: ldc.i4.1
+IL_024A: add
+IL_024B: stloc.0
+IL_024C: ldarg.0
+IL_024D: ldfld Queue`1 World::fallingBlocks
+IL_0252: callvirt System.Int32 System.Collections.Generic.Queue`1<Vector3i>::get_Count()
+IL_0257: ldc.i4.0
+IL_0258: ble.s IL_0261
+IL_025A: ldloc.0
+IL_025B: ldc.i4.2
+IL_025C: blt IL_009E
+IL_0261: ldarg.0
+IL_0262: ldfld HashSet`1 World::processedBlocks
+IL_0267: callvirt System.Void System.Collections.Generic.HashSet`1<Vector3i>::Clear()
+IL_026C: ret
+
