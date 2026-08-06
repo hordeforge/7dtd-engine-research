@@ -150,7 +150,7 @@ Per-package behaviour lives in trivial overrides. Rather than open 193 files,
 census the constants:
 
 ```bash
-mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.0.1/META.md
+mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.1.0/META.md
 ```
 
 This resolves each `get_Channel` / `get_Compress` / `get_PackageDirection` /

@@ -10,7 +10,7 @@
 **Bar:** 100% of dedicated-relevant **managed** surfaces in `Assembly-CSharp.dll`.  
 **Not in bar:** Unity native, native net plugins, EAC wire protocol, client-only UI.
 
-**Live pin (2026-08-02 dedi V3.1.0):** stock `ChunkBlockYDim=256`, `ChunkBlockLayers=64`. Expanded dumps in `terrain-v3.0.1` are historical.  
+**Live pin (2026-08-02 dedi V3.1.0):** stock `ChunkBlockYDim=256`, `ChunkBlockLayers=64`. Expanded dumps in `terrain-v3.1.0` are historical.  
 **Runtime pin:** Unity 2022 Mono (Boehm `libmonobdwgc-2.0.so`, conservative non-generational STW GC), sim target 20 TPS. GC / FPS / lifecycle knobs: [`runtime-tuning.md`](../../7dtd-optimizer/docs/runtime-tuning.md).
 
 ```mermaid
@@ -30,17 +30,17 @@ flowchart TB
 
 | # | Family | Narrative | Dump evidence | Status |
 |---|---|---|---|---|
-| 1 | Frame / gmUpdate | [loop.md](loop.md), [loop-gmupdate.md](loop-gmupdate.md) | il/gmUpdate-v3.0.1/, il/frame-entries-v3.0.1/ | Closed |
-| 2 | Timers / dual entity tick | loop.md §3, [entity-ai.md](entity-ai.md), [closed-gaps.md](closed-gaps.md) | il/gaps-v3.0.1/, il/deep-v3.0.1/, il/dedi-complete-v3.0.1/ | Closed |
-| 3 | World / chunks | [world-chunks.md](world-chunks.md) | il/dedi-complete-v3.0.1/, il/loop-complete-v3.0.1/, il/realearth-surfaces-v3.0.1/ | Closed |
-| 4 | Terrain / height | [terrain-height.md](terrain-height.md), `realearth-surfaces.md` | il/terrain-*-v3.0.1/, il/realearth-surfaces-v3.0.1/ | Closed |
-| 5 | Entities / AI / path | [entity-ai.md](entity-ai.md), [aidirector.md](aidirector.md) | il/deep-v3.0.1/, il/deeper-v3.0.1/, il/gaps-v3.0.1/ | Closed |
-| 6 | Networking | [network.md](network.md), [protocol.md](protocol.md), [protocol-packages.md](protocol-packages.md), closed-gaps.md | il/gaps-v3.0.1/, il/netpackages-v3.0.1/, il/dedi-complete-v3.0.1/, loadgen golden wire | Closed (framing/join, metadata census for all 193, P0/P1 bodies + encryption handshake); high-traffic + residual bulk catalog in protocol-packages.md 1-6.22; full flat write sequences in inventories/netpackage-bodies.md |
-| 7 | Save / region | [save-region.md](save-region.md) | il/loop-complete-v3.0.1/, il/realearth-surfaces-v3.0.1/, il/dedi-complete-v3.0.1/ | Closed |
-| 8 | Origin / claims | `7days-realworld/docs/realearth-surfaces.md` (private companion; no published narrative in this repo) | il/realearth-surfaces-v3.0.1/, il/dedi-complete-v3.0.1/ | Closed (dumped; narrative is product-owned) |
-| 9 | Managers | [managers.md](managers.md) | il/dedi-complete-v3.0.1/, il/loop-complete-v3.0.1/ | Closed |
-| 10 | Light / mesh / water | [light-mesh-water.md](light-mesh-water.md) | il/dedi-complete-v3.0.1/, il/realearth-surfaces-v3.0.1/ | Closed |
-| 11 | ModEvents | [managers.md](managers.md) | il/dedi-complete-v3.0.1/ | Closed (names; subscribers residual) |
+| 1 | Frame / gmUpdate | [loop.md](loop.md), [loop-gmupdate.md](loop-gmupdate.md) | il/loop-complete-v3.1.0/, il/frame-entries-v3.1.0/ | Closed |
+| 2 | Timers / dual entity tick | loop.md §3, [entity-ai.md](entity-ai.md), [closed-gaps.md](closed-gaps.md) | il/gaps-v3.1.0/, il/deep-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed |
+| 3 | World / chunks | [world-chunks.md](world-chunks.md) | il/dedi-complete-v3.1.0/, il/loop-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
+| 4 | Terrain / height | [terrain-height.md](terrain-height.md), `realearth-surfaces.md` | il/terrain-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
+| 5 | Entities / AI / path | [entity-ai.md](entity-ai.md), [aidirector.md](aidirector.md) | il/deep-v3.1.0/, il/deeper-v3.1.0/, il/gaps-v3.1.0/ | Closed |
+| 6 | Networking | [network.md](network.md), [protocol.md](protocol.md), [protocol-packages.md](protocol-packages.md), closed-gaps.md | il/gaps-v3.1.0/, il/netpackages-v3.1.0/, il/dedi-complete-v3.1.0/, loadgen golden wire | Closed (framing/join, metadata census for all 193, P0/P1 bodies + encryption handshake); high-traffic + residual bulk catalog in protocol-packages.md 1-6.22; full flat write sequences in inventories/netpackage-bodies.md |
+| 7 | Save / region | [save-region.md](save-region.md) | il/loop-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed |
+| 8 | Origin / claims | `7days-realworld/docs/realearth-surfaces.md` (private companion; no published narrative in this repo) | il/realearth-surfaces-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed (dumped; narrative is product-owned) |
+| 9 | Managers | [managers.md](managers.md) | il/dedi-complete-v3.1.0/, il/loop-complete-v3.1.0/ | Closed |
+| 10 | Light / mesh / water | [light-mesh-water.md](light-mesh-water.md) | il/dedi-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
+| 11 | ModEvents | [managers.md](managers.md) | il/dedi-complete-v3.1.0/ | Closed (names; subscribers residual) |
 
 Families 1-11 are managed DLL surfaces (the coverage bar above). Runtime **cost/scaling
 and process-tuning** are not managed surfaces; they are measured by the optimizer mod

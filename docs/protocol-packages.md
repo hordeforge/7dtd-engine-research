@@ -3,7 +3,7 @@
 **Owns:** per-`NetPackage` wire metadata (channel/compress/direction/auth) and
 hand-annotated `read`/`write` byte layouts beyond the join-critical set in
 [`protocol.md`](protocol.md).
-**Pin:** dedicated V **3.1.0 (b14)**; dump set dir name `il/netpackages-v3.0.1/`
+**Pin:** dedicated V **3.1.0 (b14)**; dump set dir name `il/netpackages-v3.1.0/`
 is historical (regenerate against live ASM).
 **Not:** framing/join/challenge (that is [`protocol.md`](protocol.md)); visual
 frames ([`protocol-frames.md`](protocol-frames.md)).
@@ -20,8 +20,8 @@ All widths little-endian. `string` = .NET 7-bit length prefix + UTF-8. `bool` =
 
 ## 1. Protocol-wide metadata census
 
-Full table: `il/netpackages-v3.0.1/META.md` (193 packages). Regenerate with
-`mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.0.1/META.md`.
+Full table: `il/netpackages-v3.1.0/META.md` (193 packages). Regenerate with
+`mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.1.0/META.md`.
 
 **Per-package wire bodies:** this doc hand-annotates the load-bearing packages; the
 **complete** ordered `write()` field sequence for every package (183 bodies + 61
@@ -1232,7 +1232,7 @@ Used by vehicle/drone managers for multi-entity waypoint push.
 10 ManualKick (also used for platform-blocked enter), 26 BadMTUPackets (ConnectionManager bad-packet threshold 3/s),
 31 PersistentPlayerDataExceeded (PPL cap 100 on RequestToEnterGame),
 33 EncryptionAgreementInvalidSignature, 34 EncryptionAgreementError. Full list in
-`il/netpackages-v3.0.1/` enum dump.
+`il/netpackages-v3.1.0/` enum dump.
 
 **NetPackagePlayerDenied** body (`KickPlayerData`):
 ```text

@@ -2,7 +2,7 @@
 
 **Kind:** auto dump notes (not primary narrative).
 **Prefer:** [`entity-ai.md`](../entity-ai.md).
-**Raw IL:** [`../il/deeper-v3.0.1/`](../../il/deeper-v3.0.1/) (`DEEPER.md` source).
+**Raw IL:** [`../il/deeper-v3.1.0/`](../../il/deeper-v3.1.0/) (`DEEPER.md` source).
 
 ---
 

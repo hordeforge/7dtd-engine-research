@@ -428,7 +428,7 @@ decision once `AIPackages` is enabled.
 
 ```bash
 cd tools && ./build.sh --skip-legacy
-MONO_PATH=bin mono bin/DumpAll.exe "$ASM" ../il/full-v3.0.1 UAI
+MONO_PATH=bin mono bin/DumpAll.exe "$ASM" ../il/full-v3.1.0 UAI
 ```
 
 ## Changelog

@@ -481,7 +481,7 @@ three are client render/UI and out of scope here.
 ## Prefab rotation, id mapping and YOffset placement (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump, not the `il/` v3.0.1 sets) plus the shipped Navezgane
+numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus) plus the shipped Navezgane
 world data.
 
 ### RotateY does not permute the cell array

@@ -2,7 +2,7 @@
 
 **Owns:** gmUpdate phase narrative (detail under [`loop.md`](loop.md) §2).  
 **Call list:** [`inventories/gmupdate-calls.md`](inventories/gmupdate-calls.md).  
-**Dump set:** [`../il/gmUpdate-v3.0.1/`](../il/gmUpdate-v3.0.1) (historical path name; IL size still 631 on V3.1.0).  
+**Dump set:** [`../il/loop-complete-v3.1.0/`](../il/loop-complete-v3.1.0) (historical path name; IL size still 631 on V3.1.0).  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 **Assembly:** dedicated `Assembly-CSharp.dll` V **3.1.0 (b14)** (gmUpdate IL=631 unchanged from V3.0.1)  

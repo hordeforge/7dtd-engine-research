@@ -12,9 +12,9 @@
 
 | Directory | Assembly | Role |
 |---|---|---|
-| [`../il/terrain-stock-v3.0.1/`](../il/terrain-stock-v3.0.1) | Dedicated `.re_stock_bak` | **Stock** vertical constants (pre-expand) |
-| [`../il/terrain-v3.0.1/`](../il/terrain-v3.0.1) | Dedicated, expanded snapshot | **Historical** expanded YDim (RealEarth); live dedi is stock again, see [`coverage.md`](coverage.md) live pin |
-| [`../il/terrain-client-v3.0.1/`](../il/terrain-client-v3.0.1) | Client, expanded snapshot | Historical expanded client dump |
+| [`../il/terrain-v3.1.0/`](../il/terrain-v3.1.0) | Dedicated `.re_stock_bak` | **Stock** vertical constants (pre-expand) |
+| [`../il/terrain-v3.1.0/`](../il/terrain-v3.1.0) | Dedicated, expanded snapshot | **Historical** expanded YDim (RealEarth); live dedi is stock again, see [`coverage.md`](coverage.md) live pin |
+| [`../il/terrain-v3.1.0/`](../il/terrain-v3.1.0) | Client, expanded snapshot | Historical expanded client dump |
 
 Auto narrative: `TERRAIN_auto.md` in each dump dir.  
 Tool: `tools/legacy/DumpTerrain.cs` (build via [`../tools/`](../tools/)).
@@ -23,9 +23,9 @@ Tool: `tools/legacy/DumpTerrain.cs` (build via [`../tools/`](../tools/)).
 DS="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
 ASM="$DS/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 cd tools && ./build.sh
-mono bin/legacy/DumpTerrain.exe "$ASM" ../il/terrain-v3.0.1
+mono bin/legacy/DumpTerrain.exe "$ASM" ../il/terrain-v3.1.0
 # stock backup:
-mono bin/legacy/DumpTerrain.exe "$ASM.re_stock_bak" ../il/terrain-stock-v3.0.1
+mono bin/legacy/DumpTerrain.exe "$ASM.re_stock_bak" ../il/terrain-v3.1.0
 ```
 
 ## Stock vs expanded constants (Measured)
@@ -129,7 +129,7 @@ Non-IL residuals only: [`residuals.md`](residuals.md). Product soak/ops items ar
 
 ## Chunk indexing (closed)
 
-From live stock IL (`realearth-surfaces-v3.0.1`):
+From live stock IL (`realearth-surfaces-v3.1.0`):
 
 ```text
 // blocks

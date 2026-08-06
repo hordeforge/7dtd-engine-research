@@ -10,7 +10,7 @@
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md) §2-3 (player O(N²), packages).  
 **Clone design:** [`zig-clone.md`](../../zdtd/docs/zig-clone.md).  
 **Loop:** [`loop.md`](loop.md) §6.  
-**Dumps:** `il/gaps-v3.0.1/`, `il/dedi-complete-v3.0.1/` §3-4.
+**Dumps:** `il/gaps-v3.1.0/`, `il/dedi-complete-v3.1.0/` §3-4.
 
 ---
 
@@ -188,7 +188,7 @@ Representative dedi-relevant packages (from inventory dump):
 | `NetPackagePlayer*` family | Player data |
 | Encryption packages | Auth handshake |
 
-Full name list: `il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md` §3.  
+Full name list: `il/dedi-complete-v3.1.0/DEDI_COMPLETE_auto.md` §3.  
 Join + envelope + golden entity package bodies: [protocol.md](protocol.md).
 
 ---
@@ -352,7 +352,7 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 ## 4c. Package registry, direction gate, per-package channel/compress/reliability (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump, not the `il/` v3.0.1 sets). Note LiteNetLib itself is a
+numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus). Note LiteNetLib itself is a
 separate assembly and is **not** in the dump (only `.assembly extern LiteNetLib`),
 so nothing below covers LiteNet's own framing.
 

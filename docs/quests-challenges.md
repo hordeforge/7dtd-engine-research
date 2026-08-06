@@ -492,7 +492,7 @@ section 6.17.
 ## Quest XML inheritance, objective serialization shapes and fail-soft Read (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers below are from that dump, not from the `il/` v3.0.1 sets, and drift by
+numbers below are from that dump; the tracked `il/` sets are the V3.1.0 corpus, and older citations drift by
 roughly 3500 lines in the NetPackage region).
 
 **`QuestsFromXml::ParseQuest` template branch (~1390310-1390582).** A quest with a

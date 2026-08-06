@@ -10,7 +10,7 @@
 **Full package bodies + census (channels, compress, pre-auth, encryption handshake):** [`protocol-packages.md`](protocol-packages.md).  
 **Clone use:** [zig-clone.md](../../zdtd/docs/zig-clone.md) · implementation [`../../zdtd/`](../../zdtd).  
 **Replication policy:** [network.md](network.md).  
-**Evidence:** `7dtd-loadgen` `PackageCodec.cs` / `JoinStateMachine.cs` / `GameJoinClient.cs` (live joins); `il/dedi-complete-v3.0.1/` NetPackage census; ConnectionManager dumps.
+**Evidence:** `7dtd-loadgen` `PackageCodec.cs` / `JoinStateMachine.cs` / `GameJoinClient.cs` (live joins); `il/dedi-complete-v3.1.0/` NetPackage census; ConnectionManager dumps.
 
 **Endianness:** little-endian (BinaryWriter / .NET). Strings: length-prefixed UTF-8 as .NET `BinaryWriter.Write(string)`.
 
@@ -146,7 +146,7 @@ helpers (`NetPackageDirection` [enum], `Logger`, `Metrics`, ...), not wire packa
 
 Largest maxIL (complexity signal, not wire size): Metrics, SharedQuest, QuestEvent, QuestGotoPoint, WireToolActions, PartyData, RangeCheckDamageEntity, GameEventRequest, TurretSpawn, Audio, DynamicMesh, …
 
-Full name list: `il/dedi-complete-v3.0.1/DEDI_COMPLETE_auto.md` §3.
+Full name list: `il/dedi-complete-v3.1.0/DEDI_COMPLETE_auto.md` §3.
 
 ---
 

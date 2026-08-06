@@ -369,7 +369,7 @@ what `TraderManager.HandleFullReset` puts in stock.
 ## Trader delivery paths, package direction and TEFeatureStorage (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump, not the `il/` v3.0.1 sets).
+numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus).
 
 **`NetPackageTraderData` is client-to-server only.** `get_PackageDirection` returns
 1 = `ToServer` (843057-843064) and its `ProcessPackage` early-returns unless

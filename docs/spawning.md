@@ -434,7 +434,7 @@ run or fire on the dedicated server.
 ## Biome spawn manager, director constants and the gamestage indirection (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump, not the `il/` v3.0.1 sets).
+numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus).
 
 ### AIDirectorConstants: the whole horde/scout tuning block
 

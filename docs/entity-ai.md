@@ -4,7 +4,7 @@
 **Loop context:** [`loop.md`](loop.md), [`loop-gmupdate.md`](loop-gmupdate.md).  
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md) §4 (AI volume, path ≤8, dual paths).  
 **Auto inventory:** [`inventories/deeper.md`](inventories/deeper.md).  
-**Dumps:** `il/deep-v3.0.1/`, `il/deeper-v3.0.1/`.  
+**Dumps:** `il/deep-v3.1.0/`, `il/deeper-v3.1.0/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 Do not redistribute game IL.
@@ -405,10 +405,10 @@ Graded optim candidates + APM probe list: [`../../7dtd-optimizer/docs/OPTIMIZATI
 ```bash
 cd tools && ./build.sh
 mono bin/legacy/DumpDeep.exe "$DS/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll" \
-  ../il/deep-v3.0.1
+  ../il/deep-v3.1.0
 ```
 
-Also keep [`../il/gmUpdate-v3.0.1/`](../il/gmUpdate-v3.0.1) for frame-level dump.
+Also keep [`../il/loop-complete-v3.1.0/`](../il/loop-complete-v3.1.0) for frame-level dump.
 
 ---
 

@@ -47,7 +47,7 @@ flowchart TD
 | ASP path body → AstarPath | closed-gaps.md |
 | Net package distance bands | closed-gaps.md / network.md |
 | GameTimer 20 Hz | closed-gaps.md |
-| Chunk GetBlock/density index | terrain-height.md, world-chunks.md (IL dumps in realearth-surfaces-v3.0.1) |
+| Chunk GetBlock/density index | terrain-height.md, world-chunks.md (IL dumps in realearth-surfaces-v3.1.0) |
 | Chunk write/read layer bound 64 | save-region.md |
 | WorldState.SaveLoad structure | save-region.md + dedi-complete §5 |
 | Origin.FixedUpdate on dedicated | **No-op:** `IsDedicatedServer` → early `ret` (loop.md) |

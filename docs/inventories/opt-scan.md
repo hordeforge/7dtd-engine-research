@@ -2,7 +2,7 @@
 
 **Kind:** auto dump notes (not primary narrative).  
 **Prefer:** [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md).  
-**Raw IL:** [`../il/opt-scan-v3.0.1/`](../../il/opt-scan-v3.0.1/).
+**Raw IL:** [`../il/opt-scan-v3.1.0/`](../../il/opt-scan-v3.1.0/).
 
 Generated: 2026-07-16 10:19:44Z
 Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`

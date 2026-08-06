@@ -30,12 +30,12 @@ honestly hold:
 ```bash
 cd tools && ./build.sh
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
-mono bin/FullSurface.exe "$ASM" ../il/surface-v3.0.1          # committable metadata
-mono bin/DumpAll.exe    "$ASM" ../il/full-v3.0.1              # full IL, git-ignored (all 7413 types)
-mono bin/DumpAll.exe    "$ASM" ../il/full-v3.0.1 GamePath     # or one namespace
+mono bin/FullSurface.exe "$ASM" ../il/surface-v3.1.0          # committable metadata
+mono bin/DumpAll.exe    "$ASM" ../il/full-v3.1.0              # full IL, git-ignored (all 7413 types)
+mono bin/DumpAll.exe    "$ASM" ../il/full-v3.1.0 GamePath     # or one namespace
 ```
 
-`il/full-v3.0.1/` after a full run is the 100% reversal: one `<Type>.il.txt` per
+`il/full-v3.1.0/` after a full run is the 100% reversal: one `<Type>.il.txt` per
 type, every method body. It is git-ignored on purpose.
 
 ## The assembly by functional cluster
@@ -47,7 +47,7 @@ narrated docs below, not by namespace.
 
 | Cluster | Namespaces | Coverage status |
 |---|---|---|
-| **Dedicated sim core** | `<global>` (GameManager, World, Chunk*, Entity*, EntityAlive, Tick*, managers, save) | **Narrated** for the dedicated hot path (see ledger); rest of `<global>` enumerated in `il/surface-v3.0.1/surface-types.md` (local) |
+| **Dedicated sim core** | `<global>` (GameManager, World, Chunk*, Entity*, EntityAlive, Tick*, managers, save) | **Narrated** for the dedicated hot path (see ledger); rest of `<global>` enumerated in `il/surface-v3.1.0/surface-types.md` (local) |
 | **Networking / wire** | `<global>` NetPackage*/ConnectionManager/NetEntity* | **Narrated** (protocol, protocol-frames, protocol-packages, network): 193 packages + framing + encryption |
 | **Pathfinding** | `GamePath`, `RaycastPathing` | **Narrated** ([entity-ai.md](entity-ai.md) §6 ASP wrapper, [closed-gaps.md](closed-gaps.md) ASP->A*); Aron Granberg A* library internals third-party residual |
 | **Utility AI** | `UAI` | **Narrated** ([uai.md](uai.md)): packages, considerations, tasks, decision/selection cycle |
@@ -63,7 +63,7 @@ narrated docs below, not by namespace.
 | **Analytics / services / modinfo** | `Services*`, `Services.Analytics.Events`, `ModInfo` | Not narrated (telemetry / metadata) |
 | **Bundled third-party libraries** | `UniLinq`, `ICSharpCode.WpfDesign.XamlDom`, `ConcurrentCollections`, `Microsoft.CodeAnalysis`, `SandboxOptions`, `System.*` | Not game logic (vendored libs); out of scope by definition |
 
-Per-namespace counts: `il/surface-v3.0.1/surface-namespaces.md` (regenerate).
+Per-namespace counts: `il/surface-v3.1.0/surface-namespaces.md` (regenerate).
 Per-type inventory (all 7,413, names + sizes, no bodies): `surface-types.md` (local).
 
 ## Coverage ledger (hand-written narrative)

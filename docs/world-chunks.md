@@ -4,7 +4,7 @@
 **Index math:** §2 below + [`terrain-height.md`](terrain-height.md).  
 **Save path:** [`save-region.md`](save-region.md).  
 **Product Streamed inject:** `7days-realworld/docs/realearth-runtime.md`.  
-**Dumps:** `../il/loop-complete-v3.0.1/`, `../il/realearth-surfaces-v3.0.1/`, `../il/dedi-complete-v3.0.1/`.  
+**Dumps:** `../il/loop-complete-v3.1.0/`, `../il/realearth-surfaces-v3.1.0/`, `../il/dedi-complete-v3.1.0/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 ---
@@ -314,7 +314,7 @@ stateDiagram-v2
 ## Stability, falling blocks, DamageBlock and deco subbiomes (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump, not the `il/` v3.0.1 sets).
+numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus).
 
 ### Stability runs on clients too
 

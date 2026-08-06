@@ -17,23 +17,26 @@ oss-tools/         survey notes on third-party server tools/mods
 ---
 
 
-## Version pin and IL citation convention
+## Version policy and IL citation convention
 
-**Current pin:** V **3.1.0 b14** (dedicated `Assembly-CSharp.dll`). Everything
-below describes that version unless a line says otherwise.
+**Policy: track the latest stock release only.** The corpus is regenerated
+against each new dedicated `Assembly-CSharp.dll` and the previous version's sets
+are deleted in the same change, so a citation can never quietly refer to an old
+build. Regenerate before deleting: an assembly that is no longer installed
+cannot be dumped again.
 
-Two IL corpora are in play and they do **not** share line numbers:
+**Current pin:** V **3.1.0 b14**. Every tracked set in [`../il/`](../il/) is
+V3.1.0; the V3.0.1 sets were removed on 2026-08-06.
 
-| Citation form | Means | Where |
-|---|---|---|
-| `asm.il:NNNN` | V3.1.0 b14 single-file dump | outside the repo, see [`../il/README.md`](../il/README.md) for its MD5 |
-| `il/<set>-v3.0.1/...` | tracked V3.0.1 dump sets | [`../il/`](../il/) |
+| Citation form | Means |
+|---|---|
+| `il/<set>-v3.1.0/...` | the tracked V3.1.0 dump sets |
+| `asm.il:NNNN` | a V3.1.0 single-file dump kept outside the repo, identified by MD5 in [`../il/README.md`](../il/README.md) |
 
-Drift between the two is roughly 3500 lines in the NetPackage region, so a
-V3.0.1 line number will not resolve in the V3.1.0 dump. Mentions of V3.0.1 in
-these documents are deliberate history (what changed, what a prior corpus said),
-not stale pins.
-
+Mentions of V3.0.1 in these documents are deliberate history (what changed
+between releases, what a prior corpus measured), not stale pins. Line numbers
+written before 2026-08-06 may still be V3.0.1 numbers, which drift from the
+V3.1.0 dump by roughly 3500 lines in the NetPackage region.
 
 ## Start here
 
@@ -310,8 +313,8 @@ Generic engine dumps plus surfaces dump consumed by RealEarth product docs.
 | Directory | Focus | Used by |
 |---|---|---|
 | gmUpdate / frame-entries / deep / deeper / gaps / loop-complete / opt-scan / dedi-complete | Generic loop RE | research narratives |
-| terrain-*-v3.0.1 | Stock vs expanded height | research + product |
-| realearth-surfaces-v3.0.1 | Chunk, Origin, PPL, region | product realearth-surfaces.md |
+| terrain-v3.1.0 | Stock vs expanded height | research + product |
+| realearth-surfaces-v3.1.0 | Chunk, Origin, PPL, region | product realearth-surfaces.md |
 
 Policy: [`../il/README.md`](../il/README.md).
 
@@ -336,8 +339,8 @@ catalog: [`../tools/README.md`](../tools/README.md). How to RE:
 cd tools && ./build.sh
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 mono bin/Census.exe "$ASM"
-mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.0.1
-mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.0.1
+mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.1.0
+mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.1.0
 ```
 
 Structural gate: `uv run python tools/tests/test_dedi_coverage_docs.py`  
@@ -361,7 +364,7 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
   on clients, DamageBlock repair/upgrade, subbiome deco), network (package
   registry, direction gate, per-package channel/compress/reliability, GSI version
   format). Line numbers in those sections are from the 2026-08-05 dump and drift
-  from the tracked `il/` v3.0.1 sets.
+  from the tracked `il/` V3.1.0 sets.
 
 - **2026-08-02:** Retarget hub to V3.1.0 (b14) Henpocalypse; experimental-delta promoted to shipped.
 

@@ -2,7 +2,7 @@
 
 **Kind:** inventory table (not primary narrative).  
 **Prefer:** [`loop.md`](../loop.md) §1.  
-**Raw:** [`../il/frame-entries-v3.0.1/`](../../il/frame-entries-v3.0.1/).  
+**Raw:** [`../il/frame-entries-v3.1.0/`](../../il/frame-entries-v3.1.0/).  
 **Count:** 244 zero-arg `Update`/`LateUpdate`/`FixedUpdate` bodies over the transitive `MonoBehaviour` closure (including 2 nested types, marked). Almost all are client/render/UI; the loop doc owns the dedicated-relevant ones.
 
 | Type | Base | Method | IL |

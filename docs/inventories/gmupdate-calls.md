@@ -2,7 +2,7 @@
 
 **Kind:** inventory table (not primary narrative).  
 **Prefer:** [`loop-gmupdate.md`](../loop-gmupdate.md) (gmUpdate call chain).  
-**Raw:** [`../il/gmUpdate-v3.0.1/`](../../il/gmUpdate-v3.0.1/) or frame-entries dump.  
+**Raw:** [`../il/loop-complete-v3.1.0/`](../../il/loop-complete-v3.1.0/) or frame-entries dump.  
 **Hub:** [`INDEX.md`](../INDEX.md) · Inventories section.
 
 1. IL_0000 `Time::get_frameCount`
