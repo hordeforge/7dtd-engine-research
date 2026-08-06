@@ -1276,6 +1276,8 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** EntityNetworkHoldingData carrier; Audio/Light/TreeFade/DroneParticle
+  field widths in §6.21 table.
 - **2026-08-02:** NetPackageTileEntity V3.1.0 wire (teBlockId + i32 length).
 
 - **2026-07-28:** DynamicMesh/POIAround/NavObject/EntityWaypointList package bodies.
