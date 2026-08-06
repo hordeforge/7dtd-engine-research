@@ -444,7 +444,7 @@ clients via `NetPackageInventoryTransactionResponse` (see
 New item classes: `ItemClassHeldEntity` (base), `ItemClassWildChicken`, plus
 `ItemStackGrid` for 2D stacks. Grab activation lives on `EntityAlive`
 (`InitLocalActivationCommands` / `OnEntityActivated("grab")`). Full feature
-state machine: [experimental-delta.md](experimental-delta.md) §3.
+state machine: [items.md](items.md) (held-entity item types).
 
 ## ItemClass stack defaults, recipe sentinels, fuel time and the transaction wire (2026-08-06)
 

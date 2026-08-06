@@ -126,3 +126,16 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 - **2026-07-28:** NetPackageEntityStatsBuff pointer.
 
 - **2026-07-23:** Initial buff-system reversal (EntityBuffs tick, BuffValue lifecycle, tag/death removal, net sync) with state machines.
+
+## EntityBuffs.SetCustomVar signature (V3.1.0 b14)
+
+```
+EntityBuffs::SetCustomVar(String _name, Single _value, Boolean _netSync,
+                          CVarOperation _operation, Boolean _forceSendToClients)  IL=130
+```
+
+`CVarOperation` (0 set, 1 setvalue, 2 add, 3 subtract, 4 multiply, 5 divide,
+6 percentadd, 7 percentsubtract) and the `_operation` parameter are not new; they
+exist on V3.0.1 too. The trailing `_forceSendToClients` net-sync control flag is
+the V3.1.0 addition, which took the method from IL 126 to IL 130.
+*Anchor:* `il/full-v3.1.0/_global/EntityBuffs.il.txt:1180`.

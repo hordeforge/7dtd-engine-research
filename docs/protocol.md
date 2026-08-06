@@ -1,6 +1,6 @@
 # Dedicated wire protocol (V3.1.0 pin; V3.0.1-era golden still cited)
 
-**Current game pin:** V **3.1.0 (b14)**. Framing/join and most package bodies are stable from the V3.0.1 corpus; breaking deltas (TE outer wire, PackageIds VersionInformation minor=10 build=14) are in [experimental-delta.md](experimental-delta.md) and [protocol-packages.md](protocol-packages.md). Loadgen dual fixtures cover both heads.
+**Current game pin:** V **3.1.0 (b14)**. Framing/join and most package bodies are stable from the V3.0.1 corpus; the TE outer wire and PackageIds VersionInformation (minor=10 build=14) are in [protocol-packages.md](protocol-packages.md). Loadgen dual fixtures cover both heads.
 
 
 **Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, `NetPackageRequestToSpawnPlayer` / RequestToSpawnPlayer/PlayerId/PlayerSpawnedInWorld, golden package body layouts.  

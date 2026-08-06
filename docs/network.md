@@ -1,6 +1,6 @@
 # Dedicated networking (V3.1.0 pin; corpus from V3.0.1 + delta)
 
-**Current pin:** V3.1.0 (b14). Managed net architecture below was RE'd on V3.0.1 and re-verified where delta docs say so. See [experimental-delta.md](experimental-delta.md).
+**Current pin:** V3.1.0 (b14). Managed net architecture below was RE'd on V3.0.1 and re-verified where delta docs say so. See the V3.1.0 release delta (removed; content folded into the topic docs).
 
 
 **Owns:** ConnectionManager peer pump, per-connection reader/writer threads, encrypt/compress framing, NetEntity package bands, NetPackage census.  

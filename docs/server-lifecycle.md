@@ -265,7 +265,7 @@ On player join the dedicated server may emit platform analytics via
 `Services.Analytics.Events.PlayerJoinServerEventData` (fields include ServerId,
 SaveId, OnlinePlayers, LocalMods, HasModifiedXML, character/game-stage stats).
 This is **telemetry**, not gameplay sim; transport is the platform analytics
-service (residual). See [experimental-delta.md](experimental-delta.md) §5.
+service (residual). See the EOS server-list filters section below.
 
 ## Related docs
 
@@ -290,3 +290,10 @@ service (residual). See [experimental-delta.md](experimental-delta.md) §5.
 - **2026-07-28:** Join spawn path: RequestToSpawnPlayer vs PlayerSpawnedInWorld split.
 
 - **2026-07-23:** Initial server lifecycle / game-state / player-persistence reversal (boot, rounds, join+persistence, shutdown) with state machines.
+
+## EOS server-list filters (V3.1.0 b14)
+
+`Platform.EOS.SessionsClient.matchesFilters(GameServerInfo, filters)` gates which
+sessions the server browser shows, so a server that never registers with EOS is
+invisible to browse regardless of its own state.
+*Anchor:* `il/full-v3.1.0/Platform.EOS/SessionsClient.il.txt`.

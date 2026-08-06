@@ -310,8 +310,7 @@ but idle on a headless server. The experimental branch adds
 `GetOptionNameValueDictionaryFromPreset(preset)` (name -> value dictionary
 export). It was experimental-only on V3.0.1 and **has since shipped**: it is
 present in V3.1.0 b14 on `SandboxOptionManager` and called from `GameManager`
-(re-checked 2026-08-06; compare [experimental-delta.md](experimental-delta.md)
-section 6).
+(re-checked 2026-08-06; it was experimental-only on V3.0.1).
 
 ### 7.1 Mod overrides (`sandbox_overrides.xml`)
 
@@ -405,7 +404,7 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
 | [server-lifecycle.md](server-lifecycle.md) | `StartAsServer` sequence that loads and applies the code |
 | [console-commands.md](console-commands.md) | Command registry hosting `getsandboxoptions`/`gso` |
 | [webserver.md](webserver.md) | REST `SandboxSettings` endpoint |
-| [experimental-delta.md](experimental-delta.md) | `GetOptionNameValueDictionaryFromPreset` (experimental-only) |
+| the V3.1.0 release delta (removed; content folded into the topic docs) | `GetOptionNameValueDictionaryFromPreset` (experimental-only) |
 | [loot-economy.md](loot-economy.md) | Loot abundance/tier consumers |
 | [combat-damage.md](combat-damage.md) | Damage-percent consumers |
 | [entity-ai.md](entity-ai.md) / [aidirector.md](aidirector.md) | Zombie speed, feral sense, blood moon consumers |

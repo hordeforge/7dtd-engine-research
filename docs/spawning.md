@@ -593,3 +593,9 @@ above.
 - **2026-07-24:** Added spawn config leaves: `EntitySpawnerClassForDay`,
   `GameEventManager/SpawnEntry`, `AIAirDrop/SupplyCrateSpawn`, and the two
   `ModEvents` player-spawn payload structs.
+
+## Spawn-group max-tier selection (V3.1.0 b14)
+
+`EntityGroups.GetRandomEntityFromGroupMaxTier(...)` with `NormalizeWorkingList`
+picks from a group under a tier ceiling. Used by the blood-moon party spawner.
+*Anchor:* `il/full-v3.1.0/_global/AIDirectorBloodMoonParty.il.txt`.

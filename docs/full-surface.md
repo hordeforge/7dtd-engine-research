@@ -106,7 +106,7 @@ core + wire protocol, a small but load-bearing slice of the 7,413 types.
 | Combat / damage | [combat-damage.md](combat-damage.md) | Deep (DamageSource, apply pipeline, death/kill) |
 | Twitch integration | [twitch-integration.md](twitch-integration.md) | Server slice (action/vote execution via game events); connection client residual |
 | Mod loading / ModEvents | [mod-loading.md](mod-loading.md) | Deep (load pipeline, EAC gate, hook lifecycle) |
-| V3.1.0 delta (from V3.0.1) | [experimental-delta.md](experimental-delta.md) | TE wire + held entities + analytics (shipped) |
+
 | Dynamic mesh | [dynamic-mesh.md](dynamic-mesh.md) | Deep (server regen threading, persistence, channel-1 flow control) |
 | Parties / factions / allies | [parties-factions.md](parties-factions.md) | Deep (party lifecycle, faction standing matrix, ally handshake) |
 

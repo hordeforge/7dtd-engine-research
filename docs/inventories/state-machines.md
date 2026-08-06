@@ -80,7 +80,7 @@ that is only ever a target reads one lower.
 | 2. Command dispatch (state machine) | [console-commands.md](../console-commands.md) | 12 |
 | 3. Telnet connection (state machine) | [console-commands.md](../console-commands.md) | 6 |
 | Diagram convention | [coverage.md](../coverage.md) | 0 |
-| 3.2 Held-entity item types | [experimental-delta.md](../experimental-delta.md) | 7 |
+| 3.2 Held-entity item types | [items.md](../items.md) | 7 |
 | 2. Mod load-state (state machine) | [mod-loading.md](../mod-loading.md) | 7 |
 | 2.1 Membership lifecycle (state machine) | [parties-factions.md](../parties-factions.md) | 5 |
 | 4. Faction and relationship model | [parties-factions.md](../parties-factions.md) | 5 |

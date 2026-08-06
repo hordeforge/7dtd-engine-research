@@ -173,7 +173,7 @@ changes into an update `SessionModification` that `Update()` commits on a
 `AuthServer` calls `RegisterUser`/`UnregisterUser` per authenticated client so
 EOS tracks real occupancy. Note: `SessionsClient.matchesFilters` (client-side
 re-filtering of `GameServerInfo` against browse filters) exists only in the
-experimental build; see [`experimental-delta.md`](experimental-delta.md). In
+experimental build and shipped in V3.1.0 b14. In
 stable, filtering is purely server-side via EOS attribute comparisons
 (`setSearchParameters`).
 
@@ -357,7 +357,7 @@ surface is exactly sections 1 and 2.
 | [world-generation.md](world-generation.md) | Writes `prefabs.xml`; authors the `PrefabVolumes` model consumed here |
 | [world-chunks.md](world-chunks.md) | Chunk lifecycle around `DecorateChunk` |
 | [webserver.md](webserver.md) | HTTP admin surface that mirrors server prefs |
-| [experimental-delta.md](experimental-delta.md) | `SessionsClient.matchesFilters` (experimental-only browse filter) |
+| the V3.1.0 release delta (removed; content folded into the topic docs) | `SessionsClient.matchesFilters` (experimental-only browse filter) |
 | [game-events.md](game-events.md) | `EventPrefabs` consumers of `PrefabInstance.Serializable` |
 | [protocol-packages.md](protocol-packages.md) | NetPackage inventory incl. the editor/world-init packages |
 

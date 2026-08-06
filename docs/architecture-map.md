@@ -241,7 +241,7 @@ flowchart TB
   subgraph O[Ops and edges]
     o1[server-lifecycle] --- o2[console-commands] --- o3[webserver] --- o4[mod-loading]
     o5[sandbox-options] --- o6[server-browser-prefabs] --- o7[chat] --- o8[parties-factions]
-    o9[twitch-integration] --- o10[signs] --- o11[map-objects] --- o12[experimental-delta]
+    o9[twitch-integration] --- o10[signs] --- o11[map-objects]
   end
 ```
 

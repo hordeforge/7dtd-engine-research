@@ -787,7 +787,7 @@ Also on the wire (see [protocol-packages.md](protocol-packages.md) section 6.21)
 
 `EntityAlive.InitLocalActivationCommands` registers `"grab"` / `"hand"` on the
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
-[experimental-delta.md](experimental-delta.md) §3.
+[items.md](items.md) (held-entity item types).
 
 ## Changelog
 

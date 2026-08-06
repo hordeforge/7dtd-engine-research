@@ -157,7 +157,7 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 | [architecture-map.md](architecture-map.md) | Whole-system visual map and subsystem ownership index |
 | [coverage.md](coverage.md) | Family → narrative → dump map; census numbers |
 | [full-surface.md](full-surface.md) | Whole-assembly map (all 87 namespaces) + coverage ledger toward 100% |
-| [experimental-delta.md](experimental-delta.md) | **V3.0.1 -> V3.1.0** shipped delta (TE wire, held entities, analytics) |
+
 | [residuals.md](residuals.md) | What managed IL cannot close (the only open-item list) |
 | [out-of-scope-surface.md](out-of-scope-surface.md) | Reached-but-out-of-scope types classified by category (the boundary map) |
 | [engine-limitations.md](engine-limitations.md) | Generic stock ceilings (sim, net, AI, height, GC, ops) |
