@@ -16,6 +16,25 @@ oss-tools/         survey notes on third-party server tools/mods
 
 ---
 
+
+## Version pin and IL citation convention
+
+**Current pin:** V **3.1.0 b14** (dedicated `Assembly-CSharp.dll`). Everything
+below describes that version unless a line says otherwise.
+
+Two IL corpora are in play and they do **not** share line numbers:
+
+| Citation form | Means | Where |
+|---|---|---|
+| `asm.il:NNNN` | V3.1.0 b14 single-file dump | outside the repo, see [`../il/README.md`](../il/README.md) for its MD5 |
+| `il/<set>-v3.0.1/...` | tracked V3.0.1 dump sets | [`../il/`](../il/) |
+
+Drift between the two is roughly 3500 lines in the NetPackage region, so a
+V3.0.1 line number will not resolve in the V3.1.0 dump. Mentions of V3.0.1 in
+these documents are deliberate history (what changed, what a prior corpus said),
+not stale pins.
+
+
 ## Start here
 
 Campaign audit (V3.1.0 evidence + residual map): [`../workspace/outputs/docs-research-audit-20260803.md`](../workspace/outputs/docs-research-audit-20260803.md).
@@ -330,6 +349,19 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
 ---
 
 ## Changelog
+
+- **2026-08-06:** Nine dated addendums from a full V3.1.0 b14 re-dump (2026-08-05):
+  quests (template inheritance, objective Write shapes, fail-soft Quest::Read),
+  loot-economy (trader S2C delivery paths, ToServer-only TraderData, client-side
+  pricing), aidirector (blood-moon window and party spawner, client-local FX),
+  world-generation (prefab rotation direction, .blocks.nim id space, YOffset),
+  spawning (AIDirectorConstants, SpawnManagerBiomes, gamestage indirection),
+  items (stack defaults, fuel time, InventoryTransaction wire), progression
+  (progressionData blob, XP curve, V3.1.0 death penalty), world-chunks (stability
+  on clients, DamageBlock repair/upgrade, subbiome deco), network (package
+  registry, direction gate, per-package channel/compress/reliability, GSI version
+  format). Line numbers in those sections are from the 2026-08-05 dump and drift
+  from the tracked `il/` v3.0.1 sets.
 
 - **2026-08-02:** Retarget hub to V3.1.0 (b14) Henpocalypse; experimental-delta promoted to shipped.
 

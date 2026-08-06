@@ -311,6 +311,98 @@ stateDiagram-v2
 | `AddFallingBlock` / `LetBlocksFall` | 38 / 220 | Collapse storms |
 | `EntityFallingBlock` OnUpdateEntity | 300+ | Entity cost |
 
+## Stability, falling blocks, DamageBlock and deco subbiomes (2026-08-06)
+
+Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
+numbers are from that dump, not the `il/` v3.0.1 sets).
+
+### Stability runs on clients too
+
+`GameStats::initPropertyDecl` (1919111) builds 78 `PropertyDecl`s with ctor order
+`(EnumGameStats name, bool bPersistent, EnumType type, object defaultValue)`. Array
+index 52 is `(stat 55 = ChunkStabilityEnabled, bPersistent = FALSE, type 3 = bool,
+default TRUE)` at 1919743. It is correctly absent from the persistent Write blob,
+which means **every client keeps chunk stability enabled from its own default
+regardless of what the server sends.**
+
+`ChunkCluster::Init` (1125631-1125637) constructs **both** a `StabilityCalculator`
+(`stabilityCalcMainThread`) and a `StabilityInitializer`
+(`stabilityCalcLightingThread`) and calls `StabilityCalculator::Init` whenever
+`world.GetGameManager() != null`, i.e. on clients too, not only on the server.
+
+`ChunkCluster::LightChunk` (1127022) calls `ChunkCluster::CalcStability` (1127044),
+which runs `StabilityInitializer::DistributeStability` plus
+`Chunk::CheckSameStability` for every chunk. That is why `bNetwork = true` can skip
+the stability channel on the wire: the receiving client recomputes the whole plane
+locally.
+
+`ChunkCluster::SetBlock` (~1128420-1128620) calls
+`StabilityCalculator::BlockPlacedAt` / `BlockRemovedAt` (with `Block::StabilityFull`
+as the flag) for the block and for every `multiBlockPos` cell, on the client as
+well as the server.
+
+`StabilityCalculator/UpdatePhysics` (1095820-1095900) is a coroutine gated on
+`GameStats.GetBool(EnumGameStats.ChunkStabilityEnabled)` at IL_0014 and on
+`StabilityCalculator::bRunning`; when it runs it pushes every unstable position
+into `World::AddFallingBlock` (IL_00ad).
+
+`GameManager::UpdateTick` (1881893) calls `World::LetBlocksFall()` at IL_00a5
+**outside** the `ConnectionManager.IsServer` guard that wraps
+`GameStateManager::OnUpdateTick` just above it, so clients run the falling-block
+pump too. `World::LetBlocksFall` is at 1239773, `World::AddFallingBlock` at
+1239718, and the entity comes from `EntityFactory::CreateEntity` with
+`EntityClass::FromString("fallingBlock")` at 1240000.
+`EntityFallingBlocks::Enabled` (220106) is a separate toggle for the grouped
+variant.
+
+### DamageBlock is the repair, upgrade and downgrade path
+
+`Block::DamageBlock` (96545) computes `newDamage = blockValue.damage +
+_damagePoints` (IL_00bf) and branches on the sign:
+
+- `newDamage < 0` and `Block::UpgradeBlock` is not air (IL_00d9-IL_0128):
+  **replaces** the block with `UpgradeBlock`, converting rotation via
+  `Block::convertRotation`, copying meta and zeroing damage. Block upgrading is
+  over-repair, not a separate operation.
+- `newDamage < 0` with no `UpgradeBlock` (IL_0197): clamps damage to 0 and
+  SetBlockRPCs.
+- IL_01b1 onward is the `Stage2Health` downgrade path.
+
+`ItemActionRepair` (657520) drives repair by calling `Block::DamageBlock` with the
+repair amount **negated** (IL_056f `neg`), so the resulting C2S
+`NetPackageSetBlock` always carries the new **lower** absolute `BlockValue.damage`.
+A server must never treat a wire damage value below the stored one as a delta to
+add. The repair amount is `Utils::FastMin(repairAmount, blockValue.damage)` at
+IL_0216-IL_0228; the XP event is `_xpFromRepairBlock` (657572).
+
+### Deco density comes from subbiomes, not the top-level list
+
+`WorldBiomeProviderFromImage::GetBiomeOrSubAt` (1303341) resolves `GetBiomeAt` then
+`GetSubBiomeIdxAt` (noise) and returns `BiomeDefinition::subbiomes[idx]` when the
+index is >= 0. `DecoManager::decorateChunkRandom` calls it **per cell** (1266039)
+and samples that **subbiome's** `m_DistantDecoBlocks` (1266052). Sampling only the
+top-level biome's `<decorations>` list misses where essentially all the real tree
+probability mass lives in stock `biomes.xml` (pine_forest top-level rows are prob
+.001-.007; the subbiome lists carry treeJuniper4m .06, treeDeadTree01 .07,
+treeDeadPineLeaf .08).
+
+`blocks.xml` ships `IsDistantDecoration` on only three blocks: `treeMaster` (true,
+inherited by everything extending it), `resourceRock01` (false) and `treeCactus01`
+(true). `BiomeDefinition::AddDecoBlock` (1249700-1249740) uses that flag to build
+`m_DistantDecoBlocks`, so the effective distant-deco species set is "anything whose
+Extends chain reaches treeMaster, plus treeCactus01, minus resourceRock01".
+
+### Weather packages are keyed strictly by biomeId
+
+`WeatherManager::ClientProcessPackages` (2054217) does
+`WorldBiomes::TryGetBiome(biomeId)`, then
+`BiomeDefinition::SetWeatherGroup(groupIndex)`, then
+`WeatherManager::FindBiomeWeather(biomeId)` and `WeatherPackage::CopyTo`. Entries
+for a biomeId the client does not have are skipped silently, and it early-returns
+if two weather packages arrive in the same `Time.frameCount`.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -323,6 +415,16 @@ stateDiagram-v2
 | `realearth-surfaces.md` | Product surfaces |
 
 ## Changelog
+
+- **2026-08-06:** ChunkStabilityEnabled is non-persistent with default true, so
+  clients keep stability on regardless of the server; ChunkCluster::Init builds a
+  StabilityCalculator on clients too and LightChunk recomputes the plane (why
+  bNetwork skips the channel); GameManager::UpdateTick runs LetBlocksFall outside
+  the IsServer guard; Block::DamageBlock sign branches carry repair, UpgradeBlock
+  and Stage2Health downgrade, and ItemActionRepair negates the amount so the wire
+  damage is the new lower absolute; DecoManager samples per-cell subbiome
+  m_DistantDecoBlocks via GetBiomeOrSubAt and IsDistantDecoration is set on only
+  three blocks; WeatherManager::ClientProcessPackages keys strictly on biomeId.
 
 - **2026-07-28:** Map package producer pointer (MapChunkDatabase 17x17 window).
 - **2026-07-28:** `DetermineChunksToLoad` full algorithm: 15 hollow rings, per-observer diffs, global unions, unload budget 8.

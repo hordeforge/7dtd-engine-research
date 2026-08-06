@@ -446,6 +446,83 @@ New item classes: `ItemClassHeldEntity` (base), `ItemClassWildChicken`, plus
 (`InitLocalActivationCommands` / `OnEntityActivated("grab")`). Full feature
 state machine: [experimental-delta.md](experimental-delta.md) §3.
 
+## ItemClass stack defaults, recipe sentinels, fuel time and the transaction wire (2026-08-06)
+
+Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
+numbers are from that dump, not the `il/` v3.0.1 sets).
+
+### Stack size
+
+When an `<item>` has no `Stacknumber` property the stock default is **0x1f4 = 500**
+(749087-749091, the else branch of the `DynamicProperties.ContainsKey("Stacknumber")`
+test). `ItemClassBlock`'s ctor sets the same 500 default (682393).
+
+`ItemClass::get_MaxCount` (674830-674858): if `HasQuality` **or** `!CanStack` it
+returns `Stacknumber.Value` raw; otherwise it returns
+`FastMin(FastRoundToInt(Stacknumber.Value * ItemClass::MaxStackSizeModifier),
+0x7530 = 30000)`. `MaxStackSizeModifier` is a static float (674733) and the 30000
+hard cap applies to every stackable item.
+
+In the shipped `items.xml`: 1413 items, 254 with a direct `Stacknumber`, 1144 using
+`Extends` (so the effective value is inherited, not absent).
+
+### Recipe craft time sentinel
+
+`Recipe` XML parse (1392695-1392710): when a `<recipe>` has no `craft_time`
+attribute, `Recipe::craftingTime` is set to **-1**, a sentinel, not to any positive
+default. 506 of the 630 stock recipes hit this branch.
+
+### Workstation fuel
+
+`TileEntityWorkstation::GetFuelTime` (1332283-1332301) returns
+`ItemClass::GetFuelValue(itemStack.itemValue)` directly, i.e. the `items.xml`
+`FuelValue` **is the burn time in seconds per fuel item**. It is called from
+`HandleFuel` at 1331999.
+
+### Item repair goes through the crafting queue
+
+The UI path at 1413451 sets `Recipe::craftingTime = ItemClass.RepairTime.Value *
+count`, re-runs it through `EffectManager::GetValue` with `PassiveEffects 90`
+(crafting time) and `PassiveEffects 101` for the count, and finally calls
+`XUiC_CraftingWindowGroup::AddRepairItemToQueue(craftingTime, itemValue.Clone(),
+count)`. That is what fills a `RecipeQueueItem`'s `RepairItem` slot.
+
+### NetPackageInventoryTransactionRequest has no body of its own
+
+`NetPackageInventoryTransactionRequest` (823005-823102): `read()` is
+`InventoryTransaction::Read(BinaryReader)` and `write()` is
+`InventoryTransaction::Write`. `PackageDirection` = 1 (ToServer). `ProcessPackage`
+calls `InventoryManager::TransactionRequestServer(tx, sender.entityId)`.
+
+`InventoryTransaction::Write` (614000-614087) emits:
+
+```text
+i32 inventoryOps count
+  per entry:
+    Guid TransactionalInventory.Key   (StreamUtils::Write)
+    i32  InitialHash
+    i32  FinalHash
+    i32  opCount
+    opCount x InventoryOperation::Write
+```
+
+`NetPackageInventoryTransactionResponse::read` (823186+) is
+`bool success | i32 count | per entry: Guid (StreamUtils::ReadGuid) |
+bool hasStacks | ItemStack::ReadArray`.
+
+The client half of the loop: `InventoryManager::TransactionRequestLocal`
+(612874-612917) applies the transaction locally with the `secretToken`, and on
+success sends `NetPackageInventoryTransactionRequest` to the server; on failure it
+closes the window. Callers are `TransactionalInventory::TrySetItem` /
+`TryRemoveItem` (624627, 624667, 624779).
+`InventoryManager::RequestInventoryFromServer` (613064) is client-only and takes a
+`TransactionalInventory` / KeyHashPair; `ReadInventory` (613124-613223) refuses on
+the server while the target is locked (`LockManager::IsLockedServer`) and refuses a
+client-supplied token, then calls `TransactionalInventory::UpdateInventory` and
+`CreateInventory`.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -499,6 +576,15 @@ The non-action leaves:
   customize its dropped-entity behavior.
 
 ## Changelog
+
+- **2026-08-06:** ItemClass Stacknumber default 500 and get_MaxCount's
+  MaxStackSizeModifier plus 30000 cap; Recipe craftingTime -1 sentinel when
+  craft_time is absent; TileEntityWorkstation::GetFuelTime is items.xml FuelValue
+  in seconds; item repair enters the crafting queue via
+  AddRepairItemToQueue(RepairTime * count); NetPackageInventoryTransaction
+  Request/Response bodies are InventoryTransaction::Read/Write with the
+  Guid/InitialHash/FinalHash/op-list layout, plus the client
+  TransactionRequestLocal / RequestInventoryFromServer / ReadInventory loop.
 
 - **2026-07-28:** InventoryTransaction hash-validated server apply path.
 

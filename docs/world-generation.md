@@ -478,6 +478,128 @@ three are client render/UI and out of scope here.
 
 ---
 
+## Prefab rotation, id mapping and YOffset placement (2026-08-06)
+
+Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
+numbers are from that dump, not the `il/` v3.0.1 sets) plus the shipped Navezgane
+world data.
+
+### RotateY does not permute the cell array
+
+`Prefab::RotateY` (921221-921637) rewrites each cell's `BlockValue` in place via
+`BlockShape::RotateY`, rotates entities, `indexedBlockOffsets` and the volume
+lists, updates `localRotation` (`(localRotation + (bLeft ? 1 : -1)) & 3`) and swaps
+`size.x`/`size.z`. The **coordinate** rotation happens at access time through
+`Prefab::RotateCoords` (915620) and `Prefab::offsetToCoordRotated` (915424), both
+of which read the already-swapped size.
+
+Forward local-to-rotated map, decoded from `offsetToCoordRotated`, with `sx`/`sz`
+the **unrotated** prefab size:
+
+| rotation | mapped (x', z') |
+|---|---|
+| 0 | `(x, z)` |
+| 1 | `(sz-1-z, x)` |
+| 2 | `(sx-1-x, sz-1-z)` |
+| 3 | `(z, sx-1-x)` |
+
+Equivalently the prefab is rotated by `AngleAxis(-90*r, up)`.
+`Prefab::RotatePointOnY` (921639) states this outright: the `_bLeft` path uses
+`Quaternion.AngleAxis(-90, up)`.
+
+`localRotation` equals the `prefabs.xml` `rotation` attribute exactly:
+`PrefabCache::GetPrefabRotated` (931080) clones and calls
+`Prefab::RotateY(_bLeft = true, rotation)`, and `PrefabInstance`'s ctor stores the
+same value into `lastCopiedRotation`, so `PrefabInstance::CopyIntoWorld` (944130)
+does not rotate a second time.
+
+**Cross-check against stock data.** For the 130 Navezgane decorations whose prefab
+declares `POIMarkerType=RoadExit`, projecting the marker under this map puts it
+within 4 blocks of a road or gravel pixel in `splat3_processed.png` for 129 of 130
+(rotation 1: 24/24, rotation 3: 23/23). The mirrored hypothesis (`+90*r`) scores
+only 94/130, and 6/24 and 6/23 for rotations 1 and 3.
+
+### Per-block facing is shape-dependent
+
+`BlockShapeNew::RotateY` (181926) replaces `_rotCount` with `4 - _rotCount` when
+`_bLeft` is true before indexing `BlockShapeNew::rotations`;
+`BlockShapeModelEntity::RotateY` (173648) negates `_rotCount` for the same case.
+Net effect for a prefab placed at rotation r: block facings are remapped by
+`CalcRotation(rot, 4-r)`, i.e. -90*r, matching the coordinate map.
+
+`BlockShapeNew::CalcRotation` (181959) composes in **world** space: it calls
+`ConvertRotationFree(rot, AngleAxis(90*rotCount, up), _bApplyRotFirst = false)`,
+and `ConvertRotationFree` with that flag false applies the existing orientation
+first and the delta second (176560, IL_0048 branch), i.e.
+`q_new = q_delta * q_old`. Rotations 24..27 go through a separate
+increment-and-wrap loop.
+
+The base `BlockShape::RotateY` (166904) is a **different scheme entirely**:
+`rotation = (rotation + rotCount) & 15`, ignoring `_bLeft`.
+`BlockShapeCube::RotateY` (171283) is a band-local +/-1 cycle within each group of
+four. The facing remap is virtual per BlockShape, not one global table.
+
+`Prefab::RotateY` also clears a cell to air when the block's meta bit 0x1 is set
+and the block is a `BlockModelTree` (IL_00ce-IL_00ec, ~921320).
+
+### YOffset
+
+`DynamicPrefabDecorator.Load` (902240-902460) applies `position.y += Prefab.yOffset`
+when `y_is_groundlevel` parses true, **before** constructing the `PrefabInstance`.
+`Prefab.yOffset` comes from the prefab `.xml` `YOffset` property
+(`Prefab::cProp_YOffset` 914052, parsed at `ReadFromProperties` 917079).
+679 of the 1487 full-POI decorations in Navezgane carry a nonzero YOffset; the
+extremes are structural (canyon_mine -55, house_old_ranch_13 -44, cave_07 -33,
+bunker_00 -30, ten caves at -25).
+
+The same `Load` block at IL_0252-IL_0284 is where `TraderArea` /
+`TraderAreaProtect` / `TeleportVolumeList` reach
+`DynamicPrefabDecorator::AddTrader` (903590-903616).
+
+### Block ids in a .tts are prefab-file-space, not runtime AssignIds
+
+`Prefab::loadIdMapping` (928850-928971) hard-requires `<prefabName>.blocks.nim`: a
+missing file logs `Block name to ID mapping file missing.` and fails the load. It
+builds the table with
+`NameIdMapping::createIdTranslationTable(name -> Block.GetBlockByName(name).blockID,
+missingEntryCallback)`. The `.tts` type ids are therefore **prefab-file-space ids,
+never runtime AssignIds**, and the shipped nim files have drifted from the current
+install: `abandoned_house_01`'s nim maps 6979 to `concreteShapes:cube` while the
+current AssignIds table has 6979 = `cobblestoneShapes:plateFacade01`, and 24179 to
+`sleeperSit` while the current `sleeperSit` is 24812. Measured over a random
+120-POI Navezgane sample, 203350 of 952260 cells (21.4%) resolve to a different
+block without the remap.
+
+### TileEntityType, sleeper markers and baked pads
+
+Stock `TileEntityType` (1311761-1311788): `None=0, Collector=3, LandClaim=4,
+Loot=5, Trader=6, VendingMachine=7, Forge=8, Campfire=9, SecureLoot=0x0A,
+SecureDoor=0x0B, Workstation=0x0C, Sign=0x0D, GoreBlock=0x0E, Powered=0x0F,
+PowerSource=0x10, PowerRangeTrap=0x11, Light=0x12, Trigger=0x13, Sleeper=0x14,
+PowerMeleeTrap=0x15, SecureLootSigned=0x16, Composite=0x19, Taskboard=0x1B`. The
+`.tts` tile-entity list uses these same values: real V3.1.0 prefabs contain only
+types 18 (Light), 20 (Sleeper) and 25 (Composite).
+
+`Block::IsSleeperBlock` is set true by `BlockSleeper::.ctor` (133430-133460), i.e.
+exactly the blocks whose resolved Class is `Sleeper`. Resolving `Extends` in stock
+`blocks.xml` gives 34 such blocks, 16 of them named `infestedSleeper*` rather than
+`sleeper*`, so a name-prefix test on "sleeper" misses a third of them. Scanning the
+shipped `.blocks.nim` files: 886 of 1105 POIs contain `sleeper*` markers and 338
+contain `infestedSleeper*`.
+
+`Prefab::AddAllChildBlocks` (918950-919033) is called at the end of `RotateY`
+(IL_0387-IL_0394, ~921630) and after load, so multi-block child cells (raw bit
+0x40000000) are regenerated rather than being carried in the file.
+
+**Navezgane's baked terrain already contains POI pads.** `dtm_processed.raw` at the
+footprint centre equals `deco.y - 1` for 1272 of 1487 full-POI decorations, and
+1101 of 1487 footprints are already perfectly flat. Row convention for the `.raw`
+files is `index = (z + H) * W + (x + H)` with **no flip** (validated at 96% within
+1 block; the flipped read gives 16%), while the PNG masks use the opposite row
+order (row 0 = +Z).
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -490,6 +612,17 @@ three are client render/UI and out of scope here.
 | [residuals.md](residuals.md) | Native/external residuals |
 
 ## Changelog
+
+- **2026-08-06:** Prefab rotation is -90*r and lives in offsetToCoordRotated, not
+  in the cell array (RotateY rewrites BlockValues and swaps size only); the
+  forward coordinate map per rotation, cross-checked against RoadExit markers vs
+  the road splat; shape-dependent facing remap (BlockShapeNew vs BlockShape vs
+  BlockShapeCube) and CalcRotation's world-space compose; DynamicPrefabDecorator
+  applies YOffset before constructing the PrefabInstance; loadIdMapping proves
+  .tts ids are prefab-file-space with measured drift; TileEntityType values and
+  the three types real prefabs actually contain; IsSleeperBlock covers
+  infestedSleeper*; AddAllChildBlocks regenerates multi-block children; the baked
+  dtm_processed.raw already carries POI pads at deco.y-1 and its row convention.
 
 - **2026-07-23:** Initial `WorldGenerationEngineFinal` reversal: entry chain, stage pipeline, run lifecycle + threading, output formats, PrefabVolumes markers, SDF settings format.
 - **2026-07-24:** Added prefab/decoration data leaves: `BiomeBlockDecoration`,

@@ -489,6 +489,122 @@ eventType : u8          // NPCQuestEventTypes
 Also `NetPackageQuestEntitySpawn` in [protocol-packages.md](protocol-packages.md)
 section 6.17.
 
+## Quest XML inheritance, objective serialization shapes and fail-soft Read (2026-08-06)
+
+Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
+numbers below are from that dump, not from the `il/` v3.0.1 sets, and drift by
+roughly 3500 lines in the NetPackage region).
+
+**`QuestsFromXml::ParseQuest` template branch (~1390310-1390582).** A quest with a
+`template=` attribute naming an existing `QuestClass` calls
+`QuestClass::AssignValuesFrom` on the template (IL_0080-IL_00a4) and sets
+`bTemplate`. The child-element loop then **skips** `property`, `action`, `event`,
+`requirement`, `objective`, `quest_criteria` and `offer_criteria` (branch IL_00c2
+`ldloc.3 brtrue IL_01e6`) and processes only `<reward>` and `<variable>`. After the
+loop it calls `HandleVariablesForProperties`, `HandleTemplateInit` and `Init`.
+
+**`QuestClass::AssignValuesFrom` (991300-991522)** clones Requirements, Actions,
+Objectives and Events from the template and re-derives `HighestPhase` from the
+cloned objective phases, but does **not** copy Rewards. A template-derived quest's
+rewards come solely from its own `<reward>` children.
+
+**`QuestsFromXml::ParseObjective` (1391043-1391246)** resolves the class purely by
+reflection: `ReflectionHelpers::GetTypeWithPrefix("Objective", typeString)` plus
+`Activator.CreateInstance`, so there are no objective-type string literals anywhere
+in the binary. It reads only four attributes: `id`, `value`, `optional`, `phase`. It
+never reads `item` or `count`, despite the `quests.xml` header comment documenting
+both; those must arrive as nested `<property>` entries.
+
+**`BaseObjective::ParseProperties` (959294-959410)** reads the nested properties
+`id`, `value`, `phase` (bumping `QuestClass.HighestPhase`), `optional`,
+`nav_object`, `hidden` and `force_phase_finish`, and calls
+`QuestClass::HandleVariablesForProperties` first so template variables are
+substituted. This is why the shipped `quests.xml` sets phase via
+`<property name="phase">` on 109 of 119 objectives rather than the attribute.
+
+**Four non-default objective serialization shapes**, not two:
+
+| Type | Write | IL |
+|---|---|---|
+| `BaseObjective` | `FileVersion` u8 + `CurrentValue` u8 | 959147 |
+| `ObjectivePOIStayWithin` | empty | 970493 |
+| `ObjectiveStayWithin` | **also empty** | 978390 |
+| `ObjectiveTreasureChest` | `destroyCount` i32 + `CurrentRadius` i32 | 982624 |
+| `ObjectiveTime` | a single u16 `currentTime`; its Read sets `currentValue = 1` | 978866 |
+
+**`Quest::Read` (988432-988809) is fail-soft, not desync-prone.** Both the
+objectives block and the rewards block are wrapped in `PooledBinaryReader` size
+markers (only for `CurrentFileVersion >= 7`). On a mismatch it logs
+`Loading player quests: Quest with ID <id>: Failed loading objectives` (or
+`Failed loading rewards`), clears that list, and at IL_02b5 sets
+`CurrentState = Failed (4)` unless the state was `Completed (3)`. A wrong
+per-objective byte count therefore produces a Failed quest, not a corrupted
+PlayerId stream.
+
+Two more `Quest::Read` details: it reads the reward count from the stream as an
+i32 for `CurrentFileVersion > 5` but then indexes `this.Rewards[i]` directly, so a
+count larger than the client's reward list throws `IndexOutOfRange` into the catch
+handler **before** the size-marker check. And for a Completed quest (state 3) it
+sets `CurrentPhase = QuestClass.HighestPhase` itself (IL_006a-IL_007b) and does not
+read tracked/phase/questCode from the stream, matching `Quest::Write`'s
+InProgress-only branch.
+
+**`ObjectiveGoto::ParseProperties` (966955-966966)** parses `BaseObjective.Value`
+with `StringParsers::ParseFloat` into `ObjectiveGoto::distance`: for the Goto family
+`value` is a **distance in metres**, not a count. `ObjectiveGoto` also carries
+`distanceOffset` and `currentDistance` and completes on
+`Vector3::Distance <= distance + distanceOffset`.
+
+**`ObjectiveTreasureChest` ctor (~982843)** hardcodes `DefaultTreasureRadius =
+CurrentRadius = TreasureRadiusInitial = 9`, `distance = 50`,
+`blocksPerReduction = 1`, `explosionEventDelay = 2`,
+`radiusReductionMessage = "ttTreasureRadiusReduced"` and
+`neededContainerLocation = Vector3i(-5000,-5000,-5000)`. Its extra properties are
+`block`, `alt_block`, `distance`, `container_type`, `default_radius`,
+`direct_nav_object`, `blocks_per_reduction`, `radius_reduction_sound`,
+`use_nearby`, `explosion_event_delay`, `explosion_event`,
+`radius_reduction_message`.
+
+**Trap:** `BaseObjective/ObjectiveTypes` (958167-958188) is a legacy 17-value enum
+(`AnimalKill`..`ZombieKill`) that does **not** correspond to the XML `type`
+strings, which are class names resolved by reflection. Do not use that enum as the
+objective-type list.
+
+### Net-package details
+
+**`NetPackageNPCQuestList::ProcessPackage` (827746-827975).** `eventType`
+`RemoveQuest (1)` is how the client tells the server it took a quest: the server
+walks `QuestEventManager.GetQuestList` filtering by
+`QuestClass.DifficultyTier == tierLevel`, removes the `removeIndex`'th match, then
+re-runs `SetupQuestList`. `FetchList (0)` triggers
+`EntityTrader::PopulateActiveQuests` plus
+`NetPackageNPCQuestList::SendQuestPacketsToPlayer`; `AddUsedPOI (3)` calls
+`QuestJournal::AddPOIToTraderData` with `questGiverPos` and `prefabPos`;
+`ClearUsedPOI (4)` is client-side `ClearTraderDataTier`. On the client side any
+other event ends at `EntityTrader::SetActiveQuests(player, questPacketEntries)`.
+
+**`NetPackageQuestEvent::ProcessPackage` (835620-836087)** has server-side work for
+more events than are commonly documented: `ClearSleeper (9)` does
+`QuestEventManager` Subscribe/UnSubscribeToUpdateEvent keyed on the `subscribeTo`
+bool; `SetupFetch (12)` calls `SetupFetchForMP`, which resolves the
+`PrefabInstance` via `DynamicPrefabDecorator::GetPrefabFromWorldPos` and then
+`HandleContainerPositions` to pick the fetch container; `SetupRestorePower (13)`
+calls `SetupActivateForMP`, which sends a QuestEvent back, calls
+`QuestJournal::HandleRestorePowerReceived` and `AddRestorePowerQuest`, runs an
+`UpdateBlocks` coroutine and fires the GameEvent `quest_poi_lights_off`;
+`FinishManagedQuest (14)` calls `FinishManagedQuest`; `ResetTraderQuests (16)`
+calls `AddTraderResetQuestsForPlayer`.
+
+### Line-number drift versus older notes
+
+In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
+`Quest::refreshQuestCompletion` is 987390-987648; `Quest::Write` is 988813-989038;
+`QuestEventManager::QuestLockPOI` ends 998927 and `CheckForPOILockouts` ends
+999125; `ObjectiveRallyPoint::GetRallyPosition` ends 973344;
+`QuestJournal::HasQuestAtRallyPosition` ends 1006367.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -505,6 +621,14 @@ section 6.17.
 **Leaf catalog:** every instance in [`inventories/quest-objectives.md`](inventories/quest-objectives.md) (the 38 objective leaves).
 
 ## Changelog
+
+- **2026-08-06:** Quest template inheritance (`ParseQuest` bTemplate skip +
+  `AssignValuesFrom` clones everything but Rewards); reflection-only objective
+  type resolution and the four-attribute `ParseObjective`; the four objective
+  Write shapes incl. the two empty ones; `Quest::Read` fail-soft
+  ValidateSizeMarker to `Failed`; ObjectiveGoto `value` is a float distance;
+  ObjectiveTreasureChest ctor defaults; NPCQuestList RemoveQuest as the accept
+  signal; QuestEvent server-side work for events 9/12/13/14/16; line-number drift.
 
 - **2026-07-28:** QuestEventTypes 0..16 wire tails from write IL switch.
 

@@ -349,6 +349,164 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 [`measured-scaling.md`](../../7dtd-optimizer/docs/measured-scaling.md),
 [`bottlenecks.md`](../../7dtd-optimizer/docs/bottlenecks.md).
 
+## 4c. Package registry, direction gate, per-package channel/compress/reliability (2026-08-06)
+
+Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
+numbers are from that dump, not the `il/` v3.0.1 sets). Note LiteNetLib itself is a
+separate assembly and is **not** in the dump (only `.assembly extern LiteNetLib`),
+so nothing below covers LiteNet's own framing.
+
+### Registry and the id map
+
+`NetPackageManager.knownPackageTypes` is a `CaseInsensitiveStringDictionary` filled
+by reflection over every **concrete** subclass of `NetPackage`, keyed on
+`MemberInfo.Name` (805088-805100, 805117-805140). Abstract types are excluded
+because `ReflectionHelpers.FindTypesImplementingBase` defaults `_allowAbstract` to
+false (2133289-2133345, `.param [3] = bool(false)`). The concrete count for V3.1.0
+b14 is exactly **189**; the three abstract ones are `NetPackage`,
+`NetPackageEntityTargeted` and `DynamicMeshServerData`. Nested packages register
+under their **short** name, so `Audio.NetPackageAudio` and
+`DroneWeapons/NetPackageDroneParticleEffect` are valid map entries.
+
+`SetupBaseMapping` (805194-805270) always pins `packageIdsType` to id 0 and
+`StartServer` numbers the rest from 1. `IdMappingsReceived` (805272-805340): any
+name in the server's mapping array that is not in `knownPackageTypes` logs
+`[NET] Unknown package type ..., can not proceed connecting to server`, calls
+`ConnectionManager.Disconnect()` and `ShowMessagePlayerDenied` with EKickReason 18.
+
+`NetPackageManager.GetPackageId` does an unguarded `Dictionary get_Item`
+(805413-805421), so a client trying to send a package the server omitted from the
+map throws `KeyNotFoundException` rather than failing gracefully.
+
+`NetPackagePackageIds.read` (828487-828545): `VersionInformation.Read` |
+`i32 toSendCount` | count x `ReadString` | `bool serverUseEAC` |
+`bool hasHostUserAndToken` | when hasHost: `PlatformUserIdentifierAbs.FromStream` +
+`ReadString` token.
+
+Full `EKickReason` enum, 30 values (1921854-1921883). Notable:
+`VersionMismatch=4, PlayerLimitExceeded=5, Banned=6, NotOnWhitelist=7,
+GameStillLoading=14, UnknownNetPackage=18, BadMTUPackets=26,
+InternalNetConnectionError=28`.
+
+### The direction gate
+
+`ConnectionManager::ProcessPackages(INetConnection, NetPackageDirection _disallowed,
+ClientInfo _sender)` (787230-787381) drops any package whose direction equals the
+disallowed argument and logs
+`[NET] Received package {0} which is only allowed to be sent to the server` (or
+`...to clients from client {1}`). The client passes `ToServer` (ldc.i4.1,
+787103-787107) for its `connectionToServer`; the server passes `ToClient`
+(ldc.i4.2, 786994-787009). `NetPackageDirection` is `Both=0, ToServer=1,
+ToClient=2` (803963-803970). `NetPackage`'s base `get_PackageDirection` returns 0 =
+Both (804011-804018), so any package without an override is legal in both
+directions.
+
+Base virtuals worth recording (803972-804060): `get_Channel` (0), `get_Compress`
+(false), `get_FlushQueue` (false), `get_PackageDirection` (Both),
+`get_AllowedBeforeAuth` (false), `get_PackageId` via
+`NetPackageManager.GetPackageId(GetType())`.
+
+### Per-package overrides
+
+**Delivery method is per package, not per connection.** `get_ReliableDelivery`
+defaults to true and is overridden to **false** by exactly five classes:
+`EntityPosAndRot` (816202-816208), `EntityRelPosAndRot` (816966-817238),
+`EntityRotation` (817367-817644), `EntitySpeeds` (818303-818471) and
+`EntityStatsBuff` (202136-202413). `NetConnectionAbs` passes that flag to
+`INetworkServer.SendData` (793041-793050), and
+`NetworkServerLiteNetLib.SendData` maps it to DeliveryMethod 2 (ReliableOrdered) or
+4 (Unreliable) on channelNumber 0 (854255-854262).
+
+**Compression** via `get_Compress() == true`: `NetPackageChunk` (808641),
+`ConfigFile` (809975), `DynamicClientArrive` (347114), `DynamicMesh` (373452),
+`IdMapping` (822370), `MapChunks` (826004), `POIAround` (833771) and
+`SignDataResponse` (841321); false everywhere else.
+
+**Second envelope stream** via `get_Channel() == 1`: `NetPackageChunk` (808632),
+`ChunkRemove`, `DynamicMesh`, `MapChunks` (826004) and `POIAround` (833771). All
+other packages are channel 0.
+
+### Auth wrapper and connect limits
+
+`NetworkServerLiteNetLib.LiteNetLibAuthWrapperServer` constants:
+`ConnectionRateLimitMilliseconds = 0x1F4` (500 ms) and
+`ChallengePackageSize = 0x11` (17) as literals at 852993-852999; the static ctor
+sets `ConnectionStateCheckInterval = TimeSpan.FromSeconds(10)` and
+`MaxDurationInAuthState = new TimeSpan(0,0,0,10)` at 853692-853711. The
+per-connection challenge is `Guid.NewGuid()` (853010-853025).
+
+`NetworkCommonLiteNetLib.InitConfig` (852856-852884) is the only place `NetManager`
+is tuned: `UnsyncedEvents`, `UnsyncedDeliveryEvent`, `UnsyncedReceiveEvent`,
+`AutoRecycle` and `DisconnectOnUnreachable` are all set true, and
+`UseNativeSockets` only when `IsDedicatedServer`. No DisconnectTimeout,
+PingInterval, MTU or channel-count override is set, so LiteNetLib defaults apply.
+
+`NetworkClientLiteNetLib.Connect` calls `NetManager.Connect(ip, port + 2, key)`
+(852360-852368, `ldc.i4.2` / `add`), confirming the info-TCP-port + 2 rule for the
+UDP endpoint, and passes the ServerPassword as the LiteNet connect key.
+
+### Login body
+
+`NetPackagePlayerLogin` (read 832130-832182, write 832185-832275, GetLength = 120):
+
+```text
+playerName:string
+platformUser        via PlatformUserIdentifierAbs.ToStream(inclCustomData = true)
+platformToken:string
+crossplatformUser
+crossplatformToken:string
+version:string
+compVersion:string
+discordUserId:u64
+```
+
+`PlatformUserIdentifierExtensions.ToStream(BinaryWriter, inclCustomData)`
+(31206-31248): a null identifier writes a single 0 byte; otherwise byte 1, byte 1,
+then `Write(PlatformIdentifierString)`, `Write(ReadablePlatformUserIdentifier)`,
+then `WriteCustomData` when `inclCustomData` is set. `GetToStreamLength` mirrors it
+(31250-31285).
+
+### Server browser: the version string is a strict four-field format
+
+`VersionInformation.SerializableString` is
+`String.Format("{0}.{1}.{2}.{3}", ReleaseType, Major, Minor, Build)`
+(2009306-2009320), and `GameServerInfo` sets `GameInfoString.ServerVersion` (key 9)
+to exactly that (795818-795822). For V3.1.0 b14 the correct GSI value is
+**`V.3.10.14`** (Constants `cReleaseType=1`/'V', `cVersionMajor=3`,
+`cVersionMinor=0xA`, `cVersionBuild=0xE`, 1865686-1865690).
+
+`VersionInformation.TryParseSerializedString` (2009539-2009625) requires
+`Split('.')` to yield exactly 4 fields: an `EGameReleaseType` enum name, then three
+ints. `EGameReleaseType` has only `Alpha=0` and `V=1` (2008981-2008982).
+
+The **displayed** minor is an encoding, not the wire minor: for `ReleaseType == V`
+and `Major >= 3` the ctor splits `Minor` into `Minor/10` and `Minor%10`
+(2009148-2009157), so "V 3.1.0 (b14)" is Major=3, Minor=10, Build=14.
+
+A malformed version string is not fatal: `GameServerInfo`'s ctor seeds
+`version = new VersionInformation(Alpha, -1, -1, -1)` (793967-793971), and
+`get_IsCompatibleVersion` returns true whenever `Major < 0` (793930-793950). The
+browser row simply shows no version.
+
+`GameInfoString` has 20 members (796457-796476), including `SandboxPreset = 0x12`
+and `SandboxCode = 0x13`, which is where V3.1.0 keeps the difficulty/loot/XP
+preset that used to be individual serverconfig properties. The shipped V3.1.0
+`serverconfig.xml` has 69 `<property>` names and no longer contains
+`GameDifficulty`, `BloodMoonFrequency`, `DayNightLength`, `XPMultiplier`,
+`LootAbundance`, `BlockDamage*`, `DropOnDeath`, `AirDropFrequency` or
+`Zombie*Move`; those are folded into `SandboxCode` (default
+`AAAJABJACJADJARFBNC`, Adventurer).
+
+### Console surface
+
+`Constants.cDefaultUserPermissionLevel = 0x3E8` (1000) and
+`cMaxMPPlayers = cMaxCrossplayMPPlayers = 8` (1865697-1865701).
+`ConsoleCmdAbstract` exposes `get_DefaultPermissionLevel`, `get_IsExecuteOnClient`,
+`get_AllowedInMainMenu` and `get_AllowedDeviceTypes` (204226-204320); there are
+**191** concrete `getCommands()` overrides exposing **283** command aliases.
+
+---
+
 ## 5. See also
 
 | Doc | Why |
@@ -361,6 +519,18 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 | [dedicated-leftovers.md](dedicated-leftovers.md) | AesEncryptAndMac install from SendSharedKey |
 
 ## Changelog
+
+- **2026-08-06:** Package registry is reflection over 189 concrete NetPackage
+  subclasses keyed on short type name (abstracts excluded), with id 0 pinned to
+  PackageIds and an unknown name being a hard EKickReason 18 disconnect; the
+  ProcessPackages direction gate and its two call sites; base virtuals; the exact
+  override sets for ReliableDelivery (5 packages), Compress (8) and Channel 1 (5);
+  LiteNetLibAuthWrapperServer rate-limit/auth-timeout/challenge constants and
+  InitConfig; Connect uses port + 2; NetPackagePlayerLogin field order and
+  PlatformUserIdentifier ToStream layout; GameServerInfo ServerVersion must be the
+  four-field SerializableString (`V.3.10.14`) and how the displayed minor is
+  encoded; GameInfoString SandboxPreset/SandboxCode; console permission constants
+  and the 191/283 command census.
 
 - **2026-07-28:** EncodePos/EncodeRot formulas; OnUpdateEntities priority bands.
 

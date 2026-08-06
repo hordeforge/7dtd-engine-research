@@ -366,6 +366,127 @@ what `TraderManager.HandleFullReset` puts in stock.
 
 ---
 
+## Trader delivery paths, package direction and TEFeatureStorage (2026-08-06)
+
+Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
+numbers are from that dump, not the `il/` v3.0.1 sets).
+
+**`NetPackageTraderData` is client-to-server only.** `get_PackageDirection` returns
+1 = `ToServer` (843057-843064) and its `ProcessPackage` early-returns unless
+`ConnectionManager.IsServer` (843277-843285). Its only emitter is
+`TraderData::SetModified` (860724-860742), which itself returns early on the
+server. A server that sends this package to a client gets it dropped by the
+direction gate (see [network.md](network.md)), so it is **not** a viable way to
+push trader inventory to a client.
+
+**The real S2C paths are two.**
+
+1. **`EntityCreationData`.** After the entityData blob it writes
+   `bool traderData != null` then `TraderData::Write` (472732-472745). The read side
+   gates on file version > 23 for the bool and >= 34 for the modern
+   `TraderData::Read`, falling back to
+   `TileEntityLegacyUtils::ReadLegacyTileEntityTraderData` below 34 (472303-472332).
+   `EntityCreationData` then does `EntityTrader::set_TraderData(traderData.Clone())`
+   (471328-471340). `EntityTrader` has no Read/Write override and its `TraderData`
+   field is `notserialized`, so ECD is the only entity-level carrier.
+2. **The LockManager handshake.** `EntityTrader::OnEntityActivated` (531397-531465)
+   first gates on `TraderInfo.IsTraderActivitiesOpen` (showing the
+   `GetNextTimeMessage` tooltip with `ui_denied` when closed), then calls
+   `LockManager::LockRequestLocal(this, new EntityTraderLockContext(commandId,
+   TraderData), channel 0)`. Picking "trade" does `UnlockRequestLocal` then
+   `LockRequestLocal(..., "trade", channel 1)` (533816-533838).
+   `EntityTrader::OnLockedServer` (533420-533474) is where the server does the
+   work: it fetches the quest list, calls
+   `NetPackageNPCQuestList::SendQuestPacketsToPlayer` for non-primary players, and
+   **only when `_channel == 1`** runs
+   `GameManager.traderManager.TraderInventoryRequested(TraderData, playerId)` and
+   stores `TraderData.Clone()` into the lock context. That context is serialised
+   back in `NetPackageLockResponse`, so **the lock response is the packet that
+   actually carries trader inventory to the opening client.**
+
+`EntityTraderLockContext` wire layout (530836-530893): `string Command`,
+`bool hasTraderData`, then `TraderData::Write`. `NetPackageLockResponse::write`
+(825720-825912): `bool locking`, `bool success`, `string error`,
+`bool isForceUnlocked`, `u16 channel`, `i32 targetCount`, targets, then the context
+type-name string, then `ILockContext::Write`.
+
+**Restock is lazy, not timed.** `TraderManager::TraderInventoryRequested`
+(863657-863767) bails when `TraderInfo.ResetInterval < 1`, clamps
+`lastInventoryUpdate`, and only rerolls when
+`worldTime - lastInventoryUpdate >= ResetIntervalInTicks`; it then snaps
+`lastInventoryUpdate` to `(worldTime / interval) * interval + 1`, calls
+`HandleFullReset` (863770-863910), clears `TierItemGroups` and refills them from
+`TraderInfo::SpawnTierGroup` per tier. The trigger is the channel-1 open, not a
+background timer.
+
+**Open hours.** `TraderInfo::get_IsOpen` (862122-862230) computes
+`World.worldTime % 0x5dc0` (24000 ticks/day) and compares against
+`GetOpenTime()`/`GetCloseTime()`. There is also a preset branch: when
+`traderHoursPreset == 5` it uses GameStats int 58 as a target day plus
+`WorldTimeToDays`, and when `UseOpenHours` is false, `preset == 6`, or
+`World.SandboxUseTraderArea` is 0 it returns always-open.
+`EntityTrader::OnUpdateLive` (531757-531898) runs the cycle server-side: at
+`IsWarningTime` it fires `TraderArea::HandleWarning` once (a `warningPlayed`
+latch), then compares `!TraderInfo.IsOpen` against `TraderArea.IsClosed` and calls
+`TraderArea::SetClosed(world, closed, trader, playSound)`, force-unlocking anyone
+holding a lock via `LockManager::ForceUnlockLockTarget` when it closes.
+
+**`NetPackageWorldAreas` (847341-847513)** is the ToClient package that ships
+TraderAreas: `byte cVersion=1`, `i16 count`, then `TraderArea::Write` each;
+`ProcessPackage` calls `World::SetWorldAreas`. `TraderArea` carries `Position`,
+`PrefabSize`, `ProtectPosition`/`ProtectSize`/`ProtectBounds`, `IsClosed`, a
+`PrefabTeleportVolumeList` and `owningTrader` (1207080+). `TraderAreaStates` is
+`Default=0, Claimable=1, NotClaimable=2` (1207071-1207078).
+
+**Prices are computed entirely client-side** in
+`XUiM_Trader::GetBuyPrice`/`GetSellPrice` (1830470-1830700):
+`EffectManager.GetValue(PassiveEffects…)` over the item, times
+`TraderInfo.BuyMarkup` (or `OverrideBuyMarkup`, or for Rentable/PlayerOwned traders
+`1 + Entry.Markup * 0.2`), times a `Mathf.Lerp` between
+`ItemClass.TraderQualityMinMod`/`MaxMod` (falling back to
+`TraderInfo.QualityMinMod`/`MaxMod`) over `(Quality-1)/5`, times
+`ItemValue.PercentUsesLeft`; `EconomicBundleSize` divides. **No price is ever on
+the wire**, so a server must match this formula for its own charge to agree with
+the displayed number.
+
+**`NetPackageNPCQuestList` has no direction override** (so it is Both), but its
+`ProcessPackage` resolves both the player and the NPC by entity id and casts the
+NPC to `EntityTrader` before acting (827745-827975). Offers addressed to an entity
+id that is not a live `EntityTrader` on the receiving side are silently discarded.
+
+**Per-trader fields the XML exposes** (`TraderInfo`, 861363-861700): `Id`,
+`SalesMarkup`, `resetInterval`/`resetIntervalInTicks`, `MaxItems`,
+`minCount`/`maxCount`, `AllowBuy`, `AllowSell`, `IsVendingMachine`,
+`OverrideBuyMarkup`, `OverrideSellMarkdown`, `UseOpenHours`, `OpenTime`,
+`CloseTime`, `WarningTime`, `PlayerOwned`, `Rentable`, `RentCost`,
+`RentTimeInDays`, plus statics `buyMarkup`, `sellMarkdown`,
+`qualityMinMod`/`MaxMod`, `CurrencyItem`, `GlobalResetInterval`,
+`VendingResetInterval`, `TraderMaxTier`, `TraderBuyLimit`, `TraderItemAbundance`,
+`VendingItemAbundance`, `traderHoursPreset`, `TraderDayPreset`.
+
+**`npc.xml` is the NPCID to trader-identity table**:
+`<npc_info id="traderjen" trader_id="2" dialog_id="trader" quest_faction="1"
+quest_list="trader_jen_quests"/>`. `EntityTrader::PostInit` (531098-531180) reads
+`NPCInfo.TraderID` into `TraderData.TraderID` and sets IsGodMode when it is > 0;
+`TraderData::get_TraderInfo` (860747-860770) indexes `TraderInfo.traderInfoList` by
+`TraderID`, returning null for -1. That is what ties a trader entity to its
+`traders.xml` `<trader_info>`.
+
+### TEFeatureStorage surface
+
+`TEFeatureStorage` (156979) declares `Version = 0x12` (18) and the property names
+`PropLootList`, `PropAlternateLootList`, `PropLootStageMod`, `PropLootStageBonus`,
+`PropIsJammed`, `PropIsQuestLoot`, plus `lockFeature` / `lockpickFeature`
+sub-features, an `AlternateLootList` of `(FastTags tag, string lootEntry)` and a
+`Vector2i containerSize`. Its `Write` (158970+) order is: base
+`TEFeatureAbs::Write`, `u16 version` (skipped in network mode),
+`bool lootListName-present` plus optional string, `u16 containerSize.x`,
+`u16 containerSize.y`, `bool bTouched`, `u32 worldTimeTouched`,
+`bool bPlayerStorage`, `i16 items.Length`, `ItemStack*`, then a preferences bool
+and the locked-slot bit array.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -379,6 +500,15 @@ what `TraderManager.HandleFullReset` puts in stock.
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
 ## Changelog
+
+- **2026-08-06:** NetPackageTraderData is ToServer-only (direction gate drops a
+  server-sent one); the two real S2C delivery paths (EntityCreationData
+  hasTraderData, and the channel-1 LockResponse carrying EntityTraderLockContext);
+  OnLockedServer as the restock trigger; TraderInventoryRequested lazy reset;
+  get_IsOpen presets and OnUpdateLive close cycle; NetPackageWorldAreas /
+  TraderArea layout; XUiM_Trader client-side price formula (no price on the wire);
+  NPCQuestList requires a live EntityTrader on the receiver; full TraderInfo field
+  list; npc.xml trader_id binding; TEFeatureStorage v18 Write order.
 
 - **2026-07-28:** NetPackageTraderData wire (entity vs TE key) + server CopyFrom.
 

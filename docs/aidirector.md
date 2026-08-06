@@ -229,6 +229,134 @@ This blob rides `WorldState` nested `aiDirectorState` ([save-region.md](save-reg
 | `NetPackageHordeEvent` | `m_event`, `m_maxDist` | client `HandleHordeEvent` if in range |
 | `NetPackageGameStats` | `len:i16` + `GameStats.Write` blob of **persistent** property decls (int/float/string/base64-string/bool) | client `readStatsCo` coroutine |
 
+## Blood-moon window, party spawner and client-side FX (2026-08-06)
+
+Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
+numbers are from that dump, not the `il/` v3.0.1 sets).
+
+### Time and the blood-moon window
+
+`GameUtils::WorldTimeToDays` (1925943) is `worldTime / 24000 + 1`, so the wire day
+is 1-based and day N spans `[(N-1)*24000, N*24000)`. `GameUtils::DayTimeToWorldTime`
+(1926175) is the inverse: `(day - 1) * 0x5dc0 + hours * 0x3e8 + minutes * 1000 / 60`.
+`WorldTimeToHours` (1925958) is `(wt / 1000) % 24`; `WorldTimeToMinutes` (1925972)
+is `(wt / 1000.0 * 60) % 60`. Any server-side day counter must subtract 1 before
+encoding.
+
+`GameUtils::IsBloodMoonTime(duskDawn, hour, bmDay, day)` (1926341) returns true
+when `day == bmDay && hour >= duskHour`, **or** when
+`day > 1 && day == bmDay + 1 && hour < dawnHour`. The blood moon therefore spans
+dusk on `bmDay` to dawn on `bmDay+1`, crossing the midnight day rollover.
+
+`GameUtils::CalcDuskDawnHours` (1926249): a `DayLightLength` of 0 or 24 returns
+(dusk 22, dawn 4); otherwise dusk starts at 22, is clamped to `DayLightLength` when
+`DayLightLength > 22`, becomes `12 + DayLightLength/2` when `DayLightLength < 18`,
+and dawn is `clamp(dusk - DayLightLength, 0, 23)`.
+
+### Schedule
+
+`AIDirectorBloodMoonComponent::CalcNextDay` (412880) picks
+`nextBM = bmDayLast + BloodMoonFrequency + GameRandom.RandomRange(0, BloodMoonRange+1)`.
+The jitter is strictly **non-negative**, so a stock blood moon is never early
+relative to the frequency multiple. `InitNewGame` (412068) seeds
+`bmDayLast = ((currentDay - 1) / 7) * 7` with a literal 7, independent of
+`BloodMoonFrequency`.
+
+`Tick` (412099) also polls GameStats 58 while the blood moon is inactive and, if
+the stat changed underneath it, resets `bmDay` and logs
+`Blood Moon day stat changed {0}`: the server-side component itself follows an
+externally set BloodMoonDay stat. It gates all party spawning on
+`GameStats.GetBool(24)` (EnemySpawnMode).
+
+There is **no `bloodmoon` console command in V3.1.0**. The only caller of
+`SetForToday` is the gameevents sequence action
+`GameEvent.SequenceActions.ActionSetHordeNight` (2573467), whose `keepBMDay`
+property stashes the old `bmDay` into `bmDayNextOverride`.
+
+### Start / end and the party spawner
+
+`StartBloodMoon` (412528) clears `EntityPlayer.IsBloodMoonDead` on every tracked
+player and, for every already-spawned `EntityEnemy` in the world, sets
+`IsBloodMoon = true` and divides `timeStayAfterDeath` by 3. `EndBloodMoon` (412618)
+does **not** despawn anything: it clears `bIsChunkObserver`, `IsHordeZombie` and
+`IsBloodMoon` on every `EntityEnemy`, applies `bmDayNextOverride` if set, and calls
+`CalcNextDay`.
+
+`AIDirectorBloodMoonParty` constants (413090-413140): `cPartyJoinDistance` 80
+(sq 6400), `cSightDist` 100, `cTeleportDist` 150 (sq 22500), `cSpawnPreferredArc`
+120, `cSpawnAngle` 90, `cSpawnDistance` 40, `cSpawnMinRandDistance` 0,
+`cSpawnMaxRandDistance` 10, `cSpawnMinPlayerDistance` 30. Component constants
+(412041): `cPartyEnemyMax` 30, `cTimeStayAfterDeathScale` 3, `cSpawnDelay` 1.
+
+`InitParty` (413818): `enemyActiveMax = min(30, BloodMoonEnemyCount *
+partyMemberCount)`; `gsScaling = FastLerp(1, max(1, totalCount/enemyActiveMax),
+partyLevel/60)`; `bonusLootSpawnCount` starts at `partySpawner.bonusLootEvery / 2`.
+
+`Tick` (413528) gates every spawn on `AIDirector::CanSpawn(1.9f)`: this is the 1.9x
+`MaxSpawnedZombies` blood-moon budget the stock serverconfig comment refers to. On
+each new spawn group it advances `spawnBaseDir` by +120 degrees and recomputes
+`CalcBestDir`, which is why stock waves come from rotating directions.
+
+`SpawnZombie` (413882-414105): `SetSpawnerSource(3)`, `IsHordeZombie = true`,
+`EntityAlive.IsBloodMoon = true`, `bIsChunkObserver = true`,
+`timeStayAfterDeath /= 3`, every `bonusLootEvery`-th zombie gets
+`lootDropProb *= GameStageDefinition::LootBonusScale`, and
+`AstarManager.AddLocation(spawnPos, 40)` is called.
+`bonusLootEvery = max(stageSpawnMax / GameStageDefinition::LootBonusMaxCount,
+GameStageDefinition::LootBonusEvery)` (416565).
+
+### Client-side FX: entirely local, driven by three values
+
+`SkyManager::OnGameStatsChanged` (2042093) latches `SkyManager::bloodmoonDay` from
+`EnumGameStats 58` (BloodMoonDay) and `duskTime`/`dawnTime` from
+`EnumGameStats 42` (DayLightLength). `SkyManager::IsBloodMoonVisible` (2041922)
+then tests `GameUtils::IsBloodMoonTime` with a **widened** window of
+`(duskTime - 4, dawnTime + 2)`. The whole blood-moon sky FX is client-local: a
+server only needs BloodMoonDay, DayLightLength and WorldTime to be correct.
+
+The blood-moon warning is a pure client HUD effect with **no packet**:
+`XUiC_CompassWindow` (~1574299) sets the clock text colour to FF0000 when
+`GameStats[BloodMoonDay]` equals the client's current day and
+`World::BloodMoonWarningHour <= hour`. `World::BloodMoonWarningHour` defaults to 8
+in `World::.cctor` (1248240) and is otherwise set by
+`SandboxOptionManager::SetupBloodMoonWarningTimes` (2502629) from SandboxOptions 50
+to -1 (off), 8, or 18. `EnumGameStats.BloodMoonWarning` (61 / 0x3D) is read by
+exactly one consumer, `GameSenseManager::SessionStarted` (1913041), the SteelSeries
+LED integration: nothing in the HUD or sky reads it.
+
+`DynamicMusic.Conductor.Update` (2593714/2593767/2593807) is the **only** sender of
+`NetPackageBloodmoonMusic` in the whole assembly. Eligibility per player is
+`(max gameStage across partyMembers > 1) AND (partySpawner not IsDone OR party
+BloodmoonZombiesRemain)`; it is cached in `PlayerEligibleForBloodmoonCache` and
+sent only on change, per-entity, with SendPackage flags 0xc0.
+`NetPackageBloodmoonMusic::ProcessPackage` (807889) does nothing but assign
+`World.dmsConductor.IsBloodmoonMusicEligible`.
+
+The client applies `EntityAlive.IsBloodMoon` by dividing
+`DismemberedPart.lifeTime` by 3 in `AvatarController` (59416 and 76551), but
+`IsBloodMoon` is set only on the server-side entity and appears in **no** NetPackage
+write, so on a dedicated server the client never learns it.
+
+`NetPackageHordeEvent` now occupies 822185-822359 in this dump. There is still no
+`GetPackage<NetPackageHordeEvent>()` anywhere, confirming the class is vestigial in
+V3.1.0 b14.
+
+### Where the options come from in V3.1.0
+
+The shipped dedicated-server `serverconfig.xml` no longer exposes
+`BloodMoonFrequency` / `BloodMoonRange` / `BloodMoonEnemyCount` as properties at
+all: the only blood-moon line is `TwitchBloodMoonAllowed`. Those three come from
+the `SandboxCode` string (default `AAAJABJACJADJARFBNC`) via
+`SandboxOptionManager::UpdateInGameValuesWithSandboxOptions` (2501770), which
+copies SandboxOptions 48/49/51 into the `AIDirectorBloodMoonComponent` statics.
+
+`ConsoleCmdSetTime` (251838, help at 251877) accepts four forms: `settime day` =
+day 1 12:00, `settime night` = day 2 00:00, `settime <time>` = raw world time where
+1000 == one hour, and `settime <day> <hour> <minute>` with day>=1, hour<=23,
+minute<=59.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -238,6 +366,16 @@ This blob rides `WorldState` nested `aiDirectorState` ([save-region.md](save-reg
 | [spawning.md](spawning.md) | Scout/screamer horde lifecycle |
 
 ## Changelog
+
+- **2026-08-06:** Blood-moon window spans dusk on bmDay to dawn on bmDay+1
+  (`GameUtils::IsBloodMoonTime`); `WorldTimeToDays` is 1-based; CalcDuskDawnHours
+  branches; CalcNextDay jitter is non-negative and InitNewGame seeds on a literal
+  7; StartBloodMoon/EndBloodMoon entity flag sweeps; AIDirectorBloodMoonParty
+  constants, InitParty formulas, CanSpawn(1.9f) budget and the +120 degree spawn
+  arc; SpawnZombie bonus-loot and chunk-observer effects; SkyManager /
+  XUiC_CompassWindow client-local FX driven by GameStats 58 + 42 with no packet;
+  Conductor as the only BloodmoonMusic sender; SandboxCode as the V3.1.0 source of
+  Frequency/Range/EnemyCount; ConsoleCmdSetTime four forms; no `bloodmoon` command.
 
 - **2026-07-28:** AIDirector save v10; bloodmoon/sleeper/GameStats packages.
 

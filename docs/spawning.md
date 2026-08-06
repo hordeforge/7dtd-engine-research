@@ -431,6 +431,130 @@ run or fire on the dedicated server.
 
 ---
 
+## Biome spawn manager, director constants and the gamestage indirection (2026-08-06)
+
+Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
+numbers are from that dump, not the `il/` v3.0.1 sets).
+
+### AIDirectorConstants: the whole horde/scout tuning block
+
+`AIDirectorConstants` (416218-416251) is a single literal block that pins every
+wandering-horde and screamer value:
+
+| Constant | Value |
+|---|---|
+| `kWanderingHordeGlobalStartTime` | 0x6D60 |
+| `kSpawnWanderingHordeMin` / `Max` | 0x2EE0 / 0x5DC0 |
+| `kWanderingHordeGroupSize` | 6 |
+| `kWanderingHordeSpawnDistance` | 92 |
+| `kWanderingHordeSpawnMinDistance` | 50 |
+| `kWanderingHordePlayerClusterSize` | 30 |
+| `kHordeDaySpawnRangeMin` / `Max` | 45 / 55 |
+| `kHordeNightSpawnRangeMin` / `Max` | 55 / 70 |
+| `kHordeMeterWarn1Threshold` | 0.5 |
+| `kHordeMeterWarn2Threshold` | 0.8 |
+| `kHordeMeterWarnResetThreshold` | 0.2 |
+| `kHordeMeterDecayDelay` / `DecayRate` | 8 / 4 |
+| `kScoutSpawnDistance` | 0x50 (80 m) |
+| `kScoutScreamGraceTime` | 2 |
+| `kScoutScreamAgainTime` | 18 |
+| `kScoutSpawnAnotherScoutChance` | 0.12 |
+| `kScoutSummonedPerScream` | 5 |
+| `kScoutSummonedTotal` | 0x19 (25) |
+
+`AIDirectorData/Noise` (~416280) is a struct of
+`{volume, duration, muffledWhenCrouched, heatMapStrength, heatMapWorldTimeToLive}`
+held in a static `Dictionary<string, Noise> AIDirectorData::noisySounds`: the heat
+map is fed by **named sounds** with per-sound strength and TTL.
+
+`AIDirector::CreateComponents` (409345) instantiates
+`AIDirectorPlayerManagementComponent`, `AIDirectorWanderingHordeComponent`,
+`AIDirectorAirDropComponent`, `AIDirectorChunkEventComponent` and
+`AIDirectorBloodMoonComponent`.
+
+### SpawnManagerBiomes::SpawnUpdate is per chunk area, not per player
+
+`SpawnManagerBiomes::SpawnUpdate` (1093888) tests an 80x80 `Rect` centred on each
+player (`position.x-40, position.z-40, 80, 80`) against
+`ChunkAreaBiomeSpawnData.area`, and bails out of enemy spawning entirely when
+`AIDirector::CanSpawn(1.0f)` is false **or**
+`AIDirectorBloodMoonComponent.BloodMoonActive` is true (IL_0020-IL_004b). Ordinary
+biome enemy spawning is therefore **suspended** during a blood moon in stock: the
+horde spawner owns the budget.
+
+The animal branch (IL_004e-IL_0061) gates on
+`GameStats::GetInt(EnumGameStats 13) >= GamePrefs::GetInt(EnumGamePrefs 0x81)` and
+returns early, i.e. the live-animal count is a GameStat and `MaxSpawnedAnimals` is
+`EnumGamePrefs` index 129.
+
+**POI-tag gating is concrete** (1094100-1094300): the manager calls
+`World::GetPOIsAtXZ` over the chunk area expanded by +80/16 chunks, ORs every
+`PrefabInstance.prefab.Tags` into one `FastTags<TagGroup/Poi>`, caches it behind
+`ChunkAreaBiomeSpawnData.checkedPOITags`, then per `BiomeSpawnEntityGroupData`
+tests `POITags.Test_AnySet` and `noPOITags.Test_AnySet` before setting a bit in
+`ChunkAreaBiomeSpawnData.groupsEnabledFlags`. That flags field is an int32 with a
+shift by 31, so **a biome may carry at most 32 spawn groups**.
+
+Group choice retries `Utils::FastMin(5, list.Count)` times with
+`GameRandom::RandomRange(list.Count)` before giving up (IL_02d5-IL_02fa), and the
+chosen position is rejected if `World::GetEntitiesInBounds` finds anything inside a
+`Bounds` of size `(4, 2.5, 4)` around it (IL_03f8-IL_0435). On success it calls
+`ChunkAreaBiomeSpawnData::DecMaxCount` / `IncCount` and
+`Chunk::SpawnEntityAsync` with `EnumSpawnerSource = 1` (Biome).
+
+### The gamestage group indirection
+
+Fully visible at 955240-955275 (`QuestActionSpawnGSEnemy`) and 416434
+(`AIDirectorGameStagePartySpawner`):
+`GameStageDefinition::GetGameStage(name)` to
+`GetStage(EntityPlayer::get_PartyGameStage())` to `Stage::GetSpawnGroup(i)` to
+`SpawnGroup.groupName` to
+`EntityGroups::GetRandomFromGroup(name, ref lastClassId, GameRandom)`.
+`SpawnGroup` carries `spawnCount:uint16` and `maxAlive:uint16` (416831, 416952),
+and `GameStageDefinition` has static `DifficultyBonus`, `LootBonusScale`,
+`LootBonusMaxCount` and `LootBonusEvery`. That is the whole surface a gamestage
+port needs.
+
+This matters for sleeper volumes: the dominant `SleeperVolumeGroup` value in
+`Data/Prefabs/POIs` is `GroupGenericZombie` (4781 occurrences), which is **not** an
+entitygroup: it is a `gamestages.xml`
+`<group name="1GroupGenericZombie" spawner="SleeperGSList"/>` indirection.
+
+### Sleeper wake cascade is an explicit index graph
+
+`SleeperVolume` carries `TriggeredByIndices` (`List<uint8>`), and
+`PrefabTriggerData::AddTriggeredBy` / `TriggeredByVolumes`
+(`Dictionary<int32, List<SleeperVolume>>`) live at 197208-198000. The cascade is a
+per-prefab index graph, not a proximity heuristic, so implementing it needs the
+prefab XML volume indices rather than any runtime distance test.
+
+### Corpse dwell
+
+`EntityAlive::OnDeathUpdate` (450657-450759): `deathUpdateTime` increments until it
+reaches `EntityAlive.timeStayAfterDeath`, and if
+`EntityClass.DeadBodyHitPoints > 0` and `DeathHealth <= -DeadBodyHitPoints` the
+timer is slammed to the limit (a gibbed corpse is removed immediately).
+`particleOnDestroy` fires via `IGameManager::SpawnParticleEffectServer` at the head
+position. `entityclasses.xml` carries `TimeStayAfterDeath=30` for
+`zombieTemplateMale` and 300 for the animal templates, with
+`DeadBodyHitPoints=1000`.
+
+### Wire note
+
+`NetPackageEntitySpeeds` declares `movementState` as int32 but **writes it with
+`BinaryWriter::Write(uint8)`** (818303-818382). The u8 encoding is correct; record
+the field-vs-wire type mismatch so nobody "fixes" it to i32.
+
+### Content census
+
+Stock ships **1892** `<entitygroup>` entries in `Data/Config/entitygroups.xml`,
+ordered with the plain named groups first and the gamestage-suffixed ones
+(`…HordeStageGS<n>`) after; entry #512 is `sleeperHordeStageGS623`. Any parser cap
+at 512 keeps the named groups and the low sleeper stages and loses everything
+above.
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -448,6 +572,15 @@ run or fire on the dedicated server.
 | [residuals.md](residuals.md) | Content and native residuals |
 
 ## Changelog
+
+- **2026-08-06:** AIDirectorConstants literal block (wandering-horde and screamer
+  tuning) and AIDirectorData/Noise heat-map struct; SpawnManagerBiomes::SpawnUpdate
+  is per ChunkAreaBiomeSpawnData, suspends biome enemy spawning during a blood
+  moon, and gates groups on POI tags with a 32-group flags int; spawn placement
+  retry/overlap rules; the GameStageDefinition group indirection that
+  GroupGenericZombie resolves through; SleeperVolume TriggeredByIndices cascade
+  graph; EntityAlive::OnDeathUpdate corpse dwell; NetPackageEntitySpeeds
+  movementState is written as u8; entitygroups.xml census (1892 groups).
 
 - **2026-07-28:** RequestToSpawnEntityServer place path.
 
