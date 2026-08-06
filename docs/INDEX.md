@@ -70,6 +70,7 @@ Campaign audit (V3.1.0 evidence + residual map): [`../workspace/outputs/docs-res
 | 5 | [`protocol-frames.md`](protocol-frames.md) | Visual RFC/Mermaid byte frames per package |
 | 6 | [`zig-clone.md`](../../zdtd/docs/zig-clone.md) | Zig clone architecture from RE (companion `zdtd/docs/`) |
 | 7 | [`residuals.md`](residuals.md) | What IL cannot close |
+| 7b | [`completion-bar.md`](completion-bar.md) | What "100% documented" means (tiers A-D) |
 
 ```mermaid
 flowchart LR

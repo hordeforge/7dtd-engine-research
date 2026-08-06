@@ -267,6 +267,33 @@ SaveId, OnlinePlayers, LocalMods, HasModifiedXML, character/game-stage stats).
 This is **telemetry**, not gameplay sim; transport is the platform analytics
 service (residual). See the EOS server-list filters section below.
 
+### Analytics heartbeat (client path; dead on dedicated)
+
+`ConnectionManager` holds `countdownAnalyticsHeartbeat` constructed as
+`new CountdownTimer(300f, false)` (**300 s**). `BeginHeartbeat(seconds)` only
+`SetTimeout` + `ResetAndRestart`.
+
+Each `ConnectionManager.Update`, after flush work:
+
+```text
+if GameManager.IsDedicatedServer: ret          // IL_01D9 brtrue → skip entire block
+if !countdownAnalyticsHeartbeat.HasPassed: ret
+ResetAndRestart()
+ev = new HeartbeatEventData()                  // Services.Analytics.Events
+ev.HeartbeatTimestamp = DateTime.UtcNow.ToString("O")
+ev.ServerId = Helper.GetServerId()             // Services.Analytics.Helper
+ev.SaveId = IsClient ? GamePrefs.GetString(159) : World.Guid  // null-safe
+ServiceProvider.Get<IAnalyticsService>().LogEvent(ev)
+```
+
+**Dedicated implication:** the heartbeat **never fires** on pure dedicated
+(`IsDedicatedServer` early-out). Types still appear in the reachability set
+because `ConnectionManager.Update` is shared. Classify as telemetry residual;
+do not model as a dedi sim cost. Types: `HeartbeatEventData`, `Helper`
+(Services.Analytics), `TruncateStringSerializerConverter` (JSON string length
+cap for analytics payloads). OOS list: [out-of-scope-surface.md](out-of-scope-surface.md)
+third-party/analytics.
+
 ## Related docs
 
 | Doc | Role |
@@ -279,6 +306,7 @@ service (residual). See the EOS server-list filters section below.
 
 ## Changelog
 
+- **2026-08-07:** Document analytics heartbeat (300s, client-only; dedicated skips).
 - **2026-08-02:** V3.1.0 join analytics (`PlayerJoinServerEventData`).
 
 - **2026-07-28:** PersistentPlayerList binary/XML save layout + players.xml path.

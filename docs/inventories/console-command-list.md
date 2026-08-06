@@ -86,6 +86,7 @@ Permission: blank = inherits default (0 = highest admin; higher number = less pr
 | `listplayerids` | `ConsoleCmdListPlayerIds` | 1000 | Lists all players with their IDs for ingame commands |
 | `listplayers` | `ConsoleCmdListPlayers` |  | lists all players |
 | `listthreads` | `ConsoleCmdListThreads` | 1000 | lists all threads |
+| `logenv` | `ConsoleCmdLogEnvironment` |  | Log the process environment variables |
 | `loggamestate` | `ConsoleCmdLogGameState` |  | Log the current state of the game |
 | `loglevel` | `ConsoleCmdLogLevel` |  | Telnet/Web only: Select which types of log messages are shown |
 | `loot` | `ConsoleCmdLoot` | 1000 | Loot commands |

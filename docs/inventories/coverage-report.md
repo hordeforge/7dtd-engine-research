@@ -1,4 +1,4 @@
-# RE coverage report (V3.1.0, auto-generated)
+# RE coverage report (V3.0.1, auto-generated)
 
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
 dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced
@@ -46,9 +46,9 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached, non-generated | 6040 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2341 (excluded from %) |
 | ...**game types** (the RE surface) | **3699** |
-| ...**narrated** (backticked in a narrative doc) | **1400 (37%)** |
-| ...**catalogued only** (generated inventory, not narrated) | 901 |
-| ...**classified** out-of-scope | 1398 |
+| ...**narrated** (backticked in a narrative doc) | **1416 (38%)** |
+| ...**catalogued only** (generated inventory, not narrated) | 891 |
+| ...**classified** out-of-scope | 1392 |
 | ...**unaccounted** (appears nowhere) | 0 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 502 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 179 |

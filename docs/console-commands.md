@@ -169,13 +169,13 @@ Every command subclasses `ConsoleCmdAbstract` and provides:
 | `GetDescription()` / `GetHelp()` | `help` output |
 | `IsExecuteOnClient` / `AllowedInMainMenu` / `AllowedDeviceTypes` | run-context gates |
 
-There are 187 concrete commands (e.g. `admin`, `whitelist`, `help`, `cvar`,
-`prefab`, `loot`, `visitmap`, `profiler`). This count includes the web-dashboard
-commands (`webtokens`, `webpermission`, `invalidatecaches`, `createwebuser`,
-`openiddebug`), which ship in the **base `Assembly-CSharp`**, not as a mod. Mods can
-register additional commands at runtime, above this 187 baseline. The 187 are
-enumerated in the [catalog](inventories/console-command-list.md); this doc owns the
-framework, not each leaf command.
+There are **188** concrete commands in the V3.1.0 catalog (e.g. `admin`, `whitelist`,
+`help`, `cvar`, `logenv`, `prefab`, `loot`, `visitmap`, `profiler`). This count includes
+the web-dashboard commands (`webtokens`, `webpermission`, `invalidatecaches`,
+`createwebuser`, `openiddebug`), which ship in the **base `Assembly-CSharp`**, not as a
+mod. Mods can register additional commands at runtime above this baseline. The catalog
+enumerates every leaf ([inventories/console-command-list.md](inventories/console-command-list.md));
+this doc owns the framework, not each leaf command's full prose.
 
 ---
 

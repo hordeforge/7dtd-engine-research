@@ -141,9 +141,14 @@ Supplement count: **494** (corpus classified total becomes **1178** with the bas
 
 `AchievementCacheEntry`, `AchievementData`, `AchievementUtils`, `AntiCheatClientCS`, `AntiCheatClientManager`, `AntiCheatClientP2P`, `ApplicationStateController`, `AuthClient`, `AuthenticationClient`, `ConnectionInformation`, `DownloadableContentValidator`, `EOSSanction`, `ESaveGameProviderStatusExtensions`, `EnumAchievementDataStatExtensions`, `EosConnectionTestInfo`, `EosUserIdMapper`, `FavoriteServers`, `ILobbyHost`, `IPlatformUserBlockedResults`, `JoinSessionGameInviteListener`, `LANMasterServerAnnouncer`, `LoadSaveGame`, `LobbyHost`, `LobbyListAbs`, `LobbyListFriends`, `LobbyListInternet`, `LocalServerDetect`, `MappedAccountRequest`, `MasterServerAnnouncer`, `MasterServerList`, `MultiplayerInvitationDialogSteam`, `NetworkClientEos`, `NetworkClientSteam`, `NetworkServerEos`, `NetworkServerSteam`, `NetworkUtils`, `PlatformApplicationStandalone`, `PlatformConfiguration`, `PlayerInteraction`, `PlayerInteractionsRecorderMulti`, `PlayerReportCategory`, `PlayerReporting`, `ReadRequestDetails`, `RemoteFileStorage`, `RemotePlayerFileStorage`, `RequestDetails`, `RichPresence`, `SanctionsCheck`, `SanctionsCheckResult`, `SaveDataMergedPlatformSaveGameIOProvider`, `SaveGameIOProvider`, `SaveGameIOProviderFixedRoot`, `SaveGameProvider`, `SaveGameProviderHelper`, `SendInfo`, `ServerFilter`, `ServerListAnnouncer`, `SessionModificationCallbackArgs`, `SessionSearchArgs`, `SessionsHost`, `StatCacheEntry`, `StorageOperation`, `TextCensor`, `UdpClientReceiveHandler`, `UdpClientSendHandler`, `UserBase`, `UserDataRoaming`, `UserDataRoamingAbs`, `UserDataRoamingGameCore`, `UserDataRoamingMultiPlatform`, `UserDataRoamingPS5`, `UserDetailsRequest`, `UserDetailsServiceEos`, `UserIdentifierPSN`, `UserIdentifierXbl`, `UserServer`, `WriteRequestDetails`, `XblPlatformApi`
 
-### Third-party / analytics (supplement) (38)
+### Third-party / analytics (supplement) (41)
 
-`AnalyticsServiceFactory`, `BarcodeWriter`, `BarcodeWriterGeneric`, `BhvrAnalyticsSettings`, `BindingNcalcFunctions`, `Crc32Algorithm`, `EmptyAnalyticsService`, `EncodingOptions`, `HardwareInfoEventData`, `KrakenAnalyticsMicroservice`, `LoginEventData`, `MultiFormatWriter`, `NCalcLexer`, `NCalcParser`, `QrCodeEncodingOptions`, `SafeProxy`, `ServerStartEventData`, `ServiceConfiguration`, `UnixLinkFile`, `WindowsLinkFile`, `additiveExpression_return`, `arguments_return`, `bitwiseAndExpression_return`, `bitwiseOrExpression_return`, `bitwiseXOrExpression_return`, `booleanAndExpression_return`, `conditionalExpression_return`, `equalityExpression_return`, `expressionList_return`, `identifier_return`, `logicalExpression_return`, `multiplicativeExpression_return`, `ncalcExpression_return`, `primaryExpression_return`, `relationalExpression_return`, `shiftExpression_return`, `unaryExpression_return`, `value_return`
+`AnalyticsServiceFactory`, `BarcodeWriter`, `BarcodeWriterGeneric`, `BhvrAnalyticsSettings`, `BindingNcalcFunctions`, `Crc32Algorithm`, `EmptyAnalyticsService`, `EncodingOptions`, `HardwareInfoEventData`, `HeartbeatEventData`, `Helper` (Services.Analytics), `KrakenAnalyticsMicroservice`, `LoginEventData`, `MultiFormatWriter`, `NCalcLexer`, `NCalcParser`, `QrCodeEncodingOptions`, `SafeProxy`, `ServerStartEventData`, `ServiceConfiguration`, `TruncateStringSerializerConverter`, `UnixLinkFile`, `WindowsLinkFile`, `additiveExpression_return`, `arguments_return`, `bitwiseAndExpression_return`, `bitwiseOrExpression_return`, `bitwiseXOrExpression_return`, `booleanAndExpression_return`, `conditionalExpression_return`, `equalityExpression_return`, `expressionList_return`, `identifier_return`, `logicalExpression_return`, `multiplicativeExpression_return`, `ncalcExpression_return`, `primaryExpression_return`, `relationalExpression_return`, `shiftExpression_return`, `unaryExpression_return`, `value_return`
+
+Note: `HeartbeatEventData` / `Helper` / `TruncateStringSerializerConverter` are
+reachable via shared `ConnectionManager.Update` but the heartbeat block is
+**skipped on dedicated** ([server-lifecycle.md](server-lifecycle.md) § Join analytics).
+They are not sim/wire surface.
 
 ### Twitch (supplement) (29)
 
@@ -165,6 +170,8 @@ only implement client XUi; headless dedicated does not present them:
 
 ## Changelog
 
+- **2026-08-07:** Classify `HeartbeatEventData`, `Services.Analytics.Helper`,
+  `TruncateStringSerializerConverter` OOS (client analytics; dedicated skips heartbeat).
 - **2026-08-02:** Classify V3.1.0 XUi held-item/browser leaves OOS.
 
 - **2026-07-24:** Initial classification of the out-of-scope reached surface.

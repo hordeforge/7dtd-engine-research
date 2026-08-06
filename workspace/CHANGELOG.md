@@ -6,6 +6,21 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — completion bar + unaccounted=0 + Raw 11-byte header
+
+Objective: drive Coverage unaccounted to 0 and define honest "100%" (tiers A+B).
+
+Done (verified live V3.1.0 b14):
+- Coverage: unaccounted **0** (was 4). Closed via OOS analytics types + `logenv` catalog.
+- server-lifecycle: analytics heartbeat 300s client-only (dedicated skips).
+- out-of-scope-surface: HeartbeatEventData, Helper, TruncateStringSerializerConverter.
+- inventories/console-command-list: `logenv` / ConsoleCmdLogEnvironment.
+- save-region: Raw 11-byte header `7rr` + version:i32 + paddingBytes:i32.
+- completion-bar.md + INDEX link; residuals §3 refreshed.
+- console-commands: catalog count 188.
+
+Verification: Coverage.exe unaccounted=0; make stock-check exit 0.
+---
 ## 2026-08-07 — research: path drain, interest exit, chunk dirty, animator culling init
 
 Objective: continue stock RE only (no zdtd). Close optim-facing research gaps

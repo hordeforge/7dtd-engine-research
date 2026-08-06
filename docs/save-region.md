@@ -386,12 +386,26 @@ timestamp headers. Verified on V3.1.0 b14 via `DumpMethod` (`GetLocationInfo` /
 
 No bit packing: two full little-endian `i32` values per chunk in the location table.
 
-**On-disk header flush (`SaveHeaderData` IL=50):** open file, `Seek(11)`, then
-`WriteBytes` of the entire `locationHeader` array (128×4 = **512** bytes), then
-the entire `timestampHeader` (64×4 = **256** bytes). File layout:
+**11-byte file header (closed 2026-08-07):** `RegionFileRaw.New` / `Load` (IL=70 / 74).
 
 ```text
-offset 0:   file header (11 bytes, magic "7rr" + version fields)
+offset 0..2 : magic 3 bytes  FileHeaderMagicBytes = ASCII "7rr"  (.cctor Encoding.ASCII.GetBytes("7rr"))
+offset 3..6 : version:i32 LE   (New writes CurrentVersion=1; Load reads into ctor)
+offset 7..10: paddingBytes:i32 LE  (ctor arg; free-list / alignment policy)
+// New asserts Stream.Position == 11 after header write
+```
+
+`Load` compares each of the 3 magic bytes to `FileHeaderMagicBytes[i]` and throws
+`Incorrect header: <path>` on mismatch. Then `ReadInt32` version, `ReadInt32`
+paddingBytes, constructs `RegionFileRaw`, `ReadBytes` into `locationHeader` and
+`timestampHeader`, `InitUsedSectors()`, sets `Length` from stream.
+
+**On-disk header flush (`SaveHeaderData` IL=50):** open file, `Seek(11)`, then
+`WriteBytes` of the entire `locationHeader` array (128×4 = **512** bytes), then
+the entire `timestampHeader` (64×4 = **256** bytes). Full file layout:
+
+```text
+offset 0:   file header 11 bytes  ("7rr" + version:i32 + paddingBytes:i32)
 offset 11:  location table  512 bytes  (64 × {i32 offset, i32 length})
 offset 523: timestamp table 256 bytes  (64 × u32)
 offset 779: payload area (sectorsStartOffset; free-list byte offsets)
@@ -520,6 +534,8 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-07:** Raw 11-byte file header field layout closed (`7rr` + version:i32 +
+  paddingBytes:i32) from `New`/`Load` IL.
 - **2026-08-06:** §3.5 location/timestamp header packing closed (Raw i32 pairs + on-disk
   11/512/256/779 layout; sector LE u16 + unused byte + u8 length; ToShort/FromShort).
 

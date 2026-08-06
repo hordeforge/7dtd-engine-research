@@ -29,7 +29,7 @@ flowchart TD
 | **Aron Granberg A\* library internals** | `AstarPath.StartPath` / `Pathfinding.*` third-party; 7DTD ASP wrapper closed |
 | **ModEvents subscriber sets** | Who registers handlers is mod/content dependent; **hook names closed** in [managers.md](managers.md) |
 | **Post-patch IL drift** | TFP updates move offsets; regenerate dumps (process residual) |
-| **Region sector payload byte codec detail** | **Closed (2026-08-06):** Raw free-list + V1/V2 WriteData ([save-region.md](save-region.md) 3.3-3.4) and location/timestamp header packing (3.5: Raw i32 pairs; sector LE u16 + pad + u8). Optional residual: rare per-version magic-byte field-by-field dump of the 11-byte file header only |
+| **Region sector payload byte codec detail** | **Closed (2026-08-06/07):** Raw free-list + V1/V2 WriteData ([save-region.md](save-region.md) 3.3-3.4); location/timestamp packing (3.5); Raw **11-byte** header `7rr`+version:i32+paddingBytes:i32 from `New`/`Load` |
 | **Client-only UI / avatar / NGUI / camera** | Out of dedicated scope (non-goal) |
 | **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.21. Residual: only optional per-flag framing for rare conditional-heavy packages |
 | **Encryption cipher / KDF primitives** | Handshake package bodies decoded ([protocol-packages.md](protocol-packages.md) §2). Session transform is managed `AesEncryptAndMac` (AES + HMAC; [network.md](network.md) §4.5). Residual: RSA key wrap / platform RNG quality and anything below `System.Security.Cryptography` providers |
@@ -67,20 +67,33 @@ flowchart TD
 
 ---
 
-## 3. Managed RE corpus status (2026-07-28)
+## 3. Managed RE corpus status (2026-08-07)
 
 For **dedicated managed** surfaces under the coverage bar (families 1-11 in
-[coverage.md](coverage.md)):
+[coverage.md](coverage.md)). Definition of done: [completion-bar.md](completion-bar.md)
+**tiers A+B**.
 
-- Unaccounted reached game types: **0**
+**Coverage.exe (live ASM, 2026-08-07):**
+
+| Tier | Count |
+|---|---:|
+| Game types in reach base | 3699 |
+| Narrated | 1415 |
+| Catalogued only | 892 |
+| Classified OOS | 1392 |
+| **Unaccounted** | **0** |
+
+Also:
+
 - All **193** `NetPackage*` census names appear in narrative docs
 - High-traffic package bodies + bulk residual catalog: [protocol-packages.md](protocol-packages.md) 1-6.22
 - Flat write sequences for every package: [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md)
+- Region Raw header + location packing closed (save-region §3.5)
 
 What remains open is **only** the non-IL residual table in section 1 (Unity order,
-native plugins, EAC/EOS wire, A* library internals, content XML, client UI, optional
-per-flag framing / bit packing). Those cannot be closed by further Assembly-CSharp
-narrative alone.
+native plugins, EAC/EOS wire, A* library internals, content XML, client UI) plus
+**optional** annotation depth (per-flag package framing, per-console-command prose).
+Those cannot be finished by "more managed RE until every IL line is prose."
 
 ## 4. Origin dedicated gate (correction)
 
@@ -124,6 +137,8 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
 
 ## Changelog
 
+- **2026-08-07:** Coverage unaccounted driven to 0 (analytics heartbeat + logenv);
+  completion-bar.md; Raw region 11-byte header closed; §3 census refreshed.
 - **2026-08-06:** Region location/timestamp header packing closed (save-region §3.5); ItemStack.Clone triage + chunk encode ownership noted for optim evidence (items / engine-limitations / world-chunks).
 - **2026-08-03:** V3.1.0 pin confirmed live; product residual pointer §5; managed corpus still stop-closed.
 - **2026-07-28:** Region sector residual narrowed; package narrative residual closed (6.21).
