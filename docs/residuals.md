@@ -78,8 +78,8 @@ For **dedicated managed** surfaces under the coverage bar (families 1-11 in
 | Tier | Count |
 |---|---:|
 | Game types in reach base | 3699 |
-| Narrated | 1415 |
-| Catalogued only | 892 |
+| Narrated | 1424 |
+| Catalogued only | 883 |
 | Classified OOS | 1392 |
 | **Unaccounted** | **0** |
 
