@@ -16,7 +16,7 @@ data, not IL); the `EntityBuffs` runtime that one action family drives
 **Evidence:** `MinEffectController`, `MinEffectGroup`, `MinEventActionBase`,
 `MinEventActionTargetedBase`, `MinEventActionBuffModifierBase`, `MinEventParams`
 IL plus the `MinEventTypes` / `TargetTypes` / `SourceParentType` enums and the
-`MinEventAction*` leaves (transitive subclasses; see catalog) in the V3.0.1 type surface. Dump locally with
+`MinEventAction*` leaves (transitive subclasses; see catalog) in the V3.1.0 b14 type surface (73 matches). Dump locally with
 `tools/src/DumpMethod` (git-ignored). **Hub:** [`INDEX.md`](INDEX.md).
 **Method:** [`re-methodology.md`](re-methodology.md).
 

@@ -40,7 +40,7 @@ class NetProtocolCensus {
       .Where(t => t.Name.StartsWith("NetPackage") && t.Name != "NetPackageManager")
       .OrderBy(t => t.Name).ToList();
     var sb = new StringBuilder();
-    sb.AppendLine("# NetPackage protocol metadata census (V3.0.1)");
+    sb.AppendLine("# NetPackage protocol metadata census");
     sb.AppendLine("// channel/compress/direction/delivery/before-auth from trivial getters; `expr` = computed at runtime.");
     sb.AppendLine("| Package | Chan | Compress | Dir | Delivery | BeforeAuth |");
     sb.AppendLine("|---|--:|--:|--:|--:|--:|");

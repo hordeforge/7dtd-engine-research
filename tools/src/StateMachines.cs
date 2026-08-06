@@ -45,7 +45,7 @@ static class StateMachines {
     }
 
     var sb = new StringBuilder();
-    sb.AppendLine("# State machine index (V3.0.1)");
+    sb.AppendLine("# State machine index");
     sb.AppendLine();
     sb.AppendLine("**Kind:** generated catalog of every lifecycle modelled as a mermaid");
     sb.AppendLine("`stateDiagram` in this corpus, grouped by subsystem cluster, with the section");

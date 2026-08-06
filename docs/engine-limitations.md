@@ -154,7 +154,7 @@ Combat across chunks **already works** if coordinates are shared. Per-player pri
 | **ModEvents names closed; subscribers not** | Who runs is content | **Residual** | Inventory hooks; measure live |
 | **No safe full sim evacuation to workers** | World state races | **Hard** | Starve main-thread work only |
 | **EAC-off for C# mods** | Console crossplay vs modded | **Ops** | Policy + docs |
-| **Publicizer / override visibility** | V3.0.1 build rules | **Ops** | Build against live Managed |
+| **Publicizer / override visibility** | build rules of the pinned release | **Ops** | Build against live Managed |
 
 ---
 

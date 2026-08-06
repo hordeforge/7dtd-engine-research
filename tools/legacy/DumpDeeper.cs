@@ -19,7 +19,7 @@ class DumpDeeper {
     outDir = args[1];
     Directory.CreateDirectory(outDir);
     book = new StringBuilder();
-    H1("Deeper RE notes (V3.0.1 dedicated)");
+    H1("Deeper RE notes (dedicated)");
     book.AppendLine("Generated UTC: " + DateTime.UtcNow.ToString("u"));
     book.AppendLine("Assembly: `" + args[0] + "`");
     book.AppendLine();

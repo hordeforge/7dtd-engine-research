@@ -18,7 +18,7 @@ class DumpOptScan {
     outDir = args[1];
     Directory.CreateDirectory(outDir);
     report = new StringBuilder();
-    report.AppendLine("# Optimization scan RE (V3.0.1)");
+    report.AppendLine("# Optimization scan RE");
     report.AppendLine();
     report.AppendLine("Generated: " + DateTime.UtcNow.ToString("u"));
     report.AppendLine("Assembly: `" + args[0] + "`");

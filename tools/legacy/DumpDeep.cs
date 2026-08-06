@@ -53,7 +53,7 @@ class DumpDeep {
     };
 
     var index = new StringBuilder();
-    index.AppendLine("# Deep dump index V3.0.1");
+    index.AppendLine("# Deep dump index");
     index.AppendLine();
     index.AppendLine("Assembly: `" + args[0] + "`");
     index.AppendLine("UTC: " + DateTime.UtcNow.ToString("u"));

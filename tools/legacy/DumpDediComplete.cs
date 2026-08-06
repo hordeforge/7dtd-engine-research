@@ -162,7 +162,7 @@ class DumpDediComplete {
 
     File.WriteAllText(Path.Combine(outDir,"DEDI_COMPLETE_auto.md"), book.ToString());
     File.WriteAllText(Path.Combine(outDir,"INDEX.md"), "# dedi-complete dump\n\nAuto: DEDI_COMPLETE_auto.md\nNarrative: 7dtd-research/docs/coverage.md\n");
-    File.WriteAllText(Path.Combine(outDir,"README.md"), "# dedi-complete-v3.0.1\n\nRegenerable. DumpDediComplete.cs\n");
+    File.WriteAllText(Path.Combine(outDir,"README.md"), "# dedi-complete\n\nRegenerable. DumpDediComplete.cs\nName the output dir for the release it was dumped from.\n");
     Console.WriteLine("OK types="+total+" methods="+withBody+" -> "+outDir);
   }
   static TypeDefinition Find(string n)=>asm.MainModule.Types.FirstOrDefault(t=>t.Name==n);

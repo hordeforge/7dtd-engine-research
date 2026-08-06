@@ -42,7 +42,7 @@ class DumpFrameEntries {
     Directory.CreateDirectory(outDir);
 
     var sb = new StringBuilder();
-    sb.AppendLine("# All MonoBehaviour-like Update/LateUpdate/FixedUpdate (V3.0.1)");
+    sb.AppendLine("# All MonoBehaviour-like Update/LateUpdate/FixedUpdate");
     sb.AppendLine();
     sb.AppendLine("| Type | Base | Method | IL |");
     sb.AppendLine("|---|---|---|---:|");
@@ -97,7 +97,7 @@ class DumpFrameEntries {
     var gm = asm.MainModule.Types.First(x => x.Name == "GameManager");
     var gmu = gm.Methods.First(x => x.Name == "gmUpdate" && x.HasBody);
     var calls = new StringBuilder();
-    calls.AppendLine("# GameManager.gmUpdate ordered calls (full, V3.0.1)");
+    calls.AppendLine("# GameManager.gmUpdate ordered calls (full)");
     calls.AppendLine("IL=" + gmu.Body.Instructions.Count);
     calls.AppendLine();
     int n = 0;

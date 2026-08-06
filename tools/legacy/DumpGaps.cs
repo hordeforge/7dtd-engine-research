@@ -18,7 +18,7 @@ class DumpGaps {
     outDir = args[1];
     Directory.CreateDirectory(outDir);
     book = new StringBuilder();
-    book.AppendLine("# Gap-closing RE notes (V3.0.1)");
+    book.AppendLine("# Gap-closing RE notes");
     book.AppendLine();
     book.AppendLine("UTC: " + DateTime.UtcNow.ToString("u"));
     book.AppendLine();

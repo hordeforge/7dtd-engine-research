@@ -204,7 +204,7 @@ What the dedicated server *does* run from this namespace, every drone tick:
   `areaScanTimer` cadence while idle/following/sentry: flood-scans blocks
   around the drone (`ScanBlocksAround`) and reports confinement when the air
   count is below `dist²`. The result field `isInConfinedSpace` is written but
-  **never read** in V3.0.1, a vestigial output.
+  **never read**, a vestigial output (re-checked on V3.1.0 b14).
 - `RaycastPathManager`: `Init` in the `GameManager.StartAsServer` coroutine,
   `Update` from `gmUpdate` ([`loop-gmupdate.md`](loop-gmupdate.md) peer list).
   It only holds the registry of live `RaycastPath` objects and debug-draws them

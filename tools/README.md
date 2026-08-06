@@ -62,9 +62,9 @@ fully-qualified operands, `IL_offset` branch targets: the corpus dump format).
 
 ```bash
 mono bin/Census.exe "$ASM"
-mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.0.1
-mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.0.1/META.md
-mono bin/DumpType.exe "$ASM" ../il/netpackages-v3.0.1 EntityCreationData BlockChangeInfo
+mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.1.0
+mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.1.0/META.md
+mono bin/DumpType.exe "$ASM" ../il/netpackages-v3.1.0 EntityCreationData BlockChangeInfo
 mono bin/DumpMethod.exe "$ASM" GameManager gmUpdate
 ```
 
@@ -92,16 +92,16 @@ Canonical family dumpers (map to `il/` dump sets):
 
 | Dumper | Dump set (`il/`) | Family |
 |---|---|---|
-| `DumpDediComplete` | `dedi-complete-v3.0.1/` | Complete dedicated managed surface + residual closers |
-| `DumpGmUpdate` | `gmUpdate-v3.0.1/` | `GameManager.gmUpdate` / Update structure |
-| `DumpFrameEntries` | `frame-entries-v3.0.1/` | Per-frame Update caller edges |
-| `DumpDeep` | `deep-v3.0.1/` | Entity / AI / path / manager bodies + xrefs |
-| `DumpDeeper` | `deeper-v3.0.1/` | Multi-subsystem deeper (EAI, MoveHelper, constants) |
-| `DumpGaps` | `gaps-v3.0.1/` | Gap-closing (timer, AIDirector, ASP, net bands) |
-| `DumpLoopComplete` | `loop-complete-v3.0.1/` | Loop + save + light surfaces |
-| `DumpOptScan` | `opt-scan-v3.0.1/` | Large-method scan (hot-path candidates) |
-| `DumpTerrain` | `terrain-*-v3.0.1/` | WorldConstants vertical dims + height APIs |
-| `DumpRealEarthSurfaces` | `realearth-surfaces-v3.0.1/` | Chunk/Origin/PPL/region surfaces |
+| `DumpDediComplete` | `dedi-complete-v3.1.0/` | Complete dedicated managed surface + residual closers |
+| `DumpGmUpdate` | `gmUpdate-v3.1.0/` | `GameManager.gmUpdate` / Update structure |
+| `DumpFrameEntries` | `frame-entries-v3.1.0/` | Per-frame Update caller edges |
+| `DumpDeep` | `deep-v3.1.0/` | Entity / AI / path / manager bodies + xrefs |
+| `DumpDeeper` | `deeper-v3.1.0/` | Multi-subsystem deeper (EAI, MoveHelper, constants) |
+| `DumpGaps` | `gaps-v3.1.0/` | Gap-closing (timer, AIDirector, ASP, net bands) |
+| `DumpLoopComplete` | `loop-complete-v3.1.0/` | Loop + save + light surfaces |
+| `DumpOptScan` | `opt-scan-v3.1.0/` | Large-method scan (hot-path candidates) |
+| `DumpTerrain` | `terrain-*-v3.1.0/` | WorldConstants vertical dims + height APIs |
+| `DumpRealEarthSurfaces` | `realearth-surfaces-v3.1.0/` | Chunk/Origin/PPL/region surfaces |
 | `DumpAIDirector` | (aidirector) | AIDirector component types |
 | `DumpSaveLight` | (save/light) | WorldState + light sites |
 
@@ -112,8 +112,8 @@ The remaining `legacy/*.cs` (`DumpMethod(ByName)`, `DumpType(s)`, `DumpOne(Metho
 helpers/finders, superseded by `src/DumpMethod` and `src/DumpType`.
 
 ```bash
-mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.0.1
-mono bin/legacy/DumpTerrain.exe "$ASM" ../il/terrain-v3.0.1
+mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.1.0
+mono bin/legacy/DumpTerrain.exe "$ASM" ../il/terrain-v3.1.0
 ```
 
 ## 3. Cross-version parity (`parity/`)

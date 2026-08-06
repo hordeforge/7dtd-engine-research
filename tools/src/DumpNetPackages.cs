@@ -36,7 +36,7 @@ class DumpNetPackages {
       .Where(t => t.Name.StartsWith("NetPackage") && t.Name != "NetPackageManager")
       .OrderBy(t => t.Name).ToList();
     var idx = new StringBuilder();
-    idx.AppendLine("# NetPackage body dump index (V3.0.1)");
+    idx.AppendLine("# NetPackage body dump index");
     idx.AppendLine("// " + pkgs.Count + " NetPackage* types (excl NetPackageManager)");
     idx.AppendLine("| Type | fields | read | write | Setup | GetLength | Process |");
     idx.AppendLine("|---|--:|--:|--:|--:|--:|--:|");

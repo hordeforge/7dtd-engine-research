@@ -138,7 +138,7 @@ static class WireBodies {
                           .OrderBy(t => t.Name).ToList();
 
     var sb = new StringBuilder();
-    sb.AppendLine("# NetPackage wire-body catalog (V3.0.1)");
+    sb.AppendLine("# NetPackage wire-body catalog");
     sb.AppendLine();
     sb.AppendLine("**Kind:** auto-extracted per-package wire-body reference (ordered `write()` field");
     sb.AppendLine("sequence). Not a hand-narrative; complements the annotated bodies in");

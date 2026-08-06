@@ -36,19 +36,20 @@ PRODUCT_REALEARTH = [
     "realearth-review.md",
 ]
 
+# The corpus tracks the latest release only, so these names move with it.
+# gmUpdate and terrain-stock folded into loop-complete and terrain when the
+# corpus was regenerated on V3.1.0 b14.
 DUMP_SETS = [
-    "gmUpdate-v3.0.1",
-    "deep-v3.0.1",
-    "deeper-v3.0.1",
-    "gaps-v3.0.1",
-    "loop-complete-v3.0.1",
-    "terrain-stock-v3.0.1",
-    "realearth-surfaces-v3.0.1",
-    "dedi-complete-v3.0.1",
+    "deep-v3.1.0",
+    "deeper-v3.1.0",
+    "gaps-v3.1.0",
+    "loop-complete-v3.1.0",
+    "terrain-v3.1.0",
+    "realearth-surfaces-v3.1.0",
+    "dedi-complete-v3.1.0",
 ]
 
 TOOLS = [
-    "DumpGmUpdate.cs",
     "DumpDeep.cs",
     "DumpDeeper.cs",
     "DumpGaps.cs",
@@ -116,7 +117,7 @@ def main() -> int:
         if sum(1 for _ in d.iterdir()) < 1:
             fails.append(f"empty dump set: {ds}")
 
-    auto = IL / "dedi-complete-v3.0.1" / "DEDI_COMPLETE_auto.md"
+    auto = IL / "dedi-complete-v3.1.0" / "DEDI_COMPLETE_auto.md"
     if not auto.is_file():
         fails.append("missing DEDI_COMPLETE_auto.md")
     else:

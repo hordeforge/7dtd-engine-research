@@ -197,7 +197,7 @@ Path requests originate inside individual `EAIBase` / UAI task `Update`/`Start` 
 
 ---
 
-## 6. Pathfinding (V3.0.1 production path)
+## 6. Pathfinding (production path)
 
 ### 6.1 Which implementation is live?
 
@@ -786,7 +786,7 @@ Also on the wire (see [protocol-packages.md](protocol-packages.md) section 6.21)
 ## Activation / grab (V3.1.0)
 
 `EntityAlive.InitLocalActivationCommands` registers `"grab"` / `"hand"` on the
-base class (moved up from rabbit-only on 3.0.1). Full held-entity feature:
+base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [experimental-delta.md](experimental-delta.md) §3.
 
 ## Changelog

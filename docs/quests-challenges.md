@@ -378,7 +378,7 @@ completion and the intro flow.
   `challenges.xml` data parsed by `QuestsFromXml` / `ChallengesFromXml`. This doc
   covers the engine, not the definitions.
 - **Naming note.** There is no `ChallengeManager` or `ChallengeStage` type in the
-  V3.0.1 assembly: the runtime dispatcher for both systems is `QuestEventManager`
+  assembly: the runtime dispatcher for both systems is `QuestEventManager`
   (plus the per-challenge `ChallengeTrackingHandler`), and the "stage" concept is
   `RequirementGroupPhase` inside a `BaseRequirementObjectiveGroup` for in-challenge
   steps and `ChallengeGroup` tiering for cross-challenge progression.
@@ -400,7 +400,7 @@ touches in passing:
   `quests.xml`, and its own `CheckForQuestGiver` / `CheckForPlayer` are
   `return true` stubs (subclasses do the real gating).
 - **`QuestCriteriaPOIWithinDistance`**: the "matching POI within range"
-  criteria; in V3.0.1 its `CheckForQuestGiver` override merely `TryParse`s
+  criteria; its `CheckForQuestGiver` override merely `TryParse`s
   `Value` and then returns a hardcoded false, so any quest definition using
   this criteria is never offered (dead in this build).
 - **`QuestTierReward`**: a `Tier` int plus a `List<BaseReward>` parsed by

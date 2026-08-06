@@ -21,7 +21,7 @@ class DumpLoopComplete {
     outDir = args[1];
     Directory.CreateDirectory(outDir);
     book = new StringBuilder();
-    book.AppendLine("# Loop-complete dump notes (V3.0.1)");
+    book.AppendLine("# Loop-complete dump notes");
     book.AppendLine();
     book.AppendLine("UTC: " + DateTime.UtcNow.ToString("u"));
     book.AppendLine();

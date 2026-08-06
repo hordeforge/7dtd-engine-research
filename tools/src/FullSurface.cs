@@ -29,7 +29,7 @@ class FullSurface {
 
     // Per-type inventory (one row each).
     var types = new StringBuilder();
-    types.AppendLine("# Full type surface (V3.0.1, metadata only)");
+    types.AppendLine("# Full type surface (metadata only)");
     types.AppendLine("// " + all.Count + " types (incl nested). Signatures/sizes only; no IL bodies (policy).");
     types.AppendLine("| Type | ns | kind | base | fields | methods | IL |");
     types.AppendLine("|---|---|---|---|--:|--:|--:|");
@@ -43,7 +43,7 @@ class FullSurface {
 
     // Per-namespace summary.
     var ns = new StringBuilder();
-    ns.AppendLine("# Namespace surface summary (V3.0.1)");
+    ns.AppendLine("# Namespace surface summary");
     ns.AppendLine("| Namespace | types | methods(body) | IL total | fields |");
     ns.AppendLine("|---|--:|--:|--:|--:|");
     foreach (var g in all.GroupBy(t => t.Namespace == "" ? "<global>" : t.Namespace)

@@ -11,7 +11,7 @@ class DumpAIDirector {
     r.AddSearchDirectory(Path.GetDirectoryName(args[0]));
     var asm = AssemblyDefinition.ReadAssembly(args[0], new ReaderParameters { AssemblyResolver = r });
     var sb = new StringBuilder();
-    sb.AppendLine("# AIDirector component types (V3.0.1)");
+    sb.AppendLine("# AIDirector component types");
     sb.AppendLine();
     foreach (var t in asm.MainModule.Types.OrderBy(t => t.Name)) {
       bool hit = false;

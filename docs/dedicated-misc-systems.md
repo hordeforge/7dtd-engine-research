@@ -72,8 +72,8 @@ icon classes clients display (see NavObjectClass below). Complements
 ## CompanionGroup
 
 Thin list wrapper (`Add`, `Remove`, `IndexOf`, indexer) held by
-`EntityPlayer.Companions`, which lazily constructs it. **In V3.0.1 it is an
-unpopulated stub:** `Add` and `Remove` have zero call sites anywhere in the
+`EntityPlayer.Companions`, which lazily constructs it. **Still an unpopulated stub on V3.1.0 b14
+(re-checked 2026-08-06):** `Add` and `Remove` have zero call sites anywhere in the
 assembly, so the list is never filled and the only readers are
 `XUiC_CompanionEntry*` (client view of an always-empty group). Treat it as
 reserved surface for a companion feature, not as live server state.

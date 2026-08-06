@@ -153,7 +153,7 @@ class DumpTerrain
       "# Terrain dump index\n\nAuto: `TERRAIN_auto.md` + per-method `*_il.txt` / `*_calls.md`.\n\nUTC: "
       + DateTime.UtcNow.ToString("u") + "\n");
     File.WriteAllText(Path.Combine(outDir, "README.md"),
-      "# Raw IL dump set: `terrain-v3.0.1`\n\n"
+      "# Raw IL dump set: `terrain`\n\n"
       + "Human research notes: **[`../../docs/terrain-height.md`](../../docs/terrain-height.md)** "
       + "and RealEarth product docs under `7days-realworld/docs/`.\n\n"
       + "Regenerable Cecil outputs only. Do not redistribute game assemblies.\n");

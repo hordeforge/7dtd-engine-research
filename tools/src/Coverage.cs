@@ -163,7 +163,7 @@ class Coverage {
     int cmdInBase = gameReached.Count(t => BaseName(t).StartsWith("ConsoleCmd"));
 
     var sb = new StringBuilder();
-    sb.AppendLine("# RE coverage report (V3.0.1, auto-generated)");
+    sb.AppendLine("# RE coverage report (auto-generated)");
     sb.AppendLine();
     sb.AppendLine("**Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the");
     sb.AppendLine("dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced");
