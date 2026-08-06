@@ -25,3 +25,8 @@ worlds/
 /DynamicMeshFile
 /SandboxOption
 /SandboxOptions
+/ASPPathFinderThread
+/Astar
+/PathFinderThread
+/PathInfo
+/RegionFile

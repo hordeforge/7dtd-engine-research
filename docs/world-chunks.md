@@ -85,7 +85,12 @@ Interfaces are unpatchable; patch concrete generators / provider.
 ### 4.0 Client chunk streaming (verified)
 
 **When:** every full `UpdateTick`, after `NetEntityDistribution.OnUpdateEntities`
-(Xref: sole caller of `SendChunksToClients` is `GameManager.UpdateTick`).
+(Xref V3.1.0 b14: sole caller of `SendChunksToClients` is `GameManager.UpdateTick`
+IL_00E6). `NetPackageChunk.Setup` call sites (4): two from `SendChunksToClients`
+(first-load and reload paths), plus flat/disc terrain `RebuildTerrain` paths that
+re-push overwrite chunks. There is no side-thread `write` of the package body
+outside the normal NetPackage serialize path (Xref `write` = 0 direct callers;
+serialization is virtual dispatch from the connection writer).
 
 **Observer model (`ChunkManager/ChunkObserver`):** created by
 `AddChunkObserver(pos, bBuildVisualMeshAround, viewDim, entityIdToSendChunksTo)`

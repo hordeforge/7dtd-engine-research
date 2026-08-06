@@ -226,10 +226,10 @@ Factories: RegionFileFactoryRaw / RegionFileFactorySectorBased
 | ChunksPerRegionPerDimension | **8** |
 | ChunksPerRegion | **64** |
 | fileHeaderLength | 11 |
-| locationHeaderLength | 128 |
-| timestampHeaderLength | 64 |
-| sectorsStartOffset | **779** (literal in `WriteData`) |
-| reservedBytesPerEntry | 4 |
+| locationHeaderLength | **128** (array **element** count: `Int32[128]` = 512 bytes on disk) |
+| timestampHeaderLength | **64** (array **element** count: `UInt32[64]` = 256 bytes on disk) |
+| sectorsStartOffset | **779** (= 11+512+256; free-list / payload base) |
+| reservedBytesPerEntry | 4 (sector-based location slot size; see §3.5) |
 
 `GetOffsetFromXz`: `(x%8) + (z%8)*8` with negative adjust.  
 `RegionFileManager.cChunkFileExt` = **`.ttc`**.
@@ -366,8 +366,82 @@ V1's inline compression byte path).
 Raw vs sector: Raw uses byte-offset free list from **779** (section 3.3);
 sector formats use **4 KiB** sector indices and larger per-region headers.
 
+### 3.5 Location / timestamp header packing (bit-level, closed)
 
-### 3.4 WorldBlockTicker (scheduled + random block ticks)
+Residual from the annotation backlog: exact packing of the per-chunk location and
+timestamp headers. Verified on V3.1.0 b14 via `DumpMethod` (`GetLocationInfo` /
+`SetLocationInfo` / `ToShort` / `FromShort` / `GetTimestampInfo` / `GetOffsetFromXz`).
+
+#### Raw (`RegionFileRaw`)
+
+| Piece | Layout |
+|---|---|
+| Region size | **8×8** chunks (64 entries) |
+| `locationHeader` | `Int32[128]` (ctor `ldc.i4 128`) = **2 ints × 64 chunks** |
+| Index | `base = GetOffsetFromXz(cX,cZ) * 2` |
+| Fields | `locationHeader[base] = offset` (byte offset); `locationHeader[base+1] = length` |
+| `timestampHeader` | `UInt32[64]` (one stamp per chunk) |
+| Lock | `Monitor` on the region file object for get/set |
+| Free map side effect | `SetLocationInfo` with `offset > 0` also does `usedSectors[offset] = length` |
+
+No bit packing: two full little-endian `i32` values per chunk in the location table.
+
+**On-disk header flush (`SaveHeaderData` IL=50):** open file, `Seek(11)`, then
+`WriteBytes` of the entire `locationHeader` array (128×4 = **512** bytes), then
+the entire `timestampHeader` (64×4 = **256** bytes). File layout:
+
+```text
+offset 0:   file header (11 bytes, magic "7rr" + version fields)
+offset 11:  location table  512 bytes  (64 × {i32 offset, i32 length})
+offset 523: timestamp table 256 bytes  (64 × u32)
+offset 779: payload area (sectorsStartOffset; free-list byte offsets)
+```
+
+`11 + 512 + 256 = 779`, matching the free-list base. Doc constants
+`locationHeaderLength=128` / `timestampHeaderLength=64` are **array element
+counts**, not byte lengths.
+
+#### Sector-based (`RegionFileSectorBased` → V1/V2)
+
+| Piece | Layout |
+|---|---|
+| Region size | **32×32** chunks (1024 entries) |
+| `regionLocationHeader` | `byte[]` |
+| Slot index | `GetOffsetFromXz`: `4 * (x_mod + z_mod * 32)` with negative-mod adjust to `[0,31]` |
+| Per-chunk slot | **4 bytes** at `base..base+3` |
+| Bytes 0-1 | `sectorOffset` as **little-endian u16** via `RegionFile.ToShort` / `FromShort` |
+| Byte 2 | **unused** by get/set (skipped: length is read/written at `base+3` only) |
+| Byte 3 | `sectorLength` as **u8** (number of 4096-byte sectors) |
+| `regionTimestampHeader` | `byte[]`; `BitConverter.ToUInt32(regionTimestampHeader, (int)base)` with **same** `base` as location slot start |
+| Header buffer sizes | V1 ctor **8196**; V2 ctor **12288** (includes magic + tables) |
+| Payload unit | sector index × **4096** (see WriteData §3.4) |
+
+`ToShort(byteLo, byteHi)` = `(byteHi << 8) + byteLo`. `FromShort(value, &lo, &hi)`
+stores `lo = value & 0xFF`, `hi = value >> 8` into the two header bytes (LE).
+Empty/unallocated: sectorOffset 0 and/or sectorLength 0 (callers treat 0 offset as free).
+
+```text
+Sector location slot (4 bytes):
+  +0  sectorOffset.lo
+  +1  sectorOffset.hi     // u16 LE sector index
+  +2  (padding / unused by Get/SetLocationInfo)
+  +3  sectorLength        // u8 count of 4 KiB sectors
+```
+
+```mermaid
+flowchart LR
+  xz[cX,cZ] --> off[GetOffsetFromXz]
+  off -->|Raw: base=idx*2| raw[Int32 offset + Int32 length]
+  off -->|Sector: base=idx*4| sec[u16 LE sectorIndex + pad + u8 sectorCount]
+  sec --> pay[seek sectorIndex * 4096]
+  raw --> pay2[seek byte offset from free list]
+```
+
+**Clone note:** a sector-based reader that treats the slot as three packed fields
+without the skipped byte at `+2`, or that uses big-endian u16, will mis-seek every
+chunk. Raw readers that assume 4 KiB sector indices on a Raw file will also fail.
+
+### 3.6 WorldBlockTicker (scheduled + random block ticks)
 
 Not a region-file type, but it is the other persistence-adjacent world tick that
 serializes into chunk/player save state via scheduled entries.
@@ -401,14 +475,15 @@ serializes into chunk/player save state via scheduled entries.
 
 Read reconstructs world XZ as `local + chunk*16`.
 
-### 3.5 Managed completeness
+### 3.7 Managed completeness
 
 | Question | Answer |
 |---|---|
 | How chunks enter disk? | Snapshot (`ttc\0` + ver 47 + `Chunk.save`) → Deflate → `RegionFile.WriteData` via access layer |
-| Header layout constants? | Measured above; sectorsStartOffset 779 re-hit in WriteData IL |
+| Header layout constants? | Measured above; sectorsStartOffset 779 re-hit in WriteData IL; location/timestamp bit packing in §3.5 |
 | Who drives save? | `cacheChunk` / world save → `DoSaveChunks` (no `RegionFileManager.Update`) |
 | Exact sector free-list algorithm? | **Closed:** best-fit with exact-fit short-circuit over `usedSectors` (above) |
+| Location table bit packing? | **Closed:** Raw i32 pairs; sector LE u16 + pad + u8 (§3.5) |
 | Random tick interval? | 1200 game ticks between per-chunk random passes |
 
 ---
@@ -444,6 +519,9 @@ owns paths and file lifecycle; the on-disk byte formats (WorldState, region, pla
 the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
+
+- **2026-08-06:** §3.5 location/timestamp header packing closed (Raw i32 pairs + on-disk
+  11/512/256/779 layout; sector LE u16 + unused byte + u8 length; ToShort/FromShort).
 
 - **2026-08-02:** V3.1.0 SaveLoad Stream IL=926; CurrentSaveVersion=23; volume save-version ints + weather blob gates.
 

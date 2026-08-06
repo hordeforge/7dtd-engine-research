@@ -6,6 +6,28 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-06 — RE annotation + optim evidence (research-only)
+
+Objective: close the location-table bit-packing residual and record stock IL
+facts the optimizer brief still treats as open research (Clone / chunk encode),
+without leaving 7dtd-research scope.
+
+Done (verified against live V3.1.0 b14 ASM):
+- **save-region §3.5:** Raw location = Int32[128] pairs + UInt32[64] stamps;
+  on-disk 11 + 512 + 256 = 779 payload base; sector slot = LE u16 sectorIndex +
+  unused byte + u8 sectorLength (ToShort/FromShort); timestamp via BitConverter
+  on same slot base.
+- **residuals:** region packing residual closed; closed-items row added.
+- **items.md:** ItemStack.Clone Xref triage (162 sites; ~56 XUi; dedi mass TE +
+  inventory + net Setup).
+- **engine-limitations / world-chunks:** Clone fan-out + SendChunks ownership
+  (sole UpdateTick caller; Setup from SendChunks + RebuildTerrain).
+
+Verification: DumpMethod Get/SetLocationInfo, ToShort/FromShort, SaveHeaderData;
+Xref ItemStack.Clone + ChunkManager.SendChunksToClients; make stock-check.
+
+State: verified. Path admission already closed in closed-gaps (not re-opened).
+---
 ## 2026-08-06 — research-docs-corpus hygiene + structure
 
 Objective: fix all open findings from `workspace/outputs/research-docs-corpus-audit.md`

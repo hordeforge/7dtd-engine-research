@@ -111,7 +111,9 @@ Combat across chunks **already works** if coordinates are shared. Per-player pri
 | **Static full-column RAM** | design | Tall expand × many chunks = RAM death | **Hard** | Near-term accept cost; long-term sparse Y |
 | **Practical loaded edge ~8k-16k** | ops + engine practice | Not a planet; gen/save weight | **Hard** | Stream / small host (RealEarth) or finite bake |
 | **Flat rectangle world** | no sphere topology | No over-pole paths | **Soft** | Equirectangular policy (product LON_LAT) |
-| **Region / `.7rg` / `.ttc`** | save-region | Tall worlds may bloat; codec residual detail | **Hard** / **Residual** | Expand both ends; measure save size |
+| **Region / `.7rg` / `.ttc`** | save-region §3 | Tall worlds may bloat; location headers packed (Raw i32 pairs; sector LE u16+u8) | **Hard** | Expand both ends; measure save size; clone must match §3.5 packing |
+| **ItemStack.Clone fan-out** | items.md Clone triage | 162 sites; ~56 client UI; dedi mass is TE + inventory + few net Setups | **Soft** (alloc) | Do not Harmony XUi for dedi STW; any share-not-clone needs identity proof |
+| **Chunk encode ownership** | world-chunks / Xref | `SendChunksToClients` sole caller = `GameManager.UpdateTick`; `NetPackageChunk.Setup` from SendChunks + terrain rebuild | **Hard** (serial main) | View distance / join throttle; encode not a free side thread under stock Unity main loop |
 | **Unload regenerates stock terrain** | world-chunks | Edits lost without delta policy | **Hard** | Persist deltas (product Needed) |
 
 ---

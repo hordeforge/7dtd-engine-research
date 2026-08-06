@@ -446,6 +446,39 @@ New item classes: `ItemClassHeldEntity` (base), `ItemClassWildChicken`, plus
 (`InitLocalActivationCommands` / `OnEntityActivated("grab")`). Full feature
 state machine: [items.md](items.md) (held-entity item types).
 
+## ItemStack.Clone call-site triage (V3.1.0 b14)
+
+**Owns:** stock IL census of who calls `ItemStack.Clone` (instance + array overloads),
+so alloc work is attributed to real owners. Not an EfficientServer lever list
+(that lives in optimizer docs).
+
+**Method:** `ItemStack.Clone()` IL=15 always allocates a new `ItemStack` and, when
+`itemValue != null`, also `ItemValue.Clone()`. Array overload IL=35 allocates a new
+array and clones each non-null entry (null → `ItemStack.Empty`).
+
+**Xref (live ASM, 2026-08-06):** **162** call sites total.
+
+| Bucket | Sites (approx) | Role |
+|---|---:|---|
+| Client UI (`XUi*` / `XUiC_*` / `XUiM_*`) | **56** | Stack widgets, equipment UI, craft queues; **not** headless dedi cost |
+| Tile entities / TE features | Workstation 9, Collector 7, Forge 7, TEFeatureStorage 4, PowerRangedTrap 1, … | Server TE inventory mutations and stack moves |
+| Inventory / bag / transactional | TransactionalInventory 6, Inventory 3, InventoryOperation 3, Bag 2 | Server inventory ops and absolute/relative sets |
+| Net packages | NetPackagePlayerInventory 3, NetPackageItemDrop 1 | Wire setup copies before send |
+| Loot / trader / quest / rewards | LootManager 2, TraderData 2-3, Quest 2, Reward* 2+2 | Loot open, trader copy, quest turn-in |
+| Game events / actions | SequenceActions drop/remove/unload, ItemAction* entries | Scripted and use-item paths |
+| Misc | GameManager 3, PlayerDataFile 2, Entity* drops, PreferenceTracker 4 | Save/load and entity drop content |
+
+**Implications (stock facts for optim evidence):**
+
+1. Roughly **one third** of Clone sites are client UI; Harmony on XUi will not move
+   dedicated tick STW.
+2. The dedicated-relevant mass is **TE storage + TransactionalInventory + bag/inventory
+   ops + a few net Setup paths**, not a single hot loop.
+3. Any clone-elimination lever must preserve identity semantics: many callers treat
+   Clone as a defensive copy before mutate/send. Wrong sharing breaks TE and wire.
+4. Pathfinder admission remains separate ([closed-gaps.md](closed-gaps.md) §3);
+   Clone is not on the path enqueue path.
+
 ## ItemClass stack defaults, recipe sentinels, fuel time and the transaction wire (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line

@@ -29,7 +29,7 @@ flowchart TD
 | **Aron Granberg A\* library internals** | `AstarPath.StartPath` / `Pathfinding.*` third-party; 7DTD ASP wrapper closed |
 | **ModEvents subscriber sets** | Who registers handlers is mod/content dependent; **hook names closed** in [managers.md](managers.md) |
 | **Post-patch IL drift** | TFP updates move offsets; regenerate dumps (process residual) |
-| **Region sector payload byte codec detail** | **Mostly closed:** Raw free-list + V1/V2 WriteData narrated ([save-region.md](save-region.md) 3.3-3.4). Residual: optional bit-level location-table packing for every header field |
+| **Region sector payload byte codec detail** | **Closed (2026-08-06):** Raw free-list + V1/V2 WriteData ([save-region.md](save-region.md) 3.3-3.4) and location/timestamp header packing (3.5: Raw i32 pairs; sector LE u16 + pad + u8). Optional residual: rare per-version magic-byte field-by-field dump of the 11-byte file header only |
 | **Client-only UI / avatar / NGUI / camera** | Out of dedicated scope (non-goal) |
 | **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.21. Residual: only optional per-flag framing for rare conditional-heavy packages |
 | **Encryption cipher / KDF primitives** | Handshake package bodies decoded ([protocol-packages.md](protocol-packages.md) §2). Session transform is managed `AesEncryptAndMac` (AES + HMAC; [network.md](network.md) §4.5). Residual: RSA key wrap / platform RNG quality and anything below `System.Security.Cryptography` providers |
@@ -48,6 +48,7 @@ flowchart TD
 | Net package distance bands | closed-gaps.md / network.md |
 | GameTimer 20 Hz | closed-gaps.md |
 | DynamicMesh version-160 WriteRegion as live path | dynamic-mesh.md: live `SaveRegion`; `WriteRegion` only self-retry (Xref, 2026-08-06) |
+| Region location/timestamp header bit packing | save-region.md §3.5 (Raw + sector) |
 | Chunk GetBlock/density index | terrain-height.md, world-chunks.md (IL dumps in realearth-surfaces-v3.1.0) |
 | Chunk write/read layer bound 64 | save-region.md |
 | WorldState.SaveLoad structure | save-region.md + dedi-complete §5 |
@@ -123,6 +124,7 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
 
 ## Changelog
 
+- **2026-08-06:** Region location/timestamp header packing closed (save-region §3.5); ItemStack.Clone triage + chunk encode ownership noted for optim evidence (items / engine-limitations / world-chunks).
 - **2026-08-03:** V3.1.0 pin confirmed live; product residual pointer §5; managed corpus still stop-closed.
 - **2026-07-28:** Region sector residual narrowed; package narrative residual closed (6.21).
 
