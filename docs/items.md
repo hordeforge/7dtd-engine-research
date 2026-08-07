@@ -262,6 +262,32 @@ entry. `HasStats` (IL=5) is `Stats != null`; `ClearStats` (IL=4) nulls the
 array; `RemoveUnusedStats` (IL=77) drops zero-value entries (clearing the whole
 array when none remain).
 
+### ItemValue metadata and property overrides
+
+**Typed metadata (V3.1.0 b14):** `ItemValue.Metadata :
+Dictionary<string, TypedMetadataValue>` is lazy-allocated on the first write.
+`TypedMetadataValue` pairs a value with a `TypeTag` (`Float=1`, `Int=2`,
+`String=3`). The typed setters box into `SetMetadata(key, value, typeTag)`
+(IL=86): an existing key updates through `TypedMetadataValue.SetValue` - a tag
+mismatch logs
+`Can not update Metadata value '{0}' ... does not match existing TypeTag
+({3}). From: {4}` (with a stack trace) and keeps the old value; a new key goes
+through `TypedMetadataValue.TryCreate` (creation failure logs
+`Can not set Metadata key '{0}' ...`). `SetMetadata(key, tmv)` (IL=55) is the
+copy-from-typed-value variant. Reads: `GetMetadata(key)` (IL=17) is
+`TryGetValue -> GetValue()` (null on a missing key, `(object)false` when the
+whole dictionary is absent); `TryGetMetadata(key, out T)` (IL=17) unboxes with
+the matching tag (0 / 0 / null defaults); the 3-arg typed form refuses a
+`TypeTag` mismatch. `HasMetadata(key, tag)` / `RemoveMetaData(key)` complete
+the surface.
+
+**Mod property overrides:** `GetPropertyOverride(name, original)` (IL=88)
+returns `original` when the item has no mods; otherwise the first
+`ItemClassModifier` in `Modifications` (then `CosmeticMods`) whose
+`GetPropertyOverride(name, itemName, out v)` succeeds wins, else `original` -
+a modded item re-resolves a property (e.g. damage) without touching the base
+`ItemClass`.
+
 ---
 
 ## 3. ItemClass and the Actions array
@@ -1139,6 +1165,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemValue metadata: lazy Metadata dict +
+  TypedMetadataValue TypeTag (Float=1/Int=2/String=3); SetMetadata IL=86
+  update-vs-create with tag-mismatch warnings; GetMetadata IL=17 /
+  TryGetMetadata typed unbox; GetPropertyOverride IL=88 first
+  ItemClassModifier wins over Modifications then CosmeticMods.
 - **2026-08-08:** Inventory held-slot accessors (get_holdingItem/ItemValue/
   Stack/Data) bare-hand fallbacks + slot-count constants
   (INVENTORY_SLOTS = PUBLIC_SLOTS + 1, PUBLIC_SLOTS 10 vs 20 prefab editor,
