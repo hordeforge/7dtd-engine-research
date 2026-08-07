@@ -88,6 +88,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | Vending rental expiry; Composite feature tick | tile-entities-power §4.5 |
 | Package process paths (Collect/Attach/ItemDrop/...) | protocol-packages §6.21.1-2 |
 | EmitSmell ProcessPackage no-op | protocol-packages §6.21 |
+| Broad §6.21 ProcessPackage authority table | protocol-packages §6.21.2 |
+| MinEvent AddBuff/ModifyCVar/Explode Execute | minevents §7.1 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers, and dormant UAI. Promote

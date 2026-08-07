@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: more ProcessPackage + MinEvent action leaves
+
+Done (V3.1.0 b14 IL):
+- protocol-packages §6.21: process targets for ragdoll/velocity/speeds/stealth/
+  anim/part/owned/equipment/item-fx/reload/cvar/drop-container/sound/particle/
+  game-message/wall-volume/score/close-windows; dedupe FX table rows.
+- minevents §7.1: AddBuff IL=211, ModifyCVar IL=154, Explode IL=83 (server
+  ExplosionServer), presentation residual note.
+---
 ## 2026-08-07 — tier-C: package ProcessPackage paths (Collect/Attach/...)
 
 Done (V3.1.0 b14 IL):

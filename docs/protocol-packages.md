@@ -1098,46 +1098,46 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageEntityPhysics` | 77 | flags + entityId + pos f32x3 + quat f32x4 + vel f32x3 + angVel f32x3 | Physics master broadcast |
 | `NetPackageTeleportPlayer` | 56 | pos f32x3, rot f32x3, `onlyIfNotFlying` | Local player `TeleportToPosition` |
 | `NetPackageEntityAttach` | 21 | `attachType:u8`, `riderId:i32`, `vehicleId:i32`, `slot:i16` | Process IL=104; `AttachType`: 0 AttachServer, 1 AttachClient, 2 DetachServer, 3 DetachClient (see §6.21.1) |
-| `NetPackageEntityRagdoll` | 59 | entityId, flags, duration, bodyPart, forceVec, forceWorldPos, hipPos, mode/state | Ragdoll sync |
-| `NetPackageEntityAddVelocity` | 12 | entityId, addVelocity Vector3 | Impulse |
-| `NetPackageEntitySpeeds` | 17 | movementState, speedForward, speedStrafe | Locomotion |
-| `NetPackageEntityStealth` | 12 | id, data | Stealth byte/blob |
-| `NetPackageEntityAnimationData` | 29 | animationParameterData | Animator params |
-| `NetPackageEntitySetPartActive` | 20 | id, active, partName | Multi-part entities |
+| `NetPackageEntityRagdoll` | 59 | entityId, flags, duration, bodyPart, forceVec, forceWorldPos, hipPos, mode/state | Process IL=56: `EModelBase.DoRagdoll` / `SetRagdollState` |
+| `NetPackageEntityAddVelocity` | 12 | entityId, addVelocity Vector3 | Process IL=11: `IGameManager.AddVelocityToEntityServer` |
+| `NetPackageEntitySpeeds` | 17 | movementState, speedForward, speedStrafe | Process IL=37: if remote, `NetEntityDistribution.SendPacketToTrackedPlayers` |
+| `NetPackageEntityStealth` | 12 | id, data | Process IL=92: server path + `EntityAlive.set_Crouching` |
+| `NetPackageEntityAnimationData` | 29 | animationParameterData | Process IL=64: server rebroadcast + `AvatarController.SetAnimParameters` |
+| `NetPackageEntitySetPartActive` | 20 | id, active, partName | Process IL=38: `Entity.SetTransformActive` |
 | `NetPackageEntityPrimeDetonator` | 8 | id | Process IL=23: cast `EntityZombieCop` else log Discarding; `PrimeDetonator()` |
 | `NetPackageSetAttackTarget` | 8 | m_targetId | Process IL=24: both entities as EntityAlive; `SetAttackTargetClient(target)` (cosmetic/AI client) |
-| `NetPackageOwnedEntitySync` | 20 | ownerId, entityId, entityClassId, syncType | Add/remove owned entity on EntityAlive |
+| `NetPackageOwnedEntitySync` | 20 | ownerId, entityId, entityClassId, syncType | Process IL=34: `EntityAlive.AddOwnedEntity` / `RemoveOwnedEntity` |
 
 #### Player / inventory / items
 
 | Package | IL write | Wire | Notes |
 |---|---:|---|---|
-| `NetPackagePlayerEquipment` | 8 | `Equipment` blob | Apply + server rebroadcast 192 |
+| `NetPackagePlayerEquipment` | 8 | `Equipment` blob | Process IL=56: `Equipment.Apply` + server rebroadcast |
 | `NetPackagePlayerSetBackpackPosition` | 39 | playerId, positions list | `SetDroppedBackpackPositions` |
 | `NetPackagePlayerQuestPositions` | 30 | entityId, questPositions | Quest map markers |
 | `NetPackagePlayerTwitchStats` | 26 | twitchEnabled, twitchSafe, twitchVoteLock, twitchVisionDisabled, twitchActionsEnabled | Twitch integration flags |
 | `NetPackagePlayerVendingMachine` | 28 | userId, x,y,z, removing | Vending access |
 | `NetPackagePlayerLaserSight` | 19 | entityId, laserSightActive, laserSightPosition | Cosmetic aim |
 | `NetPackageItemDrop` | 37 | itemStack, dropPos, initialMotion, randomPosAdd, lifetime, entityId, clientInstanceId, bDropPosIsRelativeToHead | Process IL=23: always `IGameManager.ItemDropServer(...)` (server apply path) |
-| `NetPackageDropItemsContainer` | 42 | droppedByID, containerEntity, worldPos, items | Multi-item drop container |
-| `NetPackageItemActionEffects` | 52 | entityId, slotIdx, actionIdx, firingState, startPos, direction, userData | Attack FX |
-| `NetPackageItemReload` | 8 | entityId | Reload anim/state |
-| `NetPackageModifyCVar` | 21 | m_entityId, cvarName, value, operation | Buff/cvar sync |
+| `NetPackageDropItemsContainer` | 42 | droppedByID, containerEntity, worldPos, items | Process IL=19: `DropContentInLootContainerServer` |
+| `NetPackageItemActionEffects` | 52 | entityId, slotIdx, actionIdx, firingState, startPos, direction, userData | Process IL=42: server/client `ItemActionEffectsServer/Client` |
+| `NetPackageItemReload` | 8 | entityId | Process IL=18: `ItemReloadServer` / `ItemReloadClient` |
+| `NetPackageModifyCVar` | 21 | m_entityId, cvarName, value, operation | Process IL=26: server `EntityBuffs.SetCustomVar` |
 | `NetPackageEntityAddExpClient` | 30 | entityId, xp, xpType, usedItem | Client XP notify (server write empty/inherit) |
 | `NetPackageEntitySetSkillLevelClient` | 16 | entityId, skill, level | Skill level display |
 | `NetPackageEntityAwardKillServer` | 12 | EntityId, KilledEntityId | Kill award |
 | `NetPackageEntityAddScoreClient` | 27 | entityId, zombieKills i16, playerKills i16, otherTeamNumber i16, conditions i32 | Client `EntityAlive.AddScore` |
-| `NetPackageEntityAddScoreServer` | (inherit client fields) | same fields | `IGameManager.AddScoreServer` (write via client base) |
+| `NetPackageEntityAddScoreServer` | (inherit client fields) | same fields | Process IL=17: `IGameManager.AddScoreServer` |
 
 #### World / blocks / volumes / power wires
 
 | Package | IL write | Wire | Notes |
 |---|---:|---|---|
 | `NetPackageSetBlockTexture` | 24 | blockPos, blockFace, idx, playerIdThatChanged, channel | Process IL=46: always `SetBlockTextureClient`; server also rebroadcast Setup excluding sender flags **192** |
-| `NetPackageAnimateBlock` | 24 | blockPosition, animParamater, animType, animationInteger, animationBool | Block animator |
+| `NetPackageAnimateBlock` | 24 | blockPosition, animParamater, animType, animationInteger, animationBool | Process IL=33 (client block animator) |
 | `NetPackagePickupBlock` | 22 | blockPos, rawData, playerId, persistentPlayerId | Process IL=41: `ValidEntityIdForSender` + `ValidUserIdForSender`; server `PickupBlockServer`, remote `PickupBlockClient` |
-| `NetPackageWallVolume` | 12 | id, wallVolume | Wall volume add/update |
-| `NetPackageWallVolumeRemove` | 8 | index | Remove wall volume |
+| `NetPackageWallVolume` | 12 | id, wallVolume | Process IL=16: client `World.AddWallVolumeAt` / remove |
+| `NetPackageWallVolumeRemove` | 8 | index | Process IL=11: client `World.RemoveWallVolumeAt` |
 | `NetPackageChunkRemoveAll` | 4 | (base only) | Clear all streamed chunks on client |
 | `NetPackageBiomeIntensity` | 8 | (base / small payload) | Biome intensity |
 | `NetPackageWireActions` | 45 | `op:u8` (`WireActions`: SetParent=0, RemoveParent=1, SendWires=2), `tileEntityPosition`, `childCount:u8` + Vector3i list, `wiringEntityID:i32` (skip if SendWires) | Server: SetParent / RemoveParent on `PowerManager`; client SendWires -> `IPowered.SetWireData` (Process IL=163). Full path: [tile-entities-power.md](tile-entities-power.md) §3.6 |
@@ -1152,16 +1152,16 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 |---|---:|---|---|
 | `NetPackageSimpleRPC` | 12 | entityId, type (SimpleRPCType) | Process IL=17: `ValidEntityIdForSender`; `GameManager.SimpleRPC(id, type, true, world.IsRemote)` |
 | `NetPackageSimpleChat` | 44 | msg, recipientEntityIds | Lightweight chat variant |
-| `NetPackageGameMessage` | 17 | msgType, mainEntityId, secondaryEntityId | System/game messages |
-| `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | HUD toolbelt toast |
-| `NetPackageCloseAllWindows` | 8 | _playerIdToClose | Force-close UI |
-| `NetPackageSoundAtPosition` | 25 | pos, audioClipName, mode, distance, entityId | 3D sound |
+| `NetPackageGameMessage` | 17 | msgType, mainEntityId, secondaryEntityId | Process IL=28: remote `GameMessageServer` else `DisplayGameMessage` |
+| `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | Process IL=18: local players HUD |
+| `NetPackageCloseAllWindows` | 8 | _playerIdToClose | Process IL=21: server no-op path; client `CloseAllOpenModalWindows` |
+| `NetPackageSoundAtPosition` | 25 | pos, audioClipName, mode, distance, entityId | Process IL=36: `PlaySoundAtPositionServer/Client` |
+| `NetPackageParticleEffect` | 20 | pe, entityThatCausedIt, forceCreation, worldSpawn | Process IL=30: `SpawnParticleEffectServer/Client` |
 | `NetPackageAudioPlayInHead` | 12 | `soundName:string`, `isUnique:bool` | Local head audio |
 | `Audio.NetPackageAudio` | 53 | after EntityTargeted id: `soundGroupName:string` (empty if null), `play:bool`, `position:3xf32`, `playOnEntity:bool`, `occlusion:f32`, `volumeScale:f32`, `signalOnly:bool` | World/entity audio group |
 | `LightManager/NetPackageLight` | 12 | `entityId:i32`, `lightLevel:f32` | Held/entity light level |
 | `EntityFallingTree/NetPackageTreeFade` | 8 | `entityId:i32` | Tree fade/remove FX |
 | `DroneWeapons/NetPackageDroneParticleEffect` | 12 | `ParticleEffect.Write` + `entityThatCausedIt:i32` | Drone beam/particle FX |
-| `NetPackageParticleEffect` | 20 | pe, entityThatCausedIt, forceCreation, worldSpawn | Particles |
 | `NetPackageEmitSmell` | 17 | EntityId, SmellName | Process IL=1: **empty ret** (wire residual / client stub) |
 | `NetPackageQuestGotoPoint` | 52 | playerId, questCode, GotoType, x,y, size, difficulty, biomeFilterType, biomeFilter | Quest goto objective |
 | `NetPackageDebug` | 34 | type, entityId, data | Debug channel |
@@ -1206,6 +1206,21 @@ conditional still lives in [inventories/netpackage-bodies.md](inventories/netpac
 | PrimeDetonator | 23 | `EntityZombieCop` only |
 | SetAttackTarget | 24 | `SetAttackTargetClient` |
 | EmitSmell | 1 | **No-op** on this assembly |
+| EntityRagdoll | 56 | `DoRagdoll` / `SetRagdollState` |
+| EntityAddVelocity | 11 | `AddVelocityToEntityServer` |
+| EntitySpeeds | 37 | tracked-player rebroadcast when remote |
+| EntityStealth | 92 | crouch + server path |
+| EntityAnimationData | 64 | rebroadcast + `SetAnimParameters` |
+| EntitySetPartActive | 38 | `SetTransformActive` |
+| OwnedEntitySync | 34 | Add/RemoveOwnedEntity |
+| PlayerEquipment | 56 | Apply + rebroadcast |
+| ItemActionEffects / ItemReload | 42 / 18 | Server/Client split |
+| ModifyCVar | 26 | server `SetCustomVar` |
+| DropItemsContainer | 19 | `DropContentInLootContainerServer` |
+| Sound/Particle/GameMessage | 36 / 30 / 28 | Server/Client presentation paths |
+| WallVolume / Remove | 16 / 11 | client wall volume add/remove |
+| AddScoreServer | 17 | `AddScoreServer` |
+| CloseAllWindows | 21 | client modal close |
 
 ### 6.22 Dynamic mesh, POI around, nav, waypoints
 

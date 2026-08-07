@@ -330,6 +330,47 @@ acting entity (`onSelfRepairBlock`, `onSelfPlaceBlock`, `onSelfUpgradedBlock`,
 own item and buff effects. So "a block fired an effect" is really "the entity
 that touched the block fired a block-context trigger".
 
+### 7.1 High-value action leaves (IL re-pin 2026-08-07)
+
+#### `MinEventActionAddBuff.Execute` (IL=211)
+
+1. Local-authority gate: run when `!Self.isEntityRemote || params.IsLocal`.
+2. Instigator id from `params.Buff.InstigatorId` if present, else `Self.entityId`.
+3. Buff name selection via `buffNames[]` / `buffWeights[]` / `buffOneOnly`
+   (weighted one-of or per-name probability using target `Entity.rand`).
+4. Duration: if `durationAltered`, optional `cvarRef` ->
+   `targets[i].Buffs.GetCustomVar(refCvarName)`, else
+   `BuffClass.InitialDurationMax` when not literal.
+5. Per target: `EntityBuffs.AddBuff(name, instigatorId, netSync, ..., duration)`.
+
+#### `MinEventActionRemoveBuff.Execute` (IL=4)
+
+Thin remove path over the buff-modifier base (inherits target walk).
+
+#### `MinEventActionModifyCVar.Execute` (IL=154)
+
+1. Scale `valueList` by item quality or progression level when `ParentType` is
+   item/progression.
+2. Value from fixed list, `cvarRef` (`GetCustomVar`), or `RandomRollTypes`
+   int/float `GameRandom.RandomRange` clamped to min/max.
+3. Apply on each target through the same cvar op surface as
+   `NetPackageModifyCVar` / `EntityBuffs.SetCustomVar`.
+
+#### `MinEventActionExplode.Execute` (IL=83)
+
+**Server only** (`ConnectionManager.IsServer`). Builds `ExplosionData` from
+action fields (`blastPower`, `blockDamage`, `blockRadius`, `blockTags`,
+`entityDamage`, `entityRadius`, `damageType`) and calls
+`GameManager.ExplosionServer(headPos, blockPos, qrotation, data, entityId, ...)`.
+Same explosion pipeline as `NetPackageExplosionInitiate`.
+
+#### Presentation leaves (dedi residual)
+
+`PlaySound` (IL=101), `AttachPrefabToEntity` (IL=90), `SetTransformActive`
+(IL=56), and other particle/animator/camera verbs are presentation. Dedicated
+sim does not depend on them; clients get FX through separate packages when the
+server path emits them.
+
 ---
 
 ## 8. Contrast with `GameEvent.*`
@@ -395,6 +436,7 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-07:** §7.1 AddBuff / ModifyCVar / Explode Execute IL; presentation residual note.
 - **2026-07-23:** Initial `MinEvent*` reversal: source-owned `MinEffectController`
   / `MinEffectGroup` handler containers, the `MinEventTypes` trigger vocabulary,
   the `FireEvent` fan-out, the `CanExecute` / `Execute` action contract and
