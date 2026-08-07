@@ -1049,11 +1049,30 @@ Top decision tasks (when EAI Update runs):
 | **105** | `EAIRunAway.Update` | path end distSq **1.21** re-pick; pathTicks **60** FindPath; panic speed subclasses |
 | **94** | `EAIWander.CanExecute` | sleep/stun/lookTime; no-player 120 ticks; executePercent; CalcInDir 90 |
 | **70** | `EAIApproachAndAttackTarget.CanExecute` | sleep/stun/jump-swim; targetClasses + chaseTimeMax |
+| **170** | `EAISetAsTargetIfHurt.CanExecute` | revenge≠attack; type filters; 66% keep attack; else investigate |
 | **60** | `EAIDestroyArea.Update` | state 6 Attack + hitDelegate |
 | **40** | `EAIApproachSpot.Update` | pathCounter 20..40 |
 | **27** | `EAIDodge.Update` | look at head if in front |
 | **21** | `EAIBreakBlock.Update` | attackDelay then AttackBlock |
 | **7** | `EAIWander.Update` / `EAILeap.Update` | thin |
+
+**`EAIApproachAndAttackTarget.CanExecute` (IL=70):** false if
+`sleepingOrWakingUp`, any stun, or (`Jumping` and not swimming). Load
+`GetAttackTarget` into `entityTarget`; null → false. Walk `targetClasses`: first
+assignable type wins and sets `chaseTimeMax` from that class; no match → false.
+
+**`EAISetAsTargetIfHurt.CanExecute` (IL=170):** need revenge target ≠ current
+attack target and different `entityType` than self. Optional `targetClasses`
+type filter (must match revenge). If living attack target and
+`RandomFloat < 0.66`: clear revenge and false (prefer keep current fight).
+If `EAITarget.check(revenge)` true → true (will promote). Else: sample
+investigate point = revenge.pos + dir*(SearchRadius*0.35) + unitCircle*SearchRadius;
+snap y to heightmap; `SetInvestigatePosition(pos, CalcInvestigateTicks(1200,
+revenge), alert=true)`; clear revenge; false.
+
+**`CalcInvestigateTicks(ticks, investigateEntity)` (IL=26):**
+`ticks / EffectManager(passive **183**, base 1, self.Tags)` (integer div;
+higher passive shortens investigate duration).
 
 **`EAIApproachAndAttackTarget.Update` (IL=846) phases:**
 
@@ -1644,8 +1663,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** EntityActivityUpdate N=clamp(60/P,4,20); cloth 25/55 m aim;
-  EntityDied ClearedUpdate; GetMaxAttackTime 10; UseHoldingItem; CanSee.
+- **2026-08-07:** EAISetAsTargetIfHurt 0.66/SearchRadius investigate; Approach
+  CanExecute type list; EntityActivityUpdate top-N; EntityDied; GetMaxAttackTime.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
