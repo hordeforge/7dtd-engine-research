@@ -884,6 +884,17 @@ Ordered when entity spawned and not unload-marked:
 
 Falling block **entities** go through same `OnUpdateEntity` chain (`EntityFallingBlock` overrides).
 
+**Chunk membership (V3.1.0 b14):** `Chunk.AddEntityToChunk(entity)` (IL=116)
+sets the volatile `hasEntities` flag, derives the entity's chunk coords from
+`position` and logs `Wrong entity chunk position! {entity} x={x} z={z}/{chunk}`
+when they mismatch this chunk (the add still proceeds), maps the entity to the
+Y-slice `clamp(Fastfloor(pos.y / 16), 0, 15)`, stamps
+`entity.addedToChunk = true` + `chunkPosAddedEntityTo = (m_X, slice, m_Z)`, and
+appends to `entityLists[slice]`. `Chunk.RemoveEntityFromChunk(entity)` (IL=41)
+removes from `entityLists[chunkPosAddedEntityTo.y]`, marks `isModified`, and
+recomputes the volatile `hasEntities` from whether any of the 16 slices still
+holds an entity.
+
 ### 7.1 Path apply helpers (always after decision AI in updateTasks)
 
 | Method | IL | Behaviour |
@@ -3004,6 +3015,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Chunk membership in §7: AddEntityToChunk (IL=116) volatile
+  hasEntities + wrong-chunk error + Y-slice clamp + chunkPosAddedEntityTo
+  stamp; RemoveEntityFromChunk (IL=41) remove + isModified + hasEntities
+  recompute.
 - **2026-08-07:** Entity lookups in D7: World.GetEntity (IL=17) async
   EnsureEntity + Entities.dict TryGetValue; GetEntityAliveCount (IL=31)
   (entityFlags & mask) == flags count over EntityAlives.

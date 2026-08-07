@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk entity membership
+
+Done (V3.1.0 b14 IL):
+- Chunk.AddEntityToChunk (IL=116) + RemoveEntityFromChunk (IL=41) narrated
+  in entity-ai.md section 7: volatile hasEntities, wrong-chunk-position
+  error log, Y-slice clamp(floor(pos.y/16), 0, 15), addedToChunk +
+  chunkPosAddedEntityTo stamp, entityLists[slice] add; remove marks
+  isModified and recomputes hasEntities from the 16 slices.
+
 ## 2026-08-08 - tier-C: PlayerStealth.NoiseCleanup
 
 Done (V3.1.0 b14 IL):
