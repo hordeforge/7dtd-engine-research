@@ -211,6 +211,17 @@ passes it with a log string. `GetNavObjectByEntityID(entityId)` (IL=34) scans
 `NavObjectList` **backward** (latest first) for the first non-null entry whose
 `EntityID` matches, null when absent.
 
+**Trader auto-waypoint (`EntityPlayer.onNewPrefabEntered`, IL=92):** when a
+local player enters a prefab whose `prefab.bTraderArea` is set, the entity
+builds a `Waypoint` at the prefab center
+(`boundingBoxPosition + boundingBoxSize / 2` in block space) with icon
+`ui_game_symbol_map_trader`, name = prefab name (localized), auto-waypoint
+flags, then `RegisterNavObject("waypoint", pos, icon, true, -1, null)`,
+paints the nav object white with `UseOverrideColor`, sets it inactive, and
+adds the waypoint to `Waypoints` (skipped when a duplicate waypoint already
+exists). This is the "you found a trader" map marker; it is local-player-only
+and never runs on a dedicated server.
+
 `Update()` is called from `GameManager.gmUpdate` (see
 [`managers.md`](managers.md), 42 IL): it prunes entries whose `IsValid()` went
 false (dead tracked entity etc.) and, **only if `GetPrimaryPlayer()` is
@@ -256,6 +267,10 @@ listed above.
 `NetPackageNavObject` (protocol-packages 6.22): class name, display name, position,
 add/remove, override color, localization flag, entityId.
 
+## Changelog
+
+- **2026-08-08:** EntityPlayer.onNewPrefabEntered (IL=92): trader-prefab
+  auto-waypoint at prefab center + RegisterNavObject, local-player only.
 ## Changelog
 
 - **2026-08-07:** Entity.GetMapObjectType (IL=2): base 0, EntitySupplyCrate 13
