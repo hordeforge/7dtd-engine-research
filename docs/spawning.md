@@ -666,6 +666,12 @@ bound as it finds closer hits), null when none qualify.
 `PrefabInstance.Contains(entityId)` across `allPrefabs` (the POI-association
 gate behind quest/POI entity checks).
 
+**`Prefab` leaf queries:** `IsPosInSleeperVolume(volume, pos)` (IL=47) is the
+strict AABB test `startPos <= pos < startPos + size` (volume must be `Used`);
+`FindSleeperVolumeFreeGroupId()` (IL=31) is the max volume `groupId` plus one.
+`HasAnyQuestTag(tag)` (IL=5) is `questTags.Test_AnySet`; `IsAllowedZone(zone)`
+(IL=5) is a case-insensitive `allowedZones` containment test.
+
 ---
 
 ## 9. Dedicated relevance and residuals
