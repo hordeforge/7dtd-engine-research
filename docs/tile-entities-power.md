@@ -541,6 +541,18 @@ Ordered path (verified):
 10. Store `lastTickTime = GameTimer.ticks`.
 11. `setModified()` if fuel module on or queue non-empty or burning; `UpdateVisible()`.
 
+**`TileEntity.emitHeatMapEvent(world, eventType)` (IL=48)** is the shared
+heat contribution: when `world.worldTime < heapMapLastTime` (time rewound)
+it resets `heapMapUpdateTime = 0`, and once `world.worldTime >=
+heapMapUpdateTime` with an AIDirector present it calls
+`NotifyActivity(eventType, ToWorldPos(), block.HeatMapStrength, 720)`, then
+records `heapMapLastTime = worldTime` and
+`heapMapUpdateTime = worldTime + AIDirector.GetActivityWorldTimeDelay()` -
+the emission cadence follows the global activity delay (`GameStats` 11,
+[`aidirector.md`](aidirector.md)), so hot TEs report at most once per delay
+window, and the 720 is the heat-duration ticks (36 s at 20 TPS) for the
+`NotifyActivity` call.
+
 ```mermaid
 flowchart TB
   UT[Workstation.UpdateTick IL=134] --> DT["timePassed = (ticks - lastTickTime) / 20"]
@@ -861,6 +873,12 @@ the matching `PowerItem` by world position and links the two.
 | [full-surface.md](full-surface.md) | Where this family sits in the whole-assembly map |
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
+## Changelog
+
+- **2026-08-08:** TileEntity.emitHeatMapEvent (IL=48): heapMapLastTime
+  rewind reset, GetActivityWorldTimeDelay cadence, NotifyActivity(...,
+  block.HeatMapStrength, 720) 36 s heat; IsActive base true, Forge meta > 0,
+  Workstation IsBurning.
 ## Changelog
 
 - **2026-08-08:** TileEntityComposite envelope (2.2): write IL=74 / read
