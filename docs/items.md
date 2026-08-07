@@ -329,6 +329,11 @@ are refreshed. `Inventory.ShowHeldItem(waitTime, hideFirst)` (IL=19) is the
 delayed re-show helper: it stops any pending `delayedShowHideHeldItemRoutine`
 coroutine and starts `delayedShowHideHeldItem(hideFirst, waitTime)` on the
 GameManager instance (used by `SetItem` step 1 after a held-slot rewrite).
+**`Inventory.HoldingItemHasChanged()` (IL=51)** cancels in-flight action
+animations when the held item changes: with entity/emodel/avatar present it
+fires `AvatarController.CancelEvent` for `WeaponFire`, `PowerAttack`,
+`UseItem`, and `ItemUse`, plus `UpdateBool("Reload", false, true)` - so a slot
+switch mid-swing/mid-reload drops the pending action pose.
 
 **`Inventory.setHeldItemByIndex(idx, applyHolsterTime)` (IL=132)** - the slot
 switch behind `SetHoldingItemIdx` (IL=5, `applyHolsterTime=true`) and
@@ -805,6 +810,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** Inventory.HoldingItemHasChanged (IL=51): cancels avatar
+  WeaponFire/PowerAttack/UseItem/ItemUse events + Reload=false on held-item
+  change.
 - **2026-08-07:** ItemClass.CanStack (IL=6) = Stacknumber > 1;
   ItemClassQuest.CanStack (IL=2) always false (quest items never stack).
 - **2026-08-07:** ItemClass.get_MaxCount (IL=23): stack cap =

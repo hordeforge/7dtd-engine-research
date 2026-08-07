@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory.HoldingItemHasChanged
+
+Done (V3.1.0 b14 IL):
+- Inventory.HoldingItemHasChanged (IL=51) narrated in items.md: cancels
+  avatar events WeaponFire / PowerAttack / UseItem / ItemUse + UpdateBool
+  Reload=false when the held item changes - drops in-flight action poses.
+
 ## 2026-08-08 - tier-C: ItemClass.CanStack
 
 Done (V3.1.0 b14 IL):
