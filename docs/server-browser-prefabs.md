@@ -280,6 +280,15 @@ boundingBoxPosition, forceOverwrite, questTags)`, then entity stubs only when
 `CopyEntitiesIntoChunkStub`, then records `lastCopiedPrefabPosition` and sets
 `bPrefabCopiedIntoWorld`.
 
+The spatial query `GetPrefabsAtXZ(xMin, xMax, zMin, zMax, list)` (IL=70,
+reached through `World.GetPOIsAtXZ`, a null-checked wrapper IL=15) clears the
+list under `listsLock`, starts at `PrefabBinarySearch(xMin)` (IL=58: resorts
+via `SortPrefabs` when `isSortNeeded`, then a classic binary search on
+`bbPos.x` against `xMin - 200`), and walks the x-sorted
+`allPrefabsSorted` adding each instance whose AABB overlaps
+(`bbPos.x <= xMax`, `bbPos.x + size.x > xMin`, `bbPos.z <= zMax`,
+`bbPos.z + size.z > zMin`), breaking when `bbPos.x > xMax`.
+
 `CopyVolumesIntoWorldCommon(world, chunk, offset, padding)` (IL=208): with a
 chunk argument the volume's padded world bounds
 (`start + offset - padding` .. `start + size + offset + padding`) must overlap
