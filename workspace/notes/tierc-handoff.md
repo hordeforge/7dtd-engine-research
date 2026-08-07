@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `d2743eb` Drone.IgnoreCollisionEntity |
-| Commits since dry-run `3b61d9c` | ~198 |
+| HEAD (at handoff write) | `16905b4` Drone.FindCollisionEntity |
+| Commits since dry-run `3b61d9c` | ~199 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
