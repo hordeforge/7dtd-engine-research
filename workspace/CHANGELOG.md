@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: MemoryPools object pool surface
+
+Done (V3.1.0 b14 IL):
+- dedicated-misc-systems.md: MemoryPooledObject stack free list
+  (Alloc IL=33 pop + Activator fallback + IMemoryPoolableObject.
+  Reset, AllocSync/FreeSync Monitor locks, Cleanup IL=43,
+  SetCapacity); InitStatic IL=45 capacities (PoolChunks 1000,
+  poolCBL/poolCBC 50000, poolMS 40); full .cctor set
+  (poolMemoryStream, binary reader/writer, MemoryPooledArray
+  family, CBL bit caches, DynamicObjectPool).
 ## 2026-08-08 - tier-C: ChunkBlockChannel storage model
 
 Done (V3.1.0 b14 IL):
