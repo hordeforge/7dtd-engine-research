@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: KickPlayerForClientInfo
+
+Done (V3.1.0 b14 IL):
+- GameUtils.KickPlayerForClientInfo (IL=24) narrated in platform-auth.md:
+  NetPackagePlayerDenied.Setup(kickData) to client, 'Kicking player' log,
+  ThreadManager coroutine disconnectLater(0.5 s) - deny package reaches the
+  client before the disconnect.
+
 ## 2026-08-08 - tier-C: ProtocolManager.LateUpdate
 
 Done (V3.1.0 b14 IL):

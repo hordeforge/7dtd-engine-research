@@ -216,6 +216,13 @@ client is still in the set call `tryAuthorizer(index+1, client)`.
 `AuthorizationDenied` (IL=17): log failure, remove from set,
 `KickPlayerForClientInfo`.
 
+**`GameUtils.KickPlayerForClientInfo(cInfo, kickData)` (IL=24)** is the kick
+path behind `AuthorizationDenied` and the bad-packet scan: it sends
+`NetPackagePlayerDenied.Setup(kickData)` to the client, logs
+`Kicking player ({kickData}): {cInfo}`, then
+`ThreadManager.StartCoroutine(disconnectLater(0.5, cInfo))` - the actual
+disconnect is delayed **0.5 s** so the deny package reaches the client first.
+
 That `PlayerLoginAnswer` is exactly the `Answer` transition in the
 [`protocol.md`](protocol.md) section 5 join state machine.
 
@@ -514,6 +521,8 @@ and the exact cipher. Those are third-party binaries, not game logic.
 
 ## Changelog
 
+- **2026-08-07:** KickPlayerForClientInfo (IL=24): NetPackagePlayerDenied +
+  Kicking player log + 0.5 s delayed disconnectLater coroutine.
 - **2026-07-28:** `playerAllowed` step list + `UpgradeToFullConnection` (full streams + compression).
 
 - **2026-07-28:** Re-verified all authorizer Order literals from IL; Init reflection details.
