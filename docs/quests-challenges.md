@@ -90,6 +90,19 @@ the current phase of an active quest / challenge are listening.
 as player, else `World.GetClosestPlayer(byEntity, 500, false)`; on success
 `Block.HandleTrigger(player, world, pos, BlockValue{type=blockID})`.
 
+The other notifier bodies are thin null-guarded invokes: `BlockChanged(old,
+new, pos)` (IL=10) fires `BlockChange(Block, Block, Vector3i)`, `ItemAdded`
+(IL=8) fires `AddItem(ItemStack)`, `HarvestedItem` (IL=10) fires
+`HarvestItem(ItemValue, ItemStack, BlockValue)`, `OpenedContainer` (IL=9) fires
+`ContainerOpened(Vector3i, ITileEntityLootable)`; each early-returns when its
+delegate field is null.
+
+**`CheckResetQuestTrader(playerEntityID, npcEntityID)` (IL=24)** is the
+quest-reset gate: false when `ForceResetQuestTrader` has no entry for the
+player, else it logs `CheckResetQuestTrader {0}` and returns
+`ForceResetQuestTrader[playerEntityID] == npcEntityID` (the player's recorded
+forced-reset trader must match the NPC in question).
+
 ---
 
 ## 2. Quest lifecycle (state machine)

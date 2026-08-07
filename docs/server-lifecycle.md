@@ -397,6 +397,23 @@ over span **80**, clamped 0..1; return min(xFactor, zFactor). Placement needs
 **Party variant** `GetLandClaimOwnerInParty` also requires party membership of
 the ally owner when granting true inside claim size.
 
+**`PersistentPlayerData` leaf semantics:**
+
+- `get_OfflineHours` / `get_OfflineMinutes` (IL=14 each): **-1** while the
+  player is in-world (`EntityId != -1`), else `(DateTime.Now - LastLogin)` in
+  hours / minutes. Offline time therefore only accrues between sessions.
+- `get_HasBedrollPos` (IL=8): `BedrollPos.y != int.MaxValue`; the `int.MaxValue`
+  y is the unset-bedroll sentinel. `ClearBedroll` (IL=37) unregisters the
+  `sleeping_bag` nav object for the live entity, sets that sentinel, and on the
+  server broadcasts `NetPackageEntityMapMarkerRemove` (flags 192).
+- `AddLandProtectionBlock(pos)` (IL=11) lazily creates the `LPBlocks` list and
+  appends.
+- Backpacks: `backpacksByID : Dictionary<int, ProtectedBackpack>` keyed by the
+  dropped-bag entity id. `ProcessBackpacks(action)` (IL=21) iterates the
+  values; `TryUpdateBackpackPosition(entityID, pos)` (IL=19) refreshes a bag
+  position while keeping its original timestamp (false when the bag is not
+  tracked).
+
 ### 3.2 Player disconnect path (`GameManager.PlayerDisconnected`, IL=76)
 
 Entry: client sends `NetPackagePlayerDisconnect` (Process IL=9 writes base player
