@@ -521,6 +521,61 @@ Path:
 | `TileEntityVendingMachine` | 25 | Non-player-owned rentable: if `rentalEndDay <= WorldTimeToDays(worldTime)` -> `ClearVendingMachine` |
 | `TileEntityComposite` | 24 | For each `modulesInternalOrder`: `ITileEntityFeature.UpdateTick` |
 | Loot / Sign / Trader | (none) | No override; base no-op |
+| `TileEntityCollector` | (large) | Converter slots; see §4.6 wire |
+| `TileEntityLight` | (none / presentation) | Light params on disk/net; see §4.6 |
+| `TileEntityPoweredRangedTrap` | (powered) | Ammo + target mask; see §4.6 |
+| `TileEntityPoweredMeleeTrap` | (powered) | owner only on wire |
+
+### 4.6 Collector, light, trap stream tails
+
+#### `TileEntityCollector.write` (IL=278)
+
+After base TE write + version u16 (persist path):
+
+```text
+lastWorldTimes.count : u16
+// per entry: key:string, worldTime:u64
+fillDataLookup.count : u16
+// per entry: key:string, slot:u32, fillTime:u32, fillTimeLeft:u32
+isUnderwater : bool
+isBlocked : bool
+outOfFuel.count : u16
+// per entry: key:string, flag:u8
+isFull.count : u16
+// per entry: key:string, flag:u8
+// then four ItemStack arrays (count:i16 + ItemStack.Write each):
+//   itemsInternal, modSlotsInternal, fuelSlotsInternal, catalystSlotsInternal
+```
+
+#### `TileEntityLight.write` (IL=48)
+
+After base + version u16:
+
+```text
+LightIntensity : f32
+LightRange : f32
+LightColor : Color32 (StreamUtils.WriteColor32)
+LightType : u8
+LightAngle : f32
+LightShadows : u8
+LightState : u8
+Rate : f32
+Delay : f32
+```
+
+#### `TileEntityPoweredRangedTrap.write` (IL=74)
+
+After `TileEntityPoweredBlock.write`:
+
+| Mode | Payload |
+|---|---|
+| **Persistency (0)** | version **u16=18**, `ownerID` (`PlatformUserIdentifier.ToStream`) |
+| **ToServer (1)** | owner (always after base); then `bUserAccessing:bool`, `IsLocked:bool`, `ClientData.SendSlots:bool` (+ `WriteItemStack(ItemSlots)` if set, clear flag), `TargetType:i32` |
+| **ToClient (2)** | owner; `hasPowerRangedTrap:bool`; if true: `IsLocked`, `WriteItemStack(PowerRangedTrap.Stacks)`; always `TargetType:i32` |
+
+#### `TileEntityPoweredMeleeTrap.write` (IL=15)
+
+After powered-block base: version u16 (persist) + `ownerID` ToStream only.
 
 ---
 
@@ -641,6 +696,7 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-07:** Collector/Light/RangedTrap/MeleeTrap write tails (§4.6).
 - **2026-08-07:** Workstation UpdateTick/HandleFuel/HandleRecipeQueue IL paths;
   Forge fuel-tick melt path; Vending rental expiry; Composite feature tick;
   Powered TE dirty flags.

@@ -521,7 +521,18 @@ Floats seen: **0.04, 0.15, 0.2, 0.33, 0.49, 0.6, 0.7, 0.9, 2** (waypoint / progr
 
 ### D3.6 Spawn (`SpawnUpdate`)
 
-Floats **1, 2.5, 4, 40, 80** (ranges / multipliers). Many GameStats/Prefs int ids in method.
+Full cycle narrative: [spawning.md](spawning.md) §2 (IL=441). Re-pin numbers:
+
+| Gate / band | Value |
+|---|---|
+| `AIDirector.CanSpawn` probe | **1.0** f (enemy path) |
+| Blood moon | demotes enemy request to animals-only |
+| Player overlap rect | player pos **-40**, size **80x80** vs area rect |
+| Enemy placement ring | **28..54** m to players |
+| Animal placement ring | **48..70** m to players |
+| Anti-stack box | **4 x 2.5 x 4** around spawn pos |
+| Groups scanned | `min(5, groupCount)` from random start |
+| GameStats / Prefs | int ids **13** and **129** in cap path (see spawning.md) |
 
 ### D3.7 Path worker budget (critical)
 

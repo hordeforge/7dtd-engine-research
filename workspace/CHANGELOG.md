@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: collector/light/trap TE wire + spawn bands re-pin
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power §4.6: Collector write IL=278, Light IL=48, RangedTrap
+  stream modes, MeleeTrap owner-only.
+- entity-ai §D3.6: SpawnUpdate distance/rect numbers cross-linked to spawning.md.
+---
 ## 2026-08-07 — tier-C: more ProcessPackage + MinEvent action leaves
 
 Done (V3.1.0 b14 IL):
