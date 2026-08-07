@@ -1163,9 +1163,10 @@ blockPos.x,y,z : i64 x3
 beginRepair : bool
 ```
 
-`ProcessPackage` (**IL=33**): resolve TE at pos; server path
-`TEFeatureAreaRepair.RepairAll(world, pos, ...)`; client owner match clears
-`IsRepairing`. Detail: [server-lifecycle.md](server-lifecycle.md) section 4.
+`ProcessPackage` (**IL=33**): `GetTileEntity` → `TEFeatureAreaRepair` (null →
+return). If `beginRepair`: **server only** `RepairAll(world, blockPos,
+sender.entityId)`. Else (end repair): if TE owner equals local platform user,
+`IsRepairing=false`. Detail: [server-lifecycle.md](server-lifecycle.md) section 4.
 
 #### `NetPackagePersistentPlayerState` / `Positions`
 
@@ -1476,6 +1477,25 @@ entityID : i32
 bossIcon1 : string
 // SetupClient: minionCount + minionIDs
 ```
+
+**`ProcessPackage` (IL=55)** switch on `eventType` → `GameEventManager`:
+
+| eventType | action |
+|---:|---|
+| 0 | `SendBossGroups(sender.entityId)` |
+| 1 | `SetupClientBossGroup(id, type, entityID, minionIDs, icon)` |
+| 2 | `UpdateBossGroupType(id, type)` |
+| 3 | `RemoveClientBossGroup(id)` |
+| 4 | `RemoveEntityFromBossGroup(id, entityID)` |
+| 5 | `RequestBossGroupStatRefresh(id, sender.entityId)` |
+
+**`NetPackageBlockLimitTracking` Process (IL=11):** server logs discard; client
+`BlockLimitTracker.UpdateClientAmounts(amounts)`.
+
+**`NetPackageCloseAllWindows` Process (IL=21):** client-only; local player from
+`_playerIdToClose` → `windowManager.CloseAllOpenModalWindows`.
+
+**`NetPackageEmitSmell` Process (IL=1):** empty `ret` (no-op on this assembly).
 
 #### `NetPackageEntityWaypointList`
 

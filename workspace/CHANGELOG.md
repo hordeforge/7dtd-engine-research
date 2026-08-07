@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: BossEvent switch and package Process leaves
+
+Done (V3.1.0 b14 IL):
+- NetPackageBossEvent eventType 0..5 GameEventManager table.
+- LandClaimRepair beginRepair server RepairAll vs client clear IsRepairing.
+- BlockLimitTracking client-only; CloseAllWindows modal close; EmitSmell no-op.
+---
 ## 2026-08-07 — tier-C: SearchForDestroyPos and GetAttackHitInfo
 
 Done (V3.1.0 b14 IL):
