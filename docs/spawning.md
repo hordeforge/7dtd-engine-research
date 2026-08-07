@@ -501,7 +501,9 @@ configured lower-tier replacements.
    `rot` euler, `entityId`, Init;
    pref **44 (`DebugMenuShowTasks`)** → `GUIHUDEntityName` when `EntityAlive`;
    parent when `parentGameObjectName` set; name `{entityClassName}_{id}`,
-   `SetEntityName`; `SetSkinTexture`; collider layers: capsule colliders → **14**
+   `SetEntityName` (`EntityAlive.SetEntityName` IL=20: store, mark
+   `bPlayerStatsChanged` when server-owned, `HandleSetNavName`);
+   `SetSkinTexture`; collider layers: capsule colliders → **14**
    unless tagged `LargeEntityBlocker`/`Physics`; box colliders → **14**.
 7. **Convergence:** `ecd.ApplyToEntity(entity)`; spawner source
    `EnumSpawnerSource.Delete (4)` → `Destroy(gameObject)` + return; `lifetime`,
