@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: MakeMotionMoveToward
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md: MakeMotionMoveToward (IL=69) root-motion scale into
+  [minMotion, maxMotion] band vs moveDirection + isMoveDirAbsolute.
+
 ## 2026-08-08 - tier-C: wandering-horde leaves
 
 Done (V3.1.0 b14 IL):
