@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemValue id accessors
+
+Done (V3.1.0 b14 IL):
+- items.md 2: GetItemOrBlockId (IL=12) split at ItemsStartHere; GetItemId
+  (IL=5) item-space subtraction.
+
 ## 2026-08-08 - tier-C: Inventory.DecItem
 
 Done (V3.1.0 b14 IL):
