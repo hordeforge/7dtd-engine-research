@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: PlayerStealth.TickServer and PrefabTriggerData
+
+Done (V3.1.0 b14 IL):
+- SleeperWokeUp: zero all targetTasks executeTime.
+- SleeperWakeup/PassiveChange Process: remote-only apply.
+- TickServer: speedAverage, light crouch 0.6, cvars _lightlevel/_noiselevel, passive 89, lightLevel 0..200.
+- PrefabTriggerData.Trigger: BlockTrigger.OnTriggered + SleeperVolume.OnTriggered by index.
+---
 ## 2026-08-07 — tier-C: sleeper wake net and crouch detect
 
 Done (V3.1.0 b14 IL):

@@ -361,6 +361,37 @@ present; server sends `NetPackageSleeperWakeup` flags **192**.
 `HasAnyTriggers` then `PrefabTriggerData.Trigger(player, blockTrigger)`.
 TriggerVolume overload (IL=27) same with prefab required (warn if null).
 
+**`EAIManager.SleeperWokeUp` (IL=21):** for each entry in `targetTasks`, set
+`executeTime = 0` (force immediate re-evaluate of target AI on wake).
+
+**`NetPackageSleeperWakeup.ProcessPackage` (IL=20):** remote worlds only; resolve
+`EntityAlive` by `m_targetId` and call `ConditionalTriggerSleeperWakeUp`.
+
+**`NetPackageSleeperPassiveChange.ProcessPackage` (IL=21):** remote only; set
+`IsSleeperPassive = false` on target (no full wake).
+
+**`PlayerStealth.TickServer` (IL=432) (high level):**
+
+1. `speedAverage` lerp toward `sqrt(speedForward²+speedStrafe²)` at 0.2 when
+   moving, else decay `*0.5`.
+2. `LightManager.GetStealthLightLevel` → ambient/boost ratio clamped
+   **0.5..3.2**; crouch multiplies light by **0.6**.
+3. Cvar `_lightlevel = light * 100` (netSync true).
+4. Scale light by `(1 + speedAverage * 0.15)`; passive **89** for
+   `lightAttackPercent` (if ambient &lt; 0.1 use passive else 1).
+5. `lightLevel = clamp((light * (0.32 + 0.68*passive89)) * 100, 0, 200)`.
+6. `NoiseCleanup` + `CalcVolume` → cvar `_noiselevel`.
+7. Decay `sleeperNoiseVolume` by **2.5** when wait ticks hit 0; noise fan-out
+   uses `CalcSenseScale` scaled radius `min(vol*0.6*(1+sense*1.6), 40+15*sense)`
+   (remainder of method walks nearby sleepers).
+
+**`PrefabTriggerData.Trigger(player, BlockTrigger)` (IL=85):** for each index in
+`TriggersIndices`: fire all `TriggeredByDictionary[index]` via
+`BlockTrigger.OnTriggered`; if player non-null also
+`SleeperVolume.OnTriggered` for `TriggeredByVolumes[index]`; if any block
+changes, `UpdateBlocks(list)`. TriggerVolume overload (IL=90) same pattern
+over `TriggersIndices`.
+
 **`SetLastTimePlayerSeen` (IL=4):** `lastTimeSeenAPlayer = Time.time`.
 
 **`IsInFrontOfMe` (IL=28):** angle between head→pos and forward vs
@@ -1293,8 +1324,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** ConditionalTriggerSleeperWakeUp pose/net; SetSleeperActive;
-  CanSleeperAttackDetect crouch 3..15; TriggerBlocks; Touch wake+attack 400.
+- **2026-08-07:** SleeperWokeUp zero target executeTime; TickServer light/noise
+  cvars passive 89; PrefabTriggerData Trigger fan-out; SleeperWakeup Process.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
