@@ -181,10 +181,15 @@ and flags `chunkPosNeedsRegeneration` for the cell.
 
 **Water leaves:** `WaterValue.HasMass()` (IL=5) is `mass > 195` (the same
 empty boundary as `GetMassPercent`). `WaterUtils.GetVoxelKey2D(x, z)` (IL=8)
-is `x * 8976890 + z * 981131` (the 2D voxel key). `IsVoxelOutsideChunk(nx, nz)`
+is `x * 8976890 + z * 981131` (the 2D voxel key); the 3D `GetVoxelKey(x, y,
+z)` (IL=10) adds `+ y`. `IsVoxelOutsideChunk(nx, nz)`
 (IL=15) is a neighbor local coord outside `[0, 15]`;
 `IsChunkSafeToUpdate(chunk)` (IL=16) requires the chunk non-null with
 `!NeedsDecoration && !NeedsCopying && !IsLocked`.
+`TryOpenChunkForUpdate(chunks, key, ref chunk)` (IL=33) opens the chunk with
+a `ScopedChunkWriteAccess` and, when safe, marks the volatile
+`chunk.InProgressWaterSim = true` and returns true (null chunk + false
+otherwise; the access is disposed in a finally).
 
 **Water queries:** `World.IsWater(x, y, z)` (IL=31) is false for `y >= 256`
 or a missing chunk, else `chunk.IsWater(x & 15, y & 255, z & 15)`; the
