@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: FastTags query + CanCollideWith
+
+Done (V3.1.0 b14 IL):
+- FastTags Test_Bit (IL=46) + Test_AnySet (IL=68) narrated in entity-ai.md
+  D8.6b: empty-query semantics, singleBit fast paths, word-AND over
+  Mathf.Min word count; Entity.HasAnyTags (IL=5) = cachedTags.Test_AnySet.
+- CanCollideWith family (13 overloads) in D7 predicates: base true, EntityAlive
+  false when dead or vs EntityItem/EntitySupplyCrate, falling blocks only vs
+  EntityAlive, EntityItem true, falling tree/supply crate false;
+  CanCollideWithBlocks matrix (EntityAlive false while sleeping, car/homerun/
+  supplycrate/supplyplane false).
+
 ## 2026-08-08 - tier-C: GetEntitiesInBounds family
 
 Done (V3.1.0 b14 IL):

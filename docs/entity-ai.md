@@ -1979,6 +1979,17 @@ All four `World.GetEntitiesInBounds` overloads are thin chunk-grid fans over the
   considerations, quest objectives, threat tracking (list in
   [inventories/deeper.md](inventories/deeper.md)).
 
+**Query predicates:** `Entity.CanCollideWith(other)` is polymorphic, so the
+exclude filter is per-exclude-type: base `Entity` returns **true** (IL=2);
+`EntityAlive` (IL=15) returns false when `this.IsDead()` or when `other` is an
+`EntityItem` or `EntitySupplyCrate`, else true; `EntityFallingBlock` /
+`EntityFallingBlocks` (IL=5) collide only with `EntityAlive`; `EntityItem`
+always true; `EntityFallingTree` / `EntitySupplyCrate` always false. The
+`HasAnyTags` filter is `cachedTags.Test_AnySet` (see the FastTags query half in
+D8.6b); `CanCollideWithBlocks` is a separate always/never family (base true,
+`EntityAlive` false while sleeping, `EntityCar` / `EntityHomerunGoal` /
+`EntitySupplyCrate` / `EntitySupplyPlane` false).
+
 ---
 
 ## D8. Falling / sleeper / deco (world systems)
@@ -2439,6 +2450,17 @@ The dictionary writes in `GetBit` are not individually locked; concurrent
 `Parse` calls serialize on the `maskList` monitor, but the `GetTag` single-tag
 path reaches `GetBit` without that lock.
 
+**`Test_Bit(bitNum)` (IL=46) / `Test_AnySet(other)` (IL=68):** the query half.
+`Test_Bit` returns false for an empty set, compares directly against
+`singleBit` when set, otherwise tests `(bits[bit >> 6] & (1UL << (bit & 63)))
+!= 0` with bounds checks on the word array. `Test_AnySet` first answers an
+empty query as `this.IsEmpty` (empty filters only match empty sets); a
+single-bit `_other` resolves to `this.Test_Bit(_other.singleBit)` and a
+single-bit `this` to `_other.Test_Bit(this.singleBit)` (symmetric fast paths);
+the general multi-word case ANDs `Mathf.Min(bits.Length, other.bits.Length)`
+words and returns true on the first nonzero intersection. `Entity.HasAnyTags`
+(IL=5) is a 5-IL wrapper: `cachedTags.Test_AnySet(tags)`.
+
 ### D8.6c Entity init chain (`EntityAlive.Init`, IL=13)
 
 `Init(class, assets, eModelAssets)`: base `Entity.Init`, then `InitStats()`,
@@ -2826,6 +2848,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** FastTags query half: Test_Bit (IL=46) / Test_AnySet (IL=68)
+  single-bit fast paths + word-AND; Entity.HasAnyTags (IL=5); CanCollideWith
+  family (base true, EntityAlive exclusions, falling blocks only EntityAlive)
+  + CanCollideWithBlocks matrix.
 - **2026-08-07:** GetEntitiesInBounds family (World IL=68-75 fan over chunk
   grid, Chunk IL=85-86 Y-slice scan): 5-m padding to chunk/slice ranges,
   shared scratch list for Entity overloads, per-overload filters
