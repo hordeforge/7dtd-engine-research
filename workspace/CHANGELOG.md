@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemActionEat leaves
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: NeedPrompt (IL=13) UsePrompt gate; IsValidConditions (IL=94)
+  ConditionBlockTypes ray gate + water sentinel 240; PercentDone (IL=24)
+  animation-delay fraction.
+
 ## 2026-08-08 - tier-C: underground spawn finder
 
 Done (V3.1.0 b14 IL):
