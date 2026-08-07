@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: sky body
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 1: Chunk.IsOpenSkyAbove (IL=9) y >= GetHeight.
+
 ## 2026-08-08 - tier-C: poi color lookup
 
 Done (V3.1.0 b14 IL):
