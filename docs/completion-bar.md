@@ -113,6 +113,9 @@ Closed in recent sessions (still optional, not required for A+B):
 | EntityBuffs.Tick IL=179 | buffs §2 |
 | BloodMoonComponent.Tick parties | spawning blood-moon section |
 | ItemActionEat.consume IL=154 | items §4.2 |
+| TickEntities slice formula exact | loop-gmupdate §5.1 |
+| ServerConsoleCommand 6-step path | console-commands §2 |
+| AddLevelExp IL=161 order | progression §2 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

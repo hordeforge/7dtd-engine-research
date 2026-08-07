@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: TickEntities slice math, console path, AddLevelExp
+
+Done (V3.1.0 b14 IL):
+- loop-gmupdate: exact TickEntities EMA/span/25/sliceCount formula.
+- console-commands: ServerConsoleCommand IL=125 ordered steps.
+- progression: AddLevelExp IL=161 bonus + recursive apply order.
+---
 ## 2026-08-07 — tier-C: stats waitTicks, buffs Tick, blood moon, eat consume
 
 Done (V3.1.0 b14 IL):

@@ -34,11 +34,21 @@ owning client.
 
 ## 2. XP and level-up (state machine)
 
-XP arrives through `AddLevelExp(exp, cvarXPName, XPTypes, useBonus, ...)` (from
-kills, harvesting, crafting `AddCraftComplete`, and quests, usually via the
-MinEvent actions `ActionAddXP` / `ActionAddPlayerLevel`, see
-[minevents.md](minevents.md)). `AddLevelExpRecursive` handles crossing several
-level thresholds at once; each level grants skill points.
+XP arrives through `AddLevelExp` (**IL=161**):
+
+```text
+AddLevelExp(exp, cvarXPName, XPTypes, useBonus, notifyUI, instigatorId, itemValue)
+```
+
+Sources: kills, harvesting, crafting `AddCraftComplete`, quests, MinEvent
+`ActionAddXP` / `ActionAddPlayerLevel` ([minevents.md](minevents.md)).
+
+**Apply order (IL):** null parent guard; bind instigator into `MinEventContext`;
+if `useBonus`, scale exp via `EffectManager.GetValue` with XP-type FastTags;
+optional GameSparks counter; local UI icon when notify; then
+`AddLevelExpRecursive(exp, cvarXPName, notifyUI)` which increments cvar XP and
+crosses level thresholds (skill points per level). `AddLevelExpRecursive`
+handles multi-level jumps.
 
 ```mermaid
 stateDiagram-v2
@@ -241,6 +251,7 @@ skills, 23 crafting_skills with max_level 20-100 driven by magazines, 57 live pe
 
 ## Changelog
 
+- **2026-08-07:** AddLevelExp IL=161 apply order (bonus EffectManager, recursive).
 - **2026-08-06:** Progression::Write blob layout (the PlayerDataFile
   progressionData stream) and ProgressionValue::Write; getExpForLevel exponent is
   Level+1 with 500/300 XML fallbacks; Progression::OnDeath is empty in V3.1.0 and

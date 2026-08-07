@@ -242,19 +242,26 @@ If `!ConnectionManager.IsServer` → **`ret`** (client stops here).
 ### 5.1 `World.TickEntities(dt)` (117 IL)
 
 1. Update frame-count EMA:  
-   `tickEntityFrameCountAverage = avg*0.8 + framesSinceLast*0.2`  
+   `framesSince = max(1, frameCount - tickEntityFrameCount)`  
+   `tickEntityFrameCountAverage = avg*0.8 + framesSince*0.2`  
 2. `tickEntityPartialTicks = dt`  
 3. `tickEntityIndex = 0`  
 4. **Clear** `tickEntityList`  
 5. Copy all `Entities.list` except primary local player into `tickEntityList`  
 6. If local player exists: **`TickEntity(localPlayer, dt)` immediately**  
 7. **`EntityActivityUpdate()`**, sets `aiActiveScale`, cloth/jiggle  
-8. Compute **`tickEntitySliceCount`** from list size and frame EMA:  
-   - Roughly: keep ~**25** “immediate” accounting; remainder spread over estimated frames  
-   - If computed span ≤ 0: **`TickEntitiesFlush()`** (tick everyone now) and return  
-   - Else set `tickEntitySliceCount` and **return without ticking the list** (slices happen on later frames via `TickEntitiesSlice`)
+8. Compute slice budget from EMA (exact IL):  
+   ```text
+   span = (int)(tickEntityFrameCountAverage + 0.4) - 1
+   if span <= 0:
+       TickEntitiesFlush()   // tick entire list now
+       return
+   // V7 = max(0, (listCount - 25) / (span + 1))  // "25 immediate" accounting
+   tickEntitySliceCount = (listCount - V7) / span + 1
+   return                  // no bulk TickEntity this call
+   ```
 
-**Important:** on a full game tick, `TickEntities` often **only prepares** the list and activity; the bulk of `TickEntity` runs via **`TickEntitiesSlice`** on this and following Unity frames until flush.
+**Important:** on a full game tick, `TickEntities` often **only prepares** the list and activity; the bulk of `TickEntity` runs via **`TickEntitiesSlice`** on this and following Unity frames until flush. The **25** constant is the baseline “batch” reserved in the division, not a hard per-frame tick cap.
 
 ### 5.2 `TickEntitiesSlice` / `Flush`
 
@@ -384,5 +391,7 @@ Entity → AI → path → fall → net interest deep dive: [`entity-ai.md`](ent
 
 ## Changelog
 
+- **2026-08-07:** TickEntities slice formula exact IL (EMA 0.8/0.2, +0.4 span, 25
+  accounting, sliceCount = (n-V7)/span+1).
 - **2026-07-16:** Link entity-ai for entity/AI/path.
 - **2026-07-16:** Initial V3.0.1 dump + structured phase map for gmUpdate, UpdateTick, World tick/entities, peer Update behaviours.
