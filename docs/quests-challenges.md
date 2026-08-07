@@ -627,6 +627,8 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 
 ## Changelog
 
+- **2026-08-07:** BlockDestroyed IL=49 BlockDestroy event + HandleTrigger via
+  closest player within 500 m.
 - **2026-08-06:** Quest template inheritance (`ParseQuest` bTemplate skip +
   `AssignValuesFrom` clones everything but Rewards); reflection-only objective
   type resolution and the four-attribute `ParseObjective`; the four objective

@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DropBagServer lootDrops vs bag
+
+Done (V3.1.0 b14 IL):
+- DropBagServer: server-only; y+0.9; class lootDrops pick OR DroppedLootContainer from bag.
+- quests BlockDestroyed changelog pin; dropItemOnDeath passive 80 already committed.
+---
 ## 2026-08-07 — tier-C: dropItemOnDeath passive 80 and BlockDestroyed
 
 Done (V3.1.0 b14 IL):

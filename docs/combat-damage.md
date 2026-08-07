@@ -158,6 +158,16 @@ lootDropProb, killer)`. Then `lootDropProb *= LootContainer.LootBagChance`.
 If not `LootContainer.NoLoot` and `lootDropProb > RandomFloat`,
 **`Entity.DropBagServer()`**.
 
+**`Entity.DropBagServer` (IL=99, server only):** no-op if already
+`EntityLootContainer`. Spawn pos = entity pos with **y+0.9**.
+
+1. If `lootDropProb != 0` and class has `lootDrops`: `LootDropPick(rand)` →
+   `CreateEntity` as `EntityLootContainer`, spawn, scale transform **1.25**,
+   play `zpack_spawn`, **return** (class loot bag path; bag not used).
+2. Else if bag non-empty: create `DroppedLootContainer` entity;
+   `OverrideLootList = GetLootList()`; `SetContent(bag slots clone, SlotCount)`;
+   copy `bag.Touched`; spawn.
+
 **`SetDead` (IL=8):** base `Entity.SetDead` + force `Health.Value = 0`.
 
 **`AwardKill` (IL=66):** if killer is a distinct living player: count zombie vs
@@ -264,8 +274,8 @@ Leaf types on the edges of the damage flow above:
   StunProne/StunKnee thresholds, Fatal); ProcessDamageResponse net fan-out;
   ProcessDamageResponseLocal IL=903 (armor wear, headshot gates, stun/pain,
   kill/revenge/FireEvent).
-- **2026-08-07:** dropItemOnDeath passive 80 on killer hold + LootBagChance
-  multiply; OnDeathUpdate / AwardKill already pinned.
+- **2026-08-07:** DropBagServer class lootDrops vs bag path; dropItemOnDeath
+  passive 80 + LootBagChance; OnDeathUpdate / AwardKill already pinned.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs
