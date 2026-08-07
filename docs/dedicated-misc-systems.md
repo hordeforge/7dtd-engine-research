@@ -418,8 +418,96 @@ mixing passes over all 56 entries, then `inext = 0`, `inextp = 21`. A seeded
 `GameRandom` therefore reproduces sequences identical to `System.Random` with
 the same seed - deterministic and portable.
 
+## DynamicProperties (the XML property bag)
+
+`DynamicProperties` is the generic `name`/`value` bag every XML-defined object
+carries (block properties, entity classes, vehicle parts, buffs, game events,
+loot, quests - see each family doc). It is one struct with **six
+dictionaries** (V3.1.0 b14 IL):
+
+| Field | Type | Filled by |
+|---|---|---|
+| `Values` | `Dictionary<string,string>` | the `value` attribute of a `<property name="..." value="...">` |
+| `Params1` / `Params2` | `Dictionary<string,string>` | optional `param1` / `param2` attributes |
+| `Data` | `Dictionary<string,string>` | optional `data` attribute (semicolon `k=v` text) |
+| `Classes` | `Dictionary<string, DynamicProperties>` | nested `<property class="...">` groups |
+| `Array` | `Dictionary<string, List<Dictionary<string,string>>>` | `AddArray` item lists |
+
+**XML ingestion:** `Parse(element, doValueReplace)` (IL=123) is the core. An
+element carrying a `class` attribute resolves `GetOrCreateClass(name)`
+(IL=17, creates on miss) and recurses its child `property` elements into that
+class. A leaf property requires a `name` attribute (else throws `Attribute
+'name' missing on property`) and `ValidateKey(name)` (IL=21, throws on an
+empty key or one containing `.`), reads the `value` attribute (with
+`doValueReplace` the value is passed through
+`EntityClassesFromXml.ReplaceProperty`, IL=15: a value starting with `^` is a
+token looked up in `sReplaceProperties`, see the `EntityClassesFromXml`
+section above), stores non-empty `param1`/`param2`/`data` attributes into
+their dictionaries, throws when the name collides with an existing class
+(`Cannot create property '...': a class with the same name already exists.
+Property and class names must be unique.`), and finally sets
+`Values[name] = value`. `Add(element, doValueReplace)` (IL=5) delegates to
+`Parse`; `AddArray(node)` (IL=70) builds `Array` from `<item>` child
+elements (each item becomes a dict of its attributes; the list is cleared
+before re-populating); static `Load(directory, name)` (IL=37) reads an
+`XmlFile`, adds its root `property` elements without replacement, and returns
+false (with `Log.Exception`) on failure.
+
+**Accessors:** `GetValue(name)` (IL=10) is a bare `Values.TryGetValue`
+(null on miss). `TryGetValue(name, out)` (IL=8) adds `ValidateKey`; the class
+overload (IL=18) resolves `Classes[name]` and recurses, returning
+false + null for a missing class. Typed reads default silently on miss and
+parse failure: `GetString` (IL=9) returns `String.Empty` when absent;
+`GetBool` (IL=13) parses with `StringParsers.TryParseBool` and discards the
+parse result (a malformed bool reads `false`); `GetInt` (IL=13) uses
+`Int32.TryParse`; `GetFloat` (IL=13) uses `StringParsers.TryParseFloat`.
+The `Parse*` out-param family is the stricter twin: `ParseBool` (IL=26)
+writes the parsed value on success but on failure logs
+`Can't parse bool {0} '{1}'` (Warning) and keeps the caller's default;
+`ParseString` (IL=9) writes only when the property exists.
+`GetParam1(name)` (IL=10) is `Params1.TryGetValue`; `GetClass(name)` (IL=10)
+is `Classes.TryGetValue`. Two localization oddities:
+`GetLocalizedString(name)` (IL=9) is byte-identical to `GetString` (raw
+value, no localization), while `ParseLocalizedString` (IL=12) is the one that
+runs `Localization.Get(value, false, null)`.
+
+**Structured data helpers:** `ParseData(data)` (IL=82) splits a
+`;`-separated list of `k=v` pairs (or a single `k=v`) into a dict, logging
+`ParseData error parsing {0}, {1}` on malformed input; `ParseKeyData(key)`
+(IL=29) resolves `Data[key]` through `ParseData` (null when the key is
+absent). `ParseStringFloatDictWithSubStringKey(prop, sep, source, out)`
+(IL=47) walks a source dict and collects every key starting with
+`prop + sep`: the substring after the separator becomes the output key
+(empty subkeys skipped), the value is parsed as float
+(`StringParsers.ParseFloat(v, 0, -1, 511)`).
+
+**Copy with exclusions:** `CopyFrom(other, exclude)` (IL=78) copies
+`Values`/`Params1`/`Params2`/`Data` via `copyDict` (IL=27, skipping keys
+rejected by `copyKey`) and recurses `Classes`, creating missing destination
+classes. `copyKey` (IL=43) rejects keys present in the exclude set and keys
+that are a dotted-prefix of an excluded path (excluding `a.b` also excludes
+`a`); per-class exclusion lists are derived by `GetNestedExclusions` (IL=42)
+which keeps every `class.`-prefixed entry and strips the prefix. The `.`
+path separator is exactly why `ValidateKey` bans dots in property names.
+`Clear` (IL=16) empties `Values`, `Params1`, `Params2`, `Data`, and
+`Classes` - but not `Array`.
+
+**Serialization:** `Deserialize(reader, out value)` (IL=214) is the
+generated MemoryPack v1 formatter with a 6-property header, reading in order
+`Values`, `Params1`, `Params2`, `Data`, `Classes`, `Array` (a partial count
+reads only those fields; a null target is allocated). The writer mirrors the
+same order, so any save/wire boundary that carries a `DynamicProperties`
+(block entity data, quest state, entity classes) uses exactly these six
+fields.
+
 ## Changelog
 
+- **2026-08-08:** DynamicProperties bag: six dicts (Values/Params1/Params2/
+  Data/Classes/Array), Parse IL=123 (class recursion, ValidateKey dot ban,
+  ^-token ReplaceProperty, name/class collision throw), AddArray IL=70,
+  Load IL=37; Get* silent defaults vs Parse* Warning; ParseData/ParseKeyData,
+  ParseStringFloatDictWithSubStringKey; CopyFrom/copyKey dotted-path
+  exclusions; Clear skips Array; MemoryPack 6-field Deserialize.
 - **2026-08-07:** GameRandom Next overloads: Next() InternalSample; Next(max)
   Sample()*max with negative throw; Next(min,max) range check + large-range
   fallback; NextBytes InternalSample()%256.
