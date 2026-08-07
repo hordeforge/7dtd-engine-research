@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DecoManager.UpdateTick thread queues and ring
+
+Done (V3.1.0 b14 IL):
+- Drain add/remove/reset queues under lock; checkDelayTicks reset to 20.
+- Player deco-chunk ring via GamePrefs 173; start UpdateDecorationsCo.
+---
 ## 2026-08-07 — tier-C: Chunk.SetBlockRaw silent write path
 
 Done (V3.1.0 b14 IL):

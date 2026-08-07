@@ -53,7 +53,26 @@ manager's `Update`/`UpdateTick` method instruction count from the dump (e.g.
 | `WorldBlockTicker.Tick` | 20 | If `bTickingActive` and not remote: `tickScheduled` then `tickRandom(activeChunks)` |
 | `WorldBlockTicker.tickScheduled` | 151 | Under lock, drain due entries from `scheduledTicksSorted` (batch cap **100**) |
 | `ChunkManager.SendChunksToClients` | 216 | Per observer: queue `NetPackageChunkRemove` for `chunksToRemove`, then reload/send packages from observer load sets; clear remove set |
-| `DecoManager.UpdateTick` | 330 | Locked deco lists + decoration coroutine start (OnUpdateTick always-path) |
+| `DecoManager.UpdateTick` | 330 | See §1.1 (OnUpdateTick always-path) |
+
+### 1.1 `DecoManager.UpdateTick` (IL=330)
+
+1. If `!IsEnabled`: ret.
+2. `checkDelayTicks--` (field used as throttle counter).
+3. If `updateCoroutine` is null, drain thread-side queues under lock (each non-empty
+   queue resets `checkDelayTicks` to 0):
+   - `addDecosFromThread` → `AddDecorationAt` each, clear.
+   - `removeDecosFromThread` → `RemoveDecorationAt` each, clear.
+   - `resetDecosInWorldRectFromThread` → `ResetDecosInWorldRect` each, clear.
+   - chunk-key list → `ResetDecosForWorldChunk` each, clear.
+4. When `checkDelayTicks <= 0`: set to **20**; rebuild `playersToCheck` (server:
+   all players; client: primary local or clear); for each player, mark deco-chunk
+   keys around block pos using view distance GamePrefs **173** into
+   `chunksAroundPlayers`.
+5. Start `UpdateDecorationsCo` via `ThreadManager.StartCoroutine` (assigns
+   `updateCoroutine`).
+
+Always-path cost on dedicated (optim skip candidate; not sim correctness).
 
 Also from peers / LateUpdate: `MeshDataManager`, `ConnectionManager`, `DynamicMeshManager`, `SdtdConsole`, `LoadManager`, `PlatformManager`, `AstarManager.UpdateGraphs` (185). The last is player-following and the top measured CPU + heap allocator at load: [`measured-scaling.md`](../../7dtd-optimizer/docs/measured-scaling.md) §1/§4b.
 
@@ -134,6 +153,8 @@ Core types include `GameEventManager` and `GameEventAction` sequences (content-d
 
 ## Changelog
 
+- **2026-08-07:** DecoManager.UpdateTick IL=330 (thread queues, checkDelay 20,
+  player deco-chunk ring GamePrefs 173, UpdateDecorationsCo).
 - **2026-08-07:** Manager Update behaviour re-pins (Vehicle/Drone unload lists,
   Quest objectives, Turret/Faction save timers, GameEvent handles, Power 0.16/120,
   WorldBlockTicker, SendChunksToClients).
