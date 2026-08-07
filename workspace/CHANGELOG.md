@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ranged reload
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ConsumeAmmo (IL=9) Meta -= 1; loadNewAmmunition (IL=20)
+  ammo-type index reset + isChangingAmmoType latch.
+
 ## 2026-08-08 - tier-C: IsEmptyPosition
 
 Done (V3.1.0 b14 IL):
