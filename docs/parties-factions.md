@@ -77,6 +77,10 @@ command package, not polled.
 leaderIndex, members, voiceLobby)` builds the client-side mirror from a snapshot.
 `GetParty(id)` is a linear scan; `RemoveParty` drops it; `Cleanup` clears the list.
 
+`EntityPlayer.IsPartyLead` (IL=11) is `Party != null && Party.Leader == this`
+(no party → false). `EntityPlayer.GetTeamColor` (IL=5) is
+`Constants.cTeamColors[TeamNumber]`, the team-indexed color array.
+
 A `Party` carries `PartyID` (int, `-1` until assigned), `MemberList : List<EntityPlayer>`
 (capacity capped at **8**, see `AddPlayer` / `IsFull`), `LeaderIndex` (int), and
 `VoiceLobbyId` (string). `Leader` is `MemberList[LeaderIndex]`. Three C# events fire

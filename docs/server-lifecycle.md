@@ -324,6 +324,12 @@ optional buff re-apply path on local.
 distance that `PlayerId` stores on the client). Indexes from
 [inventories/gamestats-gameprefs.md](inventories/gamestats-gameprefs.md).
 
+**`EntityPlayer.VisiblityCheck(distanceSqr, masterIsZooming)` (IL=48)** is the
+consumer: throttled to every **5** ticks (`visiblityCheckTicks`), it computes
+`maxDist = FastMin(12, GetViewDistance()) * 16 - 1` blocks, sets
+`bModelVisible = distanceSqr < maxDist²`, and when alive (`IsDead` false,
+`GetDeathTime() == 0`) applies it via `SetVisible`.
+
 **`World.SpawnEntityInWorld` (IL=178):** null guard; `EntityLoadedDelegates`;
 `AddEntityToMap` + `Entities.Add` + `addToChunk`; if EntityAlive, add to
 `EntityAlives`; track vehicle/drone/turret managers; audio/weather/light
