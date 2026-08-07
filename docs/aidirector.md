@@ -590,7 +590,7 @@ each new spawn group it advances `spawnBaseDir` by +120 degrees and recomputes
 &gt; 0.
 
 **`IsMemberOfParty(entityId)` (IL=5):** delegate to
-`partySpawner.IsMemberOfParty`.
+`partySpawner.IsMemberOfParty` (`memberIDs` HashSet.Contains).
 
 `SpawnZombie` (IL=181): `CalcSpawnPos` or fail. Pick class from
 `GetRandomEntityFromGroupMaxTier(spawnGroupName, MaxEntityTier, lastClassId,

@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: AddEnemyToWorld and stealth UI percent
+
+Done (V3.1.0 b14 IL):
+- AddEnemyToWorld: source 3, passive sleeper, particle, optional WakeAttackLater.
+- AddSpawnPoint cap 255; EntitySpawner runtime reset fields.
+- PlayerStealth ValuePercentUI formula (light+noise+stress+smell+alert).
+---
 ## 2026-08-07 — tier-C: destroy-pos reuse and jump headroom
 
 Done (V3.1.0 b14 IL):

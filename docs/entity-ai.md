@@ -1506,6 +1506,19 @@ jump abort.
 **`WakeAttackLater(ea, player)` (IL=9):** returns async state machine iterator
 (deferred wake+attack; not a synchronous body).
 
+**`AddEnemyToWorld` (IL=47):** null entity → log error. `SetSpawnerSource(3)`;
+`IsSleeperPassive=true`; store spawn pos/look; `SetSleeper` + `TriggerSleeperPose`;
+`SpawnEntityInWorld`; `hasPassives=true`; `SpawnParticle("sleeperSpawn")`. If
+`playerTouchedTrigger` set, start coroutine `WakeAttackLater`.
+
+**`AddSpawnPoint` (IL=19):** cap list at **255**; append
+`SpawnPoint(pos, sleeperRotation, blockType)`.
+
+**`PlayerStealth.get_ValuePercentUI` (IL=40):**
+`stress = Buffs.CVar(CVarEntityStress)/100`; `smell = smellRadius/100`;
+`raw = lightLevel + noiseVolume*0.5 + (stress+smell)*50 + (alertEnemy?5:0)`;
+`FastClamp01(raw*0.01 + 0.005)`.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
@@ -2191,6 +2204,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** AddEnemyToWorld sleeper spawn; ValuePercentUI stealth bar formula.
 - **2026-08-07:** FindExistingDestroyPos ally share; CheckJumpBlocked y+2.35; IsTriggerAndNoRespawn mode 3.
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.

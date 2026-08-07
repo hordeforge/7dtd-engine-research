@@ -158,6 +158,11 @@ save/load.
 | `DelayAllEnemySpawningUntil` | push all enemy groups' delay forward (used to suppress enemies) |
 | `IsSpawnNeeded(biomes, worldTime)` (IL=57) | false if biome/group list missing; true if any group missing from `entitesSpawned`, or `count < maxCount`, or `worldTime > delayWorldTime`; else false (all groups full and still delayed) |
 
+**`EntitySpawner.resetRuntimeVariables` (IL=19):** zero `totalSpawnedThisWave`,
+both delay timers, clear `entityIdSpawned`, `currentWave=0`,
+`numberToSpawnThisWave=0`. **`ResetSpawner`** just calls that.
+**`get_CurrentWave`:** field `currentWave`.
+
 The despawn accounting lives in `OnEntityUnloaded`, registered as a world
 delegate. It only touches `Biome`-sourced entities and reads the master chunk
 back from the entity's stored spawner chunk key:
@@ -599,6 +604,7 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** EntitySpawner.resetRuntimeVariables wave/delay clear.
 - **2026-08-07:** ChunkAreaBiomeSpawnData.IsSpawnNeeded under-max / delay /
   missing group (IL=57).
 - **2026-08-07:** AIDirector.CreateComponents IL=31 fixed component order;
