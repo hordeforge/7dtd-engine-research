@@ -84,15 +84,36 @@ Live IL order (V3.1.0 b14):
 6. If `canDisintegrate` and fraction high enough: `Disintegrate()` (IL=7):
    `timeStayAfterDeath = 0`, `isDisintegrated = true`.
 7. `CheckDismember(ref dr, chance)` (IL=125):
-   - Leg hits while alive + (stunned or sleeping/waking): early return (no
-     dismember path this call).
-   - `chance = GetDismemberChance`; if chance > 0 and rand ≤ chance: set
-     `Dismember`; leg also sets `TurnIntoCrawler`.
+   - Leg hits while alive + (stunned or `sleepingOrWakingUp`): early return.
+     **Note:** stock `get_sleepingOrWakingUp` (IL=3) returns only `IsSleeping`
+     (name overclaims; no separate wake-state field).
+   - `chance = GetDismemberChance(dr, damagePer)` (IL=128):
+     primary hit → class mult head/arms/legs; passive **143** scales mult;
+     if source `DismemberChance ≥ 100` use 100 else
+     `sourceChance * damagePer * mult`; local player debug can force 1.
+   - if chance > 0 and rand ≤ chance: set `Dismember`; leg also
+     `TurnIntoCrawler`.
    - Else if leg: if `LegCrawlerThreshold > 0` and damage fraction ≥ threshold
      set `TurnIntoCrawler`. If not already crawler path and
      `LegCrippleScale > 0`: `p = fraction * LegCrippleScale`; if p ≥ 0.05 and
      corresponding leg flag not set (4096 left / 8192 right), rand < p sets
      `CrippleLegs`.
+
+**`GetTotalPhysicalArmorRating` (IL=47):** tags = `coreDamageResist` OR
+attacking item tags; passive **41** on wearer then passive **163** on attacker
+item (armor penetration residual) returns rating percent.
+
+**`ExecuteDismember(restoreState)` (IL=49):** require emodel+avatar. If
+crippled leg hit while alive and walkType not 5 and &lt; 20: `SetWalkType(5)`.
+`AvatarController.DismemberLimb(bodyDamage, restoreState)`; if
+`ShouldBeCrawler` call `SetupCrawler`.
+
+**`BodyDamage.IsAnyLegMissing`:** Flags & **480** != 0.
+**`IsAnyArmOrLegMissing`:** Flags & **510** != 0.
+
+**`ApplyLocalBodyDamage` (IL=188 high-level):** store bodyPartHit + damageType;
+on dismember (or debug body part) OR flags into `BodyDamage.Flags` per part
+bits (1/2/4/8/16/32/64/128/256…); set `ShouldBeCrawler` for leg-loss paths.
 8. Stun accumulators: body-part mask `207` adds to `StunProne`; leg hits add
    Strength * (crit?2:1) to `StunKnee` when `CanStun` and walkType != 21 and
    not already prone-stun (2).
@@ -358,6 +379,8 @@ Leaf types on the edges of the damage flow above:
   flags&2 block; passive 161 bonus; passive 40 resist bank.
 - **2026-08-07:** Equipment.CalcDamage physical vs passive 43; CheckDismember
   crawler/cripple; Disintegrate zeros corpse stay; FireAttackedEvents type 8.
+- **2026-08-07:** GetDismemberChance head/arm/leg mult + passive 143; armor
+  rating 41/163; ExecuteDismember walkType 5; Flags 480/510; sleepingOrWakingUp=IsSleeping.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

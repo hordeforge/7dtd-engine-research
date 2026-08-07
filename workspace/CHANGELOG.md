@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: GetDismemberChance and ExecuteDismember
+
+Done (V3.1.0 b14 IL):
+- GetDismemberChance: primary mult head/arms/legs; passive 143; source*damagePer*mult; debug force.
+- GetTotalPhysicalArmorRating: passive 41 then 163 penetration.
+- ExecuteDismember: walkType 5 on cripple leg; DismemberLimb; SetupCrawler.
+- BodyDamage leg/arm missing masks 480/510.
+- sleepingOrWakingUp: IsSleeping only (name overclaims).
+---
 ## 2026-08-07 — tier-C: CheckDismember crawler and Equipment.CalcDamage
 
 Done (V3.1.0 b14 IL):
