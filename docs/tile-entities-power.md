@@ -57,6 +57,11 @@ overload (IL=30) linearly scans `blockEntityStubs.list` for the matching
 null; `ChunkCluster.GetBlockEntity` (IL=12) resolves the chunk (null chunk →
 null) and delegates.
 `Chunk.AddEntityStub(ecd)` (IL=5) appends to `entityStubs`;
+`AddEntityBlockStub(ecd)` (IL=21) keys `blockEntityStubs` by
+`GameUtils.Vector3iToUInt64(pos)` and, when a stub already occupies the cell,
+**queues the old stub into `blockEntityStubsToRemove`** before `Set`-ing the
+replacement (the deferred-removal pattern that lets a model swap clean up the
+old transform later);
 `RemoveEntityBlockStub(pos)` (IL=30) removes by the packed key (queuing the
 removed entry in `blockEntityStubsToRemove`, warning
 `Entity block on pos {0} not found!` on a miss).
@@ -828,6 +833,9 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-08:** Chunk.AddEntityBlockStub (IL=21): UInt64-keyed
+  blockEntityStubs Set with old-stub queueing into blockEntityStubsToRemove
+  on cell collision (deferred model-swap cleanup).
 - **2026-08-07:** GameUtils.Vector3iToUInt64 (IL=29): 16-bit offset-packed
   x<<32|y<<16|z position key.
 - **2026-08-07:** Chunk.GetBlockEntity: Vector3i (IL=10) UInt64-keyed dict,
