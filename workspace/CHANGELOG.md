@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World.IsWater
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 4.2: IsWater(x,y,z) (IL=31) chunk-local gate with y>=256
+  / missing-chunk false; Vector3i/Vector3 overload forwards.
+
 ## 2026-08-08 - tier-C: pre-installed mod roll
 
 Done (V3.1.0 b14 IL):
