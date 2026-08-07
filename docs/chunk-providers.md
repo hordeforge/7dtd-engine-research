@@ -657,6 +657,9 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   the prepared `writeStream` to the file and truncates.
   `DecoObject.Write` (IL=43) logs `Writing DecoObject '{0}', no block!` for a
   null block before the `NameIdMapping.AddMapping(blockID, name, false)` bookkeeping.
+  `DecoManager.Read(br, version, resetExisting)` (IL=29) mirrors the write:
+  it (re)creates the `loadedDecos` set when `resetExisting`, reads the `int32`
+  count, and `loadedDecos.Add`s one `DecoObject.Read` per entry.
 - `DecoManager.OnWorldLoaded(w, h, world, chunkProvider)` (from
   `World.LoadWorld`; `IsEnabled = levelName != "Empty"`): builds the
   `DecoOccupiedMap`, runs `chunkProvider.FillOccupiedMap` (§6.2), creates the
