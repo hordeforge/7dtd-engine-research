@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityAlive.OnAddedToWorld
+
+Done (V3.1.0 b14 IL):
+- OnAddedToWorld IL=27: occlusion add (7), m_addedToWorld, bSpawned (server),
+  MinEvent 61 for non-players, StartStopLivingSound.
 ## 2026-08-08 — tier-C: InitBreadcrumbs
 
 Done (V3.1.0 b14 IL):

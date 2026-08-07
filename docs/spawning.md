@@ -495,7 +495,10 @@ starts with `false`; the operation is polled by `TryComplete`).
 5. Server only: track vehicle/drone/turret managers; turret without item class
    `InitDynamicSpawn`.
 6. `audioManager.EntityAddedToWorld`, `WeatherManager`, `LightManager`,
-   `entity.OnAddedToWorld`.
+   `entity.OnAddedToWorld` (`EntityAlive.OnAddedToWorld` IL=27: non-local →
+   `OcclusionManager.AddEntity(this, 7)`; `m_addedToWorld = true`; not remote →
+   `bSpawned = true`; non-player → `FireEvent(MinEvent 61, true)`; then
+   `StartStopLivingSound()`).
 7. Warn if `position.y < 1`.
 8. Server: `entityDistributer.Add`; if player bump `Players` +
    `playerEntityUpdateCount`; else if EntityAlive `Spawned = true`.
