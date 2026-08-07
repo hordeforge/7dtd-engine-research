@@ -1341,6 +1341,22 @@ default. 506 of the 630 stock recipes hit this branch.
 
 ### Item repair goes through the crafting queue
 
+**`ItemActionRepair` (V3.1.0 b14)** is the repair-tool action driving that
+path. `ExecuteAction` (IL=631) gates on: release-only, the `Delay` rate, the
+hit distance (`cDigAndBuildDistance^2`), the passive-177 `twitch_no_attack`
+gate, the TP-camera lock, and a **trader-area gate** (a valid hit inside a
+`World.IsWithinTraderArea` cell is refused unless `SandboxUseTraderArea`);
+release resets `bUseStarted` and `repairType`. For a block/terrain hit it
+picks the repair type (Repair / Upgrade / Downgrade) and, for an **upgrade**,
+`CanRemoveRequiredResource(data, blockValue)` (IL=106) checks the
+`allowedUpgradeItems` / `restrictedUpgradeItems` filters against
+`GetUpgradeItemName(block)`, parses the block's `UpgradeHitCount` and
+`PropUpgradeBlockItemCount`, and requires that many of the upgrade item in
+the toolbelt (`GetItemCount`) or bag (`Bag.GetItemCount`) - a plain repair
+needs no resource. `GetRepairAmount` (IL=3) is a field read; the actual
+repair/upgrade application funnels into the crafting queue
+(`XUiC_CraftingWindowGroup.AddRepairItemToQueue`, below).
+
 The UI path at 1413451 sets `Recipe::craftingTime = ItemClass.RepairTime.Value *
 count`, re-runs it through `EffectManager::GetValue` with `PassiveEffects 90`
 (crafting time) and `PassiveEffects 101` for the count, and finally calls
@@ -1437,6 +1453,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionRepair: ExecuteAction IL=631 gates (Delay, hit
+  distance, passive 177, TP camera, trader-area refusal) + repairType;
+  CanRemoveRequiredResource IL=106 upgrade filters + UpgradeHitCount/
+  PropUpgradeBlockItemCount + toolbelt/bag count check; GetRepairAmount
+  IL=3 field; application via crafting queue.
 - **2026-08-08:** Skill book: ItemActionGainSkill.ExecuteAction IL=24 read
   latch + OnHoldingUpdate IL=143 grant (Level+1 capped at MaxLevel, MinEvent
   98, ttSkillLevelUp, DecHoldingItem); ItemActionLearnRecipe shares the
