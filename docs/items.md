@@ -384,6 +384,26 @@ server-authoritative slot write; `SetItem(idx, ItemStack)` IL=9 wraps it with
    `updateHoldingItem()`; when `notifyListeners`: `notifyListeners()` (the
    network/buff/listener fan-out).
 
+**`Inventory.notifyListeners()` (IL=24):** calls the internal
+`onInventoryChanged()` hook, then iterates the `listeners`
+(`HashSet<IInventoryChangedListener>`) calling `OnInventoryChanged(this)` on
+each - the single fan-out point behind every slot write.
+
+**Read accessors (V3.1.0 b14):** `GetItem(idx)` (IL=6) / `GetItemStack(idx)`
+(IL=6) read `slots[idx].itemStack`; `GetItemInSlot` (IL=15) and
+`GetItemDataInSlot` (IL=14) fall back to `bareHandItem` /
+`bareHandItemInventoryData` when the slot's item class is null (empty slots
+read as the bare hand). `GetItemCount()` (IL=5) is just `slots.Length`.
+`GetItemCount(ItemValue, bConsiderTexture, seed, meta, ignoreModdedItems)`
+(IL=92) sums counts over slots matching: same `type`, texture
+(`TextureFullArray` equality) when requested, `seed` when not -1, `meta` when
+not -1; with `ignoreModdedItems`, slots whose value `HasModSlots && HasMods`
+are skipped. `GetItemCount(FastTags itemTags, seed, meta, ignoreModded)`
+(IL=86) is the tag variant: non-empty values whose
+`ItemClass.ItemTags.Test_AnySet(itemTags)` match, same seed/meta/mod filters.
+The `XUiM_PlayerInventory.GetItemCount` wrappers (IL=19) sum the same query
+over backpack + toolbelt (UI-side).
+
 ---
 
 ## 7. Durability and degradation
@@ -668,6 +688,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** Inventory notifyListeners (IL=24) fan-out + read accessors:
+  bare-hand fallback in GetItemInSlot/GetItemDataInSlot, GetItemCount type/tag
+  overloads (IL=92/86) with texture/seed/meta/mod filters, XUiM wrappers.
 - **2026-08-07:** Inventory.SetItem (IL=166) slot-write flow: held re-show
   ShowHeldItem(0.2), bounds guard, missing-item-class warning + clear,
   preferredItemSlots memory, class-change rebuild (clearSlotByIndex +

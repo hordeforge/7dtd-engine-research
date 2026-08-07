@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory notify + read accessors
+
+Done (V3.1.0 b14 IL):
+- Inventory.notifyListeners (IL=24) narrated in items.md section 6:
+  onInventoryChanged hook + HashSet<IInventoryChangedListener> fan-out.
+- Read accessors: GetItemInSlot/GetItemDataInSlot bare-hand fallback,
+  GetItemCount type overload (IL=92) and tag overload (IL=86) with
+  texture/seed/meta/ignoreModded filters, XUiM_PlayerInventory backpack+
+  toolbelt summing wrappers (IL=19).
+
 ## 2026-08-08 - tier-C: Inventory.SetItem
 
 Done (V3.1.0 b14 IL):
