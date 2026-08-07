@@ -480,6 +480,14 @@ chunk with `ChunkAreaBiomeSpawnData` gets
 (3). The client `EntityPlayerLocal` override (IL=35) only feeds the
 FP-controller.
 
+**The 5-chunk grid:** `Chunk.ToAreaMasterChunkPos(pos)` (IL=19) snaps the
+chunk coords onto the grid (`toChunkXZ(x)/5*5`, y via `toChunkY`, `z` same -
+80-block cells); `IsAreaMaster()` (IL=14) is `m_X % 5 == 0 && m_Z % 5 == 0`;
+`IsAreaMasterCornerChunksLoaded(cc)` (IL=44) requires the four `±2` corner
+chunks loaded; `IsAreaMasterDominantBiomeInitialized(cc)` (IL=107) computes
+`AreaMasterDominantBiome` from the 5x5 neighborhood's dominant-biome
+histogram when it is still the 255 sentinel.
+
 ---
 
 ## 7. From decision to entity to client
