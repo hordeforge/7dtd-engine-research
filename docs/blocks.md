@@ -242,7 +242,14 @@ flowchart LR
 `BlockChangeInfo` flags (bit-packed): `bChangeBlockValue`, `bChangeDensity`,
 `bForceDensity`, `bUpdateLight`, `bChangeDamage`, `bChangeTexture`. The body then
 carries only the selected parts: `BlockValue.Write` if the value changed, a
-density `sbyte` if density changed, a texture array if texture changed. `SetBlock`
+density `sbyte` if density changed, a texture array if texture changed. The
+exact wire form (`BlockChangeInfo.Write` IL=89 / `Read` IL=76): `BlockValueRef`,
+`changedByEntityId : i32`, then the **flags byte** - bit 0 `bChangeBlockValue`
+(1), bit 1 `bChangeDamage` (2), bit 2 `bChangeDensity` (4), bit 3
+`bForceDensity` (8), bit 4 `bUpdateLight` (16), bit 5 `bChangeTexture` (32) -
+followed by the flagged payloads in that order (`BlockValue.Write`, `sbyte
+density`, `TextureFullArray.Write`). `bForceDensity` and `bUpdateLight` are
+flags only (no payload). `SetBlock`
 is **server-authoritative**: a client-originated change is a request, answered by
 `NetPackageSetBlockResponse` (`0 Success`, `1 PowerBlockLimitExceeded`,
 `2 StorageBlockLimitExceeded`).
@@ -616,6 +623,9 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** BlockChangeInfo wire (Write IL=89 / Read IL=76):
+  BlockValueRef + changedByEntityId i32 + flags byte (bit 0 value, 1 damage,
+  2 density, 3 force-density, 4 update-light, 5 texture) + flagged payloads.
 - **2026-08-08:** Batch commit machine (4.1): World.SetBlocksRPC IL=6
   delegate; GameManager.SetBlocksRPC IL=29 ChangeBlocks + NetPackageSetBlock
   broadcast/client request; GameManager.ChangeBlocks IL=530 (ccChanged lock,
