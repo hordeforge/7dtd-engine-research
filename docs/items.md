@@ -579,6 +579,10 @@ points `MinEventContext` at the old value/transform, runs
 `lastdrawnHoldingItem.StopHolding(data, transform)`, then starts the new item
 and updates the last-drawn value/index.
 
+**Switch entries:** `SetHoldingItemIdx(idx)` (IL=5) is
+`setHeldItemByIndex(idx, true)` (with holster time); the `NoHolsterTime`
+variant (IL=5) passes false.
+
 `DecHoldingItem` is the server-authoritative depletion: it lowers the held
 `ItemStack.count`, and when the stack hits zero it clears the slot and quick-swaps
 to the best remaining slot (`GetBestQuickSwapSlot`) so a used-up stack of thrown
