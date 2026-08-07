@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Bag leaves
+
+Done (V3.1.0 b14 IL):
+- items.md: TryStackItem (IL=75) CanMoveTo gate + CanStackPartly merge scan
+  (fullyPlaced, changed); ReadInto (IL=93) version/count/items/LockedSlots/
+  Touched/preferences wire format; get_SlotCount (IL=10);
+  onBackpackChanged (IL=8) null-guarded invoke.
+
 ## 2026-08-08 - tier-C: Equipment leaves
 
 Done (V3.1.0 b14 IL):
