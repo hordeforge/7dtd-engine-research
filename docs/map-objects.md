@@ -204,7 +204,12 @@ position + entityId/owner, entity) dedupe against existing entries
 (`IsTrackedTransform` / same-class + owner/entityId/position match) and fire
 `OnNavObjectAdded`; unregister variants (`ByClass`, `ByEntityID`,
 `ByOwnerEntity`, `ByPosition`) funnel through a predicate-driven
-`unRegisterNavObjects` and fire `OnNavObjectRemoved`.
+`unRegisterNavObjects` and fire `OnNavObjectRemoved`. Each unregister
+overload (`UnRegisterNavObjectByEntityID` IL=16, `ByOwnerEntity` IL=18,
+`ByPosition` IL=19) builds a small closure predicate over the captured key and
+passes it with a log string. `GetNavObjectByEntityID(entityId)` (IL=34) scans
+`NavObjectList` **backward** (latest first) for the first non-null entry whose
+`EntityID` matches, null when absent.
 
 `Update()` is called from `GameManager.gmUpdate` (see
 [`managers.md`](managers.md), 42 IL): it prunes entries whose `IsValid()` went
