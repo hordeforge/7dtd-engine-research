@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: FromRaw override + CRC leaves
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 4.1: GetChunkProtectionLevel delegation, GetHeight try/catch, GetWorldSize = dims * scale
+- chunk-providers.md 4.1: filesNeedProcessing IL=32 (dtm _processed suffix + 4 splat files + verifyFileHashes)
+
 ## 2026-08-08 - tier-C: FromRaw POI overrides + sequence groups
 
 Done (V3.1.0 b14 IL):
