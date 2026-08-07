@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: AttackEntites body mult and DamageRecord
+
+Done (V3.1.0 b14 IL):
+- AttackEntites: passives 20/21/22; Legs/Head/ChestExplosionDamageMultiplier; DamageRecord sum.
+- Apply: DismemberChance 0.5; damage vs 0.1 maxHealth; center sqr 0.67; stun bands 0.6/0.85.
+---
 ## 2026-08-07 — tier-C: LootDropPick weighted and OnBlockStartsToFall
 
 Done (V3.1.0 b14 IL):

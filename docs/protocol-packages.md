@@ -912,8 +912,15 @@ optional heat-map sound to AIDirector; if clients present, send
 via block damage path into `ChangedBlockPositions`.
 
 **`Explosion.AttackEntites` (IL=691):** EffectManager-scaled entity damage
-(passive 20) and radius (passive 21); overlap sphere / entity walk; skip dead;
-apply damage with explosion damage type.
+(passive **20**) and radius (passive **21**); Physics overlap layer mask
+`-538480653`; per hit transform tag → body-part multiplier
+(`Legs`/`Head`/`ChestExplosionDamageMultiplier`, else 1); passive **22** scales
+that mult; accumulate into `DamageRecord` dict (sum damage, union parts).
+
+Apply pass: if `damage >= maxHealth * 0.1` or health already low path, build
+`DamageSourceEntity` with `DismemberChance=0.5`, bodyParts from record;
+`DamageEntity(src, (int)damage, false, 1)`. Near-center (`sqrMagnitude < 0.67`)
+and random bands **0.6/0.85** feed stun/disorient flags (types **31** / **11**).
 
 ```text
 worldPos : Vector3          // StreamUtils
@@ -1525,6 +1532,8 @@ customReason    : string
 - **2026-08-07:** EntityAliveFlags Process bit setters (god/crouch/alert remote).
 - **2026-08-07:** QuestObjectiveUpdate eventType 0/1/2 party fan + treasure
   FinishTreasureQuest / HandlePlayer distance 15 + AddToDestroyCount.
+- **2026-08-07:** AttackEntites body-part mult + passive 22 + DamageRecord apply
+  (0.1 maxHP, DismemberChance 0.5, center 0.67).
 - **2026-08-07:** AttackBlocks IL=553 / AttackEntites IL=691; explode IL=194;
   PlayerId/PlayerSpawnedInWorld; EntityRemove/SimpleChat/SharedQuest/etc.
 - **2026-08-07:** NetPackageChunk Process IL=126 overwrite vs add paths.
