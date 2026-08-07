@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: activate/zoom + block conversion
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionActivate IL=79 (OnHoldingItemActivated
+  hook); ItemActionZoom IL=103 aim toggle.
+- ItemClass.OnConvertToBlockValue: base IL=2 passthrough;
+  ItemClassTorch IL=20 packs UseTimes into meta/meta2.
 ## 2026-08-08 - tier-C: water actions + activate/zoom
 
 Done (V3.1.0 b14 IL):
