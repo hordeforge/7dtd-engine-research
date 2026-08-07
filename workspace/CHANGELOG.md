@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SetSmellEat
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.SetSmellEat (IL=21) narrated in stealth-smell.md:
+  smellEatRadius += distance capped 100, smellEatTicks = 1800 decay timer,
+  smellRadius floored at 1, smellUpdateItemsTicks reset. The eat-smell
+  trigger behind eating and the dysentery path.
+
 ## 2026-08-08 - tier-C: SmellTickWet
 
 Done (V3.1.0 b14 IL):

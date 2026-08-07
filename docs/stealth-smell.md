@@ -127,6 +127,12 @@ the `_wetnessrate` buff cvar into `smellWetRate` and, when the rate is at
 least **0.01**, adds it to `smellWet` (the wetness level that suppresses
 item smell in `SmellUpdateItemsAndBlood`).
 
+**`PlayerStealth.SetSmellEat(distance)` (IL=21)** is the eat-smell trigger
+(consumed by eating actions and the dysentery path): it grows
+`smellEatRadius` by the distance (capped at **100**), arms the
+`smellEatTicks = 1800` decay timer, floors the total `smellRadius` at **1**,
+and resets `smellUpdateItemsTicks`.
+
 **`PlayerStealth.SmellTickEat()` (IL=36)** is the eat-smell decay: while the
 `smellEatTicks` timer runs (capped at 1640 ticks) it subtracts
 **0.007142858** (1/140) from `smellEatRadius` per tick - the eating scent
@@ -175,6 +181,8 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.SetSmellEat (IL=21): radius + distance cap
+  100, smellEatTicks = 1800, smellRadius floor 1, update ticks reset.
 - **2026-08-07:** PlayerStealth.SmellTickWet (IL=19): _wetnessrate cvar into
   smellWetRate, rate >= 0.01 accumulates into smellWet.
 - **2026-08-07:** PlayerStealth.SmellTickEat (IL=36): eat radius decays 1/140
