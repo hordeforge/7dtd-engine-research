@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: drone weapon Fire paths and PartySpawner Tick
+
+Done (V3.1.0 b14 IL):
+- MachineGunWeapon: passives 16/11/199/200/9/7, raycast Hit, ammo, UseTimes.
+- StunBeam: _droneStunDamage quality cvar + buffShocked.
+- HealBeam: inventory UseOther action1 + buffJunkDroneHealCooldownEffect.
+- AIDirectorGameStagePartySpawner Tick/canSpawn/IncSpawnCount; isValidDronePos NaN.
+---
 ## 2026-08-07 — tier-C: AIHordeSpawner.Tick and Weapon cooldown
 
 Done (V3.1.0 b14 IL):

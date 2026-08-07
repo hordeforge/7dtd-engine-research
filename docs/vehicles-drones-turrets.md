@@ -323,6 +323,23 @@ Shutdown (**5**); else true only if `WakeupAnimTime == 0`.
 **`Weapon.hasActionCompleted` (IL=6):** `cooldownTimer < cooldown` (action phase
 done, still cooling).
 
+**`MachineGunWeapon.Fire` (IL=10):** server only; base Fire then `_fireWeapon`
+(IL=411): passives **16** (ray count from `RayCount`), **11** (range), **199**
+(penetration floor+1), **200** (block pen divisor); spread from
+`spreadHorizontal`/`spreadVertical`; raycast mask `-538751005`; `ItemActionAttack.Hit`
+as `bullet`; muzzle particles; if passive **9** > 0 decrement `AmmoCount`;
+`UseTimes +=` passive **7** * `ItemDegradationModifier`.
+
+**`StunBeamWeapon.Fire` (IL=69):** base Fire; `SetCVar("_droneStunDamage",
+modItem.Quality)`; `TargetApplyBuff("buffShocked")`; sound + nozzle particles.
+
+**`HealBeamWeapon.Fire` (IL=184):** base Fire; server: `findNeededHealType` or
+abort; put heal stack in inventory slot 0, force hold, run action index **1**
+`ItemActionUseOther` (`CanExecute` then `ExecuteAction` false then true) with
+attack target as feed target; `AddBuff("buffJunkDroneHealCooldownEffect")`.
+
+**`DroneManager.isValidDronePos` (IL=16):** reject if any of x/y/z is NaN.
+
 **`updateTransitionState` (IL=98):** no-op if `transitionState == None (8)` or
 already equals `state`. Leaving Attack/Heal refreshes all installed weapon
 cooldowns. Transition Heal (**3**): server `healTargetServer(attackTarget,
@@ -528,8 +545,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** Weapon.Fire/RefreshCooldown; VehicleDataSync ReadSyncData +
-  192 rebroadcast; CanAttack; transition heal; group slots/repath.
+- **2026-08-07:** MachineGun passives 16/11/199/200/9/7; StunBeam buffShocked;
+  HealBeam UseOther + cooldown buff; isValidDronePos NaN; Weapon.Fire formula.
 - **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire
   passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds

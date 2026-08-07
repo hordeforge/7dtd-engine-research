@@ -217,6 +217,15 @@ Static noise table for smell / sound attraction.
 
 Used by `AIHordeSpawner` and blood-moon party logic for stage-scaled counts.
 
+**`Tick(Double)` (IL=52):** if no `spawnGroup`, return false (finished). Advance
+stage when `worldTime >= nextStageTime` (if set) **or** when
+`spawnCount >= numToSpawn` and `interval` countdown hits 0; then `groupIndex++`,
+`SetupGroup()`. Return true while `spawnGroup != null` (still active).
+
+**`get_canSpawn` (IL=11):** `spawnGroup != null && spawnCount < numToSpawn`.
+
+**`IncSpawnCount` (IL=7):** `spawnCount++`.
+
 ## `AIDirectorHordeComponent` : AIDirectorComponent
 
 Shared placement helpers for scout/wandering/chunk hordes.
@@ -467,8 +476,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** AIHordeSpawner.Tick IL=228 day/night radii, 2400 investigate,
-  one spawn per tick; Scout Update finish; Horde.Tick destroy path.
+- **2026-08-07:** GameStagePartySpawner Tick stage advance/canSpawn;
+  AIHordeSpawner.Tick radii 2400; Scout Update; Horde.Tick destroy.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset

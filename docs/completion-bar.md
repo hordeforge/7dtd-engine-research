@@ -196,6 +196,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | TickActiveSpawns drain + heal medical 0.67 | aidirector / vehicles |
 | Scout Update finish + Horde.Tick + CanAttack | aidirector / vehicles |
 | AIHordeSpawner.Tick radii + Weapon cooldown | aidirector / vehicles |
+| MachineGun/Stun/Heal Fire + PartySpawner Tick | vehicles / aidirector |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
