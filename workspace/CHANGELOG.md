@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity physics hooks
+
+Done (V3.1.0 b14 IL):
+- Entity.FixedUpdate (IL=71) narrated in loop.md Path B: ApplyFixedUpdate
+  then wasFixedUpdate=true; velocity/angularVelocity damped x0.9 per step;
+  physicsPos = Lerp(rbt.position, physicsTargetPos+physicsBasePos, 0.4),
+  physicsRot = Slerp(rot, Euler(0,yaw,0), 0.3), SetPositionAndRotation;
+  CrouchHeightFixedUpdate when physics capsule on EntityAlive.
+- Entity.PhysicsMasterTargetFrameUpdate (IL=52): elapsed/time ratio lerp of
+  physicsMaster FromPos/TargetPos and FromRot/TargetRot, SetPosition(pos,true)
+  + qrotation, mirrored into physicsRB origin-space, targetTime zeroed on
+  completion so next frame reverts to updateTransform.
+
 ## 2026-08-08 - tier-C: Entity.updateTransform
 
 Done (V3.1.0 b14 IL):

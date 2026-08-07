@@ -278,6 +278,22 @@ yaw-only `LerpAngle(current, yaw, dt * updateRotationLerpTimeScale)`.
 **Remote entities** additionally mirror `PhysicsTransform` position toward
 `position - Origin.position` with the same lerp scale.
 
+**Physics hooks:** `Entity.FixedUpdate()` (IL=71), the Unity fixed-step
+companion: `ApplyFixedUpdate()` first, set `wasFixedUpdate = true`, then with a
+physics rigidbody damp velocities by **0.9** per step (`velocity` and
+`angularVelocity`), blend `physicsPos = Lerp(physicsRBT.position,
+physicsTargetPos + physicsBasePos, 0.4)` and `physicsRot = Slerp(rot,
+Euler(0, rotation.y, 0), 0.3)`, apply via `SetPositionAndRotation`, and call
+`EntityAlive.CrouchHeightFixedUpdate()` when a physics capsule collider exists
+on an alive entity. `Entity.PhysicsMasterTargetFrameUpdate()` (IL=52) is the
+target-pose interpolator used while `physicsMasterTargetTime > 0` (in base
+`Entity.Update`): advances `physicsMasterTargetElapsed`, lerps
+`physicsMasterFromPos → physicsMasterTargetPos` (and the quaternion pair) at
+`t = elapsed / time`, applies through `SetPosition(pos, true)` +
+`qrotation`, mirrors into `physicsRB` (origin-space), and zeroes
+`physicsMasterTargetTime` once the blend completes (reverting the next frame
+to `updateTransform`).
+
 Slice model (EMA frame gaps, ~25 base, `tickEntitySliceCount`): [`entity-ai.md`](entity-ai.md).
 
 ### 3.4 AI / path onion (authority path)
@@ -518,6 +534,10 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-07:** Physics hooks in loop.md Path B: FixedUpdate (IL=71) 0.9
+  velocity/angular damping + 0.4/0.3 pos/rot blends + crouch-height; ApplyFixedUpdate
+  wasFixedUpdate consumption; PhysicsMasterTargetFrameUpdate (IL=52) elapsed-ratio
+  target lerp into SetPosition/qrotation/physicsRB, auto-expiry to updateTransform.
 - **2026-08-07:** Entity.updateTransform (IL=183): attach/ragdoll early-outs,
   physics-RB vs origin-space position lerp, isRotateToGround pitch smoothing
   (0.86/0.8 gains, normal clamp 0.99/0.7), yaw LerpAngle, remote PhysicsTransform
