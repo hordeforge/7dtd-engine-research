@@ -496,6 +496,13 @@ null. `GetSpawnPoints` (IL=3) exposes `spawnPointList`; `SetScript(script)`
 (IL=15) nulls `minScript` for an empty script, else builds a fresh `MinScript`
 and `SetText`s it.
 
+**World sleeper registry:** `sleeperVolumes` is a locked
+`Dictionary<int, SleeperVolume>`. `World.GetSleeperVolume(index)` (IL=30) does
+a `TryGetValue` under the lock and **throws** `SleeperVolume id {0} not found`
+on a miss (a hard-fail lookup, not a null return);
+`GetAllSleeperVolumes(volumes)` (IL=43) copies every `(id, volume)` tuple into
+the caller's list under the same lock.
+
 **`World.GetClosestPlayerSeen(entity, distMax, lightMin)` (IL=68):** same distance
 scan, require not dead + spawned, `Stealth.lightLevel >= lightMin`, and
 `entity.CanSee(player)`.
