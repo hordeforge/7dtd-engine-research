@@ -466,6 +466,14 @@ ticks since `LastTimeRandomTicked`; for each ticked block pos call
 **`RestoreCulledBlocks` (IL=58):** walk `insideDevices` reverse; OR face flags
 for devices on chunk edges (x=0 → 8, x=15 → 32, z=0 → 4, z=15 → 16); clear
 `IsInternalBlocksCulled`; return flags.
+
+**`WorldBlockTicker.execute(entry, rnd, ticksIfLoaded)` (IL=24):** if live block
+type still matches entry `blockID`, call
+`Block.UpdateTick(world, pos, bv, random=false, ticksIfLoaded, rnd)`.
+
+**`AddScheduledBlockUpdate(pos, blockId, ticks)` (IL=39):** no-op if blockId 0;
+build entry at `GameTimer.ticks + ticks`; under lock replace existing same
+hash then `add(entry)`.
 | `AddFallingBlock` / `LetBlocksFall` | 38 / 220 | Collapse storms |
 | `AddFallingBlock` detail | 38 | HashSet dedupe; skip child/air/`StabilityIgnore`/oversized (unless include); `DynamicMeshManager.AddFallingBlockObserver`; enqueue `fallingBlocks` |
 | `EntityFallingBlock` OnUpdateEntity | 300+ | Entity cost |
@@ -575,6 +583,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** WorldBlockTicker.execute type match; AddScheduledBlockUpdate.
 - **2026-08-07:** WorldBlockTicker scheduled 100 cap; random 1200 ticks; RestoreCulledBlocks flags.
 - **2026-08-07:** UpdateTick IL=150 slice/full; save 40 ticks; deco 60s; SetBlocksOnClients 192.
 - **2026-08-07:** TickEntitiesSlice/Flush; TickEntities list rebuild;

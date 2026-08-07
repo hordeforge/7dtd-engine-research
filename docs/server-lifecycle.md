@@ -58,6 +58,17 @@ check.
 server only) advances round state from GameStats (time/day/frag limit modes) and
 the world clock; `nextRound` / `SetBloodMoonDay` drive the horde schedule.
 
+**`OnUpdateTick` (IL=198) server gates:**
+
+1. If GameStats bool **2** (time limit): once per second wall, decrement
+   GameStats int **3**; when &lt; 0, `StartRound(nextRound)` and dirty.
+2. If GameStats bool **4** (day limit): when `WorldTimeToDays &gt;
+   GameStats[5]`, `StartRound(nextRound)`.
+3. If GameStats bool **6** (frag limit): every **40** ticks scan players'
+   `KilledPlayers` vs GameStats frag target → round advance residual.
+4. Count living non-dead entities vs class limits residual; set dirty GameStats
+   and if dirty broadcast `NetPackageGameStats` flags **192**.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Day
@@ -391,6 +402,7 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-07:** GameStateManager OnUpdateTick time/day/frag gates; GameStats package.
 - **2026-08-07:** IsLandProtectedBlock IL=104 (self allow, foreign deny, ally
   keystone flag); InBoundsForPlayersPercent soft edge 50/80, need ≥0.5.
 - **2026-08-07:** GetLandClaimOwner IL=119/88 (GameStats 1/44/46, lpblock index,

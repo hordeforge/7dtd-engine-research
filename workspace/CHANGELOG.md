@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: block ticker execute and GameStateManager gates
+
+Done (V3.1.0 b14 IL):
+- WorldBlockTicker.execute type-match UpdateTick; AddScheduledBlockUpdate replace hash.
+- GameStateManager OnUpdateTick: time/day/frag gates; NetPackageGameStats dirty broadcast.
+---
 ## 2026-08-07 — tier-C: WorldBlockTicker and SpawnManagerDynamic
 
 Done (V3.1.0 b14 IL):
