@@ -577,6 +577,16 @@ entities. The (slotID, id) variant (IL=72) resolves the id through
 `CosmeticMappingIDString` into an `ItemClassArmor` (id 0 clears the slot) and
 stores into the mapped or generic slot.
 
+**Equipment leaves:** `updateInsulation()` (IL=32) recomputes `waterProof` as
+the sum of every equipped slot's `ItemClass.WaterProof`;
+`GetTotalInsulation` / `GetTotalWaterproof` (IL=3) read the accumulated
+fields. `DropItemOnGround(item)` (IL=21) spawns a 1-count stack via
+`IGameManager.ItemDropServer(stack, entity position, velocity (0.5, 0, 0.5),
+belongsPlayerId, 60 s lifetime, false)` (the armor drop on death/swap path).
+`GetArmorGroupLowestQuality(group)` (IL=13) is
+`ArmorGroupEquipped[group].LowestQuality` (0 when not equipped);
+`HasAnyItems` (IL=22) is a non-null slot scan.
+
 **Armor-group bookkeeping:** `Equipment.ResetArmorGroups()` (IL=51) clears the
 `ArmorGroupEquipped` dictionary and rebuilds it from `m_slots`: every equipped
 `ItemClassArmor` registers each of its `ArmorGroup` names via
