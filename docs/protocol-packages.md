@@ -1567,6 +1567,25 @@ count : i32
 
 Used by vehicle/drone managers for multi-entity waypoint push.
 
+#### `NetPackageWorldAreas` (trader-area push)
+
+The trader protection areas are delivered to clients in one package
+(`write` IL=31 / `read` IL=27):
+
+```text
+version : u8     // 1
+count : i16
+// count x: TraderArea.Write
+```
+
+`TraderArea.Write` (IL=111): `Position : Vector3i` (3 x i32), `PrefabSize :
+Vector3i` (3 x i16), a protect-margin `Vector3i` (3 x sbyte), `u8`
+teleport-volume count, then per volume 6 bytes (3 x sbyte position + 3 x u8
+size); `GetReadWriteSize` (IL=10) = **21 + count*6**. `Setup(list)`
+(IL=5) stores the list; `ProcessPackage` (IL=4) runs
+`world.SetWorldAreas(list)` - the client replaces its trader-area set, which
+is what the placement/repair/dump-water gates then consult.
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -1620,6 +1639,9 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-08:** NetPackageWorldAreas wire (write IL=31 / read IL=27):
+  u8 version 1 + i16 count + TraderArea.Write each; TraderArea.Write IL=111
+  layout + GetReadWriteSize 21+count*6; ProcessPackage -> SetWorldAreas.
 - **2026-08-08:** Explosion.AttackEntites IL=691: passive 20/21
   entityDamage/radius, OverlapSphere scan, item-drop destruction
   (OnDamagedByExplosion + SetDead), E_BP_ root resolve + sleeper wake,
