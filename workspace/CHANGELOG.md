@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemActionAttack modifiers
+
+Done (V3.1.0 b14 IL):
+- items.md 4: difficultyModifier IL=44 (client-controlled scaling, Incoming/EntityIncomingDamageModifier), DegradationModifier IL=14 lerp, harvest-tool bonus IL=43
+
 ## 2026-08-08 - tier-C: entity registers + distance family
 
 Done (V3.1.0 b14 IL):
