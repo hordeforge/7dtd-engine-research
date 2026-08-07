@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `1ffb0fd` QuestJournal leaves |
-| Commits since dry-run `3b61d9c` | ~244 |
+| HEAD (at handoff write) | `2a00c72` Progression leaves |
+| Commits since dry-run `3b61d9c` | ~245 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

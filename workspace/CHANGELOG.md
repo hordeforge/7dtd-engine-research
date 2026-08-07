@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Progression leaves
+
+Done (V3.1.0 b14 IL):
+- progression.md 2: GetDict (IL=4) + CalcId (IL=4) name-id registry;
+  GetPerkList (IL=40) Perk/Book under parent skill; addProgressionCurrency
+  (IL=85) Skill-type scale via passive 86 SkillExpGain, cost/level cycle with
+  CalculatedCostForLevel carry-over, MaxLevel clamp; ToBytes/FromBytes (IL=28/
+  31) pooled Write/Read wrappers; ClearProgressionClassLinks (IL=27).
+
 ## 2026-08-08 - tier-C: QuestJournal leaves
 
 Done (V3.1.0 b14 IL):
