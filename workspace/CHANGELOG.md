@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: Stability queueStabilityAvail cap 200
+
+Done (V3.1.0 b14 IL):
+- BlockPlacedAt enqueues avail recompute only when queue count < 200.
+- BlockRemovedAt neighbor re-queue uses the same 200 hard cap.
+---
 ## 2026-08-07 — tier-C: FallingBlock crush damage and land drops
 
 Done (V3.1.0 b14 IL):

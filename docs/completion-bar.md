@@ -173,6 +173,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | EAI Break/Wander/RunAway/Ranged leaves | entity-ai §D2 |
 | updateTasks freeze + GroupFallingBlocks | entity-ai §5.1b / §8 |
 | FallingBlock crush damage + land drops | entity-ai §8 |
+| Stability queueStabilityAvail cap 200 | stability.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

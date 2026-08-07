@@ -69,7 +69,8 @@ never carries more than 1.
 `stab0Positions`, delegates to `ChannelCalculator::BlockRemovedAt(pos, out)` and,
 when not remote, walks all 6 neighbors, zeroing the stability of neighbors that
 fail `IsBlockSupportedByNeighbor` and collecting them into `stab0Positions`
-(positions whose byte goes to 0).
+(positions whose byte goes to 0). Neighbor re-queue into `queueStabilityAvail`
+is capped at **200** entries (same hard cap as placement).
 
 `ChannelCalculator::BlockRemovedAt` (81 IL) skips air/liquid/`StabilityIgnore`,
 then runs `CalcChangedPositionsFromRemove(pos, list2, stab0, null)`:
@@ -90,6 +91,10 @@ plane recompute path: set the removed cell's byte to 0, then `unspreadHorizontal
 then re-spread from the remaining supported anchors).
 
 ### Placement (StabilityCalculator::BlockPlacedAt / ChannelCalculator::BlockPlacedAt)
+
+`StabilityCalculator::BlockPlacedAt` (**IL=19**): always
+`channelCalculator.BlockPlacedAt(pos, forceFull)`; if not remote and
+`queueStabilityAvail.Count < **200**`, enqueue pos for avail recompute.
 
 `ChannelCalculator::BlockPlacedAt(pos, isForceFullStab)` (154 IL) with
 `getMaxStabilityAround(pos, out bFromDownwards)`: the new block's stability is
@@ -165,6 +170,8 @@ channel today; the plane can be recomputed on load with
 
 ## Changelog
 
+- **2026-08-07:** BlockPlacedAt / BlockRemovedAt `queueStabilityAvail` hard cap
+  **200**; placement always channels then optional enqueue when not remote.
 - 2026-08-06: derived plane seed/spread/removal/fall paths from
   `StabilityCalculator`, `StabilityInitializer`, `ChannelCalculator`,
   `World::AddFallingBlock/LetBlocksFall` and `EntityFallingBlock(s)`; dumps in
