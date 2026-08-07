@@ -117,6 +117,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | ServerConsoleCommand 6-step path | console-commands §2 |
 | AddLevelExp IL=161 order | progression §2 |
 | Manager Update behaviour re-pins | managers §1 / §1.1 |
+| EAI leaf Update/CanExecute IL table | entity-ai §D2 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

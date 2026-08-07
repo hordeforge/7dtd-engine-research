@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EAI leaf Update/CanExecute IL table
+
+Done (V3.1.0 b14 IL):
+- entity-ai §D2: ApproachAndAttack 846/CanExecute 70, RangedAttack 107,
+  RunAway 105, Wander.CanExecute 94, DestroyArea 60, ApproachSpot 40,
+  Dodge 27, Wander/Leap Update 7.
+---
 ## 2026-08-07 — tier-C: manager Update behaviour re-pins
 
 Done (V3.1.0 b14 IL):

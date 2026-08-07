@@ -527,7 +527,7 @@ Top decision tasks (when EAI Update runs):
 
 | IL | Method | Role |
 |---:|---|---|
-| **846** | `EAIApproachAndAttackTarget.Update` | Primary chase/attack; **3× FindPath** calls in one Update |
+| **846** | `EAIApproachAndAttackTarget.Update` | Primary chase/attack; home/eat branches; **3× FindPath** in one Update |
 | 317 | `EAIDestroyArea.Continue` | Destroy |
 | 281 | `EAISetNearestEntityAsTarget.FindTarget` | Target acquisition + bounds queries |
 | 184 | `FindTargetPlayer` | Player targeting |
@@ -535,9 +535,14 @@ Top decision tasks (when EAI Update runs):
 | 166 | `EAIRunawayFromEntity.FindEnemy` | Flee scan |
 | 137 | `EAITaskList.OnUpdateTasks` | Scheduler |
 | 118 | `EAIBreakBlock.AttackBlock` | Break |
-| 107 | Melee / Ranged attack Update | Attacks |
-| 105 | `EAIRunAway.Update` | Flee |
-| 94 | ApproachDistraction / Wander.CanExecute | |
+| **107** | `EAIRangedAttackTarget.Update` | elapsedTime += 0.05; look/seek yaw; fire window |
+| **105** | `EAIRunAway.Update` | Path check; distSq **1.21** re-pick; FindRandomPos |
+| **94** | `EAIWander.CanExecute` | sleep/stun/alert gates; `executePercent` vs RandomFloat; interestDistance |
+| **70** | `EAIApproachAndAttackTarget.CanExecute` | !sleeping, stun, jump/swim; requires attack target type in `targetClasses` |
+| **60** | `EAIDestroyArea.Update` | holding `ItemActionAttackData`; look + Attack + hitDelegate |
+| **40** | `EAIApproachSpot.Update` | path/moveHelper unreachable; updatePath (Astar line + pathCounter 20..40) |
+| **27** | `EAIDodge.Update` | look at target head if in front |
+| **7** | `EAIWander.Update` / `EAILeap.Update` | thin (0.05 step) |
 
 UAI package path also present (`UAIBase`, considerations, MoveToTarget, etc.).
 
@@ -961,6 +966,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EAI leaf Update/CanExecute IL table expansion (Approach 846,
+  Ranged 107, RunAway 105, Wander.CanExecute 94, Destroy 60, ApproachSpot 40).
 - **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;
   UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;
