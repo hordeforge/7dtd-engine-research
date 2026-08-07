@@ -689,6 +689,12 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   chunk region resets. `RegionFileManager.RemoveChunks` calls
   `DecoManager.ResetDecosForWorldChunk(chunkKey)` so chunk resets restore
   generated trees.
+  `AddDecorationAt` (IL=142) is the attach: off-main calls queue into
+  `addDecosFromThread` (`SAddDecoInfo`); on the main thread it snaps
+  `realYPos` to `GetTerrainHeightAt(x, z) + 1` when the block below is terrain
+  (unless `forceBlockYPos` or `pos.y <= 0`), sets `bDirty`, and skips a
+  re-add when the chunk already holds a record with the same
+  `realYPos`/`bv`/rotation.
   `GetDecorationsOnChunk` (IL=143) lazily decorates an undecorated DecoChunk
   under its lock (`Decorating chunk, should not happen at this point!` error),
   reads the 16x16 bucket, warns
