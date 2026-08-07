@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: MaxUseTimes chain
+
+Done (V3.1.0 b14 IL):
+- items.md 7: get_MaxUseTimesBase (IL=25) DegradationMax passive;
+  get_MaxUseTimes (IL=5) ModMaxUseTimes(base); get_MaxUseTimesUI (IL=3) base
+  only.
+
 ## 2026-08-08 - tier-C: holding dispatch reads
 
 Done (V3.1.0 b14 IL):
