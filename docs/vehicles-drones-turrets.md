@@ -219,6 +219,10 @@ is a `~`-separated list of vectors: each becomes an
 Without seat properties the fallback exit is `GetPosition() - 2 * right` at
 yaw + 90.
 
+**`Entity.IsAttached(entity)` (IL=8)** is `FindAttachSlot(entity) >= 0` (the
+other is attached to this entity); `EntityDrone.IsAttachedToVehicle(entity)`
+(IL=11) checks the entity's `AttachedToEntity` is an `EntityVehicle`.
+
 `DetachEntity` (**IL=157**): cancel delayed attach; pose -1; remove IK; restore
 model/layers; re-enable controller; remove vehicle actions; `DriverRemoved` if
 driver; base detach; unlock interaction when free seats return.
@@ -603,6 +607,8 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-07:** Entity.IsAttached (IL=8) = FindAttachSlot >= 0; Drone
+  IsAttachedToVehicle (IL=11) AttachedToEntity is EntityVehicle.
 - **2026-08-07:** Seat slot definition: EntityVehicle.GetAttachedToInfo (IL=158)
   defaults + seat<idx> DynamicProperties overrides, ~-separated exits with
   TransformDirection + y+0.02, fallback -2*right exit.

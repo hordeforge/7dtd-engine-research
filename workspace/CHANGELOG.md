@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.IsAttached
+
+Done (V3.1.0 b14 IL):
+- Entity.IsAttached (IL=8) = FindAttachSlot(entity) >= 0;
+  EntityDrone.IsAttachedToVehicle (IL=11) = AttachedToEntity is
+  EntityVehicle. vehicles-drones-turrets.md 4.2.
+
 ## 2026-08-08 - tier-C: seat slot definition
 
 Done (V3.1.0 b14 IL):
