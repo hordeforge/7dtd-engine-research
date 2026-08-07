@@ -326,6 +326,14 @@ While rented, the owner stocks the machine and sets a per-item `Entry.Markup`; o
 players buy at the owner-priced rate (§5). Buying and selling flow through the same net
 package as NPC traders, so the server stays authoritative over the machine's inventory.
 
+**Autobuy timer:** `SetAutoBuyTime(isInitial)` (IL=21) advances the
+`nextAutoBuy` timestamp by **24000** world ticks (one in-game day), from
+`worldTime` on the initial call or from the previous `nextAutoBuy` value on
+renewal. Accessors: `get_IsRentable` (IL=5) = `TraderData.TraderInfo.Rentable`;
+`get_RentTimeRemaining` (IL=9) = `rentalEndDay - WorldTimeToDays(worldTime)`
+as a float day count; `get_RentalEndDay` (IL=3), `GetUsers` (IL=3), and
+`GetPasswordHash` (IL=3) are field reads.
+
 ---
 
 ## 6b. World item drops and bag containers (IL re-pin 2026-08-07)
