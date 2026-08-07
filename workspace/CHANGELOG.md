@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: AIDirector leaves
+
+Done (V3.1.0 b14 IL):
+- aidirector.md: GetActivityWorldTimeDelay (IL=16) clamp(TimeOfDayIncPerSec/6,
+  0.2, 5)*1000; ComponentsInitNewGame (IL=20) per-component InitNewGame;
+  NotifyIntentToAttack (IL=1) empty residual.
+
 ## 2026-08-08 - tier-C: GameEventManager flag store
 
 Done (V3.1.0 b14 IL):
