@@ -712,6 +712,15 @@ player, none, true, false, true)` - the loot list rolled at the **party's
 highest loot stage** - granting each spawned stack (quality items with
 `MaxDurabilityModifier = 1`) via `AddItem` or the `ItemDropServer` fallback.
 
+**`ItemActionQuest.ExecuteInstantAction` (IL=87)** is the quest-item
+activator (local player only): `QuestClass.GetQuest(QuestGiven)` gates on
+`QuestJournal.FindQuest(name, -1)` - an existing non-repeatable or active
+quest shows the `questunavailable` tooltip - then `QuestClass.CanActivate()`
+and, when allowed, `CreateQuest()` opens
+`XUiC_QuestOfferWindow.OpenQuestOfferWindow(xui, quest, -1, 0, -1, null)`
+with the `stackController` set and `QuestLock = true` - the item stays
+locked until the offer is accepted.
+
 **`GetDamageEntity` (IL=52) / `GetDamageBlock` (IL=70):** build FastTags =
 Primary/Secondary action tag | item tags (or MeleeTag) | holder stance/movement
 tags (| block tags for block damage). Then
@@ -1377,6 +1386,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionQuest.ExecuteInstantAction IL=87: GetQuest +
+  FindQuest repeatable/active gate + CanActivate, CreateQuest ->
+  XUiC_QuestOfferWindow with stack QuestLock.
 - **2026-08-08:** ItemActionOpenLootBundle.ExecuteInstantAction IL=183:
   GetLootContainer(lootListName) + LootContainer.Spawn at party highest
   loot stage, grant via AddItem/ItemDropServer.
