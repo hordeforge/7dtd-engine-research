@@ -121,6 +121,11 @@ recursive nested `ItemValue`s for installed mods.
 | 13 | `Seed` | `u16` | procedural seed (zeroed when `type == 0`) |
 | 14 | TextureFullArray present | `bool` | `!IsDefault`; if present, `TextureFullArray.Write` follows (painted textures) |
 
+Id-space accessors: `ItemValue.GetItemOrBlockId()` (IL=12) returns `type`
+below `Block.ItemsStartHere` (block space) and `type - Block.ItemsStartHere`
+above (item space); `GetItemId()` (IL=5) unconditionally subtracts
+`Block.ItemsStartHere` (the item-space id used by the wire encoding above).
+
 After the body the write does save-id bookkeeping (`NameIdMapping.MarkIdUsed`)
 so a save can remap ids on load; that produces no wire bytes. `Read` mirrors the
 same order, opposite direction, and reconstructs the nested mods recursively.
