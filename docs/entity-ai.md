@@ -1469,6 +1469,21 @@ slope; stop when any `BlockedFlags`.
 around head/moveTo with HitInfo/HitInfo2; `SelectBestHit`; may set temp move
 when blocked.
 
+**`GetAttackHitInfo(ref damageMpy)` (IL=49):** if `BlockedEntity` present: 30%
+chance stun **0.5** + Strength `MassKg*0.4`, else Strength `MassKg*0.2` no stun;
+`DoRagdoll` on blocker. Always set `damageMpy=0` and return **null** (block hit
+path not used from this delegate when entity-blocked).
+
+**`IsABlockSideOpen(pos, chunk)` (IL=69):** for 4 cardinal offsets from
+`blockOpenOffsets` (pairs in int array length 8): if neighbor not
+`IsMovementBlocked(..., face 255)` return true; else false (fully enclosed).
+
+**`SearchForDestroyPos(ref pos, radius, isLookFar)` (IL=325):** random start
+radius (lookFar: Random(radius/2, radius), y−2, scan inward); walk
+`destroyData[]` offset patterns; `GetBlockColumn` of 7 cells; score breakable
+non-air non-terrain with open side (`IsABlockSideOpen`); need score ≥ **2** or
+radius ≥ **5**; write best block center xz into `destroyPos`.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;

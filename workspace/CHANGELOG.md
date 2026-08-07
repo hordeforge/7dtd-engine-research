@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SearchForDestroyPos and GetAttackHitInfo
+
+Done (V3.1.0 b14 IL):
+- GetAttackHitInfo: 30% stun MassKg*0.4 else *0.2 ragdoll; damageMpy 0 null hit.
+- IsABlockSideOpen: 4 cardinals movement blocked check.
+- SearchForDestroyPos: destroyData patterns, column scan, open-side score.
+---
 ## 2026-08-07 — tier-C: MoveHelper Push, area block, side-step
 
 Done (V3.1.0 b14 IL):

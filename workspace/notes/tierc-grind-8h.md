@@ -34,3 +34,7 @@
 - bda930c CalcPartyLevel (spawning.md wipe bug)
 - 2eff428 restore spawning.md
 - SetRevengeTarget / IsInFrontOfMe next commit
+
+- b089640 Push/area/side-step
+- a36a49e door/entity/AttackPush
+- next: SearchForDestroyPos commit
