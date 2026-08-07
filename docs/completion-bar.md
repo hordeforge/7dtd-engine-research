@@ -176,6 +176,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | Stability queueStabilityAvail cap 200 | stability.md |
 | getMaxStabilityAround + ChangeStability | stability.md |
 | TurretTracker 120s save; vehicle attach | vehicles-drones-turrets |
+| World.CanPlaceBlockAt claim/trader/bounds | blocks §6 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

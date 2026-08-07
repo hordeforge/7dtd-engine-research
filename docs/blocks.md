@@ -292,6 +292,20 @@ order, mostly skipped in edit mode):
 Passing the gate, the change commits through the `SetBlock` path (§4) and
 `OnBlockAdded` fires.
 
+**`World.CanPlaceBlockAt` (IL=129)** is a separate land-claim / world gate used
+by pickup and placement callers (not the Block virtual above):
+
+1. If `!traderAllowed` and sandbox trader areas on and `IsWithinTraderArea`:
+   deny.
+2. If `InBoundsForPlayersPercent(centerXZ) < 0.5`: deny (map edge soft bound).
+3. If land-claim GameStats index **1** != 1: allow (claims off).
+4. Else scan chunks in claim half-extent (`GameStats` **44**, same ring math as
+   `GetLandClaimOwner`); if any `IsLandProtectedBlock(..., forKeystone=false)`:
+   deny; else allow.
+
+**`World.CanPickupBlockAt` (IL=14):** deny in trader area when trader sandbox on;
+else `CanPlaceBlockAt(pos, lp, traderAllowed=false)`.
+
 **Activation.** `HasBlockActivationCommands` -> `GetBlockActivationCommands`
 returns a `BlockActivationCommand[]`; each entry's `enabled` is computed per
 request (land protection, take-delay, and so on). The player selects one and
@@ -416,6 +430,8 @@ carries the composite data template while the feature modules own the behavior.
 
 ## Changelog
 
+- **2026-08-07:** World.CanPlaceBlockAt IL=129 (trader, 0.5 bounds, claim ring
+  GameStats 1/44); CanPickupBlockAt trader then place gate.
 - **2026-08-07:** DropItemsOnEvent IL=246 (prob table, stick vs ItemDropServer,
   recipe scrap half ingredients, trader-area stick suppress).
 

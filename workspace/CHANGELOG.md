@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: World.CanPlaceBlockAt claim and trader gates
+
+Done (V3.1.0 b14 IL):
+- CanPlaceBlockAt: trader area, InBoundsForPlayersPercent 0.5, GameStats 1/44 claim ring.
+- CanPickupBlockAt: trader deny then CanPlaceBlockAt(traderAllowed=false).
+---
 ## 2026-08-07 — tier-C: getMaxStabilityAround and vehicle attach
 
 Done (V3.1.0 b14 IL):
