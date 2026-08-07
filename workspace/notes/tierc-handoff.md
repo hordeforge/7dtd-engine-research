@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `4378b1d` BoundsUtils.ClipBoundsMove |
-| Commits since dry-run `3b61d9c` | ~113 |
+| HEAD (at handoff write) | `cf2791e` Entity.SetupBounds |
+| Commits since dry-run `3b61d9c` | ~114 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
