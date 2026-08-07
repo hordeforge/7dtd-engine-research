@@ -295,6 +295,48 @@ fires, then the outcome branches on `d`:
   `SpawnDestroyFX`, `SetBlockRPC` to the destroyed result (air), and fire
   `blockDestroyedEvent`.
 
+**`BlockPlaceholderMap.Replace` (IL=292) is the substitution engine behind
+"replace with `UpgradeBlock` / `DowngradeBlock`" above.** The map is a
+`Dictionary<BlockValue, List<PlaceholderTarget>>`; a second dictionary
+`questResetPlaceholders` holds `QuestPlaceholderEntry` lists for quest-driven
+resets. Flow of the 9-arg core:
+
+- **Registry miss:** if the incoming `BlockValue` is not a key, it is returned
+  unchanged (the block stands as-is).
+- **Alternate list:** with `useAlternate` and a matching key, the first
+  `QuestPlaceholderEntry` whose `QuestTag.Test_AnySet(questTags)` is true
+  supplies the target list. `FastTags.none` (what the plain wrappers pass)
+  never matches, so the alternate branch only fires with real quest tags.
+- **Target filtering:** a target passes iff its `biomeName` equals the cell
+  biome (`Chunk.GetBiomeId` on `World.toBlockXZ` coords, resolved through
+  `Biomes.GetBiome`, compared case-insensitively) and its `sandboxOption` is
+  not a failing boolean gate: the sentinel `(SandboxOptions)165` always passes;
+  an option of option type 4 must satisfy `GetBool(option) != invertSandbox`.
+- **Weighted draw:** survivors land in a stack `Span<int>` while their `Prob`
+  values accumulate; `roll = random.RandomFloat() * total` walks the span
+  subtracting each `Prob` (the last survivor is the fallback pick), and the
+  winner's `blockValue.type` is copied into the result.
+- **Rotation:** with `allowRandomRotation && target.isRandomRotation`, a block
+  whose shape `Has45DegreeRotations` rolls `RandomRange(8)` and maps rolls
+  above 3 to +20 (the 45-degree band), otherwise `RandomRange(4)`; in every
+  other case the original rotation is kept.
+- **Air sentinel:** a replacement equal to the input collapses to
+  `BlockValue.Air`, so a no-op substitution removes the block. An original
+  `ischild`/`parent` is restored on the result.
+
+The random source is the caller's `GameRandom`; when null, the core derives one
+from `Utils.RandomFromSeedOnPos` at chunk origin plus block coords (plus parent
+offset for children) with `World.Seed`, which makes the pick deterministic per
+position, and returns it via `GameRandomManager.FreeGameRandom` on exit. The
+5-arg wrapper (IL=19) resolves the chunk with `World.GetChunkFromWorldPos`,
+forwards blockY 0, `FastTags.none`, and random rotation allowed; its callers
+(plant growth, trigger downgrade) pass a live `WorldBase.GetGameRandom()`, so
+the seeded branch does not run through it. The `BlockValueRef` overload (IL=36)
+dispatches on `BlockValueRefType`: `Block` replaces at `BlockPosition`, while
+`None` and `Prop` yield air and any other type throws
+`ArgumentOutOfRangeException`. `IsReplaceableBlockType` (IL=10) is the registry
+probe: false for air, else `placeholders.ContainsKey`.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Intact
