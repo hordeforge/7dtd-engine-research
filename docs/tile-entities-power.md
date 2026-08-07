@@ -85,6 +85,12 @@ this container; a size mismatch logs `UpgradeDowngradeFrom: other.size=...`).
 called; logs `[TileEntity] read must be called before using this.`), else true
 when `readVersion >= 18`; it is the local-format gate read after `Read`.
 
+**Registry writes:** `Chunk.AddTileEntity(te)` (IL=7) is
+`tileEntities.Set(te.localChunkPos, te)`. Both remove paths flag `isModified`
+and wrap `OnRemove(world)` between `IsRemoving = true` / false:
+`RemoveTileEntityAt(world, pos)` (IL=28) looks up by local position and
+`RemoveTileEntity(world, te)` (IL=29) by the entity's own local pos.
+
 ### 1.1 Type registry and factory
 
 `TileEntityType` is a byte-valued enum. `TileEntity.InstantiateFromRead` reads the
