@@ -588,6 +588,16 @@ Passive **159** scales loot stage; **160** scales biome max when GameStats **66*
   sandbox count via `RandomCountFromSandbox` / `RandomCountFromSandboxTags` when
   `_sandboxModifierUsed`.
 
+### 8.3 Count and sandbox helpers
+
+**`GetSandboxProb(ItemClass)` (IL=9):** if item tags intersect
+`LootContainer.treasureTags` return static `TreasureMapChance`; else **1**.
+
+**`RandomSpawnCount(random, min, max, abundance)` (IL=52):** if `min < 0` return
+**-1**. Else sample `RandomRange(min-0.49, max+0.49)`, clamp to `[min,max]`,
+multiply by `abundance`, then probabilistic ceil of fractional part
+(`RandomFloat < frac` → +1). Integer result.
+
 ## Related docs
 
 | Doc | Role |
@@ -602,8 +612,8 @@ Passive **159** scales loot stage; **160** scales biome max when GameStats **66*
 
 ## Changelog
 
-- **2026-08-07:** getProbability IL=192 (template stage bands, passive 79,
-  sandbox); SpawnLootItemsFromList weighted unique loop; GetLootStage wrappers.
+- **2026-08-07:** GetSandboxProb treasureTags/TreasureMapChance; RandomSpawnCount
+  ±0.49 abundance ceil; getProbability passive 79; SpawnLootItemsFromList.
 - **2026-08-07:** EntityItem.OnUpdateEntity lifetime 0.05/tick, ground counter 10,
   distraction death, Y&lt;0 death; OnCollectServer RemoveEntity reason 2.
 - **2026-08-07:** EntityTrader.OnUpdateLive IL=315 (quest populate, 10 m bounds

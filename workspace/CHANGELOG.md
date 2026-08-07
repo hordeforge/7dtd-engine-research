@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: GetSandboxProb and RandomSpawnCount
+
+Done (V3.1.0 b14 IL):
+- GetSandboxProb: treasureTags -> TreasureMapChance else 1.
+- RandomSpawnCount: RandomRange(min-0.49,max+0.49)*abundance with frac ceil.
+---
 ## 2026-08-07 — tier-C: getProbability and SpawnLootItemsFromList
 
 Done (V3.1.0 b14 IL):
