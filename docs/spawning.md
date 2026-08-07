@@ -798,6 +798,13 @@ run or fire on the dedicated server.
   game day, with `bWrapDays` cycling past the end via modulo over `Count - 1`
   and `bClampDays` holding the last entry. `EntitySpawner` (§4) calls `Day` in
   its constructor, `Spawn`, and `SpawnManually` to pick the active wave class.
+  `Day` (IL=87): empty list -> null; with `bWrapDays` and `day >= Count`
+  (> 0), a single entry maps to day 1, otherwise `day = day % (Count - 1)`
+  with a zero result rebased to `Count - 1` (so the wrap cycles indices
+  1..Count-1); with `bClampDays` and `day >= Count`, `day = Count - 1`; the
+  slot is returned unless it holds a null padding entry, which falls back to
+  `days[0]`. `AddForDay` (IL=26) null-pads up to the target index and writes
+  the class.
 - **`SpawnEntry`** (nested `GameEventManager/SpawnEntry`, base `Object`) tracks
   one entity spawned by a game-event action sequence (`SpawnedEntity`, `Target`,
   `Requester`, owning `GameEvent`, `IsAggressive`). Its only method,
