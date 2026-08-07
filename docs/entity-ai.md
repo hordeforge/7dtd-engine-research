@@ -125,6 +125,11 @@ entityId, 1)`. With a local player present,
 then base `OnUpdateLive`, `EntitySeeCache.Clear()` (no see cache for players),
 `CheckSleeperTriggers()` (server + alive only, see the sleeper section).
 
+**`EntityAnimal.OnEntityDeath` (IL=24) override:** disable the
+`PhysicsTransform` GameObject, base `OnEntityDeath`, then remove the animal's
+last-known-position waypoint from the local player (`TryRemoveLastKnown
+PositionWaypoint(entityId)`).
+
 **`updateCurrentBlockPosAndValue` (IL=318):** foot block = entity block pos, or
 y-1 if air; resolve child to parent. If pos/value changed **or** landed this
 tick (`onGround && !wasOnGround`): store standing pos/value; server sets

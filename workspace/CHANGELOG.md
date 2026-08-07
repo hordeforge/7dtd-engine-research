@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityAnimal.OnEntityDeath
+
+Done (V3.1.0 b14 IL):
+- EntityAnimal.OnEntityDeath IL=24: physics transform off, base, waypoint
+  removal for local player.
 ## 2026-08-08 — tier-C: EntityPlayer.OnUpdateLive
 
 Done (V3.1.0 b14 IL):
