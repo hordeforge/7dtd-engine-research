@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk-heat component + AIDirectorChunkData
+
+Done (V3.1.0 b14 IL):
+- spawning.md 5: NotifyEvent IL=22 + StartCooldownOnNeighbors IL=55 (5x5 region grid, neighbors table)
+- spawning.md 5: AIDirectorChunkEventComponent Write/Read v1 (outer>=5), int64 region keys
+- spawning.md 5: AIDirectorChunkData AddEvent merge, DecayEvents, Tick, FindBestEventAndReset (240 cooldown), neighbor 180/720, SetLongDelay 1320, blob v2
+
 ## 2026-08-08 - tier-C: EntitySpawner persistence + Spawn wrapper
 
 Done (V3.1.0 b14 IL):
