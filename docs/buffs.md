@@ -107,6 +107,11 @@ stateDiagram-v2
 
 ## 3. Network sync
 
+**`RemoveBuff(name, instigator, netSync)` (IL=56):** resolve class via
+`BuffManager.GetBuff`; for each active with matching name set `Remove=true`;
+if any marked and `netSync`, `RemoveBuffNetwork` (instigator defaults to
+parent entityId when -1).
+
 Buffs that matter to other clients are synced. `AddBuff`/`RemoveBuff` take a
 `netSync` flag. **`AddBuffNetwork`/`RemoveBuffNetwork` are the send side, not the
 receive side:** each builds a `NetPackageAddRemoveBuff` (`Setup(...)`) and calls
@@ -163,8 +168,8 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
-- **2026-08-07:** BuffClass.canRun Requirements; FireEvent Effects gate; Tick
-  MinEvent 0/1/2/3.
+- **2026-08-07:** RemoveBuff marks Remove + optional RemoveBuffNetwork
+  (duration -1, adding=false); canRun Requirements; Tick MinEvent 0/1/2/3.
 - **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.
 - **2026-07-28:** NetPackageEntityStatsBuff pointer.
 

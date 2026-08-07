@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CalcSpawnPos and unloadEntity pipeline
+
+Done (V3.1.0 b14 IL):
+- CalcSpawnPos: radius yaw ±45°; GetMobRandomSpawnPosWithWater 0/10/30.
+- MarkToUnload: EntityAlive copies timeStayAfterDeath -> deathUpdateTime.
+- unloadEntity: delegates, OnEntityUnload, dict/map/chunk, vehicle/drone/turret, NED/path/AIDirector.
+- RemoveBuff: mark Remove + optional RemoveBuffNetwork.
+---
 ## 2026-08-07 — tier-C: SeekTarget kill gates and OnEntityUnload
 
 Done (V3.1.0 b14 IL):

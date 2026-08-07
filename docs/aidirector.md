@@ -446,6 +446,10 @@ still a target. If no player: if not `IsPlayerAliveAndNear(pos, **60**)` →
 **22500** (150 m) try `CalcSpawnPos` near player; if still not near **70** m or
 50% roll, `DecSpawnCount(1)` + `Kill`. Else true.
 
+**`CalcSpawnPos` (IL=28):** rotate `_radiusV` by random yaw in **±45°**
+(`(RandomFloat-0.5)*90` about up); focus+rotated radius into
+`GetMobRandomSpawnPosWithWater(center, min=0, max=10, height=30, noWater=false)`.
+
 `Tick` gates every spawn on `AIDirector::CanSpawn(1.9f)`: this is the 1.9x
 `MaxSpawnedZombies` blood-moon budget the stock serverconfig comment refers to. On
 each new spawn group it advances `spawnBaseDir` by +120 degrees and recomputes
@@ -523,8 +527,8 @@ minute<=59.
 
 - **2026-08-07:** StartingWeight=1 DiminishingReturns=0.5 statics; CalcPartyLevel
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
-- **2026-08-07:** SeekTarget 60/150/70 m kill gates + 50% DecSpawnCount; Scout
-  SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
+- **2026-08-07:** CalcSpawnPos ±45° radius + GetMobRandomSpawnPosWithWater 0/10/30;
+  SeekTarget 60/150/70 m; Scout SpawnUpdate 6000; UpdateHorde 18s.
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset
   cooldown 240 s; Flow/Evap damage packing cross-ref liquid.

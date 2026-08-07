@@ -65,8 +65,20 @@ If not `EntityPlayerLocal`: `OcclusionManager.RemoveEntity`. Clear navigator pat
 (`SetPath(null,0)`) and null `navigator`, `lookHelper`, `moveHelper`, `seeCache`;
 then base `Entity.OnEntityUnload`.
 
+**`Entity.MarkToUnload` (IL=4):** `markedForUnload = true`.
+`EntityAlive.MarkToUnload` also copies `timeStayAfterDeath` into
+`deathUpdateTime` (corpse linger clock).
+
 **`World.RemoveEntity(id, reason)` (IL=16):** if entity exists: `MarkToUnload` +
 `unloadEntity(entity, reason)`; return entity (or null).
+
+**`World.unloadEntity` (IL=216):** store `unloadReason`; fire
+`EntityUnloadedDelegates`; `OnEntityUnload`; remove from entity dict +
+`TickEntityRemove` + `EntityAlives`; `RemoveEntityFromMap`; chunk remove if
+still marked; vehicle/drone/turret tracker remove; server:
+`NetEntityDistribution.Remove`, `PathFinderThread.RemovePathsFor`, player
+disconnect path, `AIDirector.RemoveEntity`; always audio/weather/light entity
+removed hooks.
 
 **`NetPackageEntityRemove.ProcessPackage` (IL=24):** log if missing; always
 `RemoveEntity(entityId, reason)` (reason is u8 enum).
@@ -1137,8 +1149,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** OnEntityUnload clear path helpers; RemoveEntity MarkToUnload;
-  EntityRemove Process; Investigate pos set/clear.
+- **2026-08-07:** unloadEntity full teardown (NED/path/AIDirector/trackers);
+  MarkToUnload deathUpdateTime; OnEntityUnload helpers; EntityRemove Process.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
