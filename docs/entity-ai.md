@@ -414,6 +414,30 @@ noise.duration)`; on true `World.CheckSleeperVolumeNoise(pos)`. If
 `heatMapStrength > 0`: `NotifyActivity(type=3, blockPos, strength*scale,
 duration=**240**)`.
 
+**`AIDirectorData.FindNoise` (IL=11):** null name → false; else
+`noisySounds.TryGetValue(name, out noise)`.
+
+**`World.CheckSleeperVolumeNoise` (IL=62):** no-op if GameStats **24** false.
+Bump pos.y by **0.1**; lock chunk sleeper list and call each
+`SleeperVolume.CheckNoise`.
+
+**`SleeperVolume.CheckNoise` (IL=69):** only if `hasPassives`; AABB with **0.9**
+pad on all axes; skip if `(flags&7)==1`; else `TouchGroup(world, null, true)`
+(noise-driven active touch, no player).
+
+**`PlayerStealth.AttractTickServer` (IL=106):** every **40** ticks if cvar
+`ItemClassHeldEntity.CVarEntityStress` &gt; 0: radius =
+`stress * (1 + CalcSenseScale())`; `GetEntitiesAround(flags=14, pos, radius)`;
+for each with 20% roll and `DetectUsScale >= 1`, set closer
+`attractPlayer` / distance / `attractPlayerTimeoutTicks = **80**`.
+
+**`PlayerStealth.SmellTickServer` (IL=259) (outline):** spectator/smell-disabled
+clears; `SmellTickWet`; every **40** ticks `SmellUpdateItemsAndBlood`; ease
+`smellRadius` toward target (sheltered path uses 0.05 / floor 10); every **20**
+ticks publish cvar `smell`; every **40** ticks emit to nearby entities
+(flags **6**, radius `smellRadius*(1+sense)`) with 20% roll and DetectUsScale
+gate (blood/item smell attract path).
+
 **`LightManager.GetStealthLightLevel` (IL=30):** if no `myServer` return 0. Else
 sample at entity pos **y+1.68**:
 `clamp01(GetLightLevel(pos) + GetLightLevelFromMovingLights(id, pos))` and out
@@ -1361,8 +1385,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** NotifyNoise crouch muffling + heat 240; AddNoise sort; NotifyNoise
-  sleeper cap 360; CalcVolume passive 88; NoiseCleanup; stealth light y+1.68.
+- **2026-08-07:** CheckSleeperVolumeNoise + CheckNoise pad 0.9; AttractTick 40/80;
+  SmellTick outline; NotifyNoise heat 240; AddNoise sort; CalcVolume passive 88.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

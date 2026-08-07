@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CheckSleeperVolumeNoise and Attract/Smell ticks
+
+Done (V3.1.0 b14 IL):
+- CheckSleeperVolumeNoise: GameStats 24; y+0.1; per-volume CheckNoise.
+- CheckNoise: hasPassives AABB pad 0.9; TouchGroup(null, true) unless mode 1.
+- AttractTickServer: every 40 ticks stress cvar radius; 20% roll; attract timeout 80.
+- SmellTickServer outline: radius ease, cvar smell, emit flags 6 every 40 ticks.
+- FindNoise: noisySounds TryGetValue.
+---
 ## 2026-08-07 — tier-C: NotifyNoise heat map and AddNoise sort
 
 Done (V3.1.0 b14 IL):
