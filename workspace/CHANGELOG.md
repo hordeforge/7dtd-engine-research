@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockTrigger.CheckIsTriggered
+
+Done (V3.1.0 b14 IL):
+- BlockTrigger.CheckIsTriggered (IL=59) narrated in block-shapes.md: OR
+  mode any TriggeredByIndices channel in TriggeredValues; AND mode all
+  channels required. Trigger combination logic complete.
+
 ## 2026-08-08 - tier-C: BlockTrigger.OnTriggered
 
 Done (V3.1.0 b14 IL):

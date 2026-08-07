@@ -327,6 +327,11 @@ bv, changes, triggeredBy)` and then clear `TriggeredValues`.
 `BlockTriggerDowngrade.OnTriggered` (IL=15) adds `HandleDowngrade` (the block
 downgrades itself).
 
+**`BlockTrigger.CheckIsTriggered()` (IL=59)** implements the channel
+combination: in OR mode (`UseOrForMultipleTriggers`) it is true when **any**
+`TriggeredByIndices` channel sits in `TriggeredValues`; in AND mode it is true
+only when **all** of them do.
+
 `BlockTrigger.OnTriggered(player, world, channel, changes, source)` is the
 receiver-side state machine:
 
@@ -421,6 +426,8 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** BlockTrigger.CheckIsTriggered (IL=59): OR = any channel
+  latched, AND = all channels latched.
 - **2026-08-07:** BlockTrigger.OnTriggered (IL=27): channel latch +
   CheckIsTriggered combination gate + block callback + latch reset;
   BlockTriggerDowngrade adds HandleDowngrade.
