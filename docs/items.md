@@ -120,6 +120,16 @@ appear inside `NetPackageHoldingItem`, `NetPackagePlayerInventory`,
 [`protocol-packages.md`](protocol-packages.md) and
 [`tile-entities-power.md`](tile-entities-power.md)).
 
+**Stacking predicates (V3.1.0 b14):** `ItemStack.CanStackWith(other,
+allowPartialStack)` (IL=46) requires both stacks non-empty, same `type`, and
+for block ids (`type < Block.ItemsStartHere`) an equal `TextureFullArray` -
+unless the item is an `IsShapeHelperBlock` (shape helpers stack regardless of
+paint). With `allowPartialStack` it answers `CanStackPartly(ref count)` (the
+incoming stack can fill the remainder), else `CanStack(count)` (the whole
+stack must fit). `ItemStack.CanMoveTo(locationType, slotNumber)` (IL=15)
+defaults to true and delegates to `ItemClass.CanMoveToLocation` when the
+stack's class resolves (the toolbelt gate behind `Inventory.AddItem`).
+
 ---
 
 ## 3. ItemClass and the Actions array
@@ -740,6 +750,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** ItemStack predicates: CanStackWith (IL=46) same-type +
+  block texture equality (shape-helper exemption) + whole/partial stack;
+  CanMoveTo (IL=15) delegates to ItemClass.CanMoveToLocation.
 - **2026-08-07:** Inventory.AddItem (IL=121) give path: CanMoveTo(Toolbelt,-1)
   gate, stack-merge pass then empty-slot pass, notifyListeners + stats-changed;
   AddItemAtSlot (IL=84) slot-targeted with PUBLIC_SLOTS bound,

@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemStack stacking predicates
+
+Done (V3.1.0 b14 IL):
+- ItemStack.CanStackWith (IL=46) narrated in items.md section 2: both
+  non-empty + same type + block texture equality (IsShapeHelperBlock
+  exemption below Block.ItemsStartHere); allowPartialStack -> CanStackPartly
+  vs CanStack. CanMoveTo (IL=15): ItemClass.CanMoveToLocation delegation,
+  default true - the AddItem toolbelt gate.
+
 ## 2026-08-08 - tier-C: Inventory.AddItem
 
 Done (V3.1.0 b14 IL):
