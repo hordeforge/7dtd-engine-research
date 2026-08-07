@@ -72,6 +72,19 @@ was already flagged).
 **`Tick` (IL=27):** if entity remote **or** dead, return. Else `waitTicks++`; when
 `waitTicks >= 10`, reset to 0. Always call `TickWait(worldTime)`.
 
+**`UpdateNPCStatsOverTime(dt)` (IL=128)** is the buff-driven over-time health
+for NPCs (phase 1): it pulls
+`EffectManager.GetValuesAndSources(HealthChangeOT = 105, null, 0, entity,
+null, emptyTags, true, true)` and, per source, when `ParentType == 5`
+(buff) resolves the buff and applies `BuffClass.ModifyValue(entity, 105,
+buff, ref base, ref perc, none)` scaled by `dt`. A negative delta (damage)
+accumulates into `buffDamageRemainder`, and every full point is dealt as
+`DamageEntity(new DamageSource(buff.DamageSource, buff.DamageType) {
+BuffClass = buff }, whole, false, 0)` - fractional buff damage carries over
+between ticks instead of being lost or rounded up. A positive delta heals
+straight into `Health.Value`; non-buff sources apply `Value * dt`
+directly.
+
 **Base `TickWait` (IL=75)** uses `waitTicks` as a 10-phase round-robin (dt=0.5):
 
 | waitTicks | Work |
@@ -204,6 +217,11 @@ Each `Stat` record (`Stat.Write` IL=24 / `Read` IL=32) is version **6** with
 | [entity-ai.md](entity-ai.md) | The entity update that ticks stats |
 | [server-lifecycle.md](server-lifecycle.md) | Stats persisted with the profile; death/respawn |
 
+## Changelog
+
+- **2026-08-08:** UpdateNPCStatsOverTime (IL=128): HealthChangeOT (105)
+  buff sources with buffDamageRemainder fractional carry, DamageEntity with
+  buff DamageSource, heal / non-buff Value*dt paths.
 ## Changelog
 
 - **2026-08-07:** EntityStatChanged Process IL=88 (self-echo skip, Health FireEvent
