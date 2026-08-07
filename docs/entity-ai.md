@@ -1161,6 +1161,27 @@ Path overload uses current/next path points and `expiryTicks = 40`.
 tries random offsets; air cell; optional home clamp; ground within **10** down
 for non-swim.
 
+**`EAIManager.CheckPath` (IL=27):** for each executing task, if
+`IsPathUsageBlocked(path)` return false (reject apply); else true.
+
+**`EAIManager.GetSeeDistance(seeEntity)` (IL=8):**
+`entity.GetDistance(seeEntity) - seeOffset` (used by stealth threshold path).
+
+**`GetMoveSpeed` (IL=45):** if blood moon or dark → passive **133** on
+`moveSpeedNight`; else passive **135** on `moveSpeed`.
+
+**`GetMoveSpeedAggro` (IL=45):** if blood moon or dark → passive **134** on
+`moveSpeedAggroMax`; else passive **133** on `moveSpeedAggro`.
+
+**`GetMoveSpeedPanic` (IL=19):** always passive **134** on `moveSpeedPanic`.
+
+**`ASPPathNavigate.SetPath` (IL=46):** null path → destruct current, false. Else
+destruct old; install; empty length → true (no Improve); else `ImprovePath()`,
+store speed + `canBreakBlocks`.
+
+**`ASPPathNavigate.UpdateNavigation` (IL=21):** if no path ret; `pathFollow()`;
+if still path `moveHelper.SetMoveTo(currentPath, speed, canBreak)`.
+
 **`EAISetAsTargetIfHurt.CanExecute` (IL=170):** need revenge target ≠ current
 attack target and different `entityType` than self. Optional `targetClasses`
 type filter (must match revenge). If living attack target and
@@ -1763,8 +1784,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** EAILeap dist 2.8..jumpMax + ray; SetMoveTo expiry 10/40;
-  CalcAway 80°; CalcAround 30 tries; DestroyArea; ApproachSpot; Dodge.
+- **2026-08-07:** CheckPath IsPathUsageBlocked; move speeds passive 133-135;
+  SetPath ImprovePath; GetSeeDistance seeOffset; EAILeap; SetMoveTo; CalcAway.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

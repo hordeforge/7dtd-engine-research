@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CheckPath and moveSpeed passives
+
+Done (V3.1.0 b14 IL):
+- EAIManager.CheckPath: reject if any executing task IsPathUsageBlocked.
+- GetSeeDistance: distance - seeOffset.
+- GetMoveSpeed: night/BM passive 133 moveSpeedNight else 135 moveSpeed.
+- GetMoveSpeedAggro: night/BM 134 aggroMax else 133 aggro; Panic always 134.
+- ASP SetPath ImprovePath; UpdateNavigation pathFollow + SetMoveTo path.
+---
 ## 2026-08-07 — tier-C: EAILeap SetMoveTo and RandomPositionGenerator
 
 Done (V3.1.0 b14 IL):

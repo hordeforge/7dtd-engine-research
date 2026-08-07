@@ -255,6 +255,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | BreakBlock AttackBlock delay + FindEnemy | entity-ai.md |
 | DestroyArea/ApproachSpot/Dodge CanExecute | entity-ai.md |
 | EAILeap + SetMoveTo + RandomPositionGenerator | entity-ai.md |
+| CheckPath + moveSpeed passives 133-135 + SetPath | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
