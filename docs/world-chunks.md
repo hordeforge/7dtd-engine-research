@@ -107,6 +107,10 @@ The 64-bit texture word packs **eight 8-bit face indexes**
 (`Chunk.Value64FullToIndex(word, face)` (IL=12) is
 `(word >> (face * 8)) & 0xFF`; `TextureIdxToTextureFullValue64(idx)` (IL=43)
 replicates the low byte across all eight slots).
+`Chunk.SetBlockFaceTexture(x, y, z, face, texture, channel)` (IL=48) writes
+one face slot: it reads the channel word, clears the face's 8 bits
+(`& ~(0xFF << (face*8 & 63))`), ORs in the new byte, writes back, and sets
+`isModified`.
 `ChunkCluster.SetBlockFaceTexture(pos, face, textureIdx, channel)` (IL=61) is
 the painted-texture write: chunk lookup (no-op on miss),
 `Chunk.SetBlockFaceTexture(lx, ly, lz, face, textureIdx, channel)`, then
