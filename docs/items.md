@@ -149,6 +149,8 @@ stack (`count = last.count + ReadInt16`; write sends `count - last.count` and
 syncs `last.count` to the new count). `ItemValue.ReadOrNull(reader)` (IL=13)
 reads the leading marker byte itself and returns null for the `0` empty
 sentinel, otherwise `new ItemValue().ReadData(reader, marker)`.
+The legacy readers are near-empty: `ItemValue.ReadOld` (IL=1) reads nothing,
+and `ItemStack.ReadOld` (IL=10) is the no-op plus an `i16` count.
 
 **Stacking predicates (V3.1.0 b14):** `ItemStack.CanStackWith(other,
 allowPartialStack)` (IL=46) requires both stacks non-empty, same `type`, and
