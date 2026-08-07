@@ -241,3 +241,8 @@ EntityBuffs::SetCustomVar(String _name, Single _value, Boolean _netSync,
 exist on V3.0.1 too. The trailing `_forceSendToClients` net-sync control flag is
 the V3.1.0 addition, which took the method from IL 126 to IL 130.
 *Anchor:* `il/full-v3.1.0/_global/EntityBuffs.il.txt:1180`.
+
+**Readers:** `EntityBuffs.GetCustomVar(name)` (IL=10) =
+`CVars.TryGetValue` (case-insensitive dict) else **0**; `GetCustomVarId(name)`
+(IL=3) = `name.GetHashCode()` (cvar ids are .NET string hash codes, like
+`EntityClass.FromString`).

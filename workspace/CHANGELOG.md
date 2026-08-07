@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: cvar readers
+
+Done (V3.1.0 b14 IL):
+- EntityBuffs.GetCustomVar IL=10 (CVars TryGetValue else 0) and
+  GetCustomVarId IL=3 (GetHashCode); noted in buffs.md.
 ## 2026-08-08 — tier-C: GetCVar
 
 Done (V3.1.0 b14 IL):
