@@ -305,6 +305,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | EntityVulture helper leaves (reposition, strike, FindTarget, course, home) | entity-ai.md D15 |
 | Air-drop family: CreateFlightPaths/Plane/Tick/crate landing (IL 355/74/193/103) | spawning.md spawn leaves |
 | EntityClass.FromString GetHashCode + ItemStack.FromString + SetAttackTargetClient | entity-ai.md D8.6 / §5.1b |
+| Chunk load/unload lifecycle (OnLoad/OnUnload/OnLoadedFromCache/layer cb) | world-chunks.md §4.0b |
+| ChunkCustomData expiry + UnloadEntities skip rules | world-chunks.md §4.0b |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
