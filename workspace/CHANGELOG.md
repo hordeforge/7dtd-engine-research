@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity registers + distance family
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md: Entity.CheckDistance family (all funnel to magnitude < 1.0)
+- entity-ai.md: AddOwnedEntity IL=35 (dedupe, server NetPackageOwnedEntitySync broadcast 192), AddPart/AddParticle IL=17 upsert
+
 ## 2026-08-08 - tier-C: water immersion
 
 Done (V3.1.0 b14 IL):
