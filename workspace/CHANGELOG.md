@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: BreakBlock AttackBlock and FindEnemy
+
+Done (V3.1.0 b14 IL):
+- AttackBlock: zombie ally +0.2 in 1.7x1.5x1.7; delay (0.25+r*0.8[+0.5 unreachable]+0.75)*20; hitDelegate.
+- FindEnemy: type bounds by see distance; CanSee/stealth nearest.
+- RunAway.Update: path end 1.21; pathTicks 60 FindPath.
+---
 ## 2026-08-07 — tier-C: EAITarget.check Wander and Ranged CanExecute
 
 Done (V3.1.0 b14 IL):

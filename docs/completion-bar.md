@@ -252,6 +252,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | EntityActivityUpdate top-N clamp + cloth radii | entity-ai.md |
 | EAISetAsTargetIfHurt + Approach CanExecute | entity-ai.md |
 | EAITarget.check + Wander/Ranged CanExecute | entity-ai.md |
+| BreakBlock AttackBlock delay + FindEnemy | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

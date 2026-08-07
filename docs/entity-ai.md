@@ -1042,9 +1042,9 @@ Top decision tasks (when EAI Update runs):
 | 281 | `EAISetNearestEntityAsTarget.FindTarget` | See-distance; player noise/breadcrumb 15/24 m; bounds +4 `GetEntitiesInBounds` |
 | 184 | `FindTargetPlayer` | Player targeting |
 | 172 | `GetMoveToLocation` | Approach helper |
-| 166 | `EAIRunawayFromEntity.FindEnemy` | Flee scan |
+| 166 | `EAIRunawayFromEntity.FindEnemy` | Bounds from GetSeeDistance; CanSee/stealth pick nearest |
 | 137 | `EAITaskList.OnUpdateTasks` | Scheduler |
-| 118 | `EAIBreakBlock.AttackBlock` | Ally boost +0.2/zombie in 1.7 box; Attack + hitDelegate; delay ~15-40 ticks |
+| 118 | `EAIBreakBlock.AttackBlock` | Ally boost +0.2/zombie in 1.7×1.5×1.7 box; delay formula below |
 | **107** | `EAIRangedAttackTarget.Update` | +0.05 time; look/SeekYaw 30; anim state then `UseHoldingItem` |
 | **105** | `EAIRunAway.Update` | path end distSq **1.21** re-pick; pathTicks **60** FindPath; panic speed subclasses |
 | **94** | `EAIWander.CanExecute` | sleep/stun/lookTime; no-player 120 ticks; executePercent; CalcInDir 90 |
@@ -1085,6 +1085,24 @@ living attack target, no missing leg (and no arm/leg if `startAnimType >= 0`);
 action 2 → `ContinueAnimAction(startAnimType+1+3000)` + release sound; after
 `releaseDelay` → `UseHoldingItem(itemActionType, false)`; if item not in use
 force `elapsedTime = +inf` (end).
+
+**`EAIBreakBlock.AttackBlock` (IL=118):** zero look. Require action0
+`ItemActionAttackData`. If zombie: allies in Bounds center±**(1.7,1.5,1.7)**;
+per other zombie `damageBoostPercent += 0.2`. `Attack(false)`; on success
+`IsBreakingBlocks=true`; delay ticks =
+`(0.25 + RandomFloat*0.8 [×0.5 if unreachableAbove] + 0.75) * 20`
+(~15..36 ticks); install `GetHitInfo` hitDelegate; `Attack(true)`.
+
+**`EAIBreakBlock.Update` (IL=21):** countdown `attackDelay`; when 0 call
+`AttackBlock`.
+
+**`EAIRunawayFromEntity.FindEnemy` (IL=166):** for each enemy type in list,
+`GetEntitiesInBounds` around self using see-distance-sized box; prefer seen
+(CanSee / player CanSeeStealth) non-ignored; pick min `GetDistanceSq`.
+
+**`EAIRunAway.Update` (IL=105):** if near path end (planar sq &lt; **1.21**)
+re-pick flee; `pathTicks` countdown; when 0 set **60** and `FindPath` at
+panic/run speed.
 
 **`EAISetAsTargetIfHurt.CanExecute` (IL=170):** need revenge target ≠ current
 attack target and different `entityType` than self. Optional `targetClasses`
@@ -1688,8 +1706,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** EAITarget.check home/see/stealth; Wander/Ranged CanExecute;
-  SetAsTargetIfHurt 0.66; Approach types; EntityActivityUpdate top-N.
+- **2026-08-07:** BreakBlock ally boost + delay formula; FindEnemy see bounds;
+  RunAway 1.21/60; EAITarget.check; Wander/Ranged CanExecute.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
