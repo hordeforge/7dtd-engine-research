@@ -591,6 +591,12 @@ up `IsSticky` projectiles (arrows): `AddItem(new ItemStack(
 itemValueProjectile, 1))` into the local inventory, destroying the shot on
 success or showing the `xuiInventoryFullForPickup` tooltip when full.
 
+**Projectile action config (`ItemActionProjectile`, IL=51):** `ReadFrom`
+parses the ammo XML that feeds the runtime above - `Explosion` from
+`new ExplosionData(Properties, item.Effects)` (the ammo's own explosion
+data), `FlyTime` / `LifeTime` / `DeadTime` / `Velocity` / `CollisionRadius`
+floats, and `Gravity` defaulting to **-9.81** before the optional override.
+
 **Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
 magazine capacity goes through the `MagazineSize` passive against the class's
@@ -1291,6 +1297,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionProjectile.ReadFrom IL=51: ExplosionData from
+  props+effects, FlyTime/LifeTime/DeadTime/Velocity/CollisionRadius,
+  Gravity default -9.81 - the config behind the projectile runtime.
 - **2026-08-08:** ProjectileMoveScript runtime: Fire IL=236 (hitMask 80
   default, passives 71/70 velocity/gravity, ballistic FlyTime<0 branch,
   water particles, SetState Flying); FixedUpdate IL=196 state machine
