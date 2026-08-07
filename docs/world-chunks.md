@@ -147,6 +147,12 @@ aligned); `ToLocalKey(key)` (IL=24) rebases a packed chunk key by
 `ChunkMinPos`/`ChunkMaxPos`. `Chunk.ToWorldPos()` (IL=14) is the chunk origin
 `(m_X*16, m_Y*256, m_Z*16)`; the local-coord overloads (IL=20/16) add the
 cell offset (note the y scale is **256**, the chunk Y-dim).
+`Chunk.IsInChunk(Vector3)` (IL=30) is the local-bounds test: true iff
+`0 <= x < 16`, `0 <= y < 256`, `0 <= z < 16` (same 256 y-scale). The
+`Vector3i` counterpart `Chunk.ToLocalPosition(Vector3i)` (IL=23) folds a
+world block coordinate into chunk-local in place by masking: `x & 15`,
+`y & 255`, `z & 15`; the mask is exact because all three dimensions are
+powers of two (16/256/16), so no division is needed.
 
 ---
 
