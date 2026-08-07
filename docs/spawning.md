@@ -137,6 +137,15 @@ Key facts read from the IL:
   completion callback runs `OnEntitySpawned`, stamping
   `SetSpawnerSource(Biome, masterChunkKey, biomeIdHash)`.
 
+`EntityFactory.SetupEntityCreationData` builds the creation payload: the
+2-arg overload (IL=10) allocates `id = nextEntityID++` and forwards with a
+zero rotation; the full overloads (IL=31/36) copy `entityClass`, `id`, `pos`,
+`rot`, `lifetime`, `belongsPlayerId`, `spawnById`/`spawnByName`, plus either
+`itemStack = new ItemStack(itemValue, count)` or the `blockValues` /
+`textureFullArrays` arrays with `itemStack.count = count`.
+`EntityFactory.CreateEntityAsync(ecd)` (IL=4) is just
+`CreateEntityOperation.Start(ecd, false)`.
+
 **`Chunk.SpawnEntityAsync(world, ecd, onEntityCreated)` (IL=40):** refuses to
 spawn onto a chunk that is mid-unload - the volatile `InProgressUnloading` flag
 logs `Spawning entity onto chunk ({0},{1}) which is unloading` and returns
