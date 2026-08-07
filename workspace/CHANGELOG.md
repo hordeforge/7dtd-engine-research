@@ -6,6 +6,21 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityBuffs.AddBuff
+
+Done (V3.1.0 b14 IL):
+- EntityBuffs.AddBuff (IL=238) narrated in buffs.md: BuffStatus codes
+  (Added..FailedGameStat enum-confirmed), electrical instigator swap to -1,
+  gates: GetBuff miss, editor (AllowInEditor), RequiredGameStat != 81 sentinel
+  + GetBool, netSync immunity, DamageType friendly-fire via FriendlyFireCheck;
+  existing-buff merge by StackType (Ignore clear Remove / Replace reset
+  ticks / Duration max(InitialDurationMax, duration, duration-remaining) /
+  Effect StackEffectMultiplier++), each fires onSelfBuffStack (4); new-buff
+  path: local player buffLegBroken achievement stat 15, DurationMax from
+  duration or InitialDurationMax, BuffValue append. AddBuffNetwork (IL=34):
+  NetPackageAddRemoveBuff Setup + SendPackage flags 192 (server) or
+  SendToServer (client).
+
 ## 2026-08-08 - tier-C: SdtdConsole.Update pump
 
 Done (V3.1.0 b14 IL):

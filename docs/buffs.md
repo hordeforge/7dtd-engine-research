@@ -102,6 +102,43 @@ if requested. Start effects still land on next `Tick` via `Started` flag.
 
 **`BuffValue.get_DurationInSeconds` (IL=7):** `durationTicks / 20` (20 TPS).
 
+**`EntityBuffs.AddBuff(name, pos, instigatorId, netSync, fromElectrical,
+duration)` (IL=238)** returns the `BuffStatus` code (`Added`=0 through
+`FailedGameStat`=5, enum-confirmed) and runs, in order:
+
+1. **Electrical:** `fromElectrical` swaps the instigator to the electrical
+   source: `_instigatorId = -1` and the position is kept (restored at spawn).
+2. **Name lookup:** `BuffManager.GetBuff(name)`; a miss returns
+   `FailedInvalidName`.
+3. **Editor gate:** `!AllowInEditor && world.IsEditor()` →
+   `FailedEditor`.
+4. **GameStat gate:** when `RequiredGameStat != 81` (the 81 sentinel skips the
+   check) and `!GameStats.GetBool(RequiredGameStat)` → `FailedGameStat`.
+5. **Immunity:** `netSync && HasImmunity(buff)` → `FailedImmune`.
+6. **Friendly fire:** non-zero `DamageType`, instigator not self, and the
+   instigator entity (resolved via `world.GetEntity`) fails
+   `FriendlyFireCheck` → `FailedFriendlyFire`.
+7. **Existing-buff merge** (same `Name` in `ActiveBuffs`): a non-negative
+   `duration` refreshes `BuffClass.DurationMax`; then the `StackType` switch -
+   `Ignore`: clear the `Remove` flag; `Replace`: zero `DurationInTicks` and
+   `FireEvent(onSelfBuffStack)`; `Duration`: extend to
+   `max(InitialDurationMax, duration, duration - remaining)` and fire
+   `onSelfBuffStack`; `Effect`: `StackEffectMultiplier++` and fire
+   `onSelfBuffStack`. `netSync` sends `AddBuffNetwork`; returns `Added`.
+8. **New buff:** local players only (not remote, `entityType == 1`): a
+   `buffLegBroken` name pushes `AchievementManager.SetAchievementStat(stat
+   15, 1)`; restores the electrical instigator id; appends
+   `new BuffValue(name, pos, instigatorId, buff)` with `DurationMax = duration`
+   (or `InitialDurationMax` when negative); `netSync` → `AddBuffNetwork`;
+   returns `Added`.
+
+**`AddBuffNetwork(name, duration, pos, instigatorId)` (IL=34):** builds
+`NetPackageAddRemoveBuff.Setup(entityId, name, duration, add=true,
+instigatorId, pos)`; on the server
+`ConnectionManager.SendPackage(pkg, false, -1, -1, entityId, null, flags
+192, false)` broadcasts to the entity's observers; on a client it is sent to
+the server instead.
+
 Each server tick, `EntityBuffs.Tick` (**IL=179**) walks `ActiveBuffs`:
 
 1. Drop `Invalid` entries via `RemoveAt`.
@@ -221,6 +258,11 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
+- **2026-08-07:** EntityBuffs.AddBuff (IL=238): BuffStatus codes, electrical
+  instigator swap, editor/gamestat 81/immunity/friendly-fire gates, StackType
+  merge (Ignore/Replace/Duration/Effect), buffLegBroken achievement stat 15,
+  DurationMax from duration or InitialDurationMax; AddBuffNetwork (IL=34)
+  NetPackageAddRemoveBuff broadcast flags 192.
 - **2026-08-07:** DurationInSeconds ticks/20; BuffClass.Tick DurationMax Finished.
 - **2026-08-07:** EntityPlayer FriendlyFireCheck GameStats 23 modes; HasImmunity
   passive 197; AddBuff status 0..5; Tick MinEvent 0/1/2/3.
