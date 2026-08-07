@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PPL registry leaves
+
+Done (V3.1.0 b14 IL):
+- server-lifecycle.md 3: GetEntityPlayerFromUserId (IL=18) PlayerToEntityMap +
+  GetEntity; SetPlayerData (IL=43) Players/ m_lpBlockMap reindex + MapPlayer
+  (UnmapPlayer on -1); SpawnPointRemoved (IL=28) ClearBedroll match;
+  HandlePlayerDetailsUpdate (IL=14) PlayerName.Update.
+
 ## 2026-08-08 - tier-C: player breadcrumb + vicinity
 
 Done (V3.1.0 b14 IL):
