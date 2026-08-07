@@ -1198,6 +1198,26 @@ bounds expand `(maxXZ, 8, maxXZ)` for living entity with
 **`EAIDodge.Update` (IL=27):** first half of action duration look at target head
 if in front.
 
+**`EAIMeleeAttackTarget` (the melee swing task, V3.1.0 b14):** `CanExecute`
+(IL=69) gates on: not dancing; cooldown drain (subtract `executeWaitTime` per
+check, false while `cooldown > 0`); `IsAttackValid()`; caches
+`entityTarget = GetAttackTarget()`; rejects null / dead targets; rejects when
+`IsAnyLegMissing`, and when `startAnimType >= 0` but `IsAnyArmOrLegMissing`
+(arm-based swing anims need an arm); then requires `InRange()` and
+`CanSee(entityTarget)`. `SetData` (IL=70) reads the tuning keys `slot` →
+`inventorySlot`, `itemType` → `itemActionType`, `startAnimType`,
+`releaseDelay`, `cooldown` → `baseCooldown`, `duration` → `attackDuration`,
+`minRange`, `maxRange`, `unreachableRange`, plus `sndStart` /
+`sndRelease` sound names. `Update` (IL=107) is the swing state machine with
+**0.05 s** per-tick accumulators: wind-up while `elapsedTime <
+attackDuration * 0.5` (look at the target head when in front,
+`SeekYawToPos(target.position, 30)`); state 0 waits for anim action state
+**2** then `ContinueAnimAction(startAnimType + 1 + 3000)` into the swing,
+plays `sndRelease` (`Audio.Manager.BroadcastPlay`), state 1; state 1 waits
+`stateTime >= releaseDelay` → state 2; state 2 calls
+`UseHoldingItem(itemActionType, false)` and, when `IsHoldingItemInUse` turns
+false, signals completion by setting `elapsedTime = float.MaxValue`.
+
 **`isWithinHomeDistance(x,y,z)` (IL=20):** if `maximumHomeDistance < 0` always
 true; else `homePosition.distSq < max²`.
 
@@ -2950,6 +2970,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EAIMeleeAttackTarget family: CanExecute (IL=69) gates
+  (dance/cooldown/legs/arms/InRange/CanSee), SetData (IL=70) tuning keys,
+  Update (IL=107) 0.05 s swing state machine (wind-up look, anim state 2 +
+  ContinueAnimAction 3000, releaseDelay, UseHoldingItem, MaxValue completion).
 - **2026-08-07:** EntityAlive.SetLookPosition (IL=43): 4 cm sqrMagnitude
   early-out, NetPackageEntityLookAt broadcast to tracked players + avatar
   cosmetic aim.

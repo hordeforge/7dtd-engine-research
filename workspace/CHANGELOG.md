@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EAIMeleeAttackTarget
+
+Done (V3.1.0 b14 IL):
+- EAIMeleeAttackTarget narrated in entity-ai.md: CanExecute (IL=69) gates -
+  not dancing, cooldown drain via executeWaitTime, IsAttackValid, target
+  null/dead reject, IsAnyLegMissing / (startAnimType>=0 and arm missing)
+  rejects, InRange + CanSee. SetData (IL=70) keys: slot, itemType,
+  startAnimType, releaseDelay, cooldown, duration, min/max/unreachableRange,
+  sndStart/sndRelease. Update (IL=107) 0.05 s state machine: wind-up look +
+  SeekYawToPos(30); state 0 -> anim action 2 -> ContinueAnimAction(start+3001)
+  + sndRelease play; state 1 -> releaseDelay; state 2 -> UseHoldingItem(false)
+  and elapsedTime = float.MaxValue when item use ends.
+
 ## 2026-08-08 - tier-C: EntityAlive.SetLookPosition
 
 Done (V3.1.0 b14 IL):
