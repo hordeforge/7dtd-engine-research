@@ -651,6 +651,10 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   `DecoState`:
   `GeneratedActive`, `GeneratedInactive` (block currently realized in a loaded
   chunk, model hidden), `Dynamic` (player-placed).
+  The `decoration.7dt` container (`DecoManager.Write` IL=56) is an `int32`
+  count followed by one `DecoObject.Write` record per entry (list built under
+  lock via `GenerateDecoWriteList`, then cleared); `WriteTask` (IL=38) copies
+  the prepared `writeStream` to the file and truncates.
 - `DecoManager.OnWorldLoaded(w, h, world, chunkProvider)` (from
   `World.LoadWorld`; `IsEnabled = levelName != "Empty"`): builds the
   `DecoOccupiedMap`, runs `chunkProvider.FillOccupiedMap` (§6.2), creates the
