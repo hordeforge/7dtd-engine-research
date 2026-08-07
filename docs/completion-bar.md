@@ -299,6 +299,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | EntityClass cctor prop-name table + GetActivationCommands IL=51 | inventories/entityclass-props.md / entity-ai D8.6a |
 | DynamicProperties.ParseData IL=82 + ParseKeyData IL=29 (k=v; pairs) | entity-ai.md D8.7 |
 | SendChunksToClients IL=216 body (cap 3/tick, reverse reloads, map pkgs) | world-chunks.md §4.0a |
+| GameStats/GamePrefs index tables (82 + 317 rows) | inventories/gamestats-gameprefs.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

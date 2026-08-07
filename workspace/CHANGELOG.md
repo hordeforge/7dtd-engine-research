@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GameStats/GamePrefs index tables
+
+Done (V3.1.0 b14 IL):
+- New inventory docs/inventories/gamestats-gameprefs.md: full EnumGameStats (82)
+  + EnumGamePrefs (317) index tables; cross-checked against corpus usages
+  (GS 25 IsSpawnNearOtherPlayer, GS 62 AllowedViewDistance, GS 71 SandboxCode,
+  GP 190 ServerMaxAllowedViewDistance, GP 235 OptionsAutoPartyWithFriends, ...).
+- Corrected GetViewDistance: pref 33 is GameWorld (not a graphics pref).
+---
 ## 2026-08-08 — tier-C: SendChunksToClients streaming body
 
 Done (V3.1.0 b14 IL):
