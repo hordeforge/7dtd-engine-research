@@ -365,7 +365,8 @@ return **0.3** (POI stealth vs wandering AI).
 **`IsInViewCone(position)` (IL=40):** if sleeping use `sleeperLookDir` +
 `sleeperViewAngle`; else `GetLookVector` + `GetMaxViewAngle` (IL=5: the
 `maxViewAngle` field, default 180). `GetLookVector` (IL=40) derives the facing
-from rotation: `(cos(yaw*0.0175 - π), -cos(pitch*0.0175), ...)`. Half-angle cone
+from rotation with `yaw = rot.y·0.0175 − π`, `pitch = rot.x·0.0175`:
+`(-sin(yaw)·cos(pitch), sin(pitch), -cos(yaw)·cos(pitch))`. Half-angle cone
 via `Utils.GetAngleBetween` (same half-angle test as `IsInFrontOfMe`).
 
 **`EntityAlive.HasImmunity(BuffClass)` (IL=2):** always **false** (immunity from
