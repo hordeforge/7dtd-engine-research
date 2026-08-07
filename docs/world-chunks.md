@@ -121,7 +121,10 @@ build. `isInside(x, y, z)` (IL=12) is the membership test
 `insideDevicesHashSet.Contains(new Vector3b(x, y, z).GetHashCode())`.
 `EnableInsideBlockEntities(on)` (IL=45) walks `insideDevices`, resolves each
 world-pos key in `blockEntityStubs`, and `SetActive(on)` on the entity's
-`gameObject` when it has a transform. The overlay itself is `Chunk.GetDamage(x, y, z)` (IL=8):
+`gameObject` when it has a transform.
+`EnableEntityBlocks(on, name)` (IL=51) toggles `blockEntityStubs` entries
+whose (lowercased) transform name contains the (lowercased) filter, or all
+entries when the filter is empty, returning the toggled count. The overlay itself is `Chunk.GetDamage(x, y, z)` (IL=8):
 `(int)chnDamage.Get(...)` from the damage channel, written by
 `Chunk.SetDamage` (IL=9): `chnDamage.Set(x, y, z, (long)damage)`.
 The 64-bit texture word packs **eight 8-bit face indexes**
