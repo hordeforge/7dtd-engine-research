@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Equipment leaves
+
+Done (V3.1.0 b14 IL):
+- items.md 6: updateInsulation (IL=32) waterProof sum of equipped WaterProof;
+  GetTotalInsulation/Waterproof (IL=3); DropItemOnGround (IL=21) ItemDropServer
+  1-count 60s; GetArmorGroupLowestQuality (IL=13) group info; HasAnyItems
+  (IL=22) slot scan.
+
 ## 2026-08-08 - tier-C: ItemAction base gates
 
 Done (V3.1.0 b14 IL):
