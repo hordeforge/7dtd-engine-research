@@ -161,6 +161,11 @@ offset = x + z*16 + (y & 3)*256
 
 // terrain heightmap (always byte)
 m_TerrainHeight[x + z*16] → byte
+
+// terrain normal (three parallel byte arrays, quantized)
+SetTerrainNormal(x, z, v) (IL=43): m_NormalX/Y/Z[x + z*16] =
+(byte)FastClamp(component * 127, -128, 127) per axis
+GetTerrainNormalY(x, z) (IL=15): (sbyte)m_NormalY[x + z*16] / 127.0f
 ```
 
 Expand must grow `m_BlockLayers` length (`ChunkBlockLayers`) with YDim; XZ formulas stay 16-wide.
