@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: turret leaves
+
+Done (V3.1.0 b14 IL):
+- vehicles-drones-turrets.md 6.1: EntityTurret get_AmmoCount/set_AmmoCount
+  (IL=4/5) store ammo in OriginalItemValue.Meta (gun-magazine style); InitTurret
+  (IL=8) FireController.Init(EntityClass.Properties, this); get_IsTurning
+  (IL=15) IsOn && (yaw || pitch turning).
+
 ## 2026-08-08 - tier-C: vehicle ownership/password/fuel
 
 Done (V3.1.0 b14 IL):
