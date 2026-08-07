@@ -86,6 +86,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | SleeperVolume.Tick / UpdateSpawn / Despawn / PlayerTouched | entity-ai §D8.1-D8.4 |
 | Workstation/Forge UpdateTick fuel+recipe IL | tile-entities-power §4 |
 | Vending rental expiry; Composite feature tick | tile-entities-power §4.5 |
+| Package process paths (Collect/Attach/ItemDrop/...) | protocol-packages §6.21.1-2 |
+| EmitSmell ProcessPackage no-op | protocol-packages §6.21 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers, and dormant UAI. Promote

@@ -1094,18 +1094,18 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | Package | IL write | Wire (after base) | Process / notes |
 |---|---:|---|---|
 | `NetPackageEntityRemove` | 8 | `reason` (EnumRemoveEntityReason) | ToClient; `World.RemoveEntity(id, reason)` |
-| `NetPackageEntityCollect` | 12 | `entityId`, `playerId` | Server validates, may rebroadcast; `OnCollectServer` / local |
+| `NetPackageEntityCollect` | 12 | `entityId`, `playerId` | Process IL=51: `ValidEntityIdForSender(playerId)`; server rebroadcast flags **192** then `Entity.OnCollectServer(playerId)`; client `OnCollectLocal` |
 | `NetPackageEntityPhysics` | 77 | flags + entityId + pos f32x3 + quat f32x4 + vel f32x3 + angVel f32x3 | Physics master broadcast |
 | `NetPackageTeleportPlayer` | 56 | pos f32x3, rot f32x3, `onlyIfNotFlying` | Local player `TeleportToPosition` |
-| `NetPackageEntityAttach` | 21 | `attachType`, `riderId`, `vehicleId`, `slot` | Mount/dismount attach |
+| `NetPackageEntityAttach` | 21 | `attachType:u8`, `riderId:i32`, `vehicleId:i32`, `slot:i16` | Process IL=104; `AttachType`: 0 AttachServer, 1 AttachClient, 2 DetachServer, 3 DetachClient (see §6.21.1) |
 | `NetPackageEntityRagdoll` | 59 | entityId, flags, duration, bodyPart, forceVec, forceWorldPos, hipPos, mode/state | Ragdoll sync |
 | `NetPackageEntityAddVelocity` | 12 | entityId, addVelocity Vector3 | Impulse |
 | `NetPackageEntitySpeeds` | 17 | movementState, speedForward, speedStrafe | Locomotion |
 | `NetPackageEntityStealth` | 12 | id, data | Stealth byte/blob |
 | `NetPackageEntityAnimationData` | 29 | animationParameterData | Animator params |
 | `NetPackageEntitySetPartActive` | 20 | id, active, partName | Multi-part entities |
-| `NetPackageEntityPrimeDetonator` | 8 | id | Explosive prime |
-| `NetPackageSetAttackTarget` | 8 | m_targetId | AI target |
+| `NetPackageEntityPrimeDetonator` | 8 | id | Process IL=23: cast `EntityZombieCop` else log Discarding; `PrimeDetonator()` |
+| `NetPackageSetAttackTarget` | 8 | m_targetId | Process IL=24: both entities as EntityAlive; `SetAttackTargetClient(target)` (cosmetic/AI client) |
 | `NetPackageOwnedEntitySync` | 20 | ownerId, entityId, entityClassId, syncType | Add/remove owned entity on EntityAlive |
 
 #### Player / inventory / items
@@ -1118,7 +1118,7 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackagePlayerTwitchStats` | 26 | twitchEnabled, twitchSafe, twitchVoteLock, twitchVisionDisabled, twitchActionsEnabled | Twitch integration flags |
 | `NetPackagePlayerVendingMachine` | 28 | userId, x,y,z, removing | Vending access |
 | `NetPackagePlayerLaserSight` | 19 | entityId, laserSightActive, laserSightPosition | Cosmetic aim |
-| `NetPackageItemDrop` | 37 | itemStack, dropPos, initialMotion, randomPosAdd, lifetime, entityId, clientInstanceId, bDropPosIsRelativeToHead | `ItemDropServer` |
+| `NetPackageItemDrop` | 37 | itemStack, dropPos, initialMotion, randomPosAdd, lifetime, entityId, clientInstanceId, bDropPosIsRelativeToHead | Process IL=23: always `IGameManager.ItemDropServer(...)` (server apply path) |
 | `NetPackageDropItemsContainer` | 42 | droppedByID, containerEntity, worldPos, items | Multi-item drop container |
 | `NetPackageItemActionEffects` | 52 | entityId, slotIdx, actionIdx, firingState, startPos, direction, userData | Attack FX |
 | `NetPackageItemReload` | 8 | entityId | Reload anim/state |
@@ -1133,9 +1133,9 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 
 | Package | IL write | Wire | Notes |
 |---|---:|---|---|
-| `NetPackageSetBlockTexture` | 24 | blockPos, blockFace, idx, playerIdThatChanged, channel | Texture paint |
+| `NetPackageSetBlockTexture` | 24 | blockPos, blockFace, idx, playerIdThatChanged, channel | Process IL=46: always `SetBlockTextureClient`; server also rebroadcast Setup excluding sender flags **192** |
 | `NetPackageAnimateBlock` | 24 | blockPosition, animParamater, animType, animationInteger, animationBool | Block animator |
-| `NetPackagePickupBlock` | 22 | blockPos, rawData, playerId, persistentPlayerId | Pickup |
+| `NetPackagePickupBlock` | 22 | blockPos, rawData, playerId, persistentPlayerId | Process IL=41: `ValidEntityIdForSender` + `ValidUserIdForSender`; server `PickupBlockServer`, remote `PickupBlockClient` |
 | `NetPackageWallVolume` | 12 | id, wallVolume | Wall volume add/update |
 | `NetPackageWallVolumeRemove` | 8 | index | Remove wall volume |
 | `NetPackageChunkRemoveAll` | 4 | (base only) | Clear all streamed chunks on client |
@@ -1144,13 +1144,13 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageWireToolActions` | 17 | currentOperation, tileEntityPosition, entityID | Wire tool |
 | `NetPackageSetProp` | 37 | m_persistentPlayerId, m_propChanges, m_localPlayerThatChanged | Prop/land edits |
 | `NetPackageRegionMetaData` | 43 | X, Z, ChunksWithData pairs | Dynamic mesh region meta |
-| `NetPackageHordeEvent` | 31 | m_event, m_maxDist | Client `HandleHordeEvent` if in range |
+| `NetPackageHordeEvent` | 31 | m_event, m_maxDist (+ pos on package) | Process IL=30: local player only if `sqrMagnitude <= maxDist^2` -> `HandleHordeEvent` |
 
 #### Chat / UI / audio / FX / misc
 
 | Package | IL write | Wire | Notes |
 |---|---:|---|---|
-| `NetPackageSimpleRPC` | 12 | entityId, type (SimpleRPCType) | `GameManager.SimpleRPC` |
+| `NetPackageSimpleRPC` | 12 | entityId, type (SimpleRPCType) | Process IL=17: `ValidEntityIdForSender`; `GameManager.SimpleRPC(id, type, true, world.IsRemote)` |
 | `NetPackageSimpleChat` | 44 | msg, recipientEntityIds | Lightweight chat variant |
 | `NetPackageGameMessage` | 17 | msgType, mainEntityId, secondaryEntityId | System/game messages |
 | `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | HUD toolbelt toast |
@@ -1162,7 +1162,7 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `EntityFallingTree/NetPackageTreeFade` | 8 | `entityId:i32` | Tree fade/remove FX |
 | `DroneWeapons/NetPackageDroneParticleEffect` | 12 | `ParticleEffect.Write` + `entityThatCausedIt:i32` | Drone beam/particle FX |
 | `NetPackageParticleEffect` | 20 | pe, entityThatCausedIt, forceCreation, worldSpawn | Particles |
-| `NetPackageEmitSmell` | 17 | EntityId, SmellName | AI smell marker |
+| `NetPackageEmitSmell` | 17 | EntityId, SmellName | Process IL=1: **empty ret** (wire residual / client stub) |
 | `NetPackageQuestGotoPoint` | 52 | playerId, questCode, GotoType, x,y, size, difficulty, biomeFilterType, biomeFilter | Quest goto objective |
 | `NetPackageDebug` | 34 | type, entityId, data | Debug channel |
 | `NetPackageNetMetrics` | 28 | enable, duration, loop, content, csv | Net metrics capture |
@@ -1180,6 +1180,32 @@ inventory body dump as authoritative when present.
 This section plus 5.x-6.20 closes the **narrative mention gap** for the remaining
 census packages that matter on dedicated; exhaustive per-flag framing for every
 conditional still lives in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md).
+
+#### 6.21.1 `NetPackageEntityAttach` process (IL=104)
+
+`AttachType` (u8): **0 AttachServer**, **1 AttachClient**, **2 DetachServer**,
+**3 DetachClient**.
+
+| Op | Behaviour |
+|---|---|
+| AttachServer (0) | Resolve rider + vehicle; if vehicle missing return; `FindAttachSlot` or `AttachToEntity(vehicle, slot)`; on success rebroadcast **AttachClient** (type 1) with resolved slot, flags **192** |
+| AttachClient (1) | `rider.AttachToEntity(vehicle, slot)` local apply |
+| DetachServer (2) | `rider.Detach()`; rebroadcast **DetachClient** (type 3) with vehicleId/slot = -1, exclude rider from fanout |
+| DetachClient (3) | `rider.Detach()` |
+
+#### 6.21.2 Process residuals closed this pass
+
+| Package | Process IL | Authority note |
+|---|---:|---|
+| EntityCollect | 51 | Server `OnCollectServer` + rebroadcast; client local |
+| ItemDrop | 23 | Always `ItemDropServer` |
+| PickupBlock | 41 | Sender id + persistent user validation |
+| SetBlockTexture | 46 | Client apply + server rebroadcast |
+| SimpleRPC | 17 | Sender validation; `SimpleRPC(..., true, IsRemote)` |
+| HordeEvent | 30 | Client range gate only |
+| PrimeDetonator | 23 | `EntityZombieCop` only |
+| SetAttackTarget | 24 | `SetAttackTargetClient` |
+| EmitSmell | 1 | **No-op** on this assembly |
 
 ### 6.22 Dynamic mesh, POI around, nav, waypoints
 
@@ -1297,6 +1323,8 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** §6.21 process paths (Collect/Attach/ItemDrop/Pickup/Texture/
+  SimpleRPC/Horde/Prime/AttackTarget); EmitSmell no-op; AttachType enum.
 - **2026-08-07:** EntitySpawnResponse direction ToClient + process; EntityLookAt
   int-truncated lookAt; WireActions process pointer; Audio/Light/TreeFade/DroneParticle
   field widths; EntityNetworkHoldingData carrier.

@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: package ProcessPackage paths (Collect/Attach/...)
+
+Done (V3.1.0 b14 IL):
+- protocol-packages §6.21 process notes for EntityCollect, EntityAttach
+  (AttachType 0-3), ItemDrop, PickupBlock, SetBlockTexture, SimpleRPC,
+  HordeEvent, PrimeDetonator, SetAttackTarget; EmitSmell Process IL=1 no-op.
+---
 ## 2026-08-07 — tier-C: workstation/forge ticks + sleeper spawn/despawn
 
 Objective: keep optional depth moving (never-stop C grind).
