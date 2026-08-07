@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameRandom surface
+
+Done (V3.1.0 b14 IL):
+- GameRandom narrated in dedicated-misc-systems.md: RandomFloat (IL=4) =
+  (float)NextDouble() [0,1); RandomRange float overloads (IL=7/12) =
+  NextDouble()*(max[-min])+min, max-exclusive; int overloads (IL=4/8) =
+  Next(max[-min])+min. All gameplay callers funnel through these.
+
 ## 2026-08-08 - tier-C: group pick helpers
 
 Done (V3.1.0 b14 IL):

@@ -358,7 +358,28 @@ classification). They were found by scanning the disassembly for
   only the resulting inventory/recipe traffic
   ([crafting-recipes.md](crafting-recipes.md), [items.md](items.md)).
 
+## GameRandom (the shared RNG primitive surface)
+
+`GameRandom` wraps the underlying `Random` instance; every public method is a
+thin `NextDouble()` / `Next(int)` wrapper (V3.1.0 b14 IL):
+
+| Method | IL | Value |
+|---|---|---|
+| `RandomFloat` | 4 | `(float)NextDouble()` - uniform in [0, 1) |
+| `RandomRange(float maxExclusive)` | 7 | `(float)(NextDouble() * max)` - [0, max) |
+| `RandomRange(float min, float maxExclusive)` | 12 | `(float)(NextDouble() * (max - min) + min)` |
+| `RandomRange(int maxExclusive)` | 4 | `Next(max)` - [0, max) |
+| `RandomRange(int min, int maxExclusive)` | 8 | `Next(max - min) + min` - [min, max) |
+
+Float ranges are **max-exclusive** like the int ones. Every gameplay caller
+(AIDirector components, spawners, loot rolls, party/group picks) funnels
+through these, so a single seeded `GameRandom` instance drives each
+deterministic subsystem.
+
 ## Changelog
 
+- **2026-08-07:** GameRandom surface: RandomFloat / RandomRange float+int
+  overloads all NextDouble()/Next(int) wrappers, max-exclusive; single seeded
+  instance drives deterministic subsystems.
 - **2026-07-24:** Initial batch reversal of small dedicated systems (19
   sections, caller-verified); client-only reclassifications listed above.
