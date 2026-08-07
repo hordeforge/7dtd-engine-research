@@ -265,6 +265,12 @@ bv)` instead. `SetBlockRaw(worldPos, bv)` (IL=25) is the low-level path:
 `GetChunkSync(toChunkXZ(x), toChunkXZ(z))`, null chunk → no-op, else
 `chunk.SetBlockRaw(toBlockXZ(x), y, toBlockXZ(z), bv)`.
 
+**`BlockValueRef` wire form (Read IL=23):** the discriminant byte first -
+`0 None`, `1 Block` (`StreamUtils.ReadVector3i` -> `BlockPosition`), `2 Prop`
+(`PropRef.Read`) - anything else throws `ArgumentOutOfRangeException`. This
+byte is the first field of every `BlockChangeInfo` on the wire, which is how
+the batch commit machine picks the `SetBlockValue` vs position path.
+
 ### 4.1 The batch commit machine (`SetBlocksRPC` -> `ChangeBlocks`)
 
 `World.SetBlocksRPC(changes)` (IL=6) is a one-line delegator:
@@ -623,6 +629,8 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** BlockValueRef wire (Read IL=23): u8 discriminant 0 None /
+  1 Block (Vector3i) / 2 Prop (PropRef.Read), else ArgumentOutOfRange.
 - **2026-08-08:** BlockChangeInfo wire (Write IL=89 / Read IL=76):
   BlockValueRef + changedByEntityId i32 + flags byte (bit 0 value, 1 damage,
   2 density, 3 force-density, 4 update-light, 5 texture) + flagged payloads.
