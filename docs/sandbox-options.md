@@ -299,6 +299,11 @@ There is **no** name/id prefix per field: reader must use the same
 `SandboxOptions` entry by enum name parse, with special cases stats **59** and
 **75** (BlockDamagePlayer / LootAbundance name mismatches already noted above).
 
+`GameStats.initDefault` (IL=29) seeds `propertyValues[name] = defaultValue`
+for every `PropertyDecl`; `GetStatType(eProperty)` (IL=31) is the linear
+`propertyList` scan returning `PropertyDecl.type` as `EnumType?` (null when the
+stat is not registered).
+
 ## 7. Presets
 
 `SandboxOptionPreset` is a named bag of changed options:

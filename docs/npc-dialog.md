@@ -215,6 +215,12 @@ records a completed POI into the server-side journal copy
 (`QuestJournal.AddPOIToTraderData`), and `ClearUsedPOI` flows server -> client
 (`ClearTraderDataTier`).
 
+`EntityTrader` leaf constants: `GetQuestFactionPoints(player)` (IL=4) is
+`player.QuestJournal.GlobalFactionPoints` (the same journal field the dialog
+pipeline reads for tier gating above); `CanDamageEntity(source)` (IL=2) is a
+hard false (traders take no entity damage); `get_IsValidAimAssistSnapTarget`
+(IL=2) is a hard false (never an aim-assist snap target).
+
 ## 6. QuestTraderData: per-trader POI history
 
 `QuestTraderData` lives in the player's `QuestJournal` (persisted through
