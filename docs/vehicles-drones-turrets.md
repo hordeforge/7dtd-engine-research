@@ -343,8 +343,18 @@ attack target as feed target; `AddBuff("buffJunkDroneHealCooldownEffect")`.
 3 then 4; if bleeding only and no 3/4, type 2. Else if bleeding: 2 then 3 then
 4. Else none (**0**).
 
-**`TeleportOutOfRange` (IL=15):** if Attack, `exitAttackState`; if Heal,
-`onHealDone`; then `teleportState()`.
+**`TeleportOutOfRange` (IL=15):** if Attack, `exitAttackState` (empty stub);
+if Heal, `onHealDone` (empty stub); then `teleportState()`.
+
+**`teleportState` (IL=109):** `setState(Teleport=7)`; clear path; build group
+slots via `GetGroupPositions(Owner, 5, …)`; sort by distance to self; pick first
+unblocked slot (mask `1073807360`); `SetPosition` + transform; `setState(Idle)`;
+`checkTeleportPos`.
+
+**`targetCanBeHealed` (IL=25):** alive, no `buffHealHealth`,
+`medicalRegHealthAmount == 0`, and `Health < Health.ModifiedMax`.
+
+**`isTargetBleeding` (IL=16):** `ActiveBuffs.Find` predicate (bleed buff match).
 
 **`DroneManager.isValidDronePos` (IL=16):** reject if any of x/y/z is NaN.
 
@@ -553,8 +563,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** findNeededHealType 2/3/4 priority; TeleportOutOfRange exit;
-  MachineGun passives; Stun/Heal Fire; isValidDronePos NaN.
+- **2026-08-07:** teleportState group slots; targetCanBeHealed gates; bleed
+  Find; findNeededHealType; empty exitAttack/onHealDone stubs.
 - **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire
   passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds

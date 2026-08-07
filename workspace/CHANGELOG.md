@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CanSpawn cap, SetPartyLevel scaling, teleportState
+
+Done (V3.1.0 b14 IL):
+- CanSpawn: GameStats 12 < GamePrefs 99 * priority.
+- SetPartyLevel: gsScaling; GetStage uses unscaled arg; bonusLootEvery.
+- ModifySpawnCountByGameDifficulty: EnemySpawnMode off -> 0 only.
+- teleportState: Teleport state, closest free group slot, Idle.
+- targetCanBeHealed / isTargetBleeding; empty exitAttack/onHealDone.
+---
 ## 2026-08-07 — tier-C: SetupGroup and heal type priority
 
 Done (V3.1.0 b14 IL):

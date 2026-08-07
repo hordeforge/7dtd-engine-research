@@ -235,6 +235,22 @@ null, log groups done. Else `interval = spawnGroup.interval`;
 **`ResetPartyLevel(mod)` (IL=13):** `level = CalcPartyLevel()`; if `mod != 0`,
 `level %= mod`; `SetPartyLevel(level)`.
 
+**`CalcPartyLevel` (IL=26):** collect each member `gameStage` into list;
+`GameStageDefinition.CalcPartyLevel(list)`.
+
+**`SetPartyLevel(_partyLevel)` (IL=123):** store `partyLevel`; then
+`partyLevel = (int)(partyLevel * gsScaling)`; reset `stageSpawnMax`/`groupIndex`/
+`spawnCount`; `stage = def.GetStage(_partyLevel)` (original arg, not scaled);
+`stageSpawnMax = CalcStageSpawnMax()`; `SetupGroup()`;
+`bonusLootEvery = max(stageSpawnMax / LootBonusMaxCount, LootBonusEvery)`.
+
+**`ModifySpawnCountByGameDifficulty(count)` (IL=6, static):** if
+`!EntityFactory.EnemySpawnMode` return **0**; else return `count` unchanged
+(name does not scale by difficulty).
+
+**`AIDirector.CanSpawn(_priority)` (IL=10):**
+`GameStats.GetInt(12) < GamePrefs.GetInt(99) * _priority` (true = under cap).
+
 ## `AIDirectorHordeComponent` : AIDirectorComponent
 
 Shared placement helpers for scout/wandering/chunk hordes.
@@ -485,8 +501,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** SetupGroup interval/duration*1000/difficulty count;
-  ResetPartyLevel mod; Party Tick/canSpawn; AIHorde radii 2400.
+- **2026-08-07:** CalcPartyLevel/SetPartyLevel gsScaling; CanSpawn stats12 vs
+  pref99*priority; ModifySpawnCount EnemySpawnMode gate only; SetupGroup.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset
