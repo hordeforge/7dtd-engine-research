@@ -811,6 +811,15 @@ marks POI/road/water cells from the processed world data, stamps every
 `IBackedArrayView<ushort>` and reserving the area. `Chunk.GetDecoAllowedAt`
 and `FlatAreaManager` consult the map at runtime; console `decomgr` dumps it.
 
+Accessors: `Get(x, z)` (IL=18) indexes via
+`DecoManager.CheckPosition(width, height, x, z)`, returning the
+`NoneAllowed` sentinel (8) out of bounds; `Set(x, z, v)` (IL=17) writes only
+when in bounds. `SetArea(x, z, v, rx, rz)` (IL=70) walks the rect from
+`(x + widthHalf) + (z + heightHalf) * width` with row wrap `width - rx`,
+storing `v` only where the existing cell is `>= v` (more restrictive wins);
+`CheckArea(x, z, v, rx, rz)` (IL=62) reports a conflict when the rect leaves
+the map or any cell is `>= v`.
+
 ---
 
 ## 7. Support types
