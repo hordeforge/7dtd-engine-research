@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: group pick helpers
+
+Done (V3.1.0 b14 IL):
+- EntityGroups.NormalizeWorkingList (IL=51) narrated in spawning.md: sum
+  probs, divide each by total (sum 1), non-positive total untouched.
+- GetRandomFromGroupList (IL=37): RandomFloat roll, walk accumulating sum,
+  return first entry with roll <= sum and prob > 0, else -1 (cumulative
+  distribution weighted pick).
+
 ## 2026-08-08 - tier-C: spawn-group max-tier selection
 
 Done (V3.1.0 b14 IL):

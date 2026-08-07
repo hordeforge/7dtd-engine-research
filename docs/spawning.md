@@ -828,6 +828,9 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** Group pick helpers: NormalizeWorkingList (IL=51) weight
+  normalization to sum 1 (non-positive total untouched);
+  GetRandomFromGroupList (IL=37) cumulative-distribution roll, -1 on no match.
 - **2026-08-07:** GetRandomEntityFromGroupMaxTier (IL=120): group lookup,
   GetEntityClassWithinMaxTier clamp + isEnemy/isAnimal filters, static
   workingGroupList, NormalizeWorkingList, up-to-3 weighted picks avoiding
@@ -889,3 +892,10 @@ the ECD chain):
    returning as soon as the pick differs from the `lastClassId` ref (the
    caller-supplied "last spawned class" - the loop avoids spawning the same
    class twice in a row and stores the winner back).
+
+The two helpers behind step 3: `NormalizeWorkingList(list)` (IL=51) sums the
+`prob` values and divides each by the total (weights sum to 1; a non-positive
+total leaves the list untouched). `GetRandomFromGroupList(list, random)`
+(IL=37) draws `random.RandomFloat()` and walks the list accumulating
+`sum += prob`, returning the first entry where `roll <= sum` and `prob > 0`
+(cumulative-distribution weighted pick; -1 when nothing matched).
