@@ -1747,7 +1747,13 @@ spawn-point index (or **-1** if none).
 
 **`CalcGameStageAround` (IL=38):** `GetPlayersAround(pos, **100**)`; collect
 `gameStage` only for players sharing the same `prefab` instance as the anchor;
-`CalcPartyLevel(list)` (diminishing returns; empty list → 0).
+`CalcPartyLevel(list)` (empty list → 0).
+
+**`CalcPartyLevel(playerGameStages)` (IL=35):** sort ascending; weight starts at
+`StartingWeight` (**1.0**); walk from highest stage down:
+`sum += stage * weight`, then `weight *= DiminishingReturns` (**0.5**);
+`FloorToInt(sum)`. Highest stage gets full weight; each lower stage half of the
+previous.
 
 **`AddSpawnCount(groupName, min, max)` (IL=50):** if max == 0 return. Sample
 `RandomRange(min, max)` with fractional ceil (same pattern as loot

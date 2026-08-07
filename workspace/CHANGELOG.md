@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CalcPartyLevel and IsSpawnNeeded
+
+Done (V3.1.0 b14 IL):
+- CalcPartyLevel: sort stages; StartingWeight 1.0; DiminishingReturns 0.5; FloorToInt.
+- ChunkAreaBiomeSpawnData.IsSpawnNeeded: missing group / under max / past delay.
+---
 ## 2026-08-07 — tier-C: DigUpdate phase table
 
 Done (V3.1.0 b14 IL):
