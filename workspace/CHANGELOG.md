@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemActionAttack.Hit orchestration
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md: ItemActionAttack.Hit IL=1614 - attacker
+  resolve, AttackHitInfo reset, block branch (BlockValueRef +
+  distant-deco fallback, GetBlockDamageScale, Block.DamageBlock)
+  vs entity branch (CanDamageEntity gate, DamageSource dismember
+  seed, crit roll, DamageEntity, RecordedDamage read-back).
 ## 2026-08-08 - tier-C: dynamic melee hitTarget
 
 Done (V3.1.0 b14 IL):
