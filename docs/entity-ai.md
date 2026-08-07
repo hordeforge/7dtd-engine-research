@@ -123,6 +123,12 @@ logs when stab 0.
 
 **`isRadiationSensitive` (IL=2):** always **true** (base).
 
+**`onNewBiomeEntered` (IL=4):** `biomeStandingOn = _biome`.
+
+**`CalcIfInElevator` (IL=59):** if `!bCanClimbLadders` force `bInElevator=false`.
+Else sample block at (standX, floor(bbox.min.y), standZ) and y+1; `bInElevator`
+= either block `IsElevator(rotation)`.
+
 From `EntityAlive.OnUpdateLive` IL (gate before `updateTasks`):
 
 ```mermaid
@@ -2017,8 +2023,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** updateCurrentBlockPosAndValue biome/walk buffs; radiation
-  always true; UpdateFall; crouch; AABB; ApplyFixedUpdate; Move.
+- **2026-08-07:** CalcIfInElevator ladder+IsElevator; onNewBiomeEntered store;
+  updateCurrentBlockPosAndValue; radiation true; UpdateFall; crouch; AABB.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

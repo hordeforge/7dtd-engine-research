@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CalcIfInElevator and onNewBiomeEntered
+
+Done (V3.1.0 b14 IL):
+- onNewBiomeEntered: store biomeStandingOn.
+- CalcIfInElevator: require bCanClimbLadders; sample stand block and y+1 IsElevator.
+---
 ## 2026-08-07 — tier-C: updateCurrentBlockPosAndValue and radiation
 
 Done (V3.1.0 b14 IL):
