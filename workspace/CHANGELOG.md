@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk point finders + height queries
+
+Done (V3.1.0 b14 IL):
+- spawning.md 4: FindRandomTopSoilPoint IL=80 (GetHeight+1 world coords, CanMobsSpawnAtPos gate), FindRandomCavePoint IL=95 (down-walk while y>2 && y>relMinY)
+- terrain-height.md: IsOpenSkyAbove IL=9 (y >= GetHeight), GetTopMostTerrainHeight IL=28 (max byte)
+
 ## 2026-08-08 - tier-C: EntityClass registry + ItemStack.FromString
 
 Done (V3.1.0 b14 IL):
