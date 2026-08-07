@@ -88,6 +88,15 @@ denied while a same-name sequence is running, and finally the template is
 from an `OwnerSequence` when a sequence-link or nested call created it), and
 appended to `ActionSequenceUpdates`.
 
+`CanPerform(player)` (IL=44) is the AND of every `Requirements[i].CanPerform`
+and `Actions[i].CanPerform`. `SetupTarget()` (IL=97) resolves `POIInstance`/
+`POIPosition` by `TargetType`: a POI/position type queries
+`GetPrefabFromWorldPos` (falling back to the player's `prefab` bounding box
+for entity targets); `HasTarget()` (IL=41) is `Target != null && !DeadCheck()`
+for entity targets, `POIPosition != zero` for POI targets, and for position
+targets "the block at `POIPosition` differs from the sequence's `blockValue`
+(unless `AllowWhileDead`)".
+
 **`StartSequence(manager)` (IL=4):** only `StartTime = Time.time` (manager arg
 unused in body).
 
