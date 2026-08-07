@@ -560,8 +560,18 @@ save-file I/O layer (local disk and, on console/platform, cloud/managed save slo
 owns paths and file lifecycle; the on-disk byte formats (WorldState, region, player) are
 the sections above. The platform cloud-save backend is native (residual).
 
+## Save entry points (IL re-pin 2026-08-07)
+
+| Method | IL | Behaviour |
+|---|---:|---|
+| `GameManager.SaveWorld` | 7 | `World.Save()` if world non-null |
+| `ChunkCluster.Save` | 7 | `ChunkProvider.SaveAll()` |
+| `ChunkProviderGenerateWorld.SaveAll` | 46 | prefab decorator save; spawn points; `RegionFileManager.MakePersistent` + `WaitSaveDone`; event prefabs |
+| `PersistentPlayerList.SavePersistentPlayerData` | 12 | server non-edit: write `{SaveGameDir}/players.xml` |
+
 ## Changelog
 
+- **2026-08-07:** Save entry points table (SaveWorld / SaveAll / players.xml).
 - **2026-08-07:** Sector `7rg` open path + V1 header layout (magic+version byte +
   4096+4096 tables); Raw 11-byte header (`7rr` + version:i32 + paddingBytes:i32).
 - **2026-08-06:** §3.5 location/timestamp header packing closed (Raw i32 pairs + on-disk

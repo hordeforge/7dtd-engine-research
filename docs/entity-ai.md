@@ -211,6 +211,19 @@ store target + time.
 **`EntitySeeCache.ClearIfExpired` (IL=17):** every **30** ticks `Clear()` the
 see cache (called from OnUpdateLive before AI).
 
+**`IsInFrontOfMe` (IL=28):** angle between head→pos and forward vs
+`GetMaxViewAngle() * 0.5` (half-angle cone).
+
+**`CheckDespawn` (IL=198):** if `!CanUpdateEntity` and no closest player →
+`MarkToUnload`. Else if `canDespawn`: every **20** ticks sample closest player;
+Despawn if none within soft band / within **130** m band rules; also unload if
+closest player distSq &gt; **6400** (80 m) with max timer. Called from TickEntity
+when area not updateable and from OnUpdateLive paths.
+
+**`EntityPlayer.OnUpdateLive` (IL=13):** zero stamina regen amount; base
+`EntityAlive.OnUpdateLive`; **force-clear** see cache; `CheckSleeperTriggers`
+(player always re-evaluates sleeper volumes).
+
 ### 5.2 `EAITaskList.OnUpdateTasks` (137 IL)
 
 Classic priority AI list (same shape IceCoffee tried to Parallel.ForEach):
@@ -995,8 +1008,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** SetAttackTarget net + SeeCache 30-tick clear; OnTriggered;
-  TickEntity/path apply; EAI leaves.
+- **2026-08-07:** CheckDespawn / IsInFrontOfMe / EntityPlayer.OnUpdateLive;
+  SetAttackTarget + SeeCache; OnTriggered; TickEntity/path; EAI leaves.
 - **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;
   UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;

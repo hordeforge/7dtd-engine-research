@@ -897,6 +897,14 @@ client forwards `NetPackageExplosionInitiate`; server if `_delay <= 0` calls
 optional heat-map sound to AIDirector; if clients present, send
 `NetPackageExplosionClient`.
 
+**`Explosion.AttackBlocks` (IL=553):** EffectManager-scaled `BlockRadius` (passive
+21); optional BlockTags filter; walk blocks in radius; terrain Y adjust; damage
+via block damage path into `ChangedBlockPositions`.
+
+**`Explosion.AttackEntites` (IL=691):** EffectManager-scaled entity damage
+(passive 20) and radius (passive 21); overlap sphere / entity walk; skip dead;
+apply damage with explosion damage type.
+
 ```text
 worldPos : Vector3          // StreamUtils
 blockPos : Vector3i
@@ -1490,8 +1498,8 @@ customReason    : string
 
 ## Changelog
 
-- **2026-08-07:** explode IL=194 AttackBlocks/Entities + ExplosionClient fan-out;
-  PlayerId/PlayerSpawnedInWorld process; EntityRemove/SimpleChat/SharedQuest/etc.
+- **2026-08-07:** AttackBlocks IL=553 / AttackEntites IL=691; explode IL=194;
+  PlayerId/PlayerSpawnedInWorld; EntityRemove/SimpleChat/SharedQuest/etc.
 - **2026-08-07:** NetPackageChunk Process IL=126 overwrite vs add paths.
 - **2026-08-07:** LandClaim/SleeperWake/GameStats/Deco/Sign/DynamicMesh/AddExp
   process re-pins; AuthConfirmation/EncryptionRequest thin paths.

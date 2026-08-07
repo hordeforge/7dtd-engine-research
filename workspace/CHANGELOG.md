@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CheckDespawn, player OnUpdateLive, explosion attack, save chain
+
+Done (V3.1.0 b14 IL):
+- CheckDespawn IL=198 (20-tick sample, 130m/80m bands); IsInFrontOfMe half-angle;
+  EntityPlayer.OnUpdateLive see-clear + sleeper triggers.
+- Explosion.AttackBlocks 553 / AttackEntites 691 EffectManager radii.
+- SaveWorld → ChunkProvider.SaveAll → RegionFileManager; players.xml.
+---
 ## 2026-08-07 — tier-C: explode AttackBlocks, LetBlocksFall, DurationTick, join pkgs
 
 Done (V3.1.0 b14 IL):
