@@ -160,6 +160,11 @@ resolves the multiblock parent (own error text, `should be a parent but is
 not! (1)`) and answers `IsDoorOpen(meta)` - an open door is see-through;
 `BlockCompositeTileEntity` (IL=42) ANDs all `IFeaturePhysicalCapabilities`
 modules' `IsSeeThrough` when `OverridesPhysicalChecks` is set, else base.
+Per-block collider testing inside the same ray walk is
+`Block.intersectRayWithBlock` (IL=45, sole caller `Voxel.GetNextBlockHit`):
+it fills a static bounds list via `GetCollisionAABB(bv, x, y, z, 0, list)`
+and returns true on the first `Bounds.IntersectRay`, reporting the cell
+origin as the hit point.
 
 **Dead step-height helpers:** `Block.MaxStepHeight` / `Block.MinStepHeight`
 (each a 2-arg IL=46 overload plus a 3-arg IL=9 overload) aggregate
@@ -473,7 +478,8 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 - **2026-08-08:** Sight contract: Block.IsSeeThrough (IL=61) multiblock parent
   resolution + !IsCollideSight && !IsWater; BlockPoweredDoor (IL=63)
   IsDoorOpen(meta); BlockCompositeTileEntity (IL=42) module AND; consumed by
-  Voxel.raycastNew / GetNextBlockHit. Dead step-height helpers: MaxStepHeight
+  Voxel.raycastNew / GetNextBlockHit; Block.intersectRayWithBlock (IL=45)
+  GetCollisionAABB + Bounds.IntersectRay. Dead step-height helpers: MaxStepHeight
   / MinStepHeight (IL=46 + IL=9) aggregate GetStepHeight over
   FrontSidesFromPosition faces, no external callers on b14 (Xref).
 - **2026-08-07:** BlockHazard state: IsHazardOn (IL=29) multiblock recursion +
