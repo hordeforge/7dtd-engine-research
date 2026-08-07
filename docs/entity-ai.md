@@ -2374,6 +2374,19 @@ that D8.6/D8.6a later copy from. Phase order:
     loot/gamestage scaling. `ParseEntityFlags(names)` (IL=49) ORs comma-separated
     `EntityFlags` values (ignore-case `EnumUtils.TryParse`).
 
+**`FastTags<T>.Parse(str)` (IL=90):** the comma-separated tag-string
+deserializer used for `Tags`, `QuestTags`, spawn args, and item tags. A string
+with no comma short-circuits to `GetTag(str)` (single-tag path). Otherwise, in
+order: split on `tagSeparator` (a `char[]` of `,`); for each tag,
+`GetBit(tag)` returns its **bit index** in the global tag table; `bucket =
+bit >> 6` selects the 64-bit word; `maskList` (a static scratch
+`List<ulong>` reused across calls) is grown with 0-entries while `Count <=
+bucket`; then `maskList[bucket] |= 1UL << (bit & 63)`. After the loop the
+accumulated words become the `FastTags` bitmask (`ToArray()`, or null when
+nothing was parsed), `maskList` is `Clear()`-ed, and the whole multi-tag path
+runs under `Monitor` on `maskList` — the static buffer is the lock, so
+concurrent `Parse` calls serialize on a single shared scratch list.
+
 ### D8.6c Entity init chain (`EntityAlive.Init`, IL=13)
 
 `Init(class, assets, eModelAssets)`: base `Entity.Init`, then `InitStats()`,
@@ -2761,6 +2774,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** FastTags.Parse (IL=90) bitmask model: single-tag shortcut,
+  comma split, bit>>6 bucket words, static maskList scratch under Monitor.
 - **2026-08-07:** AddEnemyToWorld sleeper spawn; ValuePercentUI stealth bar formula.
 - **2026-08-07:** CanNavigatePath; CalcIfSwimming 0.5/0.7; BeginDynamicRagdoll; FaceJumpTo; stompsSpikes 999.
 - **2026-08-07:** Electrocuted remaining; AddStamina health gate; HarvestingAnimation.

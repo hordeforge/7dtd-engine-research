@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: FastTags.Parse
+
+Done (V3.1.0 b14 IL):
+- FastTags<T>.Parse (IL=90) narrated in entity-ai.md D8.6b: single-tag
+  shortcut via GetTag, multi-tag path splits on ',', each tag maps to a bit
+  index via GetBit, bit>>6 selects a 64-bit maskList word (grown with zeros),
+  maskList[bucket] |= 1UL << (bit & 63); whole multi-tag path under Monitor
+  on the static scratch list, Clear() after ToArray() into the FastTags.
+
 ## 2026-08-08 — tier-C: World.Cleanup
 
 Done (V3.1.0 b14 IL):
