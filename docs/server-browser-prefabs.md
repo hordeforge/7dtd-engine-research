@@ -245,6 +245,17 @@ world-side volumes link back via `AddToPrefabInstance` ->
 `DynamicPrefabDecorator.FindVolumeOwner(EVolumeType, mins, maxs)`, which is how
 a sleeper volume knows its owning POI.
 
+`CopyVolumesIntoWorldCommon(world, chunk, offset, padding)` (IL=208): with a
+chunk argument the volume's padded world bounds
+(`start + offset - padding` .. `start + size + offset + padding`) must overlap
+the chunk span (`chunk.GetWorldPos()` .. + (16, 256, 16)) or the entry is
+skipped; in sandbox trader mode (`World.SandboxUseTraderArea`) volume types 1
+and 3 are skipped outright. Each used entry resolves `FindWorldVolume(world,
+wStart, wEnd)` and, on a miss, `CreateWorldVolume`; the resulting index is
+registered via `AddWorldVolume` — on the single chunk when one was passed,
+otherwise by walking the spanned chunk range
+(`toChunkXZ(pMin.x)` .. `toChunkXZ(pMax.x - 1)`, z likewise).
+
 **Save** (`Save(path)`, called from the chunk providers' `SaveAll`): rewrites
 `prefabs.xml` as `<prefabs><decoration type="model" name position rotation
 y_is_groundlevel="true"/></prefabs>`. So dynamically added prefabs (world
