@@ -195,6 +195,11 @@ heightmap raises `m_HeightMap` at that column.
 `ResetWaterSimHandle` (IL=4) resets the sim handle.
 `Chunk.GetWater(x, y, z)` (IL=8) is `WaterValue.FromRawData(chnWater.Get(...))`
 (`PrefabChunk` routes through the prefab after a coordinate check).
+`World.GetWaterAt(worldX, worldZ)` (IL=53) is the RWG water-grid probe: it
+requires the `ChunkProviderGenerateWorldFromRaw` `poiFromImage` grid to
+contain the point, resolves the byte via
+`Biomes.getPoiForColor`, and answers `m_BlockValue.type == 240` (the water
+block).
 
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
