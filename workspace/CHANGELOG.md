@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: Chunk process + TEFeature wire + MinEvent leaves
+
+Done (V3.1.0 b14 IL):
+- NetPackageChunk Process IL=126 (overwrite unload/read vs add NeedsRegeneration).
+- TEFeatureLockable/Storage/Signable/AreaRepair Write tails.
+- MinEvent CallGameEvent, AddHealth, Ragdoll, AddProgressionLevel, ModifyStat,
+  ShowToolbeltMessage Execute notes.
+---
 ## 2026-08-07 — tier-C: landclaim/sleeper/deco/auth/addExp process re-pins
 
 Done (V3.1.0 b14 IL):

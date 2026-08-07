@@ -605,6 +605,22 @@ After `TileEntityPowered.write`:
    - TripWire (4): wire-related bool from power item path.
    - TimerRelay (2): start/end time bytes from timer relay.
 
+### 4.7 Composite `TEFeature*` wire tails
+
+`TileEntityComposite` ticks each `ITileEntityFeature` in `modulesInternalOrder`
+(§4.5). Feature Write/Read used inside composite TE payloads:
+
+| Feature | Write IL | Disk/net tail |
+|---|---:|---|
+| `TEFeatureLockable` | 42 | version u16 (persist); `locked:bool`; count:i32 + `allowedUserIds` ToStream each; `passwordHash:string` |
+| `TEFeatureStorage` | 108 | version u16; optional loot-list string; `containerSize` u16x2; playerStorage/touched flags; items: i16 count + `ItemStack.Write` each; slot-lock packed bools |
+| `TEFeatureSignable` | 25 | version u16; `AuthoredText.ToStream(signText)` |
+| `TEFeatureAreaRepair` | 10 | version u16 only (state mostly live `isRepairing`) |
+
+Land-claim repair package drives `TEFeatureAreaRepair.RepairAll` (protocol
+§6.19). Storage/lock features are the composite replacement for classic
+`TileEntitySecureLootContainer` in V3.1.0 where the composite TE type is used.
+
 ---
 
 ## 5. Triggers and powered traps
@@ -724,8 +740,9 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
-- **2026-08-07:** Workstation write IL=246 stream modes; PoweredTrigger write
-  IL=138; Collector/Light/RangedTrap/MeleeTrap write tails (§4.6).
+- **2026-08-07:** TEFeature Lockable/Storage/Signable/AreaRepair write tails
+  (§4.7); Workstation write IL=246; PoweredTrigger write IL=138; Collector/
+  Light/RangedTrap/MeleeTrap write tails (§4.6).
 - **2026-08-07:** Workstation UpdateTick/HandleFuel/HandleRecipeQueue IL paths;
   Forge fuel-tick melt path; Vending rental expiry; Composite feature tick;
   Powered TE dirty flags.

@@ -364,6 +364,36 @@ action fields (`blastPower`, `blockDamage`, `blockRadius`, `blockTags`,
 `GameManager.ExplosionServer(headPos, blockPos, qrotation, data, entityId, ...)`.
 Same explosion pipeline as `NetPackageExplosionInitiate`.
 
+#### `MinEventActionCallGameEvent.Execute` (IL=46)
+
+Server only unless `allowClientCall`. Per target:
+`GameEventManager.HandleAction(eventName, player, entity, ..., sequenceLink)`.
+Bridge into [game-events.md](game-events.md).
+
+#### `MinEventActionAddHealth.Execute` (IL=55)
+
+Amount from literal `health` or `cvarRef` via `GetCustomVar`. Per target
+`EntityAlive.AddHealth(amount)`; optional local `ForceBloodSplatter`.
+
+#### `MinEventActionRagdoll.Execute` (IL=130)
+
+Duration/force from fields or cvar; per target `Detach` then ragdoll impulse
+from look vector * force * scaleY (presentation + physics on owning client).
+
+#### `MinEventActionAddProgressionLevel.Execute` (IL=143)
+
+Per target: resolve `Progression.GetProgressionValue(name)`; add `level`
+clamped by sandbox max and class max; `ProgressionValue.set_Level`.
+
+#### `MinEventActionModifyStat.Execute` (IL=117)
+
+Stat name switch includes `health` / `stamina` / `water` (and siblings); amount
+from cvar or literal; writes through `EntityStats` stat objects.
+
+#### `MinEventActionShowToolbeltMessage.Execute` (IL=53)
+
+Local player only: `GameManager.ShowTooltip` variants (presentation).
+
 #### Presentation leaves (dedi residual)
 
 `PlaySound` (IL=101), `AttachPrefabToEntity` (IL=90), `SetTransformActive`
@@ -436,7 +466,8 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
-- **2026-08-07:** §7.1 AddBuff / ModifyCVar / Explode Execute IL; presentation residual note.
+- **2026-08-07:** §7.1 CallGameEvent / AddHealth / Ragdoll / AddProgressionLevel /
+  ModifyStat / ShowToolbeltMessage; AddBuff / ModifyCVar / Explode; presentation note.
 - **2026-07-23:** Initial `MinEvent*` reversal: source-owned `MinEffectController`
   / `MinEffectGroup` handler containers, the `MinEventTypes` trigger vocabulary,
   the `FireEvent` fan-out, the `CanExecute` / `Execute` action contract and

@@ -101,6 +101,9 @@ Closed in recent sessions (still optional, not required for A+B):
 | SetBlock + InventoryData hash cache process | protocol-packages §6.1 / §6.13 |
 | PlayerInventory -> latestPlayerData | protocol-packages §5.4 |
 | LandClaim/Sleeper/Deco/Sign/AddExp/Auth process | protocol-packages §6.19 / §2 / §6.21 |
+| NetPackageChunk Process overwrite/add | protocol-packages §3.1 |
+| TEFeature composite wire tails | tile-entities-power §4.7 |
+| More MinEvent action leaves | minevents §7.1 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

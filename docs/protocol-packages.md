@@ -143,14 +143,28 @@ data    : dataLen bytes   // Chunk.write() blob (same codec as save), then Strea
 The `data` blob is produced in `Setup()` by `Chunk::write(PooledBinaryWriter)`
 into a pooled `serializedData` stream, so the chunk-serialization codec is shared
 with the save path ([`save-region.md`](save-region.md)). `GetLength` = 14 +
-serializedData.Length. `ProcessPackage` either overwrites an existing chunk
-(unload -> reset -> re-read -> re-add) or adds a new chunk and flags
-`NeedsRegeneration`.
+serializedData.Length.
+
+**ProcessPackage (IL=126):**
+
+1. If world null: log `Received chunk while world is not set up`; free pooled
+   chunk if present; ret.
+2. Key = overwrite ? `MakeChunkKey(X,Z)` : `chunk.Key`.
+3. If cache already has chunk and **not** overwrite: log error `chunk already
+   loaded`; ret.
+4. If overwrite: `MultiBlockManager.DeregisterTrackedBlockDatas(AABB)`.
+5. If **not** overwrite: `AddChunkSync(chunk)`; `NeedsRegeneration=true`; clear
+   package chunk ref; ret.
+6. If overwrite and existing chunk present: unload (`OnUnload`),
+   `RemoveChunkSync`, `Reset`, `Chunk.read(data, u32=-1)`, `AddChunkSync` again.
 
 ### 3.2 NetPackageChunkRemove (ToClient, channel 1)
 ```text
 chunkKey : i64      // WorldChunkCache key (packed x,z)
 ```
+
+Process **IL=8**: `GameManager.RemoveChunk(chunkKey)`. Related
+`NetPackageChunkRemoveAll` Process IL=8: `ChunkManager.RemoveAllChunks()`.
 
 
 ### 3.3 NetPackageMapChunks (ToClient, channel 1, compressed)
@@ -1448,6 +1462,7 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** NetPackageChunk Process IL=126 overwrite vs add paths.
 - **2026-08-07:** LandClaim/SleeperWake/GameStats/Deco/Sign/DynamicMesh/AddExp
   process re-pins; AuthConfirmation/EncryptionRequest thin paths.
 - **2026-08-07:** SetBlock/Response process; InventoryDataRequest hash cache;
