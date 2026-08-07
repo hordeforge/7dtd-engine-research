@@ -2592,7 +2592,9 @@ both yaw and current `rotation.y` to `[0, 360)`; `maxTurn = EntityClass.MaxTurnS
 Arms the turn: `yawSeekTime = 0`, `yawSeekTimeMax = absDelta / maxTurn`,
 `yawSeekAngle = rotation.y`, `yawSeekAngleEnd = rotation.y + delta`; the actual
 interpolation is applied by the movement update, and `IsSeekYaw()` (IL=5) is
-`yawSeekTimeMax > 0`.
+`yawSeekTimeMax > 0`. `SeekYawToPos(pos, yawSlowAt)` (IL=36) computes
+`Atan2(dx, dz) × 57.29578` (guarding against standing on the point) and calls
+`SeekYaw`.
 
 **Helper leaves (all V3.1.0 b14 IL):**
 
