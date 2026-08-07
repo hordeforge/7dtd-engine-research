@@ -283,6 +283,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | SetupCrawler walkType 21 + HeadshotMode | combat-damage.md |
 | EntityHuman/AvatarHuman TurnIntoCrawler + SpawnParticle | combat-damage.md, entity-ai.md |
 | Trader eject teleport + dynamic ragdoll flags | loot-economy.md, entity-ai.md |
+| StartJumpSwimMotion + IsWalkTypeACrawl + KillLootContainer | entity-ai.md, combat-damage.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

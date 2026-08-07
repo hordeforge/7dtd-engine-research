@@ -1432,6 +1432,21 @@ root motion × **20**; set stun duration from `_dynamicRagdollStunTime`;
 motion xz = forward * (jumpDistance/ticks); motion y from gravity/2 and
 heightDiff/ticks.
 
+**`StartJumpSwimMotion` (IL=131):** if `inWaterPercent ≤ 0.65`, zero motion.y and
+return. Else horizontal speed `s = sqrt(jumpSwimMotion.xz²) + 0.001`; clamp
+swim motion.y to `[lerp(-0.6,-0.05, s*0.8), 1]`. With duration `T =
+jumpSwimDurationTicks`:
+
+- gravity term `g = (T-1) * world.Gravity * 0.025 * 0.4999` then
+  `g /= 0.91^((T-3)*0.91*0.115)`
+- scale `u = (T-1)/15`; `k = lerpUnclamped(0.46, 0.4186, u)`;
+  `pow = 0.91^((T-1)*k)`; `scale = (1/T) / pow`
+- motion.y = `g + jumpSwimMotion.y * scale`; xz = jumpSwimMotion.xz *
+  (`scale / max(1, s)`)
+
+**`IsWalkTypeACrawl` (IL=7):** `walkType >= 20` (true for crawler **21** and any
+walk type at or above 20).
+
 **`EndJump` (IL=21):** `jumpState=0`, `jumpIsMoving=false`; local avatar
 `StartAnimationJump(mode1)` (land).
 
@@ -2059,6 +2074,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 - **2026-08-07:** UpdateSpawn: GameStats 12 log-only (not a gate); SpawnParticle
   air-above skip + light brightness.
 - **2026-08-07:** UpdateDynamicRagdoll / ActivateDynamicRagdoll flag bits 1/2/4.
+- **2026-08-07:** StartJumpSwimMotion water 0.65 gate + gravity/pow formula;
+  IsWalkTypeACrawl walkType≥20.
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 

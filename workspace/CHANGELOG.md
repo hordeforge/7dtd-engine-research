@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: StartJumpSwimMotion and KillLootContainer
+
+Done (V3.1.0 b14 IL):
+- StartJumpSwimMotion: water 0.65 gate; gravity/pow swim scale formula.
+- IsWalkTypeACrawl: walkType >= 20.
+- KillLootContainer: snap deathUpdateTime to linger-1 when corpse block present.
+---
 ## 2026-08-07 — tier-C: trader eject teleport and dynamic ragdoll
 
 Done (V3.1.0 b14 IL):

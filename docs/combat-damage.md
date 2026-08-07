@@ -266,6 +266,11 @@ If not `LootContainer.NoLoot` and `lootDropProb > RandomFloat`,
 
 **`SetDead` (IL=8):** base `Entity.SetDead` + force `Health.Value = 0`.
 
+**`KillLootContainer` (IL=24):** if local, already dead, corpse block non-air, and
+`deathUpdateTime < timeStayAfterDeath`: snap `deathUpdateTime =
+timeStayAfterDeath - 1` (almost expire corpse linger). Then base
+`Entity.KillLootContainer`.
+
 **`AwardKill` (IL=66):** if killer is a distinct living player: count zombie vs
 player kill by `entityType` (1 player / 2 zombie-ish); `GameManager.AwardKill`;
 special score condition if holding `gunHandgunT2Magnum44`;
@@ -411,6 +416,7 @@ Leaf types on the edges of the damage flow above:
   HeadshotMode/CelebrateMode enums; IsCrippled 12288.
 - **2026-08-07:** EntityHuman.TurnIntoCrawler collider 0.8 cube; AvatarHuman
   isCrawler + walkType 21 trigger; base TurnIntoCrawler stubs.
+- **2026-08-07:** KillLootContainer snaps deathUpdateTime near linger end.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs
