@@ -452,6 +452,24 @@ server; return. Else if cvar `.dysenterySmell > 0`: remove cvar and
 local `shelterPercent > 0`: `smellRadiusTarget *= 0.2` and `smellSheltered =
 true`.
 
+**`SmellCountItems` (IL=110):** sum `ItemClass.Smell * count` over drag-drop
+current stack + inventory slots + bag slots; `FastMin(sum, **50**)` then cast to
+int.
+
+**`SmellCountToRadius(count)` (IL=18):** `count -= 5`; if count &lt; 0 return **0**;
+else `FastLerp(10, 100, count/45)` (5 items → 0 radius start; ~50 → 100 m).
+
+**`SetSmellEat(distance)` (IL=21):** `smellEatRadius = min(eatRadius+distance,
+**100**)`; `smellEatTicks = **1800**`; force `smellRadius = max(smellRadius, 1)`;
+reset `smellUpdateItemsTicks = 0`.
+
+**`NetPackageEntityStealth.ProcessPackage` (IL=92):** validate sender entity id.
+Server: if `data & 2` then
+`SetSmellRadiusTarget((data>>8)-1, (data&4)!=0, (data&8)!=0)`; else
+`set_Crouching((data&1)!=0)`. Client:
+`SetClientLevels(data as u8, (data>>8)&127, (data&0x8000)!=0)` (light/noise
+bar sync).
+
 **`LightManager.GetStealthLightLevel` (IL=30):** if no `myServer` return 0. Else
 sample at entity pos **y+1.68**:
 `clamp01(GetLightLevel(pos) + GetLightLevelFromMovingLights(id, pos))` and out
@@ -1399,8 +1417,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** SmellUpdateItemsAndBlood wet/dysentery/shelter; SmellTickWet;
-  SmellClear; CheckSleeperVolumeNoise; AttractTick 40/80; NotifyNoise heat 240.
+- **2026-08-07:** SmellCountItems cap 50; SmellCountToRadius Lerp 10..100;
+  SetSmellEat 1800 ticks; EntityStealth Process bitfields; wet/shelter path.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

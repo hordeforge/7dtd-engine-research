@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SmellCountItems radius and EntityStealth bits
+
+Done (V3.1.0 b14 IL):
+- SmellCountItems: drag+inventory+bag ItemClass.Smell*count, min 50.
+- SmellCountToRadius: (count-5)/45 Lerp 10..100.
+- SetSmellEat: eatRadius+dist cap 100, ticks 1800.
+- NetPackageEntityStealth: server smell-target vs crouch; client SetClientLevels.
+---
 ## 2026-08-07 — tier-C: SmellUpdateItemsAndBlood wet and shelter
 
 Done (V3.1.0 b14 IL):
