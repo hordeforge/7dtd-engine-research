@@ -174,6 +174,21 @@ be equal. `ItemValue.CalcModSlotCount()` (IL=29) rolls the mod-slot budget from
 `Quality` as `FastMin(255, (int)EffectManager.GetValue(ModSlots, this,
 FastMax(0, Quality - 1), ...))`.
 
+`ItemValue.MergeBest(_iv)` (IL=115) merges a donor item into this one (the
+repair/combine result). With `ItemAction.RepairType` `CombineOnly`/`Both` it
+sums both remaining durabilities against the larger `MaxUseTimes`:
+`UseTimes = FastMax(0, maxMax - (myRemaining + otherRemaining))`. Otherwise
+(plain repair mode) it adopts the donor only when strictly better, same quality
+with more remaining durability or a higher quality; adoption copies the donor's
+`Quality`, `MaxDurabilityModifier`, and its own `UseTimes`. Both modes then run
+`MergeBestStats(_iv)`, clone the donor's mods and cosmetics when present, and
+resize `Modifications` to the recomputed `CalcModSlotCount()`.
+
+`MergeBestStats(_iv)` (IL=109) merges the stat arrays: a null donor array is a
+no-op; a missing own array copies the donor's wholesale; otherwise each donor
+stat either upgrades the matching entry when it beats the local value (better
+direction from `IsStatLowerBetter`) or is appended as a new entry.
+
 ---
 
 ## 3. ItemClass and the Actions array
