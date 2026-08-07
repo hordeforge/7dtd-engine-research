@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory.DecItem
+
+Done (V3.1.0 b14 IL):
+- items.md 6: DecItem (IL=132) type scan, ignoreModdedItems skip, stackable
+  min-take + removedItems record, non-stackable whole-slot, returns removed.
+
 ## 2026-08-08 - tier-C: World height queries
 
 Done (V3.1.0 b14 IL):
