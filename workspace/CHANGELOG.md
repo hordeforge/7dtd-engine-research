@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: FastTags bitmask
+
+Done (V3.1.0 b14 IL):
+- dedicated-misc-systems.md: FastTags - UInt64[] + singleBit fast
+  path; lazy per-group bit registry (GetBit IL=56,
+  Interlocked.Increment first-use order, tags/bitTags +
+  allInternal growth); Parse comma-split via locked scratch;
+  CombineTags 2..5 OR forms; Test_Bit/AllSet/AnySet/IsOnlyBit;
+  Remove; GetTagNames/ToString reverse mapping.
 ## 2026-08-08 - tier-C: ParticleEffect FX record
 
 Done (V3.1.0 b14 IL):
