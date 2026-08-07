@@ -41,17 +41,22 @@ Sources that build a `DamageSource`: melee/ranged item actions
 `EntityAlive.DamageEntity(damageSource, strength, criticalHit, impulseScale)`
 (**IL=236**) is the server apply. Ordered gates from live IL:
 
-1. Optional zombie limb cleanup on dismember types.
-2. **Consecutive-damage ignore:** if `IsIgnoreConsecutiveDamages` and same
-   `EnumDamageSource` still inside timeout window in `damageSourceTimeouts`
-   (`GameTimer.ticks`), return 0.
-3. Resolve attacker entity; **FriendlyFireCheck** may zero damage.
-4. God mode (`IsGodMode`) or **already dead** -> return.
-5. Passive/passive multipliers via `EffectManager.GetValue` on attacking item;
-   may set `DamageSource.DamageMultiplier`; accumulate resistance.
-6. Core apply: `damageEntityLocal(...)` builds `DamageResponse`.
-7. If not remote world: emit `NetPackageDamageEntity.Setup(entityId, dr)` for
-   observers (wire §6.11).
+1. If damageType **26**: zombie `AvatarZombieController.CleanupDismemberedLimbs`.
+2. **Consecutive-damage ignore:** if `IsIgnoreConsecutiveDamages` and source is
+   **not** `Internal` (1): if `damageSourceTimeouts[source]` exists and
+   `GameTimer.ticks - last < **30**` return **-1**; else stamp ticks.
+3. Resolve attacker; **FriendlyFireCheck** false → **-1**.
+4. If damage type is **not** 6 and attacker shares `entityFlags & 2` with victim
+   → **-1** (same-faction-ish block).
+5. God mode → **-1**. (Dead still continues for some bonus paths.)
+6. If not dead and attacker present: passive **161** on attacking item may set
+   `DamageMultiplier` + `BonusDamageType = 1` when value &gt; 0.
+7. Resistance: `min(1, passive **40**)` scales strength into
+   `accumulatedDamageResisted` fractional bank; integer resisted subtracted from
+   strength this hit.
+8. Core apply: `damageEntityLocal(...)` builds `DamageResponse`.
+9. Package `NetPackageDamageEntity`; remote world `SendToServer`; else fan-out
+   to tracked (type-6 path uses different exclude id residual).
 
 ### 2.1 `damageEntityLocal` (IL=484) builds `DamageResponse`
 
@@ -325,6 +330,8 @@ Leaf types on the edges of the damage flow above:
   FireEvent fan-out; NotifySleeperDeath volumes.
 - **2026-08-07:** AddScore GameStats 28/29/30 + ach 6/7/10/14; GetMaxAttackTime 10;
   SleeperVolume.EntityDied/ClearedUpdate pref 88.
+- **2026-08-07:** DamageEntity gates: type26 cleanup; consecutive 30 ticks;
+  flags&2 block; passive 161 bonus; passive 40 resist bank.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

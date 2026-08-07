@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DamageEntity consecutive 30 and resist bank
+
+Done (V3.1.0 b14 IL):
+- DamageEntity: type 26 limb cleanup; consecutive ignore 30 ticks non-Internal; FF; entityFlags&2 block; god.
+- Passive 161 attacking-item bonus mult; passive 40 resist fraction into accumulatedDamageResisted.
+---
 ## 2026-08-07 — tier-C: pathFollow radii and ImprovePath
 
 Done (V3.1.0 b14 IL):
