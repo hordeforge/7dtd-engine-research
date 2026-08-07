@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Prefab stamping engine
+
+Done (V3.1.0 b14 IL):
+- server-browser-prefabs.md 3.2: CopyBlocksIntoChunkNoEntities IL=715 structural flow (AABB clip, density-aware placement, placeholder replace, deco/inside/water/texture/quest-gate, TE + BlockTrigger clones, terrain height)
+- server-browser-prefabs.md 3.2: InitTerrainFillers IL=17 (filler block ids from Constants), IsCullThisPrefab IL=5 (!bExcludePOICulling)
+
 ## 2026-08-08 - tier-C: POI container + color registry
 
 Done (V3.1.0 b14 IL):
