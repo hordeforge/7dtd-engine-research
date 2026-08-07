@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: block light query + body damage accessors
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md: World.GetBlockLightValue IL=34 (DensityAir
+  sentinel, 0 for null chunk, GetLightValue channel 0).
+- combat-damage.md: BodyDamage HasLeftLeg (Flags & 96 == 0) /
+  HasRightLeg (Flags & 384 == 0) inverted missing-leg pairs.
 ## 2026-08-08 - tier-C: block light query
 
 Done (V3.1.0 b14 IL):
