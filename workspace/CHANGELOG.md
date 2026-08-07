@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: CreateEntityOperation.CompleteEntity
+
+Done (V3.1.0 b14 IL):
+- EntityFactory/CreateEntityOperation.CompleteEntity IL=639: asset load gates;
+  prefab instantiate; player (local +Local/remote +GUIHUDEntityName,
+  holding item, team, skin), item (EntityItem), falling block/group/tree
+  paths; generic path (unknown class log, GUIHUD pref 44, collider layer 14,
+  LargeEntityBlocker/Physics tags); convergence: ApplyToEntity, Delete source
+  destroy, lifetime/id/pos/rot/onGround, scale/head size, PostInit.
 ## 2026-08-08 — tier-C: RemoveChunkObserver force pass
 
 Done (V3.1.0 b14 IL):

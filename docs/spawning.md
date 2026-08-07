@@ -446,6 +446,44 @@ before delegating. `CreateEntity(ecd)` (IL=7) is a thin wrapper:
 `CreateEntityOperation.Start(ecd, true)` + `CompleteEntity()` (async variant
 starts with `false`; the operation is polled by `TryComplete`).
 
+**`CreateEntityOperation.CompleteEntity()` (IL=639)** builds the entity object:
+
+1. **Asset gates:** both `EntityInstanceAssets` and `EModelInstanceAssets` must
+   be load-complete and load-successful; the operation runs once (entity null).
+   Failures log `CreateEntityOperation cannot complete {0}, ...` and return.
+2. Instantiate the class prefab, position = `ecd.pos - Origin.position`, keep
+   the `GameObject` child when present.
+3. **Player path** (`isPlayer`): local →
+   `addEntityComponent(ec.classname.FullName + "Local")` + `LocalPlayer`
+   component; remote → `addEntityComponent(ec.classname)` +
+   `GUIHUDEntityName`. Wire `RootTransform`/`ModelTransform`/`PhysicsTransform`
+   (`Graphics` child local, `Physics` child remote), `playerProfile`,
+   `Entity.Init(entityClass, assets)`; non-empty `holdingItem` →
+   `inventory.AddItem(ItemStack(holdingItem, 1))` + `SetHoldingItemIdx(0)`;
+   `TeamNumber`; `SetSkinTexture`; parent + name `Player_{id}`; log.
+4. **Item path** (`entityClass == itemClass`): `EntityItem`; `clientEntityId`,
+   `OwnerId = belongsPlayerId`; parent `Items`; name `Item_{id}`;
+   `SetItemStack`.
+5. **Falling blocks:** single (`fallingBlockClass`) → `EntityFallingBlock` with
+   `SetBlockValue(blockValues[0])` + `SetTextureFull(textureFullArrays[0])`;
+   group (`fallingBlocksClass`) → `EntityFallingBlocks` with
+   `SetBlockGroupData(blockPositions, blockValues)` + `SetTextureFullArrays`;
+   tree (`fallingTreeClass`) → `EntityFallingTree` with
+   `SetBlockPos(blockPos, fallTreeDir)`; parents `FallingBlocks` /
+   `FallingTrees`, names `FallingBlock_{id}`.
+6. **Generic path:** `ec.classname == null` → log `Unknown entity {id}` +
+   return; `addEntityComponent(classname)`; `rot` euler, `entityId`, Init;
+   pref **44** (entity-name display) → `GUIHUDEntityName` when `EntityAlive`;
+   parent when `parentGameObjectName` set; name `{entityClassName}_{id}`,
+   `SetEntityName`; `SetSkinTexture`; collider layers: capsule colliders → **14**
+   unless tagged `LargeEntityBlocker`/`Physics`; box colliders → **14**.
+7. **Convergence:** `ecd.ApplyToEntity(entity)`; spawner source
+   `EnumSpawnerSource.Delete (4)` → `Destroy(gameObject)` + return; `lifetime`,
+   `entityId`, `belongsPlayerId`, `InitLocation(pos, rot)`, `onGround`;
+   `SetScale(ec.SizeScale)` when ≠ 1, then `SetScale(ecd.overrideSize)` when
+   ≠ 1; `SetHeadSize(ecd.overrideHeadSize)` when `EntityAlive` and ≠ 1;
+   `PostInit()`; store `entity`.
+
 `World.SpawnEntityInWorld` (**IL=178**) order:
 
 1. Null entity → warn and return.
