@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: WeatherManager leaves
+
+Done (V3.1.0 b14 IL):
+- weather-environment.md 4: SeaLevel (IL=2) constant 0;
+  GetCurrentTemperatureValue (IL=2) GetTemperature forward;
+  GetCurrentCloudThicknessPercent (IL=4) *0.01; EntityRemovedFromWorld (IL=1)
+  empty; IsStorming (IL=15) biome stormState >= 2.
+
 ## 2026-08-08 - tier-C: ItemActionRanged ammo leaves
 
 Done (V3.1.0 b14 IL):
