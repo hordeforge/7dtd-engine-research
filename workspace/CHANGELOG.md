@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Progression.Update + sandbox recompute
+
+Done (V3.1.0 b14 IL):
+- Progression.Update (IL=32) narrated in progression.md: 1-second cadence
+  MinEvent fire (type 5) on timer<=0 then timer=1, else timer-=dt; every
+  frame Buffs.SetCustomVar(_expdeficit, ExpDeficit, netSync, op, forceSend).
+- Progression.UpdateForSandbox (IL=22) -> ProgressionClass.UpdateForSandbox
+  (IL=52): backward walk of DisplayDataList, Enabled from HandleCheckEnabled,
+  MaxLevel from QualityStarts top entry of first enabled display row.
+
 ## 2026-08-08 - tier-C: Entity.animateYaw
 
 Done (V3.1.0 b14 IL):

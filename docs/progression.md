@@ -103,6 +103,18 @@ validates every purchase; the client only requests it.
 - **Residual / content:** `progression.xml` (the tree); the skill UI; book/schematic
   content is data.
 
+**Per-frame hooks:** `Progression.Update()` (IL=32), called from
+`EntityAlive.Update` (Path B): a 1-second cadence MinEvent - when `timer <= 0`
+it fires `FireEvent(MinEventTypes=5, parent.MinEventContext)` and resets
+`timer = 1`, otherwise `timer -= deltaTime`; every frame regardless it mirrors
+the XP debt into the buff cvar system via
+`Buffs.SetCustomVar("_expdeficit", ExpDeficit, netSync, op, forceSend)`.
+`Progression.UpdateForSandbox()` (IL=22) fans out to each
+`ProgressionClass.UpdateForSandbox()` (IL=52), which walks `DisplayDataList`
+backwards, sets the class `Enabled` from `HandleCheckEnabled()` and derives
+`MaxLevel` from the top `QualityStarts` entry of the first enabled display row
+(sandbox-options-driven recompute, not a runtime tick cost).
+
 ---
 
 ## Progression blob layout, XP curve and the V3.1.0 death penalty (2026-08-06)
@@ -275,6 +287,9 @@ paths multiply by `GlobalGameStageModifier` after the effect.
 
 ## Changelog
 
+- **2026-08-07:** Progression.Update (IL=32) 1-s cadence MinEvent(5) fire +
+  per-frame _expdeficit cvar; UpdateForSandbox fan-out + ProgressionClass
+  Enabled/MaxLevel recompute (IL=22/52).
 - **2026-08-07:** get_gameStage IL=124 daysLived clamp, biome/quest mods,
   passive 157, GlobalGameStageModifier.
 - **2026-08-07:** AddLevelExp IL=161 apply order (bonus EffectManager, recursive).
