@@ -113,6 +113,17 @@ forced-reset trader must match the NPC in question).
 current-objective grouping: only objectives whose `Phase` equals `CurrentPhase`
 (or `Phase == 0`, meaning always-active) are hooked and count toward completion.
 
+**Quest leaf mechanics:** `SetupQuestCode()` (IL=48) builds the per-instance
+`QuestCode` once (when still 0) as the hash of
+`unscaledTime + "_" + ID + "_" + ownerEntityId + "_" + QuestGiverID`.
+`SetupTags()` (IL=41) binds each objective's `OwnerQuest`, runs
+`HandleVariables()` + `SetupQuestTag()`, and ORs the objectives'
+`NeedsNPCSetPosition` into the quest flag. `get_HasPosition` (IL=10) is
+`MapObject != null || NavObject != null`; `GetActionIndex` (IL=23) /
+`GetObjectiveIndex` (IL=23) return the list index of an action / objective (0
+when absent). `get_IsShareable` (IL=18) is `SharedOwnerID == -1 &&
+QuestClass.Shareable && !RallyMarkerActivated && CurrentState == InProgress`.
+
 `StartQuest(newQuest, notify)` sets `InProgress`, wires every action / requirement
 / objective / reward to the quest, sets current-phase objectives to `InProgress`
 and calls `HandleAddHooks` + `Refresh` on them, and immediately gives any reward
