@@ -466,7 +466,9 @@ trigger mode nibble.
 `TriggerVolume already exists at {0}` and returns **-1**. `GetTriggerVolume
 (index)` (IL=30) throws `TriggerVolume id {0} not found` on a miss (like the
 sleeper lookup); `FindTriggerVolume(mins, maxs)` (IL=29) returns the mapped id
-or **-1**.
+or **-1**. The chunk-side link mirrors the sleepers:
+`Chunk.AddTriggerVolumeId(id)` (IL=18) dedupes into `triggerVolumes` with the
+same **255** cap error; `GetTriggerVolumes` (IL=3) exposes the list.
 
 **`SleeperVolume.TouchGroup` (IL=52):** `mode = flags & 7`. If no `groupId` or no
 prefab: `Touch(world, player, setActive, mode)`. Else for each volume in
