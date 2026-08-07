@@ -206,6 +206,19 @@ player (IL=88) repositions the camera, starts the `Driving` activity, updates
 owned-vehicle waypoints, and stops the `RunLoop` sound. `EntityVehicle` (IL=2)
 always returns **-1** (vehicles never attach to anything).
 
+**Seat slot definition: `Entity.GetAttachedToInfo(slot)` (IL=2 base returns
+null; `EntityVehicle` IL=158):** builds the `AttachedToEntitySlotInfo` -
+defaults `bKeep3rdPersonModelVisible = bReplaceLocalInventory = true`,
+`pitchRestriction (-30, 30)`, `yawRestriction (-90, 90)`,
+`enterParentTransform = vehicle transform`, `enterPosition (0, 0, -0.201)`,
+`enterRotation` zero; then reads `vehicle.GetPropertiesForClass("seat" +
+slotIdx)` and applies `position` / `rotation` overrides. The `exit` property
+is a `~`-separated list of vectors: each becomes an
+`AttachedToEntitySlotExit` at `GetPosition() + transform.TransformDirection(v)`
+(y + 0.02) with rotation `(0, Atan2(x, z) * 57.29578 + 180 + rotation.y, 0)`.
+Without seat properties the fallback exit is `GetPosition() - 2 * right` at
+yaw + 90.
+
 `DetachEntity` (**IL=157**): cancel delayed attach; pose -1; remove IK; restore
 model/layers; re-enable controller; remove vehicle actions; `DriverRemoved` if
 driver; base detach; unlock interaction when free seats return.
@@ -590,6 +603,9 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-07:** Seat slot definition: EntityVehicle.GetAttachedToInfo (IL=158)
+  defaults + seat<idx> DynamicProperties overrides, ~-separated exits with
+  TransformDirection + y+0.02, fallback -2*right exit.
 - **2026-08-07:** Generic attach pipeline in 4.2: StartAttachToEntity (IL=43)
   client->server + broadcast, Entity.AttachToEntity (IL=64) pose parent,
   EntityAlive (IL=60) inventory swap + Idle tag, EntityPlayer/PlayerLocal

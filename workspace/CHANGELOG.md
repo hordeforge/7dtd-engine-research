@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: seat slot definition
+
+Done (V3.1.0 b14 IL):
+- EntityVehicle.GetAttachedToInfo (IL=158) narrated in
+  vehicles-drones-turrets.md 4.2: slot defaults (visible + inventory
+  replace, pitch/yaw restrictions, enter pose (0,0,-0.201)), seat<idx>
+  DynamicProperties position/rotation overrides, exit list split on '~'
+  with TransformDirection + y+0.02 + yaw math, fallback -2*right exit.
+
 ## 2026-08-08 - tier-C: generic attach pipeline
 
 Done (V3.1.0 b14 IL):
