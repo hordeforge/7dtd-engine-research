@@ -1208,6 +1208,23 @@ pick random start index; walk candidates requiring
 remove from available and return index; if none, `FindFathestSpawnFromPlayers`
 (typo in stock method name).
 
+**`ResetSpawnsAvailable` (IL=48):** rebuild `spawnsAvailable` as all spawn-point
+indices. If prefab `LastRefreshType` has `infestedTag`, include every point;
+else skip points whose `BlockSleeper.spawnMode == 2` (infested-only / excluded
+mode).
+
+**`FindFathestSpawnFromPlayers` (IL=108):** among `spawnsAvailable`, keep only
+`CanSleeperSpawnAtPos(pos, checkBelow = minScript==null)`; score each by
+**minimum** sqr distance to any player (center +0.5 xz); pick the **maximum** of
+those minima (farthest-from-nearest-player); remove from available and return
+spawn-point index (or **-1** if none).
+
+**`World.CanSleeperSpawnAtPos` (IL=25):** resolve chunk; else false;
+`Chunk.CanSleeperSpawnAtPos(localX,Y,Z, checkBelow)`.
+
+**`GetGameStageAround` (IL=3):**
+`GameStageDefinition.CalcGameStageAround(player)`.
+
 ### D8.2b `OnTriggered` (IL=14)
 
 `triggerState = flags & 7`; store `playerTouchedTrigger`; call
@@ -1432,8 +1449,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** SpawnPointIsHidden offset rays layer 71; SetSmellRadiusTarget;
-  SetClientLevels bar colors; SmellCountItems/ToRadius; EntityStealth bits.
+- **2026-08-07:** FindFathestSpawnFromPlayers max-min player dist; ResetSpawns
+  infestedTag/spawnMode 2; CanSleeperSpawnAtPos; SpawnPointIsHidden rays.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

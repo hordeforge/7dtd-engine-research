@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: FindFathestSpawn and ResetSpawnsAvailable
+
+Done (V3.1.0 b14 IL):
+- FindFathestSpawnFromPlayers: max of min-player-dist among CanSleeperSpawnAtPos points.
+- ResetSpawnsAvailable: skip spawnMode 2 unless infestedTag refresh.
+- CanSleeperSpawnAtPos: chunk local CanSleeperSpawnAtPos.
+- GetGameStageAround: CalcGameStageAround.
+---
 ## 2026-08-07 — tier-C: SpawnPointIsHidden rays and stealth setters
 
 Done (V3.1.0 b14 IL):

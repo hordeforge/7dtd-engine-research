@@ -232,6 +232,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | SmellUpdateItemsAndBlood wet/shelter path | entity-ai.md |
 | SmellCountItems/ToRadius + EntityStealth bits | entity-ai.md |
 | SpawnPointIsHidden rays + SetClientLevels | entity-ai.md |
+| FindFathestSpawn + ResetSpawnsAvailable | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
