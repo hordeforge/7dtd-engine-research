@@ -268,8 +268,11 @@ Two task lists: **target** tasks and **general** tasks. Very thin wrapper.
 **`SetAttackTarget` (IL=70):** same target only refreshes `attackTargetTime`; else
 stash `attackTargetLast`, set `targetAlertChanged` + random `soundDelayTicks`
 5..20 when new target, clear investigate ticks; if not remote, send
-`NetPackageSetAttackTarget` via `SendPacketToTrackedPlayersAndTrackedEntity`;
-store target + time.
+`NetPackageSetAttackTarget` via `SendPacketToTrackedPlayersAndTrackedEntity`
+(target id, or **-1** when clearing); store target + time.
+
+**`SetAttackTargetClient(target)` (IL=4):** store `attackTargetClient` (the
+remote-mirror field used by `GetAttackTargetLocal` on clients).
 
 **`SetRevengeTarget(other)` (IL=14):** store `revengeEntity`; if non-null
 `revengeTimer = **500**` else **0** (ticks of revenge focus).
