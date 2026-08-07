@@ -55,7 +55,10 @@ chunk-local coords (`& 15`), reads one byte from the `chnLight` channel, and
 splits the **nibbles**: `Sun` is the low 4 bits (`light & 15`), `Block` the
 high 4 bits (`light >> 4`). `ChunkCluster.GetLight(pos, type)` (IL=21) is the
 world-coordinate wrapper: chunk lookup, `0` when the chunk is null, else
-delegate. `Chunk.SetLight(x, y, z, intensity, type)` (IL=56) is the write:
+delegate. `World.GetBlockLightValue(pos)` (IL=34) is the block-light query:
+`MarchingCubes.DensityAir` when the `ChunkCache` is missing, `0` for a null
+chunk, else `chunk.GetLightValue(toBlockXZ(x), toBlockY(y), toBlockXZ(z),
+0)`. `Chunk.SetLight(x, y, z, intensity, type)` (IL=56) is the write:
 type **1** (sun, low nibble) keeps the high nibble (`intensity | old & 0xF0`),
 type **0** (block, high nibble) keeps the low (`(intensity << 4) | old & 0x0F`);
 a changed byte writes the channel, flags `NeedsRegenerationAt(y)`, and sets
@@ -441,6 +444,8 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-08:** World.GetBlockLightValue IL=34: DensityAir sentinel (no
+  cache), 0 for null chunk, else GetLightValue(channel 0).
 - **2026-08-08:** WaterValue leaves: SetMass IL=8 FastClamp 0..65535;
   get_RawData/FromRawData u16<->i64 channel word; wire u16 both ways.
 - **2026-08-08:** Water writes: Chunk.SetWater IL=13 (raw + WakeNeighbours);
