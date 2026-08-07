@@ -626,6 +626,72 @@ are field reads.
 
 ---
 
+## 7b. The loader (`LootFromXml`)
+
+`LoadLootContainers(xmlFile)` (IL=6) is the `<LoadLootContainers>` coroutine
+entry (a state-0 iterator); the `MoveNext` walks the document's
+`lootcontainer` elements and calls the per-element loaders below. V3.1.0 b14
+IL:
+
+**`LoadLootContainer(element)` (IL=275):** `new LootContainer`; `name` is
+required (`XmlException: Attribute 'name' missing on container`) and a
+duplicate throws `Duplicate lootlist entry with name`. Attributes:
+`count` -> `StringParsers.ParseMinMaxCount` into `minCount`/`maxCount`
+(default 1/1); `size` -> `ParseVector2i(v, ',')` (zero -> default 3,3);
+`buff` -> comma-split into `BuffActions` (executed by
+`ExecuteBuffActions`); `sound_open` / `sound_close`; the bools
+`ignore_loot_abundance`, `unique_items`, `ignore_loot_prob`,
+`unmodified_lootstage`; `destroy_on_close` ->
+`EnumUtils.Parse<DestroyOnClose>`; `on_open_event`; `open_time` (default 1).
+`loot_quality_template` must already exist in
+`LootContainer.lootQualityTemplates` (else
+`Log.Error: LootContainer {0} uses an unknown loot_quality_template "{1}"`).
+The `<item>` children go to
+`ParseItemList(name, elements, itemsToSpawn, -1, -1)`, then
+`LootContainer.Init()` finalizes the definition.
+
+**`ParseItemList(containerId, childNodes, list, minQualityBase,
+maxQualityBase)` (IL=334)** - the shared item-entry parser (containers and
+groups both use it). Per `<item>`: `prob` defaults 1 and a bad float throws
+`Parsing error prob '...'`; `force_prob` sets `forceProb`; a `group`
+attribute resolves through `LootContainer.lootGroups` (missing throws
+`lootgroup '...' does not exist or has not been defined before being
+reference by lootcontainer/lootgroup name=...`); otherwise `name` builds
+`new LootItem` with `ItemClass.GetItem(name, false)` (empty result throws
+`Item with name '...' not found!`); neither attribute throws
+`Attribute 'name' or 'group' missing on item in lootcontainer/lootgroup
+name=...`. `tags` parses via `FastTags<Global>.Parse`; `count` (only for a
+`CanStack()` item class) fills `minCount`/`maxCount` via
+`ParseMinMaxCount`; `minQuality`/`maxQuality` start at the caller's
+`minQualityBase`/`maxQualityBase` and a `quality` attribute overrides them;
+`loot_prob_template` (default empty), `mods` (`modsToInstall`),
+`mod_chance`, `loot_stage_count_mod`, `requirement` (the
+`LootEntryRequirement` list), `buffs` (`buffsToAdd`), and
+`random_durability` finish the entry before it is appended.
+
+**`LoadLootGroup(element)` (IL=197):** `name` required and unique
+(`lootgroup '...' is defined multiple times`); `loot_quality_template`;
+`count` where the literal `all` means -1 (every item); min/max quality from
+`min_quality`/`max_quality`; `<item>` children via `ParseItemList` with the
+group's quality range; every entry gets `parentGroup = this`;
+`abundance_type` -> `Enum.TryParse<AbundanceLootModTypes>`; registered in
+`lootGroups`.
+
+**`LoadLootQualityTemplate(root)` (IL=231):** iterates
+`<lootqualitytemplate>` elements; `name` required (throw) and unique; the
+`<qualitytemplate>` children build the level table registered in
+`lootQualityTemplates`.
+
+**`LoadLootSetting(root)` (IL=142):** the global `<lootsetting>` config -
+`poi_tier_count` sizes `LootManager.POITierMod` / `POITierBonus` (default
+5), and `poi_tier_mod` (comma floats) / `poi_tier_bonus` fill them - the POI
+tier modifiers that feed the loot-stage math below.
+
+`ParseLootEntryRequirement` (the `LootEntryRequirement*` family) is covered
+in the Loot-entry requirement section above.
+
+---
+
 ## 8. Player loot stage (`EntityPlayer.GetLootStage`, IL=184)
 
 Container open path uses party max of this (see `GetHighestPartyLootStage`).
@@ -759,6 +825,14 @@ or `ItemStack.Empty` when nothing rolled.
 
 ## Changelog
 
+- **2026-08-08:** LootFromXml loader (7b): coroutine entry IL=6;
+  LoadLootContainer IL=275 (name/count/size/buff/sounds/flag bools/
+  destroy_on_close/on_open_event/open_time, quality template check,
+  ParseItemList + Init); ParseItemList IL=334 (prob/force_prob/group/name/
+  tags, count only for stackable, quality override, mods/mod_chance/
+  requirement/buffs/random_durability); LoadLootGroup IL=197 (all -> -1,
+  parentGroup, abundance_type); LoadLootQualityTemplate IL=231;
+  LoadLootSetting IL=142 (POITierMod/POITierBonus).
 - **2026-08-07:** DropContentOfLootContainerServer IL=99; CheckDestroyTileEntity IL=37.
 
 - **2026-08-07:** GetCountMultiplierFromSandbox enum 1..11 / -1; RandomCountFrom
