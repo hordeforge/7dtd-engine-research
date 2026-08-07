@@ -133,10 +133,20 @@ playtest) set spawn flag, `StartCooldownOnNeighbors`, `SetLongDelay`,
 `ScoutsFeral` (&lt;125), else `ScoutsRadiated`; queue `AIScoutHordeSpawner` on
 `scoutSpawnList`.
 
-**`AIScoutHordeSpawner.SpawnUpdate` (IL=129):** require `CanSpawn(1)`;
-`EntitySpawner.SpawnManually` (day check); for each spawned alive entity:
-`SetInvestigatePosition(CalcRandomPos(endPos, 6), **6000**, true)`; push
-`ZombieCommand` onto `hordeList`.
+**`AIScoutHordeSpawner.Update` (IL=22):** finished (true) if no players, or
+`SpawnUpdate` returns true and `hordeList` empty; else `UpdateHorde` and keep
+(false).
+
+**`AIScoutHordeSpawner.SpawnUpdate` (IL=129):** require `CanSpawn(1)` and
+`CurrentWave <= 0` else finished; `SpawnManually` (day, enemies on); for each
+`EntityEnemy`: `IsHordeZombie`/`IsScoutZombie`/`bIsChunkObserver` true, BM flag
+from spawner; `ZombieCommand` with `AttackDelay=**2**`, investigate
+`CalcRandomPos(endPos, 6)` for **6000** ticks; clear `spawnedList`; finished
+when `CurrentWave > 0`.
+
+**`Horde.Tick` (IL=21):** if `_destroy` finished; else if nested
+`AIHordeSpawner.Tick` finishes, `Cleanup` and clear `_horde`; never auto-finish
+while spawner null (returns false).
 
 **`UpdateHorde` (IL=229):** per command: dead scouts culled; if not attacking
 and lost investigate / dead target, may `spawnHordeNear` then
@@ -445,8 +455,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** TickActiveSpawns reverse drain; CheckToSpawn one chunk/pulse;
-  TickPlayerState Dead mirror; neighbor 180/720; SetLongDelay 1320; FindScout.
+- **2026-08-07:** Scout Update finish gates; SpawnUpdate AttackDelay=2 flags;
+  Horde.Tick destroy/spawner cleanup; TickActiveSpawns reverse drain.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset

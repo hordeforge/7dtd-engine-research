@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: scout Update finish, Horde.Tick, drone CanAttack
+
+Done (V3.1.0 b14 IL):
+- AIScoutHordeSpawner.Update finish: no players or SpawnUpdate done + empty horde.
+- SpawnUpdate: AttackDelay=2, IsHorde/Scout/chunkObserver flags, 6000 investigate.
+- Horde.Tick: _destroy or nested AIHordeSpawner finish/Cleanup.
+- CanAttack bans Heal/Attack/Shutdown; Weapon.canFire = cooldown<=0.
+- updateTransitionState heal server path and cooldown refresh.
+---
 ## 2026-08-07 — tier-C: TickActiveSpawns drain and heal medical gate
 
 Done (V3.1.0 b14 IL):

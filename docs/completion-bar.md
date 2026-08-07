@@ -194,6 +194,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | Investigate pos + neighbor cooldown delays | entity-ai §D3.8 / aidirector |
 | GetGroupPositions / DoMoveIntoFollowPos repath | vehicles-drones-turrets |
 | TickActiveSpawns drain + heal medical 0.67 | aidirector / vehicles |
+| Scout Update finish + Horde.Tick + CanAttack | aidirector / vehicles |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

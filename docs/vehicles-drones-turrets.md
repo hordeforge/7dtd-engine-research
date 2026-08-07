@@ -308,7 +308,20 @@ exists: repath via `followPlannedPath` when LOS blocked, path length >
 `findOpenBlockAbove(chest, 256)` at 0.2; rotate+move; return true (blocks other
 states).
 
+**`get_CanAttack` (IL=21):** false when state is Heal (**3**), Attack (**4**), or
+Shutdown (**5**); else true only if `WakeupAnimTime == 0`.
+
 **`IsAttackValid` (IL=9):** `activeWeapon != null && activeWeapon.canFire()`.
+
+**`Weapon.canFire` (IL=7):** `cooldownTimer <= 0`. HealBeam override also requires
+`hasHealingItem()`.
+
+**`updateTransitionState` (IL=98):** no-op if `transitionState == None (8)` or
+already equals `state`. Leaving Attack/Heal refreshes all installed weapon
+cooldowns. Transition Heal (**3**): server `healTargetServer(attackTarget,
+userRequestedHeal)`; client only `setState`. Shutdown (**5**): set
+`isShutdownPending`. Idle (**0**) from Shutdown: `setShutdown(false)`. Then
+clear `transitionState` to None.
 
 **`IsTargetInNeedOfMedical` (IL=10):** delegates to
 `HealBeamWeapon.isTargetInNeedOfMedical` (false if no heal weapon).
@@ -502,8 +515,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** Heal medical 0.67/HealDamageThreshold + cvar gate; IsAttackValid;
-  GetGroupPositions 5 slots; DoMoveIntoFollowPos repath; Fire 16/11.
+- **2026-08-07:** CanAttack state bans; Weapon.canFire cooldown; transitionState
+  heal/shutdown path; heal medical 0.67; group slots/repath.
 - **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire
   passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds
