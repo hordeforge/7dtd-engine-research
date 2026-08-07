@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.FindAttachSlot
+
+Done (V3.1.0 b14 IL):
+- Entity.FindAttachSlot (IL=27) narrated in vehicles-drones-turrets.md:
+  walks attachedEntities[] for the matching index, -1 when absent - the
+  IsAttached primitive.
+
 ## 2026-08-08 - tier-C: Entity.IsAttached
 
 Done (V3.1.0 b14 IL):
