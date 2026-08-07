@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1468 / catalogued 839 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1469 / catalogued 838 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -169,6 +169,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | EntityItem OnUpdateEntity lifetime | loot-economy §6b |
 | DropItemsOnEvent harvest table | blocks §3 |
 | PartyQuestChange HandlePlayer | parties-factions §2.3 |
+| EAIApproachAndAttackTarget Update phases | entity-ai §D2 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EAIApproachAndAttackTarget Update phases
+
+Done (V3.1.0 b14 IL):
+- Home return FindPath 0.8 aggro, homeTimeout 0.05, give-up + sleeper pose.
+- Relocate/target vel EMA; eat DamageEntity 35; chase FindPath + CanSee look.
+- CanExecute sleep/stun/jump-swim and targetClasses chaseTimeMax.
+---
 ## 2026-08-07 — tier-C: DropItemsOnEvent and PartyQuestChange
 
 Done (V3.1.0 b14 IL):
