@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `e0da480` launcher projectile family |
-| Commits since dry-run `3b61d9c` | ~397 |
+| HEAD (at handoff write) | `f523469` projectile runtime |
+| Commits since dry-run `3b61d9c` | ~398 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

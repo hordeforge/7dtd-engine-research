@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: projectile runtime
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ProjectileMoveScript.Fire IL=236 (hitMask 80
+  default, passives 71/70 velocity/gravity, ballistic FlyTime<0
+  branch, water particles, SetState Flying); FixedUpdate IL=196
+  state machine (gravity after FlyTime, ideal-position lerp,
+  LifeTime/DeadTime timeouts, sticky-ray revive via Voxel.Raycast);
+  SetState IL=33 (Dead hides MeshExplode + light); checkCollision
+  IL=616 segment sweep + firer layer exclusion; TryCollect IL=40
+  sticky-arrow pickup.
 ## 2026-08-08 - tier-C: catapult + launcher families
 
 Done (V3.1.0 b14 IL):
