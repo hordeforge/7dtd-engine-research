@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: POI container + color registry
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 4.1: WorldGridCompressedData.Contains IL=25 bounds test, GetData IL=18 world-to-grid fold
+- chunk-providers.md 3.3: getPoiForColor TryGetValue + AddPoiMapElement first-wins registration by m_uColorId
+
 ## 2026-08-08 - tier-C: POI InitData + WaterFloodFill
 
 Done (V3.1.0 b14 IL):
