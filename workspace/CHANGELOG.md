@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityAlive yaw step
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md: UpdateRotation (IL=36) shortest-arc wrap into (-180,180],
+  clamp to +-maxIncr, cur + delta.
+
 ## 2026-08-08 - tier-C: falling-block batch/cancel
 
 Done (V3.1.0 b14 IL):
