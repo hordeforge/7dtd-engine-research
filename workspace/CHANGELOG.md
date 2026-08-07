@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: top-soil sampler
+
+Done (V3.1.0 b14 IL):
+- spawning.md 6: Chunk.FindRandomTopSoilPoint (IL=80) numTrys retry loop,
+  local RandomRange(15) xz, GetHeight y, reject y<2 and
+  !CanMobsSpawnAtPos(x,y,z,false,true), world x+m_X*16 / y+1 / z+m_Z*16.
+
 ## 2026-08-08 - tier-C: world clamps + spawn sampler
 
 Done (V3.1.0 b14 IL):
