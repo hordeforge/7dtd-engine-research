@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: same-class gate + block-item bridge
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md: EntityEnemyAnimal.CanDamageEntity IL=17 same-
+  class gate; EntityAnimal/EntityEnemy DamageEntity IL=7 base
+  delegates.
+- items.md 2: ItemClassBlock.GetBlock IL=5 (Block.list[itemId]);
+  GetBlockValueFromItemValue IL=15 SelectAlternates ->
+  GetAltBlockValue(iv.Meta) else iv.ToBlockValue(false).
 ## 2026-08-08 - tier-C: same-class damage gate
 
 Done (V3.1.0 b14 IL):
