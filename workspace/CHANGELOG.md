@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: face-slot texture write
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: Chunk.SetBlockFaceTexture (IL=48) clear-or-insert face
+  byte + isModified.
+
 ## 2026-08-08 - tier-C: SetWaterRaw
 
 Done (V3.1.0 b14 IL):
