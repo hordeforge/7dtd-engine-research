@@ -294,6 +294,23 @@ target-pose interpolator used while `physicsMasterTargetTime > 0` (in base
 `physicsMasterTargetTime` once the blend completes (reverting the next frame
 to `updateTransform`).
 
+**Player frame body: `EntityPlayer.Update()` (IL=179)** (calls the
+EntityAlive chain): caches `generalTags = MinEventContext.Tags`; returns early
+until the game is started. Then accumulates `totalTimePlayed +=
+unscaledDeltaTime / 60` (minutes); on each whole-hour boundary below **301**
+minutes the local player pushes a GameSparks analytics value (`GSDataKey=6`,
+minutes, `Progression.Level`). The `ChunkObserver` is re-positioned each frame
+(`SetPosition(GetPosition())`), and when the player crosses into a new chunk
+(`chunkPosAddedEntityTo != lastChunkPos`, spawned, map database present) the
+observer's `mapDatabase.Add(chunkPos, world)` captures the map data. Avatar
+pose: `SetHeadAngles(rotation.x, 0)`, and `SetArmsAngles(rotation.x + 90, 0)`
+while the held item `CanHold()`, else `(0, 0)`. Alive players accrue
+`currentLife += deltaTime / 60` and track `longestLife`; each new
+`longestLifeLived` minute the local player calls
+`QuestEventManager.TimeSurvived(longestLife)` and
+`AchievementManager.SetAchievementStat(stat 9, longestLifeLived)`. Finishes by
+setting `HasUpdated = true`.
+
 Slice model (EMA frame gaps, ~25 base, `tickEntitySliceCount`): [`entity-ai.md`](entity-ai.md).
 
 ### 3.4 AI / path onion (authority path)
@@ -534,6 +551,11 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-07:** EntityPlayer.Update (IL=179) player frame body: generalTags
+  cache, game-started gate, totalTimePlayed minutes + hourly GameSparks (< 301
+  min), ChunkObserver reposition + mapDatabase.Add on chunk cross, avatar
+  head/arm angles, currentLife/longestLife tracking (TimeSurvived +
+  achievement stat 9), HasUpdated.
 - **2026-08-07:** Physics hooks in loop.md Path B: FixedUpdate (IL=71) 0.9
   velocity/angular damping + 0.4/0.3 pos/rot blends + crouch-height; ApplyFixedUpdate
   wasFixedUpdate consumption; PhysicsMasterTargetFrameUpdate (IL=52) elapsed-ratio

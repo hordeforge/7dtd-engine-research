@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityPlayer.Update
+
+Done (V3.1.0 b14 IL):
+- EntityPlayer.Update (IL=179) narrated in loop.md Path B: generalTags
+  cache, game-started gate, totalTimePlayed minutes accumulation with
+  hourly GameSparks SetValue (GSDataKey 6, < 301 min) for local player,
+  ChunkObserver SetPosition per frame + mapDatabase.Add on chunk change,
+  avatar SetHeadAngles/SetArmsAngles (held item CanHold -> x+90),
+  currentLife/longestLife tracking with QuestEventManager.TimeSurvived +
+  achievement stat 9 on new minutes, HasUpdated = true at end.
+
 ## 2026-08-08 - tier-C: SetPosition width/height/depth source
 
 Done (V3.1.0 b14 IL):
