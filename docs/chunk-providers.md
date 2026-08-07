@@ -64,6 +64,13 @@ resolves the chunk and returns `chunk.GetBiomeIntensity(toBlockXZ(x),
 toBlockXZ(z))` once the chunk exists and is not `NeedsLightCalculation`, else
 `BiomeIntensity.Default` with false.
 
+Chunk-side biome storage: `Chunk.GetBiomeIntensity(x, z)` (IL=16) reads the
+`m_BiomeIntensities` byte array at the column offset `(x + z*16) * 6` (six
+bytes per column; `BiomeIntensity.Default` when the array is null).
+`ResetBiomeIntensity(v)` (IL=19) writes a value back at every 6-byte step.
+`CalcDominantBiome()` (IL=55) histograms the 256 `m_Biomes` bytes into a
+50-slot count array and stores the argmax as `DominantBiome`.
+
 World-level bounds consumers: `World.IsPositionInBounds(pos)` (IL=66) builds a
 `BoundsInt` from `GetWorldExtent` and answers `Contains(round(pos))`, with two
 special cases: the shipped Navezgane map uses the fixed **±2900** block bounds
