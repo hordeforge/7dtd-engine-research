@@ -718,6 +718,67 @@ Spawn and count packages ride the reliable admin channel `192`. `entityThatPlace
 is sender-validated (`ValidEntityIdForSender`) so a client cannot spawn on
 another player's behalf.
 
+### 7.1 Deploy actions: `ItemActionSpawnTurret` / `ItemActionSpawnVehicle`
+
+Both deploy actions share one skeleton (`ExecuteAction`, turret IL=342,
+vehicle IL=213). The commit runs only on **release** of the use key (the
+press just opens the placement preview) and only while the holding entity is
+an `EntityPlayerLocal`:
+
+- **Delay window:** `Time.time - lastUseTime >= ItemAction.Delay` and `< 2`
+  seconds (double-click guard); `ValidPosition` must have been set by the
+  preview.
+- **Entity class resolve (once):** when the cached class id is `< 0`, scan
+  `EntityClass.list.Dict` for `entityClassName == entityToSpawn` and cache
+  the key; abort when it stays 0.
+- **Cap check by item tag** (`ItemClass.HasAnyTags`): `drone` ->
+  `DroneManager.CanAddMoreDrones() && EntityDrone.IsValidForLocalPlayer()`;
+  `turretRanged` / `turretMelee` -> `TurretTracker.CanAddMoreTurrets()`;
+  vehicle -> `VehicleManager.CanAddMoreVehicles()`. Denied: local tooltip
+  `xuiMaxDeployedDronesReached` / `uiCannotAddTurret` / `uiCannotAddVehicle`.
+- **Client (not server):** sends `NetPackageTurretSpawn.Setup(entityClassId,
+  Position, rot(0, yaw, 0), holdingItemItemValue.Clone(), holder.entityId)` or
+  `NetPackageVehicleSpawn.Setup(entityId, Position, rot(0, yaw + 90, 0), ...)`
+  reliably to the server. Note the vehicle yaw offset of `+90`; the turret
+  package carries the yaw unchanged.
+- **Host server:** builds the entity locally (same commit shape as the
+  package handler below), then `World.SpawnEntityInWorld` and a
+  `NetPackageVehicleCount` broadcast on channel 192 so client caps update.
+- **Post-commit (both paths):** `RightArmAnimationUse = true`,
+  `DropTimeDelay = 0.5`, `Inventory.DecHoldingItem(1)` consumes one item,
+  `PlayOneShot(soundStart ?? "placeblock")`, preview cleared.
+
+Server-side commit, identical in the host branch and in the package handlers:
+
+- `EntityFactory.CreateEntity(entityType, pos, rot)` then
+  `SetSpawnerSource(2)` (StaticSpawner, see protocol §7).
+- **EntityTurret:** copy `factionId` / `belongsPlayerId` /
+  `factionRank - 1` from the placing player; `OriginalItemValue =
+  itemValue.Clone()`; `groundPosition = pos`; `ForceOn = true`; `OwnerID`
+  set; player `AddOwnedEntity`; `World.SpawnEntityInWorld`.
+- **EntityDrone:** the same ownership copy, plus `OriginalItemValue` and
+  `SetItemValueToLoad(OriginalItemValue)` before `PrepareToSpawn()`.
+- **EntityVehicle** (host branch only): `pos + up * 0.25`,
+  `rot = (0, yaw + 90, 0)`, then `Vehicle.SetItemValue(itemValue)` and
+  `EntityVehicle.SetOwner(...)`; a non-vehicle EntityAlive spawnable gets the
+  faction / belongs / rank-1 copy instead.
+
+**Dedicated enforcement** (`NetPackageTurretSpawn.ProcessPackage` IL=207,
+`NetPackageVehicleSpawn.ProcessPackage` IL=86): the server re-checks the caps
+from the *package's* item tags (drone: `CanAddMoreDrones() &&
+EntityDrone.isValidForEntity(placingId)`; turret: `CanAddMoreTurrets()`;
+vehicle: `CanAddMoreVehicles()`) after `ValidEntityIdForSender`. When denied,
+or the placing player no longer exists, the server does **not** spawn:
+instead `GameManager.ItemDropServer(new ItemStack(itemValue, 1), pos,
+Vector3.zero, placingId, lifetime 60, false)` refunds the item as a ground
+drop at the placement position. The dedicated server never trusts the
+client's cap pre-check. On success it also sets `Spawned = true` before
+`SpawnEntityInWorld`, `bPlayerStatsChanged = true` after, and derives
+`OwnerID` from `Clients.ForEntityId(placing).InternalId` (the host path uses
+`PlatformManager.InternalLocalUserIdentifier`). The vehicle package
+`castclass EntityVehicle` on the created entity, so a package naming a
+non-vehicle type is a content contract violation, not a graceful fallback.
+
 ---
 
 ## 8. Dedicated relevance and residuals
@@ -755,6 +816,13 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-08:** Deploy actions (7.1): ItemActionSpawnTurret / ItemActionSpawnVehicle
+  ExecuteAction (IL=342 / IL=213) release-gated commit, delay window, entity
+  class resolve, tag-based cap checks; NetPackageTurretSpawn.ProcessPackage
+  (IL=207) and NetPackageVehicleSpawn.ProcessPackage (IL=86) dedicated
+  enforcement with ItemDropServer refund (lifetime 60), Spawned/bPlayerStatsChanged,
+  OwnerID via Clients.ForEntityId; host vs dedicated OwnerID split; vehicle
+  package castclass EntityVehicle.
 - **2026-08-08:** Vehicle damage (4.2c): damageEntityLocal (IL=31)
   DamageResponse build; ProcessDamageResponseLocal (IL=120) Disease/
   Suffocation immunity, blood-moon knockback, External rider splash with
