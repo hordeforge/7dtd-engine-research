@@ -90,6 +90,14 @@ writers `SetDecoAllowedSizeAt` / `SetDecoAllowedStreetOnlyAt` (IL=19 each)
 `EnsureDecoBiomeArray` then read-modify-write through
 `SetDecoAllowedAt(x, z, cell.WithSize(val))` / `.WithStreetOnly(val)`.
 
+The `EnumDecoAllowed` cell is a packed byte: bits **0-1** = slope
+(`GetSlope` IL=7: `v & 3`; `WithSlope` IL=7: `(v & -4) | slope`), bits
+**2-3** = size (`GetSize` IL=7: `(v & 12) / 4`; `WithSize` IL=9:
+`(v & -13) | (size * 4)`), bit **4** = street-only (`GetStreetOnly` IL=6;
+`WithStreetOnly` IL=12 sets/clears bit 4). Size semantics: `AllowBigDeco`
+(IL=5) is `size == 0`, `AllowSmallDeco` (IL=5) is `size < 2`, and
+`IsNothing(EnumDecoAllowed)` (IL=10) is `slope >= 2 || size >= 2`.
+
 Registry lookups: `WorldBiomes.GetBiome(Color32)` (IL=34) packs
 `(r << 16) | (g << 8) | b` into the `m_Color2BiomeMap` key (null on miss);
 `GetBiome(byte id)` (IL=5) indexes `m_Id2BiomeArr`; `GetBiome(string name)`
