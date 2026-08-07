@@ -56,6 +56,11 @@ Verified body order when `IsServer`:
 Client (non-server) half of the same method processes `connectionToServer[]`
 channels and flushes those queues (same `ProcessPackages` helper).
 
+The LateUpdate hook: `ConnectionManager.LateUpdate` (IL=4) calls
+`ProtocolManager.LateUpdate` (IL=35), which fans `LateUpdate()` out to every
+registered `INetworkServer` then every `INetworkClient` - the post-frame
+network flush, separate from the main `Update` drain.
+
 ```mermaid
 flowchart TD
   U[ConnectionManager.Update] --> P[ProtocolManager.Update]
@@ -630,6 +635,8 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-07:** ProtocolManager.LateUpdate (IL=35) fan-out to all
+  INetworkServer + INetworkClient; ConnectionManager.LateUpdate (IL=4) hook.
 - **2026-08-07:** NetEntityDistributionEntry.SendToPlayers exclude/inRange.
 - **2026-08-07:** Interest enter package order: Spawn, AliveFlags, (player)
   Stats/Twitch/Equipment, Speeds, optional Velocity; exit Unloaded already pinned.

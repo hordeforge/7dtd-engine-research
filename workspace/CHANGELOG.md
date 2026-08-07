@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ProtocolManager.LateUpdate
+
+Done (V3.1.0 b14 IL):
+- ProtocolManager.LateUpdate (IL=35) narrated in network.md: fans
+  LateUpdate() to every registered INetworkServer then INetworkClient;
+  ConnectionManager.LateUpdate (IL=4) is the entry hook - post-frame
+  network flush separate from the Update drain. (Also restored a sentence
+  dropped in an intermediate edit.)
+
 ## 2026-08-08 - tier-C: Chunk.SpawnEntityAsync
 
 Done (V3.1.0 b14 IL):
