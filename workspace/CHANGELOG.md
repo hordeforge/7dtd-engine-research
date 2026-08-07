@@ -6,6 +6,20 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityAlive frame hooks
+
+Done (V3.1.0 b14 IL):
+- loop.md 3.3 Path B body narrated: EntityAlive.Update (IL=171) order - base
+  Entity.Update, updateNetworkStats, root-motion speedForward lerp (dead
+  constant ternary 0.06935714/0.01942 artifacts noted), _underwater cvar
+  sync, full MinEventContext refresh (Area/Biome/ItemValue/BlockValue/
+  ItemInventoryData/Position/Seed=entityId+Abs(World.Seed)/Transform/Tags
+  CombineTags of class+item+stance+movement), Progression.Update, renderFade
+  MoveTowards + SetFade + SetVisible(fade>0.01). LateUpdate (IL=6) copies
+  entityStats into startOfFrameStats. OnDeathUpdate (IL=76): corpse timer
+  capped at timeStayAfterDeath, snap when DeathHealth <= -DeadBodyHitPoints
+  (>0), then particleOnDestroy spawn at head position (local, not unloaded).
+
 ## 2026-08-08 - tier-C: Entity.SetupBounds
 
 Done (V3.1.0 b14 IL):

@@ -217,6 +217,30 @@ flowchart TB
 
 AI decisions and path requests live on **path A**. Path B is still main-thread cost if entities remain active MonoBehaviours on dedicated.
 
+**Path B body: `EntityAlive.Update()` (IL=171).** Every frame when the GO is
+enabled, in order: base `Entity.Update()`; `updateNetworkStats()`; root-motion
+speed lerp (`speedForward = FastMoveTowards(speedForward, speedForwardTarget,
+step * deltaTime)` with `step` from `speedForwardTargetStep` — only for local
+entities with `RootMotion && lerpForwardSpeed`; the IL carries dead constant
+ternary artifacts 0.06935714 / 0.01942 that fold away); sync the `_underwater`
+buff cvar to the `isHeadUnderwater` flag when they differ
+(`SetCustomVar("_underwater", 1/0, ...)`); **refresh `MinEventContext`** from
+current state: `Area = boundingBox`, `Biome = biomeStandingOn`,
+`ItemValue = holdingItemItemValue`, `BlockValue = blockValueStandingOn`,
+`ItemInventoryData = holdingItemData`, `Position = position`,
+`Seed = entityId + Mathf.Abs(World.Seed)`, `Transform = transform`, and
+`Tags` = `CombineTags(EntityClass.Tags, holdingItem.ItemTags,
+CurrentStanceTag, CurrentMovementTag)`; `Progression.Update()` when the
+progression exists; and render fade: `renderFade = MoveTowards(renderFade,
+renderFadeTarget, deltaTime)`, `emodel.SetFade`, toggling
+`emodel.SetVisible(fade > 0.01, false)` when visible state flips. Companion
+frame hooks: `LateUpdate()` (IL=6) copies `entityStats` into
+`startOfFrameStats` (the per-frame snapshot consumed by stat readers), and
+`OnDeathUpdate()` (IL=76) advances the corpse timer (`deathUpdateTime` up to
+`timeStayAfterDeath`, snapped to expiry once `DeathHealth <= -DeadBodyHitPoints`
+with `DeadBodyHitPoints > 0`) then spawns the `particleOnDestroy` effect
+(local, not unloaded, non-empty name only) at the head position.
+
 Slice model (EMA frame gaps, ~25 base, `tickEntitySliceCount`): [`entity-ai.md`](entity-ai.md).
 
 ### 3.4 AI / path onion (authority path)
@@ -457,6 +481,10 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-07:** Path B body: EntityAlive.Update (IL=171) order (base update,
+  net stats, root-motion lerp, _underwater cvar, MinEventContext refresh,
+  Progression.Update, render fade), LateUpdate (IL=6) stats snapshot,
+  OnDeathUpdate (IL=76) corpse timer + particleOnDestroy spawn.
 - **2026-08-07:** WorldEventUpdateTime BM day/hour; checkPOIUnculling 38 ticks / r=6.
 - **2026-08-07:** OnUpdateTick IL order re-pin (chunk callbacks, splash, deco,
   multiblock, biome spawn walk).
