@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: repair + terrain tool
+
+Done (V3.1.0 b14 IL):
+- items.md: ItemActionRepair.ExecuteAction IL=631 gates (Delay,
+  hit distance, passive 177, TP camera, trader-area refusal) +
+  repairType; CanRemoveRequiredResource IL=106 upgrade filters +
+  UpgradeHitCount/PropUpgradeBlockItemCount + toolbelt/bag count;
+  application via crafting queue.
+- ItemActionTerrainTool: ExecuteAction IL=46 press/release latch +
+  ItemActionEffectsServer forward, GetRange IL=2 fixed 20.
 ## 2026-08-08 - tier-C: repair action
 
 Done (V3.1.0 b14 IL):
