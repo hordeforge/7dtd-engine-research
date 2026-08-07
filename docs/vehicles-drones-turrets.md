@@ -357,6 +357,15 @@ relation via `EntityToPlayerMap` + `IsAlly` / party membership when
 supply crates; ignore NPC unless TargetStrangers; ignore enemy if
 `!TargetEnemies`. Final `canHitEntity` LOS gate.
 
+**`trackTarget` (IL=121):** aim point = Lerp(chest, head,
+`targetChestHeadPercent`) - Origin; yaw = DeltaAngle(turret yaw, look yaw);
+pitch = look x (unwrap >180); success only if yaw within
+`CenteredYaw + yawRange` and pitch within `CenteredPitch + pitchRange`.
+
+**`canHitEntity` (IL=80):** require `trackTarget`; ray from cone/muzzle with
+`maxDistance`, layer mask `-538750989`; hit tag must start with `E_`; root
+transform entity must equal target and be alive.
+
 **`Fire` (IL=554, server):** resolve target; EffectManager passive **16** (spread)
 and **11** (distance) with item tags; loop `rayCount` hits via
 `ItemActionAttack.FindHitEntityNoTagCheck` / `GetBlockHit` / `Hit`; decrement
@@ -467,8 +476,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** shouldIgnoreTarget relation flags; Fire passives 16/11 + ammo;
-  healTargetServer; steerFollow speed ramps; spawnHordeNear 5/12%.
+- **2026-08-07:** trackTarget yaw/pitch ranges; canHitEntity E_ raycast; Fire
+  passives 16/11 + ammo; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds
   + raycast; PhysicsWakeNear 20 m.
 - **2026-08-07:** TurretTracker save every 120 s; AttachEntityToSelf / DetachEntity

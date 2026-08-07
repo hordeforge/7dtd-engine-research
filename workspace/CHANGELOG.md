@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: trackTarget ranges, canHitEntity, FindScoutStartPos
+
+Done (V3.1.0 b14 IL):
+- trackTarget chest/head lerp + yaw/pitch range gates.
+- canHitEntity raycast E_ tag must match target.
+- FindScoutStartPos 80 m ring, 15 tries, 30 m player avoid; neighbor cooldown grid.
+---
 ## 2026-08-07 — tier-C: turret ignore flags, Fire ammo, spawnHordeNear
 
 Done (V3.1.0 b14 IL):

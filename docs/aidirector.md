@@ -140,6 +140,16 @@ with **12%** chance reduce by 1 and either `SpawnUpdate` one extra wave or bump
 `numberToSpawnThisWave`; `Horde.SpawnMore(count)`; play scout alert sound;
 `SetSpawnPos(target)`.
 
+**`CreateHorde` (IL=10):** `new Horde(this, startPos)` onto `hordeSpawnList`.
+
+**`StartCooldownOnNeighbors` (IL=55):** map world pos to coarse cell
+`toChunkXZ/5`; walk static `neighbors[]` pairs; ensure `activeChunks` entry;
+`StartNeighborCooldown(isLong)` on each.
+
+**`FindScoutStartPos` (IL=192):** random on unit circle × **80** with up to **15**
+tries; radial band **16..40** from end; reject if any living player within
+sqr **900** (30 m); require loaded chunks and `CanMobsSpawnAtPos`.
+
 **`AIDirectorChunkData.Tick` (IL=23):** if `cooldownDelay > 0` subtract elapsed
 and keep entry; else `DecayEvents`; keep entry while `EventCount > 0`.
 
@@ -416,7 +426,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** spawnHordeNear CreateHorde + 5 count (12% reduce) + SpawnMore.
+- **2026-08-07:** CreateHorde list; StartCooldownOnNeighbors chunk/5 grid;
+  FindScoutStartPos 80 m / 15 tries / 30 m player avoid; spawnHordeNear 5/12%.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset
