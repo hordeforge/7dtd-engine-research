@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CalcPartyLevel diminishing returns and setState
+
+Done (V3.1.0 b14 IL):
+- CalcPartyLevel: sort, weighted sum high-to-low with StartingWeight/DiminishingReturns.
+- CalcStageSpawnMax: sum group spawnCounts.
+- checkTeleportPos 32 m success log; setState lastState + owned clear + heal clear.
+- CanSpawn named EnemyCount / MaxSpawnedZombies.
+---
 ## 2026-08-07 — tier-C: CanSpawn cap, SetPartyLevel scaling, teleportState
 
 Done (V3.1.0 b14 IL):

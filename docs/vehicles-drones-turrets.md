@@ -351,6 +351,15 @@ slots via `GetGroupPositions(Owner, 5, …)`; sort by distance to self; pick fir
 unblocked slot (mask `1073807360`); `SetPosition` + transform; `setState(Idle)`;
 `checkTeleportPos`.
 
+**`checkTeleportPos` (IL=17):** if owner present and still
+`isOutOfRange(owner.pos, 32)` log "teleport failed", else "teleport success!".
+
+**`setState(next)` (IL=40):** `lastState = state`; `state = next`;
+`stateTime = 0`. Switch: cases 0/1 fall through; case **2** (Sentry?) from
+lastState **1** with owned entity: `ClearLastKnownPostition` on owned data;
+case **3** (Heal): `clearNeedsHealItemCheck()`. Public `SetState(next, sync)`
+optionally `SendSyncData(0x8000)`.
+
 **`targetCanBeHealed` (IL=25):** alive, no `buffHealHealth`,
 `medicalRegHealthAmount == 0`, and `Health < Health.ModifiedMax`.
 
@@ -563,8 +572,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** teleportState group slots; targetCanBeHealed gates; bleed
-  Find; findNeededHealType; empty exitAttack/onHealDone stubs.
+- **2026-08-07:** checkTeleportPos 32 m; setState lastState/owned clear;
+  teleportState slots; targetCanBeHealed; heal type priority.
 - **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire
   passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds

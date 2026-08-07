@@ -235,8 +235,16 @@ null, log groups done. Else `interval = spawnGroup.interval`;
 **`ResetPartyLevel(mod)` (IL=13):** `level = CalcPartyLevel()`; if `mod != 0`,
 `level %= mod`; `SetPartyLevel(level)`.
 
-**`CalcPartyLevel` (IL=26):** collect each member `gameStage` into list;
-`GameStageDefinition.CalcPartyLevel(list)`.
+**`CalcPartyLevel` (instance IL=26):** collect each member `gameStage`; call
+static `GameStageDefinition.CalcPartyLevel`.
+
+**`GameStageDefinition.CalcPartyLevel(list)` (IL=35):** sort stages ascending;
+from highest to lowest: `sum += stage * weight` then
+`weight *= DiminishingReturns` (start `weight = StartingWeight`);
+`FloorToInt(sum)`.
+
+**`CalcStageSpawnMax` (IL=30):** sum every `SpawnGroup.spawnCount` in the stage
+(walks groups 0..Count-1; clobbers field `spawnGroup` during walk).
 
 **`SetPartyLevel(_partyLevel)` (IL=123):** store `partyLevel`; then
 `partyLevel = (int)(partyLevel * gsScaling)`; reset `stageSpawnMax`/`groupIndex`/
@@ -249,7 +257,8 @@ null, log groups done. Else `interval = spawnGroup.interval`;
 (name does not scale by difficulty).
 
 **`AIDirector.CanSpawn(_priority)` (IL=10):**
-`GameStats.GetInt(12) < GamePrefs.GetInt(99) * _priority` (true = under cap).
+`GameStats.EnemyCount (12) < GamePrefs.MaxSpawnedZombies (99) * _priority`
+(true = under cap; same formula as [spawning.md](spawning.md)).
 
 ## `AIDirectorHordeComponent` : AIDirectorComponent
 
@@ -501,8 +510,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** CalcPartyLevel/SetPartyLevel gsScaling; CanSpawn stats12 vs
-  pref99*priority; ModifySpawnCount EnemySpawnMode gate only; SetupGroup.
+- **2026-08-07:** CalcPartyLevel diminishing returns formula; CalcStageSpawnMax
+  sum; SetPartyLevel gsScaling; CanSpawn EnemyCount vs MaxSpawnedZombies.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset

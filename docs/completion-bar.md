@@ -199,6 +199,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | MachineGun/Stun/Heal Fire + PartySpawner Tick | vehicles / aidirector |
 | SetupGroup duration*1000 + heal type priority | aidirector / vehicles |
 | CanSpawn cap + SetPartyLevel gsScaling + teleport | aidirector / vehicles |
+| CalcPartyLevel diminishing + setState transitions | aidirector / vehicles |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
