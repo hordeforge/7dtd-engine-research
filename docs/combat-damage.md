@@ -400,6 +400,13 @@ Leaf types on the edges of the damage flow above:
   `Entity.DamageEntity(source, strength, crit, impulse)`, and reads the
   resulting `RecordedDamage` (Strength/ArmorDamage) back into the details
   for sounds, item drops, XP/events, and the hit-feedback packages.
+  The two hit resolvers behind it: `GetBlockHit` (IL=84) reads the block at
+  the hit cell (air falls back to the `IsDistantDecoration` value when it is
+  at `MaxDamage - 1` damage, children resolve to their multiblock parent via
+  `MultiBlockArray.GetParentPos`); `FindHitEntityNoTagCheck` (IL=49) strips
+  the `E_BP_` prefix into the lowercased `bodyPartName`, walks
+  `RootTransformRefEntity.FindEntityUpwards`, and for an `E_Vehicle` tag
+  falls back to `GameUtils.GetHitRootEntity`.
 
 
 
@@ -469,6 +476,9 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-08:** Hit resolvers: GetBlockHit IL=84 (distant-deco fallback,
+  multiblock parent); FindHitEntityNoTagCheck IL=49 (E_BP_ body part name,
+  FindEntityUpwards, E_Vehicle fallback).
 - **2026-08-08:** ItemActionAttack.Hit IL=1614 orchestration: attacker
   resolve, AttackHitInfo reset, block branch (BlockValueRef + distant-deco
   fallback, GetBlockDamageScale, Block.DamageBlock) vs entity branch
