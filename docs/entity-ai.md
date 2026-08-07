@@ -2371,8 +2371,9 @@ else uses the generic `updateTasks` IL=125 + EAI stack). Own state machine
 (`EntityVulture/State`: **Attack=0, AttackReposition=1, AttackStop=2, Home=3,
 Stun=4, WanderStart=5, Wander=6**) with direct motion integration, no pathfinding.
 
-**Prologue gates:** if pref **46** (debug info) → `aiManager.UpdateDebugName` +
-ret; if `GameStats[0] (GameState) == 2 (EnumGameState.Over)` → ret;
+**Prologue gates:** if pref **46 (`DebugStopEnemiesMoving`)** →
+`aiManager.UpdateDebugName` + ret (global AI-freeze debug); if
+`GameStats[0] (GameState) == 2 (EnumGameState.Over)` → ret;
 `CheckDespawn()`;
 `EntitySeeCache.ClearIfExpired()`; `IsSleeperPassive` → ret.
 
