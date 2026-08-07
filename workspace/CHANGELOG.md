@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GamePrefs.GetObject
+
+Done (V3.1.0 b14 IL):
+- GamePrefs.GetObject IL=20: bounds check -> null, else propertyValues (no
+  sandbox routing in the pref getter).
 ## 2026-08-08 — tier-C: GamePrefs.SetObject
 
 Done (V3.1.0 b14 IL):

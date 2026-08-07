@@ -170,7 +170,10 @@ and `LoadPresets()`; the same coroutine then calls
 **`GamePrefs.SetObject(prop, value)` (IL=5 -> SetObjectInternal IL=38):** the
 pref setter - bounds check ("Trying to set non-existing pref" error), skip when
 both values null or `existing.Equals(value)`, else store and
-`notifyListeners(prop)`.
+`notifyListeners(prop)`. **`GamePrefs.GetObject(prop)` (IL=20):** bounds check
+("Trying to access non-existing pref" -> null), else `propertyValues[prop]`
+(no sandbox routing in the pref getter; sandbox reads go through
+`SandboxOptionManager`).
 
 | Accessor | Behavior |
 |---|---|
