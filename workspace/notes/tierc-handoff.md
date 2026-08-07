@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `4893687` seat slot definition |
-| Commits since dry-run `3b61d9c` | ~202 |
+| HEAD (at handoff write) | `6b26c7b` Entity.IsAttached |
+| Commits since dry-run `3b61d9c` | ~203 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
