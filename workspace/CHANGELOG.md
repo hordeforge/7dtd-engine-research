@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: stat adders
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md: EntityAlive.AddHealth IL=12 dead gate
+  (Health<=0 no-op, then Health+=v); AddStamina IL=17
+  Stamina!=null + Health>0 gates; AddWater IL=9 ungated.
 ## 2026-08-08 - tier-C: throw family
 
 Done (V3.1.0 b14 IL):
