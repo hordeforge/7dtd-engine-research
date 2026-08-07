@@ -328,6 +328,18 @@ implements. The contract the server drives:
 | `ExecuteAction(actionIdx, invData, bReleased, playerActions)` | on `ItemClass`, the entry point; dispatches to `Actions[actionIdx].ExecuteAction` |
 | `ExecuteInstantAction` | one-shot variant (eat/use) |
 | `IsActionRunning(ItemActionData)` | is this action mid-execution (used to serialize primary vs secondary) |
+
+`ItemActionAttack` damage modifiers (all in §4's attack family):
+`difficultyModifier(strength, attacker, target)` (IL=44) returns the strength
+unchanged when either side is null or both share the same
+`IsClientControlled` state, else scales `RoundToInt(strength *
+IncomingDamageModifier)` for server-side attackers and `*
+EntityIncomingDamageModifier` for client-side ones.
+`DegradationModifier(strength, condition)` (IL=14) is
+`Lerp(strength * 0.5, 1, condition < 0.5 ? condition + 0.5 : 1)`.
+`calculateHarvestToolDamageBonus(toolBonuses, harvestItems)` (IL=43) returns
+the matching `Bonuses.Damage` for the harvest drop list's `toolCategory`, or 1
+when no category matches.
 | `HandleDegradation` / `HandleItemBreak` | durability (§7) |
 | `getBuffActions` / `ExecuteBuffActions` | apply buffs to a target (§8) |
 | `ItemActionEffects` | fire visual/audio effects and MinEvents (base no-op; mostly client) |
