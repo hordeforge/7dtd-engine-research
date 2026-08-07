@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — layout: workspace/autoresearch + readiness make target
+
+Done:
+- Move root autoresearch session files into workspace/autoresearch/ (README, results.jsonl, run.sh).
+- Remove empty accidental SleeperVolume/ dir; gitignore root dump mistakes and local caches.
+- AGENTS.md layout table: tools/data, tools/tests, workspace subpaths.
+- make readiness; tools/README points at workspace/autoresearch.
+
+Verification: make stock-check; make readiness.
+---
 ## 2026-08-07 — autoresearch: version-update tooling readiness
 
 Done (branch autoresearch/version-update-tooling):

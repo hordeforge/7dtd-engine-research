@@ -22,6 +22,11 @@ docs/inventories/*.gaps.tsv
 
 # Runtime scenario/save worlds (local only)
 worlds/
+
+# Accidental empty type-name dirs at repo root (DumpMethod cwd mistakes)
+/SleeperVolume/
+.zdtd_cfg_cache/
+.zig-cache/
 /DynamicMeshFile
 /SandboxOption
 /SandboxOptions

@@ -46,9 +46,14 @@ justify a lever, put the RE here and link to it from the lever doc.
 | [`docs/`](docs) | Engine RE narratives. Hub: [`docs/INDEX.md`](docs/INDEX.md) |
 | [`docs/inventories/`](docs/inventories) | Raw method/call inventories backing the narratives |
 | [`tools/`](tools) | **Tracked** Mono.Cecil dump tooling ([`tools/README.md`](tools/README.md)) |
+| [`tools/data/`](tools/data) | Committed pins (`stock_facts.json`) |
+| [`tools/tests/`](tools/tests) | Pin gate, dump-set structural tests, readiness bench |
 | `il/` | Regenerable Cecil dump output. **git-ignored** (may contain game IL); never redistribute |
 | [`oss-tools/`](oss-tools) | Third-party server-tool/mod survey notes |
-| `workspace/` | Feynman research artifacts (audits, plans, logs) |
+| [`workspace/`](workspace) | Research artifacts only (not product code) |
+| [`workspace/outputs/`](workspace/outputs) | Audits, plans, review drafts |
+| [`workspace/autoresearch/`](workspace/autoresearch) | Metric session logs (readiness bench notes) |
+| [`workspace/CHANGELOG.md`](workspace/CHANGELOG.md) | Lab notebook |
 
 ## Rules
 

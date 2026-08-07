@@ -1,13 +1,17 @@
 # Autoresearch: version-update tooling readiness
 
+Session artifacts for the bounded experiment that improved post-TFP-update
+tooling. Durable tooling lives under `tools/`; this directory only keeps the
+metric log and session notes.
+
 ## Config
 
 | Field | Value |
 |---|---|
 | Optimization target | `version_update_readiness` (0-100, **higher better**) |
-| Benchmark | `./autoresearch.sh` → `tools/tests/bench_version_update_tooling.py` |
-| Files in scope | `tools/src/StockFacts.cs`, `tools/tests/check_stock_facts.py`, `tools/stock-sync.sh`, `tools/post-update.sh`, `tools/parity/*`, `tools/data/stock_facts.json`, `Makefile`, `tools/README.md`, harness |
-| Environment | local git branch `autoresearch/version-update-tooling` |
+| Benchmark | `workspace/autoresearch/run.sh` → `tools/tests/bench_version_update_tooling.py` |
+| Files in scope | `tools/src/StockFacts.cs`, `tools/tests/check_stock_facts.py`, `tools/stock-sync.sh`, `tools/post-update.sh`, `tools/parity/*`, `tools/data/stock_facts.json`, `Makefile`, `tools/README.md` |
+| Environment | local (merged to `main` as `f28ec62`) |
 | Max iterations | 20 |
 | Baseline | **83.04** |
 | Best | **100.0** (iteration 5) |
@@ -37,12 +41,11 @@
 
 ## Stop reason
 
-Metric ceiling reached with stock-check still green. No further keep-able gains
-without gaming the bench. Remaining real work is **operational** (run post-update
-on the next TFP build, re-Dump changed families, expand pin sites as needed), not
-score hunting.
+Metric ceiling reached with stock-check still green. Remaining work is
+operational (run `make post-update` on the next TFP build, re-Dump changed
+families, expand pin sites as needed).
 
-## Deliverables
+## Deliverables (in `tools/`)
 
 - `tools/post-update.sh` + `make post-update`
 - facts-driven version pins in `check_stock_facts.py`
@@ -50,8 +53,13 @@ score hunting.
 - dump-set tests use `dump_label_suffix()` from facts
 - bench: `tools/tests/bench_version_update_tooling.py`
 
-## Next (outside loop)
+## Re-run
 
-1. On next game install: `make post-update`, fix FAIL sites, commit facts + pins.
-2. Optionally wire more doc hardcodes to `behaviour.*` checks.
-3. Optionally re-baseline drift cache after intentional surface change.
+```bash
+./workspace/autoresearch/run.sh
+# or
+make readiness
+```
+
+Results append path: `workspace/autoresearch/results.jsonl` (session log only;
+bench prints score to stdout).

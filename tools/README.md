@@ -97,7 +97,8 @@ make post-update                # same from repo root
 
 Structural dump-set tests (`tests/test_dedi_coverage_docs.py`) derive folder
 labels from `stock_facts` rather than hard-coding a line version. Readiness
-bench: `python3 tests/bench_version_update_tooling.py`.
+bench: `make readiness` or `python3 tests/bench_version_update_tooling.py`.
+Session notes for the readiness experiment: [`../workspace/autoresearch/`](../workspace/autoresearch/).
 
 ## 2. Legacy per-family dumpers (`legacy/`)
 

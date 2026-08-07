@@ -3,7 +3,7 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check post-update census drift test help
+.PHONY: tools stock-sync stock-check post-update census drift test readiness help
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
@@ -12,6 +12,7 @@ help:
 	@echo "make post-update  - after TFP patch: stock-sync + drift (tools/post-update.sh)"
 	@echo "make census       - Census.exe against ASM"
 	@echo "make drift        - parity drift-check vs baseline"
+	@echo "make readiness    - version-update tooling readiness bench (0-100)"
 	@echo "make test         - structural + stock-check (no live dump regen)"
 
 tools:
@@ -32,6 +33,9 @@ census: tools
 
 drift:
 	cd "$(TOOLS)/parity" && ./drift-check.sh "$(ASM)"
+
+readiness:
+	python3 "$(TOOLS)/tests/bench_version_update_tooling.py"
 
 test:
 	python3 "$(TOOLS)/tests/test_dedi_coverage_docs.py" || true
