@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: chunk data expiry + unload skip rules
+
+Done (V3.1.0 b14 IL):
+- Chunk.removeExpiredCustomChunkDataEntries IL=61: expire <= worldTime,
+  OnRemove + key removal.
+- World.UnloadEntities IL=36: backward unloadEntity(reason 1), skip
+  bWillRespawn entities (or attached-main bWillRespawn) unless force.
 ## 2026-08-08 — tier-C: chunk load/unload lifecycle
 
 Done (V3.1.0 b14 IL):

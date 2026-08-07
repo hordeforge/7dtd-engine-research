@@ -186,6 +186,14 @@ before unload, see [dedicated-leftovers.md](dedicated-leftovers.md) §12); per
 `RemoveBlockEntityTransforms()`; per layer `layer.OnUnload(...)` firing
 `Block.OnBlockUnloaded` (under lock); `waterSimHandle.Reset()`.
 
+**Leaves:** `removeExpiredCustomChunkDataEntries(worldTime)` (IL=61) drops
+`ChunkCustomData` entries whose `expiresInWorldTime <= worldTime` (calling
+`ChunkCustomData.OnRemove`), collecting expired keys then removing them.
+`World.UnloadEntities(list, force)` (IL=36) walks the list backward and calls
+`unloadEntity(e, reason 1)` unless `!force && (e.bWillRespawn || attached-main
+entity bWillRespawn)` (sleepers with a pending respawn and their attachments
+survive a non-forced unload).
+
 ### Chunk dirty / save invalidation (blob-cache input)
 
 **`Chunk.get_NeedsSaving` IL=20** returns true if any of:
