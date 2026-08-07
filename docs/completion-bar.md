@@ -150,9 +150,11 @@ Closed in recent sessions (still optional, not required for A+B):
 | GameTimer.updateTimer formula | entity-ai §D6 |
 | ThreadManager main-thread drain | loop-gmupdate |
 | Astar UpdateGraphs merge size 76 | loop.md |
-| damageEntityLocal + ProcessDamageResponse | combat-damage §2.1–2.3 |
+| damageEntityLocal + ProcessDamageResponse | combat-damage §2.1-2.3 |
 | EffectManager.GetValue stack | minevents §7.0 |
 | ItemValue.FireEvent recursion | items §8 / minevents §7 |
+| Sleeper TickSpawnCount + CheckSpawnPos | entity-ai §D8.1-D8.2 |
+| Workstation HandleFuel re-pin | tile-entities-power §4.2 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

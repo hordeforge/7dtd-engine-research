@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: sleeper TickSpawnCount, CheckSpawnPos, HandleFuel re-pin
+
+Done (V3.1.0 b14 IL):
+- TickSleeperVolumes zeros TickSpawnCount under lock; Tick gates UpdateSpawn <2.
+- CheckSpawnPos chunk readiness; FindSpawnIndex hidden + farthest fallback.
+- HandleFuel: not-burning early return; 0.01s quantize; fuel[0] consume path.
+- Corrected mid-wave restart: vanished mapped entity (GetEntity null), not live.
+---
 ## 2026-08-07 — tier-C: damageEntityLocal, ProcessDamage, EffectManager.GetValue
 
 Done (V3.1.0 b14 IL):

@@ -773,21 +773,30 @@ Push physics, turrets, traps, EAI target find, break block, falling entities, sp
 
 ### D8.1 `SleeperVolume.Tick` (IL=137, closed 2026-08-07)
 
-Driven from `World.TickSleeperVolumes` each OnUpdateTick. Ordered phases:
+Driven from `World.TickSleeperVolumes` each OnUpdateTick. Ordered phases from live IL:
 
 1. **If `isSpawning`:**
-   - If `minScript` present and `IsRunning`: walk `respawnMap`; if any key is not in
-     `pendingSpawnMap` and `World.GetEntity` is still live, **clear** `respawnMap` +
-     `groupCountList` and `minScript.Restart()` (spawn wave aborted / reset).
-   - Always: `minScript.Tick(this)` when non-null, then `UpdateSpawn(world)`.
-2. **Else if `isSpawned`:** walk `respawnMap` again; if a mapped entity is missing
-   from the world and not pending, the enumerator still only probes existence
-   (cleanup path shares the clear pattern with the spawning branch in the full
-   method; treat as "still-alive probe" for residual respawn bookkeeping).
-3. **Player touch:** if `playerTouchedToUpdate != null`, `UpdatePlayerTouched` then
-   clear the field (one-shot touch processing).
-4. **Despawn timer:** if `ticksUntilDespawn > 0`, decrement; when it hits 0,
-   `Despawn(world)`.
+   - If `minScript` present and `IsRunning`: walk `respawnMap`; if any key is
+     **not** in `pendingSpawnMap` and `GetEntity` is **null** (entity gone),
+     clear `respawnMap` + `respawnList` + `groupCountList`, zero `numSpawned`,
+     `minScript.Restart()` (wave reset when a mapped sleeper vanished mid-wave).
+   - Then `minScript.Tick(this)` when minScript non-null.
+   - **Spawn budget:** call `UpdateSpawn` only while static `TickSpawnCount < 2`
+     (at most two volume spawn attempts share this global counter per frame
+     window; exact reset site is `TickSleeperVolumes` residual).
+2. **If still `isSpawning` after that:** return (no touch / despawn work while
+   spawning).
+3. **Else if `isSpawned`:** if `respawnMap` empty, clear `isSpawned`; else walk
+   map and clear `isSpawned` when any non-pending mapped entity is missing.
+4. **Player touch:** if `playerTouchedToUpdate != null`, `UpdatePlayerTouched` then
+   clear field and **return** (skips despawn same tick).
+5. **Despawn timer:** `ticksUntilDespawn--`; when it reaches 0, `Despawn(world)`.
+
+### D8.1b `World.TickSleeperVolumes` (IL=34)
+
+Under `Monitor` on `World.sleeperVolumes`: set static `SleeperVolume.TickSpawnCount = 0`,
+then `Tick(world)` every volume value. That is the per-frame reset for the
+`TickSpawnCount < 2` gate inside each volume's spawning branch.
 
 ### D8.2 `UpdateSpawn` (IL=516)
 
@@ -803,8 +812,18 @@ Per-call spawn pacing and entity create:
    remove from `respawnMap` on success. At most **one** spawn attempt per tick path
    before returning in the respawn branch.
 3. **Fresh group path:** if `groupCountList` / `spawnsAvailable` remain, pick group
-   counts, allocate spawn points, same `Spawn` helper. `minScript.IsRunning` can
-   force a spawn-allowed flag for scripted waves.
+   via `GameStageGroup.TryGet` (fallback name `GroupGenericZombie`), allocate spawn
+   points, same `Spawn` helper. `minScript.IsRunning` can force a spawn-allowed flag
+   for scripted waves.
+
+**`CheckSpawnPos` (IL=26):** always true when recording/playback; else require a live
+chunk that is not internal-culled, not `NeedsCopying`, not `NeedsRegeneration`.
+
+**`FindSpawnIndex` (IL=68):** if `spawnsAvailable` empty, `ResetSpawnsAvailable`;
+pick random start index; walk candidates requiring
+`World.CanSleeperSpawnAtPos(pos, true)` **and** `SpawnPointIsHidden`; on success
+remove from available and return index; if none, `FindFathestSpawnFromPlayers`
+(typo in stock method name).
 
 ### D8.2b `OnTriggered` (IL=14)
 
@@ -1028,6 +1047,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Sleeper TickSpawnCount budget + TickSleeperVolumes reset;
+  CheckSpawnPos / FindSpawnIndex; Tick phase entity-gone restart correction.
 - **2026-08-07:** GameTimer.updateTimer formula; EnemyAnimal electrocute gate;
   canDespawn/unload; CheckDespawn; player OnUpdateLive; EAI leaves.
 - **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;

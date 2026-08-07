@@ -456,14 +456,15 @@ flowchart TB
 
 ### 4.2 `HandleFuel` (IL=105)
 
-- If not burning: emit heat-map clear (enum 0) and return false.
-- While `currentBurnTimeLeft` depletes by `_timePassed`:
-  - if empty and `getTotalFuelSeconds() > 0`: pull next fuel unit from `fuel[0]`,
-    decrement count, add `GetFuelTime(stack)` to `currentBurnTimeLeft`,
-    `cycleFuelStacks()`, invoke `FuelChanged`.
-  - fractional bookkeeping uses a **100**-unit scale (`FloorToInt` of burn*100).
-- Returns whether any fuel state changed; burning ends when both current burn and
-  total fuel seconds hit zero.
+- If not burning: return false (no heat emit).
+- If burning: `emitHeatMapEvent(world, enum 0)` then burn loop:
+  - Subtract `_timePassed` from `currentBurnTimeLeft`; quantize to 0.01 s via
+    `FloorToInt(burn * 100) / 100`.
+  - While burn time negative and total fuel seconds remain: consume one unit from
+    `fuel[0]` (or `cycleFuelStacks` when count 0), add `GetFuelTime(stack)`,
+    invoke `FuelChanged` if subscribed.
+  - If total fuel seconds and current burn both exhausted: clamp burn to 0.
+- Returns whether any fuel state changed.
 
 ### 4.3 `HandleRecipeQueue` / `cycleRecipeQueue`
 
@@ -743,6 +744,8 @@ the matching `PowerItem` by world position and links the two.
 
 - **2026-08-07:** Chunk.UpdateTick IL=26 TeTick list walk; TEFeature write tails
   (§4.7); Workstation/PoweredTrigger/Collector/Light/trap write tails.
+- **2026-08-07:** HandleFuel early-out when not burning (no heat emit); burn
+  quantize 0.01 s; fuel[0] consume + cycleFuelStacks.
 - **2026-08-07:** Workstation UpdateTick/HandleFuel/HandleRecipeQueue IL paths;
   Forge fuel-tick melt path; Vending rental expiry; Composite feature tick;
   Powered TE dirty flags.
