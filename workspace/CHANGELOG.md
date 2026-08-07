@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: time hooks + biome oracle
+
+Done (V3.1.0 b14 IL):
+- aidirector.md time gates: World.DuskDawnInit (IL=13) writes DuskHour/DawnHour
+  from GameStats DayLightLength via CalcDuskDawnHours; World.SetTimeJump (IL=14)
+  SetTime + SkyManager.bUpdateSunMoonNow + server
+  AIDirectorBloodMoonComponent.TimeChanged(isSeek).
+- chunk-providers.md 1: World.IsPositionRadiated (IL=24) GetRadiationAt > 0;
+  World.GetBiomeIntensity (IL=28) chunk.GetBiomeIntensity with
+  NeedsLightCalculation gate, BiomeIntensity.Default fallback.
+
 ## 2026-08-08 - tier-C: loot group roll + bag unlock
 
 Done (V3.1.0 b14 IL):
