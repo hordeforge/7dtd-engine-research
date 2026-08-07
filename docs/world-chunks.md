@@ -113,7 +113,11 @@ block (`bvPOIFiller` from `Constants.cPOIFillerBlock`); otherwise it reads
 overlays the block's `damage` from `GetDamage`. `GetBlockNoDamage` (IL=73) is
 the same without the damage overlay; `GetBlockId` (IL=17) returns the layer id
 (0 for a missing layer); `GetBlockColumn` (IL=101) fills a vertical span with
-the damage overlay. The overlay itself is `Chunk.GetDamage(x, y, z)` (IL=8):
+the damage overlay.
+`AddInsideDevicePosition(x, y, z, bv)` (IL=20) registers an inside position as
+a `Vector3b` in `insideDevices` (+ hash set) and flips
+`IsInternalBlocksCulled = true`; the `bv` parameter is never read in this
+build. The overlay itself is `Chunk.GetDamage(x, y, z)` (IL=8):
 `(int)chnDamage.Get(...)` from the damage channel, written by
 `Chunk.SetDamage` (IL=9): `chnDamage.Set(x, y, z, (long)damage)`.
 The 64-bit texture word packs **eight 8-bit face indexes**
