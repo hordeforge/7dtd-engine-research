@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory.setHeldItemByIndex
+
+Done (V3.1.0 b14 IL):
+- Inventory.setHeldItemByIndex (IL=132) narrated in items.md section 5:
+  BeginSwapHoldingItem, negative/oversized index wrap by slots.Length,
+  flashlightOn+IsHoldingFlashlight capture, HoldingItemHasChanged, avatar
+  itemHasChangedTriggerHash, BroadcastStop of ItemActionAttack GetSoundStart
+  sounds, m_HoldingItemIdx = m_FocusedItemIdx = idx, remote ->
+  updateHoldingItem direct, local -> ShowHeldItem(0.2 or 0, true), flashlight
+  re-toggle SetFlashlight(false) + currActiveItemIndex=-1 + flashlight_toggle
+  one-shot. SetHoldingItemIdx / NoHolsterTime are 5-IL wrappers passing
+  applyHolsterTime true/false.
+
 ## 2026-08-08 - tier-C: Inventory.updateHoldingItem
 
 Done (V3.1.0 b14 IL):

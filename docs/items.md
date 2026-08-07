@@ -295,6 +295,21 @@ delayed re-show helper: it stops any pending `delayedShowHideHeldItemRoutine`
 coroutine and starts `delayedShowHideHeldItem(hideFirst, waitTime)` on the
 GameManager instance (used by `SetItem` step 1 after a held-slot rewrite).
 
+**`Inventory.setHeldItemByIndex(idx, applyHolsterTime)` (IL=132)** - the slot
+switch behind `SetHoldingItemIdx` (IL=5, `applyHolsterTime=true`) and
+`SetHoldingItemIdxNoHolsterTime` (IL=5, `false`): after
+`BeginSwapHoldingItem()`, the index wraps around `slots.Length` (negative adds,
+oversized subtracts). It captures `flashlightWasOn = flashlightOn &&
+IsHoldingFlashlight()`, runs `HoldingItemHasChanged()`, triggers the avatar
+`itemHasChangedTriggerHash` when the entity/emodel/avatar exist, and stops
+every `ItemActionAttack` sound in the *current* holding item's `Actions`
+(`Audio.Manager.BroadcastStop(entityId, GetSoundStart())`). Sets
+`m_HoldingItemIdx = m_FocusedItemIdx = idx`; a remote entity then goes straight
+to `updateHoldingItem()` (no holster choreography), while a local entity calls
+`ShowHeldItem(applyHolsterTime ? 0.2 : 0, true)`. Finally, when the flashlight
+was on it re-toggles: `SetFlashlight(false)`, `currActiveItemIndex = -1`, and
+on success plays the `flashlight_toggle` one-shot.
+
 ```mermaid
 sequenceDiagram
   participant CL as Wielder client
@@ -710,6 +725,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** Inventory.setHeldItemByIndex (IL=132) slot switch:
+  wrap-around, avatar itemHasChangedTriggerHash, ItemActionAttack sound stop,
+  m_HoldingItemIdx/FocusedItemIdx, remote vs local holster (0.2 s), flashlight
+  re-toggle with flashlight_toggle one-shot; SetHoldingItemIdx wrappers (IL=5).
 - **2026-08-07:** Inventory.updateHoldingItem (IL=172) redraw chain: same-item
   OnHoldingReset shortcut, StopHolding + onSelfEquipStop + model hide, HeldItem
   quest hook, StartHolding + onSelfHoldingItemCreated + onSelfEquipStart
