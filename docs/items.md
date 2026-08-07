@@ -704,6 +704,14 @@ name array and, per entry, takes the matching `CreateItemCount[i]` (default
 `PlayerInventory.AddItem`, dropping with `ItemDropServer(stack, pos, zero,
 -1, 60, false)` when the inventory is full.
 
+**`ItemActionOpenLootBundle.ExecuteInstantAction` (IL=183)** is the loot
+variant: it resolves `LootContainer.GetLootContainer(lootListName, true)`
+(missing -> false), consumes the bundle, and for a player holder rolls
+`LootContainer.Spawn(rand, 100, 0, 0, player.GetHighestPartyLootStage(0, 0),
+player, none, true, false, true)` - the loot list rolled at the **party's
+highest loot stage** - granting each spawned stack (quality items with
+`MaxDurabilityModifier = 1`) via `AddItem` or the `ItemDropServer` fallback.
+
 **`GetDamageEntity` (IL=52) / `GetDamageBlock` (IL=70):** build FastTags =
 Primary/Secondary action tag | item tags (or MeleeTag) | holder stance/movement
 tags (| block tags for block damage). Then
@@ -1369,6 +1377,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionOpenLootBundle.ExecuteInstantAction IL=183:
+  GetLootContainer(lootListName) + LootContainer.Spawn at party highest
+  loot stage, grant via AddItem/ItemDropServer.
 - **2026-08-08:** ItemActionOpenBundle.ExecuteInstantAction IL=493: per
   CreateItem entry with CreateItemCount[i] min-max range roll, quality items
   forced count 1 + MaxDurabilityModifier 1, AddItem/ItemDropServer grant.
