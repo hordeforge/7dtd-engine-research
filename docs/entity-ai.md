@@ -1409,6 +1409,23 @@ heightDiff/ticks.
 **`EndJump` (IL=21):** `jumpState=0`, `jumpIsMoving=false`; local avatar
 `StartAnimationJump(mode1)` (land).
 
+**`UpdateJump` (IL=110):** fly mode forces `Jumping=false`. Else
+`jumpStateTicks++`. Switch on `jumpState` (after sub 2):
+
+| state | meaning | transition |
+|---:|---|---|
+| 2 | windup | rootMotion.y &gt; 0.005 **or** ticks ≥ `jumpDelay` → `StartJumpMotion`, `jumpTicks=200`, state **3**, moving |
+| 3 | airborne | onGround **or** motionMult &lt; 0.45 **or** ticks &gt; 40 → state **4**, stop moving |
+| 4 | land hold | ticks &gt; 5 → `Jumping=false` |
+| 5 | swim start | ticks &gt; 6 → `jumpTicks=100`, state **6**, `StartJumpSwimMotion` |
+| 6 | swim hold | not swimming **or** ticks ≥ `jumpSwimDurationTicks` → `Jumping=false` |
+
+**`fallHitGround(distance, fallMotion)` (IL=66):** base fall; if distance &gt;
+**2**: damage = `(-fallMotion.y - 0.85) * 160` (int); if &gt; 0
+`DamageEntity(DamageSource.fall, dmg)`; `PlayHitGroundSound(1)`. If alive and
+not ragdoll: unless `disableFallBehaviorUntilOnGround`, try
+`ChooseFallBehavior`; else land jump anim. `aiManager.FallHitGround(distance)`.
+
 ---
 
 ## D5. Path system fields (ASP vs AStar)
@@ -1861,8 +1878,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** StartJump state 2/5 swim; StartJumpMotion ticks formula;
-  get_Jumping passive 132; EndJump land; DigStop; CalcMoveDist.
+- **2026-08-07:** UpdateJump states 2-6; fallHitGround dmg (-vy-0.85)*160;
+  StartJump 2/5; StartJumpMotion; passive 132; DigStop.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

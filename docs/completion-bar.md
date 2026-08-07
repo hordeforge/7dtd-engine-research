@@ -269,6 +269,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | DigStart/DigUpdate + StartJump + stuck clear | entity-ai.md |
 | DigStop + CalcMoveDist + BuffClass.Tick | entity-ai.md / buffs.md |
 | StartJumpMotion + DurationInSeconds /20 | entity-ai.md / buffs.md |
+| UpdateJump states + fallHitGround damage | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

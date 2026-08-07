@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: UpdateJump states and fallHitGround
+
+Done (V3.1.0 b14 IL):
+- UpdateJump: fly cancel; states 2 windup / 3 air / 4 land / 5-6 swim; jumpTicks 200/100.
+- fallHitGround: distance>2 damage (-vy-0.85)*160; fall DamageSource; land anim; EAI FallHitGround.
+---
 ## 2026-08-07 — tier-C: StartJumpMotion and DurationInSeconds
 
 Done (V3.1.0 b14 IL):
