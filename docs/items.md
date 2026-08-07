@@ -1357,6 +1357,14 @@ needs no resource. `GetRepairAmount` (IL=3) is a field read; the actual
 repair/upgrade application funnels into the crafting queue
 (`XUiC_CraftingWindowGroup.AddRepairItemToQueue`, below).
 
+**`ItemActionTerrainTool` (V3.1.0 b14)** is the terrain-sculpt tool
+(dig/flatten): `ExecuteAction` (IL=46) latches `bActivated` +
+`activateTime` on press and forwards `GameManager.ItemActionEffectsServer
+(entityId, slotIdx, actionIdx, 1, zero, zero, 0)` (0 on release) - the
+server-side terrain mutation runs off that call (the `GrowTerrain` / dig
+family), driven by the hold duration. `GetRange` (IL=2) is a fixed **20**;
+`GetInitialMeta` completes the surface.
+
 The UI path at 1413451 sets `Recipe::craftingTime = ItemClass.RepairTime.Value *
 count`, re-runs it through `EffectManager::GetValue` with `PassiveEffects 90`
 (crafting time) and `PassiveEffects 101` for the count, and finally calls
@@ -1453,6 +1461,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionTerrainTool: ExecuteAction IL=46 press/release
+  latch + ItemActionEffectsServer forward, GetRange IL=2 fixed 20,
+  GrowTerrain/GetInitialMeta surface.
 - **2026-08-08:** ItemActionRepair: ExecuteAction IL=631 gates (Delay, hit
   distance, passive 177, TP camera, trader-area refusal) + repairType;
   CanRemoveRequiredResource IL=106 upgrade filters + UpgradeHitCount/
