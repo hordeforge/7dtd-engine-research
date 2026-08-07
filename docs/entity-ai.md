@@ -1650,6 +1650,12 @@ or **80** (surfaced) on the entity - the drowning/breath hooks. `SwimChanged()`
 (`distXZ < 0.025 && |diffY| < 0.015`), tracks the smoothed water level
 (`landWaterLevel = inWaterPercent * 2`), and when the impact distance is
 `>= 0.02` plays `player_swim` at `FastMin(dist * 2.2 + 0.01, 1)` volume.
+`Entity.TickInWater` (IL=50, called from `OnUpdateEntity`) is the driver of
+all three water flags: `inWaterLevel = CalcWaterLevel()`,
+`inWaterPercent = inWaterLevel / (GetHeight() * 1.1)`,
+`isInWater = inWaterPercent >= 0.25`, then `CalcIfSwimming()` ->
+`SwimChanged()` on change, then `IsHeadUnderwater()` ->
+`OnHeadUnderwaterStateChanged()` on change.
 
 **`FindDestroyPos` (IL=21):** zero destroyPosition.y; `SearchForDestroyPos`; on
 success `destroyRefreshTicks=**500**` and store pos.
@@ -2032,6 +2038,15 @@ or default step at volume.
 `motion * 20` (per-tick motion scaled to one second at 20 TPS). The player
 override uses `averageVel * 20` instead of the rigidbody/motion path, reading
 the smoothed per-tick average-velocity field.
+
+**`Entity.ReplicateSpeeds` (IL=66)** is the forward/strafe speed replication
+hook (called from `MoveEntityHeaded` server-side and
+`EntityPlayerLocal.OnUpdatePosition`): a `speedSentTicks` counter throttles
+sends to every **3** ticks, and the send only fires when
+`(speedForward - speedForwardSent)^2 + (speedStrafe - speedStrafeSent)^2`
+exceeds **4e-6** (a meaningful change). A remote world sends
+`NetPackageEntitySpeeds.Setup(this)` to the server; a server world fans it
+to tracked players via `world.entityDistributer.SendPacketToTrackedPlayers`.
 
 **`FindValidExitPosition` (IL=14) / `GetFallingSavePosition` (IL=161):**
 vehicle dismount + fell-through-world rescue. `FindValidExitPosition` records
@@ -3231,6 +3246,12 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+## Changelog
+
+- **2026-08-08:** Entity.ReplicateSpeeds (IL=66): 3-tick throttle, 4e-6
+  delta gate, NetPackageEntitySpeeds to server / SendPacketToTrackedPlayers;
+  Entity.TickInWater (IL=50) drives inWaterLevel/inWaterPercent/isInWater
+  0.25 gate + SwimChanged + OnHeadUnderwaterStateChanged.
 ## Changelog
 
 - **2026-08-08:** updatePlayerLandSound (IL=51): water-landing splash gate
