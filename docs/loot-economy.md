@@ -324,6 +324,17 @@ exceeds one container size.
 Death path calls these via `dropItemOnDeath` ([combat-damage.md](combat-damage.md)
 §3.1).
 
+**`EntityItem.OnCollectServer` (IL=8):** `World.RemoveEntity(id, reason=2)` only
+(inventory add is elsewhere on the collect package path).
+
+**`EntityItem.OnUpdateEntity` (IL=114):** base update; create mesh if needed;
+`ItemClass.OnDroppedUpdate`; if |dy| &lt; 0.1 for **10** ticks set `onGround`;
+physics-master client odd ticks `PhysicsMasterSendToServer`;
+`checkGravitySetting`; non-remote: if no transform force `lifetime=0`; else
+`lifetime -= 0.05` and `SetDead` when ≤ 0; eat-distraction items also die when
+`distractionTime > 0` and `distractionEatTicks <= 0`; die if world Y + Origin.y
+&lt; 0; if not dead `tickDistraction()`.
+
 ## 7. Dedicated relevance and residuals
 
 - **Server codepaths:** `LootManager.LootContainerOpened`, `TEFeatureStorage.UpdateTick`
@@ -533,6 +544,8 @@ and the locked-slot bit array.
 
 ## Changelog
 
+- **2026-08-07:** EntityItem.OnUpdateEntity lifetime 0.05/tick, ground counter 10,
+  distraction death, Y&lt;0 death; OnCollectServer RemoveEntity reason 2.
 - **2026-08-07:** EntityTrader.OnUpdateLive IL=315 (quest populate, 10 m bounds
   unload/greet, open-close/warning/lock unlock); DropContent multi-bag slice.
 

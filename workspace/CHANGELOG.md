@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EntityItem OnUpdateEntity lifetime and collect
+
+Done (V3.1.0 b14 IL):
+- OnUpdateEntity: lifetime -= 0.05, ground counter 10, distraction/Y death.
+- OnCollectServer: RemoveEntity reason 2 only.
+---
 ## 2026-08-07 — tier-C: AddKillXP and SharedKillServer party XP split
 
 Done (V3.1.0 b14 IL):

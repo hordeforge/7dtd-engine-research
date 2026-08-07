@@ -166,6 +166,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | ServerConsoleCommand 300-char reject | console-commands §2 |
 | EntityAliveFlags process bit table | protocol-packages §5.5.6 |
 | AddKillXP / SharedKillServer party XP | parties-factions §2.3 |
+| EntityItem OnUpdateEntity lifetime | loot-economy §6b |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
