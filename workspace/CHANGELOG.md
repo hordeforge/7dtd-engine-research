@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: POI query + water leaves
+
+Done (V3.1.0 b14 IL):
+- server-browser-prefabs.md 3.2: GetPrefabsAtXZ IL=70 AABB scan via PrefabBinarySearch IL=58 (xMin-200 lookback, resort gate)
+- light-mesh-water.md: WaterUtils.GetVoxelKey 3D IL=10 (+y), TryOpenChunkForUpdate IL=33 (ScopedChunkWriteAccess, InProgressWaterSim volatile)
+
 ## 2026-08-08 - tier-C: DynamicPrefabDecorator decorate path
 
 Done (V3.1.0 b14 IL):
