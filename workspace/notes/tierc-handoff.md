@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `e572209` SetBlock entry chain |
-| Commits since dry-run `3b61d9c` | ~140 |
+| HEAD (at handoff write) | `a125f98` BloodMoon component + party |
+| Commits since dry-run `3b61d9c` | ~141 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
