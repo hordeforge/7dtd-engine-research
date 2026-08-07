@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.IsSpawned
+
+Done (V3.1.0 b14 IL):
+- Entity.IsSpawned (IL=2) base always true; EntityAlive.IsSpawned (IL=3)
+  reads the bSpawned flag set in OnAddedToWorld. spawning.md.
+
 ## 2026-08-08 - tier-C: Entity.IsIgnoredByAI
 
 Done (V3.1.0 b14 IL):

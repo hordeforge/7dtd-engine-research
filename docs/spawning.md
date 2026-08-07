@@ -538,7 +538,9 @@ configured lower-tier replacements.
    `entity.OnAddedToWorld` (`EntityAlive.OnAddedToWorld` IL=27: non-local →
    `OcclusionManager.AddEntity(this, 7)`; `m_addedToWorld = true`; not remote →
    `bSpawned = true`; non-player → `FireEvent(MinEvent 61, true)`; then
-   `StartStopLivingSound()`).
+   `StartStopLivingSound()`). `Entity.IsSpawned()` (IL=2) is always true on
+   the base; `EntityAlive.IsSpawned()` (IL=3) reads the `bSpawned` flag set
+   here.
 7. Warn if `position.y < 1`.
 8. Server: `entityDistributer.Add`; if player bump `Players` +
    `playerEntityUpdateCount`; else if EntityAlive `Spawned = true`.
@@ -849,6 +851,8 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** Entity.IsSpawned (IL=2) base true; EntityAlive.IsSpawned
+  (IL=3) bSpawned flag read (set in OnAddedToWorld).
 - **2026-08-07:** EntityClass lookup leaves: GetEntityClass (IL=7) list
   TryGetValue, GetEntityClassName (IL=10) "null" fallback; LoadAssets
   paragraph restored after an edit splice.
