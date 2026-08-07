@@ -68,9 +68,20 @@ passive **197** (`FastClamp01`, buff `NameTag`): immune when
 `EntityPlayerLocal.InfectionChance == 0` force chance **1** (always immune);
 else `chance *= (2 - InfectionChance)`.
 
-**Note:** base `EntityAlive.FriendlyFireCheck` (IL=2) always returns **true**
-(no block). Player/special overrides may differ; buff gate 3 only fires when a
-override returns false.
+**`EntityAlive.FriendlyFireCheck` (IL=2):** always **true**.
+
+**`EntityPlayer.FriendlyFireCheck` (IL=77):** default true. If `other` is a
+player and not self: read GameStats **23** (player-killing mode).
+
+| Mode | Result for other players |
+|---:|---|
+| **0** | always **false** (block) |
+| **1** | **true** iff ally (`PersistentPlayerData.IsAlly` or same party) |
+| **2** | **true** iff **not** ally/party (strangers only) |
+| other | leave default **true** |
+
+Exceptions in the try path force **true**. Buff gate 3 / damage paths treat
+**false** as block.
 
 `fromElectrical` stashes original instigator into local and forces
 `instigatorId = -1` for the rest of the path. Existing same-name buff: refresh
@@ -198,8 +209,8 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
-- **2026-08-07:** HasImmunity passive 197 + infection InfectionChance; AddBuff
-  status 0..5; RemoveBuff; Tick MinEvent 0/1/2/3.
+- **2026-08-07:** EntityPlayer FriendlyFireCheck GameStats 23 modes; HasImmunity
+  passive 197; AddBuff status 0..5; Tick MinEvent 0/1/2/3.
 - **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.
 - **2026-07-28:** NetPackageEntityStatsBuff pointer.
 

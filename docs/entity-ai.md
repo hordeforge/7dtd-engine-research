@@ -240,6 +240,25 @@ see cache (called from OnUpdateLive before AI).
 `CanEntityBeSeen(e, true)`: on success add positive (and if client-controlled,
 `lastTimeSeenAPlayer = Time.time`); on fail add negative.
 
+**`CanEntityBeSeen(other, checkViewCone)` (IL=133):**
+
+1. Head→head vector; `maxDist = GetSeeDistance()`; if other is player,
+   `maxDist *= other.DetectUsScale(this)`.
+2. If distance &gt; maxDist → false.
+3. If `checkViewCone` and `!IsInViewCone(otherHead)` → false.
+4. Temp `SetModelLayer(2)` on self; ray from head along dir (origin pulled back
+   **0.1**), length maxDist, mask **`-1612492829`**, hit flag **64**.
+5. Hit `E_Vehicle` and vehicle `IsAttached(other)` → true; `E_Enemy` may
+   `EntityDrone.IgnoreCollisionEntity`; `E_BP_*` root transform equals other →
+   true.
+6. Restore model layer; return hit flag.
+
+**`EntityAlive.HasImmunity(BuffClass)` (IL=2):** always **false** (immunity from
+`EntityBuffs.HasImmunity` passive path / death only unless subclassed).
+
+**`EntityPlayer.CheckSleeperTriggers` (IL=16):** server + alive only:
+`World.CheckSleeperVolumeTouching` then `CheckTriggerVolumeTrigger`.
+
 **`SetLastTimePlayerSeen` (IL=4):** `lastTimeSeenAPlayer = Time.time`.
 
 **`IsInFrontOfMe` (IL=28):** angle between head→pos and forward vs
@@ -1172,8 +1191,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** CanSee positive/negative cache; ResetDespawnTime; CheckDespawn
-  bands; horde canDespawn; unloadEntity teardown.
+- **2026-08-07:** CanEntityBeSeen LOS + DetectUsScale; CanSee caches;
+  CheckSleeperTriggers; ResetDespawnTime; CheckDespawn bands.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

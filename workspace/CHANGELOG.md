@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: FriendlyFireCheck PvP modes and CanEntityBeSeen
+
+Done (V3.1.0 b14 IL):
+- EntityPlayer.FriendlyFireCheck: GameStats 23 modes 0/1/2 ally/stranger gates.
+- CanEntityBeSeen: see distance * DetectUsScale, view cone, ray mask -1612492829.
+- CheckSleeperTriggers: sleeper + trigger volumes on server alive players.
+- EntityAlive.HasImmunity always false.
+---
 ## 2026-08-07 — tier-C: HasImmunity passive 197 and CanSee caches
 
 Done (V3.1.0 b14 IL):
