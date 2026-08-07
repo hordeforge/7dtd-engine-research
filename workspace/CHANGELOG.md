@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameUtils time conversions
+
+Done (V3.1.0 b14 IL):
+- aidirector.md time gates: DaysToWorldTime (IL=15) (day-1)*24000;
+  DaysToWorldTimeMidnight (IL=6) +16000; WorldTimeToTotalSeconds (IL=4) *3.6;
+  WorldTimeToTotalMinutes (IL=7) *0.06; TotalMinutesToWorldTime (IL=7) /0.06;
+  WorldTimeToHourMinutesString (IL=14) D2:D2.
+
 ## 2026-08-08 - tier-C: World sky/water queries
 
 Done (V3.1.0 b14 IL):
