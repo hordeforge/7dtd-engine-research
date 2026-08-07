@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PPD leaves + quest notifiers
+
+Done (V3.1.0 b14 IL):
+- server-lifecycle.md 3.1: PersistentPlayerData get_OfflineHours/Minutes (IL=14
+  each, -1 while in-world else since LastLogin), get_HasBedrollPos (IL=8,
+  int.MaxValue y sentinel) + ClearBedroll (IL=37, nav object + map marker
+  remove), AddLandProtectionBlock (IL=11), ProcessBackpacks (IL=21) +
+  TryUpdateBackpackPosition (IL=19, keeps timestamp).
+- quests-challenges.md 1: notifier pattern (BlockChanged/ItemAdded/
+  HarvestedItem/OpenedContainer null-guarded invokes) + CheckResetQuestTrader
+  (IL=24) ForceResetQuestTrader gate.
+
 ## 2026-08-08 - tier-C: ChunkCluster helpers
 
 Done (V3.1.0 b14 IL):
