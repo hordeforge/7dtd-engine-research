@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: loot/quest items + block placement
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionOpenLootBundle IL=183 (Spawn at party
+  loot stage); ItemActionQuest IL=87 (GetQuest + repeatable/active
+  gate + CanActivate, offer window with QuestLock).
+- ItemActionPlaceAsBlock.ExecuteAction IL=353: gates (Delay +
+  cBuildIntervall + passive 177), HitInfo target + collider check,
+  OnConvertToBlockValue, placement distance + CanPlaceBlockAt,
+  BlockPlacement.OnPlaceBlock + OnBlockPlaceBefore, keystone lpblock
+  gate vs CanPlaceBlockAt claim check, Block.PlaceBlock + MinEvent
+  44 + BlockPlaced + changeItemTo/decInventoryLater + placeblock
+  sound.
 ## 2026-08-08 - tier-C: loot bundle + quest item
 
 Done (V3.1.0 b14 IL):
