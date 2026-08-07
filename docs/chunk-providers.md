@@ -84,6 +84,8 @@ rewrites the cell with the new slope via `WithSlope`.
 deco but `DecoManager.GetDecoOccupiedAt` reports an occupied column (> 3 or 6),
 downgrades the size field to 2. `SetDecoAllowedAt(x, z, val)` (IL=49) writes
 after keeping the stricter slope / size / street-only fields of the old value.
+The field readers `GetDecoAllowedSizeAt` / `GetDecoAllowedStreetOnlyAt` (IL=6
+each) extract `GetSize()` / `GetStreetOnly()` from the cell.
 
 Registry lookups: `WorldBiomes.GetBiome(Color32)` (IL=34) packs
 `(r << 16) | (g << 8) | b` into the `m_Color2BiomeMap` key (null on miss);
