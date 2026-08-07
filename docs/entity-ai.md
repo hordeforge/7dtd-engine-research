@@ -1944,6 +1944,41 @@ Push physics, turrets, traps, EAI target find, break block, falling entities, sp
 
 **Density cost:** combat + traps + spawn all pile on bounds queries independent of AI LOD.
 
+### `GetEntitiesInBounds` body: chunk-grid scan + Y-slice scan (IL=68-86)
+
+All four `World.GetEntitiesInBounds` overloads are thin chunk-grid fans over the
+`Chunk` overloads (3 variants, IL=85-86), which do the actual entity scan:
+
+- **World tier (IL=68/69/75/75):** compute the covered chunk range from the
+  query AABB expanded by **5** on each side before dividing by 16:
+  `minX = Fastfloor((bb.min.x - 5) / 16)`, `maxX = Fastfloor((bb.max.x + 5) /
+  16)`, same for Z; loop every `(x, z)` in range, resolve the chunk with
+  `GetChunkSync` (null chunks skipped), and delegate. The `Entity`-exclude
+  overloads (IL=75) reuse a shared scratch field
+  `entitiesWithinAABBExcludingEntity` (cleared per call, returned to the
+  caller, so callers must copy if the result must outlive the query); the
+  `FastTags` (IL=68) and `Type` (IL=69) overloads append into a caller-provided
+  list. The 5-m padding is the entity bounding-box safety margin: a chunk is
+  scanned whenever its 16 m tile can touch the padded box, so entities whose
+  box pokes up to 5 m across a tile boundary are not missed.
+- **Chunk tier (IL=85/85/86):** the same padding maps to a Y-slice band:
+  `minY = Fastfloor((bb.min.y - 5) / 16)` clamped to `>= 0`, `maxY =
+  Fastfloor((bb.max.y + 5) / 16)` clamped to `<= 15` (16 slices of 16 m each
+  cover a chunk's 256 m height); iterate each slice's `entityLists[y]` and
+  filter, in order: per-overload test then `entity.boundingBox.Intersects(bb)`
+  against the *unpadded* query box. Per-overload tests:
+  - `Entity` + `isAlive` (IL=85): skip the exclude entity (Unity object
+    equality); skip when `isAlive` differs from `entity.IsAlive()`; when an
+    exclude entity is given, additionally require
+    `exclude.CanCollideWith(entity)`.
+  - `FastTags` (IL=85): require `entity.HasAnyTags(_tags)`.
+  - `Type` (IL=86): require `_class.IsAssignableFrom(entity.GetType())`
+    (assignable-from, so base-class queries match derived entity types).
+- Callers (30+): turret/trap fire controllers, EAI target find + dodge + break
+  block, falling blocks, item distraction, spawners, trader areas, UAI
+  considerations, quest objectives, threat tracking (list in
+  [inventories/deeper.md](inventories/deeper.md)).
+
 ---
 
 ## D8. Falling / sleeper / deco (world systems)
@@ -2791,6 +2826,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** GetEntitiesInBounds family (World IL=68-75 fan over chunk
+  grid, Chunk IL=85-86 Y-slice scan): 5-m padding to chunk/slice ranges,
+  shared scratch list for Entity overloads, per-overload filters
+  (exclude/alive, HasAnyTags, IsAssignableFrom).
 - **2026-08-07:** FastTags bit model: Parse (IL=90) comma split + bucket words;
   GetBit (IL=56) lazy Interlocked bit assignment + allInternal grow; GetTag
   (IL=4) wrapper; GetTagNames (IL=78) mask-to-names serialization.

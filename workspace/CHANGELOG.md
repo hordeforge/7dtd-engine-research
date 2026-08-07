@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GetEntitiesInBounds family
+
+Done (V3.1.0 b14 IL):
+- Narrated World.GetEntitiesInBounds (4 overloads, IL=68-75) + Chunk
+  GetEntitiesInBounds (3 overloads, IL=85-86) in entity-ai.md D7: World
+  tier computes chunk (x,z) range from AABB padded +-5 then /16, fans via
+  GetChunkSync into chunk tier; Entity overloads reuse shared
+  entitiesWithinAABBExcludingEntity scratch list (cleared per call), FastTags
+  and Type overloads append into caller list. Chunk tier maps padded Y range
+  to slice band clamped [0,15], per-slice entityLists scan with
+  boundingBox.Intersects on the unpadded box; filters: exclude + isAlive +
+  CanCollideWith, HasAnyTags, IsAssignableFrom.
+
 ## 2026-08-08 - tier-C: GamePrefs.Save paths
 
 Done (V3.1.0 b14 IL):
