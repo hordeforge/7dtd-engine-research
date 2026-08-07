@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: block-data store
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: AddBlockData (IL=6) / ClearBlockData (IL=6) complete the
+  per-position dict pair.
+
 ## 2026-08-08 - tier-C: SetMetadata core
 
 Done (V3.1.0 b14 IL):
