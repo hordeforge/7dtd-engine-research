@@ -120,6 +120,11 @@ and alive: `timer -= deltaTime`; at ≤ 0 rearm with
 entityId, 1)`. With a local player present,
 `Waypoints.UpdateEntityAnimalWayPoint(this, true)`.
 
+**`EntityPlayer.OnUpdateLive` (IL=13) override:** zero the stamina stat's
+`RegenerationAmount` (player stamina does not use the stat's passive regen),
+then base `OnUpdateLive`, `EntitySeeCache.Clear()` (no see cache for players),
+`CheckSleeperTriggers()` (server + alive only, see the sleeper section).
+
 **`updateCurrentBlockPosAndValue` (IL=318):** foot block = entity block pos, or
 y-1 if air; resolve child to parent. If pos/value changed **or** landed this
 tick (`onGround && !wasOnGround`): store standing pos/value; server sets
