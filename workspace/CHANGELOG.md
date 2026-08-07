@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: stat adders + supply crate entity
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md: AddHealth IL=12 dead gate (Health<=0 no-op),
+  AddStamina IL=17 Stamina!=null + Health>0 gates, AddWater IL=9
+  ungated.
+- aidirector.md: EntitySupplyCrate fallHitGround IL=15 soft landing
+  (speed clamp 5, vertical min -0.75); OnEntityDeath IL=30 map-
+  marker removal (type 13) + NetPackageEntityMapMarkerRemove
+  broadcast + DropBagServer; OnEntityActivated IL=18 search via
+  LockManager LockRequestLocal; canDespawn IL=2 always false.
 ## 2026-08-08 - tier-C: stat adders
 
 Done (V3.1.0 b14 IL):
