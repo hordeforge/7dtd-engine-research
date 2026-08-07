@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `5b94544` spawn-data build |
-| Commits since dry-run `3b61d9c` | ~361 |
+| HEAD (at handoff write) | `e62ec38` deco slope gate |
+| Commits since dry-run `3b61d9c` | ~362 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
