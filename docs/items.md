@@ -227,7 +227,9 @@ stat either upgrades the matching entry when it beats the local value (better
 direction from `IsStatLowerBetter`) or is appended as a new entry.
 `CloneModsTo(_iv)` (IL=34) / `CloneCosmeticModsTo(_iv)` (IL=34) copy the
 `Modifications` / `CosmeticMods` arrays into `_iv`, cloning each non-null
-entry (null slots stay null).
+entry (null slots stay null). `get_HasModSlots` (IL=6) is
+`Modifications.Length > 0` (slot capacity, not occupancy); `HasMods` (IL=30)
+and `HasCosmetics` (IL=30) scan for any non-null, non-empty entry.
 
 **Stat-value leaves:** `GetStatPercent(type, onlyBoosted)` (IL=12) starts at
 **1** and, when stats exist, runs `StatModifyValue`. `StatModifyValue(effect,
