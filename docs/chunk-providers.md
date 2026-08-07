@@ -695,6 +695,9 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   (unless `forceBlockYPos` or `pos.y <= 0`), sets `bDirty`, and skips a
   re-add when the chunk already holds a record with the same
   `realYPos`/`bv`/rotation.
+  `RemoveDecorationAt(pos)` (IL=52) is the detach: disabled or missing
+  DecoChunk -> false, off-main queues into `removeDecosFromThread`, and the
+  main thread runs `chunk.RemoveDecoObject(pos)`.
   `GetDecorationsOnChunk` (IL=143) lazily decorates an undecorated DecoChunk
   under its lock (`Decorating chunk, should not happen at this point!` error),
   reads the 16x16 bucket, warns
