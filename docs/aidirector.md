@@ -379,6 +379,13 @@ target list.
 - `Tick(Double)` IL=71
 - 22 methods in the type surface (pathing/smell bookkeeping); static noise names resolve through `AIDirectorData.FindNoise`
 
+**`Tick(dt)` (IL=71):** decays `m_ttl` and `m_validTime` (both clamped at 0) and
+advances `m_time` (capped at `m_lifetime`). The effective model:
+`m_effectiveRadius = m_speed > 0 ? min(m_radius, m_speed * m_time) :
+m_radius` (a smell cloud that expands from the source at `m_speed` up to its
+`m_radius`), and `m_effectiveStrength = m_strength * (1 - m_time /
+m_lifetime)` (linear strength decay over the lifetime).
+
 ## AIDirectorWanderingHordeComponent : `AIDirectorHordeComponent`
 - `Tick(Double)` IL=17
 - `TickActiveSpawns(Single)` IL=43
@@ -723,6 +730,9 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** SmellMarker.Tick (IL=71): ttl/validTime decay, time cap,
+  effective radius min(radius, speed*time) expansion, effective strength
+  strength*(1 - time/lifetime) linear decay.
 - **2026-08-07:** MarkerManagementComponent TickMarkers (IL=43): reverse sweep,
   TTL <= 0 or dead owning player -> RemoveAt + Release to pool.
 - **2026-08-07:** BloodMoon component+party bodies: Tick (IL=170) edge

@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SmellMarker model
+
+Done (V3.1.0 b14 IL):
+- AIDirectorSmellMarker.Tick (IL=71) narrated in aidirector.md (was a
+  stub): ttl/validTime decay clamped at 0, m_time capped at lifetime;
+  effective radius = speed > 0 ? min(radius, speed*time) : radius (smell
+  cloud expansion); effective strength = strength * (1 - time/lifetime)
+  linear decay.
+
 ## 2026-08-08 - tier-C: MarkerManagementComponent
 
 Done (V3.1.0 b14 IL):
