@@ -625,8 +625,50 @@ parts are:
 (`RootT` + `Origin.Add`) and clears `entityParticles`; `IsAvailable(name)`
 (IL=5) = `loadedTs.ContainsKey(ToId(name))`.
 
+## FastTags (the tag bitmask)
+
+`FastTags<TTagGroup>` is the shared tag set used across the engine for
+"is this tagged X" checks (item tags, entity groups, buff tags, quest tags,
+`MovementTagIdle`, `ignoreWhenHeld`, loot tags; each `TagGroup` - e.g.
+`TagGroup.Global` - is its own registry). V3.1.0 b14 IL:
+
+**Storage:** the value is a `UInt64[] bits` with a **single-bit fast path**:
+a one-bit tag stores the bit number in the `singleBit` field instead of an
+array. The bit allocation itself is **lazy and global per group**: `GetBit`
+(IL=56) trims the name, looks it up in the static
+`tags : CaseInsensitiveStringDictionary<int>` (name -> bit), and on a miss
+assigns the next free bit via `Interlocked.Increment(next)` - first-use order,
+thread-safe - registering both `tags` and the reverse
+`bitTags : Dictionary<int,string>` and growing the cached all-ones tag
+`allInternal` (every word `0xFFFFFFFFFFFFFFFF`) to cover it. So a tag has no
+fixed number; it is whatever bit it first got.
+
+**Construction:** `GetTag(name)` (IL=3) is the single-bit ctor;
+`Parse("a,b,c")` (IL=90) splits on `,`, resolves each name with `GetBit`, and
+ORs them into a fresh `UInt64[]` through a lock-guarded scratch buffer
+(`maskList` under `Monitor`, cleared after use). `SetBit(bit, extended)`
+(IL=18) = `extended[bit >> 6] |= 1 << (bit & 63)`. `CombineTags` ORs two to
+five sets: the 2-arg is `op_BitwiseOr` (IL=4); the 3/4/5-arg forms allocate a
+max-length array and OR word-by-word. `Remove(other)` (IL=138) is the
+bitwise-AND-NOT.
+
+**Tests:** `Test_Bit(bit)` (IL=46) handles empty / single-bit / array paths
+with a bounds check; `Test_AllSet(other)` (IL=99) is the subset test (`this
+& other == other`, with single-bit fast paths); `Test_AnySet(other)` (IL=70)
+is overlap; `Test_IsOnlyBit(bit)` asks whether the set is exactly that one
+bit. `get_IsEmpty()` (IL=34) = `singleBit <= 0` and every word zero;
+`get_all()` (IL=2) returns the cached `allInternal`. Reverse mapping:
+`GetTagNames()` (IL=78) walks each set bit through `bitTags` (single-bit path
+included); `ToString()` (IL=34) is the comma-joined names, so a parsed tag
+round-trips to the same string it was built from.
+
 ## Changelog
 
+- **2026-08-08:** FastTags bitmask: UInt64[] + singleBit fast path; lazy
+  per-group bit registry (GetBit IL=56, Interlocked.Increment first-use
+  order, tags/bitTags + allInternal growth); Parse comma-split via locked
+  scratch; CombineTags 2..5 OR forms; Test_Bit/AllSet/AnySet/IsOnlyBit;
+  Remove; GetTagNames/ToString reverse mapping.
 - **2026-08-08:** ParticleEffect record: wire layout (Read IL=53 - ParticleId
   = name hash, pos/rot/color32, sound names null-normalized, volumeScale,
   parentEntityId, attachment u8); SpawnParticleEffectServer IL=41 client/
