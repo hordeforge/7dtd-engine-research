@@ -838,6 +838,17 @@ built (name, `<property>` elements, `Init`) and `AddForDay`d. An
 `entityspawner` with no days throws `Empty entityspawner not allowed:
 {name}`, and the finished schedule is registered in
 `EntitySpawnerClass.list[name]`.
+
+**`EntitySpawnerClass.Init` (IL=333) is the per-wave-class config parse.**
+`EntityGroupName` is mandatory (throws `Mandatory property '...' missing in
+entityspawnerclass '...'`) and validated against the entity groups (`Entity
+spawner '...' contains invalid group`). The rest: `StartSound`,
+`StartText`, `Time` (parsed as `EDaytime`), `DelayBetweenSpawns` (float),
+`TotalAlive` (int), `TotalPerWave` (min/max via `ParseMinMaxCount`),
+`DelayToNextWave` (float), `AttackPlayerAtOnce` (bool),
+`NumberOfWaves` (int), `Territorial` (bool) + `TerritorialRange` (int),
+`SpawnOnGround` (bool), `IgnoreTrigger` (bool), `ResetToday` (bool), and
+`DaysToRespawnIfPlayerLeft` (float, stored as int).
 - **`SpawnEntry`** (nested `GameEventManager/SpawnEntry`, base `Object`) tracks
   one entity spawned by a game-event action sequence (`SpawnedEntity`, `Target`,
   `Requester`, owning `GameEvent`, `IsAggressive`). Its only method,
@@ -1068,6 +1079,13 @@ above.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Content and native residuals |
 
+## Changelog
+
+- **2026-08-08:** EntitySpawnerClass.Init (IL=333): mandatory EntityGroupName
+  + group validation, Time/EDaytime, DelayBetweenSpawns, TotalAlive,
+  TotalPerWave min-max, DelayToNextWave, AttackPlayerAtOnce, NumberOfWaves,
+  Territorial(+Range), SpawnOnGround, IgnoreTrigger, ResetToday,
+  DaysToRespawnIfPlayerLeft.
 ## Changelog
 
 - **2026-08-08:** <spawning> loader (LoadEntitySpawnerClasses IL=204):
