@@ -124,6 +124,13 @@ or the block is air / child / `StabilityIgnore`, or oversized without
 `includeOversized`; otherwise enqueue into `World.fallingBlocks` and add to
 `fallingBlockSet` (dedupe), plus `DynamicMeshManager::AddFallingBlockObserver`.
 
+**Batch surface:** `AddFallingBlocks(list)` (IL=18) fans each position into
+`AddFallingBlock(pos, false)`. `ClearFallingBlocksForChunks(chunks)` (IL=111)
+drains the `fallingBlocks` queue: a position whose chunk is in the given set is
+dropped from `fallingBlockSet` (its fall is cancelled), everything else is
+collected into `resetTempPositions` and the queue is rebuilt from them (the
+chunk unload / stream path).
+
 `World::LetBlocksFall` (220 IL, run from `GameManager::UpdateTick` outside the
 IsServer guard, so clients run it too): when `EntityFallingBlocks::Enabled` is
 set it first groups via `GroupFallingBlocks` (up to **2** groups per pump via
