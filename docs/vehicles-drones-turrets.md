@@ -279,8 +279,8 @@ Follow and return use the drone's own flood-fill / raycast pathing
 (`FloodFillEntityPathGenerator`, `steering`, `pathMan`), not the zombie A* path
 queue, though it still calls `PathFinderThread.Instance` for projected paths.
 
-**`idleState` (IL=100):** underwater early-out; if enemy in sensor range but
-owner outside `EnemyDetectionRadius` → `Follow`; if owner outside
+**`idleState` (IL=100):** underwater early-out; if `DroneSensors.IsEnemyInRange`
+but owner outside `EnemyDetectionRadius` → `Follow`; if owner outside
 `FollowDistance+2` and no enemy → `Follow`; else face owner 2D and seek Y to
 chest height at `SpeedFlying*0.5`.
 

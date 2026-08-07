@@ -46,10 +46,10 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached, non-generated | 6040 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2341 (excluded from %) |
 | ...**game types** (the RE surface) | **3699** |
-| ...**narrated** (backticked in a narrative doc) | **1474 (39%)** |
+| ...**narrated** (backticked in a narrative doc) | **1475 (39%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 834 |
 | ...**classified** out-of-scope | 1390 |
-| ...**unaccounted** (appears nowhere) | 1 |
+| ...**unaccounted** (appears nowhere) | 0 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 502 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 179 |
 
@@ -62,7 +62,7 @@ out of scope), and the base itself is the approximation described above.
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2934 | 2933 | 1 | 99% |
+| `<global>` | 2934 | 2934 | 0 | 100% |
 | `GameEvent` | 180 | 180 | 0 | 100% |
 | `Platform` | 147 | 147 | 0 | 100% |
 | `Twitch` | 109 | 109 | 0 | 100% |
@@ -113,5 +113,4 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
-| `DroneSensors` | <global> | 9 |
 
