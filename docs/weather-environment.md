@@ -222,7 +222,12 @@ consistent with the compute living on the client: `GetOutsideTemperature()`
 returns `70`, `WeatherManager.GetTemperature()` and `GetWindSpeed()` return `0`,
 and `AddTemperatureOffSetHeight` / `ClearTemperatureOffSetHeights` are empty. The
 server still saves and restores the real biome weather state (§6), and still
-ships the params that a client turns into a felt temperature.
+ships the params that a client turns into a felt temperature. More
+stubs/delegates on the dedicated build: `SeaLevel()` (IL=2) is the constant
+**0**, `GetCurrentTemperatureValue()` (IL=2) forwards to `GetTemperature()`,
+`GetCurrentCloudThicknessPercent()` (IL=4) is `GetCloudThickness() * 0.01`,
+`EntityRemovedFromWorld` (IL=1) is empty, and `IsStorming(type)` (IL=15) is
+`FindBiomeWeather(type)` non-null with `stormState >= 2`.
 
 Two weather values do read straight off biome state even on the server, guarded
 so they return `0` when `currentWeather` is null (its normal server state):
