@@ -512,6 +512,11 @@ on a miss (a hard-fail lookup, not a null return);
 `GetAllSleeperVolumes(volumes)` (IL=43) copies every `(id, volume)` tuple into
 the caller's list under the same lock.
 
+**Chunk-side links:** `Chunk.sleeperVolumes` is a `List<int>` of volume ids;
+`AddSleeperVolumeId(id)` (IL=18) dedupes and appends, logging
+`Chunk AddSleeperVolumeId at max` once the list hits **255** entries (the
+per-chunk cap); `GetSleeperVolumes` (IL=3) exposes the list.
+
 **`World.GetClosestPlayerSeen(entity, distMax, lightMin)` (IL=68):** same distance
 scan, require not dead + spawned, `Stealth.lightLevel >= lightMin`, and
 `entity.CanSee(player)`.
