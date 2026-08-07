@@ -687,6 +687,12 @@ group's quality range; every entry gets `parentGroup = this`;
 5), and `poi_tier_mod` (comma floats) / `poi_tier_bonus` fill them - the POI
 tier modifiers that feed the loot-stage math below.
 
+**Registry accessor:** `LootContainer.GetLootContainer(name, errorOnMiss)`
+(IL=21) is the lookup every runtime path uses (loot bundles, TE loot lists):
+null for an empty name, `lootContainers.TryGetValue` on the dictionary, and
+`Log.Error("LootContainer '{name}' unknown")` + null on a miss with
+`errorOnMiss` (the loader's duplicate check passes false).
+
 `ParseLootEntryRequirement` (the `LootEntryRequirement*` family) is covered
 in the Loot-entry requirement section above.
 
@@ -825,6 +831,8 @@ or `ItemStack.Empty` when nothing rolled.
 
 ## Changelog
 
+- **2026-08-08:** LootContainer.GetLootContainer IL=21: null on empty name,
+  TryGetValue, Log.Error + null on miss with errorOnMiss.
 - **2026-08-08:** LootFromXml loader (7b): coroutine entry IL=6;
   LoadLootContainer IL=275 (name/count/size/buff/sounds/flag bools/
   destroy_on_close/on_open_event/open_time, quality template check,
