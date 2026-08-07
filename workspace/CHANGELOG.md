@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory held-slot accessors + ForceHoldingItemUpdate
+
+Done (V3.1.0 b14 IL):
+- items.md 5: held-slot accessors bare-hand fallbacks
+  (get_holdingItem/ItemValue/Stack/Data), slot-count constants
+  (INVENTORY_SLOTS=PUBLIC_SLOTS+1, PUBLIC_SLOTS 10 vs 20 prefab
+  editor, DUMMY_SLOT_IDX last slot), IsHoldingGun IL=9;
+  ForceHoldingItemUpdate IL=91 forced held-item rebuild with 6
+  xref callers (HealBeamWeapon.Fire, EntityNetworkStats.ToEntity,
+  EModelBase.SwitchModelAndView x2, client initialize-holding
+  coroutine, WorldStaticData.ReloadItemModifiers).
 ## 2026-08-08 - tier-C: StringParsers contract
 
 Done (V3.1.0 b14 IL):
