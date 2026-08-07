@@ -59,6 +59,18 @@ stateDiagram-v2
 
 ## 2. When AI actually runs (`OnUpdateLive` → `updateTasks`)
 
+### 2.0a `OnEntityUnload` (IL=29)
+
+If not `EntityPlayerLocal`: `OcclusionManager.RemoveEntity`. Clear navigator path
+(`SetPath(null,0)`) and null `navigator`, `lookHelper`, `moveHelper`, `seeCache`;
+then base `Entity.OnEntityUnload`.
+
+**`World.RemoveEntity(id, reason)` (IL=16):** if entity exists: `MarkToUnload` +
+`unloadEntity(entity, reason)`; return entity (or null).
+
+**`NetPackageEntityRemove.ProcessPackage` (IL=24):** log if missing; always
+`RemoveEntity(entityId, reason)` (reason is u8 enum).
+
 ### 2.0 Parent chain: `OnUpdateEntity` (IL=457) then `OnUpdateLive` (IL=363)
 
 `EntityAlive.OnUpdateEntity` (before Live):
@@ -1125,8 +1137,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** Investigate pos set/clear; ClearInvestigatePosition alert
-  ticks (20-35)*20, zombie half.
+- **2026-08-07:** OnEntityUnload clear path helpers; RemoveEntity MarkToUnload;
+  EntityRemove Process; Investigate pos set/clear.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

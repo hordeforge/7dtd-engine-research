@@ -439,7 +439,14 @@ does **not** despawn anything: it clears `bIsChunkObserver`, `IsHordeZombie` and
 partyMemberCount)`; `gsScaling = FastLerp(1, max(1, totalCount/enemyActiveMax),
 partyLevel/60)`; `bonusLootSpawnCount` starts at `partySpawner.bonusLootEvery / 2`.
 
-`Tick` (413528) gates every spawn on `AIDirector::CanSpawn(1.9f)`: this is the 1.9x
+**`SeekTarget(ManagedZombie)` (IL=167):** clear dead zombie (false). Prefer
+current attack target if player and `IsPlayerATarget`; else keep `mz.player` if
+still a target. If no player: if not `IsPlayerAliveAndNear(pos, **60**)` →
+`Kill` and false; else true (wander). If player: if distSq to player &gt;
+**22500** (150 m) try `CalcSpawnPos` near player; if still not near **70** m or
+50% roll, `DecSpawnCount(1)` + `Kill`. Else true.
+
+`Tick` gates every spawn on `AIDirector::CanSpawn(1.9f)`: this is the 1.9x
 `MaxSpawnedZombies` blood-moon budget the stock serverconfig comment refers to. On
 each new spawn group it advances `spawnBaseDir` by +120 degrees and recomputes
 `CalcBestDir`, which is why stock waves come from rotating directions.
@@ -516,7 +523,8 @@ minute<=59.
 
 - **2026-08-07:** StartingWeight=1 DiminishingReturns=0.5 statics; CalcPartyLevel
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
-- **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
+- **2026-08-07:** SeekTarget 60/150/70 m kill gates + 50% DecSpawnCount; Scout
+  SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset
   cooldown 240 s; Flow/Evap damage packing cross-ref liquid.

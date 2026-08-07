@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SeekTarget kill gates and OnEntityUnload
+
+Done (V3.1.0 b14 IL):
+- SeekTarget: 60 m no-player kill; 150 m / 70 m repath; 50% DecSpawnCount kill.
+- OnEntityUnload: OcclusionManager + clear navigator/look/move/see.
+- RemoveEntity MarkToUnload+unloadEntity; EntityRemove Process always RemoveEntity.
+- BuffClass.canRun Requirements.IsValid.
+---
 ## 2026-08-07 — tier-C: BuffClass.FireEvent canRun and StartSequence
 
 Done (V3.1.0 b14 IL):
