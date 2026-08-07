@@ -703,8 +703,59 @@ The full static set (`.cctor`) adds the second stream pool
 `poolFloat`, `poolColor`, `poolByte`), the `poolCBLUpper24BitArrCache` /
 `poolCBLLower8BitArrCache` `List` caches, and a `DynamicObjectPool s_pool`.
 
+## StreamUtils (the binary wire/save primitives)
+
+`StreamUtils` is the static helper layer behind every
+`StreamUtils.Read*` / `Write` call in the wire and save layouts
+(`protocol-packages.md`, `save-region.md`, this file). Two layers:
+`BinaryReader`/`BinaryWriter` helpers (component-wise) and raw
+`Stream` / `byte[]` readers. V3.1.0 b14 IL:
+
+**Vectors and quaternions:** `ReadVector3` (IL=8) = 3 x `ReadSingle`;
+`ReadVector3i` (IL=8) = 3 x `ReadInt32`; `ReadQuaterion` (IL=10) = 4 x
+`ReadSingle` (the API misspelling is in the assembly); Vector2 / Vector2i
+follow the same pattern. The `Write(BinaryWriter, ...)` twins write the
+components in the same order, so every vector/quaternion field in a package
+body is plain little-endian components.
+
+**Color32 packing:** `ReadColor32` (IL=39) reads **one `u32`** and unpacks it
+RGBA byte order (`R = v >> 24`, `G = v >> 16`, `B = v >> 8`, `A = v`), each
+divided by 255 into a `Color`. `WriteColor32` (IL=34) packs
+`r*255 << 24 | g*255 << 16 | b*255 << 8 | a*255` and writes the `u32` - so a
+color on the wire is always 4 bytes with red in the high byte.
+
+**Null-flagged strings:** `ReadString` (IL=8) reads a `bool` first - `false`
+means **null**, `true` means a .NET length-prefixed string; `Write(BinaryWriter,
+String)` (IL=11) mirrors it. This is the "null-string" convention seen across
+package bodies (e.g. `ParticleEffect.soundName` normalizes `""` to null).
+
+**Guid:** `ReadGuid` (IL=18) reads exactly 16 bytes into a span (a short read
+throws `EndOfStreamException: Failed to read 16 bytes for Guid`) and builds
+`new Guid(span)`; the writer emits the 16 raw bytes.
+
+**Varints:** `Read7BitEncodedInt` (IL=37) is the classic 7-bit varint (max 5
+bytes, `FormatException: Illegal encoding for 7 bit encoded int` past 35
+bits); `Write7BitEncodedInt` (IL=24) / `Write7BitEncodedSignedInt` (IL=70)
+and the signed reader are the encoders.
+
+**Raw integers:** `ReadInt32(Stream)` (IL=28) assembles four little-endian
+bytes; `ReadInt32(Byte[], ref offset)` (IL=56) and `ReadByte(Byte[], ref
+offset)` (IL=12) read from an in-memory buffer advancing the index;
+`Write(Stream, Int32)` (IL=31) / `Write(Byte[], Int32, ref offset)` (IL=67)
+write little-endian, and the `Int16`/`UInt16`/`Int64` variants follow.
+
+**Stream helpers:** `StreamCopy` (IL=42/48) copies a stream in chunks through
+a caller temp buffer (with optional exact-length and flush);
+`WriteStreamToFile` (IL=15/16) dumps a stream to a file (optional length),
+the dump path used for save/backup artifacts.
+
 ## Changelog
 
+- **2026-08-08:** StreamUtils primitives: ReadVector3/3i/Quaterion
+  component-wise LE; Color32 one-u32 RGBA packing (ReadColor32 IL=39,
+  WriteColor32 IL=34); null-flagged ReadString IL=8; ReadGuid 16-byte span +
+  EndOfStream; 7-bit varint pair; Read/Write Int32 LE + Byte[] ref-offset
+  variants; StreamCopy chunked copy + WriteStreamToFile.
 - **2026-08-08:** MemoryPools surface: MemoryPooledObject stack free list
   (Alloc IL=33 pop + Activator fallback + IMemoryPoolableObject.Reset,
   AllocSync/FreeSync Monitor locks, Cleanup IL=43, SetCapacity);
