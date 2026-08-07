@@ -90,7 +90,8 @@ delegates to `ChunkCluster.GetBlock` and returns `BlockValue.Air` when the
 `GetBlock(BlockValueRef)` (both IL=4) are the `IBlockAccess`
 `DefaultGetBlock` implementations. `World.GetBlockData(pos)` (IL=10) is a
 separate `Dictionary<Vector3i, object>` lookup (extra per-position data, not
-the voxel word). `WorldBiomes.GetBlockValueForName(name)` (IL=15) resolves an
+the voxel word), written by `World.AddBlockData` (IL=6, dict `Add`) and
+removed by `ClearBlockData` (IL=6, dict `Remove`). `WorldBiomes.GetBlockValueForName(name)` (IL=15) resolves an
 item/block by name via `ItemClass.GetItem` and throws
 `Block with name '...' not found!` on an empty result, else converts with
 `ToBlockValue`. The cluster hop: `ChunkCluster.GetBlock(x, y, z)` (IL=21)
