@@ -1222,8 +1222,24 @@ spawn-point index (or **-1** if none).
 **`World.CanSleeperSpawnAtPos` (IL=25):** resolve chunk; else false;
 `Chunk.CanSleeperSpawnAtPos(localX,Y,Z, checkBelow)`.
 
+**`Chunk.CanSleeperSpawnAtPos` (IL=36):** if `_checkBelow`, block at y-1 must
+`IsCollideMovement` (need floor). At (x,y,z): fail if `IsCollideMovement` **or**
+`shape.IsSolidSpace`; else true (air/non-solid sleeper cell).
+
 **`GetGameStageAround` (IL=3):**
 `GameStageDefinition.CalcGameStageAround(player)`.
+
+**`CalcGameStageAround` (IL=38):** `GetPlayersAround(pos, **100**)`; collect
+`gameStage` only for players sharing the same `prefab` instance as the anchor;
+`CalcPartyLevel(list)` (diminishing returns; empty list → 0).
+
+**`AddSpawnCount(groupName, min, max)` (IL=50):** if max == 0 return. Sample
+`RandomRange(min, max)` with fractional ceil (same pattern as loot
+`RandomSpawnCount`); if min &gt; 0 and result 0 force **1**; append
+`GroupCount{name, count}` when count &gt; 0.
+
+**`RemoveSpawnAvailable(index)` (IL=24):** linear search remove first matching
+spawn-point index from `spawnsAvailable`.
 
 ### D8.2b `OnTriggered` (IL=14)
 
@@ -1449,8 +1465,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** FindFathestSpawnFromPlayers max-min player dist; ResetSpawns
-  infestedTag/spawnMode 2; CanSleeperSpawnAtPos; SpawnPointIsHidden rays.
+- **2026-08-07:** Chunk.CanSleeperSpawnAtPos floor/solid; CalcGameStageAround 100 m
+  same-prefab; AddSpawnCount frac ceil; FindFathestSpawn; ResetSpawns.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

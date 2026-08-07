@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CanSleeperSpawn floor/solid and CalcGameStageAround
+
+Done (V3.1.0 b14 IL):
+- Chunk.CanSleeperSpawnAtPos: below must collide; cell not collide/solid.
+- CalcGameStageAround: players within 100 m same prefab; CalcPartyLevel.
+- AddSpawnCount: RandomRange min..max fractional ceil; min>0 forces at least 1.
+- RemoveSpawnAvailable: linear remove by index value.
+---
 ## 2026-08-07 — tier-C: FindFathestSpawn and ResetSpawnsAvailable
 
 Done (V3.1.0 b14 IL):
