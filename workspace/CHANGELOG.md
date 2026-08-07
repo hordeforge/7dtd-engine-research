@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: damageEntityLocal, ProcessDamage, EffectManager.GetValue
+
+Done (V3.1.0 b14 IL):
+- damageEntityLocal IL=484 DR build (armor, dismember, StunProne/Knee thresholds).
+- ProcessDamageResponse IL=86 net fan-out; ProcessDamageResponseLocal IL=903.
+- EffectManager.GetValue IL=372 stack; ItemValue.FireEvent IL=107 recursion.
+---
 ## 2026-08-07 — tier-C: GameTimer formula, ThreadManager drain, Astar merge 76
 
 Done (V3.1.0 b14 IL):

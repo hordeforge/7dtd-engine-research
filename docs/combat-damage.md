@@ -53,8 +53,67 @@ Sources that build a `DamageSource`: melee/ranged item actions
 7. If not remote world: emit `NetPackageDamageEntity.Setup(entityId, dr)` for
    observers (wire §6.11).
 
-Armor mitigation / equipment slot damage / health subtract live inside
-`damageEntityLocal` + response path ([entity-stats.md](entity-stats.md)).
+### 2.1 `damageEntityLocal` (IL=484) builds `DamageResponse`
+
+Live IL order (V3.1.0 b14):
+
+1. Init `DamageResponse`: Source, Strength, Critical, HitDirection default 5,
+   MovementState, Random float, ImpulseScale; body part + ArmorSlot +
+   ArmorSlotGroup from `DamageSource`.
+2. If source has direction: set HitDirection via
+   `Utils.Get4HitDirectionAsInt(dir, look)`.
+3. If `AffectedByArmor`: `Equipment.CalcDamage` fills Strength and ArmorDamage.
+4. `GetDamageFraction(Strength)` vs Health; Fatal when Strength >= Health.
+5. Head-part (`HitBodyPart & 2`) and damage-fraction thresholds feed
+   dismember chance (source-dependent 0.2 / max(0.5,0.3) / 0.12 / max(0.5,0.5)
+   bands in IL).
+6. If `canDisintegrate` and fraction high enough: `Disintegrate()`.
+7. `CheckDismember(ref dr, chance)`.
+8. Stun accumulators: body-part mask `207` adds to `StunProne`; leg hits add
+   Strength * (crit?2:1) to `StunKnee` when `CanStun` and walkType != 21 and
+   not already prone-stun (2).
+9. Prone knockdown if `GetDamageFraction(StunProne) >= KnockdownProneDamageThreshold`
+   (threshold > 0): Stun=2, duration random in `KnockdownProneStunDuration`.
+10. Else kneel if fraction(StunKnee) >= `KnockdownKneelDamageThreshold`:
+    Stun=1, duration from `KnockdownKneelStunDuration`.
+11. Effective impact score `Strength + ArmorDamage/2`; PainHit / remaining
+    health gates; Fatal if post-health would be <= 0; may `AddHealth(-Strength)`
+    and `FireEvent` on the local apply path.
+
+### 2.2 `ProcessDamageResponse` (IL=86) net fan-out
+
+1. If `time - lastAliveTime < 1`: return (1 s post-spawn immunity).
+2. Base `Entity.ProcessDamageResponse` then `ProcessDamageResponseLocal`.
+3. If world not remote:
+   - Local attacker + remote player victim: `SendPacketToTrackedPlayers`
+     (`NetPackageDamageEntity`).
+   - Else if `DamageSource.BuffClass` set: same tracked-players send.
+   - Else: `SendPacketToTrackedPlayersAndTrackedEntity` (includes attacker).
+
+### 2.3 `ProcessDamageResponseLocal` (IL=903) apply side effects
+
+High-signal gates from live IL:
+
+- Null emodel: return.
+- Local primary-player bonus UI: BonusDamageType 1 = sneak notify, 2 = mult notify.
+- Attacker `SetDamagedTarget`; sleeper noise wake + `ConditionalTriggerSleeperWakeUp`.
+- Armor wear: split `ArmorDamage` across `Equipment.GetArmor()` pieces
+  (`UseTimes += EffectManager.GetValue(PassiveEffects=7, ...) * ItemDegradationModifier`).
+- `ApplyLocalBodyDamage`; store `lastDamageResponse`.
+- Dismember resist passives 175/176 can zero dismember; else impact force +
+  `ExecuteDismember`.
+- Enemy headshot-only / headshot-finisher: non-head hits can zero Strength/Fatal
+  when `IsHeadshotOnly` / `IsHeadshotFinisher` and no `nohead` tag.
+- Stun type 2 (prone): ragdoll if crit bashing or rand < 0.6; else `BeginStun`;
+  duration full or *0.5 if already stunned differently.
+- Stun type 1 (kneel): ragdoll upgrade on crit or rand < 0.25; else BeginStun.
+- PainHit: accumulate `painResistPercent` (cap 3) from
+  `EntityClass.PainResistPerHit` (+ low-health variant); drive
+  `StartAnimationHit` with resist-scaled intensity.
+- Health subtract (god mode skip); wounded FireEvent type 7; on death set
+  `entityThatKilledMe` and `Entity.Kill`; electrocute if damage type 10;
+  revenge target + `EAIManager.DamagedByEntity`; FireEvent 106 on player attacker
+  and victim.
 
 ```mermaid
 stateDiagram-v2
@@ -65,7 +124,7 @@ stateDiagram-v2
   Resolve --> NoArmor: not affected by armor
   Armor --> Modifiers: buff / passive-effect damage modifiers (buffs.md)
   NoArmor --> Modifiers
-  Modifiers --> ApplyHealth: subtract final damage from Health (AddHealth negative)
+  Modifiers --> ApplyHealth: damageEntityLocal builds DR; health subtract in response
   ApplyHealth --> Response: ProcessDamageResponse (pain, crit, dismember, stun)
   Response --> Survives: Health > 0
   Response --> Dies: Health <= 0
@@ -73,10 +132,6 @@ stateDiagram-v2
   Dies --> Death
   Death --> [*]
 ```
-
-`ProcessDamageResponseLocal` (the larger response) applies the on-hit buffs, pain
-hit reaction, dismemberment, and stun; the authoritative health change stays on the
-server. Critical hits and dismemberment scale the effect.
 
 ---
 
@@ -202,6 +257,10 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-07:** damageEntityLocal IL=484 DR build (armor, dismember chance,
+  StunProne/StunKnee thresholds, Fatal); ProcessDamageResponse net fan-out;
+  ProcessDamageResponseLocal IL=903 (armor wear, headshot gates, stun/pain,
+  kill/revenge/FireEvent).
 - **2026-08-07:** OnDeathUpdate corpse HP; AwardKill/AddScoreServer; SetDead;
   OnEntityDeath / dropItemOnDeath.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,

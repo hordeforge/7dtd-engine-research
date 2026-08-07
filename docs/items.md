@@ -404,14 +404,13 @@ is exactly the `EntityBuffs.AddBuff` entry point in
 so observers see the buff. Consumables (`ItemActionEat`) apply their buffs the
 same way on completion.
 
-**MinEvents.** `ItemValue.FireEvent(MinEventTypes, MinEventParams)` routes to the
-item's `ItemClass.Effects` (a `MinEffectController`) and calls its `FireEvent`,
-which runs the XML-declared MinEvent actions (stat mods, particle/sound triggers,
-further buffs). The eat/attack paths populate `EntityAlive.MinEventContext` (the
-`MinEventParams`) with the acting `ItemValue` before firing, so the MinEvent
-actions see which item triggered them. This is the item side of the MinEvent
-framework; the controller, trigger vocabulary, and action contract are covered in
-[`minevents.md`](minevents.md).
+**MinEvents.** `ItemValue.FireEvent` (**IL=107**): base `ItemClass.Effects` (unless
+the class is an `ItemClassModifier`), then magazine ammo `FireEvent` for the
+selected ammo type on attack actions, then quality `Modifications[]` and
+`CosmeticMods[]` recursion. Eat/attack paths populate
+`EntityAlive.MinEventContext` with the acting `ItemValue` first. Controller and
+trigger vocabulary: [`minevents.md`](minevents.md) (including
+`EffectManager.GetValue` stack order in §7.0).
 
 ```mermaid
 flowchart LR
@@ -646,6 +645,7 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** ItemValue.FireEvent IL=107 ammo + mod + cosmetic recursion.
 - **2026-08-07:** InventoryTransaction.Apply IL=126 + TransactionRequestServer
   force-unlock path; GetDamageEntity/Block; Eat/fireShot/melee re-pins.
 - **2026-08-06:** ItemClass Stacknumber default 500 and get_MaxCount's

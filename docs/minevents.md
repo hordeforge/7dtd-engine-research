@@ -318,10 +318,46 @@ the `EntityBuffs` runtime these actions drive.
 
 **Items** are sources through `ItemClass.Effects` and, for equipped or held
 items, are fired by `Inventory` / `Equipment` inside the entity fan-out.
-`ItemValue.FireEvent` also recurses into ammo and quality modifiers, so a mod's
-own triggered effects fire alongside the base item's. Item action triggers
-(`onSelfPrimaryActionStart`, `onReloadStop`, etc) are raised by the item-action
-code with the item bound in `params.ItemValue`.
+`ItemValue.FireEvent` (**IL=107**) order:
+
+1. If `ItemClass` is not an `ItemClassModifier` and has `Effects`: fire controller.
+2. Walk `ItemClass.Actions`; for `ItemActionAttack` with magazine names, fire
+   selected ammo `ItemValue.FireEvent` then ammo `ItemClass.FireEvent`.
+3. If `HasQuality`: recurse `Modifications[]` then `CosmeticMods[]` via
+   `ItemValue.FireEvent` on each non-null entry.
+
+Item action triggers (`onSelfPrimaryActionStart`, `onReloadStop`, etc) are raised
+by the item-action code with the item bound in `params.ItemValue`.
+
+### 7.0 `EffectManager.GetValue` (IL=372) passive stack
+
+Signature (bool flags control which layers run):
+`GetValue(PassiveEffects, ItemValue original, float originalValue, EntityAlive,
+Recipe, FastTags, calcEquipment, calcHoldingItem, calcProgression, calcBuffs,
+calcChallenges, craftingTier, useMods, useDurability)`.
+
+Live accumulation order (starts `_perc = 1`, mutates value/perc by ref):
+
+1. Copy entity `MinEventContext` into working params when entity present.
+2. Recipe `ModifyValue` early if recipe arg set.
+3. Original item `ItemValue.ModifyValue` (with durability flag path).
+4. EntityClass `MinEffectController.ModifyValue` when game started and class found.
+5. Second item `ModifyValue` pass with `useMods`.
+6. Attached vehicle item value `ModifyValue` when entity is in a vehicle.
+7. Holding item: skip if holding is a mod item; else `Inventory.ModifyValue`.
+8. Equipment `ModifyValue` when `calcEquipment`.
+9. Progression / ChallengeJournal when their flags are set.
+10. Recipe again (tier-aware) if still present.
+11. **Client-only** workstation tool-grid slot cache (frame + entity keyed):
+    each non-empty tool `ItemValue.ModifyValue` (`EntityPlayerLocal` only).
+12. Buffs `EntityBuffs.ModifyValue` when `calcBuffs`.
+13. Quality mods: when original has Quality > 0 and `useMods`, each
+    `ItemClassModifier` in `Modifications[]` applies parent item Effects via
+    `MinEffectController.ModifyValue` with quality as seed and passive name tag.
+
+Final return is the combined modified scalar (value * perc pattern inside
+`ModifyValue` leaves). Dedicated combat/loot paths typically set equipment +
+holding + progression + buffs; workstation tools do not affect dedicated.
 
 **Blocks** own no controller. Block interactions are triggers raised on the
 acting entity (`onSelfRepairBlock`, `onSelfPlaceBlock`, `onSelfUpgradedBlock`,
@@ -465,6 +501,9 @@ side that raises the item and reload triggers.
 **Leaf catalog:** every instance is enumerated in [`inventories/minevent-actions.md`](inventories/minevent-actions.md) (all 71 triggered-effect leaves).
 
 ## Changelog
+
+- **2026-08-07:** EffectManager.GetValue IL=372 stack order; ItemValue.FireEvent
+  IL=107 ammo/mod recursion; MinEffectController/Group FireEvent IL sizes.
 
 - **2026-08-07:** FireEvent IL=57 fan-out includes equipment + buffs; §7.1 action
   leaves (CallGameEvent/AddHealth/Ragdoll/progression/ModifyStat/etc).
