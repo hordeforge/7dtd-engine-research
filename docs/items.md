@@ -340,6 +340,9 @@ EntityIncomingDamageModifier` for client-side ones.
 `calculateHarvestToolDamageBonus(toolBonuses, harvestItems)` (IL=43) returns
 the matching `Bonuses.Damage` for the harvest drop list's `toolCategory`, or 1
 when no category matches.
+`EntityPlayer.GetBlockDamageScale(isTerrain)` (IL=6) is the global damage
+pick: `isTerrain ? ItemActionAttack.TerrainDamagePercent :
+ItemActionAttack.BlockDamagePercent`.
 | `HandleDegradation` / `HandleItemBreak` | durability (§7) |
 | `getBuffActions` / `ExecuteBuffActions` | apply buffs to a target (§8) |
 | `ItemActionEffects` | fire visual/audio effects and MinEvents (base no-op; mostly client) |
