@@ -275,6 +275,38 @@ return max(1, floor(EffectManager.GetValue(passive 157, base) * GlobalGameStageM
 Passive **157** is the game-stage EffectManager hook; both biome and no-biome
 paths multiply by `GlobalGameStageModifier` after the effect.
 
+**`get_unModifiedGameStage` (IL=45)** is the raw stage before the biome/quest
+terms and the global modifier:
+
+```text
+daysLived = Clamp((worldTime - gameStageBornAtWorldTime) / 24000, 0, Level)
+base      = (Level + daysLived) * GameStageDefinition.DifficultyBonus
+return FloorToInt(EffectManager.GetValue(passive 157 GameStage, base, ...))
+```
+
+No quest/biome terms, no `GlobalGameStageModifier`, and no min-1 clamp (a fresh
+player in an empty biome can read stage below 1, where `get_gameStage` floors at
+1 via `Utils.FastMax`).
+
+**`GetTraderStage(tier)` (IL=46)** scales quest-tier trader stock:
+
+```text
+idx  = Max(0, tier - 1)
+mod  = TraderManager.QuestTierMod[Min(idx, QuestTierMod.Length - 1)]
+base = Level * (1 + mod)
+return FastMax(1, Floor(EffectManager.GetValue(passive 158 TraderStage, base, ...)
+                        * GlobalTraderStageModifier))
+```
+
+`TraderManager.QuestTierMod` is a static `Single[]` with the tier index clamped
+to the table length; `GlobalTraderStageModifier` is the trader twin of
+`GlobalGameStageModifier`.
+
+**`get_HighestPartyGameStage` (IL=10):** with a party,
+`Party.get_HighestGameStage` (IL=26) returns the max over `Party.MemberList` of
+each member's `get_gameStage` (0 for an empty party); without a party, the
+player's own `get_gameStage`.
+
 ## Related docs
 
 | Doc | Role |
