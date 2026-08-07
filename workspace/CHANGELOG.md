@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: CreateModifierData + spawn entity action
+
+Done (V3.1.0 b14 IL):
+- items.md 4.1: ItemAction.CreateModifierData IL=4 factory pattern.
+- ItemActionSpawnEntity.Spawn IL=61: headPosition + qrotation*
+  entityOffset, EntityFactory.CreateEntity + SpawnerSource 2 +
+  SpawnEntityInWorld, spawned EntityAlive inherits the holder's
+  attack target (600).
 ## 2026-08-08 - tier-C: CreateModifierData factory
 
 Done (V3.1.0 b14 IL):
