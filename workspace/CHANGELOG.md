@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: world bounds consumers
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 1: World.IsPositionInBounds (IL=66) BoundsInt from
+  GetWorldExtent, Navezgane fixed +-2900, non-playtesting 90-block inset;
+  ClampToValidWorldPosForMap (IL=28) extent clamp; IsPositionWithinPOI (IL=15)
+  decorator prefab probe.
+
 ## 2026-08-08 - tier-C: NavObjectManager leaves
 
 Done (V3.1.0 b14 IL):
