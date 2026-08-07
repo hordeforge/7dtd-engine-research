@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: InitCommandLine + pref collisions
+
+Done (V3.1.0 b14 IL):
+- GameStartupHelper.InitCommandLine IL=85: version banner, PrintSystemInfo,
+  LaunchPrefs start/end, parsedGamePrefs, ParseCommandLine.
+- GameEntrypoint.HasPrefCollisions IL=53: LaunchPref/GamePref name collision
+  abort.
 ## 2026-08-08 — tier-C: GameEntrypoint.FirstFrameInit
 
 Done (V3.1.0 b14 IL):

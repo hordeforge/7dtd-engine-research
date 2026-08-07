@@ -17,9 +17,14 @@ shutdown.
 ## 1. Boot sequence (state machine)
 
 **`GameEntrypoint.FirstFrameInit()` (IL=65)** runs before `StartGame`:
-cursor off, main-thread ref, `PlatformOptimizations.Init`; `HasPrefCollisions()`
-(abort on collision); `GamePrefs.InitPropertyDeclarations()` and
-`GameStartupHelper.InitCommandLine()` (abort on failure); `RunAutomation`
+cursor off, main-thread ref, `PlatformOptimizations.Init`;
+`HasPrefCollisions()` (IL=53: any `EnumGamePrefs` name that also exists as a
+`LaunchPref` → "Name collision between LaunchPref ... and GamePref ..." error
++ abort); `GamePrefs.InitPropertyDeclarations()` and
+`GameStartupHelper.InitCommandLine()` (IL=85: version banner +
+`PrintSystemInfo` + UTC-offset log, `Utils.InitStatic`, `LaunchPrefs.InitStart`,
+`parsedGamePrefs = new`, `ParseCommandLine(args)`, `LaunchPrefs.InitEnd`;
+abort on failure); `RunAutomation`
 launch pref → `AutomationRunner.InitialiseLogging`; `UserDataFolder` →
 `GameIO.InitializeUserDataPaths`; `PlatformApplicationManager.Init` /
 `PlatformManager.Init` (abort on failure); `Services.ServiceProvider.Init`
