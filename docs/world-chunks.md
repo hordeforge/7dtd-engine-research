@@ -584,6 +584,13 @@ from the `ChunkBlockChannel` storage (see
 (IL=23) returns `WaterValue.Empty` for `y >= 256` or a missing chunk, else
 resolves the chunk and delegates through `toBlockXZ`.
 
+**`Chunk.GetBlock(x, y, z)` (IL=100)** is the local block read: when
+`IsInternalBlocksCulled` and the cell `isInside` a culled POI interior, it
+returns the cached `bvPOIFiller` (lazily resolved from
+`Constants.cPOIFillerBlock` by name on first use) - the placeholder that
+reads as the "inside an un-entered POI" block; otherwise it reads the cell
+from `m_BlockLayers[y >> 2]` (the `ChunkBlockLayer` storage above).
+
 **`Chunk.recalcIndexedBlocks()` (IL=26)** clears `IndexedBlocks` and rebuilds
 it from every layer (`ChunkBlockLayer.AddIndexedBlocks` per layer, 64 of
 them). `saveBlockIds()` (IL=53) marks every in-chunk block id used in
@@ -866,6 +873,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-08:** Chunk.GetBlock IL=100: POI-filler culling (IsInternalBlocksCulled + isInside -> cached bvPOIFiller from cPOIFillerBlock), else m_BlockLayers[y>>2] read.
 - **2026-08-08:** Water reads: Chunk.GetWater IL=8 FromRawData(chnWater);
   ChunkCluster.GetWater IL=23 y>=256/missing-chunk Empty + toBlockXZ
   delegate.
