@@ -1291,7 +1291,7 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageTeleportPlayer` | 56 | pos f32x3, rot f32x3, `onlyIfNotFlying` | Local player `TeleportToPosition` |
 | `NetPackageEntityAttach` | 21 | `attachType:u8`, `riderId:i32`, `vehicleId:i32`, `slot:i16` | Process IL=104; `AttachType`: 0 AttachServer, 1 AttachClient, 2 DetachServer, 3 DetachClient (see §6.21.1) |
 | `NetPackageEntityRagdoll` | 59 | entityId, flags, duration, bodyPart, forceVec, forceWorldPos, hipPos, mode/state | Process IL=56: `EModelBase.DoRagdoll` / `SetRagdollState` |
-| `NetPackageEntityAddVelocity` | 12 | entityId, addVelocity Vector3 | Process IL=11: `IGameManager.AddVelocityToEntityServer` |
+| `NetPackageEntityAddVelocity` | 12 | entityId, addVelocity Vector3 | Process IL=11: `IGameManager.AddVelocityToEntityServer` (`Entity.AddVelocity` IL=10: `motion += vel`, `SetAirBorne(true)`) |
 | `NetPackageEntitySpeeds` | 17 | movementState, speedForward, speedStrafe | Process IL=37: if remote, `NetEntityDistribution.SendPacketToTrackedPlayers` |
 | `NetPackageEntityStealth` | 12 | id, data | Process IL=92: server path + `EntityAlive.set_Crouching` |
 | `NetPackageEntityAnimationData` | 29 | animationParameterData | Process IL=64: server rebroadcast + `AvatarController.SetAnimParameters` |

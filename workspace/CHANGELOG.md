@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: Entity.AddVelocity
+
+Done (V3.1.0 b14 IL):
+- Entity.AddVelocity IL=10: motion += vel + SetAirBorne(true); noted on the
+  NetPackageEntityAddVelocity row.
 ## 2026-08-08 — tier-C: SeekYaw turning helper
 
 Done (V3.1.0 b14 IL):
