@@ -426,6 +426,17 @@ touches in passing:
   compares the player's faction quest tier before/after a completion and calls
   `GiveRewards` (a loop over `BaseReward.GiveReward`) only when the tier
   actually rose, making it the one-time tier-up bonus payout.
+- **`QuestJournal` leaves:** `AddQuestFactionPoint(id, difficultyTier)`
+  (IL=34) no-ops on tier 0, else adds the tier to `GlobalFactionPoints` and to
+  the per-faction `QuestFactionPoints[id]` map (the journal field
+  `EntityTrader.GetQuestFactionPoints` reads, [npc-dialog.md](npc-dialog.md)
+  §5). `GetQuestFactionMax(id, tier)` (IL=20) is `QuestsPerTier * (1 + 2 + ...
+  + tier)` (the tier-sum cap). `HasCraftingQuest` (IL=29) is an active quest
+  whose `QuestTags` intersects `QuestEventManager.craftingTag`;
+  `HasActiveQuestByQuestCode(code)` (IL=30) is a quest with that `QuestCode` in
+  `InProgress` state. `GetObjectiveForQuest<T>(questCode)` (IL=43) finds the
+  active quest's objective whose `Phase` matches the current quest phase and is
+  the requested type, else the default value.
 - **`SharedQuestEntry`**: one party-shared quest offer in the recipient's
   `QuestJournal` (`QuestCode`, `QuestID`, POI name/position/size, `ReturnPos`,
   `SharedByPlayerID`, `QuestGiverID`, plus a `Clone` for journal copies);
