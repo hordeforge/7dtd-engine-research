@@ -64,6 +64,16 @@ resolves the chunk and returns `chunk.GetBiomeIntensity(toBlockXZ(x),
 toBlockXZ(z))` once the chunk exists and is not `NeedsLightCalculation`, else
 `BiomeIntensity.Default` with false.
 
+World-level bounds consumers: `World.IsPositionInBounds(pos)` (IL=66) builds a
+`BoundsInt` from `GetWorldExtent` and answers `Contains(round(pos))`, with two
+special cases: the shipped Navezgane map uses the fixed **±2900** block bounds
+(`GamePrefs.GetString(33) == "Navezgane"`), and non-playtesting worlds inset
+the extent by **90** blocks on x/z before testing. `ClampToValidWorldPosForMap`
+(IL=28) clamps a `Vector2` into the extent's x/z and returns it as a `Vector3`.
+`World.IsPositionWithinPOI(pos, offset)` (IL=15) is
+`GetDynamicPrefabDecorator().GetPrefabFromWorldPosInsideWithOffset(x, z,
+offset) != null`.
+
 ---
 
 ## 2. Provider selection
