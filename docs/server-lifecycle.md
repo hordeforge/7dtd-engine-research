@@ -153,9 +153,26 @@ platform/crossplatform tickets into `ClientInfo`; `tryAuthorizer` walks sorted
 player / spawn-point list / biome-aware); build ECD from PDF; create entity +
 `ToPlayer`; send player id / spawn packages (detail in join sequence above).
 
-**`PlayerSpawnedInWorld` (IL=127):** mark entity alive; multiplayer spawn message;
-server: vehicle/drone waypoint updates + following drones; fire
-`ModEvents.PlayerSpawnedInWorld` + `OnClientSpawned`.
+**`PlayerSpawnedInWorld(cInfo, respawnReason, pos, entityId)` (IL=127):**
+
+1. Guards: `entityId == -1`, entity missing from `World.Entities`, or not an
+   `EntityPlayer` → return.
+2. If `respawnReason == RespawnType.Died` and `isEntityRemote` → `SetAlive()`.
+3. If `respawnReason` is `EnterMultiplayer`/`JoinMultiplayer` →
+   `DisplayGameMessage(EnumGameMessages.JoinedGame, entityId, -1, true)`
+   (join broadcast, see [chat.md](chat.md)).
+4. `PlayerInteractions.PlayerSpawnedInMultiplayerServer(persistentPlayers,
+   entityId, respawnReason)`.
+5. Waypoint refresh when `respawnReason ∈ {NewGame, LoadedGame,
+   EnterMultiplayer, JoinMultiplayer}` (not on `Died`/`Teleport`/`Unknown`);
+   server only → `VehicleManager.UpdateVehicleWaypointsForPlayer(entityId)` +
+   `DroneManager.UpdateWaypointsForPlayer(entityId)` +
+   `DroneManager.SpawnFollowingDronesForPLayer(entityId, world)`.
+6. `ModEvents.PlayerSpawnedInWorld` with
+   `SPlayerSpawnedInWorldData(cInfo, isLocalPlayer = player is EntityPlayerLocal,
+   entityId, respawnReason, pos)`.
+7. Server: `OnClientSpawned?.Invoke(cInfo)`; log
+   `PlayerSpawnedInWorld (reason: {0}, position: {2}): {1}`.
 
 **`GameManager.SaveWorld` (IL=7):** if world non-null `World.Save()`.
 

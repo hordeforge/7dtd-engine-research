@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: PlayerSpawnedInWorld full body
+
+Done (V3.1.0 b14 IL):
+- GameManager.PlayerSpawnedInWorld IL=127: id/entity/type guards; Died+remote
+  SetAlive; Enter/JoinMultiplayer JoinedGame message; PlayerInteractions;
+  waypoint refresh on NewGame/Loaded/Enter/Join (not Died/Teleport/Unknown);
+  ModEvents.PlayerSpawnedInWorld + OnClientSpawned; log.
+---
 ## 2026-08-08 — tier-C: base Entity config copy
 
 Done (V3.1.0 b14 IL):

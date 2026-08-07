@@ -295,6 +295,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | SetupEntityCreationData ECD builder + CreateEntity wrapper | spawning.md §7 |
 | ChunkManager.AddChunkObserver IL=15 + GetPlayerDataFromEntityID IL=10 | world-chunks §4.0 / spawning §6.1 |
 | Entity.CopyPropertiesFromEntityClass IL=238 custom commands + EntityPlayerLocal | entity-ai.md D8.6a |
+| PlayerSpawnedInWorld IL=127 full body (Died SetAlive, JoinedGame msg, waypoints) | server-lifecycle.md §3 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
