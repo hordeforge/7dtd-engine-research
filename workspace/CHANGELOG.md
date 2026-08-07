@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Quest leaves
+
+Done (V3.1.0 b14 IL):
+- quests-challenges.md 2: SetupQuestCode (IL=48) hash of time_ID_owner_giver;
+  SetupTags (IL=41) objective OwnerQuest/vars/tag + NeedsNPCSetPosition OR;
+  get_HasPosition (IL=10); GetActionIndex/GetObjectiveIndex (IL=23); 
+  get_IsShareable (IL=18) gates.
+
 ## 2026-08-08 - tier-C: GameUtils classification leaves
 
 Done (V3.1.0 b14 IL):
