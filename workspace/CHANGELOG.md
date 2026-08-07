@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: trader areas (lookup + wire)
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md: DynamicPrefabDecorator.GetTraderAtPosition IL=68
+  (TraderBinarySearch + padded X/Z containment); TraderArea
+  IsWithinProtectArea IL=47 + GetProtectPadding IL=22.
+- protocol-packages.md: NetPackageWorldAreas wire (u8 version 1 +
+  i16 count + TraderArea.Write each); TraderArea.Write IL=111
+  layout + GetReadWriteSize 21+count*6; ProcessPackage ->
+  SetWorldAreas.
 ## 2026-08-08 - tier-C: trader lookup + TraderArea leaves
 
 Done (V3.1.0 b14 IL):
