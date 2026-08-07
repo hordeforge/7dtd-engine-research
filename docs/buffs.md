@@ -245,4 +245,5 @@ the V3.1.0 addition, which took the method from IL 126 to IL 130.
 **Readers:** `EntityBuffs.GetCustomVar(name)` (IL=10) =
 `CVars.TryGetValue` (case-insensitive dict) else **0**; `GetCustomVarId(name)`
 (IL=3) = `name.GetHashCode()` (cvar ids are .NET string hash codes, like
-`EntityClass.FromString`).
+`EntityClass.FromString`). `AddCustomVar(name, value)` (IL=8) =
+`SetCustomVar(name, value, netSync=true, Set, forceSend=false)`.

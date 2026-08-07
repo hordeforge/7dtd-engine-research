@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: AddCustomVar
+
+Done (V3.1.0 b14 IL):
+- EntityBuffs.AddCustomVar IL=8 = SetCustomVar(netSync, Set, no force).
 ## 2026-08-08 — tier-C: cvar readers
 
 Done (V3.1.0 b14 IL):
