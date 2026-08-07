@@ -2387,6 +2387,23 @@ nothing was parsed), `maskList` is `Clear()`-ed, and the whole multi-tag path
 runs under `Monitor` on `maskList` — the static buffer is the lock, so
 concurrent `Parse` calls serialize on a single shared scratch list.
 
+**`GetBit(tag)` (IL=56) / `GetTag(tag)` (IL=4) / `GetTagNames()` (IL=78):** the
+string-to-bit and bit-to-string halves of the model. `GetBit` trims the name,
+then consults a static `CaseInsensitiveStringDictionary<string,int> tags`; a
+miss assigns a fresh bit index via `Interlocked.Increment(next)` (process-wide
+monotonic, so the table grows lazily on first use of each name) and registers
+the pair in both `tags` and the reverse `bitTags` (`Dictionary<int,string>`).
+When `(bit >> 6) + 1` exceeds the cached `allInternal.bits` length, `allInternal`
+is rebuilt as a `ulong[]` filled with all-ones words (a "every known tag" mask)
+and the old cached instance is replaced. `GetTag` is a 4-IL wrapper:
+`new FastTags(GetBit(tag))`, i.e. the single-tag `Parse` shortcut. `GetTagNames`
+serializes a mask back to a `List<string>`: a `singleBit` instance resolves
+through `bitTags` directly; a multi-word instance walks each 64-bit word and
+collects the names of every set bit (skipping bits absent from `bitTags`).
+The dictionary writes in `GetBit` are not individually locked; concurrent
+`Parse` calls serialize on the `maskList` monitor, but the `GetTag` single-tag
+path reaches `GetBit` without that lock.
+
 ### D8.6c Entity init chain (`EntityAlive.Init`, IL=13)
 
 `Init(class, assets, eModelAssets)`: base `Entity.Init`, then `InitStats()`,
@@ -2774,6 +2791,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** FastTags bit model: Parse (IL=90) comma split + bucket words;
+  GetBit (IL=56) lazy Interlocked bit assignment + allInternal grow; GetTag
+  (IL=4) wrapper; GetTagNames (IL=78) mask-to-names serialization.
 - **2026-08-07:** FastTags.Parse (IL=90) bitmask model: single-tag shortcut,
   comma split, bit>>6 bucket words, static maskList scratch under Monitor.
 - **2026-08-07:** AddEnemyToWorld sleeper spawn; ValuePercentUI stealth bar formula.

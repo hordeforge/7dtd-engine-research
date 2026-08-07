@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: FastTags bit model
+
+Done (V3.1.0 b14 IL):
+- FastTags<T> bit model completed in entity-ai.md D8.6b: GetBit (IL=56)
+  trims + looks up static tags dict, miss assigns Interlocked.Increment(next)
+  and registers tags/bitTags pairs, rebuilds allInternal all-ones mask when
+  (bit>>6)+1 exceeds it; GetTag (IL=4) wraps GetBit into single-bit FastTags;
+  GetTagNames (IL=78) resolves singleBit or walks 64-bit words collecting
+  set-bit names. Note: GetBit dict writes unsynchronized outside Parse lock.
+
 ## 2026-08-08 - tier-C: FastTags.Parse
 
 Done (V3.1.0 b14 IL):
