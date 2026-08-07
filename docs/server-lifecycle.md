@@ -433,7 +433,9 @@ managers.
 
 1. `entityAsyncManager.CompletePendingCreateTasks()`; `ModEvents.WorldShuttingDown`
    fires first; `PathAbstractions.CacheEnabled = false`; `OnClientSpawned = null`;
-   `PlayerInputRecordingSystem.AutoSave()`; `GameStateManager.EndGame()`.
+   `PlayerInputRecordingSystem.AutoSave()`; `GameStateManager.EndGame()`
+   (IL=13: `GameStats.Set(GameState, Loading)`, `bDirty`, `bGameStarted` and
+   `bServer` cleared).
 2. **Server save block** (server + `bSavingActive` + not edit mode):
    `VehicleManager.RemoveAllVehiclesFromMap()`; `DroneManager.RemoveAllDronesFromMap()`;
    `QuestEventManager.HandleAllPlayersDisconnect()` (treasure quests removed);

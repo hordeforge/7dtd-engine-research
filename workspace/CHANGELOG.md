@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GameStateManager.EndGame
+
+Done (V3.1.0 b14 IL):
+- EndGame IL=13: GameState Loading, bDirty, bGameStarted/bServer cleared.
 ## 2026-08-08 — tier-C: SaveAndCleanupWorld ordered chain
 
 Done (V3.1.0 b14 IL):
