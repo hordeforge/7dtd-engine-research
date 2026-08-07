@@ -585,7 +585,9 @@ run or fire on the dedicated server.
   particle (brightness from `GetLightBrightness`, white tint) via
   `SpawnParticleEffectClient`; on the server call
   `AIDirectorAirDropComponent.SetSupplyCratePosition(entityId,
-  worldToBlockPos(pos))` then `RefreshCrates(-1)` (updates the crate nav
+  worldToBlockPos(pos))` (IL=30: updates the matching `SupplyCrateCache`
+  entry's `blockPos`, warning if the crate id is not cached) then
+  `RefreshCrates(-1)` (updates the crate nav
   markers, [map-objects.md](map-objects.md)). `wasOnGround = onGround`.
 - **`AIAirDrop.Tick(dt)` (IL=193):** the flight-path pump. First call builds
   `flightPaths` (`CreateFlightPaths()`, logs "Computed flight paths for {N}

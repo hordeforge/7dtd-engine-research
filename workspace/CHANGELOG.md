@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: SetSupplyCratePosition cache
+
+Done (V3.1.0 b14 IL):
+- AIDirectorAirDropComponent.SetSupplyCratePosition IL=30: SupplyCrateCache
+  blockPos update by entityId, warning when missing.
 ## 2026-08-08 — tier-C: EnumStat mapping
 
 Done (V3.1.0 b14 IL):
