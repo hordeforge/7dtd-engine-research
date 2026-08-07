@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: game stage family
+
+Done (V3.1.0 b14 IL):
+- EntityPlayer game-stage family completed in progression.md 5:
+  get_unModifiedGameStage (IL=45) = Floor(GetValue(passive 157, (Level +
+  daysLived) * GameStageDefinition.DifficultyBonus)) with no biome/quest terms,
+  no GlobalGameStageModifier and no min-1 clamp; GetTraderStage(tier) (IL=46) =
+  FastMax(1, Floor(GetValue(passive 158, Level * (1 + TraderManager.QuestTierMod[
+  clamp(tier-1)])) * GlobalTraderStageModifier)); get_HighestPartyGameStage
+  (IL=10) = Party.get_HighestGameStage (IL=26), max over MemberList of member
+  get_gameStage (0 for empty party), else own get_gameStage.
+
 ## 2026-08-08 - tier-C: BlockPlaceholderMap.Replace
 
 Done (V3.1.0 b14 IL):
