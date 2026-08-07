@@ -359,6 +359,19 @@ fires, then the outcome branches on `d`:
 - **`d >= MaxDamage`:** call `OnBlockDestroyedBy`, whose `DestroyedResult` decides
   the fate.
 
+**Explosion destruction (`OnBlockDestroyedByExplosion`, V3.1.0 b14):** the
+base (IL=15) fires `ChunkCluster.InvokeOnBlockDamagedDelegates(bvRef, bv,
+MaxDamage, playerThatStartedExpl)` and returns `DestroyedResult 2`. The
+per-block overrides add the reactions: `BlockMine` (IL=14) rolls a **33%**
+chain-explosion chance (`BlockMine.explode`, result 3, else 1);
+`BlockModelTree` (IL=10) starts the tree fall (`startToFall(world, pos, bv,
+-1)`); `BlockTNT` (IL=22) runs the base then `BlockTNT.explode(world, ref,
+playerIdx, 0.3 + rand*0.5)` (the TNT fuse delay); `BlockTrapDoor` (IL=23)
+fires `Block.HandleTrigger(player, world, pos, bv)` when the exploder is a
+player (the trapdoor's wiring triggers) before the base;
+`BlockCompositeTileEntity` (IL=54) clears its feature modules through the
+normal destroy path.
+
 `Block/DestroyedResult` (exact enum): `None=0`, `Keep=1`, `Downgrade=2`,
 `Remove=3`. The base `OnBlockDestroyedBy` returns `Downgrade`.
 
@@ -631,6 +644,10 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** Explosion destruction hooks: base OnBlockDestroyedByExplosion
+  IL=15 (InvokeOnBlockDamagedDelegates MaxDamage + result 2); BlockMine 33%
+  chain, BlockModelTree startToFall, BlockTNT fuse delay 0.3+rand*0.5,
+  BlockTrapDoor HandleTrigger, composite TE clear.
 - **2026-08-08:** BlockValueRef wire (Read IL=23): u8 discriminant 0 None /
   1 Block (Vector3i) / 2 Prop (PropRef.Read), else ArgumentOutOfRange.
 - **2026-08-08:** BlockChangeInfo wire (Write IL=89 / Read IL=76):
