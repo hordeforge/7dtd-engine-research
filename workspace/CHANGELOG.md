@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: POI InitData + WaterFloodFill
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 4.1: <InitData>d__15 coroutine IL=774 (poiCols grid, water16x16Chunks, water_info.xml, default PoiMapElement id 5, splat4 format 5 check, splat3 load, m_Poi wrap)
+- chunk-providers.md 4.1: WaterFloodFill IL=196 BFS (colWater mark, per-16x16 chunk height byte, 100k cap)
+
 ## 2026-08-08 - tier-C: deco cell layout + PoiMapElement picks
 
 Done (V3.1.0 b14 IL):
