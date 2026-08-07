@@ -129,7 +129,34 @@ Independent of storms, each biome also rerolls ordinary weather: when
 `worldTime >= nextRandWorldTime`, `SetWeather(worldTime, rand)` runs
 `BiomeDefinition.WeatherRandomize(rand)` (probability-weighted group pick), sets
 the 5 param targets from the chosen `WeatherGroup`, and schedules
-`nextRandWorldTime += currentWeatherGroup.duration`. Blood moon overrides all of
+`nextRandWorldTime += currentWeatherGroup.duration`.
+
+### 1.2 The `BiomeDefinition` weather surface
+
+`AddWeatherGroup(name, prob, duration, delay, buffName)` (IL=57) builds a
+`WeatherGroup`: `stormLevel` is 2 for a `storm*` name that does **not** contain
+`build`, 1 for `storm*build*`, else 0; `duration` and both `delay` components
+convert seconds to milliseconds (`* 1000` then `conv.i4`, stored as
+`Int32`/`Vector2i`); `buffName` is kept only when non-empty. `SetupWeather()`
+(IL=53) normalizes the groups in two passes: accumulate all `prob`s, then divide
+each by `total + 1e-6` (so the weights sum to ~1) and call
+`Probabilities.Normalize()` per group.
+
+`WeatherRandomize(float rand)` (IL=32) walks the group list accumulating `prob`
+and calls `SelectWeatherGroup(i)` at the first group where `rand < acc`; the
+`string` overload (IL=14) is `FindWeatherGroupIndex(name) >= 0` →
+`SelectWeatherGroup(idx)`. `SelectWeatherGroup(index)` (IL=40) copies
+`name`/`spectrum` into `weatherName`/`weatherSpectrum`, stores
+`currentWeatherGroupIndex`/`currentWeatherGroup`, then fills all 5 slots
+`weatherValues[slot] = group.probabilities.GetRandomValue((ProbType)slot)`.
+`FindWeatherGroup` (IL=26) / `FindWeatherGroupIndex` (IL=24) are linear name
+matches returning the group / index, null / -1 on miss; `WeatherGetValue`
+(IL=5) and `WeatherSetValue` (IL=6) index `weatherValues[type]` directly;
+`WeatherGetDuration(name[, ref delay])` (IL=11/18) resolves the group and reads
+its millisecond `duration`, filling `delay` (or `Vector2i.zero`) when the ref is
+present. `InitWeather()` (IL=1) is an empty stub in this build.
+
+Blood moon overrides all of
 **`CalcGlobalWeatherType` (IL=36):** if `SkyManager.IsBloodMoonVisible()`, for
 each biome with `stormWorldTime - worldTime < 5000`, push
 `stormWorldTime = worldTime + 5000` (defer near storms past BM window); return
