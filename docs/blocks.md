@@ -270,6 +270,8 @@ bv)` instead. `SetBlockRaw(worldPos, bv)` (IL=25) is the low-level path:
 (`PropRef.Read`) - anything else throws `ArgumentOutOfRangeException`. This
 byte is the first field of every `BlockChangeInfo` on the wire, which is how
 the batch commit machine picks the `SetBlockValue` vs position path.
+`PropRef.Read` (IL=12) is `ChunkPos : Vector2i` + `PropId : i32` - a prop is
+addressed by its prop chunk plus a per-chunk id.
 
 ### 4.1 The batch commit machine (`SetBlocksRPC` -> `ChangeBlocks`)
 
