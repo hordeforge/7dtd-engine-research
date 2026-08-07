@@ -428,6 +428,9 @@ player + tag, inheriting its requester/refund context.
 `CheckLink(player, tag)` match and returns the owner sequence (null for a null
 player/empty tag or no match); `GetTargetType(name)` (IL=11) reads
 `GameEventSequences[name].TargetType`, defaulting to enum 0 on a missing key.
+`RegisterLink(player, seq, tag)` (IL=35) keeps an existing matching link
+(first link wins) and otherwise appends `SequenceLink{Owner, OwnerSeq, Tag}`;
+`UnRegisterLink(player, tag)` (IL=25) removes the first matching link.
 
 Variable plumbing has one observed quirk: `HandleAction` writes incoming
 `variables` into the **template's** `EventVariables` store before cloning, and
