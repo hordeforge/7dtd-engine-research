@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: stat cleanup
+
+Done (V3.1.0 b14 IL):
+- items.md 2: HasStats (IL=5), ClearStats (IL=4), RemoveUnusedStats (IL=77)
+  zero-drop compaction.
+
 ## 2026-08-08 - tier-C: World.IsWater
 
 Done (V3.1.0 b14 IL):
