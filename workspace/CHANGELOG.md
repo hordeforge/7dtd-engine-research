@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockHazard state bit
+
+Done (V3.1.0 b14 IL):
+- BlockHazard.IsHazardOn (IL=29, multiblock child->parent recursion) and
+  SetHazardState (IL=15) use the same meta bit 1 as BlockLight - the
+  trigger/light/hazard states share the low meta bits. block-shapes.md 7.3.
+
 ## 2026-08-08 - tier-C: BlockLight state bits
 
 Done (V3.1.0 b14 IL):

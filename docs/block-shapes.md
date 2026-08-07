@@ -346,6 +346,12 @@ IL=1 first):** `BlockActivateSwitch` (IL=24) toggles `meta` (`(meta & ~2) |
 composite tile-entity modules. Every mutating variant appends a
 `BlockChangeInfo` for the block position.
 
+**Shared state bit:** `BlockHazard.IsHazardOn(world, pos, bv)` (IL=29, with
+multiblock child-to-parent recursion) and `BlockLight.IsLightOn` both test
+`(meta & 2) != 0`, and `BlockHazard.SetHazardState` (IL=15) / 
+`BlockLight.SetLightState` both write `(meta & ~3) | (isOn ? 2 : 0)` - the
+trigger, light, and hazard states all live in meta bit 1.
+
 `BlockTrigger.OnTriggered(player, world, channel, changes, source)` is the
 receiver-side state machine:
 
@@ -440,6 +446,9 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** BlockHazard state: IsHazardOn (IL=29) multiblock recursion +
+  meta & 2; SetHazardState (IL=15) same bit-1 pattern - trigger/light/hazard
+  share meta bit 1.
 - **2026-08-07:** Per-block OnTriggered family: switch meta toggle (IL=24),
   game event + destroyOnEvent (IL=60), hazard toggle + sounds (IL=49), light
   toggle (IL=26), trapdoor destroy (IL=26), downgrade (IL=15), composite TE.
