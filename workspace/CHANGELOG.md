@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: StartJumpMotion and DurationInSeconds
+
+Done (V3.1.0 b14 IL):
+- StartJump: jumpState 2 land / 5 swim; default distance 1; disable fall until ground.
+- StartJumpMotion: ticks = 5+(jumpDistance*8)^0.5; motion from gravity and heightDiff.
+- get_Jumping: passive 132 gate; EndJump land anim mode 1.
+- DurationInSeconds: durationTicks/20.
+---
 ## 2026-08-07 — tier-C: DigStop CalcMoveDist and BuffClass.Tick
 
 Done (V3.1.0 b14 IL):

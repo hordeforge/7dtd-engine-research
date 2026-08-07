@@ -1394,6 +1394,21 @@ pos → `moveToPos` or `tempMoveToPos` (full 3D, not planar).
 jumping movement tag; false → `EndJump`, clear jumping tag, force
 `bJumping=false`. Set `bEntityAliveFlagsChanged` if already dirty or local.
 
+**`get_Jumping` (IL=27):** if `!bJumping` false; else true only when passive
+**132** (jump enable) is non-zero.
+
+**`StartJump` (IL=45):** `jumpState=2`, `jumpStateTicks=0`, default
+`jumpDistance=1` / `jumpHeightDiff=0`, `disableFallBehaviorUntilOnGround=true`.
+If swimming: `jumpState=5` + avatar `SetSwim(true)`; else
+`StartAnimationJump(mode0)`.
+
+**`StartJumpMotion` (IL=45):** airborne; ticks ≈ `5 + (jumpDistance*8)^0.5`;
+motion xz = forward * (jumpDistance/ticks); motion y from gravity/2 and
+heightDiff/ticks.
+
+**`EndJump` (IL=21):** `jumpState=0`, `jumpIsMoving=false`; local avatar
+`StartAnimationJump(mode1)` (land).
+
 ---
 
 ## D5. Path system fields (ASP vs AStar)
@@ -1846,8 +1861,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** DigStop EndTrigger; CalcMoveDist 3D; set_Jumping tags;
-  DigStart 18; StartJump; ClearBlocked; DigUpdate.
+- **2026-08-07:** StartJump state 2/5 swim; StartJumpMotion ticks formula;
+  get_Jumping passive 132; EndJump land; DigStop; CalcMoveDist.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

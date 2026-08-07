@@ -100,6 +100,8 @@ if requested. Start effects still land on next `Tick` via `Started` flag.
 **`BuffClass.Tick` (IL=15):** `DurationTick()`; if `DurationMax > 0` and
 `DurationInSeconds >= DurationMax` set `Finished=true`.
 
+**`BuffValue.get_DurationInSeconds` (IL=7):** `durationTicks / 20` (20 TPS).
+
 Each server tick, `EntityBuffs.Tick` (**IL=179**) walks `ActiveBuffs`:
 
 1. Drop `Invalid` entries via `RemoveAt`.
@@ -219,7 +221,7 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
-- **2026-08-07:** BuffClass.Tick DurationMax Finished; BuffValue.DurationTick UpdateRateTicks.
+- **2026-08-07:** DurationInSeconds ticks/20; BuffClass.Tick DurationMax Finished.
 - **2026-08-07:** EntityPlayer FriendlyFireCheck GameStats 23 modes; HasImmunity
   passive 197; AddBuff status 0..5; Tick MinEvent 0/1/2/3.
 - **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.
