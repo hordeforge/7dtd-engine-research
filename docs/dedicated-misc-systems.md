@@ -662,8 +662,55 @@ bit. `get_IsEmpty()` (IL=34) = `singleBit <= 0` and every word zero;
 included); `ToString()` (IL=34) is the comma-joined names, so a parsed tag
 round-trips to the same string it was built from.
 
+## MemoryPools (the object pool surface)
+
+`MemoryPools` is the static registry of the engine's object and array pools;
+`MemoryPooledObject<T>` is the pool primitive behind every
+`AllocSync`/`FreeSync` call site (chunks, `CBCLayer`, `GameRandom`, network
+streams, `VoxelMeshLayer`, ...). V3.1.0 b14 IL:
+
+**`MemoryPooledObject<T>` is a stack-style free list** (`List<T> pool` +
+`int poolSize` free count). `Alloc(bReset)` (IL=33): with the pool empty it
+returns `Activator.CreateInstance<T>()` (a fresh object); otherwise it pops
+the top slot (`pool[--poolSize]`) and clears the slot (`pool[poolSize] =
+default(T)`); when `bReset` and the item implements `IMemoryPoolableObject`
+it runs `Reset()`. `AllocSync(bReset)` (IL=20) wraps `Alloc` in a
+`Monitor.Enter/Exit(pool)` critical section - the pools are safe for the
+path/worker threads. `Free` pushes back onto the list; the `FreeSync`
+overloads (`T`, `IList<T>`, `Queue<T>`) are the locked twins.
+`Cleanup()` (IL=43) calls `IMemoryPoolableObject.Cleanup()` on every
+non-null pooled item, clears the list, and zeroes the count.
+`GetPoolSize()` (IL=3) is the free count; `SetCapacity(n)` sets the list
+capacity and `maxCapacity`.
+
+**`MemoryPools.InitStatic(usePools)` (IL=45)** sizes the main object pools
+(capacity 0 when `usePools == false`, which makes every `Alloc` fresh):
+
+| Pool | Type | Capacity |
+|---|---|---|
+| `PoolChunks` | `Chunk` | 1000 |
+| `poolCBL` | `ChunkBlockLayer` | 50000 |
+| `poolVML` | `VoxelMeshLayer` | 1000 |
+| `poolCGOL` | `ChunkGameObjectLayer` | 1000 |
+| `poolMS` | `PooledMemoryStream` | 40 |
+| `poolCBC` | `CBCLayer` | 50000 |
+
+The full static set (`.cctor`) adds the second stream pool
+`poolMemoryStream` (the net hot path, see
+[`dedicated-leftovers.md`](dedicated-leftovers.md)), `poolBinaryReader` /
+`poolBinaryWriter`, `poolNameIdMapping`, the `MemoryPooledArray<T>` family
+(`poolVector3`, `poolVector4`, `poolVector2`, `poolInt`, `poolUInt16`,
+`poolFloat`, `poolColor`, `poolByte`), the `poolCBLUpper24BitArrCache` /
+`poolCBLLower8BitArrCache` `List` caches, and a `DynamicObjectPool s_pool`.
+
 ## Changelog
 
+- **2026-08-08:** MemoryPools surface: MemoryPooledObject stack free list
+  (Alloc IL=33 pop + Activator fallback + IMemoryPoolableObject.Reset,
+  AllocSync/FreeSync Monitor locks, Cleanup IL=43, SetCapacity);
+  InitStatic IL=45 capacities (PoolChunks 1000, poolCBL/poolCBC 50000,
+  poolMS 40, ...); full .cctor set (poolMemoryStream, binary reader/writer,
+  MemoryPooledArray family, CBL bit caches, DynamicObjectPool).
 - **2026-08-08:** FastTags bitmask: UInt64[] + singleBit fast path; lazy
   per-group bit registry (GetBit IL=56, Interlocked.Increment first-use
   order, tags/bitTags + allInternal growth); Parse comma-split via locked
