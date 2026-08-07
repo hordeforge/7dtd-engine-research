@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: trader eject teleport and dynamic ragdoll
+
+Done (V3.1.0 b14 IL):
+- checkForTeleportOutOfTraderArea: protect vs closed volumes, streak, NetPackageTeleportPlayer, game_on_trader_teleport.
+- UpdateDynamicRagdoll / ActivateDynamicRagdoll flag bits 1/2/4, impulse x20.
+---
 ## 2026-08-07 — post-update dry-run + tier-C crawler/SpawnParticle
 
 Dry-run (live V3.1.0 b14 dedi):

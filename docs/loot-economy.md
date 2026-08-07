@@ -212,6 +212,31 @@ times apply and can override the window entirely:
 `GetCloseTime` / `GetWarningTime` return the global fields for any non-Default preset and
 the per-trader fields for Default.
 
+### 4.1 Player eject: `EntityAlive.checkForTeleportOutOfTraderArea` (IL=241)
+
+Server-only, not edit mode, not god mode, entity is `EntityPlayer`. Rate-limited to
+once per **0.1 s** (`lastTimeTraderStationChecked`). Sample at player pos **y+0.5**;
+`World.GetTraderAreaAt`. Need initialized area.
+
+**Protect-path (world event):** if `TraderHourPresets != AlwaysOpen (6)` and
+`World.IsWorldEvent(0)` and `IsWithinProtectArea(pos)`: eject center =
+`ProtectPosition + ProtectSize*0.5`; radius half-max of protect xz.
+
+**Teleport-volume path:** else if `IsWithinTeleportArea` and (`IsClosed` **or**
+passive **191** == 1): center from POI `boundingBoxPosition + PrefabSize*0.5`;
+radius half-max of prefab xz. Missing POI → return.
+
+If radius ≤ 0 skip. Else radius += `traderTeleportStreak` and streak++.
+`GetRandomSpawnPositionMinMaxToPosition(center, r, r+1, …, landClaimOwner=2)`;
+on failure log and keep position. Delivery:
+
+- remote player: `NetPackageTeleportPlayer` to client
+- local `EntityPlayer`: `Teleport(pos, -inf)`
+- else attached entity or self `SetPosition`
+
+Then `GameEventManager.HandleAction("game_on_trader_teleport", player, …)`.
+If not inside any eject region this tick: reset `traderTeleportStreak = 1`.
+
 **Per-player trade session (`EntityTrader.TraderWindowState`).** Independent of open
 hours, one player at a time trades (a `LockManager` shared lock, `IsSharedLock`). The
 client window steps `Dialog(0)` to `Trade(1)` to `QuestComplete(2)` to `Close(3)` via
@@ -660,6 +685,8 @@ Book count modifiers (enum values **1..11**). Unknown / **0** returns **-1**
   NPCQuestList requires a live EntityTrader on the receiver; full TraderInfo field
   list; npc.xml trader_id binding; TEFeatureStorage v18 Write order.
 
+- **2026-08-07:** checkForTeleportOutOfTraderArea IL=241 protect vs closed
+  teleport volumes, streak, NetPackageTeleportPlayer, game_on_trader_teleport.
 - **2026-07-28:** NetPackageTraderData wire (entity vs TE key) + server CopyFrom.
 
 - **2026-07-23:** Initial loot/trader/economy reversal: server loot generation lifecycle (`LootContainer` + `TEFeatureStorage` + `LootManager`, touched flags, respawn timer, quest reset), trader restock interval and pricing (`TraderManager`, `XUiM_Trader`), open-hour presets and the physical `TraderArea`, and rentable vending machines, with state machines.

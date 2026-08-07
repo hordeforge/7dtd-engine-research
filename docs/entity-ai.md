@@ -1419,6 +1419,15 @@ jumping movement tag; false → `EndJump`, clear jumping tag, force
 If swimming: `jumpState=5` + avatar `SetSwim(true)`; else
 `StartAnimationJump(mode0)`.
 
+**`UpdateDynamicRagdoll` (IL=50):** if flag bit **1**: capture root motion into
+`_dynamicRagdollRootMotion`; if bit **4**: copy cur→prev ragdoll positions and
+`CaptureRagdollPositions`; if bit **2** and not on ground: `ActivateDynamicRagdoll`.
+
+**`ActivateDynamicRagdoll` (IL=80):** require bit **1**; clear flags; impulse =
+root motion × **20**; set stun duration from `_dynamicRagdollStunTime`;
+`DoRagdoll`; if bit **4** and prev/cur counts match, apply per-bone velocities
+(delta × 20) via `ApplyRagdollVelocities`.
+
 **`StartJumpMotion` (IL=45):** airborne; ticks ≈ `5 + (jumpDistance*8)^0.5`;
 motion xz = forward * (jumpDistance/ticks); motion y from gravity/2 and
 heightDiff/ticks.
@@ -2049,6 +2058,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   Tick phase order (MinScript / UpdateSpawn / player touch / despawn timer).
 - **2026-08-07:** UpdateSpawn: GameStats 12 log-only (not a gate); SpawnParticle
   air-above skip + light brightness.
+- **2026-08-07:** UpdateDynamicRagdoll / ActivateDynamicRagdoll flag bits 1/2/4.
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 
