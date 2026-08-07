@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: Chunk.SetBlockRaw silent write path
+
+Done (V3.1.0 b14 IL):
+- SetBlockRaw IL=386: y>=255 air, water flow, IndexedBlocks, heightmap, tickedBlocks.
+- Dirty flags bMapDirty/isModified/bEmptyDirty; no light/mesh/stability RPC.
+---
 ## 2026-08-07 — tier-C: IsLandProtectedBlock and map-edge soft bounds
 
 Done (V3.1.0 b14 IL):

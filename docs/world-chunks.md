@@ -463,6 +463,8 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** Chunk.SetBlockRaw IL=386 (y cap, water, IndexedBlocks, heightmap,
+  tickedBlocks, dirty flags).
 - **2026-08-07:** ChangeBlocks IL=530 / SetBlocksOnClients IL=13 authority path.
 
 - **2026-08-07:** `Chunk.get_NeedsSaving` predicate (isModified | hasEntities | TE | triggers) for blob-cache invalidation notes.
