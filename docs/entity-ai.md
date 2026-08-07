@@ -1380,6 +1380,20 @@ via attack hit info; yaw seek ±120 random; stop when ticks exhausted.
 **`EntityBuffs.FireEvent(type, params)` (IL=30):** for each non-paused active
 buff with class, `BuffClass.FireEvent`.
 
+**`DigStop` (IL=13):** if digging: `isDigging=false`; avatar `EndTrigger`.
+
+**`ClearTempMove` (IL=4):** `isTempMove=false`.
+
+**`CalcMoveDist` / `CalcTempMoveDist` (IL=36 each):** Euclidean distance entity
+pos → `moveToPos` or `tempMoveToPos` (full 3D, not planar).
+
+**`SetJumpDistance(distance, heightDiff)` (IL=7):** store `jumpDistance` /
+`jumpHeightDiff`.
+
+**`set_Jumping` (IL=46):** on change: true → `StartJump`, clear idle tag, set
+jumping movement tag; false → `EndJump`, clear jumping tag, force
+`bJumping=false`. Set `bEntityAliveFlagsChanged` if already dirty or local.
+
 ---
 
 ## D5. Path system fields (ASP vs AStar)
@@ -1832,8 +1846,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** DigStart 18 action ticks; StartJump ground/elevator;
-  ClearBlocked/ResetStuckCheck; DigUpdate; UpdateMoveHelper early gates.
+- **2026-08-07:** DigStop EndTrigger; CalcMoveDist 3D; set_Jumping tags;
+  DigStart 18; StartJump; ClearBlocked; DigUpdate.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

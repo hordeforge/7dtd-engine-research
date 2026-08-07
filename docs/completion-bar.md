@@ -267,6 +267,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | ClearParties + CalcNextDay frequency/range | aidirector.md |
 | Wandering TickNextTime + MoveHelper early gates | aidirector.md / entity-ai.md |
 | DigStart/DigUpdate + StartJump + stuck clear | entity-ai.md |
+| DigStop + CalcMoveDist + BuffClass.Tick | entity-ai.md / buffs.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

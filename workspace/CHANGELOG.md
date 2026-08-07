@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DigStop CalcMoveDist and BuffClass.Tick
+
+Done (V3.1.0 b14 IL):
+- DigStop: EndTrigger; ClearTempMove.
+- CalcMoveDist/Temp: full 3D Euclidean to move targets.
+- set_Jumping: StartJump/EndJump + movement tags; flags dirty.
+- BuffClass.Tick: DurationTick; Finished when past DurationMax.
+---
 ## 2026-08-07 — tier-C: DigStart DigUpdate and StartJump
 
 Done (V3.1.0 b14 IL):
