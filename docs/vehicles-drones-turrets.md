@@ -188,6 +188,24 @@ rider layer **24**; disable character controller; seat IK targets;
 sets `hasDriver`, `Vehicle.SetColors`, `FireEvent(0)`, `SetVehicleDriven`,
 `TriggerUpdateEffects`; local player inserts vehicle action set + CameraInit.
 
+**The generic attach pipeline behind it (V3.1.0 b14):**
+`Entity.StartAttachToEntity(other, slot)` (IL=43) is the entry: a client sends
+`NetPackageEntityAttach(0, selfId, otherId, slot)` to the server; the server
+runs `AttachToEntity(other, slot)` and, on a valid slot, broadcasts
+`NetPackageEntityAttach(1, ...)` (flags 192) to observers. `Entity.AttachToEntity`
+(IL=64) rejects already-attached entities (-1), delegates slot allocation to
+`AttachEntityToSelf`, parents the `RootTransform` to the slot's
+`enterParentTransform` (zeroed local pose), applies the slot's
+`enterPosition`/`enterRotation` to the `ModelTransform`, and (for remote
+riders without `bKeep3rdPersonModelVisible`) hides the model.
+`EntityAlive.AttachToEntity` (IL=60) sets `CurrentMovementTag = Idle`, uncrouches,
+and for a local rider whose slot `bReplaceLocalInventory` swaps the inventory
+to the host's (saving the old one + held index, holding set to the DUMMY slot);
+`EntityPlayer` (IL=21) stashes the model-parent local position; the local
+player (IL=88) repositions the camera, starts the `Driving` activity, updates
+owned-vehicle waypoints, and stops the `RunLoop` sound. `EntityVehicle` (IL=2)
+always returns **-1** (vehicles never attach to anything).
+
 `DetachEntity` (**IL=157**): cancel delayed attach; pose -1; remove IK; restore
 model/layers; re-enable controller; remove vehicle actions; `DriverRemoved` if
 driver; base detach; unlock interaction when free seats return.
@@ -572,6 +590,10 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-07:** Generic attach pipeline in 4.2: StartAttachToEntity (IL=43)
+  client->server + broadcast, Entity.AttachToEntity (IL=64) pose parent,
+  EntityAlive (IL=60) inventory swap + Idle tag, EntityPlayer/PlayerLocal
+  camera, EntityVehicle -1.
 - **2026-08-07:** checkTeleportPos 32 m; setState lastState/owned clear;
   teleportState slots; targetCanBeHealed; heal type priority.
 - **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire

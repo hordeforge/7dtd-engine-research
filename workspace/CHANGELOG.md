@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: generic attach pipeline
+
+Done (V3.1.0 b14 IL):
+- vehicles-drones-turrets.md 4.2: StartAttachToEntity (IL=43) client
+  package + server broadcast; Entity.AttachToEntity (IL=64) pose parent +
+  model hide for remote; EntityAlive (IL=60) Idle tag + inventory swap via
+  bReplaceLocalInventory; EntityPlayer (IL=21) model pos stash; PlayerLocal
+  (IL=88) camera + Driving + waypoints + RunLoop sound; EntityVehicle (IL=2)
+  always -1. Repaired the AttachEntityToSelf continuation splice.
+
 ## 2026-08-08 - tier-C: Voxel.Raycast wrappers
 
 Done (V3.1.0 b14 IL):
