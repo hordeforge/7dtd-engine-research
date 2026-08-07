@@ -77,3 +77,13 @@
 - 38 commits since post-update dry-run (3b61d9c)
 - stock-check green; unaccounted 0; narrated ~1488
 - Covered this long session: MoveHelper surface, EntityAlive helpers, World spawn/land/uncull/tick, GameStateManager, WorldBlockTicker, SpawnManagerDynamic, packages
+
+
+## Checkpoint 5 (2026-08-07/08 continuation)
+- ~55 commits since dry-run; stock-check green; narrated 1491
+- Doc structure pass (f1e6a34): section numbering, D-order, stability-dump -> il/
+- Tier-C depth: config-copy family (Entity/EntityAlive/Player/EAIManager + AI
+  task parse), spawn sampler §6.1, ECD builder, SendChunksToClients §4.0a,
+  pause save-on-pause, PlayerSpawnedInWorld, EntityVulture flight AI + helpers
+  (D15), EntityClass prop table, GameStats/GamePrefs tables
+- Next: keep rotating undoc leaves; refresh handoff tip each few commits

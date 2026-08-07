@@ -20,19 +20,23 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `f1e6a34` doc structure pass |
-| Commits since dry-run `3b61d9c` | ~40 |
+| HEAD (at handoff write) | `18e6109` chunk force-update + ground-align leaves |
+| Commits since dry-run `3b61d9c` | ~55 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1491 / catalogued ~821 / classified ~1387 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
 
-2026-08-07 session note: doc structure pass landed (commit f1e6a34) - fixed
-duplicate section numbers (server-lifecycle, quests-challenges, managers,
-save-region), ordered entity-ai D8.x sections, moved `docs/stability-dump/` raw
-IL to git-ignored `il/stability-v3.1.0/` (update stability.md link target if you
-regenerate), removed root junk dirs. CopyPropertiesFromEntityClass (IL=1128)
-narrated at entity-ai D8.6 in cd7b79c.
+2026-08-07/08 session notes: doc structure pass (f1e6a34) - fixed duplicate
+section numbers (server-lifecycle, quests-challenges, managers, save-region),
+ordered entity-ai D8.x sections, moved `docs/stability-dump/` raw IL to
+git-ignored `il/stability-v3.1.0/`, removed root junk dirs. Tier-C batch since:
+config-copy family (Entity D8.6a / EntityAlive D8.6 / EAIManager D8.7 / AI task
+parse), spawn sampler (spawning §6.1), ECD builder (spawning §7), chunk
+streaming (world-chunks §4.0a), join/disconnect (server-lifecycle §3.2), pause
+(loop-gmupdate Phase A2), PlayerSpawnedInWorld full body, EntityVulture flight
+AI + helpers (entity-ai D15), two new reference inventories
+(entityclass-props.md, gamestats-gameprefs.md). Census: narrated 1491.
 
 ## Resume checklist (next agent / next turn)
 
