@@ -144,7 +144,10 @@ zero rotation; the full overloads (IL=31/36) copy `entityClass`, `id`, `pos`,
 `itemStack = new ItemStack(itemValue, count)` or the `blockValues` /
 `textureFullArrays` arrays with `itemStack.count = count`.
 `EntityFactory.CreateEntityAsync(ecd)` (IL=4) is just
-`CreateEntityOperation.Start(ecd, false)`.
+`CreateEntityOperation.Start(ecd, false)`. `Start` (IL=25) owns the entity-id
+allocation: an `ecd.id == -1` grabs `nextEntityID++`, otherwise
+`nextEntityID = max(nextEntityID, ecd.id + 1)`, then it builds the operation
+and runs `LoadAssets(isSync)`.
 
 **`Chunk.SpawnEntityAsync(world, ecd, onEntityCreated)` (IL=40):** refuses to
 spawn onto a chunk that is mid-unload - the volatile `InProgressUnloading` flag
