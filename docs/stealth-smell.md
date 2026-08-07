@@ -30,6 +30,14 @@ things, all computed on the server in `TickServer` and fanned to the owning clie
 the client (the HUD meter, `ValuePercentUI` / `ValueColorUI` / `SetBarColor`);
 `Read`/`Write` persist and net-sync the state.
 
+**Ambient light source:** `Entity.GetBrightness(t)` (IL=53) samples the light at
+a head-ish point: it resolves the chunk from `position` (a missing chunk
+returns 0), samples at
+`floor(pos.y - yOffset + (boundingBox.max.y - boundingBox.min.y) * 0.66)` -
+66% up the entity's bounding box - and returns
+`world.GetLightBrightness(...)` (the chunk light grid from
+[`light-mesh-water.md`](light-mesh-water.md)).
+
 ---
 
 ## 2. Stealth and detection (state machine)
@@ -135,6 +143,8 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** Entity.GetBrightness (IL=53): ambient light sample at 66%
+  box height (pos.y - yOffset + height*0.66), missing chunk -> 0.
 - **2026-08-07:** PlayerStealth.NoiseCleanup (IL=43): per-entry ticks
   decrement, remove at 1 - the fade-out half of the noise lifecycle.
 - **2026-08-07:** PlayerStealth.CalcVolume (IL=68): sum with 0.6^i geometric

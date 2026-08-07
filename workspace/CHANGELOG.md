@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.GetBrightness
+
+Done (V3.1.0 b14 IL):
+- Entity.GetBrightness (IL=53) narrated in stealth-smell.md: chunk from
+  position (missing -> 0), sample y = floor(pos.y - yOffset + boxHeight *
+  0.66) - 66% up the bounding box - then world.GetLightBrightness. The
+  ambient light source for the stealth light level.
+
 ## 2026-08-08 - tier-C: Inventory.HoldingItemHasChanged
 
 Done (V3.1.0 b14 IL):
