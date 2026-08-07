@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `442aae9` trader lookup core |
-| Commits since dry-run `3b61d9c` | ~439 |
+| HEAD (at handoff write) | `ae2669d` TraderArea containment leaves |
+| Commits since dry-run `3b61d9c` | ~440 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
