@@ -155,6 +155,9 @@ Closed in recent sessions (still optional, not required for A+B):
 | ItemValue.FireEvent recursion | items §8 / minevents §7 |
 | Sleeper TickSpawnCount + CheckSpawnPos | entity-ai §D8.1-D8.2 |
 | Workstation HandleFuel re-pin | tile-entities-power §4.2 |
+| EntityStatChanged / StatsBuff Process | entity-stats §5.1-5.2 |
+| NetPackageTileEntity Process teBlockId | tile-entities-power §2 |
+| QuestObjectiveUpdate event types | protocol-packages |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

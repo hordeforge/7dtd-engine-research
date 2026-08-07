@@ -1062,8 +1062,17 @@ eventType : u8
 blockPos : Vector3i
 ```
 
-`ProcessPackage` (**IL=180**): switch on event type; server fans to party members
-via rebroadcast Setup flags **192**; local `HandlePlayer` for primary/party.
+`ProcessPackage` (**IL=180**) switch on `QuestObjectiveEventTypes` (3 cases):
+
+| eventType | Server | Client / local |
+|---|---|---|
+| 0 | Fan to each party member (HandlePlayer if local, else rebroadcast Setup flags **192**) | `HandlePlayer` for primary |
+| 1 | `QuestEventManager.FinishTreasureQuest(questCode, sender)` | (server-only path) |
+| 2 | Fan party members with Setup that includes `blockPos` | `HandlePlayer` |
+
+`HandlePlayer` (**IL=108**): find active quest by `questCode`; require distance
+`<= 15` to sender; for incomplete treasure objectives call
+`ObjectiveTreasureChest.AddToDestroyCount()`.
 
 #### `NetPackageQuestEvent`
 
@@ -1503,6 +1512,8 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** QuestObjectiveUpdate eventType 0/1/2 party fan + treasure
+  FinishTreasureQuest / HandlePlayer distance 15 + AddToDestroyCount.
 - **2026-08-07:** AttackBlocks IL=553 / AttackEntites IL=691; explode IL=194;
   PlayerId/PlayerSpawnedInWorld; EntityRemove/SimpleChat/SharedQuest/etc.
 - **2026-08-07:** NetPackageChunk Process IL=126 overwrite vs add paths.

@@ -126,6 +126,26 @@ server-side stat container and the food/water/stamina/health over-time model.
 Wire bodies: [protocol-packages.md](protocol-packages.md) section 6.16. Server
 rebroadcasts stats/buffs/playerstats with bulk flags **192** after accept.
 
+### 5.1 `NetPackageEntityStatChanged.ProcessPackage` (IL=88)
+
+1. Null world return; skip when target is primary player **and** instigator equals
+   target (self echo).
+2. `ValidEntityIdForSender(instigatorId, false)` else return.
+3. Resolve `EntityAlive`; `GetStat(entity, m_enumStat)` then set `BaseMax`,
+   `MaxModifier`, `Value`; clear `Changed`.
+4. If entity is **local** and `m_enumStat == 0` (Health): set MinEventContext.Other
+   from instigator and `FireEvent(type 9)`.
+5. If world not remote: rebroadcast `Setup(entity, instigator, enumStat)` via
+   `SendPacketToTrackedPlayersAndTrackedEntity` with exclude-self flag =
+   `(enumStat != 0)` (health rebroadcast includes self trackers differently).
+
+### 5.2 `NetPackageEntityStatsBuff.ProcessPackage` (IL=76)
+
+1. Resolve entity; if **remote** entity: pool stream from `data` bytes and
+   `EntityBuffs.Read(reader)` (client apply of full buff blob).
+2. If **server**: rebroadcast `Setup(entity, data)` via `ConnectionManager.SendPackage`
+   to all except entity owner (`entityId` as exclude), flags **192**.
+
 ## Related docs
 
 | Doc | Role |
@@ -138,6 +158,8 @@ rebroadcasts stats/buffs/playerstats with bulk flags **192** after accept.
 
 ## Changelog
 
+- **2026-08-07:** EntityStatChanged Process IL=88 (self-echo skip, Health FireEvent
+  9, rebroadcast); EntityStatsBuff Process IL=76 (remote Buffs.Read + server 192).
 - **2026-08-07:** EntityStats/PlayerEntityStats waitTicks phase tables (Tick IL=27,
   TickWait base 75 / player 133).
 - **2026-07-28:** Stat/buff/playerstats network package pointers.

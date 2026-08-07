@@ -135,12 +135,19 @@ payload : payloadLen bytes   // TileEntity.write(network stream mode)
 ```
 
 `Setup(te, streamMode[, handle])` writes the TE into a pooled stream in the
-requested mode. `ProcessPackage` (IL=90): lookup by world pos, `SetHandle`,
-`te.read` with StreamModeRead **1** (remote) or **2** (local/server),
-`NotifyListeners`; on server mark chunk modified and **rebroadcast** the package
-(flags 192) so other clients converge. Because write is mode-aware, the network
-form omits disk-only heat-map time and can include live `isPowered` (subclass
-bodies; see composite features inventory).
+requested mode. `ProcessPackage` (**IL=103**):
+
+1. `GetTileEntity(teWorldPos)`; if null return.
+2. If live block type != `teBlockId`: log warning and **drop** (stale TE after
+   block change).
+3. `SetHandle(handle)`; under lock on pooled stream, `te.read(reader,
+   StreamModeRead 2 if remote world else 1)`.
+4. `NotifyListeners()`; if server: `SetChunkModified`, then rebroadcast
+   `Setup(te, StreamModeWrite=2, handle)` with flags **192** and optional
+   position for interest (world-center pos when non-zero).
+
+Because write is mode-aware, the network form omits disk-only heat-map time and
+can include live `isPowered` (subclass bodies; see composite features inventory).
 
 ```mermaid
 flowchart LR
@@ -744,6 +751,8 @@ the matching `PowerItem` by world position and links the two.
 
 - **2026-08-07:** Chunk.UpdateTick IL=26 TeTick list walk; TEFeature write tails
   (§4.7); Workstation/PoweredTrigger/Collector/Light/trap write tails.
+- **2026-08-07:** NetPackageTileEntity Process IL=103 teBlockId drop + stream
+  mode 2 remote / 1 local + server rebroadcast.
 - **2026-08-07:** HandleFuel early-out when not burning (no heat emit); burn
   quantize 0.01 s; fuel[0] consume + cycleFuelStacks.
 - **2026-08-07:** Workstation UpdateTick/HandleFuel/HandleRecipeQueue IL paths;

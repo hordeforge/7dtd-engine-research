@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EntityStatChanged, StatsBuff, TE Process, QuestObjective
+
+Done (V3.1.0 b14 IL):
+- EntityStatChanged Process IL=88 self-echo skip, Health FireEvent 9, rebroadcast.
+- EntityStatsBuff Process IL=76 remote Buffs.Read + server flags 192 fan-out.
+- NetPackageTileEntity Process IL=103 teBlockId drop + stream mode + rebroadcast.
+- QuestObjectiveUpdate eventType 0/1/2; HandlePlayer distance 15 treasure count.
+---
 ## 2026-08-07 — tier-C: sleeper TickSpawnCount, CheckSpawnPos, HandleFuel re-pin
 
 Done (V3.1.0 b14 IL):
