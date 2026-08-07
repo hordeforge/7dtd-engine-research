@@ -484,6 +484,13 @@ Static helpers used by the §3.3 decorators when placing biome blocks and by
 
 - `HasDecoAllowed(bv)` / `GetDecoRadius(bv, block)` / `IsBigDeco` read the
   block's decoration metadata (oversized bounds or `BlockDecorationRadius`).
+  `HasDecoAllowed` (IL=29) is false for air and for `isMultiBlock` children
+  (`ischild`), else true when `SmallDecorationRadius > 0 || BigDecorationRadius
+  > 0 || isOversized`. `GetDecoRadius` (IL=29) starts at
+  `max(SmallDecorationRadius, BigDecorationRadius)` and, for `isOversized`,
+  folds in the larger of `(int)(oversizedBounds.extents.x + 0.5)` /
+  `.z + 0.5` (round-half-up on each axis). `IsBigDeco` (IL=13) is the same
+  radius-or-oversized test without the bounds fold.
 - `CanPlaceDeco(chunk[, +X,+Z,+XZ neighbors], pos, bv, DecoAllowedTest)`
   checks every column in the deco footprint against the per-chunk
   `EnumDecoAllowed` map (`Everything`, slope/size bits, `StreetOnly`,
