@@ -250,6 +250,25 @@ descending chance); remaining `Modifications` are filled with
 `noPreinstallCosmeticItemTags`, each cosmetic slot rolls
 `GetCosmeticItemMod(itemTags, accumulated, random)` (or None).
 
+**`ItemClassModifier` selection primitives (V3.1.0 b14):**
+`GetItemModWithAnyTags(tags, installedModTypes, random)` (IL=53) scans
+`ItemClass.list` for `ItemClassModifier` entries that are **not** tagged
+`installedModTypes` (`HasAnyTags` false), whose `InstallableTags` overlaps
+`tags`, and whose `DisallowedTags` is disjoint from `tags`; the surviving ids
+collect in the shared static `modIds` scratch list and one is picked uniformly
+(`random.RandomRange(count)`); no match returns null. The scratch is cleared
+after every call (main-thread use only).
+`GetDesiredItemModWithAnyTags(tags, installed, desired, random)` (IL=67) adds
+the pre-install bias: a non-empty `desiredModTypes` additionally requires the
+mod to `HasAnyTags(desired)` (used by `createDefaultModItems` for tag-requested
+mods); `GetCosmeticItemMod` is the cosmetic-pool twin.
+`GetPropertyOverride(propertyName, itemName, out value)` (IL=50) resolves a
+mod override from `PropertyOverrides : Dictionary<string, DynamicProperties>`
+keyed by item name: the exact-name entry first, then the `"*"` wildcard entry
+(the `Values` dict of each must contain the property) - the backend of
+`ItemValue.GetPropertyOverride` above. `HasAllTags` / `HasAnyTags` (IL=5/7)
+are `ModifierTags` subset / overlap tests.
+
 **Stat-value leaves:** `GetStatPercent(type, onlyBoosted)` (IL=12) starts at
 **1** and, when stats exist, runs `StatModifyValue`. `StatModifyValue(effect,
 ref value, onlyBoosted)` (IL=47) finds the matching stat entry (skipping
@@ -1165,6 +1184,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemClassModifier selection: GetItemModWithAnyTags IL=53
+  (installable/disallowed tag filter + shared modIds scratch + uniform pick),
+  GetDesiredItemModWithAnyTags IL=67 desired bias, GetCosmeticItemMod twin,
+  GetPropertyOverride IL=50 exact-name then "*" wildcard entry,
+  HasAllTags/HasAnyTags ModifierTags tests.
 - **2026-08-08:** ItemValue metadata: lazy Metadata dict +
   TypedMetadataValue TypeTag (Float=1/Int=2/String=3); SetMetadata IL=86
   update-vs-create with tag-mismatch warnings; GetMetadata IL=17 /
