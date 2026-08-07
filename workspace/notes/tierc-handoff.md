@@ -23,7 +23,7 @@ No em dashes. No AI attribution in commits.
 | HEAD (at handoff write) | `fb12b28` SetBareHandItem + GetInitialMetadata |
 | Commits since dry-run `3b61d9c` | ~95 |
 | stock-check | green expected |
-| Coverage (last pin text) | narrated ~1509 / catalogued ~811 / classified ~1379 / unaccounted **0** |
+| Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
 
