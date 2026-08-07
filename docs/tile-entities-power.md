@@ -577,6 +577,34 @@ After `TileEntityPoweredBlock.write`:
 
 After powered-block base: version u16 (persist) + `ownerID` ToStream only.
 
+#### `TileEntityWorkstation.write` (IL=246)
+
+After base TE write, always writes version **byte 50**, then branches on
+`StreamModeWrite`:
+
+| Mode | Payload (summary) |
+|---|---|
+| **Persistency (0)** | `lastTickTime:u64`; `writeItemStackArray` for fuel/input/tools/output; `writeRecipeStackArray(50)`; `writeCraftCompleteData(50)`; `isBurning:bool`; `currentBurnTimeLeft:f32`; module/material burn array (`byte` count + f32s); `isPlayerPlaced:bool`; toolsNet stacks |
+| **ToServer (1)** | fuel/input/tools/output arrays; recipe + craft-complete (50); `isBurning`; burn time; module burns; `isPlayerPlaced` (no `lastTickTime` first; network path) |
+| **ToClient (2)** | similar stack/recipe/burn mirror for UI; includes `lastTickTime` late in path |
+
+Exact stack order matches fields: fuel, input, tools, output (persist also writes
+toolsNet). Recipe queue and craft-complete use versioned helpers with constant
+**50** (matches workstation format generation).
+
+#### `TileEntityPoweredTrigger.write` (IL=138)
+
+After `TileEntityPowered.write`:
+
+1. Persist: version **u16=18**.
+2. `TriggerType:u8`.
+3. If type == **Motion (3)**: `ownerID` ToStream.
+4. Network modes (`streamMode != 0`):
+   - Non-switch types: `ClientData.Property1/2:u8`, `ResetTrigger:bool` (then clear).
+   - Motion (3): `TargetType:i32`.
+   - TripWire (4): wire-related bool from power item path.
+   - TimerRelay (2): start/end time bytes from timer relay.
+
 ---
 
 ## 5. Triggers and powered traps
@@ -696,7 +724,8 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
-- **2026-08-07:** Collector/Light/RangedTrap/MeleeTrap write tails (§4.6).
+- **2026-08-07:** Workstation write IL=246 stream modes; PoweredTrigger write
+  IL=138; Collector/Light/RangedTrap/MeleeTrap write tails (§4.6).
 - **2026-08-07:** Workstation UpdateTick/HandleFuel/HandleRecipeQueue IL paths;
   Forge fuel-tick melt path; Vending rental expiry; Composite feature tick;
   Powered TE dirty flags.

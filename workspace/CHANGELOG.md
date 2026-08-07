@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: workstation/trigger wire + quest/party/gameevent process
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power: Workstation.write IL=246 stream modes; PoweredTrigger.write
+  IL=138 TriggerType tails.
+- protocol-packages: PartyActions/Data, QuestEvent/Objective/EntitySpawn,
+  TraderData, NPCQuestList, GameEventRequest/Response, BossEvent,
+  EntityWaypointList Process IL sizes and authority notes.
+---
 ## 2026-08-07 — tier-C: UAIBase chooseAction/updateAction
 
 Done (V3.1.0 b14 IL):

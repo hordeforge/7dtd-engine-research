@@ -96,6 +96,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | StatChanged/StatsBuff/PlayerStats process IL | protocol-packages §6.16 |
 | High-value console Execute IL table | console-commands §2.1 |
 | UAIBase chooseAction/updateAction | entity-ai §5.3 |
+| Workstation/PoweredTrigger write modes | tile-entities-power §4.6 |
+| Quest/Party/GameEvent process IL re-pins | protocol-packages §6.17-6.18 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

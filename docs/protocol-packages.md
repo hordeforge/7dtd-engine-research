@@ -940,6 +940,14 @@ Already in [parties-factions.md](parties-factions.md) section 3. Re-verified:
 Actions write is `op:u8, invitedBy:i32, invited:i32, voiceLobbyId:string` (no
 member array). Data write includes member id array.
 
+**Process re-pin (2026-08-07):**
+
+- `PartyActions` Process **IL=176**: switch on action enum (invite/accept/kick/
+  leave/...); server uses `Party.ServerHandleAcceptInvite`, `AddPartyInvite`,
+  client may `SendToServer` follow-ups; rebroadcast patterns use flags **192**.
+- `PartyData` Process **IL=243**: server `PartyManager.GetParty`; client
+  `CreateClientParty` / `UpdateMemberList`; join/leave audio + localization.
+
 #### `NetPackageQuestEntitySpawn` (ToServer)
 
 ```text
@@ -948,9 +956,10 @@ gamestageGroup : string
 entityIDQuestHolder : i32
 ```
 
-`ProcessPackage`: if `entityType == -1`, resolve random class from
-`GameStageDefinition` using quest holder's `PartyGameStage`; then
-`QuestActionSpawnEnemy.SpawnQuestEntity(type, holderId, null)`.
+`ProcessPackage` (**IL=37**): if `entityType == -1`, resolve random class from
+`GameStageDefinition.GetStage(holder.PartyGameStage).GetSpawnGroup(0)` via
+`EntityGroups.GetRandomFromGroup`; then
+`QuestActionSpawnEnemy.SpawnQuestEntity(type, holderId, player)`.
 
 ### 6.18 Trader / quest packages
 
@@ -962,7 +971,9 @@ if isEntity: entityId : i32 else tePosition : Vector3i
 hasTraderData : bool (+ TraderData.Write)
 ```
 
-Server `CopyFrom` onto trader NPC or vending TE ([loot-economy.md](loot-economy.md)).
+`ProcessPackage` (**IL=50**): if server and `entityId != -1`,
+`EntityTrader.TraderData.CopyFrom`; else resolve `TileEntityVendingMachine` at
+`tePosition` and `CopyFrom` + `NotifyListeners` ([loot-economy.md](loot-economy.md)).
 
 #### `NetPackageQuestObjectiveUpdate`
 
@@ -973,6 +984,9 @@ eventType : u8
 blockPos : Vector3i
 ```
 
+`ProcessPackage` (**IL=180**): switch on event type; server fans to party members
+via rebroadcast Setup flags **192**; local `HandlePlayer` for primary/party.
+
 #### `NetPackageQuestEvent`
 
 ```text
@@ -981,6 +995,11 @@ prefabPos : Vector3
 eventType : u8
 // + type-dependent tail (write IL=205 / Process IL=368)
 ```
+
+`ProcessPackage` (**IL=368**): large switch on `QuestEventTypes` (17 cases). Server
+case 0 path: `QuestEventManager.CheckForPOILockouts` then rebroadcast Setup with
+lockout reason mapping. Other cases touch quest holder entity / POI / shared
+quest state (full case table: [quests-challenges.md](quests-challenges.md) §8).
 
 #### `NetPackageNPCQuestList`
 
@@ -991,8 +1010,29 @@ eventType : u8
 // type-dependent: FetchList entries / removeIndex / POI vectors
 ```
 
+`ProcessPackage` (**IL=180**): server populates `EntityTrader.activeQuests` via
+`QuestEventManager.GetQuestList` / `PopulateActiveQuests` / `SetupQuestList`, then
+`SendQuestPacketsToPlayer`. Client applies journal POI trader data.
+
 Detail: [quests-challenges.md](quests-challenges.md) section 8,
 [npc-dialog.md](npc-dialog.md).
+
+#### `NetPackageGameEventRequest` / `Response` / `BossEvent`
+
+- **Request** Process **IL=211**: resolve target/requester entities; party
+  membership check; `GameEventManager.HandleAction(...)`; reply
+  `NetPackageGameEventResponse` flags **192**.
+- **Response** Process **IL=135**: switch on `ResponseTypes` ->
+  `HandleGameEventDenied/Approved`, twitch party/refund, entity spawn/despawn/kill,
+  blocks added, etc.
+- **BossEvent** Process **IL=55**: switch -> `SendBossGroups`,
+  `SetupClientBossGroup`, `UpdateBossGroupType`, `RemoveClientBossGroup`,
+  `RemoveEntityFromBossGroup`, `RequestBossGroupStatRefresh`.
+
+#### `NetPackageEntityWaypointList`
+
+Process **IL=22**: primary local player only; sets vehicle + drone waypoints on
+`WaypointCollection` from manager lists.
 
 #### Ally packages
 
@@ -1361,6 +1401,7 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** Quest/Party/Trader/GameEvent/Boss process IL re-pins (§6.17-6.18).
 - **2026-08-07:** DamageEntity Process IL=172 local-player early outs; AliveFlags
   Process IL=109 apply + server rebroadcast 192.
 - **2026-08-07:** §6.21 process paths (Collect/Attach/ItemDrop/Pickup/Texture/
