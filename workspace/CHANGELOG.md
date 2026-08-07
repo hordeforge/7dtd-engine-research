@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: dynamic melee hitTarget
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionDynamic.hitTarget IL=454 - tag
+  assembly (action + item/MeleeTag + stance + movement), passive 7
+  degradation x ItemDegradationModifier + HandleItemBreak,
+  isCriticalHit reset, block/entity dispatch via GetDamageBlock /
+  GetDamageEntity.
 ## 2026-08-08 - tier-C: dynamic melee sweep raycast
 
 Done (V3.1.0 b14 IL):
