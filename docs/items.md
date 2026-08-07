@@ -560,6 +560,26 @@ slot is empty and `CanMoveToSlot(stack, slot)` passes; on any change it
 notifies, marks stats changed, and runs `HoldingItemHasChanged()` when the
 written slot is the held slot.
 
+**Take / return / lookup leaves:**
+
+- `TryTakeItem(stack)` (IL=83) deposits a stack by scanning `PUBLIC_SLOTS`: an
+  empty slot takes the whole clone (notify + `bPlayerStatsChanged =
+  !isEntityRemote`, true); a same-type slot takes `CanStackPartly(ref count)`
+  and returns true once the request is consumed; false only when nothing fits.
+- `CanTakeItem(stack)` (IL=37) is the affordance probe: true when any slot
+  (the full `slots` array) `CanStackPartlyWith` it or is empty.
+  `CanStackNoEmpty(stack)` (IL=24) is the same scan restricted to partial-stack
+  fits over `PUBLIC_SLOTS` (no empty slots).
+- `ReturnItem(stack)` (IL=36) walks `PreferredItemSlot(type, slot)` from 0: it
+  tries `AddItemAtSlot` into the first slot whose `preferredItemSlots[slot] ==
+  type`, scanning forward on failure.
+- `PreferredItemSlot(type, start)` (IL=23) is the first index at or after
+  `start` with `preferredItemSlots[i] == type`, else **-1**.
+- `GetSlotWithItemValue(iv)` (IL=25) is the first slot whose `itemValue`
+  `Equals(iv)`, else **-1**. `UsingBareHand` (IL=6) is
+  `bareHandItem == holdingItem`; `GetBareHandItemValue` (IL=3) reads the
+  `bareHandItemValue` field.
+
 ---
 
 ## 7. Durability and degradation
