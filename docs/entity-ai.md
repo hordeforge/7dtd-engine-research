@@ -1449,6 +1449,34 @@ planar distance and yaw rotation budgets; when remaining ≤ 0 play step
 (`internalPlayStepSound`) and refill from `getNextStepSoundDistance()` or **90°**
 yaw threshold; small moves may use 0.25 distance budget.
 
+**`getNextStepSoundDistance` (IL=2):** constant **1.5** m.
+
+**`SetMovementState` (IL=45):** if `speedStrafe ≥ 1234` treat as 0 (sentinel).
+`s2 = speedForward² + speedStrafe²`:
+
+| condition | MovementState |
+|---|---:|
+| s2 &gt; moveSpeedAggro² | **3** (sprint/aggro) |
+| s2 &gt; moveSpeed² | **2** (run) |
+| s2 &gt; 0.001 | **1** (walk) |
+| else | **0** (idle) |
+
+**`internalPlayStepSound(volume)` (IL=197 high-level):** skip air underfoot.
+Elevator + local player in water → `player_swim`. Else resolve standing / below
+block materials for surface step sound; passive **165** can mute; play material
+or default step at volume.
+
+**`MoveEntityHeaded(dir, absolute)` (IL=292 high-level):** if jumping
+`JumpMove`. Root-motion path: hit/ragdoll gates; apply
+`accumulatedRootMotion` via `Move` with passive speed modifiers (run scale
+0.12/0.35 residual); collision; friction 0.546; may
+`DefaultMoveEntity`. Non-root falls into DefaultMoveEntity.
+
+**`DefaultMoveEntity` (IL=290 high-level):** ground friction **0.91** / air
+**0.546**; dead residual; underfoot block checks; jumpTicks uses
+`jumpMovementFactor` **0.163** path into `Move`; climb zeros some motion;
+`entityCollision`; gravity `World.Gravity * 0.025` on y; repeated 0.91 damp.
+
 **`PlayHitGroundSound(impactSpeed)` (IL=42):** volume =
 `Lerp(0.3, 1, impactSpeed)`; play `soundLand` else `soundLandThump` else
 `"entityhitsground"`.
@@ -1918,8 +1946,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** ExecuteFallBehavior stub false; OnUpdatePosition step/speed;
-  speedForward decay 0.5; ChooseFallBehavior; FallHitGround; SetMoveForward.
+- **2026-08-07:** SetMovementState 0-3; step dist 1.5; MoveEntityHeaded/Default;
+  ExecuteFall stub; OnUpdatePosition; speed decay 0.5.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

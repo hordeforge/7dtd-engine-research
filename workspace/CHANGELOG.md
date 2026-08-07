@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SetMovementState and MoveEntityHeaded
+
+Done (V3.1.0 b14 IL):
+- getNextStepSoundDistance: 1.5 m.
+- SetMovementState: idle/walk/run/aggro by speed vs moveSpeed/moveSpeedAggro; strafe 1234 sentinel.
+- internalPlayStepSound: water swim; material sides; passive 165 mute.
+- MoveEntityHeaded: JumpMove/root motion/DefaultMoveEntity.
+- DefaultMoveEntity: 0.91/0.546 friction; gravity*0.025; jump factor 0.163.
+---
 ## 2026-08-07 — tier-C: OnUpdatePosition step/speed and fall stub
 
 Done (V3.1.0 b14 IL):
