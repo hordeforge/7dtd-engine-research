@@ -107,6 +107,16 @@ sums `ItemClass.Smell * count` over the drag-and-drop window stack (local
 player UI), every non-empty toolbelt slot, and every non-empty bag slot, then
 clamps the sum to **50** and returns it as an int.
 
+**`PlayerStealth.SmellUpdateItemsAndBlood()` (IL=79)** is the radius-target
+step: when the player is dead or `smellWet < 3` it clears the smell
+(`SmellClear`, plus a client-side `NetPackageEntityStealth` to the server).
+A `dysenterySmell` cvar is consumed into `SetSmellEat(35)` (a strong 35-smell
+event). Otherwise `itemSmell = SmellCountItems()`, zeroed when `smellWetRate
+>= 0.01` (in wet conditions carried items stop smelling); then
+`smellRadiusTarget = max(SmellCountToRadius(itemSmell), smellEatRadius)`, and
+a local player with `shelterPercent > 0` scales the target to **20%**
+(`smellRadiusTarget *= 0.2`) and marks `smellSheltered`.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Odorless
@@ -148,6 +158,10 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.SmellUpdateItemsAndBlood (IL=79): dead /
+  smellWet<3 -> SmellClear + client stealth package; dysenterySmell ->
+  SetSmellEat(35); wet suppresses item smell; smellRadiusTarget = max(
+  SmellCountToRadius(items), smellEatRadius); shelter x0.2 + sheltered flag.
 - **2026-08-07:** PlayerStealth.SmellCountItems (IL=110): ItemClass.Smell *
   count over drag + toolbelt + bag, clamp 50, int return.
 - **2026-08-07:** Entity.GetBrightness (IL=53): ambient light sample at 66%

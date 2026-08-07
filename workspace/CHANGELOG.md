@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SmellUpdateItemsAndBlood
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.SmellUpdateItemsAndBlood (IL=79) narrated in
+  stealth-smell.md: dead or smellWet<3 -> SmellClear + client stealth
+  package; dysenterySmell cvar -> SetSmellEat(35); wet (smellWetRate >=
+  0.01) suppresses item smell; smellRadiusTarget = max(SmellCountToRadius(
+  items), smellEatRadius); shelterPercent > 0 -> x0.2 + smellSheltered.
+
 ## 2026-08-08 - tier-C: PlayerStealth.SmellCountItems
 
 Done (V3.1.0 b14 IL):
