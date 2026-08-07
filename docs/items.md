@@ -1396,6 +1396,13 @@ resolves the dump cell via `TryFindDumpPosition`, and gates on the
 `ttCannotUseAtThisTime` tooltip), then latches `lastUseTime` +
 `RightArmAnimationUse`; the water is written back in `OnHoldingUpdate`.
 
+**`ItemClass.OnConvertToBlockValue(iv, blueprintBV)` (V3.1.0 b14)** is the
+item->placed-block state carrier: the base (IL=2) returns the blueprint
+value unchanged; `ItemClassTorch` (IL=20) packs the item's `UseTimes` into
+the placed block's `meta = UseTimes & 15` and `meta2 = (UseTimes >> 4) &
+15` - the torch's burn state survives placement (this is the conversion
+`ItemActionPlaceAsBlock` calls with its `blockToPlace`).
+
 **Small action leaves (V3.1.0 b14):** `ItemActionActivate.ExecuteAction`
 (IL=79) is press-only + `Delay` + the passive-177 twitch gate, plays
 `soundStart`, and calls `holdingItem.OnHoldingItemActivated(
@@ -1509,6 +1516,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemClass.OnConvertToBlockValue: base IL=2 passthrough;
+  ItemClassTorch IL=20 packs UseTimes into meta/meta2 (burn state survives
+  placement).
 - **2026-08-08:** Small action leaves: ItemActionActivate IL=79
   (OnHoldingItemActivated hook); ItemActionZoom IL=103 aim toggle
   (IsAimingGunPossible + camera gates).
