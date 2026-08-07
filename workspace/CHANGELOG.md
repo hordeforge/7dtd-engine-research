@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: cave sampler
+
+Done (V3.1.0 b14 IL):
+- spawning.md 6: Chunk.FindRandomCavePoint (IL=95) downward scan from surface
+  up to relMinY (stop y<=2), accept CanMobsSpawnAtPos(false,true), world y+1.
+
 ## 2026-08-08 - tier-C: top-soil bitmap
 
 Done (V3.1.0 b14 IL):
