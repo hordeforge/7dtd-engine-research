@@ -373,6 +373,17 @@ interior, 0 = at edge).
 TEs; if within deadZone of claim and owner valid: self not protected against
 self; ally within claimSize only when `forKeystone`; else protected → true.
 
+**`AdjustBoundsForPlayers(ref pos, padPercent)` (IL=112):** if world extent
+width &lt; **1024** or max.x == 0 return false (no clamp). Shrink min/max by
+`50 + 80*padPercent` on xz; clamp pos into that box; return true if any
+coordinate was clamped.
+
+**`FindSupportingBlockPos(pos)` (IL=175 high-level):** if block at pos movement-
+blocked or elevator → return pos. Check y+1 elevator. If y−1 elevator or blocked
+→ return. Else direction octant from pos to block center (`supportOrder` table);
+walk neighbor offsets for a movement-blocked support block and return its
+center.
+
 ### 5.1 `GameManager.ChangeBlocks` (IL=530) / `SetBlocksOnClients` (IL=13)
 
 Authoritative multi-block apply used by `NetPackageSetBlock` Process:
@@ -517,6 +528,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** FindSupportingBlockPos supportOrder; AdjustBoundsForPlayers pad clamp.
 - **2026-08-07:** InBoundsForPlayersPercent 50/80; IsLandProtectedBlock lpblock deadZone.
 - **2026-08-07:** CheckEntityCollisionWithBlocks; CanPlaceLandProtectionBlockAt 0.5 bounds.
 - **2026-08-07:** Chunk.SetBlockRaw IL=386 (y cap, water, IndexedBlocks, heightmap,

@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: support pos and land claim offline hours
+
+Done (V3.1.0 b14 IL):
+- FindSupportingBlockPos elevator/blocked/supportOrder octant.
+- AdjustBoundsForPlayers 50+80*pad clamp; IsLandProtectionValidForPlayer offline days.
+- Chunk.GetEntitiesAround y buckets; FindRandomSpawnPointNearPlayer wrapper.
+---
 ## 2026-08-07 — tier-C: Chunk player spawn and land claim bounds
 
 Done (V3.1.0 b14 IL):

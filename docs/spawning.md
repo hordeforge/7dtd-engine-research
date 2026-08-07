@@ -184,6 +184,16 @@ sqr-dist among `m_LocalPlayerEntities` when more than one.
 **`World.GetEntitiesAround(mask, pos, radius, list)` (IL=65):** chunk-range
 scan (pos±radius)/16; each chunk `GetEntitiesAround` with flag mask.
 
+**`Chunk.GetEntitiesAround(mask, pos, radius, list)` (IL=92):** y-band of entity
+list buckets 0..15; flag match and `GetDistanceSq ≤ radius²`.
+
+**`World.FindRandomSpawnPointNearPlayer(player, maxLight, ref xyz, maxDist)`
+(IL=18):** `FindRandomSpawnPointNearPosition(player.pos, maxLight, xyz,
+Vector3(maxDist×3), true, false)`.
+
+**`World.IsLandProtectionValidForPlayer(ppData)` (IL=14):** false if
+`OfflineHours > GameStats[46] * 24` (claim expires after offline days).
+
 The despawn accounting lives in `OnEntityUnloaded`, registered as a world
 delegate. It only touches `Biome`-sourced entities and reads the master chunk
 back from the entity's stored spawner chunk key:
@@ -625,6 +635,7 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** Chunk.GetEntitiesAround buckets; FindRandomSpawnPointNearPlayer; claim offline hours.
 - **2026-08-07:** Chunk.CanPlayersSpawnAtPos y 2..251; GetPlayersAround; GetEntitiesAround.
 - **2026-08-07:** CanPlayersSpawnAtPos; FindRandomSpawnPointNearRandomPlayer 32; GetClosestLocalPlayer.
 - **2026-08-07:** EntitySpawner.resetRuntimeVariables wave/delay clear.
