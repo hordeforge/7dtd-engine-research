@@ -497,9 +497,14 @@ serializes into chunk/player save state via scheduled entries.
 
 | Path | IL | Cap / cadence | Work |
 |---|---:|---|---|
-| `tickScheduled` | **151** | at most **100** due entries per call | sorted by time; drop if `scheduledTime > GameTimer.ticks`; if chunk area unloaded, reschedule +30..45 ticks; else `execute` |
+| `tickScheduled` | **151** | at most **100** due entries per call | sorted by time; drop if `scheduledTime > GameTimer.ticks`; if chunk area unloaded, reschedule **+30..45** ticks; else `execute` |
 | `tickRandom` | 97 | `max(activeCount/100, 1)` chunks per frame | rebuild key list when index wraps; per chunk `tickChunkRandom` |
-| `tickChunkRandom` | 97 | requires `GameTimer.ticks - LastTimeRandomTicked >= **1200**` | walk `Chunk.GetTickedBlocks()` reverse; skip if already scheduled; `Block.UpdateTick(...)` |
+| `tickChunkRandom` | 97 | requires `GameTimer.ticks - LastTimeRandomTicked >= **1200**` | walk `Chunk.GetTickedBlocks()` reverse; skip if already scheduled; `Block.UpdateTick(..., random=true, …)` |
+| `execute` | **24** | type must match entry `blockID` | else silent drop; `UpdateTick(..., random=false, ticksIfLoaded, rnd)` |
+| `AddScheduledBlockUpdate` | **39** | under lock | if same pos/id already scheduled, `remove` then `add` with `ticks + GameTimer.ticks` |
+
+`Chunk.UpdateTick` (IL=26, profiler `TeTick`) only walks `tileEntities.list` →
+`TileEntity.UpdateTick` (not block random ticks).
 
 `WorldBlockTickerEntry` fields: `worldPos`, `blockID`, `scheduledTime`,
 `nextTickEntryID`, `tickEntryID`.
@@ -571,6 +576,8 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-07:** WorldBlockTicker execute type-match gate; AddScheduled replace;
+  Chunk.UpdateTick TE-only TeTick.
 - **2026-08-07:** Save entry points table (SaveWorld / SaveAll / players.xml).
 - **2026-08-07:** Sector `7rg` open path + V1 header layout (magic+version byte +
   4096+4096 tables); Raw 11-byte header (`7rr` + version:i32 + paddingBytes:i32).

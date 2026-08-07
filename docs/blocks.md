@@ -353,12 +353,23 @@ heap objects; the **block** ticker (`WorldBlockTicker`, driven from
   wants deterministic growth reschedules itself with `addScheduledTick` instead
   of relying on random ticks.
 
-`BlockPlantGrowing.UpdateTick` (IL=239) is the canonical example: it aborts if
-`nextPlant` is air or the plant is not alive; on a random tick it reschedules and
-returns; otherwise it checks the light level above (`lightLevelGrow`) and whether
-anything blocks the cell above, then advances the cell by setting its `type` to
-`nextPlant`. Growth is thus a chain of scheduled ticks, each swapping one word
-for the next stage, entirely on the server.
+`BlockPlantGrowing.UpdateTick` (IL=239) is the canonical example:
+
+1. Abort if `nextPlant` is air.
+2. `CheckPlantAlive`; if dead return true (handled).
+3. Random tick: `addScheduledTick` and return.
+4. If light above (`GetLight` type 1) &lt; `lightLevelGrow`: reschedule, return.
+5. If `isPlantGrowingIfAnythingOnTop` and cell above not air: fail grow.
+6. `CanGrowOn` soil under next plant; set type to `nextPlant` (biome override
+   dictionary may remap type); `BlockPlaceholderMap.Replace`; copy rotation/meta;
+   optional `bGrowOnTopEnabled` bumps meta (cap 15); commit via SetBlock path.
+
+Growth is a chain of scheduled ticks swapping one word for the next stage on the
+server.
+
+**`BlockTorchHeatMap.UpdateTick` (IL=35):** base UpdateTick; if
+`HeatMapStrength > 0` and AIDirector present:
+`NotifyActivity(enum 6, pos, strength*0.4, 720)` (chunk heat for scouts).
 
 ---
 
@@ -433,6 +444,8 @@ carries the composite data template while the feature modules own the behavior.
 
 ## Changelog
 
+- **2026-08-07:** PlantGrowing light/CanGrowOn/biome remap; TorchHeatMap
+  NotifyActivity enum 6 strength*0.4 duration 720.
 - **2026-08-07:** IsLandProtectedBlock self/foreign/ally+keystone; bounds soft
   edge 50/80; CanPlaceBlockAt IL=129 trader/claim ring; CanPickupBlockAt wrap.
 - **2026-08-07:** DropItemsOnEvent IL=246 (prob table, stick vs ItemDropServer,

@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: PlantGrowing, TorchHeatMap, WorldBlockTicker execute
+
+Done (V3.1.0 b14 IL):
+- PlantGrowing lightLevelGrow, CanGrowOn, biome type remap, meta grow-on-top.
+- TorchHeatMap AIDirector.NotifyActivity enum 6 strength*0.4 duration 720.
+- WBT execute type-match; AddScheduled replace; Chunk.UpdateTick TE-only.
+---
 ## 2026-08-07 — tier-C: DecoManager.UpdateTick thread queues and ring
 
 Done (V3.1.0 b14 IL):

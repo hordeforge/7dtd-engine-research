@@ -46,8 +46,8 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached, non-generated | 6040 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2341 (excluded from %) |
 | ...**game types** (the RE surface) | **3699** |
-| ...**narrated** (backticked in a narrative doc) | **1470 (39%)** |
-| ...**catalogued only** (generated inventory, not narrated) | 837 |
+| ...**narrated** (backticked in a narrative doc) | **1471 (39%)** |
+| ...**catalogued only** (generated inventory, not narrated) | 836 |
 | ...**classified** out-of-scope | 1392 |
 | ...**unaccounted** (appears nowhere) | 0 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 502 |

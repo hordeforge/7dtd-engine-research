@@ -180,6 +180,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | IsLandProtectedBlock + bounds soft edge | server-lifecycle §3.1 |
 | Chunk.SetBlockRaw silent write path | world-chunks §5.0 |
 | DecoManager.UpdateTick thread queues | managers §1.1 |
+| PlantGrowing + TorchHeatMap + WBT execute | blocks §7 / save-region §3.6 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
