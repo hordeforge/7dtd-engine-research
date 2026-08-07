@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: ChooseFallBehavior and FallHitGround destroy
+
+Done (V3.1.0 b14 IL):
+- ChooseFallBehavior: height/difficulty filter; weighted pick; ExecuteFallBehavior.
+- PlayHitGroundSound: volume Lerp(0.3,1,speed); land/thump/default.
+- EAI FallHitGround: wake 0.8; destroy-area path 2.5 + UnreachablePercent; ally spread.
+- SetMoveForward / WithModifiers speed and root scale.
+---
 ## 2026-08-07 — tier-C: UpdateJump states and fallHitGround
 
 Done (V3.1.0 b14 IL):

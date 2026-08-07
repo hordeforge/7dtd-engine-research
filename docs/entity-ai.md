@@ -1426,6 +1426,27 @@ heightDiff/ticks.
 not ragdoll: unless `disableFallBehaviorUntilOnGround`, try
 `ChooseFallBehavior`; else land jump anim. `aiManager.FallHitGround(distance)`.
 
+**`ChooseFallBehavior` (IL=113):** empty list → false. Filter
+`fallBehaviors` by height range and difficulty range (hardcoded difficulty
+probe **1**); weighted pick via cumulative weights; `ExecuteFallBehavior`.
+
+**`PlayHitGroundSound(impactSpeed)` (IL=42):** volume =
+`Lerp(0.3, 1, impactSpeed)`; play `soundLand` else `soundLandThump` else
+`"entityhitsground"`.
+
+**`EAIManager.FallHitGround` (IL=96):** if distance ≥ **0.8** wake sleeper. If
+≥ **2.5** and moveHelper active and (unreachable side **or** move-to-above):
+clear `EAIDestroyArea` delay; `UnreachablePercent += 0.3`;
+`IsDestroyAreaTryUnreachable=true`. If ≥ **3** humans in **20×10×20** box,
+pick 2 random allies and add **0.12** unreachable each.
+
+**`SetMoveForward(v)` (IL=41):** `moveDirection=(0,0,v)`; not absolute; not
+climbing; `lerpForwardSpeed`; zero motion xz and root xz; elevator zeros y.
+
+**`SetMoveForwardWithModifiers(speedMod, scale, strafeAngle, climb)` (IL=64):**
+rotate forward by strafe yaw into `moveDirection`; `speedModifier =
+speedMod*scale`; if prior speed &gt; 0.2 scale root xz by ratio.
+
 ---
 
 ## D5. Path system fields (ASP vs AStar)
@@ -1878,8 +1899,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** UpdateJump states 2-6; fallHitGround dmg (-vy-0.85)*160;
-  StartJump 2/5; StartJumpMotion; passive 132; DigStop.
+- **2026-08-07:** ChooseFallBehavior weights; FallHitGround destroy-area 2.5 m;
+  PlayHitGroundSound; SetMoveForward; UpdateJump; fall dmg formula.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
