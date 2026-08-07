@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: thrown weapon
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: instantiateProjectile (IL=122) model clone +
+  ThrownWeaponMoveScript binding + MinEventContext + event 82;
+  throwAway (IL=96) StaminaLoss (112) * StaminaUsageMultiplier cost, Fire,
+  DecHoldingItem(1).
+
 ## 2026-08-08 - tier-C: MakeMotionMoveToward
 
 Done (V3.1.0 b14 IL):
