@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameUtils classification leaves
+
+Done (V3.1.0 b14 IL):
+- raycast-pathing.md: IsBlockOrTerrain (IL=22) tag set; GetDirByNormal
+  (IL=11/22) NeighborsEightWay index; GetClosestDirection (IL=74) 90-limited
+  4-way / full 8-way quantization.
+- tile-entities-power.md 1: UInt64ToVector3i (IL=27) exact inverse of the
+  16-bit pack.
+
 ## 2026-08-08 - tier-C: GameUtils time conversions
 
 Done (V3.1.0 b14 IL):
