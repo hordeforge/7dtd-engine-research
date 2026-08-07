@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: party highest loot stage wrappers
+
+Done (V3.1.0 b14 IL):
+- GetHighestPartyLootStage -> Party.GetHighestLootStage max over members.
+- GetHighestLootStage: max GetLootStage(containerMod, containerBonus).
+---
 ## 2026-08-07 — tier-C: GetLootStage POI/biome formula
 
 Done (V3.1.0 b14 IL):

@@ -561,6 +561,13 @@ else:
 Passive **159** scales loot stage; **160** scales biome max when GameStats **66**
 (loot stage clamp) is on.
 
+**`EntityPlayer.GetHighestPartyLootStage` (IL=14):** if in party,
+`Party.GetHighestLootStage(containerMod, containerBonus)`; else own
+`GetLootStage`.
+
+**`Party.GetHighestLootStage` (IL=28):** max of each member's
+`GetLootStage(containerMod, containerBonus)`.
+
 ## Related docs
 
 | Doc | Role |
@@ -575,7 +582,8 @@ Passive **159** scales loot stage; **160** scales biome max when GameStats **66*
 
 ## Changelog
 
-- **2026-08-07:** GetLootStage IL=184 POI tier + biome min/max + passives 159/160.
+- **2026-08-07:** GetLootStage IL=184 POI/biome + passives 159/160; party max
+  wrappers GetHighestPartyLootStage / GetHighestLootStage.
 - **2026-08-07:** EntityItem.OnUpdateEntity lifetime 0.05/tick, ground counter 10,
   distraction death, Y&lt;0 death; OnCollectServer RemoveEntity reason 2.
 - **2026-08-07:** EntityTrader.OnUpdateLive IL=315 (quest populate, 10 m bounds
