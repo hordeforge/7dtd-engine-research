@@ -470,6 +470,14 @@ or **-1**. The chunk-side link mirrors the sleepers:
 `Chunk.AddTriggerVolumeId(id)` (IL=18) dedupes into `triggerVolumes` with the
 same **255** cap error; `GetTriggerVolumes` (IL=3) exposes the list.
 
+**Wall volumes are the third mirror** with one extra: `World.AddWallVolume`
+(IL=69) assigns the next id and, on the server, broadcasts
+`NetPackageWallVolume.Setup(id, volume)` (channel 192) after registering;
+`AddWallVolumeAt(index, volume)` (IL=50) registers at an explicit id with
+duplicate-id errors; `GetWallVolume(index)` (IL=30) throws on miss;
+`FindWallVolume(mins, maxs)` (IL=29) maps the `VolumeKey` (or **-1**);
+`GetAllWallVolumes()` (IL=49) copies the tuples.
+
 **`SleeperVolume.TouchGroup` (IL=52):** `mode = flags & 7`. If no `groupId` or no
 prefab: `Touch(world, player, setActive, mode)`. Else for each volume in
 `prefabInstance.sleeperVolumes` with same `groupId` and not
