@@ -16,6 +16,19 @@ shutdown.
 
 ## 1. Boot sequence (state machine)
 
+**`GameEntrypoint.FirstFrameInit()` (IL=65)** runs before `StartGame`:
+cursor off, main-thread ref, `PlatformOptimizations.Init`; `HasPrefCollisions()`
+(abort on collision); `GamePrefs.InitPropertyDeclarations()` and
+`GameStartupHelper.InitCommandLine()` (abort on failure); `RunAutomation`
+launch pref → `AutomationRunner.InitialiseLogging`; `UserDataFolder` →
+`GameIO.InitializeUserDataPaths`; `PlatformApplicationManager.Init` /
+`PlatformManager.Init` (abort on failure); `Services.ServiceProvider.Init`
+(+ analytics `IAnalyticsService` registered/started, log level from the
+`analyticsLogLevel` launch arg); `Application.targetFrameRate = (int)
+Application.GetCurrentRefreshRate().value`. Then the `GameStartupHelper`
+boot/config chain ([dedicated-misc-systems.md](dedicated-misc-systems.md))
+and `GameManager.StartGame(offline)` below.
+
 `GameManager.StartGame(offline)` kicks a coroutine `startGameCo` (the boot state
 machine `startGameCo>d__138`, IL=378), which on a dedicated server reads
 `GameServerInfo.EACEnabled` (logging an `eacWarning` advisory), then routes through

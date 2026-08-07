@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GameEntrypoint.FirstFrameInit
+
+Done (V3.1.0 b14 IL):
+- FirstFrameInit IL=65 boot chain: pref collisions abort, GamePrefs decls,
+  InitCommandLine, automation logging, user data paths, platform/service init,
+  analytics start, targetFrameRate = refresh rate.
 ## 2026-08-08 — tier-C: ApplyParsedGamePrefs commit
 
 Done (V3.1.0 b14 IL):
