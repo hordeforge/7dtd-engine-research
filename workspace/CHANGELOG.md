@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: swim underwater state
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md: OnHeadUnderwaterStateChanged IL=15 MinEvents 81
+  underwater / 80 surfaced; SwimChanged IL=12 avatar SetSwim;
+  SetSwimValues IL=15 Clamp(duration/swimSpeed - 6, 3, 20).
 ## 2026-08-08 - tier-C: water write path + WaterValue leaves
 
 Done (V3.1.0 b14 IL):
