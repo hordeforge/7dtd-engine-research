@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TileEntity transfer family
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md 1: ChangeBlocks TE handoff (oldTE.ReplacedBy(newBV,
+  oldBV, newTE); air -> RemoveTileEntityAt; else newTE.UpgradeDowngradeFrom
+  (oldTE)); base IL=3 _other.OnDestroy; TileEntityComposite IL=34 Owner +
+  module fan-out; TileEntityCollector IL=73 worldTimeTouched + cloned Items;
+  TileEntityVendingMachine IL=29 ILockable copy (locked/owner/users/password);
+  UseLocalVersioning (IL=15) readVersion -1 gate / >= 18.
+
 ## 2026-08-08 - tier-C: ItemActionAttack modifiers
 
 Done (V3.1.0 b14 IL):
