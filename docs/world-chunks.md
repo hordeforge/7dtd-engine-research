@@ -22,6 +22,17 @@
 
 Full tick (when timer ready): Flush → OnUpdateTick → TickEntities → LetBlocksFall → (not dedi) visibility → NetEntityDistribution → SendChunksToClients → optional SaveRandomChunks.
 
+**`GameManager.UpdateTick` (IL=150) detail:** if `GameTimer.elapsedTicks == 0`
+but players exist → only `TickEntitiesSlice` and return true (partial). Else
+`TickEntitiesFlush`; `partial = (Time.time - lastTime) * 20`;
+`OnUpdateTick(partial, activeChunks)`. Server: if `gameStateManager.OnUpdateTick`
+false return false. Always `TickEntities(partial)` + `LetBlocksFall`. Non-dedi:
+`SetEntitiesVisibleNearToLocalPlayer`. Server: `entityDistributer.OnUpdateEntities`,
+`SendChunksToClients`; if `bSavingActive`: cache protected positions; every
+**40** ticks `SaveRandomChunks(2, …)`; every **60 s** wall time
+`SaveDecorations` + optional `EventPrefabs.Save`. Client: `updateSendClientPlayerPositionToServer`.
+Rich presence every **1 s** wall.
+
 ```mermaid
 flowchart LR
   GMu[gmUpdate] --> UT[UpdateTick]
@@ -396,9 +407,9 @@ Authoritative multi-block apply used by `NetPackageSetBlock` Process:
    on neighbor chunks; `UncullChunk`; child-block TE cleanup.
 4. Delayed regen stop after list.
 
-`SetBlocksOnClients(exceptEntityId, package)`: `ConnectionManager.SendPackage`
-with flags **192** excluding the placing entity (fan-out of the same
-`NetPackageSetBlock`).
+`SetBlocksOnClients(exceptEntityId, package)` (IL=13):
+`ConnectionManager.SendPackage(package, false, -1, exceptEntityId, -1, null,
+**192**, false)` excluding the placing entity.
 
 ```mermaid
 stateDiagram-v2
@@ -528,6 +539,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** UpdateTick IL=150 slice/full; save 40 ticks; deco 60s; SetBlocksOnClients 192.
 - **2026-08-07:** FindSupportingBlockPos supportOrder; AdjustBoundsForPlayers pad clamp.
 - **2026-08-07:** InBoundsForPlayersPercent 50/80; IsLandProtectedBlock lpblock deadZone.
 - **2026-08-07:** CheckEntityCollisionWithBlocks; CanPlaceLandProtectionBlockAt 0.5 bounds.

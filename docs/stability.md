@@ -137,6 +137,10 @@ for each pos `OnBlockStartsToFall` + `DynamicMeshManager.ChunkChanged` + remove
 from `groupedBlocks`; if first block `ShowModelOnFall`, spawn `fallingBlocks`
 entity at center with ±0.1 xz jitter.
 
+**`GroupFallingBlocks` (IL=292 high-level):** BFS over `fallingBlockSet`
+connected non-air non-terrain blocks; enforce `GroupBounds.IsWithinSize`;
+enqueue completed groups into `fallingGroups` and mark `groupedBlocks`.
+
 **`Block.OnBlockStartsToFall` (IL=6):** base path only
 `SetBlockRPC(pos, Air)` (remove solid before entity simulates). Overrides:
 `BlockModelTree` may `OnBlockDestroyedBy` then particle; composites forward to
@@ -198,6 +202,7 @@ channel today; the plane can be recomputed on load with
 
 ## Changelog
 
+- **2026-08-07:** GroupFallingBlocks BFS GroupBounds size limit.
 - **2026-08-07:** CreateFallingBlockGroup OnBlockStartsToFall + fallingBlocks entity.
 - **2026-08-07:** OnBlockStartsToFall base SetBlockRPC Air; tree/composite
   overrides.

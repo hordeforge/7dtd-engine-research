@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: UpdateTick and GroupFallingBlocks
+
+Done (V3.1.0 b14 IL):
+- UpdateTick: elapsedTicks==0 slice path; partial*20; save 40 ticks / deco 60s.
+- SetBlocksOnClients flags 192 except placer.
+- GroupFallingBlocks BFS size-limited groups into fallingGroups.
+---
 ## 2026-08-07 — tier-C: support pos and land claim offline hours
 
 Done (V3.1.0 b14 IL):
