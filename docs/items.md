@@ -273,6 +273,28 @@ ItemClass.StartHolding`, which calls `StartHolding` on each of the first three
 [`protocol-packages.md`](protocol-packages.md) §5.3), so every client renders the
 right model in the entity's hands.
 
+**`Inventory.updateHoldingItem()` (IL=172)** - the redraw on a held-slot
+change: with the same item value *and* index as last drawn, it just calls
+`holdingItem.OnHoldingReset(holdingItemData)` and returns. Otherwise it marks
+`entity.bPlayerStatsChanged = !isEntityRemote`, then tears down the old item:
+`lastdrawnHoldingItem.StopHolding(lastDrawnHoldingItemData,
+lastdrawnHoldingItemTransform)`, fires
+`lastDrawnHoldingItemValue.FireEvent(onSelfEquipStop, MinEventContext)` (when
+the old item's tags are not in the `ignoreWhenHeld` set), and hides the old
+model (`SetParent(inactiveItems, false)` + `SetActive(false)`). The new item:
+`QuestEventManager.Current.HeldItem(holdingItemData.itemValue)`,
+`holdingItem.StartHolding(holdingItemData, models[holdingItemIdx])`,
+MinEventContext gets `ItemValue = value` (with the context seed overwritten by
+`value.Seed`) and `Transform = models[idx]`,
+`setHoldingItemTransform(models[idx])`, `ShowRightHand(true)`, then fires
+`value.FireEvent(onSelfHoldingItemCreated, context)` and (tags not ignored)
+`value.FireEvent(onSelfEquipStart, context)`; finally
+`entity.OnHoldingItemChanged()` and the `lastDrawn*`/`lastdrawn*` cache fields
+are refreshed. `Inventory.ShowHeldItem(waitTime, hideFirst)` (IL=19) is the
+delayed re-show helper: it stops any pending `delayedShowHideHeldItemRoutine`
+coroutine and starts `delayedShowHideHeldItem(hideFirst, waitTime)` on the
+GameManager instance (used by `SetItem` step 1 after a held-slot rewrite).
+
 ```mermaid
 sequenceDiagram
   participant CL as Wielder client
@@ -688,6 +710,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** Inventory.updateHoldingItem (IL=172) redraw chain: same-item
+  OnHoldingReset shortcut, StopHolding + onSelfEquipStop + model hide, HeldItem
+  quest hook, StartHolding + onSelfHoldingItemCreated + onSelfEquipStart
+  (ignoreWhenHeld gate), OnHoldingItemChanged + lastDrawn cache; ShowHeldItem
+  (IL=19) coroutine scheduling.
 - **2026-08-07:** Inventory notifyListeners (IL=24) fan-out + read accessors:
   bare-hand fallback in GetItemInSlot/GetItemDataInSlot, GetItemCount type/tag
   overloads (IL=92/86) with texture/seed/meta/mod filters, XUiM wrappers.

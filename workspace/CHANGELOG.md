@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory.updateHoldingItem
+
+Done (V3.1.0 b14 IL):
+- Inventory.updateHoldingItem (IL=172) narrated in items.md section 5:
+  same-item OnHoldingReset shortcut; teardown StopHolding + FireEvent
+  onSelfEquipStop (57) when not in ignoreWhenHeld + model hide under
+  inactiveItems; draw: QuestEventManager.HeldItem, StartHolding,
+  MinEventContext ItemValue (seed copied) + Transform, ShowRightHand,
+  FireEvent onSelfHoldingItemCreated (83) + onSelfEquipStart (54);
+  OnHoldingItemChanged + lastDrawn cache refresh.
+- ShowHeldItem (IL=19): stop + restart delayedShowHideHeldItem coroutine
+  (hideFirst, waitTime) on GameManager.
+
 ## 2026-08-08 - tier-C: Inventory notify + read accessors
 
 Done (V3.1.0 b14 IL):
