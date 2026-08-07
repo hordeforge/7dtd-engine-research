@@ -66,6 +66,12 @@ Interfaces **cannot** be patched directly (RealEarth already avoids that). Concr
 | `Chunk` | `GetTerrainHeight` / `SetTerrainHeight` | **byte** | Chunk-local heightmap still byte |
 | `TerrainFromDTM` | `GetTerrainHeightByteAt` / `GetTerrainHeightAt` | byte / float | Baked DTM path |
 | `TerrainFromRaw` | same | byte / float | Raw heightmap path |
+
+**Bodies (V3.1.0 b14):** `World.GetHeightAt(x, z)` (IL=22) delegates to
+`GetTerrainGenerator().GetTerrainHeightAt((int)x, (int)z)` (the generator
+oracle, no chunk load; **0** without a generator). `World.GetTerrainHeight(x,
+z)` (IL=21) reads the live chunk's byte heightmap via `GetChunkSync` +
+`Chunk.GetTerrainHeight(toBlockXZ, toBlockXZ)` (**0** without the chunk).
 | `TerrainGeneratorWithBiomeResource` | `GetTerrainHeightAt` | float | RWG; **ByteAt abstract** |
 | `TerrainGeneratorWithBiomeResource` | `GenerateTerrain` | (void) | Large IL (~424) fill path |
 | `MeshGeneratorMC2` / `Prefab` | `GetTerrainHeight` | **int** | Meshing |
