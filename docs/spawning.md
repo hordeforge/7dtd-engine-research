@@ -119,7 +119,13 @@ Key facts read from the IL:
   director party, not the biome loop.
 - **Placement ring.** Positions are drawn in a min/max distance band to the
   nearest players: 28..54 m for enemies, 48..70 m for animals, so wandering
-  spawns appear off-camera but nearby.
+  spawns appear off-camera but nearby. IL detail: the `maxDistance` parameter
+  of `GetRandomSpawnPositionInAreaMinMaxToPlayers` is **unused** in this build
+  (never read); the actual gates are the `minDistance` (`isPositionFarFromPlayers`),
+  `chunk.CanMobsSpawnAtPos(localX, floor(y), localZ, false, true)`, an optional
+  bedroll check, and a view-cone rejection (any player within 50 m whose
+  `IsInViewCone(pos)` is true). Up to 10 random draws in the area; success
+  centers on `blockPos + (0.5, GetTerrainOffset, 0.5)`.
 - **Group selection.** The biome group list (`BiomeSpawnEntityGroupList`, keyed
   by biome name) is scanned from a random start for up to `min(5, count)` groups.
   A group must be enabled by POI tags, match the current `EDaytime`
