@@ -2507,7 +2507,11 @@ entry). `Read` gates fields on the version: `groupId` only at >= 16, a legacy
 uint64 discarded at <= 13, a legacy int32 discarded at > 7, the `respawnMap`
 section only at >= 8, the int32 flags at >= 18 with `isQuestExclude` folded in
 only at >= 12, `respawnMap.spawnPointIndex` defaulting to -1 below 17, and
-`groupCountList.groupName` read only at >= 21.
+`groupCountList.groupName` read only at >= 21. Each `SpawnPoint`
+(Write IL=25 / Read IL=70) is `pos` (3x int32), `rot` (float), and the
+`BlockSleeper` block name (string); `Read` discards a legacy 3-float rotation
+triple when `7 <= version < 20` and a legacy byte below 20, and only reads the
+block name at version > 14.
 
 ### D8.5 Entity sleeper init helpers
 
