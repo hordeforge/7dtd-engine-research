@@ -266,6 +266,18 @@ If not `LootContainer.NoLoot` and `lootDropProb > RandomFloat`,
 
 **`SetDead` (IL=8):** base `Entity.SetDead` + force `Health.Value = 0`.
 
+**`SetAlive` chain (IL=34/46/31):** `Entity.SetAlive` (IL=34): `bDead = false`;
+physics layer: local player → **20**, other players with
+`ConsoleCmdCCPhysics.EnableCCPhysicsChanges` → **3**, else **15**.
+`EntityAlive.SetAlive` (IL=46): when coming back from dead →
+`lastAliveTime = Time.time`, then base. `EntityPlayer.SetAlive` (IL=31): when
+coming back from dead, the game-stage born-at clock advances:
+`daysAliveTicks = GameStageDefinition.DaysAliveChangeWhenKilled (2) * 24000`;
+if `worldTime - gameStageBornAtWorldTime < daysAliveTicks` →
+`gameStageBornAtWorldTime = worldTime` (fresh respawn restarts the days-alive
+count), else `gameStageBornAtWorldTime += daysAliveTicks`. This is the
+`get_gameStage` "days lived" input ([progression.md](progression.md)).
+
 **`KillLootContainer` (IL=24):** if local, already dead, corpse block non-air, and
 `deathUpdateTime < timeStayAfterDeath`: snap `deathUpdateTime =
 timeStayAfterDeath - 1` (almost expire corpse linger). Then base
