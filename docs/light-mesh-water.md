@@ -304,6 +304,14 @@ Apply-stage prose also in [dedicated-misc-systems.md](dedicated-misc-systems.md)
 `meta2 = emissions`; `rotation = 8`; `damage = evaporation + (flowDir ? 50+flowDir : 0)`;
 `SetBlockRPC`. WBT schedule delay: state 0 → **60** ticks, state 2 → **1** tick,
 else **1000** ticks.
+
+**Damage packing helpers:**
+
+- `Evap` (IL=9): if `damage <= 45` return damage else 0 (evap lives in 0..45).
+- `Flow` (IL=11): if `damage > 50` return `damage - 50` else 0 (flow enum in
+  residual above 50).
+- `IncEvap`: if damage &gt; 45 reset to 0 then `damage++`.
+- `GetFlowDirection`: 1=+Z, 2=+X, 3=-Z, 4=-X.
 | `ChunkProviderGenerateWorld.updateDecosAllowedForChunk` | | 306 |
 | `UpdateDecorations` / `updateDecorationsWherePossible` | | 4 / 42 |
 
@@ -320,8 +328,8 @@ else **1000** ticks.
 
 ## Changelog
 
-- **2026-08-07:** ChangeThis pack (meta2/rotation 8/damage flow+evap, WBT 60/1/1000);
-  CheckUpdate rate limit; CheckDeepWater ≥6 above.
+- **2026-08-07:** Evap ≤45 / Flow damage-50; GetFlowDirection axes; ChangeThis pack
+  (meta2/rotation 8, WBT 60/1/1000); CheckUpdate; CheckDeepWater ≥6.
 - **2026-08-07:** BlockLiquidv2 Emissions (rotation 8 / meta2), ChangeToAir +
   WBT reschedule, HasHoles faces bitfield, UpdateTick IL size.
 - **2026-07-28:** WaterSimChunkUpdate outer/inner wire; WaterValue mass-only; WaterSet rebroadcast.

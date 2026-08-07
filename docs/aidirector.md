@@ -127,6 +127,17 @@ playtest) set spawn flag, `StartCooldownOnNeighbors`, `SetLongDelay`,
 **`AIDirectorChunkData.Tick` (IL=23):** if `cooldownDelay > 0` subtract elapsed
 and keep entry; else `DecayEvents`; keep entry while `EventCount > 0`.
 
+**`AddEvent` (IL=46):** find existing event of same type (predicate); if none
+append; else **add** `Value` and replace `Duration` with new event's duration;
+always `activityLevel += event.Value`.
+
+**`DecayEvents` (IL=61):** zero `activityLevel`; for each event:
+`Value -= Value * (elapsed/Duration)`, `Duration -= elapsed`; remove if
+Duration or Value ≤ 0; else re-sum Value into `activityLevel`.
+
+**`FindBestEventAndReset` (IL=44):** pick max-`Value` event; set
+`cooldownDelay = **240**` s; `ClearEvents()`; return best (may be null).
+
 ## AIDirectorComponent : Object
 - `Tick(Double)` IL=1 (virtual base)
 
@@ -389,6 +400,8 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset
+  cooldown 240 s; Flow/Evap damage packing cross-ref liquid.
 - **2026-08-07:** SpawnScouts gamestage bands + 120 m player; NotifyEvent queue;
   ChunkData.Tick cooldown/decay.
 - **2026-08-07:** NotifyActivity gates (GameStats 32/24, heat sensitivity, BM/

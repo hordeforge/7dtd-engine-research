@@ -296,6 +296,11 @@ Both turret families put the aim helper (`AutoTurretYawLerp` /
 `AutoTurretPitchLerp`) on every machine but keep **targeting and damage on the
 server**.
 
+### 5.9 `VehicleManager.PhysicsWakeNear` (IL=34)
+
+For each active vehicle with `sqrMagnitude` to `pos` ≤ **400** (20 m):
+`AddForce(zero, ForceMode=2)` (VelocityChange wake / un-sleep).
+
 ### 6.0 `TurretTracker.Update` (IL=45)
 
 Server-only; requires world + players + game started. Decrements `saveTime` by
@@ -421,6 +426,7 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-07:** PhysicsWakeNear 20 m (sqr 400) zero VelocityChange force.
 - **2026-08-07:** TurretTracker save every 120 s; AttachEntityToSelf / DetachEntity
   seat pose, layer 24, hasDriver, local action set.
 - **2026-07-23:** Initial reversal of the vehicle / drone / turret subsystem: three server-gated registries, the chunk / owner streaming loop, per-player waypoint push, client-authoritative vehicle physics vs server-authoritative drone and turret behaviour, mount / drive / dismount, drone state machine, and both turret fire-controller families, with state-machine diagrams.

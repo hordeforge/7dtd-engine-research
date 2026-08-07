@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: chunk activity decay and liquid Flow/Evap packing
+
+Done (V3.1.0 b14 IL):
+- AddEvent merges same-type Value; DecayEvents proportional; best event cooldown 240s.
+- Evap damage 0..45; Flow = damage-50; PhysicsWakeNear 20 m wake.
+---
 ## 2026-08-07 — tier-C: liquid ChangeThis pack and SpawnScouts bands
 
 Done (V3.1.0 b14 IL):
