@@ -105,6 +105,11 @@ flowchart TB
   `forceClouds` / `forceRain` / `forceSnowfall` / `forceTemperature`
   (`-100` = off) / `forceWind` / `SetSimRandom`, which the accessors and
   `BiomeWeather.FrameUpdate` honor.
+- **Immediate storm.** `SetStorm(biomeName, duration)` (IL=32) walks every
+  `BiomeWeather` and, for the named biome (or **all** when `biomeName` is
+  null), stamps `stormWorldTime = worldTime` and `stormDuration = duration` -
+  the admin `stormsurvival`-style instant storm, reusing the same
+  stormWorldTime/stormDuration fields the scheduler drives.
 
 ### 2.1 Storm state machine (per biome)
 
@@ -345,6 +350,9 @@ from the same clock and the received weather snapshot.
 
 ## Changelog
 
+- **2026-08-08:** WeatherManager.SetStorm IL=32: per-biome stormWorldTime/
+  stormDuration stamp for the named biome or all (null name) - instant admin
+  storm.
 - **2026-08-07:** CalcGlobalWeatherType IL=36 bloodMoon + stormWorldTime+5000
   defer for near storms.
 - **2026-07-28:** WeatherManager.ReadWriteData IL layout; Load buffer vs ApplyLoad.
