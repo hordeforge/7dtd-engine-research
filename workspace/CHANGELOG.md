@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ModMaxUseTimes
+
+Done (V3.1.0 b14 IL):
+- items.md 7: ModMaxUseTimes (IL=24) DurabilityModifier meta scaling, min 1,
+  no-op on <= 0 base.
+
 ## 2026-08-08 - tier-C: MaxUseTimes chain
 
 Done (V3.1.0 b14 IL):
