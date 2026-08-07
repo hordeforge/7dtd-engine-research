@@ -340,6 +340,10 @@ existing shape is terrain, and with `bChangeWaterDensity` the fill also stamps
 cell above air, `BlockPlaceholderMap.Replace` (y=0, unless `IsEditor`)
 resolves it, and it lands via `DecoUtils.CanPlaceDeco`/`ApplyDecoAllowed` +
 `OnBlockPlaced` + `SetBlockRaw` (or `SetBlock` for tile-entity blocks).
+`PoiMapElement.GetRandomBlockOnTop` / `GetRandomDecal` (IL=26 each) walk
+their `blocksOnTop` / `decals` lists and return the first entry whose
+`m_Prob > RandomFloat()` (null on miss); `GetDecal(index)` (IL=15) is a
+bounds-checked accessor.
 
 The provider's water support: `LoadWaterInfo(filename)` (IL=127) parses an XML
 file of `<Water>` child elements (case-insensitive) into `WaterInfo { pos,
