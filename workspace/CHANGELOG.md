@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: exchange + make fertile actions
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionExchangeBlock.ExecuteAction IL=82
+  (sourceblock match -> SetBlockRPC(targetBlock)).
+- ItemActionMakeFertile.hitTheTarget IL=175: FertileLevel<2 melee
+  delegate, dominant-axis adjacent cells -> adjacentBlock
+  (DensityTerrain/3) + hit cell -> fertileBlock, AddLevelExp
+  xpOther, SetBlocksRPC + soundEnd.
 ## 2026-08-08 - tier-C: exchange block action
 
 Done (V3.1.0 b14 IL):
