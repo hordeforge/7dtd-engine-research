@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `18e6109` chunk force-update + ground-align leaves |
-| Commits since dry-run `3b61d9c` | ~55 |
+| HEAD (at handoff write) | `fb12b28` SetBareHandItem + GetInitialMetadata |
+| Commits since dry-run `3b61d9c` | ~95 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1496 / catalogued ~817 / classified ~1386 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
@@ -38,6 +38,13 @@ streaming (world-chunks §4.0a), join/disconnect (server-lifecycle §3.2), pause
 AI + helpers (entity-ai D15), two new reference inventories
 (entityclass-props.md, gamestats-gameprefs.md). Census: narrated 1491.
 
+2026-08-08 continuation: 40+ more tier-C commits - EntityClass.Init phase
+map (D8.6b), CreateEntityOperation.CompleteEntity (spawning §7), GameMode
+family (InitGame/StartRound/GameStats bootstrap table + survival overrides),
+Stat.Tick/regen + SetChangedFlag, EntityVulture D15 (already), airdrop family
+(CreateFlightPaths/SpawnPlane/Tick/crate/plane), chunk load/unload lifecycle
+(world-chunks §4.0b), GameUtils time pins, Constants pins, several small
+resolver leaves. Census: narrated 1496 / unaccounted 0.
 ## Resume checklist (next agent / next turn)
 
 1. `cd /home/maci/Desktop/7dtd/7dtd-research && git status && git log --oneline -5`
