@@ -446,8 +446,12 @@ before delegating. `CreateEntity(ecd)` (IL=7) is a thin wrapper:
 `CreateEntityOperation.Start(ecd, true)` + `CompleteEntity()` (async variant
 starts with `false`; the operation is polled by `TryComplete`).
 
-**`CreateEntityOperation.CompleteEntity()` (IL=639)** builds the entity object:
+**`CreateEntityOperation.Start(ecd, isSync)` (IL=25):** `ecd.id == -1` →
+`ecd.id = nextEntityID++`; else `nextEntityID = max(nextEntityID, ecd.id + 1)`
+(advance past an explicit id); `new CreateEntityOperation(ecd).LoadAssets(isSync)`
+(async asset load; `CompleteEntity` runs when both asset sets report complete).
 
+**`CreateEntityOperation.CompleteEntity()` (IL=639)** builds the entity object:
 1. **Asset gates:** both `EntityInstanceAssets` and `EModelInstanceAssets` must
    be load-complete and load-successful; the operation runs once (entity null).
    Failures log `CreateEntityOperation cannot complete {0}, ...` and return.

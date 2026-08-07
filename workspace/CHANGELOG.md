@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: CreateEntityOperation.Start
+
+Done (V3.1.0 b14 IL):
+- Start IL=25: id alloc (nextEntityID++ or max(+1)), LoadAssets(isSync) async
+  kickoff; added to spawning §7.
 ## 2026-08-08 — tier-C: GetLookVector + GetMaxViewAngle
 
 Done (V3.1.0 b14 IL):
