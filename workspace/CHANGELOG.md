@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: gun spread
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: getDirectionRandomOffset (IL=86) SpreadDegreesHorizontal (32)
+  / Vertical (31) passives, accuracy-scaled uniform cone + Euler rotate.
+
 ## 2026-08-08 - tier-C: Prefab leaf queries
 
 Done (V3.1.0 b14 IL):
