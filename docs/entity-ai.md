@@ -306,9 +306,41 @@ trigger mode nibble.
 = player pos **y+0.8**; strict AABB against `BoxMin`/`BoxMax` (no pad); on hit
 `Touch(world, player)`.
 
+**`TriggerVolume.Touch` (IL=11):** `isTriggered = true`;
+`TriggerManager.TriggerBlocks(player, prefabInstance, this)`.
+
+**`SleeperVolume.TouchGroup` (IL=52):** `mode = flags & 7`. If no `groupId` or no
+prefab: `Touch(world, player, setActive, mode)`. Else for each volume in
+`prefabInstance.sleeperVolumes` with same `groupId` and not
+`IsTriggerAndNoRespawn`: same `Touch`.
+
+**`SleeperVolume.Touch` (IL=112):**
+
+- If `setActive`: for each live entity in `respawnMap`:
+  - trigger **2/3** and player present: if
+    `PlayerStealth.CanSleeperAttackDetect(sleeper)` then
+    `ConditionalTriggerSleeperWakeUp` + `SetAttackTarget(player, **400**)`;
+  - trigger **4**: always wake;
+  - else: every **10** group touches (`wanderingCountdown`) wake, else
+    `SetSleeperActive` only.
+  Then `hasPassives = false`, store `triggerState`.
+- If not `setActive` (deferred latch): set `playerTouchedToUpdate`,
+  `ticksUntilDespawn = **900**` (or **200** if still `hasPassives`); if
+  `wasCleared` and `worldTime < respawnTime`, bump `respawnTime` to at least
+  `worldTime + 1000`.
+
+**`SleeperVolume.CheckTrigger` (IL=136):** if already `isSpawned`: AABB with
+static `unpadding` expand → true/false. Else AABB with `triggerPaddingMin/Max`;
+if `wasCleared` and any player home in box (`CheckForAnyPlayerHome`) bump
+`respawnTime` by **24000** and false; else if prefab present `UncullPOI`; true.
+
 **`World.GetClosestPlayer(pos, distMax, isDead)` (IL=57):** if `distMax < 0` use
 +inf. Walk players reverse; require `IsDead() == isDead` and `Spawned`; pick min
 `GetDistanceSq` within `distMax²`.
+
+**`World.GetClosestPlayerSeen(entity, distMax, lightMin)` (IL=68):** same distance
+scan, require not dead + spawned, `Stealth.lightLevel >= lightMin`, and
+`entity.CanSee(player)`.
 
 **`SetLastTimePlayerSeen` (IL=4):** `lastTimeSeenAPlayer = Time.time`.
 
@@ -1242,8 +1274,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** CalcSenseScale FeralSense 1/2/3 day/dark/always; CheckTouching
-  pads 0.3/0.1; TriggerVolume AABB; GetClosestPlayer; DetectUsScale 0.3 POI.
+- **2026-08-07:** TouchGroup/Touch wake+attack 400; CheckTrigger pads; TriggerVolume
+  Touch; GetClosestPlayerSeen lightMin+CanSee; CalcSenseScale FeralSense.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

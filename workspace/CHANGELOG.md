@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: TouchGroup/Touch wake and GetClosestPlayerSeen
+
+Done (V3.1.0 b14 IL):
+- TouchGroup: same groupId fan-out Touch; solo Touch.
+- Touch setActive: stealth detect wake+SetAttackTarget 400; trigger4 wake; wandering countdown 10.
+- Touch !setActive: playerTouchedToUpdate, ticksUntilDespawn 900/200, respawnTime bump.
+- CheckTrigger: unpadding vs triggerPadding; home delay +24000; UncullPOI.
+- TriggerVolume.Touch: isTriggered + TriggerBlocks.
+- GetClosestPlayerSeen: lightLevel >= lightMin and CanSee.
+---
 ## 2026-08-07 — tier-C: CalcSenseScale FeralSense and volume CheckTouching
 
 Done (V3.1.0 b14 IL):
