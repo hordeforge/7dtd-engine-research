@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: drone heal/repair/ownership
+
+Done (V3.1.0 b14 IL):
+- vehicles-drones-turrets.md 5: TargetCanBeHealed (IL=14) healWeapon gate;
+  GetNearestHealTargetInRange (IL=40) party scan sorted nearest; HealRequest
+  (IL=50) no-item tooltip + userRequestedHeal -> healTargetServer; performRepair
+  (IL=23) full heal + UseTimes 0 + SendSyncData(16); GetRepairAmountNeeded
+  (IL=6) + RepairParts (IL=7); belongsToPlayerId (IL=5); isValidForPlayer
+  (IL=14/23) one-drone-per-player gate; GetStoredItemCount (IL=4).
+
 ## 2026-08-08 - tier-C: turret leaves
 
 Done (V3.1.0 b14 IL):
