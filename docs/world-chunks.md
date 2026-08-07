@@ -363,6 +363,16 @@ GameStats **1** != 1 allow always; require `InBoundsForPlayersPercent ≥ 0.5`;
 scan nearby chunks using claim size stats **44/45**; reject when
 `IsLandProtectedBlock` conflicts.
 
+**`InBoundsForPlayersPercent(pos)` (IL=100):** if world extent width &lt; **1024**
+return **1**. Else distance-to-edge soft bands: 50 m hard margin + 80 m fade on
+x and z from world center; return min of clamped x/z fractions (1 = deep
+interior, 0 = at edge).
+
+**`IsLandProtectedBlock(chunk, pos, relative, claimSize, deadZone, forKeystone)`
+(IL=104 high-level):** walk chunk `IndexedBlocks["lpblock"]` primary land-claim
+TEs; if within deadZone of claim and owner valid: self not protected against
+self; ally within claimSize only when `forKeystone`; else protected → true.
+
 ### 5.1 `GameManager.ChangeBlocks` (IL=530) / `SetBlocksOnClients` (IL=13)
 
 Authoritative multi-block apply used by `NetPackageSetBlock` Process:
@@ -507,6 +517,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** InBoundsForPlayersPercent 50/80; IsLandProtectedBlock lpblock deadZone.
 - **2026-08-07:** CheckEntityCollisionWithBlocks; CanPlaceLandProtectionBlockAt 0.5 bounds.
 - **2026-08-07:** Chunk.SetBlockRaw IL=386 (y cap, water, IndexedBlocks, heightmap,
   tickedBlocks, dirty flags).

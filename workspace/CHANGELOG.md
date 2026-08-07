@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: Chunk player spawn and land claim bounds
+
+Done (V3.1.0 b14 IL):
+- Chunk.CanPlayersSpawnAtPos y 2..251; CanPlayersSpawnOn floor; solid/water reject.
+- InBoundsForPlayersPercent 50+80 edge fade; IsLandProtectedBlock lpblock deadZone.
+- GetPlayersAround / GetEntitiesAround chunk ring scan.
+---
 ## 2026-08-07 — tier-C: spawn pos helpers and falling groups
 
 Done (V3.1.0 b14 IL):

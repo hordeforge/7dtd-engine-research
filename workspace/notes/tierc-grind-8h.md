@@ -57,3 +57,10 @@
 - stock-check green; unaccounted 0
 - Heavy EntityAlive/MoveHelper/package leaves closed this session
 - Continue: remaining EntityAlive unmentioned (~100), World/GameManager leaves
+
+
+## Checkpoint 2
+- 25+ commits since dry-run
+- stock-check green throughout
+- Areas covered: MoveHelper full surface, EntityAlive helpers, World spawn/land/uncull, packages BossEvent
+- Still open: CopyPropertiesFromEntityClass (huge), ClipBoundsMove, GroupFallingBlocks detail, FindSupportingBlockPos, more World unmentioned

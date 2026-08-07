@@ -166,12 +166,23 @@ both delay timers, clear `entityIdSpawned`, `currentWave=0`,
 **`World.CanPlayersSpawnAtPos(pos, allowAir)` (IL=25):** resolve chunk; else
 false; `Chunk.CanPlayersSpawnAtPos(local, allowAir)`.
 
+**`Chunk.CanPlayersSpawnAtPos(x,y,z, allowAir)` (IL=76):** y must be in
+**[2, 251]**. Below block (`y-1`) must `CanPlayersSpawnOn`. Cell and above
+(`y+1`): fail if solid collide-movement space, or water at cell. Floor: if
+`allowAir` and below is air (blockID 0) OK; else below must `IsCollideMovement`.
+
 **`World.FindRandomSpawnPointNearRandomPlayer(maxLight, ref x,y,z)` (IL=64):** no
 players → zeros and false; else pick a random player (decrementing counter walk)
 and `FindRandomSpawnPointNearPlayer(..., maxDist=**32**)`.
 
 **`World.GetClosestLocalPlayer(pos)` (IL=45):** primary local player, or min
 sqr-dist among `m_LocalPlayerEntities` when more than one.
+
+**`World.GetPlayersAround(pos, radius, list)` (IL=38):** add players with
+`GetDistanceSq ≤ radius²` (reverse walk).
+
+**`World.GetEntitiesAround(mask, pos, radius, list)` (IL=65):** chunk-range
+scan (pos±radius)/16; each chunk `GetEntitiesAround` with flag mask.
 
 The despawn accounting lives in `OnEntityUnloaded`, registered as a world
 delegate. It only touches `Biome`-sourced entities and reads the master chunk
@@ -614,6 +625,7 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** Chunk.CanPlayersSpawnAtPos y 2..251; GetPlayersAround; GetEntitiesAround.
 - **2026-08-07:** CanPlayersSpawnAtPos; FindRandomSpawnPointNearRandomPlayer 32; GetClosestLocalPlayer.
 - **2026-08-07:** EntitySpawner.resetRuntimeVariables wave/delay clear.
 - **2026-08-07:** ChunkAreaBiomeSpawnData.IsSpawnNeeded under-max / delay /
