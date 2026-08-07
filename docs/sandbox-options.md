@@ -304,6 +304,14 @@ for every `PropertyDecl`; `GetStatType(eProperty)` (IL=31) is the linear
 `propertyList` scan returning `PropertyDecl.type` as `EnumType?` (null when the
 stat is not registered).
 
+**Accessors:** the typed getters read `propertyValues[stat]` with an
+`InvalidCastException` fallback (logged + type default): `GetInt` (IL=34),
+`GetFloat` (IL=34), `GetBool` (IL=34), `GetString` (IL=18, empty-string
+fallback). `GetInt`/`GetFloat`/`GetBool` first consult
+`sandboxReferences[stat].Get*Value()` **on a client** when the sandbox
+reference exists (the sandbox-override read path; the server uses the plain
+array).
+
 ## 7. Presets
 
 `SandboxOptionPreset` is a named bag of changed options:
