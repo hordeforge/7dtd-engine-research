@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: SetBlocksRPC wrapper
+
+Done (V3.1.0 b14 IL):
+- GameManager.SetBlocksRPC IL=29: ChangeBlocks commit + NetPackageSetBlock
+  replicate (SetBlocksOnClients on server / SendToServer).
 ## 2026-08-08 — tier-C: PickupBlockServer replacement
 
 Done (V3.1.0 b14 IL):

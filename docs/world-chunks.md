@@ -508,6 +508,12 @@ Authoritative multi-block apply used by `NetPackageSetBlock` Process:
    on neighbor chunks; `UncullChunk`; child-block TE cleanup.
 4. Delayed regen stop after list.
 
+**`GameManager.SetBlocksRPC(changes, persistentPlayerId)` (IL=29)** is the
+commit+replicate wrapper: `ChangeBlocks(persistentPlayerId, changes)`, then
+`NetPackageSetBlock.Setup(persistentLocalPlayer, changes, dedicated ? -1 :
+myPlayerId)`; on the server `SetBlocksOnClients(-1, package)`, else
+`SendToServer`.
+
 `SetBlocksOnClients(exceptEntityId, package)` (IL=13):
 `ConnectionManager.SendPackage(package, false, -1, exceptEntityId, -1, null,
 **192**, false)` excluding the placing entity.
