@@ -459,6 +459,15 @@ trigger mode nibble.
 **`TriggerVolume.Touch` (IL=11):** `isTriggered = true`;
 `TriggerManager.TriggerBlocks(player, prefabInstance, this)`.
 
+**World trigger registry:** `triggerVolumes` is a locked
+`Dictionary<int, TriggerVolume>` plus a `VolumeKey`-keyed
+`triggerVolumeMap`. `AddTriggerVolume(volume)` (IL=49) assigns the next id and
+`TryAdd`s the `VolumeKey(volume)`; a duplicate key logs
+`TriggerVolume already exists at {0}` and returns **-1**. `GetTriggerVolume
+(index)` (IL=30) throws `TriggerVolume id {0} not found` on a miss (like the
+sleeper lookup); `FindTriggerVolume(mins, maxs)` (IL=29) returns the mapped id
+or **-1**.
+
 **`SleeperVolume.TouchGroup` (IL=52):** `mode = flags & 7`. If no `groupId` or no
 prefab: `Touch(world, player, setActive, mode)`. Else for each volume in
 `prefabInstance.sleeperVolumes` with same `groupId` and not
