@@ -375,6 +375,10 @@ normal destroy path. Both explosives end in the same forwarder:
 `GameManager.ExplosionServer(center, blockPos, identity, explosion,
 entityId, delay, true, null)` - the TNT with its fuse `delay`, the mine with
 `-1` / `0.1` s (see [`protocol-packages.md`](protocol-packages.md) §6.14).
+`BlockTNT.OnBlockDamaged` (IL=31) can detonate early: when
+`rand.RandomFloat <= damagePoints / MaxDamage` it calls
+`explode(world, bvRef, entityId, 0.1)` before the normal damage delegates -
+any hit carries a damage-proportional chance to blow the TNT.
 
 `Block/DestroyedResult` (exact enum): `None=0`, `Keep=1`, `Downgrade=2`,
 `Remove=3`. The base `OnBlockDestroyedBy` returns `Downgrade`.
@@ -648,6 +652,8 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** BlockTNT.OnBlockDamaged IL=31: damage-proportional
+  detonation chance (RandomFloat <= damage/MaxDamage -> explode 0.1 s).
 - **2026-08-08:** BlockTNT.explode IL=18 / BlockMine.explode IL=18:
   ExplosionServer forwarders (TNT fuse delay, mine -1/0.1 s).
 - **2026-08-08:** Explosion destruction hooks: base OnBlockDestroyedByExplosion
