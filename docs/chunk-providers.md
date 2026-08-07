@@ -494,6 +494,40 @@ Static helpers used by the §3.3 decorators when placing biome blocks and by
 The per-column inputs (`EnumDecoAllowed`, `EnumDecoAllowedSlope`, terrain
 normals) are produced by `updateDecosAllowedForChunk` (§3.3).
 
+`WorldDecoratorBlocksFromBiome.decorateSingleBlockTryPlaceDeco` (IL=287) is the
+per-cell gate that turns a deco entry into a placed block, in order:
+
+1. `IsDistantDecoration` blocks return false while `DecoManager.IsEnabled`
+   (they belong to the distant-deco layer, §5).
+2. Slope gates: `!CanDecorateOnSlopes` with the column slope class >= 1 (from
+   `EnumDecoAllowedExtensions.GetSlope(decoAllowed)`) returns false, and
+   `SlopeMaxCos <= normalY` returns false.
+3. For a plant at `blockPos.y > 0`, the block below must have
+   `blockMaterial.FertileLevel != 0`.
+4. A multi-block whose top would exceed y = 255 returns false.
+5. `RandomFloat() >= deco.prob` returns false.
+6. When `checkResourceOffsetY != int.MaxValue`, the ore-noise gate
+   `GameUtils.CheckOreNoiseAt(resourceNoise, worldPos + (0, checkResourceOffsetY,
+   0))` must pass.
+7. `BlockPlaceholderMap.Replace(blockValue, random, chunk, chunkWorldPos.x +
+   blockPos.x, 0, chunkWorldPos.z + blockPos.z, FastTags.none, false, true)`
+   (note the literal **y = 0**); an air replacement returns true with nothing
+   placed.
+8. `randomRotateMax > 0` rolls the rotation via `GetRandomRotation(RandomFloat(),
+   randomRotateMax)`.
+9. `radius = DecoUtils.GetDecoRadius(bv, block)`; for `radius > 0` the origin is
+   shifted `blockPos += (radius, 0, radius)` so the oversized footprint fits,
+   requiring `blockPos.x < 16 && blockPos.z < 16`, then `blockPos.y` re-snaps to
+   `chunk.GetTerrainHeight(x, z) + 1` and the plant-fertility and air checks are
+   re-run at the shifted cell.
+10. `DecoUtils.CanPlaceDeco(chunk, +X, +Z, +XZ neighbors, chunkWorldPos +
+    blockPos, bv, <cached `<>c` DecoAllowedTest lambda>)`, then
+    `DecoUtils.ApplyDecoAllowed` stamps the footprint.
+11. `block.OnBlockPlaced(world, chunkWorldPos + blockPos, bv, random)` and
+    `chunk.SetBlock(world, blockPos, placed, true, true, false, false, -1)`.
+12. Unless `shape.IsOmitTerrainSnappingUp` or `IsTerrainDecoration`:
+    `ChunkCache.SnapTerrainToPositionAroundLocal(worldPos - up)`.
+
 ### 6.2 DecoOccupiedMap (world-level)
 
 `DecoManager.OnWorldLoaded` allocates a world-sized `DecoOccupiedMap`
