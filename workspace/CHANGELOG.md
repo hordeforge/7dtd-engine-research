@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: block walk fall and ForceBigHead
+
+Done (V3.1.0 b14 IL):
+- updateCurrentBlockPosAndValue: stability-0 CanFallBelow AddFallingBlock; loot stage check.
+- ForceBigHead HeadState 2; ForceResetHead; InitInventory ctor.
+---
 ## 2026-08-07 — tier-C: GetActivatableItems MinEvent 91
 
 Done (V3.1.0 b14 IL):

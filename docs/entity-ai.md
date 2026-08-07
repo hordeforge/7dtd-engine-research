@@ -118,8 +118,16 @@ tick (`onGround && !wasOnGround`): store standing pos/value; server sets
 `blockStandingOnChanged`; biome change → `onNewBiomeEntered`. Always
 `CalcIfInElevator`. Walk-buff blocks (`UseBuffsWhenWalkedOn`): workstation
 burning path can re-add timed buffs; passive **153** residual; call
-`Block.OnEntityWalking` when appropriate. Falling-block stability residual
-logs when stab 0.
+`Block.OnEntityWalking` when appropriate. If standing block non-air with
+`GetStability==0` and `CanFallBelow`: log warning and `World.AddFallingBlock`.
+Also walks y+1 neighbor for `OnEntityWalking`; ends with
+`HandleLootStageMaxCheck()`.
+
+**`ForceBigHead` (IL=22):** only `EntityAnimal` / `EntityEnemy` / `EntityTrader`
+with `CanBigHead` and `HeadState==0` → set `HeadState=**2**`.
+**`ForceResetHead` (IL=28):** same type filter; if HeadState is **1** or **2**
+set **0**.
+**`InitInventory` (IL=9):** if inventory null, `new Inventory(GameManager, this)`.
 
 **`isRadiationSensitive` (IL=2):** always **true** (base).
 
