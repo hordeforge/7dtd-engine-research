@@ -311,6 +311,65 @@ Join + envelope + golden entity package bodies: [protocol.md](protocol.md).
 
 ---
 
+## 3a. The `NetPackage` base contract (V3.1.0 b14)
+
+Every wire package derives from `NetPackage`; the base supplies the transport
+defaults and the sender-validation helpers every `ProcessPackage` runs
+through:
+
+| Member | IL | Base behavior |
+|---|---|---|
+| `get_Channel()` | 2 | **0** |
+| `get_Compress()` | 2 | **false** |
+| `get_ReliableDelivery()` | 2 | **true** |
+| `get_AllowedBeforeAuth()` | 2 | **false** |
+| `get_PackageDirection()` | 2 | **`Both`** (0) |
+| `ShouldProcess(world, gm)` | 2 | **true** (always process) |
+| `HandleSkipped(world, gm)` | 3 | `NetPackageManager.FreePackage(this)` - the drop path returns the package to the pool |
+| `get_PackageId()` | 4 | `NetPackageManager.GetPackageId(GetType())` - the id is derived from the runtime type, never stored |
+| `RegisterSendQueue()` / `SendQueueHandled()` | 5 / 7 | `Interlocked` inc/dec of `inSendQueuesCount`; the decrement to **0** calls `FreePackage` - the send-queue refcount keeps a pooled package alive while queued |
+| `ToString()` | 14 | cached runtime type name (`classnameCached`) |
+
+**Sender validation (the two guards packages call at the top of
+`ProcessPackage`):** `ValidEntityIdForSender(entityId, allowAttachedToEntity)`
+(IL=49) is client-side always true; on the server it accepts the id only when
+it equals `Sender.entityId`, or - with `allowAttachedToEntity` - when the
+sender's `EntityPlayer` is attached to an entity with that id (the rider-slot
+case); otherwise it logs `Received {0} with invalid entityId {1} from {2}`
+and returns false. `ValidUserIdForSender(userId)` (IL=29) accepts
+`Sender.PlatformId` or `Sender.CrossplatformId`, else logs
+`Received {0} with invalid userId {1} from {2}`.
+
+**The concrete overrides (all IL=2, per type):**
+
+- **Channel 1** (the big-data channel): `NetPackageChunk`, `ChunkRemove`,
+  `MapChunks`, `POIAround`, `WorldFolder`, `DynamicMesh`; everything else
+  stays 0.
+- **Compress true**: `Chunk`, `ConfigFile`, `IdMapping`, `MapChunks`,
+  `POIAround`, `SignDataResponse`, `DynamicClientArrive`, `DynamicMesh`;
+  `WorldFolder` and `Localization` explicitly false.
+- **ReliableDelivery false** (the per-tick fire-and-forget set):
+  `EntityPosAndRot`, `EntityRelPosAndRot`, `EntityRotation`, `EntitySpeeds`,
+  `EntityStatsBuff`; every other package keeps the reliable default.
+- **AllowedBeforeAuth true** (the whole pre-auth handshake):
+  `PlayerLogin`, `PlayerDenied`, `PackageIds`, `KeyExchangeComplete`,
+  `EncryptionRequest`, `EncryptionPublicKey`, `EncryptionSharedKey`, `EAC`,
+  `AuthState`, `AuthConfirmation`.
+- **PackageDirection**: `ToServer` (1) on the client-request set
+  (`PlayerLogin`, `PlayerDisconnect`, `RequestToEnterGame`,
+  `RequestToSpawnPlayer/Entity`, `PlayerData`, `PlayerInventory`,
+  `PlayerInventoryForAI`, `PlayerQuestPositions`, `SignDataRequest`,
+  `TraderData`, `QuestEntitySpawn`, `WorldInitInfoRequest`, ...);
+  `ToClient` (2) on the server-push set (`WorldTime`, `Weather`,
+  `PlayerLoginAnswer`, `PlayerDenied`, `PlayerId`, `PartyData`, ...);
+  `Both` (0) only on `WorldFolder` and `PlayerSpawnedInWorld` besides the
+  base. The full per-package table is derivable from the dump set; the
+  pattern is: requests are client-originated, state pushes are
+  server-originated, and the two shared ones are the world-folder stream and
+  the spawned-in-world notice.
+
+---
+
 ## 3b. Join path (summary)
 
 Loadgen-proven against live V3.0.1 dedi:
@@ -638,6 +697,13 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-08:** NetPackage base contract (3a): defaults (channel 0,
+  compress false, reliable true, pre-auth false, direction Both);
+  ShouldProcess true / HandleSkipped pool-free; PackageId from runtime type;
+  send-queue Interlocked refcount; ValidEntityIdForSender IL=49 +
+  ValidUserIdForSender IL=29 guards; override sets (channel-1 big-data,
+  compress-true, unreliable entity per-tick, pre-auth handshake, direction
+  request/push split).
 - **2026-08-07:** ProtocolManager.LateUpdate (IL=35) fan-out to all
   INetworkServer + INetworkClient; ConnectionManager.LateUpdate (IL=4) hook.
 - **2026-08-07:** NetEntityDistributionEntry.SendToPlayers exclude/inRange.
