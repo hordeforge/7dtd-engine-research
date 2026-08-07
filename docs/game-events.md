@@ -354,6 +354,12 @@ applies `PerformTargetAction` to one entity (skipping dead/despawned), returning
 `InComplete` until the index runs off the end. Without a `targetGroup` it
 applies once to the sequence `Target`.
 
+The `EntityGroups` dict backing that snapshot: `AddEntityToGroup(name, e)`
+(IL=35) skips TwitchAction sequences' players whose `TwitchActionsEnabled`
+isn't 1, then get-or-creates the list and appends;
+`GetEntityGroupLiveCount(name)` (IL=44) counts alive `EntityAlive` members;
+`ClearEntityGroup(name)` (IL=15) clears the list (no-op when absent).
+
 **`ActionBaseClientAction`** is the server/client split: `PerformTargetAction`
 runs `OnServerPerform`, then either calls `OnClientPerform` directly (listen
 host) or sends `NetPackageGameEventResponse` with `ClientSequenceAction` (12)
