@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: deco array alloc
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 1: EnsureDecoBiomeArray (IL=8) 256-entry lazy alloc.
+
 ## 2026-08-08 - tier-C: deco slope gate
 
 Done (V3.1.0 b14 IL):
