@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: water immersion
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md: Entity.CalcWaterLevel IL=157 (vertical span scan, 8-dir offset sampling, surface cell 0.6 cap)
+- light-mesh-water.md: World.GetWaterPercent IL=14 (GetWater -> GetMassPercent, 0 on missing chunk)
+
 ## 2026-08-08 - tier-C: block/tile-entity reads
 
 Done (V3.1.0 b14 IL):
