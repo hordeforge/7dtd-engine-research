@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TileEntity save preamble + type registry
+
+Done (V3.1.0 b14 IL):
+- save-region.md 2: base TileEntity write IL=19 (u16 v19, Vector3i
+  chunkPos, u64 heapMapUpdateTime) / read IL=37 (v<=18 legacy i32
+  discard, heapMapLastTime = time - AIDirector delay);
+  InstantiateFromRead IL=88 type switch (12 concrete ctors,
+  unknown dropped); TryReadLegacyType IL=81 legacy types
+  4/5/10/11/13/22 -> TileEntityComposite, gore discarded; base
+  virtuals stubs.
 ## 2026-08-08 - tier-C: FastTags bitmask
 
 Done (V3.1.0 b14 IL):
