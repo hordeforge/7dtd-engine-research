@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: loot group roll + bag unlock
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md 8.4: LootContainer.SpawnItemsFromGroup (IL=84) outer group
+  roll (loop numToSpawn times while slotsLeft > 0; count via RandomSpawnCount
+  or RandomCountFromSandbox with sandboxApplied feedback; OR of pass results);
+  GetRewardItem (IL=45) quest-reward single-spawn probe returning first stack
+  or ItemStack.Empty.
+- loot-economy.md 6b: EntityLootContainer.OnUnlockedServer (IL=7) kills the
+  container when the bag IsEmpty on unlock.
+
 ## 2026-08-08 - tier-C: ItemStack/ItemValue leaves
 
 Done (V3.1.0 b14 IL):
