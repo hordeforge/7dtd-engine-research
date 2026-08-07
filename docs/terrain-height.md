@@ -78,7 +78,10 @@ array. `Chunk.GetHeight(x, z)` (IL=9) / `GetHeight(blockOffset)` (IL=5) read
 returns the prefab height).
 `Chunk.RecalcHeightAt(x, yMaxStart, z)` (IL=55) rescans the column downward
 from `yMaxStart` and writes `m_HeightMap[offset] = y` at the first non-air (or
-water) cell, returning that y (0 for an all-air column). `Chunk.GetTerrainHeight(x, z)` (IL=9) reads the
+water) cell, returning that y (0 for an all-air column).
+`Chunk.AddWallVolumeId(id)` (IL=18) is the wall-volume link: dedupe into
+`wallVolumes` with the same **255** cap error
+(`Chunk AddWallVolume at max`); `GetWallVolumes` (IL=3) exposes the list. `Chunk.GetTerrainHeight(x, z)` (IL=9) reads the
 separate `m_TerrainHeight` byte array (the `PrefabChunk` variant scans down
 from the prefab height for the first terrain-shape block); `SetTerrainHeight`
 (IL=10) writes it.
