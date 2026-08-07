@@ -292,6 +292,10 @@ inside positions (`IsInsidePrefab` -> `AddInsideDevicePosition`), copies water
 `SetBlock`, clones `IsTileEntitySavedInPrefab` tile entities and
 `BlockTrigger`s into the chunk, and finishes with `SetTerrainHeight` +
 `SetTopSoilBroken` per column.
+`InitTerrainFillers()` (IL=17) resolves the two terrain-filler block ids
+(`terrainFillerType` / `terrainFiller2Type`) from the
+`Constants.cTerrainFiller*BlockName` names; `IsCullThisPrefab()` (IL=5) is
+`!bExcludePOICulling`.
 
 The spatial query `GetPrefabsAtXZ(xMin, xMax, zMin, zMax, list)` (IL=70,
 reached through `World.GetPOIsAtXZ`, a null-checked wrapper IL=15) clears the
