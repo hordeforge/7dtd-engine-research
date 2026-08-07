@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameEvent sequence machine
+
+Done (V3.1.0 b14 IL):
+- game-events.md: RegisterLink IL=35 first-link-wins + SequenceLink fields, UnRegisterLink IL=25 RemoveAt
+- game-events.md: GameEventActionSequence.Update IL=287 (phase dispatch, refund-inactivity 60s, result 3/1+IgnoreRefund -> PhaseOnComplete, 2 -> PhaseOnDenied)
+
 ## 2026-08-08 - tier-C: GameEventManager flag + sequence leaves
 
 Done (V3.1.0 b14 IL):
