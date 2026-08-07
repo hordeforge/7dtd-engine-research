@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: same-class damage gate
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md: EntityEnemyAnimal.CanDamageEntity IL=17
+  same-class gate (no same-species damage); EntityAnimal/
+  EntityEnemy DamageEntity IL=7 base delegates.
 ## 2026-08-08 - tier-C: Hit resolvers
 
 Done (V3.1.0 b14 IL):
