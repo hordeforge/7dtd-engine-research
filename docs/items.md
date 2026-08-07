@@ -509,6 +509,25 @@ snapping to the target once the delta is below 1e-5 (the
 `getDirectionRandomOffset` above, so aim steadies while aiming/crouching/
 still and blooms while moving or right after firing.
 
+**Throw family (V3.1.0 b14):** `ItemActionThrowAway.ExecuteAction`
+(IL=137) is the charge/release state machine: press latches
+`m_bActivated` + `m_ActivateTime`; release (not in cooldown) sets
+`m_bReleased`, fires the avatar `itemThrownAwayTriggerHash` event, and
+computes `m_ThrowStrength` - `defaultThrowStrength` for a hold under 0.2 s
+or when `maxStrainTime == 0`, else
+`maxThrowStrength * min(holdTime, maxStrainTime) / maxStrainTime`. The
+avatar throw event then invokes `throwAway(data)` (IL=136): the empty-gate
+(`Meta == 0` and passive **177** <= 0 blocks with `m_bActivated = false`), a
+local-player `TPCameraCheckPassed` gate, a short obstruction ray (0.28,
+mask), and the spawn - `gameManager.ItemDropServer(new ItemStack(
+holdingItemValue, 1), pos, Vector3.zero, lookVector * m_ThrowStrength,
+entityId, 60, true, -1)` followed by `inventory.DecHoldingItem(1)`; on
+failure the avatar `itemThrownAwayTriggerHash` event is cancelled. So
+throwing is a **server item drop with velocity** (lifetime 60), not a
+projectile entity. `ItemActionThrownWeapon.ExecuteAction` (IL=117) is the
+ranged twin: same charge/release but with `WeaponPreFire`/`WeaponFire`
+avatar events and `HandleJamSound` on an empty release.
+
 **Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
 magazine capacity goes through the `MagazineSize` passive against the class's
@@ -1209,6 +1228,13 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Throw family: ItemActionThrowAway.ExecuteAction IL=137
+  charge/release + m_ThrowStrength (default vs maxThrowStrength*hold/max
+  strain), avatar itemThrownAwayTriggerHash event; throwAway IL=136 empty
+  gate (passive 177) + TP camera gate + obstruction ray +
+  ItemDropServer(stack, look*strength, 60, true, -1) + DecHoldingItem(1) -
+  throwing is an item drop with velocity; ItemActionThrownWeapon IL=117
+  WeaponPreFire/WeaponFire + jam sound variant.
 - **2026-08-08:** ItemActionRanged reload/accuracy: CanReload IL=93 gate
   (not reloading, no cancel, jammed or below capacity, ammo in toolbelt/bag
   or infinite, passive 9 magazine); CancelReload IL=57 flags + cancel effect;
