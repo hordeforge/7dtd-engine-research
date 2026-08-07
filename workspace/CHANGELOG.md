@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: throw family
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionThrowAway.ExecuteAction IL=137
+  charge/release + m_ThrowStrength (default vs maxThrowStrength*
+  hold/max-strain), avatar itemThrownAwayTriggerHash event;
+  throwAway IL=136 empty gate (passive 177) + TP camera gate +
+  obstruction ray + ItemDropServer(stack, look*strength, 60,
+  true, -1) + DecHoldingItem(1); ItemActionThrownWeapon IL=117
+  WeaponPreFire/WeaponFire + jam-sound variant.
 ## 2026-08-08 - tier-C: ranged reload gate + accuracy machine
 
 Done (V3.1.0 b14 IL):
