@@ -1771,6 +1771,14 @@ graze → `SoundImpactGraze` else `SoundImpactHit`.
 **`AddMotion(dirDeg, speed)` (IL=27):** add `sin/cos(dir)` × speed into
 `accumulatedRootMotion` xz.
 
+**`MakeMotionMoveToward(x, z, minMotion, maxMotion)` (IL=69):** with
+`RootMotion` on, it scales the requested `(x, z)` by
+`FastClamp(accumulatedRootMotion magnitude, minMotion, maxMotion) / sqrt(x²+z²)`
+(when that scale is below 1) and writes the result into
+`accumulatedRootMotion` - the per-tick root-motion step stays inside the
+`[minMotion, maxMotion]` band. Without root motion it writes `moveDirection =
+(x, 0, z)` and sets `isMoveDirAbsolute = true`.
+
 **`ExecuteDestroyBlockBehavior` (IL=2):** always **false** (stub like fall
 behavior).
 
