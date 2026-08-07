@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PlayerStealth.SmellCountItems
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.SmellCountItems (IL=110) narrated in stealth-smell.md:
+  carried-smell total = ItemClass.Smell * count summed over the drag-and-
+  drop stack (local UI), toolbelt slots, and bag slots; clamped to 50,
+  returned as int.
+
 ## 2026-08-08 - tier-C: Entity.GetBrightness
 
 Done (V3.1.0 b14 IL):

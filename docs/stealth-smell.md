@@ -102,6 +102,11 @@ grows from carried food/raw meat items (`SmellCountItems`, `SmellUpdateItemsAndB
 bleeding (`SmellUpdateItemsAndBlood`), eating (`SmellTickEat` / `SetSmellEat`), and
 wetness (`SmellTickWet`); being sheltered reduces it.
 
+**`PlayerStealth.SmellCountItems()` (IL=110)** is the carried-smell total: it
+sums `ItemClass.Smell * count` over the drag-and-drop window stack (local
+player UI), every non-empty toolbelt slot, and every non-empty bag slot, then
+clamps the sum to **50** and returns it as an int.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Odorless
@@ -143,6 +148,8 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.SmellCountItems (IL=110): ItemClass.Smell *
+  count over drag + toolbelt + bag, clamp 50, int return.
 - **2026-08-07:** Entity.GetBrightness (IL=53): ambient light sample at 66%
   box height (pos.y - yOffset + height*0.66), missing chunk -> 0.
 - **2026-08-07:** PlayerStealth.NoiseCleanup (IL=43): per-entry ticks
