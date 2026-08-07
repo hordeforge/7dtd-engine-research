@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: deploy configs + destroy-block/sleeper leaves
+
+Deploy action config (vehicles-drones-turrets.md 7.1): ItemActionSpawnTurret.ReadFrom (IL=101) Turret entity class resolved at load time, Scale/PreviewSize/CanPlaceInAir defaults; ItemActionSpawnVehicle.ReadFrom (IL=63) Vehicle + VehicleSize default (1,1.9,2); ItemActionZoom.ReadFrom (IL=34) trigger effects. EntityAlive leaves (entity-ai.md): NotifyDestroyedBlock (IL=128) blocked-move clear + weighted Difficulty-1 destroyBlockBehaviors pick to stub executor; Snore (IL=36) snore/groan cycle 20..21 tick cooldown; IsCorpse (IL=17) ragdoll-dead && deathUpdateTime > 70. verified from IL. Commits 57bc526, 4cea4d9.
 ## 2026-08-08 - tier-C: ItemAction ReadFrom config family
 
 Narrated the full action-config parse surface (items.md 4.2): base ItemAction.ReadFrom (IL=107) Delay/Sound_start/Particle_harvesting/ActionExp/ActionExpBonusMultiplier/UseAnimation/Buff list; ItemActionRanged.ReadFrom (IL=126) bullet_material, penetration counts, AutoReload, trigger effects, aiBurstShot/aiBurstDelay ranges; ItemActionEat.ReadFrom (IL=152) Consume, Create_item refund trio, BlocksAllowed -> ConditionBlockTypes, UsePrompt; ItemActionDynamic.ReadFrom (IL=495) graze/swing/power-attack keys; ItemActionThrownWeapon.ReadFrom (IL=162) throw physics; ItemActionOpenBundle.ReadFrom (IL=191) create/random item arrays + Condition_raycast_block. verified from IL. Commits ce4486a, 09e26e9, 9cd132b.
