@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GameMode.StartRound per mode
+
+Done (V3.1.0 b14 IL):
+- Survival/Creative/Edit StartRound IL=4 = GameStats.Set(GameState, Running);
+  Deathmatch IL=62 / ZombieHorde IL=53 = 4-state round-index switches
+  (time/frag limits, LoadScene transitions).
 ## 2026-08-08 — tier-C: GameStateManager.InitGame mode instantiation
 
 Done (V3.1.0 b14 IL):

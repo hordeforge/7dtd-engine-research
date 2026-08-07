@@ -118,6 +118,11 @@ mode.GetID())`. Server only: `GameStats.Set(CurrentRoundIx, 0)`,
 `timeRoundStarted = Time.time`, `mode.Init()`, `mode.StartRound(roundIx)`,
 `bDirty = true` (next tick broadcasts GameStats, see §2).
 
+**`GameMode.StartRound(idx)`:** the survival/creative/edit modes (IL=4 each) are
+just `GameStats.Set(GameState, Running)`. `Deathmatch` (IL=62) and
+`ZombieHorde` (IL=53) are 4-state switches on the round index (time/frag-limit
+setup, `CurrentRoundIx`, `LoadScene` + `SceneGame`/loading-screen transitions).
+
 ---
 
 ## 3. Player join and persistence (state machine)
