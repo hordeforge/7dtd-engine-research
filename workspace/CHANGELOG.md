@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemValue metadata + mod property overrides
+
+Done (V3.1.0 b14 IL):
+- items.md 2: ItemValue typed metadata - lazy Metadata dict +
+  TypedMetadataValue TypeTag (Float=1/Int=2/String=3);
+  SetMetadata IL=86 update-vs-create with tag-mismatch warnings;
+  GetMetadata IL=17 / TryGetMetadata typed unbox;
+  GetPropertyOverride IL=88 first ItemClassModifier wins over
+  Modifications then CosmeticMods.
 ## 2026-08-08 - tier-C: LootFromXml loader
 
 Done (V3.1.0 b14 IL):
