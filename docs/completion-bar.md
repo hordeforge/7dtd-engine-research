@@ -171,6 +171,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | PartyQuestChange HandlePlayer | parties-factions §2.3 |
 | EAIApproachAndAttackTarget Update phases | entity-ai §D2 |
 | EAI Break/Wander/RunAway/Ranged leaves | entity-ai §D2 |
+| updateTasks freeze + GroupFallingBlocks | entity-ai §5.1b / §8 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

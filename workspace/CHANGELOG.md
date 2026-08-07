@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: updateTasks freeze and GroupFallingBlocks BFS
+
+Done (V3.1.0 b14 IL):
+- updateTasks GamePrefs[46] freeze (non-drone); aiActiveDelay LOD; path apply order.
+- EAIManager interestDistance FastMoveTowards(10, 1/120).
+- GroupFallingBlocks 6-neighbor BFS size clamp; CreateFallingBlockGroup spawn.
+---
 ## 2026-08-07 — tier-C: EAI BreakBlock/Wander/RunAway/Ranged/FindTarget leaves
 
 Done (V3.1.0 b14 IL):

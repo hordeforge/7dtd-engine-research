@@ -235,6 +235,25 @@ package fan-out (remainder of method).
 `EntityAlive.OnUpdateLive`; **force-clear** see cache; `CheckSleeperTriggers`
 (player always re-evaluates sleeper volumes).
 
+### 5.1b `EntityAlive.updateTasks` (IL=125) and `EAIManager.Update` (IL=16)
+
+**`updateTasks` order:**
+
+1. If `GamePrefs` bool index **46** and entity is not `EntityDrone`: zero move
+   modifiers and return (AI freeze / debug gate; only refresh debug name).
+2. `CheckDespawn`; `seeCache.ClearIfExpired`.
+3. `aiActiveDelay -= aiActiveScale`; when delay ≤ 0 reset to **1** and run either
+   `EAIManager.Update` or `UAIBase.Update` (`UseAIPackages`).
+4. `PathFinderThread.GetPath(entityId)`; if path present and EAI `CheckPath`
+   (or UAI always) accepts: `navigator.SetPath`.
+5. Always: `navigator.UpdateNavigation`, `moveHelper.UpdateMoveHelper`,
+   `lookHelper.onUpdateLook`.
+6. Clear dead/unloading `distraction` / `pendingDistraction`.
+
+**`EAIManager.Update`:** `interestDistance = FastMoveTowards(interestDistance,
+10, 0.008333334)` (~1/120 per call toward 10); then
+`targetTasks.OnUpdateTasks()` then `tasks.OnUpdateTasks()`; debug name.
+
 ### 5.2 `EAITaskList.OnUpdateTasks` (137 IL)
 
 Classic priority AI list (same shape IceCoffee tried to Parallel.ForEach):
@@ -412,15 +431,24 @@ Called once per full `UpdateTick` after entities.
 
 ```text
 if fallingBlocks queue empty: ret
-if EntityFallingBlocks.Enabled: GroupFallingBlocks()
-// process fallingGroups: CreateFallingBlockGroup, clear hashset entries
+if EntityFallingBlocks.Enabled: GroupFallingBlocks()  // IL=292
+// process fallingGroups: CreateFallingBlockGroup (IL=107), clear hashset entries
 // process fallingBlocks queue: skip if still in hashset pending group
 GetBlock / TE canvas clone for signs / OnBlockStartsToFall
 DynamicMeshManager.ChunkChanged
 if ShowModelOnFall: EntityFactory "fallingBlock" + random motion → spawn
 ```
 
-**Queue-driven.** Spikes when many blocks lose support (base collapse). Matches ServerTools/IceCoffee “fall → air” trade: empty the problem at `AddFallingBlock` before this method invents entities.
+**`GroupFallingBlocks` (IL=292):** BFS from each ungrouped falling cell; 6-neighbor
+expand while neighbor is falling and not terrain; group size clamped by
+`GroupBounds.IsWithinSize`; enqueue finished groups.
+
+**`CreateFallingBlockGroup` (IL=107):** snapshot block values + texture full arrays;
+per pos `OnBlockStartsToFall` + `ChunkChanged(-1)`; remove from `groupedBlocks`;
+if first block `ShowModelOnFall`: spawn entity class `"fallingBlocks"` at pos +
+(0.5, random Y -0.1..0.1, 0.5) with arrays; `SetBlockGroupData`.
+
+**Queue-driven.** Spikes when many blocks lose support (base collapse). Matches ServerTools/IceCoffee fall-to-air trade: empty the problem at `AddFallingBlock` before this method invents entities.
 
 ---
 
@@ -1065,6 +1093,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
+  toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
   60, Wander 120 ticks, Ranged UseHoldingItem, FindTarget bounds +4.
 - **2026-08-07:** EAIApproachAndAttackTarget Update phases (home/relocate/eat/
