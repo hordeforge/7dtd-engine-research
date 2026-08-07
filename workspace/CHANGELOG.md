@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: DynamicProperties property bag
+
+Done (V3.1.0 b14 IL):
+- dedicated-misc-systems.md: DynamicProperties - six dicts
+  (Values/Params1/Params2/Data/Classes/Array), Parse IL=123 class
+  recursion + ValidateKey dot ban + ^-token ReplaceProperty + name/
+  class collision throw, AddArray IL=70, Load IL=37; Get* silent
+  defaults vs Parse* Warning; ParseData/ParseKeyData;
+  ParseStringFloatDictWithSubStringKey; CopyFrom/copyKey dotted-path
+  exclusions; Clear skips Array; MemoryPack 6-field Deserialize.
 ## 2026-08-08 - tier-C: vehicle attach slot-claim + detach chain
 
 Done (V3.1.0 b14 IL):

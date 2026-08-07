@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `dbb504c` vehicle attach slot-claim + detach chain |
-| Commits since dry-run `3b61d9c` | ~368 |
+| HEAD (at handoff write) | `8263a0f` DynamicProperties property bag |
+| Commits since dry-run `3b61d9c` | ~369 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
