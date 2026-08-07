@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: AddDroppedId
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md 6b: EntityClass.AddDroppedId (IL=33) lazy itemsToDrop[event]
+  list + SItemDropProb row (name, min, max, prob, 1, stickChance,
+  toolCategory, tag).
+
 ## 2026-08-08 - tier-C: Quest leaves
 
 Done (V3.1.0 b14 IL):
