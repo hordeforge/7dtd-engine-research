@@ -253,11 +253,33 @@ see cache (called from OnUpdateLive before AI).
    true.
 6. Restore model layer; return hit flag.
 
+**`GetSeeDistance` (IL=41):** reset `senseScale = 1`. If sleeping: use
+`sleeperSightRange` as `sightRange` and return it. Else start from
+`sightRangeBase`; if `aiManager` present:
+`senseScale = 1 + CalcSenseScale() * feralSense`, then
+`sightRange = sightRangeBase * senseScale`. Return `sightRange`.
+
+**`DetectUsScale(entity)` (IL=26):** default **1**. If player is in a prefab with
+`DifficultyTier ≥ 1`, has been inside **&gt; 60** s (`Time.time - prefabTimeIn`),
+and the observer is a Dynamic-spawn (`GetSpawnerSource()==1`) `EntityEnemy`:
+return **0.3** (POI stealth vs wandering AI).
+
+**`IsInViewCone(position)` (IL=40):** if sleeping use `sleeperLookDir` +
+`sleeperViewAngle`; else `GetLookVector` + `GetMaxViewAngle`. Half-angle cone
+via `Utils.GetAngleBetween` (same half-angle test as `IsInFrontOfMe`).
+
 **`EntityAlive.HasImmunity(BuffClass)` (IL=2):** always **false** (immunity from
 `EntityBuffs.HasImmunity` passive path / death only unless subclassed).
 
 **`EntityPlayer.CheckSleeperTriggers` (IL=16):** server + alive only:
 `World.CheckSleeperVolumeTouching` then `CheckTriggerVolumeTrigger`.
+
+**`World.CheckSleeperVolumeTouching` (IL=57):** no-op if GameStats **24**
+(EnemySpawnMode) false. Else lock `sleeperVolumes` and for each volume id on the
+player's chunk call `SleeperVolume.CheckTouching`.
+
+**`World.CheckTriggerVolumeTrigger` (IL=53):** same pattern on
+`triggerVolumes` / `TriggerVolume.CheckTouching` (no EnemySpawnMode gate).
 
 **`SetLastTimePlayerSeen` (IL=4):** `lastTimeSeenAPlayer = Time.time`.
 
@@ -1191,8 +1213,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** CanEntityBeSeen LOS + DetectUsScale; CanSee caches;
-  CheckSleeperTriggers; ResetDespawnTime; CheckDespawn bands.
+- **2026-08-07:** GetSeeDistance senseScale; DetectUsScale 0.3 POI; IsInViewCone
+  sleeper dirs; volume touch GameStats 24; CanEntityBeSeen LOS.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

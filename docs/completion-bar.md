@@ -221,6 +221,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | AddBuff BuffStatus 0..5 + ResetDespawnTime | buffs / entity-ai |
 | HasImmunity passive 197 + CanSee caches | buffs / entity-ai |
 | FriendlyFireCheck PvP modes + CanEntityBeSeen LOS | buffs / entity-ai |
+| GetSeeDistance/DetectUsScale + volume touch | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
