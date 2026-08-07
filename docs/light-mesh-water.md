@@ -60,6 +60,8 @@ delegate.
 **World query leaves:** `World.IsOpenSkyAbove(x, y, z)` (IL=23) is true when
 the `ChunkCache` is null, else
 `GetChunkSync(x >> 4, z >> 4).IsOpenSkyAbove(x & 15, y, z & 15)`.
+`Chunk.IsOpenSkyAbove(x, y, z)` (IL=9) is `y >= GetHeight(x, z)` (at or above
+the terrain height for that column).
 `World.IsWaterInBounds(aabb)` (IL=74) walks the integer cell range
 `[floor(min), floor(max) + 1)` per axis and returns true when any
 `WorldBase.IsWater(x, y, z)` cell is water.
