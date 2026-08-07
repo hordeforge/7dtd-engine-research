@@ -546,6 +546,25 @@ charged. `GetStrainPercent` (IL=10) reads `lastAttackStrainPercent` off the
 launcher data (0 without it); `CanReload` (IL=15) cancels a drawn bow first,
 then delegates to the ranged gate.
 
+**Launcher (rocket) family (V3.1.0 b14):** `ItemActionLauncher.fireShot`
+(IL=5) is a stub - it sets `hitEntity = true` and returns zero, because the
+launcher does not use the hit ray. The projectile is a **GameObject with a
+`ProjectileMoveScript`**, not an entity: `instantiateProjectile(data,
+positionOffset)` (IL=136) resolves the ammo via
+`MagazineItemNames[SelectedAmmoTypeIndex]`, stores `LastProjectileType`,
+copies `strainPercent` into `lastAttackStrainPercent`, clones the ammo's
+model (`ItemClass.CloneModel`) parented to `projectileJointT` (or the right
+hand), and adds `ProjectileMoveScript` wired with `itemProjectile`,
+`itemValueProjectile`, `itemValueLauncher` (the launcher value),
+`itemActionProjectile` (the ammo class's `Actions[0 or 1]` cast to
+`ItemActionProjectile`), `ProjectileOwnerID = holder.entityId`, and the
+`actionData`. `ItemActionEffects` (IL=72) runs the base ranged effects, then
+for each tracked projectile calls
+`ProjectileMoveScript.Fire(startPos, getDirectionOffset(data, direction, i),
+holdingEntity, hitmaskOverride, 0, false)` per burst and removes it - the
+rocket flies through the projectile script (physics + the ammo's
+`ItemActionProjectile`).
+
 **Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
 magazine capacity goes through the `MagazineSize` passive against the class's
@@ -1246,6 +1265,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Launcher (rocket) family: fireShot IL=5 stub (no hit ray);
+  instantiateProjectile IL=136 ammo resolve + model clone +
+  ProjectileMoveScript wiring (owner, actions, launcher value); ItemActionEffects
+  IL=72 per-burst ProjectileMoveScript.Fire with direction offset + hitmask.
 - **2026-08-08:** Catapult (bow) family: ExecuteAction IL=163 draw/release
   (strainPercent = hold/m_MaxStrainTime, reload-block, auto-reload
   ItemReloadServer, break/TP-camera cancel, fire via ranged ExecuteAction
