@@ -491,6 +491,11 @@ load path a dedicated server runs at startup:
   `TerrainFromRaw.Init(heightMap, biomeProvider, seed)`.
 - `calcWorldFileCrcs` + `filesNeedProcessing`/`processFiles`: CRC bookkeeping
   (also served to clients through `NetPackageWorldInfo.PrepareWorldHashes`).
+  `calcWorldFileCrcs` (IL=9) is a coroutine stub; `filesNeedProcessing`
+  (IL=32) returns true when the dtm filename does not end in `_processed`,
+  when any of `splat3_processed.png` / `splat4_processed.png` /
+  `splat3_half.png` / `splat4_half.png` is missing, or when
+  `verifyFileHashes` fails.
 - `WorldBiomeProviderFromImage` from `biomes.png`, splat control textures
   (`splat3/splat4_processed.png`, half-res variants, Burst `RoadSmooth`),
   water data (`GetWaterChunks16x16` used by `World.LoadWorld`).
