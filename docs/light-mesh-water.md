@@ -173,6 +173,13 @@ the `ChunkCache` is null, else `ChunkCluster.GetWater(pos).GetMassPercent()`.
 (IL=34) writes `Chunk.SetWater(lx, ly, lz, water)` (no-op on a missing chunk)
 and flags `chunkPosNeedsRegeneration` for the cell.
 
+**Water leaves:** `WaterValue.HasMass()` (IL=5) is `mass > 195` (the same
+empty boundary as `GetMassPercent`). `WaterUtils.GetVoxelKey2D(x, z)` (IL=8)
+is `x * 8976890 + z * 981131` (the 2D voxel key). `IsVoxelOutsideChunk(nx, nz)`
+(IL=15) is a neighbor local coord outside `[0, 15]`;
+`IsChunkSafeToUpdate(chunk)` (IL=16) requires the chunk non-null with
+`!NeedsDecoration && !NeedsCopying && !IsLocked`.
+
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
 **`WaterDataHandle` fields (metadata):** `voxelData` (mass), `voxelState`, `groundWaterHeights`, `activeVoxels`, `flowVoxels`, `flowsFromOtherChunks`, `activationsFromOtherChunks`, `voxelsToWakeup`.
