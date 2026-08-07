@@ -28,6 +28,13 @@ throttled (per-`worldTime`) updates. Stats persist with the entity/player profil
 
 ### 1.1 `EntityStats.Tick` / `TickWait` phase machine (IL re-pin 2026-08-07)
 
+**`Stat.set_Value(value)` (IL=19):** no-op when unchanged; else clamp
+`m_value = FastClamp(value, 0, ModifiedMax)` and
+`SetChangedFlag(old, new)` (the change flag that phase 2/5 of `TickWait`
+consumes). Entity setters are one-line forwards: `EntityAlive.set_Health(int)`
+(IL=7) / `set_Stamina` / `set_Water` (IL=6) call
+`Stats.<Stat>.set_Value(...)`.
+
 **`Tick` (IL=27):** if entity remote **or** dead, return. Else `waitTicks++`; when
 `waitTicks >= 10`, reset to 0. Always call `TickWait(worldTime)`.
 

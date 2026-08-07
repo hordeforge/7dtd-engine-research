@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: Stat.set_Value + entity stat setters
+
+Done (V3.1.0 b14 IL):
+- Stat.set_Value IL=19: clamp 0..ModifiedMax + SetChangedFlag; EntityAlive
+  set_Health/set_Stamina/set_Water one-line forwards (IL=7/6/6).
 ## 2026-08-08 — tier-C: Constants pins
 
 Done (V3.1.0 b14 IL):
