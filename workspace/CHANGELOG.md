@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: player leaves
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md 2: FriendlyFireCheck IL=77 (GameStats 23 modes 0/1/2), GetBreadcrumbPos ring sample, GetFallingSavePosition fallthrough recovery
+
 ## 2026-08-08 - tier-C: ItemActionAttack modifiers
 
 Done (V3.1.0 b14 IL):
