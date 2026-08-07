@@ -265,6 +265,12 @@ count x { voxelIndex:u16, mass:u16 }
 u16 count of `{ worldPos, WaterValue }`; server rebroadcasts (flags 192) then
 `SetWater` + `HandleWaterLevelChanged` (section 6.10).
 
+`GameManager.SetWaterRPC(package)` (IL=41) is the server entry for that
+package: `NetPackageWaterSet.ApplyChanges(ChunkCache)` when world and cache
+exist, stamps `SetSenderId` (dedicated ? -1 : myPlayerId), then either
+`ConnectionManager.SendPackage(package, false, -1, -1, -1, null, **192**, false)`
+on the server or `SendToServer(package, false)` on a client.
+
 ### 4.7 Evaporation and splash
 
 | Type | Method | IL | Role |

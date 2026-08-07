@@ -538,6 +538,18 @@ myPlayerId)`; on the server `SetBlocksOnClients(-1, package)`, else
 `ConnectionManager.SendPackage(package, false, -1, exceptEntityId, -1, null,
 **192**, false)` excluding the placing entity.
 
+**Props are the sibling path.** `GameManager.ChangeProps(persistentPlayerId,
+propsToChange)` (IL=121): lock `ccChanged`; per `PropChangeInfo` require the
+chunk (`GetChunkSync` on `ChunkPos`), bail out of the batch on a miss; then
+`ChunkCluster.SetProp(ChunkPos, PropId, Position, Rotation, Scale, BlockValue)`
+applies the nullable tuple. Touched clusters get
+`ChunkPosNeedsRegeneration_DelayedStart` around the batch and
+`_DelayedStop` after it. `SetPropsRPC(changes, persistentPlayerId)` (IL=29)
+commits, then mirrors `NetPackageSetProp` (`Setup(persistentLocalPlayer,
+changes, dedicated ? -1 : myPlayerId)`) to `SetPropsOnClients(-1, package)` on
+the server or `SendToServer`; `SetPropsOnClients(exceptEntityId, package)`
+(IL=13) fans out on channel **192** excluding the entity.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Clean
