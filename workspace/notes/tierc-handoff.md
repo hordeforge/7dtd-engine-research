@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `1d5a66e` loot bundle open |
-| Commits since dry-run `3b61d9c` | ~412 |
+| HEAD (at handoff write) | `af33024` quest item activation |
+| Commits since dry-run `3b61d9c` | ~413 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

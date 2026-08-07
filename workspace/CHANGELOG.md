@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: loot bundle + quest item
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionOpenLootBundle.ExecuteInstantAction
+  IL=183 (GetLootContainer + Spawn at party highest loot stage,
+  AddItem/ItemDropServer grant).
+- ItemActionQuest.ExecuteInstantAction IL=87 (GetQuest +
+  FindQuest repeatable/active gate + CanActivate, CreateQuest ->
+  XUiC_QuestOfferWindow with stack QuestLock).
 ## 2026-08-08 - tier-C: loot bundle open
 
 Done (V3.1.0 b14 IL):
