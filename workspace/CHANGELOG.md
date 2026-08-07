@@ -6,7 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
----
+## 2026-08-08 — tier-C: sleeper disturbed level + ranged range
+
+Done (V3.1.0 b14 IL):
+- EntityAlive.GetSleeperDisturbedLevel IL=38: pct = dist/sightRangeBase; wake
+  2 / groan 1 / 0 with Lerped threshold ranges.
+- ItemActionRanged.GetRange IL=23: EffectManager.GetValue(MaxRange 11, base
+  Range, holder).
 ## 2026-08-08 — tier-C: class-id + item-stack parse pins
 
 Done (V3.1.0 b14 IL):
