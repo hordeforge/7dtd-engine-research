@@ -1390,6 +1390,24 @@ jumping; on ground or elevator; not electrocuted. Store `JumpToPos = moveToPos`;
 yaw from entity or Atan2 to moveTo; `Jumping=true`; `SetJumpDistance`;
 `ClearBlocked`.
 
+**`CheckBlocked(pos, endPos, baseY, checkSlope, hitInfo)` (IL=192):** lower end
+y by **0.01**; dir = end-pos, len = |dir|+0.001, unit dir. Ray origin = pos −
+unit×**0.375**. Cap ray length to `ccRadius+0.35` when longer (temp move adds
+**0.4**); if dir.y ≥ **0.2** add **0.21**. `Voxel.Raycast` mask
+**1082195968**/128 radius **0.125**. On hit:
+
+- If `checkSlope` and `BlockedFlags==0` and hit normal.y &gt; **0.643** and
+  horizontal normal·dir &lt; **−0.7**: return (walkable slope, not a block).
+- `BlockDamage` → return without latch.
+- Else copy hit into `hitInfo`; OR `BlockedFlags` with bit `(1 << (baseY&31))`;
+  if closer than `blockedDistSq`: set dist, `tempMoveToPos` = hit + dir×(ccRadius+0.4)
+  scaled, y MoveTowards moveTo.y by 1; `isTempMove=true`.
+
+**`CheckBlockedUp(pos)` (IL=75):** clear `BlockedFlags`; ray from head xz at
+head.y−**0.625** upward length **1** same mask. Ignore `BlockDamage`; else copy
+hit, `BlockedFlags=4`, maybe set `blockedDistSq`, `obstacleCheckTickDelay=12`,
+`ResetStuckCheck`.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
@@ -2102,6 +2120,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   IsWalkTypeACrawl walkType≥20.
 - **2026-08-07:** DigUpdate phases digActionTicks 18/4/14; ray 1.1/1.4;
   digForwardCount; organic Hit type 3.
+- **2026-08-07:** CheckBlocked slope gate normal.y 0.643 / dot -0.7; tempMove;
+  CheckBlockedUp flags=4 delay 12.
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 

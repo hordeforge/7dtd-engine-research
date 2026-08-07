@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CheckBlocked and CheckBlockedUp
+
+Done (V3.1.0 b14 IL):
+- CheckBlocked: ray cap, slope normal.y 0.643 / horizontal dot -0.7 skip,
+  BlockedFlags baseY bit, tempMoveToPos.
+- CheckBlockedUp: flags=4, obstacleCheckTickDelay=12.
+---
 ## 2026-08-07 — tier-C: SetRevengeTarget and IsInFrontOfMe
 
 Done:
