@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameRandom Next overloads
+
+Done (V3.1.0 b14 IL):
+- GameRandom.Next family narrated in dedicated-misc-systems.md: Next() =
+  InternalSample; Next(max) = (int)(Sample()*max) with negative throw;
+  Next(min,max) validates min<=max, Sample()*range when fits int else
+  GetSampleForLargeRange; NextBytes = InternalSample()%256 per byte.
+
 ## 2026-08-08 - tier-C: GameRandom seeding
 
 Done (V3.1.0 b14 IL):

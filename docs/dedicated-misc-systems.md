@@ -371,6 +371,13 @@ thin `NextDouble()` / `Next(int)` wrapper (V3.1.0 b14 IL):
 | `RandomRange(int maxExclusive)` | 4 | `Next(max)` - [0, max) |
 | `RandomRange(int min, int maxExclusive)` | 8 | `Next(max - min) + min` - [min, max) |
 
+The `Next` overloads behind the int ranges are the .NET wrappers: `Next()`
+(IL=3) = `InternalSample()`; `Next(max)` (IL=14) = `(int)(Sample() * max)`
+with a negative-max `ArgumentOutOfRangeException`; `Next(min, max)` (IL=37)
+validates `min <= max`, uses `(int)(Sample() * range)` when the range fits in
+`int` and the two-draw `GetSampleForLargeRange` otherwise;
+`NextBytes(buffer)` (IL=26) fills with `(byte)(InternalSample() % 256)`.
+
 Float ranges are **max-exclusive** like the int ones. Every gameplay caller
 (AIDirector components, spawners, loot rolls, party/group picks) funnels
 through these, so a single seeded `GameRandom` instance drives each
@@ -402,6 +409,9 @@ the same seed - deterministic and portable.
 
 ## Changelog
 
+- **2026-08-07:** GameRandom Next overloads: Next() InternalSample; Next(max)
+  Sample()*max with negative throw; Next(min,max) range check + large-range
+  fallback; NextBytes InternalSample()%256.
 - **2026-08-07:** GameRandom algorithm: classic .NET Random (Knuth
   subtractive) inline - 56-entry SeedArray, inext/inextp wrap, Sample()*2^-31,
   PeekSample non-advancing, GetSampleForLargeRange double-draw; sequences
