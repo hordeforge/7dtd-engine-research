@@ -352,6 +352,20 @@ turn create a follow-up horde. `AIHordeSpawner` is the closely related
 screamer-triggered variant: it logs `Screamer spawned ...` and pulls a
 gamestage-scaled group toward a target position.
 
+Heat is added through `NotifyEvent(chunkEvent)` (IL=22): it resolves the
+region data via `GetChunkDataFromPosition(event.Position, true)` and, when the
+data is ready, `AddEvent` and pushes it onto the pending `checkChunks` list.
+`StartCooldownOnNeighbors(position, isLong)` (IL=55) converts the position to
+the 5x5 region grid (`toChunkXZ / 5`), walks the static `neighbors` offset
+table (pairs of ints), get-or-creates the `AIDirectorChunkData` for each
+neighbor key, and calls `StartNeighborCooldown(isLong)` on it.
+
+The component's `activeChunks` heat map is persisted with the WorldState:
+`Write` (IL=33) emits version **1** (int32), the entry count, then per entry
+the region key (`int64`) followed by `AIDirectorChunkData.Write`; `Read`
+(IL=37) only parses it when the outer WorldState version is >= **5**, clears
+the map, and rebuilds each `AIDirectorChunkData` through its own `Read`.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Cooling
