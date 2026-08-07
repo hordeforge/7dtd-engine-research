@@ -40,6 +40,8 @@ flowchart TB
   passes (scales with the day-speed stat)
 - `ComponentsInitNewGame()` IL=20: `InitNewGame()` on every registered
   component; `NotifyIntentToAttack(zombie, player)` IL=1 is an empty residual
+  (its only caller, `EntityEnemy.OnEntityTargeted` IL=21, fires it for
+  non-remote, non-`Dynamic`-spawned enemies targeting a player)
 
 **Caller:** `World.OnUpdateTick` → `AIDirector.Tick` (Xref=1, server path).
 
