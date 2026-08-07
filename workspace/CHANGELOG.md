@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: repair action
+
+Done (V3.1.0 b14 IL):
+- items.md: ItemActionRepair.ExecuteAction IL=631 gates (Delay,
+  hit distance, passive 177, TP camera, trader-area refusal) +
+  repairType; CanRemoveRequiredResource IL=106 upgrade filters +
+  UpgradeHitCount/PropUpgradeBlockItemCount + toolbelt/bag count;
+  GetRepairAmount IL=3 field; application via crafting queue.
 ## 2026-08-08 - tier-C: block placement + skill book
 
 Done (V3.1.0 b14 IL):
