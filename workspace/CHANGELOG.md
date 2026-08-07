@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: DecoOccupiedMap leaves
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 6.2: Get/Set via CheckPosition (NoneAllowed 8 out-of-bounds), SetArea min-wins rect, CheckArea conflict gate
+- chunk-providers.md 6.2: DecoManager.CheckPosition IL=34 index fold (x+halfW) + (z+halfH)*width
+
 ## 2026-08-08 - tier-C: FromRaw texture/CRC leaves
 
 Done (V3.1.0 b14 IL):
