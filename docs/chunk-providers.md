@@ -704,6 +704,10 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   `DecoManager.SetBlock(world, pos, bv)` (IL=19) is the edit-sync called by
   `ChunkCluster.SetBlock`: an air value only removes the record; any other
   value replaces it (remove + `AddDecorationAt(..., forceBlockYPos=false)`).
+  The `BlockShapeDistantDeco` hooks are all `IsEnabled`-gated: `OnBlockAdded`
+  attaches with `forceBlockYPos=true` when the block `IsDistantDecoration`,
+  `OnBlockLoaded` attaches for non-remote worlds, `OnBlockRemoved` detaches,
+  and `OnBlockValueChanged` only runs the base handler.
   `GetDecorationsOnChunk` (IL=143) lazily decorates an undecorated DecoChunk
   under its lock (`Decorating chunk, should not happen at this point!` error),
   reads the 16x16 bucket, warns
