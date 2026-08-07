@@ -65,6 +65,11 @@ whose lowercased transform name contains the filter (empty filter matches all)
 and returns the count. `AddInsideDevicePosition(x, y, z, bv)` (IL=20) records
 a `Vector3b` in `insideDevices` (+ hash set) and sets
 `IsInternalBlocksCulled = true` (the POI-filler culled path).
+`removeBlockEntitesMarkedForRemoval()` (IL=133) drains
+`blockEntityStubsToRemove` + `propEntitiesToRemove`: with occlusion culling on
+the transforms go through `OcclusionManager.RemoveChunkTransforms`; each stub
+`Cleanup()`s and pools its transform; each prop destroys its `PropReference`
+and pools the game object; both lists clear.
 
 **`GameUtils.Vector3iToUInt64(v)` (IL=29)** is the position key pack behind
 the dict: each axis becomes `(coord + 32768) & 0xFFFF` (a 16-bit field with a
