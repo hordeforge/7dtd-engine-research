@@ -510,6 +510,11 @@ and returns its `m_BlockValue.type`, except with `bFixedWaterLevel` where
 liquid elements return 0. `GetPOIHeightOverride(x, z)` (IL=66) divides world
 coords by `worldScale` for the lookup and returns `m_YPosFill` (the water
 fill height) **only** for liquid elements, else 0.
+`GetChunkProtectionLevel` (IL=5) delegates to
+`m_RegionFileManager.GetChunkProtectionLevelForWorldPos`; `GetHeight(x, z)`
+(IL=27) is `heightMap.GetAt` with a `Get Height Error x: {0} z: {1}` catch
+falling back to 0; `GetWorldSize` (IL=12) is
+`Vector2i(heightMapWidth * heightMapScale, heightMapHeight * heightMapScale)`.
 
 `loadSplatMaps(levelName, worldWidth)` (IL=883) builds the surface-channel
 map that `GetTopmostBlockValue` (§3.1) later switches on. It resolves the
