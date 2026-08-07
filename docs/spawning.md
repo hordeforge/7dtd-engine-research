@@ -163,6 +163,16 @@ both delay timers, clear `entityIdSpawned`, `currentWave=0`,
 `numberToSpawnThisWave=0`. **`ResetSpawner`** just calls that.
 **`get_CurrentWave`:** field `currentWave`.
 
+**`World.CanPlayersSpawnAtPos(pos, allowAir)` (IL=25):** resolve chunk; else
+false; `Chunk.CanPlayersSpawnAtPos(local, allowAir)`.
+
+**`World.FindRandomSpawnPointNearRandomPlayer(maxLight, ref x,y,z)` (IL=64):** no
+players → zeros and false; else pick a random player (decrementing counter walk)
+and `FindRandomSpawnPointNearPlayer(..., maxDist=**32**)`.
+
+**`World.GetClosestLocalPlayer(pos)` (IL=45):** primary local player, or min
+sqr-dist among `m_LocalPlayerEntities` when more than one.
+
 The despawn accounting lives in `OnEntityUnloaded`, registered as a world
 delegate. It only touches `Biome`-sourced entities and reads the master chunk
 back from the entity's stored spawner chunk key:
@@ -604,6 +614,7 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** CanPlayersSpawnAtPos; FindRandomSpawnPointNearRandomPlayer 32; GetClosestLocalPlayer.
 - **2026-08-07:** EntitySpawner.resetRuntimeVariables wave/delay clear.
 - **2026-08-07:** ChunkAreaBiomeSpawnData.IsSpawnNeeded under-max / delay /
   missing group (IL=57).

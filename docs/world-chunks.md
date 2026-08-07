@@ -354,6 +354,15 @@ on success log POI name + bbox and return true.
 **`World.IsWorldEvent(event)` (IL=7):** only event **0** is implemented → returns
 `isEventBloodMoon`; any other event → false.
 
+**`World.CheckEntityCollisionWithBlocks(entity)` (IL=19):** if
+`!CanCollideWithBlocks` return; if chunk cache overlaps entity AABB,
+`ChunkCluster.CheckCollisionWithBlocks`.
+
+**`World.CanPlaceLandProtectionBlockAt(pos, player)` (IL=138 high-level):** if
+GameStats **1** != 1 allow always; require `InBoundsForPlayersPercent ≥ 0.5`;
+scan nearby chunks using claim size stats **44/45**; reject when
+`IsLandProtectedBlock` conflicts.
+
 ### 5.1 `GameManager.ChangeBlocks` (IL=530) / `SetBlocksOnClients` (IL=13)
 
 Authoritative multi-block apply used by `NetPackageSetBlock` Process:
@@ -498,6 +507,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** CheckEntityCollisionWithBlocks; CanPlaceLandProtectionBlockAt 0.5 bounds.
 - **2026-08-07:** Chunk.SetBlockRaw IL=386 (y cap, water, IndexedBlocks, heightmap,
   tickedBlocks, dirty flags).
 - **2026-08-07:** UncullChunk/UncullPOI; GetTraderAreaAt decorator; IsWorldEvent

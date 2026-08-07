@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: spawn pos helpers and falling groups
+
+Done (V3.1.0 b14 IL):
+- CanPlayersSpawnAtPos chunk gate; FindRandomSpawnPointNearRandomPlayer dist 32.
+- GetClosestLocalPlayer multi-local min dist; CheckEntityCollisionWithBlocks.
+- CanPlaceLandProtectionBlockAt bounds 0.5 + claim scan; CreateFallingBlockGroup.
+---
 ## 2026-08-07 — tier-C: Uncull and IsWorldEvent blood moon
 
 Done (V3.1.0 b14 IL):

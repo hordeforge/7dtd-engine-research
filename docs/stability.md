@@ -125,11 +125,17 @@ or the block is air / child / `StabilityIgnore`, or oversized without
 
 `World::LetBlocksFall` (220 IL, run from `GameManager::UpdateTick` outside the
 IsServer guard, so clients run it too): when `EntityFallingBlocks::Enabled` is
-set it first groups via `GroupFallingBlocks` (up to 2 groups per pump), then
-dequeues individual positions, skipping processed/grouped ones, reads the block
-value, the texture array and any tile entity, and spawns the falling-block
-entity (`EntityFallingBlocks` for groups, `EntityFallingBlock` for singles) via
+set it first groups via `GroupFallingBlocks` (up to **2** groups per pump via
+`CreateFallingBlockGroup`), then dequeues individual positions, skipping
+processed/grouped ones, reads the block value, the texture array and any tile
+entity, and spawns the falling-block entity (`EntityFallingBlocks` for groups,
+`EntityFallingBlock` for singles) via
 `EntityFactory::CreateEntity(EntityClass::FromString("fallingBlock"))`.
+
+**`CreateFallingBlockGroup(list)` (IL=107):** snapshot block values + textures;
+for each pos `OnBlockStartsToFall` + `DynamicMeshManager.ChunkChanged` + remove
+from `groupedBlocks`; if first block `ShowModelOnFall`, spawn `fallingBlocks`
+entity at center with ±0.1 xz jitter.
 
 **`Block.OnBlockStartsToFall` (IL=6):** base path only
 `SetBlockRPC(pos, Air)` (remove solid before entity simulates). Overrides:
@@ -192,6 +198,7 @@ channel today; the plane can be recomputed on load with
 
 ## Changelog
 
+- **2026-08-07:** CreateFallingBlockGroup OnBlockStartsToFall + fallingBlocks entity.
 - **2026-08-07:** OnBlockStartsToFall base SetBlockRPC Air; tree/composite
   overrides.
 - **2026-08-07:** getMaxStabilityAround IL=61 (AllDirections, StabilitySupport
