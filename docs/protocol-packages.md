@@ -113,6 +113,13 @@ EncryptionKey : i32 len + byte[len]    // symmetric session key material
 IntegrityKey  : i32 len + byte[len]    // separate MAC/integrity key
 ```
 
+**NetPackageKeyExchangeComplete** Process **IL=8**:
+`AntiCheatEncryptionAuthServer.CompleteKeyExchange(Sender, wasSuccessful)`.
+
+**Also thin join helpers:** `NetPackageConfigFile` Process IL=6 ->
+`WorldStaticData.ReceivedConfigFile(name, bytes)`;
+`NetPackageWorldSpawnPoints` Process IL=5 -> `GameManager.SetSpawnPointList`.
+
 **NetPackageKeyExchangeComplete**
 ```text
 wasSuccessful : bool
@@ -188,6 +195,9 @@ count        : u16   // number of map pieces that will follow
 If any piece has length != 256, the writer logs a warning, decrements the planned
 count, and **rewinds** the stream to rewrite the `u16` count after the loop
 (so a bad piece is omitted without leaving a stale count).
+
+**ProcessPackage (IL=26):** resolve player entity; `IMapChunkDatabase.Add(keys,
+color arrays)` for minimap DB.
 
 **`GetLength` (IL=24):** `4 + 8*chunkCount + 512*pieceCount` (entityId +
 per-chunk key+pad estimate + 256 u16 colors). Not an exact wire length after
@@ -1215,7 +1225,7 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 
 | Package | IL write | Wire (after base) | Process / notes |
 |---|---:|---|---|
-| `NetPackageEntityRemove` | 8 | `reason` (EnumRemoveEntityReason) | ToClient; `World.RemoveEntity(id, reason)` |
+| `NetPackageEntityRemove` | 8 | `reason` (EnumRemoveEntityReason) | Process IL=24: log if missing; `World.RemoveEntity(id, reason)` |
 | `NetPackageEntityCollect` | 12 | `entityId`, `playerId` | Process IL=51: `ValidEntityIdForSender(playerId)`; server rebroadcast flags **192** then `Entity.OnCollectServer(playerId)`; client `OnCollectLocal` |
 | `NetPackageEntityPhysics` | 77 | flags + entityId + pos f32x3 + quat f32x4 + vel f32x3 + angVel f32x3 | Physics master broadcast |
 | `NetPackageTeleportPlayer` | 56 | pos f32x3, rot f32x3, `onlyIfNotFlying` | Local player `TeleportToPosition` |
@@ -1247,9 +1257,10 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageModifyCVar` | 21 | m_entityId, cvarName, value, operation | Process IL=26: server `EntityBuffs.SetCustomVar` |
 | `NetPackageEntityAddExpClient` | 30 | entityId, xp, xpType, usedItem | Process IL=36: `Progression.AddLevelExp` with `_xpFromKill` / `_xpOther` tags |
 | `NetPackageEntityAddExpServer` | (inherit) | same | Process IL=31: server `AddLevelExp` `_xpOther` path |
-| `NetPackageEntitySetSkillLevelClient` | 16 | entityId, skill, level | Skill level display |
-| `NetPackageEntityAwardKillServer` | 12 | EntityId, KilledEntityId | Kill award |
-| `NetPackageEntityAddScoreClient` | 27 | entityId, zombieKills i16, playerKills i16, otherTeamNumber i16, conditions i32 | Client `EntityAlive.AddScore` |
+| `NetPackageEntitySetSkillLevelClient` | 16 | entityId, skill, level | Process IL=22: `ProgressionValue.set_Level` |
+| `NetPackageEntitySetSkillLevelServer` | (inherit) | same | Process IL=26: server set_Level |
+| `NetPackageEntityAwardKillServer` | 12 | EntityId, KilledEntityId | Process IL=24: `QuestEventManager.EntityKilled(killer, victim)` |
+| `NetPackageEntityAddScoreClient` | 27 | entityId, zombieKills i16, playerKills i16, otherTeamNumber i16, conditions i32 | Process IL=25: `EntityAlive.AddScore(...)` |
 | `NetPackageEntityAddScoreServer` | (inherit client fields) | same fields | Process IL=17: `IGameManager.AddScoreServer` |
 
 #### World / blocks / volumes / power wires
@@ -1274,7 +1285,8 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | Package | IL write | Wire | Notes |
 |---|---:|---|---|
 | `NetPackageSimpleRPC` | 12 | entityId, type (SimpleRPCType) | Process IL=17: `ValidEntityIdForSender`; `GameManager.SimpleRPC(id, type, true, world.IsRemote)` |
-| `NetPackageSimpleChat` | 44 | msg, recipientEntityIds | Lightweight chat variant |
+| `NetPackageSimpleChat` | 44 | msg, recipientEntityIds | Process IL=116: remote UI chat; server fans to recipient ClientInfos |
+| `NetPackageSharedQuest` | (large) | SharedQuestData | Process IL=371: server `QuestShareServer` / client `QuestShareClient`; party journal remove/share |
 | `NetPackageGameMessage` | 17 | msgType, mainEntityId, secondaryEntityId | Process IL=28: remote `GameMessageServer` else `DisplayGameMessage` |
 | `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | Process IL=18: local players HUD |
 | `NetPackageCloseAllWindows` | 8 | _playerIdToClose | Process IL=21: server no-op path; client `CloseAllOpenModalWindows` |
@@ -1295,8 +1307,10 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageEditorAddVolumeFromClient` | 31 | addType, volumeType, startPos, size, prefabInstanceId, existingIndex | Prefab editor volume (editor) |
 
 Packages with **empty or inherit-only** `write` on this assembly (body in base or
-unused on dedi): `NetPackageEntityAddExpServer`, `NetPackageEntitySetSkillLevelServer`,
-`NetPackageInventoryKeepOpen`, `NetPackagePlayerDisconnect` (extends PlayerData),
+unused on dedi / thin process): `NetPackageEntityAddExpServer` (has Process IL=31),
+`NetPackageEntitySetSkillLevelServer` (Process IL=26),
+`NetPackageInventoryKeepOpen`, `NetPackagePlayerDisconnect` (Process IL=9: base
+PlayerData then `GameManager.PlayerDisconnected`),
 `NetPackageInfo`, `NetPackageMetrics`, `NetPackageLogger`, `NetPackageEntry`. Treat
 inventory body dump as authoritative when present.
 
@@ -1462,6 +1476,8 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** EntityRemove/SimpleChat/SharedQuest/AwardKill/SkillLevel/Score
+  process; ConfigFile/SpawnPoints/MapChunks/KeyExchangeComplete thin paths.
 - **2026-08-07:** NetPackageChunk Process IL=126 overwrite vs add paths.
 - **2026-08-07:** LandClaim/SleeperWake/GameStats/Deco/Sign/DynamicMesh/AddExp
   process re-pins; AuthConfirmation/EncryptionRequest thin paths.

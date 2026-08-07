@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: more package Process (chat/quest/score/kill/skill)
+
+Done (V3.1.0 b14 IL):
+- EntityRemove, SimpleChat, SharedQuest, AwardKill, SetSkillLevel, AddScore,
+  MapChunks, ConfigFile, WorldSpawnPoints, KeyExchangeComplete, PlayerDisconnect
+  process notes; census 1454/853.
+---
 ## 2026-08-07 — tier-C: EAI leaf Update/CanExecute IL table
 
 Done (V3.1.0 b14 IL):
