@@ -211,6 +211,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | DropBagServer lootDrops vs bag paths | combat-damage.md |
 | LootDropPick weighted + OnBlockStartsToFall Air | combat / stability |
 | AttackEntites body mult + DamageRecord apply | protocol-packages §6.14 |
+| explode ExplodeGroup delay=3 + FrameUpdate budget | protocol-packages §6.14 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

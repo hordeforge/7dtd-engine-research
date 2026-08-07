@@ -902,10 +902,21 @@ client forwards `NetPackageExplosionInitiate`; server if `_delay <= 0` calls
 `explode(...)` else `StartCoroutine(explodeLater(...))`.
 
 **`GameManager.explode` (IL=194):** `new Explosion` → `AttackBlocks` +
-`AttackEntites`; collect non-air changed blocks into fall groups for
-`explodeFallingGroups`; local `ExplosionClient` (prefab + force + ChangeBlocks);
-optional heat-map sound to AIDirector; if clients present, send
-`NetPackageExplosionClient`.
+`AttackEntites`; copy `ChangedBlockPositions` into temp list; build
+`ExplodeGroup` with `pos`, `radius=BlockRadius`, **`delay=3`**; for each change
+that is air in the change list but still solid and `IsExplosionAffected` in
+world, append `Falling{pos,bv}` to the group; if any fallings, push group onto
+`explodeFallingGroups`. Local `ExplosionClient` (prefab + force + ChangeBlocks);
+if Duration &gt; 0 set TemporaryObject life; wire `ExplosionDamageArea` buffs +
+initiator; if AIDirector and not `IgnoreHeatMap`, `OnSoundPlayedAtPosition`
+from AudioPlayer; if clients present, send `NetPackageExplosionClient`.
+
+**`ExplodeGroupFrameUpdate` (IL=220):** reverse-iterate groups; each frame
+`delay--`; when delay hits 0, process up to budget
+`max(1, min(count, 20 * 0.73^count))` fallings: raycast down for ground;
+`DropItemsOnEvent` prob **0.5**; if `ShowModelOnFall` spawn `fallingBlock` with
+start velocity (horizontal clamp **0.6*18**, vertical random **-0.2..6** scale,
+spin **2..15**); remove finished groups.
 
 **`Explosion.AttackBlocks` (IL=553):** EffectManager-scaled `BlockRadius` (passive
 21); optional BlockTags filter; walk blocks in radius; terrain Y adjust; damage
@@ -1532,6 +1543,8 @@ customReason    : string
 - **2026-08-07:** EntityAliveFlags Process bit setters (god/crouch/alert remote).
 - **2026-08-07:** QuestObjectiveUpdate eventType 0/1/2 party fan + treasure
   FinishTreasureQuest / HandlePlayer distance 15 + AddToDestroyCount.
+- **2026-08-07:** explode ExplodeGroup delay=3 + heat map sound; FrameUpdate
+  fall budget 20*0.73^n and fallingBlock velocity.
 - **2026-08-07:** AttackEntites body-part mult + passive 22 + DamageRecord apply
   (0.1 maxHP, DismemberChance 0.5, center 0.67).
 - **2026-08-07:** AttackBlocks IL=553 / AttackEntites IL=691; explode IL=194;

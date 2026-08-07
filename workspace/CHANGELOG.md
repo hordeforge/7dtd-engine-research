@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: explode ExplodeGroup delay and FrameUpdate
+
+Done (V3.1.0 b14 IL):
+- explode: ExplodeGroup delay=3; IsExplosionAffected fallings; heat map OnSoundPlayedAtPosition.
+- ExplodeGroupFrameUpdate: budget max(1,min(n,20*0.73^n)); DropItems 0.5; fallingBlock velocity.
+---
 ## 2026-08-07 — tier-C: AttackEntites body mult and DamageRecord
 
 Done (V3.1.0 b14 IL):
