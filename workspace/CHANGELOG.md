@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: enemy intent-to-attack
+
+Done (V3.1.0 b14 IL):
+- aidirector.md: EntityEnemy.OnEntityTargeted (IL=21) fires
+  NotifyIntentToAttack for non-remote, non-Dynamic-spawned enemies targeting a
+  player; IsDrawMapIcon (IL=2) true; GetMapIconScale (IL=5) (0.75, 0.75, 1).
+
 ## 2026-08-08 - tier-C: EntityAnimal distress
 
 Done (V3.1.0 b14 IL):
