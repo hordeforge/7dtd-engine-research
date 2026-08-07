@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: splat loader + InitData coroutine
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 4.1: loadSplatMaps IL=883 (splat1/2/3 png, 12-channel dominance chain -> splatMapMaxValue, splatScaleDiv = worldWidth/splatW)
+- chunk-providers.md 4.1: ProcessColor IL=22 channel fold, InitData coroutine (biomes.tga/png, BiomeImageLoader, radiation.png/tga, >512 tiled branch)
+
 ## 2026-08-08 - tier-C: POI stamping + ore-noise gate
 
 Done (V3.1.0 b14 IL):
