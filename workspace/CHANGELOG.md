@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity-stub leaves
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md 1: AddEntityStub (IL=5); RemoveEntityBlockStub (IL=30)
+  packed-key remove + not-found warn.
+
 ## 2026-08-08 - tier-C: wall-volume registry
 
 Done (V3.1.0 b14 IL):
