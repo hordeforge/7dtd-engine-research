@@ -235,6 +235,40 @@ present (overlap-safe placement window); it then:
 `ChunkManager.task_Lighting`, so late-arriving neighbors get their pending
 decoration on the lighting worker rather than only at generation time.
 
+**`WorldBlockFiller`** is the per-chunk biome deco sprinkler invoked by
+`WorldDecoratorBlocksFromBiome`. Its `m_BlocksToFill : Byte[]` is a flat
+16x16x256 grid indexed `((x << 4) | z) << 8 | y`; **255** means "untouched".
+`resetBlockInformation` (IL=41) fills the grid with 255 and inverts the bounds
+(`m_iMinX/Z = 16`, `m_iMaxX/Z = 0`, `m_iMinY = 256`, `m_iMaxY = 0`), zeroing
+`m_iFillCount`/`m_iAreaCount`. `setBlockToFill(x, y, z, top)` (IL=81) expands
+the bounds to include the cell, stores `top`, bumps `m_iFillCount`, and bumps
+`m_iAreaCount` only when `y == 0` (per-column registration; the caller passes
+the surface height as the `top` byte). `fillChunk(chunk)` (IL=66) no-ops when
+`m_iAreaCount == 0`, resolves the biome from `m_GenRules` by `m_iThisBiomeColorId`
+(`TryGetValue`; no biome -> no-op), then runs `fillLevel(chunk, deco, -1, ref
+available)` for every `BiomeDefinition.m_DecoBlocks` entry. The trailing walk
+over `m_Layers` only reads each `m_Depth` and never calls `fillLevel`, so the
+layer-resource fill is inert in this build.
+
+`fillLevel(chunk, deco, layerDepth, ref availableCount)` (IL=192) computes
+`areaCount = (int)(m_iAreaCount * deco.prob)` attempts. Each attempt picks a
+random (x, z) in bounds and reads the y=0 column marker: an untouched column
+(255) makes the **first** pick return immediately while later picks re-roll.
+It then calls `setDecorationBlock(chunk, x, marker, layerDepth, z,
+clusterProb, deco.blockValues[0])`, subtracts the returned placed count from
+`availableCount` and `areaCount`, and keeps re-picking while both are >= 0;
+it logs `did not find spot to place decoration` when the above-surface cell is
+already filled. `setDecorationBlock(chunk, x, y, d, z, probability, blockValue)`
+(IL=152) picks the placement depth `v = d < 0 ? d : RandomRange(0, d)` (so deco
+blocks, `d = -1`, sit at `y + 1` = just above the surface marker, while layers
+dig a random depth below it), bails out with 0 when `v >= y`, and with
+`probability <= 0` writes only the center `SetBlockRaw(x, y - v, z, blockValue)`.
+With `probability > 0` it first prob-gates a 3x3 (x z) neighborhood, extended
+to three depth layers when `d > 1`, each cell clamped to the chunk and written
+when `RandomDouble < probability`, then the unconditional center write (a gated
+hit on the center therefore writes it twice). It returns the number of blocks
+written and stamps every written cell back to 255.
+
 ### 3.4 Rebuild, reset, protection
 
 `RebuildTerrain(chunks, areaStart, areaSize, stopStability, regen, fillEmpty,
