@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: turret/vehicle deploy actions
+
+Reversed the turret and vehicle deploy pipeline end to end: ItemActionSpawnTurret.ExecuteAction (IL=342) and ItemActionSpawnVehicle.ExecuteAction (IL=213) release-gated commit with the Delay window (< 2 s), entity-class resolve from EntityClass.list, tag-based caps (drone/turretRanged/turretMelee -> DroneManager/TurretTracker, vehicle -> VehicleManager), and the +90 vehicle yaw offset. NetPackageTurretSpawn.ProcessPackage (IL=207) and NetPackageVehicleSpawn.ProcessPackage (IL=86): server-side cap re-check from package item tags, ItemDropServer refund (lifetime 60) on denial or missing player, Spawned=true + bPlayerStatsChanged=true, OwnerID via Clients.ForEntityId on dedicated vs InternalLocalUserIdentifier on host, castclass EntityVehicle contract on the vehicle package. Doc: vehicles-drones-turrets.md 7.1. verified from IL. Commit 4a91aef.
 ## 2026-08-08 - tier-C: CreateModifierData + spawn entity action
 
 Done (V3.1.0 b14 IL):
