@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: mods loader + attack config parse
+
+ItemModificationsFromXml (items.md 3): ParseModifier (IL=63) Groups {Mods} + installable/blocked/modifier tags + type enum; parseItem (IL=725) - mods are full ItemClass instances through the shared pipeline with CosmeticInstallChance, RequirementGroup[3] from ActionN classes, item_property_overrides -> PropertyOverrides dict, Material default Miron, Extends exclude Block.PropCreativeMode, shared Actions fill + Init last. ItemActionAttack.ReadFrom (IL=482): ToolCategory/Damage/DamageBlock/Range/Sphere, Magazine_items -> MagazineItemNames + UsesMagazines, parallel ray-counts/spreads arrays, AmmoIsPerMagazine, BulletUsePerShot, rays/spread, Infinite_ammo, Hitmask_override, sounds. verified from IL. Commits 9ed23ae, 662df6f, e4465a6.
 ## 2026-08-08 - tier-C: items.xml loader + item class init tails
 
 ItemClass loading pipeline (items.md 3): ctor (IL=181) allocates Actions[5] null-filled + defaults (Stacknumber 500, StickyOffset 0.15); InitStatic (IL=24) builds itemActionNames Action0..Action4; ItemClassesFromXml.parseItem (IL=772) - name required, property collection, Class attr Type.GetType factory, Extends CopyFrom merge + missing-parent throw, Stacknumber 500 default, required Material/Meshfile, Actions fill via GetTypeWithPrefix(ItemAction) + ReadFrom + ActionIndex + ExecutionRequirements, Init() runs last (corrected the earlier 'Init fills Actions' claim). Subclass Init overrides: Block (IL=56) block-field mirror, Armor (IL=61) ArmorGroup/EquipSlot/cosmetics, TimeBomb (IL=62) ExplosionData + FuseTime*20 ticks, WaterContainer (IL=32) MaxMass = WaterCapacity*19500 clamp, HeldEntity (IL=99) stress/sound set, WildChicken (IL=21) game stages. verified from IL. Commits 61cf7d1, f9eda67.
