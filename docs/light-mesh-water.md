@@ -180,7 +180,11 @@ the `ChunkCache` is null, else `ChunkCluster.GetWater(pos).GetMassPercent()`.
 and flags `chunkPosNeedsRegeneration` for the cell.
 
 **Water leaves:** `WaterValue.HasMass()` (IL=5) is `mass > 195` (the same
-empty boundary as `GetMassPercent`). `WaterUtils.GetVoxelKey2D(x, z)` (IL=8)
+empty boundary as `GetMassPercent`). `SetMass(v)` (IL=8) clamps
+`FastClamp(v, 0, 65535)` into the u16; `get_RawData` (IL=4) /
+`FromRawData(i64)` (IL=8) are the u16 <-> i64 channel-word conversions the
+`ChunkBlockChannel` storage and `Chunk.GetWater` use; the wire form is the
+u16 both ways (`Write`/`Read` IL=5). `WaterUtils.GetVoxelKey2D(x, z)` (IL=8)
 is `x * 8976890 + z * 981131` (the 2D voxel key); the 3D `GetVoxelKey(x, y,
 z)` (IL=10) adds `+ y`. `IsVoxelOutsideChunk(nx, nz)`
 (IL=15) is a neighbor local coord outside `[0, 15]`;
@@ -437,6 +441,8 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-08:** WaterValue leaves: SetMass IL=8 FastClamp 0..65535;
+  get_RawData/FromRawData u16<->i64 channel word; wire u16 both ways.
 - **2026-08-08:** Water writes: Chunk.SetWater IL=13 (raw + WakeNeighbours);
   SetWaterRaw IL=55 (flow-through mass-0 gate, chnWater.Set, dirty flags,
   SetWaterMass, heightmap raise).
