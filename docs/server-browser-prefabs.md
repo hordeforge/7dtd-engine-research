@@ -297,6 +297,14 @@ inside positions (`IsInsidePrefab` -> `AddInsideDevicePosition`), copies water
 `Constants.cTerrainFiller*BlockName` names; `IsCullThisPrefab()` (IL=5) is
 `!bExcludePOICulling`.
 
+`Prefab.CopyEntitiesIntoChunkStub(chunk, destPos, entityIds, spawnEnemies)`
+(IL=88) walks the prefab's `entities` list, skips classes absent from
+`EntityClass.list` and (when `!spawnEnemies`) enemy classes, drops entries
+whose floored world position falls outside this chunk, then clones the
+`EntityCreationData`, offsets `pos += destPos.ToVector3() + (0, 0.25, 0)`,
+allocates `id = EntityFactory.nextEntityID++`, and registers it via
+`chunk.AddEntityStub` (recording the id in `entityIds` when provided).
+
 The spatial query `GetPrefabsAtXZ(xMin, xMax, zMin, zMax, list)` (IL=70,
 reached through `World.GetPOIsAtXZ`, a null-checked wrapper IL=15) clears the
 list under `listsLock`, starts at `PrefabBinarySearch(xMin)` (IL=58: resorts
