@@ -159,6 +159,11 @@ idx_in_layer = x + (z << 4) + ((y & 3) * 256)
 layerIndex = (y >> 2) * bytesPerVal
 offset = x + z*16 + (y & 3)*256
 
+// density sentinel constants (MarchingCubes .cctor, IL=9)
+DensityAir = 127, DensityAirHi = 100, DensityTerrain = -128, DensityTerrainHi = -100
+GetDecorationOffsetY(densY, densYm1) (IL=12) =
+  clamp(-0.0035 * (densY + densYm1), -0.4, 0.4)
+
 // terrain heightmap (always byte)
 m_TerrainHeight[x + z*16] → byte
 
