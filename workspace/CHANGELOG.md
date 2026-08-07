@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: body damage wire + trader area queries
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md: BodyDamage.Write IL=12 i32 version + i32
+  damageType + u32 Flags; Read version-first with legacy fallback.
+- loot-economy.md: World.IsWithinTraderArea IL=6 GetTraderAreaAt !=
+  null; IL=19 sandbox gate + DynamicPrefabDecorator delegate.
 ## 2026-08-08 - tier-C: body damage wire
 
 Done (V3.1.0 b14 IL):
