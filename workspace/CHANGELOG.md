@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TEFeatureDoor
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md 4.7: TEFeatureDoor Write IL=23 (disk v18 + isOpen; net isOpen + animateOnSync cleared), CanOpen IL=29 (lockpick + lock gates)
+
 ## 2026-08-08 - tier-C: TraderArea spatial tests
 
 Done (V3.1.0 b14 IL):
