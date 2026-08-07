@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameEventManager flag + sequence leaves
+
+Done (V3.1.0 b14 IL):
+- game-events.md: HandleFlagBuffUpdates IL=69 (1s timer, flag->twitch_buff* map, AddBuff on all players)
+- game-events.md: GetSequenceLink IL=38 (CheckLink scan -> OwnerSeq), GetTargetType IL=11 (dict lookup, enum 0 default)
+
 ## 2026-08-08 - tier-C: Chunk point finders + height queries
 
 Done (V3.1.0 b14 IL):
