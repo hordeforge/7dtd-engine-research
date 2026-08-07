@@ -488,6 +488,13 @@ Silent in-chunk write used by load, falling, inject, and some TE paths:
 Does **not** fire light/mesh/stability RPC; callers that need those use full
 `SetBlock` / `SetBlockRPC`.
 
+**Density setters:** `ChunkCluster.SetDensity(pos, density, isForceDensity)`
+(IL=14) routes through the full
+`SetBlock(pos, false, Air, true, density, false, false, false, false, -1)`
+(the terrain mutation with the normal dirty/notify path). The raw twin
+`SetDensityRaw(pos, density)` (IL=27) writes `Chunk.SetDensity(lx, ly, lz,
+density)` directly (missing chunk → no-op).
+
 **Neighbor notification:** `ChunkCluster.notifyBlocksOfNeighborChange(worldPos,
 newBV, oldBV)` (IL=23) fans `notifyBlockOfNeighborChange` to all six
 `Vector3i.AllDirections` offsets. The single-cell version (IL=24) skips remote
