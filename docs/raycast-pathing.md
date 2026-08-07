@@ -126,6 +126,13 @@ with no finite `tMax` logs the same `Voxel error: GetNextBlockHit` string
 walks cells with it to push a placement away from the player, and
 `Voxel.GetCellsOnRay` iterates a ray cell by cell with it.
 
+`Voxel.GetCellsOnRay` (IL=244) iterates a ray cell by cell via
+`OneVoxelStep` but has **no callers on b14** (dead leaf). `Voxel.RaycastOnVoxels`
+(IL=290) is the physics ray/sphere-cast twin of `raycastNew` with the same tag
+dispatch (plus a `GameManager.bVolumeBlocksEditing` gate), used only by the
+client `PlayerMoveController.Update` (two sites) and
+`ItemActionTerrainTool.OnHoldingUpdate` (terrain-tool preview) - client-side.
+
 **`Voxel.Raycast` wrappers (V3.1.0 b14):** the 5-arg overload (IL=8) fills the
 layer mask `-538488845` and calls the 6-arg; the bool overload (IL=20) builds
 `hitMask = 66 | (bHitTransparentBlocks ? 1 : 0) | (bHitNotCollidableBlocks ?
@@ -475,7 +482,9 @@ the whole reason this system works headless at all.
   Voxel.GetNextBlockHit (IL=549) 3D-DDA walker: tMax/tDelta stepping,
   blockFace per axis/sign, bit 256 direct any-block mode, distance^2 cutoff,
   Voxel error log; Voxel.OneVoxelStep (IL=264) single-step DDA primitive for
-  GetFreePlacementPosition / GetCellsOnRay.
+  GetFreePlacementPosition / projectile checkCollision / terrainMeshHit;
+  GetCellsOnRay dead on b14, RaycastOnVoxels client-only (PlayerMoveController,
+  terrain tool).
 - **2026-08-07:** Voxel.Raycast wrappers: 5-arg layer mask -538488845, bool
   hitMask bits (1 transparent / 4 non-collidable), 6-arg -> raycastNew
   (IL=525); visibility chain uses -1612492829 + 64.
