@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameRandom algorithm
+
+Done (V3.1.0 b14 IL):
+- GameRandom internals narrated in dedicated-misc-systems.md: classic .NET
+  Random (Knuth subtractive) implemented inline - InternalSample (IL=61)
+  56-entry SeedArray with inext/inextp wrap to 1, value = a[i]-a[i+21]
+  style subtract with int.MaxValue clamp/rewrap; Sample (IL=6) x 2^-31;
+  PeekSample (IL=50) non-advancing; GetSampleForLargeRange (IL=22)
+  double-draw sign flip + (v+2147483646)/4294967293. Seeded sequences
+  identical to System.Random - deterministic and portable.
+
 ## 2026-08-08 - tier-C: GameRandomManager
 
 Done (V3.1.0 b14 IL):

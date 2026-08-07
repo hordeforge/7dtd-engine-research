@@ -383,8 +383,25 @@ Instances come from `GameRandomManager` (a pooled factory):
 Callers include `AIDirector.Init`, `GameEventManager`'s ctor, `ItemValue`'s
 procedural-seed ctor, `DynamicMusicManager.Init`, and `EModelInstanceAssets.Load`.
 
+**The generator itself is the classic .NET `Random` (Knuth subtractive),
+implemented inline** (V3.1.0 b14 IL): `InternalSample()` (IL=61) advances a
+56-entry `SeedArray` with wrap-around indices `inext`/`inextp` (both reset to
+1 at 56), computes `value = SeedArray[inext] - SeedArray[inextp]` with the
+`int.MaxValue` clamp and `+ int.MaxValue` re-wrap for negatives, stores and
+returns. `Sample()` (IL=6) is `InternalSample() * 4.6566128752458E-10`
+(2^-31) giving [0, 1); `PeekSample()` (IL=50) computes the same value without
+storing; `GetSampleForLargeRange()` (IL=22) draws twice (flipping the sign
+from the second draw's parity) and normalizes `(value + 2147483646) /
+4294967293` for the wide `Next(min, max)` range. A seeded `GameRandom`
+therefore reproduces sequences identical to `System.Random` with the same
+seed - deterministic and portable.
+
 ## Changelog
 
+- **2026-08-07:** GameRandom algorithm: classic .NET Random (Knuth
+  subtractive) inline - 56-entry SeedArray, inext/inextp wrap, Sample()*2^-31,
+  PeekSample non-advancing, GetSampleForLargeRange double-draw; sequences
+  reproducible from seed (portable).
 - **2026-08-07:** GameRandomManager pooled factory: CreateGameRandom()
   baseSeed + AllocSync(false) + SetSeed; callers AIDirector.Init,
   GameEventManager ctor, ItemValue ctor, DynamicMusicManager.Init,
