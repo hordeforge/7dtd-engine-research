@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SleeperVolume persistence
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md D8.4: SleeperVolume Write/Read blob v21 (group/box/respawn/numSpawned, flags u16 bits + int32 minScript bit 16, counted lists)
+- entity-ai.md D8.4: Read version gates (groupId>=16, legacy u64<=13, legacy i32>7, respawnMap>=8, flags>=18, spawnPointIndex>=17, groupName>=21, passive ids)
+- entity-ai.md D8.4: SpawnPoint Write/Read (pos, rot, block name; legacy triples <20, name >14)
+
 ## 2026-08-08 - tier-C: chunk-event blob + entity creation builders
 
 Done (V3.1.0 b14 IL):
