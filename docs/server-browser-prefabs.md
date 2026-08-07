@@ -336,6 +336,14 @@ rotation (byte), each rebuilt through `GetNextId()` and re-registered with
 instance `prefabName` + `boundingBoxPosition` + rotation via the pooled
 writer, handed to the `ThreadedFileWriterQueue.saveWriter`.
 
+`NetPackageEventPrefab` (Setup IL=9) carries `operation` (byte) plus
+`serializablePi = new PrefabInstance.Serializable(pi)`; `write`/`read`
+(IL=13/9) emit the operation byte and the serializable, `GetLength` (IL=6) is
+`1 + serializablePi.GetLength()`. `ProcessPackage` (IL=48) is client-only and
+gated on `GameManager.worldInitInfoReceived`: operation 0 routes to
+`EventPrefabsClient.TryAdd(id, name, rotation, pos)`, operation 1 to
+`EventPrefabsClient.Remove(...)`.
+
 ```mermaid
 flowchart LR
   PX[worldpath/prefabs.xml] -->|Load| DPD[DynamicPrefabDecorator]
