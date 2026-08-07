@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World height queries
+
+Done (V3.1.0 b14 IL):
+- terrain-height.md: GetHeightAt (IL=22) generator oracle; GetTerrainHeight
+  (IL=21) chunk byte heightmap.
+
 ## 2026-08-08 - tier-C: trader-area queries
 
 Done (V3.1.0 b14 IL):
