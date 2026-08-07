@@ -377,6 +377,14 @@ the chunk-heat and screamer spawners above.
 The list is built at world load (`GameManager.setSpawnPointListCo`) and is the
 player-only counterpart to the entity spawners above.
 
+**`World.GetRandomSpawnPointPositions(count)` (IL=74)** is the random-surface
+sampler: it allocates `Vector3[count]` and iterates a copy of the loaded chunk
+array, each pass rolling `RandomRange(chunkCount) == 1` (about one in
+`chunkCount`); a hit grabs the chunk's 8 neighbors and
+`Chunk.FindRandomTopSoilPoint(world, out x, out y, out z, 5)` stores a world
+position in the array, decrementing `count` until it reaches 0. Unfilled array
+slots stay `Vector3.zero`.
+
 ### 6.1 `World.GetRandomSpawnPositionMinMaxToPosition` (IL=240)
 
 Ring/disc spawn sampler shared by the join path (spawn-near-friend, see
