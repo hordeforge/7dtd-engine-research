@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: join spawn/auth path, damage tags, CommandAllowedFor
+
+Done (V3.1.0 b14 IL):
+- server-lifecycle: Authorize IL=47, RequestToSpawnPlayer 496, PlayerSpawnedInWorld
+  127, SpawnEntityInWorld 178.
+- items: GetDamageEntity/Block FastTags + EffectManager + MaxIncomingDamage.
+- console-commands: CommandAllowedFor userLevel <= cmdLevel.
+---
 ## 2026-08-07 — tier-C: TickEntity order, path apply helpers, ChangeBlocks
 
 Done (V3.1.0 b14 IL):

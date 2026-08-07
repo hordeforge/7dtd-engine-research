@@ -93,9 +93,13 @@ stateDiagram-v2
 privileged; 0 is highest). `AdminCommands.IsPermissionDefined` decides whether a
 command has an explicit level; otherwise its `DefaultPermissionLevel` applies. The
 level is enforced by `AdminTools.CommandAllowedFor` on the networked/web path, not
-inside `executeCommand`. `IsExecuteOnClient`, `AllowedInMainMenu`, and
-`AllowedDeviceTypes` gate **where** a command may run (device/menu), independently
-of **who** may run it.
+inside `executeCommand`.
+
+**`CommandAllowedFor` (IL=12):**  
+`allowed = !(GetCommandPermissionLevel(cmdNames) < GetUserPermissionLevel(client))`  
+i.e. user level must be **≤** command required level (lower/equal is more
+privileged). `IsExecuteOnClient`, `AllowedInMainMenu`, and `AllowedDeviceTypes`
+gate **where** a command may run (device/menu), independently of **who** may run it.
 
 ### 2.1 High-value admin `Execute` leaves (IL re-pin 2026-08-07)
 
@@ -233,7 +237,8 @@ this doc owns the framework, not each leaf command's full prose.
 
 ## Changelog
 
-- **2026-08-07:** ServerConsoleCommand IL=125 step list (device/perm/client-exec).
+- **2026-08-07:** CommandAllowedFor IL=12 level compare; ServerConsoleCommand
+  IL=125 step list.
 - **2026-08-07:** §2.1 high-value admin Execute IL table (killall/spawn/teleport/
   settime/save/shutdown/mem/weather/gamepref/webuser/loggamestate).
 - **2026-07-28:** WebAPI Command endpoint cross-link.

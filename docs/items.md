@@ -248,6 +248,12 @@ resolution continues in dynamic `Raycast`/`hitTarget` while `Attacking`.
 `CreateItem` set, roll sandbox chance and `AddItem` or `ItemDropServer` for the
 empty container refund.
 
+**`GetDamageEntity` (IL=52) / `GetDamageBlock` (IL=70):** build FastTags =
+Primary/Secondary action tag | item tags (or MeleeTag) | holder stance/movement
+tags (| block tags for block damage). Then
+`EffectManager.GetValue(PassiveEffects, itemValue, baseDamage, holder, tags…)`.
+Block damage is further capped by `MaterialBlock.MaxIncomingDamage`.
+
 Melee, ranged, and eat all end by mutating the held `ItemValue` (durability, ammo,
 or count) and applying effects; that mutation is the server's authority.
 
@@ -631,8 +637,8 @@ The non-action leaves:
 
 ## Changelog
 
-- **2026-08-07:** ItemActionEat.consume IL=154; fireShot IL=482; DynamicMelee
-  ExecuteAction IL=210 re-pins.
+- **2026-08-07:** GetDamageEntity/Block tag+EffectManager math; Eat.consume;
+  fireShot; DynamicMelee ExecuteAction re-pins.
 - **2026-08-06:** ItemClass Stacknumber default 500 and get_MaxCount's
   MaxStackSizeModifier plus 30000 cap; Recipe craftingTime -1 sentinel when
   craft_time is absent; TileEntityWorkstation::GetFuelTime is items.xml FuelValue

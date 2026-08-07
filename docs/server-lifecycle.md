@@ -106,7 +106,7 @@ arrives. Player state lives in a per-player `PlayerDataFile` on disk;
 stateDiagram-v2
   [*] --> Connecting
   Connecting --> Authenticated: PlayerLogin accepted (platform-auth)
-  note right of Authenticated: PlayerLoginRPC logs IP then AuthorizationManager.Authorize (IL=20)
+  note right of Authenticated: PlayerLoginRPC -> AuthorizationManager.Authorize (IL=47 chain)
   Authenticated --> LoadData: PlayerDataFile.Load(dir, playerName)
   LoadData --> DataLoaded: file ok
   LoadData --> BackupOrNew: primary load fails -> backup, else fresh profile
@@ -120,6 +120,28 @@ stateDiagram-v2
   Active --> Disconnected: leave -> final Save + PersistentPlayerList update
   Disconnected --> [*]
 ```
+
+### Join apply path (IL re-pin 2026-08-07)
+
+**`AuthorizationManager.Authorize` (IL=47):** add client to pending set; decode
+platform/crossplatform tickets into `ClientInfo`; `tryAuthorizer` walks sorted
+`IAuthorizer` list (platform-restricted). Each active authorizer may send
+`NetPackageAuthState`, then `Authorize(client)` -> Accepted / Denied
+(`KickPlayerData`) / continue. When no more authorizers, `playerAllowed`.
+
+**`RequestToSpawnPlayer` (IL=496):** clamp `_chunkViewDim` to game-pref range;
+`PlayerDataFile.Load` by platform id; resolve spawn (near friend / random near
+player / spawn-point list / biome-aware); build ECD from PDF; create entity +
+`ToPlayer`; send player id / spawn packages (detail in join sequence above).
+
+**`PlayerSpawnedInWorld` (IL=127):** mark entity alive; multiplayer spawn message;
+server: vehicle/drone waypoint updates + following drones; fire
+`ModEvents.PlayerSpawnedInWorld` + `OnClientSpawned`.
+
+**`World.SpawnEntityInWorld` (IL=178):** null guard; `EntityLoadedDelegates`;
+`AddEntityToMap` + `Entities.Add` + `addToChunk`; if EntityAlive, add to
+`EntityAlives`; track vehicle/drone/turret managers; audio/weather/light
+`EntityAddedToWorld`; `entity.OnAddedToWorld()`; warn on bad Y.
 
 - **`PlayerDataFile`**: `Write`/`Read` serialize the full profile (inventory,
   stats, progression, waypoints); `ToPlayer`/`FromPlayer` sync between the file and
@@ -307,7 +329,8 @@ third-party/analytics.
 
 ## Changelog
 
-- **2026-08-07:** PlayerLoginRPC IL=20 -> AuthorizationManager.Authorize.
+- **2026-08-07:** Authorize/RequestToSpawnPlayer/PlayerSpawnedInWorld/
+  SpawnEntityInWorld join apply path; PlayerLoginRPC entry.
 - **2026-08-07:** Document analytics heartbeat (300s, client-only; dedicated skips).
 - **2026-08-02:** V3.1.0 join analytics (`PlayerJoinServerEventData`).
 
