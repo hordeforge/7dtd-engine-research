@@ -163,6 +163,12 @@ set **0**.
 Else sample block at (standX, floor(bbox.min.y), standZ) and y+1; `bInElevator`
 = either block `IsElevator(rotation)`.
 
+**`Entity.CheckDistance` family:** all overloads funnel to
+`(A - B).magnitude < 1.0f` (the default 1-block proximity test); the
+entity/vector/id variants resolve the position via transform or the world's
+entity registry, and `(listener, source)` (IL=8) forwards the two transform
+positions.
+
 From `EntityAlive.OnUpdateLive` IL (gate before `updateTasks`):
 
 ```mermaid
