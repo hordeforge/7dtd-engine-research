@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vending autobuy
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md 6: TileEntityVendingMachine.SetAutoBuyTime (IL=21) nextAutoBuy
+  +24000 ticks from worldTime (initial) or prior nextAutoBuy (renewal);
+  get_IsRentable (IL=5) TraderInfo.Rentable; get_RentTimeRemaining (IL=9)
+  rentalEndDay - WorldTimeToDays; get_RentalEndDay / GetUsers / GetPasswordHash
+  (IL=3) field reads.
+
 ## 2026-08-08 - tier-C: TileEntity transfer family
 
 Done (V3.1.0 b14 IL):
