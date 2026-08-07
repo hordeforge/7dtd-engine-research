@@ -439,12 +439,17 @@ does **not** despawn anything: it clears `bIsChunkObserver`, `IsHordeZombie` and
 partyMemberCount)`; `gsScaling = FastLerp(1, max(1, totalCount/enemyActiveMax),
 partyLevel/60)`; `bonusLootSpawnCount` starts at `partySpawner.bonusLootEvery / 2`.
 
-**`SeekTarget(ManagedZombie)` (IL=167):** clear dead zombie (false). Prefer
-current attack target if player and `IsPlayerATarget`; else keep `mz.player` if
-still a target. If no player: if not `IsPlayerAliveAndNear(pos, **60**)` →
-`Kill` and false; else true (wander). If player: if distSq to player &gt;
-**22500** (150 m) try `CalcSpawnPos` near player; if still not near **70** m or
-50% roll, `DecSpawnCount(1)` + `Kill`. Else true.
+**`SeekTarget(ManagedZombie)` (IL=167):** false if zombie null/dead/despawned/no
+GO. Prefer current `GetAttackTarget` player into `mz.player`; if not
+`IsPlayerATarget`, `FindPartyTarget(zombie.pos)`. No player: if not
+`IsPlayerAliveAndNear(pos, **60**)` → `Kill` false; else true (wander).
+With player: horizontal distSq &gt; **22500** (150 m): `CalcSpawnPos` at player
+with `spawnDirectionV`; if calc ok and zombie still not near any player **70** m:
+50% → `DecSpawnCount(1)`, `lootDropProb=0`, `Kill` false; else teleport
+`SetPosition` + `moveHelper.Stop`. Then if full distSq ≤ **10000** (100 m) **or**
+attack target player differs from `mz.player`:
+`SetAttackTarget(player, **1200**)` ticks; else clear old attack target and
+`SetInvestigatePosition(player.pos, **1200**, true)`. Return true.
 
 **`CalcSpawnPos` (IL=28):** rotate `_radiusV` by random yaw in **±45°**
 (`(RandomFloat-0.5)*90` about up); focus+rotated radius into
@@ -529,8 +534,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** SpawnZombie vulture 50% when mounted; IL=181 full path;
-  StartingWeight=1 DiminishingReturns=0.5; CalcPartyLevel
+- **2026-08-07:** SeekTarget 1200 attack/investigate + teleport; SpawnZombie
+  vulture 50%; IL=181; StartingWeight/DiminishingReturns; CalcPartyLevel
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
 - **2026-08-07:** CalcSpawnPos ±45° radius + GetMobRandomSpawnPosWithWater 0/10/30;
   SeekTarget 60/150/70 m; Scout SpawnUpdate 6000; UpdateHorde 18s.

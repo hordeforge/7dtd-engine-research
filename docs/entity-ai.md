@@ -1288,6 +1288,13 @@ range &lt; 0 → `max(3, sightRangeBase * 0.2)`; store `sleeperViewAngle` /
 `triggerState = flags & 7`; store `playerTouchedTrigger`; call
 `UpdatePlayerTouched(world, player)` (same entry as touch latch).
 
+### D8.2c `Reset` (IL=40)
+
+Clear `playerTouchedToUpdate` / `playerTouchedTrigger`; `respawnTime = -1`;
+`isSpawning = isSpawned = wasCleared = false`; null `groupCountList`;
+`numSpawned = 0`; clear `respawnMap`; null `respawnList`;
+`CancelPendingSpawns()`; `minScript.Reset()` if present.
+
 ### D8.3 `UpdatePlayerTouched` (IL=172)
 
 Called once when a player is latched on the volume:
@@ -1518,8 +1525,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** UpdatePlayerTouched mult/bandit/defaults 5..6; TriggerSleeperPose
-  physicsHeight 0.85; Spawn async; SetSleeper pathCost+0.2; CanSleeperSpawn.
+- **2026-08-07:** Reset field clear table; UpdatePlayerTouched mult/bandit 5..6;
+  TriggerSleeperPose height 0.85; Spawn async; SetSleeper pathCost+0.2.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SeekTarget 1200 and SleeperVolume.Reset
+
+Done (V3.1.0 b14 IL):
+- SeekTarget: 150 m teleport/kill branch; 100 m SetAttackTarget 1200; else investigate 1200; lootDropProb=0 on cull.
+- SleeperVolume.Reset: full field clear table + CancelPendingSpawns + minScript.Reset.
+- Census pin narrated 1480 / catalogued 829 / unaccounted 0.
+---
 ## 2026-08-07 — tier-C: UpdatePlayerTouched mult and SpawnZombie vulture
 
 Done (V3.1.0 b14 IL):

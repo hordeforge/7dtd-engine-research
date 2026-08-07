@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1479 / catalogued 830 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1480 / catalogued 829 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -237,6 +237,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | SleeperVolume.Spawn async + SetSleeper | entity-ai.md |
 | UpdatePlayerTouched mult + TriggerSleeperPose | entity-ai.md |
 | SpawnZombie vulture / bonus loot path | aidirector.md |
+| SeekTarget 1200 attack + Reset fields | aidirector.md / entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
