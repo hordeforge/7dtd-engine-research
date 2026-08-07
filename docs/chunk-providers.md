@@ -819,6 +819,9 @@ when in bounds. `SetArea(x, z, v, rx, rz)` (IL=70) walks the rect from
 storing `v` only where the existing cell is `>= v` (more restrictive wins);
 `CheckArea(x, z, v, rx, rz)` (IL=62) reports a conflict when the rect leaves
 the map or any cell is `>= v`.
+`DecoManager.CheckPosition(width, height, x, z)` (IL=34) is the index fold:
+`(x + width/2) + (z + height/2) * width`, returning -1 outside the
+`[-half, half)` world bounds.
 
 ---
 
