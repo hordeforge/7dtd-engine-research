@@ -207,6 +207,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | GetSandboxProb + RandomSpawnCount ±0.49 | loot-economy.md |
 | RandomCountFromSandboxTags category table | loot-economy.md |
 | GetCountMultiplier enum + BM weather storm defer | loot / weather |
+| dropItemOnDeath passive 80 + BlockDestroyed 500 m | combat / quests |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

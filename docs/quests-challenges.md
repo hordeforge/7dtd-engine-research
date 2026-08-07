@@ -85,6 +85,11 @@ objective (quest or challenge) sees the same notification. Objectives subscribe
 in `HandleAddHooks` and unsubscribe in `HandleRemoveHooks`, so only objectives in
 the current phase of an active quest / challenge are listening.
 
+**`BlockDestroyed` (IL=49):** resolve block pos; fire `BlockDestroy` event with
+`(block, pos)`. If `block.AllowBlockTriggers` and `byEntity` set: use `byEntity`
+as player, else `World.GetClosestPlayer(byEntity, 500, false)`; on success
+`Block.HandleTrigger(player, world, pos, BlockValue{type=blockID})`.
+
 ---
 
 ## 2. Quest lifecycle (state machine)

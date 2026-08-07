@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: dropItemOnDeath passive 80 and BlockDestroyed
+
+Done (V3.1.0 b14 IL):
+- dropItemOnDeath: passive 80 scales lootDropProb from killer hold; * LootBagChance; DropBagServer roll.
+- BlockDestroyed: BlockDestroy event; HandleTrigger via closest player within 500 m.
+---
 ## 2026-08-07 — tier-C: GetCountMultiplier enum and BM weather defer
 
 Done (V3.1.0 b14 IL):

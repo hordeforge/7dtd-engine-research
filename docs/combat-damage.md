@@ -149,11 +149,14 @@ When health reaches zero the entity dies: it awards the kill (XP to the attacker
 death particle via `SpawnParticleEffectServer`; optional death game message;
 kill log; **`ModEvents.SEntityKilled`**; **`dropItemOnDeath()`**.
 
-**`dropItemOnDeath`:** walk inventory slots; if `ItemClass.CanDrop`,
-`ItemDropServer` with lifetime `Constants.cItemDroppedOnDeathLifetime` and clear
-slot; flashlight off; `Equipment.DropItems()`; scale `lootDropProb` via
-`EffectManager` and floor with `LootContainer.LootBagChance`; if not
-`LootContainer.NoLoot` and random &lt; prob, **`Entity.DropBagServer()`**.
+**`dropItemOnDeath` (IL=105):** walk inventory slots; if `ItemClass.CanDrop`,
+`ItemDropServer` at pos + (0.5,0,0.5) with lifetime
+`Constants.cItemDroppedOnDeathLifetime` and clear slot; flashlight off;
+`Equipment.DropItems()`. If `entityThatKilledMe` set:
+`lootDropProb = EffectManager(passive **80**, killer.holdingItem,
+lootDropProb, killer)`. Then `lootDropProb *= LootContainer.LootBagChance`.
+If not `LootContainer.NoLoot` and `lootDropProb > RandomFloat`,
+**`Entity.DropBagServer()`**.
 
 **`SetDead` (IL=8):** base `Entity.SetDead` + force `Health.Value = 0`.
 
@@ -261,8 +264,8 @@ Leaf types on the edges of the damage flow above:
   StunProne/StunKnee thresholds, Fatal); ProcessDamageResponse net fan-out;
   ProcessDamageResponseLocal IL=903 (armor wear, headshot gates, stun/pain,
   kill/revenge/FireEvent).
-- **2026-08-07:** OnDeathUpdate corpse HP; AwardKill/AddScoreServer; SetDead;
-  OnEntityDeath / dropItemOnDeath.
+- **2026-08-07:** dropItemOnDeath passive 80 on killer hold + LootBagChance
+  multiply; OnDeathUpdate / AwardKill already pinned.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs
