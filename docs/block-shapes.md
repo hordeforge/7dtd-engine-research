@@ -119,6 +119,9 @@ BlockShape::GetStepHeight    -> block.IsCollideMovement ? 1f : 0f
 BlockShape::IsMovementBlocked -> GetStepHeight(bv, face) > 0.5f
 ```
 
+`Block.get_IsCollideMovement` (IL=7) is the flag read: `(BlockingType & 2) != 0`
+(bit 1 of the blocking-type mask selects "blocks movement").
+
 Overrides refine this: `BlockShapeGrass`, `BlockShapeWater`, and
 `BlockShapeBillboardCross` hard-return not-blocked / step 0;
 `BlockShapeRotatedAbstract` returns a per-rotation `maxAABB_Y[rotation]`;
@@ -342,6 +345,8 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** Block.get_IsCollideMovement (IL=7) = (BlockingType & 2) != 0 -
+  the flag behind the GetStepHeight / IsMovementBlocked defaults.
 - **2026-07-24:** Initial reversal: shape factory and rotation-band model
   (Cube/RotatedAbstract 4-state bands, BlockShapeNew 24+4 lookup tables,
   billboard 20-degree rotations), collision/step-height contract and AI

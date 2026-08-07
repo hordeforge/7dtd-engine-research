@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Block.IsCollideMovement
+
+Done (V3.1.0 b14 IL):
+- Block.get_IsCollideMovement (IL=7) narrated in block-shapes.md section 3:
+  (BlockingType & 2) != 0 - bit 1 of the blocking-type mask; the flag behind
+  the GetStepHeight/IsMovementBlocked shape defaults.
+
 ## 2026-08-08 - tier-C: KickPlayerForClientInfo
 
 Done (V3.1.0 b14 IL):
