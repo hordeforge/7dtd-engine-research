@@ -394,7 +394,7 @@ completion and the intro flow.
 
 ---
 
-## Quest criteria + reward leaves
+## 9. Quest criteria and reward leaves
 
 Small leaf types orbiting the quest engine that the main flow (§1-§5) only
 touches in passing:
@@ -422,7 +422,7 @@ touches in passing:
 
 ---
 
-## 8. Quest net packages (verified)
+## 10. Quest net packages (verified)
 
 ### `NetPackageQuestObjectiveUpdate` (write IL=21)
 

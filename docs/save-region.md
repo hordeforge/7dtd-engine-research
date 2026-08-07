@@ -67,7 +67,7 @@ stateDiagram-v2
 
 `SetFrom(World, EnumChunkProviderId)` (IL=164) snapshots water level (`WorldConstants.WaterLevel`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
 
-### 1.1 `main.ttw` header codec (`SaveLoad(Stream)`, IL=926 on V3.1.0)
+### 1.1b `main.ttw` header codec (`SaveLoad(Stream)`, IL=926 on V3.1.0)
 
 Symmetric reader/writer via `IBinaryReaderOrWriter` under a lock on `this`.
 

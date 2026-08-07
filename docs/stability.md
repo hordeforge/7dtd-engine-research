@@ -1,7 +1,8 @@
 # Block stability, structural support and falling blocks
 
 Status: **derived 2026-08-06** from the V3.1.0 b14 disassembly (dedi-complete
-dump). Raw IL in [`docs/stability-dump/`](stability-dump/). This is the server
+dump). Raw IL in [`../il/stability-v3.1.0/`](../il/stability-v3.1.0/) (regenerable
+evidence, git-ignored). This is the server
 side of the stability model zdtd must match so that unsupported structures
 collapse the same way on the authoritative plane and on the stock client.
 
@@ -213,4 +214,4 @@ channel today; the plane can be recomputed on load with
 - 2026-08-06: derived plane seed/spread/removal/fall paths from
   `StabilityCalculator`, `StabilityInitializer`, `ChannelCalculator`,
   `World::AddFallingBlock/LetBlocksFall` and `EntityFallingBlock(s)`; dumps in
-  `docs/stability-dump/`.
+  `il/stability-v3.1.0/`.

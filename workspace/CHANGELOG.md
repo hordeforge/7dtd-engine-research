@@ -6,6 +6,24 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — doc structure pass: numbering, D-order, stability dump policy
+
+Done:
+- Fix duplicate section numbers: server-lifecycle (land-claim packages -> ##6,
+  analytics -> ##7, EOS filters -> ##8), quests-challenges (criteria -> ##9,
+  net packages -> ##10), managers 1.1b, save-region 1.1b; protocol-packages
+  cross-ref updated to section 6.
+- entity-ai.md: D8.5/D8.6 blocks moved after D8.4 (D8.1..D8.6 now in order);
+  restored dropped D8.2b header; stray "D8.4 Sleeper wake" renamed to
+  "Sleeper wake / stealth / triggers"; second "5.1b updateTasks" -> 5.1c.
+- stability-dump: 12 raw IL dumps moved docs/stability-dump/ -> il/stability-v3.1.0/
+  (git-ignored, aligns with AGENTS rule 1); stability.md links + INDEX dump-set
+  row updated.
+- Root junk dirs EnumGameStats/, Platform.DeviceFlag/ removed and gitignored.
+
+Verification: make stock-check OK; test_dedi_coverage_docs OK; zero duplicate
+numbered headers across docs/.
+---
 ## 2026-08-07 — tier-C: CopyPropertiesFromEntityClass, pause state, disconnect path
 
 Done (V3.1.0 b14 IL):

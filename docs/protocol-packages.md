@@ -1166,7 +1166,7 @@ beginRepair : bool
 `ProcessPackage` (**IL=33**): `GetTileEntity` → `TEFeatureAreaRepair` (null →
 return). If `beginRepair`: **server only** `RepairAll(world, blockPos,
 sender.entityId)`. Else (end repair): if TE owner equals local platform user,
-`IsRepairing=false`. Detail: [server-lifecycle.md](server-lifecycle.md) section 4.
+`IsRepairing=false`. Detail: [server-lifecycle.md](server-lifecycle.md) section 6.
 
 #### `NetPackagePersistentPlayerState` / `Positions`
 

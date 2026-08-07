@@ -417,7 +417,7 @@ if `wasCleared` and any player home in box (`CheckForAnyPlayerHome`) bump
 scan, require not dead + spawned, `Stealth.lightLevel >= lightMin`, and
 `entity.CanSee(player)`.
 
-### D8.4 Sleeper wake / stealth / triggers
+### Sleeper wake / stealth / triggers
 
 **`PlayerStealth.CanSleeperAttackDetect` (IL=20):** if not crouching → true. If
 crouching: max dist = `FastLerp(3, 15, lightAttackPercent)`; false when
@@ -661,7 +661,7 @@ package fan-out (remainder of method).
 `EntityAlive.OnUpdateLive`; **force-clear** see cache; `CheckSleeperTriggers`
 (player always re-evaluates sleeper volumes).
 
-### 5.1b `EntityAlive.updateTasks` (IL=125) and `EAIManager.Update` (IL=16)
+### 5.1c `EntityAlive.updateTasks` (IL=125) and `EAIManager.Update` (IL=16)
 
 **`updateTasks` order:**
 
@@ -2035,6 +2035,88 @@ block pos y+1; if that cell is **air**, return (no FX). Else y-1, read
 `IsDespawned` + `MarkToUnload` (awake entities kept). `DespawnAndReset` =
 `Despawn` + `Reset`.
 
+
+### D8.2b `OnTriggered` (IL=14)
+
+`triggerState = flags & 7`; store `playerTouchedTrigger`; call
+`UpdatePlayerTouched(world, player)` (same entry as touch latch).
+
+### D8.2c `Reset` (IL=40)
+
+Clear `playerTouchedToUpdate` / `playerTouchedTrigger`; `respawnTime = -1`;
+`isSpawning = isSpawned = wasCleared = false`; null `groupCountList`;
+`numSpawned = 0`; clear `respawnMap`; null `respawnList`;
+`CancelPendingSpawns()`; `minScript.Reset()` if present.
+
+### D8.3 `UpdatePlayerTouched` (IL=172)
+
+Called once when a player is latched on the volume:
+
+1. **Early return:** if `isSpawned` **or** (`worldTime < respawnTime` and
+   `wasCleared`) → return (still-active or post-clear cooldown without respawn
+   window).
+2. If `worldTime >= respawnTime`: `Reset()` first.
+3. Always then: `CancelPendingSpawns()`; set `isSpawning = isSpawned = true`.
+4. **Count multiplier** starts at **1**. If prefab present:
+   - `SpawnMultiplier` from `LastQuestClass` (else 1);
+   - times `difficultyTierScale[DifficultyTier]` (clamp to last of 7-element
+     static array when tier out of range);
+   - if `LastRefreshType` has `banditTag` force multiplier **0.2**.
+5. If spawn points exist: `gameStage = max(0, GetGameStageAround(player))`;
+   rebuild `respawnList` from `respawnMap` keys; `ResetSpawnsAvailable()`;
+   clear `groupCountList`; if min/max count &lt; 0 default **5..6**;
+   `AddSpawnCount(groupName, min*mult, max*mult)`; `spawnDelay = 0`.
+6. If `minScript` present: `minScript.Run(volume, player, mult)`.
+
+**`MinScript.Run` (IL=17):** no-op if no `commandList`; store `player` and
+`countScale`; `curIndex = 0`; `sleep = 0` (starts interpreter).
+
+**`MinScript.IsRunning` (IL=7):** `curIndex >= 0`.
+
+**`MinScript.FindLabel(name)` (IL=32):** first command with `command == 2` and
+`parameters == name`; else **-1** (cmd 2 doubles as label marker).
+
+**`SleeperVolume.GetAliveCount` (IL=34):**
+`sum(groupCountList.counts) - numSpawned + respawnMap.Count` (remaining planned
+plus mapped entities, not a live world entity walk).
+
+**`MinScript.Tick` (IL=261):** if `curIndex < 0` stop. While `sleep > 0`:
+subtract **0.05** per call and return until sleep ends. Switch on
+`CmdLine.command`:
+
+| cmd | effect |
+|---:|---|
+| 1 | log `"MinScript"+parameters` |
+| 2 | no-op (advance only; label placeholder) |
+| 3 | loop: parse `"label count"`; `FindLabel`; set `loopCount`; while count &gt; 0 jump `curIndex = loopToIndex` |
+| 4 | sleep: parse seconds (default **1**) into `sleep` |
+| 40 | `PlaySoundAtPositionServer(Center, params, Linear, 100, playerId, 1)` |
+| 50 | `AddSpawnCount(group, min*scale, max*scale)` from `"group [min [max]]"` defaults 1,1 |
+| 51 | wait until `GetAliveCount() <= N` (default 0); else return without advancing |
+| 52 | `TriggerManager.Trigger(player, prefab, byte param)` |
+
+After each non-blocking cmd: `curIndex++`; if past end set `curIndex = -1`;
+if sleep still &gt; 0 return else continue same tick.
+
+**Static padding (`.cctor` IL=48):** `chunkPadding=(12,1,12)`;
+`triggerPaddingMin/Max=(8,0.7,8)` as Vector3i from floats;
+`unpadding=(14,16,14)`; `wanderingCountdown=5`; `difficultyTierScale` length **7**
+(blob init); `isHiddenOffsets` two float[12] tables for pose rays.
+
+### D8.4 `Despawn` (IL=48) / `DespawnAndReset` (IL=6)
+
+`Despawn`:
+
+1. `triggerState = 1` (enum), clear `playerTouchedTrigger`.
+2. `CompletePendingSpawns()`.
+3. For each `respawnMap` entity: if `EntityAlive` still exists **and** `IsSleeping`,
+   set `IsDespawned = true` and `MarkToUnload()` (awake entities are left alone).
+
+`DespawnAndReset` = `Despawn` + `Reset()`.
+
+Related S2C packages (wakeup / pose / passive): [protocol-packages.md](protocol-packages.md)
+§6.19. Volume graph itself is prefab/world data, not a NetPackage stream.
+
 ### D8.5 Entity sleeper init helpers
 
 **`EntityAlive.SetSleeper` (IL=11):** `IsSleeper = true`;
@@ -2130,88 +2212,6 @@ Consumers: `fallBehaviors` feeds `ChooseFallBehavior` (above); the sound fields
 drive `internalPlayStepSound` / alert loops; `itemsOnEnterGame` is granted on
 spawn.
 
-### D8.2b `OnTriggered` (IL=14)
-
-`triggerState = flags & 7`; store `playerTouchedTrigger`; call
-`UpdatePlayerTouched(world, player)` (same entry as touch latch).
-
-### D8.2c `Reset` (IL=40)
-
-Clear `playerTouchedToUpdate` / `playerTouchedTrigger`; `respawnTime = -1`;
-`isSpawning = isSpawned = wasCleared = false`; null `groupCountList`;
-`numSpawned = 0`; clear `respawnMap`; null `respawnList`;
-`CancelPendingSpawns()`; `minScript.Reset()` if present.
-
-### D8.3 `UpdatePlayerTouched` (IL=172)
-
-Called once when a player is latched on the volume:
-
-1. **Early return:** if `isSpawned` **or** (`worldTime < respawnTime` and
-   `wasCleared`) → return (still-active or post-clear cooldown without respawn
-   window).
-2. If `worldTime >= respawnTime`: `Reset()` first.
-3. Always then: `CancelPendingSpawns()`; set `isSpawning = isSpawned = true`.
-4. **Count multiplier** starts at **1**. If prefab present:
-   - `SpawnMultiplier` from `LastQuestClass` (else 1);
-   - times `difficultyTierScale[DifficultyTier]` (clamp to last of 7-element
-     static array when tier out of range);
-   - if `LastRefreshType` has `banditTag` force multiplier **0.2**.
-5. If spawn points exist: `gameStage = max(0, GetGameStageAround(player))`;
-   rebuild `respawnList` from `respawnMap` keys; `ResetSpawnsAvailable()`;
-   clear `groupCountList`; if min/max count &lt; 0 default **5..6**;
-   `AddSpawnCount(groupName, min*mult, max*mult)`; `spawnDelay = 0`.
-6. If `minScript` present: `minScript.Run(volume, player, mult)`.
-
-**`MinScript.Run` (IL=17):** no-op if no `commandList`; store `player` and
-`countScale`; `curIndex = 0`; `sleep = 0` (starts interpreter).
-
-**`MinScript.IsRunning` (IL=7):** `curIndex >= 0`.
-
-**`MinScript.FindLabel(name)` (IL=32):** first command with `command == 2` and
-`parameters == name`; else **-1** (cmd 2 doubles as label marker).
-
-**`SleeperVolume.GetAliveCount` (IL=34):**
-`sum(groupCountList.counts) - numSpawned + respawnMap.Count` (remaining planned
-plus mapped entities, not a live world entity walk).
-
-**`MinScript.Tick` (IL=261):** if `curIndex < 0` stop. While `sleep > 0`:
-subtract **0.05** per call and return until sleep ends. Switch on
-`CmdLine.command`:
-
-| cmd | effect |
-|---:|---|
-| 1 | log `"MinScript"+parameters` |
-| 2 | no-op (advance only; label placeholder) |
-| 3 | loop: parse `"label count"`; `FindLabel`; set `loopCount`; while count &gt; 0 jump `curIndex = loopToIndex` |
-| 4 | sleep: parse seconds (default **1**) into `sleep` |
-| 40 | `PlaySoundAtPositionServer(Center, params, Linear, 100, playerId, 1)` |
-| 50 | `AddSpawnCount(group, min*scale, max*scale)` from `"group [min [max]]"` defaults 1,1 |
-| 51 | wait until `GetAliveCount() <= N` (default 0); else return without advancing |
-| 52 | `TriggerManager.Trigger(player, prefab, byte param)` |
-
-After each non-blocking cmd: `curIndex++`; if past end set `curIndex = -1`;
-if sleep still &gt; 0 return else continue same tick.
-
-**Static padding (`.cctor` IL=48):** `chunkPadding=(12,1,12)`;
-`triggerPaddingMin/Max=(8,0.7,8)` as Vector3i from floats;
-`unpadding=(14,16,14)`; `wanderingCountdown=5`; `difficultyTierScale` length **7**
-(blob init); `isHiddenOffsets` two float[12] tables for pose rays.
-
-### D8.4 `Despawn` (IL=48) / `DespawnAndReset` (IL=6)
-
-`Despawn`:
-
-1. `triggerState = 1` (enum), clear `playerTouchedTrigger`.
-2. `CompletePendingSpawns()`.
-3. For each `respawnMap` entity: if `EntityAlive` still exists **and** `IsSleeping`,
-   set `IsDespawned = true` and `MarkToUnload()` (awake entities are left alone).
-
-`DespawnAndReset` = `Despawn` + `Reset()`.
-
-Related S2C packages (wakeup / pose / passive): [protocol-packages.md](protocol-packages.md)
-§6.19. Volume graph itself is prefab/world data, not a NetPackage stream.
-
----
 
 ## D9. Manager chain sizes (gmUpdate every frame if instance)
 

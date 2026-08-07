@@ -325,7 +325,7 @@ flowchart TB
 
 ---
 
-## 4. Land-claim and persistent-player packages (verified)
+## 6. Land-claim and persistent-player packages (verified)
 
 Land claims live on `PersistentPlayerList` / `PersistentPlayerData` (section 3).
 Wire packages that touch claim/repair and player registry:
@@ -362,7 +362,7 @@ count : i32
 Used for map/claim marker sync of offline/online players (also referenced from
 gmUpdate when clients present).
 
-### 4.1 `PersistentPlayerData.Write` binary (IL=205)
+### 6.1 `PersistentPlayerData.Write` binary (IL=205)
 
 Used by `NetPackagePersistentPlayerState` and list save. Order:
 
@@ -396,7 +396,7 @@ XML twin (`Write(XmlElement)`, IL=313) emits the same logical fields as elements
 
 
 
-### 4.2 `PersistentPlayerList` save formats (verified)
+### 6.2 `PersistentPlayerList` save formats (verified)
 
 **Binary `Write(BinaryWriter)` IL=73** (also used when embedding):
 
@@ -418,7 +418,7 @@ Allies.Write(stream)                  // AllyStore binary
 `Read` / `ReadXML` rebuild Players dict, `MapPlayer`, lp block map, allies.
 
 
-## Join analytics (V3.1.0)
+## 7. Join analytics (V3.1.0)
 
 On player join the dedicated server may emit platform analytics via
 `GameManager.LogPlayerJoinServerEventAnalyticsCoroutine` into
@@ -490,7 +490,7 @@ third-party/analytics.
 
 - **2026-07-23:** Initial server lifecycle / game-state / player-persistence reversal (boot, rounds, join+persistence, shutdown) with state machines.
 
-## EOS server-list filters (V3.1.0 b14)
+## 8. EOS server-list filters (V3.1.0 b14)
 
 `Platform.EOS.SessionsClient.matchesFilters(GameServerInfo, filters)` gates which
 sessions the server browser shows, so a server that never registers with EOS is

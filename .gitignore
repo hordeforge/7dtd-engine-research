@@ -25,6 +25,8 @@ worlds/
 
 # Accidental empty type-name dirs at repo root (DumpMethod cwd mistakes)
 /SleeperVolume/
+/EnumGameStats/
+/Platform.DeviceFlag/
 .zdtd_cfg_cache/
 .zig-cache/
 /DynamicMeshFile

@@ -179,7 +179,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | World.CanPlaceBlockAt claim/trader/bounds | blocks §6 |
 | IsLandProtectedBlock + bounds soft edge | server-lifecycle §3.1 |
 | Chunk.SetBlockRaw silent write path | world-chunks §5.0 |
-| DecoManager.UpdateTick thread queues | managers §1.1 |
+| DecoManager.UpdateTick thread queues | managers §1.1b |
 | PlantGrowing + TorchHeatMap + WBT execute | blocks §7 / save-region §3.6 |
 | NotifyActivity + CheckToSpawn 25/20% | aidirector.md |
 | BlockLiquidv2 Emissions/ChangeToAir | light-mesh-water.md |

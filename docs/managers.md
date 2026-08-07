@@ -55,7 +55,7 @@ manager's `Update`/`UpdateTick` method instruction count from the dump (e.g.
 | `ChunkManager.SendChunksToClients` | 216 | Per observer: queue `NetPackageChunkRemove` for `chunksToRemove`, then reload/send packages from observer load sets; clear remove set |
 | `DecoManager.UpdateTick` | 330 | See §1.1 (OnUpdateTick always-path) |
 
-### 1.1 `DecoManager.UpdateTick` (IL=330)
+### 1.1b `DecoManager.UpdateTick` (IL=330)
 
 1. If `!IsEnabled`: ret.
 2. `checkDelayTicks--` (field used as throttle counter).

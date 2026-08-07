@@ -331,6 +331,7 @@ Generic engine dumps plus surfaces dump consumed by RealEarth product docs.
 | Directory | Focus | Used by |
 |---|---|---|
 | gmUpdate / frame-entries / deep / deeper / gaps / loop-complete / opt-scan / dedi-complete | Generic loop RE | research narratives |
+| stability-v3.1.0 | Stability calculator / falling blocks | stability.md |
 | terrain-v3.1.0 | Stock vs expanded height | research + product |
 | realearth-surfaces-v3.1.0 | Chunk, Origin, PPL, region | product realearth-surfaces.md |
 
