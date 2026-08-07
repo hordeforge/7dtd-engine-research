@@ -175,6 +175,16 @@ prefab, ChunkMargin)` (prefab default `error`, margin default 8) and `spectrum`
 sets `WeatherGroup.spectrum` via
 `EnumUtils.Parse<SpectrumWeatherType>(name, enum-0, true)`.
 
+The remaining `BiomeDefinition` mutators are the `parseBiome` fill targets, all
+trivial appends/inserts: `AddDecoBlock` (with the `IsDistantDecoration` split,
+see world-chunks §5), `AddDecoPrefab` (IL=5, `m_DecoPrefabs`),
+`AddBluff` (IL=5, `m_DecoBluffs`), `addSubBiome` (IL=5, `subbiomes`),
+`AddReplacement(sourceId, targetId)` (IL=6, `Replacements[int,int]` block-id
+map), and `AddLayer` (IL=12, `m_Layers` plus `TotalLayerDepth += layer.m_Depth`).
+Query leaves: `GetBiomeColor(type)` (IL=4) is `BiomeColors[type]` (a static
+`UInt32[]` indexed by `BiomeType`); `LocalizedBiomeName(type)` (IL=8) is
+`Localization.Get("biome_" + EnumUtils.ToStringCached(type))`.
+
 ### 3.2 Terrain-type tiles and stamps
 
 `GenerateTerrainTiles` (IL=385) assigns each tile a `TerrainType`
