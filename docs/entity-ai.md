@@ -1719,6 +1719,13 @@ climbing; else false (airborne without those supports cannot repath).
 **`CalcIfSwimming` (IL=17):** threshold = **0.5** if air and not jumping, else
 **0.7**; swimming ⇔ `inWaterPercent >= threshold`.
 
+**`CalcWaterLevel()` (IL=157)** computes that `inWaterPercent`: it scans the
+entity's vertical span from `floor(pos.y) - 2` up to `floor(pos.y +
+GetHeight())`, sampling `World.GetWaterPercent` per column with an 8-direction
+horizontal offset (`waterLevelDirOffsets * 0.28`) for cells at/above the feet,
+capping the surface cell's contribution at **0.6** when the cell above is dry.
+`CalcIfSwimming` thresholds then classify the result.
+
 **`BeginDynamicRagdoll(flags, stunRange)` (IL=13):** store flags; zero root
 motion; `_dynamicRagdollStunTime = stunRange.Random(rand)`.
 
