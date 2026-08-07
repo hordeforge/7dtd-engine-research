@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Prefab terrain snap + volume realization
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 3.3: Prefab.SnapTerrainToArea IL=65 (footprint + 1-cell rim, SnapTerrainToPositionAtLocal y-1, perimeter flag)
+- server-browser-prefabs.md 3.2: CopyVolumesIntoWorldCommon IL=208 (chunk-overlap filter, sandbox trader skip types 1/3, FindOrCreateWorldVolume, per-chunk AddWorldVolume walk)
+
 ## 2026-08-08 - tier-C: SleeperVolume persistence
 
 Done (V3.1.0 b14 IL):
