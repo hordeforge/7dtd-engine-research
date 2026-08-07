@@ -128,6 +128,8 @@ pass for the new observer), return it. Attached at player join
 **Force-update gate:** `IsForceUpdate()` (IL=8) =
 `isInternalForceUpdate || isChunkClusterChanged` (read from gmUpdate before the
 observer work); `ForceUpdate()` (IL=4) sets `isInternalForceUpdate = true`.
+`RemoveChunkObserver(o)` (IL=29) finds the observer by `id` in
+`m_ObservedEntities`, removes it and also sets `isInternalForceUpdate = true`.
 `GroundAlignFrameUpdate()` (IL=42, once per frame when world running) alternates
 `groundAlignIndex` 0/1 and runs `Block.GroundAlign(data)` over the corresponding
 `groundAlignBlockLists` bucket, clearing it (ground-snap of placed block entity
