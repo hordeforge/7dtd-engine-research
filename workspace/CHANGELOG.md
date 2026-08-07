@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TNT damage detonation
+
+Done (V3.1.0 b14 IL):
+- blocks.md 5: BlockTNT.OnBlockDamaged IL=31 damage-proportional
+  detonation chance (RandomFloat <= damage/MaxDamage -> explode
+  0.1 s).
 ## 2026-08-08 - tier-C: explosion hooks + TNT/mine explode
 
 Done (V3.1.0 b14 IL):
