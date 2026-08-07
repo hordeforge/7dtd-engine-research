@@ -114,6 +114,18 @@ Layer names live in Unity project settings, not in IL; bit 16 is the collider
 layer every world-geometry probe here uses. Water is special-cased by block
 type id `240` (`isPosUnderWater`), not by raycast.
 
+**`Voxel.OneVoxelStep` (IL=264) is the single-step DDA primitive.** Given the
+current cell, an origin and a direction it returns the next cell along the
+ray plus the crossed `blockFace` and the hit position on the ray: it
+computes `sign` per axis, `tMax = (firstBoundary - origin) / dir` and
+`tDelta = sign / dir` (both `+Infinity` for near-zero directions), advances
+the smallest-`tMax` axis, and reports the face from the axis and sign
+(x: 3/5, y: 1/0, z: 4/2, same mapping as `GetNextBlockHit`). A degenerate ray
+with no finite `tMax` logs the same `Voxel error: GetNextBlockHit` string
+(shared source) and returns `Vector3i.zero`. Consumers: `Block.GetFreePlacementPosition`
+walks cells with it to push a placement away from the player, and
+`Voxel.GetCellsOnRay` iterates a ray cell by cell with it.
+
 **`Voxel.Raycast` wrappers (V3.1.0 b14):** the 5-arg overload (IL=8) fills the
 layer mask `-538488845` and calls the 6-arg; the bool overload (IL=20) builds
 `hitMask = 66 | (bHitTransparentBlocks ? 1 : 0) | (bHitNotCollidableBlocks ?
@@ -462,7 +474,8 @@ the whole reason this system works headless at all.
   melee, 4096 low-MaxDamage water skip), T_Block/T_Deco/terrain tag dispatch;
   Voxel.GetNextBlockHit (IL=549) 3D-DDA walker: tMax/tDelta stepping,
   blockFace per axis/sign, bit 256 direct any-block mode, distance^2 cutoff,
-  Voxel error log.
+  Voxel error log; Voxel.OneVoxelStep (IL=264) single-step DDA primitive for
+  GetFreePlacementPosition / GetCellsOnRay.
 - **2026-08-07:** Voxel.Raycast wrappers: 5-arg layer mask -538488845, bool
   hitMask bits (1 transparent / 4 non-collidable), 6-arg -> raycastNew
   (IL=525); visibility chain uses -1612492829 + 64.
