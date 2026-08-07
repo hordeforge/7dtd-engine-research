@@ -412,6 +412,24 @@ classes parsed up front), and `Actions[i]` is set. Only then does
 `ItemClass.Init()` (the 1196-IL property application) run. The per-item
 property-parse tail lives in the subclass `Init` overrides (below).
 
+**The `mods.xml` loader (`ItemModificationsFromXml`).** Mods are full
+`ItemClass` instances too: `ParseModifier(element)` (IL=63) builds an
+`ItemClassModifier` with `Groups = {"Mods"}`, parses `installable_tags` /
+`blocked_tags` / `modifier_tags` into `InstallableTags` / `DisallowedTags` /
+`ModifierTags` and `type` into `ModifierTypes`, then hands off to the shared
+`parseItem` pipeline (IL=725), which mirrors the items loader (name
+required, `Extends` merge with the exclude set seeded by
+`Block.PropCreativeMode`, `Effects`, Stacknumber default 500, `Material`
+default **"Miron"**, mesh files `PreloadBundle`d when `CanHold`, `HoldType`
+throws on unparseable, repair / `Degradation` / `EconomicValue` / `Preview`
+fields, then the identical `Action0..Action4` Actions fill and `Init()`).
+Mod-specific extras: `CosmeticInstallChance` (default 1), a
+`RequirementGroup[3]` array filled from `class="ActionN"` properties (index
+from the trailing digit, `ParseRequirementGroup`), per-target
+`<item_property_overrides name=...>` blocks accumulated into
+`PropertyOverrides : Dictionary<string, DynamicProperties>` (the per-item
+mod override table, §4.2).
+
 Beyond `Actions`, the fields that matter server-side:
 
 | Field | Role |
@@ -1585,6 +1603,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** mods.xml loader (ItemModificationsFromXml): ParseModifier
+  (IL=63) Groups {Mods} + installable/blocked/modifier tags + type; parseItem
+  (IL=725) CosmeticInstallChance, RequirementGroup[3] from ActionN classes,
+  item_property_overrides -> PropertyOverrides, Material default Miron,
+  Extends exclude Block.PropCreativeMode, shared Actions fill + Init last.
 - **2026-08-08:** items.xml loader (ItemClassesFromXml.parseItem IL=772):
   Class attr Type.GetType factory, Extends CopyFrom merge + cycle set,
   Stacknumber 500 default, required Material/Meshfile throws; Actions fill
