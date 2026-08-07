@@ -2305,7 +2305,8 @@ that D8.6/D8.6a later copy from. Phase order:
 7. **lootDrops:** `LootDropEntityClass` = single class (weight 1) or
    `"class,weight"` pairs (weights later normalized to sum 1).
 8. **Senses (defaults, `ParseVec`-overridable):** `SightRange` default
-   `Constants.cDefaultMonsterSeeDistance`; `sightLightThreshold` **(30, 100)**;
+   `Constants.cDefaultMonsterSeeDistance` (**48**); `sightLightThreshold`
+   **(30, 100)**;
    `SleeperNoiseToSense` (15,15); `SleeperNoiseToSenseSoundChance` 1;
    `SleeperNoiseToWake` (15,15); `SleeperSightToSenseMin` (25,25) / `Max`
    (200,200); `SleeperSightToWakeMin` (15,15) / `Max` (200,200).

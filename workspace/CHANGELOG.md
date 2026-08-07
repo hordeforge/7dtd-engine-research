@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: Constants pins
+
+Done (V3.1.0 b14 IL):
+- Constants.cctor values pinned: cDefaultMonsterSeeDistance 48 (D8.6b),
+  cDefaultPort 26900, cSendWorldTickTimeToClients 1.5,
+  cItemDroppedOnDeathLifetime 300, cPlayerInteractDistance 5,
+  cDigAndBuildDistance 4, cCollectItemDistance 2, cSneakDamageMultiplier 2,
+  cMaxEntitiesPerMobSpawner 8.
 ## 2026-08-08 — tier-C: ItemClass.GetItem resolver
 
 Done (V3.1.0 b14 IL):
