@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BiomeDefinition weather surface
+
+Done (V3.1.0 b14 IL):
+- weather-environment.md 1.2: AddWeatherGroup IL=57 (stormLevel, s->ms), SetupWeather IL=53 normalize
+- weather-environment.md 1.2: WeatherRandomize/SelectWeatherGroup/Find*/GetValue/SetValue/GetDuration leaves
+
 ## 2026-08-08 - tier-C: ChunkAreaBiomeSpawnData blob layout
 
 Done (V3.1.0 b14 IL):
