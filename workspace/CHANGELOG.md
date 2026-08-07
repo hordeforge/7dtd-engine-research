@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: body damage wire
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md: BodyDamage.Write IL=12 i32 version + i32
+  damageType + u32 Flags; Read version-first with legacy fallback.
 ## 2026-08-08 - tier-C: block light query + body damage accessors
 
 Done (V3.1.0 b14 IL):
