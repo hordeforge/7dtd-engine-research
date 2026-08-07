@@ -428,7 +428,7 @@ Mod-specific extras: `CosmeticInstallChance` (default 1), a
 from the trailing digit, `ParseRequirementGroup`), per-target
 `<item_property_overrides name=...>` blocks accumulated into
 `PropertyOverrides : Dictionary<string, DynamicProperties>` (the per-item
-mod override table, §4.2).
+mod override table, §3 modifier primitives).
 
 Beyond `Actions`, the fields that matter server-side:
 
