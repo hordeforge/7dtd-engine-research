@@ -35,6 +35,11 @@ flowchart TB
 - `CanSpawn(Single)` IL=10
 - `UpdatePlayerInventory(EntityPlayerLocal)` IL=5
 - `UpdatePlayerInventory(Int32,AIDirectorPlayerInventory)` IL=6
+- `GetActivityWorldTimeDelay()` IL=16: `clamp(GameStats[11]
+  TimeOfDayIncPerSec / 6, 0.2, 5) * 1000` world-time ticks between activity
+  passes (scales with the day-speed stat)
+- `ComponentsInitNewGame()` IL=20: `InitNewGame()` on every registered
+  component; `NotifyIntentToAttack(zombie, player)` IL=1 is an empty residual
 
 **Caller:** `World.OnUpdateTick` → `AIDirector.Tick` (Xref=1, server path).
 
