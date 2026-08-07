@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityVehicle.FindCollisionEntity
+
+Done (V3.1.0 b14 IL):
+- EntityVehicle.FindCollisionEntity (IL=18) narrated in entity-ai.md:
+  transform GetComponent<EntityVehicle> or parent CollisionCallForward's
+  Entity cast to EntityVehicle - the vehicle-hit resolve in the visibility
+  ray chain.
+
 ## 2026-08-08 - tier-C: GameUtils.GetHitRootTransform
 
 Done (V3.1.0 b14 IL):

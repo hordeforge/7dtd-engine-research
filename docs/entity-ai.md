@@ -355,6 +355,11 @@ re-rooting: an `E_BP_`-prefixed tag resolves the owning entity root via
 `CollisionCallForward.FindEntity(hitTransform).transform`; any other tag
 returns the hit transform unchanged.
 
+**`EntityVehicle.FindCollisionEntity(t)` (IL=18)** (used by the vehicle-hit
+branch of the visibility ray) checks `t.GetComponent<EntityVehicle>()` and,
+failing that, `t.GetComponentInParent<CollisionCallForward>()`'s `Entity`
+cast to `EntityVehicle` - the static resolve for a vehicle collision mesh.
+
 **`CanSeeStealth(dist, lightLevel)` (IL=21):**
 `t = dist / sightRange`; threshold =
 `FastLerp(sightLightThreshold.x, .y, t)`; true if `lightLevel > threshold`.
@@ -3047,6 +3052,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EntityVehicle.FindCollisionEntity (IL=18): transform
+  EntityVehicle or parent CollisionCallForward Entity - vehicle-hit resolve.
 - **2026-08-07:** GameUtils.GetHitRootTransform (IL=29): E_BP_ body-part
   re-root via RootTransformRefEntity, E_Vehicle via CollisionCallForward,
   else unchanged.
