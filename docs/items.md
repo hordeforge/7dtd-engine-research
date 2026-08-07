@@ -170,6 +170,10 @@ IL=17 each) route through the object core (IL=36) which checks the tag and
 returns `GetValue()`. `GetMetadata(key)` (IL=17) returns the value or null -
 with the quirk that a **null dict** yields a boxed `false` instead of null.
 `RemoveMetaData(name)` (IL=12) is `dict?.Remove(name) ?? false`.
+`SetMetadata` (IL=86 core) lazy-creates the dict, updates an existing key via
+`TypedMetadataValue.SetValue` (a type mismatch logs a warning with a stack
+trace), and `TryCreate`s + `Add`s new keys (the typed overloads carry the tag
+1/2/3 for float/int/string).
 
 **Stacking predicates (V3.1.0 b14):** `ItemStack.CanStackWith(other,
 allowPartialStack)` (IL=46) requires both stacks non-empty, same `type`, and
