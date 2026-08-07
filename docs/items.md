@@ -688,6 +688,15 @@ written slot is the held slot.
   `bareHandItem == holdingItem`; `GetBareHandItemValue` (IL=3) reads the
   `bareHandItemValue` field.
 
+**`Inventory.DecItem(itemValue, count, ignoreModdedItems, removedItems)`
+(IL=132)** is the consume/remove path (fuel, ammo, crafting inputs): it scans
+slots of the matching `type` (skipping modded values when `ignoreModdedItems`
+is set), taking `min(slotCount, remaining)` from stackable slots (recording a
+cloned removed stack into `removedItems` when provided, clearing the slot when
+empty) and one whole slot at a time for non-stackables; it ends with
+`notifyListeners()` and returns the total removed count
+(`originalCount - remaining`).
+
 ---
 
 ## 7. Durability and degradation
