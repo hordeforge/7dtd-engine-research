@@ -70,6 +70,35 @@ workstation tile entity (`HandleRecipeQueue`, see
 [tile-entities-power.md](tile-entities-power.md)); backpack crafting runs it on the
 player.
 
+**Validation predicates (V3.1.0 b14).** `Recipe.CanCraft(stacks, ea,
+craftingTier)` (IL=128) starts by caching `GetCraftingTier(player)` into the
+shared recipe's `craftingTier` field, clamped down when the passed
+`_craftingTier >= 0` is lower (a caller may force a lower tier). Each
+ingredient's required count is then resolved: with `UseIngredientModifier`,
+`count = EffectManager.GetValue(CraftingIngredientCount = 198, itemValue,
+count, ea, this, FastTags.Parse(itemName), ...)`, multiplied by
+`XUiM_Recipes.GetCraftingInputModifier(this)` and clamped to at least 1.
+The player's stacks are then scanned; a stack counts toward the ingredient
+only when it is **not** a modded item (`HasModSlots && HasMods` skips it)
+and its `type` matches - a modded weapon never serves as craft fodder.
+`count` is decremented by matching stacks' counts and any ingredient left
+unsatisfied returns false. `CanCraftAny` (IL=134) repeats the scan per tier,
+walking `GetCraftingTier(player)` down to 0, and returns true when any tier
+satisfies all ingredients (the UI "can craft" flag). `ContainsIngredients`
+(IL=39) is the loose filter: true when any ingredient's `type` matches any
+of the given item types, ignoring counts.
+
+**Wire frames.** `Recipe.Write` (IL=56):
+`Version:u16, itemValueType:i32, count:i32, IsScrap:bool, craftingTime:f32,
+craftExpGain:i32, craftingArea:string` (null -> ""), then
+`ingredientCount:i32` and that many `ItemStack.Write` bodies. The craft-
+queue record `RecipeQueueItem.Write` (IL=82, version 2) is:
+`Multiplier:i16, IsCrafting:bool, CraftingTimeLeft:f32`, optional
+`RepairItem` (`hasRepair:bool` + `ItemValue.Write` + `AmountToRepair:u16`),
+`Quality:u8, StartingEntityId:i32, OneItemCraftTime:f32`, then optional
+`Recipe` (full frame above). Recipes and queue items ride the workstation /
+backpack UI sync packages ([protocol.md](protocol.md)).
+
 ---
 
 ## 3. Recipe unlock progression
@@ -88,6 +117,20 @@ stateDiagram-v2
 
 Always-available recipes are simply not locked. Unlock state is part of player
 progression, saved with the player profile ([server-lifecycle.md](server-lifecycle.md)).
+
+**Unlock and tier evaluation (IL-pinned).** `IsUnlocked(player)` (IL=31)
+short-circuits true when `XUiM_Recipes.CraftingProgression` is off or the
+recipe is not learnable; otherwise it computes
+`EffectManager.GetValue(RecipeTagUnlocked = 73, null,
+player.GetCVar(GetName()), this, this.tags, ...)` and requires `> 0` - the
+unlock gate is passive **73** seeded by a player cvar named after the recipe
+(the learned-schematic marker). `GetCraftingTier(player)` (IL=22) returns
+flat **6** when `CraftingProgression` is off, else
+`EffectManager.GetValue(CraftingTier = 91, null, 1, player, this,
+this.tags, ...)` - the per-recipe tier comes from passive **91** modulated by
+the recipe's tags. `ModifyValue` (IL=15) delegates to the recipe's
+`MinEffectController.ModifyValue(...)`, so output quality can carry
+recipe-level effects on top of the caller's base/percent pair.
 
 ---
 
@@ -113,4 +156,11 @@ progression, saved with the player profile ([server-lifecycle.md](server-lifecyc
 
 ## Changelog
 
+- **2026-08-08:** IL-pinned validation: CanCraft (IL=128) tier cache + clamp,
+  CraftingIngredientCount (198) count modifier, modded-item exclusion, per-
+  ingredient scan; CanCraftAny (IL=134) tier loop; GetCraftingTier (IL=22)
+  flat 6 off / CraftingTier (91); IsUnlocked (IL=31) RecipeTagUnlocked (73)
+  seeded by recipe-name cvar; ContainsIngredients (IL=39) type-only;
+  ModifyValue (IL=15) MinEffectController; wire frames Recipe.Write (IL=56)
+  and RecipeQueueItem.Write (IL=82 v2).
 - **2026-07-23:** Initial crafting/recipe reversal (Recipe model, CanCraft validation, craft-queue lifecycle, unlock progression) with state machines.
