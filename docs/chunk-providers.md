@@ -282,6 +282,37 @@ chunks (routed by quadrant, local coords via `World.toBlockXZ`): any
 places via `prefab.CopyIntoLocal(world.ChunkCache, pos, false, false,
 FastTags.none)` then `prefab.SnapTerrainToArea`.
 
+`WorldDecoratorPOIFromImage.DecorateChunkOverlapping` (IL=472) is the static
+POI stamping from the `poi_processed` color map. It warns and returns when any
+neighbor chunk is missing, seeds a chunk-local `GameRandom` like the biome
+decorator, and per non-trader cell whose `m_Poi.GetData(wx, wz)` color is
+non-zero/non-255 resolves a `PoiMapElement` via `getPoiForColor`. Non-water
+elements first stamp `SetDecoAllowedStreetOnlyAt(x, z, true)`; `yPos` defaults
+to `m_YPos` (or the terrain height when negative). Air elements with a
+non-empty `m_sModelName` take the prefab path
+(`PrefabCache.GetPrefab(name, true, true, false, false)` +
+`CopyIntoLocal(ChunkCache, (wx, yPos, wz), false, false, FastTags.none)`,
+gated on `!IsNothing(decoAllowed)`). Block elements: a random decal is applied
+(`GetRandomDecal`, only when `GetTerrainNormalY >= 0.98` and the face-adjacent
+cell is air), the base `m_BlockValue` is written when the target is air or a
+terrain-on-terrain match, water elements fill `yPos` down to `m_YPosFill`
+with `SetWater(WaterValue.Full)` on `CanWaterFlowThrough` cells (non-water
+fills with the block on air cells), `m_BlockBelow` replaces the base when the
+existing shape is terrain, and with `bChangeWaterDensity` the fill also stamps
+`SetDensity(MarchingCubes.DensityAir)` on non-terrain shapes. Finally
+`GetRandomBlockOnTop` picks the top decoration: `offset == 0` requires the
+cell above air, `BlockPlaceholderMap.Replace` (y=0, unless `IsEditor`)
+resolves it, and it lands via `DecoUtils.CanPlaceDeco`/`ApplyDecoAllowed` +
+`OnBlockPlaced` + `SetBlockRaw` (or `SetBlock` for tile-entity blocks).
+
+The provider's water support: `LoadWaterInfo(filename)` (IL=127) parses an XML
+file of `<Water>` child elements (case-insensitive) into `WaterInfo { pos,
+minX, maxX, minZ, maxZ }` (`pos` via `ParseVector3i`; bounds via `int.Parse`,
+defaulting to `-intMax`/`intMax`), returning null when the file is missing.
+`GetWaterChunks16x16` (IL=9) exposes the precomputed `water16x16Chunks` byte
+map and its width (used by `World.LoadWorld`); `InitData()` (IL=6) is only a
+coroutine stub returning the `<InitData>d__15` state machine.
+
 **`WorldBlockFiller`** is the per-chunk biome deco sprinkler invoked by
 `WorldDecoratorBlocksFromBiome`. Its `m_BlocksToFill : Byte[]` is a flat
 16x16x256 grid indexed `((x << 4) | z) << 8 | y`; **255** means "untouched".
