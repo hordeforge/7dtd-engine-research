@@ -413,53 +413,114 @@ position (visual wire list only).
 
 ## 4. Workstation and forge crafting
 
-`TileEntityWorkstation` (forges in earlier terms are their own type) drives a fuel
-loop and a recipe queue each `UpdateTick`. Time passed is derived from the 20 Hz
-`GameTimer.ticks` delta since `lastTickTime`, divided by 20 to get seconds. When a
-fuel module is present, elapsed time is clamped to remaining burn time so an item
-cannot advance past available heat. Being beside water forces `isBurning` off.
+### 4.1 `TileEntityWorkstation.UpdateTick` (IL=134)
+
+Fields: `fuel` / `input` / `tools` / `toolsNet` / `output` (`ItemStack[]`),
+`queue` (`RecipeQueueItem[]`), `lastTickTime:u64`, `currentBurnTimeLeft:f32`,
+`isBurning`, `isBesideWater`, `isModuleUsed:bool[]`, `CraftCompleteList`.
+
+`isModuleUsed[3]` is the **fuel module** gate used throughout the tick (index 3
+checked before fuel math and before final `isBurning` clear).
+
+Ordered path (verified):
+
+1. Early continue only when fuel module off **and** no recipe in queue **and** not burning.
+2. `timePassed = (GameTimer.ticks - lastTickTime) / 20` (seconds at 20 TPS).
+3. If fuel module on: `timePassed = min(timePassed, BurnTotalTimeLeft)` so craft
+   cannot outrun remaining burn seconds.
+4. `isBesideWater = TileEntity.IsByWater(world, pos)`; if burning and beside water
+   force `isBurning = false`.
+5. `UpdateLightState(world, block)` (block glow).
+6. If fuel module: `HandleFuel(world, timePassed)`.
+7. If `block.HeatMapStrength > 0` and `IsCrafting`: `emitHeatMapEvent` (AIDirector).
+8. `HandleRecipeQueue(timePassed)` then `HandleMaterialInput(timePassed)`.
+9. If fuel module and burning but `BurnTotalTimeLeft <= 0`: force `isBurning = false`.
+10. Store `lastTickTime = GameTimer.ticks`.
+11. `setModified()` if fuel module on or queue non-empty or burning; `UpdateVisible()`.
 
 ```mermaid
 flowchart TB
-  UT[Workstation.UpdateTick] --> DT["timePassed = (ticks - lastTickTime) / 20"]
-  DT --> WATER["isBesideWater check -> may force isBurning off"]
-  WATER --> LIGHT[UpdateLightState: block glow on/off]
-  LIGHT --> FUEL["HandleFuel: burn fuel, set isBurning"]
-  FUEL --> HEAT{crafting and HeatMapStrength > 0?}
-  HEAT -->|yes| EMIT[emitHeatMapEvent to AIDirector]
+  UT[Workstation.UpdateTick IL=134] --> DT["timePassed = (ticks - lastTickTime) / 20"]
+  DT --> CLAMP["fuel module: min with BurnTotalTimeLeft"]
+  CLAMP --> WATER["IsByWater -> may force isBurning off"]
+  WATER --> LIGHT[UpdateLightState]
+  LIGHT --> FUEL["HandleFuel if isModuleUsed[3]"]
+  FUEL --> HEAT{HeatMapStrength > 0 and IsCrafting?}
+  HEAT -->|yes| EMIT[emitHeatMapEvent]
   HEAT -->|no| QUEUE
-  EMIT --> QUEUE[HandleRecipeQueue: advance active recipe]
-  QUEUE --> MAT[HandleMaterialInput: smelt raw materials]
-  MAT --> MOD[setModified if state changed]
+  EMIT --> QUEUE[HandleRecipeQueue]
+  QUEUE --> MAT[HandleMaterialInput]
+  MAT --> MOD[setModified if active]
 ```
 
-The recipe queue lifecycle, per `HandleRecipeQueue` and `cycleRecipeQueue`:
+### 4.2 `HandleFuel` (IL=105)
+
+- If not burning: emit heat-map clear (enum 0) and return false.
+- While `currentBurnTimeLeft` depletes by `_timePassed`:
+  - if empty and `getTotalFuelSeconds() > 0`: pull next fuel unit from `fuel[0]`,
+    decrement count, add `GetFuelTime(stack)` to `currentBurnTimeLeft`,
+    `cycleFuelStacks()`, invoke `FuelChanged`.
+  - fractional bookkeeping uses a **100**-unit scale (`FloorToInt` of burn*100).
+- Returns whether any fuel state changed; burning ends when both current burn and
+  total fuel seconds hit zero.
+
+### 4.3 `HandleRecipeQueue` / `cycleRecipeQueue`
+
+`HandleRecipeQueue`: no-op while `bUserAccessing`. Active slot is last non-empty
+queue entry. Requires fuel module off **or** `isBurning`. Decrements
+`CraftingTimeLeft` by `timePassed`. When `CraftingTimeLeft <= 0` and
+`Multiplier > 0`:
+
+- Build output `ItemStack` from `Recipe.itemValueType` / `Recipe.count` / quality.
+- `ItemStack.AddToItemStackArray(output, ...)`.
+- `AddCraftComplete(StartingEntityId, item, recipeName, scrapName?, craftExpGain, count)`.
+- Analytics: `GameSparksCollector.IncrementCounter` (client/telemetry; no-op harm on dedi).
+- `Multiplier--`; reset `CraftingTimeLeft += OneItemCraftTime`.
+- If `Multiplier == 0`: `cycleRecipeQueue()` (shift queue down, clear tail, mark next
+  `IsCrafting` if Multiplier and Recipe present).
 
 ```mermaid
 stateDiagram-v2
   [*] --> Idle
-  Idle --> Queued: add recipe (Multiplier = count, CraftingTimeLeft = OneItemCraftTime)
-  Queued --> Burning: fuel available (isBurning) or no fuel needed
+  Idle --> Queued: add recipe (Multiplier, CraftingTimeLeft = OneItemCraftTime)
+  Queued --> Burning: fuel module off OR isBurning
   Burning --> Burning: CraftingTimeLeft -= timePassed
   Burning --> ItemDone: CraftingTimeLeft <= 0
-  ItemDone --> Burning: output added, XP via AddCraftComplete, Multiplier--, reset CraftingTimeLeft
+  ItemDone --> Burning: output + AddCraftComplete, Multiplier--, reset timer
   ItemDone --> Advance: Multiplier == 0
-  Advance --> Burning: cycleRecipeQueue -> next queued recipe
+  Advance --> Burning: cycleRecipeQueue
   Advance --> Idle: queue empty
   Burning --> Paused: fuel exhausted or beside water
   Paused --> Burning: fuel replenished
 ```
 
-Each completed unit appends the crafted item to the `output` array, banks craft XP
-for `StartingEntityId` through `AddCraftComplete`, and resets the timer for the
-next unit; `CheckForCraftComplete` later hands the XP to the returning player.
+### 4.4 `TileEntityForge.UpdateTick` (IL=340)
 
-`TileEntityForge` is the smelting variant. Fuel is tracked directly in ticks
-(`fuelInStorageInTicks`, `fuelInForgeInTicks`) with a `burningItemValue`, and
-`HandleMaterialInput` melts input materials into a molten `output` pool measured by
-`outputWeight`. Like the workstation it emits AI heat-map events while active and
-marks itself modified when the fuel or output changes. `TileEntityCollector`
-follows the same shape for its converter slots (fuel, catalyst, timed output).
+Separate type (not a workstation subclass). Fuel is **tick-integer** based:
+`fuelInStorageInTicks`, `fuelInForgeInTicks`, `burningItemValue`.
+
+Path:
+
+1. `recalcStats()`; if first tick (`lastTickTime == 0`) seed from `GameTimer.ticks`.
+2. `dtTicks` from timer delta; `updateLightState`.
+3. While storage or forge fuel ticks remain: `emitHeatMapEvent` (enum 1 while hot).
+4. Consume forge fuel: `fuelInForgeInTicks -= min(dt, fuelInForge)` style drain;
+   when empty, `moveDown(fuel)`, take next stack, set `burningItemValue`,
+   `fuelInForgeInTicks = ItemClass.GetFuelValue(item) * 20` (seconds->ticks at 20 TPS),
+   decrement stack count / Clear when empty.
+5. Material melt: when `outputWeight` path active, rate uses `0.1` mold factor;
+   `moveDown(input)`, add `ItemClass.GetWeight()` into `metalInForge`, consume input.
+6. `recalcStats()`; light update when forge fuel hits zero.
+
+### 4.5 Other TE ticks (IL-sized)
+
+| Type | UpdateTick | Behaviour |
+|---|---:|---|
+| `TileEntityPowered` | 26 | If transform: `wiresDirty` -> `DrawWires`; `activateDirty` -> `Activate(PowerItem.IsPowered)` |
+| `TileEntityPoweredBlock` | 4 | base only |
+| `TileEntityVendingMachine` | 25 | Non-player-owned rentable: if `rentalEndDay <= WorldTimeToDays(worldTime)` -> `ClearVendingMachine` |
+| `TileEntityComposite` | 24 | For each `modulesInternalOrder`: `ITileEntityFeature.UpdateTick` |
+| Loot / Sign / Trader | (none) | No override; base no-op |
 
 ---
 
@@ -580,6 +641,9 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-07:** Workstation UpdateTick/HandleFuel/HandleRecipeQueue IL paths;
+  Forge fuel-tick melt path; Vending rental expiry; Composite feature tick;
+  Powered TE dirty flags.
 - **2026-08-07:** PowerItem subtype tick table (gen/solar/battery/trigger/toggle),
   corrected PowerChildren/isToggled gate claim, subtype power.dat tails,
   NetPackageWireActions SetParent/RemoveParent/SendWires process.

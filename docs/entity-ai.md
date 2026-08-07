@@ -649,6 +649,48 @@ Driven from `World.TickSleeperVolumes` each OnUpdateTick. Ordered phases:
 4. **Despawn timer:** if `ticksUntilDespawn > 0`, decrement; when it hits 0,
    `Despawn(world)`.
 
+### D8.2 `UpdateSpawn` (IL=516)
+
+Per-call spawn pacing and entity create:
+
+1. Decrement `spawnDelay`; when it hits 0 set delay to **2** and continue only if
+   `AIDirector.CanSpawn(2.1f)` and game-stat enemy cap (`GameStats.GetInt` index 12)
+   allows more.
+2. **Respawn list first:** pop last id from `respawnList`; if still pending or live,
+   skip; else resolve `RespawnData` (spawnPointIndex + className), `FindSpawnIndex`
+   / `CheckSpawnPos`, `EntityClass.FromString`; if enemy and `!EnemySpawnMode`, drop
+   from map; else `Spawn(world, entityClassId, spawnPointIndex, BlockSleeper)` and
+   remove from `respawnMap` on success. At most **one** spawn attempt per tick path
+   before returning in the respawn branch.
+3. **Fresh group path:** if `groupCountList` / `spawnsAvailable` remain, pick group
+   counts, allocate spawn points, same `Spawn` helper. `minScript.IsRunning` can
+   force a spawn-allowed flag for scripted waves.
+
+### D8.3 `UpdatePlayerTouched` (IL=172)
+
+Called once when a player is latched on the volume:
+
+1. If already `isSpawned` and `worldTime` still before `respawnTime` and not
+   `wasCleared`: no full reset (still-active volume).
+2. Else if `worldTime >= respawnTime` (or cleared): `Reset()`, `CancelPendingSpawns()`,
+   clear `isSpawning` / `isSpawned` flags as appropriate, then rebuild.
+3. Difficulty: `gameStage = max(GetGameStageAround(player), prefab quest multiplier
+   / DifficultyTier path)`; quest `SpawnMultiplier` and prefab refresh tags apply.
+4. Build `respawnList` from existing `respawnMap` keys; `ResetSpawnsAvailable()`;
+   clear `groupCountList`; set `spawnCountMin/Max` from volume fields; `AddSpawnCount`;
+   set `spawnDelay`; start `minScript` if present; mark `isSpawning`.
+
+### D8.4 `Despawn` (IL=48) / `DespawnAndReset` (IL=6)
+
+`Despawn`:
+
+1. `triggerState = 1` (enum), clear `playerTouchedTrigger`.
+2. `CompletePendingSpawns()`.
+3. For each `respawnMap` entity: if `EntityAlive` still exists **and** `IsSleeping`,
+   set `IsDespawned = true` and `MarkToUnload()` (awake entities are left alone).
+
+`DespawnAndReset` = `Despawn` + `Reset()`.
+
 Related S2C packages (wakeup / pose / passive): [protocol-packages.md](protocol-packages.md)
 §6.19. Volume graph itself is prefab/world data, not a NetPackage stream.
 
@@ -841,7 +883,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** SleeperVolume.Tick phase order (MinScript / UpdateSpawn / player touch / despawn timer).
+- **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;
+  Tick phase order (MinScript / UpdateSpawn / player touch / despawn timer).
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 

@@ -83,7 +83,9 @@ Closed in recent sessions (still optional, not required for A+B):
 | WireActions SetParent/RemoveParent/SendWires process | tile-entities-power §3.6 |
 | Corrected toggle gate (not PowerChildren) | tile-entities-power §3.3 |
 | EntitySpawnResponse ToClient process; EntityLookAt | protocol-packages §5.2 |
-| SleeperVolume.Tick phases | entity-ai §D8.1 |
+| SleeperVolume.Tick / UpdateSpawn / Despawn / PlayerTouched | entity-ai §D8.1-D8.4 |
+| Workstation/Forge UpdateTick fuel+recipe IL | tile-entities-power §4 |
+| Vending rental expiry; Composite feature tick | tile-entities-power §4.5 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers, and dormant UAI. Promote

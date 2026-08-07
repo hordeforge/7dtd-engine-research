@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: workstation/forge ticks + sleeper spawn/despawn
+
+Objective: keep optional depth moving (never-stop C grind).
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power §4: Workstation UpdateTick IL=134 path, HandleFuel,
+  HandleRecipeQueue/cycleRecipeQueue, Forge IL=340 fuel-tick melt, Vending
+  rental expiry, Composite feature tick, Powered dirty flags.
+- entity-ai §D8.2-D8.4: SleeperVolume UpdateSpawn IL=516, Despawn IL=48
+  (sleeping-only unload), UpdatePlayerTouched IL=172.
+
+Coverage unaccounted remains 0.
+---
 ## 2026-08-07 — tier-C: PowerItem subtype ticks, WireActions, sleeper Tick, LookAt
 
 Objective: continue optional annotation depth (tier C) after A+B complete.
