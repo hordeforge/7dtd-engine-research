@@ -552,6 +552,11 @@ height). Else store `pendingSleepTrigger = pose`. Always:
 
 **`TriggerManager.TriggerBlocks`:** BlockTrigger overload (IL=17) requires
 `HasAnyTriggers` then `PrefabTriggerData.Trigger(player, blockTrigger)`.
+
+**Chunk trigger store:** `Chunk.triggerData` is a
+`DictionaryList<Vector3i, BlockTrigger>`; `GetBlockTriggers()` (IL=3) exposes
+it and `GetBlockTrigger(localPos)` (IL=9) is the per-position
+`TryGetValue` (null when absent).
 TriggerVolume overload (IL=27) same with prefab required (warn if null).
 
 **`EAIManager.SleeperWokeUp` (IL=21):** for each entry in `targetTasks`, set
