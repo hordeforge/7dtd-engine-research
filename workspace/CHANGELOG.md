@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: GetLootStage POI/biome formula
+
+Done (V3.1.0 b14 IL):
+- GetLootStage: POITierMod/Bonus, biome LootStageMod/Bonus/Min/Max, passives 159/160, GameStats 66 clamp, GlobalLootStageModifier.
+- SharedPartyKill: server SharedKillServer scale 1; client SharedKillClient.
+- EntityAddExpServer: AddLevelExp only when isEntityRemote with _xpOther type 8.
+---
 ## 2026-08-07 — tier-C: get_gameStage formula and GameStage statics
 
 Done (V3.1.0 b14 IL):

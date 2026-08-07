@@ -459,6 +459,8 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 
 - **2026-07-28:** Ally package write IL numbers.
 
+- **2026-08-07:** SharedPartyKill Process: server SharedKillServer(entity,killer,1);
+  client SharedKillClient(type,xp). EntityAddExpServer only on isEntityRemote.
 - **2026-07-28:** PartyActions write IL re-verify (no members on wire).
 
 - **2026-07-23:** Initial party + faction + ally reversal. Party model (`PartyManager` /

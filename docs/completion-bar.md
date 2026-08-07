@@ -201,6 +201,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | CanSpawn cap + SetPartyLevel gsScaling + teleport | aidirector / vehicles |
 | CalcPartyLevel diminishing + setState transitions | aidirector / vehicles |
 | get_gameStage formula + GameStage static defaults | progression / aidirector |
+| GetLootStage POI/biome + passives 159/160 | loot-economy.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

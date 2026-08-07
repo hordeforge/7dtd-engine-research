@@ -530,6 +530,37 @@ and the locked-slot bit array.
 
 ---
 
+## 8. Player loot stage (`EntityPlayer.GetLootStage`, IL=184)
+
+Container open path uses party max of this (see `GetHighestPartyLootStage`).
+
+```text
+poiMod/Bonus = 0
+if prefab.DifficultyTier > 0:
+  idx = clamp(tier-1, 0, POITierMod.Length-1)
+  poiMod   = POITierMod[idx]   * POITierLootStageModifier
+  poiBonus = POITierBonus[idx] * POITierLootStageModifier
+
+if biomeStandingOn:
+  biomeMod   = biome.LootStageMod   * BiomeLootStageModifier
+  biomeBonus = biome.LootStageBonus * BiomeLootStageModifier
+  raw = EffectManager(passive 159,
+          Level * (1 + poiMod + biomeMod + containerMod)
+          + poiBonus + biomeBonus + containerBonus)
+  stage = floor(raw)
+  if biome.LootStageMin != -1: stage = max(stage, LootStageMin)
+  if GameStats 66 and biome.LootStageMax != -1:
+    stage = min(stage, floor(EffectManager(passive 160, LootStageMax)))
+  return max(1, floor(stage * GlobalLootStageModifier))
+else:
+  raw = EffectManager(passive 159,
+          Level * (1 + poiMod + containerMod) + poiBonus + containerBonus)
+  return max(1, floor(raw * GlobalLootStageModifier))
+```
+
+Passive **159** scales loot stage; **160** scales biome max when GameStats **66**
+(loot stage clamp) is on.
+
 ## Related docs
 
 | Doc | Role |
@@ -544,6 +575,7 @@ and the locked-slot bit array.
 
 ## Changelog
 
+- **2026-08-07:** GetLootStage IL=184 POI tier + biome min/max + passives 159/160.
 - **2026-08-07:** EntityItem.OnUpdateEntity lifetime 0.05/tick, ground counter 10,
   distraction death, Y&lt;0 death; OnCollectServer RemoveEntity reason 2.
 - **2026-08-07:** EntityTrader.OnUpdateLive IL=315 (quest populate, 10 m bounds
