@@ -426,20 +426,41 @@ So S2C spawn is **async create**, not a synchronous `EntityFactory.CreateEntity`
 on the package thread. The ECD body layout remains the clone-critical surface
 (section 5.1 header/middle/tail).
 
-### 5.2 NetPackageEntitySpawnResponse (ToServer)
+### 5.2 NetPackageEntitySpawnResponse (ToClient)
+
+Does **not** override `get_PackageDirection` (inherits base); body is a pure
+**client inventory ack** after server accepted/rejected a place-spawn. Write IL=12.
+
 ```text
 success   : bool
-itemValue : ItemValue.Read/Write
+itemValue : ItemValue.Write
 ```
 
-**Client `ProcessPackage` (IL=153)** (local player only): tags the item as
-`vehicle` / `drone` / `turretRanged|turretMelee`. On **success**: clear the
-matching `ItemActionSpawnVehicle` / `ItemActionSpawnTurret` preview when the
-holding item matches, `Inventory.DecItem` by 1, play `placeblock`. On
+**Client `ProcessPackage` (IL=153)** (local primary player only): classifies the
+item by tags `vehicle` / `drone` / `turretRanged|turretMelee`. On **success**:
+clear matching `ItemActionSpawnVehicle` / `ItemActionSpawnTurret` preview when
+the holding item matches, `Inventory.DecItem` by 1, play `placeblock`. On
 **failure**: tooltip `uiCannotAddVehicle` / `uiCannotAddDrone` /
 `uiCannotAddTurret`. Server authority for the place still lives on the
-placement / `RequestToSpawnEntity` path; this package is the client inventory
-ack.
+placement / `RequestToSpawnEntity` path; this package never mutates world state
+on dedicated (no server Process branch).
+
+### 5.2.1 NetPackageEntityLookAt (ToClient)
+
+Write IL=22 / Process IL=31 / direction **ToClient** (`ldc.i4.2`).
+
+```text
+// NetPackageEntityTargeted base:
+entityId : i32
+// then int-truncated look-at world position:
+lookAt.x : i32   // (int)Vector3.x
+lookAt.y : i32
+lookAt.z : i32
+```
+
+Process: resolve `EntityAlive` by id; if `emodel.avatarController` present,
+`AvatarController.SetLookPosition(lookAtPosition)`. Cosmetic aim/look only;
+no sim authority.
 
 ### 5.3 NetPackageHoldingItem (ToClient)
 ```text
@@ -1119,7 +1140,7 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageWallVolumeRemove` | 8 | index | Remove wall volume |
 | `NetPackageChunkRemoveAll` | 4 | (base only) | Clear all streamed chunks on client |
 | `NetPackageBiomeIntensity` | 8 | (base / small payload) | Biome intensity |
-| `NetPackageWireActions` | 45 | currentOperation, tileEntityPosition, wireChildren list, wiringEntityID | Power wire graph edits (Process IL=163) |
+| `NetPackageWireActions` | 45 | `op:u8` (`WireActions`: SetParent=0, RemoveParent=1, SendWires=2), `tileEntityPosition`, `childCount:u8` + Vector3i list, `wiringEntityID:i32` (skip if SendWires) | Server: SetParent / RemoveParent on `PowerManager`; client SendWires -> `IPowered.SetWireData` (Process IL=163). Full path: [tile-entities-power.md](tile-entities-power.md) §3.6 |
 | `NetPackageWireToolActions` | 17 | currentOperation, tileEntityPosition, entityID | Wire tool |
 | `NetPackageSetProp` | 37 | m_persistentPlayerId, m_propChanges, m_localPlayerThatChanged | Prop/land edits |
 | `NetPackageRegionMetaData` | 43 | X, Z, ChunksWithData pairs | Dynamic mesh region meta |
@@ -1276,8 +1297,9 @@ customReason    : string
 
 ## Changelog
 
-- **2026-08-07:** EntityNetworkHoldingData carrier; Audio/Light/TreeFade/DroneParticle
-  field widths in §6.21 table.
+- **2026-08-07:** EntitySpawnResponse direction ToClient + process; EntityLookAt
+  int-truncated lookAt; WireActions process pointer; Audio/Light/TreeFade/DroneParticle
+  field widths; EntityNetworkHoldingData carrier.
 - **2026-08-02:** NetPackageTileEntity V3.1.0 wire (teBlockId + i32 length).
 
 - **2026-07-28:** DynamicMesh/POIAround/NavObject/EntityWaypointList package bodies.

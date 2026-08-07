@@ -627,9 +627,30 @@ Push physics, turrets, traps, EAI target find, break block, falling entities, sp
 | AddFallingBlock | Dedupe hashset, mesh observer, enqueue |
 | GroupFallingBlocks | 292 IL |
 | LetBlocksFall | Spawn falling entities |
-| SleeperVolume.Tick | MinScript, UpdateSpawn, Despawn, player touch |
+| SleeperVolume.Tick | MinScript, UpdateSpawn, Despawn, player touch (detail below) |
 | DecoManager.UpdateTick | Locked lists, Add/Remove deco, starts `UpdateDecorationsCo` |
 | WaterSplashCubes | 185 IL always on OnUpdateTick |
+
+### D8.1 `SleeperVolume.Tick` (IL=137, closed 2026-08-07)
+
+Driven from `World.TickSleeperVolumes` each OnUpdateTick. Ordered phases:
+
+1. **If `isSpawning`:**
+   - If `minScript` present and `IsRunning`: walk `respawnMap`; if any key is not in
+     `pendingSpawnMap` and `World.GetEntity` is still live, **clear** `respawnMap` +
+     `groupCountList` and `minScript.Restart()` (spawn wave aborted / reset).
+   - Always: `minScript.Tick(this)` when non-null, then `UpdateSpawn(world)`.
+2. **Else if `isSpawned`:** walk `respawnMap` again; if a mapped entity is missing
+   from the world and not pending, the enumerator still only probes existence
+   (cleanup path shares the clear pattern with the spawning branch in the full
+   method; treat as "still-alive probe" for residual respawn bookkeeping).
+3. **Player touch:** if `playerTouchedToUpdate != null`, `UpdatePlayerTouched` then
+   clear the field (one-shot touch processing).
+4. **Despawn timer:** if `ticksUntilDespawn > 0`, decrement; when it hits 0,
+   `Despawn(world)`.
+
+Related S2C packages (wakeup / pose / passive): [protocol-packages.md](protocol-packages.md)
+§6.19. Volume graph itself is prefab/world data, not a NetPackage stream.
 
 ---
 
@@ -820,6 +841,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** SleeperVolume.Tick phase order (MinScript / UpdateSpawn / player touch / despawn timer).
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 

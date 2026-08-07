@@ -275,17 +275,26 @@ flowchart TB
   SRC --> DRAIN["CurrentPower -= LastPowerUsed"]
 ```
 
-`PowerItem.PowerChildren` is the branch gate: the base returns true, but
-`PowerConsumerToggle` returns its `isToggled` flag (a switch that is off blacks out
-everything downstream of it), and triggers gate their branch on being active. When
-a node's `isPowered` changes it marks its tile entity modified so the new state is
-saved and replicated.
+`PowerItem.PowerChildren` (base IL=2) always returns **true**. Subtypes do **not**
+override it for the common switch/trigger cases on V3.1.0 b14 (verified: no
+`PowerConsumerToggle.PowerChildren` method; `PowerTrigger.PowerChildren` also
+returns true). Branch gating is therefore **not** via `PowerChildren`:
 
-### 3.4 Source on/off state
+| Gate | Where | Effect |
+|---|---|---|
+| **Full requirement** | `HandlePowerReceived` | `isPowered = (consumed == RequiredPower)`; partial power blacks the node |
+| **Toggle switch** | `PowerConsumerToggle.HandlePowerUpdate` | TE `Activate` uses `isPowered && isToggled`; children still get `HandlePowerUpdate(parentIsOn)` |
+| **Trigger active** | `PowerTrigger.HandlePowerUpdate` | non-trigger children only updated when `get_IsActive()`; trigger children always get parent-trigger link |
+| **Solar light** | `PowerSolarPanel.HandleSendPower` | early-out if `!HasLight` (after periodic `CheckLightLevel`) |
+
+When a node's `isPowered` flips, `IsPoweredChanged` + `TileEntity.SetModified` run
+so state is saved and replicated.
+
+### 3.4 Source on/off state and subtype tick table
 
 A source that is on generates and distributes; if it should auto turn off (a
-generator with `CurrentFuel == 0`, a solar panel with no light) it zeroes its power
-and flips off, disconnecting the subtree.
+generator with `CurrentFuel == 0`) it zeroes its power and flips off. Solar does
+not use `ShouldAutoTurnOff` for daylight; it gates inside `HandleSendPower`.
 
 ```mermaid
 stateDiagram-v2
@@ -294,18 +303,45 @@ stateDiagram-v2
   On --> Generating: CurrentPower < MaxPower -> TickPowerGeneration
   Generating --> Distributing: offer min(MaxOutput, CurrentPower) to children
   Distributing --> On: LastPowerUsed drained from CurrentPower
-  On --> AutoOff: ShouldAutoTurnOff (no fuel / no daylight)
-  AutoOff --> Off: CurrentPower = 0, IsOn = false, children HandleDisconnect
+  On --> AutoOff: ShouldAutoTurnOff (generator fuel empty)
+  AutoOff --> Off: CurrentPower = 0, IsOn = false
   On --> Off: player switches off
 ```
 
-Source subtypes differ only in `TickPowerGeneration` and `ShouldAutoTurnOff`:
-the generator burns fuel (`OutputPerFuel` per unit `CurrentFuel`, auto-off at
-empty), the solar panel produces only while `HasLight` is true (daylight-gated),
-and the battery bank both charges (`TickPowerGeneration`) and discharges
-(`HandleSendPower`) from stored charge.
+**`PowerSource.Update` IL=28:** `HandleSendPower()` then, if `hasChangesLocal`,
+`HandlePowerUpdate(IsOn)` on each child and clear the flag.
 
-### 3.5 Graph persistence
+**`PowerSource.HandleSendPower` IL=86** (base path):
+
+1. Return if `!IsOn`.
+2. If `CurrentPower < MaxPower`: virtual `TickPowerGeneration()`; if above max, clamp.
+3. If `ShouldAutoTurnOff()`: `CurrentPower=0`, `IsOn=false`.
+4. If `hasChangesLocal`: `budget = min(MaxOutput, CurrentPower)`; for each child
+   `HandlePowerReceived(ref budget)`; accumulate `LastPowerUsed`.
+5. `CurrentPower -= LastPowerUsed`.
+
+| Type | Tick / override | Generation / auto-off (IL) |
+|---|---|---|
+| `PowerSource` | `Update` -> `HandleSendPower` | base `TickPowerGeneration` empty (IL=1-ish); `ShouldAutoTurnOff` always **false** (IL=2) |
+| `PowerGenerator` | same | `TickPowerGeneration` IL=30: if room and `CurrentFuel>0`, burn **1** fuel, add `OutputPerFuel` to `CurrentPower`. `ShouldAutoTurnOff` = (`CurrentFuel == 0`) |
+| `PowerSolarPanel` | **override** `HandleSendPower` IL=111 | Every **2 s** (`lightUpdateTime`) call `CheckLightLevel`: `Chunk.GetLight(..., LIGHT_TYPE=1)` into `sunLight`; `HasLight = (sunLight==15 && World.IsDaytime())`. On light loss: zero power + `HandleDisconnect`. Only if `HasLight`: same generate/distribute as base. `TickPowerGeneration` IL=8: if `HasLight`, `CurrentPower = MaxOutput` (full fill, not incremental) |
+| `PowerBatteryBank` | `Update` IL=22 | If has **Parent** and incoming power: while on, `AddPowerToBatteries(LastInputAmount)` then return (does **not** run base source distribute). If root (no parent): `PowerSource.Update`. `TickPowerGeneration` IL=76: discharge batteries by raising `ItemValue.UseTimes`, add `n * OutputPerCharge` to `CurrentPower`. `HandlePowerReceived` IL=89: when on, take `min(InputPerTick, available)` into batteries, then pass remainder to children |
+| `PowerConsumer` | `HandlePowerUpdate` IL=51 | `Activate(isPowered && parentIsOn)`; edge `ActivateOnce`; always recurse children if `PowerChildren()` |
+| `PowerConsumerToggle` | `HandlePowerUpdate` IL=53 | Activate uses `isPowered && parentIsOn && isToggled`; still recurses children with **parent** `isOn` (toggle does not cut child power budget; only local TE activation) |
+| `PowerConsumerSingle` | `HandlePowerUpdate` IL=41 | one-shot `ActivateOnce` on rising edge of `isPowered`; recurse children |
+| `PowerTrigger` | `CachedUpdateCall` IL=77 (from manager) + `HandlePowerUpdate` IL=72 | Manager path only for types 1 and 3..4 band: edge-detect trigger, delay/duration timers via `Time.time`, `HandleDisconnectChildren` when duration ends. `get_IsActive`: type 0 uses `isTriggered`; else `isActive \|\| parentTriggered` |
+| `PowerTimerRelay` | `CachedUpdateCall` IL=12 | every **1 s** (`updateTime`) call `CheckForActiveChange` |
+| `PowerElectricWireRelay` | (consumer) | no extra fields; pure consumer relay |
+| `PowerTripWireRelay` | (trigger) | no extra fields beyond `PowerTrigger` |
+| `PowerPressurePlate` | (trigger) | fields `pressed` / `lastPressed` |
+| `PowerRangedTrap` | (consumer) | slots + `TargetType` + `isLocked` on disk; TE activate path via consumer |
+
+`PowerManager.Update` IL=106: early-out if no world/players; **server + game
+started** only for the 0.16 s source/trigger loop and 120 s save; **every frame**
+flushes `ClientUpdateList` -> `TileEntityPoweredBlock.ClientUpdate` (also on
+client connection path).
+
+### 3.5 Graph persistence and subtype disk tails
 
 Path `{SaveGameDir}/power.dat`. `SavePowerManager` (IL=41) serializes via `Write`
 into a pooled stream and starts thread `powerDataSave`; the worker copies any
@@ -333,10 +369,45 @@ childCount : u8
 // per child: powerItemType:u8 + PowerItem.write
 ```
 
+**Subtype write tails** (after base `PowerItem` / `PowerSource` / `PowerTrigger`):
+
+| Type | Extra disk fields |
+|---|---|
+| `PowerSource` | `CurrentPower:u16`, `IsOn:bool`, `Stacks` (`WriteItemStack`) |
+| `PowerGenerator` | + `CurrentFuel:u16` |
+| `PowerSolarPanel` | + `sunLight:u8` (only if file version >= 2 on read) |
+| `PowerConsumerToggle` | + `isToggled:bool` |
+| `PowerTrigger` | `TriggerType:u8`; if type==0: `isTriggered:bool` else `isActive:bool`; if type!=0: delay:u8, duration:u8, `delayStartTime:f32`, `powerTime:f32`; if type==3: `TargetType:i32` |
+| `PowerTimerRelay` | + `StartTime:u8`, `EndTime:u8` |
+| `PowerRangedTrap` | `isLocked:bool`, `Stacks`, `TargetType:i32` |
+
 `Read` rebuilds with `CreateItem` per node and `AddPowerNode`, which registers
 the node in `Circuits`, in `PowerSources` / `PowerTriggers` if applicable, and in
 `PowerItemDictionary`; `SetParent` enforces no cycles via `CircularParentCheck` and
 pulls a re-parented node out of the roots list.
+
+### 3.6 Wire edit package (`NetPackageWireActions`)
+
+Write IL=45 / read IL=38 / ProcessPackage IL=163.
+
+```text
+currentOperation : u8   // WireActions: 0 SetParent, 1 RemoveParent, 2 SendWires
+tileEntityPosition : Vector3i
+childCount : u8
+// childCount x Vector3i wireChildren
+wiringEntityID : i32    // omitted when operation == SendWires (2)
+```
+
+**Server process** (`ConnectionManager.IsServer`):
+
+| Op | Behaviour |
+|---|---|
+| **SetParent (0)** | Resolve/create `PowerItem` for `tileEntityPosition` and first `wireChildren[0]`; `PowerManager.SetParent(child, parent)`; refresh wire TE data (`CreateWireDataFromPowerItem` / `SendWireData` / `RemoveWires` / `DrawWires`) on old parent and new parent |
+| **RemoveParent (1)** | `RemoveSelfFromParent` on item at position; refresh former parent's wire TE |
+| **SendWires (2)** | (falls through to client path only in this method) |
+
+**Client path:** if op is **SendWires**, `IPowered.SetWireData(wireChildren)` on TE at
+position (visual wire list only).
 
 ---
 
@@ -509,6 +580,9 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-07:** PowerItem subtype tick table (gen/solar/battery/trigger/toggle),
+  corrected PowerChildren/isToggled gate claim, subtype power.dat tails,
+  NetPackageWireActions SetParent/RemoveParent/SendWires process.
 - **2026-08-07:** `ClientPowerData` field table + `TileEntityPowerSource` write/read by
   StreamMode (Persistency / ToServer / ToClient) from IL=98/158.
 - **2026-07-28:** power.dat field-level Write/Read tree codec + threaded save.

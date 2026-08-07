@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1415 / catalogued 892 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1425 / catalogued 882 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -79,6 +79,11 @@ Closed in recent sessions (still optional, not required for A+B):
 | `ClientPowerData` stream modes | tile-entities-power §2.1 |
 | Audio/Light/TreeFade/DroneParticle wire fields | protocol-packages §6.21 |
 | Explosion Initiate/Client full field lists | protocol-packages §6.14-6.15 (already) |
+| PowerItem subtype tick table + power.dat tails | tile-entities-power §3.4-3.5 |
+| WireActions SetParent/RemoveParent/SendWires process | tile-entities-power §3.6 |
+| Corrected toggle gate (not PowerChildren) | tile-entities-power §3.3 |
+| EntitySpawnResponse ToClient process; EntityLookAt | protocol-packages §5.2 |
+| SleeperVolume.Tick phases | entity-ai §D8.1 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers, and dormant UAI. Promote

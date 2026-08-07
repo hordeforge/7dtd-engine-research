@@ -6,6 +6,21 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: PowerItem subtype ticks, WireActions, sleeper Tick, LookAt
+
+Objective: continue optional annotation depth (tier C) after A+B complete.
+
+Done (verified live V3.1.0 b14 IL):
+- tile-entities-power: full PowerItem subtype tick table; corrected claim that
+  PowerConsumerToggle.PowerChildren returns isToggled (it does not override;
+  gate is HandlePowerUpdate Activate only); power.dat subtype tails;
+  NetPackageWireActions SetParent/RemoveParent/SendWires process §3.6.
+- protocol-packages: EntitySpawnResponse marked ToClient (client inventory ack);
+  EntityLookAt int-truncated Vector3; WireActions field/process pointer.
+- entity-ai §D8.1: SleeperVolume.Tick phase order from IL=137.
+
+Coverage unaccounted remains 0. stock-check expected green.
+---
 ## 2026-08-07 — tier-C depth: power ClientData, sector 7rg, BuffManager, audio fields
 
 Objective: continue optional annotation depth after A+B complete (unaccounted=0).
