@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: sync create + sleeper gate
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md D8.2: Chunk.CanSleeperSpawnAtPos IL=36 (below IsCollideMovement when checkBelow, cell open-space)
+- spawning.md 2: EntityFactory.CreateEntity(ecd) IL=7 sync path (Start(true) + CompleteEntity), convenience overload id alloc + ItemValue.None
+
 ## 2026-08-08 - tier-C: spawn area sampler
 
 Done (V3.1.0 b14 IL):
