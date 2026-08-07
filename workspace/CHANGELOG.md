@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TriggerManager.TriggerBlocks
+
+Done (V3.1.0 b14 IL):
+- block-shapes.md 7.3: TriggerManager.TriggerBlocks block overload (IL=17)
+  HasAnyTriggers gate + PrefabDataDict[instance].Trigger; TriggerVolume
+  overload (IL=27) same gate + null-instance 'Cannot do TriggerBlocks...'
+  warning.
+
 ## 2026-08-08 - tier-C: BlockTrigger registry accessors
 
 Done (V3.1.0 b14 IL):

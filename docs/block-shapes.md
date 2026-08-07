@@ -281,6 +281,14 @@ flowchart TD
   BC --> UB["UpdateBlocks -> World.SetBlocksRPC<br/>(committed + replicated)"]
 ```
 
+**`TriggerManager.TriggerBlocks` dispatch (V3.1.0 b14):** the block-trigger
+overload (IL=17) early-outs on `!trigger.HasAnyTriggers()`, then routes
+`PrefabDataDict[instance].Trigger(player, trigger)`. The `TriggerVolume`
+overload (IL=27) gates the same way, warns
+`Cannot do {0} for TriggerVolume at {1}. No prefab instance assigned` for a
+null instance, and otherwise routes
+`PrefabDataDict[instance].Trigger(player, volume)`.
+
 `BlockTrigger.OnTriggered(player, world, channel, changes, source)` is the
 receiver-side state machine:
 
@@ -375,6 +383,9 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** TriggerManager.TriggerBlocks dispatch (IL=17/27):
+  HasAnyTriggers gate + PrefabDataDict route; volume variant null-instance
+  warning.
 - **2026-08-07:** BlockTrigger registry accessors: AddBlockTrigger (IL=10)
   Set + isModified, GetBlockTriggers (IL=3), GetBlockTrigger (IL=9)
   TryGetValue.
