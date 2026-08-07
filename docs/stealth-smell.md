@@ -67,6 +67,12 @@ passive **88** via `EffectManager.GetValue` and accumulated into
 the accumulator reaches **360** (clamped), which is what makes
 `AIDirector.NotifyNoise` call `world.CheckSleeperVolumeNoise`.
 
+**`PlayerStealth.AddNoise(list, volume, ticks)` (IL=35)** keeps the event list
+sorted by **descending volume**: it walks until the first entry with volume
+`<=` the new event and inserts there (append when the new event is smallest).
+`CalcVolume` reads the head of this sorted list, so the loudest live events
+dominate the audible level.
+
 ---
 
 ## 3. Smell and attraction (state machine)
@@ -118,6 +124,8 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.AddNoise (IL=35): volume-descending insertion
+  into the event list - CalcVolume reads the head so loudest events dominate.
 - **2026-08-07:** PlayerStealth.NotifyNoise (IL=71): volume<=0 false, AddNoise
   duration*20 ticks, volume>=11 arms sleeperNoiseWaitTicks=20, >60 superlinear
   60+(v-60)^1.4, passive 88 scale, sleeperNoiseVolume >= 360 true (sleeper-wake

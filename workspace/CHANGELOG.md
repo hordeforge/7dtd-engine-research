@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PlayerStealth.AddNoise
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.AddNoise (IL=35) narrated in stealth-smell.md: volume-
+  descending insertion (first entry with volume <= new event, append when
+  smallest); CalcVolume reads the head so loudest live events dominate.
+
 ## 2026-08-08 - tier-C: PlayerStealth.NotifyNoise
 
 Done (V3.1.0 b14 IL):
