@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: instant eat + bundle open
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionEat.ExecuteInstantAction IL=179 (MinEvent
+  24 use start, Consume sip vs full decrement, MinEvent 29 +
+  UsedItem, CreateItem refund with UseJarRefund roll +
+  AddItem/ItemDropServer).
+- ItemActionOpenBundle.ExecuteInstantAction IL=493 (per CreateItem
+  entry with CreateItemCount[i] min-max roll, quality items forced
+  count 1 + MaxDurabilityModifier 1, AddItem/ItemDropServer grant).
 ## 2026-08-08 - tier-C: instant eat path
 
 Done (V3.1.0 b14 IL):
