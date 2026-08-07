@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.HasUIIcon
+
+Done (V3.1.0 b14 IL):
+- Entity.HasUIIcon (IL=13) narrated in map-objects.md: true when any of
+  mapIcon / trackerIcon / compassIcon (EntityClass config) is non-null - the
+  AddEntityToMap gate.
+
 ## 2026-08-08 - tier-C: World.worldToBlockPos
 
 Done (V3.1.0 b14 IL):

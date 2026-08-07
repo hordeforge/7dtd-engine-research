@@ -122,6 +122,10 @@ vehicles and drones away from the MapObject path entirely: they get a
 `NavObject`-driven tracking toggle tied to the `mapArea` XUi window, with the
 generic `MapObject` Entity fallback only for other icon-bearing entities.
 
+**`Entity.HasUIIcon()` (IL=13)** is that gate: true when any of the
+`mapIcon` / `trackerIcon` / `compassIcon` strings (from the `EntityClass`
+config) is non-null.
+
 ## 4. MapObjectManager (client-only in practice)
 
 - Storage: `List<DictionaryList<int, MapObject>>` with one bucket per enum
@@ -244,6 +248,8 @@ add/remove, override color, localization flag, entityId.
 
 ## Changelog
 
+- **2026-08-07:** Entity.HasUIIcon (IL=13): mapIcon/trackerIcon/compassIcon
+  non-null gate behind AddEntityToMap.
 - **2026-07-28:** NetPackageNavObject field list.
 
 - **2026-07-28:** MapMarkerRemove / POIWaypoint wire fields.
