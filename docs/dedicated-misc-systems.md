@@ -392,9 +392,13 @@ returns. `Sample()` (IL=6) is `InternalSample() * 4.6566128752458E-10`
 (2^-31) giving [0, 1); `PeekSample()` (IL=50) computes the same value without
 storing; `GetSampleForLargeRange()` (IL=22) draws twice (flipping the sign
 from the second draw's parity) and normalizes `(value + 2147483646) /
-4294967293` for the wide `Next(min, max)` range. A seeded `GameRandom`
-therefore reproduces sequences identical to `System.Random` with the same
-seed - deterministic and portable.
+4294967293` for the wide `Next(min, max)` range. Seeding is the .NET
+constructor verbatim (`SetSeed` IL=4 -> `InternalSetSeed` IL=118): `abs(seed)`
+with `int.MinValue` mapped to `int.MaxValue`, `mj = 161803398 - seed` into
+`SeedArray[55]`, `(21*i) % 55` index scramble with the `mk = mj - mk` walk, 5
+mixing passes over all 56 entries, then `inext = 0`, `inextp = 21`. A seeded
+`GameRandom` therefore reproduces sequences identical to `System.Random` with
+the same seed - deterministic and portable.
 
 ## Changelog
 

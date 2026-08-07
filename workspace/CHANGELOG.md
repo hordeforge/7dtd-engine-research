@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameRandom seeding
+
+Done (V3.1.0 b14 IL):
+- GameRandom.SetSeed (IL=4) -> InternalSetSeed (IL=118) narrated as the
+  .NET Random ctor verbatim: abs(seed) with int.MinValue -> int.MaxValue,
+  mj = 161803398 - seed into SeedArray[55], (21*i)%55 scramble with mk =
+  mj - mk walk, 5 mixing passes, inext = 0 / inextp = 21. Completes the
+  portability claim in dedicated-misc-systems.md.
+
 ## 2026-08-08 - tier-C: GameRandom algorithm
 
 Done (V3.1.0 b14 IL):
