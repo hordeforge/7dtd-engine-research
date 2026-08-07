@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EntityTrader OnUpdateLive + DropContent multi-bag
+
+Done (V3.1.0 b14 IL):
+- EntityTrader.OnUpdateLive IL=315 quest list, 10m bounds unload/greet, open-close.
+- DropContentInLootContainerServer multi-bag by loot container size, y+0.25.
+---
 ## 2026-08-07 — tier-C: GetLandClaimOwner self/ally/other + offline hours
 
 Done (V3.1.0 b14 IL):

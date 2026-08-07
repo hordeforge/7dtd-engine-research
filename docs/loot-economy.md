@@ -314,9 +314,12 @@ cap:** collect `EntityItem`s in the target chunk; if count &gt; **50**, sort by
 `EntityItemLifetimeComparer` and `MarkToUnload` oldest until ≤ 50.
 
 **`DropContentInLootContainerServer` (IL=104):** if empty and skip, ret; client
-forwards `NetPackageDropItemsContainer`; server creates `EntityLootContainer`
-from container entity class loot-list props, `SetContent` cloned stacks,
-`spawnById`, `SpawnEntityInWorld`.
+forwards `NetPackageDropItemsContainer`. Server: lift pos.y by **0.25**; resolve
+container entity class hash -> `PropLootList` -> `LootContainer.size` (slot
+capacity = x*y). While items remain: `CreateEntity` as `EntityLootContainer`,
+optional position `increment` between bags, `SetContent(Clone slice)`,
+`spawnById = droppedByID`, `SpawnEntityInWorld`. Multiple bags when inventory
+exceeds one container size.
 
 Death path calls these via `dropItemOnDeath` ([combat-damage.md](combat-damage.md)
 §3.1).
@@ -443,11 +446,22 @@ background timer.
 `traderHoursPreset == 5` it uses GameStats int 58 as a target day plus
 `WorldTimeToDays`, and when `UseOpenHours` is false, `preset == 6`, or
 `World.SandboxUseTraderArea` is 0 it returns always-open.
-`EntityTrader::OnUpdateLive` (531757-531898) runs the cycle server-side: at
-`IsWarningTime` it fires `TraderArea::HandleWarning` once (a `warningPlayed`
-latch), then compares `!TraderInfo.IsOpen` against `TraderArea.IsClosed` and calls
-`TraderArea::SetClosed(world, closed, trader, playSound)`, force-unlocking anyone
-holding a lock via `LockManager::ForceUnlockLockTarget` when it closes.
+`EntityTrader.OnUpdateLive` (**IL=315**) ordered server path (after base
+`EntityAlive.OnUpdateLive`):
+
+1. If `questDictionary` empty: `PopulateQuestList()`.
+2. Client collider/look-at presentation (skip relevance on pure dedi).
+3. Server: bind `traderArea` via `World.GetTraderAreaAt` if missing.
+4. Throttle: when `updateTime` elapsed, set next to `time + 3` (or +1 after fire);
+   inside throttle window: `GetEntitiesInBounds` radius **10** around trader.
+   - Non-player entities with certain class flags: `MarkToUnload` (clear strays
+     in trader protect volume).
+   - Players `CanSee`: manage `GreetingDictionary` with
+     `traderTalkDelayTime`; `PlayVoiceSetEntry` + `SendAnimReaction(1)`.
+5. Open/close: at `IsWarningTime` fire `TraderArea.HandleWarning` once
+   (`warningPlayed` latch); when `!IsOpen` vs `TraderArea.IsClosed` differ,
+   `SetClosed`; on close, `LockManager.ForceUnlockLockTarget` if locked;
+   optional open/close sound via `ShouldPlayOpenSound` / `ShouldPlayCloseSound`.
 
 **`NetPackageWorldAreas` (847341-847513)** is the ToClient package that ships
 TraderAreas: `byte cVersion=1`, `i16 count`, then `TraderArea::Write` each;
@@ -518,6 +532,9 @@ and the locked-slot bit array.
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
 ## Changelog
+
+- **2026-08-07:** EntityTrader.OnUpdateLive IL=315 (quest populate, 10 m bounds
+  unload/greet, open-close/warning/lock unlock); DropContent multi-bag slice.
 
 - **2026-08-07:** ItemDropServer IL=268 (50 EntityItem/chunk cap);
   DropContentInLootContainerServer IL=104.

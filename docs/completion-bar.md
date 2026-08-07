@@ -161,6 +161,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | UAI all 5 concrete task Start+Update | entity-ai §5.3 |
 | More MinEvent leaves (exp/loot/rage/jam) | minevents §7.1 |
 | GetLandClaimOwner self/ally/other + offline | server-lifecycle §3.1 |
+| EntityTrader.OnUpdateLive open/greet/unload | loot-economy |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
