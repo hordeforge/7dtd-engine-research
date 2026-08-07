@@ -46,6 +46,16 @@ Sources that build a `DamageSource`: melee/ranged item actions
    **not** `Internal` (1): if `damageSourceTimeouts[source]` exists and
    `GameTimer.ticks - last < **30**` return **-1**; else stamp ticks.
 3. Resolve attacker; **FriendlyFireCheck** false → **-1**.
+   `EntityPlayer.FriendlyFireCheck(other)` (IL=77): self -> true; `GameStats[23]`
+   0 -> false, 1 -> `other.IsAlly(self) || (party != null && party.MemberList
+   .Contains(other))`, 2 -> the inverse (only non-allies pass, PvP).
+   `GetBreadcrumbPos(distance)` (IL=27) samples the 32-entry breadcrumb ring
+   `breadcrumbs[(breadcrumbIndex + (d >= 31 ? 1 : -d)) & 31]` with
+   `d = (int)(distance + 0.5)`; `GetFallingSavePosition()` (IL=161) returns the
+   `lastVehiclePositionOnDismount` within the teleport threshold, else finds the
+   nearest non-empty chunk in `ChunkObserver.chunksAround` (fallthrough-world
+   recovery, `[FELLTHROUGHWORLD]` logs) and snaps x/z to it with
+   `y = GetTerrainHeight + 0.5`.
 4. If damage type is **not** 6 and attacker shares `entityFlags & 2` with victim
    → **-1** (same-faction-ish block).
 5. God mode → **-1**. (Dead still continues for some bonus paths.)
