@@ -572,6 +572,13 @@ Wire mirror struct: `EntityNetworkHoldingData` carries `m_HoldingItemStack` +
 `m_HoldingItemIndex` for the S2C `NetPackageHoldingItem` body (same fields as
 [protocol-packages.md](protocol-packages.md) §5.3).
 
+**`updateHoldingItem()` (IL=172)** is the switch body: with the same value and
+index as last drawn it runs `holdingItem.OnHoldingReset(data)` and returns
+(the re-arm path); otherwise it marks `bPlayerStatsChanged = !isEntityRemote`,
+points `MinEventContext` at the old value/transform, runs
+`lastdrawnHoldingItem.StopHolding(data, transform)`, then starts the new item
+and updates the last-drawn value/index.
+
 `DecHoldingItem` is the server-authoritative depletion: it lowers the held
 `ItemStack.count`, and when the stack hits zero it clears the slot and quick-swaps
 to the best remaining slot (`GetBestQuickSwapSlot`) so a used-up stack of thrown
