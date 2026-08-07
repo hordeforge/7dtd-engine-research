@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockValue.ToItemValue
+
+Done (V3.1.0 b14 IL):
+- BlockValue.ToItemValue (IL=6) narrated in blocks.md section 2: new
+  ItemValue with type copied from the BlockValue type field - the block to
+  item conversion (same id space, Block.ItemsStartHere offset aside).
+
 ## 2026-08-08 - tier-C: Entity.IsSpawned
 
 Done (V3.1.0 b14 IL):

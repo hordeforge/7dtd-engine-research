@@ -80,6 +80,10 @@ over `rawData`, so the layout is unambiguous:
 as a `u32` then `damage` as a `u16`, so a `BlockValue` on disk or wire is **6
 bytes**, not 4. `Read` mirrors it (`ReadUInt32` then `ReadUInt16`).
 
+**`BlockValue.ToItemValue()` (IL=6)** converts to the item domain:
+`new ItemValue { type = this.type }` (the block id becomes the item type id -
+the same id space, `Block.ItemsStartHere` offset aside).
+
 ```mermaid
 flowchart LR
   RW["rawData : u32"] --> B0["bits 0-15<br/>type (id)"]
@@ -483,6 +487,8 @@ damage.
 
 ## Changelog
 
+- **2026-08-07:** BlockValue.ToItemValue (IL=6): type copy to ItemValue - the
+  block-to-item conversion.
 - **2026-08-07:** SetBlock entry chain: World.SetBlock (IL=9) -> ChunkCluster
   SetBlock IL=13/48 dispatch on BlockValueRefType (BlockPosition body vs
   SetProp), SetBlockValue (IL=32), SetBlockRaw (IL=25) GetChunkSync guard.
