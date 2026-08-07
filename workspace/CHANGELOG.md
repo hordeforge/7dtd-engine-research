@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: air drop flight logic + SetStorm
+
+Done (V3.1.0 b14 IL):
+- aidirector.md: AIAirDrop.Tick IL=193 wait-for-chunks then per-
+  path plane + staggered crate spawns; CreateFlightPaths IL=355
+  (MakePlayerClusters 30 m, CalcSupplyDropMetrics 1-4 planes,
+  crateY min(player.y+180, 276), FindSafePoint >= 600 m from
+  players, ClampToMapExtents); SpawnPlane IL=74 supplyPlane entity
+  + SetDirectionToFly (20*(len/120+10) ticks); EntitySupplyPlane
+  SetDirectionToFly IL=12 (motion = dir*6, unreplicated) +
+  OnUpdatePosition IL=49 (ticksToFly countdown -> MarkToUnload).
+- weather-environment.md: WeatherManager.SetStorm IL=32 per-biome
+  stormWorldTime/stormDuration stamp for named biome or all.
 ## 2026-08-08 - tier-C: air drop flight logic
 
 Done (V3.1.0 b14 IL):
