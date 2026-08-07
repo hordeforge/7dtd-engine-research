@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: biome oracle query
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 1: World.GetBiomeInWorld (IL=23) GetBiomeAt, null without
+  cache/provider.
+
 ## 2026-08-08 - tier-C: slot action lookups
 
 Done (V3.1.0 b14 IL):
