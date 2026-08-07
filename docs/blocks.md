@@ -258,6 +258,67 @@ bv)` instead. `SetBlockRaw(worldPos, bv)` (IL=25) is the low-level path:
 `GetChunkSync(toChunkXZ(x), toChunkXZ(z))`, null chunk → no-op, else
 `chunk.SetBlockRaw(toBlockXZ(x), y, toBlockXZ(z), bv)`.
 
+### 4.1 The batch commit machine (`SetBlocksRPC` -> `ChangeBlocks`)
+
+`World.SetBlocksRPC(changes)` (IL=6) is a one-line delegator:
+`gameManager.SetBlocksRPC(changes, null)`. `GameManager.SetBlocksRPC(changes,
+persistentPlayerId)` (IL=29) runs the authoritative `ChangeBlocks(...)` first,
+then builds `NetPackageSetBlock.Setup(persistentLocalPlayer, changes,
+dedicated ? -1 : myPlayerId)` and, on the server, broadcasts it to clients
+(`SetBlocksOnClients(-1, pkg)`); a non-server caller sends it to the server
+instead (the client request path).
+
+**`GameManager.ChangeBlocks(persistentPlayerId, changes)` (IL=530)** is the
+batch commit machine (the destination of `PrefabTriggerData.UpdateBlocks`,
+`QuestEventManager.UpdateBlocks`, and every `World.SetBlocksRPC` caller):
+
+1. **Lock:** the whole pass runs under a `Monitor` on `ccChanged`
+   (`List<ChunkCluster>`).
+2. **Acting player:** a null id resolves to the local player
+   (`persistentLocalPlayer` + `myEntityPlayerLocal`); otherwise
+   `PersistentPlayerList.GetPlayerData(id)` and, when the data has a live
+   `EntityId`, `world.GetEntity(EntityId)` (used by the sleeping-bag branch
+   below).
+3. **Per `BlockChangeInfo`:**
+   - The owning `ChunkCluster` (`World.ChunkCache`) is added to `ccChanged`
+     once and gets `ChunkPosNeedsRegeneration_DelayedStart()`.
+   - **Density derivation:** with no explicit `bChangeDensity`, an air block
+     in a negative-density cell is set to `MarchingCubes.DensityAir` and a
+     terrain-shape block in a non-negative cell to `MarchingCubes.DensityTerrain`;
+     an unchanged value cancels the density change.
+   - **`bChangeDamage` guard:** a damage-only change whose old block type
+     differs from the new type is skipped entirely.
+   - **Ref type:** a `BlockValueRefType` value ref goes through
+     `ChunkCluster.SetBlockValue(ref, bv)` directly (no mesh/light fallout);
+     a position ref runs the full path.
+   - **Position path:** resolve the `Chunk`; when the new block `IsTerrain()`
+     and `y >= chunk.GetHeight(x, z)` the engine calls `SetTopSoilBroken` on
+     the chunk and, for border cells, the 1-wide edge neighbor chunks
+     (x/z == 0 or 15), then `World.UncullChunk(chunk)`. The old `TileEntity`
+     (non-child new block) is captured, and
+     `ChunkCluster.SetBlock(ref, bChangeBlockValue, blockValue,
+     bChangeDensity, density, true, bUpdateLight, bForceDensity, false,
+     changedByEntityId)` runs with the old value returned.
+   - **TE lifecycle (server):** a replaced TE gets
+     `oldTE.ReplacedBy(oldBV, newBV, newTE)`; a new air block runs
+     `Chunk.RemoveTileEntityAt<TileEntity>`; a non-air swap runs
+     `newTE.UpgradeDowngradeFrom(oldTE)`; a locked old TE is force-unlocked
+     (`LockManager.ForceUnlockLockTarget`).
+   - **Triggers and quests:** a new air block runs `Chunk.RemoveBlockTrigger`;
+     a type change fires `QuestEventManager.BlockChanged(oldBlock, newBlock,
+     pos)`; sleeping-bag edges update the acting player's spawn point
+     (`EntityAlive.SpawnPoints.Set(pos)` when placed;
+     `NavObjectManager.UnRegisterNavObjectByOwnerEntity("sleeping_bag")` +
+     `PersistentPlayerList.SpawnPointRemoved(pos)` when removed) and flag a
+     player-data save.
+   - **Texture:** `bChangeTexture` applies `SetTextureFullArray(ref,
+     textureFull)`; otherwise an old block with `CanBlocksReplace` clears the
+     texture (`new TextureFullArray(0)`).
+4. **Tail:** any sleeping-bag change on the server triggers
+   `PersistentPlayerList.SavePersistentPlayerData()`; every newly tracked
+   cluster gets `ChunkPosNeedsRegeneration_DelayedStop()` and is removed from
+   `ccChanged`.
+
 ---
 
 ## 5. Damage, upgrade, and downgrade lifecycle
@@ -555,6 +616,14 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** Batch commit machine (4.1): World.SetBlocksRPC IL=6
+  delegate; GameManager.SetBlocksRPC IL=29 ChangeBlocks + NetPackageSetBlock
+  broadcast/client request; GameManager.ChangeBlocks IL=530 (ccChanged lock,
+  acting-player resolve, density derivation DensityAir/Terrain, bChangeDamage
+  type guard, SetBlockValue vs position path, SetTopSoilBroken neighbor
+  chunks + UncullChunk, TE ReplacedBy/RemoveTileEntityAt/UpgradeDowngradeFrom,
+  LockManager force-unlock, RemoveBlockTrigger, QuestEventManager.BlockChanged,
+  sleeping-bag spawn-point edges + player-data save, texture commit/clear).
 - **2026-08-07:** Block.ToBlockValue (IL=8) blockID -> BlockValue;
   BlockLiquidv2.WaterDataToBlockValue (IL=28) mass > 195 -> water block
   type 240 meta2/rotation, else Air.
