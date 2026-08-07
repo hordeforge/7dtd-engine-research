@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: ECD builder, chunk observer attach
+
+Done (V3.1.0 b14 IL):
+- EntityFactory.SetupEntityCreationData IL=31/36/12/10: ECD fill (itemStack,
+  blockValues/textureFullArrays, lifetime, belongsPlayerId, spawnById/Name);
+  defaults None/1/float.MaxValue/-1; (et,pos) overloads nextEntityID++.
+  CreateEntity(ecd) = Start(true)+CompleteEntity; async = Start(false).
+- ChunkManager.AddChunkObserver IL=15: ctor + m_ObservedEntities + 
+  isInternalForceUpdate = true.
+- PersistentPlayerList.GetPlayerDataFromEntityID IL=10: EntityToPlayerMap.
+---
 ## 2026-08-07 — tier-C: spawn sampler, walk type, view distance
 
 Done (V3.1.0 b14 IL):

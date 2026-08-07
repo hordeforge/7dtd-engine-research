@@ -119,6 +119,12 @@ re-push overwrite chunks. There is no side-thread `write` of the package body
 outside the normal NetPackage serialize path (Xref `write` = 0 direct callers;
 serialization is virtual dispatch from the connection writer).
 
+**`ChunkManager.AddChunkObserver(pos, buildVisualMesh, viewDim,
+entityIdToSendChunksTo)` (IL=15):** `new ChunkObserver(...)`, push onto
+`m_ObservedEntities`, set `isInternalForceUpdate = true` (forces one full stream
+pass for the new observer), return it. Attached at player join
+([server-lifecycle.md](server-lifecycle.md) §3) and per stream-target.
+
 ### Chunk dirty / save invalidation (blob-cache input)
 
 **`Chunk.get_NeedsSaving` IL=20** returns true if any of:

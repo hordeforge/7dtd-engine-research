@@ -380,8 +380,9 @@ useSquareRadius)`.
 
 1. `pos = zero`; `range = maxRange - minRange`; `range <= 0` → false.
 2. If `checkLandClaim`: `playerData =
-   persistentPlayers.GetPlayerDataFromEntityID(forPlayerEntityId)` (null when the
-   list is missing).
+   persistentPlayers.GetPlayerDataFromEntityID(forPlayerEntityId)` (IL=10:
+   `EntityToPlayerMap.TryGetValue`; null when the list is missing or id
+   unmapped).
 3. Try up to `retryCount` times:
    - **Square mode:** `dx, dz = rand.RandomRange(-minRange, minRange+1)` (uniform
      in `[-minRange, minRange]`), re-rolled while `|dx|` or `|dz|` ≥ `maxRange`
@@ -432,6 +433,18 @@ Client place requests arrive as `NetPackageRequestToSpawnEntity` →
 persistent record, then `EntityFactory.CreateEntity` +
 `World.SpawnEntityInWorld`). See [protocol-packages.md](protocol-packages.md)
 section 5.0.
+
+**`EntityFactory.SetupEntityCreationData` (ECD builder):** the rich overload
+(IL=31) fills `entityClass`, `id`, `itemStack = ItemStack(itemValue, count)`,
+`pos`/`rot`, `lifetime`, `belongsPlayerId`, `spawnById`, `spawnByName`. The
+falling-block overload (IL=36) additionally fills `blockValues` /
+`textureFullArrays` and drops `itemValue` (count lands on `itemStack.count`).
+The `(et, id, pos, rot)` convenience (IL=12) passes `ItemValue.None`, count
+**1**, lifetime `float.MaxValue`, player/spawn id **-1**, empty spawn name. The
+`(et, pos[, rot])` variants (IL=10) allocate `EntityFactory.nextEntityID++`
+before delegating. `CreateEntity(ecd)` (IL=7) is a thin wrapper:
+`CreateEntityOperation.Start(ecd, true)` + `CompleteEntity()` (async variant
+starts with `false`; the operation is polled by `TryComplete`).
 
 `World.SpawnEntityInWorld` (**IL=178**) order:
 
