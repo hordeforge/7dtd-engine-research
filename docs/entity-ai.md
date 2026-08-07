@@ -1441,6 +1441,34 @@ success `destroyRefreshTicks=**500**` and store pos.
 HitInfo2; if HitInfo2 remaining &lt; HitInfo remaining × **0.7**, copy HitInfo2
 over HitInfo (prefer weaker block).
 
+**`Push(blocker)` (IL=40):** damage type **3** toward blocker; Strength =
+`(int)(MassKg * 0.05)`; StunDuration 0; `blocker.DoRagdoll(damageResponse)`
+(mass shove, not weapon Attack).
+
+**`ResetStuckCheck` (IL=22):** clear `SideStepAngle`, `moveToTicks`,
+`moveToFailCnt`; recompute `moveToDistance` from temp or normal move dist.
+
+**`IsMoveToAbove` (IL=14):** true if `moveToPos.y - position.y > **1.9**`.
+
+**`SetFocusPos(pos)` (IL=7):** store `focusPos`; `focusTicks = **5**`.
+
+**`EntityAlive.SetSwimValues(durationTicks, motion)` (IL=15):**
+`jumpSwimDurationTicks = Clamp(durationTicks/swimSpeed - 6, 3, 20)`;
+store `jumpSwimMotion`.
+
+**`CheckAreaBlocked` (IL=130):** clear flags; head xz at feet y; dir to moveTo;
+sample edge offsets from `checkEdgeXs` (3 columns) stepping height down from
+`ccHeight-0.125` by **0.25** until ≤ **0.225**; each sample `CheckBlocked` no
+slope; stop when any `BlockedFlags`.
+
+**`CalcObstacleSideStep` (IL=146):** if dy ≥ **0.6** or planar dist ≤
+`ccRadius+0.05` → 0. Probe arcs via `CalcObstacleSideStepArc` at ±8..20 then
+±48..20; return preferred side-step angle (or 0 if none).
+
+**`CheckWorldBlocked` (IL=300 high-level):** multi-height `CheckBlocked` fan
+around head/moveTo with HitInfo/HitInfo2; `SelectBestHit`; may set temp move
+when blocked.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
@@ -2157,6 +2185,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   CheckBlockedUp flags=4 delay 12.
 - **2026-08-07:** CheckEntityBlocked / CheckForDoorAndOpen / AttackPush /
   StartSwimStroke / FindDestroyPos / SelectBestHit.
+- **2026-08-07:** Push MassKg*0.05 ragdoll; CheckAreaBlocked edges; side-step
+  arcs; SetSwimValues clamp 3..20; IsMoveToAbove 1.9.
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 

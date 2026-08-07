@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: MoveHelper Push, area block, side-step
+
+Done (V3.1.0 b14 IL):
+- Push: MassKg*0.05 strength ragdoll type 3.
+- CheckAreaBlocked edge fan; CalcObstacleSideStep arcs.
+- SetSwimValues duration clamp 3..20; IsMoveToAbove 1.9; focusTicks 5.
+---
 ## 2026-08-07 — tier-C: MoveHelper entity block, door open, attack push
 
 Done (V3.1.0 b14 IL):
