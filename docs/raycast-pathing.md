@@ -90,6 +90,15 @@ hierarchy": one block node, quarter-block children, `childAirBlocks` /
 partially-occupied blocks (poles, plates, bars) that a whole-block grid would
 reject.
 
+**Hit-tag classification:** `GameUtils.IsBlockOrTerrain(tag)` (IL=22) accepts
+`B_Mesh`, `T_Mesh`, `T_Mesh_B`, `T_Block`, `T_Deco` (a `Component` overload
+uses `CompareTag`). `GetDirByNormal(normal)` (IL=11 + IL=22) normalizes,
+rounds to integers, and indexes `NeighborsEightWay` (the `DirEightWay` list,
+-1 on no match). `GetClosestDirection(rotation, limitTo90)` (IL=74) reduces
+the angle modulo 360 and quantizes: 90-limited to the four even directions
+(0/2/4/6 at the 315/45/135/225-degree boundaries), full range to all eight
+(22.5-degree half-steps).
+
 ### Physics masks
 
 All occupancy tests are Unity `Physics.Raycast` calls, not block-store reads

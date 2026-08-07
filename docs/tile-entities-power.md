@@ -62,6 +62,8 @@ the dict: each axis becomes `(coord + 32768) & 0xFFFF` (a 16-bit field with a
 32768 offset so negative coordinates survive), combined as
 `x << 32 | y << 16 | z` - the same pack used on the wire in
 [`chunk-providers.md`](chunk-providers.md) `packedPos:u64`.
+`GameUtils.UInt64ToVector3i(v)` (IL=27) is the exact inverse: each axis is
+`((v >> shift) & 0xFFFF) - 32768`.
 
 **TE transfer on block change (`GameManager.ChangeBlocks`, IL=530):** after
 `SetBlock`, the engine compares the pre-change TE (`oldTE`, read before the
