@@ -6,6 +6,20 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemStack/ItemValue leaves
+
+Done (V3.1.0 b14 IL):
+- items.md 2: ItemStack.ReadDelta (IL=15) / WriteDelta (IL=23) delta wire pair
+  (full ItemValue body + i16 count delta, last.count synced on write);
+  ItemValue.ReadOrNull (IL=13) marker-first null sentinel.
+- items.md 2: StackTransferCount (IL=21) partial transfer count;
+  EqualsForMerging (IL=47) merge gate (RepairType CombineOnly/Both, same
+  durability extreme, equal Stats); CalcModSlotCount (IL=29) ModSlots passive
+  from Quality-1 clamped 255.
+- items.md 7: AdjustForSandboxOptions (ItemValue IL=7 / ItemStack IL=8)
+  strips DurabilityModifier meta when perma-degradation off (DegradeOnDeathType
+  MaxDurability/Both or ItemMaxDegrationAmount > 0).
+
 ## 2026-08-08 - tier-C: dismount recall + fall rescue
 
 Done (V3.1.0 b14 IL):

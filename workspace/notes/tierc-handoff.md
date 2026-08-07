@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `a5da84d` dismount recall + fall rescue |
-| Commits since dry-run `3b61d9c` | ~221 |
+| HEAD (at handoff write) | `c545ff3` ItemStack/ItemValue leaves |
+| Commits since dry-run `3b61d9c` | ~222 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
