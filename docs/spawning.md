@@ -154,6 +154,11 @@ zero rotation; the full overloads (IL=31/36) copy `entityClass`, `id`, `pos`,
 allocation: an `ecd.id == -1` grabs `nextEntityID++`, otherwise
 `nextEntityID = max(nextEntityID, ecd.id + 1)`, then it builds the operation
 and runs `LoadAssets(isSync)`.
+`CreateEntity(ecd)` (IL=7) is the **sync** counterpart:
+`Start(ecd, true)` then `CompleteEntity()`, returning `op.entity`; the
+convenience overload (IL=17) allocates `nextEntityID++` and builds the
+`EntityCreationData` via `SetupEntityCreationData(et, id, ItemValue.None, 1,
+pos, rot, float.MaxValue, -1, spawnById, spawnByName)`.
 
 **`Chunk.SpawnEntityAsync(world, ecd, onEntityCreated)` (IL=40):** refuses to
 spawn onto a chunk that is mid-unload - the volatile `InProgressUnloading` flag
