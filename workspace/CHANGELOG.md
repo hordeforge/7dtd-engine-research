@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: getMaxStabilityAround and vehicle attach
+
+Done (V3.1.0 b14 IL):
+- getMaxStabilityAround: AllDirections, StabilitySupport max, bFromDownwards.
+- ChangeStability recursive stab-1 with non-support cap 1.
+- TurretTracker.Update save every 120s; Attach/Detach seat pose and driver flags.
+---
 ## 2026-08-07 — tier-C: Stability queueStabilityAvail cap 200
 
 Done (V3.1.0 b14 IL):

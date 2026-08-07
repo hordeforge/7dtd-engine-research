@@ -147,10 +147,27 @@ decision. It runs a 25-iteration BFS from the position over
 - result `1 - mass / (downTotal * 1.01)` when `downTotal > 0`, `1` when no
   support was reached, `0` when `mass > downTotal`.
 
+### `getMaxStabilityAround` (IL=61) closed 2026-08-07
+
+1. `_bFromDownwards = false`; `maxStab = 0`; `downStab = 0`.
+2. For each of `Vector3i.AllDirections` (6):
+   - `s = world.GetStability(neighbor)`.
+   - If direction.y == **-1**: `downStab = s` (downward neighbor byte, even if 0).
+   - If `s > maxStab` **and** neighbor block has `StabilitySupport`: `maxStab = s`.
+3. `_bFromDownwards = (maxStab == downStab)`; return `maxStab`.
+
+So downward support wins the `bFromDownwards` flag only when the max support
+value equals the downward neighbor's stability (including when both are 0).
+Non-support blocks never contribute to the max even if they have high bytes.
+
+### `ChangeStability` (IL=111)
+
+Recursive: for each neighbor non-air/non-liquid/non-`StabilityIgnore`, candidate
+`stab-1`; if current stability already >= candidate, stop; non-support blocks
+cap candidate at 1; update stab0 set; `SetStability`; recurse.
+
 ## Remaining detail to pin down before implementing
 
-- `ChannelCalculator::getMaxStabilityAround` (61 IL) exact 6-neighbor ordering
-  and the `bFromDownwards` rule.
 - `StabilityInitializer::unspreadHorizontal` / `clearHorizontal` / `clearDown`
   exact stop conditions and the re-spread entry points.
 - `EntityFallingBlock::OnUpdateEntity` / `OnContactEvent` landing: which position
@@ -170,6 +187,8 @@ channel today; the plane can be recomputed on load with
 
 ## Changelog
 
+- **2026-08-07:** getMaxStabilityAround IL=61 (AllDirections, StabilitySupport
+  max, bFromDownwards = max==down); ChangeStability recurse stab-1.
 - **2026-08-07:** BlockPlacedAt / BlockRemovedAt `queueStabilityAvail` hard cap
   **200**; placement always channels then optional enqueue when not remote.
 - 2026-08-06: derived plane seed/spread/removal/fall paths from

@@ -182,6 +182,16 @@ stateDiagram-v2
   Parked --> [*]: removed / destroyed
 ```
 
+`AttachEntityToSelf` (**IL=100**): base attach; `SetVehiclePoseMode(GetSeatPose)`;
+rider layer **24**; disable character controller; seat IK targets;
+`isInteractionLocked = (free seats == 0)` and toggle native collider; seat 0
+sets `hasDriver`, `Vehicle.SetColors`, `FireEvent(0)`, `SetVehicleDriven`,
+`TriggerUpdateEffects`; local player inserts vehicle action set + CameraInit.
+
+`DetachEntity` (**IL=157**): cancel delayed attach; pose -1; remove IK; restore
+model/layers; re-enable controller; remove vehicle actions; `DriverRemoved` if
+driver; base detach; unlock interaction when free seats return.
+
 `AttachEntityToSelf(entity, slot)` sets the rider's vehicle pose
 (`SetVehiclePoseMode`), moves it to layer 24, **disables the rider's
 `CharacterController`**, binds IK targets from `Vehicle.GetIKTargets(slot)`, and
@@ -285,6 +295,12 @@ decisions.
 Both turret families put the aim helper (`AutoTurretYawLerp` /
 `AutoTurretPitchLerp`) on every machine but keep **targeting and damage on the
 server**.
+
+### 6.0 `TurretTracker.Update` (IL=45)
+
+Server-only; requires world + players + game started. Decrements `saveTime` by
+`deltaTime`; when ≤ 0 and prior save thread terminated (or null), reset
+`saveTime = **120**` seconds and `Save()` (periodic `turrets.dat`, no streaming).
 
 ### 6.1 EntityTurret (deployed junk turret)
 
@@ -405,4 +421,6 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-07:** TurretTracker save every 120 s; AttachEntityToSelf / DetachEntity
+  seat pose, layer 24, hasDriver, local action set.
 - **2026-07-23:** Initial reversal of the vehicle / drone / turret subsystem: three server-gated registries, the chunk / owner streaming loop, per-player waypoint push, client-authoritative vehicle physics vs server-authoritative drone and turret behaviour, mount / drive / dismount, drone state machine, and both turret fire-controller families, with state-machine diagrams.

@@ -174,6 +174,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | updateTasks freeze + GroupFallingBlocks | entity-ai §5.1b / §8 |
 | FallingBlock crush damage + land drops | entity-ai §8 |
 | Stability queueStabilityAvail cap 200 | stability.md |
+| getMaxStabilityAround + ChangeStability | stability.md |
+| TurretTracker 120s save; vehicle attach | vehicles-drones-turrets |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
