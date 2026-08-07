@@ -104,10 +104,14 @@ Closed in recent sessions (still optional, not required for A+B):
 | NetPackageChunk Process overwrite/add | protocol-packages §3.1 |
 | TEFeature composite wire tails | tile-entities-power §4.7 |
 | More MinEvent action leaves | minevents §7.1 |
+| DamageEntity IL=236 gate order | combat-damage §2 |
+| UAI Move/Wander/Attack task leaves | entity-ai §5.3 |
+| OnUpdateTick order re-pin | loop §3.2 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves
-remain optional depth. Promote only when a clone or optim lever needs the behaviour.
+beyond Move/Wander/Attack remain optional depth. Promote only when a clone or
+optim lever needs the behaviour.
 
 ---
 

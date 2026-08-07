@@ -38,11 +38,23 @@ Sources that build a `DamageSource`: melee/ranged item actions
 
 ## 2. Damage application (state machine)
 
-`EntityAlive.DamageEntity(damageSource, strength, criticalHit, impulseScale)` is
-the server apply. It early-outs if already dead, mitigates by armor when
-`AffectedByArmor` (damaging the equipment slot, `ArmorDamage`), applies buff /
-passive modifiers, subtracts from `Health` ([entity-stats.md](entity-stats.md)),
-and runs the response (pain, crit, dismember, stun) before the death check.
+`EntityAlive.DamageEntity(damageSource, strength, criticalHit, impulseScale)`
+(**IL=236**) is the server apply. Ordered gates from live IL:
+
+1. Optional zombie limb cleanup on dismember types.
+2. **Consecutive-damage ignore:** if `IsIgnoreConsecutiveDamages` and same
+   `EnumDamageSource` still inside timeout window in `damageSourceTimeouts`
+   (`GameTimer.ticks`), return 0.
+3. Resolve attacker entity; **FriendlyFireCheck** may zero damage.
+4. God mode (`IsGodMode`) or **already dead** -> return.
+5. Passive/passive multipliers via `EffectManager.GetValue` on attacking item;
+   may set `DamageSource.DamageMultiplier`; accumulate resistance.
+6. Core apply: `damageEntityLocal(...)` builds `DamageResponse`.
+7. If not remote world: emit `NetPackageDamageEntity.Setup(entityId, dr)` for
+   observers (wire §6.11).
+
+Armor mitigation / equipment slot damage / health subtract live inside
+`damageEntityLocal` + response path ([entity-stats.md](entity-stats.md)).
 
 ```mermaid
 stateDiagram-v2
@@ -155,6 +167,8 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
+  dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs
   (damageTyp 15 discard; ambient src0 + typ 1/25 + attacker -1 discard).
 - **2026-07-28:** Wire pointer to protocol-packages 6.11; ProcessPackage apply entry.

@@ -106,6 +106,7 @@ arrives. Player state lives in a per-player `PlayerDataFile` on disk;
 stateDiagram-v2
   [*] --> Connecting
   Connecting --> Authenticated: PlayerLogin accepted (platform-auth)
+  note right of Authenticated: PlayerLoginRPC logs IP then AuthorizationManager.Authorize (IL=20)
   Authenticated --> LoadData: PlayerDataFile.Load(dir, playerName)
   LoadData --> DataLoaded: file ok
   LoadData --> BackupOrNew: primary load fails -> backup, else fresh profile

@@ -169,11 +169,19 @@ stateDiagram-v2
 
 ### 3.2 World.OnUpdateTick (189 IL)
 
-**Always:** chunk callbacks, WorldEventUpdateTime, **WaterSplashCubes**, **DecoManager.UpdateTick**, MultiBlock MainThreadUpdate, DynamicMusic.Conductor (non-editor), POI uncull.
+**Always (order from IL):** `updateChunkAddedRemovedCallbacks` ->
+`WorldEventUpdateTime` -> `WaterSplashCubes.Update` -> `DecoManager.UpdateTick`
+-> `MultiBlockManager.MainThreadUpdate` -> (non-editor) DynamicMusic.Conductor
+-> `checkPOIUnculling` / `updateChunksToUncull`.
 
 **If !IsServer:** return.
 
-**Server:** `WorldBlockTicker`.Tick → (every **20** game ticks) area-master biome **SpawnUpdate** → `AIDirector`.Tick → TickSleeperVolumes.
+**Server:** `WorldBlockTicker.Tick(activeChunks, player, random)` -> walk active
+chunks: if `NeedsTicking`, `Chunk.UpdateTick` (TE path); area-master biome spawn
+data delay/clear + `biomeSpawnManager.Update` / `SpawnUpdate` when due ->
+(if dynamic spawn pref set) `dynamicSpawnManager.Update` -> (elsewhere in
+full-tick path) `AIDirector.Tick` / sleepers as documented in §3.1 and
+[spawning.md](spawning.md).
 
 ### 3.3 Dual entity simulation paths
 
@@ -438,6 +446,8 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-07:** OnUpdateTick IL order re-pin (chunk callbacks, splash, deco,
+  multiblock, biome spawn walk).
 - **2026-07-19:** Related docs table.
 - **2026-07-18:** §14 residuals-only; managed gaps closed into coverage hub + family docs.
 - **2026-07-18:** Origin + region type map partially closed via RealEarth surfaces dump; link new research docs.

@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DamageEntity gates, UAI tasks, OnUpdateTick order
+
+Done (V3.1.0 b14 IL):
+- combat-damage: DamageEntity IL=236 consecutive/FF/god/dead/mult/local apply.
+- entity-ai: UAITaskMoveToTarget/Wander/AttackTargetEntity Update leaves.
+- loop: OnUpdateTick always/server order re-pin.
+- server-lifecycle: PlayerLoginRPC -> AuthorizationManager.Authorize.
+---
 ## 2026-08-07 — tier-C: Chunk process + TEFeature wire + MinEvent leaves
 
 Done (V3.1.0 b14 IL):

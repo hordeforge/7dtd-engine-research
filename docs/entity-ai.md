@@ -231,6 +231,14 @@ So UAI is a **utility-scored action chooser** on a timer, then a **linear task
 list** inside the chosen action. Path requests still come from individual
 `UAITaskBase` Start/Update via `FindPath`, same ASP queue as EAI.
 
+**Representative task leaves (IL re-pin):**
+
+| Task | Update IL | Behaviour |
+|---|---:|---|
+| `UAITaskMoveToTarget` | 12 | base Update; if `navigator.noPathAndNotPlanningOne` -> `Stop` |
+| `UAITaskWander` | 12 | same no-path Stop pattern |
+| `UAITaskAttackTargetEntity` | 71 | convert ActionData.Target; `SetLookPosition` / `RotateTo` (30,30) if limbs; countdown `attackTimeout`; when 0, `Attack(false)` then `Attack(true)`, reload timeout from `GetAttackTimeoutTicks`, `Stop` |
+
 ---
 
 ## 6. Pathfinding (production path)
@@ -930,7 +938,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** UAIBase Update/chooseAction/updateAction IL (utility packages).
+- **2026-08-07:** UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase
+  Update/chooseAction/updateAction IL (utility packages).
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;
   Tick phase order (MinScript / UpdateSpawn / player touch / despawn timer).
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
