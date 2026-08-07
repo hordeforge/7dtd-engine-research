@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChunkCluster read hops
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md read surface extended: ChunkCluster.GetBlock (IL=21)
+  y >= 256 -> Air guard + null chunk -> Air; GetBlockEntities (IL=59)
+  IndexedBlocks[key] sweep across chunks with world-pos BlockEntityData
+  collection; GetBlockEntity (IL=12) null on missing chunk;
+  GetBlockFaceTexture (IL=23) 0 on missing chunk.
+
 ## 2026-08-08 - tier-C: block read surface
 
 Done (V3.1.0 b14 IL):

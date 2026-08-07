@@ -87,7 +87,13 @@ separate `Dictionary<Vector3i, object>` lookup (extra per-position data, not
 the voxel word). `WorldBiomes.GetBlockValueForName(name)` (IL=15) resolves an
 item/block by name via `ItemClass.GetItem` and throws
 `Block with name '...' not found!` on an empty result, else converts with
-`ToBlockValue`.
+`ToBlockValue`. The cluster hop: `ChunkCluster.GetBlock(x, y, z)` (IL=21)
+returns `Air` when `y >= 256` (out-of-height guard) or the chunk is missing,
+else `chunk.GetBlock(toBlockXZ(x), y, toBlockXZ(z))`; `GetBlockEntities(key)`
+(IL=59) sweeps every chunk's `IndexedBlocks[key]` positions and collects the
+`BlockEntityData` (world-coordinate) for each; `GetBlockEntity(pos)` (IL=12)
+returns null for a missing chunk; `GetBlockFaceTexture(pos, face, channel)`
+(IL=23) returns `0` for a missing chunk, else the per-face texture index.
 
 ---
 
@@ -683,6 +689,9 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** ChunkCluster read hops: GetBlock (IL=21) y>=256 Air guard +
+  null-chunk Air; GetBlockEntities (IL=59) IndexedBlocks sweep; GetBlockEntity
+  (IL=12) null on missing chunk; GetBlockFaceTexture (IL=23) 0 on missing chunk.
 - **2026-08-07:** Block read surface: World.GetBlock (IL=13) null-cache Air +
   ChunkCluster delegate, WorldBase.GetBlock IBlockAccess defaults (IL=4),
   GetBlockData dict (IL=10), WorldBiomes.GetBlockValueForName (IL=15) name
