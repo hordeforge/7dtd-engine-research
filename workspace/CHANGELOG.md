@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World availability/water queries
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 4.0b: IsPositionAvailable (IL=43) 3x3 chunk neighborhood
+  GetAvailable gate.
+- light-mesh-water.md 4.2: GetWaterPercent (IL=14) GetMassPercent, 0 on null
+  cache.
+
 ## 2026-08-08 - tier-C: ItemValue stat leaves
 
 Done (V3.1.0 b14 IL):
