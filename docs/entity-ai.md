@@ -239,13 +239,23 @@ see cache (called from OnUpdateLive before AI).
 `GetMaxViewAngle() * 0.5` (half-angle cone).
 
 **`CheckDespawn` (IL=198):** if `!CanUpdateEntity` and no closest player →
-`MarkToUnload`. Else if `canDespawn`: every **20** ticks sample closest player;
-Despawn if none within soft band / within **130** m band rules; also unload if
-closest player distSq &gt; **6400** (80 m) with max timer. Called from TickEntity
-when area not updateable and from OnUpdateLive paths.
+`MarkToUnload`. Else if `canDespawn`, every **20** ticks (`despawnDelayCounter`):
+
+| Condition | Action |
+|---|---|
+| No player within **130** m (any) but player within **20** m (flagged) | set `isDespawnWhenPlayerFar` |
+| `isDespawnWhenPlayerFar` | `Despawn()` |
+| Closest player distSq &gt; **6400** (80 m) | reset `ticksNoPlayerAdjacent`, arm far timer |
+| distSq &gt; **9216** (96 m) for **80** ticks | `Despawn()` |
+| distSq &gt; **2304** (48 m) for **60** ticks | `Despawn()` |
+| `ticksNoPlayerAdjacent` ≥ **1800** | `Despawn()` |
+| `ticksNoPlayerAdjacent` ≥ **100** and distSq &gt; **16384** (128 m) | `Despawn()` |
+
+Called from TickEntity when area not updateable and from OnUpdateLive paths.
 
 **`canDespawn` (IL=14):** false if client-controlled, or spawner source == **2**
-(Dynamic), or sleeping; else true (Biome/static AI may despawn).
+(Dynamic), or sleeping; else true. **`EntityEnemy.canDespawn` (IL=13):** horde
+zombies (`IsHordeZombie`) never despawn while any player is online; else base.
 
 **`Despawn` (IL=6):** `IsDespawned = true` then unload path.
 
@@ -1149,8 +1159,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** unloadEntity full teardown (NED/path/AIDirector/trackers);
-  MarkToUnload deathUpdateTime; OnEntityUnload helpers; EntityRemove Process.
+- **2026-08-07:** CheckDespawn distance/timer bands 48/80/96/128 m; EntityEnemy
+  horde canDespawn gate; unloadEntity teardown; MarkToUnload deathUpdateTime.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

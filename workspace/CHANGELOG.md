@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CheckDespawn distance/timer bands
+
+Done (V3.1.0 b14 IL):
+- CheckDespawn every 20 ticks: 130/20 m far-flag; bands 48/80/96/128 m with 60/80/100/1800 tick timers.
+- EntityEnemy.canDespawn: horde zombies stay while players online.
+---
 ## 2026-08-07 — tier-C: CalcSpawnPos and unloadEntity pipeline
 
 Done (V3.1.0 b14 IL):

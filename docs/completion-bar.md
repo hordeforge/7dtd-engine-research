@@ -217,6 +217,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | BuffClass.FireEvent canRun + StartSequence | buffs / game-events |
 | SeekTarget kill distances + OnEntityUnload | aidirector / entity-ai |
 | CalcSpawnPos + unloadEntity teardown pipeline | aidirector / entity-ai |
+| CheckDespawn band table + horde canDespawn | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
