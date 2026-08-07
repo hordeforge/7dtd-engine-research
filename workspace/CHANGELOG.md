@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockValueRef wire discriminant
+
+Done (V3.1.0 b14 IL):
+- blocks.md 4: BlockValueRef.Read IL=23 - u8 discriminant 0 None /
+  1 Block (StreamUtils.ReadVector3i) / 2 Prop (PropRef.Read),
+  else ArgumentOutOfRangeException; first field of every
+  BlockChangeInfo on the wire.
 ## 2026-08-08 - tier-C: ChunkBlockLayer storage + BlockChangeInfo wire
 
 Done (V3.1.0 b14 IL):
