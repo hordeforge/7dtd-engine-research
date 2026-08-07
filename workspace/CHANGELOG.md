@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: sequence target + props
+
+Done (V3.1.0 b14 IL):
+- game-events.md: CanPerform IL=44 AND of requirements+actions; SetupTarget IL=97 POIInstance resolution by TargetType; HasTarget IL=41 per-type
+- game-events.md: ParseProperties IL=70 knobs (allow_user_trigger, action_type/target_type enums, allow_while_dead, refund_inactivity, single_instance, category)
+
 ## 2026-08-08 - tier-C: GameEvent sequence machine
 
 Done (V3.1.0 b14 IL):
