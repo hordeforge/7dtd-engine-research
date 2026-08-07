@@ -125,6 +125,34 @@ entityIdToSendChunksTo)` (IL=15):** `new ChunkObserver(...)`, push onto
 pass for the new observer), return it. Attached at player join
 ([server-lifecycle.md](server-lifecycle.md) §3) and per stream-target.
 
+### 4.0a `SendChunksToClients` body (IL=216)
+
+Per observer (`m_ObservedEntities`; skip when `entityIdToSendChunksTo == -1`),
+using one shared `sendToClientPackages` list:
+
+1. **Removes:** for each key in `chunksToRemove`: queue
+   `NetPackageChunkRemove.Setup(key)`, drop the key from `chunksLoaded` and
+   `chunksToReload`. Clear `chunksToRemove`. Flush immediately:
+   `SendPackage(list, false, 0, entityIdToSendChunksTo, -1, null, 192, false)`,
+   clear list.
+2. **Loads:** walk `chunksToLoad.list` while the batch has fewer than **3**
+   packages: `GetChunkSync(key)`; skip while the chunk is missing or
+   `NeedsLightCalculation` (volatile read); else queue
+   `NetPackageChunk.Setup(chunk, false)` (first load), add the key to
+   `chunksLoaded`, remove from `chunksToLoad`. So at most **3 new chunks per
+   observer per tick**.
+3. **Reloads:** walk `chunksToReload` **backwards** (`Count-1 .. 0`); same
+   existence/light gate; queue `NetPackageChunk.Setup(chunk, true)` and
+   `RemoveAt(index)`.
+4. **Map chunks:** if `mapDatabase` set: `GetMapChunkPackagesToSend()` appended.
+5. Flush whatever accumulated (`SendPackage` as step 1) and clear.
+
+**`ResendChunksToClients(chunks)` (IL=55):** for each observer with
+`!bBuildVisualMeshAround` whose `entityIdToSendChunksTo` does **not** match a
+local player (or no local players exist): `chunksToReload.AddRange(chunks)`.
+So a terrain rebuild re-pushes overwrite chunks to remote observers while
+local visual-mesh observers rebuild directly (used by `RebuildTerrain` paths).
+
 ### Chunk dirty / save invalidation (blob-cache input)
 
 **`Chunk.get_NeedsSaving` IL=20** returns true if any of:

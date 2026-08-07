@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: SendChunksToClients streaming body
+
+Done (V3.1.0 b14 IL):
+- ChunkManager.SendChunksToClients IL=216: per-observer removes flush;
+  loads capped at 3/tick with chunk-exists + !NeedsLightCalculation gate;
+  reloads walked backwards; mapDatabase GetMapChunkPackagesToSend; flags 192.
+- ResendChunksToClients IL=55: non-visual-mesh observers AddRange reload.
+---
 ## 2026-08-08 — tier-C: DynamicProperties k=v parse format
 
 Done (V3.1.0 b14 IL):
