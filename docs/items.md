@@ -231,6 +231,16 @@ entry (null slots stay null). `get_HasModSlots` (IL=6) is
 `Modifications.Length > 0` (slot capacity, not occupancy); `HasMods` (IL=30)
 and `HasCosmetics` (IL=30) scan for any non-null, non-empty entry.
 
+**`createDefaultModItems(ic, random, modsToInstall, modInstallDescendingChance)`
+(IL=187)** rolls the pre-installed mods: for each requested mod name (or tag
+via `GetDesiredItemModWithAnyTags`) it rolls `RandomFloat <= chance` to install
+- cosmetic mods into `CosmeticMods[0]`, regular mods into the next free
+`Modifications` slot, **halving the chance after every regular install** (the
+descending chance); remaining `Modifications` are filled with
+`ItemValue.None`. When nothing cosmetic was installed and the class lacks
+`noPreinstallCosmeticItemTags`, each cosmetic slot rolls
+`GetCosmeticItemMod(itemTags, accumulated, random)` (or None).
+
 **Stat-value leaves:** `GetStatPercent(type, onlyBoosted)` (IL=12) starts at
 **1** and, when stats exist, runs `StatModifyValue`. `StatModifyValue(effect,
 ref value, onlyBoosted)` (IL=47) finds the matching stat entry (skipping
