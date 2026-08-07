@@ -487,6 +487,10 @@ chunk coords onto the grid (`toChunkXZ(x)/5*5`, y via `toChunkY`, `z` same -
 chunks loaded; `IsAreaMasterDominantBiomeInitialized(cc)` (IL=107) computes
 `AreaMasterDominantBiome` from the 5x5 neighborhood's dominant-biome
 histogram when it is still the 255 sentinel.
+`Chunk.GetChunkBiomeSpawnData()` (IL=40) requires that biome sentinel to be
+set and lazily builds `biomeSpawnData` (persisted through the `bspd.main`
+`ChunkCustomData` slot); `Chunk.IsTraderArea(x, z)` (IL=22) is
+`world.IsWithinTraderArea(worldPosIMin + (x, 0, z))`.
 
 ---
 
