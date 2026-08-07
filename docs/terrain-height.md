@@ -72,6 +72,8 @@ Interfaces **cannot** be patched directly (RealEarth already avoids that). Concr
 oracle, no chunk load; **0** without a generator). `World.GetTerrainHeight(x,
 z)` (IL=21) reads the live chunk's byte heightmap via `GetChunkSync` +
 `Chunk.GetTerrainHeight(toBlockXZ, toBlockXZ)` (**0** without the chunk).
+`Chunk.GetMaxHeight()` (IL=29) is the max of the chunk's `m_HeightMap` byte
+array.
 | `TerrainGeneratorWithBiomeResource` | `GetTerrainHeightAt` | float | RWG; **ByteAt abstract** |
 | `TerrainGeneratorWithBiomeResource` | `GenerateTerrain` | (void) | Large IL (~424) fill path |
 | `MeshGeneratorMC2` / `Prefab` | `GetTerrainHeight` | **int** | Meshing |
