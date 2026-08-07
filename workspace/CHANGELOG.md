@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: top-soil bitmap
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 5.1: Chunk m_bTopSoilBroken 32-byte bitmap (idx
+  (x+z*16)/8, bit (x+z*16)%8); IsTopSoil (IL=31) bit-clear test,
+  SetTopSoilBroken (IL=36) set; GetTopSoil (IL=3) / SetTopSoil (IL=21) /
+  GetTopMostTerrainHeight (IL=28) max heightmap; PrefabChunk stubs.
+
 ## 2026-08-08 - tier-C: spawn column probe
 
 Done (V3.1.0 b14 IL):
