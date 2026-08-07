@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: World.Cleanup
+
+Done (V3.1.0 b14 IL):
+- World.Cleanup IL=162: prefab cache, chunk manager, audio, conductor, light,
+  entity GO destroy, Entities/EntityAlives clear, biomes.
 ## 2026-08-08 — tier-C: World.UnloadWorld
 
 Done (V3.1.0 b14 IL):
