@@ -549,6 +549,15 @@ run or fire on the dedicated server.
   `AIDirectorAirDropComponent.SetSupplyCratePosition(entityId,
   worldToBlockPos(pos))` then `RefreshCrates(-1)` (updates the crate nav
   markers, [map-objects.md](map-objects.md)). `wasOnGround = onGround`.
+- **`AIAirDrop.Tick(dt)` (IL=193):** the flight-path pump. First call builds
+  `flightPaths` (`CreateFlightPaths()`, logs "Computed flight paths for {N}
+  aircraft."). `spawningCrates` latches once every crate's `SpawnPos` chunk is
+  loaded. While spawning, per path: `path.Delay -= dt`; at ≤ 0 spawn the plane
+  (`SpawnPlane(path)`, once); per crate: `crate.Delay -= dt`; at ≤ 0 →
+  `controller.SpawnSupplyCrate(SpawnPos, ChunkRef)` and remove the entry
+  (log includes the plane position). Paths with no crates left are removed;
+  when all paths finish, `flightPaths = null` (recomputed next Tick). Returns
+  `flightPaths == null` (done signal to `AIDirectorAirDropComponent`).
 - **`RequestToSpawnPlayer` join path (IL=496):** server creates the remote
   `EntityPlayer` and sends `NetPackagePlayerId` before `SpawnEntityInWorld`.
   Spawn position order: team-near (GameStats 25) -> friend-near (`nearEntityId`,

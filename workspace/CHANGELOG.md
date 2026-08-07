@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: air-drop flight-path pump
+
+Done (V3.1.0 b14 IL):
+- AIAirDrop.Tick IL=193: CreateFlightPaths first call; spawningCrates latch on
+  chunk-loaded; per-path Delay -> SpawnPlane; per-crate Delay -> SpawnSupplyCrate
+  + RemoveAt; done = flightPaths == null.
 ## 2026-08-08 — tier-C: air-drop crate landing tick
 
 Done (V3.1.0 b14 IL):
