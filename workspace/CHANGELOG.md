@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemClass leaves
+
+Done (V3.1.0 b14 IL):
+- items.md 1: CreateItemValue (IL=17) ItemValue(id, quality, quality, false,
+  null, 1f); GetForId (IL=15) list index; CanCollect base true vs
+  ItemClassTimeBomb Meta!=0 refuse; HasAllTags per-subclass tag source;
+  IsGun/IsDynamicMelee Actions[0] isinst; IsLightSource; held/dropped pose
+  corrections ((90,0,0) block held, (-90,0,0) dropped non-block);
+  GetLocalizedItemName field vs Block delegate.
+
 ## 2026-08-08 - tier-C: TEFeatureLockable gates
 
 Done (V3.1.0 b14 IL):
