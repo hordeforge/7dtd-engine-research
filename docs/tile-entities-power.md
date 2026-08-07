@@ -63,6 +63,26 @@ the dict: each axis becomes `(coord + 32768) & 0xFFFF` (a 16-bit field with a
 `x << 32 | y << 16 | z` - the same pack used on the wire in
 [`chunk-providers.md`](chunk-providers.md) `packedPos:u64`.
 
+**TE transfer on block change (`GameManager.ChangeBlocks`, IL=530):** after
+`SetBlock`, the engine compares the pre-change TE (`oldTE`, read before the
+write) with the post-change TE (`newTE`). On the server the old one first gets
+`ReplacedBy(newBV, oldBV, newTE)`; if the new block is air, the TE is removed
+via `Chunk.RemoveTileEntityAt`; otherwise, when `oldTE != newTE` and
+`newTE != null`, `newTE.UpgradeDowngradeFrom(oldTE)` moves state across.
+
+`UpgradeDowngradeFrom` overrides: the base (IL=3) destroys the other TE
+(`_other.OnDestroy()`). `TileEntityComposite` (IL=34) copies `Owner` and fans
+to each module's `UpgradeDowngradeFrom(composite)`. `TileEntityCollector`
+(IL=73) clones `worldTimeTouched` and the other collector's `Items` (resized to
+this container; a size mismatch logs `UpgradeDowngradeFrom: other.size=...`).
+`TileEntityVendingMachine` (IL=29) copies `IsLocked`, owner,
+`allowedUserIds`, and `passwordHash` from any `ILockable` source and
+`setModified()`.
+
+**`UseLocalVersioning` (IL=15):** false when `readVersion == -1` (Read not yet
+called; logs `[TileEntity] read must be called before using this.`), else true
+when `readVersion >= 18`; it is the local-format gate read after `Read`.
+
 ### 1.1 Type registry and factory
 
 `TileEntityType` is a byte-valued enum. `TileEntity.InstantiateFromRead` reads the
