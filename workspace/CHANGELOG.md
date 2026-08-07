@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk-event blob + entity creation builders
+
+Done (V3.1.0 b14 IL):
+- spawning.md 5: AIDirectorChunkEvent Write/Read v2 blob (pos, Value, EventType byte, Duration; v1 legacy uint64 discard)
+- spawning.md 2: EntityFactory.SetupEntityCreationData overloads (nextEntityID alloc, itemStack vs blockValues/textureFullArrays)
+- spawning.md 2: CreateEntityOperation.Start IL=25 id allocation (auto-id -1, else max bump) + LoadAssets
+
 ## 2026-08-08 - tier-C: chunk-heat component + AIDirectorChunkData
 
 Done (V3.1.0 b14 IL):
