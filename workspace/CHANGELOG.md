@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChunkBlockChannel storage model
+
+Done (V3.1.0 b14 IL):
+- save-region.md 2: ChunkBlockChannel storage - 64*bytesPerVal
+  layers + sameValue compression, bandStart=(y>>2)*bytesPerVal,
+  cellOffs=z*16+x+(y&3)*256 (1024 cells), getData/getSameValue
+  byte assembly, GetSet IL=79 no-op/prefill/write,
+  checkSameValue + CheckSameValue sweep, pooled CBCLayer,
+  ctor IL=27.
 ## 2026-08-08 - tier-C: TileEntity save preamble + type registry
 
 Done (V3.1.0 b14 IL):
