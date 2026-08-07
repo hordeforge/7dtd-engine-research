@@ -66,6 +66,22 @@ stateDiagram-v2
 `GetExpForNextLevel` the remaining XP. XP amounts and bonuses are
 server-authoritative.
 
+**`Progression` leaf store:** `GetDict` (IL=4) exposes the `ProgressionValues`
+dictionary; `CalcId(name)` (IL=4) registers a name in the static
+`ProgressionNameIds` mapping and returns its id. `GetPerkList(perkList,
+skillName)` (IL=40) fills the list with every `ProgressionValue` whose class
+is `Perk` (3) or `Book` (5) and whose `Parent.Name` equals the skill.
+`addProgressionCurrency(amount, pv)` (IL=85) spends skill currency on one
+value: `Skill`-type amounts first scale through passive **86**
+(`SkillExpGain`); the value's `CostForNextLevel` is reduced and, when it hits
+zero, the level rises and the cost resets via
+`CalculatedCostForLevel(level+1)`; leftover currency recurses into the same
+value (carry-over), and the level is clamped to the class `MaxLevel`.
+`ToBytes(isNetwork)` (IL=28) / `FromBytes(data, parent)` (IL=31) are the
+pooled-binary serialization wrappers around `Write`/`Read` (null on a failed
+read); `ClearProgressionClassLinks` (IL=27) drops per-value class links and
+re-runs `SetupData()`.
+
 ---
 
 ## 3. Perk purchase (state machine)
