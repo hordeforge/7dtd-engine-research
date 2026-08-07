@@ -261,6 +261,27 @@ wet cell requires water above as well. It reads
 then walks that biome's `m_DecoBlocks` entries, returning as soon as one
 placement attempt succeeds.
 
+`decoratePrefabs` (IL=403) is the biome-prefab path of the same decorator
+(the `BiomePrefabDecoration` entries of each biome's `m_DecoPrefabs`). Per
+cell bucketed in `biomePositions` it picks a random entry
+(`RandomRange(Count)`), keeps it on `RandomFloat() <= prob`, and applies the
+`IsNothing`/`StreetOnly`/slope gates (`slope >= 1` when not
+`isDecorateOnSlopes`, `>= 2` when it is). It resolves the prefab via
+`world.m_PrefabCache.GetPrefab(name, true, true, false, false)` (missing ->
+`Log.Error("Prefab with name '<name>' not found!")` and skip), requires the
+footprint origin plus `size/2` to stay inside the chunk, computes
+`height = GetTerrainHeight(x + size.x/2, z + size.z/2) + 1`, applies the same
+`checkResourceOffsetY` ore-noise gate (with `prefab.yOffset` on the floor
+height), and requires the landing cell air with a solid, non-`water` block
+below. The footprint is then validated cell-by-cell across the neighbor
+chunks (routed by quadrant, local coords via `World.toBlockXZ`): any
+`IsNothing`/`StreetOnly` cell fails, `!AllowBigDeco` fails for prefabs with
+`size.x > 1 || size.z > 1`, per-cell slope gates apply, ground must match
+`height - 1`, and `GetHeight + prefab.size.y` must stay below 255. A fit rolls
+`rotation = RandomRange(4)` (clone + `RotateY(true, rot)` when non-zero) and
+places via `prefab.CopyIntoLocal(world.ChunkCache, pos, false, false,
+FastTags.none)` then `prefab.SnapTerrainToArea`.
+
 **`WorldBlockFiller`** is the per-chunk biome deco sprinkler invoked by
 `WorldDecoratorBlocksFromBiome`. Its `m_BlocksToFill : Byte[]` is a flat
 16x16x256 grid indexed `((x << 4) | z) << 8 | y`; **255** means "untouched".
