@@ -361,6 +361,29 @@ validate moves on the server. `NetPackagePlayerInventoryForAI` sends a reduced
 view for AI. Server validates every transaction; the client requests, the server
 approves and echoes the authoritative result.
 
+**`Inventory.SetItem(idx, itemValue, count, notifyListeners)` (IL=166)** (the
+server-authoritative slot write; `SetItem(idx, ItemStack)` IL=9 wraps it with
+`notifyListeners=true`):
+
+1. **Held re-show:** when writing the held slot and the new item value differs
+   from the current one (`EqualsExceptUseTimesAndAmmo`), `ShowHeldItem(0.2,
+   true)` re-displays the held item model.
+2. **Bounds:** `idx >= slots.Length` returns without touching anything.
+3. **Missing-class guard:** a non-zero `ItemValue.type` whose `ItemClass` is
+   null logs `Inventory slot {0} {1} missing item class` and clears the value.
+4. **Preferred-slot memory:** with `idx < preferredItemSlots.Length`, a
+   non-zero new type records `preferredItemSlots[idx] = type` (when notifying);
+   otherwise the *old* slot type is remembered before it is overwritten.
+5. **Class-change rebuild:** when the incoming class differs from the slot's
+   (or the slot is empty), `clearSlotByIndex(idx)` first, then rebuild
+   `models[idx]` (`createHeldItem` only when the class `CanHold()`, else null)
+   and `slots[idx] = createInventoryData(idx, itemValue)`; `changed` is set.
+6. **Store:** `slots[idx].itemStack.itemValue = itemValue.Clone()` and
+   `.count = count` (the value is cloned, never aliased).
+7. When `changed` and the written slot is the held slot:
+   `updateHoldingItem()`; when `notifyListeners`: `notifyListeners()` (the
+   network/buff/listener fan-out).
+
 ---
 
 ## 7. Durability and degradation
@@ -645,6 +668,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** Inventory.SetItem (IL=166) slot-write flow: held re-show
+  ShowHeldItem(0.2), bounds guard, missing-item-class warning + clear,
+  preferredItemSlots memory, class-change rebuild (clearSlotByIndex +
+  createHeldItem/createInventoryData), clone-store, updateHoldingItem +
+  notifyListeners; IL=9 wrapper.
 - **2026-08-07:** ItemValue.FireEvent IL=107 ammo + mod + cosmetic recursion.
 - **2026-08-07:** InventoryTransaction.Apply IL=126 + TransactionRequestServer
   force-unlock path; GetDamageEntity/Block; Eat/fireShot/melee re-pins.

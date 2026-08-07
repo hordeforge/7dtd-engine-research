@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory.SetItem
+
+Done (V3.1.0 b14 IL):
+- Inventory.SetItem (IL=166) narrated in items.md section 6: held-slot write
+  ShowHeldItem(0.2, true) on value change, bounds guard, missing item class
+  warning + Clear, preferredItemSlots type memory (new type on notify, old
+  type otherwise), class-change rebuild via clearSlotByIndex +
+  createHeldItem(CanHold)/createInventoryData, Clone-store + count, then
+  updateHoldingItem on held slot and notifyListeners when requested;
+  SetItem(idx, ItemStack) IL=9 wrapper passes notifyListeners=true.
+
 ## 2026-08-08 - tier-C: EntityPlayer.Update
 
 Done (V3.1.0 b14 IL):
