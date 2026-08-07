@@ -240,6 +240,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | SeekTarget 1200 attack + Reset fields | aidirector.md / entity-ai.md |
 | IsPlayerATarget Level/BM-dead + FindPartyTarget | aidirector.md |
 | MinScript.Run interpreter start | entity-ai.md |
+| MinScript.Tick opcode table + CalcBestDir | entity-ai.md / aidirector.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

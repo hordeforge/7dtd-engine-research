@@ -1320,6 +1320,24 @@ Called once when a player is latched on the volume:
 
 **`MinScript.IsRunning` (IL=7):** `curIndex >= 0`.
 
+**`MinScript.Tick` (IL=261):** if `curIndex < 0` stop. While `sleep > 0`:
+subtract **0.05** per call and return until sleep ends. Switch on
+`CmdLine.command`:
+
+| cmd | effect |
+|---:|---|
+| 1 | log `"MinScript"+parameters` |
+| 2 | no-op (advance only; label placeholder) |
+| 3 | loop: parse `"label count"`; `FindLabel`; set `loopCount`; while count &gt; 0 jump `curIndex = loopToIndex` |
+| 4 | sleep: parse seconds (default **1**) into `sleep` |
+| 40 | `PlaySoundAtPositionServer(Center, params, Linear, 100, playerId, 1)` |
+| 50 | `AddSpawnCount(group, min*scale, max*scale)` from `"group [min [max]]"` defaults 1,1 |
+| 51 | wait until `GetAliveCount() <= N` (default 0); else return without advancing |
+| 52 | `TriggerManager.Trigger(player, prefab, byte param)` |
+
+After each non-blocking cmd: `curIndex++`; if past end set `curIndex = -1`;
+if sleep still &gt; 0 return else continue same tick.
+
 **Static padding (`.cctor` IL=48):** `chunkPadding=(12,1,12)`;
 `triggerPaddingMin/Max=(8,0.7,8)` as Vector3i from floats;
 `unpadding=(14,16,14)`; `wanderingCountdown=5`; `difficultyTierScale` length **7**
@@ -1530,8 +1548,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** MinScript.Run start; Reset fields; UpdatePlayerTouched mult;
-  TriggerSleeperPose height 0.85; Spawn async; SetSleeper pathCost+0.2.
+- **2026-08-07:** MinScript.Tick opcodes 1-4/40/50-52; Run start; Reset fields;
+  UpdatePlayerTouched mult; TriggerSleeperPose; Spawn async.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

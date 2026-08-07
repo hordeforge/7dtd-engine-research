@@ -435,9 +435,17 @@ does **not** despawn anything: it clears `bIsChunkObserver`, `IsHordeZombie` and
 `cSpawnMaxRandDistance` 10, `cSpawnMinPlayerDistance` 30. Component constants
 (412041): `cPartyEnemyMax` 30, `cTimeStayAfterDeathScale` 3, `cSpawnDelay` 1.
 
-`InitParty` (413818): `enemyActiveMax = min(30, BloodMoonEnemyCount *
-partyMemberCount)`; `gsScaling = FastLerp(1, max(1, totalCount/enemyActiveMax),
-partyLevel/60)`; `bonusLootSpawnCount` starts at `partySpawner.bonusLootEvery / 2`.
+`InitParty` (IL=49): `enemyActiveMax = min(30, BloodMoonEnemyCount *
+partyMemberCount)`; scale factor `max(1, totalCount/enemyActiveMax)` then
+`FastLerp(1, that, partyLevel/60)` into `SetScaling`; `SetPartyLevel(level)`;
+`bonusLootSpawnCount = bonusLootEvery / 2`.
+
+**`CalcBestDir(basePos)` (IL=161):** score **16** directions at **22.5°** steps.
+For each angle set `spawnDirectionV = forward*40` rotated; try **9**
+`GetRandomSpawnPositionMinMaxToPosition(base+dir, 0, 10, 30, ...)` samples;
+success count `s`; if `s > 0` score = `(s+2)/3`, and if
+`|DeltaAngle(angle, spawnBaseDir)| <= 60` multiply score by **3**. Pick random
+among max-score bins; store that bin's `spawnDirectionV`.
 
 **`IsPlayerATarget(player)` (IL=29):** false if dead, not spawned, or
 `entityId == -1`; false if `IsIgnoredByAI`; false if `Progression.Level <= 1`
@@ -541,8 +549,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** IsPlayerATarget Level&gt;1 / not BM-dead; FindPartyTarget nearest;
-  SeekTarget 1200 attack/investigate; SpawnZombie vulture; CalcPartyLevel
+- **2026-08-07:** CalcBestDir 16 bins 22.5° score; InitParty IL=49; IsPlayerATarget;
+  FindPartyTarget; SeekTarget 1200; SpawnZombie vulture; CalcPartyLevel
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
 - **2026-08-07:** CalcSpawnPos ±45° radius + GetMobRandomSpawnPosWithWater 0/10/30;
   SeekTarget 60/150/70 m; Scout SpawnUpdate 6000; UpdateHorde 18s.

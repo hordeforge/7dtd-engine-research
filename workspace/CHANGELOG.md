@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: MinScript.Tick opcodes and CalcBestDir bins
+
+Done (V3.1.0 b14 IL):
+- MinScript.Tick: sleep 0.05 steps; cmds 1 log, 2 nop, 3 loop, 4 sleep, 40 sound, 50 AddSpawnCount, 51 wait alive, 52 trigger.
+- CalcBestDir: 16x22.5 deg; 9 samples; score (s+2)/3; *3 if within 60 of spawnBaseDir; random among max.
+- InitParty IL=49 confirmed scaling path.
+---
 ## 2026-08-07 — tier-C: IsPlayerATarget and MinScript.Run
 
 Done (V3.1.0 b14 IL):
