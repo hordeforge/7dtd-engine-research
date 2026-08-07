@@ -316,6 +316,26 @@ is answered with `NetPackageWorldInitInfo` carrying
 `NetPackageEventPrefab` ships single event-prefab placements
 ([`game-events.md`](game-events.md), [`protocol-packages.md`](protocol-packages.md)).
 
+**EventPrefabs persistence + placement.** `TryPlaceAt(prefabName, rotation,
+position, yIsGroundLevel)` (IL=122) resolves the rotated prefab
+(`GetPrefabRotated`, missing -> `[EventPrefabs] cannot place <name>, prefab not
+found` and null), folds `position.y += prefab.yOffset` when
+`yIsGroundLevel`, builds `new PrefabInstance(dpd.GetNextId(), prefab.location,
+position, rotation, prefab, 0)`, then requires
+`rfm.TryResetChunks(pi.GetOccupiedChunks(), -1)` to succeed (failure logs
+`[EventPrefabs] cannot place {0} at ({1}), {2}. Chunks could not be reset,
+protection level: {3}` and returns null), clears `DecoManager`
+deco objects over the bounding box, and registers the instance
+(`dpd.AddEventPrefab`, `prefabs.Add`, `rfm.AddGroupedChunks`), broadcasting a
+`NetPackageEventPrefab` (operation 0) and setting `needsSaving`. `Load()`
+(IL=125) reads `<save>/eventprefabs.dat` (missing -> no-op): version + count
+int32s, then per entry `prefabName` (string), position (`StreamUtils.ReadVector3i`),
+rotation (byte), each rebuilt through `GetNextId()` and re-registered with
+`DecoManager`/`AddEventPrefab`/`AddGroupedChunks`. `Save(waitForComplete)`
+(IL=70) is `needsSaving`-gated and writes version **1**, the count, and per
+instance `prefabName` + `boundingBoxPosition` + rotation via the pooled
+writer, handed to the `ThreadedFileWriterQueue.saveWriter`.
+
 ```mermaid
 flowchart LR
   PX[worldpath/prefabs.xml] -->|Load| DPD[DynamicPrefabDecorator]
