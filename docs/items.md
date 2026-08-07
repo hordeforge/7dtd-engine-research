@@ -244,6 +244,10 @@ confirmed from `Inventory.GetHoldingPrimary` (`Actions[0]`) and
 | `Actions[1]` | **secondary** action (right mouse): aim/zoom, alt-fire, block |
 | `Actions[2..4]` | additional slots (reload/utility); `StartHolding` initializes the first three |
 
+The dispatch reads confirm the convention:
+`Inventory.GetHoldingPrimary()` (IL=6) is `holdingItem.Actions[0]` and
+`GetHoldingSecondary()` (IL=6) is `holdingItem.Actions[1]`.
+
 Beyond `Actions`, the fields that matter server-side:
 
 | Field | Role |
