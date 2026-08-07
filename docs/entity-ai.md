@@ -302,7 +302,9 @@ see cache (called from OnUpdateLive before AI).
    `maxDist *= other.DetectUsScale(this)`.
 2. If distance &gt; maxDist → false.
 3. If `checkViewCone` and `!IsInViewCone(otherHead)` → false.
-4. Temp `SetModelLayer(2)` on self; ray from head along dir (origin pulled back
+4. Temp `SetModelLayer(2)` on self (`EntityAlive.SetModelLayer` IL=7 =
+   `Utils.SetLayerRecursively(modelTransform.gameObject, layer)`); ray from
+   head along dir (origin pulled back
    **0.1**), length maxDist, mask **`-1612492829`**, hit flag **64**.
 5. Hit `E_Vehicle` and vehicle `IsAttached(other)` → true; `E_Enemy` may
    `EntityDrone.IgnoreCollisionEntity`; `E_BP_*` root transform equals other →
