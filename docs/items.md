@@ -345,6 +345,13 @@ ItemActionData
 `GetBlockHit`; damage scaled by `EffectManager.GetValue` passive effects; server
 path applies entity/block damage (same authority model as melee `Hit`).
 
+**Reload leaves:** `ConsumeAmmo(data)` (IL=9) is `iv.Meta -= 1` (one round per
+shot). `loadNewAmmunition(gun, ammo, entity)` (IL=20) reads the holding
+action slot 0 as `ItemActionDataRanged`, resets `SelectedAmmoTypeIndex` to 0
+when it exceeds `MagazineItemNames.Length`, and sets
+`isChangingAmmoType = true` (the ammo-type-swap latch consumed by
+`CompleteReload`, IL=178).
+
 **Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
 magazine capacity goes through the `MagazineSize` passive against the class's
