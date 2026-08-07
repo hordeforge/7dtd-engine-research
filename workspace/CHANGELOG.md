@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemValue metadata store
+
+Done (V3.1.0 b14 IL):
+- items.md 2: HasMetadata (IL=25), typed TryGetMetadata overloads (IL=17) +
+  object core (IL=36), GetMetadata (IL=17, boxed-false quirk), RemoveMetaData
+  (IL=12).
+
 ## 2026-08-08 - tier-C: durability-modifier accessors
 
 Done (V3.1.0 b14 IL):
