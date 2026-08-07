@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BiomeImageLoader + PerlinNoise
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 4.1: BiomeImageLoader <Load>d__11 (GetPixelData, block grid SetSameValue/SetValue, MicroStopwatch frame-slice), GetBiomeId cache, ARGB/RGBA pack, BiomeIdToColor32
+- chunk-providers.md 6.1: PerlinNoise Lattice perm/gradient hash, Smooth/Lerp, Noise 2D/3D clamp, Noise01, FBM 2-octave
+
 ## 2026-08-08 - tier-C: splat loader + InitData coroutine
 
 Done (V3.1.0 b14 IL):
