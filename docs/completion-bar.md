@@ -244,6 +244,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | GetAliveCount + BM Tick 1.8 / SetScaling | entity-ai.md / aidirector.md |
 | isBestTask MutexBits + OnUpdateEntity buff path | entity-ai.md |
 | CheckDespawn source bands + IsAttackValid | entity-ai.md |
+| CanSee ray/stealth + Attack target-now | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

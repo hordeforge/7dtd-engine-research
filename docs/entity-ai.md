@@ -265,6 +265,26 @@ see cache (called from OnUpdateLive before AI).
 `senseScale = 1 + CalcSenseScale() * feralSense`, then
 `sightRange = sightRangeBase * senseScale`. Return `sightRange`.
 
+**`CanSee(Vector3 pos)` (IL=62):** head→pos; if magnitude &gt; `GetSeeDistance()`
+false; if `!IsInViewCone` false; ray origin head + **0.2** along dir;
+`SetModelLayer(2)` self; `Voxel.Raycast(world, ray, maxDist, false, false)` →
+false if hit (blocked); restore layer; true if clear.
+
+**`CanSeeStealth(dist, lightLevel)` (IL=21):**
+`t = dist / sightRange`; threshold =
+`FastLerp(sightLightThreshold.x, .y, t)`; true if `lightLevel > threshold`.
+
+**`Attack(isReleased)` (IL=5):** `UseHoldingItem(0, isReleased)`.
+
+**`GetAttackTimeoutTicks` (IL=10):** day → `attackTimeoutDay`; dark →
+`attackTimeoutNight`.
+
+**`GetTargetIfAttackedNow` (IL=98):** null if `!IsAttackValid`. Holding action 0
+`GetExecuteActionTarget`; require valid hit + transform; range =
+`ItemAction.Range` or passive **11** on item; allow +**0.3** m; require
+`distanceSq ≤ range²`. `E_BP_*` → root transform entity component; `E_Vehicle`
+→ `EntityVehicle.FindCollisionEntity`; else null.
+
 **`EAIManager.CalcSenseScale` (static IL=23):** switch on static `FeralSense`
 (sandbox `ZombieFeralSense`):
 
@@ -1589,8 +1609,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** CheckDespawn source 1/2/3 bands; IsAttackValid pain/stun;
-  isBestTask MutexBits; OnUpdateEntity buff path; MinScript.Tick.
+- **2026-08-07:** CanSee ray 0.2 + CanSeeStealth lerp; Attack/timeout/target now;
+  CheckDespawn source bands; IsAttackValid; isBestTask MutexBits.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

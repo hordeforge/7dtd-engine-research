@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CanSee ray and Attack target-now
+
+Done (V3.1.0 b14 IL):
+- CanSee(Vector3): view cone + 0.2 origin pull; Voxel.Raycast clear LOS.
+- CanSeeStealth: light threshold FastLerp by dist/sightRange.
+- Attack: UseHoldingItem(0); timeout day/night; GetTargetIfAttackedNow range+0.3 and E_BP_/E_Vehicle.
+---
 ## 2026-08-07 — tier-C: CheckDespawn source bands and IsAttackValid
 
 Done (V3.1.0 b14 IL):
