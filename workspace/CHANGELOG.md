@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.SetPosition
+
+Done (V3.1.0 b14 IL):
+- Entity.SetPosition (IL=111) narrated in entity-ai.md D7: position store,
+  boundingBox rebuild from width*0.5/depth*0.5, yOffset/ySize base and
+  +height top, recursion into attachedEntities with bUpdatePhysics=false;
+  physics mirror: PhysicsTransform.position = pos - Origin.position,
+  physicsPos = (pos-Origin)+physicsBasePos on physicsRBT, physicsTargetPos =
+  PhysicsTransform.position. Overrides: EntityDrone base-only, EntityPlayerLocal
+  Origin/FPController/camera (client), EntityVehicle ModelTransform for local.
+
 ## 2026-08-08 - tier-C: EAISetNearestCorpseAsTarget
 
 Done (V3.1.0 b14 IL):

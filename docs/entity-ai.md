@@ -2108,6 +2108,21 @@ unit box). The box is origin-relative; `SetPosition` (IL_0065) recenters it on
 the entity position, and `aabbEntityCollision` (IL_0180/02A2) rewrites it from
 the resolved move, so the field tracks the entity's current world AABB.
 
+**`Entity.SetPosition(pos, bUpdatePhysics)` (IL=111):** the position setter
+that maintains all of the above. Stores `position = pos`, then rebuilds
+`boundingBox` from the model extents: half-width `width * 0.5`, half-depth
+`depth * 0.5`, base `pos.y - yOffset + ySize`, top `base + height`
+(`BoundsForMinMax` on the six values), and recurses
+`SetPosition(pos, false)` into every `attachedEntities[]` member. With
+`bUpdatePhysics`, mirrors into the physics objects in origin space:
+`PhysicsTransform.position = pos - Origin.position`, `physicsPos =
+(pos - Origin.position) + physicsBasePos` applied to `physicsRBT`, and
+`physicsTargetPos = PhysicsTransform.position` (the FixedUpdate blend target).
+Subclass overrides: `EntityDrone` and `EntityPlayerLocal` (the latter adds
+`Origin.UpdateLocalPlayer` + vp_FPController sync + `Audio.Manager.CameraChanged`,
+client path) just call the base; `EntityVehicle` additionally mirrors
+`ModelTransform` for non-remote vehicles.
+
 ---
 
 ## D8. Falling / sleeper / deco (world systems)
@@ -2982,6 +2997,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Entity.SetPosition (IL=111): boundingBox rebuild from
+  width/depth/yOffset/ySize/height, attachedEntities recursion, physics mirror
+  (PhysicsTransform/physicsRBT/physicsTargetPos in origin space), subclass
+  overrides (Drone/PlayerLocal/Vehicle).
 - **2026-08-07:** EAISetNearestCorpseAsTarget.CanExecute (IL=110): investigate/
   sleep rejects, 1/rndTimeout throttle, 95% keep fighting living players,
   sleeper radius 7 vs maxXZDistance, GetEntitiesAround + sorter, dead
