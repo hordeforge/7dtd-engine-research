@@ -122,6 +122,13 @@ curve: `count -= 5` (the first 5 smell are free), a negative result maps to
 0, else `FastLerp(10, 100, count / 45)` - a linear 10 m at the threshold up to
 100 m at full smell.
 
+**`PlayerStealth.SmellTickEat()` (IL=36)** is the eat-smell decay: while the
+`smellEatTicks` timer runs (capped at 1640 ticks) it subtracts
+**0.007142858** (1/140) from `smellEatRadius` per tick - the eating scent
+fades out over roughly 140 ticks (7 s at 20 tps) - and resets both
+`smellEatRadius` and `smellUpdateItemsTicks` when the timer or the radius
+bottom out.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Odorless
@@ -163,6 +170,8 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.SmellTickEat (IL=36): eat radius decays 1/140
+  per tick (~7 s fade), resets radius + update ticks at 0.
 - **2026-08-07:** PlayerStealth.SmellCountToRadius (IL=18): count-5 free
   threshold, negative -> 0, FastLerp(10, 100, count/45) radius curve.
 - **2026-08-07:** PlayerStealth.SmellUpdateItemsAndBlood (IL=79): dead /

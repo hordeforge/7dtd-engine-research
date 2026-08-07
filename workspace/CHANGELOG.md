@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SmellTickEat
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.SmellTickEat (IL=36) narrated in stealth-smell.md: eat
+  radius decays 0.007142858 (1/140) per tick while smellEatTicks runs
+  (cap 1640); full fade ~140 ticks (~7 s); zeroes radius + update ticks at
+  the bottom.
+
 ## 2026-08-08 - tier-C: SmellCountToRadius
 
 Done (V3.1.0 b14 IL):
