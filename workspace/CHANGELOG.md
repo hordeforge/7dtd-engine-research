@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: IsEmptyPosition
+
+Done (V3.1.0 b14 IL):
+- server-lifecycle.md 3.1: World.IsEmptyPosition (IL=117) trader-protection
+  reject, non-survival pass, LandClaimSize-neighborhood lpblock scan.
+
 ## 2026-08-08 - tier-C: density compaction
 
 Done (V3.1.0 b14 IL):
