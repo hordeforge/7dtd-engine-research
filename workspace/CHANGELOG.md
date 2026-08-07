@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity stat blobs
+
+Done (V3.1.0 b14 IL):
+- entity-stats.md 5: EntityStats/PlayerEntityStats blob (v11, Health + Stamina/Water/Food + CoreTemp/2 sbyte)
+- entity-stats.md 5: Stat record v6 (value/maxModifier/baseMax/originalBaseMax/originalValue), <=5 legacy float discard
+
 ## 2026-08-08 - tier-C: deco join sync + tick
 
 Done (V3.1.0 b14 IL):
