@@ -78,6 +78,8 @@ write that per-column byte at `m_Biomes[x + z*16]`.
 cell (`GetDecoAllowedAt(...).GetSlope()`);
 `SetDecoAllowedSlopeAt(x, z, slope)` (IL=19) `EnsureDecoBiomeArray`s and
 rewrites the cell with the new slope via `WithSlope`.
+`EnsureDecoBiomeArray()` (IL=8) lazily allocates the 256-entry
+`m_DecoBiomeArray` (one `EnumDecoAllowed` per column).
 
 Registry lookups: `WorldBiomes.GetBiome(Color32)` (IL=34) packs
 `(r << 16) | (g << 8) | b` into the `m_Color2BiomeMap` key (null on miss);
