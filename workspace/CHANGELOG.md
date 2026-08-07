@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: damage channel write
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: Chunk.SetDamage (IL=9) chnDamage long write.
+
 ## 2026-08-08 - tier-C: damage channel read
 
 Done (V3.1.0 b14 IL):
