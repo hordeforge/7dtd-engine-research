@@ -1365,6 +1365,17 @@ equals the configured `sourceblock`, stamps `lastUseTime` and
 value (the action carries both) - then plays `soundStart` (or
 `placeblock`) and `RightArmAnimationAttack = true`.
 
+**`ItemActionMakeFertile.hitTheTarget(data, hitInfo, damageScale)`
+(IL=175)** is the fertilize action: on a block/terrain hit whose material
+`FertileLevel < 2` it delegates to the melee base (the cell is not fertile
+soil); otherwise it picks the dominant axis (`|dx| > |dz|` -> forward, else
+right), builds a `BlockChangeInfo` batch - the hit cell becomes the
+`fertileBlock` at `MarchingCubes.DensityTerrain`, and the two cells along
+that axis (when terrain with `FertileLevel >= 2`) become `adjacentBlock` at
+`DensityTerrain / 3` - grants the local player
+`Progression.AddLevelExp(fertileBlock.material.Experience, "_xpOther", 8,
+true, true, -1, null)`, commits via `SetBlocksRPC`, and plays `soundEnd`.
+
 **`ItemActionTerrainTool` (V3.1.0 b14)** is the terrain-sculpt tool
 (dig/flatten): `ExecuteAction` (IL=46) latches `bActivated` +
 `activateTime` on press and forwards `GameManager.ItemActionEffectsServer
@@ -1469,6 +1480,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionMakeFertile.hitTheTarget IL=175: FertileLevel<2
+  melee delegate, dominant-axis adjacent cells -> adjacentBlock
+  (DensityTerrain/3) + hit cell -> fertileBlock, AddLevelExp xpOther,
+  SetBlocksRPC + soundEnd.
 - **2026-08-08:** ItemActionExchangeBlock.ExecuteAction IL=82: press-only +
   Delay/cBuildIntervall gates, sourceblock match -> SetBlockRPC(targetBlock)
   + placeblock sound + RightArmAnimationAttack.
