@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: inside/entity block toggles
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md: EnableInsideBlockEntities IL=45 (blockEntityStubs by world-pos key, SetActive on transform)
+- world-chunks.md: EnableEntityBlocks IL=51 (name-contains filter, toggled count)
+
 ## 2026-08-08 - tier-C: inside-device register + test
 
 Done (V3.1.0 b14 IL):
