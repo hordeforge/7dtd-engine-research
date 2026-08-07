@@ -119,6 +119,10 @@ special score condition if holding `gunHandgunT2Magnum44`;
 **`EntityAlive.AddScore` (IL=97):** increment KilledZombies/Players/Died counters;
 score from GameStats weights; clamp score ≥ 0; achievement stats hooks.
 
+**`OnDeathUpdate` (IL=76):** while corpse remains, track `DeathHealth` vs
+`EntityClass.DeadBodyHitPoints`; when depleted enough, death particle and unload
+path (corpse cleanup after body HP exhausted).
+
 ```mermaid
 stateDiagram-v2
   [*] --> Alive
@@ -198,8 +202,8 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
-- **2026-08-07:** AwardKill/AddScoreServer chain; SetDead; OnEntityDeath /
-  dropItemOnDeath death path.
+- **2026-08-07:** OnDeathUpdate corpse HP; AwardKill/AddScoreServer; SetDead;
+  OnEntityDeath / dropItemOnDeath.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

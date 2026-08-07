@@ -98,6 +98,14 @@ Ordered (main-thread only; off-thread hops via `AddSingleTaskMainThread`):
 `PlayerDataFile.Save` dir+id; async map-chunk DB save task; notify persistent
 player list observers; fire **`ModEvents.SavePlayerData`**.
 
+### 1.5 `ConnectionManager.SendPackage` (list overload IL=168)
+
+For each package `RegisterSendQueue`. For each `ClientInfo` with `loginDone`:
+filter by attached-to-entity flags (`_onlyClientsAttachedToAnEntity` /
+`_onlyClientsNotAttachedToAnEntity` / exclude/include entity ids); optional
+`World.IsEntityInRange` for entity-id or world-pos range; enqueue to
+`netConnection[package.Channel]`.
+
 ---
 
 ## 2. Entity replication (from UpdateTick)
@@ -598,7 +606,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 - **2026-07-28:** ProtocolManager as thin INetworkServer/Client pump.
 - **2026-07-28:** SendChunksToClients pointer to world-chunks observer pipeline.
-- **2026-08-07:** DisconnectClient ordered steps; SavePlayerData IL=91 + ModEvents.
+- **2026-08-07:** SendPackage list IL=168 filters; DisconnectClient; SavePlayerData.
 - **2026-07-28:** ConnectionManager.Update order, BadMTUPackets>=3 kick, ProcessPackages gates, DisconnectClient highlights.
 - **2026-07-28:** NetConnectionSteam/Simple reader-writer pipelines, compress-then-encrypt order, Simple framing, AesEncryptAndMac stream layout.
 - **2026-07-19:** Related docs table.

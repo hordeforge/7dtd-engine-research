@@ -144,6 +144,9 @@ Closed in recent sessions (still optional, not required for A+B):
 | SaveWorld entry chain | save-region |
 | canDespawn / unloadEntity | entity-ai §5.1b |
 | AwardKill / AddScoreServer chain | combat-damage §3.1 |
+| SimpleRPC holding activate/reset | protocol-packages §6.21 |
+| ChatMessageServer / GameMessage | chat.md |
+| SendPackage client filters | network §1.5 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

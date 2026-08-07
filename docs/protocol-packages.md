@@ -1307,6 +1307,11 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | Package | IL write | Wire | Notes |
 |---|---:|---|---|
 | `NetPackageSimpleRPC` | 12 | entityId, type (SimpleRPCType) | Process IL=17: `ValidEntityIdForSender`; `GameManager.SimpleRPC(id, type, true, world.IsRemote)` |
+
+**`GameManager.SimpleRPC` (IL=59):** if `_bExeLocal` and entity alive: type 0 →
+`ItemClass.OnHoldingItemActivated`; type 1 → `OnHoldingReset`. If not
+`_bOnlyLocal`: remote world `SendToServer` package; server
+`SendPacketToTrackedPlayers` (exclude self).
 | `NetPackageSimpleChat` | 44 | msg, recipientEntityIds | Process IL=116: remote UI chat; server fans to recipient ClientInfos |
 | `NetPackageSharedQuest` | (large) | SharedQuestData | Process IL=371: server `QuestShareServer` / client `QuestShareClient`; party journal remove/share |
 | `NetPackageGameMessage` | 17 | msgType, mainEntityId, secondaryEntityId | Process IL=28: remote `GameMessageServer` else `DisplayGameMessage` |

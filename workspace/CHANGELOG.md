@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SimpleRPC, ChatMessageServer, SendPackage, OnDeathUpdate
+
+Done (V3.1.0 b14 IL):
+- SimpleRPC IL=59 holding activate/reset + track fan-out.
+- ChatMessageServer IL=195 mod interrupt + recipient fan-out; GameMessage 61.
+- SendPackage list IL=168 attached/range filters.
+- OnDeathUpdate corpse DeadBodyHitPoints path.
+---
 ## 2026-08-07 — tier-C: canDespawn, unloadEntity, AwardKill/AddScore chain
 
 Done (V3.1.0 b14 IL):
