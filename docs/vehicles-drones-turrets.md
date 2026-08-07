@@ -236,6 +236,28 @@ locks interaction once all seats are full. `DriverRemoved` fires the local
 player's `MountEvent(false)`, clears `hasDriver`, and resets the no-driver
 ground / sleep timers so the Rigidbody can settle and sleep.
 
+### 4.2b Ownership, lock, password, fuel
+
+- **Owner:** `SetOwner(user)` (IL=5) / `GetOwner()` (IL=4) are
+  `vehicle.OwnerId` writes/reads; `SetLocked(isLocked)` (IL=4) sets the local
+  `isLocked` field. `IsUserAllowed(user)` (IL=11) is
+  `LocalPlayerIsOwner() || vehicle.AllowedUsers.Contains(user)`.
+- **Password:** `HasPassword()` (IL=7) is a non-empty `vehicle.PasswordHash`;
+  `GetHashForPassword(pw)` (IL=3) = `Utils.HashString(pw)`. `SetPasswordHash`
+  (IL=33) is owner-only: a new hash is written, `AllowedUsers` is cleared, and
+  when no owner is set the setter becomes the owner with `isLocked = true`.
+  `CheckPasswordHash(hash, user)` (IL=29): owners and password-free vehicles
+  pass; a matching hash adds `user` to `AllowedUsers`; both grant paths
+  `SendSyncData(2)` (vehicle-data sync).
+- **Fuel:** the `Vehicle` fuel level is float units, **25 per gas item**.
+  `GetFuelCount()` (IL=7) = `FloorToInt(GetFuelLevel * 25)`. `needsFuel()`
+  (IL=12) = `HasEnginePart() && GetFuelPercent() < 1`. `takeFuel(player,
+  count)` (IL=67) removes fuel items from the player's inventory then bag via
+  `DecItem` (0 for a non-player actor, or when neither has them).
+  `AddFuelFromInventory(entity)` (IL=45): under 100 % fuel, take
+  `CeilToInt(Min(2500, (GetMaxFuelLevel - GetFuelLevel) * 25))` items and
+  `vehicle.AddFuel(taken / 25)`, playing `useactions/gas_refill`.
+
 ### 4.3 Movement authority: client-authoritative physics
 
 This is the load-bearing distinction. `EntityVehicle.PhysicsFixedUpdate` (1509
