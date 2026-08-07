@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `a2f2d9e` Inventory held-slot accessors |
-| Commits since dry-run `3b61d9c` | ~371 |
+| HEAD (at handoff write) | `2102471` vehicle damage machine |
+| Commits since dry-run `3b61d9c` | ~372 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

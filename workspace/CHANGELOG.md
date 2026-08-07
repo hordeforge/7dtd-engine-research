@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vehicle damage machine
+
+Done (V3.1.0 b14 IL):
+- vehicles-drones-turrets.md 4.2c: damageEntityLocal IL=31
+  DamageResponse build; ProcessDamageResponseLocal IL=120 (Disease/
+  Suffocation immunity, blood-moon knockback, External rider splash
+  with FriendlyFireCheck skip); ApplyDamage IL=86 explodeHealth
+  machine (health-1 or 99999 entry, 20% roll, ExplosionServer),
+  3% max-health buffer; ApplyAccumulatedDamage IL=19 fractional
+  accumulator; ApplyCollisionDamageToAttached IL=32
+  Internal/VehicleInside crash damage; GetBlockDamageScale IL=13.
 ## 2026-08-08 - tier-C: Inventory held-slot accessors + ForceHoldingItemUpdate
 
 Done (V3.1.0 b14 IL):
