@@ -153,6 +153,11 @@ appear inside `NetPackageHoldingItem`, `NetPackagePlayerInventory`,
 [`protocol-packages.md`](protocol-packages.md) and
 [`tile-entities-power.md`](tile-entities-power.md)).
 
+`ItemStack.FromString(s)` (IL=38) parses the `name=count` text form: an `=`
+splits the item name (before) from an `int.TryParse` count (after, defaulting
+to the empty stack's 0 on failure); without `=` the whole string is the name
+with count **1**; the value resolves through `ItemClass.GetItem(name, false)`.
+
 `ItemStack.ReadDelta(reader, last)` (IL=15) / `WriteDelta(writer, last)`
 (IL=23) are the inventory-delta wire pair: the full `ItemValue` body is written
 both ways and only the count is delta-coded as an `i16` relative to the previous
