@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: DecoChunk buckets + reads
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 5: AddDecoObject IL=67 (16x16 bucket, main-thread instantiate, OcclusionManager), GetDecoObjectAt state!=1 scan, ToDecoChunkPos 128-fold, MakeKey16
+- chunk-providers.md 5: GetDecorationsOnChunk IL=143 (lazy decorate under lock, null warning, SBlockPosValue output)
+
 ## 2026-08-08 - tier-C: decoration.7dt codec
 
 Done (V3.1.0 b14 IL):
