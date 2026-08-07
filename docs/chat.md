@@ -90,6 +90,11 @@ and delivered through the same client message path.
 `GameMessageServer` → interruptible `ModEvents.GameMessage` →
 `DisplayGameMessage` + `NetPackageGameMessage` fan-out (or log if mod handled).
 
+**`FinishGameMessageServer` (IL=69):** secondary entity → display name (or null);
+`ModEvents.GameMessage` interruptible. Always `DisplayGameMessage`. If mod result
+!= **2** (handled): fan-out `NetPackageGameMessage` with flags **192**. If
+handled: log only.
+
 ---
 
 ## 4. Dedicated relevance and residuals
@@ -111,6 +116,8 @@ and delivered through the same client message path.
 | [server-lifecycle.md](server-lifecycle.md) | Join/leave system messages |
 
 ## Changelog
+
+- **2026-08-07:** FinishGameMessageServer IL=69 mod interrupt + flags 192.
 
 - **2026-08-07:** ChatMessageServer IL=195 + GameMessage IL=61 paths.
 

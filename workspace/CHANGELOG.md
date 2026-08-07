@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DropContentOf TE + local inventory send + handoff
+
+Done (V3.1.0 b14 IL):
+- DropContentOfLootContainerServer lock/open/drop bag; CheckDestroyTileEntity.
+- doSendLocalPlayerData/Inventory dirty flags; IsSafeToDisconnect; player count scan.
+- FinishGameMessageServer mod interrupt flags 192; HandleFirstSpawnInteractions party invite.
+- Handoff/TODO: workspace/notes/tierc-handoff.md
+---
 ## 2026-08-07 — tier-C: SaveLocalPlayerData and RequestToSpawnEntityServer
 
 Done (V3.1.0 b14 IL):

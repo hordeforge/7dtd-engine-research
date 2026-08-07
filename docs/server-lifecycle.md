@@ -157,6 +157,35 @@ player / spawn-point list / biome-aware); build ECD from PDF; create entity +
 server: vehicle/drone waypoint updates + following drones; fire
 `ModEvents.PlayerSpawnedInWorld` + `OnClientSpawned`.
 
+**`GameManager.SaveWorld` (IL=7):** if world non-null `World.Save()`.
+
+**`GameManager.SaveLocalPlayerData` (IL=45):** require world + primary local
+player + `bSavingActive`; `PlayerDataFile.FromPlayer` → `Save(playerDataDir,
+combinedId)`; if `ChunkObserver.mapDatabase` present, `SaveAsync` via
+`ThreadManager.AddSingleTask`.
+
+**`RequestToSpawnEntityServer` (IL=101):** client →
+`NetPackageRequestToSpawnEntity` to server. Server: if class is fallingTree,
+skip when an existing `EntityFallingTree` shares `blockPos`. Create entity;
+if `EntityBackpack`, match `RefPlayerId` to persistent player and
+`AddDroppedBackpack`. `SpawnEntityInWorld`.
+
+**`doSendLocalPlayerData(player)` (IL=25):** if server → `SaveLocalPlayerData`;
+else `NetPackagePlayerData` to server. Clear send flags toolbelt/bag/equipment/
+drag.
+
+**`doSendLocalInventory(player)` (IL=40):** if any of toolbelt/bag/equipment/
+drag dirty flags: `NetPackagePlayerInventory.Setup` with those four bools to
+server; clear flags. No-op when all clean.
+
+**`IsSafeToDisconnect` (IL=27):** true if network mode 0 (offline). False if
+prefab edit active and `NeedsSaving`. If game started and not `IsStartingGame`:
+return `!isDisconnectingLater`. Else false.
+
+**`CalculatePersistentPlayerCount(world, save, storage)` (IL=64):** rebuild
+`persistentPlayerIds` from `{save}/Player/*` basenames (strip first `.`); unique
+add.
+
 **`EntityPlayer.Respawn` (IL=10 + local helpers):** disable ragdoll; breadcrumbs;
 `BeforePlayerRespawn` / teleport delegates / held-entity check /
 `AfterPlayerRespawn`; local FP revive camera; clear death state via `SetAlive`;
@@ -408,6 +437,8 @@ third-party/analytics.
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 
 ## Changelog
+
+- **2026-08-07:** doSendLocalPlayerData/Inventory; IsSafeToDisconnect; CalculatePersistentPlayerCount.
 
 - **2026-08-07:** SaveWorld/SaveLocalPlayerData; RequestToSpawnEntityServer backpack/tree.
 - **2026-08-07:** nextRound wrap GameStats 10; SetBloodMoonDay 58.

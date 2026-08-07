@@ -349,6 +349,18 @@ exceeds one container size.
 Death path calls these via `dropItemOnDeath` ([combat-damage.md](combat-damage.md)
 §3.1).
 
+**`DropContentOfLootContainerServer(bvOld, worldPos, teOld)` (IL=99):** server-only
+(client logs warning). Resolve lootable TE (`teOld` or world TE feature). If
+`LockManager.IsLockedServer` → return. Drop pos = world + **(0.5, 0.75, 0.5)**.
+Default entity class `DroppedLootContainer`; override via block prop
+`DroppedEntityClass`. If `!bTouched`, force `LootContainerOpened(-1, block.Tags)`.
+If not empty: `CreateEntity` as `EntityLootContainer`, `SetContent(Clone items)`,
+`SpawnEntityInWorld`. Always `SetEmpty()` on the TE.
+
+**`CheckDestroyTileEntity(te, blockPos)` (IL=37):** require `ITileEntityLootable`
+and `ShouldDestroyOnClose`. Call `DropContentOfLootContainerServer` then
+`Block.DamageBlock(..., MaxDamage, ...)` to destroy the block.
+
 **`EntityItem.OnCollectServer` (IL=8):** `World.RemoveEntity(id, reason=2)` only
 (inventory add is elsewhere on the collect package path).
 
@@ -665,6 +677,8 @@ Book count modifiers (enum values **1..11**). Unknown / **0** returns **-1**
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
 ## Changelog
+
+- **2026-08-07:** DropContentOfLootContainerServer IL=99; CheckDestroyTileEntity IL=37.
 
 - **2026-08-07:** GetCountMultiplierFromSandbox enum 1..11 / -1; RandomCountFrom
   SandboxTags table; GetSandboxProb; RandomSpawnCount ±0.49.

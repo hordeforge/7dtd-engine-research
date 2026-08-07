@@ -116,6 +116,13 @@ resets `LeaderIndex` to 0 or promotes the prior leader.
 
 ### 2.2 Server command dispatch
 
+**`GameManager.HandleFirstSpawnInteractions` (IL=116):** only when interaction
+type **2**. Resolve entity id from `PlayerToEntityMap`. Local player skip if same
+id. If platform block type **2** active: `DisplayGameMessage` type **6** (blocked
+alert) and return. If GamePrefs **235** and local is ally of joiner: emit
+`NetPackagePartyActions` op **0** (invite) to server, or if already server fan-out
+with flags **192**.
+
 The client never mutates the authoritative `Party`; it sends a `NetPackagePartyActions`
 whose `currentOperation` selects a handler. `NetPackagePartyActions.ProcessPackage`
 resolves the two entity ids, then `switch`es on `PartyActions`, gating every mutating
@@ -452,6 +459,8 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 | [`residuals.md`](residuals.md) | External / native / content residuals |
 
 ## Changelog
+
+- **2026-08-07:** HandleFirstSpawnInteractions IL=116 blocked alert + pref 235 ally invite.
 
 - **2026-08-07:** PartyQuestChange Process/HandlePlayer (15 m or location rect,
   ChangeStatus / RemoveSharedQuest).
