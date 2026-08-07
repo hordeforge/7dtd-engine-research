@@ -28,23 +28,32 @@ manager's `Update`/`UpdateTick` method instruction count from the dump (e.g.
 | Manager | Update IL | Notes |
 |---|---:|---|
 | `TwitchManager` | **1585** | Large; waste if constructed without Twitch |
-| `DroneManager` | **305** | Waypoints |
-| `VehicleManager` | **297** | Waypoints |
+| `DroneManager` | **305** | Server + game started + players: reconcile `dronesUnloaded` ECD list vs live entities (near-identical vehicle pattern) |
+| `VehicleManager` | **297** | Server + game started + players: reconcile `vehiclesUnloaded` ECD vs live; spawn/unload vehicle persistence path |
 | `TriggerEffectManager` | 216 | |
-| `QuestEventManager` | 127 | |
+| `QuestEventManager` | 127 | Each frame: `ObjectiveRallyPoint.SetupFlags`; walk `objectivesToUpdate` / `challengeObjectivesToUpdate` `HandleUpdate(dt)`; prune dead `questTrackersToUpdate` |
 | `TokenManager` | 121 | |
-| `PowerManager` | **106** | Tile-entity power; content can explode |
+| `PowerManager` | **106** | Server + players + game started: every **0.16 s** sources then triggers; every **120 s** threaded save; every frame flush `ClientUpdateList` ([tile-entities-power.md](tile-entities-power.md) §3) |
 | `DismembermentManager` | 60 | |
 | `BlockedPlayerList` | 59 | |
-| `TurretTracker` | 45 | |
-| `FactionManager` | 43 | |
+| `TurretTracker` | 45 | Server + started: **120 s** threaded `Save` when prior save thread done |
+| `FactionManager` | 43 | Server + started: **60 s** threaded faction data save |
 | `NavObjectManager` | 42 | Map/claim pins |
-| `GameEventManager` | 25 | + HandleSpawnUpdates 148 etc. |
+| `GameEventManager` | 25 | Server: `HandleSpawnUpdates` (attack timer **2 s**), `HandleActionUpdates`, block/flag/boss-group updates, HomerunManager |
 | `TriggerManager` | 23 | |
 | `EntityAsyncManager` | 22 | Async entity create complete (**phase F**: called after the game-started gate, not the phase-B chain; see [loop-gmupdate.md](loop-gmupdate.md) §2) |
 | `RaycastPathManager` | 5 | |
 | `PartyManager` | 4 | |
 | `ThreadManager.UpdateMainThreadTasks` | 64 | Main queue drain (name may not be bare `Update`) |
+
+### 1.1 Related non-gmUpdate sim managers (re-pin 2026-08-07)
+
+| Manager / method | IL | Behaviour |
+|---|---:|---|
+| `WorldBlockTicker.Tick` | 20 | If `bTickingActive` and not remote: `tickScheduled` then `tickRandom(activeChunks)` |
+| `WorldBlockTicker.tickScheduled` | 151 | Under lock, drain due entries from `scheduledTicksSorted` (batch cap **100**) |
+| `ChunkManager.SendChunksToClients` | 216 | Per observer: queue `NetPackageChunkRemove` for `chunksToRemove`, then reload/send packages from observer load sets; clear remove set |
+| `DecoManager.UpdateTick` | 330 | Locked deco lists + decoration coroutine start (OnUpdateTick always-path) |
 
 Also from peers / LateUpdate: `MeshDataManager`, `ConnectionManager`, `DynamicMeshManager`, `SdtdConsole`, `LoadManager`, `PlatformManager`, `AstarManager.UpdateGraphs` (185). The last is player-following and the top measured CPU + heap allocator at load: [`measured-scaling.md`](../../7dtd-optimizer/docs/measured-scaling.md) §1/§4b.
 
@@ -125,5 +134,8 @@ Core types include `GameEventManager` and `GameEventAction` sequences (content-d
 
 ## Changelog
 
+- **2026-08-07:** Manager Update behaviour re-pins (Vehicle/Drone unload lists,
+  Quest objectives, Turret/Faction save timers, GameEvent handles, Power 0.16/120,
+  WorldBlockTicker, SendChunksToClients).
 - **2026-07-19:** Related docs table.
 - **2026-07-18:** Managers + full ModEvents field inventory from dedi-complete dump.

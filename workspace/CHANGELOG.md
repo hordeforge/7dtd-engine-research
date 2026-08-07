@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: manager Update behaviour re-pins
+
+Done (V3.1.0 b14 IL):
+- managers: Vehicle/Drone unloaded ECD reconcile; QuestEvent objectives;
+  Turret 120s / Faction 60s save; GameEvent Handle* chain; Power 0.16/120;
+  WorldBlockTicker scheduled+random; SendChunksToClients remove/send.
+---
 ## 2026-08-07 — tier-C: TickEntities slice math, console path, AddLevelExp
 
 Done (V3.1.0 b14 IL):
