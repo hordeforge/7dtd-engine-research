@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: JumpMove MaxVelocity and speed passives
+
+Done (V3.1.0 b14 IL):
+- JumpMove: collision then gravity; state3 full Gravity else *0.025 + 0.91 damp.
+- MaxVelocity: 5.
+- GetPassiveEffectSpeedModifier: crouch/run table passives 133-135 with Constants bases.
+- ccEntityCollision: start/results; motionMultiplier when slowed.
+---
 ## 2026-08-07 — tier-C: SetMovementState and MoveEntityHeaded
 
 Done (V3.1.0 b14 IL):

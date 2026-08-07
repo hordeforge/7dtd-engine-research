@@ -1477,6 +1477,26 @@ or default step at volume.
 `jumpMovementFactor` **0.163** path into `Move`; climb zeros some motion;
 `entityCollision`; gravity `World.Gravity * 0.025` on y; repeated 0.91 damp.
 
+**`JumpMove` (IL=82):** clear root motion; `entityCollision(motion)` then restore
+xz (and y if non-zero). If jumpState **3** (airborne): `motion.y -= Gravity`.
+Else: xz `*= 0.91`; `motion.y -= Gravity*0.025` then `*= 0.91`.
+
+**`get_MaxVelocity` (IL=2):** constant **5**.
+
+**`GetPassiveEffectSpeedModifier` (IL=81):**
+
+| crouch | running | passive | base constant |
+|:---:|:---:|---:|---|
+| yes | yes | **133** | `cPlayerSpeedModifierWalking` |
+| yes | no | **135** | `cPlayerSpeedModifierCrouching` |
+| no | yes | **134** | `cPlayerSpeedModifierRunning` |
+| no | no | **133** | `cPlayerSpeedModifierWalking` |
+
+**`ccEntityCollision` (IL=12):** `canCCMove=true`;
+`ccEntityCollisionStart(vel)`; if not delayed `ccEntityCollisionResults`.
+Start scales ySize by 0.4 physics constant; applies `motionMultiplier` when
+slowed; stores `hitMove`.
+
 **`PlayHitGroundSound(impactSpeed)` (IL=42):** volume =
 `Lerp(0.3, 1, impactSpeed)`; play `soundLand` else `soundLandThump` else
 `"entityhitsground"`.
@@ -1946,8 +1966,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** SetMovementState 0-3; step dist 1.5; MoveEntityHeaded/Default;
-  ExecuteFall stub; OnUpdatePosition; speed decay 0.5.
+- **2026-08-07:** JumpMove gravity paths; MaxVelocity 5; passive speed 133-135;
+  ccEntityCollision; SetMovementState; step 1.5; MoveEntityHeaded.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
