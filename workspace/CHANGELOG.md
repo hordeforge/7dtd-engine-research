@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TileEntityComposite envelope
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md 2.2: TileEntityComposite write IL=74 /
+  read IL=479 - version u16 18, outer + per-feature i32 size
+  markers, blockId via blockIdMapping remap + BlockCompositeTileEntity
+  check, owner (null in edit mode), featureCount u8, per-feature
+  NameHash; legacy (<17) count/hash match vs modern GetFeatureIndex
+  dispatch, skip-on-unknown, caught module read failures,
+  ValidateSizeMarker checks.
 ## 2026-08-08 - tier-C: NetPackage contract + AddEntityBlockStub
 
 Done (V3.1.0 b14 IL):
