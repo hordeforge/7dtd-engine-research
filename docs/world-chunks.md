@@ -664,6 +664,11 @@ stateDiagram-v2
 **`WorldBlockTicker.Tick` (IL=20):** require `bTickingActive` and server: run
 `tickScheduled` then `tickRandom`.
 
+**Chunk tick gate:** `Chunk.get_NeedsTicking` (IL=13) is
+`tileEntities.Count > 0 || sleeperVolumes.Count > 0` - the per-chunk reason to
+run the TE tick loop at all. `GetTickRefCount(layerIdx)` (IL=13) reads a
+layer's `tickRefCount` (0 for a missing layer).
+
 **`tickScheduled` (IL=151):** lock; process up to **100** due entries from
 `scheduledTicksSorted` (stop at first future `scheduledTime`). If chunk area not
 loaded: reschedule +**30..45** random ticks when chunk exists; else drop. If
