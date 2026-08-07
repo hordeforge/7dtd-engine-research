@@ -96,6 +96,10 @@ for entity targets); `HasTarget()` (IL=41) is `Target != null && !DeadCheck()`
 for entity targets, `POIPosition != zero` for POI targets, and for position
 targets "the block at `POIPosition` differs from the sequence's `blockValue`
 (unless `AllowWhileDead`)".
+`ParseProperties(properties)` (IL=70) stores the `Properties` and parses the
+sequence knobs: `allow_user_trigger` (bool), `action_type` and `target_type`
+(enums), `allow_while_dead`, `refund_inactivity`, `single_instance` (bools),
+`category` (string), and the comma-split `category_names` array.
 
 **`StartSequence(manager)` (IL=4):** only `StartTime = Time.time` (manager arg
 unused in body).
