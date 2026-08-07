@@ -440,6 +440,19 @@ partyMemberCount)`; scale factor `max(1, totalCount/enemyActiveMax)` then
 `FastLerp(1, that, partyLevel/60)` into `SetScaling`; `SetPartyLevel(level)`;
 `bonusLootSpawnCount = bonusLootEvery / 2`.
 
+**`SetScaling(_scaling)` (IL=11):**
+`gsScaling = FastLerp(1, 2.5, (_scaling - 1) / 3)` (clamps growth of stage
+level via later `SetPartyLevel` multiply).
+
+**`AIDirectorBloodMoonParty.Tick` (IL=162):** if `partyLevel < 0` `InitParty`.
+Reverse walk zombies: `updateDelay -= dt`; when ≤0 reset to **1.8** and
+`SeekTarget` (remove on false). Always `partySpawner.Tick(dt)`. If `_canSpawn`
+and `canSpawn` and members &gt; 0 and `CanSpawn(1.9)`: on new `groupIndex`
+add **120** to `spawnBaseDir` and `CalcBestDir(spawnBasePos)`. Cap alive at
+`min(maxAlive, enemyActiveMax)`. Try up to `min(3, memberCount)` players via
+rotating `nextPlayer`; first successful `SpawnZombie` stops the try loop.
+Return true if a spawn attempt window ran.
+
 **`CalcBestDir(basePos)` (IL=161):** score **16** directions at **22.5°** steps.
 For each angle set `spawnDirectionV = forward*40` rotated; try **9**
 `GetRandomSpawnPositionMinMaxToPosition(base+dir, 0, 10, 30, ...)` samples;
@@ -549,8 +562,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** CalcBestDir 16 bins 22.5° score; InitParty IL=49; IsPlayerATarget;
-  FindPartyTarget; SeekTarget 1200; SpawnZombie vulture; CalcPartyLevel
+- **2026-08-07:** BM Tick 1.8s SeekTarget + nextPlayer; SetScaling 1..2.5;
+  CalcBestDir 16 bins; InitParty; IsPlayerATarget; SeekTarget 1200
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
 - **2026-08-07:** CalcSpawnPos ±45° radius + GetMobRandomSpawnPosWithWater 0/10/30;
   SeekTarget 60/150/70 m; Scout SpawnUpdate 6000; UpdateHorde 18s.

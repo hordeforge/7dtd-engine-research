@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: GetAliveCount and BloodMoonParty.Tick
+
+Done (V3.1.0 b14 IL):
+- GetAliveCount: sum(groupCounts)-numSpawned+respawnMap.Count.
+- FindLabel: command==2 name match.
+- SetScaling: FastLerp(1,2.5,(s-1)/3).
+- BloodMoonParty.Tick: updateDelay 1.8 SeekTarget; CanSpawn 1.9; +120 baseDir; min(3,members) spawn tries.
+---
 ## 2026-08-07 — tier-C: MinScript.Tick opcodes and CalcBestDir bins
 
 Done (V3.1.0 b14 IL):

@@ -1320,6 +1320,13 @@ Called once when a player is latched on the volume:
 
 **`MinScript.IsRunning` (IL=7):** `curIndex >= 0`.
 
+**`MinScript.FindLabel(name)` (IL=32):** first command with `command == 2` and
+`parameters == name`; else **-1** (cmd 2 doubles as label marker).
+
+**`SleeperVolume.GetAliveCount` (IL=34):**
+`sum(groupCountList.counts) - numSpawned + respawnMap.Count` (remaining planned
+plus mapped entities, not a live world entity walk).
+
 **`MinScript.Tick` (IL=261):** if `curIndex < 0` stop. While `sleep > 0`:
 subtract **0.05** per call and return until sleep ends. Switch on
 `CmdLine.command`:
@@ -1548,8 +1555,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** MinScript.Tick opcodes 1-4/40/50-52; Run start; Reset fields;
-  UpdatePlayerTouched mult; TriggerSleeperPose; Spawn async.
+- **2026-08-07:** GetAliveCount formula; FindLabel cmd2; MinScript.Tick opcodes;
+  Run start; Reset fields; UpdatePlayerTouched; Spawn async.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
