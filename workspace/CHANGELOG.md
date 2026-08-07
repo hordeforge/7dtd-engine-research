@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: decorator POI queries
+
+Done (V3.1.0 b14 IL):
+- spawning.md 8: chooseClosestPrefab (IL=35) shrinking-bound nearest pick;
+  IsEntityInPrefab (IL=40) listsLock + Contains across allPrefabs.
+
 ## 2026-08-08 - tier-C: EntityItem stick
 
 Done (V3.1.0 b14 IL):
