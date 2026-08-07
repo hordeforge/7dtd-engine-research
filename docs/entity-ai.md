@@ -1315,6 +1315,11 @@ Called once when a player is latched on the volume:
    `AddSpawnCount(groupName, min*mult, max*mult)`; `spawnDelay = 0`.
 6. If `minScript` present: `minScript.Run(volume, player, mult)`.
 
+**`MinScript.Run` (IL=17):** no-op if no `commandList`; store `player` and
+`countScale`; `curIndex = 0`; `sleep = 0` (starts interpreter).
+
+**`MinScript.IsRunning` (IL=7):** `curIndex >= 0`.
+
 **Static padding (`.cctor` IL=48):** `chunkPadding=(12,1,12)`;
 `triggerPaddingMin/Max=(8,0.7,8)` as Vector3i from floats;
 `unpadding=(14,16,14)`; `wanderingCountdown=5`; `difficultyTierScale` length **7**
@@ -1525,7 +1530,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** Reset field clear table; UpdatePlayerTouched mult/bandit 5..6;
+- **2026-08-07:** MinScript.Run start; Reset fields; UpdatePlayerTouched mult;
   TriggerSleeperPose height 0.85; Spawn async; SetSleeper pathCost+0.2.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.

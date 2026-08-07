@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: IsPlayerATarget and MinScript.Run
+
+Done (V3.1.0 b14 IL):
+- IsPlayerATarget: dead/spawned/id; IgnoreAI; Level<=1 or IsBloodMoonDead reject.
+- FindPartyTarget: reverse partyMembers nearest sqr among targets.
+- MinScript.Run: store player/countScale; curIndex=0 sleep=0; IsRunning curIndex>=0.
+---
 ## 2026-08-07 — tier-C: SeekTarget 1200 and SleeperVolume.Reset
 
 Done (V3.1.0 b14 IL):

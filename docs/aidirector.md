@@ -439,6 +439,13 @@ does **not** despawn anything: it clears `bIsChunkObserver`, `IsHordeZombie` and
 partyMemberCount)`; `gsScaling = FastLerp(1, max(1, totalCount/enemyActiveMax),
 partyLevel/60)`; `bonusLootSpawnCount` starts at `partySpawner.bonusLootEvery / 2`.
 
+**`IsPlayerATarget(player)` (IL=29):** false if dead, not spawned, or
+`entityId == -1`; false if `IsIgnoredByAI`; false if `Progression.Level <= 1`
+or `IsBloodMoonDead`; else true (BM-valid living party member).
+
+**`FindPartyTarget(fromPos)` (IL=46):** walk `partyMembers` reverse; among
+`IsPlayerATarget` pick minimum `sqrMagnitude` to `fromPos`; null if none.
+
 **`SeekTarget(ManagedZombie)` (IL=167):** false if zombie null/dead/despawned/no
 GO. Prefer current `GetAttackTarget` player into `mz.player`; if not
 `IsPlayerATarget`, `FindPartyTarget(zombie.pos)`. No player: if not
@@ -534,8 +541,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** SeekTarget 1200 attack/investigate + teleport; SpawnZombie
-  vulture 50%; IL=181; StartingWeight/DiminishingReturns; CalcPartyLevel
+- **2026-08-07:** IsPlayerATarget Level&gt;1 / not BM-dead; FindPartyTarget nearest;
+  SeekTarget 1200 attack/investigate; SpawnZombie vulture; CalcPartyLevel
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
 - **2026-08-07:** CalcSpawnPos ±45° radius + GetMobRandomSpawnPosWithWater 0/10/30;
   SeekTarget 60/150/70 m; Scout SpawnUpdate 6000; UpdateHorde 18s.

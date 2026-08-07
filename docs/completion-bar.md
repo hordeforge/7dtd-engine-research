@@ -238,6 +238,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | UpdatePlayerTouched mult + TriggerSleeperPose | entity-ai.md |
 | SpawnZombie vulture / bonus loot path | aidirector.md |
 | SeekTarget 1200 attack + Reset fields | aidirector.md / entity-ai.md |
+| IsPlayerATarget Level/BM-dead + FindPartyTarget | aidirector.md |
+| MinScript.Run interpreter start | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
