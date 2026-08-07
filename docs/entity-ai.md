@@ -106,11 +106,22 @@ more equipment / held-item / animation residual in later IL.
 
 1. Stat regen zeroing; if not dead: `EntityStats.Tick`.
 2. Attack-target net: may send `NetPackageSetAttackTarget` to tracked players.
-3. `updateCurrentBlockPosAndValue`.
+3. `updateCurrentBlockPosAndValue` (detail below).
 4. Movement / jump / headed move for non-AI branches.
 5. **AI gate** then `updateTasks()` (detail below).
 6. Stun clear/set via avatar controller; can-see updates; dynamic ragdoll;
    trader-area teleport check.
+
+**`updateCurrentBlockPosAndValue` (IL=318):** foot block = entity block pos, or
+y-1 if air; resolve child to parent. If pos/value changed **or** landed this
+tick (`onGround && !wasOnGround`): store standing pos/value; server sets
+`blockStandingOnChanged`; biome change → `onNewBiomeEntered`. Always
+`CalcIfInElevator`. Walk-buff blocks (`UseBuffsWhenWalkedOn`): workstation
+burning path can re-add timed buffs; passive **153** residual; call
+`Block.OnEntityWalking` when appropriate. Falling-block stability residual
+logs when stab 0.
+
+**`isRadiationSensitive` (IL=2):** always **true** (base).
 
 From `EntityAlive.OnUpdateLive` IL (gate before `updateTasks`):
 
@@ -2006,8 +2017,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** UpdateFall hit; set_Crouching stance/_crouching; AABB clip;
-  ApplyFixedUpdate physics RB; entityCollision; Move; climb tags.
+- **2026-08-07:** updateCurrentBlockPosAndValue biome/walk buffs; radiation
+  always true; UpdateFall; crouch; AABB; ApplyFixedUpdate; Move.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

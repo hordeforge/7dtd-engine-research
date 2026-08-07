@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: updateCurrentBlockPosAndValue and radiation
+
+Done (V3.1.0 b14 IL):
+- updateCurrentBlockPosAndValue: air/child resolve; biome enter; elevator; walk buffs; OnEntityWalking.
+- isRadiationSensitive: always true base.
+- Census pin narrated 1484 / catalogued 825 / unaccounted 0.
+---
 ## 2026-08-07 — tier-C: UpdateFall set_Crouching and aabb collision
 
 Done (V3.1.0 b14 IL):

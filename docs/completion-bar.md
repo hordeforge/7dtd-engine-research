@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1483 / catalogued 826 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1484 / catalogued 825 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -276,6 +276,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | JumpMove + MaxVelocity 5 + speed passives | entity-ai.md |
 | entityCollision + Move accel + crouch/climb | entity-ai.md |
 | UpdateFall + set_Crouching + aabb clip | entity-ai.md |
+| updateCurrentBlockPosAndValue biome/walk | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
