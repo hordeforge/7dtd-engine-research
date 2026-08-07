@@ -608,6 +608,20 @@ indexed by the selected ammo slot), `Single_magazine_usage` ->
 `Damage_type`, `Reload_time`, `Show_ammo_force`, the muzzle particles and
 empty/repeat/reload/end sound keys, and `Sound_impact_volume_scale`.
 
+`ItemActionRanged.ReadFrom` (IL=126) adds `bullet_material` (default
+"bullet"), `SupportHarvesting`, `UseMeleeCrosshair`, `EntityPenetrationCount`
+(0), `BlockPenetrationFactor` (0), `AutoReload`, the controller
+trigger-effect strings (Dualsense / Xbox shoot + trigger-pull, empty
+default), `SpreadVerticalOffset`, `RapidTrigger`, and the AI burst ranges
+`aiBurstShot` (IntRange, default 1..1) / `aiBurstDelay` (FloatRange, default
+1..2). `ItemActionEat.ReadFrom` (IL=152) parses `Consume` (default true),
+the `Create_item` refund (name + `Create_item_count` default 1 +
+`Use_jar_refund`; all three cleared when the key is absent), `BlocksAllowed`
+(comma list resolved via `Block.GetBlockByName`, unknown names logged as
+`ItemActionEat BlocksAllowed invalid {0}`, into the `ConditionBlockTypes`
+set; an empty set is nulled), `PromptDescription` / `PromptTitle` / `SmellUse`,
+and sets `UsePrompt = PromptDescription != null`.
+
 **Reload leaves:** `ConsumeAmmo(data)` (IL=9) is `iv.Meta -= 1` (one round per
 shot). `loadNewAmmunition(gun, ammo, entity)` (IL=20) reads the holding
 action slot 0 as `ItemActionDataRanged`, resets `SelectedAmmoTypeIndex` to 0
@@ -1615,6 +1629,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionRanged.ReadFrom (IL=126) bullet_material /
+  penetration / AutoReload / aiBurst ranges; ItemActionEat.ReadFrom
+  (IL=152) Consume, Create_item refund trio, BlocksAllowed ->
+  ConditionBlockTypes, UsePrompt = PromptDescription != null.
 - **2026-08-08:** ItemActionAttack.ReadFrom (IL=482) config parse:
   ToolCategory/DamageEntity/DamageBlock/Range/Sphere, Magazine_items ->
   MagazineItemNames + UsesMagazines, parallel ray-counts/spreads arrays,
