@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: StringParsers contract
+
+Done (V3.1.0 b14 IL):
+- dedicated-misc-systems.md: StringParsers - Parse vs TryParse,
+  substring overloads, float defaults 511 vs integer defaults 7;
+  internalParseBool True/False-only, internalParseDouble hex
+  rejection, float overflow guard; GetSeparatorPositions scanner
+  + findOther; vector/quaternion/color/min-max table; ParseList.
 ## 2026-08-08 - tier-C: DynamicProperties property bag
 
 Done (V3.1.0 b14 IL):
