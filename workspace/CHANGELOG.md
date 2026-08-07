@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: dismount recall + fall rescue
+
+Done (V3.1.0 b14 IL):
+- EntityPlayer.FindValidExitPosition (IL=14) + GetFallingSavePosition (IL=161)
+  in entity-ai.md D4: dismount bookkeeping (lastVehiclePositionOnDismount,
+  timeOfVehicleDismount, forcedDetach); recall window returns dismount position
+  while Time.time - timeOfVehicleDismount < vehicleTeleportThresholdSeconds and
+  not forcedDetach; fell-through-world path logs [FELLTHROUGHWORLD], picks the
+  closest non-empty chunk from ChunkObserver.chunksAround (center +8 probe,
+  min sqrMagnitude), clamps x/z into [origin+0.5, origin+16-1], y =
+  GetTerrainHeight + 0.5.
+
 ## 2026-08-08 - tier-C: velocity-per-second + CanHeal
 
 Done (V3.1.0 b14 IL):
