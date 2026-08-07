@@ -264,6 +264,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | CreateNewParty + RemovePlayer/AddMember | aidirector.md |
 | BloodMoonComponent.Tick party round-robin | aidirector.md |
 | Start/EndBloodMoon + KillPartyZombies | aidirector.md |
+| ClearParties + CalcNextDay frequency/range | aidirector.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

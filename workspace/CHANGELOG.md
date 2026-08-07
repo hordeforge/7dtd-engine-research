@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: ClearParties and CalcNextDay
+
+Done (V3.1.0 b14 IL):
+- ClearParties: nextParty 0; clear parties; null player.bloodMoonParty.
+- CalcNextDay: step = Frequency + Random(0..Range); walk last; optional seek keep.
+- SetDay: GameStateManager.SetBloodMoonDay + log.
+---
 ## 2026-08-07 — tier-C: Start/EndBloodMoon and KillPartyZombies
 
 Done (V3.1.0 b14 IL):

@@ -441,6 +441,18 @@ clear `bIsChunkObserver`, `IsHordeZombie`, `IsBloodMoon` (no kill/despawn).
 **`KillPartyZombies` (IL=48):** `DecSpawnCount(zombies.Count)`; kill each live
 non-despawned zombie with `DamageResponse.New(true)`; clear list.
 
+**`ClearParties` (IL=25):** `nextParty = 0`; clear `parties` list; null every
+player's `bloodMoonParty`.
+
+**`SetDay(day)` (IL=45):** `GameStateManager.SetBloodMoonDay(day)` if present;
+if day changed store `bmDay` and log freq/range.
+
+**`CalcNextDay(isSeek)` (IL=82):** if `BloodMoonFrequency <= 0` set day **0**.
+Else step = frequency + `RandomRange(0, range+1)`. Walk `bmDayLast` forward so
+`bmDayLast + step` is after current day (clamp last ≥ 0). If `isSeek` and
+current `bmDay` still in `[bmDayLast, bmDayLast+freq+range]` keep that day;
+else `SetDay(computed)`.
+
 `AIDirectorBloodMoonParty` constants (413090-413140): `cPartyJoinDistance` 80
 (sq 6400), `cSightDist` 100, `cTeleportDist` 150 (sq 22500), `cSpawnPreferredArc`
 120, `cSpawnAngle` 90, `cSpawnDistance` 40, `cSpawnMinRandDistance` 0,
@@ -627,8 +639,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** Start/EndBloodMoon ClearParties + enemy flag sweeps;
-  KillPartyZombies DecSpawnCount; IsBloodMoonTime; BM Tick delay 1/N.
+- **2026-08-07:** ClearParties; CalcNextDay frequency+range; SetDay GameState;
+  Start/EndBloodMoon; KillPartyZombies; BM Tick delay 1/N.
 - **2026-08-07:** get_maxAlive; BM Tick 1.8s SeekTarget + nextPlayer; SetScaling;
   CalcBestDir 16 bins; InitParty; IsPlayerATarget; SeekTarget 1200
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
