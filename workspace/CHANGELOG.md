@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TraderArea blob
+
+Done (V3.1.0 b14 IL):
+- dedicated-leftovers.md: TraderArea Write IL=111 / Read IL=91 (pos int32, size int16, padding sbyte -2 x/z, per-volume sbyte+byte), GetReadWriteSize 22+6n, IsWithinProtectArea AABB
+
 ## 2026-08-08 - tier-C: damage-scale pick
 
 Done (V3.1.0 b14 IL):
