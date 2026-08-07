@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityClass prop-name table + activation commands
+
+Done (V3.1.0 b14 IL):
+- New inventory docs/inventories/entityclass-props.md: 187 EntityClass Prop*
+  statics from .cctor (IL=394) with literal values; class-id/tag statics noted.
+- Corrected D8.7 AI task keys: AITask-1..N / AITarget-1..N (dash, not no-dash);
+  D8.6a custom-command keys: CustomCommandName<i> etc. (not CustomCommand<i>).
+- Entity.GetActivationCommands IL=51: cache + InitLocalActivationCommands +
+  customCmds + ReorderActivationCommands.
+---
 ## 2026-08-08 — tier-C: PlayerSpawnedInWorld full body
 
 Done (V3.1.0 b14 IL):

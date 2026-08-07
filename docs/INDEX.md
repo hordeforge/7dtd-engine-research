@@ -319,6 +319,7 @@ live with the mod that ships them.
 | [inventories/minevent-actions.md](inventories/minevent-actions.md) | minevents.md (71 triggered-effect leaves) |
 | [inventories/console-command-list.md](inventories/console-command-list.md) | console-commands.md (187 commands, with descriptions) |
 | [inventories/xmlsToLoad.md](inventories/xmlsToLoad.md) | mod-loading.md (49 WorldStaticData XmlLoadInfo rows) |
+| [inventories/entityclass-props.md](inventories/entityclass-props.md) | entity-ai.md D8.6-D8.7 (187 EntityClass prop-name constants from the cctor) |
 | [inventories/quest-objectives.md](inventories/quest-objectives.md) | quests-challenges.md (38 objectives) |
 | [inventories/sequence-requirements.md](inventories/sequence-requirements.md) | game-events.md (37 concrete requirements) |
 

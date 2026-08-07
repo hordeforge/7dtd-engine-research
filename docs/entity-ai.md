@@ -2225,11 +2225,15 @@ Runs first (D8.6 calls it). Copies from the resolved `EntityClass`:
 3. Icon props (all `ParseString`): `mapIcon`, `compassIcon`, `compassUpIcon`,
    `compassDownIcon`, `trackerIcon`; `isRotateToGround` bool prop.
 4. **Custom activation commands:** scan keys `PropCustomCommandName + i` for
-   `i = 1..10` (a `{0}{1}` format of the static name and the counter; stock XML:
-   `CustomCommand1`, ...) in `Properties.Values` to count how many exist;
+   `i = 1..10` (a `{0}{1}` format of the static name and the counter: the
+   `CustomCommandName` static concatenated with the index, giving
+   `CustomCommandName1..10`; see
+   [inventories/entityclass-props.md](inventories/entityclass-props.md)) in
+   `Properties.Values` to count how many exist;
    allocate `customCmds`. For each present index build
    `EntityActivationCommand {commandId, icon, eventName}` from the
-   `CustomCommand<i>` / `CustomCommandIcon<i>` / `CustomCommandEvent<i>` keys;
+   `CustomCommandName<i>` / `CustomCommandIcon<i>` / `CustomCommandEvent<i>`
+   keys;
    `iconColor` = `ParseHexColor(CustomCommandIconColor<i>)` or white;
    `activateTime` = parsed float or **-1**; `enabled = true`. Stored at
    `customCmds[i-1]`.
@@ -2237,6 +2241,12 @@ Runs first (D8.6 calls it). Copies from the resolved `EntityClass`:
    `lastUpdateFrameOfActivationCommands = -1`,
    `lastUpdateActivationCommandsPlayerId = -1`,
    `lastUpdateHadEnabledActivationCommands = false`.
+
+**Consumer `Entity.GetActivationCommands()` (IL=51):** return the cached
+`activationCommands` if set; else collect subclass defaults via
+`InitLocalActivationCommands(cmd => add)`, append all `customCmds`, then
+`ReorderActivationCommands(list)`, cache `activationCommands = list.ToArray()`
+and return it.
 
 `EntityPlayer.CopyPropertiesFromEntityClass` (IL=3) is a pure base call;
 `EntityPlayerLocal` (IL=21) additionally reads `dropInventoryBlock` from the
@@ -2258,8 +2268,10 @@ aiManager exists. Builds the AI tuning fields and both task lists from the
    `GamePath.ASPPathFinder.Calculate`, the partial-height path weight).
 3. **AITask list** (`tasks`, the always-run decision tasks):
    - If the `AITask` string prop is non-empty: `ParseTasks(AITask, tasks)`.
-   - Else: numbered fallback keys `PropAITask + "1"`, `+ "2"`, ... (stock XML:
-     `AITask1`, `AITask2`, ...) looked up in `Properties.Values`; for each
+   - Else: numbered fallback keys `PropAITask + i` for `i = 1..` (the `AITask-`
+     static plus index: `AITask-1`, `AITask-2`, ...; see
+     [inventories/entityclass-props.md](inventories/entityclass-props.md))
+     looked up in `Properties.Values`; for each
      present non-empty key: `CreateInstance(class)` (throws
      `Class '<x>' not found!` when null), `Init(entity)`,
      `SetData(ParseKeyData(key))` inside a try/catch that logs
@@ -2267,7 +2279,7 @@ aiManager exists. Builds the AI tuning fields and both task lists from the
      with index counting up from 1.
 4. **AITarget list** (`targetTasks`, the target-selection tasks, e.g.
    `EAISetNearestEntityAsTarget`): identical pattern via the `AITarget` string
-   prop, else numbered `AITargetTask1..N` keys.
+   prop, else numbered `PropAITargetTask + i` keys (`AITarget-1..N`).
 
 **`ParseTasks(str, list)` (IL=111):** scan for letter-starting tokens; each
 entry runs to the next `|` or end of string. An entry is
