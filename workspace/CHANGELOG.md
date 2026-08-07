@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EnumStat mapping
+
+Done (V3.1.0 b14 IL):
+- NetPackageEntityStatChanged/EnumStat pinned: Health 0, Stamina 1, Sickness 2,
+  Gassiness 3, SpeedModifier 4, Wellness 5, CoreTempOLD 6, Food 7, Water 8.
 ## 2026-08-08 — tier-C: stat max getters
 
 Done (V3.1.0 b14 IL):
