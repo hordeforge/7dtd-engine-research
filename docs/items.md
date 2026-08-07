@@ -52,6 +52,12 @@ called `ItemActionData`.
 So an `ItemAction` **is** its own XML parameter bag, and it is **handed** a
 runtime `ItemActionData` on every call. Keep the two apart when reading the IL.
 
+**Name resolution:** `ItemClass.GetItemClass(name, caseInsensitive)` (IL=15)
+looks up the static `nameToItem` (or `nameToItemCaseInsensitive`) dictionary;
+`ItemClass.GetItem(name, ci)` (IL=13) wraps a hit into
+`new ItemValue(class.Id, false)` and returns `ItemValue.None` for a miss
+(the resolution behind `WorldBiomes.GetBlockValueForName`).
+
 ```mermaid
 flowchart TB
   IV["ItemValue<br/>(packed instance)"] -->|type id indexes| IC["ItemClass<br/>(definition, ItemClass.list[type])"]

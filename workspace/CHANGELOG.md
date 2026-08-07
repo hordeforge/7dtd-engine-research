@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemClass name resolution
+
+Done (V3.1.0 b14 IL):
+- ItemClass.GetItemClass (IL=15) nameToItem / nameToItemCaseInsensitive
+  dict lookup; GetItem (IL=13) wraps hit into new ItemValue(class.Id) or
+  ItemValue.None - the WorldBiomes.GetBlockValueForName resolution. items.md
+  section 1.
+
 ## 2026-08-08 - tier-C: World entity lookups
 
 Done (V3.1.0 b14 IL):
