@@ -689,6 +689,11 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   chunk region resets. `RegionFileManager.RemoveChunks` calls
   `DecoManager.ResetDecosForWorldChunk(chunkKey)` so chunk resets restore
   generated trees.
+  `GetDecorationsOnChunk` (IL=143) lazily decorates an undecorated DecoChunk
+  under its lock (`Decorating chunk, should not happen at this point!` error),
+  reads the 16x16 bucket, warns
+  `DecoManager decosInChunk #{0} null at {1}, {2}` on null entries, and
+  appends `SBlockPosValue(pos, bv)` for every `state != 1` record.
 - Dedicated networking: `GameManager.RequestToEnterGame →
   DecoManager.SendDecosToClient(clientInfo)`; updates and resets flow through
   `NetPackageDecoUpdate` / `NetPackageDecoResetWorldChunk` /
