@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `03b6f4f` mine damage detonation |
-| Commits since dry-run `3b61d9c` | ~448 |
+| HEAD (at handoff write) | `318a352` collision damage + spike retract |
+| Commits since dry-run `3b61d9c` | ~449 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
