@@ -99,6 +99,11 @@ meta), else the plain value.
 `GetAltBlock(typeId).ToBlockValue()`; `GetAltBlockNames()` (IL=3) is the raw
 field read.
 
+**`Block.GetBlockByName(name, caseInsensitive)` (IL=19)** is the registry
+lookup: a null `nameToBlock` (uninitialized registry) returns null; otherwise
+the `nameToBlockCaseInsensitive` (or `nameToBlock`) dictionary
+`TryGetValue`, null when absent.
+
 ```mermaid
 flowchart LR
   RW["rawData : u32"] --> B0["bits 0-15<br/>type (id)"]
@@ -502,6 +507,8 @@ damage.
 
 ## Changelog
 
+- **2026-08-07:** Block.GetBlockByName (IL=19): nameToBlock[CaseInsensitive]
+  dict lookup, null registry -> null.
 - **2026-08-07:** Alternate-block resolution: GetAltBlock (IL=19) indexed
   placeAltBlockClasses w/ Block.list[0] fallback, GetAltBlocks (IL=39) lazy
   name resolve, GetAltBlockValue (IL=5) wrap, GetAltBlockNames (IL=3).

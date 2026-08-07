@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Block.GetBlockByName
+
+Done (V3.1.0 b14 IL):
+- Block.GetBlockByName (IL=19) narrated in blocks.md: null nameToBlock
+  (uninitialized registry) -> null; else nameToBlockCaseInsensitive or
+  nameToBlock TryGetValue (null when absent) - the block name registry.
+
 ## 2026-08-08 - tier-C: Block alternate resolution
 
 Done (V3.1.0 b14 IL):
