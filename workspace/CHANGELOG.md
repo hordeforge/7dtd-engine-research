@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: water write path + WaterValue leaves
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md: Chunk.SetWater IL=13 (raw +
+  WakeNeighbours); SetWaterRaw IL=55 (flow-through mass-0 gate,
+  chnWater.Set, dirty flags, SetWaterMass, heightmap raise).
+- WaterValue: SetMass IL=8 FastClamp 0..65535;
+  get_RawData/FromRawData u16<->i64 channel word; wire u16.
 ## 2026-08-08 - tier-C: water write path
 
 Done (V3.1.0 b14 IL):
