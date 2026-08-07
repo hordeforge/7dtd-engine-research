@@ -126,6 +126,11 @@ generic `MapObject` Entity fallback only for other icon-bearing entities.
 `mapIcon` / `trackerIcon` / `compassIcon` strings (from the `EntityClass`
 config) is non-null.
 
+**`Entity.GetMapObjectType()` (IL=2)** returns the entity's `EnumMapObjectType`
+- base `Entity` is 0 (none); `EntitySupplyCrate` overrides to **13** (the
+special crate type handled by the `MapObjectType == 13` branch in
+`World.RemoveEntityFromMap`).
+
 ## 4. MapObjectManager (client-only in practice)
 
 - Storage: `List<DictionaryList<int, MapObject>>` with one bucket per enum
@@ -248,6 +253,8 @@ add/remove, override color, localization flag, entityId.
 
 ## Changelog
 
+- **2026-08-07:** Entity.GetMapObjectType (IL=2): base 0, EntitySupplyCrate 13
+  (the RemoveEntityFromMap special-crate branch).
 - **2026-08-07:** Entity.HasUIIcon (IL=13): mapIcon/trackerIcon/compassIcon
   non-null gate behind AddEntityToMap.
 - **2026-07-28:** NetPackageNavObject field list.

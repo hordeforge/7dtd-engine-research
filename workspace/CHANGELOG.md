@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.GetMapObjectType
+
+Done (V3.1.0 b14 IL):
+- Entity.GetMapObjectType (IL=2) narrated in map-objects.md: base 0,
+  EntitySupplyCrate override 13 - the special crate type handled by the
+  MapObjectType == 13 branch in World.RemoveEntityFromMap.
+
 ## 2026-08-08 - tier-C: Entity.HasUIIcon
 
 Done (V3.1.0 b14 IL):
