@@ -166,6 +166,20 @@ Twitch boss horde active. Else build `AIDirectorChunkEvent(type, pos,
 value * HeatMapSensitivityModifier, duration)` and
 `chunkEventComponent.NotifyEvent`.
 
+**`AIDirector.NotifyNoise(instigator, pos, clipName, volumeScale)` (IL=84)** is
+the sound-to-AI chain behind `OnSoundPlayedAtPosition` (IL=17, which resolves
+the instigator entity first): `AIDirectorData.FindNoise(clipName)` fails for an
+unknown clip (silent return); enemy instigators, `IsIgnoredByAI` entities, and
+`EntityItem` throwable **decoys** are all excluded. The instigator's
+`AIDirectorPlayerState` is looked up in `playerManagementComponent`; a
+crouching player muffles the noise (`volumeScale *= noise.muffledWhenCrouched`).
+`volume = noise.volume * volumeScale` feeds
+`playerState.Player.Stealth.NotifyNoise(volume, noise.duration)`; when the
+stealth system accepts it, `world.CheckSleeperVolumeNoise(pos)` wakes sleepers
+in range. Finally, `noise.heatMapStrength > 0` raises a heat-map chunk event:
+`NotifyActivity(EnumAIDirectorChunkEvent=3, worldToBlockPos(pos),
+heatMapStrength * volumeScale, 240)`.
+
 **`CheckToSpawn()` (IL=18):** FIFO pop one entry from `checkChunks` and call
 `CheckToSpawn(chunkData)` (one chunk per 5 s pulse).
 
@@ -730,6 +744,10 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** NotifyNoise (IL=84) sound-to-AI chain: noise-table lookup,
+  enemy/ignored/decoy exclusions, crouch muffle, PlayerStealth.NotifyNoise ->
+  CheckSleeperVolumeNoise, heat-map NotifyActivity(3, strength*scale, 240);
+  OnSoundPlayedAtPosition (IL=17) entry.
 - **2026-08-07:** SmellMarker.Tick (IL=71): ttl/validTime decay, time cap,
   effective radius min(radius, speed*time) expansion, effective strength
   strength*(1 - time/lifetime) linear decay.

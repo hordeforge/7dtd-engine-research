@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: AIDirector.NotifyNoise
+
+Done (V3.1.0 b14 IL):
+- AIDirector.NotifyNoise (IL=84) + OnSoundPlayedAtPosition (IL=17) narrated
+  in aidirector.md: noise-table lookup (unknown clip silent), enemy /
+  IsIgnoredByAI / ThrowableDecoy exclusions, tracked-player state lookup,
+  crouch volumeScale *= muffledWhenCrouched, volume = noise.volume * scale
+  -> PlayerStealth.NotifyNoise -> CheckSleeperVolumeNoise on accept, then
+  heat-map NotifyActivity(3, pos, heatMapStrength * scale, 240).
+
 ## 2026-08-08 - tier-C: SmellMarker model
 
 Done (V3.1.0 b14 IL):
