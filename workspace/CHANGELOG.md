@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GameModeAbstract.Init GameStats bootstrap table
+
+Done (V3.1.0 b14 IL):
+- Init IL=205 full GameStats <- GamePrefs seed table (53 rows) added to
+  server-lifecycle §2.1: GS 24/23/15/20/18/37/59/60/61/42/72-76/51/53/35/33/34/
+  39-41/43-50/63/54/66/68/71/57/62/65/67 <- matching prefs; GS 14/27/19/21/22/
+  4/2/6 consts; GS 11 = 24000/(DayNightLength*60); GS 77-80 const 100.
 ## 2026-08-08 — tier-C: GameMode.StartRound per mode
 
 Done (V3.1.0 b14 IL):

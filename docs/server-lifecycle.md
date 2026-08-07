@@ -123,6 +123,68 @@ just `GameStats.Set(GameState, Running)`. `Deathmatch` (IL=62) and
 `ZombieHorde` (IL=53) are 4-state switches on the round index (time/frag-limit
 setup, `CurrentRoundIx`, `LoadScene` + `SceneGame`/loading-screen transitions).
 
+**`GameModeAbstract.Init()` (IL=205):** the GameStats bootstrap - every
+`GameStats.Set` copied from a `GamePrefs` (via `GetBool`/`GetInt`/`GetString`
+per stat type, or a constant) so the mode's
+`Init` pref switches take effect on the running server. Indexes resolve
+via [inventories/gamestats-gameprefs.md](inventories/gamestats-gameprefs.md).
+
+| GameStats | Seeded from |
+|---|---|
+| `24` IsSpawnEnemies | GamePrefs.GetInt(82) `EnemySpawnMode` |
+| `23` PlayerKillingMode | GamePrefs.GetInt(52) `PlayerKillingMode` |
+| `14` ShowAllPlayersOnMap | const 0 |
+| `15` ShowFriendPlayerOnMap | GamePrefs.GetInt(65) `ShowFriendPlayerOnMap` |
+| `27` IsResetMapOnRestart | const 0 |
+| `20` IsFlyingEnabled | GamePrefs.GetInt(58) `BuildCreate` |
+| `18` IsCreativeMenuEnabled | GamePrefs.GetInt(58) `BuildCreate` |
+| `19` IsTeleportEnabled | const 0 |
+| `21` IsPlayerDamageEnabled | const 1 |
+| `22` IsPlayerCollisionEnabled | const 1 |
+| `11` TimeOfDayIncPerSec | 24000 / (GamePrefs.GetInt(60) `DayNightLength` * 60) |
+| `4` DayLimitActive | const 0 |
+| `2` TimeLimitActive | const 0 |
+| `6` FragLimitActive | const 0 |
+| `37` GameDifficulty | GamePrefs.GetInt(30) `GameDifficulty` |
+| `59` BlockDamagePlayer | GamePrefs.GetInt(84) `BlockDamagePlayer` |
+| `60` XPMultiplier | GamePrefs.GetInt(111) `XPMultiplier` |
+| `61` BloodMoonWarning | GamePrefs.GetInt(64) `BloodMoonWarning` |
+| `42` DayLightLength | GamePrefs.GetInt(61) `DayLightLength` |
+| `72` DayNightLength | GamePrefs.GetInt(60) `DayNightLength` |
+| `73` BlockDamageAI | GamePrefs.GetInt(85) `BlockDamageAI` |
+| `74` BlockDamageAIBM | GamePrefs.GetInt(86) `BlockDamageAIBM` |
+| `75` LootAbundance | GamePrefs.GetInt(87) `LootAbundance` |
+| `76` LootRespawnDays | GamePrefs.GetInt(88) `LootRespawnDays` |
+| `77` GlobalGSModifier | const 100 |
+| `78` BiomeGSModifier | const 100 |
+| `79` GlobalLSModifier | const 100 |
+| `80` BiomeLSModifier | const 100 |
+| `51` AirDropFrequency | GamePrefs.GetInt(98) `AirDropFrequency` |
+| `53` AirDropMarker | GamePrefs.GetInt(150) `AirDropMarker` |
+| `35` DeathPenalty | GamePrefs.GetInt(79) `DeathPenalty` |
+| `33` DropOnDeath | GamePrefs.GetInt(77) `DropOnDeath` |
+| `34` DropOnQuit | GamePrefs.GetInt(78) `DropOnQuit` |
+| `39` BloodMoonEnemyCount | GamePrefs.GetInt(81) `BloodMoonEnemyCount` |
+| `40` EnemySpawnMode | GamePrefs.GetInt(82) `EnemySpawnMode` |
+| `41` EnemyDifficulty | GamePrefs.GetInt(83) `EnemyDifficulty` |
+| `43` LandClaimCount | GamePrefs.GetInt(90) `LandClaimCount` |
+| `44` LandClaimSize | GamePrefs.GetInt(91) `LandClaimSize` |
+| `45` LandClaimDeadZone | GamePrefs.GetInt(92) `LandClaimDeadZone` |
+| `46` LandClaimExpiryTime | GamePrefs.GetInt(93) `LandClaimExpiryTime` |
+| `47` LandClaimDecayMode | GamePrefs.GetInt(94) `LandClaimDecayMode` |
+| `48` LandClaimOnlineDurabilityModifier | GamePrefs.GetInt(95) `LandClaimOnlineDurabilityModifier` |
+| `49` LandClaimOfflineDurabilityModifier | GamePrefs.GetInt(96) `LandClaimOfflineDurabilityModifier` |
+| `50` LandClaimOfflineDelay | GamePrefs.GetInt(97) `LandClaimOfflineDelay` |
+| `63` BedrollExpiryTime | GamePrefs.GetInt(192) `BedrollExpiryTime` |
+| `54` PartySharedKillRange | GamePrefs.GetInt(100) `PartySharedKillRange` |
+| `66` BiomeProgression | GamePrefs.GetInt(271) `BiomeProgression` |
+| `68` CameraRestrictionMode | GamePrefs.GetInt(280) `CameraRestrictionMode` |
+| `71` SandboxCode | GamePrefs.GetInt(296) `SandboxCode` |
+| `57` OptionsPOICulling | GamePrefs.GetInt(174) `OptionsPOICulling` |
+| `62` AllowedViewDistance | GamePrefs.GetInt(8) `OptionsGfxViewDistance` |
+| `65` QuestProgressionDailyLimit | GamePrefs.GetInt(265) `QuestProgressionDailyLimit` |
+| `67` StormFreq | GamePrefs.GetInt(275) `StormFreq` |
+
 ---
 
 ## 3. Player join and persistence (state machine)
