@@ -205,6 +205,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | Party GetHighestLootStage wrappers | loot-economy.md |
 | getProbability passive 79 + SpawnLootItemsFromList | loot-economy.md |
 | GetSandboxProb + RandomSpawnCount ±0.49 | loot-economy.md |
+| RandomCountFromSandboxTags category table | loot-economy.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

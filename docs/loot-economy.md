@@ -598,6 +598,30 @@ Passive **159** scales loot stage; **160** scales biome max when GameStats **66*
 multiply by `abundance`, then probabilistic ceil of fractional part
 (`RandomFloat < frac` → +1). Integer result.
 
+**`RandomCountFromSandboxTags` (IL=97):** pick category multiplier by first
+matching item tags (else leave **1**):
+
+| Tags field | Modifier field |
+|---|---|
+| `foodTags` | `FoodCountModifier` |
+| `drinksTags` | `DrinkCountModifier` |
+| `ammoTags` | `AmmoCountModifier` |
+| `medicalTags` | `MedicalCountModifier` |
+| `junkTags` | `ResourceCountModifier` |
+| `armorTags` | `ArmorCountModifier` |
+| `meleeTags` | `MeleeCountModifier` |
+| `rangedTags` | `RangedCountModifier` |
+| `dukesTags` | `DukesCountModifier` |
+| `magazineTags` | `MagazinesCountModifier` |
+| `booksTags` | `BookCountModifier` |
+
+If mod **0** return 0; if **1** return `itemSpawnCount` unchanged; else
+`RandomSpawnCount(count, count, mod)`.
+
+**`RandomCountFromSandbox(group, min, max, abundance)` (IL=27):**
+`GetCountMultiplierFromSandbox(group.abundanceType)` (null group → 0 type); if
+mult ≥ 0, `abundance *= mult`; then `RandomSpawnCount(min, max, abundance)`.
+
 ## Related docs
 
 | Doc | Role |
@@ -612,8 +636,8 @@ multiply by `abundance`, then probabilistic ceil of fractional part
 
 ## Changelog
 
-- **2026-08-07:** GetSandboxProb treasureTags/TreasureMapChance; RandomSpawnCount
-  ±0.49 abundance ceil; getProbability passive 79; SpawnLootItemsFromList.
+- **2026-08-07:** RandomCountFromSandboxTags category table; RandomCountFromSandbox
+  abundanceType mult; GetSandboxProb; RandomSpawnCount ±0.49.
 - **2026-08-07:** EntityItem.OnUpdateEntity lifetime 0.05/tick, ground counter 10,
   distraction death, Y&lt;0 death; OnCollectServer RemoveEntity reason 2.
 - **2026-08-07:** EntityTrader.OnUpdateLive IL=315 (quest populate, 10 m bounds
