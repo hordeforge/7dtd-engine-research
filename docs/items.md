@@ -583,6 +583,13 @@ and updates the last-drawn value/index.
 `setHeldItemByIndex(idx, true)` (with holster time); the `NoHolsterTime`
 variant (IL=5) passes false.
 
+**`DecHoldingItem(count)` (IL=45)** consumes from the held slot (stackable
+only): on emptying it runs `HandleTurningOffHoldingFlashlight()` +
+`clearSlotByIndex`, then `updateHoldingItem()` + `notifyListeners()`.
+**`GetBestQuickSwapSlot()` (IL=50)** prefers the remembered
+`quickSwapSlotIdx` when it still holds the same item id, else scans for the
+first slot with that id (**-1** when absent or never armed).
+
 `DecHoldingItem` is the server-authoritative depletion: it lowers the held
 `ItemStack.count`, and when the stack hits zero it clears the slot and quick-swaps
 to the best remaining slot (`GetBestQuickSwapSlot`) so a used-up stack of thrown
