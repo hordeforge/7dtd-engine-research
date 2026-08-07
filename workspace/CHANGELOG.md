@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EnumGameState pinning
+
+Done (V3.1.0 b14 IL):
+- EnumGameState pinned (Off -1 / Loading 0 / Running 1 / Over 2): pause path
+  sets GameState Over(2) / Running(1); vulture prologue ret on Over(2);
+  inventory note added.
+---
 ## 2026-08-08 — tier-C: EntityVulture helper leaves
 
 Done (V3.1.0 b14 IL):

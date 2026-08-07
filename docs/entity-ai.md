@@ -2372,7 +2372,8 @@ else uses the generic `updateTasks` IL=125 + EAI stack). Own state machine
 Stun=4, WanderStart=5, Wander=6**) with direct motion integration, no pathfinding.
 
 **Prologue gates:** if pref **46** (debug info) → `aiManager.UpdateDebugName` +
-ret; if `GameStats[0] (GameState) == 2` → ret; `CheckDespawn()`;
+ret; if `GameStats[0] (GameState) == 2 (EnumGameState.Over)` → ret;
+`CheckDespawn()`;
 `EntitySeeCache.ClearIfExpired()`; `IsSleeperPassive` → ret.
 
 **Sleeper wake scan (while `IsSleeping`):** gather players within

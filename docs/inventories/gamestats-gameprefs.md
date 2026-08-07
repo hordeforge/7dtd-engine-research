@@ -7,6 +7,9 @@ the V3.1.0 b14 assembly. Docs cite indices like `GameStats[24]` or
 
 ## EnumGameStats
 
+Note: `GameStats[0] (GameState)` holds `EnumGameState` (Off=-1, Loading=0,
+Running=1, Over=2). `GameStats[1] (GameModeId)` holds a `GameMode` id.
+
 | Index | Name |
 |---|---|
 | 0 | `GameState` |

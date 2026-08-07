@@ -77,11 +77,13 @@ every frame (also reachable from `Disconnect`):
 4. `SetPauseWindowEffects(state)`: when pausing and not
    `GameModeSurvivalSP`: clear `AimingGun` on every local player (client-only;
    no local players on dedicated).
-5. **Pause:** `GameStats.Set(0, 2)`; if `IsServer()` →
+5. **Pause:** `GameStats.Set(GameState, 2 = EnumGameState.Over)`; if
+   `IsServer()` →
    `SaveLocalPlayerData()` + `SaveWorld()` (a pause triggers a world save);
    `Time.timeScale = 0`; stop gamepad vibration if primary player exists.
-6. **Unpause:** if `GameStats.GetInt(0) != 0` → `GameStats.Set(0, 1)` (round
-   becomes active); `Time.timeScale = 1`.
+6. **Unpause:** if `GameStats.GetInt(GameState) != 0` (not
+   `EnumGameState.Loading`) → `GameStats.Set(GameState, 1 =
+   EnumGameState.Running)`; `Time.timeScale = 1`.
 7. If `gamePaused` actually flips and world exists: pause → audio
    `PauseGameplayAudio` + `EnvironmentAudioManager.Pause` +
    `dmsConductor.OnPauseGame`; unpause → matching `UnPause*`. Store `gamePaused`.
