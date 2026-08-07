@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: StartStopLivingSound
+
+Done (V3.1.0 b14 IL):
+- EntityAlive.StartStopLivingSound IL=55: soundLiving loop gate (spawned/
+  alive/health), soundSpawn once unless SleeperSupressLivingSounds.
 ## 2026-08-08 — census refresh 7
 
 Done:

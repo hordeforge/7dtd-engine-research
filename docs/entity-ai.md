@@ -2216,6 +2216,10 @@ that i32 is what save files and the spawn wire carry. Order in IL:
    (`SoundPlayerLandThump`), hurt, distressed, hurt small, drown pain, drown
    death, water surface. `soundAlertTicks` default **25** ×20; `soundRandomTicks`
    default **25** ×20; `particleOnDeath` / `particleOnDestroy`.
+   Consumer `StartStopLivingSound()` (IL=55): the `soundLiving` loop plays
+   while spawned/alive/health > 0 (stopped otherwise, `soundLivingID` tracks
+   the handle); `soundSpawn` plays once on spawn unless
+   `SleeperSupressLivingSounds`.
 8. **itemsOnEnterGame:** only when
    `GameMode.GetGameModeForId(GameStats.GetInt(1))` is non-null. Class prop
    `ItemsOnEnterGame` → `GetString(gameMode.GetTypeName())` (per-mode list,
