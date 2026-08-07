@@ -407,6 +407,15 @@ scans downward at most `relMinY` blocks (stopping above `y = 2`), accepting the
 first `CanMobsSpawnAtPos(x, y, z, false, true)` spot and returning the world
 position one block above it; false after `numTrys` failed columns.
 
+**`World.FindRandomSpawnPointNearPositionUnderground(pos, maxLightValue, out
+x, out y, out z, maxDistance)` (IL=135)** samples up to 5 random `(x, z)`
+within `maxDistance / 2` of `pos`; for each, it prefers the exact `pos.y`
+inside the `[pos.y - maxDistance.y/2, pos.y + maxDistance.y/2]` band when
+`CanMobsSpawnAtPos` passes, else falls back to
+`Chunk.FindSpawnPointAtXZ(lx, lz, ref y, maxLightValue, 0, yMin, yMax, false)`
+(the dark-column scan above). Non-playfield chunks are skipped; false when all
+tries fail.
+
 ### 6.1 `World.GetRandomSpawnPositionMinMaxToPosition` (IL=240)
 
 Ring/disc spawn sampler shared by the join path (spawn-near-friend, see
