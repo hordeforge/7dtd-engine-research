@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: instant eat path
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionEat.ExecuteInstantAction IL=179 - MinEvent
+  24 use start, Consume flag -> partial UseTimes sip vs full stack
+  decrement, MinEvent 29 + QuestEventManager.UsedItem, CreateItem
+  refund with UseJarRefund sandbox roll + AddItem/ItemDropServer
+  fallback.
 ## 2026-08-08 - tier-C: same-class gate + block-item bridge
 
 Done (V3.1.0 b14 IL):
