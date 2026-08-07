@@ -1844,6 +1844,24 @@ graze → `SoundImpactGraze` else `SoundImpactHit`.
 **`ExecuteDestroyBlockBehavior` (IL=2):** always **false** (stub like fall
 behavior).
 
+**`NotifyDestroyedBlock(attackHitInfo)` (IL=128)** is the block-destroyed
+hook. It acts only when the entity has a `moveHelper` with
+`BlockedFlags > 0`: if the destroyed block is exactly the one the move helper
+was blocked on (`moveHelper.HitInfo.hit.blockValueRef ==
+attackHitInfo.hitRef`) it `ClearBlocked()` first. It then rolls a weighted
+pick over `_destroyBlockBehaviors` whose `Difficulty` IntRange contains **1**
+(weighted sum in a static `weightBehaviorTemp` list, then
+`rand.RandomFloat() * totalWeight` walk) and, on a hit, calls
+`ExecuteDestroyBlockBehavior(picked, attackHitInfo)` (the stub above, so the
+pick machinery is live but the executor is a no-op on b14).
+
+**`Snore` (IL=36)** is the sleeper snore/groan cycle: when not snoring but
+`isGroan` and the `snoreGroanCD` counter has elapsed, it flips `isSnore`,
+clears `isGroan`, rolls a new cooldown of **20..21** ticks, and plays
+`soundSleeperSnore` via `Audio.Manager.BroadcastPlay` unless `isGroanSilent`.
+`IsCorpse` (IL=17) is `emodel.IsRagdollDead && deathUpdateTime > 70` (ticks;
+about 3.5 s post-death the ragdoll counts as a corpse).
+
 **Dropped backpack list:** `ClearDroppedBackpackPositions` clears list;
 `GetLastDroppedBackpackPosition` returns last entry or zero;
 `EqualsDroppedBackpackPositions` true if any stored pos equals arg.
@@ -3209,6 +3227,13 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+## Changelog
+
+- **2026-08-08:** NotifyDestroyedBlock (IL=128): blocked-move clear when the
+  destroyed block is the moveHelper hit, weighted Difficulty-1 pick over
+  destroyBlockBehaviors -> stub executor; Snore (IL=36) snore/groan cycle
+  with 20..21 tick cooldown + BroadcastPlay; IsCorpse (IL=17) ragdoll dead
+  && deathUpdateTime > 70.
 ## Changelog
 
 - **2026-08-08:** EntityAlive.GetLightLevel IL=14: attached -> host
