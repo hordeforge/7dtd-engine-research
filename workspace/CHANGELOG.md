@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChunkBlockLayer storage
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 5.0a: ChunkBlockLayer split-byte layout
+  (m_Lower8Bits + lower8BitSameValue compression, m_Upper24Bits
+  3 bytes/cell), CalcOffset IL=12 1024-cell sub-planes; GetAt
+  IL=61 word assembly + Air fallback; SetAt IL=294
+  materialize-on-differing-low-byte, pooled alloc/free (10000
+  cap); blockRefCount/tickRefCount + notifyLoadUnload HashSet
+  bookkeeping; bOnlyTerrain + CheckOnlyTerrain IL=153 scan.
 ## 2026-08-08 - tier-C: ItemClassModifier selection leaves
 
 Done (V3.1.0 b14 IL):
