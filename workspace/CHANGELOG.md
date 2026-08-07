@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChunkCluster helpers
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: ChunkCluster ToWorldPosition (IL=5) / ToLocalPosition
+  (IL=29) / ToLocalVector (IL=2) / ToLocalKey (IL=24) coordinate rebasing;
+  IsOnBorder (IL=32) fixed-size edge test.
+- world-chunks.md 5.0: notifyBlocksOfNeighborChange (IL=23) fans all 6
+  AllDirections offsets; notifyBlockOfNeighborChange (IL=24) skips remote,
+  calls Block.OnNeighborBlockChange for non-air neighbors.
+
 ## 2026-08-08 - tier-C: party leaves + player visibility
 
 Done (V3.1.0 b14 IL):
