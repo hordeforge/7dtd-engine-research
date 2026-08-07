@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: NetPackage contract + AddEntityBlockStub
+
+Done (V3.1.0 b14 IL):
+- network.md 3a: NetPackage base contract - defaults (channel 0,
+  compress false, reliable true, pre-auth false, direction Both),
+  ShouldProcess true / HandleSkipped pool-free, PackageId from
+  runtime type, send-queue Interlocked refcount,
+  ValidEntityIdForSender IL=49 + ValidUserIdForSender IL=29
+  guards, override sets (channel-1 big-data, compress-true,
+  unreliable entity per-tick, pre-auth handshake, direction split).
+- tile-entities-power.md: Chunk.AddEntityBlockStub IL=21 UInt64-
+  keyed Set with old-stub queueing into blockEntityStubsToRemove on
+  cell collision.
 ## 2026-08-08 - tier-C: NetPackage base contract
 
 Done (V3.1.0 b14 IL):
