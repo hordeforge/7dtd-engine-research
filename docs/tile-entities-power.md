@@ -664,6 +664,17 @@ Land-claim repair package drives `TEFeatureAreaRepair.RepairAll` (protocol
 §6.19). Storage/lock features are the composite replacement for classic
 `TileEntitySecureLootContainer` in V3.1.0 where the composite TE type is used.
 
+**`TEFeatureLockable` command leaves:** `InitBlockActivationCommands` (IL=37)
+registers the `lock`, `unlock`, and `keypad` `BlockActivationCommand`s (all
+order 1 with the feature data). `AllowBlockActivationCommand` (IL=93) gates
+them: non-owning modules pass through; for its own commands the local actor
+must be owner or a party ally (`Allies.IsAlly(parent.Owner, localUser)`):
+`lock` shows when unlocked, `unlock` when locked (owner or editor), `keypad`
+only for the owner when the actor is allowed, there is no password, or the lock
+is off. `get_TriggerRole` (IL=2) is the constant role **1**;
+`OnBlockTriggered` (IL=10) unlocks the feature when `triggeredBy.Unlock` is
+set.
+
 ---
 
 ## 5. Triggers and powered traps
