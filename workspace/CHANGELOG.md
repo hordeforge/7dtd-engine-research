@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: death loot path and ItemDropServer chunk cap
+
+Done (V3.1.0 b14 IL):
+- combat-damage §3.1: OnEntityDeath AwardKill/ModEvents/dropItemOnDeath.
+- loot-economy §6b: ItemDropServer IL=268 with 50 EntityItem/chunk cull;
+  DropContentInLootContainerServer IL=104 bag spawn.
+---
 ## 2026-08-07 — tier-C: DisconnectClient and SavePlayerData order
 
 Done (V3.1.0 b14 IL):

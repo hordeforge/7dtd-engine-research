@@ -125,6 +125,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | GetDamageEntity/Block EffectManager tags | items §4.2 |
 | CommandAllowedFor level compare | console-commands §2 |
 | DisconnectClient / SavePlayerData order | network §1.3-1.4 |
+| OnEntityDeath / dropItemOnDeath | combat-damage §3.1 |
+| ItemDropServer 50/chunk cap | loot-economy §6b |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

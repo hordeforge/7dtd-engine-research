@@ -303,6 +303,24 @@ package as NPC traders, so the server stays authoritative over the machine's inv
 
 ---
 
+## 6b. World item drops and bag containers (IL re-pin 2026-08-07)
+
+**`GameManager.ItemDropServer` (full IL=268):** client may only `SendToServer`
+`NetPackageItemDrop` unless local physics master; server builds
+`EntityCreationData` class `item`, assigns id (`EntityFactory.nextEntityID` or
+client id), clones stack, pos/rot/lifetime/`belongsPlayerId`, optional velocity;
+`EntityFactory.CreateEntity` → `EntityItem`; `SpawnEntityInWorld`. **Per-chunk
+cap:** collect `EntityItem`s in the target chunk; if count &gt; **50**, sort by
+`EntityItemLifetimeComparer` and `MarkToUnload` oldest until ≤ 50.
+
+**`DropContentInLootContainerServer` (IL=104):** if empty and skip, ret; client
+forwards `NetPackageDropItemsContainer`; server creates `EntityLootContainer`
+from container entity class loot-list props, `SetContent` cloned stacks,
+`spawnById`, `SpawnEntityInWorld`.
+
+Death path calls these via `dropItemOnDeath` ([combat-damage.md](combat-damage.md)
+§3.1).
+
 ## 7. Dedicated relevance and residuals
 
 - **Server codepaths:** `LootManager.LootContainerOpened`, `TEFeatureStorage.UpdateTick`
@@ -500,6 +518,9 @@ and the locked-slot bit array.
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
 ## Changelog
+
+- **2026-08-07:** ItemDropServer IL=268 (50 EntityItem/chunk cap);
+  DropContentInLootContainerServer IL=104.
 
 - **2026-08-06:** NetPackageTraderData is ToServer-only (direction gate drops a
   server-sent one); the two real S2C delivery paths (EntityCreationData

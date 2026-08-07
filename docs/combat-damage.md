@@ -88,6 +88,18 @@ When health reaches zero the entity dies: it awards the kill (XP to the attacker
 ([loot-economy.md](loot-economy.md)), and for players enters the respawn path
 ([server-lifecycle.md](server-lifecycle.md)).
 
+### 3.1 `OnEntityDeath` (IL=146) / `dropItemOnDeath` (IL=105)
+
+**`OnEntityDeath` order:** score bump; stop audio; detach; **`AwardKill(attacker)`**;
+death particle via `SpawnParticleEffectServer`; optional death game message;
+kill log; **`ModEvents.SEntityKilled`**; **`dropItemOnDeath()`**.
+
+**`dropItemOnDeath`:** walk inventory slots; if `ItemClass.CanDrop`,
+`ItemDropServer` with lifetime `Constants.cItemDroppedOnDeathLifetime` and clear
+slot; flashlight off; `Equipment.DropItems()`; scale `lootDropProb` via
+`EffectManager` and floor with `LootContainer.LootBagChance`; if not
+`LootContainer.NoLoot` and random &lt; prob, **`Entity.DropBagServer()`**.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Alive
@@ -167,6 +179,7 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-07:** OnEntityDeath / dropItemOnDeath ordered death loot path.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs
