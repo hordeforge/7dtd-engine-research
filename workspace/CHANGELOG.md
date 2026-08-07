@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+---
+## 2026-08-08 — tier-C: class-id + item-stack parse pins
+
+Done (V3.1.0 b14 IL):
+- EntityClass.FromString IL=3 = String.GetHashCode: entityClass ids in save/
+  wire are .NET string hash codes (noted in entity-ai D8.6).
+- ItemStack.FromString IL=38: "ItemName[=Count]", count default 1.
+---
 ## 2026-08-08 — tier-C: chunk force-update + ground-align leaves
 
 Done (V3.1.0 b14 IL):

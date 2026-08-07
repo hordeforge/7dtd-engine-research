@@ -2136,7 +2136,9 @@ range &lt; 0 → `max(3, sightRangeBase * 0.2)`; store `sleeperViewAngle` /
 ### D8.6 Entity config init: `EntityAlive.CopyPropertiesFromEntityClass` (IL=1128)
 
 One-time copy from the resolved `EntityClass` (via `EntityClass.list[entityClass]`,
-after base `Entity::CopyPropertiesFromEntityClass`). Order in IL:
+after base `Entity::CopyPropertiesFromEntityClass`). `entityClass` ids are
+`.NET String.GetHashCode()` of the class name (`EntityClass.FromString`, IL=3);
+that i32 is what save files and the spawn wire carry. Order in IL:
 
 1. **Hand item:** `handItem = ItemClass.GetItem(Properties[HandItem], false)`, but
    if the prop value contains `,` only the substring before the first comma is
@@ -2192,7 +2194,7 @@ after base `Entity::CopyPropertiesFromEntityClass`). Order in IL:
    `GameMode.GetGameModeForId(GameStats.GetInt(1))` is non-null. Class prop
    `ItemsOnEnterGame` → `GetString(gameMode.GetTypeName())` (per-mode list,
    keyed by mode type name). Split on `,`; `ItemStack.FromString` each trimmed
-   entry; empty result throws `"Item with name '...' not found in class
+   entry (`"ItemName[=Count]"`, count default 1, IL=38); empty result throws `"Item with name '...' not found in class
    <name>"`. An item is **skipped** when `ItemClass.CreativeMode == 2 &&
    Platform.DeviceFlags.IsCurrent(DeviceFlag 56)` (dedicated platform: creative
    items dropped from the enter-game grant).
