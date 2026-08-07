@@ -332,6 +332,20 @@ combination: in OR mode (`UseOrForMultipleTriggers`) it is true when **any**
 `TriggeredByIndices` channel sits in `TriggeredValues`; in AND mode it is true
 only when **all** of them do.
 
+**Per-block `OnTriggered` behaviors (V3.1.0 b14, all call the empty base
+IL=1 first):** `BlockActivateSwitch` (IL=24) toggles `meta` (`(meta & ~2) |
+1`); `BlockGameEvent` (IL=60) requires the game event's target type to be
+**Block** (else error log), runs
+`GameEventManager.HandleAction(onTriggeredEvent, player, ...)` and, with
+`destroyOnEvent`, `DamageBlock(MaxDamage - damage, ...)`; `BlockHazard`
+(IL=49) toggles the hazard state with Start/StopSound at the block center;
+`BlockLight` (IL=26) toggles the light (`SetLightState(world, pos, bv,
+!IsLightOn)`); `BlockTrapDoor` (IL=26) destroys itself
+(`DamageBlock(MaxDamage - damage)`); `BlockTriggerDowngrade` (IL=15) adds
+`HandleDowngrade`; `BlockCompositeTileEntity` (IL=53) delegates into the
+composite tile-entity modules. Every mutating variant appends a
+`BlockChangeInfo` for the block position.
+
 `BlockTrigger.OnTriggered(player, world, channel, changes, source)` is the
 receiver-side state machine:
 
@@ -426,6 +440,9 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** Per-block OnTriggered family: switch meta toggle (IL=24),
+  game event + destroyOnEvent (IL=60), hazard toggle + sounds (IL=49), light
+  toggle (IL=26), trapdoor destroy (IL=26), downgrade (IL=15), composite TE.
 - **2026-08-07:** BlockTrigger.CheckIsTriggered (IL=59): OR = any channel
   latched, AND = all channels latched.
 - **2026-08-07:** BlockTrigger.OnTriggered (IL=27): channel latch +

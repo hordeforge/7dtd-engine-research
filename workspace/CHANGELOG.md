@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: per-block OnTriggered family
+
+Done (V3.1.0 b14 IL):
+- block-shapes.md 7.3: Block.OnTriggered variants - ActivateSwitch (IL=24)
+  meta toggle, GameEvent (IL=60) target-type Block gate + HandleAction +
+  destroyOnEvent damage, Hazard (IL=49) toggle + sounds, Light (IL=26)
+  SetLightState toggle, TrapDoor (IL=26) self-destroy, Downgrade (IL=15),
+  CompositeTileEntity (IL=53); each mutating variant appends BlockChangeInfo.
+
 ## 2026-08-08 - tier-C: BlockTrigger.CheckIsTriggered
 
 Done (V3.1.0 b14 IL):
