@@ -844,6 +844,17 @@ still emits the ack for remote players.
 `NetPackageInventoryDataResponse`: success, errorMsg, inventoryKey Guid,
 `ItemStack[]`, managerToken; client updates `TransactionalInventory` on success.
 
+**Request Process (IL=92, server):**
+
+1. `InventoryManager.TryGetTransactionalInventory(key)`.
+2. Missing key -> Response success=false + error string, flags **192** to sender.
+3. If `inventory.Hash == request.Hash` -> Response success=true with **null** items
+   (client already current; bandwidth short-circuit).
+4. Else -> Response success=true with `GetItemsReadonly()` + managerToken.
+
+**Response Process (IL=30, client):** failure logs warning; success calls
+`TransactionalInventory.UpdateInventory(items, managerToken)` when key found.
+
 ### 6.14 NetPackageExplosionInitiate (ToServer)
 
 Client/server-placed explosives. `ProcessPackage` → `IGameManager.ExplosionServer(...)`.
