@@ -709,6 +709,12 @@ sample at entity pos **y+1.68**:
 `clamp01(GetLightLevel(pos) + GetLightLevelFromMovingLights(id, pos))` and out
 `selfLight = entity.GetLightLevel()`.
 
+**`EntityAlive.GetLightLevel()` (IL=14):** an entity attached to another
+`EntityAlive` (a vehicle rider) delegates to the host's light level; a free
+entity reads `inventory.GetLightLevel()` - the held item's light
+(flashlight/glowstick) - which is the `selfLight` the stealth model blends
+in.
+
 **`BlockTrigger.OnTriggered` (IL=27):** `SetTriggeredValueFlag(index)`; if
 `CheckIsTriggered` then `Block.OnTriggered(...)` and clear `TriggeredValues`.
 
@@ -3205,6 +3211,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-08:** EntityAlive.GetLightLevel IL=14: attached -> host
+  delegate, else inventory.GetLightLevel (held-item light, the stealth
+  selfLight).
 - **2026-08-08:** Swim/underwater state: OnHeadUnderwaterStateChanged IL=15
   MinEvents 81 underwater / 80 surfaced; SwimChanged IL=12 avatar SetSwim;
   SetSwimValues IL=15 Clamp(duration/swimSpeed - 6, 3, 20).
