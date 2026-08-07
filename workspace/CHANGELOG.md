@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: legacy item readers
+
+Done (V3.1.0 b14 IL):
+- items.md 2: ItemValue.ReadOld (IL=1) empty; ItemStack.ReadOld (IL=10) no-op
+  + i16 count.
+
 ## 2026-08-08 - tier-C: World availability/water queries
 
 Done (V3.1.0 b14 IL):
