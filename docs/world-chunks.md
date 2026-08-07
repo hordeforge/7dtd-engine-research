@@ -591,6 +591,13 @@ changes, dedicated ? -1 : myPlayerId)`) to `SetPropsOnClients(-1, package)` on
 the server or `SendToServer`; `SetPropsOnClients(exceptEntityId, package)`
 (IL=13) fans out on channel **192** excluding the entity.
 
+**The delayed-regen pair:** `ChunkPosNeedsRegeneration_DelayedStop` (IL=48)
+decrements the cluster's `delayedRegenCount`; when it reaches 0 it applies the
+buffered `(Chunk, bits)` pairs under lock via `Chunk.NeedsRegenerationOrBits`
+and clears `delayedRegenChunks`. The matching `_DelayedStart` increments the
+count, so nested multi-batch edits defer the regen flags until the last batch
+finishes.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Clean
