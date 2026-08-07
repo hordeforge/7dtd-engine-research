@@ -66,7 +66,10 @@ the `ChunkCache` is null, else
 
 **`Chunk.IsNeighbourChunksLit(neighbours)` (IL=26)** is the light-completion
 gate: true only when every non-null neighbour chunk has cleared its volatile
-`NeedsLightCalculation` flag (a null neighbour fails the test).
+`NeedsLightCalculation` flag (a null neighbour fails the test). The decoration
+twin `IsNeighbourChunksDecorated` (IL=26) tests the same pattern against
+`NeedsDecoration`. `Chunk.CheckSameLight` (IL=4) runs the light channel's
+`CheckSameValue` fast-path compaction check.
 
 **Light-block state bits (V3.1.0 b14):** `BlockLight.IsLightOn(bv)` (IL=7)
 is `(meta & 2) != 0` - bit 1 of the block's meta is the light-on flag;
