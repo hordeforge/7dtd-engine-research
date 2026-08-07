@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World entity lookups
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md D7 entity lookups: World.GetEntity (IL=17) - async
+  EntityAsyncManager.EnsureEntity when present, then Entities.dict
+  TryGetValue (null when absent); World.GetEntityAliveCount (IL=31) -
+  walk EntityAlives, count (entityFlags & mask) == flags.
+
 ## 2026-08-08 - tier-C: ChunkCluster read hops
 
 Done (V3.1.0 b14 IL):

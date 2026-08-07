@@ -2108,6 +2108,11 @@ unit box). The box is origin-relative; `SetPosition` (IL_0065) recenters it on
 the entity position, and `aabbEntityCollision` (IL_0180/02A2) rewrites it from
 the resolved move, so the field tracks the entity's current world AABB.
 
+**Entity lookups:** `World.GetEntity(id)` (IL=17) kicks the async loader
+(`entityAsyncManager.EnsureEntity(id)` when the manager exists), then returns
+`Entities.dict.TryGetValue(id)` (null when absent). `World.GetEntityAliveCount(flags, mask)` (IL=31) walks the `EntityAlives` list and counts entries with
+`(entityFlags & mask) == flags`.
+
 **`Entity.SetPosition(pos, bUpdatePhysics)` (IL=111):** the position setter
 that maintains all of the above. Stores `position = pos`, then rebuilds
 `boundingBox` from the model extents: half-width `width * 0.5`, half-depth
@@ -2999,6 +3004,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Entity lookups in D7: World.GetEntity (IL=17) async
+  EnsureEntity + Entities.dict TryGetValue; GetEntityAliveCount (IL=31)
+  (entityFlags & mask) == flags count over EntityAlives.
 - **2026-08-07:** Entity.SetPosition (IL=111): boundingBox rebuild from
   width/depth/yOffset/ySize/height, attachedEntities recursion, physics mirror
   (PhysicsTransform/physicsRBT/physicsTargetPos in origin space), subclass
