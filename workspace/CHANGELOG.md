@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk coordinate fold
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: Chunk.IsInChunk (IL=30) bounds test 0<=x<16/0<=y<256/0<=z<16
+- world-chunks.md 2: Chunk.ToLocalPosition (IL=23) world-to-local mask x&15/y&255/z&15
+
 ## 2026-08-08 - tier-C: ToWorldPos
 
 Done (V3.1.0 b14 IL):
