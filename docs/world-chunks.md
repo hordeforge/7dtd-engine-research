@@ -560,6 +560,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 - **2026-08-07:** UpdateTick IL=150 slice/full; save 40 ticks; deco 60s; SetBlocksOnClients 192.
 - **2026-08-07:** TickEntitiesSlice/Flush; TickEntities list rebuild;
   SaveDecorations DecoManager.
+- **2026-08-07:** updateChunksToUncull RestoreCulledBlocks + 5 ms budget.
 - **2026-08-07:** FindSupportingBlockPos supportOrder; AdjustBoundsForPlayers pad clamp.
 - **2026-08-07:** InBoundsForPlayersPercent 50/80; IsLandProtectedBlock lpblock deadZone.
 - **2026-08-07:** CheckEntityCollisionWithBlocks; CanPlaceLandProtectionBlockAt 0.5 bounds.

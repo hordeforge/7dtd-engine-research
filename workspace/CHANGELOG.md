@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: updateChunksToUncull restore path
+
+Done (V3.1.0 b14 IL):
+- updateChunksToUncull: RestoreCulledBlocks; neighbor regenerate flags; 5 ms budget.
+---
 ## 2026-08-07 — tier-C: WorldEventUpdateTime and POI uncull
 
 Done (V3.1.0 b14 IL):
