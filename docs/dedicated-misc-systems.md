@@ -561,8 +561,79 @@ tokenizer.
 The two face-mask parsers `ParseWaterFlowMask` / `ParseCoverFaceMask` are
 documented with their consumers in [`block-shapes.md`](block-shapes.md) §5.
 
+## ParticleEffect (FX data + spawn / audio)
+
+`ParticleEffect` is the serializable FX record every `NetPackageParticleEffect`
+carries (wire census: [`protocol-packages.md`](protocol-packages.md)). The
+dedicated server's role is **scheduling and audio**, not rendering: the FX
+prefab is instantiated only on clients, but the spawn call registers the
+effect's sound with the AI director so zombies hear it.
+
+**Data model + wire layout (`Read` IL=53):**
+
+| Field | Wire | Note |
+|---|---|---|
+| `ParticleId` | i32 | the effect id; `ToId(name)` (IL=3) is **`name.GetHashCode()`** |
+| `pos` | Vector3 | `StreamUtils.ReadVector3` |
+| `rot` | Quaternion | `StreamUtils.ReadQuaterion` |
+| `color` | Color32 | `StreamUtils.ReadColor32` |
+| `soundName` | string | empty string normalized to **null** |
+| `additionalHitSoundName` | string | empty -> null |
+| `volumeScale` | f32 | |
+| `parentEntityId` | i32 | -1 = world-space |
+| `attachment` | u8 | `None=0 / Head=1 / Pelvis=2` |
+
+`NetPackageParticleEffect` appends `entityThatCausedIt:i32`,
+`forceCreation:bool`, `worldSpawn:bool` after the effect record.
+
+**`GameManager.SpawnParticleEffectServer(pe, entityId, forceCreation,
+worldSpawn)` (IL=41):** no-op without a world; spawns through
+`ParticleEffect.SpawnParticleEffect` (which on a dedicated host returns
+immediately - only the audio registration survives), then: a non-server caller
+sends `NetPackageParticleEffect` to the server, while the server broadcasts it
+to all (flags 192). The receiving clients run
+`SpawnParticleEffectClient` (IL=7) / `...ForceCreation` (IL=6), which just
+call the local spawn.
+
+**`ParticleEffect.SpawnParticleEffect(pe, entityThatCausedIt, forceCreation,
+isWorldPos)` (IL=339):** the client-side instantiation; the server-relevant
+parts are:
+
+- **Audio -> AI noise:** `PlaySoundInServer(entityId, pos, soundName,
+  volume)` (IL=18) runs on the server for `soundName` and
+  `additionalHitSoundName`: a non-empty name goes to
+  `world.aiDirector.OnSoundPlayedAtPosition(entityId, pos, soundName,
+  volume)` - a particle effect with a sound is a **noise event** for the
+  zombie hearing model. `PlaySoundInClient` is the render-side twin.
+- **Dedicated short-circuit:** `GameManager.IsDedicatedServer()` returns null
+  before any prefab work; the host never instantiates FX.
+- **Entity-bound effects:** with `entityThatCausedIt != -1` and
+  `!forceCreation`, the spawn tracks instances per entity in the static
+  `entityParticles : Dictionary<int, List<EntityData>>` and enforces a
+  **4-instance cap per (entity, ParticleId)**: a 4th concurrent instance
+  removes the oldest before spawning. Pruned entries (destroyed transforms)
+  are dropped on every spawn.
+- **Instancing:** `GetDynamicTransform(ParticleId)` (the loaded prefab) is
+  instantiated at `pos`/`rot` (`isWorldPos` subtracts `Origin.position`),
+  `color` is applied to renderers without a `ParticleSystem`, and a non-zero
+  `opqueTextureId` swaps `_MainTex`/`_BumpMap` to the mesh-0 texture atlas.
+  `GetParentTransform()` (IL=58) resolves `parentEntityId` from
+  `world.Entities` and, per `attachment`, `emodel.GetHeadTransform()`
+  (Head) / `GetPelvisTransform()` (Pelvis).
+
+`Init()` (IL=10) roots everything at the `/Particles` GameObject
+(`RootT` + `Origin.Add`) and clears `entityParticles`; `IsAvailable(name)`
+(IL=5) = `loadedTs.ContainsKey(ToId(name))`.
+
 ## Changelog
 
+- **2026-08-08:** ParticleEffect record: wire layout (Read IL=53 - ParticleId
+  = name hash, pos/rot/color32, sound names null-normalized, volumeScale,
+  parentEntityId, attachment u8); SpawnParticleEffectServer IL=41 client/
+  server split + channel 192 broadcast; SpawnParticleEffect IL=339 audio ->
+  AIDirector.OnSoundPlayedAtPosition noise events, dedicated short-circuit,
+  4-instance-per-entity cap, origin-relative world spawn; GetParentTransform
+  IL=58 head/pelvis attachment resolve.
 - **2026-08-08:** StringParsers contract: Parse vs TryParse, substring
   overloads, float default styles 511 vs integer default 7; internalParseBool
   True/False-only (Ordinal/IgnoreCase), internalParseDouble hex rejection,
