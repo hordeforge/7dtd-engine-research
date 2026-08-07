@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: notifyListeners
+
+Done (V3.1.0 b14 IL):
+- items.md 6: notifyListeners (IL=24) onInventoryChanged hook + listener
+  hash-set fan-out.
+
 ## 2026-08-08 - tier-C: Inventory.SetItem core
 
 Done (V3.1.0 b14 IL):
