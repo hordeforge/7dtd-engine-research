@@ -292,6 +292,10 @@ group slot from `GetGroupPositions(owner, 5, …)`; `DoMoveIntoFollowPos` then
 **`sentryState` (IL=61):** if chunk loaded and more than **5** m from `SentryPos`,
 `DoMoveIntoFollowPos`; else Seek/rotate toward sentry pos until within **0.25** m.
 
+**`onUnderWaterState` (IL=33):** if owner chest underwater: clear path; Seek to
+`findOpenBlockAbove(chest, 256)` at 0.2; rotate+move; return true (blocks other
+states).
+
 **`healTargetServer` (IL=19):** only when not already in Heal state; require
 `healWeapon.canFire()`; if not forced request, require
 `isTargetInNeedOfMedical`; then `healTarget(target)` (server heal apply).
@@ -476,8 +480,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** trackTarget yaw/pitch ranges; canHitEntity E_ raycast; Fire
-  passives 16/11 + ammo; healTargetServer; steerFollow; spawnHordeNear 5/12%.
+- **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire
+  passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds
   + raycast; PhysicsWakeNear 20 m.
 - **2026-08-07:** TurretTracker save every 120 s; AttachEntityToSelf / DetachEntity

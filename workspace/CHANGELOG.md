@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: investigate pos and neighbor cooldown delays
+
+Done (V3.1.0 b14 IL):
+- Set/ClearInvestigatePosition; alert ticks (20-35)*20, zombie half.
+- StartNeighborCooldown 180/720 s; SetLongDelay 1320 s; drone underwater surface seek.
+---
 ## 2026-08-07 — tier-C: trackTarget ranges, canHitEntity, FindScoutStartPos
 
 Done (V3.1.0 b14 IL):

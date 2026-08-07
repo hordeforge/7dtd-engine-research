@@ -752,6 +752,16 @@ yield return null                     // <>1__state = 1; next resume loops again
 | Coalesce | Enqueue path (elsewhere) keys `finishedPaths` by entityId; drain pops wait list |
 | Yield | After ≤8 starts, coroutine yields; infinite outer loop |
 
+### D3.8 Investigate position (scout / noise)
+
+| Method | IL | Behaviour |
+|---|---:|---|
+| `SetInvestigatePosition(pos, ticks, isAlert)` | 10 | store `investigatePos`, `investigatePositionTicks`, `isInvestigateAlert` |
+| `get_HasInvestigatePosition` | 5 | `investigatePositionTicks > 0` |
+| `ClearInvestigatePosition` | 28 | zero pos/ticks; `ResetDespawnTime`; `SetAlertTicks(Random(20,35)*20)` (entityType 2 zombie halves that) |
+
+Scout path uses ticks **2000** / **6000** (see [aidirector.md](aidirector.md)).
+
 **Production pathfinder drains ≤ 8 path computations per coroutine slice**, then yields.  
 Under blood moon, queue depth grows; main still enqueues unbounded FindPaths.  
 **Admission on enqueue complements this fixed drain of 8.** There is **no** priority
@@ -1115,6 +1125,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
+- **2026-08-07:** Investigate pos set/clear; ClearInvestigatePosition alert
+  ticks (20-35)*20, zombie half.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

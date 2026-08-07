@@ -164,6 +164,14 @@ Duration or Value ≤ 0; else re-sum Value into `activityLevel`.
 **`FindBestEventAndReset` (IL=44):** pick max-`Value` event; set
 `cooldownDelay = **240**` s; `ClearEvents()`; return best (may be null).
 
+**Cooldown setters:**
+
+| Method | IL | Delay |
+|---|---:|---|
+| `StartNeighborCooldown(false)` | 13 | max(current, **180** s) |
+| `StartNeighborCooldown(true)` | 13 | max(current, **720** s) |
+| `SetLongDelay` | 4 | **1320** s (hard set) |
+
 ## AIDirectorComponent : Object
 - `Tick(Double)` IL=1 (virtual base)
 
@@ -426,7 +434,7 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** CreateHorde list; StartCooldownOnNeighbors chunk/5 grid;
+- **2026-08-07:** Neighbor cooldown 180/720 s; SetLongDelay 1320 s; CreateHorde;
   FindScoutStartPos 80 m / 15 tries / 30 m player avoid; spawnHordeNear 5/12%.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
