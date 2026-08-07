@@ -247,6 +247,37 @@ locks interaction once all seats are full. `DriverRemoved` fires the local
 player's `MountEvent(false)`, clears `hasDriver`, and resets the no-driver
 ground / sleep timers so the Rigidbody can settle and sleep.
 
+**Slot-claim rules in `Entity.AttachEntityToSelf` (IL=56):** `attachedEntities`
+is a plain slot array and an entity occupies at most one slot. `FindAttachSlot`
+(IL=27, linear identity scan) first looks for the rider; a request whose slot is
+negative or equals the found slot reuses the existing slot (so re-attach is a
+no-op), while a conflicting slot request detaches the old occupant via
+`DetachEntity` first. A negative requested slot picks the first free slot
+(`FindAttachSlot(null)`); no free slot, or a slot beyond the array length, fails
+with **-1**. **Slot 0 is special:** it snapshots `serverPos = EncodePos(position)`
+and copies `isEntityRemote = _other.isEntityRemote` onto the occupant - the
+driver inherits the vehicle's authority flag for the ride. `GetAttachFreeCount()`
+(IL=31) counts null slots; `EntityVehicle` derives `isInteractionLocked` from it.
+
+**The detach chain (V3.1.0 b14 IL):** `EntityAlive.Detach()` (IL=27) restores
+the swapped inventory (`inventory = saveInventory`,
+`SetHoldingItemIdxNoHolsterTime(saveHoldingItemIdxBeforeAttach)`, clears
+`saveInventory`) and ORs `bPlayerStatsChanged |= !isEntityRemote`, then calls
+base `Entity.Detach()` (IL=79): reparent `RootTransform` back to
+`EntityFactory.ParentNameToTransform[EntityClass.parentGameObjectName]`, clear
+the host's `AttachedToEntity` and the rider's `isUpdatePosition`, pick
+`FindValidExitPosition(info.exits)`, teleport to the exit
+(`SetPosition(exit.position, true)` + `SetRotation` when non-zero), snap
+`ResetLastTickPos`, then `DetachEntity(host)`; a remote rider whose slot clears
+`bKeep3rdPersonModelVisible` gets its model back (`SetVisible(true, false)`).
+`Entity.DetachEntity(_other)` (IL=21) nulls the slot and, for slot 0, restores
+`isEntityRemote = world.IsRemote()` (undoing the attach-time copy).
+`EntityVehicle.DetachEntity` (IL=157) additionally cancels matching
+`delayedAttachments`, resets the rider's pose mode (-1) / IK targets / model
+layer / collider state, calls `DriverRemoved()` on slot 0, and on the server
+wakes the Rigidbody (`RBActive = true`, `RBNoDriverSleepTime = 0`,
+`isKinematic = false`, `velocity = vehicle.CurrentVelocity`).
+
 ### 4.2b Ownership, lock, password, fuel
 
 - **Owner:** `SetOwner(user)` (IL=5) / `GetOwner()` (IL=4) are
@@ -672,6 +703,13 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-08:** Slot-claim rules in Entity.AttachEntityToSelf (IL=56):
+  one occupant per slot, existing-slot reuse, conflicting request detaches old
+  occupant, free-slot pick, slot-0 serverPos snapshot + isEntityRemote copy,
+  GetAttachFreeCount (IL=31); detach chain: EntityAlive.Detach (IL=27)
+  inventory restore, Entity.Detach (IL=79) exit teleport + parent restore,
+  Entity.DetachEntity (IL=21) slot-0 isEntityRemote restore,
+  EntityVehicle.DetachEntity (IL=157) delayed-attach cancel + server RB wake.
 - **2026-08-07:** Entity.FindAttachSlot (IL=27): attachedEntities[] index
   walk, -1 absent - behind IsAttached.
 - **2026-08-07:** Entity.IsAttached (IL=8) = FindAttachSlot >= 0; Drone

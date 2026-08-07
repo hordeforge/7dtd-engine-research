@@ -342,90 +342,6 @@ classification). They were found by scanning the disassembly for
 
 ---
 
-## Entity attach (mount / ride slot model)
-
-Mounting (riders on vehicles) is a slot array on the host, not a scene-graph
-property. The wire entry is `NetPackageEntityAttach` (see
-[`protocol-packages.md`](protocol-packages.md) §6.21.1); the server-side model
-(V3.1.0 b14 IL) is:
-
-**Storage:** `Entity.attachedEntities : Entity[]` (null until first attach,
-one occupant per slot) plus the back-ref `Entity.AttachedToEntity`. Slot
-semantics are host-defined: `EntityVehicle.GetAttachedToInfo(slot)` (IL=158)
-builds the per-slot `AttachedToEntitySlotInfo` - defaults
-`enterPosition = (0, 0, -0.201)`, `enterRotation = 0`, pitch restriction
-`(-30, 30)`, yaw restriction `(-90, 90)`, `bKeep3rdPersonModelVisible = true`,
-`bReplaceLocalInventory = true` - then overrides `position`/`rotation` from
-`vehicle.GetPropertiesForClass("seat" + slot)` and parses the `exit` property
-(a `~`-separated list of `StringParsers.ParseVector3` entries, each +0.02 y
-and turned into a world-space `AttachedToEntitySlotExit` at
-`GetPosition() + transform.TransformDirection(exit)` with rotation
-`(0, atan2(x, z) * 57.29578 + 180 + rotation.y, 0)`). With no XML properties
-the fallback exit is `position - 2 * transform.right`, yaw + 90. The base
-`Entity.GetAttachedToInfo` returns null - only the vehicle overrides it.
-
-**`Entity.AttachToEntity(_other, slot)` (IL=64):** returns -1 when already
-attached (`IsAttached` = `FindAttachSlot >= 0`); otherwise
-`AttachEntityToSelf(_other, slot)` (IL=56) claims the slot: `FindAttachSlot`
-(IL=27) is a linear identity scan of `attachedEntities`, and a request whose
-slot is negative or equals the found slot reuses the existing slot (one
-occupant per entity; a conflicting slot request detaches the old occupant via
-`DetachEntity`). A negative requested slot picks the first free slot
-(`FindAttachSlot(null)`); no free slot or an out-of-range slot fails with -1.
-**Slot 0 is special:** it snapshots `serverPos = EncodePos(position)` and
-copies `isEntityRemote = _other.isEntityRemote` onto the occupant. On success
-the rider's `RootTransform` reparents to `enterParentTransform` at zero local
-pos/rot, `ModelTransform` gets `enterPosition`/`enterRotation`, `rotation =
-enterRotation`, and `AttachedToEntity = _other`; a remote rider whose slot
-clears `bKeep3rdPersonModelVisible` hides its model (`emodel.SetVisible(false,
-false)`).
-
-**`EntityAlive.AttachToEntity` (IL=60):** after the base call, a successful
-attach sets `CurrentMovementTag = MovementTagIdle` and `Crouching = false`.
-Non-remote riders swap inventory with the host when the slot's
-`bReplaceLocalInventory` is set: `saveInventory = inventory`,
-`saveHoldingItemIdxBeforeAttach = holdingItemIdx`,
-`SetHoldingItemIdxNoHolsterTime(DUMMY_SLOT_IDX)`, `inventory =
-_other.inventory`, `bPlayerStatsChanged = true`. Remote riders instead just
-hide the held item (`ShowHoldingItem(false)`).
-
-**`EntityVehicle.AttachEntityToSelf` (IL=100):** the vehicle side of a slot
-claim: rider (cast to `EntityAlive`) gets
-`SetVehiclePoseMode(vehicle.GetSeatPose(slot))`, gameObject layer 24, the
-character controller disabled, and `SetIKTargets(vehicle.GetIKTargets(slot))`;
-`isInteractionLocked = (GetAttachFreeCount() == 0)` mirrors the free-slot
-count (IL=31, null slots) into the collider. Slot 0 additionally sets
-`hasDriver = true`, `vehicle.SetColors()`, `vehicle.FireEvent(0)`,
-`SetVehicleDriven()`, `TriggerUpdateEffects()`. The remaining IL is
-local-player UI (vehicle action sets, camera init) and is client-only.
-`EntityVehicle.AttachToEntity` (IL=2) returns -1: vehicles never mount other
-entities.
-
-**Detach** mirrors attach: `EntityAlive.Detach()` (IL=27) restores the
-swapped inventory (`inventory = saveInventory`,
-`SetHoldingItemIdxNoHolsterTime(saveHoldingItemIdxBeforeAttach)`, clears
-`saveInventory`), then calls base `Entity.Detach()` (IL=79): reparent
-`RootTransform` back to
-`EntityFactory.ParentNameToTransform[EntityClass.parentGameObjectName]`, clear
-`host.AttachedToEntity` and `isUpdatePosition`, pick
-`FindValidExitPosition(info.exits)`, teleport to the exit
-(`SetPosition(exit.position, true)` + `SetRotation` when non-zero), snap
-`ResetLastTickPos`, `DetachEntity(host)`, and restore the model on remote
-riders unless `bKeep3rdPersonModelVisible`. `Entity.DetachEntity(_other)`
-(IL=21) nulls the slot and, for slot 0, restores
-`isEntityRemote = world.IsRemote()` (undoing the attach-time copy).
-`EntityVehicle.DetachEntity` (IL=157) also clears matching
-`delayedAttachments`, resets the rider's pose mode (-1), IK targets, model
-layer and collider state, calls `DriverRemoved()` on slot 0, and on the server
-wakes the rigidbody (`RBActive = true`, `RBNoDriverSleepTime = 0`,
-`isKinematic = false`, `velocity = vehicle.CurrentVelocity`).
-
-Server flow per package op: AttachServer (0) resolves rider + vehicle,
-`FindAttachSlot`/`AttachToEntity`, rebroadcasts AttachClient (1) on success;
-DetachServer (2) runs `rider.Detach()` and rebroadcasts DetachClient (3)
-(§6.21.1). `Entity.StartAttachToEntity` (IL=43) is the client-side request
-path (sends type 0, applies locally on the server host).
-
 ## Out of scope (verified client-only)
 
 - **WireManager**: pooled wire visuals, not the electrical graph. It
@@ -504,12 +420,6 @@ the same seed - deterministic and portable.
 
 ## Changelog
 
-- **2026-08-08:** Entity attach slot model: AttachToEntity chain (Entity
-  IL=64 / EntityAlive IL=60 / EntityVehicle IL=100 + -1 override),
-  AttachEntityToSelf slot claim + slot-0 isEntityRemote copy, GetAttachedToInfo
-  seat/exit XML, Detach chain (EntityAlive IL=27 inventory restore, Entity
-  IL=79 exit teleport, EntityVehicle IL=157 RB wake), FindAttachSlot /
-  GetAttachFreeCount, per-package server flow.
 - **2026-08-07:** GameRandom Next overloads: Next() InternalSample; Next(max)
   Sample()*max with negative throw; Next(min,max) range check + large-range
   fallback; NextBytes InternalSample()%256.
