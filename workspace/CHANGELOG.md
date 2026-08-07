@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: density compaction
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: CheckSameDensity (IL=4) + HasSameDensityValue (IL=5)
+  chnDensity layer compaction probes (PrefabChunk stub).
+
 ## 2026-08-08 - tier-C: decoration gate
 
 Done (V3.1.0 b14 IL):
