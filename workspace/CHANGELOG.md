@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: inventory Apply, party accept, AIDirector components
+
+Done (V3.1.0 b14 IL):
+- InventoryTransaction.Apply IL=126 InitialHash/ops/Finalize; RequestServer unlock.
+- Party.ServerHandleAcceptInvite IL=89; PartyManager.CreateParty IL=24.
+- AIDirector.CreateComponents IL=31 fixed list; GameStateManager.OnUpdateTick 198.
+---
 ## 2026-08-07 — tier-C: death loot path and ItemDropServer chunk cap
 
 Done (V3.1.0 b14 IL):

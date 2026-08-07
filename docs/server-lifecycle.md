@@ -54,8 +54,9 @@ check.
 ## 2. Game state and rounds (`GameStateManager`)
 
 `GameStateManager` owns the game mode and the day/blood-moon progression.
-`InitGame(bServer)` sets up the mode; `OnUpdateTick` advances round state from the
-world clock; `nextRound` / `SetBloodMoonDay` drive the horde schedule.
+`InitGame(bServer)` sets up the mode; `GameStateManager.OnUpdateTick` (**IL=198**,
+server only) advances round state from GameStats (time/day/frag limit modes) and
+the world clock; `nextRound` / `SetBloodMoonDay` drive the horde schedule.
 
 ```mermaid
 stateDiagram-v2
@@ -329,8 +330,8 @@ third-party/analytics.
 
 ## Changelog
 
-- **2026-08-07:** Authorize/RequestToSpawnPlayer/PlayerSpawnedInWorld/
-  SpawnEntityInWorld join apply path; PlayerLoginRPC entry.
+- **2026-08-07:** GameStateManager.OnUpdateTick IL=198 server round gates;
+  Authorize/RequestToSpawn/PlayerSpawned/SpawnEntityInWorld join path.
 - **2026-08-07:** Document analytics heartbeat (300s, client-only; dedicated skips).
 - **2026-08-02:** V3.1.0 join analytics (`PlayerJoinServerEventData`).
 

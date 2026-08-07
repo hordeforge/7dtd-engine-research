@@ -467,7 +467,10 @@ wandering-horde and screamer value:
 held in a static `Dictionary<string, Noise> AIDirectorData::noisySounds`: the heat
 map is fed by **named sounds** with per-sound strength and TTL.
 
-`AIDirector::CreateComponents` (409345) instantiates
+`AIDirector::CreateComponents` (**IL=31**) instantiates in order:
+`MarkerManagement`, `PlayerManagement`, `WanderingHorde`, `AirDrop`,
+`ChunkEvent`, `BloodMoon`; then caches playerManagement / chunkEvent /
+bloodMoon fields. Instantiates
 `AIDirectorPlayerManagementComponent`, `AIDirectorWanderingHordeComponent`,
 `AIDirectorAirDropComponent`, `AIDirectorChunkEventComponent` and
 `AIDirectorBloodMoonComponent`.
@@ -582,7 +585,8 @@ above.
 
 ## Changelog
 
-- **2026-08-07:** AIDirectorBloodMoonComponent.Tick IL=170 party rotation re-pin.
+- **2026-08-07:** AIDirector.CreateComponents IL=31 fixed component order;
+  BloodMoonComponent.Tick IL=170 party rotation re-pin.
 - **2026-08-06:** AIDirectorConstants literal block (wandering-horde and screamer
   tuning) and AIDirectorData/Noise heat-map struct; SpawnManagerBiomes::SpawnUpdate
   is per ChunkAreaBiomeSpawnData, suspends biome enemy spawning during a blood

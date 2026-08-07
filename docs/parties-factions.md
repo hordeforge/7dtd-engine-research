@@ -124,7 +124,7 @@ branch on `ConnectionManager.IsServer`:
 | `PartyActions` | Server handler | Effect |
 |---|---:|---|
 | `0 SendInvite` | (invite bookkeeping) | if target has a pending invite from source, routes to accept; else `AddPartyInvite` + rebroadcast + `ttPartyInviteReceived` |
-| `1 AcceptInvite` | `Party.ServerHandleAcceptInvite` | create party if inviter has none, add both, clear invites |
+| `1 AcceptInvite` | `Party.ServerHandleAcceptInvite` (**IL=89**) | if inviter has no party, `PartyManager.CreateParty` (**IL=24**, server-only, `nextPartyID++`); `AddPlayer` both; clear invites; join audio; `NetPackagePartyData` fan-out |
 | `2 ChangeLead` | `Party.ServerHandleChangeLead` | `SetLeader(newHost)` |
 | `3 LeaveParty` | `Party.ServerHandleLeaveParty` | `RemovePlayer`, drop shared quests |
 | `4 KickFromParty` | `Party.ServerHandleKickParty` | `KickPlayer`, drop shared quests |
@@ -431,6 +431,8 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 | [`residuals.md`](residuals.md) | External / native / content residuals |
 
 ## Changelog
+
+- **2026-08-07:** ServerHandleAcceptInvite IL=89; CreateParty IL=24 nextPartyID.
 
 - **2026-07-28:** Ally package write IL numbers.
 

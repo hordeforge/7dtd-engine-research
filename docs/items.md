@@ -455,8 +455,17 @@ validates each transaction (source/destination slots, counts) before applying it
 which is the anti-dupe / anti-cheat gate for inventory. Requests arrive as
 `NetPackageInventoryTransactionRequest` whose body is
 `InventoryTransaction.Write` (per-inventory Guid + initial/final hash + ops).
-Server `TransactionRequestServer` applies with `secretToken`, runs
-`ValidateFinalHashes`, force-unlocks the player on failure, and acks remote
+Server `TransactionRequestServer` (**IL=46**): must be server (else throw);
+`tx.Apply(secretToken)` then on success `ValidateFinalHashes`; on failure log +
+`LockManager.ForceUnlockByPlayer` (**IL=11** -> `UnlockRequestServer`); on
+success for non-primary player send `NetPackageInventoryTransactionResponse`
+flags **192** (minimal ack).
+
+**`InventoryTransaction.Apply` (IL=126):** for each inventory op data: require
+`TransactionalInventory.Hash == InitialHash` else warn/fail; `StartTransaction`;
+`ProcessOperation` each op; `FinalizeTransaction`; store `FinalHash`.
+
+Force-unlocks the player on failure, and acks remote
 clients via `NetPackageInventoryTransactionResponse` (see
 [protocol-packages.md](protocol-packages.md) section 6.13).
 
@@ -637,8 +646,8 @@ The non-action leaves:
 
 ## Changelog
 
-- **2026-08-07:** GetDamageEntity/Block tag+EffectManager math; Eat.consume;
-  fireShot; DynamicMelee ExecuteAction re-pins.
+- **2026-08-07:** InventoryTransaction.Apply IL=126 + TransactionRequestServer
+  force-unlock path; GetDamageEntity/Block; Eat/fireShot/melee re-pins.
 - **2026-08-06:** ItemClass Stacknumber default 500 and get_MaxCount's
   MaxStackSizeModifier plus 30000 cap; Recipe craftingTime -1 sentinel when
   craft_time is absent; TileEntityWorkstation::GetFuelTime is items.xml FuelValue
