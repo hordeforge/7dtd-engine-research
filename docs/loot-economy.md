@@ -568,6 +568,26 @@ Passive **159** scales loot stage; **160** scales biome max when GameStats **66*
 **`Party.GetHighestLootStage` (IL=28):** max of each member's
 `GetLootStage(containerMod, containerBonus)`.
 
+### 8.1 `LootContainer.getProbability` (IL=192)
+
+1. If player non-null and `!HasRequirements(player)` → **0**.
+2. If `lootProbTemplate` set and registered: walk template entries whose
+   `[minLevel, maxLevel]` contains `lootStage`; first match wins:
+   - item with tags: `GetSandboxProb(itemClass)` then either raw
+     `template.prob * sandbox` (`_ignoreLootProb`) or
+     `EffectManager(passive **79**, template.prob, item tags) * sandbox`.
+   - else entry tags: raw `template.prob` or passive **79** on entry tags.
+3. No template: same item/tags branches using **entry** `prob` (not template).
+
+### 8.2 `SpawnLootItemsFromList` (IL=270)
+
+- `numToSpawn < 1`: if `-1`, `SpawnAllItemsFromList`; else false.
+- Else sum `getProbability` over non-`forceProb` entries; zero sum → fail.
+- Loop `numToSpawn` times: weighted pick via cumulative `RandomFloat * totalProb`
+  (skip already-picked indices when `uniqueItems`); spawn group or item;
+  sandbox count via `RandomCountFromSandbox` / `RandomCountFromSandboxTags` when
+  `_sandboxModifierUsed`.
+
 ## Related docs
 
 | Doc | Role |
@@ -582,8 +602,8 @@ Passive **159** scales loot stage; **160** scales biome max when GameStats **66*
 
 ## Changelog
 
-- **2026-08-07:** GetLootStage IL=184 POI/biome + passives 159/160; party max
-  wrappers GetHighestPartyLootStage / GetHighestLootStage.
+- **2026-08-07:** getProbability IL=192 (template stage bands, passive 79,
+  sandbox); SpawnLootItemsFromList weighted unique loop; GetLootStage wrappers.
 - **2026-08-07:** EntityItem.OnUpdateEntity lifetime 0.05/tick, ground counter 10,
   distraction death, Y&lt;0 death; OnCollectServer RemoveEntity reason 2.
 - **2026-08-07:** EntityTrader.OnUpdateLive IL=315 (quest populate, 10 m bounds

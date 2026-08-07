@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: getProbability and SpawnLootItemsFromList
+
+Done (V3.1.0 b14 IL):
+- getProbability: requirements, lootProbTemplate stage bands, passive 79, GetSandboxProb.
+- SpawnLootItemsFromList: numToSpawn -1 all, weighted unique pick, sandbox counts.
+- MemberCountInRange: other members Distance < GameStats 54.
+---
 ## 2026-08-07 — tier-C: party highest loot stage wrappers
 
 Done (V3.1.0 b14 IL):

@@ -146,8 +146,10 @@ stat is on, so players auto group after respawn.
      victim class, scaled by `EffectManager.GetValue(PassiveEffects=193, victim
      holding item, …)`; if `xpModifier != 1`, `xp = (int)(xp * mod + 0.5)`; if
      in party, `Party.GetPartyXP` =
-     `startingXP * (1 - 0.1 * MemberCountInRange)` (other members in range
-     `GameStats` **54**); local `AddLevelExp("_xpFromKill")` or
+     `startingXP * (1 - 0.1 * MemberCountInRange)` where
+     `MemberCountInRange` (**IL=40**) counts **other** members with
+     `Distance < GameStats` **54** (self excluded); local
+     `AddLevelExp("_xpFromKill")` or
      `NetPackageEntityAddExpClient` flags **192**; when `xpModifier == 1` also
      calls `SharedKillServer` for party mates.
   2. **Party mates** `GameManager.SharedKillServer` (**IL=162**): resolve killer
@@ -459,8 +461,9 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 
 - **2026-07-28:** Ally package write IL numbers.
 
-- **2026-08-07:** SharedPartyKill Process: server SharedKillServer(entity,killer,1);
-  client SharedKillClient(type,xp). EntityAddExpServer only on isEntityRemote.
+- **2026-08-07:** MemberCountInRange: count other members with Distance <
+  GameStats 54 (excludes self). SharedPartyKill / EntityAddExpServer process
+  gates already pinned.
 - **2026-07-28:** PartyActions write IL re-verify (no members on wire).
 
 - **2026-07-23:** Initial party + faction + ally reversal. Party model (`PartyManager` /
