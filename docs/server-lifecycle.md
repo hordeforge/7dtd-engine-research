@@ -313,6 +313,14 @@ add.
 `AfterPlayerRespawn`; local FP revive camera; clear death state via `SetAlive`;
 optional buff re-apply path on local.
 
+**`EntityPlayer.GetBreadcrumbPos(distance)` (IL=27)** reads the 32-slot
+`breadcrumbs` ring buffer: with `bucket = (int)(distance + 0.5)`, the index is
+`(breadcrumbIndex - bucket) & 31` for buckets below 31, else
+`(breadcrumbIndex + 1) & 31`. `SetPrefabsAroundNear(prefabs)` (IL=26) is the
+prefab-vicinity cache: it clears `prefabsAroundNear` and copies the incoming
+`Dictionary<int, PrefabInstance>` in. `GetLayerForMapIcon` returns the icon
+layer constants **19** (base) and **20** (`EntityPlayerLocal`).
+
 **Join packages:** `NetPackagePlayerId` Process IL=11 →
 `GameManager.PlayerId(id, team, playerDataFile, chunkViewDim)`.
 `NetPackagePlayerSpawnedInWorld` Process IL=47: `ValidEntityIdForSender`;
