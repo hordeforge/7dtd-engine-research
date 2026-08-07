@@ -294,7 +294,14 @@ FastTags.none)` then `prefab.SnapTerrainToArea`.
 `size.x`/`size.z` and calls
 `cluster.SnapTerrainToPositionAtLocal(pos + (dx, -1, dz), true, perimeter)`
 where `perimeter` marks the -1 and size+1 border cells, so the terrain is
-snapped under the whole footprint plus a 1-cell rim.
+snapped under the whole footprint plus a 1-cell rim. The local/RPC wrappers
+are stubs; the engine is `ChunkCluster.snapTerrainToPosition(world, pos,
+liftUp, halfDensity)` (IL=113): for a non-terrain cell it returns unless
+`liftUp` and the cell is air with terrain below, then places the below block
+and clamps the density; for a terrain cell it returns when the cell above is
+`IsTerrainDecoration`, else raises the density. The density target is
+`MarchingCubes.DensityTerrain` (or half when `useHalfDensity`), and a non-null
+`world` routes writes through `SetBlockRPC`.
 
 `WorldDecoratorPOIFromImage.DecorateChunkOverlapping` (IL=472) is the static
 POI stamping from the `poi_processed` color map. It warns and returns when any
