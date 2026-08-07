@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EAI BreakBlock/Wander/RunAway/Ranged/FindTarget leaves
+
+Done (V3.1.0 b14 IL):
+- EAIBreakBlock ally damageBoost +0.2 and attack delay formula.
+- EAIWander CanExecute 120 no-player / executePercent / CalcInDir 90.
+- EAIRunAway path end 1.21 and pathTicks 60; panic speed subclasses.
+- EAIRangedAttackTarget look/SeekYaw then UseHoldingItem state machine.
+- FindTarget see-distance, breadcrumb 15/24, bounds expand +4.
+---
 ## 2026-08-07 — tier-C: EAIApproachAndAttackTarget Update phases
 
 Done (V3.1.0 b14 IL):
