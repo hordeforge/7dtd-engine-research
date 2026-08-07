@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: mod clones
+
+Done (V3.1.0 b14 IL):
+- items.md 2: CloneModsTo / CloneCosmeticModsTo (IL=34 each) array copy with
+  per-entry Clone.
+
 ## 2026-08-08 - tier-C: ItemValue metadata store
 
 Done (V3.1.0 b14 IL):
