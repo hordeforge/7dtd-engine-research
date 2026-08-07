@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityItem init leaves
+
+Done (V3.1.0 b14 IL):
+- EntityItem.Init IL=10 (itemRB), PostInit IL=37 (PhysicsSetRB, stickPercent
+  from StickPercent prop, itemWorldData), InitLocalActivationCommands IL=15
+  (take/search).
 ## 2026-08-08 — tier-C: Entity.AddVelocity
 
 Done (V3.1.0 b14 IL):

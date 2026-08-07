@@ -364,6 +364,15 @@ and `ShouldDestroyOnClose`. Call `DropContentOfLootContainerServer` then
 **`EntityItem.OnCollectServer` (IL=8):** `World.RemoveEntity(id, reason=2)` only
 (inventory add is elsewhere on the collect package path).
 
+**Init leaves:** `EntityItem.Init` (IL=10) = base + `itemRB =
+GetComponent<Rigidbody>()`. `PostInit` (IL=37): base, `PhysicsSetRB(itemRB)`,
+`transform.eulerAngles = rotation`; from the item class
+`stickPercent = Properties.GetFloat("StickPercent")` (the thrown-item stick
+chance); `itemWorldData = itemClass.CreateWorldData(gm, this, itemValue,
+belongsPlayerId)` (the on-world context, see
+[dedicated-leftovers.md](dedicated-leftovers.md) `ItemWorldData`).
+`InitLocalActivationCommands` (IL=15) adds `take`/`hand` and `search`/`search`.
+
 **`EntityItem.OnUpdateEntity` (IL=114):** base update; create mesh if needed;
 `ItemClass.OnDroppedUpdate`; if |dy| &lt; 0.1 for **10** ticks set `onGround`;
 physics-master client odd ticks `PhysicsMasterSendToServer`;
