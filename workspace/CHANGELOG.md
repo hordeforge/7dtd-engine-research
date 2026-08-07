@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CheckDespawn source bands and IsAttackValid
+
+Done (V3.1.0 b14 IL):
+- CheckDespawn: remote/chunk-observer unload; 20-tick cadence; source 1/2/3 early and switch bands (48/80/96/128 m; 60/80/100/1800 ticks).
+- IsAttackValid: electrocute/stun 1-2; attack prevented; painResist>=1 free; hasBeenAttackedTime gate; hit anim.
+- GetAttackTargetLocal remote uses attackTargetClient.
+---
 ## 2026-08-07 — tier-C: isBestTask MutexBits and OnUpdateEntity path
 
 Done (V3.1.0 b14 IL):

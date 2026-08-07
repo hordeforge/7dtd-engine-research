@@ -523,20 +523,35 @@ over `TriggersIndices`.
 `GetMaxViewAngle() * 0.5` (half-angle cone). `GetMaxViewAngle` returns field
 `maxViewAngle`.
 
-**`CheckDespawn` (IL=198):** if `!CanUpdateEntity` and no closest player →
-`MarkToUnload`. Else if `canDespawn`, every **20** ticks (`despawnDelayCounter`):
+**`CheckDespawn` (IL=198):** remote → return. If `!CanUpdateEntity` and
+`bIsChunkObserver` and no closest living player → `MarkToUnload`. If
+`!canDespawn` return. Every call increments `despawnDelayCounter`; real work
+only every **20** ticks (then counter reset, `ticksNoPlayerAdjacent += 20`).
 
-| Condition | Action |
-|---|---|
-| No player within **130** m (any) but player within **20** m (flagged) | set `isDespawnWhenPlayerFar` |
-| `isDespawnWhenPlayerFar` | `Despawn()` |
-| Closest player distSq &gt; **6400** (80 m) | reset `ticksNoPlayerAdjacent`, arm far timer |
-| distSq &gt; **9216** (96 m) for **80** ticks | `Despawn()` |
-| distSq &gt; **2304** (48 m) for **60** ticks | `Despawn()` |
-| `ticksNoPlayerAdjacent` ≥ **1800** | `Despawn()` |
-| `ticksNoPlayerAdjacent` ≥ **100** and distSq &gt; **16384** (128 m) | `Despawn()` |
+**Spawner-source early paths** (`GetSpawnerSource`):
 
-Called from TickEntity when area not updateable and from OnUpdateLive paths.
+| Source | Early |
+|---:|---|
+| **3** (Dynamic) | no living closest: if also no dead closest → `Despawn`; return |
+| **1** | no living within **130** m: if dead within **20** m set
+`isDespawnWhenPlayerFar`; else if flag already set → `Despawn` |
+| other | fall through |
+
+If living closest exists and distSq &lt; **6400** (80 m): zero
+`ticksNoPlayerAdjacent`. `lastSeenSec` from `seeCache.GetLastTimePlayerSeen`
+(0 if never). Then switch on `source - 1`:
+
+| Source | Despawn when |
+|---:|---|
+| **3** Dynamic | attack target forces lastSeen=0; sleeper awake: distSq &gt;
+**9216** (96 m) and lastSeen &gt; **80** s; else distSq &gt; **2304** (48 m) and
+lastSeen &gt; **60** s and no investigate; else `ticksNoPlayerAdjacent` &gt;
+**1800** |
+| **1** | `ticksNoPlayerAdjacent` &gt; **100** and distSq &gt; **16384** (128 m);
+or ticks &gt; **1800** |
+| **2** Static | no extra (switch fall-through ret) |
+
+Called from `updateTasks` every AI tick (and other unload paths).
 
 **`canDespawn` (IL=14):** false if client-controlled, or spawner source == **2**
 (Dynamic), or sleeping; else true. **`EntityEnemy.canDespawn` (IL=13):** horde
@@ -544,6 +559,14 @@ zombies (`IsHordeZombie`) never despawn while any player is online; else base.
 
 **`Despawn` (IL=6):** `IsDespawned = true` then `MarkToUnload`.
 `ForceDespawn` (IL=3) just calls `Despawn`.
+
+**`IsAttackValid` (IL=70):** non-player: false if electrocuted or stun type
+**1** or **2**. Any: false if avatar `IsAttackPrevented` or dead. If
+`painResistPercent >= 1` → true (pain-resist free attack). Else false while
+`hasBeenAttackedTime > 0`; else true if no avatar or hit anim not running.
+
+**`GetAttackTarget` / `GetAttackTargetLocal`:** server field `attackTarget`;
+remote reads `attackTargetClient`. Hit aim uses `getChestPosition()`.
 
 **`ResetDespawnTime` (IL=7):** `ticksNoPlayerAdjacent = 0` and
 `seeCache.SetLastTimePlayerSeen()` (clears far-despawn pressure after investigate
@@ -1566,8 +1589,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** isBestTask priority/continuous + MutexBits; OnUpdateEntity buff
-  then live; GetAliveCount; FindLabel; MinScript.Tick; Spawn async.
+- **2026-08-07:** CheckDespawn source 1/2/3 bands; IsAttackValid pain/stun;
+  isBestTask MutexBits; OnUpdateEntity buff path; MinScript.Tick.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
