@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: loot registry accessor
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md: LootContainer.GetLootContainer IL=21 - null on
+  empty name, TryGetValue, Log.Error + null on miss with
+  errorOnMiss.
 ## 2026-08-08 - tier-C: activate/zoom + block conversion
 
 Done (V3.1.0 b14 IL):
