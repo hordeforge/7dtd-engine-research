@@ -2344,6 +2344,10 @@ pick random start index; walk candidates requiring
 remove from available and return index; if none, `FindFathestSpawnFromPlayers`
 (typo in stock method name).
 
+**`Chunk.CanSleeperSpawnAtPos(x, y, z, checkBelow)` (IL=36):** with
+`checkBelow`, the block at y-1 must `IsCollideMovement`; the cell itself must
+be neither `IsCollideMovement` nor `shape.IsSolidSpace` (open space).
+
 **`ResetSpawnsAvailable` (IL=48):** rebuild `spawnsAvailable` as all spawn-point
 indices. If prefab `LastRefreshType` has `infestedTag`, include every point;
 else skip points whose `BlockSleeper.spawnMode == 2` (infested-only / excluded
