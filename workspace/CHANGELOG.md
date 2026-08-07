@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vehicle ownership/password/fuel
+
+Done (V3.1.0 b14 IL):
+- vehicles-drones-turrets.md 4.2b: SetOwner/GetOwner (IL=5/4) OwnerId,
+  SetLocked (IL=4), IsUserAllowed (IL=11); password chain HasPassword (IL=7),
+  GetHashForPassword (IL=3) Utils.HashString, SetPasswordHash (IL=33) clears
+  AllowedUsers + first-owner lock, CheckPasswordHash (IL=29) adds user +
+  SendSyncData(2); fuel: GetFuelCount (IL=7) floor(level*25), needsFuel (IL=12),
+  takeFuel (IL=67) inventory-then-bag DecItem, AddFuelFromInventory (IL=45)
+  25-per-item refill.
+
 ## 2026-08-08 - tier-C: Inventory take/return leaves
 
 Done (V3.1.0 b14 IL):
