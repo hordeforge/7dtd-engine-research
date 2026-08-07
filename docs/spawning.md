@@ -649,6 +649,14 @@ the world and the recorded `lastCopiedPrefabPosition`, `boundingBoxSize` vs
 `prefab.size`, and `lastCopiedRotation` all still match the live fields
 (edits that move or resize the bounding box desync it).
 
+**Decorator leaf queries:** `chooseClosestPrefab(candidates, worldPos,
+maxSearchDistanceSquared)` (IL=35) scans `(PrefabInstance, Vector2)` tuples and
+returns the one with the smallest `sqrMagnitude` under the bound (shrinking the
+bound as it finds closer hits), null when none qualify.
+`IsEntityInPrefab(entityId)` (IL=40) holds `listsLock` and tests
+`PrefabInstance.Contains(entityId)` across `allPrefabs` (the POI-association
+gate behind quest/POI entity checks).
+
 ---
 
 ## 9. Dedicated relevance and residuals
