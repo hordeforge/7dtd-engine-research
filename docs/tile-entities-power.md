@@ -65,6 +65,9 @@ whose lowercased transform name contains the filter (empty filter matches all)
 and returns the count. `AddInsideDevicePosition(x, y, z, bv)` (IL=20) records
 a `Vector3b` in `insideDevices` (+ hash set) and sets
 `IsInternalBlocksCulled = true` (the POI-filler culled path).
+`EnableInsideBlockEntities(on)` (IL=45) walks `insideDevices`, resolves each
+entry's stub by packed world key, and `SetActive(on)`s every stub with a
+transform (returning the count).
 `removeBlockEntitesMarkedForRemoval()` (IL=133) drains
 `blockEntityStubsToRemove` + `propEntitiesToRemove`: with occlusion culling on
 the transforms go through `OcclusionManager.RemoveChunkTransforms`; each stub
