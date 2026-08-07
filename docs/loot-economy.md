@@ -687,6 +687,11 @@ group's quality range; every entry gets `parentGroup = this`;
 5), and `poi_tier_mod` (comma floats) / `poi_tier_bonus` fill them - the POI
 tier modifiers that feed the loot-stage math below.
 
+**Buff application:** `LootContainer.ExecuteBuffActions(instigatorId,
+target)` (IL=28) walks `BuffActions` (null list -> no-op) and, per name,
+`target.Buffs.AddBuff(name, -1, true, false, -1)` - the loot-entry buffs
+land on the container opener with net-sync on.
+
 **Registry accessor:** `LootContainer.GetLootContainer(name, errorOnMiss)`
 (IL=21) is the lookup every runtime path uses (loot bundles, TE loot lists):
 null for an empty name, `lootContainers.TryGetValue` on the dictionary, and
@@ -831,6 +836,8 @@ or `ItemStack.Empty` when nothing rolled.
 
 ## Changelog
 
+- **2026-08-08:** LootContainer.ExecuteBuffActions IL=28: per BuffActions
+  name target.Buffs.AddBuff(name, -1, true, false, -1) on the opener.
 - **2026-08-08:** LootContainer.GetLootContainer IL=21: null on empty name,
   TryGetValue, Log.Error + null on miss with errorOnMiss.
 - **2026-08-08:** LootFromXml loader (7b): coroutine entry IL=6;
