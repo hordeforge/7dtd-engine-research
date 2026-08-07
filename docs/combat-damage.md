@@ -121,6 +121,10 @@ crippled leg hit while alive and walkType not 5 and &lt; 20: `SetWalkType(5)`.
 **`BodyDamage.IsAnyLegMissing`:** Flags & **480** != 0.
 **`IsAnyArmOrLegMissing`:** Flags & **510** != 0.
 **`IsCrippled`:** Flags & **12288** (4096|8192) != 0.
+**Leg-present accessors (IL=7):** `HasLeftLeg` is `(Flags & 96) == 0` and
+`HasRightLeg` `(Flags & 384) == 0` - the missing-leg bit pairs (32|64 left,
+128|256 right), inverted: a leg is "present" when neither of its missing
+flags is set.
 
 **`ApplyLocalBodyDamage` (IL=188 high-level):** store bodyPartHit + damageType;
 on dismember (or debug body part) OR part bits into `Flags` (1/2/4/8/16/32/64/
@@ -482,6 +486,8 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-08:** BodyDamage leg accessors (IL=7): HasLeftLeg (Flags & 96
+  == 0), HasRightLeg (Flags & 384 == 0) - inverted missing-leg bit pairs.
 - **2026-08-08:** EntityEnemyAnimal.CanDamageEntity IL=17 same-class gate
   (no same-species damage); EntityAnimal/EntityEnemy DamageEntity IL=7
   base delegates.
