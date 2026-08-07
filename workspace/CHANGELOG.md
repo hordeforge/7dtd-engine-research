@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SmellCountToRadius
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.SmellCountToRadius (IL=18) narrated in stealth-smell.md:
+  count -= 5 free threshold, negative -> 0, FastLerp(10, 100, count/45) -
+  linear radius from 10 m at threshold to 100 m at full smell.
+
 ## 2026-08-08 - tier-C: SmellUpdateItemsAndBlood
 
 Done (V3.1.0 b14 IL):

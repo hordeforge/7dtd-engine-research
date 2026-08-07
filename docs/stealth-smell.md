@@ -117,6 +117,11 @@ event). Otherwise `itemSmell = SmellCountItems()`, zeroed when `smellWetRate
 a local player with `shelterPercent > 0` scales the target to **20%**
 (`smellRadiusTarget *= 0.2`) and marks `smellSheltered`.
 
+**`PlayerStealth.SmellCountToRadius(count)` (IL=18)** is the count-to-radius
+curve: `count -= 5` (the first 5 smell are free), a negative result maps to
+0, else `FastLerp(10, 100, count / 45)` - a linear 10 m at the threshold up to
+100 m at full smell.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Odorless
@@ -158,6 +163,8 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.SmellCountToRadius (IL=18): count-5 free
+  threshold, negative -> 0, FastLerp(10, 100, count/45) radius curve.
 - **2026-08-07:** PlayerStealth.SmellUpdateItemsAndBlood (IL=79): dead /
   smellWet<3 -> SmellClear + client stealth package; dysenterySmell ->
   SetSmellEat(35); wet suppresses item smell; smellRadiusTarget = max(
