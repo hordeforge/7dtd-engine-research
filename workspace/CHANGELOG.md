@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: biome-id accessors
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 1: Chunk.GetBiomeId (IL=9) / SetBiomeId (IL=10)
+  m_Biomes[x + z*16] byte.
+
 ## 2026-08-08 - tier-C: cluster water accessors
 
 Done (V3.1.0 b14 IL):
