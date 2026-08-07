@@ -110,6 +110,14 @@ The mode does not drive per-tick logic itself; it sets the prefs that the rest o
 the systems (spawning, buffs, save, etc.) read. So "what a mode does" is almost
 entirely the `GamePrefs` it applies in `Init`.
 
+**`GameStateManager.InitGame(bServer)` (IL=50):** `GameStats.Set(GameState,
+Running)`; mode type from `GamePrefs.GetString(29)` (falling back to the pref
+default when the string does not resolve), `currentGameMode =
+(GameMode)Activator.CreateInstance(type)`; `GameStats.Set(GameModeId,
+mode.GetID())`. Server only: `GameStats.Set(CurrentRoundIx, 0)`,
+`timeRoundStarted = Time.time`, `mode.Init()`, `mode.StartRound(roundIx)`,
+`bDirty = true` (next tick broadcasts GameStats, see §2).
+
 ---
 
 ## 3. Player join and persistence (state machine)

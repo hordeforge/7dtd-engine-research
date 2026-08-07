@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GameStateManager.InitGame mode instantiation
+
+Done (V3.1.0 b14 IL):
+- InitGame IL=50: GameState Running, mode from pref 29 type (default fallback)
+  via Activator; GameModeId = GetID; server: round 0, timeRoundStarted,
+  mode.Init + StartRound(0), bDirty.
 ## 2026-08-08 — tier-C: chunk data expiry + unload skip rules
 
 Done (V3.1.0 b14 IL):
