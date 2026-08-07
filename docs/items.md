@@ -441,6 +441,21 @@ are skipped. `GetItemCount(FastTags itemTags, seed, meta, ignoreModded)`
 The `XUiM_PlayerInventory.GetItemCount` wrappers (IL=19) sum the same query
 over backpack + toolbelt (UI-side).
 
+**`Inventory.AddItem(stack, out slot)` (IL=121)** (wrapper IL=5): the give-item
+path (loot, crafting output, admin `give`). First gate:
+`stack.CanMoveTo(StackLocationTypes.Toolbelt, -1)` (the item must be movable
+into the toolbelt); a rejection writes `slot = -1` and returns false. Then a
+**stack-merge pass** over `slots`: the first slot with the same `type` and
+`CanStackWith(stack, false)` gets `count += stack.count`; failing that, an
+**empty-slot pass** writes the stack into the first `IsEmpty()` slot via
+`SetItem(i, value, count, true)`. Both paths call `notifyListeners()`, set
+`entity.bPlayerStatsChanged = !isEntityRemote`, and report the slot index.
+`AddItemAtSlot(stack, slot)` (IL=84) targets one slot: it requires
+`0 <= slot < PUBLIC_SLOTS`, merges counts when stackable, else writes when the
+slot is empty and `CanMoveToSlot(stack, slot)` passes; on any change it
+notifies, marks stats changed, and runs `HoldingItemHasChanged()` when the
+written slot is the held slot.
+
 ---
 
 ## 7. Durability and degradation
@@ -725,6 +740,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** Inventory.AddItem (IL=121) give path: CanMoveTo(Toolbelt,-1)
+  gate, stack-merge pass then empty-slot pass, notifyListeners + stats-changed;
+  AddItemAtSlot (IL=84) slot-targeted with PUBLIC_SLOTS bound,
+  CanMoveToSlot gate, HoldingItemHasChanged on held slot.
 - **2026-08-07:** Inventory.setHeldItemByIndex (IL=132) slot switch:
   wrap-around, avatar itemHasChangedTriggerHash, ItemActionAttack sound stop,
   m_HoldingItemIdx/FocusedItemIdx, remote vs local holster (0.2 s), flashlight

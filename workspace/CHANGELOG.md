@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory.AddItem
+
+Done (V3.1.0 b14 IL):
+- Inventory.AddItem (IL=121 + IL=5 wrapper) narrated in items.md section 6:
+  CanMoveTo(Toolbelt, -1) gate, stack-merge pass (same type + CanStackWith)
+  then empty-slot pass via SetItem(notify=true), notifyListeners +
+  bPlayerStatsChanged = !isEntityRemote, out slot index.
+- AddItemAtSlot (IL=84): PUBLIC_SLOTS bound, merge or CanMoveToSlot gate +
+  SetItem, notify + stats-changed + HoldingItemHasChanged when held slot.
+
 ## 2026-08-08 - tier-C: EntityBuffs.AddBuff
 
 Done (V3.1.0 b14 IL):
