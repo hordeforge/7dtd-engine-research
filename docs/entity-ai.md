@@ -1243,7 +1243,23 @@ UAI package path also present (`UAIBase`, considerations, MoveToTarget, etc.).
 
 ### D3.4 Path follow (`ASPPathNavigate.pathFollow`, 160 IL)
 
-Floats seen: **0.04, 0.15, 0.2, 0.33, 0.49, 0.6, 0.7, 0.9, 2** (waypoint / progress thresholds; exact semantics need line-level read of dump).
+1. Project current waypoint to ground; closest point of entity segment
+   (prevPos→pos) onto path segment; measure planar distance to waypoint.
+2. Horizontal arrive radius = `max(0.15 or mid-path 0.33/0.49, radius*0.6)`;
+   mid-path uses **0.33** if no side-step angle else **0.49**; swimming uses
+   **0.9** arrive and **0.7** vertical; elevator vertical **0.2** (else **2**).
+3. If next point exists: if near current (sq &lt; **0.04**) or plane same-side
+   past waypoint → advance index.
+4. Otherwise advance when planar dist &lt; arrive radius and |dy| ok.
+
+**`ImprovePath` (IL=56):** `ProjectToGround` every point; if ≥2 points and
+point1.y - point0.y &lt; **0.6**, snap point0 projected to closest on segment
+from entity pos (smooth first step).
+
+**`EAIBase.IsPathUsageBlocked` (IL=2):** default **false** (subclasses can veto).
+
+**`hasHome` (IL=7):** `maximumHomeDistance >= 0`. **`detachHome` (IL=4):** set
+`maximumHomeDistance = -1`.
 
 ### D3.5 Net interest (`NetEntityDistributionEntry.updatePlayerList`)
 
@@ -1784,8 +1800,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** CheckPath IsPathUsageBlocked; move speeds passive 133-135;
-  SetPath ImprovePath; GetSeeDistance seeOffset; EAILeap; SetMoveTo; CalcAway.
+- **2026-08-07:** pathFollow arrive radii swim/elevator; ImprovePath first-step;
+  hasHome/detachHome; CheckPath; moveSpeed passives 133-135; SetPath.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
