@@ -204,8 +204,12 @@ special score condition if holding `gunHandgunT2Magnum44`;
 `NetPackageEntityAddScoreClient` to that entity; else local
 `EntityAlive.AddScore`.
 
-**`EntityAlive.AddScore` (IL=97):** increment KilledZombies/Players/Died counters;
-score from GameStats weights; clamp score ≥ 0; achievement stats hooks.
+**`EntityAlive.AddScore` (IL=97):** add to KilledZombies / KilledPlayers / Died;
+`Score += zKills*GameStats[28] + pKills*GameStats[29] + died*GameStats[30]`;
+if Score &lt; 0 clamp 0. Achievements: died→stat **10**, zombies→**6**, players→**7**;
+if `_conditions & 2` (magnum path) achievement **14** += 1.
+
+**`HandleClientDeath` (base IL=1):** empty `ret` (subclasses may override).
 
 **`NotifySleeperDeath` (IL=11):** server + `IsSleeper` only →
 `World.NotifySleeperVolumesEntityDied(this)`.
@@ -319,6 +323,8 @@ Leaf types on the edges of the damage flow above:
   SetStun/_stunned; Kill NotifySleeperDeath; AwardKill magnum score flag 2.
 - **2026-08-07:** ClientKill buff/progression; OnDeathUpdate DeadBodyHitPoints;
   FireEvent fan-out; NotifySleeperDeath volumes.
+- **2026-08-07:** AddScore GameStats 28/29/30 + ach 6/7/10/14; GetMaxAttackTime 10;
+  SleeperVolume.EntityDied/ClearedUpdate pref 88.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

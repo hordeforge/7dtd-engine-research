@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EntityDied ClearedUpdate and AddScore weights
+
+Done (V3.1.0 b14 IL):
+- NotifySleeperVolumesEntityDied: lock + EntityDied all volumes.
+- EntityDied: remove respawnMap/list; ClearedUpdate if not spawning.
+- ClearedUpdate: pref 88 days * 24000 -> respawnTime; wasCleared.
+- GetMaxAttackTime: 10 ticks.
+- AddScore: GameStats 28/29/30 weights; achievements 6/7/10/14; HandleClientDeath nop.
+---
 ## 2026-08-07 — tier-C: ClientKill OnDeathUpdate FireEvent
 
 Done (V3.1.0 b14 IL):

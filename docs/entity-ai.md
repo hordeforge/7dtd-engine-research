@@ -286,6 +286,9 @@ false if hit (blocked); restore layer; true if clear.
 **`GetAttackTimeoutTicks` (IL=10):** day → `attackTimeoutDay`; dark →
 `attackTimeoutNight`.
 
+**`GetMaxAttackTime` (IL=2):** constant **10** (sets `hasBeenAttackedTime` on
+pain hits; gates `IsAttackValid`).
+
 **`GetTargetIfAttackedNow` (IL=98):** null if `!IsAttackValid`. Holding action 0
 `GetExecuteActionTarget`; require valid hit + transform; range =
 `ItemAction.Range` or passive **11** on item; allow +**0.3** m; require
@@ -586,6 +589,16 @@ zombies (`IsHordeZombie`) never despawn while any player is online; else base.
 
 **`Despawn` (IL=6):** `IsDespawned = true` then `MarkToUnload`.
 `ForceDespawn` (IL=3) just calls `Despawn`.
+
+**`World.NotifySleeperVolumesEntityDied` (IL=32):** `Monitor` on
+`sleeperVolumes`; every volume `EntityDied(entity)`.
+
+**`SleeperVolume.EntityDied` (IL=31):** if id not in `respawnMap` return; remove
+from map and `respawnList`; if not `isSpawning` call `ClearedUpdate`.
+
+**`ClearedUpdate` (IL=33):** if already `wasCleared` or `respawnMap` still non-empty
+return. Pref **88** (sleeper respawn days): if &gt; 0 set
+`respawnTime = worldTime + days*24000`; else `-1`. Set `wasCleared = true`.
 
 **`IsAttackValid` (IL=70):** non-player: false if electrocuted or stun type
 **1** or **2**. Any: false if avatar `IsAttackPrevented` or dead. If
@@ -1623,8 +1636,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** UseHoldingItem attack anim/60 ticks; AStar lock vs ASP no-lock;
-  CanSee ray/stealth; Attack target-now; CheckDespawn; IsAttackValid.
+- **2026-08-07:** EntityDied + ClearedUpdate pref 88; GetMaxAttackTime 10;
+  UseHoldingItem; AStar/ASP enqueue; CanSee; CheckDespawn; IsAttackValid.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
