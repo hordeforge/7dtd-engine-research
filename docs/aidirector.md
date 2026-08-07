@@ -124,6 +124,16 @@ playtest) set spawn flag, `StartCooldownOnNeighbors`, `SetLongDelay`,
 `ScoutsFeral` (&lt;125), else `ScoutsRadiated`; queue `AIScoutHordeSpawner` on
 `scoutSpawnList`.
 
+**`AIScoutHordeSpawner.SpawnUpdate` (IL=129):** require `CanSpawn(1)`;
+`EntitySpawner.SpawnManually` (day check); for each spawned alive entity:
+`SetInvestigatePosition(CalcRandomPos(endPos, 6), **6000**, true)`; push
+`ZombieCommand` onto `hordeList`.
+
+**`UpdateHorde` (IL=229):** per command: dead scouts culled; if not attacking
+and lost investigate / dead target, may `spawnHordeNear` then
+`AttackDelay = **18**` s; investigate refresh uses **2000** / **6000** tick
+lifetimes; when attacking, keep horde spawn pos on living scout.
+
 **`AIDirectorChunkData.Tick` (IL=23):** if `cooldownDelay > 0` subtract elapsed
 and keep entry; else `DecayEvents`; keep entry while `EventCount > 0`.
 
@@ -400,6 +410,8 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
+  and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset
   cooldown 240 s; Flow/Evap damage packing cross-ref liquid.
 - **2026-08-07:** SpawnScouts gamestage bands + 120 m player; NotifyEvent queue;

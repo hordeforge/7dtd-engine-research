@@ -186,6 +186,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | ChangeThis pack + SpawnScouts bands | light-mesh-water / aidirector |
 | Chunk activity AddEvent/Decay/240s | aidirector.md |
 | Liquid Evap/Flow damage packing | light-mesh-water.md |
+| Scout horde SpawnUpdate/UpdateHorde | aidirector.md |
+| Drone idle/follow/sentry + turret findTarget | vehicles-drones-turrets |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

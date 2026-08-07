@@ -276,10 +276,21 @@ stateDiagram-v2
 ```
 
 Follow and return use the drone's own flood-fill / raycast pathing
-(`FloodFillEntityPathGenerator`, `steering`, `pathMan`), not the zombie A\* path
+(`FloodFillEntityPathGenerator`, `steering`, `pathMan`), not the zombie A* path
 queue, though it still calls `PathFinderThread.Instance` for projected paths.
-`idleState` polls `DroneSensors.IsEnemyInRange` and the owner distance to decide
-whether to drop into Follow; it also faces the owner and holds hover height.
+
+**`idleState` (IL=100):** underwater early-out; if enemy in sensor range but
+owner outside `EnemyDetectionRadius` → `Follow`; if owner outside
+`FollowDistance+2` and no enemy → `Follow`; else face owner 2D and seek Y to
+chest height at `SpeedFlying*0.5`.
+
+**`followState` (IL=76):** interrupt/underwater/vehicle handlers; pick closest
+group slot from `GetGroupPositions(owner, 5, …)`; `DoMoveIntoFollowPos` then
+`steerFollow`; return to `Idle` when within **0.5** of slot or within
+`FollowDistance` of chest.
+
+**`sentryState` (IL=61):** if chunk loaded and more than **5** m from `SentryPos`,
+`DoMoveIntoFollowPos`; else Seek/rotate toward sentry pos until within **0.25** m.
 `DroneManager` handles cross-cutting ownership: `SpawnFollowingDronesForPLayer`
 teleports a player's Follow-order drones to them on join, `TeleportIfFollowing`
 hooks the owner's teleport event, and `ClearAllDronesForPlayer` removes both the
@@ -320,6 +331,13 @@ then, when anything changes, syncs it:
 - When `TargetEntityId`, `IsOn`, or the item value changes versus the last tick,
   the server sends `NetPackageTurretSync(id, targetId, isOn, itemValue)` on
   channel `192`.
+
+**`findTarget` (IL=173):** clear target; `GetEntitiesInBounds(EntityAlive,
+bounds centered on muzzle with size ~`range`×2 height 1)`; sort by
+`TurretEntitySorter`; skip `shouldIgnoreTarget`; for each try `trackTarget`
+(yaw/pitch); Voxel raycast layer mask `-538750989` thickness 0.05; accept first
+hit whose transform name starts with expected prefix / resolves to EntityAlive;
+set `TargetEntityId`.
 
 The attached `MiniTurretFireController.Update` (a MonoBehaviour, so per frame)
 does the aiming and the target search:
@@ -426,7 +444,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** PhysicsWakeNear 20 m (sqr 400) zero VelocityChange force.
+- **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds
+  + raycast; PhysicsWakeNear 20 m.
 - **2026-08-07:** TurretTracker save every 120 s; AttachEntityToSelf / DetachEntity
   seat pose, layer 24, hasDriver, local action set.
 - **2026-07-23:** Initial reversal of the vehicle / drone / turret subsystem: three server-gated registries, the chunk / owner streaming loop, per-player waypoint push, client-authoritative vehicle physics vs server-authoritative drone and turret behaviour, mount / drive / dismount, drone state machine, and both turret fire-controller families, with state-machine diagrams.

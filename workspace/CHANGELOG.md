@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: scout horde update and drone state IL
+
+Done (V3.1.0 b14 IL):
+- Scout SpawnUpdate: CanSpawn, investigate 6000 ticks, random pos radius 6.
+- UpdateHorde: AttackDelay 18s, investigate 2000/6000, spawnHordeNear.
+- Drone idle/follow/sentry distance gates; MiniTurret findTarget raycast.
+---
 ## 2026-08-07 — tier-C: chunk activity decay and liquid Flow/Evap packing
 
 Done (V3.1.0 b14 IL):
