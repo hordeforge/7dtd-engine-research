@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GamePrefs.Parse typed conversion
+
+Done (V3.1.0 b14 IL):
+- GamePrefs.Parse IL=45: PropertyDecl.type switch (Int32 TryParse/Float/Bool/
+  String, unknown -> null); ParseGamePref IL=24 stores to parsedGamePrefs or
+  reports Could not parse config value.
 ## 2026-08-08 — tier-C: config file load + pref parse
 
 Done (V3.1.0 b14 IL):

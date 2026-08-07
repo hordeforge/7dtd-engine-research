@@ -204,6 +204,10 @@ Leaves (all V3.1.0 b14 IL):
   config error when quitting, else a warning (command-line args that are not
   config properties are ignored); exceptions → config error. Both pref parsers
   store into `parsedGamePrefs` for `ApplyParsedGamePrefs` to commit.
+  `ParseGamePref` (IL=24) uses `GamePrefs.Parse` (IL=45), the typed
+  string→object conversion by `PropertyDecl.type` (Int32 TryParse default 0 /
+  Float / Bool / String; unknown pref → null) and reports
+  `Could not parse config value '{value}'` on failure.
 - **`InitGamePrefs()` (IL=36):** log `Last played version: {pref 34}`; set
   `GamePrefs[34 (GameVersion)] = Constants.cVersionInformation.LongStringNoBuild`;
   `initGamePrefsOk = ApplyParsedGamePrefs()`.
