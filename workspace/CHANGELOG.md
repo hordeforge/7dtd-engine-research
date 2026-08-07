@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Bag.GetItemCount mirror
+
+Done (V3.1.0 b14 IL):
+- Bag.GetItemCount type/tag overloads (IL=68/75) noted in items.md as the
+  backpack mirror of the Inventory versions: same type-or-ItemTags match,
+  seed/meta filters, ignoreModdedItems, over GetSlots().
+
 ## 2026-08-08 - tier-C: GameRandom Next overloads
 
 Done (V3.1.0 b14 IL):

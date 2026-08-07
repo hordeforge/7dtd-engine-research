@@ -461,7 +461,9 @@ are skipped. `GetItemCount(FastTags itemTags, seed, meta, ignoreModded)`
 (IL=86) is the tag variant: non-empty values whose
 `ItemClass.ItemTags.Test_AnySet(itemTags)` match, same seed/meta/mod filters.
 The `XUiM_PlayerInventory.GetItemCount` wrappers (IL=19) sum the same query
-over backpack + toolbelt (UI-side).
+over backpack + toolbelt (UI-side). `Bag.GetItemCount` mirrors both Inventory
+overloads (IL=68 / IL=75) over the backpack's `GetSlots()` array with the same
+type-or-tags, seed, meta, and `ignoreModdedItems` filters.
 
 **`Inventory.AddItem(stack, out slot)` (IL=121)** (wrapper IL=5): the give-item
 path (loot, crafting output, admin `give`). First gate:
