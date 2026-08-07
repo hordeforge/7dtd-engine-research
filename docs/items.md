@@ -1385,6 +1385,17 @@ returns; the one-shot latch (`lastUseTime == 0`) raycasts the player's
 stores `targetPosition` + `targetMass` on the action data, and starts the
 `RightArmAnimationUse` - the actual fill completes in `OnHoldingUpdate`.
 
+**`ItemActionDumpWater.ExecuteAction` (IL=118)** is the empty-container
+action: press-only, requires an `ItemClassWaterContainer` (else logs
+`Cannot dump water as item is not a WaterContainer`), `Meta >= 195`, and the
+one-shot latch; it raycasts the `HitInfo` ray
+(`Voxel.Raycast(world, ray, cDigAndBuildDistance, -555266061, 4095, 0)`),
+resolves the dump cell via `TryFindDumpPosition`, and gates on the
+**trader area** (`IsWithinTraderArea` + `!SandboxUseTraderArea`) and the
+**land claim** (`GetLandClaimOwner(pos, playerData) == 3` -> the
+`ttCannotUseAtThisTime` tooltip), then latches `lastUseTime` +
+`RightArmAnimationUse`; the water is written back in `OnHoldingUpdate`.
+
 **`ItemActionTerrainTool` (V3.1.0 b14)** is the terrain-sculpt tool
 (dig/flatten): `ExecuteAction` (IL=46) latches `bActivated` +
 `activateTime` on press and forwards `GameManager.ItemActionEffectsServer
@@ -1489,6 +1500,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionDumpWater.ExecuteAction IL=118: water-container
+  check, Meta>=195 gate, dump-cell raycast + TryFindDumpPosition, trader-
+  area and land-claim (owner 3) ttCannotUseAtThisTime gates, latch +
+  OnHoldingUpdate write-back.
 - **2026-08-08:** ItemActionCollectWater.ExecuteAction IL=89: fill mass =
   MaxMass - Meta (default 19500, <195 return), one-shot latch, water-cell
   raycast (16/4095), targetPosition/targetMass latch + fill in
