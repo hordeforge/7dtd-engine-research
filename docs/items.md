@@ -126,6 +126,14 @@ appear inside `NetPackageHoldingItem`, `NetPackagePlayerInventory`,
 [`protocol-packages.md`](protocol-packages.md) and
 [`tile-entities-power.md`](tile-entities-power.md)).
 
+`ItemStack.ReadDelta(reader, last)` (IL=15) / `WriteDelta(writer, last)`
+(IL=23) are the inventory-delta wire pair: the full `ItemValue` body is written
+both ways and only the count is delta-coded as an `i16` relative to the previous
+stack (`count = last.count + ReadInt16`; write sends `count - last.count` and
+syncs `last.count` to the new count). `ItemValue.ReadOrNull(reader)` (IL=13)
+reads the leading marker byte itself and returns null for the `0` empty
+sentinel, otherwise `new ItemValue().ReadData(reader, marker)`.
+
 **Stacking predicates (V3.1.0 b14):** `ItemStack.CanStackWith(other,
 allowPartialStack)` (IL=46) requires both stacks non-empty, same `type`, and
 for block ids (`type < Block.ItemsStartHere`) an equal `TextureFullArray` -
@@ -154,6 +162,17 @@ container gate: with `slotNumber >= 0` it first requires
 `bRestrictedMove` is set the location must be one of the `restrictedTo`
 `StackLocationTypes` list (a restricted class can only live in its listed
 containers - toolbelt, backpack, or equipment); both conditions must hold.
+
+`ItemStack.StackTransferCount(other)` (IL=21) is the partial-stack transfer
+count: 0 when the types differ, else `Min(MaxCount - count, other.count)` (how
+much of `other` fits into this slot). `ItemValue.EqualsForMerging(other)`
+(IL=47) gates stack merging: null or a different `type` fail; with
+`ItemAction.RepairType` `CombineOnly` (2) or `Both` (3) the two values must sit
+at the same durability extreme, either both pristine (`UseTimes` sum 0) or both
+fully used (`UseTimes == MaxUseTimes` on each), and then the `Stats` arrays must
+be equal. `ItemValue.CalcModSlotCount()` (IL=29) rolls the mod-slot budget from
+`Quality` as `FastMin(255, (int)EffectManager.GetValue(ModSlots, this,
+FastMax(0, Quality - 1), ...))`.
 
 ---
 
@@ -547,6 +566,12 @@ quality and mods through `ModMaxUseTimes`). The exposed fraction is
   `ItemMaxDegrationAmount` per repair, and floors it at `0.05`, so a repeatedly
   repaired item permanently loses headroom. When `ItemMaxDegrationAmount` is `0`
   the item never degrades.
+- **Sandbox off switch:** `ItemValue.AdjustForSandboxOptions` (IL=7, and the
+  null-guarding `ItemStack` wrapper IL=8) strips the `DurabilityModifier`
+  metadata when perma-degradation is off
+  (`EntityPlayerLocal.get_PermaDegrationOn`, IL=12: `DegradeOnDeathType`
+  `MaxDurability`/`Both`, else `ItemAction.ItemMaxDegrationAmount > 0`), so a
+  sandbox without degradation keeps every item at full durability headroom.
 
 `Quality` (`u16`) drives `MaxUseTimes` and stat rolls; `Meta` (`u16`) is separate
 scratch (magazine ammo for guns, state for other items). Both are packed in the
