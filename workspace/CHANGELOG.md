@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: FromRaw texture/CRC leaves
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 4.1: generateHalfResTexture IL=27 (mip-1 half-res, error fallback), GetProviderId=4, ARGB32ToColor copy
+- chunk-providers.md 4.1: GetChunkProtectionLevel/GetHeight/GetWorldSize overrides, filesNeedProcessing CRC gate
+
 ## 2026-08-08 - tier-C: FromRaw override + CRC leaves
 
 Done (V3.1.0 b14 IL):
