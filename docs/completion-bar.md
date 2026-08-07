@@ -158,11 +158,12 @@ Closed in recent sessions (still optional, not required for A+B):
 | EntityStatChanged / StatsBuff Process | entity-stats §5.1-5.2 |
 | NetPackageTileEntity Process teBlockId | tile-entities-power §2 |
 | QuestObjectiveUpdate event types | protocol-packages |
+| UAI all 5 concrete task Start+Update | entity-ai §5.3 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
-Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves
-beyond Move/Wander/Attack remain optional depth. Promote only when a clone or
-optim lever needs the behaviour.
+Quest/Action leaves (inventories), client-shared helpers. Further UAI is only
+considerations / action scoring XML, not more task subclasses (only 5 exist).
+Promote only when a clone or optim lever needs the behaviour.
 
 ---
 

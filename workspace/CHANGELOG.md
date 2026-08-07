@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: full UAI task Start+Update table (5 types)
+
+Done (V3.1.0 b14 IL):
+- Enumerated all concrete UAITask* types (only 5).
+- Start+Update for MoveToTarget, Wander, AttackTargetEntity/Block, FleeFromTarget.
+- Flee sets home area radius 10 on path end; Attack dual Attack(false/true) pattern.
+---
 ## 2026-08-07 — tier-C: EntityStatChanged, StatsBuff, TE Process, QuestObjective
 
 Done (V3.1.0 b14 IL):

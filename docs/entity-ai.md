@@ -289,13 +289,18 @@ So UAI is a **utility-scored action chooser** on a timer, then a **linear task
 list** inside the chosen action. Path requests still come from individual
 `UAITaskBase` Start/Update via `FindPath`, same ASP queue as EAI.
 
-**Representative task leaves (IL re-pin):**
+**Concrete UAI task types in V3.1.0 b14** (only these five subclasses exist):
+`MoveToTarget`, `Wander`, `AttackTargetEntity`, `AttackTargetBlock`, `FleeFromTarget`.
 
-| Task | Update IL | Behaviour |
-|---|---:|---|
-| `UAITaskMoveToTarget` | 12 | base Update; if `navigator.noPathAndNotPlanningOne` -> `Stop` |
-| `UAITaskWander` | 12 | same no-path Stop pattern |
-| `UAITaskAttackTargetEntity` | 71 | convert ActionData.Target; `SetLookPosition` / `RotateTo` (30,30) if limbs; countdown `attackTimeout`; when 0, `Attack(false)` then `Attack(true)`, reload timeout from `GetAttackTimeoutTicks`, `Stop` |
+| Task | Start IL | Update IL | Start behaviour | Update behaviour |
+|---|---:|---:|---|---|
+| `UAITaskMoveToTarget` | 90 | 12 | Target as EntityAlive: path to entity with speed = walk / aggro if alert / panic if `run`; `shouldBreakWalls` into FindPath. Target as Vector3: same with walk/panic only. Else Stop. | noPathAndNotPlanningOne -> Stop |
+| `UAITaskWander` | 19 | 12 | `CalcAround(self, 10, 10)` + `FindPath` at `GetMoveSpeed` | noPathAndNotPlanningOne -> Stop |
+| `UAITaskAttackTargetEntity` | 53 | 71 | Convert target; look at head if `CanSee` else zero; `RotateTo` 30/30 if limbs; seed `attackTimeout = GetAttackTimeoutTicks`. Missing target -> Stop. | same look/rotate; countdown timeout; when 0: `Attack(false)` then on success reload timeout + `Attack(true)` + Stop |
+| `UAITaskAttackTargetBlock` | 53 | 72 | Target must be Vector3 else Stop; seed timeout; look/rotate at block pos if `CanSee(pos)` | countdown; look/rotate; `Attack(false)` then success path same as entity attack |
+| `UAITaskFleeFromTarget` | 41 | 20 | Convert target; `detachHome`; `CalcAway` with `maxFleeDistance` both min/max radii; `FindPath` at `GetMoveSpeedPanic`. Missing target -> `ActionData.Failed = true`. | no path: `setHomeArea(pos, 10)` then Stop |
+
+All pathing still hits `EntityAlive.FindPath` -> ASP queue (same as EAI).
 
 ---
 
@@ -1047,6 +1052,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Full UAI task table (5 concrete types) Start+Update IL for
+  Move/Wander/AttackEntity/AttackBlock/Flee.
 - **2026-08-07:** Sleeper TickSpawnCount budget + TickSleeperVolumes reset;
   CheckSpawnPos / FindSpawnIndex; Tick phase entity-gone restart correction.
 - **2026-08-07:** GameTimer.updateTimer formula; EnemyAnimal electrocute gate;
