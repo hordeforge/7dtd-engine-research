@@ -180,6 +180,10 @@ is `x * 8976890 + z * 981131` (the 2D voxel key). `IsVoxelOutsideChunk(nx, nz)`
 `IsChunkSafeToUpdate(chunk)` (IL=16) requires the chunk non-null with
 `!NeedsDecoration && !NeedsCopying && !IsLocked`.
 
+**Water queries:** `World.IsWater(x, y, z)` (IL=31) is false for `y >= 256`
+or a missing chunk, else `chunk.IsWater(x & 15, y & 255, z & 15)`; the
+`Vector3i` (IL=9) and `Vector3` (IL=5) overloads forward through it.
+
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
 **`WaterDataHandle` fields (metadata):** `voxelData` (mass), `voxelState`, `groundWaterHeights`, `activeVoxels`, `flowVoxels`, `flowsFromOtherChunks`, `activationsFromOtherChunks`, `voxelsToWakeup`.
