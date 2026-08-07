@@ -332,6 +332,22 @@ false; if `!IsInViewCone` false; ray origin head + **0.2** along dir;
 `SetModelLayer(2)` self; `Voxel.Raycast(world, ray, maxDist, false, false)` →
 false if hit (blocked); restore layer; true if clear.
 
+**`CanEntityBeSeen(other, checkViewCone)` (IL=133):** the entity-targeted
+visibility check (UAI `TargetVisible`, vulture/stealth paths). Head-to-head
+vector; `seeDist = GetSeeDistance()` is **scaled by the target's
+`DetectUsScale(self)`** when the target is a player (stealth shrinks how far
+you are seen); distance beyond it or (with `checkViewCone`) outside the view
+cone returns false. The ray starts `-0.1` behind the self head
+(`origin + dir*-0.1`), the self model layer is temporarily switched to **2**
+and restored after, and `Voxel.Raycast(world, ray, seeDist, -1612492829, 64,
+0)` runs. Hit handling: an `E_Vehicle` hit resolves via
+`EntityVehicle.FindCollisionEntity` and counts as seen only when that vehicle
+has the target **attached**; an `E_Enemy` hit consults
+`EntityDrone.FindCollisionEntity` / `IgnoreCollisionEntity` (drone
+pass-through); an `E_BP_` (body part) hit is re-rooted via
+`GameUtils.GetHitRootTransform`; the target is seen iff the final hit
+transform equals `other.transform`.
+
 **`CanSeeStealth(dist, lightLevel)` (IL=21):**
 `t = dist / sightRange`; threshold =
 `FastLerp(sightLightThreshold.x, .y, t)`; true if `lightLevel > threshold`.
@@ -3015,6 +3031,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EntityAlive.CanEntityBeSeen (IL=133): stealth-scaled
+  seeDist via DetectUsScale, view-cone gate, -0.1 back-off ray with model-layer
+  switch, E_Vehicle attached / E_Enemy drone pass-through / E_BP_ re-root hit
+  handling, seen iff hit transform == target.
 - **2026-08-07:** Chunk membership in §7: AddEntityToChunk (IL=116) volatile
   hasEntities + wrong-chunk error + Y-slice clamp + chunkPosAddedEntityTo
   stamp; RemoveEntityFromChunk (IL=41) remove + isModified + hasEntities

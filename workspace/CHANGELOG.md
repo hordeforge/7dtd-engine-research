@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityAlive.CanEntityBeSeen
+
+Done (V3.1.0 b14 IL):
+- EntityAlive.CanEntityBeSeen (IL=133) narrated in entity-ai.md: head
+  vector, seeDist scaled by player DetectUsScale (stealth), view-cone gate,
+  ray from head + dir*-0.1 with self model layer switched to 2, Voxel.Raycast
+  (-1612492829, 64, 0); E_Vehicle seen iff target attached,
+  E_Enemy drone pass-through, E_BP_ body-part re-root, seen iff hit
+  transform == other.transform.
+
 ## 2026-08-08 - tier-C: EntityClass lookup leaves
 
 Done (V3.1.0 b14 IL):
