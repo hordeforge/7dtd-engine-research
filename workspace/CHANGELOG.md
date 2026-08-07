@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockFaceFlags.FrontSidesFromPosition
+
+Done (V3.1.0 b14 IL):
+- BlockFaceFlags.FrontSidesFromPosition (IL=70) narrated in block-shapes.md:
+  entity position relative to the block cell sets face bits - entity < block
+  low-side x=8/y=2/z=16, entity >= block+1 high-side x=32/y=1/z=4; the faces
+  the entity is outside of and crossing into.
+
 ## 2026-08-08 - tier-C: Block.IsMovementBlocked dispatch
 
 Done (V3.1.0 b14 IL):

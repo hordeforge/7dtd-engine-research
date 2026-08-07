@@ -135,7 +135,12 @@ hard-false), while `BlocksMovement == 1` short-circuits true. The
 blocked (`sides == 0` means all 255); the `Vector3` entity-position overload
 (IL=94) derives the sides from `BlockFaceFlags.FrontSidesFromPosition`; the
 `IsMovementBlockedAny` twin (IL=94) flips the AND into an OR (any blocked
-face). Notable per-block overrides: liquids, mines, motion sensors, pressure
+face). `FrontSidesFromPosition(blockPos, entityPos)` (IL=70) builds that
+`BlockFaceFlag` mask from the entity's position relative to the block cell:
+`entity < block` sets the low-side face bit (x=8, y=2, z=16), `entity >=
+block+1` the high-side bit (x=32, y=1, z=4) - the faces the entity is
+outside of and crossing into. Notable per-block overrides: liquids, mines,
+motion sensors, pressure
 plates, spotlights, stairs (unless a child) are never blocked; `BlockSpikes`
 always; `BlockPoweredDoor` (IL=66) blocks when `!IsDoorOpen(meta)`; and
 `BlockCompositeTileEntity` (IL=44) lets `IFeaturePhysicalCapabilities`
@@ -365,6 +370,8 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** BlockFaceFlags.FrontSidesFromPosition (IL=70): entity
+  relative to block cell sets face bits (low x=8/y=2/z=16, high x=32/y=1/z=4).
 - **2026-08-07:** Block.IsMovementBlocked dispatch: multiblock child->parent
   resolve, BlocksMovement byte short-circuit vs shape deferral, sides/entity
   overloads (AND/OR), per-block overrides (liquids/mines/stairs/spikes/door/
