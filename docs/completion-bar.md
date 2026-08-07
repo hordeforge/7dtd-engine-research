@@ -119,6 +119,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | Manager Update behaviour re-pins | managers §1 / §1.1 |
 | EAI leaf Update/CanExecute IL table | entity-ai §D2 |
 | More package Process (chat/quest/score/kill/skill) | protocol-packages §6.21 / §2 |
+| TickEntity + path apply helpers | entity-ai §7 |
+| ChangeBlocks / SetBlocksOnClients | world-chunks §5.1 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

@@ -319,6 +319,22 @@ stateDiagram-v2
 
 Prefer SetBlock over SetBlockRaw when mesh must update (product inject lesson).
 
+### 5.1 `GameManager.ChangeBlocks` (IL=530) / `SetBlocksOnClients` (IL=13)
+
+Authoritative multi-block apply used by `NetPackageSetBlock` Process:
+
+1. Lock; resolve `PersistentPlayerData` for the changer (local or list lookup).
+2. Walk `List<BlockChangeInfo>`: collect touched `ChunkCluster`s; delayed regen
+   start per cluster.
+3. Per change: density/air/terrain shape checks; `GetBlock` vs new type;
+   `SetBlockValue` / full `ChunkCluster.SetBlock(...)` overload; top-soil break
+   on neighbor chunks; `UncullChunk`; child-block TE cleanup.
+4. Delayed regen stop after list.
+
+`SetBlocksOnClients(exceptEntityId, package)`: `ConnectionManager.SendPackage`
+with flags **192** excluding the placing entity (fan-out of the same
+`NetPackageSetBlock`).
+
 ```mermaid
 stateDiagram-v2
   [*] --> Clean
@@ -445,6 +461,8 @@ if two weather packages arrive in the same `Time.frameCount`.
 | `realearth-surfaces.md` | Product surfaces |
 
 ## Changelog
+
+- **2026-08-07:** ChangeBlocks IL=530 / SetBlocksOnClients IL=13 authority path.
 
 - **2026-08-07:** `Chunk.get_NeedsSaving` predicate (isModified | hasEntities | TE | triggers) for blob-cache invalidation notes.
 - **2026-08-06:** ChunkStabilityEnabled is non-persistent with default true, so

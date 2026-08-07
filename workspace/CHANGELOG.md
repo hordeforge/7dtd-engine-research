@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: TickEntity order, path apply helpers, ChangeBlocks
+
+Done (V3.1.0 b14 IL):
+- entity-ai §7: TickEntity IL=148 chunk membership + OnUpdateEntity gates;
+  LookHelper pitch damp; ASPPathNavigate Update/SetPath; MoveHelper 1236 pointer.
+- world-chunks §5.1: ChangeBlocks IL=530 multi-block apply; SetBlocksOnClients 192.
+---
 ## 2026-08-07 — tier-C: more package Process (chat/quest/score/kill/skill)
 
 Done (V3.1.0 b14 IL):

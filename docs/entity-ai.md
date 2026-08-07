@@ -339,16 +339,28 @@ Also `EntityDrone.GetProjectedPath`.
 
 ---
 
-## 7. `TickEntity` body (reminder)
+## 7. `TickEntity` body (IL=148)
 
-Before AI:
+Ordered when entity spawned and not unload-marked:
 
-- position update, chunk tracking add/remove  
-- if area loaded + `CanUpdateEntity` → `OnUpdateEntity`  
-- else despawn checks  
-- unload if marked  
+1. `SetLastTickPos` / `OnUpdatePosition` / `CheckPosition`.
+2. Chunk membership: if chunk coords changed, `RemoveEntityFromChunk` old +
+   `AddEntityToChunk` new (via `GetChunkSync` / `toChunkXZ`).
+3. If `IsChunkAreaLoaded` and `CanUpdateEntity` → **`OnUpdateEntity()`**
+   (buffs/live/AI chain §2.0).
+4. Else: `CheckDespawn` (and attack-target clear paths on EntityAlive).
+5. If `IsMarkedForUnload` → `unloadEntity(entity, reason)`.
 
 Falling block **entities** go through same `OnUpdateEntity` chain (`EntityFallingBlock` overrides).
+
+### 7.1 Path apply helpers (always after decision AI in updateTasks)
+
+| Method | IL | Behaviour |
+|---|---:|---|
+| `EntityLookHelper.onUpdateLook` | 32 | Damp pitch (`rotation.x`) toward 0 by **1°/tick** if \|x\| &gt; 1 |
+| `ASPPathNavigate.UpdateNavigation` | 21 | if path: `pathFollow()`; then `moveHelper.SetMoveTo(path, speed, canBreak)` |
+| `ASPPathNavigate.SetPath` | 46 | Destruct old path; install new; empty path fails; else `ImprovePath()`, store speed/canBreak |
+| `EntityMoveHelper.UpdateMoveHelper` | **1236** | Largest common walker cost: stuck checks, jump/elevator, root-motion gates, blocked clear, moveToPos pursuit (full line-level residual) |
 
 ---
 
@@ -966,8 +978,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** EAI leaf Update/CanExecute IL table expansion (Approach 846,
-  Ranged 107, RunAway 105, Wander.CanExecute 94, Destroy 60, ApproachSpot 40).
+- **2026-08-07:** TickEntity IL=148 order; LookHelper/ASPPathNavigate/MoveHelper
+  apply table; EAI leaf Update/CanExecute expansion.
 - **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;
   UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;
