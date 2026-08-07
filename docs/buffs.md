@@ -289,3 +289,23 @@ the V3.1.0 addition, which took the method from IL 126 to IL 130.
 (IL=3) = `name.GetHashCode()` (cvar ids are .NET string hash codes, like
 `EntityClass.FromString`). `AddCustomVar(name, value)` (IL=8) =
 `SetCustomVar(name, value, netSync=true, Set, forceSend=false)`.
+
+**Leaves over the cvar store:**
+
+- `SetCustomVarNetwork(name, value, operation)` (IL=33) is the wire half of the
+  system: it builds `NetPackageModifyCVar.Setup(parent, name, value, operation)`
+  and either broadcasts it (channel **192**) when server or `SendToServer`
+  otherwise; the value lands through the package's Process → `SetCustomVar`
+  ([protocol-packages.md](protocol-packages.md) `NetPackageModifyCVar`).
+- `IncrementCustomVar(name, amount)` (IL=8) = `SetCustomVar(name, amount,
+  true, add, false)`. `HasCustomVar` (IL=5) / `CountCustomVars` (IL=4) are
+  `CVars.ContainsKey` / `Count`; `EnumerateCustomVars(search, startsWith)`
+  (IL=12) is a filter iterator over the dictionary.
+- `RemoveCustomVar(name)` (IL=21) removes from `CVars` and logs
+  `CVar {name} was removed.` when the name is tracked; `TrackCustomVar(name,
+  isTracked)` (IL=39) maintains the `TrackedCVars` debug set with console
+  logging.
+- `SetBuff(name, isAdd)` (IL=17) dispatches to `AddBuff(name, -1, true,
+  false, -1f)` / `RemoveBuff(name, -1, true)`. `UnPauseAll` (IL=19) clears
+  `Paused` on every active buff; `ClearBuffClassLinks` (IL=21) calls
+  `BuffValue.ClearBuffClassLink` on each active buff.
