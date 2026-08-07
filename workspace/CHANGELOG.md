@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: trigger registry
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md trigger section: AddTriggerVolume (IL=49) next-id + VolumeKey
+  TryAdd, duplicate -1; GetTriggerVolume (IL=30) throw-on-miss;
+  FindTriggerVolume (IL=29) VolumeKey map or -1.
+
 ## 2026-08-08 - tier-C: sleeper registry
 
 Done (V3.1.0 b14 IL):
