@@ -515,6 +515,12 @@ Silent in-chunk write used by load, falling, inject, and some TE paths:
 Does **not** fire light/mesh/stability RPC; callers that need those use full
 `SetBlock` / `SetBlockRPC`.
 
+**`Chunk.recalcIndexedBlocks()` (IL=26)** clears `IndexedBlocks` and rebuilds
+it from every layer (`ChunkBlockLayer.AddIndexedBlocks` per layer, 64 of
+them). `saveBlockIds()` (IL=53) marks every in-chunk block id used in
+`Block.nameIdMapping` under its lock (the save-id bookkeeping that lets a save
+remap ids on load, mirroring `ItemValue.Write`).
+
 **Density setters:** `ChunkCluster.SetDensity(pos, density, isForceDensity)`
 (IL=14) routes through the full
 `SetBlock(pos, false, Air, true, density, false, false, false, false, -1)`
