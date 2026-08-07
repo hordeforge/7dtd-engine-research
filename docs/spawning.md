@@ -385,6 +385,13 @@ array, each pass rolling `RandomRange(chunkCount) == 1` (about one in
 position in the array, decrementing `count` until it reaches 0. Unfilled array
 slots stay `Vector3.zero`.
 
+`Chunk.FindRandomTopSoilPoint(world, out x, out y, out z, numTrys)` (IL=80)
+retries up to `numTrys` times: local `x, z = RandomRange(15)` (0..14),
+`y = GetHeight(x, z)`, rejecting `y < 2` and any spot failing
+`CanMobsSpawnAtPos(x, y, z, false, true)`; a hit returns world
+`x + m_X*16, y + 1, z + m_Z*16` (one block above the surface), false when
+exhausted.
+
 ### 6.1 `World.GetRandomSpawnPositionMinMaxToPosition` (IL=240)
 
 Ring/disc spawn sampler shared by the join path (spawn-near-friend, see
