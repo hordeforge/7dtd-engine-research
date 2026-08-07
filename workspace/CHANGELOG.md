@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World.GetCollidingBounds
+
+Done (V3.1.0 b14 IL):
+- World.GetCollidingBounds (IL=391) narrated in entity-ai.md D4: padded
+  ranges (0.5 X/Z, 1 Y), chunk walk with cached chunk + GetChunkFromWorldPos,
+  IsInPlayfield false -> whole-chunk GetAABB obstacle, fill pass into scratch
+  collBlockCache/collDensityCache (3D, offset reads +1), AABB pass filtered by
+  IsCollideMovement with terrain decoration offsetY via
+  MarchingCubes.GetDecorationOffsetY, entity pass via 0.25-expanded
+  GetEntitiesInBounds + own box, 50-iteration cap per loop with NBB warning
+  strings (Log.Warning) and partial-list return.
+
 ## 2026-08-08 - tier-C: FastTags query + CanCollideWith
 
 Done (V3.1.0 b14 IL):

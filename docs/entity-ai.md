@@ -1876,6 +1876,39 @@ set/clear `MovementTagClimbing` (clear idle when climbing).
 update center; set onGround from vertical resolution; step/slide residual;
 apply transform if displacement sq &gt; 0.0001.
 
+**`World.GetCollidingBounds(entity, aabb, out)` (IL=391):** the block-vs-entity
+AABB gatherer behind `aabbEntityCollision` and slide checks. Appends every
+colliding box (block + entity) into the caller list:
+
+1. **Ranges:** block-walk limits from the query box padded **0.5** in X/Z and
+   **1** in Y: `floor(aabb.min-0.5)..floor(aabb.max+0.5)` on X/Z,
+   `floor(aabb.min.y-1)..floor(aabb.max.y+1)` on Y.
+2. **Chunk loop (x, z):** reuse the cached `Chunk` while
+   `toChunkXZ(x/z)` matches, else `GetChunkFromWorldPos` (cast to `Chunk`;
+   null chunk skips the tile). A chunk **outside the playfield**
+   (`!IsInPlayfield(chunk)`) is returned wholesale as `chunk.GetAABB()` (the
+   unloaded border acts as a full-chunk obstacle) and the block scan still
+   runs.
+3. **Fill pass:** for each in-range `y` strictly inside `(0, 255)`, stash
+   `chunk.GetBlock(toBlockXZ(x), y, toBlockXZ(z))` and the matching density
+   into the reusable 3D scratch arrays `World.collBlockCache` /
+   `collDensityCache` (indexed by loop offsets).
+4. **AABB pass:** for the same range, read back
+   `collBlockCache[x+1, y, z+1]` (cache reads are offset by +1); when
+   `Block.IsCollideMovement`: `offsetY = 0`, and for terrain shapes
+   (`shape.IsTerrain()`) `offsetY = MarchingCubes.GetDecorationOffsetY(
+   density[x+1, y+1, z+1], density[x+1, y, z+1])`; then
+   `block.GetCollidingAABB(bv, x, y, z, offsetY, aabb, out)` appends the
+   block's collision box (terrain uses the density-derived decoration offset).
+5. **Entity pass:** expand a copy of `_aabb` by **0.25**, run
+   `GetEntitiesInBounds(entity, expanded)` (the ExcludeEntity overload above),
+   and append each hit's `getBoundingBox()` when it intersects the *unexpanded*
+   `_aabb`; the caller entity's own `getBoundingBox()` is appended too when it
+   overlaps.
+6. **Guard rails:** every loop is capped at **50** iterations; a cap trip logs
+   `NBB exceeded size {0}: BB={1}` (`Log.Warning`) and returns the partial
+   list, bounding worst-case cost for pathological query boxes.
+
 **`ConditionalScalePhysicsAddConstant` (IL=2):** identity (returns arg).
 
 **`PlayHitGroundSound(impactSpeed)` (IL=42):** volume =
@@ -2848,6 +2881,11 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** World.GetCollidingBounds (IL=391) in D4: padded ranges
+  (+-0.5 X/Z, +-1 Y), IsInPlayfield whole-chunk shortcut, collBlockCache /
+  collDensityCache scratch fill + offset reads, terrain decoration offsetY via
+  MarchingCubes, 0.25-expanded entity pass, 50-iter cap per loop with NBB
+  warnings.
 - **2026-08-07:** FastTags query half: Test_Bit (IL=46) / Test_AnySet (IL=68)
   single-bit fast paths + word-AND; Entity.HasAnyTags (IL=5); CanCollideWith
   family (base true, EntityAlive exclusions, falling blocks only EntityAlive)
