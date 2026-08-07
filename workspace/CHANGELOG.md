@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk water + channel read
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md: Chunk.GetWater IL=8 FromRawData(chnWater),
+  ChunkCluster.GetWater IL=23; Chunk.GetHeight/IsWater/
+  SetTopSoilBroken leaves.
+- save-region.md: ChunkBlockChannel.Get IL=44 64-bit read
+  (compressed getSameValue else getData).
 ## 2026-08-08 - tier-C: chunk map + water reads
 
 Done (V3.1.0 b14 IL):
