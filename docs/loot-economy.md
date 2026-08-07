@@ -357,6 +357,10 @@ Default entity class `DroppedLootContainer`; override via block prop
 If not empty: `CreateEntity` as `EntityLootContainer`, `SetContent(Clone items)`,
 `SpawnEntityInWorld`. Always `SetEmpty()` on the TE.
 
+**`EntityLootContainer.OnUnlockedServer(playerId, channel)` (IL=7):** an empty
+`bag` dies on unlock: `IsEmpty()` → `KillLootContainer()`, so a loot bag that
+was picked clean despawns the moment a player opens it.
+
 **`CheckDestroyTileEntity(te, blockPos)` (IL=37):** require `ITileEntityLootable`
 and `ShouldDestroyOnClose`. Call `DropContentOfLootContainerServer` then
 `Block.DamageBlock(..., MaxDamage, ...)` to destroy the block.
@@ -672,6 +676,28 @@ mult ≥ 0, `abundance *= mult`; then `RandomSpawnCount(min, max, abundance)`.
 `type-1` → Food/Drink/Ammo/Medical/Resource/Armor/Melee/Ranged/Dukes/Magazines/
 Book count modifiers (enum values **1..11**). Unknown / **0** returns **-1**
 (caller treats negative as "do not scale abundance").
+
+### 8.4 Group roll entry points
+
+**`SpawnItemsFromGroup(random, group, numToSpawn, abundance, spawnedItems, ref
+slotsLeft, gameStage, rareLootChance, lootQualityTemplate, player,
+containerTags, uniqueItems, ignoreLootProb, _forceStacking,
+_ignoreLootAbundance, _buffsToAdd, _sandboxModifierUsed)` (IL=84)** is the
+outer group roll: loop up to `numToSpawn` times while `*slotsLeft > 0`, each
+pass rolling the entry count and calling `SpawnLootItemsFromList` (§8.2). The
+count comes from `RandomSpawnCount(random, group.items, minCount, maxCount, 1)`
+when the caller already applied sandbox modifiers (`_sandboxModifierUsed`),
+else from `RandomCountFromSandbox(group, minCount, maxCount, 1)`, whose
+`sandboxApplied` flag feeds back into `SpawnLootItemsFromList`; the pass results
+OR together across the loop.
+
+**`GetRewardItem(lootGroup, questDifficulty)` (IL=45)** is the quest-reward
+probe: unknown group → `ItemStack.Empty`. Else spawns a single stack with
+`numToSpawn=1`, `abundance=1`, `gameStage=questDifficulty`, `rareLootChance=0`,
+the group's own `lootQualityTemplate`, no player, `FastTags.none`, with
+`uniqueItems`, `ignoreLootProb`, `_ignoreLootAbundance` and
+`_sandboxModifierUsed` all on, and one slot. Returns the first spawned stack,
+or `ItemStack.Empty` when nothing rolled.
 
 ## Related docs
 
