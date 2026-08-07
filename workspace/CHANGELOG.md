@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SetMetadata core
+
+Done (V3.1.0 b14 IL):
+- items.md 2: SetMetadata (IL=86) lazy dict, SetValue update with type-mismatch
+  warning + stack, TryCreate/Add new keys.
+
 ## 2026-08-08 - tier-C: held-item leaves
 
 Done (V3.1.0 b14 IL):
