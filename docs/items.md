@@ -749,6 +749,16 @@ replaced with `ItemStack.Empty`, and a present model game object triggers
 `HoldingItemHasChanged()`, is unparented, deactivated, `Destroy`ed, and the
 model slot nulled.
 
+**`SetItem(idx, itemValue, count, notifyListeners)` (IL=166)** is the core
+slot write: a held-slot item change redraws via `ShowHeldItem(0.2, true)`;
+an out-of-range index returns; a type with no `ItemClass` logs and
+`Clear()`s the value; the `preferredItemSlots` array follows the write
+(writing a type, or preserving the old type on an empty write). A class change
+or empty value runs `clearSlotByIndex` then rebuilds the model
+(`createHeldItem` when `CanHold`) and `createInventoryData`; the stack stores
+`itemValue.Clone()` plus the count; a changed held slot calls
+`updateHoldingItem()` and `notifyListeners()` fires when requested.
+
 ---
 
 ## 7. Durability and degradation
