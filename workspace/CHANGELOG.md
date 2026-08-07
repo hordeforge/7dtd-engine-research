@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: spawn column probe
+
+Done (V3.1.0 b14 IL):
+- spawning.md 6: Chunk.FindSpawnPointAtXZ (IL=54) downward scan from endY
+  while y > startY, accept GetLightValue(x,y,z,darknessV) <= maxLightV and
+  CanMobsSpawnAtPos(ignoreCanMobsSpawnOn, true), y+1 on success.
+
 ## 2026-08-08 - tier-C: top-soil sampler
 
 Done (V3.1.0 b14 IL):
