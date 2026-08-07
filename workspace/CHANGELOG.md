@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: texture word + neighbour-lit
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: 64-bit texture word = eight 8-bit face indexes
+  (Value64FullToIndex shift, TextureIdxToTextureFullValue64 replicate).
+- light-mesh-water.md 1: IsNeighbourChunksLit (IL=26) NeedsLightCalculation
+  gate.
+
 ## 2026-08-08 - tier-C: neighbour-lit gate
 
 Done (V3.1.0 b14 IL):
