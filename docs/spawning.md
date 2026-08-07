@@ -558,6 +558,22 @@ run or fire on the dedicated server.
   (log includes the plane position). Paths with no crates left are removed;
   when all paths finish, `flightPaths = null` (recomputed next Tick). Returns
   `flightPaths == null` (done signal to `AIDirectorAirDropComponent`).
+- **`AIAirDrop.CreateFlightPaths()` (IL=355):** builds one `FlightPath` per
+  drop: `CalcSupplyDropMetrics(numPlayers, clusterCount, ...)` sizes the round;
+  pick a random unused player cluster; plane altitude
+  `min(cluster player y + 180, 276)`; drop point = cluster center +
+  `randOnUnitCircle * rand(30, 750)`; start/end = drop point ± direction *
+  `(rand(150,700)/2 + rand(1500,2000)/2)`, nudged by `FindSafePoint(..., 25,
+  600)`. Crates are spaced along the line (`startOffset -max(1,(n-1)/2)*spacing`
+  stepping by `length/n`); each crate's altitude = plane - 10 (or ground
+  height + 15), `ClampToMapExtents(..., 25)`; first crate re-aims the path End
+  at the drop; `Delay = |start - drop| / 120`; a `ChunkObserver` keeps the drop
+  chunk loaded (`AddChunkObserver(pos, false, 3, -1)`). Paths are staggered by
+  `cluster.Delay += rand(25, 120)`.
+- **`AIAirDrop.SpawnPlane(path)` (IL=74):** heading = normalized(End - Start);
+  `CreateEntity(FromString("supplyPlane"), path.Start, yaw = Angle(heading))`;
+  `SetDirectionToFly(dir, (int)(20 * (|End-Start|/120) + 10))`;
+  `SpawnEntityInWorld`; log "AIAirDrop: Spawned aircraft at (...), heading (...)".
 - **`RequestToSpawnPlayer` join path (IL=496):** server creates the remote
   `EntityPlayer` and sends `NetPackagePlayerId` before `SpawnEntityInWorld`.
   Spawn position order: team-near (GameStats 25) -> friend-near (`nearEntityId`,

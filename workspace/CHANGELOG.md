@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: air-drop flight path build + plane spawn
+
+Done (V3.1.0 b14 IL):
+- AIAirDrop.CreateFlightPaths IL=355: cluster pick, altitude min(y+180,276),
+  drop point 30-750, start/end ± (150-700)/2+(1500-2000)/2, FindSafePoint
+  25/600, crate spacing length/n, crate y = plane-10 or ground+15,
+  ClampToMapExtents 25, first crate re-aim, Delay = |start-drop|/120,
+  ChunkObserver(3,-1), cluster.Delay += rand(25,120).
+- AIAirDrop.SpawnPlane IL=74: supplyPlane entity at path.Start yaw Angle,
+  SetDirectionToFly(dir, 20*(len/120)+10), SpawnEntityInWorld.
 ## 2026-08-08 — tier-C: air-drop flight-path pump
 
 Done (V3.1.0 b14 IL):
