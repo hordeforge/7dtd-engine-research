@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityEnemy.PostInit blood moon flag
+
+Done (V3.1.0 b14 IL):
+- EntityEnemy.PostInit IL=13: server IsBloodMoon from BloodMoonComponent.
 ## 2026-08-08 — tier-C: EntityAnimal.OnEntityDeath
 
 Done (V3.1.0 b14 IL):

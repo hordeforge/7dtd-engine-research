@@ -2390,6 +2390,9 @@ that D8.6/D8.6a later copy from. Phase order:
   `screenRelativeTransitionHeight = 0.003` (keep the final LOD until very
   small on screen); `disableFallBehaviorUntilOnGround = true`;
   `GameEventManager.Current.HandleSpawnModifier(this)`.
+  `EntityEnemy.PostInit` (IL=13) override adds: server →
+  `IsBloodMoon = aiDirector.BloodMoonComponent.BloodMoonActive` (an enemy
+  spawned while a blood moon is active is flagged for the horde bonus path).
 - **`InitInventory()` (IL=9):** `inventory ??= new Inventory(gameManager, this)`.
 
 ### D8.7 AI task config: `EAIManager.CopyPropertiesFromEntityClass` (IL=213)
