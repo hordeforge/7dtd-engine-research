@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DamageEntity early outs + AliveFlags/stat process
+
+Done (V3.1.0 b14 IL):
+- DamageEntity Process IL=172 local-player discard gates (typ 15; ambient 1/25).
+- AliveFlags Process IL=109 apply + server rebroadcast 192.
+- StatChanged IL=88, StatsBuff IL=76, PlayerStats IL=70 process notes.
+---
 ## 2026-08-07 — tier-C: collector/light/trap TE wire + spawn bands re-pin
 
 Done (V3.1.0 b14 IL):

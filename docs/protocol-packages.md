@@ -583,6 +583,12 @@ Bit packing from `Setup` (IL=91), OR into flags:
 | 8 | 256 | `IsGodMode` |
 | 9 | 512 | `IsCrouching` |
 
+**ProcessPackage (IL=109):** `ValidEntityIdForSender(entityId)`; resolve
+`EntityAlive`; apply flag bits to setters (`AimingGun`, `Spawned`, `Jumping`,
+`IsBreakingBlocks`, alert DataItem, `Crouching`, `Inventory.SetFlashlight`). On
+**server**, rebroadcast `Setup(entity)` with flags **192** (exclude self fanout
+pattern).
+
 ### 5.6 `NetPackagePlayerData` (ToServer)
 
 Periodic client save of local player blob (not the join ECD).
@@ -718,9 +724,21 @@ attackingItem present : bool (+ ItemValue.Write if true)
 ```
 
 `Setup(targetId, DamageResponse)` (IL=141) flattens `DamageResponse` + nested
-`DamageSource` into those fields. `ProcessPackage` (IL=168): rebuild
-`DamageSource`/`DamageResponse`, `FireAttackedEvents`, `ProcessDamageResponse`
-on the target entity (apply path owned by [combat-damage.md](combat-damage.md)).
+`DamageSource` into those fields. `ProcessPackage` (**IL=172**):
+
+1. Null world -> ret.
+2. **Local-player early outs** (when primary local player exists and
+   `entityId == primary.entityId`):
+   - if `damageTyp == 15` -> ret (discard);
+   - if `damageSrc == 0` and (`damageTyp == 1` or `damageTyp == 25`) and
+     `attackerEntityId == -1` -> ret (discard self/ambient spam on local).
+3. Resolve target entity; rebuild `DamageSource` (src/type/attacker/dir/
+   hitTransform/uv/ignoreConsecutive/multiplier/bonus/item/blockPos/
+   ignorePartyShare) and `DamageResponse` (strength/movement/hitDir/bodyPart/
+   pain/fatal/critical/random/cripple/dismember/...).
+4. `Entity.FireAttackedEvents(dr)` then `Entity.ProcessDamageResponse(dr)`.
+
+Apply path owned by [combat-damage.md](combat-damage.md).
 
 ### 6.12 NetPackageTileEntity (V3.1.0 wire)
 
@@ -858,8 +876,11 @@ baseMax : f32
 maxModifier : f32
 ```
 
-`ProcessPackage`: apply to `Stat` via `GetStat`; optional MinEvent on health;
-server re-sends to tracked players via `NetEntityDistribution`.
+`ProcessPackage` (**IL=88**): if target is primary local player and instigator
+path fails validation, ret; `ValidEntityIdForSender` on entity; apply
+`Stat.set_BaseMax/MaxModifier/Value` + `Changed`; if health-related fire
+`EntityAlive.FireEvent`; when **remote world**, rebuild package and
+`NetEntityDistribution.SendPacketToTrackedPlayersAndTrackedEntity`.
 
 #### `NetPackageEntityStatsBuff`
 
@@ -869,8 +890,8 @@ dataLen : i32
 data : dataLen bytes     // EntityBuffs.Write / Read blob
 ```
 
-`Setup` can serialize live buffs if data null. Client remote entities apply
-`EntityBuffs.Read`; server rebroadcasts (flags 192, exclude self).
+`Setup` can serialize live buffs if data null. `ProcessPackage` (**IL=76**):
+pooled stream -> `EntityBuffs.Read`; on **server** rebroadcast Setup flags **192**.
 
 #### `NetPackagePlayerStats` (extends EntityTargeted)
 
@@ -879,8 +900,10 @@ entityId : i32
 EntityNetworkStats.write(...)
 ```
 
-`Setup` fills `EntityNetworkStats` from entity. Server may stamp sender player
-name, `ToEntity` + `EnqueueNetworkStats`, rebroadcast excluding sender (192).
+`Setup` fills `EntityNetworkStats` from entity. `ProcessPackage` (**IL=70**):
+`ValidEntityIdForSender`; if not `EntityAlive` log discard; on server may stamp
+sender name into network stats; `ToEntity` + `EnqueueNetworkStats`; server
+rebroadcast Setup flags **192**.
 
 ### 6.17 Social / admin / lock / quest spawn packages
 
@@ -1338,6 +1361,8 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** DamageEntity Process IL=172 local-player early outs; AliveFlags
+  Process IL=109 apply + server rebroadcast 192.
 - **2026-08-07:** §6.21 process paths (Collect/Attach/ItemDrop/Pickup/Texture/
   SimpleRPC/Horde/Prime/AttackTarget); EmitSmell no-op; AttachType enum.
 - **2026-08-07:** EntitySpawnResponse direction ToClient + process; EntityLookAt

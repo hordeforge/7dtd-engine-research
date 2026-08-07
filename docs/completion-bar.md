@@ -92,6 +92,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | MinEvent AddBuff/ModifyCVar/Explode Execute | minevents §7.1 |
 | Collector/Light/trap TE write tails | tile-entities-power §4.6 |
 | SpawnUpdate distance bands re-pin | entity-ai §D3.6 / spawning §2 |
+| DamageEntity local early outs; AliveFlags process | protocol-packages §6.11 / §5.5.6 |
+| StatChanged/StatsBuff/PlayerStats process IL | protocol-packages §6.16 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers, and dormant UAI. Promote

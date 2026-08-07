@@ -155,6 +155,8 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs
+  (damageTyp 15 discard; ambient src0 + typ 1/25 + attacker -1 discard).
 - **2026-07-28:** Wire pointer to protocol-packages 6.11; ProcessPackage apply entry.
 
 - **2026-07-23:** Initial combat/damage reversal (DamageSource, DamageEntity apply, death/kill path) consolidating the cross-system damage flow, with state machines.
