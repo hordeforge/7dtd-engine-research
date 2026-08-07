@@ -271,6 +271,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | StartJumpMotion + DurationInSeconds /20 | entity-ai.md / buffs.md |
 | UpdateJump states + fallHitGround damage | entity-ai.md |
 | ChooseFallBehavior + FallHitGround destroy | entity-ai.md |
+| OnUpdatePosition step/speed + ExecuteFall stub | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

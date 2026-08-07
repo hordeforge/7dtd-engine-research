@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: OnUpdatePosition step/speed and fall stub
+
+Done (V3.1.0 b14 IL):
+- ExecuteFallBehavior: always false (stub).
+- OnUpdatePosition: avg lastTickPos; step sound if unattached; local speed update.
+- updateSpeedForwardAndStrafe: *0.5 decay; yaw-relative accumulate; SetMovementState.
+- updateStepSound: distance/yaw budgets; internalPlayStepSound.
+---
 ## 2026-08-07 — tier-C: ChooseFallBehavior and FallHitGround destroy
 
 Done (V3.1.0 b14 IL):

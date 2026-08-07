@@ -1430,6 +1430,25 @@ not ragdoll: unless `disableFallBehaviorUntilOnGround`, try
 `fallBehaviors` by height range and difficulty range (hardcoded difficulty
 probe **1**); weighted pick via cumulative weights; `ExecuteFallBehavior`.
 
+**`ExecuteFallBehavior` (IL=2):** always returns **false** (stub; weighted
+selection currently never applies a special fall action on dedi).
+
+**`OnUpdatePosition(_partialTicks)` (IL=107):** yaw delta vs prev; base
+`Entity.OnUpdatePosition`. Average xz displacement over `lastTickPos` ring +
+current pos. If not attached: `updateStepSound(dx,dz,yawDelta)`. If not root
+motion and not remote: `updateSpeedForwardAndStrafe(avgDist, partial)`.
+
+**`updateSpeedForwardAndStrafe(dist, partial)` (IL=101):** remote with
+partial &gt; 1 scales dist by 1/partial. Decay forward/strafe/vertical **×0.5**.
+If planar |dist| &gt; 0.001: rotate into entity yaw (sin/cos) and accumulate
+forward/strafe. Vertical |dy| &gt; 0.001 accumulates `speedVertical`.
+`SetMovementState()`.
+
+**`updateStepSound` (IL=107 high-level):** skip if underfoot air. Track
+planar distance and yaw rotation budgets; when remaining ≤ 0 play step
+(`internalPlayStepSound`) and refill from `getNextStepSoundDistance()` or **90°**
+yaw threshold; small moves may use 0.25 distance budget.
+
 **`PlayHitGroundSound(impactSpeed)` (IL=42):** volume =
 `Lerp(0.3, 1, impactSpeed)`; play `soundLand` else `soundLandThump` else
 `"entityhitsground"`.
@@ -1899,8 +1918,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** ChooseFallBehavior weights; FallHitGround destroy-area 2.5 m;
-  PlayHitGroundSound; SetMoveForward; UpdateJump; fall dmg formula.
+- **2026-08-07:** ExecuteFallBehavior stub false; OnUpdatePosition step/speed;
+  speedForward decay 0.5; ChooseFallBehavior; FallHitGround; SetMoveForward.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
