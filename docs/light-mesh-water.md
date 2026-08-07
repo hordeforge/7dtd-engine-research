@@ -202,7 +202,9 @@ requires the `ChunkProviderGenerateWorldFromRaw` `poiFromImage` grid to
 contain the point, resolves the byte via
 `Biomes.getPoiForColor`, and answers `m_BlockValue.type == 240` (the water
 block). `WorldBiomes.getPoiForColor` (IL=10) is the `m_PoiMap`
-color-to-element dictionary lookup (null on miss).
+color-to-element dictionary lookup (null on miss);
+`AddPoiMapElement(element)` (IL=13) adds keyed by `m_uColorId` (skipped when
+the color already exists).
 
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
