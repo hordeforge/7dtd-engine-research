@@ -911,6 +911,29 @@ if Duration &gt; 0 set TemporaryObject life; wire `ExplosionDamageArea` buffs +
 initiator; if AIDirector and not `IgnoreHeatMap`, `OnSoundPlayedAtPosition`
 from AudioPlayer; if clients present, send `NetPackageExplosionClient`.
 
+**`ExplosionData` struct (the blob behind these; Write IL=88 / Read IL=82):**
+
+| Field | Wire | Note |
+|---|---|---|
+| `ParticleIndex` | i16 | the explosion particle effect id |
+| `Duration` | i16 | float x10 on write, /10 on read |
+| `BlockRadius` | i16 | float x20 on write, /20 (0.05) on read |
+| `EntityRadius` | i16 | |
+| `BlastPower` | i16 | |
+| `BlockDamage` | f32 | |
+| `EntityDamage` | f32 | |
+| `BlockTags` | string | |
+| `IgnoreHeatMap` | bool | skips the AI heat-map sound feed |
+| `DamageType` | i16 | `EnumDamageTypes` |
+| `damageMultiplier` | `DamageMultiplier` | nested Read/Write |
+| `BuffActions` | u8 count + strings | null -> 0 |
+
+`ToByteArray()` (IL=21) serializes through a pooled `PooledBinaryWriter`
+over a `MemoryStream` - this is the blob stored in
+`EntityClass.explosionData` and carried by the explosion packages, and the
+`new ExplosionData(DynamicProperties, MinEffectController)` ctor builds it
+from the block/item/entity XML (e.g. `ItemActionProjectile.Explosion`).
+
 **`ExplodeGroupFrameUpdate` (IL=220):** reverse-iterate groups; each frame
 `delay--`; when delay hits 0, process up to budget
 `max(1, min(count, 20 * 0.73^count))` fallings: raycast down for ground;
@@ -1560,6 +1583,11 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-08:** ExplosionData struct wire (Write IL=88 / Read IL=82):
+  ParticleIndex/Duration x10/BlockRadius x20/EntityRadius/BlastPower i16,
+  BlockDamage/EntityDamage f32, BlockTags string, IgnoreHeatMap bool,
+  DamageType i16, DamageMultiplier nested, BuffActions u8+strings;
+  ToByteArray IL=21 pooled writer; ctor from DynamicProperties+effects.
 - **2026-08-07:** EntityAliveFlags Process bit setters (god/crouch/alert remote).
 - **2026-08-07:** QuestObjectiveUpdate eventType 0/1/2 party fan + treasure
   FinishTreasureQuest / HandlePlayer distance 15 + AddToDestroyCount.
