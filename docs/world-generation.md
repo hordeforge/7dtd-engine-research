@@ -153,6 +153,13 @@ regions are grown with edge preference and neighbor checks
 world edges become water border. `BiomeType`: forest=0, burntForest=1, desert=2,
 snow=3, wasteland=4, waterDebug=6.
 
+The runtime registry `WorldBiomes` (loaded from `biomes.xml` by `readXML`)
+keeps `m_Color2BiomeMap : Dictionary<UInt32, BiomeDefinition>` (color-keyed
+lookup for image splats) and `m_Id2BiomeArr : BiomeDefinition[]`. `GetBiomeCount`
+(IL=9) is the color-map count (0 before load); `GetBiomeMap` (IL=3) exposes the
+map; `GetTotalBluffsCount` (IL=31) sums `m_DecoBluffs.Count` over the id array
+(the bluff-rock decorations).
+
 ### 3.2 Terrain-type tiles and stamps
 
 `GenerateTerrainTiles` (IL=385) assigns each tile a `TerrainType`

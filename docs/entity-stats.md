@@ -26,6 +26,11 @@ so the survival loop is a per-tick dedicated codepath.
 throttled (per-`worldTime`) updates. Stats persist with the entity/player profile
 ([server-lifecycle.md](server-lifecycle.md)) and net-sync to the owning client.
 
+`EntityStats.SimpleClone` (IL=7) copies only `Health`; the
+`PlayerEntityStats.SimpleClone` (IL=26) override additionally copies `Stamina`,
+`Water`, `Food`, and the `CoreTemp` float. Base `ResetStats` (IL=1) is an
+empty virtual (subclass overrides do the work).
+
 ### 1.1 `EntityStats.Tick` / `TickWait` phase machine (IL re-pin 2026-08-07)
 
 **`Stat.set_Value(value)` (IL=19):** no-op when unchanged; else clamp
