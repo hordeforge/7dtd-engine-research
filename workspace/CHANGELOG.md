@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: trader lookup core
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md: DynamicPrefabDecorator.GetTraderAtPosition IL=68
+  - TraderBinarySearch + X/Z containment against padded Protect
+  rect (Y unchecked).
 ## 2026-08-08 - tier-C: body damage wire + trader area queries
 
 Done (V3.1.0 b14 IL):
