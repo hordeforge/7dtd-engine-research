@@ -496,6 +496,10 @@ load path a dedicated server runs at startup:
   when any of `splat3_processed.png` / `splat4_processed.png` /
   `splat3_half.png` / `splat4_half.png` is missing, or when
   `verifyFileHashes` fails.
+  `generateHalfResTexture(tex)` (IL=27) builds a `width>>1` x `height>>1`
+  texture from mip level 1 (error + source fallback when `mipmapCount < 1`);
+  `GetProviderId()` returns **4**; `ARGB32ToColor` (IL=10) is a plain
+  `Color32(r, g, b, a)` copy.
 - `WorldBiomeProviderFromImage` from `biomes.png`, splat control textures
   (`splat3/splat4_processed.png`, half-res variants, Burst `RoadSmooth`),
   water data (`GetWaterChunks16x16` used by `World.LoadWorld`).
