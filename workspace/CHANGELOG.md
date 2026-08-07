@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: WorldBiomes lookups + ParseWeather
+
+Done (V3.1.0 b14 IL):
+- world-generation.md 3: GetBiome(byte/string) lookups, m_Name2BiomeMap
+- world-generation.md 3: ParseWeather (IL=211) weathergroup parse mapping
+
 ## 2026-08-08 - tier-C: Chunk coordinate fold
 
 Done (V3.1.0 b14 IL):
