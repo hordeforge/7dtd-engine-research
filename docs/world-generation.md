@@ -185,6 +185,13 @@ Query leaves: `GetBiomeColor(type)` (IL=4) is `BiomeColors[type]` (a static
 `UInt32[]` indexed by `BiomeType`); `LocalizedBiomeName(type)` (IL=8) is
 `Localization.Get("biome_" + EnumUtils.ToStringCached(type))`.
 
+A `BiomeLayer` resource column is built by `AddResource(res)` (IL=34): append
+to `m_Resources`, fold `MaxResourceProb = FastMax(res.prob, MaxResourceProb)`,
+and append to `SumResourceProbs` a running sum (previous entry plus `prob`, or
+`prob` when first). Its ctor (IL=18) keeps the layer's `m_Block` and `m_Depth`
+and seeds the two accumulators empty (see chunk-providers §3.3 for how
+`WorldBlockFiller` consumes, or rather skips, layers in this build).
+
 ### 3.2 Terrain-type tiles and stamps
 
 `GenerateTerrainTiles` (IL=385) assigns each tile a `TerrainType`
