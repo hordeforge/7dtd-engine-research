@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EventPrefabs + NetPackageEventPrefab
+
+Done (V3.1.0 b14 IL):
+- server-browser-prefabs.md 3: EventPrefabs TryPlaceAt IL=122 (GetPrefabRotated, TryResetChunks gate, AddEventPrefab, NetPackageEventPrefab, needsSaving)
+- server-browser-prefabs.md 3: Load IL=125 eventprefabs.dat format, Save IL=70 (version 1, ThreadedFileWriterQueue)
+- server-browser-prefabs.md 3: NetPackageEventPrefab write/read/ProcessPackage IL=48 (op 0 TryAdd / 1 Remove, client-gated)
+- server-browser-prefabs.md 3: PrefabInstance.Serializable (id/name/pos/rot, GetLength = 17 + name.Length)
+
 ## 2026-08-08 - tier-C: Prefab terrain snap + volume realization
 
 Done (V3.1.0 b14 IL):
