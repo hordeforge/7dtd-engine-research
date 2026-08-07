@@ -84,6 +84,13 @@ bytes**, not 4. `Read` mirrors it (`ReadUInt32` then `ReadUInt16`).
 `new ItemValue { type = this.type }` (the block id becomes the item type id -
 the same id space, `Block.ItemsStartHere` offset aside).
 
+**`ItemValue.ToBlockValue(allowAlternates)` (IL=26)** is the reverse: an item
+type at/above `Block.ItemsStartHere` yields `BlockValue.Air` (not a block);
+otherwise the type is copied into a `BlockValue`, and with `allowAlternates`
+and a `SelectAlternates` block the value becomes
+`Block.GetAltBlockValue(Meta)` (the alternate variant selected by the item's
+meta), else the plain value.
+
 ```mermaid
 flowchart LR
   RW["rawData : u32"] --> B0["bits 0-15<br/>type (id)"]
@@ -487,6 +494,8 @@ damage.
 
 ## Changelog
 
+- **2026-08-07:** ItemValue.ToBlockValue (IL=26): type >= ItemsStartHere ->
+  Air, else type copy + SelectAlternates -> GetAltBlockValue(Meta).
 - **2026-08-07:** BlockValue.ToItemValue (IL=6): type copy to ItemValue - the
   block-to-item conversion.
 - **2026-08-07:** SetBlock entry chain: World.SetBlock (IL=9) -> ChunkCluster

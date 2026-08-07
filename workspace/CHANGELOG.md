@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemValue.ToBlockValue
+
+Done (V3.1.0 b14 IL):
+- ItemValue.ToBlockValue (IL=26) narrated in blocks.md section 2: item
+  type at/above Block.ItemsStartHere -> BlockValue.Air; else type copy,
+  allowAlternates + SelectAlternates -> Block.GetAltBlockValue(Meta).
+  Completes the block/item conversion pair.
+
 ## 2026-08-08 - tier-C: BlockValue.ToItemValue
 
 Done (V3.1.0 b14 IL):
