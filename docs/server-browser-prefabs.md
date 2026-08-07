@@ -344,6 +344,11 @@ gated on `GameManager.worldInitInfoReceived`: operation 0 routes to
 `EventPrefabsClient.TryAdd(id, name, rotation, pos)`, operation 1 to
 `EventPrefabsClient.Remove(...)`.
 
+`PrefabInstance.Serializable` is the wire snapshot (ctor IL=18 / 17): `id`
+(int32), `prefabName` (string), `position` = `boundingBoxPosition`
+(`StreamUtils` Vector3i), `rotation` (byte); `GetLength` (IL=11) is
+`17 + prefabName.Length` (4 + 4 + 12 + 1 fixed bytes).
+
 ```mermaid
 flowchart LR
   PX[worldpath/prefabs.xml] -->|Load| DPD[DynamicPrefabDecorator]
