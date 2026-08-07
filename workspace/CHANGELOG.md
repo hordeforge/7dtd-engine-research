@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: mine trigger + damage detonation
+
+Done (V3.1.0 b14 IL):
+- blocks.md 5: BlockMine.TriggerMine IL=99 (step -> trigger sound
+  + passive 171/172, WBT-scheduled fuse); UpdateTick IL=8 fuse
+  fire; IsMovementBlocked IL=2 false; OnBlockDamaged IL=44
+  damage-proportional detonation, repair delegates base.
 ## 2026-08-08 - tier-C: mine fuse tick + walk-over
 
 Done (V3.1.0 b14 IL):
