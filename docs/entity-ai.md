@@ -2215,7 +2215,10 @@ that i32 is what save files and the spawn wire carry. Order in IL:
    entry (`"ItemName[=Count]"`, count default 1, IL=38); empty result throws `"Item with name '...' not found in class
    <name>"`. An item is **skipped** when `ItemClass.CreativeMode == 2 &&
    Platform.DeviceFlags.IsCurrent(DeviceFlag 56)` (dedicated platform: creative
-   items dropped from the enter-game grant).
+   items dropped from the enter-game grant). Granted at spawn by
+   `EntityPlayerLocal.SetupStartingItems` (IL=39): metadata from
+   `ItemClass.GetInitialMetadata`, placed in inventory slots `1..N`, holding
+   index 0.
 9. **fallBehaviors** (class prop `FallBehavior`, key = op name): each key data
    parses `anim` (enum `FallBehavior.Op`), `weight` (float), `height` /
    `ragePer` / `rageTime` (FloatRange), `difficulty` (IntRange, default

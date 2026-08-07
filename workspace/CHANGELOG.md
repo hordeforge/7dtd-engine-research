@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: SetupStartingItems grant
+
+Done (V3.1.0 b14 IL):
+- EntityPlayerLocal.SetupStartingItems IL=39: itemsOnEnterGame granted to
+  slots 1..N with GetInitialMetadata, holding index 0 (D8.6 step 8 consumer).
 ## 2026-08-08 — tier-C: CompleteEntity pref 44 correction
 
 Done:
