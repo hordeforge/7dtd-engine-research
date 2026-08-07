@@ -144,7 +144,9 @@ component; `ToLocalVector` (IL=2) is the identity (the cluster is axis
 aligned); `ToLocalKey(key)` (IL=24) rebases a packed chunk key by
 `toChunkXZ(FloorToInt(Position.x/z))` and repacks it. `IsOnBorder(chunk)`
 (IL=32) is true only for fixed-size clusters, when the chunk X/Z sits on
-`ChunkMinPos`/`ChunkMaxPos`.
+`ChunkMinPos`/`ChunkMaxPos`. `Chunk.ToWorldPos()` (IL=14) is the chunk origin
+`(m_X*16, m_Y*256, m_Z*16)`; the local-coord overloads (IL=20/16) add the
+cell offset (note the y scale is **256**, the chunk Y-dim).
 
 ---
 
