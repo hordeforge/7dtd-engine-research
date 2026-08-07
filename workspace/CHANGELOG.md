@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemClassModifier selection leaves
+
+Done (V3.1.0 b14 IL):
+- items.md 2: ItemClassModifier selection - GetItemModWithAnyTags
+  IL=53 (installable/disallowed tag filter + shared modIds scratch
+  + uniform pick), GetDesiredItemModWithAnyTags IL=67 desired bias,
+  GetCosmeticItemMod twin, GetPropertyOverride IL=50 exact-name
+  then "*" wildcard entry, HasAllTags/HasAnyTags ModifierTags
+  tests.
 ## 2026-08-08 - tier-C: ItemValue metadata + mod property overrides
 
 Done (V3.1.0 b14 IL):
