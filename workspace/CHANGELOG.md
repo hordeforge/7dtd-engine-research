@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: inside-device register + test
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md: AddInsideDevicePosition IL=20 (Vector3b + hash set, IsInternalBlocksCulled, dead bv param)
+- world-chunks.md: Chunk.isInside IL=12 hash-set membership test
+
 ## 2026-08-08 - tier-C: entity stat blobs
 
 Done (V3.1.0 b14 IL):
