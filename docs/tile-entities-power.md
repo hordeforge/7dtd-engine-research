@@ -690,6 +690,9 @@ After `TileEntityPowered.write`:
 Land-claim repair package drives `TEFeatureAreaRepair.RepairAll` (protocol
 §6.19). Storage/lock features are the composite replacement for classic
 `TileEntitySecureLootContainer` in V3.1.0 where the composite TE type is used.
+`TEFeatureStorage.CountItem(class)` (IL=33) sums `count` over matching
+`ItemClass` slots; `AddItem(stack)` (IL=29) writes the first empty slot via
+`UpdateSlot` + `SetModified` (false when full).
 
 **`TEFeatureLockable` command leaves:** `InitBlockActivationCommands` (IL=37)
 registers the `lock`, `unlock`, and `keypad` `BlockActivationCommand`s (all
