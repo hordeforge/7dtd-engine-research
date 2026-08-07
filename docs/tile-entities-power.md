@@ -56,6 +56,10 @@ overload (IL=30) linearly scans `blockEntityStubs.list` for the matching
 `BlockEntityData.transform` (null when absent). `PrefabChunk` stubs both as
 null; `ChunkCluster.GetBlockEntity` (IL=12) resolves the chunk (null chunk →
 null) and delegates.
+`Chunk.AddEntityStub(ecd)` (IL=5) appends to `entityStubs`;
+`RemoveEntityBlockStub(pos)` (IL=30) removes by the packed key (queuing the
+removed entry in `blockEntityStubsToRemove`, warning
+`Entity block on pos {0} not found!` on a miss).
 
 **`GameUtils.Vector3iToUInt64(v)` (IL=29)** is the position key pack behind
 the dict: each axis becomes `(coord + 32768) & 0xFFFF` (a 16-bit field with a
