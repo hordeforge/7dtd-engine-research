@@ -58,6 +58,22 @@ looks up the static `nameToItem` (or `nameToItemCaseInsensitive`) dictionary;
 `new ItemValue(class.Id, false)` and returns `ItemValue.None` for a miss
 (the resolution behind `WorldBiomes.GetBlockValueForName`).
 
+**ItemClass leaves (V3.1.0 b14):** `CreateItemValue(name, quality,
+caseInsensitive)` (IL=17) resolves the class and builds a fresh
+`ItemValue(id, quality, quality, false, null, 1f)`, `ItemValue.None` on a
+miss. `GetForId(id)` (IL=15) indexes the static `list` (null when out of
+range or unbuilt). `CanCollect(iv)` is true in the base, but
+`ItemClassTimeBomb` (IL=5) refuses while `iv.Meta != 0` (a lit bomb cannot be
+picked up). `HasAllTags` resolves the tag source per subclass: `ItemTags`
+(base), `Block.Tags` (`ItemClassBlock`), `ModifierTags` (`ItemClassModifier`).
+`IsGun` (IL=8) / `IsDynamicMelee` (IL=8) test `Actions[0]` against
+`ItemActionAttack` / `ItemActionDynamic` (so `IsGun` is true for melee too);
+`IsLightSource` (IL=5) is a non-null `LightSource` DataItem. Pose corrections:
+the held-item correction is `(90, 0, 0)` for block classes else zero, and the
+dropped-item correction mirrors it (zero for blocks, `(-90, 0, 0)` otherwise).
+`GetLocalizedItemName` is the `localizedName` field, with `ItemClassBlock`
+delegating to `Block.GetLocalizedBlockName`.
+
 ```mermaid
 flowchart TB
   IV["ItemValue<br/>(packed instance)"] -->|type id indexes| IC["ItemClass<br/>(definition, ItemClass.list[type])"]
