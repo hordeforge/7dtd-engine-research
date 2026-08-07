@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: safe-zone chunk lock
+
+Done (V3.1.0 b14 IL):
+- spawning.md 6.2: EntityPlayer.onSpawnStateChanged (IL=52) safe-zone lock on
+  respawn reasons NewGame/Died/EnterMultiplayer (non-remote/non-editor +
+  IsSafeZoneActive): LockAreaMasterChunksAround(worldTime +
+  PlayerSafeZoneHours*1000); World.LockAreaMasterChunksAround (IL=71) 5x5
+  area-master grid (dx,dz in [-2,2] * 80, ToAreaMasterChunkPos):
+  DelayAllEnemySpawningUntil on loaded spawn-data chunks (isModified set) else
+  areaMasterChunksToLock deferred map; lastRespawnReason normalized to
+  Unknown(6) unless Teleport(3).
+
 ## 2026-08-08 - tier-C: WorldBiomes + EntityStats leaves
 
 Done (V3.1.0 b14 IL):
