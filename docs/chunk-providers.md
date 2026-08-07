@@ -57,6 +57,13 @@ from `ConsoleCmdChunkReset`). Height/biome queries go through
 `World.GetHeightAt → GetTerrainGenerator()` and `World.GetBiomeInWorld /
 WorldEnvironment.DistantTerrain_GetBlockIdAt → GetBiomeProvider()`.
 
+World-level consumers of the biome oracle: `World.IsPositionRadiated(pos)`
+(IL=24) is `GetBiomeProvider().GetRadiationAt(x, z) > 0` (false when the
+provider is null). `World.GetBiomeIntensity(pos, out intensity)` (IL=28)
+resolves the chunk and returns `chunk.GetBiomeIntensity(toBlockXZ(x),
+toBlockXZ(z))` once the chunk exists and is not `NeedsLightCalculation`, else
+`BiomeIntensity.Default` with false.
+
 ---
 
 ## 2. Provider selection

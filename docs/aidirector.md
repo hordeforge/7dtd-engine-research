@@ -501,6 +501,15 @@ by the time gates.
 `DayLightLength > 22`, becomes `12 + DayLightLength/2` when `DayLightLength < 18`,
 and dawn is `clamp(dusk - DayLightLength, 0, 23)`.
 
+`World.DuskDawnInit` (IL=13) writes the dusk/dawn fields the gates read: it
+loads `GameStats` `DayLightLength`, runs it through `CalcDuskDawnHours`, and
+stores the pair into `World.DuskHour` / `World.DawnHour`.
+
+`World.SetTimeJump(time, isSeek)` (IL=14) is the clock-jump entry: `SetTime`,
+flags `SkyManager.bUpdateSunMoonNow`, and on the server calls
+`AIDirectorBloodMoonComponent.TimeChanged(isSeek)` so the blood-moon schedule
+re-evaluates against the jumped time (the seek flag marks an artificial jump).
+
 ### Schedule
 
 `AIDirectorBloodMoonComponent::CalcNextDay` (412880) picks
