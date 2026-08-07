@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: LootFromXml loader
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md 7b: LootFromXml - coroutine entry IL=6;
+  LoadLootContainer IL=275 (name/count/size/buff/sounds/flag
+  bools/destroy_on_close/on_open_event/open_time, quality template
+  check, ParseItemList + Init); ParseItemList IL=334 (prob/
+  force_prob/group/name/tags, count only for stackable, quality
+  override, mods/mod_chance/requirement/buffs/random_durability);
+  LoadLootGroup IL=197 (all -> -1, parentGroup, abundance_type);
+  LoadLootQualityTemplate IL=231; LoadLootSetting IL=142
+  (POITierMod/POITierBonus).
 ## 2026-08-08 - tier-C: StreamUtils binary primitives
 
 Done (V3.1.0 b14 IL):
