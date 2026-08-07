@@ -78,7 +78,10 @@ stateDiagram-v2
 ```
 
 - **Instant buffs** apply their effect and expire immediately (zero/short
-  duration); **timed buffs** count down `DurationInTicks` at the sim rate.
+  duration); **timed buffs** count down at the sim rate.
+- **`BuffValue.DurationTick` (IL=27):** `durationTicks++`; `updateTicks++`; when
+  `updateTicks >= BuffClass.UpdateRateTicks`, set `Update=true` and reset
+  `updateTicks` (drives periodic update MinEvents).
 - **Death handling:** `OnDeath` runs `RemoveDeathBuffs(excludeTags)`, clearing
   buffs not tagged to persist through death.
 - **Tag queries:** `HasBuffByTag` / `RemoveBuffsByTag` operate on `FastTags`, so
@@ -144,7 +147,8 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
-- **2026-08-07:** EntityBuffs.Tick IL=179 walk (Invalid/Finished/Remove/Paused).
+- **2026-08-07:** BuffValue.DurationTick IL=27 UpdateRateTicks; EntityBuffs.Tick
+  IL=179 walk (Invalid/Finished/Remove/Paused).
 - **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.
 - **2026-07-28:** NetPackageEntityStatsBuff pointer.
 

@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: explode AttackBlocks, LetBlocksFall, DurationTick, join pkgs
+
+Done (V3.1.0 b14 IL):
+- GameManager.explode IL=194 AttackBlocks/Entities + ExplosionClient S2C.
+- LetBlocksFall group/single falling entity create path.
+- BuffValue.DurationTick UpdateRateTicks.
+- NetPackagePlayerId / PlayerSpawnedInWorld process.
+---
 ## 2026-08-07 — tier-C: FireEvent fan-out, SetAttackTarget, explosions, falling
 
 Done (V3.1.0 b14 IL):

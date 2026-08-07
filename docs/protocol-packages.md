@@ -891,6 +891,12 @@ Client/server-placed explosives. `ProcessPackage` → `IGameManager.ExplosionSer
 client forwards `NetPackageExplosionInitiate`; server if `_delay <= 0` calls
 `explode(...)` else `StartCoroutine(explodeLater(...))`.
 
+**`GameManager.explode` (IL=194):** `new Explosion` → `AttackBlocks` +
+`AttackEntites`; collect non-air changed blocks into fall groups for
+`explodeFallingGroups`; local `ExplosionClient` (prefab + force + ChangeBlocks);
+optional heat-map sound to AIDirector; if clients present, send
+`NetPackageExplosionClient`.
+
 ```text
 worldPos : Vector3          // StreamUtils
 blockPos : Vector3i
@@ -1484,8 +1490,8 @@ customReason    : string
 
 ## Changelog
 
-- **2026-08-07:** EntityRemove/SimpleChat/SharedQuest/AwardKill/SkillLevel/Score
-  process; ConfigFile/SpawnPoints/MapChunks/KeyExchangeComplete thin paths.
+- **2026-08-07:** explode IL=194 AttackBlocks/Entities + ExplosionClient fan-out;
+  PlayerId/PlayerSpawnedInWorld process; EntityRemove/SimpleChat/SharedQuest/etc.
 - **2026-08-07:** NetPackageChunk Process IL=126 overwrite vs add paths.
 - **2026-08-07:** LandClaim/SleeperWake/GameStats/Deco/Sign/DynamicMesh/AddExp
   process re-pins; AuthConfirmation/EncryptionRequest thin paths.

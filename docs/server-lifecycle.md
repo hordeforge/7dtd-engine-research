@@ -144,6 +144,11 @@ server: vehicle/drone waypoint updates + following drones; fire
 `AfterPlayerRespawn`; local FP revive camera; clear death state via `SetAlive`;
 optional buff re-apply path on local.
 
+**Join packages:** `NetPackagePlayerId` Process IL=11 →
+`GameManager.PlayerId(id, team, playerDataFile, chunkViewDim)`.
+`NetPackagePlayerSpawnedInWorld` Process IL=47: `ValidEntityIdForSender`;
+`PlayerSpawnedInWorld(...)`; server rebroadcast flags **192** excluding sender.
+
 **`World.SpawnEntityInWorld` (IL=178):** null guard; `EntityLoadedDelegates`;
 `AddEntityToMap` + `Entities.Add` + `addToChunk`; if EntityAlive, add to
 `EntityAlives`; track vehicle/drone/turret managers; audio/weather/light

@@ -382,10 +382,11 @@ Called once per full `UpdateTick` after entities.
 ```text
 if fallingBlocks queue empty: ret
 if EntityFallingBlocks.Enabled: GroupFallingBlocks()
-// process fallingGroups and/or per-block queue
-GetBlock / OnBlockStartsToFall / DynamicMeshManager.ChunkChanged
-EntityFactory.CreateEntity → EntityFallingBlock (or group)
-Spawn into world…
+// process fallingGroups: CreateFallingBlockGroup, clear hashset entries
+// process fallingBlocks queue: skip if still in hashset pending group
+GetBlock / TE canvas clone for signs / OnBlockStartsToFall
+DynamicMeshManager.ChunkChanged
+if ShowModelOnFall: EntityFactory "fallingBlock" + random motion → spawn
 ```
 
 **Queue-driven.** Spikes when many blocks lose support (base collapse). Matches ServerTools/IceCoffee “fall → air” trade: empty the problem at `AddFallingBlock` before this method invents entities.
