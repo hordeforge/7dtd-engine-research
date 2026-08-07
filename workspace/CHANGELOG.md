@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: trader-area queries
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md 4: get_TraderAreas (IL=12) / GetTraderAreaAt (IL=14);
+  IsWithinTraderPlacingProtection (IL=20 pos / IL=29 bounds+4) with
+  SandboxUseTraderArea gate.
+
 ## 2026-08-08 - tier-C: trigger registry
 
 Done (V3.1.0 b14 IL):
