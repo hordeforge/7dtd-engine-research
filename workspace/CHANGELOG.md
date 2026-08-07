@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Equipment armor-group bookkeeping
+
+Done (V3.1.0 b14 IL):
+- Equipment.ResetArmorGroups (IL=51) + AddArmorGroup (IL=36) narrated in
+  items.md: rebuild of ArmorGroupEquipped from m_slots (per ItemClassArmor
+  ArmorGroup name with Quality); AddArmorGroup Count++ + LowestQuality min,
+  new entry Count=1; set bonuses scale off worst piece.
+
 ## 2026-08-08 - tier-C: Equipment container
 
 Done (V3.1.0 b14 IL):

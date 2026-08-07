@@ -485,6 +485,14 @@ entities. The (slotID, id) variant (IL=72) resolves the id through
 `CosmeticMappingIDString` into an `ItemClassArmor` (id 0 clears the slot) and
 stores into the mapped or generic slot.
 
+**Armor-group bookkeeping:** `Equipment.ResetArmorGroups()` (IL=51) clears the
+`ArmorGroupEquipped` dictionary and rebuilds it from `m_slots`: every equipped
+`ItemClassArmor` registers each of its `ArmorGroup` names via
+`AddArmorGroup(name, itemValue.Quality)`. `AddArmorGroup` (IL=36) bumps the
+group's `Count` and keeps the running `LowestQuality` (min), or seeds a new
+`ArmorGroupInfo { Count = 1, LowestQuality = quality }` - so set bonuses can
+scale off the worst piece worn.
+
 **`Inventory.AddItem(stack, out slot)` (IL=121)** (wrapper IL=5): the give-item
 path (loot, crafting output, admin `give`). First gate:
 `stack.CanMoveTo(StackLocationTypes.Toolbelt, -1)` (the item must be movable
@@ -784,6 +792,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** Equipment armor-group bookkeeping: ResetArmorGroups (IL=51)
+  rebuild from m_slots per ArmorGroup name; AddArmorGroup (IL=36) Count++ +
+  LowestQuality min, seeds Count=1.
 - **2026-08-07:** Equipment family: SetSlotItem (IL=191) equip path (IsEquipping
   wrap, same-value equip-start only, teardown onSelfItemDeactivate 92 for
   activated items+mods then onSelfEquipStop 57, preferredItemSlots + set/changed
