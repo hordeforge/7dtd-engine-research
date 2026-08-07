@@ -318,6 +318,17 @@ stateDiagram-v2
 
 `Chunk.SetWaterSimUpdate` (IL=75): refuses flow into non-flow-through blocks; stores via `ChunkBlockChannel.GetSet` of `WaterValue.RawData`; fires `HandleWaterLevelChanged` when mass changes.
 
+**The direct water writes (V3.1.0 b14):** `Chunk.SetWater(x, y, z, data)`
+(IL=13) is `SetWaterRaw` plus `waterSimHandle.WakeNeighbours(x, y, z)`.
+`Chunk.SetWaterRaw` (IL=55) is the channel commit: a cell whose block fails
+`WaterUtils.CanWaterFlowThrough(GetBlockNoDamage(...))` forces `data.SetMass(0)`
+(water cannot sit in a non-flow block), then
+`chnWater.Set(x, y, z, data.RawData)`, the dirty flags
+(`bEmptyDirty`/`bMapDirty`/`isModified`), `waterSimHandle.SetWaterMass(x, y,
+z, data.GetMass())`, and - when the water has mass - the column height is
+raised to `y` in `m_HeightMap` if the recorded height is lower (water counts
+toward the height map).
+
 **Client/listen apply path:** `NetPackageWaterSimChunkUpdate.ProcessPackage` re-enters the same `GetChangeWriter`/`RecordChange` path on the local `WaterSimulationNative.Instance` (so remote updates merge into the same apply queue). Package `read` copies a length-prefixed blob into a pooled memory stream; `ProcessPackage` then decodes the **inner** layout:
 
 ```text
@@ -426,6 +437,9 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-08:** Water writes: Chunk.SetWater IL=13 (raw + WakeNeighbours);
+  SetWaterRaw IL=55 (flow-through mass-0 gate, chnWater.Set, dirty flags,
+  SetWaterMass, heightmap raise).
 - **2026-08-07:** BlockLight state bits: IsLightOn (IL=7) meta & 2;
   SetLightState (IL=15) (meta & ~3) | (isOn?2:0) - trigger/light share low
   meta bits.
