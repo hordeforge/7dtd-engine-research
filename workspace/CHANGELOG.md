@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.IsIgnoredByAI
+
+Done (V3.1.0 b14 IL):
+- Entity.IsIgnoredByAI (IL=3) field read; EntityDrone.IsIgnoredByAI (IL=2)
+  always true - drones never AI targets; the flag behind EAITarget.check /
+  NotifyNoise / horde member scan. entity-ai.md.
+
 ## 2026-08-08 - tier-C: Entity.GetMapObjectType
 
 Done (V3.1.0 b14 IL):

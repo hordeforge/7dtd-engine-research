@@ -1161,6 +1161,11 @@ Top decision tasks (when EAI Update runs):
 `isWithinHomeDistance` of e's block. If `bNeedToSee` require `CanSee(e)`. If
 player: also `CanSeeStealth(manager.GetSeeDistance(player), lightLevel)`.
 
+**`Entity.IsIgnoredByAI()` (IL=3)** reads the `isIgnoredByAI` field;
+`EntityDrone.IsIgnoredByAI()` (IL=2) hard-returns **true** (drones are never
+AI targets - the flag behind `EAITarget.check`, `NotifyNoise`, and the horde
+member scan).
+
 **`EAIApproachAndAttackTarget.CanExecute` (IL=70):** false if
 `sleepingOrWakingUp`, any stun, or (`Jumping` and not swimming). Load
 `GetAttackTarget` into `entityTarget`; null → false. Walk `targetClasses`: first
@@ -3035,6 +3040,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Entity.IsIgnoredByAI (IL=3) field read; EntityDrone always
+  true - the AI-target exclusion flag.
 - **2026-08-07:** Utils.GetAngleBetween (IL=34): XZ Atan2 yaw difference
   wrapped to [-180, 180] - the view-cone / IsInFrontOfMe half-angle test.
 - **2026-08-07:** EntityAlive.CanEntityBeSeen (IL=133): stealth-scaled
