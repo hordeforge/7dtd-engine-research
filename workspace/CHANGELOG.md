@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: decoration gate
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 1: IsNeighbourChunksDecorated (IL=26) NeedsDecoration
+  twin of the lit gate; CheckSameLight (IL=4) CheckSameValue compaction.
+
 ## 2026-08-08 - tier-C: texture word + neighbour-lit
 
 Done (V3.1.0 b14 IL):
