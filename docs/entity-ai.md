@@ -426,6 +426,14 @@ scan, require not dead + spawned, `Stealth.lightLevel >= lightMin`, and
 crouching: max dist = `FastLerp(3, 15, lightAttackPercent)`; false when
 `GetDistance(player) > max` (stealth close-range only).
 
+**`EntityAlive.GetSleeperDisturbedLevel(dist, lightLevel)` (IL=38):**
+`pct = dist / sightRangeBase`; `pct > 1` → **0**. Else
+`wake = Lerp(sightWakeThresholdAtRange.x, .y, pct)`: `lightLevel > wake` → **2**
+(wake); `groan = Lerp(sightGroanThresholdAtRange.x, .y, pct)`:
+`lightLevel > groan` → **1** (groan); else **0**. (The thresholds are the
+per-entity random ranges rolled in `CopyPropertiesFromEntityClass`, D8.6 step 5;
+used by the vulture wake scan and sleeper volumes.)
+
 **`EntityAlive.ConditionalTriggerSleeperWakeUp` (IL=55):** only if `IsSleeping`
 and not dead: clear `IsSleeping`/`IsSleeperPassive`; avatar pose **-1** (stand)
 or **-2** (crawl if short and not crawl walk); `EAIManager.SleeperWokeUp` if
@@ -2443,7 +2451,9 @@ player with `CanSee` and `GetSleeperDisturbedLevel(dist, Stealth.lightLevel) >=
   `position + (0, 0.22, 0) - dir*0.13` along `dir`, length **0.83**, mask
   **1082198968**, layer 128 → hit → `AttackAndAdjust(true)`.
 - **Attack 2 (vomit):** requires holding item action 1 to be `ItemActionVomit`;
-  arm when `attack2Delay <= 0 && distSq >= 9 && distSq < range²` and
+  arm when `attack2Delay <= 0 && distSq >= 9 && distSq < range²`
+  (`ItemActionRanged.GetRange` = `EffectManager.GetValue(MaxRange passive 11,
+  itemValue, base Range, holder, ...)`, IL=23) and
   `|DeltaAngle(yaw, rotation.y)| < 20` and
   `|SignedAngle(waypointDelta, forward, right)| < 25` → `isAttack2On = true`,
   `muzzle = GetHeadTransform()`, `numWarningsPlayed = 999`. While active: if
