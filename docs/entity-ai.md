@@ -1920,6 +1920,23 @@ or default step at volume.
 override uses `averageVel * 20` instead of the rigidbody/motion path, reading
 the smoothed per-tick average-velocity field.
 
+**`FindValidExitPosition` (IL=14) / `GetFallingSavePosition` (IL=161):**
+vehicle dismount + fell-through-world rescue. `FindValidExitPosition` records
+`lastVehiclePositionOnDismount = position`, `timeOfVehicleDismount =
+Time.time`, clears `forcedDetach`, then delegates to the base
+`Entity.FindValidExitPosition(list)`. `GetFallingSavePosition` first honors the
+dismount recall window: while not `forcedDetach` and
+`Time.time - timeOfVehicleDismount < vehicleTeleportThresholdSeconds`, it
+returns the recorded dismount position. Outside that window it checks the chunk
+under the player (`GetChunkFromWorldPos`); if the chunk is null or
+`IsEmpty()` (fell through the world) it logs `[FELLTHROUGHWORLD]
+GetFallingSavePosition - CurrentChunk {0}`, scans `ChunkObserver.chunksAround`
+for the closest non-empty chunk (chunk-center probe at origin **+8** in XZ,
+minimum `sqrMagnitude`; first found wins when none chosen yet), and clamps the
+player x/z into that chunk's `[origin + 0.5, origin + 16 - 1]` footprint.
+Finally it sets `y = World.GetTerrainHeight(x, z) + 0.5` and returns the
+position.
+
 **`JumpMove` (IL=82):** clear root motion; `entityCollision(motion)` then restore
 xz (and y if non-zero). If jumpState **3** (airborne): `motion.y -= Gravity`.
 Else: xz `*= 0.91`; `motion.y -= Gravity*0.025` then `*= 0.91`.
