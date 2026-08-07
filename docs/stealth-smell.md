@@ -122,6 +122,11 @@ curve: `count -= 5` (the first 5 smell are free), a negative result maps to
 0, else `FastLerp(10, 100, count / 45)` - a linear 10 m at the threshold up to
 100 m at full smell.
 
+**`PlayerStealth.SmellTickWet()` (IL=19)** accumulates wetness smell: it reads
+the `_wetnessrate` buff cvar into `smellWetRate` and, when the rate is at
+least **0.01**, adds it to `smellWet` (the wetness level that suppresses
+item smell in `SmellUpdateItemsAndBlood`).
+
 **`PlayerStealth.SmellTickEat()` (IL=36)** is the eat-smell decay: while the
 `smellEatTicks` timer runs (capped at 1640 ticks) it subtracts
 **0.007142858** (1/140) from `smellEatRadius` per tick - the eating scent
@@ -170,6 +175,8 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.SmellTickWet (IL=19): _wetnessrate cvar into
+  smellWetRate, rate >= 0.01 accumulates into smellWet.
 - **2026-08-07:** PlayerStealth.SmellTickEat (IL=36): eat radius decays 1/140
   per tick (~7 s fade), resets radius + update ticks at 0.
 - **2026-08-07:** PlayerStealth.SmellCountToRadius (IL=18): count-5 free

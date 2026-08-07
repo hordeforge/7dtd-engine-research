@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SmellTickWet
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.SmellTickWet (IL=19) narrated in stealth-smell.md:
+  _wetnessrate cvar -> smellWetRate; rate >= 0.01 accumulates into
+  smellWet (the wetness that suppresses item smell). Also restored the
+  SmellTickEat paragraph displaced in an intermediate edit.
+
 ## 2026-08-08 - tier-C: SmellTickEat
 
 Done (V3.1.0 b14 IL):
