@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `a8a6204` EAIMeleeAttackTarget |
-| Commits since dry-run `3b61d9c` | ~123 |
+| HEAD (at handoff write) | `fa09d2b` EAISetNearestCorpseAsTarget |
+| Commits since dry-run `3b61d9c` | ~124 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
