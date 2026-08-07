@@ -68,12 +68,31 @@ Live IL order (V3.1.0 b14):
 2. If source has direction: set HitDirection via
    `Utils.Get4HitDirectionAsInt(dir, look)`.
 3. If `AffectedByArmor`: `Equipment.CalcDamage` fills Strength and ArmorDamage.
-4. `GetDamageFraction(Strength)` vs Health; Fatal when Strength >= Health.
+
+   **`Equipment.CalcDamage` (IL=83):** start `armorDamageTaken = entityDamage`.
+   Physical tags (`physicalDamageTypes`): armorRating =
+   `GetTotalPhysicalArmorRating/100`; armor damage =
+   `max(1 if rating>0 else 0, round(entityDmg * rating))`; entity damage
+   reduced by that. Non-physical: entity damage scaled by
+   `1 - passive **43**/100` (min 0); armor damage = max(0, original - new).
+
+4. `GetDamageFraction(_damage)` (IL=6) = `_damage / GetMaxHealth()`; Fatal when
+   Strength >= Health.
 5. Head-part (`HitBodyPart & 2`) and damage-fraction thresholds feed
    dismember chance (source-dependent 0.2 / max(0.5,0.3) / 0.12 / max(0.5,0.5)
    bands in IL).
-6. If `canDisintegrate` and fraction high enough: `Disintegrate()`.
-7. `CheckDismember(ref dr, chance)`.
+6. If `canDisintegrate` and fraction high enough: `Disintegrate()` (IL=7):
+   `timeStayAfterDeath = 0`, `isDisintegrated = true`.
+7. `CheckDismember(ref dr, chance)` (IL=125):
+   - Leg hits while alive + (stunned or sleeping/waking): early return (no
+     dismember path this call).
+   - `chance = GetDismemberChance`; if chance > 0 and rand ≤ chance: set
+     `Dismember`; leg also sets `TurnIntoCrawler`.
+   - Else if leg: if `LegCrawlerThreshold > 0` and damage fraction ≥ threshold
+     set `TurnIntoCrawler`. If not already crawler path and
+     `LegCrippleScale > 0`: `p = fraction * LegCrippleScale`; if p ≥ 0.05 and
+     corresponding leg flag not set (4096 left / 8192 right), rand < p sets
+     `CrippleLegs`.
 8. Stun accumulators: body-part mask `207` adds to `StunProne`; leg hits add
    Strength * (crit?2:1) to `StunKnee` when `CanStun` and walkType != 21 and
    not already prone-stun (2).
@@ -105,6 +124,11 @@ High-signal gates from live IL:
 - Armor wear: split `ArmorDamage` across `Equipment.GetArmor()` pieces
   (`UseTimes += EffectManager.GetValue(PassiveEffects=7, ...) * ItemDegradationModifier`).
 - `ApplyLocalBodyDamage`; store `lastDamageResponse`.
+- **`FireAttackedEvents` (IL=61):** base entity fire; if no `BuffClass` on source
+  (or progression present): set `MinEventContext.DamageResponse`; mark
+  `IsLocal` for local non-remote player attacker; fire MinEvent type **8**
+  (`onOtherAttacked` path) via `FireEvent` or progression-only when buff-sourced;
+  clear `IsLocal`.
 - Dismember resist passives 175/176 can zero dismember; else impact force +
   `ExecuteDismember`.
 - Enemy headshot-only / headshot-finisher: non-head hits can zero Strength/Fatal
@@ -332,6 +356,8 @@ Leaf types on the edges of the damage flow above:
   SleeperVolume.EntityDied/ClearedUpdate pref 88.
 - **2026-08-07:** DamageEntity gates: type26 cleanup; consecutive 30 ticks;
   flags&2 block; passive 161 bonus; passive 40 resist bank.
+- **2026-08-07:** Equipment.CalcDamage physical vs passive 43; CheckDismember
+  crawler/cripple; Disintegrate zeros corpse stay; FireAttackedEvents type 8.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

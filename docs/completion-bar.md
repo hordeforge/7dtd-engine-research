@@ -278,6 +278,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | UpdateFall + set_Crouching + aabb clip | entity-ai.md |
 | updateCurrentBlockPosAndValue biome/walk | entity-ai.md |
 | CalcIfInElevator + onNewBiomeEntered | entity-ai.md |
+| CheckDismember crawler/cripple + CalcDamage | combat-damage.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CheckDismember crawler and Equipment.CalcDamage
+
+Done (V3.1.0 b14 IL):
+- GetDamageFraction: damage/maxHealth; Disintegrate: timeStayAfterDeath=0.
+- CheckDismember: leg stun/sleep skip; chance roll; LegCrawlerThreshold; LegCrippleScale flags 4096/8192.
+- Equipment.CalcDamage: physical armor rating vs passive 43 elemental.
+- FireAttackedEvents: MinEvent type 8; buff-sourced uses Progression only.
+---
 ## 2026-08-07 — tier-C: CalcIfInElevator and onNewBiomeEntered
 
 Done (V3.1.0 b14 IL):
