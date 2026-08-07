@@ -401,6 +401,12 @@ and `startY - 1` to `[1, 255]`, start `y = endY`, and scan downward while
 returned `y` is one block above the surface (the stored `y + 1`), false when
 the scan bottoms out.
 
+**`Chunk.FindRandomCavePoint(world, out x, out y, out z, numTrys, relMinY)`
+(IL=95)** is the underground sampler: it starts `y` at the surface height and
+scans downward at most `relMinY` blocks (stopping above `y = 2`), accepting the
+first `CanMobsSpawnAtPos(x, y, z, false, true)` spot and returning the world
+position one block above it; false after `numTrys` failed columns.
+
 ### 6.1 `World.GetRandomSpawnPositionMinMaxToPosition` (IL=240)
 
 Ring/disc spawn sampler shared by the join path (spawn-near-friend, see
