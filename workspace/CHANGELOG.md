@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PlayerStealth.CalcVolume
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.CalcVolume (IL=68) narrated in stealth-smell.md: sum =
+  Sigma noises[i].volume * 0.6^i (geometric decay, head dominates); stored
+  noiseVolume = ((sum * 2.35) ^ 0.86) * 1.5 * passive 88; method returns the
+  raw weighted sum, shaped value feeds detection thresholds.
+
 ## 2026-08-08 - tier-C: PlayerStealth.AddNoise
 
 Done (V3.1.0 b14 IL):

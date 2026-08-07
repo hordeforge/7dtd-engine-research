@@ -73,6 +73,13 @@ sorted by **descending volume**: it walks until the first entry with volume
 `CalcVolume` reads the head of this sorted list, so the loudest live events
 dominate the audible level.
 
+**`PlayerStealth.CalcVolume()` (IL=68)** is the audible-level formula: it sums
+the event volumes with **geometric decay** (`sum = Σ noises[i].volume × 0.6^i`,
+the i-th entry weighted `0.6^i`), then shapes the stored `noiseVolume` as
+`((sum × 2.35) ^ 0.86) × 1.5`, finally scaled by passive **88** via
+`EffectManager.GetValue`. The method returns the raw weighted `sum`; the shaped
+value feeds the detection thresholds.
+
 ---
 
 ## 3. Smell and attraction (state machine)
@@ -124,6 +131,9 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.CalcVolume (IL=68): sum with 0.6^i geometric
+  weights, stored noiseVolume = ((sum*2.35)^0.86)*1.5 * passive 88; returns
+  raw weighted sum.
 - **2026-08-07:** PlayerStealth.AddNoise (IL=35): volume-descending insertion
   into the event list - CalcVolume reads the head so loudest events dominate.
 - **2026-08-07:** PlayerStealth.NotifyNoise (IL=71): volume<=0 false, AddNoise
