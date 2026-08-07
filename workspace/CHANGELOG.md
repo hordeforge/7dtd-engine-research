@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GameStats.GetInt sandbox routing
+
+Done (V3.1.0 b14 IL):
+- GameStats.GetInt IL=34: server reads sandboxReferences first (GetIntValue)
+  then raw propertyValues; sandbox overrides live in the read path.
 ## 2026-08-08 — tier-C: addEntityComponent
 
 Done (V3.1.0 b14 IL):

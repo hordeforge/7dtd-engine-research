@@ -250,6 +250,12 @@ name mismatches special-cased: `EnumGameStats.BlockDamagePlayer` maps to
 `SandboxOptions.BlockDamage` and `EnumGameStats.LootAbundance` to
 `SandboxOptions.GlobalLootCount`.
 
+**Read routing (`GameStats.GetInt` IL=34):** on the **server** (not client),
+the sandbox reference is consulted first: `sandboxReferences[stat] != null` →
+`BaseSandboxOption.GetIntValue()`; otherwise the raw `propertyValues[stat]`
+box (InvalidCastException logged). So the sandbox override is live in the read
+path for server sim, not just the write/broadcast path.
+
 ---
 
 
