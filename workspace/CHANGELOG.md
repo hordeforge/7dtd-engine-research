@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — census refresh 3
+
+Done:
+- Coverage.exe re-run: narrated 1496, catalogued 817, unaccounted 0.
 ## 2026-08-08 — tier-C: Stat.Tick regen + change flag
 
 Done (V3.1.0 b14 IL):

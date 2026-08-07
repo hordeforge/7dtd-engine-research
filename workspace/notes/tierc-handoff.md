@@ -23,7 +23,7 @@ No em dashes. No AI attribution in commits.
 | HEAD (at handoff write) | `18e6109` chunk force-update + ground-align leaves |
 | Commits since dry-run `3b61d9c` | ~55 |
 | stock-check | green expected |
-| Coverage (last pin text) | narrated ~1493 / catalogued ~820 / classified ~1386 / unaccounted **0** |
+| Coverage (last pin text) | narrated ~1496 / catalogued ~817 / classified ~1386 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
 
