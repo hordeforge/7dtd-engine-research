@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EAISetNearestCorpseAsTarget
+
+Done (V3.1.0 b14 IL):
+- EAISetNearestCorpseAsTarget.CanExecute (IL=110) narrated in entity-ai.md:
+  investigate/sleep rejects, 1/rndTimeout probabilistic throttle, living
+  player target kept 95% of the time, search radius 7 when sleeper else
+  maxXZDistance, World.GetEntitiesAround into static scratch + nearest sorter,
+  first dead EntityAlive wins (dead animals only with ZombiesEatAnimalCorpses).
+
 ## 2026-08-08 - tier-C: EAIMeleeAttackTarget
 
 Done (V3.1.0 b14 IL):

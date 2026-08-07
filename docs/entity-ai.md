@@ -2946,6 +2946,18 @@ entry wins.
   index 0 is nearest. Built in `EAISetNearestEntityAsTarget.Init`,
   `EAISetNearestCorpseAsTarget.Init`, and `EntityVulture.SetSleeper`.
 
+**`EAISetNearestCorpseAsTarget.CanExecute` (IL=110):** the corpse-seeking
+target task (vultures). Rejects when the entity has an investigate position or
+is sleeping; throttles with probability `1/rndTimeout` when `rndTimeout > 0`.
+When the current attack target is a *living* `EntityPlayer`, 95% keep fighting
+it (`RandomFloat < 0.95` → false). Search radius is **7** while `IsSleeper`,
+else `maxXZDistance`; `World.GetEntitiesAround(targetFlags, targetFlags,
+position, radius, entityList)` fills a static scratch list, sorted by the
+nearest-first sorter. The first entry that is a dead `EntityAlive` becomes
+`targetEntity` - dead animals (`EntityAnimal` / `EntityEnemyAnimal`) count only
+when the static `ZombiesEatAnimalCorpses` flag is set. The scratch list is
+cleared and the task accepts iff a target was found.
+
 Server relevance: the latch task and the sorter run for every stock
 zombie/animal (`entityclasses.xml` wires `BlockingTargetTask` +
 `SetNearestEntityAsTarget` into the AITarget lists). The `AIFocus*` trio is
@@ -2970,6 +2982,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EAISetNearestCorpseAsTarget.CanExecute (IL=110): investigate/
+  sleep rejects, 1/rndTimeout throttle, 95% keep fighting living players,
+  sleeper radius 7 vs maxXZDistance, GetEntitiesAround + sorter, dead
+  EntityAlive (animals need ZombiesEatAnimalCorpses).
 - **2026-08-07:** EAIMeleeAttackTarget family: CanExecute (IL=69) gates
   (dance/cooldown/legs/arms/InRange/CanSee), SetData (IL=70) tuning keys,
   Update (IL=107) 0.05 s swing state machine (wind-up look, anim state 2 +
