@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: AddBuff BuffStatus gates and ResetDespawnTime
+
+Done (V3.1.0 b14 IL):
+- AddBuff IL=238: status 0 success, 1 unknown, 2 immune, 3 FF, 4 editor, 5 gamestat; stack event 4.
+- Despawn/ForceDespawn; ResetDespawnTime clears ticksNoPlayerAdjacent + seeCache seen time.
+---
 ## 2026-08-07 — tier-C: CheckDespawn distance/timer bands
 
 Done (V3.1.0 b14 IL):

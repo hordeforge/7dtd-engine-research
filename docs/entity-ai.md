@@ -257,7 +257,12 @@ Called from TickEntity when area not updateable and from OnUpdateLive paths.
 (Dynamic), or sleeping; else true. **`EntityEnemy.canDespawn` (IL=13):** horde
 zombies (`IsHordeZombie`) never despawn while any player is online; else base.
 
-**`Despawn` (IL=6):** `IsDespawned = true` then unload path.
+**`Despawn` (IL=6):** `IsDespawned = true` then `MarkToUnload`.
+`ForceDespawn` (IL=3) just calls `Despawn`.
+
+**`ResetDespawnTime` (IL=7):** `ticksNoPlayerAdjacent = 0` and
+`seeCache.SetLastTimePlayerSeen()` (clears far-despawn pressure after investigate
+clear / combat attention).
 
 **`World.unloadEntity` (IL=216):** set `unloadReason`; `EntityUnloadedDelegates`;
 nav-object unregister; `OnEntityUnload`; remove from `Entities` +
@@ -1159,8 +1164,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** CheckDespawn distance/timer bands 48/80/96/128 m; EntityEnemy
-  horde canDespawn gate; unloadEntity teardown; MarkToUnload deathUpdateTime.
+- **2026-08-07:** ResetDespawnTime + ForceDespawn; CheckDespawn bands; horde
+  canDespawn; unloadEntity teardown; MarkToUnload deathUpdateTime.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
