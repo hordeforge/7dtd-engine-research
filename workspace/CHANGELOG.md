@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: deco edit-sync + load
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 5: DecoManager.SetBlock IL=19 (air removes, else replace via remove + AddDecorationAt)
+- chunk-providers.md 5: DecoManager.Read IL=29 (loadedDecos set, int32 count, per-record DecoObject.Read)
+
 ## 2026-08-08 - tier-C: deco attach/detach
 
 Done (V3.1.0 b14 IL):
