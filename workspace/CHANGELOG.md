@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EntityBuffs.Tick MinEvent order
+
+Done (V3.1.0 b14 IL):
+- Tick: Invalid drop; Finished->event 2; Remove->event 3; Start event 0; Tick; Update event 1.
+- FireEvent skips paused; CanExecute Requirements.IsValid or true.
+---
 ## 2026-08-07 — tier-C: interest enter package order
 
 Done (V3.1.0 b14 IL):

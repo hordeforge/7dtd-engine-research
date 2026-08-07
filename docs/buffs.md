@@ -53,11 +53,21 @@ a `BuffValue`. Each server tick, `EntityBuffs.Tick` (**IL=179**) walks
 
 1. Drop `Invalid` entries via `RemoveAt`.
 2. Bind `MinEventContext.Buff`; ensure `Other` = attack target if null.
-3. If `Finished`: fire finish MinEvent, set `Remove`.
-4. If `Remove`: fire remove MinEvent; if not `Hidden`,
+3. If `Finished`: `FireEvent(MinEventTypes **2** = onSelfBuffFinish)`, set `Remove`.
+4. If `Remove`: `FireEvent(**3** = onSelfBuffRemove)`; if not `Hidden`,
    `EntityStats.EntityBuffRemoved`; `RemoveAt`.
-5. Else if not `Paused` and parent not dead: duration tick / update MinEvents
-   (continues in method tail).
+5. Else if not `Paused` and parent not dead:
+   - if not `Started`: resolve instigator entity for context when id ≥ 0;
+     `FireEvent(**0** = onSelfBuffStart)`; set `Started`; `EntityBuffAdded` +
+     `EntityAlive.BuffAdded`.
+   - `BuffValue.Tick()` (duration + update-rate).
+   - if `Update`: `FireEvent(**1** = onSelfBuffUpdate)`; clear `Update`.
+
+**`EntityBuffs.FireEvent(event, params)` (IL=30):** for each active buff with non-null
+class and not `Paused`, `BuffClass.FireEvent`.
+
+**`MinEventActionBase.CanExecute` (IL=10):** if `Requirements` null → true; else
+`Requirements.IsValid(params)`.
 
 On the base `EntityStats`, `EntityBuffRemoved` is a **no-op** (`ret`); the real
 work is in the `PlayerEntityStats` override, which fans the removal out to every
@@ -147,8 +157,8 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
-- **2026-08-07:** BuffValue.DurationTick IL=27 UpdateRateTicks; EntityBuffs.Tick
-  IL=179 walk (Invalid/Finished/Remove/Paused).
+- **2026-08-07:** EntityBuffs.Tick MinEvent 0/1/2/3 order; FireEvent skip paused;
+  CanExecute Requirements; DurationTick already pinned.
 - **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.
 - **2026-07-28:** NetPackageEntityStatsBuff pointer.
 
