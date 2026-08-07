@@ -424,12 +424,22 @@ property stashes the old `bmDay` into `bmDayNextOverride`.
 
 ### Start / end and the party spawner
 
-`StartBloodMoon` (412528) clears `EntityPlayer.IsBloodMoonDead` on every tracked
-player and, for every already-spawned `EntityEnemy` in the world, sets
-`IsBloodMoon = true` and divides `timeStayAfterDeath` by 3. `EndBloodMoon` (412618)
-does **not** despawn anything: it clears `bIsChunkObserver`, `IsHordeZombie` and
-`IsBloodMoon` on every `EntityEnemy`, applies `bmDayNextOverride` if set, and calls
-`CalcNextDay`.
+**`IsBloodMoonTime(worldTime)` (IL=10):**
+`GameUtils.IsBloodMoonTime(worldTime, (duskHour, dawnHour), bmDay)`.
+
+**`StartBloodMoon` (IL=70):** log day; `ClearParties()`; clear
+`IsBloodMoonDead` on every tracked player; `delay = 0`; for every world
+`EntityEnemy` set `IsBloodMoon = true` and `timeStayAfterDeath /= 3`.
+
+**`EndBloodMoon` (IL=73):** log; `isBloodMoon = false`; if `bmDayNextOverride > 0`
+apply via `SetDay` and clear override; if current day &gt; `bmDay` stash
+`bmDayLast` and `CalcNextDay(false)`; `ClearParties()`; for every `EntityEnemy`
+clear `bIsChunkObserver`, `IsHordeZombie`, `IsBloodMoon` (no kill/despawn).
+
+**`get_IsEmpty` (IL=9):** true when `partyMembers.Count == 0`.
+
+**`KillPartyZombies` (IL=48):** `DecSpawnCount(zombies.Count)`; kill each live
+non-despawned zombie with `DamageResponse.New(true)`; clear list.
 
 `AIDirectorBloodMoonParty` constants (413090-413140): `cPartyJoinDistance` 80
 (sq 6400), `cSightDist` 100, `cTeleportDist` 150 (sq 22500), `cSpawnPreferredArc`
@@ -617,8 +627,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** BloodMoonComponent.Tick delay 1/N parties; party ctor
-  BloodMoonHorde; PlayerLoggedOut keep ID; CreateNewParty; RemovePlayer pool.
+- **2026-08-07:** Start/EndBloodMoon ClearParties + enemy flag sweeps;
+  KillPartyZombies DecSpawnCount; IsBloodMoonTime; BM Tick delay 1/N.
 - **2026-08-07:** get_maxAlive; BM Tick 1.8s SeekTarget + nextPlayer; SetScaling;
   CalcBestDir 16 bins; InitParty; IsPlayerATarget; SeekTarget 1200
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.

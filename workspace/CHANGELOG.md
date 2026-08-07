@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: Start/EndBloodMoon and KillPartyZombies
+
+Done (V3.1.0 b14 IL):
+- IsBloodMoonTime: GameUtils with dusk/dawn/bmDay.
+- StartBloodMoon: ClearParties; clear IsBloodMoonDead; delay 0; enemies IsBloodMoon + stay/3.
+- EndBloodMoon: override day; CalcNextDay; ClearParties; clear observer/horde/BM flags.
+- KillPartyZombies: DecSpawnCount; Kill each; clear list; IsEmpty = no members.
+---
 ## 2026-08-07 — tier-C: BloodMoonComponent.Tick and party ctor
 
 Done (V3.1.0 b14 IL):
