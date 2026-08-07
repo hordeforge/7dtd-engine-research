@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: spawner-class loaders
+
+spawning.xml surface (spawning.md): LoadEntitySpawnerClasses (IL=204) - entityspawner name/dynamic/wrapMode wrap|clamp, day value * / min-max / single, EntitySpawnerClass build + AddForDay, empty-spawner throw, EntitySpawnerClass.list registration; EntitySpawnerClass.Init (IL=333) - mandatory EntityGroupName + group validation, Time/EDaytime, DelayBetweenSpawns, TotalAlive, TotalPerWave min-max, DelayToNextWave, AttackPlayerAtOnce, NumberOfWaves, Territorial+Range, SpawnOnGround, IgnoreTrigger, ResetToday, DaysToRespawnIfPlayerLeft. verified from IL. Commits 03aa8bf, b047947.
 ## 2026-08-08 - tier-C: entity water/speed/physics-master leaves
 
 EntityAlive/Entity movement leaves (entity-ai.md): updatePlayerLandSound (IL=51) water-landing splash with 0.025/0.015 impact gate + player_swim volume; Entity.TickInWater (IL=50) drives inWaterLevel/inWaterPercent/isInWater (0.25 gate) + SwimChanged + OnHeadUnderwaterStateChanged; ReplicateSpeeds (IL=66) 3-tick throttle + 4e-6 delta gate via NetPackageEntitySpeeds; PhysicsMasterGetFinalPosition (IL=10) used by ItemClassTimeBomb.OnDroppedUpdate for fuse position; SetRotFromNetwork/SetQRotFromNetwork interpolation targets; GetSoundTravelTime (IL=10) 343 m/s sound delay, dead on b14. verified from IL + Xref. Commits 3e617a0, 5cbf542, f2adc54.
