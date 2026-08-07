@@ -2357,6 +2357,8 @@ that D8.6/D8.6a later copy from. Phase order:
 
 - **`InitStats()` (IL=9):** `entityStats` and `startOfFrameStats` both
   `new EntityStats(this)` (the latter is the per-frame snapshot source).
+- **`switchModelView(view)` (IL=11):** `emodel.SwitchModelAndView(view == 0,
+  IsMale)` then `ReassignEquipmentTransforms()`.
 - **`InitPostCommon()` (IL=97):** dedicated → `ServerHelper.SetupForServer`
   on the model transform's GameObject; `AddCharacterController()`;
   `wasSeenByPlayer = false`, `ticksToCheckSeenByPlayer = 20`. When the class

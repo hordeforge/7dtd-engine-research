@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: switchModelView
+
+Done (V3.1.0 b14 IL):
+- EntityAlive.switchModelView IL=11: SwitchModelAndView(view==0, IsMale) +
+  ReassignEquipmentTransforms.
 ## 2026-08-08 — tier-C: EntityAlive init chain
 
 Done (V3.1.0 b14 IL):
