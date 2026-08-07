@@ -80,6 +80,10 @@ cell (`GetDecoAllowedAt(...).GetSlope()`);
 rewrites the cell with the new slope via `WithSlope`.
 `EnsureDecoBiomeArray()` (IL=8) lazily allocates the 256-entry
 `m_DecoBiomeArray` (one `EnumDecoAllowed` per column).
+`GetDecoAllowedAt(x, z)` (IL=44) reads the cell and, when the cell allows big
+deco but `DecoManager.GetDecoOccupiedAt` reports an occupied column (> 3 or 6),
+downgrades the size field to 2. `SetDecoAllowedAt(x, z, val)` (IL=49) writes
+after keeping the stricter slope / size / street-only fields of the old value.
 
 Registry lookups: `WorldBiomes.GetBiome(Color32)` (IL=34) packs
 `(r << 16) | (g << 8) | b` into the `m_Color2BiomeMap` key (null on miss);
