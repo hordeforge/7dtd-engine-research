@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EAITarget.check Wander and Ranged CanExecute
+
+Done (V3.1.0 b14 IL):
+- EAITarget.check: home distance; optional CanSee; player CanSeeStealth.
+- EAIWander.CanExecute: lookTime/stun/fade+120 ticks; executePercent; CalcInDir 90.
+- EAIRangedAttackTarget: cooldown; IsAttackValid; limbs; InRange+CanSee; Update anim states UseHoldingItem.
+---
 ## 2026-08-07 — tier-C: EAISetAsTargetIfHurt and Approach CanExecute
 
 Done (V3.1.0 b14 IL):

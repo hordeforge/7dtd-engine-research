@@ -1056,10 +1056,35 @@ Top decision tasks (when EAI Update runs):
 | **21** | `EAIBreakBlock.Update` | attackDelay then AttackBlock |
 | **7** | `EAIWander.Update` / `EAILeap.Update` | thin |
 
+**`EAITarget.check(e)` (IL=71):** false if null/self/dead/`IsIgnoredByAI` / not
+`isWithinHomeDistance` of e's block. If `bNeedToSee` require `CanSee(e)`. If
+player: also `CanSeeStealth(manager.GetSeeDistance(player), lightLevel)`.
+
 **`EAIApproachAndAttackTarget.CanExecute` (IL=70):** false if
 `sleepingOrWakingUp`, any stun, or (`Jumping` and not swimming). Load
 `GetAttackTarget` into `entityTarget`; null → false. Walk `targetClasses`: first
 assignable type wins and sets `chaseTimeMax` from that class; no match → false.
+
+**`EAIWander.CanExecute` (IL=94):** false if sleeping/waking, `lookTime > 0`,
+stun. If `fade == 1` and `GetTicksNoPlayerAdjacent() >= 120` false (despawn-ish
+idle). If not alert: require
+`executePercent * executeWaitTime > RandomFloat`. Then pick dir: 60%
+`RandomOnUnitCircleXZ` else forward; `CalcInDir(entity, y=1or2, xz=interest
+or 2*interest when alert, dir, 90°)`; y==0 fail; store `position`.
+
+**`EAIWander.Start` (IL=19):** `FindPath(position, GetMoveSpeed, canBreak=false)`;
+`renderFadeMax = fade`.
+
+**`EAIRangedAttackTarget.CanExecute` (IL=69):** false if dancing; while
+`cooldown > 0` subtract `executeWaitTime` and false; require `IsAttackValid`,
+living attack target, no missing leg (and no arm/leg if `startAnimType >= 0`);
+`InRange()` and `CanSee(target)`.
+
+**`EAIRangedAttackTarget.Update` (IL=107):** `elapsedTime += 0.05`. First half of
+`attackDuration`: look/yaw to target head (SeekYaw 30). State machine: wait anim
+action 2 → `ContinueAnimAction(startAnimType+1+3000)` + release sound; after
+`releaseDelay` → `UseHoldingItem(itemActionType, false)`; if item not in use
+force `elapsedTime = +inf` (end).
 
 **`EAISetAsTargetIfHurt.CanExecute` (IL=170):** need revenge target ≠ current
 attack target and different `entityType` than self. Optional `targetClasses`
@@ -1663,8 +1688,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** EAISetAsTargetIfHurt 0.66/SearchRadius investigate; Approach
-  CanExecute type list; EntityActivityUpdate top-N; EntityDied; GetMaxAttackTime.
+- **2026-08-07:** EAITarget.check home/see/stealth; Wander/Ranged CanExecute;
+  SetAsTargetIfHurt 0.66; Approach types; EntityActivityUpdate top-N.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
