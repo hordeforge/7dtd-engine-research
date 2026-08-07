@@ -314,6 +314,7 @@ unload in this method; unload is driven elsewhere once stay time elapsed).
 `inventory` (if useInventory) → `equipment` → `Buffs` with `MinEventContext`.
 
 **`SetCVar(name, value)` (IL=13):** `Buffs.SetCustomVar(name, value, netSync=true)`.
+**`GetCVar(name)` (IL=10):** `Buffs != null ? Buffs.GetCustomVar(name) : 0`.
 
 ```mermaid
 stateDiagram-v2

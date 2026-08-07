@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GetCVar
+
+Done (V3.1.0 b14 IL):
+- EntityAlive.GetCVar IL=10: Buffs.GetCustomVar or 0.
 ## 2026-08-08 — tier-C: hazard contact damage
 
 Done (V3.1.0 b14 IL):
