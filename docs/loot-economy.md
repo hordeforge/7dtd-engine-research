@@ -182,6 +182,14 @@ warning marks. `EntityTrader.OnUpdateLive` samples `TraderInfo.IsOpen` /
 `IsWarningTime` each update and, when a `TraderArea` is active, drives
 `TraderArea.HandleWarning` and `TraderArea.SetClosed`.
 
+**Trader-area queries:** `World.get_TraderAreas` (IL=12) is the decorator's
+`GetTraderAreas()` list (null without the decorator); `GetTraderAreaAt(pos)`
+(IL=14) is `GetTraderAtPosition(pos, 0)` or null.
+`IsWithinTraderPlacingProtection(pos)` (IL=20) is false when the world flag
+`SandboxUseTraderArea` is set, else `GetTraderAtPosition(pos, 2) != null`; the
+`Bounds` overload (IL=29) expands the bounds by **4** and asks
+`IsWithinTraderArea(min, max)` under the same sandbox gate.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Open: open <= worldTime%24000 < close
