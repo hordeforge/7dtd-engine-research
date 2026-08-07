@@ -150,6 +150,7 @@ The core surface, grouped by phase:
 | `OnBlockPlaceBefore(world, ref Result, ea, rnd)` | mutate the placement result | alt-block selection, random rotation | both |
 | `PlaceBlock` / `PlaceProp(world, Result, ea)` | build the placement `Result` | fills `Result.blockValue` / pos | both |
 | `OnBlockAdded(world,chunk,pos,bv,addedBy)` | a block first appears in a cell | forward to `shape`, add multiblock children, register temporary-block cleanup | server |
+| `OnBlockReset(world,chunk,pos,bv)` | a cell is re-seeded from the prefab (chunk stream-in / POI reset) | no-op (light / hazard restore state, below) | server |
 | `OnBlockValueChanged(world,chunk,pos,oldBV,newBV)` | an existing cell's word is edited | forward to `shape`; re-lay multiblock children on rotation change | server |
 | `OnBlockRemoved(world,chunk,pos,bv)` | a cell is cleared | forward to `shape`, remove multiblock children / parent | server |
 | `OnBlockLoaded` / `OnBlockUnloaded(world,pos,bv)` | owning chunk streams in / out | no-op (powered blocks relink here) | server |
@@ -197,6 +198,19 @@ flowchart TB
   ACT --> RM
   CVC --> CU[CheckUpdate<br/>relight / remesh / notify]
 ```
+
+**`OnBlockReset` restores meta state (V3.1.0 b14).** The base is a no-op
+(IL=1). `BlockHazard.OnBlockReset` (IL=33) and `BlockLight.OnBlockReset`
+(IL=35) are both server-gated and skip multiblock children. The two share a
+meta-bit split: **bit 0 = original (prefab) state, bit 1 = runtime state**
+(`IsHazardOn` / `IsLightOn` read `meta & 2`; `OriginalHazardState` /
+`OriginalLightState` read `meta & 1`, with `BlockLight.ignoreLightsOff`
+forcing original off). On reset the hazard variant re-arms to the authored
+state (`SetHazardState(bv, original)` writes `meta & ~3 | original*2`,
+then `SetBlockRPC`), so a tripped mine snaps back to its prefab on/off
+setting when the chunk re-seeds; the light variant instead **promotes the
+runtime state into the original slot** (`meta = (meta & ~1) | (runtime ? 1 :
+0)` via `SetBlockRPC`), persisting a toggled light across the reset.
 
 **Server authority.** Every mutating helper the block calls (`SetBlockRPC`,
 `GameManager.SetBlockTextureServer`, `IGameManager.PickupBlockServer`,
@@ -506,6 +520,17 @@ order, mostly skipped in edit mode):
 Passing the gate, the change commits through the `SetBlock` path (§4) and
 `OnBlockAdded` fires.
 
+**`BlockPlant.CanPlantStay(world, pos, bv)` (IL=41) is the planted-crop
+support check** (base `Block::CanPlantStay` IL=2 returns true). Edit mode
+always passes. With a `lightLevelStay` configured, the cell and the cell
+above must both read `GetBlockLightValue >= lightLevelStay`; failing that,
+the spot still passes when `IsOpenSkyAbove(x, y, z)`. The final gate is
+`CanGrowOn(world, pos - up, bv)` - the block directly below must be the
+supported soil/farm block. The consumer is `BlockPlant.CheckPlantAlive`
+(IL=20), which on a failed check commits `SetBlockRPC(pos -> Air)` - an
+unsupported plant is destroyed, not merely flagged - and `BlockTallgrass`
+(IL=4) reuses the same gate.
+
 **`World.CanPlaceBlockAt` (IL=129)** is a separate land-claim / world gate used
 by pickup and placement callers (not the Block virtual above):
 
@@ -708,6 +733,13 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** OnBlockReset meta-state restore: base IL=1 no-op;
+  BlockHazard (IL=33) re-arms runtime bit 1 to authored bit 0 via
+  SetHazardState + SetBlockRPC; BlockLight (IL=35) promotes runtime bit 1
+  into bit 0 (ignoreLightsOff forces original off); BlockCompositeTileEntity
+  (IL=44) debug log + TE OnBlockReset forward. BlockPlant.CanPlantStay
+  (IL=41) lightLevelStay + open-sky + CanGrowOn below, CheckPlantAlive
+  (IL=20) destroys unsupported plants (SetBlockRPC Air).
 - **2026-08-08:** Timed take machine: Block.TakeItemWithTimer (IL=62) repair
   guard + callback + XUiC_Timer.OpenTimer with Data {bv, pos, player};
   TakeItemWithTimerDone (IL=106) re-validates damage/type/IsUserAccessing,

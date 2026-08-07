@@ -147,6 +147,30 @@ always; `BlockPoweredDoor` (IL=66) blocks when `!IsDoorOpen(meta)`; and
 modules of the tile entity override the base result when
 `OverridesPhysicalChecks` is set.
 
+**Sight twin: `Block.IsSeeThrough` (IL=61) and `IsCollideSight`.**
+`IsSeeThrough(world, pos, bv)` is the line-of-sight gate consumed by
+`Voxel.raycastNew` (two sites) and `Voxel.GetNextBlockHit` - it decides which
+blocks stop sight rays for AI / stealth. It mirrors the movement dispatch:
+multiblock children resolve to the parent (a child parent logs
+`IsSeeThrough {0} at {1} has child parent, {2} at {3}` and returns true),
+then the base answer is `!IsCollideSight && !world.IsWater(pos)` - water
+counts as *not* see-through (blocks sight), and `get_IsCollideSight` is the
+flag read like its movement twin. Overrides: `BlockPoweredDoor` (IL=63)
+resolves the multiblock parent (own error text, `should be a parent but is
+not! (1)`) and answers `IsDoorOpen(meta)` - an open door is see-through;
+`BlockCompositeTileEntity` (IL=42) ANDs all `IFeaturePhysicalCapabilities`
+modules' `IsSeeThrough` when `OverridesPhysicalChecks` is set, else base.
+
+**Dead step-height helpers:** `Block.MaxStepHeight` / `Block.MinStepHeight`
+(each a 2-arg IL=46 overload plus a 3-arg IL=9 overload) aggregate
+`GetStepHeight` over the faces selected by a `BlockFaceFlag` mask (faces
+2..5, bit test against `stepSides & 31`) with max / min aggregation and a
+`>= 0` clamp; the 3-arg form derives the mask via
+`BlockFaceFlags.FrontSidesFromPosition(blockPos, entityPos)`. Xref finds no
+caller of either family outside its own overload delegation on V3.1.0 b14 -
+the vehicle/entity step-height query they appear built for is not wired up
+in the stock binary.
+
 Overrides refine this: `BlockShapeGrass`, `BlockShapeWater`, and
 `BlockShapeBillboardCross` hard-return not-blocked / step 0;
 `BlockShapeRotatedAbstract` returns a per-rotation `maxAABB_Y[rotation]`;
@@ -446,6 +470,12 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-08:** Sight contract: Block.IsSeeThrough (IL=61) multiblock parent
+  resolution + !IsCollideSight && !IsWater; BlockPoweredDoor (IL=63)
+  IsDoorOpen(meta); BlockCompositeTileEntity (IL=42) module AND; consumed by
+  Voxel.raycastNew / GetNextBlockHit. Dead step-height helpers: MaxStepHeight
+  / MinStepHeight (IL=46 + IL=9) aggregate GetStepHeight over
+  FrontSidesFromPosition faces, no external callers on b14 (Xref).
 - **2026-08-07:** BlockHazard state: IsHazardOn (IL=29) multiblock recursion +
   meta & 2; SetHazardState (IL=15) same bit-1 pattern - trigger/light/hazard
   share meta bit 1.
