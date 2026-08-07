@@ -313,6 +313,19 @@ y+1 must not be solid collide space; if checkWater reject water at cell.
 Its own `currentSpawner` is serialized, so a day's dynamic spawn progress
 survives a restart.
 
+**`EntitySpawner.Write`/`Read`** (IL=86/111) define the spawner blob: version
+byte **3**, `position` (3x int32), `size` (3x int16), `triggerDiameter`
+(uint16), `entitySpawnerClassName` (string), `totalSpawnedThisWave` (int16),
+`timeDelayToNextWave` (float), `timeDelayBetweenSpawns` (float),
+`entityIdSpawned` (`PList<int>`), `currentWave` (int16), `lastDaySpawnCalled`
+(int32), `numberToSpawnThisWave` (int32); version >= 2 appends
+`worldTimeNextWave` (uint64) and version >= 3 appends `bCaveSpawn` (bool).
+`Read` validates the class name against `EntitySpawnerClass.list`, warning
+`Entity spawner at pos <pos> contains invalid spawner class reference '<name>'`
+and falling back to `DefaultClassName.name`. `ModifySpawnCountByGameDifficulty`
+(IL=6) is the `EntityFactory.EnemySpawnMode` gate: the count unchanged when
+enemy spawning is enabled, else 0.
+
 ---
 
 ## 5. Chunk-heat scouts and screamer hordes (state machine)
