@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: destroy-pos reuse and jump headroom
+
+Done (V3.1.0 b14 IL):
+- GetExistingDestroyPos / FindExistingDestroyPos ally share within 20 m.
+- CheckJumpBlocked headroom at y+2.35; CalcBlockedDistanceSq planar.
+- IsTriggerAndNoRespawn flags&7==3; WakeAttackLater async iterator.
+- BloodmoonZombiesRemain / IsMemberOfParty.
+---
 ## 2026-08-07 — tier-C: BossEvent switch and package Process leaves
 
 Done (V3.1.0 b14 IL):

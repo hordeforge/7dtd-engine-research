@@ -586,6 +586,12 @@ attack target player differs from `mz.player`:
 each new spawn group it advances `spawnBaseDir` by +120 degrees and recomputes
 `CalcBestDir`, which is why stock waves come from rotating directions.
 
+**`get_BloodmoonZombiesRemain` (IL=6):** true if managed `zombies` list count
+&gt; 0.
+
+**`IsMemberOfParty(entityId)` (IL=5):** delegate to
+`partySpawner.IsMemberOfParty`.
+
 `SpawnZombie` (IL=181): `CalcSpawnPos` or fail. Pick class from
 `GetRandomEntityFromGroupMaxTier(spawnGroupName, MaxEntityTier, lastClassId,
 true, false, null)`. If target `AttachedToEntity` and `RandomFloat < 0.5`:
@@ -660,6 +666,7 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** BloodmoonZombiesRemain list count; IsMemberOfParty partySpawner.
 - **2026-08-07:** Wandering TickNextTime 28000/7h; ChooseNextTime 12k-24k;
   ClearParties; CalcNextDay; Start/EndBloodMoon; KillPartyZombies.
 - **2026-08-07:** get_maxAlive; BM Tick 1.8s SeekTarget + nextPlayer; SetScaling;

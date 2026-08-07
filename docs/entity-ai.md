@@ -1484,6 +1484,28 @@ radius (lookFar: Random(radius/2, radius), y−2, scan inward); walk
 non-air non-terrain with open side (`IsABlockSideOpen`); need score ≥ **2** or
 radius ≥ **5**; write best block center xz into `destroyPos`.
 
+**`GetExistingDestroyPos(ref pos)` (IL=47):** require `destroyRefreshTicks > 0`
+and `destroyPosition.y > 0`; block at pos still movement-blocked and
+`StabilitySupport`; else zero y and false.
+
+**`FindExistingDestroyPos(ref pos)` (IL=66):** try own `GetExistingDestroyPos`;
+else `GetEntitiesAround` flags **6** within **20** m; scan other entities'
+moveHelpers for a still-valid destroy pos (share ally dig target).
+
+**`CheckJumpBlocked(position, moveToDistXZSq)` (IL=85):** block at floor
+(pos.y+**2.35**); if movement-blocked: sphere-cast upward (and slerp toward
+moveTo if xz dist² &gt; **0.25**) to test headroom; returns blocked state for
+jump abort.
+
+**`CalcBlockedDistanceSq` (IL=27):** planar (xz) sqr distance entity →
+`HitInfo.hit.pos`.
+
+**`get_IsTriggerAndNoRespawn` (IL=14):** true only when `(flags&7)==**3**` and
+`respawnMap` empty.
+
+**`WakeAttackLater(ea, player)` (IL=9):** returns async state machine iterator
+(deferred wake+attack; not a synchronous body).
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
@@ -2169,6 +2191,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** FindExistingDestroyPos ally share; CheckJumpBlocked y+2.35; IsTriggerAndNoRespawn mode 3.
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
 - **2026-08-07:** CalcIfInElevator ladder+IsElevator; onNewBiomeEntered store;
