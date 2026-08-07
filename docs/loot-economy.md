@@ -369,6 +369,12 @@ If not empty: `CreateEntity` as `EntityLootContainer`, `SetContent(Clone items)`
 `bag` dies on unlock: `IsEmpty()` → `KillLootContainer()`, so a loot bag that
 was picked clean despawns the moment a player opens it.
 
+**`EntityClass.AddDroppedId(event, name, minCount, maxCount, prob,
+stickChance, toolCategory, tag)` (IL=33)** registers a corpse/entity drop: it
+lazy-creates the `itemsToDrop[event]` list and appends a
+`Block.SItemDropProb(name, min, max, prob, 1f, stickChance, toolCategory, tag)`
+row (the harvest/tool-category drops a looter rolls from an entity corpse).
+
 **`CheckDestroyTileEntity(te, blockPos)` (IL=37):** require `ITileEntityLootable`
 and `ShouldDestroyOnClose`. Call `DropContentOfLootContainerServer` then
 `Block.DamageBlock(..., MaxDamage, ...)` to destroy the block.
