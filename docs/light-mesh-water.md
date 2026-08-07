@@ -44,7 +44,13 @@ stateDiagram-v2
 and turret fires): resolves the chunk via `GetChunkFromWorldPos` and, when it
 exists, returns `chunk.GetLightBrightness(toBlockXZ(x), toBlockY(y),
 toBlockXZ(z), 0)`; when the chunk is missing (unloaded area) it falls back to
-the ambient constant `IsDaytime() ? 0.65 : 0.1`.
+the ambient constant `IsDaytime() ? 0.65 : 0.1`. The chunk half:
+`Chunk.GetLightBrightness` (IL=10) is `GetLightValue / 15` (0-15 light grid
+normalized), and `Chunk.GetLightValue(x, y, z, darknessValue)` (IL=30) is
+`max(sun - darknessValue, blockLight)`: it reads the Sun channel, subtracts
+the caller's darkness term, returns it when it is not 15, else returns the
+max of that and the Block channel (`PrefabChunk` stubs both as constant 15 /
+1.0).
 
 ### Hardcoded stock Y ceilings (expand risk)
 
@@ -334,6 +340,9 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-07:** Light query chain: Chunk.GetLightBrightness (IL=10) =
+  GetLightValue/15; GetLightValue (IL=30) = max(sun - darkness, blockLight),
+  sun channel returned unless 15; PrefabChunk stubs constant 15/1.
 - **2026-08-07:** World.GetLightBrightness (IL=32): chunk lookup +
   chunk.GetLightBrightness(...,0) or unloaded fallback IsDaytime()?0.65:0.1.
 - **2026-08-07:** Evap ≤45 / Flow damage-50; GetFlowDirection axes; ChangeThis pack

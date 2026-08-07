@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: light query chain
+
+Done (V3.1.0 b14 IL):
+- Chunk.GetLightBrightness (IL=10) = GetLightValue / 15 (0-15 grid
+  normalized); Chunk.GetLightValue (IL=30) = max(sun - darknessValue,
+  blockLight): Sun channel read, darkness subtracted, returned when != 15,
+  else max with Block channel; PrefabChunk stubs constant 15 / 1.0.
+  Completes the World.GetLightBrightness chain in light-mesh-water.md.
+
 ## 2026-08-08 - tier-C: World.GetLightBrightness
 
 Done (V3.1.0 b14 IL):
