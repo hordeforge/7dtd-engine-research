@@ -409,7 +409,10 @@ collision wear) and the `MovementFactor` slow. `BlockSpikes.
 OnEntityCollidedWithBlock` (IL=38) runs the base, then **retracts**: a
 non-air `SiblingBlock` replaces the cell via `SetBlockRPC` (type swap,
 damage 0), otherwise the cell is set to Air - the spikes are consumed by a
-step.
+step. `BlockBarbed.OnEntityCollidedWithBlock` (IL=51) degrades instead:
+after the base damage it increments the cell `meta` and, at `meta == 15`,
+`DamageBlock(..., MaxDamage, entityId, ...)` destroys the wire, otherwise
+commits the incremented word - barbed wire survives 15 collisions.
 
 `Block/DestroyedResult` (exact enum): `None=0`, `Keep=1`, `Downgrade=2`,
 `Remove=3`. The base `OnBlockDestroyedBy` returns `Downgrade`.
@@ -683,6 +686,8 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** BlockBarbed.OnEntityCollidedWithBlock IL=51: meta step
+  counter, at 15 full DamageBlock destroy, else SetBlockRPC commit.
 - **2026-08-08:** Collision damage base IL=126 (DamageSourceEntity build,
   DamageEntity, CalculateBlockDamage, MovementFactor slow);
   BlockSpikes.OnEntityCollidedWithBlock IL=38 retract (SiblingBlock replace
