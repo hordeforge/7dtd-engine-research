@@ -641,6 +641,14 @@ Sleeper volumes themselves tick in `SleeperVolume.Tick`
 sleeper population enters the world through prefab placement here, then through
 `EntitySpawner` (§4) when a player trips the volume.
 
+**`PrefabInstance` leaf helpers:** `GetCenterXZ()` (IL=24) is
+`(bboxPos.x + bboxSize.x * 0.5, bboxPos.z + bboxSize.z * 0.5)` as a `Vector2`
+(the POI center used for trader-area / quest-distance math).
+`IsBBInSyncWithPrefab()` (IL=24) is true only when the prefab was copied into
+the world and the recorded `lastCopiedPrefabPosition`, `boundingBoxSize` vs
+`prefab.size`, and `lastCopiedRotation` all still match the live fields
+(edits that move or resize the bounding box desync it).
+
 ---
 
 ## 9. Dedicated relevance and residuals
