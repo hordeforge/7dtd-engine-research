@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: WeatherGroup Probabilities table
+
+Done (V3.1.0 b14 IL):
+- weather-environment.md 1.2: Probabilities List<Vector3>[5] table, AddProbability IL=14, Normalize IL=62
+- weather-environment.md 1.2: GetRandomValue IL=54 dual-draw weighted+lerp, CalcMinMaxPossibleValue IL=44
+
 ## 2026-08-08 - tier-C: BiomeDefinition weather surface
 
 Done (V3.1.0 b14 IL):
