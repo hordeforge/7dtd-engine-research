@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: prop-change wire + water RPC
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 5.1: GameManager.ChangeProps (IL=121) lock + per-PropChangeInfo
+  SetProp nullable tuple, delayed regen start/stop; SetPropsRPC (IL=29) +
+  SetPropsOnClients (IL=13) NetPackageSetProp fan-out channel 192.
+- light-mesh-water.md: GameManager.SetWaterRPC (IL=41) ApplyChanges +
+  SetSenderId + rebroadcast 192 / SendToServer.
+
 ## 2026-08-08 - tier-C: ItemValue.MergeBest
 
 Done (V3.1.0 b14 IL):

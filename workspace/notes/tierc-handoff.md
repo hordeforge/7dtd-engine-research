@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `87feba3` ItemValue.MergeBest |
-| Commits since dry-run `3b61d9c` | ~225 |
+| HEAD (at handoff write) | `89d8131` prop-change wire + water RPC |
+| Commits since dry-run `3b61d9c` | ~226 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
