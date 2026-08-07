@@ -129,6 +129,12 @@ incoming stack can fill the remainder), else `CanStack(count)` (the whole
 stack must fit). `ItemStack.CanMoveTo(locationType, slotNumber)` (IL=15)
 defaults to true and delegates to `ItemClass.CanMoveToLocation` when the
 stack's class resolves (the toolbelt gate behind `Inventory.AddItem`).
+The stack-size checks behind `CanStackWith`: `CanStack(count)` (IL=19) is
+`count + stack.count <= ItemClass.MaxCount` (empty values always stack);
+`CanStackPartly(ref count)` (IL=24) clamps the incoming `count` down to the
+room left in the slot (`FastMin(MaxCount - stack.count, count)`) and answers
+whether any of it fits; `CanStackPartlyWith(other, ref count)` (IL=15) seeds
+the ref from `other.count` and runs the partial path.
 `ItemClass.CanMoveToLocation(locationType, slotNumber)` (IL=41) is the
 container gate: with `slotNumber >= 0` it first requires
 `CanMoveToSlot(locationType, slotNumber)`, and when the class
@@ -756,6 +762,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** ItemStack size checks: CanStack (IL=19) sum <= MaxCount,
+  CanStackPartly (IL=24) FastMin clamp to room + >0, CanStackPartlyWith
+  (IL=15) seed from other.count.
 - **2026-08-07:** ItemClass.CanMoveToLocation (IL=41): CanMoveToSlot gate for
   slot >= 0 + bRestrictedMove restrictedTo container list check.
 - **2026-08-07:** ItemStack predicates: CanStackWith (IL=46) same-type +

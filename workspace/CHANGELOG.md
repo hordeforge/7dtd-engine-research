@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemStack size checks
+
+Done (V3.1.0 b14 IL):
+- ItemStack.CanStack (IL=19) = count + stack.count <= ItemClass.MaxCount
+  (empty always true); CanStackPartly (IL=24) = FastMin(MaxCount - count,
+  incoming) and > 0; CanStackPartlyWith (IL=15) seeds ref from other.count
+  then partial path. Completes the CanStackWith family in items.md.
+
 ## 2026-08-08 - tier-C: ItemClass.CanMoveToLocation
 
 Done (V3.1.0 b14 IL):
