@@ -468,6 +468,19 @@ when it exceeds `MagazineItemNames.Length`, and sets
 `isChangingAmmoType = true` (the ammo-type-swap latch consumed by
 `CompleteReload`, IL=178).
 
+**The reload gate and cancel (V3.1.0 b14):** `CanReload(data)` (IL=93) is
+true only when all of: not already reloading (`NotReloading`), a local
+player is not `CancellingInventoryActions`, the magazine is below capacity or
+the gun is jammed (`isJammed` forces a reload), and ammo is available - the
+selected `MagazineItemNames[SelectedAmmoTypeIndex]` item counted in the
+toolbelt (`GetItemCount(ammo, false, -1, -1, true)`) or the bag
+(`Bag.GetItemCount(ammo, -1, -1, true)`), or `HasInfiniteAmmo(data)`.
+Magazine capacity is passive **9** applied over `BulletsPerMagazine`.
+`CancelReload(data, holsterWeapon)` (IL=57): clears the reload anim bool,
+sets `isReloadCancelled`, `isWeaponReloadCancelled = item.HasReloadAnim`,
+`isChangingAmmoType = false`, and when the firing state was non-idle resets
+it and fires `ItemActionEffects(..., 0, ...)` (the cancel effect).
+
 **`ItemActionEat` leaves:** `NeedPrompt(data)` (IL=13) is
 `UsePrompt && !bPromptChecked` (the eat-confirmation gate).
 `IsValidConditions(data)` (IL=94), with a `ConditionBlockTypes` set, casts a
@@ -483,6 +496,18 @@ lastAccuracy * (rand.RandomFloat()*2 - 1)` and the vertical twin from passive
 **31** plus `spreadVerticalOffset`, then rotates `forward` by
 `Euler(spreadV, spreadH, 0)` - the shot cone shrinks with `lastAccuracy`
 (the bloom-after-firing accuracy decay).
+
+**Accuracy state machine:** `updateAccuracy(data, isAimingGun,
+deltaTickTime)` (IL=175) re-derives the target accuracy factor every tick as
+a product of passive-effect multipliers - base passive **26** x 0.1 while
+aiming (or **25** x 1 hip); movement: standing still x passive **30** x 0.1,
+walking x **28**, running x **27**; crouching x **29** - then multiplies by
+passive **13** (Clamp01). `lastAccuracy` eases toward that target through
+`AccuracyExpDecay` (IL=29): `target + (last - target) * exp(-decay * dt)`,
+snapping to the target once the delta is below 1e-5 (the
+`AccuracyUpdateDecayConstant` rate). The result feeds the spread cone in
+`getDirectionRandomOffset` above, so aim steadies while aiming/crouching/
+still and blooms while moving or right after firing.
 
 **Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
@@ -1184,6 +1209,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionRanged reload/accuracy: CanReload IL=93 gate
+  (not reloading, no cancel, jammed or below capacity, ammo in toolbelt/bag
+  or infinite, passive 9 magazine); CancelReload IL=57 flags + cancel effect;
+  updateAccuracy IL=175 target factor (passives 25/26/27/28/29/30/13) +
+  AccuracyExpDecay exponential ease into the spread cone.
 - **2026-08-08:** ItemClassModifier selection: GetItemModWithAnyTags IL=53
   (installable/disallowed tag filter + shared modIds scratch + uniform pick),
   GetDesiredItemModWithAnyTags IL=67 desired bias, GetCosmeticItemMod twin,
