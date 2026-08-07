@@ -577,6 +577,13 @@ sets a bit in the `m_bTopSoilBroken` bitfield
 "topsoil disturbed" marker the terrain-dig/upgrade and explosion paths set
 on affected columns.
 
+**Water reads (V3.1.0 b14):** `Chunk.GetWater(x, y, z)` (IL=8) is
+`WaterValue.FromRawData(chnWater.Get(x, y, z))` - the water cell decoded
+from the `ChunkBlockChannel` storage (see
+[`save-region.md`](save-region.md) §2); `ChunkCluster.GetWater(pos)`
+(IL=23) returns `WaterValue.Empty` for `y >= 256` or a missing chunk, else
+resolves the chunk and delegates through `toBlockXZ`.
+
 **`Chunk.recalcIndexedBlocks()` (IL=26)** clears `IndexedBlocks` and rebuilds
 it from every layer (`ChunkBlockLayer.AddIndexedBlocks` per layer, 64 of
 them). `saveBlockIds()` (IL=53) marks every in-chunk block id used in
@@ -859,6 +866,9 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-08:** Water reads: Chunk.GetWater IL=8 FromRawData(chnWater);
+  ChunkCluster.GetWater IL=23 y>=256/missing-chunk Empty + toBlockXZ
+  delegate.
 - **2026-08-08:** Chunk map leaves: GetHeight IL=9 m_HeightMap[z*16+x];
   IsWater IL=9 GetWater().HasMass(); SetTopSoilBroken IL=36
   m_bTopSoilBroken bitfield (32 bytes, idx/8 bit idx%8).
