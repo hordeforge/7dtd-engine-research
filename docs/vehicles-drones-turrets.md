@@ -300,6 +300,58 @@ wakes the Rigidbody (`RBActive = true`, `RBNoDriverSleepTime = 0`,
   `CeilToInt(Min(2500, (GetMaxFuelLevel - GetFuelLevel) * 25))` items and
   `vehicle.AddFuel(taken / 25)`, playing `useactions/gas_refill`.
 
+### 4.2c Vehicle damage (server-side)
+
+**Entry:** `damageEntityLocal(source, strength, critical, impulseScale)`
+(IL=31) fills a `DamageResponse` (Source, Strength, Critical,
+`HitDirection = 5`, `MovementState`, `Random = rand.RandomFloat`,
+`ImpulseScale`) and routes to the `ProcessDamageResponseLocal` override
+(IL=120):
+
+1. **Immune types:** `EnumDamageTypes` **Disease (11)** and **Suffocation
+   (16)** return immediately.
+2. **Blood-moon knockback:** while `world.IsWorldEvent(BloodMoon)` on a
+   local (non-remote) vehicle with an attached main entity,
+   `velocityMax *= 0.6` and
+   `vehicleRB.AddRelativeForce(source.getDirection() * 6, ForceMode.Impulse)`.
+3. **Rider splash (External damage only):** with `attachedEntities`
+   populated and `source.GetSource() == External (0)`,
+   `riderDamage = FastRoundToInt(strength * vehicle.GetPlayerDamagePercent())`
+   is dealt by a fresh `DamageSource(External, Bashing)` to every attached
+   `EntityAlive`, skipped only when an `EntityAlive` attacker exists and
+   `rider.FriendlyFireCheck(attacker)` passes (same-team attackers do not
+   hurt riders; a non-entity or absent attacker damages all riders).
+4. **Vehicle itself:** `ApplyDamage(strength)` runs last.
+
+**`ApplyDamage(damage)` (IL=86)** - the health/explosion machine:
+
+- `health <= 0` is a no-op. The **explosion path** is taken when
+  `health == 1` (brought to the edge) or `damage >= 99999` (the destroy
+  command / `dm` path). On the server: `explodeHealth -= damage`, and once
+  `explodeHealth <= 0` it explodes when the hit is the 99999 destroy or
+  `rand.RandomFloat < 0.2` (20% per qualifying hit): `DropItemsAsBackpack()`,
+  `Kill()`, then
+  `GameManager.ExplosionServer(position, worldToBlockPos, rotation,
+  EntityClass.list[entityClass].explosionData, entityId, 0, false, null)`.
+- The **normal path** clamps `health = max(1, health - damage)` and, when
+  health reaches exactly 1, resets `explodeHealth =
+  vehicle.GetMaxHealth() * 0.03` (a 3% of-max buffer the remaining hits must
+  drain). So a vehicle can never die from ordinary damage - destruction is
+  always the explosion ending, gated by the buffer plus the 20% roll.
+- **Fractional collision damage** accumulates in `damageAccumulator`:
+  `ApplyAccumulatedDamage()` (IL=19) converts the integer part to
+  `ApplyDamage` and keeps the fraction; the collision path feeds it
+  (`OnCollisionForward` IL=611, `ApplyCollisionsCoroutine`).
+- **Crash riders:** `ApplyCollisionDamageToAttached(damage)` (IL=32) deals
+  `DamageSource(Internal, VehicleInside)` (source 1, type 27) to every
+  attached rider - distinct from the external splash above. The same
+  Internal/VehicleInside source is what `damageEntityLocal` itself is
+  called with from the collision pipeline.
+
+**`GetBlockDamageScale(isTerrain)` (IL=13):** delegates to the attached main
+`EntityAlive`'s block-damage scale when a driver exists, else **1.0** -
+vehicle block damage inherits the driver's multiplier.
+
 ### 4.3 Movement authority: client-authoritative physics
 
 This is the load-bearing distinction. `EntityVehicle.PhysicsFixedUpdate` (1509
@@ -703,6 +755,14 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-08:** Vehicle damage (4.2c): damageEntityLocal (IL=31)
+  DamageResponse build; ProcessDamageResponseLocal (IL=120) Disease/
+  Suffocation immunity, blood-moon knockback, External rider splash with
+  FriendlyFireCheck skip, ApplyDamage; ApplyDamage (IL=86) explodeHealth
+  machine (health-1 or 99999 entry, 20% roll, ExplosionServer), 3% max-health
+  buffer, ApplyAccumulatedDamage (IL=19) fractional accumulator;
+  ApplyCollisionDamageToAttached (IL=32) Internal/VehicleInside crash
+  damage; GetBlockDamageScale (IL=13) driver-delegated.
 - **2026-08-08:** Slot-claim rules in Entity.AttachEntityToSelf (IL=56):
   one occupant per slot, existing-slot reuse, conflicting request detaches old
   occupant, free-slot pick, slot-0 serverPos snapshot + isEntityRemote copy,
