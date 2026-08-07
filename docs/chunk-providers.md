@@ -75,6 +75,12 @@ bytes per column; `BiomeIntensity.Default` when the array is null).
 `Chunk.GetBiomeId(x, z)` (IL=9) / `SetBiomeId(x, z, id)` (IL=10) read and
 write that per-column byte at `m_Biomes[x + z*16]`.
 
+Registry lookups: `WorldBiomes.GetBiome(Color32)` (IL=34) packs
+`(r << 16) | (g << 8) | b` into the `m_Color2BiomeMap` key (null on miss);
+`GetBiome(byte id)` (IL=5) indexes `m_Id2BiomeArr`; `GetBiome(string name)`
+(IL=12) hits `m_Name2BiomeMap` (null on miss); `TryGetBiome(id, out bd)`
+(IL=11) is the non-null test over the id array.
+
 World-level bounds consumers: `World.IsPositionInBounds(pos)` (IL=66) builds a
 `BoundsInt` from `GetWorldExtent` and answers `Contains(round(pos))`, with two
 special cases: the shipped Navezgane map uses the fixed **±2900** block bounds
