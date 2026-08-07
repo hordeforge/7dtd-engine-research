@@ -392,6 +392,15 @@ retries up to `numTrys` times: local `x, z = RandomRange(15)` (0..14),
 `x + m_X*16, y + 1, z + m_Z*16` (one block above the surface), false when
 exhausted.
 
+**`Chunk.FindSpawnPointAtXZ(x, z, out y, maxLightV, darknessV, startY, endY,
+ignoreCanMobsSpawnOn)` (IL=54)** is the per-column spawn probe: clamp `endY`
+and `startY - 1` to `[1, 255]`, start `y = endY`, and scan downward while
+`y > startY`. A column position is accepted when
+`GetLightValue(x, y, z, darknessV) <= maxLightV` and
+`CanMobsSpawnAtPos(x, y, z, ignoreCanMobsSpawnOn, true)`; on acceptance the
+returned `y` is one block above the surface (the stored `y + 1`), false when
+the scan bottoms out.
+
 ### 6.1 `World.GetRandomSpawnPositionMinMaxToPosition` (IL=240)
 
 Ring/disc spawn sampler shared by the join path (spawn-near-friend, see
