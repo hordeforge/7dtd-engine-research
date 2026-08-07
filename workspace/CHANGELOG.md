@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SetPosition width/height/depth source
+
+Done (V3.1.0 b14 IL):
+- Entity width/height/depth getters (all IL=6) pinned as scaledExtent x/y/z
+  x 2 in entity-ai.md D7, tying SetPosition boundingBox rebuild to the
+  SetupBounds half-extents; fixed a sentence lost in the previous edit.
+
 ## 2026-08-08 - tier-C: Entity.SetPosition
 
 Done (V3.1.0 b14 IL):

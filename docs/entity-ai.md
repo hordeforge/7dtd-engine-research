@@ -2113,8 +2113,10 @@ that maintains all of the above. Stores `position = pos`, then rebuilds
 `boundingBox` from the model extents: half-width `width * 0.5`, half-depth
 `depth * 0.5`, base `pos.y - yOffset + ySize`, top `base + height`
 (`BoundsForMinMax` on the six values), and recurses
-`SetPosition(pos, false)` into every `attachedEntities[]` member. With
-`bUpdatePhysics`, mirrors into the physics objects in origin space:
+`SetPosition(pos, false)` into every `attachedEntities[]` member
+(`width`/`height`/`depth` are `scaledExtent` x/y/z × 2, tying the box to the
+SetupBounds half-extents). With `bUpdatePhysics`, mirrors into the physics
+objects in origin space:
 `PhysicsTransform.position = pos - Origin.position`, `physicsPos =
 (pos - Origin.position) + physicsBasePos` applied to `physicsRBT`, and
 `physicsTargetPos = PhysicsTransform.position` (the FixedUpdate blend target).
