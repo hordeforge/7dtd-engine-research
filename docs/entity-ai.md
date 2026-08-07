@@ -2161,6 +2161,9 @@ that i32 is what save files and the spawn wire carry. Order in IL:
    `nameToItem[CaseInsensitive]` dicts, else `ItemValue.None`), but
    if the prop value contains `,` only the substring before the first comma is
    used. Empty prop → fallback `ItemClass.GetItem("meleeHandPlayer").Clone()`.
+   `inventory.SetBareHandItem(item)` (IL=23) stores the value, resolves
+   `bareHandItem` from its type, and builds `bareHandItemInventoryData` via
+   `ItemClass.CreateInventoryData(ItemStack(item, 1), ...)`.
    Empty result throws `"HandItem missing <name>"`. If `inventory != null`:
    `inventory.SetBareHandItem(handItem)`.
 2. **Right-hand joint:** default `"Gunjoint"`, or `"RightWeapon"` when
