@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: spawn area sampler
+
+Done (V3.1.0 b14 IL):
+- spawning.md 2: GetRandomSpawnPositionInAreaMinMaxToPlayers IL=164 (10 tries, y=GetHeight+1, bedroll/CanMobsSpawnAtPos/isPositionFarFromPlayers/view-cone gates, (0.5, GetTerrainOffset, 0.5) center)
+- spawning.md 2: maxDistance parameter UNUSED in this build (placement band is min-only + view-cone)
+
 ## 2026-08-08 - tier-C: entity stubs + spawner-class day resolution
 
 Done (V3.1.0 b14 IL):
