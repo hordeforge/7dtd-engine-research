@@ -74,6 +74,12 @@ dropped-item correction mirrors it (zero for blocks, `(-90, 0, 0)` otherwise).
 `GetLocalizedItemName` is the `localizedName` field, with `ItemClassBlock`
 delegating to `Block.GetLocalizedBlockName`.
 
+**ItemValue classification:** `get_ItemClassOrMissing` (IL=9) is
+`ItemClass ?? ItemClass.MissingItem`; `get_HasQuality` (IL=17) is
+`ItemClass.HasQuality || value is ItemClassModifier`; `get_IsMod` (IL=12) is
+`value is ItemClassModifier`; `get_IsShapeHelperBlock` (IL=12) is
+`value is ItemClassBlock && block.SelectAlternates`.
+
 ```mermaid
 flowchart TB
   IV["ItemValue<br/>(packed instance)"] -->|type id indexes| IC["ItemClass<br/>(definition, ItemClass.list[type])"]
