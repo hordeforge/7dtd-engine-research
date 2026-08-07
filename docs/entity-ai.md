@@ -2488,6 +2488,27 @@ if sleep still &gt; 0 return else continue same tick.
 Related S2C packages (wakeup / pose / passive): [protocol-packages.md](protocol-packages.md)
 §6.19. Volume graph itself is prefab/world data, not a NetPackage stream.
 
+**`SleeperVolume.Write`/`Read`** (IL=332/350) is the persisted volume blob
+(version byte **21**): `groupName` (string), `groupId` (int16),
+`spawnCountMin`/`spawnCountMax` (int16), `BoxMin`/`BoxMax` (6x int32 via
+`SetMinMax`), `respawnTime` (uint64), `numSpawned` (int32), a legacy int32,
+`gameStage` (int32), a legacy string, a legacy int32, `ticksUntilDespawn`
+(int32), a flags **uint16** (`isQuestExclude`=1, `isPriority`=2,
+`isSpawning`=4, `wasCleared`=8), a flags **int32** whose bit 16 is set when
+`minScript.HasData()` (the bit is cleared before that check), then the
+counted lists: `spawnPointList` (byte count + `SpawnPoint.Write` each),
+`spawnsAvailable` (byte count + byte each), a deprecated byte (always 0 in
+Write; `Read` treats a non-zero value as a count of legacy passive entity ids,
+discarding that many int32s and setting `hasPassives = true`),
+`respawnMap` (byte count + per entry: `int32` key, `className` string,
+`spawnPointIndex` byte), and `groupCountList` (byte count, capped with a
+`{0}, groupCountList > 255` error, + `groupName` string + `count` int32 per
+entry). `Read` gates fields on the version: `groupId` only at >= 16, a legacy
+uint64 discarded at <= 13, a legacy int32 discarded at > 7, the `respawnMap`
+section only at >= 8, the int32 flags at >= 18 with `isQuestExclude` folded in
+only at >= 12, `respawnMap.spawnPointIndex` defaulting to -1 below 17, and
+`groupCountList.groupName` read only at >= 21.
+
 ### D8.5 Entity sleeper init helpers
 
 **`EntityAlive.SetSleeper` (IL=11):** `IsSleeper = true`;
