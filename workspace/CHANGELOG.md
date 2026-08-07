@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SetupCrawler and HeadshotMode
+
+Done (V3.1.0 b14 IL):
+- SetupCrawler: walkType 21; height 0.5; crawler hand item; TurnIntoCrawler.
+- SetWalkType: crawler lock; before-crouch stash; avatar SetWalkType.
+- IsCrippled flags 12288; HeadshotMode 1/2; CelebrateMode 1/2.
+- Census pin narrated 1485 / catalogued 824.
+---
 ## 2026-08-07 — tier-C: GetDismemberChance and ExecuteDismember
 
 Done (V3.1.0 b14 IL):

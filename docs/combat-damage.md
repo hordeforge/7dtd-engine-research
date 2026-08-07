@@ -110,10 +110,25 @@ crippled leg hit while alive and walkType not 5 and &lt; 20: `SetWalkType(5)`.
 
 **`BodyDamage.IsAnyLegMissing`:** Flags & **480** != 0.
 **`IsAnyArmOrLegMissing`:** Flags & **510** != 0.
+**`IsCrippled`:** Flags & **12288** (4096|8192) != 0.
 
 **`ApplyLocalBodyDamage` (IL=188 high-level):** store bodyPartHit + damageType;
-on dismember (or debug body part) OR flags into `BodyDamage.Flags` per part
-bits (1/2/4/8/16/32/64/128/256…); set `ShouldBeCrawler` for leg-loss paths.
+on dismember (or debug body part) OR part bits into `Flags` (1/2/4/8/16/32/64/
+128/256…); leg-loss paths set `ShouldBeCrawler`; `TurnIntoCrawler` forces it;
+`CrippleLegs` ORs 4096 (left) / 8192 (right).
+
+**`SetupCrawler` (IL=49):** if alive: `SetWalkType(21)`; `SetMaxHeight(0.5)`;
+bare-hand item from class `PropHandItemCrawler` or default
+`meleeHandZombie02`; `inventory.SetBareHandItem`; `TurnIntoCrawler()`.
+
+**`SetWalkType(w)` (IL=36):** no-op if already crawler (21). Setting **21**:
+store walkType; avatar `TurnIntoCrawler`; clear `walkTypeBeforeCrouch`. Else if
+`walkTypeBeforeCrouch` set, only update that field; else store walkType and
+avatar `SetWalkType(w, true)`.
+
+**Headshot/celebrate static modes:**
+`IsHeadshotOnly` ⇔ `HeadshotMode==1`; `IsHeadshotFinisher` ⇔ `==2`.
+`IsCelebrate` ⇔ `CelebrateMode==1`; `IsCelebrateHeadshot` ⇔ `==2`.
 8. Stun accumulators: body-part mask `207` adds to `StunProne`; leg hits add
    Strength * (crit?2:1) to `StunKnee` when `CanStun` and walkType != 21 and
    not already prone-stun (2).
@@ -381,6 +396,8 @@ Leaf types on the edges of the damage flow above:
   crawler/cripple; Disintegrate zeros corpse stay; FireAttackedEvents type 8.
 - **2026-08-07:** GetDismemberChance head/arm/leg mult + passive 143; armor
   rating 41/163; ExecuteDismember walkType 5; Flags 480/510; sleepingOrWakingUp=IsSleeping.
+- **2026-08-07:** SetupCrawler walkType 21 height 0.5; SetWalkType crawler lock;
+  HeadshotMode/CelebrateMode enums; IsCrippled 12288.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs
