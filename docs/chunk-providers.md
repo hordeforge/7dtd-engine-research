@@ -74,6 +74,10 @@ bytes per column; `BiomeIntensity.Default` when the array is null).
 50-slot count array and stores the argmax as `DominantBiome`.
 `Chunk.GetBiomeId(x, z)` (IL=9) / `SetBiomeId(x, z, id)` (IL=10) read and
 write that per-column byte at `m_Biomes[x + z*16]`.
+`Chunk.GetDecoAllowedSlopeAt(x, z)` (IL=6) reads the slope field of the deco
+cell (`GetDecoAllowedAt(...).GetSlope()`);
+`SetDecoAllowedSlopeAt(x, z, slope)` (IL=19) `EnsureDecoBiomeArray`s and
+rewrites the cell with the new slope via `WithSlope`.
 
 Registry lookups: `WorldBiomes.GetBiome(Color32)` (IL=34) packs
 `(r << 16) | (g << 8) | b` into the `m_Color2BiomeMap` key (null on miss);
