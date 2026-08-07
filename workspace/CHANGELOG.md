@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemAction base gates
+
+Done (V3.1.0 b14 IL):
+- items.md 3: CanRepair (IL=37) status codes 0/1/2 (no-degradation, modifier
+  headroom thresholds); CanCancel (IL=2) false base; IsEndDelayed base false /
+  ItemActionEat true; IsAimingGunPossible base true / Ranged NotReloading.
+
 ## 2026-08-08 - tier-C: AIDirector leaves
 
 Done (V3.1.0 b14 IL):
