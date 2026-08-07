@@ -57,6 +57,12 @@ high 4 bits (`light >> 4`). `ChunkCluster.GetLight(pos, type)` (IL=21) is the
 world-coordinate wrapper: chunk lookup, `0` when the chunk is null, else
 delegate.
 
+**Light-block state bits (V3.1.0 b14):** `BlockLight.IsLightOn(bv)` (IL=7)
+is `(meta & 2) != 0` - bit 1 of the block's meta is the light-on flag;
+`BlockLight.SetLightState(world, pos, bv, isOn)` (IL=15) writes it with
+`meta = (meta & ~3) | (isOn ? 2 : 0)` (the trigger and light state share the
+low meta bits).
+
 ### Hardcoded stock Y ceilings (expand risk)
 
 | Site | Literal |
@@ -345,6 +351,9 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-07:** BlockLight state bits: IsLightOn (IL=7) meta & 2;
+  SetLightState (IL=15) (meta & ~3) | (isOn?2:0) - trigger/light share low
+  meta bits.
 - **2026-08-07:** Chunk.GetLight (IL=28) nibble packing: Sun = low 4 bits,
   Block = high 4 bits of the chnLight byte, x/z masked to chunk-local;
   ChunkCluster.GetLight (IL=21) world wrapper with null -> 0.

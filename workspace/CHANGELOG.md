@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockLight state bits
+
+Done (V3.1.0 b14 IL):
+- BlockLight.IsLightOn (IL=7) = (meta & 2) != 0; SetLightState (IL=15) =
+  (meta & ~3) | (isOn ? 2 : 0) - the light-on flag in meta bit 1, sharing
+  low bits with the trigger state. light-mesh-water.md.
+
 ## 2026-08-08 - tier-C: per-block OnTriggered family
 
 Done (V3.1.0 b14 IL):
