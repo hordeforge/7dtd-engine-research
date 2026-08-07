@@ -157,6 +157,9 @@ see [loop-gmupdate.md](loop-gmupdate.md)).
 - Column stability helper `WaterConstants.GetStableMassBelow(mass, massBelow)` = `min(mass + massBelow, 19500)`.
 - Flow "full cell" constant used in calc/overfull paths: **19500** (same scale as stable max).
 
+**World water query:** `World.GetWaterPercent(pos)` (IL=14) returns `0` when
+the `ChunkCache` is null, else `ChunkCluster.GetWater(pos).GetMassPercent()`.
+
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
 **`WaterDataHandle` fields (metadata):** `voxelData` (mass), `voxelState`, `groundWaterHeights`, `activeVoxels`, `flowVoxels`, `flowsFromOtherChunks`, `activationsFromOtherChunks`, `voxelsToWakeup`.

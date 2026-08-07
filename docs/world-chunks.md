@@ -193,6 +193,12 @@ local visual-mesh observers rebuild directly (used by `RebuildTerrain` paths).
 
 ### 4.0b Chunk load/unload lifecycle
 
+**`World.IsPositionAvailable(position)` (IL=43)** is the placement gate: with a
+`ChunkCache` present it walks `Vector3i.MIDDLE_AND_HORIZONTAL_DIRECTIONS_DIAGONAL`
+scaled by **16** (the 3x3 chunk neighborhood around the block) and requires each
+`GetChunkFromWorldPos` to be non-null and `GetAvailable()` - any missing or
+busy chunk makes the position unavailable.
+
 **`Chunk.OnLoadedFromCache` (IL=90):** `NeedsRegeneration = true`,
 `isModified = true`; clear the volatile `InProgress*` flags
 (Regeneration/Saving/Copying/Decorating/Lighting/Unloading) and the collision
