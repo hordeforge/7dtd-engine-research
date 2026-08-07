@@ -39,6 +39,37 @@ recipe model is the same everywhere, but the *tick* is client (backpack) or serv
 effects to the output, so the same recipe yields higher-quality output at a higher
 tier (shared with the passive-effect/buff math, [buffs.md](buffs.md)).
 
+**`recipes.xml` loader (`RecipesFromXml.<LoadRecipies>d__1.MoveNext`,
+IL=436).** The load is a frame-budgeted coroutine: it yields back to the
+frame loop whenever its `MicroStopwatch` exceeds
+`Constants.cMaxLoadTimePerFrameMillis`, so a large `recipes.xml` streams in
+over several frames. Each `<recipe>` requires a `name` (an unknown item
+throws `No item/block with name '...' existing`) and parses: `count` (1),
+`material_based` (false), `tags` or `tag`
+(`FastTags.Parse(attr + "," + recipeName)`), `tooltip`, `craft_area` (""),
+`craft_tool` (looks up the item and sets `ItemClass.list[type].bCraftingTool
+= true`), `craft_time` (-1), `learn_exp_gain` (20 on parse failure, -1
+absent), `craft_exp_gain` (1, -1 absent), `is_trackable` (true),
+`use_ingredient_modifier` (true), and a `MinEffectController.ParseXml`
+block for recipe-level effects. Child elements are `<ingredient name count>`
+(appended via `AddIngredient`; an unknown name throws) and
+`<wildcard_forge_category>` (sets `wildcardForgeCategory`). Each recipe ends
+with `Recipe.Init()` then `CraftingManager.AddRecipe(recipe)`; the whole load
+finishes with `CraftingManager.PostInit()`. The editor export twin
+`RecipesFromXml.SaveRecipes` (IL=123) writes `CraftingManager.GetAllRecipes()`
+back to `<recipes>` XML and has no production callers on b14.
+
+**`Recipe.Init` (IL=79)** derives the defaults left at -1 from the
+ingredients: it sums each ingredient's `ItemClass.CraftComponentExp` and
+`CraftComponentTime` times its count, then sets `unlockExpGain = 2 *
+totalExp` (when < 0), `craftExpGain = totalExp` (when < 0),
+`craftingTime = totalTime` (when < 0), and
+`IsLearnable = tags.Test_AnySet(LearnableRecipe)`. `RecipeUnlockData.Init`
+(IL=56) resolves an unlock text against `Progression.ProgressionClasses`
+(perk), then `ChallengeGroup.GetGroup` / `ChallengeClass.GetChallenge`
+(challenge), then `ItemClass.GetItemClass` (item), and falls back to
+`UnlockTypes` 0 (7 in edit mode) when nothing matches.
+
 ---
 
 ## 2. Craft lifecycle (state machine)
@@ -156,6 +187,12 @@ recipe-level effects on top of the caller's base/percent pair.
 
 ## Changelog
 
+- **2026-08-08:** recipes.xml loader (LoadRecipies MoveNext IL=436):
+  frame-budgeted coroutine, full attribute parse, craft_tool bCraftingTool
+  side effect, wildcard_forge_category, PostInit; Recipe.Init (IL=79)
+  component exp/time defaults + LearnableRecipe tag; RecipeUnlockData.Init
+  (IL=56) perk/challenge/item resolution order; SaveRecipes (IL=123) editor
+  export, no callers.
 - **2026-08-08:** IL-pinned validation: CanCraft (IL=128) tier cache + clamp,
   CraftingIngredientCount (198) count modifier, modded-item exclusion, per-
   ingredient scan; CanCraftAny (IL=134) tier loop; GetCraftingTier (IL=22)
