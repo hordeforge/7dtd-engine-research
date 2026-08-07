@@ -384,6 +384,20 @@ Leaf types on the edges of the damage flow above:
 - **`EntityPlayer.CanHeal` (IL=12):** the heal-side gate
   `Health > 0 && Health < GetMaxHealth()`: the entity must be alive and not
   already at full health. (Healing itself runs through `AddHealth` in §2.1.)
+- **`ItemActionAttack` modifier leaves:** `difficultyModifier(strength,
+  attacker, target)` (IL=44) applies the PvE scalers only in mixed
+  client/server matchups: `RoundToInt(strength * IncomingDamageModifier)` when
+  a server (AI) attacker hits a client entity, and `* EntityIncomingDamageModifier`
+  when a client hits a server entity; both sides client-controlled (PvP) or
+  both server-controlled (AI vs AI) leave strength unchanged, as do null
+  actors. `calculateHarvestToolDamageBonus(toolBonuses, harvestItems)` (IL=43)
+  is the per-category harvest bonus: the first `EnumDropEvent` 2 entry with a
+  `toolCategory` present in the `toolBonuses` map yields its `Damage`, else
+  **1**. `GetDamageMultiplier()` (IL=3) reads the per-item material-tag
+  `damageMultiplier` map; `GetIdealAIRange` (IL=3) is the action `Range`;
+  base `CanReload` (IL=2) / `ReloadGun` (IL=1) / `GetKickbackForce` (IL=2) are
+  no-op stubs the ranged subclass overrides; `GetEntityFromHit(hit)` (IL=6) is
+  `GameUtils.GetHitRootEntity(hit.tag, hit.transform)`.
 - **`BodyParts`** (nested in `BodyAnimator`): a two-field holder (`BodyObj`
   model root + `RightHandT` transform) the avatar controllers use to attach
   held items and locate the active model
