@@ -44,8 +44,9 @@ flowchart LR
   TU --> VM["VendingMachine: rent expiry"]
 ```
 
-`Chunk.UpdateTick` walks every tile entity in the chunk each server tick and calls
-`UpdateTick`. Most concrete types override it; the base is a no-op. So a chunk with
+`Chunk.UpdateTick` (**IL=26**, profiler tag `TeTick`) walks
+`tileEntities.list` in order and calls `te.UpdateTick(world)` for each. Most
+concrete types override it; the base is a no-op. So a chunk with
 no active machines still pays a bounded loop over its tile-entity list.
 
 ### 1.1 Type registry and factory
@@ -740,9 +741,8 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
-- **2026-08-07:** TEFeature Lockable/Storage/Signable/AreaRepair write tails
-  (§4.7); Workstation write IL=246; PoweredTrigger write IL=138; Collector/
-  Light/RangedTrap/MeleeTrap write tails (§4.6).
+- **2026-08-07:** Chunk.UpdateTick IL=26 TeTick list walk; TEFeature write tails
+  (§4.7); Workstation/PoweredTrigger/Collector/Light/trap write tails.
 - **2026-08-07:** Workstation UpdateTick/HandleFuel/HandleRecipeQueue IL paths;
   Forge fuel-tick melt path; Vending rental expiry; Composite feature tick;
   Powered TE dirty flags.

@@ -242,6 +242,12 @@ path applies entity/block damage (same authority model as melee `Hit`).
 PowerAttack trigger; `FireEvent` MinEvents; set `Attacking` on data. Per-frame hit
 resolution continues in dynamic `Raycast`/`hitTarget` while `Attacking`.
 
+**`ItemActionEat.consume` (IL=154):** `QuestEventManager.UsedItem` + entity
+`FireEvent`; increase `UseTimes` via `EffectManager` (durability of food stack);
+`Inventory.DecHoldingItem(1)`; `PlayerStealth.SetSmellEat(smellUse)`; if
+`CreateItem` set, roll sandbox chance and `AddItem` or `ItemDropServer` for the
+empty container refund.
+
 Melee, ranged, and eat all end by mutating the held `ItemValue` (durability, ammo,
 or count) and applying effects; that mutation is the server's authority.
 
@@ -625,7 +631,8 @@ The non-action leaves:
 
 ## Changelog
 
-- **2026-08-07:** fireShot IL=482 and DynamicMelee ExecuteAction IL=210 re-pins.
+- **2026-08-07:** ItemActionEat.consume IL=154; fireShot IL=482; DynamicMelee
+  ExecuteAction IL=210 re-pins.
 - **2026-08-06:** ItemClass Stacknumber default 500 and get_MaxCount's
   MaxStackSizeModifier plus 30000 cap; Recipe craftingTime -1 sentinel when
   craft_time is absent; TileEntityWorkstation::GetFuelTime is items.xml FuelValue

@@ -26,6 +26,32 @@ so the survival loop is a per-tick dedicated codepath.
 throttled (per-`worldTime`) updates. Stats persist with the entity/player profile
 ([server-lifecycle.md](server-lifecycle.md)) and net-sync to the owning client.
 
+### 1.1 `EntityStats.Tick` / `TickWait` phase machine (IL re-pin 2026-08-07)
+
+**`Tick` (IL=27):** if entity remote **or** dead, return. Else `waitTicks++`; when
+`waitTicks >= 10`, reset to 0. Always call `TickWait(worldTime)`.
+
+**Base `TickWait` (IL=75)** uses `waitTicks` as a 10-phase round-robin (dt=0.5):
+
+| waitTicks | Work |
+|---:|---|
+| 1 | `UpdateNPCStatsOverTime(0.5)` + `Health.Tick(0.5)` |
+| 2 | if `Health.Changed` -> `SendStatChangePacket(Health)` + clear |
+| 6 | net-sync wait: every 10 outer cycles, server sends
+  `NetPackageEntityStatsBuff` flags **192**; client `SendToServer` |
+| other | no-op in base |
+
+**`PlayerEntityStats.TickWait` (IL=133)** expands the phases:
+
+| waitTicks | Work |
+|---:|---|
+| 1 | `UpdateWeatherStats(0.5, worldTime, IsGodMode)` |
+| 2 | `UpdatePlayerFoodOT` + `UpdatePlayerWaterOT` |
+| 3 | `UpdatePlayerHealthOT` |
+| 4 | `UpdatePlayerStaminaOT` |
+| 5 | send changed Health/Stamina/Water/Food packets (`EnumStat` 0/1/8/7) |
+| 6 | same `NetPackageEntityStatsBuff` cadence as base |
+
 ---
 
 ## 2. Survival over-time loop (state machine)
@@ -112,6 +138,8 @@ rebroadcasts stats/buffs/playerstats with bulk flags **192** after accept.
 
 ## Changelog
 
+- **2026-08-07:** EntityStats/PlayerEntityStats waitTicks phase tables (Tick IL=27,
+  TickWait base 75 / player 133).
 - **2026-07-28:** Stat/buff/playerstats network package pointers.
 
 - **2026-07-23:** Initial entity/survival stats reversal (EntityStats tick, food/water/stamina/health over-time, client/server split) with state machine.

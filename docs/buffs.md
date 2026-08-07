@@ -48,13 +48,20 @@ XML load (`BuffsFromXml`) fills this table; entity code resolves names through
 ## 2. Buff instance lifecycle (state machine)
 
 `EntityBuffs.AddBuff(name, instigator, netSync, ..., duration)` creates or refreshes
-a `BuffValue`. Each server tick, `EntityBuffs.Tick` advances every instance
-(`BuffValue.DurationTick`/`Tick`), and when an instance is flagged `Remove`
-(expired, or explicitly removed) it is dropped from the list and
-`EntityStats.EntityBuffRemoved` is called. On the base `EntityStats` this is a
-**no-op** (`ret`); the real work is in the `PlayerEntityStats` override, which
-fans the removal out to every registered `IEntityBuffsChanged` in
-`buffChangedDelegates` (which is where stat/UI recompute is driven).
+a `BuffValue`. Each server tick, `EntityBuffs.Tick` (**IL=179**) walks
+`ActiveBuffs` backward/forward:
+
+1. Drop `Invalid` entries via `RemoveAt`.
+2. Bind `MinEventContext.Buff`; ensure `Other` = attack target if null.
+3. If `Finished`: fire finish MinEvent, set `Remove`.
+4. If `Remove`: fire remove MinEvent; if not `Hidden`,
+   `EntityStats.EntityBuffRemoved`; `RemoveAt`.
+5. Else if not `Paused` and parent not dead: duration tick / update MinEvents
+   (continues in method tail).
+
+On the base `EntityStats`, `EntityBuffRemoved` is a **no-op** (`ret`); the real
+work is in the `PlayerEntityStats` override, which fans the removal out to every
+registered `IEntityBuffsChanged` in `buffChangedDelegates` (stat/UI recompute).
 
 ```mermaid
 stateDiagram-v2
@@ -137,6 +144,7 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
+- **2026-08-07:** EntityBuffs.Tick IL=179 walk (Invalid/Finished/Remove/Paused).
 - **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.
 - **2026-07-28:** NetPackageEntityStatsBuff pointer.
 

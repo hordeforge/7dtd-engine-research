@@ -109,6 +109,10 @@ Closed in recent sessions (still optional, not required for A+B):
 | OnUpdateTick order re-pin | loop §3.2 |
 | OnUpdateEntity / OnUpdateLive phase order | entity-ai §2.0 |
 | fireShot / DynamicMelee Execute re-pin | items §4.2 |
+| EntityStats waitTicks phase machine | entity-stats §1.1 |
+| EntityBuffs.Tick IL=179 | buffs §2 |
+| BloodMoonComponent.Tick parties | spawning blood-moon section |
+| ItemActionEat.consume IL=154 | items §4.2 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

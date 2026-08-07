@@ -478,7 +478,16 @@ map is fed by **named sounds** with per-sound strength and TTL.
 player (`position.x-40, position.z-40, 80, 80`) against
 `ChunkAreaBiomeSpawnData.area`, and bails out of enemy spawning entirely when
 `AIDirector::CanSpawn(1.0f)` is false **or**
-`AIDirectorBloodMoonComponent.BloodMoonActive` is true (IL_0020-IL_004b). Ordinary
+`AIDirectorBloodMoonComponent.BloodMoonActive` is true (IL_0020-IL_004b).
+
+**`AIDirectorBloodMoonComponent.Tick` (IL=170) re-pin:** base component Tick;
+recompute `isBloodMoon` via `IsBloodMoonTime(worldTime)`; on rising edge
+`StartBloodMoon`, falling edge `EndBloodMoon`; while active, maintain player
+party membership (`AddPlayerToParty` for spawned players without party), rotate
+`nextParty`, and `KillPartyZombies` on empty parties. Blood-moon enemy pressure
+is party-driven, not biome `SpawnUpdate` (which demotes to animals).
+
+Ordinary
 biome enemy spawning is therefore **suspended** during a blood moon in stock: the
 horde spawner owns the budget.
 
@@ -573,6 +582,7 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** AIDirectorBloodMoonComponent.Tick IL=170 party rotation re-pin.
 - **2026-08-06:** AIDirectorConstants literal block (wandering-horde and screamer
   tuning) and AIDirectorData/Noise heat-map struct; SpawnManagerBiomes::SpawnUpdate
   is per ChunkAreaBiomeSpawnData, suspends biome enemy spawning during a blood

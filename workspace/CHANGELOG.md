@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: stats waitTicks, buffs Tick, blood moon, eat consume
+
+Done (V3.1.0 b14 IL):
+- entity-stats §1.1: waitTicks 10-phase TickWait (base + PlayerEntityStats).
+- buffs: EntityBuffs.Tick IL=179 Invalid/Finished/Remove walk.
+- spawning: AIDirectorBloodMoonComponent.Tick IL=170 party path.
+- items: ItemActionEat.consume IL=154 quest/smell/refund.
+- tile-entities: Chunk.UpdateTick IL=26 TeTick confirmation.
+---
 ## 2026-08-07 — tier-C: OnUpdateEntity/Live phases + fireShot/melee
 
 Done (V3.1.0 b14 IL):
