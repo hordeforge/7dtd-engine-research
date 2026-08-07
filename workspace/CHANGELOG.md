@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: sub-biome noise fold
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 3.3: GetSubBiomeIdxAt IL=79 (FBM(x+ox, z+oz, freq)*0.5+0.5, cached per freq/offset, y unused, noiseMin<=v<noiseMax)
+- chunk-providers.md 3.3: GetBiomeOrSubAt IL=24 wrapper (y slot hard-coded 0)
+
 ## 2026-08-08 - tier-C: radiation map + fill loops
 
 Done (V3.1.0 b14 IL):
