@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ParticleEffect FX record
+
+Done (V3.1.0 b14 IL):
+- dedicated-misc-systems.md: ParticleEffect wire layout (Read
+  IL=53, ParticleId = name hash, sound names null-normalized,
+  attachment u8); SpawnParticleEffectServer IL=41 client/server
+  split + channel-192 broadcast; SpawnParticleEffect IL=339 audio
+  -> AIDirector noise events, dedicated short-circuit,
+  4-instance-per-entity cap, origin-relative world spawn;
+  GetParentTransform IL=58 head/pelvis attachment.
 ## 2026-08-08 - tier-C: vehicle damage machine
 
 Done (V3.1.0 b14 IL):
