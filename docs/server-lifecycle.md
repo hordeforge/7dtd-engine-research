@@ -225,6 +225,15 @@ via `GameManager.PlayerSpawnedInWorld` when `NetPackagePlayerSpawnedInWorld`
 arrives. Player state lives in a per-player `PlayerDataFile` on disk;
 `PersistentPlayerList` is the cross-session registry (identity, allies, land claims).
 
+**Registry leaves:** `GetEntityPlayerFromUserId(user)` (IL=18) resolves the
+live player via `PlayerToEntityMap` + `World.GetEntity` (null on miss).
+`SetPlayerData(ppData)` (IL=43) writes `Players[primaryId]`, reindexes every
+`LPBlocks` position into `m_lpBlockMap`, and `MapPlayer`s the id (an
+`EntityId == -1` data first `UnmapPlayer`s the old mapping). `SpawnPointRemoved`
+(IL=28) walks the players and `ClearBedroll()`s any whose `BedrollPos` matches.
+`HandlePlayerDetailsUpdate(userData, name)` (IL=14) refreshes
+`PlayerName.Update(name, primaryId)`.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Connecting
