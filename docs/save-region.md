@@ -223,8 +223,10 @@ every 1024 cells of each with the old value's byte**, then
 offsets of a band read back equal, it calls `setSameValue` and `freeLayer`
 (each pooled `CBCLayer` back to the pool); `CheckSameValue()` (IL=17) sweeps
 every band. `GetByte(x,y,z)` (IL=31) is the byte fast path (layer index
-`y >> 2`), and `FreeLayers()` frees the whole array then resets `sameValue`
-to `defaultValue`.
+`y >> 2`), `Get(x, y, z)` (IL=44) the 64-bit read (`getSameValue(bandStart)`
+when compressed, else `getData(bandStart, cellOffs)` - the accessor
+`Chunk.GetWater` decodes from), and `FreeLayers()` frees the whole array
+then resets `sameValue` to `defaultValue`.
 
 Read path: `ReadByte` / `Read` / `allocLayer` / `freeLayer` / `onLayerRead`.
 
@@ -645,6 +647,8 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-08:** ChunkBlockChannel.Get IL=44 64-bit read (compressed
+  getSameValue else getData) - the Chunk.GetWater accessor.
 - **2026-08-08:** ChunkBlockChannel storage model: 64*bytesPerVal layers +
   sameValue compression, bandStart = (y>>2)*bytesPerVal, cellOffs =
   z*16+x+(y&3)*256 (1024 cells), getData/getSameValue byte assembly,
