@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemValue classification
+
+Done (V3.1.0 b14 IL):
+- items.md 1: get_ItemClassOrMissing (IL=9), get_HasQuality (IL=17),
+  get_IsMod (IL=12), get_IsShapeHelperBlock (IL=12).
+
 ## 2026-08-08 - tier-C: GameStats accessors
 
 Done (V3.1.0 b14 IL):
