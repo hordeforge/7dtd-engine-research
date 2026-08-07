@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Prefab leaf queries
+
+Done (V3.1.0 b14 IL):
+- spawning.md 8: IsPosInSleeperVolume (IL=47) strict AABB + Used gate;
+  FindSleeperVolumeFreeGroupId (IL=31) max+1; HasAnyQuestTag (IL=5);
+  IsAllowedZone (IL=5) case-insensitive.
+
 ## 2026-08-08 - tier-C: density setters
 
 Done (V3.1.0 b14 IL):
