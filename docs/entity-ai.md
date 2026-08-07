@@ -2276,6 +2276,59 @@ wake via the action packages).
 `EntityPlayerLocal` (IL=21) additionally reads `dropInventoryBlock` from the
 `DropInventoryBlock` key when present (client-local).
 
+### D8.6b Config source: `EntityClass.Init` (IL=1465)
+
+Runs once per `entityclasses.xml` entry at load and populates the class object
+that D8.6/D8.6a later copy from. Phase order:
+
+1. **Censor:** `censorType = 1`; `Censor` prop is either `"mode,type"` (split)
+   or a bare int into `censorMode`.
+2. **Prefab:** `prefab` is mandatory (missing → throw); `PrefabCombined` bool →
+   `IsPrefabCombined`; leading `/` strips and sets combined; in-resources paths
+   get the `Prefabs/prefabEntity` prefix.
+3. **Mesh:** `Mesh` → `meshPath` (gore censoring rewrites `.` → `_CGore.` when
+   `censorMode` and `censorType ∈ {1,3}` and gore censored; `Entities/` prefix
+   when in resources). `MeshFP` loads a `Transform` asset eagerly (error log on
+   failure).
+4. **Type resolution:** `entityFlags` default 0 ← `ParseEntityFlags`;
+   `classname = Type.GetType(Class)` (error if unresolved); `modelType` default
+   `EModelCustom` ← `GetTypeWithPrefix("EModel", ModelType)` (throw if
+   missing); `AltMatNames` / `MatSwap` comma-split.
+5. **Assets:** `particleOnSpawn` (fileName + shapeMesh from `Params1`,
+   `PreloadBundle`); `RagdollOnDeathChance` default **0.5**; `HasRagdoll`;
+   `CollidersRagdollAsset` + preload; `skinTexture` + preload; `LookAtAngle`,
+   `crouchYOffsetFP`, `parentGameObjectName`.
+6. **Classification:** `bIsEnemyEntity`, `bIsAnimalEntity`, `RootMotion`,
+   `HasDeathAnim` (defaults false); `ExperienceValue` default **100**.
+7. **lootDrops:** `LootDropEntityClass` = single class (weight 1) or
+   `"class,weight"` pairs (weights later normalized to sum 1).
+8. **Senses (defaults, `ParseVec`-overridable):** `SightRange` default
+   `Constants.cDefaultMonsterSeeDistance`; `sightLightThreshold` **(30, 100)**;
+   `SleeperNoiseToSense` (15,15); `SleeperNoiseToSenseSoundChance` 1;
+   `SleeperNoiseToWake` (15,15); `SleeperSightToSenseMin` (25,25) / `Max`
+   (200,200); `SleeperSightToWakeMin` (15,15) / `Max` (200,200).
+9. **Physics:** `MassKg` default **10** then `× 0.454` (lbs→kg); `SizeScale`
+   default 1; `PhysicsBody` ← `PhysicsBodyLayout.Find`; `DeadBodyHitPoints`.
+10. **Damage model:** `LegCrippleScale`, `LegCrawlerThreshold`;
+    `DismemberMultiplierHead/Arms/Legs` default 1; `KnockdownKneel/Prone`
+    `DamageThreshold` + `StunDuration` + `RefillRate`;
+    `Legs/Arms/Head/ChestExplosionDamageMultiplier` default 1;
+    `PainResistPerHit` vec → `PainResistPerHit`, `PainResistPerHitLowHealth`,
+    `PainResistPerHitLowHealthPercent`.
+11. **Behavior:** `ArchetypeName`; `SwimOffset` default 0.9; `SearchRadius`
+    default 6; `UMARace` / `UMAGeneratedModelName` / `ModelTransformAdjust`;
+    `AIPackages` comma-split + trimmed → **`UseAIPackages = true`**;
+    `Buffs` semicolon-split → list; `MaxTurnSpeed`; `Tags` ←
+    `FastTags.Parse`; `NavObject` + `NavObjectHeadOffset`; `explosionData` ←
+    `ExplosionData(Properties, Effects)`.
+12. **Spawn/UI:** `userSpawnType` (`HideInSpawnMenu` → 1, else
+    `UserSpawnType` enum); `CanBigHead`; `DanceTypeID`; `onActivateEvent`;
+    `PreviousTierZombieName`; `PickupItem` / `PickupStressCvar` /
+    `PickupStressBuff`.
+13. **Token manager:** `TokenManager` array entries (`type` enum +
+    `max`) → `TokenManagerConfig[AITokenType] = { MaxClaims }`.
+14. `CalculateEntityTier()` (tier from stats; feeds loot/gamestage).
+
 ### D8.7 AI task config: `EAIManager.CopyPropertiesFromEntityClass` (IL=213)
 
 Called from `EntityAlive.CopyPropertiesFromEntityClass` (D8.6, step 6) when the

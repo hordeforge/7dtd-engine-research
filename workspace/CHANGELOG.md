@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityClass.Init config source
+
+Done (V3.1.0 b14 IL):
+- EntityClass.Init IL=1465 phase map (entity-ai D8.6b): censor, mandatory
+  prefab + combined flag, mesh/gore paths, type resolution (classname,
+  modelType EModelCustom), alt mats, particles, ragdoll, classification flags,
+  lootDrops weighted normalize, sleeper senses defaults, MassKg *0.454,
+  PhysicsBodyLayout.Find, damage model (dismember/knockdown/explosion mults),
+  pain resist vec, AIPackages -> UseAIPackages, Buffs ';' list, Tags,
+  explosionData, userSpawnType, token manager config, CalculateEntityTier.
 ## 2026-08-08 — tier-C: CreateEntityOperation.CompleteEntity
 
 Done (V3.1.0 b14 IL):
