@@ -488,6 +488,14 @@ if `wasCleared` and any player home in box (`CheckForAnyPlayerHome`) bump
 +inf. Walk players reverse; require `IsDead() == isDead` and `Spawned`; pick min
 `GetDistanceSq` within `distMax²`.
 
+**`SleeperVolume` leaf accessors:** `SetMinMax(boxMin, boxMax)` (IL=19) stores
+`BoxMin`/`BoxMax` and derives `Center = (BoxMin + BoxMax).ToVector3() * 0.5`.
+`GetPlayerTouchedToUpdateId` / `GetPlayerTouchedTriggerId` (IL=13 each) return
+the `playerTouchedToUpdate` / `playerTouchedTrigger` entity id, **-1** when
+null. `GetSpawnPoints` (IL=3) exposes `spawnPointList`; `SetScript(script)`
+(IL=15) nulls `minScript` for an empty script, else builds a fresh `MinScript`
+and `SetText`s it.
+
 **`World.GetClosestPlayerSeen(entity, distMax, lightMin)` (IL=68):** same distance
 scan, require not dead + spawned, `Stealth.lightLevel >= lightMin`, and
 `entity.CanSee(player)`.
