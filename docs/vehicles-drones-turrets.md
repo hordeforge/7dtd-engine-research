@@ -445,6 +445,29 @@ heal when either (a) `GetMaxHealth == Health.ModifiedMax` and
 `healWeapon.canFire()`; if not forced request, require
 `isTargetInNeedOfMedical`; then `healTarget(target)` (server heal apply).
 
+**Drone heal / repair / ownership leaves:**
+
+- `TargetCanBeHealed(entity)` (IL=14): `healWeapon.targetCanBeHealed(entity) &&
+  healWeapon.hasHealingItem()`.
+- `GetNearestHealTargetInRange(range)` (IL=40): heal mode with registered
+  party members → `getHealingTargetsInRange(registeredPartyMembers, range)`
+  sorted nearest-first, first hit; empty → null; heal mode off or no party list
+  → the Owner.
+- `HealRequest()` (IL=50): with no healing item it tooltips
+  `xuiDroneNeedsHealItemsStored` (`ui_denied`, `drone_empty` sound) and
+  returns; else, outside Heal state with `healWeapon.canFire()`, it flags
+  `userRequestedHeal` and runs `healTargetServer(Owner, userRequestedHeal)` on
+  the server (the client mirror `healRequestClient` is State 3 then 0).
+- `performRepair()` (IL=23) fully repairs: `set_Health(Stats.Health.Max)`,
+  `OriginalItemValue.UseTimes = 0`, `setShutdown(false)`, wakeup anim, and on
+  the server `SendSyncData(16)`. `GetRepairAmountNeeded()` (IL=6) =
+  `MaxHealth - Health`; `RepairParts(amount)` (IL=7) adds to health.
+- Ownership: `belongsToPlayerId(id)` (IL=5) = `belongsPlayerId == id`;
+  `isValidForPlayer` (IL=14 + IL=23) is false when the player already has an
+  `ownedEntities` entry with `ClassId == EntityClass.junkDroneClass` (one drone
+  per player).
+- `GetStoredItemCount()` (IL=4) = `bag.GetUsedSlotCount()`.
+
 **`steerFollow` (IL=208):** if beyond **10** m of follow point, ramp
 `currentSpeedFlying` toward max(15, dist) with 0.05 lerp; if within **0.1** of
 point, ease speed down to `SpeedFlying*0.5`; Seek toward point; optional ground
