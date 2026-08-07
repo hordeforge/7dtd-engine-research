@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: TickEntitiesSlice and SaveDecorations
+
+Done (V3.1.0 b14 IL):
+- TickEntitiesSlice advances tickEntityIndex; Flush drains remainder.
+- TickEntities rebuilds list + EntityActivityUpdate path.
+- SaveDecorations DecoManager.Save; AIDirector.AddEntity players only.
+- Census pin narrated 1488 / catalogued 822.
+---
 ## 2026-08-07 — tier-C: UpdateTick and GroupFallingBlocks
 
 Done (V3.1.0 b14 IL):

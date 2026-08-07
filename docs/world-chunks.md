@@ -33,6 +33,16 @@ false return false. Always `TickEntities(partial)` + `LetBlocksFall`. Non-dedi:
 `SaveDecorations` + optional `EventPrefabs.Save`. Client: `updateSendClientPlayerPositionToServer`.
 Rich presence every **1 s** wall.
 
+**`TickEntitiesSlice` / `Flush`:** slice uses `tickEntitySliceCount` entities
+from `tickEntityIndex` via `TickEntity(e, tickEntityPartialTicks)` then advances
+index. Flush calls slice with full list count (drain remainder).
+
+**`TickEntities(partial)` (IL=117 high-level):** rebuild `tickEntityList` from
+world entities (primary local first ordering residual); if slice mode path not
+used, tick all then `EntityActivityUpdate`; else set partial and flush.
+
+**`SaveDecorations` (IL=3):** `DecoManager.Instance.Save()`.
+
 ```mermaid
 flowchart LR
   GMu[gmUpdate] --> UT[UpdateTick]
@@ -540,6 +550,8 @@ if two weather packages arrive in the same `Time.frameCount`.
 ## Changelog
 
 - **2026-08-07:** UpdateTick IL=150 slice/full; save 40 ticks; deco 60s; SetBlocksOnClients 192.
+- **2026-08-07:** TickEntitiesSlice/Flush; TickEntities list rebuild;
+  SaveDecorations DecoManager.
 - **2026-08-07:** FindSupportingBlockPos supportOrder; AdjustBoundsForPlayers pad clamp.
 - **2026-08-07:** InBoundsForPlayersPercent 50/80; IsLandProtectedBlock lpblock deadZone.
 - **2026-08-07:** CheckEntityCollisionWithBlocks; CanPlaceLandProtectionBlockAt 0.5 bounds.
