@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SetRevengeTarget and AwardKill magnum
+
+Done (V3.1.0 b14 IL):
+- SetRevengeTarget: revengeTimer 500 when non-null.
+- DamagedByEntity: EAIDestroyArea.Stop.
+- SetStun/ClearStun: CurrentStun + _stunned cvar.
+- Kill: NotifySleeperDeath; death sound; ClientKill.
+- AwardKill: type 1/2 counters; magnum44 score flag 2; AddScoreServer.
+---
 ## 2026-08-07 — tier-C: UseHoldingItem and path FindPath enqueue
 
 Done (V3.1.0 b14 IL):

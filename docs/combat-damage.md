@@ -112,8 +112,23 @@ High-signal gates from live IL:
   `StartAnimationHit` with resist-scaled intensity.
 - Health subtract (god mode skip); wounded FireEvent type 7; on death set
   `entityThatKilledMe` and `Entity.Kill`; electrocute if damage type 10;
-  revenge target + `EAIManager.DamagedByEntity`; FireEvent 106 on player attacker
-  and victim.
+  `SetRevengeTarget` (`revengeTimer = **500**` if non-null);
+  `EAIManager.DamagedByEntity` stops any `EAIDestroyArea`; FireEvent 106 on
+  player attacker and victim.
+
+**`SetStun` / `ClearStun`:** set/clear `bodyDamage.CurrentStun` (+ zero duration
+on clear); cvar `_stunned` = **1** / **0**.
+
+**`DoRagdoll(dmResponse)`:** `emodel.DoRagdoll(dm, mode0, StunDuration)`.
+
+**`Kill(dmResponse)` (IL=40):** `NotifySleeperDeath`; detach if attached; if
+`deathUpdateTime==0` play death sound; if already dead `SetDead` ret; else
+`ClientKill` then `Entity.Kill`.
+
+**`AwardKill(killer)` (IL=66):** if killer is other player: count zombie
+(entityType **2**) or player (**1**) kill; `GameManager.AwardKill`; if holding
+`gunHandgunT2Magnum44` score flag **2**; `AddScoreServer(entityId, zKills,
+pKills, team, scoreFlag)`.
 
 ```mermaid
 stateDiagram-v2
@@ -281,6 +296,8 @@ Leaf types on the edges of the damage flow above:
   kill/revenge/FireEvent).
 - **2026-08-07:** LootDropPick weighted entityClass; DropBagServer dual path;
   dropItemOnDeath passive 80 + LootBagChance.
+- **2026-08-07:** SetRevengeTarget 500; DamagedByEntity stops DestroyArea;
+  SetStun/_stunned; Kill NotifySleeperDeath; AwardKill magnum score flag 2.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs
