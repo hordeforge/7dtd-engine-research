@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: sleeper links
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md sleeper section: Chunk.AddSleeperVolumeId (IL=18) dedupe +
+  255 cap error; GetSleeperVolumes (IL=3); GetTileEntities (IL=3).
+
 ## 2026-08-08 - tier-C: TE registry writes
 
 Done (V3.1.0 b14 IL):
