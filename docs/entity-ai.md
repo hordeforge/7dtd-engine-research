@@ -120,6 +120,14 @@ and alive: `timer -= deltaTime`; at ≤ 0 rearm with
 entityId, 1)`. With a local player present,
 `Waypoints.UpdateEntityAnimalWayPoint(this, true)`.
 
+**`EntityAnimal.SetDistressed(isDistressed, minTime, maxTime, playerId)`
+(IL=16)** is the distress entry: it stores the flag, the `minStressTime` /
+`maxStressTime` bounds, the offending `playerId`, and seeds `timer = 2.5`
+(the first panic sound fires almost immediately).
+`getEntityPlayerLocal` (IL=16) returns the primary player only when its id
+matches the stored `playerId`; `isGameMessageOnDeath` (IL=2) is false (animals
+produce no death message).
+
 **`EntityPlayer.OnUpdateLive` (IL=13) override:** zero the stamina stat's
 `RegenerationAmount` (player stamina does not use the stat's passive regen),
 then base `OnUpdateLive`, `EntitySeeCache.Clear()` (no see cache for players),
