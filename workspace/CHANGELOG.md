@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: switch entries
+
+Done (V3.1.0 b14 IL):
+- items.md 6: SetHoldingItemIdx / NoHolsterTime (IL=5) setHeldItemByIndex
+  bool flag.
+
 ## 2026-08-08 - tier-C: updateHoldingItem
 
 Done (V3.1.0 b14 IL):
