@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: NPC stat regen + trader waypoint
+
+EntityStats.UpdateNPCStatsOverTime (IL=128, entity-stats.md): HealthChangeOT (105) buff sources with buffDamageRemainder fractional carry, DamageEntity with buff DamageSource, heal / non-buff Value*dt paths. EntityPlayer.onNewPrefabEntered (IL=92, map-objects.md): trader-prefab auto-waypoint at prefab center + RegisterNavObject, local-player only. verified from IL. Commits 7220b4b, 39cfb64.
 ## 2026-08-08 - tier-C: TE heat emission + biome intensity
 
 TileEntity.emitHeatMapEvent (IL=48, tile-entities-power.md): heapMapLastTime rewind reset, GetActivityWorldTimeDelay cadence, NotifyActivity(eventType, pos, block.HeatMapStrength, 720) 36 s heat; IsActive base true / Forge meta>0 / Workstation IsBurning. Chunk.CalcBiomeIntensity (IL=150, chunk-providers.md): 16x16 columns, 32-cell diagonal biome histogram across the 3x3 neighbour chunk window, BiomeIntensity.FromArray into the 6-byte m_BiomeIntensities columns. verified from IL. Commits 5a9da5e, 099c128.
