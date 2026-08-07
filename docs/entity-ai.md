@@ -1588,6 +1588,21 @@ slot via `GetActivatableItems`.
 `bPlayerStatsChanged` when local (same pattern as breaking-blocks).
 **`PlayGiveUpSound` (IL=13):** `PlayOneShot(soundGiveUp)` if non-null.
 
+**`GetBlockDamageScale(isTerrain)` (IL=7):** if `IsBloodMoon` →
+`ItemActionAttack.BMBlockDamagePercent`; else
+`ItemActionAttack.EntityBlockDamagePercent` (terrain flag unused in body).
+
+**`GetDropPosition` (IL=32):** world transform pos + forward (+ Origin).
+If parachute or jetpack wearing: also subtract `up * 0.3`; else add full `up`.
+
+**`GetEyeHeight` (IL=25):** walkType **21** → **0.15**; **22** → **0.6**;
+crouch → `height * 0.5`; else `height * 0.8`.
+**`GetLookRay` (IL=12):** origin = position + (0, eyeHeight, 0); dir =
+`GetLookVector()`.
+
+**`CanCollideWithBlocks` (IL=7):** false while sleeping; else true.
+**`CanLockLocally` (IL=10):** false if dead; else base Entity lock.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;

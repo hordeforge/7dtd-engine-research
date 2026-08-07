@@ -50,3 +50,10 @@
 - a36a49e door/entity
 - e776463 IsAlert
 - 577bc1c CheckBlocked
+
+
+## Status checkpoint
+- Commits since post-update dry-run (3b61d9c): 21+
+- stock-check green; unaccounted 0
+- Heavy EntityAlive/MoveHelper/package leaves closed this session
+- Continue: remaining EntityAlive unmentioned (~100), World/GameManager leaves

@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: eye height and block damage scale
+
+Done (V3.1.0 b14 IL):
+- GetBlockDamageScale BM vs entity percents.
+- GetDropPosition parachute/jetpack up*0.3; GetEyeHeight crawler 0.15 / 22=0.6.
+- CanCollideWithBlocks sleeping false; CanLockLocally dead false.
+---
 ## 2026-08-07 — tier-C: block walk fall and ForceBigHead
 
 Done (V3.1.0 b14 IL):
