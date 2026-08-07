@@ -500,8 +500,75 @@ same order, so any save/wire boundary that carries a `DynamicProperties`
 (block entity data, quest state, entity classes) uses exactly these six
 fields.
 
+## StringParsers (the text-to-value contract)
+
+`StringParsers` is the shared text parser behind XML properties, net strings,
+and console input (the `Get*`/`Parse*` accessors above call into it). The API
+is two-tier: `Parse*` throws on malformed input, `TryParse*` returns a bool
+and leaves the out value at the caller's default. Every numeric parser exists
+with a substring overload `(String input, Int32 startIndex, Int32 endIndex,
+NumberStyles style)`; the short overloads fix the defaults:
+
+- **float / double** short overloads call `(0, -1, 511)` - whole string,
+  styles **511** = every `NumberStyles` flag except `AllowHexSpecifier` (512).
+- **integer** short overloads call `(0, -1, 7)` - whole string, styles **7** =
+  `AllowLeadingWhite | AllowTrailingWhite | AllowLeadingSign`. Integers never
+  accept decimal points, exponents, thousands separators, or currency
+  (verified on `TryParseSInt32` IL=7 and `TryParseFloat` IL=7).
+
+**The internal engines** (V3.1.0 b14 IL): `internalParseDouble` (IL=632)
+rejects `AllowHexSpecifier` outright (throws `ArgumentException: Double
+doesn't support parsing with 'AllowHexSpecifier'`), rejects style values
+above 511, and writes the failure exception into an out `Exception` when
+parsing for real, returning bool in try mode; negative `endIndex` means
+`Length - 1`, and out-of-range indexes throw `ArgumentException` quoting the
+input (`_startIndex ({0}) out of range (input='{1}')`).
+`internalParseBool` (IL=180) trims whitespace inside `[start, end]`, then
+compares the substring against `Boolean.TrueString` / `Boolean.FalseString`
+with `Ordinal` or `OrdinalIgnoreCase` per the flag - **only `True`/`False`
+forms parse** (no `1`/`0`); a mismatch throws `FormatException: Value is not
+equivalent to either TrueString or FalseString (input='...')`.
+`internalParseInt64` (+ Advanced) is the same shape for the whole signed and
+unsigned integer family (`Parse/TryParseSInt8..64`, `UInt8..64`).
+
+**Float range guard:** `ParseFloat` (IL=19) parses as double, then throws
+`OverflowException` when the value sits more than ~3.61e29 above
+`float.MaxValue` (roughly 1e-9 relative) and is not positive infinity, else
+`conv.r4`. `TryParseFloat` (IL=33) mirrors this with out = 0 / false.
+
+**The separator scanner:** `GetSeparatorPositions(input, sep, expected,
+start, end)` (IL=182) fills a `SeparatorPositions` struct (`Sep1..Sep4` +
+`TotalFound`) by successive `IndexOf` scans, stopping early once
+`TotalFound == expected` (so `expected` is how many separators the caller
+wants); it validates `expected > 0`, non-null input, and the index range.
+`findOther(pos&, input, other)` (IL=16) is a one-char consumer (if
+`input[pos] == other`, advance `pos`, return true) used by the bool
+tokenizer.
+
+**Structured parsers built on the scanner:**
+
+| Parser | IL | Contract |
+|---|---|---|
+| `ParseVector3(input, start, end)` | 93 | strips a surrounding `(...)` pair, then requires **2** commas (else zero vector); three floats with styles 511 |
+| `ParseVector3(input, defaultValue)` | 71 | 0 commas -> `(v, def, def)`; 1 comma -> `(v1, v2, def)`; 2 -> `(v1, v2, v3)` |
+| `ParseVector3i(input, start, end, errorOnFailure)` | 72 | int triple; the bool controls error vs silent failure |
+| `ParseQuaternion(input)` | 53 | **3** commas required (else identity); `Quaternion(x, y, z, w)` |
+| `ParseColor` -> `TryParseColor` | 8 / 112 | `RGBA(...)`-wrapped or bare, **2 or 3** commas (3 or 4 floats) -> `Color(r,g,b)` (alpha 1) or `Color(r,g,b,a)`; `ParseColor` falls back to white, `TryParseColor` to false |
+| `ParseMinMaxCount(int)` / `(float)` | 61 / 61 | **0 or 1** comma (else throws `Parsing error count (input='...')`): single value -> min = max = value; pair -> (min, max); int styles 7, float 511 |
+| `ParseMinMaxCount(input)` | 46 | returns a `Vector2(x = min, y = max)` normalized by `Mathf.Min/Max`; zero vector when not exactly one comma |
+| `ParseList(input, sep, parserFunc)` | 53 | `IndexOf`-loop split; each segment parsed by `Func<string,int,int,T>` over `(input, start, end)` |
+
+The two face-mask parsers `ParseWaterFlowMask` / `ParseCoverFaceMask` are
+documented with their consumers in [`block-shapes.md`](block-shapes.md) §5.
+
 ## Changelog
 
+- **2026-08-08:** StringParsers contract: Parse vs TryParse, substring
+  overloads, float default styles 511 vs integer default 7; internalParseBool
+  True/False-only (Ordinal/IgnoreCase), internalParseDouble hex rejection,
+  float overflow guard ~1e-9 above float.MaxValue; GetSeparatorPositions /
+  SeparatorPositions / findOther scanner; vector/quaternion/color/min-max
+  table (paren strip, comma counts, defaults); ParseList Func4 splitter.
 - **2026-08-08:** DynamicProperties bag: six dicts (Values/Params1/Params2/
   Data/Classes/Array), Parse IL=123 (class recursion, ValidateKey dot ban,
   ^-token ReplaceProperty, name/class collision throw), AddArray IL=70,
