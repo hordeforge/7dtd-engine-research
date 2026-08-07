@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: MarkerManagementComponent
+
+Done (V3.1.0 b14 IL):
+- AIDirectorMarkerManagementComponent.Tick (IL=7) + TickMarkers (IL=43)
+  narrated in aidirector.md (was a stub): reverse sweep of markers, per
+  marker Tick(dt), removed + Release() to pool when TimeToLive <= 0 or the
+  owning player died.
+
 ## 2026-08-08 - tier-C: BlockFaceFlags.FrontSidesFromPosition
 
 Done (V3.1.0 b14 IL):

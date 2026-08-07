@@ -331,6 +331,11 @@ Shared placement helpers for scout/wandering/chunk hordes.
 ## AIDirectorMarkerManagementComponent : AIDirectorComponent
 - `Tick(Double)` IL=7
 
+**`Tick(dt)` (IL=7)** = base tick + `TickMarkers(dt)` (IL=43): reverse-iterate
+the `markers` list; each `IAIDirectorMarker.Tick(dt)` advances, then the
+marker is removed and `Release()`d back to its pool when `TimeToLive <= 0`
+**or** its owning `Player` died - the smell/sound marker TTL sweep.
+
 ## AIDirectorPlayerInventory : ValueType
 
 **Fields:** `List bag`, `List belt` (item id lists used for director interest).
@@ -718,6 +723,8 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** MarkerManagementComponent TickMarkers (IL=43): reverse sweep,
+  TTL <= 0 or dead owning player -> RemoveAt + Release to pool.
 - **2026-08-07:** BloodMoon component+party bodies: Tick (IL=170) edge
   Start/End + stat 58 day change + round-robin party spawn window 1/Count;
   Party.Tick (IL=162) 1.8 s seek cadence + groupIndex 120 dir rotate +
