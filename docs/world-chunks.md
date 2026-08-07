@@ -110,7 +110,8 @@ block (`bvPOIFiller` from `Constants.cPOIFillerBlock`); otherwise it reads
 overlays the block's `damage` from `GetDamage`. `GetBlockNoDamage` (IL=73) is
 the same without the damage overlay; `GetBlockId` (IL=17) returns the layer id
 (0 for a missing layer); `GetBlockColumn` (IL=101) fills a vertical span with
-the damage overlay.
+the damage overlay. The overlay itself is `Chunk.GetDamage(x, y, z)` (IL=8):
+`(int)chnDamage.Get(...)` from the damage channel.
 The 64-bit texture word packs **eight 8-bit face indexes**
 (`Chunk.Value64FullToIndex(word, face)` (IL=12) is
 `(word >> (face * 8)) & 0xFF`; `TextureIdxToTextureFullValue64(idx)` (IL=43)
