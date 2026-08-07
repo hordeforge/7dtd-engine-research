@@ -196,11 +196,37 @@ flowchart LR
 
 ### Density/light channel persistence
 
-`ChunkBlockChannel.Write` IL=120, `Read` IL=151:
+`ChunkBlockChannel.Write` IL=120, `Read` IL=151. The storage model behind
+them (V3.1.0 b14 IL):
 
-- Layer data size literal **1024** (16×16×4 cells per sublayer band)  
-- Fields: `layers`, `bytesPerVal`, `sameValue`, `CBCLayer.data`  
-- Read path: `ReadByte` / `Read` / `allocLayer` / `freeLayer` / `onLayerRead`
+**Layout:** the channel is `defaultValue : i64`, `bytesPerVal : i32`, and two
+arrays of length `64 * bytesPerVal`: `CBCLayer[] layers` (allocated cell
+data, pooled from `MemoryPools.poolCBC`) and `Byte[] sameValue` (the
+run-compression: a null layer means "every cell in this band equals the
+assembled `sameValue` byte sequence"). The ctor (IL=27) allocates both and
+fills `sameValue` with `defaultValue`. A cell reads as:
+
+- `bandStart = (y >> 2) * bytesPerVal` - a value's bytes live in
+  `bytesPerVal` **consecutive layers** starting there, at the same cell
+  offset.
+- `cellOffs = z*16 + x + (y & 3) * 256` (`calcOffset` IL=12) - each layer
+  holds four 16x16 sub-planes, **1024 cells**, matching the write literal.
+- `layers[bandStart] == null` -> `sameValue[bandStart]` (compressed);
+  otherwise `getData(bandStart, cellOffs)` (IL=39) assembles the
+  `bytesPerVal` bytes little-endian (`data[cellOffs] << (i*8)`).
+
+**Write (`GetSet` IL=79):** a write into a compressed band whose value equals
+the old is a no-op; otherwise it allocates the band's layers and **pre-fills
+every 1024 cells of each with the old value's byte**, then
+`getSetData` (IL=49) writes the new bytes and returns the old value.
+`checkSameValue(idx)` (IL=49) re-compresses after writes: when all 1024
+offsets of a band read back equal, it calls `setSameValue` and `freeLayer`
+(each pooled `CBCLayer` back to the pool); `CheckSameValue()` (IL=17) sweeps
+every band. `GetByte(x,y,z)` (IL=31) is the byte fast path (layer index
+`y >> 2`), and `FreeLayers()` frees the whole array then resets `sameValue`
+to `defaultValue`.
+
+Read path: `ReadByte` / `Read` / `allocLayer` / `freeLayer` / `onLayerRead`.
 
 ### TileEntity save preamble and type registry
 
@@ -619,6 +645,11 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-08:** ChunkBlockChannel storage model: 64*bytesPerVal layers +
+  sameValue compression, bandStart = (y>>2)*bytesPerVal, cellOffs =
+  z*16+x+(y&3)*256 (1024 cells), getData/getSameValue byte assembly,
+  GetSet IL=79 no-op/prefill/write, checkSameValue + CheckSameValue
+  re-compression sweep, pooled CBCLayer alloc/free, ctor IL=27.
 - **2026-08-08:** TileEntity preamble + registry: base write IL=19 (u16 v19,
   Vector3i chunkPos, u64 heapMapUpdateTime) / read IL=37 (v<=18 legacy i32
   discard, heapMapLastTime = time - AIDirector delay); InstantiateFromRead
