@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityItem stick
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md 6b: CheckStick (IL=93) stickPercent damp, stickT record +
+  layer-0 colliders + SoundStick; get_IsDistractionActive (IL=5);
+  PhysicsMasterBecome (IL=6) gravity recheck.
+
 ## 2026-08-08 - tier-C: SleeperVolume accessors
 
 Done (V3.1.0 b14 IL):
