@@ -3182,6 +3182,12 @@ Also on the wire (see [protocol-packages.md](protocol-packages.md) section 6.21)
 `NetPackageEntityRemove`, `NetPackageEntityPhysics`, `NetPackageEntityAttach`,
 `NetPackageEntityRagdoll`, `NetPackageEntityCollect`, `NetPackageSetAttackTarget`,
 `NetPackageOwnedEntitySync`, `NetPackageEntitySpeeds`, `NetPackageEntityStealth`.
+`EntityAlive.AddOwnedEntity(data)` (IL=35) dedupes by `HasOwnedEntity(Id)`,
+appends to `ownedEntities`, and on the server broadcasts
+`NetPackageOwnedEntitySync.Setup(ownerId, data.Id, data.ClassId, SyncType=1)`
+(bulk flag 192); the `Entity` overload wraps in `OwnedEntityData`.
+`AddPart`/`AddParticle` (IL=17 each) upsert the named transform into the
+`parts`/`particles` dicts.
 
 
 ## Activation / grab (V3.1.0)
