@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: CompleteEntity pref 44 correction
+
+Done:
+- CompleteEntity GUIHUDEntityName gate pref 44 = DebugMenuShowTasks (not an
+  entity-name display pref); spawning.md §7 corrected.
 ## 2026-08-08 — tier-C: EntityAnimal distress loop
 
 Done (V3.1.0 b14 IL):

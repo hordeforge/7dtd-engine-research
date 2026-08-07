@@ -473,7 +473,7 @@ starts with `false`; the operation is polled by `TryComplete`).
    `FallingTrees`, names `FallingBlock_{id}`.
 6. **Generic path:** `ec.classname == null` → log `Unknown entity {id}` +
    return; `addEntityComponent(classname)`; `rot` euler, `entityId`, Init;
-   pref **44** (entity-name display) → `GUIHUDEntityName` when `EntityAlive`;
+   pref **44 (`DebugMenuShowTasks`)** → `GUIHUDEntityName` when `EntityAlive`;
    parent when `parentGameObjectName` set; name `{entityClassName}_{id}`,
    `SetEntityName`; `SetSkinTexture`; collider layers: capsule colliders → **14**
    unless tagged `LargeEntityBlocker`/`Physics`; box colliders → **14**.
