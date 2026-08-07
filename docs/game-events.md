@@ -387,6 +387,27 @@ denies the whole event when `CurrentCount + count > MaxSpawnCount`
 `ReservedCount` held by running sequences) or when the target is dead or the
 spawn area cannot accept blocks (for non-safe spawns).
 
+**`ActionRespawnEntity` (IL=213) / `ActionRespawnEntities` (IL=254)** are the
+respawn verbs (`respawnEntity` / `respawnEntities`). The single-entity
+variant snapshots the old class/id/position/rotation of a non-player target
+on its first tick, then waits out `delay` (counted down by `deltaTime`, while
+still delaying it returns `InComplete`). On expiry it commits:
+`EntityFactory.CreateEntity(oldClass, oldPos, oldRot, target.entityId,
+extraData)` (null -> `Complete`, no respawn), `SetSpawnerSource(3)`
+(Dynamic), `World.SpawnEntityInWorld`, `World.RemoveEntity(oldId, Killed)`,
+and re-points the sequence `Target` at the new entity. When the old target
+was an `EntityAlive`, it also `RegisterSpawnedEntity(new, old, requester,
+owner, true)` and issues `SetAttackTarget(old, **12000**)` - a 12 s reaction
+window on the replacement. The requester is then notified (in-process
+`HandleGameEntitySpawned` locally, `NetPackageGameEventResponse(Spawned = 4)`
+on 192 remotely), each `AddToGroups` entry goes through
+`AddEntityToGroup`, and `Audio.Manager.BroadcastPlayByLocalPlayer(oldPos,
+respawnSound)` plays when a sound is set; success returns `Complete`. The
+plural variant snapshots `Owner.GetEntityGroup(targetGroup)` into a private
+`entityList` (missing group: `Debug.LogWarning` and `InCompleteRefund`), then
+per `checkTime` expiry respawns **one** dead entity per tick with the same
+commit and removes it from the list (`InComplete` while it keeps working).
+
 ---
 
 ## 7. Server driver, tracking, and net plumbing
@@ -398,7 +419,7 @@ sequence tick of §2:
 
 | Pass | Tracks | Behavior (IL-observed) |
 |---|---|---|
-| `HandleSpawnUpdates` | `spawnEntries` (spawned entity, requester, owning sequence) | Every 2 s re-issues attack orders for aggressive spawns; removes despawned entries (flags `HasDespawn` on the owning sequence, notifies requester with `EntityDespawned`), removes dead entries (`EntityKilled`), both mirrored via `NetPackageGameEventResponse` |
+| `HandleSpawnUpdates` | `spawnEntries` (spawned entity, requester, owning sequence) | 2 s cadence while the list is non-empty; reaps despawned entries (flags `HasDespawn` on the owning sequence) and dead or model-less entries, notifying the requester (`EntityDespawned` / `EntityKilled`) in-process or via `NetPackageGameEventResponse` on 192; the per-entry re-aggro pass exists but is inert on b14 (§7.1) |
 | `HandleBlockUpdates` | `blockEntries` (`SpawnedBlocksEntry`) | Counts down `TimeAlive` (`-1` = permanent) and bulk-removes expired event blocks (`TryRemoveBlocks`); periodic block-damage sync |
 | `HandleEventFlagUpdates` | `GameEventFlags` (`GameEventFlagTypes`: BigHead, Dancing, BucketHead, TinyZombies, ...) | 1 s cadence; timed global flags with buff application on flag change |
 
@@ -412,6 +433,42 @@ that does not already have it, then resets the timer to 1.
 
 `Cleanup`/`ClearActions` (game shutdown / XML reload) clear the running list,
 the template dictionary, and all tracked entries.
+
+### 7.1 Spawn-entry tracking: reap vs re-aggro
+
+`GameEventManager.Update` (IL=25) is gated on `IsServer` **and** a live world;
+with no world the whole fan-out is skipped. `HandleSpawnUpdates` (IL=148)
+only counts its `attackTimerUpdate` down while `spawnEntries` is non-empty,
+resetting it to **2** s on expiry (that reset value is what gates the
+re-aggro pass, `loc.0`). Every entry is then processed backwards:
+
+- **Despawned** (`Entity.IsDespawned`): sets `GameEvent.HasDespawn = true` on
+  the owning sequence, removes the entry, and notifies the requester. A local
+  requester gets the in-process `HandleGameEntityDespawned(entityId)`; a
+  remote one gets `NetPackageGameEventResponse(EntityDespawned = 6,
+  entityId, -1, "", false)` on channel 192.
+- **Dead or model-less** (`!IsAlive()` or `emodel == null`): removes the
+  entry, then `HandleGameEntityKilled(entityId)` locally or
+  `NetPackageGameEventResponse(EntityKilled = 7, ...)` remotely on 192.
+- Otherwise, when the 2 s timer fired: `SpawnEntry.HandleUpdate()`.
+
+**`RegisterSpawnedEntity(spawned, target, requester, gameEvent, isAggressive)`
+(IL=19)** appends a `SpawnEntry{SpawnedEntity, Target, Requester, GameEvent}`
+to the list and **drops the `isAggressive` argument**: the body stores only
+four fields (IL is 19 instructions end to end) and nothing else in the
+assembly ever writes `SpawnEntry.IsAggressive`. RefScan finds zero references
+to the nested `GameEventManager/SpawnEntry` type outside `GameEventManager`
+itself, and inside it the field is only ever read. All five callers do pass a
+value (the four spawn/respawn/replace/twitch actions pass `true`;
+`ActionBaseSpawn.OnPerformAction` passes its XML-parsed `isAggressive` field,
+`PropIsAggressive`), so the flag is dropped at the boundary on purpose or by
+regression. Consequence: the re-aggro branch of `SpawnEntry.HandleUpdate`
+(IL=32: when `IsAggressive`, `SetAttackTarget(World.GetClosestPlayer(entity,
+500, false), 1000)`; with an existing player target it re-issues
+`SetAttackTarget(player, 1000)`) is **structurally dead on V3.1.0 b14** - the
+500 m search and 1000 ms reaction time are the intended behavior, not what a
+stock server runs. The spawn-entry machinery's real work on b14 is the
+despawn/death reap and the requester notification above.
 
 **Flag store:** `SetGameEventFlag(flag, value, duration, isPermanent)` (IL=94)
 adds a `GameEventFlag` to `GameEventFlags` when setting (updating the duration
@@ -527,6 +584,16 @@ Full field lists in inventories/netpackage-bodies.md; tick pipeline above.
 
 ## Changelog
 
+- **2026-08-08:** Spawn-entry tracking (7.1) + respawn verbs: HandleSpawnUpdates
+  (IL=148) 2 s reap cadence, HasDespawn flag, EntityDespawned (6) / EntityKilled
+  (7) requester notify on 192; RegisterSpawnedEntity (IL=19) drops its
+  isAggressive argument (all 5 callers pass a value, ActionBaseSpawn from
+  PropIsAggressive XML) and nothing writes SpawnEntry.IsAggressive, so
+  HandleUpdate's 500 m / 1000 ms re-aggro is structurally dead on b14;
+  ActionRespawnEntity (IL=213) / ActionRespawnEntities (IL=254) snapshot,
+  delay/checkTime gates, CreateEntity + SetSpawnerSource 3 + RemoveEntity
+  (Killed), 12000 ms retarget, Spawned (4) notify, AddToGroups, respawnSound;
+  Update (IL=25) IsServer + world gate.
 - **2026-08-07:** StartSequence IL=4 stamps Time.time only.
 
 - **2026-07-28:** BossEvent wire; GameEventRequest/Response pointers.
