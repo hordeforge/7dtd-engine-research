@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk.SetWater
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 4.2: Chunk.SetWater (IL=13) = SetWaterRaw +
+  WakeNeighbours; ResetWaterSimHandle (IL=4).
+
 ## 2026-08-08 - tier-C: face-slot texture write
 
 Done (V3.1.0 b14 IL):
