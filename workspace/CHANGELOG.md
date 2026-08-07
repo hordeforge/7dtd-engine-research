@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: FallingBlock crush damage and land drops
+
+Done (V3.1.0 b14 IL):
+- AddFallingBlock dedupe/stability/oversized gates; OnBlockStartsToFall -> Air.
+- FallingBlock/Blocks hit damage min(40, massKg*-vy*0.05)*passive 164, max 3 hits.
+- Land: vel^2 < 0.0625; DropItemsOnEvent; SetDead.
+---
 ## 2026-08-07 — tier-C: updateTasks freeze and GroupFallingBlocks BFS
 
 Done (V3.1.0 b14 IL):

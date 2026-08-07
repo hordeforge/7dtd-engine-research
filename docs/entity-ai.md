@@ -448,6 +448,26 @@ per pos `OnBlockStartsToFall` + `ChunkChanged(-1)`; remove from `groupedBlocks`;
 if first block `ShowModelOnFall`: spawn entity class `"fallingBlocks"` at pos +
 (0.5, random Y -0.1..0.1, 0.5) with arrays; `SetBlockGroupData`.
 
+**`AddFallingBlock(pos, includeOversized)` (IL=38):** skip if already in
+`fallingBlockSet`; skip child / `StabilityIgnore` / air / oversized (unless
+includeOversized); `DynamicMeshManager.AddFallingBlockObserver`; enqueue +
+hashset add.
+
+**`OnBlockStartsToFall` (IL=6):** `SetBlockRPC(pos, Air)` (tree/composite
+overrides may destroy/particles first).
+
+**`EntityFallingBlock.OnUpdateEntity` (IL=344)** (group variant similar IL=302):
+
+1. If dead: ret; else `fallTimeInTicks++`.
+2. While falling (`fallTimeInTicks > 1` and velocity): bounds hit test (expand
+   0/0.2/0); per entity if hits &lt; **3** and `CanCollideWith` and head below
+   faller by 0.8: damage =
+   `min(40, massKg * max(0, -vy) * 0.05)` * passive **164**; `DamageEntity`
+   with `DamageSource.fallingBlock`; record hit count.
+3. Land path (vel sq &lt; **0.0625** or timeout ~60): particle/audio; if not terrain
+   and has drop event, `DropItemsOnEvent` with overallProb **1** (and sometimes
+   **0.7** second pass); `SetDead`.
+
 **Queue-driven.** Spikes when many blocks lose support (base collapse). Matches ServerTools/IceCoffee fall-to-air trade: empty the problem at `AddFallingBlock` before this method invents entities.
 
 ---
@@ -1093,6 +1113,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
+  crush damage mass*vy cap 40 + passive 164; land drop events.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

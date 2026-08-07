@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1469 / catalogued 838 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1470 / catalogued 837 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -172,6 +172,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | EAIApproachAndAttackTarget Update phases | entity-ai §D2 |
 | EAI Break/Wander/RunAway/Ranged leaves | entity-ai §D2 |
 | updateTasks freeze + GroupFallingBlocks | entity-ai §5.1b / §8 |
+| FallingBlock crush damage + land drops | entity-ai §8 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
