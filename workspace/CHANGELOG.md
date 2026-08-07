@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ToWorldPos
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: Chunk.ToWorldPos (IL=14/20/16) origin
+  (m_X*16, m_Y*256, m_Z*16) + local offset.
+
 ## 2026-08-08 - tier-C: deco extractors
 
 Done (V3.1.0 b14 IL):
