@@ -456,7 +456,11 @@ managers.
    `myPlayerId = -1`, per non-primary UI: XUi shutdown, entities removed, UIs
    destroyed; `ModManager.GameEnded()`; main menu re-open.
 7. **World teardown:** `PrefabLODManager.Cleanup`; light/sky/weather/water/sleeper/
-   POI-tool managers cleaned; `World.UnloadWorld(true)` + `World.Cleanup()`;
+   POI-tool managers cleaned; `World.UnloadWorld(true)` (IL=62:
+   `WorldEnvironment.Cleanup` + destroy, `ChunkCluster.Cleanup` + null,
+   `UnloadEntities(all, force)`, `EntityFactory.Cleanup`, selection categories
+   cleared, `DecoManager.OnWorldUnloaded` + `Block.OnWorldUnloaded`) +
+   `World.Cleanup()`;
    `m_World = null`; `GameHasStarted = false`.
 8. **Singleton cleanup sweep:** water sim, projectile, vehicle, drone, dismember,
    turret tracker, block limit, map objects, target events; loot/trader managers
