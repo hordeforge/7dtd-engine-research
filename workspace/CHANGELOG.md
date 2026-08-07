@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: VehicleManager save path
+
+Done (V3.1.0 b14 IL):
+- vehicles-drones-turrets.md 2: SaveAndClear (IL=15) flush + clear + null
+  singleton; WaitOnSave (IL=11) 30ms thread join; SaveThread (IL=41)
+  vehicles.dat.bak rotation + pooled stream write + byte log; GetServerVehicleCount
+  (IL=13) active+unloaded vs replicated static.
+
 ## 2026-08-08 - tier-C: world bounds consumers
 
 Done (V3.1.0 b14 IL):
