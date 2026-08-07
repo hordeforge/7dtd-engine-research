@@ -130,9 +130,11 @@ Independent of storms, each biome also rerolls ordinary weather: when
 `BiomeDefinition.WeatherRandomize(rand)` (probability-weighted group pick), sets
 the 5 param targets from the chosen `WeatherGroup`, and schedules
 `nextRandWorldTime += currentWeatherGroup.duration`. Blood moon overrides all of
-this: `CalcGlobalWeatherType` returns `"bloodMoon"` while
-`SkyManager.IsBloodMoonVisible()` holds, and `SetAllWeather("bloodMoon")` forces
-every biome to the blood-moon group.
+**`CalcGlobalWeatherType` (IL=36):** if `SkyManager.IsBloodMoonVisible()`, for
+each biome with `stormWorldTime - worldTime < 5000`, push
+`stormWorldTime = worldTime + 5000` (defer near storms past BM window); return
+`"bloodMoon"` so `SetAllWeather("bloodMoon")` forces every biome to the
+blood-moon group. Else null (per-biome path).
 
 ---
 
@@ -300,6 +302,8 @@ from the same clock and the received weather snapshot.
 
 ## Changelog
 
+- **2026-08-07:** CalcGlobalWeatherType IL=36 bloodMoon + stormWorldTime+5000
+  defer for near storms.
 - **2026-07-28:** WeatherManager.ReadWriteData IL layout; Load buffer vs ApplyLoad.
 
 - **2026-07-23:** Initial weather/sky/environment reversal (WeatherManager biome state machine, storm scheduling, 5-slot param model, NetPackageWeather sync, temperature/survival client-server split, SkyManager clock vs rendering) with state machines.

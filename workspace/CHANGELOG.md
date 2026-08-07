@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: GetCountMultiplier enum and BM weather defer
+
+Done (V3.1.0 b14 IL):
+- GetCountMultiplierFromSandbox: types 1..11 map to count modifiers; else -1.
+- CalcGlobalWeatherType: bloodMoon + push stormWorldTime by 5000 when near.
+---
 ## 2026-08-07 — tier-C: RandomCountFromSandboxTags category table
 
 Done (V3.1.0 b14 IL):

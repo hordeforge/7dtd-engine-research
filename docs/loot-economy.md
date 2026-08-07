@@ -622,6 +622,11 @@ If mod **0** return 0; if **1** return `itemSpawnCount` unchanged; else
 `GetCountMultiplierFromSandbox(group.abundanceType)` (null group → 0 type); if
 mult ≥ 0, `abundance *= mult`; then `RandomSpawnCount(min, max, abundance)`.
 
+**`GetCountMultiplierFromSandbox(AbundanceLootModTypes)` (IL=29):** switch on
+`type-1` → Food/Drink/Ammo/Medical/Resource/Armor/Melee/Ranged/Dukes/Magazines/
+Book count modifiers (enum values **1..11**). Unknown / **0** returns **-1**
+(caller treats negative as "do not scale abundance").
+
 ## Related docs
 
 | Doc | Role |
@@ -636,8 +641,8 @@ mult ≥ 0, `abundance *= mult`; then `RandomSpawnCount(min, max, abundance)`.
 
 ## Changelog
 
-- **2026-08-07:** RandomCountFromSandboxTags category table; RandomCountFromSandbox
-  abundanceType mult; GetSandboxProb; RandomSpawnCount ±0.49.
+- **2026-08-07:** GetCountMultiplierFromSandbox enum 1..11 / -1; RandomCountFrom
+  SandboxTags table; GetSandboxProb; RandomSpawnCount ±0.49.
 - **2026-08-07:** EntityItem.OnUpdateEntity lifetime 0.05/tick, ground counter 10,
   distraction death, Y&lt;0 death; OnCollectServer RemoveEntity reason 2.
 - **2026-08-07:** EntityTrader.OnUpdateLive IL=315 (quest populate, 10 m bounds
