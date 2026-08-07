@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk map leaves
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md: Chunk.GetHeight IL=9 m_HeightMap[z*16+x];
+  IsWater IL=9 GetWater().HasMass(); SetTopSoilBroken IL=36
+  m_bTopSoilBroken bitfield (32 bytes, idx/8 bit idx%8).
 ## 2026-08-08 - tier-C: loot registry accessor
 
 Done (V3.1.0 b14 IL):
