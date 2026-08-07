@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: chunk force-update + ground-align leaves
+
+Done (V3.1.0 b14 IL):
+- ChunkManager.IsForceUpdate IL=8 (isInternalForceUpdate || isChunkClusterChanged),
+  ForceUpdate IL=4, GroundAlignFrameUpdate IL=42 (alternating 0/1 buckets,
+  Block.GroundAlign per BlockEntityData).
+---
 ## 2026-08-08 — tier-C: EnumGameState pinning
 
 Done (V3.1.0 b14 IL):

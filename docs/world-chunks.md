@@ -125,6 +125,14 @@ entityIdToSendChunksTo)` (IL=15):** `new ChunkObserver(...)`, push onto
 pass for the new observer), return it. Attached at player join
 ([server-lifecycle.md](server-lifecycle.md) §3) and per stream-target.
 
+**Force-update gate:** `IsForceUpdate()` (IL=8) =
+`isInternalForceUpdate || isChunkClusterChanged` (read from gmUpdate before the
+observer work); `ForceUpdate()` (IL=4) sets `isInternalForceUpdate = true`.
+`GroundAlignFrameUpdate()` (IL=42, once per frame when world running) alternates
+`groundAlignIndex` 0/1 and runs `Block.GroundAlign(data)` over the corresponding
+`groundAlignBlockLists` bucket, clearing it (ground-snap of placed block entity
+data).
+
 ### 4.0a `SendChunksToClients` body (IL=216)
 
 Per observer (`m_ObservedEntities`; skip when `entityIdToSendChunksTo == -1`),
