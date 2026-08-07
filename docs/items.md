@@ -626,6 +626,23 @@ hitmaskOverride, m_ThrowStrength)` and `inventory.DecHoldingItem(1)`.
 PowerAttack trigger; `FireEvent` MinEvents; set `Attacking` on data. Per-frame hit
 resolution continues in dynamic `Raycast`/`hitTarget` while `Attacking`.
 
+**Dynamic-melee attack gate and end (V3.1.0 b14):** `canStartAttack`
+(IL=198) allows a swing only when all of: not already `Attacking`; a
+third-person local player passes the TP-camera check
+(`StartTPCameraLockTimer` + `TPCameraCheckResult`); the attack interval has
+elapsed (`time - lastUseTime >= 60 / max(0.0001, passive **18** (swings per
+minute)) + 0.1`); passive **177** on the held item is not set (else the
+`twitch_no_attack` sound + a `lastUseTime` stamp block); the item is not
+broken (`PercentUsesLeft != 0`, else `HandleJamSound` when released); and
+`Stamina.Value >= GetValue(passive 112 StaminaLoss, iv, 2, holder,
+ActionTags) * StaminaUsageMultiplier` (else the `player1stamina` /
+`player2stamina` sound + `ttOutOfStamina` tooltip). `canContinueAttack`
+(IL=5) is just `holdingEntity.IsAttackValid()`. `SetAttackFinished` (IL=53)
+closes the swing: fires MinEvent **29** (or **37** with
+`UsePowerAttackTriggers`) on the holder, plus the whiff event **31** /
+**39** by action index when `MinEventContext.Other == null` (nothing was
+hit), then clears `Attacking` / `IsHarvesting` and sets `HasFinished`.
+
 **`ItemActionEat.consume` (IL=154):** `QuestEventManager.UsedItem` + entity
 `FireEvent`; increase `UseTimes` via `EffectManager` (durability of food stack);
 `Inventory.DecHoldingItem(1)`; `PlayerStealth.SetSmellEat(smellUse)`; if
@@ -1297,6 +1314,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Dynamic-melee gate: canStartAttack IL=198 (passives 18
+  swing interval / 112 stamina / 177 twitch gate, TP-camera check, jam,
+  stamina tooltip); canContinueAttack IL=5 IsAttackValid; SetAttackFinished
+  IL=53 MinEvents 29/37 + whiff 31/39, clears Attacking/HasFinished.
 - **2026-08-08:** ItemActionProjectile.ReadFrom IL=51: ExplosionData from
   props+effects, FlyTime/LifeTime/DeadTime/Velocity/CollisionRadius,
   Gravity default -9.81 - the config behind the projectile runtime.
