@@ -507,6 +507,23 @@ Static helpers used by the §3.3 decorators when placing biome blocks and by
   (`chunk.X*16 .. chunk.X*16 + 15`). The 7-arg form (IL=26) is simply the AND
   of the 4-arg form over the four chunks `(cX0Z0, cX1Z0, cX0Z1, cX1Z1)`.
 - `ApplyDecoAllowed*` writes the footprint back so later decorations keep
+  their distance; `Prefab.ApplyDecoAllowed` does the same for POIs. The 6-arg
+  form (IL=17) runs the 3-arg form (IL=48) on all four chunks; the 3-arg form
+  no-ops without `HasDecoAllowed`, computes the chunk span, and calls both
+  footprint writers. `ApplyDecoAllowedForBlockDecorationRadius` (IL=116) takes
+  `r = max(SmallDecorationRadius, BigDecorationRadius)`, skips when `r <= 0`
+  or the `blockPos ± r` footprint misses the span, clamps the footprint cells
+  into the chunk, and stamps `SetDecoAllowedSizeAt(cell, 2)` for cells inside
+  the small radius (or when both radii are equal) and `1` otherwise.
+  `ApplyDecoAllowedForBlockOversized` (IL=50) instead enumerates the rotated
+  `oversizedBounds` cells (`OversizedBlockUtils.EnumerateOverlappingCells(
+  blockPos, oversizedBounds, blockValue.rotation, spanBounds)`) and stamps
+  each with flag `2`. The matching `CanPlaceBigDecoForBlock*` scanners
+  (IL=109 / IL=65) use the same radius/oversized shapes but reject the cell
+  when `!AllowBigDeco(dec)` and (`additionalTest == null` or it returns
+  true), so a non-null `additionalTest` can rescue cells the size flags
+  reject; a footprint missing the span passes (the neighbor chunk decides).
+- `ApplyDecoAllowed*` writes the footprint back so later decorations keep
   their distance; `Prefab.ApplyDecoAllowed` does the same for POIs.
 
 The per-column inputs (`EnumDecoAllowed`, `EnumDecoAllowedSlope`, terrain
