@@ -608,6 +608,13 @@ indexed by the selected ammo slot), `Single_magazine_usage` ->
 `Damage_type`, `Reload_time`, `Show_ammo_force`, the muzzle particles and
 empty/repeat/reload/end sound keys, and `Sound_impact_volume_scale`.
 
+The base `ItemAction.ReadFrom` (IL=107) is the common `p*` set every action
+inherits: `Delay` (0), `Sound_start`, `Sound_in_head`, `Particle_harvesting`
+(bool plus the `Particle_harvesting` param-category string), `ActionExp` (2),
+`ActionExpBonusMultiplier` (10), `UseAnimation`, and `Buff` (a comma list
+split into `BuffActions`, or a single trimmed entry), ending by stashing the
+full `Properties` bag on the action.
+
 `ItemActionRanged.ReadFrom` (IL=126) adds `bullet_material` (default
 "bullet"), `SupportHarvesting`, `UseMeleeCrosshair`, `EntityPenetrationCount`
 (0), `BlockPenetrationFactor` (0), `AutoReload`, the controller
@@ -1629,6 +1636,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** base ItemAction.ReadFrom (IL=107): Delay/Sound_start/
+  Particle_harvesting/ActionExp (2)/ActionExpBonusMultiplier (10)/
+  UseAnimation/Buff list -> BuffActions.
 - **2026-08-08:** ItemActionRanged.ReadFrom (IL=126) bullet_material /
   penetration / AutoReload / aiBurst ranges; ItemActionEat.ReadFrom
   (IL=152) Consume, Create_item refund trio, BlocksAllowed ->
