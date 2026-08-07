@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: HasImmunity passive 197 and CanSee caches
+
+Done (V3.1.0 b14 IL):
+- HasImmunity: dead+RemoveOnDeath; parent HasImmunity; passive 197 roll; infection InfectionChance.
+- CanSee: positive/negative HashSet caches; CanEntityBeSeen; client-controlled updates lastTimeSeenAPlayer.
+- Base FriendlyFireCheck always true (IL=2).
+---
 ## 2026-08-07 — tier-C: AddBuff BuffStatus gates and ResetDespawnTime
 
 Done (V3.1.0 b14 IL):

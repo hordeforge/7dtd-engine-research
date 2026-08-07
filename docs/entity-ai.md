@@ -235,8 +235,16 @@ store target + time.
 **`EntitySeeCache.ClearIfExpired` (IL=17):** every **30** ticks `Clear()` the
 see cache (called from OnUpdateLive before AI).
 
+**`EntitySeeCache.CanSee(entity)` (IL=49):** null → false; hit in
+`positiveCache` → true; hit in `negativeCache` → false; else
+`CanEntityBeSeen(e, true)`: on success add positive (and if client-controlled,
+`lastTimeSeenAPlayer = Time.time`); on fail add negative.
+
+**`SetLastTimePlayerSeen` (IL=4):** `lastTimeSeenAPlayer = Time.time`.
+
 **`IsInFrontOfMe` (IL=28):** angle between head→pos and forward vs
-`GetMaxViewAngle() * 0.5` (half-angle cone).
+`GetMaxViewAngle() * 0.5` (half-angle cone). `GetMaxViewAngle` returns field
+`maxViewAngle`.
 
 **`CheckDespawn` (IL=198):** if `!CanUpdateEntity` and no closest player →
 `MarkToUnload`. Else if `canDespawn`, every **20** ticks (`despawnDelayCounter`):
@@ -1164,8 +1172,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** ResetDespawnTime + ForceDespawn; CheckDespawn bands; horde
-  canDespawn; unloadEntity teardown; MarkToUnload deathUpdateTime.
+- **2026-08-07:** CanSee positive/negative cache; ResetDespawnTime; CheckDespawn
+  bands; horde canDespawn; unloadEntity teardown.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

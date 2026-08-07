@@ -61,6 +61,17 @@ XML load (`BuffsFromXml`) fills this table; entity code resolves names through
 | **4** | Editor reject | `!AllowInEditor` while world is editor |
 | **5** | GameStat off | `RequiredGameStat != 81` and bool false |
 
+**`HasImmunity(BuffClass)` (IL=63):** true if parent dead and buff
+`RemoveOnDeath`; else if `EntityAlive.HasImmunity(buff)`; else roll against
+passive **197** (`FastClamp01`, buff `NameTag`): immune when
+`RandomFloat <= chance`. Infection-tagged buffs: if
+`EntityPlayerLocal.InfectionChance == 0` force chance **1** (always immune);
+else `chance *= (2 - InfectionChance)`.
+
+**Note:** base `EntityAlive.FriendlyFireCheck` (IL=2) always returns **true**
+(no block). Player/special overrides may differ; buff gate 3 only fires when a
+override returns false.
+
 `fromElectrical` stashes original instigator into local and forces
 `instigatorId = -1` for the rest of the path. Existing same-name buff: refresh
 `DurationMax` / clear `Remove` / reset ticks; fire stack-related MinEvent
@@ -187,8 +198,8 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
-- **2026-08-07:** AddBuff BuffStatus 0..5 gates + stack event 4; RemoveBuff mark
-  + network; canRun Requirements; Tick MinEvent 0/1/2/3.
+- **2026-08-07:** HasImmunity passive 197 + infection InfectionChance; AddBuff
+  status 0..5; RemoveBuff; Tick MinEvent 0/1/2/3.
 - **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.
 - **2026-07-28:** NetPackageEntityStatsBuff pointer.
 
