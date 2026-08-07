@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: heightmap accessors
+
+Done (V3.1.0 b14 IL):
+- terrain-height.md: GetHeight (IL=9/5) m_HeightMap, GetTerrainHeight
+  (IL=9) m_TerrainHeight + PrefabChunk scans, SetTerrainHeight (IL=10).
+
 ## 2026-08-08 - tier-C: sky body
 
 Done (V3.1.0 b14 IL):
