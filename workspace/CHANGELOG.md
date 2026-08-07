@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PlayerStealth.NotifyNoise
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.NotifyNoise (IL=71) narrated in stealth-smell.md: volume
+  <= 0 false; AddNoise queue with (int)(duration*20) tick lifetime;
+  volume >= 11 arms sleeperNoiseWaitTicks = 20; volume > 60 superlinear
+  60 + (v-60)^1.4; passive 88 EffectManager scale; sleeperNoiseVolume
+  accumulate, >= 360 clamp + true - the sleeper-wake signal consumed by
+  AIDirector.NotifyNoise.
+
 ## 2026-08-08 - tier-C: AIDirector.NotifyNoise
 
 Done (V3.1.0 b14 IL):

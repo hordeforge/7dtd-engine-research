@@ -56,6 +56,17 @@ Noise is event-driven: actions call `NotifyNoise(volume, duration)`, which
 `NoiseCleanup` expires them, so a single loud action (gunshot, sprint) spikes
 audibility then fades.
 
+**`PlayerStealth.NotifyNoise(volume, duration)` (IL=71)** is the intake behind
+that chain: `volume <= 0` returns false. It queues the event
+(`AddNoise(noises, volume, (int)(duration * 20))` ticks); a `volume >= 11`
+event arms `sleeperNoiseWaitTicks = 20`. For the sleeper side the volume is
+shaped - `v = volume`, but `volume > 60` becomes
+`60 + (volume - 60) ^ 1.4` (superlinear for very loud events) - then scaled by
+passive **88** via `EffectManager.GetValue` and accumulated into
+`sleeperNoiseVolume`. The return value is the sleeper-wake signal: true once
+the accumulator reaches **360** (clamped), which is what makes
+`AIDirector.NotifyNoise` call `world.CheckSleeperVolumeNoise`.
+
 ---
 
 ## 3. Smell and attraction (state machine)
@@ -107,4 +118,8 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.NotifyNoise (IL=71): volume<=0 false, AddNoise
+  duration*20 ticks, volume>=11 arms sleeperNoiseWaitTicks=20, >60 superlinear
+  60+(v-60)^1.4, passive 88 scale, sleeperNoiseVolume >= 360 true (sleeper-wake
+  signal).
 - **2026-07-23:** Initial stealth/noise/smell reversal (PlayerStealth server tick, light+noise detection, item/blood/food smell attraction) with state machines.
