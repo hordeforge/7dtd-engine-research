@@ -317,6 +317,16 @@ triggers whose `NeedsTriggered == 1`, marking them 2);
 `AddTriggeredBy(volume)` (IL=34) indexes a sleeper volume under each of its
 `TriggeredByIndices` channels.
 
+**`BlockTrigger.OnTriggered(player, world, index, changes, triggeredBy)`
+(IL=27)** is the listener callback: it latches the fired channel
+(`SetTriggeredValueFlag((byte)index)`), then `CheckIsTriggered()` combines the
+latched channels (OR or AND per `UseOrForMultipleTriggers`); only when the
+combination fires does it run
+`chunk.GetBlock(LocalChunkPos).Block.OnTriggered(player, world, ToWorldPos(),
+bv, changes, triggeredBy)` and then clear `TriggeredValues`.
+`BlockTriggerDowngrade.OnTriggered` (IL=15) adds `HandleDowngrade` (the block
+downgrades itself).
+
 `BlockTrigger.OnTriggered(player, world, channel, changes, source)` is the
 receiver-side state machine:
 
@@ -411,6 +421,9 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** BlockTrigger.OnTriggered (IL=27): channel latch +
+  CheckIsTriggered combination gate + block callback + latch reset;
+  BlockTriggerDowngrade adds HandleDowngrade.
 - **2026-08-07:** PrefabTriggerData.Trigger fan-out (IL=63/85/90): channel
   listeners + sleeper volumes, UpdateBlocks on changes; needs-trigger update
   list (3 s timer), Refresh/RefreshForQuest/Reset (IL=22), AddTriggeredBy

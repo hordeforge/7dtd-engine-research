@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockTrigger.OnTriggered
+
+Done (V3.1.0 b14 IL):
+- block-shapes.md 7.3: BlockTrigger.OnTriggered (IL=27) - latch channel,
+  CheckIsTriggered OR/AND combination gate, chunk.GetBlock + Block.OnTriggered
+  callback, TriggeredValues clear; BlockTriggerDowngrade (IL=15) adds
+  HandleDowngrade. Trigger system listener path complete.
+
 ## 2026-08-08 - tier-C: PrefabTriggerData.Trigger fan-out
 
 Done (V3.1.0 b14 IL):
