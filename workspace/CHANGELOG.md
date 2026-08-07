@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: density constants + deco field writers
+
+Done (V3.1.0 b14 IL):
+- terrain-height.md: MarchingCubes density sentinels (Air 127/AirHi 100/Terrain -128/TerrainHi -100), GetDecorationOffsetY clamp formula
+- chunk-providers.md: Chunk.SetDecoAllowedSizeAt/SetDecoAllowedStreetOnlyAt IL=19 (Ensure + read-modify-write via SetDecoAllowedAt)
+
 ## 2026-08-08 - tier-C: terrain snap engine
 
 Done (V3.1.0 b14 IL):
