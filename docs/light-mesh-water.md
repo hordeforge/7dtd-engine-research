@@ -167,6 +167,12 @@ see [loop-gmupdate.md](loop-gmupdate.md)).
 **World water query:** `World.GetWaterPercent(pos)` (IL=14) returns `0` when
 the `ChunkCache` is null, else `ChunkCluster.GetWater(pos).GetMassPercent()`.
 
+**Cluster water accessors:** `ChunkCluster.GetWater(pos)` (IL=23) returns
+`WaterValue.Empty` for `y >= 256` or a missing chunk, else
+`chunk.GetWater(toBlockXZ(x), y, toBlockXZ(z))`. `SetWater(pos, water)`
+(IL=34) writes `Chunk.SetWater(lx, ly, lz, water)` (no-op on a missing chunk)
+and flags `chunkPosNeedsRegeneration` for the cell.
+
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
 **`WaterDataHandle` fields (metadata):** `voxelData` (mass), `voxelState`, `groundWaterHeights`, `activeVoxels`, `flowVoxels`, `flowsFromOtherChunks`, `activationsFromOtherChunks`, `voxelsToWakeup`.
