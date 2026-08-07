@@ -685,6 +685,7 @@ After `TileEntityPowered.write`:
 | `TEFeatureStorage` | 108 | version u16; optional loot-list string; `containerSize` u16x2; playerStorage/touched flags; items: i16 count + `ItemStack.Write` each; slot-lock packed bools |
 | `TEFeatureSignable` | 25 | version u16; `AuthoredText.ToStream(signText)` |
 | `TEFeatureAreaRepair` | 10 | version u16 only (state mostly live `isRepairing`) |
+| `TEFeatureDoor` | 23 | disk: version u16 **18** + `isOpen:bool`; net: `isOpen` + `animateOnSync` (cleared after write). `CanOpen(ref canPickToOpen)` (IL=29): open -> true; `canPickToOpen = lockpickFeature?.NeedsLockpicking()`; `lockFeature.IsLocked()` -> false |
 
 Land-claim repair package drives `TEFeatureAreaRepair.RepairAll` (protocol
 §6.19). Storage/lock features are the composite replacement for classic
