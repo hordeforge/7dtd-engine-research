@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SpawnPointIsHidden rays and stealth setters
+
+Done (V3.1.0 b14 IL):
+- SpawnPointIsHidden: center+0.5; pose5 offsets; per-player head rays layer 71; any clear LOS fails hidden.
+- SetSmellRadiusTarget: radius/eating/sheltered; radius<0 clears.
+- SetClientLevels + SetBarColor green/alert UI.
+---
 ## 2026-08-07 — tier-C: SmellCountItems radius and EntityStealth bits
 
 Done (V3.1.0 b14 IL):

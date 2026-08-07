@@ -470,6 +470,21 @@ Server: if `data & 2` then
 `SetClientLevels(data as u8, (data>>8)&127, (data&0x8000)!=0)` (light/noise
 bar sync).
 
+**`SetSmellRadiusTarget(radius, eating, sheltered)` (IL=21):** store
+`smellRadiusTarget = radius`; if eating force `smellRadius = max(smellRadius,1)`;
+store `smellSheltered`; if radius &lt; 0 call `SmellClear`.
+
+**`SetClientLevels(light, noise, isAlert)` (IL=13):** store light/noise levels and
+`alertEnemy`; `SetBarColor(isAlert)` (UI bar green **50,135** or alert
+**180,180**).
+
+**`SpawnPointIsHidden` (IL=139):** spawn sample at block center xz **+0.5**;
+pose **5** selects second offset table from `isHiddenOffsets`. For every player:
+temp model layer **2**, ray from player head through each offset pair
+(horizontal side offset + vertical lift); `Voxel.Raycast` layer **71**. Any clear
+LOS returns **false** (visible); all rays blocked for all players → **true**
+(hidden).
+
 **`LightManager.GetStealthLightLevel` (IL=30):** if no `myServer` return 0. Else
 sample at entity pos **y+1.68**:
 `clamp01(GetLightLevel(pos) + GetLightLevelFromMovingLights(id, pos))` and out
@@ -1417,8 +1432,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** SmellCountItems cap 50; SmellCountToRadius Lerp 10..100;
-  SetSmellEat 1800 ticks; EntityStealth Process bitfields; wet/shelter path.
+- **2026-08-07:** SpawnPointIsHidden offset rays layer 71; SetSmellRadiusTarget;
+  SetClientLevels bar colors; SmellCountItems/ToRadius; EntityStealth bits.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
