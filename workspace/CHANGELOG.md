@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BoundsUtils.ClipBoundsMove + decoration offset
+
+Done (V3.1.0 b14 IL):
+- BoundsUtils.ClipBoundsMove (IL=67) + 6 per-axis clippers (IL=72-114)
+  narrated in entity-ai.md D4: dispatcher clips move Y->X->Z translating the
+  box after each axis; per-axis logic: move==0 skip, lateral overlap gate,
+  face-flush Clamp on positive/negative move, Y-only 0.2 step allowance when
+  collider top protrudes < 0.2 into box bottom, Abs(move)<0.0001 zero-snap
+  with early loop exit in the IList variants bounded by numColliders.
+- MarchingCubes.GetDecorationOffsetY (IL=12) = FastClamp(-0.0035 *
+  (densY + densYm1), -0.4, 0.4) - terrain collision decoration offset.
+
 ## 2026-08-08 - tier-C: Block.GetCollidingAABB
 
 Done (V3.1.0 b14 IL):

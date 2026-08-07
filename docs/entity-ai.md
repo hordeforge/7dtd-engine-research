@@ -1904,7 +1904,35 @@ colliding box (block + entity) into the caller list:
    `Block.staticList_IntersectRayWithBlockList` scratch, fills it with the
    shape boxes via `GetCollisionAABB(bv, x, y, z, distortedAddY, scratch)`,
    then copies the entries that `Intersects` the query `_aabb` into the caller
-   list.
+   list. The terrain `offsetY` comes from
+   `MarchingCubes.GetDecorationOffsetY(densY, densYm1)` (IL=12):
+   `FastClamp(-0.0035 * (densY + densYm1), -0.4, 0.4)` - a signed offset that
+   lowers the box on dense ground and raises it over air, bounded to 0.4 m.
+
+**`BoundsUtils.ClipBoundsMove(bounds, move, colliderList, numColliders)`
+(IL=67) + per-axis clippers (IL=72-114):** the movement-resolution step used
+by `aabbEntityCollision` (the "Y clip" in the summary above). The dispatcher
+clips `move` **axis by axis in Y → X → Z order**, translating the moving box
+by the clipped component before the next axis, and returns the residual move
+vector. Each per-axis clip (single-collider `Bounds` variants IL=72-87, list
+`IList<Bounds> + numColliders` variants IL=99-114) has the same shape:
+
+- Skip entirely when `move == 0`; for the list variants iterate `i <
+  numColliders` (the caller caps collider count).
+- Overlap gate on the two lateral axes: the collider must overlap the moving
+  box's range in both non-move axes, else skip.
+- Moving up/forward (`move > 0`): if the collider face sits at/beyond the box
+  on the move axis, `move = Clamp(face - boxEdge, 0, move)` (stop flush
+  against the face).
+- Moving down/back (`move < 0`): symmetric clamp
+  `move = Clamp(face - boxEdge, move, 0)`.
+- **Y-only step allowance:** when moving down and the collider top protrudes
+  less than **0.2** into the box bottom (`collider.max.y - bmins.y < 0.2`),
+  `move` snaps to exactly that gap (lets the box "step up" over shallow
+  obstacles instead of stopping).
+- Epsilon snap: `Abs(move) < 0.0001` → `move = 0`; the list variants then
+  break out of the loop early (no further colliders consulted once the move
+  is consumed).
 5. **Entity pass:** expand a copy of `_aabb` by **0.25**, run
    `GetEntitiesInBounds(entity, expanded)` (the ExcludeEntity overload above),
    and append each hit's `getBoundingBox()` when it intersects the *unexpanded*
@@ -2886,6 +2914,11 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** BoundsUtils.ClipBoundsMove family (IL=67 dispatcher + 6
+  per-axis clippers IL=72-114): Y→X→Z axis order with box translation between
+  axes, face-flush clamps, Y-only 0.2 step allowance, 0.0001 epsilon zero-snap
+  with early loop exit; MarchingCubes.GetDecorationOffsetY (IL=12) =
+  FastClamp(-0.0035*(densY+densYm1), -0.4, 0.4).
 - **2026-08-07:** World.GetCollidingBounds (IL=391) + Block.GetCollidingAABB
   (IL=33) in D4: padded ranges (+-0.5 X/Z, +-1 Y), IsInPlayfield whole-chunk
   shortcut, collBlockCache / collDensityCache scratch fill + offset reads,
