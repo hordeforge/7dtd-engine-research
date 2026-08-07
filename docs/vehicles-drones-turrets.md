@@ -289,6 +289,18 @@ group slot from `GetGroupPositions(owner, 5, …)`; `DoMoveIntoFollowPos` then
 `steerFollow`; return to `Idle` when within **0.5** of slot or within
 `FollowDistance` of chest.
 
+**`GetGroupPositions` (IL=178):** build **5** horizontal slots from owner chest +
+flattened look: (0) behind look at `followDist`; (1)/(2) right±look diagonals;
+(3)/(4) outer diagonals with scale **1**; for each slot, if blocked
+(`IsPositionBlocked` mask `1073807360`) fall back to `ScanVolume` node.
+
+**`DoMoveIntoFollowPos` (IL=126):** if `currentPath` empty, `GetPath` to target
+with `SpeedFlying` (set `currentPathDest` to last path point or target). If path
+exists: repath via `followPlannedPath` when LOS blocked, path length >
+`seekDist+1`, or distance > `seekDist+1.414`; else if dist >= `seekDist`,
+`RotateTo` + `Move` toward target. Success when not blocked and dist <=
+`seekDist`.
+
 **`sentryState` (IL=61):** if chunk loaded and more than **5** m from `SentryPos`,
 `DoMoveIntoFollowPos`; else Seek/rotate toward sentry pos until within **0.25** m.
 
@@ -480,6 +492,8 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-07:** GetGroupPositions 5 slots; DoMoveIntoFollowPos repath
+  seekDist+1 / +1.414; onUnderWaterState; trackTarget/canHitEntity; Fire 16/11.
 - **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire
   passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds

@@ -227,7 +227,9 @@ Mirrored from clients via `AIDirector.UpdatePlayerInventory` /
 - `UpdatePlayerInventory(Int32, AIDirectorPlayerInventory)` IL=11
 - `UpdatePlayerInventory(EntityPlayerLocal)` IL=7
 
-Owns the live `List<AIDirectorPlayerState>` that horde targeting reads.
+Owns the live `DictionaryList` `trackedPlayers` that horde targeting reads.
+`TickPlayerState` only mirrors `Player.IsDead()` into `set_Dead` (no inventory
+or underground work on this path).
 
 ## `AIDirectorPlayerState` : Object
 
@@ -434,8 +436,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** Neighbor cooldown 180/720 s; SetLongDelay 1320 s; CreateHorde;
-  FindScoutStartPos 80 m / 15 tries / 30 m player avoid; spawnHordeNear 5/12%.
+- **2026-08-07:** TickPlayerState Dead mirror only; Neighbor cooldown 180/720;
+  SetLongDelay 1320; CreateHorde; FindScoutStartPos 80/15/30 m; spawnHordeNear.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset

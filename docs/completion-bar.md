@@ -192,6 +192,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | spawnHordeNear CreateHorde counts | aidirector.md |
 | trackTarget/canHitEntity + FindScoutStartPos | vehicles / aidirector |
 | Investigate pos + neighbor cooldown delays | entity-ai §D3.8 / aidirector |
+| GetGroupPositions / DoMoveIntoFollowPos repath | vehicles-drones-turrets |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

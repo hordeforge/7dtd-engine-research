@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: drone group slots and follow repath
+
+Done (V3.1.0 b14 IL):
+- GetGroupPositions: 5 horizontal slots from chest/look; ScanVolume fallback.
+- DoMoveIntoFollowPos: GetPath when empty; repath seekDist+1 / +1.414; success dist.
+- TickPlayerState: Dead mirror only from Player.IsDead.
+---
 ## 2026-08-07 — tier-C: investigate pos and neighbor cooldown delays
 
 Done (V3.1.0 b14 IL):
