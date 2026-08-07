@@ -275,6 +275,22 @@ if bedroll-near (when flag), `!CanMobsSpawnAtPos`, any player within min², or
 any player `CanSee` the point. Success: pos = block center + (0.5,
 terrainOffset, 0.5).
 
+**`isPositionInRangeOfBedrolls(pos)` (IL=58):** GamePrefs **160** as radius;
+true if any player's bedroll spawn point is within radius².
+
+**`isPositionFarFromPlayers(pos, minDist)` (IL=31):** true only if every player
+has `GetDistanceSq ≥ minDist²`.
+
+**`GetTerrainOffset(blockPos)` (IL=27):** if block below is terrain shape,
+`MarchingCubes.GetDecorationOffsetY(density(pos), density(pos-up))`; else 0.
+
+**`Chunk.CanMobsSpawnAtPos(x,y,z, ignoreCanMobsSpawnOn, checkWater)` (IL=94):**
+y in **[2, 251]**; reject trader area; unless checkWater, reject water at y-1;
+below must `CanMobsSpawnOn` (unless ignore) and `IsCollideMovement`; cell and
+y+1 must not be solid collide space; if checkWater reject water at cell.
+
+**`Chunk.IsPositionOnTerrain` (IL=18):** y ≥ 1 and shape below is terrain.
+
 Its own `currentSpawner` is serialized, so a day's dynamic spawn progress
 survives a restart.
 
@@ -650,6 +666,7 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** isPositionInRangeOfBedrolls pref 160; CanMobsSpawnAtPos; terrain offset.
 - **2026-08-07:** SpawnManagerDynamic Update IL=75 night ES 64..96 m.
 - **2026-08-07:** GetRandomSpawnPositionMinMaxToRandomPlayer 10 tries bedroll/see reject.
 - **2026-08-07:** Chunk.GetEntitiesAround buckets; FindRandomSpawnPointNearPlayer; claim offline hours.

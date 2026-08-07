@@ -161,6 +161,11 @@ Encode helpers (verified IL):
 Relative packages carry encoded **deltas** of those integers. Thresholds in the
 table above are in that encoded space (e.g. ±256 encoded = ±8 blocks).
 
+**`NetEntityDistributionEntry.SendToPlayers(packet, exclude, inRangeOnly, range)`
+(IL=42):** for each `trackedPlayers` except exclude: `SendPackage` to that
+entityId; if `inRangeOnly`, range arg is tracked entity id else **-1** (full
+flags residual).
+
 ### 2.1 `OnUpdateEntities` interest + priority (IL=322)
 
 Server-only each full tick. Entries live in an `IntHashMap` keyed by entity id
@@ -625,6 +630,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-07:** NetEntityDistributionEntry.SendToPlayers exclude/inRange.
 - **2026-08-07:** Interest enter package order: Spawn, AliveFlags, (player)
   Stats/Twitch/Equipment, Speeds, optional Velocity; exit Unloaded already pinned.
 - **2026-08-06:** Package registry is reflection over 189 concrete NetPackage

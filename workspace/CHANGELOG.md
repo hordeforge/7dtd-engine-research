@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: bedroll range and CanMobsSpawnAtPos
+
+Done (V3.1.0 b14 IL):
+- isPositionInRangeOfBedrolls GamePrefs 160; isPositionFarFromPlayers.
+- GetTerrainOffset MarchingCubes; CanMobsSpawnAtPos y 2..251 trader/water/floor.
+- SendToPlayers tracked set exclude.
+---
 ## 2026-08-07 — tier-C: GetRandomSpawnPositionMinMaxToRandomPlayer
 
 Done (V3.1.0 b14 IL):
