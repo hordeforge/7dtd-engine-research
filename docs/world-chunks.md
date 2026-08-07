@@ -369,6 +369,14 @@ Does **not** fire light/mesh/stability RPC; callers that need those use full
 **`World.UncullPOI(prefab)` (IL=26):** `prefab.AddChunksToUncull(world, set)`;
 on success log POI name + bbox and return true.
 
+**`updateChunksToUncull` (IL=191):** if queue empty return. Restart
+`msUnculling` stopwatch; clear `chunksToRegenerate`. Reverse-walk
+`chunksToUncull`: drop if `InProgressUnloading`; else
+`RestoreCulledBlocks` → remove from uncull queue → add to regenerate set; for
+neighbor faces from restore flags (W/E/N/S bits) enqueue neighbor chunks for
+regenerate. Time-budget residual via stopwatch (continues next frames if
+needed).
+
 **`World.GetTraderAreaAt(pos)` (IL=14):**
 `ChunkProvider.GetDynamicPrefabDecorator().GetTraderAtPosition(pos, 0)` or null.
 
