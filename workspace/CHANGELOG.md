@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: water leaves
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 4.2: HasMass (IL=5) mass > 195; GetVoxelKey2D (IL=8)
+  hash; IsVoxelOutsideChunk (IL=15); IsChunkSafeToUpdate (IL=16) flags gate.
+
 ## 2026-08-08 - tier-C: biome-id accessors
 
 Done (V3.1.0 b14 IL):
