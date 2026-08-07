@@ -231,6 +231,17 @@ ItemActionData
 | Consume | `ItemActionEat` | `consume`: reduces `UseTimes` via `EffectManager`, sets stealth smell, creates a refund item (`CreateItem`, e.g. empty jar), fires quest events, applies buffs |
 | Dynamic | `ItemActionDynamicMelee` | the newer melee model: `GrazeCast` for near-misses, `hitTarget`, `harvestOnCompletion`, per-swing crit chance |
 
+**`ItemActionRanged.fireShot` (IL=482) re-pin:** look ray + direction offset ->
+`Voxel.Raycast` -> clone `voxelRayHitInfo`; entity hits via
+`ItemActionAttack.FindHitEntityNoTagCheck` (drone ally skip); block hits via
+`GetBlockHit`; damage scaled by `EffectManager.GetValue` passive effects; server
+path applies entity/block damage (same authority model as melee `Hit`).
+
+**`ItemActionDynamicMelee.ExecuteAction` (IL=210):** `canStartAttack` gate; clear
+`alreadyHitEnts`/`alreadyHitBlocks`; optional harvest path; avatar attack bools /
+PowerAttack trigger; `FireEvent` MinEvents; set `Attacking` on data. Per-frame hit
+resolution continues in dynamic `Raycast`/`hitTarget` while `Attacking`.
+
 Melee, ranged, and eat all end by mutating the held `ItemValue` (durability, ammo,
 or count) and applying effects; that mutation is the server's authority.
 
@@ -614,6 +625,7 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** fireShot IL=482 and DynamicMelee ExecuteAction IL=210 re-pins.
 - **2026-08-06:** ItemClass Stacknumber default 500 and get_MaxCount's
   MaxStackSizeModifier plus 30000 cap; Recipe craftingTime -1 sentinel when
   craft_time is absent; TileEntityWorkstation::GetFuelTime is items.xml FuelValue

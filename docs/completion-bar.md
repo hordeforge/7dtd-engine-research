@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1439 / catalogued 868 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1449 / catalogued 858 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -107,6 +107,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | DamageEntity IL=236 gate order | combat-damage §2 |
 | UAI Move/Wander/Attack task leaves | entity-ai §5.3 |
 | OnUpdateTick order re-pin | loop §3.2 |
+| OnUpdateEntity / OnUpdateLive phase order | entity-ai §2.0 |
+| fireShot / DynamicMelee Execute re-pin | items §4.2 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

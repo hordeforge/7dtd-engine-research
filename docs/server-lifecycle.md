@@ -307,6 +307,7 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-07:** PlayerLoginRPC IL=20 -> AuthorizationManager.Authorize.
 - **2026-08-07:** Document analytics heartbeat (300s, client-only; dedicated skips).
 - **2026-08-02:** V3.1.0 join analytics (`PlayerJoinServerEventData`).
 

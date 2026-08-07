@@ -59,6 +59,29 @@ stateDiagram-v2
 
 ## 2. When AI actually runs (`OnUpdateLive` → `updateTasks`)
 
+### 2.0 Parent chain: `OnUpdateEntity` (IL=457) then `OnUpdateLive` (IL=363)
+
+`EntityAlive.OnUpdateEntity` (before Live):
+
+1. Base `Entity.OnUpdateEntity`.
+2. Buff cvar / `EntityBuffs.Tick`.
+3. Optional weather/biome buffs via `AddBuff` / `SetCVar`.
+4. **`OnUpdateLive()`**.
+5. `Inventory.OnUpdate`.
+6. Health/death paths: radiation / environmental `DamageEntity`, hurt sounds,
+   sleeper pose, alert/random sounds, investigate clear, `OnDeathUpdate`,
+   revenge target set.
+
+`OnUpdateLive` (AI-relevant):
+
+1. Stat regen zeroing; if not dead: `EntityStats.Tick`.
+2. Attack-target net: may send `NetPackageSetAttackTarget` to tracked players.
+3. `updateCurrentBlockPosAndValue`.
+4. Movement / jump / headed move for non-AI branches.
+5. **AI gate** then `updateTasks()` (detail below).
+6. Stun clear/set via avatar controller; can-see updates; dynamic ragdoll;
+   trader-area teleport check.
+
 From `EntityAlive.OnUpdateLive` IL (gate before `updateTasks`):
 
 ```mermaid
@@ -938,8 +961,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase
-  Update/chooseAction/updateAction IL (utility packages).
+- **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;
+  UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;
   Tick phase order (MinScript / UpdateSpawn / player touch / despawn timer).
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.

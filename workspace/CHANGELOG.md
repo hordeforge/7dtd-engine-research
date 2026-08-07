@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: OnUpdateEntity/Live phases + fireShot/melee
+
+Done (V3.1.0 b14 IL):
+- entity-ai §2.0: OnUpdateEntity IL=457 then OnUpdateLive IL=363 ordered work.
+- items §4.2: fireShot IL=482 raycast/hit path; DynamicMelee ExecuteAction IL=210.
+- server-lifecycle: PlayerLoginRPC Authorize changelog.
+---
 ## 2026-08-07 — tier-C: DamageEntity gates, UAI tasks, OnUpdateTick order
 
 Done (V3.1.0 b14 IL):
