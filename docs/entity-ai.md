@@ -1519,6 +1519,29 @@ jump abort.
 `raw = lightLevel + noiseVolume*0.5 + (stress+smell)*50 + (alertEnemy?5:0)`;
 `FastClamp01(raw*0.01 + 0.005)`.
 
+**`CanNavigatePath` (IL=14):** true if on ground, swimming, in elevator, or
+climbing; else false (airborne without those supports cannot repath).
+
+**`CalcIfSwimming` (IL=17):** threshold = **0.5** if air and not jumping, else
+**0.7**; swimming ⇔ `inWaterPercent >= threshold`.
+
+**`BeginDynamicRagdoll(flags, stunRange)` (IL=13):** store flags; zero root
+motion; `_dynamicRagdollStunTime = stunRange.Random(rand)`.
+
+**`FaceJumpTo` (IL=27):** yaw to `moveHelper.JumpToPos` snapped to nearest **90°**
+via Atan2/Round; `SeekYaw`.
+
+**`ApplySpawnState` (IL=15):** if Health ≤ 0 and remote → `ClientKill(New)`;
+always `ExecuteDismember(true)` (restore dismember visuals on spawn).
+
+**`ClearDamagedTarget` (IL=4):** `damagedTarget = null`.
+**`ClearDistressed` (IL=1):** empty ret.
+**`CanBePushed` (IL=5):** true iff not dead.
+**`CanEntityJump` (IL=2):** always true.
+**`CalculateBlockDamage(block, default, ref bypass)` (IL=17):** if
+`stompsSpikes` and block has tag **6**: `bypass=true`, return **999**; else
+`bypass=false`, return default.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
@@ -2205,6 +2228,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 ## Changelog
 
 - **2026-08-07:** AddEnemyToWorld sleeper spawn; ValuePercentUI stealth bar formula.
+- **2026-08-07:** CanNavigatePath; CalcIfSwimming 0.5/0.7; BeginDynamicRagdoll; FaceJumpTo; stompsSpikes 999.
 - **2026-08-07:** FindExistingDestroyPos ally share; CheckJumpBlocked y+2.35; IsTriggerAndNoRespawn mode 3.
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.

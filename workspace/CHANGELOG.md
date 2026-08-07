@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CanNavigatePath and swim/ragdoll helpers
+
+Done (V3.1.0 b14 IL):
+- CanNavigatePath: ground/swim/elevator/climb only.
+- CalcIfSwimming thresholds 0.5 air vs 0.7 grounded/jumping.
+- BeginDynamicRagdoll; FaceJumpTo 90-degree snap; ApplySpawnState dismember.
+- CalculateBlockDamage stompsSpikes tag 6 -> 999 bypass.
+---
 ## 2026-08-07 — tier-C: AddEnemyToWorld and stealth UI percent
 
 Done (V3.1.0 b14 IL):
