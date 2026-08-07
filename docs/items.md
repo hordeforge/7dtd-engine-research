@@ -87,6 +87,27 @@ item->block conversion every held/placed block item goes through - with
 meta byte selects the alternate block variant, e.g. paint/frame variants),
 otherwise `iv.ToBlockValue(false)`.
 
+**`ItemActionPlaceAsBlock.ExecuteAction` (IL=353)** is the placement action
+(the place half of the bridge): release-only, rate-gated by `Delay` and
+`Constants.cBuildIntervall`, with the same passive-177 `twitch_no_attack`
+gate. It reads the local player's `HitInfo` (valid hit, non-zero
+`lastBlockPos`, not an `E_` tag), refuses to place into a collider
+(`GameUtils.IsColliderWithinBlock` for a non-editor air cell), derives
+`blockToPlace = item.OnConvertToBlockValue(itemValue, this.blockToPlace)`,
+gates on `hit.distanceSq <= Block.GetPlacementDistanceSq()` and
+`Block.CanPlaceBlockAt` (false -> `blockCantPlaced` tooltip), then runs
+`BlockPlacement.OnPlaceBlock` (placement/rotation/propTransform from the
+`ItemBlockInventoryData`, or defaults) + `Block.OnBlockPlaceBefore`. The
+**keystone path** (`IndexName == "lpblock"`) gates on
+`WorldBase.CanPlaceLandProtectionBlockAt` (`keystone_placed` vs
+`keystone_build_warning`); every other block gates on
+`WorldBase.CanPlaceBlockAt(pos, playerData, false)`. On success:
+`Block.PlaceBlock(world, result, entity)`, MinEvent **44** with the
+ItemActionData/BlockValue/Position context, `QuestEventManager.BlockPlaced`,
+`RightArmAnimationUse`, then `changeItemTo` swaps the held slot or the
+`decInventoryLater` coroutine consumes one, and the `placeblock` sound fires
+with `DropTimeDelay = 0.5`.
+
 ```mermaid
 flowchart TB
   IV["ItemValue<br/>(packed instance)"] -->|type id indexes| IC["ItemClass<br/>(definition, ItemClass.list[type])"]
@@ -1386,6 +1407,12 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionPlaceAsBlock.ExecuteAction IL=353: release +
+  Delay/cBuildIntervall + passive 177 gates, HitInfo target + collider
+  check, OnConvertToBlockValue, placement distance + CanPlaceBlockAt,
+  BlockPlacement.OnPlaceBlock + OnBlockPlaceBefore, keystone lpblock gate
+  vs CanPlaceBlockAt claim check, Block.PlaceBlock + MinEvent 44 +
+  BlockPlaced + changeItemTo/decInventoryLater + placeblock sound.
 - **2026-08-08:** ItemActionQuest.ExecuteInstantAction IL=87: GetQuest +
   FindQuest repeatable/active gate + CanActivate, CreateQuest ->
   XUiC_QuestOfferWindow with stack QuestLock.
