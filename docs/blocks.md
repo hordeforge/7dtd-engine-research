@@ -91,6 +91,14 @@ and a `SelectAlternates` block the value becomes
 `Block.GetAltBlockValue(Meta)` (the alternate variant selected by the item's
 meta), else the plain value.
 
+**Alternate-block resolution:** `Block.GetAltBlock(typeId)` (IL=19) returns
+`placeAltBlockClasses[typeId]` when the array exists and is non-empty, else
+`Block.list[0]` (the fallback). `GetAltBlocks()` (IL=39) lazily resolves the
+`placeAltBlockNames` strings into the class array via
+`GetBlockByName(name, false)`; `GetAltBlockValue(typeId)` (IL=5) wraps
+`GetAltBlock(typeId).ToBlockValue()`; `GetAltBlockNames()` (IL=3) is the raw
+field read.
+
 ```mermaid
 flowchart LR
   RW["rawData : u32"] --> B0["bits 0-15<br/>type (id)"]
@@ -494,6 +502,9 @@ damage.
 
 ## Changelog
 
+- **2026-08-07:** Alternate-block resolution: GetAltBlock (IL=19) indexed
+  placeAltBlockClasses w/ Block.list[0] fallback, GetAltBlocks (IL=39) lazy
+  name resolve, GetAltBlockValue (IL=5) wrap, GetAltBlockNames (IL=3).
 - **2026-08-07:** ItemValue.ToBlockValue (IL=26): type >= ItemsStartHere ->
   Air, else type copy + SelectAlternates -> GetAltBlockValue(Meta).
 - **2026-08-07:** BlockValue.ToItemValue (IL=6): type copy to ItemValue - the

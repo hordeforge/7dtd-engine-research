@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Block alternate resolution
+
+Done (V3.1.0 b14 IL):
+- blocks.md: Block.GetAltBlock (IL=19) = placeAltBlockClasses[typeId] with
+  Block.list[0] fallback; GetAltBlocks (IL=39) lazy name-to-class resolve;
+  GetAltBlockValue (IL=5) wrap; GetAltBlockNames (IL=3) field read.
+  Completes the ToBlockValue alternate path.
+
 ## 2026-08-08 - tier-C: ItemValue.ToBlockValue
 
 Done (V3.1.0 b14 IL):
