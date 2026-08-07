@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: entityCollision Move and crouch/climb
+
+Done (V3.1.0 b14 IL):
+- entityCollision: ragdoll fall track else CC or AABB.
+- Move: AI-disable skip; absolute vs relative motion add with maxVelocity clamp.
+- ConditionalScalePhysicsMulConstant: identity.
+- IsCrouching: Crouching || CrouchingLocked; set_Climbing movement tags.
+---
 ## 2026-08-07 — tier-C: JumpMove MaxVelocity and speed passives
 
 Done (V3.1.0 b14 IL):

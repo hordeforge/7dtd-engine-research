@@ -274,6 +274,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | OnUpdatePosition step/speed + ExecuteFall stub | entity-ai.md |
 | SetMovementState + MoveEntityHeaded/Default | entity-ai.md |
 | JumpMove + MaxVelocity 5 + speed passives | entity-ai.md |
+| entityCollision + Move accel + crouch/climb | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

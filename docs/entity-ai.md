@@ -1497,6 +1497,24 @@ Else: xz `*= 0.91`; `motion.y -= Gravity*0.025` then `*= 0.91`.
 Start scales ySize by 0.4 physics constant; applies `motionMultiplier` when
 slowed; stores `hitMove`.
 
+**`entityCollision(motion)` (IL=91):** if ragdoll movement + pelvis RB: track
+fall distance from pelvis y; on upward vel after fall set onGround and
+`UpdateFall`. Else `ApplyFixedUpdate`; if character controller
+`ccEntityCollision` else `aabbEntityCollision`.
+
+**`Entity.Move(dir, absolute, velocity, maxVelocity)` (IL=138):** skip if not
+client-controlled and (AI disabled pref 46 **or** GameStats0==2). Zero y on
+dir and normalize. Absolute: remaining speed = clamp(maxV - max(0,dot(motion,dir)),
+0, velocity) added via `ConditionalScalePhysicsAddConstant`. Relative: transform
+forward/right/up composition into motion.
+
+**`ConditionalScalePhysicsMulConstant` (IL=2):** identity (returns arg).
+
+**`get_IsCrouching` (IL=8):** `Crouching || CrouchingLocked`.
+
+**`set_Climbing` (IL=39):** on change store flag; dirty player stats if local;
+set/clear `MovementTagClimbing` (clear idle when climbing).
+
 **`PlayHitGroundSound(impactSpeed)` (IL=42):** volume =
 `Lerp(0.3, 1, impactSpeed)`; play `soundLand` else `soundLandThump` else
 `"entityhitsground"`.
@@ -1966,8 +1984,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** JumpMove gravity paths; MaxVelocity 5; passive speed 133-135;
-  ccEntityCollision; SetMovementState; step 1.5; MoveEntityHeaded.
+- **2026-08-07:** entityCollision ragdoll/CC/AABB; Move absolute/relative add;
+  IsCrouching locked; set_Climbing tags; JumpMove; MaxVelocity 5.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
