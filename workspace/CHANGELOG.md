@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: distant-deco seeding + lazy decorate
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 5: decorateChunkRandom IL=243 (fixed-size skip, 128x128 cell gates, distant-deco walk prob*2 + ore noise)
+- chunk-providers.md 5: GetDecoOccupiedAt IL=87 lazy decorate under lock (seed from chunk XZ), GetDecoOccupiedFromMap IL=26 plain read
+
 ## 2026-08-08 - tier-C: DecoOccupiedMap leaves
 
 Done (V3.1.0 b14 IL):
