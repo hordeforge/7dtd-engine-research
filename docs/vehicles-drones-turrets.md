@@ -111,6 +111,17 @@ per subsystem on the dedicated build (`CanAddMoreVehicles` /
 `CanAddMoreTurrets` / `CanAddMoreDrones`, gated on device flag 56); other
 platforms are unbounded.
 
+**`VehicleManager` save path:** `SaveAndClear` (IL=15) is the shutdown flush:
+`WaitOnSave(); Save(); WaitOnSave();` then clears `vehiclesActive` and
+`vehiclesUnloaded` and nulls the singleton. `WaitOnSave` (IL=11) joins the
+background `saveThread` (30 ms wait) and drops it. `SaveThread` (IL=41) is the
+worker: it copies an existing `vehicles.dat` to `vehicles.dat.bak`, rewinds the
+pooled stream handed over by `Save`, `WriteStreamToFile` to
+`{saveDir}/vehicles.dat`, logs `VehicleManager saved {0} bytes`, and returns
+the pooled stream. `GetServerVehicleCount` (IL=13) is
+`vehiclesActive.Count + vehiclesUnloaded.Count` on the server, else the
+replicated `serverVehicleCount` static.
+
 ---
 
 ## 3. Per-player map waypoints
