@@ -6,6 +6,26 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BloodMoon component + party
+
+Done (V3.1.0 b14 IL):
+- aidirector.md BloodMoon bodies narrated (previously method-name stubs):
+  Component.Tick (IL=170) - IsBloodMoonTime edge Start/EndBloodMoon, GameStats
+  int 58 blood-moon-day change warn, GameStats bool 24 gate, AddPlayerToParty
+  for spawned unpartied players, round-robin party ticks with delay = 1/Count
+  window and nextParty rotation, KillPartyZombies on empty.
+- Party.Tick (IL=162) - InitParty, 1.8 s ManagedZombie seek cadence, spawner
+  canSpawn + CanSpawn(1.9) gates, groupIndex change -> spawnBaseDir += 120 +
+  CalcBestDir, alive cap FastMin(maxAlive, enemyActiveMax), round-robin up to
+  min(members,3) players.
+- SpawnZombie (IL=181) - CalcSpawnPos, GetRandomEntityFromGroupMaxTier with
+  50% attached -> animalZombieVultureRadiated override, CreateEntity +
+  SetSpawnerSource(3) + SpawnEntityInWorld, horde/BM/observer flags,
+  timeStayAfterDeath/3, bonus loot every bonusLootEvery scaled by LootBonusScale,
+  AstarManager.AddLocation(40), structured log.
+- CalcSpawnPos (IL=28) - radius rotated +-45 deg, GetMobRandomSpawnPosWithWater
+  ring 10-30 m.
+
 ## 2026-08-08 - tier-C: SetBlock entry chain
 
 Done (V3.1.0 b14 IL):

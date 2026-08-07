@@ -55,10 +55,59 @@ flowchart TB
 ## AIDirectorBloodMoonComponent : AIDirectorComponent
 - `Tick(Double)` IL=170
 
+**`Tick(dt)` (IL=170):** base component tick, then `isBloodMoon =
+IsBloodMoonTime(world.worldTime)`; on a rising edge `StartBloodMoon()`, on a
+falling edge `EndBloodMoon()`. When **not** blood moon it watches the GameStats
+int **58** (blood-moon day): a change stores `bmDay` / `bmDayLast = bmDay - 1`
+and warns `Blood Moon day stat changed {0}`. When blood moon **and** GameStats
+bool **24** are active: `delay -= dt`; every tracked player without a
+`bloodMoonParty` that `IsSpawned()` joins one via `AddPlayerToParty`; then the
+`parties` list is walked round-robin from `nextParty` (wrapping at Count): an
+empty party gets `KillPartyZombies()`; the primary party (index == `nextParty`)
+ticks `party.Tick(world, dt, canSpawn = delay <= 0)`; when it ticks, `delay =
+1 / parties.Count` and `nextParty++` (one party spawns per delay window).
+
 ## AIDirectorBloodMoonParty : Object
 - `Tick(World,Double,Boolean)` IL=162
-- `SpawnZombie(World,EntityPlayer,Vector3,Vector3)` IL=165
+- `SpawnZombie(World,EntityPlayer,Vector3,Vector3)` IL=181
 - `CalcSpawnPos(World,Vector3,Vector3,Vector3&)` IL=28
+
+**`Tick(world, dt, canSpawn)` (IL=162):** `InitParty()` on first tick
+(`partyLevel < 0`); then each `ManagedZombie` counts `updateDelay -= dt` and at
+`<= 0` resets it to **1.8** s and re-runs `SeekTarget` (a failed seek removes
+the zombie). `partySpawner.Tick(dt)` advances the gamestage spawner. With
+`canSpawn && partySpawner.canSpawn && partyMembers.Count > 0 &&
+AIDirector.CanSpawn(1.9)`: on a `groupIndex` change it syncs the index, rotates
+`spawnBaseDir += 120` (degrees) and recalcs `CalcBestDir(spawnBasePos)`; the
+alive cap is `FastMin(partySpawner.maxAlive, enemyActiveMax)`; while
+`zombies.Count < cap`, up to `FastMin(memberCount, 3)` round-robin players from
+`nextPlayer` get `SpawnZombie(world, player, player.position,
+spawnDirectionV)` (only when `IsPlayerATarget`), stopping at the first
+successful spawn.
+
+**`SpawnZombie(world, target, focusPos, radiusV)` (IL=181):** `CalcSpawnPos`
+fails → false. Class pick:
+`EntityGroups.GetRandomEntityFromGroupMaxTier(partySpawner.spawnGroupName,
+EntityFactory.MaxEntityTier, ref lastClassId, ...)`; when the pick is an
+attached entity, 50% of the time it is overridden to
+`animalZombieVultureRadiated`; a `-1` pick logs
+`Could not spawn an entity from group {0} within Sandbox Options Max Tier
+Limit {1}.` and returns false. Spawns via
+`EntityFactory.CreateEntity(id, pos)` (cast `EntityEnemy`) +
+`SetSpawnerSource(3)` (Dynamic) + `SpawnEntityInWorld`, then flags
+`IsHordeZombie = IsBloodMoon = bIsChunkObserver = true` and cuts
+`timeStayAfterDeath /= 3`. **Bonus loot:** `bonusLootSpawnCount++`; when it
+reaches `partySpawner.bonusLootEvery` it resets and scales
+`lootDropProb *= GameStageDefinition.LootBonusScale`. Registers a
+`ManagedZombie`, `SeekTarget`, `partySpawner.IncSpawnCount()`,
+`AstarManager.AddLocation(spawnPos, 40)`, and logs
+`BloodMoonParty: SpawnZombie grp {0}, cnt {1}, {2}, loot {3}, at player {4},
+day/time {5} {6:D2}:{7:D2}`.
+
+**`CalcSpawnPos(world, focusPos, radiusV, out spawnPos)` (IL=28):** rotates
+`_radiusV` around `up` by `(RandomFloat - 0.5) * 90` degrees (±45) and runs
+`GetMobRandomSpawnPosWithWater(focusPos + rotatedRadius, 0, 10, 30, false,
+out)` - the ring 10-30 m around the focus.
 
 ## AIDirectorChunkData : Object
 
@@ -669,6 +718,12 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** BloodMoon component+party bodies: Tick (IL=170) edge
+  Start/End + stat 58 day change + round-robin party spawn window 1/Count;
+  Party.Tick (IL=162) 1.8 s seek cadence + groupIndex 120 dir rotate +
+  maxAlive cap + 3-player round robin; SpawnZombie (IL=181) group pick with
+  vulture override + bonus loot every + timeStayAfterDeath/3 + log;
+  CalcSpawnPos (IL=28) +-45 ring 10-30 m.
 - **2026-08-07:** BloodmoonZombiesRemain list count; IsMemberOfParty partySpawner.
 - **2026-08-07:** Wandering TickNextTime 28000/7h; ChooseNextTime 12k-24k;
   ClearParties; CalcNextDay; Start/EndBloodMoon; KillPartyZombies.
