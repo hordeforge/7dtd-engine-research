@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityAnimal distress loop
+
+Done (V3.1.0 b14 IL):
+- EntityAnimal.OnUpdateLive IL=57: see-cache clear, distress sound timer
+  rand(min,max), animal waypoint update for local player.
 ## 2026-08-08 — tier-C: WorldTimeToElements
 
 Done (V3.1.0 b14 IL):

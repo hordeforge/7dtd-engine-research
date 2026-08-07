@@ -112,6 +112,14 @@ more equipment / held-item / animation residual in later IL.
 6. Stun clear/set via avatar controller; can-see updates; dynamic ragdoll;
    trader-area teleport check.
 
+**`EntityAnimal.OnUpdateLive` (IL=57) override:** `EntitySeeCache.Clear()`
+(animals keep no see cache), then base `OnUpdateLive`. While `isDistressed`
+and alive: `timer -= deltaTime`; at ≤ 0 rearm with
+`rand(minStressTime, maxStressTime)` and
+`PlaySoundAtPositionServer(position, GetSoundDistressed(), Linear, 1,
+entityId, 1)`. With a local player present,
+`Waypoints.UpdateEntityAnimalWayPoint(this, true)`.
+
 **`updateCurrentBlockPosAndValue` (IL=318):** foot block = entity block pos, or
 y-1 if air; resolve child to parent. If pos/value changed **or** landed this
 tick (`onGround && !wasOnGround`): store standing pos/value; server sets
