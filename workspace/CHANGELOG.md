@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk.GetMaxHeight
+
+Done (V3.1.0 b14 IL):
+- terrain-height.md: Chunk.GetMaxHeight (IL=29) max of m_HeightMap bytes.
+
 ## 2026-08-08 - tier-C: ItemValue classification
 
 Done (V3.1.0 b14 IL):
