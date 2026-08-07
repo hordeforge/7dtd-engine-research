@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: walk-trigger block overrides
+
+Done (V3.1.0 b14 IL):
+- Block.OnEntityWalking base no-op; BlockJumpPad IL=5 motion.y=3; BlockMine
+  IL=113: LandMineImmunity 137 skip, spectator skip, trigger sound, delay 171,
+  entity damage 172 (TrapIncomingDamage), scheduled detonate delay*20.
 ## 2026-08-08 — tier-C: GamePrefs.GetObject
 
 Done (V3.1.0 b14 IL):

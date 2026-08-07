@@ -405,6 +405,16 @@ The absence of `BlockLoot` / `BlockSecureLoot` / `BlockLandClaim` classes is
 deliberate: those roles migrated onto `TileEntityComposite`, so the block only
 carries the composite data template while the feature modules own the behavior.
 
+**Walk-trigger overrides (`Block.OnEntityWalking`, base IL=1 no-op; dispatched
+from `EntityAlive.updateCurrentBlockPosAndValue`):**
+- `BlockJumpPad` (IL=5): `entity.motion.y = 3` (launch).
+- `BlockMine` (IL=113): skip when the walker has `PassiveEffects.LandMineImmunity
+  (137) != 0` or is a spectator player; play `TriggerSound` at the block
+  (Linear, count 5, entity id); `delay = GetValue(LandMineTriggerDelay 171,
+  TriggerDelay)`; `explosion.EntityDamage = GetValue(TrapIncomingDamage 172,
+  BaseEntityDamage)`; `world.GetWBT().AddScheduledBlockUpdate(pos, blockID,
+  (ulong)(delay * 20))` (detonate after delay).
+
 ---
 
 ## 9. Dedicated relevance and residuals
