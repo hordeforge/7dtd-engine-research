@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: world clamps + spawn sampler
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 1: ClampToValidWorldPos (IL=82) Navezgane/90-inset clamp
+  all-axes; ClampToValidWorldPosForMap (IL=28) raw-extent-only contrast.
+- spawning.md 6: World.GetRandomSpawnPointPositions (IL=74) chunk-array
+  RandomRange(count)==1 gate + FindRandomTopSoilPoint(x,y,z,5) fill, zero
+  remainder.
+
 ## 2026-08-08 - tier-C: WeatherManager leaves
 
 Done (V3.1.0 b14 IL):
