@@ -241,6 +241,13 @@ directly; otherwise the base prefab is loaded once and rotations > 0 get a
 `fixChildblocks` argument is computed as `fixChildblocks && (slotArray ==
 null)` — the array is always non-null at that point, so the flag never reaches
 `GetPrefab` in this build (effectively dead).
+
+`PrefabInstance.GetOccupiedChunks()` (IL=65) lazily builds the cached
+`HashSetLong` of chunk keys: from `toChunkXZ(bbPos.x)` to
+`toChunkXZ(bbPos.x + bbSize.x)` and z likewise, adding every
+`MakeChunkKey(cx, cz)` in the inclusive range. `AddWorldPrefab(pi, isPOI)`
+(IL=32) is lock-guarded and registers the instance in `allPrefabs` +
+`worldPrefabs`, plus `poiPrefabs` when `isPOI`, setting `isSortNeeded`.
 ([`world-generation.md`](world-generation.md)).
 
 **Decorate** (`DecorateChunk`, called from
