@@ -682,6 +682,19 @@ the per-target damage math itself lives in
 `CreateItem` set, roll sandbox chance and `AddItem` or `ItemDropServer` for the
 empty container refund.
 
+**`ItemActionEat.ExecuteInstantAction(ent, stack, isHeldItem, stackCtrl)`
+(IL=179)** is the inventory right-click eat (the §4.1 one-shot variant): it
+stamps `MinEventContext.ItemValue` and fires MinEvent **24** on the item and
+the entity (use start) with `soundStart`. With the `Consume` flag and a
+partially-used stack (`UseTimes + passive 7 degradation < MaxUseTimes`) it
+only increments `UseTimes` and returns true (a sip); otherwise it decrements
+`DecHoldingItem(1)` (held) or `stack.count -= 1` (inventory, refreshing the
+`stackController`), fires MinEvent **29** (use end), runs
+`QuestEventManager.UsedItem`, and applies the `CreateItem` refund - gated by
+the `UseJarRefund` sandbox roll (option 12), added via
+`PlayerInventory.AddItem` or dropped with `ItemDropServer(stack, pos, zero,
+-1, 60, false)` when the inventory is full.
+
 **`GetDamageEntity` (IL=52) / `GetDamageBlock` (IL=70):** build FastTags =
 Primary/Secondary action tag | item tags (or MeleeTag) | holder stance/movement
 tags (| block tags for block damage). Then
@@ -1347,6 +1360,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionEat.ExecuteInstantAction IL=179: MinEvent 24
+  use start, Consume flag -> partial UseTimes sip vs full stack decrement,
+  MinEvent 29 + QuestEventManager.UsedItem, CreateItem refund with
+  UseJarRefund sandbox roll + AddItem/ItemDropServer fallback.
 - **2026-08-08:** Block bridge: ItemClassBlock.GetBlock IL=5 (Block.list
   [itemId]); GetBlockValueFromItemValue IL=15 SelectAlternates ->
   GetAltBlockValue(iv.Meta) else iv.ToBlockValue(false).
