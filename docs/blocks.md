@@ -380,6 +380,17 @@ entityId, delay, true, null)` - the TNT with its fuse `delay`, the mine with
 `explode(world, bvRef, entityId, 0.1)` before the normal damage delegates -
 any hit carries a damage-proportional chance to blow the TNT.
 
+**`BlockMine.TriggerMine(entity, world, blockPos, useTrigger)` (IL=99)** is
+the mine detonation: on a walker step (`useTrigger`) it plays the
+`TriggerSound` at the position, derives `TriggerDelay` from passive **171**
+and `explosion.EntityDamage` from passive **172** over
+`BaseEntityDamage`, then schedules the mine's own block update at
+`TriggerDelay * 20` sim ticks (`WorldBlockTicker.AddScheduledBlockUpdate`) -
+the fuse - so `UpdateTick` fires the `explode`. A direct trigger
+(`!useTrigger`) applies the same damage passive and
+`explode(world, ref, -1)` immediately. (The walker-side
+`LandMineImmunity` skip is the `OnEntityWalking` gate above.)
+
 `Block/DestroyedResult` (exact enum): `None=0`, `Keep=1`, `Downgrade=2`,
 `Remove=3`. The base `OnBlockDestroyedBy` returns `Downgrade`.
 
@@ -652,6 +663,9 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** BlockMine.TriggerMine IL=99: step -> trigger sound +
+  passive 171 delay / 172 entity damage, WBT-scheduled fuse
+  (TriggerDelay*20 ticks), direct trigger explodes immediately.
 - **2026-08-08:** BlockTNT.OnBlockDamaged IL=31: damage-proportional
   detonation chance (RandomFloat <= damage/MaxDamage -> explode 0.1 s).
 - **2026-08-08:** BlockTNT.explode IL=18 / BlockMine.explode IL=18:
