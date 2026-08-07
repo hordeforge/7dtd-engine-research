@@ -249,7 +249,9 @@ unboosted entries under `onlyBoosted`), computes
 the reference in place. `IsStatLowerBetter(type)` (IL=9) is true for
 `StaminaLoss` (112) and `TargetArmor` (163) - the two stats where a smaller
 value is better. `HasAnyBoostedStats` (IL=26) is a scan for any `isBoosted`
-entry.
+entry. `HasStats` (IL=5) is `Stats != null`; `ClearStats` (IL=4) nulls the
+array; `RemoveUnusedStats` (IL=77) drops zero-value entries (clearing the whole
+array when none remain).
 
 ---
 
