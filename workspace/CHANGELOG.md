@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: WorldBiomeProviderFromImage + DecoUtils cluster
+
+Done (V3.1.0 b14 IL):
+- world-generation.md 3.1: GetBiomeAt scale/offset fold, humidity/temperature stubs, GetRadiationAt, GetTopmostBlockValue splat switch, worldCoordsToTileCoords
+- chunk-providers.md 6.1: decorateSingleBlockTryPlaceDeco IL=287 gate order (slope/fertility/ore-noise/placeholder/replace)
+- chunk-providers.md 6.1: DecoUtils radius/flag leaves, CanPlaceDeco 4/7-arg, ApplyDecoAllowed + big-deco scanners
+
 ## 2026-08-08 - tier-C: WorldBlockFiller + BiomeLayer
 
 Done (V3.1.0 b14 IL):
