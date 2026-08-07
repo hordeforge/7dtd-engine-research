@@ -49,6 +49,14 @@ flowchart LR
 concrete types override it; the base is a no-op. So a chunk with
 no active machines still pays a bounded loop over its tile-entity list.
 
+**`Chunk.GetBlockEntity` (V3.1.0 b14)** is the read side of the registry:
+the `Vector3i` overload (IL=10) looks up `blockEntityStubs.dict` keyed by
+`GameUtils.Vector3iToUInt64(pos)` (null when absent); the `Transform`
+overload (IL=30) linearly scans `blockEntityStubs.list` for the matching
+`BlockEntityData.transform` (null when absent). `PrefabChunk` stubs both as
+null; `ChunkCluster.GetBlockEntity` (IL=12) resolves the chunk (null chunk →
+null) and delegates.
+
 ### 1.1 Type registry and factory
 
 `TileEntityType` is a byte-valued enum. `TileEntity.InstantiateFromRead` reads the
@@ -749,6 +757,9 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-07:** Chunk.GetBlockEntity: Vector3i (IL=10) UInt64-keyed dict,
+  Transform (IL=30) linear scan, PrefabChunk null, ChunkCluster (IL=12)
+  resolve + delegate.
 - **2026-08-07:** Chunk.UpdateTick IL=26 TeTick list walk; TEFeature write tails
   (§4.7); Workstation/PoweredTrigger/Collector/Light/trap write tails.
 - **2026-08-07:** NetPackageTileEntity Process IL=103 teBlockId drop + stream

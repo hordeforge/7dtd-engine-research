@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk.GetBlockEntity
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md: Chunk.GetBlockEntity Vector3i (IL=10) = dict
+  keyed Vector3iToUInt64; Transform (IL=30) = linear scan; PrefabChunk
+  null stubs; ChunkCluster (IL=12) resolve + delegate.
+
 ## 2026-08-08 - tier-C: Entity.FindAttachSlot
 
 Done (V3.1.0 b14 IL):
