@@ -520,6 +520,13 @@ and **11** (distance) with item tags; loop `rayCount` hits via
 `ItemActionAttack.FindHitEntityNoTagCheck` / `GetBlockHit` / `Hit`; decrement
 `AmmoCount` and apply `UseTimes` degradation.
 
+Leaf constants: `get_AmmoCount` (IL=4) / `set_AmmoCount` (IL=5) read and write
+`OriginalItemValue.Meta` - the deployed turret's ammo rides the item-value meta
+field, exactly like a gun's magazine. `InitTurret` (IL=8) is
+`FireController.Init(EntityClass.Properties, this)`.
+`get_IsTurning` (IL=15) is `IsOn && (YawController.IsTurning ||
+PitchController.IsTurning)`.
+
 The attached `MiniTurretFireController.Update` (a MonoBehaviour, so per frame)
 does the aiming and the target search:
 
