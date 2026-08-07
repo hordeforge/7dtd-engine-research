@@ -64,6 +64,31 @@ IL count **631**, **14** locals, **1** exception handler (destroy queue lock).
 | 11 | FPS stopwatch restart + `FPS.Update` | FPS counter |
 | 12 | `BlockLiquidv2.UpdateTime` | Liquid time |
 
+#### Phase A2: `updatePauseState` (IL=94)
+
+`Pause(bool)` (IL=5) only stores `requestedPauseState`; the apply happens here
+every frame (also reachable from `Disconnect`):
+
+1. No pending request → return.
+2. Clear `requestedPauseState`; if the new state equals `gamePaused` → return.
+3. **Force-unpause override:** if `ConnectionManager.IsSinglePlayer()` and
+   gamemode != `GameModeEditWorld` and `GameStats.GetInt(0) != 0` → state = false
+   (single-player cannot pause mid-save/round; not applicable on dedicated).
+4. `SetPauseWindowEffects(state)`: when pausing and not
+   `GameModeSurvivalSP`: clear `AimingGun` on every local player (client-only;
+   no local players on dedicated).
+5. **Pause:** `GameStats.Set(0, 2)`; if `IsServer()` →
+   `SaveLocalPlayerData()` + `SaveWorld()` (a pause triggers a world save);
+   `Time.timeScale = 0`; stop gamepad vibration if primary player exists.
+6. **Unpause:** if `GameStats.GetInt(0) != 0` → `GameStats.Set(0, 1)` (round
+   becomes active); `Time.timeScale = 1`.
+7. If `gamePaused` actually flips and world exists: pause → audio
+   `PauseGameplayAudio` + `EnvironmentAudioManager.Pause` +
+   `dmsConductor.OnPauseGame`; unpause → matching `UnPause*`. Store `gamePaused`.
+
+`IsPaused()` (IL=3) reads `gamePaused`. `SetToolTipPause` (IL=10) early-returns
+on dedicated (client UI only).
+
 ### Phase B: Optional singleton managers (null-checked chain)
 
 Rough order (each guarded `brfalse` if instance missing):

@@ -288,12 +288,16 @@ Client sends after the enter-game batch. Package process is a thin forwarder to
 3. Entity id: reuse `PlayerDataFile.id` if loaded and not `-1` and free; else
    allocate `EntityFactory.nextEntityID` (and reallocate if that id is already live).
 4. Spawn position selection (first success wins):
-   - If `GameStats` bool **25**: for each same-`TeamNumber` player, try
-     `FindRandomSpawnPointNearPlayer(..., radius 15, ...)`.
+   - If `GameStats` bool **25** (`IsSpawnNearOtherPlayer`): for each player with
+     `TeamNumber == 0`, try `FindRandomSpawnPointNearPlayer(..., radius 15, ...)`.
+     The IL's `teamNumber` local is written exactly once with **0**, so the scan
+     matches unteamed players only (the joining team is not restored here;
+     `NetPackagePlayerId.Setup` also passes team **0**).
    - Else if `nearEntityId != -1` and spawn-near-friend mode != 0:
      up to 15 tries of `GetRandomSpawnPositionMinMaxToPosition` (min **40**, max **150**,
-     land-claim aware); mode **2** rejects forest/pine forest biome results
-     (`BiomeType` 2..3).
+     land-claim aware); mode **2** (`AllowSpawnNearFriend.InForest`) keeps the
+     candidate only when the biome is `BiomeType` **2..3 = Forest / PineForest**
+     (other biomes rejected).
    - Else if still undef: `SpawnPointList.GetRandomSpawnPosition`.
 5. Build `EntityCreationData` (class from profile, id, team, pos/rot); copy saved
    `entityData` stream when `bLoaded`.

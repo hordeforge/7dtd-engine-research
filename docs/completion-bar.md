@@ -285,6 +285,10 @@ Closed in recent sessions (still optional, not required for A+B):
 | Trader eject teleport + dynamic ragdoll flags | loot-economy.md, entity-ai.md |
 | StartJumpSwimMotion + IsWalkTypeACrawl + KillLootContainer | entity-ai.md, combat-damage.md |
 | DigUpdate digActionTicks 18/4/14 + organic Hit | entity-ai.md |
+| CopyPropertiesFromEntityClass IL=1128 full config copy | entity-ai.md D8.6 |
+| updatePauseState save-on-pause + pause apply | loop-gmupdate.md Phase A2 |
+| PlayerDisconnected path + MemoryPools.Cleanup + reason 2 | server-lifecycle.md §3.2 |
+| Spawn-near-friend InForest biome gate = Forest/PineForest only | protocol.md post-spawn |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

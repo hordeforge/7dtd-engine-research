@@ -325,9 +325,6 @@ false if hit (blocked); restore layer; true if clear.
 **`GetAttackTimeoutTicks` (IL=10):** if world not dark → `attackTimeoutDay`;
 else `attackTimeoutNight`.
 
-**`GetAttackTimeoutTicks` (IL=10 legacy note):** day → `attackTimeoutDay`; dark →
-`attackTimeoutNight`.
-
 **`GetMaxAttackTime` (IL=2):** constant **10** (sets `hasBeenAttackedTime` on
 pain hits; gates `IsAttackValid`).
 
@@ -2050,6 +2047,88 @@ range &lt; 0 → `max(3, sightRangeBase * 0.2)`; store `sleeperViewAngle` /
 **`SetSleeperHearing(percent)` (IL=22):** clamp percent ≥ **0.001**; store
 `1/percent` into local then
 `sleeperNoiseToSense/Wake *= percent` (hearing scale).
+
+### D8.6 Entity config init: `EntityAlive.CopyPropertiesFromEntityClass` (IL=1128)
+
+One-time copy from the resolved `EntityClass` (via `EntityClass.list[entityClass]`,
+after base `Entity::CopyPropertiesFromEntityClass`). Order in IL:
+
+1. **Hand item:** `handItem = ItemClass.GetItem(Properties[HandItem], false)`, but
+   if the prop value contains `,` only the substring before the first comma is
+   used. Empty prop → fallback `ItemClass.GetItem("meleeHandPlayer").Clone()`.
+   Empty result throws `"HandItem missing <name>"`. If `inventory != null`:
+   `inventory.SetBareHandItem(handItem)`.
+2. **Right-hand joint:** default `"Gunjoint"`, or `"RightWeapon"` when
+   `emodel is EModelSDCS`; prop `RightHandJointName` can override.
+3. **Faction:** non-player: `factionId/factionRank = 0`; prop `Faction` →
+   `FactionManager.Instance.GetFactionByName`; if found store `factionId =
+   faction.ID` and prop `FactionRank` (ParseUInt8) into `factionRank`. Player
+   special case: if the current `factionId` resolves to `Faction.ID == 0`
+   (none), `CreateFaction(entityName, true, "")` and `factionRank = 255`.
+4. **Sight:** `maxViewAngle` default **180** (prop); `sightRangeBase =
+   EntityClass.SightRange`; `sightLightThreshold` copied from class;
+   `SetSleeperSight(-1, -1)` (→ `maxViewAngle` / `max(3, sightRangeBase*0.2)`).
+5. **Sleeper thresholds** (each a `rand.RandomRange(min, max)` over the class
+   vector2 pair): `sightWakeThresholdAtRange` from `SleeperSightToWakeMin/Max`;
+   `sightGroanThresholdAtRange` from `SleeperSightToSenseMin/Max`;
+   `sleeperNoiseToSense` from `SleeperNoiseToSense`;
+   `sleeperNoiseToSenseSoundChance` = class scalar;
+   `sleeperNoiseToWake` from `SleeperNoiseToWake`.
+6. **Timing / movement fields** (seconds values ×**20** become ticks):
+   - `attackTimeoutDay/Night`: float default **1** (props `AttackTimeoutDay/Night`) ×20.
+   - `stompsSpikes` prop (bool); `weight` default **1**, then `FastMax(weight, 0.5)`;
+     `pushFactor` default **1**; `timeStayAfterDeath` default **5** ×20;
+     `IsMale` default **true**.
+   - `IsFeral = EntityClass.Tags.Test_Bit(FeralTagBit)`.
+   - `proneRefillRate` / `kneelRefillRate` from `KnockdownProneRefillRate` /
+     `KnockdownKneelRefillRate` ranges.
+   - `moveSpeed` default **1**; `moveSpeedNight` starts at `moveSpeed` then prop;
+     `moveSpeedAggro` and `moveSpeedAggroMax` both start at `moveSpeed`, then one
+     `ParseVec` (`"aggro aggroMax"` pair) overwrites both.
+   - `moveSpeedPanic`/`moveSpeedPanicMax` default **1**; after panic prop, if
+     panic ≠ 1 then `panicMax = panic`.
+   - `swimSpeed` prop; `swimStrokeRate` vec.
+   - `moveSpeedRand` default `Vector2.negativeInfinity`; if `x > -1`: roll
+     `rand x..y`; if `moveSpeedAggro < 1`: aggro += roll, clamp min **0.1**,
+     then cap at `moveSpeedAggroMax`.
+   - `crouchType` int prop; `walkType = GetSpawnWalkType(EntityClass)`;
+     `bCanClimbLadders` / `bCanClimbVertical` bool props.
+   - `jumpMaxDistance` default `(1.9, 2.1)` → `RandomRange`; `jumpDelay` default
+     **1** ×20; `ExperienceValue` default **20** (prop `ExperienceGain`).
+   - `aiManager.CopyPropertiesFromEntityClass(entityClass)` when aiManager set.
+7. **Sounds** (all string props; defaults in parentheses): spawn, sleeper groan
+   (`SoundSleeperSense`), sleeper snore, death, alert, attack, living, random,
+   sense, give-up, step type (**"step"**), stamina, jump, land, land thump
+   (`SoundPlayerLandThump`), hurt, distressed, hurt small, drown pain, drown
+   death, water surface. `soundAlertTicks` default **25** ×20; `soundRandomTicks`
+   default **25** ×20; `particleOnDeath` / `particleOnDestroy`.
+8. **itemsOnEnterGame:** only when
+   `GameMode.GetGameModeForId(GameStats.GetInt(1))` is non-null. Class prop
+   `ItemsOnEnterGame` → `GetString(gameMode.GetTypeName())` (per-mode list,
+   keyed by mode type name). Split on `,`; `ItemStack.FromString` each trimmed
+   entry; empty result throws `"Item with name '...' not found in class
+   <name>"`. An item is **skipped** when `ItemClass.CreativeMode == 2 &&
+   Platform.DeviceFlags.IsCurrent(DeviceFlag 56)` (dedicated platform: creative
+   items dropped from the enter-game grant).
+9. **fallBehaviors** (class prop `FallBehavior`, key = op name): each key data
+   parses `anim` (enum `FallBehavior.Op`), `weight` (float), `height` /
+   `ragePer` / `rageTime` (FloatRange), `difficulty` (IntRange, default
+   **0..10**). Bad parse logs `Expected 'X' parameter ... skipping` and drops
+   the entry. Add `FallBehavior(key, op, height, weight, ragePer, rageTime,
+   difficulty)`.
+10. **destroyBlockBehaviors** (class prop `DestroyBlockBehavior`): iterate every
+    `DestroyBlockBehavior.Op` enum value; if the class carries data for that op
+    name, parse `weight` (float), `ragePer` / `rageTime` (FloatRange),
+    `difficulty` (IntRange default 0..10) and add
+    `DestroyBlockBehavior(name, op, weight, ragePer, rageTime, difficulty)`.
+11. **Distraction:** `distractionResistance` =
+    `EffectManager.GetValue(PassiveEffects 65 (DistractionResistance), null,
+    0, this, null, emptyTags, ...)`; `distractionResistanceWithTarget` = same
+    but with the static `DistractionResistanceWithTargetTags` tag set.
+
+Consumers: `fallBehaviors` feeds `ChooseFallBehavior` (above); the sound fields
+drive `internalPlayStepSound` / alert loops; `itemsOnEnterGame` is granted on
+spawn.
 
 ### D8.2b `OnTriggered` (IL=14)
 

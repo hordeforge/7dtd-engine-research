@@ -6,6 +6,21 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CopyPropertiesFromEntityClass, pause state, disconnect path
+
+Done (V3.1.0 b14 IL):
+- EntityAlive.CopyPropertiesFromEntityClass IL=1128: hand item, faction, sight +
+  sleeper thresholds, attack timeout/speed/jump/weight fields, sound table,
+  itemsOnEnterGame (creative items skipped on device flag 56), fallBehaviors +
+  destroyBlockBehaviors parse, distraction passives 65.
+- GameManager.updatePauseState: Pause(false) on dedi; save-on-pause
+  (SaveLocalPlayerData + SaveWorld); GameStats 0 2/1; timeScale 0/1.
+- GameManager.PlayerDisconnected: dedi GC.Collect + MemoryPools.Cleanup;
+  LastLogin/EntityId -1; NetPackagePersistentPlayerState reason 2 flags 192;
+  SavePersistentPlayerData; DisconnectClient. HandlePersistentPlayerDisconnected.
+- protocol.md post-spawn fix: spawn-near-friend mode 2 (InForest) accepts only
+  BiomeType 2..3 (Forest/PineForest), not rejects; teamNumber local hard 0.
+---
 ## 2026-08-07 — tier-C: DropContentOf TE + local inventory send + handoff
 
 Done (V3.1.0 b14 IL):

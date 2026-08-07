@@ -263,6 +263,34 @@ over span **80**, clamped 0..1; return min(xFactor, zFactor). Placement needs
 **Party variant** `GetLandClaimOwnerInParty` also requires party membership of
 the ally owner when granting true inside claim size.
 
+### 3.2 Player disconnect path (`GameManager.PlayerDisconnected`, IL=76)
+
+Entry: client sends `NetPackagePlayerDisconnect` (Process IL=9 writes base player
+data, then calls `GameManager.PlayerDisconnected(cInfo)`; see
+[protocol-packages.md](protocol-packages.md) §6.21). Server work in order:
+
+1. If `cInfo.entityId != -1`: resolve the entity; log
+   `Player {0} disconnected after {1} minutes` (elapsed = `timeSinceLevelLoad -
+   CreationTimeSinceLevelLoad`, `/60`, culture-invariant `0.0`).
+2. **Dedicated only:** `GC.Collect()` + `MemoryPools.Cleanup()` (post-disconnect
+   idle trim).
+3. `getPersistentPlayerData(cInfo)`; if found: `LastLogin = DateTime.Now`,
+   `EntityId = -1`, then broadcast `NetPackagePersistentPlayerState.Setup(data,
+   reason **2** (disconnect))` on flags **192**.
+4. If `persistentPlayers` set: `SavePersistentPlayerData()`.
+5. `ConnectionManager.DisconnectClient(cInfo, false, true)` (full teardown, see
+   [network.md](network.md) §1.3).
+
+**`HandlePersistentPlayerDisconnected(entityId)` (IL=19):** look up data by
+entity id; `DispatchPlayerEvent(data, null, reason 2)` then
+`UnmapPlayer(PrimaryId)`.
+
+**`GameManager.Disconnect()` (IL=129) on dedicated:** log `"Disconnect"`;
+`Pause(false)`; the client UI/local-player blocks are skipped (`IsDedicatedServer`
+jumps), so on a dedicated host it ends at `ConnectionManager.StopServers()`
+(not-client path). The client path (when not dedicated) sends
+`NetPackagePlayerDisconnect` and starts the `disconnectLater` coroutine instead.
+
 ---
 
 ## 4. Shutdown and save
