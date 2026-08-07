@@ -447,8 +447,11 @@ managers.
 4. **Client-only block** (not server): map DB `SaveAsync` via
    `ThreadManager.AddSingleTask`; local players `EnableCamera(false)` +
    `SetControllable(false)`.
-5. `ShutdownMultiplayerServicesNow()`; `PlayerInteractions.Shutdown`;
-   `GameplayNotifier.GameplayEnd()`.
+5. `ShutdownMultiplayerServicesNow()` (IL=33: not dedicated →
+   `IUserClient.StopAdvertisePlaying`; server → `AuthorizationManager.ServerStop`,
+   `IMasterServerAnnouncer.StopServer` + `ServerInformationTcpProvider.StopServer`;
+   `ILobbyHost.ExitLobby`; `IGameplayNotifier.EndOnlineMultiplayer`);
+   `PlayerInteractions.Shutdown`; `GameplayNotifier.GameplayEnd()`.
 6. **Client-only teardown** (not dedicated): local player entity removed,
    `myPlayerId = -1`, per non-primary UI: XUi shutdown, entities removed, UIs
    destroyed; `ModManager.GameEnded()`; main menu re-open.

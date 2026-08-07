@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: ShutdownMultiplayerServicesNow
+
+Done (V3.1.0 b14 IL):
+- ShutdownMultiplayerServicesNow IL=33: advertise stop, AuthorizationManager.
+  ServerStop, master announcer + ServerInformationTcpProvider stop, lobby
+  exit, EndOnlineMultiplayer.
 ## 2026-08-08 — tier-C: GameStateManager.EndGame
 
 Done (V3.1.0 b14 IL):
