@@ -360,6 +360,13 @@ branch of the visibility ray) checks `t.GetComponent<EntityVehicle>()` and,
 failing that, `t.GetComponentInParent<CollisionCallForward>()`'s `Entity`
 cast to `EntityVehicle` - the static resolve for a vehicle collision mesh.
 
+**`EntityDrone.IgnoreCollisionEntity(ray, seeDist)` (IL=38)** implements the
+drone pass-through in the same ray: it records the drone GameObject's layer
+and its `PhysicsTransform` layer, temporarily sets both to **2** (the
+self-model layer the ray skips), re-runs `Voxel.Raycast(world, ray, seeDist,
+-1612492829, 64, 0)`, restores both layers, and returns whether the ray still
+hit anything - i.e. whether something *behind* the drone blocks the view.
+
 **`CanSeeStealth(dist, lightLevel)` (IL=21):**
 `t = dist / sightRange`; threshold =
 `FastLerp(sightLightThreshold.x, .y, t)`; true if `lightLevel > threshold`.
@@ -3052,6 +3059,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EntityDrone.IgnoreCollisionEntity (IL=38): temporary layer-2
+  switch of drone + PhysicsTransform, ray re-run, restore - pass-through
+  visibility check.
 - **2026-08-07:** EntityVehicle.FindCollisionEntity (IL=18): transform
   EntityVehicle or parent CollisionCallForward Entity - vehicle-hit resolve.
 - **2026-08-07:** GameUtils.GetHitRootTransform (IL=29): E_BP_ body-part

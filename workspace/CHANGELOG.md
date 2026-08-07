@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityDrone.IgnoreCollisionEntity
+
+Done (V3.1.0 b14 IL):
+- EntityDrone.IgnoreCollisionEntity (IL=38) narrated in entity-ai.md:
+  drone + PhysicsTransform layers saved, both set to 2, ray re-run, layers
+  restored - returns whether something behind the drone still blocks.
+
 ## 2026-08-08 - tier-C: EntityVehicle.FindCollisionEntity
 
 Done (V3.1.0 b14 IL):
