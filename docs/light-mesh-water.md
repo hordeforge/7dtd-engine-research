@@ -55,7 +55,11 @@ chunk-local coords (`& 15`), reads one byte from the `chnLight` channel, and
 splits the **nibbles**: `Sun` is the low 4 bits (`light & 15`), `Block` the
 high 4 bits (`light >> 4`). `ChunkCluster.GetLight(pos, type)` (IL=21) is the
 world-coordinate wrapper: chunk lookup, `0` when the chunk is null, else
-delegate.
+delegate. `Chunk.SetLight(x, y, z, intensity, type)` (IL=56) is the write:
+type **1** (sun, low nibble) keeps the high nibble (`intensity | old & 0xF0`),
+type **0** (block, high nibble) keeps the low (`(intensity << 4) | old & 0x0F`);
+a changed byte writes the channel, flags `NeedsRegenerationAt(y)`, and sets
+`isModified`. `ResetLights(value)` (IL=6) clears the channel to a value.
 
 **World query leaves:** `World.IsOpenSkyAbove(x, y, z)` (IL=23) is true when
 the `ChunkCache` is null, else
