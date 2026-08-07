@@ -167,6 +167,16 @@ save/load.
 | `DelayAllEnemySpawningUntil` | push all enemy groups' delay forward (used to suppress enemies) |
 | `IsSpawnNeeded(biomes, worldTime)` (IL=57) | false if biome/group list missing; true if any group missing from `entitesSpawned`, or `count < maxCount`, or `worldTime > delayWorldTime`; else false (all groups full and still delayed) |
 
+The persisted blob is a versioned stream (header byte 2 = version, then a
+count byte capped at **255**, then per entry: `int32` idHash, `uint16` packed
+`(maxCount << 8) | count`, `uint64 delayWorldTime`). `read` clears the dict
+first and, for a version-1 stream, reads and discards the legacy entries
+(string key + the same uint16/uint64). `BeforeWrite` (IL=32) allocates a pooled
+`MemoryStream`/`BinaryWriter` (`MemoryPools.poolMemoryStream` /
+`poolBinaryWriter`), runs `write`, and stores `ccd.data = ms.ToArray()` into the
+chunk's `ChunkCustomData`, so the budget rides the chunk save blob with no extra
+region field.
+
 **`EntitySpawner.resetRuntimeVariables` (IL=19):** zero `totalSpawnedThisWave`,
 both delay timers, clear `entityIdSpawned`, `currentWave=0`,
 `numberToSpawnThisWave=0`. **`ResetSpawner`** just calls that.
