@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: DynamicPrefabDecorator decorate path
+
+Done (V3.1.0 b14 IL):
+- server-browser-prefabs.md 3.2: DecorateChunk IL=70 (thread-local list, GetPrefabsAtXZ +15 span, prefabInstanceSizeComparison descending x*z)
+- server-browser-prefabs.md 3.2: SortPrefabs IL=38 allPrefabsSorted rebuild; CopyIntoChunk IL=34 (entity stubs gated on IsEditor || GameStats 24)
+
 ## 2026-08-08 - tier-C: sub-biome noise fold
 
 Done (V3.1.0 b14 IL):
