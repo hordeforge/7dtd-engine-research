@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PropRef wire form
+
+Done (V3.1.0 b14 IL):
+- blocks.md 4: PropRef.Read IL=12 - ChunkPos Vector2i + PropId i32
+  (prop addressed by prop chunk + per-chunk id).
 ## 2026-08-08 - tier-C: BlockValueRef wire discriminant
 
 Done (V3.1.0 b14 IL):
