@@ -365,6 +365,9 @@ water mask: it allocates `poiCols : GridCompressedData<Byte>` at
 `splat3.png`/`.tga` (format error `World's splat3 file is not in the correct
 format (needs to be either RGBA32 or ARGB32)!`), and finally wraps the result
 as `m_Poi : WorldGridCompressedData<Byte>`.
+`WorldGridCompressedData.Contains(x, y)` (IL=25) is the `MinPos`/`MaxPos`
+bounds test; `GetData(x, y)` (IL=18) folds world coords through
+`colors.GetValue(x + addXOffs + sizeXHalf, y + addYOffs + sizeYHalf)`.
 
 `WaterFloodFill` (IL=196) is the BFS water-mask builder: a cell whose terrain
 height is below `maxY + 1` is marked `cols.SetValue(x, z, colWater)` and its
