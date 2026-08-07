@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: deco shape hooks + reset
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 5: BlockShapeDistantDeco OnBlockAdded/Loaded (attach, forced Y / non-remote), OnBlockRemoved (detach), OnBlockValueChanged base-only
+- chunk-providers.md 5: ResetDecosForWorldChunk IL=73 (off-main queue, RestoreGeneratedDecos, NetPackageDecoResetWorldChunk broadcast)
+
 ## 2026-08-08 - tier-C: deco edit-sync + load
 
 Done (V3.1.0 b14 IL):
