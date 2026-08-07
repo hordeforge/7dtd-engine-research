@@ -656,6 +656,19 @@ dir, max(Range, BlockRange) + SphereRadius, entityId)` +
 `RayHit = false` + MinEvent **26** / **34** by action index; any hit:
 `RayHit = true` and the swing counts.
 
+**`ItemActionDynamic.hitTarget(data, hitInfo, isGrazingHit)` (IL=454)** is
+the hit application: the effect tags assemble as
+`ActionTags | holdingItem.ItemTags (or MeleeTag) | CurrentStanceTag |
+CurrentMovementTag`; each swing on a degradable item adds
+`GetValue(passive 7, iv, 1, holder, tags) * ItemDegradationModifier` to
+`UseTimes` and runs `HandleItemBreak`; `attackDetails.isCriticalHit` resets
+to false and `MinEventContext.StartPosition` is set from the ray origin.
+The hit then dispatches by `hitInfo.tag`: a block/terrain hit goes through
+`GetDamageBlock` (the block damage + density path), an entity hit through
+`GetDamageEntity` (with the graze/penetration accounting from the sweep) -
+the per-target damage math itself lives in
+[`combat-damage.md`](combat-damage.md).
+
 **`ItemActionEat.consume` (IL=154):** `QuestEventManager.UsedItem` + entity
 `FireEvent`; increase `UseTimes` via `EffectManager` (durability of food stack);
 `Inventory.DecHoldingItem(1)`; `PlayerStealth.SetSmellEat(smellUse)`; if
@@ -1327,6 +1340,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionDynamic.hitTarget IL=454: tag assembly
+  (action + item/MeleeTag + stance + movement), passive 7 degradation x
+  ItemDegradationModifier + HandleItemBreak, isCriticalHit reset, block/
+  entity dispatch via GetDamageBlock / GetDamageEntity.
 - **2026-08-08:** Dynamic-melee sweep: ItemActionDynamicMelee.Raycast
   IL=203 - no vehicle, stamina cost on local player, passive 199
   penetration loop (useExistingRay, 20-iter cap), water particles,
