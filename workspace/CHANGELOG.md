@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: get_gameStage formula and GameStage statics
+
+Done (V3.1.0 b14 IL):
+- EntityPlayer.get_gameStage: daysLived clamp to Level, biome/quest mods, passive 157, GlobalGameStageModifier.
+- GameStageDefinition.cctor: DifficultyBonus=1, StartingWeight=1, DiminishingReturns=0.5, DaysAliveChangeWhenKilled=2.
+---
 ## 2026-08-07 — tier-C: CalcPartyLevel diminishing returns and setState
 
 Done (V3.1.0 b14 IL):

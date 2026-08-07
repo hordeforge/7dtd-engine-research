@@ -240,6 +240,29 @@ skills, 23 crafting_skills with max_level 20-100 driven by magazines, 57 live pe
 
 ---
 
+## 5. Player `gameStage` (`EntityPlayer.get_gameStage`, IL=124)
+
+Used by party/horde spawner sizing ([aidirector.md](aidirector.md)
+`CalcPartyLevel`). Not the same as loot stage.
+
+```text
+daysLived = Clamp((worldTime - gameStageBornAtWorldTime) / 24000, 0, Progression.Level)
+difficulty = GameStageDefinition.DifficultyBonus   // default 1
+
+if biomeStandingOn:
+  questMod/Bonus from ActiveQuest.QuestClass (else 0)
+  biomeMod   = biome.GameStageMod   * BiomeGameStageModifier
+  biomeBonus = biome.GameStageBonus * BiomeGameStageModifier
+  base = (Level * (1 + biomeMod + questMod) + daysLived + biomeBonus + questBonus) * difficulty
+else:
+  base = (Level + daysLived) * difficulty
+
+return max(1, floor(EffectManager.GetValue(passive 157, base) * GlobalGameStageModifier))
+```
+
+Passive **157** is the game-stage EffectManager hook; both biome and no-biome
+paths multiply by `GlobalGameStageModifier` after the effect.
+
 ## Related docs
 
 | Doc | Role |
@@ -247,10 +270,13 @@ skills, 23 crafting_skills with max_level 20-100 driven by magazines, 57 live pe
 | [minevents.md](minevents.md) | `ActionAddXP` / `ActionAddPlayerLevel` XP sources |
 | [crafting-recipes.md](crafting-recipes.md) | Perks unlock recipes |
 | [buffs.md](buffs.md) | Perk passive-effect math + calculated level |
+| [aidirector.md](aidirector.md) | Party level from member `gameStage` |
 | [server-lifecycle.md](server-lifecycle.md) | Progression persisted with the player profile |
 
 ## Changelog
 
+- **2026-08-07:** get_gameStage IL=124 daysLived clamp, biome/quest mods,
+  passive 157, GlobalGameStageModifier.
 - **2026-08-07:** AddLevelExp IL=161 apply order (bonus EffectManager, recursive).
 - **2026-08-06:** Progression::Write blob layout (the PlayerDataFile
   progressionData stream) and ProgressionValue::Write; getExpForLevel exponent is

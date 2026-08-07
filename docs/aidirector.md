@@ -243,6 +243,10 @@ from highest to lowest: `sum += stage * weight` then
 `weight *= DiminishingReturns` (start `weight = StartingWeight`);
 `FloorToInt(sum)`.
 
+**`GameStageDefinition` static defaults (`.cctor` IL=12):**
+`DifficultyBonus=1`, `StartingWeight=1`, `DiminishingReturns=0.5`,
+`DaysAliveChangeWhenKilled=2` (then empty `gameStages` dict).
+
 **`CalcStageSpawnMax` (IL=30):** sum every `SpawnGroup.spawnCount` in the stage
 (walks groups 0..Count-1; clobbers field `spawnGroup` during walk).
 
@@ -510,8 +514,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** CalcPartyLevel diminishing returns formula; CalcStageSpawnMax
-  sum; SetPartyLevel gsScaling; CanSpawn EnemyCount vs MaxSpawnedZombies.
+- **2026-08-07:** StartingWeight=1 DiminishingReturns=0.5 statics; CalcPartyLevel
+  formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset
