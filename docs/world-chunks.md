@@ -98,6 +98,14 @@ returns null for a missing chunk; `GetBlockFaceTexture(pos, face, channel)`
 `new Vector3i(Fastfloor(x), Fastfloor(y), Fastfloor(z))` (floor, so the
 negative half-space maps consistently).
 
+`ChunkCluster` coordinate helpers: `ToWorldPosition(local)` (IL=5) adds the
+cluster `Position`; `ToLocalPosition(world)` (IL=29) subtracts it per
+component; `ToLocalVector` (IL=2) is the identity (the cluster is axis
+aligned); `ToLocalKey(key)` (IL=24) rebases a packed chunk key by
+`toChunkXZ(FloorToInt(Position.x/z))` and repacks it. `IsOnBorder(chunk)`
+(IL=32) is true only for fixed-size clusters, when the chunk X/Z sits on
+`ChunkMinPos`/`ChunkMaxPos`.
+
 ---
 
 ## 3. Generation
@@ -463,6 +471,14 @@ Silent in-chunk write used by load, falling, inject, and some TE paths:
 
 Does **not** fire light/mesh/stability RPC; callers that need those use full
 `SetBlock` / `SetBlockRPC`.
+
+**Neighbor notification:** `ChunkCluster.notifyBlocksOfNeighborChange(worldPos,
+newBV, oldBV)` (IL=23) fans `notifyBlockOfNeighborChange` to all six
+`Vector3i.AllDirections` offsets. The single-cell version (IL=24) skips remote
+worlds, reads the neighbor's current block, and for non-air blocks calls
+`Block.OnNeighborBlockChange(world, neighborPos, neighborBV, changedPos, newBV,
+oldBV)` - the hook behind water flow, plant updates, rails, and spike /
+mechanical neighbor reactions.
 
 ### 5.0b Uncull and trader lookup helpers
 
