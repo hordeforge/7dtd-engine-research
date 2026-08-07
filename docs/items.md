@@ -1376,6 +1376,15 @@ that axis (when terrain with `FertileLevel >= 2`) become `adjacentBlock` at
 `Progression.AddLevelExp(fertileBlock.material.Experience, "_xpOther", 8,
 true, true, -1, null)`, commits via `SetBlocksRPC`, and plays `soundEnd`.
 
+**`ItemActionCollectWater.ExecuteAction` (IL=89)** is the water-fill
+action: press-only; for an `ItemClassWaterContainer` the fill mass is
+`max(0, MaxMass - Meta)` (default 19500) and a remaining capacity under 195
+returns; the one-shot latch (`lastUseTime == 0`) raycasts the player's
+`HitInfo` ray (`Voxel.Raycast(world, ray, cDigAndBuildDistance, 16, 4095,
+0)`) and, when the hit cell's `WaterValue.HasMass()`, stamps `lastUseTime`,
+stores `targetPosition` + `targetMass` on the action data, and starts the
+`RightArmAnimationUse` - the actual fill completes in `OnHoldingUpdate`.
+
 **`ItemActionTerrainTool` (V3.1.0 b14)** is the terrain-sculpt tool
 (dig/flatten): `ExecuteAction` (IL=46) latches `bActivated` +
 `activateTime` on press and forwards `GameManager.ItemActionEffectsServer
@@ -1480,6 +1489,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionCollectWater.ExecuteAction IL=89: fill mass =
+  MaxMass - Meta (default 19500, <195 return), one-shot latch, water-cell
+  raycast (16/4095), targetPosition/targetMass latch + fill in
+  OnHoldingUpdate.
 - **2026-08-08:** ItemActionMakeFertile.hitTheTarget IL=175: FertileLevel<2
   melee delegate, dominant-axis adjacent cells -> adjacentBlock
   (DensityTerrain/3) + hit cell -> fertileBlock, AddLevelExp xpOther,
