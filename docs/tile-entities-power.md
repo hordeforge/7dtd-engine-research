@@ -261,6 +261,36 @@ for network and UI fuel/slot sync. Fields (DumpType):
 IsOn/fuel/solar/slots/MaxOutput/LastOutput for UI. Disk path uses base TE versioning.
 
 This is the wire shape inside `NetPackageTileEntity` payloads for power sources,
+
+### 2.2 The `TileEntityComposite` envelope (V3.1.0 b14)
+
+`TileEntityComposite` (TE type 25) wraps its feature modules in a versioned,
+size-marked envelope (`write` IL=74 / `read` IL=479 with the save-id
+`blockIdMapping`):
+
+| Field | Width | Note |
+|---|---|---|
+| base `TileEntity` preamble | - | version u16 + chunkPos (+ heapMapUpdateTime on disk) |
+| version | u16 | **18** on disk (Save mode); `UseLocalVersioning` reads/writes a local u16 on net; legacy path uses `GetLegacyForkVersion` |
+| outer size marker | i32 | `ReserveSizeMarker(4)` / `FinalizeSizeMarker` |
+| `blockId` | i32 | `teData.Block.blockID`; on read remapped through `blockIdMapping[blockId]` when provided; the resolved `Block.list` entry must be a `BlockCompositeTileEntity` (else `Log.Error` + skip) |
+| owner | `PlatformUserIdentifier` | null in edit mode (`GameManager.IsEditMode`) |
+| `featureCount` | u8 | `modulesInternalOrder.Length` |
+| per feature | | `i32 NameHash` (`TileEntityFeatureData.NameHash`), per-feature i32 size marker, `ITileEntityFeature.Write/Read` payload |
+
+**Read resilience (IL=479):** modules are initialized from the block first
+when absent (`InitModulesFromBlock`). The **legacy path** (version < 17)
+requires the stream feature count to equal the current definition (else
+`Legacy composite TE ... has {N} features in stream but current definition
+has {M}. Skipping TE payload.`) and matches each module position by
+`NameHash`; the **modern path** (>= 17) resolves each hash through
+`teData.GetFeatureIndex` - an unknown hash logs
+`Block ... no longer defines feature hash 0x... Skipping payload.` and skips,
+a module read failure is caught (`Module read failed for feature ...`) and
+logged, and every level (`outer`, per-feature) validates its size marker
+(`ValidateSizeMarker`), erroring on mismatch
+(`... failed size validation: expected {0} B, read {1} B`). The per-feature
+body layouts are in §4.7 below.
 not a separate NetPackage type.
 
 ---
@@ -833,6 +863,12 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-08:** TileEntityComposite envelope (2.2): write IL=74 / read
+  IL=479 - version u16 18, outer + per-feature i32 size markers, blockId
+  via blockIdMapping remap + BlockCompositeTileEntity check, owner (null in
+  edit mode), featureCount u8, per-feature NameHash; legacy (<17) count/hash
+  match vs modern GetFeatureIndex dispatch, skip-on-unknown, caught module
+  read failures, ValidateSizeMarker checks.
 - **2026-08-08:** Chunk.AddEntityBlockStub (IL=21): UInt64-keyed
   blockEntityStubs Set with old-stub queueing into blockEntityStubsToRemove
   on cell collision (deferred model-swap cleanup).
