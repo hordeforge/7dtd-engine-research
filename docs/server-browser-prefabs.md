@@ -280,6 +280,19 @@ boundingBoxPosition, forceOverwrite, questTags)`, then entity stubs only when
 `CopyEntitiesIntoChunkStub`, then records `lastCopiedPrefabPosition` and sets
 `bPrefabCopiedIntoWorld`.
 
+`Prefab.CopyBlocksIntoChunkNoEntities` (IL=715) is the block stamping engine:
+after the `IsCullThisPrefab` early-out and `InitTerrainFillers`, it clips the
+prefab's blocks to the chunk AABB and, per block, applies density-aware
+placement (terrain-vs-air decisions against the chunk's current density and
+heightmap), `BlockPlaceholderMap.Replace` for replaceable types, and
+`SetBlock`. It then stamps `SetDecoAllowedSizeAt` for POI cells, records
+inside positions (`IsInsidePrefab` -> `AddInsideDevicePosition`), copies water
+(`Prefab.GetWater` -> `SetWater`) and textures
+(`GetTexture` -> `GetSetTextureFullArray`), applies the quest-tag gate on
+`SetBlock`, clones `IsTileEntitySavedInPrefab` tile entities and
+`BlockTrigger`s into the chunk, and finishes with `SetTerrainHeight` +
+`SetTopSoilBroken` per column.
+
 The spatial query `GetPrefabsAtXZ(xMin, xMax, zMin, zMax, list)` (IL=70,
 reached through `World.GetPOIsAtXZ`, a null-checked wrapper IL=15) clears the
 list under `listsLock`, starts at `PrefabBinarySearch(xMin)` (IL=58: resorts
