@@ -110,7 +110,9 @@ replicates the low byte across all eight slots).
 `Chunk.SetBlockFaceTexture(x, y, z, face, texture, channel)` (IL=48) writes
 one face slot: it reads the channel word, clears the face's 8 bits
 (`& ~(0xFF << (face*8 & 63))`), ORs in the new byte, writes back, and sets
-`isModified`.
+`isModified`. The read twin `Chunk.GetBlockFaceTexture` (IL=19) is
+`(word >> (face*8 & 63)) & 0xFF`; the `PrefabChunk` variant (IL=29) uses
+6-bit face slots (`face*6`, mask 63) against the prefab's stored texture.
 `ChunkCluster.SetBlockFaceTexture(pos, face, textureIdx, channel)` (IL=61) is
 the painted-texture write: chunk lookup (no-op on miss),
 `Chunk.SetBlockFaceTexture(lx, ly, lz, face, textureIdx, channel)`, then
