@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DigUpdate phase table
+
+Done (V3.1.0 b14 IL):
+- DigUpdate: digForTicks countdown; digActionTicks 18/4/14; move abort 0.25 sqr;
+  DigTrigger then organic Hit type 3; digForwardCount 2; ray 1.1/1.4.
+---
 ## 2026-08-07 — tier-C: StartJumpSwimMotion and KillLootContainer
 
 Done (V3.1.0 b14 IL):

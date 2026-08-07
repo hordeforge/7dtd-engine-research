@@ -1389,10 +1389,22 @@ yaw from entity or Atan2 to moveTo; `Jumping=true`; `SetJumpDistance`;
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
 cancel `EndTrigger`, fire `DigStartTrigger`; `isDigging=true`.
 
-**`DigUpdate` (IL=261 high-level):** countdown dig ticks; dark shortens action;
-if dig anim not running clear digging; if moved &gt; 0.5 m from start `DigStop`.
-At action windows fire `DigTrigger` / raycast break (Voxel.Raycast layer mask)
-via attack hit info; yaw seek ±120 random; stop when ticks exhausted.
+**`DigUpdate` (IL=261):** each call `digForTicks--`; at ≤0 `DigStop` and return.
+Force `SetMoveForward(0)`. If `world.IsDark()` set `expiryTicks=5`.
+`digTicks++`; until `digTicks >= digActionTicks` return.
+
+1. If dig anim not running: `isDigging=false` return.
+2. If sqr distance from `digStartPos` ≥ **0.25** (0.5 m): `DigStop`.
+3. If not yet `digAttacked`: fire `DigTrigger`; reset `digTicks=0`,
+   `digActionTicks=4`; set `digAttacked`; return.
+4. Else: `digActionTicks=14`; clear `digAttacked`. Sample pos y+**0.6**.
+   - If `digForwardCount > 0`: decrement; yaw seek random ±**120°** around
+     current yaw; ray length **1.1** along forward.
+   - Else: jitter xz by ±0.15; ray toward `moveToPos` length **1.4**.
+   `Voxel.Raycast` (mask **1082195968**, 128, radius 0.15). On hit:
+   damage from holding `ItemActionAttack.GetDamageBlock` (else 1);
+   `ItemActionAttack.Hit(..., EnumDamageTypes **3**, …, "organic", …)`.
+   On miss: if `digForwardCount==0` set it to **2**, else clear to 0.
 
 **`EntityBuffs.FireEvent(type, params)` (IL=30):** for each non-paused active
 buff with class, `BuffClass.FireEvent`.
@@ -2076,6 +2088,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 - **2026-08-07:** UpdateDynamicRagdoll / ActivateDynamicRagdoll flag bits 1/2/4.
 - **2026-08-07:** StartJumpSwimMotion water 0.65 gate + gravity/pow formula;
   IsWalkTypeACrawl walkType≥20.
+- **2026-08-07:** DigUpdate phases digActionTicks 18/4/14; ray 1.1/1.4;
+  digForwardCount; organic Hit type 3.
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 
