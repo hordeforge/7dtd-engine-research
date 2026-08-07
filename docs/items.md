@@ -728,6 +728,12 @@ capped by `ItemClass` derived `MaxUseTimes` (base `MaxUseTimesBase` scaled by
 quality and mods through `ModMaxUseTimes`). The exposed fraction is
 `PercentUsesLeft = 1 - clamp01(UseTimes / MaxUseTimes)`.
 
+**Chain bodies:** `get_MaxUseTimesBase()` (IL=25) is
+`(int)GetValue(passive 8 DegradationMax, this, 0, null, null, itemClass tags)`
+(the class's degradation cap through the passive; the `MaxUseTimesUI` read is
+the same base without the mod scale). `get_MaxUseTimes()` (IL=5) =
+`ModMaxUseTimes(MaxUseTimesBase, this)` (quality + installed mods applied).
+
 - **Wear:** each qualifying use adds to `UseTimes` (melee/ranged via the attack
   path, consumables via `ItemActionEat.consume` through `EffectManager.GetValue`
   so perks and mods can reduce wear).
