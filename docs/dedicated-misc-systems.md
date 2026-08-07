@@ -112,6 +112,17 @@ drones) is typed by this table, including the reflective `EAIManager
 .CreateInstance` AI task wiring (see EAI tasks below). Complements
 [spawning.md](spawning.md) and [entity-stats.md](entity-stats.md).
 
+Registry leaves: `FromString(name)` (IL=3) is **`name.GetHashCode()`** (the
+class id is the string hash, which is why callers pass the name and get an
+id); `GetId(name)` (IL=30) is a linear scan over `EntityClass.list` by
+`entityClassName` equality (-1 on miss); `GetEntityClass(id)` (IL=7) /
+`GetEntityClassName(id)` (IL=10) are `TryGetValue` reads, the latter falling
+back to the literal string `"null"`.
+`GetEntityClassWithinMaxTier(ec, maxTier)` (IL=30) walks the
+`GetPreviousTierEntity()` chain while `ec.EntityTier > maxTier`, warning
+`EntityFactory CreateEntity: No entity within max tier ({0}) found for {1}`
+and returning null when the chain runs out.
+
 ## EventsFromXml
 
 Seasonal calendar loader (`events.xml`): parses `EventDefinition` date windows
