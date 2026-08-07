@@ -759,6 +759,10 @@ or empty value runs `clearSlotByIndex` then rebuilds the model
 `itemValue.Clone()` plus the count; a changed held slot calls
 `updateHoldingItem()` and `notifyListeners()` fires when requested.
 
+**`notifyListeners()` (IL=24)** runs the `onInventoryChanged()` virtual hook
+then fans `IInventoryChangedListener.OnInventoryChanged(this)` to every
+listener in the `listeners` hash set (a null set skips the fan-out).
+
 ---
 
 ## 7. Durability and degradation
