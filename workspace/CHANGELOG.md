@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: chunk load/unload lifecycle
+
+Done (V3.1.0 b14 IL):
+- Chunk.OnLoadedFromCache IL=90 (flags clear, saved entities -> entityStubs);
+  OnLoad IL=97 (stub respawn via SpawnEntityAsync, layer OnLoad ->
+  OnBlockLoaded, TE OnLoad); OnUnload IL=188 (async create WaitForComplete
+  drain, UnloadEntities, TE OnUnload, RemoveBlockEntityTransforms, layer
+  OnUnload -> OnBlockUnloaded, waterSimHandle.Reset).
+- ChunkBlockLayer OnLoad/OnUnload IL=66 each (locked notifyLoadUnloadCallback
+  Blocks fan-out).
 ## 2026-08-08 — tier-C: supply plane server motion
 
 Done (V3.1.0 b14 IL):

@@ -161,6 +161,31 @@ local player (or no local players exist): `chunksToReload.AddRange(chunks)`.
 So a terrain rebuild re-pushes overwrite chunks to remote observers while
 local visual-mesh observers rebuild directly (used by `RebuildTerrain` paths).
 
+### 4.0b Chunk load/unload lifecycle
+
+**`Chunk.OnLoadedFromCache` (IL=90):** `NeedsRegeneration = true`,
+`isModified = true`; clear the volatile `InProgress*` flags
+(Regeneration/Saving/Copying/Decorating/Lighting/Unloading) and the collision
+mesh flags; clear `entityStubs`; for each of the 16 `entityLists`: move every
+`IsSavedToFile()` entity into `entityStubs` as `EntityCreationData(entity,
+true)` and clear the list (the stubs are re-spawned on next `OnLoad`).
+
+**`Chunk.OnLoad(world)` (IL=97):** server side only: for each `entityStub`
+whose id is not already present in the world → `SpawnEntityAsync(world, stub,
+null)`; `removeExpiredCustomChunkDataEntries(worldTime)`; per block layer
+`layer.OnLoad(world, x*16, layer*4, z*16)` which, under lock, fires
+`Block.OnBlockLoaded` for every `notifyLoadUnloadCallbackBlocks` index; per
+tile entity `TileEntity.OnLoad()`.
+
+**`Chunk.OnUnload(world)` (IL=188):** `InProgressUnloading = true`; destroy the
+`biomeParticles` list. Server side: drain `pendingEntityCreateOps` by calling
+`EntityCreateHandle.WaitForComplete()` on a snapshot (async creation must finish
+before unload, see [dedicated-leftovers.md](dedicated-leftovers.md) §12); per
+`entityLists` bucket `world.UnloadEntities(list, false)`;
+`removeExpiredCustomChunkDataEntries`; per tile entity `TileEntity.OnUnload(world)`;
+`RemoveBlockEntityTransforms()`; per layer `layer.OnUnload(...)` firing
+`Block.OnBlockUnloaded` (under lock); `waterSimHandle.Reset()`.
+
 ### Chunk dirty / save invalidation (blob-cache input)
 
 **`Chunk.get_NeedsSaving` IL=20** returns true if any of:
