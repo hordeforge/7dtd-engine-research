@@ -528,6 +528,24 @@ projectile entity. `ItemActionThrownWeapon.ExecuteAction` (IL=117) is the
 ranged twin: same charge/release but with `WeaponPreFire`/`WeaponFire`
 avatar events and `HandleJamSound` on an empty release.
 
+**Catapult (bow) family (V3.1.0 b14):** `ItemActionCatapult.ExecuteAction`
+(IL=163) is the draw-and-release state machine over the ranged base. While
+reloading it only stamps `m_LastShotTime` (no fire); the rate gate is the
+inherited `Delay`. An empty weapon (`!InfiniteAmmo && Meta == 0`) with
+`AutoReload && CanReload` runs `ItemReloadServer(entityId)` and sets
+`holdingEntitySoundID = -2`. The draw (press) latches `m_bActivated` +
+`m_ActivateTime`, sets `SpecialAttack = true`, plays `soundDraw`, and a local
+player starts the TP-camera lock timer; the release computes
+`strainPercent = (time - m_ActivateTime) / m_MaxStrainTime`, cancels when the
+weapon is broken (`MaxUseTimes > 0 && UseTimes >= MaxUseTimes`), when
+`UseTimes != 0 && MaxUseTimes == 0`, or when the local player fails
+`TPCameraCheckPassed`, then fires by calling
+`ItemActionRanged.ExecuteAction(data, false)` followed by
+`(data, true)` - the shot runs the ranged fire path with the strain
+charged. `GetStrainPercent` (IL=10) reads `lastAttackStrainPercent` off the
+launcher data (0 without it); `CanReload` (IL=15) cancels a drawn bow first,
+then delegates to the ranged gate.
+
 **Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
 magazine capacity goes through the `MagazineSize` passive against the class's
@@ -1228,6 +1246,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Catapult (bow) family: ExecuteAction IL=163 draw/release
+  (strainPercent = hold/m_MaxStrainTime, reload-block, auto-reload
+  ItemReloadServer, break/TP-camera cancel, fire via ranged ExecuteAction
+  press+release); GetStrainPercent IL=10 lastAttackStrainPercent;
+  CanReload IL=15 cancels drawn bow then ranged gate.
 - **2026-08-08:** Throw family: ItemActionThrowAway.ExecuteAction IL=137
   charge/release + m_ThrowStrength (default vs maxThrowStrength*hold/max
   strain), avatar itemThrownAwayTriggerHash event; throwAway IL=136 empty
