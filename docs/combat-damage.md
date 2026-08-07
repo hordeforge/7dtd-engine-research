@@ -428,6 +428,12 @@ Leaf types on the edges of the damage flow above:
   `Health > 0` gate before `Stamina.Value += v`; `AddWater(v)` (IL=9) is
   ungated (`Stats.Water.Value += v`). So dead entities ignore health and
   stamina deltas but still accumulate water.
+- **`EntityEnemyAnimal.CanDamageEntity(sourceEntityId)` (IL=17):** the
+  same-class gate - a source whose `entityClass` equals this entity's returns
+  false, so animals/enemies of one species never damage each other; any
+  other source (or a missing entity) passes. `EntityAnimal.DamageEntity` /
+  `EntityEnemy.DamageEntity` (both IL=7) are pure delegates to the
+  `EntityAlive` base.
 - **`ItemActionAttack` modifier leaves:** `difficultyModifier(strength,
   attacker, target)` (IL=44) applies the PvE scalers only in mixed
   client/server matchups: `RoundToInt(strength * IncomingDamageModifier)` when
@@ -476,6 +482,9 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-08:** EntityEnemyAnimal.CanDamageEntity IL=17 same-class gate
+  (no same-species damage); EntityAnimal/EntityEnemy DamageEntity IL=7
+  base delegates.
 - **2026-08-08:** Hit resolvers: GetBlockHit IL=84 (distant-deco fallback,
   multiblock parent); FindHitEntityNoTagCheck IL=49 (E_BP_ body part name,
   FindEntityUpwards, E_Vehicle fallback).
