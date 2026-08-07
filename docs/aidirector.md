@@ -417,6 +417,9 @@ encoding.
 when `day == bmDay && hour >= duskHour`, **or** when
 `day > 1 && day == bmDay + 1 && hour < dawnHour`. The blood moon therefore spans
 dusk on `bmDay` to dawn on `bmDay+1`, crossing the midnight day rollover.
+`GameUtils::WorldTimeToElements(wt)` (1925958) = `(wt/24000 + 1,
+(wt/1000) % 24, (int)(wt * 0.06) % 60)` - the `(day, hour, minute)` tuple used
+by the time gates.
 
 `GameUtils::CalcDuskDawnHours` (1926249): a `DayLightLength` of 0 or 24 returns
 (dusk 22, dawn 4); otherwise dusk starts at 22, is clamped to `DayLightLength` when

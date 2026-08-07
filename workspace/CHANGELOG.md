@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: WorldTimeToElements
+
+Done (V3.1.0 b14 IL):
+- GameUtils.WorldTimeToElements IL=29: (day, hour, minute) = (wt/24000+1,
+  (wt/1000)%24, (int)(wt*0.06)%60); noted in aidirector time gates.
 ## 2026-08-08 — census refresh 3
 
 Done:
