@@ -1572,6 +1572,14 @@ bare hands, non-empty `EntityClass.PickupItem`; else base
 **`CollectActivatableItems(pool)` (IL=32):** holding item value + each equipment
 slot via `GetActivatableItems`.
 
+**`GetActivatableItems(item, pool)` (IL=46):** if item class
+`HasTrigger(MinEventTypes **91**)` add item; same for each non-null
+`Modifications[]` entry with trigger 91.
+
+**`set_DeathHealth` / `set_Died` (IL=17 each):** on change dirty
+`bPlayerStatsChanged` when local (same pattern as breaking-blocks).
+**`PlayGiveUpSound` (IL=13):** `PlayOneShot(soundGiveUp)` if non-null.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
