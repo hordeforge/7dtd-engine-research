@@ -320,6 +320,16 @@ child cell forwards to its parent; the `take` command starts
 (`CanPickupBlockAt`), a "repair before pickup" guard when `damage > 0`, and
 inventory room, then `OnBlockPickedUp` and the server RPC `PickupBlockServer`.
 
+**`GameManager.PickupBlockServer(pos, bv, playerId, persistentPlayerId)`
+(IL=77):** client path sends `NetPackagePickupBlock` to the server. Server:
+verify the world block type still matches the pickup (else drop); local player
+→ `PickupBlockClient`, else send the pickup package to that player (flags
+192). Replacement block = `Block.PickupSource` resolved (or `BlockValue.Air`
+when the block has no PickupSource), applied via
+`SetBlocksRPC([BlockChangeInfo(pos, replacement, true)], persistentPlayerId)`
+- so a pickup can leave a different block (e.g. a dug-up plant) instead of
+air.
+
 ```mermaid
 flowchart TB
   subgraph Placement

@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: PickupBlockServer replacement
+
+Done (V3.1.0 b14 IL):
+- GameManager.PickupBlockServer IL=77: type-verify gate, local/client split,
+  PickupSource replacement (or Air) via SetBlocksRPC.
 ## 2026-08-08 — tier-C: InitCommandLine + pref collisions
 
 Done (V3.1.0 b14 IL):
