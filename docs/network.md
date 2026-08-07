@@ -201,11 +201,17 @@ Per full tick, for each tracked entity entry × each player:
 
 ```text
 trackedPlayers.Add(player)
-SendPackage(getSpawnPacket(), ..., player.entityId, flags=192)
-// if tracked entity is EntityAlive:
-SendPackage(NetPackageEntityAliveFlags.Setup(alive), ...)
-// if also EntityPlayer: PlayerStats / Equipment / TwitchStats as applicable
-// may send NetPackageEntityVelocity Setup(id, motion, ...)
+SendPackage(getSpawnPacket(), to player, flags=192)
+if tracked is EntityAlive:
+  SendPackage(NetPackageEntityAliveFlags.Setup(alive), flags=192)
+  if also EntityPlayer:
+    NetPackagePlayerStats
+    NetPackagePlayerTwitchStats
+    NetPackagePlayerEquipment
+// always (if avatar present): AvatarController.SyncAnimParameters(playerId)
+SendPackage(NetPackageEntitySpeeds.Setup(entity), flags=192)
+if shouldSendMotionUpdates:
+  SendPackage(NetPackageEntityVelocity.Setup(id, motion, false), flags=192)
 ```
 
 **Exit (was in, now out) - the package a spatial grid must not skip:**
@@ -589,7 +595,8 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
-- **2026-08-07:** Interest exit path documented: `updatePlayerEntity` sends `NetPackageEntityRemove` with `EnumRemoveEntityReason.Unloaded` (ldc.i4.1) when a player leaves tracking range.
+- **2026-08-07:** Interest enter package order: Spawn, AliveFlags, (player)
+  Stats/Twitch/Equipment, Speeds, optional Velocity; exit Unloaded already pinned.
 - **2026-08-06:** Package registry is reflection over 189 concrete NetPackage
   subclasses keyed on short type name (abstracts excluded), with id 0 pinned to
   PackageIds and an unknown name being a hard EKickReason 18 disconnect; the

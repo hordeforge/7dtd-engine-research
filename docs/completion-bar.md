@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1478 / catalogued 831 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1479 / catalogued 830 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -212,6 +212,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | LootDropPick weighted + OnBlockStartsToFall Air | combat / stability |
 | AttackEntites body mult + DamageRecord apply | protocol-packages §6.14 |
 | explode ExplodeGroup delay=3 + FrameUpdate budget | protocol-packages §6.14 |
+| Interest enter package order (Speeds/Velocity) | network.md §2.1 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

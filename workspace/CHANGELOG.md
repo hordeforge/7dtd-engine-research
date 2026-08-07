@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: interest enter package order
+
+Done (V3.1.0 b14 IL):
+- updatePlayerEntity enter: Spawn, AliveFlags, PlayerStats/Twitch/Equipment, Speeds, optional Velocity.
+- Census pins: narrated 1479 / catalogued 830 / unaccounted 0.
+---
 ## 2026-08-07 — tier-C: explode ExplodeGroup delay and FrameUpdate
 
 Done (V3.1.0 b14 IL):
