@@ -504,6 +504,12 @@ Overrides: `GetWorldExtent`/`GetWorldSize` from heightmap dimensions × scale
 distant terrain), `GetChunkProtectionLevel` → region manager, and
 `FillOccupiedMap` (§6.2) including nested `Bluff` heightmap stamps that
 modify the terrain heightmap at biome-chosen spots.
+`GetPOIBlockIdOverride(x, z)` (IL=51) resolves the `m_Poi` color (0 when the
+decorator, cell, or element is missing; 255 = empty) to a `PoiMapElement`
+and returns its `m_BlockValue.type`, except with `bFixedWaterLevel` where
+liquid elements return 0. `GetPOIHeightOverride(x, z)` (IL=66) divides world
+coords by `worldScale` for the lookup and returns `m_YPosFill` (the water
+fill height) **only** for liquid elements, else 0.
 
 `loadSplatMaps(levelName, worldWidth)` (IL=883) builds the surface-channel
 map that `GetTopmostBlockValue` (§3.1) later switches on. It resolves the
