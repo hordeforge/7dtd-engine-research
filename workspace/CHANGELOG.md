@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Block.IsMovementBlocked dispatch
+
+Done (V3.1.0 b14 IL):
+- block-shapes.md section 3 extended: Block.IsMovementBlocked single-face
+  (IL=70) multiblock child->parent resolve with child-parent error log,
+  !IsCollideMovement false, BlocksMovement byte short-circuit (==1) vs shape
+  deferral (==0, BlockShape base GetStepHeight > 0.5); BlockFaceFlag sides
+  (IL=90) AND across flagged faces (0 = all 255); entity-pos (IL=94) via
+  FrontSidesFromPosition; IsMovementBlockedAny OR twin. Overrides: liquids /
+  mines / motion sensor / pressure plate / spotlight / stairs(unless child)
+  false; spikes true; BlockPoweredDoor !IsDoorOpen(meta); composite TE
+  IFeaturePhysicalCapabilities modules when OverridesPhysicalChecks.
+
 ## 2026-08-08 - tier-C: Block.IsCollideMovement
 
 Done (V3.1.0 b14 IL):

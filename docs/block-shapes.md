@@ -122,6 +122,26 @@ BlockShape::IsMovementBlocked -> GetStepHeight(bv, face) > 0.5f
 `Block.get_IsCollideMovement` (IL=7) is the flag read: `(BlockingType & 2) != 0`
 (bit 1 of the blocking-type mask selects "blocks movement").
 
+**`Block.IsMovementBlocked` dispatch (V3.1.0 b14):** the single-face overload
+(IL=70) resolves multi-block children first (`isMultiBlock && bv.ischild` ->
+`GetParentPos` -> read the parent block; a parent that is itself a child logs
+`IsMovementBlocked {0} at {1} has child parent, {2} at {3}` and returns true,
+else recurses on the parent). A non-colliding block (`!IsCollideMovement`)
+returns false. Then a zero `BlocksMovement` byte defers to
+`shape.IsMovementBlocked(bv, face)` (`BlockShape` base IL=7:
+`GetStepHeight(bv, face) > 0.5`, `BlockShapeGrass`/`Water`/`BillboardCross`
+hard-false), while `BlocksMovement == 1` short-circuits true. The
+`BlockFaceFlag` sides overload (IL=90) requires **every** flagged face to be
+blocked (`sides == 0` means all 255); the `Vector3` entity-position overload
+(IL=94) derives the sides from `BlockFaceFlags.FrontSidesFromPosition`; the
+`IsMovementBlockedAny` twin (IL=94) flips the AND into an OR (any blocked
+face). Notable per-block overrides: liquids, mines, motion sensors, pressure
+plates, spotlights, stairs (unless a child) are never blocked; `BlockSpikes`
+always; `BlockPoweredDoor` (IL=66) blocks when `!IsDoorOpen(meta)`; and
+`BlockCompositeTileEntity` (IL=44) lets `IFeaturePhysicalCapabilities`
+modules of the tile entity override the base result when
+`OverridesPhysicalChecks` is set.
+
 Overrides refine this: `BlockShapeGrass`, `BlockShapeWater`, and
 `BlockShapeBillboardCross` hard-return not-blocked / step 0;
 `BlockShapeRotatedAbstract` returns a per-rotation `maxAABB_Y[rotation]`;
@@ -345,6 +365,10 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** Block.IsMovementBlocked dispatch: multiblock child->parent
+  resolve, BlocksMovement byte short-circuit vs shape deferral, sides/entity
+  overloads (AND/OR), per-block overrides (liquids/mines/stairs/spikes/door/
+  composite TE physical-capabilities modules).
 - **2026-08-07:** Block.get_IsCollideMovement (IL=7) = (BlockingType & 2) != 0 -
   the flag behind the GetStepHeight / IsMovementBlocked defaults.
 - **2026-07-24:** Initial reversal: shape factory and rotation-band model
