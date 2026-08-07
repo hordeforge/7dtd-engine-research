@@ -168,6 +168,11 @@ If not `LootContainer.NoLoot` and `lootDropProb > RandomFloat`,
    `OverrideLootList = GetLootList()`; `SetContent(bag slots clone, SlotCount)`;
    copy `bag.Touched`; spawn.
 
+**`EntityClass.LootDropPick` (IL=44):** if `lootDrops.Count < 2` return entry
+**0** `entityClass`. Else cumulative weighted pick:
+`r = RandomFloat`; walk entries adding `weight` until `r <= sum`; return that
+`LootDrop.entityClass`.
+
 **`SetDead` (IL=8):** base `Entity.SetDead` + force `Health.Value = 0`.
 
 **`AwardKill` (IL=66):** if killer is a distinct living player: count zombie vs
@@ -274,8 +279,8 @@ Leaf types on the edges of the damage flow above:
   StunProne/StunKnee thresholds, Fatal); ProcessDamageResponse net fan-out;
   ProcessDamageResponseLocal IL=903 (armor wear, headshot gates, stun/pain,
   kill/revenge/FireEvent).
-- **2026-08-07:** DropBagServer class lootDrops vs bag path; dropItemOnDeath
-  passive 80 + LootBagChance; OnDeathUpdate / AwardKill already pinned.
+- **2026-08-07:** LootDropPick weighted entityClass; DropBagServer dual path;
+  dropItemOnDeath passive 80 + LootBagChance.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

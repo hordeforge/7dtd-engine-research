@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: LootDropPick weighted and OnBlockStartsToFall
+
+Done (V3.1.0 b14 IL):
+- LootDropPick: <2 entries -> [0]; else cumulative weight RandomFloat pick entityClass.
+- OnBlockStartsToFall base: SetBlockRPC Air; tree/composite overrides.
+---
 ## 2026-08-07 — tier-C: DropBagServer lootDrops vs bag
 
 Done (V3.1.0 b14 IL):

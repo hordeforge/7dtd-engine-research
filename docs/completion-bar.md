@@ -209,6 +209,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | GetCountMultiplier enum + BM weather storm defer | loot / weather |
 | dropItemOnDeath passive 80 + BlockDestroyed 500 m | combat / quests |
 | DropBagServer lootDrops vs bag paths | combat-damage.md |
+| LootDropPick weighted + OnBlockStartsToFall Air | combat / stability |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

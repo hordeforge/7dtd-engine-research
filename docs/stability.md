@@ -131,6 +131,11 @@ value, the texture array and any tile entity, and spawns the falling-block
 entity (`EntityFallingBlocks` for groups, `EntityFallingBlock` for singles) via
 `EntityFactory::CreateEntity(EntityClass::FromString("fallingBlock"))`.
 
+**`Block.OnBlockStartsToFall` (IL=6):** base path only
+`SetBlockRPC(pos, Air)` (remove solid before entity simulates). Overrides:
+`BlockModelTree` may `OnBlockDestroyedBy` then particle; composites forward to
+`TileEntityComposite.OnBlockStartsToFall` then base.
+
 ## The stability viewer BFS (GetBlockStability)
 
 `GetBlockStability(pos, newBV)` (293 IL) is the debug/UI measure (StabilityViewer
@@ -187,6 +192,8 @@ channel today; the plane can be recomputed on load with
 
 ## Changelog
 
+- **2026-08-07:** OnBlockStartsToFall base SetBlockRPC Air; tree/composite
+  overrides.
 - **2026-08-07:** getMaxStabilityAround IL=61 (AllDirections, StabilitySupport
   max, bFromDownwards = max==down); ChangeStability recurse stab-1.
 - **2026-08-07:** BlockPlacedAt / BlockRemovedAt `queueStabilityAvail` hard cap
