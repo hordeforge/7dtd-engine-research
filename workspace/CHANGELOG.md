@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: UseHoldingItem and path FindPath enqueue
+
+Done (V3.1.0 b14 IL):
+- UseHoldingItem: attack-anim gate; IsAttackValid; attack sound on release; attackingTime=60; ExecuteAction.
+- AStar FindPath: Monitor lock + wait handle pulse; ASP FindPath: no lock overwrite.
+---
 ## 2026-08-07 — tier-C: CanSee ray and Attack target-now
 
 Done (V3.1.0 b14 IL):

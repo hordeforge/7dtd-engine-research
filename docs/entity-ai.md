@@ -276,6 +276,13 @@ false if hit (blocked); restore layer; true if clear.
 
 **`Attack(isReleased)` (IL=5):** `UseHoldingItem(0, isReleased)`.
 
+**`UseHoldingItem(actionIndex, isReleased)` (IL=64):**
+- Press (`!isReleased`): if actionIndex 0 and attack anim playing → false;
+  if `!IsAttackValid` → false.
+- Release of action 0: play `GetSoundAttack` one-shot if present.
+- Always (success path): `attackingTime = 60`; if action slot non-null
+  `ItemAction.ExecuteAction(actionData[index], isReleased)`; return true.
+
 **`GetAttackTimeoutTicks` (IL=10):** day → `attackTimeoutDay`; dark →
 `attackTimeoutNight`.
 
@@ -716,6 +723,13 @@ StartWorkerThreads()
 | PathFinderThread base | stubs (`ret` / null) | abstract-ish |
 
 Both queue work off the caller; **AStar** is classic OS thread; **ASP** is Unity coroutine driver (`FindPaths` state machine). Admission still matters: unbounded enqueue under blood moon fills `entityWaitQueue` / `finishedPaths`.
+
+**AStar `FindPath` (IL=42):** `Monitor.Enter(finishedPaths)`; add entityId to
+`entityWaitQueue` if missing; `finishedPaths[id] = PathInfoSingleTarget(...)`;
+exit lock; `writerThreadWaitHandle.Set()`.
+
+**ASP `FindPath` (IL=17):** **no lock**; always `entityWaitQueue.Add` +
+`finishedPaths[id] = PathInfoSingleTarget` (overwrites prior).
 
 ### 6.2 `EntityAlive.FindPath` (49 IL)
 
@@ -1609,8 +1623,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** CanSee ray 0.2 + CanSeeStealth lerp; Attack/timeout/target now;
-  CheckDespawn source bands; IsAttackValid; isBestTask MutexBits.
+- **2026-08-07:** UseHoldingItem attack anim/60 ticks; AStar lock vs ASP no-lock;
+  CanSee ray/stealth; Attack target-now; CheckDespawn; IsAttackValid.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
