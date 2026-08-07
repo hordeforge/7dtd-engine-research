@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: pre-installed mod roll
+
+Done (V3.1.0 b14 IL):
+- items.md 2: createDefaultModItems (IL=187) descending-chance install,
+  Modifications None-fill, cosmetic fallback via GetCosmeticItemMod.
+
 ## 2026-08-08 - tier-C: ItemValue mod queries
 
 Done (V3.1.0 b14 IL):
