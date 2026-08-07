@@ -331,6 +331,15 @@ y in **[2, 251]**; reject trader area; unless checkWater, reject water at y-1;
 below must `CanMobsSpawnOn` (unless ignore) and `IsCollideMovement`; cell and
 y+1 must not be solid collide space; if checkWater reject water at cell.
 
+**`Chunk.FindRandomTopSoilPoint(world, ref xyz, numTrys)` (IL=80)** tries up
+to `numTrys` random cells: `y = GetHeight(x, z)` must be >= 2 and pass
+`CanMobsSpawnAtPos(x, y, z, false, true)`, then returns the **world** coords
+with `y + 1` (above terrain). `FindRandomCavePoint(world, ref xyz, numTrys,
+relMinY)` (IL=95) is the cave variant: it walks `y` **down** from the terrain
+height while `y > 2 && y > relMinY` (the `relMinY` bound is enforced via a
+`y - relMinY <= 0` break), accepting the first `CanMobsSpawnAtPos` cell at
+`y + 1`.
+
 **`Chunk.IsPositionOnTerrain` (IL=18):** y ≥ 1 and shape below is terrain.
 
 Its own `currentSpawner` is serialized, so a day's dynamic spawn progress
