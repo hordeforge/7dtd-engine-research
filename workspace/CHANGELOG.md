@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: NavObjectManager leaves
+
+Done (V3.1.0 b14 IL):
+- map-objects.md 7: unregister overloads (ByEntityID IL=16 / ByOwnerEntity
+  IL=18 / ByPosition IL=19) are closure predicates funneled through
+  unRegisterNavObjects; GetNavObjectByEntityID (IL=34) backward scan, null when
+  absent.
+
 ## 2026-08-08 - tier-C: Progression leaves
 
 Done (V3.1.0 b14 IL):
