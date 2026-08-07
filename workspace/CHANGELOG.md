@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: held-item leaves
+
+Done (V3.1.0 b14 IL):
+- items.md 6: DecHoldingItem (IL=45) consume + flashlight-off/clear/update/
+  notify; GetBestQuickSwapSlot (IL=50) remembered-then-scan.
+
 ## 2026-08-08 - tier-C: switch entries
 
 Done (V3.1.0 b14 IL):
