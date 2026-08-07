@@ -6,16 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
-## 2026-08-08 - tier-C: entity attach slot model
+## 2026-08-08 - tier-C: vehicle attach slot-claim + detach chain
 
 Done (V3.1.0 b14 IL):
-- dedicated-misc-systems.md: attach slot model - Entity.AttachToEntity IL=64,
-  AttachEntityToSelf IL=56 (slot claim, slot-0 isEntityRemote copy),
-  EntityAlive IL=60 (movement tag idle, inventory swap),
-  EntityVehicle.AttachEntityToSelf IL=100 (seat pose, hasDriver) and
-  AttachToEntity IL=2 (never mounts); Detach chain EntityAlive IL=27 /
-  Entity IL=79 (exit teleport) / EntityVehicle IL=157 (RB wake);
-  GetAttachedToInfo IL=158 seat/exit XML, FindAttachSlot, GetAttachFreeCount.
+- vehicles-drones-turrets.md 4.2: slot-claim rules in Entity.AttachEntityToSelf
+  IL=56 (one occupant per slot, existing-slot reuse, conflicting request
+  detaches old occupant, free-slot pick, slot-0 serverPos snapshot +
+  isEntityRemote copy), GetAttachFreeCount IL=31; detach chain
+  EntityAlive.Detach IL=27 (inventory restore), Entity.Detach IL=79 (exit
+  teleport + parent restore), Entity.DetachEntity IL=21 (slot-0 isEntityRemote
+  restore), EntityVehicle.DetachEntity IL=157 (delayed-attach cancel + server
+  RB wake). First draft landed in dedicated-misc-systems.md then relocated
+  (duplicated existing 4.2 content there).
 ## 2026-08-08 - tier-C: AddChunkObserver
 
 Done (V3.1.0 b14 IL):
