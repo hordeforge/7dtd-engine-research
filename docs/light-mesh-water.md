@@ -64,6 +64,10 @@ the `ChunkCache` is null, else
 `[floor(min), floor(max) + 1)` per axis and returns true when any
 `WorldBase.IsWater(x, y, z)` cell is water.
 
+**`Chunk.IsNeighbourChunksLit(neighbours)` (IL=26)** is the light-completion
+gate: true only when every non-null neighbour chunk has cleared its volatile
+`NeedsLightCalculation` flag (a null neighbour fails the test).
+
 **Light-block state bits (V3.1.0 b14):** `BlockLight.IsLightOn(bv)` (IL=7)
 is `(meta & 2) != 0` - bit 1 of the block's meta is the light-on flag;
 `BlockLight.SetLightState(world, pos, bv, isOn)` (IL=15) writes it with
