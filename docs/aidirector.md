@@ -454,6 +454,24 @@ sqr **6400** = 80 m); else `CreateNewParty`.
 **`TryAddPlayer` (IL=34):** walk `partyMembers`; if distSq ≤ **6400** call
 `AddPlayer` (spawner `AddMember` + set `player.bloodMoonParty`) and true.
 
+**`CreateNewParty` (IL=8):** `parties.Add(new BloodMoonParty(player, this,
+BloodMoonEnemyCount))`.
+
+**`AIDirector.RemovePlayer` (IL=9):** PlayerManagement then BloodMoonComponent
+remove.
+
+**`PlayerManagement.RemovePlayer` (IL=21):** remove tracked state, `Reset`,
+pool `Free`.
+
+**`BloodMoonComponent.RemovePlayer` (IL=24):** remove from `players`; every
+party `PlayerLoggedOut(player)`.
+
+**`GameStagePartySpawner.AddMember` (IL=22):** ensure id in `memberIDs` and
+player in `members` list.
+
+**`RemoveMember(player, removeID)` (IL=14):** remove from `members`; if
+`removeID` also drop from `memberIDs`.
+
 `InitParty` (IL=49): `enemyActiveMax = min(30, BloodMoonEnemyCount *
 partyMemberCount)`; scale factor `max(1, totalCount/enemyActiveMax)` then
 `FastLerp(1, that, partyLevel/60)` into `SetScaling`; `SetPartyLevel(level)`;
@@ -581,7 +599,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** BM party join 80 m TryAddPlayer; AIDirector AddPlayer chain.
+- **2026-08-07:** CreateNewParty; RemovePlayer pool free; AddMember/RemoveMember;
+  BM party join 80 m TryAddPlayer; AIDirector AddPlayer chain.
 - **2026-08-07:** get_maxAlive; BM Tick 1.8s SeekTarget + nextPlayer; SetScaling;
   CalcBestDir 16 bins; InitParty; IsPlayerATarget; SeekTarget 1200
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.

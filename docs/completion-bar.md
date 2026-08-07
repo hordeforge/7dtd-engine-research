@@ -261,6 +261,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | SpawnEntityInWorld registration + BuffValue.Tick | spawning.md / buffs.md |
 | NetEntityDistribution SEnts distances + Remove | network.md |
 | AIDirector AddPlayer + BM party join 80 m | aidirector.md |
+| CreateNewParty + RemovePlayer/AddMember | aidirector.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
