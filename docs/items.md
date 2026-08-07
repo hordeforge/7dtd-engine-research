@@ -695,6 +695,15 @@ the `UseJarRefund` sandbox roll (option 12), added via
 `PlayerInventory.AddItem` or dropped with `ItemDropServer(stack, pos, zero,
 -1, 60, false)` when the inventory is full.
 
+**`ItemActionOpenBundle.ExecuteInstantAction` (IL=493)** is the bundle-open
+twin (same MinEvent 24/29 + consume skeleton): it iterates the `CreateItem`
+name array and, per entry, takes the matching `CreateItemCount[i]` (default
+`1`), which may be a `min-max` range rolled with the holder's `rand`
+(`RandomRange(min, max + 1)`); quality items get a quality-rolled `ItemValue`
+(count forced to 1, `MaxDurabilityModifier = 1`); each stack goes to
+`PlayerInventory.AddItem`, dropping with `ItemDropServer(stack, pos, zero,
+-1, 60, false)` when the inventory is full.
+
 **`GetDamageEntity` (IL=52) / `GetDamageBlock` (IL=70):** build FastTags =
 Primary/Secondary action tag | item tags (or MeleeTag) | holder stance/movement
 tags (| block tags for block damage). Then
@@ -1360,6 +1369,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionOpenBundle.ExecuteInstantAction IL=493: per
+  CreateItem entry with CreateItemCount[i] min-max range roll, quality items
+  forced count 1 + MaxDurabilityModifier 1, AddItem/ItemDropServer grant.
 - **2026-08-08:** ItemActionEat.ExecuteInstantAction IL=179: MinEvent 24
   use start, Consume flag -> partial UseTimes sip vs full stack decrement,
   MinEvent 29 + QuestEventManager.UsedItem, CreateItem refund with
