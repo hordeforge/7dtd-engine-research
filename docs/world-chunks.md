@@ -82,7 +82,9 @@ Live stock: `ChunkBlockYDim=256`, `ChunkBlockLayers=64`, `ChunkAreaDim=256` (XZ 
 `Chunk.CheckSameLight` (IL=4) / `CheckSameDensity` (IL=4) run the channel's
 `CheckSameValue` pass, and `Chunk.HasSameDensityValue(y)` (IL=5) is
 `chnDensity.HasSameValue(y)` - whether one `y` layer is a single value (the
-fast-path storage probe; `PrefabChunk` stubs it false).
+fast-path storage probe; `PrefabChunk` stubs it false). The write is
+`Chunk.SetDensity(x, y, z, density)` (IL=10): `chnDensity.Set(...)` with the
+value widened to a `ulong` (`PrefabChunk` stubs no-op).
 
 **Block read surface (V3.1.0 b14):** `World.GetBlock(x, y, z)` (IL=13)
 delegates to `ChunkCluster.GetBlock` and returns `BlockValue.Air` when the
