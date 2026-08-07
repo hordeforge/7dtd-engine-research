@@ -390,8 +390,9 @@ the fuse - so `UpdateTick` fires the `explode`. A direct trigger
 (`!useTrigger`) applies the same damage passive and
 `explode(world, ref, -1)` immediately. The scheduled tick is the fuse:
 `BlockMine.UpdateTick` (IL=8) simply calls `explode(world, ref, -1)` and
-returns 1. (The walker-side `LandMineImmunity` skip is the
-`OnEntityWalking` gate above.)
+returns 1. `IsMovementBlocked` (IL=2) is always false - mines never block
+movement, which is what lets walkers step on them. (The walker-side
+`LandMineImmunity` skip is the `OnEntityWalking` gate above.)
 
 `Block/DestroyedResult` (exact enum): `None=0`, `Keep=1`, `Downgrade=2`,
 `Remove=3`. The base `OnBlockDestroyedBy` returns `Downgrade`.
@@ -665,6 +666,8 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** BlockMine.IsMovementBlocked IL=2 always false (walkers
+  step on mines).
 - **2026-08-08:** BlockMine.UpdateTick IL=8: scheduled fuse fire ->
   explode(world, ref, -1) + 1.
 - **2026-08-08:** BlockMine.TriggerMine IL=99: step -> trigger sound +
