@@ -701,6 +701,10 @@ only for the owner when the actor is allowed, there is no password, or the lock
 is off. `get_TriggerRole` (IL=2) is the constant role **1**;
 `OnBlockTriggered` (IL=10) unlocks the feature when `triggeredBy.Unlock` is
 set.
+`CheckPasswordHash(hash, user)` (IL=24): owner or no password -> true; a
+matching hash adds the user to `allowedUserIds` (SetModified) and returns
+true; `IsLocked` (IL=3) is the `locked` field, `HasPassword` (IL=6) is
+`!IsNullOrEmpty(passwordHash)`.
 
 ---
 
