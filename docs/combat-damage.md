@@ -394,6 +394,13 @@ Leaf types on the edges of the damage flow above:
 - **`EntityPlayer.CanHeal` (IL=12):** the heal-side gate
   `Health > 0 && Health < GetMaxHealth()`: the entity must be alive and not
   already at full health. (Healing itself runs through `AddHealth` in §2.1.)
+- **The stat adders (V3.1.0 b14):** `EntityAlive.AddHealth(v)` (IL=12) is a
+  **dead gate** - `Health <= 0` returns without touching anything - then
+  `set_Health(Health + v)` (negative values damage through the same path).
+  `AddStamina(v)` (IL=17) needs `entityStats.Stamina != null` plus the same
+  `Health > 0` gate before `Stamina.Value += v`; `AddWater(v)` (IL=9) is
+  ungated (`Stats.Water.Value += v`). So dead entities ignore health and
+  stamina deltas but still accumulate water.
 - **`ItemActionAttack` modifier leaves:** `difficultyModifier(strength,
   attacker, target)` (IL=44) applies the PvE scalers only in mixed
   client/server matchups: `RoundToInt(strength * IncomingDamageModifier)` when
@@ -442,6 +449,9 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-08:** Stat adders: AddHealth IL=12 dead gate (Health<=0 no-op,
+  then Health+=v); AddStamina IL=17 Stamina!=null + Health>0 gates;
+  AddWater IL=9 ungated.
 - **2026-08-07:** damageEntityLocal IL=484 DR build (armor, dismember chance,
   StunProne/StunKnee thresholds, Fatal); ProcessDamageResponse net fan-out;
   ProcessDamageResponseLocal IL=903 (armor wear, headshot gates, stun/pain,
