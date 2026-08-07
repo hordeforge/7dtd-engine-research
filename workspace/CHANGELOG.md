@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: neighbour-lit gate
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 1: Chunk.IsNeighbourChunksLit (IL=26) all non-null
+  neighbours cleared NeedsLightCalculation, null fails.
+
 ## 2026-08-08 - tier-C: legacy item readers
 
 Done (V3.1.0 b14 IL):
