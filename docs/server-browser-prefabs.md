@@ -230,6 +230,17 @@ each `<decoration name position rotation y_is_groundlevel>` resolves through
 `new PrefabInstance(id++, prefab.location, pos, rotation, prefab, 0)` and
 `AddWorldPrefab(pi, prefab.HasQuestTag())`, then `SortPrefabs()`. This is the
 runtime consumer of the `prefabs.xml` that RWG wrote at world-create time
+
+`PrefabCache.GetPrefab(name, applyMapping, fixChildblocks, allowMissingBlocks,
+skipBlockData)` (IL=47) is the lock-guarded load-or-cache: a hit returns the
+cached `Prefab`, otherwise `new Prefab().Load(...)` and the result is cached
+(null on load failure). `GetPrefabRotated(name, rotation, ...)` (IL=79)
+masks `rotation &= 3` and caches a `Prefab[4]` per name: a live slot returns
+directly; otherwise the base prefab is loaded once and rotations > 0 get a
+`Clone(true)` + `RotateY(true, rotation)` into their slot. The
+`fixChildblocks` argument is computed as `fixChildblocks && (slotArray ==
+null)` — the array is always non-null at that point, so the flag never reaches
+`GetPrefab` in this build (effectively dead).
 ([`world-generation.md`](world-generation.md)).
 
 **Decorate** (`DecorateChunk`, called from
