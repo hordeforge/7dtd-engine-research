@@ -163,6 +163,14 @@ sentinel, otherwise `new ItemValue().ReadData(reader, marker)`.
 The legacy readers are near-empty: `ItemValue.ReadOld` (IL=1) reads nothing,
 and `ItemStack.ReadOld` (IL=10) is the no-op plus an `i16` count.
 
+**Metadata store:** `Metadata` is a lazy `Dictionary<string, TypedMetadataValue>`.
+`HasMetadata(key, typeTag)` (IL=25) tests presence (and the value's `TypeTag`
+when one is given); the typed `TryGetMetadata` overloads (int / float / string,
+IL=17 each) route through the object core (IL=36) which checks the tag and
+returns `GetValue()`. `GetMetadata(key)` (IL=17) returns the value or null -
+with the quirk that a **null dict** yields a boxed `false` instead of null.
+`RemoveMetaData(name)` (IL=12) is `dict?.Remove(name) ?? false`.
+
 **Stacking predicates (V3.1.0 b14):** `ItemStack.CanStackWith(other,
 allowPartialStack)` (IL=46) requires both stacks non-empty, same `type`, and
 for block ids (`type < Block.ItemsStartHere`) an equal `TextureFullArray` -
