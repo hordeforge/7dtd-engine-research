@@ -161,6 +161,14 @@ avatar `SetWalkType(w, true)`.
    - Else if `DamageSource.BuffClass` set: same tracked-players send.
    - Else: `SendPacketToTrackedPlayersAndTrackedEntity` (includes attacker).
 
+**`ServerNetSendRangeCheckedDamage` (IL=27)** is the sibling server send used by
+area-damage callers (explosions, traps): it builds
+`NetPackageRangeCheckDamageEntity.Setup(entityId, origin, maxRange,
+damageSource, strength, isCritical, buffActions, buffActionsContext,
+particleEffect)` and `ConnectionManager.SendPackage(package, false, entityId,
+-1, -1, null, **192**, false)`, fanning the range-checked damage to every
+tracked player except the victim.
+
 ### 2.3 `ProcessDamageResponseLocal` (IL=903) apply side effects
 
 High-signal gates from live IL:

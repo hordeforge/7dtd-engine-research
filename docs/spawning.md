@@ -415,6 +415,13 @@ useSquareRadius)`.
      0.5, 0.5)`; return true.
 4. Tries exhausted: `pos = zero`, return false.
 
+### 6.2 `EntityPlayer.IsSafeZoneActive` (IL=14)
+
+`Level <= GamePrefs.GetInt(EnumGamePrefs.PlayerSafeZoneLevel)` **and**
+`spawnPoints.Count == 0`. The spawn safe zone applies only to players still at
+or below the `PlayerSafeZoneLevel` cap who have not claimed a bedroll spawn;
+past the level or with a bedroll set, the flag is off.
+
 ---
 
 ## 7. From decision to entity to client
