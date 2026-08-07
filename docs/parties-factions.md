@@ -166,7 +166,13 @@ stat is on, so players auto group after respawn.
   disconnect handlers call into `QuestJournal.RemoveSharedQuest*` and
   `RemovePlayerFromSharedWiths`; the shared-quest fetch / activate / repair setup lives
   in `QuestEventManager` ([`quests-challenges.md`](quests-challenges.md) §5). Party
-  quest deltas ride their own `NetPackagePartyQuestChange`.
+  quest deltas ride `NetPackagePartyQuestChange` (**Process IL=83**):
+  server fans to other party members (local `HandlePlayer` or rebroadcast
+  Setup flags **192**); client always `HandlePlayer`. `HandlePlayer` (**IL=70**):
+  find shared quest by `questCode`; if location rect non-zero, require player
+  xz in rect, else require distance to sender **&lt; 15**; on pass
+  `Objectives[objectiveIndex].ChangeStatus(isComplete)`, else
+  `RemoveSharedQuestByOwner`; always `RemoveSharedQuestEntry`.
 - **Party chat.** A party message is tagged `EChatType.Party` (channel 2); the
   sending client supplies the party members' entity ids as the message's
   `recipientEntityIds`, and `GameManager.ChatMessageServer` sends to that recipient
@@ -445,6 +451,8 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 
 ## Changelog
 
+- **2026-08-07:** PartyQuestChange Process/HandlePlayer (15 m or location rect,
+  ChangeStatus / RemoveSharedQuest).
 - **2026-08-07:** AddKillXP / SharedKillServer IL XP pipeline (passive 193,
   party 0.1 split, GameStats 54 range, party-mate only SharedKill fan-out).
 - **2026-08-07:** ServerHandleAcceptInvite IL=89; CreateParty IL=24 nextPartyID.

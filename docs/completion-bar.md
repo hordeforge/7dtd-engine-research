@@ -167,6 +167,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | EntityAliveFlags process bit table | protocol-packages §5.5.6 |
 | AddKillXP / SharedKillServer party XP | parties-factions §2.3 |
 | EntityItem OnUpdateEntity lifetime | loot-economy §6b |
+| DropItemsOnEvent harvest table | blocks §3 |
+| PartyQuestChange HandlePlayer | parties-factions §2.3 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

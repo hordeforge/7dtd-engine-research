@@ -131,7 +131,19 @@ The core surface, grouped by phase:
 | `OnBlockActivated(cmd,world,pos,bv,player)` | player runs an activation command | dispatch per command | server |
 | `HasBlockActivationCommands` / `GetBlockActivationCommands` / `GetActivationText` | building the interact menu | pickup command if `CanPickup` | both |
 | `OnBlockPickedUp` / `PickupOrDrop` | block is taken into inventory | returns dropped `ItemStack` | server |
-| `DropItemsOnEvent(world,bv,event,...)` | harvest / destroy drops | roll `AddDroppedId` table | server |
+| `DropItemsOnEvent(world,bv,event,...)` | harvest / destroy drops | roll drop table (**IL=246**) | server |
+
+**`DropItemsOnEvent` (IL=246)** order:
+
+1. Clear static `itemsDropped`; lookup `itemsToDrop[event]`. If missing and
+   `_bGetSameItemIfNoneFound`, push `block.ToItemValue` x1.
+2. Per `SItemDropProb`: random count in `[minCount, maxCount+1)`; skip if 0;
+   optional stick-chance early continue; special names resolve recipe scrap
+   (half ingredient counts) or named items.
+3. Per entry roll `prob` vs random; overall gate if `_overallProb < 0.999`.
+4. Stick path: if not trader area and target cell air, `SetBlockRPC` place item
+   block; else `ItemDropServer` with lifetime from arg or
+   `ItemClass.GetLifetimeOnDrop()` when arg &lt; 0.001.
 | `CheckUpdate(oldBV,newBV, out mesh, out notify, out light)` | after any word change | sets **all three true** (relight, remesh, notify neighbors) | both |
 
 ```mermaid
@@ -403,5 +415,8 @@ carries the composite data template while the feature modules own the behavior.
 **Leaf catalog:** every instance is enumerated in [`inventories/block-behaviors.md`](inventories/block-behaviors.md) (the 65 `Block` behavior leaves).
 
 ## Changelog
+
+- **2026-08-07:** DropItemsOnEvent IL=246 (prob table, stick vs ItemDropServer,
+  recipe scrap half ingredients, trader-area stick suppress).
 
 - **2026-07-23:** Initial `Block` framework reversal (flyweight registry and id bands, the `BlockValue` 32-bit-plus-damage packing, the virtual-call contract, the `SetBlock`-to-`BlockChangeInfo` change flow, the damage / upgrade / downgrade lifecycle with `DestroyedResult`, placement and activation flows, the block tick model, and representative behavior categories) with state machines.

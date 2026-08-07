@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DropItemsOnEvent and PartyQuestChange
+
+Done (V3.1.0 b14 IL):
+- DropItemsOnEvent IL=246 drop table, stick place vs ItemDropServer, scrap half.
+- PartyQuestChange fan-out; HandlePlayer location rect or 15 m; ChangeStatus.
+---
 ## 2026-08-07 — tier-C: EntityItem OnUpdateEntity lifetime and collect
 
 Done (V3.1.0 b14 IL):
