@@ -1046,7 +1046,7 @@ TickEntity
 
 | Type | Method | IL | Note |
 |---|---|---:|---|
-| **EntityVulture** | updateTasks | **1344** | Flying special case; own world |
+| **EntityVulture** | updateTasks | **1344** | Flying special case; own world (D15) |
 | EntityMoveHelper | UpdateMoveHelper | **1236** | Shared by walkers |
 | EntityFallingBlock | OnUpdateEntity | 344 | Collapse path |
 | EntityFallingBlocks | OnUpdateEntity | 302 | Group fall |
@@ -2361,6 +2361,97 @@ Graded candidates and experiment order live in the optimizer project (not under 
 - Parent index: [`INDEX.md`](INDEX.md)  
 
 Regenerate: `tools/legacy/DumpDeeper.cs` (build via [`../tools/`](../tools/)).
+
+---
+
+## D15. EntityVulture flight AI (`updateTasks` IL=1344)
+
+The flying-enemy special case (only vulture-class zombies run this; everything
+else uses the generic `updateTasks` IL=125 + EAI stack). Own state machine
+(`EntityVulture/State`: **Attack=0, AttackReposition=1, AttackStop=2, Home=3,
+Stun=4, WanderStart=5, Wander=6**) with direct motion integration, no pathfinding.
+
+**Prologue gates:** if pref **46** (debug info) → `aiManager.UpdateDebugName` +
+ret; if `GameStats[0] (GameState) == 2` → ret; `CheckDespawn()`;
+`EntitySeeCache.ClearIfExpired()`; `IsSleeperPassive` → ret.
+
+**Sleeper wake scan (while `IsSleeping`):** gather players within
+`ExpandBounds(boundingBox, seeDist x3)` sorted by distance; candidate =
+`noisePlayer` when `noisePlayerVolume >= sleeperNoiseToWake`, else the nearest
+player with `CanSee` and `GetSleeperDisturbedLevel(dist, Stealth.lightLevel) >=
+2`. If a candidate was found: `ConditionalTriggerSleeperWakeUp()` +
+`SetAttackTarget(candidate, 1200)`.
+
+**Targeting / state entry:**
+- `HasBuff("buffShocked")` → `SetState(Stun)`, skip to the shared motion block.
+- Revenge target set → `battleDuration = 0`, `isBattleFatigued = false`,
+  `SetRevengeTarget(null)`; if revenge != `attackTarget` and (no attack target
+  or `rand < 0.5`) → `SetAttackTarget(revenge, 1200)`.
+- `attackTarget != currentTarget` → `currentTarget = attackTarget`; if non-null:
+  `SetState(Attack)`, `waypoint = position`, `moveUpdateDelay = 0`,
+  `homeCheckDelay = 400`; else `SetState(AttackStop)`.
+
+**Shared per tick:** `waypointDelta = waypoint - position` (distSq kept);
+`stateTime += 0.05`.
+
+| State | Behavior |
+|---|---|
+| 0 Attack | `battleDuration += 0.05` |
+| 1 AttackReposition | hold while `distSq >= 2.25 && stateTime < stateMaxTime`; else → Attack, `motion *= -0.2`, `motion.y = 0` (hover brake) |
+| 2 AttackStop | `ClearTarget()`; → WanderStart |
+| 3 Home | `distSq >= 4 || stateTime > 30` → WanderStart; else every `homeSeekDelay` (reset **40**): offset ±**10** (stateTime > 20 → **-20**) toward home, `CalcTowards(home, ±10|30, maxHome/2, ...)`; zero result = skip; `AdjustWaypoint()` |
+| 4 Stun | shocked (buff present): `motion = randOnUnitSphere * -0.075`, `y -= 0.06`, **disable** animator, ret; else re-**enable** animator, → WanderStart |
+| 5 WanderStart | `homeCheckDelay = 60`; not within home distance → `StartHome(homePos)` and skip; else → Wander; `isCircling = (!IsSleeper && rand < 0.4)`; downward raycast (length 999, layer 65536): target altitude `y + (-hitDist) + rand(wanderHeightRange)` (sleeper ×0.4), miss → `isCircling = false`; `closest = GetClosestPlayerSeen(80, lightMin 1)`; `nearPlayer = closest && distSq > 400`. Circling: `wanderChangeDelay = 120`, `circleCenter = position + right*(3 + rand*7)` at altitude, 50% reverse scale, pulled 0.6/0.4 toward player when near. Else: `wanderChangeDelay = 400`, waypoint = position + jitter ±(8..16) x/z at altitude, same player pull; `AdjustWaypoint()` |
+| 6 Wander | fatigue drain (`battleDuration -= 0.05` when `isBattleFatigued`, clear at ≤ 0); `wanderChangeDelay` → 0 → WanderStart; circling: waypoint = position + tangent `(-dz, 0, dx) * circleReverseScale` about `circleCenter`; else `distSq < 1` → WanderStart; every `targetSwitchDelay` (reset **40**): if `!IsSleeper && rand < 0.5` skip, else `FindTarget()` → `SetAttackTarget(t, 1200)` |
+
+**Post-switch:**
+- **Home guard:** state != Home: `homeCheckDelay` → 0 → reset **60**; outside
+  home distance → `SetState(AttackStop)`.
+- **Move update** (`moveUpdateDelay` reset `4 + rand(5)`): only in Attack with a
+  current target: `waypoint = target.headPosition - 0.1y`; + target velocity lead
+  (**0.3**× when target attached, else **0.1**×); then pull back
+  `-0.6 × normalized horizontal (waypoint - position)`. If
+  `!IsCourseTraversable(waypoint, ...)`: `waypoint.y += 2`; in Attack with
+  `rand < 0.1` → `StartAttackReposition()`, else (not Home/AttackReposition) →
+  WanderStart.
+- **Motion:** `dir = normalized(waypoint - position)`; `glidingPercent = 0`;
+  `accel` by `dir.y`: > **0.57** → 0.35; < **-0.34** → 0.95 (+ gliding 1);
+  else 0.55 (Home/Wander → 0.8, + gliding 1 when circling); `attackDelay > 0` →
+  gliding 0. With target (attached, not ignored): `accel *= moveSpeedAggro`,
+  and BloodMoon with `accel > 0.5` → accel = **2.5** before the multiply; else
+  `accel *= moveSpeed`. Integrate `motion = motion*0.9 + dir*(accel*0.1)`;
+  `glidingCurrentPercent` moves toward `glidingPercent` (0.06/tick) →
+  `avatarController.UpdateFloat("Gliding", ...)`; `attackDelay--`,
+  `attack2Delay--`.
+- **Yaw:** `Atan2(motion.x * motionReverseScale, motion.z * motionReverseScale)
+  × 57.29578` (motion-aligned heading).
+- **Target switch** (every `targetSwitchDelay` reset **60**, state != AttackStop):
+  `FindTarget()` → different target → `SetAttackTarget(t, 400)`. Reposition
+  chance per tick: attached target **0.25** else **0.1** (not in
+  AttackReposition) → `StartAttackReposition()`.
+- **Attack 1 (talons):** require `attackDelay <= 0 && !isAttack2On`; strike when
+  `distSq < 0.81` and vulture is above target's head band
+  (`y >= target.y && y < predicted.y + 0.1`) → `AttackAndAdjust(false)`; else
+  every `checkBlockedDelay` (reset **6**): `Voxel.Raycast` from
+  `position + (0, 0.22, 0) - dir*0.13` along `dir`, length **0.83**, mask
+  **1082198968**, layer 128 → hit → `AttackAndAdjust(true)`.
+- **Attack 2 (vomit):** requires holding item action 1 to be `ItemActionVomit`;
+  arm when `attack2Delay <= 0 && distSq >= 9 && distSq < range²` and
+  `|DeltaAngle(yaw, rotation.y)| < 20` and
+  `|SignedAngle(waypointDelta, forward, right)| < 25` → `isAttack2On = true`,
+  `muzzle = GetHeadTransform()`, `numWarningsPlayed = 999`. While active: if
+  aim lost → off; else `motion *= 0.7`, `SetLookPosition(predicted)`,
+  `UseHoldingItem(1, false)`; when the vomit action deactivates: if
+  `numVomits > 0` → `StartAttackReposition()`; `UseHoldingItem(1, true)`;
+  `attack2Delay = 60`; `SetLookPosition(zero)`.
+- **Tail:** clamp `|motion|` to ≥ **0.02**; `SeekYaw(yaw, 0, 20)`;
+  `aiManager.UpdateDebugName()`.
+
+Helper leaves: `StartAttackReposition` / `AttackAndAdjust(blocked)` / `ClearTarget`
+/ `StartHome` / `AdjustWaypoint` / `IsCourseTraversable` / `FindTarget` remain in
+[inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) if not yet
+narrated; the EAI stack is bypassed entirely while `state` runs (this method owns
+motion, attacks and yaw directly).
 
 ---
 

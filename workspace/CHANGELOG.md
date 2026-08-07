@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityVulture flight AI
+
+Done (V3.1.0 b14 IL):
+- EntityVulture.updateTasks IL=1344 full narration: prologue gates (pref 46,
+  GameState 2, CheckDespawn), sleeper wake scan (disturbed >= 2), buffShocked ->
+  Stun dive, revenge/attackTarget switch, state table Attack/AttackReposition/
+  AttackStop/Home/Stun/WanderStart/Wander (enum pinned), home guard, move update
+  4+rand(5), accel table by dir.y (0.35/0.95/0.55, BM 2.5, aggro/moveSpeed),
+  gliding anim, talons strike + Voxel.Raycast 0.83 mask 1082198968, vomit
+  attack2 (range, 20/25 deg gates, muzzle, numVomits -> reposition).
+---
 ## 2026-08-08 — tier-C: activation command defaults/reorder
 
 Done (V3.1.0 b14 IL):
