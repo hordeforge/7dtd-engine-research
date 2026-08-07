@@ -239,6 +239,17 @@ draws or uses the item: `StartHolding`, `OnHoldingUpdate`, `StopHolding`,
 that slot's runtime `ItemActionData` (pulled from
 `ItemInventoryData.actionData[slot]`).
 
+**`ItemAction` base gates (V3.1.0 b14):** `CanRepair(item)` (IL=37) returns a
+status code: **0** when `ItemMaxDegrationAmount == 0` (no degradation in this
+game) or the item has no `DurabilityModifier` metadata; **1** when
+`DurabilityModifier - ItemMaxDegrationAmount < ItemMaxDegrationAmount`; **2**
+when `(DurabilityModifier - ItemMaxDegrationAmount) * MaxUseTimes <
+MaxUseTimes - UseTimes`; else **0**. `CanCancel(data)` (IL=2) is false in the
+base; `IsEndDelayed()` is false, `ItemActionEat` overriding to true (eating
+holds the action until consumption completes). `IsAimingGunPossible(data)` is
+true in the base and `ItemActionRanged` (IL=4) restricts it to
+`NotReloading(data)` (no aiming while reloading).
+
 ---
 
 ## 4. The ItemAction contract
