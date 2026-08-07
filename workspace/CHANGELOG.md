@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: party leaves + player visibility
+
+Done (V3.1.0 b14 IL):
+- parties-factions.md 2: EntityPlayer.IsPartyLead (IL=11) Party.Leader == this;
+  GetTeamColor (IL=5) Constants.cTeamColors[TeamNumber].
+- server-lifecycle.md: EntityPlayer.VisiblityCheck (IL=48) 5-tick throttle,
+  FastMin(12, GetViewDistance())*16-1 maxDist, bModelVisible = distSqr < maxDist^2,
+  SetVisible when alive.
+
 ## 2026-08-08 - tier-C: prop-change wire + water RPC
 
 Done (V3.1.0 b14 IL):
