@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityVulture helper leaves
+
+Done (V3.1.0 b14 IL):
+- StartAttackReposition IL=104 (fatigue 80-180 break vs reposition waypoint
+  +3..7 y / -motion / 50% reverse), AttackAndAdjust IL=53 (attackDelay 18,
+  motion 0.7/0.6, attackCount 5 or 0.25 -> reposition), FindTarget IL=69
+  (BM no-LOS fallback; 80/lightMin 26; water 0.6 -> noisePlayer; health gate),
+  IsCourseTraversable IL=102 (step bounds), StartHome IL=10, ClearTarget
+  IL=11, AdjustWaypoint IL=46 (air probe, y <= 250).
+---
 ## 2026-08-08 — tier-C: EntityVulture flight AI
 
 Done (V3.1.0 b14 IL):

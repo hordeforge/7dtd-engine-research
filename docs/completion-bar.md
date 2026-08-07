@@ -302,6 +302,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | GameStats/GamePrefs index tables (82 + 317 rows) | inventories/gamestats-gameprefs.md |
 | Activation command defaults/reorder (grab, storage-after-heal/horn) | entity-ai.md D8.6a |
 | EntityVulture.updateTasks IL=1344 flight AI state machine | entity-ai.md D15 |
+| EntityVulture helper leaves (reposition, strike, FindTarget, course, home) | entity-ai.md D15 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

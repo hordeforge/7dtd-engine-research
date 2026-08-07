@@ -2447,11 +2447,33 @@ player with `CanSee` and `GetSleeperDisturbedLevel(dist, Stealth.lightLevel) >=
 - **Tail:** clamp `|motion|` to ≥ **0.02**; `SeekYaw(yaw, 0, 20)`;
   `aiManager.UpdateDebugName()`.
 
-Helper leaves: `StartAttackReposition` / `AttackAndAdjust(blocked)` / `ClearTarget`
-/ `StartHome` / `AdjustWaypoint` / `IsCourseTraversable` / `FindTarget` remain in
-[inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) if not yet
-narrated; the EAI stack is bypassed entirely while `state` runs (this method owns
-motion, attacks and yaw directly).
+**Helper leaves (all V3.1.0 b14 IL):**
+
+- **`ClearTarget` (IL=11):** `SetAttackTarget(null, 0)` + `SetRevengeTarget(null)`
+  + `currentTarget = null`.
+- **`StartAttackReposition` (IL=104):** when not BloodMoon and
+  `battleDuration >= battleFatigueSeconds`: fatigue break →
+  `ClearTarget()`, `battleDuration = rand(80, 180)`, `isBattleFatigued = true`,
+  → Wander. Else → AttackReposition with `stateMaxTime = rand(0.8, 5)`,
+  `attackCount = 0`, `waypoint = position + (rand*8-4, rand*4+3, rand*8-4)`,
+  `moveUpdateDelay = 0`, `motion = -motion`, 50% `motionReverseScale = -1` and
+  `motion.y = 0.2`.
+- **`AttackAndAdjust(isBlock)` (IL=53):** talon strike: `UseHoldingItem(0,
+  false)` gate, then release `(0, true)`; `attackDelay = 18`; `isCircling =
+  false`; `motion *= 0.7` (attached target) else **0.6**; `attackCount++`; when
+  `attackCount >= 5 || rand < 0.25` → `StartAttackReposition()`.
+- **`FindTarget` (IL=69):** BloodMoon → `GetClosestPlayerSeen(this, -1, 0)`
+  then fallback `GetClosestPlayer(this, -1, false)` (LOS not required in BM).
+  Else `GetClosestPlayerSeen(this, 80, lightMin 26)`; null or
+  `inWaterPercent >= 0.6` → `noisePlayer`. `isBattleFatigued` → null.
+  `!IsSleeper && health/MaxHealth > targetAttackHealthPercent` → null.
+- **`IsCourseTraversable(pos, out dist)` (IL=102):** `dist = |pos - position|`;
+  `< 1.5` → true; else step the bounding box along the normalized delta with
+  `world.GetCollidingBounds` per step; any collision → false.
+- **`StartHome(homePos)` (IL=10):** → Home; `homeSeekDelay = 0`;
+  `waypoint = homePos`.
+- **`AdjustWaypoint` (IL=46):** raise `waypoint.y` (and the probe block pos)
+  until the block at the waypoint is air (probe cap 255); clamp `y <= 250`.
 
 ---
 
