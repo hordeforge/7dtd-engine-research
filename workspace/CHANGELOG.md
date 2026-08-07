@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory take/return leaves
+
+Done (V3.1.0 b14 IL):
+- items.md 6: TryTakeItem (IL=83) deposit scan (empty slot whole clone /
+  CanStackPartly until consumed); CanTakeItem (IL=37) + CanStackNoEmpty (IL=24)
+  affordance probes; ReturnItem (IL=36) via PreferredItemSlot; PreferredItemSlot
+  (IL=23) preferredItemSlots scan; GetSlotWithItemValue (IL=25); UsingBareHand
+  (IL=6) + GetBareHandItemValue (IL=3).
+
 ## 2026-08-08 - tier-C: GameStats + EntityTrader leaves
 
 Done (V3.1.0 b14 IL):
