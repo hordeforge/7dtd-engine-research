@@ -353,6 +353,19 @@ defaulting to `-intMax`/`intMax`), returning null when the file is missing.
 map and its width (used by `World.LoadWorld`); `InitData()` (IL=6) is only a
 coroutine stub returning the `<InitData>d__15` state machine.
 
+The `<InitData>d__15` coroutine (MoveNext IL=774) builds the POI map and the
+water mask: it allocates `poiCols : GridCompressedData<Byte>` at
+`worldSizeX*scale` x `worldSizeZ*scale` (16x16 cells) plus
+`water16x16Chunks = byte[(w/16) * (h/16)]` and `water16x16ChunksW`, loads
+`water_info.xml` into the `waterSources` list, registers a default
+`PoiMapElement` (id **5**, `terrDirt` blocks) via `AddPoiMapElement`, requires
+`splat4Tex` to be `TextureFormat` 5 (else it throws
+`splat4Tex was not in the correct format. Expected: {0}, Actual: {1}`), runs
+`GameUtils.WaterFloodFill` over the poi grid into the water mask, loads
+`splat3.png`/`.tga` (format error `World's splat3 file is not in the correct
+format (needs to be either RGBA32 or ARGB32)!`), and finally wraps the result
+as `m_Poi : WorldGridCompressedData<Byte>`.
+
 **`WorldBlockFiller`** is the per-chunk biome deco sprinkler invoked by
 `WorldDecoratorBlocksFromBiome`. Its `m_BlocksToFill : Byte[]` is a flat
 16x16x256 grid indexed `((x << 4) | z) << 8 | y`; **255** means "untouched".
