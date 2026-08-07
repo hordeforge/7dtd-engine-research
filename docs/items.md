@@ -361,6 +361,13 @@ for the water sentinel 240, a hit with water mass blocks it).
 `PercentDone(data)` (IL=24) is 0 until `bEatingStarted`, then
 `(time - lastUseTime) / AnimationDelay[item.HoldType].RayCast`.
 
+**Gun spread:** `getDirectionRandomOffset(data, forward)` (IL=86) computes
+`spreadH = GetValue(passive 32 SpreadDegreesHorizontal, iv, 45, holder) *
+lastAccuracy * (rand.RandomFloat()*2 - 1)` and the vertical twin from passive
+**31** plus `spreadVerticalOffset`, then rotates `forward` by
+`Euler(spreadV, spreadH, 0)` - the shot cone shrinks with `lastAccuracy`
+(the bloom-after-firing accuracy decay).
+
 **Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
 magazine capacity goes through the `MagazineSize` passive against the class's
