@@ -342,6 +342,25 @@ if `wasCleared` and any player home in box (`CheckForAnyPlayerHome`) bump
 scan, require not dead + spawned, `Stealth.lightLevel >= lightMin`, and
 `entity.CanSee(player)`.
 
+### D8.4 Sleeper wake / stealth / triggers
+
+**`PlayerStealth.CanSleeperAttackDetect` (IL=20):** if not crouching → true. If
+crouching: max dist = `FastLerp(3, 15, lightAttackPercent)`; false when
+`GetDistance(player) > max` (stealth close-range only).
+
+**`EntityAlive.ConditionalTriggerSleeperWakeUp` (IL=55):** only if `IsSleeping`
+and not dead: clear `IsSleeping`/`IsSleeperPassive`; avatar pose **-1** (stand)
+or **-2** (crawl if short and not crawl walk); `EAIManager.SleeperWokeUp` if
+present; server sends `NetPackageSleeperWakeup` flags **192**.
+
+**`EntityAlive.SetSleeperActive` (IL=26):** if was passive: clear
+`IsSleeperPassive`; server sends `NetPackageSleeperPassiveChange` flags **192**
+(does not fully wake).
+
+**`TriggerManager.TriggerBlocks`:** BlockTrigger overload (IL=17) requires
+`HasAnyTriggers` then `PrefabTriggerData.Trigger(player, blockTrigger)`.
+TriggerVolume overload (IL=27) same with prefab required (warn if null).
+
 **`SetLastTimePlayerSeen` (IL=4):** `lastTimeSeenAPlayer = Time.time`.
 
 **`IsInFrontOfMe` (IL=28):** angle between head→pos and forward vs
@@ -1274,8 +1293,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** TouchGroup/Touch wake+attack 400; CheckTrigger pads; TriggerVolume
-  Touch; GetClosestPlayerSeen lightMin+CanSee; CalcSenseScale FeralSense.
+- **2026-08-07:** ConditionalTriggerSleeperWakeUp pose/net; SetSleeperActive;
+  CanSleeperAttackDetect crouch 3..15; TriggerBlocks; Touch wake+attack 400.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

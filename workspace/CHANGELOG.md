@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: sleeper wake net and crouch detect
+
+Done (V3.1.0 b14 IL):
+- ConditionalTriggerSleeperWakeUp: clear sleep/passive; pose -1/-2; SleeperWokeUp; NetPackageSleeperWakeup 192.
+- SetSleeperActive: clear passive only; NetPackageSleeperPassiveChange 192.
+- CanSleeperAttackDetect: crouch Lerp(3,15,lightAttackPercent) distance gate.
+- TriggerManager.TriggerBlocks: PrefabTriggerData for BlockTrigger/TriggerVolume.
+---
 ## 2026-08-07 — tier-C: TouchGroup/Touch wake and GetClosestPlayerSeen
 
 Done (V3.1.0 b14 IL):
