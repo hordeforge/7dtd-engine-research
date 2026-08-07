@@ -1241,6 +1241,37 @@ spawn-point index (or **-1** if none).
 **`RemoveSpawnAvailable(index)` (IL=24):** linear search remove first matching
 spawn-point index from `spawnsAvailable`.
 
+**`SleeperVolume.Spawn` (IL=139):** spawn pos = block + **(0.502, 0, 0.501)**.
+Missing class → fallback `zombieArlene`. If `BlockSleeper.ExcludesWalkType` for
+entity walk type → fail. `EntityFactory.SetupEntityCreationData` + async
+`EntityAsyncManager.StartCreateEntity` with callback; enqueue handle in
+`pendingSpawnOps`, id in `pendingSpawnMap`; write `respawnMap[id] =
+{className, spawnPointIndex}`; `TickSpawnCount++`.
+
+**`CompletePendingSpawns` (IL=18):** drain queue `WaitForComplete` on each handle;
+clear `pendingSpawnMap`.
+
+**`CancelPendingSpawns` (IL=22):** same drain but `Destroy(RootTransform)` on
+completed entities; clear map.
+
+**`Despawn` (IL=48):** `triggerState = 1`; clear `playerTouchedTrigger`;
+`CompletePendingSpawns`; for each `respawnMap` live **sleeping** entity set
+`IsDespawned` + `MarkToUnload` (awake entities kept). `DespawnAndReset` =
+`Despawn` + `Reset`.
+
+### D8.5 Entity sleeper init helpers
+
+**`EntityAlive.SetSleeper` (IL=11):** `IsSleeper = true`;
+`aiManager.pathCostScale += 0.2`.
+
+**`SetSleeperSight(angle, range)` (IL=23):** angle &lt; 0 → use `maxViewAngle`;
+range &lt; 0 → `max(3, sightRangeBase * 0.2)`; store `sleeperViewAngle` /
+`sleeperSightRange`.
+
+**`SetSleeperHearing(percent)` (IL=22):** clamp percent ≥ **0.001**; store
+`1/percent` into local then
+`sleeperNoiseToSense/Wake *= percent` (hearing scale).
+
 ### D8.2b `OnTriggered` (IL=14)
 
 `triggerState = flags & 7`; store `playerTouchedTrigger`; call
@@ -1465,8 +1496,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** Chunk.CanSleeperSpawnAtPos floor/solid; CalcGameStageAround 100 m
-  same-prefab; AddSpawnCount frac ceil; FindFathestSpawn; ResetSpawns.
+- **2026-08-07:** Spawn async pending maps; Despawn sleeping-only; SetSleeper
+  pathCostScale+0.2; Sight/Hearing; CanSleeperSpawn; CalcGameStageAround.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

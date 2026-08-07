@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SleeperVolume.Spawn async and SetSleeper helpers
+
+Done (V3.1.0 b14 IL):
+- Spawn: pos +0.502/0.501; zombieArlene fallback; ExcludesWalkType fail; async create + pending maps; TickSpawnCount++.
+- CompletePendingSpawns WaitForComplete; CancelPendingSpawns Destroy RootTransform.
+- Despawn only sleeping respawnMap entities; DespawnAndReset = Despawn+Reset.
+- SetSleeper pathCostScale+0.2; SetSleeperSight defaults; SetSleeperHearing 1/percent scale.
+---
 ## 2026-08-07 — tier-C: CanSleeperSpawn floor/solid and CalcGameStageAround
 
 Done (V3.1.0 b14 IL):
