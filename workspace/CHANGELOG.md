@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity-block/cull leaves
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md 1: EnableEntityBlocks (IL=51) name-filter toggle;
+  AddInsideDevicePosition (IL=20) culled path flag.
+
 ## 2026-08-08 - tier-C: entity-stub leaves
 
 Done (V3.1.0 b14 IL):
