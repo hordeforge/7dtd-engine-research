@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: slot action lookups
+
+Done (V3.1.0 b14 IL):
+- items.md 4.1: GetItemActionInSlot (IL=32) / GetItemActionDataInSlot (IL=18)
+  held-vs-slot split over Actions / actionData.
+
 ## 2026-08-08 - tier-C: ItemValue id accessors
 
 Done (V3.1.0 b14 IL):
