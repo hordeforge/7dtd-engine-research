@@ -198,6 +198,10 @@ lookup core: a `TraderBinarySearch(x - padding)` over the X-sorted
 `traderAreas`, then an X/Z containment test against
 `[ProtectPosition - padding, ProtectPosition + ProtectSize + padding)`
 (Y unchecked) - the first matching `TraderArea`, else null.
+`TraderArea.IsWithinProtectArea(pos)` (IL=47) is the full 3D containment
+against the cached `ProtectBounds`; `GetProtectPadding()` (IL=22) is
+`ProtectSize - PrefabSize` with x/z minus 2 - the protection margin around
+the prefab footprint.
 
 ```mermaid
 stateDiagram-v2
@@ -845,6 +849,9 @@ or `ItemStack.Empty` when nothing rolled.
 
 ## Changelog
 
+- **2026-08-08:** TraderArea leaves: IsWithinProtectArea IL=47 full 3D
+  ProtectBounds test; GetProtectPadding IL=22 ProtectSize - PrefabSize with
+  x/z minus 2.
 - **2026-08-08:** DynamicPrefabDecorator.GetTraderAtPosition IL=68:
   TraderBinarySearch + X/Z containment against padded Protect rect (Y
   unchecked).
