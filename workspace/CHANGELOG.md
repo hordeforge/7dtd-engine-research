@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: deco attach/detach
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 5: AddDecorationAt IL=142 (off-main queue SAddDecoInfo, terrain Y-snap, bDirty, dedupe by realYPos/bv/rotation)
+- chunk-providers.md 5: RemoveDecorationAt IL=52 (disabled/missing -> false, off-main queue, main-thread RemoveDecoObject)
+
 ## 2026-08-08 - tier-C: DecoChunk buckets + reads
 
 Done (V3.1.0 b14 IL):
