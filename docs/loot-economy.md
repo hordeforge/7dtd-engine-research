@@ -586,6 +586,21 @@ sub-features, an `AlternateLootList` of `(FastTags tag, string lootEntry)` and a
 `bool bPlayerStorage`, `i16 items.Length`, `ItemStack*`, then a preferences bool
 and the locked-slot bit array.
 
+**`migrateItemsFromOtherContainer(other)` (IL=94)** is the storage-upgrade
+handoff: it clones the other container's items clamped to this size, and when
+the source held more than fits, drops the overflow as a `DroppedLootContainer`
+at `ToWorldCenterPos() + (0, 0.9, 0)` through
+`GameManager.DropContentInLootContainerServer`. Slot locks follow the source:
+cloned and resized to this size when the source supports them, else a fresh
+all-empty `PackedBoolArray`.
+
+**Storage leaves:** `SetContainerSize(size, clearItems)` (IL=48) writes the
+size and, when clearing, either rebuilds `items` at the new capacity or empties
+the existing array. `HasItem(item)` (IL=26) scans for a matching `type`;
+`UpdateSlot(idx, item)` (IL=10) stores a clone and `NotifyListeners()`;
+`GetContainerSize` (IL=3) and the `LootStageMod`/`LootStageBonus` accessors
+are field reads.
+
 ---
 
 ## 8. Player loot stage (`EntityPlayer.GetLootStage`, IL=184)
