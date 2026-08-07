@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: BuffClass.FireEvent canRun and StartSequence
+
+Done (V3.1.0 b14 IL):
+- BuffClass.FireEvent: Effects null / canRun gate then MinEffectController.FireEvent.
+- StartSequence: StartTime = Time.time only.
+---
 ## 2026-08-07 — tier-C: EntityBuffs.Tick MinEvent order
 
 Done (V3.1.0 b14 IL):

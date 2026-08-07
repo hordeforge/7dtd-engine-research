@@ -66,6 +66,9 @@ a `BuffValue`. Each server tick, `EntityBuffs.Tick` (**IL=179**) walks
 **`EntityBuffs.FireEvent(event, params)` (IL=30):** for each active buff with non-null
 class and not `Paused`, `BuffClass.FireEvent`.
 
+**`BuffClass.FireEvent` (IL=15):** no-op if `Effects` null; if `!canRun(params)`
+return; else `Effects.FireEvent(eventType, params)`.
+
 **`MinEventActionBase.CanExecute` (IL=10):** if `Requirements` null → true; else
 `Requirements.IsValid(params)`.
 
@@ -157,8 +160,8 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
-- **2026-08-07:** EntityBuffs.Tick MinEvent 0/1/2/3 order; FireEvent skip paused;
-  CanExecute Requirements; DurationTick already pinned.
+- **2026-08-07:** BuffClass.FireEvent canRun + Effects gate; Tick MinEvent
+  0/1/2/3; CanExecute Requirements.
 - **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.
 - **2026-07-28:** NetPackageEntityStatsBuff pointer.
 

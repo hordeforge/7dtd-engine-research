@@ -88,6 +88,9 @@ denied while a same-name sequence is running, and finally the template is
 from an `OwnerSequence` when a sequence-link or nested call created it), and
 appended to `ActionSequenceUpdates`.
 
+**`StartSequence(manager)` (IL=4):** only `StartTime = Time.time` (manager arg
+unused in body).
+
 Each tick, `HandleActionUpdates` runs `StartSequence` once (the `StartTime`
 sentinel is `-1`; the first tick stamps `Time.time`), then `Update()`, inside a
 try/catch that logs `Exception while updating action sequence <name>` and
@@ -476,6 +479,8 @@ Full field lists in inventories/netpackage-bodies.md; tick pipeline above.
 **Leaf catalog:** every instance in [`inventories/sequence-requirements.md`](inventories/sequence-requirements.md) (all 37 concrete requirement leaves).
 
 ## Changelog
+
+- **2026-08-07:** StartSequence IL=4 stamps Time.time only.
 
 - **2026-07-28:** BossEvent wire; GameEventRequest/Response pointers.
 

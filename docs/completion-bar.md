@@ -214,6 +214,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | explode ExplodeGroup delay=3 + FrameUpdate budget | protocol-packages §6.14 |
 | Interest enter package order (Speeds/Velocity) | network.md §2.1 |
 | EntityBuffs.Tick MinEvent 0/1/2/3 order | buffs.md |
+| BuffClass.FireEvent canRun + StartSequence | buffs / game-events |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
