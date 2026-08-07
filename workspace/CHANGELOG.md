@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DigStart DigUpdate and StartJump
+
+Done (V3.1.0 b14 IL):
+- DigStart: digActionTicks 18; DigStartTrigger; CanBreakBlocks gate.
+- DigUpdate: move-away stop 0.5 m; DigTrigger; raycast break residual.
+- StartJump: ground/elevator; not electrocuted; SetJumpDistance.
+- ClearBlocked / ResetStuckCheck field clears.
+- Census pin narrated 1483 / catalogued 826.
+---
 ## 2026-08-07 — tier-C: Wandering TickNextTime and MoveHelper gates
 
 Done (V3.1.0 b14 IL):

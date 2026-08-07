@@ -1355,6 +1355,31 @@ Call themes in the bulk: stuck / jump / dig / blocked clear / Attack ×2 / angle
 lerp / RandomFloat ×9. Full **locomotion + dig + combat assist**. Far skip of
 `updateTasks` avoids this entirely.
 
+**`ClearBlocked` (IL=10):** zero `BlockedFlags`, `BlockedFlagsAfterCrouch`,
+`BlockedTime`.
+
+**`ResetStuckCheck` (IL=22):** zero `SideStepAngle`, `moveToTicks`,
+`moveToFailCnt`; recompute `moveToDistance` via `CalcTempMoveDist` or
+`CalcMoveDist`.
+
+**`StartJump(calcYaw, distance, heightDiff)` (IL=66):** require not already
+jumping; on ground or elevator; not electrocuted. Store `JumpToPos = moveToPos`;
+yaw from entity or Atan2 to moveTo; `Jumping=true`; `SetJumpDistance`;
+`ClearBlocked`.
+
+**`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
+`digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
+`digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
+cancel `EndTrigger`, fire `DigStartTrigger`; `isDigging=true`.
+
+**`DigUpdate` (IL=261 high-level):** countdown dig ticks; dark shortens action;
+if dig anim not running clear digging; if moved &gt; 0.5 m from start `DigStop`.
+At action windows fire `DigTrigger` / raycast break (Voxel.Raycast layer mask)
+via attack hit info; yaw seek ±120 random; stop when ticks exhausted.
+
+**`EntityBuffs.FireEvent(type, params)` (IL=30):** for each non-paused active
+buff with class, `BuffClass.FireEvent`.
+
 ---
 
 ## D5. Path system fields (ASP vs AStar)
@@ -1807,8 +1832,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** UpdateMoveHelper early gates (expiry/root/dig/stun);
-  pathFollow radii; ImprovePath; hasHome; CheckPath; moveSpeed 133-135.
+- **2026-08-07:** DigStart 18 action ticks; StartJump ground/elevator;
+  ClearBlocked/ResetStuckCheck; DigUpdate; UpdateMoveHelper early gates.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
