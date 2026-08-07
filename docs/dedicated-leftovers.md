@@ -209,6 +209,11 @@ teleport-out); `PrefabInfoVolumeList` backs `PrefabInstance.IsWithinInfoArea`;
 rebuilds each volume via `Use(start, size)` +
 `AddExistingVolume`. `GetReadWriteSize` (IL=10) is `22 + count * 6`;
 `IsWithinProtectArea` (IL=47) is the `ProtectBounds` AABB test.
+`SetClosed(world, closed, trader, playSound)` (IL=222) stores
+`owningTrader`/`IsClosed`, requires every chunk of the prefab span to be
+loaded, then per chunk walks `IndexedBlocks["TraderOnOff"]`: non-child blocks
+inside `ProtectBounds` resolve their `TileEntityComposite` and toggle the
+`TEFeatureDoor` feature (plus the teleport/sound side).
 
 ## 5. PathAbstractions: SearchDefinition, SearchPathBasic/Saves/Mods/UserData
 
