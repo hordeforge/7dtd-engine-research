@@ -273,6 +273,13 @@ world-side volumes link back via `AddToPrefabInstance` ->
 `DynamicPrefabDecorator.FindVolumeOwner(EVolumeType, mins, maxs)`, which is how
 a sleeper volume knows its owning POI.
 
+`PrefabInstance.CopyIntoChunk(world, chunk, forceOverwrite, questTags)`
+(IL=34) is the stamping entry: `CopyBlocksIntoChunkNoEntities(world, chunk,
+boundingBoxPosition, forceOverwrite, questTags)`, then entity stubs only when
+`world.IsEditor() || GameStats.GetBool(24)` via
+`CopyEntitiesIntoChunkStub`, then records `lastCopiedPrefabPosition` and sets
+`bPrefabCopiedIntoWorld`.
+
 `CopyVolumesIntoWorldCommon(world, chunk, offset, padding)` (IL=208): with a
 chunk argument the volume's padded world bounds
 (`start + offset - padding` .. `start + size + offset + padding`) must overlap
