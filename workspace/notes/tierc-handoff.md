@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `6cf2c65` PPL registry leaves |
-| Commits since dry-run `3b61d9c` | ~257 |
+| HEAD (at handoff write) | `8f452e1` World sky/water queries |
+| Commits since dry-run `3b61d9c` | ~258 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

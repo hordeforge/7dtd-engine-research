@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World sky/water queries
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 1: World.IsOpenSkyAbove (IL=23) chunk-local delegation
+  (x>>4, z>>4 / x&15, z&15), null-cache true; World.IsWaterInBounds (IL=74)
+  integer cell walk [floor(min), floor(max)+1) with IsWater probe.
+
 ## 2026-08-08 - tier-C: PPL registry leaves
 
 Done (V3.1.0 b14 IL):
