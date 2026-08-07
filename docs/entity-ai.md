@@ -385,6 +385,22 @@ TriggerVolume overload (IL=27) same with prefab required (warn if null).
    uses `CalcSenseScale` scaled radius `min(vol*0.6*(1+sense*1.6), 40+15*sense)`
    (remainder of method walks nearby sleepers).
 
+**`PlayerStealth.NoiseCleanup` (IL=43):** for each `noises` entry: if `ticks > 1`
+decrement ticks; else `RemoveAt`.
+
+**`PlayerStealth.CalcVolume` (IL=68):** weighted sum of noise volumes with decay
+factor **0.6** per successive entry (`sum += vol * weight; weight *= 0.6`);
+`noiseVolume = (sum * 2.35)^0.86 * 1.5 * EffectManager(passive **88**)`; return
+raw sum (noiseVolume field is the scaled value used by TickServer).
+
+**`LightManager.GetStealthLightLevel` (IL=30):** if no `myServer` return 0. Else
+sample at entity pos **y+1.68**:
+`clamp01(GetLightLevel(pos) + GetLightLevelFromMovingLights(id, pos))` and out
+`selfLight = entity.GetLightLevel()`.
+
+**`BlockTrigger.OnTriggered` (IL=27):** `SetTriggeredValueFlag(index)`; if
+`CheckIsTriggered` then `Block.OnTriggered(...)` and clear `TriggeredValues`.
+
 **`PrefabTriggerData.Trigger(player, BlockTrigger)` (IL=85):** for each index in
 `TriggersIndices`: fire all `TriggeredByDictionary[index]` via
 `BlockTrigger.OnTriggered`; if player non-null also
@@ -1324,8 +1340,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** SleeperWokeUp zero target executeTime; TickServer light/noise
-  cvars passive 89; PrefabTriggerData Trigger fan-out; SleeperWakeup Process.
+- **2026-08-07:** CalcVolume 0.6 decay + passive 88; NoiseCleanup; stealth light
+  y+1.68; BlockTrigger.OnTriggered; SleeperWokeUp; TickServer passive 89.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

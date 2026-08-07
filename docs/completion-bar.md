@@ -226,6 +226,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | TouchGroup/Touch wake + GetClosestPlayerSeen | entity-ai.md |
 | Sleeper wake/passive net + crouch detect | entity-ai.md |
 | PlayerStealth.TickServer + PrefabTriggerData | entity-ai.md |
+| CalcVolume/NoiseCleanup + GetStealthLightLevel | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

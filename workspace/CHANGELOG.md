@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CalcVolume noise formula and stealth light
+
+Done (V3.1.0 b14 IL):
+- CalcVolume: 0.6 successive decay, (sum*2.35)^0.86 * 1.5 * passive 88.
+- NoiseCleanup: decrement ticks or RemoveAt.
+- GetStealthLightLevel: y+1.68 sample + moving lights; selfLight out.
+- BlockTrigger.OnTriggered: flag + Block.OnTriggered + clear values.
+- SleeperVolume.OnTriggered: already D8.2b (triggerState + UpdatePlayerTouched).
+---
 ## 2026-08-07 — tier-C: PlayerStealth.TickServer and PrefabTriggerData
 
 Done (V3.1.0 b14 IL):
