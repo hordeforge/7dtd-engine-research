@@ -6,6 +6,20 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Equipment container
+
+Done (V3.1.0 b14 IL):
+- Equipment narrated in items.md section 6: SetSlotItem (IL=191) - empty
+  value null under isLocal, IsEquipping wrap, same-value path fires only
+  onSelfEquipStart (54); changed path tears down old item: activated items +
+  mods fire onSelfItemDeactivate (92) + clear Activated (gated on the 91
+  trigger), then onSelfEquipStop (57); preferredItemSlots store,
+  slotsSetFlags/slotsChangedFlags bit set, bPlayerEquipmentChanged +
+  ResetArmorGroups + OnChanged, IsEquipping false. SetSlotItemRaw (IL=13)
+  silent store. SetCosmeticSlot class (IL=50): EquipSlot < 4,
+  HasCosmeticUnlocked gate, ArmorGroup[0] dedupe, local changed flag; id
+  variant (IL=72) CosmeticMappingIDString resolve, id 0 clears.
+
 ## 2026-08-08 - tier-C: Bag.GetItemCount mirror
 
 Done (V3.1.0 b14 IL):

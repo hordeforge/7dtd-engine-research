@@ -465,6 +465,26 @@ over backpack + toolbelt (UI-side). `Bag.GetItemCount` mirrors both Inventory
 overloads (IL=68 / IL=75) over the backpack's `GetSlots()` array with the same
 type-or-tags, seed, meta, and `ignoreModdedItems` filters.
 
+**`Equipment.SetSlotItem(index, value, isLocal)` (IL=191)** (the armor-slot
+equip path): with `isLocal` an empty value is treated as null; a no-op when
+both old and new are null; wraps the work in `m_entity.IsEquipping = true`.
+The **same-value path** stores and fires `onSelfEquipStart` (54) only. The
+**changed path** first tears down the old item: for the item and each mod with
+an `onSelfItemActivate` (91) trigger and `Activated != 0`, fire
+`onSelfItemDeactivate` (92) and clear `Activated`; then fire
+`onSelfEquipStop` (57) on the old value. It stores
+`preferredItemSlots[index] = value?.type ?? 0`, `m_slots[index] = value`, and
+sets the `slotsSetFlags` / `slotsChangedFlags` bit for the index; on a real
+change a local entity gets `bPlayerEquipmentChanged = true` plus
+`ResetArmorGroups()` and `OnChanged?.Invoke()`; finally
+`IsEquipping = false`. `SetSlotItemRaw` (IL=13) is the silent raw store.
+**`SetCosmeticSlot`** (IL=50, class variant): only `EquipSlot < 4` cosmetic
+slots, gated on `HasCosmeticUnlocked`; skips when the slot already wears the
+same `ArmorGroup[0]`; stores and flags `bPlayerEquipmentChanged` for local
+entities. The (slotID, id) variant (IL=72) resolves the id through
+`CosmeticMappingIDString` into an `ItemClassArmor` (id 0 clears the slot) and
+stores into the mapped or generic slot.
+
 **`Inventory.AddItem(stack, out slot)` (IL=121)** (wrapper IL=5): the give-item
 path (loot, crafting output, admin `give`). First gate:
 `stack.CanMoveTo(StackLocationTypes.Toolbelt, -1)` (the item must be movable
@@ -764,6 +784,12 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** Equipment family: SetSlotItem (IL=191) equip path (IsEquipping
+  wrap, same-value equip-start only, teardown onSelfItemDeactivate 92 for
+  activated items+mods then onSelfEquipStop 57, preferredItemSlots + set/changed
+  flags, ResetArmorGroups + OnChanged); SetSlotItemRaw (IL=13);
+  SetCosmeticSlot class (IL=50) EquipSlot<4 + unlock + armor-group dedupe and
+  id (IL=72) CosmeticMappingIDString resolve.
 - **2026-08-07:** ItemStack size checks: CanStack (IL=19) sum <= MaxCount,
   CanStackPartly (IL=24) FastMin clamp to room + >0, CanStackPartlyWith
   (IL=15) seed from other.count.
