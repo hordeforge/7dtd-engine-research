@@ -366,6 +366,13 @@ water mask: it allocates `poiCols : GridCompressedData<Byte>` at
 format (needs to be either RGBA32 or ARGB32)!`), and finally wraps the result
 as `m_Poi : WorldGridCompressedData<Byte>`.
 
+`WaterFloodFill` (IL=196) is the BFS water-mask builder: a cell whose terrain
+height is below `maxY + 1` is marked `cols.SetValue(x, z, colWater)` and its
+16x16 chunk cell
+`waterChunks16x16Height[(x/16) + (z/16) * (width/16)] = (byte)maxY` is
+written; the queue expands to the four neighbors within the box, skipping
+already-filled cells and stopping at a 100000-cell cap.
+
 **`WorldBlockFiller`** is the per-chunk biome deco sprinkler invoked by
 `WorldDecoratorBlocksFromBiome`. Its `m_BlocksToFill : Byte[]` is a flat
 16x16x256 grid indexed `((x << 4) | z) << 8 | y`; **255** means "untouched".
