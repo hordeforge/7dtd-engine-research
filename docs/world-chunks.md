@@ -85,6 +85,9 @@ Live stock: `ChunkBlockYDim=256`, `ChunkBlockLayers=64`, `ChunkAreaDim=256` (XZ 
 fast-path storage probe; `PrefabChunk` stubs it false). The write is
 `Chunk.SetDensity(x, y, z, density)` (IL=10): `chnDensity.Set(...)` with the
 value widened to a `ulong` (`PrefabChunk` stubs no-op).
+`Chunk.IsOnlyTerrain(y)` (IL=8) / `IsOnlyTerrainLayer(idx)` (IL=24) test the
+layer's `bOnlyTerrain` compaction flag (out-of-range index → true, missing
+layer → false; `PrefabChunk` stubs false).
 
 **Block read surface (V3.1.0 b14):** `World.GetBlock(x, y, z)` (IL=13)
 delegates to `ChunkCluster.GetBlock` and returns `BlockValue.Air` when the
