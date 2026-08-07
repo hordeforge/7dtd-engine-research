@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityClass registry + ItemStack.FromString
+
+Done (V3.1.0 b14 IL):
+- dedicated-misc-systems.md: EntityClass FromString=GetHashCode, GetId linear scan, GetEntityClassName null fallback, GetEntityClassWithinMaxTier walk
+- items.md 2: ItemStack.FromString IL=38 name=count parse
+
 ## 2026-08-08 - tier-C: sync create + sleeper gate
 
 Done (V3.1.0 b14 IL):
