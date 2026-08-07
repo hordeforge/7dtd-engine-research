@@ -238,6 +238,8 @@ chunk in a `DictionaryList<Vector3i, BlockTrigger>` (`Chunk.GetBlockTriggers`,
 stores into `triggerData` keyed by `LocalChunkPos` and marks `isModified`;
 `GetBlockTriggers()` (IL=3) returns the `DictionaryList`; `GetBlockTrigger(pos)`
 (IL=9) is the `triggerData.dict` `TryGetValue` (null when absent).
+`BlockTrigger.HasAnyTriggers()` (IL=6) is `TriggersIndices.Count > 0` - the
+gate in `TriggerManager.TriggerBlocks`.
 | `NeedsTriggered : TriggeredStates` | `NotTriggered=0 / NeedsTriggered=1 / HasTriggered=2` deferred-fire latch |
 | `ExcludeIcon`, `Unlock`, `TriggerDataOwner` | editor icon suppression, unlock flag, owning `PrefabTriggerData` |
 
@@ -389,6 +391,8 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** BlockTrigger.HasAnyTriggers (IL=6) = TriggersIndices.Count > 0
+  - the TriggerBlocks gate.
 - **2026-08-07:** Block.HandleTrigger (IL=41): client -> NetPackageBlockTrigger,
   server resolves chunk trigger + TriggerBlocks(player, player.prefab, trigger).
 - **2026-08-07:** TriggerManager.TriggerBlocks dispatch (IL=17/27):

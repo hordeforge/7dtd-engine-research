@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockTrigger.HasAnyTriggers
+
+Done (V3.1.0 b14 IL):
+- BlockTrigger.HasAnyTriggers (IL=6) = TriggersIndices.Count > 0 - the
+  TriggerBlocks gate. block-shapes.md.
+
 ## 2026-08-08 - tier-C: Block.HandleTrigger
 
 Done (V3.1.0 b14 IL):
