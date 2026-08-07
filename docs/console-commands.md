@@ -39,7 +39,15 @@ flowchart LR
 
 `RegisterServer(IConsoleServer)` lets the dedicated/telnet server attach; `Output`
 + `LogCallback` fan command results and log lines back to connected clients.
-`Update` pumps queued async work each frame.
+
+**`Update` pump (IL=60):** each frame, when `m_commandsToExecuteAsync` is
+non-empty, executes **exactly one** queued async command under the list's
+`Monitor` lock: builds a `CommandSenderInfo` (`IsLocalGame=false`,
+`NetworkConnection = entry.sender`), runs
+`executeCommand(command, senderInfo)` (exceptions logged via `Log.Exception`),
+sends the result lines back through `entry.sender.SendLines`, and removes the
+entry (`RemoveAt(0)`) - a FIFO one-per-frame drain, so N queued commands take N
+frames on the main thread.
 
 ---
 
@@ -241,6 +249,9 @@ this doc owns the framework, not each leaf command's full prose.
 
 ## Changelog
 
+- **2026-08-07:** SdtdConsole.Update (IL=60) one-command-per-frame FIFO drain:
+  Monitor lock, CommandSenderInfo from entry.sender, executeCommand +
+  Log.Exception, SendLines, RemoveAt(0).
 - **2026-08-07:** ServerConsoleCommand 300-char reject; null adminTools deny;
   msgServer25 deny string.
 - **2026-08-07:** CommandAllowedFor IL=12 level compare; ServerConsoleCommand

@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SdtdConsole.Update pump
+
+Done (V3.1.0 b14 IL):
+- SdtdConsole.Update (IL=60) narrated in console-commands.md: FIFO drain of
+  m_commandsToExecuteAsync at one command per frame under Monitor lock;
+  CommandSenderInfo with NetworkConnection = entry.sender, executeCommand
+  (exceptions -> Log.Exception), result SendLines back to sender,
+  RemoveAt(0); N queued commands take N main-thread frames.
+
 ## 2026-08-08 - tier-C: Inventory.setHeldItemByIndex
 
 Done (V3.1.0 b14 IL):
