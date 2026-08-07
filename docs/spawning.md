@@ -366,6 +366,22 @@ the region key (`int64`) followed by `AIDirectorChunkData.Write`; `Read`
 (IL=37) only parses it when the outer WorldState version is >= **5**, clears
 the map, and rebuilds each `AIDirectorChunkData` through its own `Read`.
 
+`AIDirectorChunkData` is the per-region heat cell. `AddEvent` (IL=46) merges
+an event into the `events` list (same-kind events fold their `Value` into the
+existing entry and refresh its `Duration`; new kinds append) and adds
+`event.Value` to `activityLevel`. `DecayEvents(elapsed)` (IL=61) re-accumulates
+`activityLevel` from the surviving events, shrinking each event by
+`Value -= Value * (elapsed / Duration)` and `Duration -= elapsed`, dropping
+entries at zero. `Tick(elapsed)` (IL=23) counts a cooldown down
+(`cooldownDelay -= elapsed`, returns true while active) and otherwise decays
+and returns `EventCount > 0`. `FindBestEventAndReset` (IL=44) returns the
+highest-`Value` event, arms `cooldownDelay = 240`, and clears the list;
+`StartNeighborCooldown(isLong)` (IL=13) raises it to `max(current, 180)` or
+`720`; `SetLongDelay` (IL=4) pins it to 1320; `IsReady` is
+`cooldownDelay == 0`. Its blob (Write IL=35 / Read IL=36) is version **2**:
+activityLevel (float), event count, per-event `AIDirectorChunkEvent.Write`,
+then cooldownDelay (float, version >= 2 only).
+
 ```mermaid
 stateDiagram-v2
   [*] --> Cooling
