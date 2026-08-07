@@ -207,9 +207,28 @@ special score condition if holding `gunHandgunT2Magnum44`;
 **`EntityAlive.AddScore` (IL=97):** increment KilledZombies/Players/Died counters;
 score from GameStats weights; clamp score ≥ 0; achievement stats hooks.
 
-**`OnDeathUpdate` (IL=76):** while corpse remains, track `DeathHealth` vs
-`EntityClass.DeadBodyHitPoints`; when depleted enough, death particle and unload
-path (corpse cleanup after body HP exhausted).
+**`NotifySleeperDeath` (IL=11):** server + `IsSleeper` only →
+`World.NotifySleeperVolumesEntityDied(this)`.
+
+**`ClientKill` (IL=216 high-level):** set `lastHitDirection`; resolve
+`entityThatKilledMe` from source if missing; if not already dead: `SetDead`;
+`Buffs.OnDeath` (attacking item, is-crushing type **4**, damage tags default
+`crushing`); `Progression.OnDeath`; analytics; `HandleClientDeath`;
+`OnEntityDeath`; enemy killed by player may spawn celebrate FX via passive
+**181** / celebrate flags.
+
+**`OnDeathUpdate` (IL=76):** if `deathUpdateTime < timeStayAfterDeath`
+increment by 1. If `DeadBodyHitPoints > 0` and `DeathHealth <= -DeadBodyHitPoints`,
+force `deathUpdateTime = timeStayAfterDeath` (early corpse clear). When
+`deathUpdateTime >= timeStayAfterDeath` and server not already unloading:
+spawn `particleOnDestroy` at head with block light brightness (no explicit
+unload in this method; unload is driven elsewhere once stay time elapsed).
+
+**`FireEvent(type, useInventory)` (IL=57):** fan-out
+`EntityClass.Effects` → `Progression` → `challengeJournal` → optional
+`inventory` (if useInventory) → `equipment` → `Buffs` with `MinEventContext`.
+
+**`SetCVar(name, value)` (IL=13):** `Buffs.SetCustomVar(name, value, netSync=true)`.
 
 ```mermaid
 stateDiagram-v2
@@ -298,6 +317,8 @@ Leaf types on the edges of the damage flow above:
   dropItemOnDeath passive 80 + LootBagChance.
 - **2026-08-07:** SetRevengeTarget 500; DamagedByEntity stops DestroyArea;
   SetStun/_stunned; Kill NotifySleeperDeath; AwardKill magnum score flag 2.
+- **2026-08-07:** ClientKill buff/progression; OnDeathUpdate DeadBodyHitPoints;
+  FireEvent fan-out; NotifySleeperDeath volumes.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

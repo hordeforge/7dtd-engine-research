@@ -247,6 +247,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | CanSee ray/stealth + Attack target-now | entity-ai.md |
 | UseHoldingItem + AStar/ASP FindPath enqueue | entity-ai.md |
 | SetRevengeTarget 500 + AwardKill magnum flag | combat-damage.md |
+| ClientKill + OnDeathUpdate + FireEvent fan-out | combat-damage.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

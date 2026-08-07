@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: ClientKill OnDeathUpdate FireEvent
+
+Done (V3.1.0 b14 IL):
+- NotifySleeperDeath: server sleeper -> NotifySleeperVolumesEntityDied.
+- ClientKill: SetDead; Buffs.OnDeath crushing default; Progression.OnDeath; OnEntityDeath; celebrate passive 181.
+- OnDeathUpdate: deathUpdateTime++; DeadBodyHitPoints force stay; particleOnDestroy.
+- FireEvent: class Effects, Progression, challenges, inv, equip, Buffs.
+- SetCVar: Buffs.SetCustomVar netSync true.
+---
 ## 2026-08-07 — tier-C: SetRevengeTarget and AwardKill magnum
 
 Done (V3.1.0 b14 IL):
