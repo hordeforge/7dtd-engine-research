@@ -313,11 +313,32 @@ stateDiagram-v2
 | Method | IL | Role |
 |---|---:|---|
 | `ChunkCluster.SetBlock(Vector3i,…)` | **828** | Full set path |
-| `ChunkCluster.SetBlockRaw` | 25 | Silent |
+| `ChunkCluster.SetBlockRaw` | 25 | Resolve chunk + local coords → `Chunk.SetBlockRaw` |
+| `Chunk.SetBlockRaw` | **386** | Silent voxel write (detail below) |
 | `chunkPosNeedsRegeneration` | **550** | Dirty mesh/light |
 | `LightChunk` / `CalcStability` / `RegenerateChunk` | cluster | Fallout |
 
 Prefer SetBlock over SetBlockRaw when mesh must update (product inject lesson).
+
+### 5.0 `Chunk.SetBlockRaw` (IL=386)
+
+Silent in-chunk write used by load, falling, inject, and some TE paths:
+
+1. If `y >= 255`: force Air write target.
+2. Water path: if old/new is water or `CanWaterFlowThrough`, may recurse
+   `SetBlockRaw` / `SetWater` and notify `waterSimHandle.SetVoxelSolid` with
+   rotation faces.
+3. Layer: `ChunkBlockLayer.GetAt` / `SetAt`; allocate layer if needed; preserve
+   or clear damage for non-child air/solid transitions.
+4. Index lists: update `IndexedBlocks` (remove old index type, add new if
+   `FilterIndexType`, e.g. `lpblock`).
+5. Heightmap: if air↔solid at column, `RecalcHeightAt`.
+6. Random tick registry: under lock on `tickedBlocks`, Remove or Replace world
+   pos when `IsRandomlyTick` transitions.
+7. Flags: `bMapDirty`, `isModified`, `bEmptyDirty`; return previous BlockValue.
+
+Does **not** fire light/mesh/stability RPC; callers that need those use full
+`SetBlock` / `SetBlockRPC`.
 
 ### 5.1 `GameManager.ChangeBlocks` (IL=530) / `SetBlocksOnClients` (IL=13)
 
