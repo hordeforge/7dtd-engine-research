@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SetBlock entry chain
+
+Done (V3.1.0 b14 IL):
+- blocks.md section 4 entry chain: World.SetBlock (IL=9) ->
+  ChunkCluster.SetBlock IL=13 -> 10-arg dispatcher IL=48 switching on
+  BlockValueRefType (BlockPosition -> 828-IL main body; PropReference ->
+  SetProp via SetBlockValue IL=32); SetBlockRaw (IL=25) GetChunkSync +
+  null no-op + chunk.SetBlockRaw. SetBlocksRPC (IL=6) ->
+  gameManager.SetBlocksRPC; SetBlockRPC overloads (IL=7-8) wrap
+  BlockChangeInfo variants.
+
 ## 2026-08-08 - tier-C: Chunk.GetLight nibbles
 
 Done (V3.1.0 b14 IL):

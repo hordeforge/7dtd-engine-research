@@ -217,6 +217,17 @@ is **server-authoritative**: a client-originated change is a request, answered b
 `NetPackageSetBlockResponse` (`0 Success`, `1 PowerBlockLimitExceeded`,
 `2 StorageBlockLimitExceeded`).
 
+**Entry chain (V3.1.0 b14):** `World.SetBlock(pos, bv, bNotify, updateLight)`
+(IL=9) delegates straight to `ChunkCluster.SetBlock(BlockValueRef(pos), bv,
+bNotify, updateLight)` (IL=13), which fills the defaults (change BV only, no
+density) and calls the 10-arg dispatcher (IL=48). That dispatcher switches on
+`BlockValueRef.Type`: a `BlockPosition` ref runs the main 828-IL body
+([`world-chunks.md`](world-chunks.md)); a `PropReference` ref goes through
+`SetBlockValue` (IL=32) to `ChunkCluster.SetProp(propRef, null pos/rot/scale,
+bv)` instead. `SetBlockRaw(worldPos, bv)` (IL=25) is the low-level path:
+`GetChunkSync(toChunkXZ(x), toChunkXZ(z))`, null chunk → no-op, else
+`chunk.SetBlockRaw(toBlockXZ(x), y, toBlockXZ(z), bv)`.
+
 ---
 
 ## 5. Damage, upgrade, and downgrade lifecycle
@@ -472,6 +483,9 @@ damage.
 
 ## Changelog
 
+- **2026-08-07:** SetBlock entry chain: World.SetBlock (IL=9) -> ChunkCluster
+  SetBlock IL=13/48 dispatch on BlockValueRefType (BlockPosition body vs
+  SetProp), SetBlockValue (IL=32), SetBlockRaw (IL=25) GetChunkSync guard.
 - **2026-08-07:** PlantGrowing light/CanGrowOn/biome remap; TorchHeatMap
   NotifyActivity enum 6 strength*0.4 duration 720.
 - **2026-08-07:** IsLandProtectedBlock self/foreign/ally+keystone; bounds soft
