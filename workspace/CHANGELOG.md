@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: block/tile-entity reads
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md: EnableInsideBlockEntities IL=45 + EnableEntityBlocks IL=51 toggles
+- tile-entities-power.md: Chunk.GetTileEntity IL=11 TryGetValue read
+
 ## 2026-08-08 - tier-C: inside/entity block toggles
 
 Done (V3.1.0 b14 IL):
