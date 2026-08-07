@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: CalcSenseScale FeralSense and volume CheckTouching
+
+Done (V3.1.0 b14 IL):
+- CalcSenseScale: FeralSense 1=day, 2=dark, 3=always -> 1 else 0.
+- SleeperVolume.CheckTouching: y+0.8; hasPassives pad 0.3; trigger pad 0.1; TouchGroup.
+- TriggerVolume.CheckTouching: y+0.8 strict AABB then Touch.
+- GetClosestPlayer: distMax<0 => inf; dead match + Spawned; min distSq.
+---
 ## 2026-08-07 — tier-C: GetSeeDistance senseScale and DetectUsScale
 
 Done (V3.1.0 b14 IL):

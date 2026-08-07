@@ -259,6 +259,16 @@ see cache (called from OnUpdateLive before AI).
 `senseScale = 1 + CalcSenseScale() * feralSense`, then
 `sightRange = sightRangeBase * senseScale`. Return `sightRange`.
 
+**`EAIManager.CalcSenseScale` (static IL=23):** switch on static `FeralSense`
+(sandbox `ZombieFeralSense`):
+
+| FeralSense | Returns **1** when | Else |
+|---:|---|---|
+| **1** | `World.IsDaytime()` | **0** |
+| **2** | `World.IsDark()` | **0** |
+| **3** | always | |
+| other / 0 | always **0** | |
+
 **`DetectUsScale(entity)` (IL=26):** default **1**. If player is in a prefab with
 `DifficultyTier ≥ 1`, has been inside **&gt; 60** s (`Time.time - prefabTimeIn`),
 and the observer is a Dynamic-spawn (`GetSpawnerSource()==1`) `EntityEnemy`:
@@ -278,8 +288,27 @@ via `Utils.GetAngleBetween` (same half-angle test as `IsInFrontOfMe`).
 (EnemySpawnMode) false. Else lock `sleeperVolumes` and for each volume id on the
 player's chunk call `SleeperVolume.CheckTouching`.
 
+**`SleeperVolume.CheckTouching` (IL=165):** no-op if `IsTriggerAndNoRespawn` or
+player spectator. Sample point = player pos with **y+0.8**. `flags & 7` is the
+trigger mode nibble.
+
+- If `hasPassives`: AABB test with **0.3** pad on XZ (min-0.3 / max-0.3); skip
+  when mode == **1**; else `TouchGroup(world, player, true)`.
+- Else if mode is **2** or **3** and `triggerState != mode`: AABB with **0.1**
+  pad on XZ; on hit `TouchGroup(..., true)`.
+- If `playerTouchedToUpdate` still null and `CheckTrigger` at sample point:
+  `TouchGroup(..., false)` (delayed update latch).
+
 **`World.CheckTriggerVolumeTrigger` (IL=53):** same pattern on
 `triggerVolumes` / `TriggerVolume.CheckTouching` (no EnemySpawnMode gate).
+
+**`TriggerVolume.CheckTouching` (IL=61):** if already `isTriggered` return. Point
+= player pos **y+0.8**; strict AABB against `BoxMin`/`BoxMax` (no pad); on hit
+`Touch(world, player)`.
+
+**`World.GetClosestPlayer(pos, distMax, isDead)` (IL=57):** if `distMax < 0` use
++inf. Walk players reverse; require `IsDead() == isDead` and `Spawned`; pick min
+`GetDistanceSq` within `distMax²`.
 
 **`SetLastTimePlayerSeen` (IL=4):** `lastTimeSeenAPlayer = Time.time`.
 
@@ -1213,8 +1242,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** GetSeeDistance senseScale; DetectUsScale 0.3 POI; IsInViewCone
-  sleeper dirs; volume touch GameStats 24; CanEntityBeSeen LOS.
+- **2026-08-07:** CalcSenseScale FeralSense 1/2/3 day/dark/always; CheckTouching
+  pads 0.3/0.1; TriggerVolume AABB; GetClosestPlayer; DetectUsScale 0.3 POI.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
