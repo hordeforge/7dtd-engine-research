@@ -281,6 +281,11 @@ chunks (routed by quadrant, local coords via `World.toBlockXZ`): any
 `rotation = RandomRange(4)` (clone + `RotateY(true, rot)` when non-zero) and
 places via `prefab.CopyIntoLocal(world.ChunkCache, pos, false, false,
 FastTags.none)` then `prefab.SnapTerrainToArea`.
+`Prefab.SnapTerrainToArea(cluster, pos)` (IL=65) walks `dx`/`dz` from -1 to
+`size.x`/`size.z` and calls
+`cluster.SnapTerrainToPositionAtLocal(pos + (dx, -1, dz), true, perimeter)`
+where `perimeter` marks the -1 and size+1 border cells, so the terrain is
+snapped under the whole footprint plus a 1-cell rim.
 
 `WorldDecoratorPOIFromImage.DecorateChunkOverlapping` (IL=472) is the static
 POI stamping from the `poi_processed` color map. It warns and returns when any
