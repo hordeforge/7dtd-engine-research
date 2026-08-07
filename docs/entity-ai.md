@@ -1900,6 +1900,11 @@ colliding box (block + entity) into the caller list:
    density[x+1, y+1, z+1], density[x+1, y, z+1])`; then
    `block.GetCollidingAABB(bv, x, y, z, offsetY, aabb, out)` appends the
    block's collision box (terrain uses the density-derived decoration offset).
+   `GetCollidingAABB` itself (IL=33) is a thin wrapper: it clears the static
+   `Block.staticList_IntersectRayWithBlockList` scratch, fills it with the
+   shape boxes via `GetCollisionAABB(bv, x, y, z, distortedAddY, scratch)`,
+   then copies the entries that `Intersects` the query `_aabb` into the caller
+   list.
 5. **Entity pass:** expand a copy of `_aabb` by **0.25**, run
    `GetEntitiesInBounds(entity, expanded)` (the ExcludeEntity overload above),
    and append each hit's `getBoundingBox()` when it intersects the *unexpanded*
@@ -2881,11 +2886,12 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** World.GetCollidingBounds (IL=391) in D4: padded ranges
-  (+-0.5 X/Z, +-1 Y), IsInPlayfield whole-chunk shortcut, collBlockCache /
-  collDensityCache scratch fill + offset reads, terrain decoration offsetY via
-  MarchingCubes, 0.25-expanded entity pass, 50-iter cap per loop with NBB
-  warnings.
+- **2026-08-07:** World.GetCollidingBounds (IL=391) + Block.GetCollidingAABB
+  (IL=33) in D4: padded ranges (+-0.5 X/Z, +-1 Y), IsInPlayfield whole-chunk
+  shortcut, collBlockCache / collDensityCache scratch fill + offset reads,
+  terrain decoration offsetY via MarchingCubes, 0.25-expanded entity pass,
+  50-iter cap per loop with NBB warnings; shape boxes via
+  staticList_IntersectRayWithBlockList + Intersects filter.
 - **2026-08-07:** FastTags query half: Test_Bit (IL=46) / Test_AnySet (IL=68)
   single-bit fast paths + word-AND; Entity.HasAnyTags (IL=5); CanCollideWith
   family (base true, EntityAlive exclusions, falling blocks only EntityAlive)

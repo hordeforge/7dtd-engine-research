@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Block.GetCollidingAABB
+
+Done (V3.1.0 b14 IL):
+- Block.GetCollidingAABB (IL=33) narrated as the shape-box wrapper behind
+  World.GetCollidingBounds: clears staticList_IntersectRayWithBlockList,
+  fills via GetCollisionAABB with distortedAddY, copies entries that
+  Intersects the query AABB into the caller list.
+
 ## 2026-08-08 - tier-C: World.GetCollidingBounds
 
 Done (V3.1.0 b14 IL):
