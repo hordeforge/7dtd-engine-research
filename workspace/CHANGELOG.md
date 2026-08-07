@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: stat max getters
+
+Done (V3.1.0 b14 IL):
+- Stat.get_ModifiedMax IL=6 = baseMax + maxModifier; ModifiedMaxPercent
+  clamp01; EntityAlive.GetMaxHealth IL=6 = (int)Health.Max.
 ## 2026-08-08 — tier-C: SetBareHandItem + GetInitialMetadata
 
 Done (V3.1.0 b14 IL):

@@ -35,6 +35,10 @@ consumes). Entity setters are one-line forwards: `EntityAlive.set_Health(int)`
 (IL=7) / `set_Stamina` / `set_Water` (IL=6) call
 `Stats.<Stat>.set_Value(...)`.
 
+**Max getters:** `Stat.get_ModifiedMax()` (IL=6) = `m_baseMax + m_maxModifier`;
+`get_ModifiedMaxPercent()` (IL=7) = `clamp01(ModifiedMax / Max)`.
+`EntityAlive.GetMaxHealth()` (IL=6) = `(int) Stats.Health.get_Max()`.
+
 **`Stat.Tick(dt)` (IL=301)** - the per-phase stat step (`Health.Tick` in
 phase 1):
 
