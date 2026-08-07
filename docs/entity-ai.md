@@ -1170,9 +1170,16 @@ Atan2 xz * rad2deg. **`Update`:** `abortTime -= 0.05`.
 `StopMove`: clear active; if not (jumping and not swimming) zero forward and
 stop turning; clear blocked/expiry.
 
+**`get_IsAlert` (IL=9):** remote → `bReplicatedAlertFlag`; else local `isAlert`.
+**`SetAlertTicks(ticks)` (IL=4):** store `alertTicks` only.
+
 **`SetMoveTo(pos, canBreak)` (IL=29):** store pos; speed = `GetMoveSpeedAggro`;
-`CanBreakBlocks`; `IsActive`; `expiryTicks = 10`; reset stuck.
-Path overload uses current/next path points and `expiryTicks = 40`.
+clear focus/temp/climb; `CanBreakBlocks`; `IsActive`; `expiryTicks = **10**`;
+reset stuck. Speed overload same with explicit speed.
+**`SetMoveTo(path, speed, canBreak)` (IL=78):** current path point
+`AdjustedPositionForEntity`; if already active and move delta sqr &lt; **0.01**,
+skip focus/temp reset; optional `nextMoveToPos` from next point (`hasNextPos`);
+`expiryTicks = **40**`; `IsActive=true`.
 
 **`CalcIfUnreachablePos` (IL=105):** from path geometry set
 `IsUnreachableAbove` (dy large / far), `IsUnreachableSide`,

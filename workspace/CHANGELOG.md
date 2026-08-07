@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: IsAlert and SetMoveTo path expiry
+
+Done:
+- get_IsAlert remote vs local; SetAlertTicks stores only.
+- SetMoveTo path overload expiry 40 vs point 10; nextMoveToPos.
+---
 ## 2026-08-07 — tier-C: CheckBlocked and CheckBlockedUp
 
 Done (V3.1.0 b14 IL):
