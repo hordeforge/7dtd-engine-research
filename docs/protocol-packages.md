@@ -887,6 +887,10 @@ still emits the ack for remote players.
 
 Client/server-placed explosives. `ProcessPackage` → `IGameManager.ExplosionServer(...)`.
 
+**`GameManager.ExplosionServer` (IL=50):** optional air block at expl pos;
+client forwards `NetPackageExplosionInitiate`; server if `_delay <= 0` calls
+`explode(...)` else `StartCoroutine(explodeLater(...))`.
+
 ```text
 worldPos : Vector3          // StreamUtils
 blockPos : Vector3i
@@ -918,6 +922,10 @@ changeCount : u16
 ```
 
 `ProcessPackage` → `IGameManager.ExplosionClient(...)`.
+
+**`GameManager.ExplosionClient` (IL=51):** instantiate explosion prefab by index;
+`ApplyExplosionForce.Explode`; if change list non-empty `ChangeBlocks`;
+`QuestEventManager.DetectedExplosion`.
 
 ### 6.16 Stat / buff sync packages
 

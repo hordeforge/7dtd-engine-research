@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: FireEvent fan-out, SetAttackTarget, explosions, falling
+
+Done (V3.1.0 b14 IL):
+- FireEvent IL=57 full fan-out (class/progression/challenge/inv/equip/buffs).
+- SetAttackTarget IL=70 net package; SeeCache clear every 30 ticks.
+- ExplosionServer delay/coroutine; ExplosionClient force+ChangeBlocks.
+- AddFallingBlock hashset dedupe + DynamicMesh observer.
+---
 ## 2026-08-07 — tier-C: AwardKill, SetDead, sleeper OnTriggered, Respawn
 
 Done (V3.1.0 b14 IL):

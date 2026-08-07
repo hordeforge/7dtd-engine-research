@@ -355,6 +355,7 @@ stateDiagram-v2
 |---|---:|---|
 | `WorldBlockTicker` tickScheduled / tickRandom | 151 / 97 | From OnUpdateTick server path |
 | `AddFallingBlock` / `LetBlocksFall` | 38 / 220 | Collapse storms |
+| `AddFallingBlock` detail | 38 | HashSet dedupe; skip child/air/`StabilityIgnore`/oversized (unless include); `DynamicMeshManager.AddFallingBlockObserver`; enqueue `fallingBlocks` |
 | `EntityFallingBlock` OnUpdateEntity | 300+ | Entity cost |
 
 ## Stability, falling blocks, DamageBlock and deco subbiomes (2026-08-06)

@@ -132,6 +132,9 @@ Closed in recent sessions (still optional, not required for A+B):
 | AIDirector CreateComponents order | spawning / loop |
 | AwardKill / SetDead | combat-damage §3.1 |
 | SleeperVolume.OnTriggered | entity-ai §D8.2b |
+| FireEvent fan-out order | minevents §3 |
+| SetAttackTarget / SeeCache | entity-ai §5.1b |
+| ExplosionServer/Client | protocol-packages §6.14-6.15 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

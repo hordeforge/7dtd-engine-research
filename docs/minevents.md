@@ -109,17 +109,17 @@ the trigger is raised from; the actual actor bindings live in `MinEventParams`
 
 ## 3. Dispatch: `FireEvent` fan-out
 
-`EntityAlive.FireEvent(eventType, useInventory)` is the aggregator. It reuses the
-entity's single `MinEventContext` (a `MinEventParams` the caller has already
-populated with self/other/item/position) and fans it to every controller the
-entity currently exposes, in a fixed order:
+`EntityAlive.FireEvent(eventType, useInventory)` (**IL=57**) is the aggregator. It
+reuses the entity's single `MinEventContext` (a `MinEventParams` the caller has
+already populated with self/other/item/position) and fans it to every controller
+the entity currently exposes, in a fixed order:
 
 1. `EntityClass.Effects` (the entity definition's own effects)
 2. `Progression` (perk-driven effects)
 3. `challengeJournal` (challenge effects)
 4. `inventory` held item, only when `useInventory` is set
-5. `equipment` (worn items)
-6. `Buffs` (every active buff's `BuffClass.Effects`)
+5. `equipment` (worn items; always if present)
+6. `EntityBuffs` (every active buff's `BuffClass.Effects`)
 
 Each of those is itself a `FireEvent` that either wraps one `MinEffectController`
 (`BuffClass`, `ItemClass`, `ProgressionClass`: with a `canRun` pre-gate on
@@ -466,8 +466,8 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
-- **2026-08-07:** §7.1 CallGameEvent / AddHealth / Ragdoll / AddProgressionLevel /
-  ModifyStat / ShowToolbeltMessage; AddBuff / ModifyCVar / Explode; presentation note.
+- **2026-08-07:** FireEvent IL=57 fan-out includes equipment + buffs; §7.1 action
+  leaves (CallGameEvent/AddHealth/Ragdoll/progression/ModifyStat/etc).
 - **2026-07-23:** Initial `MinEvent*` reversal: source-owned `MinEffectController`
   / `MinEffectGroup` handler containers, the `MinEventTypes` trigger vocabulary,
   the `FireEvent` fan-out, the `CanExecute` / `Execute` action contract and

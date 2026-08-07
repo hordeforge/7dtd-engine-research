@@ -200,6 +200,17 @@ UpdateDebugName()
 
 Two task lists: **target** tasks and **general** tasks. Very thin wrapper.
 
+### 5.1b Attack target + see cache (IL re-pin)
+
+**`SetAttackTarget` (IL=70):** same target only refreshes `attackTargetTime`; else
+stash `attackTargetLast`, set `targetAlertChanged` + random `soundDelayTicks`
+5..20 when new target, clear investigate ticks; if not remote, send
+`NetPackageSetAttackTarget` via `SendPacketToTrackedPlayersAndTrackedEntity`;
+store target + time.
+
+**`EntitySeeCache.ClearIfExpired` (IL=17):** every **30** ticks `Clear()` the
+see cache (called from OnUpdateLive before AI).
+
 ### 5.2 `EAITaskList.OnUpdateTasks` (137 IL)
 
 Classic priority AI list (same shape IceCoffee tried to Parallel.ForEach):
@@ -983,7 +994,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** SleeperVolume.OnTriggered IL=14; TickEntity/path apply; EAI leaves.
+- **2026-08-07:** SetAttackTarget net + SeeCache 30-tick clear; OnTriggered;
+  TickEntity/path apply; EAI leaves.
 - **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;
   UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;
