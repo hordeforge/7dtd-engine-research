@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: IsWater gate
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 4.2: Chunk.IsWater (IL=9) GetWater().HasMass().
+
 ## 2026-08-08 - tier-C: RecalcHeightAt
 
 Done (V3.1.0 b14 IL):
