@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk tick gate
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 6: get_NeedsTicking (IL=13) TE/sleeper gate; GetTickRefCount
+  (IL=13) layer tickRefCount.
+
 ## 2026-08-08 - tier-C: inside-device enable
 
 Done (V3.1.0 b14 IL):
