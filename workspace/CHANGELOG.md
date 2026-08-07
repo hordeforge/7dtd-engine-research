@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: liquid ChangeThis pack and SpawnScouts bands
+
+Done (V3.1.0 b14 IL):
+- ChangeThis: rotation 8, meta2 emissions, damage=evap+flow, WBT 60/1/1000.
+- CheckUpdate rate limit; CheckDeepWater 6-stack; NotifyEvent checkChunks.
+- SpawnScouts 120 m player, Scouts1/2/Feral/Radiated by gamestage.
+---
 ## 2026-08-07 — tier-C: NotifyActivity gates and liquid Emissions/ChangeToAir
 
 Done (V3.1.0 b14 IL):

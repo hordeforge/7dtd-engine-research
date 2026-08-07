@@ -183,6 +183,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | PlantGrowing + TorchHeatMap + WBT execute | blocks §7 / save-region §3.6 |
 | NotifyActivity + CheckToSpawn 25/20% | aidirector.md |
 | BlockLiquidv2 Emissions/ChangeToAir | light-mesh-water.md |
+| ChangeThis pack + SpawnScouts bands | light-mesh-water / aidirector |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

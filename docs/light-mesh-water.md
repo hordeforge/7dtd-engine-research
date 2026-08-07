@@ -293,8 +293,17 @@ Apply-stage prose also in [dedicated-misc-systems.md](dedicated-misc-systems.md)
 | `DecoManager.UpdateTick` | | **330** |
 | `BlockLiquidv2.Emissions` | | **9** | if rotation==8 use meta2 else `MAX_EMISSIONS` |
 | `BlockLiquidv2.ChangeToAir` | | **33** | splash remove; SetBlockRPC Air; reschedule WBT |
+| `BlockLiquidv2.ChangeThis` | | **69** | pack liquid word (below) |
+| `BlockLiquidv2.CheckUpdate` | | **22** | rate limit: blockUpdates &gt; blockUpdatesPerSecond/2 → false |
+| `BlockLiquidv2.CheckDeepWater_Expensive` | | **51** | true if ≥6 water cells stacked above |
 | `BlockLiquidv2.HasHoles` | | **89** | faces-drawn bitfield vs 255/63 water hole test |
 | `BlockLiquidv2.UpdateTick` | | **1106** | hole/air/plant/emission/deep-water → ChangeThis/ChangeToAir |
+
+**`ChangeThis` full pack (IL=69):** if rotation != 8 force emissions to
+`MAX_EMISSIONS`; clamp emissions; write `blockID` into rawData; `SetBlockState`;
+`meta2 = emissions`; `rotation = 8`; `damage = evaporation + (flowDir ? 50+flowDir : 0)`;
+`SetBlockRPC`. WBT schedule delay: state 0 → **60** ticks, state 2 → **1** tick,
+else **1000** ticks.
 | `ChunkProviderGenerateWorld.updateDecosAllowedForChunk` | | 306 |
 | `UpdateDecorations` / `updateDecorationsWherePossible` | | 4 / 42 |
 
@@ -311,6 +320,8 @@ Apply-stage prose also in [dedicated-misc-systems.md](dedicated-misc-systems.md)
 
 ## Changelog
 
+- **2026-08-07:** ChangeThis pack (meta2/rotation 8/damage flow+evap, WBT 60/1/1000);
+  CheckUpdate rate limit; CheckDeepWater ≥6 above.
 - **2026-08-07:** BlockLiquidv2 Emissions (rotation 8 / meta2), ChangeToAir +
   WBT reschedule, HasHoles faces bitfield, UpdateTick IL size.
 - **2026-07-28:** WaterSimChunkUpdate outer/inner wire; WaterValue mass-only; WaterSet rebroadcast.

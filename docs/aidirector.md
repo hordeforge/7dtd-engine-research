@@ -116,6 +116,17 @@ value * HeatMapSensitivityModifier, duration)` and
 playtest) set spawn flag, `StartCooldownOnNeighbors`, `SetLongDelay`,
 `SpawnScouts`. Otherwise neighbor cooldown only.
 
+**`NotifyEvent` (IL=22):** `GetChunkDataFromPosition(pos, create=true)`; if ready
+`AddEvent` and enqueue into `checkChunks` if not already listed.
+
+**`SpawnScouts` (IL=76):** `FindScoutStartPos`; closest player within **120** m;
+`CalcGameStageAround` → group name: `Scouts1` (&lt;45), `Scouts2` (&lt;85),
+`ScoutsFeral` (&lt;125), else `ScoutsRadiated`; queue `AIScoutHordeSpawner` on
+`scoutSpawnList`.
+
+**`AIDirectorChunkData.Tick` (IL=23):** if `cooldownDelay > 0` subtract elapsed
+and keep entry; else `DecayEvents`; keep entry while `EventCount > 0`.
+
 ## AIDirectorComponent : Object
 - `Tick(Double)` IL=1 (virtual base)
 
@@ -378,6 +389,8 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** SpawnScouts gamestage bands + 120 m player; NotifyEvent queue;
+  ChunkData.Tick cooldown/decay.
 - **2026-08-07:** NotifyActivity gates (GameStats 32/24, heat sensitivity, BM/
   Twitch skip); CheckToSpawn ActivityLevel 25 and 20% SpawnScouts.
 - **2026-08-06:** Blood-moon window spans dusk on bmDay to dawn on bmDay+1
