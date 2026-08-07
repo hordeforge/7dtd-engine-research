@@ -225,6 +225,9 @@ resize `Modifications` to the recomputed `CalcModSlotCount()`.
 no-op; a missing own array copies the donor's wholesale; otherwise each donor
 stat either upgrades the matching entry when it beats the local value (better
 direction from `IsStatLowerBetter`) or is appended as a new entry.
+`CloneModsTo(_iv)` (IL=34) / `CloneCosmeticModsTo(_iv)` (IL=34) copy the
+`Modifications` / `CosmeticMods` arrays into `_iv`, cloning each non-null
+entry (null slots stay null).
 
 **Stat-value leaves:** `GetStatPercent(type, onlyBoosted)` (IL=12) starts at
 **1** and, when stats exist, runs `StatModifyValue`. `StatModifyValue(effect,
