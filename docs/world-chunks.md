@@ -103,6 +103,14 @@ else `chunk.GetBlock(toBlockXZ(x), y, toBlockXZ(z))`; `GetBlockEntities(key)`
 `BlockEntityData` (world-coordinate) for each; `GetBlockEntity(pos)` (IL=12)
 returns null for a missing chunk; `GetBlockFaceTexture(pos, face, channel)`
 (IL=23) returns `0` for a missing chunk, else the per-face texture index.
+`Chunk.GetBlock(x, y, z)` (IL=100) is the voxel-read core: with
+`IsInternalBlocksCulled` and inside it returns the lazily-resolved POI-filler
+block (`bvPOIFiller` from `Constants.cPOIFillerBlock`); otherwise it reads
+`m_BlockLayers[y >> 2].GetAt(...)` (error + rethrow on a missing layer) and
+overlays the block's `damage` from `GetDamage`. `GetBlockNoDamage` (IL=73) is
+the same without the damage overlay; `GetBlockId` (IL=17) returns the layer id
+(0 for a missing layer); `GetBlockColumn` (IL=101) fills a vertical span with
+the damage overlay.
 The 64-bit texture word packs **eight 8-bit face indexes**
 (`Chunk.Value64FullToIndex(word, face)` (IL=12) is
 `(word >> (face * 8)) & 0xFF`; `TextureIdxToTextureFullValue64(idx)` (IL=43)
