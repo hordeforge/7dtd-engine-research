@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: max-tier zombie substitution
+
+Done (V3.1.0 b14 IL):
+- EntityClass.GetEntityClassWithinMaxTier IL=30 (tier walk) and
+  GetPreviousTierEntity IL=73 (PreviousTierZombieName chain, random pick);
+  MaxEntityTier degradation documented in spawning §7.
 ## 2026-08-08 — tier-C: CreateEntityOperation.LoadAssets
 
 Done (V3.1.0 b14 IL):

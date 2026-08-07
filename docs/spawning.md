@@ -461,6 +461,16 @@ GetId(ec.entityClassName)`. `isPlayer` = class is `playerMaleClass`/
 ecd.belongsPlayerId`. Kick `EntityInstanceAssets.Load(isSync, ec,
 isLocalPlayer)` and `EModelInstanceAssets.Load(isSync, ecd, ec)`.
 
+**Tier substitution:** `GetEntityClassWithinMaxTier(ec, maxTier)` (IL=30):
+`ec.EntityTier <= maxTier` → as-is; else walk the `GetPreviousTierEntity()`
+chain until a class at/below `maxTier` (warning + null if the chain ends).
+`GetPreviousTierEntity()` (IL=73) lazily resolves `PreviousTierZombieName`
+(comma-separated class names, the `PreviousTierZombie` config from
+`EntityClass.Init`) into `previousTierEntities`; one entry → it, several → a
+random one via the world GameRandom. So a max-tier-limited server (sandbox
+`EntityFactory.MaxEntityTier`) degrades out-of-range zombies to their
+configured lower-tier replacements.
+
 **`CreateEntityOperation.CompleteEntity()` (IL=639)** builds the entity object:
 1. **Asset gates:** both `EntityInstanceAssets` and `EModelInstanceAssets` must
    be load-complete and load-successful; the operation runs once (entity null).
