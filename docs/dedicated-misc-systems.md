@@ -376,8 +376,19 @@ Float ranges are **max-exclusive** like the int ones. Every gameplay caller
 through these, so a single seeded `GameRandom` instance drives each
 deterministic subsystem.
 
+Instances come from `GameRandomManager` (a pooled factory):
+`CreateGameRandom()` (IL=5) seeds from the manager's `baseSeed`, and
+`CreateGameRandom(seed)` (IL=8) allocates a pooled `GameRandom` via
+`MemoryPooledObject<GameRandom>.AllocSync(false)` then `SetSeed(seed)`.
+Callers include `AIDirector.Init`, `GameEventManager`'s ctor, `ItemValue`'s
+procedural-seed ctor, `DynamicMusicManager.Init`, and `EModelInstanceAssets.Load`.
+
 ## Changelog
 
+- **2026-08-07:** GameRandomManager pooled factory: CreateGameRandom()
+  baseSeed + AllocSync(false) + SetSeed; callers AIDirector.Init,
+  GameEventManager ctor, ItemValue ctor, DynamicMusicManager.Init,
+  EModelInstanceAssets.Load.
 - **2026-08-07:** GameRandom surface: RandomFloat / RandomRange float+int
   overloads all NextDouble()/Next(int) wrappers, max-exclusive; single seeded
   instance drives deterministic subsystems.

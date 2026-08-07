@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameRandomManager
+
+Done (V3.1.0 b14 IL):
+- GameRandomManager narrated in dedicated-misc-systems.md: CreateGameRandom()
+  (IL=5) seeds from baseSeed; CreateGameRandom(seed) (IL=8) = pooled
+  AllocSync(false) + SetSeed. Callers: AIDirector.Init, GameEventManager
+  ctor, ItemValue procedural ctor, DynamicMusicManager.Init,
+  EModelInstanceAssets.Load.
+
 ## 2026-08-08 - tier-C: ItemStack size checks
 
 Done (V3.1.0 b14 IL):
