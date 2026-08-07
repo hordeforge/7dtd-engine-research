@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk.GetLight nibbles
+
+Done (V3.1.0 b14 IL):
+- Chunk.GetLight (IL=28) narrated in light-mesh-water.md: x/z masked & 15
+  to chunk-local, chnLight byte read, Sun = low nibble (light & 15),
+  Block = high nibble (light >> 4). ChunkCluster.GetLight (IL=21) world
+  wrapper: chunk lookup, null -> 0, else delegate.
+
 ## 2026-08-08 - tier-C: light query chain
 
 Done (V3.1.0 b14 IL):

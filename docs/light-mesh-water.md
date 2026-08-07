@@ -50,7 +50,12 @@ normalized), and `Chunk.GetLightValue(x, y, z, darknessValue)` (IL=30) is
 `max(sun - darknessValue, blockLight)`: it reads the Sun channel, subtracts
 the caller's darkness term, returns it when it is not 15, else returns the
 max of that and the Block channel (`PrefabChunk` stubs both as constant 15 /
-1.0).
+1.0). The channel read: `Chunk.GetLight(x, y, z, type)` (IL=28) masks x/z to
+chunk-local coords (`& 15`), reads one byte from the `chnLight` channel, and
+splits the **nibbles**: `Sun` is the low 4 bits (`light & 15`), `Block` the
+high 4 bits (`light >> 4`). `ChunkCluster.GetLight(pos, type)` (IL=21) is the
+world-coordinate wrapper: chunk lookup, `0` when the chunk is null, else
+delegate.
 
 ### Hardcoded stock Y ceilings (expand risk)
 
@@ -340,6 +345,9 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-07:** Chunk.GetLight (IL=28) nibble packing: Sun = low 4 bits,
+  Block = high 4 bits of the chnLight byte, x/z masked to chunk-local;
+  ChunkCluster.GetLight (IL=21) world wrapper with null -> 0.
 - **2026-08-07:** Light query chain: Chunk.GetLightBrightness (IL=10) =
   GetLightValue/15; GetLightValue (IL=30) = max(sun - darkness, blockLight),
   sun channel returned unless 15; PrefabChunk stubs constant 15/1.
