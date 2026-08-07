@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: StreamUtils binary primitives
+
+Done (V3.1.0 b14 IL):
+- dedicated-misc-systems.md: StreamUtils - ReadVector3/3i/Quaterion
+  component-wise LE; Color32 one-u32 RGBA packing (ReadColor32
+  IL=39, WriteColor32 IL=34); null-flagged ReadString IL=8; ReadGuid
+  16-byte span + EndOfStream; 7-bit varint pair; Read/Write Int32 LE
+  + Byte[] ref-offset variants; StreamCopy chunked copy +
+  WriteStreamToFile.
 ## 2026-08-08 - tier-C: batch block commit machine
 
 Done (V3.1.0 b14 IL):
