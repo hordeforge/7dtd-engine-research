@@ -233,6 +233,11 @@ chunk in a `DictionaryList<Vector3i, BlockTrigger>` (`Chunk.GetBlockTriggers`,
 | `TriggeredByIndices : List<byte>` | channels this block **listens** on |
 | `TriggeredValues : List<byte>` | channels currently toggled on (latched inputs) |
 | `UseOrForMultipleTriggers` | OR vs AND combination of listened channels |
+
+**Registry accessors (V3.1.0 b14):** `Chunk.AddBlockTrigger(td)` (IL=10)
+stores into `triggerData` keyed by `LocalChunkPos` and marks `isModified`;
+`GetBlockTriggers()` (IL=3) returns the `DictionaryList`; `GetBlockTrigger(pos)`
+(IL=9) is the `triggerData.dict` `TryGetValue` (null when absent).
 | `NeedsTriggered : TriggeredStates` | `NotTriggered=0 / NeedsTriggered=1 / HasTriggered=2` deferred-fire latch |
 | `ExcludeIcon`, `Unlock`, `TriggerDataOwner` | editor icon suppression, unlock flag, owning `PrefabTriggerData` |
 
@@ -370,6 +375,9 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** BlockTrigger registry accessors: AddBlockTrigger (IL=10)
+  Set + isModified, GetBlockTriggers (IL=3), GetBlockTrigger (IL=9)
+  TryGetValue.
 - **2026-08-07:** BlockFaceFlags.FrontSidesFromPosition (IL=70): entity
   relative to block cell sets face bits (low x=8/y=2/z=16, high x=32/y=1/z=4).
 - **2026-08-07:** Block.IsMovementBlocked dispatch: multiblock child->parent

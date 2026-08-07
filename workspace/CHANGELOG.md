@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockTrigger registry accessors
+
+Done (V3.1.0 b14 IL):
+- block-shapes.md 7.1: Chunk.AddBlockTrigger (IL=10) triggerData.Set +
+  isModified; GetBlockTriggers (IL=3) field read; GetBlockTrigger (IL=9)
+  dict TryGetValue (null when absent).
+
 ## 2026-08-08 - tier-C: Vector3iToUInt64
 
 Done (V3.1.0 b14 IL):
