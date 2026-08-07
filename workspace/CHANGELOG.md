@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: WorldBiomes + EntityStats leaves
+
+Done (V3.1.0 b14 IL):
+- world-generation.md 3.1: WorldBiomes runtime registry (m_Color2BiomeMap /
+  m_Id2BiomeArr), GetBiomeCount (IL=9) 0-before-load, GetBiomeMap (IL=3),
+  GetTotalBluffsCount (IL=31) m_DecoBluffs sum.
+- entity-stats.md 1: EntityStats.SimpleClone (IL=7) Health-only vs
+  PlayerEntityStats.SimpleClone (IL=26) Health/Stamina/Water/Food/CoreTemp;
+  ResetStats (IL=1) empty virtual.
+
 ## 2026-08-08 - tier-C: EntityBuffs cvar leaves
 
 Done (V3.1.0 b14 IL):
