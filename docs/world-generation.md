@@ -192,6 +192,30 @@ and append to `SumResourceProbs` a running sum (previous entry plus `prob`, or
 and seeds the two accumulators empty (see chunk-providers §3.3 for how
 `WorldBlockFiller` consumes, or rather skips, layers in this build).
 
+`WorldBiomeProviderFromImage` (the id-4 RWG provider's biome source) resolves
+world coords to a biome through `m_BiomeMap : GridCompressedData<Byte>`:
+`GetBiomeAt(x, z)` (IL=57) returns null when `biomesScaleDiv == 0`, folds
+`tileX = x / biomesScaleDiv + biomesMapWidthHalf` (and z likewise), bounds-checks
+the grid, treats value **255** as "no biome", and maps the byte through
+`WorldBiomes.GetBiome(byte)`. The 3-arg overload (IL=8) just sets the intensity
+ref to **1** and delegates. `GetHumidityAt`/`GetTemperatureAt` (IL=2 each) are
+**stubs returning 0** in this build; per-cell climate comes from
+`BiomeDefinition`/`WeatherManager`, not the image provider. `GetRadiationAt(x, z)`
+(IL=41) indexes `radiationMapSmall` at
+`(x+worldSizeHalf)/radiationMapScale + (z+worldSizeHalf)/radiationMapScale *
+radiationMapSize` (null map or out of range -> 0).
+
+`GetTopmostBlockValue(xWorld, zWorld)` (IL=116) is the splat-map surface query:
+out of the `[-worldSizeHalf, worldSizeHalf)` square, or with
+`cntSplatChannels <= 0`, it returns `bvReturn` with type 0 (air); otherwise it
+reads `splatMapMaxValue[(x+half)/splatScaleDiv + (z+half)/splatScaleDiv * splatW]`
+and switches the channel byte 0..11 onto hard-coded block ids: 0->14, 1->1,
+2->9, 3->8, 4->12, 5->13, 6->16, 7->11, 8->3, 9->29, 10->28, 11->2 (default
+`blocks.xml` order ids). The
+tile-helper `worldCoordsToTileCoords` (IL=41) is the 512x512 tiled-map fold:
+`tile = (world + worldSizeHalf) / 512 + tileAreaConfig.tileStart`,
+`pos = world - tile * 512`.
+
 ### 3.2 Terrain-type tiles and stamps
 
 `GenerateTerrainTiles` (IL=385) assigns each tile a `TerrainType`
