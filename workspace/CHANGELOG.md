@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: deco join sync + tick
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 5: SendDecosToClient IL=32 (write list under lock, sliced NetPackageDecoUpdate loop)
+- chunk-providers.md 5: UpdateTick IL=330 (drains add/remove/rect-reset/chunk-reset queues, checkDelayTicks-gated player check)
+
 ## 2026-08-08 - tier-C: deco shape hooks + reset
 
 Done (V3.1.0 b14 IL):
