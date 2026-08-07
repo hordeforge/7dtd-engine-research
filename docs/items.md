@@ -335,6 +335,13 @@ ItemActionData
   -> MyInventoryData        (ItemActionEat)
 ```
 
+**Slot action lookups:** `Inventory.GetItemActionInSlot(slotIdx, actionIdx)`
+(IL=32) returns `holdingItem.Actions[actionIdx]` for the held slot, else
+`slots[slotIdx].item.Actions[actionIdx]` (null for an empty slot).
+`GetItemActionDataInSlot(slotIdx, actionIdx)` (IL=18) is the same split over
+the runtime `actionData` list (the held path reads
+`holdingItemData.actionData[actionIdx]`).
+
 ### 4.2 Representative actions
 
 | Category | Class | Server-authoritative work |
