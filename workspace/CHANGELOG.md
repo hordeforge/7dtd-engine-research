@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: mine trigger
+
+Done (V3.1.0 b14 IL):
+- blocks.md 5: BlockMine.TriggerMine IL=99 - step -> trigger
+  sound + passive 171 delay / 172 entity damage, WBT-scheduled
+  fuse (TriggerDelay*20 ticks), direct trigger explodes
+  immediately.
 ## 2026-08-08 - tier-C: TNT damage detonation
 
 Done (V3.1.0 b14 IL):
