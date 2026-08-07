@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: holding dispatch reads
+
+Done (V3.1.0 b14 IL):
+- items.md 4.1: GetHoldingPrimary (IL=6) Actions[0] / GetHoldingSecondary
+  (IL=6) Actions[1] confirm the slot convention.
+
 ## 2026-08-08 - tier-C: Chunk.GetMaxHeight
 
 Done (V3.1.0 b14 IL):
