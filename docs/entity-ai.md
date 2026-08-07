@@ -1603,6 +1603,21 @@ crouch → `height * 0.5`; else `height * 0.8`.
 **`CanCollideWithBlocks` (IL=7):** false while sleeping; else true.
 **`CanLockLocally` (IL=10):** false if dead; else base Entity lock.
 
+**`GetAmountEnclosed` (IL=58):** sample at pos y+**0.5**; if y ≥ **255** return
+**1**. Else max of block light type **1** at (x,y,z) and (x,y+1,z) / **15**;
+return `1 - that` (1 = fully enclosed/dark, 0 = full sky light).
+
+**`GetChestTransformPosition` (IL=37):** transform.pos + (0, eyeHeight×k, 0)
+where k = **0.25** if crouching or stun 1/2, else **0.95**.
+
+**`GetArmorMaterial(slot, cosmetic)` (IL=35):** optional cosmetic class else
+slot item class; return `MadeOfMaterial.SurfaceCategory` or empty.
+**`GetArmorImpactSound(slot, graze, cosmetic)` (IL=35):** same class resolve;
+graze → `SoundImpactGraze` else `SoundImpactHit`.
+**`GetAnimActionState` (IL=12):** avatar `GetActionState` or 0.
+**`GetCameraFOV` (IL=3):** `GamePrefs` int **16**.
+**`GetActivatableItemPool` (IL=7):** new list + `CollectActivatableItems`.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;

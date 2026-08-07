@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: enclosure light and armor material
+
+Done (V3.1.0 b14 IL):
+- GetAmountEnclosed: 1 - max(blockLight y/y+1)/15.
+- GetChestTransformPosition eyeHeight*0.25 crouch/stun else 0.95.
+- GetArmorMaterial SurfaceCategory; impact graze/hit sounds; CameraFOV pref 16.
+---
 ## 2026-08-07 — tier-C: eye height and block damage scale
 
 Done (V3.1.0 b14 IL):
