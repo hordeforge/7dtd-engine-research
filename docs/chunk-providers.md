@@ -72,6 +72,14 @@ bytes per column; `BiomeIntensity.Default` when the array is null).
 `ResetBiomeIntensity(v)` (IL=19) writes a value back at every 6-byte step.
 `CalcDominantBiome()` (IL=55) histograms the 256 `m_Biomes` bytes into a
 50-slot count array and stores the argmax as `DominantBiome`.
+**`Chunk.CalcBiomeIntensity(neighbours)` (IL=150)** is the intensity
+computation: for each of the 16x16 columns it clears a 50-slot biome-count
+histogram, samples `GetBiomeId` over a 32-cell diagonal span around the
+column (resolving the source chunk from the 3x3 `neighbours` array by which
+quadrant the sample falls in: `neighbour[0]` center, `[1]` north, `[2]` east,
+`[3]` west, `[4]` south-east, `[5]` north-west, `[6]` north-east, with the
+west/south edge falling back to `[3]`), then `BiomeIntensity.FromArray` ->
+`ToArray` into `m_BiomeIntensities` at the column's 6-byte offset.
 `Chunk.GetBiomeId(x, z)` (IL=9) / `SetBiomeId(x, z, id)` (IL=10) read and
 write that per-column byte at `m_Biomes[x + z*16]`.
 `Chunk.GetDecoAllowedSlopeAt(x, z)` (IL=6) reads the slope field of the deco
@@ -930,6 +938,11 @@ the map or any cell is `>= v`.
 | [`loop.md`](loop.md) / [`loop-gmupdate.md`](loop-gmupdate.md) | Frame cost of `provider.Update`, `DecoManager.UpdateTick`, `SaveRandomChunks` |
 | [`light-mesh-water.md`](light-mesh-water.md) | Lighting/water stages that follow decoration |
 
+## Changelog
+
+- **2026-08-08:** Chunk.CalcBiomeIntensity (IL=150): 16x16 columns, 32-cell
+  diagonal biome histogram over the 3x3 neighbour window, FromArray ->
+  m_BiomeIntensities 6-byte columns.
 ## Changelog
 
 - **2026-07-28:** `GetNextChunkToProvide` lock/snapshot/sentinel and GenerateChunksThread sleep codes.
