@@ -8,6 +8,7 @@
 #   ASM=/path/to/Assembly-CSharp.dll ./stock-sync.sh
 #
 # After a TFP patch: run this, fix any FAIL sites, commit stock_facts.json + pin edits.
+# Full post-update path (facts + pins + optional drift): tools/post-update.sh
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -62,3 +63,9 @@ case "$MODE" in
   check) check ;;
   all) extract; check ;;
 esac
+
+# Optional drift hook for callers that set STOCK_SYNC_DRIFT=1 (post-update.sh).
+if [[ "${STOCK_SYNC_DRIFT:-0}" == "1" ]]; then
+  echo "stock-sync: STOCK_SYNC_DRIFT=1 -> parity/drift-check.sh"
+  "$HERE/parity/drift-check.sh" "$ASM"
+fi

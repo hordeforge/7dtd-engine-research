@@ -80,6 +80,25 @@ Commit `data/stock_facts.json` when the game pin changes. The checker fails if
 `docs/coverage.md`, loadgen `GameVersion`, or zdtd `stock_wire` / challenge /
 ticks disagree with the JSON. See [`../docs/re-methodology.md`](../docs/re-methodology.md) §5c.
 
+### After a TFP game update
+
+Preferred one-shot path (facts + pin gate + optional surface drift):
+
+```bash
+./post-update.sh                # stock-sync then parity/drift-check.sh
+./post-update.sh --no-drift     # extract + pins only
+make post-update                # same from repo root
+```
+
+`stock_facts.json` also carries:
+- `update.dump_label_suffix` / `update.dump_sets` for `il/<set>-<suffix>/` regen
+- `pins.*` machine-checked path inventory
+- `behaviour.*` high-value Constants hardcodes (mob spawner cap, sense memory, …)
+
+Structural dump-set tests (`tests/test_dedi_coverage_docs.py`) derive folder
+labels from `stock_facts` rather than hard-coding a line version. Readiness
+bench: `python3 tests/bench_version_update_tooling.py`.
+
 ## 2. Legacy per-family dumpers (`legacy/`)
 
 39 archival dumpers that generated the historical `il/` dump sets. Each emits a

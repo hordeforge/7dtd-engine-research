@@ -50,7 +50,7 @@ def must_match(label: str, text: str, pattern: str, errors: list[str]) -> None:
 
 def check_research(facts: dict, errors: list[str]) -> None:
     v = facts["version"]
-    display = v["display"]  # e.g. V 3.1.0
+    display = v["display"]  # facts-driven, e.g. "V {major}.{minor/10}.{minor%10}"
     major, minor, build = v["major"], v["minor"], v["build"]
     tps = facts["sim"]["constants_ticks_per_second"]
     ydim = facts["chunk"]["block_y_dim"]
@@ -59,17 +59,23 @@ def check_research(facts: dict, errors: list[str]) -> None:
     save_ver = facts["save"].get("current_save_version")
 
     cov = read(ROOT / "docs" / "coverage.md")
-    # Pin banner: V 3.1.0 (b14) or similar
+    # Pin banner: V X.Y.Z (bN) driven entirely by stock_facts (no fixed version soft path).
+    pin_display = display.replace("V ", "")  # strip leading V from facts display
+    pin_esc = re.escape(pin_display)
     must_match(
         "docs/coverage.md pin",
         cov,
-        rf"V\s*{re.escape(display.replace('V ', ''))}\s*\(b{build}\)|"
-        rf"V\s*\*\*{re.escape(display.replace('V ', ''))}\s*\(b{build}\)\*\*",
+        rf"V\s*{pin_esc}\s*\(b{build}\)|"
+        rf"V\s*\*\*{pin_esc}\s*\(b{build}\)\*\*",
         errors,
     )
-    # Also accept "V **3.1.0 (b14)**" style already used
-    if not re.search(rf"3\.1\.0.*b{build}|b{build}.*3\.1\.0|Major\s*=\s*{major}.*Minor\s*=\s*{minor}.*Build\s*=\s*{build}", cov, re.I | re.S):
-        # softer: require major.minor.build triple somewhere
+    # Fallback: Major/Minor/Build triple or display+build without hard-coded line version.
+    if not re.search(
+        rf"{pin_esc}.*b{build}|b{build}.*{pin_esc}|"
+        rf"Major\s*=\s*{major}.*Minor\s*=\s*{minor}.*Build\s*=\s*{build}",
+        cov,
+        re.I | re.S,
+    ):
         if f"Major={major}" not in cov and f"Minor={minor}" not in cov:
             errors.append(
                 f"docs/coverage.md: expected version pin for {display} b{build} "
@@ -86,7 +92,12 @@ def check_research(facts: dict, errors: list[str]) -> None:
 
     proto = read(ROOT / "docs" / "protocol.md")
     must_contain("docs/protocol.md challenge", proto, "0xCA", errors)
-    must_match("docs/protocol.md version display", proto, re.escape(display) + r"|V 3\.1\.0", errors)
+    must_match(
+        "docs/protocol.md version display",
+        proto,
+        re.escape(display) + r"|" + re.escape("V " + pin_display),
+        errors,
+    )
 
     if save_ver is not None:
         save = read(ROOT / "docs" / "save-region.md")
@@ -130,9 +141,8 @@ def check_research(facts: dict, errors: list[str]) -> None:
             errors,
         )
 
-    # README must pin current display version (not a stale V3.0.1-only banner)
+    # README must pin current display version (not a stale prior-line banner)
     readme = read(ROOT / "README.md")
-    pin_display = display.replace("V ", "")  # e.g. 3.1.0
     must_match(
         "README.md version pin",
         readme,

@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — autoresearch: version-update tooling readiness
+
+Done (branch autoresearch/version-update-tooling):
+- Baseline readiness 83.04 → best 100.0 in 5 keep iterations.
+- check_stock_facts: no fixed 3.1.0 soft accept paths (facts-driven only).
+- tools/post-update.sh + make post-update; stock-sync STOCK_SYNC_DRIFT hook.
+- stock_facts schema: update/pins/behaviour (Constants cctor extract).
+- test_dedi_coverage_docs DUMP_SETS from stock_facts dump_label_suffix.
+- Bench: tools/tests/bench_version_update_tooling.py; session autoresearch.md/jsonl.
+
+Verification: make stock-check OK; test_dedi_coverage_docs OK; readiness=100.0.
+---
 ## 2026-08-07 — tier-C: SetupCrawler and HeadshotMode
 
 Done (V3.1.0 b14 IL):

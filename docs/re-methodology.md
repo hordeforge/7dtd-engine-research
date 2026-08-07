@@ -211,8 +211,9 @@ cd tools
 | `tools/tests/check_stock_facts.py` | Greps research docs + sibling pins against JSON |
 | `tools/stock-sync.sh` | extract + check wrapper |
 
-After a game update: run `stock-sync.sh`, fix any FAIL pin sites, commit the new
-JSON together with doc/code pin edits. Pair with §5b `drift-check.sh` for full
+After a game update: prefer `tools/post-update.sh` (or `make post-update`), which
+runs `stock-sync.sh` then §5b `drift-check.sh`. Fix any FAIL pin sites, commit the
+new JSON together with doc/code pin edits. Pair with §5b `drift-check.sh` for full
 surface drift; stock-sync is the **small constant** gate, not a replacement for
 parity dumps.
 

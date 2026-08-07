@@ -6,13 +6,40 @@ game constants as the pass condition; asserts files and dump-backed markers).
 """
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-DOCS = ROOT / "7dtd-research" / "docs"
-IL = ROOT / "7dtd-research" / "il"
+RESEARCH = ROOT / "7dtd-research"
+DOCS = RESEARCH / "docs"
+IL = RESEARCH / "il"
+FACTS = RESEARCH / "tools" / "data" / "stock_facts.json"
+
+
+def dump_label_suffix() -> str:
+    """Folder suffix from stock_facts display, e.g. V X.Y.Z -> vX.Y.Z."""
+    if FACTS.is_file():
+        v = json.loads(FACTS.read_text(encoding="utf-8"))["version"]
+        disp = v.get("display", "V 0.0.0").replace("V ", "").strip()
+        return f"v{disp}"
+    # Fallback only when facts missing (tests still need a label).
+    return "v0.0.0"
+
+
+def dump_sets_for_pin() -> list[str]:
+    suf = dump_label_suffix()
+    bases = [
+        "deep",
+        "deeper",
+        "gaps",
+        "loop-complete",
+        "terrain",
+        "realearth-surfaces",
+        "dedi-complete",
+    ]
+    return [f"{b}-{suf}" for b in bases]
 
 FAMILY_DOCS = [
     "coverage.md",
@@ -36,18 +63,9 @@ PRODUCT_REALEARTH = [
     "realearth-review.md",
 ]
 
-# The corpus tracks the latest release only, so these names move with it.
-# gmUpdate and terrain-stock folded into loop-complete and terrain when the
-# corpus was regenerated on V3.1.0 b14.
-DUMP_SETS = [
-    "deep-v3.1.0",
-    "deeper-v3.1.0",
-    "gaps-v3.1.0",
-    "loop-complete-v3.1.0",
-    "terrain-v3.1.0",
-    "realearth-surfaces-v3.1.0",
-    "dedi-complete-v3.1.0",
-]
+# The corpus tracks the latest release only; directory names follow stock_facts.
+# gmUpdate and terrain-stock folded into loop-complete and terrain historically.
+DUMP_SETS = dump_sets_for_pin()
 
 TOOLS = [
     "DumpDeep.cs",
@@ -117,9 +135,10 @@ def main() -> int:
         if sum(1 for _ in d.iterdir()) < 1:
             fails.append(f"empty dump set: {ds}")
 
-    auto = IL / "dedi-complete-v3.1.0" / "DEDI_COMPLETE_auto.md"
+    dedi_dir = f"dedi-complete-{dump_label_suffix()}"
+    auto = IL / dedi_dir / "DEDI_COMPLETE_auto.md"
     if not auto.is_file():
-        fails.append("missing DEDI_COMPLETE_auto.md")
+        fails.append(f"missing {dedi_dir}/DEDI_COMPLETE_auto.md")
     else:
         t = auto.read_text(encoding="utf-8", errors="replace")
         for needle in (

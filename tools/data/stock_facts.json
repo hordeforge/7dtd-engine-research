@@ -2,7 +2,7 @@
   "schema": 1,
   "generated_by": "tools/src/StockFacts.cs",
   "asm": "Assembly-CSharp.dll",
-  "extracted_utc": "2026-08-04T09:03:34.9552790Z",
+  "extracted_utc": "2026-08-07T10:01:05.0261650Z",
   "version": {
     "release_type": 1,
     "major": 3,
@@ -55,5 +55,25 @@
     "research_docs": ["docs/coverage.md", "docs/protocol.md", "docs/closed-gaps.md", "docs/save-region.md"],
     "loadgen": ["src/LoadGen/PackageCodec.cs GameVersion", "tests golden-wire"],
     "zdtd": ["src/version.zig stock_wire", "src/protocol.zig challenge/ticks"]
+  },
+  "update": {
+    "entrypoint": "tools/post-update.sh",
+    "stock_sync": "tools/stock-sync.sh",
+    "drift_check": "tools/parity/drift-check.sh",
+    "dump_label_suffix": "v3.1.0",
+    "dump_sets": ["deep", "deeper", "gaps", "loop-complete", "terrain", "realearth-surfaces", "dedi-complete"],
+    "note": "After TFP patch: post-update.sh then re-Dump* into il/<set>-<dump_label_suffix>/"
+  },
+  "pins": {
+    "research": ["docs/coverage.md", "docs/protocol.md", "docs/closed-gaps.md", "docs/save-region.md", "README.md", "docs/tile-entities-power.md", "docs/protocol-packages.md"],
+    "siblings": ["7dtd-loadgen/src/LoadGen/PackageCodec.cs", "zdtd/src/version.zig", "zdtd/src/protocol.zig", "zdtd/src/world/store.zig"]
+  },
+  "behaviour": {
+    "max_entities_per_mob_spawner": 8,
+    "enemy_sense_memory": 60,
+    "default_monster_see_distance": 48,
+    "send_world_tick_time_to_clients": 1.5,
+    "max_party_size": 8,
+    "party_activation_range": 15
   }
 }

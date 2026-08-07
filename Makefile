@@ -3,12 +3,13 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check census drift test help
+.PHONY: tools stock-sync stock-check post-update census drift test help
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
 	@echo "make stock-check  - pin check only (committed JSON)"
+	@echo "make post-update  - after TFP patch: stock-sync + drift (tools/post-update.sh)"
 	@echo "make census       - Census.exe against ASM"
 	@echo "make drift        - parity drift-check vs baseline"
 	@echo "make test         - structural + stock-check (no live dump regen)"
@@ -21,6 +22,9 @@ stock-sync:
 
 stock-check:
 	cd "$(TOOLS)" && ./stock-sync.sh --check-only
+
+post-update:
+	cd "$(TOOLS)" && ASM="$(ASM)" ./post-update.sh
 
 census: tools
 	@test -f "$(ASM)" || (echo "ASM not found: $(ASM)"; exit 2)

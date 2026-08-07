@@ -92,18 +92,48 @@ class StockFacts {
         var f = (FieldReference)i.Operand;
         if (f.Name == fieldName && pending.HasValue) found = pending;
         pending = null;
-      } else if (i.OpCode.Code != Code.Nop && i.OpCode.Code != Code.Dup) {
-        // non-trivial ops clear pending to avoid false association
-        if (i.OpCode.Code != Code.Ldsfld && i.OpCode.Code != Code.Call &&
-            i.OpCode.Code != Code.Callvirt && i.OpCode.Code != Code.Newobj &&
-            i.OpCode.Code != Code.Ldstr && i.OpCode.Code != Code.Box &&
-            i.OpCode.Code != Code.Conv_I8 && i.OpCode.Code != Code.Conv_R4 &&
-            i.OpCode.Code != Code.Conv_R8) {
-          // keep pending only for simple ldc -> stsfld chains
-        }
+      } else if (i.OpCode.Code == Code.Ldc_R4 || i.OpCode.Code == Code.Ldc_R8) {
+        pending = null;
       }
     }
     return found;
+  }
+
+  // Walk cctor; last float pushed before stsfld Name wins.
+  static float? StsfldR4(TypeDefinition t, string fieldName) {
+    var cctor = t.Methods.FirstOrDefault(m => m.IsConstructor && m.IsStatic && m.HasBody);
+    if (cctor == null) return null;
+    float? pending = null;
+    float? found = null;
+    foreach (var i in cctor.Body.Instructions) {
+      if (i.OpCode.Code == Code.Ldc_R4) pending = AsFloat(i.Operand);
+      else if (i.OpCode.Code == Code.Ldc_R8) pending = AsFloat(i.Operand);
+      else if (i.OpCode.Code == Code.Stsfld) {
+        var f = (FieldReference)i.Operand;
+        if (f.Name == fieldName && pending.HasValue) found = pending;
+        pending = null;
+      } else if (LdcI4(i).HasValue) {
+        pending = null;
+      }
+    }
+    return found;
+  }
+
+  // Prefer metadata constant; else cctor stsfld int/float.
+  static int FieldInt(TypeDefinition t, string name) {
+    var f = t.Fields.FirstOrDefault(x => x.Name == name);
+    if (f != null && f.HasConstant) return AsInt(f.Constant);
+    var v = StsfldInt(t, name);
+    if (v.HasValue) return v.Value;
+    throw new Exception(t.Name + "." + name + " not a metadata const or simple cctor int");
+  }
+
+  static float FieldFloat(TypeDefinition t, string name) {
+    var f = t.Fields.FirstOrDefault(x => x.Name == name);
+    if (f != null && f.HasConstant) return AsFloat(f.Constant);
+    var v = StsfldR4(t, name);
+    if (v.HasValue) return v.Value;
+    throw new Exception(t.Name + "." + name + " not a metadata const or simple cctor float");
   }
 
   static float? GameTimerTicksPerSecond(ModuleDefinition mod) {
@@ -178,6 +208,17 @@ class StockFacts {
     // cDefaultPort is cctor-init (not a metadata constant on this build).
     int defaultPort = StsfldInt(c, "cDefaultPort") ?? 26900;
 
+    // High-value dedicated behaviour hardcodes (const or simple cctor stsfld).
+    int maxEntitiesPerMobSpawner = FieldInt(c, "cMaxEntitiesPerMobSpawner");
+    int enemySenseMemory = FieldInt(c, "cEnemySenseMemory");
+    float defaultMonsterSeeDistance = FieldFloat(c, "cDefaultMonsterSeeDistance");
+    float sendWorldTickTimeToClients = FieldFloat(c, "cSendWorldTickTimeToClients");
+    // Party fields may be metadata const on some builds; optional.
+    int? maxPartySize = null;
+    float? partyActivationRange = null;
+    try { maxPartySize = FieldInt(c, "cMaxPartySize"); } catch { /* optional */ }
+    try { partyActivationRange = FieldFloat(c, "cPartyActivationRange"); } catch { /* optional */ }
+
     // Display: stock LongStringNoBuild style for Minor>=10: V {Major}.{Minor/10}.{Minor%10}
     // Matches loadgen PackageCodec.VersionLongString for EGameReleaseType.V=1.
     string display;
@@ -185,7 +226,7 @@ class StockFacts {
       display = string.Format(CultureInfo.InvariantCulture, "V {0}.{1}.{2}", major, minor / 10, minor % 10);
     else
       display = string.Format(CultureInfo.InvariantCulture, "V {0}.{1}.{2}", major, minor, 0);
-    // zdtd stock_wire form: "V3.1.0 b14"
+    // zdtd stock_wire form: "V{display without space} b{build}"
     string stockWire = string.Format(CultureInfo.InvariantCulture, "V{0}.{1}.{2} b{3}",
       major, minor >= 10 ? minor / 10 : minor, minor >= 10 ? minor % 10 : 0, build);
 
@@ -279,6 +320,34 @@ class StockFacts {
     sb.AppendLine("    \"research_docs\": [\"docs/coverage.md\", \"docs/protocol.md\", \"docs/closed-gaps.md\", \"docs/save-region.md\"],");
     sb.AppendLine("    \"loadgen\": [\"src/LoadGen/PackageCodec.cs GameVersion\", \"tests golden-wire\"],");
     sb.AppendLine("    \"zdtd\": [\"src/version.zig stock_wire\", \"src/protocol.zig challenge/ticks\"]");
+    sb.AppendLine("  },");
+    // Post-update orchestration metadata (not extracted from IL; pin path for agents).
+    string dumpSuf = string.Format(CultureInfo.InvariantCulture, "v{0}.{1}.{2}",
+      major, minor >= 10 ? minor / 10 : minor, minor >= 10 ? minor % 10 : 0);
+    sb.AppendLine("  \"update\": {");
+    sb.AppendLine("    \"entrypoint\": \"tools/post-update.sh\",");
+    sb.AppendLine("    \"stock_sync\": \"tools/stock-sync.sh\",");
+    sb.AppendLine("    \"drift_check\": \"tools/parity/drift-check.sh\",");
+    sb.AppendLine("    \"dump_label_suffix\": " + JsonEsc(dumpSuf) + ",");
+    sb.AppendLine("    \"dump_sets\": [\"deep\", \"deeper\", \"gaps\", \"loop-complete\", \"terrain\", \"realearth-surfaces\", \"dedi-complete\"],");
+    sb.AppendLine("    \"note\": \"After TFP patch: post-update.sh then re-Dump* into il/<set>-<dump_label_suffix>/\"");
+    sb.AppendLine("  },");
+    // Machine-checked pin sites (mirrors check_stock_facts.py consumers).
+    sb.AppendLine("  \"pins\": {");
+    sb.AppendLine("    \"research\": [\"docs/coverage.md\", \"docs/protocol.md\", \"docs/closed-gaps.md\", \"docs/save-region.md\", \"README.md\", \"docs/tile-entities-power.md\", \"docs/protocol-packages.md\"],");
+    sb.AppendLine("    \"siblings\": [\"7dtd-loadgen/src/LoadGen/PackageCodec.cs\", \"zdtd/src/version.zig\", \"zdtd/src/protocol.zig\", \"zdtd/src/world/store.zig\"]");
+    sb.AppendLine("  },");
+    sb.AppendLine("  \"behaviour\": {");
+    sb.AppendLine("    \"max_entities_per_mob_spawner\": " + maxEntitiesPerMobSpawner + ",");
+    sb.AppendLine("    \"enemy_sense_memory\": " + enemySenseMemory + ",");
+    sb.AppendLine("    \"default_monster_see_distance\": " + defaultMonsterSeeDistance.ToString(CultureInfo.InvariantCulture) + ",");
+    sb.AppendLine("    \"send_world_tick_time_to_clients\": " + sendWorldTickTimeToClients.ToString(CultureInfo.InvariantCulture) +
+      (maxPartySize.HasValue || partyActivationRange.HasValue ? "," : ""));
+    if (maxPartySize.HasValue)
+      sb.AppendLine("    \"max_party_size\": " + maxPartySize.Value +
+        (partyActivationRange.HasValue ? "," : ""));
+    if (partyActivationRange.HasValue)
+      sb.AppendLine("    \"party_activation_range\": " + partyActivationRange.Value.ToString(CultureInfo.InvariantCulture));
     sb.AppendLine("  }");
     sb.AppendLine("}");
 
