@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityAnimal distress
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md: SetDistressed (IL=16) flags + bounds + playerId + timer 2.5;
+  getEntityPlayerLocal (IL=16) primary-player id gate; isGameMessageOnDeath
+  (IL=2) false.
+
 ## 2026-08-08 - tier-C: PrefabInstance leaves
 
 Done (V3.1.0 b14 IL):
