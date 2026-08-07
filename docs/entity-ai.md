@@ -348,6 +348,13 @@ pass-through); an `E_BP_` (body part) hit is re-rooted via
 `GameUtils.GetHitRootTransform`; the target is seen iff the final hit
 transform equals `other.transform`.
 
+**`GameUtils.GetHitRootTransform(tag, hitTransform)` (IL=29)** is that
+re-rooting: an `E_BP_`-prefixed tag resolves the owning entity root via
+`RootTransformRefEntity` (component `RootTransform`, else
+`FindEntityUpwards`); an `E_Vehicle` tag resolves
+`CollisionCallForward.FindEntity(hitTransform).transform`; any other tag
+returns the hit transform unchanged.
+
 **`CanSeeStealth(dist, lightLevel)` (IL=21):**
 `t = dist / sightRange`; threshold =
 `FastLerp(sightLightThreshold.x, .y, t)`; true if `lightLevel > threshold`.
@@ -3040,6 +3047,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** GameUtils.GetHitRootTransform (IL=29): E_BP_ body-part
+  re-root via RootTransformRefEntity, E_Vehicle via CollisionCallForward,
+  else unchanged.
 - **2026-08-07:** Entity.IsIgnoredByAI (IL=3) field read; EntityDrone always
   true - the AI-target exclusion flag.
 - **2026-08-07:** Utils.GetAngleBetween (IL=34): XZ Atan2 yaw difference
