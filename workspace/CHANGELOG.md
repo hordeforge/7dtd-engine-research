@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GameStartupHelper boot leaves
+
+Done (V3.1.0 b14 IL):
+- ParseCommandLine IL=82: configfile load (+.xml), ParsePref each, dedicated
+  NoGraphicsMode 139, dedicated quits without a config file.
+- InitGamePrefs IL=36: GameVersion = cVersionInformation.LongStringNoBuild,
+  ApplyParsedGamePrefs.
+- SetDedicatedServerSettings IL=51: boot logs, all prefs non-persistent,
+  OpenMainMenuAfterAwake = false.
 ## 2026-08-08 — census refresh 6
 
 Done:

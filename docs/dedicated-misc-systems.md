@@ -181,6 +181,23 @@ name, max players from `GamePrefs`). Linux-specific checks (`checkLinuxLimits`,
 [server-lifecycle.md](server-lifecycle.md) and
 [sandbox-options.md](sandbox-options.md).
 
+Leaves (all V3.1.0 b14 IL):
+
+- **`ParseCommandLine(args)` (IL=82):** parse raw `key=value` args; a
+  `configfile` value gets `.xml` appended when it has no dot and is loaded via
+  `LoadConfigFile` (failure → false). Every remaining pair is applied with
+  `ParsePref(key, value, false, true)`. Dedicated: `parsedGamePrefs[139
+  (NoGraphicsMode)] = true`. **Dedicated without a loaded config file →
+  error banner ("No server config file loaded ...") + `Application.Quit()` +
+  false** - the dedicated server refuses to run without `-configfile`.
+- **`InitGamePrefs()` (IL=36):** log `Last played version: {pref 34}`; set
+  `GamePrefs[34 (GameVersion)] = Constants.cVersionInformation.LongStringNoBuild`;
+  `initGamePrefsOk = ApplyParsedGamePrefs()`.
+- **`SetDedicatedServerSettings()` (IL=51):** log level / game name / max
+  players / game mode / crossplay from prefs; then for every existing
+  `EnumGamePrefs` value `SetPersistent(pref, false)` (nothing persists to the
+  registry on dedicated); `OpenMainMenuAfterAwake = false`.
+
 ## NavObjectClass
 
 Registry of compass/map/on-screen icon classes loaded from `nav_objects.xml`
