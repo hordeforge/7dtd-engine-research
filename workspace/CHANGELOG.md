@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: spawn-group max-tier selection
+
+Done (V3.1.0 b14 IL):
+- EntityGroups.GetRandomEntityFromGroupMaxTier (IL=120) narrated in
+  spawning.md (was a stub): group lookup with default world GameRandom,
+  per-entry GetEntityClassWithinMaxTier tier clamp (null skip) + isEnemy /
+  isAnimal flag filters, unknown-id error log return -1, static scratch
+  workingGroupList rebuild with original weights, NormalizeWorkingList,
+  weighted GetRandomFromGroupList up to 3 tries avoiding a repeat of the
+  caller's lastClassId, winner stored back.
+
 ## 2026-08-08 - tier-C: BloodMoon component + party
 
 Done (V3.1.0 b14 IL):

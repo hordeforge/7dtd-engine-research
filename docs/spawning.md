@@ -828,6 +828,10 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** GetRandomEntityFromGroupMaxTier (IL=120): group lookup,
+  GetEntityClassWithinMaxTier clamp + isEnemy/isAnimal filters, static
+  workingGroupList, NormalizeWorkingList, up-to-3 weighted picks avoiding
+  lastClassId repeats.
 - **2026-08-07:** isPositionInRangeOfBedrolls pref 160; CanMobsSpawnAtPos; terrain offset.
 - **2026-08-07:** SpawnManagerDynamic Update IL=75 night ES 64..96 m.
 - **2026-08-07:** GetRandomSpawnPositionMinMaxToRandomPlayer 10 tries bedroll/see reject.
@@ -862,6 +866,26 @@ above.
 
 ## Spawn-group max-tier selection (V3.1.0 b14)
 
-`EntityGroups.GetRandomEntityFromGroupMaxTier(...)` with `NormalizeWorkingList`
-picks from a group under a tier ceiling. Used by the blood-moon party spawner.
-*Anchor:* `il/full-v3.1.0/_global/AIDirectorBloodMoonParty.il.txt`.
+`EntityGroups.GetRandomEntityFromGroupMaxTier(name, maxTier, ref lastClassId,
+isEnemy, isAnimal, random)` (IL=120) picks a weighted entity from a spawn group
+under a tier ceiling (used by the blood-moon party spawner, AIHordeSpawner and
+the ECD chain):
+
+1. **Lookup:** `group = EntityGroups.list[name]` (the static
+   `DictionarySave<string, List<SEntityClassAndProb>>`); `random` defaults to
+   `world.GetGameRandom()`.
+2. **Filter pass:** for each entry, `ec = EntityClass.GetEntityClass(id)` (an
+   unknown id logs `EntityGroup GetRandomEnemyFromGroupMaxTier: unknown type
+   ({0})` and returns -1); `ec2 =
+   ec.GetEntityClassWithinMaxTier(ec, maxTier)` clamps the pick to the tier
+   ceiling (null skips the entry); when `isEnemy` / `isAnimal` are set the
+   class must carry the matching `bIsEnemyEntity` / `bIsAnimalEntity` flag.
+   Surviving entries are appended to the static scratch `workingGroupList` as
+   `SEntityClassAndProb { entityClassId = GetId(ec2.entityClassName), prob =
+   entry.prob }` (the tier-clamped class keeps the original weight).
+3. **Weighted pick:** an empty working list returns -1; otherwise
+   `NormalizeWorkingList(workingGroupList)` normalizes weights, then
+   `GetRandomFromGroupList(workingGroupList, random)` runs **up to 3 times**,
+   returning as soon as the pick differs from the `lastClassId` ref (the
+   caller-supplied "last spawned class" - the loop avoids spawning the same
+   class twice in a row and stores the winner back).
