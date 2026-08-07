@@ -568,6 +568,15 @@ non-terrain block landing in the layer clears `bOnlyTerrain`;
 `CheckOnlyTerrain()` (IL=153) re-derives it by scanning the 24-bit array for
 all-zero upper words.
 
+**Chunk map leaves (V3.1.0 b14):** `GetHeight(x, z)` (IL=9) reads
+`m_HeightMap[z*16 + x]` (the 256-byte column-height byte map) and
+`GetHeight(blockOffset)` (IL=5) is the direct index. `IsWater(x, y, z)`
+(IL=9) is `GetWater(x, y, z).HasMass()`. `SetTopSoilBroken(x, z)` (IL=36)
+sets a bit in the `m_bTopSoilBroken` bitfield
+(`[idx/8] |= 1 << (idx%8 & 31)`, 32 bytes covering the 256 columns) - the
+"topsoil disturbed" marker the terrain-dig/upgrade and explosion paths set
+on affected columns.
+
 **`Chunk.recalcIndexedBlocks()` (IL=26)** clears `IndexedBlocks` and rebuilds
 it from every layer (`ChunkBlockLayer.AddIndexedBlocks` per layer, 64 of
 them). `saveBlockIds()` (IL=53) marks every in-chunk block id used in
@@ -850,6 +859,9 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-08:** Chunk map leaves: GetHeight IL=9 m_HeightMap[z*16+x];
+  IsWater IL=9 GetWater().HasMass(); SetTopSoilBroken IL=36
+  m_bTopSoilBroken bitfield (32 bytes, idx/8 bit idx%8).
 - **2026-08-08:** ChunkBlockLayer storage (5.0a): split-byte layout
   (m_Lower8Bits + lower8BitSameValue compression, m_Upper24Bits 3 bytes/cell),
   CalcOffset IL=12 1024-cell sub-planes; GetAt IL=61 word assembly + Air
