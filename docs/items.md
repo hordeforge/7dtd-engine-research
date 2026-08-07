@@ -1396,6 +1396,15 @@ resolves the dump cell via `TryFindDumpPosition`, and gates on the
 `ttCannotUseAtThisTime` tooltip), then latches `lastUseTime` +
 `RightArmAnimationUse`; the water is written back in `OnHoldingUpdate`.
 
+**Small action leaves (V3.1.0 b14):** `ItemActionActivate.ExecuteAction`
+(IL=79) is press-only + `Delay` + the passive-177 twitch gate, plays
+`soundStart`, and calls `holdingItem.OnHoldingItemActivated(
+holdingItemData)` - the per-class activation hook (flashlight/candle
+toggles). `ItemActionZoom.ExecuteAction` (IL=103) is the aim toggle:
+`IsAimingGunPossible()` on press, with local-player camera gates
+(`IsCameraAttachedToPlayerOrScope` + first-person) before the zoom state
+flips - client-camera work, with the server seeing only the aim flag.
+
 **`ItemActionTerrainTool` (V3.1.0 b14)** is the terrain-sculpt tool
 (dig/flatten): `ExecuteAction` (IL=46) latches `bActivated` +
 `activateTime` on press and forwards `GameManager.ItemActionEffectsServer
@@ -1500,6 +1509,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Small action leaves: ItemActionActivate IL=79
+  (OnHoldingItemActivated hook); ItemActionZoom IL=103 aim toggle
+  (IsAimingGunPossible + camera gates).
 - **2026-08-08:** ItemActionDumpWater.ExecuteAction IL=118: water-container
   check, Meta>=195 gate, dump-cell raycast + TryFindDumpPosition, trader-
   area and land-claim (owner 3) ttCannotUseAtThisTime gates, latch +
