@@ -502,7 +502,8 @@ configured lower-tier replacements.
    pref **44 (`DebugMenuShowTasks`)** → `GUIHUDEntityName` when `EntityAlive`;
    parent when `parentGameObjectName` set; name `{entityClassName}_{id}`,
    `SetEntityName` (`EntityAlive.SetEntityName` IL=20: store, mark
-   `bPlayerStatsChanged` when server-owned, `HandleSetNavName`);
+   `bPlayerStatsChanged` when server-owned, `HandleSetNavName` which mirrors
+   the name onto the NavObject, IL=9);
    `SetSkinTexture`; collider layers: capsule colliders → **14**
    unless tagged `LargeEntityBlocker`/`Physics`; box colliders → **14**.
 7. **Convergence:** `ecd.ApplyToEntity(entity)`; spawner source
