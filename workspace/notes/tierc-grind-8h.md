@@ -64,3 +64,10 @@
 - stock-check green throughout
 - Areas covered: MoveHelper full surface, EntityAlive helpers, World spawn/land/uncull, packages BossEvent
 - Still open: CopyPropertiesFromEntityClass (huge), ClipBoundsMove, GroupFallingBlocks detail, FindSupportingBlockPos, more World unmentioned
+
+
+## Checkpoint 3
+- 33 commits since dry-run
+- stock-check green; narrated 1488
+- Loop/tick path, MoveHelper, land claims, spawn gates heavily filled
+- Continue until interrupted

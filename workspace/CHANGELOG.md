@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: WorldBlockTicker and SpawnManagerDynamic
+
+Done (V3.1.0 b14 IL):
+- tickScheduled max 100; reschedule 30..45 if chunk not area-loaded.
+- tickRandom 1200 tick period; countPerFrame active/100.
+- RestoreCulledBlocks edge face flags; SpawnManagerDynamic 64..96 night ES.
+---
 ## 2026-08-07 — tier-C: updateChunksToUncull restore path
 
 Done (V3.1.0 b14 IL):

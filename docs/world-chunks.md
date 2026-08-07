@@ -374,8 +374,8 @@ on success log POI name + bbox and return true.
 `chunksToUncull`: drop if `InProgressUnloading`; else
 `RestoreCulledBlocks` → remove from uncull queue → add to regenerate set; for
 neighbor faces from restore flags (W/E/N/S bits) enqueue neighbor chunks for
-regenerate. Time-budget residual via stopwatch (continues next frames if
-needed).
+regenerate. Stop when `msUnculling.ElapsedMilliseconds ≥ **5**` (5 ms budget;
+continues next frames).
 
 **`World.GetTraderAreaAt(pos)` (IL=14):**
 `ChunkProvider.GetDynamicPrefabDecorator().GetTraderAtPosition(pos, 0)` or null.
@@ -448,6 +448,24 @@ stateDiagram-v2
 | System | IL | Note |
 |---|---:|---|
 | `WorldBlockTicker` tickScheduled / tickRandom | 151 / 97 | From OnUpdateTick server path |
+
+**`WorldBlockTicker.Tick` (IL=20):** require `bTickingActive` and server: run
+`tickScheduled` then `tickRandom`.
+
+**`tickScheduled` (IL=151):** lock; process up to **100** due entries from
+`scheduledTicksSorted` (stop at first future `scheduledTime`). If chunk area not
+loaded: reschedule +**30..45** random ticks when chunk exists; else drop. If
+loaded: `execute(entry)`.
+
+**`tickRandom` (IL=97):** rebuild key list from active chunks when index
+exhausted; `randomTickCountPerFrame = max(1, activeCount/100)`; each frame
+`tickChunkRandom` that many. Per chunk: skip if needs light; require ≥ **1200**
+ticks since `LastTimeRandomTicked`; for each ticked block pos call
+`Block.UpdateTick(..., random=true)` unless already scheduled.
+
+**`RestoreCulledBlocks` (IL=58):** walk `insideDevices` reverse; OR face flags
+for devices on chunk edges (x=0 → 8, x=15 → 32, z=0 → 4, z=15 → 16); clear
+`IsInternalBlocksCulled`; return flags.
 | `AddFallingBlock` / `LetBlocksFall` | 38 / 220 | Collapse storms |
 | `AddFallingBlock` detail | 38 | HashSet dedupe; skip child/air/`StabilityIgnore`/oversized (unless include); `DynamicMeshManager.AddFallingBlockObserver`; enqueue `fallingBlocks` |
 | `EntityFallingBlock` OnUpdateEntity | 300+ | Entity cost |
@@ -557,6 +575,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** WorldBlockTicker scheduled 100 cap; random 1200 ticks; RestoreCulledBlocks flags.
 - **2026-08-07:** UpdateTick IL=150 slice/full; save 40 ticks; deco 60s; SetBlocksOnClients 192.
 - **2026-08-07:** TickEntitiesSlice/Flush; TickEntities list rebuild;
   SaveDecorations DecoManager.

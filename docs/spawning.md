@@ -257,11 +257,18 @@ spawners all reuse it. Per invocation it:
 (24000 ticks per in-game day) so a POI that a player abandoned repopulates on a
 schedule.
 
-`SpawnManagerDynamic` is the thin night-only wrapper: it returns immediately in
-daytime or with no players, builds one fresh `EntitySpawner` per in-game day
-(`lastDaySpawned`), and calls `SpawnManually` with a position callback that
-picks 64..96 m from a random player. Its own `currentSpawner` is serialized, so
-a day's dynamic spawn progress survives a restart.
+`SpawnManagerDynamic` is the thin night-only wrapper (**Update IL=75**):
+
+1. Daytime or zero players → return.
+2. If `WorldTimeToDays` equals `lastDaySpawned` **and** `currentSpawner` exists
+   → reuse spawner; else set `lastDaySpawned`, construct new
+   `EntitySpawner(name, zero, zero, 0, prior entity ids or null)`.
+3. `SpawnManually(world, day, spawnEnemies, precondition lambda,
+   GetSpawnPosition, null, null)` where position callback is
+   `GetRandomSpawnPositionMinMaxToRandomPlayer(min=**64**, max=**96**, …)`.
+
+Its own `currentSpawner` is serialized, so a day's dynamic spawn progress
+survives a restart.
 
 ---
 
@@ -635,6 +642,7 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** SpawnManagerDynamic Update IL=75 night ES 64..96 m.
 - **2026-08-07:** Chunk.GetEntitiesAround buckets; FindRandomSpawnPointNearPlayer; claim offline hours.
 - **2026-08-07:** Chunk.CanPlayersSpawnAtPos y 2..251; GetPlayersAround; GetEntitiesAround.
 - **2026-08-07:** CanPlayersSpawnAtPos; FindRandomSpawnPointNearRandomPlayer 32; GetClosestLocalPlayer.
