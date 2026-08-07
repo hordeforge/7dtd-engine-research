@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — census refresh 4
+
+Done:
+- Coverage.exe re-run: narrated 1497, catalogued 818, classified 1384,
+  unaccounted 0.
 ## 2026-08-08 — tier-C: SetSupplyCratePosition cache
 
 Done (V3.1.0 b14 IL):
