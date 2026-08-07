@@ -71,6 +71,39 @@ EntityLockContext(commandId, bag), 0)` - the crate opens via the same lock
 system as loot bags. `canDespawn()` (IL=2) is **always false**: landed
 crates persist until looted or removed.
 
+**Air drop flight logic (`AIAirDrop`, V3.1.0 b14):** `SpawnAirDrop`
+(IL=59) builds an `AIAirDrop` (players + controller), whose `Tick` (IL=193)
+drives the whole drop. `CreateFlightPaths` (IL=355) runs once:
+`MakePlayerClusters` (IL=70) groups players within **30 m** (`Radius`,
+`XZCenter`); `CalcSupplyDropMetrics` (IL=53) sizes the drop - 1..4 planes
+(`max(1, min(4, rand(0..2) + 1))`), crates from `SelectCrateCount`
+(min=max=1, balanced so `crates/planes` stays 1..3). Per path it picks a
+random cluster and a random player inside it, sets
+`crateY = FastMin(player.y + 180, 276)` (180 m up, capped), picks a drop
+point at `XZCenter + RandomOnUnitCircle * RandomRange(30, 750)`, a random
+flight direction, and `FindSafePoint` (IL=70) walks the perpendicular to
+find Start/End **at least 600 m from every player** (squared-distance
+check, clamped to the map via `ClampToMapExtents`). Crates are spaced along
+the flight line, each with a staggered `Delay` and a `ChunkObserver` ref.
+`Tick` first waits until every crate's chunk is loaded
+(`GetChunkFromWorldPos` non-null), then per path: after `Delay` ->
+`SpawnPlane`; each crate after its `Delay` ->
+`controller.SpawnSupplyCrate(SpawnPos, ChunkRef)` (with the
+`AIAirDrop: Spawned supply crate at ...` log); a path is removed when its
+crates are gone, and `flightPaths = null` ends the drop.
+`SpawnPlane` (IL=74) creates the plane
+(`EntityClass.FromString("supplyPlane")`, yaw = `Angle(heading)`),
+`SetDirectionToFly(dir, 20 * (len/120 + 10))` and
+`world.SpawnEntityInWorld`.
+
+**Plane entity (`EntitySupplyPlane`):** `SetDirectionToFly` (IL=12) stores
+`motion = direction * 6` and `IsMovementReplicated = false` (server flies
+the straight line); `OnUpdatePosition` (IL=49) advances
+`position += motion * partialTicks`, counts `ticksToFly` down and
+`MarkToUnload()` at 0, plays `SupplyDrops/Supply_Crate_Plane_lp` once, and
+`SetAirBorne(true)`. `IsSavedToFile` and `IsDeadIfOutOfWorld` are both
+false - the plane lives only for its flight budget.
+
 ## AIDirectorBloodMoonComponent : AIDirectorComponent
 - `Tick(Double)` IL=170
 
@@ -785,6 +818,14 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** AIAirDrop flight logic: Tick IL=193 wait-for-chunks then
+  per-path plane + staggered crate spawns; CreateFlightPaths IL=355
+  (MakePlayerClusters 30 m, CalcSupplyDropMetrics 1-4 planes, crateY
+  min(player.y+180, 276), FindSafePoint >= 600 m from players,
+  ClampToMapExtents); SpawnPlane IL=74 supplyPlane entity + SetDirectionToFly
+  (20*(len/120+10) ticks); EntitySupplyPlane SetDirectionToFly IL=12
+  (motion = dir*6, unreplicated) + OnUpdatePosition IL=49 (ticksToFly
+  countdown -> MarkToUnload, engine loop, SetAirBorne).
 - **2026-08-08:** Supply crate entity: fallHitGround IL=15 soft landing
   (speed clamp 5, vertical min -0.75); OnEntityDeath IL=30 map-marker
   removal (type 13) + NetPackageEntityMapMarkerRemove broadcast + DropBagServer;
