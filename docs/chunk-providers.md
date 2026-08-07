@@ -690,6 +690,16 @@ scaled by **0.05** into the noise field, rebased by 0.333 and amplified by 3.
 `CheckOreNoiseAt` (IL=8) is just `GetOreNoiseAt(...) > 0`, so roughly the
 positive half of the rebased field passes.
 
+`PerlinNoise` itself is a classic gradient noise: `Lattice` (IL=34/48) dots
+the fractional offset against one of the `_gradients` entries, selected by a
+`_perm` byte hash (2D hashes `(iy + 225) & 255` then folds in `ix`; 3D folds
+`iz & 255` then `iy` then `ix`, all masked, times 3 for the xyz gradient
+triplet). `Smooth` (IL=10) is the `x*x*(3-2x)` smoothstep, `Lerp` (IL=8) is
+`v0 + (v1-v0)*t`, and `Noise(x, y[, z])` (IL=104/205) interpolates the 4 (or
+8) corner lattice dots, scales by `1/0.55`, and clamps to [-1, 1].
+`Noise01` (IL=9) maps that to [0, 1] via `(n+1)*0.5`; `FBM(x, y, freq)`
+(IL=45) sums 2 octaves with persistence 0.3 and frequency multiplier 2.1.
+
 ### 6.2 DecoOccupiedMap (world-level)
 
 `DecoManager.OnWorldLoaded` allocates a world-sized `DecoOccupiedMap`
