@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: spawn-data build
+
+Done (V3.1.0 b14 IL):
+- spawning.md 6.2: GetChunkBiomeSpawnData (IL=40) lazy build via bspd.main
+  custom-data; IsTraderArea (IL=22) world probe.
+
 ## 2026-08-08 - tier-C: area-master grid
 
 Done (V3.1.0 b14 IL):
