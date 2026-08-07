@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: area-master grid
+
+Done (V3.1.0 b14 IL):
+- spawning.md 6.2: ToAreaMasterChunkPos (IL=19) /5*5 snap; IsAreaMaster
+  (IL=14) %5; corner-load gate (IL=44); dominant-biome init (IL=107).
+
 ## 2026-08-08 - tier-C: chunk tick gate
 
 Done (V3.1.0 b14 IL):
