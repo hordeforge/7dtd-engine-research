@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: collision damage + trap degradation
+
+Done (V3.1.0 b14 IL):
+- blocks.md 5: BlockDamage.OnEntityCollidedWithBlock IL=126 base;
+  BlockSpikes retract (SiblingBlock or Air); BlockBarbed IL=51
+  meta step counter, destroy at 15.
 ## 2026-08-08 - tier-C: collision damage + spike retract
 
 Done (V3.1.0 b14 IL):
