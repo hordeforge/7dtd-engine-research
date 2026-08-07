@@ -2327,7 +2327,11 @@ that D8.6/D8.6a later copy from. Phase order:
     `PickupStressBuff`.
 13. **Token manager:** `TokenManager` array entries (`type` enum +
     `max`) → `TokenManagerConfig[AITokenType] = { MaxClaims }`.
-14. `CalculateEntityTier()` (tier from stats; feeds loot/gamestage).
+14. `CalculateEntityTier()`: tag priority → `EntityTierTypes` (elite tag →
+    **Elite(5)**, radiated → **Radiated(4)**, feral → **Feral(3)**, special →
+    **Special(2)**, strong → **Strong(1)**, else **Normal(0)**). The tier feeds
+    loot/gamestage scaling. `ParseEntityFlags(names)` (IL=49) ORs comma-separated
+    `EntityFlags` values (ignore-case `EnumUtils.TryParse`).
 
 ### D8.7 AI task config: `EAIManager.CopyPropertiesFromEntityClass` (IL=213)
 

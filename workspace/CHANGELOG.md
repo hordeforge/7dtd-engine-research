@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: entity tier calc + flags parse
+
+Done (V3.1.0 b14 IL):
+- EntityClass.CalculateEntityTier IL=49: tag priority elite/radiated/feral/
+  special/strong -> EntityTierTypes 5..1 else Normal.
+- ParseEntityFlags IL=49: comma OR of EntityFlags (ignore-case).
 ## 2026-08-08 — tier-C: EntityClass.Init config source
 
 Done (V3.1.0 b14 IL):
