@@ -1104,6 +1104,33 @@ per other zombie `damageBoostPercent += 0.2`. `Attack(false)`; on success
 re-pick flee; `pathTicks` countdown; when 0 set **60** and `FindPath` at
 panic/run speed.
 
+**`EAIDestroyArea.CanExecute` (IL=209):** require `moveHelper.CanBreakBlocks`,
+living attack target, no stun. Set `isLookFar` from unreachable try roll
+(`UnreachablePercent` halves after roll) or from long path (nodes &gt; **18** and
+target distSq ≤ **81**) when `pathCostScale < 0.65`. Require `isLookFar` **or**
+`IsUnreachableAbove`. Sample destroy focus around self/unreachable pos (random
+±5 xz, y toward target via `FastMoveTowards` 2 m step).
+
+**`EAIDestroyArea.Start` (IL=10):** `delayTime = 3`; clear path-end/timeout.
+
+**`EAIApproachSpot.CanExecute` (IL=27):** need investigate position and not
+sleeping; `seekPos = world.FindSupportingBlockPos(investigate)`.
+
+**`EAIApproachSpot.Update` / `updatePath`:** look at investigate **y+0.8**;
+`pathRecalculateTicks` countdown; scout zombies
+`AstarManager.AddLocationLine(self, seek, 32)`; if not calculating path set
+ticks **40+Random(20)** and `FindPath(seek, GetMoveSpeedAggro, canBreak=true)`.
+
+**`EAIDodge.CanExecute` (IL=89):** not dancing; cooldown drain; scan tags in
+bounds expand `(maxXZ, 8, maxXZ)` for living entity with
+`IsAnimationToDodge`; require `InRange` + `CanSee`.
+
+**`EAIDodge.Update` (IL=27):** first half of action duration look at target head
+if in front.
+
+**`isWithinHomeDistance(x,y,z)` (IL=20):** if `maximumHomeDistance < 0` always
+true; else `homePosition.distSq < max²`.
+
 **`EAISetAsTargetIfHurt.CanExecute` (IL=170):** need revenge target ≠ current
 attack target and different `entityType` than self. Optional `targetClasses`
 type filter (must match revenge). If living attack target and
@@ -1706,8 +1733,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** BreakBlock ally boost + delay formula; FindEnemy see bounds;
-  RunAway 1.21/60; EAITarget.check; Wander/Ranged CanExecute.
+- **2026-08-07:** DestroyArea unreachable gates; ApproachSpot 40+R20 path;
+  Dodge dodge-anim scan; home distance; BreakBlock; FindEnemy; RunAway.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

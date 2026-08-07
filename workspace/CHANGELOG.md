@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DestroyArea ApproachSpot and Dodge
+
+Done (V3.1.0 b14 IL):
+- DestroyArea.CanExecute: CanBreakBlocks; unreachable/pathCostScale long-path gates; sample focus.
+- ApproachSpot: investigate + supporting block; path 40+R20; scout AddLocationLine 32.
+- Dodge: tag bounds + IsAnimationToDodge; look head first half.
+- isWithinHomeDistance: max<0 always; else home distSq.
+---
 ## 2026-08-07 — tier-C: BreakBlock AttackBlock and FindEnemy
 
 Done (V3.1.0 b14 IL):
