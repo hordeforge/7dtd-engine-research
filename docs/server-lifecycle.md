@@ -196,6 +196,23 @@ optional buff re-apply path on local.
 **`IsLandProtectionValidForPlayer` (IL=14):** offline hours from
 `PersistentPlayerData.OfflineHours` must not exceed `GameStats[46] * 24` hours.
 
+**`IsLandProtectedBlock` (IL=104)** (used by `CanPlaceBlockAt`):
+
+1. Walk chunk `IndexedBlocks["lpblock"]` primary `TEFeatureLandClaim`s.
+2. Require `|dx|` and `|dz|` ≤ `deadZone` (placement passes half claim size).
+3. Owner valid via `IsLandProtectionValidForPlayer`.
+4. If no `lpRelative`: protected = true (anyone blocked).
+5. If `lpRelative` is owner: **not** protected (self may place).
+6. If ally and within `claimSize` (not just deadZone): protected = `forKeystone`
+   (keystone placement can treat ally zone differently; normal place uses
+   `forKeystone=false` so ally range does not block).
+7. Else protected = true (foreign claim).
+
+**`InBoundsForPlayersPercent` (IL=100):** if world width &lt; 1024 return 1.
+Else soft-edge factor from each axis: distance from edge inset **50** blocks
+over span **80**, clamped 0..1; return min(xFactor, zFactor). Placement needs
+≥ **0.5** (roughly outer ~40 blocks of a large map denied).
+
 **Party variant** `GetLandClaimOwnerInParty` also requires party membership of
 the ally owner when granting true inside claim size.
 
@@ -374,6 +391,8 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-07:** IsLandProtectedBlock IL=104 (self allow, foreign deny, ally
+  keystone flag); InBoundsForPlayersPercent soft edge 50/80, need ≥0.5.
 - **2026-08-07:** GetLandClaimOwner IL=119/88 (GameStats 1/44/46, lpblock index,
   primary TEFeatureLandClaim, self/ally/other enum, offline-hours validity).
 - **2026-08-07:** GameStateManager.OnUpdateTick IL=198 server round gates;

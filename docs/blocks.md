@@ -297,11 +297,14 @@ by pickup and placement callers (not the Block virtual above):
 
 1. If `!traderAllowed` and sandbox trader areas on and `IsWithinTraderArea`:
    deny.
-2. If `InBoundsForPlayersPercent(centerXZ) < 0.5`: deny (map edge soft bound).
+2. If `InBoundsForPlayersPercent(centerXZ) < 0.5`: deny (map edge soft bound;
+   soft ramp uses edge inset 50 / width 80; worlds &lt; 1024 wide always pass).
 3. If land-claim GameStats index **1** != 1: allow (claims off).
 4. Else scan chunks in claim half-extent (`GameStats` **44**, same ring math as
    `GetLandClaimOwner`); if any `IsLandProtectedBlock(..., forKeystone=false)`:
-   deny; else allow.
+   deny. Self-owner claims allow; foreign valid claims deny; ally zone does not
+   deny when `forKeystone=false` (see [server-lifecycle.md](server-lifecycle.md)
+   §3.1).
 
 **`World.CanPickupBlockAt` (IL=14):** deny in trader area when trader sandbox on;
 else `CanPlaceBlockAt(pos, lp, traderAllowed=false)`.
@@ -430,8 +433,8 @@ carries the composite data template while the feature modules own the behavior.
 
 ## Changelog
 
-- **2026-08-07:** World.CanPlaceBlockAt IL=129 (trader, 0.5 bounds, claim ring
-  GameStats 1/44); CanPickupBlockAt trader then place gate.
+- **2026-08-07:** IsLandProtectedBlock self/foreign/ally+keystone; bounds soft
+  edge 50/80; CanPlaceBlockAt IL=129 trader/claim ring; CanPickupBlockAt wrap.
 - **2026-08-07:** DropItemsOnEvent IL=246 (prob table, stick vs ItemDropServer,
   recipe scrap half ingredients, trader-area stick suppress).
 

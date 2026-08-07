@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: IsLandProtectedBlock and map-edge soft bounds
+
+Done (V3.1.0 b14 IL):
+- IsLandProtectedBlock: primary lpblock, deadZone, self allow, ally keystone flag.
+- InBoundsForPlayersPercent: edge inset 50 / span 80, min axis, threshold 0.5.
+---
 ## 2026-08-07 — tier-C: World.CanPlaceBlockAt claim and trader gates
 
 Done (V3.1.0 b14 IL):
