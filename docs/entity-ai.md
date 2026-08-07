@@ -2283,11 +2283,18 @@ aiManager exists. Builds the AI tuning fields and both task lists from the
 
 **`ParseTasks(str, list)` (IL=111):** scan for letter-starting tokens; each
 entry runs to the next `|` or end of string. An entry is
-`ClassName [key=val ...]`: the class name is the token up to the first space,
-the remainder is parsed with `ParseData` into the `SetData` dictionary (errors
-logged, not fatal). `list.AddTask(priority, instance)` with priority counting
-up from 1 per entry. This is the parse half of the stock `AITarget-2/-3` wiring
-noted in the focus leaves section.
+`ClassName [k1=v1;k2=v2]`: the class name is the token up to the first space,
+the remainder is parsed with `DynamicProperties.ParseData` into the `SetData`
+dictionary (errors logged, not fatal). `list.AddTask(priority, instance)` with
+priority counting up from 1 per entry. This is the parse half of the stock
+`AITarget-2/-3` wiring noted in the focus leaves section.
+
+**`DynamicProperties.ParseData(data)` (IL=82):** `k=v` list parse: split on
+`semicolonSeparator` (`;`), each part split on `equalSeparator` (`=`), first two
+segments stored as key/value; a string without `;` is parsed as a single
+`k=v`. Errors log `ParseData error parsing {0}, {1}` and return the partial
+dict. **`ParseKeyData(key)` (IL=29):** `Data.TryGetValue(key)` → `ParseData` of
+the stored value; null when the key is absent.
 
 ## D9. Manager chain sizes (gmUpdate every frame if instance)
 

@@ -297,6 +297,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | Entity.CopyPropertiesFromEntityClass IL=238 custom commands + EntityPlayerLocal | entity-ai.md D8.6a |
 | PlayerSpawnedInWorld IL=127 full body (Died SetAlive, JoinedGame msg, waypoints) | server-lifecycle.md §3 |
 | EntityClass cctor prop-name table + GetActivationCommands IL=51 | inventories/entityclass-props.md / entity-ai D8.6a |
+| DynamicProperties.ParseData IL=82 + ParseKeyData IL=29 (k=v; pairs) | entity-ai.md D8.7 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

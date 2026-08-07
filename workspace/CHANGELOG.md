@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: DynamicProperties k=v parse format
+
+Done (V3.1.0 b14 IL):
+- DynamicProperties.ParseData IL=82: ';' split then '=' split (equalSeparator/
+  semicolonSeparator statics); single k=v without ';'; error log partial dict.
+- ParseKeyData IL=29: Data.TryGetValue -> ParseData; null when absent.
+- D8.7 ParseTasks entry format corrected to `ClassName k1=v1;k2=v2`.
+---
 ## 2026-08-08 — tier-C: EntityClass prop-name table + activation commands
 
 Done (V3.1.0 b14 IL):
