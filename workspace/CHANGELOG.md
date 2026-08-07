@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: GetRandomSpawnPositionMinMaxToRandomPlayer
+
+Done (V3.1.0 b14 IL):
+- 10 tries unit-circle min..max band; height+1; bedroll/CanMobsSpawn/min-dist/CanSee rejects.
+- Success center + terrainOffset.
+---
 ## 2026-08-07 — tier-C: nextRound and DecoManager.UpdateTick
 
 Done (V3.1.0 b14 IL):

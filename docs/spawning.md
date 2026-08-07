@@ -267,6 +267,14 @@ schedule.
    GetSpawnPosition, null, null)` where position callback is
    `GetRandomSpawnPositionMinMaxToRandomPlayer(min=**64**, max=**96**, …)`.
 
+**`GetRandomSpawnPositionMinMaxToRandomPlayer(min, max, bedrolls, ref player,
+ref pos)` (IL=212):** require players and `max > min`. Pick random player.
+Up to **10** tries: unit-circle offset scaled to [min, max] band (reject near-
+zero vectors); place at player.xz + offset; height = terrain height + 1; reject
+if bedroll-near (when flag), `!CanMobsSpawnAtPos`, any player within min², or
+any player `CanSee` the point. Success: pos = block center + (0.5,
+terrainOffset, 0.5).
+
 Its own `currentSpawner` is serialized, so a day's dynamic spawn progress
 survives a restart.
 
@@ -643,6 +651,7 @@ above.
 ## Changelog
 
 - **2026-08-07:** SpawnManagerDynamic Update IL=75 night ES 64..96 m.
+- **2026-08-07:** GetRandomSpawnPositionMinMaxToRandomPlayer 10 tries bedroll/see reject.
 - **2026-08-07:** Chunk.GetEntitiesAround buckets; FindRandomSpawnPointNearPlayer; claim offline hours.
 - **2026-08-07:** Chunk.CanPlayersSpawnAtPos y 2..251; GetPlayersAround; GetEntitiesAround.
 - **2026-08-07:** CanPlayersSpawnAtPos; FindRandomSpawnPointNearRandomPlayer 32; GetClosestLocalPlayer.

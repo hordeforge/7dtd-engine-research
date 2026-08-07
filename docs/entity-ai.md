@@ -322,7 +322,10 @@ false if hit (blocked); restore layer; true if clear.
 - Always (success path): `attackingTime = 60`; if action slot non-null
   `ItemAction.ExecuteAction(actionData[index], isReleased)`; return true.
 
-**`GetAttackTimeoutTicks` (IL=10):** day → `attackTimeoutDay`; dark →
+**`GetAttackTimeoutTicks` (IL=10):** if world not dark → `attackTimeoutDay`;
+else `attackTimeoutNight`.
+
+**`GetAttackTimeoutTicks` (IL=10 legacy note):** day → `attackTimeoutDay`; dark →
 `attackTimeoutNight`.
 
 **`GetMaxAttackTime` (IL=2):** constant **10** (sets `hasBeenAttackedTime` on
