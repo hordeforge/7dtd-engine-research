@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameStats accessors
+
+Done (V3.1.0 b14 IL):
+- sandbox-options.md 6.1: typed getters (GetInt/Float/Bool IL=34, GetString
+  IL=18) with cast-failure fallbacks; client sandbox-reference read path.
+
 ## 2026-08-08 - tier-C: water leaves
 
 Done (V3.1.0 b14 IL):
