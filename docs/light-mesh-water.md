@@ -199,7 +199,8 @@ heightmap raises `m_HeightMap` at that column.
 requires the `ChunkProviderGenerateWorldFromRaw` `poiFromImage` grid to
 contain the point, resolves the byte via
 `Biomes.getPoiForColor`, and answers `m_BlockValue.type == 240` (the water
-block).
+block). `WorldBiomes.getPoiForColor` (IL=10) is the `m_PoiMap`
+color-to-element dictionary lookup (null on miss).
 
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
