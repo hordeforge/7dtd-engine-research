@@ -193,6 +193,11 @@ warning marks. `EntityTrader.OnUpdateLive` samples `TraderInfo.IsOpen` /
 2-pos overload (IL=19) is false in sandbox mode, else
 `DynamicPrefabDecorator.IsWithinTraderArea(min, max)` (the point queries
 behind the placement/repair/dump-water gates).
+`DynamicPrefabDecorator.GetTraderAtPosition(pos, padding)` (IL=68) is the
+lookup core: a `TraderBinarySearch(x - padding)` over the X-sorted
+`traderAreas`, then an X/Z containment test against
+`[ProtectPosition - padding, ProtectPosition + ProtectSize + padding)`
+(Y unchecked) - the first matching `TraderArea`, else null.
 
 ```mermaid
 stateDiagram-v2
@@ -840,6 +845,9 @@ or `ItemStack.Empty` when nothing rolled.
 
 ## Changelog
 
+- **2026-08-08:** DynamicPrefabDecorator.GetTraderAtPosition IL=68:
+  TraderBinarySearch + X/Z containment against padded Protect rect (Y
+  unchecked).
 - **2026-08-08:** World.IsWithinTraderArea: IL=6 GetTraderAreaAt != null;
   IL=19 sandbox gate + DynamicPrefabDecorator.IsWithinTraderArea.
 - **2026-08-08:** LootContainer.ExecuteBuffActions IL=28: per BuffActions
