@@ -158,7 +158,22 @@ keeps `m_Color2BiomeMap : Dictionary<UInt32, BiomeDefinition>` (color-keyed
 lookup for image splats) and `m_Id2BiomeArr : BiomeDefinition[]`. `GetBiomeCount`
 (IL=9) is the color-map count (0 before load); `GetBiomeMap` (IL=3) exposes the
 map; `GetTotalBluffsCount` (IL=31) sums `m_DecoBluffs.Count` over the id array
-(the bluff-rock decorations).
+(the bluff-rock decorations). Lookups: `GetBiome(byte)` (IL=5) is a plain index
+into `m_Id2BiomeArr`; `GetBiome(string)` (IL=12) guards `ContainsKey` on
+`m_Name2BiomeMap : Dictionary<String, BiomeDefinition>` and returns the item or
+null. `WorldBiomes.ParseWeather(BiomeDefinition, XElement)` (IL=211) parses the
+`weathergroup` element of a biome into its `WeatherGroup`: attributes `name`
+(default `?`), `prob` (float, 1), `duration` (float, 3), `delay` (Vector2, zero)
+and `buff` (string) feed `AddWeatherGroup(name, prob, duration, delay, buff)`.
+Child elements match case-insensitively by local name against the `ProbType`
+slots: `temperature`=0, `precipitation`=1, `cloudthickness`=2, `wind`=3,
+`fog`=4; anything else (slot 5) is skipped. Each slot element reads `min`/`max`
+(temperature defaults to the -50..150 range), `range` (Vector2) and `prob`
+(float, 1) into `AddProbability(slot, range, prob)`. Two special children:
+`particleeffect` registers `BiomeParticleManager.RegisterEffect(biomeName,
+prefab, ChunkMargin)` (prefab default `error`, margin default 8) and `spectrum`
+sets `WeatherGroup.spectrum` via
+`EnumUtils.Parse<SpectrumWeatherType>(name, enum-0, true)`.
 
 ### 3.2 Terrain-type tiles and stamps
 
