@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity stubs + spawner-class day resolution
+
+Done (V3.1.0 b14 IL):
+- server-browser-prefabs.md 3.2: Prefab.CopyEntitiesIntoChunkStub IL=88 (enemy gate, chunk filter, +0.25 y offset, AddEntityStub)
+- spawning.md: EntitySpawnerClassForDay.Day IL=87 wrap (mod Count-1, 0->Count-1) / clamp / null-slot fallback to days[0], AddForDay null-pad
+
 ## 2026-08-08 - tier-C: Prefab stamping engine
 
 Done (V3.1.0 b14 IL):
