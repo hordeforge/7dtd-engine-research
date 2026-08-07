@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: loot buff actions
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md: LootContainer.ExecuteBuffActions IL=28 - per
+  BuffActions name target.Buffs.AddBuff(name, -1, true, false,
+  -1) on the opener.
 ## 2026-08-08 - tier-C: swim state + chunk block read
 
 Done (V3.1.0 b14 IL):
