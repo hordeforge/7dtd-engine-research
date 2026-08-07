@@ -105,6 +105,15 @@ Layer names live in Unity project settings, not in IL; bit 16 is the collider
 layer every world-geometry probe here uses. Water is special-cased by block
 type id `240` (`isPosUnderWater`), not by raycast.
 
+**`Voxel.Raycast` wrappers (V3.1.0 b14):** the 5-arg overload (IL=8) fills the
+layer mask `-538488845` and calls the 6-arg; the bool overload (IL=20) builds
+`hitMask = 66 | (bHitTransparentBlocks ? 1 : 0) | (bHitNotCollidableBlocks ?
+4 : 0)` with sphere 0 (bit 0 = transparent blocks count as hits, bit 2 =
+non-collidable blocks count); the 6-arg (IL=8) forwards to `raycastNew`
+(IL=525), the real voxel-DDA core. The visibility chain (`CanEntityBeSeen`,
+`EntityDrone.IgnoreCollisionEntity`) calls the 6-arg directly with the
+layer mask `-1612492829` and hitMask `64`.
+
 ## 3. The flood-fill raycast path build
 
 `RaycastEntityPathGenerator` is a lifecycle shell: `CreatePath(start, end,
@@ -391,6 +400,9 @@ the whole reason this system works headless at all.
 
 ## Changelog
 
+- **2026-08-07:** Voxel.Raycast wrappers: 5-arg layer mask -538488845, bool
+  hitMask bits (1 transparent / 4 non-collidable), 6-arg -> raycastNew
+  (IL=525); visibility chain uses -1612492829 + 64.
 - **2026-07-26:** Added the drone `State` machine diagram (9-member nested enum, `SetState` as sole mutator with 15 call sites) which the doc previously described in prose only.
 - **2026-07-24:** Initial reversal: full `RaycastPathing` type map and block
   classification (quarter-block Half hierarchy, door handling), the

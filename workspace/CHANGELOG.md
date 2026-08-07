@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Voxel.Raycast wrappers
+
+Done (V3.1.0 b14 IL):
+- raycast-pathing.md: Voxel.Raycast wrappers - 5-arg fills layer mask
+  -538488845; bool overload hitMask = 66 | (transparent?1:0) |
+  (nonCollidable?4:0); 6-arg forwards to raycastNew (IL=525); visibility
+  chain calls the 6-arg with -1612492829 + 64.
+
 ## 2026-08-08 - tier-C: EntityDrone.FindCollisionEntity
 
 Done (V3.1.0 b14 IL):
