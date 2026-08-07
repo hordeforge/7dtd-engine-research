@@ -457,6 +457,24 @@ sqr **6400** = 80 m); else `CreateNewParty`.
 **`CreateNewParty` (IL=8):** `parties.Add(new BloodMoonParty(player, this,
 BloodMoonEnemyCount))`.
 
+**`BloodMoonParty..ctor` (IL=41):** zombies list; `spawnWorld`/`spawnBasePos` from
+player; `partySpawner = new GameStagePartySpawner(world, "BloodMoonHorde")` +
+`AddMember(player)`; set `player.bloodMoonParty`; random `spawnBaseDir` 0..359;
+`groupIndex = -1`. Third ctor arg unused.
+
+**`PlayerLoggedOut` (IL=16):** `RemoveMember(player, removeID=false)` (keeps id
+in set); clamp `nextPlayer` into member count.
+
+**`AIDirector.Tick` (IL=6):** `ComponentsTick` all components then `DebugTick`.
+
+**`BloodMoonComponent.Tick` (IL=170):** base tick; recompute `isBloodMoon` via
+`IsBloodMoonTime`; edge → `StartBloodMoon` / `EndBloodMoon`. If not BM, sync
+`bmDay` from GameStats **58**. If BM and GameStats **24** (spawn enemies):
+`delay -= dt`; ensure every spawned player has a party (`AddPlayerToParty`);
+round-robin parties: empty → `KillPartyZombies` and maybe advance `nextParty`;
+else `party.Tick(world, dt, canSpawn=(this==nextParty && delay<=0))`; on spawn
+window success set `delay = 1/partyCount` and advance `nextParty`.
+
 **`AIDirector.RemovePlayer` (IL=9):** PlayerManagement then BloodMoonComponent
 remove.
 
@@ -599,8 +617,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** CreateNewParty; RemovePlayer pool free; AddMember/RemoveMember;
-  BM party join 80 m TryAddPlayer; AIDirector AddPlayer chain.
+- **2026-08-07:** BloodMoonComponent.Tick delay 1/N parties; party ctor
+  BloodMoonHorde; PlayerLoggedOut keep ID; CreateNewParty; RemovePlayer pool.
 - **2026-08-07:** get_maxAlive; BM Tick 1.8s SeekTarget + nextPlayer; SetScaling;
   CalcBestDir 16 bins; InitParty; IsPlayerATarget; SeekTarget 1200
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.

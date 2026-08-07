@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: BloodMoonComponent.Tick and party ctor
+
+Done (V3.1.0 b14 IL):
+- Party ctor: BloodMoonHorde spawner; random spawnBaseDir; groupIndex -1.
+- PlayerLoggedOut: RemoveMember keep ID; nextPlayer clamp.
+- BloodMoonComponent.Tick: BM edge Start/End; stats 58/24; delay; party attach; round-robin Tick with delay=1/N.
+- AIDirector.Tick: ComponentsTick + DebugTick.
+---
 ## 2026-08-07 — tier-C: CreateNewParty and RemovePlayer pool
 
 Done (V3.1.0 b14 IL):
