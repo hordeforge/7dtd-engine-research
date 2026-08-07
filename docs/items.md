@@ -129,6 +129,12 @@ incoming stack can fill the remainder), else `CanStack(count)` (the whole
 stack must fit). `ItemStack.CanMoveTo(locationType, slotNumber)` (IL=15)
 defaults to true and delegates to `ItemClass.CanMoveToLocation` when the
 stack's class resolves (the toolbelt gate behind `Inventory.AddItem`).
+`ItemClass.CanMoveToLocation(locationType, slotNumber)` (IL=41) is the
+container gate: with `slotNumber >= 0` it first requires
+`CanMoveToSlot(locationType, slotNumber)`, and when the class
+`bRestrictedMove` is set the location must be one of the `restrictedTo`
+`StackLocationTypes` list (a restricted class can only live in its listed
+containers - toolbelt, backpack, or equipment); both conditions must hold.
 
 ---
 
@@ -750,6 +756,8 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** ItemClass.CanMoveToLocation (IL=41): CanMoveToSlot gate for
+  slot >= 0 + bRestrictedMove restrictedTo container list check.
 - **2026-08-07:** ItemStack predicates: CanStackWith (IL=46) same-type +
   block texture equality (shape-helper exemption) + whole/partial stack;
   CanMoveTo (IL=15) delegates to ItemClass.CanMoveToLocation.

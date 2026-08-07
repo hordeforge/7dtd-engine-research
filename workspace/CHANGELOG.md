@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemClass.CanMoveToLocation
+
+Done (V3.1.0 b14 IL):
+- ItemClass.CanMoveToLocation (IL=41) narrated in items.md: slotNumber >= 0
+  requires CanMoveToSlot; bRestrictedMove requires locationType in
+  restrictedTo StackLocationTypes list; both must hold. Completes the
+  ItemStack.CanMoveTo chain.
+
 ## 2026-08-08 - tier-C: GameRandom surface
 
 Done (V3.1.0 b14 IL):
