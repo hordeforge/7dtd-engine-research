@@ -124,6 +124,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | Join Authorize/RequestToSpawn/SpawnEntity | server-lifecycle join path |
 | GetDamageEntity/Block EffectManager tags | items §4.2 |
 | CommandAllowedFor level compare | console-commands §2 |
+| DisconnectClient / SavePlayerData order | network §1.3-1.4 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

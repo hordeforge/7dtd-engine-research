@@ -82,10 +82,21 @@ Per connection:
 
 ### 1.3 `DisconnectClient` (IL=184, highlights)
 
-On remove: `OnClientDisconnected` / `ModEvents` player-disconnected; optional
-`PlayerDataFile.Save`; `INetConnection.Disconnect` both channels;
-`AuthorizationManager.Disconnect`; party/quest disconnect handlers;
-`LockManager.ForceUnlockByPlayer`; remove chunk observer; `World.RemoveEntity`.
+Ordered (main-thread only; off-thread hops via `AddSingleTaskMainThread`):
+
+1. Null/missing client guards + stack log.
+2. Optional `ClientConnectionAction` callback.
+3. **`ModEvents.PlayerDisconnected`**.
+4. If `latestPlayerData.bModifiedSinceLastSave`: `PlayerDataFile.Save` by platform id.
+5. `INetConnection.Disconnect` (both channels) + `AuthorizationManager.Disconnect`.
+6. Resolve player entity: `PartyDisconnect`, `QuestEventManager.HandlePlayerDisconnect`,
+   `LockManager.ForceUnlockByPlayer`, disconnect game message.
+7. Remove chunk observer / world entity unload (remainder of method).
+
+### 1.4 `SavePlayerData` (IL=91)
+
+`PlayerDataFile.Save` dir+id; async map-chunk DB save task; notify persistent
+player list observers; fire **`ModEvents.SavePlayerData`**.
 
 ---
 
@@ -587,6 +598,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 - **2026-07-28:** ProtocolManager as thin INetworkServer/Client pump.
 - **2026-07-28:** SendChunksToClients pointer to world-chunks observer pipeline.
+- **2026-08-07:** DisconnectClient ordered steps; SavePlayerData IL=91 + ModEvents.
 - **2026-07-28:** ConnectionManager.Update order, BadMTUPackets>=3 kick, ProcessPackages gates, DisconnectClient highlights.
 - **2026-07-28:** NetConnectionSteam/Simple reader-writer pipelines, compress-then-encrypt order, Simple framing, AesEncryptAndMac stream layout.
 - **2026-07-19:** Related docs table.

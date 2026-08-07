@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: DisconnectClient and SavePlayerData order
+
+Done (V3.1.0 b14 IL):
+- network: DisconnectClient IL=184 ordered disconnect/save/party/quest/unlock;
+  SavePlayerData IL=91 + ModEvents.SavePlayerData.
+---
 ## 2026-08-07 — tier-C: join spawn/auth path, damage tags, CommandAllowedFor
 
 Done (V3.1.0 b14 IL):
