@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.animateYaw
+
+Done (V3.1.0 b14 IL):
+- Entity.animateYaw (IL=54) narrated in entity-ai.md SeekYaw block as the
+  per-frame interpolation half: while yawSeekTimeMax>0 accumulate
+  yawSeekTime+=dt and rotation.y = Lerp(yawSeekAngle, yawSeekAngleEnd,
+  Clamp01(yawSeekTime/yawSeekTimeMax)); on window expiry snap to
+  yawSeekAngleEnd and zero yawSeekTimeMax (IsSeekYaw gate); denormal-tiny
+  positive timeMax snaps immediately.
+
 ## 2026-08-08 - tier-C: Entity physics hooks
 
 Done (V3.1.0 b14 IL):

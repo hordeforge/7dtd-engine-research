@@ -2763,10 +2763,14 @@ both yaw and current `rotation.y` to `[0, 360)`; `maxTurn = EntityClass.MaxTurnS
 `maxTurn × (absDelta/yawSlowAt)²`, floored at **20** (slow-down near the target).
 Arms the turn: `yawSeekTime = 0`, `yawSeekTimeMax = absDelta / maxTurn`,
 `yawSeekAngle = rotation.y`, `yawSeekAngleEnd = rotation.y + delta`; the actual
-interpolation is applied by the movement update, and `IsSeekYaw()` (IL=5) is
-`yawSeekTimeMax > 0`. `SeekYawToPos(pos, yawSlowAt)` (IL=36) computes
-`Atan2(dx, dz) × 57.29578` (guarding against standing on the point) and calls
-`SeekYaw`.
+interpolation is applied by **`Entity.animateYaw()` (IL=54)** from the frame
+update: while `yawSeekTimeMax > 0` it accumulates `yawSeekTime += deltaTime`
+and sets `rotation.y = Lerp(yawSeekAngle, yawSeekAngleEnd,
+Clamp01(yawSeekTime / yawSeekTimeMax))`; when the window elapses it snaps
+`rotation.y = yawSeekAngleEnd` and disarms (`yawSeekTimeMax = 0`), and
+`IsSeekYaw()` (IL=5) is `yawSeekTimeMax > 0`. `SeekYawToPos(pos, yawSlowAt)`
+(IL=36) computes `Atan2(dx, dz) × 57.29578` (guarding against standing on the
+point) and calls `SeekYaw`.
 
 **Helper leaves (all V3.1.0 b14 IL):**
 
@@ -2928,6 +2932,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Entity.animateYaw (IL=54) named as the SeekYaw interpolation
+  half: per-frame Lerp(yawSeekAngle, yawSeekAngleEnd,
+  Clamp01(yawSeekTime/yawSeekTimeMax)), end-snap + disarm, IsSeekYaw gate.
 - **2026-08-07:** Entity.SetupBounds (IL=90) in D7: BoxCollider (extent =
   size*localScale*0.5, disabled when detailed head/body colliders) /
   CharacterController (radius half-width, half-height) / unit-box fallback;
