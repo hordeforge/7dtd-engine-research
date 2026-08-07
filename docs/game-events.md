@@ -374,6 +374,12 @@ sequence tick of §2:
 | `HandleSpawnUpdates` | `spawnEntries` (spawned entity, requester, owning sequence) | Every 2 s re-issues attack orders for aggressive spawns; removes despawned entries (flags `HasDespawn` on the owning sequence, notifies requester with `EntityDespawned`), removes dead entries (`EntityKilled`), both mirrored via `NetPackageGameEventResponse` |
 | `HandleBlockUpdates` | `blockEntries` (`SpawnedBlocksEntry`) | Counts down `TimeAlive` (`-1` = permanent) and bulk-removes expired event blocks (`TryRemoveBlocks`); periodic block-damage sync |
 | `HandleEventFlagUpdates` | `GameEventFlags` (`GameEventFlagTypes`: BigHead, Dancing, BucketHead, TinyZombies, ...) | 1 s cadence; timed global flags with buff application on flag change |
+
+`HandleFlagBuffUpdates(flag, deltaTime)` (IL=69) is the buff side of that 1 s
+cadence: it counts `gameFlagCheckTime` down and, on expiry, maps the flag
+(1 = BigHead, 2 = Dance, 3 = BucketHead, 4 = TinyZombies) to its
+`twitch_buff*` name and `AddBuff(name, -1, true, false, -1)` on every player
+that does not already have it, then resets the timer to 1.
 | `HandleBossGroupUpdates` | `BossGroups` | 1 s cadence; boss + minion HP groups, client HUD sync (`SetupClientBossGroup` / `SendBossGroups`) |
 | `HomerunManager.Update` | mini-game | `GameEvent.GameEventHelpers` |
 
