@@ -380,6 +380,13 @@ sequence tick of §2:
 `Cleanup`/`ClearActions` (game shutdown / XML reload) clear the running list,
 the template dictionary, and all tracked entries.
 
+**Flag store:** `SetGameEventFlag(flag, value, duration, isPermanent)` (IL=94)
+adds a `GameEventFlag` to `GameEventFlags` when setting (updating the duration
+of an existing non-permanent entry, otherwise appending a new one and calling
+`HandleFlagChanged(flag, true, true)`), and `RemoveAt`s the entry when clearing
+(`HandleFlagChanged(flag, true, false)`). `CheckGameEventFlag(flag)` (IL=23)
+is a linear presence scan of the list.
+
 Request/response wire flow (packages annotated in
 [`protocol.md`](protocol.md)):
 
