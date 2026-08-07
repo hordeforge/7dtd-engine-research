@@ -189,6 +189,10 @@ warning marks. `EntityTrader.OnUpdateLive` samples `TraderInfo.IsOpen` /
 `SandboxUseTraderArea` is set, else `GetTraderAtPosition(pos, 2) != null`; the
 `Bounds` overload (IL=29) expands the bounds by **4** and asks
 `IsWithinTraderArea(min, max)` under the same sandbox gate.
+`World.IsWithinTraderArea(pos)` (IL=6) is `GetTraderAreaAt(pos) != null`; the
+2-pos overload (IL=19) is false in sandbox mode, else
+`DynamicPrefabDecorator.IsWithinTraderArea(min, max)` (the point queries
+behind the placement/repair/dump-water gates).
 
 ```mermaid
 stateDiagram-v2
@@ -836,6 +840,8 @@ or `ItemStack.Empty` when nothing rolled.
 
 ## Changelog
 
+- **2026-08-08:** World.IsWithinTraderArea: IL=6 GetTraderAreaAt != null;
+  IL=19 sandbox gate + DynamicPrefabDecorator.IsWithinTraderArea.
 - **2026-08-08:** LootContainer.ExecuteBuffActions IL=28: per BuffActions
   name target.Buffs.AddBuff(name, -1, true, false, -1) on the opener.
 - **2026-08-08:** LootContainer.GetLootContainer IL=21: null on empty name,
