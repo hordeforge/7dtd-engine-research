@@ -2047,6 +2047,15 @@ sends to every **3** ticks, and the send only fires when
 exceeds **4e-6** (a meaningful change). A remote world sends
 `NetPackageEntitySpeeds.Setup(this)` to the server; a server world fans it
 to tracked players via `world.entityDistributer.SendPacketToTrackedPlayers`.
+`Entity.PhysicsMasterGetFinalPosition` (IL=10) returns `physicsMasterTargetPos`
+while the physics-master target time is pending, else the current position;
+its only caller is `ItemClassTimeBomb.OnDroppedUpdate`, so a dropped time
+bomb tracks the client-simulated physics-master position for its fuse.
+`SetRotFromNetwork` / `SetQRotFromNetwork` (IL=7 each) store the network
+rotation / quaternion plus the `interpolateTargetRot` / `interpolateTargetQRot`
+step counts for client interpolation. `GetSoundTravelTime(pos)` (IL=10) is
+`|position - pos| / 343` (speed of sound) with **no callers on b14** (dead
+leaf).
 
 **`FindValidExitPosition` (IL=14) / `GetFallingSavePosition` (IL=161):**
 vehicle dismount + fell-through-world rescue. `FindValidExitPosition` records
@@ -3246,6 +3255,11 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+## Changelog
+
+- **2026-08-08:** PhysicsMasterGetFinalPosition (IL=10) time-bomb fuse
+  position; SetRotFromNetwork/SetQRotFromNetwork interpolation targets;
+  GetSoundTravelTime (IL=10) 343 m/s sound delay, no callers on b14.
 ## Changelog
 
 - **2026-08-08:** Entity.ReplicateSpeeds (IL=66): 3-tick throttle, 4e-6
