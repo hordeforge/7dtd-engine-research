@@ -934,6 +934,25 @@ over a `MemoryStream` - this is the blob stored in
 `new ExplosionData(DynamicProperties, MinEffectController)` ctor builds it
 from the block/item/entity XML (e.g. `ItemActionProjectile.Explosion`).
 
+**`Explosion.AttackBlocks` damage model (IL=553):** the causer resolves to
+an `EntityAlive` (for `PersistentPlayerData` + `GetBlockDamageScale`). The
+effective radius is
+`CeilToInt(max(0.01, GetValue(passive 21, itemValue, BlockRadius, causer,
+explosionTag | itemClass.ItemTags)))`; when the center cell is terrain with a
+non-terrain block above, `blockPos.y += 1` (the blast rises out of the
+ground). The damage loop sweeps the **cubic** volume `[-radius, radius]^3`
+around `blockPos.ToVector3Center()`; per cell it marches a ray toward the
+cell (`dir = offset / |offset| * 0.51`), skipping air/water,
+`StabilityIgnore` blocks, and cells already in `damagedBlockPositions`
+(except the center once). Per damaged block:
+`damage = max(1, GetValue(passive 19, itemValue, BlockDamage, causer, tags |
+block.Tags))`, scaled by `causer.GetBlockDamageScale(block.isTerrain) + 0.5`
+when a causer exists, with linear falloff
+`damage * (1 - dist/radius) / (2*radius + 1)` where
+`dist = max(0, |blockCenter - worldPos| - 0.5)` - blocks at the edge take a
+fraction, the center takes the full scaled amount, and the `BlockTags` set
+filters which blocks are touched.
+
 **`ExplodeGroupFrameUpdate` (IL=220):** reverse-iterate groups; each frame
 `delay--`; when delay hits 0, process up to budget
 `max(1, min(count, 20 * 0.73^count))` fallings: raycast down for ground;
@@ -1583,6 +1602,10 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-08:** Explosion.AttackBlocks IL=553 damage model: passive 21
+  radius, terrain rise (blockPos.y+1), cubic sweep + occlusion ray march
+  (dir*0.51), passive 19 block damage x GetBlockDamageScale+0.5, linear
+  falloff (1-dist/radius)/(2r+1), BlockTags filter, damagedBlockPositions.
 - **2026-08-08:** ExplosionData struct wire (Write IL=88 / Read IL=82):
   ParticleIndex/Duration x10/BlockRadius x20/EntityRadius/BlastPower i16,
   BlockDamage/EntityDamage f32, BlockTags string, IgnoreHeatMap bool,
