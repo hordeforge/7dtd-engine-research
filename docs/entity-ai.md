@@ -263,6 +263,12 @@ stash `attackTargetLast`, set `targetAlertChanged` + random `soundDelayTicks`
 `NetPackageSetAttackTarget` via `SendPacketToTrackedPlayersAndTrackedEntity`;
 store target + time.
 
+**`SetRevengeTarget(other)` (IL=14):** store `revengeEntity`; if non-null
+`revengeTimer = **500**` else **0** (ticks of revenge focus).
+
+**`IsInFrontOfMe(pos)` (IL=28):** angle between head→pos and forward vs half of
+`GetMaxViewAngle()` (inclusive).
+
 **`EntitySeeCache.ClearIfExpired` (IL=17):** every **30** ticks `Clear()` the
 see cache (called from OnUpdateLive before AI).
 

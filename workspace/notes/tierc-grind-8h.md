@@ -26,3 +26,11 @@
 
 ## Commits this session
 (append as we go)
+
+
+## Progress log
+- 95e87b6 StartJumpSwimMotion / KillLootContainer
+- a33ebb7 DigUpdate phases
+- bda930c CalcPartyLevel (spawning.md wipe bug)
+- 2eff428 restore spawning.md
+- SetRevengeTarget / IsInFrontOfMe next commit

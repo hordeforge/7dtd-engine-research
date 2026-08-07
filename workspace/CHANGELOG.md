@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SetRevengeTarget and IsInFrontOfMe
+
+Done:
+- SetRevengeTarget: revengeTimer 500 when set.
+- IsInFrontOfMe: half maxViewAngle cone.
+- Recovered spawning.md after accidental wipe in bda930c (fix 2eff428).
+---
 ## 2026-08-07 — tier-C: CalcPartyLevel and IsSpawnNeeded
 
 Done (V3.1.0 b14 IL):
