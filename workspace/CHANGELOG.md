@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: canDespawn, unloadEntity, AwardKill/AddScore chain
+
+Done (V3.1.0 b14 IL):
+- canDespawn IL=14 (not client/dynamic/sleeping); Despawn IsDespawned;
+  unloadEntity IL=216 full remove path.
+- GameManager.AwardKill remote package vs QuestEvent; AddScoreServer remote/
+  local fan-out; EntityAlive.AddScore counters/GameStats.
+---
 ## 2026-08-07 — tier-C: CheckDespawn, player OnUpdateLive, explosion attack, save chain
 
 Done (V3.1.0 b14 IL):

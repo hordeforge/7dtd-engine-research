@@ -220,6 +220,17 @@ Despawn if none within soft band / within **130** m band rules; also unload if
 closest player distSq &gt; **6400** (80 m) with max timer. Called from TickEntity
 when area not updateable and from OnUpdateLive paths.
 
+**`canDespawn` (IL=14):** false if client-controlled, or spawner source == **2**
+(Dynamic), or sleeping; else true (Biome/static AI may despawn).
+
+**`Despawn` (IL=6):** `IsDespawned = true` then unload path.
+
+**`World.unloadEntity` (IL=216):** set `unloadReason`; `EntityUnloadedDelegates`;
+nav-object unregister; `OnEntityUnload`; remove from `Entities` +
+`TickEntityRemove` + `EntityAlives`; `RemoveEntityFromMap`; remove from chunk if
+added; if not remote, untrack vehicle/drone/turret as applicable; net remove
+package fan-out (remainder of method).
+
 **`EntityPlayer.OnUpdateLive` (IL=13):** zero stamina regen amount; base
 `EntityAlive.OnUpdateLive`; **force-clear** see cache; `CheckSleeperTriggers`
 (player always re-evaluates sleeper volumes).
@@ -1008,8 +1019,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** CheckDespawn / IsInFrontOfMe / EntityPlayer.OnUpdateLive;
-  SetAttackTarget + SeeCache; OnTriggered; TickEntity/path; EAI leaves.
+- **2026-08-07:** canDespawn/Despawn/unloadEntity; CheckDespawn bands;
+  IsInFrontOfMe; player OnUpdateLive; SetAttackTarget; OnTriggered; EAI leaves.
 - **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;
   UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;

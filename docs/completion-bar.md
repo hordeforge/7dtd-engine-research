@@ -142,6 +142,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | CheckDespawn / player OnUpdateLive | entity-ai §5.1b |
 | Explosion AttackBlocks/Entities | protocol-packages §6.14 |
 | SaveWorld entry chain | save-region |
+| canDespawn / unloadEntity | entity-ai §5.1b |
+| AwardKill / AddScoreServer chain | combat-damage §3.1 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

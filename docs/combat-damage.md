@@ -107,6 +107,18 @@ player kill by `entityType` (1 player / 2 zombie-ish); `GameManager.AwardKill`;
 special score condition if holding `gunHandgunT2Magnum44`;
 `GameManager.AddScoreServer(killerId, zombieKills, playerKills, team, conditions)`.
 
+**`GameManager.AwardKill` (IL=27):** if killer remote →
+`NetPackageEntityAwardKillServer` to killer (flags 192); else local
+`QuestEventManager.EntityKilled`.
+
+**`GameManager.AddScoreServer` (IL=56):** client →
+`NetPackageEntityAddScoreServer` to server; server: if target remote →
+`NetPackageEntityAddScoreClient` to that entity; else local
+`EntityAlive.AddScore`.
+
+**`EntityAlive.AddScore` (IL=97):** increment KilledZombies/Players/Died counters;
+score from GameStats weights; clamp score ≥ 0; achievement stats hooks.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Alive
@@ -186,7 +198,8 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
-- **2026-08-07:** AwardKill/SetDead; OnEntityDeath / dropItemOnDeath death path.
+- **2026-08-07:** AwardKill/AddScoreServer chain; SetDead; OnEntityDeath /
+  dropItemOnDeath death path.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs
