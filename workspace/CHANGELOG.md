@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemClass.CanStack
+
+Done (V3.1.0 b14 IL):
+- ItemClass.CanStack (IL=6) = Stacknumber > 1; ItemClassQuest.CanStack
+  (IL=2) always false - quest items never stack. Completes the stack-cap
+  story in items.md.
+
 ## 2026-08-08 - tier-C: ItemClass.get_MaxCount
 
 Done (V3.1.0 b14 IL):

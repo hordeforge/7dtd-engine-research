@@ -145,6 +145,9 @@ the ref from `other.count` and runs the partial path.
 `MaxStackSizeModifier != 1` and the class stacks and has no quality tiers it
 returns `FastMin(FastRoundToInt(Stacknumber * MaxStackSizeModifier), 30000)`;
 otherwise the raw `Stacknumber` (the 30000 hard cap bounds even scaled stacks).
+`ItemClass.CanStack()` (IL=6) is simply `Stacknumber > 1`;
+`ItemClassQuest.CanStack()` (IL=2) hard-returns false (quest items never
+stack).
 `ItemClass.CanMoveToLocation(locationType, slotNumber)` (IL=41) is the
 container gate: with `slotNumber >= 0` it first requires
 `CanMoveToSlot(locationType, slotNumber)`, and when the class
@@ -802,6 +805,8 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** ItemClass.CanStack (IL=6) = Stacknumber > 1;
+  ItemClassQuest.CanStack (IL=2) always false (quest items never stack).
 - **2026-08-07:** ItemClass.get_MaxCount (IL=23): stack cap =
   min(round(Stacknumber*MaxStackSizeModifier), 30000) when modifier != 1 +
   stacks + no quality, else raw Stacknumber.
