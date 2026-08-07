@@ -70,6 +70,17 @@ totalExp` (when < 0), `craftExpGain = totalExp` (when < 0),
 (challenge), then `ItemClass.GetItemClass` (item), and falls back to
 `UnlockTypes` 0 (7 in edit mode) when nothing matches.
 
+**Registry (`CraftingManager`).** `AddRecipe` (IL=6) appends and clears the
+lazy-sort flag `bSorted`; `PostInit` (IL=6) builds
+`cacheNonScrapableRecipes()` and, when backpack crafting is enabled
+(`XUiM_Recipes.BackpackCrafting == 1`), refreshes
+`UpdateRecipesforBackpackCrafting()`. `GetScrapableRecipe(itemValue, count)`
+(IL=77) resolves the forge scrap target: the item's `MadeOfMaterial` must
+carry a `ForgeCategory` and the item class must not be `NoScrapping`, then
+the first `wildcardForgeCategory` recipe whose output material shares the
+same `ForgeCategory` (output type != item type) and whose output weight is
+`<= itemWeight * count` wins.
+
 ---
 
 ## 2. Craft lifecycle (state machine)
@@ -163,6 +174,16 @@ the recipe's tags. `ModifyValue` (IL=15) delegates to the recipe's
 `MinEffectController.ModifyValue(...)`, so output quality can carry
 recipe-level effects on top of the caller's base/percent pair.
 
+**The unlock write path closes the loop.** `CraftingManager.UnlockRecipe(recipe,
+player)` (IL=21, plus the name-only overload IL=18) adds `GetName()` to the
+`UnlockedRecipeList` hash set, fires the `RecipeUnlocked` event, and - when a
+player is passed - `SetCVar(recipeName, 1)`. That is exactly the cvar
+`Recipe.IsUnlocked` reads: `GetCVar(GetName())` seeds passive `RecipeTagUnlocked`
+(73). `LockRecipe(name, locktype)` (IL=40) ORs the `RecipeLockTypes` flag into
+the parallel `lockedRecipeNames` / `lockedRecipeTypes` list entry (case-
+insensitive name match), and `GetLockedRecipeCount` / `GetUnlockedRecipeCount`
+report the sizes for the UI.
+
 ---
 
 ## 4. Dedicated relevance and residuals
@@ -187,6 +208,10 @@ recipe-level effects on top of the caller's base/percent pair.
 
 ## Changelog
 
+- **2026-08-08:** CraftingManager registry: AddRecipe lazy sort, PostInit
+  cacheNonScrapable + backpack refresh, GetScrapableRecipe (IL=77) forge
+  category + weight gate, UnlockRecipe (IL=21) sets the IsUnlocked cvar
+  (passive 73 seed), LockRecipe OR-flag, count getters.
 - **2026-08-08:** recipes.xml loader (LoadRecipies MoveNext IL=436):
   frame-budgeted coroutine, full attribute parse, craft_tool bCraftingTool
   side effect, wildcard_forge_category, PostInit; Recipe.Init (IL=79)
