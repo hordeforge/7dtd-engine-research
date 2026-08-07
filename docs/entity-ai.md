@@ -1645,7 +1645,11 @@ bUnderwater)` (IL=15) runs the base then fires MinEvent **81** (underwater)
 or **80** (surfaced) on the entity - the drowning/breath hooks. `SwimChanged()`
 (IL=12) pushes `isSwimming` into the avatar (`SetSwim`). `SetSwimValues`
 (IL=15) clamps the stroke duration: `Clamp(durationTicks/swimSpeed - 6, 3,
-20)` with `jumpSwimMotion` stored.
+20)` with `jumpSwimMotion` stored. `updatePlayerLandSound(distXZ, diffY)`
+(IL=51) is the water-landing splash: it skips on air or a near-zero impact
+(`distXZ < 0.025 && |diffY| < 0.015`), tracks the smoothed water level
+(`landWaterLevel = inWaterPercent * 2`), and when the impact distance is
+`>= 0.02` plays `player_swim` at `FastMin(dist * 2.2 + 0.01, 1)` volume.
 
 **`FindDestroyPos` (IL=21):** zero destroyPosition.y; `SearchForDestroyPos`; on
 success `destroyRefreshTicks=**500**` and store pos.
@@ -3227,6 +3231,11 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+## Changelog
+
+- **2026-08-08:** updatePlayerLandSound (IL=51): water-landing splash gate
+  (0.025/0.015 impact), landWaterLevel smoothing, player_swim volume
+  FastMin(dist*2.2+0.01, 1).
 ## Changelog
 
 - **2026-08-08:** NotifyDestroyedBlock (IL=128): blocked-move clear when the
