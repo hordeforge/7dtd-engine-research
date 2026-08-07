@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SetLight nibble write
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 1: Chunk.SetLight (IL=56) sun/block nibble merge +
+  NeedsRegenerationAt + isModified; ResetLights (IL=6).
+
 ## 2026-08-08 - tier-C: damage channel write
 
 Done (V3.1.0 b14 IL):
