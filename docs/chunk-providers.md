@@ -455,6 +455,20 @@ miniature: last non-zero channel, `g`->1, `b`->2, `r`->3, else 0. `InitData()`
 (IL=6) is only a coroutine stub returning the `<InitData>d__23` state
 machine; the actual deferred init runs there.
 
+The `<InitData>d__23` coroutine (MoveNext IL=315) drives the map loads: it
+loads `biomes.tga` else `biomes.png`, sets `biomeMapWidth/Height` and their
+halves from the texture, logs `Biomes image size w=.., h = ..`, builds
+`m_BiomeMap` via `new BiomeImageLoader(biomesTex, WorldBiomes.GetBiomeMap())
+.Load()` (itself a coroutine), sets
+`biomesScaleDiv = worldSize / biomesTex.width` (so `GetBiomeAt`'s fold is the
+world scale over the image scale), destroys the texture, seeds
+`noiseGen = new PerlinNoise(GetStableHashCode(worldName))`, then loads
+`radiation.png` else `radiation.tga`: when present it sets
+`radiationMapSize = texture width` and `radiationMapScale = worldSize /
+radiationMapSize`, and branches on whether the texture is wider than **512**
+(tiled/file-backed `LoadRadiationMap*` path versus the direct small-map
+fill).
+
 The splat/texture work runs on dedicated too (textures are loaded and
 compressed); only their rendering is client work.
 
