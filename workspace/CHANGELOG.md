@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: water collect + dump actions
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionCollectWater.ExecuteAction IL=89 (fill
+  mass = MaxMass - Meta, one-shot latch, water-cell raycast,
+  targetPosition/targetMass).
+- ItemActionDumpWater.ExecuteAction IL=118 (water-container check,
+  Meta>=195, TryFindDumpPosition, trader-area + land-claim owner 3
+  gates, OnHoldingUpdate write-back).
 ## 2026-08-08 - tier-C: collect water action
 
 Done (V3.1.0 b14 IL):
