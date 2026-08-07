@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SmellUpdateItemsAndBlood wet and shelter
+
+Done (V3.1.0 b14 IL):
+- SmellTickWet: _wetnessrate cvar accumulates smellWet when >= 0.01.
+- SmellClear: zero radius/eat/wet/sheltered fields.
+- SmellUpdateItemsAndBlood: wet>=3 or dead clears; dysenterySmell -> SetSmellEat(35); items radius; shelter *0.2.
+---
 ## 2026-08-07 — tier-C: CheckSleeperVolumeNoise and Attract/Smell ticks
 
 Done (V3.1.0 b14 IL):

@@ -438,6 +438,20 @@ ticks publish cvar `smell`; every **40** ticks emit to nearby entities
 (flags **6**, radius `smellRadius*(1+sense)`) with 20% roll and DetectUsScale
 gate (blood/item smell attract path).
 
+**`SmellTickWet` (IL=19):** `smellWetRate = cvar _wetnessrate`; if rate ≥ **0.01**
+accumulate `smellWet += rate`.
+
+**`SmellClear` (IL=19):** zero `smellRadiusTarget/Radius/EatRadius`, `smellEatTicks`,
+`smellSheltered`, `smellWet`.
+
+**`SmellUpdateItemsAndBlood` (IL=79):** if `smellWet ≥ 3` or player dead:
+`SmellClear` and client may send `NetPackageEntityStealth` (-1,0,sheltered) to
+server; return. Else if cvar `.dysenterySmell > 0`: remove cvar and
+`SetSmellEat(35)`. `itemCount = SmellCountItems()` (forced 0 if wet rate ≥ 0.01);
+`smellRadiusTarget = max(SmellCountToRadius(itemCount), smellEatRadius)`; if
+local `shelterPercent > 0`: `smellRadiusTarget *= 0.2` and `smellSheltered =
+true`.
+
 **`LightManager.GetStealthLightLevel` (IL=30):** if no `myServer` return 0. Else
 sample at entity pos **y+1.68**:
 `clamp01(GetLightLevel(pos) + GetLightLevelFromMovingLights(id, pos))` and out
@@ -1385,8 +1399,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** CheckSleeperVolumeNoise + CheckNoise pad 0.9; AttractTick 40/80;
-  SmellTick outline; NotifyNoise heat 240; AddNoise sort; CalcVolume passive 88.
+- **2026-08-07:** SmellUpdateItemsAndBlood wet/dysentery/shelter; SmellTickWet;
+  SmellClear; CheckSleeperVolumeNoise; AttractTick 40/80; NotifyNoise heat 240.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
