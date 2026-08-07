@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GamePrefs.notifyListeners
+
+Done (V3.1.0 b14 IL):
+- GamePrefs.notifyListeners IL=24: IGamePrefsChangedListener fan-out + static
+  OnGamePrefChanged action.
 ## 2026-08-08 — tier-C: EntityFallingBlock.SetBlockValue
 
 Done (V3.1.0 b14 IL):
