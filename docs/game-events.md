@@ -387,6 +387,26 @@ denies the whole event when `CurrentCount + count > MaxSpawnCount`
 `ReservedCount` held by running sequences) or when the target is dead or the
 spawn area cannot accept blocks (for non-safe spawns).
 
+**`ActionBaseSpawn.SpawnEntity(entityId, target, startPoint, minDistance,
+maxDistance, spawnInSafe, yOffset)` (IL=84)** is the per-entity commit the
+SpawnEntities state runs once per tick. Position comes from
+`FindValidPosition(ref pos, ...)` (8-arg overload, IL=150): a random
+horizontal direction `dir = normalize(2r-1, 0, 2r-1)` and a random distance
+`min + r*(max-min)` give `pos = startPoint + dir*dist`, then `y += 1.5` plus
+`yOffset` when non-zero; a `Voxel.Raycast` from `startPoint + dir*raycastOffset`
+toward `pos` (layer mask `-538750989`) rejects the spot on any terrain hit;
+the block at `pos - rayDir*0.5` must not collide movement or arrows; when
+`!spawnInSafe` the spot must pass `World.CanPlaceBlockAt(pos, null, false)`;
+when `!spawnInAir` a `3 + yOffset` ray down must hit ground, snapping `pos`
+to the hit point. The commit then builds
+`EntityFactory.CreateEntity(entityId, pos + (0, 0.5, 0), rot, ownerId,
+owner.ExtraData)` where `rot` faces the target (`target.transform.eulerAngles.y
++ 180`) or is zero, and `ownerId` is the target's entity id when
+`owner.TwitchActivated` and the target exists, else `-1`; `SetSpawnerSource(3)`
+(Dynamic); `World.SpawnEntityInWorld`; and
+`BroadcastPlayByLocalPlayer(entity.position, spawnSound)` when a sound is set.
+Position failure returns null and the machine stays in NeedPosition to retry.
+
 **`ActionRespawnEntity` (IL=213) / `ActionRespawnEntities` (IL=254)** are the
 respawn verbs (`respawnEntity` / `respawnEntities`). The single-entity
 variant snapshots the old class/id/position/rotation of a non-player target
@@ -485,6 +505,40 @@ regression. Consequence: the re-aggro branch of `SpawnEntry.HandleUpdate`
 500 m search and 1000 ms reaction time are the intended behavior, not what a
 stock server runs. The spawn-entry machinery's real work on b14 is the
 despawn/death reap and the requester notification above.
+
+### 7.2 Block-entry tracking (event-placed blocks)
+
+`HandleBlockUpdates` (IL=53) reaps `blockEntries` backwards: an entry with
+`TimeAlive > 0` counts down by `deltaTime`; `TimeAlive == -1` is permanent
+and skipped; on expiry (`<= 0`) it tries `TryRemoveBlocks()` - success
+removes the entry, failure resets `TimeAlive = 5` for a retry in 5 s. Entries
+flagged `IsRefunded` are dropped regardless.
+
+`SpawnedBlocksEntry` (ctor IL=16) defaults `TimeAlive = -1` (permanent) and
+assigns a monotone `BlockGroupID` from a static counter (`++newID`).
+`TryRemoveBlocks()` (IL=111) walks the block list backwards and, for every
+position whose chunk is loaded (`GetChunkFromWorldPos`), appends
+`BlockChangeInfo(pos, BlockValue.Air, true)` to a batch and removes the entry
+from the list; any pending changes go out through `World.SetBlocksRPC` (the
+ChangeBlocks machine, [`blocks.md`](blocks.md) §4.1). Once the list empties,
+it plays `RemoveSound` at `Center` (`BroadcastPlayByLocalPlayer`), calls
+`GameEvent.SetRefundNeeded()` when `RefundOnRemove`, and notifies the
+requester: local `HandleGameBlocksRemoved(BlockGroupID, IsDespawn)`, remote
+`NetPackageGameEventResponse(BlocksRemoved = 9, -1, BlockGroupID, "",
+IsDespawn)` on 192. Its return value is `BlockList.Count == 0`, the signal
+`HandleBlockUpdates` uses to reap the entry or retry.
+`RegisterSpawnedBlocks` (IL=32) stores all eight fields
+(`BlockList, Target, Requester, GameEvent, TimeAlive, RemoveSound, Center,
+RefundOnRemove`) and returns the new entry.
+
+**Early-destruction refunds:** `RefundSpawnedBlock(pos)` (IL=32) is the hook
+for a player destroying a tracked event block before its timer: it finds the
+first entry whose `BlockList` contains `pos`, calls
+`GameEvent.SetRefundNeeded()` and marks `IsRefunded = true` (reaped by the
+next `HandleBlockUpdates`). `RemoveSpawnedEntry(entity)` (IL=73) is the
+entity-side equivalent: matching `SpawnedEntity` -> `GameEvent.HasDespawn =
+true`, entry removed, and the requester notified with `EntityDespawned` (6)
+on 192, exactly like the despawn branch of `HandleSpawnUpdates`.
 
 **Flag store:** `SetGameEventFlag(flag, value, duration, isPermanent)` (IL=94)
 adds a `GameEventFlag` to `GameEventFlags` when setting (updating the duration
@@ -610,6 +664,13 @@ Full field lists in inventories/netpackage-bodies.md; tick pipeline above.
   delay/checkTime gates, CreateEntity + SetSpawnerSource 3 + RemoveEntity
   (Killed), 12000 ms retarget, Spawned (4) notify, AddToGroups, respawnSound;
   Update (IL=25) IsServer + world gate.
+- **2026-08-08:** SpawnEntity (IL=84) commit + FindValidPosition (IL=150):
+  random dir/dist, y+1.5, mask -538750989 raycast, ground snap, facing rot,
+  TwitchActivated ownerId; block-entry tracking (7.2): HandleBlockUpdates
+  (IL=53) reap/retry-5s, SpawnedBlocksEntry TryRemoveBlocks (IL=111) Air batch
+  via SetBlocksRPC + BlocksRemoved (9) notify + refund on remove,
+  RefundSpawnedBlock (IL=32) SetRefundNeeded + IsRefunded, RemoveSpawnedEntry
+  (IL=73) entity-side despawn reap.
 - **2026-08-08:** ActionReplaceEntities (IL=163): entityIDs pick (selected
   index or Random.Range), SetTargetOnlyPlayers(100), 12000 ms retarget,
   EntitySpawned (5) notify, removeLater coroutine; response enum values pinned
