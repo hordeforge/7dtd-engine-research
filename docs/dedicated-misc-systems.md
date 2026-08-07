@@ -190,6 +190,20 @@ Leaves (all V3.1.0 b14 IL):
   (NoGraphicsMode)] = true`. **Dedicated without a loaded config file →
   error banner ("No server config file loaded ...") + `Application.Quit()` +
   false** - the dedicated server refuses to run without `-configfile`.
+- **`LoadConfigFile(filename)` (IL=146):** relative paths are prefixed with
+  `GameIO.GetApplicationPath() + "/"`; missing file → error banner +
+  `Application.Quit()` + false. Parse with `SdXDocument.Load`; walk the
+  `<ServerSettings>` property elements into a `DynamicProperties`; every key
+  must have a value ("Value not set" error) and is applied via
+  `ParsePref(key, value, quitOnError=true, false)`; success logs
+  "Parsing server configfile successfully completed" and sets
+  `bConfigFileLoaded = true`.
+- **`ParsePref(name, value, quitOnError, ignoreCase)` (IL=74):** empty name →
+  config error; a matching `LaunchPrefs.All()` entry → `ParseLaunchPref`;
+  else `EnumUtils.TryParse<EnumGamePrefs>` → `ParseGamePref`; unknown →
+  config error when quitting, else a warning (command-line args that are not
+  config properties are ignored); exceptions → config error. Both pref parsers
+  store into `parsedGamePrefs` for `ApplyParsedGamePrefs` to commit.
 - **`InitGamePrefs()` (IL=36):** log `Last played version: {pref 34}`; set
   `GamePrefs[34 (GameVersion)] = Constants.cVersionInformation.LongStringNoBuild`;
   `initGamePrefsOk = ApplyParsedGamePrefs()`.

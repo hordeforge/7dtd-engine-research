@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: config file load + pref parse
+
+Done (V3.1.0 b14 IL):
+- GameStartupHelper.LoadConfigFile IL=146: ServerSettings XML -> Dynamic
+  Properties -> ParsePref per key; missing/unparseable quits.
+- ParsePref IL=74: LaunchPrefs lookup -> ParseLaunchPref; EnumGamePrefs
+  TryParse -> ParseGamePref; unknown ignored on cmdline, error in config.
 ## 2026-08-08 — tier-C: GameStartupHelper boot leaves
 
 Done (V3.1.0 b14 IL):
