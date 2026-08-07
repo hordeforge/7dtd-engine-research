@@ -80,6 +80,10 @@ the i-th entry weighted `0.6^i`), then shapes the stored `noiseVolume` as
 `EffectManager.GetValue`. The method returns the raw weighted `sum`; the shaped
 value feeds the detection thresholds.
 
+**`PlayerStealth.NoiseCleanup()` (IL=43)** is the expiry sweep: it walks the
+noise list and decrements each entry's `ticks`, removing entries once they
+reach **1** - the fade-out half of the event-driven lifecycle.
+
 ---
 
 ## 3. Smell and attraction (state machine)
@@ -131,6 +135,8 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-07:** PlayerStealth.NoiseCleanup (IL=43): per-entry ticks
+  decrement, remove at 1 - the fade-out half of the noise lifecycle.
 - **2026-08-07:** PlayerStealth.CalcVolume (IL=68): sum with 0.6^i geometric
   weights, stored noiseVolume = ((sum*2.35)^0.86)*1.5 * passive 88; returns
   raw weighted sum.

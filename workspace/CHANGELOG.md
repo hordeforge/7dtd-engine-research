@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PlayerStealth.NoiseCleanup
+
+Done (V3.1.0 b14 IL):
+- PlayerStealth.NoiseCleanup (IL=43) narrated in stealth-smell.md: walk the
+  noise list, decrement ticks per entry, RemoveAt when reaching 1 - the
+  fade-out half of the event-driven noise lifecycle.
+
 ## 2026-08-08 - tier-C: PlayerStealth.CalcVolume
 
 Done (V3.1.0 b14 IL):
