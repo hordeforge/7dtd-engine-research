@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity light level leaf
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md: EntityAlive.GetLightLevel IL=14 - attached -> host
+  delegate, else inventory.GetLightLevel (held-item light, the
+  stealth selfLight).
 ## 2026-08-08 - tier-C: loot buff actions
 
 Done (V3.1.0 b14 IL):
