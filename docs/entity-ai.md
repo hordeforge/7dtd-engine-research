@@ -2248,6 +2248,17 @@ Runs first (D8.6 calls it). Copies from the resolved `EntityClass`:
 `ReorderActivationCommands(list)`, cache `activationCommands = list.ToArray()`
 and return it.
 
+**Command defaults / ordering:** `Entity.InitLocalActivationCommands` and
+`Entity.ReorderActivationCommands` are base no-ops. `EntityAlive`
+(InitLocal, IL=14) adds `EntityActivationCommand("grab", "hand", null, null)`
+when `EntityClass.PickupItem != ""`. `EntityDrone` reorder (IL=9) moves
+`storage` after `heal` when the local user is allowed; `EntityVehicle` moves
+`storage` after `horn`. `Entity.MoveActivationCommandAfter(commands, cmd,
+after)` (IL=64): find both ids, remove `cmd`, reinsert right after `after`
+(index adjusted when `after` sat past the removed slot). These are the client
+E-menu entries; the server validates the triggered actions separately (grab /
+wake via the action packages).
+
 `EntityPlayer.CopyPropertiesFromEntityClass` (IL=3) is a pure base call;
 `EntityPlayerLocal` (IL=21) additionally reads `dropInventoryBlock` from the
 `DropInventoryBlock` key when present (client-local).

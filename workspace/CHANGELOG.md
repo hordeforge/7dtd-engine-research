@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: activation command defaults/reorder
+
+Done (V3.1.0 b14 IL):
+- Entity.InitLocalActivationCommands base no-op; EntityAlive adds grab/hand when
+  PickupItem != ""; drone adds full command table.
+- Entity.ReorderActivationCommands base no-op; drone storage-after-heal,
+  vehicle storage-after-horn (owner allowed).
+- MoveActivationCommandAfter IL=64 reorder helper.
+---
 ## 2026-08-08 — census refresh
 
 Done:
