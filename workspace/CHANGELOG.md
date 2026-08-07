@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: player breadcrumb + vicinity
+
+Done (V3.1.0 b14 IL):
+- server-lifecycle.md: GetBreadcrumbPos (IL=27) 32-slot ring index
+  (breadcrumbIndex - round(distance)) & 31 (>=31: +1); SetPrefabsAroundNear
+  (IL=26) prefabsAroundNear copy; GetLayerForMapIcon layers 19/20.
+
 ## 2026-08-08 - tier-C: cave sampler
 
 Done (V3.1.0 b14 IL):
