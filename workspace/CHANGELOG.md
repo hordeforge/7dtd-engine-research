@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: deco cell layout + PoiMapElement picks
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md: EnumDecoAllowed cell bit layout (slope bits 0-1, size 2-3, street bit 4; AllowBig = size 0, AllowSmall = size < 2, Nothing >= 2)
+- chunk-providers.md 3.3: PoiMapElement.GetRandomBlockOnTop/GetRandomDecal IL=26 prob test, GetDecal bounds-checked
+
 ## 2026-08-08 - tier-C: density constants + deco field writers
 
 Done (V3.1.0 b14 IL):
