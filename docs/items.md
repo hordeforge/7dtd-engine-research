@@ -503,6 +503,18 @@ accessors (`GetHoldingGun`, `GetHoldingBlock`, `GetHoldingDynamicMelee`,
 stats through its armor groups and tracks cosmetic unlocks; it changes stats but
 is never "held".
 
+**`Bag` leaves:** `TryStackItem(startIndex, stack)` (IL=75) is the stack-merge:
+it requires `CanMoveTo(Backpack, -1)`, then scans slots from `startIndex`,
+merging same-type slots via `CanStackPartly(ref count)` (each merge fires
+`onBackpackChanged()`), and returns `(fullyPlaced, changed)`.
+`ReadInto(br)` (IL=93) is the bag wire format: version byte, `u16` slot count
+(resizing `items` when it differs), per-slot `ItemStack.Read`, a
+`LockedSlots` `PackedBoolArray` when flagged (else null), and at version >= 1
+`Touched` plus an optional `PreferenceTracker` (a non-`PooledBinaryReader`
+here throws `InvalidOperationException`). `get_SlotCount` (IL=10) is
+`items?.Length`; the change notification `onBackpackChanged` (IL=8) is a
+null-guarded invoke.
+
 All three ride the inventory net packages rather than a per-item packet:
 `NetPackagePlayerInventory` carries `toolbelt` (`ItemStack[]`), `bag`
 (`Bag.Write`), `equipment`, and the drag-and-drop item; the request/response and
