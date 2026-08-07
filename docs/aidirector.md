@@ -332,6 +332,27 @@ target list.
 - `StartSpawning(SpawnType)` IL=124
 - `get_HasAnySpawns()` IL=6
 
+**`Tick` (IL=17):** playtest → return; base tick; `TickActiveSpawns`;
+`TickNextTime(HordeNextTime, type=1)` (horde schedule; bandit is separate).
+
+**`TickActiveSpawns` (IL=43):** reverse-iterate `spawners`;
+`AIWanderingHordeSpawner.Update`; on finish log + `Cleanup` + `RemoveAt`.
+
+**`TickNextTime(nextTime, spawnType)` (IL=74):** if GameStats **32** or **24**
+off, zero `nextTime` and return. If `nextTime == 0` and `worldTime > 28000`,
+`ChooseNextTime`. Else if remaining hours (`(next-now)/1000`) &lt; **7**: if
+other hordes active, push `nextTime` by `(7 - hours)*1000`; else if due and
+players present `StartSpawning`, else `ChooseNextTime`.
+
+**`ChooseNextTime` (IL=40):** type 0 bandit: `BanditNextTime = now +
+Random(12000..24000) + 2000`. Type 1 horde: `HordeNextTime = now +
+Random(12000..24000)` (no +2000).
+
+**`StartSpawning` (IL=124 high-level):** log; `CleanupType`; require living
+tracked players; on fail delay +4000; `FindTargets` → on fail delay +1000 and
+`ChooseNextTime`; else create `AIWanderingHordeSpawner` and add to list
+(+12000 residual schedule in IL).
+
 ## AIHordeSpawner : Object
 
 Screamer / event horde runner (not an `AIDirectorComponent`, but driven from
@@ -639,8 +660,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** ClearParties; CalcNextDay frequency+range; SetDay GameState;
-  Start/EndBloodMoon; KillPartyZombies; BM Tick delay 1/N.
+- **2026-08-07:** Wandering TickNextTime 28000/7h; ChooseNextTime 12k-24k;
+  ClearParties; CalcNextDay; Start/EndBloodMoon; KillPartyZombies.
 - **2026-08-07:** get_maxAlive; BM Tick 1.8s SeekTarget + nextPlayer; SetScaling;
   CalcBestDir 16 bins; InitParty; IsPlayerATarget; SeekTarget 1200
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.

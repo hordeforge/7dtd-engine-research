@@ -265,6 +265,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | BloodMoonComponent.Tick party round-robin | aidirector.md |
 | Start/EndBloodMoon + KillPartyZombies | aidirector.md |
 | ClearParties + CalcNextDay frequency/range | aidirector.md |
+| Wandering TickNextTime + MoveHelper early gates | aidirector.md / entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

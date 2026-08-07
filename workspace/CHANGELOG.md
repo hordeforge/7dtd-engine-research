@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: Wandering TickNextTime and MoveHelper gates
+
+Done (V3.1.0 b14 IL):
+- Wandering Tick: playtest skip; TickActiveSpawns; TickNextTime horde.
+- TickNextTime: stats 32/24; 28000 bootstrap; 7h other-horde push; StartSpawning.
+- ChooseNextTime: bandit 12k-24k+2k; horde 12k-24k.
+- UpdateMoveHelper: !IsActive/expiry/root-motion/dig/stun early structure.
+---
 ## 2026-08-07 — tier-C: ClearParties and CalcNextDay
 
 Done (V3.1.0 b14 IL):

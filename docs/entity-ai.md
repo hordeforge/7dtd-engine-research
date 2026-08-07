@@ -1335,18 +1335,25 @@ alert/attack enqueues (or the wait list happens to still hold them when FIFO rea
 
 ## D4. MoveHelper anatomy (why 1236 IL matters)
 
-Call breakdown themes:
+**`UpdateMoveHelper` early order (IL=1236, verified prefix):**
 
-- Stuck detection / `ResetStuckCheck`  
-- **Jump** (`StartJump` ×4 sites)  
-- **Dig** (`DigStart`, `DigUpdate`)  
-- Blocked clearing  
-- Attack from move helper (`EntityAlive.Attack` ×2)  
-- Angle lerp, sin/cos, random (9× RandomFloat)  
-- Sleeping/stun/ragdoll early-outs  
+1. Optional `destroyRefreshTicks` / destroy path residual.
+2. If `!IsActive` → late residual only (jump to end).
+3. `expiryTicks--`; at 0 `StopMove`.
+4. Cache controller height/radius; temp-move blocked → `ResetStuckCheck`.
+5. Jumping (non-swim) / elevator+ladder residual.
+6. Forced root motion → `SetMoveForwardWithModifiers` + clear stuck/blocked/temp
+   and **return**.
+7. Digging / anim-with-motion / sleeping / stun-cant-move / ragdoll → zero
+   forward, clear stuck/blocked, continue or return.
+8. Ground dig start/update when blocked flags warrant.
+9. Compute yaw to `moveToPos` (`Atan2`); `MoveTowardsAngle`; optional look clear;
+   next-pos blend (lerp xz); jump yaw; pursuit remainder (block break, side-step,
+   climb, attack assist, random) fills the rest of the method.
 
-This is full **locomotion + dig + combat assist**, not a thin “apply velocity.”  
-Any far entity still running `updateTasks` pays this. Far skip of updateTasks avoids it entirely.
+Call themes in the bulk: stuck / jump / dig / blocked clear / Attack ×2 / angle
+lerp / RandomFloat ×9. Full **locomotion + dig + combat assist**. Far skip of
+`updateTasks` avoids this entirely.
 
 ---
 
@@ -1800,8 +1807,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** pathFollow arrive radii swim/elevator; ImprovePath first-step;
-  hasHome/detachHome; CheckPath; moveSpeed passives 133-135; SetPath.
+- **2026-08-07:** UpdateMoveHelper early gates (expiry/root/dig/stun);
+  pathFollow radii; ImprovePath; hasHome; CheckPath; moveSpeed 133-135.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
