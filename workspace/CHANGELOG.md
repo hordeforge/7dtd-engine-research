@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: nextRound and DecoManager.UpdateTick
+
+Done (V3.1.0 b14 IL):
+- nextRound EndRound/wrap GameStats 10; SetBloodMoonDay GameStats 58 dirty.
+- DecoManager.UpdateTick drain add/remove/rect/chunk queues.
+---
 ## 2026-08-07 — tier-C: block ticker execute and GameStateManager gates
 
 Done (V3.1.0 b14 IL):

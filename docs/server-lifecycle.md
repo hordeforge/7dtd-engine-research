@@ -69,6 +69,13 @@ the world clock; `nextRound` / `SetBloodMoonDay` drive the horde schedule.
 4. Count living non-dead entities vs class limits residual; set dirty GameStats
    and if dirty broadcast `NetPackageGameStats` flags **192**.
 
+**`nextRound` (IL=29):** `EndRound(GameStats[10])`; increment round index;
+wrap to 0 if ≥ `GameMode.GetRoundCount()`; `GameStats.Set(10, round)`; dirty;
+reset `timeRoundStarted`; return new round.
+
+**`SetBloodMoonDay(day)` (IL=13):** if GameStats **58** differs, set it and
+dirty.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Day
@@ -402,6 +409,7 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-07:** nextRound wrap GameStats 10; SetBloodMoonDay 58.
 - **2026-08-07:** GameStateManager OnUpdateTick time/day/frag gates; GameStats package.
 - **2026-08-07:** IsLandProtectedBlock IL=104 (self allow, foreign deny, ally
   keystone flag); InBoundsForPlayersPercent soft edge 50/80, need ≥0.5.

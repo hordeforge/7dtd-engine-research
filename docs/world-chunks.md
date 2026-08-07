@@ -43,6 +43,12 @@ used, tick all then `EntityActivityUpdate`; else set partial and flush.
 
 **`SaveDecorations` (IL=3):** `DecoManager.Instance.Save()`.
 
+**`DecoManager.UpdateTick` (IL=330 high-level):** drain locked queues:
+`SAddDecoInfo` → `AddDecorationAt`; remove-pos list → `RemoveDecorationAt`;
+rect resets → `ResetDecosInWorldRect`; chunk-key resets →
+`ResetDecosForWorldChunk`. Then server: rebuild player list for deco interest
+residual / coroutine path.
+
 ```mermaid
 flowchart LR
   GMu[gmUpdate] --> UT[UpdateTick]
@@ -583,6 +589,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** DecoManager.UpdateTick add/remove/rect/chunk drain.
 - **2026-08-07:** WorldBlockTicker.execute type match; AddScheduledBlockUpdate.
 - **2026-08-07:** WorldBlockTicker scheduled 100 cap; random 1200 ticks; RestoreCulledBlocks flags.
 - **2026-08-07:** UpdateTick IL=150 slice/full; save 40 ticks; deco 60s; SetBlocksOnClients 192.
