@@ -440,6 +440,21 @@ distant terrain), `GetChunkProtectionLevel` → region manager, and
 `FillOccupiedMap` (§6.2) including nested `Bluff` heightmap stamps that
 modify the terrain heightmap at biome-chosen spots.
 
+`loadSplatMaps(levelName, worldWidth)` (IL=883) builds the surface-channel
+map that `GetTopmostBlockValue` (§3.1) later switches on. It resolves the
+world path and requires `splat1.png` (missing -> return), loads `splat1`
+plus `splat2`/`splat3` when present (each texture adds **4** to
+`cntSplatChannels`), sets `splatW = texture width` and
+`splatScaleDiv = worldWidth / splatW`, and fills `splatMapMaxValue : Byte[]`
+(pixel-count sized). Per pixel it reads the three textures' `Color32` and runs
+a dominance chain assigning the channel whose byte is `>=` all other 11
+channel bytes: 0..3 = `splat1` RGBA, 4..7 = `splat2` RGBA, 8..11 = `splat3`
+RGBA (ties fall to the earliest channel; an all-zero pixel yields 0).
+`ProcessColor(Color32/ColorARGB32)` (IL=22 each) is the same idea in
+miniature: last non-zero channel, `g`->1, `b`->2, `r`->3, else 0. `InitData()`
+(IL=6) is only a coroutine stub returning the `<InitData>d__23` state
+machine; the actual deferred init runs there.
+
 The splat/texture work runs on dedicated too (textures are loaded and
 compressed); only their rendering is client work.
 
