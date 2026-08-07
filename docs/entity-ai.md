@@ -2583,6 +2583,17 @@ player with `CanSee` and `GetSleeperDisturbedLevel(dist, Stealth.lightLevel) >=
 - **Tail:** clamp `|motion|` to ≥ **0.02**; `SeekYaw(yaw, 0, 20)`;
   `aiManager.UpdateDebugName()`.
 
+**Shared turning helper `Entity.SeekYaw(yaw, _, yawSlowAt)` (IL=136):** wraps
+both yaw and current `rotation.y` to `[0, 360)`; `maxTurn = EntityClass.MaxTurnSpeed`
+(scaled `× (1 - inWaterPercent·0.5)` when `inWaterPercent > 0.3`). `maxTurn <= 0`
+→ snap `rotation.y = yaw`. Else `delta = wrap180(yaw - rotation.y)`,
+`absDelta = |delta|`; when `absDelta < yawSlowAt` the rate scales quadratically
+`maxTurn × (absDelta/yawSlowAt)²`, floored at **20** (slow-down near the target).
+Arms the turn: `yawSeekTime = 0`, `yawSeekTimeMax = absDelta / maxTurn`,
+`yawSeekAngle = rotation.y`, `yawSeekAngleEnd = rotation.y + delta`; the actual
+interpolation is applied by the movement update, and `IsSeekYaw()` (IL=5) is
+`yawSeekTimeMax > 0`.
+
 **Helper leaves (all V3.1.0 b14 IL):**
 
 - **`ClearTarget` (IL=11):** `SetAttackTarget(null, 0)` + `SetRevengeTarget(null)`

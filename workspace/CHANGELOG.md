@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: SeekYaw turning helper
+
+Done (V3.1.0 b14 IL):
+- Entity.SeekYaw IL=136: 360 wrap, MaxTurnSpeed (water-scaled), quadratic
+  slow-down near target (min 20), arms yawSeek* interpolation; IsSeekYaw IL=5.
 ## 2026-08-08 — tier-C: EntityEnemy.PostInit blood moon flag
 
 Done (V3.1.0 b14 IL):
