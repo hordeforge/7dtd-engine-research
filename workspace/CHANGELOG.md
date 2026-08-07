@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: biome lookup surfaces
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 1: GetBiome Color32-pack (IL=34) / byte id (IL=5) / name
+  (IL=12) / TryGetBiome (IL=11).
+
 ## 2026-08-08 - tier-C: poi-map add
 
 Done (V3.1.0 b14 IL):
