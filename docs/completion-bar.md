@@ -130,6 +130,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | InventoryTransaction.Apply hash/ops | items inventory section |
 | Party AcceptInvite / CreateParty | parties-factions |
 | AIDirector CreateComponents order | spawning / loop |
+| AwardKill / SetDead | combat-damage §3.1 |
+| SleeperVolume.OnTriggered | entity-ai §D8.2b |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

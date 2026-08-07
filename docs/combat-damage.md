@@ -100,6 +100,13 @@ slot; flashlight off; `Equipment.DropItems()`; scale `lootDropProb` via
 `EffectManager` and floor with `LootContainer.LootBagChance`; if not
 `LootContainer.NoLoot` and random &lt; prob, **`Entity.DropBagServer()`**.
 
+**`SetDead` (IL=8):** base `Entity.SetDead` + force `Health.Value = 0`.
+
+**`AwardKill` (IL=66):** if killer is a distinct living player: count zombie vs
+player kill by `entityType` (1 player / 2 zombie-ish); `GameManager.AwardKill`;
+special score condition if holding `gunHandgunT2Magnum44`;
+`GameManager.AddScoreServer(killerId, zombieKills, playerKills, team, conditions)`.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Alive
@@ -179,7 +186,7 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
-- **2026-08-07:** OnEntityDeath / dropItemOnDeath ordered death loot path.
+- **2026-08-07:** AwardKill/SetDead; OnEntityDeath / dropItemOnDeath death path.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

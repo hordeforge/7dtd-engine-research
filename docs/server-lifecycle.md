@@ -139,6 +139,11 @@ player / spawn-point list / biome-aware); build ECD from PDF; create entity +
 server: vehicle/drone waypoint updates + following drones; fire
 `ModEvents.PlayerSpawnedInWorld` + `OnClientSpawned`.
 
+**`EntityPlayer.Respawn` (IL=10 + local helpers):** disable ragdoll; breadcrumbs;
+`BeforePlayerRespawn` / teleport delegates / held-entity check /
+`AfterPlayerRespawn`; local FP revive camera; clear death state via `SetAlive`;
+optional buff re-apply path on local.
+
 **`World.SpawnEntityInWorld` (IL=178):** null guard; `EntityLoadedDelegates`;
 `AddEntityToMap` + `Entities.Add` + `addToChunk`; if EntityAlive, add to
 `EntityAlives`; track vehicle/drone/turret managers; audio/weather/light

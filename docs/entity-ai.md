@@ -761,6 +761,11 @@ Per-call spawn pacing and entity create:
    counts, allocate spawn points, same `Spawn` helper. `minScript.IsRunning` can
    force a spawn-allowed flag for scripted waves.
 
+### D8.2b `OnTriggered` (IL=14)
+
+`triggerState = flags & 7`; store `playerTouchedTrigger`; call
+`UpdatePlayerTouched(world, player)` (same entry as touch latch).
+
 ### D8.3 `UpdatePlayerTouched` (IL=172)
 
 Called once when a player is latched on the volume:
@@ -978,8 +983,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** TickEntity IL=148 order; LookHelper/ASPPathNavigate/MoveHelper
-  apply table; EAI leaf Update/CanExecute expansion.
+- **2026-08-07:** SleeperVolume.OnTriggered IL=14; TickEntity/path apply; EAI leaves.
 - **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;
   UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;

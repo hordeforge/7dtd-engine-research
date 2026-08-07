@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: AwardKill, SetDead, sleeper OnTriggered, Respawn
+
+Done (V3.1.0 b14 IL):
+- AwardKill IL=66 score path; SetDead Health=0; OnTriggered IL=14;
+  EntityPlayer.Respawn outline.
+---
 ## 2026-08-07 — tier-C: inventory Apply, party accept, AIDirector components
 
 Done (V3.1.0 b14 IL):
