@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk.SetDensity
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: Chunk.SetDensity (IL=10) chnDensity.Set ulong write,
+  PrefabChunk no-op.
+
 ## 2026-08-08 - tier-C: texture read
 
 Done (V3.1.0 b14 IL):
