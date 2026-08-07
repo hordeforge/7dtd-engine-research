@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TraderArea spatial tests
+
+Done (V3.1.0 b14 IL):
+- dedicated-leftovers.md: Overlaps IL=38 (ProtectPosition+Size 2D AABB), IsWithinTeleportArea IL=93 (volume world box, sandbox-mode disabled)
+
 ## 2026-08-08 - tier-C: TraderArea.SetClosed
 
 Done (V3.1.0 b14 IL):
