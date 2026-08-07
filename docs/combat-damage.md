@@ -383,6 +383,26 @@ the server validates and applies them uniformly.
 
 Leaf types on the edges of the damage flow above:
 
+- **`ItemActionAttack.Hit` (IL=1614)** is the melee/ranged hit
+  orchestration every attack funnels through (27 params: damages, crit and
+  dismember chances, `DamageMultiplier`, buffs, `AttackHitInfo`, tool
+  bonuses, attack mode, hit-sound overrides, owned entity, `ItemValue`,
+  graze/force-no-damage/special-body-part flags). It resolves the attacker
+  (`EntityAlive`; `damagingItemValue` defaults to the held item), resets the
+  `AttackHitInfo` (itemsToDrop/bBlockHit/entityHit), then branches on
+  `hitInfo.tag`: a **block/terrain** hit builds a `BlockValueRef` (air cells
+  fall back to the distant-decoration path), scales
+  `GetBlockDamageScale(block.isTerrain)` over the incoming block damage and
+  calls `Block.DamageBlock(world, ref, bv, damage, ..., attackDetails, ...)`;
+  an **entity** hit (`E_` tag) gates on `Entity.CanDamageEntity(attackerId)`,
+  seeds a `DamageSource` (`DismemberChance = _dismemberChance`), rolls crit
+  into `attackDetails.isCriticalHit`, runs
+  `Entity.DamageEntity(source, strength, crit, impulse)`, and reads the
+  resulting `RecordedDamage` (Strength/ArmorDamage) back into the details
+  for sounds, item drops, XP/events, and the hit-feedback packages.
+
+
+
 - **`AttackHitInfo`** (nested in `ItemActionAttack`): the mutable hit-result
   carrier an attack fills in as it resolves, with a block half
   (`blockBeingDamaged`, `hitRef`, `bBlockHit`, `hardnessScale`, `itemsToDrop`,
@@ -449,6 +469,11 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionAttack.Hit IL=1614 orchestration: attacker
+  resolve, AttackHitInfo reset, block branch (BlockValueRef + distant-deco
+  fallback, GetBlockDamageScale, Block.DamageBlock) vs entity branch
+  (CanDamageEntity gate, DamageSource dismember seed, crit roll,
+  DamageEntity, RecordedDamage read-back).
 - **2026-08-08:** Stat adders: AddHealth IL=12 dead gate (Health<=0 no-op,
   then Health+=v); AddStamina IL=17 Stamina!=null + Health>0 gates;
   AddWater IL=9 ungated.
