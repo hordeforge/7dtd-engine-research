@@ -193,6 +193,8 @@ heightmap raises `m_HeightMap` at that column.
 `Chunk.SetWater` (IL=13) is `SetWaterRaw` plus
 `waterSimHandle.WakeNeighbours(x, y, z)` (the full write wakes the sim);
 `ResetWaterSimHandle` (IL=4) resets the sim handle.
+`Chunk.GetWater(x, y, z)` (IL=8) is `WaterValue.FromRawData(chnWater.Get(...))`
+(`PrefabChunk` routes through the prefab after a coordinate check).
 
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
