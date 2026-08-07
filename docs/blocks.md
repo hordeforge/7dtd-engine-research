@@ -104,6 +104,12 @@ lookup: a null `nameToBlock` (uninitialized registry) returns null; otherwise
 the `nameToBlockCaseInsensitive` (or `nameToBlock`) dictionary
 `TryGetValue`, null when absent.
 
+**`Block.ToBlockValue()` (IL=8)** is the class→word conversion:
+`new BlockValue { type = blockID }`. **`BlockLiquidv2.WaterDataToBlockValue`
+(IL=28)** converts a water cell: with mass `> 195` it builds the water block
+`type 240, damage 0, meta 2, meta2 = MAX_EMISSIONS, rotation 8`, else
+`BlockValue.Air`.
+
 ```mermaid
 flowchart LR
   RW["rawData : u32"] --> B0["bits 0-15<br/>type (id)"]
@@ -507,6 +513,9 @@ damage.
 
 ## Changelog
 
+- **2026-08-07:** Block.ToBlockValue (IL=8) blockID -> BlockValue;
+  BlockLiquidv2.WaterDataToBlockValue (IL=28) mass > 195 -> water block
+  type 240 meta2/rotation, else Air.
 - **2026-08-07:** Block.GetBlockByName (IL=19): nameToBlock[CaseInsensitive]
   dict lookup, null registry -> null.
 - **2026-08-07:** Alternate-block resolution: GetAltBlock (IL=19) indexed

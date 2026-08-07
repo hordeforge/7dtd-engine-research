@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Block conversions
+
+Done (V3.1.0 b14 IL):
+- blocks.md: Block.ToBlockValue (IL=8) = new BlockValue { type = blockID };
+  BlockLiquidv2.WaterDataToBlockValue (IL=28) - mass > 195 -> water block
+  type 240, damage 0, meta 2, meta2 = MAX_EMISSIONS, rotation 8, else Air.
+
 ## 2026-08-08 - tier-C: Block.GetBlockByName
 
 Done (V3.1.0 b14 IL):
