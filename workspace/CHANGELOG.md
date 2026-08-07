@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: density setters
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 5: ChunkCluster.SetDensity (IL=14) full SetBlock path vs
+  SetDensityRaw (IL=27) silent Chunk.SetDensity.
+
 ## 2026-08-08 - tier-C: delayed-regen batch
 
 Done (V3.1.0 b14 IL):
