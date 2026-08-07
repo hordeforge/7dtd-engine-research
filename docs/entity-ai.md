@@ -1512,8 +1512,30 @@ forward/right/up composition into motion.
 
 **`get_IsCrouching` (IL=8):** `Crouching || CrouchingLocked`.
 
+**`get_Crouching` (IL=3):** `bCrouching` field.
+
+**`set_Crouching` (IL=50):** on change: store; avatar `SetCrouching`;
+`CurrentStanceTag` standing/crouching; cvar `_crouching` 0/1 netSync; dirty
+alive flags if local.
+
 **`set_Climbing` (IL=39):** on change store flag; dirty player stats if local;
 set/clear `MovementTagClimbing` (clear idle when climbing).
+
+**`UpdateFall(mY)` (IL=43):** if onGround and `fallDistance > 0`:
+`fallHitGround(fallDistance, fallLastMotion)` then zero distance. Else if
+`mY < 0` accumulate `fallDistance` from `fallLastY - pos.y`, store
+`fallLastMotion = motion`.
+
+**`ApplyFixedUpdate` (IL=77):** if `wasFixedUpdate` and physics RB moved
+&gt; 0.0001 sq: `SetPosition` from physics RB vs base; track
+`physicsPosMoveDistance`; if rotation angle &gt; 0.1° sync euler/qrotation.
+
+**`aabbEntityCollision(vel)` (IL=392 high-level):** expand/move bounds with
+`World.GetCollidingBounds` + `BoundsUtils.ClipBoundsMove` (and Y clip);
+update center; set onGround from vertical resolution; step/slide residual;
+apply transform if displacement sq &gt; 0.0001.
+
+**`ConditionalScalePhysicsAddConstant` (IL=2):** identity (returns arg).
 
 **`PlayHitGroundSound(impactSpeed)` (IL=42):** volume =
 `Lerp(0.3, 1, impactSpeed)`; play `soundLand` else `soundLandThump` else
@@ -1984,8 +2006,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** entityCollision ragdoll/CC/AABB; Move absolute/relative add;
-  IsCrouching locked; set_Climbing tags; JumpMove; MaxVelocity 5.
+- **2026-08-07:** UpdateFall hit; set_Crouching stance/_crouching; AABB clip;
+  ApplyFixedUpdate physics RB; entityCollision; Move; climb tags.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

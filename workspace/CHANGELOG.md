@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: UpdateFall set_Crouching and aabb collision
+
+Done (V3.1.0 b14 IL):
+- UpdateFall: onGround triggers fallHitGround; airborne accumulates distance.
+- set_Crouching: stance tag + _crouching cvar + avatar.
+- ApplyFixedUpdate: physics RB position/rotation sync thresholds.
+- aabbEntityCollision: ClipBoundsMove colliding bounds; onGround resolve.
+- ConditionalScalePhysicsAddConstant: identity.
+---
 ## 2026-08-07 — tier-C: entityCollision Move and crouch/climb
 
 Done (V3.1.0 b14 IL):
