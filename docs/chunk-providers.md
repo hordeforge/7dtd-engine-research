@@ -495,6 +495,17 @@ Static helpers used by the §3.3 decorators when placing biome blocks and by
   checks every column in the deco footprint against the per-chunk
   `EnumDecoAllowed` map (`Everything`, slope/size bits, `StreetOnly`,
   `Nothing`), spanning chunk borders via the neighbor overloads.
+  The 4-arg form (IL=134) rejects air and multi-block children, rebases
+  `blockPos` to chunk-local `(x - chunk.X*16, z - chunk.Z*16)`, and for a
+  **small** deco (`!IsBigDeco`) returns true when the cell is outside
+  `[0,16)` (the neighbor chunk's own check decides, hence the 7-arg form),
+  else `AllowSmallDeco(chunk.GetDecoAllowedAt(x, z))` AND the
+  `additionalTest` delegate (when set). A **big** deco additionally requires
+  the in-bounds `AllowBigDeco` test plus both
+  `CanPlaceBigDecoForBlockDecorationRadius` and
+  `CanPlaceBigDecoForBlockOversized` over the footprint span
+  (`chunk.X*16 .. chunk.X*16 + 15`). The 7-arg form (IL=26) is simply the AND
+  of the 4-arg form over the four chunks `(cX0Z0, cX1Z0, cX0Z1, cX1Z1)`.
 - `ApplyDecoAllowed*` writes the footprint back so later decorations keep
   their distance; `Prefab.ApplyDecoAllowed` does the same for POIs.
 
