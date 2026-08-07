@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: face-extract reads
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: Chunk.GetBlockFaceTexture (IL=19) 8-bit extract; prefab
+  variant (IL=29) 6-bit slots.
+
 ## 2026-08-08 - tier-C: biome lookup surfaces
 
 Done (V3.1.0 b14 IL):
