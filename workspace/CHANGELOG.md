@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory.SetItem core
+
+Done (V3.1.0 b14 IL):
+- items.md 6: SetItem (IL=166) held-redraw, class-change rebuild
+  (createHeldItem/createInventoryData), preferred-slot bookkeeping, clone
+  store, updateHoldingItem + notify.
+
 ## 2026-08-08 - tier-C: clearSlotByIndex
 
 Done (V3.1.0 b14 IL):
