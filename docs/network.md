@@ -166,6 +166,36 @@ table above are in that encoded space (e.g. ±256 encoded = ±8 blocks).
 Server-only each full tick. Entries live in an `IntHashMap` keyed by entity id
 (constructed only from `NetEntityDistribution..ctor`).
 
+**Config table (`.ctor` IL=141)** `SEnts(type, distance, updateTicks, motion)`:
+
+| Type | distance | update | motion |
+|---|---:|---:|:---:|
+| EntityPlayer | int.Max | 3 | 0 |
+| EntityVehicle | int.Max | 3 | 0 |
+| EntityEnemy | **80** | 3 | 0 |
+| EntityNPC | **80** | 3 | 0 |
+| EntityItem | **64** | 3 | 0 |
+| EntityFallingBlock/Blocks | **120** | 3 | 0 |
+| EntityFallingTree | **120** | **1** | 0 |
+| EntityAnimalStag | **80** | 3 | 0 |
+| EntityAnimalRabbit | **64** | 3 | 0 |
+| EntityCar | **100** | 3 | 0 |
+| EntitySupplyCrate/Plane | **1200** | 3 | plane motion **1** |
+| EntityTurret | **60** | 3 | 0 |
+| EntityHomerunGoal | **80** | 3 | 0 |
+
+**`Add(entity)` (IL=66):** for each matching config type call
+`Add(e, distance, update, motion)` which creates `NetEntityDistributionEntry`
+(cap tracking distance at **46340**), hash+set insert, `updatePlayerEntities` all
+players. If entity is player, also `updatePlayerEntity` on every existing entry.
+
+**`Remove(entity, reason)` (IL=48):** if player, strip from every entry's
+`trackedPlayers`. Remove hash+set entry; if reason **1** (unload)
+`SendUnloadEntityToPlayers` else `SendDestroyEntityToPlayers`.
+
+**`AIDirector.AddEntity` (IL=10):** only `EntityPlayer` → `AddPlayer` (zombies not
+registered here).
+
 1. Clear working enemy/player lists; walk distribution entries, bucket tracked
    entities into enemies vs players.
 2. Optional **network prioritization** (`GameManager.enableNetworkdPrioritization`):

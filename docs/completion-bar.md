@@ -259,6 +259,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | pathFollow radii + ImprovePath + hasHome | entity-ai.md |
 | DamageEntity consecutive 30 + passives 161/40 | combat-damage.md |
 | SpawnEntityInWorld registration + BuffValue.Tick | spawning.md / buffs.md |
+| NetEntityDistribution SEnts distances + Remove | network.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

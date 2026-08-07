@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: NetEntityDistribution SEnts and Remove
+
+Done (V3.1.0 b14 IL):
+- SEnts table: Player/Vehicle infinite; Enemy/NPC 80; Item 64; Falling 120; Supply 1200; Turret 60.
+- Add: type match -> entry; player updates all entries.
+- Remove: reason 1 unload vs destroy packages; AIDirector.AddEntity players only.
+---
 ## 2026-08-07 — tier-C: SpawnEntityInWorld and BuffValue ticks
 
 Done (V3.1.0 b14 IL):
