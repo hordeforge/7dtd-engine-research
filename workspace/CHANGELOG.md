@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: WorldBlockFiller + BiomeLayer
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 3.3: WorldBlockFiller grid ((x<<4|z)<<8|y, 255 untouched), fillChunk IL=66, fillLevel IL=192 placement loop
+- chunk-providers.md 3.3: setDecorationBlock IL=152 depth pick + 3x3 prob-gated cluster + center write
+- world-generation.md 3.1: BiomeLayer AddResource IL=34 running sum / MaxResourceProb
+
 ## 2026-08-08 - tier-C: WeatherGroup Probabilities table
 
 Done (V3.1.0 b14 IL):
