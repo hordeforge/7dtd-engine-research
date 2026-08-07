@@ -2148,7 +2148,9 @@ after base `Entity::CopyPropertiesFromEntityClass`). `entityClass` ids are
 `.NET String.GetHashCode()` of the class name (`EntityClass.FromString`, IL=3);
 that i32 is what save files and the spawn wire carry. Order in IL:
 
-1. **Hand item:** `handItem = ItemClass.GetItem(Properties[HandItem], false)`, but
+1. **Hand item:** `handItem = ItemClass.GetItem(Properties[HandItem], false)`
+   (`ItemClass.GetItem` IL=13: `ItemValue(class.Id)` via the
+   `nameToItem[CaseInsensitive]` dicts, else `ItemValue.None`), but
    if the prop value contains `,` only the substring before the first comma is
    used. Empty prop → fallback `ItemClass.GetItem("meleeHandPlayer").Clone()`.
    Empty result throws `"HandItem missing <name>"`. If `inventory != null`:

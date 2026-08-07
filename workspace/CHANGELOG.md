@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: ItemClass.GetItem resolver
+
+Done (V3.1.0 b14 IL):
+- ItemClass.GetItem IL=13 / GetItemClass IL=15: nameToItem(case-insensitive)
+  dicts -> ItemValue(class.Id) or None; noted in D8.6 hand item.
 ## 2026-08-08 — tier-C: entity tier calc + flags parse
 
 Done (V3.1.0 b14 IL):
