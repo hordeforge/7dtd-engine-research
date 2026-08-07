@@ -246,6 +246,12 @@ null; a liquid `GetPOIBlockIdOverride` falls back to the `underwater` biome;
 otherwise `biomeProvider.GetBiomeAt(wx, wz)` (a null biome aborts the whole
 chunk), the cell is bucketed into `biomePositions`, and the sub-biome fold
 runs `GetSubBiomeIdxAt(biome, wx, terrainHeight, wz)` when the index is >= 0.
+`GetSubBiomeIdxAt` (IL=79) walks the biome's `subbiomes` and returns the first
+index whose `noiseMin <= v < noiseMax`, where
+`v = noiseGen.FBM(x + noiseOffset.x, z + noiseOffset.y, noiseFreq) * 0.5 +
+0.5` (mapping the [-1, 1] noise to [0, 1]); the FBM result is cached per
+`(noiseFreq, noiseOffset)` pair, and the `y` argument is unused (the field is
+2D over x/z). No match returns -1.
 It finishes with `decoratePrefabs` then `decorateSingleBlocks`, and logs
 `DecorateChunkOverlapping` errors with the current `GameManager.frameCount`.
 `decorateSingleBlocks` (IL=56) walks the 16x16 cells, skips null trader cells
