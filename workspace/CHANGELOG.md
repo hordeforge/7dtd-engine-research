@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: CreateEntityOperation.LoadAssets
+
+Done (V3.1.0 b14 IL):
+- LoadAssets IL=100: class resolve, MaxEntityTier substitution + id rewrite,
+  isPlayer/isLocalPlayer detection, EntityInstanceAssets/EModelInstanceAssets
+  async load.
 ## 2026-08-08 — tier-C: CreateEntityOperation.Start
 
 Done (V3.1.0 b14 IL):

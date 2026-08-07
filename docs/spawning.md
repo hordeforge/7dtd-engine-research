@@ -451,6 +451,16 @@ starts with `false`; the operation is polled by `TryComplete`).
 (advance past an explicit id); `new CreateEntityOperation(ecd).LoadAssets(isSync)`
 (async asset load; `CompleteEntity` runs when both asset sets report complete).
 
+**`CreateEntityOperation.LoadAssets(isSync)` (IL=100):** resolve
+`ec = EntityClass.GetEntityClass(ecd.entityClass)` (unknown → error); apply
+**max-tier substitution** `ec = GetEntityClassWithinMaxTier(ec,
+EntityFactory.MaxEntityTier)` (a class above the server max tier is replaced;
+none available → error) and rewrite `ecd.entityClass =
+GetId(ec.entityClassName)`. `isPlayer` = class is `playerMaleClass`/
+`playerFemaleClass`; `isLocalPlayer` = player with `ecd.id ==
+ecd.belongsPlayerId`. Kick `EntityInstanceAssets.Load(isSync, ec,
+isLocalPlayer)` and `EModelInstanceAssets.Load(isSync, ecd, ec)`.
+
 **`CreateEntityOperation.CompleteEntity()` (IL=639)** builds the entity object:
 1. **Asset gates:** both `EntityInstanceAssets` and `EModelInstanceAssets` must
    be load-complete and load-successful; the operation runs once (entity null).
