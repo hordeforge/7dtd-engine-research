@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: LockRequestServer 5-target cap and lock maps
+
+Done (V3.1.0 b14 IL):
+- LockRequestServer IL=239: stale unlock, max 5 targets, single vs shared maps.
+- CanLockOnServer gate; OnLockedServer; NetPackageLockResponse flags 192.
+- ForceUnlockLockTarget walks single+shared holders and force-unlocks.
+---
 ## 2026-08-07 — tier-C: EntityTrader OnUpdateLive + DropContent multi-bag
 
 Done (V3.1.0 b14 IL):

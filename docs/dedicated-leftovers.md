@@ -128,6 +128,24 @@ contextTypeFullName : string  // empty if no context
 `LockManager.LockRequestServer(targets, sender.entityId, context, channel)`;
 else `UnlockRequestServer(sender.entityId, force=false)`.
 
+**`LockRequestServer` (IL=239)** ordered gates (server-only):
+
+1. If player already has `singleLocks` / `sharedLocks` / `keepOpenTimes` entry:
+   warn + `ForceUnlockByPlayer` then continue (self-heal stale lock state).
+2. Reject null targets; reject span length **> 5** (hard cap).
+3. For each target: build `LockEntry(target, channel)`; if not shared and
+   `singleLocks.ContainsValue(entry)` → fail "already locked by another".
+4. For each: `target.CanLockOnServer(playerId, context, channel)` must pass.
+5. On full success: add to `sharedLocks` or `singleLocks` by channel;
+   `RefreshPlayerActive`; stamp `keepOpenTimes[player] = UtcNow`;
+   `OnLockedServer(true, playerId, context, channel)` per target.
+6. Reply: non-primary-player → `NetPackageLockResponse` flags **192** to
+   player; primary/local → `LockResponse` in-process.
+
+**`ForceUnlockLockTarget` (IL=124):** server-only; collect all player ids that
+hold the target in single or shared maps; `UnlockRequestServer(id, force=true)`
+each (trader close path).
+
 **`NetPackageLockResponse` (ToClient, write IL=74):**
 
 ```text
@@ -535,6 +553,8 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   used during RWG road/path routing ([world-generation.md](world-generation.md)).
 
 ## Changelog
+
+- **2026-08-07:** LockRequestServer IL=239 (5-target cap, single/shared maps, CanLockOnServer, OnLockedServer, response 192); ForceUnlockLockTarget multi-player unlock.
 
 - **2026-07-28:** NetPackageLockRequest/Response wire + ForceUnlockByPlayer.
 

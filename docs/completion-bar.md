@@ -162,6 +162,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | More MinEvent leaves (exp/loot/rage/jam) | minevents §7.1 |
 | GetLandClaimOwner self/ally/other + offline | server-lifecycle §3.1 |
 | EntityTrader.OnUpdateLive open/greet/unload | loot-economy |
+| LockRequestServer 5-target cap + maps | dedicated-leftovers §2.2 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
