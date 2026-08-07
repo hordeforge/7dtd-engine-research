@@ -469,6 +469,19 @@ radiationMapSize`, and branches on whether the texture is wider than **512**
 (tiled/file-backed `LoadRadiationMap*` path versus the direct small-map
 fill).
 
+`BiomeImageLoader` turns `biomesTex` into the byte map: `Load()` (IL=7) is a
+coroutine stub for `<Load>d__11` (MoveNext IL=229), which resets `isError`/
+`lastBiomeValue`/`biomeId` (255), grabs the pixels as a
+`NativeArray<BiomePixel>` via `GetPixelData<BiomePixel>(0)`, and walks the
+`GridCompressedData` block grid: per block it converts the corner pixel with
+the `toBiomeValue` delegate (`BiomeValueFromARGB32` packs `(c2<<16)|(c3<<8)|c4`,
+`BiomeValueFromRGBA32` packs `(c1<<16)|(c2<<8)|c3`), maps it through
+`GetBiomeId` (a cached `TryGetValue` on the color-keyed biome dictionary that
+keeps the last lookup's id on miss), then stamps `SetSameValue` for the whole
+block and `SetValue` per pixel. The work is frame-sliced with a
+`MicroStopwatch` and yields between blocks. `BiomeIdToColor32(value)` (IL=23)
+unpacks a value into `Color32((value>>16)&255, (value>>8)&255, value&255, 0)`.
+
 The splat/texture work runs on dedicated too (textures are loaded and
 compressed); only their rendering is client work.
 
