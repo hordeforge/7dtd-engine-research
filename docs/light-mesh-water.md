@@ -57,6 +57,13 @@ high 4 bits (`light >> 4`). `ChunkCluster.GetLight(pos, type)` (IL=21) is the
 world-coordinate wrapper: chunk lookup, `0` when the chunk is null, else
 delegate.
 
+**World query leaves:** `World.IsOpenSkyAbove(x, y, z)` (IL=23) is true when
+the `ChunkCache` is null, else
+`GetChunkSync(x >> 4, z >> 4).IsOpenSkyAbove(x & 15, y, z & 15)`.
+`World.IsWaterInBounds(aabb)` (IL=74) walks the integer cell range
+`[floor(min), floor(max) + 1)` per axis and returns true when any
+`WorldBase.IsWater(x, y, z)` cell is water.
+
 **Light-block state bits (V3.1.0 b14):** `BlockLight.IsLightOn(bv)` (IL=7)
 is `(meta & 2) != 0` - bit 1 of the block's meta is the light-on flag;
 `BlockLight.SetLightState(world, pos, bv, isOn)` (IL=15) writes it with
