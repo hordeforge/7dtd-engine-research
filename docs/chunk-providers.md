@@ -235,6 +235,32 @@ present (overlap-safe placement window); it then:
 `ChunkManager.task_Lighting`, so late-arriving neighbors get their pending
 decoration on the lighting worker rather than only at generation time.
 
+`WorldDecoratorBlocksFromBiome.DecorateChunkOverlapping` (IL=245) is the
+biome-deco driver, guarded by its own `rwlock` write lock. It builds a
+per-chunk seeded `GameRandom` via `Utils.RandomFromSeedOnPos(chunk.X, chunk.Z,
+seed)`, lazily creates `resourceNoise = new PerlinNoise(seed)`, clears the
+`biomePositions[biomeId]` cell buckets, then resolves a `BiomeDefinition` per
+cell into the linear `chunkBiomes[x + z*16]` array: cells inside a trader area
+(`prefabDecorator.IsWithinTraderArea` / `GetTraderAtPosition`) are stored as
+null; a liquid `GetPOIBlockIdOverride` falls back to the `underwater` biome;
+otherwise `biomeProvider.GetBiomeAt(wx, wz)` (a null biome aborts the whole
+chunk), the cell is bucketed into `biomePositions`, and the sub-biome fold
+runs `GetSubBiomeIdxAt(biome, wx, terrainHeight, wz)` when the index is >= 0.
+It finishes with `decoratePrefabs` then `decorateSingleBlocks`, and logs
+`DecorateChunkOverlapping` errors with the current `GameManager.frameCount`.
+`decorateSingleBlocks` (IL=56) walks the 16x16 cells, skips null trader cells
+and `terrainHeight + 1 >= 255` columns, and calls `decorateSingleBlock` at
+`Vector3i(x, height + 1, z)`.
+
+`decorateSingleBlock` (IL=139) is the per-cell gate that reaches
+`decorateSingleBlockTryPlaceDeco` (§6.1): the cell must be air (the block
+above must be air too, and the block below solid: air-above-with-air-below
+returns), must not be `StreetOnly`, must not be `IsNothing` when dry, and a
+wet cell requires water above as well. It reads
+`chunkBiomes[x + z*16]`, `chunk.GetWorldPos()` and `GetTerrainNormalY(x, z)`,
+then walks that biome's `m_DecoBlocks` entries, returning as soon as one
+placement attempt succeeds.
+
 **`WorldBlockFiller`** is the per-chunk biome deco sprinkler invoked by
 `WorldDecoratorBlocksFromBiome`. Its `m_BlocksToFill : Byte[]` is a flat
 16x16x256 grid indexed `((x << 4) | z) << 8 | y`; **255** means "untouched".
