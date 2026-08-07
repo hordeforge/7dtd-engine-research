@@ -398,6 +398,19 @@ entityIdThatDamaged)`, while negative (repair) damage delegates to the base.
 (The walker-side `LandMineImmunity` skip is the `OnEntityWalking` gate
 above.)
 
+**Collision damage (`BlockDamage.OnEntityCollidedWithBlock`, IL=126):** the
+shared base behind spikes/barbed wire: for an alive `EntityAlive` it builds a
+`DamageSourceEntity(damageType, -1)` with `AttackingItem` from the block
+value, `BlockPosition`, and `SetIgnoreConsecutiveDamages(true)` (no tick
+re-trigger), sets the `EntityHuman` hit-transform name, runs
+`Entity.DamageEntity(source, damage, false, 1)`, then
+`CalculateBlockDamage(this, damageReceived, ...)` (the block's own
+collision wear) and the `MovementFactor` slow. `BlockSpikes.
+OnEntityCollidedWithBlock` (IL=38) runs the base, then **retracts**: a
+non-air `SiblingBlock` replaces the cell via `SetBlockRPC` (type swap,
+damage 0), otherwise the cell is set to Air - the spikes are consumed by a
+step.
+
 `Block/DestroyedResult` (exact enum): `None=0`, `Keep=1`, `Downgrade=2`,
 `Remove=3`. The base `OnBlockDestroyedBy` returns `Downgrade`.
 
@@ -670,6 +683,10 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** Collision damage base IL=126 (DamageSourceEntity build,
+  DamageEntity, CalculateBlockDamage, MovementFactor slow);
+  BlockSpikes.OnEntityCollidedWithBlock IL=38 retract (SiblingBlock replace
+  or Air).
 - **2026-08-08:** BlockMine.OnBlockDamaged IL=44: damage-proportional
   detonation (clamp(damagePoints,1,MaxDamage-1)/MaxDamage roll), repair
   delegates base.
