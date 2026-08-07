@@ -825,6 +825,19 @@ run or fire on the dedicated server.
   slot is returned unless it holds a null padding entry, which falls back to
   `days[0]`. `AddForDay` (IL=26) null-pads up to the target index and writes
   the class.
+
+**The `<spawning>` loader (`EntitySpawnerClassesFromXml.
+LoadEntitySpawnerClasses`, IL=204):** requires a `<spawning>` root (throws
+`No element <spawning> found!`), then per `<entityspawner>`: `name` (throws
+`Attribute 'name' missing on property in entityspawner`), `dynamic` (bool,
+false), and `wrapMode` (`"wrap"` sets `bWrapDays`, `"clamp"` sets
+`bClampDays`). Each `<day>` child reads `value`: `"*"` selects every day, a
+comma string parses as a min/max range (`ParseMinMaxCount`), and a plain int
+pins a single day; for each day in the range an `EntitySpawnerClass` is
+built (name, `<property>` elements, `Init`) and `AddForDay`d. An
+`entityspawner` with no days throws `Empty entityspawner not allowed:
+{name}`, and the finished schedule is registered in
+`EntitySpawnerClass.list[name]`.
 - **`SpawnEntry`** (nested `GameEventManager/SpawnEntry`, base `Object`) tracks
   one entity spawned by a game-event action sequence (`SpawnedEntity`, `Target`,
   `Requester`, owning `GameEvent`, `IsAggressive`). Its only method,
@@ -1055,6 +1068,11 @@ above.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Content and native residuals |
 
+## Changelog
+
+- **2026-08-08:** <spawning> loader (LoadEntitySpawnerClasses IL=204):
+  entityspawner name/dynamic/wrapMode (wrap/clamp), day value * / min-max /
+  single, EntitySpawnerClass build + AddForDay, empty-spawner throw.
 ## Changelog
 
 - **2026-08-07:** Entity.IsSpawned (IL=2) base true; EntityAlive.IsSpawned
