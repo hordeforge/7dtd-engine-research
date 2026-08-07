@@ -38,3 +38,15 @@
 - b089640 Push/area/side-step
 - a36a49e door/entity/AttackPush
 - next: SearchForDestroyPos commit
+
+
+## Commits this session (partial)
+- 6912ebf CanNavigatePath
+- 02daace AddEnemyToWorld
+- 89a6bb9 destroy-pos reuse
+- 3d699ca BossEvent
+- 2616b49 SearchForDestroyPos
+- b089640 Push/area
+- a36a49e door/entity
+- e776463 IsAlert
+- 577bc1c CheckBlocked

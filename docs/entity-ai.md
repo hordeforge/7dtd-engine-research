@@ -1542,6 +1542,18 @@ always `ExecuteDismember(true)` (restore dismember visuals on spawn).
 `stompsSpikes` and block has tag **6**: `bypass=true`, return **999**; else
 `bypass=false`, return default.
 
+**`get_Electrocuted` (IL=20):** true if avatar
+`GetAnimationElectrocuteRemaining() > 0`.
+**`set_Electrocuted(value)` (IL=41):** if value differs from remaining &gt; **0.4**:
+mark `bPlayerStatsChanged` when local; if value true:
+`StartAnimationElectrocute(0.6)` + `Electrocute(true)`.
+
+**`AddStamina(v)` (IL=17):** if Stamina stat exists and Health &gt; 0, add to
+value. **`AddWater(v)` (IL=9):** add to Water stat.
+**`get_HarvestingAnimation` (IL=13):** avatar `IsAnimationHarvestingPlaying`.
+**`get_IsEating` / `get_IsDancing` / `get_Climbing` / `get_HasAI`:** field
+reads. **`SetDamagedTarget`:** store field.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
@@ -2229,6 +2241,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddEnemyToWorld sleeper spawn; ValuePercentUI stealth bar formula.
 - **2026-08-07:** CanNavigatePath; CalcIfSwimming 0.5/0.7; BeginDynamicRagdoll; FaceJumpTo; stompsSpikes 999.
+- **2026-08-07:** Electrocuted remaining; AddStamina health gate; HarvestingAnimation.
 - **2026-08-07:** FindExistingDestroyPos ally share; CheckJumpBlocked y+2.35; IsTriggerAndNoRespawn mode 3.
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.

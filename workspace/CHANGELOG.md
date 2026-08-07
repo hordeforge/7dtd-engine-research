@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: Electrocuted and stamina helpers
+
+Done (V3.1.0 b14 IL):
+- get/set Electrocuted via avatar remaining and StartAnimationElectrocute(0.6).
+- AddStamina health gate; AddWater; HarvestingAnimation; simple field getters.
+---
 ## 2026-08-07 — tier-C: CanNavigatePath and swim/ragdoll helpers
 
 Done (V3.1.0 b14 IL):
