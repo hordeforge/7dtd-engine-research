@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.Update base + updateNetworkStats
+
+Done (V3.1.0 b14 IL):
+- Base Entity.Update (IL=105) narrated in loop.md Path B: bWasDead snapshot,
+  animateYaw, PhysicsMasterTargetFrameUpdate vs updateTransform on
+  physicsMasterTargetTime>0, chunk-observer lazy create + SetPosition per
+  frame vs Dispose on flag drop, animatorAudioMonitoringDictionary sweep
+  (stop + remove finished handles).
+- EntityAlive.updateNetworkStats (IL=55): drains networkStatsUpdateQueue one
+  entry per call - m_NetworkStats -> EntityNetworkStats.ToEntity + return;
+  m_HoldingData -> SetItem when slot differs + SetHoldingItemIdxNoHolsterTime
+  when held index changed.
+
 ## 2026-08-08 - tier-C: EntityAlive frame hooks
 
 Done (V3.1.0 b14 IL):

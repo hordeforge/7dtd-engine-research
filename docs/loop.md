@@ -241,6 +241,26 @@ frame hooks: `LateUpdate()` (IL=6) copies `entityStats` into
 with `DeadBodyHitPoints > 0`) then spawns the `particleOnDestroy` effect
 (local, not unloaded, non-empty name only) at the head position.
 
+**Base `Entity.Update()` (IL=105)** (called first by the override above):
+snapshot `bWasDead = IsDead()`; `animateYaw()`; then either
+`PhysicsMasterTargetFrameUpdate()` while `physicsMasterTargetTime > 0` or
+`updateTransform()` otherwise. Chunk-observer maintenance: a local
+`bIsChunkObserver` entity lazily builds `movableChunkObserver`
+(`new MovableSharedChunkObserver(world.m_SharedChunkObserverCache)`) and
+pushes `SetPosition(position)` each frame, keeping the shared observer cache
+pinned to the entity; dropping the flag disposes the observer and nulls the
+field. Finally, animator audio sweep: any `animatorAudioMonitoringDictionary`
+entry whose `Audio.Handle` stopped playing gets `Stop(entityId)` and is removed
+from the dictionary (enumerate, collect, then remove).
+
+**`EntityAlive.updateNetworkStats()` (IL=55):** drains
+`networkStatsUpdateQueue` **one entry per call** (bounded per frame): an
+`m_NetworkStats` entry is applied via `EntityNetworkStats.ToEntity(this)` and
+returns immediately; an `m_HoldingData` entry instead re-applies the holding
+state: `inventory.SetItem(index, m_HoldingItemStack)` when the current slot
+differs, plus `SetHoldingItemIdxNoHolsterTime(index)` when the held index
+changed. Nothing happens when the queue is empty.
+
 Slice model (EMA frame gaps, ~25 base, `tickEntitySliceCount`): [`entity-ai.md`](entity-ai.md).
 
 ### 3.4 AI / path onion (authority path)
@@ -481,6 +501,10 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-07:** Base Entity.Update (IL=105): bWasDead snapshot, animateYaw,
+  physics-master vs updateTransform split, chunk-observer pin/dispose,
+  animator-audio sweep; updateNetworkStats (IL=55) one-entry-per-call queue
+  drain (stats ToEntity vs holding reapply).
 - **2026-08-07:** Path B body: EntityAlive.Update (IL=171) order (base update,
   net stats, root-motion lerp, _underwater cvar, MinEventContext refresh,
   Progression.Update, render fade), LateUpdate (IL=6) stats snapshot,
