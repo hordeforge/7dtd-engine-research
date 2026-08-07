@@ -201,17 +201,25 @@ So stock LOD **slows how often EAI tasks re-decide**, not how often an entity fo
 
 ---
 
-## 4. `aiActiveScale` bands (EntityActivityUpdate IL)
+## 4. `aiActiveScale` bands (EntityActivityUpdate IL=229)
 
-Per player, build `EntityPlayer.aiClosest` lists via `GetClosestPlayer` + sqr magnitude, sort, then:
+1. Clear every player's `aiClosest` list.
+2. For each `EntityAlives`: `GetClosestPlayer(pos, -1, dead=false)`; push entity
+   into that player's `aiClosest`; store `aiClosestPlayer` +
+   `aiClosestPlayerDistSq` (or null / +inf if none).
+3. Per player: sort `aiClosest` by distSq ascending.
+4. `N = FastClamp(60 / playerCount, **4**, **20**)` (top-N full AI quota).
+5. For each entity in that list:
 
 | Condition on `aiClosestPlayerDistSq` | `aiActiveScale` | Jiggle |
 |---|---|---|
-| index in first `N` closest **or** dist² **&lt; 64** (~8 m) | **1.0** | On if dist² **&lt; 36** (~6 m) |
+| index &lt; **N** **or** dist² **&lt; 64** (~8 m) | **1.0** | On if dist² **&lt; 36** (~6 m) |
 | dist² **&lt; 225** (~15 m) | **0.3** | Off |
 | else | **0.1** | Off |
 
-Also cloth sim toggles involving local player attach/distance (constants **625** / **3025** appear earlier in method for cloth radii).
+**Cloth sim (local player only):** radius² **625** (25 m) default; **3025** (55 m)
+when `AimingGun`. For each *other* player: if not attached and distSq &lt; radius²
+enable cloth; attached → off. Local player cloth also set from camera vs attach.
 
 Only **`World.EntityActivityUpdate` stores** `aiActiveScale`; only **`updateTasks` loads** it (plus EfficientServer patches).
 
@@ -1636,8 +1644,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** EntityDied + ClearedUpdate pref 88; GetMaxAttackTime 10;
-  UseHoldingItem; AStar/ASP enqueue; CanSee; CheckDespawn; IsAttackValid.
+- **2026-08-07:** EntityActivityUpdate N=clamp(60/P,4,20); cloth 25/55 m aim;
+  EntityDied ClearedUpdate; GetMaxAttackTime 10; UseHoldingItem; CanSee.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

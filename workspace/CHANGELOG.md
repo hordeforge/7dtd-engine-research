@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EntityActivityUpdate top-N and cloth radii
+
+Done (V3.1.0 b14 IL):
+- EntityActivityUpdate: clear aiClosest; assign closest player; sort; N=FastClamp(60/P,4,20).
+- Scale bands 1.0 / 0.3 / 0.1 at 64/225; jiggle under 36.
+- Cloth: 625 (25 m) / 3025 (55 m) when AimingGun; skip attached others.
+---
 ## 2026-08-07 — tier-C: EntityDied ClearedUpdate and AddScore weights
 
 Done (V3.1.0 b14 IL):
