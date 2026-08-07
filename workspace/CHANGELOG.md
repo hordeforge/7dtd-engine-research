@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SleeperVolume accessors
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md sleeper section: SetMinMax (IL=19) BoxMin/Max + Center half-sum;
+  GetPlayerTouchedToUpdateId/TriggerId (IL=13) entity id or -1; GetSpawnPoints
+  (IL=3); SetScript (IL=15) MinScript null-or-set.
+
 ## 2026-08-08 - tier-C: enemy intent-to-attack
 
 Done (V3.1.0 b14 IL):
