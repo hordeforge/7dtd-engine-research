@@ -346,6 +346,17 @@ and calls `GameManager.ItemReloadServer(entityId)` (server-authoritative
 reload). `isJammed(iv)` (IL=5) reads the `scGunIsJammed` metadata key (the jam
 flag lives in item metadata).
 
+**`ItemActionThrownWeapon` (V3.1.0 b14):** `instantiateProjectile(data)`
+(IL=122) clones the held item's model game object, detaches it, forces material
+instances, positions it at the model transform, moves it to layer 0, and adds a
+`ThrownWeaponMoveScript` bound to the action / item / value / owner id; it then
+hides the original held model and points `MinEventContext` (`Self`,
+`Transform`, `Tags`) at the new projectile before firing the `onThrown` event
+(82). `throwAway(data)` (IL=96) resolves the look ray origin and, for local
+players, subtracts the `StaminaLoss` passive (112) scaled by
+`StaminaUsageMultiplier` from Stamina; it then `Fire(origin, look, holder,
+hitmaskOverride, m_ThrowStrength)` and `inventory.DecHoldingItem(1)`.
+
 **`ItemActionDynamicMelee.ExecuteAction` (IL=210):** `canStartAttack` gate; clear
 `alreadyHitEnts`/`alreadyHitBlocks`; optional harvest path; avatar attack bools /
 PowerAttack trigger; `FireEvent` MinEvents; set `Attacking` on data. Per-frame hit
