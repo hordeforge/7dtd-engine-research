@@ -326,6 +326,18 @@ and falling back to `DefaultClassName.name`. `ModifySpawnCountByGameDifficulty`
 (IL=6) is the `EntityFactory.EnemySpawnMode` gate: the count unchanged when
 enemy spawning is enabled, else 0.
 
+`Spawn(world, day, spawnEnemies)` (IL=31) is the default wrapper around
+`SpawnManually`: it returns early unless `AIDirector.CanSpawn(1.0)` and then
+calls `SpawnManually` with the two stock callbacks. The stock precondition
+(`<Spawn>b__0`, IL=206) starts with a null target and, when the day class sets
+`bIgnoreTrigger`, returns true immediately with
+`GetClosestPlayer(spawnerPos, 0, 160.0)` as the target when
+`bAttackPlayerImmediately`; otherwise it scans players and accepts when one is
+close enough to the trigger box. The stock position callback (`<Spawn>b__1`,
+IL=67) sets the target and, for `bCaveSpawn`, uses
+`FindRandomSpawnPointNearPositionUnderground(pos, 16, ...)` (failure -> zero
+pos, false), else the ground variant honoring the day class's `bSpawnOnGround`.
+
 ---
 
 ## 5. Chunk-heat scouts and screamer hordes (state machine)
