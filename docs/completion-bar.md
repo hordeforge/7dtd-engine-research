@@ -303,6 +303,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | Activation command defaults/reorder (grab, storage-after-heal/horn) | entity-ai.md D8.6a |
 | EntityVulture.updateTasks IL=1344 flight AI state machine | entity-ai.md D15 |
 | EntityVulture helper leaves (reposition, strike, FindTarget, course, home) | entity-ai.md D15 |
+| Air-drop family: CreateFlightPaths/Plane/Tick/crate landing (IL 355/74/193/103) | spawning.md spawn leaves |
+| EntityClass.FromString GetHashCode + ItemStack.FromString + SetAttackTargetClient | entity-ai.md D8.6 / §5.1b |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

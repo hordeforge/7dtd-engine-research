@@ -574,6 +574,11 @@ run or fire on the dedicated server.
   `CreateEntity(FromString("supplyPlane"), path.Start, yaw = Angle(heading))`;
   `SetDirectionToFly(dir, (int)(20 * (|End-Start|/120) + 10))`;
   `SpawnEntityInWorld`; log "AIAirDrop: Spawned aircraft at (...), heading (...)".
+- **`EntitySupplyPlane`** server motion: `SetDirectionToFly(dir, ticks)`
+  (IL=12) stores `ticksToFly`, `motion = dir * 6`, `IsMovementReplicated =
+  false`. `OnUpdatePosition(partial)` (IL=49): `position += motion *
+  partial`; server counts down `ticksToFly` and `MarkToUnload()` at 0; plays
+  the `SupplyDrops/Supply_Crate_Plane_lp` loop once; `SetAirBorne(true)`.
 - **`RequestToSpawnPlayer` join path (IL=496):** server creates the remote
   `EntityPlayer` and sends `NetPackagePlayerId` before `SpawnEntityInWorld`.
   Spawn position order: team-near (GameStats 25) -> friend-near (`nearEntityId`,

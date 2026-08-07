@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: supply plane server motion
+
+Done (V3.1.0 b14 IL):
+- EntitySupplyPlane.SetDirectionToFly IL=12 (ticks, motion = dir*6, no
+  replication) and OnUpdatePosition IL=49 (advance motion*partial, unload at
+  0, plane loop sound, SetAirBorne).
 ## 2026-08-08 — tier-C: air-drop flight path build + plane spawn
 
 Done (V3.1.0 b14 IL):
