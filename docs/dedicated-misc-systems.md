@@ -208,6 +208,12 @@ Leaves (all V3.1.0 b14 IL):
   string→object conversion by `PropertyDecl.type` (Int32 TryParse default 0 /
   Float / Bool / String; unknown pref → null) and reports
   `Could not parse config value '{value}'` on failure.
+- **`ApplyParsedGamePrefs()` (IL=57):** `parsedGamePrefs` missing → "Expected
+  parsed game prefs." + quit + false; else `GamePrefs.SetObject` each parsed
+  (enum, value) and clear the dict. Dedicated: `GameUtils.ValidateGameName(pref
+  31)`; invalid → banner ("GameName is empty or contains invalid characters.
+  Allowed characters: A-Z, a-z, 0-9, dot (.), underscore (_), dash (-) and
+  space ( )") + quit + false; valid → `SetDedicatedServerSettings()` + true.
 - **`InitGamePrefs()` (IL=36):** log `Last played version: {pref 34}`; set
   `GamePrefs[34 (GameVersion)] = Constants.cVersionInformation.LongStringNoBuild`;
   `initGamePrefsOk = ApplyParsedGamePrefs()`.

@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: ApplyParsedGamePrefs commit
+
+Done (V3.1.0 b14 IL):
+- ApplyParsedGamePrefs IL=57: SetObject each parsed pref, dedicated GameName
+  validation (quit on invalid), SetDedicatedServerSettings on success.
 ## 2026-08-08 — tier-C: GamePrefs.Parse typed conversion
 
 Done (V3.1.0 b14 IL):
