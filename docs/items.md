@@ -484,7 +484,12 @@ flowchart TB
 ```
 
 Each family has a matching runtime-state class in the top-level `ItemActionData`
-hierarchy, so the mutable per-shot state grows with the behavior:
+hierarchy, so the mutable per-shot state grows with the behavior. The
+instantiation is uniform: `ItemAction.CreateModifierData(invData, index)`
+(IL=4) is `new ItemActionData(invData, index)`, and every subclass override
+(ILEat, Ranged, Catapult, DynamicMelee, Repair, OpenBundle, ...) is the same
+4-IL pattern returning its own `MyInventoryData` / `ItemActionData*` type -
+the per-action runtime-data factory:
 
 ```text
 ItemActionData
@@ -1516,6 +1521,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemAction.CreateModifierData IL=4 factory: base new
+  ItemActionData; every subclass the same 4-IL pattern returning its own
+  runtime-data type.
 - **2026-08-08:** ItemClass.OnConvertToBlockValue: base IL=2 passthrough;
   ItemClassTorch IL=20 packs UseTimes into meta/meta2 (burn state survives
   placement).
