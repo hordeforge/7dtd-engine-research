@@ -488,6 +488,14 @@ is 1-based and day N spans `[(N-1)*24000, N*24000)`. `GameUtils::DayTimeToWorldT
 is `(wt / 1000.0 * 60) % 60`. Any server-side day counter must subtract 1 before
 encoding.
 
+More time conversions: `DaysToWorldTime(day)` (IL=15) is `(day - 1) * 24000`
+(0 for `day < 1`); `DaysToWorldTimeMidnight(day)` (IL=6) adds **16000** ticks
+(16:00); `WorldTimeToTotalSeconds(wt)` (IL=4) is `wt * 3.6` (1 tick = 3.6 s at
+the 1000-ticks-per-hour scale); `WorldTimeToTotalMinutes(wt)` (IL=7) is
+`(uint)(wt * 0.06)` and `TotalMinutesToWorldTime(min)` (IL=7) divides by the
+same 0.06; `WorldTimeToHourMinutesString(wt)` (IL=14) formats
+`{hour:D2}:{minute:D2}` from `WorldTimeToElements`.
+
 `GameUtils::IsBloodMoonTime(duskDawn, hour, bmDay, day)` (1926341) returns true
 when `day == bmDay && hour >= duskHour`, **or** when
 `day > 1 && day == bmDay + 1 && hour < dawnHour`. The blood moon therefore spans
