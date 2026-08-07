@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ExplosionData wire + explosion damage model
+
+Done (V3.1.0 b14 IL):
+- protocol-packages.md 6.14: ExplosionData Write IL=88 / Read
+  IL=82 (ParticleIndex/Duration x10/BlockRadius x20/EntityRadius/
+  BlastPower i16, BlockDamage/EntityDamage f32, BlockTags,
+  IgnoreHeatMap, DamageType i16, DamageMultiplier, BuffActions);
+  ToByteArray IL=21 pooled writer.
+- Explosion.AttackBlocks IL=553 damage model: passive 21 radius,
+  terrain rise, cubic sweep + occlusion ray march (dir*0.51),
+  passive 19 block damage x GetBlockDamageScale+0.5, linear
+  falloff (1-dist/radius)/(2r+1), BlockTags filter,
+  damagedBlockPositions.
 ## 2026-08-08 - tier-C: ExplosionData struct wire
 
 Done (V3.1.0 b14 IL):
