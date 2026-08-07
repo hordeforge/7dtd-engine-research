@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: Uncull and IsWorldEvent blood moon
+
+Done (V3.1.0 b14 IL):
+- UncullChunk queues culled chunks; UncullPOI AddChunksToUncull.
+- GetTraderAreaAt DynamicPrefabDecorator; IsWorldEvent only event 0 blood moon.
+---
 ## 2026-08-07 — tier-C: AddMotion and crouch height fixed update
 
 Done (V3.1.0 b14 IL):

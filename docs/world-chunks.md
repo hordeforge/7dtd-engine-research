@@ -340,6 +340,20 @@ Silent in-chunk write used by load, falling, inject, and some TE paths:
 Does **not** fire light/mesh/stability RPC; callers that need those use full
 `SetBlock` / `SetBlockRPC`.
 
+### 5.0b Uncull and trader lookup helpers
+
+**`World.UncullChunk(chunk)` (IL=8):** if `IsInternalBlocksCulled`, add to
+`chunksToUncull` set (async uncull queue).
+
+**`World.UncullPOI(prefab)` (IL=26):** `prefab.AddChunksToUncull(world, set)`;
+on success log POI name + bbox and return true.
+
+**`World.GetTraderAreaAt(pos)` (IL=14):**
+`ChunkProvider.GetDynamicPrefabDecorator().GetTraderAtPosition(pos, 0)` or null.
+
+**`World.IsWorldEvent(event)` (IL=7):** only event **0** is implemented → returns
+`isEventBloodMoon`; any other event → false.
+
 ### 5.1 `GameManager.ChangeBlocks` (IL=530) / `SetBlocksOnClients` (IL=13)
 
 Authoritative multi-block apply used by `NetPackageSetBlock` Process:
@@ -486,6 +500,8 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 - **2026-08-07:** Chunk.SetBlockRaw IL=386 (y cap, water, IndexedBlocks, heightmap,
   tickedBlocks, dirty flags).
+- **2026-08-07:** UncullChunk/UncullPOI; GetTraderAreaAt decorator; IsWorldEvent
+  only blood-moon (0).
 - **2026-08-07:** ChangeBlocks IL=530 / SetBlocksOnClients IL=13 authority path.
 
 - **2026-08-07:** `Chunk.get_NeedsSaving` predicate (isModified | hasEntities | TE | triggers) for blob-cache invalidation notes.
