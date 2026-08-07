@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemActionRanged ammo leaves
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: GetMaxAmmoCount (IL=25) MagazineSize passive vs
+  BulletsPerMagazine; checkAmmo (IL=12) InfiniteAmmo || Meta>0; HasInfiniteAmmo
+  (IL=24) passive 188; GetBurstCount (IL=23) passive 15; IsAmmoUsableUnderwater
+  (IL=19) magazine item class flag; requestReload (IL=12) ItemReloadServer;
+  isJammed (IL=5) scGunIsJammed metadata.
+
 ## 2026-08-08 - tier-C: VehicleManager save path
 
 Done (V3.1.0 b14 IL):
