@@ -6,6 +6,20 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChunkBlockLayer storage + BlockChangeInfo wire
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 5.0a: ChunkBlockLayer split-byte layout
+  (m_Lower8Bits + lower8BitSameValue compression, m_Upper24Bits
+  3 bytes/cell), CalcOffset 1024-cell sub-planes; GetAt word
+  assembly + Air fallback; SetAt materialize-on-differing-low-byte,
+  pooled alloc/free (10000 cap); blockRefCount/tickRefCount +
+  notifyLoadUnload HashSet bookkeeping; bOnlyTerrain +
+  CheckOnlyTerrain IL=153 scan.
+- blocks.md 4: BlockChangeInfo wire (Write IL=89 / Read IL=76):
+  BlockValueRef + changedByEntityId i32 + flags byte (bit 0 value,
+  1 damage, 2 density, 3 force-density, 4 update-light, 5 texture)
+  + flagged payloads.
 ## 2026-08-08 - tier-C: ChunkBlockLayer storage
 
 Done (V3.1.0 b14 IL):
