@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TEFeatureLockable gates
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md 4.7: InitBlockActivationCommands (IL=37) lock/unlock/
+  keypad commands; AllowBlockActivationCommand (IL=93) owner/ally gates per
+  command; get_TriggerRole (IL=2) role 1; OnBlockTriggered (IL=10) unlocks on
+  triggeredBy.Unlock.
+
 ## 2026-08-08 - tier-C: TEFeatureStorage migration
 
 Done (V3.1.0 b14 IL):
