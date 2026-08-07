@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GameStats.SetObject
+
+Done (V3.1.0 b14 IL):
+- GameStats.SetObject IL=12: propertyValues store + OnChangedDelegates invoke;
+  Set overloads box only (writes do not touch sandbox refs).
 ## 2026-08-08 — tier-C: GameStats.GetInt sandbox routing
 
 Done (V3.1.0 b14 IL):

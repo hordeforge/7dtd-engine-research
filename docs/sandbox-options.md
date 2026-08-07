@@ -254,7 +254,10 @@ name mismatches special-cased: `EnumGameStats.BlockDamagePlayer` maps to
 the sandbox reference is consulted first: `sandboxReferences[stat] != null` →
 `BaseSandboxOption.GetIntValue()`; otherwise the raw `propertyValues[stat]`
 box (InvalidCastException logged). So the sandbox override is live in the read
-path for server sim, not just the write/broadcast path.
+path for server sim, not just the write/broadcast path. **Writes** do **not**
+route through the sandbox: every `Set` overload boxes into `SetObject`
+(IL=12), which stores `propertyValues[stat]` and fires
+`OnChangedDelegates?.Invoke(stat, value)`.
 
 ---
 
