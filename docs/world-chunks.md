@@ -105,6 +105,10 @@ The 64-bit texture word packs **eight 8-bit face indexes**
 (`Chunk.Value64FullToIndex(word, face)` (IL=12) is
 `(word >> (face * 8)) & 0xFF`; `TextureIdxToTextureFullValue64(idx)` (IL=43)
 replicates the low byte across all eight slots).
+`ChunkCluster.SetBlockFaceTexture(pos, face, textureIdx, channel)` (IL=61) is
+the painted-texture write: chunk lookup (no-op on miss),
+`Chunk.SetBlockFaceTexture(lx, ly, lz, face, textureIdx, channel)`, then
+`chunkPosNeedsRegeneration`.
 `World.worldToBlockPos(pos)` (IL=11) is the world-to-block conversion:
 `new Vector3i(Fastfloor(x), Fastfloor(y), Fastfloor(z))` (floor, so the
 negative half-space maps consistently).
