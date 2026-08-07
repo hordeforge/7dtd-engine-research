@@ -422,6 +422,25 @@ useSquareRadius)`.
 or below the `PlayerSafeZoneLevel` cap who have not claimed a bedroll spawn;
 past the level or with a bedroll set, the flag is off.
 
+**The protection is a chunk-level spawn lock.** `EntityPlayer.onSpawnStateChanged`
+(IL=52) runs base, `SetVisible(Spawned)`, zeroes `SpawnedTicks`, and for the
+respawn reasons `NewGame` (0), `Died` (2), and `EnterMultiplayer` (4), when the
+world is not remote or editor and `IsSafeZoneActive()`, calls
+`World.LockAreaMasterChunksAround(worldToBlockPos(position), worldTime +
+PlayerSafeZoneHours * 1000)` (the `PlayerSafeZoneHours` game-pref window in
+game-hours).
+
+`World.LockAreaMasterChunksAround(blockPos, worldTimeToLock)` (IL=71) walks a
+5x5 grid of area-master chunks around the point (offsets `dx, dz` in
+[-2, 2] x **80** blocks, resolved via `Chunk.ToAreaMasterChunkPos`): a loaded
+chunk with `ChunkAreaBiomeSpawnData` gets
+`spawnData.DelayAllEnemySpawningUntil(worldTimeToLock, Biomes)` (and sets
+`isModified`); a not-yet-loaded chunk is recorded in `areaMasterChunksToLock`
+(key → lock time) to apply when it loads. After the hook,
+`lastRespawnReason` is normalized to `Unknown` (6) unless it was `Teleport`
+(3). The client `EntityPlayerLocal` override (IL=35) only feeds the
+FP-controller.
+
 ---
 
 ## 7. From decision to entity to client
