@@ -735,7 +735,9 @@ the same base without the mod scale). `get_MaxUseTimes()` (IL=5) =
 `ModMaxUseTimes(MaxUseTimesBase, this)` (quality + installed mods applied).
 `ModMaxUseTimes(value, iv)` (IL=24) multiplies the base by the
 `DurabilityModifier` metadata when present (clamped to at least 1, no-op when
-the base is ≤ 0).
+the base is ≤ 0). `get_MaxDurabilityModifier()` (IL=9) reads that metadata with
+**1.0** as the default; `set_MaxDurabilityModifier(value)` (IL=13) removes the
+metadata at exactly **1** and stores it otherwise.
 
 - **Wear:** each qualifying use adds to `UseTimes` (melee/ranged via the attack
   path, consumables via `ItemActionEat.consume` through `EffectManager.GetValue`
