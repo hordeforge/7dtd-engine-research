@@ -596,6 +596,18 @@ the runtime `actionData` list (the held path reads
 `GetBlockHit`; damage scaled by `EffectManager.GetValue` passive effects; server
 path applies entity/block damage (same authority model as melee `Hit`).
 
+**`ItemActionAttack.ReadFrom` (IL=482) is the attack-action config parse** run
+from the loader's Actions fill: `ToolCategory` (string), `DamageEntity` /
+`DamageBlock` (float, defaults rolled before the keys), `Range` /
+`Block_range` / `Sphere`, `Magazine_size`, `Magazine_items` (comma list ->
+`MagazineItemNames`, sets `UsesMagazines`), parallel
+`Magazine_item_ray_counts` / `Magazine_item_ray_spreads` (int / float arrays
+indexed by the selected ammo slot), `Single_magazine_usage` ->
+`AmmoIsPerMagazine`, `Bullet_use_per_shot` -> `BulletUsePerShot`,
+`Rays_per_shot` / `Rays_spread`, `Infinite_ammo`, `Hitmask_override`,
+`Damage_type`, `Reload_time`, `Show_ammo_force`, the muzzle particles and
+empty/repeat/reload/end sound keys, and `Sound_impact_volume_scale`.
+
 **Reload leaves:** `ConsumeAmmo(data)` (IL=9) is `iv.Meta -= 1` (one round per
 shot). `loadNewAmmunition(gun, ammo, entity)` (IL=20) reads the holding
 action slot 0 as `ItemActionDataRanged`, resets `SelectedAmmoTypeIndex` to 0
@@ -1603,6 +1615,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionAttack.ReadFrom (IL=482) config parse:
+  ToolCategory/DamageEntity/DamageBlock/Range/Sphere, Magazine_items ->
+  MagazineItemNames + UsesMagazines, parallel ray-counts/spreads arrays,
+  Single_magazine_usage -> AmmoIsPerMagazine, Bullet_use_per_shot,
+  Rays_per_shot/spread, Infinite_ammo, Hitmask_override, sounds.
 - **2026-08-08:** mods.xml loader (ItemModificationsFromXml): ParseModifier
   (IL=63) Groups {Mods} + installable/blocked/modifier tags + type; parseItem
   (IL=725) CosmeticInstallChance, RequirementGroup[3] from ActionN classes,
