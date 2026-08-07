@@ -121,6 +121,17 @@ on dismember (or debug body part) OR part bits into `Flags` (1/2/4/8/16/32/64/
 bare-hand item from class `PropHandItemCrawler` or default
 `meleeHandZombie02`; `inventory.SetBareHandItem`; `TurnIntoCrawler()`.
 
+**`EntityAlive.TurnIntoCrawler` / base `AvatarController.TurnIntoCrawler`:** empty
+stubs (`ret` only). Real work is on human subclasses.
+
+**`EntityHuman.TurnIntoCrawler` (IL=33):** if `BoxCollider` present, set
+center `(0, 0.35, 0)` and size `(0.8, 0.8, 0.8)`; `SetupBounds()`; re-center
+`boundingBox` at `position + center`; `bCanClimbLadders = false`.
+
+**`AvatarHumanController.TurnIntoCrawler` (IL=23):** `isCrawler=true`;
+`crawlerTime=Time.time`; `isSuppressPain=true`; animator int
+`hitBodyPartHash=0`; `SetWalkType(21, false)`; trigger `toCrawlerTriggerHash`.
+
 **`SetWalkType(w)` (IL=36):** no-op if already crawler (21). Setting **21**:
 store walkType; avatar `TurnIntoCrawler`; clear `walkTypeBeforeCrouch`. Else if
 `walkTypeBeforeCrouch` set, only update that field; else store walkType and
@@ -398,6 +409,8 @@ Leaf types on the edges of the damage flow above:
   rating 41/163; ExecuteDismember walkType 5; Flags 480/510; sleepingOrWakingUp=IsSleeping.
 - **2026-08-07:** SetupCrawler walkType 21 height 0.5; SetWalkType crawler lock;
   HeadshotMode/CelebrateMode enums; IsCrippled 12288.
+- **2026-08-07:** EntityHuman.TurnIntoCrawler collider 0.8 cube; AvatarHuman
+  isCrawler + walkType 21 trigger; base TurnIntoCrawler stubs.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

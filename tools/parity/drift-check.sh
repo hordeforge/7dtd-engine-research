@@ -34,7 +34,15 @@ run "$BIN/Census.exe"           "$ASM" > "$cur/census.txt" 2>/dev/null
 run "$BIN/FullSurface.exe"      "$ASM" "$cur/surface" >/dev/null 2>&1
 [[ -f "$BIN/MethodList.exe" ]] && run "$BIN/MethodList.exe" "$ASM" "$cur/methods.txt" 2>/dev/null
 [[ -f "$BIN/EnumList.exe"   ]] && run "$BIN/EnumList.exe"   "$ASM" "$cur/enums.txt"   2>/dev/null
-[[ -f "$here/ParitySurface.exe" ]] && run "$here/ParitySurface.exe" "$ASM" > "$cur/parity.json" 2>/dev/null
+# Mono may print "mono_thread_internal_set_priority..." on stdout; keep only JSON.
+if [[ -f "$here/ParitySurface.exe" ]]; then
+  run "$here/ParitySurface.exe" "$ASM" 2>/dev/null | sed -n '/^{/,$p' > "$cur/parity.json"
+  # Reject empty/non-JSON captures so parity_diff does not throw.
+  if ! python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$cur/parity.json" 2>/dev/null; then
+    echo "drift: warning: ParitySurface output not valid JSON; skipping package wire diff" >&2
+    rm -f "$cur/parity.json"
+  fi
+fi
 
 if [[ ! -f "$BASELINE_DIR/surface/surface-types.md" ]]; then
   cp -r "$cur/." "$BASELINE_DIR/"; echo "drift: baseline created at $BASELINE_DIR (no comparison this run)"; exit 0

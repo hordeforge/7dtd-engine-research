@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1485 / catalogued 824 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1486 / catalogued 824 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -281,6 +281,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | CheckDismember crawler/cripple + CalcDamage | combat-damage.md |
 | GetDismemberChance + armor 41/163 + ExecuteDismember | combat-damage.md |
 | SetupCrawler walkType 21 + HeadshotMode | combat-damage.md |
+| EntityHuman/AvatarHuman TurnIntoCrawler + SpawnParticle | combat-damage.md, entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

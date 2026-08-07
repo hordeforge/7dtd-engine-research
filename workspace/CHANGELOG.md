@@ -6,6 +6,20 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — post-update dry-run + tier-C crawler/SpawnParticle
+
+Dry-run (live V3.1.0 b14 dedi):
+- StockFacts extract matches committed stock_facts.json (0 field diffs).
+- stock-check green.
+- drift: baseline is stale vs live (expected until re-baseline after review);
+  fixed ParitySurface stdout pollution so parity_diff no longer sees non-JSON.
+
+Tier-C (IL):
+- EntityHuman.TurnIntoCrawler: BoxCollider center/size, SetupBounds, no ladders.
+- AvatarHumanController.TurnIntoCrawler: isCrawler, walkType 21, trigger.
+- SleeperVolume.SpawnParticle: y+0.5, air-above skip, light brightness FX.
+- UpdateSpawn correction: GameStats index 12 log-only, not a spawn gate.
+---
 ## 2026-08-07 — layout: workspace/autoresearch + readiness make target
 
 Done:

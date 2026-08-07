@@ -1664,9 +1664,10 @@ then `Tick(world)` every volume value. That is the per-frame reset for the
 
 Per-call spawn pacing and entity create:
 
-1. Decrement `spawnDelay`; when it hits 0 set delay to **2** and continue only if
-   `AIDirector.CanSpawn(2.1f)` and game-stat enemy cap (`GameStats.GetInt` index 12)
-   allows more.
+1. Decrement `spawnDelay`; when it hits 0 set delay to **2**. Fresh-group path
+   also requires `AIDirector.CanSpawn(2.1f)`. `GameStats.GetInt` index **12** is
+   loaded into a local used only in log format strings (enemy count label), **not**
+   as a hard spawn gate in this method.
 2. **Respawn list first:** pop last id from `respawnList`; if still pending or live,
    skip; else resolve `RespawnData` (spawnPointIndex + className), `FindSpawnIndex`
    / `CheckSpawnPos`, `EntityClass.FromString`; if enemy and `!EnemySpawnMode`, drop
@@ -1732,6 +1733,11 @@ clear `pendingSpawnMap`.
 
 **`CancelPendingSpawns` (IL=22):** same drain but `Destroy(RootTransform)` on
 completed entities; clear map.
+
+**`SpawnParticle(name, zombie)` (IL=61):** sample at entity pos with **y+0.5**;
+block pos y+1; if that cell is **air**, return (no FX). Else y-1, read
+`GetLightBrightness`, build `ParticleEffect(name, pos, light, white, …)` and
+`SpawnParticleEffectServer(effect, entityId, false, false)`.
 
 **`Despawn` (IL=48):** `triggerState = 1`; clear `playerTouchedTrigger`;
 `CompletePendingSpawns`; for each `respawnMap` live **sleeping** entity set
@@ -2041,6 +2047,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;
   Tick phase order (MinScript / UpdateSpawn / player touch / despawn timer).
+- **2026-08-07:** UpdateSpawn: GameStats 12 log-only (not a gate); SpawnParticle
+  air-above skip + light brightness.
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 
