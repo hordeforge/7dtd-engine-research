@@ -399,14 +399,30 @@ and re-points the sequence `Target` at the new entity. When the old target
 was an `EntityAlive`, it also `RegisterSpawnedEntity(new, old, requester,
 owner, true)` and issues `SetAttackTarget(old, **12000**)` - a 12 s reaction
 window on the replacement. The requester is then notified (in-process
-`HandleGameEntitySpawned` locally, `NetPackageGameEventResponse(Spawned = 4)`
-on 192 remotely), each `AddToGroups` entry goes through
+`HandleGameEntitySpawned` locally, `NetPackageGameEventResponse(EntitySpawned
+= 5)` on 192 remotely), each `AddToGroups` entry goes through
 `AddEntityToGroup`, and `Audio.Manager.BroadcastPlayByLocalPlayer(oldPos,
 respawnSound)` plays when a sound is set; success returns `Complete`. The
 plural variant snapshots `Owner.GetEntityGroup(targetGroup)` into a private
 `entityList` (missing group: `Debug.LogWarning` and `InCompleteRefund`), then
 per `checkTime` expiry respawns **one** dead entity per tick with the same
 commit and removes it from the list (`InComplete` while it keeps working).
+
+**`ActionReplaceEntities.PerformTargetAction` (IL=163)** swaps a live,
+non-player target for a new instance of a class picked from the configured
+`entityIDs` list (`Random.Range(0, count)` unless `selectedEntityIndex >= 0`
+pins one). The commit is the respawn pipeline again: `CreateEntity(classId,
+target.position, target.rotation, owner.Target?.entityId ?? -1,
+owner.ExtraData)`, `SetSpawnerSource(3)` (Dynamic), spawn, and the new entity
+goes onto the action's `newList`. With `attackTarget` set and both sides
+`EntityAlive` it registers the replacement
+(`RegisterSpawnedEntity(new, old, requester, owner, true)`),
+`SetAttackTarget(old, 12000)` (the same 12 s window), and also
+`new.aiManager.SetTargetOnlyPlayers(100)` - a player-only targeting override
+at 100 m on the spawned AI. Requester notification follows the same pattern
+(remote: `NetPackageGameEventResponse(EntitySpawned = 5, ...)` on 192), then
+`HandleRemoveData(target)` and a `removeLater(target)` coroutine retires the
+old entity; returns `Complete`.
 
 ---
 
@@ -594,6 +610,10 @@ Full field lists in inventories/netpackage-bodies.md; tick pipeline above.
   delay/checkTime gates, CreateEntity + SetSpawnerSource 3 + RemoveEntity
   (Killed), 12000 ms retarget, Spawned (4) notify, AddToGroups, respawnSound;
   Update (IL=25) IsServer + world gate.
+- **2026-08-08:** ActionReplaceEntities (IL=163): entityIDs pick (selected
+  index or Random.Range), SetTargetOnlyPlayers(100), 12000 ms retarget,
+  EntitySpawned (5) notify, removeLater coroutine; response enum values pinned
+  (Denied 0 .. Completed 13, EntitySpawned = 5).
 - **2026-08-07:** StartSequence IL=4 stamps Time.time only.
 
 - **2026-07-28:** BossEvent wire; GameEventRequest/Response pointers.
