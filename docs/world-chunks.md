@@ -108,7 +108,11 @@ replicates the low byte across all eight slots).
 `ChunkCluster.SetBlockFaceTexture(pos, face, textureIdx, channel)` (IL=61) is
 the painted-texture write: chunk lookup (no-op on miss),
 `Chunk.SetBlockFaceTexture(lx, ly, lz, face, textureIdx, channel)`, then
-`chunkPosNeedsRegeneration`.
+`chunkPosNeedsRegeneration`. The read side:
+`GetTextureFullArray(pos)` (IL=22) is `TextureFullArray.Default` without the
+chunk, else `chunk.GetTextureFullArray(lx, ly, lz, true)`; the
+`BlockValueRef` overload (IL=17) returns Default for `None`/`Prop` types and
+throws for anything else.
 `World.worldToBlockPos(pos)` (IL=11) is the world-to-block conversion:
 `new Vector3i(Fastfloor(x), Fastfloor(y), Fastfloor(z))` (floor, so the
 negative half-space maps consistently).
