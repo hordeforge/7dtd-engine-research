@@ -297,6 +297,26 @@ resolves `chunk.GetBlockTrigger(world.toBlock(pos))` and, when a trigger
 exists and the player is valid, calls
 `world.triggerManager.TriggerBlocks(player, player.prefab, trigger)`.
 
+**`PrefabTriggerData.Trigger` fan-out (V3.1.0 b14):** all three overloads -
+`(player, Byte index)` (IL=63), `(player, BlockTrigger source)` (IL=85), and
+`(player, TriggerVolume volume)` (IL=90) - share one shape: for each fired
+channel (the byte, the source's `TriggersIndices`, or the volume's), every
+listener in `TriggeredByDictionary[channel]` gets
+`BlockTrigger.OnTriggered(player, world, channel, changes, source)` (source
+null for the byte/volume overloads), and every
+`TriggeredByVolumes[channel]` sleeper gets
+`SleeperVolume.OnTriggered(player, world, channel)` (only when the player is
+valid); when the collected `BlockChangeInfo` list is non-empty,
+`UpdateBlocks(changes)` commits + replicates. Support plumbing:
+`set_NeedsTriggerUpdate(true)` (IL=26) registers the POI on the manager's
+update list with a **3**-second timer (`HandleNeedTriggers` IL=33 then fires
+triggers whose `NeedsTriggered == 1`, marking them 2);
+`RefreshTriggers` / `RefreshTriggersForQuest(tags)` / `ResetTriggers`
+(all IL=22) walk the `Triggers` list calling `BlockTrigger.Refresh` (with
+`FastTags.none` or the quest tags) or zeroing `NeedsTriggered`;
+`AddTriggeredBy(volume)` (IL=34) indexes a sleeper volume under each of its
+`TriggeredByIndices` channels.
+
 `BlockTrigger.OnTriggered(player, world, channel, changes, source)` is the
 receiver-side state machine:
 
@@ -391,6 +411,10 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** PrefabTriggerData.Trigger fan-out (IL=63/85/90): channel
+  listeners + sleeper volumes, UpdateBlocks on changes; needs-trigger update
+  list (3 s timer), Refresh/RefreshForQuest/Reset (IL=22), AddTriggeredBy
+  (IL=34) volume indexing.
 - **2026-08-07:** BlockTrigger.HasAnyTriggers (IL=6) = TriggersIndices.Count > 0
   - the TriggerBlocks gate.
 - **2026-08-07:** Block.HandleTrigger (IL=41): client -> NetPackageBlockTrigger,

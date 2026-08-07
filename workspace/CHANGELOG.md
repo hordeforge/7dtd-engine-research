@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PrefabTriggerData.Trigger fan-out
+
+Done (V3.1.0 b14 IL):
+- block-shapes.md 7.3: PrefabTriggerData.Trigger overloads (IL=63/85/90)
+  - per fired channel, TriggeredByDictionary listeners OnTriggered + sleeper
+  volumes OnTriggered (player gate), UpdateBlocks when changes non-empty;
+  needs-trigger update list with 3 s timer (HandleNeedTriggers IL=33),
+  Refresh/RefreshForQuest/Reset (IL=22), AddTriggeredBy (IL=34) channel
+  indexing of sleeper volumes.
+
 ## 2026-08-08 - tier-C: BlockTrigger.HasAnyTriggers
 
 Done (V3.1.0 b14 IL):
