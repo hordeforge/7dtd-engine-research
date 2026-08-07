@@ -481,6 +481,14 @@ equipment present: bool  (+ Equipment: slot count i32 + unlockedCosmetics list .
 dragAndDropItem  : ItemStack.Write
 ```
 
+**ProcessPackage (IL=36):** writes optional toolbelt/bag/equipment/drag fields
+into `Sender.latestPlayerData` (`PlayerDataFile`) and sets
+`bModifiedSinceLastSave = true` (server-side inventory snapshot for save, not
+live entity mutate).
+
+Also related: `NetPackagePlayerInventoryForAI` Process IL=23 ->
+`AIDirector.UpdatePlayerInventory(entityId, bag/belt lists)` for smell/threat.
+
 
 ### 5.5 Entity motion package family (ToClient / Both)
 
@@ -631,11 +639,20 @@ if bChangeDensity:    density : sbyte
 if bChangeTexture:    TextureFullArray.Write
 ```
 
+**ProcessPackage (IL=59):** `ValidUserIdForSender(persistentPlayerId)` +
+`ValidEntityIdForSender(localPlayerThatChanged)`; if **server**,
+`GameManager.SetBlocksOnClients(localPlayer, this)` (fan-out); if
+`DynamicMeshManager.CONTENT_ENABLED`, per-change `ChunkChanged`; then always
+`GameManager.ChangeBlocks(persistentPlayerId, blockChanges)`.
+
 ### 6.2 NetPackageSetBlockResponse (ToClient)
 ```text
 response : u16    // eSetBlockResponse: 0 Success, 1 PowerBlockLimitExceeded,
                   //                    2 StorageBlockLimitExceeded
 ```
+
+**ProcessPackage (IL=28):** client tooltips only: response **1** ->
+`uicannotaddpowerblock`; **2** -> `uicannotaddstorageblock`; success is no-op.
 
 ---
 
@@ -1401,6 +1418,8 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** SetBlock/Response process; InventoryDataRequest hash cache;
+  PlayerInventory latestPlayerData apply; login/world thin process re-pins.
 - **2026-08-07:** Quest/Party/Trader/GameEvent/Boss process IL re-pins (§6.17-6.18).
 - **2026-08-07:** DamageEntity Process IL=172 local-player early outs; AliveFlags
   Process IL=109 apply + server rebroadcast 192.

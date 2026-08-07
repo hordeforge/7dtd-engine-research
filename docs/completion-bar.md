@@ -98,6 +98,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | UAIBase chooseAction/updateAction | entity-ai §5.3 |
 | Workstation/PoweredTrigger write modes | tile-entities-power §4.6 |
 | Quest/Party/GameEvent process IL re-pins | protocol-packages §6.17-6.18 |
+| SetBlock + InventoryData hash cache process | protocol-packages §6.1 / §6.13 |
+| PlayerInventory -> latestPlayerData | protocol-packages §5.4 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

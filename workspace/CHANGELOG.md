@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SetBlock + inventory hash cache process
+
+Done (V3.1.0 b14 IL):
+- SetBlock Process IL=59 (ValidUser/Entity, SetBlocksOnClients, ChangeBlocks,
+  DynamicMesh ChunkChanged); SetBlockResponse tooltips.
+- InventoryDataRequest hash short-circuit vs full item dump; Response UpdateInventory.
+- PlayerInventory applies to Sender.latestPlayerData + dirty flag.
+---
 ## 2026-08-07 — tier-C: workstation/trigger wire + quest/party/gameevent process
 
 Done (V3.1.0 b14 IL):
