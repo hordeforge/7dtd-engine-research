@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity attach slot model
+
+Done (V3.1.0 b14 IL):
+- dedicated-misc-systems.md: attach slot model - Entity.AttachToEntity IL=64,
+  AttachEntityToSelf IL=56 (slot claim, slot-0 isEntityRemote copy),
+  EntityAlive IL=60 (movement tag idle, inventory swap),
+  EntityVehicle.AttachEntityToSelf IL=100 (seat pose, hasDriver) and
+  AttachToEntity IL=2 (never mounts); Detach chain EntityAlive IL=27 /
+  Entity IL=79 (exit teleport) / EntityVehicle IL=157 (RB wake);
+  GetAttachedToInfo IL=158 seat/exit XML, FindAttachSlot, GetAttachFreeCount.
 ## 2026-08-08 - tier-C: AddChunkObserver
 
 Done (V3.1.0 b14 IL):
