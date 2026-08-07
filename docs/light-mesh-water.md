@@ -184,6 +184,13 @@ is `x * 8976890 + z * 981131` (the 2D voxel key). `IsVoxelOutsideChunk(nx, nz)`
 or a missing chunk, else `chunk.IsWater(x & 15, y & 255, z & 15)`; the
 `Vector3i` (IL=9) and `Vector3` (IL=5) overloads forward through it.
 
+**`Chunk.SetWaterRaw(x, y, z, data)` (IL=55)** is the silent channel write:
+a cell whose block `!CanWaterFlowThrough` has its mass zeroed first, then
+`chnWater.Set(...)` with the raw value, the dirty flags
+(`bEmptyDirty`/`bMapDirty`/`isModified`) set, `waterSimHandle.SetWaterMass`
+mirrors the value into the native sim, and a mass-bearing cell above the
+heightmap raises `m_HeightMap` at that column.
+
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
 **`WaterDataHandle` fields (metadata):** `voxelData` (mass), `voxelState`, `groundWaterHeights`, `activeVoxels`, `flowVoxels`, `flowsFromOtherChunks`, `activationsFromOtherChunks`, `voxelsToWakeup`.
