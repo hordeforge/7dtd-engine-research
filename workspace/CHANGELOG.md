@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityDrone.FindCollisionEntity
+
+Done (V3.1.0 b14 IL):
+- EntityDrone.FindCollisionEntity (IL=13) narrated in entity-ai.md:
+  null-guarded GetComponent<EntityDrone> - the E_Enemy hit resolve in the
+  visibility ray chain.
+
 ## 2026-08-08 - tier-C: EntityDrone.IgnoreCollisionEntity
 
 Done (V3.1.0 b14 IL):

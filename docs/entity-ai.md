@@ -366,6 +366,8 @@ and its `PhysicsTransform` layer, temporarily sets both to **2** (the
 self-model layer the ray skips), re-runs `Voxel.Raycast(world, ray, seeDist,
 -1612492829, 64, 0)`, restores both layers, and returns whether the ray still
 hit anything - i.e. whether something *behind* the drone blocks the view.
+`EntityDrone.FindCollisionEntity(t)` (IL=13) is the null-guarded
+`t.GetComponent<EntityDrone>()` resolve used by the `E_Enemy` hit branch.
 
 **`CanSeeStealth(dist, lightLevel)` (IL=21):**
 `t = dist / sightRange`; threshold =
@@ -3059,6 +3061,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EntityDrone.FindCollisionEntity (IL=13): null-guarded
+  GetComponent<EntityDrone> - the E_Enemy hit resolve.
 - **2026-08-07:** EntityDrone.IgnoreCollisionEntity (IL=38): temporary layer-2
   switch of drone + PhysicsTransform, ray re-run, restore - pass-through
   visibility check.
