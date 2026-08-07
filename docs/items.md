@@ -141,6 +141,10 @@ The stack-size checks behind `CanStackWith`: `CanStack(count)` (IL=19) is
 room left in the slot (`FastMin(MaxCount - stack.count, count)`) and answers
 whether any of it fits; `CanStackPartlyWith(other, ref count)` (IL=15) seeds
 the ref from `other.count` and runs the partial path.
+`ItemClass.get_MaxCount()` (IL=23) is the cap behind all of it: when
+`MaxStackSizeModifier != 1` and the class stacks and has no quality tiers it
+returns `FastMin(FastRoundToInt(Stacknumber * MaxStackSizeModifier), 30000)`;
+otherwise the raw `Stacknumber` (the 30000 hard cap bounds even scaled stacks).
 `ItemClass.CanMoveToLocation(locationType, slotNumber)` (IL=41) is the
 container gate: with `slotNumber >= 0` it first requires
 `CanMoveToSlot(locationType, slotNumber)`, and when the class
@@ -798,6 +802,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-07:** ItemClass.get_MaxCount (IL=23): stack cap =
+  min(round(Stacknumber*MaxStackSizeModifier), 30000) when modifier != 1 +
+  stacks + no quality, else raw Stacknumber.
 - **2026-08-07:** Equipment armor-group bookkeeping: ResetArmorGroups (IL=51)
   rebuild from m_slots per ArmorGroup name; AddArmorGroup (IL=36) Count++ +
   LowestQuality min, seeds Count=1.

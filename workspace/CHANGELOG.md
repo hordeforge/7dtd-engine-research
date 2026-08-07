@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemClass.get_MaxCount
+
+Done (V3.1.0 b14 IL):
+- ItemClass.get_MaxCount (IL=23) narrated in items.md: stack cap = min(
+  FastRoundToInt(Stacknumber * MaxStackSizeModifier), 30000) when
+  MaxStackSizeModifier != 1 AND !HasQuality AND CanStack; else raw
+  Stacknumber. The 30000 hard cap bounds even scaled stacks.
+
 ## 2026-08-08 - tier-C: entity removal side
 
 Done (V3.1.0 b14 IL):
