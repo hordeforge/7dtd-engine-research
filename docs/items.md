@@ -352,6 +352,15 @@ when it exceeds `MagazineItemNames.Length`, and sets
 `isChangingAmmoType = true` (the ammo-type-swap latch consumed by
 `CompleteReload`, IL=178).
 
+**`ItemActionEat` leaves:** `NeedPrompt(data)` (IL=13) is
+`UsePrompt && !bPromptChecked` (the eat-confirmation gate).
+`IsValidConditions(data)` (IL=94), with a `ConditionBlockTypes` set, casts a
+2.5 m ray (mask 131, model layer temporarily swapped) and requires a
+`GameUtils.IsBlockOrTerrain` hit; a block type in the set blocks eating (or,
+for the water sentinel 240, a hit with water mass blocks it).
+`PercentDone(data)` (IL=24) is 0 until `bEatingStarted`, then
+`(time - lastUseTime) / AnimationDelay[item.HoldType].RayCast`.
+
 **Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
 magazine capacity goes through the `MagazineSize` passive against the class's
