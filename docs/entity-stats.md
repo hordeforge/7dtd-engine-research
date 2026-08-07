@@ -167,6 +167,10 @@ server-side stat container and the food/water/stamina/health over-time model.
 Wire bodies: [protocol-packages.md](protocol-packages.md) section 6.16. Server
 rebroadcasts stats/buffs/playerstats with bulk flags **192** after accept.
 
+Persisted blob: `EntityStats.Write` (IL=8) writes version **11** (int32) then
+`Health`; `PlayerEntityStats.Write` (IL=27) appends `Stamina`, `Water`,
+`Food` (each `Stat.Write`) and `CoreTemp` as `sbyte(CoreTemp / 2)`.
+
 ### 5.1 `NetPackageEntityStatChanged.ProcessPackage` (IL=88)
 
 1. Null world return; skip when target is primary player **and** instigator equals
