@@ -658,6 +658,14 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   `addLoadedDecoration` per DecoObject), and on the server seeds random decos
   per DecoChunk (`decorateChunkRandom` with `RandomFromSeedOnPos`), mirroring
   the map into a `FileBackedDecoOccupiedMap`.
+  `decorateChunkRandom` (IL=243) is that seeding: a `bFixedSize` world skips
+  the roll entirely (`isDecorated = true`); otherwise each random cell of the
+  128x128 chunk must pass `occupiedMap.Get(x, z) <= 2` and
+  `!CheckArea(x-2, z-2, 6, 5, 5)` (no `Stop_AnyDeco` in the 5x5 block), then
+  the biome's `m_DistantDecoBlocks` are walked from the end, keeping an entry
+  on `RandomFloat() <= prob * 2` plus the `checkResourceOffsetY` ore-noise
+  gate at `terrainHeight + 1 + offsetY`, and the block is placed with
+  `randomRotateMax` rotation.
 - Runtime attach/detach: `BlockShapeDistantDeco.OnBlockAdded/OnBlockLoaded →
   DecoManager.AddDecorationAt`, `OnBlockRemoved → RemoveDecorationAt`;
   `ChunkCluster.SetBlock → DecoManager.SetBlock` keeps records in sync with
