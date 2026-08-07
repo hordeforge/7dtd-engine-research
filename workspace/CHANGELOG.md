@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: range-checked damage + safe zone
+
+Done (V3.1.0 b14 IL):
+- EntityPlayer.ServerNetSendRangeCheckedDamage (IL=27) narrated in
+  combat-damage.md 2.2: builds NetPackageRangeCheckDamageEntity (Setup with
+  origin/maxRange/source/strength/critical/buffActions/context/particleEffect)
+  and SendPackage excluding the victim on channel 192.
+- EntityPlayer.IsSafeZoneActive (IL=14) narrated in spawning.md 6.2: active iff
+  Level <= GamePrefs.PlayerSafeZoneLevel and spawnPoints.Count == 0.
+
 ## 2026-08-08 - tier-C: game stage family
 
 Done (V3.1.0 b14 IL):
