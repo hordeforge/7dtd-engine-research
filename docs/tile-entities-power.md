@@ -60,6 +60,11 @@ null) and delegates.
 `RemoveEntityBlockStub(pos)` (IL=30) removes by the packed key (queuing the
 removed entry in `blockEntityStubsToRemove`, warning
 `Entity block on pos {0} not found!` on a miss).
+`EnableEntityBlocks(on, name)` (IL=51) toggles every `blockEntityStubs` entry
+whose lowercased transform name contains the filter (empty filter matches all)
+and returns the count. `AddInsideDevicePosition(x, y, z, bv)` (IL=20) records
+a `Vector3b` in `insideDevices` (+ hash set) and sets
+`IsInternalBlocksCulled = true` (the POI-filler culled path).
 
 **`GameUtils.Vector3iToUInt64(v)` (IL=29)** is the position key pack behind
 the dict: each axis becomes `(coord + 32768) & 0xFFFF` (a 16-bit field with a
