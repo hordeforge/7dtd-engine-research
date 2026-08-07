@@ -302,6 +302,10 @@ and clamps the density; for a terrain cell it returns when the cell above is
 `IsTerrainDecoration`, else raises the density. The density target is
 `MarchingCubes.DensityTerrain` (or half when `useHalfDensity`), and a non-null
 `world` routes writes through `SetBlockRPC`.
+`SnapTerrainToPositionAroundRPC` (IL=49) requires the cell itself to be
+terrain and then runs `snapTerrainToPosition` on the four cardinal neighbors
+(`liftUp=false`, `halfDensity=true`), normalizing the border density around a
+placed block.
 
 `WorldDecoratorPOIFromImage.DecorateChunkOverlapping` (IL=472) is the static
 POI stamping from the `poi_processed` color map. It warns and returns when any
