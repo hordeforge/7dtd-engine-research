@@ -190,6 +190,9 @@ a cell whose block `!CanWaterFlowThrough` has its mass zeroed first, then
 (`bEmptyDirty`/`bMapDirty`/`isModified`) set, `waterSimHandle.SetWaterMass`
 mirrors the value into the native sim, and a mass-bearing cell above the
 heightmap raises `m_HeightMap` at that column.
+`Chunk.SetWater` (IL=13) is `SetWaterRaw` plus
+`waterSimHandle.WakeNeighbours(x, y, z)` (the full write wakes the sim);
+`ResetWaterSimHandle` (IL=4) resets the sim handle.
 
 **Flow-through gate:** `WaterUtils.CanWaterFlowThrough(BlockValue)` is false for air/null block; true when `Block.WaterFlowMask != 63` (63 = all six faces blocked).
 
