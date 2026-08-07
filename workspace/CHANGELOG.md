@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk map + water reads
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md: Chunk.GetHeight IL=9 m_HeightMap[z*16+x];
+  IsWater IL=9; SetTopSoilBroken IL=36 bitfield.
+- Chunk.GetWater IL=8 FromRawData(chnWater); ChunkCluster.GetWater
+  IL=23 y>=256/missing-chunk Empty + toBlockXZ delegate.
 ## 2026-08-08 - tier-C: chunk map leaves
 
 Done (V3.1.0 b14 IL):
