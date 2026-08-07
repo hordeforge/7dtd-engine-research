@@ -72,6 +72,8 @@ bytes per column; `BiomeIntensity.Default` when the array is null).
 `ResetBiomeIntensity(v)` (IL=19) writes a value back at every 6-byte step.
 `CalcDominantBiome()` (IL=55) histograms the 256 `m_Biomes` bytes into a
 50-slot count array and stores the argmax as `DominantBiome`.
+`Chunk.GetBiomeId(x, z)` (IL=9) / `SetBiomeId(x, z, id)` (IL=10) read and
+write that per-column byte at `m_Biomes[x + z*16]`.
 
 World-level bounds consumers: `World.IsPositionInBounds(pos)` (IL=66) builds a
 `BoundsInt` from `GetWorldExtent` and answers `Contains(round(pos))`, with two
