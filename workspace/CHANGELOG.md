@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Utils.GetAngleBetween
+
+Done (V3.1.0 b14 IL):
+- Utils.GetAngleBetween (IL=34) narrated in entity-ai.md: XZ-plane Atan2
+  yaw difference x 57.29578, wrapped to [-180, 180] - the view-cone and
+  IsInFrontOfMe half-angle test.
+
 ## 2026-08-08 - tier-C: EntityAlive.CanEntityBeSeen
 
 Done (V3.1.0 b14 IL):

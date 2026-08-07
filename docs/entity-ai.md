@@ -395,6 +395,10 @@ from rotation with `yaw = rot.y·0.0175 − π`, `pitch = rot.x·0.0175`:
 `(-sin(yaw)·cos(pitch), sin(pitch), -cos(yaw)·cos(pitch))`. Half-angle cone
 via `Utils.GetAngleBetween` (same half-angle test as `IsInFrontOfMe`).
 
+**`Utils.GetAngleBetween(dir1, dir2)` (IL=34)** is the horizontal yaw-angle
+difference: `Atan2(dir.z, dir.x) * 57.29578` for each, difference wrapped to
+`[-180, 180]` (subtract 360 above 180, add 360 below -180).
+
 **`EntityAlive.HasImmunity(BuffClass)` (IL=2):** always **false** (immunity from
 `EntityBuffs.HasImmunity` passive path / death only unless subclassed).
 
@@ -3031,6 +3035,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Utils.GetAngleBetween (IL=34): XZ Atan2 yaw difference
+  wrapped to [-180, 180] - the view-cone / IsInFrontOfMe half-angle test.
 - **2026-08-07:** EntityAlive.CanEntityBeSeen (IL=133): stealth-scaled
   seeDist via DetectUsScale, view-cone gate, -0.1 back-off ray with model-layer
   switch, E_Vehicle attached / E_Enemy drone pass-through / E_BP_ re-root hit
