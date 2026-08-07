@@ -357,6 +357,17 @@ present; server sends `NetPackageSleeperWakeup` flags **192**.
 `IsSleeperPassive`; server sends `NetPackageSleeperPassiveChange` flags **192**
 (does not fully wake).
 
+**`TriggerSleeperPose(pose, returningToSleep)` (IL=52):** dead → return. If
+avatar present: `AvatarController.TriggerSleeperPose`; clear
+`pendingSleepTrigger`; if pose != **5** set `physicsHeight = 0.85` (pose 5 keeps
+height). Else store `pendingSleepTrigger = pose`. Always:
+`lastSleeperPose = pose`; `IsSleeping = true`;
+`SleeperSupressLivingSounds = true`;
+`sleeperLookDir = AngleAxis(rotation.y, up) * SleeperSpawnLookDir`.
+
+**`ResumeSleeperPose` (IL=6):**
+`TriggerSleeperPose(lastSleeperPose, returningToSleep=true)`.
+
 **`TriggerManager.TriggerBlocks`:** BlockTrigger overload (IL=17) requires
 `HasAnyTriggers` then `PrefabTriggerData.Trigger(player, blockTrigger)`.
 TriggerVolume overload (IL=27) same with prefab required (warn if null).
@@ -1281,15 +1292,26 @@ range &lt; 0 → `max(3, sightRangeBase * 0.2)`; store `sleeperViewAngle` /
 
 Called once when a player is latched on the volume:
 
-1. If already `isSpawned` and `worldTime` still before `respawnTime` and not
-   `wasCleared`: no full reset (still-active volume).
-2. Else if `worldTime >= respawnTime` (or cleared): `Reset()`, `CancelPendingSpawns()`,
-   clear `isSpawning` / `isSpawned` flags as appropriate, then rebuild.
-3. Difficulty: `gameStage = max(GetGameStageAround(player), prefab quest multiplier
-   / DifficultyTier path)`; quest `SpawnMultiplier` and prefab refresh tags apply.
-4. Build `respawnList` from existing `respawnMap` keys; `ResetSpawnsAvailable()`;
-   clear `groupCountList`; set `spawnCountMin/Max` from volume fields; `AddSpawnCount`;
-   set `spawnDelay`; start `minScript` if present; mark `isSpawning`.
+1. **Early return:** if `isSpawned` **or** (`worldTime < respawnTime` and
+   `wasCleared`) → return (still-active or post-clear cooldown without respawn
+   window).
+2. If `worldTime >= respawnTime`: `Reset()` first.
+3. Always then: `CancelPendingSpawns()`; set `isSpawning = isSpawned = true`.
+4. **Count multiplier** starts at **1**. If prefab present:
+   - `SpawnMultiplier` from `LastQuestClass` (else 1);
+   - times `difficultyTierScale[DifficultyTier]` (clamp to last of 7-element
+     static array when tier out of range);
+   - if `LastRefreshType` has `banditTag` force multiplier **0.2**.
+5. If spawn points exist: `gameStage = max(0, GetGameStageAround(player))`;
+   rebuild `respawnList` from `respawnMap` keys; `ResetSpawnsAvailable()`;
+   clear `groupCountList`; if min/max count &lt; 0 default **5..6**;
+   `AddSpawnCount(groupName, min*mult, max*mult)`; `spawnDelay = 0`.
+6. If `minScript` present: `minScript.Run(volume, player, mult)`.
+
+**Static padding (`.cctor` IL=48):** `chunkPadding=(12,1,12)`;
+`triggerPaddingMin/Max=(8,0.7,8)` as Vector3i from floats;
+`unpadding=(14,16,14)`; `wanderingCountdown=5`; `difficultyTierScale` length **7**
+(blob init); `isHiddenOffsets` two float[12] tables for pose rays.
 
 ### D8.4 `Despawn` (IL=48) / `DespawnAndReset` (IL=6)
 
@@ -1496,8 +1518,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** Spawn async pending maps; Despawn sleeping-only; SetSleeper
-  pathCostScale+0.2; Sight/Hearing; CanSleeperSpawn; CalcGameStageAround.
+- **2026-08-07:** UpdatePlayerTouched mult/bandit/defaults 5..6; TriggerSleeperPose
+  physicsHeight 0.85; Spawn async; SetSleeper pathCost+0.2; CanSleeperSpawn.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

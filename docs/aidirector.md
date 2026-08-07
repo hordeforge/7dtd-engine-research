@@ -455,13 +455,17 @@ still a target. If no player: if not `IsPlayerAliveAndNear(pos, **60**)` →
 each new spawn group it advances `spawnBaseDir` by +120 degrees and recomputes
 `CalcBestDir`, which is why stock waves come from rotating directions.
 
-`SpawnZombie` (413882-414105): `SetSpawnerSource(3)`, `IsHordeZombie = true`,
-`EntityAlive.IsBloodMoon = true`, `bIsChunkObserver = true`,
-`timeStayAfterDeath /= 3`, every `bonusLootEvery`-th zombie gets
-`lootDropProb *= GameStageDefinition::LootBonusScale`, and
-`AstarManager.AddLocation(spawnPos, 40)` is called.
-`bonusLootEvery = max(stageSpawnMax / GameStageDefinition::LootBonusMaxCount,
-GameStageDefinition::LootBonusEvery)` (416565).
+`SpawnZombie` (IL=181): `CalcSpawnPos` or fail. Pick class from
+`GetRandomEntityFromGroupMaxTier(spawnGroupName, MaxEntityTier, lastClassId,
+true, false, null)`. If target `AttachedToEntity` and `RandomFloat < 0.5`:
+force class `animalZombieVultureRadiated` and skip bonus-loot counter path.
+Missing class → log + false. Then `CreateEntity` → `SetSpawnerSource(3)`,
+`SpawnEntityInWorld`, `IsHordeZombie=true`, `IsBloodMoon=true`,
+`bIsChunkObserver=true`, `timeStayAfterDeath /= 3`. Non-vulture: increment
+`bonusLootSpawnCount`; when `>= partySpawner.bonusLootEvery` reset counter and
+`lootDropProb *= LootBonusScale`. Wrap `ManagedZombie`, `SeekTarget`,
+`IncSpawnCount`, `AstarManager.AddLocation(pos, 40)`. Log day/time.
+`bonusLootEvery = max(stageSpawnMax / LootBonusMaxCount, LootBonusEvery)`.
 
 ### Client-side FX: entirely local, driven by three values
 
@@ -525,7 +529,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** StartingWeight=1 DiminishingReturns=0.5 statics; CalcPartyLevel
+- **2026-08-07:** SpawnZombie vulture 50% when mounted; IL=181 full path;
+  StartingWeight=1 DiminishingReturns=0.5; CalcPartyLevel
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
 - **2026-08-07:** CalcSpawnPos ±45° radius + GetMobRandomSpawnPosWithWater 0/10/30;
   SeekTarget 60/150/70 m; Scout SpawnUpdate 6000; UpdateHorde 18s.

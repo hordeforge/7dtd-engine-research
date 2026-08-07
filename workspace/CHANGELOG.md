@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: UpdatePlayerTouched mult and SpawnZombie vulture
+
+Done (V3.1.0 b14 IL):
+- UpdatePlayerTouched: early return gates; quest SpawnMultiplier * difficultyTierScale; banditTag 0.2; default counts 5..6; minScript.Run.
+- TriggerSleeperPose: pose!=5 physicsHeight 0.85; look dir from spawn; ResumeSleeperPose.
+- Static padding chunk/trigger/unpadding; difficultyTierScale len 7.
+- SpawnZombie IL=181: mounted 50% animalZombieVultureRadiated skips bonus loot; Astar 40.
+---
 ## 2026-08-07 — tier-C: SleeperVolume.Spawn async and SetSleeper helpers
 
 Done (V3.1.0 b14 IL):

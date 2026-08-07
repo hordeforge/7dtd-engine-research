@@ -235,6 +235,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | FindFathestSpawn + ResetSpawnsAvailable | entity-ai.md |
 | Chunk.CanSleeperSpawn + CalcGameStageAround 100 m | entity-ai.md |
 | SleeperVolume.Spawn async + SetSleeper | entity-ai.md |
+| UpdatePlayerTouched mult + TriggerSleeperPose | entity-ai.md |
+| SpawnZombie vulture / bonus loot path | aidirector.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
