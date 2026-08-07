@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: falling-block batch/cancel
+
+Done (V3.1.0 b14 IL):
+- stability.md: AddFallingBlocks (IL=18) fan-out; ClearFallingBlocksForChunks
+  (IL=111) queue drain, chunk-set drops + resetTempPositions rebuild.
+
 ## 2026-08-08 - tier-C: decorator POI queries
 
 Done (V3.1.0 b14 IL):
