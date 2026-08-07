@@ -641,6 +641,13 @@ per-cell gate that turns a deco entry into a placed block, in order:
 12. Unless `shape.IsOmitTerrainSnappingUp` or `IsTerrainDecoration`:
     `ChunkCache.SnapTerrainToPositionAroundLocal(worldPos - up)`.
 
+The ore-noise gate shared by steps 6 and the `decoratePrefabs` path is
+`GameUtils.GetOreNoiseAt(noise, x, y, z)` (IL=23):
+`((float)noise.Noise(x*0.05, y*0.05, z*0.05) - 0.333f) * 3` — world coords
+scaled by **0.05** into the noise field, rebased by 0.333 and amplified by 3.
+`CheckOreNoiseAt` (IL=8) is just `GetOreNoiseAt(...) > 0`, so roughly the
+positive half of the rebased field passes.
+
 ### 6.2 DecoOccupiedMap (world-level)
 
 `DecoManager.OnWorldLoaded` allocates a world-sized `DecoOccupiedMap`
