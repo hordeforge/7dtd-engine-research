@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: lockable password leaves
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md 4.7: CheckPasswordHash IL=24 (owner/password gates, allowedUserIds add), IsLocked/HasPassword
+
 ## 2026-08-08 - tier-C: TEFeatureDoor
 
 Done (V3.1.0 b14 IL):
