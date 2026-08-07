@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntitySpawner persistence + Spawn wrapper
+
+Done (V3.1.0 b14 IL):
+- terrain-height.md: Chunk terrain-normal storage (m_NormalX/Y/Z x127 clamp, GetTerrainNormalY /127)
+- spawning.md 4: EntitySpawner Write/Read blob v3 layout + invalid-class fallback, ModifySpawnCountByGameDifficulty EnemySpawnMode gate
+- spawning.md 4: Spawn IL=31 wrapper + stock precondition/position callbacks (bIgnoreTrigger, GetClosestPlayer 160, cave/ground spawn)
+
 ## 2026-08-08 - tier-C: BiomeImageLoader + PerlinNoise
 
 Done (V3.1.0 b14 IL):
