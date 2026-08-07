@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: decoration.7dt codec
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 5: DecoManager.Write IL=56 (int32 count + per-record), WriteTask IL=38 stream copy + truncate
+- chunk-providers.md 5: DecoObject.Write no-block error + NameIdMapping.AddMapping bookkeeping; Read IL=19 reverse
+
 ## 2026-08-08 - tier-C: distant-deco seeding + lazy decorate
 
 Done (V3.1.0 b14 IL):
