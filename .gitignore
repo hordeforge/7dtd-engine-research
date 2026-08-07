@@ -23,6 +23,9 @@ docs/inventories/*.gaps.tsv
 # Runtime scenario/save worlds (local only)
 worlds/
 
+/ChunkManager
+/NetPackageEntityAction
+
 # Accidental empty type-name dirs at repo root (DumpMethod cwd mistakes)
 /SleeperVolume/
 /EnumGameStats/
