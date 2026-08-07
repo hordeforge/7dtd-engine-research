@@ -322,6 +322,19 @@ ItemActionData
 `GetBlockHit`; damage scaled by `EffectManager.GetValue` passive effects; server
 path applies entity/block damage (same authority model as melee `Hit`).
 
+**Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
+`GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
+magazine capacity goes through the `MagazineSize` passive against the class's
+base. `checkAmmo` (IL=12) is `InfiniteAmmo || iv.Meta > 0`; `HasInfiniteAmmo`
+(IL=24) is `GetValue(passive 188 InfiniteAmmo, iv, 0, holder, ...) > 0`.
+`GetBurstCount` (IL=23) is `GetValue(passive 15 BurstRoundCount, iv, 1,
+holder, ...)`. `IsAmmoUsableUnderwater(entity)` (IL=19) is true without
+`UsesMagazines`, else the selected `MagazineItemNames[SelectedAmmoTypeIndex]`
+class's `UsableUnderwater`. `requestReload` (IL=12) sets `isReloadRequested`
+and calls `GameManager.ItemReloadServer(entityId)` (server-authoritative
+reload). `isJammed(iv)` (IL=5) reads the `scGunIsJammed` metadata key (the jam
+flag lives in item metadata).
+
 **`ItemActionDynamicMelee.ExecuteAction` (IL=210):** `canStartAttack` gate; clear
 `alreadyHitEnts`/`alreadyHitBlocks`; optional harvest path; avatar attack bools /
 PowerAttack trigger; `FireEvent` MinEvents; set `Attacking` on data. Per-frame hit
