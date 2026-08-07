@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: only-terrain flag
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: IsOnlyTerrain (IL=8) / IsOnlyTerrainLayer (IL=24)
+  bOnlyTerrain layer flag.
+
 ## 2026-08-08 - tier-C: entity-block/cull leaves
 
 Done (V3.1.0 b14 IL):
