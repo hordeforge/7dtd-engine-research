@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: base Entity config copy
+
+Done (V3.1.0 b14 IL):
+- Entity.CopyPropertiesFromEntityClass IL=238: RootMotion/HasDeathAnim/
+  entityFlags; entityType enum default 0; lootDropProb/lootList; map/compass/
+  tracker icons; isRotateToGround; customCmds from CustomCommand<i> 1..10 keys
+  (commandId/icon/eventName/iconColor white|hex/activateTime -1|float/enabled);
+  activation command cache reset fields.
+- EntityPlayer override IL=3 pure base; EntityPlayerLocal IL=21 adds
+  dropInventoryBlock key.
+---
 ## 2026-08-08 — tier-C: ECD builder, chunk observer attach
 
 Done (V3.1.0 b14 IL):

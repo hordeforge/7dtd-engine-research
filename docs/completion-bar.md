@@ -294,6 +294,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | GetSpawnWalkType IL=9 + GameUtils.GetViewDistance IL=10 | entity-ai.md D8.6 / server-lifecycle |
 | SetupEntityCreationData ECD builder + CreateEntity wrapper | spawning.md §7 |
 | ChunkManager.AddChunkObserver IL=15 + GetPlayerDataFromEntityID IL=10 | world-chunks §4.0 / spawning §6.1 |
+| Entity.CopyPropertiesFromEntityClass IL=238 custom commands + EntityPlayerLocal | entity-ai.md D8.6a |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

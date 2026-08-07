@@ -2214,6 +2214,34 @@ drive `internalPlayStepSound` / alert loops; `itemsOnEnterGame` is granted on
 spawn.
 
 
+### D8.6a Base `Entity::CopyPropertiesFromEntityClass` (IL=238)
+
+Runs first (D8.6 calls it). Copies from the resolved `EntityClass`:
+
+1. Flags straight from the class object: `RootMotion`, `HasDeathAnim`,
+   `entityFlags`.
+2. `entityType` default **0** (`ParseEnum` of the `EntityType` prop);
+   `lootDropProb` / `lootList` props.
+3. Icon props (all `ParseString`): `mapIcon`, `compassIcon`, `compassUpIcon`,
+   `compassDownIcon`, `trackerIcon`; `isRotateToGround` bool prop.
+4. **Custom activation commands:** scan keys `PropCustomCommandName + i` for
+   `i = 1..10` (a `{0}{1}` format of the static name and the counter; stock XML:
+   `CustomCommand1`, ...) in `Properties.Values` to count how many exist;
+   allocate `customCmds`. For each present index build
+   `EntityActivationCommand {commandId, icon, eventName}` from the
+   `CustomCommand<i>` / `CustomCommandIcon<i>` / `CustomCommandEvent<i>` keys;
+   `iconColor` = `ParseHexColor(CustomCommandIconColor<i>)` or white;
+   `activateTime` = parsed float or **-1**; `enabled = true`. Stored at
+   `customCmds[i-1]`.
+5. Reset command cache: `activationCommands = null`,
+   `lastUpdateFrameOfActivationCommands = -1`,
+   `lastUpdateActivationCommandsPlayerId = -1`,
+   `lastUpdateHadEnabledActivationCommands = false`.
+
+`EntityPlayer.CopyPropertiesFromEntityClass` (IL=3) is a pure base call;
+`EntityPlayerLocal` (IL=21) additionally reads `dropInventoryBlock` from the
+`DropInventoryBlock` key when present (client-local).
+
 ### D8.7 AI task config: `EAIManager.CopyPropertiesFromEntityClass` (IL=213)
 
 Called from `EntityAlive.CopyPropertiesFromEntityClass` (D8.6, step 6) when the
