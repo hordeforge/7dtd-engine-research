@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: explosion entity damage + dynamic melee gate
+
+Done (V3.1.0 b14 IL):
+- protocol-packages.md 6.14: Explosion.AttackEntites IL=691 -
+  passive 20/21 entityDamage/radius, OverlapSphere scan, item-drop
+  destruction, E_BP_ root resolve + sleeper wake, Voxel.Raycast
+  LOS gate (65536/66), part multipliers (arms/legs/head/chest),
+  linear falloff, passive 22 scale, >=3 gate, DamageRecord.
+- items.md 4.2: dynamic-melee canStartAttack IL=198 (passives
+  18/112/177, TP-camera, jam, stamina); canContinueAttack IL=5
+  IsAttackValid; SetAttackFinished IL=53 MinEvents 29/37 + whiff
+  31/39.
 ## 2026-08-08 - tier-C: explosion entity damage
 
 Done (V3.1.0 b14 IL):
