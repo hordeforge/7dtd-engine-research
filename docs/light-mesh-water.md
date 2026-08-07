@@ -40,6 +40,12 @@ stateDiagram-v2
 | | `FrameUpdate` | 175 |
 | `MeshGeneratorMC2.calcLights` | mesh light sample | 289 |
 
+**`World.GetLightBrightness(pos)` (IL=32)** (the query used by particle spawns
+and turret fires): resolves the chunk via `GetChunkFromWorldPos` and, when it
+exists, returns `chunk.GetLightBrightness(toBlockXZ(x), toBlockY(y),
+toBlockXZ(z), 0)`; when the chunk is missing (unloaded area) it falls back to
+the ambient constant `IsDaytime() ? 0.65 : 0.1`.
+
 ### Hardcoded stock Y ceilings (expand risk)
 
 | Site | Literal |
@@ -328,6 +334,8 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-07:** World.GetLightBrightness (IL=32): chunk lookup +
+  chunk.GetLightBrightness(...,0) or unloaded fallback IsDaytime()?0.65:0.1.
 - **2026-08-07:** Evap ≤45 / Flow damage-50; GetFlowDirection axes; ChangeThis pack
   (meta2/rotation 8, WBT 60/1/1000); CheckUpdate; CheckDeepWater ≥6.
 - **2026-08-07:** BlockLiquidv2 Emissions (rotation 8 / meta2), ChangeToAir +

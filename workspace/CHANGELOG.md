@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World.GetLightBrightness
+
+Done (V3.1.0 b14 IL):
+- World.GetLightBrightness (IL=32) narrated in light-mesh-water.md section 1:
+  chunk present -> chunk.GetLightBrightness(toBlockXZ(x), toBlockY(y),
+  toBlockXZ(z), 0); chunk missing -> IsDaytime() ? 0.65 : 0.1 ambient.
+  Callers: particle spawn brightness, AutoTurretFireController.Fire,
+  BlockModelTree fall effects.
+
 ## 2026-08-08 - tier-C: ItemStack stacking predicates
 
 Done (V3.1.0 b14 IL):
