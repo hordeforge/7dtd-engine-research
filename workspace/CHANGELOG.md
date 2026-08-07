@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: wall-volume registry
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md: AddWallVolume (IL=69) + NetPackageWallVolume broadcast 192,
+  AddWallVolumeAt (IL=50), GetWallVolume (IL=30) throw, FindWallVolume (IL=29),
+  GetAllWallVolumes (IL=49).
+
 ## 2026-08-08 - tier-C: wall-volume links
 
 Done (V3.1.0 b14 IL):
