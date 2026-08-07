@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: POI stamping + ore-noise gate
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 3.3: WorldDecoratorPOIFromImage.DecorateChunkOverlapping IL=472 (poi color -> PoiMapElement, decal, water fill, GetRandomBlockOnTop)
+- chunk-providers.md 3.3: LoadWaterInfo IL=127 XML format, GetWaterChunks16x16, InitData coroutine stub
+- chunk-providers.md 6.1: GameUtils.GetOreNoiseAt IL=23 (0.05 scale, -0.333 rebase, x3) + CheckOreNoiseAt
+
 ## 2026-08-08 - tier-C: WorldDecoratorBlocksFromBiome driver + decoratePrefabs
 
 Done (V3.1.0 b14 IL):
