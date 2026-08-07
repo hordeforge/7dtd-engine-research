@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemValue mod queries
+
+Done (V3.1.0 b14 IL):
+- items.md 2: get_HasModSlots (IL=6) capacity; HasMods / HasCosmetics (IL=30)
+  occupancy scans.
+
 ## 2026-08-08 - tier-C: mod clones
 
 Done (V3.1.0 b14 IL):
