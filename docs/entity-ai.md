@@ -1913,6 +1913,13 @@ or default step at volume.
 `jumpMovementFactor` **0.163** path into `Move`; climb zeros some motion;
 `entityCollision`; gravity `World.Gravity * 0.025` on y; repeated 0.91 damp.
 
+**`Entity.GetVelocityPerSecond` (IL=21) / `EntityPlayer.GetVelocityPerSecond`
+(IL=13):** base: attached → delegate to the attached entity's own
+`GetVelocityPerSecond`; else `physicsRB.velocity` when a rigidbody exists; else
+`motion * 20` (per-tick motion scaled to one second at 20 TPS). The player
+override uses `averageVel * 20` instead of the rigidbody/motion path, reading
+the smoothed per-tick average-velocity field.
+
 **`JumpMove` (IL=82):** clear root motion; `entityCollision(motion)` then restore
 xz (and y if non-zero). If jumpState **3** (airborne): `motion.y -= Gravity`.
 Else: xz `*= 0.91`; `motion.y -= Gravity*0.025` then `*= 0.91`.

@@ -381,6 +381,9 @@ Leaf types on the edges of the damage flow above:
   effects; it is threaded through `Block.DamageBlock` / `OnBlockDamaged`, so
   traps (`BlockBarbed`, `BlockBladeTrap`, `BlockMine`) report through the same
   struct the server damage path reads.
+- **`EntityPlayer.CanHeal` (IL=12):** the heal-side gate
+  `Health > 0 && Health < GetMaxHealth()`: the entity must be alive and not
+  already at full health. (Healing itself runs through `AddHealth` in §2.1.)
 - **`BodyParts`** (nested in `BodyAnimator`): a two-field holder (`BodyObj`
   model root + `RightHandT` transform) the avatar controllers use to attach
   held items and locate the active model
