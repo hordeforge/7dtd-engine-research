@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: SaveAndCleanupWorld ordered chain
+
+Done (V3.1.0 b14 IL):
+- SaveAndCleanupWorld IL=499: WorldShuttingDown mod event first, async create
+  drain, server save block (vehicles/drones/quests/player/world/persistent),
+  nameIdMapping saves, client map DB async, multiplayer shutdown, world
+  teardown (UnloadWorld + Cleanup), singleton cleanup sweep, GamePrefs.Save.
 ## 2026-08-08 — tier-C: GamePrefs.notifyListeners
 
 Done (V3.1.0 b14 IL):

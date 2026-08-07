@@ -429,6 +429,36 @@ jumps), so on a dedicated host it ends at `ConnectionManager.StopServers()`
 ([save-region.md](save-region.md)) and player data, then `Cleanup` clears pools and
 managers.
 
+**`SaveAndCleanupWorld()` (IL=499) ordered chain:**
+
+1. `entityAsyncManager.CompletePendingCreateTasks()`; `ModEvents.WorldShuttingDown`
+   fires first; `PathAbstractions.CacheEnabled = false`; `OnClientSpawned = null`;
+   `PlayerInputRecordingSystem.AutoSave()`; `GameStateManager.EndGame()`.
+2. **Server save block** (server + `bSavingActive` + not edit mode):
+   `VehicleManager.RemoveAllVehiclesFromMap()`; `DroneManager.RemoveAllDronesFromMap()`;
+   `QuestEventManager.HandleAllPlayersDisconnect()` (treasure quests removed);
+   `SaveLocalPlayerData()`; `SaveWorld()`; then per `PersistentPlayerData`:
+   update `Position` (when it matches the primary player) and `LastLogin = Now`,
+   and `SavePersistentPlayerData()`.
+3. `Block.nameIdMapping.SaveIfDirty(true)` + null, same for `ItemClass` (server
+   only).
+4. **Client-only block** (not server): map DB `SaveAsync` via
+   `ThreadManager.AddSingleTask`; local players `EnableCamera(false)` +
+   `SetControllable(false)`.
+5. `ShutdownMultiplayerServicesNow()`; `PlayerInteractions.Shutdown`;
+   `GameplayNotifier.GameplayEnd()`.
+6. **Client-only teardown** (not dedicated): local player entity removed,
+   `myPlayerId = -1`, per non-primary UI: XUi shutdown, entities removed, UIs
+   destroyed; `ModManager.GameEnded()`; main menu re-open.
+7. **World teardown:** `PrefabLODManager.Cleanup`; light/sky/weather/water/sleeper/
+   POI-tool managers cleaned; `World.UnloadWorld(true)` + `World.Cleanup()`;
+   `m_World = null`; `GameHasStarted = false`.
+8. **Singleton cleanup sweep:** water sim, projectile, vehicle, drone, dismember,
+   turret tracker, block limit, map objects, target events; loot/trader managers
+   nulled; quest/twitch/power/wire/party/sign/nav managers cleaned; `Origin`,
+   `GameObjectPool`, `MemoryPools`, `VoxelMeshLayer.StaticCleanup`.
+9. `GamePrefs.Save()`; reset record-session flags.
+
 ```mermaid
 flowchart TB
   Q[shutdown / OnApplicationQuit] --> SC[SaveAndCleanupWorld]
