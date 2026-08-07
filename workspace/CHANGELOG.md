@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: GetLandClaimOwner self/ally/other + offline hours
+
+Done (V3.1.0 b14 IL):
+- Outer GetLandClaimOwner GameStats[1] off / trader area / claim size GameStats[44].
+- Per-chunk lpblock primary TEFeatureLandClaim; deadZone half-extent.
+- Enum self=1 ally=2 other=3; IsLandProtectionValidForPlayer GameStats[46]*24h.
+---
 ## 2026-08-07 — tier-C: MinEvent GiveExp, loot override, rage, jam
 
 Done (V3.1.0 b14 IL):

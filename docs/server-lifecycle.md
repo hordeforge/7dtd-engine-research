@@ -165,6 +165,40 @@ optional buff re-apply path on local.
   and ally relationships; dispatches player events. It is written into the world
   save and sent to clients in `WorldInfo` (see [protocol-packages.md](protocol-packages.md) §4.2).
 
+### 3.1 Land claim ownership query (`World.GetLandClaimOwner`)
+
+**Outer** `GetLandClaimOwner(worldBlockPos, lpRelative)` (**IL=119**):
+
+1. If `GameStats` index **1** != 1 (land claim system off): return owner enum **1**
+   (treated as free / self-allowed path in callers).
+2. If `IsWithinTraderArea(pos)`: return **0** (no claim / blocked).
+3. `claimSize = GameStats` index **44**; half-extent `half = (claimSize-1)/2`;
+   chunk ring radius = `claimSize/16 + 1`.
+4. Walk chunks in that ring; for each unique chunk call overload
+   `GetLandClaimOwner(chunk, pos, lpRelative, half, half, forKeystone=false)`;
+   first non-zero result wins; clear scratch `m_lpChunkList`.
+
+**Per-chunk** overload (**IL=88**):
+
+1. Read chunk `IndexedBlocks["lpblock"]` list (local block coords).
+2. For each: world pos = chunk origin + local; `GetTileEntity` ->
+   `TEFeatureLandClaim`; require `IsPrimary()`.
+3. Chebyshev-ish gate: `|dx|` and `|dz|` must each be `<= deadZone` (outer passes
+   `half` as both claimSize and deadZone).
+4. `PersistentPlayerList.GetLandProtectionBlockOwner(claimPos)`; require
+   `IsLandProtectionValidForPlayer` (offline hours `<= GameStats[46] * 24`).
+5. Enum result (`EnumLandClaimOwner`):
+   - no `lpRelative` arg -> **3** (other/protected),
+   - same as owner -> **1** (self),
+   - `IsAlly` -> **2** (ally),
+   - else -> **3** (other).
+
+**`IsLandProtectionValidForPlayer` (IL=14):** offline hours from
+`PersistentPlayerData.OfflineHours` must not exceed `GameStats[46] * 24` hours.
+
+**Party variant** `GetLandClaimOwnerInParty` also requires party membership of
+the ally owner when granting true inside claim size.
+
 ---
 
 ## 4. Shutdown and save
@@ -340,6 +374,8 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-07:** GetLandClaimOwner IL=119/88 (GameStats 1/44/46, lpblock index,
+  primary TEFeatureLandClaim, self/ally/other enum, offline-hours validity).
 - **2026-08-07:** GameStateManager.OnUpdateTick IL=198 server round gates;
   Authorize/RequestToSpawn/PlayerSpawned/SpawnEntityInWorld join path.
 - **2026-08-07:** Document analytics heartbeat (300s, client-only; dedicated skips).
