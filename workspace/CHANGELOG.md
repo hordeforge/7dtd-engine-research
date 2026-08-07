@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: poi-map add
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 4.2: WorldBiomes.AddPoiMapElement (IL=13) color-keyed
+  add, duplicate skip.
+
 ## 2026-08-08 - tier-C: heightmap accessors
 
 Done (V3.1.0 b14 IL):
