@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `cd6e33b` catapult bow family |
-| Commits since dry-run `3b61d9c` | ~396 |
+| HEAD (at handoff write) | `e0da480` launcher projectile family |
+| Commits since dry-run `3b61d9c` | ~397 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

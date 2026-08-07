@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: catapult + launcher families
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionCatapult.ExecuteAction IL=163 draw/
+  release (strainPercent, reload-block, auto-reload
+  ItemReloadServer, break/TP-camera cancel, fire via ranged
+  ExecuteAction press+release); GetStrainPercent IL=10;
+  CanReload IL=15 cancels drawn bow.
+- ItemActionLauncher: fireShot IL=5 stub; instantiateProjectile
+  IL=136 ammo resolve + model clone + ProjectileMoveScript wiring
+  (owner, actions, launcher value); ItemActionEffects IL=72
+  per-burst ProjectileMoveScript.Fire with direction offset +
+  hitmask.
 ## 2026-08-08 - tier-C: catapult bow family
 
 Done (V3.1.0 b14 IL):
