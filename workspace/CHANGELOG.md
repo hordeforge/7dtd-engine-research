@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Hit resolvers
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md: GetBlockHit IL=84 (distant-deco fallback,
+  multiblock parent); FindHitEntityNoTagCheck IL=49 (E_BP_ body
+  part name, FindEntityUpwards, E_Vehicle fallback).
 ## 2026-08-08 - tier-C: ItemActionAttack.Hit orchestration
 
 Done (V3.1.0 b14 IL):
