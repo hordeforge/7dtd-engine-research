@@ -388,10 +388,31 @@ TriggerVolume overload (IL=27) same with prefab required (warn if null).
 **`PlayerStealth.NoiseCleanup` (IL=43):** for each `noises` entry: if `ticks > 1`
 decrement ticks; else `RemoveAt`.
 
+**`PlayerStealth.AddNoise` (IL=35):** insert `NoiseData(volume, ticks)` into list
+sorted **descending by volume** (first slot with existing vol ≤ new vol).
+
+**`PlayerStealth.NotifyNoise(volume, duration)` (IL=71):** if volume ≤ 0 false.
+`AddNoise(noises, volume, duration*20 ticks)`. If volume ≥ **11** set
+`sleeperNoiseWaitTicks = 20`. Soft-cap volume for sleeper accumulate: if &gt;
+**60**, `60 + (v-60)^1.4`; then `* passive 88`; add into `sleeperNoiseVolume`
+clamped at **360**; return true only when clamp hit (loud enough to force
+sleeper path).
+
 **`PlayerStealth.CalcVolume` (IL=68):** weighted sum of noise volumes with decay
 factor **0.6** per successive entry (`sum += vol * weight; weight *= 0.6`);
 `noiseVolume = (sum * 2.35)^0.86 * 1.5 * EffectManager(passive **88**)`; return
 raw sum (noiseVolume field is the scaled value used by TickServer).
+
+**`AIDirector.OnSoundPlayedAtPosition` (IL=17):** resolve entity if id ≠ -1;
+`NotifyNoise(entity, pos, clipName, volumeScale)`.
+
+**`AIDirector.NotifyNoise` (IL=84):** `AIDirectorData.FindNoise(clipName)` or
+return; ignore if instigator is `EntityEnemy` or `IsIgnoredByAI` or throwable
+decoy item. If tracked player and crouching: `volumeScale *=
+muffledWhenCrouched`. `PlayerStealth.NotifyNoise(noise.volume*scale,
+noise.duration)`; on true `World.CheckSleeperVolumeNoise(pos)`. If
+`heatMapStrength > 0`: `NotifyActivity(type=3, blockPos, strength*scale,
+duration=**240**)`.
 
 **`LightManager.GetStealthLightLevel` (IL=30):** if no `myServer` return 0. Else
 sample at entity pos **y+1.68**:
@@ -1340,8 +1361,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** CalcVolume 0.6 decay + passive 88; NoiseCleanup; stealth light
-  y+1.68; BlockTrigger.OnTriggered; SleeperWokeUp; TickServer passive 89.
+- **2026-08-07:** NotifyNoise crouch muffling + heat 240; AddNoise sort; NotifyNoise
+  sleeper cap 360; CalcVolume passive 88; NoiseCleanup; stealth light y+1.68.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: NotifyNoise heat map and AddNoise sort
+
+Done (V3.1.0 b14 IL):
+- AddNoise: insert sorted descending by volume.
+- NotifyNoise (PlayerStealth): duration*20 ticks; vol>=11 sleeper wait 20; soft cap 60+(v-60)^1.4; passive 88; sleeperNoiseVolume max 360.
+- AIDirector.NotifyNoise: ignore enemies/decoys; crouch muffling; CheckSleeperVolumeNoise; heat NotifyActivity type 3 duration 240.
+- OnSoundPlayedAtPosition -> NotifyNoise.
+---
 ## 2026-08-07 — tier-C: CalcVolume noise formula and stealth light
 
 Done (V3.1.0 b14 IL):
