@@ -565,6 +565,32 @@ holdingEntity, hitmaskOverride, 0, false)` per burst and removes it - the
 rocket flies through the projectile script (physics + the ammo's
 `ItemActionProjectile`).
 
+**Projectile runtime (`ProjectileMoveScript`, V3.1.0 b14):** the
+GameObject script the launcher wires (above) flies and detonates the shot.
+`Fire(idealStartPos, dirOrPos, firingEntity, hmOverride, radius,
+isBallistic)` (IL=236): `hitMask = hmOverride != 0 ? hmOverride : 80`;
+`radius = radius >= 0 ? radius : itemActionProjectile.collisionRadius`;
+velocity/gravity from passives **71** / **70** over the projectile action's
+`Velocity`/`Gravity` (the `FlyTime < 0` branch computes a ballistic
+trajectory from the target offset instead); water-collision particles init;
+then detach, layer 0, and `SetState(1 Flying)`.
+`FixedUpdate` (IL=196) is the state machine: **Flying (1)** applies gravity
+only after `FlyTime` has elapsed, advances `position += velocity * dt` with
+`LookAt`, and when off the ideal line lerps toward `idealPosition`
+(`Lerp(..., stateTime * 5)` until `stateTime >= 0.2`); `stateTime >=
+LifeTime` -> `SetState(4 Dead)`. **Stuck (2)** times out after 180 s
+(destroy), but first checks `stickyRay`: a `Voxel.Raycast` that no longer
+hits a block/terrain or `E_` entity means the stuck surface is gone and the
+arrow `DoRevive()`s. **Dead (4)** destroys after `DeadTime`; `SetState`
+(IL=33) resets `stateTime` and, on Dead, hides the `MeshExplode` child and
+the light. `checkCollision` (IL=616) runs only in the Flying state: it sweeps
+the last segment (skipped under 0.04), feeds `waterCollisionParticles`, reads
+the firer's model layer (so the shot does not hit its firer), and raycasts
+with `radius + collisionStartBack`. `TryCollect` (IL=40) lets players pick
+up `IsSticky` projectiles (arrows): `AddItem(new ItemStack(
+itemValueProjectile, 1))` into the local inventory, destroying the shot on
+success or showing the `xuiInventoryFullForPickup` tooltip when full.
+
 **Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
 magazine capacity goes through the `MagazineSize` passive against the class's
@@ -1265,6 +1291,13 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ProjectileMoveScript runtime: Fire IL=236 (hitMask 80
+  default, passives 71/70 velocity/gravity, ballistic FlyTime<0 branch,
+  water particles, SetState Flying); FixedUpdate IL=196 state machine
+  (gravity after FlyTime, ideal-position lerp, LifeTime/DeadTime timeouts,
+  sticky-ray revive via Voxel.Raycast); SetState IL=33 (Dead hides
+  MeshExplode + light); checkCollision IL=616 segment sweep + firer layer
+  exclusion + water particles; TryCollect IL=40 sticky-arrow pickup.
 - **2026-08-08:** Launcher (rocket) family: fireShot IL=5 stub (no hit ray);
   instantiateProjectile IL=136 ammo resolve + model clone +
   ProjectileMoveScript wiring (owner, actions, launcher value); ItemActionEffects
