@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GamePrefs.SetObject
+
+Done (V3.1.0 b14 IL):
+- GamePrefs.SetObjectInternal IL=38: bounds check, null/equal skip, store +
+  notifyListeners.
 ## 2026-08-08 — tier-C: GameStats.SetObject
 
 Done (V3.1.0 b14 IL):

@@ -167,6 +167,11 @@ and `LoadPresets()`; the same coroutine then calls
 `GamePrefs.SetupSandboxReferences()` and `GameStats.SetupSandboxReferences()`
 (section 6). Static accessors serve the whole codebase:
 
+**`GamePrefs.SetObject(prop, value)` (IL=5 -> SetObjectInternal IL=38):** the
+pref setter - bounds check ("Trying to set non-existing pref" error), skip when
+both values null or `existing.Equals(value)`, else store and
+`notifyListeners(prop)`.
+
 | Accessor | Behavior |
 |---|---|
 | `GetFloat / GetInt / GetBool / GetIndex(option)` | Current value; unknown id returns 0/false. If the option is in `overrideList` (section 7) the **default** value is returned instead |
