@@ -251,7 +251,10 @@ index whose `noiseMin <= v < noiseMax`, where
 `v = noiseGen.FBM(x + noiseOffset.x, z + noiseOffset.y, noiseFreq) * 0.5 +
 0.5` (mapping the [-1, 1] noise to [0, 1]); the FBM result is cached per
 `(noiseFreq, noiseOffset)` pair, and the `y` argument is unused (the field is
-2D over x/z). No match returns -1.
+2D over x/z). No match returns -1. `GetBiomeOrSubAt(x, z)` (IL=24) is the
+convenience wrapper: `GetBiomeAt(x, z)`, then `GetSubBiomeIdxAt(biome, x, 0,
+z)` (the y slot hard-coded to 0) and the sub-biome substitution when the index
+is >= 0.
 It finishes with `decoratePrefabs` then `decorateSingleBlocks`, and logs
 `DecorateChunkOverlapping` errors with the current `GameManager.frameCount`.
 `decorateSingleBlocks` (IL=56) walks the 16x16 cells, skips null trader cells
