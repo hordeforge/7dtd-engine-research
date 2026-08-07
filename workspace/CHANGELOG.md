@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: exchange block action
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionExchangeBlock.ExecuteAction IL=82 -
+  press-only + Delay/cBuildIntervall gates, sourceblock match ->
+  SetBlockRPC(targetBlock) + placeblock sound +
+  RightArmAnimationAttack.
 ## 2026-08-08 - tier-C: repair + terrain tool
 
 Done (V3.1.0 b14 IL):
