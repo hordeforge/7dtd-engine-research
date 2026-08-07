@@ -75,7 +75,10 @@ z)` (IL=21) reads the live chunk's byte heightmap via `GetChunkSync` +
 `Chunk.GetMaxHeight()` (IL=29) is the max of the chunk's `m_HeightMap` byte
 array. `Chunk.GetHeight(x, z)` (IL=9) / `GetHeight(blockOffset)` (IL=5) read
 `m_HeightMap[x + z*16]` (the same array `GetMaxHeight` scans; `PrefabChunk`
-returns the prefab height). `Chunk.GetTerrainHeight(x, z)` (IL=9) reads the
+returns the prefab height).
+`Chunk.RecalcHeightAt(x, yMaxStart, z)` (IL=55) rescans the column downward
+from `yMaxStart` and writes `m_HeightMap[offset] = y` at the first non-air (or
+water) cell, returning that y (0 for an all-air column). `Chunk.GetTerrainHeight(x, z)` (IL=9) reads the
 separate `m_TerrainHeight` byte array (the `PrefabChunk` variant scans down
 from the prefab height for the first terrain-shape block); `SetTerrainHeight`
 (IL=10) writes it.
