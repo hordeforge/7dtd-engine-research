@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Block.HandleTrigger
+
+Done (V3.1.0 b14 IL):
+- Block.HandleTrigger (IL=41) narrated in block-shapes.md 7.3: client
+  sends NetPackageBlockTrigger, server resolves the chunk's BlockTrigger
+  and calls TriggerBlocks(player, player.prefab, trigger) when valid.
+
 ## 2026-08-08 - tier-C: TriggerManager.TriggerBlocks
 
 Done (V3.1.0 b14 IL):

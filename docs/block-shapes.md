@@ -289,6 +289,12 @@ overload (IL=27) gates the same way, warns
 null instance, and otherwise routes
 `PrefabDataDict[instance].Trigger(player, volume)`.
 
+**`Block.HandleTrigger(player, world, pos, bv)` (IL=41)** is the server-side
+entry: a client forwards `NetPackageBlockTrigger.Setup(pos, bv)`; the server
+resolves `chunk.GetBlockTrigger(world.toBlock(pos))` and, when a trigger
+exists and the player is valid, calls
+`world.triggerManager.TriggerBlocks(player, player.prefab, trigger)`.
+
 `BlockTrigger.OnTriggered(player, world, channel, changes, source)` is the
 receiver-side state machine:
 
@@ -383,6 +389,8 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-07:** Block.HandleTrigger (IL=41): client -> NetPackageBlockTrigger,
+  server resolves chunk trigger + TriggerBlocks(player, player.prefab, trigger).
 - **2026-08-07:** TriggerManager.TriggerBlocks dispatch (IL=17/27):
   HasAnyTriggers gate + PrefabDataDict route; volume variant null-instance
   warning.
