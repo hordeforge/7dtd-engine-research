@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `6bc9b90` ItemClass name resolution |
-| Commits since dry-run `3b61d9c` | ~157 |
+| HEAD (at handoff write) | `cca6502` Chunk.SpawnEntityAsync |
+| Commits since dry-run `3b61d9c` | ~158 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
