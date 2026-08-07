@@ -205,6 +205,16 @@ no-op; a missing own array copies the donor's wholesale; otherwise each donor
 stat either upgrades the matching entry when it beats the local value (better
 direction from `IsStatLowerBetter`) or is appended as a new entry.
 
+**Stat-value leaves:** `GetStatPercent(type, onlyBoosted)` (IL=12) starts at
+**1** and, when stats exist, runs `StatModifyValue`. `StatModifyValue(effect,
+ref value, onlyBoosted)` (IL=47) finds the matching stat entry (skipping
+unboosted entries under `onlyBoosted`), computes
+`multiplier = 1 + statValue * 0.005` (each stat point is 0.5 %) and multiplies
+the reference in place. `IsStatLowerBetter(type)` (IL=9) is true for
+`StaminaLoss` (112) and `TargetArmor` (163) - the two stats where a smaller
+value is better. `HasAnyBoostedStats` (IL=26) is a scan for any `isBoosted`
+entry.
+
 ---
 
 ## 3. ItemClass and the Actions array
