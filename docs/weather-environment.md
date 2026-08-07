@@ -156,6 +156,17 @@ matches returning the group / index, null / -1 on miss; `WeatherGetValue`
 its millisecond `duration`, filling `delay` (or `Vector2i.zero`) when the ref is
 present. `InitWeather()` (IL=1) is an empty stub in this build.
 
+The `Probabilities` table inside each `WeatherGroup` is a `List<Vector3>[5]` —
+one list per `ProbType` slot, each entry a `Vector3(min, max, prob)`
+(`AddProbability`, IL=14; `WeatherGroup.AddProbability` is a 7-instruction
+pass-through). `Normalize()` (IL=62) divides every entry's `z` by the slot's
+`z`-sum, so the weights within a slot sum to 1. `GetRandomValue(type)` (IL=54)
+uses two `GameRandom.RandomFloat` draws from `World.GetGameRandom()`: the first
+walks the cumulative `z` weights to pick an entry, the second lerps the range
+`x + (y - x) * rand2`; no entry hit returns 0. `CalcMinMaxPossibleValue(type)`
+(IL=44) folds the per-slot entry ranges into a `Vector2(min, max)` (starting
+from `+floatMax`/`-floatMax`).
+
 Blood moon overrides all of
 **`CalcGlobalWeatherType` (IL=36):** if `SkyManager.IsBloodMoonVisible()`, for
 each biome with `stormWorldTime - worldTime < 5000`, push
