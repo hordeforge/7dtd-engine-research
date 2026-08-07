@@ -91,6 +91,14 @@ appended to `ActionSequenceUpdates`.
 **`StartSequence(manager)` (IL=4):** only `StartTime = Time.time` (manager arg
 unused in body).
 
+`GameEventActionSequence.Update()` (IL=287) is the per-tick action dispatch:
+for each incomplete action whose `Phase` matches `CurrentPhase`, it either
+refunds (when `AllowRefunds && RefundInactivity` and
+`Time.time - StartTime > 60`) or runs `PerformAction()`. A result of 3
+(complete), or 1 combined with `action.IgnoreRefund`, marks `IsComplete` and
+jumps to `PhaseOnComplete`; a result of 2 (denied) marks complete and jumps to
+`PhaseOnDenied` (no jump when the target is -1).
+
 Each tick, `HandleActionUpdates` runs `StartSequence` once (the `StartTime`
 sentinel is `-1`; the first tick stamps `Time.time`), then `Update()`, inside a
 try/catch that logs `Exception while updating action sequence <name>` and
