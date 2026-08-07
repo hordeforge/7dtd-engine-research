@@ -2213,6 +2213,41 @@ drive `internalPlayStepSound` / alert loops; `itemsOnEnterGame` is granted on
 spawn.
 
 
+### D8.7 AI task config: `EAIManager.CopyPropertiesFromEntityClass` (IL=213)
+
+Called from `EntityAlive.CopyPropertiesFromEntityClass` (D8.6, step 6) when the
+aiManager exists. Builds the AI tuning fields and both task lists from the
+`EntityClass` XML properties:
+
+1. **Scalar tuning** (all `ParseFloat`): `feralSense` (`AIFeralSense`),
+   `groupCircle` (`AIGroupCircle`), `noiseSeekDist` (`AINoiseSeekDist`),
+   `seeOffset` (`AISeeOffset`). These feed `GetSeeDistance` / `CalcSenseScale`
+   (D3.x) and scout group-circle placement.
+2. **Path cost:** `pathCostScale` = `rand.RandomRange(x, y)` over the
+   `AIPathCostScale` vec (default `(1,1)`); then
+   `partialPathHeightScale = 1 - pathCostScale` (read/written inside
+   `GamePath.ASPPathFinder.Calculate`, the partial-height path weight).
+3. **AITask list** (`tasks`, the always-run decision tasks):
+   - If the `AITask` string prop is non-empty: `ParseTasks(AITask, tasks)`.
+   - Else: numbered fallback keys `PropAITask + "1"`, `+ "2"`, ... (stock XML:
+     `AITask1`, `AITask2`, ...) looked up in `Properties.Values`; for each
+     present non-empty key: `CreateInstance(class)` (throws
+     `Class '<x>' not found!` when null), `Init(entity)`,
+     `SetData(ParseKeyData(key))` inside a try/catch that logs
+     `EAIManager {0} SetData error {1}`, then `tasks.AddTask(index, instance)`
+     with index counting up from 1.
+4. **AITarget list** (`targetTasks`, the target-selection tasks, e.g.
+   `EAISetNearestEntityAsTarget`): identical pattern via the `AITarget` string
+   prop, else numbered `AITargetTask1..N` keys.
+
+**`ParseTasks(str, list)` (IL=111):** scan for letter-starting tokens; each
+entry runs to the next `|` or end of string. An entry is
+`ClassName [key=val ...]`: the class name is the token up to the first space,
+the remainder is parsed with `ParseData` into the `SetData` dictionary (errors
+logged, not fatal). `list.AddTask(priority, instance)` with priority counting
+up from 1 per entry. This is the parse half of the stock `AITarget-2/-3` wiring
+noted in the focus leaves section.
+
 ## D9. Manager chain sizes (gmUpdate every frame if instance)
 
 | Manager | Update IL |

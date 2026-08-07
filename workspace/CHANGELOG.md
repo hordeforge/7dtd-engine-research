@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EAIManager AI task config parse
+
+Done (V3.1.0 b14 IL):
+- EAIManager.CopyPropertiesFromEntityClass IL=213: feralSense/groupCircle/
+  noiseSeekDist/seeOffset; pathCostScale rand over AIPathCostScale (1,1);
+  partialPathHeightScale = 1-pathCostScale (ASPPathFinder.Calculate xref);
+  AITask string or AITask1..N keys -> tasks; AITarget / AITargetTask1..N ->
+  targetTasks; CreateInstance/Init/SetData/AddTask.
+- ParseTasks IL=111: pipe-delimited "ClassName [params]" entries, priority 1+.
+---
 ## 2026-08-07 — doc structure pass: numbering, D-order, stability dump policy
 
 Done:

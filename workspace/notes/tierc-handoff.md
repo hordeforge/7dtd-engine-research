@@ -20,12 +20,19 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `b6c36fa` SaveLocalPlayerData + RequestToSpawnEntityServer |
-| Commits since dry-run `3b61d9c` | ~38 |
+| HEAD (at handoff write) | `f1e6a34` doc structure pass |
+| Commits since dry-run `3b61d9c` | ~40 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1488 / catalogued ~822 / OOS ~1392 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
+
+2026-08-07 session note: doc structure pass landed (commit f1e6a34) - fixed
+duplicate section numbers (server-lifecycle, quests-challenges, managers,
+save-region), ordered entity-ai D8.x sections, moved `docs/stability-dump/` raw
+IL to git-ignored `il/stability-v3.1.0/` (update stability.md link target if you
+regenerate), removed root junk dirs. CopyPropertiesFromEntityClass (IL=1128)
+narrated at entity-ai D8.6 in cd7b79c.
 
 ## Resume checklist (next agent / next turn)
 

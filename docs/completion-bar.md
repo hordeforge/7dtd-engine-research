@@ -289,6 +289,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | updatePauseState save-on-pause + pause apply | loop-gmupdate.md Phase A2 |
 | PlayerDisconnected path + MemoryPools.Cleanup + reason 2 | server-lifecycle.md §3.2 |
 | Spawn-near-friend InForest biome gate = Forest/PineForest only | protocol.md post-spawn |
+| EAIManager.CopyPropertiesFromEntityClass IL=213 + ParseTasks IL=111 | entity-ai.md D8.7 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
