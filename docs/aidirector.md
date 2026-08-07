@@ -232,6 +232,8 @@ null, log groups done. Else `interval = spawnGroup.interval`;
 `numToSpawn = ModifySpawnCountByGameDifficulty(spawnGroup.spawnCount)`;
 `spawnCount = 0`.
 
+**`get_maxAlive` (IL=9):** `spawnGroup.maxAlive` or **0** if no group.
+
 **`ResetPartyLevel(mod)` (IL=13):** `level = CalcPartyLevel()`; if `mod != 0`,
 `level %= mod`; `SetPartyLevel(level)`.
 
@@ -562,7 +564,7 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** BM Tick 1.8s SeekTarget + nextPlayer; SetScaling 1..2.5;
+- **2026-08-07:** get_maxAlive; BM Tick 1.8s SeekTarget + nextPlayer; SetScaling;
   CalcBestDir 16 bins; InitParty; IsPlayerATarget; SeekTarget 1200
   formula; CalcStageSpawnMax; SetPartyLevel gsScaling; CanSpawn cap.
 - **2026-08-07:** CalcSpawnPos ±45° radius + GetMobRandomSpawnPosWithWater 0/10/30;

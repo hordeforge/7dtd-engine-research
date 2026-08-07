@@ -242,6 +242,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | MinScript.Run interpreter start | entity-ai.md |
 | MinScript.Tick opcode table + CalcBestDir | entity-ai.md / aidirector.md |
 | GetAliveCount + BM Tick 1.8 / SetScaling | entity-ai.md / aidirector.md |
+| isBestTask MutexBits + OnUpdateEntity buff path | entity-ai.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

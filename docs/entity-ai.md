@@ -85,6 +85,12 @@ removed hooks.
 
 ### 2.0 Parent chain: `OnUpdateEntity` (IL=457) then `OnUpdateLive` (IL=363)
 
+**`OnUpdateEntity` high-level (IL=457):** base `Entity.OnUpdateEntity`;
+`Buffs.SetCustomVar` / `Buffs.Tick`; optional class `PickupStressBuff` add;
+**`OnUpdateLive()`**; `inventory.OnUpdate()` when present; death / hurt sound;
+radiation-sensitive path can `DamageEntity` (e.g. **20** under biome flags);
+more equipment / held-item / animation residual in later IL.
+
 `EntityAlive.OnUpdateEntity` (before Live):
 
 1. Base `Entity.OnUpdateEntity`.
@@ -584,7 +590,12 @@ Classic priority AI list (same shape IceCoffee tried to Parallel.ForEach):
 3. For started: `Start()`  
 4. For executing: **`EAIBase.Update()`**
 
-Mutex/priority via `isBestTask` / `areTasksCompatible` (not fully dumped here; present in type).
+**`areTasksCompatible(a,b)` (IL=10):** `(a.MutexBits & b.MutexBits) == 0`.
+
+**`isBestTask(task)` (IL=38):** for each other in `executingTasks` (skip self):
+- if other.priority &gt; task.priority and other is **not** continuous → false;
+- if other.priority ≤ task.priority and not compatible → false;
+- else keep scanning. Empty list or all pass → true.
 
 **0.05** is a fixed step (independent of `deltaTime` in this method), i.e. assumes ~20 Hz task list cadence when ticked.
 
@@ -1555,8 +1566,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** GetAliveCount formula; FindLabel cmd2; MinScript.Tick opcodes;
-  Run start; Reset fields; UpdatePlayerTouched; Spawn async.
+- **2026-08-07:** isBestTask priority/continuous + MutexBits; OnUpdateEntity buff
+  then live; GetAliveCount; FindLabel; MinScript.Tick; Spawn async.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks

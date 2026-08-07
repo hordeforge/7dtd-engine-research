@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: isBestTask MutexBits and OnUpdateEntity path
+
+Done (V3.1.0 b14 IL):
+- areTasksCompatible: MutexBits AND == 0.
+- isBestTask: higher priority non-continuous blocks; incompatible lower/equal blocks.
+- OnUpdateEntity: Buffs.Tick then OnUpdateLive then inventory; radiation damage residual.
+- get_maxAlive: spawnGroup.maxAlive.
+---
 ## 2026-08-07 — tier-C: GetAliveCount and BloodMoonParty.Tick
 
 Done (V3.1.0 b14 IL):
