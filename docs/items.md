@@ -629,6 +629,23 @@ the `Create_item` refund (name + `Create_item_count` default 1 +
 set; an empty set is nulled), `PromptDescription` / `PromptTitle` / `SmellUse`,
 and sets `UsePrompt = PromptDescription != null`.
 
+Other config tails: `ItemActionDynamic.ReadFrom` (IL=495) is the dynamic-melee
+config (`Damage_type` / `DamageType`, `EntityPenetrationCount`,
+`GrazeDamagePercentage` / `GrazeStart` / `GrazeEnd` /
+`GrazeStaminaPercentage` / `GrazeSounds` / `UseGrazingHits`,
+`SwingAngle` / `SwingDegrees` / `InvertSwing` / `IsHorizontalSwing` /
+`IsVerticalSwing`, `HitSounds`, `HarvestLength` / `HarvestHitEffectOn`,
+`UsePowerAttackAnimation` / `UsePowerAttackTriggers`, plus the base
+`Range` / `Sphere` / `Hitmask_override` / `ToolCategory`).
+`ItemActionThrownWeapon.ReadFrom` (IL=162) parses the throw physics
+(`Velocity`, `Gravity`, `FlyTime`, `LifeTime`, `CollisionRadius`,
+`DamageEntity` / `DamageBlock`, `Hitmask_override`).
+`ItemActionOpenBundle.ReadFrom` (IL=191) parses the bundle-open config
+(`Consume` default true, comma-split `Create_item` + `Create_item_count`,
+comma-split `Random_item` + `Random_item_count`, `Random_count`,
+`Unique_random_only`, and `Condition_raycast_block` - the block the player
+must be looking at to open the bundle).
+
 **Reload leaves:** `ConsumeAmmo(data)` (IL=9) is `iv.Meta -= 1` (one round per
 shot). `loadNewAmmunition(gun, ammo, entity)` (IL=20) reads the holding
 action slot 0 as `ItemActionDataRanged`, resets `SelectedAmmoTypeIndex` to 0
@@ -1636,6 +1653,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionDynamic.ReadFrom (IL=495) graze/swing/
+  power-attack config; ItemActionThrownWeapon.ReadFrom (IL=162) throw
+  physics; ItemActionOpenBundle.ReadFrom (IL=191) create/random item
+  arrays + Condition_raycast_block.
 - **2026-08-08:** base ItemAction.ReadFrom (IL=107): Delay/Sound_start/
   Particle_harvesting/ActionExp (2)/ActionExpBonusMultiplier (10)/
   UseAnimation/Buff list -> BuffActions.
