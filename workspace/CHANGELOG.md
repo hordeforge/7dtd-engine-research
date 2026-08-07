@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityAlive.SetLookPosition
+
+Done (V3.1.0 b14 IL):
+- EntityAlive.SetLookPosition (IL=43) narrated in entity-ai.md: early-out
+  when sqrMagnitude of delta < 0.0016 (4 cm); store lookAtPosition;
+  SendPacketToTrackedPlayers with NetPackageEntityLookAt(entityId, pos);
+  forward to avatarController.SetLookPosition (cosmetic aim).
+
 ## 2026-08-08 - tier-C: EAILook.Continue + MinEvent name
 
 Done (V3.1.0 b14 IL):

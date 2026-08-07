@@ -1281,6 +1281,15 @@ below 35) and every **40** ticks re-picks a look point
 (forwardVector * 20))` (20 m ahead, ±30 pitch, ±60 yaw); ends (returns false)
 when `waitTicks` expires.
 
+**`EntityAlive.SetLookPosition(pos)` (IL=43):** the look-target setter behind
+`EAILook`, ranged tasks, and the vomit action. Early-outs when the new point
+moved less than **4 cm** (`sqrMagnitude < 0.0016`); otherwise stores
+`lookAtPosition`, broadcasts `NetPackageEntityLookAt(entityId, pos)` to the
+entity's tracked players (`SendPacketToTrackedPlayers(entityId,
+primaryPlayerId, pkg, false)`), and forwards to
+`avatarController.SetLookPosition(pos)` (cosmetic aim only, per
+[protocol-packages.md](protocol-packages.md)).
+
 **`EAIApproachAndAttackTarget.Update` (IL=846) phases:**
 
 1. **Home return** (`isGoingHome`): near home (planar sq &lt; 0.16, |dy| &lt; 2)
@@ -2941,6 +2950,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EntityAlive.SetLookPosition (IL=43): 4 cm sqrMagnitude
+  early-out, NetPackageEntityLookAt broadcast to tracked players + avatar
+  cosmetic aim.
 - **2026-08-07:** EAILook.Continue (IL=116): ambient look task - stun gate,
   alert 14-tick yaw seek (+-60, slow 35) and 40-tick look-point re-pick
   (20 m ahead, +-30/+-60), waitTicks expiry ends it.
