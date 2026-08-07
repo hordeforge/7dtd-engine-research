@@ -701,6 +701,11 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   `RemoveDecorationAt(pos)` (IL=52) is the detach: disabled or missing
   DecoChunk -> false, off-main queues into `removeDecosFromThread`, and the
   main thread runs `chunk.RemoveDecoObject(pos)`.
+  `ResetDecosForWorldChunk(key)` (IL=73) queues off-main into
+  `resetDecosForWorldChunkFromThread`; on the main thread it sets `bDirty`,
+  resolves the DecoChunk from the key's 16x16 grid position, runs
+  `RestoreGeneratedDecos(key, <cached predicate>)`, and broadcasts
+  `NetPackageDecoResetWorldChunk` on the server.
   `DecoManager.SetBlock(world, pos, bv)` (IL=19) is the edit-sync called by
   `ChunkCluster.SetBlock`: an air value only removes the record; any other
   value replaces it (remove + `AddDecorationAt(..., forceBlockYPos=false)`).
