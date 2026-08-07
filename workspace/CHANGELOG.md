@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: addEntityComponent
+
+Done (V3.1.0 b14 IL):
+- EntityFactory.addEntityComponent IL=5/11: Type.GetType + AddComponent cast
+  Entity; null on bad type (CompleteEntity generic path).
 ## 2026-08-08 — census refresh 4
 
 Done:

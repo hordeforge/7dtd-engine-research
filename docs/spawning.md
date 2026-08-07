@@ -472,7 +472,9 @@ starts with `false`; the operation is polled by `TryComplete`).
    `SetBlockPos(blockPos, fallTreeDir)`; parents `FallingBlocks` /
    `FallingTrees`, names `FallingBlock_{id}`.
 6. **Generic path:** `ec.classname == null` → log `Unknown entity {id}` +
-   return; `addEntityComponent(classname)`; `rot` euler, `entityId`, Init;
+   return; `addEntityComponent(classname)` (IL=5/11: `Type.GetType` then
+   `gameObject.AddComponent(type)` cast to `Entity`, null for a bad type);
+   `rot` euler, `entityId`, Init;
    pref **44 (`DebugMenuShowTasks`)** → `GUIHUDEntityName` when `EntityAlive`;
    parent when `parentGameObjectName` set; name `{entityClassName}_{id}`,
    `SetEntityName`; `SetSkinTexture`; collider layers: capsule colliders → **14**
