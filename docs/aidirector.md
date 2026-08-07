@@ -413,6 +413,11 @@ m_lifetime)` (linear strength decay over the lifetime).
 - `TickNextTime(UInt64&, SpawnType)` IL=74
 - `StartSpawning(SpawnType)` IL=124
 - `get_HasAnySpawns()` IL=6
+- `get_OtherHordesAreActive()` IL=9: `SkyManager.IsBloodMoonVisible() ||
+  Director.GetComponent<AIDirectorChunkEventComponent>().HasAnySpawns()` (other
+  horde traffic suppresses a new wandering horde)
+- `SetNextTime(SpawnType, UInt64)` IL=13: `Bandits` (0) writes
+  `BanditNextTime`, `Horde` (1) writes `HordeNextTime`
 
 **`Tick` (IL=17):** playtest → return; base tick; `TickActiveSpawns`;
 `TickNextTime(HordeNextTime, type=1)` (horde schedule; bandit is separate).
