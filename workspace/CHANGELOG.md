@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: WorldAreas wire + explosion hooks
+
+Done (V3.1.0 b14 IL):
+- protocol-packages.md: NetPackageWorldAreas wire (u8 version 1 +
+  i16 count + TraderArea.Write); TraderArea.Write IL=111 layout;
+  ProcessPackage -> SetWorldAreas.
+- blocks.md 5: OnBlockDestroyedByExplosion base IL=15 +
+  BlockMine 33% chain / BlockModelTree fall / BlockTNT fuse
+  0.3+rand*0.5 / BlockTrapDoor HandleTrigger overrides.
 ## 2026-08-08 - tier-C: trader areas (lookup + wire)
 
 Done (V3.1.0 b14 IL):
