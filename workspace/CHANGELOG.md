@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: InitBreadcrumbs
+
+Done (V3.1.0 b14 IL):
+- EntityPlayer.InitBreadcrumbs IL=6: Utils.Fill(breadcrumbs, position).
 ## 2026-08-08 — census refresh 5
 
 Done:

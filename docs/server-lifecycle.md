@@ -289,7 +289,8 @@ return `!isDisconnectingLater`. Else false.
 `persistentPlayerIds` from `{save}/Player/*` basenames (strip first `.`); unique
 add.
 
-**`EntityPlayer.Respawn` (IL=10 + local helpers):** disable ragdoll; breadcrumbs;
+**`EntityPlayer.Respawn` (IL=10 + local helpers):** disable ragdoll; breadcrumbs
+(`InitBreadcrumbs` IL=6 fills the breadcrumb array with the current position);
 `BeforePlayerRespawn` / teleport delegates / held-entity check /
 `AfterPlayerRespawn`; local FP revive camera; clear death state via `SetAlive`;
 optional buff re-apply path on local.
