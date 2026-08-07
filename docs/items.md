@@ -614,6 +614,39 @@ only): on emptying it runs `HandleTurningOffHoldingFlashlight()` +
 `quickSwapSlotIdx` when it still holds the same item id, else scans for the
 first slot with that id (**-1** when absent or never armed).
 
+**Held-slot accessors (V3.1.0 b14):** `get_holdingItemIdx()` (IL=3) is the raw
+`m_HoldingItemIdx`. `get_holdingItem()` (IL=20),
+`get_holdingItemItemValue()` (IL=16), `get_holdingItemStack()` (IL=17), and
+`get_holdingItemData()` (IL=23) all read `slots[m_HoldingItemIdx]` and fall
+back to the bare-hand twin when the held slot is empty: `bareHandItem`,
+`bareHandItemValue`, `new ItemStack(bareHandItemValue, 0)`, and
+`bareHandItemInventoryData` (with `slotIdx = holdingItemIdx` stamped in),
+respectively - an empty toolbelt slot reads as the bare hand everywhere.
+`IsHoldingGun()` (IL=9) is `holdingItem != null && holdingItem.IsGun()`
+(the guard behind the magnum kill-score flag in
+[`combat-damage.md`](combat-damage.md)). Slot-count constants:
+`get_INVENTORY_SLOTS()` (IL=5) = `PUBLIC_SLOTS + 1`;
+`get_PUBLIC_SLOTS()` (IL=11) = 10 in play, 20 while
+`PrefabEditModeManager.IsActive()` (`PREFABEDITOR = 2 * PLAYMODE`);
+`get_DUMMY_SLOT_IDX()` (IL=5) = `INVENTORY_SLOTS - 1`, the hidden last slot
+used to stow the held item during a vehicle attach
+(`SetHoldingItemIdxNoHolsterTime(DUMMY_SLOT_IDX)`, see
+[`vehicles-drones-turrets.md`](vehicles-drones-turrets.md) §4.2).
+
+**`ForceHoldingItemUpdate()` (IL=91)** is the forced full rebuild of the held
+item: it destroys the current held model, re-creates the model only when the
+class `CanHold()` (`createHeldItem`), re-creates the slot's
+`ItemInventoryData` when a block-data slot no longer holds a block class,
+restores the cloned value + count into the slot, sets
+`m_LastDrawnHoldingItemIndex = -1`, and runs `updateHoldingItem()`. Xref
+callers (6): `DroneWeapons.HealBeamWeapon.Fire` (the drone heal beam rebuilds
+the patient's held item), `EntityAlive.EntityNetworkStats.ToEntity` (stats
+restore on entity materialization), `EModelBase.SwitchModelAndView` (x2,
+client model swap), the client
+`PlayerMoveController.<initializeHoldingItemLater>d__92` coroutine, and the
+server-relevant `WorldStaticData.ReloadItemModifiers` (an item-modifier
+reload forces every held item to re-resolve).
+
 `DecHoldingItem` is the server-authoritative depletion: it lowers the held
 `ItemStack.count`, and when the stack hits zero it clears the slot and quick-swaps
 to the best remaining slot (`GetBestQuickSwapSlot`) so a used-up stack of thrown
@@ -1106,6 +1139,13 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Inventory held-slot accessors (get_holdingItem/ItemValue/
+  Stack/Data) bare-hand fallbacks + slot-count constants
+  (INVENTORY_SLOTS = PUBLIC_SLOTS + 1, PUBLIC_SLOTS 10 vs 20 prefab editor,
+  DUMMY_SLOT_IDX last slot); IsHoldingGun (IL=9);
+  ForceHoldingItemUpdate (IL=91) forced held-item rebuild with 6 xref
+  callers (drone heal beam, EntityNetworkStats.ToEntity, EModelBase model
+  swap, client initialize-holding coroutine, WorldStaticData.ReloadItemModifiers).
 - **2026-08-07:** Inventory.HoldingItemHasChanged (IL=51): cancels avatar
   WeaponFire/PowerAttack/UseItem/ItemUse events + Reload=false on held-item
   change.
