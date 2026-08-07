@@ -6,6 +6,18 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: block placement (action + math + commit)
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionPlaceAsBlock.ExecuteAction IL=353 (gates,
+  HitInfo target, OnConvertToBlockValue, BlockPlacement.OnPlaceBlock
+  + OnBlockPlaceBefore, keystone lpblock gate vs CanPlaceBlockAt
+  claim check, Block.PlaceBlock + MinEvent 44 + BlockPlaced +
+  changeItemTo/decInventoryLater).
+- BlockPlacement.OnPlaceBlock IL=235 (ground-cover face snap,
+  face<<2 + ConvertRotationFree, face-offset cell); Block.PlaceBlock
+  IL=67 (terrain Density / non-terrain DensityAir / deco no-density
+  SetBlockRPC, keystoneBlock achievement 4).
 ## 2026-08-08 - tier-C: loot/quest items + block placement
 
 Done (V3.1.0 b14 IL):
