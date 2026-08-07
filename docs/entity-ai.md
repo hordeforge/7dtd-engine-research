@@ -1554,6 +1554,24 @@ value. **`AddWater(v)` (IL=9):** add to Water stat.
 **`get_IsEating` / `get_IsDancing` / `get_Climbing` / `get_HasAI`:** field
 reads. **`SetDamagedTarget`:** store field.
 
+**`set_IsBreakingBlocks(value)` (IL=17):** on change store field; OR
+`bPlayerStatsChanged` with local-entity (alive flags dirty for net).
+
+**`ForceHoldingWeaponUpdate` (IL=39):** require connected. Server:
+`NetPackageHoldingItem.Setup(this)` SendPackage flags **192** excluding self.
+Client local player with entityId &gt; 0: same package `SendToServer`.
+
+**`EnqueueNetworkHoldingData(stack, index)` (IL=18):** queue
+`NetworkStatChange` carrying `EntityNetworkHoldingData` on
+`networkStatsUpdateQueue`.
+
+**`AllowActivationCommand("grab", player)` (IL=25):** for grab: require alive,
+bare hands, non-empty `EntityClass.PickupItem`; else base
+`Entity.AllowActivationCommand`.
+
+**`CollectActivatableItems(pool)` (IL=32):** holding item value + each equipment
+slot via `GetActivatableItems`.
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;

@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: HoldingItem force and grab activation
+
+Done (V3.1.0 b14 IL):
+- set_IsBreakingBlocks dirties bPlayerStatsChanged when local.
+- ForceHoldingWeaponUpdate HoldingItem S2C/C2S.
+- EnqueueNetworkHoldingData queue; grab AllowActivationCommand bare-hand PickupItem.
+- CollectActivatableItems holding + equipment slots.
+---
 ## 2026-08-07 — tier-C: Electrocuted and stamina helpers
 
 Done (V3.1.0 b14 IL):
