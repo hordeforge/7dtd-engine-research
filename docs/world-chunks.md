@@ -544,6 +544,15 @@ Authoritative multi-block apply used by `NetPackageSetBlock` Process:
    on neighbor chunks; `UncullChunk`; child-block TE cleanup.
 4. Delayed regen stop after list.
 
+**Top-soil break bitmap:** `Chunk.IsTopSoil(x, z)` (IL=31) /
+`SetTopSoilBroken(x, z)` (IL=36) pack one bit per column in the 32-byte
+`m_bTopSoilBroken` array (index `(x + z*16) / 8`, bit `(x + z*16) % 8`):
+`IsTopSoil` answers the bit clear, `SetTopSoilBroken` sets it (dug soil no
+longer regrows top soil). `GetTopSoil` (IL=3) exposes the array, `SetTopSoil`
+(IL=21) copies a full list in, and `GetTopMostTerrainHeight` (IL=28) is the
+max of the `m_TerrainHeight` heightmap bytes. `PrefabChunk` stubs
+`IsTopSoil` / `SetTopSoilBroken` as false / no-op.
+
 **`GameManager.SetBlocksRPC(changes, persistentPlayerId)` (IL=29)** is the
 commit+replicate wrapper: `ChangeBlocks(persistentPlayerId, changes)`, then
 `NetPackageSetBlock.Setup(persistentLocalPlayer, changes, dedicated ? -1 :
