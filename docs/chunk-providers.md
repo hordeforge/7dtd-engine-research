@@ -480,6 +480,12 @@ of 512x512 tiles via `RadiationTileArrayFromTexture` (IL=50) /
 `RadiationTileArrayFileFromTexture` (IL=37), per-pixel through the
 `ProcessColor` channel fold and a `FileBackedArray`/`TileFile` backing, but
 that path is not what the runtime InitData uses.
+`FillRadiationResult` (IL=83) / `FillRadiationFileBackedArray` (IL=104) are
+the fill loops: the first allocates a `byte[512,512]` per tile and writes
+`processColor(radPixs[(tz*512+py) * radiationMapSize + tx*512+px])`; the
+second lays tiles row-major in the file-backed array
+(`offset = (tz*512*512*radiationTilesX + tx*512*512)`, span 262144) and fills
+each `span[py*512+px]`.
 
 `BiomeImageLoader` turns `biomesTex` into the byte map: `Load()` (IL=7) is a
 coroutine stub for `<Load>d__11` (MoveNext IL=229), which resets `isError`/
