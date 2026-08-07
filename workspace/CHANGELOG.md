@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: dynamic melee sweep raycast
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionDynamicMelee.Raycast IL=203 - no
+  vehicle, stamina cost on local player, passive 199 penetration
+  loop (useExistingRay, 20-iter cap), water particles, hitTarget
+  per cast, RayHit avatar bool + whiff MinEvents 26/34.
 ## 2026-08-08 - tier-C: explosion entity damage + dynamic melee gate
 
 Done (V3.1.0 b14 IL):
