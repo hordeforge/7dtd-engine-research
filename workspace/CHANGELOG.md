@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World.worldToBlockPos
+
+Done (V3.1.0 b14 IL):
+- World.worldToBlockPos (IL=11) narrated in world-chunks.md: Vector3i of
+  Fastfloor x/y/z - the floor-based world-to-block conversion; repaired a
+  sentence dropped by an intermediate edit.
+
 ## 2026-08-08 - tier-C: Utils.GetAngleBetween
 
 Done (V3.1.0 b14 IL):

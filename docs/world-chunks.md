@@ -94,6 +94,9 @@ else `chunk.GetBlock(toBlockXZ(x), y, toBlockXZ(z))`; `GetBlockEntities(key)`
 `BlockEntityData` (world-coordinate) for each; `GetBlockEntity(pos)` (IL=12)
 returns null for a missing chunk; `GetBlockFaceTexture(pos, face, channel)`
 (IL=23) returns `0` for a missing chunk, else the per-face texture index.
+`World.worldToBlockPos(pos)` (IL=11) is the world-to-block conversion:
+`new Vector3i(Fastfloor(x), Fastfloor(y), Fastfloor(z))` (floor, so the
+negative half-space maps consistently).
 
 ---
 
@@ -689,6 +692,8 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** World.worldToBlockPos (IL=11) floor-based Vector3i
+  conversion; restored a sentence dropped in an intermediate edit.
 - **2026-08-07:** ChunkCluster read hops: GetBlock (IL=21) y>=256 Air guard +
   null-chunk Air; GetBlockEntities (IL=59) IndexedBlocks sweep; GetBlockEntity
   (IL=12) null on missing chunk; GetBlockFaceTexture (IL=23) 0 on missing chunk.
