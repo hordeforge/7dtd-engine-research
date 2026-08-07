@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: terrain snap engine
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 3.3: ChunkCluster.snapTerrainToPosition IL=113 (air-above-terrain lift, density clamp to DensityTerrain or half, SetBlockRPC routing)
+- chunk-providers.md 3.3: SnapTerrainToPositionAroundRPC IL=49 (4 cardinal neighbors, liftUp=false halfDensity=true)
+
 ## 2026-08-08 - tier-C: POI query + water leaves
 
 Done (V3.1.0 b14 IL):
