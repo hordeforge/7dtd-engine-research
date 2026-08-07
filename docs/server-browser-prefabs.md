@@ -250,6 +250,16 @@ null)` — the array is always non-null at that point, so the flag never reaches
 `worldPrefabs`, plus `poiPrefabs` when `isPOI`, setting `isSortNeeded`.
 ([`world-generation.md`](world-generation.md)).
 
+**Decorate.** `DecorateChunk(world, chunk, forceOverwrite)` (IL=70, the 2-arg
+form delegates with false) fills a thread-local scratch list via
+`GetPrefabsAtXZ(chunkWorldX0 .. +15, chunkWorldZ0 .. +15)` under `listsLock`,
+sorts it with `prefabInstanceSizeComparison` (IL=20, **descending** by
+`size.x * size.z` so larger POIs stamp first), then per instance that
+`Overlaps(chunk)` runs `CopyIntoChunk(world, chunk, forceOverwrite,
+FastTags.none)`. `SortPrefabs()` (IL=38) rebuilds `allPrefabsSorted` from
+`allPrefabs` under the lock with a cached `<>c` comparison and clears
+`isSortNeeded`.
+
 **Decorate** (`DecorateChunk`, called from
 `ChunkProviderGenerateWorld.GenerateSingleChunk`): collects
 `GetPrefabsAtXZ` for the chunk footprint, sorts by size, and for each
