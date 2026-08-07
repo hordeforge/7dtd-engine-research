@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: AIDirector AddPlayer and BM party join
+
+Done (V3.1.0 b14 IL):
+- AIDirector.Add/RemoveEntity: players only.
+- AddPlayer -> PlayerManagement tracked state + BloodMoonComponent players list.
+- AddPlayerToParty / TryAddPlayer: join within sqr 6400 (80 m) or CreateNewParty.
+---
 ## 2026-08-07 — tier-C: NetEntityDistribution SEnts and Remove
 
 Done (V3.1.0 b14 IL):

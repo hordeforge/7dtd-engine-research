@@ -260,6 +260,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | DamageEntity consecutive 30 + passives 161/40 | combat-damage.md |
 | SpawnEntityInWorld registration + BuffValue.Tick | spawning.md / buffs.md |
 | NetEntityDistribution SEnts distances + Remove | network.md |
+| AIDirector AddPlayer + BM party join 80 m | aidirector.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only
