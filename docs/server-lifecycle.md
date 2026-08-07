@@ -448,7 +448,8 @@ managers.
    `ThreadManager.AddSingleTask`; local players `EnableCamera(false)` +
    `SetControllable(false)`.
 5. `ShutdownMultiplayerServicesNow()` (IL=33: not dedicated →
-   `IUserClient.StopAdvertisePlaying`; server → `AuthorizationManager.ServerStop`,
+   `IUserClient.StopAdvertisePlaying`; server → `AuthorizationManager.ServerStop`
+   (IL=22: each `IAuthorizer.ServerStop`, clear `clientsInAuthorization`),
    `IMasterServerAnnouncer.StopServer` + `ServerInformationTcpProvider.StopServer`;
    `ILobbyHost.ExitLobby`; `IGameplayNotifier.EndOnlineMultiplayer`);
    `PlayerInteractions.Shutdown`; `GameplayNotifier.GameplayEnd()`.
