@@ -744,6 +744,11 @@ empty) and one whole slot at a time for non-stackables; it ends with
 `notifyListeners()` and returns the total removed count
 (`originalCount - remaining`).
 
+**`clearSlotByIndex(idx)` (IL=41)** empties one slot: a non-empty value is
+replaced with `ItemStack.Empty`, and a present model game object triggers
+`HoldingItemHasChanged()`, is unparented, deactivated, `Destroy`ed, and the
+model slot nulled.
+
 ---
 
 ## 7. Durability and degradation
