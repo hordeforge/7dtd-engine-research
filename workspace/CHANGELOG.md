@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: trigger links
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md trigger registry: Chunk.AddTriggerVolumeId (IL=18) 255 cap,
+  GetTriggerVolumes (IL=3).
+
 ## 2026-08-08 - tier-C: sleeper links
 
 Done (V3.1.0 b14 IL):
