@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameEventManager flag store
+
+Done (V3.1.0 b14 IL):
+- game-events.md 7: SetGameEventFlag (IL=94) add/update-duration/remove +
+  HandleFlagChanged(true, true/false); CheckGameEventFlag (IL=23) linear scan.
+
 ## 2026-08-08 - tier-C: AddDroppedId
 
 Done (V3.1.0 b14 IL):
