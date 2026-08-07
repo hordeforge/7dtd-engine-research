@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PrefabCache + PrefabInstance registration
+
+Done (V3.1.0 b14 IL):
+- server-browser-prefabs.md 3.2: PrefabCache.GetPrefab IL=47 load-or-cache; GetPrefabRotated IL=79 rotation&=3, Prefab[4] slots, dead fixChildblocks flag
+- server-browser-prefabs.md 3.2: PrefabInstance.GetOccupiedChunks IL=65 (bb -> chunk key range), AddWorldPrefab IL=32 (allPrefabs/worldPrefabs/poiPrefabs + isSortNeeded)
+
 ## 2026-08-08 - tier-C: EventPrefabs + NetPackageEventPrefab
 
 Done (V3.1.0 b14 IL):
