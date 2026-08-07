@@ -78,6 +78,12 @@ flowchart TB
 
 Live stock: `ChunkBlockYDim=256`, `ChunkBlockLayers=64`, `ChunkAreaDim=256` (XZ plane map size).
 
+**Channel compaction:** the light and density channels compact whole layers:
+`Chunk.CheckSameLight` (IL=4) / `CheckSameDensity` (IL=4) run the channel's
+`CheckSameValue` pass, and `Chunk.HasSameDensityValue(y)` (IL=5) is
+`chnDensity.HasSameValue(y)` - whether one `y` layer is a single value (the
+fast-path storage probe; `PrefabChunk` stubs it false).
+
 **Block read surface (V3.1.0 b14):** `World.GetBlock(x, y, z)` (IL=13)
 delegates to `ChunkCluster.GetBlock` and returns `BlockValue.Air` when the
 `ChunkCache` is null (uninitialized world). `WorldBase.GetBlock(Vector3i)` /
