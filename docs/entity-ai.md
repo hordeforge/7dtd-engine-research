@@ -1890,6 +1890,11 @@ selection currently never applies a special fall action on dedi).
 current pos. If not attached: `updateStepSound(dx,dz,yawDelta)`. If not root
 motion and not remote: `updateSpeedForwardAndStrafe(avgDist, partial)`.
 
+**`UpdateRotation(cur, intended, maxIncr)` (IL=36)** is the yaw-step helper:
+`delta = intended - cur` wrapped into `(-180, 180]` (add 360 while `<-180`,
+subtract while `>= 180`), clamped to `[-maxIncr, maxIncr]`, returning
+`cur + delta` - the shortest-arc turn at most `maxIncr` degrees per call.
+
 **`updateSpeedForwardAndStrafe(dist, partial)` (IL=101):** remote with
 partial &gt; 1 scales dist by 1/partial. Decay forward/strafe/vertical **×0.5**.
 If planar |dist| &gt; 0.001: rotate into entity yaw (sin/cos) and accumulate
