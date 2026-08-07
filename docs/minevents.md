@@ -426,6 +426,60 @@ clamped by sandbox max and class max; `ProgressionValue.set_Level`.
 Stat name switch includes `health` / `stamina` / `water` (and siblings); amount
 from cvar or literal; writes through `EntityStats` stat objects.
 
+#### `MinEventActionGiveExp.Execute` (IL=63)
+
+Per target with `Progression`: amount = `cvarRef` ?
+`Buffs.GetCustomVar(refCvarName)` : `exp`. Calls
+`Progression.AddLevelExp(amount, "_xpOther", XPTypes=8, notify=true, ..., -1,
+null)`. Sets `bProgressionStatsChanged` / `bPlayerStatsChanged` when entity is
+local (`!isEntityRemote`).
+
+#### `MinEventActionGiveSkillExp.Execute` (IL=112)
+
+Per target: if `exp != -1`, same `AddLevelExp` path as GiveExp with fixed
+`exp`. Else if `level_percent != -1`, IL still calls `AddLevelExp` with the
+`exp` field (stock does not convert percent in this method body; treat as
+residual / content-authoring quirk). Same dirty flags as GiveExp.
+
+#### `MinEventActionSetProgressionLevel.Execute` (IL=104)
+
+Per target: `GetProgressionValue(progressionName)`; if `level != -1` set that
+level, else set `ProgressionClass.MaxLevel`. Marks progression/player stats
+changed for local entities.
+
+#### `MinEventActionAwardChallenge.Execute` (IL=41) /
+`AwardQuestStat` (IL=41)
+
+**Local player only** (`isinst EntityPlayerLocal`). Count from cvar or literal.
+`QuestEventManager.ChallengeAwardCredited(stat, count)` /
+`QuestAwardCredited(stat, count)`. No-op on pure dedicated targets (no local
+player).
+
+#### `MinEventActionSetItemInSlot.Execute` (IL=39)
+
+`ItemClass.GetItem(itemName)`; requires `ItemClassArmor` whose `EquipSlot`
+matches action `slot`; then `Equipment.SetSlotItem(slot, item, true)` per target.
+
+#### `MinEventActionResetHeldItem.Execute` (IL=13)
+
+If `params.ItemActionData` present:
+`item.OnHoldingReset(invData)`.
+
+#### `MinEventActionSetHeldItemJammed.Execute` (IL=13)
+
+If `params.ItemValue` non-empty: `SetMetadata(ItemActionRanged.scGunIsJammed, 1)`.
+
+#### `MinEventActionRage.Execute` (IL=38)
+
+Per target as `EntityHuman`: if `enabled`,
+`StartRage(speedPercent, rageTime + 1)`; else `StopRage()`.
+
+#### `MinEventActionSetOverrideLoot.Execute` (IL=56)
+
+**Server only.** Per `EntityPlayer` target: empty `altLoot` removes from
+`LootContainer.OverrideItems`; else split `altLoot` on `,` and set/add string[]
+override list for that player.
+
 #### `MinEventActionShowToolbeltMessage.Execute` (IL=53)
 
 Local player only: `GameManager.ShowTooltip` variants (presentation).
@@ -502,6 +556,8 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-07:** GiveExp/GiveSkillExp/SetProgressionLevel; AwardChallenge/QuestStat
+  local-only; SetItemInSlot armor gate; jam/reset held; Rage; SetOverrideLoot.
 - **2026-08-07:** EffectManager.GetValue IL=372 stack order; ItemValue.FireEvent
   IL=107 ammo/mod recursion; MinEffectController/Group FireEvent IL sizes.
 

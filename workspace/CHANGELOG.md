@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: MinEvent GiveExp, loot override, rage, jam
+
+Done (V3.1.0 b14 IL):
+- GiveExp/GiveSkillExp AddLevelExp + dirty flags; SetProgressionLevel max/-1.
+- AwardChallenge/QuestStat EntityPlayerLocal only via QuestEventManager.
+- SetItemInSlot armor EquipSlot gate; ResetHeldItem; SetHeldItemJammed metadata.
+- Rage StartRage/StopRage on EntityHuman; SetOverrideLoot server comma list.
+---
 ## 2026-08-07 — tier-C: full UAI task Start+Update table (5 types)
 
 Done (V3.1.0 b14 IL):

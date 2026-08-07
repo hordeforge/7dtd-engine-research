@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1458 / catalogued 849 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1459 / catalogued 848 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -159,9 +159,10 @@ Closed in recent sessions (still optional, not required for A+B):
 | NetPackageTileEntity Process teBlockId | tile-entities-power §2 |
 | QuestObjectiveUpdate event types | protocol-packages |
 | UAI all 5 concrete task Start+Update | entity-ai §5.3 |
+| More MinEvent leaves (exp/loot/rage/jam) | minevents §7.1 |
 
-Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
-Quest/Action leaves (inventories), client-shared helpers. Further UAI is only
+Remaining catalogued-only mass is mostly console commands (catalog rows), residual
+MinEvent presentation leaves, client-shared helpers. Further UAI is only
 considerations / action scoring XML, not more task subclasses (only 5 exist).
 Promote only when a clone or optim lever needs the behaviour.
 
