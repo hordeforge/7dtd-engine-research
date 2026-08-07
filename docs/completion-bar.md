@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1425 / catalogued 882 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1439 / catalogued 868 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -95,10 +95,11 @@ Closed in recent sessions (still optional, not required for A+B):
 | DamageEntity local early outs; AliveFlags process | protocol-packages §6.11 / §5.5.6 |
 | StatChanged/StatsBuff/PlayerStats process IL | protocol-packages §6.16 |
 | High-value console Execute IL table | console-commands §2.1 |
+| UAIBase chooseAction/updateAction | entity-ai §5.3 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
-Quest/Action leaves (inventories), client-shared helpers, and dormant UAI. Promote
-only when a clone or optim lever needs the behaviour.
+Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves
+remain optional depth. Promote only when a clone or optim lever needs the behaviour.
 
 ---
 

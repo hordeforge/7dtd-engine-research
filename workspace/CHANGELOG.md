@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: UAIBase chooseAction/updateAction
+
+Done (V3.1.0 b14 IL):
+- entity-ai §5.3: UAIBase.Update IL=18, chooseAction IL=97 (package DecideAction
+  weighted pick), updateAction IL=63 (Init/Start/Update/Reset task chain).
+- residuals/completion-bar census refresh (narrated 1439 / catalogued 868).
+---
 ## 2026-08-07 — tier-C: high-value console Execute IL table
 
 Done (V3.1.0 b14 IL):

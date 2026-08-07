@@ -195,6 +195,42 @@ Mutex/priority via `isBestTask` / `areTasksCompatible` (not fully dumped here; p
 
 Path requests originate inside individual `EAIBase` / UAI task `Update`/`Start` methods via `EntityAlive.FindPath`.
 
+### 5.3 UAI package path (`UAIBase`, when `UseAIPackages`)
+
+Entities with `EntityClass.UseAIPackages` call `UAI.UAIBase.Update(context)` on
+the same LOD gate as EAI (not every tick unless `aiActiveDelay` elapsed).
+
+**`UAIBase.Update` (IL=18):**
+
+1. If `context.updateTimer <= 0`: set timer to static `ActionChoiceDelay`, call
+   `chooseAction(context)`.
+2. Always: `updateAction(context)`.
+3. `updateTimer -= Time.deltaTime`.
+
+**`chooseAction` (IL=97):**
+
+1. Clear `ConsiderationData.EntityTargets` and `WaypointTargets`.
+2. `addEntityTargetsToConsider` + `addWaypointTargetsToConsider`.
+3. For each package name in `context.AIPackages` present in static
+   `UAIBase.AIPackages`:
+   - `score = package.DecideAction(context, out action, out target) * package.Weight`
+   - Keep best score; if new action differs from current, `Stop`/`Reset` current
+     task if started/initialized, then install `ActionData.Action`, `Target`,
+     `TaskIndex = 0`.
+
+**`updateAction` (IL=63):**
+
+1. No current task -> ret.
+2. If not `Initialized`: `CurrentTask.Init(context)`.
+3. If not `Started`: `CurrentTask.Start(context)`.
+4. If `Executing`: `CurrentTask.Update(context)` and return.
+5. Else (task finished): `Reset`; advance `TaskIndex`; if past last task in
+   `Action.GetTasks()`, clear `ActionData.Action`.
+
+So UAI is a **utility-scored action chooser** on a timer, then a **linear task
+list** inside the chosen action. Path requests still come from individual
+`UAITaskBase` Start/Update via `FindPath`, same ASP queue as EAI.
+
 ---
 
 ## 6. Pathfinding (production path)
@@ -894,6 +930,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** UAIBase Update/chooseAction/updateAction IL (utility packages).
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;
   Tick phase order (MinScript / UpdateSpawn / player touch / despawn timer).
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
