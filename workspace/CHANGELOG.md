@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: AddMotion and crouch height fixed update
+
+Done (V3.1.0 b14 IL):
+- AddMotion root-motion xz accumulate.
+- Dropped backpack list helpers; ExecuteDestroyBlockBehavior stub false.
+- CrouchHeightFixedUpdate elevator 1.3 / default 1.06; sphere-cast push; SetHeight.
+---
 ## 2026-08-07 — tier-C: enclosure light and armor material
 
 Done (V3.1.0 b14 IL):

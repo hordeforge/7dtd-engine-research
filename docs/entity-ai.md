@@ -1618,6 +1618,21 @@ graze → `SoundImpactGraze` else `SoundImpactHit`.
 **`GetCameraFOV` (IL=3):** `GamePrefs` int **16**.
 **`GetActivatableItemPool` (IL=7):** new list + `CollectActivatableItems`.
 
+**`AddMotion(dirDeg, speed)` (IL=27):** add `sin/cos(dir)` × speed into
+`accumulatedRootMotion` xz.
+
+**`ExecuteDestroyBlockBehavior` (IL=2):** always **false** (stub like fall
+behavior).
+
+**Dropped backpack list:** `ClearDroppedBackpackPositions` clears list;
+`GetLastDroppedBackpackPosition` returns last entry or zero;
+`EqualsDroppedBackpackPositions` true if any stored pos equals arg.
+
+**`CrouchHeightFixedUpdate` (IL=227 high-level):** if elevator target height
+**1.3** else **1.06** (ragdoll movement residual). Sphere-cast forward from
+transform for entity push (`PhysicsPush`) and low block probes; ease height
+toward target with `SetHeight` (crouch collision shrink).
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
