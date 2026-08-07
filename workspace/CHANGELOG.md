@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.updateTransform
+
+Done (V3.1.0 b14 IL):
+- Entity.updateTransform (IL=183) narrated in loop.md Path B: attach/ragdoll
+  early-outs, ApplyFixedUpdate first; position lerp via physicsRBT-physicsBasePos
+  scaled by physicsPosMoveDistance*dt/fixedDt, or origin-space
+  position-Origin.position by dt*updatePositionLerpTimeScale; isRotateToGround
+  pitch from groundSurface.normal (flat override, clamped to up outside
+  0.7..0.99 dot), smoothed pitchVel = vel*0.86 + DeltaAngle*0.8*dt; plain yaw
+  LerpAngle path; remote PhysicsTransform position mirror.
+
 ## 2026-08-08 - tier-C: Entity.Update base + updateNetworkStats
 
 Done (V3.1.0 b14 IL):

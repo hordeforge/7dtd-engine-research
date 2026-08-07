@@ -261,6 +261,23 @@ state: `inventory.SetItem(index, m_HoldingItemStack)` when the current slot
 differs, plus `SetHoldingItemIdxNoHolsterTime(index)` when the held index
 changed. Nothing happens when the queue is empty.
 
+**`Entity.updateTransform()` (IL=183)** (the transform sync behind path B):
+returns early when attached to another entity or while the emodel ragdoll is
+on; otherwise `ApplyFixedUpdate()` first. **Position:** with a physics
+rigidbody, lerp the transform toward `physicsRBT.position - physicsBasePos`
+scaled by `physicsPosMoveDistance * deltaTime / fixedDeltaTime`; without one,
+lerp toward `position - Origin.position` by `deltaTime *
+updatePositionLerpTimeScale`. **Yaw** comes from the physics body's euler Y or
+`rotation.y`. **Rotation:** with `isRotateToGround`, align pitch to the ground
+normal (`groundSurface.normal`, forced flat when `IsRotateToGroundFlat`, and
+clamped back to `up` when the normal dot is `> 0.99` or `< 0.7`): target pitch
+from `90 - Atan2(d.y, d.z) * 57.29578` with `d` = `AngleAxis(-yaw, up) *
+normal`, smoothed via `rotateToGroundPitchVel = vel * 0.86 + DeltaAngle(pitch,
+target) * 0.8 * dt`, applied as euler `(pitch, yaw, 0)`. Without the flag,
+yaw-only `LerpAngle(current, yaw, dt * updateRotationLerpTimeScale)`.
+**Remote entities** additionally mirror `PhysicsTransform` position toward
+`position - Origin.position` with the same lerp scale.
+
 Slice model (EMA frame gaps, ~25 base, `tickEntitySliceCount`): [`entity-ai.md`](entity-ai.md).
 
 ### 3.4 AI / path onion (authority path)
@@ -501,6 +518,10 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-07:** Entity.updateTransform (IL=183): attach/ragdoll early-outs,
+  physics-RB vs origin-space position lerp, isRotateToGround pitch smoothing
+  (0.86/0.8 gains, normal clamp 0.99/0.7), yaw LerpAngle, remote PhysicsTransform
+  mirror.
 - **2026-08-07:** Base Entity.Update (IL=105): bWasDead snapshot, animateYaw,
   physics-master vs updateTransform split, chunk-observer pin/dispose,
   animator-audio sweep; updateNetworkStats (IL=55) one-entry-per-call queue
