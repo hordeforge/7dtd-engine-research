@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: GetLookVector + GetMaxViewAngle
+
+Done (V3.1.0 b14 IL):
+- EntityAlive.GetLookVector IL=40: facing from yaw/pitch trig; GetMaxViewAngle
+  IL=5 = maxViewAngle field.
 ## 2026-08-08 — tier-C: SetModelLayer
 
 Done (V3.1.0 b14 IL):

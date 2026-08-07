@@ -363,7 +363,9 @@ and the observer is a Dynamic-spawn (`GetSpawnerSource()==1`) `EntityEnemy`:
 return **0.3** (POI stealth vs wandering AI).
 
 **`IsInViewCone(position)` (IL=40):** if sleeping use `sleeperLookDir` +
-`sleeperViewAngle`; else `GetLookVector` + `GetMaxViewAngle`. Half-angle cone
+`sleeperViewAngle`; else `GetLookVector` + `GetMaxViewAngle` (IL=5: the
+`maxViewAngle` field, default 180). `GetLookVector` (IL=40) derives the facing
+from rotation: `(cos(yaw*0.0175 - π), -cos(pitch*0.0175), ...)`. Half-angle cone
 via `Utils.GetAngleBetween` (same half-angle test as `IsInFrontOfMe`).
 
 **`EntityAlive.HasImmunity(BuffClass)` (IL=2):** always **false** (immunity from
