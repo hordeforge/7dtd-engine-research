@@ -1417,6 +1417,16 @@ toggles). `ItemActionZoom.ExecuteAction` (IL=103) is the aim toggle:
 (`IsCameraAttachedToPlayerOrScope` + first-person) before the zoom state
 flips - client-camera work, with the server seeing only the aim flag.
 
+**`ItemActionSpawnEntity.Spawn` (IL=61)** is the entity-spawn action (the
+spawn-entity weapons): gated on `IsAttackValid`, it positions the spawn at
+`headPosition + qrotation * entityOffset` (the configured offset rotated by
+the holder), resolves `EntityClass.GetId(entityToSpawn)`, and
+`EntityFactory.CreateEntity(id, pos, (0, rotation.y, 0))` with
+`SetSpawnerSource(2)` before `world.SpawnEntityInWorld`; an `EntityAlive`
+spawn takes over the holder's attack target
+(`SetAttackTarget(holder.GetAttackTarget(), 600)`) and the `soundAttack`
+plays.
+
 **`ItemActionTerrainTool` (V3.1.0 b14)** is the terrain-sculpt tool
 (dig/flatten): `ExecuteAction` (IL=46) latches `bActivated` +
 `activateTime` on press and forwards `GameManager.ItemActionEffectsServer
@@ -1521,6 +1531,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionSpawnEntity.Spawn IL=61: IsAttackValid gate,
+  headPosition + qrotation*entityOffset, EntityFactory.CreateEntity +
+  SpawnerSource 2 + SpawnEntityInWorld, spawned EntityAlive inherits the
+  holder's attack target (600).
 - **2026-08-08:** ItemAction.CreateModifierData IL=4 factory: base new
   ItemActionData; every subclass the same 4-IL pattern returning its own
   runtime-data type.
