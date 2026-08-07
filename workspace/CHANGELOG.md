@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: loot bundle open
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionOpenLootBundle.ExecuteInstantAction
+  IL=183 - GetLootContainer(lootListName) + LootContainer.Spawn at
+  party highest loot stage, grant via AddItem/ItemDropServer.
 ## 2026-08-08 - tier-C: instant eat + bundle open
 
 Done (V3.1.0 b14 IL):
