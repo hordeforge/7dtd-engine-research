@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: console 300-char reject, EntityAliveFlags bits
+
+Done (V3.1.0 b14 IL):
+- ServerConsoleCommand rejects cmd length > 300 before resolve; deny msgServer25.
+- EntityAliveFlags Process bit setters corrected (god DataItem, alert remote-only).
+---
 ## 2026-08-07 — tier-C: LockRequestServer 5-target cap and lock maps
 
 Done (V3.1.0 b14 IL):

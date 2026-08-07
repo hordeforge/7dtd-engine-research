@@ -620,10 +620,20 @@ Bit packing from `Setup` (IL=91), OR into flags:
 | 9 | 512 | `IsCrouching` |
 
 **ProcessPackage (IL=109):** `ValidEntityIdForSender(entityId)`; resolve
-`EntityAlive`; apply flag bits to setters (`AimingGun`, `Spawned`, `Jumping`,
-`IsBreakingBlocks`, alert DataItem, `Crouching`, `Inventory.SetFlashlight`). On
-**server**, rebroadcast `Setup(entity)` with flags **192** (exclude self fanout
-pattern).
+`EntityAlive`; apply bits:
+
+| Bit | Setter |
+|---:|---|
+| 4 | `AimingGun` |
+| 8 | `Spawned` |
+| 16 | `Jumping` |
+| 32 | `IsBreakingBlocks` |
+| 256 | `IsGodMode.Value` (DataItem) |
+| 512 | `Crouching` |
+| 64 | `bReplicatedAlertFlag` **only if** `isEntityRemote` |
+| 128 | `Inventory.SetFlashlight` |
+
+On **server**, rebroadcast `Setup(entity)` with flags **192** excluding sender.
 
 ### 5.6 `NetPackagePlayerData` (ToServer)
 
@@ -1512,6 +1522,7 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** EntityAliveFlags Process bit setters (god/crouch/alert remote).
 - **2026-08-07:** QuestObjectiveUpdate eventType 0/1/2 party fan + treasure
   FinishTreasureQuest / HandlePlayer distance 15 + AddToDestroyCount.
 - **2026-08-07:** AttackBlocks IL=553 / AttackEntites IL=691; explode IL=194;

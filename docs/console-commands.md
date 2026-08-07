@@ -54,13 +54,17 @@ upstream** of it, at the trust boundary:
 
 - **Networked client commands** go through
   `ConnectionManager.ServerConsoleCommand(cInfo, cmd)` (**IL=125**):
-  1. Resolve command via `SdtdConsole.GetCommand`.
-  2. If missing / `!CanExecuteForDevice`: reply `NetPackageConsoleCmdClient` error.
-  3. **`AdminTools.CommandAllowedFor(cmdNames, clientInfo)`** gate.
-  4. If `IsExecuteOnClient`: log and send command line back to client for local
+  1. If `cmd.Length > 300`: log warning (length + first 20 chars) and **return**
+     (no package reply).
+  2. Resolve command via `SdtdConsole.GetCommand`.
+  3. If missing / `!CanExecuteForDevice`: reply `NetPackageConsoleCmdClient` error
+     (`Unknown command` / device message).
+  4. **`AdminTools.CommandAllowedFor(cmdNames, clientInfo)`** gate (null
+     `adminTools` treated as deny).
+  5. If `IsExecuteOnClient`: log and send command line back to client for local
      execute (`NetPackageConsoleCmdClient` with execute flag).
-  5. Else `SdtdConsole.ExecuteSync(cmd, clientInfo)` and send output lines package.
-  6. Denied: localized permission error package.
+  6. Else `SdtdConsole.ExecuteSync(cmd, clientInfo)` and send output lines package.
+  7. Denied: localized `msgServer25` permission error package.
   The web Command API applies the same `CommandAllowedFor` gate.
 - **Telnet / stdin / dedicated-console input** call `executeCommand` directly and
   therefore **bypass per-command permission levels** (they are already a trusted
@@ -237,6 +241,8 @@ this doc owns the framework, not each leaf command's full prose.
 
 ## Changelog
 
+- **2026-08-07:** ServerConsoleCommand 300-char reject; null adminTools deny;
+  msgServer25 deny string.
 - **2026-08-07:** CommandAllowedFor IL=12 level compare; ServerConsoleCommand
   IL=125 step list.
 - **2026-08-07:** §2.1 high-value admin Execute IL table (killall/spawn/teleport/
