@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: WorldEventUpdateTime and POI uncull
+
+Done (V3.1.0 b14 IL):
+- WorldEventUpdateTime blood-moon day/hour window; BloodMoonParticipation.
+- checkPOIUnculling every 38 ticks; GameStats 57; Overlaps radius 6.
+---
 ## 2026-08-07 — tier-C: TickEntitiesSlice and SaveDecorations
 
 Done (V3.1.0 b14 IL):

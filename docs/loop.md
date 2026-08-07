@@ -174,6 +174,17 @@ stateDiagram-v2
 -> `MultiBlockManager.MainThreadUpdate` -> (non-editor) DynamicMusic.Conductor
 -> `checkPOIUnculling` / `updateChunksToUncull`.
 
+**`WorldEventUpdateTime` (IL=110):** refresh `WorldDay`/`WorldHour` from
+`worldTime`. Only when day/hour change vs `eventWorldTime`: recompute dusk/dawn
+from GameStats **42**; set `isEventBloodMoon` true on blood-moon day (GameStats
+**58**) from dusk hour onward, or on next day before dawn hour. Local player:
+at dusk hour set `BloodMoonParticipation=true`; at dawn after participation
+`QuestEventManager.BloodMoonSurvived` and clear flag.
+
+**`checkPOIUnculling` (IL=67):** every **38** ticks if GameStats **57** non-zero:
+for each spawned player, prefabs in `GetPrefabsAroundNear`; if prefab
+`Overlaps(player.pos, **6**)` call `UncullPOI`.
+
 **If !IsServer:** return.
 
 **Server:** `WorldBlockTicker.Tick(activeChunks, player, random)` -> walk active
@@ -446,6 +457,7 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-07:** WorldEventUpdateTime BM day/hour; checkPOIUnculling 38 ticks / r=6.
 - **2026-08-07:** OnUpdateTick IL order re-pin (chunk callbacks, splash, deco,
   multiblock, biome spawn walk).
 - **2026-07-19:** Related docs table.
