@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemActionAttack modifiers
+
+Done (V3.1.0 b14 IL):
+- combat-damage.md leaf types: difficultyModifier (IL=44) PvE scalers
+  IncomingDamageModifier / EntityIncomingDamageModifier only in mixed
+  client/server matchups; calculateHarvestToolDamageBonus (IL=43) first
+  toolCategory match -> Damage else 1; GetDamageMultiplier (IL=3),
+  GetIdealAIRange (IL=3), base CanReload/ReloadGun/GetKickbackForce stubs,
+  GetEntityFromHit (IL=6) GetHitRootEntity.
+
 ## 2026-08-08 - tier-C: drone heal/repair/ownership
 
 Done (V3.1.0 b14 IL):
