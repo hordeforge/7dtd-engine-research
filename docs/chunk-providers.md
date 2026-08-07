@@ -322,7 +322,9 @@ placed block.
 POI stamping from the `poi_processed` color map. It warns and returns when any
 neighbor chunk is missing, seeds a chunk-local `GameRandom` like the biome
 decorator, and per non-trader cell whose `m_Poi.GetData(wx, wz)` color is
-non-zero/non-255 resolves a `PoiMapElement` via `getPoiForColor`. Non-water
+non-zero/non-255 resolves a `PoiMapElement` via `getPoiForColor`
+(`m_PoiMap.TryGetValue`, null on miss; `AddPoiMapElement` registers it
+first-wins by `m_uColorId`). Non-water
 elements first stamp `SetDecoAllowedStreetOnlyAt(x, z, true)`; `yPos` defaults
 to `m_YPos` (or the terrain height when negative). Air elements with a
 non-empty `m_sModelName` take the prefab path
