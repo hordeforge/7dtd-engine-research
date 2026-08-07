@@ -291,6 +291,10 @@ Apply-stage prose also in [dedicated-misc-systems.md](dedicated-misc-systems.md)
 | Type | Method | IL |
 |---|---|---:|
 | `DecoManager.UpdateTick` | | **330** |
+| `BlockLiquidv2.Emissions` | | **9** | if rotation==8 use meta2 else `MAX_EMISSIONS` |
+| `BlockLiquidv2.ChangeToAir` | | **33** | splash remove; SetBlockRPC Air; reschedule WBT |
+| `BlockLiquidv2.HasHoles` | | **89** | faces-drawn bitfield vs 255/63 water hole test |
+| `BlockLiquidv2.UpdateTick` | | **1106** | hole/air/plant/emission/deep-water → ChangeThis/ChangeToAir |
 | `ChunkProviderGenerateWorld.updateDecosAllowedForChunk` | | 306 |
 | `UpdateDecorations` / `updateDecorationsWherePossible` | | 4 / 42 |
 
@@ -307,6 +311,8 @@ Apply-stage prose also in [dedicated-misc-systems.md](dedicated-misc-systems.md)
 
 ## Changelog
 
+- **2026-08-07:** BlockLiquidv2 Emissions (rotation 8 / meta2), ChangeToAir +
+  WBT reschedule, HasHoles faces bitfield, UpdateTick IL size.
 - **2026-07-28:** WaterSimChunkUpdate outer/inner wire; WaterValue mass-only; WaterSet rebroadcast.
 
 - **2026-07-28:** Full water-sim pipeline from IL (`WaterSimulationNative.Update` job graph, flow rules, apply thread, mass constants, net backpressure).

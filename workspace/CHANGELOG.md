@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: NotifyActivity gates and liquid Emissions/ChangeToAir
+
+Done (V3.1.0 b14 IL):
+- NotifyActivity: GameStats 32/24, heat mod, skip BM/Twitch; chunk NotifyEvent.
+- CheckToSpawn: ActivityLevel 25, 20% SpawnScouts + neighbor cooldown.
+- BlockLiquidv2 Emissions rotation/meta2; ChangeToAir splash+WBT; HasHoles.
+---
 ## 2026-08-07 — tier-C: PlantGrowing, TorchHeatMap, WorldBlockTicker execute
 
 Done (V3.1.0 b14 IL):

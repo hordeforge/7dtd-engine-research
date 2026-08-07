@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1470 / catalogued 837 / OOS 1392) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1471 / catalogued 836 / OOS 1392) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -181,6 +181,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | Chunk.SetBlockRaw silent write path | world-chunks §5.0 |
 | DecoManager.UpdateTick thread queues | managers §1.1 |
 | PlantGrowing + TorchHeatMap + WBT execute | blocks §7 / save-region §3.6 |
+| NotifyActivity + CheckToSpawn 25/20% | aidirector.md |
+| BlockLiquidv2 Emissions/ChangeToAir | light-mesh-water.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

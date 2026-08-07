@@ -105,6 +105,17 @@ Scout / activity-driven hordes (see also [spawning.md](spawning.md)).
    remove entries that expire.
 4. `TickActiveSpawns(dt)`.
 
+**`AIDirector.NotifyActivity` (IL=31):** no-op if `value <= 0`, or GameStats bool
+**32** / **24** off, or `HeatMapSensitivityModifier <= 0`, or blood moon active, or
+Twitch boss horde active. Else build `AIDirectorChunkEvent(type, pos,
+value * HeatMapSensitivityModifier, duration)` and
+`chunkEventComponent.NotifyEvent`.
+
+**`CheckToSpawn(AIDirectorChunkData)` (IL=46):** require GameStats 32+24;
+`ActivityLevel >= 25`; `FindBestEventAndReset`; with **20%** random (and not
+playtest) set spawn flag, `StartCooldownOnNeighbors`, `SetLongDelay`,
+`SpawnScouts`. Otherwise neighbor cooldown only.
+
 ## AIDirectorComponent : Object
 - `Tick(Double)` IL=1 (virtual base)
 
@@ -367,6 +378,8 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** NotifyActivity gates (GameStats 32/24, heat sensitivity, BM/
+  Twitch skip); CheckToSpawn ActivityLevel 25 and 20% SpawnScouts.
 - **2026-08-06:** Blood-moon window spans dusk on bmDay to dawn on bmDay+1
   (`GameUtils::IsBloodMoonTime`); `WorldTimeToDays` is 1-based; CalcDuskDawnHours
   branches; CalcNextDay jitter is non-negative and InitNewGame seeds on a literal
