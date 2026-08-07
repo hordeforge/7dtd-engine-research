@@ -370,7 +370,11 @@ playerIdx, 0.3 + rand*0.5)` (the TNT fuse delay); `BlockTrapDoor` (IL=23)
 fires `Block.HandleTrigger(player, world, pos, bv)` when the exploder is a
 player (the trapdoor's wiring triggers) before the base;
 `BlockCompositeTileEntity` (IL=54) clears its feature modules through the
-normal destroy path.
+normal destroy path. Both explosives end in the same forwarder:
+`BlockTNT.explode` (IL=18) and `BlockMine.explode` (IL=18) call
+`GameManager.ExplosionServer(center, blockPos, identity, explosion,
+entityId, delay, true, null)` - the TNT with its fuse `delay`, the mine with
+`-1` / `0.1` s (see [`protocol-packages.md`](protocol-packages.md) §6.14).
 
 `Block/DestroyedResult` (exact enum): `None=0`, `Keep=1`, `Downgrade=2`,
 `Remove=3`. The base `OnBlockDestroyedBy` returns `Downgrade`.
@@ -644,6 +648,8 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** BlockTNT.explode IL=18 / BlockMine.explode IL=18:
+  ExplosionServer forwarders (TNT fuse delay, mine -1/0.1 s).
 - **2026-08-08:** Explosion destruction hooks: base OnBlockDestroyedByExplosion
   IL=15 (InvokeOnBlockDamagedDelegates MaxDamage + result 2); BlockMine 33%
   chain, BlockModelTree startToFall, BlockTNT fuse delay 0.3+rand*0.5,
