@@ -73,7 +73,12 @@ oracle, no chunk load; **0** without a generator). `World.GetTerrainHeight(x,
 z)` (IL=21) reads the live chunk's byte heightmap via `GetChunkSync` +
 `Chunk.GetTerrainHeight(toBlockXZ, toBlockXZ)` (**0** without the chunk).
 `Chunk.GetMaxHeight()` (IL=29) is the max of the chunk's `m_HeightMap` byte
-array.
+array. `Chunk.GetHeight(x, z)` (IL=9) / `GetHeight(blockOffset)` (IL=5) read
+`m_HeightMap[x + z*16]` (the same array `GetMaxHeight` scans; `PrefabChunk`
+returns the prefab height). `Chunk.GetTerrainHeight(x, z)` (IL=9) reads the
+separate `m_TerrainHeight` byte array (the `PrefabChunk` variant scans down
+from the prefab height for the first terrain-shape block); `SetTerrainHeight`
+(IL=10) writes it.
 | `TerrainGeneratorWithBiomeResource` | `GetTerrainHeightAt` | float | RWG; **ByteAt abstract** |
 | `TerrainGeneratorWithBiomeResource` | `GenerateTerrain` | (void) | Large IL (~424) fill path |
 | `MeshGeneratorMC2` / `Prefab` | `GetTerrainHeight` | **int** | Meshing |
