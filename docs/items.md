@@ -414,6 +414,33 @@ holds the action until consumption completes). `IsAimingGunPossible(data)` is
 true in the base and `ItemActionRanged` (IL=4) restricts it to
 `NotReloading(data)` (no aiming while reloading).
 
+**`ItemClass` subclass `Init` overrides (V3.1.0 b14)** run after the base
+1196-IL `Init` and parse the subclass's tail properties:
+
+- `ItemClassBlock` (IL=56) mirrors the linked `Block` definition onto the
+  item: `DescriptionKey`, `MadeOfMaterial` (= `block.blockMaterial`),
+  `CustomIcon` (when set), `NoScrapping`, `CustomIconTint`, `SortOrder`,
+  `CreativeMode`, `TraderStageTemplate`, `SoundPickup`, `SoundPlace`,
+  `IsLimited`.
+- `ItemClassArmor` (IL=61) parses `ArmorGroup` (comma-split), `EquipSlot`
+  (parsed as `EquipmentSlots`), `IsCosmetic`, `KeepOnDeath`, `AllowUnEquip`,
+  `AutoEquip`, `ReplaceByTag`.
+- `ItemClassTimeBomb` (IL=62) builds `explosion = new ExplosionData(
+  Properties, Effects)` and reads `ExplodeOnHit`, `FuseStartOnDrop`,
+  `FusePrimeOnActivate`, `ActivationTransformToHide` (split on ';'),
+  `ActivationEmissive`, and `FuseTime` (default 2) converted to
+  `explodeAfterTicks = FuseTime * 20` - the 20-TPS tick conversion.
+- `ItemClassWaterContainer` (IL=32) derives `MaxMass =
+  Clamp(WaterCapacity * 19500, 0, 65535)` and clamps `initialFillRatio` to
+  [0, 1].
+- `ItemClassHeldEntity` (IL=99) parses the stress/behaviour set
+  (`FreakoutTime`, `StressMaxLevel`, `SneakModifier`, `RunModifier`,
+  `DecayModifier`, `FullStressDropStress`, `PickupPlayerBuff`,
+  `PickedUpEntityName`, `PickedUpAltEntityName`, pickup/drop/stress sound
+  names, `DropEntityBuff`, `FullStressEvent`).
+- `ItemClassWildChicken` (IL=21) parses `ZombieHordeGS`, `AngryChickenGS`,
+  `MurderChickensGS` game-stage numbers.
+
 ---
 
 ## 4. The ItemAction contract
@@ -1531,6 +1558,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemClass subclass Init overrides: Block (IL=56) block-field
+  mirror, Armor (IL=61) ArmorGroup/EquipSlot/cosmetics, TimeBomb (IL=62)
+  ExplosionData + FuseTime*20 ticks, WaterContainer (IL=32) MaxMass =
+  WaterCapacity*19500 clamp 65535, HeldEntity (IL=99) stress/sound set,
+  WildChicken (IL=21) game stages.
 - **2026-08-08:** ItemActionSpawnEntity.Spawn IL=61: IsAttackValid gate,
   headPosition + qrotation*entityOffset, EntityFactory.CreateEntity +
   SpawnerSource 2 + SpawnEntityInWorld, spawned EntityAlive inherits the
