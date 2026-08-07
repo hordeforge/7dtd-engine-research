@@ -928,6 +928,11 @@ hashset add.
 **`OnBlockStartsToFall` (IL=6):** `SetBlockRPC(pos, Air)` (tree/composite
 overrides may destroy/particles first).
 
+**`EntityFallingBlock.SetBlockValue(bv)` (IL=32):** store the block value;
+`isTerrain = block.shape.IsTerrain()`; terrain blocks get
+`terrainScale = rand(0.3, 0.98)` and keep the `SphereCollider`, non-terrain
+keep their collider (setup for the land/crush path).
+
 **`EntityFallingBlock.OnUpdateEntity` (IL=344)** (group variant similar IL=302):
 
 1. If dead: ret; else `fallTimeInTicks++`.

@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityFallingBlock.SetBlockValue
+
+Done (V3.1.0 b14 IL):
+- SetBlockValue IL=32: isTerrain from shape, terrainScale rand(0.3, 0.98),
+  collider selection.
 ## 2026-08-08 — tier-C: EntityItem init leaves
 
 Done (V3.1.0 b14 IL):
