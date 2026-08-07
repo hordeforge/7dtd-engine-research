@@ -214,6 +214,11 @@ rebuilds each volume via `Use(start, size)` +
 loaded, then per chunk walks `IndexedBlocks["TraderOnOff"]`: non-child blocks
 inside `ProtectBounds` resolve their `TileEntityComposite` and toggle the
 `TEFeatureDoor` feature (plus the teleport/sound side).
+`Overlaps(min, max)` (IL=38) is the 2D AABB test against
+`ProtectPosition + ProtectSize`; `IsWithinTeleportArea(pos, ref tpVolume)`
+(IL=93) AABB-tests each teleport volume's world box
+(`Position + startPos .. + size`), returning the matching volume (disabled in
+sandbox trader mode).
 
 ## 5. PathAbstractions: SearchDefinition, SearchPathBasic/Saves/Mods/UserData
 
