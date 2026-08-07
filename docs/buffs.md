@@ -90,6 +90,13 @@ Exceptions in the try path force **true**. Buff gate 3 / damage paths treat
 `AddBuffNetwork`. New buff: `new BuffValue(...)`, append `ActiveBuffs`, network
 if requested. Start effects still land on next `Tick` via `Started` flag.
 
+**`BuffValue.DurationTick` (IL=27):** `durationTicks++`; `updateTicks++`; when
+`updateTicks >= BuffClass.UpdateRateTicks` set `Update=true` and zero
+`updateTicks`.
+
+**`BuffValue.Tick` (IL=13):** if class null mark `Remove`; else
+`BuffClass.Tick(this)`.
+
 Each server tick, `EntityBuffs.Tick` (**IL=179**) walks `ActiveBuffs`:
 
 1. Drop `Invalid` entries via `RemoveAt`.
@@ -209,6 +216,7 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
+- **2026-08-07:** BuffValue.DurationTick UpdateRateTicks; Tick class null removes.
 - **2026-08-07:** EntityPlayer FriendlyFireCheck GameStats 23 modes; HasImmunity
   passive 197; AddBuff status 0..5; Tick MinEvent 0/1/2/3.
 - **2026-08-07:** `BuffManager` global registry (AddBuff/GetBuff/Cleanup) from IL.

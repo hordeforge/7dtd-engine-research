@@ -328,9 +328,22 @@ persistent record, then `EntityFactory.CreateEntity` +
 `World.SpawnEntityInWorld`). See [protocol-packages.md](protocol-packages.md)
 section 5.0.
 
-`World.SpawnEntityInWorld` registers the entity (world map, alive list, per-type
-trackers, `AIDirector.AddEntity`) and calls `NetEntityDistribution.Add`. It does
-**not** broadcast a spawn. The replication layer (`NetEntityDistribution`,
+`World.SpawnEntityInWorld` (**IL=178**) order:
+
+1. Null entity → warn and return.
+2. `EntityLoadedDelegates` invoke if set.
+3. `AddEntityToMap` + `Entities.Add(id)` + `addToChunk`.
+4. Non-player `EntityAlive` → append `EntityAlives`.
+5. Server only: track vehicle/drone/turret managers; turret without item class
+   `InitDynamicSpawn`.
+6. `audioManager.EntityAddedToWorld`, `WeatherManager`, `LightManager`,
+   `entity.OnAddedToWorld`.
+7. Warn if `position.y < 1`.
+8. Server: `entityDistributer.Add`; if player bump `Players` +
+   `playerEntityUpdateCount`; else if EntityAlive `Spawned = true`.
+9. Server: `aiDirector.AddEntity`.
+
+It does **not** broadcast a spawn package. The replication layer (`NetEntityDistribution`,
 [`entity-ai.md`](entity-ai.md) §9) walks players against tracked entities by
 distance and view angle and emits `NetPackageEntitySpawn` (an
 `EntityCreationData` payload, [`protocol-packages.md`](protocol-packages.md) §5.1)

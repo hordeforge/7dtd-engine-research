@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SpawnEntityInWorld and BuffValue ticks
+
+Done (V3.1.0 b14 IL):
+- SpawnEntityInWorld: map/Entities/chunk; EntityAlives; vehicle/drone/turret track; audio/weather/light; net Add; player list; AIDirector.
+- BuffValue.DurationTick: updateRate gate; Tick -> BuffClass.Tick or Remove.
+---
 ## 2026-08-07 — tier-C: DamageEntity consecutive 30 and resist bank
 
 Done (V3.1.0 b14 IL):
