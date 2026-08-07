@@ -6,6 +6,19 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: batch block commit machine
+
+Done (V3.1.0 b14 IL):
+- blocks.md 4.1: World.SetBlocksRPC IL=6 delegate;
+  GameManager.SetBlocksRPC IL=29 ChangeBlocks + NetPackageSetBlock
+  broadcast / client request; GameManager.ChangeBlocks IL=530
+  (ccChanged lock, acting-player resolve, density derivation
+  DensityAir/Terrain, bChangeDamage type guard, SetBlockValue vs
+  position path, SetTopSoilBroken neighbor chunks + UncullChunk,
+  TE ReplacedBy/RemoveTileEntityAt/UpgradeDowngradeFrom, LockManager
+  force-unlock, RemoveBlockTrigger, QuestEventManager.BlockChanged,
+  sleeping-bag spawn-point edges + player-data save, texture
+  commit/clear).
 ## 2026-08-08 - tier-C: MemoryPools object pool surface
 
 Done (V3.1.0 b14 IL):

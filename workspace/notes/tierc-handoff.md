@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `9ca6a14` MemoryPools object pool surface |
-| Commits since dry-run `3b61d9c` | ~377 |
+| HEAD (at handoff write) | `b8bb61f` batch block commit machine |
+| Commits since dry-run `3b61d9c` | ~378 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
