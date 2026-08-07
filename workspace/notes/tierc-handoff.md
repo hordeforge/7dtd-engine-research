@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `5e15cfc` block read surface |
-| Commits since dry-run `3b61d9c` | ~154 |
+| HEAD (at handoff write) | `1f64be7` ChunkCluster read hops |
+| Commits since dry-run `3b61d9c` | ~155 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
