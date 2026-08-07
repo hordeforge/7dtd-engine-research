@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: voxel-read core
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 2: Chunk.GetBlock (IL=100) POI-filler + damage overlay;
+  GetBlockNoDamage (IL=73); GetBlockId (IL=17); GetBlockColumn (IL=101).
+
 ## 2026-08-08 - tier-C: face-extract reads
 
 Done (V3.1.0 b14 IL):
