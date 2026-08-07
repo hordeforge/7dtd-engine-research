@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `0391eca` BlockHazard state bit |
-| Commits since dry-run `3b61d9c` | ~216 |
+| HEAD (at handoff write) | `8196770` BlockPlaceholderMap.Replace |
+| Commits since dry-run `3b61d9c` | ~217 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
@@ -142,6 +142,7 @@ Scratch dumps live under `/tmp/nNNN_*` (not committed). Recent batches: `n189` s
 | Package bodies | `docs/protocol-packages.md` |
 | Power / TE | `docs/tile-entities-power.md` |
 | Save files | `docs/save-region.md` |
+| Block damage / upgrade / downgrade / placeholder map | `docs/blocks.md` |
 | Tier-C progress rows | `docs/completion-bar.md` |
 | Honest permanent non-IL | `docs/residuals.md` |
 

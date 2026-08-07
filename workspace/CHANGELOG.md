@@ -6,6 +6,21 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BlockPlaceholderMap.Replace
+
+Done (V3.1.0 b14 IL):
+- BlockPlaceholderMap.Replace 9-arg core (IL=292) narrated in blocks.md 5:
+  registry miss returns unchanged; questResetPlaceholders alternate list picks
+  first QuestTag.Test_AnySet match; biome (case-insensitive) + sandboxOption
+  boolean-gate filtering; survivors in stack Span, weighted draw on Prob;
+  rotation = Has45DegreeRotations ? RandomRange(8) with >3 mapped +20 :
+  RandomRange(4), else keep; equals-input collapses to BlockValue.Air sentinel;
+  ischild/parent restored. No GameRandom -> Utils.RandomFromSeedOnPos at chunk
+  origin + block coords (+parent offset) with World.Seed, freed on exit. Also
+  the 5-arg wrapper (GetChunkFromWorldPos, blockY 0, rotation allowed), the
+  BlockValueRef overload (None/Prop -> air, Block -> replace at BlockPosition,
+  else ArgumentOutOfRangeException), and the IsReplaceableBlockType probe.
+
 ## 2026-08-08 - tier-C: BlockHazard state bit
 
 Done (V3.1.0 b14 IL):
