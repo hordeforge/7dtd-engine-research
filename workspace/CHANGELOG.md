@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: inside-device enable
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md 1: EnableInsideBlockEntities (IL=45) stub SetActive
+  pass over insideDevices.
+
 ## 2026-08-08 - tier-C: block-entity removal
 
 Done (V3.1.0 b14 IL):
