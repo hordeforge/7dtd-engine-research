@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: Stat.Tick regen + change flag
+
+Done (V3.1.0 b14 IL):
+- Stat.Tick IL=301: MaxPassive base, gain/loss passive clamp for
+  Health/Stamina, regenAmount cap, food/water drain passives 127/119/126/120,
+  UI regen, lastValue.
+- Stat.SetChangedFlag IL=15: m_changed || floor(new)!=floor(old).
 ## 2026-08-08 — tier-C: Stat.set_Value + entity stat setters
 
 Done (V3.1.0 b14 IL):

@@ -35,6 +35,31 @@ consumes). Entity setters are one-line forwards: `EntityAlive.set_Health(int)`
 (IL=7) / `set_Stamina` / `set_Water` (IL=6) call
 `Stats.<Stat>.set_Value(...)`.
 
+**`Stat.Tick(dt)` (IL=301)** - the per-phase stat step (`Health.Tick` in
+phase 1):
+
+1. `MaxPassive` set → `BaseMax = EffectManager.GetValue(MaxPassive, ...,
+   m_originalBaseMax, ...)`.
+2. Health/Stamina only, when `|value - lastValue| >= 1`: gain (`value >
+   lastValue`, `GainPassive`) → `value = clamp(lastValue + GetValue(GainPassive),
+   0, BaseMax)`; loss (`value < lastValue`, `LossPassive`) →
+   `value = clamp(lastValue - GetValue(LossPassive), 0, BaseMax)`.
+3. **Regen:** cap `regenAmount` so `value + regenAmount <= ModifiedMax`;
+   `RegenerationAmountUI = (value - lastValue) + regenAmount/dt`;
+   `value += regenAmount`.
+4. When `regenAmount > 0`, food/water drain by the gained amount: Stamina
+   uses `WaterLossPerStaminaPointGained (127)` and
+   `FoodLossPerStaminaPointGained (119)`; Health/others use
+   `WaterLossPerHealthPointGained (126)` and
+   `FoodLossPerHealthPointGained (120)` (each
+   `RegenerationAmount -= regenAmount * GetValue(passive, ...)`).
+5. `regenAmount = value - lastValue`; `SetChangedFlag(value, lastValue)`;
+   `lastValue = value`.
+
+**`Stat.SetChangedFlag(new, old)` (IL=15):** `m_changed ||= Fastfloor(new) !=
+Fastfloor(old)` (a stat is "changed" once it crosses an integer boundary or
+was already flagged).
+
 **`Tick` (IL=27):** if entity remote **or** dead, return. Else `waitTicks++`; when
 `waitTicks >= 10`, reset to 0. Always call `TickWait(worldTime)`.
 
