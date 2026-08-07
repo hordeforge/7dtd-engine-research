@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: FromRaw POI overrides + sequence groups
+
+Done (V3.1.0 b14 IL):
+- game-events.md: sequence entity-group leaves (AddEntityToGroup Twitch gate, GetEntityGroupLiveCount, ClearEntityGroup)
+- chunk-providers.md 4.1: GetPOIBlockIdOverride IL=51 (bFixedWaterLevel liquid suppression), GetPOIHeightOverride IL=66 (m_YPosFill for liquid only, worldScale fold)
+
 ## 2026-08-08 - tier-C: sequence target + props
 
 Done (V3.1.0 b14 IL):
