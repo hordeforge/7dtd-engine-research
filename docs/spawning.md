@@ -470,6 +470,10 @@ GetId(ec.entityClassName)`. `isPlayer` = class is `playerMaleClass`/
 ecd.belongsPlayerId`. Kick `EntityInstanceAssets.Load(isSync, ec,
 isLocalPlayer)` and `EModelInstanceAssets.Load(isSync, ecd, ec)`.
 
+**Class lookup leaves (V3.1.0 b14):** `EntityClass.GetEntityClass(id)` (IL=7)
+is `list.TryGetValue` (null when absent). `GetEntityClassName(id)` (IL=10)
+returns the class's `entityClassName` or the string `"null"` when missing.
+
 **Tier substitution:** `GetEntityClassWithinMaxTier(ec, maxTier)` (IL=30):
 `ec.EntityTier <= maxTier` → as-is; else walk the `GetPreviousTierEntity()`
 chain until a class at/below `maxTier` (warning + null if the chain ends).
@@ -845,6 +849,9 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** EntityClass lookup leaves: GetEntityClass (IL=7) list
+  TryGetValue, GetEntityClassName (IL=10) "null" fallback; LoadAssets
+  paragraph restored after an edit splice.
 - **2026-08-07:** Removal side: World.RemoveEntity (IL=16) MarkToUnload +
   unloadEntity; RemoveEntityFromMap (IL=123) waypoint clear + ObjectOnMapRemove
   (MapObjectType 13 only on reason 2).

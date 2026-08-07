@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityClass lookup leaves
+
+Done (V3.1.0 b14 IL):
+- spawning.md: EntityClass.GetEntityClass (IL=7) = list.TryGetValue,
+  GetEntityClassName (IL=10) = entityClassName or 'null' string; repaired
+  the LoadAssets paragraph split by an edit splice (GetEntityClassWithinMaxTier
+  + GetPreviousTierEntity already covered by the Tier substitution section).
+
 ## 2026-08-08 - tier-C: SetSmellEat
 
 Done (V3.1.0 b14 IL):
