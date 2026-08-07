@@ -1415,6 +1415,32 @@ head.y−**0.625** upward length **1** same mask. Ignore `BlockDamage`; else cop
 hit, `BlockedFlags=4`, maybe set `blockedDistSq`, `obstacleCheckTickDelay=12`,
 `ResetStuckCheck`.
 
+**`CheckEntityBlocked(pos, endPos)` (IL=79):** pos.y += **0.7**; sphere-cast from
+`pos - Origin.position` radius **0.15** along end-pos dir max **0.8** layer
+**524288**. Hit transform → parent `Find("GameObject")` → `EntityAlive` other
+than self; if dist² &lt; `(ccRadius + otherRadius + 0.16 + 0.25)²` set
+`BlockedEntity` + `blockedEntityDistSq`.
+
+**`CheckForDoorAndOpen` (IL=66):** need unfinished path with current point;
+block at path block pos must `HasTag(2)` and be `BlockCompositeTileEntity`; TE
+must expose `TEFeatureDoor` not open; if `TEFeatureLockable` locked skip; else
+`SetOpen(true, true)` (zombies open unlocked doors on path).
+
+**`AttackPush(blocker)` (IL=44):** damage source from self→blocker dir
+(`EnumDamageSource 0`, type **3**); if holding `ItemActionAttackData`, install
+`GetAttackHitInfo` hit delegate and `Attack(false)` then `Attack(true)`.
+
+**`StartSwimStroke` (IL=50):** if already jumping return; store `JumpToPos`;
+`jumpYaw` Atan2 to moveTo; `Jumping=true`; `SetSwimValues(swimStrokeDelayTicks,
+moveTo−pos)`.
+
+**`FindDestroyPos` (IL=21):** zero destroyPosition.y; `SearchForDestroyPos`; on
+success `destroyRefreshTicks=**500**` and store pos.
+
+**`SelectBestHit` (IL=35):** remaining HP = MaxDamage−damage on HitInfo vs
+HitInfo2; if HitInfo2 remaining &lt; HitInfo remaining × **0.7**, copy HitInfo2
+over HitInfo (prefer weaker block).
+
 **`DigStart(forTicks)` (IL=49):** store `digStartPos`. If already digging extend
 `digForTicks = max(old, forTicks)`. Else require `CanBreakBlocks`; set
 `digForTicks`, `digTicks=0`, `digActionTicks=18`, clear digAttacked/forward;
@@ -2129,6 +2155,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   digForwardCount; organic Hit type 3.
 - **2026-08-07:** CheckBlocked slope gate normal.y 0.643 / dot -0.7; tempMove;
   CheckBlockedUp flags=4 delay 12.
+- **2026-08-07:** CheckEntityBlocked / CheckForDoorAndOpen / AttackPush /
+  StartSwimStroke / FindDestroyPos / SelectBestHit.
 - **2026-08-07:** Re-pin ASP `<FindPaths>d__8.MoveNext` (FIFO `list[0]`, hard `ldc.i4.8`, no priority); BodyAnimator `defaultCullingMode=AlwaysAnimate` vs live CullUpdateTransforms note.
 - **2026-08-02:** V3.1.0 grab activation on EntityAlive base.
 

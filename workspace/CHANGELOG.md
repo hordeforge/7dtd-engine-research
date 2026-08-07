@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: MoveHelper entity block, door open, attack push
+
+Done (V3.1.0 b14 IL):
+- CheckEntityBlocked sphere-cast layer 524288; radius sum +0.41 pad.
+- CheckForDoorAndOpen: path door tag 2, unlocked TEFeatureDoor SetOpen.
+- AttackPush: damage type 3 + Attack press/release.
+- StartSwimStroke SetSwimValues; FindDestroyPos refresh 500; SelectBestHit 0.7.
+---
 ## 2026-08-07 — tier-C: IsAlert and SetMoveTo path expiry
 
 Done:
