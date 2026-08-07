@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemValue.MergeBest
+
+Done (V3.1.0 b14 IL):
+- items.md 2: ItemValue.MergeBest (IL=115) donor merge: CombineOnly/Both sums
+  remaining durability vs larger MaxUseTimes; plain-repair mode adopts donor
+  only when strictly better (quality/durability), copying Quality,
+  MaxDurabilityModifier and donor UseTimes; then MergeBestStats, clone mods +
+  cosmetics, resize Modifications to CalcModSlotCount.
+- MergeBestStats (IL=109): null donor no-op; missing own array copies donor;
+  else per-stat better-value upgrade (IsStatLowerBetter) or append.
+
 ## 2026-08-08 - tier-C: time hooks + biome oracle
 
 Done (V3.1.0 b14 IL):
