@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: underground spawn finder
+
+Done (V3.1.0 b14 IL):
+- spawning.md 6: FindRandomSpawnPointNearPositionUnderground (IL=135) 5-try
+  random xz within maxDistance/2, exact-y CanMobsSpawnAtPos or
+  FindSpawnPointAtXZ fallback, playfield gate.
+
 ## 2026-08-08 - tier-C: ranged reload
 
 Done (V3.1.0 b14 IL):
