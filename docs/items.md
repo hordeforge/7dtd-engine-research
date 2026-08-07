@@ -733,6 +733,9 @@ quality and mods through `ModMaxUseTimes`). The exposed fraction is
 (the class's degradation cap through the passive; the `MaxUseTimesUI` read is
 the same base without the mod scale). `get_MaxUseTimes()` (IL=5) =
 `ModMaxUseTimes(MaxUseTimesBase, this)` (quality + installed mods applied).
+`ModMaxUseTimes(value, iv)` (IL=24) multiplies the base by the
+`DurabilityModifier` metadata when present (clamped to at least 1, no-op when
+the base is ≤ 0).
 
 - **Wear:** each qualifying use adds to `UseTimes` (melee/ranged via the attack
   path, consumables via `ItemActionEat.consume` through `EffectManager.GetValue`
