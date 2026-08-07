@@ -170,6 +170,9 @@ rebroadcasts stats/buffs/playerstats with bulk flags **192** after accept.
 Persisted blob: `EntityStats.Write` (IL=8) writes version **11** (int32) then
 `Health`; `PlayerEntityStats.Write` (IL=27) appends `Stamina`, `Water`,
 `Food` (each `Stat.Write`) and `CoreTemp` as `sbyte(CoreTemp / 2)`.
+Each `Stat` record (`Stat.Write` IL=24 / `Read` IL=32) is version **6** with
+`m_value`, `m_maxModifier`, `m_baseMax`, `m_originalBaseMax`,
+`m_originalValue` (floats); reads at version <= 5 discard a legacy float.
 
 ### 5.1 `NetPackageEntityStatChanged.ProcessPackage` (IL=88)
 
