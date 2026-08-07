@@ -537,6 +537,37 @@ Silent in-chunk write used by load, falling, inject, and some TE paths:
 Does **not** fire light/mesh/stability RPC; callers that need those use full
 `SetBlock` / `SetBlockRPC`.
 
+### 5.0a `ChunkBlockLayer` storage (V3.1.0 b14)
+
+Each of the 64 `ChunkBlockLayer` objects (one per 4-block Y band) stores the
+block words with a **split-byte layout** and a same-value compression:
+
+- `CalcOffset(x, y, z)` (IL=12) = `z*16 + x + (y & 3) * 256` - 1024 cells,
+  the same sub-plane layout as `ChunkBlockChannel`
+  ([`save-region.md`](save-region.md) §2).
+- **Low byte:** `m_Lower8Bits : Byte[]` (1024) holds bits 0..7, compressed as
+  `lower8BitSameValue : byte` when every cell shares it (array null).
+- **Upper 24 bits:** `m_Upper24Bits : Byte[]` (3072 = 3 bytes per cell,
+  little-endian) holds bits 8..31; allocated on demand and zero-cleared.
+
+`GetAt(offs)` (IL=61) assembles `low | u24[3*offs]<<8 | u24[3*offs+1]<<16 |
+u24[3*offs+2]<<24` into the `BlockValue` word and falls back to
+`BlockValue.Air` when the type is out of `Block.list` range or resolves to a
+null `Block` (corrupt save ids read as air). `SetAt(offs, fullBlock)`
+(IL=294) writes the low byte, materializing the 8-bit array filled with the
+old same value when a differing low byte arrives (pooled
+`allocArray8Bit`/`allocArray24Bit` from `MemoryPools.poolCBLLower8BitArrCache`
+/ `poolCBLUpper24BitArrCache`, Monitor-locked, capped at 10000 entries; both
+arrays are 1024/3072-byte fresh allocs when the pool is empty).
+
+**Per-layer bookkeeping maintained by `SetAt`:** `blockRefCount` and
+`tickRefCount` (distinct block types / `IsRandomlyTick` blocks present) update
+on type transitions, and a lock-guarded `notifyLoadUnloadCallbackBlocks`
+`HashSet<int>` tracks ids needing `IsNotifyOnLoadUnload` callbacks. A
+non-terrain block landing in the layer clears `bOnlyTerrain`;
+`CheckOnlyTerrain()` (IL=153) re-derives it by scanning the 24-bit array for
+all-zero upper words.
+
 **`Chunk.recalcIndexedBlocks()` (IL=26)** clears `IndexedBlocks` and rebuilds
 it from every layer (`ChunkBlockLayer.AddIndexedBlocks` per layer, 64 of
 them). `saveBlockIds()` (IL=53) marks every in-chunk block id used in
@@ -819,6 +850,12 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-08:** ChunkBlockLayer storage (5.0a): split-byte layout
+  (m_Lower8Bits + lower8BitSameValue compression, m_Upper24Bits 3 bytes/cell),
+  CalcOffset IL=12 1024-cell sub-planes; GetAt IL=61 word assembly + Air
+  fallback; SetAt IL=294 materialize-on-differing-low-byte, pooled
+  alloc/free (10000 cap); blockRefCount/tickRefCount + notifyLoadUnload
+  HashSet bookkeeping; bOnlyTerrain + CheckOnlyTerrain IL=153 scan.
 - **2026-08-07:** World.worldToBlockPos (IL=11) floor-based Vector3i
   conversion; restored a sentence dropped in an intermediate edit.
 - **2026-08-07:** ChunkCluster read hops: GetBlock (IL=21) y>=256 Air guard +
