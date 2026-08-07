@@ -700,6 +700,14 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   wherever a `rootObj` exists; occlusion/culling and rendering are client
   concerns, but the record layer above is fully server-authoritative.
   `DecoManager.UpdateTick` cost on dedi is covered in [`loop.md`](loop.md).
+  `AddDecoObject` (IL=67) buckets the record by its 16x16 chunk key
+  (`decosPerSmallChunks`, capacity-64 lists), instantiates the model only on
+  the main thread with a `rootObj` (else defers via `isModelsUpdated = false`),
+  and registers the transform with `OcclusionManager` when culling is on.
+  `GetDecoObjectAt` (IL=54) scans the bucket for a matching pos with
+  `state != 1` (GeneratedInactive); `ToDecoChunkPos` (IL=15) is the 128-block
+  grid fold with negative handling; `MakeKey16` (IL=8) packs
+  `(x << 16) | (z & 0xFFFF)`.
 
 ```mermaid
 flowchart LR
