@@ -290,6 +290,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | PlayerDisconnected path + MemoryPools.Cleanup + reason 2 | server-lifecycle.md §3.2 |
 | Spawn-near-friend InForest biome gate = Forest/PineForest only | protocol.md post-spawn |
 | EAIManager.CopyPropertiesFromEntityClass IL=213 + ParseTasks IL=111 | entity-ai.md D8.7 |
+| GetRandomSpawnPositionMinMaxToPosition IL=240 ring/disc sampler | spawning.md §6.1 |
+| GetSpawnWalkType IL=9 + GameUtils.GetViewDistance IL=10 | entity-ai.md D8.6 / server-lifecycle |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

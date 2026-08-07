@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: spawn sampler, walk type, view distance
+
+Done (V3.1.0 b14 IL):
+- World.GetRandomSpawnPositionMinMaxToPosition IL=240: square (dx/dz
+  -min..min, |max| gate) vs circle (unit-circle*range then +maxRange dir) modes;
+  height+1, bedroll/CanMobsSpawn|CanPlayersSpawn/terrain/POI/water/land-claim
+  rejects; isPositionFarFromPlayers; accept center + (0.5, terrainOffset+0.5).
+- EntityAlive.GetSpawnWalkType IL=9: ParseInt WalkType prop default 0.
+- GameUtils.GetViewDistance IL=10: pref 33 "Empty" -> 12 else GameStats 62.
+---
 ## 2026-08-07 — tier-C: EAIManager AI task config parse
 
 Done (V3.1.0 b14 IL):

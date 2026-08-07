@@ -368,6 +368,43 @@ the chunk-heat and screamer spawners above.
 The list is built at world load (`GameManager.setSpawnPointListCo`) and is the
 player-only counterpart to the entity spawners above.
 
+### 6.1 `World.GetRandomSpawnPositionMinMaxToPosition` (IL=240)
+
+Ring/disc spawn sampler shared by the join path (spawn-near-friend, see
+[protocol.md](protocol.md) post-spawn), trader respawn
+([loot-economy.md](loot-economy.md)) and scout placement
+([aidirector.md](aidirector.md)). Signature
+`(target, minRange, maxRange, minPlayerRange, checkBedrolls, out pos,
+forPlayerEntityId, checkWater, retryCount, checkLandClaim, maxLandClaimType,
+useSquareRadius)`.
+
+1. `pos = zero`; `range = maxRange - minRange`; `range <= 0` → false.
+2. If `checkLandClaim`: `playerData =
+   persistentPlayers.GetPlayerDataFromEntityID(forPlayerEntityId)` (null when the
+   list is missing).
+3. Try up to `retryCount` times:
+   - **Square mode:** `dx, dz = rand.RandomRange(-minRange, minRange+1)` (uniform
+     in `[-minRange, minRange]`), re-rolled while `|dx|` or `|dz|` ≥ `maxRange`
+     (only binds when `maxRange <= minRange`). `pos = target + (dx, 0, dz)`.
+   - **Circle mode:** `v = rand.RandomInsideUnitCircle() * range`, re-rolled
+     while `v.sqrMagnitude < 0.01`; then `v = v + (maxRange / |v|) * v`, so the
+     radial distance lands in `(maxRange, maxRange + range]`.
+     `pos = target + (v.x, 0, v.y)`.
+   - `blockPos = worldToBlockPos(pos)`; null chunk → next try.
+   - `blockPos.y = chunk.GetHeight(bx, bz) + 1`; `pos.y = blockPos.y`.
+   - Reject when: `checkBedrolls && isPositionInRangeOfBedrolls(pos)`; or
+     `forPlayerEntityId == -1` ? `!chunk.CanMobsSpawnAtPos(bx, floor(y), bz,
+     false, checkWater)` : `!chunk.CanPlayersSpawnAtPos(bx, floor(y), bz,
+     false)`; or (player path) `!chunk.IsPositionOnTerrain(bx, blockPos.y, bz)`;
+     or `GetPOIAtPosition(pos)` non-null (no POI overlap); or
+     `checkWater && chunk.IsWater(bx, blockPos.y - 1, bz)`; or
+     `checkLandClaim && GetLandClaimOwner(blockPos, playerData) >
+     maxLandClaimType`.
+   - Require `isPositionFarFromPlayers(pos, minPlayerRange)`.
+   - Accept: `pos = blockPos.ToVector3() + (0.5, GetTerrainOffset(blockPos) +
+     0.5, 0.5)`; return true.
+4. Tries exhausted: `pos = zero`, return false.
+
 ---
 
 ## 7. From decision to entity to client

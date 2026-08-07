@@ -2173,7 +2173,8 @@ after base `Entity::CopyPropertiesFromEntityClass`). Order in IL:
    - `moveSpeedRand` default `Vector2.negativeInfinity`; if `x > -1`: roll
      `rand x..y`; if `moveSpeedAggro < 1`: aggro += roll, clamp min **0.1**,
      then cap at `moveSpeedAggroMax`.
-   - `crouchType` int prop; `walkType = GetSpawnWalkType(EntityClass)`;
+   - `crouchType` int prop; `walkType = GetSpawnWalkType(EntityClass)`
+     (`ParseInt` of the `WalkType` prop, default 0);
      `bCanClimbLadders` / `bCanClimbVertical` bool props.
    - `jumpMaxDistance` default `(1.9, 2.1)` → `RandomRange`; `jumpDelay` default
      **1** ×20; `ExperienceValue` default **20** (prop `ExperienceGain`).

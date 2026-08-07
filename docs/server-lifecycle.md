@@ -196,6 +196,10 @@ optional buff re-apply path on local.
 `NetPackagePlayerSpawnedInWorld` Process IL=47: `ValidEntityIdForSender`;
 `PlayerSpawnedInWorld(...)`; server rebroadcast flags **192** excluding sender.
 
+**`GameUtils.GetViewDistance()` (IL=10):** `GamePrefs.GetString(33) == "Empty"` →
+**12**; else `GameStats.GetInt(62)` (the admin-allowed chunk view distance that
+`PlayerId` stores on the client).
+
 **`World.SpawnEntityInWorld` (IL=178):** null guard; `EntityLoadedDelegates`;
 `AddEntityToMap` + `Entities.Add` + `addToChunk`; if EntityAlive, add to
 `EntityAlives`; track vehicle/drone/turret managers; audio/weather/light
