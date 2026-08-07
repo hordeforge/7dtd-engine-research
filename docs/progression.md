@@ -105,7 +105,7 @@ validates every purchase; the client only requests it.
 
 **Per-frame hooks:** `Progression.Update()` (IL=32), called from
 `EntityAlive.Update` (Path B): a 1-second cadence MinEvent - when `timer <= 0`
-it fires `FireEvent(MinEventTypes=5, parent.MinEventContext)` and resets
+it fires `FireEvent(MinEventTypes.onSelfProgressionUpdate, parent.MinEventContext)` and resets
 `timer = 1`, otherwise `timer -= deltaTime`; every frame regardless it mirrors
 the XP debt into the buff cvar system via
 `Buffs.SetCustomVar("_expdeficit", ExpDeficit, netSync, op, forceSend)`.

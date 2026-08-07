@@ -1272,6 +1272,15 @@ revenge), alert=true)`; clear revenge; false.
 `ticks / EffectManager(passive **183**, base 1, self.Tags)` (integer div;
 higher passive shortens investigate duration).
 
+**`EAILook.Continue` (IL=116)** (the ambient "look around" task): returns
+false while stunned (`bodyDamage.CurrentStun`); while `IsAlert()` runs two
+periodic timers - every **14** ticks re-arms a yaw seek
+`SeekYaw(rotation.y + RandomFloat*120 - 60, 0, 35)` (random ±60 degrees, slow
+below 35) and every **40** ticks re-picks a look point
+`SetLookPosition(headPosition + Euler(rand*60-30, rand*120-60, 0) *
+(forwardVector * 20))` (20 m ahead, ±30 pitch, ±60 yaw); ends (returns false)
+when `waitTicks` expires.
+
 **`EAIApproachAndAttackTarget.Update` (IL=846) phases:**
 
 1. **Home return** (`isGoingHome`): near home (planar sq &lt; 0.16, |dy| &lt; 2)
@@ -2932,6 +2941,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EAILook.Continue (IL=116): ambient look task - stun gate,
+  alert 14-tick yaw seek (+-60, slow 35) and 40-tick look-point re-pick
+  (20 m ahead, +-30/+-60), waitTicks expiry ends it.
 - **2026-08-07:** Entity.animateYaw (IL=54) named as the SeekYaw interpolation
   half: per-frame Lerp(yawSeekAngle, yawSeekAngleEnd,
   Clamp01(yawSeekTime/yawSeekTimeMax)), end-snap + disarm, IsSeekYaw gate.

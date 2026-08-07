@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EAILook.Continue + MinEvent name
+
+Done (V3.1.0 b14 IL):
+- EAILook.Continue (IL=116) narrated in entity-ai.md EAI leaves: stun gate,
+  alert timers - 14-tick yaw seek SeekYaw(rotation.y + rand*120-60, 0, 35),
+  40-tick look point SetLookPosition(headPos + Euler(rand*60-30,
+  rand*120-60, 0) * forward*20); ends on waitTicks expiry.
+- progression.md: MinEventTypes value 5 named as onSelfProgressionUpdate
+  (EnumDump) in the Progression.Update cadence narration.
+
 ## 2026-08-08 - tier-C: Progression.Update + sandbox recompute
 
 Done (V3.1.0 b14 IL):
