@@ -108,6 +108,19 @@ ItemActionData/BlockValue/Position context, `QuestEventManager.BlockPlaced`,
 `decInventoryLater` coroutine consumes one, and the `placeblock` sound fires
 with `DropTimeDelay = 0.5`.
 
+**Skill book (`ItemActionGainSkill`, V3.1.0 b14):** `ExecuteAction`
+(IL=24) is the read latch - release + `Delay` gate, `RightArmAnimationUse =
+true`, `bReadingStarted = true`. `OnHoldingUpdate` (IL=143) grants once the
+read time passes the hold-type `RayCast` animation delay: for each
+`SkillsToGain` entry (player holder) it resolves
+`Progression.GetProgressionValue(name)` and bumps `Level += 1` when below
+`ProgressionClass.MaxLevel` (else `ttSkillMaxLevel`), firing MinEvent **98**
+with the `ProgressionValue` context, the `ttSkillLevelUp` tooltip, and
+`bPlayerStatsChanged = true`; when any skill was granted it consumes one
+(`DecHoldingItem(1)`) and plays `soundStart`. `ItemActionLearnRecipe`
+shares the identical read-latch `ExecuteAction` (IL=24) with its own
+recipe-grant path.
+
 **Placement math and commit (V3.1.0 b14):** `BlockPlacement.OnPlaceBlock`
 (IL=235) is the base position/rotation resolver the placement action drives:
 a hit block that `CanBlocksReplaceOrGroundCover` snaps the face to Top; the
@@ -1424,6 +1437,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Skill book: ItemActionGainSkill.ExecuteAction IL=24 read
+  latch + OnHoldingUpdate IL=143 grant (Level+1 capped at MaxLevel, MinEvent
+  98, ttSkillLevelUp, DecHoldingItem); ItemActionLearnRecipe shares the
+  latch.
 - **2026-08-08:** Placement math + commit: BlockPlacement.OnPlaceBlock
   IL=235 (ground-cover face snap, face<<2 + ConvertRotationFree rotation,
   face-offset cell); Block.PlaceBlock IL=67 (terrain Density / non-terrain
