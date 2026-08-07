@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: survival-mode Init overrides
+
+Done (V3.1.0 b14 IL):
+- GameModeSurvival/MP/SP/PvP Init overrides: spawn window off, limits off,
+  score mults 1/0/-5, spawn-near-other off, horde meter on, flying = pref 58,
+  AutoParty off (survival); SP forces DropOnQuit 0, max players 1, not public,
+  default port.
 ## 2026-08-08 — tier-C: GameModeAbstract.Init GameStats bootstrap table
 
 Done (V3.1.0 b14 IL):

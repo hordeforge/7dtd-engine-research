@@ -185,6 +185,17 @@ via [inventories/gamestats-gameprefs.md](inventories/gamestats-gameprefs.md).
 | `65` QuestProgressionDailyLimit | GamePrefs.GetInt(265) `QuestProgressionDailyLimit` |
 | `67` StormFreq | GamePrefs.GetInt(275) `StormFreq` |
 
+**Survival-mode `Init` overrides** (`GameModeSurvival` IL=41, `SurvivalMP`
+IL=38, `SurvivalSP` IL=50, `SurvivalPvP` IL=34): after the base bootstrap,
+`ShowSpawnWindow = false`, `TimeLimitActive`/`DayLimitActive = false`,
+`ShowWindow = ""`, `IsSpawnEnemies = GamePrefs[82]`, score multipliers
+(`ScoreZombieKillMultiplier = 1`, `ScorePlayerKillMultiplier = 0`,
+`ScoreDiedMultiplier = -5`), `IsSpawnNearOtherPlayer = false`,
+`ZombieHordeMeter = true`, `IsFlyingEnabled = GamePrefs[58]`; Survival (not MP)
+also `AutoParty = false`. `SurvivalSP` additionally forces
+`DropOnQuit = 0`, `GamePrefs.Set(ServerMaxPlayerCount, 1)`,
+`Set(ServerIsPublic, false)`, `Set(ServerPort, Constants.cDefaultPort)`.
+
 ---
 
 ## 3. Player join and persistence (state machine)
