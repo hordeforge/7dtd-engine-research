@@ -59,6 +59,18 @@ flowchart TB
 - `SpawnAirDrop()` IL=59
 - `SpawnSupplyCrate(Vector3,ChunkObserver)` IL=77
 
+**Supply crate entity (`EntitySupplyCrate`, V3.1.0 b14):** `fallHitGround`
+(IL=15) clamps the impact speed to 5 and forces the vertical fall component
+to `max(fallMotion.y, -0.75)` before delegating to the base - the crate
+always lands softly. `OnEntityDeath` (IL=30) removes the map marker
+(`World.ObjectOnMapRemove(EnumMapObjectType 13, entityId)`), broadcasts
+`NetPackageEntityMapMarkerRemove(13, entityId)` (channel 192) on the server,
+and `DropBagServer()`s the loot. `OnEntityActivated` (IL=18) routes the
+`search` command through `LockManager.LockRequestLocal(this, new
+EntityLockContext(commandId, bag), 0)` - the crate opens via the same lock
+system as loot bags. `canDespawn()` (IL=2) is **always false**: landed
+crates persist until looted or removed.
+
 ## AIDirectorBloodMoonComponent : AIDirectorComponent
 - `Tick(Double)` IL=170
 
@@ -773,6 +785,11 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** Supply crate entity: fallHitGround IL=15 soft landing
+  (speed clamp 5, vertical min -0.75); OnEntityDeath IL=30 map-marker
+  removal (type 13) + NetPackageEntityMapMarkerRemove broadcast + DropBagServer;
+  OnEntityActivated IL=18 search via LockManager LockRequestLocal;
+  canDespawn IL=2 always false.
 - **2026-08-07:** NotifyNoise (IL=84) sound-to-AI chain: noise-table lookup,
   enemy/ignored/decoy exclusions, crouch muffle, PlayerStealth.NotifyNoise ->
   CheckSleeperVolumeNoise, heat-map NotifyActivity(3, strength*scale, 240);
