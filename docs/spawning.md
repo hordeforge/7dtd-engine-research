@@ -553,6 +553,14 @@ Biome spawns additionally run through the async creator
 (`Chunk.SpawnEntityAsync` -> `EntityAsyncManager`), which safely refuses to
 spawn onto a chunk that is unloading.
 
+**Removal side:** `World.RemoveEntity(id, reason)` (IL=16) resolves the entity
+via `GetEntity` and, when present, runs `MarkToUnload()` then
+`unloadEntity(entity, reason)` (the deferred unload path the tick loop drains).
+`World.RemoveEntityFromMap(entity, reason)` (IL=123) is the map-icon removal:
+it clears the client map-area vehicle/drone waypoints (local-player-owned
+only, on reason 1/2/3) and calls `ObjectOnMapRemove(type, entityId)`; the
+`MapObjectType == 13` special case only removes when `reason == 2`.
+
 ---
 
 ## 8. Prefab placement context (`DynamicPrefabDecorator`)
@@ -837,6 +845,9 @@ above.
 
 ## Changelog
 
+- **2026-08-07:** Removal side: World.RemoveEntity (IL=16) MarkToUnload +
+  unloadEntity; RemoveEntityFromMap (IL=123) waypoint clear + ObjectOnMapRemove
+  (MapObjectType 13 only on reason 2).
 - **2026-08-07:** Group pick helpers: NormalizeWorkingList (IL=51) weight
   normalization to sum 1 (non-positive total untouched);
   GetRandomFromGroupList (IL=37) cumulative-distribution roll, -1 on no match.

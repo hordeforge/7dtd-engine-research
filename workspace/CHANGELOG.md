@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity removal side
+
+Done (V3.1.0 b14 IL):
+- spawning.md removal side: World.RemoveEntity (IL=16) GetEntity +
+  MarkToUnload + unloadEntity; RemoveEntityFromMap (IL=123) client
+  vehicle/drone waypoint clear (local owner, reason 1/2/3) +
+  ObjectOnMapRemove; MapObjectType 13 special case only on reason 2.
+
 ## 2026-08-08 - tier-C: Chunk entity membership
 
 Done (V3.1.0 b14 IL):
