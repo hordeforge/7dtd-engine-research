@@ -424,6 +424,10 @@ objectives (`ObjectiveGameEvent`), and the event UI observe outcomes without
 polling. Sequence links (`RegisterLink` / `GetSequenceLink`) let a later
 `HandleAction` attach a new sequence to a still-running owner sequence by
 player + tag, inheriting its requester/refund context.
+`GetSequenceLink(player, tag)` (IL=38) linear-scans `SequenceLinks` for a
+`CheckLink(player, tag)` match and returns the owner sequence (null for a null
+player/empty tag or no match); `GetTargetType(name)` (IL=11) reads
+`GameEventSequences[name].TargetType`, defaulting to enum 0 on a missing key.
 
 Variable plumbing has one observed quirk: `HandleAction` writes incoming
 `variables` into the **template's** `EventVariables` store before cloning, and
