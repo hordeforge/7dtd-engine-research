@@ -315,6 +315,29 @@ roaming-migration logic, inert on dedicated.
   `PlayerEntryInfo` consumers (all UI or client join), remote-save (`SavesLocal`)
   scanning. `SaveDataManager_Minimal` has **no callers at all** in this assembly.
 
+### GamePrefs.Save: two persistence paths (IL=78 / IL=29 / IL=92)
+
+`GamePrefs.Save()` (parameterless, IL=78) is the dedicated-server write path
+(`GameManager.SaveAndCleanupWorld` IL_06B0, `ConsoleCmdGfx`, `ConsoleCmdSetTempUnit`,
+and `GameManager.Awake`). It walks `s_propertyList`, writes every
+`IsPersistent` decl into `SdPlayerPrefs` keyed by the cached enum name, then
+`SdPlayerPrefs.Save()` + `SaveDataManager.CommitAsync()` and logs
+`Persistent GamePrefs saved`. The per-type mapping (switch on
+`PropertyDecl.type`, `EnumType`): `Int` → `SetInt`, `Float` → `SetFloat`,
+`String` → `SetString`, `Bool` → `SetInt(name, 1/0)` (bools are stored as 0/1
+ints), `Binary` → `SetString(name, Utils.ToBase64(str))` (a string blob
+base64-encoded before it touches the prefs store).
+
+`Save(sdfFileName)` (IL=29) is a thin wrapper that collects every enum name and
+delegates to `Save(sdfFileName, List<EnumGamePrefs>)` (IL=92). That overload
+opens `SDF.SdfFile(file)` (created + `Load()`ed), writes each pref present in
+the caller-supplied list through the typed `SdfFile.Set` overloads
+(`Set(name, float/int/string/bool)`, `Binary` → `Set(name, str, true)`), then
+`Save()`, with errors caught and logged via `Log.Error`. Callers are the
+client/console option menus only (`XUiC_OptionsDialogBase.saveChanges`,
+`XUiC_NewContinueGameSettings.SaveGameOptions`) - the SDF variant is not part
+of the dedicated shutdown chain.
+
 ---
 
 ## Related docs
@@ -329,4 +352,7 @@ roaming-migration logic, inert on dedicated.
 
 ## Changelog
 
+- **2026-08-07:** GamePrefs.Save overloads (IL=78 / 29 / 92): parameterless
+  SdPlayerPrefs path (persistent prefs, bool to 0/1 int, Binary to base64) is
+  the dedicated shutdown path; SDF-file variant is client-menu only.
 - **2026-07-24:** Initial doc: managed path/slot model, SaveDataUtils init + backup/restore mapping, manager implementations, SaveInfoProvider enumeration and size math, dedicated-vs-client call map from FindCallers.

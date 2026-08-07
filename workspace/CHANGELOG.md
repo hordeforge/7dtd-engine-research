@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GamePrefs.Save paths
+
+Done (V3.1.0 b14 IL):
+- GamePrefs.Save() (IL=78) narrated in save-persistence.md: walks
+  s_propertyList, writes IsPersistent prefs to SdPlayerPrefs keyed by cached
+  enum name (Int/Float/String via typed setters, Bool as SetInt 0/1, Binary as
+  ToBase64 string), then SdPlayerPrefs.Save + CommitAsync + log. Dedicated
+  shutdown path (SaveAndCleanupWorld IL_06B0, ConsoleCmdGfx/SetTempUnit,
+  GameManager.Awake). Save(file) (IL=29) + Save(file, list) (IL=92) SDF
+  variant: SdfFile typed Set per EnumType, client-menu callers only.
+
 ## 2026-08-08 - tier-C: FastTags bit model
 
 Done (V3.1.0 b14 IL):
