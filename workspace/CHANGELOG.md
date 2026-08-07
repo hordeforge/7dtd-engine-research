@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TEFeatureStorage migration
+
+Done (V3.1.0 b14 IL):
+- loot-economy.md TEFeatureStorage surface: migrateItemsFromOtherContainer
+  (IL=94) clone-clamped items + overflow DroppedLootContainer drop at
+  ToWorldCenterPos + y0.9 + slot-lock clone/resize; SetContainerSize (IL=48)
+  rebuild-or-empty; HasItem (IL=26) type scan; UpdateSlot (IL=10) clone +
+  NotifyListeners; GetContainerSize + LootStageMod/Bonus field reads.
+
 ## 2026-08-08 - tier-C: vending autobuy
 
 Done (V3.1.0 b14 IL):
