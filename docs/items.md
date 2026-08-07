@@ -108,6 +108,23 @@ ItemActionData/BlockValue/Position context, `QuestEventManager.BlockPlaced`,
 `decInventoryLater` coroutine consumes one, and the `placeblock` sound fires
 with `DropTimeDelay = 0.5`.
 
+**Placement math and commit (V3.1.0 b14):** `BlockPlacement.OnPlaceBlock`
+(IL=235) is the base position/rotation resolver the placement action drives:
+a hit block that `CanBlocksReplaceOrGroundCover` snaps the face to Top; the
+hit `blockFace` supplies the initial rotation (`face << 2`), then the
+`HandleFace`-derived quaternion (AngleAxis around right/forward per face)
+converts through `BlockShapeNew.ConvertRotationFree`; the placement cell is
+the hit block plus the face offset (45-degree modes handled by the subclass
+placements `BlockPlacementDoor`/`Plate`/`Spotlight`/`Torch`/
+`TowardsPlacer(90/Inverted)`/`PineLeaves`). `Block.PlaceBlock(world,
+result, entity)` (IL=67) is the commit: terrain shapes
+`SetBlockRPC(ref, bv, Block.Density, entityId)`, non-terrain
+`SetBlockRPC(ref, bv, MarchingCubes.DensityAir, entityId)`, terrain
+decorations no-density, and the `keystoneBlock` name grants the local
+player achievement stat 4. Subclass commits add per-block work
+(`BlockCollector`, `BlockPlantGrowing`, `BlockSleepingBag`,
+`BlockVendingMachine`, `BlockWorkstation`).
+
 ```mermaid
 flowchart TB
   IV["ItemValue<br/>(packed instance)"] -->|type id indexes| IC["ItemClass<br/>(definition, ItemClass.list[type])"]
@@ -1407,6 +1424,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Placement math + commit: BlockPlacement.OnPlaceBlock
+  IL=235 (ground-cover face snap, face<<2 + ConvertRotationFree rotation,
+  face-offset cell); Block.PlaceBlock IL=67 (terrain Density / non-terrain
+  DensityAir / deco no-density SetBlockRPC, keystoneBlock achievement 4,
+  per-block subclass commits).
 - **2026-08-08:** ItemActionPlaceAsBlock.ExecuteAction IL=353: release +
   Delay/cBuildIntervall + passive 177 gates, HitInfo target + collider
   check, OnConvertToBlockValue, placement distance + CanPlaceBlockAt,
