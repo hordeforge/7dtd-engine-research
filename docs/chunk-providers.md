@@ -666,6 +666,13 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   on `RandomFloat() <= prob * 2` plus the `checkResourceOffsetY` ore-noise
   gate at `terrainHeight + 1 + offsetY`, and the block is placed with
   `randomRotateMax` rotation.
+  `GetDecoOccupiedAt(x, z)` (IL=87) is the query that drives the on-demand
+  decorate: disabled -> 0, missing/out-of-bounds chunk -> 8, and an
+  undecorated `DecoChunk` is decorated lazily under a lock
+  (`RandomFromSeedOnPos(decoChunkX, decoChunkZ, world.Seed)`, error
+  `Should not be decorating here!` on a race) before the value is read from
+  the file-backed or in-memory map; `GetDecoOccupiedFromMap` (IL=26) is the
+  plain map read (8 out of bounds).
 - Runtime attach/detach: `BlockShapeDistantDeco.OnBlockAdded/OnBlockLoaded →
   DecoManager.AddDecorationAt`, `OnBlockRemoved → RemoveDecorationAt`;
   `ChunkCluster.SetBlock → DecoManager.SetBlock` keeps records in sync with
