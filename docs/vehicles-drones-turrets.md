@@ -308,6 +308,16 @@ exists: repath via `followPlannedPath` when LOS blocked, path length >
 `findOpenBlockAbove(chest, 256)` at 0.2; rotate+move; return true (blocks other
 states).
 
+**`IsAttackValid` (IL=9):** `activeWeapon != null && activeWeapon.canFire()`.
+
+**`IsTargetInNeedOfMedical` (IL=10):** delegates to
+`HealBeamWeapon.isTargetInNeedOfMedical` (false if no heal weapon).
+
+**`HealBeamWeapon.isTargetInNeedOfMedical` (IL=40):** false if null target. Need
+heal when either (a) `GetMaxHealth == Health.ModifiedMax` and
+`Health < max - HealDamageThreshold`, or (b) `Health < ModifiedMax * 0.67`; and
+`GetCVar("medicalRegHealthAmount") == 0`.
+
 **`healTargetServer` (IL=19):** only when not already in Heal state; require
 `healWeapon.canFire()`; if not forced request, require
 `isTargetInNeedOfMedical`; then `healTarget(target)` (server heal apply).
@@ -492,8 +502,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** GetGroupPositions 5 slots; DoMoveIntoFollowPos repath
-  seekDist+1 / +1.414; onUnderWaterState; trackTarget/canHitEntity; Fire 16/11.
+- **2026-08-07:** Heal medical 0.67/HealDamageThreshold + cvar gate; IsAttackValid;
+  GetGroupPositions 5 slots; DoMoveIntoFollowPos repath; Fire 16/11.
 - **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire
   passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds

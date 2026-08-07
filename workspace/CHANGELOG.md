@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: TickActiveSpawns drain and heal medical gate
+
+Done (V3.1.0 b14 IL):
+- TickActiveSpawns reverse scout/horde lists; HasAnySpawns = horde only.
+- CheckToSpawn FIFO one chunk per 5 s pulse.
+- HealBeamWeapon need: max-HealDamageThreshold or <0.67 ModifiedMax; medicalRegHealthAmount==0.
+- IsAttackValid: activeWeapon.canFire.
+---
 ## 2026-08-07 — tier-C: drone group slots and follow repath
 
 Done (V3.1.0 b14 IL):

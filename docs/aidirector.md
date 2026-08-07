@@ -105,11 +105,20 @@ Scout / activity-driven hordes (see also [spawning.md](spawning.md)).
    remove entries that expire.
 4. `TickActiveSpawns(dt)`.
 
+**`TickActiveSpawns` (IL=66):** reverse-iterate `scoutSpawnList`;
+`AIScoutHordeSpawner.Update(world, dt)`; on true: log finished, `Cleanup`,
+`RemoveAt`. Then reverse-iterate `hordeSpawnList`; `Horde.Tick(dt as double)`;
+on true: log finished, `RemoveAt`. `HasAnySpawns` is only `hordeSpawnList.Count
+> 0` (scouts not counted).
+
 **`AIDirector.NotifyActivity` (IL=31):** no-op if `value <= 0`, or GameStats bool
 **32** / **24** off, or `HeatMapSensitivityModifier <= 0`, or blood moon active, or
 Twitch boss horde active. Else build `AIDirectorChunkEvent(type, pos,
 value * HeatMapSensitivityModifier, duration)` and
 `chunkEventComponent.NotifyEvent`.
+
+**`CheckToSpawn()` (IL=18):** FIFO pop one entry from `checkChunks` and call
+`CheckToSpawn(chunkData)` (one chunk per 5 s pulse).
 
 **`CheckToSpawn(AIDirectorChunkData)` (IL=46):** require GameStats 32+24;
 `ActivityLevel >= 25`; `FindBestEventAndReset`; with **20%** random (and not
@@ -436,8 +445,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** TickPlayerState Dead mirror only; Neighbor cooldown 180/720;
-  SetLongDelay 1320; CreateHorde; FindScoutStartPos 80/15/30 m; spawnHordeNear.
+- **2026-08-07:** TickActiveSpawns reverse drain; CheckToSpawn one chunk/pulse;
+  TickPlayerState Dead mirror; neighbor 180/720; SetLongDelay 1320; FindScout.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset
