@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: EAILeap SetMoveTo and RandomPositionGenerator
+
+Done (V3.1.0 b14 IL):
+- EAILeap.CanExecute: limb/blocked/path; leapDist 2.8..jumpMax; y band; clear ray.
+- SetMoveTo: aggro speed; expiry 10 (pos) / 40 (path); Stop clears path.
+- CalcInDir/Around swim retry; CalcAway 80 deg; CalcAround 30 air/home tries.
+---
 ## 2026-08-07 — tier-C: DestroyArea ApproachSpot and Dodge
 
 Done (V3.1.0 b14 IL):

@@ -1131,6 +1131,36 @@ if in front.
 **`isWithinHomeDistance(x,y,z)` (IL=20):** if `maximumHomeDistance < 0` always
 true; else `homePosition.distSq < max²`.
 
+**`setHomeArea(pos, maxDistance)` (IL=8):** store `homePosition.position` and
+`maximumHomeDistance`.
+
+**`EAILeap.CanExecute` (IL=136):** not dancing; has attack target; not jumping;
+limbs ok (`IsAnyLegMissing` or arm/leg if `legCount > 2`); `BlockedFlags == 0`;
+have path. `leapV = pathEnd - pos`; reject if `y < -5` or `y > 0.5 + 0.5*jumpMaxDistance`.
+Horizontal `leapDist` must be in **[2.8, jumpMaxDistance]**. Physics ray from
+pos **y+1.5** along leap for `leapDist-0.5` (layer mask) must be clear.
+
+**`EAILeap.Start` (IL=19):** `abortTime = 5`; `moveHelper.Stop()`; `leapYaw` from
+Atan2 xz * rad2deg. **`Update`:** `abortTime -= 0.05`.
+
+**`EntityMoveHelper.Stop` (IL=7):** `StopMove` + `navigator.clearPath`.
+`StopMove`: clear active; if not (jumping and not swimming) zero forward and
+stop turning; clear blocked/expiry.
+
+**`SetMoveTo(pos, canBreak)` (IL=29):** store pos; speed = `GetMoveSpeedAggro`;
+`CanBreakBlocks`; `IsActive`; `expiryTicks = 10`; reset stuck.
+Path overload uses current/next path points and `expiryTicks = 40`.
+
+**`CalcIfUnreachablePos` (IL=105):** from path geometry set
+`IsUnreachableAbove` (dy large / far), `IsUnreachableSide`,
+`IsUnreachableSideJump` (blocked jump window).
+
+**`RandomPositionGenerator` wrappers:** `CalcInDir` / `CalcAround` call core with
+`canSwim=false`, retry `canSwim=true` if swimming. `CalcAway` =
+`CalcInDir` away from threat with **80°** angle. `CalcAround` core: up to **30**
+tries random offsets; air cell; optional home clamp; ground within **10** down
+for non-swim.
+
 **`EAISetAsTargetIfHurt.CanExecute` (IL=170):** need revenge target ≠ current
 attack target and different `entityType` than self. Optional `targetClasses`
 type filter (must match revenge). If living attack target and
@@ -1733,8 +1763,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-07:** AddFallingBlock gates; OnBlockStartsToFall air; FallingBlock
   crush damage mass*vy cap 40 + passive 164; land drop events.
-- **2026-08-07:** DestroyArea unreachable gates; ApproachSpot 40+R20 path;
-  Dodge dodge-anim scan; home distance; BreakBlock; FindEnemy; RunAway.
+- **2026-08-07:** EAILeap dist 2.8..jumpMax + ray; SetMoveTo expiry 10/40;
+  CalcAway 80°; CalcAround 30 tries; DestroyArea; ApproachSpot; Dodge.
 - **2026-08-07:** updateTasks GamePrefs 46 freeze; EAIManager interestDistance
   toward 10; GroupFallingBlocks BFS + CreateFallingBlockGroup spawn.
 - **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
