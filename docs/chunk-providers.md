@@ -470,9 +470,16 @@ world scale over the image scale), destroys the texture, seeds
 `noiseGen = new PerlinNoise(GetStableHashCode(worldName))`, then loads
 `radiation.png` else `radiation.tga`: when present it sets
 `radiationMapSize = texture width` and `radiationMapScale = worldSize /
-radiationMapSize`, and branches on whether the texture is wider than **512**
-(tiled/file-backed `LoadRadiationMap*` path versus the direct small-map
-fill).
+radiationMapSize`. A texture within **512x512** fills
+`radiationMapSmall : Byte[]` with the **red channel** of each pixel (the
+array `GetRadiationAt` indexes); a wider texture is skipped with
+`Log.Out("Radiation ignored {0}", radiationMapSize)` and destroyed. The
+general tiled machinery (`LoadRadiationMap` IL=8 /
+`LoadRadiationMapToFile` IL=24) instead builds a `TileArea`/`TileAreaCache`
+of 512x512 tiles via `RadiationTileArrayFromTexture` (IL=50) /
+`RadiationTileArrayFileFromTexture` (IL=37), per-pixel through the
+`ProcessColor` channel fold and a `FileBackedArray`/`TileFile` backing, but
+that path is not what the runtime InitData uses.
 
 `BiomeImageLoader` turns `biomesTex` into the byte map: `Load()` (IL=7) is a
 coroutine stub for `<Load>d__11` (MoveNext IL=229), which resets `isError`/
