@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — census refresh
+
+Done:
+- Coverage.exe re-run: narrated 1488 -> 1491, catalogued 822 -> 821,
+  classified 1387, unaccounted 0. completion-bar + handoff census updated.
+---
 ## 2026-08-08 — tier-C: GameStats/GamePrefs index tables
 
 Done (V3.1.0 b14 IL):
