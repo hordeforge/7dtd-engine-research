@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ExplosionData struct wire
+
+Done (V3.1.0 b14 IL):
+- protocol-packages.md 6.14: ExplosionData Write IL=88 / Read
+  IL=82 - ParticleIndex/Duration x10/BlockRadius x20/EntityRadius/
+  BlastPower i16, BlockDamage/EntityDamage f32, BlockTags string,
+  IgnoreHeatMap bool, DamageType i16, DamageMultiplier nested,
+  BuffActions u8+strings; ToByteArray IL=21 pooled writer; ctor
+  from DynamicProperties + effects (ItemActionProjectile.Explosion).
 ## 2026-08-08 - tier-C: projectile runtime + config
 
 Done (V3.1.0 b14 IL):
