@@ -953,6 +953,24 @@ when a causer exists, with linear falloff
 fraction, the center takes the full scaled amount, and the `BlockTags` set
 filters which blocks are touched.
 
+**`Explosion.AttackEntites` model (IL=691):** `entityDamage` and
+`EntityRadius` come from passives **20** / **21** over the source item; the
+scan is `Physics.OverlapSphere(worldPos, radius, -538480653)`. Two target
+classes: an **`Item`-tagged** collider resolves to an `EntityItem` (via
+`RootTransformRefEntity` when needed) and, unless dead, is added to
+`hitEntities` with an empty `DamageRecord`, `OnDamagedByExplosion()` and
+`SetDead()` - the blast destroys item drops. An **`E_BP_`-tagged** collider
+resolves through `GetHitRootTransform` to an `EntityAlive`, wakes it
+(`ConditionalTriggerSleeperWakeUp`), and is gated by **line of sight**:
+`Voxel.Raycast(world, ray(worldPos, dir), dist, 65536, 66, 0)` hitting a
+block cancels the damage. The hit part picks an entity-class multiplier
+(`Arms/Legs/Head/ChestExplosionDamageMultiplier` by the `E_BP_LArm/RArm/
+LLeg/RLeg/Head` tags), and
+`damage = entityDamage * partMult * (1 - dist/radius)` (linear falloff),
+further scaled by passive **22** and gated at `>= 3`. Per-entity
+`DamageRecord`s accumulate the part hits before the damage/buff application
+in the tail of the method.
+
 **`ExplodeGroupFrameUpdate` (IL=220):** reverse-iterate groups; each frame
 `delay--`; when delay hits 0, process up to budget
 `max(1, min(count, 20 * 0.73^count))` fallings: raycast down for ground;
@@ -1602,6 +1620,12 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-08:** Explosion.AttackEntites IL=691: passive 20/21
+  entityDamage/radius, OverlapSphere scan, item-drop destruction
+  (OnDamagedByExplosion + SetDead), E_BP_ root resolve + sleeper wake,
+  Voxel.Raycast LOS gate (65536/66), part multipliers (arms/legs/head/
+  chest), linear falloff, passive 22 scale, >=3 gate, DamageRecord
+  accumulation.
 - **2026-08-08:** Explosion.AttackBlocks IL=553 damage model: passive 21
   radius, terrain rise (blockPos.y+1), cubic sweep + occlusion ray march
   (dir*0.51), passive 19 block damage x GetBlockDamageScale+0.5, linear
