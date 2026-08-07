@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PrefabInstance leaves
+
+Done (V3.1.0 b14 IL):
+- spawning.md 8: GetCenterXZ (IL=24) bbox center Vector2; IsBBInSyncWithPrefab
+  (IL=24) lastCopied pos/size/rotation match gate.
+
 ## 2026-08-08 - tier-C: Bag leaves
 
 Done (V3.1.0 b14 IL):
