@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: sleeper registry
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md sleeper section: World.GetSleeperVolume (IL=30) locked
+  TryGetValue with throw-on-miss; GetAllSleeperVolumes (IL=43) tuple copy.
+
 ## 2026-08-08 - tier-C: gun spread
 
 Done (V3.1.0 b14 IL):
