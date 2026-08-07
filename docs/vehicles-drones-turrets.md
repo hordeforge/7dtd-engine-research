@@ -291,6 +291,15 @@ group slot from `GetGroupPositions(owner, 5, …)`; `DoMoveIntoFollowPos` then
 
 **`sentryState` (IL=61):** if chunk loaded and more than **5** m from `SentryPos`,
 `DoMoveIntoFollowPos`; else Seek/rotate toward sentry pos until within **0.25** m.
+
+**`healTargetServer` (IL=19):** only when not already in Heal state; require
+`healWeapon.canFire()`; if not forced request, require
+`isTargetInNeedOfMedical`; then `healTarget(target)` (server heal apply).
+
+**`steerFollow` (IL=208):** if beyond **10** m of follow point, ramp
+`currentSpeedFlying` toward max(15, dist) with 0.05 lerp; if within **0.1** of
+point, ease speed down to `SpeedFlying*0.5`; Seek toward point; optional ground
+ray when height delta large.
 `DroneManager` handles cross-cutting ownership: `SpawnFollowingDronesForPLayer`
 teleports a player's Follow-order drones to them on join, `TeleportIfFollowing`
 hooks the owner's teleport event, and `ClearAllDronesForPlayer` removes both the
@@ -338,6 +347,20 @@ bounds centered on muzzle with size ~`range`×2 height 1)`; sort by
 (yaw/pitch); Voxel raycast layer mask `-538750989` thickness 0.05; accept first
 hit whose transform name starts with expected prefix / resolves to EntityAlive;
 set `TargetEntityId`.
+
+**`shouldIgnoreTarget` (IL=245):** ignore null / not alive / behind muzzle
+(`Dot(forward, toTarget) <= 0`) / not attached-main when required. Player
+relation via `EntityToPlayerMap` + `IsAlly` / party membership when
+`GamePrefs` **52** (PvP mode) allows player targeting. Respect flags:
+`TargetOwner` (entityType 3), `TargetAllies` (3 or 1), `TargetStrangers` (2 or
+3), `TargetEnemies`. Always ignore `EntityTrader`, other turrets, drones,
+supply crates; ignore NPC unless TargetStrangers; ignore enemy if
+`!TargetEnemies`. Final `canHitEntity` LOS gate.
+
+**`Fire` (IL=554, server):** resolve target; EffectManager passive **16** (spread)
+and **11** (distance) with item tags; loop `rayCount` hits via
+`ItemActionAttack.FindHitEntityNoTagCheck` / `GetBlockHit` / `Hit`; decrement
+`AmmoCount` and apply `UseTimes` degradation.
 
 The attached `MiniTurretFireController.Update` (a MonoBehaviour, so per frame)
 does the aiming and the target search:
@@ -444,6 +467,8 @@ another player's behalf.
 
 ## Changelog
 
+- **2026-08-07:** shouldIgnoreTarget relation flags; Fire passives 16/11 + ammo;
+  healTargetServer; steerFollow speed ramps; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds
   + raycast; PhysicsWakeNear 20 m.
 - **2026-08-07:** TurretTracker save every 120 s; AttachEntityToSelf / DetachEntity

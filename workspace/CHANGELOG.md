@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: turret ignore flags, Fire ammo, spawnHordeNear
+
+Done (V3.1.0 b14 IL):
+- shouldIgnoreTarget: ally/party/owner/stranger/enemy flags; always skip traders/turrets/drones.
+- Fire: passives 16/11, rayCount Hit path, AmmoCount--, UseTimes.
+- spawnHordeNear: CreateHorde, base 5, 12% reduce, SpawnMore; healTargetServer.
+---
 ## 2026-08-07 — tier-C: scout horde update and drone state IL
 
 Done (V3.1.0 b14 IL):

@@ -134,6 +134,12 @@ and lost investigate / dead target, may `spawnHordeNear` then
 `AttackDelay = **18**` s; investigate refresh uses **2000** / **6000** tick
 lifetimes; when attacking, keep horde spawn pos on living scout.
 
+**`spawnHordeNear` (IL=94):** ensure `IHorde` via
+`AIDirectorChunkEventComponent.CreateHorde`; if `canSpawnMore`: base count **5**,
+with **12%** chance reduce by 1 and either `SpawnUpdate` one extra wave or bump
+`numberToSpawnThisWave`; `Horde.SpawnMore(count)`; play scout alert sound;
+`SetSpawnPos(target)`.
+
 **`AIDirectorChunkData.Tick` (IL=23):** if `cooldownDelay > 0` subtract elapsed
 and keep entry; else `DecayEvents`; keep entry while `EventCount > 0`.
 
@@ -410,6 +416,7 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-07:** spawnHordeNear CreateHorde + 5 count (12% reduce) + SpawnMore.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset
