@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: radiation map + fill loops
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 4.1: InitData radiation branch corrected (<=512x512 -> radiationMapSmall from red channel; >512 -> Radiation ignored log, not tiled)
+- chunk-providers.md 4.1: LoadRadiationMap/TileArray machinery + FillRadiationResult IL=83 / FillRadiationFileBackedArray IL=104 layouts
+
 ## 2026-08-08 - tier-C: PrefabCache + PrefabInstance registration
 
 Done (V3.1.0 b14 IL):
