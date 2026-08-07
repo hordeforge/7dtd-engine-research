@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: deco-cell accessors
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 1: GetDecoAllowedAt (IL=44) occupancy downgrade;
+  SetDecoAllowedAt (IL=49) stricter-field merge.
+
 ## 2026-08-08 - tier-C: deco array alloc
 
 Done (V3.1.0 b14 IL):
