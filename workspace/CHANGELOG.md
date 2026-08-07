@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: indexed blocks + save ids
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md 5: recalcIndexedBlocks (IL=26) rebuild; saveBlockIds (IL=53)
+  nameIdMapping mark under lock.
+
 ## 2026-08-08 - tier-C: IsWater gate
 
 Done (V3.1.0 b14 IL):
