@@ -698,6 +698,9 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   `RemoveDecorationAt(pos)` (IL=52) is the detach: disabled or missing
   DecoChunk -> false, off-main queues into `removeDecosFromThread`, and the
   main thread runs `chunk.RemoveDecoObject(pos)`.
+  `DecoManager.SetBlock(world, pos, bv)` (IL=19) is the edit-sync called by
+  `ChunkCluster.SetBlock`: an air value only removes the record; any other
+  value replaces it (remove + `AddDecorationAt(..., forceBlockYPos=false)`).
   `GetDecorationsOnChunk` (IL=143) lazily decorates an undecorated DecoChunk
   under its lock (`Decorating chunk, should not happen at this point!` error),
   reads the 16x16 bucket, warns
