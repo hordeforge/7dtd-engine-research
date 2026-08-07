@@ -369,8 +369,11 @@ a modded item re-resolves a property (e.g. damage) without touching the base
 
 ## 3. ItemClass and the Actions array
 
-`ItemClass` is the immutable definition. `ItemClass.Init` allocates
-`Actions = new ItemAction[5]` and fills it from the XML `<action>` entries; each
+`ItemClass` is the immutable definition. The **ctor** (IL=181) allocates
+`Actions = new ItemAction[5]` (null-filled) and seeds the defaults
+(`Stacknumber = 500`, `StickyOffset = 0.15`, `StickyColliderUp = -1`,
+`StickyColliderRadius/Length`, `HoldType`, `MaxUseTimes`). The fill happens
+later in the `items.xml` loader, not in `Init` (see the loader below); each
 `ItemAction` parses its own `p*` parameters via `ReadFrom`. Index conventions,
 confirmed from `Inventory.GetHoldingPrimary` (`Actions[0]`) and
 `GetHoldingSecondary` (`Actions[1]`):
@@ -384,6 +387,30 @@ confirmed from `Inventory.GetHoldingPrimary` (`Actions[0]`) and
 The dispatch reads confirm the convention:
 `Inventory.GetHoldingPrimary()` (IL=6) is `holdingItem.Actions[0]` and
 `GetHoldingSecondary()` (IL=6) is `holdingItem.Actions[1]`.
+
+**The `items.xml` loader (`ItemClassesFromXml.parseItem`, IL=772).** Each
+`<item>` requires `name` (throws `Attribute 'name' missing on item`) and
+collects its `<property>` elements into a `DynamicProperties`. The concrete
+class comes from the `Class` attribute via `Type.GetType` +
+`Activator.CreateInstance` (castclass `ItemClass`, throws `No item class
+'...' found!`), defaulting to the base `ItemClass`; `Extends` must resolve to
+an existing item (`Extends item {0} is not specified for item {1}`), and the
+parsed properties are merged over the parent's via `DynamicProperties.CopyFrom`
+with an exclude set. After `Effects = MinEffectController.ParseXml(...)`,
+`GSStatsParseXml`, name / localized-name, `Stacknumber` (default **500**),
+`Canhold` / `Candrop`, required `Material` and `Meshfile` (both throw on
+missing or unknown), sticky collision fields, mesh / image-effect /
+hold-type fields, and repair rules, the **Actions array is filled**: for each
+`itemActionNames[i]` (`InitStatic` IL=24 builds the static list
+`Action0`..`Action4`), if the item declares a matching class block, the
+`Class` attribute resolves through
+`ReflectionHelpers.GetTypeWithPrefix("ItemAction", className)` +
+`Activator.CreateInstance` (throws `ItemAction class '...' could not be
+instantiated`), then `item`, `ActionIndex = i`, `ReadFrom(props)`, an
+optional `ExecutionRequirements` group (the `Action`-prefixed requirement
+classes parsed up front), and `Actions[i]` is set. Only then does
+`ItemClass.Init()` (the 1196-IL property application) run. The per-item
+property-parse tail lives in the subclass `Init` overrides (below).
 
 Beyond `Actions`, the fields that matter server-side:
 
@@ -1558,6 +1585,12 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** items.xml loader (ItemClassesFromXml.parseItem IL=772):
+  Class attr Type.GetType factory, Extends CopyFrom merge + cycle set,
+  Stacknumber 500 default, required Material/Meshfile throws; Actions fill
+  from itemActionNames Action0..Action4 via GetTypeWithPrefix("ItemAction"),
+  ActionIndex + ExecutionRequirements, Init runs last; ctor (IL=181)
+  allocates Actions[5] + defaults; InitStatic (IL=24) builds itemActionNames.
 - **2026-08-08:** ItemClass subclass Init overrides: Block (IL=56) block-field
   mirror, Armor (IL=61) ArmorGroup/EquipSlot/cosmetics, TimeBomb (IL=62)
   ExplosionData + FuseTime*20 ticks, WaterContainer (IL=32) MaxMass =
