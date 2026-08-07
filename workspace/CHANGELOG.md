@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: block light query
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md: World.GetBlockLightValue IL=34 - DensityAir
+  sentinel (no cache), 0 for null chunk, else GetLightValue(channel
+  0).
 ## 2026-08-08 - tier-C: entity light level leaf
 
 Done (V3.1.0 b14 IL):
