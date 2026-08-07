@@ -139,6 +139,9 @@ Also: `SendChunksToClients` (IL=216) after entity packages: per
 `ChunkObserver` sends `ChunkRemove` / `Chunk` (channel 1, compressed) / map
 packages to `entityIdToSendChunksTo` (3 first-load packages per tick cap).
 Detail: [world-chunks.md](world-chunks.md) section 4.0.
+`ChunkManager.AddChunkObserver(pos, buildVisualMesh, viewDim,
+entityIdToSendChunksTo)` (IL=15) builds the `ChunkObserver` and appends it to
+`m_ObservedEntities`, setting `isInternalForceUpdate`.
 
 ### Package selection thresholds (decoded IL)
 
