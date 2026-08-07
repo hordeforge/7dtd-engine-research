@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: velocity-per-second + CanHeal
+
+Done (V3.1.0 b14 IL):
+- Entity.GetVelocityPerSecond (IL=21) / EntityPlayer.GetVelocityPerSecond
+  (IL=13) in entity-ai.md D4: attached delegate, physicsRB.velocity, else
+  motion * 20 (20 TPS scale); player override uses averageVel * 20.
+- EntityPlayer.CanHeal (IL=12) in combat-damage.md leaf types: gate
+  Health > 0 && Health < GetMaxHealth().
+
 ## 2026-08-08 - tier-C: range-checked damage + safe zone
 
 Done (V3.1.0 b14 IL):

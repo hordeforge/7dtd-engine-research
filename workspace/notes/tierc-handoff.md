@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `babea9d` range-checked damage + safe zone |
-| Commits since dry-run `3b61d9c` | ~219 |
+| HEAD (at handoff write) | `7129901` velocity-per-second + CanHeal |
+| Commits since dry-run `3b61d9c` | ~220 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
