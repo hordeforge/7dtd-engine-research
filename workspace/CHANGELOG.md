@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityBuffs cvar leaves
+
+Done (V3.1.0 b14 IL):
+- buffs.md: SetCustomVarNetwork (IL=33) NetPackageModifyCVar wire half (192
+  broadcast / SendToServer); IncrementCustomVar (IL=8) add-op; HasCustomVar /
+  CountCustomVars / EnumerateCustomVars; RemoveCustomVar (IL=21) + TrackCustomVar
+  (IL=39) tracking logs; SetBuff (IL=17) AddBuff/RemoveBuff dispatcher;
+  UnPauseAll (IL=19); ClearBuffClassLinks (IL=21).
+
 ## 2026-08-08 - tier-C: PPD leaves + quest notifiers
 
 Done (V3.1.0 b14 IL):
