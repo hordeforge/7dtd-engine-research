@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: high-value console Execute IL table
+
+Done (V3.1.0 b14 IL):
+- console-commands §2.1: KillAll, SpawnEntity, Teleport, SetTime, SaveWorld,
+  Shutdown, Mem, Weather, Get/SetGamePref, CreateWebUser, LogGameState Execute
+  sizes and authority notes.
+---
 ## 2026-08-07 — tier-C: DamageEntity early outs + AliveFlags/stat process
 
 Done (V3.1.0 b14 IL):

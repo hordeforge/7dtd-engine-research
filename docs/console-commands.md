@@ -91,6 +91,29 @@ inside `executeCommand`. `IsExecuteOnClient`, `AllowedInMainMenu`, and
 `AllowedDeviceTypes` gate **where** a command may run (device/menu), independently
 of **who** may run it.
 
+### 2.1 High-value admin `Execute` leaves (IL re-pin 2026-08-07)
+
+Catalog of all names: [inventories/console-command-list.md](inventories/console-command-list.md).
+Selected dedi-critical Execute bodies:
+
+| Command type | Execute IL | Behaviour |
+|---|---:|---|
+| `ConsoleCmdKillAll` | 92 | Optional `alive` / `all` filters; walk world entities; `Entity.DamageEntity` with large strength; log damage lines |
+| `ConsoleCmdSpawnEntity` | 280 | Lists players/entity numbers when short args; otherwise builds spawn near player/pos via entity class lookup (large help/list branch) |
+| `ConsoleCmdTeleport` | 141 | **Client-only** for local player (`"use teleportplayer instead"` on remote); offset/player destination via `ConsoleCmdTeleportsAbs.ExecuteTeleport` |
+| `ConsoleCmdSetTime` | 145 | `day` / `night` presets via `GameUtils.DayTimeToWorldTime`, or raw u64 parse; multi-arg day/hour/min variants |
+| `ConsoleCmdSaveWorld` | 12 | If server: `SaveLocalPlayerData` + `SaveWorld`; output `World saved` |
+| `ConsoleCmdShutdown` | 5 | Output `Shutting server down...` then `Application.Quit()` |
+| `ConsoleCmdMem` | 480 | Subcommands: `gc` (GC stats / incremental collector), editor/mem dump branches (large) |
+| `ConsoleCmdWeather` | 465 | Dumps biome weather / WeatherManager state; mutator subcommands for weather params |
+| `ConsoleCmdGetGamePrefs` | 73 | Optional filter string; lists allowed prefs `GamePref.X = value` via `prefAccessAllowed` |
+| `ConsoleCmdSetGamePref` | 58 | `GamePrefs.Parse` + `SetObject`; errors on bad pref/value |
+| `ConsoleCmdCreateWebUser` | 96 | In-game console only; server builds registration token/URL for web dashboard user |
+| `ConsoleCmdLogGameState` | 97 | 1-2 args; optional bool; client restriction on second param |
+
+Full per-command description strings remain in the inventory catalog; this table is
+the **server-effect** pin for operators and clone fidelity.
+
 ---
 
 ## 3. Telnet connection (state machine)
@@ -204,6 +227,8 @@ this doc owns the framework, not each leaf command's full prose.
 
 ## Changelog
 
+- **2026-08-07:** §2.1 high-value admin Execute IL table (killall/spawn/teleport/
+  settime/save/shutdown/mem/weather/gamepref/webuser/loggamestate).
 - **2026-07-28:** WebAPI Command endpoint cross-link.
 
 - **2026-07-28:** Telnet HandlerThread 25ms loop; ServerConsoleCommand permission/client-exec path.

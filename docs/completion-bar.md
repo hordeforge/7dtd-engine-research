@@ -94,6 +94,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | SpawnUpdate distance bands re-pin | entity-ai §D3.6 / spawning §2 |
 | DamageEntity local early outs; AliveFlags process | protocol-packages §6.11 / §5.5.6 |
 | StatChanged/StatsBuff/PlayerStats process IL | protocol-packages §6.16 |
+| High-value console Execute IL table | console-commands §2.1 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers, and dormant UAI. Promote
