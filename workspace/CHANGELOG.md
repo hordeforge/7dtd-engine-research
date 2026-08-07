@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChunkAreaBiomeSpawnData blob layout
+
+Done (V3.1.0 b14 IL):
+- spawning.md 3: persisted budget blob v2 (byte ver 2, count<=255, int32 id, uint16 (maxCount<<8)|count, uint64 delayWorldTime)
+- spawning.md 3: read v1 legacy discard; BeforeWrite pooled stream into ccd.data
+
 ## 2026-08-08 - tier-C: WorldBiomes lookups + ParseWeather
 
 Done (V3.1.0 b14 IL):
