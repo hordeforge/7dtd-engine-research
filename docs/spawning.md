@@ -539,6 +539,16 @@ run or fire on the dedicated server.
   counts down `Delay` then spawns the crate and removes the entry; `ChunkRef` is
   the `ChunkObserver` that keeps the drop chunk loaded until then. Part of the
   air-drop director component ([`aidirector.md`](aidirector.md)).
+- **`EntitySupplyCrate.OnUpdateEntity` (IL=103):** base `EntityAlive` tick plus
+  parachute state: `showParachuteInTicks` / `closeParachuteInTicks` countdowns
+  (edge-triggered to **10** on leaving / landing ground). The parachute
+  GameObject hides when `(onGround || IsInWater) && closeParachuteInTicks <= 0`.
+  On landing (`onGround && !wasOnGround`): spawn the `supply_crate_impact`
+  particle (brightness from `GetLightBrightness`, white tint) via
+  `SpawnParticleEffectClient`; on the server call
+  `AIDirectorAirDropComponent.SetSupplyCratePosition(entityId,
+  worldToBlockPos(pos))` then `RefreshCrates(-1)` (updates the crate nav
+  markers, [map-objects.md](map-objects.md)). `wasOnGround = onGround`.
 - **`RequestToSpawnPlayer` join path (IL=496):** server creates the remote
   `EntityPlayer` and sends `NetPackagePlayerId` before `SpawnEntityInWorld`.
   Spawn position order: team-near (GameStats 25) -> friend-near (`nearEntityId`,

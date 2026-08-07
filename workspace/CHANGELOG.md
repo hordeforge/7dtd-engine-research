@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: air-drop crate landing tick
+
+Done (V3.1.0 b14 IL):
+- EntitySupplyCrate.OnUpdateEntity IL=103: parachute show/close countdowns 10,
+  hide when (onGround||inWater) && close<=0; landing -> supply_crate_impact
+  particle + SetSupplyCratePosition + RefreshCrates(-1) on server.
 ## 2026-08-08 — tier-C: sleeper disturbed level + ranged range
 
 Done (V3.1.0 b14 IL):
