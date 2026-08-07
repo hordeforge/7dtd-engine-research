@@ -137,6 +137,15 @@ Key facts read from the IL:
   completion callback runs `OnEntitySpawned`, stamping
   `SetSpawnerSource(Biome, masterChunkKey, biomeIdHash)`.
 
+**`Chunk.SpawnEntityAsync(world, ecd, onEntityCreated)` (IL=40):** refuses to
+spawn onto a chunk that is mid-unload - the volatile `InProgressUnloading` flag
+logs `Spawning entity onto chunk ({0},{1}) which is unloading` and returns
+without creating anything. Otherwise it forwards
+`world.entityAsyncManager.StartCreateEntity(ecd, callback)` and adds the
+returned `EntityCreateHandle` to the chunk's `pendingEntityCreateOps`
+`HashSet` (the set `Chunk.OnUnload` drains via `WaitForComplete`, so unload
+never races an in-flight create).
+
 ---
 
 ## 3. Per-chunk-area caps, cooldown, and kill attrition (`ChunkAreaBiomeSpawnData`)
