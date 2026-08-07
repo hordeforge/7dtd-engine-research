@@ -391,8 +391,12 @@ the fuse - so `UpdateTick` fires the `explode`. A direct trigger
 `explode(world, ref, -1)` immediately. The scheduled tick is the fuse:
 `BlockMine.UpdateTick` (IL=8) simply calls `explode(world, ref, -1)` and
 returns 1. `IsMovementBlocked` (IL=2) is always false - mines never block
-movement, which is what lets walkers step on them. (The walker-side
-`LandMineImmunity` skip is the `OnEntityWalking` gate above.)
+movement, which is what lets walkers step on them. `OnBlockDamaged` (IL=44)
+mirrors the TNT: positive damage rolls `RandomFloat <= clamp(damagePoints,
+1, MaxDamage-1) / MaxDamage` for an immediate `explode(world, bvRef,
+entityIdThatDamaged)`, while negative (repair) damage delegates to the base.
+(The walker-side `LandMineImmunity` skip is the `OnEntityWalking` gate
+above.)
 
 `Block/DestroyedResult` (exact enum): `None=0`, `Keep=1`, `Downgrade=2`,
 `Remove=3`. The base `OnBlockDestroyedBy` returns `Downgrade`.
@@ -666,6 +670,9 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** BlockMine.OnBlockDamaged IL=44: damage-proportional
+  detonation (clamp(damagePoints,1,MaxDamage-1)/MaxDamage roll), repair
+  delegates base.
 - **2026-08-08:** BlockMine.IsMovementBlocked IL=2 always false (walkers
   step on mines).
 - **2026-08-08:** BlockMine.UpdateTick IL=8: scheduled fuse fire ->
