@@ -415,6 +415,14 @@ from `EntityAlive.updateCurrentBlockPosAndValue`):**
   BaseEntityDamage)`; `world.GetWBT().AddScheduledBlockUpdate(pos, blockID,
   (ulong)(delay * 20))` (detonate after delay).
 
+**Hazard contact (`BlockDamage.OnEntityCollidedWithBlock`, IL=126):** skip
+non-`EntityAlive` or dead targets; build a `DamageSourceEntity(damageType,
+-1)` with `AttackingItem = blockValue.ToItemValue()`, `BlockPosition = pos`,
+`SetIgnoreConsecutiveDamages(true)` (spike hits bypass the consecutive-damage
+gate); for `EntityHuman` record the `GetHitTransform(1).name`; apply
+`target.DamageEntity(source, damage, false, 1)`, return true when it dealt
+damage.
+
 ---
 
 ## 9. Dedicated relevance and residuals
