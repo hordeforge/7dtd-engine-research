@@ -80,6 +80,13 @@ delegating to `Block.GetLocalizedBlockName`.
 `value is ItemClassModifier`; `get_IsShapeHelperBlock` (IL=12) is
 `value is ItemClassBlock && block.SelectAlternates`.
 
+**The block bridge (V3.1.0 b14):** `ItemClassBlock.GetBlock()` (IL=5) is
+`Block.list[itemId]`; `GetBlockValueFromItemValue(iv)` (IL=15) is the
+item->block conversion every held/placed block item goes through - with
+`Block.SelectAlternates` it returns `GetAltBlockValue(iv.Meta)` (the item's
+meta byte selects the alternate block variant, e.g. paint/frame variants),
+otherwise `iv.ToBlockValue(false)`.
+
 ```mermaid
 flowchart TB
   IV["ItemValue<br/>(packed instance)"] -->|type id indexes| IC["ItemClass<br/>(definition, ItemClass.list[type])"]
@@ -1340,6 +1347,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Block bridge: ItemClassBlock.GetBlock IL=5 (Block.list
+  [itemId]); GetBlockValueFromItemValue IL=15 SelectAlternates ->
+  GetAltBlockValue(iv.Meta) else iv.ToBlockValue(false).
 - **2026-08-08:** ItemActionDynamic.hitTarget IL=454: tag assembly
   (action + item/MeleeTag + stance + movement), passive 7 degradation x
   ItemDegradationModifier + HandleItemBreak, isCriticalHit reset, block/
