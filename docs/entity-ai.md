@@ -2350,6 +2350,27 @@ that D8.6/D8.6a later copy from. Phase order:
     loot/gamestage scaling. `ParseEntityFlags(names)` (IL=49) ORs comma-separated
     `EntityFlags` values (ignore-case `EnumUtils.TryParse`).
 
+### D8.6c Entity init chain (`EntityAlive.Init`, IL=13)
+
+`Init(class, assets, eModelAssets)`: base `Entity.Init`, then `InitStats()`,
+`switchModelView(1)`, `InitPostCommon()`. Leaves:
+
+- **`InitStats()` (IL=9):** `entityStats` and `startOfFrameStats` both
+  `new EntityStats(this)` (the latter is the per-frame snapshot source).
+- **`InitPostCommon()` (IL=97):** dedicated → `ServerHelper.SetupForServer`
+  on the model transform's GameObject; `AddCharacterController()`;
+  `wasSeenByPlayer = false`, `ticksToCheckSeenByPlayer = 20`. When the class
+  has `UseAIPackages`: `hasAI = true`, `AIPackages.AddRange(class.AIPackages)`,
+  `utilityAIContext = new UAI.Context(this)` (see [uai.md](uai.md)). Adds any
+  class `Buffs` not already present (`AddBuff(name, -1, true, false, -1)`).
+  `entityFlags & 14 != 0` (invisible) → `emodel.SetVisible(false, false)` +
+  `SetFade(0)`.
+- **`PostInit()` (IL=34):** base; `ApplySpawnState()`; last `LODGroup` LOD
+  `screenRelativeTransitionHeight = 0.003` (keep the final LOD until very
+  small on screen); `disableFallBehaviorUntilOnGround = true`;
+  `GameEventManager.Current.HandleSpawnModifier(this)`.
+- **`InitInventory()` (IL=9):** `inventory ??= new Inventory(gameManager, this)`.
+
 ### D8.7 AI task config: `EAIManager.CopyPropertiesFromEntityClass` (IL=213)
 
 Called from `EntityAlive.CopyPropertiesFromEntityClass` (D8.6, step 6) when the

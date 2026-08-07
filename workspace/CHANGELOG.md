@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 — tier-C: EntityAlive init chain
+
+Done (V3.1.0 b14 IL):
+- EntityAlive.Init IL=13 (base + InitStats + switchModelView + InitPostCommon);
+  InitPostCommon IL=97 (ServerHelper.SetupForServer, character controller,
+  seen-by-player 20 ticks, UAI wiring, class buffs, invisible flags);
+  PostInit IL=34 (ApplySpawnState, LOD 0.003, fall disabled, HandleSpawn
+  Modifier); InitInventory IL=9.
 ## 2026-08-08 — tier-C: SetAlive chain + game-stage born-at clock
 
 Done (V3.1.0 b14 IL):
