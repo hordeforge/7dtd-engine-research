@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: swim state + chunk block read
+
+Done (V3.1.0 b14 IL):
+- entity-ai.md: OnHeadUnderwaterStateChanged IL=15 MinEvents 81/80;
+  SwimChanged IL=12 avatar SetSwim; SetSwimValues IL=15 clamp.
+- world-chunks.md: Chunk.GetBlock IL=100 POI-filler culling
+  (IsInternalBlocksCulled + isInside -> bvPOIFiller), else
+  m_BlockLayers[y>>2] read.
 ## 2026-08-08 - tier-C: swim underwater state
 
 Done (V3.1.0 b14 IL):
