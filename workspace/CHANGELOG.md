@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: cluster water accessors
+
+Done (V3.1.0 b14 IL):
+- light-mesh-water.md 4.2: ChunkCluster.GetWater (IL=23) Empty fallbacks;
+  SetWater (IL=34) chunk write + regen flag.
+
 ## 2026-08-08 - tier-C: biome oracle query
 
 Done (V3.1.0 b14 IL):
