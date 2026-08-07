@@ -288,10 +288,22 @@ target list.
 Screamer / event horde runner (not an `AIDirectorComponent`, but driven from
 director/spawn paths; see [spawning.md](spawning.md)).
 
-- `Tick(Double)` IL=**210**
-- Uses `AIDirector.CanSpawn`, builds `AIDirectorGameStagePartySpawner` members
-  from world players, `GetMobRandomSpawnPosWithWater` with radii **45..55**,
-  `World.SpawnEntityInWorld`, marks `EnumSpawnerSource`, `IncSpawnCount`.
+**`Tick(Double)` (IL=228):**
+
+1. Finished (true) if no players **or** `!AIDirector.CanSpawn(1)`.
+2. First tick only (`!isInited`): bounds = `targetPos ± playerSearchBounds`;
+   `GetEntitiesInBounds(EntityPlayer)`; `AddMember` if not `IsIgnoredByAI`.
+   If `partyMembers.Count == 0`, return **false** (wait). Else `isInited=true`,
+   `ResetPartyLevel(0)`, `ClearMembers()` (level sampled while members present).
+3. Every tick: if `spawner.Tick(dt)` is **false**, finished (true). Party Tick
+   true means still active.
+4. If `!canSpawn` or `numSpawned >= numToSpawn`, return false (idle hold).
+5. Else one spawn attempt: day `GetMobRandomSpawnPosWithWater` **45/55/45** else
+   **55/70/55**; `GetRandomEntityFromGroupMaxTier(spawnGroupName,
+   MaxEntityTier)`; `CreateEntity` + `SetSpawnerSource(Dynamic=3)` +
+   `SpawnEntityInWorld`; `IsHordeZombie`/`bIsChunkObserver`; investigate
+   `RandomPos(target, 3)` for **2400** ticks; `hordeList.Add`;
+   `IncSpawnCount`; `numSpawned++`; return false.
 
 ## AIDirectorZombieState : Object
 
@@ -455,8 +467,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** Scout Update finish gates; SpawnUpdate AttackDelay=2 flags;
-  Horde.Tick destroy/spawner cleanup; TickActiveSpawns reverse drain.
+- **2026-08-07:** AIHordeSpawner.Tick IL=228 day/night radii, 2400 investigate,
+  one spawn per tick; Scout Update finish; Horde.Tick destroy path.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset

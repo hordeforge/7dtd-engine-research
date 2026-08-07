@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: AIHordeSpawner.Tick and Weapon cooldown
+
+Done (V3.1.0 b14 IL):
+- AIHordeSpawner.Tick IL=228: party init, day 45/55/45 night 55/70/55, one spawn/tick, investigate 2400.
+- Weapon.Fire stores target + RefreshCooldown (actionTime+cooldown).
+- VehicleDataSync Process: ReadSyncData; server GetSyncFlagsReplicated + SendPackage 192.
+---
 ## 2026-08-07 — tier-C: scout Update finish, Horde.Tick, drone CanAttack
 
 Done (V3.1.0 b14 IL):

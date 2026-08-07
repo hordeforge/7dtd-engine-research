@@ -316,6 +316,13 @@ Shutdown (**5**); else true only if `WakeupAnimTime == 0`.
 **`Weapon.canFire` (IL=7):** `cooldownTimer <= 0`. HealBeam override also requires
 `hasHealingItem()`.
 
+**`Weapon.Fire` (IL=6):** store `target`; `RefreshCooldown`.
+
+**`Weapon.RefreshCooldown` (IL=8):** `cooldownTimer = actionTime + cooldown`.
+
+**`Weapon.hasActionCompleted` (IL=6):** `cooldownTimer < cooldown` (action phase
+done, still cooling).
+
 **`updateTransitionState` (IL=98):** no-op if `transitionState == None (8)` or
 already equals `state`. Leaving Attack/Heal refreshes all installed weapon
 cooldowns. Transition Heal (**3**): server `healTargetServer(attackTarget,
@@ -469,6 +476,12 @@ target and damage on the server. The robotic sledge reuses this via
 | `NetPackageTurretSpawn` | client -> server | deploy a turret **or** drone (branches on item tag: `turretRanged`/`turretMelee` -> `TurretTracker`, `drone` -> `DroneManager`) |
 | `NetPackageTurretSync` | server -> client | `id`, `targetEntityId`, `isOn`, `itemValue` (drives client aim + laser) |
 | `NetPackageVehicleDataSync` | driver <-> peers | vehicle transform / remote-data sync (feeds `incomingRemoteData`) |
+
+**`NetPackageVehicleDataSync.ProcessPackage` (IL=113):**
+`ValidEntityIdForSender(senderId)`; resolve `EntityVehicle`; lock pooled stream;
+`ReadSyncData(reader, syncFlags, senderId)`. If server:
+`GetSyncFlagsReplicated(syncFlags)`; when non-zero, rebroadcast `Setup(vehicle,
+senderId, flags)` via `SendPackage` exclude sender, bulk **192**.
 | `NetPackageVehiclePositions` | server -> client | bulk `(id, pos)` list refreshing vehicle map markers |
 | `NetPackageDroneDataSync` | server -> client | drone owner / order / state / storage sync fields |
 | `NetPackageEntityWaypointList` | server -> client | per-player vehicle (`eWayPointListType 0`) or drone (`1`) marker list |
@@ -515,8 +528,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** CanAttack state bans; Weapon.canFire cooldown; transitionState
-  heal/shutdown path; heal medical 0.67; group slots/repath.
+- **2026-08-07:** Weapon.Fire/RefreshCooldown; VehicleDataSync ReadSyncData +
+  192 rebroadcast; CanAttack; transition heal; group slots/repath.
 - **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire
   passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds
