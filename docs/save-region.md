@@ -202,6 +202,49 @@ flowchart LR
 - Fields: `layers`, `bytesPerVal`, `sameValue`, `CBCLayer.data`  
 - Read path: `ReadByte` / `Read` / `allocLayer` / `freeLayer` / `onLayerRead`
 
+### TileEntity save preamble and type registry
+
+The base `TileEntity.write` (IL=19) / `read` (IL=37) define the per-TE
+preamble every subclass extends:
+
+| Mode | Fields |
+|---|---|
+| Save (`StreamModeWrite 0`) | `u16` version (**19**), `Vector3i chunkPos`, `u64 heapMapUpdateTime` |
+| Live (stream mode != 0) | `Vector3i chunkPos` only |
+
+The read side mirrors this and adds compatibility: `readVersion > 18` means
+a legacy `i32` (old block id) is read and discarded; `readVersion >= 2`
+reads `heapMapUpdateTime` and sets `heapMapLastTime = heapMapUpdateTime -
+AIDirector.GetActivityWorldTimeDelay()` (the delay is subtracted at load so
+the TE counts as recently active); older versions leave the time zero.
+Each subclass appends its own `u16` version + fields after the base preamble
+(e.g. `TileEntityCollector.write` IL=278 writes its own version **21** after
+calling the base).
+
+**`TileEntity.InstantiateFromRead(br, mode, type, chunk, blockIdMapping,
+getBlock)` (IL=88)** is the type registry: in Save mode it first asks
+`TileEntityLegacyUtils.TryReadLegacyType`, then switches on `type - 3`
+constructing the concrete `new TileEntityX(chunk)`: Collector, Forge,
+Workstation, VendingMachine, PoweredBlock, PowerSource, PoweredRangedTrap,
+PoweredMeleeTrap, Light, PoweredTrigger, Sleeper, Composite. A type outside
+the table logs `Dropping TE with unknown/outdated type: {0}` and returns
+null. Composites read through the 3-arg
+`TileEntityComposite.read(br, mode, blockIdMapping)` (the per-block id
+remap); every other type reads through the 2-arg base `read`.
+
+**Legacy migration (`TryReadLegacyType` IL=81):** only in Save mode. Legacy
+`TileEntityType` values 4 (land claim), 5 (loot), 10 (secure loot),
+11 (secure door), 13 (sign), and 22 (secure-loot signed) are rewritten into
+`TileEntityComposite` via the `ReadLegacy*IntoComposite(br, chunk, getBlock)`
+helpers; type 14 (gore) is read and **discarded** (`ReadLegacyGoreAndDiscard`),
+type 6 is dropped silently, and anything else falls through to the modern
+registry above.
+
+The base virtuals are stubs - `UpdateTick` IL=1, `CopyFrom` IL=3,
+`UpgradeDowngradeFrom` IL=3, `OnLoad` / `OnReadComplete` / `OnUnload` IL=1 -
+all real behavior lives in the subclasses (`TileEntityComposite` feature
+modules, see [`tile-entities-power.md`](tile-entities-power.md)).
+
 ---
 
 ## 3. Region file system
@@ -576,6 +619,12 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-08:** TileEntity preamble + registry: base write IL=19 (u16 v19,
+  Vector3i chunkPos, u64 heapMapUpdateTime) / read IL=37 (v<=18 legacy i32
+  discard, heapMapLastTime = time - AIDirector delay); InstantiateFromRead
+  IL=88 type switch (12 concrete ctors, unknown dropped); TryReadLegacyType
+  IL=81 legacy types 4/5/10/11/13/22 -> TileEntityComposite, gore discarded;
+  base virtuals stubs.
 - **2026-08-07:** WorldBlockTicker execute type-match gate; AddScheduled replace;
   Chunk.UpdateTick TE-only TeTick.
 - **2026-08-07:** Save entry points table (SaveWorld / SaveAll / players.xml).
