@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: landclaim/sleeper/deco/auth/addExp process re-pins
+
+Done (V3.1.0 b14 IL):
+- LandClaimRepair, PersistentPlayerState, SleeperWakeup, GameStats, DecoUpdate,
+  SignDataRequest, DynamicMesh, AddExp Server/Client, AuthConfirmation,
+  EncryptionRequest process notes; still-open table honesty update.
+---
 ## 2026-08-07 — tier-C: SetBlock + inventory hash cache process
 
 Done (V3.1.0 b14 IL):

@@ -95,6 +95,10 @@ sequenceDiagram
 Bodies (from `write`):
 
 **NetPackageEncryptionRequest** - empty body (id only). Server -> client trigger.
+Process **IL=4**: `AntiCheatEncryptionAuthClient.StartKeyExchange()`.
+
+**NetPackageAuthConfirmation** Process **IL=17**: server
+`AuthFinalizer.ReplyReceived(Sender)`; client `SendToServer` empty Setup ack.
 
 **NetPackageEncryptionPublicKey**
 ```text
@@ -1076,7 +1080,8 @@ blockPos.x,y,z : i64 x3
 beginRepair : bool
 ```
 
-Server `TEFeatureAreaRepair.RepairAll` when begin; owner-local end clears
+`ProcessPackage` (**IL=33**): resolve TE at pos; server path
+`TEFeatureAreaRepair.RepairAll(world, pos, ...)`; client owner match clears
 `IsRepairing`. Detail: [server-lifecycle.md](server-lifecycle.md) section 4.
 
 #### `NetPackagePersistentPlayerState` / `Positions`
@@ -1084,10 +1089,15 @@ Server `TEFeatureAreaRepair.RepairAll` when begin; owner-local end clears
 State: `reason:u8` + `PersistentPlayerData.Write`. Positions: count + platform id
 + Vector3i map.
 
+`ProcessPackage` (**IL=5**): `GameManager.PersistentPlayerLogin(ppData)`.
+
 #### `NetPackageSleeperWakeup` / `Pose` / `PassiveChange`
 
 Wakeup: `entityId:i32`. Pose: `entityId` + `pose:u8`. PassiveChange: EntityTargeted
 id; client clears `IsSleeperPassive`.
+
+Wakeup Process (**IL=20**): if not remote world, resolve entity,
+`EntityAlive.ConditionalTriggerSleeperWakeUp()`.
 
 #### `NetPackageBloodmoonMusic`
 
@@ -1095,12 +1105,16 @@ id; client clears `IsSleeperPassive`.
 IsBloodMoonMusicEligible : bool
 ```
 
+Process **IL=14**: client music path via world fields (presentation).
+
 #### `NetPackageGameStats`
 
 ```text
 payloadLen : i16
 payload : GameStats.Write of bPersistent PropertyDecls only
 ```
+
+Process **IL=5**: starts `readStatsCo` coroutine to apply persistent stats.
 
 #### QuestEvent type tails
 
@@ -1147,7 +1161,8 @@ entityId : i32
 
 #### `NetPackageSignDataRequest` / `Response`
 
-Request body empty (write IL=4). Response:
+Request body empty (write IL=4). Request Process **IL=5**:
+`SignDataManager.SendSignDataToClient(Sender)`. Response:
 
 ```text
 isLastBatch : bool
@@ -1167,6 +1182,8 @@ payload : bytes          // DecoManager.Read stream
 ```
 
 Client applies under lock via `DecoManager.Read(reader, int.MaxValue, firstPackage)`.
+Process **IL=39**: pooled reader + `Monitor.Enter` on deco lock, then
+`DecoManager.Read`.
 
 ### 6.21 Remaining wire packages (bulk residual close)
 
@@ -1214,7 +1231,8 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageItemActionEffects` | 52 | entityId, slotIdx, actionIdx, firingState, startPos, direction, userData | Process IL=42: server/client `ItemActionEffectsServer/Client` |
 | `NetPackageItemReload` | 8 | entityId | Process IL=18: `ItemReloadServer` / `ItemReloadClient` |
 | `NetPackageModifyCVar` | 21 | m_entityId, cvarName, value, operation | Process IL=26: server `EntityBuffs.SetCustomVar` |
-| `NetPackageEntityAddExpClient` | 30 | entityId, xp, xpType, usedItem | Client XP notify (server write empty/inherit) |
+| `NetPackageEntityAddExpClient` | 30 | entityId, xp, xpType, usedItem | Process IL=36: `Progression.AddLevelExp` with `_xpFromKill` / `_xpOther` tags |
+| `NetPackageEntityAddExpServer` | (inherit) | same | Process IL=31: server `AddLevelExp` `_xpOther` path |
 | `NetPackageEntitySetSkillLevelClient` | 16 | entityId, skill, level | Skill level display |
 | `NetPackageEntityAwardKillServer` | 12 | EntityId, KilledEntityId | Kill award |
 | `NetPackageEntityAddScoreClient` | 27 | entityId, zombieKills i16, playerKills i16, otherTeamNumber i16, conditions i32 | Client `EntityAlive.AddScore` |
@@ -1329,8 +1347,8 @@ bytes : PresumedLength          // mesh payload
 // length cross-checks / debug logs in write body
 ```
 
-Process: if server, `DynamicMeshServer.ClientReadyForNextMesh` (ack). If client
-and valid, `DynamicMeshManager.AddDataFromServer` then send empty ack package to
+Process (**IL=24**): if server, `DynamicMeshServer.ClientReadyForNextMesh` (ack).
+If client and valid, `DynamicMeshManager.AddDataFromServer` then send empty ack package to
 server. Detail: [dynamic-mesh.md](dynamic-mesh.md).
 
 #### `NetPackagePOIAround` (channel 1)
@@ -1411,8 +1429,9 @@ customReason    : string
 | `EntityCreationData` class-conditional tail | fully extracted (56 fields, per-class branches) in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) + §5.1 table |
 | Bulk-package compression codec (LZ variant) | flag known; byte codec in native/StreamUtils (residual) |
 | Encryption cipher/KDF | handshake bodies decoded; crypto primitives native (residual) |
-| Quest/Party/Twitch families | not yet annotated (low priority) |
-| `NetPackageDynamicMesh`, `POIAround` bodies | channel/compress known; bodies not annotated |
+| Quest/Party process | re-pinned 2026-08-07 (§6.17-6.18); Twitch still low priority |
+| `NetPackageDynamicMesh`, `POIAround` | Process re-pinned (mesh ack IL=24; POIAround IL=156 prefab dict fill) |
+| Per-flag conditional framing on every package | optional tier-C only |
 
 ---
 
@@ -1429,6 +1448,8 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-07:** LandClaim/SleeperWake/GameStats/Deco/Sign/DynamicMesh/AddExp
+  process re-pins; AuthConfirmation/EncryptionRequest thin paths.
 - **2026-08-07:** SetBlock/Response process; InventoryDataRequest hash cache;
   PlayerInventory latestPlayerData apply; login/world thin process re-pins.
 - **2026-08-07:** Quest/Party/Trader/GameEvent/Boss process IL re-pins (§6.17-6.18).

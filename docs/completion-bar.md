@@ -100,6 +100,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | Quest/Party/GameEvent process IL re-pins | protocol-packages §6.17-6.18 |
 | SetBlock + InventoryData hash cache process | protocol-packages §6.1 / §6.13 |
 | PlayerInventory -> latestPlayerData | protocol-packages §5.4 |
+| LandClaim/Sleeper/Deco/Sign/AddExp/Auth process | protocol-packages §6.19 / §2 / §6.21 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves
