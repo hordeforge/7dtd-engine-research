@@ -1634,6 +1634,13 @@ must expose `TEFeatureDoor` not open; if `TEFeatureLockable` locked skip; else
 `jumpYaw` Atan2 to moveTo; `Jumping=true`; `SetSwimValues(swimStrokeDelayTicks,
 moveTo−pos)`.
 
+**Swim/underwater state (V3.1.0 b14):** `OnHeadUnderwaterStateChanged(
+bUnderwater)` (IL=15) runs the base then fires MinEvent **81** (underwater)
+or **80** (surfaced) on the entity - the drowning/breath hooks. `SwimChanged()`
+(IL=12) pushes `isSwimming` into the avatar (`SetSwim`). `SetSwimValues`
+(IL=15) clamps the stroke duration: `Clamp(durationTicks/swimSpeed - 6, 3,
+20)` with `jumpSwimMotion` stored.
+
 **`FindDestroyPos` (IL=21):** zero destroyPosition.y; `SearchForDestroyPos`; on
 success `destroyRefreshTicks=**500**` and store pos.
 
@@ -3198,6 +3205,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-08:** Swim/underwater state: OnHeadUnderwaterStateChanged IL=15
+  MinEvents 81 underwater / 80 surfaced; SwimChanged IL=12 avatar SetSwim;
+  SetSwimValues IL=15 Clamp(duration/swimSpeed - 6, 3, 20).
 - **2026-08-07:** EntityDrone.FindCollisionEntity (IL=13): null-guarded
   GetComponent<EntityDrone> - the E_Enemy hit resolve.
 - **2026-08-07:** EntityDrone.IgnoreCollisionEntity (IL=38): temporary layer-2
