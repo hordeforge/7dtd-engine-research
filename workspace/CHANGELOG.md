@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: durability-modifier accessors
+
+Done (V3.1.0 b14 IL):
+- items.md 7: get_MaxDurabilityModifier (IL=9) meta-or-1; setter (IL=13)
+  remove-at-1 else SetMetadata.
+
 ## 2026-08-08 - tier-C: ModMaxUseTimes
 
 Done (V3.1.0 b14 IL):
