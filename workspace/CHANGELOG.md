@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: WorldDecoratorBlocksFromBiome driver + decoratePrefabs
+
+Done (V3.1.0 b14 IL):
+- chunk-providers.md 3.3: DecorateChunkOverlapping IL=245 (rwlock, per-chunk seed, biomePositions buckets, sub-biome fold, trader/POI-liquid cells)
+- chunk-providers.md 3.3: decorateSingleBlocks IL=56 + decorateSingleBlock IL=139 cell gates
+- chunk-providers.md 3.3: decoratePrefabs IL=403 biome-prefab path (cache lookup, footprint fit, rotation, CopyIntoLocal)
+
 ## 2026-08-08 - tier-C: WorldBiomeProviderFromImage + DecoUtils cluster
 
 Done (V3.1.0 b14 IL):
