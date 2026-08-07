@@ -141,11 +141,23 @@ stat is on, so players auto group after respawn.
 
 `Party` aggregates member state for shared mechanics:
 
-- **Shared kill XP.** `GetPartyXP(player, startingXP)` returns
-  `startingXP * (1 - 0.1 * MemberCountInRange(player))`, where `MemberCountInRange`
-  counts **other** members within the party-share radius (`EnumGameStats` 54). More
-  nearby party members lowers each member's base kill XP (a split, not a bonus).
-  `EntityPlayer.AddKillXP` and `NetPackageSharedPartyKill` feed `GameManager.SharedKillServer`.
+- **Shared kill XP.** Two server paths, both using the same base XP:
+  1. **Killer** `EntityPlayer.AddKillXP` (**IL=99**): `ExperienceValue` from
+     victim class, scaled by `EffectManager.GetValue(PassiveEffects=193, victim
+     holding item, …)`; if `xpModifier != 1`, `xp = (int)(xp * mod + 0.5)`; if
+     in party, `Party.GetPartyXP` =
+     `startingXP * (1 - 0.1 * MemberCountInRange)` (other members in range
+     `GameStats` **54**); local `AddLevelExp("_xpFromKill")` or
+     `NetPackageEntityAddExpClient` flags **192**; when `xpModifier == 1` also
+     calls `SharedKillServer` for party mates.
+  2. **Party mates** `GameManager.SharedKillServer` (**IL=162**): resolve killer
+     player + victim alive; same ExperienceValue + passive 193; same optional
+     modifier and in-range party split; for each **other** member with
+     `Distance < GameStats[54]`, local `SharedKillClient` or
+     `NetPackageSharedPartyKill.Setup(class, xp, killerId, entityId)` flags
+     **192**. Killer is **skipped** in this loop (killer already got AddKillXP).
+  3. **SharedKillClient** (**IL=65**): `AddLevelExp("_xpFromParty", XPTypes=0)`;
+     optional tooltip; `QuestEventManager.EntityKilled` for the party member.
 - **Group gamestage / loot.** `get_GameStage` runs the member gamestages through
   `GameStageDefinition.CalcPartyLevel`; `get_HighestGameStage` and
   `GetHighestLootStage` take the max across members. This is how a party's blood-moon
@@ -212,8 +224,9 @@ entityID     : i32   // killed entity
 killerID     : i32
 ```
 
-On the server `ProcessPackage` calls `GameManager.SharedKillServer(entityID, killerID, 1.0)`;
-on a client it calls `SharedKillClient` to credit the local player's kill count / XP.
+Server `ProcessPackage` (**IL=22**): `SharedKillServer(entityID, killerID, 1.0)`
+(Setup used only 2-arg form; modifier forced 1). Client: `SharedKillClient` with
+`entityTypeID` + `xp` from the package (party-mate credit, not the killer path).
 
 ---
 
@@ -432,6 +445,8 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 
 ## Changelog
 
+- **2026-08-07:** AddKillXP / SharedKillServer IL XP pipeline (passive 193,
+  party 0.1 split, GameStats 54 range, party-mate only SharedKill fan-out).
 - **2026-08-07:** ServerHandleAcceptInvite IL=89; CreateParty IL=24 nextPartyID.
 
 - **2026-07-28:** Ally package write IL numbers.

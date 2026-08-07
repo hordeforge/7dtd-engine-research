@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: AddKillXP and SharedKillServer party XP split
+
+Done (V3.1.0 b14 IL):
+- AddKillXP: ExperienceValue, passive 193, modifier, GetPartyXP, _xpFromKill.
+- SharedKillServer: same base XP; other members within GameStats[54]; _xpFromParty.
+- Killer skipped in SharedKill loop; SharedKillClient quest EntityKilled hook.
+---
 ## 2026-08-07 — tier-C: console 300-char reject, EntityAliveFlags bits
 
 Done (V3.1.0 b14 IL):
