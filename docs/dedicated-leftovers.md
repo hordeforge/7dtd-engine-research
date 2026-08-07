@@ -202,6 +202,14 @@ teleport-out); `PrefabInfoVolumeList` backs `PrefabInstance.IsWithinInfoArea`;
 `AddNewVolume`/`SelectionBox` members are the editor half. Complements
 [server-browser-prefabs.md](server-browser-prefabs.md) (prefab load pipeline).
 
+`TraderArea.Write` (IL=111) is the blob: `Position` (3x int32), `PrefabSize`
+(3x int16), `GetProtectPadding()` (3x sbyte, = `ProtectSize - PrefabSize` with
+2 removed on x/z), teleport-volume count (byte), then per volume
+`startPos` (3x sbyte) + `size` (3x byte); `Read` (IL=91) mirrors it and
+rebuilds each volume via `Use(start, size)` +
+`AddExistingVolume`. `GetReadWriteSize` (IL=10) is `22 + count * 6`;
+`IsWithinProtectArea` (IL=47) is the `ProtectBounds` AABB test.
+
 ## 5. PathAbstractions: SearchDefinition, SearchPathBasic/Saves/Mods/UserData
 
 The static `PathAbstractions` class builds one `SearchDefinition` per asset
