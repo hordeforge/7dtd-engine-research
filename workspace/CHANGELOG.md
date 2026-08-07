@@ -6,6 +6,17 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity.SetupBounds
+
+Done (V3.1.0 b14 IL):
+- Entity.SetupBounds (IL=90) narrated in entity-ai.md D7: called from
+  Entity.Awake (IL_0052) and EntityHuman.TurnIntoCrawler (IL_0049); three
+  cases - BoxCollider (scaledExtent = size*localScale*0.5, nativeCollider,
+  disabled when isDetailedHeadBodyColliders), CharacterController (radius
+  half-widths, height*0.5 half-height), fallback unit box; boundingBox
+  origin-relative, recentered by SetPosition (IL_0065) and
+  aabbEntityCollision (IL_0180/02A2).
+
 ## 2026-08-08 - tier-C: BoundsUtils.ClipBoundsMove + decoration offset
 
 Done (V3.1.0 b14 IL):

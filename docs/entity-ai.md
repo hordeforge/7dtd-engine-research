@@ -2056,6 +2056,20 @@ D8.6b); `CanCollideWithBlocks` is a separate always/never family (base true,
 `EntityAlive` false while sleeping, `EntityCar` / `EntityHomerunGoal` /
 `EntitySupplyCrate` / `EntitySupplyPlane` false).
 
+**Where `boundingBox` comes from: `Entity.SetupBounds()` (IL=90), called from
+`Entity.Awake` (IL_0052) and re-run by `EntityHuman.TurnIntoCrawler`
+(IL_0049).** Three cases in priority order: (1) a `BoxCollider` component:
+`scaledExtent = collider.size * transform.localScale * 0.5`, center
+`collider.center * localScale`, `boundingBox = BoundsForMinMax(-extent,
+extent)` recentered; the collider is stored as `nativeCollider` and
+**disabled** when `isDetailedHeadBodyColliders()` is true (the detailed
+colliders replace it). (2) a `CharacterController`: X/Z half-widths
+`radius * localScale.x/z`, Y half-height `height * localScale.y * 0.5`, box
+built the same way. (3) neither: `BoundsForMinMax(zero, one)` (a degenerate
+unit box). The box is origin-relative; `SetPosition` (IL_0065) recenters it on
+the entity position, and `aabbEntityCollision` (IL_0180/02A2) rewrites it from
+the resolved move, so the field tracks the entity's current world AABB.
+
 ---
 
 ## D8. Falling / sleeper / deco (world systems)
@@ -2914,6 +2928,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** Entity.SetupBounds (IL=90) in D7: BoxCollider (extent =
+  size*localScale*0.5, disabled when detailed head/body colliders) /
+  CharacterController (radius half-width, half-height) / unit-box fallback;
+  recentered by SetPosition and aabbEntityCollision.
 - **2026-08-07:** BoundsUtils.ClipBoundsMove family (IL=67 dispatcher + 6
   per-axis clippers IL=72-114): Y→X→Z axis order with box translation between
   axes, face-flush clamps, Y-only 0.2 step allowance, 0.0001 epsilon zero-snap
