@@ -643,6 +643,19 @@ closes the swing: fires MinEvent **29** (or **37** with
 **39** by action index when `MinEventContext.Other == null` (nothing was
 hit), then clears `Attacking` / `IsHarvesting` and sets `HasFinished`.
 
+**`ItemActionDynamicMelee.Raycast` (IL=203)** is the sweep that resolves a
+swing: no melee from a vehicle; a local player pays the stamina cost here
+(`Stamina.Value -= StaminaUsage`); `waterCollisionParticles.Reset()`; then a
+penetration loop - `penetrationCount = 1 + FloorToInt(GetValue(passive 199,
+iv, EntityPenetrationCount, holder, itemTags))` - that re-casts from
+`hit.pos + ray.direction * 0.1` (`useExistingRay = true`) after each entity
+hit, capped at 20 iterations. Each cast runs
+`GetExecuteActionTarget` + `waterCollisionParticles.CheckCollision(origin,
+dir, max(Range, BlockRange) + SphereRadius, entityId)` +
+`isHitValid` -> `hitTarget(data, hitInfo, false)`. No hit at all: avatar
+`RayHit = false` + MinEvent **26** / **34** by action index; any hit:
+`RayHit = true` and the swing counts.
+
 **`ItemActionEat.consume` (IL=154):** `QuestEventManager.UsedItem` + entity
 `FireEvent`; increase `UseTimes` via `EffectManager` (durability of food stack);
 `Inventory.DecHoldingItem(1)`; `PlayerStealth.SetSmellEat(smellUse)`; if
@@ -1314,6 +1327,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** Dynamic-melee sweep: ItemActionDynamicMelee.Raycast
+  IL=203 - no vehicle, stamina cost on local player, passive 199
+  penetration loop (useExistingRay, 20-iter cap), water particles,
+  hitTarget per cast, RayHit avatar bool + whiff MinEvents 26/34.
 - **2026-08-08:** Dynamic-melee gate: canStartAttack IL=198 (passives 18
   swing interval / 112 stamina / 177 twitch gate, TP-camera check, jam,
   stamina tooltip); canContinueAttack IL=5 IsAttackValid; SetAttackFinished
