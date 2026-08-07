@@ -170,6 +170,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | DropItemsOnEvent harvest table | blocks §3 |
 | PartyQuestChange HandlePlayer | parties-factions §2.3 |
 | EAIApproachAndAttackTarget Update phases | entity-ai §D2 |
+| EAI Break/Wander/RunAway/Ranged leaves | entity-ai §D2 |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), residual
 MinEvent presentation leaves, client-shared helpers. Further UAI is only

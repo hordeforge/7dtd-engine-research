@@ -582,43 +582,35 @@ Top decision tasks (when EAI Update runs):
 
 | IL | Method | Role |
 |---:|---|---|
-| **846** | `EAIApproachAndAttackTarget.Update` | Primary chase/attack; home/eat; **3× FindPath** (detail below) |
-
-**`EAIApproachAndAttackTarget.Update` (IL=846) phases:**
-
-1. **Home return** (`isGoingHome`): if near home (planar sq &lt; 0.16 and |dy| &lt; 2),
-   snap position, `ResumeSleeperPose`, clear path; else `pathCounter` and when
-   not calculating path set counter **60**, `FindPath` home at `GetMoveSpeedAggro
-   * 0.8`. `homeTimeout -= 0.05`; on expire enable `EAIBlockingTargetTask`,
-   clear attack target, give-up sound, stay going home.
-2. **Null target:** abort.
-3. **Relocate ticks:** while &gt; 0, decrement; `moveHelper.SetFocusPos(target)`;
-   track target pos/vel (eat uses belly pos); EMA vel 0.7/0.3.
-4. **Attack timeout:** decrement; if eating + limbs, `RotateTo` 8/5; when timeout
-   0 set random 10..35 and if `eatCount` path: one-shot + `DamageEntity` 35 +
-   motion impulse; manage eatCount / isEating.
-5. **Chase:** `GetTargetXZDistanceSq`; pathCounter / `GetMoveToLocation` +
-   seekPosOffset; `FindPath` toward predicted pos; if `CanSee` look at head;
-   `moveHelper` pursue; eat transition sets `IsEating` + attackTimeout.
-
-**`CanExecute` (IL=70):** fail if sleeping/waking, stunned, or jumping while not
-swimming; require `GetAttackTarget` type assignable from `targetClasses` and
-copy that class's `chaseTimeMax`.
+| **846** | `EAIApproachAndAttackTarget.Update` | Primary chase/attack; home/eat; **3× FindPath** (phases below) |
 | 317 | `EAIDestroyArea.Continue` | Destroy |
-| 281 | `EAISetNearestEntityAsTarget.FindTarget` | Target acquisition + bounds queries |
+| 281 | `EAISetNearestEntityAsTarget.FindTarget` | See-distance; player noise/breadcrumb 15/24 m; bounds +4 `GetEntitiesInBounds` |
 | 184 | `FindTargetPlayer` | Player targeting |
 | 172 | `GetMoveToLocation` | Approach helper |
 | 166 | `EAIRunawayFromEntity.FindEnemy` | Flee scan |
 | 137 | `EAITaskList.OnUpdateTasks` | Scheduler |
-| 118 | `EAIBreakBlock.AttackBlock` | Break |
-| **107** | `EAIRangedAttackTarget.Update` | elapsedTime += 0.05; look/seek yaw; fire window |
-| **105** | `EAIRunAway.Update` | Path check; distSq **1.21** re-pick; FindRandomPos |
-| **94** | `EAIWander.CanExecute` | sleep/stun/alert gates; `executePercent` vs RandomFloat; interestDistance |
-| **70** | `EAIApproachAndAttackTarget.CanExecute` | !sleeping, stun, jump/swim; requires attack target type in `targetClasses` |
-| **60** | `EAIDestroyArea.Update` | holding `ItemActionAttackData`; look + Attack + hitDelegate |
-| **40** | `EAIApproachSpot.Update` | path/moveHelper unreachable; updatePath (Astar line + pathCounter 20..40) |
-| **27** | `EAIDodge.Update` | look at target head if in front |
-| **7** | `EAIWander.Update` / `EAILeap.Update` | thin (0.05 step) |
+| 118 | `EAIBreakBlock.AttackBlock` | Ally boost +0.2/zombie in 1.7 box; Attack + hitDelegate; delay ~15-40 ticks |
+| **107** | `EAIRangedAttackTarget.Update` | +0.05 time; look/SeekYaw 30; anim state then `UseHoldingItem` |
+| **105** | `EAIRunAway.Update` | path end distSq **1.21** re-pick; pathTicks **60** FindPath; panic speed subclasses |
+| **94** | `EAIWander.CanExecute` | sleep/stun/lookTime; no-player 120 ticks; executePercent; CalcInDir 90 |
+| **70** | `EAIApproachAndAttackTarget.CanExecute` | sleep/stun/jump-swim; targetClasses + chaseTimeMax |
+| **60** | `EAIDestroyArea.Update` | state 6 Attack + hitDelegate |
+| **40** | `EAIApproachSpot.Update` | pathCounter 20..40 |
+| **27** | `EAIDodge.Update` | look at head if in front |
+| **21** | `EAIBreakBlock.Update` | attackDelay then AttackBlock |
+| **7** | `EAIWander.Update` / `EAILeap.Update` | thin |
+
+**`EAIApproachAndAttackTarget.Update` (IL=846) phases:**
+
+1. **Home return** (`isGoingHome`): near home (planar sq &lt; 0.16, |dy| &lt; 2)
+   snap + `ResumeSleeperPose`; else FindPath home at aggro*0.8, pathCounter 60;
+   `homeTimeout -= 0.05` then give-up + clear attack target.
+2. **Null target:** abort.
+3. **Relocate:** focus moveHelper; target pos/vel EMA 0.7/0.3 (eat uses belly).
+4. **Attack/eat timeout:** RotateTo 8/5; on 0: rand delay 10..35; eat path
+   DamageEntity **35** + impulse.
+5. **Chase:** GetMoveToLocation + FindPath; CanSee head look; moveHelper;
+   eat sets `IsEating`.
 
 UAI package path also present (`UAIBase`, considerations, MoveToTarget, etc.).
 
@@ -1073,6 +1065,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-07:** EAI leaf re-pins: BreakBlock ally +0.2, RunAway 1.21/pathTicks
+  60, Wander 120 ticks, Ranged UseHoldingItem, FindTarget bounds +4.
 - **2026-08-07:** EAIApproachAndAttackTarget Update phases (home/relocate/eat/
   chase, FindPath x3, CanExecute gates).
 - **2026-08-07:** Full UAI task table (5 concrete types) Start+Update IL for
