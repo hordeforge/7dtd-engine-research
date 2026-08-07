@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ranged reload gate + accuracy machine
+
+Done (V3.1.0 b14 IL):
+- items.md 4.2: ItemActionRanged.CanReload IL=93 gate (not
+  reloading, no cancel, jammed or below capacity, ammo in
+  toolbelt/bag or infinite, passive 9 magazine); CancelReload
+  IL=57 flags + cancel effect; updateAccuracy IL=175 target
+  factor (passives 25/26/27/28/29/30/13) + AccuracyExpDecay
+  exponential ease into the spread cone.
 ## 2026-08-08 - tier-C: TileEntityComposite envelope
 
 Done (V3.1.0 b14 IL):
