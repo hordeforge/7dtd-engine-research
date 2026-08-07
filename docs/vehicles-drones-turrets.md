@@ -725,6 +725,13 @@ vehicle IL=213). The commit runs only on **release** of the use key (the
 press just opens the placement preview) and only while the holding entity is
 an `EntityPlayerLocal`:
 
+- **Config (`ReadFrom`, turret IL=101 / vehicle IL=63):** the `Turret` /
+  `Vehicle` property names the entity class, resolved to `entityClassId` /
+  `entityId` **at load time** by scanning `EntityClass.list.Dict` for the
+  class name (the ExecuteAction re-resolve below is only a fallback when
+  that id is `< 0`). The turret also parses `Scale` (`turretSize`, default
+  (0.5, 0.5, 0.5)), `PreviewSize` (default (1, 1, 1)), and `CanPlaceInAir`
+  (false); the vehicle parses `VehicleSize` (default (1, 1.9, 2)).
 - **Delay window:** `Time.time - lastUseTime >= ItemAction.Delay` and `< 2`
   seconds (double-click guard); `ValidPosition` must have been set by the
   preview.
@@ -816,6 +823,9 @@ non-vehicle type is a content contract violation, not a graceful fallback.
 
 ## Changelog
 
+- **2026-08-08:** Deploy action config (ReadFrom, turret IL=101 / vehicle
+  IL=63): Turret/Vehicle entity class resolved at load time, Scale /
+  VehicleSize / PreviewSize / CanPlaceInAir defaults.
 - **2026-08-08:** Deploy actions (7.1): ItemActionSpawnTurret / ItemActionSpawnVehicle
   ExecuteAction (IL=342 / IL=213) release-gated commit, delay window, entity
   class resolve, tag-based cap checks; NetPackageTurretSpawn.ProcessPackage
