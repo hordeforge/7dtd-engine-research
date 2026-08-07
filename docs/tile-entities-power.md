@@ -57,6 +57,12 @@ overload (IL=30) linearly scans `blockEntityStubs.list` for the matching
 null; `ChunkCluster.GetBlockEntity` (IL=12) resolves the chunk (null chunk →
 null) and delegates.
 
+**`GameUtils.Vector3iToUInt64(v)` (IL=29)** is the position key pack behind
+the dict: each axis becomes `(coord + 32768) & 0xFFFF` (a 16-bit field with a
+32768 offset so negative coordinates survive), combined as
+`x << 32 | y << 16 | z` - the same pack used on the wire in
+[`chunk-providers.md`](chunk-providers.md) `packedPos:u64`.
+
 ### 1.1 Type registry and factory
 
 `TileEntityType` is a byte-valued enum. `TileEntity.InstantiateFromRead` reads the
@@ -757,6 +763,8 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-07:** GameUtils.Vector3iToUInt64 (IL=29): 16-bit offset-packed
+  x<<32|y<<16|z position key.
 - **2026-08-07:** Chunk.GetBlockEntity: Vector3i (IL=10) UInt64-keyed dict,
   Transform (IL=30) linear scan, PrefabChunk null, ChunkCluster (IL=12)
   resolve + delegate.

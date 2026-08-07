@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Vector3iToUInt64
+
+Done (V3.1.0 b14 IL):
+- GameUtils.Vector3iToUInt64 (IL=29) narrated in tile-entities-power.md:
+  each axis (coord+32768) & 0xFFFF, x<<32|y<<16|z - the position key pack
+  also used on the chunk-provider wire packedPos.
+
 ## 2026-08-08 - tier-C: Chunk.GetBlockEntity
 
 Done (V3.1.0 b14 IL):
