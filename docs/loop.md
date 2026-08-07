@@ -371,7 +371,7 @@ Full manager Update inventory: [`inventories/manager-updates.md`](inventories/ma
 | SkyManager.Update | 456 | Present if component exists; mostly visual |
 | WorldEnvironment.Update | 83 | Environment |
 | GameLightManager.UpdateLightFrameUpdate | 159 | Lights |
-| AstarManager.UpdateGraphs | 185 | Player-following nav graph maintenance; top CPU section + heap allocator at load (`AstarVoxelGrid.InitScan`), see [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) §1/§4b |
+| AstarManager.UpdateGraphs | 185 | Per player `Merge(pos.xz, size=76)`; decay timed `locations`; mark graphs dirty; top CPU + heap at load (`AstarVoxelGrid.InitScan`), see [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) §1/§4b |
 | LoadManager.Update | 56 | Async loads |
 | PlatformManager.Update | - | Platform |
 | SdtdConsole.Update | 60 | Admin console |

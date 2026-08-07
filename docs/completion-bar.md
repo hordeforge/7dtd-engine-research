@@ -147,6 +147,9 @@ Closed in recent sessions (still optional, not required for A+B):
 | SimpleRPC holding activate/reset | protocol-packages §6.21 |
 | ChatMessageServer / GameMessage | chat.md |
 | SendPackage client filters | network §1.5 |
+| GameTimer.updateTimer formula | entity-ai §D6 |
+| ThreadManager main-thread drain | loop-gmupdate |
+| Astar UpdateGraphs merge size 76 | loop.md |
 
 Remaining catalogued-only mass is mostly console commands (catalog rows), MinEvent/
 Quest/Action leaves (inventories), client-shared helpers. UAI package task leaves

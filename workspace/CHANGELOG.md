@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: GameTimer formula, ThreadManager drain, Astar merge 76
+
+Done (V3.1.0 b14 IL):
+- GameTimer.updateTimer IL=74 stopwatch/timeScale/ticksPerSecond formula.
+- ThreadManager.UpdateMainThreadTasks double-buffer swap + invoke.
+- EntityEnemyAnimal electrocute early-out; Astar UpdateGraphs Merge size 76.
+---
 ## 2026-08-07 — tier-C: SimpleRPC, ChatMessageServer, SendPackage, OnDeathUpdate
 
 Done (V3.1.0 b14 IL):

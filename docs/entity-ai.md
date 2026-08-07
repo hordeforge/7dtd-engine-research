@@ -727,13 +727,20 @@ AStar also: `threadInfo`, `writerThreadWaitHandle`
 
 ## D6. GameTimer (authoritative ticks)
 
-`updateTimer(bool)`:
+`updateTimer(bool _bServerIsStopped)` (**IL=74**):
 
-- If bool true (dedicated idle path from gmUpdate when no players): `Reset` and return  
-- Else: advance from stopwatch ms × `timeScale` × `ticksPerSecond` → `elapsedTicks` + `elapsedPartialTicks`  
-- Bump `ticks` and `ticksSincePlayfieldLoaded`  
+- If stopped (gmUpdate idle when no players): `Reset(ticks)` and return.
+- Else: `dtMs = ElapsedMilliseconds - lastMillis`;
+  `elapsedTicksD += (timeScale * dtMs / 1000) * ticksPerSecond`;
+  `elapsedTicks = (int)elapsedTicksD`; fractional remainder kept in
+  `elapsedPartialTicks` / `elapsedTicksD`; `ticks += elapsedTicks`;
+  `ticksSincePlayfieldLoaded += elapsedTicks`.
 
-`UpdateTick` uses game timer readiness to choose **slice-only** vs **full tick** (entities + world). Partial ticks feed entity partials.
+`UpdateTick` uses game timer readiness (`elapsedTicks > 0`) to choose **slice-only**
+vs **full tick**. Partial ticks feed entity partials.
+
+**`EntityEnemyAnimal.updateTasks` (IL=26):** if electrocuted, zero move + disable
+animator and return; else re-enable animator and call base `updateTasks`.
 
 ---
 
@@ -1021,8 +1028,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-07:** canDespawn/Despawn/unloadEntity; CheckDespawn bands;
-  IsInFrontOfMe; player OnUpdateLive; SetAttackTarget; OnTriggered; EAI leaves.
+- **2026-08-07:** GameTimer.updateTimer formula; EnemyAnimal electrocute gate;
+  canDespawn/unload; CheckDespawn; player OnUpdateLive; EAI leaves.
 - **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;
   UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;

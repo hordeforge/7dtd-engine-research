@@ -88,7 +88,10 @@ Rough order (each guarded `brfalse` if instance missing):
 18. `PrefabEditModeManager.Update` (edit mode)  
 19. `TriggerEffectManager.Update`  
 20. `SpeedTreeWindHistoryBufferManager.Update`  
-21. **`ThreadManager.UpdateMainThreadTasks()`**, drains main-thread job queue  
+21. **`ThreadManager.UpdateMainThreadTasks()`** (**IL=64**): fire `UpdateEv`;
+    `MainThreadScheduler.ProcessTasks()`; under lock swap `mainThreadTasks` with
+    `mainThreadTasksCopy` (double-buffer); invoke each `taskDelegate(parameter)`;
+    clear copy.  
 
 **Dedicated:** many of these still run if instances exist. Twitch/edit/nav/speedtree are often no-ops or waste if constructed.
 
@@ -391,7 +394,7 @@ Entity → AI → path → fall → net interest deep dive: [`entity-ai.md`](ent
 
 ## Changelog
 
-- **2026-08-07:** TickEntities slice formula exact IL (EMA 0.8/0.2, +0.4 span, 25
-  accounting, sliceCount = (n-V7)/span+1).
+- **2026-08-07:** ThreadManager main-thread double-buffer drain; TickEntities
+  slice formula exact IL (EMA 0.8/0.2, +0.4 span, 25 accounting).
 - **2026-07-16:** Link entity-ai for entity/AI/path.
 - **2026-07-16:** Initial V3.0.1 dump + structured phase map for gmUpdate, UpdateTick, World tick/entities, peer Update behaviours.
