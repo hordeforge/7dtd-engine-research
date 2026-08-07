@@ -226,6 +226,15 @@ stage when `worldTime >= nextStageTime` (if set) **or** when
 
 **`IncSpawnCount` (IL=7):** `spawnCount++`.
 
+**`SetupGroup` (IL=57):** `spawnGroup = stage.GetSpawnGroup(groupIndex)`; if
+null, log groups done. Else `interval = spawnGroup.interval`;
+`nextStageTime = duration>0 ? worldTime + duration*1000 : 0`;
+`numToSpawn = ModifySpawnCountByGameDifficulty(spawnGroup.spawnCount)`;
+`spawnCount = 0`.
+
+**`ResetPartyLevel(mod)` (IL=13):** `level = CalcPartyLevel()`; if `mod != 0`,
+`level %= mod`; `SetPartyLevel(level)`.
+
 ## `AIDirectorHordeComponent` : AIDirectorComponent
 
 Shared placement helpers for scout/wandering/chunk hordes.
@@ -476,8 +485,8 @@ minute<=59.
 
 ## Changelog
 
-- **2026-08-07:** GameStagePartySpawner Tick stage advance/canSpawn;
-  AIHordeSpawner.Tick radii 2400; Scout Update; Horde.Tick destroy.
+- **2026-08-07:** SetupGroup interval/duration*1000/difficulty count;
+  ResetPartyLevel mod; Party Tick/canSpawn; AIHorde radii 2400.
 - **2026-08-07:** Scout SpawnUpdate investigate 6000; UpdateHorde AttackDelay 18s
   and spawnHordeNear path.
 - **2026-08-07:** AddEvent value merge; DecayEvents; FindBestEventAndReset

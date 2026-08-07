@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SetupGroup and heal type priority
+
+Done (V3.1.0 b14 IL):
+- SetupGroup: interval, nextStageTime=worldTime+duration*1000, difficulty-scaled numToSpawn.
+- ResetPartyLevel: CalcPartyLevel then optional mod remainder.
+- findNeededHealType: types 2/3/4 priority for medical vs bleeding.
+- TeleportOutOfRange: exit attack/heal then teleportState.
+---
 ## 2026-08-07 — tier-C: drone weapon Fire paths and PartySpawner Tick
 
 Done (V3.1.0 b14 IL):

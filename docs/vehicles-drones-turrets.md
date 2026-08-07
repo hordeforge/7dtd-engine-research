@@ -338,6 +338,14 @@ abort; put heal stack in inventory slot 0, force hold, run action index **1**
 `ItemActionUseOther` (`CanExecute` then `ExecuteAction` false then true) with
 attack target as feed target; `AddBuff("buffJunkDroneHealCooldownEffect")`.
 
+**`findNeededHealType` (IL=52):** inventory presence for types **2** (bandage),
+**3** (first aid), **4** (kit). If medical need or `targetCanBeHealed`: prefer
+3 then 4; if bleeding only and no 3/4, type 2. Else if bleeding: 2 then 3 then
+4. Else none (**0**).
+
+**`TeleportOutOfRange` (IL=15):** if Attack, `exitAttackState`; if Heal,
+`onHealDone`; then `teleportState()`.
+
 **`DroneManager.isValidDronePos` (IL=16):** reject if any of x/y/z is NaN.
 
 **`updateTransitionState` (IL=98):** no-op if `transitionState == None (8)` or
@@ -545,8 +553,8 @@ another player's behalf.
 
 ## Changelog
 
-- **2026-08-07:** MachineGun passives 16/11/199/200/9/7; StunBeam buffShocked;
-  HealBeam UseOther + cooldown buff; isValidDronePos NaN; Weapon.Fire formula.
+- **2026-08-07:** findNeededHealType 2/3/4 priority; TeleportOutOfRange exit;
+  MachineGun passives; Stun/Heal Fire; isValidDronePos NaN.
 - **2026-08-07:** onUnderWaterState surface seek; trackTarget/canHitEntity; Fire
   passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds
