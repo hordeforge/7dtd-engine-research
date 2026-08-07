@@ -409,6 +409,7 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-07:** SaveWorld/SaveLocalPlayerData; RequestToSpawnEntityServer backpack/tree.
 - **2026-08-07:** nextRound wrap GameStats 10; SetBloodMoonDay 58.
 - **2026-08-07:** GameStateManager OnUpdateTick time/day/frag gates; GameStats package.
 - **2026-08-07:** IsLandProtectedBlock IL=104 (self allow, foreign deny, ally

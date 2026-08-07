@@ -71,3 +71,9 @@
 - stock-check green; narrated 1488
 - Loop/tick path, MoveHelper, land claims, spawn gates heavily filled
 - Continue until interrupted
+
+
+## Checkpoint 4
+- 38 commits since post-update dry-run (3b61d9c)
+- stock-check green; unaccounted 0; narrated ~1488
+- Covered this long session: MoveHelper surface, EntityAlive helpers, World spawn/land/uncull/tick, GameStateManager, WorldBlockTicker, SpawnManagerDynamic, packages

@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-07 — tier-C: SaveLocalPlayerData and RequestToSpawnEntityServer
+
+Done (V3.1.0 b14 IL):
+- SaveWorld World.Save; SaveLocalPlayerData FromPlayer + map async.
+- RequestToSpawnEntityServer fallingTree dedupe; backpack AddDroppedBackpack.
+---
 ## 2026-08-07 — tier-C: bedroll range and CanMobsSpawnAtPos
 
 Done (V3.1.0 b14 IL):
