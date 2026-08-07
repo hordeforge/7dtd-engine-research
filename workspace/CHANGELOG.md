@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameStats + EntityTrader leaves
+
+Done (V3.1.0 b14 IL):
+- sandbox-options.md 6.1: GameStats.initDefault (IL=29) seeds
+  propertyValues from PropertyDecl.defaultValue; GetStatType (IL=31) linear
+  scan -> EnumType? null when unregistered.
+- npc-dialog.md 5: EntityTrader.GetQuestFactionPoints (IL=4) =
+  QuestJournal.GlobalFactionPoints; CanDamageEntity (IL=2) hard false;
+  get_IsValidAimAssistSnapTarget (IL=2) hard false.
+
 ## 2026-08-08 - tier-C: safe-zone chunk lock
 
 Done (V3.1.0 b14 IL):
