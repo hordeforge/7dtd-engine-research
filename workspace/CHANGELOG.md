@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity water/speed/physics-master leaves
+
+EntityAlive/Entity movement leaves (entity-ai.md): updatePlayerLandSound (IL=51) water-landing splash with 0.025/0.015 impact gate + player_swim volume; Entity.TickInWater (IL=50) drives inWaterLevel/inWaterPercent/isInWater (0.25 gate) + SwimChanged + OnHeadUnderwaterStateChanged; ReplicateSpeeds (IL=66) 3-tick throttle + 4e-6 delta gate via NetPackageEntitySpeeds; PhysicsMasterGetFinalPosition (IL=10) used by ItemClassTimeBomb.OnDroppedUpdate for fuse position; SetRotFromNetwork/SetQRotFromNetwork interpolation targets; GetSoundTravelTime (IL=10) 343 m/s sound delay, dead on b14. verified from IL + Xref. Commits 3e617a0, 5cbf542, f2adc54.
 ## 2026-08-08 - tier-C: deploy configs + destroy-block/sleeper leaves
 
 Deploy action config (vehicles-drones-turrets.md 7.1): ItemActionSpawnTurret.ReadFrom (IL=101) Turret entity class resolved at load time, Scale/PreviewSize/CanPlaceInAir defaults; ItemActionSpawnVehicle.ReadFrom (IL=63) Vehicle + VehicleSize default (1,1.9,2); ItemActionZoom.ReadFrom (IL=34) trigger effects. EntityAlive leaves (entity-ai.md): NotifyDestroyedBlock (IL=128) blocked-move clear + weighted Difficulty-1 destroyBlockBehaviors pick to stub executor; Snore (IL=36) snore/groan cycle 20..21 tick cooldown; IsCorpse (IL=17) ragdoll-dead && deathUpdateTime > 70. verified from IL. Commits 57bc526, 4cea4d9.
