@@ -723,6 +723,10 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   `NetPackageDecoUpdate` / `NetPackageDecoResetWorldChunk` /
   `NetPackageDecoResetWorldRect`. Saves: `World.SaveDecorations →
   DecoManager.Save()` (async `WriteTask`).
+  `SendDecosToClient` (IL=32) regenerates the write list under lock and loops
+  `NetPackageDecoUpdate.Setup(decoWriteList, ref index)` →
+  `ClientInfo.SendPackage` until the index reaches the end (the package
+  carries a slice of the list per message).
 - Model side: `DecoChunk.AddDecoObject(_tryInstantiate)` calls
   `DecoObject.CreateGameObject` under the DecoChunk `rootObj` and feeds
   `OcclusionManager`; `UpdateModels`/`SetVisible` maintain them. These run
