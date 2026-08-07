@@ -1357,6 +1357,14 @@ needs no resource. `GetRepairAmount` (IL=3) is a field read; the actual
 repair/upgrade application funnels into the crafting queue
 (`XUiC_CraftingWindowGroup.AddRepairItemToQueue`, below).
 
+**`ItemActionExchangeBlock.ExecuteAction` (IL=82)** is the click-replace
+action: press-only, rate-gated by `Delay` + `cBuildIntervall`; with a valid
+block/terrain hit it reads `GetBlock(blockPos)` and, only when the cell
+equals the configured `sourceblock`, stamps `lastUseTime` and
+`SetBlockRPC(ref, targetBlock)` - the block type is swapped to the target
+value (the action carries both) - then plays `soundStart` (or
+`placeblock`) and `RightArmAnimationAttack = true`.
+
 **`ItemActionTerrainTool` (V3.1.0 b14)** is the terrain-sculpt tool
 (dig/flatten): `ExecuteAction` (IL=46) latches `bActivated` +
 `activateTime` on press and forwards `GameManager.ItemActionEffectsServer
@@ -1461,6 +1469,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-08:** ItemActionExchangeBlock.ExecuteAction IL=82: press-only +
+  Delay/cBuildIntervall gates, sourceblock match -> SetBlockRPC(targetBlock)
+  + placeblock sound + RightArmAnimationAttack.
 - **2026-08-08:** ItemActionTerrainTool: ExecuteAction IL=46 press/release
   latch + ItemActionEffectsServer forward, GetRange IL=2 fixed 20,
   GrowTerrain/GetInitialMeta surface.
