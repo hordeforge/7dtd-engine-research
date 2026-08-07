@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TE registry writes
+
+Done (V3.1.0 b14 IL):
+- tile-entities-power.md 1: AddTileEntity (IL=7) Set; RemoveTileEntityAt
+  (IL=28) / RemoveTileEntity (IL=29) OnRemove wrap + isModified.
+
 ## 2026-08-08 - tier-C: indexed blocks + save ids
 
 Done (V3.1.0 b14 IL):
