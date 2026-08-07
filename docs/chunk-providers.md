@@ -733,6 +733,10 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   wherever a `rootObj` exists; occlusion/culling and rendering are client
   concerns, but the record layer above is fully server-authoritative.
   `DecoManager.UpdateTick` cost on dedi is covered in [`loop.md`](loop.md).
+  The tick (IL=330) drains the four off-thread queues in order (`addDecos`,
+  `removeDecos`, `resetDecosInWorldRect`, `resetDecosForWorldChunk`), each
+  resetting `checkDelayTicks`, then runs the periodic player check only when
+  the `checkDelayTicks` gate elapses and `ConnectionManager.IsServer`.
   `AddDecoObject` (IL=67) buckets the record by its 16x16 chunk key
   (`decosPerSmallChunks`, capacity-64 lists), instantiates the model only on
   the main thread with a `rootObj` (else defers via `isModelsUpdated = false`),
