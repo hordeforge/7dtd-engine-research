@@ -391,6 +391,14 @@ consumer: throttled to every **5** ticks (`visiblityCheckTicks`), it computes
    - `IsAlly` -> **2** (ally),
    - else -> **3** (other).
 
+**`World.IsEmptyPosition(blockPos)` (IL=117)** is the placement gate: it fails
+inside trader protection (`IsWithinTraderArea`); outside survival game mode
+(`GameStats[1] GameModeId != 1`) it passes immediately; otherwise it walks the
+chunk neighborhood of radius `(GameStats[44] LandClaimSize - 1) / 2` (in
+16-block chunk steps) and fails when any chunk holds a protected
+`lpblock` (`IsLandProtectedBlock` with the claim radius), clearing the
+`m_lpChunkList` cache as it goes.
+
 **`IsLandProtectionValidForPlayer` (IL=14):** offline hours from
 `PersistentPlayerData.OfflineHours` must not exceed `GameStats[46] * 24` hours.
 
