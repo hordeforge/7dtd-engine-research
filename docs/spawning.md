@@ -380,7 +380,10 @@ highest-`Value` event, arms `cooldownDelay = 240`, and clears the list;
 `720`; `SetLongDelay` (IL=4) pins it to 1320; `IsReady` is
 `cooldownDelay == 0`. Its blob (Write IL=35 / Read IL=36) is version **2**:
 activityLevel (float), event count, per-event `AIDirectorChunkEvent.Write`,
-then cooldownDelay (float, version >= 2 only).
+then cooldownDelay (float, version >= 2 only). Each `AIDirectorChunkEvent` payload
+(Write IL=32 / Read IL=39) is version **2**: `Position` (3x int32), `Value`
+(float), `EventType` (byte), `Duration` (float); reads before version 2 skip
+`Duration` and discard a legacy `uint64` instead.
 
 ```mermaid
 stateDiagram-v2
