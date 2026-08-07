@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: QuestJournal leaves
+
+Done (V3.1.0 b14 IL):
+- quests-challenges.md 9: AddQuestFactionPoint (IL=34) GlobalFactionPoints +
+  QuestFactionPoints[id] += tier (tier-0 no-op); GetQuestFactionMax (IL=20)
+  QuestsPerTier tier-sum; HasCraftingQuest (IL=29) craftingTag intersect;
+  HasActiveQuestByQuestCode (IL=30) QuestState.InProgress; GetObjectiveForQuest
+  (IL=43) phase + type match.
+
 ## 2026-08-08 - tier-C: ItemClass leaves
 
 Done (V3.1.0 b14 IL):
