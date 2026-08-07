@@ -78,6 +78,17 @@ flowchart TB
 
 Live stock: `ChunkBlockYDim=256`, `ChunkBlockLayers=64`, `ChunkAreaDim=256` (XZ plane map size).
 
+**Block read surface (V3.1.0 b14):** `World.GetBlock(x, y, z)` (IL=13)
+delegates to `ChunkCluster.GetBlock` and returns `BlockValue.Air` when the
+`ChunkCache` is null (uninitialized world). `WorldBase.GetBlock(Vector3i)` /
+`GetBlock(BlockValueRef)` (both IL=4) are the `IBlockAccess`
+`DefaultGetBlock` implementations. `World.GetBlockData(pos)` (IL=10) is a
+separate `Dictionary<Vector3i, object>` lookup (extra per-position data, not
+the voxel word). `WorldBiomes.GetBlockValueForName(name)` (IL=15) resolves an
+item/block by name via `ItemClass.GetItem` and throws
+`Block with name '...' not found!` on an empty result, else converts with
+`ToBlockValue`.
+
 ---
 
 ## 3. Generation
@@ -672,6 +683,10 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-07:** Block read surface: World.GetBlock (IL=13) null-cache Air +
+  ChunkCluster delegate, WorldBase.GetBlock IBlockAccess defaults (IL=4),
+  GetBlockData dict (IL=10), WorldBiomes.GetBlockValueForName (IL=15) name
+  resolve + not-found throw.
 - **2026-08-07:** DecoManager.UpdateTick add/remove/rect/chunk drain.
 - **2026-08-07:** WorldBlockTicker.execute type match; AddScheduledBlockUpdate.
 - **2026-08-07:** WorldBlockTicker scheduled 100 cap; random 1200 ticks; RestoreCulledBlocks flags.

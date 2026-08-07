@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: block read surface
+
+Done (V3.1.0 b14 IL):
+- world-chunks.md section 2 block read surface: World.GetBlock (IL=13)
+  ChunkCache null -> Air else ChunkCluster.GetBlock; WorldBase.GetBlock
+  Vector3i/BlockValueRef (IL=4) IBlockAccess DefaultGetBlock; GetBlockData
+  (IL=10) blockData dict; WorldBiomes.GetBlockValueForName (IL=15) name
+  resolve + 'not found' throw + ToBlockValue.
+
 ## 2026-08-08 - tier-C: Equipment armor-group bookkeeping
 
 Done (V3.1.0 b14 IL):
