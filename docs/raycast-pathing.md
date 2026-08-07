@@ -123,6 +123,53 @@ non-collidable blocks count); the 6-arg (IL=8) forwards to `raycastNew`
 `EntityDrone.IgnoreCollisionEntity`) calls the 6-arg directly with the
 layer mask `-1612492829` and hitMask `64`.
 
+**`Voxel.raycastNew` (IL=525) - the physics-march core.** The 6-arg form
+drives a physics ray (or `SphereCast` when `_sphereRadius > 0.01`) up to **10
+iterations**, each time advancing the ray origin past the previous hit by
+`point + dir * 0.01` and shrinking `distance` by `hit.distance - 0.01` (or
+`0.01` when the hit is closer). The `_hitMask` selects which hits count; the
+bits are decoded up front:
+
+| Bit | Value | raycastNew meaning |
+|---:|---:|---|
+| 0 | 1 | see-through blocks count (`IsSeeThrough`) |
+| 1 | 2 | water counts as a hit |
+| 2 | 4 | non-movement-colliding blocks count |
+| 3 | 8 | `IsCollideBullets` blocks |
+| 4 | 16 | `IsCollideRockets` blocks |
+| 5 | 32 | `IsCollideArrows` blocks |
+| 6 | 64 | `IsCollideMovement` blocks |
+| 7 | 128 | `IsCollideMelee` blocks |
+| 12 | 4096 | skip water hits on blocks with `MaxDamage <= 5` |
+
+Per hit, the collider tag dispatches: `T_Block` resolves entity-model blocks
+to their master block (`GameUtils.FindMasterBlockForEntityModelBlock`),
+`T_Deco` resolves the parent block via
+`DecoManager.GetParentBlockOfDecoration` (reporting the deco block value with
+`damage = MaxDamage - 1`), `IsBlockOrTerrain` delegates to `terrainMeshHit`,
+and anything else (entity / non-block collider) is accepted directly with its
+transform + tag. Accepted block hits test both the block and its prop
+(`Block.IsSeeThrough` per hitMask bit 0; `IsCollide*` per bits 3..7). Hits
+that do not match the mask clear the `VoxelData` and the march continues; the
+loop ends with `false` when `distance <= 0` or after 10 iterations.
+
+**`Voxel.GetNextBlockHit` (IL=549) - the voxel-DDA walker.** This is the
+block-store traversal used by sight and projectile paths, stepping cell to
+cell with the classic 3D-DDA: `tMax` per axis = `(nextBoundary - origin) /
+dir` and `tDelta` = `sign / dir` (both `+Infinity` for near-zero
+directions), advancing the axis with the smallest `tMax` and setting
+`hit.blockFace` from the stepped axis and sign (x: 3/5, y: 1/0, z: 4/2).
+Each cell runs the same mask filter (bits 0..7 as above, block + `IsSeeThrough`),
+then `Block.intersectRayWithBlock` (see [block-shapes.md](block-shapes.md)
+§3) confirms the ray actually crosses one of the block's colliders before the
+hit is recorded with the current ray point as `pos`. Bit **8 (256)** is
+`GetNextBlockHit`-only: the first non-air cell is a hit without any collider
+or mask test. Hits beyond `distance^2` from the origin return `false`, and a
+ray whose `tMax` never advances (all directions zero) logs
+`Voxel error: GetNextBlockHit, tMax=...` and fails. `raycastNew` is the
+physics-side twin: it also records water hits (bit 1) and honors the
+MaxDamage <= 5 water skip (bit 12).
+
 ## 3. The flood-fill raycast path build
 
 `RaycastEntityPathGenerator` is a lifecycle shell: `CreatePath(start, end,
@@ -409,6 +456,13 @@ the whole reason this system works headless at all.
 
 ## Changelog
 
+- **2026-08-08:** Voxel.raycastNew (IL=525) physics-march core: 10-iteration
+  loop, sphere-cast when radius > 0.01, full hitMask bit table (1 see-through,
+  2 water, 4 non-movement, 8 bullets, 16 rockets, 32 arrows, 64 movement, 128
+  melee, 4096 low-MaxDamage water skip), T_Block/T_Deco/terrain tag dispatch;
+  Voxel.GetNextBlockHit (IL=549) 3D-DDA walker: tMax/tDelta stepping,
+  blockFace per axis/sign, bit 256 direct any-block mode, distance^2 cutoff,
+  Voxel error log.
 - **2026-08-07:** Voxel.Raycast wrappers: 5-arg layer mask -538488845, bool
   hitMask bits (1 transparent / 4 non-collidable), 6-arg -> raycastNew
   (IL=525); visibility chain uses -1612492829 + 64.
