@@ -391,6 +391,15 @@ belongsPlayerId)` (the on-world context, see
 [dedicated-leftovers.md](dedicated-leftovers.md) `ItemWorldData`).
 `InitLocalActivationCommands` (IL=15) adds `take`/`hand` and `search`/`search`.
 
+**`EntityItem.CheckStick(collision)` (IL=93)** implements the throw-stick: with
+`stickPercent <= 0` it returns; otherwise it damps the rigidbody velocity and
+angular velocity by `(1 - stickPercent)`; at `stickPercent >= 1` with no
+`stickT` yet it records the hit transform (`stickT`, local `stickRelativePos`,
+`stickRot`), moves every child collider to layer 0, reapplies gravity, and
+plays `itemClass.SoundStick`. `get_IsDistractionActive` (IL=5) is
+`distractionLifetime > 0`; `PhysicsMasterBecome` (IL=6) calls
+`checkGravitySetting(true)` before the base.
+
 **`EntityItem.OnUpdateEntity` (IL=114):** base update; create mesh if needed;
 `ItemClass.OnDroppedUpdate`; if |dy| &lt; 0.1 for **10** ticks set `onGround`;
 physics-master client odd ticks `PhysicsMasterSendToServer`;
