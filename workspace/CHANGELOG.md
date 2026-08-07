@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemAction ReadFrom config family
+
+Narrated the full action-config parse surface (items.md 4.2): base ItemAction.ReadFrom (IL=107) Delay/Sound_start/Particle_harvesting/ActionExp/ActionExpBonusMultiplier/UseAnimation/Buff list; ItemActionRanged.ReadFrom (IL=126) bullet_material, penetration counts, AutoReload, trigger effects, aiBurstShot/aiBurstDelay ranges; ItemActionEat.ReadFrom (IL=152) Consume, Create_item refund trio, BlocksAllowed -> ConditionBlockTypes, UsePrompt; ItemActionDynamic.ReadFrom (IL=495) graze/swing/power-attack keys; ItemActionThrownWeapon.ReadFrom (IL=162) throw physics; ItemActionOpenBundle.ReadFrom (IL=191) create/random item arrays + Condition_raycast_block. verified from IL. Commits ce4486a, 09e26e9, 9cd132b.
 ## 2026-08-08 - tier-C: mods loader + attack config parse
 
 ItemModificationsFromXml (items.md 3): ParseModifier (IL=63) Groups {Mods} + installable/blocked/modifier tags + type enum; parseItem (IL=725) - mods are full ItemClass instances through the shared pipeline with CosmeticInstallChance, RequirementGroup[3] from ActionN classes, item_property_overrides -> PropertyOverrides dict, Material default Miron, Extends exclude Block.PropCreativeMode, shared Actions fill + Init last. ItemActionAttack.ReadFrom (IL=482): ToolCategory/Damage/DamageBlock/Range/Sphere, Magazine_items -> MagazineItemNames + UsesMagazines, parallel ray-counts/spreads arrays, AmmoIsPerMagazine, BulletUsePerShot, rays/spread, Infinite_ammo, Hitmask_override, sounds. verified from IL. Commits 9ed23ae, 662df6f, e4465a6.
