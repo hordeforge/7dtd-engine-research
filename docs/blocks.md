@@ -544,6 +544,28 @@ when the block has no PickupSource), applied via
 - so a pickup can leave a different block (e.g. a dug-up plant) instead of
 air.
 
+**Timed take (`takeItemWithTimer`).** `Block.TakeItemWithTimer(pos, bv,
+player, delay, canTakeCallback)` (IL=62) is the UI-timed pickup: it refuses
+with the `ttRepairBeforePickup` tooltip while `bv.damage > 0`, consults the
+callback (base `takeItemWithTimerCanTake` IL=2 returns true), then opens
+`XUiC_Timer.OpenTimer(playerUI.xui, delay, timerData, -1, "", true)` where
+`timerData.Data = {bv, pos, player}` and its `FullTimeFinishEvent` is
+`TakeItemWithTimerDone`. The 4-arg `takeItemWithTimer` (IL=10) is the same
+call with a null callback. `BlockCollector` and `BlockWorkstation` override
+`takeItemWithTimerCanTake` (IL=24 each): the timed take is only allowed when
+the block's `TileEntityCollector` / `TileEntityWorkstation` reports
+`IsEmpty()`, otherwise the local player gets the `ttWorkstationNotEmpty` /
+`ui_denied` tooltip.
+
+`TakeItemWithTimerDone` (IL=106) re-validates at fire time: it re-reads the
+world block at the stored position and denies with `ttRepairBeforePickup`
+when it now has `damage > 0`, `ttBlockMissingPickup` when its type no longer
+matches the original, and `ttCantPickupInUse` when the tile entity is
+`IsUserAccessing()`. On success it adds `ItemStack(bv.ToItemValue(), 1)` to
+the player inventory (dropping when full) and removes the block via
+`World.SetBlockRPC(pos -> Air)`. The three denials and the timer UI are
+client-side; the block removal is the RPC that reaches the server.
+
 ```mermaid
 flowchart TB
   subgraph Placement
@@ -686,6 +708,11 @@ damage.
 
 ## Changelog
 
+- **2026-08-08:** Timed take machine: Block.TakeItemWithTimer (IL=62) repair
+  guard + callback + XUiC_Timer.OpenTimer with Data {bv, pos, player};
+  TakeItemWithTimerDone (IL=106) re-validates damage/type/IsUserAccessing,
+  adds stack + SetBlockRPC Air; takeItemWithTimerCanTake base IL=2 true,
+  BlockCollector/BlockWorkstation IL=24 empty-gate with ttWorkstationNotEmpty.
 - **2026-08-08:** BlockBarbed.OnEntityCollidedWithBlock IL=51: meta step
   counter, at 15 full DamageBlock destroy, else SetBlockRPC commit.
 - **2026-08-08:** Collision damage base IL=126 (DamageSourceEntity build,
