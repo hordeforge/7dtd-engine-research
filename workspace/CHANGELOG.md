@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TraderArea.SetClosed
+
+Done (V3.1.0 b14 IL):
+- dedicated-leftovers.md: SetClosed IL=222 (chunk-span gate, IndexedBlocks TraderOnOff walk, ProtectBounds filter, TEFeatureDoor toggle)
+
 ## 2026-08-08 - tier-C: TraderArea blob
 
 Done (V3.1.0 b14 IL):
