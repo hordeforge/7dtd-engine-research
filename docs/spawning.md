@@ -320,6 +320,12 @@ terrainOffset, 0.5).
 **`isPositionInRangeOfBedrolls(pos)` (IL=58):** GamePrefs **160** as radius;
 true if any player's bedroll spawn point is within radius².
 
+**`EntityPlayerLocal.CheckSpawnPointStillThere` (IL=30)** is the respawn
+gate: the spawn point is still valid (true) when it is `IsUndef`, its chunk
+is not loaded, or the block at the spawn position is a `BlockSleepingBag`;
+false only when the block exists but is no longer a bedroll - the player's
+bedroll was destroyed, so their saved spawn is void.
+
 **`isPositionFarFromPlayers(pos, minDist)` (IL=31):** true only if every player
 has `GetDistanceSq ≥ minDist²`.
 
@@ -1079,6 +1085,11 @@ above.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Content and native residuals |
 
+## Changelog
+
+- **2026-08-08:** EntityPlayerLocal.CheckSpawnPointStillThere (IL=30): spawn
+  valid when undef / chunk unloaded / block is BlockSleepingBag; void when
+  the bedroll is gone.
 ## Changelog
 
 - **2026-08-08:** EntitySpawnerClass.Init (IL=333): mandatory EntityGroupName
