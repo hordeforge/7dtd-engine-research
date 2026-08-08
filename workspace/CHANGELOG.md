@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: items doc spot-check (13 claims exact)
 ## 2026-08-08 - tier-C: world-chunks doc spot-check (13 claims exact)
 ## 2026-08-08 - tier-C: aidirector doc spot-check (13 claims exact)
 ## 2026-08-08 - tier-C: network.md spot-check (8 claims exact; ConnectionManager.Update 215->228 x3 sites)
