@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: npc-dialog + residuals spot-check (6 claims exact)
 ## 2026-08-08 - tier-C: loop second spot-check (9 claims exact; diagram OnUpdateEntity 417->457)
 ## 2026-08-08 - tier-C: sandbox + chunk-providers + buffs second spot-check (19 claims exact)
 ## 2026-08-08 - tier-C: map-objects + raycast second spot-check (13 claims exact)
