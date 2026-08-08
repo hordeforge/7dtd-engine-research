@@ -745,6 +745,26 @@ stateDiagram-v2
   Paused --> Burning: fuel replenished
 ```
 
+**Workstation queue/timer leaves (all IL-verified):**
+`ResetCraftingQueue()` (IL=42) fills every `queue` slot with an empty
+`RecipeQueueItem` (null recipe, 0 multiplier / times, not crafting);
+`ResetTickTime()` (IL=5) stamps `lastTickTime = GameTimer.Instance.ticks`;
+`ClearSlotTimersForInputs()` (IL=19) zeroes `currentMeltTimesLeft[]` and
+`GetTimerForSlot(slot)` (IL=13) reads it (0 out of range).
+`IsToolsSame(tools)` (IL=37) is same-length element-wise stack equality;
+`OutputEmpty()` (IL=23) is every output slot empty;
+`get_IsEmpty()` (IL=31) is no recipe in the queue and `isEmpty` across fuel /
+tools / output plus `InputIsEmpty()` (IL=57: the first
+`input.Length - materialNames.Length` slots empty, the material tail empty
+or count < 10); `get_IsCrafting()` (IL=15) is
+`hasRecipeInQueue() && (isModuleUsed[3] ? isBurning : true)`;
+`get_BurnTimeLeft()` (IL=3) reads `currentBurnTimeLeft`.
+`readRecipeStackArray(reader, version, ref queueStack)` (IL=79) reads the
+count byte, reallocates the queue on a length change, and per entry runs
+`RecipeQueueItem.Read` (version >= 50) or `ReadLegacy`; with
+`bWaitingForServerResponse` it consumes the entries into a scratch item
+instead (the client keeps its pending queue untouched).
+
 ### 4.4 `TileEntityForge.UpdateTick` (IL=340)
 
 Separate type (not a workstation subclass). Fuel is **tick-integer** based:
