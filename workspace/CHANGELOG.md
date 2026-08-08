@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ModEvents payload structs (S- data carriers)
+
+SChatMessageData/SGameMessageData interruptible pair, SGameStartingData/SPlayerDisconnectedData/SSavePlayerDataData/SEntityKilledData ModEvent payloads, SNetPackageInfo net-command stats (verified)
 ## 2026-08-08 - tier-C: forge/sign block leaves + completion-bar rows
 
 BlockForge MaterialUpdate _EmissionMultiply 20 + DisableSmelter text, BlockSign UpwardsCount stack + meta bit 1, BlockCampfire empty shell, Tier-C completion rows for 6 recent batches (verified)
