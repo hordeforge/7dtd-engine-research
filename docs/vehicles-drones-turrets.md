@@ -199,6 +199,20 @@ rider layer **24**; disable character controller; seat IK targets;
 sets `hasDriver`, `Vehicle.SetColors`, `FireEvent(0)`, `SetVehicleDriven`,
 `TriggerUpdateEffects`; local player inserts vehicle action set + CameraInit.
 
+**`Vehicle.CalcMods` (IL=77) and `CalcEffects` (IL=182) are the
+item-value-driven config passes.** `CalcMods` ORs every installed
+`ItemClassModifier`'s `ModifierTags` into `Vehicle.ModTags`, counts the mods
+carrying `EntityVehicle.StorageModifierTags`, then per `VehiclePart`
+`SetMods()` and updates the entity (`UpdateStorageModCount(count)` +
+`UpdateContainerSize(false)`) - so storage mods enlarge the vehicle
+container. `CalcEffects` evaluates the vehicle passive set on the item value
+with the driver's entity tags: entity/block/self damage per (passives **55** /
+**56** / **57** / **58**, each scaled by the static
+`VehicleEntityDamageModifier` / `VehicleBlockDamageModifier` /
+`VehicleSelfDamageModifier`), light intensity (**49**), fuel max (**50**) and
+fuel use per (**51**, scaled by `VehicleFuelUsageModifier`), motor torque
+(**53**) and max velocity (**52**).
+
 **The generic attach pipeline behind it (V3.1.0 b14):**
 `Entity.StartAttachToEntity(other, slot)` (IL=43) is the entry: a client sends
 `NetPackageEntityAttach(0, selfId, otherId, slot)` to the server; the server
@@ -821,6 +835,11 @@ non-vehicle type is a content contract violation, not a graceful fallback.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native / content residuals |
 
+## Changelog
+
+- **2026-08-08:** Vehicle.CalcMods (IL=77) ModTags OR + storage-mod count +
+  part SetMods + container resize; CalcEffects (IL=182) vehicle passive set
+  55-58 damage per / 49 light / 50-51 fuel / 53 torque / 52 velocity.
 ## Changelog
 
 - **2026-08-08:** Deploy action config (ReadFrom, turret IL=101 / vehicle
