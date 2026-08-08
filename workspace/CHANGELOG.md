@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: reward-family leaves
+
+BaseReward GetRewardText/Settings hooks, RewardItem/SkillPoints text, property accessors (verified)
 ## 2026-08-08 - tier-C: BlockCollector config/leaf methods
 
 add/removeTileEntity, transform-activation + UpdateVisible, sandbox fuel scaling, modifyTime disable rule, output/catalyst/fuel field getters (verified)
