@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: REACH 100% NARRATED (3574/3574; client-side-surface.md + arity appendix)
 ## 2026-08-08 - tier-C: re-narrate 68 server-classified leaves in family docs (narrated 2388->2456)
 ## 2026-08-08 - tier-C: narrate 218 support leaves (narrated 2168->2388; catalogued-only = 0)
 ## 2026-08-08 - tier-C: fix classified>catalogued bucket hierarchy (buckets now disjoint, sum 3574)

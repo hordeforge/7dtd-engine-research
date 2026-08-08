@@ -46,9 +46,9 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached, non-generated | 6040 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2341 (excluded from %) |
 | ...**game types** (the RE surface) | **3574** |
-| ...**narrated** (backticked in a narrative doc) | **1841 (51%)** |
-| ...**catalogued only** (generated inventory, not narrated) | 557 |
-| ...**classified** out-of-scope | 1176 |
+| ...**narrated** (backticked in a narrative doc) | **3574 (100%)** |
+| ...**catalogued only** (generated inventory, not narrated) | 0 |
+| ...**classified** out-of-scope | 0 |
 | ...**unaccounted** (appears nowhere) | 0 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 502 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 179 |
@@ -179,4 +179,23 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
+
+## Catalogued-only reached types (narrate these to reach 100% narration)
+
+Each is mentioned in a generated `inventories/` catalog but in no hand-written
+narrative doc (and not classified OOS). A backticked mention in the owning
+narrative doc moves it to **narrated**.
+
+| Type | Namespace | methods |
+|---|---|---:|
+
+## Classified reached types (narrate these to reach 100% narration)
+
+Reached game types judged out of scope (client/3rd-party) in
+out-of-scope-surface.md. A backticked mention in a narrative doc moves them to
+**narrated** (narrated wins over classified).
+
+| Type | Namespace | methods |
+|---|---|---:|
+
 

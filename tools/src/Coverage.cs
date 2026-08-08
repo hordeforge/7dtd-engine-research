@@ -356,7 +356,24 @@ class Coverage {
     sb.AppendLine("| Type | Namespace | methods |");
     sb.AppendLine("|---|---|---:|");
     var catOnly = gameReached.Where(t => !narrated.Contains(BaseName(t)) && catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t))).ToList();
-    sb.AppendLine("<!-- catOnly count: " + catOnly.Count + " -->");
+    foreach (var t in catOnly.OrderBy(t => string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace).ThenBy(t => t.Name)) {
+      sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
+    }
+    sb.AppendLine();
+
+    sb.AppendLine("## Classified reached types (narrate these to reach 100% narration)");
+    sb.AppendLine();
+    sb.AppendLine("Reached game types judged out of scope (client/3rd-party) in");
+    sb.AppendLine("out-of-scope-surface.md. A backticked mention in a narrative doc moves them to");
+    sb.AppendLine("**narrated** (narrated wins over classified).");
+    sb.AppendLine();
+    sb.AppendLine("| Type | Namespace | methods |");
+    sb.AppendLine("|---|---|---:|");
+    var clsOnly = gameReached.Where(t => !narrated.Contains(BaseName(t)) && classified.Contains(BaseName(t))).ToList();
+    foreach (var t in clsOnly.OrderBy(t => string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace).ThenBy(t => t.Name)) {
+      sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
+    }
+    sb.AppendLine();
     foreach (var t in catOnly.OrderBy(t => string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace).ThenBy(t => t.Name)) {
       sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     }
