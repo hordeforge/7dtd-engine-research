@@ -288,6 +288,12 @@ If not `LootContainer.NoLoot` and `lootDropProb > RandomFloat`,
 `r = RandomFloat`; walk entries adding `weight` until `r <= sum`; return that
 `LootDrop.entityClass`.
 
+**`Entity.InitializeBagFromLootList` (IL=39):** when the entity has no `bag`
+yet and `GetLootList()` names a `LootContainer`, it allocates
+`bag = new Bag(size.x * size.y)` from the container's size - the entity's
+drop bag is sized by its loot container (the bag `DropBagServer` carries on
+death).
+
 **`SetDead` (IL=8):** base `Entity.SetDead` + force `Health.Value = 0`.
 
 **`SetAlive` chain (IL=34/46/31):** `Entity.SetAlive` (IL=34): `bDead = false`;
@@ -486,6 +492,10 @@ Leaf types on the edges of the damage flow above:
 | [protocol.md](protocol.md) | `NetPackageDamageEntity` wire body (§6.5) |
 | [blocks.md](blocks.md) | Block damage (separate but parallel) |
 
+## Changelog
+
+- **2026-08-08:** Entity.InitializeBagFromLootList (IL=39): bag sized from
+  the loot container (size.x * size.y) when unset.
 ## Changelog
 
 - **2026-08-08:** BodyDamage wire: Write IL=12 i32 version + i32 damageType
