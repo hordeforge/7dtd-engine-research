@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `1cbb624` 6.14/6.15/6.17/6.18 wire spot-check log |
+| HEAD (at handoff write) | `d4c3f7c` 6.2/6.9/6.10 wire spot-check log |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 1846 / catalogued 558 / classified 1295 / unaccounted **0** |
