@@ -781,6 +781,21 @@ SaveId, OnlinePlayers, LocalMods, HasModifiedXML, character/game-stage stats).
 This is **telemetry**, not gameplay sim; transport is the platform analytics
 service (residual). See the EOS server-list filters section below.
 
+**Server-start analytics (`LogServerStartEventAnalytics`, IL=261):** the
+boot twin, skipped in edit/playtesting mode. It resolves the sandbox preset
+(GamePrefs 295, localized name, group), loads the code-based options
+(GamePrefs 296), and builds `ServerStartEventData` (server id, save guid,
+UTC timestamp, `ServerType` = Dedicated / Listen / Offline, sandbox seed
+from GameStats 71, sandbox-settings delta, world name GamePrefs 33, a
+`GeneralSettings` dict of ~25 server prefs: region 217, visibility 169,
+EAC 28, crossplay 27, max players 26, chunk-reset 221/312, creative 58,
+persistent profiles 110, camera restriction 280, player killing 52, and
+the full land-claim set 91-96 plus bedroll 160/192 and party range 100,
+and the truncated mod list) before `_analyticsService.LogEvent`; a
+non-dedicated host also starts the player-join coroutine.
+`GameManager.loadStaticData` (IL=6) is the boot static-data coroutine
+wrapper whose progress callback stores `CurrentLoadAction`.
+
 ### Analytics heartbeat (client path; dead on dedicated)
 
 `ConnectionManager` holds `countdownAnalyticsHeartbeat` constructed as
