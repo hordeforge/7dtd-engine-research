@@ -816,7 +816,7 @@ count          : u16
 
 Authoritative damage event for clients (and some C2S external paths). Full field
 order also in [protocol.md](protocol.md) section 6.5; re-verified against
-`write` IL=172.
+`write` IL=176.
 
 ```text
 entityId : i32
@@ -841,6 +841,7 @@ bonusDamageType : u8
 StunType : u8
 StunDuration : f32
 bFromBuff : bool
+bIgnorePartyShare : bool
 ArmorSlot : u8
 ArmorSlotGroup : u8
 ArmorDamage : u16

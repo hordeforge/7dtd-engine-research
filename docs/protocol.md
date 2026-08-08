@@ -470,6 +470,7 @@ bonusDamageType:u8
 StunType:u8
 StunDuration:f32
 bFromBuff:bool
+bIgnorePartyShare:bool
 ArmorSlot:u8
 ArmorSlotGroup:u8
 ArmorDamage:u16
