@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: delayed chunk regeneration
+
+ChunkCluster delayed/batched regen (world-chunks.md 5): ChunkPosNeedsRegeneration_DelayedStart (IL=28) refcount + batch clear, chunkRegenerateAt (IL=49) accumulates Y-slice bitmask 1 << ((yPos>>4)&31) in delayedRegenChunks while the refcount is up, DelayedStop (IL=48) flushes masks via chunk.NeedsRegenerationOrBits on the 1->0 transition. verified from IL. Commit 3ed5e32.
 ## 2026-08-08 - tier-C: remaining action configs
 
 Completed the ItemAction ReadFrom family (items.md 4.2): ExchangeItem (IL=83), GainSkill (IL=53), LearnRecipe (IL=75), Quest (IL=49), Repair (IL=43), UseOther (IL=57), MakeFertile (IL=66), ExchangeBlock (IL=55), SpawnEntity (IL=34) key sets incl. throw-on-missing patterns. verified from IL. Commit 48acfbf.
