@@ -1174,6 +1174,16 @@ here throws `InvalidOperationException`). `get_SlotCount` (IL=10) is
 `items?.Length`; the change notification `onBackpackChanged` (IL=8) is a
 null-guarded invoke.
 
+**`Equipment` leaves:** `ApplyTempCosmeticSlot` (IL=24) writes the pending
+`tempCosmeticSlot` into `m_cosmeticSlots[tempCosmeticSlotIndex]` and, for a
+non-remote entity, sets `bPlayerEquipmentChanged = true` (the equip-sync
+flag); `ClearTempCosmeticSlot` (IL=7) resets the index and class.
+`FireEventsForChangedSlots` (IL=137) is the equip-change dispatch: it
+latches `IsEquipping`, and per changed slot (the `slotsChangedFlags`
+bitmask) fires MinEvent **55** on the item, then **91** (equip) or **92**
+(unequip) on the item class and every installed mod depending on
+`Activated`, clearing the flags and `IsEquipping` at the end.
+
 All three ride the inventory net packages rather than a per-item packet:
 `NetPackagePlayerInventory` carries `toolbelt` (`ItemStack[]`), `bag`
 (`Bag.Write`), `equipment`, and the drag-and-drop item; the request/response and
@@ -1725,6 +1735,11 @@ The non-action leaves:
   `OnDamagedByExplosion`, and `OnMeshCreated` hooks, letting an `ItemClass`
   customize its dropped-entity behavior.
 
+## Changelog
+
+- **2026-08-08:** Equipment leaves: ApplyTempCosmeticSlot (IL=24) sync flag,
+  ClearTempCosmeticSlot (IL=7), FireEventsForChangedSlots (IL=137) MinEvent
+  55 + 91/92 equip dispatch.
 ## Changelog
 
 - **2026-08-08:** Equipment.CheckBreakUseItems (IL=85): lowest-durability
