@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemAction leaves (Melee, Cancel, ExchangeItem, DisconnectPower)
+
+ItemActionMelee ExecuteAction/GetExecuteActionTarget/GetCrosshairType; ItemActionCancel prev-slot cancel; ItemActionExchangeItem ExecuteAction/OnHoldingUpdate/ReadFrom/isFocusingBlock; ItemActionDisconnectPower ExecuteAction/OnHoldingUpdate/GetPoweredBlock/IsActionRunning (verified)
 ## 2026-08-08 - tier-C: EntityPlayer leaves (trader stage, alive reset, quest events)
 
 GetTraderStage (QuestTierMod clamp + passive 158); SetAlive game-stage born-time reset (base IL=31, local IL=38); TurnOffLightFlares; DetectUsScale (prefab difficulty + 60s + biome enemy -> 0.3); getHeadPosition fallback; TriggerQuestAdded/Removed/Changed + Shared variants on EntityPlayer (verified)
