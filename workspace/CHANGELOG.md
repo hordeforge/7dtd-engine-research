@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: shelter enclosure scan
+
+EntityPlayerLocal.ShelterFrameUpdate (IL=184, weather-environment.md):
+sampled enclosure scan - sky-up + diagonal checks, 4-side block gate,
+upward sampling offset (0.65 / 0.54 crouch), shelterPercent 0/1. verified
+from IL. Commit c67e1d4.
 ## 2026-08-08 - tier-C: block radius effect buffs
 
 BlockRadiusEffect (dedicated-misc-systems.md): EntityPlayerLocal.
