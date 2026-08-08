@@ -161,6 +161,16 @@ strongest IL evidence that requirement evaluation is client-side.
 | `DialogActionAddItem` | parses `Value` as count or `min,max`/quality and adds to `XUiM_PlayerInventory` (debug-flavored) |
 | `DialogActionVoice` | `EntityNPC.PlayVoiceSetEntry(ID)` on the respondent |
 
+**`EntityTrader.PlayVoiceSetEntry(name, player, ignoreTime, showReactionAnim)`
+(IL=98)** is the voice playback (gated on `TraderInfo.TraderDialog`): a
+**5 s** cooldown (`lastVoiceTime = Time.time + 5`, skipped with
+`ignoreTime`), the clip is `voiceSet + "_" + name.ToLower()` from
+`NPCInfo.VoiceSet`, and `Audio.Manager.StopAllSequencesOnEntity` cuts any
+current line first. With no player it `PlayOneShot`s the clip for everyone;
+a remote player gets `NetPackageAudioPlayInHead.Setup(clip, true)` on
+channel 192; a local player gets `PlayOneShot(clip, 1, 0, 1, ...)`. With
+`showReactionAnim` it also runs `PlayAnimReaction(1)`.
+
 ## 5. Trader quest offers: the server pipeline
 
 The server decides what a trader offers each player. Entry points:
@@ -313,6 +323,11 @@ objective's lifetime:
 | [`server-browser-prefabs.md`](server-browser-prefabs.md) | `PrefabInstance`, home of `lockInstance` |
 | [`re-methodology.md`](re-methodology.md) | How this was reversed |
 
+## Changelog
+
+- **2026-08-08:** EntityTrader.PlayVoiceSetEntry (IL=98): TraderDialog gate,
+  5 s voice cooldown, voiceSet_name clip, StopAllSequencesOnEntity,
+  PlayOneShot / NetPackageAudioPlayInHead (192) for remote, PlayAnimReaction.
 ## Changelog
 
 - **2026-07-28:** NetPackageNPCQuestList write IL=99 header note.
