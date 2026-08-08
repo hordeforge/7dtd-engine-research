@@ -661,6 +661,23 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   space); `GetUpdatedNormalAtPosition(worldPos, saveNrmToChunk)` (IL=178)
   recomputes the terrain normal from the height + density samples at the
   position and its +x / +z neighbors (near-1 densities clamped to 0.5).
+- **`XmlExtensions` XML helper leaves (all IL-verified):** attribute accessors
+  on `XElement`: `GetAttribute` (IL=11) is the attribute value or `""` on a
+  miss; `TryGetAttribute` (IL=16 each, `XElement`/`XName` and
+  `XmlElement`/`String` overloads) fills the out ref and returns presence;
+  `HasAttribute` (IL=6) is a null-check on `Attribute()`. `ParseAttribute`
+  (8 overloads: int, short, string, float, Vector2, Vector3, ulong, bool) is
+  `TryGetAttribute` + the matching `Parse` (float via
+  `StringParsers.ParseFloat` with NumberStyles 511, Vector2/Vector3 via the
+  `StringParsers` parsers). `GetElementString` (IL=57) renders
+  `<name attr="value" ...>` into a StringBuilder; `GetXPath` (IL=6/20) builds
+  the `/a/b` chain via the recursive `getXPath` (IL=17) and appends `[@name]`
+  for attributes. DOM writers (used by the settings save paths):
+  `AddXmlElement` (IL=21) creates the element from the owner document (or the
+  node itself when it is a document); `SetAttrib` (IL=6) is `SetAttribute`;
+  `AddXmlKeyValueProperty` (IL=10) is `<property name value>`; `AddXmlComment`
+  (IL=21) appends a comment; `CreateXmlDeclaration` (IL=13) inserts
+  `<?xml version="1.0" encoding="UTF-8"?>` before the document element.
 
 ## Changelog
 
