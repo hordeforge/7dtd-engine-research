@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: drone support buff aura
+
+EntityDrone (vehicles-drones-turrets.md 6): buffAllies (IL=80) party-members
++ owner loop, procBuffRange (IL=21) 32 m gate, addSupportBuff (IL=19)
+buffJunkDroneSupportEffect when not in attack state, removeSupportBuff (IL=19)
+with doesEntityHaveSupport gate. verified from IL. Commit 3dc8330.
 ## 2026-08-08 - tier-C: vehicle sync-flag mask
 
 EntityVehicle.GetSyncFlagsReplicated (IL=5, vehicles-drones-turrets.md 7):
