@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `8f53e4f` join world-file filter |
-| Commits since dry-run `3b61d9c` | ~1060 |
+| HEAD (at handoff write) | `c3a9dec` world-folder sender |
+| Commits since dry-run `3b61d9c` | ~1061 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: world-folder download sender
+
+NetPackageWorldFolder.prepareWorldFolderData (IL=389, protocol-packages.md):
+GamePrefs 189 delay, DeflateOutputStream level 3, filtered file list, dtm.raw
+writeDtmDelta delta path, 4096-byte frame-budgeted copy, 64 KiB part split
+with seqNr/totalParts. verified from IL. Commit c3a9dec.
 ## 2026-08-08 - tier-C: join world-file filter
 
 GameUtils.GetWorldFilesToTransmitToClient (IL=85, chunk-providers.md): join
