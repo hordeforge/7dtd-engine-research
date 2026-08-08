@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityAlive item-hold hooks
+
+Firing/reload animation bridge, sight-light threshold, model layer (verified)
 ## 2026-08-08 - tier-C: EntityAlive movement/combat getters
 
 Stamina multiplier base, walk type, attack impact, view angle, yaw forward vector, owned-entity find (verified)
