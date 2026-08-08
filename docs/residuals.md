@@ -36,6 +36,7 @@ flowchart TD
 | **XML content semantics** | Blocks/items/biomes/prefabs are data, not loop IL |
 | **Discord GameSDK integration (`DiscordManager`, 140 methods)** | Rich presence, lobbies, invites, voice device list (`inGameUpdate`, `updateAudioDeviceList`, `EDiscordStatus`, `UserAuthorizationResult`); needs a local Discord client, so it is a **client** social feature, not a dedicated codepath. Reachable in the assembly but never active on a headless server |
 | **Server-side support/utility code (enumeration-level, not per-method narrated)** | Cross-cutting helpers the reachability set includes but no subsystem doc singles out: `Configuration.*` XML/option parsing, `StringParsers`, `TEFeatureAbs` base helpers. Covered by their owning frameworks ([blocks.md](blocks.md)/[tile-entities-power.md](tile-entities-power.md)) and the [full-surface.md](full-surface.md) caveat; a per-method narrative would not add sim understanding |
+| **0-method data-carrier types can never be "reached"** | The reachability model is method-based (`reached = declaring types of visited method bodies`). Types with **no method bodies** (`QuestEvent_*` payload structs, enum holders, DTO records) are structurally absent from the reached set no matter what seeds are added. They are classified with roles in [out-of-scope-surface.md](out-of-scope-surface.md) and enumerated in the full-surface census, but the graph will always report them as unreached. This is a model limitation, not a documentation gap |
 
 ---
 

@@ -124,7 +124,14 @@ def pct(n, total):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    history = None
+    if "--history" in sys.argv:
+        i = sys.argv.index("--history")
+        history = sys.argv[i + 1] if i + 1 < len(sys.argv) else "census-history.csv"
+    skip = {"--json", "--history"}
+    if history:
+        skip.add(history)
+    args = [a for a in sys.argv[1:] if a not in skip and not a.startswith("--")]
     as_json = "--json" in sys.argv
     asm = args[0] if len(args) > 0 else default_asm()
     docs = args[1] if len(args) > 1 else os.path.join(REPO, "docs")
@@ -206,6 +213,19 @@ def main():
         "reached_methods": cov["reached_methods"],
         "narrated_pct": round(pct(cov["narrated"], cov["game_types"]), 1),
     }
+    if history:
+        import datetime
+        row = "%s,%d,%d,%d,%d,%d,%.1f%%\n" % (
+            datetime.datetime.now().strftime("%Y-%m-%d"),
+            result["reached_game_types"], result["narrated"], result["catalogued"],
+            result["classified"], result["unaccounted"], result["narrated_pct"])
+        header = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
+        if not os.path.exists(history):
+            open(history, "w").write(header)
+        with open(history, "a") as fh:
+            fh.write(row)
+        print("history appended to", history)
+        return 0
     if as_json:
         import json as _json
         print(_json.dumps(result, indent=2))
