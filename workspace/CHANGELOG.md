@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: add census-pct.py (live coverage-percentage calculator)
 ## 2026-08-08 - tier-C: LockRequest wire re-verify (locking/channel/targets/context, IL=62 exact)
 ## 2026-08-08 - tier-C: AesEncryptAndMac stream codec re-verify (Encrypt 102 / Decrypt 148)
 ## 2026-08-08 - tier-C: QuestEntitySpawn/AttachType/TraderData wire re-verify (all exact)
