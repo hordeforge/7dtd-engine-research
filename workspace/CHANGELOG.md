@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: workstation craft delivery
+
+TileEntityWorkstation.CheckForCraftComplete (IL=55, tile-entities-power.md):
+per-owner CraftCompleteList delivery with cosmetic unlock + GiveExp + TE
+modified flag. verified from IL. Commit 4d87e53.
 ## 2026-08-08 - tier-C: craft-complete XP
 
 EntityPlayerLocal.GiveExp (IL=54, crafting-recipes.md 2): _craftCount_
