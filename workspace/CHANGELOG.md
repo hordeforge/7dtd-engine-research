@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: drone frame driver (OnUpdateEntity phases)
+
+Base call + sync/transition/anim, shutdown gate, idle hover loop, confined-space scan, focus-box node cache, service menu (verified)
 ## 2026-08-08 - tier-C: drone sync-flag bit table (WriteSyncData v3)
 
 9 sync sections: owner/health, lock+password+users, bag, quiet/flashlight/heal-allies, item value, order/sentry, state/heal-request (verified)
