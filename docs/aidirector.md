@@ -529,6 +529,17 @@ marker is removed and `Release()`d back to its pool when `TimeToLive <= 0`
 Mirrored from clients via `AIDirector.UpdatePlayerInventory` /
 `AIDirectorPlayerManagementComponent.UpdatePlayerInventory`.
 
+**`NetPackagePlayerInventoryForAI`** (direction **1**, client to server) is
+the wire carrier: `Setup(entity, inventory)` (IL=9) stores the entity id and
+the inventory; `GetLength()` (IL=30) is `8 + 4 * (bag.Count + belt.Count)`;
+`write` (IL=18) emits `entityId:i32` then both sets through
+`WriteInventorySet` (IL=33: `count:i16`, 0 for a null list, then per entry
+`AIDirectorPlayerInventory/ItemId.Write`), and `read` (IL=15) mirrors it
+through `ReadInventorySet` (IL=25). `ProcessPackage` (IL=23) no-ops without
+a world / `aiDirector`, else calls
+`world.aiDirector.UpdatePlayerInventory(entityId, inventory)` - the client's
+reduced item-id report that feeds director interest.
+
 ## AIDirectorPlayerManagementComponent : AIDirectorComponent
 
 - `Tick(Double)` IL=7 → `TickPlayerStates` IL=24 → per-state `TickPlayerState` IL=6
