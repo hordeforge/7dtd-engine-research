@@ -579,6 +579,42 @@ true, false, -1)` when the state is not 5 / Attack) within **32 m** and
 removes it beyond, and `removeSupportBuff` (IL=19) only drops the buff when
 `doesEntityHaveSupport` reports no other nearby drone still provides it.
 
+**`updateDroneSystems` (IL=169):** the per-frame server systems pass: ticks
+`initSuppressVOTimer`; on the server with an owner it lazily registers the
+owner teleport hook (`PlayerTeleportedDelegates += TeleportIfFollowing`,
+guarded by `registeredOwnerHandlers`) and the party hooks
+(`PartyMemberAdded` / `PartyMemberRemoved` -> `onPartyMemberAdded` /
+`onPartyMemberRemoved`, snapshotting `registeredPartyMembers` from
+`Party.GetMemberIdArray()`); then `sensors.Update()` with
+`IsEnemyInRange` widening `FollowDistance` to **10** (else **5**); outside
+Shutdown/Sentry/Attack/Heal states, with a `healWeapon` that
+`targetCanBeHealed(Owner)` and the VO timer done, it runs
+`updateNeedsHealItemCheck()`; ticks `teleportAtkCooldownTimer` and each
+`installedWeapons[i].Update()`.
+
+**`procEnemiesInRange` (IL=96):** the debug-gated enemy engagement: with
+`DebugEnemiesInRange` on, `sensors.IsEnemyInRange` and an `EntityPlayerLocal`
+owner, it rotates toward the enemy-owner direction and steers to a point in
+front of the owner's camera (first person: `headPosition - forward`; third
+person: camera position), y raised to `max(..., head.y) + 0.5` / `+ 1`,
+moving via `steering.Seek` with the distance times 15.
+
+**`processShutdown` (IL=91):** the powered-down descent: grounded returns
+early; it records `fallBlockPos = RoundToInt(pos - blockHeightOffset)` and,
+when the block below is air (or no fall point yet), raycasts down 999
+(mask `268500992`) into `fallPoint`; while `isShutdown` it descends toward
+`fallPoint` (`position.y -= dist * SpeedFlying * 0.05`, clamped to the
+fall point y) and sets `isGrounded` within **0.01** of it.
+
+**`pickup` (IL=100):** the player pickup interaction: a non-empty drone bag
+plays `drone_takefail` VO + the `ttEmptyDroneBeforePickup` tooltip and
+stops the interaction; otherwise it builds
+`ItemStack(GetUpdatedItemValue(), 1)` and, when the owner's inventory or
+bag `CanTakeItem`, sets `isBeingPickedUp`, plays `drone_take`, resets
+`initWorldValues(false)`, disables the collider, `Collect(ownerId)`,
+removes the owner's `buffJunkDroneSupportEffect`, `removePartyBuffs` and
+`unRegsiterMovingLights` - the drone returns to the item slot.
+
 **`TeleportOutOfRange` (IL=15):** if Attack, `exitAttackState` (empty stub);
 if Heal, `onHealDone` (empty stub); then `teleportState()`.
 
