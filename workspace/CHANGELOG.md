@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: INDEX changelog entry
 ## 2026-08-08 - tier-C: fix full-surface DumpAll comment count
 ## 2026-08-08 - tier-C: fix INDEX namespace count
 ## 2026-08-08 - tier-C: refresh full-surface census (7432 types)
