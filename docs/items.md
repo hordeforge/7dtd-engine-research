@@ -842,6 +842,24 @@ closes the swing: fires MinEvent **29** (or **37** with
 **39** by action index when `MinEventContext.Other == null` (nothing was
 hit), then clears `Attacking` / `IsHarvesting` and sets `HasFinished`.
 
+**The harvest drop pipeline (`GameUtils.HarvestOnAttack` IL=623 +
+`collectHarvestedItem` IL=138).** When a swing kills a harvestable block,
+`HarvestOnAttack` gates on a local player with `attackDetails.itemsToDrop`,
+seeds the static `GameUtils.random` (from `Stopwatch.GetTimestamp()`), then
+computes `bKilled` with the repair-damage-state quirk (`damage + damageGiven
+>= MaxDamage` makes `bKilled = false`; otherwise it is
+`shape.UseRepairDamageState(bv)`). With no `EnumDropEvent.Harvest` rules the
+block's own `ToItemValue()` is collected once; with rules, each is resolved -
+a `[recipe]`-named drop resolves to the recipe's output stacks, and ordinary
+items go through `collectHarvestedItem(actionData, iv, count, prob,
+bScaleCountOnDamage)`, which with damage scaling shrinks the count by
+`(int)((min(damageTotalOfTarget, damageMax) - damageGiven) / (damageMax /
+count) + 0.5)` (fewer drops the less damage landed), rolls `prob`, and on
+success fires `QuestEventManager.HarvestedItem`, adds the stack to the
+player inventory (dropping it on the ground via `ItemDropServer` with
+lifetime 60 when full), and grants `AddLevelExp(material.Experience *
+count, "_xpFromHarvesting", ...)`.
+
 **`ItemActionDynamicMelee.Raycast` (IL=203)** is the sweep that resolves a
 swing: no melee from a vehicle; a local player pays the stamina cost here
 (`Stamina.Value -= StaminaUsage`); `waterCollisionParticles.Reset()`; then a
@@ -1665,6 +1683,12 @@ The non-action leaves:
   `OnDamagedByExplosion`, and `OnMeshCreated` hooks, letting an `ItemClass`
   customize its dropped-entity behavior.
 
+## Changelog
+
+- **2026-08-08:** Harvest drop pipeline: GameUtils.HarvestOnAttack (IL=623)
+  bKilled repair-damage-state quirk, [recipe] drop resolution;
+  collectHarvestedItem (IL=138) damage-scaled count, prob roll,
+  QuestEventManager.HarvestedItem, inventory/drop, _xpFromHarvesting XP.
 ## Changelog
 
 - **2026-08-08:** ItemActionDynamic.ReadFrom (IL=495) graze/swing/
