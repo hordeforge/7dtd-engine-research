@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: fix SpawnEntry leaf key-method claim
 ## 2026-08-08 - tier-C: Vector2EqualityComparer region-dict comparer
 ## 2026-08-08 - tier-C: Vector3EqualityComparer + IdPalette closures
 ## 2026-08-08 - tier-C: RequirementItemTier dead leaf + CommandPermission record
