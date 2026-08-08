@@ -178,6 +178,21 @@ participants via `AddPointsAll`, and refunds go through
 `SdFile` streams, plus `WriteExport` / `LoadExport` (a user-facing points
 export) and `SetupLocalization`.
 
+**Action-queue records (`TwitchActionEntry` / `TwitchActionHistoryEntry`):**
+`TwitchActionEntry` is the live queued action (viewer `UserName`, `Target`
+`EntityPlayer`, the `TwitchAction`; `get_ActionCost` = the action's
+`CurrentCost`). `SetupHistoryEntry(viewerEntry)` (IL=41) snapshots it into a
+`TwitchActionHistoryEntry` (user name, viewer `UserColor`, the target's
+entity name, the action). The history record drives refund/retry:
+`CanRefund` (IL=19, `PointsSpent > 0` and the `EntryState` not terminal),
+`Refund` (IL=26) calls `TwitchManager.ViewerData.ReimburseAction(UserName,
+PointsSpent, Action)` plus a purchase sound, `CanRetry` / `Retry` re-queue a
+failed action, and `IsValid` / `IsRefunded` plus the `HistoryType` /
+`Title` / `Description` / `Command` surface back the UI. The field-only
+`TwitchActionCooldownAddition` (`ActionName`, `CooldownTime`, `IsAction`) is
+the per-action cooldown modifier record appended by `TwitchAction.SetQueued`
+when the manager's cooldown preset adds delays.
+
 ---
 
 ## 3. Dedicated relevance and residuals
