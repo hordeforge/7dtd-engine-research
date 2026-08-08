@@ -129,6 +129,26 @@ who enforces it: `ConsoleCmdAdmin`, the webserver session/permission handlers,
 [console-commands.md](console-commands.md) (command permission levels) and
 [webserver.md](webserver.md) (web session permissions).
 
+**`AdminTools` file/lifecycle leaves (all IL-verified):**
+`InitFileWatcher()` (IL=33) watches `GetFilePath()` / `GetFileName()`
+(GamePref 66, `GetSaveGameRootDir(adminFileStorage)`) with Changed /
+Created / Deleted handlers all routed to `OnFileChanged` (IL=5, logs
+`Reloading serveradmin.xml` and `Load()`s - the hot-reload on external
+edits); `DestroyFileWatcher()` (IL=10) disposes and nulls it.
+`ParseSection(node)` (IL=41) maps `admins` -> the `users` module and
+`permissions` -> the `commands` module (else the raw element name), parses a
+known module via `AdminSectionAbs.Parse` and collects unknown ones into
+`unknownSections` with `Ignoring unknown section in permissions file:`;
+`WriteSections(root)` (IL=24) saves every module under the root.
+`ParseUserIdentifier(element)` (IL=39) uses
+`PlatformUserIdentifierAbs.FromXml` with a legacy `steamID` attribute
+fallback (`UserIdentifierSteam`), warning on invalid / missing attributes.
+`AdminUsers.HasEntry(client)` (IL=30) is a locked `PlatformId` /
+`CrossplatformId` lookup in `userPermissions`;
+`AdminWhitelist.IsWhitelisted(client)` (IL=58) matches the ids or any
+`groupMemberships` key against `whitelistedGroups`;
+`AdminWhitelist.IsWhiteListEnabled()` (IL=29) is non-empty users or groups.
+
 ## EntitlementManager
 
 Singleton gating DLC/cosmetic entitlement sets (`HasEntitlement`,
