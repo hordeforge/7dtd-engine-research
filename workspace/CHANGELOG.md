@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityFallingTree full type
+
+CreateMesh (IL=292): air-swap block, reparent deco transform, rootBall
+shadows off, RB mass (15+7*collHeight)*5, capsule collider height/center
+from SphereCast ground offset, impulse kick fallTreeDir*(80+h*8)*5,
+SpawnDestroyParticleEffect, lifetime 3, timeToEnableDamage 1.5. updateTransform
+(IL=147): fade MoveTowards + ENABLE_FADEOUT/_FadeOut, server SetPosition,
+remote lerp dt*20. ctor defaults, IsSavedToFile false. Verified fresh dumps.
 ## 2026-08-08 - tier-C: EntityFallingTree lifecycle
 
 Awake RB gravity/kinematic by remote; SetBlockPos (IL=111) deco/blockentity
