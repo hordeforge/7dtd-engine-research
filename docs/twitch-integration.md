@@ -213,7 +213,9 @@ when the manager's cooldown preset adds delays. Spawn bookkeeping:
 originating `Action` / `Event` / `Vote` / `RespawnEntry`) and the
 countdown-bearing `TwitchRecentlyRemovedEntityEntry` (adds `TimeRemaining`)
 are the records of `TwitchManager`'s action-spawn list, pruned each frame as
-the manager's running loop reconciles `LiveActionEntries`.
+the manager's running loop reconciles `LiveActionEntries`; the originating
+records are `TwitchEventActionEntry`, `TwitchVoteEntry` and
+`TwitchRespawnEntry`.
 
 ---
 
