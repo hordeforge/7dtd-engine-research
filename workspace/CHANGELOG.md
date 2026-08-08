@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: hit-face resolution (GetBlockFaceFromHitInfo)
+
+Mesh-triangle face center/normal, block-local wrap, inverse-rotation, GetBlockFaceFromColliderTriangle (verified)
 ## 2026-08-08 - tier-C: FactionManager threaded save + debug print
 
 factions.dat + .bak backup, pooled stream write/free, per-faction log (verified)
