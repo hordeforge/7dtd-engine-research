@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: LiteNetLib wrapper leaves
+
+Server ports/password/drop/peer-disconnect; client connect-install + disconnect-cause decode (verified)
 ## 2026-08-08 - tier-C: connection send/queue leaves
 
 Writer wake, reliable-first drain, maxPacketSize split, server/client route, error re-queue retry (verified)
