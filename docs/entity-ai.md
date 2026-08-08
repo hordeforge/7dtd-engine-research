@@ -3277,7 +3277,7 @@ bit >> 6` selects the 64-bit word; `maskList` (a static scratch
 bucket`; then `maskList[bucket] |= 1UL << (bit & 63)`. After the loop the
 accumulated words become the `FastTags` bitmask (`ToArray()`, or null when
 nothing was parsed), `maskList` is `Clear()`-ed, and the whole multi-tag path
-runs under `Monitor` on `maskList` — the static buffer is the lock, so
+runs under `Monitor` on `maskList` (the static buffer is the lock, so
 concurrent `Parse` calls serialize on a single shared scratch list.
 
 **`GetBit(tag)` (IL=56) / `GetTag(tag)` (IL=4) / `GetTagNames()` (IL=78):** the
