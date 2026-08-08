@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `09df53c` drone activation commands (startInteraction + AllowActivationCommand) |
-| Commits since dry-run `3b61d9c` | ~1206 |
+| HEAD (at handoff write) | `4515638` drone sync-flag bit table (WriteSyncData v3) |
+| Commits since dry-run `3b61d9c` | ~1207 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

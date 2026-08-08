@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: drone sync-flag bit table (WriteSyncData v3)
+
+9 sync sections: owner/health, lock+password+users, bag, quiet/flashlight/heal-allies, item value, order/sentry, state/heal-request (verified)
 ## 2026-08-08 - tier-C: drone activation commands (startInteraction + AllowActivationCommand)
 
 Verb dispatch (talk/service/repair/lock/keypad/take/orders/heal/storage/silent/light/ally-heal/attack), owner vs locked-password gates, per-command conditions (verified)
