@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `d769637` CraftingManager clear leaves + SdDirectory enumeration |
-| Commits since dry-run `3b61d9c` | ~1292 |
+| HEAD (at handoff write) | `b8d0785` EntityAlive stat/count/slot leaves |
+| Commits since dry-run `3b61d9c` | ~1293 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
