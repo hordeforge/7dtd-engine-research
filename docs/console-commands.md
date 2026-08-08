@@ -138,6 +138,12 @@ Selected dedi-critical Execute bodies:
 | `ConsoleCmdSetGamePref` | 58 | `GamePrefs.Parse` + `SetObject`; errors on bad pref/value |
 | `ConsoleCmdCreateWebUser` | 96 | In-game console only; server builds registration token/URL for web dashboard user |
 | `ConsoleCmdLogGameState` | 97 | 1-2 args; optional bool; client restriction on second param |
+| `ConsoleCmdAdmin` | 70 | `add` / `remove` / `addgroup` / `removegroup` / `list` on `AdminTools.Users`: `ExecuteAdd` parses name/id via `ConsoleHelper.ParseParamPartialNameOrId` + int level -> `AdminUsers.AddUser(name, id, level)`; `ExecuteAddGroup` -> `AdminUsers.AddGroup(name, groupId, regularLevel, moderatorLevel)`; `ExecuteList` prints the `Defined User/Group Permissions:` tables |
+| `ConsoleCmdWhitelist` | 70 | Same subcommand shape on `AdminTools.Whitelist` (`AdminWhitelist`): `ExecuteAdd` resolves an entity id / player name / user id (`" is not a valid entity id, player name or user id."`), group variant validates the steam group id |
+| `ConsoleCmdPermissionsAllowed` | 134 | `i/info` / `g/grant` / `rev/revoke` / `res/resolve` subcommands over the permission table (span-based dispatch, `Unknown sub-command:` fallback) |
+| `ConsoleCmdCVar` | 65 | `get` / `set` / `track` / `list` subcommands; `ExecuteGet` resolves the player by id (`Could not find player matching ID {0}.`) and reads a CVar |
+| `ConsoleCmdGetSandboxOptions` | 20 | Optional bool arg; `LogOptions(GameStats.GetString(71), flag, LogType)` |
+| `ConsoleCmdSaveDataManagerInfo` | 20 | Builds `AppendSaveDataManagerInfo` + `AppendSaveGameProviderInfo` text and `Log.Out`s it |
 
 Full per-command description strings remain in the inventory catalog; this table is
 the **server-effect** pin for operators and clone fidelity.
