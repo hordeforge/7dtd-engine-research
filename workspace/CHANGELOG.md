@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: DynamicProperties parse/format/param/range leaves
+
+ParseByte/ParseColorHex/TryParseRange, SetParam1/TryGetParam1, MemoryPack RegisterFormatter, PrettyPrint (verified)
 ## 2026-08-08 - tier-C: QuestEventManager notifier/POI-count/tier-reward leaves
 
 Event notifiers (IL=8-9), GetTraderPoiCount lazy list, AddQuestTierReward, ClearTraderResetQuestsForPlayer (verified)
