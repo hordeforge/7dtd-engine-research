@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk entity-band tracking + TE list leaves
+
+AdJustEntityTracking y-band rebucket, GetTileEntities/RemoveAllTileEntities, cluster regen-history skip on dedi (verified)
 ## 2026-08-08 - tier-C: drone gates (canMove, underwater, shutdown lifecycle)
 
 Movement probe, water-type 240 check, teleport cooldown, shutdown perform/wake conditions (verified)
