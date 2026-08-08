@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vehicle mod refresh chain
+
+Vehicle.SetItemValueMods (IL=22, vehicles-drones-turrets.md): mods copy +
+CalcEffects/CalcMods/SetColors/SetSeats refresh; IsLockBroken lock part
+health 0; GetNoise constant 0.5. verified from IL. Commit c0d21be.
 ## 2026-08-08 - tier-C: vehicle part mod state
 
 VehiclePart.SetMods (IL=68, vehicles-drones-turrets.md 4.2): modInstalled

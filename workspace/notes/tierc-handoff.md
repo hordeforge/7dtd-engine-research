@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `4b69726` vehicle part mod state |
-| Commits since dry-run `3b61d9c` | ~1069 |
+| HEAD (at handoff write) | `c0d21be` vehicle mod refresh |
+| Commits since dry-run `3b61d9c` | ~1070 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
