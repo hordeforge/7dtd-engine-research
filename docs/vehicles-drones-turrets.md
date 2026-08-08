@@ -648,6 +648,22 @@ only with `TargetCanBeHealed` and not shut down, `stay` / `follow` only
 when the order would actually change, `attack_*` only with a weapon
 attached and `GamePrefs` 45 on, `light_*` only with the headlamp mod).
 
+**Drone sync flags (`WriteSyncData` IL=188, version byte **3** header):**
+each `SendSyncData(flags)` call ships only the changed sections; the bit
+table:
+
+| Flag | Payload |
+|---|---:|
+| 1 | `OwnerID` ToStream + `Health` i32 |
+| 2 | packed u8 (bit 2 = `isLocked`) + `ownerSteamId` + `passwordHash` + allowed-users count and each id |
+| 8 | `Bag.Write` |
+| 32 | `isQuietMode` bool |
+| 64 | `IsFlashlightOn` bool |
+| 128 | `OriginalItemValue.Write` |
+| 256 | `IsHealingAllies` bool |
+| 16384 | `OrderState` u8 + `SentryPos` 3 x f32 (only when Sentry) |
+| 32768 | `State` u8 + `userRequestedHeal` bool (only when Heal; the flag is cleared after send) |
+
 **`updateDroneSystems` (IL=169):** the per-frame server systems pass: ticks
 `initSuppressVOTimer`; on the server with an owner it lazily registers the
 owner teleport hook (`PlayerTeleportedDelegates += TeleportIfFollowing`,
