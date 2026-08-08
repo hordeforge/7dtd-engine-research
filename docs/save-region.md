@@ -755,6 +755,15 @@ persistent-data surface tracks the player's rented vending machines via the
 `OwnedVendingMachinePositions` list (`AddVendingMachinePosition` IL=10
 dedupes before appending; `TryRemoveVendingMachinePosition` IL=5 removes).
 
+Backpack cleanup: `ClearDroppedBackpacks` (IL=10) empties both
+`backpacksByID` and `backpacksSortedByTimestamp` and flags
+`sortedBackpacksDirty` (the full reset); `RemoveBackpacks(predicate)`
+(IL=30) refreshes the sorted list, then removes every entry the predicate
+matches via `TryRemoveDroppedBackpack(EntityID)` (the selective cleanup
+used by e.g. the backpack-expiry path).
+`PersistentPlayerList.AddPlayerEventHandler` / `RemovePlayerEventHandler`
+(IL=11/6) manage the `m_dispatch` handler list on the shared player list.
+
 ## See also
 
 | Doc | Why |
