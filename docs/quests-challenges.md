@@ -448,6 +448,16 @@ touches in passing:
   `InProgress` state. `GetObjectiveForQuest<T>(questCode)` (IL=43) finds the
   active quest's objective whose `Phase` matches the current quest phase and is
   the requested type, else the default value.
+  `GetCurrentFactionTier(id, offset, allowExtraTierOverMax)` (IL=46) is the
+  tier formula: `points = GetQuestFactionPoints(id) + offset`, starting at
+  tier 1 and incrementing while `points >= tier * Quest.QuestsPerTier` (capped
+  at 100), then `min(tier, Quest.MaxQuestTier + (allowExtraTierOverMax ? 1 :
+  0))`; a zero `QuestsPerTier` short-circuits to `MaxQuestTier +
+  (allowExtraTierOverMax ? 1 : 0)` (the tier-up cap the trader pipeline reads
+  in [npc-dialog.md](npc-dialog.md) §5).
+  `GetTraderData(giver)` (IL=27) linear-scans the journal's `TraderData`
+  list for the `QuestTraderData` whose `TraderPOI` Vector2 matches the giver,
+  returning null when absent.
 - **`SharedQuestEntry`**: one party-shared quest offer in the recipient's
   `QuestJournal` (`QuestCode`, `QuestID`, POI name/position/size, `ReturnPos`,
   `SharedByPlayerID`, `QuestGiverID`, plus a `Clone` for journal copies);
@@ -660,6 +670,11 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 
 **Leaf catalog:** every instance in [`inventories/quest-objectives.md`](inventories/quest-objectives.md) (the 38 objective leaves).
 
+## Changelog
+
+- **2026-08-08:** QuestJournal.GetCurrentFactionTier (IL=46) tier formula
+  (points vs tier*QuestsPerTier, MaxQuestTier cap); GetTraderData (IL=27)
+  TraderPOI linear scan.
 ## Changelog
 
 - **2026-08-07:** BlockDestroyed IL=49 BlockDestroy event + HandleTrigger via
