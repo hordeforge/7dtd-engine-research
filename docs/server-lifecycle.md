@@ -338,6 +338,14 @@ player + `bSavingActive`; `PlayerDataFile.FromPlayer` → `Save(playerDataDir,
 combinedId)`; if `ChunkObserver.mapDatabase` present, `SaveAsync` via
 `ThreadManager.AddSingleTask`.
 
+**`GameManager.DoSpawn` (IL=14):** with GamePrefs **262** (spawn-point
+selection disabled) it calls `RequestToSpawn(-1)` directly; otherwise it
+opens the `XUiC_SpawnSelectionWindow` (join-time spawn choice).
+`GetPersistentPlayerList` (IL=3) is the `persistentPlayers` accessor;
+`TriggerSendOfLocalPlayerDataFile(seconds)` (IL=5) arms the
+`countdownSendPlayerDataFileToServer` timer that ships the local player
+data file to the server after the delay.
+
 **`RequestToSpawnEntityServer` (IL=101):** client →
 `NetPackageRequestToSpawnEntity` to server. Server: if class is fallingTree,
 skip when an existing `EntityFallingTree` shares `blockPos`. Create entity;

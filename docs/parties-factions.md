@@ -156,6 +156,9 @@ the party code raises on membership change. Invite bookkeeping:
 `HasPendingPartyInvite(playerEntityID)` (IL=11) resolves the id to an
 `EntityPlayer` and checks `partyInvites.Contains`; `RemovePartyInvite(id)`
 (IL=17) removes it when present.
+`GameManager.RemovePartyInvitesFromAllPlayers(player)` (IL=30) sweeps the
+world player list and calls `RemovePartyInvite(player.entityId)` on every
+other player - the pending-invite cleanup when a player leaves/disconnects.
 
 ### 2.3 Shared party scope
 
