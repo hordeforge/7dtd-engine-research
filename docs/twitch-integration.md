@@ -65,6 +65,19 @@ stateDiagram-v2
 how strong it is. Because the effect path is the game-event system, a Twitch action
 is just another `HandleAction` caller alongside quests and challenges.
 
+**Server vote queue (`TwitchVoteScheduler`, server singleton):** the
+dedicated host's vote-window FIFO (`votingParticipants` list +
+`nextVoteTime`). `NetPackageTwitchVoteScheduling.ProcessPackage` (IL=16)
+registers the sender on the server
+(`TwitchVoteScheduler.Current.AddParticipant(sender.entityId)`, IL=10
+dedupes) and asks `VotingManager.RequestApprovedToStart()` on the client.
+The scheduler's `Update` (IL=68) requires a live world with players, counts
+`nextVoteTime` down, and when a participant is due (windows spaced **3** s
+apart) either starts the host vote (`RequestApprovedToStart` when the first
+participant is the primary player) or broadcasts a fresh
+`NetPackageTwitchVoteScheduling` on channel **192** to that participant,
+then dequeues it.
+
 ---
 
 ## 3. Dedicated relevance and residuals
