@@ -57,6 +57,13 @@ singleton ticked once per frame from `GameManager.gmUpdate`
 | `ChallengeGroup` / `ChallengeCategory` / `ChallengeGroupEntry` | Group / tier / daily-rotation containers for challenges |
 | `QuestEventManager` | Central C# event hub + per-frame update loop + server-side shared-quest coordination |
 
+Registry leaves: `QuestClass.NewClass(id)` (IL=16) returns null when `id`
+already exists in `s_Quests`, else lowercases the id, news the class,
+`set_Item`s it and returns it (the `QuestsFromXml` insert);
+`QuestClass.AddCriteria(criteria)` (IL=8) appends a non-null
+`BaseQuestCriteria` to `Criteria` and returns it (the offer-gate list, e.g.
+`CriteriaQuestCompleted`).
+
 ```mermaid
 flowchart TB
   QX[quests.xml] --> QP[QuestsFromXml]
