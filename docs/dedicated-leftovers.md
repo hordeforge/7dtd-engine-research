@@ -618,6 +618,29 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   `SeparateCamelCase` (IL=6) and `Unindent` (IL=24) are regex-driven text
   transforms; `TrimStart` / `TrimEnd` (IL=33/38) trim `StringBuilder`
   whitespace.
+- **`GameUtils` server leaves (all IL-verified):** `FindPrefabForBlockPos
+  (prefabs, pos)` (IL=61) is the first prefab whose XZ bbox contains the
+  block position; `GetBlockPlacementBounds(block)` (IL=23) returns
+  `oversizedBounds` for oversized blocks, `Bounds(dim +
+  GetMultiBlockBoundsOffset, dim)` for multi-blocks, else a unit bounds at
+  the origin; `GetMultiBlockBoundsOffset(dim)` (IL=26) is
+  `(even ? -0.5 : 0, dim.y/2 - 0.5, even ? -0.5 : 0)`.
+  `GetLaunchArgument(name)` (IL=79) lazily parses `-key=value` /
+  `-key` from `GameStartupHelper.GetCommandLineArgs()` into the
+  case-insensitive `arguments` dict (null on a miss); `IsWorldEditor()`
+  (IL=12) is GamePref 29 == `GameModeEditWorld.TypeName` and GamePref 31 ==
+  `WorldEditor`. `ColorToUInt(color, includeAlpha)` (IL=33) packs RGBA
+  (alpha in the high byte) or RGB; `UIntToColor` (IL=32) is the reverse
+  (alpha 255 when not included); `FindPaintIdForBlockFace(bv, face, out
+  name, channel)` (IL=42) scans `BlockTextureData.list` for the side
+  texture id; `WriteItemValueArray` / `ReadItemValueArray` (IL=35/30) are
+  the `u16 count` + per-entry `bool` + `ItemValue.Write/Read` wire pair.
+  `GetNormalFromHitInfo(blockPos, collider, triIdx, out faceCenter)`
+  (IL=98) reads the hit triangle of a readable `MeshCollider` and returns
+  its cross-product normal with the vertex-average face center (world
+  space); `GetUpdatedNormalAtPosition(worldPos, saveNrmToChunk)` (IL=178)
+  recomputes the terrain normal from the height + density samples at the
+  position and its +x / +z neighbors (near-1 densities clamped to 0.5).
 
 ## Changelog
 
