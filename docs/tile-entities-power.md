@@ -456,7 +456,7 @@ stateDiagram-v2
 | `PowerTrigger` | `CachedUpdateCall` IL=77 (from manager) + `HandlePowerUpdate` IL=72 | Manager path only for types 1 and 3..4 band: edge-detect trigger, delay/duration timers via `Time.time`, `HandleDisconnectChildren` when duration ends. `get_IsActive`: type 0 uses `isTriggered`; else `isActive \|\| parentTriggered` |
 | `PowerTimerRelay` | `CachedUpdateCall` IL=12 | every **1 s** (`updateTime`) call `CheckForActiveChange` |
 | `PowerElectricWireRelay` | (consumer) | no extra fields; pure consumer relay |
-| `PowerTripWireRelay` | (trigger) | no extra fields beyond `PowerTrigger` |
+| `PowerTripWireRelay` | (trigger) | no extra fields beyond `PowerTrigger`; the tripwire `TripWireController` MonoBehaviour is added by `TileEntityPowered` on the wire node's GameObject (`TileEntityParent` / `TileEntityChild` / `WireNode` fields) and fires `checkIfTriggered` from `OnTriggerEnter` / `OnTriggerStay`: it resolves the collider's `EntityAlive` (self, parent, then children fallbacks; driver-less vehicles ignored) and, gated on `ConnectionManager.IsServer` + `TileEntityParent.IsPowered()`, sets `TileEntityChild.IsTriggered = true` |
 | `PowerPressurePlate` | (trigger) | fields `pressed` / `lastPressed` |
 | `PowerRangedTrap` | (consumer) | slots + `TargetType` + `isLocked` on disk; TE activate path via consumer |
 
