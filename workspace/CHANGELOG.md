@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemClass derived-value + tech-type + GSStat pipeline
+
+Recursive weight/eco from recipes with cycle guard, tech tags to types, GSStat nearest-stage pick + SetStat rolls (verified)
 ## 2026-08-08 - tier-C: EntityAlive item-hold hooks
 
 Firing/reload animation bridge, sight-light threshold, model layer (verified)
