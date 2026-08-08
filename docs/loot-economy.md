@@ -536,6 +536,21 @@ which filter the displayed trader stock by the player's trader stage and item qu
 The dedicated server parses the templates but never calls `IsWithin`; they do not gate
 what `TraderManager.HandleFullReset` puts in stock.
 
+**`TradersFromXml.ParseTraderInfo` (IL=320) is the per-`<trader>` definition
+parse.** `id` is required (throws `trader must have an id attribute`, rejects
+duplicates with `Duplicate lootlist entry with id`), then the numeric
+knobs: `reset_interval` (also stored as `ResetIntervalInTicks`),
+`override_buy_markup` / `override_sell_markup`, `rent_cost` (RentCost) /
+`rent_time` (RentTimeInDays), and the booleans `is_vending`,
+`player_owned`, `rentable`. Quirk: **both `allow_buy` and `allow_sell` write
+the single `AllowSell` field** - there is no separate allow-buy boolean on
+`TraderInfo`. `open_time` / `close_time` parse `HH:mm` via
+`GameUtils.DayTimeToWorldTime(h, m, 0)` into `OpenTime` / `CloseTime` and set
+`UseOpenHours`; the `WarningTime` is `CloseTime - 300` (ticks). Child
+elements dispatch to the item / tier / group / stage-template parsers
+(`trader_items`, `tier_items`, `trader_item_groups`,
+`traderstage_templates`; anything else logs `Unrecognized xml element`).
+
 ---
 
 ## Trader delivery paths, package direction and TEFeatureStorage (2026-08-06)
@@ -893,6 +908,12 @@ or `ItemStack.Empty` when nothing rolled.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
+## Changelog
+
+- **2026-08-08:** TradersFromXml.ParseTraderInfo (IL=320): id required +
+  duplicate check, reset_interval -> ticks, allow_buy AND allow_sell both
+  write AllowSell, open/close HH:mm -> OpenTime/CloseTime + UseOpenHours,
+  WarningTime = CloseTime - 300, rent knobs, child element dispatch.
 ## Changelog
 
 - **2026-08-08:** TileEntityVendingMachine.TryAutoBuy (IL=227): customer
