@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `b392dfa` World volume registry leaves + quest/terrain/save accessors |
-| Commits since dry-run `3b61d9c` | ~1258 |
+| HEAD (at handoff write) | `bcfc7b9` NetPackage world-folder/localization/dynamic-arrive bodies |
+| Commits since dry-run `3b61d9c` | ~1259 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
