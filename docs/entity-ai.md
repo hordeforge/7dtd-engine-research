@@ -2068,6 +2068,16 @@ out; with `pushOutOfTerrain` a solid-terrain cell pushes out only when the
 cell above is also solid terrain (the buried case). The matched cells push
 the player's position to the nearest free spot.
 
+**Player move-state machine (`EntityPlayerLocal.SetMoveState(state,
+isOverride)`, IL=553):** the local input controller derives the effective
+`MoveState` from the requested state plus the holding weapon's `HoldType`,
+aiming / `SpecialAttack` / crouch / overhead-space conditions, fires
+MinEvent **71** on a state change, and applies the per-state
+`vp_FPController` motor values (e.g. `MotorDamping` 0.346,
+`PhysicsSlopeSlideLimit` 60, `PhysicsCrouchHeightModifier` 0.7, weapon
+`RotationKneeling` 0.065). `SetMoveStateToDefault` (IL=88) is the
+crouch/run/stand dispatcher used when no weapon state applies.
+
 **`Entity.GetVelocityPerSecond` (IL=21) / `EntityPlayer.GetVelocityPerSecond`
 (IL=13):** base: attached → delegate to the attached entity's own
 `GetVelocityPerSecond`; else `physicsRB.velocity` when a rigidbody exists; else
@@ -3291,6 +3301,11 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+## Changelog
+
+- **2026-08-08:** Player move-state machine: SetMoveState (IL=553) HoldType
+  + condition-derived state, MinEvent 71, per-state motor values;
+  SetMoveStateToDefault (IL=88) crouch/run/stand dispatch.
 ## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.PlayStepSound (IL=7) third-person-only
