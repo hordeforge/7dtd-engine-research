@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World volume write-out/reset + creation/block-value accessors
+
+WriteTriggerVolumes/WriteWallVolumes (IL=52), ResetTriggerVolumes (IL=47), GetWorldCreationData, GetBlockValues (verified)
 ## 2026-08-08 - tier-C: ChunkProviderGenerateWorldFromRaw file/heightmap pipeline
 
 loadDTM/getFilenameDTM/ctor defaults, verifyFileHashes + processFiles coroutine stages, ReloadAllChunks/Cleanup (verified)
