@@ -522,6 +522,15 @@ subtype behaviour of §3.4). The `PowerItemType` literals seen in the
 wrappers: speaker **1**, spotlight **2**, generator **5**, solar panel **6**,
 battery bank **7**, launcher **8**, electric wire **9**, trip wire **10**.
 
+**Read side (`TileEntityPoweredTrigger.CreatePowerItem`, IL=95):** the
+trigger TE resolves its own identity back from the block at its position:
+`BlockPressurePlate` -> TriggerType **1**, `BlockMotionSensor` -> **3**,
+`BlockTripWire` -> **4**, `BlockTimerRelay` -> **2**, `BlockSwitch` -> **0**
+(the run-time mirror of the wrapper table below), then instantiates the
+matching power item: `PowerTimerRelay` (2), `PowerTripWireRelay` (4),
+`PowerTrigger` (3, with `TriggerPowerDuration = 1` and `TriggerPowerDelay
+= 0` defaults), `PowerPressurePlate` (1) or a plain `PowerTrigger`.
+
 - **Sources** (`TileEntityPowerSource`): `BlockBatteryBank` (PowerItemType
   7), `BlockGenerator` (5) and `BlockSolarPanel` (6) all lazily resolve
   `SlotItemName` into the `slotItem` class and hand it to the TE (IL=19
@@ -844,6 +853,18 @@ itself; `te is TileEntityComposite` -> `GetFeature<T>()` on the composite;
 composite; otherwise default + false. `GetSelfOrFeature` (IL=6) is the same
 call with the bool discarded - this is how callers reach a storage / door /
 sign feature whether they hold the composite or the feature directly.
+
+**Composite capability/command plumbing:** `PrecomputeCapabilities`
+(IL=43) ORs `OverridesPhysicalChecks` and the `TriggerRole` across
+`modulesCustomOrder` (a feature implementing `IFeaturePhysicalCapabilities`
+or `IFeatureTriggerCapability` lifts the flag onto the composite).
+`SplitFullCommandName` (IL=28) splits `"module:command"` at the first
+colon into the module and command `ReadOnlyMemory` halves (false when no
+colon). `UpdateBlockActivationCommands` (IL=124) refreshes the activation
+commands once per frame (a `frameCount` gate): every command starts
+enabled; a `IFeatureTriggerCapability`-prefixed command is enabled only in
+the editor, and any other command delegates to the owning feature's
+`AllowBlockActivationCommand`, tracking `lastUpdateHadEnabledCommands`.
 
 `TileEntityComposite` ticks each `ITileEntityFeature` in `modulesInternalOrder`
 (§4.5). Feature Write/Read used inside composite TE payloads:

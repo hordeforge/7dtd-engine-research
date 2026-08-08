@@ -1101,7 +1101,7 @@ Ordered when entity spawned and not unload-marked:
 4. Else: `CheckDespawn` (and attack-target clear paths on EntityAlive).
 5. If `IsMarkedForUnload` → `unloadEntity(entity, reason)`.
 
-Falling block **entities** go through same `OnUpdateEntity` chain (`EntityFallingBlock` overrides).
+Falling block **entities** go through same `OnUpdateEntity` chain (`EntityFallingBlock` overrides). `EntityFallingBlock.SetStartVelocity(vel, angularVel)` (IL=7) stores `startVel` / `startAngularVel` (the launch impulse from `World.AddFallingBlock`), and `SetCanvasState(state)` (IL=4) stores `pendingCanvasState` (applied on the render pass). `EntityCar.updateDamageModel` (IL=53) picks the damage model child: `modelIdx = floor((1 - max(0, health/maxHealth)) * (modelCount - 1))`, activating the new child and deactivating the old (`UpdateLightOnAllMaterials.Reset` after the swap).
 
 **Chunk membership (V3.1.0 b14):** `Chunk.AddEntityToChunk(entity)` (IL=116)
 sets the volatile `hasEntities` flag, derives the entity's chunk coords from
