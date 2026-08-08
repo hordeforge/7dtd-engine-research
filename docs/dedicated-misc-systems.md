@@ -217,6 +217,13 @@ persists with the player record). Server consumers: `EntitySpawner` and
 Complements [save-persistence.md](save-persistence.md) and
 [spawning.md](spawning.md).
 
+Leaves (IL-verified): `GetData()` (IL=7) resolves the player record via
+`GetPlayerDataFromEntityID(theEntity.entityId)`; `GetPos()` (IL=13) returns
+`BedrollPos` or the `(0, int.MaxValue, 0)` sentinel; `Set(pos)` (IL=11) stores
+the position and calls `ShowBedrollOnMap()`; `Clear()` (IL=8) delegates to
+`PersistentPlayerData.ClearBedroll()`; `Count()` (IL=9) is 0 for the sentinel
+else 1; `get_Item(idx)` (IL=3) ignores the index and returns `GetPos()`.
+
 ## GameStartupHelper
 
 Dedicated boot-time helper: `ParseCommandLine`/`parseRawCommandline`,
@@ -806,6 +813,9 @@ the dump path used for save/backup artifacts.
   buff apply; ResetBiomeWeatherOnDeath (IL=15) weather cvar reset.
 ## Changelog
 
+- **2026-08-08:** EntityBedrollPositionList leaves: GetData via entity id;
+  GetPos sentinel (0, int.MaxValue, 0); Set -> ShowBedrollOnMap; Clear ->
+  ClearBedroll; Count 0/1; get_Item ignores idx.
 - **2026-08-08:** StreamUtils primitives: ReadVector3/3i/Quaterion
   component-wise LE; Color32 one-u32 RGBA packing (ReadColor32 IL=39,
   WriteColor32 IL=34); null-flagged ReadString IL=8; ReadGuid 16-byte span +
