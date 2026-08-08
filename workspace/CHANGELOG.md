@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Quest shared/event/state leaves
+
+SetupSharedQuest bootstrap, HandleQuestEvent fan-out, AddSharedKill/Location, HandleActivateListReceived, ResetToRallyPointObjective, ParseVariable (verified)
 ## 2026-08-08 - tier-C: GameIO path/save-discovery leaves
 
 GetPlayerSaves scan + FoundSave callback, IsWorldGenerated, SetSaveGameLocalGuid, path helpers, snap/steam-runtime probes (verified)
