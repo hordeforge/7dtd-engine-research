@@ -440,6 +440,18 @@ from highest to lowest: `sum += stage * weight` then
 `weight *= DiminishingReturns` (start `weight = StartingWeight`);
 `FloorToInt(sum)`.
 
+**Party leaves:** `SetPartyLevel(level)` (IL=123) applies the game-stage
+scaling (`partyLevel *= gsScaling`), resets stage/group/spawn bookkeeping, looks
+up `def.GetStage(level)`, and on a valid stage recomputes `stageSpawnMax` +
+`SetupGroup()`; `bonusLootEvery = FastMax(stageSpawnMax /
+GameStageDefinition.LootBonusMaxCount, LootBonusEvery)`; it logs
+`Party of {0}, GS {1} ({2}), scaling {3}, enemy max {4}, bonus every {5}` and
+per-member `Player id {0}, gameStage {1}`. `SetScaling(scaling)` (IL=11) is
+`gsScaling = FastLerp(1, 2.5, (scaling - 1) / 3)`. `AddMember` (IL=22) dedupes
+through the `memberIDs` hashset + members list; `RemoveMember(player, removeID)`
+(IL=14) optionally clears the id; `DecSpawnCount(dec)` (IL=15) clamps at 0;
+`get_IsDone` (IL=11) is `groupIndex > 0 && spawnGroup == null`.
+
 **`GameStageDefinition` static defaults (`.cctor` IL=12):**
 `DifficultyBonus=1`, `StartingWeight=1`, `DiminishingReturns=0.5`,
 `DaysAliveChangeWhenKilled=2` (then empty `gameStages` dict).
@@ -933,6 +945,9 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** GameStagePartySpawner leaves: SetPartyLevel (IL=123)
+  scaling + stage lookup + bonusLootEvery + party log; SetScaling FastLerp
+  1..2.5; AddMember/RemoveMember dedupe; DecSpawnCount clamp; IsDone.
 - **2026-08-08:** AIWanderingHordeSpawner: ctor group/party-level seeding;
   Update endTime/arrived + AddLocationLine(64); UpdateSpawn (IL=158) CanSpawn
   + spawnDelay + mob spawn + max-tier pick; UpdateHorde (IL=189) Walk/Wander/
