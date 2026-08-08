@@ -292,6 +292,7 @@ the browser.
 
 ## Changelog
 
+- **2026-08-08:** AdminWebModules/WebModule per-module record (name + level, ParseElement/Save round-trip).
 - **2026-07-28:** WebAPI Command GET/POST + WebConnection session note.
 
 - **2026-07-23:** Initial `Webserver.*` reversal (request pipeline, auth/session + Steam OpenID, REST host, permission model, SSE lifecycle) with state machines.
