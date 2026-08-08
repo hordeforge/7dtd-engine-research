@@ -1134,6 +1134,11 @@ above.
   single, EntitySpawnerClass build + AddForDay, empty-spawner throw.
 ## Changelog
 
+- **2026-08-08:** EntityGroups leaves: IsEnemyGroup first-entry flag;
+  Normalize(name, totalp); EntityGroupSpawnState cumulative roll + DidSpawn
+  numSpawned; EntityGroupsFromXml parseGroup (text lines + entity/e elements,
+  prob default 1, "none" id 0, missing-name throws, normalize + empty-group
+  throw).
 - **2026-08-08:** ECD apply + leaves: ApplyToEntity (IL=176) full order
   (stats/health death-anim, home area, player profile, sleeper pair, head
   state, trader clone, sleeper pose 255 gate, drone order state, stress,
@@ -1219,3 +1224,23 @@ total leaves the list untouched). `GetRandomFromGroupList(list, random)`
 (IL=37) draws `random.RandomFloat()` and walks the list accumulating
 `sum += prob`, returning the first entry where `roll <= sum` and `prob > 0`
 (cumulative-distribution weighted pick; -1 when nothing matched).
+
+**`EntityGroups` leaves:** `IsEnemyGroup(name)` (IL=20) returns the first
+entry's class `bIsEnemyEntity` (false for a null/empty group).
+`Normalize(name, totalp)` (IL=31) divides every entry's prob by the caller's
+total (the `parseGroup` normalization). `EntityGroupSpawnState` (ctor IL=28)
+snapshots the group into `State{entityClassId, prob, numSpawned}` rows;
+`GetRandomFromGroup()` (IL=41) does the same cumulative roll over the world
+`GameRandom` and `DidSpawn(classId)` (IL=34) increments `numSpawned` on the
+matching row - the countdown-style spawn bookkeeping.
+
+**`EntityGroupsFromXml` parse leaves:** `parseGroup` (IL=89) requires the
+`name` attribute (throw), registers the new list, then per child node:
+`XText` -> `parseTextBasedList` (IL=84, newline-split lines, `name,prob` with
+default prob 1), `XElement` named `entity`/`e` -> `parseElementBased` (IL=53,
+`name`/`n` required, `prob`/`p` default 1, both throw on missing/empty names).
+Each entry goes through `addEntity` (IL=45: `"none"` maps to class id 0,
+otherwise `EntityClass.FromString` with a `Entity with name '<name>' not found`
+throw). After the pass, a positive `totalProb` triggers
+`EntityGroups.Normalize(name, totalProb)` and an empty group throws
+`Empty entity groups not allowed!`.
