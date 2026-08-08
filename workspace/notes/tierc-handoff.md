@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `651a63e` 100% narrated |
+| HEAD (at handoff write) | `d34818c` unreached role narration |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 3574 / catalogued 0 / classified 0 / unaccounted **0** (100% narrated) |
