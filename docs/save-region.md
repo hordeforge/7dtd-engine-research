@@ -66,6 +66,7 @@ stateDiagram-v2
 | `Guid` | string | world identity |
 
 `SetFrom(World, EnumChunkProviderId)` (IL=164) snapshots water level (`WorldConstants.WaterLevel`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
+`World.get_Guid()` (IL=9) is the world-identity accessor: `worldState?.get_Guid()` (null world state -> null).
 
 ### 1.1b `main.ttw` header codec (`SaveLoad(Stream)`, IL=926 on V3.1.0)
 

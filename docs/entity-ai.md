@@ -607,6 +607,18 @@ and under the lock calls `TriggerVolume.Reset()` on every volume whose
 bounds intersect it - the re-arm when a chunk reloads so triggers fire
 again.
 
+**Volume registry removal / client sync leaves:** the `Remove*VolumesFor`
+trio drops every volume owned by a `PrefabInstance` under the dict lock,
+removing the `VolumeKey(volume)` from the `*VolumeMap` and the id from the
+`*Volumes` dict. `RemoveTriggerVolumesFor` (IL=46) additionally tells
+`triggerManager.RemoveFromUpdateList(prefabInstance)` first;
+`RemoveWallVolumesFor` (IL=61) additionally, on the server, broadcasts
+`NetPackageWallVolumeRemove.Setup(id)` (channel 192) per removed volume.
+`HasWallVolumes(ids)` (IL=41) is true only when every id exists in
+`wallVolumes`; `SetWallVolumesForClient(wallVolumeData)` (IL=37) clears
+both wall dicts and re-adds the `(id, WallVolume)` tuples (the client-side
+bulk replace from `NetPackageWallVolumes`).
+
 **`SleeperVolume.TouchGroup` (IL=52):** `mode = flags & 7`. If no `groupId` or no
 prefab: `Touch(world, player, setActive, mode)`. Else for each volume in
 `prefabInstance.sleeperVolumes` with same `groupId` and not

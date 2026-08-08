@@ -740,6 +740,16 @@ CurrentRadius = TreasureRadiusInitial = 9`, `distance = 50`,
 `use_nearby`, `explosion_event_delay`, `explosion_event`,
 `radius_reduction_message`.
 
+**`World.CheckForLevelNearbyHeights(worldX, worldZ, distance)` (IL=119)** is
+the flat-ground gate behind the random-point objectives
+(`ObjectiveRandomGoto.GetPosition` / `CalculateRandomPoint`,
+`ObjectiveRandomGotoNPC.GetPosition`,
+`ObjectiveTreasureChest.CalculateTreasurePoint`): with the chunk provider's
+terrain generator it samples the center and the 4 cardinal points at
+`±distance`, tracks the min/max height, and returns true only when
+`|max - min| <= 2` (points on level terrain pass the objective's spot
+selection).
+
 **Trap:** `BaseObjective/ObjectiveTypes` (958167-958188) is a legacy 17-value enum
 (`AnimalKill`..`ZombieKill`) that does **not** correspond to the XML `type`
 strings, which are class names resolved by reflection. Do not use that enum as the

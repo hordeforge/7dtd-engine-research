@@ -147,7 +147,10 @@ entity at center with ±0.1 xz jitter.
 
 **`World.GetBlockValues(groupBlocks)` (IL=25)** is the snapshot helper behind
 the group snapshot: allocates a `BlockValue[count]` and fills index i with
-`GetBlock(groupBlocks[i])`.
+`GetBlock(groupBlocks[i])`. **`GetBlockTextureFullArrays(groupBlocks)`
+(IL=34)** is the texture twin: per position `GetTextureFullArray(x, y, z)`
+into a `TextureFullArray[]` (the mesh material arrays the falling-block
+entity needs).
 
 **`GroupFallingBlocks` (IL=292 high-level):** BFS over `fallingBlockSet`
 connected non-air non-terrain blocks; enforce `GroupBounds.IsWithinSize`;

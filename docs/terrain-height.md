@@ -179,6 +179,10 @@ GetTopMostTerrainHeight() (IL=28): max over all m_TerrainHeight bytes
 
 Expand must grow `m_BlockLayers` length (`ChunkBlockLayers`) with YDim; XZ formulas stay 16-wide.
 
+`World.GetTerrainNormalAt(x, z)` (IL=17) is the world-level wrapper:
+`GetChunkFromWorldPos(x, z) as Chunk`, `Vector3.zero` when the chunk is
+absent, else `chunk.GetTerrainNormal(toBlockXZ(x), toBlockXZ(z))`.
+
 ## See also (stock RE)
 
 | Doc | Why |
