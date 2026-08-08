@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: protocol-packages 6.2/6.9/6.10 wire spot-check
 ## 2026-08-08 - tier-C: protocol-packages 6.14/6.15/6.17/6.18 wire spot-check
 ## 2026-08-08 - tier-C: protocol-packages 6.1/6.11/6.12/6.13/6.16/6.19 wire spot-check
 ## 2026-08-08 - tier-C: protocol-packages 6.20/6.22 wire spot-check
