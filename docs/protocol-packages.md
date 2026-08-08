@@ -475,6 +475,8 @@ if networkWrite:                          // true for NetPackageEntitySpawn
 if entityClass == EntityClass.junkDroneClass:
     belongsPlayerId : i32
     orderState      : i32
+// FINAL, every entity (after the junk-drone block, no guard):
+stressAmount : f32
 ```
 
 Two gating details a clone must honour (both cost stream sync if missed):
