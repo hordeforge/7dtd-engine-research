@@ -85,6 +85,14 @@ same `ForgeCategory` (output type != item type) and whose output weight is
 linear scan by `Recipe.GetName` (null on miss); `GetRecipes()` (IL=3)
 returns a copy of the list; `GetRecipes(name)` (IL=27) filters by name.
 `ClearAllRecipes` (IL=3) clears the list (the `ReloadRecipes` reset).
+`ClearAllGeneralRecipes()` (IL=30) removes every recipe whose `craftingArea`
+is null or empty (the non-workstation recipes); `ClearCraftAreaRecipes(
+craftArea, craftTool)` (IL=36) removes recipes whose `craftingArea` equals
+the area and whose `craftingToolType` equals the tool's item type;
+`ClearRecipe(recipe)` (IL=5) is the single-entry `Remove`.
+`InitForNewGame()` (IL=10) resets the whole registry for a fresh game:
+`ClearAllRecipes()` plus clearing `UnlockedRecipeList` /
+`AlreadyCraftedList` / `FavoriteRecipeList` / `craftingAreaData`.
 Favorites: `RecipeIsFavorite(recipe)` (IL=5) is `FavoriteRecipeList.
 Contains(name)`; `ToggleFavoriteRecipe` (IL=17) adds/removes the name;
 `GetFavoriteRecipesFromList(ref list)` (IL=31) filters the list in place.

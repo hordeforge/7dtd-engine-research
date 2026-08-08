@@ -55,6 +55,15 @@ The copy trio `ManagedToManagedCopy` / `ManagedToUnmanagedCopy` /
 `UnmanagedToManagedCopy` (IL=33 each) open the source (Read/ReadShare) and
 the destination (FileMode.Create when `overwrite` else OpenOrCreate,
 Write/ReadShare) and `StreamUtils.StreamCopy` between them.
+`SdDirectory` is the same routing for directories: `EnumerateDirectories` /
+`EnumerateFiles` / `EnumerateFileSystemEntries` (IL=22-24 each) go through
+`SaveDataUtils.TryGetManagedPath` and, for managed paths, `Select` the
+`SaveDataManager.ManagedDirectoryEnumerate*` results back to strings (plain
+`System.IO.Directory.Enumerate*` otherwise); `GetDirectories` /
+`GetFileSystemEntries` (IL=4-6) are the `ToArray` wrappers;
+`ManagedDelete` (IL=5) is `SaveDataManager.ManagedDirectoryDelete`;
+`GetCurrentDirectory` (IL=2) stays plain. `SdDirectoryInfo` mirrors this
+with `WrapFileSystemInfo`-selected `Enumerate*` variants.
 
 **Dedicated reality:** `SaveDataUtils.s_isManagementEnabled` is set to
 `MultiPlatform.SaveGameProvider != null` during init (§3). No code in the dedicated
