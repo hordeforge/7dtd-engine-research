@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemClass id/activation/creative-list/cleanup leaves
+
+SetId parent-pointer, SetActivated flag fold, GetItemsAndBlocks creative list (mode/favorites/filter/sort), HeldEntity catalyst + cleanup leaves (verified)
 ## 2026-08-08 - tier-C: ItemClass derived-value + tech-type + GSStat pipeline
 
 Recursive weight/eco from recipes with cycle guard, tech tags to types, GSStat nearest-stage pick + SetStat rolls (verified)
