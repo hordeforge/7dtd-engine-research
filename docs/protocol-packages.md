@@ -58,6 +58,15 @@ remainder as the final shorter part), each shipped as a
 `NetPackageWorldFolder(seqNr, totalParts, part)` - the wire body the client
 reassembles in order.
 
+**`NetPackageWorldInfo.PrepareWorldHashes` (IL=83)** is the companion
+validation blob: from `ChunkProviderGenerateWorldFromRaw.worldFileCrcs`
+(null when the provider is not the raw generator, making `worldDataSize` 0
+and the list empty) it filters the CRC keys through the same
+`GetWorldFilesToTransmitToClient` and serializes
+`count:i32` + per file `name:string` + `crc:u32` into the static
+`worldHashesData` byte array the `WorldInfo` package ships, so the client
+can verify its local world files match the server's.
+
 `protocol.md` previously said game packages use channel 0 and treated other
 channels as "later". Channel 1 is the real second band and it carries the
 heaviest bodies. A clone must bind/route both channels.
@@ -1652,6 +1661,11 @@ customReason    : string
 | [residuals.md](residuals.md) | Non-IL residuals |
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
+## Changelog
+
+- **2026-08-08:** NetPackageWorldInfo.PrepareWorldHashes (IL=83): filtered
+  name+crc:u32 blob from ChunkProviderGenerateWorldFromRaw.worldFileCrcs,
+  worldDataSize, worldHashesData for client validation.
 ## Changelog
 
 - **2026-08-08:** NetPackageWorldFolder.prepareWorldFolderData (IL=389):
