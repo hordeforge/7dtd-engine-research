@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: minevent requirement leaves enumeration (22)
 ## 2026-08-08 - tier-C: handoff TODO refresh (Batch B verified done)
 ## 2026-08-08 - tier-C: per-doc changelog entries for session additions
 ## 2026-08-08 - tier-C: BinaryReaderExtensions dead helper

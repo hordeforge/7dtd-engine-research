@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `6d4825f` handoff TODO refresh (Batch B verified done) |
+| HEAD (at handoff write) | `e9625a2` minevent requirement leaves enumeration (22) |
 | Commits since dry-run `3b61d9c` | ~1316 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
