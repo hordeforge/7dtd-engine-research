@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: deco-rect reset + client console executor packages
+
+Rect rebuild -> ResetDecosInWorldRect; ExecuteSync client executor + AddLines round-trip (verified)
 ## 2026-08-08 - tier-C: deco-reset + turret-sync package processes
 
 Chunk-key pooled read -> ResetDecosForWorldChunk; EntityTurret TargetEntityId/OriginalItemValue/IsOn mirror (verified)
