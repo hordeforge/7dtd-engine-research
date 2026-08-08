@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: powered-trap/block accessor leaves
+
+Server/client TargetType/ItemSlots/IsLocked split, lazy AmmoItems, target flag bits, OwnerEntityID resolve, PowerUsed toggle gate (verified)
 ## 2026-08-08 - tier-C: TileEntityCollector conversion loop
 
 handleUpdateForOutputType tick + FillData, convert count/speed/fuel/capacity reads, newItem/removeFuel/dropItems, disabled/full/out-of-fuel flags (verified)
