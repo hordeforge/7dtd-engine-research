@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Entity position/spawner/drive/bag accessors
+
+worldToBlockPos, spawner biome hash, driven check, bag-sync, CommandIs span compare (verified)
 ## 2026-08-08 - tier-C: server-start analytics + static-data boot wrapper
 
 ServerStartEventData build (sandbox preset, 25-pref settings, mods), ServerType split, loadStaticData coroutine (verified)
