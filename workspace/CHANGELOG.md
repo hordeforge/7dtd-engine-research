@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: bedroll spawn point resolution
+
+EntityPlayerLocal.GetSpawnPoint (IL=24, spawning.md): SpawnPoints[0] ->
+block-center + (0.5,0,0.5), yaw 0, else SpawnPosition.Undef. verified from
+IL. Commit 24e84ff.
 ## 2026-08-08 - tier-C: rally block activation
 
 ObjectiveRallyPoint.Current_BlockActivate (IL=182, quests-challenges.md):
