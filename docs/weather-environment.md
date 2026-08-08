@@ -261,7 +261,10 @@ steps the sampling offset upward (y += 0.65, or 0.54 while crouching; x
 += 0.011, z += 0.013) and rescans; when the offset reaches the player's
 height it finalizes `shelterIsUpdating = false` and `shelterPercent = 1` -
 fully sheltered. The resulting `shelterPercent` feeds the `_sheltered`
-cvar path above.
+cvar path above. `WeatherBuffUpdate` (IL=45) is the indoor/outdoor buff
+gate that consumes `isIndoorsCurrent`: with a `weatherBuff` set it removes
+the buff while indoors and re-adds it (`AddBuff(name, -1, true, false,
+-1)`) once outdoors - the outdoor-weather buff follows the shelter state.
 
 ```mermaid
 flowchart LR
@@ -363,6 +366,10 @@ from the same clock and the received weather snapshot.
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
+## Changelog
+
+- **2026-08-08:** EntityPlayerLocal.WeatherBuffUpdate (IL=45): weatherBuff
+  removed indoors / re-added outdoors, driven by isIndoorsCurrent.
 ## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.ShelterFrameUpdate (IL=184) sampled
