@@ -146,6 +146,16 @@ new` and builds a fresh `Progression` when the entity has none.
 `ProgressionValue` (level + `CalculatedCostForLevel`) and rebuilds the quick
 list + passive-keys index.
 
+**`ProgressionValue` (the per-player entry):** `set_Level` (IL=24) invalidates
+the frame cache and pins skills to `MaxLevel` (skills are always maxed).
+`GetCalculatedLevel(ea)` (IL=79) is frame-cached: `Level` plus a bonus from
+`EffectManager.GetValue` over the type's passive (perk 83, skill 84, quest 85)
+when the class has one. `get_PercToNextLevel` (IL=15) is
+`1 - CostForNextLevel / CalculatedCostForLevel(level + 1)`; `CanPurchase(ea,
+level)` (IL=9) is `level <= MaxLevel`; `IsLocked(ea)` (IL=6) is
+`GetCalculatedMaxLevel(ea, this) == 0`. Wire: `Write` (IL=17) is version **1**
++ `name` + `level` (u8) + `costForNextLevel` (i32); `Read` (IL=16) mirrors it.
+
 **Validation predicates (V3.1.0 b14).** `Recipe.CanCraft(stacks, ea,
 craftingTier)` (IL=128) starts by caching `GetCraftingTier(player)` into the
 shared recipe's `craftingTier` field, clamped down when the passed
@@ -247,6 +257,9 @@ report the sizes for the UI.
   CraftedItem hook.
 ## Changelog
 
+- **2026-08-08:** ProgressionValue: set_Level frame-cache invalidation + skill
+  pin; GetCalculatedLevel frame-cached + type passive 83/84/85 bonus;
+  PercToNextLevel; CanPurchase MaxLevel; IsLocked; Write v1 / Read.
 - **2026-08-08:** Progression leaves: AddLevelExp (IL=161) XPGain + XP(87)
   bonus + clamp + GameSparks counter + recursive apply + level-up log;
   getExpForLevel/getLevelFloat; AddXPDeficit 97/96; SpendSkillPoints +
