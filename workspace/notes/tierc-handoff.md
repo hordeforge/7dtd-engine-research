@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `8354c60` LockRequest re-verify |
+| HEAD (at handoff write) | `0cff775` census-pct tool |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 1847 / catalogued 557 / classified 1295 / unaccounted **0** |
