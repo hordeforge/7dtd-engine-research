@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: wandering horde cluster
+
+WanderingHorde persistence/cleanup leaves; AIWanderingHordeSpawner ctor
+party-level seeding, Update endTime + AddLocationLine(64), UpdateSpawn gates
++ max-tier pick, UpdateHorde Walk/Wander/Endstop state machine with horde flag
+release. Verified fresh dumps.
 ## 2026-08-08 - tier-C: AIDirector core leaves
 
 AddEntity/AddPlayer/RemovePlayer fan-out, GetComponent FullName lookup,
