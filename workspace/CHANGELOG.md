@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: RecipeQueueItem read side
+
+Read (IL=116) version u16 + legacy inline recipe below v2 + outdata warning;
+ReadLegacy (IL=101) header-less v1; Clear (IL=32) resets. Verified fresh
+dumps.
 ## 2026-08-08 - tier-C: ProgressionClass
 
 ModifyValue calculated-level pass; CalculatedCostForLevel multiplier/override;
