@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TileEntityCollector conversion loop
+
+handleUpdateForOutputType tick + FillData, convert count/speed/fuel/capacity reads, newItem/removeFuel/dropItems, disabled/full/out-of-fuel flags (verified)
 ## 2026-08-08 - tier-C: Chunk flag/property leaves
 
 IsLocked/IsInitialized volatile chains, regen bitmask get/set + mesh-layer teardown, ChunkPos/X/Z setters, IsEmptyLayer/GetSizeOfMesh (verified)
