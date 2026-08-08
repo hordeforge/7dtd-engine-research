@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk-save callback
+
+WorldChunkCache.NotifyOnChunkBeforeSave (IL=19, save-region.md 4):
+IChunkCallback fan-out before DoSaveChunks snapshot. verified from IL.
+Commit c965b45.
 ## 2026-08-08 - tier-C: crop growth rescheduler
 
 BlockPlantGrowing.addScheduledTick (IL=63, blocks.md 7): deterministic
