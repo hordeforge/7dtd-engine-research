@@ -169,6 +169,42 @@ ReadNetwork: Read(version=-1) + PlayerMetaInfo.FromStream
 `FromPlayer` / `ToPlayer` (IL=300 / 463) bridge live `EntityPlayer` and this blob
 (join path in [protocol.md](protocol.md) section 5).
 
+**`Read` body (IL=564)** mirrors `Write` with version gates: whole body requires
+`version > 37`; legacy inventory via `ReadItemStackOld` (v < 10); `Bag` is
+`Bag.Read` (v >= 58) or built from `ReadItemStack` + version-gated locked-slots
+(v >= 57 bool + `PackedBoolArray`, v >= 55 u16 count, v >= 53 all-true count);
+v >= 52 takes the first of a drag-and-drop stack; v < 49 pops three legacy ints;
+v < 54 pops a legacy `Equipment`; `craftingData` reads `Read` (v >= 59) else
+`ReadLegacy`; v <= 38 reads `rentalEndTime` (u64) else `rentalEndDay` (i32);
+v <= 55 pops a legacy u16 count of ints; `progressionData` / `buffData` /
+`stealthData` are length-prefixed byte blobs (0 length = empty stream); v > 50
+reads `favoriteShapes`; v > 44 reads `ownedEntities` (`OwnedEntityData.Read` at
+v > 47, else legacy id + optional extra id); v > 45 reads `totalTimePlayed`.
+A `bModdedSaveGame` flag logs `Modded save game` on load.
+
+**`ToPlayer(player)` (IL=463)** applies the blob: entity id / `SetStats` /
+position / rotation from the `ecd`; inventory slots + focused/holding idx; the
+bag; the dummy slot overflow is pushed into the bag, then the inventory, else
+`ItemDropServer(stack, GetDropPosition(), zero, id, 60, false)` +
+`BroadcastPlay("itemdropped")`; first spawn point, `onGround`, selected spawn
+key, `lastSpawnPosition`, `belongsPlayerId`, kills/deaths/score, equipment
+apply; lights off when no primary player; nav marker + crouch lock +
+`deathUpdateTime`; `bDead -> SetDead()`. `EntityPlayerLocal` only: the
+crafting lists (`AlreadyCraftedList` / `UnlockedRecipeList` / `FavoriteRecipeList`),
+drag-and-drop stack, per-waypoint `waypoint` NavObjects, creative favorites.
+The length-prefixed blobs become `Progression.Read`, `EntityBuffs.Read`, and
+`PlayerStealth.Read` via pooled readers; owned entities are re-added;
+`gameStageBornAtWorldTime` clamps to the current `worldTime`.
+
+**`Save(dir, playerId)` (IL=129)** makes the directory, backs the existing file
+to `.bak` (overwrite), writes `'t' 't' 'p' 0x00` + version **59** + the `Write`
+body to a fresh `.tmp` (`FileMode.Create`, `FileShare.Read`), clears
+`bModifiedSinceLastSave`, promotes `.tmp` over the target, and writes the
+`.meta` sidecar via `PlayerMetaInfo.Write`. `Exists(dir, playerName)` (IL=25)
+is a plain `SdFile.Exists` on the `.ttp` path.
+`ToggleWaypointHiddenStatus(nav)` (IL=12) copies `nav.hiddenOnCompass` onto the
+matching waypoint.
+
 ## 2. Chunk binary format (stock IL)
 
 | Method | IL | Bound |
@@ -695,6 +731,12 @@ the sections above. The platform cloud-save backend is native (residual).
   (IL=44), TryRemoveDroppedBackpack (IL=14), ProtectedBackpack record.
 ## Changelog
 
+- **2026-08-08:** PlayerDataFile read/apply: Read (IL=564) mirrors Write with
+  version gates (bag/locked-slots v53/55/57/58, legacy equipment v54, rental
+  u64/u32 v38, blobs, ownedEntities v44/46/47, modded flag); ToPlayer (IL=463)
+  full apply incl. dummy-slot overflow drop + waypoint nav objects +
+  progression/buffs/stealth blobs + born-at clamp; Save (IL=129) .bak/.tmp
+  promote + meta sidecar; Exists (IL=25); ToggleWaypointHiddenStatus (IL=12).
 - **2026-08-08:** Chunk buffered IO leaves: ChunkMemoryStreamReader (512000
   buffer, Close = Seek 0); ChunkMemoryStreamWriter Init stores target, Close
   flushes RegionFileAccessMultipleChunks.Write(dir, x, z, ext, buffer, pos).
