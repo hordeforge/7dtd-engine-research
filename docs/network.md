@@ -34,7 +34,7 @@ These run as **peer MonoBehaviours** relative to `GameManager.Update` (script or
 `LateUpdate` on each transport backend (LiteNet/Steam/etc.). Package
 decode/dispatch stays in `ConnectionManager` (section 1.1).
 
-### 1.1 `ConnectionManager.Update` (IL=215, server path)
+### 1.1 `ConnectionManager.Update` (IL=228, server path)
 
 Verified body order when `IsServer`:
 
@@ -538,7 +538,7 @@ SendData(cInfo, channel, buf, reliable)`) or client-side
 (`netClient.SendData(channel, buf)`), and re-queues the buffer at the
 front when the send errors - the retry loop.
 
-`ConnectionManager.Update` (IL=215, peer MB) drains each connection via `GetPackages` → `ProcessPackages` (IL=116) and flushes send queues. Xref: `ProcessPackages` is only called from that Update path (4 sites).
+`ConnectionManager.Update` (IL=228, peer MB) drains each connection via `GetPackages` → `ProcessPackages` (IL=116) and flushes send queues. Xref: `ProcessPackages` is only called from that Update path (4 sites).
 
 **Server bring-up (`ProtocolManager`):** `SetupProtocols` (IL=128) builds the
 `servers` / `clients` lists once: it parses `GamePrefs` 144
