@@ -576,6 +576,30 @@ zeroes both next-times. `Write` (IL=12) persists `HordeNextTime` then
 the spawner list and `Cleanup()`s + removes matching-type spawners.
 `LogTimes` (IL=17) logs `Next wandering - bandit {0}, horde {1}` via `LogAI`.
 
+**`AIWanderingHordeSpawner`:** ctor (IL=76) picks the group name
+`WanderingBandits` (type 0) / `WanderingHorde` (type 1), builds a
+`AIDirectorGameStagePartySpawner` over the group, adds every target player as a
+member, resets the party level (50 for hordes, 0 for bandits) and clears
+members (pure level seeding). `Update` (IL=101): returns done when no players;
+when `worldTime >= endTime` or the spawn phase finished with an empty command
+list it fires `arrivedCallback` and finishes; a not-yet-spawning run registers
+an `AstarManager.AddLocationLine(startPos, endPos, 64)`; otherwise
+`UpdateHorde` drives the zombies. `UpdateSpawn` (IL=158): gates on
+`AIDirector.CanSpawn(1)` + `spawner.Tick(dt)` + `canSpawn`, a 1 s `spawnDelay`,
+a spawn point from `GetMobRandomSpawnPosWithWater(startPos, 1, 6, 15, true)`,
+and `GetRandomEntityFromGroupMaxTier(spawnGroupName, MaxEntityTier, ref
+lastClassId, isEnemy, isAnimal, null)` (-1 logs the max-tier warning and fails);
+the created `EntityEnemy` becomes a horde zombie with an investigate order
+toward the pit stop. `UpdateHorde(dt)` (IL=189) is the three-command state
+machine per zombie (`Walk` → `Wander` → `Endstop`): the walk leg re-affirms the
+pit-stop investigate target (divergence or an attack target drops the zombie
+from control), the wander leg counts `WanderTime = 90 + RandomFloat * 4`
+(refreshing the despawn timer), and the endstop leg targets
+`RandomPos(endPos, 6)` and clears `IsHordeZombie`; any released zombie has
+`bIsChunkObserver` cleared before `RemoveAt`. `Cleanup` (IL=24) releases every
+remaining zombie's horde flags. `RandomPos` (IL=15) is
+`target + RandomOnUnitCircle * radius` (y = 0).
+
 ## AIHordeSpawner : Object
 
 Screamer / event horde runner (not an `AIDirectorComponent`, but driven from
@@ -909,6 +933,11 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** AIWanderingHordeSpawner: ctor group/party-level seeding;
+  Update endTime/arrived + AddLocationLine(64); UpdateSpawn (IL=158) CanSpawn
+  + spawnDelay + mob spawn + max-tier pick; UpdateHorde (IL=189) Walk/Wander/
+  Endstop state machine (pit-stop re-affirm, 90+rnd*4 wander, RandomPos endstop
+  6, horde flag release); Cleanup release.
 - **2026-08-08:** WanderingHorde leaves: InitNewGame playtest latch + zeroed
   times; Write/Read persist Horde then Bandit next-times (version > 3 gate);
   CleanupType reverse-walk cleanup; LogTimes.
