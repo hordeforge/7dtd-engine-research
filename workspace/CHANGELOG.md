@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityItem mesh + cache lifecycle leaves
+
+OnLoadedFromEntityCache reset, createMesh 249-IL (block/item clone, DropScale, collider pass), throw sound pair (verified)
 ## 2026-08-08 - tier-C: EntityVehicle world-boundary rescue + state getters
 
 CheckForOutOfWorld 474-IL rescue phases (bounds clamp, chunk regen, worldValidPos walk-back), TeleportToWithinBounds, VelocityFlip, UpdateAttachment, state getters (verified)
