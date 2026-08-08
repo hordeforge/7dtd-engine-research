@@ -295,6 +295,19 @@ whether anything changed. `CheckDensities(logAll)` (IL=129) collects
 once per call. `ClearNeedsRegenerationAt(idx)` (IL=32) clears the
 `m_NeedsRegenerationAtY` bit (Monitor-locked, volatile) for a single
 y-band index.
+`LoopOverAllBlocksCoroutine(delegate, includeChilds, includeAirBlocks)`
+(IL=15) is the frame-sliced twin: the `<LoopOverAllBlocksCoroutine>d__345`
+MoveNext (IL=69) runs the same per-layer fan-out but yields once per layer
+to spread the sweep across frames.
+
+**Chunk geometry/bounds leaves:** `updateBounds()` (IL=55) recomputes
+`boundingBox = CalculateAABB(m_X, m_Y, m_Z)` and the world-corner literals
+`worldPosIMin = (m_X << 4, m_Y << 8, m_Z << 4)` /
+`worldPosIMax = worldPosIMin + (15, 255, 15)`.
+`GetBlockWorldPosZ(z)` (IL=7) is `(m_Z << 4) + z`;
+`GetSameDensityValue(y)` (IL=16) returns the `DensityTerrain` /
+`DensityAir` sentinels outside the 0..255 band else
+`chnDensity.GetSameValue(y)` (`PrefabChunk` overrides it with a constant 0).
 
 **`Chunk.OnLoad(world)` (IL=97):** server side only: for each `entityStub`
 whose id is not already present in the world → `SpawnEntityAsync(world, stub,
