@@ -123,7 +123,9 @@ greater-or-equal). Concrete action requirements: `TwitchRequirementHasBuff`
 GetBool` with the invert XOR) while `TwitchRequirementSandboxFloat` and
 `TwitchRequirementSandboxInt` are
 operation requirements comparing two sandbox values via `LeftSide` /
-`RightSide`; the `TwitchVoteRequirement*` types mirror them for votes.
+`RightSide`; the vote mirrors `BaseTwitchVoteRequirement` and its concrete
+`TwitchVoteRequirementHasBuff` / `TwitchVoteRequirementHasProgression` /
+`TwitchVoteRequirementIsNight` gate `TwitchVote` the same way.
 
 **Pimp-pot and blood-moon bookkeeping (server fields):** `AddToPot(amount)`
 / `AddToBitPot(amount)` (IL=23 each) add to `RewardPot` / `BitPot`

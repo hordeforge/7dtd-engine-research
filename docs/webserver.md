@@ -198,7 +198,9 @@ flowchart TB
   level.
 - `Whitelist` / `Blacklist`: allow/deny lists.
 - `AdminWebModules` / `AdminWebUsers` (`Webserver.Permissions`): the admin-section
-  management surface for the above.
+  management surface for the above (per-module records are the nested
+  `AdminWebModules/WebModule`: module name + required level, round-tripped via
+  `ParseElement` / `Save`).
 
 ---
 
