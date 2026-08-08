@@ -644,6 +644,12 @@ director/spawn paths; see [spawning.md](spawning.md)).
    `RandomPos(target, 3)` for **2400** ticks; `hordeList.Add`;
    `IncSpawnCount`; `numSpawned++`; return false.
 
+**ctor (IL=20):** builds `spawner = new AIDirectorGameStagePartySpawner(world,
+spawnerDefinition)` and stores `targetPos` + `playerSearchBounds`.
+`get_isSpawning` (IL=4) is `spawner.canSpawn`; `Cleanup` (IL=25) clears
+`IsHordeZombie` / `bIsChunkObserver` on every tracked zombie and empties
+`hordeList`.
+
 ## AIDirectorZombieState : Object
 
 ## Network and save surfaces (verified)
@@ -955,6 +961,8 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** AIHordeSpawner ctor/cleanup: party-spawner build +
+  playerSearchBounds; isSpawning = canSpawn; Cleanup releases horde flags.
 - **2026-08-08:** AIDirectorChunkData persistence/accessors: Write v2
   (activity + events + cooldownDelay) / Read inner >= 2; IsReady cooldown gate;
   EventCount/GetEvent/ActivityLevel.
