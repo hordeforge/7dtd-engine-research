@@ -78,6 +78,27 @@ participant is the primary player) or broadcasts a fresh
 `NetPackageTwitchVoteScheduling` on channel **192** to that participant,
 then dequeues it.
 
+**`TwitchManager.Update` (IL=1585) init-state machine + running loop:** the
+manager's frame peer runs only with a live world and players. It is a
+`switch` over `InitState` (9 targets): state 0 subscribes
+`GameEventAccessApproved` and loads viewer data; states 2 / 4 are
+login-timeout guards (`updateTime` countdown, then
+`StopTwitchIntegration` + `Twitch: login failed in {state} state` warning
+and a jump to state 10); state 5 checks the OAuth credentials and drives
+the IRC connect; state 8 finalizes (`SetupTwitchCommands`, resolves
+`LocalPlayer`, `RefreshPartyInfo`, seeds `HighestGameStage`). The common
+tail (the default target) is the running loop: poll
+`ExtensionManager.HasCommand`/`GetCommand` -> `HandleExtensionMessage`,
+`ircClient.Update` + `AvailableMessage`/`ReadMessage` -> `HandleMessage`,
+`ViewerData.Update`, then reconcile `LiveActionEntries` backwards
+(removing `ReadyForRemove` entries, flagging `CooldownBlocked`) and prune
+null `actionSpawnLiveList` entries; the cooldown/leaderboard/blood-moon
+preset work shows up as `TwitchActionPreset.HandleCooldowns`,
+`TwitchLeaderboardStats.UpdateStats` and the `BMCooldown*` fields. On a
+dedicated host without Twitch configured the machine stalls in the init
+states, which is the managers.md "waste if constructed without Twitch"
+note.
+
 ---
 
 ## 3. Dedicated relevance and residuals
