@@ -681,6 +681,18 @@ node it moves toward its center while `isOutOfRange(center, 0.25)` and
 clears it otherwise (any non-Idle state also clears it). Ends with
 `updateDroneServiceMenu`.
 
+**Drone gates:** `canMove(dir)` (IL=18) is
+`!IsPositionBlocked(pos, pos + normalized(dir) * physColHeight, mask
+1073807360, false)` - the movement feasibility probe; `isTargetUnderWater`
+(IL=14) is `world.GetBlock(getBlockPosition(target)).type == 240` (water);
+`IsOnTeleportCooldown` (IL=5) is `teleportAtkCooldownTimer > 0`;
+`NotifyOffTheWorld` (IL=1) is a no-op.
+`updateShutdownState` (IL=53, server only) drives the powered-down
+lifecycle: with a live owner it calls `performShutdown` when the drone's
+own health hit 0 outside Shutdown/Sentry; it wakes (`setShutdown(false)`)
+when both the drone and owner have health above 1 and the owner is within
+10; and it runs `processShutdown` whenever the state is Shutdown.
+
 **`updateDroneSystems` (IL=169):** the per-frame server systems pass: ticks
 `initSuppressVOTimer`; on the server with an owner it lazily registers the
 owner teleport hook (`PlayerTeleportedDelegates += TeleportIfFollowing`,
