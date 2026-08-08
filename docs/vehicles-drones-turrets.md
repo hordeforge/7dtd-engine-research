@@ -205,7 +205,14 @@ item-value-driven config passes.** `CalcMods` ORs every installed
 carrying `EntityVehicle.StorageModifierTags`, then per `VehiclePart`
 `SetMods()` and updates the entity (`UpdateStorageModCount(count)` +
 `UpdateContainerSize(false)`) - so storage mods enlarge the vehicle
-container. `CalcEffects` evaluates the vehicle passive set on the item value
+container. `VehiclePart.SetMods` (IL=68) is the part-level half: it reads
+the part's `mod` property and sets `modInstalled =
+vehicle.ModTags.Test_Bit(FastTags.GetBit(mod))`, then positions the `modT`
+transform via `modRot` (or `SetActive(modInstalled)` without a rotation),
+hides the `modHideT` transform when installed, and enables the `modRBT`
+physics transform when installed - the mod's visual and collider appear on
+the part exactly when the vehicle carries the matching mod tag.
+`CalcEffects` evaluates the vehicle passive set on the item value
 with the driver's entity tags: entity/block/self damage per (passives **55** /
 **56** / **57** / **58**, each scaled by the static
 `VehicleEntityDamageModifier` / `VehicleBlockDamageModifier` /
@@ -835,6 +842,10 @@ non-vehicle type is a content contract violation, not a graceful fallback.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native / content residuals |
 
+## Changelog
+
+- **2026-08-08:** VehiclePart.SetMods (IL=68): modInstalled from ModTags bit,
+  modT pose/active, modHideT hide, modRBT physics enable.
 ## Changelog
 
 - **2026-08-08:** Vehicle.CalcMods (IL=77) ModTags OR + storage-mod count +
