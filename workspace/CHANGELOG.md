@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: xmlsToLoad inventory verified (49 XmlLoadInfo entries = cctor array, IL=871)
 ## 2026-08-08 - tier-C: dedicated-leaves inventory verified (88 base + 283 promoted = 371 rows)
 ## 2026-08-08 - tier-C: OOS supplement count fix 494->497 (total 1168 verified)
 ## 2026-08-08 - tier-C: protocol join-sequence EKickReason values verified (10/31)
