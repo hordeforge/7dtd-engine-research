@@ -660,6 +660,19 @@ isLocalPlayer)` and `EModelInstanceAssets.Load(isSync, ecd, ec)`.
 **Class lookup leaves (V3.1.0 b14):** `EntityClass.GetEntityClass(id)` (IL=7)
 is `list.TryGetValue` (null when absent). `GetEntityClassName(id)` (IL=10)
 returns the class's `entityClassName` or the string `"null"` when missing.
+The class **id is the name's hash**: `FromString(name)` (IL=3) is
+`name.GetHashCode()` and `Add(name, ec)` (IL=9) registers under that hash after
+storing `entityClassName`. `GetId(name)` (IL=30) linear-scans the dict for the
+matching class name (-1 when absent). `Cleanup()` (IL=3) clears the registry.
+
+**Class drop + tier leaves:** `AddDroppedId(event, name, minCount, maxCount,
+prob, stickChance, toolCategory, tag)` (IL=33) appends a `SItemDropProb` to the
+event's `itemsToDrop` list (lazy-created). `LootDropPick(rand)` (IL=44) returns
+the first entry when fewer than two drops, else a cumulative weighted pick over
+`lootDrops[].weight`. `CalculateEntityTier()` (IL=49) derives the tier purely
+from tags: `elite -> 5`, `radiated -> 4`, `feral -> 3`, `special -> 2`,
+`strong -> 1`, else `0`. `ParseEntityFlags(names, ref flags)` (IL=49) ORs
+comma-split `EntityFlags` names via `TryParse` (single name when no comma).
 
 **Tier substitution:** `GetEntityClassWithinMaxTier(ec, maxTier)` (IL=30):
 `ec.EntityTier <= maxTier` → as-is; else walk the `GetPreviousTierEntity()`
@@ -1134,6 +1147,10 @@ above.
   single, EntitySpawnerClass build + AddForDay, empty-spawner throw.
 ## Changelog
 
+- **2026-08-08:** EntityClass leaves: FromString/Add name-hash ids, GetId
+  linear scan, Cleanup; AddDroppedId SItemDropProb append; LootDropPick
+  weighted roll; CalculateEntityTier tag ladder elite 5 -> strong 1 -> 0;
+  ParseEntityFlags comma OR.
 - **2026-08-08:** EntityGroups leaves: IsEnemyGroup first-entry flag;
   Normalize(name, totalp); EntityGroupSpawnState cumulative roll + DidSpawn
   numSpawned; EntityGroupsFromXml parseGroup (text lines + entity/e elements,
