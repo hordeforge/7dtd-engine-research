@@ -383,6 +383,15 @@ Protection margins (cull): land claim / bedroll / offline / backpack / vehicle /
 | `GetChunkSync(Int64)` | 178 | live cache → pending snapshot → pending chunk → load from save dir → load from load dir → `cacheChunk` |
 | `DoSaveChunks` | **292** | free locked unload list, `CullExpiredChunks`, `OptimizeLayouts`, drain snapshot dict + dirty chunk dict via `IRegionFileChunkSnapshotUtil.TakeSnapshot` / write |
 | `CullExpiredChunks` | 179 | refresh protection levels + group timestamps; remove unprotected expired keys (`RemoveChunks`) |
+| `MakeRoom` / `MakeRoomForChunk` | 297 / 322 | the save-size-limit eviction core: sort `chunksInSaveDir` culling candidates (timestamp comparer), `RemoveChunks` the oldest until the target bytes are free; `Requested space ({0} bytes) exceeds maximum available space ({1} bytes).` when the request exceeds `maxBytes`; `Failed to clear as much space as requested.` on a shortfall; `MakeRoom` warns `RegionFileManager has been requested to clear more space than is currently occupied by region data...` when the target exceeds the occupied bytes |
+| `IsChunkSavedAndDormant` | 62 | in `chunksInSaveDir`, not in the live cache, not in `chunksToSave`, and not the chunk currently saving |
+| `GetUniqueChunkKeys` | 78 | unions `chunksInLoadDir` + `chunksInSaveDir` keys, skipping chunks whose protection level intersects the excluded set |
+| `GetChunkTimestamp` / `SetChunkTimestamp` | 29 / 30 | the group / per-chunk save timestamps (`No timestamp available for chunk with key: {0}` on a miss; `Set` keeps the earlier group timestamp unless `groupTimestampsDirty`) |
+| `GetChunkProtectionLevelWithGrouping` | 24 | the chunk group's protection level, else the per-chunk level (0 default) |
+| `LoadResetRequests` | 44 | reads `{saveDir}/PendingResets.7pr` (`i32` count + `i64` keys) into `resetRequestedChunks` |
+| `resetVolumeDataForChunks` | 26 | per chunk `World.ResetTriggerVolumes` + `ResetSleeperVolumes` |
+| `isChunkInLoadDir` / `isChunkInSaveDir` | 5 / 21 | the load-dir hashset / locked save-dir dict membership |
+| `SetCacheSize` / `get_MaxBytes` / `get_SaveDataSlot` / `get_ChunkGroups` | 4 / 3 / 3 / 3 | the cache-size, byte budget, slot and chunk-group accessors |
 
 There is **no** `RegionFileManager.Update` call site in the assembly (Xref=0).
 Save work is task-driven from `cacheChunk` / world save, not a per-frame MB.
