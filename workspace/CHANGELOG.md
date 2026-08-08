@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: save-persistence doc spot-check (17 claims exact)
 ## 2026-08-08 - tier-C: spawning doc spot-check (11 claims exact)
 ## 2026-08-08 - tier-C: loop-gmupdate + managers spot-check (9 claims exact, TwitchManager.Update=1585)
 ## 2026-08-08 - tier-C: entity-ai doc spot-check (8 claims exact)
