@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Quest lifecycle leaves
+
+SetupQuestCode hash mint; SetupTags objective wiring; StartQuest (IL=318)
+activation pass; SetupRewards RewardIndex + chosen rolls; UnhookQuest teardown.
+Verified fresh dumps.
 ## 2026-08-08 - tier-C: QuestClass leaves
 
 CreateQuest (IL=147) clones actions/requirements/objectives/rewards with
