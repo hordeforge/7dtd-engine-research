@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: FactionManager threaded save + debug print
+
+factions.dat + .bak backup, pooled stream write/free, per-faction log (verified)
 ## 2026-08-08 - tier-C: trigger manager list plumbing + GameUtils time/kick helpers
 
 UpdateList add/remove, layer union, nav-object test toggle, prefab teardown; day/hour formatting, 0.5s delayed kick (verified)
