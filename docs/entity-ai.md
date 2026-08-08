@@ -395,8 +395,16 @@ see cache (called from OnUpdateLive before AI).
 - Stats/derived: `GetMaxStamina` / `GetMaxWater` (IL=6 each) are
   `(int)Stats.Stamina/Water.Max`; `GetPushFactor` (IL=3) = `pushFactor`;
   `GetOwnedEntities(classId)` (IL=28) filters `ownedEntities` by
-  `OwnedEntityData.ClassId` into a fresh list; `getNavigator` (IL=3) =
-  `navigator`.
+  `OwnedEntityData.ClassId` into a fresh list; `GetOwnedEntity(entityId)`
+  (IL=12) is the `Find` by id; `getNavigator` (IL=3) = `navigator`.
+- Movement/combat: `GetStaminaMultiplier` (IL=2) is 1 (base);
+  `GetWalkType` (IL=3) = `walkType`; `IsAttackImpact` (IL=16) is the
+  avatar controller's attack-impact flag; `GetMaxViewAngle` (IL=3) =
+  `maxViewAngle` (the `IsInFrontOfMe` cone half-angle);
+  `GetForwardVector` (IL=32) is the yaw-derived 3D forward
+  (`cos(rotation.y * 0.0175 - pi), 0, -sin(...)` shape), with the 2D
+  variant `GetForwardVector2` (IL=12); `GetHandItem` (IL=3) =
+  `handItem`.
 - Spawn/misc: `SetSpawnByData(id, name)` (IL=16) stores `spawnById` /
   `spawnByName` and sets `bPlayerStatsChanged |= !isEntityRemote`;
   `WillForceToFollow` (IL=2) is false; `CycleActivatableItems` (IL=1) is a
