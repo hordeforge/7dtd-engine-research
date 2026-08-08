@@ -290,7 +290,34 @@ the browser.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native/external residuals |
 
+**Newly-reached webserver leaves (2026-08-08 reachability-seed pass):** the call-graph
+seeds now include `WebServer.Init` / `GameStartDone` / `WorldShuttingDown` (the
+`GameManager.Awake` -> ModEvent-handler boot), so the HTTP stack is reached. Roles are
+dump-derived.
+
+| Type | base | key methods |
+|---|---|---|
+| `ApiToken` | ValueType | TryParse, ToXml |
+| `CommandInstance` | Object | console command wrapper |
+| `LogEntry` | Object | web log entry record |
+| `OpenApiSpec` | ValueType | OpenAPI document builder |
+| `WebModule` | ValueType | TryParse, ToXml, FixPermissionLevelsFromKnownModule |
+| `WebUser` | ValueType | TryParse, ToXml, ValidatePassword |
+| `Map` | Object | MapRendering.Api live map render entry |
+| `ResourceHelpers` | Object | OpenManifestResource, GetManifestResourceText |
+| `WebMod` | Object | mod web registration record |
+| `WebServer` | Object | GameStartDone, Init, WorldShuttingDown |
+| `AbstractCache` | Object | InvalidateAllCaches |
+| `EntityFilterList` | Object | live-data entity filter |
+| `PermissionUtils` | Object | CanViewAllPlayers, CanViewAllClaims |
+| `SimpleRedirectHandler` | AbsHandler | HandleRequest |
+| `Null` | AbsWebAPI | HandleRequest (null object) |
+| `PermissionsApiHelpers` | Object | TryParseId |
+| `Animals` | EntityFilterList | predicate (live-data animal filter) |
+
 ## Changelog
+
+- **2026-08-08:** Newly-reached webserver leaves narrated (reachability-seed pass).
 
 - **2026-08-08:** AdminWebModules/WebModule per-module record (name + level, ParseElement/Save round-trip).
 - **2026-07-28:** WebAPI Command GET/POST + WebConnection session note.

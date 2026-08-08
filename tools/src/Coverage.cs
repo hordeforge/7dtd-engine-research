@@ -98,16 +98,42 @@ class Coverage {
     var gm = all.First(t => t.Name == "GameManager");
     string[] seeds = { "StartGame", "startGameCo", "StartAsServer", "gmUpdate", "UpdateTick", "SaveAndCleanupWorld", "PlayerLoginRPC", "PlayerSpawnedInWorld", "ChatMessageServer" };
     foreach (var s in seeds) foreach (var m in gm.Methods.Where(x => x.Name == s && x.HasBody)) if (visited.Add(m)) work.Enqueue(m);
-    string[][] extra = { new[]{"ConnectionManager","Update"}, new[]{"DynamicMeshManager","Update"}, new[]{"World","TickEntities"}, new[]{"World","TickEntity"}, new[]{"World","OnUpdateTick"}, new[]{"EntityAlive","OnUpdateEntity"}, new[]{"EntityAlive","updateTasks"} };
+    string[][] extra = {
+      new[]{"ConnectionManager","Update"}, new[]{"DynamicMeshManager","Update"},
+      new[]{"World","TickEntities"}, new[]{"World","TickEntity"}, new[]{"World","OnUpdateTick"},
+      new[]{"EntityAlive","OnUpdateEntity"}, new[]{"EntityAlive","updateTasks"},
+      // Dedicated HTTP API: GameManager.Awake -> Webserver.WebServer.Init registers the
+      // GameStartDone/WorldShuttingDown ModEvent handlers; the IsServer-gated
+      // GameStartDone creates Webserver.Web (the REST host). Both are verifiably
+      // dedicated-server code, so they are seeded directly (a blanket GameManager.Awake
+      // seed would flood the base with client UI).
+      new[]{"WebServer","Init"}, new[]{"WebServer","GameStartDone"},
+      new[]{"WebServer","WorldShuttingDown"},
+    };
     foreach (var e in extra) foreach (var m in all.Where(t => t.Name == e[0]).SelectMany(t => t.Methods).Where(x => x.Name == e[1] && x.HasBody)) if (visited.Add(m)) work.Enqueue(m);
 
+    // Reflection targets: XML loaders resolve classes via Type.GetType /
+    // Activator.CreateInstance on a constant string (dialog actions, quest criteria,
+    // twitch vote requirements, game events). Follow the string to its type and seed
+    // the type's method bodies so reflection-instantiated dedicated code is reached.
+    string lastLdstr = null;
     while (work.Count > 0) { var m = work.Dequeue();
       foreach (var i in m.Body.Instructions) {
+        if (i.OpCode.Code == Code.Ldstr) { lastLdstr = i.Operand as string; }
         var mr = i.Operand as MethodReference; if (mr == null) continue;
         MethodDefinition md = null; try { md = mr.Resolve(); } catch { }
         if (md != null && md.HasBody && visited.Add(md)) work.Enqueue(md);
         if (i.OpCode.Code == Code.Callvirt) { var k = mr.DeclaringType.FullName + "::" + mr.Name + "/" + mr.Parameters.Count;
           List<MethodDefinition> ovs; if (overrides.TryGetValue(k, out ovs)) foreach (var ov in ovs) if (visited.Add(ov)) work.Enqueue(ov); }
+        // Type.GetType / Activator.CreateInstance on a constant name: seed that type.
+        if (mr.DeclaringType.FullName == "System.Type" && (mr.Name == "GetType" || mr.Name == "GetTypeFromHandle")) {
+          if (!string.IsNullOrEmpty(lastLdstr)) { var tt = all.FirstOrDefault(t => t.FullName == lastLdstr || t.Name == lastLdstr || t.FullName.Replace('/','+') == lastLdstr);
+            if (tt != null) foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm); }
+        }
+        if (mr.DeclaringType.FullName == "System.Activator" && mr.Name == "CreateInstance" && !string.IsNullOrEmpty(lastLdstr)) {
+          var tt = all.FirstOrDefault(t => t.FullName == lastLdstr || t.Name == lastLdstr || t.FullName.Replace('/','+') == lastLdstr);
+          if (tt != null) foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm);
+        }
       }
     }
 

@@ -707,6 +707,9 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   wire/file contract. (`UtilList<T>` is not dead but is reachable only from
   the client `DistantTerrain` render path.)
 
+**`AdminBlacklist`** (AdminSectionAbs): the ban list - `AddBan` / `RemoveBan` /
+`IsBanned` / `GetBanned` over the admin XML, with `Save`.
+
 ## Changelog
 
 - **2026-08-08:** XmlExtensions XML helpers, LiveStats dead survival-stat record, body-verified dead collection/noise families (TList/TQueue, OneToOneDictionary, CollectionDebugWrapper, ParsingConverters, SimplexNoise, OpenSimplex2/2S, IEnumerableExtensions, BinaryReaderExtensions, IdPalette), ObservableDictionary live backing note.

@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: reachability seeds fixed (webserver 73 + reflection 4+ types reached; narrated 3574->3651)
 ## 2026-08-08 - tier-C: narrate all 2,363 unreached game types with roles (OOS role tables)
 ## 2026-08-08 - tier-C: REACH 100% NARRATED (3574/3574; client-side-surface.md + arity appendix)
 ## 2026-08-08 - tier-C: re-narrate 68 server-classified leaves in family docs (narrated 2388->2456)

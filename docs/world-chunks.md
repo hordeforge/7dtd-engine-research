@@ -1038,6 +1038,8 @@ if two weather packages arrive in the same `Time.frameCount`.
 | `WorldMove` | ValueType | PerformMove, get_CountOfAssociatedSavesInSameStorage, get_IsReady |
 | `WorldPreviewTerrain` | Object | createMesh, GenerateTerrain, destroyTerrain |
 
+**`TileAreaConfig`** (ValueType): tile-area geometry config with `checkCoordinates` bounds validation (reached via the tile-area reflection path).
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining

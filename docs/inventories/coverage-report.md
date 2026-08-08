@@ -41,12 +41,12 @@ The tiers are reported separately and deliberately **not summed into a headline*
 
 | Metric | Value |
 |---|---:|
-| Reached methods (with body) | 45217 |
-| Reached types (incl. compiler-generated) | 7177 |
-| Reached, non-generated | 6040 |
-| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2341 (excluded from %) |
-| ...**game types** (the RE surface) | **3574** |
-| ...**narrated** (backticked in a narrative doc) | **3574 (100%)** |
+| Reached methods (with body) | 46445 |
+| Reached types (incl. compiler-generated) | 7297 |
+| Reached, non-generated | 6158 |
+| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2366 (excluded from %) |
+| ...**game types** (the RE surface) | **3651** |
+| ...**narrated** (backticked in a narrative doc) | **3651 (100%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 0 |
 | ...**classified** out-of-scope | 0 |
 | ...**unaccounted** (appears nowhere) | 0 |
@@ -67,16 +67,16 @@ reached-and-documented plus unreached-and-classified (client / editor / dead).
 | Metric | Value |
 |---|---:|
 | All types (incl. nested) | 7432 |
-| Reached (Assembly-CSharp own types) | 4655 (62%) |
-| Unreached | 2777 (37%) |
-| ...compiler-generated / obfuscated | 357 (excluded) |
+| Reached (Assembly-CSharp own types) | 4734 (63%) |
+| Unreached | 2698 (36%) |
+| ...compiler-generated / obfuscated | 355 (excluded) |
 | ...third-party / BCL | 57 (excluded) |
-| ...**unreached game types** (need classification) | **2363** |
+| ...**unreached game types** (need classification) | **2286** |
 | All methods with body | 53235 |
-| Reached methods (Assembly-CSharp own) | 30289 (56%) |
-| Unreached methods | 22946 (43%) |
-| ...in reached game types (uncalled members) | 13671 |
-| ...in unreached game types | 4966 |
+| Reached methods (Assembly-CSharp own) | 31164 (58%) |
+| Unreached methods | 22071 (41%) |
+| ...in reached game types (uncalled members) | 13218 |
+| ...in unreached game types | 4549 |
 
 **Whole-assembly accounting (the 100% view):**
 
@@ -86,13 +86,12 @@ reached-and-documented plus unreached-and-classified (client / editor / dead).
 | Methods in accounted game types | **46331 / 46331 (100%)** |
 | (excluded by design: 1358 compiler-generated, 99 third-party/BCL, 38 both; sums to 7432 of 7432) | |
 
-Unreached game types (2363), grouped by top namespace:
+Unreached game types (2286), grouped by top namespace:
 
 | Namespace | count |
 |---|---:|
-| `<global>` | 1817 |
+| `<global>` | 1804 |
 | `Platform` | 155 |
-| `Webserver` | 72 |
 | `Twitch` | 58 |
 | `DynamicMusic` | 45 |
 | `XMLData` | 40 |
@@ -101,6 +100,7 @@ Unreached game types (2363), grouped by top namespace:
 | `JBooth` | 20 |
 | `MusicUtils` | 13 |
 | `CoverClippingTool` | 11 |
+| `Webserver` | 9 |
 | `Audio` | 9 |
 | `XMLEditing` | 8 |
 | `Challenges` | 7 |
@@ -111,10 +111,10 @@ Unreached game types (2363), grouped by top namespace:
 | `Assets` | 4 |
 | `ModInfo` | 3 |
 | `PrefabVolumes` | 3 |
-| `MapRendering` | 3 |
 | `GearVariants` | 2 |
 | `Quests` | 2 |
 | `RaycastPathing` | 2 |
+| `MapRendering` | 2 |
 | `PostEffects` | 2 |
 | `ShinyScreenSpaceRaytracedReflections` | 1 |
 | `WaterClippingTool` | 1 |
@@ -124,13 +124,13 @@ Unreached game types (2363), grouped by top namespace:
 | `GUI_2` | 1 |
 | `UAI` | 1 |
 
-Unreached game types already mentioned in docs: **2363** (accounted).
+Unreached game types already mentioned in docs: **2286** (accounted).
 Unreached game types with **no mention anywhere**: **0** (the whole-assembly gap).
 
 Gap list (no mention in any doc):
 
 
-Full unreached game-type list (2363):
+Full unreached game-type list (2286):
 
 | Type | Namespace | methods |
 |---|---|---:|
@@ -147,9 +147,7 @@ Full unreached game-type list (2363):
 | `ActivityJoiningCallback` | <global> | 0 |
 | `AddressableFolders` | <global> | 1 |
 | `AddSnowToGlass` | <global> | 2 |
-| `AdminBlacklist` | <global> | 8 |
 | `AdminSectionAbs` | <global> | 2 |
-| `AdminWhitelist` | <global> | 12 |
 | `AdvancedSettings` | <global> | 1 |
 | `AffectMode` | <global> | 0 |
 | `AggregateMetrics` | <global> | 0 |
@@ -229,7 +227,6 @@ Full unreached game-type list (2363):
 | `BackgroundMusicMono` | <global> | 7 |
 | `BackpackCraftingOptions` | <global> | 0 |
 | `BakeJobState` | <global> | 0 |
-| `BannedUser` | <global> | 3 |
 | `BansAndWhitelistAuthorizer` | <global> | 6 |
 | `BbCodeSupportMode` | <global> | 0 |
 | `BenchmarkContainer` | <global> | 4 |
@@ -341,8 +338,6 @@ Full unreached game-type list (2363):
 | `ColorMode` | <global> | 0 |
 | `ColorRGB24` | <global> | 0 |
 | `CommandHandlerDelegate` | <global> | 0 |
-| `CommandInstance` | <global> | 1 |
-| `CommandPermission` | <global> | 3 |
 | `CommandSenderInfo` | <global> | 0 |
 | `CompareLightLevel` | <global> | 3 |
 | `CompletionCallback` | <global> | 0 |
@@ -352,7 +347,6 @@ Full unreached game-type list (2363):
 | `ConfirmationResult` | <global> | 0 |
 | `ConsoleCmdTeleportsAbs` | <global> | 6 |
 | `ConsoleCmdTestSystemAbs` | <global> | 6 |
-| `ConsoleConnectionAbstract` | <global> | 3 |
 | `ConsoleHelper` | <global> | 9 |
 | `Constants` | <global> | 2 |
 | `Constraint` | <global> | 0 |
@@ -464,7 +458,6 @@ Full unreached game-type list (2363):
 | `DynamicItemState` | <global> | 0 |
 | `DynamicMeshBuilderStatus` | <global> | 0 |
 | `DynamicMeshData` | <global> | 14 |
-| `DynamicMeshData` | <global> | 4 |
 | `DynamicMeshDataQueue`1` | <global> | 45 |
 | `DynamicMeshLoadResult` | <global> | 0 |
 | `DynamicMeshPrefabPreviewThread` | <global> | 9 |
@@ -808,7 +801,6 @@ Full unreached game-type list (2363):
 | `Grip` | <global> | 0 |
 | `Group` | <global> | 0 |
 | `GroupCount` | <global> | 0 |
-| `GroupPermission` | <global> | 3 |
 | `GSDataCollection` | <global> | 0 |
 | `GSDataKey` | <global> | 0 |
 | `GSStat` | <global> | 0 |
@@ -898,7 +890,6 @@ Full unreached game-type list (2363):
 | `IModApi` | <global> | 0 |
 | `ImpactData` | <global> | 0 |
 | `includeInList` | <global> | 0 |
-| `IncrementalHashExtensions` | <global> | 9 |
 | `INeighborBlockCache` | <global> | 0 |
 | `INetConnection` | <global> | 0 |
 | `INetworkClient` | <global> | 0 |
@@ -1601,7 +1592,6 @@ Full unreached game-type list (2363):
 | `ThreadInfoParamPool` | <global> | 6 |
 | `ThreadProcessing` | <global> | 10 |
 | `ThreadProcessingPool` | <global> | 4 |
-| `TileAreaConfig` | <global> | 1 |
 | `TileAreaSimple`1` | <global> | 4 |
 | `TileEntityType` | <global> | 0 |
 | `TimedAction` | <global> | 3 |
@@ -1682,7 +1672,6 @@ Full unreached game-type list (2363):
 | `UpscalerMode` | <global> | 0 |
 | `UserAuthorizationResultCallback` | <global> | 0 |
 | `UserDataManagement` | <global> | 6 |
-| `UserPermission` | <global> | 3 |
 | `UserSpawnType` | <global> | 0 |
 | `UtilList`1` | <global> | 11 |
 | `UVMode` | <global> | 0 |
@@ -1855,8 +1844,6 @@ Full unreached game-type list (2363):
 | `WeaponComparer` | <global> | 2 |
 | `WeatherParams` | <global> | 2 |
 | `WeightBehavior` | <global> | 0 |
-| `WhitelistGroup` | <global> | 3 |
-| `WhitelistUser` | <global> | 3 |
 | `WhitespaceSplitEnumerator` | <global> | 5 |
 | `WindowAutoYaw` | <global> | 4 |
 | `WindowDragTilt` | <global> | 3 |
@@ -2098,7 +2085,6 @@ Full unreached game-type list (2363):
 | `TextureSize` | JBooth.MicroSplat | 0 |
 | `CurrentZoomFile` | MapRendering | 1 |
 | `MapRendering` | MapRendering | 4 |
-| `Map` | MapRendering.Api | 5 |
 | `ModInfo` | ModInfo | 11 |
 | `ModInfoLoader` | ModInfo | 1 |
 | `Parser` | ModInfo | 7 |
@@ -2357,78 +2343,15 @@ Full unreached game-type list (2363):
 | `User` | Twitch.PubSub | 5 |
 | `CurveType` | UAI | 0 |
 | `WaterClippingPlanePlacer` | WaterClippingTool | 3 |
-| `ConnectionHandler` | Webserver | 5 |
 | `ERequestMethod` | Webserver | 0 |
-| `LogBuffer` | Webserver | 11 |
-| `LogEntry` | Webserver | 1 |
-| `MimeType` | Webserver | 2 |
-| `OpenID` | Webserver | 6 |
 | `RegistrationData` | Webserver | 1 |
-| `RequestContext` | Webserver | 2 |
-| `ResourceHelpers` | Webserver | 2 |
 | `ResultType` | Webserver | 0 |
-| `UserRegistrationTokens` | Webserver | 3 |
-| `WebConnection` | Webserver | 12 |
-| `WebMod` | Webserver | 1 |
-| `WebServer` | Webserver | 3 |
-| `WebUtils` | Webserver | 9 |
-| `AbstractCache` | Webserver.FileCache | 3 |
-| `DirectAccess` | Webserver.FileCache | 3 |
-| `SimpleCache` | Webserver.FileCache | 3 |
-| `Animals` | Webserver.LiveData | 3 |
-| `EntityFilterList`1` | Webserver.LiveData | 3 |
 | `Hostiles` | Webserver.LiveData | 3 |
-| `AdminApiTokens` | Webserver.Permissions | 10 |
-| `AdminWebModules` | Webserver.Permissions | 12 |
-| `AdminWebUsers` | Webserver.Permissions | 11 |
-| `ApiToken` | Webserver.Permissions | 3 |
-| `PermissionUtils` | Webserver.Permissions | 2 |
-| `WebModule` | Webserver.Permissions | 8 |
-| `WebUser` | Webserver.Permissions | 5 |
-| `AbsEvent` | Webserver.SSE | 8 |
 | `ESseClientWriteResult` | Webserver.SSE | 0 |
 | `EventLog` | Webserver.SSE | 2 |
-| `SseClient` | Webserver.SSE | 4 |
-| `ApiHandler` | Webserver.UrlHandlers | 7 |
-| `RewriteHandler` | Webserver.UrlHandlers | 2 |
-| `SessionHandler` | Webserver.UrlHandlers | 7 |
-| `SimpleRedirectHandler` | Webserver.UrlHandlers | 2 |
-| `StaticHandler` | Webserver.UrlHandlers | 2 |
-| `UserStatusHandler` | Webserver.UrlHandlers | 3 |
-| `AbsRestApi` | Webserver.WebAPI | 16 |
-| `AbsWebAPI` | Webserver.WebAPI | 5 |
 | `EApiErrorCode` | Webserver.WebAPI | 0 |
-| `JsonCommons` | Webserver.WebAPI | 14 |
-| `Null` | Webserver.WebAPI | 2 |
-| `OpenApiHelpers` | Webserver.WebAPI | 14 |
-| `OpenApiSpec` | Webserver.WebAPI | 1 |
-| `Command` | Webserver.WebAPI.APIs | 7 |
-| `LogApi` | Webserver.WebAPI.APIs | 4 |
-| `OpenAPI` | Webserver.WebAPI.APIs | 3 |
-| `EntityClass` | Webserver.WebAPI.APIs.GameData | 4 |
-| `Item` | Webserver.WebAPI.APIs.GameData | 4 |
-| `Mods` | Webserver.WebAPI.APIs.GameData | 5 |
-| `Blacklist` | Webserver.WebAPI.APIs.Permissions | 10 |
-| `CommandPermissions` | Webserver.WebAPI.APIs.Permissions | 9 |
-| `PermissionsApiHelpers` | Webserver.WebAPI.APIs.Permissions | 1 |
-| `RegisterUser` | Webserver.WebAPI.APIs.Permissions | 5 |
-| `UserPermissions` | Webserver.WebAPI.APIs.Permissions | 10 |
-| `WebApiTokens` | Webserver.WebAPI.APIs.Permissions | 9 |
-| `WebModules` | Webserver.WebAPI.APIs.Permissions | 9 |
-| `WebUsers` | Webserver.WebAPI.APIs.Permissions | 10 |
-| `Whitelist` | Webserver.WebAPI.APIs.Permissions | 10 |
-| `GamePrefs` | Webserver.WebAPI.APIs.ServerState | 2 |
-| `GameStats` | Webserver.WebAPI.APIs.ServerState | 2 |
-| `KeyValueListAbs` | Webserver.WebAPI.APIs.ServerState | 16 |
 | `SandboxOptionInfo` | Webserver.WebAPI.APIs.ServerState | 0 |
 | `SandboxOptionValue` | Webserver.WebAPI.APIs.ServerState | 0 |
-| `SandboxSettings` | Webserver.WebAPI.APIs.ServerState | 5 |
-| `ServerInfo` | Webserver.WebAPI.APIs.ServerState | 3 |
-| `ServerStats` | Webserver.WebAPI.APIs.ServerState | 4 |
-| `Animal` | Webserver.WebAPI.APIs.WorldState | 3 |
-| `Bloodmoon` | Webserver.WebAPI.APIs.WorldState | 3 |
-| `Hostile` | Webserver.WebAPI.APIs.WorldState | 3 |
-| `Player` | Webserver.WebAPI.APIs.WorldState | 5 |
 | `BiomeLayout` | WorldGenerationEngineFinal | 0 |
 | `BiomeType` | WorldGenerationEngineFinal | 0 |
 | `Data` | WorldGenerationEngineFinal | 0 |
@@ -2502,10 +2425,11 @@ Full unreached game-type list (2363):
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2849 | 2849 | 0 | 100% |
+| `<global>` | 2862 | 2862 | 0 | 100% |
 | `GameEvent` | 180 | 180 | 0 | 100% |
 | `Platform` | 147 | 147 | 0 | 100% |
 | `Twitch` | 109 | 109 | 0 | 100% |
+| `Webserver` | 73 | 73 | 0 | 100% |
 | `DynamicMusic` | 47 | 47 | 0 | 100% |
 | `Challenges` | 47 | 47 | 0 | 100% |
 | `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100% |
@@ -2516,11 +2440,10 @@ Full unreached game-type list (2363):
 | `Audio` | 12 | 12 | 0 | 100% |
 | `SDF` | 11 | 11 | 0 | 100% |
 | `RaycastPathing` | 10 | 10 | 0 | 100% |
-| `Webserver` | 10 | 10 | 0 | 100% |
 | `Services` | 9 | 9 | 0 | 100% |
 | `XMLData` | 7 | 7 | 0 | 100% |
 | `Quests` | 7 | 7 | 0 | 100% |
-| `MapRendering` | 6 | 6 | 0 | 100% |
+| `MapRendering` | 7 | 7 | 0 | 100% |
 | `MusicUtils` | 5 | 5 | 0 | 100% |
 | `GearVariants` | 4 | 4 | 0 | 100% |
 | `ConcurrentCollections` | 3 | 3 | 0 | 100% |
