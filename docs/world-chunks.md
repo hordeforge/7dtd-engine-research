@@ -274,6 +274,20 @@ bucket the unload/interest paths scan. `GetTileEntities` (IL=3) is the
 `tileEntities` `DictionaryList`; `RemoveAllTileEntities` (IL=11) clears it
 and flags the chunk modified when it was non-empty.
 
+**Block iteration and density repair:** `LoopOverAllBlocks(delegate,
+includeChilds, includeAirBlocks)` (IL=30) fans out to each
+`ChunkBlockLayer.LoopOverAllBlocks` (IL=54), which walks the 1024 cells of
+a layer, decodes `x = idx % 16`, `y = idx / 256 + layerY`,
+`z = (idx % 256) / 16`, fills the damage word via `GetDamage`, and invokes
+the delegate (skipping air / child blocks per the flags).
+`RepairDensities` (IL=90) scans the whole chunk and forces terrain blocks
+to density `-1` and non-terrain to `1` where they disagree, returning
+whether anything changed. `CheckDensities(logAll)` (IL=129) collects
+`DensityMismatchInformation` records for every disagreeing cell and warns
+once per call. `ClearNeedsRegenerationAt(idx)` (IL=32) clears the
+`m_NeedsRegenerationAtY` bit (Monitor-locked, volatile) for a single
+y-band index.
+
 **`Chunk.OnLoad(world)` (IL=97):** server side only: for each `entityStub`
 whose id is not already present in the world → `SpawnEntityAsync(world, stub,
 null)`; `removeExpiredCustomChunkDataEntries(worldTime)`; per block layer
