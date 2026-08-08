@@ -259,6 +259,38 @@ collects every part's non-empty `particle_transform` property.
 `ItemValue(ItemClass.GetItemClass(name + "Placeable").id, 1, 6, 0, null, 1f)`
 and applies it via `SetItemValue`.
 
+**`EntityVehicle` runtime leaves (all IL-verified):**
+`EnterVehicle(entity)` (IL=39) fires `MountEvent.Invoke(true)` for a local
+player, `StartAttachToEntity(this, -1)`, deactivates the vehicle `NavObject`
+when a player is mounting, and refreshes the player's owned-vehicle waypoint.
+`SetupDevices()` (IL=14) chains `SetupMotors` / `SetupForces` / `SetupWheels`
+and parses `PropOnHonkEvent` into `onHonkEvent`.
+`SetWheelsForces(motorTorque, motorTorqueBase, brakeTorque, frictionPercent)`
+(IL=74) stores `CurrentMotorTorquePercent = motorTorque / motorTorqueBase`,
+derives the side-friction scale (`1` at full friction else `* 0.33`), and per
+wheel sets `WheelCollider.motorTorque` / `brakeTorque` scaled by the wheel's
+`motorTorqueScale` / `brakeTorqueScale`, plus the forward / sideways
+`WheelFrictionCurve.stiffness` from `forwardStiffnessBase * frictionPercent`
+and `sideStiffnessBase * friction`.
+`UseHorn(player)` (IL=40) plays the `GetHornSoundName()` one-shot when set,
+then runs the `onHonkEvent` game event at the vehicle position.
+`ToggleHeadlight()` (IL=7) flips `IsHeadlightOn`; `HasHeadlight()` (IL=19) is
+a `VPHeadlight` part with a transform or `modInstalled`;
+`AddMaxFuel()` (IL=7) tops the tank up (`vehicle.AddFuel(GetMaxFuelLevel())`);
+`hasHandlebars()` (IL=4) is `vehicle.HasSteering()`.
+`CalcWaterDepth(offsetY)` (IL=49) walks upward from the water block at
+`position + offsetY` (up to 5) and returns the depth below the surface
+(0 on land). `GetCenterPosition()` (IL=9) is `position + ModelTransform.up *
+0.8`; `GetRBVelocity()` (IL=3) / `GetVehicle()` (IL=3) /
+`get_HasDriver()` (IL=3) expose `lastRBVel` / `vehicle` / `hasDriver`.
+`PhysicsResetAndSleep()` (IL=44) snaps the physics transform + rigidbody to
+the model pose (origin-relative), zeroes velocity / angular velocity,
+`Sleep()`s (when not kinematic) and applies `SetWheelsForces(0, 1, 0, 1)`.
+`PhysicsRevertCollisionMotion(ignoreExcess)` (IL=91) rolls the position back
+by `lastRBVel * fixedDeltaTime * 0.5` (beyond a 0.0001 threshold), blends
+the rigidbody velocity into `lastRBVel` (x/z 0.9, y 0.6/0.4 mix) and re-applies
+`lastRBAngVel`.
+
 **The generic attach pipeline behind it (V3.1.0 b14):**
 `Entity.StartAttachToEntity(other, slot)` (IL=43) is the entry: a client sends
 `NetPackageEntityAttach(0, selfId, otherId, slot)` to the server; the server
