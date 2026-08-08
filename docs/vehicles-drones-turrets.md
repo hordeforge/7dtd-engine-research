@@ -536,6 +536,15 @@ attack target as feed target; `AddBuff("buffJunkDroneHealCooldownEffect")`.
 3 then 4; if bleeding only and no 3/4, type 2. Else if bleeding: 2 then 3 then
 4. Else none (**0**).
 
+**Drone support buff (carry/capacity aura):** `buffAllies()` (IL=80) keeps
+the owner and every party member (`knownPartyMembers` snapshot from
+`Party.GetMemberIdArray()`, cleared when the owner leaves the party) inside
+the `buffJunkDroneSupportEffect` aura: `procBuffRange(entity)` (IL=21)
+applies `addSupportBuff` (IL=19, `AddBuff("buffJunkDroneSupportEffect", -1,
+true, false, -1)` when the state is not 5 / Attack) within **32 m** and
+removes it beyond, and `removeSupportBuff` (IL=19) only drops the buff when
+`doesEntityHaveSupport` reports no other nearby drone still provides it.
+
 **`TeleportOutOfRange` (IL=15):** if Attack, `exitAttackState` (empty stub);
 if Heal, `onHealDone` (empty stub); then `teleportState()`.
 
@@ -864,6 +873,11 @@ non-vehicle type is a content contract violation, not a graceful fallback.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native / content residuals |
 
+## Changelog
+
+- **2026-08-08:** Drone support buff: buffAllies (IL=80) party + owner aura,
+  procBuffRange (IL=21) 32 m gate, addSupportBuff (IL=19) buffJunkDroneSupportEffect
+  when not attacking, removeSupportBuff (IL=19) with doesEntityHaveSupport gate.
 ## Changelog
 
 - **2026-08-08:** EntityVehicle.GetSyncFlagsReplicated (IL=5): flags &
