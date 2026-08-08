@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: persistent backpack/vending tracking
+
+PersistentPlayerData (save-region.md 4): AddDroppedBackpack (IL=69) with
+3-backpack cap, oldest-first eviction via RefreshSortedBackpacksList (IL=44)
+and TryRemoveDroppedBackpack (IL=14), 192 broadcast of
+NetPackagePlayerSetBackpackPosition; OwnedVendingMachinePositions add/remove
+(IL=10/5). verified from IL. Commits e493ef6, 7b29593.
 ## 2026-08-08 - tier-C: prefab home-overlap probe
 
 PrefabInstance.CheckForAnyPlayerHome (IL=10) + GameUtils.CheckForAnyPlayerHome (IL=164, server-browser-prefabs.md 3.1): claim-size (GamePrefs 160) expanded box, bedroll overlap (OfflineHours < GameStats 63*24) -> Bedroll (2), land-claim overlap (46*24, claimHalf 44) -> Landclaim (1), else None (0). verified from IL. Commit 841d95d.
