@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: terrain mesh build helpers
+
+TerrainSubMesh texture-id accumulator + MeshCalculations tangents/normals (0.01745329 deg-rad); client-only mesh math, dedi streams raw chunks (verified)
 ## 2026-08-08 - tier-C: EntityFlying base MoveEntityHeaded
 
 Airborne motion model (corpse settle decay, water drag 0.8, damp 0.91/0.55/friction, accel 0.163/damp^2); no direct stock caller (vulture integrates its own motion), virtual-reachable (verified)
