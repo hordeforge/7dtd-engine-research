@@ -397,6 +397,16 @@ see cache (called from OnUpdateLive before AI).
   `GetOwnedEntities(classId)` (IL=28) filters `ownedEntities` by
   `OwnedEntityData.ClassId` into a fresh list; `GetOwnedEntity(entityId)`
   (IL=12) is the `Find` by id; `getNavigator` (IL=3) = `navigator`.
+- Stat/count accessors (IL=3-6 each): `get_Health()` (IL=6) is
+  `(int)Stats.Health.Value`; `get_Water()` (IL=5) is `Stats.Water.Value`;
+  `get_Score` / `get_KilledPlayers` / `get_KilledZombies` / `get_DeathHealth`
+  / `get_Died` / `get_TeamNumber` read the `score` / `killedPlayers` /
+  `killedZombies` / `deathHealth` / `died` / `teamNumber` fields.
+  `SetInventorySlots(handItemName)` (IL=69) fills slots 1+ from a
+  comma-separated item list (`ItemStack.FromString` per entry, empty for
+  blank entries, `HandItem missing` error on an unresolvable name) via
+  `inventory.SetSlots(stacks, true)`; `AnalyticsSendDeath` (IL=1) is the
+  base telemetry no-op.
 - Movement/combat: `GetStaminaMultiplier` (IL=2) is 1 (base);
   `GetWalkType` (IL=3) = `walkType`; `IsAttackImpact` (IL=16) is the
   avatar controller's attack-impact flag; `GetMaxViewAngle` (IL=3) =
