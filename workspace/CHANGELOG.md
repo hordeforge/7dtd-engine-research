@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityVehicle runtime leaves
+
+EnterVehicle mount flow, SetupDevices chain, SetWheelsForces, UseHorn event, headlight/fuel/handlebars, CalcWaterDepth, physics reset/revert (verified)
 ## 2026-08-08 - tier-C: Vehicle config-class leaves
 
 SetupProperties/CreateParts part factory, ParseGeneralProperties physics fields, OnXMLChanged reparse, part/particle accessors, horn/steering checks, MakeItemValue (verified)
