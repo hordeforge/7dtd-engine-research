@@ -1,6 +1,6 @@
 # Tier-C grind handoff / TODO
 
-**Updated:** 2026-08-08 ~05:40 UTC
+**Updated:** 2026-08-08 ~07:20 UTC
 **Repo:** `7dtd-research` (cwd this tree)  
 **Pin:** V **3.1.0 (b14)** via `tools/data/stock_facts.json`  
 **Managed bar:** tiers A+B met (unaccounted **0**). This grind is **tier C only**.
@@ -23,7 +23,7 @@ No em dashes. No AI attribution in commits.
 | HEAD (at handoff write) | `949161a` census refresh (1846 narrated) |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
-| Coverage (last pin text) | narrated 1845 / catalogued 558 / classified 1296 / unaccounted **0** |
+| Coverage (last pin text) | narrated 1846 / catalogued 558 / classified 1295 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
 
