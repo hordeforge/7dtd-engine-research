@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameEventManager hooks + boss driver
+
+Registry delegates, twitch-owner spawn-by-data, Damaged variable bump, 1s boss-group tick/selection, force-despawn (verified)
 ## 2026-08-08 - tier-C: Block id-assignment + combat property leaves
 
 NameIdMapping assign + terrain-up/non-terrain-down fill, alternate block list, path offset, hardness/explosion resistance (verified)
