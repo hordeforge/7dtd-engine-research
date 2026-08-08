@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: network second spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: save-region second spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: quests + server-lifecycle second spot-check (16 claims exact)
 ## 2026-08-08 - tier-C: minevents MinEventAction Execute spot-check (10 claims exact)
