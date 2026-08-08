@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PowerManager graph edit + save leaves
+
+FindPowerItems predicate, RemovePowerNode teardown, RemoveChild re-root, power.dat backup save, source slot add (verified)
 ## 2026-08-08 - tier-C: hit-face resolution (GetBlockFaceFromHitInfo)
 
 Mesh-triangle face center/normal, block-local wrap, inverse-rotation, GetBlockFaceFromColliderTriangle (verified)
