@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: WorldStaticData Cleanup family
+
+Per-family registry cleanup delegates, Twitch singleton-guarded (verified)
 ## 2026-08-08 - tier-C: NetPackageManager registry + LootContainer load gates
 
 AddPackageMapping reflection instance, UnknownNetPackageException gate, pool stats; IsLoaded/LootLog (verified)
