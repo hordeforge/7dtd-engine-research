@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vending autobuy + trader wire frames
+
+TileEntityVendingMachine.TryAutoBuy (IL=227, loot-economy.md): customer restock from XUiC_TraderWindow.OnOpen, eligible-entry buy + AvailableMoney, threshold reset/ramp, one-day re-entry; UpdateTick (IL=25) rental-expiry ClearVendingMachine. TraderData wire (netpackage-bodies.md): header IL=15 (TraderID:i32, lastInventoryUpdate:u64, FileVersion:u8) + WriteInventoryData IL=52 (PrimaryInventory count + Entry.Write, TierItemGroups count + WriteItemStack, AvailableMoney:i32); Entry frame IL=13 (ItemStack, Markup:s8, AddedByPlayer:bool). verified from IL. Commits b2fefbd, cbcc6d3.
 ## 2026-08-08 - tier-C: vending machine autobuy
 
 TileEntityVendingMachine (loot-economy.md): TryAutoBuy (IL=227) simulated-
