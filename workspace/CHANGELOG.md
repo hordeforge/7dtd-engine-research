@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: faction tier formula
+
+QuestJournal.GetCurrentFactionTier (IL=46, quests-challenges.md): points vs
+tier*QuestsPerTier loop with MaxQuestTier cap; GetTraderData (IL=27)
+TraderPOI linear scan. verified from IL. Commit c51446e.
 ## 2026-08-08 - tier-C: bedroll spawn validity
 
 EntityPlayerLocal.CheckSpawnPointStillThere (IL=30, spawning.md): spawn
