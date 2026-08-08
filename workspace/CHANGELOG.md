@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: drone gates (canMove, underwater, shutdown lifecycle)
+
+Movement probe, water-type 240 check, teleport cooldown, shutdown perform/wake conditions (verified)
 ## 2026-08-08 - tier-C: container accessors (Inventory/Equipment slot queries)
 
 GetSlotCount/GetSlotsWithBlock/IsHoldingBlock/PerformActionOnSlots both containers, GetSlotItemOrNone (verified)
