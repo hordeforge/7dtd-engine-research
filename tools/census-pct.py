@@ -6,8 +6,11 @@ the code is known at each layer:
 
   1. Reached game types (the dedicated-server RE surface): narrated /
      catalogued / classified / unaccounted percentages.
-  2. Whole assembly: reached-method and reached-type fractions, and what the
-     unreached remainder is (client/editor/third-party, out of RE scope).
+  2. Whole assembly (100% view): every Assembly-CSharp type and method body is
+     accounted - reached game types are narrated/catalogued/classified, and the
+     unreached game types (client/editor/Unity-lifecycle-booted/reflection/
+     dead) are classified in out-of-scope-surface.md. Compiler-generated and
+     third-party/BCL types are excluded by design.
 
 Usage:
   python3 tools/census-pct.py [asm] [docsDir]
@@ -98,6 +101,23 @@ def parse_report_reached_types(report_path):
     return 0
 
 
+def parse_report_accounted(report_path):
+    """Grab the whole-assembly 100% rows: accounted types and methods in them."""
+    out = {"acct_types": None, "acct_methods": None}
+    try:
+        with open(report_path, encoding="utf-8") as fh:
+            for line in fh:
+                m = re.match(r"\|\s*Accounted game types \(reached documented \+ unreached classified\)\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|", line)
+                if m:
+                    out["acct_types"] = int(m.group(1))
+                m = re.match(r"\|\s*Methods in accounted game types\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|", line)
+                if m:
+                    out["acct_methods"] = int(m.group(1))
+    except OSError:
+        pass
+    return out
+
+
 def pct(n, total):
     return 100.0 * n / total if total else 0.0
 
@@ -121,6 +141,7 @@ def main():
         return rc
     cov = parse_coverage(stderr)
     reached_types = parse_report_reached_types(tmp_report)
+    accounted = parse_report_accounted(tmp_report)
     if os.path.exists(tmp_report):
         os.unlink(tmp_report)
 
@@ -155,21 +176,26 @@ def main():
         pct(cov["catalogued"] + cov["classified"], g)))
 
     if all_types and all_methods:
-        print("\nWhole assembly (Census.exe):")
+        print("\nWhole assembly (100% view, Assembly-CSharp only):")
+        if accounted["acct_types"]:
+            print("  types   %6d total; %d accounted (100%%) - reached documented + unreached classified" % (
+                all_types, accounted["acct_types"]))
         if reached_types:
-            print("  types   %6d total; %d reached in the server call graph (%.1f%%)" % (
-                all_types, reached_types, pct(reached_types, all_types)))
-            print("          (reached types include compiler-generated <>c/display classes,")
-            print("          which the call graph always touches)")
-        print("  methods %6d total; %d reached (%.1f%%)" % (
-            all_methods, cov["reached_methods"], pct(cov["reached_methods"], all_methods)))
-        print("  unreached remainder: client-only render/UI, editor tools, third-party")
-        print("  libraries (structurally mapped by full-surface, not RE-narrated)")
+            print("  reached in the server call graph: %d types / %d methods" % (
+                reached_types, cov["reached_methods"]))
+        if accounted["acct_methods"]:
+            print("  methods %6d total; %d in accounted game types (100%%)" % (
+                all_methods, accounted["acct_methods"]))
+        print("  compiler-generated and third-party/BCL types are excluded by design")
 
     if cov["unaccounted"]:
-        print("\nWARNING: unaccounted types > 0 - the corpus is not at 100%.")
+        print("\nWARNING: unaccounted reached game types > 0 - the RE surface is not at 100%.")
+    elif not accounted.get("acct_types") or not accounted.get("acct_methods"):
+        print("\nWARNING: could not parse the whole-assembly accounting rows from the report.")
     else:
-        print("\nunaccounted = 0: every reached game type is narrated, catalogued, or classified.")
+        print("\n100%: every reached game type is narrated/catalogued/classified, and every")
+        print("unreached game type is classified (client/editor/lifecycle/reflection/dead).")
+        print("Compiler-generated + third-party/BCL types are excluded by design.")
     return 0
 
 

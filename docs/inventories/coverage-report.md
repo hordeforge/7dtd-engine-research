@@ -45,10 +45,10 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached types (incl. compiler-generated) | 7177 |
 | Reached, non-generated | 6040 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2341 (excluded from %) |
-| ...**game types** (the RE surface) | **3699** |
-| ...**narrated** (backticked in a narrative doc) | **1847 (49%)** |
+| ...**game types** (the RE surface) | **3574** |
+| ...**narrated** (backticked in a narrative doc) | **1841 (51%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 557 |
-| ...**classified** out-of-scope | 1295 |
+| ...**classified** out-of-scope | 1176 |
 | ...**unaccounted** (appears nowhere) | 0 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 502 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 179 |
@@ -58,18 +58,89 @@ Third-party/BCL and obfuscated `#`-named types are excluded from the base.
 and "classified" are different epistemic states (reverse engineered vs judged
 out of scope), and the base itself is the approximation described above.
 
+## Whole-assembly accounting (all types and methods)
+
+The reached-set rows above cover the server call graph. This section accounts
+for **every** type and method body in the assembly, so the whole can reach 100%:
+reached-and-documented plus unreached-and-classified (client / editor / dead).
+
+| Metric | Value |
+|---|---:|
+| All types (incl. nested) | 7432 |
+| Reached (Assembly-CSharp own types) | 4655 (62%) |
+| Unreached | 2777 (37%) |
+| ...compiler-generated / obfuscated | 357 (excluded) |
+| ...third-party / BCL | 57 (excluded) |
+| ...**unreached game types** (need classification) | **2363** |
+| All methods with body | 53235 |
+| Reached methods (Assembly-CSharp own) | 30289 (56%) |
+| Unreached methods | 22946 (43%) |
+| ...in reached game types (uncalled members) | 13671 |
+| ...in unreached game types | 4966 |
+
+**Whole-assembly accounting (the 100% view):**
+
+| Metric | Value |
+|---|---:|
+| Accounted game types (reached documented + unreached classified) | **5937 / 5937 (100%)** |
+| Methods in accounted game types | **46331 / 46331 (100%)** |
+| (excluded by design: 1358 compiler-generated, 99 third-party/BCL, 38 both; sums to 7432 of 7432) | |
+
+Unreached game types (2363), grouped by top namespace:
+
+| Namespace | count |
+|---|---:|
+| `<global>` | 1817 |
+| `Platform` | 155 |
+| `Webserver` | 72 |
+| `Twitch` | 58 |
+| `DynamicMusic` | 45 |
+| `XMLData` | 40 |
+| `GameEvent` | 40 |
+| `WorldGenerationEngineFinal` | 20 |
+| `JBooth` | 20 |
+| `MusicUtils` | 13 |
+| `CoverClippingTool` | 11 |
+| `Audio` | 9 |
+| `XMLEditing` | 8 |
+| `Challenges` | 7 |
+| `GamePath` | 6 |
+| `mumblelib` | 5 |
+| `PI` | 5 |
+| `SandboxOptions` | 4 |
+| `Assets` | 4 |
+| `ModInfo` | 3 |
+| `PrefabVolumes` | 3 |
+| `MapRendering` | 3 |
+| `GearVariants` | 2 |
+| `Quests` | 2 |
+| `RaycastPathing` | 2 |
+| `PostEffects` | 2 |
+| `ShinyScreenSpaceRaytracedReflections` | 1 |
+| `WaterClippingTool` | 1 |
+| `Services` | 1 |
+| `TriggerEffects` | 1 |
+| `SDF` | 1 |
+| `GUI_2` | 1 |
+| `UAI` | 1 |
+
+Unreached game types already mentioned in docs: **2363** (accounted).
+Unreached game types with **no mention anywhere**: **0** (the whole-assembly gap).
+
+Gap list (no mention in any doc):
+
+
 ## Per-namespace coverage (reached game types)
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2934 | 2934 | 0 | 100% |
+| `<global>` | 2849 | 2849 | 0 | 100% |
 | `GameEvent` | 180 | 180 | 0 | 100% |
 | `Platform` | 147 | 147 | 0 | 100% |
 | `Twitch` | 109 | 109 | 0 | 100% |
 | `DynamicMusic` | 47 | 47 | 0 | 100% |
 | `Challenges` | 47 | 47 | 0 | 100% |
 | `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100% |
-| `Discord` | 25 | 25 | 0 | 100% |
 | `UAI` | 24 | 24 | 0 | 100% |
 | `PrefabVolumes` | 16 | 16 | 0 | 100% |
 | `GamePath` | 13 | 13 | 0 | 100% |
@@ -81,18 +152,13 @@ out of scope), and the base itself is the approximation described above.
 | `Services` | 9 | 9 | 0 | 100% |
 | `XMLData` | 7 | 7 | 0 | 100% |
 | `Quests` | 7 | 7 | 0 | 100% |
-| `ZXing` | 6 | 6 | 0 | 100% |
 | `MapRendering` | 6 | 6 | 0 | 100% |
-| `BhvrAnalyticsServices` | 5 | 5 | 0 | 100% |
 | `MusicUtils` | 5 | 5 | 0 | 100% |
 | `GearVariants` | 4 | 4 | 0 | 100% |
 | `ConcurrentCollections` | 3 | 3 | 0 | 100% |
 | `mumblelib` | 2 | 2 | 0 | 100% |
-| `Force` | 2 | 2 | 0 | 100% |
 | `WaterClippingTool` | 1 | 1 | 0 | 100% |
 | `XMLEditing` | 1 | 1 | 0 | 100% |
-| `SystemInformation` | 1 | 1 | 0 | 100% |
-| `UnityEngineInternal` | 1 | 1 | 0 | 100% |
 | `TriggerEffects` | 1 | 1 | 0 | 100% |
 | `GUI_2` | 1 | 1 | 0 | 100% |
 
