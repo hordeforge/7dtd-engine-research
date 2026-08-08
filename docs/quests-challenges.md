@@ -251,6 +251,16 @@ Concrete rewards: `RewardExp`, `RewardItem`, `RewardLootItem`, `RewardTreasureIt
 `RewardRecipe`, `RewardSkill`, `RewardSkillPoints`, `RewardLevel`, `RewardQuest`
 (chain: `IsChainQuest` unlocks the next quest), `RewardShowMessageWindow`.
 
+**Reward leaves (all IL-verified):** `BaseReward.GetRewardText()` (IL=2)
+returns "" and `SetupGlobalRewardSettings()` (IL=1) is a no-op (the subclass
+hooks); `RewardItem.GetRewardText()` (IL=12) is
+`"{count} x {itemClass.GetLocalizedItemName()}"`;
+`RewardSkillPoints.GetRewardText()` (IL=7) is
+`"{Description} {ValueText}"`. The `ID` / `Description` / `Icon` /
+`IconAtlas` / `Optional` / `HiddenReward` / `ReceiveStage` / `RewardIndex` /
+`ValueText` / `isChainReward` / `isChosenReward` / `isFixedLocation` /
+`OwnerQuest` fields are plain property accessors.
+
 `BaseQuestAction` verbs are side effects bound to a phase, run by `StartQuest` /
 `AdvancePhase` when their `Phase` becomes current (`HandlePerformAction`):
 `QuestActionSpawnEnemy` / `QuestActionSpawnGSEnemy` (gamestage-scaled spawns),
