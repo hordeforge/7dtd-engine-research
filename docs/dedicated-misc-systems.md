@@ -868,6 +868,33 @@ within a per-frame byte budget; `AdminTools` and `StockFileHashes` use it
 for the world-file integrity checks. `WaveReader` (a WAV stream reader,
 `Read(float[])` IL=54) loads audio assets, client-side.
 
+## TaskManager (the game-code async task layer)
+
+A small scheduling layer on top of `ThreadManager.AddSingleTask`
+([loop.md](loop.md)); `GameManager` calls `TaskManager.Init` at startup and
+`Destroy` on shutdown. The model:
+
+- **`Schedule(execute, complete)` / `Schedule(group, execute, complete)`
+  (IL=16 each):** wrap the two `Action`s in a `TaskManager/Task` (fields
+  `Group`, `Execute`, `Complete`), run `OnTaskCreated` (which walks the
+  group + parent chain Interlocked-incrementing each `TaskGroup.pending`),
+  and post `Execute` to the thread pool via
+  `ThreadManager.AddSingleTask(Execute, task, null, false)`.
+- **`Execute(TaskInfo)` (IL=17):** the worker entry: invokes `task.Execute`;
+  a task with a `Complete` callback is queued into the
+  `TaskManager.tasks` `WorkBatch` (drained on the main thread), otherwise
+  `OnTaskCompleted` runs immediately.
+- **`Update()` (IL=6):** the main-thread drain: `tasks.DoWork(CompleteTask)`.
+  `CompleteTask` (IL=9) invokes `Complete` then `OnTaskCompleted`.
+- **`WaitOnGroup(group)` (IL=16):** the synchronous barrier: asserts the
+  caller is the main thread ("`TaskManager.WaitOnGroup should only be
+  called from the main thread.`"), then loops `Update()` + `Thread.Sleep(1)`
+  until `TaskGroup.Pending` is false - how startup/shutdown paths wait for
+  a scheduled batch to finish.
+- **`TaskGroup`:** a parent link + an Interlocked `pending` counter
+  (`get_Pending` IL=8 reads it via `CompareExchange`), so `WaitOnGroup` on
+  a parent group also covers every child group's tasks.
+
 ## ModEvents payload structs (the `S*` data carriers)
 
 `ModEvents` registers each game-event hook with a dedicated payload struct
