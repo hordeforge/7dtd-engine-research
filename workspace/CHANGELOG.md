@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: player anti-stuck push-out
+
+EntityPlayerLocal.pushOutOfBlocks (IL=225) 3x3 neighborhood probe +
+shouldPushOutOfBlock (IL=50) solid non-terrain always, buried terrain when
+the cell above is solid too (entity-ai.md movement). verified from IL.
+Commit d655412.
 ## 2026-08-08 - tier-C: swim-mode water probe
 
 EntityPlayerLocal.SwimModeUpdateThrottle (IL=258, entity-ai.md): camera duck

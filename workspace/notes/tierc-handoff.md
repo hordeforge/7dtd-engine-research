@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `0b1b03c` swim-mode water probe |
-| Commits since dry-run `3b61d9c` | ~1080 |
+| HEAD (at handoff write) | `d655412` anti-stuck push-out |
+| Commits since dry-run `3b61d9c` | ~1081 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
