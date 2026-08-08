@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: AIHordeSpawner leaves
+
+ctor party-spawner + playerSearchBounds; isSpawning = canSpawn; Cleanup
+releases IsHordeZombie/bIsChunkObserver. Verified fresh dumps.
 ## 2026-08-08 - tier-C: AIDirectorChunkData leaves
 
 Write v2 (activity + events + cooldownDelay) / Read inner >= 2; IsReady
