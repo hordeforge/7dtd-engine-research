@@ -755,6 +755,9 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   (i64, pooled reader under the stream monitor) and calls
   `DecoManager.ResetDecosForWorldChunk(key)` - the reset side of the
   broadcast above.
+  `NetPackageDecoResetWorldRect.ProcessPackage` (IL=58) is the area twin:
+  it reads four i32 and rebuilds the `Rect(x, y, w, h)` before
+  `DecoManager.ResetDecosInWorldRect(rect)`.
   `SendDecosToClient` (IL=32) regenerates the write list under lock and loops
   `NetPackageDecoUpdate.Setup(decoWriteList, ref index)` →
   `ClientInfo.SendPackage` until the index reaches the end (the package

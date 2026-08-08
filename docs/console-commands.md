@@ -73,6 +73,12 @@ upstream** of it, at the trust boundary:
      execute (`NetPackageConsoleCmdClient` with execute flag).
   6. Else `SdtdConsole.ExecuteSync(cmd, clientInfo)` and send output lines package.
   7. Denied: localized `msgServer25` permission error package.
+
+`NetPackageConsoleCmdClient.ProcessPackage` (IL=19) is the client-side
+executor: with the execute flag it runs `SdtdConsole.ExecuteSync(lines[0],
+sender)` (the server-gated command re-executed locally, e.g. a UI command)
+and shows the result via `GUIWindowConsole.AddLines`; without the flag it
+just appends the carried output lines - the two halves of the round-trip.
   The web Command API applies the same `CommandAllowedFor` gate.
 - **Telnet / stdin / dedicated-console input** call `executeCommand` directly and
   therefore **bypass per-command permission levels** (they are already a trusted
