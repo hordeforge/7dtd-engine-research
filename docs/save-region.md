@@ -286,6 +286,12 @@ when compressed, else `getData(bandStart, cellOffs)` - the accessor
 `Chunk.GetWater` decodes from), and `FreeLayers()` frees the whole array
 then resets `sameValue` to `defaultValue`.
 
+`SmartArray` is the pooled x/y/z-addressed `Byte` storage the legacy
+`ChunkBlockChannel`/`ChunkBlockLayerLegacy` use: `get(x,y,z)` (IL=46) /
+`set(x,y,z,b)` (IL=71) with `clear` (IL=19), `copyFrom` (IL=7),
+`GetUsedMem` (IL=5) and the `write`/`read` (IL=5/7) save pair - the
+3D-array primitive under the channel layers above.
+
 Read path: `ReadByte` / `Read` / `allocLayer` / `freeLayer` / `onLayerRead`.
 
 ### TileEntity save preamble and type registry
