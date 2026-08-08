@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entityclass-props verified (167 Prop constants = cctor stsfld count)
 ## 2026-08-08 - tier-C: challenge-objectives (34 concrete + abstract base) + quest-objectives (38) verified
 ## 2026-08-08 - tier-C: block-behaviors (65 leaves) + te-features (12) verified exact
 ## 2026-08-08 - tier-C: inventory leaf-count cross-check (ItemAction 38, SequenceActions 131+base, xmlsToLoad 49)
