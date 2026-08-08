@@ -256,6 +256,17 @@ handle to a chunk's `DynamicMeshChunkData` on the generation threads:
 `Exists` (IL=4) give the on-disk file handles; `Reset` (IL=4) drops the
 payload for reuse.
 
+**The chunk-data queue (`DynamicMeshChunkDataStorage<T>`):** the generic
+storage behind `DynamicMeshThread.ChunkDataQueue` (a
+`DynamicMeshChunkDataStorage<DynamicMeshItem>`). The generation thread uses
+`IsUpdating` / `MarkAsUpdating` / `MarkAsUpdated` / `MarkAsGenerating`
+(IL=11-15 each) to track per-item load/generate state, `ClearQueues`
+(IL=15) / `IsReadyThreaded` (IL=13) for shutdown pacing, and
+`TryLoadItem(wrapper, releaseLock)` (IL=192) for the disk-read path: it
+takes the wrapper's lock, reads the chunk bytes (`Stream.ReadByte` /
+`PooledBinaryWriter.SetBaseStream` decode into `DynamicMeshChunkData`),
+then `TryExit` / `ReleaseLock` under the wrapper's lock discipline.
+
 **Dead legacy path (not executed from live producers).** `DynamicMeshFile.WriteRegion`
 (IL=159) / `WriteRegionHeaderData` (IL=133) / `Write16BitVoxelMeshes` /
 `LoadRegionGameObjectSync` are an older version-`160` region format. On V3.1.0 b14,
