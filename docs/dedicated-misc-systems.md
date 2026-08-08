@@ -171,6 +171,55 @@ consumers are server systems: `GameEventsFromXml`, the game-event requirement
 and `ConsoleCmdForceEventDate` to override the date for testing. Complements
 [game-events.md](game-events.md).
 
+## Static-data XML loaders (misc)
+
+The boot-time XML loaders that are not their own doc. All entry points are
+6-IL coroutine factories (the real parse runs in the iterator's `MoveNext`)
+except the weather loader, which is a real body:
+
+- **`SoundsFromXml`**: `CreateSounds` (IL=6) is a coroutine entry (the
+  `WorldStaticData` static-data chain pulls it via `ldftn`).
+  `ParseNode(master, root)` (IL=70) collects the
+  `ControllerVibrationAudioSourceExclusions` source names, then parses every
+  `<SoundDataNode>` via `Parse` (IL=544): the group name is the node's first
+  attribute, each child element is dispatched case-insensitively. `<noise>`
+  fills `NoiseData` (volume / time / heat_map_strength / heat_map_time
+  default 100 / muffled_when_crouched default 1); `<audioclip>` builds a
+  `ClipSourceMap` (ClipName, AudioSourceName defaulting to the node's
+  audiosource, Loop -> forceLoop, DistantClip / DistantSource,
+  AltSound -> alt clip map, Subtitle -> subtitleID / hasSubtitle, profanity
+  -> hasProfanity) and `PreloadBundle`s all four clip/source names; scalar
+  children map to the group's fields (localcrouchvolumescale,
+  crouchnoisescale, noisescale, maxvoices, maxVoicesPerEntity,
+  prioritizeNewNodes, maxrepeatrate, immediate, sequence,
+  runningvolumescale, lowestpitch, highestpitch, distantfadestart /
+  distantfadeend, channel `mouth` = 0 else 1, priority, vibratecontroller,
+  vibrationstrengthmultiply); `ignoredistancecheck` registers the group with
+  `Audio.Manager.AddSoundToIgnoreDistanceCheckList`. A node with
+  `vibratecontroller` still clears the flag when its audio source sits in
+  the exclusions list, then `Audio.Manager.AddAudioData` stores the group.
+  `ParseSubtitleNode` (IL=104) builds `SubtitleData` (name, contentLocId,
+  speakerColor, speakerLocId) plus `SpeakerColors` (name = first attribute,
+  color = last) and hands both lists to `Audio.Manager.AddSubtitleData`.
+- **`WeatherSurvivalParametersFromXml.Load` (IL=121)** (from the
+  `_LoadWeather` coroutine): throws `No element <weathersurvival> found!`
+  on an empty root, collects `<property>` elements into a
+  `DynamicProperties`, clears and rebuilds `WeatherManager` temperature
+  offsets from each `TemperatureHeight` descendant (height / addDegrees ->
+  `AddTemperatureOffSetHeight`), then reflects over the `WeatherParams`
+  static class: every float field declared on it whose name exists in the
+  properties is set via `SetValue(null, GetFloat(name))` - the XML-to-code
+  binding is by field name.
+- **Coroutine wrappers** (entry IL=6 each): `MaterialsFromXml.CreateMaterials`
+  (from `WorldStaticData`), `MiscFromXml.Create` (called by
+  `WorldStaticData.ReloadMisc` after `AnimationDelayData.InitStatic` /
+  `AnimationGunjointOffsetData.InitStatic`, then
+  `ThreadManager.RunCoroutineSync`), `MusicDataFromXml.Load` (from the
+  `_LoadMusic` coroutine into the DynamicMusic pipeline), and
+  `BiomeSpawningFromXml.Load` (from the `_LoadSpawning` coroutine into the
+  `BiomeSpawningClass` list). The parse bodies are the compiler-generated
+  `MoveNext` methods of each iterator.
+
 ## Chunk/block access interfaces: IChunkAccess, IBlockAccess, ChunkKey
 
 `IChunkAccess` exposes `GetChunkFromWorldPos`/`GetChunkSync` with static
