@@ -409,6 +409,17 @@ If not empty: `CreateEntity` as `EntityLootContainer`, `SetContent(Clone items)`
 `bag` dies on unlock: `IsEmpty()` → `KillLootContainer()`, so a loot bag that
 was picked clean despawns the moment a player opens it.
 
+**`EntityLootContainer.OnUpdateEntity` (IL=46)** is the unattended despawn:
+after the base `EntityItem` update it skips while the bag is locked (channel
+0, local or server), and otherwise removes the bag when
+`bag.Touched && bag.IsEmpty()` (emptied by someone who touched it) or when
+`deathUpdateTime >= timeStayAfterDeath - 1` (the timed expiry), else
+increments `deathUpdateTime`. `removeBackpack` (IL=10) sets
+`deathUpdateTime = timeStayAfterDeath`, `bRemoved = true` and
+`MarkToUnload()`; `IsMarkedForUnload` (IL=8) is the base flag OR `bRemoved`;
+`GetLootList` (IL=11) prefers `OverrideLootList` when set, else the base
+`lootList`.
+
 **`EntityClass.AddDroppedId(event, name, minCount, maxCount, prob,
 stickChance, toolCategory, tag)` (IL=33)** registers a corpse/entity drop: it
 lazy-creates the `itemsToDrop[event]` list and appends a
@@ -908,6 +919,11 @@ or `ItemStack.Empty` when nothing rolled.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
+## Changelog
+
+- **2026-08-08:** EntityLootContainer.OnUpdateEntity (IL=46): lock-skip,
+  touched-and-empty / timeStayAfterDeath-1 despawn, removeBackpack (IL=10)
+  MarkToUnload + bRemoved; GetLootList OverrideLootList preference.
 ## Changelog
 
 - **2026-08-08:** TradersFromXml.ParseTraderInfo (IL=320): id required +
