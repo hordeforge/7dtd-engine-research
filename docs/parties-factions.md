@@ -347,6 +347,14 @@ a symmetric map keyed by **platform identity**, stored in `AllyStore` (reachable
 `SetStatus(source, target, status)` writes **both** directions with complementary
 values: `Allies` on both sides; an `OutgoingInvite` from source stores `IncomingInvite`
 on the target; status `0` clears the pair. `IsAlly(a, b)` is `GetStatus == Allies`.
+`GetStatus` (IL=23) is a null-guarded nested `TryGetValue` (0 on miss); `HasAllies`
+(IL=36) is true when any entry for the id has status `Allies` (the `CleanupPlayers`
+eviction gate, server-lifecycle §3); `ClearStatus` (IL=21) removes both directions,
+`ClearAll` (IL=4) empties the map; `CopyFrom` (IL=47) clears then re-applies every
+pair via `SetStatus` (the `NetworkCloneRelevantForPlayer` ally copy);
+`ApplyTransition` (IL=20) is the server-side shortcut:
+`SetStatus(source, target, ComputeTransition(GetStatus(...), addAlly))`.
+`EnumerateAllies` (IL=9) is an iterator over the id's ally rows.
 
 ### 5.1 Handshake (state machine)
 
@@ -464,6 +472,10 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 
 ## Changelog
 
+- **2026-08-08:** AllyStore trivials: GetStatus nested TryGetValue; HasAllies
+  any Allies row (CleanupPlayers gate); ClearStatus both directions / ClearAll;
+  CopyFrom re-applies via SetStatus (clone path); ApplyTransition
+  GetStatus -> ComputeTransition -> SetStatus; EnumerateAllies iterator.
 - **2026-08-07:** HandleFirstSpawnInteractions IL=116 blocked alert + pref 235 ally invite.
 
 - **2026-08-07:** PartyQuestChange Process/HandlePlayer (15 m or location rect,
