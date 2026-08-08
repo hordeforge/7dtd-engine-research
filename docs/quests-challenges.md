@@ -277,6 +277,19 @@ server responsibility on a dedicated box):
 |---|---|---|
 | Trader quest offers | `GetQuestList`, `SetupQuestList`, `SetupTraderPrefabList`, `GetPrefabsForTrader`, `ClearQuestList*` | Generates and caches the per-trader, per-player offered quest list (`npcQuestData`); regenerated on `ResetTraderQuests` |
 | Treasure quests | `AddTreasureQuest`, `GetTreasureContainerPosition`, `FinishTreasureQuest`, `SetTreasureContainerPosition` | Server picks and tracks the buried-supplies location (`TreasureQuestDictionary`), reducing radius as the player digs |
+
+**`NetPackageQuestTreasurePoint.ProcessPackage` (IL=176)** is the treasure
+position wire: on the **server** (`World.IsRemote` false) action types 2 / 3
+call `SetTreasureContainerPosition(questCode, pos)` /
+`UpdateTreasureBlocksPerReduction(questCode, blocksPerReduction)`, and the
+default path retries `GetTreasureContainerPosition(...)` up to **15** times,
+replying `Setup(playerId, questCode, blocksPerReduction, pos, offset)` to
+that player on channel 192 once a point resolves. On the **client** it
+finds the active quest and, per current-phase objective, runs
+`ObjectiveTreasureChest.FinalizePointFromServer(blocksPerReduction, pos,
+offset)` (action 1), sets `CurrentBlocksPerReduction` (action 3), or
+`ObjectiveRandomGoto.FinalizePoint(x, y, z)` - the dug-up-supplies
+reveal.
 | POI lockouts | `QuestLockPOI`, `QuestUnlockPOI`, `CheckForPOILockouts` | Reserves a POI for a party so two players do not clear the same instance |
 | Shared / party setup | `SetupFetchForMP`, `SetupActivateForMP`, `SetupRepairForMP`, `HandleContainerPositions` | Places fetch containers / activation blocks / repair targets for every player in the `sharedWithList` |
 | Sleeper volumes | `SubscribeToUpdateEvent`, `AddSleeperVolumeLocation`, sleeper dictionary tick | Tracks clear-sleeper progress per POI volume |
