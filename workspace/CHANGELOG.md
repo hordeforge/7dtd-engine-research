@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: CraftingManager clear leaves + SdDirectory enumeration
+
+ClearAllGeneral/CraftArea/Recipe + InitForNewGame registry reset; SdDirectory managed/plain Enumerate routing (verified)
 ## 2026-08-08 - tier-C: Extensions string/component leaves
 
 EqualsCaseInsensitive/ContainsInclusive/WithComparer, NormalizeReturnMagnitude, CalculatePersistableHash, Guid WriteToBuffer, text transforms (verified)
