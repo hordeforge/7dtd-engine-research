@@ -465,6 +465,10 @@ Mirrored from clients via `AIDirector.UpdatePlayerInventory` /
 Owns the live `DictionaryList` `trackedPlayers` that horde targeting reads.
 `TickPlayerState` only mirrors `Player.IsDead()` into `set_Dead` (no inventory
 or underground work on this path).
+`AddPlayer(player)` (IL=23) skips an already-tracked id, pools an
+`AIDirectorPlayerState` and stores `Construct(player)` keyed by entity id;
+`RemovePlayer(player)` (IL=21) removes the entry, `Reset()`s and returns the
+state to the pool.
 
 ## `AIDirectorPlayerState` : Object
 
@@ -865,6 +869,8 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** AIDirectorPlayerManagementComponent AddPlayer (IL=23)
+  pooled-state track on first sight; RemovePlayer (IL=21) reset + pool free.
 - **2026-08-08:** EntitySupplyPlane far-draw: UpdateFarDraw (IL=35) mainCamera
   + planeMesh lazy, MoveBoundsInsideFrustrum (IL=31) mesh bounds inflated by
   |camera - plane| * 1.25 anti-cull; Awake/ctor base-only,
