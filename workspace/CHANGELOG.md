@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: census refresh (1846 narrated)
 ## 2026-08-08 - tier-C: fix OOS summary Twitch count
 ## 2026-08-08 - tier-C: WorldBiomeProviderFromHeight unused note
 ## 2026-08-08 - tier-C: handoff session summary
