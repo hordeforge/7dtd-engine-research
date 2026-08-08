@@ -151,9 +151,9 @@ reachable via shared `ConnectionManager.Update` but the heartbeat block is
 **skipped on dedicated** ([server-lifecycle.md](server-lifecycle.md) § Join analytics).
 They are not sim/wire surface.
 
-### Twitch (supplement) (28)
+### Twitch (supplement) (24)
 
-`ActionCategory`, `AuthenticationValues`, `BasePubSubMessage`, `CommandModel`, `ConfigContent`, `ConfigModel`, `Entitlement`, `ExtensionDeleteBitActionsRequestData`, `FulfillmentPayload`, `GoalData`, `PubSubBitRedemptionMessage`, `PubSubChannelPointMessage`, `PubSubGoalMessage`, `PubSubListenData`, `PubSubListenMessage`, `PubSubStatusMessage`, `PubSubStatusRequestData`, `PubSubSubscriptionRedemptionMessage`, `SetConfigRequestData`, `SetDevConfigRequestData`, `TwitchActionCooldownModifier`, `TwitchCooldownEntry`, `TwitchEntitlementManager`, `TwitchHypeTrainEventEntry`, `TwitchRandomActionGroup`, `TwitchTopic`, `TwitchVotePreset`, `UpdateMessage`
+`ActionCategory`, `AuthenticationValues`, `BasePubSubMessage`, `CommandModel`, `ConfigContent`, `ConfigModel`, `Entitlement`, `ExtensionDeleteBitActionsRequestData`, `FulfillmentPayload`, `GoalData`, `PubSubBitRedemptionMessage`, `PubSubChannelPointMessage`, `PubSubGoalMessage`, `PubSubListenData`, `PubSubListenMessage`, `PubSubStatusMessage`, `PubSubStatusRequestData`, `PubSubSubscriptionRedemptionMessage`, `SetConfigRequestData`, `SetDevConfigRequestData`, `TwitchEntitlementManager`, `TwitchHypeTrainEventEntry`, `TwitchTopic`, `UpdateMessage`
 
 ### Utility / infra (supplement) (44)
 
