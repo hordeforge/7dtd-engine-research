@@ -256,6 +256,14 @@ from Unity render/UI code; a headless server never executes them):
   warp settings), `SignTextureExporter`, and the debug console commands
   `signeditordebug`/`sed` and `signtexman`/`stm`.
 
+Bake leaves: `SignBakeRequest` (ValueType: `{GroupIndex, Tier,
+GroupMinDistanceSquared}`; `CompareTo` sorts Tier ascending then group distance
+ascending) is the prioritiser's work order; `SignComplexityInfo`
+(`{TotalComplexity, ComplexityByLayer, StackInfo}`, `IsValid` = non-null
+dictionary, `Invalid` = (0, null, default)) carries the per-layer complexity
+metrics from `UpdateRenderingData` into the tier assignment
+(`TryGetLayerComplexityInfo` guards a null layer/dictionary).
+
 For a reimplementation the server surface is small: parse `signs.xml`-format
 libraries, store `(libraryId, guid)` references and `AuthoredText` in tile
 entities, and answer `NetPackageSignDataRequest` with batched compressed
@@ -278,6 +286,10 @@ entities, and answer `NetPackageSignDataRequest` with batched compressed
 
 ## Changelog
 
+- **2026-08-08:** Bake leaves: SignBakeRequest {GroupIndex, Tier,
+  GroupMinDistanceSquared} CompareTo tier-then-distance; SignComplexityInfo
+  TotalComplexity/by-layer dict + IsValid/Invalid; MethodSignature re-roled
+  client messaging infra (inventory).
 - **2026-07-28:** SignDataRequest/Response write IL re-verify.
 
 - **2026-07-24:** Initial reversal of the sign/authored-text/drawing system (SignData layer + warp model with binary/XML formats, GlobalSignId + library map with v0-v2 migrations, one-way batched sign download protocol, AuthoredText per-viewer moderation, server/client split with the bake pipeline flagged client-only).

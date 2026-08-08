@@ -155,7 +155,7 @@ wholesale, or the referrer-verified promotions and the IL-verified roles are los
 
 | Leaf | Role | Base | Key methods |
 |---|---|---|---|
-| `MethodSignature` | Method Signature | `Object` | (fields only) |
+| `MethodSignature` | **client-only** `ObjectMessaging` method-key record: lazy hash = ReturnType hash XORed with each argument-type hash | `Object` | GetHashCode |
 | `SignBakeRequest` | Sign Bake Request | `ValueType` | CompareTo |
 | `SignComplexityInfo` | Sign Complexity Info | `ValueType` | TryGetLayerComplexityInfo |
 
