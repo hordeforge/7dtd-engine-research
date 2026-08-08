@@ -799,6 +799,14 @@ current texture slot: `BlockTextureData.list[idx].TextureID` is looked up in
 into an int (`r*255 & 0xFF | (g*255 & 0xFF) << 8 | (b*255 & 0xFF) << 16`),
 falling back to `Color.gray` when the texture id is 0.
 
+**Action runtime-data records:** the per-action state classes are fields-only
+(no behavior): `InventoryDataMelee` (the melee swing state the §4.2 melee
+methods drive: `ray`, `bFirstHitInARow`, `bAttackStarted`, `bHarvesting`),
+`InventoryDataRepair` (repair-tool state), `CollectWaterActionData` /
+`DumpWaterActionData` (the water-fill/dump action state). They exist so each
+action's mutable fields live on the per-entity action data, not the shared
+`ItemAction` instance.
+
 **`ItemActionAttack.ReadFrom` (IL=482) is the attack-action config parse** run
 from the loader's Actions fill: `ToolCategory` (string), `DamageEntity` /
 `DamageBlock` (float, defaults rolled before the keys), `Range` /

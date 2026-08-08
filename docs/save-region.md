@@ -427,6 +427,13 @@ offline player, dropped backpack, vehicle, quest objective, supply crate).
 mutations on the save thread (the lock entry point is
 `Chunk.EnterReadLock` / `EnterWriteLock`).
 
+**Chunk groups (`LongSetGroups`):** `RegionFileManager.chunkGroups` is the
+group-clustering set (`groups` list + `groupsByLongKey` map,
+`MergeOrCreateGroup(HashSetLong)` IL=100) that batches chunks into groups
+for the cull pass - the `s_ComputeChunkGroups` / `s_AddGroupedChunks` /
+`s_RemoveGroupedChunks` / `s_UpdateGroupTimestamps` profiler markers around
+`CullExpiredChunks` (§3.1 table).
+
 **`RegionItemData`** (IL=10/15) is the dynamic-mesh region record:
 `Update(x, z, updateTime)` stores the triple, and the `DynamicMeshItem`
 overload copies `WorldPosition.x/z` plus `UpdateTime` from the item

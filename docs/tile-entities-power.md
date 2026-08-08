@@ -645,6 +645,13 @@ rest become the `Items[]` list (trimmed) - the "what burns in a collector"
 map that `TileEntityCollector` / `BlockCollector` read (see the collector
 stream tails below).
 
+**`WorkstationData`** is the workstation display config record
+(`WorkstationName`, `WorkstationIcon`, `CraftIcon`, `CraftActionName`,
+`WorkstationWindow`, plus the `OpenSound` / `CloseSound` / `CraftSound` /
+`CraftCompleteSound` audio ids): `BlockWorkstation` owns one instance
+(ctor from name + `DynamicProperties`) that `CraftingManager` and the
+workstation UI read, and `ConsoleCmdWorkstationMaterials` prints.
+
 ### 4.3 `HandleRecipeQueue` / `cycleRecipeQueue`
 
 `HandleRecipeQueue`: no-op while `bUserAccessing`. Active slot is last non-empty
