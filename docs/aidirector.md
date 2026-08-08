@@ -55,20 +55,9 @@ order; `Load(stream)` (IL=14) reads the version, `ComponentsLoad` (IL=22) runs
 `component.Read(reader, version)` per component, and a zero `world.worldTime`
 triggers `Init()` (fresh world).
 
-**Noise + activity:** `NotifyNoise(instigator, position, clipName,
-volumeScale)` (IL=84) is the AI-aware sound entry (reached from
-`OnSoundPlayedAtPosition` IL=17, entity resolved by id, null for -1). It looks
-up the clip in `AIDirectorData.FindNoise` (unknown clips are ignored), skips
-enemy-instigated noise, `IsIgnoredByAI` entities, and `EntityItem`s carrying a
-`ThrowableDecoy`. For a tracked player the volume is muffled while crouching
-(`noise.muffledWhenCrouched`), `Stealth.NotifyNoise(noise.volume *
-volumeScale, noise.duration)` gates sleeper wake-up
-(`world.CheckSleeperVolumeNoise`), and a positive `heatMapStrength` raises a
-`Sound (3)` chunk event scaled by `HeatMapSensitivityModifier` with a **240**
-tick duration. `NotifyActivity(type, pos, value, duration)` (IL=31) gates on
-`value > 0`, `GameStats.IsSpawnEnemies (24)` + `ZombieHordeMeter (32)`,
-`HeatMapSensitivityModifier > 0`, and not blood-moon / Twitch boss-horde, then
-`chunkEventComponent.NotifyEvent(...)`.
+**Noise + activity:** `NotifyNoise` (IL=84) / `NotifyActivity` (IL=31) - the
+AI-aware sound and heat-map entries (reached from `OnSoundPlayedAtPosition`
+IL=17); full bodies in the chunk-event section below.
 
 ### CreateComponents order (IL=31, verified)
 
