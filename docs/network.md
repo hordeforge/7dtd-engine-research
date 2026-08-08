@@ -142,6 +142,29 @@ sets `IsConnected`. `SendToClientsOrServer(package)` (IL=21) is the
 direction-neutral helper: server -> broadcast on 192, client ->
 `SendToServer`. `EnableNetworkStatistics` / `PrintNetworkStatistics`
 (IL=4 each) delegate to `ProtocolManager` (the `net` command surface).
+`DisableNetworkStatistics` / `SetLatencySimulation(enable, min, max)` /
+`SetPacketLossSimulation(enable, chance)` (IL=4-7) are the same
+`ProtocolManager` debug delegation; `get_CurrentMode()` / `get_IsClient()` /
+`GetRequiredPortsString()` (IL=4 each) forward to
+`ProtocolManager.CurrentMode` / `IsClient` / `GetGamePortsString`.
+
+**Server receive / join handlers:** `Net_DataReceivedServer(cInfo, channel,
+data, size)` (IL=14) appends the raw bytes to
+`cInfo.netConnection[channel]`'s reader stream (the pump drains it).
+`Net_PlayerConnected(cInfo)` (IL=12) logs `[NET] PlayerConnected {0}` and
+immediately sends `NetPackagePackageIds.Setup()` on channel 0 (the
+package-id mapping is the first packet a joining client gets).
+`SendLogin()` (IL=60) ships
+`NetPackagePlayerLogin.Setup(GamePref 37 name, (nativeId, authTicket),
+(crossId, crossTicket), version, version, discordId)` to the server (the
+client-side join identity; the discord id is `DiscordManager.LocalUser.ID`
+when ready, else 0). `Net_InvalidPassword()` (IL=16) opens the server
+password window (client; saved password prefilled, submit reconnects, cancel
+returns to the browser); `Net_ConnectionFailed(message)` (IL=30) logs the
+error, shows `mmLblErrorConnectionFailed`, clears `IsConnected` and calls
+`AntiCheatClient.DisconnectFromServer`; `Net_DisconnectedFromServer(reason)`
+(IL=22) logs, runs `DisconnectFromServer()` and shows
+`mmLblErrorConnectionLost`.
 
 ---
 
