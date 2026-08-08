@@ -1117,6 +1117,34 @@ skips dead entities and damage <= 10; otherwise
 With the tree's rigidbody mass, `(int)(mass * 0.36)` clears the 10-point floor
 for normal trees.
 
+**Mesh + fall kick (`CreateMesh` IL=292):** server-side, if the block at
+`treeBlockPos` still matches `treeBV.type` it is replaced with air
+(`SetBlockRPC`), detaching the tree from the world. The stolen visual transform
+is reparented under the entity (`SetParent(this, false)`, zero local transform);
+the `rootBall` child is activated with shadows off. The tree's RB is set up:
+`mass = (15 + 7 * collHeight) * 5`, capsule collider `height = collHeight` /
+`center = (0, collHeight * 0.5 - groundOffset, 0)` with `enabled = true`, and
+`centerOfMass = (0, collHeight * 0.3 - groundOffset, 0)` where `groundOffset`
+comes from a downward `SphereCast` (radius 0.25, distance 5) or a
+`BlockShapeModelEntity` offset. Server-only kick: zero velocity/angular
+velocity, solver iterations 10/3, then
+`AddForceAtPosition(fallTreeDir * (80 + collHeight * 8) * 5, up * (collHeight * 0.65 - groundOffset), Impulse)`;
+`SpawnDestroyParticleEffect`, `lifetime = 3`, `timeToEnableDamage = 1.5`.
+Finally `rendererList` is rebuilt from child `MeshRenderer`s for the fade path.
+
+**Transform sync / fade (`updateTransform` IL=147):** lazily calls `CreateMesh`
+on first sight of the transform. `fade = MoveTowards(fade, targetFade, dt)`; while
+`fade < 1`, per renderer: shadow-only renderers deactivate once `fade < 0.5`, and
+each material gets keyword `ENABLE_FADEOUT` (enabled while fading) plus
+`_FadeOut = fade` (`targetFade = 0` from `NetPackageTreeFade` drives the fade).
+Server applies `SetPosition(pos + Origin.position)` / `SetRotation(euler)`;
+remote clients instead lerp position and Slerp rotation toward `targetPos` /
+`targetQRot` at `dt * 20`.
+
+**ctor / getters:** ctor defaults `fade = targetFade = 1`, `timeToRemoveTree = -1`,
+allocates `rendererList` / `hitEntities` / `mats`. `IsQRotationUsed` true (the
+remote rotation slerp), `IsSavedToFile` false (falling trees never persist).
+
 **Queue-driven.** Spikes when many blocks lose support (base collapse). Matches ServerTools/IceCoffee fall-to-air trade: empty the problem at `AddFallingBlock` before this method invents entities.
 
 ---
@@ -3416,9 +3444,14 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   E_BP_ root resolve, treeCanDamageEntity gate (hitEntities / players /
   supply crates), mass*0.36 damage; Awake RB gravity/kinematic by remote,
   SetBlockPos (IL=111) deco/blockentity transform steal + collider disable,
-  OnUpdateEntity (IL=91) settle->TreeFade channel 192 -> DestroyTree,
-  DestroyTree (IL=37) stump clear when type matches, NetPackageTreeFade
-  ToClient int32 entityId, damage coroutine 0.05s + External/Crushing, >10.
+  CreateMesh (IL=292) air-swap + reparent + RB mass (15+7*h)*5 + capsule +
+  impulse kick (80+h*8)*5 + SpawnDestroyParticleEffect + lifetime 3 +
+  timeToEnableDamage 1.5, OnUpdateEntity (IL=91) settle->TreeFade channel 192
+  -> DestroyTree, DestroyTree (IL=37) stump clear when type matches,
+  updateTransform (IL=147) fade MoveTowards + ENABLE_FADEOUT/_FadeOut +
+  server SetPosition / remote lerp dt*20, NetPackageTreeFade ToClient int32
+  entityId, damage coroutine 0.05s + External/Crushing, >10, ctor defaults,
+  IsSavedToFile false.
 - **2026-08-08:** EntityAlive.GetLightLevel IL=14: attached -> host
   delegate, else inventory.GetLightLevel (held-item light, the stealth
   selfLight).
