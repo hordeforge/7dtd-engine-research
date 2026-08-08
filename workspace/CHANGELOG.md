@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: bedroll spawn validity
+
+EntityPlayerLocal.CheckSpawnPointStillThere (IL=30, spawning.md): spawn
+valid when undef / chunk unloaded / block is BlockSleepingBag; void when
+the bedroll is gone. verified from IL. Commit 4cf811a.
 ## 2026-08-08 - tier-C: player fall impact
 
 EntityPlayerLocal.FallImpact (IL=117, entity-ai.md): elevator block resolve,
