@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: buffs doc spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: vehicles-drones-turrets doc spot-check (9 claims exact)
 ## 2026-08-08 - tier-C: parties-factions doc spot-check (9 claims exact)
 ## 2026-08-08 - tier-C: dynamic-mesh doc spot-check (8 claims exact)
