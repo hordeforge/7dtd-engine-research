@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: traders.xml definition parse
+
+TradersFromXml.ParseTraderInfo (IL=320, loot-economy.md): id required + duplicate check, reset_interval -> ResetIntervalInTicks, allow_buy AND allow_sell both write AllowSell (no separate allow-buy bool), override_buy/sell markups, is_vending/player_owned/rentable, rent_cost + rent_time, open/close HH:mm via DayTimeToWorldTime -> OpenTime/CloseTime + UseOpenHours, WarningTime = CloseTime - 300, child element dispatch to trader_items/tier_items/trader_item_groups/traderstage_templates. verified from IL. Commit 34efd5a.
 ## 2026-08-08 - tier-C: vending autobuy + trader wire frames
 
 TileEntityVendingMachine.TryAutoBuy (IL=227, loot-economy.md): customer restock from XUiC_TraderWindow.OnOpen, eligible-entry buy + AvailableMoney, threshold reset/ramp, one-day re-entry; UpdateTick (IL=25) rental-expiry ClearVendingMachine. TraderData wire (netpackage-bodies.md): header IL=15 (TraderID:i32, lastInventoryUpdate:u64, FileVersion:u8) + WriteInventoryData IL=52 (PrimaryInventory count + Entry.Write, TierItemGroups count + WriteItemStack, AvailableMoney:i32); Entry frame IL=13 (ItemStack, Markup:s8, AddedByPlayer:bool). verified from IL. Commits b2fefbd, cbcc6d3.
