@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChallengeJournal leaves
+
+StartChallenges two-pass seeding; ModifyValue challenge passives;
+HandleChallengeRedeemed eventList; GetNextChallenge chain; End/Reset/Remove;
+Write/Read/Clone. Verified fresh dumps.
 ## 2026-08-08 - tier-C: QuestJournal leaves
 
 FailAllSharedQuests/FailAllActivatedQuests CloseQuest sweeps; QuestIsActive
