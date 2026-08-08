@@ -31,7 +31,7 @@ honestly hold:
 cd tools && ./build.sh
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 mono bin/FullSurface.exe "$ASM" ../il/surface-v3.1.0          # committable metadata
-mono bin/DumpAll.exe    "$ASM" ../il/full-v3.1.0              # full IL, git-ignored (all 7413 types)
+mono bin/DumpAll.exe    "$ASM" ../il/full-v3.1.0              # full IL, git-ignored (all 7432 types)
 mono bin/DumpAll.exe    "$ASM" ../il/full-v3.1.0 GamePath     # or one namespace
 ```
 
