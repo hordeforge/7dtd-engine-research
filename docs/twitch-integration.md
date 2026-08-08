@@ -161,6 +161,23 @@ dedicated host without Twitch configured the machine stalls in the init
 states, which is the managers.md "waste if constructed without Twitch"
 note.
 
+**Viewer-points ledger (`TwitchViewerData`, server-side with Twitch
+configured):** the `Dictionary<string, ViewerEntry>` registry keyed by
+username (`ViewerEntry` carries `StandardPoints` / `SpecialPoints` floats,
+sub-tier point values, and a display name). Commands and event entries spend
+into it: `TwitchCommandAddPoints` / `TwitchCommandAddSpecialPoints` /
+`TwitchCommandAddBitCredit` (`AddCredit`), `BaseTwitchEventEntry` credits
+participants via `AddPointsAll`, and refunds go through
+`ReimburseAction(username, amount, action)`. Query/flow surface:
+`HasPointsForAction` (affordability), `GetPointTotals`, `GetRandomActiveViewer`
+(action targeting), `MoveStandardToSpecialPoints`, `ResetAllPoints` /
+`ResetAllSpecialPoints` / `ResetAllStandardPoints`, the per-second
+`PointRate`, and `AddGiftSubEntry` / `GetGiftSubTierPoints` / `GetSubTierPoints`
+(sub-tier credit). Persistence: `TwitchManager` saves via `Write` /
+`WriteSpecial` and loads versioned via `Read(reader, version)` over
+`SdFile` streams, plus `WriteExport` / `LoadExport` (a user-facing points
+export) and `SetupLocalization`.
+
 ---
 
 ## 3. Dedicated relevance and residuals
