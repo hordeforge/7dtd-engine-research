@@ -373,6 +373,14 @@ and keep entry; else `DecayEvents`; keep entry while `EventCount > 0`.
 append; else **add** `Value` and replace `Duration` with new event's duration;
 always `activityLevel += event.Value`.
 
+**Persistence + accessors:** `Write` (IL=35) emits inner version **2**,
+`activityLevel` (f32), event count, each `AIDirectorChunkEvent.Write`, then
+`cooldownDelay` (f32); `Read` (IL=36) mirrors it and only reads
+`cooldownDelay` at inner version >= **2**. `get_IsReady` (IL=7) is
+`cooldownDelay <= 0` (the spawn gate); `get_EventCount` / `GetEvent(index)`
+(IL=4 / 5) expose the list; `get_ActivityLevel` (IL=3) is the field. The ctor
+allocates the event list.
+
 **`DecayEvents` (IL=61):** zero `activityLevel`; for each event:
 `Value -= Value * (elapsed/Duration)`, `Duration -= elapsed`; remove if
 Duration or Value ≤ 0; else re-sum Value into `activityLevel`.
@@ -947,6 +955,9 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** AIDirectorChunkData persistence/accessors: Write v2
+  (activity + events + cooldownDelay) / Read inner >= 2; IsReady cooldown gate;
+  EventCount/GetEvent/ActivityLevel.
 - **2026-08-08:** ChunkEventComponent leaves: 5x5 district keying
   (GetChunkDataFromPosition), StartCooldownOnNeighbors walk, CreateHorde
   append, Write v1 / Read outer-version >= 5, Clear/GetActiveCount; deduped
