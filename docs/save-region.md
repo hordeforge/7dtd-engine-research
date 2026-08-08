@@ -489,7 +489,8 @@ read header/version → **`DeflateInputStream`** → pooled load stream for
 
 (`RegionFileAccessMultipleChunks/RegionExtensions` is the cached
 `Dictionary<string, RegionFile>` collection that `GetRFC` populates, ctor
-only.)
+only; the `Region` type's own `Dictionary<Vector2, RegionExtensions>` lookup
+uses the `Vector2EqualityComparer` singleton as its key comparer.)
 
 `RegionFileRaw.WriteData` IL=229:
 
