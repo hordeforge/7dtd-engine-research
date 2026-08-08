@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: world-gen + weather second spot-check (15 claims exact)
 ## 2026-08-08 - tier-C: block-shapes + loot second spot-check (12 claims exact)
 ## 2026-08-08 - tier-C: game-events second spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: crafting second spot-check (7 claims exact)
