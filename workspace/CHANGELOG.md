@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vehicle part mod state
+
+VehiclePart.SetMods (IL=68, vehicles-drones-turrets.md 4.2): modInstalled
+from vehicle.ModTags bit, modT pose/SetActive, modHideT hide, modRBT
+physics enable. verified from IL. Commit 4b69726.
 ## 2026-08-08 - tier-C: vehicle mod/effect config passes
 
 Vehicle (vehicles-drones-turrets.md 4.2): CalcMods (IL=77) ModTags OR of
