@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: DismembermentManager resolution leaves
+
+Body-part flag/name maps, damage tag, dismemberPart property chase + part pick, biped/quadruped tables (verified)
 ## 2026-08-08 - tier-C: HeightMapUtils conversion leaves
 
 ConvertDTMToHeightData overloads, raw-to-stamp/unity/height encodings, image-file loader, box-blur smooth (verified)
