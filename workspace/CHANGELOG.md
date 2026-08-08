@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: loot-bag despawn
+
+EntityLootContainer (loot-economy.md): OnUpdateEntity (IL=46) lock-skip,
+touched-and-empty / timeStayAfterDeath-1 despawn, removeBackpack (IL=10)
+MarkToUnload + bRemoved, IsMarkedForUnload (IL=8), GetLootList (IL=11)
+OverrideLootList preference. verified from IL. Commit 63dd80a.
 ## 2026-08-08 - tier-C: entity bag sizing
 
 Entity.InitializeBagFromLootList (IL=39, combat-damage.md): bag allocated
