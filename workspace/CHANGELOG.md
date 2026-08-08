@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: stealth-smell doc spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: npc-dialog doc spot-check (4 claims exact)
 ## 2026-08-08 - tier-C: buffs doc spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: vehicles-drones-turrets doc spot-check (9 claims exact)
