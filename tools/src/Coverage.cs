@@ -312,6 +312,13 @@ class Coverage {
     foreach (var t in unGame.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t))).OrderBy(t => NsOf(t)).ThenBy(t => t.Name))
       sb.AppendLine("- `" + BaseName(t) + "` (" + (string.IsNullOrEmpty(NsOf(t)) ? "<global>" : NsOf(t)) + ")");
     sb.AppendLine();
+    sb.AppendLine("Full unreached game-type list (" + unGame.Count + "):");
+    sb.AppendLine();
+    sb.AppendLine("| Type | Namespace | methods |");
+    sb.AppendLine("|---|---|---:|");
+    foreach (var t in unGame.OrderBy(t => NsOf(t)).ThenBy(t => t.Name))
+      sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(NsOf(t)) ? "<global>" : NsOf(t)) + " | " + t.Methods.Count(x => x.HasBody) + " |");
+    sb.AppendLine();
 
     sb.AppendLine("## Per-namespace coverage (reached game types)");
     sb.AppendLine();

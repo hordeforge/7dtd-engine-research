@@ -190,162 +190,2421 @@ seeds** of the call-graph model (same seeds as `tools/src/Coverage`). That does
 (`GameManager.Awake`, e.g. the `Webserver.WebServer.Init` HTTP boot), reflection /
 XML-instantiated classes, client render/UI, editor tools, and dead code all land
 here. The classification is by namespace / name dominance; the census is the
-authoritative count. Listing them makes the whole assembly **accounted**
-(reached-and-documented plus unreached-and-classified = 100% of types and methods).
+authoritative count. Roles are dump-derived (base + key methods).
 
 Counts by category:
 
 | Category | Count |
 |---|---:|
-| unreached (client / Unity-lifecycle-booted / reflection / dead) | 1162 |
-| client UI / editor | 175 |
-| platform SDK wrappers (client) | 128 |
-| client render / audio / editor | 111 |
-| Twitch client API / PubSub DTOs | 48 |
-| XML data model types | 39 |
+| unreached (client / Unity-lifecycle-booted / reflection / dead) | 1754 |
+| client UI / editor | 223 |
+| platform SDK wrappers (client) | 155 |
+| client render / audio / editor | 124 |
+| Twitch client API / PubSub DTOs | 58 |
+| XML data model types | 40 |
 | client audio | 9 |
 
-### Twitch client API / PubSub DTOs (48)
+### Twitch client API / PubSub DTOs (58)
 
-`BitCmdVerifyResponse`, `CooldownTypes`, `CooldownTypes`, `CreateCustomRewardResponse`, `CreateCustomRewardResponses`, `CreateCustomRewards`, `DeviceAuthIntitationData`, `EntitlementListWrapper`, `EntryStates`, `ErrorResponse`, `EventTypes`, `ExtensionAction`, `ExtensionActionResponse`, `ExtensionBitAction`, `InBetaResponse`, `InitStates`, `IntegrationSettings`, `MessageTypes`, `OnCommandsChanged`, `OnGameEventVoteAction`, `OnHistoryAdded`, `OnLeaderboardStatsChanged`, `OnTwitchConnectionStateChange`, `OnlyUsableTypes`, `OwnerTypes`, `PermissionLevels`, `PimpPotSettings`, `PointTypes`, `PollingIncompleteResponse`, `PollingSuccessResponse`, `RespawnCountTypes`, `SpecialRequirements`, `SubTierTypes`, `TwitchAuth_QRCodeGenerated`, `TwitchExtensionCommand`, `TwitchUserData`, `TwitchUserDataContainer`, `TwitchVoteLockTypes`, `ValidationResponseData`, `VoteDisplayTypes`, `VoteStateTypes`
+| Type | base | key methods |
+|---|---|---|
+| `BaseTwitchVoteOperationRequirement` | BaseTwitchVoteRequirement | CanPerform, ParseProperties, RightSide |
+| `BaseTwitchVoteRequirement` | Object | ParseProperties, Init, CanPerform |
+| `BitCmdVerifyResponse` | Object |  |
+| `BossVoteSettings` | Enum |  |
+| `CooldownTypes` | Enum |  |
+| `CooldownTypes` | Enum |  |
+| `CreateCustomRewardResponse` | Object |  |
+| `CreateCustomRewardResponses` | Object |  |
+| `CreateCustomRewards` | Object |  |
+| `DeviceAuthIntitationData` | Object |  |
+| `EntitlementListWrapper` | Object |  |
+| `EntryStates` | Enum |  |
+| `ErrorResponse` | Object |  |
+| `EventTypes` | Enum |  |
+| `ExtensionAction` | Object |  |
+| `ExtensionActionResponse` | Object |  |
+| `ExtensionBitAction` | ExtensionAction |  |
+| `InBetaResponse` | Object |  |
+| `InitStates` | Enum |  |
+| `IntegrationSettings` | Enum |  |
+| `MessageTypes` | Enum |  |
+| `OnCommandsChanged` | MulticastDelegate |  |
+| `OnGameEventVoteAction` | MulticastDelegate |  |
+| `OnHistoryAdded` | MulticastDelegate |  |
+| `OnLeaderboardStatsChanged` | MulticastDelegate |  |
+| `OnTwitchConnectionStateChange` | MulticastDelegate |  |
+| `OnlyUsableTypes` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `OwnerTypes` | Enum |  |
+| `PermissionLevels` | Enum |  |
+| `PimpPotSettings` | Enum |  |
+| `PointTypes` | Enum |  |
+| `PollingIncompleteResponse` | Object |  |
+| `PollingSuccessResponse` | Object |  |
+| `RespawnCountTypes` | Enum |  |
+| `SpecialRequirements` | Enum |  |
+| `SubTierTypes` | Enum |  |
+| `TwitchAuth_QRCodeGenerated` | MulticastDelegate |  |
+| `TwitchExtensionCommand` | Object |  |
+| `TwitchUserData` | Object |  |
+| `TwitchUserDataContainer` | Object |  |
+| `TwitchVoteLockTypes` | Enum |  |
+| `TwitchVoteRequirementHasBuff` | BaseTwitchVoteRequirement | CanPerform, CheckBuff, ParseProperties |
+| `TwitchVoteRequirementHasProgression` | BaseTwitchVoteOperationRequirement | CheckPerk, ParseProperties, LeftSide |
+| `TwitchVoteRequirementIsNight` | BaseTwitchVoteRequirement | CanPerform |
+| `ValidationResponseData` | Object |  |
+| `VoteDisplayTypes` | Enum |  |
+| `VoteStateTypes` | Enum |  |
+| `BitRedemptionData` | EventArgs | set_user_name, set_user_id, set_total_bits_used |
+| `ChannelRedemptionData` | EventArgs | set_redemption, get_redemption |
+| `Goal` | Object | set_targetContributions, set_state, set_currentContributions |
+| `HypeTrainData` | EventArgs | set_user_name, get_user_name |
+| `MessageTypes` | Enum |  |
+| `PubSubHypeTrainMessage` | BasePubSubMessage | Deserialize |
+| `Redemption` | Object | set_user, set_reward, get_user |
+| `Reward` | Object | set_title, get_title |
+| `User` | UserBase | loadUserMappings, PlayOffline, getNativePlatformUserIdentifier |
 
-`BitRedemptionData`, `ChannelRedemptionData`, `Goal`, `HypeTrainData`, `MessageTypes`, `PubSubHypeTrainMessage`, `Redemption`
+### XML data model types (40)
 
-### XML data model types (39)
+| Type | base | key methods |
+|---|---|---|
+| `ConverterDelegate`1` | MulticastDelegate |  |
+| `IXMLData` | - |  |
+| `IXMLParserBase` | - |  |
+| `ParserUtils` | Object | ParseRangeAttribute, ParseBoolAttribute, ParseIntAttribute |
+| `XmlParserAttribute` | Attribute |  |
+| `IncorrectAttributeOccurrenceException` | XmlParserException |  |
+| `InvalidValueException` | XmlParserException |  |
+| `MissingAttributeException` | XmlParserException |  |
+| `RedefinedElementException` | XmlParserException |  |
+| `UnexpectedElementException` | XmlParserException |  |
+| `MassFormatter` | Single> | FormatValue |
+| `ValueFormatter`1` | Object |  |
+| `ArmorData` | Object | set_Puncture, set_Melee, set_Explosive |
+| `AttributesData` | Object | set_GainWater, set_GainHealth, set_GainFood |
+| `DamageBonusData` | Object | set_Wood, set_Stone, set_Snow |
+| `DataItemArrayAction` | Object | set_Item, get_Item, get_Length |
+| `EItemGroup` | Enum |  |
+| `EPartType` | Enum |  |
+| `ExplosionData` | Object | set_RadiusEntities, set_RadiusBlocks, set_ParticleIndex |
+| `Parser` | Object | Unparse, Parse |
+| `Parser` | Object | Unparse, Parse |
+| `Parser` | Object | Unparse, Parse |
+| `Parser` | Object | Unparse, Parse |
+| `Parser` | Object | Unparse, Parse |
+| `Parser` | Object | Unparse, Parse |
+| `Parser` | Object | Unparse, Parse |
+| `Parser` | Object | Unparse, Parse |
+| `Parser` | Object | Unparse, Parse |
+| `PartsData` | Object | set_Stock, set_Receiver, set_Pump |
+| `UMAData` | Object | set_UISlot, set_ShowHair, set_OverlayTints |
+| `ColorParser` | Object | Parse, Unparse |
+| `EnumParser` | Object | Parse, Unparse |
+| `MaterialBlockParser` | Object | Parse, Unparse |
+| `Vector2Parser` | Object | Unparse, Parse |
+| `Vector3Parser` | Object | Unparse, Parse |
+| `boolParser` | Object | Parse, Unparse |
+| `doubleParser` | Object | Parse, Unparse |
+| `floatParser` | Object | Parse, Unparse |
+| `intParser` | Object | Unparse, Parse |
+| `stringParser` | Object | Unparse, Parse |
 
-`ConverterDelegate`, `IXMLData`, `IXMLParserBase`, `ParserUtils`, `XmlParserAttribute`
+### client UI / editor (223)
 
-`IncorrectAttributeOccurrenceException`, `InvalidValueException`, `MissingAttributeException`, `RedefinedElementException`, `UnexpectedElementException`
-
-`MassFormatter`, `ValueFormatter`
-
-`ArmorData`, `AttributesData`, `DamageBonusData`, `DataItemArrayAction`, `EItemGroup`, `EPartType`, `Parser`, `Parser`, `Parser`, `Parser`, `Parser`, `Parser`, `Parser`, `Parser`, `Parser`, `PartsData`, `UMAData`
-
-`ColorParser`, `EnumParser`, `MaterialBlockParser`, `Vector2Parser`, `Vector3Parser`, `boolParser`, `doubleParser`, `floatParser`, `intParser`, `stringParser`
-
-### client UI / editor (175)
-
-`BenchmarkContainer`, `BenchmarkObject`, `DebugDirection`, `DebugGameStats`, `DebugLevel`, `DebugView`, `EditorCloneCache`, `ExampleDragDropItem`, `ExampleDragDropSurface`, `GUIBlinker`, `GUILocalizedLabel`, `INGuiButtonOnClick`, `INGuiButtonOnDoubleClick`, `INGuiButtonOnHover`, `INGuiButtonOnIsHeld`, `PreviewQuality`, `PreviewStep`, `SplashType`, `TestClassBase`, `TestClassParse`, `TestClassTryParse`, `UIEquipmentSlot`, `UIItemStorage`, `UISoundType`, `UIStorageSlot`, `XUiC_CraftingToolWindow`, `XUiC_LoginPS5`, `XUiC_MainMenuPlayerName`, `XUiC_OptionEntryComboAbs`, `XUiC_OptionsVideoBase`, `XUiC_PlayersBlockedListEntry`, `XUiC_RWGLSystem`, `XUiC_SpawnersList`, `XUiC_StringList`, `XUiC_VehiclePartStack`, `XUiControllerComparerDepth`, `XUiEvent_BackpackItemsChanged`, `XUiEvent_BackpackItemsChangedInternal`, `XUiEvent_CategoryChangedEventHandler`, `XUiEvent_CurrencyChanged`, `XUiEvent_EquipmentSlotChanged`, `XUiEvent_FuelStackChanged`, `XUiEvent_GenericValueChanged`, `XUiEvent_HoveredStateChanged`, `XUiEvent_InputOnAbortedEventHandler`, `XUiEvent_InputOnChangedEventHandler`, `XUiEvent_InputOnChangedEventHandler`, `XUiEvent_InputOnErrorEventHandler`, `XUiEvent_InputOnSelectedEventHandler`, `XUiEvent_InputOnSubmitEventHandler`, `XUiEvent_InputStackChanged`, `XUiEvent_ListEntryClickedEventHandler`, `XUiEvent_ListEntryDoubleClickedEventHandler`, `XUiEvent_ListEntryHoveredEventHandler`, `XUiEvent_ListPageNumberChangedEventHandler`, `XUiEvent_ListSelectionChangedEventHandler`, `XUiEvent_LockChangeEventHandler`, `XUiEvent_OnCountChanged`, `XUiEvent_OnDragEventHandler`, `XUiEvent_OnEnabledChanged`, `XUiEvent_OnHeldHandler`, `XUiEvent_OnHoverEventHandler`, `XUiEvent_OnInteraction`, `XUiEvent_OnMouseUpDownEventHandler`, `XUiEvent_OnOptionSelectionChanged`, `XUiEvent_OnPressEventHandler`, `XUiEvent_OnScrollEventHandler`, `XUiEvent_OnSelectEventHandler`, `XUiEvent_OnVisibilityChanged`, `XUiEvent_PageChangedEventHandler`, `XUiEvent_PageContentsChangedEventHandler`, `XUiEvent_PageNumberChangedEventHandler`, `XUiEvent_RecipeChangedEventHandler`, `XUiEvent_RefreshEquipment`, `XUiEvent_RequiredSlotFailedSwapEventHandler`, `XUiEvent_SelectedColorChanged`, `XUiEvent_SlotChangedEventHandler`, `XUiEvent_TileEntityDestroyed`, `XUiEvent_TimeIntervalElapsedEventHandler`, `XUiEvent_ToggleButtonValueChanged`, `XUiEvent_ToolLockChangeEventHandler`, `XUiEvent_ToolbeltItemsChanged`, `XUiEvent_ToolbeltItemsChangedInternal`, `XUiEvent_TrackedQuestChanged`, `XUiEvent_ValueChanged`, `XUiM_PlayerDefense`, `vp_3DUtility`, `vp_AmmoPickup`, `vp_AudioUtility`, `vp_ClimbingSounds`, `vp_CustomPooledObject`, `vp_CustomType`, `vp_DamageHandler`, `vp_DamageInfo`, `vp_DecalManager`, `vp_EventDump`, `vp_FPInventory`, `vp_FPPistolReloader`, `vp_FPPlayerEventHandler`, `vp_FPSDemoManager`, `vp_FPWeaponHandler`, `vp_FPWeaponReloader`, `vp_FPWeaponShooter`, `vp_FPWeaponThrower`, `vp_FractalNoise`, `vp_Gameplay`, `vp_Gizmo`, `vp_GlobalCallback`, `vp_GlobalCallback`, `vp_GlobalCallback`, `vp_GlobalCallback`, `vp_GlobalCallbackReturn`, `vp_GlobalCallbackReturn`, `vp_GlobalCallbackReturn`, `vp_GlobalCallbackReturn`, `vp_GlobalEvent`, `vp_GlobalEvent`, `vp_GlobalEvent`, `vp_GlobalEvent`, `vp_GlobalEventMode`, `vp_Grenade`, `vp_HealthPickup`, `vp_HitscanBullet`, `vp_Input`, `vp_InputAxis`, `vp_InteractType`, `vp_Interactable`, `vp_Inventory`, `vp_ItemIdentifier`, `vp_ItemInstance`, `vp_ItemType`, `vp_KillZone`, `vp_Layer`, `vp_MathUtility`, `vp_PainHUD`, `vp_Perlin`, `vp_Placement`, `vp_PlatformSwitch`, `vp_PlayerDamageHandler`, `vp_PlayerEventHandler`, `vp_PlayerInventory`, `vp_PlayerRespawner`, `vp_RandomSpawner`, `vp_Remover`, `vp_Respawner`, `vp_RigidbodyImpulse`, `vp_RigidbodyImpulse_random`, `vp_SimpleCrosshair`, `vp_SimpleInventory`, `vp_SmoothRandom`, `vp_SpawnPoint`, `vp_Spring`, `vp_StateEventHandler`, `vp_SurfaceIdentifier`, `vp_SurfaceTypes`, `vp_Switch`, `vp_TargetEvent`, `vp_TargetEvent`, `vp_TargetEvent`, `vp_TargetEvent`, `vp_TargetEventOptions`, `vp_TargetEventReturn`, `vp_TargetEventReturn`, `vp_TargetEventReturn`, `vp_TargetEventReturn`, `vp_TimeUtility`, `vp_UnitBankInstance`, `vp_UnitBankType`, `vp_UnitType`, `vp_WaypointGizmo`, `vp_WeaponPickup`, `vp_WeaponReloader`, `vp_WeaponThrower`
-
-`UINavTypes`
-
-`PreviewPoint`
+| Type | base | key methods |
+|---|---|---|
+| `BenchmarkContainer` | Object | get_ticks, set_name, get_name |
+| `BenchmarkObject` | Object | PrintAll, UpdateName, SwitchObject |
+| `DebugDirection` | Enum |  |
+| `DebugDrawNormals` | MonoBehaviour | Draw, Update, SetDie |
+| `DebugGameStats` | Object | StartStatisticsUpdate, TryInitializeStatisticsDictionary, GetHeader |
+| `DebugLevel` | Enum |  |
+| `DebugView` | Object |  |
+| `EditorCloneCache` | Object | CacheClone |
+| `ExampleDragDropItem` | UIDragDropItem | OnDragDropRelease |
+| `ExampleDragDropSurface` | MonoBehaviour |  |
+| `GUIBlinker` | Object | Draw |
+| `GUIFPS` | MonoBehaviour | updateFPSGraph, OnGUI, createGUITexture |
+| `GUIHUDEntityName` | MonoBehaviour | OnGUI, Start, findRenderers |
+| `GUILocalizedLabel` | MonoBehaviour | Awake |
+| `INGuiButtonOnClick` | - |  |
+| `INGuiButtonOnDoubleClick` | - |  |
+| `INGuiButtonOnHover` | - |  |
+| `INGuiButtonOnIsHeld` | - |  |
+| `PreviewQuality` | Enum |  |
+| `PreviewStep` | Enum |  |
+| `ScreenshotData` | MonoBehaviour | OnGUI, Update, Start |
+| `SplashScreenScript` | MonoBehaviour | Awake, Update, OnGUI |
+| `SplashType` | Enum |  |
+| `TestClassBase`1` | Object | GetResults |
+| `TestClassParse`1` | StringParsersTests/TestClassBase`1<TOut> | RunTests |
+| `TestClassTryParse`1` | StringParsersTests/TestClassBase`1<TOut> | RunTests |
+| `UICursor` | MonoBehaviour | Update, Start, Set |
+| `UIEquipmentSlot` | UIItemSlot | Replace, get_observedItem |
+| `UIItemSlot` | MonoBehaviour | OnTooltip, Update, OnDrop |
+| `UIItemStorage` | MonoBehaviour | Start, Replace, get_items |
+| `UISliderColors` | MonoBehaviour | Update, Start |
+| `UISoundType` | Enum |  |
+| `UIStorageSlot` | UIItemSlot | Replace, get_observedItem |
+| `XUiC_CraftingToolWindow` | Object |  |
+| `XUiC_LoginPS5` | XUiC_LoginBase | get_MsgTitleKey |
+| `XUiC_MainMenuPlayerName` | XUiController | get_PlayerName |
+| `XUiC_OptionEntryComboAbs` | XUiC_OptionEntryAbs | OnComboValueChanged |
+| `XUiC_OptionsVideoBase` | XUiC_OptionsDialogBase | get_UiSizeLimited, get_VSyncCountPref, get_UiSizeLimit |
+| `XUiC_PlayersBlockedListEntry` | XUiC_PlayersBlockedListEntryBase | unblockPlayerPressed |
+| `XUiC_RWGLSystem` | XUiController |  |
+| `XUiC_SpawnersList` | XUiC_List`1<XUiC_SpawnersList/SpawnerEntry> | RebuildList |
+| `XUiC_StringList` | XUiC_List`1<XUiC_StringList/Entry> | SelectByTag, SelectByString, AddEntry |
+| `XUiC_VehiclePartStack` | XUiC_ItemPartStack |  |
+| `XUiControllerComparerDepth` | Object | Compare, get_Instance |
+| `XUiEvent_BackpackItemsChanged` | MulticastDelegate |  |
+| `XUiEvent_BackpackItemsChangedInternal` | MulticastDelegate |  |
+| `XUiEvent_CategoryChangedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_CurrencyChanged` | MulticastDelegate |  |
+| `XUiEvent_EquipmentSlotChanged` | MulticastDelegate |  |
+| `XUiEvent_FuelStackChanged` | MulticastDelegate |  |
+| `XUiEvent_GenericValueChanged` | MulticastDelegate |  |
+| `XUiEvent_HoveredStateChanged` | MulticastDelegate |  |
+| `XUiEvent_InputOnAbortedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_InputOnChangedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_InputOnChangedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_InputOnErrorEventHandler` | MulticastDelegate |  |
+| `XUiEvent_InputOnSelectedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_InputOnSubmitEventHandler` | MulticastDelegate |  |
+| `XUiEvent_InputStackChanged` | MulticastDelegate |  |
+| `XUiEvent_ListEntryClickedEventHandler`1` | MulticastDelegate |  |
+| `XUiEvent_ListEntryDoubleClickedEventHandler`1` | MulticastDelegate |  |
+| `XUiEvent_ListEntryHoveredEventHandler`1` | MulticastDelegate |  |
+| `XUiEvent_ListPageNumberChangedEventHandler`1` | MulticastDelegate |  |
+| `XUiEvent_ListSelectionChangedEventHandler`1` | MulticastDelegate |  |
+| `XUiEvent_LockChangeEventHandler` | MulticastDelegate |  |
+| `XUiEvent_OnCountChanged` | MulticastDelegate |  |
+| `XUiEvent_OnDragEventHandler` | MulticastDelegate |  |
+| `XUiEvent_OnEnabledChanged` | MulticastDelegate |  |
+| `XUiEvent_OnHeldHandler` | MulticastDelegate |  |
+| `XUiEvent_OnHoverEventHandler` | MulticastDelegate |  |
+| `XUiEvent_OnInteraction` | MulticastDelegate |  |
+| `XUiEvent_OnMouseUpDownEventHandler` | MulticastDelegate |  |
+| `XUiEvent_OnOptionSelectionChanged` | MulticastDelegate |  |
+| `XUiEvent_OnPressEventHandler` | MulticastDelegate |  |
+| `XUiEvent_OnScrollEventHandler` | MulticastDelegate |  |
+| `XUiEvent_OnSelectEventHandler` | MulticastDelegate |  |
+| `XUiEvent_OnVisibilityChanged` | MulticastDelegate |  |
+| `XUiEvent_PageChangedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_PageContentsChangedEventHandler`1` | MulticastDelegate |  |
+| `XUiEvent_PageNumberChangedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_RecipeChangedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_RefreshEquipment` | MulticastDelegate |  |
+| `XUiEvent_RequiredSlotFailedSwapEventHandler` | MulticastDelegate |  |
+| `XUiEvent_SelectedColorChanged` | MulticastDelegate |  |
+| `XUiEvent_SlotChangedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_TileEntityDestroyed` | MulticastDelegate |  |
+| `XUiEvent_TimeIntervalElapsedEventHandler` | MulticastDelegate |  |
+| `XUiEvent_ToggleButtonValueChanged` | MulticastDelegate |  |
+| `XUiEvent_ToolLockChangeEventHandler` | MulticastDelegate |  |
+| `XUiEvent_ToolbeltItemsChanged` | MulticastDelegate |  |
+| `XUiEvent_ToolbeltItemsChangedInternal` | MulticastDelegate |  |
+| `XUiEvent_TrackedQuestChanged` | MulticastDelegate |  |
+| `XUiEvent_ValueChanged` | MulticastDelegate |  |
+| `XUiM_PlayerDefense` | XUiModel | GetDefenseFromPlayer, GetWeight, GetDefenseFromItemValue |
+| `XUiUpdateHelper` | MonoBehaviour | LateUpdate |
+| `vp_3DUtility` | Object | DebugPrimitive, GetBoneLookRotationInWorldSpace, OnScreen |
+| `vp_3rdPersonWeaponAim` | MonoBehaviour | UpdateAiming, Awake, get_HandObj |
+| `vp_Activity`1` | vp_Activity | TryStart |
+| `vp_AmmoPickup` | vp_Pickup | TryGive, TryReloadIfEmpty |
+| `vp_AngleBob` | MonoBehaviour | Update, OnEnable, Awake |
+| `vp_AudioUtility` | Object | PlayRandomSound, PlayRandomSound |
+| `vp_Billboard` | MonoBehaviour | Update, Start |
+| `vp_Bob` | MonoBehaviour | Update, OnEnable, Awake |
+| `vp_ClimbingSounds` | Object |  |
+| `vp_CustomPooledObject` | Object |  |
+| `vp_CustomType` | vp_ItemType |  |
+| `vp_DamageHandler` | MonoBehaviour | GenerateRespawnersForAllDamageHandlers, Die, Damage |
+| `vp_DamageInfo` | Object |  |
+| `vp_Debris` | MonoBehaviour | OnEnable, Awake, Update |
+| `vp_DecalManager` | Object | FadeAndRemove, DebugOutput, Add |
+| `vp_DemoManager` | Object | DrawBoxes, DrawEditorPreview, ToggleColumn |
+| `vp_DoomsDayDevice` | MonoBehaviour | Awake, InitiateDoomsDay, OnEnable |
+| `vp_EventDump` | Object | DumpEventListeners, DumpEventsOfType, Dump |
+| `vp_Explosion` | MonoBehaviour | DoExplode, TargetInCover, AddRigidbodyForce |
+| `vp_FPEarthquake` | MonoBehaviour | UpdateEarthQuake, OnStart_CameraEarthQuake, OnMessage_CameraBombShake |
+| `vp_FPInput` | vp_Component | GetMouseLook, InputSetWeapon, UpdateCursorLock |
+| `vp_FPInteractManager` | MonoBehaviour | InteractCrosshair, FindInteractable, OnControllerColliderHit |
+| `vp_FPInventory` | vp_Inventory | TryWieldNewItem, CanStart_SetWeapon, GetWeaponOfItemInstance |
+| `vp_FPPistolReloader` | vp_FPWeaponReloader | OnStart_Reload |
+| `vp_FPPlayerDamageHandler` | vp_PlayerDamageHandler | Damage, Damage, RefreshColliders |
+| `vp_FPPlayerEventHandler` | vp_PlayerEventHandler |  |
+| `vp_FPSDemo1` | MonoBehaviour | DemoExamples, DemoForces, DemoMouseInput |
+| `vp_FPSDemo2` | MonoBehaviour | DemoPhysics, Start, DemoPresets |
+| `vp_FPSDemo3` | MonoBehaviour | DemoGameplay, DemoOutro, Start |
+| `vp_FPSDemoManager` | vp_DemoManager | Reset, SetWeaponPreset, ResetState |
+| `vp_FPSDemoPlaceHolderMessenger` | MonoBehaviour | Update, Start |
+| `vp_FPWeaponHandler` | vp_WeaponHandler | OnAttempt_AutoReload |
+| `vp_FPWeaponMeleeAttack` | vp_Component | SpawnImpactFX, UpdateAttack, PickAttack |
+| `vp_FPWeaponReloader` | vp_WeaponReloader | OnStart_Reload |
+| `vp_FPWeaponShooter` | vp_WeaponShooter | ApplyRecoil, Fire, RefreshFirePoint |
+| `vp_FPWeaponThrower` | vp_WeaponThrower | RewindAnimation, OnStart_Attack, get_FirePosition |
+| `vp_FootstepManager` | MonoBehaviour | GetMainTerrainTexture, Footstep, PlaySound |
+| `vp_FractalNoise` | Object | HybridMultifractal, RidgedMultifractal, BrownianMotion |
+| `vp_Gameplay` | Object | set_isMaster, get_isMaster |
+| `vp_Gizmo` | MonoBehaviour | OnDrawGizmosSelected, OnDrawGizmos |
+| `vp_GlobalCallback` | MulticastDelegate |  |
+| `vp_GlobalCallbackReturn`1` | MulticastDelegate |  |
+| `vp_GlobalCallbackReturn`2` | MulticastDelegate |  |
+| `vp_GlobalCallbackReturn`3` | MulticastDelegate |  |
+| `vp_GlobalCallbackReturn`4` | MulticastDelegate |  |
+| `vp_GlobalCallback`1` | MulticastDelegate |  |
+| `vp_GlobalCallback`2` | MulticastDelegate |  |
+| `vp_GlobalCallback`3` | MulticastDelegate |  |
+| `vp_GlobalEvent` | Object | Send, Register, Unregister |
+| `vp_GlobalEventMode` | Enum |  |
+| `vp_GlobalEventReturn`1` | Object | Send, Register, Unregister |
+| `vp_GlobalEventReturn`2` | Object | Send, Register, Unregister |
+| `vp_GlobalEventReturn`3` | Object | Send, Register, Unregister |
+| `vp_GlobalEvent`1` | Object | Send, Register, Unregister |
+| `vp_GlobalEvent`2` | Object | Send, Register, Unregister |
+| `vp_GlobalEvent`3` | Object | Send, Register, Unregister |
+| `vp_Grab` | vp_Interactable | StopGrab, UpdatePosition, UpdateRotation |
+| `vp_Grenade` | MonoBehaviour | OnEnable, Start, SetSource |
+| `vp_HealthPickup` | vp_Pickup | TryGive |
+| `vp_HitscanBullet` | MonoBehaviour | DoHit, TryDestroy, SetSource |
+| `vp_Input` | MonoBehaviour | SetupDefaults, UpdateDictionaries, DoGetAxisRaw |
+| `vp_InputAxis` | Object |  |
+| `vp_InteractType` | Enum |  |
+| `vp_Interactable` | MonoBehaviour | OnTriggerEnter, Start, OnEnable |
+| `vp_Inventory` | MonoBehaviour | Reset, Refresh, TryGiveUnitBank |
+| `vp_ItemIdentifier` | MonoBehaviour | OnEnable, GetItemType, GetItemID |
+| `vp_ItemInstance` | Object | SetUniqueID |
+| `vp_ItemPickup` | MonoBehaviour | TryGiveTo, OnSuccess, OnFail |
+| `vp_ItemType` | ScriptableObject | get_DisplayNameFull |
+| `vp_KillZone` | MonoBehaviour | OnTriggerEnter |
+| `vp_Layer` | Object | Set, IsInMask |
+| `vp_MathUtility` | Object | NaNSafeQuaternion, NaNSafeVector3, SnapToZero |
+| `vp_MovingPlatform` | MonoBehaviour | Start, UpdateRotation, TrySnapPlayerToTop |
+| `vp_MuzzleFlash` | MonoBehaviour | Update, Awake, ShootInternal |
+| `vp_PainHUD` | MonoBehaviour | UpdateInflictorArrows, OnStart_Dead, OnMessage_HUDDamageFlash |
+| `vp_Perlin` | Object | Noise, Noise, normalize3 |
+| `vp_Pickup` | MonoBehaviour | Start, OnTriggerEnter, Respawn |
+| `vp_Placement` | Object | AdjustPosition, SnapToGround, IsObstructed |
+| `vp_PlatformSwitch` | vp_Interactable | OnTriggerEnter, TryInteract, PlaySound |
+| `vp_PlayerDamageHandler` | vp_DamageHandler | Die, Reset, OnMessage_FallImpact |
+| `vp_PlayerEventHandler` | vp_StateEventHandler | Awake |
+| `vp_PlayerInventory` | vp_Inventory | TryWieldNewItem, CanStart_SetWeapon, GetWeaponOfItemInstance |
+| `vp_PlayerRespawner` | vp_Respawner | Reset, get_Player, OnEnable |
+| `vp_PulsingLight` | MonoBehaviour | Update, Start |
+| `vp_RagdollHandler` | MonoBehaviour | UpdateDeathCamera, SetRagdoll, Awake |
+| `vp_RandomSpawner` | MonoBehaviour | Awake |
+| `vp_Remover` | MonoBehaviour | OnEnable, OnDisable |
+| `vp_Respawner` | MonoBehaviour | PickSpawnPoint, SpawnFX, Awake |
+| `vp_RigidbodyImpulse` | MonoBehaviour | OnEnable, Awake |
+| `vp_RigidbodyImpulse_random` | MonoBehaviour | OnEnable, Awake |
+| `vp_SecurityCamTurret` | vp_SimpleAITurret | Update, Start |
+| `vp_Shell` | MonoBehaviour | OnCollisionEnter, Update, DecideRestAngle |
+| `vp_SimpleAITurret` | MonoBehaviour | ScanForLocalPlayer, AttackTarget, Update |
+| `vp_SimpleCrosshair` | MonoBehaviour | OnGUI, OnEnable, OnDisable |
+| `vp_SimpleFiring` | MonoBehaviour | Update, OnEnable, OnDisable |
+| `vp_SimpleHUD` | MonoBehaviour | DrawAmmo, Update, DrawLabel |
+| `vp_SimpleInventory` | MonoBehaviour | get_ItemStatusDictionary, GetWeaponStatus, OnAttempt_AddItem |
+| `vp_SlomoPickup` | vp_Pickup | Update, TryGive |
+| `vp_SmoothRandom` | Object | GetVector3Centered, GetVector3Centered, GetVector3 |
+| `vp_SpawnPoint` | MonoBehaviour | GetRandomPlacement, GetRandomSpawnPoint, GetRandomSpawnPoint |
+| `vp_SpeedPickup` | vp_Pickup | TryGive, Update |
+| `vp_Spin` | MonoBehaviour | Update, Start |
+| `vp_Spring` | Object | RefreshUpdateMode, Calculate, FixedUpdate |
+| `vp_StateEventHandler` | vp_EventHandler | RefreshActivityStates, Awake, ActivityInitialized |
+| `vp_SurfaceIdentifier` | MonoBehaviour |  |
+| `vp_SurfaceTypes` | Object |  |
+| `vp_Switch` | vp_Interactable | OnTriggerEnter, PlaySound, TryInteract |
+| `vp_TargetEvent` | Object | SendUpwards, Send, Register |
+| `vp_TargetEventOptions` | Enum |  |
+| `vp_TargetEventReturn`1` | Object | SendUpwards, Send, Register |
+| `vp_TargetEventReturn`2` | Object | SendUpwards, Send, Register |
+| `vp_TargetEventReturn`3` | Object | SendUpwards, Send, Register |
+| `vp_TargetEventReturn`4` | Object | SendUpwards, Send, Register |
+| `vp_TargetEvent`1` | Object | SendUpwards, Send, Register |
+| `vp_TargetEvent`2` | Object | SendUpwards, Send, Register |
+| `vp_TargetEvent`3` | Object | SendUpwards, Send, Register |
+| `vp_TimeUtility` | Object | ClampTimeScale, FadeTimeScale, set_Paused |
+| `vp_UnitBankInstance` | vp_ItemInstance | TryGiveUnits, DoRemoveUnits, DoAddUnits |
+| `vp_UnitBankType` | vp_ItemType |  |
+| `vp_UnitType` | vp_ItemType |  |
+| `vp_WaypointGizmo` | MonoBehaviour | OnDrawGizmosSelected, OnDrawGizmos |
+| `vp_WeaponHandler` | MonoBehaviour | InitWeaponLists, GetWeaponList, SetWeapon |
+| `vp_WeaponPickup` | vp_Pickup | TryGive |
+| `vp_WeaponReloader` | MonoBehaviour | CanStart_Reload, OnStart_Reload, Awake |
+| `vp_WeaponShooter` | vp_Shooter | ShowMuzzleFlash, Awake, ApplyRecoil |
+| `vp_WeaponThrower` | MonoBehaviour | Start, OnStart_Attack, get_UnitBank |
+| `UINavTypes` | Enum |  |
+| `PreviewPoint` | ValueType |  |
 
 ### client audio (9)
 
-`AudioSourceData`, `Channel`, `Channels`, `DopplerItem`, `LoopingPair`, `NearAndFarGO`, `SequenceGOs`, `SourceGameObjectPair`, `StrAudioClip`
+| Type | base | key methods |
+|---|---|---|
+| `AudioSourceData` | ValueType |  |
+| `Channel` | Enum |  |
+| `Channels` | Enum |  |
+| `DopplerItem` | ValueType |  |
+| `LoopingPair` | ValueType |  |
+| `NearAndFarGO` | ValueType |  |
+| `SequenceGOs` | ValueType |  |
+| `SourceGameObjectPair` | ValueType |  |
+| `StrAudioClip` | Object |  |
 
-### client render / audio / editor (111)
+### client render / audio / editor (124)
 
-`JiggleScheduler`
+| Type | base | key methods |
+|---|---|---|
+| `Extensions` | Object | GetOrthogonalVectors, HasLength, Clamp01 |
+| `Jiggle` | MonoBehaviour | ScheduledUpdate, OnDrawGizmosSelected, DebugString |
+| `JiggleScheduler` | Object | Update, FixedUpdate, UpdateOrderedRecords |
+| `ProceduralAnimation` | MonoBehaviour | Update, GetSineValue, Awake |
+| `ArrayValue` | Object | Clone |
+| `BlockSettings` | Object | ResetToDefault |
+| `BlockShapeInfo` | Object | SaveChanges, get_RenderOffset, SerializeCoverMaskValue |
+| `CoverMaskBlockPlacer` | MonoBehaviour | UpdateSelectedMultiBlock |
+| `DataSource` | Enum |  |
+| `PropertyValue` | ValueType | Clone |
+| `Renderable` | ValueType |  |
+| `SelectedBlockInfo` | ValueType | set_shapeInfo, get_shapeInfo, get_savedShapeReference |
+| `ShapeData` | Object | Clone |
+| `ShapeDataSet` | Object |  |
+| `ShapeReference` | ValueType |  |
+| `DayPeriodType` | Enum |  |
+| `ICleanable` | - |  |
+| `IClipAdapter` | - |  |
+| `IConfigurable` | - |  |
+| `IConfiguration` | - |  |
+| `IConfiguration`1` | - |  |
+| `ICountable` | - |  |
+| `IFadeable` | - |  |
+| `IFilter`1` | - |  |
+| `IFiniteConfiguration` | - |  |
+| `IGuarantor` | - |  |
+| `ILayerMixer` | - |  |
+| `ILayerable` | - |  |
+| `IMultiNotifiableFilter` | - |  |
+| `INotifiable` | - |  |
+| `INotifiableFilter`1` | - |  |
+| `INotifiableFilter`2` | - |  |
+| `INotifiableSelector`2` | - |  |
+| `INotifiable`1` | - |  |
+| `IPassArbiter` | - |  |
+| `IPauseable` | - |  |
+| `IPlayArbiter` | - |  |
+| `IPlayable` | - |  |
+| `IResettable` | - |  |
+| `ISection` | - |  |
+| `ISectionLayer` | - |  |
+| `ISectionSelector` | - |  |
+| `ISelector`1` | - |  |
+| `IThreatLevel` | - |  |
+| `IThreatLevelTracker` | - |  |
+| `IUpdatable` | - |  |
+| `LayerParams` | Object |  |
+| `SectionTest` | Object | Run |
+| `ThreatLevelUtility` | Object | GetThreatLevelOn, isPlayerInUnclearedPOI, EnemiesTargeting |
+| `TrackerTests` | Object | Run, SelectorTest, RealTimeConductorTest |
+| `FrequencyManager` | Object | Tick, OnUnPause, OnMusicStopped |
+| `LayerReserve` | Object | Load, AddLoad, Tick |
+| `ThreatLevelTracker` | Object | TickTrackThreatLevel, TickMoveThreatLevel, Init |
+| `ConfigSet` | ThreatLevelConfig> | Cleanup |
+| `Layer` | InstrumentID> | PopulateQueue, GetInstrumentID, RefillQueue |
+| `LayerConfig` | PlacementType> |  |
+| `LoadFinishedAction` | MulticastDelegate |  |
+| `ThreatLevel` | Layer> |  |
+| `ThreatLevelConfig` | LayerConfig> |  |
+| `ITester` | - |  |
+| `ButtonIcon` | Enum |  |
+| `GearPart` | Enum |  |
+| `Sex` | Enum |  |
+| `AllTextureChannel` | Enum |  |
+| `ClusterMode` | Enum |  |
+| `Compression` | Enum |  |
+| `CurvatureMapGenerator` | Object | ComputeOutflow, CreateMap, UpdateWaterMap |
+| `GlitterLight` | MonoBehaviour | Update, OnEnable, OnDisable |
+| `Int4` | ValueType |  |
+| `MicroSplatProceduralTextureUtil` | Object | PCFilter, Sample, PCProcessLayer |
+| `MicroSplatRuntimeUtil` | Object | UVScaleToUnityUVScale, UnityUVScaleToUVScale |
+| `NoiseUVMode` | Enum |  |
+| `PBRWorkflow` | Enum |  |
+| `PackingMode` | Enum |  |
+| `PlatformTextureOverride` | Object |  |
+| `SourceTextureSize` | Enum |  |
+| `TextureArrayConfig` | ScriptableObject | FindConfig, OnDestroy, Awake |
+| `TextureArrayGroup` | Object |  |
+| `TextureArraySettings` | Object |  |
+| `TextureChannel` | Enum |  |
+| `TextureEntry` | Object | Reset, HasTextures |
+| `TextureMode` | Enum |  |
+| `TextureSize` | Enum |  |
+| `ModInfo` | Object | set_Website, set_Version, set_Name |
+| `ModInfoLoader` | Object | ParseXml |
+| `Parser` | Object | Unparse, Parse |
+| `DMSConstants` | Object |  |
+| `FileCleanupUtils` | Object | CleanUpAllWaveFiles, CleanUpWaveFile |
+| `Pair`2` | ValueType |  |
+| `SignalProcessing` | Object | get_SuspenseRange, get_SuspenseThreshold, get_CombatReadyThreshold |
+| `ThreatLevelConstants` | Object |  |
+| `IntensityType` | Enum |  |
+| `LayerStateType` | Enum |  |
+| `LayerType` | Enum |  |
+| `MusicActionType` | Enum |  |
+| `PlacementType` | Enum |  |
+| `SectionType` | Enum |  |
+| `ThreatLevelLegacyType` | Enum |  |
+| `ThreatLevelType` | Enum |  |
+| `NGSS_Directional` | MonoBehaviour | Update, AddCommandBuffer, RemoveCommandBuffer |
+| `NGSS_FrustumShadows` | MonoBehaviour | OnPreRender, Init, AddCommandBuffers |
+| `NGSS_FrustumShadows_7DTD` | MonoBehaviour | OnPreRender, Init, AddCommandBuffers |
+| `NGSS_Local` | MonoBehaviour | SetProperties, Init, OnEnable |
+| `ShadowMapResolution` | Enum |  |
+| `ContactShadows` | MonoBehaviour | UpdateTempObjects, BuildCommandBuffer, OnDestroy |
+| `NoiseTextureSet` | ScriptableObject | GetTexture, GetTexture |
+| `SdfTagType` | Enum |  |
+| `EventTypes` | Enum |  |
+| `Rotate` | MonoBehaviour | Update |
+| `TriggerEffectDualsense` | Object | Update, SetWeaponEffect, SetTriggerEffectVibrationMultiplePosition |
+| `WaterClippingPlanePlacer` | MonoBehaviour | GetPlane |
+| `BlockNode` | Object | TryGetModelOffset, TryGetPropertyParent, ShapeSupportsModelOffset |
+| `ConversionDebugInfo` | Object | CountsToString, OnOriginModelOffsetTypeCalculated, Reset |
+| `ElementInfo` | Object | set_IsClass, set_Element, set_CanInherit |
+| `ModelOffsetType` | Enum |  |
+| `OffsetCounts` | Object | set_ShapeOther, set_ShapeNew, set_ShapeModelEntity |
+| `OversizedConversionUtils` | Object | FixUndersizedHelpers, ConvertToOversizedRecursive, ConvertBlocksToOversized |
+| `PropNameConsts` | Object |  |
+| `XMLUtils` | Object | GetReplacementBlockNames, PopulateReplacementMap, AllAttributesAreEqual |
+| `ILinkFile` | - |  |
+| `LinkFileManager` | Object | Open |
+| `LinuxLinkMemory` | ValueType |  |
+| `Util` | Object | PCFilter, Sample, PCProcessLayer |
+| `WindowsLinkMemory` | ValueType |  |
 
-`ArrayValue`, `BlockSettings`, `BlockShapeInfo`, `CoverMaskBlockPlacer`, `DataSource`, `PropertyValue`, `Renderable`, `SelectedBlockInfo`, `ShapeDataSet`, `ShapeReference`
+### platform SDK wrappers (client) (155)
 
-`DayPeriodType`, `ICleanable`, `IClipAdapter`, `IConfigurable`, `IConfiguration`, `IConfiguration`, `ICountable`, `IFadeable`, `IFilter`, `IFiniteConfiguration`, `IGuarantor`, `ILayerMixer`, `ILayerable`, `IMultiNotifiableFilter`, `INotifiable`, `INotifiable`, `INotifiableFilter`, `INotifiableFilter`, `INotifiableSelector`, `IPassArbiter`, `IPauseable`, `IPlayArbiter`, `IPlayable`, `IResettable`, `ISection`, `ISectionLayer`, `ISectionSelector`, `ISelector`, `IThreatLevel`, `IThreatLevelTracker`, `IUpdatable`, `LayerParams`, `SectionTest`, `TrackerTests`
+| Type | base | key methods |
+|---|---|---|
+| `AbsUserIdentifierFactory` | Object |  |
+| `AchievementConstants` | Object |  |
+| `AchievementInfo` | ValueType |  |
+| `AchievementStatDecl` | ValueType |  |
+| `ApplicationState` | Enum |  |
+| `ApplicationStateChanged` | MulticastDelegate |  |
+| `AuthenticationSuccessfulCallbackDelegate` | MulticastDelegate |  |
+| `CallbackResult` | Enum |  |
+| `CatalogEntry` | ValueType |  |
+| `CensoredTextRequest` | ValueType | set_CensoredLength, get_Input, get_CensoredLength |
+| `ClientAuthenticateServerDisconnectDelegate` | MulticastDelegate |  |
+| `ClientAuthenticateServerSuccessDelegate` | MulticastDelegate |  |
+| `ControllerIconStyle` | Enum |  |
+| `DLCEnvironmentFlags` | Enum |  |
+| `DeviceCapabilities` | Object | CanUserAccessFilesystem |
+| `DeviceFlag` | Enum |  |
+| `DeviceGamePrefs` | Object | ApplyGamePrefs, Apply, ApplyConfigFilePrefs |
+| `DeviceName` | Object | GetDeviceName |
+| `EApiStatus` | Enum |  |
+| `EApiStatusReason` | Enum |  |
+| `EBeginUserAuthenticationResult` | Enum |  |
+| `EBlockType` | Enum |  |
+| `EDeviceType` | Enum |  |
+| `EFileDownloadResult` | Enum |  |
+| `EMatchmakingGroup` | Enum |  |
+| `EPartyVoiceStatus` | Enum |  |
+| `EPlatformIdentifier` | Enum |  |
+| `EPlatformIdentifierExtensions` | Object | IsServer, IsNative, IsCross |
+| `EPlatformLoadSaveGameState` | Enum |  |
+| `EPlayGroup` | Enum |  |
+| `ESaveGameProviderStatus` | Enum |  |
+| `EServerFilterType` | Enum |  |
+| `EUserAccountState` | Enum |  |
+| `EUserAuthenticationResult` | Enum |  |
+| `EUserBlockState` | Enum |  |
+| `EUserPerms` | Enum |  |
+| `EUserStatus` | Enum |  |
+| `EVoiceChannelAction` | Enum |  |
+| `EVoiceMemberState` | Enum |  |
+| `EnumAchievementDataStat` | Enum |  |
+| `EnumAchievementManagerAchievement` | Enum |  |
+| `EnumAchievementManagerAchievementExtensions` | Object | IsSupported |
+| `EnumStatEvent` | Enum |  |
+| `EnumStatType` | Enum |  |
+| `EnumUpdateType` | Enum |  |
+| `FileDownloadCompleteCallback` | MulticastDelegate |  |
+| `FileReadCompleteCallback` | MulticastDelegate |  |
+| `FileReadObjectCompleteCallback`1` | MulticastDelegate |  |
+| `FileWriteCompleteCallback` | MulticastDelegate |  |
+| `GameServerFoundCallback` | MulticastDelegate |  |
+| `IAchievementManager` | - |  |
+| `IAntiCheatClient` | - |  |
+| `IAntiCheatEncryption` | - |  |
+| `IAntiCheatServer` | - |  |
+| `IApplicationStateController` | - |  |
+| `IAuthenticationClient` | - |  |
+| `IAuthenticationServer` | - |  |
+| `IEntitlementValidator` | - |  |
+| `IGameplayNotifier` | - |  |
+| `IJoinSessionGameInviteListener` | - |  |
+| `IMasterServerAnnouncer` | - |  |
+| `IMultiplayerInvitationDialog` | - |  |
+| `IPartyVoice` | - |  |
+| `IPlatform` | - |  |
+| `IPlatformApi` | - |  |
+| `IPlatformMemory` | - |  |
+| `IPlatformMemorySampler` | - | RenderToTable, UpdateLast |
+| `IPlatformMemoryStat` | - |  |
+| `IPlatformMemoryStatExtensions` | Object | TryGetCurrentAndLast, HasColumnIncreased, HasColumnDecreased |
+| `IPlatformMemoryStat`1` | - |  |
+| `IPlatformNetworkClient` | - |  |
+| `IPlatformNetworkServer` | - |  |
+| `IPlatformSaveGameIOProvider` | - |  |
+| `IPlatformSaveGameProvider` | - |  |
+| `IPlatformUser` | - |  |
+| `IPlatformUserBlockedData` | - |  |
+| `IPlatformUserData` | - |  |
+| `IPlayerInteractionsRecorder` | - |  |
+| `IPlayerReporting` | - |  |
+| `IRemoteFileStorage` | - |  |
+| `IRemotePlayerStorageObject` | - |  |
+| `IRichPresence` | - |  |
+| `IServerListInterface` | - |  |
+| `ITextCensor` | - |  |
+| `IUserDataRoaming` | - |  |
+| `IUserDetailsService` | - |  |
+| `IUserIdentifierMappingService` | - |  |
+| `IUtils` | - |  |
+| `IVirtualKeyboard` | - |  |
+| `InputStyle` | Enum |  |
+| `KickPlayerDelegate` | MulticastDelegate |  |
+| `LobbyHostJoinResult` | ValueType |  |
+| `LoginUserCallback` | MulticastDelegate |  |
+| `MappedAccountQueryCallback` | MulticastDelegate |  |
+| `MappedAccountQueryResult` | Enum |  |
+| `MappedAccountReverseQueryCallback` | MulticastDelegate |  |
+| `MappedAccountReverseRequest` | Object |  |
+| `MappedAccountsQueryCallback` | MulticastDelegate |  |
+| `MappedAccountsReverseQueryCallback` | MulticastDelegate |  |
+| `MaxResultsReachedCallback` | MulticastDelegate |  |
+| `MemoryStatColumn` | Enum |  |
+| `NetworkStateChanged` | MulticastDelegate |  |
+| `PlatformFactoryAttribute` | Attribute |  |
+| `PlatformMemoryColumnChangedHandler`1` | MulticastDelegate |  |
+| `PlatformMemoryRenderDelta`1` | MulticastDelegate |  |
+| `PlatformMemoryRenderValue`1` | MulticastDelegate |  |
+| `PlatformMemoryStat` | Object | CreateUInt64, CreateUInt32, CreateInt64 |
+| `PlatformMemoryStatHasChangedSignificantly`1` | MulticastDelegate |  |
+| `PlatformMemoryStat`1` | Object | RenderColumn, UpdateLast, Set |
+| `PlatformUserBlockedStateChangedHandler` | MulticastDelegate |  |
+| `PlatformUserDetails` | ValueType |  |
+| `PlatformUserDetailsUpdatedHandler` | MulticastDelegate |  |
+| `PlayerInteractionType` | Enum |  |
+| `PresenceStates` | Enum |  |
+| `SaveRoamingMode` | Enum |  |
+| `ServerSearchErrorCallback` | MulticastDelegate |  |
+| `SteamGroupStatusResponse` | MulticastDelegate |  |
+| `UserBlocksChangedCallback` | MulticastDelegate |  |
+| `UserDataStorageType` | Enum |  |
+| `UserDetailsRequestCompleteHandler` | MulticastDelegate |  |
+| `UserDetailsUpdatedEvent` | MulticastDelegate |  |
+| `UserIdentifierFactoryAttribute` | Attribute |  |
+| `AntiCheatClientMode` | Enum |  |
+| `EConnectionState` | Enum |  |
+| `EDebugLevel` | Enum |  |
+| `ESessionSearchType` | Enum |  |
+| `ESteamNetChannels` | Enum |  |
+| `EosBindingsUnityEditor` | Object | Shutdown, Init |
+| `EosCreds` | Object |  |
+| `NetworkCommonEos` | Object |  |
+| `Api` | Object | initPlatform, logCallback, createPlatformInterface |
+| `Factory` | AbsUserIdentifierFactory | FromId |
+| `LANServerSearchConfig` | Object |  |
+| `UpdateTimes` | ValueType |  |
+| `Factory` | AbsUserIdentifierFactory | FromId |
+| `PlatformIdCache` | Object | TryGetCachedId, SetCachedId, get_IdFilePath |
+| `Constants` | Object |  |
+| `EConnectionState` | Enum |  |
+| `ESteamNetChannels` | Enum |  |
+| `GameServerDetailsCallback` | MulticastDelegate |  |
+| `NetworkCommonSteam` | Object |  |
+| `RulesRequest` | Object |  |
+| `SteamGroupsAuthorizer` | AuthorizerAbs | Authorize, groupStatusCallback, ServerStart |
+| `SteamOwnerAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_PlatformRestriction |
+| `SteamQueryPortReader` | Object | GetGameServerInfo, RulesRefreshComplete, StartNextRulesRequest |
+| `FactoryStubPSN` | AbsPlatform | CreateInstances |
+| `Api` | Object | initPlatform, logCallback, createPlatformInterface |
+| `Factory` | AbsUserIdentifierFactory | FromId |
+| `UserIdentifierMappedHandler` | MulticastDelegate |  |
+| `Utils` | Object | TryDeleteTempDirectoryContentsExceptCrashes, GetRandomFileName, GetPlatformLanguage |
+| `XblXuidMapper` | Object | ResolveXuids, SetXuid, GetXuidState |
+| `XuidMappedHandler` | MulticastDelegate |  |
+| `XuidResolveRequest` | Object |  |
+| `XuidState` | Object |  |
+| `IMigratable` | - |  |
 
-`FrequencyManager`, `LayerReserve`
+### unreached (client / Unity-lifecycle-booted / reflection / dead) (1754)
 
-`ConfigSet`, `Layer`, `LayerConfig`, `LoadFinishedAction`, `ThreatLevelConfig`
-
-`ITester`
-
-`ButtonIcon`
-
-`GearPart`, `Sex`
-
-`AllTextureChannel`, `ClusterMode`, `Compression`, `CurvatureMapGenerator`, `Int4`, `MicroSplatProceduralTextureUtil`, `MicroSplatRuntimeUtil`, `NoiseUVMode`, `PBRWorkflow`, `PackingMode`, `PlatformTextureOverride`, `SourceTextureSize`, `TextureArrayConfig`, `TextureArrayGroup`, `TextureArraySettings`, `TextureChannel`, `TextureEntry`, `TextureMode`, `TextureSize`
-
-`ModInfoLoader`, `Parser`
-
-`DMSConstants`, `FileCleanupUtils`, `Pair`, `SignalProcessing`, `ThreatLevelConstants`
-
-`IntensityType`, `LayerStateType`, `LayerType`, `MusicActionType`, `PlacementType`, `SectionType`, `ThreatLevelLegacyType`, `ThreatLevelType`
-
-`NGSS_FrustumShadows`, `NGSS_FrustumShadows_7DTD`, `ShadowMapResolution`
-
-`NoiseTextureSet`
-
-`SdfTagType`
-
-`EventTypes`
-
-`TriggerEffectDualsense`
-
-`WaterClippingPlanePlacer`
-
-`BlockNode`, `ConversionDebugInfo`, `ElementInfo`, `ModelOffsetType`, `OffsetCounts`, `OversizedConversionUtils`, `PropNameConsts`, `XMLUtils`
-
-`ILinkFile`, `LinkFileManager`, `LinuxLinkMemory`, `Util`, `WindowsLinkMemory`
-
-### platform SDK wrappers (client) (128)
-
-`AbsUserIdentifierFactory`, `AchievementConstants`, `AchievementInfo`, `AchievementStatDecl`, `ApplicationState`, `ApplicationStateChanged`, `AuthenticationSuccessfulCallbackDelegate`, `CallbackResult`, `CatalogEntry`, `CensoredTextRequest`, `ClientAuthenticateServerDisconnectDelegate`, `ClientAuthenticateServerSuccessDelegate`, `ControllerIconStyle`, `DLCEnvironmentFlags`, `DeviceCapabilities`, `DeviceGamePrefs`, `DeviceName`, `EApiStatus`, `EApiStatusReason`, `EBeginUserAuthenticationResult`, `EBlockType`, `EDeviceType`, `EFileDownloadResult`, `EMatchmakingGroup`, `EPartyVoiceStatus`, `EPlatformIdentifierExtensions`, `EPlatformLoadSaveGameState`, `ESaveGameProviderStatus`, `EUserAccountState`, `EUserAuthenticationResult`, `EUserBlockState`, `EUserPerms`, `EUserStatus`, `EVoiceChannelAction`, `EVoiceMemberState`, `EnumAchievementDataStat`, `EnumAchievementManagerAchievement`, `EnumAchievementManagerAchievementExtensions`, `EnumStatEvent`, `EnumStatType`, `EnumUpdateType`, `FileDownloadCompleteCallback`, `FileReadCompleteCallback`, `FileReadObjectCompleteCallback`, `FileWriteCompleteCallback`, `GameServerFoundCallback`, `IAchievementManager`, `IApplicationStateController`, `IEntitlementValidator`, `IJoinSessionGameInviteListener`, `IMultiplayerInvitationDialog`, `IPartyVoice`, `IPlatformApi`, `IPlatformMemory`, `IPlatformMemorySampler`, `IPlatformMemoryStat`, `IPlatformMemoryStat`, `IPlatformMemoryStatExtensions`, `IPlatformNetworkClient`, `IPlatformNetworkServer`, `IPlatformSaveGameIOProvider`, `IPlatformUser`, `IPlatformUserBlockedData`, `IPlatformUserData`, `IPlayerInteractionsRecorder`, `IPlayerReporting`, `IRemoteFileStorage`, `IRemotePlayerStorageObject`, `IRichPresence`, `IUserDetailsService`, `IUserIdentifierMappingService`, `IUtils`, `IVirtualKeyboard`, `InputStyle`, `KickPlayerDelegate`, `LobbyHostJoinResult`, `LoginUserCallback`, `MappedAccountQueryCallback`, `MappedAccountQueryResult`, `MappedAccountReverseQueryCallback`, `MappedAccountReverseRequest`, `MappedAccountsQueryCallback`, `MappedAccountsReverseQueryCallback`, `MaxResultsReachedCallback`, `MemoryStatColumn`, `NetworkStateChanged`, `PlatformMemoryColumnChangedHandler`, `PlatformMemoryRenderDelta`, `PlatformMemoryRenderValue`, `PlatformMemoryStat`, `PlatformMemoryStat`, `PlatformMemoryStatHasChangedSignificantly`, `PlatformUserBlockedStateChangedHandler`, `PlatformUserDetails`, `PlatformUserDetailsUpdatedHandler`, `PlayerInteractionType`, `PresenceStates`, `SaveRoamingMode`, `ServerSearchErrorCallback`, `SteamGroupStatusResponse`, `UserBlocksChangedCallback`, `UserDetailsRequestCompleteHandler`, `UserDetailsUpdatedEvent`, `UserIdentifierFactoryAttribute`
-
-`AntiCheatClientMode`, `EConnectionState`, `EDebugLevel`, `ESessionSearchType`, `ESteamNetChannels`, `EosBindingsUnityEditor`, `EosCreds`, `NetworkCommonEos`
-
-`LANServerSearchConfig`, `UpdateTimes`
-
-`PlatformIdCache`
-
-`EConnectionState`, `ESteamNetChannels`, `GameServerDetailsCallback`, `NetworkCommonSteam`, `RulesRequest`, `SteamQueryPortReader`
-
-`FactoryStubPSN`
-
-`UserIdentifierMappedHandler`, `XblXuidMapper`, `XuidMappedHandler`, `XuidResolveRequest`, `XuidState`
-
-`IMigratable`
-
-### unreached (client / Unity-lifecycle-booted / reflection / dead) (1162)
-
-`AIClaimTokenFlags`, `AIDirectorPrivateData`, `AITokenClaim`, `AITokenConfig`, `AITokenType`, `AbundanceLootModTypes`, `ActionGroup`, `ActionSetUserData`, `ActionState`, `ActionTab`, `ActionTargetType`, `ActiveIndex`, `ActivityInviteReceivedCallback`, `ActivityJoiningCallback`, `AddSnowToGlass`, `AddressableFolders`, `AdminBlacklist`, `AdvancedSettings`, `AffectMode`, `AggregateMetrics`, `AimTrajectory`, `Allocation`, `AllocationsForType`, `AllyChangeEvent`, `AlternateLootEntry`, `AnimJumpMode`, `AnimReaction`, `AnimationEventBridge`, `AnimationMode`, `AnimationRandomTransition`, `AnimationStateRagdoll`, `AnimationStateRandomBlend`, `AnimationTPVHolsterUnholster`, `AnimatorDoorState`, `AnimatorDrawbridgeState`, `AnimatorRangedAttackState`, `AnimatorRangedHoldState`, `AnimatorRangedSpecialAttackState`, `AnimatorSpeedSetter`, `AnimatorStateHold`, `AnimatorStateHolstering`, `AnimatorStateRaycastOnExit`, `AnimatorStateTPVHold`, `AnimatorStateTPVHolsterUnholster`, `AnimatorStateUnholstering`, `AnimatorThrownWeaponHoldState`, `AnimatorThrownWeaponHolsterState`, `AnimatorWeaponRangedReloadState`, `ApplyChangesDelegate`, `ArchetypePreviewIKController`, `ArgCallback`, `ArmStates`, `ArrayAccessor`, `ArrayWithOffsetSparse`, `AssetAddress`, `AssetBundleMassRequestTFP`, `AssetLocation`, `AsyncLoadInfo`, `AtomicActionDelegate`, `Attachment`, `AudioDevicesChangedCallback`, `AudioMixerStates`, `AutoWieldSection`, `AutoWieldSection`, `AuxBoneTracker`, `BackedArrayHandleMode`, `BackpackCraftingOptions`, `BakeJobState`, `BbCodeSupportMode`, `BiDictionary`, `BiomeFilterTypes`, `BiomePixel`, `BitAddOptions`, `BitString`, `BitmapData`, `BladeTrapStates`, `BlinkState`, `Blinking`, `BlockMaskRules`, `BlockRadiusEffect`, `BlockRule`, `BlockUVCoordinates`, `BobStepDelegate`, `BodySlot`, `BossEventTypes`, `BossGroupTypes`, `BoundsHandlingTypes`, `BoundsHelperEntry`, `BreakdownType`, `Brush`, `BrushSettings`, `BrushShape`, `BuffFlags`, `BuildTriangle`, `BuildVertex`, `ButtonSelectedDelegate`, `ByteArray`, `CVarDisplayFormat`, `CVertexWeight`, `CWeightList`, `CacheDisposition`, `CachedStringFormatterFloat`, `CachedStringFormatterInt`, `CachedStringFormatterXuiRgbaColor`, `CallChangedCallback`, `CallMembersChangedCallback`, `CallStatusChangedCallback`, `Callback`, `Callback`, `Callback`, `CalloutType`, `CamPerspectiveEntry`, `CameraType`, `CanRepairValues`, `CanvasRef`, `CanvasRotationMode`, `CelebrateModes`, `CensorModeType`, `CharacterClickHandler`, `CharacterColliderHelper`, `CharacterConfigurator`, `CharacterConfiguratorUIController`, `CharacterConstructUIController`, `CharacterConstructUtils`, `CharacterMatrixOverride`, `ChatInput`, `ChunkCaveShadowMeshManager`, `ChunkConditions`, `ChunkGroupVisualiser`, `ChunkState`, `ChunkStateHelper`, `CircleLayer`, `ClipBlock`, `ClothFix`, `CollectionDebugWrapper`, `CollectorTypes`, `ColliderHitCallForward`, `Color32EqualityComparer`, `ColorARGB32`, `ColorBGRA32`, `ColorMappingsFromXml`, `ColorMode`, `ColorRGB24`, `CommandHandlerDelegate`, `CommandInstance`, `CompletionCallback`, `CompletionTypes`, `Condition`, `Condition`, `ConfirmationResult`, `Constraint`, `ConsumeType`, `ContainerTypes`, `ControllerMouseSimulation`, `ControllerTriggerEffect`, `CoverEngageType`, `CoverMode`, `CoverType`, `CreateAsyncCallback`, `CreateCallback`, `CreateFlags`, `CriteriaTypes`, `CrosshairDrawer`, `CurveMode`, `CustomNcalcFunctionDelegate`, `CustomValueFormatterDelegate`, `DChunkSquareMesh`, `DamageKeys`, `DamageState`, `DamageTags`, `DataFormat`, `DataTypes`, `DecoAllowedTest`, `DeferredNightVisionEffect`, `DegradeOnDeathTypes`, `DelayedAttach`, `Delegate`, `DelegateGetTerrainHeight`, `DelegateOnVideoFinished`, `DeletageNextBlockHit`, `DeletionMode`, `DescriptorFormat`, `DestroyData`, `DestroyOnClose`, `DetectLeaks`, `DictionaryAddEventHandler`, `DictionaryEntryModifiedEventHandler`, `DictionaryRemoveCallback`, `DictionaryRemoveEventHandler`, `DictionarySaveFormatter`, `DictionaryUpdatedValueEventHandler`, `Dir`, `Direction`, `Direction`, `DisplayMode`, `DisplayMode`, `DisplayState`, `DisplayStyle`, `DisplayTypes`, `DisplayTypes`, `DistantChunkBasicMesh`, `DistantChunkMapInfo`, `DistantChunkPosData`, `DistantTerrainConstants`, `DistantTerrainQuadTree`, `DlcEntry`, `DoNotTouchSerializableFlagsAttribute`, `Documentation`, `DownloadTexture`, `DragInfo`, `DrawSideParams`, `DroneInventory`, `DroneRunningLightMan`, `DropdownArrowButtons`, `DynamicClassFactory`, `DynamicItemState`, `DynamicMeshDataQueue`, `DynamicMeshLoadResult`, `DynamicMeshServerStatus`, `DynamicMeshServerType`, `DynamicMeshServerUpdates`, `DynamicMeshStates`, `DynamicPropertiesFormatter`, `DynamicRagdollFlags`, `DynamicRagdollFlagsExtension`, `DynamicRegionState`, `DynamicUIAtlas`, `DynamicUIAtlasAssigner`, `DynamicUIAtlasTools`, `EActionSet`, `EAddType`, `EAdditionalDisconnectCause`, `EAppliesToInputType`, `EAspectRatio`, `EAutoJoinVoiceMode`, `EAutoShapeType`, `EBiomePoiMap`, `EBlockCommandOrder`, `EBlockRotationClasses`, `EChatDirection`, `EColorChannel`, `ECommand`, `EComparisonType`, `ECsvOperation`, `ECursorType`, `EDebugDataType`, `EDebugLevel`, `EDebugLevel`, `EDeviceType`, `EDirection45`, `EDragType`, `EEntryType`, `EEntryType`, `EEntryType`, `EEvaluator`, `EFieldXuiType`, `EFloatParseState`, `EFullAccountLoginResult`, `EGameServerInfoReadState`, `EGuiState`, `EHasActionSetFor`, `EHoldType`, `EItemMoveKind`, `ELobbyType`, `ELogType`, `EMessageSender`, `EModEventResult`, `EMode`, `EMode`, `EMultiShutReason`, `EMultiplicity`, `EOpenedFor`, `EOptionValueType`, `EOptionValueType`, `EOptionValueType`, `EPagingStepSize`, `EPaintResult`, `EPerformanceDisplayType`, `EPropertiesFrom`, `EProvisionalAccountLoginResult`, `ERagdollState`, `ERestartAntiCheatMode`, `ERoutineState`, `ES_CheckSpawnPrecondition`, `ES_GetSpawnPosition`, `ESaveCompatibility`, `EScreenshotMode`, `ESection`, `ESelectedAction`, `ESpawnWindowMode`, `ESpecIdx`, `EStackPanelPos`, `EState`, `EStaticMapOverlay`, `ETextureType`, `ETriggerRole`, `ETriggerType`, `ETweenType`, `EVersionComparisonResult`, `EVisibility`, `EWildcardPositions`, `EWorldType`, `EXUiControllerInteractionType`, `Edge`, `EffectDualsense`, `EffectGroup`, `EffectXbox`, `EmissionRateData`, `EmptyBindingStyle`, `EntitlementAddressablesMaps`, `EntitlementSetEnum`, `EntityActivationCommand`, `EntityAnimalStag`, `EntityBicycle`, `EntityCollisionRules`, `EntityData`, `EntityMinEvents`, `EntityMinibike`, `EntityMotorcycle`, `EntitySurvivor`, `EntityTokenState`, `EntityUINotification`, `EntryTypes`, `EnumAppState`, `EnumApproachState`, `EnumArmorDamageModifier`, `EnumAttackMode`, `EnumAttackType`, `EnumCameraRestriction`, `EnumCameraShake`, `EnumColliderEnabledFlags`, `EnumColliderMode`, `EnumColliderType`, `EnumColumns`, `EnumCreativeMode`, `EnumCrosshairType`, `EnumDamageBonusType`, `EnumDamageSourceExtensions`, `EnumDecoAllowedSize`, `EnumDisplayInfo`, `EnumDragType`, `EnumEnemyDifficulty`, `EnumEntityModelView`, `EnumEntityStunType`, `EnumEntityUINotificationDisplayMode`, `EnumEntityUINotificationSubject`, `EnumExtensions`, `EnumGameMode`, `EnumHitDirection`, `EnumInsideOutside`, `EnumKeyMode`, `EnumLandClaimDecayMode`, `EnumMeshType`, `EnumMirrorAlong`, `EnumMode`, `EnumNGUIWindow`, `EnumOperation`, `EnumPaintMode`, `EnumParsers`, `EnumPartyStatus`, `EnumPersistentPlayerDataReason`, `EnumPlacement`, `EnumPlayerKillingMode`, `EnumPositionUpdateMovementType`, `EnumRemoveEntityReason`, `EnumRenderMode`, `EnumRepairType`, `EnumReportCategory`, `EnumResetUnprotectedChunksGroupingMode`, `EnumSelOpMode`, `EnumSelectionBoxAvailabilities`, `EnumServerLists`, `EnumServerVisibility`, `EnumState`, `EnumTrackStatus`, `EnumWaypointInviteMode`, `EquipItems`, `EquipRandomItem`, `EquipmentSlotGroups`, `Equipment_CosmeticUnlocked`, `EquippedPart`, `EstimateOwnedBytes`, `EstimatedMemoryContext`, `EventPackageTypes`, `ExecuteSubCommand`, `ExitCallbackTask`, `ExitCallbackThread`, `ExportMeshResult`, `ExtensionChunkDatabase`, `FadeState`, `Falling`, `FastEnumConverter`, `FeatureChangedDelegate`, `FeatureDataSorterByName`, `FeatureEntry`, `FeatureFlags`, `FeatureRequirement`, `FetchModeTypes`, `FileLoadCallback`, `Filter`, `FilterItem`, `FirePositionFunc`, `FireRotationFunc`, `FireSeedFunc`, `FixedMeshData`, `FlowDirection`, `FontInfo`, `ForceLabelInputStyle`, `FrameInfo`, `FrameTimeCapture`, `FriendsListChangedCallback`, `FuelBehavior`, `FullStressEvents`, `Func`, `Func`, `Func`, `FurCombPainter`, `GSDataCollection`, `GSDataKey`, `GameEventEntry`, `GameEventStates`, `GameObjectLoadedCallback`, `GameObjectMeshesReadCallback`, `GameSaveCopy`, `GameSaveMove`, `GameSunShafts`, `GamepadShortCut`, `GamepadTrigger`, `GearSet`, `GeneratorStates`, `GetLastValue`, `GetTargetDisplayName`, `Getter`, `GfxPreset`, `Global`, `GotoStates`, `GotoStates`, `Graph`, `GraphicsMode`, `GraphicsMode`, `Grip`, `GroupCount`, `HSVCurve`, `HUDStatGroups`, `HUDStatTypes`, `HairColorData`, `HairData`, `HairMaskTypes`, `HairTypes`, `HandleInitRequest`, `HandleTextClickUrlDelegate`, `HandleTextHoverUrlDelegate`, `HashDef`, `HeadShotOnlyModes`, `HeadStates`, `HealItemType`, `HeldItemState`, `HelpTopic`, `HierarchyElement`, `HitData`, `HitDataFlags`, `HitDelegate`, `HolsterState`, `HordeArrivedDelegate`, `HordeEvent`, `HotZoneTypes`, `HudEnabledStates`, `IAssetHandle`, `IBackedArray`, `IBackedArrayHandle`, `IBackedArrayView`, `IBindingInstance`, `IBindingNcalc`, `IBlockTool`, `IBodyColliderInstance`, `IChunkProviderIndicator`, `IConsoleServer`, `IDataItem`, `IDataItemFormatter`, `IDynamicDecorator`, `IEntityUINotificationChanged`, `IFeatureSavedInPrefab`, `IFocusCondition`, `IFocusTarget`, `IGameStatsChangedListener`, `IGroup`, `IIntermediateDataWrapper`, `IInventory`, `IItemDataDragSource`, `ILaunchPref`, `ILaunchPref`, `ILightProcessor`, `IMarchingCubes`, `IMeshGenerator`, `IMetric`, `IMinEventAction`, `INeighborBlockCache`, `IOnAnimatorIKCallback`, `IOnPostRender`, `IPackageDestinationFilter`, `IPackageInformation`, `IPowerSystemCamera`, `IProtocolManagerProtocolInterface`, `IRegionFileChunkSnapshot`, `IRegionFileDebugUtil`, `IRegionFilePlatformFactory`, `ISelectionBoxCallback`, `ISelectionCategoryCallback`, `IServerBrowserFilterControl`, `ISharedChunkObserver`, `ITileEntity`, `ITileEntityChangedListener`, `ITrader`, `IWireNode`, `IXUiElement`, `IXUiWindowConditionalClosing`, `Identifier`, `ImageEffectManager`, `ImageEffect_TurretView`, `ImpactData`, `InGameServiceTypes`, `Inflictor`, `InformationTypes`, `InitializedRenderer`, `InputAxisHelper`, `InputType`, `IntRect`, `InternalEdgeData`, `Interval`, `InvAttachmentPoint`, `InvBaseItem`, `InvDatabase`, `InvEquipment`, `InvGameItem`, `InvSlots`, `InvStat`, `InventoryItemStatus`, `InventoryWeaponStatus`, `InventoryWeaponStatusComparer`, `IsCheckedDelegate`, `IsEnabledDelegate`, `IsValidTarget`, `IsVisibleDelegate`, `ItemActionFiringState`, `ItemActionListTypes`, `ItemCap`, `ItemCapsSection`, `ItemRecordsSection`, `ItemSection`, `JPGEncoder`, `JumpState`, `KeyExchangeCompleteDelegate`, `KeyExchangeFailedDelegate`, `LIGHT_TYPE`, `LandClaimBoundsHelper`, `LaunchPrefParser`, `LaunchSceneScript`, `Layer`, `LayerComplexityInfo`, `LayerData`, `LayerType`, `LayerTypeID`, `LegacyLootContainerData`, `LegacySettings`, `LightEffect`, `LightState`, `LightStateType`, `LightbarGradients`, `ListEntryHoveredDelegate`, `ListExtensions`, `ListSortOrderComparer`, `ListTypes`, `LoadCallback`, `LoadLevelCallback`, `LoadLevelOnClick`, `LobbyMember`, `LobbyMemberActionType`, `LobbyMembersChangedCallback`, `LobbyStateChangedCallback`, `LocalPlayerFinalCamera`, `LocalUserChangedCallback`, `LockChannel`, `LockTargetType`, `LockTypes`, `LoggingTypes`, `LoopBlocksDelegate`, `MainThreadTaskFunctionDelegate`, `MainThreadTaskInfo`, `MapChunkDatabaseType`, `MapObjectListChangedDelegate`, `Mask`, `MaskModifier`, `MaterialSync`, `MaterialSyncAll`, `MaxIntensityEvent`, `MemStringEqualityComparer`, `MemberState`, `MemoryPooledArraySizes`, `MenuItemClickedDelegate`, `MenuItemValueChangedDelegate`, `MergedLocations`, `MeshDataLayout`, `MeshFilterState`, `MeshLodOptimization`, `MeshMorphMatrix`, `MeshMorphMatrixType`, `MeshOptimizer`, `MessageSection`, `MetricConversion`, `MetricHelpers`, `MicroSplatKeywords`, `MicroSplatObject`, `MicroSplatTerrain`, `MigrationFunc`, `MinEffectGameVars`, `MinEventTarget`, `MiscSection`, `MiscSection`, `MissingEntryCallbackDelegate`, `ModEffectTypes`, `ModEventHandlerDelegate`, `ModEventInterruptibleHandlerDelegate`, `ModKeys`, `ModTypes`, `Mode`, `Mode`, `Mode`, `Mode`, `Mode`, `Modifier`, `Module`, `MonoScriptData`, `MorphTarget`, `MoveAllowedDelegate`, `MoveHitSurface`, `MovementInterpolationMode`, `MultiSelectionDeselectCallback`, `MusicTrack`, `MusicTrackState`, `NGuiButtonOnClickHandler`, `NGuiHUDRoot`, `NGuiMapData`, `NGuiWdwInGameHUD`, `NavObjectChangedDelegate`, `NetworkFunc`, `NetworkType`, `NewAvatarRootMotion`, `NewsEntryClickedDelegate`, `ObjectDuplicateChecker`, `ObjectInfo`, `ObjectiveTypes`, `ObjectiveValueChanged`, `ObjectiveValueTypes`, `ObserverRequest`, `ObstructionSolver`, `OccludeeLight`, `OcclusionEntry`, `OfferTypes`, `OffsetTarget`, `OnAnimatorIKForwardCall`, `OnBlockChangedDelegate`, `OnBlockDamagedDelegate`, `OnChangeDelegate`, `OnChangedDelegate`, `OnChunkVisibleDelegate`, `OnChunksFinishedDisplayingDelegate`, `OnChunksFinishedLoadingDelegate`, `OnClickActionDelegate`, `OnCompanionGroupChanged`, `OnDoubleClickActionDelegate`, `OnEntityLoadedDelegate`, `OnEntityUnloadedDelegate`, `OnError`, `OnGameBlockRemoved`, `OnGameBlocksAdded`, `OnGameBlocksRemoved`, `OnGameEntityAdded`, `OnGameEntityChanged`, `OnLocalPlayerChangedEvent`, `OnPlayerAuthenticated`, `OnPlayerTeleportDelegate`, `OnPostRenderDispatcher`, `OnRecipeUnlocked`, `OnReleaseActionDelegate`, `OnSelectActionDelegate`, `OnWorldChangedEvent`, `OnWrittenHandler`, `OneToOneDictionary`, `Op`, `Op`, `Op`, `OpenURLOnClick`, `OperationType`, `OptionalParameterExtensions`, `Options`, `OptionsVideoWindowMode`, `OriginParticles`, `OutputDelegate`, `OverrideSettingValueDelegate`, `OverrideTypes`, `Ownership`, `PNG2TGA`, `PackageDestinationAllButEntityID`, `PackageDestinationAttachedToEntity`, `PackageDestinationInRangeOf`, `PackageDestinationSingleEntityID`, `PackagesSentInfoEntry`, `PaintMode`, `PaletteEntry`, `PanelDefinition`, `ParentControllerState`, `ParseFunc`, `ParseKeys`, `Parsers`, `Part`, `PartBones`, `PartInfo`, `ParticleChildSpawner`, `ParticleData`, `ParticleEffectData`, `ParticlePlacement`, `ParticleSystemSpawnRateLimiter`, `ParticleType`, `PatchMethodDefinition`, `PathMoveType`, `PendingActionsUpdateCallback`, `PendingEntry`, `PerTexColor`, `PerTexFloat`, `PerTexVector2`, `PerformanceMetrics`, `PermissionSources`, `PerspectivePixelPerfect`, `PixelToBiomeValue`, `PlaneAxis`, `PlanePick`, `PlayOrder`, `PlayerActionData`, `PlayerAutoPilotControllor`, `PlayerDetails`, `PlayerEventHandler`, `PlayerIteractionEvent`, `PlayerPosHelper`, `Poi`, `PoiListEntry`, `PointsGenerationOptions`, `Polarizer`, `Pos`, `PositionSetTypes`, `PrefRefs`, `PrefType`, `PrefValues`, `PrefabCheckState`, `PrefabFileEntry`, `PrefabFolderEntry`, `PrefabNameHandler`, `PrefabTriggerEntry`, `PreserveCheckPatch`, `Probe`, `ProcessFilesCallback`, `ProfilerExt`, `ProgressDelegate`, `ProjectileInfo`, `ProjectionMode`, `ProjectorEffectData`, `ProjectorEntry`, `PublicizedFromAttribute`, `Pulsing`, `QTDataElement`, `QuestCriteriaLevel`, `QuestEvent_BiomeEvent`, `QuestEvent_BlockChangedEvent`, `QuestEvent_BlockDestroyEvent`, `QuestEvent_BlockEvent`, `QuestEvent_ChallengeAwardCredit`, `QuestEvent_ChallengeCompleteEvent`, `QuestEvent_EntityKillEvent`, `QuestEvent_Event`, `QuestEvent_Explosion`, `QuestEvent_FloatEvent`, `QuestEvent_HarvestStackActionEvent`, `QuestEvent_IntegerActionEvent`, `QuestEvent_ItemStackActionEvent`, `QuestEvent_NPCInteracted`, `QuestEvent_NPCKilled`, `QuestEvent_OpenContainer`, `QuestEvent_PurchaseEvent`, `QuestEvent_QuestCompleteEvent`, `QuestEvent_SkillPointSpent`, `QuestEvent_SleeperVolumePositionChanged`, `QuestEvent_SleepersCleared`, `QuestEvent_StringEvent`, `QuestEvent_TwitchEvent`, `QuestEvent_WindowChanged`, `QuestGotoTypes`, `QuestJournal_QuestSharedEvent`, `QuestPointActions`, `RadialContextAbs`, `RadialContextBlock`, `RadialContextEntity`, `RadialContextHoldingSlotIndex`, `RadialContextItem`, `RadialStillValidDelegate`, `RagdollMode`, `RagdollPose`, `RallyStartTypes`, `RawConverterFromStringDelegate`, `RawConverterTypeToTypeDelegate`, `ReadMode`, `RecipeInfo`, `RecipientTagsSection`, `ReferenceEqualityComparer`, `ReferenceEqualityComparer`, `RegLightGroup`, `RegionFileDebugUtilRaw`, `RegionFileDebugUtilSectorBased`, `RegionFileLog`, `RelationshipChangedCallback`, `ReloadFlags`, `RemoteData`, `RemoteResourcesCompleteHandler`, `RemoveByTypes`, `RemoveSelfLater`, `RenderBlock`, `RenderCubeType`, `RenderData`, `RenderDisplacedCube`, `RenderItem`, `RenderItem`, `RendererHandle`, `RendererSettings`, `RendererSettings`, `RenderingDataPatcher`, `RentResult`, `RequiredTypes`, `RespawnProgress`, `RestAngleFunc`, `RewardTypes`, `RootTransformRef`, `RotateInterpolationMode`, `RulesRequestDone`, `SCalcChunkColorsDoneData`, `SCreateWorldDoneData`, `SDCSGearXmlCatalog`, `SEntityClassAndProb`, `SGameAwakeData`, `SGameFocusData`, `SGameShutdownData`, `SGameStartDoneData`, `SGameUpdateData`, `SIdCnt`, `SIdCntSorter`, `SItemNameCount`, `SPlayerLoginData`, `SServerRegisteredData`, `SSpawnedEntity`, `SUnityUpdateData`, `SWorldShuttingDownData`, `SandboxPresetSelectionChangedDelegate`, `SaveCopyResultInfo`, `SaveManagementActionApply`, `SaveManagementActionCopy`, `SaveManagementActionMove`, `SaveManagementMode`, `SaveMoveResultInfo`, `ScoreConditions`, `ScreenEffectsProxy`, `ScreenEffectsProxyRenderer`, `SdDirectoryInfoExtensions`, `SdEncoding`, `SdXDocumentExtensions`, `SearchDir`, `SearchTypes`, `SearchTypes`, `SelectionDepth`, `SelfMuteStateChangedCallback`, `SeparatorSplitAnyEnumerator`, `SetColorPickerColor`, `SetShadowMapAsGlobalTexture`, `Setter`, `ShaderParameter`, `ShaftsScreenBlendMode`, `ShaftsScreenBlendMode`, `ShaftsScreenBlendModeParameter`, `ShapeMode`, `ShockSpot`, `ShowLocationInfoTypes`, `ShowTextTypes`, `ShowXPTypes`, `SiSizeUnits`, `SideTypes`, `SignBlendMode`, `SignFontConfiguration`, `SignShaderIDs`, `SignTextureQuality`, `SignUIStyle`, `SimpleGraph`, `SimpleRPCType`, `SizeTextMeshDefinition`, `SkinTextureOverride`, `SkinnedMeshCombiner`, `SleeperPreview`, `SnapshotController`, `Sorter`, `SoundKeys`, `SoundPlayType`, `SoundSection`, `SpaceLimitSection`, `SpawnEntityEntry`, `SpawnMethod`, `SpawnMode`, `SpawnType`, `SpawnerEntry`, `SpecialDateDelegate`, `SpectrumWeatherType`, `SpeedTreeLODController`, `SpeedTreeMotionVectorHelper`, `SpikeEvent`, `SpinWithMouse`, `SpiralSequenceState`, `SpriteFillTypes`, `StackLockTypes`, `StanceTypes`, `StartItemRecord`, `StateTypes`, `StateTypes`, `StateTypes`, `StateTypes`, `Statistics`, `StatisticsUpdatedCallback`, `StepType`, `StopAnimatorAudioType`, `StringSplitEnumerator`, `StringTags`, `Summary`, `SunSettings`, `SunShaftsEffect`, `SunShaftsEffectRenderer`, `SunShaftsResolution`, `SunShaftsResolution`, `SunShaftsResolutionParameter`, `SyncType`, `TSOverrides`, `TabChangedDelegate`, `TabTypes`, `TableSize`, `TagsGroupAbs`, `TargetClass`, `TargetClass`, `TargetClass`, `TaskFunctionDelegate`, `TerrainAlignmentMode`, `TextureContainer`, `TextureInfo`, `TextureInfo`, `TextureLabels`, `TexturesSkybox`, `ThreadFunctionDelegate`, `ThreadFunctionEndDelegate`, `ThreadFunctionLoopDelegate`, `ThreadInfoParam`, `ThreadInfoParamPool`, `ThreadProcessing`, `ThreadProcessingPool`, `TileAreaSimple`, `TimedAction`, `Timer`, `TimerEventHandler`, `TintableMaterialBaker`, `TokenRequester`, `TokenState`, `ToolTipEventHandler`, `TrackingTypeFlags`, `TrackingTypes`, `TraderActionTypes`, `TraderDaysPresets`, `TraderHourPresets`, `TransformState`, `TransformWarp`, `TransitionCellData`, `TransitionVertexData`, `Transvoxel`, `TreasureChestStates`, `Tri`, `Trigger`, `Trigger`, `Trigger`, `TriggerEffectDS`, `TriggerEffectXB`, `TriggerPowerDelayTypes`, `TriggerPowerDurationTypes`, `TriggerTypes`, `TriggerWriteData`, `TriggeredStates`, `TryParseFunc`, `Tryer`, `Tryer`, `Tutorial5`, `TwitchBloodMoonOptions`, `TwitchVoteStates`, `UVMode`, `UlongAsUshorts`, `UnitySourceGeneratedAssemblyMonoScriptTypes_v1`, `UnregisterException`, `UpdateDelegate`, `UpdateID`, `UpdateMode`, `UpdateStates`, `UpdateTiming`, `UserAuthorizationResultCallback`, `UtilList`, `ValueModifierBase`, `ValueTypes`, `ValueTypes`, `Vector2Int`, `Vector3ToFixedEqualityComparer`, `Vertex`, `VertexDistortion`, `VideoErrorDelegate`, `VideoFinishedDelegate`, `VideoSubtitle`, `ViewEnums`, `VisitChunkDelegate`, `VisitMapDoneDelegate`, `VoiceStateChangedCallback`, `VolumeStats`, `VolumeTypeDefinition`, `WaitMode`, `WallVisibilityStates`, `WarpType`, `WaterDebug`, `WaterDebugAssets`, `WaterDebugPools`, `WaterFlow`, `WaterInfo`, `WaterMesh`, `WaterMode`, `WaterSourceInfo`, `WaterVoxelUpdate`, `WaypointComparer`, `WeaponComparer`, `WeightBehavior`, `WhitespaceSplitEnumerator`, `WindowSelectedDelegate`, `WorldEvent`, `WorldListEntry`, `WorldRefMono`, `WrapMode`, `XNames`, `XPTypes`, `XmlPatchMethodsClassAttribute`, `XuiBindComponentAttribute`, `XuiBindEventAttribute`, `XuiBindParentAttribute`, `XuiBindingDelegate`, `XuiBindingNcalcFunctionAttribute`, `XuiEvent_WorkstationItemsChanged`, `XuiParsingConverterFromStringDelegate`, `XuiParsingConverterTypeToTypeDelegate`, `XuiParsingDelegate`, `XuiXmlAttributeAttribute`, `XuiXmlAttributeConverterAttribute`, `XuiXmlAttributeConvertersClassAttribute`, `XuiXmlBindingAttribute`, `ZoomStates`, `cActionType`, `cTypes`, `eCameraSnapMode`, `eControllerJoystickLayout`, `eDefaultQuickAction`, `eFlatAreaSizeFilter`, `eGamepadRotationMode`, `eLastKnownPositionEntityType`, `eMode`, `eOp`, `eSetBlockResponse`, `eState`, `eTPCameraCheckResult`, `eType`, `eType`, `eWayPointListType`, `flashLockTypes`, `includeInList`, `pulsingLightEmissive`, `rTypes`, `sTypes`, `water_reflectionMirror`
-
-`ChallengeStateChanged`, `ResourceRequiredTypes`, `ShowTypes`
-
-`Direction`
-
-`ConditionTypes`, `ContainerActionStates`, `CountTypes`, `DestroySafeZoneStates`, `DestructionTypes`, `Direction`, `EntityStates`, `FillSafeZoneStates`, `FillSafeZoneStates`, `FillTypes`, `FillTypes`, `FuelSettingTypes`, `HealthStates`, `ItemLocations`, `ItemLocations`, `ItemLocations`, `ModifyTypes`, `OffsetTypes`, `RecipientTypes`, `ReturnVehicleTypes`, `SearchTypes`, `SpawnTypes`, `SpawnUpdateTypes`, `TargetingTypes`, `TimePresets`
-
-`ConditionTypes`
-
-`ConditionTypes`
-
-`EntityStates`
-
-`MultiTargetPathSelection`, `PathInfoFleeRandom`, `PathInfoFleeTarget`, `PathInfoMultiSource`, `PathInfoMultiTarget`
-
-`CurrentZoomFile`
-
-`Map`
-
-`MarkerSize`
-
-`GroupOperator`
-
-`dColor`
-
-`DisplayOverride`, `SandboxOptionCategory`
-
-`ERequestMethod`, `LogEntry`, `ResourceHelpers`, `ResultType`, `WebMod`, `WebServer`
-
-`AbstractCache`
-
-`Animals`, `EntityFilterList`, `Hostiles`
-
-`ApiToken`, `PermissionUtils`, `WebModule`, `WebUser`
-
-`ESseClientWriteResult`, `EventLog`
-
-`SimpleRedirectHandler`
-
-`EApiErrorCode`, `Null`, `OpenApiSpec`
-
-`PermissionsApiHelpers`
-
-`SandboxOptionInfo`
-
-`BiomeLayout`, `PathNodeType`, `PathTile`, `PathTileStates`, `RoadShapeTypes`, `RotateParams`, `StreetTileData`, `WorldBuilderConstants`, `eCategory`
-
+| Type | base | key methods |
+|---|---|---|
+| `AIAimFocusOffset` | Enum |  |
+| `AIClaimTokenFlags` | Enum |  |
+| `AIDirectorConstants` | Object |  |
+| `AIDirectorEventsFromXml` | MonoBehaviour | Update, Start |
+| `AIDirectorPooledMarker` | MonoBehaviour | Update, Start |
+| `AIDirectorPrivateData` | Object |  |
+| `AITokenClaim` | Enum |  |
+| `AITokenConfig` | ValueType |  |
+| `AITokenType` | Enum |  |
+| `AbundanceLootModTypes` | Enum |  |
+| `ActionGroup` | Object |  |
+| `ActionSetUserData` | Object |  |
+| `ActionState` | Enum |  |
+| `ActionTab` | Object | CompareTo, get_LocalizedName |
+| `ActionTargetType` | Enum |  |
+| `ActionTypes` | Enum |  |
+| `ActionTypes` | Enum |  |
+| `ActiveIndex` | Enum |  |
+| `ActivityInviteReceivedCallback` | MulticastDelegate |  |
+| `ActivityJoiningCallback` | MulticastDelegate |  |
+| `AddSnowToGlass` | MonoBehaviour | Start |
+| `AddressableFolders` | Object |  |
+| `AdminBlacklist` | AdminSectionAbs | IsBanned, AddBan, Save |
+| `AdminSectionAbs` | Object | Parse |
+| `AdminWhitelist` | AdminSectionAbs | Save, IsWhitelisted, IsWhiteListEnabled |
+| `AdvancedSettings` | Object |  |
+| `AffectMode` | Enum |  |
+| `AggregateMetrics` | ValueType |  |
+| `AimTrajectory` | ValueType |  |
+| `Allocation` | ValueType | GetOwnedBytes |
+| `AllocationsForType` | Object | ClearDeadAllocations |
+| `AllowSpawnNearFriend` | Enum |  |
+| `AllyChangeEvent` | MulticastDelegate |  |
+| `AllyEvent` | Enum |  |
+| `AllyHealMode` | Enum |  |
+| `AllyStatus` | Enum |  |
+| `AlternateLootEntry` | ValueType |  |
+| `AnimJumpMode` | Enum |  |
+| `AnimReaction` | Enum |  |
+| `AnimationEventBridge` | RootTransformRefEntity | ConsumeComplete, PlayStepSound, playSound |
+| `AnimationMode` | Enum |  |
+| `AnimationParameters` | Object | Add, GetParameterLists, newPacket |
+| `AnimationRandomTransition` | StateMachineBehaviour | OnStateExit |
+| `AnimationStateRagdoll` | StateMachineBehaviour | OnStateEnter, OnStateExit |
+| `AnimationStateRandomBlend` | StateMachineBehaviour | OnStateEnter |
+| `AnimationTPVHolsterUnholster` | StateMachineBehaviour |  |
+| `AnimationTestSceneTools` | MonoBehaviour | Update, attachWeapon, updateYLook |
+| `Animator3PRangedReloadState` | StateMachineBehaviour | OnStateEnter, GetAmmoCount, OnStateUpdate |
+| `AnimatorDoorState` | StateMachineBehaviour | PushPlayers, CheckForObstacles, OnStateUpdate |
+| `AnimatorDrawbridgeState` | AnimatorDoorState | CheckForObstacles, OnEnable, PushPlayers |
+| `AnimatorRangedAttackState` | StateMachineBehaviour | OnStateEnter, OnStateUpdate, OnStateExit |
+| `AnimatorRangedHoldState` | StateMachineBehaviour | OnStateEnter, OnStateUpdate, OnStateExit |
+| `AnimatorRangedReloadState` | StateMachineBehaviour | OnStateEnter, OnStateExit, OnStateUpdate |
+| `AnimatorRangedSpecialAttackState` | StateMachineBehaviour | OnStateEnter, OnStateUpdate, OnStateExit |
+| `AnimatorSpeedSetter` | StateMachineBehaviour | OnStateExit, OnStateEnter, OnStateUpdate |
+| `AnimatorStateHold` | StateMachineBehaviour | OnStateUpdate |
+| `AnimatorStateHolstering` | StateMachineBehaviour | OnStateEnter, OnStateExit |
+| `AnimatorStateRaycast` | StateMachineBehaviour | OnStateEnter |
+| `AnimatorStateRaycastOnExit` | StateMachineBehaviour | OnStateUpdate |
+| `AnimatorStateTPVHold` | StateMachineBehaviour |  |
+| `AnimatorStateTPVHolsterUnholster` | StateMachineBehaviour | OnStateEnter |
+| `AnimatorStateUnholstering` | StateMachineBehaviour | OnStateExit, OnStateEnter |
+| `AnimatorThrownWeaponHoldState` | StateMachineBehaviour | OnStateEnter, OnStateMove, OnStateIK |
+| `AnimatorThrownWeaponHolsterState` | StateMachineBehaviour | OnStateEnter, OnStateMove, OnStateIK |
+| `AnimatorWeaponRangedReloadState` | StateMachineBehaviour | OnStateEnter, OnStateUpdate, OnStateExit |
+| `AntiCheatEncryptionAgreementAuthorizer` | AuthorizerAbs | Authorize, ServerStart, KeyExchangeCompleted |
+| `ApplyChangesDelegate` | MulticastDelegate |  |
+| `ArcWarp` | ValueType |  |
+| `ArchetypePreviewIKController` | MonoBehaviour | OnAnimatorIK, Start |
+| `ArgCallback` | MulticastDelegate |  |
+| `ArmStates` | Enum |  |
+| `ArrayAccessor`1` | Object |  |
+| `ArrayWithOffsetSparse`1` | Object | Contains, makeKey, get_Item |
+| `AssetAddress` | Object |  |
+| `AssetBundleMassRequestTFP` | CustomYieldInstruction | get_keepWaiting, get_Assets, get_IsDone |
+| `AssetLocation` | Enum |  |
+| `AsyncLoadInfo` | ValueType |  |
+| `AtomicActionDelegate` | MulticastDelegate |  |
+| `AttachType` | Enum |  |
+| `AttachedToEntitySlotExit` | ValueType |  |
+| `Attachment` | Enum |  |
+| `AttachmentTestSceneTools` | MonoBehaviour | Start, Update |
+| `AttackMode` | Enum |  |
+| `AudioDevicesChangedCallback` | MulticastDelegate |  |
+| `AudioMixerManager` | MonoBehaviour | Update, transitionTo |
+| `AudioMixerStates` | Enum |  |
+| `AudioSourceLifetimeSwitch` | MonoBehaviour | Update, Start |
+| `AutoWieldSection` | Object |  |
+| `AutoWieldSection` | Object |  |
+| `AutomationStep` | Object | Describe, MovePingPong, Orbit |
+| `AuxBoneTracker` | MonoBehaviour |  |
+| `BackedArrayHandleMode` | Enum |  |
+| `BackgroundMusicMono` | SingletonMonoBehaviour`1<BackgroundMusicMono> | UpdateTrack, Start, Update |
+| `BackpackCraftingOptions` | Enum |  |
+| `BakeJobState` | Enum |  |
+| `BannedUser` | ValueType | TryParse, ToXml |
+| `BansAndWhitelistAuthorizer` | AuthorizerAbs | Authorize, get_AuthorizerActive, get_StateLocalizationKey |
+| `BbCodeSupportMode` | Enum |  |
+| `BiDictionary`2` | Object | Add, RemoveByValue, RemoveByKey |
+| `BinaryReaderExtensions` | Object | TryReadAllBytes, TryReadAllBytes |
+| `BiomeFilterTypes` | Enum |  |
+| `BiomeIntensityMap` | Object | Load, Save, GetBiomeIntensity |
+| `BiomePixel` | ValueType |  |
+| `BiomeSpawningClass` | Object | Cleanup |
+| `BiomeType` | Enum |  |
+| `BitAddOptions` | Enum |  |
+| `BitString` | ValueType |  |
+| `BitmapData` | Object | GetPixelColor |
+| `BladeTrapStates` | Enum |  |
+| `BlendshapeTestSceneTools` | MonoBehaviour | Update, Start |
+| `BlinkState` | Enum |  |
+| `Blinking` | LightState | get_Emissive, blink, OnEnable |
+| `BlockCampfire` | BlockWorkstation |  |
+| `BlockFace` | Enum |  |
+| `BlockFaceFlag` | Enum |  |
+| `BlockMaskRules`2` | Object | RotateLocalRangeYAxis, GetOutput, AddRule |
+| `BlockPlaceholdersFromXml` | Object | Load |
+| `BlockProjectileMoveScript` | ProjectileMoveScript | checkCollision, GetProjectileDamageEntity |
+| `BlockRadiusEffect` | ValueType |  |
+| `BlockRule`2` | Object |  |
+| `BlockTags` | Enum |  |
+| `BlockTexturesFromXML` | Object | CreateBlockTextures |
+| `BlockTrunk` | Block |  |
+| `BlockUVCoordinates` | Object | get_BlockFaceUvCoordinates |
+| `BlockValueRefType` | Enum |  |
+| `BobStepDelegate` | MulticastDelegate |  |
+| `BodyPrimaryHit` | Enum |  |
+| `BodySlot` | Object |  |
+| `BossEventTypes` | Enum |  |
+| `BossGroupTypes` | Enum |  |
+| `BoundsHandlingTypes` | Enum |  |
+| `BoundsHelperEntry` | Object | OnOriginChanged, Remove |
+| `BreakdownType` | Enum |  |
+| `Brush` | Object | CalcCubesInSphere, CalcCubesInCube, GetCubesInBrush |
+| `BrushSettings` | Object | UpdateBrushPreview, set_Strength, set_Size |
+| `BrushShape` | Enum |  |
+| `BuffEffectStackTypes` | Enum |  |
+| `BuffFlags` | Enum |  |
+| `BuffStatus` | Enum |  |
+| `BuildTriangle` | ValueType |  |
+| `BuildVertex` | ValueType |  |
+| `BulgeWarp` | ValueType |  |
+| `BurstRoundCount` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `ButtonSelectedDelegate` | MulticastDelegate |  |
+| `ByteArray` | SdfTag | WritePayload |
+| `CVarDisplayFormat` | Enum |  |
+| `CVarOperation` | Enum |  |
+| `CVertexWeight` | Object |  |
+| `CWeightList` | Object |  |
+| `CacheDisposition` | Enum |  |
+| `CachedStringFormatterFloat` | Single> | formatterFunc |
+| `CachedStringFormatterInt` | Int32> | formatterFunc |
+| `CachedStringFormatterXuiRgbaColor` | Color32> | formatterFunc |
+| `CachedStringFormatter`5` | Object | Format, Format |
+| `CallChangedCallback` | MulticastDelegate |  |
+| `CallMembersChangedCallback` | MulticastDelegate |  |
+| `CallStatusChangedCallback` | MulticastDelegate |  |
+| `Callback` | MulticastDelegate |  |
+| `Callback` | MulticastDelegate |  |
+| `Callback` | MulticastDelegate |  |
+| `CalloutType` | Enum |  |
+| `CamPerspectiveEntry` | XUiListEntry`1<XUiC_CamPositionsList/CamPerspectiveEntry> | MatchesSearch, CompareTo |
+| `CameraControl` | MonoBehaviour | Update, Start |
+| `CameraMatrixOverride` | MonoBehaviour | UpdateRendererList, OnPreRender, RestoreChildSettings |
+| `CameraType` | Enum |  |
+| `CanRepairValues` | Enum |  |
+| `CanvasRef` | ValueType |  |
+| `CanvasRotationMode` | Enum |  |
+| `CatapultStrainAmount` | TargetedCompareRequirementBase | IsValid |
+| `CelebrateModes` | Enum |  |
+| `CensorModeType` | Enum |  |
+| `CharLayer` | ValueType |  |
+| `CharacterClickHandler` | MonoBehaviour | HandleClick |
+| `CharacterColliderHelper` | MonoBehaviour |  |
+| `CharacterConfigurator` | MonoBehaviour | CreateCurrentArchetype, PopulateGearLookups, GetFacialHairTypes |
+| `CharacterConfiguratorUIController` | MonoBehaviour | InitializeDropdowns, SetupDropdownListeners, Start |
+| `CharacterConstruct` | MonoBehaviour | Awake, CreateHatHairInstances, CreateGearInstances |
+| `CharacterConstructUIController` | MonoBehaviour | InitializeDropdowns, SetupDropdownListeners, SetupToggleListeners |
+| `CharacterConstructUtils` | Object | CollectRequiredNamesForSlot, setupBase, setupEquipmentSlot |
+| `CharacterMatrixOverride` | MonoBehaviour | OnPreRenderCallback, UpdateRendererList, OnPostRenderCallback |
+| `CharacterShaderLODControl` | MonoBehaviour | Start, Update |
+| `ChatInput` | MonoBehaviour | Start, OnSubmit |
+| `ChunkCaveShadowMeshManager` | MonoBehaviour |  |
+| `ChunkConditions` | Object |  |
+| `ChunkGroupVisualiser` | SingletonMonoBehaviour`1<ChunkGroupVisualiser> | SetGroups, OnDrawGizmos |
+| `ChunkProtectionLevel` | Enum |  |
+| `ChunkProviderParameter` | Object |  |
+| `ChunkResetCommandHelpers` | Object | ExecuteReset, TryParseProtectionMode, TryParseRegion |
+| `ChunkState` | Enum |  |
+| `ChunkStateHelper` | Object |  |
+| `CircleLayer` | ValueType |  |
+| `ClientConnectionAction` | MulticastDelegate |  |
+| `ClipBlock` | Object | Init, New, ResetStorage |
+| `CloneToTransform` | MonoBehaviour | LateUpdate, CheckTransform, Start |
+| `ClothFix` | MonoBehaviour | OnEnable, OnDisable, Awake |
+| `CmdLine` | ValueType |  |
+| `CollectionDebugWrapper`1` | EnumerableDebugWrapper`1<T> | Remove, Contains, CopyTo |
+| `CollectorTypes` | Enum |  |
+| `ColliderHitCallForward` | MonoBehaviour | OnControllerColliderHit |
+| `Colliders` | Object | TraceAll, Trace |
+| `Color32EqualityComparer` | Object | Equals, GetHashCode |
+| `ColorARGB32` | ValueType |  |
+| `ColorBGRA32` | ValueType |  |
+| `ColorMappingsFromXml` | MonoBehaviour | Load |
+| `ColorMode` | Enum |  |
+| `ColorRGB24` | ValueType |  |
+| `CommandHandlerDelegate` | MulticastDelegate |  |
+| `CommandInstance` | Object |  |
+| `CommandPermission` | ValueType | TryParse, ToXml |
+| `CommandSenderInfo` | ValueType |  |
+| `CompareLightLevel` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `CompletionCallback` | MulticastDelegate |  |
+| `CompletionTypes` | Enum |  |
+| `Condition` | MulticastDelegate |  |
+| `Condition` | MulticastDelegate |  |
+| `ConfirmationResult` | Enum |  |
+| `ConsoleCmdTeleportsAbs` | ConsoleCmdAbstract | TryParseViewDirection, TryGetDestinationFromPlayer, TryParseV3i |
+| `ConsoleCmdTestSystemAbs` | ConsoleCmdAbstract | ExecutesWithoutException, ExecutesWithoutExceptions, AssertException |
+| `ConsoleConnectionAbstract` | Object | EnableLogLevel, IsLogLevelEnabled |
+| `ConsoleHelper` | Object | ParseParamPartialNameOrId, ParamIsLocalPlayer, ParseParamBool |
+| `Constants` | Object |  |
+| `Constraint` | ValueType |  |
+| `ConsumeType` | Enum |  |
+| `ContainerTypes` | Enum |  |
+| `ControllerCamera` | MonoBehaviour | LateUpdate, Start |
+| `ControllerDebugLabel` | MonoBehaviour | Update, BuildControlsString, BuildDevicesString |
+| `ControllerDebugMacros` | MonoBehaviour | Update, BuildDebugMacroStatus, OnEnable |
+| `ControllerGUI` | MonoBehaviour | GenerateSlider, OnGUI, Update |
+| `ControllerMouseSimulation` | MonoBehaviour |  |
+| `ControllerTriggerEffect` | ValueType |  |
+| `CoverEngageType` | Enum |  |
+| `CoverMode` | Enum |  |
+| `CoverType` | Enum |  |
+| `CreateAsyncCallback` | MulticastDelegate |  |
+| `CreateCallback` | MulticastDelegate |  |
+| `CreateFlags` | Enum |  |
+| `CriteriaTypes` | Enum |  |
+| `CrosshairDrawer` | MonoBehaviour | OnGUI |
+| `CrossplatformAuthorizer` | AuthorizerAbs | Authorize, ServerStart, ServerStop |
+| `CrossplayAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `CurveMode` | Enum |  |
+| `CustomController` | MonoBehaviour | CollidesWithY, CollidesWithX, Update |
+| `CustomNcalcFunctionDelegate` | MulticastDelegate |  |
+| `CustomValueFormatterDelegate` | MulticastDelegate |  |
+| `DChunkSquareMesh` | Object | Init |
+| `DMSContentFromXml` | Object | Load |
+| `DamageKeys` | Object |  |
+| `DamageRecord` | ValueType |  |
+| `DamageState` | ValueType |  |
+| `DamageTags` | Enum |  |
+| `DamageText` | MonoBehaviour | LateUpdate, Create, get_Enabled |
+| `DangerRoomEnvironmentSim` | MonoBehaviour | Update |
+| `Data` | - |  |
+| `Data` | - |  |
+| `Data` | - |  |
+| `DataFormat` | Enum |  |
+| `DataTypes` | Enum |  |
+| `DecoAllowedTest` | MulticastDelegate |  |
+| `DecoState` | Enum |  |
+| `DeferredNightVisionEffect` | MonoBehaviour | UpdateShaderValues, CreateMaterials, OnDisable |
+| `DegradeOnDeathTypes` | Enum |  |
+| `DelayedAttach` | ValueType |  |
+| `DelayedLightIgnition` | MonoBehaviour | Update, Start, Awake |
+| `Delegate` | MulticastDelegate |  |
+| `DelegateGetTerrainHeight` | MulticastDelegate |  |
+| `DelegateOnVideoFinished` | MulticastDelegate |  |
+| `DeletageNextBlockHit` | MulticastDelegate |  |
+| `DeletionMode` | Enum |  |
+| `DescriptorFormat` | Enum |  |
+| `DestroyData` | ValueType |  |
+| `DestroyOnClose` | Enum |  |
+| `DestroyedResult` | Enum |  |
+| `DetectLeaks` | MonoBehaviour | OnGUI |
+| `DialogActionAddBuff` | BaseDialogAction | PerformAction, get_ActionType |
+| `DialogActionAddItem` | BaseDialogAction | PerformAction, get_ActionType |
+| `DialogActionAddQuest` | BaseDialogAction | PerformAction, get_ActionType |
+| `DialogActionCompleteQuest` | BaseDialogAction | PerformAction, get_ActionType |
+| `DialogActionTrader` | BaseDialogAction | PerformAction, get_ActionType |
+| `DialogActionVoice` | BaseDialogAction | PerformAction, get_ActionType |
+| `DialogResponseQuest` | DialogResponse |  |
+| `DictionaryAddEventHandler`2` | MulticastDelegate |  |
+| `DictionaryDebugWrapper`2` | KeyValuePair`2<TKey,TValue>> | TryGetValue, get_Item, Remove |
+| `DictionaryEntryModifiedEventHandler`2` | MulticastDelegate |  |
+| `DictionaryRemoveCallback` | MulticastDelegate |  |
+| `DictionaryRemoveEventHandler`2` | MulticastDelegate |  |
+| `DictionarySaveFormatter` | MemoryPackFormatter`1<DictionarySave`2<T1,T2>> | Serialize, Deserialize |
+| `DictionaryUpdatedValueEventHandler`2` | MulticastDelegate |  |
+| `Dir` | Enum |  |
+| `DirEightWay` | Enum |  |
+| `Direction` | Enum |  |
+| `Direction` | Enum |  |
+| `DisplayMode` | Enum |  |
+| `DisplayMode` | Enum |  |
+| `DisplayState` | Enum |  |
+| `DisplayStyle` | Enum |  |
+| `DisplayTypes` | Enum |  |
+| `DisplayTypes` | Enum |  |
+| `DistantChunkBasicMesh` | Object |  |
+| `DistantChunkMap` | Object | SetChunkTrigger, ComputeChunkPos, createBaseDataMeshFold |
+| `DistantChunkMapInfo` | Object |  |
+| `DistantChunkPosData` | Object |  |
+| `DistantTerrainConstants` | Object |  |
+| `DistantTerrainQuadTree` | Object | SetRandomData, AddElement, GetAllElementFromLevelId |
+| `DlcEntry` | XUiListEntry`1<XUiC_DlcList/DlcEntry> | CompareTo |
+| `DoNotTouchSerializableFlagsAttribute` | Attribute |  |
+| `Documentation` | Attribute | get_Text |
+| `DownloadTexture` | MonoBehaviour | OnDestroy, Start |
+| `DragInfo` | ValueType |  |
+| `DrawSideParams` | ValueType |  |
+| `DroneInventory` | Inventory | SetupSlots |
+| `DroneRunningLight` | MonoBehaviour | Update, setLightsActive, _initLights |
+| `DroneRunningLightMan` | Object | AddLight, QueueLight |
+| `DroneWeapons` | Object |  |
+| `DropOption` | Enum |  |
+| `DropdownArrowButtons` | MonoBehaviour |  |
+| `DuplicateUserIdAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `DynamicClassFactory` | Object | Instantiate |
+| `DynamicItemState` | Enum |  |
+| `DynamicMeshBuilderStatus` | Enum |  |
+| `DynamicMeshData` | Object | AddQuad, Clear |
+| `DynamicMeshData` | Object | AddQuad, Clear |
+| `DynamicMeshDataQueue`1` | Object | TryLoadItem, CollectItem, SaveItem |
+| `DynamicMeshLoadResult` | Enum |  |
+| `DynamicMeshPrefabPreviewThread` | Object | StopThread, ProcessList, StartThread |
+| `DynamicMeshRegionBuilder` | Object | AddNewItem, RequestStop, StartThread |
+| `DynamicMeshServerData` | NetPackage |  |
+| `DynamicMeshServerStatus` | Enum |  |
+| `DynamicMeshServerType` | Enum |  |
+| `DynamicMeshServerUpdates` | Object | WriteBinaryBlock, WriteLayer, AddToPool |
+| `DynamicMeshStates` | Enum |  |
+| `DynamicPropertiesFormatter` | MemoryPackFormatter`1<DynamicProperties> | Serialize, Deserialize |
+| `DynamicRagdollFlags` | Enum |  |
+| `DynamicRagdollFlagsExtension` | Object | HasFlag |
+| `DynamicRegionState` | Enum |  |
+| `DynamicUIAtlas` | UIAtlas | Awake, ResetAtlas, Create |
+| `DynamicUIAtlasAssigner` | MonoBehaviour | Awake, AtlasUpdateCallback, OnDestroy |
+| `DynamicUIAtlasTools` | Object | AddSprites, ReadPrebakedAtlasDescriptor, Prebake |
+| `EAbstractedLocationType` | Enum |  |
+| `EAccessModifier` | Enum |  |
+| `EActionSet` | Enum |  |
+| `EAddType` | Enum |  |
+| `EAdditionalDisconnectCause` | Enum |  |
+| `EAppliesToInputType` | Enum |  |
+| `EAspectRatio` | Enum |  |
+| `EAuthorizerSyncResult` | Enum |  |
+| `EAutoJoinVoiceMode` | Enum |  |
+| `EAutoShapeType` | Enum |  |
+| `EBiomePoiMap` | Enum |  |
+| `EBlockCommandOrder` | Enum |  |
+| `EBlockRotationClasses` | Enum |  |
+| `EChangeType` | Enum |  |
+| `EChangeType` | Enum |  |
+| `EChangeType` | Enum |  |
+| `EChatDirection` | Enum |  |
+| `EChatType` | Enum |  |
+| `EClientFileState` | Enum |  |
+| `EColorChannel` | Enum |  |
+| `ECommand` | Enum |  |
+| `EComparisonType` | Enum |  |
+| `ECsvOperation` | Enum |  |
+| `ECursorType` | Enum |  |
+| `EDaytime` | Enum |  |
+| `EDebugDataType` | Enum |  |
+| `EDebugLevel` | Enum |  |
+| `EDebugLevel` | Enum |  |
+| `EDeviceType` | Enum |  |
+| `EDirection45` | Enum |  |
+| `EDiscordAccountType` | Enum |  |
+| `EDiscordStatus` | Enum |  |
+| `EDragType` | Enum |  |
+| `EEntryType` | Enum |  |
+| `EEntryType` | Enum |  |
+| `EEntryType` | Enum |  |
+| `EEvaluator` | Enum |  |
+| `EFieldXuiType` | Enum |  |
+| `EFloatParseState` | Enum |  |
+| `EFullAccountLoginResult` | Enum |  |
+| `EGameReleaseType` | Enum |  |
+| `EGameServerInfoReadState` | Enum |  |
+| `EGuiState` | Enum |  |
+| `EHasActionSetFor` | Enum |  |
+| `EHoldType` | Enum |  |
+| `EItemMoveKind` | Enum |  |
+| `EKickReason` | Enum |  |
+| `ELobbyType` | Enum |  |
+| `ELogType` | Enum |  |
+| `EMarkerSize` | Enum |  |
+| `EMessageSender` | Enum |  |
+| `EModEventResult` | Enum |  |
+| `EModLoadState` | Enum |  |
+| `EMode` | Enum |  |
+| `EMode` | Enum |  |
+| `EModelCustom` | EModelBase |  |
+| `EMultiShutReason` | Enum |  |
+| `EMultiplicity` | Enum |  |
+| `EOpenedFor` | Enum |  |
+| `EOptionValueType` | Enum |  |
+| `EOptionValueType` | Enum |  |
+| `EOptionValueType` | Enum |  |
+| `EPagingStepSize` | Enum |  |
+| `EPaintResult` | Enum |  |
+| `EPerformanceDisplayType` | Enum |  |
+| `EPlayerHomeType` | Enum |  |
+| `EPropertiesFrom` | Enum |  |
+| `EProvisionalAccountLoginResult` | Enum |  |
+| `ERagdollState` | Enum |  |
+| `ERestartAntiCheatMode` | Enum |  |
+| `ERoutineState` | Enum |  |
+| `ES_CheckSpawnPrecondition` | MulticastDelegate |  |
+| `ES_GetSpawnPosition` | MulticastDelegate |  |
+| `ES_ModifySpawnCount` | MulticastDelegate |  |
+| `ESaveCompatibility` | Enum |  |
+| `EScreenshotMode` | Enum |  |
+| `ESection` | Enum |  |
+| `ESelectedAction` | Enum |  |
+| `EServerRelationType` | Enum |  |
+| `ESpawnWindowMode` | Enum |  |
+| `ESpecIdx` | Enum |  |
+| `EStackPanelPos` | Enum |  |
+| `EState` | Enum |  |
+| `EStaticMapOverlay` | Enum |  |
+| `ETextureType` | Enum |  |
+| `ETriggerRole` | Enum |  |
+| `ETriggerType` | Enum |  |
+| `ETweenType` | Enum |  |
+| `EVersionComparisonResult` | Enum |  |
+| `EVisibility` | Enum |  |
+| `EWildcardPositions` | Enum |  |
+| `EWorldType` | Enum |  |
+| `EXUiControllerInteractionType` | Enum |  |
+| `EacAuthorizer` | AuthorizerAbs | ServerStart, Authorize, ServerStop |
+| `Edge` | ValueType |  |
+| `Effect` | ActionBaseClientAction | OnClientPerform, ParseProperties, CloneChildSettings |
+| `EffectDualsense` | Object | Update, SetWeaponEffect, SetTriggerEffectVibrationMultiplePosition |
+| `EffectGroup` | Object | GetEffectName, GetNumEffects |
+| `EffectXbox` | Enum |  |
+| `EmissionRateData` | Object |  |
+| `EmptyBindingStyle` | Enum |  |
+| `EntitlementAddressablesMaps` | Object |  |
+| `EntitlementSetEnum` | Enum |  |
+| `EntityActivationCommand` | ValueType |  |
+| `EntityAnimalStag` | EntityAnimal | Awake |
+| `EntityBicycle` | EntityDriveable |  |
+| `EntityCollisionRules` | MonoBehaviour |  |
+| `EntityData` | ValueType |  |
+| `EntityFlags` | Enum |  |
+| `EntityGroupSpawnState` | Object | GetRandomFromGroup, DidSpawn |
+| `EntityMinEvents` | Object |  |
+| `EntityMinibike` | EntityDriveable |  |
+| `EntityMotorcycle` | EntityDriveable |  |
+| `EntitySurvivor` | EntityNPC |  |
+| `EntityTierTypes` | Enum |  |
+| `EntityTokenState` | Object |  |
+| `EntityType` | Enum |  |
+| `EntityUINotification` | - |  |
+| `EntityVGyroCopter` | EntityDriveable | UpdateWheelsSteering |
+| `EntityVJeep` | EntityDriveable | UpdateWheelsSteering |
+| `Entry` | Object | Reset, HasTextures |
+| `Entry` | Object | Reset, HasTextures |
+| `Entry` | Object | Reset, HasTextures |
+| `Entry` | Object | Reset, HasTextures |
+| `Entry` | Object | Reset, HasTextures |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+| `EntryTypes` | Enum |  |
+| `EnumAIDirectorChunkEvent` | Enum |  |
+| `EnumAppState` | Enum |  |
+| `EnumApproachState` | Enum |  |
+| `EnumArmorDamageModifier` | Enum |  |
+| `EnumAttackMode` | Enum |  |
+| `EnumAttackType` | Enum |  |
+| `EnumBodyPartHit` | Enum |  |
+| `EnumCameraRestriction` | Enum |  |
+| `EnumCameraShake` | Enum |  |
+| `EnumChunkProviderId` | Enum |  |
+| `EnumColliderEnabledFlags` | Enum |  |
+| `EnumColliderMode` | Enum |  |
+| `EnumColliderType` | Enum |  |
+| `EnumColumns` | Enum |  |
+| `EnumCreativeMode` | Enum |  |
+| `EnumCrosshairType` | Enum |  |
+| `EnumDamageBonusType` | Enum |  |
+| `EnumDamageSource` | Enum |  |
+| `EnumDamageSourceExtensions` | Object | AffectedByArmor |
+| `EnumDamageTypes` | Enum |  |
+| `EnumDeathPenalty` | Enum |  |
+| `EnumDecoAllowed` | Enum |  |
+| `EnumDecoAllowedSize` | Enum |  |
+| `EnumDecoAllowedSlope` | Enum |  |
+| `EnumDecoOccupied` | Enum |  |
+| `EnumDisplayInfo` | Enum |  |
+| `EnumDragType` | Enum |  |
+| `EnumDropEvent` | Enum |  |
+| `EnumEnemyDifficulty` | Enum |  |
+| `EnumEntityModelView` | Enum |  |
+| `EnumEntityStunType` | Enum |  |
+| `EnumEntityUINotificationDisplayMode` | Enum |  |
+| `EnumEntityUINotificationSubject` | Enum |  |
+| `EnumExtensions` | Object | GetDocumentation |
+| `EnumFaceOcclusionInfo` | Enum |  |
+| `EnumGameMessages` | Enum |  |
+| `EnumGameMode` | Enum |  |
+| `EnumGamePrefs` | Enum |  |
+| `EnumGameState` | Enum |  |
+| `EnumGameStats` | Enum |  |
+| `EnumHitDirection` | Enum |  |
+| `EnumInsideOutside` | Enum |  |
+| `EnumKeyMode` | Enum |  |
+| `EnumLandClaimDecayMode` | Enum |  |
+| `EnumLandClaimOwner` | Enum |  |
+| `EnumMapObjectType` | Enum |  |
+| `EnumMeshType` | Enum |  |
+| `EnumMirrorAlong` | Enum |  |
+| `EnumMode` | Enum |  |
+| `EnumNGUIWindow` | Enum |  |
+| `EnumOperation` | Enum |  |
+| `EnumPaintMode` | Enum |  |
+| `EnumParsers`1` | Object |  |
+| `EnumPartyStatus` | Enum |  |
+| `EnumPersistentPlayerDataReason` | Enum |  |
+| `EnumPlacement` | Enum |  |
+| `EnumPlayerKillingMode` | Enum |  |
+| `EnumPositionUpdateMovementType` | Enum |  |
+| `EnumRemoveEntityReason` | Enum |  |
+| `EnumRenderMode` | Enum |  |
+| `EnumRepairType` | Enum |  |
+| `EnumReplaceMode` | Enum |  |
+| `EnumReplacePaintMode` | Enum |  |
+| `EnumReportCategory` | Enum |  |
+| `EnumResetUnprotectedChunksGroupingMode` | Enum |  |
+| `EnumRotationMode` | Enum |  |
+| `EnumSelOpMode` | Enum |  |
+| `EnumSelectionBoxAvailabilities` | Enum |  |
+| `EnumServerLists` | Enum |  |
+| `EnumServerVisibility` | Enum |  |
+| `EnumSpawnerSource` | Enum |  |
+| `EnumStat` | Enum |  |
+| `EnumState` | Enum |  |
+| `EnumTrackStatus` | Enum |  |
+| `EnumType` | Enum |  |
+| `EnumType` | Enum |  |
+| `EnumWaypointInviteMode` | Enum |  |
+| `EquipItems` | MonoBehaviour | Start |
+| `EquipRandomItem` | MonoBehaviour | OnClick |
+| `EquipmentSlotGroups` | Enum |  |
+| `EquipmentSlots` | Enum |  |
+| `Equipment_CosmeticUnlocked` | MulticastDelegate |  |
+| `EquippedPart` | Object |  |
+| `EstimateOwnedBytes` | MulticastDelegate |  |
+| `EstimatedMemoryContext` | ValueType |  |
+| `Event` | MulticastDelegate |  |
+| `Event` | MulticastDelegate |  |
+| `EventPackageTypes` | Enum |  |
+| `ExecuteSubCommand` | MulticastDelegate |  |
+| `ExitCallbackTask` | MulticastDelegate |  |
+| `ExitCallbackThread` | MulticastDelegate |  |
+| `ExplosionDamageArea` | MonoBehaviour | getEntityFromCollider, OnTriggerEnter, Awake |
+| `ExportMeshResult` | Enum |  |
+| `ExtensionChunkDatabase` | Byte[]> | copyToWrite, copyFromRead, writeKey |
+| `EyeAdv_AutoDilation` | MonoBehaviour | LateUpdate, Start |
+| `EyeLidController` | MonoBehaviour | LateUpdate, Start |
+| `FaceSpriteAtCamera` | MonoBehaviour | Update, Start, Awake |
+| `FadeState` | Enum |  |
+| `Falling` | ValueType |  |
+| `FastEnumConverter`1` | Object | ToInt |
+| `FeatherFlutter` | MonoBehaviour | LateUpdate, Start |
+| `FeatureChangedDelegate` | MulticastDelegate |  |
+| `FeatureDataSorterByName` | Object | Compare |
+| `FeatureEntry` | XUiListEntry`1<XUiC_PrefabFeatureEditorList/FeatureEntry> | CompareTo, MatchesSearch |
+| `FeatureFlags` | Enum |  |
+| `FeatureRequirement` | Enum |  |
+| `FetchModeTypes` | Enum |  |
+| `FileLoadCallback` | MulticastDelegate |  |
+| `Filter` | Object |  |
+| `FilterItem` | MulticastDelegate |  |
+| `FirePositionFunc` | MulticastDelegate |  |
+| `FireRotationFunc` | MulticastDelegate |  |
+| `FireSeedFunc` | MulticastDelegate |  |
+| `FixedMeshData` | Object |  |
+| `Flags` | Enum |  |
+| `Flags` | Enum |  |
+| `FlowDirection` | Enum |  |
+| `Fluctuating` | LightState | Update, Slide, Flutter |
+| `FocusPriority` | Enum |  |
+| `FontInfo` | Object |  |
+| `ForceLabelInputStyle` | Enum |  |
+| `FoundSave` | MulticastDelegate |  |
+| `FrameInfo` | ValueType |  |
+| `FrameRateLimiter` | MonoBehaviour | Update, Start |
+| `FrameTimeCapture` | MonoBehaviour | LateUpdate |
+| `FreeCamera` | MonoBehaviour | Update, Start |
+| `FriendsAuthorizer` | AuthorizerAbs | Authorize, get_AuthorizerActive, get_StateLocalizationKey |
+| `FriendsListChangedCallback` | MulticastDelegate |  |
+| `FuelBehavior` | Enum |  |
+| `FullStressEvents` | Enum |  |
+| `Func`6` | MulticastDelegate |  |
+| `Func`7` | MulticastDelegate |  |
+| `Func`8` | MulticastDelegate |  |
+| `FurCombPainter` | Object | Paint |
+| `GSDataCollection` | Enum |  |
+| `GSDataKey` | Enum |  |
+| `GSStat` | ValueType |  |
+| `GameEventEntry` | XUiListEntry`1<XUiC_GameEventsList/GameEventEntry> | CompareTo, MatchesSearch |
+| `GameEventFlagTypes` | Enum |  |
+| `GameEventStates` | Enum |  |
+| `GameGraphManager` | Object | Draw, AddStat, AddPassiveEffect |
+| `GameInfoBool` | BindingInfoNcalc/VariableStateSimpleLookupAbs | getCurrentValue, get_VarName, get_VarType |
+| `GameInfoInt` | BindingInfoNcalc/VariableStateSimpleLookupAbs | getCurrentValue, get_VarName, get_VarType |
+| `GameInfoString` | BindingInfoNcalc/VariableStateSimpleLookupAbs | getCurrentValue, get_VarName, get_VarType |
+| `GameObjectLoadedCallback` | MulticastDelegate |  |
+| `GameObjectMeshesReadCallback` | MulticastDelegate |  |
+| `GameSaveCopy` | ValueType | PerformCopy, get_WorldRequiresMoving, get_IsReady |
+| `GameSaveMove` | ValueType | PerformMove, get_WorldRequiresMoving, get_IsReady |
+| `GameStatsBridge` | Object | Init, UpdateStaticFields, ToFloatPercent |
+| `GameSunShafts` | PostEffectsBase | OnRenderImage, CheckResources |
+| `GamepadShortCut` | Enum |  |
+| `GamepadTrigger` | Enum |  |
+| `GearSet` | Object |  |
+| `GeneratorStates` | Enum |  |
+| `GetLastValue` | MulticastDelegate |  |
+| `GetTargetDisplayName` | MulticastDelegate |  |
+| `Getter`1` | MulticastDelegate |  |
+| `GfxPreset` | Enum |  |
+| `Global` | TagGroup/TagsGroupAbs |  |
+| `GotoStates` | Enum |  |
+| `GotoStates` | Enum |  |
+| `Graph` | Object | Update, Init, Cleanup |
+| `GraphicsMode` | Enum |  |
+| `GraphicsMode` | Enum |  |
+| `GridWarp` | ValueType |  |
+| `Grip` | Enum |  |
+| `Group` | Object |  |
+| `GroupCount` | ValueType |  |
+| `GroupPermission` | ValueType | TryParse, ToXml |
+| `HSVCurve` | Object |  |
+| `HUDStatGroups` | Enum |  |
+| `HUDStatTypes` | Enum |  |
+| `HairColorData` | ValueType |  |
+| `HairData` | ValueType |  |
+| `HairMaskTypes` | Enum |  |
+| `HairTypes` | Enum |  |
+| `HandleInitRequest` | ValueType |  |
+| `HandleTextClickUrlDelegate` | MulticastDelegate |  |
+| `HandleTextHoverUrlDelegate` | MulticastDelegate |  |
+| `HashDef` | ValueType |  |
+| `HazardDamageController` | MonoBehaviour | touched, Update, OnTriggerStay |
+| `HeadShotOnlyModes` | Enum |  |
+| `HeadStates` | Enum |  |
+| `HealItemType` | Enum |  |
+| `HeldItemState` | Enum |  |
+| `HelpTopic` | ValueType |  |
+| `HierarchyElement` | Object |  |
+| `HitData` | ValueType |  |
+| `HitDataFlags` | Enum |  |
+| `HitDelegate` | MulticastDelegate |  |
+| `HoldingItemBroken` | TargetedCompareRequirementBase | IsValid |
+| `HolsterState` | Enum |  |
+| `HordeArrivedDelegate` | MulticastDelegate |  |
+| `HordeEvent` | NetPackage | write, ProcessPackage, read |
+| `HostMpAllowedAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `HotZoneTypes` | Enum |  |
+| `HudEnabledStates` | Enum |  |
+| `IAIDirectorMarker` | - |  |
+| `IAssetHandle` | - |  |
+| `IAuthorizationResponses` | - |  |
+| `IAuthorizer` | - |  |
+| `IBackedArrayHandle` | - |  |
+| `IBackedArrayView`1` | - |  |
+| `IBackedArray`1` | - |  |
+| `IBinaryReaderOrWriter` | - |  |
+| `IBindingInstance` | - |  |
+| `IBindingNcalc` | - |  |
+| `IBlockTool` | - |  |
+| `IBodyColliderInstance` | - |  |
+| `IChunkCallback` | - |  |
+| `IChunkProvider` | - |  |
+| `IChunkProviderIndicator` | - |  |
+| `IConsoleConnection` | - |  |
+| `IConsoleServer` | - |  |
+| `IDataItem` | - |  |
+| `IDataItemFormatter` | - |  |
+| `IDynamicDecorator` | - |  |
+| `IEncryptionModule` | - |  |
+| `IEntityBuffsChanged` | - |  |
+| `IEntityUINotificationChanged` | - |  |
+| `IEnumerableExtensions` | Object | Join, IsEmpty, Join |
+| `IFeaturePhysicalCapabilities` | - |  |
+| `IFeatureSavedInPrefab` | - |  |
+| `IFeatureTriggerCapability` | - |  |
+| `IFocusCondition` | - |  |
+| `IFocusTarget` | - |  |
+| `IGameManager` | - |  |
+| `IGamePrefsChangedListener` | - |  |
+| `IGameStatsChangedListener` | - |  |
+| `IGroup` | - |  |
+| `IHorde` | - |  |
+| `IIntermediateDataWrapper` | - |  |
+| `IInventory` | - |  |
+| `IInventoryChangedListener` | - |  |
+| `IItemDataDragSource` | - |  |
+| `ILaunchPref` | - |  |
+| `ILaunchPref`1` | - |  |
+| `ILightProcessor` | - |  |
+| `ILockContext` | - |  |
+| `IMarchingCubes` | - |  |
+| `IMemoryPoolableObject` | - |  |
+| `IMeshGenerator` | - |  |
+| `IMetric` | - |  |
+| `IMinEventAction` | - |  |
+| `IModApi` | - |  |
+| `INeighborBlockCache` | - |  |
+| `INetConnection` | - |  |
+| `INetworkClient` | - |  |
+| `INetworkServer` | - |  |
+| `IOnAnimatorIKCallback` | - |  |
+| `IOnPostRender` | - |  |
+| `IPackageDestinationFilter` | - |  |
+| `IPackageInformation` | - |  |
+| `IPowerSystemCamera` | - |  |
+| `IPowered` | - |  |
+| `IProtocolManagerProtocolInterface` | - |  |
+| `IRegionFileChunkSnapshot` | - |  |
+| `IRegionFileChunkSnapshotUtil` | - |  |
+| `IRegionFileDebugUtil` | - |  |
+| `IRegionFilePlatformFactory` | - |  |
+| `IRequirement` | - |  |
+| `ISaveDataManager` | - |  |
+| `ISelectionBoxCallback` | - |  |
+| `ISelectionCategoryCallback` | - |  |
+| `IServerBrowserFilterControl` | - |  |
+| `ISharedChunkObserver` | - |  |
+| `ISignRenderingDataUpdateListener` | - |  |
+| `ITerrainGenerator` | - |  |
+| `IThreadingSemantics` | - |  |
+| `ITileEntity` | - |  |
+| `ITileEntityChangedListener` | - |  |
+| `ITileEntityFeature` | - |  |
+| `ITileEntityLootable` | - |  |
+| `ITileEntitySignable` | - |  |
+| `ITrader` | - |  |
+| `IWireNode` | - |  |
+| `IWorldDecorator` | - |  |
+| `IXUiElement` | - |  |
+| `IXUiWindowConditionalClosing` | - |  |
+| `IdPalette` | ScriptableObject | OnEnable, get_Instance, ResetStatic |
+| `Identifier` | Enum |  |
+| `ImageEffectManager` | MonoBehaviour | OnRenderImage, SetEffectIntenal, ValidateStaticClassEffects |
+| `ImageEffect_TurretView` | MonoBehaviour | OnRenderImage |
+| `ImpactData` | ValueType |  |
+| `InGameServiceTypes` | Enum |  |
+| `InSafeZone` | BaseRequirement | CanPerform, CloneChildSettings |
+| `IncrementalHashExtensions` | Object | AppendDataNoAlloc, AppendDataNoAlloc, AppendDataNoAlloc |
+| `Inflictor` | Object |  |
+| `InformationTypes` | Enum |  |
+| `InitializedRenderer` | ValueType |  |
+| `InputAxisHelper` | Object |  |
+| `InputType` | Enum |  |
+| `IntRect` | Object |  |
+| `InternalEdgeData` | Object |  |
+| `Interval` | Object |  |
+| `InvAttachmentPoint` | MonoBehaviour | Attach |
+| `InvBaseItem` | Object |  |
+| `InvDatabase` | MonoBehaviour | FindByName, FindItemID, GetItem |
+| `InvEquipment` | MonoBehaviour | Replace, HasEquipped, HasEquipped |
+| `InvGameItem` | Object | CalculateStats, get_color, get_statMultiplier |
+| `InvSlots` | Enum |  |
+| `InvStat` | Object | CompareWeapon, CompareArmor, GetDescription |
+| `InventoryItemStatus` | Object |  |
+| `InventoryWeaponStatus` | vp_SimpleInventory/InventoryItemStatus |  |
+| `InventoryWeaponStatusComparer` | Object |  |
+| `IsAlive` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `IsAlly` | TargetedCompareRequirementBase | IsValid |
+| `IsAttachedToEntity` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `IsBloodMoon` | TargetedCompareRequirementBase | GetInfoStrings, IsValid |
+| `IsCheckedDelegate` | MulticastDelegate |  |
+| `IsCorpse` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `IsDay` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `IsDayNumber` | TargetedCompareRequirementBase | IsValid |
+| `IsEnabledDelegate` | MulticastDelegate |  |
+| `IsEquipped` | TargetedCompareRequirementBase | IsValid |
+| `IsFPV` | TargetedCompareRequirementBase | IsValid |
+| `IsHeldItem` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `IsIndoors` | BaseRequirement | CanPerform, CloneChildSettings |
+| `IsInstigator` | TargetedCompareRequirementBase | IsValid |
+| `IsItemActive` | TargetedCompareRequirementBase | IsValid |
+| `IsLocalPlayer` | TargetedCompareRequirementBase | IsValid |
+| `IsMale` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `IsNight` | BaseTwitchVoteRequirement | CanPerform |
+| `IsOnLadder` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `IsPrimaryAttack` | TargetedCompareRequirementBase | IsValid |
+| `IsSDCS` | TargetedCompareRequirementBase | IsValid |
+| `IsSecondaryAttack` | TargetedCompareRequirementBase | IsValid |
+| `IsSheltered` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `IsSleeping` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `IsValidTarget` | MulticastDelegate |  |
+| `IsVisibleDelegate` | MulticastDelegate |  |
+| `ItemActionFiringState` | Enum |  |
+| `ItemActionListTypes` | Enum |  |
+| `ItemCap` | Object |  |
+| `ItemCapsSection` | Object |  |
+| `ItemRecordsSection` | Object |  |
+| `ItemSection` | Object |  |
+| `ItemTechTypes` | Enum |  |
+| `JPGEncoder` | Object | FDCTQuant, ProcessDU, InitQuantTables |
+| `JumpState` | Enum |  |
+| `KaleidoWarp` | ValueType |  |
+| `KeyExchangeCompleteDelegate` | MulticastDelegate |  |
+| `KeyExchangeFailedDelegate` | MulticastDelegate |  |
+| `LIGHT_TYPE` | Enum |  |
+| `LagPosition` | MonoBehaviour | Interpolate, ResetPosition, Update |
+| `LagRotation` | MonoBehaviour | Interpolate, Start, Update |
+| `LandClaimBoundsHelper` | Object | GetBoundsHelper, RemoveBoundsHelper, GetEntryFromList |
+| `LatticeVertex4D` | Object |  |
+| `LaunchPrefParser`1` | MulticastDelegate |  |
+| `LaunchSceneScript` | MonoBehaviour | Awake, GoToNextSceneCo |
+| `Layer` | InstrumentID> | PopulateQueue, GetInstrumentID, RefillQueue |
+| `LayerComplexityInfo` | ValueType |  |
+| `LayerData` | Object | Add, get_Count |
+| `LayerDescriptor` | ValueType |  |
+| `LayerType` | Enum |  |
+| `LayerTypeID` | Enum |  |
+| `LegacyLootContainerData` | ValueType |  |
+| `LegacyModAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `LegacySettings` | Object | set_OutputVolume, set_InputVolume, set_VoiceVadThreshold |
+| `LightAnim` | MonoBehaviour | Update, Awake |
+| `LightEffect` | Object |  |
+| `LightFlicker` | MonoBehaviour | Update, Init, Reset |
+| `LightLODHeld` | LightLOD | LateUpdate, Awake |
+| `LightState` | BaseAction | OnPerformAction, ParseProperties, CloneChildSettings |
+| `LightStateType` | Enum |  |
+| `LightbarGradients` | ScriptableObject |  |
+| `ListDebugWrapper`1` | CollectionDebugWrapper`1<T> | get_Item, IndexOf, set_Item |
+| `ListEntry` | Object | SetBlockState, Write, Read |
+| `ListEntry` | Object | SetBlockState, Write, Read |
+| `ListEntry` | Object | SetBlockState, Write, Read |
+| `ListEntryHoveredDelegate` | MulticastDelegate |  |
+| `ListExtensions` | Object | GetInternalArray |
+| `ListSortOrderComparer` | Object | Compare |
+| `ListTypes` | Enum |  |
+| `LiveStats` | Object | AddStats, OnUpdate, Copy |
+| `LoadCallback` | MulticastDelegate |  |
+| `LoadLevelCallback` | MulticastDelegate |  |
+| `LoadLevelOnClick` | MonoBehaviour | OnClick |
+| `LobbyMember` | XUiListEntry`1<XUiC_DiscordLobbyMemberList/LobbyMember> | CompareTo, MatchesSearch |
+| `LobbyMemberActionType` | Enum |  |
+| `LobbyMembersChangedCallback` | MulticastDelegate |  |
+| `LobbyStateChangedCallback` | MulticastDelegate |  |
+| `LocalPlayerFinalCamera` | MonoBehaviour | OnPreCull, OnPreRender |
+| `LocalUserChangedCallback` | MulticastDelegate |  |
+| `LocationTypes` | Enum |  |
+| `LockChannel` | Enum |  |
+| `LockTargetType` | Enum |  |
+| `LockTypes` | Enum |  |
+| `LoggingTypes` | Enum |  |
+| `LoginAttempts` | Object | IsBanned, LogAttempt |
+| `LookAtTarget` | MonoBehaviour | LateUpdate, Start |
+| `LoopBlocksDelegate` | MulticastDelegate |  |
+| `LootDrop` | ValueType |  |
+| `MainThreadTaskFunctionDelegate` | MulticastDelegate |  |
+| `MainThreadTaskInfo` | ValueType |  |
+| `MapChunkDatabaseType` | Enum |  |
+| `MapObjectLandClaim` | MapObject | IsMapIconEnabled, IsOnCompass, GetMapIconColor |
+| `MapObjectListChangedDelegate` | MulticastDelegate |  |
+| `MapObjectRestorePower` | MapObject | GetMapIconColor, UseUpDownCompassIcons, NearbyCompassBlink |
+| `MapObjectSleepingBag` | MapObject | GetMapIconColor, IsMapIconEnabled, IsOnCompass |
+| `MapObjectSupplyDrop` | MapObject | GetMapIconColor, IsShowName, IsOnCompass |
+| `MapObjectVehicle` | MapObject | GetCompassIcon, IsOnCompass, GetRotation |
+| `MapObjectVendingMachine` | MapObject | IsOnCompass, IsMapIconEnabled, GetMapIconColor |
+| `Mask` | Object |  |
+| `MaskModifier` | MulticastDelegate |  |
+| `MaterialSync` | MulticastDelegate |  |
+| `MaterialSyncAll` | MulticastDelegate |  |
+| `MaxIntensityEvent` | MulticastDelegate |  |
+| `MemStringEqualityComparer` | Object | Equals, GetHashCode |
+| `MemberState` | Enum |  |
+| `MemoryPooledArraySizes` | Object |  |
+| `MemoryTracker` | Object | Dump, EstimateMemoryUsage, GetSizeAuto |
+| `MenuItemClickedDelegate` | MulticastDelegate |  |
+| `MenuItemValueChangedDelegate` | MulticastDelegate |  |
+| `MergedLocations` | ValueType |  |
+| `MeshData` | Object | ApproximatelyEquals |
+| `MeshDataLayout` | ValueType |  |
+| `MeshFilterState` | Object |  |
+| `MeshLodOptimization` | Object | RemoveLod1, Apply |
+| `MeshMorphMatrix` | ScriptableObject | get_NormalBias, get_MorphedMeshes, get_MorphTargetsSource |
+| `MeshMorphMatrixType` | Enum |  |
+| `MeshOptimizer` | Object | DetectDegenerateCollapse, MergeEdgeList, AddEdge |
+| `MeshPurpose` | Enum |  |
+| `MessageSection` | Object |  |
+| `MetricConversion` | Object | ToShortestBytesString |
+| `MetricHelpers` | Object |  |
+| `MicroSplatKeywords` | ScriptableObject | DisableKeyword, EnableKeyword, IsKeywordEnabled |
+| `MicroSplatObject` | MonoBehaviour | GetOverrideHash, ApplyMaps, ApplyControlTextures |
+| `MicroSplatTerrain` | MicroSplatObject | Sync, remove_OnMaterialSync, add_OnMaterialSync |
+| `MigrationFunc` | MulticastDelegate |  |
+| `MinEffectGameVars` | Object | GetValueForVar |
+| `MinEvent` | Object |  |
+| `MinEventTarget` | Object |  |
+| `MinEventTypes` | Enum |  |
+| `MiscSection` | Object |  |
+| `MiscSection` | Object |  |
+| `MissingEntryCallbackDelegate` | MulticastDelegate |  |
+| `ModEffectTypes` | Enum |  |
+| `ModEventHandlerDelegate`1` | MulticastDelegate |  |
+| `ModEventInterruptibleHandlerDelegate`1` | MulticastDelegate |  |
+| `ModEvents` | Object |  |
+| `ModKeys` | Object |  |
+| `ModTypes` | Enum |  |
+| `Mode` | Enum |  |
+| `Mode` | Enum |  |
+| `Mode` | Enum |  |
+| `Mode` | Enum |  |
+| `Mode` | Enum |  |
+| `ModelViewerCam` | MonoBehaviour | Update, Start |
+| `Modifier` | Object |  |
+| `ModifierTypes` | Enum |  |
+| `Module` | ValueType | TryParse, ToXml, FixPermissionLevelsFromKnownModule |
+| `MonoScriptData` | ValueType |  |
+| `MorphTarget` | ValueType |  |
+| `MoveAllowedDelegate` | MulticastDelegate |  |
+| `MoveHitSurface` | ValueType |  |
+| `MoveState` | Enum |  |
+| `MovementInterpolationMode` | Enum |  |
+| `MultiSelectionDeselectCallback` | MulticastDelegate |  |
+| `MumblePositionalAudio` | SingletonMonoBehaviour`1<MumblePositionalAudio> | Update, setCommonValues, singletonDestroy |
+| `MusicTrack` | Enum |  |
+| `MusicTrackState` | Object |  |
+| `MuzzleFlash` | MonoBehaviour | Update, Awake, ShootInternal |
+| `NGuiButtonOnClickHandler` | MonoBehaviour | OnHover, OnIsHeld, OnDoubleClick |
+| `NGuiHUDRoot` | MonoBehaviour | Awake |
+| `NGuiHUDText` | MonoBehaviour | Update, Add, Create |
+| `NGuiMapData` | Object |  |
+| `NGuiPanelFade` | MonoBehaviour | Update, init, Awake |
+| `NGuiUIFollowTarget` | MonoBehaviour | LateUpdate, Start, SetVisible |
+| `NGuiWdwDebugPanels` | MonoBehaviour | showDebugPanel_FocusedBlock, showDebugPanel_Network, showDebugPanel_PlayerEffectInfo |
+| `NGuiWdwInGameHUD` | MonoBehaviour | Start, OnGUI, OnEnable |
+| `NPCIsAlert` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `NPCQuestEventTypes` | Enum |  |
+| `NativePlatformAuthorizer` | AuthorizerAbs | Authorize, ServerStart, ServerStop |
+| `NavObjectChangedDelegate` | MulticastDelegate |  |
+| `NetPackageDirection` | Enum |  |
+| `NetPackageEntry` | Object |  |
+| `NetPackageInfo` | ValueType |  |
+| `NetworkConnectionError` | Enum |  |
+| `NetworkFunc` | MulticastDelegate |  |
+| `NetworkMonitor` | Object | Update, updatePackageListText, printPackageSequence |
+| `NetworkType` | Enum |  |
+| `NewAvatarRootMotion` | MonoBehaviour | OnAnimatorMove |
+| `NewsEntryClickedDelegate` | MulticastDelegate |  |
+| `NguiWdwTerrainEditor` | MonoBehaviour | Awake, Update, NGuiButtonOnClick |
+| `NoiseLayer` | ValueType |  |
+| `ObjectDuplicateChecker`1` | Object | GenerateReport, AddValue |
+| `ObjectInfo` | Object |  |
+| `ObjectMessaging` | Object | SendMessageEx, buildMethodSignature, findMethod |
+| `ObjectiveStates` | Enum |  |
+| `ObjectiveTypes` | Enum |  |
+| `ObjectiveValueChanged` | MulticastDelegate |  |
+| `ObjectiveValueTypes` | Enum |  |
+| `ObserverRequest` | Enum |  |
+| `ObstructionSolver` | Enum |  |
+| `OccludeeLight` | Object |  |
+| `OcclusionEntry` | Object |  |
+| `OfferTypes` | Enum |  |
+| `OffsetTarget` | Enum |  |
+| `OnAnimatorIKForwardCall` | MonoBehaviour | OnAnimatorIK |
+| `OnBlockChangedDelegate` | MulticastDelegate |  |
+| `OnBlockDamagedDelegate` | MulticastDelegate |  |
+| `OnChangeDelegate` | MulticastDelegate |  |
+| `OnChangedDelegate` | MulticastDelegate |  |
+| `OnChunkVisibleDelegate` | MulticastDelegate |  |
+| `OnChunksFinishedDisplayingDelegate` | MulticastDelegate |  |
+| `OnChunksFinishedLoadingDelegate` | MulticastDelegate |  |
+| `OnClickActionDelegate` | MulticastDelegate |  |
+| `OnCompanionGroupChanged` | MulticastDelegate |  |
+| `OnDoubleClickActionDelegate` | MulticastDelegate |  |
+| `OnEntityLoadedDelegate` | MulticastDelegate |  |
+| `OnEntityUnloadedDelegate` | MulticastDelegate |  |
+| `OnError` | MulticastDelegate |  |
+| `OnGameBlockRemoved` | MulticastDelegate |  |
+| `OnGameBlocksAdded` | MulticastDelegate |  |
+| `OnGameBlocksRemoved` | MulticastDelegate |  |
+| `OnGameEntityAdded` | MulticastDelegate |  |
+| `OnGameEntityChanged` | MulticastDelegate |  |
+| `OnGameEventAccessApproved` | MulticastDelegate |  |
+| `OnGameEventStatus` | MulticastDelegate |  |
+| `OnLocalPlayerChangedEvent` | MulticastDelegate |  |
+| `OnPartyChanged` | MulticastDelegate |  |
+| `OnPartyMembersChanged` | MulticastDelegate |  |
+| `OnPlayerAuthenticated` | MulticastDelegate |  |
+| `OnPlayerTeleportDelegate` | MulticastDelegate |  |
+| `OnPostRenderDispatcher` | MonoBehaviour | OnPostRender, Remove, Add |
+| `OnRecipeUnlocked` | MulticastDelegate |  |
+| `OnReleaseActionDelegate` | MulticastDelegate |  |
+| `OnSelectActionDelegate` | MulticastDelegate |  |
+| `OnWorldChangedEvent` | MulticastDelegate |  |
+| `OnWrittenHandler` | MulticastDelegate |  |
+| `OneToOneDictionary`2` | Object | Add, TryGetByValue, TryGetByKey |
+| `Op` | Enum |  |
+| `Op` | Enum |  |
+| `Op` | Enum |  |
+| `OpenSimplex2` | Object | Noise3_UnrotatedBase, Noise4_UnskewedBase, Noise2_UnskewedBase |
+| `OpenSimplex2S` | Object | Noise3_UnrotatedBase, Noise2_UnskewedBase, Noise4_UnskewedBase |
+| `OpenURLOnClick` | MonoBehaviour | OnClick |
+| `Operation` | ValueType |  |
+| `OperationType` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `OptionalParameterExtensions` | Object | OrIfNullThen |
+| `Options` | Enum |  |
+| `OptionsVideoWindowMode` | Enum |  |
+| `Orders` | Enum |  |
+| `OriginParticles` | MonoBehaviour | OnDisable, OnEnable |
+| `OutputDelegate` | MulticastDelegate |  |
+| `OverrideSettingValueDelegate` | MulticastDelegate |  |
+| `OverrideTypes` | Enum |  |
+| `Ownership` | Enum |  |
+| `PNG2TGA` | Object | Process, Process2, Process3 |
+| `POILockoutReasonTypes` | Enum |  |
+| `PackageDestinationAllButEntityID` | Object | Exclude |
+| `PackageDestinationAttachedToEntity` | Object | Exclude |
+| `PackageDestinationInRangeOf` | Object | Exclude |
+| `PackageDestinationSingleEntityID` | Object | Exclude |
+| `PackagesSentInfoEntry` | Object |  |
+| `PaintMode` | Enum |  |
+| `PaletteEntry` | Object |  |
+| `PanWithMouse` | MonoBehaviour | Update, Start |
+| `PanelDefinition` | Object |  |
+| `ParentControllerState` | Object | Restore, Hide |
+| `ParseFunc`1` | MulticastDelegate |  |
+| `ParseKeys` | Object |  |
+| `Parsers` | Object | internalParseInt64Advanced, internalParseDouble, internalParseInt64 |
+| `ParsingConverters` | Object | parseColor32, parseColor, parseInputAction |
+| `Part` | Enum |  |
+| `PartBones` | Object |  |
+| `PartInfo` | Object | RefMatchesSlot, IsInSlot |
+| `ParticleChildSpawner` | MonoBehaviour | Start, OnDestroy |
+| `ParticleData` | ValueType |  |
+| `ParticleEffectData` | ValueType |  |
+| `ParticleLifetimeSwitch` | MonoBehaviour | Update, Start |
+| `ParticlePlacement` | Object |  |
+| `ParticleSystemSpawnRateLimiter` | MonoBehaviour | ScaleEmissionRate, Start, ScaleBurstCurve |
+| `ParticleType` | Enum |  |
+| `PartyActions` | Enum |  |
+| `PartyActions` | Enum |  |
+| `PassiveEffects` | Enum |  |
+| `PatchMethodDefinition` | ValueType |  |
+| `PathMoveType` | Enum |  |
+| `PendingActionsUpdateCallback` | MulticastDelegate |  |
+| `PendingEntry` | XUiListEntry`1<XUiC_DiscordPendingList/PendingEntry> | CompareTo, MatchesSearch |
+| `PerTexColor` | Enum |  |
+| `PerTexFloat` | Enum |  |
+| `PerTexVector2` | Enum |  |
+| `PerformanceMetrics` | ValueType |  |
+| `PermissionSources` | Enum |  |
+| `PerspectivePixelPerfect` | MonoBehaviour | Start |
+| `PerspectiveWarp` | ValueType |  |
+| `PhysicsBodiesFromXml` | Object | Save, Load |
+| `PixelToBiomeValue` | MulticastDelegate |  |
+| `PlaneAxis` | Enum |  |
+| `PlanePick` | ValueType |  |
+| `PlayIdleAnimations` | MonoBehaviour | Start, Update |
+| `PlayOrder` | Enum |  |
+| `PlayerActionData` | Object |  |
+| `PlayerAutoPilotControllor` | Object | IsEnabled, GetForwardMovement, Update |
+| `PlayerDetails` | Object |  |
+| `PlayerEquippedSlots` | MonoBehaviour | _RunRules, Equip, UnEquip |
+| `PlayerEventHandler` | vp_StateEventHandler | Awake |
+| `PlayerIdAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `PlayerIteractionEvent` | MulticastDelegate |  |
+| `PlayerLevel` | ActionBaseClientAction | OnClientPerform, ParseProperties, CloneChildSettings |
+| `PlayerNameAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `PlayerPosHelper` | Object |  |
+| `PlayerReflectionProbe` | MonoBehaviour | setReflectionSettings, Update, Start |
+| `PlayerSlotsAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `Poi` | XUiController | Init, BtnOk_OnPressed, GetBindingValueInternal |
+| `PoiListEntry` | XUiListEntry`1<XUiC_PoiList/PoiListEntry> | CompareTo, MatchesSearch |
+| `PointsGenerationOptions` | Enum |  |
+| `Polarizer` | MonoBehaviour | Start, SetDebugView, GetDebugView |
+| `PolygonLayer` | ValueType |  |
+| `Pos` | Enum |  |
+| `PositionDataTypes` | Enum |  |
+| `PositionSetTypes` | Enum |  |
+| `PowerItemTypes` | Enum |  |
+| `PrefRefs` | ValueType |  |
+| `PrefType` | Enum |  |
+| `PrefValues` | ValueType |  |
+| `PrefabCheckState` | Enum |  |
+| `PrefabFileEntry` | XUiListEntry`1<XUiC_PrefabFileList/PrefabFileEntry> | CompareTo, MatchesSearch |
+| `PrefabFolderEntry` | XUiListEntry`1<XUiC_PrefabFolderList/PrefabFolderEntry> | CompareTo, MatchesSearch |
+| `PrefabGameObject` | Object |  |
+| `PrefabInstanceGizmo` | MonoBehaviour | OnDrawGizmos, OnDrawGizmosSelected, Update |
+| `PrefabNameHandler` | MonoBehaviour | OnMouseOver, Awake |
+| `PrefabTriggerEntry` | XUiListEntry`1<XUiC_PrefabTriggerEditorList/PrefabTriggerEntry> | isSelected, CompareTo, MatchesSearch |
+| `PreserveCheckPatch` | Object | Enable, Disable |
+| `ProbType` | Enum |  |
+| `Probe` | Object |  |
+| `ProcessFilesCallback` | MulticastDelegate |  |
+| `ProfilerExt` | Object | EndSampleThreadSafe, BeginSampleThreadSafe |
+| `ProgressDelegate` | MulticastDelegate |  |
+| `ProgressionCurrencyType` | Enum |  |
+| `ProgressionType` | Enum |  |
+| `ProjectileInfo` | ValueType |  |
+| `ProjectionMode` | Enum |  |
+| `ProjectorEffectData` | Object |  |
+| `ProjectorEntry` | Object |  |
+| `PublicizedFromAttribute` | Attribute |  |
+| `Pulsing` | LightState | get_Intensity, get_Emissive, get_LODThreshold |
+| `QTDataElement` | Object |  |
+| `Quality` | Enum |  |
+| `QualityInfoFromXml` | MonoBehaviour | CreateQualityInfo |
+| `QuestCriteriaLevel` | BaseQuestCriteria | CheckForPlayer |
+| `QuestEventTypes` | Enum |  |
+| `QuestEvent_BiomeEvent` | MulticastDelegate |  |
+| `QuestEvent_BlockChangedEvent` | MulticastDelegate |  |
+| `QuestEvent_BlockDestroyEvent` | MulticastDelegate |  |
+| `QuestEvent_BlockEvent` | MulticastDelegate |  |
+| `QuestEvent_ChallengeAwardCredit` | MulticastDelegate |  |
+| `QuestEvent_ChallengeCompleteEvent` | MulticastDelegate |  |
+| `QuestEvent_EntityKillEvent` | MulticastDelegate |  |
+| `QuestEvent_Event` | MulticastDelegate |  |
+| `QuestEvent_Explosion` | MulticastDelegate |  |
+| `QuestEvent_FloatEvent` | MulticastDelegate |  |
+| `QuestEvent_HarvestStackActionEvent` | MulticastDelegate |  |
+| `QuestEvent_IntegerActionEvent` | MulticastDelegate |  |
+| `QuestEvent_ItemStackActionEvent` | MulticastDelegate |  |
+| `QuestEvent_ItemValueActionEvent` | MulticastDelegate |  |
+| `QuestEvent_NPCInteracted` | MulticastDelegate |  |
+| `QuestEvent_NPCKilled` | MulticastDelegate |  |
+| `QuestEvent_OpenContainer` | MulticastDelegate |  |
+| `QuestEvent_PurchaseEvent` | MulticastDelegate |  |
+| `QuestEvent_QuestCompleteEvent` | MulticastDelegate |  |
+| `QuestEvent_SkillPointSpent` | MulticastDelegate |  |
+| `QuestEvent_SleeperVolumePositionChanged` | MulticastDelegate |  |
+| `QuestEvent_SleepersCleared` | MulticastDelegate |  |
+| `QuestEvent_StringEvent` | MulticastDelegate |  |
+| `QuestEvent_TwitchEvent` | MulticastDelegate |  |
+| `QuestEvent_WindowChanged` | MulticastDelegate |  |
+| `QuestGotoTypes` | Enum |  |
+| `QuestJournal_QuestEvent` | MulticastDelegate |  |
+| `QuestJournal_QuestSharedEvent` | MulticastDelegate |  |
+| `QuestObjectiveEventTypes` | Enum |  |
+| `QuestPlaceholderEntry` | ValueType |  |
+| `QuestPointActions` | Enum |  |
+| `QuestState` | Enum |  |
+| `QuestStatuses` | Enum |  |
+| `RadialContextAbs` | Object |  |
+| `RadialContextBlock` | XUiC_Radial/RadialContextAbs |  |
+| `RadialContextEntity` | XUiC_Radial/RadialContextAbs |  |
+| `RadialContextHoldingSlotIndex` | XUiC_Radial/RadialContextAbs |  |
+| `RadialContextItem` | XUiC_Radial/RadialContextAbs |  |
+| `RadialStillValidDelegate` | MulticastDelegate |  |
+| `RagdollMode` | Enum |  |
+| `RagdollPose` | ValueType |  |
+| `RagdollWhenHit` | RootTransformRefEntity | Start, LateUpdate, get_theEntity |
+| `RallyStartTypes` | Enum |  |
+| `RandomRollTypes` | Enum |  |
+| `RawConverterFromStringDelegate`1` | MulticastDelegate |  |
+| `RawConverterTypeToTypeDelegate`2` | MulticastDelegate |  |
+| `ReadMode` | Enum |  |
+| `ReadProceduralTextureExample` | MonoBehaviour | Update |
+| `ReceiveStages` | Enum |  |
+| `RecipeInfo` | ValueType |  |
+| `RecipeLockTypes` | Enum |  |
+| `RecipientTagsSection` | Object |  |
+| `RecvBuffer` | ValueType |  |
+| `ReferenceEqualityComparer` | Object | get_Instance |
+| `ReferenceEqualityComparer`1` | Object | get_Instance |
+| `ReflectiveWater` | MonoBehaviour | CalculateReflectionMatrix, OnPreRender, CreateWaterObjects |
+| `RegLightGroup` | ValueType |  |
+| `RegionFileDebugUtilRaw` | Object | GetLocationString |
+| `RegionFileDebugUtilSectorBased` | Object | GetLocationString |
+| `RegionFileLog` | Object | Region |
+| `Relationship` | Enum |  |
+| `RelationshipChangedCallback` | MulticastDelegate |  |
+| `ReloadFlags` | Enum |  |
+| `RemoteData` | ValueType |  |
+| `RemoteResourcesCompleteHandler` | MulticastDelegate |  |
+| `RemoveByTypes` | Enum |  |
+| `RemoveObserver` | MulticastDelegate |  |
+| `RemoveSelfLater` | MonoBehaviour | remove, Start |
+| `RenderBlock` | Object | renderBlock |
+| `RenderCubeType` | Enum |  |
+| `RenderData` | ValueType |  |
+| `RenderDisplacedCube` | Object | update0, Update, disableAllComponents |
+| `RenderItem` | MonoBehaviour |  |
+| `RenderItem` | MonoBehaviour |  |
+| `RendererHandle` | ValueType | SetWater, SetChunkOrigin, Reset |
+| `RendererSettings` | Object |  |
+| `RendererSettings` | Object |  |
+| `RenderingDataPatcher` | MulticastDelegate |  |
+| `RentResult` | Enum |  |
+| `RepairTypes` | Enum |  |
+| `RequiredTypes` | Enum |  |
+| `RequirementItemTier` | RequirementBase | IsValid, GetInfoStrings |
+| `RequirementTypes` | Enum |  |
+| `RequirementTypes` | Enum |  |
+| `RequirementVisibilityTypes` | Enum |  |
+| `RespawnData` | ValueType |  |
+| `RespawnProgress` | Enum |  |
+| `RespawnType` | Enum |  |
+| `ResponseTypes` | Enum |  |
+| `ResponseTypes` | Enum |  |
+| `RestAngleFunc` | MulticastDelegate |  |
+| `Result` | ValueType |  |
+| `Result` | ValueType |  |
+| `RewardTypes` | Enum |  |
+| `RootTransformRef` | MonoBehaviour |  |
+| `RotateInterpolationMode` | Enum |  |
+| `RotateObject` | MonoBehaviour | Update |
+| `RotatingText` | MonoBehaviour | Update, Start |
+| `RoundsInMagazine` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `Row` | Object |  |
+| `Row` | Object |  |
+| `RulesRequestDone` | MulticastDelegate |  |
+| `SAddDecoInfo` | ValueType |  |
+| `SCalcChunkColorsDoneData` | ValueType |  |
+| `SCreateWorldDoneData` | ValueType |  |
+| `SDCSGearXmlCatalog` | Object | BuildFromXml, NormalizePart, NormalizeBaseToTurnOff |
+| `SEntityClassAndProb` | ValueType |  |
+| `SGameAwakeData` | ValueType |  |
+| `SGameFocusData` | ValueType |  |
+| `SGameShutdownData` | ValueType |  |
+| `SGameStartDoneData` | ValueType |  |
+| `SGameUpdateData` | ValueType |  |
+| `SIdCnt` | ValueType |  |
+| `SIdCntSorter` | Object | Compare |
+| `SItemNameCount` | ValueType |  |
+| `SPlayerLoginData` | ValueType |  |
+| `SServerRegisteredData` | ValueType |  |
+| `SSpawnedEntity` | ValueType |  |
+| `SUnityUpdateData` | ValueType |  |
+| `SWorldShuttingDownData` | ValueType |  |
+| `SandboxOverridesFromXml` | Object | CreateOverrides, Reload |
+| `SandboxPresetSelectionChangedDelegate` | MulticastDelegate |  |
+| `SaveCopyResultInfo` | ValueType |  |
+| `SaveDataLimitType` | Enum |  |
+| `SaveDataType` | Enum |  |
+| `SaveDataWriteMode` | Enum |  |
+| `SaveManagementActionApply` | MulticastDelegate |  |
+| `SaveManagementActionCopy` | MulticastDelegate |  |
+| `SaveManagementActionMove` | MulticastDelegate |  |
+| `SaveManagementMode` | Enum |  |
+| `SaveMoveResultInfo` | ValueType |  |
+| `ScoreConditions` | Enum |  |
+| `ScreenEffect` | ActionBaseClientAction | OnClientPerform, ParseProperties, CloneChildSettings |
+| `ScreenEffectsProxy` | PostProcessEffectSettings | IsEnabledAndSupported |
+| `ScreenEffectsProxyRenderer` | PostProcessEffectRendererProxy`1<ScreenEffectsProxy> | AddSubRenderersTo |
+| `ScreenSpaceParticleAspectScaler` | MonoBehaviour | Update |
+| `ScriptBase` | MonoBehaviour | get_transform, get_gameObject, Awake |
+| `SdDirectoryInfoExtensions` | Object | IsDirEmpty |
+| `SdEncoding` | Object |  |
+| `SdXDocumentExtensions` | Object | SdSave |
+| `SearchDir` | Enum |  |
+| `SearchTypes` | Enum |  |
+| `SearchTypes` | Enum |  |
+| `SeedType` | Enum |  |
+| `SeedType` | Enum |  |
+| `SelectionDepth` | Enum |  |
+| `SelfMuteStateChangedCallback` | MulticastDelegate |  |
+| `SendMessage` | MulticastDelegate |  |
+| `Sender` | MulticastDelegate |  |
+| `Sender`1` | MulticastDelegate |  |
+| `Sender`2` | MulticastDelegate |  |
+| `SeparatorSplitAnyEnumerator` | ValueType | MoveToNextInternal, MoveNext, get_Current |
+| `Serializable` | - |  |
+| `ServerStateAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `SetColorPickerColor` | MonoBehaviour | SetToCurrent |
+| `SetShadowMapAsGlobalTexture` | MonoBehaviour | SetupCommandBuffer, OnDisable, OnEnable |
+| `Setter`1` | MulticastDelegate |  |
+| `ShaderGlobalsHelper` | MonoBehaviour | Start, Update |
+| `ShaderParameter` | Shader> |  |
+| `ShaftsScreenBlendMode` | Enum |  |
+| `ShaftsScreenBlendMode` | Enum |  |
+| `ShaftsScreenBlendModeParameter` | ParameterOverride`1<SunShaftsEffect/ShaftsScreenBlendMode> |  |
+| `ShapeMode` | Enum |  |
+| `SharedQuestEvents` | Enum |  |
+| `ShockSpot` | ValueType |  |
+| `ShowLocationInfoTypes` | Enum |  |
+| `ShowTextTypes` | Enum |  |
+| `ShowXPTypes` | Enum |  |
+| `SiSizeUnits` | Enum |  |
+| `SideTypes` | Enum |  |
+| `SignBlendMode` | Enum |  |
+| `SignFontConfiguration` | ScriptableObject |  |
+| `SignShaderIDs` | Object |  |
+| `SignTextureQuality` | Enum |  |
+| `SignUIStyle` | Enum |  |
+| `SimpleGraph` | Object | Update, Init, Cleanup |
+| `SimpleRPCType` | Enum |  |
+| `SimplexNoise` | Object | K, noise, shuffle |
+| `SingletonMonoBehaviour`1` | MonoBehaviour | Awake, OnDestroy, singletonDestroy |
+| `SizeTextMeshDefinition` | Object |  |
+| `SkewWarp` | ValueType |  |
+| `SkinTextureOverride` | MonoBehaviour | ApplyOverrides |
+| `SkinnedCollisionHelper` | MonoBehaviour | Start, UpdateCollisionMesh, Update |
+| `SkinnedMeshCombiner` | MonoBehaviour | CombineMeshes, Start |
+| `SkinningTestSceneTools` | MonoBehaviour | Update, Start |
+| `SleeperPreview` | MonoBehaviour | SetRotation, Awake, SetPose |
+| `Slot` | XUiC_SelectableEntry | Update, itemTypeIcon, itemIcon |
+| `SnapshotController` | Object |  |
+| `Sorter` | Object | Compare |
+| `SoundKeys` | Object |  |
+| `SoundPlayType` | Enum |  |
+| `SoundSection` | Object |  |
+| `SourceParentType` | Enum |  |
+| `SpaceLimitSection` | Object |  |
+| `SpawnEntityEntry` | XUiListEntry`1<XUiC_SpawnEntitiesList/SpawnEntityEntry> | CompareTo, MatchesSearch |
+| `SpawnMethod` | Enum |  |
+| `SpawnMode` | Enum |  |
+| `SpawnType` | Enum |  |
+| `SpawnerEntry` | XUiListEntry`1<XUiC_SpawnersList/SpawnerEntry> | CompareTo, MatchesSearch |
+| `SpecialDateDelegate` | MulticastDelegate |  |
+| `SpectrumWeatherType` | Enum |  |
+| `SpeedTreeLODController` | MonoBehaviour | Start, Awake |
+| `SpeedTreeMotionVectorHelper` | MonoBehaviour | OnBecameVisible, OnBecameInvisible, Init |
+| `SpikeEvent` | ValueType |  |
+| `Spin` | MonoBehaviour | Update, Start |
+| `SpinWithMouse` | MonoBehaviour | OnDrag, Start |
+| `SpiralSequenceState` | Enum |  |
+| `SpriteFillTypes` | Enum |  |
+| `StackLocationTypes` | Enum |  |
+| `StackLockTypes` | Enum |  |
+| `StanceTypes` | Enum |  |
+| `StartItemRecord` | ValueType |  |
+| `StatCompareCurrent` | StatCompareAbs | Compare |
+| `StatCompareMax` | StatCompareAbs | Compare |
+| `StatCompareModMax` | StatCompareAbs | Compare |
+| `StatComparePercCurrentToMax` | StatCompareAbs | Compare |
+| `StatComparePercCurrentToModMax` | StatCompareAbs | Compare |
+| `StatComparePercModMaxToMax` | StatCompareAbs | Compare |
+| `StatSample` | Enum |  |
+| `StatTypes` | Enum |  |
+| `StatTypes` | Enum |  |
+| `StatTypes` | Enum |  |
+| `State` | ValueType |  |
+| `State` | ValueType |  |
+| `State` | ValueType |  |
+| `State` | ValueType |  |
+| `State` | ValueType |  |
+| `State` | ValueType |  |
+| `State` | ValueType |  |
+| `State` | ValueType |  |
+| `State` | ValueType |  |
+| `StateTypes` | Enum |  |
+| `StateTypes` | Enum |  |
+| `StateTypes` | Enum |  |
+| `StateTypes` | Enum |  |
+| `Statistics` | Object |  |
+| `StatisticsUpdatedCallback` | MulticastDelegate |  |
+| `Stats` | Object |  |
+| `StepType` | Enum |  |
+| `StopAnimatorAudioType` | Enum |  |
+| `StreamModeRead` | Enum |  |
+| `StreamModeWrite` | Enum |  |
+| `StretchWarp` | ValueType |  |
+| `StringParsersTests` | Object | RunTests, PV3old, PV3dOld |
+| `StringSplitEnumerator` | ValueType | MoveToNextInternal, MoveNext, get_Current |
+| `StringTags` | Object | AddTag, HasTag |
+| `Summary` | ValueType |  |
+| `SunSettings` | ValueType |  |
+| `SunShaftsEffect` | PostProcessEffectSettings | IsEnabledAndSupported, GetSunSettings |
+| `SunShaftsEffectRenderer` | PostProcessEffectRenderer`1<SunShaftsEffect> | Render, DrawBorder, get_fullscreenTriangle |
+| `SunShaftsResolution` | Enum |  |
+| `SunShaftsResolution` | Enum |  |
+| `SunShaftsResolutionParameter` | ParameterOverride`1<SunShaftsEffect/SunShaftsResolution> |  |
+| `SyncType` | Enum |  |
+| `TSOverrides` | ValueType |  |
+| `TabChangedDelegate` | MulticastDelegate |  |
+| `TabTypes` | Enum |  |
+| `TableSize` | Enum |  |
+| `TagGroup` | Object |  |
+| `Tags` | Object |  |
+| `TagsGroupAbs` | Object |  |
+| `Target` | ActionBaseTeleport | HandleTeleportToTarget, OnPerformAction, ParseProperties |
+| `TargetClass` | ValueType |  |
+| `TargetClass` | ValueType |  |
+| `TargetClass` | ValueType |  |
+| `TargetRange` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `TargetTypes` | Enum |  |
+| `TargetTypes` | Enum |  |
+| `TargetTypes` | Enum |  |
+| `TargetTypes` | Enum |  |
+| `TargetTypes` | Enum |  |
+| `Task` | MulticastDelegate |  |
+| `TaskFunctionDelegate` | MulticastDelegate |  |
+| `TerrainAlignmentMode` | Enum |  |
+| `TerrainMapGenerator` | Object | GenerateTerrain, calcNormal |
+| `TextFilteringMode` | Enum |  |
+| `TextureContainer` | MonoBehaviour |  |
+| `TextureDynamicLoader` | MonoBehaviour | SetLoResTexture, checkMaterials, Update |
+| `TextureInfo` | Object |  |
+| `TextureInfo` | Object |  |
+| `TextureLabels` | ValueType |  |
+| `TexturesSkybox` | Object | LoadSkybox |
+| `ThreadFunctionDelegate` | MulticastDelegate |  |
+| `ThreadFunctionEndDelegate` | MulticastDelegate |  |
+| `ThreadFunctionLoopDelegate` | MulticastDelegate |  |
+| `ThreadInfoParam` | Object | Init, ClearAll |
+| `ThreadInfoParamPool` | Object | ReturnObject, GetObjectBig, GetObject |
+| `ThreadProcessing` | Object | ThreadJob, Init, RemoveTreatedElement |
+| `ThreadProcessingPool` | Object | GetObject, ReturnObject, get_Count |
+| `TileAreaConfig` | ValueType | checkCoordinates |
+| `TileAreaSimple`1` | Object | get_Item, get_Item, get_Config |
+| `TileEntityType` | Enum |  |
+| `TimeOfDay` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `TimeRotateObject` | MonoBehaviour | Update |
+| `TimedAction` | MonoBehaviour | Update, InitiateTimer |
+| `Timer` | MonoBehaviour | Schedule, Update, CancelAll |
+| `TimerEventHandler` | MulticastDelegate |  |
+| `TintableMaterialBaker` | Object | ProcessGameObject, GetNonTintableShader, BakeMaterial |
+| `TokenRequester` | Object |  |
+| `TokenState` | Object |  |
+| `TooManyPlayerSlotsAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `ToolTipEventHandler` | MulticastDelegate |  |
+| `TrackTypes` | Enum |  |
+| `TrackingTypeFlags` | Enum |  |
+| `TrackingTypes` | Enum |  |
+| `TraderActionTypes` | Enum |  |
+| `TraderAreaStates` | Enum |  |
+| `TraderDaysPresets` | Enum |  |
+| `TraderHourPresets` | Enum |  |
+| `TraderWindowState` | Enum |  |
+| `TransformDebug` | MonoBehaviour | DoOperation, Test, DescribeTransformHierarchy |
+| `TransformState` | Object | Update |
+| `TransformWarp` | ValueType |  |
+| `TransitionCellData` | Object | GetVertexCount, GetTriangleCount |
+| `TransitionVertexData` | Object | get_Item |
+| `Transvoxel` | Object |  |
+| `TreasureChestStates` | Enum |  |
+| `Tri` | ValueType |  |
+| `Trigger` | Enum |  |
+| `Trigger` | Enum |  |
+| `Trigger` | Enum |  |
+| `TriggerEffectDS` | ValueType |  |
+| `TriggerEffectXB` | ValueType |  |
+| `TriggerPowerDelayTypes` | Enum |  |
+| `TriggerPowerDurationTypes` | Enum |  |
+| `TriggerTypes` | Enum |  |
+| `TriggerWriteData` | MulticastDelegate |  |
+| `TriggeredStates` | Enum |  |
+| `TripWireController` | MonoBehaviour | checkIfTriggered, OnTriggerStay, OnTriggerEnter |
+| `TryParseFunc`1` | MulticastDelegate |  |
+| `Tryer` | MulticastDelegate |  |
+| `Tryer`1` | MulticastDelegate |  |
+| `TurnTable` | MonoBehaviour | Update |
+| `TurretState` | Enum |  |
+| `TurretState` | Enum |  |
+| `Tutorial5` | MonoBehaviour | SetDurationToCurrentProgress |
+| `TwirlWarp` | ValueType |  |
+| `TwitchActionsStates` | Enum |  |
+| `TwitchBloodMoonOptions` | Enum |  |
+| `TwitchVoteStates` | Enum |  |
+| `Type` | Enum |  |
+| `Type` | Enum |  |
+| `Type` | Enum |  |
+| `Type` | Enum |  |
+| `TypeTag` | Enum |  |
+| `UVMode` | Enum |  |
+| `UlongAsUshorts` | ValueType |  |
+| `UnityMemoryProfilerLabel` | MonoBehaviour | Update, OnEnable, OnDisable |
+| `UnitySourceGeneratedAssemblyMonoScriptTypes_v1` | Object | Get |
+| `UnlockTypes` | Enum |  |
+| `UnregisterException` | Exception |  |
+| `UpdateDelegate` | MulticastDelegate |  |
+| `UpdateID` | Enum |  |
+| `UpdateLightOnAllMaterials` | UpdateLight | OnEnable, OnDisable |
+| `UpdateLightOnChunkMesh` | MonoBehaviour | checkLight, Update, Reset |
+| `UpdateLightOnPlayers` | UpdateLight | Update, OnApplicationFocus, ForceUpdate |
+| `UpdateMode` | Enum |  |
+| `UpdateStates` | Enum |  |
+| `UpdateTiming` | Enum |  |
+| `UpscalerMode` | Object | ToString |
+| `UpscalerMode` | Object | ToString |
+| `UserAuthorizationResultCallback` | MulticastDelegate |  |
+| `UserDataManagement` | Object | MoveWorld, MoveSave, CopySave |
+| `UserPermission` | ValueType | TryParse, ToXml |
+| `UserSpawnType` | Enum |  |
+| `UtilList`1` | Object | RemoveAt, Dequeue, Add |
+| `VPChassis` | VehiclePart |  |
+| `VPStorage` | VehiclePart |  |
+| `ValueModifierBase` | Object |  |
+| `ValueModifierTypes` | Enum |  |
+| `ValueSourceType` | Enum |  |
+| `ValueTypes` | Enum |  |
+| `ValueTypes` | Enum |  |
+| `Vector2EqualityComparer` | Object | GetHashCode, Equals |
+| `Vector2Int` | ValueType | op_Subtraction, op_Addition |
+| `Vector3EqualityComparer` | Object | GetHashCode, Equals |
+| `Vector3ToFixedEqualityComparer` | Object | GetHashCode, Equals, FloatToFixed |
+| `VehiclesFromXml` | Object | Load, Reload |
+| `VersionAuthorizer` | AuthorizerAbs | Authorize, get_StateLocalizationKey, get_Order |
+| `Vertex` | ValueType |  |
+| `VertexDistortion` | Object |  |
+| `VideoErrorDelegate` | MulticastDelegate |  |
+| `VideoFinishedDelegate` | MulticastDelegate |  |
+| `VideoSubtitle` | ValueType |  |
+| `ViewEnums` | Enum |  |
+| `VisitChunkDelegate` | MulticastDelegate |  |
+| `VisitMapDoneDelegate` | MulticastDelegate |  |
+| `VoiceStateChangedCallback` | MulticastDelegate |  |
+| `VolumeStats` | ValueType |  |
+| `VolumeTypeDefinition` | Object |  |
+| `WaitMode` | Enum |  |
+| `WallVisibilityStates` | Enum |  |
+| `WarpType` | Enum |  |
+| `WasAlive` | TargetedCompareRequirementBase | IsValid, GetInfoStrings |
+| `WaterDebug` | Object | Init, Cleanup, get_RenderingEnabled |
+| `WaterDebugAssets` | Object | GenerateCubeMesh, CreateDebugMaterial, get_DebugMaterial |
+| `WaterDebugManager` | Object | UpdateRenderers, Cleanup, InitializeDebugRender |
+| `WaterDebugPools` | Object | Cleanup, CreatePools |
+| `WaterFlow` | ValueType |  |
+| `WaterInfo` | ValueType |  |
+| `WaterMesh` | Object | Init |
+| `WaterMode` | Enum |  |
+| `WaterSourceInfo` | MonoBehaviour |  |
+| `WaterVoxelUpdate` | ValueType |  |
+| `WaypointComparer` | Object |  |
+| `WeaponComparer` | Object |  |
+| `WeatherParams` | Object |  |
+| `WeightBehavior` | ValueType |  |
+| `WhitelistGroup` | ValueType | TryParse, ToXml |
+| `WhitelistUser` | ValueType | TryParse, ToXml |
+| `WhitespaceSplitEnumerator` | ValueType | MoveToNextInternal, MoveNext, get_Current |
+| `WindowAutoYaw` | MonoBehaviour | Update, OnEnable, OnDisable |
+| `WindowDragTilt` | MonoBehaviour | Update, OnEnable |
+| `WindowSelectedDelegate` | MulticastDelegate |  |
+| `WireActions` | Enum |  |
+| `WireActions` | Enum |  |
+| `WorldBlockFiller` | Object | fillLevel, setDecorationBlock, setBlockToFill |
+| `WorldEvent` | Enum |  |
+| `WorldGlobalFromXml` | Object | Load, Reload |
+| `WorldListEntry` | XUiListEntry`1<XUiC_WorldList/WorldListEntry> | MatchesSearch, CompareTo |
+| `WorldRefMono` | MonoBehaviour |  |
+| `WrapMode` | Enum |  |
+| `XNames` | Object |  |
+| `XPTypes` | Enum |  |
+| `XmlPatchMethodAttribute` | Attribute |  |
+| `XmlPatchMethods` | Object | CsvOperationsByXPath, SetByXPath, PrependByXPath |
+| `XmlPatchMethodsClassAttribute` | Attribute |  |
+| `XpathDelegate` | MulticastDelegate |  |
+| `XuiBindComponentAttribute` | Attribute |  |
+| `XuiBindEventAttribute` | Attribute |  |
+| `XuiBindParentAttribute` | Attribute |  |
+| `XuiBindingDelegate` | MulticastDelegate |  |
+| `XuiBindingNcalcFunctionAttribute` | Attribute |  |
+| `XuiEvent_WorkstationItemsChanged` | MulticastDelegate |  |
+| `XuiParsingConverterFromStringDelegate` | MulticastDelegate |  |
+| `XuiParsingConverterTypeToTypeDelegate` | MulticastDelegate |  |
+| `XuiParsingDelegate` | MulticastDelegate |  |
+| `XuiXmlAttributeAttribute` | Attribute |  |
+| `XuiXmlAttributeConverterAttribute` | Attribute |  |
+| `XuiXmlAttributeConvertersClassAttribute` | Attribute |  |
+| `XuiXmlBindingAttribute` | Attribute |  |
+| `ZoomStates` | Enum |  |
+| `bleedingScale` | MonoBehaviour | Start, Update |
+| `cActionType` | Enum |  |
+| `cTypes` | Enum |  |
+| `eCameraSnapMode` | Enum |  |
+| `eControllerJoystickLayout` | Enum |  |
+| `eDefaultQuickAction` | Enum |  |
+| `eFlatAreaSizeFilter` | Enum |  |
+| `eGamepadRotationMode` | Enum |  |
+| `eLastKnownPositionEntityType` | Enum |  |
+| `eMode` | Enum |  |
+| `eOp` | Enum |  |
+| `eSetBlockResponse` | NetPackage | ProcessPackage, write, read |
+| `eState` | Enum |  |
+| `eTPCameraCheckResult` | Enum |  |
+| `eType` | Enum |  |
+| `eType` | Enum |  |
+| `eWayPointListType` | Enum |  |
+| `flashLockTypes` | Enum |  |
+| `includeInList` | MulticastDelegate |  |
+| `pulsingLightEmissive` | LightState | get_Intensity, get_Emissive |
+| `rTypes` | Enum |  |
+| `sTypes` | Enum |  |
+| `water_reflectionMirror` | MonoBehaviour | OnWillRenderObject, CalculateReflectionMatrix, CreateMirrorObjects |
+| `ChallengeObjectiveType` | Enum |  |
+| `ChallengeStateChanged` | MulticastDelegate |  |
+| `ChallengeStates` | Enum |  |
+| `ResourceRequiredTypes` | Enum |  |
+| `ShowTypes` | Enum |  |
+| `TwitchObjectiveTypes` | Enum |  |
+| `Direction` | Enum |  |
+| `HomerunGoalController` | MonoBehaviour | Update |
+| `ActionCompleteStates` | Enum |  |
+| `ConditionTypes` | Enum |  |
+| `ContainerActionStates` | Enum |  |
+| `CountTypes` | Enum |  |
+| `DestroySafeZoneStates` | Enum |  |
+| `DestructionTypes` | Enum |  |
+| `Direction` | Enum |  |
+| `EntityStates` | Enum |  |
+| `FillSafeZoneStates` | Enum |  |
+| `FillSafeZoneStates` | Enum |  |
+| `FillTypes` | Enum |  |
+| `FillTypes` | Enum |  |
+| `FuelSettingTypes` | Enum |  |
+| `HealthStates` | Enum |  |
+| `ItemLocations` | Enum |  |
+| `ItemLocations` | Enum |  |
+| `ItemLocations` | Enum |  |
+| `ModifyTypes` | Enum |  |
+| `OffsetTypes` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `RecipientTypes` | Enum |  |
+| `ResetTypes` | Enum |  |
+| `ReturnVehicleTypes` | Enum |  |
+| `SearchTypes` | Enum |  |
+| `SpawnTypes` | Enum |  |
+| `SpawnUpdateTypes` | Enum |  |
+| `SpecialPointTypes` | Enum |  |
+| `StatTypes` | Enum |  |
+| `State` | ValueType |  |
+| `TargetTypes` | Enum |  |
+| `TargetTypes` | Enum |  |
+| `TargetingTypes` | Enum |  |
+| `TimePresets` | Enum |  |
+| `ConditionTypes` | Enum |  |
+| `ConditionTypes` | Enum |  |
+| `EntityStates` | Enum |  |
+| `OperationTypes` | Enum |  |
+| `MultiTargetPathSelection` | Enum |  |
+| `PathInfoFleeRandom` | PathInfo |  |
+| `PathInfoFleeTarget` | PathInfoFleeRandom |  |
+| `PathInfoMultiSource` | PathInfo |  |
+| `PathInfoMultiTarget` | PathInfo |  |
+| `State` | ValueType |  |
+| `CurrentZoomFile` | Object |  |
+| `MapRendering` | Object | Init, GameStartDone, CalcChunkColorsDone |
+| `Map` | Object |  |
+| `EVolumeType` | Enum |  |
+| `MarkerSize` | Enum |  |
+| `MarkerTypes` | Enum |  |
+| `GroupOperator` | Enum |  |
+| `RequirementTypes` | Enum |  |
+| `cPathNodeType` | Enum |  |
+| `dColor` | Object |  |
+| `DisplayOverride` | Object |  |
+| `OptionTypes` | Enum |  |
+| `SandboxOptionCategory` | Object |  |
+| `SandboxOptions` | Enum |  |
+| `CurveType` | Enum |  |
+| `ConnectionHandler` | Object | SendLine, LogIn, IsLoggedIn |
+| `ERequestMethod` | Enum |  |
+| `LogBuffer` | Object | GetRange, LogCallback, get_Item |
+| `LogEntry` | Object |  |
+| `MimeType` | Object | GetMimeType |
+| `OpenID` | Object | Validate, buildUrlParams, GetOpenIdLoginUrl |
+| `RegistrationData` | Object |  |
+| `RequestContext` | Object | get_QueryParameters |
+| `ResourceHelpers` | Object | OpenManifestResource, GetManifestResourceText |
+| `ResultType` | Enum |  |
+| `UserRegistrationTokens` | Object | CreateToken, TryValidate |
+| `WebConnection` | ConsoleConnectionAbstract | get_Age, UpdateUsage, get_Username |
+| `WebMod` | Object |  |
+| `WebServer` | Object | GameStartDone, Init, WorldShuttingDown |
+| `WebUtils` | Object | SendEnvelopedResult, WriteText, WriteJsonData |
+| `AbstractCache` | Object | InvalidateAllCaches |
+| `DirectAccess` | AbstractCache | GetFileContent, Invalidate |
+| `SimpleCache` | AbstractCache | Invalidate, GetFileContent |
+| `Animals` | EntityFilterList`1<EntityAnimal> | predicate |
+| `EntityFilterList`1` | Object | GetCount, Get |
+| `Hostiles` | EntityFilterList`1<EntityEnemy> | predicate |
+| `AdminApiTokens` | AdminSectionAbs | GetPermissionLevel, IsCommandlineToken, Save |
+| `AdminWebModules` | AdminSectionAbs | GetModules, AddKnownModule, GetModule |
+| `AdminWebUsers` | AdminSectionAbs | HasUser, TryGetUser, Save |
+| `ApiToken` | ValueType | TryParse, ToXml |
+| `PermissionUtils` | Object | CanViewAllPlayers, CanViewAllClaims |
+| `WebModule` | ValueType | TryParse, ToXml, FixPermissionLevelsFromKnownModule |
+| `WebUser` | ValueType | TryParse, ToXml, ValidatePassword |
+| `AbsEvent` | Object | ProcessSendQueue, logConnectionState, sendBufToListeners |
+| `ESseClientWriteResult` | Enum |  |
+| `EventLog` | AbsEvent | LogCallback |
+| `SseClient` | Object | Write, HandleKeepAlive |
+| `ApiHandler` | AbsHandler | HandleRequest, HandleCors, apiFoundCallback |
+| `RewriteHandler` | AbsHandler | HandleRequest |
+| `SessionHandler` | AbsHandler | HandleUserPassLogin, HandleUserIdLogin, HandleRequest |
+| `SimpleRedirectHandler` | AbsHandler | HandleRequest |
+| `StaticHandler` | AbsHandler | HandleRequest |
+| `UserStatusHandler` | AbsHandler | HandleRequest |
+| `AbsRestApi` | AbsWebAPI | HandleRequest, Authorized, SendEmptyResponse |
+| `AbsWebAPI` | Object | Authorized, RegisterPermissions, DefaultPermissionLevel |
+| `EApiErrorCode` | Enum |  |
+| `JsonCommons` | Object | TryReadPlatformUserIdentifier, TryGetJsonField, TryGetJsonField |
+| `Null` | AbsWebAPI | HandleRequest |
+| `OpenApiHelpers` | Object | writeJsonPointerEncodedPath, buildMainSpecRefs, findExportedPaths |
+| `OpenApiSpec` | ValueType |  |
+| `Command` | AbsRestApi | HandleRestPost, writeCommandJson, HandleRestGet |
+| `LogApi` | AbsRestApi | HandleRestGet, WriteLogMessageObject |
+| `OpenAPI` | AbsRestApi | HandleRestGet, DefaultPermissionLevel |
+| `EntityClass` | AbsRestApi | HandleRestGet, DefaultPermissionLevel |
+| `Item` | ValueType |  |
+| `Mods` | AbsRestApi | writeModJson, writeWebModJson, HandleRestGet |
+| `Blacklist` | AbsRestApi | HandleRestGet, HandleRestPost, writeBan |
+| `CommandPermissions` | AbsRestApi | HandleRestGet, HandleRestPost, HandleRestDelete |
+| `PermissionsApiHelpers` | Object | TryParseId |
+| `RegisterUser` | AbsRestApi | HandleRestPost, HandleRestGet, DefaultPermissionLevel |
+| `UserPermissions` | AbsRestApi | HandleRestGet, HandleRestPost, writeGroupJson |
+| `WebApiTokens` | AbsRestApi | HandleRestGet, HandleRestPost, writeTokenJson |
+| `WebModules` | AdminSectionAbs | GetModules, AddKnownModule, GetModule |
+| `WebUsers` | AdminSectionAbs | HasUser, TryGetUser, Save |
+| `Whitelist` | AbsRestApi | HandleRestGet, HandleRestPost, HandleRestDelete |
+| `GamePrefs` | Object | ApplyGamePrefs, Apply, ApplyConfigFilePrefs |
+| `GameStats` | KeyValueListAbs | iterateList |
+| `KeyValueListAbs` | AbsRestApi | HandleRestGet, addItem, addItem |
+| `SandboxOptionInfo` | ValueType |  |
+| `SandboxOptionValue` | ValueType |  |
+| `SandboxSettings` | AbsRestApi | logSandbox, HandleRestGet, logValue |
+| `ServerInfo` | KeyValueListAbs | iterateList, DefaultPermissionLevel |
+| `ServerStats` | AbsRestApi | HandleRestGet, DefaultPermissionLevel |
+| `Animal` | AbsRestApi | HandleRestGet |
+| `Bloodmoon` | AbsRestApi | HandleRestGet |
+| `Hostile` | AbsRestApi | HandleRestGet |
+| `Player` | AbsRestApi | writePlayerJson, HandleRestGet, DefaultPermissionLevel |
+| `BiomeLayout` | Enum |  |
+| `BiomeType` | Enum |  |
+| `Data` | - |  |
+| `Data` | - |  |
+| `DistrictPlannerStatic` | Object |  |
+| `GenerationSelections` | Enum |  |
+| `PathNodeType` | Enum |  |
+| `PathTile` | ValueType |  |
+| `PathTileStates` | Enum |  |
+| `PrefabManagerStatic` | Object |  |
+| `RoadShapeTypes` | Enum |  |
+| `RotateParams` | ValueType |  |
+| `SaveDataPromptMode` | Enum |  |
+| `StreetTileData` | ValueType |  |
+| `TerrainType` | Enum |  |
+| `Type` | Enum |  |
+| `WorldBuilderConstants` | Object |  |
+| `WorldBuilderStatic` | Object |  |
+| `eCategory` | Object | ParseElement, CanShow, get_IsActive |
 ## Changelog
+
+- **2026-08-08:** Unreached game-type section rewritten as role tables (base + key
+  methods for all 2,363 types; previously bare name lists).
 
 - **2026-08-08:** Whole-assembly pass: classified the 1,672 game types unreached
   from the dedicated call-graph seeds (client render/UI, editor tools, platform SDK
