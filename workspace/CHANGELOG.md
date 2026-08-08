@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: AIScoutHordeSpawner internals
+
+SpawnUpdate SpawnManually + scout flags + investigate 6000; UpdateHorde;
+spawnHordeNear 5-zombie horde 12% wave-reset + GetSoundAlert + SetSpawnPos;
+CalcRandomPos; Cleanup. Verified fresh dumps.
 ## 2026-08-08 - tier-C: AIHordeSpawner leaves
 
 ctor party-spawner + playerSearchBounds; isSpawning = canSpawn; Cleanup
