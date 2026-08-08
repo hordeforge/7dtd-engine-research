@@ -85,6 +85,22 @@ active; `HasTwitchMember` (IL=9) is `Party?.HasTwitchMember() ?? false`;
 per-player gates that couple Twitch action availability to party
 composition.
 
+**Pimp-pot and blood-moon bookkeeping (server fields):** `AddToPot(amount)`
+/ `AddToBitPot(amount)` (IL=23 each) add to `RewardPot` / `BitPot`
+(clamped at 0) and track `LeaderboardStats.LargestPimpPot` /
+`LargestBitPot`; `SetPot` / `SetBitPot` (IL=28 each) clamp, store, and
+announce the new balance through `ircClient.SendChannelMessage` using the
+`chatOutput_PimpPotBalance` / `chatOutput_BitPotBalance` templates.
+`SetupBloodMoonData` (IL=23) reads `GameStats` 42 (blood-moon day),
+`CalcDuskDawnHours`, and sets `BMCooldownStart = dusk -
+CurrentCooldownPreset.BMStartOffset`, `BMCooldownEnd = dawn +
+BMEndOffset`; `WithinBloodMoonPeriod` (IL=33) is true while
+`day == nextBMDay && hour >= BMCooldownStart` or
+`day == currentBMDayEnd && hour < BMCooldownEnd` (the action cooldown
+window around the horde). `AddKillToLeaderboard(username, color)` (IL=44)
+increments the entry's `Kills` or appends `TwitchLeaderboardEntry(name,
+color, 1)`.
+
 **`TwitchManager.Update` (IL=1585) init-state machine + running loop:** the
 manager's frame peer runs only with a live world and players. It is a
 `switch` over `InitState` (9 targets): state 0 subscribes
