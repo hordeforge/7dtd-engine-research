@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity sound dispatch
+
+Entity.PlayOneShot (IL=38, dedicated-misc-systems.md): head-play / unique
+with anim-event monitor / BroadcastPlay; EntityPlayer (IL=16) spectator
+skip. verified from IL. Commit c21ec8d.
 ## 2026-08-08 - tier-C: equipment slot events
 
 Equipment leaves (items.md 7): ApplyTempCosmeticSlot (IL=24) equip-sync flag,
