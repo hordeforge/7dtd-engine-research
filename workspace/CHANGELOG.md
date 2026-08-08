@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: DynamicPrefabDecorator registry/quest-POI/RWG stamping leaves
+
+List accessors, GetPrefabAtPosition/Intersecting/FromWorldPosInside, quest POI pickers + ValidPrefabForQuest, chooseBestTrader, copyPrefabsIntoHeightMap (verified)
 ## 2026-08-08 - tier-C: ChunkCluster regen-state/loading + stability teardown leaves
 
 UpdateRegenerationState (client-only), SecondsSince*Regeneration, NotifyOnChunksFinishedLoading, GetIndexedBlocks, ClearStabilityForChunks (verified)
