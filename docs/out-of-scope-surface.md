@@ -128,7 +128,7 @@ hand-curated lists above so those lists stay byte-stable. Server-dominant types 
 same pass are in [`inventories/dedicated-leaves.md`](inventories/dedicated-leaves.md)
 (Promoted unaccounted server surface), not here.
 
-Supplement count: **494** (corpus classified total becomes **1178** with the base lists).
+Supplement count: **497** (corpus classified total stays **1168** with the base lists).
 
 ### Audio / music (supplement) (43)
 
