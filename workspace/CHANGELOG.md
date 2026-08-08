@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: QuestJournal leaves
+
+FailAllSharedQuests/FailAllActivatedQuests CloseQuest sweeps; QuestIsActive
+states; Find* scans; AddTraderPOI/HasTraderPOI/GetTraderList faction tracking.
+Verified fresh dumps.
 ## 2026-08-08 - tier-C: Quest lifecycle leaves
 
 SetupQuestCode hash mint; SetupTags objective wiring; StartQuest (IL=318)
