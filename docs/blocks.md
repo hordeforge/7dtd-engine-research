@@ -65,6 +65,49 @@ false (the base one-shot activation default); `GetPlaceAltBlockValue`
 and the `GetAutoShape*` / `GetMaterialForSide` family are the XML-driven
 shape/config getters.
 
+The property-application leaves behind those getters (called from the
+`Init` / `LateInit` XML build): `SetSideTextureId(id, channel)` (IL=13)
+stores `textureInfos[channel].singleTextureId` and clears the per-side flag;
+the `string[]` overload (IL=39) parses every entry into `sideTextureIds` and
+sets `bTextureForEachSide`. `SetLightValue(percent)` (IL=8) stores
+`(byte)(15 * percent)` and returns `this` (fluent); `SetBlockName` /
+`GetBlockName` (IL=4/3) wrap the `blockName` field; `StringToVector3(input)`
+(IL=79) parses `"r,g,b"` (0..255, 255 defaults) into `Vector3 / 255` (the
+color-style property parser); `GetBlockValueFromProperty(name)` (IL=40)
+reads the property value and resolves it via `GetBlockValue(value, false)`,
+throwing `You need to specify a property with name '{0}' for the block` on a
+missing key and `Block with name '{0}' not found!` on an unknown block;
+`BlockIdsByName()` (IL=26) folds `nameToBlock` into a name -> id dictionary;
+`get_UnlockedBy()` (IL=55) lazily comma-splits `PropUnlockedBy` into cached
+`RecipeUnlockData[]` (empty array when the prop is absent).
+Query leaves: `GetShownMaxDamage()` (IL=15) returns `MaxDamagePlusDowngrades`
+for a composite door (`TEFeatureDoor`) else `MaxDamage`;
+`GetActivationDistanceSq()` (IL=14) squares `activationDistance`, falling
+back to `cCollectItemDistance^2` when 0; `GetAlternateBlockIndex(name)`
+(IL=24) is the `placeAltBlockNames` index or -1; `GetIconName()` (IL=8) is
+`CustomIcon ?? GetBlockName()`; `GetCustomDescription` (IL=2) returns "";
+`GetUVMode(side, channel)` (IL=18) unpacks the per-side UV-mode bits;
+`CopyDroppedFrom(other)` (IL=89) merges the other block's `itemsToDrop`,
+appending drop entries whose item name is not already present;
+`HasCollidingAABB(...)` (IL=33) tests any `GetCollisionAABB` box against the
+given bounds; `CacheStats()` (IL=7) forwards to
+`DynamicPropertiesCache.Stats()`; `ForceAnimationState` (IL=1) is a base
+no-op whose `BlockActivateSingle` override (IL=69) sets `AnimActivatedBool`
+from meta bit 1 and CrossFades `AnimActivatedState` on the child animators.
+
+The auto-shape (procedural RWG block) leaves: `GetAutoShapeType` /
+`GetAutoShapeBlockName` / `GetAutoShapeShapeName` / `GetAutoShapeHelperBlock`
+(IL=3 each) expose the `AutoShapeType` / `autoShapeBaseName` /
+`autoShapeShapeName` / `autoShapeHelper` fields;
+`AutoShapeAlternateShapeNameIndex(shapeName)` (IL=14) is, for
+`AutoShapeType == 1`, `GetAlternateBlockIndex(autoShapeBaseName + ":" +
+shapeName)` else -1; `AutoShapeSupportsShapeName(shapeName)` (IL=14) is the
+same concatenation through `ContainsAlternateBlock`;
+`GetLocalizedAutoShapeShapeName()` (IL=8) is
+`Localization.Get("shape" + autoShapeShapeName)`;
+`GetShapeCategories(altBlocks, target)` (IL=47) unions the alt blocks'
+`ShapeCategories` lists (deduped) and sorts the result.
+
 Block ids are partitioned into fixed bands (static literals on `Block`):
 
 | Band | Id range | Constant(s) |
