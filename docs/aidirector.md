@@ -569,6 +569,13 @@ tracked players; on fail delay +4000; `FindTargets` → on fail delay +1000 and
 `ChooseNextTime`; else create `AIWanderingHordeSpawner` and add to list
 (+12000 residual schedule in IL).
 
+**Leaves:** `InitNewGame` (IL=12) latches `isPlaytest = IsPlaytesting()` and
+zeroes both next-times. `Write` (IL=12) persists `HordeNextTime` then
+`BanditNextTime` (u64 each) after the base; `Read` (IL=16) mirrors and gates
+`BanditNextTime` on version **> 3**. `CleanupType(type)` (IL=30) reverse-walks
+the spawner list and `Cleanup()`s + removes matching-type spawners.
+`LogTimes` (IL=17) logs `Next wandering - bandit {0}, horde {1}` via `LogAI`.
+
 ## AIHordeSpawner : Object
 
 Screamer / event horde runner (not an `AIDirectorComponent`, but driven from
@@ -902,6 +909,9 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** WanderingHorde leaves: InitNewGame playtest latch + zeroed
+  times; Write/Read persist Horde then Bandit next-times (version > 3 gate);
+  CleanupType reverse-walk cleanup; LogTimes.
 - **2026-08-08:** AIDirector core leaves: AddEntity/AddPlayer/RemovePlayer
   fan-out; GetComponent by FullName; Save version 10 + ComponentsSave/Load;
   Load Init on zero worldTime; NotifyNoise (IL=84) FindNoise lookup, crouch
