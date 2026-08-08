@@ -477,6 +477,7 @@ if entityClass == EntityClass.junkDroneClass:
     orderState      : i32
 // FINAL, every entity (after the junk-drone block, no guard):
 stressAmount : f32
+// (write always emits it; read only consumes it when readFileVersion >= 36)
 ```
 
 Two gating details a clone must honour (both cost stream sync if missed):
