@@ -679,6 +679,21 @@ Allies.Write(stream)                  // AllyStore binary
 
 `Read` / `ReadXML` rebuild Players dict, `MapPlayer`, lp block map, allies.
 
+**Binary `Read(BinaryReader)` (IL=72):** fresh list, then `playerCount` x
+`PersistentPlayerData.Read` (each added to `Players` and `MapPlayer`d), then
+`lpMapCount` x `{blockPos Vector3i, ownerPrimaryId FromStream(false,false)}`
+written into `m_lpBlockMap` only when the owner is present in `Players`, then
+`Allies.Read(stream)`.
+
+**XML `ReadXML(filePath)` (IL=153):** logs `Loading players.xml`, aborts with an
+empty list when the file is missing; a null document element throws
+`malformed persistent player data xml file!`; the `version` attribute gates the
+per-player parse (`PersistentPlayerData.ReadXML(element, version, out newIds)` -
+a null result aborts the whole load). Per player it re-adds `Players` and
+rebuilds `m_lpBlockMap` from `LPBlocks`; ids in `newIds` (allies discovered
+inside the player element) become `Allies.SetStatus(primaryId, newId, 1)`.
+A top-level `allies` element (version >= 1) loads via `AllyStore.ReadXml`.
+
 
 ## 7. Join analytics (V3.1.0)
 
@@ -728,6 +743,10 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-08:** PersistentPlayerList read paths: binary Read (IL=72) player
+  count + lpMap rebuild (owner must exist) + Allies.Read; ReadXML (IL=153)
+  version attr gate, per-player ReadXML + newIds ally discovery SetStatus 1,
+  allies element ReadXml, malformed throw, missing-file empty.
 - **2026-08-08:** PersistentPlayerList registry leaves: MapPlayer/UnmapPlayer
   identity maps; CreatePlayerData; FixNameCollisions (IL=197) suffix 0 owner +
   online-before-offline numbering + AutoFixNameCollisions hook;
