@@ -144,6 +144,11 @@ Selected dedi-critical Execute bodies:
 | `ConsoleCmdCVar` | 65 | `get` / `set` / `track` / `list` subcommands; `ExecuteGet` resolves the player by id (`Could not find player matching ID {0}.`) and reads a CVar |
 | `ConsoleCmdGetSandboxOptions` | 20 | Optional bool arg; `LogOptions(GameStats.GetString(71), flag, LogType)` |
 | `ConsoleCmdSaveDataManagerInfo` | 20 | Builds `AppendSaveDataManagerInfo` + `AppendSaveGameProviderInfo` text and `Log.Out`s it |
+| `ConsoleCmdVisitPois` | 10 (+87) | Client-oriented POI tour: `start` / `pause` / `reset` subcommands teleport the local player through the decorator's prefabs (`No local player! (Are you in-game?)` on a dedi console) |
+| `ConsoleCmdJunkDrone` | 289 | Player-owned drone control: `debuglog` / `help` / `log` (`logPlayerOwnedDrones`) / `unstuck` (teleport; falls back to `jds unstuck` server-side hint) / `clear` (`clearDronesForPlayer`) |
+| `ConsoleCmdServerJunkDrone` | 289+ | The server-side twin of `ConsoleCmdJunkDrone` (same subcommand surface, operates on the server drone registry) |
+| `ConsoleCmdPrefab` | 492 | Prefab-editor tool (`Command has to be run while in Prefab Editor!`): `load` / `save` / `simplify` / `simplify1` subcommands |
+| `ConsoleCmdChallenges` | 65 | Client-only (`Cannot execute {0} on dedicated server, please execute as a client`): `list/l` / `complete/c` / `groups/g` subcommands |
 
 Full per-command description strings remain in the inventory catalog; this table is
 the **server-effect** pin for operators and clone fidelity.
