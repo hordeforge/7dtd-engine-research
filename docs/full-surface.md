@@ -78,7 +78,7 @@ core + wire protocol, a small but load-bearing slice of the 7,432 types.
 | Entities / AI / path | [entity-ai.md](entity-ai.md), [aidirector.md](aidirector.md), [closed-gaps.md](closed-gaps.md) | Deep (tick chain, thresholds, EAI) |
 | World / chunks | [world-chunks.md](world-chunks.md) | Deep |
 | Terrain / height | [terrain-height.md](terrain-height.md) | Deep |
-| Save / region | [save-region.md](save-region.md) | Deep (SaveLoad 884 IL) |
+| Save / region | [save-region.md](save-region.md) | Deep (SaveLoad 926 IL) |
 | Light / mesh / water | [light-mesh-water.md](light-mesh-water.md) | Deep |
 | Managers / ModEvents | [managers.md](managers.md) | Method-level |
 | Networking / wire | [network.md](network.md), [protocol.md](protocol.md), [protocol-frames.md](protocol-frames.md), [protocol-packages.md](protocol-packages.md) | Deep (193 packages, framing, encryption) |
