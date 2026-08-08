@@ -189,6 +189,13 @@ warning marks. `EntityTrader.OnUpdateLive` samples `TraderInfo.IsOpen` /
 `SandboxUseTraderArea` is set, else `GetTraderAtPosition(pos, 2) != null`; the
 `Bounds` overload (IL=29) expands the bounds by **4** and asks
 `IsWithinTraderArea(min, max)` under the same sandbox gate.
+
+**Trader stock records:** `TraderItemGroup` (fields `name`,
+`minCount` / `maxCount`, `minQuality` / `maxQuality`, `modsToInstall[]`,
+`modChance`, `uniqueOnly`, `items`) is the per-group stock definition the
+trader inventory generates from; `DynamicPrefabDecorator/TraderComparer`
+(`Compare` IL=8) sorts `TraderArea`s by `ProtectPosition.x`, the ordering
+used when the decorator lays out trader compounds.
 `World.IsWithinTraderArea(pos)` (IL=6) is `GetTraderAreaAt(pos) != null`; the
 2-pos overload (IL=19) is false in sandbox mode, else
 `DynamicPrefabDecorator.IsWithinTraderArea(min, max)` (the point queries

@@ -895,6 +895,11 @@ Classic priority AI list (same shape IceCoffee tried to Parallel.ForEach):
 - if other.priority ≤ task.priority and not compatible → false;
 - else keep scanning. Empty list or all pass → true.
 
+**`EAITaskEntry`** is the list record (fields `action: EAIBase`, `priority`,
+`isExecuting`, `executeTime`; ctor IL=9 stores priority + action): the
+per-task slot the `EAITaskList` loop above drives, and the unit the
+`executingTasks` / `allTasks` collections hold.
+
 **0.05** is a fixed step (independent of `deltaTime` in this method), i.e. assumes ~20 Hz task list cadence when ticked.
 
 Path requests originate inside individual `EAIBase` / UAI task `Update`/`Start` methods via `EntityAlive.FindPath`.

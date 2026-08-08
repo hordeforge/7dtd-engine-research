@@ -615,6 +615,10 @@ rotation from geometry, delegating every other mode to the base.
 - **`BlockPlacementTorch`** (IL=53): Auto clears `meta`, keeps the block's own
   rotation on `Top` / `Bottom` faces, and re-rotates by the wall face:
   `North -> 0`, `West -> 3`, `South -> 2`, `East -> 1`.
+- **`BlockPlacementDrawBridge`** (`LimitRotation` IL=35): Auto steps the
+  rotation by ±1 (with `_bAdd`) and wraps the 0..3 range (4 rotations
+  only); every other mode delegates to the base `BlockPlacement.
+  LimitRotation`.
 
 **`BlockSleepingBag` (the bedroll):** the two-tile bed. `rotationToAddVector`
 (IL=25) maps rotation to the sibling offset (`0 -> (0,0,1)`, `1 -> (1,0,0)`,

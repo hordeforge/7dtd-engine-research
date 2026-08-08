@@ -639,6 +639,12 @@ flowchart TB
   - If total fuel seconds and current burn both exhausted: clamp burn to 0.
 - Returns whether any fuel state changed.
 
+**`BlockCollector/FuelType`** (ctor IL=41) is the fuel-class definition: the
+comma-separated `ftDef` string splits so element 0 becomes `Name` and the
+rest become the `Items[]` list (trimmed) - the "what burns in a collector"
+map that `TileEntityCollector` / `BlockCollector` read (see the collector
+stream tails below).
+
 ### 4.3 `HandleRecipeQueue` / `cycleRecipeQueue`
 
 `HandleRecipeQueue`: no-op while `bUserAccessing`. Active slot is last non-empty
