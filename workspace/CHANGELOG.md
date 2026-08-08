@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: server vote queue (TwitchVoteScheduler)
+
+Vote-window FIFO: AddParticipant dedupe, Update 3s windows, host-vote vs broadcast 192, package process (verified)
 ## 2026-08-08 - tier-C: webserver leaves (registration tokens, request plumbing, mime)
 
 UserRegistrationTokens expiry purge + validate; RequestContext record; WebUtils response helpers; MimeType table (verified)
