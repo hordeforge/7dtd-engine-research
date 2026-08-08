@@ -118,7 +118,7 @@ brtrue → ret    // dedicated: return immediately
 | [coverage.md](coverage.md) | Family closed checklist |
 | [engine-limitations.md](engine-limitations.md) | Stock ceilings (including residual-tagged rows) |
 | [protocol.md](protocol.md) | Wire residuals vs closed golden packages |
-| [zig-clone.md](../../zdtd/docs/zig-clone.md) | Clone readiness matrix |
+| [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md) | Clone readiness matrix |
 | [INDEX.md](INDEX.md) | Research hub |
 | Product status (not residuals) | `7days-realworld/docs/MODIFICATIONS.md` |
 | Product failure catalog | `7days-realworld/docs/realearth-review.md` |

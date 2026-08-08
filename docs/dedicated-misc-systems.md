@@ -1133,6 +1133,7 @@ interruptible pair are in [chat.md](chat.md) §3.
 | `AudioObject` | Object | Update, PlayConditionPasses, SetValue, Init |
 | `AudioPlayer` | MonoBehaviour | Play, Update, StopAudio, PlayAtPos |
 | `AudioTrigger` | Object | Update, TurnOff, SetVolume, UnPause |
+
 ### Support and utility leaves (catalogued, narrated for the census)
 
 Cross-cutting `<global>` leaves reachable on a dedicated server but catalogued only
@@ -1359,6 +1360,7 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 | `ModEvent` | `ModEventAbs` | Invoke |
 | `NetPackageInformation` | `Object` (IPackageInformation) | package info record |
 | `ReadOnlyListWrapper` | `Object` (IReadOnlyList) | GetEnumerator |
+
 ## Changelog
 
 - **2026-08-08:** Support/utility leaf index added (narrates 211 catalogued
@@ -1369,20 +1371,16 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 - **2026-08-08:** AdminBlacklist sub-store (ban add/remove/query, file round-trip, login/console/web enforcement); WhitelistUser/WhitelistGroup record types.
 - **2026-08-08:** Entity.StopAnimatorAudio (IL=16) monitored-handle stop +
   removal.
-## Changelog
 
 - **2026-08-08:** Entity.StopOneShot (IL=5) BroadcastStop complement.
-## Changelog
 
 - **2026-08-08:** Entity.PlayOneShot (IL=38) dispatch: PlayInsidePlayerHead /
   unique Play with anim-event monitor / BroadcastPlay; EntityPlayer (IL=16)
   spectator skip unless serverSignalOnly.
-## Changelog
 
 - **2026-08-08:** BlockRadiusEffect: EntityPlayerLocal.BlockRadiusEffectsTick
   (IL=83) 3-chunk rotating scan + BlockRadiusEffectsApply (IL=58) radiusSq
   buff apply; ResetBiomeWeatherOnDeath (IL=15) weather cvar reset.
-## Changelog
 
 - **2026-08-08:** EntityBedrollPositionList leaves: GetData via entity id;
   GetPos sentinel (0, int.MaxValue, 0); Set -> ShowBedrollOnMap; Clear ->

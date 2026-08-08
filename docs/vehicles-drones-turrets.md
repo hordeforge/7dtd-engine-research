@@ -1263,6 +1263,7 @@ no `RootMotion`, else builds the normal avatar controller and calls
 | Leaf | base | key methods |
 |---|---|---|
 | `DroneBeamParticle` | MonoBehaviour | Update, SetDisplayTime, Start |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
@@ -1271,38 +1272,30 @@ no `RootMotion`, else builds the normal avatar controller and calls
 - **2026-08-08:** Drone support buff: buffAllies (IL=80) party + owner aura,
   procBuffRange (IL=21) 32 m gate, addSupportBuff (IL=19) buffJunkDroneSupportEffect
   when not attacking, removeSupportBuff (IL=19) with doesEntityHaveSupport gate.
-## Changelog
 
 - **2026-08-08:** EntityVehicle.GetSyncFlagsReplicated (IL=5): flags &
   49159 (0xC007, bits 0-2 + 14-15) server-rebroadcast subset.
-## Changelog
 
 - **2026-08-08:** Vehicle cargo drop: DropItemsAsBackpack (IL=94) bag +
   cosmetic/mods stacks; dropLoot (IL=23) DroppedVehicleContainer at
   position + y*0.9.
-## Changelog
 
 - **2026-08-08:** EntityVehicle.GetExitVelocity (IL=17) damped dismount
   velocity (x0.5 grounded, x0.7); GetWheelsOnGround (IL=29) grounded count.
-## Changelog
 
 - **2026-08-08:** EntityVehicle.hasGasCan (IL=73): fuel item presence in bag
   or inventory as the fueling gate.
-## Changelog
 
 - **2026-08-08:** Vehicle.SetItemValueMods (IL=22) mods copy + CalcEffects/
   CalcMods/SetColors/SetSeats refresh; IsLockBroken lock part health 0;
   GetNoise constant 0.5.
-## Changelog
 
 - **2026-08-08:** VehiclePart.SetMods (IL=68): modInstalled from ModTags bit,
   modT pose/active, modHideT hide, modRBT physics enable.
-## Changelog
 
 - **2026-08-08:** Vehicle.CalcMods (IL=77) ModTags OR + storage-mod count +
   part SetMods + container resize; CalcEffects (IL=182) vehicle passive set
   55-58 damage per / 49 light / 50-51 fuel / 53 torque / 52 velocity.
-## Changelog
 
 - **2026-08-08:** Drone/turret leaves: spawn-data ctors base-only;
   DroneLightManager InitMaterials/DisableMaterials emission color + linked

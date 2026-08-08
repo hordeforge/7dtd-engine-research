@@ -1184,7 +1184,8 @@ census credits them by their arity-stripped base name.
 | `XUiListEntry`1` | Object | set_UiDirty, get_UiDirty, MatchesSearch |
 | `vp_GlobalEventReturn`4` | Object | Send, Register, Unregister |
 | `vp_Value`1` | vp_Event | InitFields, Unregister, Register |
-## Related
+
+## Related docs
 
 - [out-of-scope-surface.md](out-of-scope-surface.md) - the authoritative client/3rd-party classification.
 - [coverage.md](coverage.md) - the census and how these tiers are counted.

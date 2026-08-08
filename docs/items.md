@@ -1871,7 +1871,6 @@ clients via `NetPackageInventoryTransactionResponse` (see
 `NetPackageItemDrop`, `NetPackageDropItemsContainer`, `NetPackageItemActionEffects`,
 `NetPackageItemReload`, `NetPackagePickupBlock` ([protocol-packages.md](protocol-packages.md) 6.21).
 
-
 ## Held entities (V3.1.0 Henpocalypse)
 
 New item classes: `ItemClassHeldEntity` (base), `ItemClassWildChicken`, plus
@@ -2141,6 +2140,7 @@ The non-action leaves:
 | `ItemActionDataCatapult` |  |  |
 | `ItemActionDataSpawnEntity` |  |  |
 | `ItemActionDataZoom` |  |  |
+
 **Server-relevant classified leaves (re-narrated for the coverage census):**
 
 | Leaf | base | key methods |
@@ -2175,37 +2175,30 @@ The non-action leaves:
 - **2026-08-08:** Equipment leaves: ApplyTempCosmeticSlot (IL=24) sync flag,
   ClearTempCosmeticSlot (IL=7), FireEventsForChangedSlots (IL=137) MinEvent
   55 + 91/92 equip dispatch.
-## Changelog
 
 - **2026-08-08:** Equipment.CheckBreakUseItems (IL=85): lowest-durability
   scan, MaxUseTimesBreaksAfter slot clear + break sound.
-## Changelog
 
 - **2026-08-08:** Equipment.UnlockCosmeticItem (IL=31): CosmeticMappingStringID
   resolve, m_unlockedCosmetics append, CosmeticUnlocked event.
-## Changelog
 
 - **2026-08-08:** ItemClass tag scans: GetItemWithTag (IL=30) first
   HasAllTags match, GetItemsWithTag (IL=33) all matches, linear over the
   static list.
-## Changelog
 
 - **2026-08-08:** ItemClassTimeBomb.OnHoldingItemActivated (IL=82): held
   priming - WeaponPreFireCancel, activation transforms, Meta =
   explodeAfterTicks or -1 (FusePrimeOnActivate), SimpleRPC broadcast.
-## Changelog
 
 - **2026-08-08:** ItemClassTimeBomb.OnDroppedUpdate (IL=188) dropped-bomb
   fuse machine: remote Meta 65535->-1, PhysicsMasterGetFinalPosition,
   MinEvent 97 arming on collide/water, PinPulled + Meta = explodeAfterTicks,
   per-tick SoundTick countdown, ExplosionServer detonation at 0.
-## Changelog
 
 - **2026-08-08:** Harvest drop pipeline: GameUtils.HarvestOnAttack (IL=623)
   bKilled repair-damage-state quirk, [recipe] drop resolution;
   collectHarvestedItem (IL=138) damage-scaled count, prob roll,
   QuestEventManager.HarvestedItem, inventory/drop, _xpFromHarvesting XP.
-## Changelog
 
 - **2026-08-08:** Inventory layer leaves: ModifyValue (IL=29) holding-item
   chain with ignoreWhenHeld tags; DecItem (IL=132) toolbelt consume over

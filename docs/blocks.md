@@ -936,6 +936,7 @@ not (the parent/child split of the vertical sign).
 | `BlockShapeBillboardDiagonal` | BlockShapeBillboardAbstract | renderFull |
 | `BlockStatistics` |  |  |
 | `BlockTorch` | BlockParticle | OnBlockPickedUp, getParticleOffset |
+
 **Server-relevant classified leaves (re-narrated for the coverage census):**
 
 | Leaf | base | key methods |
@@ -957,7 +958,6 @@ not (the parent/child split of the vertical sign).
 
 - **2026-08-08:** BlockPlantGrowing.addScheduledTick (IL=63): deterministic
   GetTickRate schedule vs gaussian-jittered growthDeviation band 0.5x-1.5x.
-## Changelog
 
 - **2026-08-08:** BlockSleepingBag: rotationToAddVector sibling offsets;
   CanPlaceBlockAt dual-cell StabilitySupport floor + replaceable sibling;

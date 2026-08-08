@@ -634,7 +634,7 @@ Details: [network.md](network.md) §2.
 
 ---
 
-## Related
+## Related docs
 
 | Doc | Role |
 |---|---|

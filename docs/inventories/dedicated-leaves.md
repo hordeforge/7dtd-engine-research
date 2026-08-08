@@ -413,6 +413,7 @@ misclassified. The rule is now **dominance** (server referrers outnumber client 
 | `PrefabVolumeAbs` | DynamicPrefabDecorator, Prefab, NetPackageEditorUpdateVolume |
 | `PrefabVolumeListAbs` | DynamicPrefabDecorator, EntityPlayer, Prefab |
 | `SimpleBitStream` | Prefab |
+
 ## Changelog
 
 - **2026-07-26:** Round-2 promotion of 19 gameplay types out of the out-of-scope bucket after an independent review showed it was never referrer-verified; promotion rule changed from zero-client-referrers to server-dominance.
@@ -707,4 +708,3 @@ before treating a row as a behavioral claim. Infra collections are classified in
 | `WeatherSurvivalParametersFromXml` | Weather Survival Parameters From Xml | `Object` | Load |
 | `XmlLoadInfo` | Xml Load Info | `Object` | XmlFileExists |
 | `MiscFromXml` | Misc From Xml | `Object` | Create |
-

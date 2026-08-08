@@ -540,7 +540,6 @@ so nearer rings tend to stream first when buckets were filled ring-first.
 
 ### 4.1 Chunk progress flags (stock `InProgress*` volatiles)
 
-
 Measured fields on `Chunk`: `InProgressCopying`, `Decorating`, `Lighting`, `Regeneration`, `Unloading`, `Saving`, `Networking`. Conceptual lifecycle (flags can overlap; not a single exclusive enum):
 
 ```mermaid
@@ -1028,6 +1027,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 | `RegionExtensions` |  |  |
 | `RegionFileAccessRaw` | RegionFileAccessMultipleChunks | OpenRegionFile, GetRegionCoords, ReadDirectory, get_ChunksPerRegionPerDimension |
 | `RegionFileAccessSectorBased` | RegionFileAccessMultipleChunks | GetRegionCoords, ReadDirectory, OpenRegionFile, get_ChunksPerRegionPerDimension |
+
 **Server-relevant classified leaves (re-narrated for the coverage census):**
 
 | Leaf | base | key methods |
@@ -1050,7 +1050,6 @@ if two weather packages arrive in the same `Time.frameCount`.
   refcount + batch clear, chunkRegenerateAt (IL=49) Y-slice bitmask
   accumulation (1 << (yPos>>4 & 31)), DelayedStop (IL=48) flush via
   NeedsRegenerationOrBits.
-## Changelog
 
 - **2026-08-08:** ChunkBlockClearData leaf: BlockList<Vector3i>, OnRemove
   (IL=37) airs every listed pos via Chunk.SetBlock (the expiry callback).

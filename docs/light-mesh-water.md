@@ -499,6 +499,7 @@ else **1000** ticks.
 | `MeshGeneratorPrefab` | MeshGenerator | build, CalculateSecondaryPosition, calcLights, calcTopSoil |
 | `WaterPoint` |  |  |
 | `WaterSetInfo` |  |  |
+
 **Server-relevant classified leaves (re-narrated for the coverage census):**
 
 | Leaf | base | key methods |
@@ -521,7 +522,6 @@ else **1000** ticks.
 
 - **2026-08-08:** World.GetSunAndBlockColors (IL=41): sun (LIGHT_TYPE 1) and
   block (0) channel split, zeroed on missing chunk.
-## Changelog
 
 - **2026-08-08:** Water stats leaves: WaterStats 6 counters + ResetFrame +
   op_Addition + Sum(NativeArray); WaterStatsProfiler cctor ProfilerCounter

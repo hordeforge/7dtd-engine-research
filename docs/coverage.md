@@ -55,7 +55,7 @@ and live outside this bar, in the companion docs:
 
 **Stock limitation maps:** generic dedi ceilings → [engine-limitations.md](engine-limitations.md); RealEarth 1:1 Earth blockers → `7days-realworld/docs/ENGINE_LIMITATIONS.md`.
 
-**Custom / Zig dedi clone:** architecture → [zig-clone.md](../../zdtd/docs/zig-clone.md); wire → [protocol.md](protocol.md).
+**Custom / Zig dedi clone:** architecture → [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md); wire → [protocol.md](protocol.md).
 
 ---
 

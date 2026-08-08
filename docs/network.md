@@ -8,7 +8,7 @@
 **Visual frames:** [`protocol-frames.md`](protocol-frames.md).  
 **Companion:** [`closed-gaps.md`](closed-gaps.md) §4 (threshold decode).  
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md) §2-3 (player O(N²), packages).  
-**Clone design:** [`zig-clone.md`](../../zdtd/docs/zig-clone.md).  
+**Clone design:** [`ZIG_CLONE.md`](../../zdtd/docs/ZIG_CLONE.md).  
 **Loop:** [`loop.md`](loop.md) §6.  
 **Dumps:** `il/gaps-v3.1.0/`, `il/dedi-complete-v3.1.0/` §3-4.
 
@@ -847,6 +847,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 | `NetPackageEntityLookAt` | NetPackageEntityTargeted | ProcessPackage, write, read, Setup |
 | `NetPackageEntitySpawnResponse` | NetPackage | ProcessPackage, write, read, Setup |
 | `NetPackageLight` |  |  |
+
 **Server-relevant classified leaves (re-narrated for the coverage census):**
 
 | Leaf | base | key methods |

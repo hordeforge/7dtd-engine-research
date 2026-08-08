@@ -1019,17 +1019,14 @@ the map or any cell is `>= v`.
 - **2026-08-08:** calcWorldFileCrcs coroutine (MoveNext IL=121): zeroes
   worldFileTotalSize, clears worldFileCrcs, per-file size + chunked CRC
   accumulation, frame-budgeted.
-## Changelog
 
 - **2026-08-08:** GameUtils.GetWorldFilesToTransmitToClient (IL=85) join
   download filter: excludes _processed twins, GenerationInfo, Version.txt,
   checksums.txt, .bak; feeds NetPackageWorldFolder + PrepareWorldHashes.
-## Changelog
 
 - **2026-08-08:** Chunk.CalcBiomeIntensity (IL=150): 16x16 columns, 32-cell
   diagonal biome histogram over the 3x3 neighbour window, FromArray ->
   m_BiomeIntensities 6-byte columns.
-## Changelog
 
 - **2026-07-28:** `GetNextChunkToProvide` lock/snapshot/sentinel and GenerateChunksThread sleep codes.
 

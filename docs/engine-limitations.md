@@ -208,7 +208,7 @@ Generic ceilings (this file)
 | [residuals.md](residuals.md) | Non-IL permanent gaps |
 | `product ENGINE_LIMITATIONS` | 1:1 Earth blockers + attack path |
 | [protocol.md](protocol.md) | Wire framing (clone / custom dedi) |
-| [zig-clone.md](../../zdtd/docs/zig-clone.md) | Zig redesign that avoids these walls |
+| [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md) | Zig redesign that avoids these walls |
 | [HOST_TUNING](../../7dtd-optimizer/docs/HOST_TUNING.md) | CCD / NUMA / disk |
 | [ARCHITECTURE](../../7dtd-optimizer/docs/ARCHITECTURE.md) | Optim-oriented hot path |
 | [SIM_PARALLELISM](../../7dtd-optimizer/docs/SIM_PARALLELISM.md) | Why not MT sim in a mod |

@@ -68,7 +68,7 @@ Campaign audit (V3.1.0 evidence + residual map): [`../workspace/outputs/docs-res
 | 3 | [`loop.md`](loop.md) | How the dedicated frame/sim runs |
 | 4 | [`protocol.md`](protocol.md) | Wire framing, join, golden package bodies |
 | 5 | [`protocol-frames.md`](protocol-frames.md) | Visual RFC/Mermaid byte frames per package |
-| 6 | [`zig-clone.md`](../../zdtd/docs/zig-clone.md) | Zig clone architecture from RE (companion `zdtd/docs/`) |
+| 6 | [`ZIG_CLONE.md`](../../zdtd/docs/ZIG_CLONE.md) | Zig clone architecture from RE (companion `zdtd/docs/`) |
 | 7 | [`residuals.md`](residuals.md) | What IL cannot close |
 | 7b | [`completion-bar.md`](completion-bar.md) | What "100% documented" means (tiers A-D) |
 
@@ -89,10 +89,10 @@ flowchart LR
 |---|---|
 | Whole engine map | coverage → loop → family docs → residuals |
 | **Stock ceilings (any dedi)** | [engine-limitations.md](engine-limitations.md) → loop (scaling laws: optimizer `measured-scaling.md`) |
-| **Zig / custom dedi clone** | [zig-clone.md](../../zdtd/docs/zig-clone.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
+| **Zig / custom dedi clone** | [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
 | Wire / join / golden packages | protocol → **protocol-frames** → **protocol-packages** → network → loadgen PackageCodec |
 | How to reverse-engineer | **re-methodology** → [`../tools/`](../tools) → coverage |
-- **Stock hardcode pin:** [`../tools/stock-sync.sh`](../tools/stock-sync.sh) → [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) (see re-methodology §5c)
+| **Stock hardcode pin** | [`../tools/stock-sync.sh`](../tools/stock-sync.sh) → [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) (see re-methodology §5c) |
 | Frame / gmUpdate | loop → loop-gmupdate → inventories/gmupdate-calls |
 | Entities / AI / path | entity-ai → closed-gaps → aidirector |
 | World / chunks / save | world-chunks → save-region → terrain-height |
@@ -149,7 +149,7 @@ Optimization-mod topics (bottlenecks, algorithm cost anatomy, APM scaling laws,
 GC/FPS tuning, allocation reuse, aggressive levers) live in the **companion
 `7dtd-optimizer/docs/`**, not this repo. See the table below. The **Zig clone
 architecture** (module map, M0-M6 milestones) is reimplementation design and lives
-in **`zdtd/docs/zig-clone.md`**, built from the wire/loop RE here.
+in **`zdtd/docs/ZIG_CLONE.md`**, built from the wire/loop RE here.
 
 | Topic | File (product `7days-realworld/docs/`, private, not published) |
 |---|---|
@@ -375,6 +375,12 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
 
 ## Changelog
 
+- **2026-08-09:** Docs consistency pass: consolidated 22 docs' duplicate
+  `## Changelog` runs into single sections (no content change); fixed the
+  broken non-table row in the reading-paths table; repointed `zig-clone.md`
+  links to the actual `ZIG_CLONE.md` (7 docs); normalized `## Related` ->
+  `## Related docs`; removed stale git-ignored `coverage-report*.gaps.tsv`
+  scratch from inventories/. Dead-link audit: all 1,611 links resolve.
 - **2026-08-08:** Namespace count corrected to 89 in the full-surface row (7432 types / 53235 methods / 1,740,737 IL).
 - **2026-08-06:** Nine dated addendums from a full V3.1.0 b14 re-dump (2026-08-05):
   quests (template inheritance, objective Write shapes, fail-soft Quest::Read),

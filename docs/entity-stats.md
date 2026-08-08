@@ -222,7 +222,6 @@ Each `Stat` record (`Stat.Write` IL=24 / `Read` IL=32) is version **6** with
 - **2026-08-08:** UpdateNPCStatsOverTime (IL=128): HealthChangeOT (105)
   buff sources with buffDamageRemainder fractional carry, DamageEntity with
   buff DamageSource, heal / non-buff Value*dt paths.
-## Changelog
 
 - **2026-08-07:** EntityStatChanged Process IL=88 (self-echo skip, Health FireEvent
   9, rebroadcast); EntityStatsBuff Process IL=76 (remote Buffs.Read + server 192).

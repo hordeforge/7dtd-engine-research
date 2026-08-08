@@ -613,6 +613,7 @@ them for the coverage census with their base and key methods.
 | `RequirementVarFloat` |  |  |
 | `RequirementVarInt` |  |  |
 | `RequirementVarString` |  |  |
+
 ### 7.0 `EffectManager.GetValue` (IL=372) passive stack
 
 Signature (bool flags control which layers run):

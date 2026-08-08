@@ -2601,6 +2601,7 @@ Counts by category:
 | `WorldBuilderConstants` | Object |  |
 | `WorldBuilderStatic` | Object |  |
 | `eCategory` | Object | ParseElement, CanShow, get_IsActive |
+
 ## Changelog
 
 - **2026-08-08:** Unreached game-type section rewritten as role tables (base + key

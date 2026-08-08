@@ -958,29 +958,24 @@ or `ItemStack.Empty` when nothing rolled.
 - **2026-08-08:** EntityLootContainer.OnUpdateEntity (IL=46): lock-skip,
   touched-and-empty / timeStayAfterDeath-1 despawn, removeBackpack (IL=10)
   MarkToUnload + bRemoved; GetLootList OverrideLootList preference.
-## Changelog
 
 - **2026-08-08:** TradersFromXml.ParseTraderInfo (IL=320): id required +
   duplicate check, reset_interval -> ticks, allow_buy AND allow_sell both
   write AllowSell, open/close HH:mm -> OpenTime/CloseTime + UseOpenHours,
   WarningTime = CloseTime - 300, rent knobs, child element dispatch.
-## Changelog
 
 - **2026-08-08:** TileEntityVendingMachine.TryAutoBuy (IL=227): customer
   restock roll on XUiC_TraderWindow.OnOpen, eligible-entry buy + AvailableMoney,
   threshold reset/ramp, one-day re-entry; UpdateTick (IL=25) rental-expiry
   ClearVendingMachine.
-## Changelog
 
 - **2026-08-08:** EntityItem.tickDistraction (IL=147): 20-tick throttle,
   contact gate, DistractionTags filter, pendingDistraction takeover only
   when closer, resistance-strength probability gate.
-## Changelog
 
 - **2026-08-08:** EntityItem.SetItemStack (IL=115): distraction config from
   passives 66 DistractionRadius (squared) / 67 Lifetime / 68 Strength / 69
   EatTicks; CanCollect (IL=12) itemClass gate.
-## Changelog
 
 - **2026-08-08:** TraderArea leaves: IsWithinProtectArea IL=47 full 3D
   ProtectBounds test; GetProtectPadding IL=22 ProtectSize - PrefabSize with

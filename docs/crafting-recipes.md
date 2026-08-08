@@ -299,7 +299,6 @@ report the sizes for the UI.
 - **2026-08-08:** EntityPlayerLocal.GiveExp (IL=54): _craftCount_ recipe var
   accumulation, AddLevelExp(CraftExpGain / total, _xpFromCrafting), quest
   CraftedItem hook.
-## Changelog
 
 - **2026-08-08:** RecipeQueueItem read side: Read (IL=116) version u16 +
   legacy inline recipe below v2 + outdata warning; ReadLegacy (IL=101)

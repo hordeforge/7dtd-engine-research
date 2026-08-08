@@ -830,12 +830,10 @@ the sections above. The platform cloud-save backend is native (residual).
 
 - **2026-08-08:** WorldChunkCache.NotifyOnChunkBeforeSave (IL=19):
   IChunkCallback fan-out before chunk snapshot.
-## Changelog
 
 - **2026-08-08:** Dropped-backpack tracking (4): AddDroppedBackpack (IL=69)
   3-backpack cap with oldest eviction + 192 broadcast, RefreshSortedBackpacksList
   (IL=44), TryRemoveDroppedBackpack (IL=14), ProtectedBackpack record.
-## Changelog
 
 - **2026-08-08:** PlayerMetaInfo: XML Write/TryRead (IL=43/133) attribute set +
   hard-fail vs warn split; network Write/FromStream (IL=38/30) presence-bool

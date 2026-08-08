@@ -789,7 +789,6 @@ order (row 0 = +Z).
 - **2026-08-08:** Prefab.CountSleeperSpawnsInVolume (IL=116): sleeper-stack
   census (IsSleeperBlock with non-sleeper below, priority volumes excluded)
   into Transient_NumSleeperSpawns.
-## Changelog
 
 - **2026-08-06:** Prefab rotation is -90*r and lives in offsetToCoordRotated, not
   in the cell array (RotateY rewrites BlockValues and swaps size only); the

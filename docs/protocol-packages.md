@@ -1720,13 +1720,11 @@ customReason    : string
 - **2026-08-08:** NetPackageWorldInfo.PrepareWorldHashes (IL=83): filtered
   name+crc:u32 blob from ChunkProviderGenerateWorldFromRaw.worldFileCrcs,
   worldDataSize, worldHashesData for client validation.
-## Changelog
 
 - **2026-08-08:** NetPackageWorldFolder.prepareWorldFolderData (IL=389):
   GamePrefs 189 delay, DeflateOutputStream level 3, filtered file list,
   dtm.raw writeDtmDelta, 4096-byte frame-budgeted copy, 64 KiB part split
   (seqNr/totalParts).
-## Changelog
 
 - **2026-08-08:** NetPackageWorldAreas wire (write IL=31 / read IL=27):
   u8 version 1 + i16 count + TraderArea.Write each; TraderArea.Write IL=111

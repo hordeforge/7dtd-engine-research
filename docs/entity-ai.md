@@ -902,6 +902,7 @@ If living closest exists and distSq &lt; **6400** (80 m): zero
 | Source | Despawn when |
 |---:|---|
 | **3** Dynamic | attack target forces lastSeen=0; sleeper awake: distSq &gt;
+
 **9216** (96 m) and lastSeen &gt; **80** s; else distSq &gt; **2304** (48 m) and
 lastSeen &gt; **60** s and no investigate; else `ticksNoPlayerAdjacent` &gt;
 **1800** |
@@ -1497,7 +1498,6 @@ Also keep [`../il/loop-complete-v3.1.0/`](../il/loop-complete-v3.1.0) for frame-
 ## Deeper synthesis (thresholds and scale)
 
 Companion detail formerly in entity-ai. Raw auto: [`inventories/deeper.md`](inventories/deeper.md).
-
 
 ## D1. Per-entity cost onion (when a zombie is ticked)
 
@@ -2942,7 +2942,6 @@ block pos y+1; if that cell is **air**, return (no FX). Else y-1, read
 `IsDespawned` + `MarkToUnload` (awake entities kept). `DespawnAndReset` =
 `Despawn` + `Reset`.
 
-
 ### D8.2b `OnTriggered` (IL=14)
 
 `triggerState = flags & 7`; store `playerTouchedTrigger`; call
@@ -3158,7 +3157,6 @@ that i32 is what save files and the spawn wire carry. Order in IL:
 Consumers: `fallBehaviors` feeds `ChooseFallBehavior` (above); the sound fields
 drive `internalPlayStepSound` / alert loops; `itemsOnEnterGame` is granted on
 spawn.
-
 
 ### D8.6a Base `Entity::CopyPropertiesFromEntityClass` (IL=238)
 
@@ -3724,7 +3722,6 @@ appends to `ownedEntities`, and on the server broadcasts
 `AddPart`/`AddParticle` (IL=17 each) upsert the named transform into the
 `parts`/`particles` dicts.
 
-
 ## Activation / grab (V3.1.0)
 
 `EntityAlive.InitLocalActivationCommands` registers `"grab"` / `"hand"` on the
@@ -3752,6 +3749,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 | `EntityVHelicopter` | EntityDriveable | PhysicsInputMove, Update, SetWheelsForces, Init |
 | `EntityZombie` | EntityHuman | get_AimingGun, set_AimingGun |
 | `EntityZombieDog` | EntityEnemyAnimal | Init, OnUpdateLive, Awake, OnEntityTargeted |
+
 **Server-relevant classified leaves (re-narrated for the coverage census):**
 
 | Leaf | base | key methods |
@@ -3770,53 +3768,43 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 - **2026-08-08:** Player move-state machine: SetMoveState (IL=553) HoldType
   + condition-derived state, MinEvent 71, per-state motor values;
   SetMoveStateToDefault (IL=88) crouch/run/stand dispatch.
-## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.PlayStepSound (IL=7) third-person-only
   delegate gate.
-## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.FallImpact (IL=117): elevator block
   resolve, block.FallDamage scale, FallDamageModifier + passive 47
   FallDamageReduction, _fallSpeed cvar, MinEvent 95, hit-ground sound.
-## Changelog
 
 - **2026-08-08:** Player anti-stuck: pushOutOfBlocks (IL=225) 3x3 neighborhood
   probe; shouldPushOutOfBlock (IL=50) solid non-terrain always, buried
   terrain when the cell above is solid too.
-## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.SwimModeUpdateThrottle (IL=258): camera
   duck on overhead, hip raycast swimClimbing latch.
-## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.SwimModeTick (IL=151): swim enter MinEvent
   76, free-fly motor, idle sink 0.003 / move 0 gravity / sprint 0.0024 (78),
   60-tick stamina-exhausted slow (79 on exit).
-## Changelog
 
 - **2026-08-08:** PhysicsMasterGetFinalPosition (IL=10) time-bomb fuse
   position; SetRotFromNetwork/SetQRotFromNetwork interpolation targets;
   GetSoundTravelTime (IL=10) 343 m/s sound delay, no callers on b14.
-## Changelog
 
 - **2026-08-08:** Entity.ReplicateSpeeds (IL=66): 3-tick throttle, 4e-6
   delta gate, NetPackageEntitySpeeds to server / SendPacketToTrackedPlayers;
   Entity.TickInWater (IL=50) drives inWaterLevel/inWaterPercent/isInWater
   0.25 gate + SwimChanged + OnHeadUnderwaterStateChanged.
-## Changelog
 
 - **2026-08-08:** updatePlayerLandSound (IL=51): water-landing splash gate
   (0.025/0.015 impact), landWaterLevel smoothing, player_swim volume
   FastMin(dist*2.2+0.01, 1).
-## Changelog
 
 - **2026-08-08:** NotifyDestroyedBlock (IL=128): blocked-move clear when the
   destroyed block is the moveHelper hit, weighted Difficulty-1 pick over
   destroyBlockBehaviors -> stub executor; Snore (IL=36) snore/groan cycle
   with 20..21 tick cooldown + BroadcastPlay; IsCorpse (IL=17) ragdoll dead
   && deathUpdateTime > 70.
-## Changelog
 
 - **2026-08-08:** Stat record: Tick (IL=301) regen via MaxPassive/GainPassive/
   LossPassive + clamp + regenAmount; Write v6 / Read v<=5 extra pop + lastValue

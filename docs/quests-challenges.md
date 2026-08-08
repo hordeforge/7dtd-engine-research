@@ -1069,6 +1069,7 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 | `TraderComparer` |  |  |
 | `TraderItem` |  |  |
 | `TraderItemEntry` |  |  |
+
 **Server-relevant classified leaves (re-narrated for the coverage census):**
 
 | Leaf | base | key methods |
@@ -1093,16 +1094,13 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 - **2026-08-08:** ObjectiveRallyPoint.Current_BlockActivate (IL=182): twitch
   vote gate, startTime/endTime window, RemoveSharedNotInRange, server POI
   claim, RallyPointActivate.
-## Changelog
 
 - **2026-08-08:** QuestJournal rally markers: CheckRallyMarkerActivation
   (IL=56) gate, HandleRallyMarkerActivation (IL=36) delegate to Quest.
-## Changelog
 
 - **2026-08-08:** QuestJournal.GetCurrentFactionTier (IL=46) tier formula
   (points vs tier*QuestsPerTier, MaxQuestTier cap); GetTraderData (IL=27)
   TraderPOI linear scan.
-## Changelog
 
 - **2026-08-08:** Challenge + wire: StartChallenge resource gate + autocomplete
   -> Redeemed; ReadyToComplete; Write/Read field order + 27-type objective

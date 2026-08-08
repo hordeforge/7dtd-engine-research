@@ -326,7 +326,6 @@ add/remove, override color, localization flag, entityId.
 
 - **2026-08-08:** EntityPlayer.onNewPrefabEntered (IL=92): trader-prefab
   auto-waypoint at prefab center + RegisterNavObject, local-player only.
-## Changelog
 
 - **2026-08-08:** NavObject leaves: TrackTypes 0-3; set_TrackedEntity +
   SetupEntityOptions tracker-icon override; IsValid track downgrade; GetPosition

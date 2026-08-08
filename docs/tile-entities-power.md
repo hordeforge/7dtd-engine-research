@@ -1167,6 +1167,7 @@ the matching `PowerItem` by world position and links the two.
 | `TEFeatureExplodable` | TEFeatureAbs | Explode, Init, OnBlockDestroyedBy, OnAdded |
 | `TEFeaturePickup` | TEFeatureAbs | AllowBlockActivationCommand, OnBlockActivated, Read, InitBlockActivationCommands |
 | `WireFrameSphere` | MonoBehaviour | RenderCircleOnPlane, Update, Start, KillWF |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
@@ -1176,13 +1177,11 @@ the matching `PowerItem` by world position and links the two.
 - **2026-08-08:** TileEntityWorkstation.CheckForCraftComplete (IL=55):
   per-owner CraftCompleteList delivery, cosmetic unlock, GiveExp, TE
   modified flag.
-## Changelog
 
 - **2026-08-08:** TileEntity.emitHeatMapEvent (IL=48): heapMapLastTime
   rewind reset, GetActivityWorldTimeDelay cadence, NotifyActivity(...,
   block.HeatMapStrength, 720) 36 s heat; IsActive base true, Forge meta > 0,
   Workstation IsBurning.
-## Changelog
 
 - **2026-08-08:** TileEntityComposite envelope (2.2): write IL=74 / read
   IL=479 - version u16 18, outer + per-feature i32 size markers, blockId

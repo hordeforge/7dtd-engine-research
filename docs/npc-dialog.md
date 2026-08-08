@@ -328,7 +328,6 @@ objective's lifetime:
 - **2026-08-08:** EntityTrader.PlayVoiceSetEntry (IL=98): TraderDialog gate,
   5 s voice cooldown, voiceSet_name clip, StopAllSequencesOnEntity,
   PlayOneShot / NetPackageAudioPlayInHead (192) for remote, PlayAnimReaction.
-## Changelog
 
 - **2026-07-28:** NetPackageNPCQuestList write IL=99 header note.
 

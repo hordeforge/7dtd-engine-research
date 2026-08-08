@@ -534,18 +534,15 @@ surface is exactly sections 1 and 2.
 - **2026-08-08:** Prefab.CopyIntoLocal (IL=680): CopyVolumesIntoWorld first,
   per-chunk RandomFromSeedOnPos + world-time seeded GameRandom for the
   stamp.
-## Changelog
 
 - **2026-08-08:** PrefabInstance.CopyIntoWorld (IL=85): rotation delta
   RotateY sync + bounding box refresh, CopyIntoLocal stamp, entity copy
   with IsEditor/GameStats 24 allow flag.
-## Changelog
 
 - **2026-08-08:** PrefabInstance.CheckForAnyPlayerHome (IL=10) +
   GameUtils.CheckForAnyPlayerHome (IL=164): claim-size-expanded box scan,
   bedroll (GameStats 63*24) and land-claim (46*24, claimHalf 44) overlap,
   EPlayerHomeType None/Landclaim/Bedroll.
-## Changelog
 
 - **2026-08-08:** Prefab.BlockStatistics leaf: 5 counters (cntSolid /
   cntBlockEntities / cntBlockModels / cntWindows / cntDoors), Clear zeroes all,

@@ -1283,24 +1283,20 @@ above.
 
 - **2026-08-08:** EntityPlayerLocal.GetSpawnPoint (IL=24): SpawnPoints[0] ->
   block-center + (0.5,0,0.5), yaw 0, else SpawnPosition.Undef.
-## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.CheckSpawnPointStillThere (IL=30): spawn
   valid when undef / chunk unloaded / block is BlockSleepingBag; void when
   the bedroll is gone.
-## Changelog
 
 - **2026-08-08:** EntitySpawnerClass.Init (IL=333): mandatory EntityGroupName
   + group validation, Time/EDaytime, DelayBetweenSpawns, TotalAlive,
   TotalPerWave min-max, DelayToNextWave, AttackPlayerAtOnce, NumberOfWaves,
   Territorial(+Range), SpawnOnGround, IgnoreTrigger, ResetToday,
   DaysToRespawnIfPlayerLeft.
-## Changelog
 
 - **2026-08-08:** <spawning> loader (LoadEntitySpawnerClasses IL=204):
   entityspawner name/dynamic/wrapMode (wrap/clamp), day value * / min-max /
   single, EntitySpawnerClass build + AddForDay, empty-spawner throw.
-## Changelog
 
 - **2026-08-08:** GameStageDefinition leaves: GetStage (IL=43) bracket via
   GetBoundIndex (IL=42, last index where stageNum <= stage) + clamp;

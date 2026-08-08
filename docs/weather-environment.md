@@ -384,12 +384,10 @@ from the same clock and the received weather snapshot.
 
 - **2026-08-08:** EntityPlayerLocal.WeatherBuffUpdate (IL=45): weatherBuff
   removed indoors / re-added outdoors, driven by isIndoorsCurrent.
-## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.ShelterFrameUpdate (IL=184) sampled
   enclosure scan: sky-up + diagonal checks, 4-side block gate, upward
   sampling offset (0.65 / 0.54 crouch), shelterPercent 0/1 finalization.
-## Changelog
 
 - **2026-08-08:** WeatherManager.SetStorm IL=32: per-biome stormWorldTime/
   stormDuration stamp for the named biome or all (null name) - instant admin
