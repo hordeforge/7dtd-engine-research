@@ -313,6 +313,9 @@ copy of its wire list and parent position; on load it reconnects by world positi
 | `PowerItemDictionary` | `Dictionary<Vector3i, PowerItem>` | O(1) lookup by world position |
 
 **Graph edit leaves:** `FindPowerItems(predicate, results)` (IL=25) filters
+(the wire-node `Vector3EqualityComparer` singleton is the position comparer
+`WireNode`/`WireManager` use for wire-point containment checks on their
+`List<Vector3>` points).
 the `PowerItemDictionary` values into the result list.
 `GetPowerItemByWorldPos(pos)` (IL=12) is the dictionary lookup (null on
 miss); `SetTileEntityUpdate(te, shouldUpdate)` (IL=14) adds/removes the TE

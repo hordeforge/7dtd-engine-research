@@ -700,7 +700,8 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   `ParsingMethodCache` singleton; `SimplexNoise` (6) and the vendored
   `OpenSimplex2` / `OpenSimplex2S` noise stack (33 methods, with the
   field-only `LatticeVertex4D` helper); `IEnumerableExtensions` (3,
-  `IsEmpty` / `Join`); `BinaryReaderExtensions` (1, `TryReadAllBytes`).
+  `IsEmpty` / `Join`); `BinaryReaderExtensions` (1, `TryReadAllBytes`);
+  `IdPalette` (3, a palette MonoBehaviour with `OnEnable`/`ResetStatic`).
   None are constructed or
   called by live server (or client) code; do not model them as part of any
   wire/file contract. (`UtilList<T>` is not dead but is reachable only from
