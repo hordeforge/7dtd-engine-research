@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: item tag-scan lookups
+
+ItemClass.GetItemWithTag (IL=30) / GetItemsWithTag (IL=33): linear
+HasAllTags scans of the static list (items.md 1). verified from IL.
+Commit 71af6ec.
 ## 2026-08-08 - tier-C: prefab stamp wrapper
 
 Prefab.CopyIntoLocal (IL=680, server-browser-prefabs.md 3.1):
