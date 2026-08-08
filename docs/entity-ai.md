@@ -1061,6 +1061,29 @@ keep their collider (setup for the land/crush path).
    and has drop event, `DropItemsOnEvent` with overallProb **1** (and sometimes
    **0.7** second pass); `SetDead`.
 
+**`EntityFallingTree` impact damage (Collide IL=101 / collidedWith IL=58):**
+Trees spawned through `RequestToSpawnEntityServer` (spawning.md §5) fall as a
+physics body. Each `Collision` event:
+
+1. Server-only (`isEntityRemote` gate) and needs `contactCount > 0`.
+2. If `relativeVelocity.magnitude > 1`: `collidedWith(collision.gameObject.transform)`.
+3. If `relativeVelocity.magnitude > 0.2` and
+   `impulse.magnitude / treeRB.mass > **1.5**`: scan `GetContact(i)` for the
+   contact with the largest impulse, `Audio.Manager.BroadcastPlay(this,
+   "treefallimpact", false, 1)`, and spawn `ParticleEffect("treefall",
+   contactPoint + Origin.position, rotation * AngleAxis(90, forward), 1,
+   white, ...)` via `GameManager.SpawnParticleEffectServer(pe, entityId,
+   false, false)`.
+
+**`collidedWith(_other)` (IL=58):** skips while `timeToEnableDamage > 0` (grace
+after spawn). A hit tagged `E_BP_` resolves to its root via
+`GameUtils.GetHitRootTransform`; requires an `E_` tag and a live `Entity`
+component. `treeCanDamageEntity(entity)` (IL=20) then gates: false for ids
+already in `hitEntities`, for `EntityPlayer`, and for `EntitySupplyCrate`. On the
+first valid hit: `hitEntities.Add(id)` and
+`damage = (int)(treeRB.mass * 0.36)` via `StartCoroutine(onEntityDamageLater(...))`.
+Each tree damages each entity once; players and supply crates are never hit.
+
 **Queue-driven.** Spikes when many blocks lose support (base collapse). Matches ServerTools/IceCoffee fall-to-air trade: empty the problem at `AddFallingBlock` before this method invents entities.
 
 ---
@@ -3354,6 +3377,11 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   && deathUpdateTime > 70.
 ## Changelog
 
+- **2026-08-08:** EntityFallingTree impact damage: Collide (IL=101) server-only,
+  rel-vel > 1 collidedWith, rel-vel > 0.2 + impulse/mass > 1.5 max-impulse
+  contact -> treefallimpact audio + treefall particle; collidedWith (IL=58)
+  E_BP_ root resolve, treeCanDamageEntity gate (hitEntities / players /
+  supply crates), mass*0.36 damage coroutine.
 - **2026-08-08:** EntityAlive.GetLightLevel IL=14: attached -> host
   delegate, else inventory.GetLightLevel (held-item light, the stealth
   selfLight).
