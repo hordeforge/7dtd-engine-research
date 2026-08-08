@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: land-protection hardness curve + entity attach/physics accessors
+
+Offline decay blend (modes 1/2), expiry 1, online 48; CanAttach/GetFirstAttached/SetVelocityPerSecond master path (verified)
 ## 2026-08-08 - tier-C: WorldStaticData Cleanup family
 
 Per-family registry cleanup delegates, Twitch singleton-guarded (verified)
