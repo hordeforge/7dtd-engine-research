@@ -50,6 +50,27 @@ flowchart TB
 `GetFailedMods(reason)` records failures. `ModManager.GameEnded` and per-mod cleanup
 run on shutdown ([server-lifecycle.md](server-lifecycle.md)).
 
+**`Mod` ModInfo parsing leaves (all IL-verified):**
+`parseModInfoV2(modPath, folderName, xmlRoot)` (IL=148) is the V2 loader:
+the `Name` element must exist, be non-empty and match `nameValidationRegex`
+(each failure logs `[MODS]{folder}/ModInfo.xml does not ...` and returns
+null), `Version` runs `System.Version.TryParse` (a missing / invalid value
+warns `does not define a valid Version. Please consider updating it for
+future compatibility.`), `DisplayName` must be non-empty, and
+`Description` / `Author` / `Website` are optional; `SkipWithAntiCheat` is
+parsed as a bool (warning + assumed false on a bad value). The result is a
+new `Mod` with Path / FolderName / Name / DisplayName / Description /
+Author / Version / VersionString / Website / SkipLoadingWithAntiCheat.
+`parseModInfoV1` (IL=7) always errors `[MODS]{folder}/ModInfo.xml in legacy
+format. V2 required to load mod` and returns null (V1 unsupported).
+`getElementAttributeValue(folderName, xmlParent, elementName, logNonExisting)`
+(IL=76) requires exactly one child element of that name carrying a `value`
+attribute (both violations log and return null). `DetectContents()` (IL=46)
+scans `{Path}/Config` and sets `GameConfigMod = true` when any entry other
+than `XUi_Menu` / `loadingscreen.xml` / `Localization.csv` exists (the
+config-mod marker); `ContainsAssembly(assembly)` (IL=5) is the
+`allAssemblies` containment test.
+
 ---
 
 ## 2. Mod load-state (state machine)
