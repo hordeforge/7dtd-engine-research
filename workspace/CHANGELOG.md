@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntitySupplyCrate runtime
+
+MoveEntityHeaded parachute gravity*0.95 slow-fall; Update airborne swing
+(8*sin(t)-4, 8*sin(t+0.3)-4+startRotY, 0); PostInit layer 21 + collider +
+wasOnGround smoke/parachute off; ValidateResources crateT/parachuteT;
+StopSmokeAndLights SupplySmoke loop off + SupplyLit off; RequiresChunkObserver
+airborne||isSmokeOn; ctor isSmokeOn true + smokeTimeAfterLanding 240; search
+allow + GetActivationText lootTooltip*; HandleNavObject GameStats 53 gate +
+NetPackageNavObject ch192; Read/Write v>=11; OnEntityUnload Killed ->
+RemoveSupplyCrate; trivials. Verified fresh dumps.
 ## 2026-08-08 - tier-C: EntityFallingBlock landing + mesh
 
 OnUpdateEntity (IL=344) full: every-other-tick damage pass (entityHits < 3,
