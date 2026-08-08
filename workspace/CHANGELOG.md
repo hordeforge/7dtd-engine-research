@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: rally marker quest gates
+
+QuestJournal.CheckRallyMarkerActivation (IL=56) share gate + HandleRallyMarkerActivation (IL=36) Quest delegate (quests-challenges.md).
+verified from IL. Commit ed759d5.
 ## 2026-08-08 - tier-C: faction tier formula
 
 QuestJournal.GetCurrentFactionTier (IL=46, quests-challenges.md): points vs
