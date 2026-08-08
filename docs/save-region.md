@@ -434,6 +434,14 @@ for the cull pass - the `s_ComputeChunkGroups` / `s_AddGroupedChunks` /
 `s_RemoveGroupedChunks` / `s_UpdateGroupTimestamps` profiler markers around
 `CullExpiredChunks` (§3.1 table).
 
+**Save-thread record (`ThreadManager/ThreadInfo`):** `RegionFileManager`
+starts its save worker with `ThreadManager.StartThread(...)` and keeps the
+returned `ThreadInfo taskInfoThreadSaveChunks` (the `thread_SaveChunks`
+function delegate). The record carries the thread delegate + parameter and
+the shutdown surface `RequestTermination` / `TerminationRequested` /
+`HasTerminated` / `WaitForEnd(timeout)` (IL=47) that `DoSaveChunks` /
+disconnect paths use to drain the save thread.
+
 **`RegionItemData`** (IL=10/15) is the dynamic-mesh region record:
 `Update(x, z, updateTime)` stores the triple, and the `DynamicMeshItem`
 overload copies `WorldPosition.x/z` plus `UpdateTime` from the item

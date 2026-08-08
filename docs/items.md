@@ -805,7 +805,12 @@ methods drive: `ray`, `bFirstHitInARow`, `bAttackStarted`, `bHarvesting`),
 `InventoryDataRepair` (repair-tool state), `CollectWaterActionData` /
 `DumpWaterActionData` (the water-fill/dump action state). They exist so each
 action's mutable fields live on the per-entity action data, not the shared
-`ItemAction` instance.
+`ItemAction` instance. `ItemActionTextureBlockData` holds the paint state
+(`idx`, `bAutoChannel`, `paintMode`, `bReplacePaintNextTime`,
+`bPaintAllSides`) including the `ChannelMask channelMask` - the
+`ItemActionTextureBlock/ChannelMask` bit-set (`IncludesChannel` IL=11,
+`ToggleChannel` IL=19, `SetExclusiveChannel` IL=8) that decides which of
+the block's channels a paint stroke touches.
 
 **`ItemActionAttack.ReadFrom` (IL=482) is the attack-action config parse** run
 from the loader's Actions fill: `ToolCategory` (string), `DamageEntity` /

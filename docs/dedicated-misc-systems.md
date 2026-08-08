@@ -855,7 +855,10 @@ the dump path used for save/backup artifacts.
 **Binary/stream utility leaves:** `BitConverterLE` is the little-endian raw
 converter (`GetUIntBytes` IL=56, `GetULongBytes` IL=112, `GetBytes(float)`
 IL=5) that `PooledBinaryReader` / `PooledBinaryWriter` use for the pooled
-serialization layer. `ByteLengthUtils` pre-computes writer sizes
+serialization layer. `StreamWriteSizeMarker` (fields `Position` +
+`EMarkerSize`) is the "write a size placeholder, patch it later" record
+`PooledBinaryWriter` hands out, and `Quest` / `QuestJournal` use it to
+reserve the byte-length slot of a serialized payload. `ByteLengthUtils` pre-computes writer sizes
 (`GetBinaryWriter7BitEncodedIntLength` IL=22, `GetBinaryWriterLength`
 IL=9). `SimpleBitStream` is the bit accumulator (`Add(bool)` IL=42,
 `GetNext` IL=41, `Reset` IL=13, byte/bit cursors plus a `Write(BinaryWriter)`)

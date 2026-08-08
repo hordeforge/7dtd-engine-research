@@ -645,6 +645,12 @@ rest become the `Items[]` list (trimmed) - the "what burns in a collector"
 map that `TileEntityCollector` / `BlockCollector` read (see the collector
 stream tails below).
 
+**`BlockCollector/CatalystConvert`** (`Convert(ItemStack)` IL=23) is the
+catalyst rule: when the input stack is non-empty and its item class name
+equals `convertFrom`, the output is `new ItemStack(GetItem(convertTo),
+count)` - the collector's catalyst-to-output conversion, used by
+`TileEntityCollector` / `XUiC_CollectorFuelGrid`.
+
 **`WorkstationData`** is the workstation display config record
 (`WorkstationName`, `WorkstationIcon`, `CraftIcon`, `CraftActionName`,
 `WorkstationWindow`, plus the `OpenSound` / `CloseSound` / `CraftSound` /
