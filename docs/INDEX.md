@@ -218,6 +218,7 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 | [save-persistence.md](save-persistence.md) | Save path/slot model + SaveInfoProvider (dedicated runs the System.IO placeholder) |
 | [chunk-providers.md](chunk-providers.md) | ChunkProvider* (dedicated = GenerateWorldFromRaw) + decoration layer |
 | [light-mesh-water.md](light-mesh-water.md) | Light, stability, mesh, water, deco |
+| [stability.md](stability.md) | Stability calculator / falling blocks: StabilityInitializer spread/clear, GetBlockStability BFS, EntityFallingBlock landing |
 | [world-generation.md](world-generation.md) | RWG world create pipeline: WorldBuilder stages, threading, outputs |
 | [blocks.md](blocks.md) | Block framework: BlockValue bitfield, virtual surface, damage/upgrade, block-change flow |
 | [block-shapes.md](block-shapes.md) | BlockShape rotation model + BlockTrigger firing chain |
