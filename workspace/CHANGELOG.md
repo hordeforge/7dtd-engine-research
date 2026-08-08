@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PersistentPlayerList + catalog leaves
+
+PPL: identity maps (MapPlayer/UnmapPlayer/CreatePlayerData), FixNameCollisions
+suffix numbering online-first, land-claim place/remove + RemoveExtraLandClaims
+(GameStats 43 cap), CleanupPlayers (46*24h eviction), NetworkCloneRelevantForPlayer
+snapshot, binary/XML read paths (version gate, ally discovery). Also signs bake
+leaves, ChunkMemoryStreamReader/Writer + ChunkBlockClearData, drone/turret
+leaves. All verified fresh dumps.
 ## 2026-08-08 - tier-C: leaf-catalog batch (placement, UAI, water, events)
 
 BlockPlacement* Auto-mode rotation tables (Plate/Spotlight/TowardsPlacer90/
