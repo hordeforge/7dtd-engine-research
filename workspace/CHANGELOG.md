@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: leaf-catalog batch (placement, UAI, water, events)
+
+BlockPlacement* Auto-mode rotation tables (Plate/Spotlight/TowardsPlacer90/
+Inverted, PineLeaves rot 0, Torch wall faces); UAIConsideration* scores;
+WaterStats/Profiler/WaterPoint; sequence-link leaves + GameEventFlag ctor +
+SequenceStopper; ModeGamePref device-default pick; BarRegion*/VariableState
+re-roled client-only. All verified fresh dumps.
 ## 2026-08-08 - tier-C: EntitySupplyCrate runtime
 
 MoveEntityHeaded parachute gravity*0.95 slow-fall; Update airborne swing
