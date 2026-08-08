@@ -623,6 +623,19 @@ sets `CurrentPhase = QuestClass.HighestPhase` itself (IL_006a-IL_007b) and does 
 read tracked/phase/questCode from the stream, matching `Quest::Write`'s
 InProgress-only branch.
 
+**Quest lifecycle leaves:** `SetupQuestCode` (IL=48) mints the per-instance
+`QuestCode` as the hash of `unscaledTime_ID_ownerEntityId_questGiverID` when
+still 0. `SetupTags` (IL=41) per-objective `OwnerQuest` +
+`HandleVariables` + `SetupQuestTag` and ORs `NeedsNPCSetPosition`.
+`StartQuest(newQuest, notify)` (IL=318) is the activation: state set, then per
+action (`OwnerQuest` + `HandleVariables` + `SetupAction`, phase-matched
+`OnComplete` actions performed), per requirement (`SetupRequirement`), per
+objective (`SetupObjective` + `SetupDisplay`, phase-matched), before the
+position/tag pass. `SetupRewards` (IL=116) stamps `RewardIndex` per reward and
+rolls the chosen-reward random picks. `UnhookQuest` (IL=37) runs
+`HandleRemoveHooks` + `RemoveObjectives` on every objective and clears the map
+object (the journal's `UnHookQuests` fans out to it).
+
 **`ObjectiveGoto::ParseProperties` (966955-966966)** parses `BaseObjective.Value`
 with `StringParsers::ParseFloat` into `ObjectiveGoto::distance`: for the Goto family
 `value` is a **distance in metres**, not a count. `ObjectiveGoto` also carries
@@ -710,6 +723,10 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
   TraderPOI linear scan.
 ## Changelog
 
+- **2026-08-08:** Quest lifecycle leaves: SetupQuestCode hash mint;
+  SetupTags objective wiring; StartQuest (IL=318) activation pass (actions/
+  requirements/objectives); SetupRewards RewardIndex + chosen rolls; UnhookQuest
+  hook teardown.
 - **2026-08-08:** QuestClass leaves: CreateQuest (IL=147) template-to-instance
   clones; CanActivate RequiresZombies gate; GetCurrentHint 1-indexed hints +
   _alt localization + sandbox gate; CheckCriteria* AND pass; ResetObjectives.
