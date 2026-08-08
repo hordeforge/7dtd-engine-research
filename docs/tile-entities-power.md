@@ -807,6 +807,49 @@ isFull.count : u16
 //   itemsInternal, modSlotsInternal, fuelSlotsInternal, catalystSlotsInternal
 ```
 
+**`TileEntityCollector` conversion loop (all IL-verified):**
+`handleUpdateForOutputType(world, outputType, slotIndices)` (IL=233) is the
+per-output tick. It resolves the `FuelType` via `collector.GetFuelType(
+outputType.Fuel)`, sets `outOfFuel[name] = !(getMaxProductionCount > 0)`
+and `isFull[name] = getFirstFreeIndex(slotIndices) < 0`, and latches
+`wasDisabled` (calling `setModified()` on the disabled -> enabled edge).
+It then folds the elapsed world time into the conversion budget:
+`convertTime = GetSandboxModifiedTime((worldTime - lastWorldTimes[name]) *
+getCurrentConvertSpeed)` (a negative result keeps the raw value and flags
+"keep going"). Per conversion: a `FillData(name, slot, fillTimeLeft)` is
+created with the first free slot and `RandomRange(MinConvertTime,
+MaxConvertTime)`; while the budget covers `fillTimeLeft` it places
+`newItem(outputType, fuelType)` into `Items[slot]`, removes the FillData,
+re-picks the next free index and refreshes the `isFull` / `outOfFuel` /
+`isDisabled` flags; otherwise the remainder is subtracted from
+`fillTimeLeft` (0 budget left). The loop exits when disabled or the budget
+runs out.
+Supporting reads: `getCurrentConvertCount(outputType)` (IL=52) is the
+catalyst-driven per-batch count (`catalystCount * CatalystMultipliers[name]`
+when `UsesCatalyst` and the multiplier is positive, else
+`HasModCount ? ModdedConvertCountMultiplier : 1`, run through
+`GetSandboxModifiedOutput`); `getCurrentConvertSpeed(outputType)` (IL=9) is
+`HasModSpeed ? ModdedConvertSpeedMultiplier : 1`; `getCatalystCount()`
+(IL=57) counts non-empty catalyst slots whose item name is in
+`collector.CatalystTypes`; `getFuelCount(fuelType)` (IL=30) sums
+`getFuelSlotFuelCount` (IL=35, the stack count when its item name is in
+`fuelType.Items`) across the fuel slots; `getMaxProductionCount(outputType,
+fuelType)` (IL=29) reduces the convert count while `fuelCost` is affordable
+(no cap when `!UsesFuel`); `fuelCost(outputType, count)` plus
+`getAdditionalFuelCost` (IL=3, `outputType.AdditionalFuelCost`) size the
+fuel burn. `newItem(outputType, fuelType)` (IL=36) burns the fuel
+(`removeFuel`, IL=67, draining fuel slots) and builds
+`ItemStack(HasModConvert ? OutputItemModded : OutputItem, count)`;
+`dropItems(list)` (IL=22) is
+`DropContentInLootContainerServer(-1, "DroppedLootContainer",
+ToWorldCenterPos() + 0.9 y, list, true, null)`.
+`isDisabled(outputType)` (IL=16) is `isBlocked || outOfFuel || isUnderwater
+|| isFull`; `anyEnabled()` (IL=39) is any output not disabled;
+`resetTimeValues(outputType)` (IL=9) stamps `lastWorldTimes[name] =
+worldTime`; `GetSlotOutputType(slot)` (IL=9) /
+`GetSlotFillData(slot)` (IL=28) / `IsCurrentStack(slot)` (IL=26) resolve the
+slot-facing output type and the live `FillData` for a slot.
+
 #### `TileEntityLight.write` (IL=48)
 
 After base + version u16:
