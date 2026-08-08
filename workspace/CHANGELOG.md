@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityVehicle world-boundary rescue + state getters
+
+CheckForOutOfWorld 474-IL rescue phases (bounds clamp, chunk regen, worldValidPos walk-back), TeleportToWithinBounds, VelocityFlip, UpdateAttachment, state getters (verified)
 ## 2026-08-08 - tier-C: EntityHuman leaves (storm exposure, move-speed pattern, hand item)
 
 IsStormEffected biome-source + PineForest exclusion + IsStorming; MoveSpeedPatternTick (delay,scale) pairs; SetupHandItem (verified)
