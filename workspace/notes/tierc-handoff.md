@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `e8ce622` scout spawner |
-| Commits since dry-run `3b61d9c` | ~1142 |
+| HEAD (at handoff write) | `bcc2e96` EntitySpawner leaves |
+| Commits since dry-run `3b61d9c` | ~1143 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntitySpawner persistence/parse
+
+Write v3 / Read gates + DefaultClassName fallback; Spawn wrapper;
+ModifySpawnCount EnemySpawnMode gate; burst path; startSound 300; revenge +
+territorial; LoadEntitySpawnerClasses day value forms + empty throw.
+Verified fresh dumps.
 ## 2026-08-08 - tier-C: AIScoutHordeSpawner internals
 
 SpawnUpdate SpawnManually + scout flags + investigate 6000; UpdateHorde;
