@@ -174,7 +174,7 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 |---|---|
 | [architecture-map.md](architecture-map.md) | Whole-system visual map and subsystem ownership index |
 | [coverage.md](coverage.md) | Family → narrative → dump map; census numbers |
-| [full-surface.md](full-surface.md) | Whole-assembly map (all 87 namespaces) + coverage ledger toward 100% |
+| [full-surface.md](full-surface.md) | Whole-assembly map (all 89 namespaces) + coverage ledger toward 100% |
 
 | [residuals.md](residuals.md) | What managed IL cannot close (the only open-item list) |
 | [out-of-scope-surface.md](out-of-scope-surface.md) | Reached-but-out-of-scope types classified by category (the boundary map) |
