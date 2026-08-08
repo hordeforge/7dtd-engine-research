@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: equipment slot events
+
+Equipment leaves (items.md 7): ApplyTempCosmeticSlot (IL=24) equip-sync flag,
+ClearTempCosmeticSlot (IL=7), FireEventsForChangedSlots (IL=137) MinEvent
+55 + 91/92 equip dispatch per mod. verified from IL. Commit 5134166.
 ## 2026-08-08 - tier-C: equipment break pass
 
 Equipment.CheckBreakUseItems (IL=85, items.md 7): lowest-durability scan,
