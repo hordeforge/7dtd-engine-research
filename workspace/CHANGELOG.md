@@ -6,6 +6,8 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: dedicated-misc-systems spot-check (7 claims exact)
+## 2026-08-08 - tier-C: save-region SetFrom IL fix 164->203
 ## 2026-08-08 - tier-C: mod-loading doc spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: platform-auth doc spot-check (4 claims exact)
 ## 2026-08-08 - tier-C: chat + server-lifecycle spot-check (8 claims exact)
