@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `271c880` move Twitch server records out of OOS |
+| HEAD (at handoff write) | `fbc505b` spell TwitchRequirementSandboxInt + census (1834) |
 | Commits since dry-run `3b61d9c` | ~1316 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
