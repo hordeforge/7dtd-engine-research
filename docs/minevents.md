@@ -775,6 +775,11 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-08:** Requirement-leaf catalog completed: all 67
+  `TargetedCompareRequirementBase` leaves named in §7.0a (IsDay/IsNight,
+  TimeOfDay, RandomRoll, GameStat/SandboxOption compares, IsBloodMoon =
+  SkyManager.IsBloodMoonVisible, InSafeZone = TwitchSafe, IsAlly =
+  IsFriendOfLocalPlayer, IsOnLadder = IsInElevator, ...).
 - **2026-08-08:** EffectManager twins: GetValuesAndSources (IL=208) with
   ValueSourceType codes 1/2/3/10/11/12/14 + quality-mod tail; GetDisplayValues
   (IL=216) base/perc deltas over the same layers.
