@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ProtocolManager event leaves
+
+ConnectionFailedEv client-fallback chain, Disconnected/InvalidPassword resets, ResetNetworkStatistics fan-out, HasRunningServers (verified)
 ## 2026-08-08 - tier-C: ConnectionManager receive/join handlers
 
 Net_DataReceivedServer pump append, PlayerConnected PackageIds first packet, SendLogin identity tuple, password/failed/lost client flows, protocol debug + mode delegates (verified)
