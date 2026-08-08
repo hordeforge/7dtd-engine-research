@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Stat record
+
+Tick (IL=301) regen via MaxPassive/GainPassive/LossPassive + clamp +
+regenAmount; Write v6 / Read v<=5 extra pop + lastValue sync; GodModeEntity/
+SetChangedFlag; max accessors. Verified fresh dumps.
 ## 2026-08-08 - tier-C: EntityStats tick + wire
 
 Init stat wiring (MaxPassive 104/109/122/114 + gain/loss); Tick 10-phase
