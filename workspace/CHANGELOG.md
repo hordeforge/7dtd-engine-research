@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk block iteration + density repair/check leaves
+
+Layer LoopOverAllBlocks decode, RepairDensities terrain sign fix, CheckDensities mismatch records, regen-bit clear (verified)
 ## 2026-08-08 - tier-C: chunk entity-band tracking + TE list leaves
 
 AdJustEntityTracking y-band rebucket, GetTileEntities/RemoveAllTileEntities, cluster regen-history skip on dedi (verified)
