@@ -248,6 +248,21 @@ temperature and the buffs**.
   MinEvents read to apply cold/hot buffs. See [buffs.md](buffs.md) for the cvar
   and buff mechanism.
 
+**The `_sheltered` computation (`EntityPlayerLocal.ShelterFrameUpdate`,
+IL=184) is a sampled enclosure scan**, spread over frames with a
+`shelterIsUpdating` latch. It anchors `shelterStartPos` at the player
+(position - Origin, y+0.62) and walks: `ShelterCheckSkyUp()` (exposed when
+the sky check finds nothing above -> `shelterPercent = 0`), then a
+`shelterSideCount` phase from -10 that runs `ShelterCheckSkyDiagonal()`
+while stepping `shelterPos.y` by 0.1, then a side scan
+(`ShelterCheckSides()` at `shelterDir = 0` / `shelterRadius = 1`) that must
+block **4** sides to count as enclosed. When all 4 sides are blocked it
+steps the sampling offset upward (y += 0.65, or 0.54 while crouching; x
++= 0.011, z += 0.013) and rescans; when the offset reaches the player's
+height it finalizes `shelterIsUpdating = false` and `shelterPercent = 1` -
+fully sheltered. The resulting `shelterPercent` feeds the `_sheltered`
+cvar path above.
+
 ```mermaid
 flowchart LR
   BW[BiomeWeather params<br/>temp, precip, cloud] -->|NetPackageWeather| CLI
@@ -348,6 +363,11 @@ from the same clock and the received weather snapshot.
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
+## Changelog
+
+- **2026-08-08:** EntityPlayerLocal.ShelterFrameUpdate (IL=184) sampled
+  enclosure scan: sky-up + diagonal checks, 4-side block gate, upward
+  sampling offset (0.65 / 0.54 crouch), shelterPercent 0/1 finalization.
 ## Changelog
 
 - **2026-08-08:** WeatherManager.SetStorm IL=32: per-biome stormWorldTime/
