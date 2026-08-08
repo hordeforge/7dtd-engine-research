@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `2c36df2` closed-gaps IL fix |
+| HEAD (at handoff write) | `cc77e99` entity-ai 2nd spot-check |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 1846 / catalogued 558 / classified 1295 / unaccounted **0** |
