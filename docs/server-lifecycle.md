@@ -240,6 +240,44 @@ live player via `PlayerToEntityMap` + `World.GetEntity` (null on miss).
 `HandlePlayerDetailsUpdate(userData, name)` (IL=14) refreshes
 `PlayerName.Update(name, primaryId)`.
 
+**Identity maps:** `MapPlayer(ppd)` (IL=18) fills `EntityToPlayerMap[EntityId]`
+and `PlayerToEntityMap[primaryId]` when `EntityId != -1`; `UnmapPlayer(user)`
+(IL=25) reverses both and resets `EntityId = -1`. `CreatePlayerData(primaryId,
+nativeId, name, playGroup)` (IL=21) builds a `PersistentPlayerData` with
+`AuthoredText(name, primaryId)`, `EntityId = -1`, `LastLogin = Now`, and inserts
+it into `Players`.
+
+**Display-name collision resolution:** `AutoFixNameCollisions` (IL=58) collects
+every distinct `AuthoredName` into a set and runs `FixNameCollisions(name)` per
+name, then hooks `Players.EntryModified` to `NameCollisionEvent`.
+`FixNameCollisions(name)` (IL=197): when a name duplicates another player's,
+the primary owner keeps the clean name (suffix 0), and every other player with
+that name gets `SetCollisionSuffix(1, 2, ...)` - online players (in
+`PlayerToEntityMap`) are numbered before offline ones. When the local platform
+user owns the name, it takes the 0 slot regardless.
+
+**Land claims:** `GetLandProtectionBlockOwner(pos)` (IL=8) is a
+`m_lpBlockMap` lookup. `PlaceLandProtectionBlock(pos, owner)` (IL=47): on an
+occupied position the previous owner's entry is removed first, then the new
+owner `AddLandProtectionBlock(pos)`, `RemoveExtraLandClaims` (IL=50, deactivates
+the oldest claims past `GameStats 43` via `TEFeatureLandClaim.
+HandleDeactivateLandClaim`, warning when the tile entity is missing), a
+`land_claim` `NavObject` is registered with `OwnerEntity` from the live player,
+and `SavePersistentPlayerData()` runs. `RemoveLandProtectionBlock(pos)` (IL=45)
+unregisters the nav object, and on the server broadcasts
+`NetPackageEntityMapMarkerRemove(EnumMapObjectType.LandClaim = 15, pos)` on
+channel 192, then saves.
+
+**Maintenance:** `CleanupPlayers()` (IL=113) evicts players with no allies, no
+bedroll, offline (`EntityId == -1`) and `LastLogin` older than
+`GameStats.LandClaimExpiryTime (46) * 24` hours, removing their claim blocks from
+`m_lpBlockMap` and dropping them from `Players` (returns whether any were
+removed). `NetworkCloneRelevantForPlayer()` (IL=80) snapshots the whole list
+(copied `Players` references, rebuilt `m_lpBlockMap`, `Allies.CopyFrom`) - the
+full registry is what a joining client receives.
+`SavePersistentPlayerData()` (IL=12) writes `<save>/players.xml` when on the
+server outside edit mode (§6.2 for the layout).
+
 ```mermaid
 stateDiagram-v2
   [*] --> Connecting
@@ -690,6 +728,14 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-08:** PersistentPlayerList registry leaves: MapPlayer/UnmapPlayer
+  identity maps; CreatePlayerData; FixNameCollisions (IL=197) suffix 0 owner +
+  online-before-offline numbering + AutoFixNameCollisions hook;
+  PlaceLandProtectionBlock (IL=47) nav object + RemoveExtraLandClaims (IL=50,
+  GameStats 43 cap, TEFeatureLandClaim deactivate); RemoveLandProtectionBlock
+  (IL=45) marker remove ch 192; CleanupPlayers (IL=113) GameStats 46 * 24 h
+  eviction; NetworkCloneRelevantForPlayer full snapshot; SavePersistentPlayerData
+  players.xml gate.
 - **2026-08-08:** ModeGamePref leaf (GameMode/ModeGamePref ctor IL=22): pref
   record, DeviceFlag 2 default override, plain default fallback; client-only
   leaves re-role'd in dedicated-leaves (BarRegion/BarRegionFloat regions,
