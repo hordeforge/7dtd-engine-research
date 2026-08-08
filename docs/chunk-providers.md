@@ -499,7 +499,13 @@ load path a dedicated server runs at startup:
   `TerrainFromRaw.Init(heightMap, biomeProvider, seed)`.
 - `calcWorldFileCrcs` + `filesNeedProcessing`/`processFiles`: CRC bookkeeping
   (also served to clients through `NetPackageWorldInfo.PrepareWorldHashes`).
-  `calcWorldFileCrcs` (IL=9) is a coroutine stub; `filesNeedProcessing`
+  `calcWorldFileCrcs` (IL=9) is the coroutine shell; its
+  `<calcWorldFileCrcs>d__29.MoveNext` (IL=121) is the real pass: it zeroes
+  `worldFileTotalSize` and clears `worldFileCrcs`, then per file in
+  `SdDirectory.GetFiles(worldPath)` adds `GameIO.FileSize` to the total and
+  streams the file through a chunked CRC accumulation (the
+  `<calcWorldFileCrcs>b__0(uint)` callback), frame-budgeted between files.
+  `filesNeedProcessing`
   (IL=32) returns true when the dtm filename does not end in `_processed`,
   when any of `splat3_processed.png` / `splat4_processed.png` /
   `splat3_half.png` / `splat4_half.png` is missing, or when
@@ -945,6 +951,11 @@ the map or any cell is `>= v`.
 | [`loop.md`](loop.md) / [`loop-gmupdate.md`](loop-gmupdate.md) | Frame cost of `provider.Update`, `DecoManager.UpdateTick`, `SaveRandomChunks` |
 | [`light-mesh-water.md`](light-mesh-water.md) | Lighting/water stages that follow decoration |
 
+## Changelog
+
+- **2026-08-08:** calcWorldFileCrcs coroutine (MoveNext IL=121): zeroes
+  worldFileTotalSize, clears worldFileCrcs, per-file size + chunked CRC
+  accumulation, frame-budgeted.
 ## Changelog
 
 - **2026-08-08:** GameUtils.GetWorldFilesToTransmitToClient (IL=85) join
