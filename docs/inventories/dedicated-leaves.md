@@ -130,16 +130,16 @@ wholesale, or the referrer-verified promotions and the IL-verified roles are los
 
 | Leaf | Role | Base | Key methods |
 |---|---|---|---|
-| `ModeGamePref` | Mode Game Pref | `ValueType` | (fields only) |
-| `VariableStateGameInfoInt` | Variable State Game Info Int | `VariableStateSimpleLookupAbs` | getCurrentValue |
-| `VariableStateGameInfoString` | Variable State Game Info String | `VariableStateSimpleLookupAbs` | getCurrentValue |
+| `ModeGamePref` | mode-scoped pref record {GamePref, ValueType, DefaultValue}; ctor prefers the `DeviceFlag` 2 entry of deviceDefaults, else the plain default (server-lifecycle §2.1) | `ValueType` | .ctor |
+| `VariableStateGameInfoInt` | **client-only** binding var: `GameServerInfo.GetValue(GameInfoInt)` (LocalServerInfo when server, LastGameServerInfo when client) | `VariableStateSimpleLookupAbs` | getCurrentValue, get_VarName |
+| `VariableStateGameInfoString` | **client-only** binding var: `GameServerInfo.GetValue(GameInfoString)`, same server/client source split | `VariableStateSimpleLookupAbs` | getCurrentValue, get_VarName |
 
 ## save-persistence / save-region (3)
 
 | Leaf | Role | Base | Key methods |
 |---|---|---|---|
-| `BarRegion` | Bar Region | `ValueType` | (fields only) |
-| `BarRegionFloat` | Bar Region Float | `ValueType` | (fields only) |
+| `BarRegion` | **client-only** `XUiC_DataManagementBar` region record `{Start, Size, End = Start + Size}` (int64), static `None = (0, 0)` | `ValueType` | .ctor, Equals |
+| `BarRegionFloat` | **client-only** `XUiC_SizeBar` region record `{Start, Size, End = Start + Size}` (float), static `None = (0, 0)` | `ValueType` | .ctor, Equals |
 | `SaveDataLimitUtils` | Save Data Limit Utils | `Object` | CalculatePlayerMapSize |
 
 ## server-lifecycle (4)

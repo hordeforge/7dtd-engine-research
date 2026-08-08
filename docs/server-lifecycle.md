@@ -128,6 +128,12 @@ The mode does not drive per-tick logic itself; it sets the prefs that the rest o
 the systems (spawning, buffs, save, etc.) read. So "what a mode does" is almost
 entirely the `GamePrefs` it applies in `Init`.
 
+**`ModeGamePref` leaf (GameMode/ModeGamePref, ctor IL=22):** a mode-scoped pref
+record `{GamePref, ValueType, DefaultValue}`; the ctor prefers the
+`Platform.DeviceFlag` **2** entry of the device-defaults dictionary when
+present, else the plain default. Concrete modes use these to re-scope a pref
+per mode (`ResetGamePrefs`).
+
 **`GameStateManager.InitGame(bServer)` (IL=50):** `GameStats.Set(GameState,
 Running)`; mode type from `GamePrefs.GetString(29)` (falling back to the pref
 default when the string does not resolve), `currentGameMode =
@@ -684,6 +690,10 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-08:** ModeGamePref leaf (GameMode/ModeGamePref ctor IL=22): pref
+  record, DeviceFlag 2 default override, plain default fallback; client-only
+  leaves re-role'd in dedicated-leaves (BarRegion/BarRegionFloat regions,
+  VariableStateGameInfo* binding vars).
 - **2026-08-07:** doSendLocalPlayerData/Inventory; IsSafeToDisconnect; CalculatePersistentPlayerCount.
 
 - **2026-08-07:** SaveWorld/SaveLocalPlayerData; RequestToSpawnEntityServer backpack/tree.
