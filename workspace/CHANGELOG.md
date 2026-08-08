@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityPlayer party/twitch/teleport/reload hooks
+
+Party delegate hooks + invite bookkeeping; Twitch member/vote-lock gates; IsReloadCancelled ranged scan; teleport delegates; IsSavedToNetwork false (verified)
 ## 2026-08-08 - tier-C: EntityAlive leaf getters (sense/home/alert/stats hooks)
 
 21 getter/small-state leaves verified: see cache, home distance, alert/sound ticks, death, max stats, owned entities filter, spawn-by-data (verified)
