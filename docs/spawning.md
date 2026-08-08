@@ -325,6 +325,10 @@ gate: the spawn point is still valid (true) when it is `IsUndef`, its chunk
 is not loaded, or the block at the spawn position is a `BlockSleepingBag`;
 false only when the block exists but is no longer a bedroll - the player's
 bedroll was destroyed, so their saved spawn is void.
+`EntityPlayerLocal.GetSpawnPoint` (IL=24) resolves the point: an empty
+`SpawnPoints` (`EntityBedrollPositionList`) yields `SpawnPosition.Undef`,
+else the first bedroll position becomes `SpawnPosition(pos.ToVector3() +
+(0.5, 0, 0.5), 0)` - block center with yaw 0.
 
 **`isPositionFarFromPlayers(pos, minDist)` (IL=31):** true only if every player
 has `GetDistanceSq ≥ minDist²`.
@@ -1085,6 +1089,10 @@ above.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Content and native residuals |
 
+## Changelog
+
+- **2026-08-08:** EntityPlayerLocal.GetSpawnPoint (IL=24): SpawnPoints[0] ->
+  block-center + (0.5,0,0.5), yaw 0, else SpawnPosition.Undef.
 ## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.CheckSpawnPointStillThere (IL=30): spawn
