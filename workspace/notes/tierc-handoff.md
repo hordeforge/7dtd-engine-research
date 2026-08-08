@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `320b49e` LongSetGroups, WorkstationData, action runtime-data records |
-| Commits since dry-run `3b61d9c` | ~1188 |
+| HEAD (at handoff write) | `14146cd` planner records (POIWeightData, township/biome records, IBiomeProvider) |
+| Commits since dry-run `3b61d9c` | ~1189 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

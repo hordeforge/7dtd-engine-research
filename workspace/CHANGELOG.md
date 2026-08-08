@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: planner records (POIWeightData, township/biome records, IBiomeProvider)
+
+POI weighting ctor fields, wilderness path records, township spawn-info/biome-stats dicts, BiomeTypeData ctor, biome provider interface (verified)
 ## 2026-08-08 - tier-C: LongSetGroups, WorkstationData, action runtime-data records
 
 RegionFileManager cull group clustering; workstation display config; melee/repair/water action data records (verified)
