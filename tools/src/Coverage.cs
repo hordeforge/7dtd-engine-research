@@ -95,22 +95,7 @@ class Coverage {
     }
 
     var visited = new HashSet<MethodDefinition>(); var work = new Queue<MethodDefinition>();
-    var gm = all.First(t => t.Name == "GameManager");
-    string[] seeds = { "StartGame", "startGameCo", "StartAsServer", "gmUpdate", "UpdateTick", "SaveAndCleanupWorld", "PlayerLoginRPC", "PlayerSpawnedInWorld", "ChatMessageServer" };
-    foreach (var s in seeds) foreach (var m in gm.Methods.Where(x => x.Name == s && x.HasBody)) if (visited.Add(m)) work.Enqueue(m);
-    string[][] extra = {
-      new[]{"ConnectionManager","Update"}, new[]{"DynamicMeshManager","Update"},
-      new[]{"World","TickEntities"}, new[]{"World","TickEntity"}, new[]{"World","OnUpdateTick"},
-      new[]{"EntityAlive","OnUpdateEntity"}, new[]{"EntityAlive","updateTasks"},
-      // Dedicated HTTP API: GameManager.Awake -> Webserver.WebServer.Init registers the
-      // GameStartDone/WorldShuttingDown ModEvent handlers; the IsServer-gated
-      // GameStartDone creates Webserver.Web (the REST host). Both are verifiably
-      // dedicated-server code, so they are seeded directly (a blanket GameManager.Awake
-      // seed would flood the base with client UI).
-      new[]{"WebServer","Init"}, new[]{"WebServer","GameStartDone"},
-      new[]{"WebServer","WorldShuttingDown"},
-    };
-    foreach (var e in extra) foreach (var m in all.Where(t => t.Name == e[0]).SelectMany(t => t.Methods).Where(x => x.Name == e[1] && x.HasBody)) if (visited.Add(m)) work.Enqueue(m);
+    Seeds.EnqueueSeeds(all, visited, work);
 
     // Reflection targets: XML loaders resolve classes via Type.GetType /
     // Activator.CreateInstance on a constant string (dialog actions, quest criteria,
@@ -122,9 +107,7 @@ class Coverage {
     // so a constant prefix means EVERY game type starting with it is instantiable.
     // Seed those families (server-relevant only; XUiC_/ItemAction/Block are client or
     // already reached, and seeding them would flood the base).
-    string[] reflPrefixes = { "QuestAction", "Requirement", "Objective", "ObjectiveModifier",
-      "Reward", "QuestCriteria", "LootEntryRequirement", "DialogAction", "DialogRequirement" };
-    var reflTypes = all.Where(t => reflPrefixes.Any(p => t.Name.StartsWith(p))).ToList();
+    var reflTypes = Seeds.ReflTargets(all);
     string lastLdstr = null;
     while (work.Count > 0) { var m = work.Dequeue();
       foreach (var i in m.Body.Instructions) {

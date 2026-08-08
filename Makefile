@@ -40,3 +40,4 @@ readiness:
 test:
 	python3 "$(TOOLS)/tests/test_dedi_coverage_docs.py" || true
 	python3 "$(TOOLS)/tests/check_stock_facts.py" --require-live
+	python3 "$(TOOLS)/tests/test_reach_consistency.py" "$(ASM)"

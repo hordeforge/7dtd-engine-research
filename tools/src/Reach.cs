@@ -21,19 +21,45 @@ class Reach {
           if(!overrides.TryGetValue(k,out l)){l=new List<MethodDefinition>();overrides[k]=l;} l.Add(m); }
         bt=btd.BaseType; }
     }
+    foreach(var t in all){
+      if(!t.HasInterfaces)continue;
+      foreach(var ii in t.Interfaces){
+        TypeDefinition itd=null; try{itd=ii.InterfaceType.Resolve();}catch{}
+        if(itd==null)continue;
+        foreach(var im in itd.Methods){
+          var impl=t.Methods.FirstOrDefault(x=>x.HasBody && x.Name==im.Name && x.Parameters.Count==im.Parameters.Count);
+          if(impl==null)continue;
+          var k=itd.FullName+"::"+im.Name+"/"+im.Parameters.Count; List<MethodDefinition> l;
+          if(!overrides.TryGetValue(k,out l)){l=new List<MethodDefinition>();overrides[k]=l;}
+          if(!l.Contains(impl))l.Add(impl);
+        }
+      }
+    }
     var visited=new HashSet<MethodDefinition>(); var work=new Queue<MethodDefinition>();
-    var gm=all.First(t=>t.Name=="GameManager");
-    foreach(var s in new[]{"StartGame","startGameCo","StartAsServer","gmUpdate","UpdateTick","SaveAndCleanupWorld","PlayerLoginRPC","PlayerSpawnedInWorld","ChatMessageServer"})
-      foreach(var m in gm.Methods.Where(x=>x.Name==s&&x.HasBody)){if(visited.Add(m))work.Enqueue(m);}
-    string[][] extra={new[]{"ConnectionManager","Update"},new[]{"DynamicMeshManager","Update"},new[]{"World","TickEntities"},new[]{"World","TickEntity"},new[]{"World","OnUpdateTick"},new[]{"EntityAlive","OnUpdateEntity"},new[]{"EntityAlive","updateTasks"}};
-    foreach(var e in extra) foreach(var m in all.Where(t=>t.Name==e[0]).SelectMany(t=>t.Methods).Where(x=>x.Name==e[1]&&x.HasBody)){if(visited.Add(m))work.Enqueue(m);}
+    Seeds.EnqueueSeeds(all, visited, work);
+    var reflTypes = Seeds.ReflTargets(all);
+    string lastLdstr=null;
     while(work.Count>0){ var m=work.Dequeue();
       foreach(var i in m.Body.Instructions){
+        if(i.OpCode.Code==Code.Ldstr){ lastLdstr=i.Operand as string; }
         var mr=i.Operand as MethodReference; if(mr==null)continue;
         MethodDefinition md=null; try{md=mr.Resolve();}catch{}
         if(md!=null && md.HasBody && visited.Add(md)) work.Enqueue(md);
         if(i.OpCode.Code==Code.Callvirt){ var k=mr.DeclaringType.FullName+"::"+mr.Name+"/"+mr.Parameters.Count;
           List<MethodDefinition> ovs; if(overrides.TryGetValue(k,out ovs)) foreach(var ov in ovs) if(visited.Add(ov)) work.Enqueue(ov); }
+        // Same reflection-following as Coverage.exe (shared seed contract).
+        if(md!=null && md.DeclaringType.Name=="ReflectionHelpers" && md.Name=="GetTypeWithPrefix" && !string.IsNullOrEmpty(lastLdstr)){
+          foreach(var tt in reflTypes.Where(t=>t.Name.StartsWith(lastLdstr)))
+            foreach(var tm in tt.Methods.Where(x=>x.HasBody)) if(visited.Add(tm)) work.Enqueue(tm);
+        }
+        if(mr.DeclaringType.FullName=="System.Type" && (mr.Name=="GetType"||mr.Name=="GetTypeFromHandle") && !string.IsNullOrEmpty(lastLdstr)){
+          var tt=all.FirstOrDefault(t=>t.FullName==lastLdstr||t.Name==lastLdstr||t.FullName.Replace('/','+')==lastLdstr);
+          if(tt!=null) foreach(var tm in tt.Methods.Where(x=>x.HasBody)) if(visited.Add(tm)) work.Enqueue(tm);
+        }
+        if(mr.DeclaringType.FullName=="System.Activator" && mr.Name=="CreateInstance" && !string.IsNullOrEmpty(lastLdstr)){
+          var tt=all.FirstOrDefault(t=>t.FullName==lastLdstr||t.Name==lastLdstr||t.FullName.Replace('/','+')==lastLdstr);
+          if(tt!=null) foreach(var tm in tt.Methods.Where(x=>x.HasBody)) if(visited.Add(tm)) work.Enqueue(tm);
+        }
       }
     }
     var reached=new HashSet<TypeDefinition>(visited.Select(m=>m.DeclaringType));

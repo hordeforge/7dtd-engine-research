@@ -27,11 +27,11 @@ echo "using Mono.Cecil: $cecil"
 
 # Primary tools (src/): general, maintained. IlFmt.cs is a shared helper compiled
 # into each dumper that references it.
-shared="src/IlFmt.cs"
+shared=("src/IlFmt.cs" "src/Seeds.cs")
 for f in src/*.cs; do
-  [[ "$f" == "$shared" ]] && continue
+  [[ " ${shared[*]} " == *" $f "* ]] && continue
   name="$(basename "$f" .cs)"
-  mcs -nologo -r:bin/Mono.Cecil.dll "$f" "$shared" -out:"bin/$name.exe" 2>&1 | grep -v '^$' || true
+  mcs -nologo -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"bin/$name.exe" 2>&1 | grep -v '^$' || true
   echo "built bin/$name.exe"
 done
 
