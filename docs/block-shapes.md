@@ -188,7 +188,8 @@ Mesh emission (`renderFull` / `renderFace` into `VoxelMesh[]`) is shared engine
 code; the server runs it for chunk colliders (see
 [`light-mesh-water.md`](light-mesh-water.md)), which is why every shape also
 implements `CalculateCollisionHash` (folds collider geometry into an
-`IncrementalHash` via `Block.GetCollisionCollisionHash`; no in-assembly caller
+`IncrementalHash` via `Block.GetCollisionCollisionHash`, using the
+`IncrementalHashExtensions.AppendDataNoAlloc` helper; no in-assembly caller
 beyond that, so treat the hash consumer as external/residual).
 
 ## 4. Shape subclass catalog
