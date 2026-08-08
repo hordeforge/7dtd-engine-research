@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: harvest drop pipeline
+
+GameUtils.HarvestOnAttack (IL=623, items.md 4.2): local-player gate,
+bKilled repair-damage-state quirk, EnumDropEvent.Harvest rules with
+[recipe] output resolution; collectHarvestedItem (IL=138) damage-scaled
+count shrink, prob roll, QuestEventManager.HarvestedItem, inventory add /
+ItemDropServer lifetime-60 fallback, _xpFromHarvesting XP. verified from
+IL. Commit c725c94.
 ## 2026-08-08 - tier-C: trader voice-line playback
 
 EntityTrader.PlayVoiceSetEntry (IL=98, npc-dialog.md 4): TraderDialog gate,
