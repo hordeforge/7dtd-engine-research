@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: sun/block light split
+
+World.GetSunAndBlockColors (IL=41, light-mesh-water.md): sun (LIGHT_TYPE 1)
+and block (0) channel split, zeroed on missing chunk. verified from IL.
+Commit ef66a37.
 ## 2026-08-08 - tier-C: bedroll spawn point resolution
 
 EntityPlayerLocal.GetSpawnPoint (IL=24, spawning.md): SpawnPoints[0] ->
