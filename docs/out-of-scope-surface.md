@@ -94,6 +94,15 @@ Vendored libs reached via the game (SDF, EXR, compression, controllers, TMPro, .
 
 `CharacterControllerKinematic`, `CharacterControllerUnity`, `GearVariantMatrixSO`, `Row`, `SexGearTables`, `ShapeSettings`, `StringTable2D`, `WebRequestUtils`
 
+Client-render families of the same kind, not in the dedicated reach base (not
+counted above): the `vp_*` first-person controller asset (Visual Pro / UFPS,
+`vp_FPController` and siblings, the client motor the player moves through),
+`KinematicCharacterController.*` (`KinematicCharacterMotor` / `PhysicsMover`),
+`SharpEXR.*` (EXR reader), `ICSharpCode.WpfDesign.XamlDom` (the position-tracking
+XML DOM), `JBooth.MicroSplat.*` / `PI.NGSS.*` (terrain/lighting shaders),
+`DynamicMusic.*` (client music), and the dead noise `OpenSimplex2` / `OpenSimplex2S` /
+`SimplexNoise` (see [dedicated-leftovers.md](dedicated-leftovers.md)).
+
 ## Utility / collections / infra (6)
 
 Generic containers, math/byte helpers, task schedulers, asset loaders, reflection glue. **Many of these ARE called by server code** (`ChunkManager`, `GameManager`, `Prefab`, mesh generators); they are out of scope because they are infrastructure rather than gameplay/sim logic, **not** because a dedicated server never executes them. A referrer sweep (`tools/src/RefScan`, dominance rule) confirmed this for the bucket; the gameplay-relevant types it surfaced were promoted out.
