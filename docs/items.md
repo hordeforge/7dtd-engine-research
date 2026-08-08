@@ -350,6 +350,33 @@ entry. `HasStats` (IL=5) is `Stats != null`; `ClearStats` (IL=4) nulls the
 array; `RemoveUnusedStats` (IL=77) drops zero-value entries (clearing the whole
 array when none remain).
 
+**`ModifyValue(entity, originalItemValue, passiveEffect, ref originalValue,
+ref percValue, tags, useMods, useDurability)` (IL=304)** is the passive-effects
+application engine (the damage/armor modifier chain). It returns early when
+`originalItemValue` equals this value (double-application guard), then:
+
+1. **Loaded-ammo effects:** for a ranged weapon, the class's
+   `MagazineItemNames[SelectedAmmoTypeIndex]` ammo class runs
+   `Effects.ModifyValue(entity, effect, ref orig, ref perc, 0, tags, 1)`.
+2. **Item effects:** the shared `MinEventParams.CachedEventParam` gets
+   `ItemValue = this` (+ the entity's context mirror) so item effects can read
+   it; `ic.Effects.ModifyValue(entity, effect, ref orig, ref perc, Quality,
+   tags, 1)` applies the class's `MinEffectController` with the item quality as
+   the base scale.
+3. **Durability decay (resistances only):** for `PhysicalDamageResist` (41),
+   `ElementalDamageResist` (43) and `BuffResistance` (197), when
+   `PercentUsesLeft < 0.5` the modified delta is scaled:
+   `orig = saved + (modified - saved) * PercentUsesLeft * 2` - a worn-out item
+   resists less.
+4. **Stats:** `StatModifyValue(effect, ref orig, false)` when `Stats` present.
+5. **Mods (useMods):** every cosmetic and regular slot holding an
+   `ItemClassModifier` recurses with `(useMods = true, useDurability = false)`.
+
+`GetModifiedValueData(list, sourceType, ...)` (IL=142) is the source-tracking
+twin: same ammo/item/mod recursion but collects `ModifierValuesAndSources`
+entries into the list for the tooltip/debug UI (no durability scaling or stat
+step).
+
 ### ItemValue metadata and property overrides
 
 **Typed metadata (V3.1.0 b14):** `ItemValue.Metadata :
@@ -1788,6 +1815,10 @@ The non-action leaves:
   QuestEventManager.HarvestedItem, inventory/drop, _xpFromHarvesting XP.
 ## Changelog
 
+- **2026-08-08:** ItemValue.ModifyValue (IL=304): ammo effects + item effects
+  with Quality scale, resistance durability decay (41/43/197, < 50% uses
+  scales delta), stat step, mod recursion; GetModifiedValueData (IL=142)
+  source-tracking twin for tooltips.
 - **2026-08-08:** Bag storage leaves: DecItem (IL=120) consume with
   removedItems + non-stackable whole-slot removal; CanStack/CanStackNoEmpty/
   CanTakeItem/GetUsedSlotCount/IsEmpty/AddItem/Clear; GetItemCount ItemValue +
