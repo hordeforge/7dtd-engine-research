@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `4c78be6` sandbox+chunk+buffs 2nd |
+| HEAD (at handoff write) | `c1e01ff` loop diagram IL fix |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 1846 / catalogued 558 / classified 1295 / unaccounted **0** |
