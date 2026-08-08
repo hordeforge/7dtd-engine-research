@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vehicle cargo drop
+
+EntityVehicle.DropItemsAsBackpack (IL=94) bag + cosmetic/mods stacks;
+dropLoot (IL=23) DroppedVehicleContainer at position + y*0.9
+(vehicles-drones-turrets.md 4.2c). verified from IL. Commit 194f60c.
 ## 2026-08-08 - tier-C: vehicle dismount velocity
 
 EntityVehicle.GetExitVelocity (IL=17, vehicles-drones-turrets.md 4.2b):
