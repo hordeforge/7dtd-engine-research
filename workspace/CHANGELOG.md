@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EffectManager twins
+
+GetValuesAndSources (IL=208) ValueSourceType codes 1/2/3/10/11/12/14 +
+quality-mod tail; GetDisplayValues (IL=216) base/perc deltas. Verified fresh
+dumps.
 ## 2026-08-08 - tier-C: PassiveEffect leaf
 
 ModifyValue cvar source resolution + ModValue dispatch; RequirementsMet tag
