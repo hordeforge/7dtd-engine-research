@@ -451,6 +451,17 @@ Both start **two worker threads** in the ctor (`ThreadManager.StartThread`):
 
 `InitStreams` (Steam IL=131, Simple IL=190) allocates large memory streams (capacity literal **2097152**) plus Deflate zip streams and pooled binary writers/readers. Copy buffers are **4096** bytes.
 
+**Send/queue leaves:** `NetConnectionAbs.FlushSendQueue` is an IL=1 no-op
+base; `IsDisconnected` (IL=4) reads the volatile `bDisconnected`.
+`NetConnectionSimple.FlushSendQueue` (IL=19) wakes the writer thread
+(Monitor-locked `writerTriggerEvent.Set`); `SendBuffers` (IL=22) drains
+the reliable queue first then the unreliable one via
+`sendBuffersFromQueue` (IL=63), which pops the head buffer, splits it when
+it exceeds `maxPacketSize`, routes it server-side (`cInfo.network.
+SendData(cInfo, channel, buf, reliable)`) or client-side
+(`netClient.SendData(channel, buf)`), and re-queues the buffer at the
+front when the send errors - the retry loop.
+
 `ConnectionManager.Update` (IL=215, peer MB) drains each connection via `GetPackages` → `ProcessPackages` (IL=116) and flushes send queues. Xref: `ProcessPackages` is only called from that Update path (4 sites).
 
 **Server bring-up (`ProtocolManager`):** `SetupProtocols` (IL=128) builds the
