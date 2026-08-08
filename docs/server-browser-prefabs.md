@@ -217,6 +217,19 @@ Nested `PrefabInstance.Serializable` is the 17+name-byte wire struct
 `int32 id, string prefabName, Vector3i position, byte rotation`
 (read/written with `PooledBinaryReader/Writer`).
 
+**`PrefabInstance.CheckForAnyPlayerHome(world)` (IL=10)** is the
+land-claim / bedroll overlap probe the prefab-reset path consults
+([`entity-ai.md`](entity-ai.md)): it delegates to
+`GameUtils.CheckForAnyPlayerHome(world, boundingBoxPosition,
+boundingBoxPosition + boundingBoxSize)` (IL=164), which expands the box by
+the claim size (`GamePrefs` 160) and scans `PersistentPlayerList.Players`:
+a player still within their bedroll offline-protection window
+(`OfflineHours < GameStats 63 * 24`) whose `BedrollPos` falls inside the
+expanded box yields `EPlayerHomeType.Bedroll` (2); a claim still within the
+land-claim window (`GameStats 46 * 24`) whose `LPBlocks` claim box
+(`pos - claimHalf`, size = claim size, `GameStats` 44 half-extent) overlaps
+the box yields `Landclaim` (1); otherwise `None` (0).
+
 ### 3.2 `DynamicPrefabDecorator`: load, decorate, save
 
 Owned per world; created by the chunk providers
@@ -474,6 +487,12 @@ surface is exactly sections 1 and 2.
 | [game-events.md](game-events.md) | `EventPrefabs` consumers of `PrefabInstance.Serializable` |
 | [protocol-packages.md](protocol-packages.md) | NetPackage inventory incl. the editor/world-init packages |
 
+## Changelog
+
+- **2026-08-08:** PrefabInstance.CheckForAnyPlayerHome (IL=10) +
+  GameUtils.CheckForAnyPlayerHome (IL=164): claim-size-expanded box scan,
+  bedroll (GameStats 63*24) and land-claim (46*24, claimHalf 44) overlap,
+  EPlayerHomeType None/Landclaim/Bedroll.
 ## Changelog
 
 - **2026-07-24:** Initial reversal: `GameServerInfo` store + searchable arrays,
