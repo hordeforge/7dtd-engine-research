@@ -346,6 +346,32 @@ teardown / XML reload.
   `QuestGiverID` or the entity stands within 3 of `GetQuestGiverLocation()`;
   `GiveRewardsLater(q)` (IL=9) is the delayed-rewards coroutine wrapper.
 
+**Quest shared/event/state leaves (all IL-verified):**
+`SetupSharedQuest()` (IL=116) is the shared-instance bootstrap: it sets
+`CurrentState = InProgress`, then for every action / requirement / objective
+/ reward sets `OwnerQuest`, runs `HandleVariables()`, and calls the
+`SetupAction` / `SetupRequirement` / `SetupObjective` + `SetupDisplay`
+(setup phases; rewards have no setup step).
+`HandleQuestEvent(ownerQuest, eventType)` (IL=30) fans a runtime event to
+every `questClass.Events` entry with a matching `EventType` via
+`QuestEvent.HandleEvent(ownerQuest)`.
+`AddSharedKill(enemyType)` (IL=46) bumps `CurrentValue += 1` (plus
+`Refresh()`) on every current-phase objective whose `ID` matches the enemy
+type; `AddSharedLocation(pos, size)` (IL=30) stops at the first
+current-phase objective whose `SetLocation(pos, size)` accepts.
+`HandleActivateListReceived(prefabPos, activateList)` (IL=24) forwards to
+the first objective with `SetupActivationList(prefabPos, activateList)`
+true; `SetObjectivePosition(dataType, position)` (IL=48) re-wires
+`OwnerQuest` / `HandleVariables` / `SetupQuestTag` per objective, then
+pushes `SetPosition(dataType, position)` to all of them.
+`ResetToRallyPointObjective()` (IL=75) runs only on the highest phase with
+`QuestClass.LoginRallyReset`: it clears `RallyMarkerActivated`, finds the
+`ObjectiveRallyPoint` phase, `ResetObjective()`s every objective in phases
+[rallyPhase, currentPhase], and drops `CurrentPhase` to the rally phase.
+`AddQuestTag(tag)` (IL=7) ORs the quest tag set; `AddReward(reward)` (IL=8)
+appends to `Rewards` when non-null; `ParseVariable(value)` (IL=39) replaces
+a `{name}` token with `DataVariables[name]` when present.
+
 The **client owns the quest object**: `Quest.OwnerJournal.OwnerPlayer` and
 `Challenge.Owner.Player` are `EntityPlayerLocal`, and the progression code calls
 `GameManager.ShowTooltip`, `Audio.Manager.PlayInsidePlayerHead`, and `XUi`
