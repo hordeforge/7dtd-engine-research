@@ -617,6 +617,21 @@ Read reconstructs world XZ as `local + chunk*16`.
 | `ChunkProviderGenerateWorld.SaveRandomChunks` | 99 |
 | `World.SaveDecorations` | 3 |
 
+**Dropped-backpack tracking (server-persisted).** Each `PersistentPlayerData`
+holds `backpacksByID: Dictionary<int, ProtectedBackpack>` with
+`ProtectedBackpack{EntityID, Pos, Timestamp}`. `AddDroppedBackpack(id, pos,
+timestamp)` (IL=69) inserts the record, flags `sortedBackpacksDirty`,
+`RefreshSortedBackpacksList()` (IL=44, timestamp-ordered list), then enforces
+the tracking limit: when more than **3** backpacks are tracked it drops the
+oldest (`TryRemoveDroppedBackpack`, IL=14, which removes from both the dict
+and the sorted list), logging
+`AddDroppedBackpack failed: dropped backpack timestamp is older than other
+tracked backpacks and the tracking limit has been reached.` when the
+newly-added backpack is itself the evicted one. On the server, after the
+update it broadcasts `NetPackagePlayerSetBackpackPosition.Setup(EntityId,
+GetDroppedBackpackPositions())` on channel 192. So a player's dropped bags
+on the map are capped at the three most recent, oldest first.
+
 ## See also
 
 | Doc | Why |
@@ -645,6 +660,11 @@ the sections above. The platform cloud-save backend is native (residual).
 | `ChunkProviderGenerateWorld.SaveAll` | 46 | prefab decorator save; spawn points; `RegionFileManager.MakePersistent` + `WaitSaveDone`; event prefabs |
 | `PersistentPlayerList.SavePersistentPlayerData` | 12 | server non-edit: write `{SaveGameDir}/players.xml` |
 
+## Changelog
+
+- **2026-08-08:** Dropped-backpack tracking (4): AddDroppedBackpack (IL=69)
+  3-backpack cap with oldest eviction + 192 broadcast, RefreshSortedBackpacksList
+  (IL=44), TryRemoveDroppedBackpack (IL=14), ProtectedBackpack record.
 ## Changelog
 
 - **2026-08-08:** ChunkBlockChannel.Get IL=44 64-bit read (compressed
