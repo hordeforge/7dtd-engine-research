@@ -223,6 +223,42 @@ with the driver's entity tags: entity/block/self damage per (passives **55** /
 fuel use per (**51**, scaled by `VehicleFuelUsageModifier`), motor torque
 (**53**) and max velocity (**52**).
 
+**`Vehicle` config-class leaves (all IL-verified):**
+`SetupProperties()` (IL=17) resolves the vehicle's `Properties` from the
+static `PropertyMap` by `vehicleName`, erroring `Vehicle properties for
+'{0}' not found!` on a miss. `CreateParts()` (IL=86) runs
+`ParseGeneralProperties` then walks the `Properties.Classes`: each class's
+`class` attribute resolves through `GetTypeWithPrefix("VP", name)` +
+`Activator.CreateInstance` into a `VehiclePart`, which gets
+`SetVehicle(this)` + `SetTag(className)` + `SetProperties(props)` and joins
+`vehicleParts` (a bad class name rethrows `No vehicle part class 'VP{name}'
+found!`), then every part gets `InitPrefabConnections()`.
+`ParseGeneralProperties(properties)` (IL=133) reads the physics/config
+fields: the `cameraDistance` / `cameraTurnRate` / `hopForce` Vector2s, the
+`steerAngleMax` / `steerRate` / `steerCenteringRate` / `tiltAngleMax` /
+`tiltThreshold` / `tiltDampening` / `tiltDampenThreshold` / `tiltUpForce` /
+`upAngleMax` / `upForce` / `brakeTorque` / `unstickForce` / `wheelPtlScale`
+floats, the `motorTorque_turbo` and `velocityMax_turbo` 4-tuples
+(forward / backward / turbo forward / turbo backward), the
+`airDrag_velScale_angVelScale` pair, the `waterDrag_y_velScale_velMaxScale`
+and `waterLift_y_depth_force` triples, and `recipeName`.
+`OnXMLChanged()` (IL=41) re-runs `SetupProperties` + `ParseGeneralProperties`
+and pushes each class's properties into the existing part via
+`FindPart(key)?.SetProperties(props)` (the entity-side wrapper, IL=6, then
+calls `SetupDevices`).
+`GetPartProperty(tag, propertyName)` (IL=12) is `FindPart(tag)?.GetProperty`
+("" on a missing part); `GetParts()` (IL=3) and `GetMeshTransform()` (IL=3)
+expose `vehicleParts` / `meshT`; `GetParticleTransformPaths()` (IL=30)
+collects every part's non-empty `particle_transform` property.
+`GetHornSoundName()` (IL=5) is `Properties.GetString("hornSound")`;
+`HasHorn()` (IL=6) is its length > 0; `IsSteeringBroken()` (IL=10) is
+`!HasSteering()` or `FindPart("handlebars").IsBroken()`.
+`GetBatteryLevel()` (IL=2) and `GetEngineQualityPercent()` (IL=2) are the
+0-returning base defaults (electric-vehicle overrides), and
+`SetBatteryLevel` (IL=1) is a base no-op. `MakeItemValue()` (IL=28) builds
+`ItemValue(ItemClass.GetItemClass(name + "Placeable").id, 1, 6, 0, null, 1f)`
+and applies it via `SetItemValue`.
+
 **The generic attach pipeline behind it (V3.1.0 b14):**
 `Entity.StartAttachToEntity(other, slot)` (IL=43) is the entry: a client sends
 `NetPackageEntityAttach(0, selfId, otherId, slot)` to the server; the server
