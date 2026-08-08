@@ -1,6 +1,6 @@
 # Tier-C grind handoff / TODO
 
-**Updated:** 2026-08-08 ~00:10 UTC
+**Updated:** 2026-08-08 ~05:40 UTC
 **Repo:** `7dtd-research` (cwd this tree)  
 **Pin:** V **3.1.0 (b14)** via `tools/data/stock_facts.json`  
 **Managed bar:** tiers A+B met (unaccounted **0**). This grind is **tier C only**.
@@ -20,10 +20,10 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `66b1b6e` name client-only third-party families |
-| Commits since dry-run `3b61d9c` | ~1316 |
+| HEAD (at handoff write) | `d1230c3` workspace changelog em dash cleanup |
+| Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
-| Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
+| Coverage (last pin text) | narrated 1845 / catalogued 558 / classified 1296 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
 
@@ -45,6 +45,23 @@ Stat.Tick/regen + SetChangedFlag, EntityVulture D15 (already), airdrop family
 (CreateFlightPaths/SpawnPlane/Tick/crate/plane), chunk load/unload lifecycle
 (world-chunks §4.0b), GameUtils time pins, Constants pins, several small
 resolver leaves. Census: narrated 1496 / unaccounted 0.
+
+2026-08-08 late continuation (3h turn): 57 more tier-C commits. Dead/inert
+sweep (full-IL body-verified, 0-ref): LiveStats, DynamicMeshDataQueue<T>,
+DynamicMeshRegionBuilder, Prefab.Cells<T>, World.ClipBoundsMove (IL=573),
+ServerUpdates channel, TList/TQueue, OneToOneDictionary, CollectionDebugWrapper,
+ParsingConverters, SimplexNoise, OpenSimplex2/2S, IEnumerableExtensions,
+BinaryReaderExtensions (UniLinq + ObservableDictionary refuted as dead - both
+live). Wire corrections from the rebuilt WireBodies.exe: NetPackageDamageEntity
+bIgnorePartyShare (IL=176), EntityCreationData stressAmount f32 tail (read v36+),
+NetPackageTileEntity teBlockId. Families narrated: AdminBlacklist sub-store +
+telnet login lockout, GameStatsBridge, shared chunk observers, TripWireController,
+minevent requirement catalog complete (67 leaves, misleading names corrected:
+IsBloodMoon=SkyManager, InSafeZone=TwitchSafe, IsAlly=IsFriendOfLocalPlayer,
+IsOnLadder=IsInElevator), Twitch requirement gates / viewer-points ledger /
+action-queue records / vote+cooldown presets / spawn-entry records / TwitchActionManager,
+OOS hygiene (HasParticle un-classified, 15 Twitch server records moved out,
+third-party families named). Census: narrated 1845 / unaccounted 0.
 ## Resume checklist (next agent / next turn)
 
 1. `cd /home/maci/Desktop/7dtd/7dtd-research && git status && git log --oneline -5`
