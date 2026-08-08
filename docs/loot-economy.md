@@ -404,6 +404,22 @@ exceeds one container size.
 Death path calls these via `dropItemOnDeath` ([combat-damage.md](combat-damage.md)
 §3.1).
 
+**`EntityItem` mesh + cache lifecycle:** `OnLoadedFromEntityCache` (IL=73)
+resets the pooled instance: clears `markedForUnload`, renames the transform
+`Item_{id}`, `SetItemStack`, disables cached `meshRenderers`, resets the
+`UpdateLightOnChunkMesh` component, and zeroes `itemWorldData` / `bDead` /
+`motion` / `addedToChunk` / `fallDistance`. `createMesh` (IL=249) errors
+(`Could not create item with id {0}`) and `SetDead`s when the item class is
+missing; block items clone the block model, other items clone the item
+model, both then apply the `DropScale` property, the
+`ItemClass.GetDroppedCorrectionRotation()` and local position; the collider
+pass disables rigidbody/non-convex mesh colliders, layers the rest 13 with
+a `RootTransformRefEntity`, and re-enables the root collider; the finished
+mesh GameObject activates, `OnMeshCreated` fires for the `ItemWorldData`,
+and `bMeshCreated` / `meshRenderers` / `VisiblityCheck` follow.
+`GetModelTransform` (IL=3) is `itemTransform`; `playThrowSound(name)`
+(IL=15) plays `throw{name}` then `throwdefault` at volume 1.
+
 **`DropContentOfLootContainerServer(bvOld, worldPos, teOld)` (IL=99):** server-only
 (client logs warning). Resolve lootable TE (`teOld` or world TE feature). If
 `LockManager.IsLockedServer` → return. Drop pos = world + **(0.5, 0.75, 0.5)**.
