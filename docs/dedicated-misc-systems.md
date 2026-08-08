@@ -677,6 +677,50 @@ tokenizer.
 The two face-mask parsers `ParseWaterFlowMask` / `ParseCoverFaceMask` are
 documented with their consumers in [`block-shapes.md`](block-shapes.md) §5.
 
+## Localization (the CSV text pipeline)
+
+`Localization` (all IL-verified) loads `Data/Config/Localization.csv` into a
+`Dictionary<string, string[]>` (`mDictionary` keyed by the localization key,
+each value one row across the language columns) plus a case-insensitive
+twin. `LoadAndSelectLanguage(forceReload)` (IL=14) nulls the dicts when
+forcing, lazily runs `loadBaseDictionaries()` (IL=25: clears
+`allLanguages` / `patchedCells`, news the dicts, `loadCsv(GameIO.GetGameDir
+("Data/Config") + "/Localization.csv", false)`, then `updateLanguages()` +
+`WriteCsv()`), and finishes with `selectLanguage()` (IL=32: resolves
+`defaultLanguageIndex` / `currentLanguageIndex` via
+`findUserLanguageColumns(KEY row, RequestedLanguage)` (IL=45, the `english`
+column + the user column, -1s on an empty header), broadcasts `OnLocalize`
+to UIRoot, invokes `LanguageSelected(ActiveLanguage)`, and returns
+`currentLanguageIndex >= 0`).
+`loadCsv(bytes, patch, serverData)` (IL=166) parses with a `ByteReader` /
+`ReadCSV`, requiring a `KEY` first cell (else
+`Invalid localization CSV file...`); non-patch clears both dicts, patch
+builds a column-translation table against the existing header (validating
+each new column against `languageHeaderMatcher`, `context`-prefixed
+columns allowed, and locating the `UsedInMainMenu` column), then feeds every
+row to `addCsv` (IL=201): a missing key warns
+`Localization: Entry missing a key!`, a duplicate warns
+`Localization: Duplicate key "..." found!`, and patch rows merge into the
+existing entry (resizing, marking `patchedCells`, skipping server-data cells
+in the `UsedInMainMenu` column).
+`LoadPatchDictionaries(modName, folder, loadingInGame)` (IL=26) merges
+`{folder}/Localization.csv` (`[MODS] Loading localization from mod:` /
+`Could not load localization from` logs), then `updateLanguages()` +
+`selectLanguage()`; `LoadServerPatchDictionary(data)` (IL=14) is the
+`NetPackageLocalization` receive side (error `Could not load localization
+from server!`); `ReloadBaseLocalization()` (IL=3) is `LoadAndSelectLanguage
+(true)`; `checkLoaded(throwExc)` (IL=15) lazily loads and throws
+`Localization could not be loaded` when forced.
+`updateLanguages()` (IL=36) rebuilds `allLanguages` and
+`languageToColumnIndex` from the KEY row; `get_TotalKeys()` (IL=5) is the
+dict count; `get_ActiveLanguage()` (IL=17) is
+`allLanguages[currentLanguageIndex]` with an `english` fallback;
+`getLanguageEntry(entry, column, out result, prefix)` (IL=38) returns the
+cell, prefixing it when `LocalizationChecks` is on.
+`FormatListAnd(items)` / `FormatListOr(items)` (IL=7 each) build a localized
+list via `formatListX` using the `listAnd*` / `listOr*` keys (two / start /
+middle / end templates).
+
 ## ParticleEffect (FX data + spawn / audio)
 
 `ParticleEffect` is the serializable FX record every `NetPackageParticleEffect`
