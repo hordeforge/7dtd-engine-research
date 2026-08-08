@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: player fall impact
+
+EntityPlayerLocal.FallImpact (IL=117, entity-ai.md): elevator block resolve,
+block.FallDamage scale, FallDamageModifier + passive 47 FallDamageReduction,
+_fallSpeed cvar, MinEvent 95, hit-ground sound. verified from IL. Commit
+c7a4cd9.
 ## 2026-08-08 - tier-C: player anti-stuck push-out
 
 EntityPlayerLocal.pushOutOfBlocks (IL=225) 3x3 neighborhood probe +
