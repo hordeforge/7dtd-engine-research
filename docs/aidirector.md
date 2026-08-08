@@ -321,6 +321,19 @@ playtest) set spawn flag, `StartCooldownOnNeighbors`, `SetLongDelay`,
 `SpawnUpdate` returns true and `hordeList` empty; else `UpdateHorde` and keep
 (false).
 
+**Chunk-event leaves:** `GetChunkDataFromPosition(pos, createIfNeeded)` (IL=33)
+keys the per-chunk bags by a **5x5-chunk district**
+(`MakeChunkKey(toChunkXZ(x) / 5, toChunkXZ(z) / 5)`), creating the entry when
+asked. `StartCooldownOnNeighbors(pos, isLong)` (IL=55) walks the static
+`neighbors` offset array, get-or-creates each neighbor district's data and
+calls `StartNeighborCooldown(isLong)` (the 180 s / 720 s cooldown table).
+`CreateHorde(startPos)` (IL=10) appends a nested `Horde` to `hordeSpawnList`
+and returns it. `Write` (IL=33) persists version **1**, the count, then per
+entry the i64 district key + `AIDirectorChunkData.Write`; `Read` (IL=37) only
+runs when the outer version is >= **5**, reading the inner version + count into
+`AIDirectorChunkData.Read`. `Clear` (IL=7) empties `activeChunks` +
+`checkChunks`; `GetActiveCount` (IL=4) is the dict count.
+
 **`AIScoutHordeSpawner.SpawnUpdate` (IL=129):** require `CanSpawn(1)` and
 `CurrentWave <= 0` else finished; `SpawnManually` (day, enemies on); for each
 `EntityEnemy`: `IsHordeZombie`/`IsScoutZombie`/`bIsChunkObserver` true, BM flag
@@ -934,6 +947,10 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** ChunkEventComponent leaves: 5x5 district keying
+  (GetChunkDataFromPosition), StartCooldownOnNeighbors walk, CreateHorde
+  append, Write v1 / Read outer-version >= 5, Clear/GetActiveCount; deduped
+  the NotifyNoise/NotifyActivity summary to a pointer.
 - **2026-08-08:** GameStagePartySpawner leaves: SetPartyLevel (IL=123)
   scaling + stage lookup + bonusLootEvery + party log; SetScaling FastLerp
   1..2.5; AddMember/RemoveMember dedupe; DecSpawnCount clamp; IsDone.
