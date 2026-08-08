@@ -400,6 +400,21 @@ actions by their `EventType` into lazy lists; `HasEvents` (IL=6) is
 `TriggeredEffects.Count > 0`, `HasTrigger` (IL=7) is a non-empty bucket for the
 given type.
 
+**`PassiveEffect` (the value-modifier leaf):** `ModifyValue` (IL=61) first
+resolves the cvar-driven sources: each `CVarValues[i]` reads
+`entity.Buffs.GetCustomVar(cvar)` into `Values[i]` (seeding the cvar at 0 when
+absent), then `ModValue(Modifier, level, ...)` applies the modifier to the base
+and percent values with the `stackEffectMultiplier`.
+`RequirementsMet` (IL=17) is `hasMatchingTag(params.Tags) &&
+(Requirements == null || Requirements.IsValid(params))`; `hasMatchingTag`
+(IL=53) tests `Test_AllSet` (or `Test_AnySet` with `MatchAnyTags`), inverted by
+`InvertTagCheck`, with the empty-tag edge cases. `ValueModifierTypes` is
+`base_set 0, base_add 1, base_subtract 2, perc_set 3, perc_add 4,
+perc_subtract 5`; `CreateEmptyPassiveEffect` (IL=14) defaults to
+`perc_add` with a single value 1. `AddColoredInfoStrings(ref list, level)`
+(IL=52) appends the display strings (one per level entry, or a single entry at
+the given level).
+
 ### ItemValue metadata and property overrides
 
 **Typed metadata (V3.1.0 b14):** `ItemValue.Metadata :
@@ -1838,6 +1853,10 @@ The non-action leaves:
   QuestEventManager.HarvestedItem, inventory/drop, _xpFromHarvesting XP.
 ## Changelog
 
+- **2026-08-08:** PassiveEffect leaves: ModifyValue cvar source resolution +
+  ModValue dispatch; RequirementsMet tag + requirement gates; hasMatchingTag
+  AllSet/AnySet with invert; ValueModifierTypes 0-5; CreateEmptyPassiveEffect
+  perc_add default; AddColoredInfoStrings.
 - **2026-08-08:** MinEffectGroup leaves: ModifyValue canRun gate + per-passive
   Type/RequirementsMet; FireEvent dispatch; GetTriggeredEffects dict + lazy
   buckets; HasEvents/HasTrigger.
