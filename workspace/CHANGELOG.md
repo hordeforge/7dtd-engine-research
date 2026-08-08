@@ -6,6 +6,8 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: dynamic-mesh doc spot-check (8 claims exact)
+## 2026-08-08 - tier-C: terrain-height GetTerrainHeight IL fix 21->19
 ## 2026-08-08 - tier-C: weather-environment doc spot-check (9 claims exact)
 ## 2026-08-08 - tier-C: dedicated-misc-systems spot-check (7 claims exact)
 ## 2026-08-08 - tier-C: save-region SetFrom IL fix 164->203
