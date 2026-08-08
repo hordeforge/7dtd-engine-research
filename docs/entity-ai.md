@@ -1664,7 +1664,11 @@ slowly (gravity 0.003) and fires MinEvent **79** when leaving swim; moving
 sets gravity 0 with acceleration 0.0024 while sprinting (MinEvent **78**);
 and with `Stamina <= 0` an exhausted window of **60** ticks forces gravity
 0.004 (0.08 with the head above water) and acceleration 0.00025 - the
-client-side exhaustion slow.
+client-side exhaustion slow. `SwimModeUpdateThrottle` (IL=258) is the
+companion water probe: it ducks the camera when
+`vp_FPCamera.HasOverheadSpace` fails and raycasts forward from the hip
+(`Voxel.Raycast`, mask, 0.45, 65, 0.165) to set `swimClimbing` when a steep
+surface blocks the stroke - the swim-out-of-water / surface-climb latch.
 
 **`FindDestroyPos` (IL=21):** zero destroyPosition.y; `SearchForDestroyPos`; on
 success `destroyRefreshTicks=**500**` and store pos.
@@ -3264,6 +3268,10 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+## Changelog
+
+- **2026-08-08:** EntityPlayerLocal.SwimModeUpdateThrottle (IL=258): camera
+  duck on overhead, hip raycast swimClimbing latch.
 ## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.SwimModeTick (IL=151): swim enter MinEvent
