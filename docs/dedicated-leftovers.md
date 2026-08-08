@@ -697,7 +697,9 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   `_get_Keys/_get_Values` iterators reference it); `CollectionDebugWrapper<T>`
   (5) with its `ListDebugWrapper` / `DictionaryDebugWrapper` subclasses;
   `ParsingConverters` (7, color/action/string-list parsers) with its
-  `ParsingMethodCache` singleton; `SimplexNoise` (6). None are constructed or
+  `ParsingMethodCache` singleton; `SimplexNoise` (6) and the vendored
+  `OpenSimplex2` / `OpenSimplex2S` noise stack (33 methods, with the
+  field-only `LatticeVertex4D` helper). None are constructed or
   called by live server (or client) code; do not model them as part of any
   wire/file contract. (`UtilList<T>` is not dead but is reachable only from
   the client `DistantTerrain` render path.)
