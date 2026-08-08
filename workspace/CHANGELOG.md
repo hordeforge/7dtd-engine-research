@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Progression leaves
+
+AddLevelExp XPGain + XP(87) bonus + clamp + GameSparks + recursive + level-up
+log; getExpForLevel/getLevelFloat; AddXPDeficit 97/96; SpendSkillPoints +
+addProgressionCurrency (SkillPoints 86); GetPerkList; Write v3 / Read;
+SetupData. Verified fresh dumps.
 ## 2026-08-08 - tier-C: Stat record
 
 Tick (IL=301) regen via MaxPassive/GainPassive/LossPassive + clamp +
