@@ -566,6 +566,15 @@ duplicate-id errors; `GetWallVolume(index)` (IL=30) throws on miss;
 `FindWallVolume(mins, maxs)` (IL=29) maps the `VolumeKey` (or **-1**);
 `GetAllWallVolumes()` (IL=49) copies the tuples.
 
+**World-load volume registration:** `World.SetupSleeperVolumes` /
+`SetupTriggerVolumes` / `SetupWallVolumes` (IL=19 each) iterate their dict
+values and call `AddToPrefabInstance()` on every volume - the load-time
+link that attaches each volume to its `PrefabInstance` so prefab-relative
+triggers resolve. `World.SetupTraders` (IL=30) clears and re-adds every
+`traderAreas` entry through the chunk provider's `DynamicPrefabDecorator`
+(`ClearTraders` + `AddTrader` each), then clears the static list - the
+trader-compound registration at world load.
+
 **`SleeperVolume.TouchGroup` (IL=52):** `mode = flags & 7`. If no `groupId` or no
 prefab: `Touch(world, player, setActive, mode)`. Else for each volume in
 `prefabInstance.sleeperVolumes` with same `groupId` and not

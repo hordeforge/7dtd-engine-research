@@ -466,6 +466,21 @@ chunk neighborhood of radius `(GameStats[44] LandClaimSize - 1) / 2` (in
    `forKeystone=false` so ally range does not block).
 7. Else protected = true (foreign claim).
 
+**The per-player "my claim" twins:** `IsMyLandClaimInChunk(chunk, blockPos,
+lpRelative, claimSize, deadZone, forKeystone)` (IL=116) scans the chunk's
+primary `TEFeatureLandClaim`s within `deadZone`, resolves the owner via
+`GetLandProtectionBlockOwner` + `IsLandProtectionValidForPlayer`, and
+returns true when the owner is `lpRelative` (within `claimSize`) or an
+ally (within `claimSize` and `forKeystone`). `IsMyLandProtectedBlock(pos,
+lpRelative)` (IL=8) wraps the 3-arg body (IL=119) with
+`traderAllowed = (SandboxUseTraderArea == 1)`; the body is the
+`IsLandProtectedBlock` shape above, except the per-chunk gate is the
+"my claim" check (self/ally logic instead of the generic protected enum) -
+the query the land-claim block UI and claim placement use.
+`GetPrimaryPlayerId` (IL=11) is `m_LocalPlayerEntity?.entityId ?? -1`;
+`IsRandomWorld` (IL=19) is the chunk provider's
+`WorldInfo.RandomGeneratedWorld`.
+
 **`InBoundsForPlayersPercent` (IL=100):** if world width &lt; 1024 return 1.
 Else soft-edge factor from each axis: distance from edge inset **50** blocks
 over span **80**, clamped 0..1; return min(xFactor, zFactor). Placement needs
