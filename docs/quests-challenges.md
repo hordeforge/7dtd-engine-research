@@ -402,6 +402,24 @@ class name looked up in `ChallengeDictionary`. `EndChallenges` (IL=19) and
 removes a group's entries. `Write` (IL=103) / `Read` (IL=176) persist the
 journal; `Clone` (IL=56) copies it.
 
+**`Challenge` leaves + wire:** `StartChallenge()` (IL=55) gates on the class
+`HandleResourceRequirement`, auto-completes qualifying objectives, runs
+`HandleComplete(false)`, flips an auto-completed challenge straight to
+`Redeemed (2)`, and hooks the remaining active objectives.
+`get_ReadyToComplete` (IL=17) is `Completed (1)` or (`RedeemAlways` and
+`Active`). Wire: `Challenge.Write` (IL=43) is `FileVersion` byte + class name +
+state byte + `AutoCompleted` + objective version + count + per-objective
+`WriteObjective` (type byte + `current` i32, per-type extras e.g. `currentTime`);
+`Read` (IL=60) mirrors with the 27-type `BaseChallengeObjective.ReadObjective`
+switch (BlockPlace/BlockUpgrade/Bloodmoon/Craft/CureDebuff/EnterBiome/Gather/
+GatherIngredient/Harvest/Hold/Kill/QuestComplete/Scrap/Survive/Trader/Wear/
+UseItem/ChallengeComplete/MeetTrader/KillByTag/ChallengeStatAwarded/
+SpendSkillPoint/Twitch/Time/GatherByTag/LootContainer) and re-resolves the
+class from `s_Challenges`. Journal `Write` (IL=103) appends the tracked
+challenge name + per-group `(name, LastUpdateDay)` for entries that started;
+`Read` (IL=176) `SetupData`s, rebuilds via `ResetToChallengeClass`, re-sorts the
+challenge list, restores group days, and marks the tracked challenge.
+
 ---
 
 ## 8. Dedicated relevance and residuals
@@ -748,6 +766,9 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
   TraderPOI linear scan.
 ## Changelog
 
+- **2026-08-08:** Challenge + wire: StartChallenge resource gate + autocomplete
+  -> Redeemed; ReadyToComplete; Write/Read field order + 27-type objective
+  switch; journal Write/Read (tracked name, group days, reset-to-class).
 - **2026-08-08:** ChallengeJournal leaves: StartChallenges two-pass seeding;
   ModifyValue challenge passives; HandleChallengeRedeemed eventList append;
   GetNextChallenge chain; End/Reset/RemoveChallengesForGroup; Write/Read/Clone.
