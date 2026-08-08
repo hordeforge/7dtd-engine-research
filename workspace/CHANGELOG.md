@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: buff passive application
+
+EntityBuffs.ModifyValue (IL=35) active-buff walk skipping paused;
+BuffClass.ModifyValue (IL=39) Remove skip + tag OR + canRun + duration-as-
+level + Effect-stack multiplier. Verified fresh dumps.
 ## 2026-08-08 - tier-C: EffectManager twins
 
 GetValuesAndSources (IL=208) ValueSourceType codes 1/2/3/10/11/12/14 +
