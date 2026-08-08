@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: trader voice-line playback
+
+EntityTrader.PlayVoiceSetEntry (IL=98, npc-dialog.md 4): TraderDialog gate,
+5 s voice cooldown, voiceSet_name clip naming, StopAllSequencesOnEntity,
+PlayOneShot vs NetPackageAudioPlayInHead (192) for remote players,
+PlayAnimReaction(1). verified from IL. Commit 2f63332.
 ## 2026-08-08 - tier-C: sleeper stack census
 
 Prefab.CountSleeperSpawnsInVolume (IL=116, world-generation.md): sleeper-stack census - counts IsSleeperBlock cells with a non-sleeper below (one spawn per stack), excluding sleeper priority volumes, into Transient_NumSleeperSpawns. verified from IL. Commit 1e41c07.
