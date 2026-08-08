@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Twitch pimp-pot + blood-moon cooldown bookkeeping
+
+RewardPot/BitPot add/set + chat announce + largest-track, BM window from dusk/dawn offsets, kill leaderboard (verified)
 ## 2026-08-08 - tier-C: census refresh 2 (narrated 1771->1780)
 
 Drone depth (systems/pathing/mods/sync/commands/frame), vehicle rescue, EntityItem mesh, EntityHuman, Twitch server slice, EntityAlive/Player hooks, infra records; unaccounted 0 (verified)

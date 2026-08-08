@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `census-refresh-2` drone/twitch/entity depth (see CHANGELOG) |
-| Commits since dry-run `3b61d9c` | ~1211 |
+| HEAD (at handoff write) | `247ee7d` Twitch pimp-pot + blood-moon cooldown bookkeeping |
+| Commits since dry-run `3b61d9c` | ~1212 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
