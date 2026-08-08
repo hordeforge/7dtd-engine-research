@@ -75,6 +75,39 @@ subtrees:
 `Saves/<GameWorld>/<GameName>` from `GamePrefs` 33/31 with storage from pref 294
 (`GameSaveStorageType`), measured in `GameIO.GetSaveGameDir()` IL=8.
 
+**GameIO path/helper leaves (all IL-verified):** `GetDefaultPersistentDataPath()`
+(IL=8) is `GetDocumentPath() + "/7 Days To Die"`;
+`GetDefaultUserGameDataPath(folder)` (IL=18) falls back to
+`GetCachedUserDataPath(0, folder)` with a log error when the native platform
+is not yet initialized; `GetRoamingUserGameDataDir()` /
+`GetDeviceLocalUserGameDataDir()` (IL=4 each) are `GetUserGameDataPath(1/0, "")`
+(roaming vs device-local storage); `GetPlayerDataDir()` /
+`GetPlayerDataLocalDir()` (IL=4 each) are `GetSaveGameDir()/Player` and
+`GetSaveGameLocalDir()/Player` (the `Player` subtree in each save).
+`GetPlayerSaves(foundSave, includeArchived)` (IL=26, with the
+`<GetPlayerSaves>g__SearchSaveDir` scan IL=132) walks the roaming (when
+`SaveRoamingEnabled`) and local `GetSaveGameRootDir` trees, and for each
+`<World>/<SaveGame>` dir (names containing `#` skipped) skips archived saves
+unless requested (`archived.flag`), reads the `main.ttw` header into a
+`WorldState`, and invokes the `FoundSave` callback
+(`storage, worldName, saveName, lastWriteTime, state, archived`), warning
+`Error reading header of level '{0}'. Ignoring. Msg:{1}` on a bad header.
+`IsWorldGenerated(worldName, storage)` (IL=7) is the existence of
+`GetUserGameDataDir(storage)/GeneratedWorlds/<worldName>`;
+`SetSaveGameLocalGuid(guid)` (IL=28) stores GamePref 159 and picks the save
+storage pref 294 (0 when the local GUID dir exists, 1 otherwise, honoring
+`SaveRoamingEnabled`).
+Path helpers: `GetNormalizedPath` (IL=5) is `Path.GetFullPath` + trim;
+`GetOsStylePath` (IL=16) flips `\` to `/` on Windows;
+`IsAbsolutePath` (IL=92) switches on the runtime platform (drive-letter /
+root rules); `MakeAbsolutePath(path)` (IL=10) prefixes `GetGamePath() + "/"`
+for relative inputs; `GetFilenameFromPath` / `GetDirectoryFromPath`
+(IL=19/18) split on the last resource separator;
+`GetFileExtension` / `RemoveFileExtension` (IL=17/18) split on the last dot
+for names longer than 4; `IsRunningAsSnap()` (IL=21) is Linux + `SNAP_NAME`;
+`IsRunningInSteamRuntime()` (IL=65) probes `/etc/os-release` on Linux;
+`GetGameExecutableName` (IL=80) returns the platform executable name.
+
 ### 2.2 `SaveDataManagedPath` construction
 
 The constructor (`.ctor(String,Boolean)` IL=64) normalizes then precomputes everything:
