@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TripWireController trigger MonoBehaviour
 ## 2026-08-08 - tier-C: Twitch requirement gate family
 ## 2026-08-08 - tier-C: ObservableDictionary backing registry
 ## 2026-08-08 - tier-C: OpenSimplex noise stack dead
