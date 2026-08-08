@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: combat third spot-check (9 claims exact)
 ## 2026-08-08 - tier-C: blocks + vehicles third spot-check (15 claims exact)
 ## 2026-08-08 - tier-C: dedicated-misc third spot-check (11 claims exact)
 ## 2026-08-08 - tier-C: tile-entities + world-chunks third spot-check (16 claims exact)
