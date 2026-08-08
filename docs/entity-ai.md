@@ -405,6 +405,12 @@ see cache (called from OnUpdateLive before AI).
   (`cos(rotation.y * 0.0175 - pi), 0, -sin(...)` shape), with the 2D
   variant `GetForwardVector2` (IL=12); `GetHandItem` (IL=3) =
   `handItem`.
+- Item-hold hooks: `OnFired` (IL=11) / `OnReloadStart` (IL=11) run
+  `AvatarController.StartAnimationFiring` / `StartAnimationReloading` (the
+  item-action to animation bridge, only when the avatar controller is
+  attached); `OnReloadEnd` (IL=1) is a no-op; `SetSightLightThreshold`
+  (IL=4) stores the `sightLightThreshold` Vector2; `GetModelLayer` (IL=6)
+  is the model transform's GameObject layer.
 - Spawn/misc: `SetSpawnByData(id, name)` (IL=16) stores `spawnById` /
   `spawnByName` and sets `bPlayerStatsChanged |= !isEntityRemote`;
   `WillForceToFollow` (IL=2) is false; `CycleActivatableItems` (IL=1) is a
