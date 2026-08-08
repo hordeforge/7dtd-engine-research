@@ -47,7 +47,7 @@ For each unaccounted type:
 
 ---
 
-## 3. Current pin status (2026-08-07, regenerate to refresh)
+## 3. Current pin status (2026-08-08, regenerate to refresh)
 
 | Check | How | Result |
 |---|---|---|
