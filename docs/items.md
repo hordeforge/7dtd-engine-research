@@ -2130,7 +2130,21 @@ The non-action leaves:
   `OnDamagedByExplosion`, and `OnMeshCreated` hooks, letting an `ItemClass`
   customize its dropped-entity behavior.
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `InventoryBase` | Object |  |
+| `InventoryOperation` | Object | Read, Write, CreateSetRelative, CreateSetAbsolute |
+| `ItemActionAttachment` | ItemAction | ExecuteAction |
+| `ItemActionBailLiquid` | ItemAction | ExecuteAction, OnHoldingUpdate, IsActionRunning, CreateModifierData |
+| `ItemActionDataCatapult` |  |  |
+| `ItemActionDataSpawnEntity` |  |  |
+| `ItemActionDataZoom` |  |  |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** Equipment leaves: ApplyTempCosmeticSlot (IL=24) sync flag,
   ClearTempCosmeticSlot (IL=7), FireEventsForChangedSlots (IL=137) MinEvent

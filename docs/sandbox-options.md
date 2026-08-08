@@ -457,7 +457,17 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `EnumGamePrefGroup` |  |  |
+| `SandboxOptionValueSetBool` |  |  |
+| `SandboxOptionValueSetInt` |  |  |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** GameStatsBridge static mirror of GameStats into gameplay float statics.
 - **2026-07-28:** EnumGameStats 0..81 census; GameStats.Write persistent typed stream.

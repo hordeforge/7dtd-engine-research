@@ -943,7 +943,46 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 
 **Leaf catalog:** every instance in [`inventories/quest-objectives.md`](inventories/quest-objectives.md) (the 38 objective leaves).
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `ChallengeObjectiveBlockPlace` |  |  |
+| `ChallengeObjectiveBlockUpgrade` |  |  |
+| `ChallengeObjectiveBloodmoon` |  |  |
+| `ChallengeObjectiveChallengeStatAwarded` |  |  |
+| `ChallengeObjectiveCraft` |  |  |
+| `ChallengeObjectiveCureDebuff` |  |  |
+| `ChallengeObjectiveEnterBiome` |  |  |
+| `ChallengeObjectiveGather` |  |  |
+| `ChallengeObjectiveGatherByTag` |  |  |
+| `ChallengeObjectiveGatherIngredient` |  |  |
+| `ChallengeObjectiveHarvest` |  |  |
+| `ChallengeObjectiveHarvestByTag` |  |  |
+| `ChallengeObjectiveHold` |  |  |
+| `ChallengeObjectiveKill` |  |  |
+| `ChallengeObjectiveKillByTag` |  |  |
+| `ChallengeObjectiveLootContainer` |  |  |
+| `ChallengeObjectiveMeetTrader` |  |  |
+| `ChallengeObjectiveScrap` |  |  |
+| `ChallengeObjectiveSpendSkillPoint` |  |  |
+| `ChallengeObjectiveSurvive` |  |  |
+| `ChallengeObjectiveTime` |  |  |
+| `ChallengeObjectiveTrader` |  |  |
+| `ChallengeObjectiveTwitch` |  |  |
+| `ChallengeObjectiveUseItem` |  |  |
+| `ChallengeObjectiveWear` |  |  |
+| `ChallengeObjectiveWindowOpen` |  |  |
+| `DialogResponseEntry` | BaseResponseEntry |  |
+| `ObjectiveRallyPointData` | MonoBehaviour | UpdateAllFlags, Start, RemoveFlag, AddFlag |
+| `QuestPacketEntry` |  |  |
+| `TraderComparer` |  |  |
+| `TraderItem` |  |  |
+| `TraderItemEntry` |  |  |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** ObjectiveRallyPoint.Current_BlockActivate (IL=182): twitch
   vote gate, startTime/endTime window, RemoveSharedNotInRange, server POI

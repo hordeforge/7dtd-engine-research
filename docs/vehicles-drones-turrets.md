@@ -1258,7 +1258,15 @@ no `RootMotion`, else builds the normal avatar controller and calls
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native / content residuals |
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `DroneBeamParticle` | MonoBehaviour | Update, SetDisplayTime, Start |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** Drone support buff: buffAllies (IL=80) party + owner aura,
   procBuffRange (IL=21) 32 m gate, addSupportBuff (IL=19) buffJunkDroneSupportEffect

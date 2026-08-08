@@ -920,7 +920,26 @@ not (the parent/child split of the vertical sign).
 
 **Leaf catalog:** every instance is enumerated in [`inventories/block-behaviors.md`](inventories/block-behaviors.md) (the 65 `Block` behavior leaves).
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `BlockData` |  |  |
+| `BlockData` |  |  |
+| `BlockInfo` | Block | GetActivationText, Init, GetBlockActivationCommands, OnBlockActivated |
+| `BlockNodeMap` |  |  |
+| `BlockParticle` | Block | Init, OnBlockLoaded, addParticles, OnNeighborBlockChange |
+| `BlockPlacementTowardsPlacer` | BlockPlacement | OnPlaceBlock |
+| `BlockPoweredLight` | BlockPowered | updateLightState, GetActivationText, OnBlockActivated, GetBlockActivationCommands |
+| `BlockPoweredTrap` | BlockPowered | OnBlockEntityTransformAfterActivated, updateTrapState, OnBlockAdded, GetCollisionAABB |
+| `BlockShapeBillboardComplex` | BlockShapeBillboardAbstract | renderFull |
+| `BlockShapeBillboardDiagonal` | BlockShapeBillboardAbstract | renderFull |
+| `BlockStatistics` |  |  |
+| `BlockTorch` | BlockParticle | OnBlockPickedUp, getParticleOffset |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** BlockPlantGrowing.addScheduledTick (IL=63): deterministic
   GetTickRate schedule vs gaussian-jittered growthDeviation band 0.5x-1.5x.

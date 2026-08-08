@@ -490,7 +490,19 @@ else **1000** ticks.
 | [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) | `NetPackageWaterSimChunkUpdate` / `WaterValue` wire |
 | [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) | job struct leaf rows |
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `DistantChunk` | Object | calculateEdgeInformation, ActivateObject, calculateMeshTangents, CreateWaterPlaneMesh |
+| `LightViewer` | MonoBehaviour | Update, TurnOffAllLights, TurnOnAllLights, Disable |
+| `MeshGeneratorPrefab` | MeshGenerator | build, CalculateSecondaryPosition, calcLights, calcTopSoil |
+| `WaterPoint` |  |  |
+| `WaterSetInfo` |  |  |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** World.GetSunAndBlockColors (IL=41): sun (LIGHT_TYPE 1) and
   block (0) channel split, zeroed on missing chunk.

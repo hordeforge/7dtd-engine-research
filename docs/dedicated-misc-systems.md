@@ -1126,7 +1126,17 @@ interruptible pair are in [chat.md](chat.md) §3.
 `Tick` (`UInt64`) are the per-package stats record `ConsoleCmdProfileNetwork`
 (the `net` console command) reads for the packet histogram.
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `AudioObject` | Object | Update, PlayConditionPasses, SetValue, Init |
+| `AudioPlayer` | MonoBehaviour | Play, Update, StopAudio, PlayAtPos |
+| `AudioTrigger` | Object | Update, TurnOff, SetVolume, UnPause |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** AdminBlacklist sub-store (ban add/remove/query, file round-trip, login/console/web enforcement); WhitelistUser/WhitelistGroup record types.
 - **2026-08-08:** Entity.StopAnimatorAudio (IL=16) monitored-handle stop +

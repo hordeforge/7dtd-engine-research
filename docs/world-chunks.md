@@ -1013,7 +1013,25 @@ if two weather packages arrive in the same `Time.frameCount`.
 | [terrain-height.md](terrain-height.md) | YDim / height |
 | `realearth-surfaces.md` | Product surfaces |
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `ChunkGameObject` | MonoBehaviour | CheckLODs, SetChunk, StartCopyMeshLayer, SetStatic |
+| `ChunkPreviewManager` | Object | SetWorldPosition, IsPositionInArea, Update, SetChunkGoVisiblity |
+| `ChunkQueue` | Object | Add, Remove, Contains, Clear |
+| `ChunkSnapshotUtil` | Object | LoadChunk, Free, TakeSnapshot, WriteSnapshot |
+| `FlatArea` | Object | IsValid, GetPositions, GetRandomPosition, IsInArea |
+| `PrefabHelpers` | Object | smoothChunk, SimplifyPrefab, mergePrefab, combine |
+| `PrefabVolumeAbs` |  |  |
+| `RegionData` |  |  |
+| `RegionExtensions` |  |  |
+| `RegionFileAccessRaw` | RegionFileAccessMultipleChunks | OpenRegionFile, GetRegionCoords, ReadDirectory, get_ChunksPerRegionPerDimension |
+| `RegionFileAccessSectorBased` | RegionFileAccessMultipleChunks | GetRegionCoords, ReadDirectory, OpenRegionFile, get_ChunksPerRegionPerDimension |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** Shared chunk observers (SharedChunkObserver/SharedChunkObserverCache): refcounted per-chunk observer sharing.
 - **2026-08-08:** Delayed/batched regeneration (5): DelayedStart (IL=28)

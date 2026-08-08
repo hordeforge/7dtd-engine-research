@@ -3731,7 +3731,31 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `AvatarAnimalController` | AvatarController | RemoveLimb, SpawnLimbGore, LateUpdate, SwitchModelAndView |
+| `AvatarBanditController` | AvatarHumanController | ProcDismemberedPart, ActivateDetachableLimbs, MakeDismemberedPart, Update |
+| `AvatarLocalPlayerController` | AvatarCharacterController | SwitchModelAndView, avatarVisibilityChanged, LateUpdate, SetInRightHand |
+| `AvatarNpcController` | LegacyAvatarController | LateUpdate, SwitchModelAndView, setLayerWeights, assignParts |
+| `AvatarSDCSController` | LegacyAvatarController | LateUpdate, assignParts, SwitchModelAndView, setLayerWeights |
+| `AvatarUMAController` | LegacyAvatarController | LateUpdate, assignParts, SwitchModelAndView, setLayerWeights |
+| `EAIApproachDistraction` | EAIBase | Update, Continue, CanExecute, updatePath |
+| `EAIBlockIf` | EAIBase | SetData, CanExecute, Compare, Init |
+| `EAIDroneItemModHealWeapon` | EAIDroneItemTask | Continue, CanExecute, Reset, SetData |
+| `EAIDroneItemModStunWeapon` | EAIDroneItemTask | Continue, CanExecute, Reset, SetData |
+| `EntityAnimalRabbit` | EntityAnimal | Awake, IsAttackValid |
+| `EntityLockContext` |  |  |
+| `EntityNewStyleAvatar` | Entity | Init, EnableSubmesh, Update, Awake |
+| `EntitySwarm` | EntityVulture | OnUpdateLive, Init |
+| `EntityVHelicopter` | EntityDriveable | PhysicsInputMove, Update, SetWheelsForces, Init |
+| `EntityZombie` | EntityHuman | get_AimingGun, set_AimingGun |
+| `EntityZombieDog` | EntityEnemyAnimal | Init, OnUpdateLive, Awake, OnEntityTargeted |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** World.ClipBoundsMove (IL=573) inert alternative clip path, 0 call sites.
 - **2026-08-08:** Player move-state machine: SetMoveState (IL=553) HoldType

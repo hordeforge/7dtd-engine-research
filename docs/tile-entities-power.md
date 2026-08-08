@@ -1158,7 +1158,19 @@ the matching `PowerItem` by world position and links the two.
 | [full-surface.md](full-surface.md) | Where this family sits in the whole-assembly map |
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `ElectricWireController` | MonoBehaviour | touched, Init, DamageSelf, Update |
+| `TEFeatureCombine` | TEFeatureAbs | ShowUI, OnBlockActivated, Init, GetActivationText |
+| `TEFeatureExplodable` | TEFeatureAbs | Explode, Init, OnBlockDestroyedBy, OnAdded |
+| `TEFeaturePickup` | TEFeatureAbs | AllowBlockActivationCommand, OnBlockActivated, Read, InitBlockActivationCommands |
+| `WireFrameSphere` | MonoBehaviour | RenderCircleOnPlane, Update, Start, KillWF |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** TripWireController trigger MonoBehaviour (collider -> IsTriggered on server).
 - **2026-08-08:** TileEntityWorkstation.CheckForCraftComplete (IL=55):

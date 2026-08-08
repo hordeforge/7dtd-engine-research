@@ -837,7 +837,20 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 | [protocol-packages.md](protocol-packages.md) | Encryption handshake package bodies |
 | [dedicated-leftovers.md](dedicated-leftovers.md) | AesEncryptAndMac install from SendSharedKey |
 
+**Catalogued-leaf index (narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `ClientInfoCollection` | Object | GetForPlayerName, ForUserId, Remove, ForLiteNetPeer |
+| `NetPackageAudio` |  |  |
+| `NetPackageDroneParticleEffect` |  |  |
+| `NetPackageEntityLookAt` | NetPackageEntityTargeted | ProcessPackage, write, read, Setup |
+| `NetPackageEntitySpawnResponse` | NetPackage | ProcessPackage, write, read, Setup |
+| `NetPackageLight` |  |  |
 ## Changelog
+
+- **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
+  catalogued leaves for the coverage census).
 
 - **2026-08-08:** NetPackage base contract (3a): defaults (channel 0,
   compress false, reliable true, pre-auth false, direction Both);

@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: narrate 103 family leaves across 11 docs (narrated 2065->2168)
 ## 2026-08-08 - tier-C: narrate 83 minevents leaves (narrated 1982->2065)
 ## 2026-08-08 - tier-C: narrate 141 console-command leaves (narrated 1841->1982)
 ## 2026-08-08 - tier-C: whole-assembly 100% accounting (1,672 unreached types classified)
