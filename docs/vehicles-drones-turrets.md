@@ -528,6 +528,21 @@ exists: repath via `followPlannedPath` when LOS blocked, path length >
 `RotateTo` + `Move` toward target. Success when not blocked and dist <=
 `seekDist`.
 
+**Drone pathing (`GetPath` IL=318 / `GetProjectedPath` IL=93 /
+`followPlannedPath` IL=96):** `GetProjectedPath` clears the output and pulls
+the drone's `PathFinderThread.Instance` path (`GetPath(entityId).path`),
+issuing `FindPath(entity, start, end, speed, false, aiTask)` when none is
+pending, then copies every `PathPoint.projectedLocation`. `GetPath` projects
+start/end to ground points (`GetProjectedGroundPoint`), builds the projected
+path, raises each point by `blockHeightOffset + 1`, then runs the LOS
+refinement pass: a blocked consecutive pair is replaced by the pair lowered
+1 block when those clear, else the middle point is skipped when the i..i+2
+segment clears; the first point is dropped and the path returned.
+`followPlannedPath` drives the list: `RotateTo` toward `path[0]` and `Move`
+to it at `pointRadius`; in range -> `RemoveAt(0)`; when
+`PathTracker.IsStuck(pos, target, 0.5)` it un-sticks by teleporting to
+`path[1]` (or `path[0]`) and dropping the consumed prefix.
+
 **`sentryState` (IL=61):** if chunk loaded and more than **5** m from `SentryPos`,
 `DoMoveIntoFollowPos`; else Seek/rotate toward sentry pos until within **0.25** m.
 
