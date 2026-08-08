@@ -449,6 +449,20 @@ connected, stores `serverPeer`, and installs the two
 bytes) and posts the localized `DisconnectLiteNetLib` message on the main
 thread.
 
+**LiteNetLib auth wrapper:** `NetworkServerLiteNetLib/
+LiteNetLibAuthWrapperServer.ConnectionRequestCheck` (IL=86) rate-limits
+per IP (**500 ms** window, `Limiting connect rate from that IP!`), rejects
+when a connection from the same IP is already being processed, checks the
+peer's string against `serverPassword` (`rejectInvalidPassword`), else
+`Accept`. Its `OnNetworkReceiveEvent` (IL=134) gates the pre-auth state: a
+17-byte challenge reply (header **202** + 16-byte `Guid`) that does not
+match the issued challenge disconnects the peer; a match advances the
+state and fires `PeerConnectedEvent`. The client wrapper echoes the 202
+challenge back (`OnNetworkReceiveEvent` IL=36) and forwards disconnect
+events to `OnDisconnectedFromServer` (IL=6).
+`NetworkCommonLiteNetLib.CreateRejectMessage(text)` (IL=27) builds the
+reject payload (`0xFF` header + UTF8 length byte + text).
+
 ### 4.1 Connection hierarchy
 
 ```text
