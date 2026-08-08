@@ -70,6 +70,9 @@ Closed in recent sessions (still optional, not required for A+B):
 
 | Topic | Doc |
 |---|---|
+| World records (WorldCreationData pin, BackedArrays, POI map) | chunk-providers §2 / world-generation §3.5 |
+| NetPackage per-type pool record | network §3a |
+| Dynamic-mesh pipeline records | dynamic-mesh §3/§4 |
 | Static-data XML loaders (sounds/weather/materials/music/biome) | dedicated-misc-systems |
 | Network leaves (unknown-package decode, NTP probe) | network §1.2 |
 | Save-region leaves (protection cache, chunk scopes) | save-region §3.1 |
