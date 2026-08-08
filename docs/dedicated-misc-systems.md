@@ -1133,8 +1133,236 @@ interruptible pair are in [chat.md](chat.md) §3.
 | `AudioObject` | Object | Update, PlayConditionPasses, SetValue, Init |
 | `AudioPlayer` | MonoBehaviour | Play, Update, StopAudio, PlayAtPos |
 | `AudioTrigger` | Object | Update, TurnOff, SetVolume, UnPause |
+### Support and utility leaves (catalogued, narrated for the census)
+
+Cross-cutting `<global>` leaves reachable on a dedicated server but catalogued only
+(support/utility helpers, client-shared controllers, DTOs, and delegates). Roles are
+the dump-derived base + key methods; each family doc owns the substantive groups.
+
+| Leaf | base | key methods |
+|---|---|---|
+| `ActionAddAllPlayersToGroup` |  |  |
+| `ActionAddChatMessage` |  |  |
+| `ActionAddClosestEntityToGroup` |  |  |
+| `ActionAddPartyToGroup` |  |  |
+| `ActionAddRandomBuff` |  |  |
+| `ActionAddSpawnedEntitiesToGroup` |  |  |
+| `ActionAddStartingItems` |  |  |
+| `ActionAddXPDeficit` |  |  |
+| `ActionBlockAnimateBlock` |  |  |
+| `ActionBlockDoorState` |  |  |
+| `ActionBlockDowngrade` |  |  |
+| `ActionBlockGameEvent` |  |  |
+| `ActionBlockGrowCrops` |  |  |
+| `ActionBlockHealth` |  |  |
+| `ActionBlockPickup` |  |  |
+| `ActionBlockReplace` |  |  |
+| `ActionBlockReplaceAttack` |  |  |
+| `ActionDropHeldItem` |  |  |
+| `ActionEjectFromVehicle` |  |  |
+| `ActionEnemyToCrawler` |  |  |
+| `ActionExplodePosition` |  |  |
+| `ActionExplodeTarget` |  |  |
+| `ActionFailQuest` |  |  |
+| `ActionFlipRotation` |  |  |
+| `ActionGetLandClaimPosition` |  |  |
+| `ActionGetNearbyPoint` |  |  |
+| `ActionModifyCVar` |  |  |
+| `ActionModifyEntityStat` |  |  |
+| `ActionModifyProgression` |  |  |
+| `ActionModifyVarBool` |  |  |
+| `ActionModifyVarFloat` |  |  |
+| `ActionPOISetLightState` |  |  |
+| `ActionPrimeEntity` |  |  |
+| `ActionPullEntities` |  |  |
+| `ActionPushEntity` |  |  |
+| `ActionRagdoll` |  |  |
+| `ActionRageZombies` |  |  |
+| `ActionRandomizeRotation` |  |  |
+| `ActionRemoveBuff` |  |  |
+| `ActionRemoveBuffsByTag` |  |  |
+| `ActionRemoveDeathBuffs` |  |  |
+| `ActionRemoveEntities` |  |  |
+| `ActionRemoveFuel` |  |  |
+| `ActionRemoveSpawnedBlocks` |  |  |
+| `ActionRemoveVehicles` |  |  |
+| `ActionReplaceBuff` |  |  |
+| `ActionSetFuel` |  |  |
+| `ActionSetInvestigationPosition` |  |  |
+| `ActionSetItemSlots` |  |  |
+| `ActionShuffleItems` |  |  |
+| `ActionTarget` | ValueType | op_Implicit, Write, Read, Equals |
+| `ActionTimeChange` |  |  |
+| `ActionTwitchAddActionCooldown` |  |  |
+| `ActionTwitchAddEntitiesToSpawned` |  |  |
+| `ActionTwitchAddPoints` |  |  |
+| `ActionTwitchChallengeAction` |  |  |
+| `ActionTwitchEndCooldown` |  |  |
+| `ActionTwitchSendChannelMessage` |  |  |
+| `ActionTwitchStartCooldown` |  |  |
+| `ActionTwitchStartVote` |  |  |
+| `ActionTwitchVoteDelay` |  |  |
+| `AdminSpeedConsoleCmd` | ConsoleCmdAbstract | Execute, GetParamAsInt, GetParam, getCommands |
+| `AnimParamData` | ValueType | ToString, CreateFromBinary, Write |
+| `Arrays` |  |  |
+| `AsyncItem` |  |  |
+| `AutoMove` |  |  |
+| `BarRegion` |  |  |
+| `BarRegionFloat` |  |  |
+| `BoundaryProjector` | MonoBehaviour | Update, SetRadius, SetAlpha, Awake |
+| `Builder` |  |  |
+| `CachedStream` |  |  |
+| `CatalystConvert` |  |  |
+| `ChannelMask` |  |  |
+| `CharacterControllerAbstract` | Object | get_GroundNormal, Update |
+| `CharacterGazeController` | MonoBehaviour | UpdateLookAtTarget, UpdateEyeGaze, UpdateHeadRotation, Start |
+| `ClientAuthenticateServerContext` |  |  |
+| `ColorMappingData` |  |  |
+| `Config` |  |  |
+| `ConsoleCommandUnlockInventories` | ConsoleCmdAbstract | Execute, getCommands, get_IsExecuteOnClient, get_AllowedDeviceTypes |
+| `Contextual` |  |  |
+| `CreativeActionEntryFavorite` | BaseItemActionEntry | OnActivated |
+| `DayTimeTracker` |  |  |
+| `DebugLines` | MonoBehaviour | AddCube, Create, CreateAttached, Create |
+| `Detonator` | MonoBehaviour | Update, StartCountdown, OnEnable, OnDisable |
+| `DirectoryPlayerId` |  |  |
+| `DisabledImposterChunkManager` |  |  |
+| `District` |  |  |
+| `DynamicMeshDebugConsoleCmd` | ConsoleCmdAbstract | Execute, GetParamAsInt, GetParam, getCommands |
+| `EnableOpenIDDebug` |  |  |
+| `EnableRendering` |  |  |
+| `EnumEntityStunTypeExtensions` | Object | CanMove |
+| `Enumerator` |  |  |
+| `ExitConnection` |  |  |
+| `ExtensionConfigManager` |  |  |
+| `ExtensionPubSubManager` |  |  |
+| `ExtensionStateManager` |  |  |
+| `FlexibleCursor` | CursorControllerAbs | HandleControllerInput, SnapOs, Awake, SetCursor |
+| `Force` |  |  |
+| `FunctionDefinition` |  |  |
+| `GUIWindowManager` | MonoBehaviour | Update, OnGUI, openInternal, CloseAllOpenModalWindows |
+| `GameObjectAnimalAnimation` | AvatarController | Update, Awake, SetVisible, StartAnimationAttack |
+| `GameRenderManager` | Object | ApplyCameraOptions, DynamicResolutionUpdate, SetDynamicResolution, SetAntialiasing |
+| `GameSparksManager` | MonoBehaviour | ProgramStarted, SessionStarted, SessionEnded, AuthError |
+| `GroupOffsets` |  |  |
+| `Handle` |  |  |
+| `Handle` |  |  |
+| `HomerunData` |  |  |
+| `IntRange` | ValueType | ToString, IsSet, RandomInclusive, Random |
+| `JunkSledgeFireController` | MiniTurretFireController | Update, hitTarget, Fire |
+| `LNLAuthConnectionState` |  |  |
+| `LegacyAvatarController` | AvatarController | Update, LateUpdate, updateSpineRotation, InternalStartAnimationHit |
+| `LegacyState` |  |  |
+| `LoadTask` |  |  |
+| `LoadingStats` |  |  |
+| `Manager` |  |  |
+| `MathUtils` | Object | ToNextPowerOfTwo, DistanceToSegment, Min, Max |
+| `MethodSignature` |  |  |
+| `MotionSensorController` | MonoBehaviour | Init, trackTarget, hasTarget, shouldIgnoreTarget |
+| `Motor` |  |  |
+| `NGUIWindowManager` | MonoBehaviour | ShowAll, SetLabel, ParseWindows, SetLabelText |
+| `NearestEntitySorter` |  |  |
+| `NewsManager` | Object | GetNewsData, UpdateNews, remove_Updated, add_Updated |
+| `Node` |  |  |
+| `Noise` |  |  |
+| `OperationData` |  |  |
+| `OutputType` |  |  |
+| `POIBoundsSideHelper` | MonoBehaviour | SetSize, OnTriggerExit, OnTriggerEnter, Setup |
+| `POIMarkerToolManager` | Object | UpdateAllColors, DisplayPrefabPreviewForMarker, RegisterPoiMarker, isFirstMarkerInGroup |
+| `POIWaypoint` | Waypoint | TrySet, Remove, ClearAll, Remove |
+| `Param` |  |  |
+| `ParsingMethodData` |  |  |
+| `PathFinder` |  |  |
+| `PathInfoSingleTarget` |  |  |
+| `PathNode` |  |  |
+| `PerformanceProfiler` | Object | CalculateMetrics, CalculateAggregateMetrics, ExtractSpikeEvents, SaveAnalysis |
+| `PhysicsBodyInstance` | Object | bindCollider, GetTransformForColliderTag, SetColliderMode, BindColliders |
+| `PlaceholderTarget` |  |  |
+| `PlayerCluster` |  |  |
+| `PlayerInputManager` |  |  |
+| `PlayerQuestData` |  |  |
+| `PlayerSpawn` |  |  |
+| `PlayerTracker` |  |  |
+| `PreviewData` |  |  |
+| `ProceduralGridMover` |  |  |
+| `ProfilerCaptureUtils` | Object | CreateMemoryProfiler |
+| `ProfilerGameUtils` | Object | TryGetFlyingPlayer, WaitForSingleChunkToLoad, WaitForSingleChunkToLoad, WaitForChunksAroundObserverToLoad |
+| `ProjectileManager` | Object | AddProjectileItem, Update, RemoveProjectile, Cleanup |
+| `ProtectedBackpack` |  |  |
+| `ProtectedPositionCache` |  |  |
+| `RandomCountyNameGenerator` |  |  |
+| `RenderMap` |  |  |
+| `RoamingPrefs` | Object | Init, set_Store, Destroy, get_Store |
+| `SBlockPosValue` | ValueType |  |
+| `SEnts` |  |  |
+| `Sample` |  |  |
+| `ScreenEffects` | MonoBehaviour | Update, SetScreenEffect, ResetEffects, Init |
+| `SequenceStopper` |  |  |
+| `ServiceActionEntryRent` | BaseItemActionEntry | OnDisabledActivate, OnActivated, RefreshEnabled |
+| `ShapeCategory` |  |  |
+| `SlotSizeData` |  |  |
+| `SmartTextMesh` | MonoBehaviour | WrapTextToWidth, FormatSeparateLines, GetTextWidth, CanRenderString |
+| `SoftCursor` | CursorControllerAbs | HandleMovement, Awake, Snap, SetNavigationTarget |
+| `SpinningBladeTrapBladeController` | MonoBehaviour | Update, Init, GetEntityFromCollider, OnTriggerExit |
+| `SpinningBladeTrapController` | MonoBehaviour | Update, Init, EnterState, DamageSelf |
+| `TextureLoadingManager` | MonoBehaviour | LoadTexture, Update, UnloadTexture, Cleanup |
+| `TierItemGroup` |  |  |
+| `TierSpec` |  |  |
+| `TileGroup` |  |  |
+| `TrackedBlockData` |  |  |
+| `TrackingEntry` |  |  |
+| `TrackingHandler` |  |  |
+| `Trajectory` | Object | Calculate, SuggestVelocity_CustomArc |
+| `TranslationData` |  |  |
+| `TraversalProvider` |  |  |
+| `TraversalProviderNoBreak` |  |  |
+| `Triangle` |  |  |
+| `TwitchDropAvailabilityManager` | Object | FromXmlBenefit, ParseEntries, GetEntries, GetLatestForBenefit |
+| `UAIConsiderationPathBlocked` |  |  |
+| `UnityDistantTerrainTest` | Object | LoadTerrain, LoadTerrainHeightTiles, Cleanup, OnChunkVisible |
+| `UnlockData` |  |  |
+| `UnsafeBitArraySetIndicesEnumerator` | ValueType | MoveNext, Reset, get_Current, Dispose |
+| `UpdateLight` | MonoBehaviour | UpdateLighting, SetTintColorForItem, SetTintColor, ApplyLit |
+| `ValueCollection` |  |  |
+| `VariableStateGameInfoInt` |  |  |
+| `VariableStateGameInfoString` |  |  |
+| `VendingMachineLockContext` |  |  |
+| `VoxeChunkInfo` |  |  |
+| `VoxelNode` |  |  |
+| `WaveCleanUp` | MonoBehaviour | PCMDataToByteArray, Create, Start, FormatHeader |
+| `WebTokens` |  |  |
+| `Wheel` |  |  |
+| `Writer` |  |  |
+| `XUiC_CombineGrid` | XUiC_ItemStackGrid | Merge_SlotChangedEvent, OnClose, Init, Result1_SlotChangedEvent |
+| `XUiC_ItemActionEntry` | XUiController | set_ItemActionEntry, GetBindingValueInternal, Init, Update |
+| `XUiC_QuestTrackerObjectiveEntry` | XUiController | GetBindingValueInternal, set_QuestObjective, set_ChallengeObjective, Update |
+| `XUiC_QuestTrackerObjectiveList` | XUiController | Update, ParseAttribute, Init, set_Challenge |
+| `XUiC_QuestTrackerWindow` | XUiController | GetBindingValueInternal, Update, OnOpen, set_CurrentChallenge |
+| `XUiC_RecipeTrackerIngredientEntry` | XUiController | GetBindingValueInternal, set_Ingredient, Update, set_Owner |
+| `XUiC_RecipeTrackerIngredientsList` | XUiController | Update, ParseAttribute, GetActiveIngredientCount, Init |
+| `XUiC_RecipeTrackerWindow` | XUiController | GetBindingValueInternal, Update, OnOpen, RecipeTracker_OnTrackedRecipeChanged |
+| `XUiC_VehicleFrameWindow` | XUiC_AssembleWindow | GetBindingValueInternal, Init, Update, BtnRefuel_OnPress |
+| `XUiC_WorldToolsWindow` | XUiController | Init, BtnLevelStartPoint_Controller_OnPress, OnOpen, CbxBoxSideTransparency_OnValueChanged |
+| `XUi_FallThrough` | MonoBehaviour | Update, OnDestroy, Start, SetXUi |
+| `vp_BodyAnimator` | MonoBehaviour | UpdateSpine, UpdateBody, UpdateAnimator, UpdateAnimationSpeeds |
+| `vp_Climb` | vp_Interactable | Climbing, OnStop_Climb, TryInteract, OnStart_Climb |
+| `vp_Component` | MonoBehaviour | RefreshDefaultState, get_EventHandler, FixedUpdate, DeactivateWhenSilent |
+| `vp_FPBodyAnimator` | vp_BodyAnimator | InitMaterials, UpdatePosition, UpdateCameraPosition, RefreshMaterials |
+| `vp_FPWeapon` | vp_Weapon | UpdateLookDown, UpdateSwaying, Refresh, Start |
+| `vp_Shooter` | vp_Component | Refresh, EjectShell, SpawnProjectiles, Fire |
+| `vp_Timer` | MonoBehaviour | Schedule, Update, CancelAll, NotifyLevelWasLoaded |
+| `vp_Weapon` | vp_Component | Refresh, Awake, SnapSprings, Start |
+| `AIFocus` | `ValueType` | SetFocus, ClearFocus |
+| `ArrayWithOffset` | `Object` | CopyInto, Contains |
+| `BlockingQueue` | `Object` | Dequeue, HasData |
+| `DynamicMeshChunkDataStorage` | `Object` | TryLoadItem, SaveItem |
+| `ModEvent` | `ModEventAbs` | Invoke |
+| `NetPackageInformation` | `Object` (IPackageInformation) | package info record |
+| `ReadOnlyListWrapper` | `Object` (IReadOnlyList) | GetEnumerator |
 ## Changelog
 
+- **2026-08-08:** Support/utility leaf index added (narrates 211 catalogued
+  global support leaves for the coverage census).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
 

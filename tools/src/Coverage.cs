@@ -159,8 +159,11 @@ class Coverage {
     }
 
     int docd  = gameReached.Count(t => narrated.Contains(BaseName(t)));
-    int catd  = gameReached.Count(t => !narrated.Contains(BaseName(t)) && catalogued.Contains(BaseName(t)));
-    int classd = gameReached.Count(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && classified.Contains(BaseName(t)));
+    // Hierarchy: narrated > classified > catalogued. A type listed in the OOS doc is
+    // judged out of scope even if an inventory also names it, so classified wins over
+    // catalogued and the buckets are disjoint (they must sum to gameReached).
+    int classd = gameReached.Count(t => !narrated.Contains(BaseName(t)) && classified.Contains(BaseName(t)));
+    int catd  = gameReached.Count(t => !narrated.Contains(BaseName(t)) && !classified.Contains(BaseName(t)) && catalogued.Contains(BaseName(t)));
     int accounted = docd + catd + classd;
     int undoc = gameReached.Count - accounted;
     int uiInBase = gameReached.Count(t => BaseName(t).StartsWith("XUiC_") || BaseName(t).StartsWith("XUi"));
@@ -340,6 +343,21 @@ class Coverage {
     sb.AppendLine("|---|---|---:|");
     foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
                                  .OrderByDescending(t => t.Methods.Count(x => x.HasBody)).Take(60)) {
+      sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
+    }
+    sb.AppendLine();
+
+    sb.AppendLine("## Catalogued-only reached types (narrate these to reach 100% narration)");
+    sb.AppendLine();
+    sb.AppendLine("Each is mentioned in a generated `inventories/` catalog but in no hand-written");
+    sb.AppendLine("narrative doc (and not classified OOS). A backticked mention in the owning");
+    sb.AppendLine("narrative doc moves it to **narrated**.");
+    sb.AppendLine();
+    sb.AppendLine("| Type | Namespace | methods |");
+    sb.AppendLine("|---|---|---:|");
+    var catOnly = gameReached.Where(t => !narrated.Contains(BaseName(t)) && catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t))).ToList();
+    sb.AppendLine("<!-- catOnly count: " + catOnly.Count + " -->");
+    foreach (var t in catOnly.OrderBy(t => string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace).ThenBy(t => t.Name)) {
       sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     }
     sb.AppendLine();
