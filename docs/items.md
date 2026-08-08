@@ -198,6 +198,19 @@ After the body the write does save-id bookkeeping (`NameIdMapping.MarkIdUsed`)
 so a save can remap ids on load; that produces no wire bytes. `Read` mirrors the
 same order, opposite direction, and reconstructs the nested mods recursively.
 
+**Load-time id assignment (the `ItemClass.assignIds*` pipeline):**
+`assignIdsFromXml` (IL=29) logs `ItemIDs from XML` and assigns every
+non-block item its XML-declared `Id`; `assignIdsLinear` (IL=14) logs
+`ItemIDs linear`, builds a `MAX_ITEMS` used-flag array and hands the
+unassigned list to `assignLeftOverItems` (IL=87), which first honors the
+`fixedItemIds` map (fixed ids offset by `Block.ItemsStartHere`) and then
+scans upward from `ItemsStartHere` for the first free id per remaining
+item, logging `ItemClass assignLeftOverItems {0} of {1}`.
+`createFullMappingForClients` (IL=31) builds a full `NameIdMapping` of
+every item id->name and `SaveToArray()`s it into
+`fullMappingDataForClients` - the blob behind `NetPackageIdMapping` that a
+joining client receives to resolve item ids.
+
 The **static** `ItemValue.Write(ItemValue, BinaryWriter)` overload handles a null
 reference by emitting a single `0` byte, which is why a null and an empty
 `ItemValue` are indistinguishable on the wire (both are the empty sentinel).
