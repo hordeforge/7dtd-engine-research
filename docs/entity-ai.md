@@ -2451,6 +2451,22 @@ player present and an `EntityAlive` it appends
 `GetAudioManager()` (IL=3) is the `audioManager` field accessor (client
 audio).
 
+**`EntityPlayer` server accessors (all IL-verified):**
+`get_PersistentPlayerData()` (IL=11) is
+`GameManager.Instance.persistentPlayers.GetPlayerDataFromEntityID(entityId)`
+(null when the persistent list is absent); `get_PlayerDisplayName()` (IL=21)
+caches `PersistentPlayerData.PlayerName.DisplayName` in `cachedPlayerName`
+and returns it. `get_PlayerStats()` (IL=4) is
+`entityStats as PlayerEntityStats`; `get_CarryCapacity()` (IL=3) reads the
+`CarryCapacity` backing field; `get_Companions()` (IL=9) lazily creates the
+`CompanionGroup`; `get_IsSpectator()` (IL=3) reads `isSpectator`;
+`get_RentedVMPosition()` (IL=3) reads `m_rentedVMPosition`.
+`set_IsAdmin(value)` (IL=8) only writes the `isAdmin` field on a change.
+`set_Party(value)` (IL=24) clears the old party's nav-object colors when a
+local player leaves, stores the new party, and when the party becomes null
+as a local player runs `QuestJournal.RemoveAllSharedQuests()` (the
+party-leave shared-quest teardown).
+
 **`FindValidExitPosition` (IL=14) / `GetFallingSavePosition` (IL=161):**
 vehicle dismount + fell-through-world rescue. `FindValidExitPosition` records
 `lastVehiclePositionOnDismount = position`, `timeOfVehicleDismount =
