@@ -1265,6 +1265,16 @@ bitmask) fires MinEvent **55** on the item, then **91** (equip) or **92**
 (unequip) on the item class and every installed mod depending on
 `Activated`, clearing the flags and `IsEquipping` at the end.
 
+**More `Equipment` leaves:** `ModifyValue(original, effect, ref base, ref perc,
+tags, useDurability)` (IL=39) runs `ItemValue.ModifyValue` (useMods true) over
+every non-null, non-original slot with a class - the worn-gear layer of
+`EffectManager.GetValue`. `updateInsulation` (IL=32) recomputes `waterProof`
+as the sum of the worn classes' `WaterProof` (the `insulation` field is the
+cached total). `DropItems` (IL=31) drops every slot via
+`ItemDropServer(ItemStack(iv, 1), position + (0.5, 0, 0.5), belongsPlayerId,
+60, false)` and clears the slot, then re-runs `updateInsulation`;
+`GetTotalInsulation` / `GetTotalWaterproof` (IL=3 each) are field getters.
+
 All three ride the inventory net packages rather than a per-item packet:
 `NetPackagePlayerInventory` carries `toolbelt` (`ItemStack[]`), `bag`
 (`Bag.Write`), `equipment`, and the drag-and-drop item; the request/response and
@@ -1853,6 +1863,9 @@ The non-action leaves:
   QuestEventManager.HarvestedItem, inventory/drop, _xpFromHarvesting XP.
 ## Changelog
 
+- **2026-08-08:** Equipment leaves: ModifyValue worn-gear chain; updateInsulation
+  waterProof sum; DropItems + DropItemOnGround server drop; insulation/waterproof
+  getters.
 - **2026-08-08:** PassiveEffect leaves: ModifyValue cvar source resolution +
   ModValue dispatch; RequirementsMet tag + requirement gates; hasMatchingTag
   AllSet/AnySet with invert; ValueModifierTypes 0-5; CreateEmptyPassiveEffect
