@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: minevents 7.0a requirement catalog spot-check (26 claims exact)
 ## 2026-08-08 - tier-C: INDEX structure coherence check (all linked, no dead links)
 ## 2026-08-08 - tier-C: netpackage inventory reconciliation (193 census / 182 bodies OK)
 ## 2026-08-08 - tier-C: DumpAll collision fix (7432 files, was 6675)
