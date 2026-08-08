@@ -491,7 +491,13 @@ Each server tick then decrements `Meta` (playing `SoundTick` on the
 `tickSoundDelay` cadence from `ItemClass.SoundTickDelay`) and, at `Meta == 0`,
 `SetDead()` + `gameManager.ExplosionServer(pos, worldToBlockPos(pos),
 identity, explosion, belongsEntityId, 0, false, itemValue.Clone())` - the
-detonation itself.
+detonation itself. The held-side priming is
+`ItemClassTimeBomb.OnHoldingItemActivated` (IL=82): with `Meta == 0` it
+cancels the `WeaponPreFireCancel` avatar event, activates the model's
+activation transforms, sets `RightArmAnimationUse`, and primes
+`Meta = explodeAfterTicks` (or **-1** when `FusePrimeOnActivate`, matching
+the fuse-init branch above), then `data.Changed()`, plays the model audio,
+and `SimpleRPC(holderId, 0, false, false)` when the holder is not remote.
 - `ItemClassWaterContainer` (IL=32) derives `MaxMass =
   Clamp(WaterCapacity * 19500, 0, 65535)` and clamps `initialFillRatio` to
   [0, 1].
@@ -1700,6 +1706,11 @@ The non-action leaves:
   `OnDamagedByExplosion`, and `OnMeshCreated` hooks, letting an `ItemClass`
   customize its dropped-entity behavior.
 
+## Changelog
+
+- **2026-08-08:** ItemClassTimeBomb.OnHoldingItemActivated (IL=82): held
+  priming - WeaponPreFireCancel, activation transforms, Meta =
+  explodeAfterTicks or -1 (FusePrimeOnActivate), SimpleRPC broadcast.
 ## Changelog
 
 - **2026-08-08:** ItemClassTimeBomb.OnDroppedUpdate (IL=188) dropped-bomb
