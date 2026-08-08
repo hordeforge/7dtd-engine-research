@@ -145,7 +145,14 @@ BMEndOffset`; `WithinBloodMoonPeriod` (IL=33) is true while
 `day == currentBMDayEnd && hour < BMCooldownEnd` (the action cooldown
 window around the horde). `AddKillToLeaderboard(username, color)` (IL=44)
 increments the entry's `Kills` or appends `TwitchLeaderboardEntry(name,
-color, 1)`.
+color, 1)`. Cooldown config records (parsed from `twitchevents.xml`):
+`CooldownPreset` (`Name`, `Title`, `CooldownType`, `CooldownFillMax`,
+`StartCooldownTime`, `AfterDeathCooldownTime`, `BMStartOffset` /
+`BMEndOffset`, plus `CooldownMaxEntries` of `TwitchCooldownEntry`
+per game-stage band with `CooldownMax` / `CooldownTime`), and
+`TwitchActionCooldownModifier` (`CategoryName` / `ActionName`,
+`ValueModifierTypes Modifier`, `Value`) are applied by
+`TwitchActionPreset.HandleCooldowns` per action.
 
 **`TwitchManager.Update` (IL=1585) init-state machine + running loop:** the
 manager's frame peer runs only with a live world and players. It is a
