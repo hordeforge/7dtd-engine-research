@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: block behavior leaves (cactus/hay AABB, sibling remove, stairs/ladder, stubs)
+
+BlockCactus/BlockHay collision AABB + hay fall-cushion 5, BlockSiblingRemove rotation map + pair removal, BlockLadder climbable rotations, BlockStairs child-only unblocked, BlockDeadgrass meta variants, BlockMusic/BlockRanged stubs (verified)
 ## 2026-08-08 - tier-C: power block wrappers (3.7 block to tile-entity mapping)
 
 CreateTileEntity identity table (PowerItemType 1-10, TriggerType 1-4), solar CanPlaceBlockAt sky-light 15, speaker/trader sounds, spotlight activate/updateState, launcher InstantiateProjectile + BlockProjectileMoveScript, electric wire BrokenPercentage, rally marker quest hook (verified)
