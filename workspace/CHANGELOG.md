@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vehicle gas-can gate
+
+EntityVehicle.hasGasCan (IL=73, vehicles-drones-turrets.md 4.2b): fuel item
+presence in bag or inventory as the fueling gate. verified from IL. Commit
+76df4f2.
 ## 2026-08-08 - tier-C: vehicle mod refresh chain
 
 Vehicle.SetItemValueMods (IL=22, vehicles-drones-turrets.md): mods copy +
