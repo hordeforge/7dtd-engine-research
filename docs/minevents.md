@@ -478,6 +478,44 @@ target - the one shared predicate shape (the XOR appears as
   (`HasAnyTags`), invert-aware.
 - **`IsSDCS`** (IL=~15): target is an `EModelSDCS` avatar (the SDCS
   character system present check).
+- **`IsMale`** (IL=~25): `target.IsMale` field, invert-aware.
+- **`IsCorpse`** (IL=~25): `target.IsCorpse()`.
+- **`IsLocalPlayer`** (IL=~30): target is an `EntityPlayerLocal`.
+- **`IsSleeping`** (IL=~30): target is an `EntityEnemy` with `IsSleeping`
+  set (non-enemy fails).
+- **`WasAlive`** (IL=~30): `target.WasAlive()`.
+- **`IsBloodMoon`** (IL=17): `SkyManager.IsBloodMoonVisible()` XOR `invert`
+  (the blood-moon sky state, not the game-stage check).
+- **`IsIndoors`** (IL=~30): `target.Stats.AmountEnclosed > 0` (the enclosure
+  amount from the survival stats).
+- **`InSafeZone`** (IL=~40): despite the name, the check is
+  `target is EntityPlayer && TwitchSafe` (the Twitch-safe flag), not a
+  land-claim zone test.
+- **`IsAlly`** (IL=~46): `target is EntityPlayer && IsFriendOfLocalPlayer()`
+  with a local-player refinement (friend-of-local-player, not the
+  `PersistentPlayerList` ally store; see [parties-factions.md](parties-factions.md)).
+- **`InBiome`** (IL=30): `biomeID == params.Biome.m_Id` (needs a non-null
+  `params.Biome`).
+- **`GameStatFloat`** / **`GameStatInt`** (IL=~30 each):
+  `compareValues(GameStats.GetFloat / GetInt(GameStat), operation, value)`
+  against a configured `EnumGameStats`.
+- **`SandboxOptionFloat`** / **`SandboxOptionInt`** (IL=~30 each):
+  `compareValues(SandboxOptionManager.GetFloat / GetInt(Option),
+  operation, value)` against a configured `SandboxOptions`.
+- **`TimeOfDay`** (IL=~85): lazily converts the configured `value`
+  (hours*100 + minutes) via `GameUtils.DayTimeToWorldTime(h, m, 0)` into
+  `timeValue`, then `compareValues(world.worldTime % 24000, operation,
+  timeValue)`.
+- **`RandomRoll`** (IL=71): `value` first resolves an `@cvar` to
+  `target.Buffs.GetCustomVar(cvarName)`; then a seeded `GameRandom`
+  (`GameRandomManager.CreateGameRandom`, seed per `SeedType` - cvar-derived
+  or `Environment.TickCount`) rolls within `minMax` and the result is
+  compared with `compareValues`.
+- **`HasParticle`** (IL=23): `params.Self.HasParticle(particleName)` (reads
+  `params.Self`, not the resolved target).
+- **`BurstRoundCount`** (IL=61): the held item's first action is an
+  `ItemActionRanged`; `compareValues(GetBurstCount(holdingItemData.
+  actionData[0]), operation, value)`.
 
 ### 7.0 `EffectManager.GetValue` (IL=372) passive stack
 
