@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: POI-tour/drone/prefab/challenge command Execute leaves
+
+VisitPois start/pause/reset, JunkDrone + server twin unstuck/log/clear, Prefab editor load/save/simplify, Challenges client-only subcommands (verified)
 ## 2026-08-08 - tier-C: admin/whitelist/permission/cvar command Execute leaves
 
 ConsoleCmdAdmin/Whitelist add/remove/group/list on AdminTools, PermissionsAllowed subcommands, CVar get/set/track/list, sandbox + save-manager info (verified)
