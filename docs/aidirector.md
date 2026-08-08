@@ -45,6 +45,31 @@ flowchart TB
 
 **Caller:** `World.OnUpdateTick` → `AIDirector.Tick` (Xref=1, server path).
 
+**Director leaves:** `AddEntity` (IL=10) routes `EntityPlayer` to `AddPlayer`
+(IL=9) = `playerManagementComponent.AddPlayer` + `bloodMoonComponent.AddPlayer`;
+`RemovePlayer` (IL=9) mirrors both removals. `GetComponent<T>()` (IL=19) looks
+up the `components` dict by `Type.FullName` (default(T) when absent).
+Persistence: `Save(stream)` (IL=7) writes version **10** then
+`ComponentsSave` (IL=21), which runs `component.Write(writer)` over the install
+order; `Load(stream)` (IL=14) reads the version, `ComponentsLoad` (IL=22) runs
+`component.Read(reader, version)` per component, and a zero `world.worldTime`
+triggers `Init()` (fresh world).
+
+**Noise + activity:** `NotifyNoise(instigator, position, clipName,
+volumeScale)` (IL=84) is the AI-aware sound entry (reached from
+`OnSoundPlayedAtPosition` IL=17, entity resolved by id, null for -1). It looks
+up the clip in `AIDirectorData.FindNoise` (unknown clips are ignored), skips
+enemy-instigated noise, `IsIgnoredByAI` entities, and `EntityItem`s carrying a
+`ThrowableDecoy`. For a tracked player the volume is muffled while crouching
+(`noise.muffledWhenCrouched`), `Stealth.NotifyNoise(noise.volume *
+volumeScale, noise.duration)` gates sleeper wake-up
+(`world.CheckSleeperVolumeNoise`), and a positive `heatMapStrength` raises a
+`Sound (3)` chunk event scaled by `HeatMapSensitivityModifier` with a **240**
+tick duration. `NotifyActivity(type, pos, value, duration)` (IL=31) gates on
+`value > 0`, `GameStats.IsSpawnEnemies (24)` + `ZombieHordeMeter (32)`,
+`HeatMapSensitivityModifier > 0`, and not blood-moon / Twitch boss-horde, then
+`chunkEventComponent.NotifyEvent(...)`.
+
 ### CreateComponents order (IL=31, verified)
 
 1. `AIDirectorMarkerManagementComponent`
@@ -207,6 +232,14 @@ day/time {5} {6:D2}:{7:D2}`.
 `_radiusV` around `up` by `(RandomFloat - 0.5) * 90` degrees (±45) and runs
 `GetMobRandomSpawnPosWithWater(focusPos + rotatedRadius, 0, 10, 30, false,
 out)` - the ring 10-30 m around the focus.
+
+**Party bookkeeping leaves:** `AddPlayerToParty(player)` (IL=55) first looks for
+an existing party whose `IsMemberOfParty(entityId)` matches (and adds), else
+walks the `parties` list calling `TryAddPlayer` (IL=34): the player joins the
+first party with a member within **80 m** (sqr 6400), and a still-partyless
+player gets `CreateNewParty`. `AddPlayer(player)` (IL=8) adds a member to the
+party spawner and stamps `player.bloodMoonParty`. `RemovePlayer` (IL=24) drops
+the player from the list and calls `PlayerLoggedOut` on every party.
 
 ## AIDirectorChunkData : Object
 
@@ -869,6 +902,12 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** AIDirector core leaves: AddEntity/AddPlayer/RemovePlayer
+  fan-out; GetComponent by FullName; Save version 10 + ComponentsSave/Load;
+  Load Init on zero worldTime; NotifyNoise (IL=84) FindNoise lookup, crouch
+  muffling, stealth gate + sleeper check, Sound (3) heat event 240 ticks;
+  NotifyActivity gates (IsSpawnEnemies 24 + ZombieHordeMeter 32); blood-moon
+  party bookkeeping (AddPlayerToParty/TryAddPlayer 80 m/AddPlayer/RemovePlayer).
 - **2026-08-08:** AIDirectorPlayerManagementComponent AddPlayer (IL=23)
   pooled-state track on first sight; RemovePlayer (IL=21) reset + pool free.
 - **2026-08-08:** EntitySupplyPlane far-draw: UpdateFarDraw (IL=35) mainCamera
