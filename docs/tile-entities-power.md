@@ -514,6 +514,65 @@ position (visual wire list only).
 
 ---
 
+### 3.7 Block wrappers: which block owns which tile entity
+
+Each power block's `CreateTileEntity` pins the runtime `TileEntity*` class
+and its `PowerItemType` / `TriggerType` identity (the identity keys the
+subtype behaviour of §3.4). The `PowerItemType` literals seen in the
+wrappers: speaker **1**, spotlight **2**, generator **5**, solar panel **6**,
+battery bank **7**, launcher **8**, electric wire **9**, trip wire **10**.
+
+- **Sources** (`TileEntityPowerSource`): `BlockBatteryBank` (PowerItemType
+  7), `BlockGenerator` (5) and `BlockSolarPanel` (6) all lazily resolve
+  `SlotItemName` into the `slotItem` class and hand it to the TE (IL=19
+  each). `BlockSolarPanel.CanPlaceBlockAt` (IL=28) additionally requires
+  sky light >= 15 (`ChunkCache.GetLight(pos + up, SkyLight)`) on top of the
+  base placement check: panels only go where the sky is exposed.
+- **Consumers** (`TileEntityPoweredBlock`): `BlockSpeaker` (PowerItemType
+  1) reads a `PlaySound` property in `Init` (IL=16) and `ActivateBlock`
+  (IL=53) stores the on/off bit in block meta bit 1, `SetBlockRPC`s the
+  change and runs `Audio.Manager.BroadcastPlay` / `BroadcastStop` of that
+  sound at the block position (looping ambient).
+  `BlockSpeakerTrader` (Init IL=42) is a plain `Block`: it only parses
+  `OpenSound` / `CloseSound` / `WarningSound` and plays them from
+  `PlayOpen` / `PlayClose` / `PlayWarning` (trader-door ambience, no power
+  graph).
+  `BlockSpotlight` (PowerItemType 2) is the richest consumer wrapper:
+  `OnBlockActivated` (IL=127) handles the `light` (toggles meta bit 1 and
+  the TE's `IsToggled`), `aim` (sets `AimingGun` and
+  `LockManager.LockRequestLocal` on the TE) and `take` (block
+  `takeItemWithTimer` with `BlockPowered.TakeDelay`) commands, resolving
+  multiblock children to the parent first; `updateState` (IL=249) writes
+  the on/off meta bit with `switch_up` / `switch_down` head sounds, lazily
+  creates the TE (`WindowGroupToOpen = XUiC_PoweredSpotlightWindowGroup.ID`),
+  initializes a `SpotlightController` from the block properties,
+  instantiates shared materials per renderer for `_EmissionColor`
+  white/black, and drives the `MainLight` child's `LightLOD.SwitchOnOff`.
+- **Triggers** (`TileEntityPoweredTrigger`): `BlockPressurePlate` sets
+  `TriggerType` **1**, `BlockTimerRelay` **2**, `BlockMotionSensor` **3**
+  (IL=6 each), `BlockTripWire` **4** plus PowerItemType 10 (IL=9); the
+  trigger behaviour lives in the TE ticks of §3.4 / §5.
+- **Traps**: `BlockLauncher` (PowerItemType 8,
+  `TileEntityPoweredRangedTrap`): `InstantiateProjectile` (IL=188) bails
+  unless the TE is unlocked, on the server `DecrementAmmo` (unlocking and
+  `SetModified` when empty), clones the ammo class model onto the block
+  transform, adds a `BlockProjectileMoveScript` (itemProjectile,
+  itemValueProjectile, the `ItemActionProjectile` from action slot 0 or 1,
+  `ProjectileOwnerID` from the TE) and fires it at the block position plus
+  (0.5, 0.5, 0.5) along the transform forward, `BroadcastPlay(playSound)`
+  on the server. `BlockElectricWire` (PowerItemType 9,
+  `TileEntityPoweredMeleeTrap`) parses `BrokenPercentage` (default 0.25,
+  clamped 0..1) in `Init` (IL=25), the chance a damaged wire stays
+  non-conductive.
+- **`BlockRallyMarker`** is a quest block, not a power block:
+  `OnBlockActivated` (IL=29) with command `activate` calls
+  `QuestEventManager.HandleRallyMarkerActivate(player, pos, blockValue)`
+  when `QuestJournal.HasQuestAtRallyPosition(pos, true)` finds an
+  un-activated rally quest and the player has no active quest
+  ([quests-challenges.md](quests-challenges.md)).
+
+---
+
 ## 4. Workstation and forge crafting
 
 ### 4.1 `TileEntityWorkstation.UpdateTick` (IL=134)
