@@ -85,6 +85,23 @@ Per connection:
    `ProcessPackage` + `FreePackage`, else `HandleSkipped` (entity hold-back;
    see [dedicated-leftovers.md](dedicated-leftovers.md) §12).
 
+**Decode failure path:** an unknown package id in the incoming stream throws
+`NetPackageManager/UnknownNetPackageException` (ctor IL=7, takes the
+`packageId`) from the package factory, which is the "malformed or
+out-of-version package" error a server logs when a mismatched client sends
+an id the server no longer knows.
+
+**NTP clock probe (`ServerDateTimeRequest`):** `GameManager.Awake` starts
+`GetNtpTimeAsync(onComplete, "pool.ntp.org", 5000)` (IL=15), which runs
+`FetchNtpTimeAsync` (IL=20) on a worker: the async body
+(`<FetchNtpTimeAsync>d__1.MoveNext` IL=286) opens a `UdpClient`, sets the
+socket `ReceiveTimeout` to the 5000 ms budget, sends the classic 48-byte NTP
+request and awaits the reply (`SwapEndianness` IL=29 reverses the NTP
+seconds field). The result (`ServerDateTimeResult`: `RequestComplete`,
+`HasError`, `SecondsOffset`) is stored, but the only consumer is the client
+main menu (`XUiC_MainMenu`), so a dedicated server computes the offset and
+never uses it - the probe is dormant on the headless host.
+
 ### 1.3 `DisconnectClient` (IL=184, highlights)
 
 Ordered (main-thread only; off-thread hops via `AddSingleTaskMainThread`):
