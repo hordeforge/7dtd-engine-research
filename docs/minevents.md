@@ -493,6 +493,13 @@ Per targeted `EntityAlive`: with `add` (default true), calls
 `text`, `cvar_to_text` (strings, all default empty), `add` (bool). This is the
 quest/event "show a tracker marker" verb.
 
+Entity side: `AddNavObject` (IL=24) registers a fresh `NavObject` via
+`NavObjectManager.RegisterNavObject(className, this, sprite, false)` when the
+entity has none yet (the sprite is the override, the text the display name), or
+stacks an extra `NavObjectClass` onto the existing nav object; `RemoveNavObject`
+(IL=15) drops the class and clears `Entity.NavObject` when the last one is
+removed.
+
 #### Presentation leaves (dedi residual)
 
 `PlaySound` (IL=101), `AttachPrefabToEntity` (IL=90), `SetTransformActive`
@@ -565,6 +572,9 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-08:** Entity.AddNavObject (IL=24) fresh register + name from text,
+  or class stack on existing; RemoveNavObject (IL=15) class drop + null when
+  last. Complements the SetNavObject minevent.
 - **2026-08-08:** MinEventActionSetNavObject (Execute IL=53): AddNavObject
   with sprite + cvar_to_text/overrideText resolution, RemoveNavObject on
   add=false; nav_object/sprite/text/cvar_to_text/add attributes.
