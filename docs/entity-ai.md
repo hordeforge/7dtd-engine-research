@@ -2641,6 +2641,14 @@ vector. Each per-axis clip (single-collider `Bounds` variants IL=72-87, list
    `NBB exceeded size {0}: BB={1}` (`Log.Warning`) and returns the partial
    list, bounding worst-case cost for pathological query boxes.
 
+**Inert alternative: `World.ClipBoundsMove(entity, aabb, move, expandDir,
+stepHeight)` (IL=573).** A second movement-clip implementation that pools per
+block `World.ClipBlock` records (`New(bv, block, _, pos, bounds)` /
+`Init` / `ResetStorage`, static pool) over the entity's expanded bounds.
+`tools/bin/RefScan.exe` reports **0 external call sites** on b14; the live
+resolution path is `aabbEntityCollision` -> `BoundsUtils.ClipBoundsMove`
+above, so treat this World method as unused in this build.
+
 **`ConditionalScalePhysicsAddConstant` (IL=2):** identity (returns arg).
 
 **`PlayHitGroundSound(impactSpeed)` (IL=42):** volume =
