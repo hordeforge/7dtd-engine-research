@@ -204,6 +204,26 @@ teleport-out); `PrefabInfoVolumeList` backs `PrefabInstance.IsWithinInfoArea`;
 `AddNewVolume`/`SelectionBox` members are the editor half. Complements
 [server-browser-prefabs.md](server-browser-prefabs.md) (prefab load pipeline).
 
+**`PrefabVolumeManager` server leaves (all IL-verified):**
+`AddVolumeServer(volumeType, startPos, size)` (IL=115) is the
+server-authoritative add: a client forwards
+`NetPackageEditorAddVolumeFromClient`; on the server it resolves the prefab
+under the box center (`GetPrefabFromWorldPosInside`), runs
+`CanCreateVolume` + `AddNewVolume` on the type's volume list
+(`VolumeList for Type {0} not found` throws), broadcasts
+`NetPackageEditorUpdateVolume.Setup(0, prefabId, volIdx, volume)` (channel
+192), and flags `PrefabEditModeManager.NeedsSaving` when the editor is on
+the prefab. `CloneVolumeServer(volumeType, prefabInstanceId, existingIndex,
+offset)` (IL=76) is the clone twin (`CloneVolume` + the same broadcast).
+`GetPrefabIdAndVolumeId(name, out volumeId, out prefabInstance)` (IL=76)
+parses the `prefabId_volumeId` selection-box name and resolves the instance
+via `PrefabInstanceClientManager`; `TryGetSelectedVolume(category, out box,
+out volume, out prefabInstance, out volumeIndex)` (IL=50) resolves the
+current `SelectionBoxManager.Selection` into a volume;
+`getBoxVolumeType(box)` (IL=27) maps the selection category to
+`EVolumeType` (1 trader teleport, 2 info, 3 wall; `Invalid box category`
+throws).
+
 `TraderArea.Write` (IL=111) is the blob: `Position` (3x int32), `PrefabSize`
 (3x int16), `GetProtectPadding()` (3x sbyte, = `ProtectSize - PrefabSize` with
 2 removed on x/z), teleport-volume count (byte), then per volume
