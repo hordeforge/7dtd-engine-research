@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Prefab data-model leaves
+
+CellsToArrays/FromArrays, writeBlockData tts payload, TE list read/write, ProcessMultiBlock reconcile, copyFromWorld capture, stats (verified)
 ## 2026-08-08 - tier-C: NetPackagePlayerInventoryForAI wire body
 
 direction 1, entityId + bag/belt ItemId sets (i16 count), ProcessPackage -> aiDirector.UpdatePlayerInventory (verified)
