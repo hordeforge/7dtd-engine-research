@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: player move-state machine
+
+EntityPlayerLocal.SetMoveState (IL=553) HoldType + condition-derived
+state, MinEvent 71, per-state motor values; SetMoveStateToDefault (IL=88)
+crouch/run/stand dispatch (entity-ai.md). verified from IL. Commit 2638ef0.
 ## 2026-08-08 - tier-C: player step view gate
 
 EntityPlayerLocal.PlayStepSound (IL=7, entity-ai.md): third-person-only
