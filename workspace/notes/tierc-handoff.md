@@ -23,13 +23,13 @@ No em dashes. No AI attribution in commits.
 | HEAD (at handoff write) | `8354c60` LockRequest re-verify |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
-| Coverage (last pin text) | narrated 1846 / catalogued 558 / classified 1295 / unaccounted **0** |
+| Coverage (last pin text) | narrated 1847 / catalogued 557 / classified 1295 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
 
 2026-08-08 final-stretch notes: full protocol-packages §6.x wire sweep
 (6.1/6.2/6.9-6.22; every claimed write/process IL size exact); Coverage census
-re-verified (1846/558/1295, unaccounted 0, report in sync); INDEX structure
+re-verified (1847/557/1295, unaccounted 0, report in sync); INDEX structure
 coherence (all docs linked, no dead links); netpackage inventory reconciled
 (193 census / 182 own-write bodies; 8 write-less or inherited-write packages
 covered narratively); minevents §7.0a catalog spot-checked (26 claims exact,
@@ -59,7 +59,7 @@ closed-gaps + terrain-height SaveLoad 884->926, terrain-height heightmap pair
 49/63->132/74. Netpackage bodies inventory IL-verified field-by-field
 (EntityRemove, PlayerId, ExplosionInitiate 9 fields); gmupdate-calls 182 rows
 and frame-entries 244 rows confirmed; 0xCA marker found in the LiteNetLib auth
-wrapper. Census unchanged 1846/558/1295, unaccounted 0, report in sync. Final
+wrapper. Census: 1847/557/1295 after the TE-tick table narrative mentions, unaccounted 0. Final
 state: tree clean at the closing commit, `make test` + `make stock-check`
 green, 2205+ commits.
 
@@ -108,7 +108,7 @@ OOS doc counts (supplement sections now match their lists; total 1168),
 verified every leaf-catalog key-method/referrer/base claim (1 real error
 fixed: SpawnEntry HandleUpdate), and verified all remaining doc structural
 claims (game-events 179/1014, quests 7/48, Twitch 117, Webserver 72/413,
-largest-maxIL order). Census: narrated 1846 / unaccounted 0.
+largest-maxIL order). Census: narrated 1847 / unaccounted 0.
 ## Resume checklist (next agent / next turn)
 
 1. `cd /home/maci/Desktop/7dtd/7dtd-research && git status && git log --oneline -5`

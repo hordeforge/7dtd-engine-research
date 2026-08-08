@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1846 / catalogued 558 / classified 1295) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1847 / catalogued 557 / classified 1295) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -357,5 +357,5 @@ work, not more narrative RE.
 
 ## Changelog
 
-- **2026-08-08:** Census pin refreshed to 1846 narrated / 0 unaccounted after the tier-C sweep.
+- **2026-08-08:** Census pin refreshed to 1847 narrated / 0 unaccounted after the tier-C sweep.
 - **2026-08-07:** Initial completion-bar definition after Coverage unaccounted=4 cleanup drive.
