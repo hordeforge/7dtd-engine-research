@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: AIDirectorChunkData leaves
+
+Write v2 (activity + events + cooldownDelay) / Read inner >= 2; IsReady
+cooldown gate; EventCount/GetEvent/ActivityLevel accessors. Verified fresh
+dumps.
 ## 2026-08-08 - tier-C: ChunkEventComponent + dedupe
 
 5x5-chunk district keying (GetChunkDataFromPosition), StartCooldownOnNeighbors
