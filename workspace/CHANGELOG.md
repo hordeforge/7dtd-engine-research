@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: RegionFileManager cache/timestamp/reset leaves
+
+MakeRoom/MakeRoomForChunk eviction, IsChunkSavedAndDormant, GetUniqueChunkKeys, timestamps + protection grouping, PendingResets load, volume reset (verified)
 ## 2026-08-08 - tier-C: PrefabVolumeManager server leaves
 
 AddVolumeServer/CloneVolumeServer + editor broadcast, prefabId_volumeId parse, selected-volume resolution, box category to type map (verified)
