@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: tooling: committed-inventory staleness test (WireBodies/Coverage)
 ## 2026-08-08 - tier-C: tooling: make census also shows coverage percentages
 ## 2026-08-08 - tier-C: tooling: census-pct.py --json mode
 ## 2026-08-08 - tier-C: tooling: regen.sh one-shot regeneration script
