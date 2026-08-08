@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChunkCluster regen-state/loading + stability teardown leaves
+
+UpdateRegenerationState (client-only), SecondsSince*Regeneration, NotifyOnChunksFinishedLoading, GetIndexedBlocks, ClearStabilityForChunks (verified)
 ## 2026-08-08 - tier-C: NetPackage world-folder/localization/dynamic-arrive bodies
 
 WorldFolder send/TestWorldValid/uncompressWorld/readDtmDelta coroutines, NetPackageLocalization chunk pipeline, DynamicClientArrive BuildData (verified)
