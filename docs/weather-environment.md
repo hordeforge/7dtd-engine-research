@@ -111,6 +111,14 @@ flowchart TB
   the admin `stormsurvival`-style instant storm, reusing the same
   stormWorldTime/stormDuration fields the scheduler drives.
 
+**Exposure query (`EntityHuman.IsStormEffected`, IL=22):** true only when
+the entity's `GetSpawnerSource()` is `Biome` (1), `biomeStandingOn` is set,
+the biome type is not 3 (`BiomeType.PineForest` in the `BiomeDefinition/
+BiomeType` order), and
+`WeatherManager.IsStorming(biomeStandingOn.m_BiomeType)` - the per-biome
+storm-exposure check the survival layers use to apply storm
+buffs/penalties to NPC-style humans standing in a storming biome.
+
 ### 2.1 Storm state machine (per biome)
 
 `BiomeWeather.ServerTimeUpdate(worldTime, freq)` is the state machine. Storms are

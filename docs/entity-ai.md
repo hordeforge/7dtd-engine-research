@@ -2598,6 +2598,15 @@ All four `World.GetEntitiesInBounds` overloads are thin chunk-grid fans over the
   considerations, quest objectives, threat tracking (list in
   [inventories/deeper.md](inventories/deeper.md)).
 
+**NPC move pattern (`EntityHuman.MoveSpeedPatternTick`, IL=46):** when the
+`moveSpeedPattern` list is set, every tick it decrements
+`moveSpeedPatternDelay -= 0.05`; at 0 it advances `moveSpeedPatternIndex
++= 2` (wrapping to 0 past the end), then loads the pair
+`moveSpeedPatternDelay = pattern[i]` and
+`moveSpeedPatternScale = pattern[i+1]` - the (delay, scale) walk-pattern
+for NPC-style humans. `SetupHandItem` (IL=7) is
+`inventory.SetRightHandAsModel()` + `ShowHoldingItem(false)`.
+
 **Query predicates:** `Entity.CanCollideWith(other)` is polymorphic, so the
 exclude filter is per-exclude-type: base `Entity` returns **true** (IL=2);
 `EntityAlive` (IL=15) returns false when `this.IsDead()` or when `other` is an
