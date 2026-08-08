@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `3bd1482` correct UniLinq/ConcurrentHashSet liveness in surface map |
+| HEAD (at handoff write) | `277b7bc` fix SaveLoad IL in surface ledger |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 1846 / catalogued 558 / classified 1295 / unaccounted **0** |
