@@ -667,6 +667,22 @@ touches in passing:
   `QuestJournal.AddSharedQuestEntry`, and the server's `Party.ServerHandle*`
   leave/kick/disconnect paths purge them via `RemoveSharedQuestEntryByOwner`.
 
+**`NetPackageSharedQuest` wire (`SharedQuestData.write` IL=63, per-flag framing):**
+the package body is `sharedByEntityID:i32` + `questEvent:u8`, then a
+`SharedQuestEvents` switch (`0 ShareQuest`, `1 RemoveQuest`,
+`2 AddSharedMember`, `3 RemoveSharedMember`):
+
+| questEvent | Extra fields |
+|---:|---|
+| 0 ShareQuest | `questCode:i32`, `questID:string`, `poiName:string`, `position:Vector3`, `size:Vector3`, `returnPos:Vector3` (all `StreamUtils.Write`), `questGiverID:i32`, `sharedWithEntityID:i32` |
+| 1 RemoveQuest | `questCode:i32` only |
+| 2 / 3 Add/RemoveSharedMember | `questCode:i32`, `sharedWithEntityID:i32` |
+
+`ProcessPackage` (IL=371) switches on the same enum: `ShareQuest` on the server
+calls `GameManager.QuestShareServer(data)` (client `SendToServer`); the member
+add/remove cases touch the journal's shared-quest entries; `RemoveQuest` clears
+the recipient's entry (channel **192** fan-out per member).
+
 **`QuestJournal` leaves:** `FailAllSharedQuests` (IL=46) closes every shared
 quest (`SharedOwnerID != -1`) still in `InProgress` before its highest phase
 with `CloseQuest(Failed, null)` - the shared-quest cleanup on member
