@@ -71,6 +71,45 @@ EntityLockContext(commandId, bag), 0)` - the crate opens via the same lock
 system as loot bags. `canDespawn()` (IL=2) is **always false**: landed
 crates persist until looted or removed.
 
+More `EntitySupplyCrate` runtime (V3.1.0 b14):
+
+- **Parachute flight:** `MoveEntityHeaded` (IL=35) adds
+  `motion.y += ScalePhysicsAddConstant(world.Gravity * 0.95)` each tick while
+  the parachute is active and the crate is not in water - the chute cuts gravity
+  to **95%** (slow descent). `Update` (IL=39) swings the model while airborne:
+  `localEulerAngles = (8*sin(t) - 4, 8*sin(t + 0.3) - 4 + startRotY, 0)`
+  (`startRotY` captured in `Start` from `rotation.y`). `Awake` sets
+  `hasAI = false` (no AI on crates). The ctor defaults `isSmokeOn = true` and
+  `smokeTimeAfterLanding = 240`.
+- **Spawn/load:** `PostInit` (IL=35) calls `ValidateResources` (IL=23: locates
+  `crateT` under `SupplyCrateEntityPrefab` and `parachuteT` under
+  `parachute_supplies` via `FindInChilds`), sets `gameObject.layer = 21`,
+  re-enables the collider, and if `wasOnGround` (crate loaded landed from save)
+  calls `StopSmokeAndLights()` and deactivates the parachute.
+- **Smoke/lights:** `StopSmokeAndLights` (IL=77) turns off `loop` on every
+  `ParticleSystem` under the `SupplySmoke`-tagged children and deactivates all
+  `SupplyLit` children (lights). `RequiresChunkObserver` (IL=8) is `true` while
+  airborne, and `isSmokeOn` once landed (the smoke keeps the crate's chunk
+  observed until it goes off).
+- **Loot UI:** `InitLocalActivationCommands` (IL=8) registers one `search`
+  command; `AllowActivationCommand` (IL=20) allows it only when `bag != null`
+  and alive; `GetActivationText` (IL=81) shows `lootTooltipNew` / `Empty` /
+  `Touched` localized text prefixed with the Activate binding markup.
+- **Map marker:** `HandleNavObject` (IL=64), gated on
+  `GameStats.GetBool(AirDropMarker = 53)`: re-registers the `NavObject` from
+  `EntityClass.NavObject` and, on the server, pushes
+  `NetPackageNavObject(className, displayName, navPos + Origin.position, true,
+  usingLocalizationId, entityId)` on channel 192.
+- **Persistence/wire:** `Read`/`Write` (IL=20/17) carry `wasOnGround`,
+  `closeParachuteInTicks`, `showParachuteInTicks`; the Read block is version
+  **>= 11** gated. `IsSavedToFile` is `true`. `OnEntityUnload` (IL=17), when the
+  unload reason is `Killed` and running on the server, calls
+  `AIDirectorAirDropComponent.RemoveSupplyCrate(entityId)`.
+- **Flavor trivials:** `GetMapObjectType` = `SupplyDrop` (13);
+  `SetMotionMultiplier` is a no-op; `CanCollideWithBlocks` / `CanCollideWith` /
+  `CanBePushed` / `isRadiationSensitive` / `get_IsValidAimAssistSnapTarget` are
+  all `false`.
+
 **Air drop flight logic (`AIAirDrop`, V3.1.0 b14):** `SpawnAirDrop`
 (IL=59) builds an `AIAirDrop` (players + controller), whose `Tick` (IL=193)
 drives the whole drop. `CreateFlightPaths` (IL=355) runs once:
@@ -818,6 +857,15 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** EntitySupplyCrate rest: MoveEntityHeaded parachute gravity
+  0.95 + Update airborne swing + PostInit layer 21 / ValidateResources /
+  wasOnGround smoke off; StopSmokeAndLights SupplySmoke loop + SupplyLit off;
+  RequiresChunkObserver airborne||isSmokeOn; ctor isSmokeOn true +
+  smokeTimeAfterLanding 240; search command allow + GetActivationText
+  lootTooltip* + binding markup; HandleNavObject GameStats 53 + NetPackageNavObject
+  channel 192; Read/Write version >= 11 wasOnGround + parachute ticks;
+  OnEntityUnload Killed -> RemoveSupplyCrate; trivials (CanCollideWithBlocks/
+  CanBePushed false, IsSavedToFile true, GetMapObjectType 13).
 - **2026-08-08:** AIAirDrop flight logic: Tick IL=193 wait-for-chunks then
   per-path plane + staggered crate spawns; CreateFlightPaths IL=355
   (MakePlayerClusters 30 m, CalcSupplyDropMetrics 1-4 planes, crateY
