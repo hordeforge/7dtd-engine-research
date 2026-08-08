@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityPlayerLocal death/quit leaves
+
+dropItemOnQuit, HandleRemoveRandomItems 3 overloads (LocationTypes 0/1/2), ShouldRemoveEquipmentOnDeath drop options 1/6, EmptyBackpack/Toolbelt/AndToolbelt, RemoveSpawnPoints, TryAddRecoveryPosition cap 5 + 100 m + no-POI, AdjustItemsForSandboxOptions (verified)
 ## 2026-08-08 - tier-C: static-data XML loaders (sounds parse, weather params, coroutine entries)
 
 SoundsFromXml Parse IL=544 SoundDataNode grammar + NoiseData/ClipSourceMap, ParseNode exclusions, ParseSubtitleNode; WeatherSurvivalParametersFromXml.Load WeatherParams reflection bind; 4 coroutine entry wrappers with WorldStaticData call sites (verified)
