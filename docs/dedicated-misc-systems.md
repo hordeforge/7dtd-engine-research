@@ -149,6 +149,36 @@ fallback (`UserIdentifierSteam`), warning on invalid / missing attributes.
 `groupMemberships` key against `whitelistedGroups`;
 `AdminWhitelist.IsWhiteListEnabled()` (IL=29) is non-empty users or groups.
 
+## AdminBlacklist
+
+The third `AdminTools` sub-store (the `<blacklist>` section of
+`serveradmin.xml`): `bannedUsers: Dictionary<PlatformUserIdentifierAbs,
+BannedUser>` where the nested `BannedUser` is `Name`, `UserIdentifier`,
+`BannedUntil` (a `DateTime`), `BanReason` (empty default). Every
+mutating/querying method takes the parent `AdminTools` lock
+(`Monitor.Enter/Exit`) like the users store:
+- `AddBan(name, identifier, banUntil, reason)` (IL=40) inserts the
+  `BannedUser`, and for a time-limited ban (`banUntil > Now`) also
+  `AdminUsers.RemoveUser(identifier, false)`, then `AdminTools.Save()`.
+- `RemoveBan(identifier)` (IL=26) removes the entry and saves on success.
+- `IsBanned(identifier, out bannedUntil, out reason)` (IL=50) is true only
+  when an entry exists with `BannedUntil > Now` (filling both out params);
+  otherwise `Now` / `""` and false.
+- `GetBanned()` (IL=31) returns a filtered `Values` snapshot (active bans
+  only); `Clear()` empties the dictionary.
+- `ParseElement(child)` (IL=11) / `Save(root)` (IL=31) are the file
+  round-trip: parse via `BannedUser.TryParse` (a `Log.Warning` and false on a
+  missing `unbandate` attribute), save via a `<blacklisted>` element per entry
+  (`PlatformUserIdentifierAbs.ToXml`, then `name` / `unbandate`
+  (culture-invariant) / `reason` attributes; the `XmlExtensions` helpers).
+
+Enforcement sites: `IsBanned` gates login through
+`BansAndWhitelistAuthorizer.Authorize` and `SteamOwnerAuthorizer.Authorize`
+(the dedicated authorizer chain), and the webserver `WorldState.Player`
+JSON; `AddBan` / `GetBanned` back `ConsoleCmdBan` and the webserver
+`Permissions.Blacklist` REST API. Complements
+[console-commands.md](console-commands.md) and [webserver.md](webserver.md).
+
 ## EntitlementManager
 
 Singleton gating DLC/cosmetic entitlement sets (`HasEntitlement`,
