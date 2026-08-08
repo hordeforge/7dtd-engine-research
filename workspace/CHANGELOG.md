@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemActionTextureBlock painting internals
+
+getHitBlockFace/paintBlock/paintFace + SetBlockTextureServer, decreaseAmmo cost, floodFill BFS, eyedropper copies, radial paint modes (verified)
 ## 2026-08-08 - tier-C: ItemActionRanged leaf helpers
 
 TryExecuteAction trigger machine, GetReloadFlags bitmask, ammo cycling/swap/removal, AI range + damage reads, burst/reset helpers (verified)
