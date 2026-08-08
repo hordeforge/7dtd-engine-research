@@ -1255,6 +1255,14 @@ on `CanMoveTo(Backpack, -1)` then `AddToItemStackArray` (fires
 match the `Inventory` variants (type/tag, seed/meta filters, modded skip).
 `Clone()` (IL=31) deep-copies items, locked slots, `Touched`, and preferences.
 
+**`Inventory` layer leaves:** `ModifyValue(original, effect, ref base, ref
+perc, tags)` (IL=29) applies the holding item's chain (`ItemValue.ModifyValue`,
+useMods true) unless it equals the original or its class matches the
+`ignoreWhenHeld` tags - the holding-item layer of `EffectManager.GetValue`.
+`DecItem(value, count, ignoreModded, removedItems)` (IL=132) is the toolbelt
+consume, the same take-min/record/clear walk as `Bag.DecItem` over the
+`ItemInventoryData[]` slots (holding-index updates included).
+
 **`Equipment` leaves:** `ApplyTempCosmeticSlot` (IL=24) writes the pending
 `tempCosmeticSlot` into `m_cosmeticSlots[tempCosmeticSlotIndex]` and, for a
 non-remote entity, sets `bPlayerEquipmentChanged = true` (the equip-sync
@@ -1863,6 +1871,9 @@ The non-action leaves:
   QuestEventManager.HarvestedItem, inventory/drop, _xpFromHarvesting XP.
 ## Changelog
 
+- **2026-08-08:** Inventory layer leaves: ModifyValue (IL=29) holding-item
+  chain with ignoreWhenHeld tags; DecItem (IL=132) toolbelt consume over
+  ItemInventoryData slots.
 - **2026-08-08:** Equipment leaves: ModifyValue worn-gear chain; updateInsulation
   waterProof sum; DropItems + DropItemOnGround server drop; insulation/waterproof
   getters.
