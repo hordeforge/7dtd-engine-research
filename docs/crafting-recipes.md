@@ -81,6 +81,18 @@ the first `wildcardForgeCategory` recipe whose output material shares the
 same `ForgeCategory` (output type != item type) and whose output weight is
 `<= itemWeight * count` wins.
 
+**Registry accessors (all IL-verified):** `GetRecipe(name)` (IL=24) is a
+linear scan by `Recipe.GetName` (null on miss); `GetRecipes()` (IL=3)
+returns a copy of the list; `GetRecipes(name)` (IL=27) filters by name.
+`ClearAllRecipes` (IL=3) clears the list (the `ReloadRecipes` reset).
+Favorites: `RecipeIsFavorite(recipe)` (IL=5) is `FavoriteRecipeList.
+Contains(name)`; `ToggleFavoriteRecipe` (IL=17) adds/removes the name;
+`GetFavoriteRecipesFromList(ref list)` (IL=31) filters the list in place.
+`ClearLockedData` (IL=5) clears `lockedRecipeNames` + `lockedRecipeTypes`.
+Workstation config: `AddWorkstationData(data)` (IL=17) upserts into
+`craftingAreaData` by `WorkstationName`; `GetWorkstationData(name)`
+(IL=12) is the lookup (null on miss).
+
 ---
 
 ## 2. Craft lifecycle (state machine)

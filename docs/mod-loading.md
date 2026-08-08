@@ -231,6 +231,17 @@ Notable **server-loaded, not S2C** rows: `gamestages`, `spawning`, `signs`
 `ExecuteAfterLoad` hooks used on stock: materials → `LoadTextureAtlases`;
 item_modifiers → `LateInitItems`.
 
+**Reload lifecycle (the `Reload*` family, all IL=5):** each in-game reload
+first tears down the target registry then re-runs the load synchronously on
+the main thread: `ReloadItems` = `ItemClass.Cleanup()` +
+`RunCoroutineSync(LoadItems)`; `ReloadItemsAppend` skips the cleanup
+(mods append); `ReloadRecipes` = `CraftingManager.ClearAllRecipes()` +
+`LoadRecipes`; `ReloadLoot` = `LootContainer.Cleanup()` + `LoadLoot`.
+The per-family `Load*` entries themselves (LoadBlocks, LoadItems,
+LoadRecipes, LoadTraders, ...) are 6-IL coroutine factories whose parse
+bodies live in the compiler-generated `MoveNext` of each iterator
+(`<LoadBlocks>d__16` etc.), invoked through the `XmlLoadInfo` table above.
+
 
 ### 5.6 Config S2C (`SendXmlsToClient` / `NetPackageConfigFile`)
 
