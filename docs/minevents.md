@@ -359,6 +359,21 @@ Final return is the combined modified scalar (value * perc pattern inside
 `ModifyValue` leaves). Dedicated combat/loot paths typically set equipment +
 holding + progression + buffs; workstation tools do not affect dedicated.
 
+**Source-tracking twin (`GetValuesAndSources`, IL=208):** same layers but each
+`ModifyValue` is replaced by its `GetModifiedValueData` twin, appending
+`ModifierValuesAndSources` records with a `ValueSourceType` code: **1** item,
+**2** holding item, **3** equipment, **10** buffs, **11** progression, **12**
+entity class, **14** quality-mod pass. The no-entity path runs only the original
+item's sources; the entity path requires `IsGameStarted()` before the class
+controller, and the quality-mod tail (original `Quality > 0`) runs each
+installed `ItemClassModifier`'s parent-item `Effects` with `Quality` as the
+level and the passive-effect name parsed as the tag.
+
+**Display twin (`GetDisplayValues`, IL=216):** runs the same ordered layers
+(recipe → item → entity class → item → holding → equipment → progression →
+recipe → buffs) but returns only the accumulated `baseValueChange` /
+`percValueMultiplier` deltas for tooltip math.
+
 **Blocks** own no controller. Block interactions are triggers raised on the
 acting entity (`onSelfRepairBlock`, `onSelfPlaceBlock`, `onSelfUpgradedBlock`,
 `onSelfDamagedBlock`, `onSelfDestroyedBlock`, `onSelfHarvestBlock`) with the
@@ -572,6 +587,9 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-08:** EffectManager twins: GetValuesAndSources (IL=208) with
+  ValueSourceType codes 1/2/3/10/11/12/14 + quality-mod tail; GetDisplayValues
+  (IL=216) base/perc deltas over the same layers.
 - **2026-08-08:** Entity.AddNavObject (IL=24) fresh register + name from text,
   or class stack on existing; RemoveNavObject (IL=15) class drop + null when
   last. Complements the SetNavObject minevent.
