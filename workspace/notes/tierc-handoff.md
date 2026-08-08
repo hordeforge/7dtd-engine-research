@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `5a244fc` world volume setup + my-claim land checks |
-| Commits since dry-run `3b61d9c` | ~1214 |
+| HEAD (at handoff write) | `bd5af40` ItemClass load-time id assignment pipeline |
+| Commits since dry-run `3b61d9c` | ~1215 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
