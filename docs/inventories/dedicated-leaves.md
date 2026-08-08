@@ -166,7 +166,7 @@ wholesale, or the referrer-verified promotions and the IL-verified roles are los
 | `EntitySpawnerClassForDay` | day-indexed EntitySpawnerClass schedule read by EntitySpawner | `Object` | Day, AddForDay, Count |
 | `SPlayerSpawnedInWorldData` | in-process PlayerSpawnedInWorld ModEvents payload (not a wire struct) | `ValueType` | (fields only) |
 | `SPlayerSpawningData` | in-process PlayerSpawning ModEvents payload (not a wire struct) | `ValueType` | (fields only) |
-| `SpawnEntry` | per-game-event spawned-entity record (forces aggressive spawns near players) | `Object` | HandleUpdate |
+| `SpawnEntry` | per-game-event spawned-entity record (forces aggressive spawns near players) | `Object` | (fields only: `Target`, `EntityTypeID`; ctor) |
 | `SupplyCrateSpawn` | pending air-drop crate queued by AIAirDrop.CreateFlightPaths | `Object` | (fields only) |
 
 ## tile-entities-power (1)
