@@ -388,6 +388,20 @@ groups) and periodically fires a `MinEvent` so group-level passive effects apply
 `HandleChallengeGroupComplete` and `CompleteIntroChallenges` handle group
 completion and the intro flow.
 
+**`ChallengeJournal` leaves:** `StartChallenges(player)` (IL=160) binds the
+player, builds a `ChallengeGroupEntry` per registry group (`CreateChallenges`),
+then a second pass marks every group `IsComplete` and runs
+`AddAnyMissingChallenges` per matching entry. `ModifyValue` (IL=88) applies the
+challenge-layer passives: each `CompleteChallengesForMinEvents` entry's class
+`Effects` (PassivesIndex-gated) plus the completed group effects.
+`HandleChallengeRedeemed(challenge)` (IL=12) appends the challenge to
+`CompleteChallengesForMinEvents` when its class is in the `eventList`.
+`GetNextChallenge` (IL=52) resolves the chain: the group's first challenge
+class name looked up in `ChallengeDictionary`. `EndChallenges` (IL=19) and
+`ResetChallenges` (IL=30) tear down / reset; `RemoveChallengesForGroup` (IL=38)
+removes a group's entries. `Write` (IL=103) / `Read` (IL=176) persist the
+journal; `Clone` (IL=56) copies it.
+
 ---
 
 ## 8. Dedicated relevance and residuals
@@ -734,6 +748,9 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
   TraderPOI linear scan.
 ## Changelog
 
+- **2026-08-08:** ChallengeJournal leaves: StartChallenges two-pass seeding;
+  ModifyValue challenge passives; HandleChallengeRedeemed eventList append;
+  GetNextChallenge chain; End/Reset/RemoveChallengesForGroup; Write/Read/Clone.
 - **2026-08-08:** QuestJournal leaves: FailAllSharedQuests/FailAllActivatedQuests
   CloseQuest sweeps; QuestIsActive states; Find* scans; AddTraderPOI/
   HasTraderPOI/GetTraderList faction tracking.
