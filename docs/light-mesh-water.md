@@ -44,7 +44,11 @@ stateDiagram-v2
 and turret fires): resolves the chunk via `GetChunkFromWorldPos` and, when it
 exists, returns `chunk.GetLightBrightness(toBlockXZ(x), toBlockY(y),
 toBlockXZ(z), 0)`; when the chunk is missing (unloaded area) it falls back to
-the ambient constant `IsDaytime() ? 0.65 : 0.1`. The chunk half:
+the ambient constant `IsDaytime() ? 0.65 : 0.1`. The split query
+`World.GetSunAndBlockColors(pos, out sun, out block)` (IL=41) reads the two
+channels separately: `sun = chunk.GetLight(x, y, z, LIGHT_TYPE 1)` and
+`block = chunk.GetLight(x, y, z, LIGHT_TYPE 0)`, both zeroed when the chunk
+is missing. The chunk half:
 `Chunk.GetLightBrightness` (IL=10) is `GetLightValue / 15` (0-15 light grid
 normalized), and `Chunk.GetLightValue(x, y, z, darknessValue)` (IL=30) is
 `max(sun - darknessValue, blockLight)`: it reads the Sun channel, subtracts
@@ -442,6 +446,10 @@ else **1000** ticks.
 | [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) | `NetPackageWaterSimChunkUpdate` / `WaterValue` wire |
 | [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) | job struct leaf rows |
 
+## Changelog
+
+- **2026-08-08:** World.GetSunAndBlockColors (IL=41): sun (LIGHT_TYPE 1) and
+  block (0) channel split, zeroed on missing chunk.
 ## Changelog
 
 - **2026-08-08:** World.GetBlockLightValue IL=34: DensityAir sentinel (no
