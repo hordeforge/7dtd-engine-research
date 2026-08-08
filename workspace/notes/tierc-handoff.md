@@ -27,6 +27,23 @@ No em dashes. No AI attribution in commits.
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
 
+2026-08-08 final-stretch notes: full protocol-packages §6.x wire sweep
+(6.1/6.2/6.9-6.22; every claimed write/process IL size exact); Coverage census
+re-verified (1846/558/1295, unaccounted 0, report in sync); INDEX structure
+coherence (all docs linked, no dead links); netpackage inventory reconciled
+(193 census / 182 own-write bodies; 8 write-less or inherited-write packages
+covered narratively); minevents §7.0a catalog spot-checked (26 claims exact,
+67 TargetedCompareRequirementBase leaves confirmed, IsBloodMoon IsValid IL
+fixed 17 -> 11); console command catalog verified census-correct (187 commands
++ 2 alias rows; Coverage credits bare simple names, namespaced full names in
+the Type cell break the count). **DumpAll fix:** the tool silently clobbered
+757 of 7432 types (filename collisions among compiler-generated nested types;
+Cecil reports empty Namespace for nested types of namespaced parents). Fixed
+by full declaring-chain scoping + outermost-namespace dir; fresh runs now
+produce exactly 7432 files, 0 missing, 0 extra (verified vs a new
+ListAllTypes.exe audit tool). Canonical `il/full-v3.1.0/` and `/tmp/full-il.txt`
+regenerated clean.
+
 2026-08-07/08 session notes: doc structure pass (f1e6a34) - fixed duplicate
 section numbers (server-lifecycle, quests-challenges, managers, save-region),
 ordered entity-ai D8.x sections, moved `docs/stability-dump/` raw IL to
