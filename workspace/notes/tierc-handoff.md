@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `7b29593` owned vending positions |
-| Commits since dry-run `3b61d9c` | ~1056 |
+| HEAD (at handoff write) | `1e41c07` sleeper stack census |
+| Commits since dry-run `3b61d9c` | ~1057 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: sleeper stack census
+
+Prefab.CountSleeperSpawnsInVolume (IL=116, world-generation.md): sleeper-stack census - counts IsSleeperBlock cells with a non-sleeper below (one spawn per stack), excluding sleeper priority volumes, into Transient_NumSleeperSpawns. verified from IL. Commit 1e41c07.
 ## 2026-08-08 - tier-C: persistent backpack/vending tracking
 
 PersistentPlayerData (save-region.md 4): AddDroppedBackpack (IL=69) with
