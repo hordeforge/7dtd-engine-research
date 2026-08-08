@@ -646,6 +646,20 @@ comma-split `Random_item` + `Random_item_count`, `Random_count`,
 `Unique_random_only`, and `Condition_raycast_block` - the block the player
 must be looking at to open the bundle).
 
+Remaining config tails, compact: `ExchangeItem` (IL=83) parses
+`Change_item_to` / `Change_block_to` / `Do_block_action` /
+`Focused_blockname_`; `GainSkill` (IL=53) `Title` / `Description` /
+`Skills_to_gain`; `LearnRecipe` (IL=75) `Title` / `Description` /
+`Recipes_to_learn`; `Quest` (IL=49) `Title` / `Description` / `QuestGiven`;
+`Repair` (IL=43) `Repair_amount` / `Repair_action_sound` /
+`Upgrade_action_sound` / `Upgrade_hit_offset` /
+`Allowed_upgrade_items` / `Restricted_upgrade_items`; `UseOther` (IL=57)
+`Consume` / `Create_item` / `Create_item_count`; `MakeFertile` (IL=66)
+`Fertileblock` / `Adjacentblock`; `ExchangeBlock` (IL=55) `Sourceblock` /
+`Targetblock` (the exchange/make-fertile families throw on missing or
+unknown names); `SpawnEntity` (IL=34) `Entity` / `EntityOffset` /
+`AnimType` / `AnimWait` / `SoundWarn` / `SoundAttack`.
+
 **Reload leaves:** `ConsumeAmmo(data)` (IL=9) is `iv.Meta -= 1` (one round per
 shot). `loadNewAmmunition(gun, ammo, entity)` (IL=20) reads the holding
 action slot 0 as `ItemActionDataRanged`, resets `SelectedAmmoTypeIndex` to 0
@@ -1660,6 +1674,10 @@ The non-action leaves:
 - **2026-08-08:** base ItemAction.ReadFrom (IL=107): Delay/Sound_start/
   Particle_harvesting/ActionExp (2)/ActionExpBonusMultiplier (10)/
   UseAnimation/Buff list -> BuffActions.
+- **2026-08-08:** Remaining ReadFrom configs: ExchangeItem (IL=83),
+  GainSkill (IL=53), LearnRecipe (IL=75), Quest (IL=49), Repair (IL=43),
+  UseOther (IL=57), MakeFertile (IL=66), ExchangeBlock (IL=55),
+  SpawnEntity (IL=34) key sets.
 - **2026-08-08:** ItemActionRanged.ReadFrom (IL=126) bullet_material /
   penetration / AutoReload / aiBurst ranges; ItemActionEat.ReadFrom
   (IL=152) Consume, Create_item refund trio, BlocksAllowed ->
