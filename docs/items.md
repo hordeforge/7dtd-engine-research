@@ -695,6 +695,77 @@ the runtime `actionData` list (the held path reads
 `GetBlockHit`; damage scaled by `EffectManager.GetValue` passive effects; server
 path applies entity/block damage (same authority model as melee `Hit`).
 
+**`ItemActionMelee` (classic melee, `: ItemActionAttack`):**
+`ExecuteAction` (IL=116) is release-gated: a released click sets
+`bFirstHitInARow = true` and returns; a held tick passes the `Delay` gate
+(`Time.time - lastUseTime < Delay` drops it). With the tool broken
+(`MaxUseTimes > 0 && UseTimes >= MaxUseTimes`) it plays the jam sound
+(`HandleJamSound`) and returns. Otherwise it sets
+`RightArmAnimationAttack = true`, runs `checkHarvesting` into `bHarvesting`
+(which drives `HarvestingAnimation`), plays `soundStart` via `PlayOneShot`,
+sets `bAttackStarted = true`, and picks the swing ray-cast delay from
+`AnimationDelayData.AnimationDelay[item.HoldType]` (`RayCastMoving` when
+`speedForward > 0.009`, else `RayCast`).
+`GetExecuteActionTarget` (IL=152) builds the swing ray from `GetMeleeRay()`:
+while `IsBreakingBlocks` with the ray aimed down it is flattened to
+horizontal and its origin lowered by `(0, -0.7, 0)`; with an attack target it
+is re-aimed at `GetAttackTargetHitPosition() - origin`; either way the origin
+then steps back `0.15 * direction`. Range is `FastMax(Range, BlockRange) +
+0.15`. The scan temporarily sets model layer 2 and raycasts
+`Voxel.Raycast(world, ray, range, mask, 128, radius)`: mask `1073807360` for
+an `EntityEnemy` that `IsBreakingBlocks` (dig-through), `-538767389`
+otherwise, and a fallback pass with `-538488845` when the first pass found no
+`EntityAlive`; each uses `SphereRadius`.
+`GetCrosshairType` (IL=9) is crosshair **4** when `isShowOverlay`, else **1**.
+
+**`ItemActionCancel.ExecuteAction` (IL=26):** on release only, cancels the
+action one slot earlier: `item.Actions[indexInEntityOfAction - 1].
+CancelAction(actionData[indexInEntityOfAction - 1])` when that slot's data
+exists, the "cancel the previous action" entry of multi-action items.
+
+**`ItemActionExchangeItem` (exchange held item / focused block):**
+`ExecuteAction` (IL=75) fires on the first activation only
+(`lastUseTime <= 0`): it raycasts `GetLookRay()` with the origin pushed
+`0.5 * normalized direction` out to `cDigAndBuildDistance` (mask
+`-538480653`, 4095), and when the hit is valid and `isFocusingBlock` (IL=29,
+linear `focusedBlocks` match on the hit `BlockValue`) it records
+`hitLiquidBlock` / `hitLiquidPos`, sets `lastUseTime = now`,
+`RightArmAnimationUse = true` and plays `soundStart`.
+`OnHoldingUpdate` (IL=93) then performs the swap once the action is not
+running: `QuestEventManager.ExchangedFromItem(itemStack)` first, then
+`inventory.SetItem(slotIdx, new ItemStack(GetItem(changeItemToItem),
+holdingCount))` replaces the held stack; with `do_block_action` set and
+`world.IsWater(hitLiquidPos)` the hit liquid block runs
+`Block.DoExchangeAction(world, hitLiquidPos, hitLiquidBlock,
+doBlockAction, holdingCount)`; with `change_block_to` set the block under
+the local player's `HitInfo` is replaced via
+`SetBlockRPC(pos, GetItem(changeBlockTo).ToBlockValue())`.
+`ReadFrom` (IL=83) requires `change_item_to` (throws `Missing attribute
+'change_item_to' in use_action 'ExchangeItem'`), accepts `change_block_to`
+and `do_block_action`, and parses `focused_blockname_0..N` into
+`focusedBlocks` via `ItemClass.GetItem(name).ToBlockValue()` (an unknown
+name throws `Unknown block name 'X' in use_action!`).
+
+**`ItemActionDisconnectPower` (wire cutter):** `ExecuteAction` (IL=19) is
+release- and `Delay`-gated and only sets
+`MyInventoryData.StartDisconnect = true`; `IsActionRunning` (IL=25) holds
+while `Time.time - lastUseTime < 2 * AnimationDelay[HoldType].RayCast`.
+`OnHoldingUpdate` (IL=193) waits out the `RayCast` delay, requires a valid
+non-entity hit (`tag` not starting with `E_`), and first tries
+`holdingItem.Actions[1] as ItemActionConnectPower` with its
+`ConnectPowerData`: `DisconnectWire` returning true ends the action.
+Otherwise it must place-block at the hit (`CanPlaceBlockAt(pos,
+persistentLocalPlayer, false)`), then `GetPoweredBlock` (IL=99) resolves
+the hit block (must be `BlockPowered` or `BlockPowerSource`) to its
+`IPowered` tile entity, creating it on the fly
+(`BlockPowered`/`BlockPowerSource.CreateTileEntity`, `InitializePowerData`,
+`Chunk.AddTileEntity`) when absent; a null powered block falls back to
+`DisconnectWire` again. With a powered block it applies the tool-degradation
+pattern (`UseTimes += GetValue(passive 7, iv, UseTimes + 1, ...) *
+ItemDegradationModifier`, `HandleItemBreak` when the tool breaks), sets
+`RightArmAnimationAttack = true`, and finally
+`powered.RemoveParentWithWiringTool(entityId)` severs the wire.
+
 **`ItemActionAttack.ReadFrom` (IL=482) is the attack-action config parse** run
 from the loader's Actions fill: `ToolCategory` (string), `DamageEntity` /
 `DamageBlock` (float, defaults rolled before the keys), `Range` /
