@@ -742,6 +742,43 @@ gate); for `EntityHuman` record the `GetHitTransform(1).name`; apply
 `target.DamageEntity(source, damage, false, 1)`, return true when it dealt
 damage.
 
+**Collision-box variants (`GetCollisionAABB`):**
+- `BlockCactus` (IL=60): base `BlockDamage` AABB, then every bounds is
+  expanded by `(0.15, 0.05, 0.15)` on both ends (min shrunk, max grown);
+  a multiblock cactus with `multiBlockPos.dim.y == 1` instead uses
+  `(0.15, -0.75, 0.15)` (the enlarged hitbox is what lets walkers touch
+  the damage block from just outside the cell).
+- `BlockHay` (IL=34): one bounds inset by 0.0625 (1/16) on x/z with full
+  height, `(x + 0.0625, y, z + 0.0625)` to `(x + 0.9375, y + 1,
+  z + 0.9375)`; `OnEntityCollidedWithBlock` (IL=10) cuts the entity's
+  `fallDistance` by 5 (`max(0, fallDistance - 5)`), the hay-bale
+  fall-cushion.
+
+**Movement helpers:** `BlockLadder.IsElevator()` (IL=2) returns true and
+`IsElevator(rotation)` (IL=6) tests `climbableRotations[rotation] != 0`
+(which rotations are climbable). `BlockStairs.IsMovementBlocked` (IL=7,
+both face overloads) is false for multiblock children, true otherwise.
+
+**Placement trivia:** `BlockDeadgrass` sets `IsDecoration = true` in Init
+(IL=6) and `OnBlockPlaceBefore` (IL=8) rolls a random `meta` in 0..15
+(the 16 decoration variants). `BlockTrunk` is fields-only (tree-trunk
+shape config); `BlockTrunkTip.RotateVerticesOnCollisionCheck` (IL=2)
+returns false.
+
+**Pair removal:** `BlockSiblingRemove` (base of `BlockSleepingBag`): Init
+(IL=20) parses `SiblingDirection` (a Vector3). `OnBlockRemoved` (IL=177)
+removes the paired block: with a zero direction it probes the four
+horizontal neighbors (+x, +z, -x, -z) for the first block equal to
+`SiblingBlock` and clears it; with a direction it rotates that vector by
+the block rotation (rot 0 -> 180 deg, 1 -> 270 deg, 3 -> 90 deg around
+up), rounds to a `Vector3i`, and clears the sibling at
+`pos + rotatedDir` when it matches.
+
+**Thin stubs worth knowing:** `BlockMusic.OnBlockAdded` / `OnBlockRemoved`
+are IL=1 no-ops (the music behaviour is not on the block);
+`BlockRanged.Init` (IL=16) only parses `AmmoItem` into `AmmoItemName`
+(the powered-ranged-trap base, [tile-entities-power.md](tile-entities-power.md) §3.7).
+
 ---
 
 ## 9. Dedicated relevance and residuals
