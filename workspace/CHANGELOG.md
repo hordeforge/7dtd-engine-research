@@ -6,6 +6,8 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: narrate 218 support leaves (narrated 2168->2388; catalogued-only = 0)
+## 2026-08-08 - tier-C: fix classified>catalogued bucket hierarchy (buckets now disjoint, sum 3574)
 ## 2026-08-08 - tier-C: narrate 103 family leaves across 11 docs (narrated 2065->2168)
 ## 2026-08-08 - tier-C: narrate 83 minevents leaves (narrated 1982->2065)
 ## 2026-08-08 - tier-C: narrate 141 console-command leaves (narrated 1841->1982)
