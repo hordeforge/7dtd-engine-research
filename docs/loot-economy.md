@@ -355,6 +355,25 @@ renewal. Accessors: `get_IsRentable` (IL=5) = `TraderData.TraderInfo.Rentable`;
 as a float day count; `get_RentalEndDay` (IL=3), `GetUsers` (IL=3), and
 `GetPasswordHash` (IL=3) are field reads.
 
+**`TryAutoBuy(isInitial)` (IL=227)** is the machine's simulated-customer
+restock, driven by the client opening the machine (`XUiC_TraderWindow.OnOpen`)
+plus its own one-day re-entry. It initializes `nextAutoBuy` on first run and,
+before the timer fires, returns `!isInitial` (a later non-initial call
+proceeds). At the due time, a roll `rand.RandomFloat() < autoBuyThreshold`
+plus `PrimaryInventory.Count > minimumAutoBuyCount` triggers a purchase of
+`RandomRange(1, Max(1, count / 10))` entries (logging `Items Purchased:`):
+each round counts the eligible entries (`Markup <= 0`, economic value > 0,
+`SellableToTrader`), picks a random one, computes `XUiM_Trader.GetBuyPrice`,
+removes the entry, and adds the price to `TraderData.AvailableMoney`.
+Afterwards `autoBuyThreshold` resets to `autoBuyThresholdStep` on a
+successful purchase or ramps up by the step on a failed roll (a machine that
+keeps failing to roll becomes more likely to buy), `SetAutoBuyTime(false)`
+schedules the next day, and the call recurses once. This keeps a rented
+machine's stock turning over and its cash growing while no player is
+present. The vending `UpdateTick` (IL=25) is separate: it clears the machine
+(`ClearVendingMachine`) once `rentalEndDay <= WorldTimeToDays(worldTime)`
+for a rented, owner-set machine.
+
 ---
 
 ## 6b. World item drops and bag containers (IL re-pin 2026-08-07)
@@ -874,6 +893,12 @@ or `ItemStack.Empty` when nothing rolled.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
+## Changelog
+
+- **2026-08-08:** TileEntityVendingMachine.TryAutoBuy (IL=227): customer
+  restock roll on XUiC_TraderWindow.OnOpen, eligible-entry buy + AvailableMoney,
+  threshold reset/ramp, one-day re-entry; UpdateTick (IL=25) rental-expiry
+  ClearVendingMachine.
 ## Changelog
 
 - **2026-08-08:** EntityItem.tickDistraction (IL=147): 20-tick throttle,
