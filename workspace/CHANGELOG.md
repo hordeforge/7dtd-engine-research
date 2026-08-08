@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SdFile managed/plain leaf shapes
+
+ManagedReadAllBytes pooled stream, ManagedExists/GetLastWriteTimeUtc manager calls, copy trio StreamCopy (verified)
 ## 2026-08-08 - tier-C: Localization CSV pipeline
 
 LoadAndSelectLanguage/selectLanguage, loadCsv/addCsv merge + patchedCells, mod/server patch dictionaries, updateLanguages, list format keys (verified)
