@@ -594,6 +594,20 @@ true, false, -1)` when the state is not 5 / Attack) within **32 m** and
 removes it beyond, and `removeSupportBuff` (IL=19) only drops the buff when
 `doesEntityHaveSupport` reports no other nearby drone still provides it.
 
+**`LoadMods` (IL=432):** the drone's item-mod application, run when the
+drone's `OriginalItemValue` is set. It resolves the `roboticDrone` loot
+container size (`x*y` = the bag capacity), disables the lamp materials and
+all five visual child GameObjects (`freightBox`, `armor`, `machineGun`,
+`teddyBear`, `junkDroneArmRight`), then - with `OriginalItemValue.HasMods()`
+- walks `Modifications[]` and hash-switches on the mod class name, enabling
+the matching visuals for the seven drone mods (`modRoboticDroneCargoMod`
+also drives the bag, `ArmorPlatingMod` the armor, `StunWeaponMod` /
+`WeaponMod` the weapons, `MedicMod`, `MoraleBoosterMod`,
+`HeadlampMod` the lamp materials). Finally it resizes the bag: when the
+slot count differs from capacity it allocates `ItemStack.CreateArray(cap)`,
+copies `min(old, new)` items across, and `Bag.SetSlots` - the cargo mod
+grows the drone's storage without dropping contents.
+
 **`updateDroneSystems` (IL=169):** the per-frame server systems pass: ticks
 `initSuppressVOTimer`; on the server with an owner it lazily registers the
 owner teleport hook (`PlayerTeleportedDelegates += TeleportIfFollowing`,
