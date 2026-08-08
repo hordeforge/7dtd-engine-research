@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: map-objects + raycast second spot-check (13 claims exact)
 ## 2026-08-08 - tier-C: leftovers + parties second spot-check (16 claims exact)
 ## 2026-08-08 - tier-C: terrain-height + stealth + mod-loading second spot-check (19 claims exact)
 ## 2026-08-08 - tier-C: twitch second spot-check (10 claims exact)
