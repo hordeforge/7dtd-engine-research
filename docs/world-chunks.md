@@ -265,6 +265,14 @@ mesh flags; clear `entityStubs`; for each of the 16 `entityLists`: move every
 `IsSavedToFile()` entity into `entityStubs` as `EntityCreationData(entity,
 true)` and clear the list (the stubs are re-spawned on next `OnLoad`).
 
+**Coordinate helpers (`World.toChunk*`):** `toChunkXYZ(v)` (IL=14) is
+`(x >> 4, y >> 8, z >> 4)` (16/256-block chunk units); `toChunkXYZCube(v)`
+(IL=17) is `floor(v) >> 4` per axis (the 16-cube bucket); `toChunkXyzWorldPos`
+(IL=17) masks the block coords back to world floats (`x & -16`, `y & -256`,
+`z & -16`). `TryRetrieveAndRemovePendingDowngradeBlock(ref bv)` (IL=14)
+consumes one entry from `pendingUpgradeDowngradeBlocks` when present (the
+upgrade/downgrade batch hand-off).
+
 **Entity-band tracking (`Chunk.AdJustEntityTracking`, IL=50):** with the
 entity in the chunk, recomputes its y-band `floor(pos.y / 16)` (clamped
 0..15) and, when it differs from `chunkPosAddedEntityTo.y`, removes the

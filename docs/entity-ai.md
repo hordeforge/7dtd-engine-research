@@ -575,6 +575,14 @@ triggers resolve. `World.SetupTraders` (IL=30) clears and re-adds every
 (`ClearTraders` + `AddTrader` each), then clears the static list - the
 trader-compound registration at world load.
 
+**Volume read-back (`World.ReadSleeperVolumes` / `ReadTriggerVolumes` /
+`ReadWallVolumes`, IL=144 each):** the world-save load side: each clears
+its id + `VolumeKey` maps, then reads the count; version < 1 assigns
+sequential ids (`next*VolumeId = count`), version >= 1 reads per-volume
+`(id, Volume.Read)` pairs plus a trailing `next*VolumeId`. A duplicate
+`VolumeKey` logs `Read*Volumes #{0} dup key ({1}) ({2}) {3}` and skips
+the record.
+
 **`SleeperVolume.TouchGroup` (IL=52):** `mode = flags & 7`. If no `groupId` or no
 prefab: `Touch(world, player, setActive, mode)`. Else for each volume in
 `prefabInstance.sleeperVolumes` with same `groupId` and not
