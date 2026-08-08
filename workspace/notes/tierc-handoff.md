@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `c1cb291` EAITaskEntry, FuelType, trader stock records, drawbridge rotation |
-| Commits since dry-run `3b61d9c` | ~1180 |
+| HEAD (at handoff write) | `9ceb25f` TileEntityExtensions self-or-feature resolution |
+| Commits since dry-run `3b61d9c` | ~1181 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
