@@ -421,6 +421,18 @@ plays `itemClass.SoundStick`. `get_IsDistractionActive` (IL=5) is
 `distractionLifetime > 0`; `PhysicsMasterBecome` (IL=6) calls
 `checkGravitySetting(true)` before the base.
 
+**`EntityItem.SetItemStack(stack)` (IL=115)** computes the dropped-item
+distraction config (the zombie-bait values `tickDistraction` consumes): it
+null-guards the stack (defaulting to `ItemStack.Empty`), caches a clone as
+`lastCachedItemStack`, stores the stack, resolves `itemClass`, then reads
+the four distraction passives off the item: `DistractionRadius` (**66**)
+stored **squared** (`distractionRadiusSq`), `DistractionLifetime` (**67**)
+-> `distractionLifetime`, `DistractionStrength` (**68**) ->
+`distractionStrength`, and `DistractionEatTicks` (**69**) ->
+`distractionEatTicks` (both last two floored). `CanCollect()` (IL=12) is
+`itemClass != null && itemClass.CanCollect(itemValue)` - the pick-up gate the
+collect action consults.
+
 **`EntityItem.OnUpdateEntity` (IL=114):** base update; create mesh if needed;
 `ItemClass.OnDroppedUpdate`; if |dy| &lt; 0.1 for **10** ticks set `onGround`;
 physics-master client odd ticks `PhysicsMasterSendToServer`;
@@ -847,6 +859,11 @@ or `ItemStack.Empty` when nothing rolled.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
+## Changelog
+
+- **2026-08-08:** EntityItem.SetItemStack (IL=115): distraction config from
+  passives 66 DistractionRadius (squared) / 67 Lifetime / 68 Strength / 69
+  EatTicks; CanCollect (IL=12) itemClass gate.
 ## Changelog
 
 - **2026-08-08:** TraderArea leaves: IsWithinProtectArea IL=47 full 3D
