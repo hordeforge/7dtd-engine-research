@@ -285,7 +285,7 @@ masks `rotation &= 3` and caches a `Prefab[4]` per name: a live slot returns
 directly; otherwise the base prefab is loaded once and rotations > 0 get a
 `Clone(true)` + `RotateY(true, rotation)` into their slot. The
 `fixChildblocks` argument is computed as `fixChildblocks && (slotArray ==
-null)` — the array is always non-null at that point, so the flag never reaches
+null)`, the array is always non-null at that point, so the flag never reaches
 `GetPrefab` in this build (effectively dead).
 
 `PrefabInstance.GetOccupiedChunks()` (IL=65) lazily builds the cached
@@ -376,7 +376,7 @@ the chunk span (`chunk.GetWorldPos()` .. + (16, 256, 16)) or the entry is
 skipped; in sandbox trader mode (`World.SandboxUseTraderArea`) volume types 1
 and 3 are skipped outright. Each used entry resolves `FindWorldVolume(world,
 wStart, wEnd)` and, on a miss, `CreateWorldVolume`; the resulting index is
-registered via `AddWorldVolume` — on the single chunk when one was passed,
+registered via `AddWorldVolume` (on the single chunk when one was passed,
 otherwise by walking the spanned chunk range
 (`toChunkXZ(pMin.x)` .. `toChunkXZ(pMax.x - 1)`, z likewise).
 

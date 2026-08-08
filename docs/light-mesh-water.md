@@ -227,7 +227,7 @@ otherwise; the access is disposed in a finally).
 or a missing chunk, else `chunk.IsWater(x & 15, y & 255, z & 15)`; the
 `Vector3i` (IL=9) and `Vector3` (IL=5) overloads forward through it.
 `World.GetWaterPercent(pos)` (IL=14) is
-`chunkCache.GetWater(pos).GetMassPercent()` (0 for a missing chunk) — the
+`chunkCache.GetWater(pos).GetMassPercent()` (0 for a missing chunk), the
 fraction behind `Entity.CalcWaterLevel` (entity-ai.md).
 
 **`Chunk.SetWaterRaw(x, y, z, data)` (IL=55)** is the silent channel write:

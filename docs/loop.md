@@ -220,7 +220,7 @@ AI decisions and path requests live on **path A**. Path B is still main-thread c
 **Path B body: `EntityAlive.Update()` (IL=171).** Every frame when the GO is
 enabled, in order: base `Entity.Update()`; `updateNetworkStats()`; root-motion
 speed lerp (`speedForward = FastMoveTowards(speedForward, speedForwardTarget,
-step * deltaTime)` with `step` from `speedForwardTargetStep` — only for local
+step * deltaTime)` with `step` from `speedForwardTargetStep` (only for local
 entities with `RootMotion && lerpForwardSpeed`; the IL carries dead constant
 ternary artifacts 0.06935714 / 0.01942 that fold away); sync the `_underwater`
 buff cvar to the `isHeadUnderwater` flag when they differ

@@ -169,7 +169,7 @@ matches returning the group / index, null / -1 on miss; `WeatherGetValue`
 its millisecond `duration`, filling `delay` (or `Vector2i.zero`) when the ref is
 present. `InitWeather()` (IL=1) is an empty stub in this build.
 
-The `Probabilities` table inside each `WeatherGroup` is a `List<Vector3>[5]` —
+The `Probabilities` table inside each `WeatherGroup` is a `List<Vector3>[5]` (
 one list per `ProbType` slot, each entry a `Vector3(min, max, prob)`
 (`AddProbability`, IL=14; `WeatherGroup.AddProbability` is a 7-instruction
 pass-through). `Normalize()` (IL=62) divides every entry's `z` by the slot's
