@@ -658,6 +658,29 @@ item); `isTargetUnderWater(pos)` (IL=14) is block type 240;
 `SetAttacKMode(mode)` / `SetActiveWeapon(w)` (IL=4 each) write the
 `attackMode` / `activeWeapon` fields; `OnOriginChanged` (IL=1) is a no-op.
 
+**`DroneManager` registry leaves (all IL-verified):**
+`AddTrackedDrone(drone)` (IL=27) wakes the drone and dedupes it into
+`dronesActive` (+ `TriggerSave`); `RemoveTrackedDrone(drone, reason)`
+(IL=47) removes it, and on `Unloaded` updates the owner's
+`OwnedEntityData.SetLastKnownPosition`, stores `EntityCreationData(drone,
+true)` in `dronesUnloaded`, `TriggerSave`s and broadcasts
+`NetPackageVehicleCount.Setup()` (channel 192).
+`CreateDroneEntity(data, world)` (IL=18) materializes an ECD
+(`EntityFactory.CreateEntity as EntityDrone`, add to active,
+`world.SpawnEntityInWorld`, `SyncOwnerData`); `LoadDrone(entityId, world)`
+(IL=30) is the stream-in lookup in `dronesUnloaded` -> `CreateDroneEntity`;
+`AssignUnloadedDrone(player, entityId)` (IL=42) re-bases an unloaded drone's
+`pos` to the player's head and `belongsPlayerId` (returns whether found).
+`GetServerDroneCount()` (IL=13) sums active + unloaded on the server (the
+client mirrors `serverDroneCount` via `SetServerDroneCount` IL=7);
+`GetActiveDronesWithId(entityId)` (IL=27) is the reverse entity-id scan;
+`GetAllDronesECD()` (IL=42) and `GetDronePositionsList()` (IL=79,
+`(id, pos)` tuples) fold the active / unloaded / without-owner lists;
+`GetDronesList()` (IL=7) is the `GetDrones` allocator wrapper.
+`ClearActiveDrones(entityId)` (IL=35) removes every drone of the player
+backward and `World.RemoveEntity(id, 2)`s it; `ClearUnloadedDrones(entityId)`
+(IL=26) drops the matching unloaded ECDs.
+
 **Drone pathing (`GetPath` IL=318 / `GetProjectedPath` IL=93 /
 `followPlannedPath` IL=96):** `GetProjectedPath` clears the output and pulls
 the drone's `PathFinderThread.Instance` path (`GetPath(entityId).path`),
