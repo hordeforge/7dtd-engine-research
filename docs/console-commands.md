@@ -160,7 +160,17 @@ the **server-effect** pin for operators and clone fidelity.
 `TelnetConsole` accepts TCP clients; each becomes a `TelnetConnection` with its own
 `HandlerThread`. If telnet auth is enabled the connection must present the password
 before any command runs; failed attempts are counted (`RegisterFailedLogin`) and the
-connection is dropped after too many.
+connection is dropped after too many. The lockout is per endpoint:
+`loginAttemptsPerIP` (`Dictionary<Int32, LoginAttempts>` keyed by the
+connection's `EndPointHash`) with the console's `maxLoginAttempts` /
+`blockTimeSeconds` settings. `LoginAttempts` (fields `count` / `lastAttempt`)
+implements the window: `LogAttempt()` (IL=14) stamps `lastAttempt = Now`,
+increments `count`, and returns `count < maxLoginAttempts` (still allowed);
+`IsBanned()` (IL=20) resets `count = 0` when `(Now - lastAttempt).TotalSeconds`
+exceeds `blockTimeSeconds` (the window expired), then returns
+`count == maxLoginAttempts`. `AcceptClient` runs `IsBanned()` on the new
+endpoint before creating the connection, so a banned IP is refused outright
+until the window lapses.
 
 ```mermaid
 stateDiagram-v2
