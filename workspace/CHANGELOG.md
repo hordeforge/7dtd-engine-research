@@ -6,6 +6,14 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: waypoints + nav-object leaves
+
+Waypoint Read/Write version-gated format (v7) + legacy vehicle inference;
+WaypointCollection saved-only Write + Read/Clone; vehicle/drone/animal auto-
+waypoint refresh + manager reconcile stale removal; NavObject TrackTypes,
+set_TrackedEntity tracker icon, IsValid downgrade, GetPosition Origin-relative,
+compass scale lerp, DisplayName localization, Reset pool path. Verified fresh
+dumps.
 ## 2026-08-08 - tier-C: containers, bedroll, meta sidecar
 
 Bag storage leaves (DecItem consume with removedItems, CanStack/CanTakeItem,
