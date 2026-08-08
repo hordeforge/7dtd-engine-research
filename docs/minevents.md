@@ -432,6 +432,10 @@ target - the one shared predicate shape (the XOR appears as
   `invert`. `ParseXAttribute` (IL=48) splits the `body_parts` attribute on
   commas and ORs each `EnumBodyPartHit` parse into the flag mask (the
   "only on head hit" style trigger gate).
+- **`CompareItemMetaFloat`** (IL=44): reads `params.ItemValue.
+  TryGetMetadata(metaKey, out float)` and compares it with `compareValues`
+  (`key` attribute, `ParseXAttribute` IL=20); fails when the item or the
+  metadata key is missing.
 
 ### 7.0 `EffectManager.GetValue` (IL=372) passive stack
 
