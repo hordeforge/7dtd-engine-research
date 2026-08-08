@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: world volume setup + my-claim land checks
+
+Sleeper/trigger/wall AddToPrefabInstance load pass, trader decorator re-register, IsMyLandClaimInChunk/IsMyLandProtectedBlock self-ally gates (verified)
 ## 2026-08-08 - tier-C: GameManager server leaves (DoSpawn, invite sweep, player-data timer)
 
 Spawn-pref 262 direct spawn, persistent-list accessor, world invite sweep, countdown player-data send (verified)
