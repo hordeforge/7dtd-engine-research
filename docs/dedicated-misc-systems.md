@@ -888,6 +888,18 @@ for the world-file integrity checks. `WaveReader` (a WAV stream reader,
   rigidbody, so the config only matters where entity physics bodies are
   instantiated.
 
+## GameUtils time and kick helpers
+
+- **Time formatting:** `WorldTimeToString(worldTime)` (IL=19) is
+  `"{day} {hour:D2}:{minute:D2}"` from `WorldTimeToElements`;
+  `WorldTimeDeltaToString` (IL=21) is the same with `day - 1` (the
+  "time until" display used by horde/event timers).
+- **Force disconnect:** `ForceDisconnect()` (IL=9) builds a
+  `KickPlayerData(EKickReason 28, 0, DateTime default, "")` and delegates
+  to `ForceDisconnect(KickPlayerData)` (IL=6), which starts the
+  `ForceDisconnectRoutine(0.5, data)` coroutine - the delayed-kick path
+  (the 0.5 s grace before the connection drops).
+
 ## TaskManager (the game-code async task layer)
 
 A small scheduling layer on top of `ThreadManager.AddSingleTask`

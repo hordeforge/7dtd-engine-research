@@ -343,6 +343,17 @@ triggers whose `NeedsTriggered == 1`, marking them 2);
 `RefreshTriggers` / `RefreshTriggersForQuest(tags)` / `ResetTriggers`
 (all IL=22) walk the `Triggers` list calling `BlockTrigger.Refresh` (with
 `FastTags.none` or the quest tags) or zeroing `NeedsTriggered`;
+
+**Manager list plumbing (`TriggerManager`):** `AddToUpdateList(data)`
+(IL=10) dedupe-adds a `PrefabTriggerData` to the `UpdateList`;
+`RemoveFromUpdateList` (IL=11 by data, IL=26 by `PrefabInstance`) removes
+it (the instance overload sweeps backwards matching `PrefabInstance`);
+`GetTriggerLayers` (IL=71) unions every data's `TriggeredLayers` +
+`TriggeredByLayers` across `PrefabDataDict` (the editor layer list);
+`HandleNavObjects(enabled)` (IL=25) calls
+`SetupTriggerTestNavObjects` / `RemoveTriggerTestNavObjects` on every
+data; `RemovePrefabData(instance)` (IL=16) removes the trigger-test nav
+objects and the dict entry - the POI-teardown path.
 `AddTriggeredBy(volume)` (IL=34) indexes a sleeper volume under each of its
 `TriggeredByIndices` channels.
 
