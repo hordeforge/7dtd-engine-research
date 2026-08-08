@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: TaskManager async task layer
+
+Schedule/Execute/Update drain, OnTaskCreated/Completed pending chain, WaitOnGroup main-thread barrier, TaskGroup parent counter (verified)
 ## 2026-08-08 - tier-C: CatalystConvert, save-thread record, paint ChannelMask, size marker
 
 Collector catalyst conversion rule; ThreadInfo save-thread lifecycle; texture-block paint channel mask; StreamWriteSizeMarker size placeholder (verified)

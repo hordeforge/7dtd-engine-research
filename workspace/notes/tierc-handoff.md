@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `2af480c` CatalystConvert, save-thread record, paint ChannelMask, size marker |
-| Commits since dry-run `3b61d9c` | ~1190 |
+| HEAD (at handoff write) | `1a47290` TaskManager async task layer (schedule/execute/wait barriers) |
+| Commits since dry-run `3b61d9c` | ~1191 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
