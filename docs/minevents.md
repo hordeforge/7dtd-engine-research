@@ -436,6 +436,48 @@ target - the one shared predicate shape (the XOR appears as
   TryGetMetadata(metaKey, out float)` and compares it with `compareValues`
   (`key` attribute, `ParseXAttribute` IL=20); fails when the item or the
   metadata key is missing.
+- **`IsDay`** (IL=19) / **`IsNight`** (IL=19): `World.IsDaytime()` / its
+  negation, inverted by `invert` (the pure day/night gate).
+- **`IsDayNumber`** (IL=32): `compareValues(GameUtils.WorldTimeToDays(
+  world.worldTime), operation, value)`.
+- **`PlayerLevel`** (IL=38): `compareValues(target.Progression.GetLevel(),
+  operation, value)` (null progression fails).
+- **`IsFPV`** (IL=34): target is an `EntityPlayerLocal` with
+  `bFirstPersonView` set (inverted).
+- **`IsSheltered`** (IL=24): target is an `EntityPlayerLocal` with
+  `shelterPercent > 0` (inverted XOR; a non-player target fails).
+- **`IsInstigator`** (IL=17): `target == params.Instigator`.
+- **`IsAttachedToEntity`** (IL=19): `target.AttachedToEntity != null`.
+- **`IsOnLadder`** (IL=19): despite the name, tests `target.IsInElevator()`
+  (inverted); the elevator flag is the "on ladder" signal.
+- **`NPCIsAlert`** (IL=25): `target.IsAlive() && target.IsAlert` (inverted).
+- **`IsHeldItem`** (IL=24): `target.inventory.holdingItemStack.itemValue ==
+  params.ItemValue`.
+- **`IsEquipped`** (IL=97): for a mod item, scans `target.equipment.
+  GetItems()` for it; otherwise tests the held item (equipped-or-held
+  gate, invert-aware).
+- **`IsItemActive`** (IL=30): `params.ItemValue.Activated > 0`.
+- **`HoldingItemBroken`** (IL=32):
+  `target.inventory.holdingItemItemValue.PercentUsesLeft <= 0` (inverted).
+- **`IsPrimaryAttack`** / **`IsSecondaryAttack`** (IL=65 each): the held
+  item's `ItemClass.Actions[0]` / `Actions[1]` is an `ItemActionAttack`
+  (attack-in-hand gate; null target fails).
+- **`RoundsInMagazine`** (IL=45): the held item's first action is an
+  `ItemActionRanged`; compares its magazine state with `compareValues`
+  (empty item or non-ranged action fails).
+- **`CatapultStrainAmount`** (IL=~50): the held item's first action is an
+  `ItemActionCatapult`; compares `GetStrainPercent(actionData[0])` with
+  `compareValues`.
+- **`CompareLightLevel`** (IL=36): `compareValues(target.
+  GetLightBrightness(), operation, value)`.
+- **`TargetRange`** (IL=59): requires a non-empty `params.ItemValue` plus
+  both `params.Self` and `params.Other`; `compareValues(Self.GetDistance(
+  Other), operation, value)`.
+- **`HasTrackedEntity`** (IL=93): target is an `EntityPlayerLocal`; scans
+  the world's entity list for any entity matching `trackerTags`
+  (`HasAnyTags`), invert-aware.
+- **`IsSDCS`** (IL=~15): target is an `EModelSDCS` avatar (the SDCS
+  character system present check).
 
 ### 7.0 `EffectManager.GetValue` (IL=372) passive stack
 
