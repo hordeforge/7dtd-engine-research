@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: items third spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: ExplosionInitiate wire body field-by-field (9 fields + ExplosionServer)
 ## 2026-08-08 - tier-C: inventories spot-check (gmupdate-calls 182, frame-entries 244, ChunkBlockChannel, CopyIntoLocal)
 ## 2026-08-08 - tier-C: npc-dialog + residuals spot-check (6 claims exact)
