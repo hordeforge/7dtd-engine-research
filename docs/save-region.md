@@ -211,6 +211,16 @@ is a plain `SdFile.Exists` on the `.ttp` path.
 `ToggleWaypointHiddenStatus(nav)` (IL=12) copies `nav.hiddenOnCompass` onto the
 matching waypoint.
 
+**`PlayerMetaInfo` (the `.meta` sidecar):** `{NativeId, Name, Level,
+DistanceWalked}`. XML `Write(path)` (IL=43) emits a `PlayerMetaInfo` root with
+`nativeid` (`CombinedString`, omitted when null), `name`, `level`,
+`distanceWalked`. `TryRead(path, out meta)` (IL=133) hard-fails (logs + false)
+on a missing file, null root, unparsable `nativeid` (`TryFromCombinedString`),
+`level`, or `distanceWalked`; a missing `name`/`nativeid` attribute only warns.
+The network form (`Write`/`FromStream`, IL=38/30) prefixes the native id and
+name with presence bools before the i32 level and f32 distance - used by
+`NetPackagePlayerData` and the join `PlayerId`.
+
 ## 2. Chunk binary format (stock IL)
 
 | Method | IL | Bound |
@@ -737,6 +747,9 @@ the sections above. The platform cloud-save backend is native (residual).
   (IL=44), TryRemoveDroppedBackpack (IL=14), ProtectedBackpack record.
 ## Changelog
 
+- **2026-08-08:** PlayerMetaInfo: XML Write/TryRead (IL=43/133) attribute set +
+  hard-fail vs warn split; network Write/FromStream (IL=38/30) presence-bool
+  prefixes.
 - **2026-08-08:** PlayerDataFile read/apply: Read (IL=564) mirrors Write with
   version gates (bag/locked-slots v53/55/57/58, legacy equipment v54, rental
   u64/u32 v38, blobs, ownedEntities v44/46/47, modded flag); ToPlayer (IL=463)
