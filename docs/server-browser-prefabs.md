@@ -46,6 +46,22 @@ publisher below subscribes to those, so a single `SetValue` on the live
 `LocalServerInfo` propagates to Steam, EOS and the TCP info port without any
 polling of `GamePrefs`.
 
+**Parse and derived-flag leaves (all IL-verified):**
+`ParseAny(key, value)` (IL=80) is the server-list ingest: it tries the key
+as a `GameInfoString` / `GameInfoInt` / `GameInfoBool` enum and routes to
+the matching `SetValue` (ints via `Convert.ToInt32`, bools via
+`StringParsers.ParseBool`); an unknown key logs
+`GameServer {0}:{1} replied with invalid setting: {2}={3}` (name `<unknown>`
+when `GameInfoString.GameName` is empty) and flags `isBroken = true`,
+returning false.
+Derived flags read through `GetValue`: `get_IsDedicatedStock()` (IL=16) is
+`IsDedicated && StockFiles && !ModdedConfig`; `get_IsDedicatedModded()`
+(IL=10) is `IsDedicated && ModdedConfig`; `get_AllowsCrossplay()` (IL=4) is
+bool key 15 (`AllowCrossplay`); `get_EACEnabled()` (IL=4) is bool key 4;
+`get_PlayGroup()` (IL=11) parses string key 17 (`PlayGroup`) as
+`EPlayGroup` (0 on failure); `get_Version()` (IL=3) exposes the parsed
+`VersionInformation`.
+
 Three static arrays in the cctor define what is machine-searchable:
 
 | Array | Count | Members (decoded from the init blob) |
