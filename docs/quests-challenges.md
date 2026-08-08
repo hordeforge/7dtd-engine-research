@@ -520,6 +520,15 @@ Trader POI tracking: `AddTraderPOI(pos, factionID)` (IL=33) dedupes into both
 `TraderPOIs` and `TradersByFaction[factionID]`; `HasTraderPOI(pos)` (IL=5) is a
 `Contains` check; `GetTraderList(factionID)` (IL=12) returns the faction list.
 
+**`EntityPlayer` quest event triggers:** `TriggerQuestAddedEvent`,
+`TriggerQuestRemovedEvent` and `TriggerQuestChangedEvent` (IL=9 each) are
+null-guarded invokes of the `QuestAccepted` / `QuestRemoved` / `QuestChanged`
+`QuestJournal_QuestEvent` delegates the journal raises (the `QuestJournal`
+calls `TriggerQuestAddedEvent` on `AddQuest`); `TriggerSharedQuestAddedEvent`
+(IL=13) invokes `SharedQuestAdded` when subscribed and otherwise logs
+`No SharedQuestAdded listeners! Player: {0}`; `TriggerSharedQuestRemovedEvent`
+(IL=9) is the same null-guarded invoke for `SharedQuestRemoved`.
+
 ---
 
 ## 10. Quest net packages (verified)

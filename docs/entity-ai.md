@@ -163,6 +163,31 @@ produce no death message).
 then base `OnUpdateLive`, `EntitySeeCache.Clear()` (no see cache for players),
 `CheckSleeperTriggers()` (server + alive only, see the sleeper section).
 
+**`EntityPlayer.SetAlive` (IL=31):** base `EntityAlive.SetAlive`, then if the
+player was dead the game-stage birth time moves forward on respawn:
+`delta = GameStageDefinition.DaysAliveChangeWhenKilled * 24000` game ticks;
+when `worldTime - gameStageBornAtWorldTime < delta` the birth time snaps to
+the current `worldTime`, otherwise it shifts forward by `delta`.
+**`EntityPlayerLocal.SetAlive` (IL=38) override:** on top of the base,
+re-layers `PhysicsTransform.gameObject` to layer 20, stops the first-person
+`Dead` activity (`Player.Dead.Stop(0)`), runs
+`SetModelLayer(24, false, null)` + `ShowHoldingItemLayer(true)`, and sets
+`bPlayerStatsChanged` and `bPlayerEquipmentChanged`.
+
+**`EntityPlayer.TurnOffLightFlares` (IL=4):** forwards to
+`inventory.TurnOffLightFlares()`.
+
+**`EntityPlayer.DetectUsScale(entity)` (IL=26):** the zombie-scale check for
+the local player's threat display. Returns 0.3 when the player's spawn
+`prefab` has `DifficultyTier >= 1`, the player has been inside the prefab
+longer than 60 seconds (`Time.time - prefabTimeIn > 60`), and the target is an
+`EntityEnemy` spawned by the biome (`GetSpawnerSource() == Biome`); otherwise
+1.
+
+**`EntityPlayer.getHeadPosition()` (IL=32):** `emodel.GetHeadTransform().
+position + Origin.position` when the model and head transform exist, else
+`transform.position + (0, height - 0.15, 0) + Origin.position`.
+
 **`EntityAnimal.OnEntityDeath` (IL=24) override:** disable the
 `PhysicsTransform` GameObject, base `OnEntityDeath`, then remove the animal's
 last-known-position waypoint from the local player (`TryRemoveLastKnown

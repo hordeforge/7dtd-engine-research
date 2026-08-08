@@ -826,6 +826,13 @@ Passive **159** scales loot stage; **160** scales biome max when GameStats **66*
 **`Party.GetHighestLootStage` (IL=28):** max of each member's
 `GetLootStage(containerMod, containerBonus)`.
 
+**`EntityPlayer.GetTraderStage(tier)` (IL=46):** the quest-tier-modified
+trader loot stage. `mod = TraderManager.QuestTierMod[clamp(max(0, tier - 1),
+0, len - 1)]`; the result is
+`FastMax(1, FloorToInt(EffectManager.GetValue(158, null, Level * (1 + mod),
+player, ...) * GlobalTraderStageModifier))`. Passive **158** scales the
+player's level, multiplied by `(1 + mod)`.
+
 ### 8.1 `LootContainer.getProbability` (IL=192)
 
 1. If player non-null and `!HasRequirements(player)` → **0**.
