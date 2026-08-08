@@ -182,6 +182,12 @@ reads `favoriteShapes`; v > 44 reads `ownedEntities` (`OwnedEntityData.Read` at
 v > 47, else legacy id + optional extra id); v > 45 reads `totalTimePlayed`.
 A `bModdedSaveGame` flag logs `Modded save game` on load.
 
+**`FromPlayer(player)` (IL=300)** is the extraction mirror: clones the bag,
+equipment, waypoints, quest/challenge journals, and inventory slots, writes the
+`progressionData` / `buffData` / `stealthData` blobs via pooled writers, copies
+kills/deaths/score, marker position, rented-VM position, and the drag-and-drop
+stack (when the XUi is ready), and clears shared quest markers.
+
 **`ToPlayer(player)` (IL=463)** applies the blob: entity id / `SetStats` /
 position / rotation from the `ecd`; inventory slots + focused/holding idx; the
 bag; the dummy slot overflow is pushed into the bag, then the inventory, else
