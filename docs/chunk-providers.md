@@ -504,6 +504,16 @@ load path a dedicated server runs at startup:
   `HeightMapUtils.ConvertDTMToHeightData`) or `dtm.png` on first run and saves
   a `.raw`; wraps it in a `HeightMap` (ushort backed array) consumed by
   `TerrainFromRaw.Init(heightMap, biomeProvider, seed)`.
+  `getFilenameDTM()` (IL=17) resolves the source heightmap file:
+  `worldLocation.FullPath + "/dtm_processed"` when
+  `{FullPath}/dtm_processed.raw` exists, else `{FullPath}/dtm`.
+  `loadDTM(filename)` (IL=25) disposes any existing `heightData`, then loads
+  `filename + ".raw"` through `HeightMapUtils.LoadHeightMapRAW(filename,
+  heightMapWidth, heightMapHeight, 1f, 250)`; the ctor (IL=28) seeds
+  `heightMapWidth/Height = 4096` and `heightMapScale = 1`, allocates
+  `splats = new Texture2D[7]`, the `bluffs` dictionary and the
+  `CaseInsensitiveStringDictionary<uint> worldFileCrcs`, then chains the
+  base ctor and stores `bFixedWaterLevel`.
 - `calcWorldFileCrcs` + `filesNeedProcessing`/`processFiles`: CRC bookkeeping
   (also served to clients through `NetPackageWorldInfo.PrepareWorldHashes`).
   `calcWorldFileCrcs` (IL=9) is the coroutine shell; its
@@ -517,6 +527,36 @@ load path a dedicated server runs at startup:
   when any of `splat3_processed.png` / `splat4_processed.png` /
   `splat3_half.png` / `splat4_half.png` is missing, or when
   `verifyFileHashes` fails.
+  `verifyFileHashes` (IL=61) loads the stored hashes and, for each
+  `FilesUsedForProcessing` entry (the static array, `.cctor`:
+  `prefabs.xml` / `dtm.raw` / `splat3.tga` / `splat3.png` /
+  `water_info.xml` / `main.ttw` / `biomes.png`), requires a stored crc only
+  when the file exists on disk (else warning `Missing hash for {f}` and
+  false), and when both the stored map and the fresh `worldFileCrcs` hold
+  the entry, the crcs must match (else false).
+  `processFiles(worldPath, callback)` (IL=12) starts the
+  `<processFiles>d__34` coroutine (MoveNext IL=918), the processing pass:
+  it sets the `uiLoadProcessWorldHeightmap` progress (client UI), logs
+  `Processing world files`, calls `loadDTM(worldPath + "/dtm")`, allocates
+  the `topTexMap` buffer, stamps prefab heights via
+  `CopyWorldPrefabHeightsIntoHeightMap`, and offloads
+  `HeightMapUtils.SaveHeightMapRAW(processedFileName, ...)` (the
+  `<processFiles>b__0` task, IL=13) to a `ThreadManager` thread; the splat
+  stage then loads `splat3.png` / `.tga` (RGBA32 or ARGB32 required, else
+  the log error and early false), builds a fresh `splat4` texture, and per
+  pixel (frame-budgeted by the `Constants.cMaxLoadTime*` pair) paints the
+  `topTexMap` codes into the raw splat arrays (2 -> `splat4.g`, 8 ->
+  `splat3.b`, 10 -> `splat3.r`, 11 -> `splat3.g`, 185 -> `splat3.a`, 200 ->
+  `splat4.r`), builds the `WorldDecoratorPOIFromImage` (added to
+  `m_Decorators`, `InitData`'d) and stamps POI cells with value >= 5 into
+  splat4 (green top marker when the ground is within reach, blue =
+  value - 5), then writes `splat3_processed.png` / `splat4_processed.png`
+  and the half-res twins via `generateHalfResTexture`, runs
+  `calcWorldFileCrcs` + `saveFileHashes(worldPath, worldFileCrcs)` (each
+  write followed by `GCUtils.UnloadAndCollectCo`), logs
+  `Loading and creating dtm raw file took {ms} ms`, and finally invokes the
+  `ProcessFilesCallback(splat3, splat3Half, splat4, splat4Half,
+  worldDecoratorPoiFromImage)`.
 - `GameUtils.GetWorldFilesToTransmitToClient(files)` (IL=85) is the join
   download filter (used by `NetPackageWorldFolder.prepareWorldFolderData`
   and `NetPackageWorldInfo.PrepareWorldHashes`): it keeps a file only when
@@ -552,6 +592,13 @@ fill height) **only** for liquid elements, else 0.
 (IL=27) is `heightMap.GetAt` with a `Get Height Error x: {0} z: {1}` catch
 falling back to 0; `GetWorldSize` (IL=12) is
 `Vector2i(heightMapWidth * heightMapScale, heightMapHeight * heightMapScale)`.
+
+`ReloadAllChunks()` (IL=17) reloads the heightmap via `loadDTM(null)` (the
+`getFilenameDTM` pick), re-inits the `TerrainFromRaw` generator with the
+current `heightMap` / biome provider / world seed, then chains the base
+reload. `Cleanup()` (IL=54) chains the base, destroys the `splats[0..6]`
+textures and `procBiomeMask1/2`, disposes and nulls both `heightMap` and
+`heightData`, and calls `m_BiomeProvider.Cleanup()`.
 
 `loadSplatMaps(levelName, worldWidth)` (IL=883) builds the surface-channel
 map that `GetTopmostBlockValue` (§3.1) later switches on. It resolves the
