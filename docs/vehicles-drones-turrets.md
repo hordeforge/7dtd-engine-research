@@ -749,6 +749,9 @@ target and damage on the server. The robotic sledge reuses this via
 `ReadSyncData(reader, syncFlags, senderId)`. If server:
 `GetSyncFlagsReplicated(syncFlags)`; when non-zero, rebroadcast `Setup(vehicle,
 senderId, flags)` via `SendPackage` exclude sender, bulk **192**.
+`EntityVehicle.GetSyncFlagsReplicated(flags)` (IL=5) is `flags & 49159`
+(0xC007: bits 0-2 and 14-15) - the subset of vehicle-data-sync flags the
+server echoes to the other peers.
 | `NetPackageVehiclePositions` | server -> client | bulk `(id, pos)` list refreshing vehicle map markers |
 | `NetPackageDroneDataSync` | server -> client | drone owner / order / state / storage sync fields |
 | `NetPackageEntityWaypointList` | server -> client | per-player vehicle (`eWayPointListType 0`) or drone (`1`) marker list |
@@ -861,6 +864,10 @@ non-vehicle type is a content contract violation, not a graceful fallback.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native / content residuals |
 
+## Changelog
+
+- **2026-08-08:** EntityVehicle.GetSyncFlagsReplicated (IL=5): flags &
+  49159 (0xC007, bits 0-2 + 14-15) server-rebroadcast subset.
 ## Changelog
 
 - **2026-08-08:** Vehicle cargo drop: DropItemsAsBackpack (IL=94) bag +
