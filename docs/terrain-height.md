@@ -70,7 +70,7 @@ Interfaces **cannot** be patched directly (RealEarth already avoids that). Concr
 **Bodies (V3.1.0 b14):** `World.GetHeightAt(x, z)` (IL=22) delegates to
 `GetTerrainGenerator().GetTerrainHeightAt((int)x, (int)z)` (the generator
 oracle, no chunk load; **0** without a generator). `World.GetTerrainHeight(x,
-z)` (IL=21) reads the live chunk's byte heightmap via `GetChunkSync` +
+z)` (IL=19) reads the live chunk's byte heightmap via `GetChunkSync` +
 `Chunk.GetTerrainHeight(toBlockXZ, toBlockXZ)` (**0** without the chunk).
 `Chunk.GetMaxHeight()` (IL=29) is the max of the chunk's `m_HeightMap` byte
 array. `Chunk.GetHeight(x, z)` (IL=9) / `GetHeight(blockOffset)` (IL=5) read
