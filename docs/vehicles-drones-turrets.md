@@ -838,6 +838,19 @@ client's cap pre-check. On success it also sets `Spawned = true` before
 `castclass EntityVehicle` on the created entity, so a package naming a
 non-vehicle type is a content contract violation, not a graceful fallback.
 
+**Drone/turret leaves:** `ItemActionDataSpawnTurret` / 
+`ItemActionDataSpawnVehicle` are base `ItemActionAttackData` ctors only (the
+deploy state lives in the action's own fields, §7.1). `DroneLightManager`
+(MonoBehaviour, `LightEffects[]`) is the drone's light-ring visuals:
+`getLightEffect(key)` (IL=29) scans by material name; `InitMaterials(key)`
+(IL=92) activates the effect's `linkedObjects` and copies the effect material's
+`_EmissionColor` onto the matching skinned-mesh materials; `DisableMaterials`
+(IL=89) deactivates the objects and blacks out `_EmissionColor`. `EModelDrone`
+(IL=74 Init) is client-model plumbing: on a dedicated server it adds an
+`AvatarControllerDummy` and disables all child `Animator`s when the entity has
+no `RootMotion`, else builds the normal avatar controller and calls
+`SetVisible(true)`.
+
 ---
 
 ## 8. Dedicated relevance and residuals
@@ -911,6 +924,9 @@ non-vehicle type is a content contract violation, not a graceful fallback.
   55-58 damage per / 49 light / 50-51 fuel / 53 torque / 52 velocity.
 ## Changelog
 
+- **2026-08-08:** Drone/turret leaves: spawn-data ctors base-only;
+  DroneLightManager InitMaterials/DisableMaterials emission color + linked
+  objects; EModelDrone server AvatarControllerDummy + animator disable.
 - **2026-08-08:** Deploy action config (ReadFrom, turret IL=101 / vehicle
   IL=63): Turret/Vehicle entity class resolved at load time, Scale /
   VehicleSize / PreviewSize / CanPlaceInAir defaults.
