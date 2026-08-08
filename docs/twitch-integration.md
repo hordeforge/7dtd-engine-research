@@ -120,7 +120,8 @@ greater-or-equal). Concrete action requirements: `TwitchRequirementHasBuff`
 `LeftSide`/`RightSide`), `TwitchRequirementIsNight`
 (`!World.IsDaytime()`, inverted by the `invert` flag), and
 `TwitchRequirementSandboxBool` (reads `SandboxOptions.SandboxOptionManager.
-GetBool` with the invert XOR) while `TwitchRequirementSandboxFloat/Int` are
+GetBool` with the invert XOR) while `TwitchRequirementSandboxFloat` and
+`TwitchRequirementSandboxInt` are
 operation requirements comparing two sandbox values via `LeftSide` /
 `RightSide`; the `TwitchVoteRequirement*` types mirror them for votes.
 
