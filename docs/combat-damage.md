@@ -74,7 +74,10 @@ Live IL order (V3.1.0 b14):
 
 1. Init `DamageResponse`: Source, Strength, Critical, HitDirection default 5,
    MovementState, Random float, ImpulseScale; body part + ArmorSlot +
-   ArmorSlotGroup from `DamageSource`.
+   ArmorSlotGroup from `DamageSource` (plus the `DamageSource.
+   IgnorePartyShare` flag, which rides the wire as the
+   `NetPackageDamageEntity` `bIgnorePartyShare` field,
+   [protocol-packages.md](protocol-packages.md) §6.11).
 2. If source has direction: set HitDirection via
    `Utils.Get4HitDirectionAsInt(dir, look)`.
 3. If `AffectedByArmor`: `Equipment.CalcDamage` fills Strength and ArmorDamage.
