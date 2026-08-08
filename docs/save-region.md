@@ -14,7 +14,7 @@ flowchart TD
   SW[GameManager.SaveWorld IL=7]
   SW --> WS[World.Save / SaveWorldState IL=16]
   WS --> PID[provider.GetProviderId]
-  PID --> SF[WorldState.SetFrom IL=164]
+  PID --> SF[WorldState.SetFrom IL=203]
   SF --> SAVE[WorldState.Save path IL=21]
   SAVE --> SL[SaveLoad Stream IL=926 (V3.1.0; was 884 on V3.0.1)]
   SL --> MON[Monitor.Enter]
@@ -65,7 +65,7 @@ stateDiagram-v2
 | `saveDataLimit` | long | |
 | `Guid` | string | world identity |
 
-`SetFrom(World, EnumChunkProviderId)` (IL=164) snapshots water level (`WorldConstants.WaterLevel`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
+`SetFrom(World, EnumChunkProviderId)` (IL=203) snapshots water level (`WorldConstants.WaterLevel`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
 `World.get_Guid()` (IL=9) is the world-identity accessor: `worldState?.get_Guid()` (null world state -> null).
 
 ### 1.1b `main.ttw` header codec (`SaveLoad(Stream)`, IL=926 on V3.1.0)
