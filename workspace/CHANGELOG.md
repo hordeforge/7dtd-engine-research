@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Challenge wire + StartChallenge
+
+StartChallenge resource gate + autocomplete -> Redeemed; ReadyToComplete;
+Write/Read field order + 27-type objective switch; journal Write/Read
+tracked name + group days + reset-to-class. Verified fresh dumps.
 ## 2026-08-08 - tier-C: ChallengeJournal leaves
 
 StartChallenges two-pass seeding; ModifyValue challenge passives;
