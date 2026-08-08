@@ -293,6 +293,16 @@ queue is the `DynamicMeshChunkDataStorage<T>` described above
 (`DynamicMeshThread.ChunkDataQueue`); do not treat the dead template as the
 storage contract.
 
+**Inert server-update channel:** `DynamicMeshThread.ServerUpdates`
+(`Queue<DynamicMeshServerUpdates>`) is the pooled per-chunk update record
+(chunk X/Z, `StartY`/`EndY`, deflated `Bytes`, `UpdateTime`, with
+`WriteAir` / `WriteEmptyLayer` / `WriteLayer` / `WriteBinaryBlock` writers).
+`AddChunkUpdateFromServer(data)` (IL=15) enqueues into it, but the method
+has **0 external call sites on b14** and nothing in the generation loop ever
+dequeues the queue, so even a produced record would sit unprocessed. Treat
+the channel as inert in this build (re-meshing of server block changes flows
+through the normal `PrimaryQueue`/`SecondaryQueue` staging instead).
+
 ---
 
 ## 5. Streaming to clients
