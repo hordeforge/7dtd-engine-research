@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: drone systems/pickup/storage leaves
+
+updateDroneSystems hooks + sensors + weapon ticks, debug enemy proc, pickup flow, Has/TakeStoredItem, underwater/canMove/teleport cooldown gates (verified)
 ## 2026-08-08 - tier-C: reward-family leaves
 
 BaseReward GetRewardText/Settings hooks, RewardItem/SkillPoints text, property accessors (verified)
