@@ -630,7 +630,10 @@ tracked backpacks and the tracking limit has been reached.` when the
 newly-added backpack is itself the evicted one. On the server, after the
 update it broadcasts `NetPackagePlayerSetBackpackPosition.Setup(EntityId,
 GetDroppedBackpackPositions())` on channel 192. So a player's dropped bags
-on the map are capped at the three most recent, oldest first.
+on the map are capped at the three most recent, oldest first. The same
+persistent-data surface tracks the player's rented vending machines via the
+`OwnedVendingMachinePositions` list (`AddVendingMachinePosition` IL=10
+dedupes before appending; `TryRemoveVendingMachinePosition` IL=5 removes).
 
 ## See also
 
