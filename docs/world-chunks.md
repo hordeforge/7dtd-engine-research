@@ -284,6 +284,10 @@ before unload, see [dedicated-leftovers.md](dedicated-leftovers.md) §12); per
 **Leaves:** `removeExpiredCustomChunkDataEntries(worldTime)` (IL=61) drops
 `ChunkCustomData` entries whose `expiresInWorldTime <= worldTime` (calling
 `ChunkCustomData.OnRemove`), collecting expired keys then removing them.
+`ChunkBlockClearData` (subclass) carries a `BlockList<Vector3i>` and its
+`OnRemove(chunk)` (IL=37) sets every listed position to air via
+`chunk.SetBlock(world, x, y, z, Air, true, true, false, false, -1)` - the
+expiry callback is what actually clears the blocks.
 `World.UnloadEntities(list, force)` (IL=36) walks the list backward and calls
 `unloadEntity(e, reason 1)` unless `!force && (e.bWillRespawn || attached-main
 entity bWillRespawn)` (sleepers with a pending respawn and their attachments
@@ -893,6 +897,8 @@ if two weather packages arrive in the same `Time.frameCount`.
   NeedsRegenerationOrBits.
 ## Changelog
 
+- **2026-08-08:** ChunkBlockClearData leaf: BlockList<Vector3i>, OnRemove
+  (IL=37) airs every listed pos via Chunk.SetBlock (the expiry callback).
 - **2026-08-08:** Chunk.GetBlock IL=100: POI-filler culling (IsInternalBlocksCulled + isInside -> cached bvPOIFiller from cPOIFillerBlock), else m_BlockLayers[y>>2] read.
 - **2026-08-08:** Water reads: Chunk.GetWater IL=8 FromRawData(chnWater);
   ChunkCluster.GetWater IL=23 y>=256/missing-chunk Empty + toBlockXZ

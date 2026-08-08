@@ -414,6 +414,15 @@ Factories: `RegionFileFactoryRaw.CreateRegionFileAccess` and
 `RegionFileFactorySectorBased.CreateRegionFileAccess` are 2-IL wrappers;
 `RegionFilePlatform.CreateFactory` selects the platform default.
 
+**Chunk buffered IO leaves:** `ChunkMemoryStreamReader` (MemoryStream over a
+**512000**-byte default buffer; `Close` (IL=7) just `Seek(0, Begin)` - rewind,
+no dispose) is the chunk load buffer. `ChunkMemoryStreamWriter` (same default
+buffer, ctor also keeps the `buffer` field) is the save buffer:
+`Init(regionFileAccess, dir, x, z, ext)` (IL=22) stores the target and rewinds;
+`Close` (IL=17) flushes via
+`regionFileAccess.Write(dir, chunkX, chunkZ, ext, buffer, (int)Position)` -
+the buffered chunk blob reaches the region file only at close.
+
 ### 3.4 Sector-based region files (V1 / V2)
 
 `RegionFileSectorBased` is the abstract parent of **V1** and **V2** (platform
@@ -686,6 +695,9 @@ the sections above. The platform cloud-save backend is native (residual).
   (IL=44), TryRemoveDroppedBackpack (IL=14), ProtectedBackpack record.
 ## Changelog
 
+- **2026-08-08:** Chunk buffered IO leaves: ChunkMemoryStreamReader (512000
+  buffer, Close = Seek 0); ChunkMemoryStreamWriter Init stores target, Close
+  flushes RegionFileAccessMultipleChunks.Write(dir, x, z, ext, buffer, pos).
 - **2026-08-08:** SaveDataLimitUtils.CalculatePlayerMapSize (IL=28): area/256 *
   516 bytes per chunk, capped 270532608 (258 MiB), ArgumentException on
   non-positive area.
