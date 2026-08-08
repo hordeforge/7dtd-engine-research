@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: dead/inert path sweep synthesis
 ## 2026-08-08 - tier-C: census refresh (1837 narrated)
 ## 2026-08-08 - tier-C: name vote-requirement mirrors + WebModule record
 ## 2026-08-08 - tier-C: shared chunk observer cache leaf
