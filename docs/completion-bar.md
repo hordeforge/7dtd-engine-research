@@ -70,6 +70,7 @@ Closed in recent sessions (still optional, not required for A+B):
 
 | Topic | Doc |
 |---|---|
+| Static-data XML loaders (sounds/weather/materials/music/biome) | dedicated-misc-systems |
 | ModEvents payload structs (S- carriers) + SNetPackageInfo | dedicated-misc-systems |
 | Requirement framework + all 26 leaves | minevents §7.0a |
 | Power block wrappers (block to TE identity) | tile-entities-power §3.7 |

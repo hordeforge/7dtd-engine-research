@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: static-data XML loaders (sounds parse, weather params, coroutine entries)
+
+SoundsFromXml Parse IL=544 SoundDataNode grammar + NoiseData/ClipSourceMap, ParseNode exclusions, ParseSubtitleNode; WeatherSurvivalParametersFromXml.Load WeatherParams reflection bind; 4 coroutine entry wrappers with WorldStaticData call sites (verified)
 ## 2026-08-08 - tier-C: ModEvents payload structs (S- data carriers)
 
 SChatMessageData/SGameMessageData interruptible pair, SGameStartingData/SPlayerDisconnectedData/SSavePlayerDataData/SEntityKilledData ModEvent payloads, SNetPackageInfo net-command stats (verified)

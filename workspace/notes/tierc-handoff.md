@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `0524158` ModEvents payload structs (S- data carriers) |
-| Commits since dry-run `3b61d9c` | ~1172 |
+| HEAD (at handoff write) | `a71bb5d` static-data XML loaders (sounds parse, weather params, coroutine entries) |
+| Commits since dry-run `3b61d9c` | ~1173 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
