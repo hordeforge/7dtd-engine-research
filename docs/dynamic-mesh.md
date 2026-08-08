@@ -193,6 +193,26 @@ On a dedicated server it caches the produced `DyMeshData` bytes (`DyMeshData.Add
 rather than instantiating a renderable Unity `Mesh`; the item key is then surfaced
 to the main thread through `ReadyForCollection` for the server to send.
 
+**Load-request and copy helpers:** `DyMeshRegionLoadRequest.CreateMeshSync`
+(IL=52) builds the client-side region GameObject: it pools a mesh-renderer
+GameObject named `"R:" + region.ToDebugLocation()` at the origin (inactive),
+fills `OpaqueMesh` via `CreateOpaqueMeshSync` and `TerrainMesh` via
+`CreateTerrainGoSync`, each budgeted by
+`DynamicMeshSettings.MaxRegionLoadMsPerFrame`, then installs
+`RegionObject`, sets `IsMeshLoaded = true`, repositions the region and
+`SetVisibleNew(VisibleChunks != 0 && !InBuffer, "create mesh sync
+finished", true)`.
+`DynamicMeshVoxelLoad.CopyTerrain(terrain, mesh, filter, timing, item)`
+(IL=209) is the voxel-mesh-to-Unity copy job: `MeshUnsafeCopyHelper` copies
+vertices / uv / uv2 / uv3 / uv4 / colors, each stage timed into `MeshTiming`
+(CopyVerts, CopyUv..CopyUv4, CopyColours); triangles copy through
+`CopyTriangles` with per-`TerrainSubMesh` submeshes when the main index list
+is empty; normals copy or fall back to `Mesh.RecalculateNormals`; then
+`GameUtils.SetMeshVertexAttributes(mesh, true)` and `UploadMeshData(false)`.
+Materials come from the `DynamicMeshFile.TerrainSharedMaterials` cache keyed
+by submesh count, built from `MeshDescription.meshes[5].material` (see the
+[light-mesh-water.md](light-mesh-water.md) §3 terrain-mesh note).
+
 ---
 
 ## 4. Region persistence
@@ -226,6 +246,15 @@ a trailing `i64`, and `ChunkNeighbourData.Write`.
 "`Deleting corrupted file.`" log lives in `LoadRegion`; the "`Corrupted region.
 Adding for regen`" log is `DynamicMeshRegion.OnCorrupted`. On a headless server the
 byte-level load is what matters, the actual `Mesh`/GameObject build is client render.
+
+**Chunk-data access layer:** `DynamicMeshChunkDataWrapper` is the locked
+handle to a chunk's `DynamicMeshChunkData` on the generation threads:
+`TryGetData(out data, debug)` (IL=15) is `TryTakeLock(debug)` then out the
+`Data` (null + false when the lock is held elsewhere); `GetLock` (IL=73) /
+`ReleaseLock` (IL=4) / `ThreadHasLock` (IL=4) and `IsReadyForRelease`
+(IL=49) manage the lifecycle, while `Path` (IL=13) / `RawPath` (IL=13) /
+`Exists` (IL=4) give the on-disk file handles; `Reset` (IL=4) drops the
+payload for reuse.
 
 **Dead legacy path (not executed from live producers).** `DynamicMeshFile.WriteRegion`
 (IL=159) / `WriteRegionHeaderData` (IL=133) / `Write16BitVoxelMeshes` /
