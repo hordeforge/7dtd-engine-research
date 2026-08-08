@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: container accessors (Inventory/Equipment slot queries)
+
+GetSlotCount/GetSlotsWithBlock/IsHoldingBlock/PerformActionOnSlots both containers, GetSlotItemOrNone (verified)
 ## 2026-08-08 - tier-C: PPD backpack cleanup + player-list handler registry
 
 ClearDroppedBackpacks reset, RemoveBackpacks predicate sweep, m_dispatch handler list (verified)
