@@ -617,6 +617,12 @@ Read reconstructs world XZ as `local + chunk*16`.
 | `ChunkProviderGenerateWorld.SaveRandomChunks` | 99 |
 | `World.SaveDecorations` | 3 |
 
+**Chunk save callback:** `WorldChunkCache.NotifyOnChunkBeforeSave(chunk)`
+(IL=19) is the fan-out the save path drives before a chunk writes: it calls
+`IChunkCallback.OnChunkBeforeSave(chunk)` on every registered callback
+(`AddChunkCallback`, IL=5), letting subscribers (tile entities, power grid)
+flush state into the chunk before `DoSaveChunks` snapshots it.
+
 **Dropped-backpack tracking (server-persisted).** Each `PersistentPlayerData`
 holds `backpacksByID: Dictionary<int, ProtectedBackpack>` with
 `ProtectedBackpack{EntityID, Pos, Timestamp}`. `AddDroppedBackpack(id, pos,
@@ -663,6 +669,10 @@ the sections above. The platform cloud-save backend is native (residual).
 | `ChunkProviderGenerateWorld.SaveAll` | 46 | prefab decorator save; spawn points; `RegionFileManager.MakePersistent` + `WaitSaveDone`; event prefabs |
 | `PersistentPlayerList.SavePersistentPlayerData` | 12 | server non-edit: write `{SaveGameDir}/players.xml` |
 
+## Changelog
+
+- **2026-08-08:** WorldChunkCache.NotifyOnChunkBeforeSave (IL=19):
+  IChunkCallback fan-out before chunk snapshot.
 ## Changelog
 
 - **2026-08-08:** Dropped-backpack tracking (4): AddDroppedBackpack (IL=69)
