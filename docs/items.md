@@ -778,6 +778,46 @@ flags and count; `ResetOldAccuracy()` (IL=3) restores `_oldAccuracy = 1`;
 `SelectedAmmoTypeIndex` for the matching magazine entry; `get_aiBurstDelay`
 / `get_aiBurstShot` (IL=3 each) expose the AI burst ranges.
 
+**`ItemActionTextureBlock` painting internals (all IL-verified):**
+`getHitBlockFace(data, out blockPos, out bv, out face, out hitInfo)`
+(IL=222) resolves the paint target from the action ray (block / terrain hit
+required), follows multi-block children to the parent, requires
+`MeshIndex == 0`, derives the face via
+`GameUtils.GetBlockFaceFromHitInfo` (`BlockShapeNew` only), and returns the
+current paint id: the auto-channel path uses
+`BlockShapeNew.GetVisualMeshChannelFromHitInfo` (exclusive channel), else
+the first included channel's `GetBlockFaceTexture`.
+`paintBlock(world, cc, entityId, actionData, pos, face, bv, lpRelative,
+channelMask)` (IL=88) gates through `getParentBlock` (IL=28, child ->
+parent) + `checkBlockCanBePainted` (IL=23: non-air, `BlockShapeNew` with
+`MeshIndex == 0`, plus `CanPlaceBlockAt`) + the active `BlockToolSelection`
+bounds, then paints the single face or all six
+(`paintFace` IL=48 per included channel: `decreaseAmmo` -> fail, else
+`GameManager.SetBlockTextureServer(BlockValueRef(pos), face, idx, entityId,
+channel)`). `decreaseAmmo` (IL=76) is free for `InfiniteAmmo` / creative
+(GameStats 1 in {2, 8}), else `DecItem`s the `BlockTextureData.PaintCost`
+from the bag / inventory of the magazine item.
+`floodFill(world, cc, entityId, actionData, lpRelative, sourcePaint,
+hitPosition, hitFaceNormal, dir1, dir2, channel)` (IL=207) is the BFS paint
+fill: a stack of face-grid offsets, each probed by a `Voxel.Raycast` back
+into the face; matching-face hits with the source paint get `paintBlock`'d
+and fan out to the 4 neighbors (visited sets prevent loops, temp collections
+cleared at the end).
+`CopyTextureFromWorld(data)` (IL=91) / `CopyBlockFromWorld(data)` (IL=81)
+are the eyedropper flows (local player only): the first reads the hit
+face's paint id into `data.idx` + the gun's `Meta` (`ui_denied` +
+`ttPaintTextureIsLocked` when the paint is locked), the second converts the
+hit block to an `ItemStack(BlockValue.ToItemValue() + TextureFullArray, 99)`
+and `AddItem`s it.
+`SetupRadial(xuiRadialWindow, epl)` (IL=149) builds the paint-mode radial
+(bucket / brush / roller / flood fill / spray gun / all-sides entries, each
+marked when `paintMode` matches); `handleRadialCommand(sender, commandIndex,
+context)` (IL=182) dispatches the mode switch across both `ActionData` slots
+with the `bReplacePaintNextTime` latch; `getCurrentPaintIdx` (IL=16) is
+`cc.GetBlockFaceTexture` with the `FindPaintIdForBlockFace` fallback;
+`ProjectVectorOnPlane(normal, vector)` (IL=8) is
+`vector - dot(vector, normal) * normal`.
+
 **`ItemActionMelee` (classic melee, `: ItemActionAttack`):**
 `ExecuteAction` (IL=116) is release-gated: a released click sets
 `bFirstHitInARow = true` and returns; a held tick passes the `Delay` gate
