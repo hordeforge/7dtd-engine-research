@@ -212,6 +212,9 @@ transform via `modRot` (or `SetActive(modInstalled)` without a rotation),
 hides the `modHideT` transform when installed, and enables the `modRBT`
 physics transform when installed - the mod's visual and collider appear on
 the part exactly when the vehicle carries the matching mod tag.
+`SetItemValueMods(itemValue)` (IL=22) is the refresh entry: it copies
+`Modifications` + `CosmeticMods` from a clone into the vehicle's item value,
+then runs `CalcEffects` + `CalcMods` + `SetColors` + `SetSeats`.
 `CalcEffects` evaluates the vehicle passive set on the item value
 with the driver's entity tags: entity/block/self damage per (passives **55** /
 **56** / **57** / **58**, each scaled by the static
@@ -842,6 +845,11 @@ non-vehicle type is a content contract violation, not a graceful fallback.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native / content residuals |
 
+## Changelog
+
+- **2026-08-08:** Vehicle.SetItemValueMods (IL=22) mods copy + CalcEffects/
+  CalcMods/SetColors/SetSeats refresh; IsLockBroken lock part health 0;
+  GetNoise constant 0.5.
 ## Changelog
 
 - **2026-08-08:** VehiclePart.SetMods (IL=68): modInstalled from ModTags bit,
