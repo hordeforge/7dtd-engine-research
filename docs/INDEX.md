@@ -374,6 +374,7 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
 
 ## Changelog
 
+- **2026-08-08:** Namespace count corrected to 89 in the full-surface row (7432 types / 53235 methods / 1,740,737 IL).
 - **2026-08-06:** Nine dated addendums from a full V3.1.0 b14 re-dump (2026-08-05):
   quests (template inheritance, objective Write shapes, fail-soft Quest::Read),
   loot-economy (trader S2C delivery paths, ToServer-only TraderData, client-side
