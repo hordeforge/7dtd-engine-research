@@ -270,6 +270,26 @@ local player's goto / timer objectives and the map / nav markers.
 change / craft calls the notifier; local objectives react. On the owning client
 this is what advances that player's quests and challenges.
 
+**Notifier leaves (IL=8-9 each, all `event?.Invoke(...)` when non-null):**
+`AssembledItem` -> `AssembleItem`, `ScrappedItem` -> `ScrapItem`,
+`RepairedItem` -> `RepairItem`, `WoreItem` -> `WearItem` (each with the
+`ItemStack` / `ItemValue` payload), `BlockUpgraded` -> `BlockUpgrade`
+(block name + pos), `BoughtItems` / `SoldItems` -> `BuyItems` / `SellItems`
+(trader name + item count), `ClosedContainer` -> `ContainerClosed`
+(container pos + `ITileEntityLootable`), `ClearedSleepers` ->
+`SleepersCleared` (prefab pos), `SleeperVolumePositionAdded` ->
+`SleeperVolumePositionAdd` (pos), `ChangedWindow` -> `WindowChanged`
+(window name). The `add_` / `remove_` accessors for all ~30 events are the
+standard `Interlocked.CompareExchange` delegate add/remove loops.
+Other leaves: `GetTraderPoiCount(traderArea, difficulty, index)` (IL=30)
+lazily runs `SetupTraderPrefabList` and returns
+`TraderPrefabList[traderArea][index].TierData[difficulty].Count` (0 for a
+null area or a missing tier);
+`AddQuestTierReward(reward)` (IL=11) lazily creates `questTierRewards` and
+appends (the `quest_tier_reward` XML list);
+`ClearTraderResetQuestsForPlayer(playerID)` (IL=11) drops the id from
+`ForceResetQuestTrader`.
+
 **Server-authoritative shared-quest coordination** (the part that is genuinely a
 server responsibility on a dedicated box):
 
