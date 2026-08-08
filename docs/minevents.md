@@ -427,6 +427,11 @@ target - the one shared predicate shape (the XOR appears as
   at `parent_transform_path` (when set) and looks for the attached prefab
   transform named `"tempPrefab_" + prefabName` under it (or under the root),
   passing when the prefab child exists.
+- **`HitLocation`** (IL=27): tests the hit body part: valid when
+  `(bodyParts & params.DamageResponse.HitBodyPart) != 0`, inverted by
+  `invert`. `ParseXAttribute` (IL=48) splits the `body_parts` attribute on
+  commas and ORs each `EnumBodyPartHit` parse into the flag mask (the
+  "only on head hit" style trigger gate).
 
 ### 7.0 `EffectManager.GetValue` (IL=372) passive stack
 

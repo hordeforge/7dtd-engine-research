@@ -689,6 +689,15 @@ to all (flags 192). The receiving clients run
 `SpawnParticleEffectClient` (IL=7) / `...ForceCreation` (IL=6), which just
 call the local spawn.
 
+**`FireControllerUtils.SpawnParticleEffect(pe, entityId)` (IL=40)** is the
+fire-block spawn twin: on a server that is not dedicated it calls
+`GameManager.SpawnParticleEffectClient(pe, entityId, false, true)`; on a
+client it `Setup`s a `NetPackageParticleEffect` and sends it to the server;
+on a dedicated server (or as the final fallback) it broadcasts the package
+on channel **192** to everyone (`SendPackage(... -1, -1, entityId, -1,
+channel 192, ...)`). The dedicated host therefore ships the fire FX to all
+clients without ever instantiating it locally.
+
 **`ParticleEffect.SpawnParticleEffect(pe, entityThatCausedIt, forceCreation,
 isWorldPos)` (IL=339):** the client-side instantiation; the server-relevant
 parts are:
