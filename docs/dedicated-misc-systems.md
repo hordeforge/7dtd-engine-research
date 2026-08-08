@@ -794,6 +794,28 @@ a caller temp buffer (with optional exact-length and flush);
 `WriteStreamToFile` (IL=15/16) dumps a stream to a file (optional length),
 the dump path used for save/backup artifacts.
 
+## ModEvents payload structs (the `S*` data carriers)
+
+`ModEvents` registers each game-event hook with a dedicated payload struct
+(namespace `ModEvents/`); every struct is fields + a storing ctor, so the
+"payload shape" is the whole contract. The event registry and firing sites
+live in [mod-loading.md](mod-loading.md) / [loop.md](loop.md) (field
+inventory in [managers.md](managers.md)); the interrupt semantics of the
+interruptible pair are in [chat.md](chat.md) §3.
+
+| Struct | Ctor fields | Carried by |
+|---|---|---|
+| `SChatMessageData` (ctor IL=19) | `ClientInfo`, `ChatType` (`EChatType`), `SenderEntityId`, `Message`, `MainName`, `RecipientEntityIds` (`List<int>`) | `ModEventInterruptible<SChatMessageData>` |
+| `SGameMessageData` (ctor IL=13) | `ClientInfo`, `MessageType` (`EnumGameMessages`), `MainName`, `SecondaryName` | `ModEventInterruptible<SGameMessageData>` |
+| `SGameStartingData` (ctor IL=4) | `AsServer` (`bool`) | `ModEvent<SGameStartingData>` |
+| `SPlayerDisconnectedData` (ctor IL=7) | `ClientInfo`, `GameShuttingDown` (`bool`) | `ModEvent<SPlayerDisconnectedData>` |
+| `SSavePlayerDataData` (ctor IL=7) | `ClientInfo`, `PlayerDataFile` | `ModEvent<SSavePlayerDataData>` |
+| `SEntityKilledData` (ctor IL=7) | `KilledEntitiy` (sic), `KillingEntity` | `ModEvent<SEntityKilledData>` |
+
+`SNetPackageInfo` (ctor IL=11) is not a ModEvents payload: `Id`, `Size`,
+`Tick` (`UInt64`) are the per-package stats record `ConsoleCmdProfileNetwork`
+(the `net` console command) reads for the packet histogram.
+
 ## Changelog
 
 - **2026-08-08:** Entity.StopAnimatorAudio (IL=16) monitored-handle stop +
