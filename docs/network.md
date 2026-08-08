@@ -133,6 +133,16 @@ filter by attached-to-entity flags (`_onlyClientsAttachedToAnEntity` /
 `World.IsEntityInRange` for entity-id or world-pos range; enqueue to
 `netConnection[package.Channel]`.
 
+**Connection lifecycle leaves:** `AddClient(cInfo)` (IL=32) fires the
+`OnClientAdded` delegate, registers the `ClientInfo`, and records the
+client-count analytics (`GameSparksCollector.SetMax` keys 16 / 17, the
+latter +1 for the local player when not dedicated). `ServerReady` (IL=10)
+clears the client list when reconnecting (`IsConnected` already true) and
+sets `IsConnected`. `SendToClientsOrServer(package)` (IL=21) is the
+direction-neutral helper: server -> broadcast on 192, client ->
+`SendToServer`. `EnableNetworkStatistics` / `PrintNetworkStatistics`
+(IL=4 each) delegate to `ProtocolManager` (the `net` command surface).
+
 ---
 
 ## 2. Entity replication (from UpdateTick)
