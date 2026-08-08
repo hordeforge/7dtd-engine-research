@@ -395,6 +395,19 @@ Evaporation does **not** call into `WaterSimulationNative` jobs directly; it sch
 
 Apply-stage prose also in [dedicated-misc-systems.md](dedicated-misc-systems.md) (`WaterSimulationApplyChanges`, `WaterUtils`, `ChunkHandle`). Leaves for the job structs are in [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) (light-mesh-water group).
 
+**Water stats leaves:** `WaterStats` (struct) is the per-frame water-sim
+accounting with six `int` counters: `NumChunksProcessed`, `NumChunksActive`,
+`NumFlowEvents`, `NumVoxelsProcessed`, `NumVoxelsPutToSleep`,
+`NumVoxelsWokeUp`. `ResetFrame()` (IL=19) zeroes all six; `op_Addition` (IL=46)
+sums them fieldwise; `Sum(NativeArray<WaterStats>)` (IL=21) folds a per-chunk
+array into one total. `WaterStatsProfiler` registers six Unity
+`ProfilerCounter<int>` markers (Scripts category, unit Count) in its cctor,
+but `SampleTick(stats)` is an empty `ret` - the counters exist, the sampling
+stub is compiled out. `CollectWaterUtils/WaterPoint` (ctor(pos, mass) IL=10)
+records `worldPos`, `mass`, `massToTake = mass`, with
+`finalMass = mass - massToTake` - the per-cell take budget for the
+water-collection harvest.
+
 ### 4.9 Residuals / not closed here
 
 | Item | Why |
@@ -452,6 +465,10 @@ else **1000** ticks.
   block (0) channel split, zeroed on missing chunk.
 ## Changelog
 
+- **2026-08-08:** Water stats leaves: WaterStats 6 counters + ResetFrame +
+  op_Addition + Sum(NativeArray); WaterStatsProfiler cctor ProfilerCounter
+  markers, SampleTick empty ret; CollectWaterUtils/WaterPoint mass/massToTake
+  finalMass.
 - **2026-08-08:** World.GetBlockLightValue IL=34: DensityAir sentinel (no
   cache), 0 for null chunk, else GetLightValue(channel 0).
 - **2026-08-08:** WaterValue leaves: SetMass IL=8 FastClamp 0..65535;
