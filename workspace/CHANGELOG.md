@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: buff remove-mark + duration accessor leaves
+
+removeBuff(BuffValue) direct mark, BuffClass duration get/set with initial seed (verified)
 ## 2026-08-08 - tier-C: QuestEventManager final notifiers
 
 NPCMeet/SleeperVolumePositionRemove/TwitchEventReceive dispatch (verified)
