@@ -261,6 +261,157 @@ this doc owns the framework, not each leaf command's full prose.
 - **Residual:** telnet TCP socket internals; the in-game `GUIWindowConsole` UI
   (client-only); individual command effects (feature/content).
 
+## 7. Command index (catalogued leaves)
+
+Every `ConsoleCmdAbstract` leaf is catalogued with its primary name and a one-line
+effect in [inventories/console-command-list.md](inventories/console-command-list.md);
+this index names the leaves for the coverage census. Dispatch/permission behaviour
+is in the framework sections above; per-command effects are the catalog's role.
+
+| Command type | Primary name | Effect |
+|---|---|---|
+| `ConsoleCmdAI` | `ai` | AI commands |
+| `ConsoleCmdAIDirectorDebug` | `aiddebug` | Toggles AIDirector debug output. |
+| `ConsoleCmdAIDirectorShowNextWanderingHordeTime` | `shownexthordetime` | Displays the wandering horde time |
+| `ConsoleCmdAIDirectorSpawnAirDrop` | `spawnairdrop` | Spawns an air drop |
+| `ConsoleCmdAIDirectorSpawnHorde` | `spawnwandering` | Spawn wandering entities |
+| `ConsoleCmdAIDirectorSpawnScouts` | `spawnscouts` | Spawns zombie scouts |
+| `ConsoleCmdAIDirectorSpawnSupplyCrate` | `spawnsupplycrate` | Spawns a supply crate where the player is |
+| `ConsoleCmdAccDecay` | `AccDecay` | Accuracy Decay for guns, show/hide/reset/<Decimal value> |
+| `ConsoleCmdAudioManager` | `audio` | Watch audio stats |
+| `ConsoleCmdAutoMove` | `automove` | Player auto movement |
+| `ConsoleCmdBents` | `bents` | Switches block entities on/off or counts them |
+| `ConsoleCmdBuff` | `buff` | Applies a buff to the local player |
+| `ConsoleCmdBuffPlayer` | `buffplayer` | Apply a buff to a player |
+| `ConsoleCmdBugReportOcclusionManager` | `testoccreport` | Test the occlusion manager self reporting to backtrace, requires Backtrace to be enabled at build creation |
+| `ConsoleCmdCamera` | `camera` | Lock/unlock camera movement or load/save a specific camera position |
+| `ConsoleCmdCensor` | `testCensor` | Censorship testing toggle. |
+| `ConsoleCmdChunkCache` | `chunkcache` | shows all loaded chunks in cache |
+| `ConsoleCmdCommandPermissions` | `commandpermission` | Manage command permission levels |
+| `ConsoleCmdConfig` | `config` | Import/export config data from/to external file |
+| `ConsoleCmdCreativeMenu` | `creativemenu` | enables/disables the creativemenu |
+| `ConsoleCmdDMS` | `dms` | Gives control over Dynamic Music functionality. |
+| `ConsoleCmdDamageReset` | `damagereset` | Reset damage on all blocks in the currently loaded POI |
+| `ConsoleCmdDebuff` | `debuff` | Removes a buff from the local player |
+| `ConsoleCmdDebuffPlayer` | `debuffplayer` | Remove a buff from a player |
+| `ConsoleCmdDebugGameStats` | `debuggamestats` | GameStats commands |
+| `ConsoleCmdDebugJiggle` | `debugjiggle` | (no description) |
+| `ConsoleCmdDebugMenu` | `debugmenu` | enables/disables the debugmenu |
+| `ConsoleCmdDebugPanels` | `debugpanels` | allows usage of debug display panels (F3 menu) via command console |
+| `ConsoleCmdDebugShot` | `debugshot` | Creates a screenshot with some debug information |
+| `ConsoleCmdDebugWeather` | `debugweather` | Dumps internal weather state to the console. |
+| `ConsoleCmdDecoMgr` | `decomgr` | "decomgr": Saves a debug texture visualising the DecoOccupiedMap. "decomgr state": Saves a debug texture visualising the location/state of all of the DecoObjects saved in decorations.7dtd. |
+| `ConsoleCmdDiscord` | `discord` | Toggle Discord debug window |
+| `ConsoleCmdDismemberment` | `testDismemberment` | Dismemberment testing toggle. |
+| `ConsoleCmdDynamicProperties` | `dynamicproperties` | Dynamic Properties debugging |
+| `ConsoleCmdExhausted` | `exhausted` | Makes the player exhausted. |
+| `ConsoleCmdExportCurrentConfigs` | `exportcurrentconfigs` | Exports the current game config XMLs |
+| `ConsoleCmdExportPrefab` | `exportprefab` | Exports a prefab from a world area |
+| `ConsoleCmdFallingBlocks` | `fallingblocks` | FallingBlocks WIP Settings |
+| `ConsoleCmdFloatingOrigin` | `floatingorigin` | (no description) |
+| `ConsoleCmdFov` | `fov` | Camera field of view |
+| `ConsoleCmdGameStage` | `gamestage` | Shows the gamestage of the local player |
+| `ConsoleCmdGetGameStats` | `getgamestat` | Gets game stats |
+| `ConsoleCmdGetLogfilePath` | `getlogpath` | Get the path of the logfile the game currently writes to |
+| `ConsoleCmdGetOptions` | `getoptions` | Gets game options |
+| `ConsoleCmdGetTime` | `gettime` | Get the current game time |
+| `ConsoleCmdGiveQualityItem` | `giveself` | usage: giveself itemName [qualityLevel= |
+| `ConsoleCmdGiveQuest` | `givequest` | Gives a quest to the player or add to quest tier |
+| `ConsoleCmdGiveXp` | `givexp` | Give XP to a player |
+| `ConsoleCmdGraph` | `graph` | Draws graphs on screen |
+| `ConsoleCmdHelp` | `help` | Help on console and specific commands |
+| `ConsoleCmdKick` | `kick` | Kicks user with optional reason. "kick playername reason" |
+| `ConsoleCmdKickAll` | `kickall` | Kicks all users with optional reason. "kickall reason" |
+| `ConsoleCmdKill` | `kill` | Kill a given entity |
+| `ConsoleCmdLights` | `lights` | Light debugging |
+| `ConsoleCmdListDLC` | `listdlc` | List the available DLC and their current entitlement status. |
+| `ConsoleCmdListEntities` | `listents` | lists all entities |
+| `ConsoleCmdListGameObjects` | `lgo` | List all active game objects |
+| `ConsoleCmdListPlayerIds` | `listplayerids` | Lists all players with their IDs for ingame commands |
+| `ConsoleCmdListPlayers` | `listplayers` | lists all players |
+| `ConsoleCmdListThreads` | `listthreads` | lists all threads |
+| `ConsoleCmdLogFellThroughWorldDebugInfo` | `ftw` | Log the fell through world debug information for testing purposes. |
+| `ConsoleCmdLogLevel` | `loglevel` | Telnet/Web only: Select which types of log messages are shown |
+| `ConsoleCmdLogOwnedEntities` | `playerOwnedEntities` | Lists player owned entities. |
+| `ConsoleCmdLoot` | `loot` | Loot commands |
+| `ConsoleCmdMapData` | `mapdata` | Writes some map data to an image |
+| `ConsoleCmdMemCl` | `memcl` | Prints memory information on client and calls garbage collector |
+| `ConsoleCmdMemoryProfiler` | `memprofile` | Toggles screen Memory Profiler UI |
+| `ConsoleCmdMeshDataManager` | `meshdatamanager` | Toggle the MeshDataManager |
+| `ConsoleCmdMumblePositionalAudio` | `mumblepositionalaudio` | Mumble Positional Audio related tools |
+| `ConsoleCmdNetworkClient` | `networkclient` | Client side network commands |
+| `ConsoleCmdNetworkServer` | `networkserver` | Server side network commands |
+| `ConsoleCmdNewAvatarTest` | `na` | Test new HD stuff. |
+| `ConsoleCmdNewWeatherSurvival` | `newweathersurvival` | Enables/disables new weather survival |
+| `ConsoleCmdOcclusion` | `occlusion` | Control OcclusionManager |
+| `ConsoleCmdOverlapRecovery` | `overlap` | Toggle LocalPlayer's Character Controller Overlap Recovery |
+| `ConsoleCmdOverrideServerMaxPlayerCount` | `overridemaxplayercount` | Override Max Server Player Count |
+| `ConsoleCmdPIRS` | `pirs` | tbd |
+| `ConsoleCmdPOIWaypoints` | `poiwaypoints` | Adds waypoints for specified POIs. |
+| `ConsoleCmdPPList` | `pplist` | Lists all PersistentPlayer data |
+| `ConsoleCmdPathTest` | `pathtest` | enable a path testing utility mode |
+| `ConsoleCmdPerformanceProfiler` | `performanceprofiler` | Performance Profiling Utility |
+| `ConsoleCmdPlaceBlockRotations` | `placeblockrotations` | Places all rotations of the currently held block |
+| `ConsoleCmdPlaceObserver` | `chunkobserver` | Place a chunk observer on a given position. |
+| `ConsoleCmdPlayerVisitMap` | `playervisitmap` | Teleports the player through a rectangular area with optional memory logging |
+| `ConsoleCmdPois` | `pois` | Switches distant POIs on/off |
+| `ConsoleCmdPrefabEditor` | `prefabeditor` | Open the Prefab Editor |
+| `ConsoleCmdPrefabUpdater` | `prefabupdater` | (no description) |
+| `ConsoleCmdPrintChunkExpiryInfo` | `expiryinfo` | Prints location and expiry day/time for the next [x] chunks set to expire. |
+| `ConsoleCmdProfiler` | `profiler` | Utilities for collection profiling data from a variety of sources |
+| `ConsoleCmdProfiling` | `profiling` | Enable Unity profiling for 300 frames |
+| `ConsoleCmdRegionReset` | `regionreset` | Resets chunks within a target region, or for the entire map. |
+| `ConsoleCmdReloadEntityClasses` | `reloadentityclasses` | reloads entityclasses xml data. |
+| `ConsoleCmdRemoveQuest` | `removequest` | usage: removequest questname |
+| `ConsoleCmdRepairChunkDensity` | `repairchunkdensity` | check and optionally fix densities of a chunk |
+| `ConsoleCmdResetAchievementStats` | `resetallstats` | Resets all achievement stats (and achievements when parameter is true) |
+| `ConsoleCmdSDCS` | `sdcs` | Control entity sex, race, and variant |
+| `ConsoleCmdSaveChunkAgeMap` | `agemap` | Output debug map for chunk age/protection/save status. |
+| `ConsoleCmdScreenEffect` | `ScreenEffect` | Sets a screen effect |
+| `ConsoleCmdSelfExp` | `giveselfxp` | usage: giveselfxp 10000 |
+| `ConsoleCmdServerMessage` | `say` | Sends a message to all connected clients |
+| `ConsoleCmdSetGameStat` | `setgamestat` | sets a game stat |
+| `ConsoleCmdSetTargetFps` | `settargetfps` | Set the target FPS the game should run at (upper limit) |
+| `ConsoleCmdSetWaterValue` | `setwatervalue` | Sets the water value for all flow-permitting blocks within the current selection area, specified in the range of 0 (empty) to 1 (full). |
+| `ConsoleCmdShow` | `show` | Shows custom layers of rendering. |
+| `ConsoleCmdShowAlbedo` | `showalbedo` | enables/disables display of albedo in gBuffer |
+| `ConsoleCmdShowChunkData` | `showchunkdata` | shows some date of the current chunk |
+| `ConsoleCmdShowClouds` | `showClouds` | Artist command to show one layer of clouds. |
+| `ConsoleCmdShowHits` | `showhits` | Show hit entity info |
+| `ConsoleCmdShowNormals` | `shownormals` | enables/disables display of normal maps in gBuffer |
+| `ConsoleCmdShowSpecular` | `showspecular` | enables/disables display of specular values in gBuffer |
+| `ConsoleCmdShowSwings` | `showswings` | Show melee swing arc rays |
+| `ConsoleCmdShowTriggers` | `showtriggers` | Sets the visibility of the block triggers. |
+| `ConsoleCmdSignTextureManager` | `signtexman` | Allows enabling/disabling the Sign Texture Manager and configuring various baking settings. |
+| `ConsoleCmdSleep` | `sleep` | Makes the main thread sleep for the given number of seconds (allows decimals) |
+| `ConsoleCmdSleeper` | `sleeper` | Drawn or list sleeper info |
+| `ConsoleCmdSmoothPOI` | `smoothpoi` | Smoothens the POI |
+| `ConsoleCmdSmoothWorldAll` | `smoothworldall` | Applies some batched smoothing commands. |
+| `ConsoleCmdSpawnEntityAt` | `spawnentityat` | Spawns an entity at a give position |
+| `ConsoleCmdSpawnScreen` | `SpawnScreen` | Display SpawnScreen |
+| `ConsoleCmdSpectatorMode` | `spectator` | enables/disables spectator mode |
+| `ConsoleCmdSpectrum` | `spectrum` | Force a particular lighting spectrum. |
+| `ConsoleCmdSquareSpiral` | `squarespiral` | Move the player chunk by chunk in a square spiral. Will start off paused and required un-pausing. Also gives god mode and flying at the start. |
+| `ConsoleCmdStab` | `stab` | stability |
+| `ConsoleCmdStarve` | `starve` | Makes the player starve (optionally specify the amount of food you want to have in percent). |
+| `ConsoleCmdSwitchView` | `switchview` | Switch between fpv and tpv |
+| `ConsoleCmdSystemInfo` | `SystemInfo` | List SystemInfo |
+| `ConsoleCmdTeleportPlayer` | `teleportplayer` | Teleport a given player |
+| `ConsoleCmdTeleportPoi` | `tppoi` | Open POI Teleporter window |
+| `ConsoleCmdTeleportPoiRelative` | `teleportpoirelative` | Teleport the local player within the current POI |
+| `ConsoleCmdTestLoop` | `testloop` | Test code in a loop |
+| `ConsoleCmdThirsty` | `thirsty` | Makes the player thirsty (optionally specify the amount of water you want to have in percent). |
+| `ConsoleCmdTraderArea` | `traderarea` | ... |
+| `ConsoleCmdTransformDebug` | `transformdebug` | Transform Debugging |
+| `ConsoleCmdTrees` | `trees` | Switches trees on/off |
+| `ConsoleCmdTwitchAdminCommand` | `twitchadmin` | Twitch Admin Commands |
+| `ConsoleCmdTwitchCommand` | `twitch` | usage: twitch <command> <params> |
+| `ConsoleCmdUIOptions` | `uioptions` | Allows overriding of some options that control the presentation of the UI |
+| `ConsoleCmdVersion` | `version` | Get the currently running version of the game and loaded mods |
+| `ConsoleCmdVersionUi` | `versionui` | Toggle version number display |
+| `ConsoleCmdWorldChunkReset` | `worldchunkreset` | Resets all unprotected chunks across the world. |
+| `ConsoleCmdXui` | `xui` | Execute XUi operations |
+
 ---
 
 ## Related docs
@@ -275,6 +426,9 @@ this doc owns the framework, not each leaf command's full prose.
 **Leaf catalog:** every instance is enumerated in [`inventories/console-command-list.md`](inventories/console-command-list.md) (all 187 commands with descriptions).
 
 ## Changelog
+
+- **2026-08-08:** Command index section added (narrates the 141 catalogued
+  `ConsoleCmdAbstract` leaves for the coverage census).
 
 - **2026-08-08:** Telnet login lockout window: loginAttemptsPerIP + LoginAttempts count/window mechanics.
 - **2026-08-07:** SdtdConsole.Update (IL=60) one-command-per-frame FIFO drain:

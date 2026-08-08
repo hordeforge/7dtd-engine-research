@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: narrate 141 console-command leaves (narrated 1841->1982)
 ## 2026-08-08 - tier-C: whole-assembly 100% accounting (1,672 unreached types classified)
 ## 2026-08-08 - tier-C: Coverage.cs AC-only base correction (game 3699->3574; 125 referenced-assembly types removed)
 ## 2026-08-08 - tier-C: add census-pct.py (live coverage-percentage calculator)
