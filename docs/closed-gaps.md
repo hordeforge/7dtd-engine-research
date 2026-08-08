@@ -180,7 +180,7 @@ the gap-closing context only. All items here are **non-IL** residuals:
 2. Runtime **entity Behaviour.enabled** population on dedi (needs runtime or deeper spawn).  
 3. Full line-by-line **AstarPath** library (third-party; treat as black box).  
 4. **Region sector payload byte codec** only. The WorldState/Region **managed
-   structure is CLOSED** ([`save-region.md`](save-region.md), `WorldState.SaveLoad` IL=884);
+   structure is CLOSED** ([`save-region.md`](save-region.md), `WorldState.SaveLoad` IL=926);
    just the compressed sector payload is left un-annotated ([`residuals.md`](residuals.md)).  
 5. ModEvents subscriber sets.  
 6. Post-V3.0.1 IL drift.
