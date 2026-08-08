@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: cosmetic unlock path
+
+Equipment.UnlockCosmeticItem (IL=31, items.md 3): CosmeticMappingStringID
+resolve, m_unlockedCosmetics append, CosmeticUnlocked event. verified from
+IL. Commit 1c281e4.
 ## 2026-08-08 - tier-C: workstation craft delivery
 
 TileEntityWorkstation.CheckForCraftComplete (IL=55, tile-entities-power.md):
