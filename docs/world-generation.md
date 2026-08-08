@@ -309,6 +309,15 @@ placed element" record the image/raw world providers read
 (blockValue, `m_Prob`, offset) and `PoiMapDecal` (textureIndex, face,
 `m_Prob`) are the weighted sub-records behind those lists.
 
+**Array storage (`BackedArrays`):** the worldgen buffer factory:
+`Create(length)` (IL=11) returns a `FileBackedArray<T>` when
+`ENABLE_FILE_BACKED_ARRAYS` is on and the length is positive, else a
+`MemoryBackedArray<T>`; `CreateSingleView` (IL=14) wraps either in a
+single-view handle, and the view factory warns once the open view count
+passes **16** (`BackedArraySingleView has opened a large amount of array
+views, this could indicate a memory issue`) - the large-splat-map buffers
+are file-backed to keep the generator's working set out of RAM.
+
 ### 3.6 Spawns, roads, water finalization
 
 - Player spawns: `CreatePlayerSpawn` over `CalcPlayerSpawnTiles` until **12**

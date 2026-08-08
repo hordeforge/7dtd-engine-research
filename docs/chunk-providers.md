@@ -138,6 +138,13 @@ defaults it to `Disc=1`). If this process is not the server it forces
 `NetworkClient=3`. The id then goes to `World.CreateChunkCluster →
 ChunkCluster.Init`, which switches on it:
 
+**Programmatic override:** `WorldCreationData.Apply(world, worldState)`
+(IL=15) sets `WorldState.providerId =
+(EnumChunkProviderId)int.Parse(Properties["ProviderId"])` when the
+`ProviderId` property is present - the world-creation record (provider id
+plus the `PropWorldEnvironment*` strings) used by the distant-terrain
+startup to pin which provider the generated world runs on.
+
 | Id | Concrete type | Source | Dedicated relevance |
 |---|---|---|---|
 | 1 `Disc` | `ChunkProviderDisc` | world's own `/Region` files, fully preloaded | editor / playtest worlds; rare on dedi |
