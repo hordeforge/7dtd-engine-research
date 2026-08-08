@@ -150,6 +150,10 @@ fallback (`UserIdentifierSteam`), warning on invalid / missing attributes.
 `AdminWhitelist.IsWhiteListEnabled()` (IL=29) is non-empty users or groups;
 the whitelist entries round-trip through the nested `WhitelistUser` /
 `WhitelistGroup` records (`TryParse` / `ToXml` each).
+The sibling `AdminCommands` store (`commands` dict + `defaultCommandPermission`,
+[console-commands.md](console-commands.md) permission gate) round-trips its
+entries through the nested `CommandPermission` record (`Command`,
+`PermissionLevel`, `ToXml`).
 
 ## AdminBlacklist
 

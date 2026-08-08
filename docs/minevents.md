@@ -384,6 +384,11 @@ target - the one shared predicate shape (the XOR appears as
     `StatComparePercModMaxToMax` (IL=42): `Stat.ModifiedMaxPercent`
     (Health / Stamina only).
 - **`NotHasBuff`** (IL=25): `!target.Buffs.HasBuff(buffName)`.
+- **`RequirementItemTier`** (IL=36): a plain `RequirementBase` leaf (no
+  `target` attribute): needs a non-empty `params.ItemValue` and compares
+  `ItemValue.Quality` with `compareValues` (invert-aware). **0 external
+  references on b14** (never instantiated; the live item-quality gates are
+  the `RequirementItemModTier` and `ItemHasTags` leaves above).
 - **`BlockStandingOn`** (IL=37): `target.blockValueStandingOn.Block`
   matches `blockTags` with `HasAllFastTags` (`has_all_tags`) or
   `HasAnyFastTags`.
