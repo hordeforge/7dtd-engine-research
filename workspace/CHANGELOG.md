@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: world file CRC pass
+
+ChunkProviderGenerateWorldFromRaw.<calcWorldFileCrcs>d__29.MoveNext (IL=121,
+chunk-providers.md): zeroes worldFileTotalSize, clears worldFileCrcs, per-file
+FileSize + chunked CRC accumulation via the b__0 callback, frame-budgeted.
+verified from IL. Commit 1b4fea0.
 ## 2026-08-08 - tier-C: world hash validation blob
 
 NetPackageWorldInfo.PrepareWorldHashes (IL=83, protocol-packages.md):
