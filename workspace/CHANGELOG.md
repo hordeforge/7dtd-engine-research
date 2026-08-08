@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: remaining action configs
+
+Completed the ItemAction ReadFrom family (items.md 4.2): ExchangeItem (IL=83), GainSkill (IL=53), LearnRecipe (IL=75), Quest (IL=49), Repair (IL=43), UseOther (IL=57), MakeFertile (IL=66), ExchangeBlock (IL=55), SpawnEntity (IL=34) key sets incl. throw-on-missing patterns. verified from IL. Commit 48acfbf.
 ## 2026-08-08 - tier-C: traders.xml definition parse
 
 TradersFromXml.ParseTraderInfo (IL=320, loot-economy.md): id required + duplicate check, reset_interval -> ResetIntervalInTicks, allow_buy AND allow_sell both write AllowSell (no separate allow-buy bool), override_buy/sell markups, is_vending/player_owned/rentable, rent_cost + rent_time, open/close HH:mm via DayTimeToWorldTime -> OpenTime/CloseTime + UseOpenHours, WarningTime = CloseTime - 300, child element dispatch to trader_items/tier_items/trader_item_groups/traderstage_templates. verified from IL. Commit 34efd5a.
