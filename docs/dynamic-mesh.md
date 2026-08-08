@@ -247,6 +247,12 @@ a trailing `i64`, and `ChunkNeighbourData.Write`.
 Adding for regen`" log is `DynamicMeshRegion.OnCorrupted`. On a headless server the
 byte-level load is what matters, the actual `Mesh`/GameObject build is client render.
 
+**Regen bookkeeping (`ThreadRegeneratingData`):** `ChunkManager` snapshots
+`viewingChunkPositionsCopy` / `collisionChunkPositionsCopy` for a
+regenerating chunk - the two position sets (the viewers' seen range and the
+collision range) the regeneration pass re-checks before deciding a chunk
+really needs rebuilding.
+
 **Chunk-data access layer:** `DynamicMeshChunkDataWrapper` is the locked
 handle to a chunk's `DynamicMeshChunkData` on the generation threads:
 `TryGetData(out data, debug)` (IL=15) is `TryTakeLock(debug)` then out the

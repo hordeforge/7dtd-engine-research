@@ -477,6 +477,10 @@ read header/version → **`DeflateInputStream`** → pooled load stream for
 2. `GetRFC` opens/caches the `RegionFile` for that region + extension.
 3. `RegionFile.WriteData(chunkX, chunkZ, length, compression, bytes, saveHeader)`.
 
+(`RegionFileAccessMultipleChunks/RegionExtensions` is the cached
+`Dictionary<string, RegionFile>` collection that `GetRFC` populates, ctor
+only.)
+
 `RegionFileRaw.WriteData` IL=229:
 
 1. `GetLocationInfo` / `FindBestFreeSpace` / `SetLocationInfo` / `SetTimestampInfo`.

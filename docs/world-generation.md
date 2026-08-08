@@ -284,7 +284,11 @@ After both complete, `ClearWaterUnderTerrain` iterates `waterRects` and clears
   connects township gateways (`ConnectClosest` / `ConnectSelf`, A* paths from
   `PathingUtils` over the WorldSize/10 `PathTileGrid`, Burst
   `FindDetailedPath`), producing `highwayPaths`; `RunTownshipDirtRoads` adds
-  country roads.
+  country roads. `PathingUtils` runs its node search on a
+  `MinHeapBinned` (the binned priority queue: `Init` IL=19 / `Add` IL=97 /
+  `ExtractFirst` IL=62 / `Reset` IL=36 with `cBins` / `cScale` bin
+  geometry over a `NativeArray`), the closed node bookkeeping for the
+  pathfinding pass.
 - `TownPlanner.SpawnPrefabs` -> `Township.SpawnPrefabs` -> per street tile
   `StreetTile.SpawnMarkerPartsAndPrefabs` (IL=1410): picks district-appropriate
   prefabs (`PrefabManager.GetPrefabWithDistrict`, scoring + density budget) and
