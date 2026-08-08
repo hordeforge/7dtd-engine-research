@@ -147,7 +147,9 @@ fallback (`UserIdentifierSteam`), warning on invalid / missing attributes.
 `CrossplatformId` lookup in `userPermissions`;
 `AdminWhitelist.IsWhitelisted(client)` (IL=58) matches the ids or any
 `groupMemberships` key against `whitelistedGroups`;
-`AdminWhitelist.IsWhiteListEnabled()` (IL=29) is non-empty users or groups.
+`AdminWhitelist.IsWhiteListEnabled()` (IL=29) is non-empty users or groups;
+the whitelist entries round-trip through the nested `WhitelistUser` /
+`WhitelistGroup` records (`TryParse` / `ToXml` each).
 
 ## AdminBlacklist
 
