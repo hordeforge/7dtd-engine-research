@@ -1989,6 +1989,17 @@ walk type at or above 20).
 not ragdoll: unless `disableFallBehaviorUntilOnGround`, try
 `ChooseFallBehavior`; else land jump anim. `aiManager.FallHitGround(distance)`.
 
+**`EntityPlayerLocal.FallImpact(speed)` (IL=117) is the player fall
+modifier.** It returns when god-mode, attached, or `speed <= 0`; the landed
+block (an elevator resolves to the block below) supplies `landingScale =
+block.FallDamage` (1 default; a block with `FallDamage <= 0` cancels the
+fall entirely). The speed is floored at 1, scaled by the static
+`EntityPlayer.FallDamageModifier` and `landingScale`, then reduced by the
+`FallDamageReduction` (**47**) passive on the held item; the player snapshots
+`fallHealth`, `SetCVar("_fallSpeed", speed)`, fires MinEvent **95** (the
+fall-impact event that applies the actual damage), and plays the hit-ground
+sound for `speed > 0.05`.
+
 **`ChooseFallBehavior` (IL=113):** empty list → false. Filter
 `fallBehaviors` by height range and difficulty range (hardcoded difficulty
 probe **1**); weighted pick via cumulative weights; `ExecuteFallBehavior`.
@@ -3277,6 +3288,11 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+## Changelog
+
+- **2026-08-08:** EntityPlayerLocal.FallImpact (IL=117): elevator block
+  resolve, block.FallDamage scale, FallDamageModifier + passive 47
+  FallDamageReduction, _fallSpeed cvar, MinEvent 95, hit-ground sound.
 ## Changelog
 
 - **2026-08-08:** Player anti-stuck: pushOutOfBlocks (IL=225) 3x3 neighborhood
