@@ -20,10 +20,10 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `6d2876a` server-classified re-narration |
+| HEAD (at handoff write) | `651a63e` 100% narrated |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
-| Coverage (last pin text) | narrated 1841 / catalogued 557 / classified 1176 / unaccounted **0** |
+| Coverage (last pin text) | narrated 3574 / catalogued 0 / classified 0 / unaccounted **0** (100% narrated) |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
 
