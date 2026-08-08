@@ -90,6 +90,24 @@ from the prefab height for the first terrain-shape block); `SetTerrainHeight`
 | `MeshGeneratorMC2` / `Prefab` | `GetTerrainHeight` | **int** | Meshing |
 | `ITerrainGenerator` / `IChunk` | * | * | Abstract; patch implementors only |
 
+**`HeightMapUtils` conversion leaves (all IL-verified):**
+`ConvertDTMToHeightData` (three overloads: `Color[] + size + flip` IL=81,
+`Texture2D + flip` IL=96, `Color32[] + w + h + flip` IL=155) turns a DTM
+image into the `float[,]` height grid (red-channel driven);
+`ConvertDTMToTerrainStampData(dtm)` (IL=46) is the same as a
+`Single[,]` stamp. `LoadHeightMapRAWAsStampData(filePath, multiplier)`
+(IL=101) streams a `.raw` as `float[sqrt(len/2), sqrt(len/2)]` with each
+little-endian u16 mapped to `(hi*256 + lo) / 65535 * multiplier`;
+`LoadRAWToHeightData(filePath)` (IL=60) re-reads the u16 array as
+`/ 65280 * 255` floats with reversed rows (the byte-height encoding);
+`LoadHeightMapRAWAsUnityHeightMap(filePath, w, h, fac)` (IL=90) fills a
+`float[0..1]` grid from the u16 pairs; `GetHeightDataFromImageFile(filePath)`
+(IL=18) loads + converts + destroys a texture
+(`FileNotFoundException` when missing); `SmoothTerrain(passes, heightData)`
+(IL=217) applies a center + 8-neighbor box blur for `passes` iterations.
+`SaveHeightMapRAW` / `LoadHeightMapRAW` (the world-load pair, IL=49 / 63)
+are narrated in [`chunk-providers.md`](chunk-providers.md) §4.1.
+
 **Product consequence:** even with YDim=16384, **byte heightmaps cannot store Everest**. RealEarth must:
 
 1. Expand Y storage (binary).  
