@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: world volume read-back + chunk coordinate helpers
+
+Sleeper/trigger/wall Read version split + dup-key errors, toChunk shift/mask family, pending downgrade consume (verified)
 ## 2026-08-08 - tier-C: land-protection hardness curve + entity attach/physics accessors
 
 Offline decay blend (modes 1/2), expiry 1, online 48; CanAttach/GetFirstAttached/SetVelocityPerSecond master path (verified)
