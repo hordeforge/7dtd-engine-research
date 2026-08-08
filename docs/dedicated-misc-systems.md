@@ -888,6 +888,19 @@ for the world-file integrity checks. `WaveReader` (a WAV stream reader,
   rigidbody, so the config only matters where entity physics bodies are
   instantiated.
 
+## Discord ID mapping package
+
+`NetPackageDiscordIdMappings.ProcessPackage` (IL=58) carries the Discord
+Social-SDK user mapping (the stock-side surface of the third-party SDK).
+The single-entry form validates `ValidEntityIdForSender`, stores
+`sender.DiscordUserId` on the server, and hands off to
+`DiscordManager.UserMappingReceived(entityId, remove, discordId, false)`.
+The multi-list form errors
+`[Discord] Received invalid User ID mapping package` on a length mismatch
+(and `[Discord] Received User ID mapping package on server with multiple
+entries` when a multi-entry form hits the server) before
+`DiscordManager.UserMappingsReceived(ids, discordIds)`.
+
 ## GameUtils time and kick helpers
 
 - **Time formatting:** `WorldTimeToString(worldTime)` (IL=19) is

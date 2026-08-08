@@ -53,6 +53,11 @@ Verified body order when `IsServer`:
    `ClientCount > 0`: `UpdatePings()`, rebuild/send `NetPackageClientInfo`
    (`Setup(world, clientList)`).
 
+`NetPackageClientInfo.ProcessPackage` (IL=47) applies the payload on the
+receiver: for each player id it resolves the `EntityAlive` and writes
+`pingToServer = pingTimes[i]`, plus `IsAdmin = admins[i]` for players -
+the client's ping/admin display state.
+
 Client (non-server) half of the same method processes `connectionToServer[]`
 channels and flushes those queues (same `ProcessPackages` helper).
 
