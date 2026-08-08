@@ -73,6 +73,28 @@ RaycastPathing (namespace)
 `AddNeighbor` / `SetParent` / `SetWaypoint` / `GetNeighbor` to it. The
 misspelling `RaycastNodeHierarcy` is the shipped type name.
 
+**The A* handoff grid (`AstarVoxelGrid` / `AstarManager`, all IL-verified):**
+the `AstarVoxelGrid` extends the A* Pathfinding `GridGraph`:
+`ScanInternal()` (IL=6) is the coroutine shell for the grid scan;
+`UpdateArea(graphUpdate)` (IL=102) runs `CalculateAffectedRegions`,
+`RecalculateCell`s every affected cell, then `CalculateConnections`s each
+cell of the expanded region (the incremental graph update);
+`CalcBlockingFlags(pos, offsetY)` (IL=99) probes the default physics scene
+with a sphere-cast and derives the walkability flags from the hit normal;
+`AddConnection(node, other, cost, tag, payload)` (IL=85) /
+`RemoveConnection(node, other)` (IL=84) maintain a node's `Connection[]`
+through `AllocConnection(count)` (IL=33, pooled per array length < 16) and
+`ClearConnections(node)` (IL=38, pool-returned).
+`AstarManager` (the per-world path manager) owns the area registry:
+`AddArea(pos, noNext)` (IL=64) aligns to 16-block cells, reuses or news an
+`Area` (updateDelay 2) and chains a follow-up area while the delay is low;
+`AddAreaBlock(pos)` (IL=26) merges the block into the area's bounds
+(partial-flag set); `FindLocation(pos, size)` (IL=47) returns the nearest
+registered `Location` whose `size` fits and lies within
+`(size * size * 0.04)^2`; `OnBlockChanged(pos, bvOld, densOld, texOld,
+bvNew)` (IL=209) routes block edits into `UpdateBlock(pos, ...)` (the grid
+dirty-marking the search reads).
+
 ### Block classification
 
 `RaycastPathWorldUtils.getBlockType` maps a world position to `cPathNodeType`:
