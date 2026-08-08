@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: coverage live-pin re-verify date
 ## 2026-08-08 - tier-C: completion-bar pin date refresh
 ## 2026-08-08 - tier-C: fix OOS total to header-sum
 ## 2026-08-08 - tier-C: reconcile OOS supplement count + utility note
