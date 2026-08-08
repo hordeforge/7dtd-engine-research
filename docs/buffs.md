@@ -227,6 +227,14 @@ package to observers and then applies it via `AddBuff`/`RemoveBuff` with
 `netSync=false` (so applying does not re-emit). So the server is authoritative: it
 applies locally and relays to observers.
 
+**`BuffValue` wire format (`Write` IL=29 / `Read` IL=75):** `buffName` (string,
+lowercased), `stackEffectMultiplier` (u8), `durationTicks` (u32),
+`instigatorId` (i32), `buffFlags` (u8), `updateTicks` (u16), `instigatorPos`
+(Vector3i). Reads: below version **2** the name is resolved from a legacy i32
+hash by scanning `BuffManager.Buffs` keys (falling back to a plain lowercased
+string); `updateTicks` is a byte at version 0, u16 later; `instigatorPos` only
+from version **3** on; always ends with `cacheBuffClassPointer()`.
+
 ```mermaid
 sequenceDiagram
   participant SRC as Instigator (server logic / item / trap)
@@ -271,6 +279,9 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
+- **2026-08-08:** BuffValue wire format: Write (IL=29) name/stack/duration/
+  instigator/flags/updateTicks/pos; Read (IL=75) version gates (hash-name
+  below 2, byte/u16 updateTicks, pos from 3) + class pointer cache.
 - **2026-08-08:** Buff passive application: EntityBuffs.ModifyValue (IL=35)
   walks ActiveBuffs skipping paused; BuffClass.ModifyValue (IL=39) Remove skip,
   tag OR into MinEventContext, canRun gate, duration-as-level, stack multiplier
