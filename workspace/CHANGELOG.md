@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: SmartArray channel storage primitive
+
+Pooled 3D byte array behind ChunkBlockChannel/ChunkBlockLayerLegacy: get/set/clear/copyFrom/GetUsedMem + save pair (verified)
 ## 2026-08-08 - tier-C: binary/stream utility leaves
 
 BitConverterLE pooled RW endianness, ByteLengthUtils size prefetch, SimpleBitStream Prefab flag packing, IOUtils hash/CRC integrity (AdminTools/StockFileHashes), WaveReader audio (verified)
