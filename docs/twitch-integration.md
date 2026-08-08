@@ -76,7 +76,11 @@ The scheduler's `Update` (IL=68) requires a live world with players, counts
 apart) either starts the host vote (`RequestApprovedToStart` when the first
 participant is the primary player) or broadcasts a fresh
 `NetPackageTwitchVoteScheduling` on channel **192** to that participant,
-then dequeues it.
+then dequeues it. Vote configuration data: `TwitchVotePreset` (`Name`,
+`IsDefault`, `IsEmpty`, `Title`, `Description`, `BossVoteSettings`) and
+`TwitchRandomActionGroup` (`Name`, `RandomCount`, the random-action pick set)
+are the parsed `twitchevents.xml` records `TwitchVotingManager` and
+`TwitchManager` consult when a vote window opens.
 
 **Server access gate (`NetPackageTwitchAccess`, ProcessPackage IL=55):**
 the client asks the server whether its Twitch integration may run; the
