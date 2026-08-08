@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: dynamic-mesh pipeline records
+
+DyMeshRegionLoadRequest.CreateMeshSync region GO build + MaxRegionLoadMsPerFrame; DynamicMeshVoxelLoad.CopyTerrain MeshUnsafeCopyHelper stages + TerrainSharedMaterials; DynamicMeshChunkDataWrapper locked chunk data access (verified)
 ## 2026-08-08 - tier-C: TileEntityExtensions self-or-feature resolution
 
 TryGetSelfOrFeature 4-branch typed TE access (self / composite GetFeature / feature parent); GetSelfOrFeature bool-discard (verified)
