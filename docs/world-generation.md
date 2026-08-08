@@ -575,6 +575,12 @@ three are client render/UI and out of scope here.
   driven by `NetPackageEventPrefab.ProcessPackage` and
   `NetPackageWorldInitInfo.ProcessPackage`. Client-only mirror of server prefab
   state, out of scope.
+- **`Prefab.Cells<T>`** (nested `CellsAtZ` / `CellsAtX` / `Cell`): a sparse
+  3-level cell grid (`CellsAtZ[] -> CellsAtX[] -> Cell<T>[]`, coordinates
+  `>> 2` = cell size 4, `Cell.empty` sentinel for unallocated cells), with a
+  `Cell.Save` / `Cell.Load` wire pair. **Dead in b14**: `tools/bin/RefScan.exe`
+  reports **0 external references**; live RWG prefab placement happens entirely
+  in `WorldGenerationEngineFinal` (this doc §2-§5), so nothing touches this grid.
 
 ---
 
