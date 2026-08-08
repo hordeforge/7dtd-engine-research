@@ -2044,6 +2044,9 @@ yaw threshold; small moves may use 0.25 distance budget.
 Elevator + local player in water → `player_swim`. Else resolve standing / below
 block materials for surface step sound; passive **165** can mute; play material
 or default step at volume.
+`EntityPlayerLocal.PlayStepSound(volume)` (IL=7) only delegates to the base
+when not in first-person view - third-person footsteps play through this
+path, first-person through the FP controller.
 
 **`MoveEntityHeaded(dir, absolute)` (IL=292 high-level):** if jumping
 `JumpMove`. Root-motion path: hit/ragdoll gates; apply
@@ -3288,6 +3291,10 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+## Changelog
+
+- **2026-08-08:** EntityPlayerLocal.PlayStepSound (IL=7) third-person-only
+  delegate gate.
 ## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.FallImpact (IL=117): elevator block
