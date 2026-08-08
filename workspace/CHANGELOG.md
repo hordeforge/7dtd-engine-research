@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BinaryReaderExtensions dead helper
 ## 2026-08-08 - tier-C: whitelist record types
 ## 2026-08-08 - tier-C: telnet login lockout window
 ## 2026-08-08 - tier-C: DynamicMeshRegionBuilder dead wrapper
