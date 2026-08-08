@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: indoor/outdoor weather buff
+
+EntityPlayerLocal.WeatherBuffUpdate (IL=45, weather-environment.md):
+weatherBuff removed indoors / re-added outdoors per isIndoorsCurrent.
+verified from IL. Commit ba653d9.
 ## 2026-08-08 - tier-C: swim-mode client controller
 
 EntityPlayerLocal.SwimModeTick (IL=151, entity-ai.md): swim enter MinEvent 76,
