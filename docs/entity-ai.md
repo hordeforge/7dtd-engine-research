@@ -2440,6 +2440,16 @@ Local-player helpers: `GetVectorToClosestLocalPlayer(pos)` (IL=7) is
 `SetLocalPlayer(player)` (IL=16) stores `m_LocalPlayerEntity` and attaches
 the player to the audio manager, `LightManager` and the occlusion camera;
 `RemoveLocalPlayer(player)` (IL=6) removes it from `m_LocalPlayerEntities`.
+World event accessors: `add_` / `remove_EntityLoadedDelegates` and
+`add_` / `remove_EntityUnloadedDelegates` (IL=20 each) are the standard
+`Interlocked.CompareExchange` delegate add/remove loops over
+`EntityLoadedDelegates` / `EntityUnloadedDelegates`.
+`DebugAddSpawnedEntity(entity)` (IL=50) is the debug ring: with a primary
+player present and an `EntityAlive` it appends
+`SSpawnedEntity(name, pos, distanceToLocalPlayer, timeSpawned)` to
+`Last4Spawned`, trimming to the newest 4.
+`GetAudioManager()` (IL=3) is the `audioManager` field accessor (client
+audio).
 
 **`FindValidExitPosition` (IL=14) / `GetFallingSavePosition` (IL=161):**
 vehicle dismount + fell-through-world rescue. `FindValidExitPosition` records
