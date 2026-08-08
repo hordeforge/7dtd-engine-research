@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChunkEventComponent + dedupe
+
+5x5-chunk district keying (GetChunkDataFromPosition), StartCooldownOnNeighbors
+walk, CreateHorde append, Write v1 / Read outer >= 5, Clear/GetActiveCount;
+removed duplicated NotifyNoise/NotifyActivity summary (pointer instead).
+Verified fresh dumps.
 ## 2026-08-08 - tier-C: GameStagePartySpawner leaves
 
 SetPartyLevel (IL=123) scaling + stage lookup + bonusLootEvery + party log;
