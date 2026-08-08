@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: AIDirector core leaves
+
+AddEntity/AddPlayer/RemovePlayer fan-out, GetComponent FullName lookup,
+Save v10 + ComponentsSave/Load with zero-worldTime Init; NotifyNoise (IL=84)
+FindNoise + crouch muffle + stealth/sleeper gate + Sound(3) heat 240 ticks;
+NotifyActivity gates; blood-moon party AddPlayerToParty/TryAddPlayer 80m.
+Verified fresh dumps.
 ## 2026-08-08 - tier-C: EntityClass registry leaves
 
 FromString/Add name-hash ids, GetId scan, Cleanup, AddDroppedId, LootDropPick,
