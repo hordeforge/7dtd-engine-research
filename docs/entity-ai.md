@@ -112,6 +112,23 @@ more equipment / held-item / animation residual in later IL.
 6. Stun clear/set via avatar controller; can-see updates; dynamic ragdoll;
    trader-area teleport check.
 
+**`EntityStats` tick + sync:** `Init` (base IL=40) builds the `Health` `Stat`
+with `MaxPassive = MaxHealth (104)`, `GainPassive 106`, `LossPassive 107` and
+max seeded from `EffectManager.GetValue(104, null, 100, entity, ...)`.
+`PlayerEntityStats.Init` (IL=166) adds `Stamina` (MaxPassive 109, Gain 111,
+Loss 112), `Water` (122/124/125), `Food` (114/116/117) plus the UI-notification
+lists. `Tick` (IL=27) skips remote/dead entities and runs a 10-tick phase wheel
+via `TickWait`: base (IL=75) at phase 1 runs `UpdateNPCStatsOverTime(0.5)` +
+`Health.Tick(0.5)`, phase 2 sends `NetPackageEntityStatChanged` for a changed
+Health, and phase 6 (every 10 ticks, throttled by `netSyncWaitTicks`) sends
+`NetPackageEntityStatsBuff` (server broadcasts on 192, client sends to server).
+The player variant (IL=133) runs the four `Update*OT` regen passes at phases
+1-4, per-stat change packets at phase 5 (Health 0, Stamina 1, Water 8, Food 7),
+and the same stats-buff sync. Wire: base `Write`/`Read` (IL=8 each) are version
+**11** + the Health stat only; the player form (27/38) adds Stamina, Water,
+Food and `CoreTemp` as `sbyte(CoreTemp / 2)` (read back `* 2`, version >= 11);
+`NetPackageEntityStatsBuff` is `entityId i32 + length i32 + raw bytes`.
+
 **`EntityAnimal.OnUpdateLive` (IL=57) override:** `EntitySeeCache.Clear()`
 (animals keep no see cache), then base `OnUpdateLive`. While `isDistressed`
 and alive: `timer -= deltaTime`; at ≤ 0 rearm with
@@ -3520,6 +3537,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   && deathUpdateTime > 70.
 ## Changelog
 
+- **2026-08-08:** EntityStats: Init stat wiring (MaxPassive 104/109/122/114 +
+  gain/loss passives); Tick 10-phase wheel + TickWait regen/change packets/
+  stats-buff 10-tick sync; player variant 4 OT passes + per-stat packets; wire
+  version 11 + CoreTemp sbyte/2.
 - **2026-08-08:** EntityAnimalSnake.GetAttackTargetHitPosition (IL=13): aims at
   attackTarget.position with y + 0.5 (body center).
 - **2026-08-08:** UAIConsideration* score leaves (dormant utility AI):
