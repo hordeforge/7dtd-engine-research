@@ -93,6 +93,15 @@ optional cross-play identity) for the session; the resulting permission level
 comes from the permission model (§4). The `sid` cookie is set `HttpOnly` with
 path `/`.
 
+**Registration tokens (`UserRegistrationTokens`):** the one-time token
+store behind the `RegisterUser` API. `CreateToken(playerName, platformId,
+crossPlatformId)` (IL=31) first purges expired entries
+(`RemoveAll` on `ExpiryTime < Now`), builds a `RegistrationData` carrying
+the player identity plus the expiry, and keys it by `Utils.GenerateGuid()`.
+`TryValidate(token, out data)` (IL=13) is a `TryGetValue` plus
+`ExpiryTime > Now` check - the browser's register page exchanges a valid
+token for a real account.
+
 ### 2.1 Steam OpenID sub-flow
 
 `SessionHandler.HandleSteamLogin` redirects the browser to Steam's OpenID
@@ -140,6 +149,16 @@ flowchart LR
   GET --> J[JsonCommons -> response]
   POST --> J
 ```
+
+**Request plumbing:** `RequestContext` is the per-request record
+(`RequestPath`, `Method`, the `HttpListenerRequest`/`Response`, plus the
+lazily-parsed `QueryParameters` NameValueCollection). `WebUtils` is the
+response helper: `WriteText` / `WriteJsonData` (IL=40/26) write a status
+code with the right mime, `SendEnvelopedResult` (IL=70) wraps JSON into the
+standard envelope, `IsSslRedirected` (IL=15) enforces HTTPS when enabled,
+and `GenerateGuid` (IL=6) is the token/id source. `MimeType.GetMimeType(ext)`
+(IL=22) resolves file extensions to content types from the static
+`mappings` table.
 
 `OpenApiHelpers` + `JsonCommons` render OpenAPI metadata and JSON bodies.
 Complete set of concrete APIs under `Webserver.WebAPI.APIs` (each an `AbsRestApi`;
