@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: progression doc spot-check (7 claims exact)
 ## 2026-08-08 - tier-C: crafting-recipes doc spot-check (5 claims exact)
 ## 2026-08-08 - tier-C: blocks doc spot-check (12 claims exact)
 ## 2026-08-08 - tier-C: chunk-providers doc spot-check (6 claims exact)
