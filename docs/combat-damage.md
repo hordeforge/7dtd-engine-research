@@ -531,6 +531,7 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-08:** DamageSource.IgnorePartyShare linked to the NetPackageDamageEntity bIgnorePartyShare wire field.
 - **2026-08-08:** Entity.InitializeBagFromLootList (IL=39): bag sized from
   the loot container (size.x * size.y) when unset.
 ## Changelog

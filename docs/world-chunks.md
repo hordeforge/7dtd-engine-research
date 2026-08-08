@@ -1013,6 +1013,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-08:** Shared chunk observers (SharedChunkObserver/SharedChunkObserverCache): refcounted per-chunk observer sharing.
 - **2026-08-08:** Delayed/batched regeneration (5): DelayedStart (IL=28)
   refcount + batch clear, chunkRegenerateAt (IL=49) Y-slice bitmask
   accumulation (1 << (yPos>>4 & 31)), DelayedStop (IL=48) flush via
