@@ -2361,6 +2361,22 @@ bomb tracks the client-simulated physics-master position for its fuse.
 rotation / quaternion plus the `interpolateTargetRot` / `interpolateTargetQRot`
 step counts for client interpolation. `GetSoundTravelTime(pos)` (IL=10) is
 `|position - pos| / 343` (speed of sound) with **no callers on b14** (dead
+
+**Entity attach/physics accessors (all IL-verified):** `CanAttach(other)`
+(IL=15) is `FindAttachSlot`-driven (false when the slot scan finds a
+conflict); `GetAttachMaxCount` (IL=11) is the `attachedEntities` array
+length; `GetFirstAttached` (IL=28) returns the first non-null attached
+entity (the vehicle-driver/attached-main lookup). `SetVelocityPerSecond
+(vel, angularVel)` (IL=37) forwards to the attached entity when present,
+else stores `physicsVel` / `physicsAngVel`, applies them to the rigidbody
+when this is the physics master, and seeds `motion = vel * 0.05`.
+`SetIgnoredByAI` (IL=4) is the `isIgnoredByAI` flag (AI targeting skip);
+`WasAlive` (IL=5) is `!WasDead()` (the respawn-transition latch).
+`World.GetAIDirector` / `GetDynamiceSpawnManager` / `GetLocalPlayers`
+(IL=3 each) are the field accessors for the director, the dynamic spawner
+and the local-player list; `GameManager.GetPersistentLocalPlayer` /
+`GetGameStateManager` (IL=3) are the persistent-data / game-state accessors;
+`GameManager.IsSafeToConnect` (IL=7) is `CurrentMode == 0` (offline).
 leaf).
 
 **`FindValidExitPosition` (IL=14) / `GetFallingSavePosition` (IL=161):**

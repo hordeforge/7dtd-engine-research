@@ -199,6 +199,17 @@ via [inventories/gamestats-gameprefs.md](inventories/gamestats-gameprefs.md).
 | `48` LandClaimOnlineDurabilityModifier | GamePrefs.GetInt(95) `LandClaimOnlineDurabilityModifier` |
 | `49` LandClaimOfflineDurabilityModifier | GamePrefs.GetInt(96) `LandClaimOfflineDurabilityModifier` |
 | `50` LandClaimOfflineDelay | GamePrefs.GetInt(97) `LandClaimOfflineDelay` |
+
+**Land-protection hardness (`World.GetLandProtectionHardnessModifierForPlayer`,
+IL=97):** the offline-durability curve. An online player (`EntityId != -1`)
+gets `GameStats[48]` (online modifier) directly. An offline player starts
+from `GameStats[48]` too, but returns **1** (full protection) when
+`OfflineHours > GameStats[46] * 24` (claim expired) and **0** when the
+decay mode `GameStats[47]` is 0 (no offline decay) - otherwise it blends
+toward `GameStats[49]` (offline modifier) with `(offlineHours - 24) /
+(expiryHours - 24)` linear (mode 1) or squared (mode 2) decay. The
+no-argument `GetLandProtectionHardnessModifier` resolves the player
+internally.
 | `63` BedrollExpiryTime | GamePrefs.GetInt(192) `BedrollExpiryTime` |
 | `54` PartySharedKillRange | GamePrefs.GetInt(100) `PartySharedKillRange` |
 | `66` BiomeProgression | GamePrefs.GetInt(271) `BiomeProgression` |
