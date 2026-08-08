@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vehicle mod/effect config passes
+
+Vehicle (vehicles-drones-turrets.md 4.2): CalcMods (IL=77) ModTags OR of
+modifier tags, storage-mod count -> UpdateStorageModCount + container
+resize, per-part SetMods; CalcEffects (IL=182) passive set 55-58 damage
+per (modifier-scaled), 49 light, 50 fuel max, 51 fuel use, 53 torque, 52
+velocity. verified from IL. Commit 93b3ab5.
 ## 2026-08-08 - tier-C: held time-bomb priming
 
 ItemClassTimeBomb.OnHoldingItemActivated (IL=82, items.md): held priming -
