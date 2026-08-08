@@ -1124,6 +1124,7 @@ interruptible pair are in [chat.md](chat.md) §3.
 
 ## Changelog
 
+- **2026-08-08:** AdminBlacklist sub-store (ban add/remove/query, file round-trip, login/console/web enforcement); WhitelistUser/WhitelistGroup record types.
 - **2026-08-08:** Entity.StopAnimatorAudio (IL=16) monitored-handle stop +
   removal.
 ## Changelog

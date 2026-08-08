@@ -848,6 +848,7 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-08:** ObservableDictionary<K,V> backing collection for PersistentPlayerList.Players (event funnel + EChangeType).
 - **2026-08-08:** PPD trivials: IsAlly x2 via AllyStore; LPBlocks lazy
   alloc + GetLandProtectionBlock first-entry; Update rebuilds PlayerData
   keeping PrimaryId; OfflineHours/Minutes -1 while online; MostRecentBackpackPosition

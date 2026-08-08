@@ -459,6 +459,7 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
 
 ## Changelog
 
+- **2026-08-08:** GameStatsBridge static mirror of GameStats into gameplay float statics.
 - **2026-07-28:** EnumGameStats 0..81 census; GameStats.Write persistent typed stream.
 
 - **2026-07-24:** Initial sandbox-options reversal: typed option system (152

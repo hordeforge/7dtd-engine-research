@@ -497,6 +497,7 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-08:** Named IncrementalHashExtensions.AppendDataNoAlloc in the collision-hash path.
 - **2026-08-08:** Sight contract: Block.IsSeeThrough (IL=61) multiblock parent
   resolution + !IsCollideSight && !IsWater; BlockPoweredDoor (IL=63)
   IsDoorOpen(meta); BlockCompositeTileEntity (IL=42) module AND; consumed by

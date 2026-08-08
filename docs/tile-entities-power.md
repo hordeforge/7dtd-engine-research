@@ -1136,6 +1136,7 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-08:** TripWireController trigger MonoBehaviour (collider -> IsTriggered on server).
 - **2026-08-08:** TileEntityWorkstation.CheckForCraftComplete (IL=55):
   per-owner CraftCompleteList delivery, cosmetic unlock, GiveExp, TE
   modified flag.

@@ -276,6 +276,7 @@ this doc owns the framework, not each leaf command's full prose.
 
 ## Changelog
 
+- **2026-08-08:** Telnet login lockout window: loginAttemptsPerIP + LoginAttempts count/window mechanics.
 - **2026-08-07:** SdtdConsole.Update (IL=60) one-command-per-frame FIFO drain:
   Monitor lock, CommandSenderInfo from entry.sender, executeCommand +
   Log.Exception, SendLines, RemoveAt(0).

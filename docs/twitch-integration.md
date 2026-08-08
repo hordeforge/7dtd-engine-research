@@ -217,4 +217,5 @@ when the manager's cooldown preset adds delays.
 
 ## Changelog
 
+- **2026-08-08:** Twitch requirement gates (BaseTwitchRequirement family + vote mirrors), TwitchViewerData points ledger, TwitchActionEntry/TwitchActionHistoryEntry queue records.
 - **2026-07-23:** Initial Twitch-integration reversal (server action/vote execution via game events, client-hosted connection residual) with state machines.

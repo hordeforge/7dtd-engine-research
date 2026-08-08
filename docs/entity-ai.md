@@ -3733,6 +3733,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-08:** World.ClipBoundsMove (IL=573) inert alternative clip path, 0 call sites.
 - **2026-08-08:** Player move-state machine: SetMoveState (IL=553) HoldType
   + condition-derived state, MinEvent 71, per-state motor values;
   SetMoveStateToDefault (IL=88) crouch/run/stand dispatch.

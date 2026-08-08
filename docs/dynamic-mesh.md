@@ -434,6 +434,7 @@ stateDiagram-v2
 
 ## Changelog
 
+- **2026-08-08:** DynamicMeshDataQueue<T> dead template, inert ServerUpdates channel, DynamicMeshRegionBuilder dead wrapper (all 0-ref verified).
 - **2026-07-28:** `GetNextChunkToLoad` queue sentinel contract for GenerateChunksThread.
 
 - **2026-07-23:** Initial dynamic mesh reversal: the item/region model, the

@@ -782,6 +782,7 @@ order (row 0 = +Z).
 
 ## Changelog
 
+- **2026-08-08:** Prefab.Cells<T> dead sparse cell grid (0 external refs).
 - **2026-08-08:** Prefab.CountSleeperSpawnsInVolume (IL=116): sleeper-stack
   census (IsSleeperBlock with non-sleeper below, priority volumes excluded)
   into Transient_NumSleeperSpawns.
