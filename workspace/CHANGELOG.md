@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Inventory layer leaves
+
+ModifyValue (IL=29) holding-item chain with ignoreWhenHeld tags; DecItem
+(IL=132) toolbelt consume over ItemInventoryData slots. Verified fresh dumps.
 ## 2026-08-08 - tier-C: Equipment worn-gear leaves
 
 ModifyValue per-slot chain; updateInsulation waterProof sum; DropItems +
