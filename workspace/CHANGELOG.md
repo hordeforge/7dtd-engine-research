@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: CatalystConvert, save-thread record, paint ChannelMask, size marker
+
+Collector catalyst conversion rule; ThreadInfo save-thread lifecycle; texture-block paint channel mask; StreamWriteSizeMarker size placeholder (verified)
 ## 2026-08-08 - tier-C: planner records (POIWeightData, township/biome records, IBiomeProvider)
 
 POI weighting ctor fields, wilderness path records, township spawn-info/biome-stats dicts, BiomeTypeData ctor, biome provider interface (verified)
