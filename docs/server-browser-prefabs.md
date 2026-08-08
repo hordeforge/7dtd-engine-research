@@ -230,6 +230,17 @@ land-claim window (`GameStats 46 * 24`) whose `LPBlocks` claim box
 (`pos - claimHalf`, size = claim size, `GameStats` 44 half-extent) overlaps
 the box yields `Landclaim` (1); otherwise `None` (0).
 
+**`PrefabInstance.CopyIntoWorld(world, copyEntities, overwriteExisting,
+tags)` (IL=85) is the placement commit.** When the instance's `rotation`
+differs from `lastCopiedRotation`, it rotates the in-memory prefab by the
+delta (`Prefab.RotateY`, forward or backward) and refreshes
+`lastCopiedRotation` + the bounding box; then
+`prefab.CopyIntoLocal(chunkCache, boundingBoxPosition, overwriteExisting,
+true, tags)` stamps the blocks. With `copyEntities` it clears
+`entityInstanceIds` and `CopyEntitiesIntoWorld`s them (the allow flag is
+`IsEditor() || GameStats 24`), recording `lastCopiedPrefabPosition` and
+`bPrefabCopiedIntoWorld = true`.
+
 ### 3.2 `DynamicPrefabDecorator`: load, decorate, save
 
 Owned per world; created by the chunk providers
@@ -487,6 +498,11 @@ surface is exactly sections 1 and 2.
 | [game-events.md](game-events.md) | `EventPrefabs` consumers of `PrefabInstance.Serializable` |
 | [protocol-packages.md](protocol-packages.md) | NetPackage inventory incl. the editor/world-init packages |
 
+## Changelog
+
+- **2026-08-08:** PrefabInstance.CopyIntoWorld (IL=85): rotation delta
+  RotateY sync + bounding box refresh, CopyIntoLocal stamp, entity copy
+  with IsEditor/GameStats 24 allow flag.
 ## Changelog
 
 - **2026-08-08:** PrefabInstance.CheckForAnyPlayerHome (IL=10) +
