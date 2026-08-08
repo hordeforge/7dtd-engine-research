@@ -300,6 +300,15 @@ After both complete, `ClearWaterUnderTerrain` iterates `waterRects` and clears
 `/Prefabs/` locations, skipping `navonly,devonly,testonly,biomeonly` tagged and
 `/test` prefabs, and `ShufflePrefabData(Seed)` fixed a deterministic order.
 
+**POI map records:** `PoiMapElement` (colorId, modelName, blockValue,
+blockBelow, yPos, yPosFill, plus `decals` / `blocksOnTop` lists with
+`GetRandomDecal` / `GetRandomBlockOnTop` IL=26 each) is the "pixel color ->
+placed element" record the image/raw world providers read
+(`ChunkProviderGenerateWorldFromImage` / `FromRaw`), the layer that turns
+`splat3`-style color maps into placed POI blocks. `PoiMapBlock`
+(blockValue, `m_Prob`, offset) and `PoiMapDecal` (textureIndex, face,
+`m_Prob`) are the weighted sub-records behind those lists.
+
 ### 3.6 Spawns, roads, water finalization
 
 - Player spawns: `CreatePlayerSpawn` over `CalcPlayerSpawnTiles` until **12**
