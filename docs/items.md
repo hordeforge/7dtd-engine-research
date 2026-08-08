@@ -57,6 +57,10 @@ looks up the static `nameToItem` (or `nameToItemCaseInsensitive`) dictionary;
 `ItemClass.GetItem(name, ci)` (IL=13) wraps a hit into
 `new ItemValue(class.Id, false)` and returns `ItemValue.None` for a miss
 (the resolution behind `WorldBiomes.GetBlockValueForName`).
+Tag scans are linear walks of the static `ItemClass.list`:
+`GetItemWithTag(tags)` (IL=30) returns the first item whose
+`HasAllTags(tags)` (null when none); `GetItemsWithTag(tags)` (IL=33)
+collects every matching class into a new list.
 
 **ItemClass leaves (V3.1.0 b14):** `CreateItemValue(name, quality,
 caseInsensitive)` (IL=17) resolves the class and builds a fresh
@@ -1706,6 +1710,11 @@ The non-action leaves:
   `OnDamagedByExplosion`, and `OnMeshCreated` hooks, letting an `ItemClass`
   customize its dropped-entity behavior.
 
+## Changelog
+
+- **2026-08-08:** ItemClass tag scans: GetItemWithTag (IL=30) first
+  HasAllTags match, GetItemsWithTag (IL=33) all matches, linear over the
+  static list.
 ## Changelog
 
 - **2026-08-08:** ItemClassTimeBomb.OnHoldingItemActivated (IL=82): held
