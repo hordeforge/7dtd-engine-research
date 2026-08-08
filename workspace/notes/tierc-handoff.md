@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `00b05c7` EntityPlayer server accessors |
-| Commits since dry-run `3b61d9c` | ~1278 |
+| HEAD (at handoff write) | `91392d3` Turret accessor leaves |
+| Commits since dry-run `3b61d9c` | ~1279 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

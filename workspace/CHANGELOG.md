@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Turret accessor leaves
+
+EntityTurret health/name reads, TurretTracker count mirror + GetTurrets + RemoveTrackedTurret sync (verified)
 ## 2026-08-08 - tier-C: EntityPlayer server accessors
 
 PersistentPlayerData/DisplayName cache, PlayerStats cast, CarryCapacity/Companions/Spectator/RentedVM, IsAdmin change-guard, Party leave shared-quest teardown (verified)
