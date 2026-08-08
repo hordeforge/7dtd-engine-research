@@ -690,6 +690,17 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   constructor is its own `Clone`, and no entity type holds an instance, so
   the drain simulation never runs (the live system is
   [entity-stats.md](entity-stats.md)).
+- **Dead collection/utility families (no in-assembly references outside their
+  own family on b14, verified against the full IL dump):** the
+  `TList<T>` / `TQueue<T>` pair (self-contained, 78 methods together with
+  their iterator state machines); `OneToOneDictionary<K,V>` (10, only its own
+  `_get_Keys/_get_Values` iterators reference it); `CollectionDebugWrapper<T>`
+  (5) with its `ListDebugWrapper` / `DictionaryDebugWrapper` subclasses;
+  `ParsingConverters` (7, color/action/string-list parsers) with its
+  `ParsingMethodCache` singleton; `SimplexNoise` (6). None are constructed or
+  called by live server (or client) code; do not model them as part of any
+  wire/file contract. (`UtilList<T>` is not dead but is reachable only from
+  the client `DistantTerrain` render path.)
 
 ## Changelog
 
