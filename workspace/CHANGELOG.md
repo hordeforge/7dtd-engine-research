@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EAITaskEntry, FuelType, trader stock records, drawbridge rotation
+
+EAI list record; BlockCollector/FuelType ftDef split; TraderItemGroup stock fields + TraderComparer x-sort; BlockPlacementDrawBridge 4-rotation wrap (verified)
 ## 2026-08-08 - tier-C: network leaves (UnknownNetPackageException, NTP clock probe)
 
 Package-decode unknown-id exception; GameManager.Awake pool.ntp.org 5000 ms probe (48-byte NTP, ReceiveTimeout), SecondsOffset consumed by main menu only (dormant on dedi) (verified)
