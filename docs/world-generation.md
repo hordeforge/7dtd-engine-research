@@ -650,6 +650,15 @@ exactly the blocks whose resolved Class is `Sleeper`. Resolving `Extends` in sto
 shipped `.blocks.nim` files: 886 of 1105 POIs contain `sleeper*` markers and 338
 contain `infestedSleeper*`.
 
+**Sleeper-spawn census:** `Prefab::CountSleeperSpawnsInVolume(world, offset,
+index)` (IL=116) counts the sleeper **stacks** in a sleeper volume: it walks the
+volume bounds (`startPos + offset` .. `startPos + size + offset`) and counts each
+cell whose block `IsSleeperBlock` while the cell below (y-1) is not - i.e. the
+topmost sleeper block of each stack, one spawned sleeper per stack - skipping
+cells inside a sleeper priority volume
+(`IsPosInSleeperPriorityVolume`), accumulating into
+`Transient_NumSleeperSpawns`.
+
 `Prefab::AddAllChildBlocks` (918950-919033) is called at the end of `RotateY`
 (IL_0387-IL_0394, ~921630) and after load, so multi-block child cells (raw bit
 0x40000000) are regenerated rather than being carried in the file.
@@ -674,6 +683,11 @@ order (row 0 = +Z).
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native/external residuals |
 
+## Changelog
+
+- **2026-08-08:** Prefab.CountSleeperSpawnsInVolume (IL=116): sleeper-stack
+  census (IsSleeperBlock with non-sleeper below, priority volumes excluded)
+  into Transient_NumSleeperSpawns.
 ## Changelog
 
 - **2026-08-06:** Prefab rotation is -90*r and lives in offsetToCoordRotated, not
