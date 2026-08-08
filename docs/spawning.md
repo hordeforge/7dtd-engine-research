@@ -900,6 +900,33 @@ for `questKey == "traderquest"` picks via `chooseBestTrader` (IL=58, the
 candidate whose trader area has the fewest assigned quest POIs) else via
 `chooseClosestPrefab`.
 
+**Decorator registry/lifecycle leaves (all IL-verified):**
+`CleanAllPrefabsFromWorld(world)` (IL=34) runs `PrefabInstance.CleanFromWorld
+(world, true)` on every entry of `allPrefabs` under the lock;
+`ClearAllPrefabs()` (IL=46) fires `CallPrefabRemovedEvent` per prefab then
+clears `allPrefabs` / `poiPrefabs` / `worldPrefabs` / `allPrefabsSorted`;
+`CreateBoundingBoxes()` (IL=33) runs `PrefabInstance.CreateBoundingBox(false)`
+on every prefab; `CallPrefabChangedEvent(pi)` (IL=25) sets `isSortNeeded`
+under the lock and invokes `OnPrefabChanged`; `CallPrefabRemovedEvent(pi)`
+(IL=8) invokes `OnPrefabRemoved`.
+`CreateNewPrefabAndActivate(location, pos, bad, bSetActive)` (IL=46) defaults
+`bad` to a fresh 3x3x3 `Prefab`, builds
+`PrefabInstance(GetNextId(), location, pos, 0, bad, 0)`, `AddWorldPrefab`s
+it, `CreateBoundingBox(true)`, and on `bSetActive` activates the editor
+selection box, then fires `OnPrefabLoaded`.
+`RemoveWorldPrefab(pi)` (IL=39) removes from `worldPrefabs` (warning
+`{0} is not a world prefab` when absent), `allPrefabs`, `poiPrefabs` and
+`allPrefabsSorted`; `RemoveEventPrefab(pi)` (IL=25) removes from
+`allPrefabs` + `allPrefabsSorted`; `IsActivePrefab(id)` (IL=13) is
+`GetPrefab(id) == ActivePrefab`.
+`CalculateStats(basePrefabCount, rotatedPrefabsCount, activePrefabCount,
+basePrefabBytes, rotatedPrefabBytes, activePrefabBytes)` (IL=133) is the
+memory census: `prefabCache.CalculateStats` fills the base/rotated counts
+and bytes, and on the server the active half walks every player's
+`chunksAround` chunks, collects the prefabs at each chunk via
+`GetPrefabsAtXZ` into a deduped `HashSet<Prefab>`, and sums
+`Prefab.EstimateOwnedBytes()` (client sets the active outputs to -1).
+
 **RWG heightmap stamping:** `copyPrefabsIntoHeightMap(pi, width, height,
 heightData, scale, topTextures)` (IL=318) writes a POI's terrain into the
 raw heightmap: it creates a single-view over `heightData`, warns
