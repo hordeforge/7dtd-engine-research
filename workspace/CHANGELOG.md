@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: DumpAll collision fix (7432 files, was 6675)
 ## 2026-08-08 - tier-C: coverage census re-verify (1846/558/1295, 0 undocumented)
 ## 2026-08-08 - tier-C: protocol-packages 6.2/6.9/6.10 wire spot-check
 ## 2026-08-08 - tier-C: protocol-packages 6.14/6.15/6.17/6.18 wire spot-check

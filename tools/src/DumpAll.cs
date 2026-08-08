@@ -36,9 +36,21 @@ class DumpAll {
         sb.AppendLine();
         nm++;
       }
-      string dir = Path.Combine(a[1], Safe(t.Namespace == "" ? "_global" : t.Namespace));
+      // Scope the file by the full declaring chain and place it under the
+      // OUTERMOST declaring type's namespace. Cecil reports an empty Namespace
+      // for nested types even when the owning type is namespaced, so two
+      // different namespaced parents (e.g. Platform.EOS.User and
+      // Platform.MultiPlatform.User) used to collide in _global on a single
+      // declaring-name scope and clobber each other's files; the whole chain
+      // plus the real namespace keeps one file per type (observed: 7432 -> 6675
+      // before the fix).
+      string scope = "";
+      var root = t;
+      for (var p = t.DeclaringType; p != null; p = p.DeclaringType) { scope = Safe(p.Name) + "_" + scope; root = p; }
+      string ns = root.Namespace;
+      string dir = Path.Combine(a[1], Safe(ns == "" ? "_global" : ns));
       Directory.CreateDirectory(dir);
-      File.WriteAllText(Path.Combine(dir, Safe(t.Name) + ".il.txt"), sb.ToString());
+      File.WriteAllText(Path.Combine(dir, scope + Safe(t.Name) + ".il.txt"), sb.ToString());
       nt++;
     }
     Console.Error.WriteLine("dumped " + nt + " types / " + nm + " method bodies to " + a[1]);
