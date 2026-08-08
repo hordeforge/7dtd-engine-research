@@ -13,10 +13,11 @@ the code is known at each layer:
      third-party/BCL types are excluded by design.
 
 Usage:
-  python3 tools/census-pct.py [asm] [docsDir]
+  python3 tools/census-pct.py [asm] [docsDir] [--json]
     asm     path to Assembly-CSharp.dll (default: $ASM or the Steam path
             under ~/.local/share/Steam; same resolution as tools/stock-sync.sh)
     docsDir docs directory to scan (default: docs)
+    --json  emit a machine-readable JSON object instead of the human report
 
 Exit code is 0 unless the census itself fails; unaccounted > 0 is reported
 loudly but is not a hard failure (this is a report, not a gate).
@@ -123,8 +124,10 @@ def pct(n, total):
 
 
 def main():
-    asm = sys.argv[1] if len(sys.argv) > 1 else default_asm()
-    docs = sys.argv[2] if len(sys.argv) > 2 else os.path.join(REPO, "docs")
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    as_json = "--json" in sys.argv
+    asm = args[0] if len(args) > 0 else default_asm()
+    docs = args[1] if len(args) > 1 else os.path.join(REPO, "docs")
 
     if not os.path.isfile(asm):
         print(f"error: assembly not found at {asm}", file=sys.stderr)
@@ -154,39 +157,59 @@ def main():
     all_types = cen.get("AllTypes (incl nested)", 0)
     all_methods = cen.get("AllMethodsWithBody", 0)
 
-    g = cov["game_types"]
-    print("RE coverage of the 7dtd-research corpus (live census)\n")
-    print("Reached game types (dedicated-server RE surface): %d" % g)
-    print("  narrated      %6d  %5.1f%%  (hand-written narrative prose)" % (
-        cov["narrated"], pct(cov["narrated"], g)))
-    print("  catalogued    %6d  %5.1f%%  (generated inventory: enumerated, not explained)" % (
-        cov["catalogued"], pct(cov["catalogued"], g)))
-    print("  classified    %6d  %5.1f%%  (verified out-of-scope: client/3rd-party, not dedi work)" % (
-        cov["classified"], pct(cov["classified"], g)))
-    print("  UNACCOUNTED   %6d  %5.1f%%  (appears nowhere)" % (
-        cov["unaccounted"], pct(cov["unaccounted"], g)))
+    if not as_json:
+        g = cov["game_types"]
+        print("RE coverage of the 7dtd-research corpus (live census)\n")
+        print("Reached game types (dedicated-server RE surface): %d" % g)
+        print("  narrated      %6d  %5.1f%%  (hand-written narrative prose)" % (
+            cov["narrated"], pct(cov["narrated"], g)))
+        print("  catalogued    %6d  %5.1f%%  (generated inventory: enumerated, not explained)" % (
+            cov["catalogued"], pct(cov["catalogued"], g)))
+        print("  classified    %6d  %5.1f%%  (verified out-of-scope: client/3rd-party, not dedi work)" % (
+            cov["classified"], pct(cov["classified"], g)))
+        print("  UNACCOUNTED   %6d  %5.1f%%  (appears nowhere)" % (
+            cov["unaccounted"], pct(cov["unaccounted"], g)))
 
-    known = cov["narrated"] + cov["catalogued"] + cov["classified"]
-    print("\nAccounted-for reached game types: %d / %d (%.1f%%)" % (
-        known, g, pct(known, g)))
-    print("Completely unknown (unaccounted):  %d / %d (%.1f%%)" % (
-        cov["unaccounted"], g, pct(cov["unaccounted"], g)))
-    print("Not deeply narrated (catalogued + classified): %d / %d (%.1f%%)" % (
-        cov["catalogued"] + cov["classified"], g,
-        pct(cov["catalogued"] + cov["classified"], g)))
+        known = cov["narrated"] + cov["catalogued"] + cov["classified"]
+        print("\nAccounted-for reached game types: %d / %d (%.1f%%)" % (
+            known, g, pct(known, g)))
+        print("Completely unknown (unaccounted):  %d / %d (%.1f%%)" % (
+            cov["unaccounted"], g, pct(cov["unaccounted"], g)))
+        print("Not deeply narrated (catalogued + classified): %d / %d (%.1f%%)" % (
+            cov["catalogued"] + cov["classified"], g,
+            pct(cov["catalogued"] + cov["classified"], g)))
 
-    if all_types and all_methods:
-        print("\nWhole assembly (100% view, Assembly-CSharp only):")
-        if accounted["acct_types"]:
-            print("  types   %6d total; %d accounted (100%%) - reached documented + unreached classified" % (
-                all_types, accounted["acct_types"]))
-        if reached_types:
-            print("  reached in the server call graph: %d types / %d methods" % (
-                reached_types, cov["reached_methods"]))
-        if accounted["acct_methods"]:
-            print("  methods %6d total; %d in accounted game types (100%%)" % (
-                all_methods, accounted["acct_methods"]))
-        print("  compiler-generated and third-party/BCL types are excluded by design")
+        if all_types and all_methods:
+            print("\nWhole assembly (100% view, Assembly-CSharp only):")
+            if accounted["acct_types"]:
+                print("  types   %6d total; %d accounted (100%%) - reached documented + unreached classified" % (
+                    all_types, accounted["acct_types"]))
+            if reached_types:
+                print("  reached in the server call graph: %d types / %d methods" % (
+                    reached_types, cov["reached_methods"]))
+            if accounted["acct_methods"]:
+                print("  methods %6d total; %d in accounted game types (100%%)" % (
+                    all_methods, accounted["acct_methods"]))
+            print("  compiler-generated and third-party/BCL types are excluded by design")
+
+    result = {
+        "reached_game_types": cov["game_types"],
+        "narrated": cov["narrated"],
+        "catalogued": cov["catalogued"],
+        "classified": cov["classified"],
+        "unaccounted": cov["unaccounted"],
+        "not_deeply_narrated": cov["catalogued"] + cov["classified"],
+        "all_types": all_types,
+        "accounted_types": accounted.get("acct_types"),
+        "all_methods": all_methods,
+        "accounted_methods": accounted.get("acct_methods"),
+        "reached_methods": cov["reached_methods"],
+        "narrated_pct": round(pct(cov["narrated"], cov["game_types"]), 1),
+    }
+    if as_json:
+        import json as _json
+        print(_json.dumps(result, indent=2))
+        return 0
 
     if cov["unaccounted"]:
         print("\nWARNING: unaccounted reached game types > 0 - the RE surface is not at 100%.")
