@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: workstation queue/timer/empty leaves
+
+ResetCraftingQueue/ResetTickTime/GetTimerForSlot, IsToolsSame, IsEmpty/InputIsEmpty gates, IsCrafting burn gate, readRecipeStackArray version split (verified)
 ## 2026-08-08 - tier-C: powered-trap/block accessor leaves
 
 Server/client TargetType/ItemSlots/IsLocked split, lazy AmmoItems, target flag bits, OwnerEntityID resolve, PowerUsed toggle gate (verified)
