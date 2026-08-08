@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: crafting second spot-check (7 claims exact)
 ## 2026-08-08 - tier-C: combat + light-mesh-water second spot-check (11 claims exact)
 ## 2026-08-08 - tier-C: network second spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: save-region second spot-check (8 claims exact)
