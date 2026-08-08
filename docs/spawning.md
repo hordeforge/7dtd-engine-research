@@ -299,6 +299,36 @@ spawners all reuse it. Per invocation it:
 (24000 ticks per in-game day) so a POI that a player abandoned repopulates on a
 schedule.
 
+**Persistence (`Write` IL=86 / `Read` IL=111):** version byte **3**, then
+`position` (i32 x3), `size` (i16 x3), `triggerDiameter` (u16), class name
+(string), `totalSpawnedThisWave` (i16), `timeDelayToNextWave` (f32),
+`timeDelayBetweenSpawns` (f32), `entityIdSpawned` (`PList.Write`), `currentWave`
+(i16), `lastDaySpawnCalled` (i32), `numberToSpawnThisWave` (i32),
+`worldTimeNextWave` (u64, version > 1), `bCaveSpawn` (bool, version > 2). `Read`
+falls back to `EntitySpawnerClass.DefaultClassName` with a warning when the
+saved class name is not in `EntitySpawnerClass.list`.
+
+**Wrapper + difficulty:** `Spawn(world, day, spawnEnemies)` (IL=31) is
+`AIDirector.CanSpawn(1)` + `SpawnManually` with the default precondition /
+position delegates. `ModifySpawnCountByGameDifficulty(count)` (IL=6) returns 0
+when `!EntityFactory.EnemySpawnMode`, else the count (both wave min and max are
+run through it, and the optional `ES_ModifySpawnCount` callback). The spawn
+burst: `toSpawn = 1` normally, but `delayBetweenSpawns == 0` fans out
+`FastMin(numberToSpawnThisWave, totalAlive - aliveCount)` per tick. First spawn
+of a wave with a `startSound` plays
+`PlaySoundAtPositionServer(pos, startSound, rolloff 2, range 300, 1)`;
+`bAttackPlayerImmediately` sets a revenge target; `bTerritorial` sets the home
+area to the spawn position.
+
+**Class parse (`EntitySpawnerClassesFromXml.LoadEntitySpawnerClasses` IL=204):**
+`name` is required (throw); `dynamic` (default false) and `wrapMode`
+(`wrap` / `clamp`, each default false) set the day-index behaviour; per `<day>`
+element the `value` attribute is `*` (all days), `min,max` (via
+`ParseMinMaxCount`), or a single day; each day index gets a fresh
+`EntitySpawnerClass` whose `<property>` children feed `DynamicProperties` +
+`Init`, registered via `AddForDay`. An empty spawner throws
+`Empty entityspawner not allowed: <name>`.
+
 `SpawnManagerDynamic` is the thin night-only wrapper (**Update IL=75**):
 
 1. Daytime or zero players → return.
@@ -1151,6 +1181,11 @@ above.
   single, EntitySpawnerClass build + AddForDay, empty-spawner throw.
 ## Changelog
 
+- **2026-08-08:** EntitySpawner persistence + parse: Write v3 / Read v>1/v>2
+  gates + DefaultClassName fallback; Spawn wrapper + CanSpawn gate;
+  ModifySpawnCountByGameDifficulty EnemySpawnMode gate; burst path when
+  delayBetweenSpawns 0; startSound/rolloff 2/300; revenge + territorial;
+  LoadEntitySpawnerClasses day value * / min,max / single + empty throw.
 - **2026-08-08:** EntityClass CopyFrom (IL=171) DynamicProperties deep copy
   with exclude set; tier names pinned (EntityTierTypes Normal 0 .. Elite 5).
 - **2026-08-08:** EntityClass leaves: FromString/Add name-hash ids, GetId
