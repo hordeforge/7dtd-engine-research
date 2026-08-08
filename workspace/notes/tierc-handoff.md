@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `ac3ee2b` regen.sh + refreshed artifacts |
+| HEAD (at handoff write) | `cf166b5` census-pct json + make census |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 3681 / catalogued 0 / classified 0 / unaccounted **0** (100% narrated; webserver + reflection/prefix seeds) |
