@@ -638,6 +638,16 @@ heap objects; the **block** ticker (`WorldBlockTicker`, driven from
 Growth is a chain of scheduled ticks swapping one word for the next stage on the
 server.
 
+**`BlockPlantGrowing.addScheduledTick(world, pos)` (IL=63) is the
+rescheduler.** Deterministic growth
+(`!isPlantGrowingRandom`) registers `WBT.AddScheduledBlockUpdate(pos,
+blockID, GetTickRate())`. Random-growth mode rolls
+`RoundToInt(GetTickRate() * (1 + growthDeviation * RandomGaussian()))`,
+clamped to `[GetTickRate()/2, GetTickRate()*3/2]` and re-rolled until it
+lands inside that band, then schedules with the jittered tick count - so
+crops with a `growthDeviation` mature on a gaussian-jittered schedule around
+the base `GetTickRate()`, bounded to 0.5x-1.5x.
+
 **`BlockTorchHeatMap.UpdateTick` (IL=35):** base UpdateTick; if
 `HeatMapStrength > 0` and AIDirector present:
 `NotifyActivity(enum 6, pos, strength*0.4, 720)` (chunk heat for scouts).
@@ -731,6 +741,10 @@ damage.
 
 **Leaf catalog:** every instance is enumerated in [`inventories/block-behaviors.md`](inventories/block-behaviors.md) (the 65 `Block` behavior leaves).
 
+## Changelog
+
+- **2026-08-08:** BlockPlantGrowing.addScheduledTick (IL=63): deterministic
+  GetTickRate schedule vs gaussian-jittered growthDeviation band 0.5x-1.5x.
 ## Changelog
 
 - **2026-08-08:** OnBlockReset meta-state restore: base IL=1 no-op;
