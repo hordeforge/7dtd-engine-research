@@ -581,6 +581,23 @@ Fields: `fuel` / `input` / `tools` / `toolsNet` / `output` (`ItemStack[]`),
 `queue` (`RecipeQueueItem[]`), `lastTickTime:u64`, `currentBurnTimeLeft:f32`,
 `isBurning`, `isBesideWater`, `isModuleUsed:bool[]`, `CraftCompleteList`.
 
+**Workstation accessors (all IL-verified):** `CanOperate` (IL=3) is
+`isBurning`. `AcceptsMaterial(material)` (IL=31) matches
+`material.ForgeCategory` (case-insensitive) against `materialNames`.
+`getFuelTime(stack)` (IL=46) reads `FuelValue` for an item or `Block.FuelValue`
+for a block; `GetFuelTime` (IL=11) is `ItemClass.GetFuelValue(iv)`.
+`getTotalFuelSeconds` (IL=41) sums `GetFuelValue * count` over the fuel
+slots. `hasRecipeInQueue` (IL=31) is any `queue` entry with
+`Multiplier > 0` and a non-null `Recipe`. `InputIsEmpty` (IL=57): the
+`input.length - materialNames.length` non-material slots must be empty and
+the material slots must each hold `count >= 10` of a real item (the
+workstation refuses to run on tiny partial loads).
+`readItemStackArray(br, ref stack)` (IL=59/54) reads the count byte,
+resizes, and reads the `ItemStack`s - skipping the actual reads while
+`bWaitingForServerResponse` / `bUserAccessing` (the net-optimized read).
+`SetDataFromNet` (IL=20) copies `toolsNet` into `tools` when they differ
+(`visibleChanged = true`) and refreshes the visible tools.
+
 `isModuleUsed[3]` is the **fuel module** gate used throughout the tick (index 3
 checked before fuel math and before final `isBurning` clear).
 
@@ -702,6 +719,15 @@ stateDiagram-v2
 
 Separate type (not a workstation subclass). Fuel is **tick-integer** based:
 `fuelInStorageInTicks`, `fuelInForgeInTicks`, `burningItemValue`.
+
+**Forge accessors (all IL-verified):** `GetFuelLeft(worldTimeInTicks)`
+(IL=30) is `fuelInForgeInTicks / 20`, minus the ticks elapsed since
+`lastTickTimeDataCalculated` when that is set (clamped at 0) - the
+"seconds of burn remaining" the UI reads. `GetMetalForgedSoFar(tickTime)`
+(IL=45) is `moldedMetalSoFar + elapsed * 0.1` (0.1 metal per tick),
+clamped to `metalInForge` while operating or to `outputWeight` otherwise.
+`GetInputWeight` / `GetOutputWeight` / `GetBurningItemValue` (IL=3 each)
+are the `inputMetal` / `outputWeight` / `burningItemValue` fields.
 
 Path:
 
