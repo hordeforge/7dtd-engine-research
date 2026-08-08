@@ -36,7 +36,9 @@ the returned handle with the anim-event monitor for stop-on-anim) or a
 broadcast to everyone nearby (`Audio.Manager.BroadcastPlay(entity, clip,
 isUnique, volume)`). The `EntityPlayer` override (IL=16) additionally skips
 while the player is a spectator unless `serverSignalOnly` - spectators hear
-nothing local, but server-signaled sounds still flow.
+nothing local, but server-signaled sounds still flow. The matching stop is
+`Entity.StopOneShot(clip)` (IL=5) = `Audio.Manager.BroadcastStop(entityId,
+clip)`.
 
 ---
 
@@ -779,6 +781,9 @@ a caller temp buffer (with optional exact-length and flush);
 `WriteStreamToFile` (IL=15/16) dumps a stream to a file (optional length),
 the dump path used for save/backup artifacts.
 
+## Changelog
+
+- **2026-08-08:** Entity.StopOneShot (IL=5) BroadcastStop complement.
 ## Changelog
 
 - **2026-08-08:** Entity.PlayOneShot (IL=38) dispatch: PlayInsidePlayerHead /
