@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: twitch second spot-check (10 claims exact)
 ## 2026-08-08 - tier-C: entity-stats + save-persistence second spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: stability second spot-check (4 claims exact)
 ## 2026-08-08 - tier-C: world-gen + weather second spot-check (15 claims exact)
