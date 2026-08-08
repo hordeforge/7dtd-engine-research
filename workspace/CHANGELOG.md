@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: equipment break pass
+
+Equipment.CheckBreakUseItems (IL=85, items.md 7): lowest-durability scan,
+MaxUseTimesBreaksAfter slot clear + break sound. verified from IL. Commit
+c631d33.
 ## 2026-08-08 - tier-C: cosmetic unlock path
 
 Equipment.UnlockCosmeticItem (IL=31, items.md 3): CosmeticMappingStringID
