@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: census refresh
+
+Coverage.exe re-run: narrated 1509->1771, catalogued 585, classified 1343, unaccounted 0 (verified)
 ## 2026-08-08 - tier-C: DynamicMeshChunkDataStorage generation queue
 
 Chunk-data queue with load/generate state tracking, TryLoadItem disk-read path under wrapper lock (verified)
