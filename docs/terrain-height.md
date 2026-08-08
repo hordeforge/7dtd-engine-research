@@ -105,7 +105,8 @@ little-endian u16 mapped to `(hi*256 + lo) / 65535 * multiplier`;
 (IL=18) loads + converts + destroys a texture
 (`FileNotFoundException` when missing); `SmoothTerrain(passes, heightData)`
 (IL=217) applies a center + 8-neighbor box blur for `passes` iterations.
-`SaveHeightMapRAW` / `LoadHeightMapRAW` (the world-load pair, IL=49 / 63)
+`SaveHeightMapRAW` / `LoadHeightMapRAW` (the world-load pair: the 5-arg
+`LoadHeightMapRAW(file, w, h, 1f, 250)` IL=132, the `Single[]` save IL=74)
 are narrated in [`chunk-providers.md`](chunk-providers.md) §4.1.
 
 **Product consequence:** even with YDim=16384, **byte heightmaps cannot store Everest**. RealEarth must:
@@ -152,7 +153,7 @@ Non-IL residuals only: [`residuals.md`](residuals.md). Product soak/ops items ar
 | Height API inventory (byte vs float) | **CLOSED**, this doc + TERRAIN dumps |
 | Light/sun/mesh sites loading **255** | **CLOSED** inventory, [`light-mesh-water.md`](light-mesh-water.md), `realearth-surfaces.md` §7.1 |
 | RegionFileRaw type map + header constants | **CLOSED**, [`save-region.md`](save-region.md) |
-| WorldState.SaveLoad managed structure | **CLOSED**, save-region (IL=884) |
+| WorldState.SaveLoad managed structure | **CLOSED**, save-region (IL=926) |
 
 ### Product / ops (not managed-RE open gaps)
 
