@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `3b2c412` LiteNetLib auth wrapper (rate limit, challenge, reject msg) |
-| Commits since dry-run `3b61d9c` | ~1243 |
+| HEAD (at handoff write) | `dc7d9b2` crafting registry accessors + static-data reload lifecycle |
+| Commits since dry-run `3b61d9c` | ~1244 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

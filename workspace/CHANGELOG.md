@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: crafting registry accessors + static-data reload lifecycle
+
+GetRecipe/GetRecipes/favorites/locked/workstation maps; Reload* = cleanup + RunCoroutineSync, Load* coroutine wrappers (verified)
 ## 2026-08-08 - tier-C: LiteNetLib auth wrapper
 
 500ms IP rate limit, pending-connection reject, 202+Guid challenge handshake, reject payload builder (verified)
