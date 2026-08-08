@@ -434,6 +434,21 @@ Port: LiteNet often **ServerPort+2** (26902). Details and binary layouts: [proto
 | LiteNetLib **managed** wrappers | Partial type map | Present where named |
 | LiteNetLib **native** plugin | No | **Residual** ([`residuals.md`](residuals.md)) |
 
+**LiteNetLib wrapper leaves:** `NetworkServerLiteNetLib.GetServerPorts`
+(IL=9) is `(basePort + 2)/UDP`; `SetServerPassword` (IL=8) stores the
+password (null normalizes to empty); `DropClient` (IL=17) runs
+`OnPlayerDisconnected(peerConnectId)` then
+`server.DisconnectPeer(peer, disconnectFromClientSide)`;
+`OnPlayerDisconnected` (IL=11) maps the peer id through
+`Clients.ForLiteNetPeer` to `ConnectionManager.Net_PlayerDisconnected`.
+`NetworkClientLiteNetLib.OnPeerConnectedEvent` (IL=35) marks the client
+connected, stores `serverPeer`, and installs the two
+`NetConnectionSimple` channel connections via
+`ConnectionManager.SetConnectionToServer`; `OnDisconnectedFromServer`
+(IL=100) reads the disconnect cause/`DisconnectInfo` payload (pooled
+bytes) and posts the localized `DisconnectLiteNetLib` message on the main
+thread.
+
 ### 4.1 Connection hierarchy
 
 ```text
