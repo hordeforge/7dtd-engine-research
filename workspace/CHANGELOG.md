@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: one-shot stop
+
+Entity.StopOneShot (IL=5, dedicated-misc-systems.md) BroadcastStop
+complement to PlayOneShot. verified from IL. Commit 3a31b2e.
 ## 2026-08-08 - tier-C: entity sound dispatch
 
 Entity.PlayOneShot (IL=38, dedicated-misc-systems.md): head-play / unique
