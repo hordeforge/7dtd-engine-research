@@ -317,7 +317,7 @@ Slice model (EMA frame gaps, ~25 base, `tickEntitySliceCount`): [`entity-ai.md`]
 
 ```mermaid
 flowchart TD
-  TE[TickEntity] --> OUE[OnUpdateEntity IL=417]
+  TE[TickEntity] --> OUE[OnUpdateEntity IL=457]
   OUE --> OUL[OnUpdateLive IL=363]
   OUL --> UT[updateTasks IL=125]
   UT --> LOD{aiActiveDelay elapsed?}
