@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: NetPackagePlayerInventoryForAI wire body
+
+direction 1, entityId + bag/belt ItemId sets (i16 count), ProcessPackage -> aiDirector.UpdatePlayerInventory (verified)
 ## 2026-08-08 - tier-C: Inventory.SimulateActionExecution dummy-slot use flow
 
 Context-menu use coroutine: dummy slot, Execute x2, OnHoldingUpdate pump, HandleComplete restore (verified)
