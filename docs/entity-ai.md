@@ -1051,15 +1051,64 @@ keep their collider (setup for the land/crush path).
 
 **`EntityFallingBlock.OnUpdateEntity` (IL=344)** (group variant similar IL=302):
 
-1. If dead: ret; else `fallTimeInTicks++`.
-2. While falling (`fallTimeInTicks > 1` and velocity): bounds hit test (expand
-   0/0.2/0); per entity if hits &lt; **3** and `CanCollideWith` and head below
-   faller by 0.8: damage =
-   `min(40, massKg * max(0, -vy) * 0.05)` * passive **164**; `DamageEntity`
-   with `DamageSource.fallingBlock`; record hit count.
-3. Land path (vel sq &lt; **0.0625** or timeout ~60): particle/audio; if not terrain
-   and has drop event, `DropItemsOnEvent` with overallProb **1** (and sometimes
-   **0.7** second pass); `SetDead`.
+1. If dead: ret; else `fallTimeInTicks++`; server-only after that point.
+2. Damage pass every other tick: `GetEntitiesInBounds(this, ExpandBounds(
+   ExpandDirectional(boundingBox, motion), 0, 0.2, 0))`; per entity skip when
+   `entityHits[id] >= 3`, `!CanCollideWith`, faller center below the target's
+   head, or `vel.y >= -0.8` (too slow). Raw damage =
+   `FastMin(massKg * vel.y * -0.05, 40)` (upward as `|vy|`), then modified by
+   `EffectManager.GetValue(PassiveEffects **164**, null, raw, entity as
+   EntityAlive, ...)` (target armor reduction); `DamageEntity(
+   DamageSource.fallingBlock, dmg, false, 1)`; hit counts above 0 bump
+   `entityHits[id]`; every hit logs
+   `"{0} EntityFallingBlock {1} hit {2}, vel {3}, for {4}"`.
+3. Land path: once `fallTimeInTicks >= 60` and `velocity.sqrMagnitude <= 0.0625`
+   (settled), `notMovingCount` accumulates; when it exceeds **3** and the block
+   below (`worldToBlockPos(position + down)`) is non-air with
+   `GetStability(pos) > 0`: landing audio `<surface>destroy` at that block
+   (throttled **0.15s** via `lastTimeEndParticleSpawned`, gated on the block
+   having a destroy particle), then item drops (below) and `SetDead()`.
+
+**`Update()` (IL=147) client mesh + server mass:** non-dedicated clients lazily
+call `CreateMesh()` and enable `meshRenderer`; terrain blocks get
+`localScale = (terrainScale, terrainScale, terrainScale)` plus a
+`MaterialPropertyBlock` with `_MainTex` / `_BumpMap` from
+`MeshDescription.meshes[5].textureAtlas` using `GetSideTextureId(blockValue, 0,
+0)`. When the collider is still disabled it is enabled and
+`massKg = FastMin(Hardness * Mass, 10) * 8`, refined by
+`* (isTerrain ? terrainScale^2 * 1.5 : (isMultiBlock ? 2.2 : 1))`. Server-only:
+`rigidBody.mass = FastMax(10, massKg)`, `velocity = startVel`,
+`angularVelocity = rand.RandomOnUnitSphere() * startAngularVel` (default 0.5).
+
+**`Awake` (IL=27) / `InitLocation` (IL=45) / registry:** `Awake` sets
+`yOffset = 0.15`, caches `rigidBody`, destroys it on remote clients (they
+interpolate instead), and disables the box/sphere colliders. `InitLocation`
+registers the entity in the static `fallingBlocksByChunk[chunkKey]` list
+(`WorldChunkCache.MakeChunkKey(toChunkXZ(pos))`); server places the RB at
+`pos - Origin.position` / `Euler(rot)`. `SetDead` (IL=20) cleans up the sign
+canvas and removes the entity from that list. The static
+`ClearFallingBlocksForChunks(chunks)` (IL=57) kills every in-flight falling
+block whose `chunkKey` is in the set (chunk-clear / unload path).
+
+**`CreateMesh` (IL=172):** resolves `ItemClass.GetForId(blockValue.ToItemType())`;
+terrain blocks instantiate the `@:Entities/Debris/Falling/Terrain1.prefab`,
+others `itemClass.CloneModel(world, ToItemValue(), position, transform,
+MeshPurpose 3, textureFull)`; failures log and `SetDead`. Non-terrain meshes get
+shadow casting off, all child colliders and animators disabled, and
+`Utils.SetColliderLayerRecursively(gameObject, 13)`; a pending sign canvas is
+reapplied (`SignCanvas.State` + `Initialize(null)`).
+
+**Landing drops, no re-placement:** the falling block is never written back into
+the world. With `OptionsStabSpawnBlocksOnGround` (GamePrefs 148) set:
+`DropItemsOnEvent(world, blockValue, EnumDropEvent.Fall, prob, GetPosition(),
+(1.5, 0, 1.5), cItemExplosionLifetime, -1, false)` where `prob` is the first
+`itemsToDrop[Fall][0].prob` (default 1); plus a second `EnumDropEvent.Destroy`
+pass at **0.7** when `fallTimeInTicks < 16`; terrain blocks only drop when
+landing on terrain-shape ground. `SetDead()` also fires on `fallTimeInTicks >
+300` or world-y below 2. Impact visuals come from `OnContactEvent` (IL=77,
+server-only until `isGroundHit`): `ParticleEffect("impact_stone_on_" +
+groundSurfaceCategory, ...)` with material `<blockSurface>hit<groundSurface>`
+at the entity position.
 
 **`EntityFallingTree` impact damage (Collide IL=101 / collidedWith IL=58):**
 Trees spawned through `RequestToSpawnEntityServer` (spawning.md §5) fall as a
@@ -3438,6 +3487,17 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   && deathUpdateTime > 70.
 ## Changelog
 
+- **2026-08-08:** EntityFallingBlock landing + mesh: OnUpdateEntity (IL=344)
+  full - every-other-tick bounds damage pass (entityHits < 3, passive 164,
+  fallingBlock source, warning log), land path (ticks >= 60 + settled,
+  notMovingCount > 3, block below non-air + stability > 0) -> <surface>destroy
+  audio 0.15s throttle -> Fall drop (first prob, default 1) + Destroy 0.7
+  (ticks < 16) gated on GamePrefs 148, no re-placement, SetDead on 300 ticks /
+  y < 2; Update (IL=147) client mesh + massKg hardness*mass min10 *8 * scale,
+  server RB mass/vel/angular; Awake/InitLocation fallingBlocksByChunk registry,
+  SetDead cleanup, static ClearFallingBlocksForChunks (IL=57); CreateMesh
+  (IL=172) Terrain1.prefab / CloneModel MeshPurpose 3, collider+animator off,
+  layer 13, sign canvas; OnContactEvent (IL=77) impact_stone_on_ particle.
 - **2026-08-08:** EntityFallingTree lifecycle: Collide (IL=101) server-only,
   rel-vel > 1 collidedWith, rel-vel > 0.2 + impulse/mass > 1.5 max-impulse
   contact -> treefallimpact audio + treefall particle; collidedWith (IL=58)

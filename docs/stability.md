@@ -193,13 +193,16 @@ cap candidate at 1; update stab0 set; `SetStability`; recurse.
 
 - `StabilityInitializer::unspreadHorizontal` / `clearHorizontal` / `clearDown`
   exact stop conditions and the re-spread entry points.
-- `EntityFallingBlock::OnUpdateEntity` / `OnContactEvent` landing: which position
-  it re-places into, damage applied on impact, and the block removal timing
-  (44 methods dumped, not yet translated).
 - `Block.StabilitySupport`, `Block.StabilityIgnore`,
   `MaterialBlock.StabilityGlue` and `MaterialBlock.Mass` data sources in
   blocks.xml (properties on `<block>` and `<material>`), to be loaded into the
   block/material tables.
+
+Landing of `EntityFallingBlock` is resolved in entity-ai.md §8: no re-placement;
+settled on a non-air, stability > 0 block below, it plays `<surface>destroy`
+audio and drops items (Fall event prob from the first drop entry, Destroy pass
+at 0.7 early), gated on GamePrefs 148, then `SetDead` (also on 300 ticks or
+world-y below 2).
 
 ## Chunk file note
 
@@ -210,6 +213,8 @@ channel today; the plane can be recomputed on load with
 
 ## Changelog
 
+- **2026-08-08:** EntityFallingBlock landing resolved (entity-ai §8): no
+  re-placement, drops + SetDead; residual closed.
 - **2026-08-07:** GroupFallingBlocks BFS GroupBounds size limit.
 - **2026-08-07:** CreateFallingBlockGroup OnBlockStartsToFall + fallingBlocks entity.
 - **2026-08-07:** OnBlockStartsToFall base SetBlockRPC Air; tree/composite
