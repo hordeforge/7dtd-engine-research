@@ -2421,6 +2421,29 @@ else stores `physicsVel` / `physicsAngVel`, applies them to the rigidbody
 when this is the physics master, and seeds `motion = vel * 0.05`.
 `SetIgnoredByAI` (IL=4) is the `isIgnoredByAI` flag (AI targeting skip);
 `WasAlive` (IL=5) is `!WasDead()` (the respawn-transition latch).
+`GetAttachedPlayerLocal()` (IL=29) scans `attachedEntities` for the first
+`EntityPlayerLocal`; `SetAttachMaxCount(maxCount)` (IL=72) resizes the array
+(`Detach()`ing entries past the new count, copying min(old, new) across);
+`SendDetach()` (IL=35) ships `NetPackageEntityAttach.Setup(2, selfId, -1,
+-1)` to the server on a client (or the type-3 broadcast on channel 192 on
+the server), then `Detach()`. `GetAngularVelocityPerSecond()` (IL=18)
+delegates to the attached entity, else reads `physicsRB.angularVelocity`;
+`SetRotationAndStopTurning(rot)` (IL=13) applies `SetRotation` and zeroes
+`yawSeekTimeMax` + the interpolate counters; `PhysicsSetHeight(height)`
+(IL=53) stores `physicsHeight`, clamps `physicsColliderLowerY`, and
+re-shapes the capsule (height + center).
+`GetSpawnerSourceChunkKey()` (IL=3) reads `spawnerSourceChunkKey`;
+`SetInElevator(b)` (IL=4) writes `bInElevator`; `IsSwimming()` (IL=3) reads
+`isSwimming`; `get_EntityClass()` (IL=8) is
+`EntityClass.list.TryGetValue(entityClass)`; `get_EntityTags()` (IL=3) reads
+`cachedTags`; `get_width` / `get_depth` / `get_height` (IL=6 each) are
+`scaledExtent.x / z / y * 2`.
+`HasEnabledActivationCommands(player)` (IL=4) is
+`UpdateActivationCommands(player)`; `MoveActivationCommandBefore(commands,
+commandToMove, beforeCommand)` (IL=64) reorders the activation-command list,
+moving one entry before another (or to the end);
+`AddUIHarvestingItem` (IL=1) is a base no-op whose `EntityPlayerLocal`
+override (IL=8) feeds `xui.CollectedItemList.AddItemStack` (client).
 `GetBlockPosition` (IL=4) is `worldToBlockPos(position)`;
 `GetSpawnerSourceBiomeIdHash` (IL=3) is the spawner biome hash field;
 `IsDriven` (IL=11) is `attachedEntities[0] != null`; `setBeenAttacked`
