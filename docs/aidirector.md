@@ -143,6 +143,14 @@ the straight line); `OnUpdatePosition` (IL=49) advances
 `SetAirBorne(true)`. `IsSavedToFile` and `IsDeadIfOutOfWorld` are both
 false - the plane lives only for its flight budget.
 
+**Far-draw trick:** `UpdateFarDraw` (IL=35) caches `mainCamera = Camera.main`
+and lazily captures `planeMesh` from the child `MeshFilter`, then
+`MoveBoundsInsideFrustrum(transform)` (IL=31) sets
+`planeMesh.bounds = Bounds(zero, Vector3.one * |camera - plane| * 1.25)` - the
+mesh bounds are inflated with distance so the far plane is never frustum-culled
+while it crosses the sky. `Awake` and the ctor are base-only; `CanCollideWithBlocks`
+is false (no collisions on the plane).
+
 ## AIDirectorBloodMoonComponent : AIDirectorComponent
 - `Tick(Double)` IL=170
 
@@ -857,6 +865,10 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** EntitySupplyPlane far-draw: UpdateFarDraw (IL=35) mainCamera
+  + planeMesh lazy, MoveBoundsInsideFrustrum (IL=31) mesh bounds inflated by
+  |camera - plane| * 1.25 anti-cull; Awake/ctor base-only,
+  CanCollideWithBlocks false.
 - **2026-08-08:** EntitySupplyCrate rest: MoveEntityHeaded parachute gravity
   0.95 + Update airborne swing + PostInit layer 21 / ValidateResources /
   wasOnGround smoke off; StopSmokeAndLights SupplySmoke loop + SupplyLit off;
