@@ -1365,6 +1365,19 @@ accessors (`GetHoldingGun`, `GetHoldingBlock`, `GetHoldingDynamicMelee`,
 stats through its armor groups and tracks cosmetic unlocks; it changes stats but
 is never "held".
 
+**Container accessors (all IL-verified):** `Inventory.GetSlotCount` (IL=5)
+is the `slots` array length; `GetSlotsWithBlock(block)` (IL=60) returns the
+slot indices holding that block - for a `CanPickup` block the item name
+must equal `block.PickedUpItemValue`, otherwise the slot's
+`ItemClassBlock.GetBlock()` must equal it; `IsHoldingBlock` (IL=9) is
+`holdingItem?.IsBlock()`; `PerformActionOnSlots(action)` (IL=21) invokes
+the action on every slot's `ItemStack` (the sandbox-adjust fan-out).
+`Equipment.GetSlotCount` (IL=5) is the `m_slots` length; `GetSlotItem(i)`
+(IL=13) returns null past the end; `GetSlotItemOrNone(i)` (IL=19) returns
+`ItemValue.None` for out-of-range or empty slots;
+`Equipment.PerformActionOnSlots(action)` (IL=24) invokes the action on
+every non-null worn `ItemValue`.
+
 **`Bag` leaves:** `TryStackItem(startIndex, stack)` (IL=75) is the stack-merge:
 it requires `CanMoveTo(Backpack, -1)`, then scans slots from `startIndex`,
 merging same-type slots via `CanStackPartly(ref count)` (each merge fires
