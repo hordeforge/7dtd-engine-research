@@ -766,6 +766,39 @@ ItemDegradationModifier`, `HandleItemBreak` when the tool breaks), sets
 `RightArmAnimationAttack = true`, and finally
 `powered.RemoveParentWithWiringTool(entityId)` severs the wire.
 
+**`ItemActionUseOther` (medical / feed items):** `CanExecute` (IL=102) is
+`Delay`-gated, scans `GetLookRay()` at range 4 with model layer 2 set, first
+with mask `-538750989` (entity-targeted) then `-538488845` (generic) when the
+first pass found no alive non-`EntityPlayer` target, stores the result in
+`FeedInventoryData.TargetEntity` (kept when one is already set), seeds
+`MinEventContext.Other` / `.ItemValue`, and delegates to base `CanExecute`.
+`ExecuteAction` (IL=287) is release-gated and starts with the Twitch gate:
+passive **177** (`twitch_no_attack`) above 0 sets `lastUseTime = now + 1`,
+plays the `twitch_no_attack` sound in the player's head and aborts. Otherwise
+it sets `bFeedingStarted = true` (aborts with no target) and enforces two
+medical-item guards: a `medicalItemTag` item cannot target a non-player, and
+cannot target an entity holding the `noMedBuffsTag`. It then plays `soundStart`,
+sets `RightArmAnimationUse = true`, seeds the min-event context and fires
+`onSelfHealedOther` (13) plus `onSelfPrimaryActionEnd` (29) / `onSelf
+SecondaryActionEnd` (37) depending on `indexInEntityOfAction`. A `stopBleed`
+item against a `Player` target with `buffInjuryBleeding` sets achievement
+stat `(2, 1)`; `ExecuteBuffActions` applies the action's buffs to the target.
+Consumption: with `Consume` and the tool still valid
+(`MaxUseTimes > 0 && UseTimes + 1 < MaxUseTimes`) it degrades via the usual
+passive-7 pattern (`UseTimes += GetValue(7, iv, UseTimes + 1, ...) *
+ItemDegradationModifier`), else `Inventory.DecHoldingItem(1)`. A configured
+`CreateItem` / `CreateItemCount` adds the stack through the local player's
+`xui.PlayerInventory.AddItem`, falling back to
+`ItemDropServer(stack, GetPosition(), zero, -1, lifetime 60, false)` on a
+full inventory. The pass ends by clearing `bFeedingStarted` and
+`TargetEntity`.
+
+**`ItemActionTextureBlock.GetUserData` (IL=51):** the paint color for the
+current texture slot: `BlockTextureData.list[idx].TextureID` is looked up in
+`MeshDescription.meshes[0].textureAtlas.uvMapping` and its `color` packed
+into an int (`r*255 & 0xFF | (g*255 & 0xFF) << 8 | (b*255 & 0xFF) << 16`),
+falling back to `Color.gray` when the texture id is 0.
+
 **`ItemActionAttack.ReadFrom` (IL=482) is the attack-action config parse** run
 from the loader's Actions fill: `ToolCategory` (string), `DamageEntity` /
 `DamageBlock` (float, defaults rolled before the keys), `Range` /

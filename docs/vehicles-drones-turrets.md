@@ -807,6 +807,22 @@ an `EntityPlayerLocal`:
   `DropTimeDelay = 0.5`, `Inventory.DecHoldingItem(1)` consumes one item,
   `PlayOneShot(soundStart ?? "placeblock")`, preview cleared.
 
+**Preview lifecycle** (the press that opens the placement ghost): turret
+`StartHolding` (IL=40) / vehicle `StartHolding` (IL=45) run for the local
+player only: they destroy any prior preview (`DestroyImmediate`), instantiate
+`holdingItem.MeshFile` into `TurretPreviewT` / `VehiclePreviewT`, and hand off
+to the setup helpers. Turret `setupPreview` (IL=57) lazily caches
+`PreviewRenderers` (`GetComponentsInChildren<Renderer>`), applies
+`previewSize` as local scale, copies `canPlaceInAir` into the action data,
+disables the preview's `SphereCollider`, and tints every renderer material
+`(2, 0.25, 0.25)`; `updatePreview` then tracks validity, and `StopHolding`
+(IL=21) destroys the ghost object when the holder is the local player. The
+vehicle variant's `SetupPreview` (IL=46) resets `ValidPosition = false`,
+caches the renderers and applies the same tint, and its `StartHolding`
+additionally runs `Vehicle.SetupPreview(VehiclePreviewT)` plus a
+`StartCoroutine(UpdatePreview(data))` on `GameManager.Instance` (the vehicle
+ghost re-validates position every frame).
+
 Server-side commit, identical in the host branch and in the package handlers:
 
 - `EntityFactory.CreateEntity(entityType, pos, rot)` then
