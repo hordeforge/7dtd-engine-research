@@ -198,6 +198,9 @@ world coords to a biome through `m_BiomeMap : GridCompressedData<Byte>`:
 `tileX = x / biomesScaleDiv + biomesMapWidthHalf` (and z likewise), bounds-checks
 the grid, treats value **255** as "no biome", and maps the byte through
 `WorldBiomes.GetBiome(byte)`. The 3-arg overload (IL=8) just sets the intensity
+(the height-based sibling `WorldBiomeProviderFromHeight` is not constructed
+by any live provider on b14: it is referenced only from its own `_InitData`
+iterator, so treat it as unused).
 ref to **1** and delegates. `GetHumidityAt`/`GetTemperatureAt` (IL=2 each) are
 **stubs returning 0** in this build; per-cell climate comes from
 `BiomeDefinition`/`WeatherManager`, not the image provider. `GetRadiationAt(x, z)`
