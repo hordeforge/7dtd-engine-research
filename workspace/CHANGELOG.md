@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: sandbox-options doc spot-check (9 claims exact)
 ## 2026-08-08 - tier-C: signs + webserver spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: game-events + map-objects spot-check (10 claims exact)
 ## 2026-08-08 - tier-C: progression doc spot-check (7 claims exact)
