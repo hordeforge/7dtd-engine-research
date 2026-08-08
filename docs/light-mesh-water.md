@@ -31,6 +31,12 @@ stateDiagram-v2
 | Type | Key methods | IL |
 |---|---|---:|
 | `LightProcessor` | `LightChunk` | 53 |
+
+**Server light manager (`LightManager.CreateServer`, IL=8):** lazily builds
+the `LightManager.Server` singleton once the connection reports
+`IsServer` - the dedicated host's light-level oracle used by
+server-side queries that depend on light (stealth, sleeper disturbance),
+separate from the client render path.
 | | `RefreshSunlightAtLocalPos` | 107 |
 | | `RefreshLightAtLocalPos` | 128 |
 | | `SpreadLight` / `UnspreadLight` | 116 / 125 |
@@ -402,6 +408,15 @@ Evaporation does **not** call into `WaterSimulationNative` jobs directly; it sch
 | `WaterSimulationApplyChanges` | `ThreadLoop` / `ApplyChanges` / `SendUpdateToClients` | 56 / **254** / 30 | verified |
 | `WaterSimulationApplyChanges` | `HasNetWorkLimitBeenReached` | 37 | verified backpressure |
 | `WaterDataHandle` | `InitializeFromChunk` / `ApplyEnqueuedFlows` | 154 / 29 | verified |
+| `WaterSimulationNative` | `SetPaused` | 4 | verified pause flag |
+| `WaterSimulationNative` | `GetMemoryStats` | 157 | verified: sums `usedHandles` / `freeHandles` / `newInitializedHandles` (`CalculateOwnedBytes` each) plus the `activeHandles` / `waterDataHandles` native sets (via `ProfilerUtils`), formatted `Allocated Handles: {0}, Used: {1}, Free: {2}, Pending: {3}, Handle Contents (MB): {4:F2}, Other Memory (MB): {5:F2}, Total Memory (MB): {6:F2}` |
+
+**World-file checksums (`ChunkProviderGenerateWorldFromRaw`):**
+`saveFileHashes(worldPath)` (IL=49) writes `{worldPath}/checksums.txt`
+(`name=crc` lines, UTF-8); `loadStoredFileHashes` (IL=63) reads it back
+into a case-insensitive map, warning `Invalid line in checksums.txt: {0}`
+on malformed rows - the world-integrity checksum pair the loader compares
+against the current files.
 | `WaterValue` | mass u16 + percent | 3 / 20 | verified |
 | `WaterUtils` | `CanWaterFlowThrough` / `GetWaterLevel` | 14 / 8 | verified |
 | `WaterConstants` | `GetStableMassBelow` | 6 | verified min(..., 19500) |
