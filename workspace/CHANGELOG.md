@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: census refresh (1845 narrated)
 ## 2026-08-08 - tier-C: name event/vote entry records
 ## 2026-08-08 - tier-C: trim TwitchActionManager from OOS
 ## 2026-08-08 - tier-C: TwitchActionManager registry

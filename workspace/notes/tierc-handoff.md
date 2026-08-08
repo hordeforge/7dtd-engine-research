@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `18c7506` name event/vote entry records |
+| HEAD (at handoff write) | `2b8d8e4` census refresh (1845 narrated) |
 | Commits since dry-run `3b61d9c` | ~1316 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
