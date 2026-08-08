@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vehicle sync-flag mask
+
+EntityVehicle.GetSyncFlagsReplicated (IL=5, vehicles-drones-turrets.md 7):
+flags & 49159 (0xC007, bits 0-2 + 14-15) server-rebroadcast subset.
+verified from IL. Commit d147511.
 ## 2026-08-08 - tier-C: vehicle cargo drop
 
 EntityVehicle.DropItemsAsBackpack (IL=94) bag + cosmetic/mods stacks;

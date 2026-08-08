@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `194f60c` vehicle cargo drop |
-| Commits since dry-run `3b61d9c` | ~1073 |
+| HEAD (at handoff write) | `d147511` vehicle sync-flag mask |
+| Commits since dry-run `3b61d9c` | ~1074 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
