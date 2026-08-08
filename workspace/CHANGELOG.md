@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameStageDefinition leaves
+
+GetStage bracket via GetBoundIndex (last stageNum <= stage) + clamp;
+CalcGameStageAround same-prefab players 100m; SortStages ascending;
+AddStage. Verified fresh dumps.
 ## 2026-08-08 - tier-C: EntitySpawner persistence/parse
 
 Write v3 / Read gates + DefaultClassName fallback; Spawn wrapper;
