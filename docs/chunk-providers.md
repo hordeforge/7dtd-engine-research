@@ -504,6 +504,13 @@ load path a dedicated server runs at startup:
   when any of `splat3_processed.png` / `splat4_processed.png` /
   `splat3_half.png` / `splat4_half.png` is missing, or when
   `verifyFileHashes` fails.
+- `GameUtils.GetWorldFilesToTransmitToClient(files)` (IL=85) is the join
+  download filter (used by `NetPackageWorldFolder.prepareWorldFolderData`
+  and `NetPackageWorldInfo.PrepareWorldHashes`): it keeps a file only when
+  its basename is not the `_processed` twin of another file in the set, and
+  the name contains none of `GenerationInfo`, `Version.txt`, `checksums.txt`
+  and does not end in `.bak` - so processed twins, generation metadata, and
+  checksum files never go to the client.
   `generateHalfResTexture(tex)` (IL=27) builds a `width>>1` x `height>>1`
   texture from mip level 1 (error + source fallback when `mipmapCount < 1`);
   `GetProviderId()` returns **4**; `ARGB32ToColor` (IL=10) is a plain
@@ -938,6 +945,11 @@ the map or any cell is `>= v`.
 | [`loop.md`](loop.md) / [`loop-gmupdate.md`](loop-gmupdate.md) | Frame cost of `provider.Update`, `DecoManager.UpdateTick`, `SaveRandomChunks` |
 | [`light-mesh-water.md`](light-mesh-water.md) | Lighting/water stages that follow decoration |
 
+## Changelog
+
+- **2026-08-08:** GameUtils.GetWorldFilesToTransmitToClient (IL=85) join
+  download filter: excludes _processed twins, GenerationInfo, Version.txt,
+  checksums.txt, .bak; feeds NetPackageWorldFolder + PrepareWorldHashes.
 ## Changelog
 
 - **2026-08-08:** Chunk.CalcBiomeIntensity (IL=150): 16x16 columns, 32-cell
