@@ -6,6 +6,16 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityFallingBlock landing + mesh
+
+OnUpdateEntity (IL=344) full: every-other-tick damage pass (entityHits < 3,
+passive 164, fallingBlock), land path (ticks >= 60 + settled, notMovingCount
+> 3, non-air + stability > 0 below) -> <surface>destroy audio 0.15s throttle,
+Fall drop prob default 1 + Destroy 0.7 (ticks < 16), GamePrefs 148 gate, NO
+re-placement, SetDead 300 ticks / y < 2. Update (IL=147) client mesh + massKg,
+Awake/InitLocation fallingBlocksByChunk registry, ClearFallingBlocksForChunks,
+CreateMesh (IL=172), OnContactEvent (IL=77). Closed stability.md residual.
+Verified from fresh dumps.
 ## 2026-08-08 - tier-C: EntityFallingTree full type
 
 CreateMesh (IL=292): air-swap block, reparent deco transform, rootBall
