@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ProgressionValue
+
+set_Level frame-cache + skill pin; GetCalculatedLevel cached + type passive
+83/84/85 bonus; PercToNextLevel; CanPurchase MaxLevel; IsLocked; Write v1 /
+Read. Verified fresh dumps.
 ## 2026-08-08 - tier-C: Progression leaves
 
 AddLevelExp XPGain + XP(87) bonus + clamp + GameSparks + recursive + level-up
