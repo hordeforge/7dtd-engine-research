@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemActionRanged leaf helpers
+
+TryExecuteAction trigger machine, GetReloadFlags bitmask, ammo cycling/swap/removal, AI range + damage reads, burst/reset helpers (verified)
 ## 2026-08-08 - tier-C: ProtocolManager event leaves
 
 ConnectionFailedEv client-fallback chain, Disconnected/InvalidPassword resets, ResetNetworkStatistics fan-out, HasRunningServers (verified)
