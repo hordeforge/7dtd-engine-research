@@ -73,15 +73,15 @@ For **dedicated managed** surfaces under the coverage bar (families 1-11 in
 [coverage.md](coverage.md)). Definition of done: [completion-bar.md](completion-bar.md)
 **tiers A+B**.
 
-**Coverage.exe (live ASM, 2026-08-07):**
+**Coverage.exe (live ASM, 2026-08-08):**
 
 | Tier | Count |
 |---|---:|
 | Game types in reach base | 3699 |
-| Narrated | 1488 |
-| Catalogued only | 822 |
+| Narrated | 1818 |
+| Catalogued only | 562 |
 | (refresh after each Coverage run) | |
-| Classified OOS | 1392 |
+| Classified OOS | 1319 |
 | **Unaccounted** | **0** |
 
 Also:
