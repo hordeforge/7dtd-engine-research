@@ -616,6 +616,19 @@ rotation from geometry, delegating every other mode to the base.
   rotation on `Top` / `Bottom` faces, and re-rotates by the wall face:
   `North -> 0`, `West -> 3`, `South -> 2`, `East -> 1`.
 
+**`BlockSleepingBag` (the bedroll):** the two-tile bed. `rotationToAddVector`
+(IL=25) maps rotation to the sibling offset (`0 -> (0,0,1)`, `1 -> (1,0,0)`,
+`2 -> (0,0,-1)`, `3 -> (-1,0,0)`). `CanPlaceBlockAt` (IL=80) additionally
+requires both cells' floors (`pos - up` and `siblingPos - up`) to be non-air
+with `StabilitySupport` materials and the sibling cell to be air/replaceable.
+`PlaceBlock` (IL=52) sets `selectedSpawnPointKey = entityId` on the placing
+`EntityPlayerLocal` (the bedroll becomes the spawn point, spawning.md) and, for
+a non-multiblock bed, places the `SiblingBlock` half via `SetBlockRPC` at the
+rotation-adjusted position. `GetOwningPlayer(pos, out ownedByOther)` (IL=43)
+scans `PersistentPlayerList.Players` for a matching `BedrollPos` and reports
+whether the owner is another player; `OnBlockActivated` (IL=16) rejects
+activation of someone else's bedroll (base otherwise).
+
 ```mermaid
 flowchart TB
   subgraph Placement
@@ -772,6 +785,10 @@ damage.
   GetTickRate schedule vs gaussian-jittered growthDeviation band 0.5x-1.5x.
 ## Changelog
 
+- **2026-08-08:** BlockSleepingBag: rotationToAddVector sibling offsets;
+  CanPlaceBlockAt dual-cell StabilitySupport floor + replaceable sibling;
+  PlaceBlock selectedSpawnPointKey = entityId + SiblingBlock half placement;
+  GetOwningPlayer scan + ownedByOther; OnBlockActivated rejects others' beds.
 - **2026-08-08:** BlockPlacement* Auto-mode rotation overrides: Plate /
   Spotlight / TowardsPlacer90 / TowardsPlacerInverted (IL=91 each) orient by
   placer-vs-hit dx/dz with per-class rotation tables; PineLeaves (IL=26) forces

@@ -1174,6 +1174,22 @@ here throws `InvalidOperationException`). `get_SlotCount` (IL=10) is
 `items?.Length`; the change notification `onBackpackChanged` (IL=8) is a
 null-guarded invoke.
 
+**`Bag` storage leaves:** `DecItem(value, count, ignoreModdedItems,
+removedItems)` (IL=120) is the consume path: over matching-type slots
+(skipping modded when asked) it takes `min(slot.count, remaining)` from
+stackable classes (recording the taken `ItemStack(value.Clone(), take)` in
+`removedItems`), and for non-stackable classes removes the whole slot (recording
+a clone) decrementing one per slot; returns the amount actually removed.
+`CanStack(stack)` (IL=31) is true when any slot is empty or `CanStackWith`;
+`CanStackNoEmpty` (IL=26) and `CanTakeItem` (IL=33) use `CanStackPartlyWith`
+(empty-slot allowance for the latter); `GetUsedSlotCount` (IL=28) counts
+non-empty slots; `IsEmpty` (IL=24) is all-empty; `AddItem(stack)` (IL=21) gates
+on `CanMoveTo(Backpack, -1)` then `AddToItemStackArray` (fires
+`onBackpackChanged` on success); `Clear()` (IL=24) empties every slot + notifies.
+`GetItemCount(ItemValue / FastTags, seed, meta, ignoreModded)` (IL=68 / 75)
+match the `Inventory` variants (type/tag, seed/meta filters, modded skip).
+`Clone()` (IL=31) deep-copies items, locked slots, `Touched`, and preferences.
+
 **`Equipment` leaves:** `ApplyTempCosmeticSlot` (IL=24) writes the pending
 `tempCosmeticSlot` into `m_cosmeticSlots[tempCosmeticSlotIndex]` and, for a
 non-remote entity, sets `bPlayerEquipmentChanged = true` (the equip-sync
@@ -1772,6 +1788,10 @@ The non-action leaves:
   QuestEventManager.HarvestedItem, inventory/drop, _xpFromHarvesting XP.
 ## Changelog
 
+- **2026-08-08:** Bag storage leaves: DecItem (IL=120) consume with
+  removedItems + non-stackable whole-slot removal; CanStack/CanStackNoEmpty/
+  CanTakeItem/GetUsedSlotCount/IsEmpty/AddItem/Clear; GetItemCount ItemValue +
+  FastTags variants; Clone deep copy.
 - **2026-08-08:** ItemActionDynamic.ReadFrom (IL=495) graze/swing/
   power-attack config; ItemActionThrownWeapon.ReadFrom (IL=162) throw
   physics; ItemActionOpenBundle.ReadFrom (IL=191) create/random item
