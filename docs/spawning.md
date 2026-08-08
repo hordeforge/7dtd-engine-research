@@ -927,6 +927,25 @@ and bytes, and on the server the active half walks every player's
 `GetPrefabsAtXZ` into a deduped `HashSet<Prefab>`, and sums
 `Prefab.EstimateOwnedBytes()` (client sets the active outputs to -1).
 
+**`PrefabInstance` coordinate leaves (all IL-verified):**
+`GetPositionRelativeToPoi(pos)` (IL=81) is the world-to-POI transform
+(`pos - bboxPos`, x/z swapped on odd rotation, then mirrored per
+`rotation & 3`); `GetWorldPositionOfPoiOffset(offset)` (IL=81) is the
+inverse (rotation-mirror, x/z swap, `+ bboxPos`).
+`MoveBoundingBox(delta)` (IL=10) and `RotateAroundY()` (IL=24, `rotation =
+(rotation + 1) % 4` with the size x/z swap) and `ResizeBoundingBox(delta)`
+(IL=33, per-axis minimum 1) all funnel into
+`UpdateBoundingBoxPosAndScale(pos, size, moveVolumes)` (IL=82): it calls
+`prefab.MoveVolumes(oldPos - pos)` when volumes move, stores the bbox,
+syncs the `SelectionBox` (position/size + the facing derived from
+`(rotationToFaceNorth + rotation) % 4 * 90` with the 90/270 normalization),
+re-applies the prefab volumes to the selection boxes, and on the server
+fires `DynamicPrefabDecorator.CallPrefabChangedEvent`.
+`SetBoundingBoxPosition(pos)` / `SetBoundingBoxSize(world, size)` (IL=7
+each) are the one-sided wrappers; `GetBox()` (IL=9) resolves the
+dynamic-prefab `SelectionBox`; `GetSerializable()` (IL=3) is the save
+snapshot wrapper.
+
 **RWG heightmap stamping:** `copyPrefabsIntoHeightMap(pi, width, height,
 heightData, scale, topTextures)` (IL=318) writes a POI's terrain into the
 raw heightmap: it creates a single-view over `heightData`, warns
