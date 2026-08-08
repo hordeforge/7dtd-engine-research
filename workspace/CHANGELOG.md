@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: light + entity-stats + stability third spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: terrain-height IL fixes (SaveLoad 884->926; heightmap pair 49/63->132/74)
 ## 2026-08-08 - tier-C: mod + twitch + chunk-providers third spot-check (16 claims exact)
 ## 2026-08-08 - tier-C: save + network + weather third spot-check (18 claims exact)
