@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: changelog wire-correction entry
 ## 2026-08-08 - tier-C: add bIgnorePartyShare to DamageEntity wire
 ## 2026-08-08 - tier-C: coverage live-pin re-verify date
 ## 2026-08-08 - tier-C: completion-bar pin date refresh
