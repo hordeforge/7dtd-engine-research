@@ -193,6 +193,25 @@ special cases, and `Entity.spawnByName` matching. This is why marker
 visibility (ally pins, owned-vehicle icons, tracked-quest icons) needs no
 server round trip.
 
+**`NavObject` leaves:** `TrackTypes` is `None=0, Transform=1, Position=2,
+Entity=3`. `set_TrackedEntity` (IL=20) stores the entity, derives `EntityID`
+(-1 for null), sets `TrackType = 3` and runs `SetupEntityOptions` (IL=28): for
+an Entity track whose class has `RequirementType.Tracking (3)`, the
+`OverrideSpriteName` becomes `GetTrackerIcon()` (empty fallback), else empty.
+`IsValid` (IL=30) downgrades a dead track to `None` when the transform or
+entity reference is gone, returning `TrackType > 0`. `GetPosition` (IL=25)
+returns `trackedPosition - Origin.position` (Position), `trackedTransform.
+position` (Transform), `trackedEntity.position - Origin.position` (Entity), or
+`InvalidPos`. The `IsTracked*` checks (IL=11 each) are TrackType-gated equality
+used by the manager's unregister predicates. `GetCompassIconScale(distance)`
+(IL=17) is `Lerp(MinCompassIconScale, MaxCompassIconScale, 1 - distance /
+MaxScaleDistance)`; `get_DisplayName` (IL=20) lazily caches
+`Localization.Get(name)` when `usingLocalizationId`; `get_Rotation` (IL=25)
+returns the tracked entity's rotation (the attach parent's when mounted) only
+when the map settings `UseRotation`, else zero. `Reset(className)` (IL=34)
+clears overrides/track state and re-resolves the class list (the pooled
+recycle path).
+
 ## 7. NavObjectManager
 
 Lazy singleton (`get_Instance` constructs on demand), so it exists on both
@@ -309,6 +328,11 @@ add/remove, override color, localization flag, entityId.
   auto-waypoint at prefab center + RegisterNavObject, local-player only.
 ## Changelog
 
+- **2026-08-08:** NavObject leaves: TrackTypes 0-3; set_TrackedEntity +
+  SetupEntityOptions tracker-icon override; IsValid track downgrade; GetPosition
+  Origin-relative per type; IsTracked* equality; compass icon scale lerp;
+  DisplayName localization cache; Rotation only with UseRotation (attach parent
+  when mounted); Reset pool path.
 - **2026-08-08:** Waypoint/WaypointCollection leaves: Waypoint.Read (IL=77)
   version-gated fields + legacy Vehicle inference; Write (IL=57); Collection
   Write version 7 saved-only + Read + Clone; auto-waypoint refresh
