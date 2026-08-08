@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityHuman leaves (storm exposure, move-speed pattern, hand item)
+
+IsStormEffected biome-source + PineForest exclusion + IsStorming; MoveSpeedPatternTick (delay,scale) pairs; SetupHandItem (verified)
 ## 2026-08-08 - tier-C: EntityPlayer party/twitch/teleport/reload hooks
 
 Party delegate hooks + invite bookkeeping; Twitch member/vote-lock gates; IsReloadCancelled ranged scan; teleport delegates; IsSavedToNetwork false (verified)
