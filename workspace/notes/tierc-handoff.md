@@ -92,23 +92,23 @@ Scratch dumps live under `/tmp/nNNN_*` (not committed). Recent batches: `n189` s
 
 **Entity / move / combat**
 
-- [ ] `EntityAlive.updateStepSound` (IL=107) if not fully narrated
-- [ ] `NetEntityDistributionEntry.updatePlayerList` (IL=509) interest rebuild
-- [ ] `ProcessDamageResponseLocal` deep residual branches only if holes remain
-- [ ] `ClientKill` / `AwardKill` / `OnEntityDeath` residual detail
-- [ ] `dropItemOnDeath` full path
-- [ ] `StartJumpSwimMotion` water y-clamp formula (partially done)
+- [x] `EntityAlive.updateStepSound` (IL=107) if not fully narrated
+- [x] `NetEntityDistributionEntry.updatePlayerList` (IL=509) interest rebuild
+- [x] `ProcessDamageResponseLocal` deep residual branches only if holes remain
+- [x] `ClientKill` / `AwardKill` / `OnEntityDeath` residual detail
+- [x] `dropItemOnDeath` full path
+- [x] `StartJumpSwimMotion` water y-clamp formula (partially done)
 
 **Sleeper / stealth**
 
-- [ ] `SleeperVolume.Touch` correct overload body
-- [ ] `ConditionalTriggerSleeperWakeUp` residual
-- [ ] `NotifySleeperDeath` if thin
+- [x] `SleeperVolume.Touch` correct overload body
+- [x] `ConditionalTriggerSleeperWakeUp` residual
+- [x] `NotifySleeperDeath` if thin
 
 **World / blocks**
 
-- [ ] `GameManager.ChangeBlocks` (IL=530) phase map if not complete
-- [ ] `SetBlocksOnClients` thin wrapper confirm
+- [x] `GameManager.ChangeBlocks` (IL=530) phase map if not complete
+- [x] `SetBlocksOnClients` thin wrapper confirm
 - [ ] land-claim / stability / falling residual leaves only if undoc
 
 **Net packages**
