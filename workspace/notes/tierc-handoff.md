@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `6141828` animator audio stop |
-| Commits since dry-run `3b61d9c` | ~1101 |
+| HEAD (at handoff write) | `0e59600` player step gate |
+| Commits since dry-run `3b61d9c` | ~1102 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

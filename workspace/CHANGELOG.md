@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: player step view gate
+
+EntityPlayerLocal.PlayStepSound (IL=7, entity-ai.md): third-person-only
+delegate. verified from IL. Commit 0e59600.
 ## 2026-08-08 - tier-C: animator audio stop
 
 Entity.StopAnimatorAudio (IL=16, dedicated-misc-systems.md) monitored-handle
