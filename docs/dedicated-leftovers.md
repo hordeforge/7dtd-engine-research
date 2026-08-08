@@ -575,6 +575,32 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   every integer cell inside the bounds (`Fastfloor(min)` .. `Fastfloor(max + 1)`
   per axis) returning true when any `GetBlock(x, y, z).Block.blockMaterial`
   matches; **0 call sites on b14** (an unused world-query leaf).
+- **`Utils` server leaves (all IL-verified):** the wrap trio `WrapFloat` /
+  `WrapInt` (IL=21/22, wrap into `[min, max]`) and `WrapIndex` (IL=18, wrap
+  into `[0, arraySize)`); `FastAbsInt` (IL=13, with the `int.MinValue`
+  clamp); `FastLerpUnclamped` (IL=8, `a + (b-a)*t`); `Saturate` (IL=44,
+  per-channel Color clamp 0..1); `FastRoundToIntAndMod(f, mod)` (IL=25, 0
+  when mod is 0); `ToCelsius` / `ToRelativeCelsius` (IL=6/4, `(f-32)*5/9`
+  and `f*5/9`); `get_CurrentUnixTime()` (IL=13,
+  `(UtcNow - 1970-01-01).TotalSeconds` as uint); `get_StandardCulture()`
+  (IL=2, the static invariant CultureInfo); `ArrayEquals` (IL=43 each for
+  `byte[]` / `int[]`: reference-equal, length, element-wise);
+  `MaskIp(input)` (IL=46) replaces everything before the first and after the
+  last separator character with `*`; `EncryptOrDecrypt(text, key)` (IL=30)
+  XORs each char with `key[i % key.Length]` (reversible);
+  `CreateGameMessage(sender, message)` (IL=10) prefixes `sender: ` when a
+  sender is set.
+  Block-face math: `BlockFaceToRotation(face)` (IL=27) maps
+  Top=identity, Bottom=180° about forward, North=90° right, South=90°
+  forward, West=-90° right, East=-90° forward;
+  `BlockFaceToVector(face)` (IL=35) is `Top (0,1,0)`, `Bottom (0,-1,0)`,
+  `North (0,0,1)`, `South (-1,0,0)`, `West (0,0,-1)`, `East (1,0,0)`;
+  `MoveInBlockFaceDirection(vertices, face, d)` (IL=64) offsets every vertex
+  by the face direction times `d`; `Get6HitDirectionAsInt(direction, look)`
+  (IL=46) buckets the `GetAngleBetween` value into front (1) / right (2) /
+  left (3) / back-right (4) / back-left (5) / back (0) by angle bands;
+  `GetHitDirection4Sides(fwd, targetDir, up)` (IL=63) is the 4-side variant
+  (right 2 / left 3 / up 1 / front-back 0-1 via the atan2 difference).
 
 ## Changelog
 
