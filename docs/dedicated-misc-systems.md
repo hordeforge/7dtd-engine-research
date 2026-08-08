@@ -594,6 +594,28 @@ same order, so any save/wire boundary that carries a `DynamicProperties`
 (block entity data, quest state, entity classes) uses exactly these six
 fields.
 
+**Remaining leaves (all IL-verified):** `ParseByte(name, ref byte)` (IL=26)
+is the byte twin of the `Parse*` family (writes on `TryParseUInt8` success,
+else warns `Can't parse byte {0} '{1}'` and keeps the default);
+`ParseColorHex(name, ref Color)` (IL=10) runs `StringParsers.ParseHexColor`
+over the value when present; `TryParseRange(name, IntRange/FloatRange)`
+(IL=22 each) parses through `StringParsers.TryParseRange(..., '-')` and
+falls back to the given default. `SetParam1(name, param1)` (IL=29) validates
+the key, ensures a null `Values` entry, and sets/creates the `Params1`
+entry (the 3-arg overload routes through `GetOrCreateClass`);
+`TryGetParam1(name, out)` (IL=8) is `ValidateKey` +
+`Params1.TryGetValue`; the class overload (IL=18) returns false + null on a
+missing class. `RegisterFormatter()` (IL=25) lazily registers the
+`MemoryPack` formatters for `DynamicProperties`, `DynamicProperties[]`,
+`Dictionary<string,string>`, `Dictionary<string,DynamicProperties>`, the
+nested `Dictionary<string, List<Dictionary<string,string>>>`, and
+`List<Dictionary<string,string>>` (guarded by `IsRegistered`).
+`PrettyPrint()` (IL=9) / `PrettyPrint(sb, indent)` (IL=133) renders the bag
+for logs: a `Properties:` header with sorted `name={0}, value={1}` rows
+(plus `, param1=` / `, param2=` / `, fields=` suffixes when the dicts hold
+the key), then a `Classes:` header with one recursive block per class under
+a deeper indent.
+
 ## StringParsers (the text-to-value contract)
 
 `StringParsers` is the shared text parser behind XML properties, net strings,
