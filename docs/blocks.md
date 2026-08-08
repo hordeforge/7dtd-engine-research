@@ -40,6 +40,22 @@ So a chunk holding a million stone cells holds a million 6-byte `BlockValue`s an
 ([`tile-entities-power.md`](tile-entities-power.md)); everything else lives in the
 word.
 
+**Load-time id assignment (the `Block.assignIds*` pipeline):**
+`assignIdsFromMapping` (IL=42) assigns every block whose name is in the
+`NameIdMapping` its mapped id, queueing the rest;
+`assignLeftOverBlocks` (IL=107) first honors the `fixedBlockIds` map, then
+fills terrain blocks by scanning **upward from id 0** for free ids and
+non-terrain blocks **downward from 255**, logging
+`Block IDs total {0}, terr {1}, last {2}` (the mirror of the ItemClass
+pipeline, [items.md](items.md) §2). `AlternateBlockCount` (IL=5) /
+`ContainsAlternateBlock(name)` (IL=24) read the `placeAltBlockNames` list;
+`GetPathOffset(rotation)` (IL=11) returns `shape.GetPathOffset` when
+`PathType == -1` (the `BlockShapeNew` variant indexes
+`boundsPathOffsetRotations[rotation]`).
+Combat properties: `GetExplosionResistance` (IL=4) is
+`blockMaterial.ExplosionResistance`; `GetHardness` (IL=5) is
+`blockMaterial.Hardness.Value`.
+
 Block ids are partitioned into fixed bands (static literals on `Block`):
 
 | Band | Id range | Constant(s) |
