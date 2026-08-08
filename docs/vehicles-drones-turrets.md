@@ -608,6 +608,25 @@ slot count differs from capacity it allocates `ItemStack.CreateArray(cap)`,
 copies `min(old, new)` items across, and `Bag.SetSlots` - the cargo mod
 grows the drone's storage without dropping contents.
 
+**Owner/storage plumbing:** `SyncOwnerData` (IL=63) runs the pending owner
+sync (`notifySyncOwner`, IL=55: resolves `OwnerID` -> `PersistentPlayerData.
+EntityId` -> `belongsPlayerId`, resolves `Owner` from the world, faces the
+owner, `HandleNavObject` for the local player, `SetOwner` + `SendSyncData(3)`)
+and, with `belongsPlayerId == -1`, fills it from the persistent list; a
+missing `Owner` is resolved from the world and `AddOwnedEntity`-registered.
+`updatePartyBuffs` (IL=13) runs `buffAllies()` when the support mod is
+attached, the owner exists and the drone is not remote. `GetInstalledWeapons`
+(IL=3) / `SetActiveWeapon` (IL=4) are the weapon-list accessors.
+`HasStoredItem(entity, name, tags)` (IL=34) is `Bag.GetItemCount +
+Inventory.GetItemCount > 0` for the resolved item; `TakeStoredItem`
+(IL=49) decrements one from the inventory (else the bag) and returns a
+cloned single stack, null when the item class is missing.
+`DoRepairAction(ui)` (IL=46) is the repair-kit flow: with a stored
+`resourceRepairKit` and `GetRepairAmountNeeded() > 0` it removes one kit
+from the UI collect list, plays `craft_repair_item`, `TakeStoredItem`s the
+kit, `performRepair()` and `SendSyncData(16)`; without the item it plays
+the `misc/missingitemtorepair` head sound.
+
 **`updateDroneSystems` (IL=169):** the per-frame server systems pass: ticks
 `initSuppressVOTimer`; on the server with an owner it lazily registers the
 owner teleport hook (`PlayerTeleportedDelegates += TeleportIfFollowing`,
