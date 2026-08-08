@@ -1267,6 +1267,11 @@ Detail: [quests-challenges.md](quests-challenges.md) section 8,
 
 #### `NetPackageGameEventRequest` / `Response` / `BossEvent`
 
+- **Request wire** (`write` IL=83): `eventName:string`, `entityID:i32`,
+  `extraData:string`, `tag:string`, `isTwitchEvent:bool`, `crateShare:bool`,
+  `allowRefunds:bool`, `sequenceLink:string`, then `variables count:u8`
+  (capped at **255** from the list length) + `count x (name:string,
+  value:string)` tuples.
 - **Request** Process **IL=211**: resolve target/requester entities; party
   membership check; `GameEventManager.HandleAction(...)`; reply
   `NetPackageGameEventResponse` flags **192**.

@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameEventRequest wire body (write IL=83, u8-capped variables)
 ## 2026-08-08 - tier-C: NetPackageSharedQuest per-flag wire framing (SharedQuestData.write IL=63)
 ## 2026-08-08 - tier-C: TE subclass UpdateTick table (13 overrides, IL-verified bodies)
 ## 2026-08-08 - tier-C: state-machines catalog cross-checked (75 stateDiagram blocks, generator-scoped)
