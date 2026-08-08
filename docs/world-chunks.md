@@ -441,7 +441,9 @@ unload/reset/re-read/re-add when overwriting. Codec shared with region save
 **`ResendChunksToClients(HashSetLong)`:** for each observer that is **not** a local
 player visual mesh builder, append the given keys to `chunksToReload` so the next
 `SendChunksToClients` re-pushes with overwrite (terrain rebuild paths call
-`NetPackageChunk.Setup` directly as well).
+`NetPackageChunk.Setup` directly as well). The long-key set's internal
+`HashSetLong/PrimeHelper` (`ToPrime` / `CalcPrime` / `TestPrime`, 3 methods)
+is the prime-table used for hash-bucket sizing.
 
 ### 4.0.1 `DetermineChunksToLoad` algorithm (verified)
 
