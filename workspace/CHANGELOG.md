@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: containers, bedroll, meta sidecar
+
+Bag storage leaves (DecItem consume with removedItems, CanStack/CanTakeItem,
+GetItemCount variants, Clone); BlockSleepingBag two-tile placement + spawn
+key + GetOwningPlayer; EntityBedrollPositionList adapter leaves; PlayerMetaInfo
+XML/network forms. Verified fresh dumps.
 ## 2026-08-08 - tier-C: player persistence + spawn payload leaves
 
 PersistentPlayerData Read/ReadXML/trivials (bedroll sentinel, offline hours,
