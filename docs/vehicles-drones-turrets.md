@@ -627,6 +627,37 @@ owner is attached to a vehicle it enables no-clip once, clears the path and
 owner dismounts it clears the flag and `SetPosition(followPoint, true)`
 (false).
 
+**Drone systems leaves (all IL-verified):**
+`updateDroneSystems()` (IL=169) is the per-frame systems driver: it decays
+`initSuppressVOTimer`, and on the server lazily registers the owner's
+`PlayerTeleportedDelegates` (`TeleportIfFollowing`) plus the party
+member-added/removed handlers (seeding `registeredPartyMembers` from
+`Party.GetMemberIdArray`), then runs `sensors.Update()` (FollowDistance 10
+with an enemy in range, else 5), the heal-item check (heal weapon present,
+state not Idle/Sentry/Attack/Heal, `targetCanBeHealed`, timer expired), the
+`teleportAtkCooldownTimer` decay, and `Update()` on every installed weapon.
+`procEnemiesInRange()` (IL=96) is the debug AI: with
+`DebugEnemiesInRange` + a sensed enemy + a local owner it rotates toward the
+enemy and `move(steering.Seek(target), dist * 15, true)` toward the camera /
+head point (returns whether it handled the frame).
+`pickup(entityFocusing)` (IL=100) refuses a non-empty bag
+(`drone_takefail` VO + `ttEmptyDroneBeforePickup` tooltip), else checks the
+player's inventory / bag `CanTakeItem`, marks `isBeingPickedUp`, plays
+`drone_take`, `initWorldValues(false)`, disables the native collider,
+`Collect(playerId)`, strips the `buffJunkDroneSupportEffect` buff,
+`removePartyBuffs(player)` and `unRegsiterMovingLights` (or the
+`xuiInventoryFullForPickup` tooltip).
+`HasStoredItem(entity, itemGroupOrName, fastTags)` (IL=34) is a bag +
+inventory count > 0; `TakeStoredItem(entity, ...)` (IL=49) `DecItem`s 1 from
+the inventory else the bag and returns the single stack (null for an unknown
+item); `isTargetUnderWater(pos)` (IL=14) is block type 240;
+`canMove(dir)` (IL=18) is the `RaycastPathUtils.IsPositionBlocked` probe at
+`position + normalized(dir) * physColHeight`; `IsOnTeleportCooldown()`
+(IL=5) is `teleportAtkCooldownTimer > 0`; `updatePartyBuffs()` (IL=13) runs
+`buffAllies()` for a non-remote owner with the support mod;
+`SetAttacKMode(mode)` / `SetActiveWeapon(w)` (IL=4 each) write the
+`attackMode` / `activeWeapon` fields; `OnOriginChanged` (IL=1) is a no-op.
+
 **Drone pathing (`GetPath` IL=318 / `GetProjectedPath` IL=93 /
 `followPlannedPath` IL=96):** `GetProjectedPath` clears the output and pulls
 the drone's `PathFinderThread.Instance` path (`GetPath(entityId).path`),
