@@ -329,6 +329,105 @@ items, are fired by `Inventory` / `Equipment` inside the entity fan-out.
 Item action triggers (`onSelfPrimaryActionStart`, `onReloadStop`, etc) are raised
 by the item-action code with the item bound in `params.ItemValue`.
 
+### 7.0a Requirement framework: `RequirementBase` and the leaves
+
+`RequirementGroup.IsValid` fans out to a flat list of `RequirementBase` leaves
+(all must pass unless the group's `op` is `or`). The base contract:
+
+- **`RequirementBase.IsValid` (IL=13):** resolves an `@cvar` reference into
+  `value` (`value = params.Self.Buffs.GetCustomVar(cvarName)`) and returns
+  true; the actual predicates live in the subclasses.
+- **`RequirementBase.ParseXAttribute` (IL=64):** `operation` parses the
+  `OperationTypes` enum; `value` either becomes `cvarName` when it starts
+  with `@` (char 64) or is parsed as a float into `value`; `invert` parses
+  a bool. Unknown attributes return false (so subclasses can extend).
+- **`RequirementBase.ParseRequirement` (IL=76):** `name` (a leading `!`
+  sets `invert`) resolves a type via `Type.GetType` +
+  `Activator.CreateInstance`; `desc_key` becomes the localized `Description`;
+  every attribute on the element then goes through `ParseXAttribute`.
+- **`RequirementBase.ParseRequirementGroup` (IL=148):** `op` or
+  `compare_type` equal to `or` (case-insensitive) selects
+  `RequirementGroup.Op.Or`, else And. It collects `<requirement>` children
+  into an `IRequirement` list and `<requirement_group>` / `<requirements>`
+  children into a group list, returning the sole group when only one exists,
+  else `new RequirementGroup(op, requirements, groups)`.
+- **`RequirementBase.compareValues` (IL=37):** the operation switch over two
+  floats (`OperationTypes`: 1 Equals, 2 NotEquals, 3 Less, 4 Greater,
+  5 LessOrEqual, 6 GreaterOrEqual; the switch on `op - 1` has three
+  duplicated targets per group, all landing on the same compare).
+- **`TargetedCompareRequirementBase`** adds a `target` attribute
+  (`TargetTypes`): `IsValid` (IL=51) resolves `params.Other` (1),
+  `params.Instigator` (2), else `params.Self`, and passes only when that
+  target exists; `ParseXAttribute` (IL=22) delegates to the base first.
+
+Nearly every leaf's `IsValid` is then
+`invert XOR compareValues(measured, operation, value)` against the resolved
+target - the one shared predicate shape (the XOR appears as
+`invert == (compareResult == false)` in the IL). The leaves:
+
+- **`CVarCompare`** (IL=23): measured is `target.Buffs.GetCustomVar(cvar)`
+  (the `cvar` attribute, `ParseXAttribute` IL=20).
+- **`IsStatAtMax`** (IL=100): stat enum 1 Health, 2 Stamina, 3 Food,
+  4 Water; true when `Max - Value < 0.1` (the 0.1 tolerance), inverted via
+  `invert`; other stat values fail.
+- **`StatCompareAbs`** (IL=10) delegates to an abstract `Compare`; the six
+  implementations all read `stat` (same 1..4 mapping, plus 5 = durability
+  in `StatCompareCurrent`) from `get_Stats` (`StatSample`: 0 = live
+  `EntityStats`, 1 = `StartOfFrameStats`):
+  - `StatCompareCurrent` (IL=52): the stat `Value`; stat 5 reads
+    `Equipment.CurrentLowestDurability`.
+  - `StatCompareMax` (IL=46): `Stat.Max`; `StatCompareModMax` (IL=46):
+    `Stat.ModifiedMax`.
+  - `StatComparePercCurrentToMax` (IL=120): `Value / Max`, failing when
+    max is <= 0; `StatComparePercCurrentToModMax` (IL=66):
+    `Value / ModifiedMax` (Health / Stamina only);
+    `StatComparePercModMaxToMax` (IL=42): `Stat.ModifiedMaxPercent`
+    (Health / Stamina only).
+- **`NotHasBuff`** (IL=25): `!target.Buffs.HasBuff(buffName)`.
+- **`BlockStandingOn`** (IL=37): `target.blockValueStandingOn.Block`
+  matches `blockTags` with `HasAllFastTags` (`has_all_tags`) or
+  `HasAnyFastTags`.
+- **`IsLookingAtBlock.IsValid` (IL=8)** runs the base and returns true; the
+  class's `raycast()` helper is an empty stub (IL=1), so the "looking at"
+  check itself is done by the caller, not the requirement.
+  `IsLookingAtEntity` inherits that `IsValid`; both parse `tags` and
+  `has_all_tags` (ParseXAttribute IL=38 each).
+- **`PerksUnlocked`** (IL=68): sums the perk's own level and the levels of
+  every `ProgressionClass.Children` entry
+  (`Progression.GetProgressionValue(skill_name)`) and compares the total.
+- **`PlayerItemCount`** (IL=67): lazily resolves `item_name` to an
+  `ItemValue`, then `inventory.GetItemCount(item, false, -1, -1, true)` +
+  `bag.GetItemCount(item, -1, -1, true)`. `PlayerItemCountByTags` (IL=49)
+  is the same sum over `Inventory.GetItemCount(item_tags, ...)` /
+  `Bag.GetItemCount(item_tags, ...)` (`item_tags` attribute).
+- **`ArmorGroupCount`** (IL=34) / **`ArmorGroupLowestQuality`** (IL=34):
+  `equipment.GetArmorGroupCount(name)` /
+  `equipment.GetArmorGroupLowestQuality(name)` compared.
+- **`WornItems`** (IL=54): counts equipment slots whose item class
+  `HasAnyTags(equipmentTags)`. **`WornItemMods`** (IL=80): counts the mods
+  (`ItemValue.Modifications`) of worn items whose class matches `tags`.
+- **`RecipeUnlocked`** (IL=48): true when any
+  `CraftingManager.GetNonScrapableRecipes(item_name)` has
+  `IsUnlocked(target as EntityPlayer)`.
+- **`ProgressionLevel`** (IL=50): `Progression.GetProgressionValue(id).
+  GetCalculatedLevel(target)` compared (`progressionId` attribute).
+- **`RequirementItemModTier`** (IL=84): needs `params.ItemValue` with
+  `HasModSlots`; scans `Modifications[]` for the mod whose class name equals
+  `modName` (case-insensitive) and compares that mod's `Quality`.
+- **Tag predicates:** `ItemHasTags` (IL=43, on `params.ItemValue`'s class),
+  `HoldingItemHasTags` (IL=37, `target.inventory.holdingItem`),
+  `BlockHasTags` (IL=45, `params.BlockValue`'s `Block.Tags`, non-air only),
+  `TriggerHasTags` (IL=33, `params.Tags`), `ProjectileHasTags` (IL=45,
+  `params.ItemValue`'s class) - each `HasAnyTags` / `HasAllTags` on
+  `has_all_tags`. `EntityHasMovementTag` / `EntityHasStanceTag` (IL=47 each)
+  test `target.CurrentMovementTag` / `CurrentStanceTag` via
+  `Test_AnySet` / `Test_AllSet`; `EntityTagCompare` (IL=43) tests
+  `target.HasAnyTags` / `HasAllTags`. All are invert-aware.
+- **`HasAttachedPrefab`** (IL=53): finds the `Self.RootTransform` deep child
+  at `parent_transform_path` (when set) and looks for the attached prefab
+  transform named `"tempPrefab_" + prefabName` under it (or under the root),
+  passing when the prefab child exists.
+
 ### 7.0 `EffectManager.GetValue` (IL=372) passive stack
 
 Signature (bool flags control which layers run):
