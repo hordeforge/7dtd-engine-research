@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityDrone server/order leaves
+
+isAlly/isOwnerSneaking gates, order/attack toggles + sync flags, teleport/storage/heal-item checks, onVehicleState ride-follow (verified)
 ## 2026-08-08 - tier-C: Turret accessor leaves
 
 EntityTurret health/name reads, TurretTracker count mirror + GetTurrets + RemoveTrackedTurret sync (verified)
