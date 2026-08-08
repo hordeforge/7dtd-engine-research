@@ -112,6 +112,15 @@ workstation tile entity (`HandleRecipeQueue`, see
 [tile-entities-power.md](tile-entities-power.md)); backpack crafting runs it on the
 player.
 
+**Craft-complete XP (`EntityPlayerLocal.GiveExp(CraftCompleteData)`, IL=54):**
+the `_craftCount_{recipeName}` custom var accumulates `RecipeUsedCount` per
+craft, and the grant is `Progression.AddLevelExp(CraftExpGain / total,
+"_xpFromCrafting", XPTypes 3, ...)` - the recipe's exp divided by the
+cumulative craft count, so repeated crafts of the same recipe yield
+diminishing XP. It also bumps `totalItemsCrafted`, fires
+`QuestEventManager.CraftedItem(stack)`, and notifies the recipe UI
+(`XUiC_RecipeStack.HandleCraftXPGained`).
+
 **Validation predicates (V3.1.0 b14).** `Recipe.CanCraft(stacks, ea,
 craftingTier)` (IL=128) starts by caching `GetCraftingTier(player)` into the
 shared recipe's `craftingTier` field, clamped down when the passed
@@ -206,6 +215,11 @@ report the sizes for the UI.
 | [buffs.md](buffs.md) | Passive-effect math (crafting-tier quality) |
 | [server-lifecycle.md](server-lifecycle.md) | Player progression / unlock persistence |
 
+## Changelog
+
+- **2026-08-08:** EntityPlayerLocal.GiveExp (IL=54): _craftCount_ recipe var
+  accumulation, AddLevelExp(CraftExpGain / total, _xpFromCrafting), quest
+  CraftedItem hook.
 ## Changelog
 
 - **2026-08-08:** CraftingManager registry: AddRecipe lazy sort, PostInit
