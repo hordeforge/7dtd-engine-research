@@ -61,7 +61,7 @@ narrated docs below, not by namespace.
 | **Rendering / graphics libs** | `SharpEXR*` (4 ns), `JBooth.MicroSplat`, `PI.NGSS`, `PostEffects`, `ShinyScreenSpace*`, `GearVariants`, `GUI_2`, `Assets.DuckType.Jiggle` | Out of dedicated scope (client render) |
 | **Character controller / physics** | `KinematicCharacterController` | Client/movement; server uses the character-controller path (entity-ai) |
 | **Analytics / services / modinfo** | `Services*`, `Services.Analytics.Events`, `ModInfo` | Not narrated (telemetry / metadata) |
-| **Bundled third-party libraries** | `UniLinq`, `ICSharpCode.WpfDesign.XamlDom`, `ConcurrentCollections`, `Microsoft.CodeAnalysis`, `SandboxOptions`, `System.*` | Not game logic (vendored libs); out of scope by definition |
+| **Bundled third-party libraries** | `UniLinq`, `ICSharpCode.WpfDesign.XamlDom`, `ConcurrentCollections`, `Microsoft.CodeAnalysis`, `SandboxOptions`, `System.*` | Vendored libs; `UniLinq` (LINQ impl) and `ConcurrentCollections.ConcurrentHashSet` are **live helpers** called by server code (RWG/Twitch/chunk queues, [dedicated-leftovers.md](dedicated-leftovers.md)); the rest are unreferenced or non-game |
 
 Per-namespace counts: `il/surface-v3.1.0/surface-namespaces.md` (regenerate).
 Per-type inventory (all 7,432, names + sizes, no bodies): `surface-types.md` (local).
