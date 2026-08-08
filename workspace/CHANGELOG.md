@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Extensions string/component leaves
+
+EqualsCaseInsensitive/ContainsInclusive/WithComparer, NormalizeReturnMagnitude, CalculatePersistableHash, Guid WriteToBuffer, text transforms (verified)
 ## 2026-08-08 - tier-C: Utils server leaves
 
 Wrap/FastAbs/Lerp/Saturate/round-mod math, Celsius/UnixTime/culture, MaskIp/XOR cipher, block-face rotation/vector/hit-direction helpers (verified)
