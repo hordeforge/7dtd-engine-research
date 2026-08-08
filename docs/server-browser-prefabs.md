@@ -217,6 +217,12 @@ Nested `PrefabInstance.Serializable` is the 17+name-byte wire struct
 `int32 id, string prefabName, Vector3i position, byte rotation`
 (read/written with `PooledBinaryReader/Writer`).
 
+**`Prefab.BlockStatistics` leaf:** a five-counter struct
+(`cntSolid`, `cntBlockEntities`, `cntBlockModels`, `cntWindows`, `cntDoors`);
+`Clear()` (IL=16) zeroes all five and `ToString()` (IL=29) formats
+`"Blocks: {0} BEnts: {1} BMods: {2} Wdws: {3}"` (doors omitted) - the prefab
+importer's composition tally.
+
 **`PrefabInstance.CheckForAnyPlayerHome(world)` (IL=10)** is the
 land-claim / bedroll overlap probe the prefab-reset path consults
 ([`entity-ai.md`](entity-ai.md)): it delegates to
@@ -525,6 +531,9 @@ surface is exactly sections 1 and 2.
   EPlayerHomeType None/Landclaim/Bedroll.
 ## Changelog
 
+- **2026-08-08:** Prefab.BlockStatistics leaf: 5 counters (cntSolid /
+  cntBlockEntities / cntBlockModels / cntWindows / cntDoors), Clear zeroes all,
+  ToString omits doors.
 - **2026-07-24:** Initial reversal: `GameServerInfo` store + searchable arrays,
   Steam/EOS/LAN advertisement, gametags encoding, TCP info port, and the
   runtime prefab-instance layer (`DynamicPrefabDecorator` load/decorate/save,

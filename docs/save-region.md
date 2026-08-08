@@ -114,6 +114,12 @@ blob path (versions 15/22). Field inventory on the type is unchanged
 Ctor defaults: `providerId = Disc (1)`, `saveDataLimit = -1`, empty
 `SpawnPointList`, new Guid.
 
+**`SaveDataLimitUtils.CalculatePlayerMapSize(worldSize)` (IL=28):** the player
+map byte budget: `area = worldSize.x * worldSize.y` (throws
+`ArgumentException` on a non-positive area), then
+`Min(area / 256 * 516, 270532608)` - 516 bytes per 16x16 chunk of the world,
+capped at 258 MiB for the map data.
+
 ### 1.2 File path helpers
 
 | Method | IL | Behavior |
@@ -680,6 +686,9 @@ the sections above. The platform cloud-save backend is native (residual).
   (IL=44), TryRemoveDroppedBackpack (IL=14), ProtectedBackpack record.
 ## Changelog
 
+- **2026-08-08:** SaveDataLimitUtils.CalculatePlayerMapSize (IL=28): area/256 *
+  516 bytes per chunk, capped 270532608 (258 MiB), ArgumentException on
+  non-positive area.
 - **2026-08-08:** ChunkBlockChannel.Get IL=44 64-bit read (compressed
   getSameValue else getData) - the Chunk.GetWater accessor.
 - **2026-08-08:** ChunkBlockChannel storage model: 64*bytesPerVal layers +

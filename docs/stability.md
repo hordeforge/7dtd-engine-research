@@ -170,6 +170,18 @@ decision. It runs a 25-iteration BFS from the position over
 - result `1 - mass / (downTotal * 1.01)` when `downTotal > 0`, `1` when no
   support was reached, `0` when `mass > downTotal`.
 
+**`BuildStabilityBlocks` (StabilityViewer leaf, ctor IL=11 + `RegisterWhenDone`
+coroutine IL=1304):** the debug F9 overlay's per-chunk box builder. The ctor
+`StartCoroutine(RegisterWhenDone)`: after a 0.01 s delay it reads the chunk at
+`startPos`; a missing / not-yet-available / empty chunk just removes
+`startPos` from `StabilityViewer.buildingChunks` and clears the `boxes` entry
+(both under `Monitor`). Otherwise it scans the whole 16³ chunk volume, skipping
+terrain and air, collecting every solid position with
+`StabilityCalculator.GetBlockStability(pos)`, and builds one box mesh (8
+vertices per cell, vertex color = `white * stability`, 36 indices per cell)
+registered as `StabilityViewer.boxes[startPos]` under the `StabilityViewBoxes`
+root - so the overlay's per-cell shade maps stability 0..1 to black..white.
+
 ### `getMaxStabilityAround` (IL=61) closed 2026-08-07
 
 1. `_bFromDownwards = false`; `maxStab = 0`; `downStab = 0`.
@@ -213,6 +225,10 @@ channel today; the plane can be recomputed on load with
 
 ## Changelog
 
+- **2026-08-08:** BuildStabilityBlocks (StabilityViewer F9 overlay) leaf:
+  ctor coroutine RegisterWhenDone IL=1304, 16^3 scan of solid non-terrain
+  blocks, per-cell box mesh colored white * stability, boxes dict under
+  Monitor, empty/unavailable chunk cleanup.
 - **2026-08-08:** EntityFallingBlock landing resolved (entity-ai §8): no
   re-placement, drops + SetDead; residual closed.
 - **2026-08-07:** GroupFallingBlocks BFS GroupBounds size limit.

@@ -153,6 +153,8 @@ Also walks y+1 neighbor for `OnEntityWalking`; ends with
 with `CanBigHead` and `HeadState==0` → set `HeadState=**2**`.
 **`ForceResetHead` (IL=28):** same type filter; if HeadState is **1** or **2**
 set **0**.
+**`EntityAnimalSnake.GetAttackTargetHitPosition` (IL=13):** the snake aims at
+`attackTarget.position` with `y + 0.5` (body center, not the feet).
 **`InitInventory` (IL=9):** if inventory null, `new Inventory(GameManager, this)`.
 
 **`isRadiationSensitive` (IL=2):** always **true** (base).
@@ -3518,6 +3520,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   && deathUpdateTime > 70.
 ## Changelog
 
+- **2026-08-08:** EntityAnimalSnake.GetAttackTargetHitPosition (IL=13): aims at
+  attackTarget.position with y + 0.5 (body center).
 - **2026-08-08:** UAIConsideration* score leaves (dormant utility AI):
   SelfHealth (Health-min)/(max-min) NaN-resolved max; SelfVisible see-dist
   falloff * CanEntityBeSeen; TargetDistance Clamp01 over squared min/max,
