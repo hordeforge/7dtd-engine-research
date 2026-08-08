@@ -129,9 +129,9 @@ Supplement count: **494** (corpus classified total becomes **1178** with the bas
 
 `AnimationDelayData`, `AnimationDelays`, `AnimationGunjointOffsetData`, `AnimationGunjointOffsets`, `AtlasManagerEntry`, `AtmosphereEffect`, `AvatarCharacterController`, `AvatarHumanController`, `BaseAtlas`, `BlockParticleCreationData`, `CameraPerspectives`, `Color32Renderer`, `ColorSpectrum`, `DChunkSquareMeshPool`, `DismemberedPart`, `DistantTerrain`, `EModelPlayer`, `FastWireNode`, `GenerateVoxelCubeSurface`, `HSVUtil`, `HasParticle`, `LightLOD`, `LightingAround`, `MapRenderBlockBuffer`, `MapRenderer`, `MapTileCache`, `MeshDataUtils`, `MeshDescriptionCollection`, `MeshTiming`, `OccludeeZone`, `SDCSArchetypesFromXml`, `TGALoader`, `TerrainAndWater`, `TextureAtlas`, `TextureAtlasBlocks`, `TextureAtlasExternalModels`, `TextureAtlasTerrain`, `TextureScale`, `VideoData`, `VideoFromXML`, `VideoManager`, `WaterDebugRenderer`, `WaterDebugRendererLayer`
 
-### Editor / tools (supplement) (3)
+### Editor / tools (supplement) (4)
 
-`AutomationRunner`, `AutomationScript`, `ChunkPreviewData`
+`AutomationRunner`, `AutomationScript`, `AutomationStep`, `ChunkPreviewData`
 
 ### Input (supplement) (8)
 
