@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `c3d8f25` challenge/quest objectives verify |
+| HEAD (at handoff write) | `2b7dcc7` entityclass-props verify |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 1846 / catalogued 558 / classified 1295 / unaccounted **0** |
