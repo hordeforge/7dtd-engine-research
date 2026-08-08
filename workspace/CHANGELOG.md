@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: MultiBlockManager register/cull core
+
+TryRegister POI/cross-chunk/oversized/terrain-aligned paths, dereg + ProcessDeregistrationCleanup, cull passes, dirty-stability/alignment marking, TryGetOversizedBlock (verified)
 ## 2026-08-08 - tier-C: AdminTools file-watcher/parse + whitelist checks
 
 serveradmin.xml hot-reload watcher, section/user-id parsing, WriteSections, HasEntry/IsWhitelisted/IsWhiteListEnabled (verified)
