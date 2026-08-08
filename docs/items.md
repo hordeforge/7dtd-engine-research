@@ -1184,6 +1184,12 @@ or count) and applying effects; that mutation is the server's authority.
 An `EntityAlive` holds one item at a time. The toolbelt is an `Inventory`; its
 `m_HoldingItemIdx` / `currActiveItemIndex` name the active slot, and each slot is
 an `ItemInventoryData` binding (`item` = `ItemClass`, `itemStack` = `ItemStack`,
+`createItemInventoryData(stack, gm, holder, slotIdx)` (IL=7) is the
+per-holder factory `new ItemInventoryData(...)` (`ItemClassBlock` returns
+its `ItemBlockInventoryData` subclass); `CanPlaceInContainer` (IL=2) is
+true (quest items override to false); `HandleSandboxTechType` (IL=21)
+walks `GetPreviousTechItem` until the tech type is within `MaxTechType`
+(the sandbox tech clamp).
 `actionData` = the per-action runtime states, `holdingEntity` = the wielder).
 
 Drawing an item runs `SetHoldingItemIdx -> updateHoldingItem ->

@@ -56,6 +56,15 @@ Combat properties: `GetExplosionResistance` (IL=4) is
 `blockMaterial.ExplosionResistance`; `GetHardness` (IL=5) is
 `blockMaterial.Hardness.Value`.
 
+**Behavior query leaves (all IL-verified):** `ActivateBlockOnce` (IL=2) is
+false (the base one-shot activation default); `GetPlaceAltBlockValue`
+(IL=21) picks a random `placeAltBlockNames` entry via the world's
+`GameRandom` (empty string when none); `HasItemsToDropForEvent(event)`
+(IL=5) is the `itemsToDrop` dict `ContainsKey`; `IsPlant` (IL=9) is
+`blockMaterial.IsPlant || bIsPlant`; `SupportsRotation` / `SupportsRotationFromMask`
+and the `GetAutoShape*` / `GetMaterialForSide` family are the XML-driven
+shape/config getters.
+
 Block ids are partitioned into fixed bands (static literals on `Block`):
 
 | Band | Id range | Constant(s) |
