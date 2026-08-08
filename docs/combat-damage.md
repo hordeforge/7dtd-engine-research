@@ -185,6 +185,19 @@ particleEffect)` and `ConnectionManager.SendPackage(package, false, entityId,
 -1, -1, null, **192**, false)`, fanning the range-checked damage to every
 tracked player except the victim.
 
+**`NetPackageRangeCheckDamageEntity.ProcessPackage` (IL=151)** is the
+server-side re-validation of that damage: it resolves the victim and the
+attacker, then accepts the hit only when the attacker exists or the victim
+is within `maxRangeSq` **and** in front of the attacker
+(`dot(normalize(attacker->victim), attacker.forward) < 0` - the client's
+claimed hit must pass the server's range/facing check). On acceptance it
+builds the `DamageSourceEntity` from the carried fields, applies
+`SetIgnoreConsecutiveDamages` / `DamageMultiplier` / `BonusDamageType`,
+runs `victim.DamageEntity(source, strength, bCritical, 1)`, executes the
+carried `buffActions` (with the source's `GetEntityDamageBodyPart`), and
+spawns the carried particle through `SpawnParticleEffectServer` for the
+primary player - the melee-hit authority gate.
+
 ### 2.3 `ProcessDamageResponseLocal` (IL=903) apply side effects
 
 High-signal gates from live IL:

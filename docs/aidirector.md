@@ -687,6 +687,11 @@ This blob rides `WorldState` nested `aiDirectorState` ([save-region.md](save-reg
 |---|---|---|
 | `NetPackageSleeperWakeup` | `targetId:i32` | remote client: `EntityAlive.ConditionalTriggerSleeperWakeUp` |
 | `NetPackageSleeperPose` | `targetId:i32`, `pose:u8` | sleeper pose sync |
+
+**`NetPackageSleeperPose.ProcessPackage` (IL=23):** runs only on a
+non-remote world (the server); it resolves the target `EntityAlive` and
+calls `TriggerSleeperPose(pose, false)` - the sleeper's crouch/lie pose
+applied when a client syncs a sleeper's animation state.
 | `NetPackageSleeperPassiveChange` | EntityTargeted id only (`Setup(targetId)`) | remote: `IsSleeperPassive=false` |
 | `NetPackageBloodmoonMusic` | `IsBloodMoonMusicEligible:bool` | sets `World.dmsConductor.IsBloodmoonMusicEligible` |
 | `NetPackageHordeEvent` | `m_event`, `m_maxDist` | client `HandleHordeEvent` if in range |
