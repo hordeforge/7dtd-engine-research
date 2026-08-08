@@ -541,7 +541,8 @@ true`, entry removed, and the requester notified with `EntityDespawned` (6)
 on 192, exactly like the despawn branch of `HandleSpawnUpdates`.
 
 **Flag store:** `SetGameEventFlag(flag, value, duration, isPermanent)` (IL=94)
-adds a `GameEventFlag` to `GameEventFlags` when setting (updating the duration
+adds a `GameEventFlag` (nested record, ctor default `Duration = -1`) to
+`GameEventFlags` when setting (updating the duration
 of an existing non-permanent entry, otherwise appending a new one and calling
 `HandleFlagChanged(flag, true, true)`), and `RemoveAt`s the entry when clearing
 (`HandleFlagChanged(flag, true, false)`). `CheckGameEventFlag(flag)` (IL=23)
@@ -585,6 +586,14 @@ player/empty tag or no match); `GetTargetType(name)` (IL=11) reads
 `RegisterLink(player, seq, tag)` (IL=35) keeps an existing matching link
 (first link wins) and otherwise appends `SequenceLink{Owner, OwnerSeq, Tag}`;
 `UnRegisterLink(player, tag)` (IL=25) removes the first matching link.
+
+**Sequence-link leaves:** `SequenceLink` (nested, ctor Tag = "") has
+`CheckLink(player, tag)` (IL=12): true only when `Owner == player &&
+Tag == tag`. `MinEventActionUnregisterSequenceLink` (minevents side) reads the
+`sequence_link` XML attribute and, per targeted player, calls
+`GameEventManager.Current.UnRegisterLink(player, sequenceLink)`; the
+`RequirementHasSequenceLink` sequence requirement (IL=13) returns
+`HasSequenceLink(Owner) == !Invert`.
 
 Variable plumbing has one observed quirk: `HandleAction` writes incoming
 `variables` into the **template's** `EventVariables` store before cloning, and
@@ -654,6 +663,11 @@ Full field lists in inventories/netpackage-bodies.md; tick pipeline above.
 
 ## Changelog
 
+- **2026-08-08:** Sequence-link leaves: SequenceLink.CheckLink owner+tag
+  match; MinEventActionUnregisterSequenceLink per-player UnRegisterLink with
+  sequence_link attr; RequirementHasSequenceLink = HasSequenceLink == !Invert;
+  GameEventFlag ctor Duration -1; Audio.Manager/SequenceStopper audio-fade
+  record (dedicated-misc-systems).
 - **2026-08-08:** Spawn-entry tracking (7.1) + respawn verbs: HandleSpawnUpdates
   (IL=148) 2 s reap cadence, HasDespawn flag, EntityDespawned (6) / EntityKilled
   (7) requester notify on 192; RegisterSpawnedEntity (IL=19) drops its

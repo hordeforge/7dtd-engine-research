@@ -42,6 +42,10 @@ clip)`; `Entity.StopAnimatorAudio(type)` (IL=16) stops and removes the
 `animatorAudioMonitoringDictionary[type]` handle registered by the
 anim-event monitor.
 
+Client-side fade-out record `Audio.Manager/SequenceStopper` (ctor IL=9) holds
+`sequenceObjs` (a `List<AudioSource>`) plus `stopTime` - the pending audio-fade
+descriptor consumed by `Audio.Manager`'s sequence-stop path.
+
 ---
 
 ## BlockRadiusEffect (player-local proximity buffs)
