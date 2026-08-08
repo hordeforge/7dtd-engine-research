@@ -314,6 +314,13 @@ copy of its wire list and parent position; on load it reconnects by world positi
 
 **Graph edit leaves:** `FindPowerItems(predicate, results)` (IL=25) filters
 the `PowerItemDictionary` values into the result list.
+`GetPowerItemByWorldPos(pos)` (IL=12) is the dictionary lookup (null on
+miss); `SetTileEntityUpdate(te, shouldUpdate)` (IL=14) adds/removes the TE
+on the per-frame `ClientUpdateList`; `LogChildren(item)` (IL=65) prints
+the tree `{indent}{item}({depth}) - Pos:{pos} | Powered:{bool}` recursively
+(the `logpower`-style debug). `TileEntityPoweredBlock.OnSetLocalChunkPosition`
+(IL=37) re-runs `Block.ActivateBlock(world, pos, bv, IsPowered, IsPowered)`
+on the server when a chunk (re)loads the TE - the power-state relink.
 `RemovePowerNode(node)` (IL=61) detaches every child
 (`SetParent(child, null)`), then the node itself, and removes it from
 `Circuits` plus `PowerSources` / `PowerTriggers` by type and from the

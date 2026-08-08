@@ -409,6 +409,7 @@ Evaporation does **not** call into `WaterSimulationNative` jobs directly; it sch
 | `WaterSimulationApplyChanges` | `HasNetWorkLimitBeenReached` | 37 | verified backpressure |
 | `WaterDataHandle` | `InitializeFromChunk` / `ApplyEnqueuedFlows` | 154 / 29 | verified |
 | `WaterSimulationNative` | `SetPaused` | 4 | verified pause flag |
+| `WaterSimulationNative` | `IsChunkInWorldBounds` | 37 | verified: chunk x/z * 16 inside `GetWorldExtent` |
 | `WaterSimulationNative` | `GetMemoryStats` | 157 | verified: sums `usedHandles` / `freeHandles` / `newInitializedHandles` (`CalculateOwnedBytes` each) plus the `activeHandles` / `waterDataHandles` native sets (via `ProfilerUtils`), formatted `Allocated Handles: {0}, Used: {1}, Free: {2}, Pending: {3}, Handle Contents (MB): {4:F2}, Other Memory (MB): {5:F2}, Total Memory (MB): {6:F2}` |
 
 **World-file checksums (`ChunkProviderGenerateWorldFromRaw`):**
