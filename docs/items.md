@@ -389,6 +389,17 @@ ParentType` and fans out to the groups; `HasEvents` (IL=23), `HasTrigger`
 (IL=24), and `IsOwnerTiered` (IL=23) are per-group OR scans used by callers to
 skip controllers with no matching work.
 
+**`MinEffectGroup` (the per-group effect bucket):** `ModifyValue` (IL=41) gates
+on `canRun` (IL=10: `Requirements == null || RequirementGroup.IsValid(params)`),
+then runs each `PassiveEffect` in the group whose `Type` matches the requested
+effect and whose `RequirementsMet(params)` holds - the effect-level gate is
+evaluated per passive, not once per group. `FireEvent` (IL=44) dispatches the
+matching triggered actions; `GetTriggeredEffects(eventType)` (IL=10) is a dict
+lookup (empty array on miss) and `AddTriggeredEffect(action)` (IL=20) buckets
+actions by their `EventType` into lazy lists; `HasEvents` (IL=6) is
+`TriggeredEffects.Count > 0`, `HasTrigger` (IL=7) is a non-empty bucket for the
+given type.
+
 ### ItemValue metadata and property overrides
 
 **Typed metadata (V3.1.0 b14):** `ItemValue.Metadata :
@@ -1827,6 +1838,9 @@ The non-action leaves:
   QuestEventManager.HarvestedItem, inventory/drop, _xpFromHarvesting XP.
 ## Changelog
 
+- **2026-08-08:** MinEffectGroup leaves: ModifyValue canRun gate + per-passive
+  Type/RequirementsMet; FireEvent dispatch; GetTriggeredEffects dict + lazy
+  buckets; HasEvents/HasTrigger.
 - **2026-08-08:** MinEffectController leaves: ModifyValue PassivesIndex gate +
   per-group pass with MinEventContext; GetModifiedValueData source twin with
   ParentType/Pointer; FireEvent ParentType stamp; HasEvents/HasTrigger/
