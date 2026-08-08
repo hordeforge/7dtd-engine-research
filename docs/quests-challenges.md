@@ -477,6 +477,17 @@ touches in passing:
   `QuestJournal.AddSharedQuestEntry`, and the server's `Party.ServerHandle*`
   leave/kick/disconnect paths purge them via `RemoveSharedQuestEntryByOwner`.
 
+**`QuestJournal` leaves:** `FailAllSharedQuests` (IL=46) closes every shared
+quest (`SharedOwnerID != -1`) still in `InProgress` before its highest phase
+with `CloseQuest(Failed, null)` - the shared-quest cleanup on member
+departure; `FailAllActivatedQuests` (IL=45) is the same sweep over
+`RallyMarkerActivated` quests. `QuestIsActive(q)` (IL=36) is state
+`InProgress (1)` or `Ready (2)`; `FindQuest`/`FindCompletedQuest`/`FindActiveQuest`
+(IL=33-40) scan by name/faction/state with their `SharedOwnerID` variants.
+Trader POI tracking: `AddTraderPOI(pos, factionID)` (IL=33) dedupes into both
+`TraderPOIs` and `TradersByFaction[factionID]`; `HasTraderPOI(pos)` (IL=5) is a
+`Contains` check; `GetTraderList(factionID)` (IL=12) returns the faction list.
+
 ---
 
 ## 10. Quest net packages (verified)
@@ -723,6 +734,9 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
   TraderPOI linear scan.
 ## Changelog
 
+- **2026-08-08:** QuestJournal leaves: FailAllSharedQuests/FailAllActivatedQuests
+  CloseQuest sweeps; QuestIsActive states; Find* scans; AddTraderPOI/
+  HasTraderPOI/GetTraderList faction tracking.
 - **2026-08-08:** Quest lifecycle leaves: SetupQuestCode hash mint;
   SetupTags objective wiring; StartQuest (IL=318) activation pass (actions/
   requirements/objectives); SetupRewards RewardIndex + chosen rolls; UnhookQuest
