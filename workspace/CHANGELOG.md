@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ConnectionManager lifecycle leaves
+
+AddClient analytics keys, ServerReady reconnect reset, SendToClientsOrServer 192 broadcast, net-stat delegates (verified)
 ## 2026-08-08 - tier-C: client-info apply + discord mapping packages
 
 Ping/admin apply loop; Discord ID mapping single/multi forms + error strings (verified)
