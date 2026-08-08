@@ -187,6 +187,34 @@ the gap-closing context only. All items here are **non-IL** residuals:
 
 ---
 
+## 10. Dead / inert paths swept (2026-08-08)
+
+Body-verified (full IL dump + RefScan) closures that stop a clone from
+implementing the wrong path. All narrated at their family docs:
+
+- **`LiveStats`** survival-stat record: 0 external ctor call sites (only its
+  own `Clone`), no entity holds one ([dedicated-leftovers.md](dedicated-leftovers.md)).
+- **`DynamicMeshDataQueue<T>`** queue template: 0 external refs; the live
+  storage is `DynamicMeshChunkDataStorage<T>`. **`DynamicMeshRegionBuilder`**:
+  0 external refs. **`DynamicMeshThread.ServerUpdates`** channel: the producer
+  has no callers and nothing dequeues ([dynamic-mesh.md](dynamic-mesh.md)).
+- **`Prefab.Cells<T>`** sparse grid: 0 external refs
+  ([world-generation.md](world-generation.md)).
+- **`World.ClipBoundsMove`** (IL=573): 0 call sites; live clip is
+  `BoundsUtils.ClipBoundsMove` ([entity-ai.md](entity-ai.md)).
+- **Dead collections/noise**: `TList<T>`/`TQueue<T>`, `OneToOneDictionary<K,V>`,
+  `CollectionDebugWrapper<T>`, `ParsingConverters`, `SimplexNoise`,
+  `OpenSimplex2/2S`, `IEnumerableExtensions`, `BinaryReaderExtensions`
+  ([dedicated-leftovers.md](dedicated-leftovers.md)). (`UniLinq` and
+  `ObservableDictionary<K,V>` are **live**; the latter backs
+  `PersistentPlayerList.Players`, [server-lifecycle.md](server-lifecycle.md).)
+- **Wire-body corrections** from the regenerated catalog: `NetPackageDamageEntity`
+  writes `bIgnorePartyShare` (IL=176, not 172); `EntityCreationData` writes a
+  final `stressAmount : f32` for every entity (read gated on version >= 36);
+  `NetPackageTileEntity` writes `teBlockId` + `i32` length ([protocol-packages.md](protocol-packages.md)).
+
+---
+
 ## Related docs
 
 | Doc | Role |
@@ -197,5 +225,6 @@ the gap-closing context only. All items here are **non-IL** residuals:
 
 ## Changelog
 
+- **2026-08-08:** Dead/inert path sweep synthesis (section 10).
 - **2026-07-19:** Related docs table.
 - **2026-07-16:** Closed GameTimer=20, AIDirector CreateComponents list, ASP→AstarPath path body, net package thresholds, MB classification, EAC/LiteNet type map.
