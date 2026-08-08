@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BaseObjective base leaves
+
+HandleCompleted/Setup* no-ops, HandleVariables token resolve, AddModifier/DisableModifiers, CopyValues (verified)
 ## 2026-08-08 - tier-C: QuestJournal lookup/lifecycle/shared-quest leaves
 
 Find* quest scans, Failed/ForceRemove teardown, GetQuestRecipes/RewardedSkillPoints, daily cap + buff, StartQuests, shared-quest party removal (verified)
