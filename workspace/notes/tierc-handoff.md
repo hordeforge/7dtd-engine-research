@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `b14e76c` whole-assembly 100% accounting |
+| HEAD (at handoff write) | `ca35831` console cmd narration |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 1841 / catalogued 557 / classified 1176 / unaccounted **0** |
