@@ -385,6 +385,14 @@ and returns false. `ValidUserIdForSender(userId)` (IL=29) accepts
   server-originated, and the two shared ones are the world-folder stream and
   the spawned-in-world notice.
 
+**Per-type pool (`NetPackageInformation<T>`):** the registry entry
+`NetPackageManager` keeps for each package type holds the single template
+`instance`, the pooled `TPackage[]` (poolSize / capacity) and the
+`ConstructorInfo ctor` used to fill it, plus the profiler `CustomSampler`s
+(getSampler / getSamplerPool / getSamplerNew / getSamplerType /
+freeSampler / freeSamplerPool / freeSamplerCleanup) - the alloc/free
+bookkeeping behind `GetPackage<T>` and `FreePackage`.
+
 ---
 
 ## 3b. Join path (summary)
