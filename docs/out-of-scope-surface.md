@@ -17,7 +17,7 @@ them back in, so treat this file as hand-maintained and re-verify with RefScan
 (referrer, not name) before changing any classification.  
 **Hub:** [`INDEX.md`](INDEX.md). **Method:** [`re-methodology.md`](re-methodology.md).
 
-Total out-of-scope reached types classified: **1178** (base lists + 2026-07-28 supplement).
+Total out-of-scope reached types classified: **1168** (base lists + 2026-07-28 supplement; header counts are the referrer-verified classification, the census is the authoritative count).
 
 | Category | Count |
 |---|---:|
