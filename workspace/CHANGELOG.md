@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: World event accessors + debug spawn ring + audio accessor
+
+EntityLoaded/Unloaded delegate add/remove (IL=20), DebugAddSpawnedEntity Last4Spawned ring, GetAudioManager (verified)
 ## 2026-08-08 - tier-C: Prefab data-model leaves
 
 CellsToArrays/FromArrays, writeBlockData tts payload, TE list read/write, ProcessMultiBlock reconcile, copyFromWorld capture, stats (verified)
