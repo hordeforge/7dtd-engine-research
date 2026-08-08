@@ -116,6 +116,15 @@ class Coverage {
     // Activator.CreateInstance on a constant string (dialog actions, quest criteria,
     // twitch vote requirements, game events). Follow the string to its type and seed
     // the type's method bodies so reflection-instantiated dedicated code is reached.
+    // Reflection-instantiated server XML families: the loaders call
+    // ReflectionHelpers.GetTypeWithPrefix(constPrefix, xmlName) to build class names
+    // ("DialogAction" + "AddBuff" = DialogActionAddBuff). The xmlName is runtime data,
+    // so a constant prefix means EVERY game type starting with it is instantiable.
+    // Seed those families (server-relevant only; XUiC_/ItemAction/Block are client or
+    // already reached, and seeding them would flood the base).
+    string[] reflPrefixes = { "QuestAction", "Requirement", "Objective", "ObjectiveModifier",
+      "Reward", "QuestCriteria", "LootEntryRequirement", "DialogAction", "DialogRequirement" };
+    var reflTypes = all.Where(t => reflPrefixes.Any(p => t.Name.StartsWith(p))).ToList();
     string lastLdstr = null;
     while (work.Count > 0) { var m = work.Dequeue();
       foreach (var i in m.Body.Instructions) {
@@ -125,6 +134,12 @@ class Coverage {
         if (md != null && md.HasBody && visited.Add(md)) work.Enqueue(md);
         if (i.OpCode.Code == Code.Callvirt) { var k = mr.DeclaringType.FullName + "::" + mr.Name + "/" + mr.Parameters.Count;
           List<MethodDefinition> ovs; if (overrides.TryGetValue(k, out ovs)) foreach (var ov in ovs) if (visited.Add(ov)) work.Enqueue(ov); }
+        // ReflectionHelpers.GetTypeWithPrefix(constPrefix, ...): seed the whole family.
+        if (md != null && md.DeclaringType.Name == "ReflectionHelpers" && md.Name == "GetTypeWithPrefix"
+            && !string.IsNullOrEmpty(lastLdstr)) {
+          foreach (var tt in reflTypes.Where(t => t.Name.StartsWith(lastLdstr)))
+            foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm);
+        }
         // Type.GetType / Activator.CreateInstance on a constant name: seed that type.
         if (mr.DeclaringType.FullName == "System.Type" && (mr.Name == "GetType" || mr.Name == "GetTypeFromHandle")) {
           if (!string.IsNullOrEmpty(lastLdstr)) { var tt = all.FirstOrDefault(t => t.FullName == lastLdstr || t.Name == lastLdstr || t.FullName.Replace('/','+') == lastLdstr);

@@ -987,6 +987,8 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 | `Reward` | Object | set_Title, set_Id, set_Cost |
 | `TraderDisplayInfo` | Object | Refresh, GetTimeText, GetTimeTitle |
 
+**`QuestCriteriaLevel`** (2 IL): quest level criterion (XML-instantiated via the `QuestCriteria` reflection prefix).
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining

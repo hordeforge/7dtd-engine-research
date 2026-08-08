@@ -41,12 +41,12 @@ The tiers are reported separately and deliberately **not summed into a headline*
 
 | Metric | Value |
 |---|---:|
-| Reached methods (with body) | 46445 |
-| Reached types (incl. compiler-generated) | 7297 |
-| Reached, non-generated | 6158 |
+| Reached methods (with body) | 46699 |
+| Reached types (incl. compiler-generated) | 7330 |
+| Reached, non-generated | 6188 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2366 (excluded from %) |
-| ...**game types** (the RE surface) | **3651** |
-| ...**narrated** (backticked in a narrative doc) | **3651 (100%)** |
+| ...**game types** (the RE surface) | **3681** |
+| ...**narrated** (backticked in a narrative doc) | **3681 (100%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 0 |
 | ...**classified** out-of-scope | 0 |
 | ...**unaccounted** (appears nowhere) | 0 |
@@ -67,16 +67,16 @@ reached-and-documented plus unreached-and-classified (client / editor / dead).
 | Metric | Value |
 |---|---:|
 | All types (incl. nested) | 7432 |
-| Reached (Assembly-CSharp own types) | 4734 (63%) |
-| Unreached | 2698 (36%) |
-| ...compiler-generated / obfuscated | 355 (excluded) |
+| Reached (Assembly-CSharp own types) | 4767 (64%) |
+| Unreached | 2665 (35%) |
+| ...compiler-generated / obfuscated | 352 (excluded) |
 | ...third-party / BCL | 57 (excluded) |
-| ...**unreached game types** (need classification) | **2286** |
+| ...**unreached game types** (need classification) | **2256** |
 | All methods with body | 53235 |
-| Reached methods (Assembly-CSharp own) | 31164 (58%) |
-| Unreached methods | 22071 (41%) |
-| ...in reached game types (uncalled members) | 13218 |
-| ...in unreached game types | 4549 |
+| Reached methods (Assembly-CSharp own) | 31418 (59%) |
+| Unreached methods | 21817 (40%) |
+| ...in reached game types (uncalled members) | 13060 |
+| ...in unreached game types | 4460 |
 
 **Whole-assembly accounting (the 100% view):**
 
@@ -86,13 +86,13 @@ reached-and-documented plus unreached-and-classified (client / editor / dead).
 | Methods in accounted game types | **46331 / 46331 (100%)** |
 | (excluded by design: 1358 compiler-generated, 99 third-party/BCL, 38 both; sums to 7432 of 7432) | |
 
-Unreached game types (2286), grouped by top namespace:
+Unreached game types (2256), grouped by top namespace:
 
 | Namespace | count |
 |---|---:|
-| `<global>` | 1804 |
+| `<global>` | 1775 |
 | `Platform` | 155 |
-| `Twitch` | 58 |
+| `Twitch` | 57 |
 | `DynamicMusic` | 45 |
 | `XMLData` | 40 |
 | `GameEvent` | 40 |
@@ -124,13 +124,13 @@ Unreached game types (2286), grouped by top namespace:
 | `GUI_2` | 1 |
 | `UAI` | 1 |
 
-Unreached game types already mentioned in docs: **2286** (accounted).
+Unreached game types already mentioned in docs: **2256** (accounted).
 Unreached game types with **no mention anywhere**: **0** (the whole-assembly gap).
 
 Gap list (no mention in any doc):
 
 
-Full unreached game-type list (2286):
+Full unreached game-type list (2256):
 
 | Type | Namespace | methods |
 |---|---|---:|
@@ -276,7 +276,6 @@ Full unreached game-type list (2286):
 | `BuildTriangle` | <global> | 0 |
 | `BuildVertex` | <global> | 0 |
 | `BulgeWarp` | <global> | 0 |
-| `BurstRoundCount` | <global> | 3 |
 | `ButtonSelectedDelegate` | <global> | 0 |
 | `ByteArray` | <global> | 3 |
 | `CacheDisposition` | <global> | 0 |
@@ -339,7 +338,6 @@ Full unreached game-type list (2286):
 | `ColorRGB24` | <global> | 0 |
 | `CommandHandlerDelegate` | <global> | 0 |
 | `CommandSenderInfo` | <global> | 0 |
-| `CompareLightLevel` | <global> | 3 |
 | `CompletionCallback` | <global> | 0 |
 | `CompletionTypes` | <global> | 0 |
 | `Condition` | <global> | 0 |
@@ -410,12 +408,6 @@ Full unreached game-type list (2286):
 | `DestroyedResult` | <global> | 0 |
 | `DestroyOnClose` | <global> | 0 |
 | `DetectLeaks` | <global> | 2 |
-| `DialogActionAddBuff` | <global> | 3 |
-| `DialogActionAddItem` | <global> | 3 |
-| `DialogActionAddQuest` | <global> | 3 |
-| `DialogActionCompleteQuest` | <global> | 3 |
-| `DialogActionTrader` | <global> | 3 |
-| `DialogActionVoice` | <global> | 3 |
 | `DialogResponseQuest` | <global> | 2 |
 | `DictionaryAddEventHandler`2` | <global> | 0 |
 | `DictionaryDebugWrapper`2` | <global> | 11 |
@@ -904,7 +896,6 @@ Full unreached game-type list (2286):
 | `InitializedRenderer` | <global> | 0 |
 | `InputAxisHelper` | <global> | 1 |
 | `InputType` | <global> | 0 |
-| `InSafeZone` | <global> | 3 |
 | `InternalEdgeData` | <global> | 1 |
 | `Interval` | <global> | 1 |
 | `IntRect` | <global> | 2 |
@@ -930,14 +921,9 @@ Full unreached game-type list (2286):
 | `IRegionFileDebugUtil` | <global> | 0 |
 | `IRegionFilePlatformFactory` | <global> | 0 |
 | `IRequirement` | <global> | 0 |
-| `IsAlive` | <global> | 3 |
 | `IsAlly` | <global> | 2 |
-| `IsAttachedToEntity` | <global> | 3 |
 | `ISaveDataManager` | <global> | 0 |
-| `IsBloodMoon` | <global> | 3 |
 | `IsCheckedDelegate` | <global> | 0 |
-| `IsCorpse` | <global> | 3 |
-| `IsDay` | <global> | 3 |
 | `IsDayNumber` | <global> | 2 |
 | `ISelectionBoxCallback` | <global> | 0 |
 | `ISelectionCategoryCallback` | <global> | 0 |
@@ -946,20 +932,13 @@ Full unreached game-type list (2286):
 | `IServerBrowserFilterControl` | <global> | 0 |
 | `IsFPV` | <global> | 2 |
 | `ISharedChunkObserver` | <global> | 0 |
-| `IsHeldItem` | <global> | 3 |
 | `ISignRenderingDataUpdateListener` | <global> | 0 |
-| `IsIndoors` | <global> | 3 |
 | `IsInstigator` | <global> | 2 |
 | `IsItemActive` | <global> | 2 |
 | `IsLocalPlayer` | <global> | 2 |
-| `IsMale` | <global> | 3 |
-| `IsNight` | <global> | 3 |
-| `IsOnLadder` | <global> | 3 |
 | `IsPrimaryAttack` | <global> | 2 |
 | `IsSDCS` | <global> | 2 |
 | `IsSecondaryAttack` | <global> | 2 |
-| `IsSheltered` | <global> | 3 |
-| `IsSleeping` | <global> | 3 |
 | `IsValidTarget` | <global> | 0 |
 | `IsVisibleDelegate` | <global> | 0 |
 | `ItemActionFiringState` | <global> | 0 |
@@ -1127,7 +1106,6 @@ Full unreached game-type list (2286):
 | `NGuiWdwInGameHUD` | <global> | 11 |
 | `NguiWdwTerrainEditor` | <global> | 11 |
 | `NoiseLayer` | <global> | 0 |
-| `NPCIsAlert` | <global> | 3 |
 | `NPCQuestEventTypes` | <global> | 0 |
 | `ObjectDuplicateChecker`1` | <global> | 3 |
 | `ObjectInfo` | <global> | 1 |
@@ -1246,7 +1224,6 @@ Full unreached game-type list (2286):
 | `PlayerEventHandler` | <global> | 0 |
 | `PlayerIdAuthorizer` | <global> | 5 |
 | `PlayerIteractionEvent` | <global> | 0 |
-| `PlayerLevel` | <global> | 3 |
 | `PlayerNameAuthorizer` | <global> | 5 |
 | `PlayerPosHelper` | <global> | 1 |
 | `PlayerReflectionProbe` | <global> | 9 |
@@ -1294,7 +1271,6 @@ Full unreached game-type list (2286):
 | `QTDataElement` | <global> | 2 |
 | `Quality` | <global> | 0 |
 | `QualityInfoFromXml` | <global> | 2 |
-| `QuestCriteriaLevel` | <global> | 2 |
 | `QuestEvent_BiomeEvent` | <global> | 0 |
 | `QuestEvent_BlockChangedEvent` | <global> | 0 |
 | `QuestEvent_BlockDestroyEvent` | <global> | 0 |
@@ -1377,7 +1353,6 @@ Full unreached game-type list (2286):
 | `RentResult` | <global> | 0 |
 | `RepairTypes` | <global> | 0 |
 | `RequiredTypes` | <global> | 0 |
-| `RequirementItemTier` | <global> | 3 |
 | `RequirementTypes` | <global> | 0 |
 | `RequirementTypes` | <global> | 0 |
 | `RequirementVisibilityTypes` | <global> | 0 |
@@ -1394,7 +1369,6 @@ Full unreached game-type list (2286):
 | `RotateInterpolationMode` | <global> | 0 |
 | `RotateObject` | <global> | 3 |
 | `RotatingText` | <global> | 3 |
-| `RoundsInMagazine` | <global> | 3 |
 | `Row` | <global> | 1 |
 | `Row` | <global> | 2 |
 | `rTypes` | <global> | 0 |
@@ -1565,7 +1539,6 @@ Full unreached game-type list (2286):
 | `TargetClass` | <global> | 0 |
 | `TargetClass` | <global> | 0 |
 | `TargetClass` | <global> | 0 |
-| `TargetRange` | <global> | 3 |
 | `TargetTypes` | <global> | 0 |
 | `TargetTypes` | <global> | 0 |
 | `TargetTypes` | <global> | 0 |
@@ -1595,7 +1568,6 @@ Full unreached game-type list (2286):
 | `TileAreaSimple`1` | <global> | 4 |
 | `TileEntityType` | <global> | 0 |
 | `TimedAction` | <global> | 3 |
-| `TimeOfDay` | <global> | 3 |
 | `Timer` | <global> | 5 |
 | `TimerEventHandler` | <global> | 0 |
 | `TimeRotateObject` | <global> | 2 |
@@ -1828,7 +1800,6 @@ Full unreached game-type list (2286):
 | `WaitMode` | <global> | 0 |
 | `WallVisibilityStates` | <global> | 0 |
 | `WarpType` | <global> | 0 |
-| `WasAlive` | <global> | 3 |
 | `water_reflectionMirror` | <global> | 9 |
 | `WaterDebug` | <global> | 9 |
 | `WaterDebugAssets` | <global> | 5 |
@@ -2339,7 +2310,6 @@ Full unreached game-type list (2286):
 | `MessageTypes` | Twitch.PubSub | 0 |
 | `PubSubHypeTrainMessage` | Twitch.PubSub | 2 |
 | `Redemption` | Twitch.PubSub | 5 |
-| `Reward` | Twitch.PubSub | 3 |
 | `User` | Twitch.PubSub | 5 |
 | `CurveType` | UAI | 0 |
 | `WaterClippingPlanePlacer` | WaterClippingTool | 3 |
@@ -2425,10 +2395,10 @@ Full unreached game-type list (2286):
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2862 | 2862 | 0 | 100% |
+| `<global>` | 2891 | 2891 | 0 | 100% |
 | `GameEvent` | 180 | 180 | 0 | 100% |
 | `Platform` | 147 | 147 | 0 | 100% |
-| `Twitch` | 109 | 109 | 0 | 100% |
+| `Twitch` | 110 | 110 | 0 | 100% |
 | `Webserver` | 73 | 73 | 0 | 100% |
 | `DynamicMusic` | 47 | 47 | 0 | 100% |
 | `Challenges` | 47 | 47 | 0 | 100% |
