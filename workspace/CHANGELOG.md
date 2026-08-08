@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: held time-bomb priming
+
+ItemClassTimeBomb.OnHoldingItemActivated (IL=82, items.md): held priming -
+WeaponPreFireCancel, activation transforms, Meta = explodeAfterTicks or -1
+when FusePrimeOnActivate, SimpleRPC broadcast for non-remote holders.
+verified from IL. Commit 10ce716.
 ## 2026-08-08 - tier-C: dropped time-bomb fuse machine
 
 ItemClassTimeBomb.OnDroppedUpdate (IL=188, items.md): remote Meta
