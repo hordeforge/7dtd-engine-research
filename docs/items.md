@@ -475,6 +475,23 @@ true in the base and `ItemActionRanged` (IL=4) restricts it to
   `FusePrimeOnActivate`, `ActivationTransformToHide` (split on ';'),
   `ActivationEmissive`, and `FuseTime` (default 2) converted to
   `explodeAfterTicks = FuseTime * 20` - the 20-TPS tick conversion.
+
+**`ItemClassTimeBomb.OnDroppedUpdate(data)` (IL=188) is the dropped-bomb
+fuse machine** (driven from `EntityItem.OnUpdateEntity` -> `ItemClass.OnDroppedUpdate`):
+a remote client marks a ticking bomb by `Meta = 65535 -> -1`; the server
+tracks `pos = entity.PhysicsMasterGetFinalPosition()` (the physics-master
+position). With `ExplodeOnHit`, when `!mustPrime || Meta > 0` and the item
+is `isCollided` or in water, it fires MinEvent **97** on the item (Self =
+the owner `EntityAlive`, IsLocal, Position, ItemValue) and sets `Meta = 1` -
+the fuse arms on landing. The fuse length loads when
+`FuseStartOnDrop && Meta == 0` (or `mustPrime && Meta <= -1`): it pulls the
+`PinPulled` animator bool, activates the `OnActivateItemGameObjectReference`
++ `ActivationTransformToHide` transforms, and sets `Meta = explodeAfterTicks`.
+Each server tick then decrements `Meta` (playing `SoundTick` on the
+`tickSoundDelay` cadence from `ItemClass.SoundTickDelay`) and, at `Meta == 0`,
+`SetDead()` + `gameManager.ExplosionServer(pos, worldToBlockPos(pos),
+identity, explosion, belongsEntityId, 0, false, itemValue.Clone())` - the
+detonation itself.
 - `ItemClassWaterContainer` (IL=32) derives `MaxMass =
   Clamp(WaterCapacity * 19500, 0, 65535)` and clamps `initialFillRatio` to
   [0, 1].
@@ -1683,6 +1700,12 @@ The non-action leaves:
   `OnDamagedByExplosion`, and `OnMeshCreated` hooks, letting an `ItemClass`
   customize its dropped-entity behavior.
 
+## Changelog
+
+- **2026-08-08:** ItemClassTimeBomb.OnDroppedUpdate (IL=188) dropped-bomb
+  fuse machine: remote Meta 65535->-1, PhysicsMasterGetFinalPosition,
+  MinEvent 97 arming on collide/water, PinPulled + Meta = explodeAfterTicks,
+  per-tick SoundTick countdown, ExplosionServer detonation at 0.
 ## Changelog
 
 - **2026-08-08:** Harvest drop pipeline: GameUtils.HarvestOnAttack (IL=623)
