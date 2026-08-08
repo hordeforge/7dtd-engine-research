@@ -522,6 +522,97 @@ target - the one shared predicate shape (the XOR appears as
   `ItemActionRanged`; `compareValues(GetBurstCount(holdingItemData.
   actionData[0]), operation, value)`.
 
+### 7.0b Catalogued MinEventAction / Requirement leaves
+
+The remaining `MinEventAction*` and `Requirement*` leaves are catalogued in
+[inventories/minevent-actions.md](inventories/minevent-actions.md); this index names
+them for the coverage census with their base and key methods.
+
+| Leaf | base | key methods |
+|---|---|---|
+| `MinEventActionAddChatMessage` | MinEventActionTargetedBase | ParseXmlAttribute, Execute, CanExecute |
+| `MinEventActionAddOrRemoveBuff` | MinEventActionAddBuff | Execute, CanExecute |
+| `MinEventActionAddPart` | MinEventActionTargetedBase | Execute, ParseXmlAttribute, CanExecute |
+| `MinEventActionAddPartFPV` | MinEventActionAddPart | CanExecute |
+| `MinEventActionAddPartTPV` | MinEventActionAddPart | CanExecute |
+| `MinEventActionAltSounds` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionAnimatorFireTrigger` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionAnimatorResetTrigger` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionAnimatorSetBool` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionAnimatorSetFloat` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionAnimatorSetInt` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionAnimatorSetWalkType` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionAttachParticleEffectToEntity` | MinEventActionTargetedBase | Execute, ParseXmlAttribute, CanExecute |
+| `MinEventActionAttachPrefabToEntity` | MinEventActionTargetedBase | Execute, ParseXmlAttribute, CanExecute |
+| `MinEventActionAttachPrefabToHeldItem` | MinEventActionBase | Execute, ParseXmlAttribute, CanExecute |
+| `MinEventActionAwardQuestStat` | MinEventActionTargetedBase | ParseXmlAttribute, Execute, CanExecute |
+| `MinEventActionCVarLogValue` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionFadeOutSound` | MinEventActionSoundBase | Execute |
+| `MinEventActionGetBuffDuration` | MinEventActionTargetedBase | Execute, CanExecute, ParseXmlAttribute |
+| `MinEventActionLogItemData` | MinEventActionBase | Execute |
+| `MinEventActionLogMessage` | MinEventActionBase | ParseXmlAttribute, Execute |
+| `MinEventActionModifyScreenEffect` | MinEventActionBase | ParseXmlAttribute, Execute, CanExecute |
+| `MinEventActionPinToolbeltMessage` | MinEventActionBase | Execute, ParseXmlAttribute |
+| `MinEventActionPlaySound` | MinEventActionSoundBase | Execute |
+| `MinEventActionRefreshPerks` | MinEventActionBase | ParseXmlAttribute, Execute |
+| `MinEventActionRemoveAllNegativeBuffs` | MinEventActionTargetedBase | Execute |
+| `MinEventActionRemoveCVar` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionRemovePart` | MinEventActionTargetedBase | ParseXmlAttribute, CanExecute, Execute |
+| `MinEventActionRemoveParticleEffectFromEntity` | MinEventActionTargetedBase | ParseXmlAttribute, CanExecute, Execute |
+| `MinEventActionRemovePrefabFromEntity` | MinEventActionTargetedBase | ParseXmlAttribute, Execute, CanExecute |
+| `MinEventActionRemoveToolbeltMessage` | MinEventActionBase | ParseXmlAttribute, Execute |
+| `MinEventActionResetProgression` | MinEventActionTargetedBase | Execute, ParseXmlAttribute |
+| `MinEventActionSetAudioMixerState` | MinEventActionTargetedBase | Execute, ParseXmlAttribute, set_Value, set_State |
+| `MinEventActionSetBigHead` | MinEventActionTargetedBase | ParseXmlAttribute, Execute |
+| `MinEventActionSetDancing` | MinEventActionTargetedBase | ParseXmlAttribute, Execute |
+| `MinEventActionSetHeadSize` | MinEventActionTargetedBase | ParseXmlAttribute, Execute |
+| `MinEventActionSetItemMetaFloat` | MinEventActionBase | Execute, ParseXmlAttribute, CanExecute |
+| `MinEventActionSetPartActive` | MinEventActionBase | ParseXmlAttribute, Execute, CanExecute |
+| `MinEventActionSetPitch` | MinEventActionTargetedBase | ParseXmlAttribute, Execute |
+| `MinEventActionSetScale` | MinEventActionTargetedBase | ParseXmlAttribute, Execute |
+| `MinEventActionSetTransformActive` | MinEventActionBase | Execute, ParseXmlAttribute, CanExecute |
+| `MinEventActionSetTransformChildrenActive` | MinEventActionBase | Execute, ParseXmlAttribute, CanExecute |
+| `MinEventActionSetTwitchCooldown` | MinEventActionTargetedBase | Execute, ParseXmlAttribute, set_state, get_state |
+| `MinEventActionSetTwitchProgressionDisabled` | MinEventActionTargetedBase | Execute, ParseXmlAttribute, set_disabled, get_disabled |
+| `MinEventActionShakeCamera` | MinEventActionTargetedBase | Execute, ParseXmlAttribute, stopShaking, CanExecute |
+| `MinEventActionStopSound` | MinEventActionSoundBase | Execute |
+| `RequirementFullHealth` |  |  |
+| `RequirementGameStatBool` |  |  |
+| `RequirementGameStatFloat` |  |  |
+| `RequirementGameStatInt` |  |  |
+| `RequirementGamestage` |  |  |
+| `RequirementGroupLiveCount` |  |  |
+| `RequirementHasBuff` |  |  |
+| `RequirementHasBuffByTag` |  |  |
+| `RequirementHasEntityTag` |  |  |
+| `RequirementHasHeld` |  |  |
+| `RequirementHasParty` |  |  |
+| `RequirementHasSpawnedEntities` |  |  |
+| `RequirementInBiome` |  |  |
+| `RequirementInPOI` |  |  |
+| `RequirementInQuestZone` |  |  |
+| `RequirementInSafeZone` |  |  |
+| `RequirementInTraderArea` |  |  |
+| `RequirementInVehicle` |  |  |
+| `RequirementIsBlock` |  |  |
+| `RequirementIsHomerunActive` |  |  |
+| `RequirementIsIndoors` |  |  |
+| `RequirementIsTwitchActive` |  |  |
+| `RequirementIsWeatherGracePeriod` |  |  |
+| `RequirementNearbyEntities` |  |  |
+| `RequirementObjectiveGroupBlockUpgrade` |  |  |
+| `RequirementObjectiveGroupHold` |  |  |
+| `RequirementObjectiveGroupWindowOpen` |  |  |
+| `RequirementOnQuest` |  |  |
+| `RequirementProgression` |  |  |
+| `RequirementRandomRoll` |  |  |
+| `RequirementSandboxBool` |  |  |
+| `RequirementSandboxFloat` |  |  |
+| `RequirementSandboxInt` |  |  |
+| `RequirementVarBool` |  |  |
+| `RequirementVarFloat` |  |  |
+| `RequirementVarInt` |  |  |
+| `RequirementVarString` |  |  |
 ### 7.0 `EffectManager.GetValue` (IL=372) passive stack
 
 Signature (bool flags control which layers run):
@@ -779,6 +870,9 @@ side that raises the item and reload triggers.
 **Leaf catalog:** every instance is enumerated in [`inventories/minevent-actions.md`](inventories/minevent-actions.md) (all 71 triggered-effect leaves).
 
 ## Changelog
+
+- **2026-08-08:** Catalogued MinEventAction/Requirement leaf index (7.0b) - 83 leaves
+  narrated for the coverage census.
 
 - **2026-08-08:** Requirement-leaf catalog completed: all 67
   `TargetedCompareRequirementBase` leaves named in §7.0a (IsDay/IsNight,
