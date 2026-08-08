@@ -25,6 +25,21 @@ or render code are listed at the end instead.
 
 ---
 
+## Entity sound dispatch (`Entity.PlayOneShot`, IL=38)
+
+`PlayOneShot(clip, inHead, serverSignalOnly, isUnique, animEvent, volume)` is
+the one-shot sound entry every server action uses: with `inHead` it plays in
+the listener's head (`Audio.Manager.PlayInsidePlayerHead(clip, -1, 0, false,
+isUnique)`); with `serverSignalOnly` false it is either a unique one-shot
+(`Audio.Manager.Play(entity, clip, volume, true)`, optionally registering
+the returned handle with the anim-event monitor for stop-on-anim) or a
+broadcast to everyone nearby (`Audio.Manager.BroadcastPlay(entity, clip,
+isUnique, volume)`). The `EntityPlayer` override (IL=16) additionally skips
+while the player is a spectator unless `serverSignalOnly` - spectators hear
+nothing local, but server-signaled sounds still flow.
+
+---
+
 ## BlockRadiusEffect (player-local proximity buffs)
 
 Blocks may carry a `BlockRadiusEffect[]` (`radiusSq`, `variable` buff name)
@@ -764,6 +779,11 @@ a caller temp buffer (with optional exact-length and flush);
 `WriteStreamToFile` (IL=15/16) dumps a stream to a file (optional length),
 the dump path used for save/backup artifacts.
 
+## Changelog
+
+- **2026-08-08:** Entity.PlayOneShot (IL=38) dispatch: PlayInsidePlayerHead /
+  unique Play with anim-event monitor / BroadcastPlay; EntityPlayer (IL=16)
+  spectator skip unless serverSignalOnly.
 ## Changelog
 
 - **2026-08-08:** BlockRadiusEffect: EntityPlayerLocal.BlockRadiusEffectsTick
