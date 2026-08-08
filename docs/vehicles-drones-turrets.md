@@ -323,6 +323,8 @@ wakes the Rigidbody (`RBActive = true`, `RBNoDriverSleepTime = 0`,
   `AddFuelFromInventory(entity)` (IL=45): under 100 % fuel, take
   `CeilToInt(Min(2500, (GetMaxFuelLevel - GetFuelLevel) * 25))` items and
   `vehicle.AddFuel(taken / 25)`, playing `useactions/gas_refill`.
+  `hasGasCan(entity)` (IL=73) is the availability gate: true when the fuel
+  item (`GetFuelItem()`) appears in the player's bag or inventory slots.
 
 ### 4.2c Vehicle damage (server-side)
 
@@ -845,6 +847,10 @@ non-vehicle type is a content contract violation, not a graceful fallback.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native / content residuals |
 
+## Changelog
+
+- **2026-08-08:** EntityVehicle.hasGasCan (IL=73): fuel item presence in bag
+  or inventory as the fueling gate.
 ## Changelog
 
 - **2026-08-08:** Vehicle.SetItemValueMods (IL=22) mods copy + CalcEffects/
