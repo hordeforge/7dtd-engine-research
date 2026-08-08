@@ -1084,6 +1084,39 @@ first valid hit: `hitEntities.Add(id)` and
 `damage = (int)(treeRB.mass * 0.36)` via `StartCoroutine(onEntityDamageLater(...))`.
 Each tree damages each entity once; players and supply crates are never hit.
 
+**Spawn side (`Awake` IL=19 / `SetBlockPos` IL=111):** `Awake` grabs
+`treeRB = GetComponent<Rigidbody>()` and makes it `useGravity = !isEntityRemote`,
+`isKinematic = isEntityRemote`, so the server's tree is a dynamic body and remote
+clients see a kinematic copy. `SetBlockPos` stores `treeBlockPos` / `fallTreeDir`,
+server-side calls `SetAirBorne(true)`, reads `treeBV = chunk.GetBlock(toBlock(pos))`,
+then steals the visual transform: `DecoManager.GetDecorationTransform(pos, true)`
+for `IsDistantDecoration` trees, else the chunk's `BlockEntityData.transform`
+(clearing `bHasTransform`). It disables every child collider and records the
+largest `CapsuleCollider` height as `collHeight` (min 3, then `*= 0.9`).
+
+**Fall tick (`OnUpdateEntity` IL=91):** server-only. Decrements
+`timeToEnableDamage` by 0.05/tick; while `lifetime > 0` it decrements too and
+stops early. When `timeToRemoveTree < 0` and the RB has settled
+(`angularVelocity.sqrMagnitude < 0.1` and `velocity.sqrMagnitude < 0.1`):
+`timeToRemoveTree = 1`, `targetFade = 0`, and a `NetPackageTreeFade` is broadcast
+(channel 192). When the 1s countdown expires, `DestroyTree()` runs; it also runs
+immediately if the mesh exists and world-y drops below 1.
+
+**`DestroyTree()` (IL=37):** `SetDead()`; server-only, clears the stump with
+`SetBlockRPC(treeBlockPos, Air)` when the block there still matches `treeBV.type`;
+destroys `treeTransform.gameObject` and nulls the field.
+
+**Client fade (`NetPackageTreeFade`):** direction `ToClient` (2), body is one
+`int32` entityId (GetLength 4). `ProcessPackage` (IL=17) looks up the entity and,
+if it is an `EntityFallingTree`, sets `targetFade = 0` to start the client-side
+fade-out.
+
+**Damage coroutine (`onEntityDamageLater`, MoveNext IL=46):** waits 0.05s, then
+skips dead entities and damage <= 10; otherwise
+`entity.DamageEntity(new DamageSource(External, Crushing), damage, false, 1)`.
+With the tree's rigidbody mass, `(int)(mass * 0.36)` clears the 10-point floor
+for normal trees.
+
 **Queue-driven.** Spikes when many blocks lose support (base collapse). Matches ServerTools/IceCoffee fall-to-air trade: empty the problem at `AddFallingBlock` before this method invents entities.
 
 ---
@@ -3377,11 +3410,15 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   && deathUpdateTime > 70.
 ## Changelog
 
-- **2026-08-08:** EntityFallingTree impact damage: Collide (IL=101) server-only,
+- **2026-08-08:** EntityFallingTree lifecycle: Collide (IL=101) server-only,
   rel-vel > 1 collidedWith, rel-vel > 0.2 + impulse/mass > 1.5 max-impulse
   contact -> treefallimpact audio + treefall particle; collidedWith (IL=58)
   E_BP_ root resolve, treeCanDamageEntity gate (hitEntities / players /
-  supply crates), mass*0.36 damage coroutine.
+  supply crates), mass*0.36 damage; Awake RB gravity/kinematic by remote,
+  SetBlockPos (IL=111) deco/blockentity transform steal + collider disable,
+  OnUpdateEntity (IL=91) settle->TreeFade channel 192 -> DestroyTree,
+  DestroyTree (IL=37) stump clear when type matches, NetPackageTreeFade
+  ToClient int32 entityId, damage coroutine 0.05s + External/Crushing, >10.
 - **2026-08-08:** EntityAlive.GetLightLevel IL=14: attached -> host
   delegate, else inventory.GetLightLevel (held-item light, the stealth
   selfLight).
