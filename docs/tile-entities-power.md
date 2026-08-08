@@ -49,6 +49,27 @@ flowchart LR
 concrete types override it; the base is a no-op. So a chunk with
 no active machines still pays a bounded loop over its tile-entity list.
 
+**Per-subclass `UpdateTick` bodies (V3.1.0 b14, IL-verified):**
+
+| Subclass | UpdateTick IL | What the body does (called methods) |
+|---|---:|---|
+| `TileEntity` (base) | 1 | no-op |
+| `TEFeatureAbs` (base) | 1 | no-op (feature-level tick hook) |
+| `TileEntityPoweredBlock` | 4 | thin passthrough: `TileEntityPowered::UpdateTick(world)` only (the block `ActivateBlock` calls live in `Activate`/`ActivateOnce`/`OnSetLocalChunkPosition`, not the tick) |
+| `TileEntityPowered` | 26 | power base: `ConnectionManager.IsServer` gate; `Audio.Manager.Broadcast` + wire relink (`IPowered`/`PowerManager` calls); GUI tooltip on local |
+| `TileEntityPowerSource` | 32 | power graph: `ClientPowerData` fuel/`CurrentFuel`/`IsOn`/`ItemSlots` refresh against the `Chunk.GetBlock` read, battery/consumption bookkeeping |
+| `TEFeatureDoor` | 28 | auto-close: `Block.HandleTrigger` + `BlockTrigger.Unlock` with `isMultiBlock`/`multiBlockPos`/`shape` resolution; `Audio.Manager.BroadcastPlayByLocalPlayer` for open/close |
+| `TEFeatureLandClaim` | 24 | claim upkeep: `Block.MaxDamage`/`damage` read, decay/repair bookkeeping, `ConnectionManager.SendPackage` for bounds sync |
+| `TEFeatureStorage` | 84 | loot container: item/loot-stage processing, `EntityAlive.FireEvent` hooks, `Audio.Manager.BroadcastPlayByLocalPlayer` open sound |
+| `TileEntityCollector` | 7 | dispatcher: base tick + `HandleUpdate(world)` (**IL=120**), which does mod-changed rescan, `Block.IsUnderwater` + sky-blocked checks, per-output-type `handleUpdateForOutputType` (fuel/production), and start/stop of the `ActivateSound`/`RunningSound` broadcasts |
+| `TileEntityComposite` | 24 | composite: fan-out to the feature set via the `<>c__DisplayClass46_0` closure over `Block.GetBlockName`/`blockID` dispatch |
+| `TileEntityForge` | 340 | smelt timer: `BlockValue.get_meta`/`set_meta` progression, `GameTimer.ticks` scheduling, `IGameManager.PlaySoundAtPositionServer` on completion |
+| `TileEntityVendingMachine` | 25 | rent expiry: `GameUtils.WorldTimeToDays` against `TraderData`, `ClearVendingMachine` when the rental elapsed (see [loot-economy.md](loot-economy.md) §4) |
+| `TileEntityWorkstation` | 134 | fuel + recipe queue: `Block.FuelValue`/`HeatMapStrength`, `BlockWorkstation.UpdateVisible` for the active work light |
+
+The forge (340) and workstation (134) dominate per-tick cost; everything else is
+a bounded flag/refresher body.
+
 **`Chunk.GetBlockEntity` (V3.1.0 b14)** is the read side of the registry:
 the `Vector3i` overload (IL=10) looks up `blockEntityStubs.dict` keyed by
 `GameUtils.Vector3iToUInt64(pos)` (null when absent); the `Transform`
