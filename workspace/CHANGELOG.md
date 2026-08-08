@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: block radius effect buffs
+
+BlockRadiusEffect (dedicated-misc-systems.md): EntityPlayerLocal.
+BlockRadiusEffectsTick (IL=83) rotating 3-chunk TE scan +
+BlockRadiusEffectsApply (IL=58) radiusSq buff apply; ResetBiomeWeatherOnDeath
+(IL=15) weather reset on respawn. verified from IL. Commit f753d28.
 ## 2026-08-08 - tier-C: drone support buff aura
 
 EntityDrone (vehicles-drones-turrets.md 6): buffAllies (IL=80) party-members
