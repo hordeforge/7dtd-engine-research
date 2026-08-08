@@ -852,6 +852,19 @@ a caller temp buffer (with optional exact-length and flush);
 `WriteStreamToFile` (IL=15/16) dumps a stream to a file (optional length),
 the dump path used for save/backup artifacts.
 
+**Binary/stream utility leaves:** `BitConverterLE` is the little-endian raw
+converter (`GetUIntBytes` IL=56, `GetULongBytes` IL=112, `GetBytes(float)`
+IL=5) that `PooledBinaryReader` / `PooledBinaryWriter` use for the pooled
+serialization layer. `ByteLengthUtils` pre-computes writer sizes
+(`GetBinaryWriter7BitEncodedIntLength` IL=22, `GetBinaryWriterLength`
+IL=9). `SimpleBitStream` is the bit accumulator (`Add(bool)` IL=42,
+`GetNext` IL=41, `Reset` IL=13, byte/bit cursors plus a `Write(BinaryWriter)`)
+that `Prefab` uses to pack per-cell flags. `IOUtils.CalcHashSync` (IL=23) /
+`CalcHashCoroutine` (IL=18) / `CalcCrcCoroutine` (IL=15) hash or CRC a file
+within a per-frame byte budget; `AdminTools` and `StockFileHashes` use it
+for the world-file integrity checks. `WaveReader` (a WAV stream reader,
+`Read(float[])` IL=54) loads audio assets, client-side.
+
 ## ModEvents payload structs (the `S*` data carriers)
 
 `ModEvents` registers each game-event hook with a dedicated payload struct
