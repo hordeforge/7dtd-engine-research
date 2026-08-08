@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameStagePartySpawner leaves
+
+SetPartyLevel (IL=123) scaling + stage lookup + bonusLootEvery + party log;
+SetScaling FastLerp(1, 2.5, (s-1)/3); AddMember/RemoveMember dedupe;
+DecSpawnCount clamp; IsDone. Verified fresh dumps.
 ## 2026-08-08 - tier-C: wandering horde cluster
 
 WanderingHorde persistence/cleanup leaves; AIWanderingHordeSpawner ctor
