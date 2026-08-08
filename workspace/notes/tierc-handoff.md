@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `2b8555c` depth narration + live wire verification + cross-repo link fix (docs-consistency pass staged on top) |
+| HEAD (at handoff write) | `0f022f1` docs consistency pass |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 3681 / catalogued 0 / classified 0 / unaccounted **0** (100% narrated; webserver + reflection/prefix seeds) |
