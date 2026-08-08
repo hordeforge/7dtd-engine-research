@@ -290,6 +290,29 @@ called from `GameManager.SaveAndCleanupWorld` on the graceful shutdown path
 ([`server-lifecycle.md`](server-lifecycle.md) §4). `Cleanup()` runs on world
 teardown / XML reload.
 
+**`Quest` shared/position/reward leaves:**
+- Shared list: `AddSharedWith(player)` (IL=16) lazily creates
+  `sharedWithList` and dedupes; `HasSharedWith` (IL=28) is a
+  reference-equality scan; `RemoveSharedWith(player)` (IL=44) removes by
+  entity id (backwards walk, nulls the list when empty); `GetSharedWithCount`
+  (IL=9) is the count or 0; `GetSharedWithCountNotInRange` (IL=64) counts
+  members outside the quest location rect (or more than 15 from the owner
+  when no rect exists) - the "shared member too far" gate.
+- Position: `GetPositionData(out pos, type)` (IL=18) is the `PositionData`
+  dict lookup (zero + false on miss); `GetLocationRect` (IL=44) builds the
+  5-padded rect from types 2/3 (`(x-5, z-5)` to `(x+10, z+10)`); the
+  `SetPositionData` / `RemovePositionData` / `GetQuestGiverLocation` pair
+  manage the stored quest positions.
+- Text binding: `ParseBindingVariables(response)` (IL=106) replaces
+  `{field_index.variable}` tokens (split on `_` / `.`, 2-part and 3-part
+  forms) via `GetVariableText`; `GetVariableText(field, index, name)`
+  (IL=250) dispatches the field name (`fetch`, `buff`, `kill`, `goto`,
+  `poi`, `treasure`) to the matching objective type's `ParseBinding`,
+  scanning `Objectives` with an optional index.
+- Misc: `CheckIsQuestGiver(entityID)` (IL=27) is true when the id equals
+  `QuestGiverID` or the entity stands within 3 of `GetQuestGiverLocation()`;
+  `GiveRewardsLater(q)` (IL=9) is the delayed-rewards coroutine wrapper.
+
 The **client owns the quest object**: `Quest.OwnerJournal.OwnerPlayer` and
 `Challenge.Owner.Player` are `EntityPlayerLocal`, and the progression code calls
 `GameManager.ShowTooltip`, `Audio.Manager.PlayInsidePlayerHead`, and `XUi`
