@@ -377,6 +377,18 @@ twin: same ammo/item/mod recursion but collects `ModifierValuesAndSources`
 entries into the list for the tooltip/debug UI (no durability scaling or stat
 step).
 
+**`MinEffectController` (the per-class effect holder):** `ModifyValue(self,
+effect, ref base, ref perc, level, tags, multiplier)` (IL=54) fast-paths on the
+`PassivesIndex` hashset (no group touches an effect the class never uses), then
+runs `MinEffectGroup.ModifyValue` over every group in order with the entity's
+`MinEventContext` (or the shared `CachedEventParam` with `Self = null`).
+`GetModifiedValueData` (IL=38) is the source-tracking twin, forwarding
+`ParentType` / `ParentPointer` per group for tooltip attribution.
+`FireEvent(eventType, eventParms)` (IL=25) stamps `eventParms.ParentType =
+ParentType` and fans out to the groups; `HasEvents` (IL=23), `HasTrigger`
+(IL=24), and `IsOwnerTiered` (IL=23) are per-group OR scans used by callers to
+skip controllers with no matching work.
+
 ### ItemValue metadata and property overrides
 
 **Typed metadata (V3.1.0 b14):** `ItemValue.Metadata :
@@ -1815,6 +1827,10 @@ The non-action leaves:
   QuestEventManager.HarvestedItem, inventory/drop, _xpFromHarvesting XP.
 ## Changelog
 
+- **2026-08-08:** MinEffectController leaves: ModifyValue PassivesIndex gate +
+  per-group pass with MinEventContext; GetModifiedValueData source twin with
+  ParentType/Pointer; FireEvent ParentType stamp; HasEvents/HasTrigger/
+  IsOwnerTiered OR scans.
 - **2026-08-08:** ItemValue.ModifyValue (IL=304): ammo effects + item effects
   with Quality scale, resistance durability decay (41/43/197, < 50% uses
   scales delta), stat step, mod recursion; GetModifiedValueData (IL=142)
