@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `d1230c3` workspace changelog em dash cleanup |
+| HEAD (at handoff write) | `ada9e84` handoff session summary |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 1845 / catalogued 558 / classified 1296 / unaccounted **0** |
