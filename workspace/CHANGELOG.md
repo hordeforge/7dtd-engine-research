@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemValue.ModifyValue engine
+
+ModifyValue (IL=304): ammo + item MinEffectController passes, resistance
+durability decay (41/43/197 <50% uses), stat step, mod recursion;
+GetModifiedValueData (IL=142) source-tracking twin. Verified fresh dumps.
 ## 2026-08-08 - tier-C: GameStageDefinition leaves
 
 GetStage bracket via GetBoundIndex (last stageNum <= stage) + clamp;
