@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: power block wrappers (3.7 block to tile-entity mapping)
+
+CreateTileEntity identity table (PowerItemType 1-10, TriggerType 1-4), solar CanPlaceBlockAt sky-light 15, speaker/trader sounds, spotlight activate/updateState, launcher InstantiateProjectile + BlockProjectileMoveScript, electric wire BrokenPercentage, rally marker quest hook (verified)
 ## 2026-08-08 - tier-C: requirement framework + leaves (RequirementBase family)
 
 RequirementBase contract (IsValid/@cvar, ParseXAttribute, ParseRequirement, ParseRequirementGroup, compareValues op table), TargetedCompareRequirementBase target resolution, all 26 catalog leaves (stat compare family, tag predicates, inventory/armor/progression counts, CVarCompare, NotHasBuff, HasAttachedPrefab, IsLookingAt*) (verified)
