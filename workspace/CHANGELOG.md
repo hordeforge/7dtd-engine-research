@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: LongSetGroups, WorkstationData, action runtime-data records
+
+RegionFileManager cull group clustering; workstation display config; melee/repair/water action data records (verified)
 ## 2026-08-08 - tier-C: WorldCreationData provider pin + BackedArrays storage
 
 Apply sets WorldState.providerId from ProviderId property (distant terrain); file-backed vs memory arrays, 16-view warning (verified)
