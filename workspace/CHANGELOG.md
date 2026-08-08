@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityClass registry leaves
+
+FromString/Add name-hash ids, GetId scan, Cleanup, AddDroppedId, LootDropPick,
+CalculateEntityTier tag ladder (Elite 5..Normal 0), ParseEntityFlags comma OR,
+CopyFrom DynamicProperties deep copy with exclude. Verified fresh dumps.
 ## 2026-08-08 - tier-C: EntityGroups registry leaves
 
 IsEnemyGroup, Normalize(name, totalp), EntityGroupSpawnState roll + DidSpawn,
