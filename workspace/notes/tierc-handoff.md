@@ -1,6 +1,6 @@
 # Tier-C grind handoff / TODO
 
-**Updated:** 2026-08-08 ~12:20 UTC
+**Updated:** 2026-08-08 ~12:40 UTC
 **Repo:** `7dtd-research` (cwd this tree)  
 **Pin:** V **3.1.0 (b14)** via `tools/data/stock_facts.json`  
 **Managed bar:** tiers A+B met (unaccounted **0**). This grind is **tier C only**.
