@@ -93,6 +93,37 @@ active; `HasTwitchMember` (IL=9) is `Party?.HasTwitchMember() ?? false`;
 per-player gates that couple Twitch action availability to party
 composition.
 
+**Twitch requirement gates (`BaseTwitchRequirement` family):** actions and
+votes each carry a `List<BaseTwitchRequirement>` filled by
+`TwitchActionsFromXml.ParseRequirement(XElement)` (IL=83): reflection on
+`Twitch.TwitchRequirement{ClassName}` (and the `TwitchVoteRequirement{...}`
+mirror for votes), cast to `BaseTwitchRequirement`, then `ParseProperties` +
+`Init`. The base contract: `ParseProperties` (IL=14) stores the element's
+`DynamicProperties` and parses the two shared props `invert` / `hide_action`
+into `Invert` / `HideAction`; `Init()` delegates to the virtual `OnInit()`;
+`CanPerform(Entity)` defaults to true. Two consumers gate on the list:
+`TwitchAction.CheckAllowed()` (IL=34) and `TwitchAction.IsReady(manager)`
+(IL=308) walk `TwitchRequirements`; a requirement with `HideAction` only
+hides the action from the Twitch client UI when
+`CanPerform(TwitchManager.LocalPlayer)` is false, while a plain requirement
+blocks readiness/queueing the same way (the `LocalPlayer` is the Twitch
+client's player, so this is the UI-side gate; execution stays server-side).
+`BaseTwitchOperationRequirement` adds an `operation` field (the
+`OperationTypes` enum, `ParseEnum` from the `operation` prop) with abstract
+`LeftSide` / `RightSide` float providers and a `stringComparison` for string
+sides; `BaseTwitchVoteOperationRequirement.CanPerform(player)` (IL=48)
+compares the two sides with the operation via an 18-target switch (6
+operations, 3 aliases each: equal, not-equal, less, greater, less-or-equal,
+greater-or-equal). Concrete action requirements: `TwitchRequirementHasBuff`
+(`buff` name split on `,` in `OnInit`, all must be active in `CanPerform`),
+`TwitchRequirementHasProgression` (skill-tree perk points as
+`LeftSide`/`RightSide`), `TwitchRequirementIsNight`
+(`!World.IsDaytime()`, inverted by the `invert` flag), and
+`TwitchRequirementSandboxBool` (reads `SandboxOptions.SandboxOptionManager.
+GetBool` with the invert XOR) while `TwitchRequirementSandboxFloat/Int` are
+operation requirements comparing two sandbox values via `LeftSide` /
+`RightSide`; the `TwitchVoteRequirement*` types mirror them for votes.
+
 **Pimp-pot and blood-moon bookkeeping (server fields):** `AddToPot(amount)`
 / `AddToBitPot(amount)` (IL=23 each) add to `RewardPot` / `BitPot`
 (clamped at 0) and track `LeaderboardStats.LargestPimpPot` /
