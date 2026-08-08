@@ -408,6 +408,17 @@ and returns false. `ValidUserIdForSender(userId)` (IL=29) accepts
 freeSampler / freeSamplerPool / freeSamplerCleanup) - the alloc/free
 bookkeeping behind `GetPackage<T>` and `FreePackage`.
 
+**Registry plumbing (`NetPackageManager`):** `AddPackageMapping(id, type)`
+(IL=29) fills `packageIdToClass` + `packageClassToPackageId` and resolves
+`NetPackageInformation<T>.Instance` (reflection `MakeGenericType`) into
+`packageIdToPackageInformation`; `GetPackageName(id)` (IL=5) is the class
+`ToString`; `ResetMappings` (IL=7) nulls all three tables;
+`getPackageInfoByType(id)` (IL=16) bounds-checks and throws
+`UnknownNetPackageException` on a bad id before returning the info (the
+decode-failure path of §1.2). `LogStats` (IL=70) prints per-package
+`{name}: {n} packages, {bytes} Bytes` from each `GetStats` plus the
+totals.
+
 ---
 
 ## 3b. Join path (summary)

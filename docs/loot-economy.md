@@ -805,6 +805,10 @@ land on the container opener with net-sync on.
 null for an empty name, `lootContainers.TryGetValue` on the dictionary, and
 `Log.Error("LootContainer '{name}' unknown")` + null on a miss with
 `errorOnMiss` (the loader's duplicate check passes false).
+`IsLoaded` (IL=5) is `lootContainers.Count > 0` (the load-complete gate the
+`ReloadLoot` path checks); `LootLog(name, format, args)` (IL=11) writes
+`{frame} LootContainer {name} {format}` as a warning - the loot debug
+tracer.
 
 `ParseLootEntryRequirement` (the `LootEntryRequirement*` family) is covered
 in the Loot-entry requirement section above.
