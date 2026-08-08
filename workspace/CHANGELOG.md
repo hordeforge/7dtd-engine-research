@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: nav-object chain + AI director leaves
+
+MinEventActionSetNavObject (add/sprite/cvar_to_text) + Entity AddNavObject/
+RemoveNavObject class stack; AIDirectorPlayerManagementComponent AddPlayer/
+RemovePlayer pooled state. Verified fresh dumps.
 ## 2026-08-08 - tier-C: waypoints + nav-object leaves
 
 Waypoint Read/Write version-gated format (v7) + legacy vehicle inference;
