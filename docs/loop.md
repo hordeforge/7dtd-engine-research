@@ -551,6 +551,7 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-08:** Em-dash cleanup (repo-wide rule 5 pass).
 - **2026-08-07:** EntityPlayer.Update (IL=179) player frame body: generalTags
   cache, game-started gate, totalTimePlayed minutes + hourly GameSparks (< 301
   min), ChunkObserver reposition + mapDatabase.Add on chunk cross, avatar

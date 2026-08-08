@@ -355,4 +355,5 @@ work, not more narrative RE.
 
 ## Changelog
 
+- **2026-08-08:** Census pin refreshed to 1846 narrated / 0 unaccounted after the tier-C sweep.
 - **2026-08-07:** Initial completion-bar definition after Coverage unaccounted=4 cleanup drive.

@@ -580,6 +580,7 @@ Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23
 
 ## Changelog
 
+- **2026-08-08:** NetPackageDamageEntity wire: added bIgnorePartyShare:bool (between bFromBuff and ArmorSlot).
 - **2026-07-28:** `RequestToSpawnPlayer` server path, `PlayerId`/`PlayerSpawnedInWorld` bodies, RespawnType.
 
 - **2026-07-28:** `RequestToEnterGame` package sequence, deny reasons 10/31, `PlayerLoginAnswer` write fields.

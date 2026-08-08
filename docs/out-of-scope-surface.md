@@ -180,6 +180,7 @@ only implement client XUi; headless dedicated does not present them:
 
 ## Changelog
 
+- **2026-08-08:** HasParticle un-classified (minevent requirement); 15 Twitch server records moved to twitch-integration.md; client-only third-party families named; AutomationStep/ConsoleCmdTestSystemAbs/PlayerEquippedSlots classified.
 - **2026-08-07:** Classify `HeartbeatEventData`, `Services.Analytics.Helper`,
   `TruncateStringSerializerConverter` OOS (client analytics; dedicated skips heartbeat).
 - **2026-08-02:** Classify V3.1.0 XUi held-item/browser leaves OOS.
