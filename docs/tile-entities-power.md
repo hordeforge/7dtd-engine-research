@@ -870,6 +870,20 @@ worldTime`; `GetSlotOutputType(slot)` (IL=9) /
 `GetSlotFillData(slot)` (IL=28) / `IsCurrentStack(slot)` (IL=26) resolve the
 slot-facing output type and the live `FillData` for a slot.
 
+**`BlockCollector` config/leaf methods (all IL-verified):**
+`addTileEntity(world, chunk, pos, bv)` (IL=13) news the `TileEntityCollector`,
+sets its `localChunkPos` + `SetWorldTime()` and adds it to the chunk;
+`removeTileEntity` (IL=7) is `chunk.RemoveTileEntityAt<TileEntityCollector>`.
+`OnBlockEntityTransformBeforeActivated` (IL=11) chains the base then
+`UpdateVisible(world, pos)`.
+`GetSandboxModifiedFuelNeeded(cost)` (IL=28) scales the fuel cost by the
+collector type's `XUiM_Recipes` input factor (Apiary /
+DewCollector / ChickenCoop); `modifyTime(time, modifier)` (IL=16) is
+`time / modifier` (or -1 when the modifier is 0, disabling the output).
+The `outputs` / `catalystTypes` / `fuelTypes` string arrays (with their
+sprite / atlas twins) and the grid-height / title / mod-transform fields are
+plain field accessors the collector UI reads.
+
 #### `TileEntityLight.write` (IL=48)
 
 After base + version u16:
