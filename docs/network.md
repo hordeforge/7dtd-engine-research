@@ -453,6 +453,21 @@ Both start **two worker threads** in the ctor (`ThreadManager.StartThread`):
 
 `ConnectionManager.Update` (IL=215, peer MB) drains each connection via `GetPackages` → `ProcessPackages` (IL=116) and flushes send queues. Xref: `ProcessPackages` is only called from that Update path (4 sites).
 
+**Server bring-up (`ProtocolManager`):** `SetupProtocols` (IL=128) builds the
+`servers` / `clients` lists once: it parses `GamePrefs` 144
+(`ServerDisabledNetworkProtocols`, comma-separated) plus the launch-arg
+overrides (`nounet` -> `unet`, `noraknet` -> `raknet`,
+`nolitenetlib` -> `litenetlib`), adds `NetworkServerLiteNetLib` /
+`NetworkClientLiteNetLib` unless disabled, then the native platform
+networking and every server-only `ServerPlatforms` entry.
+`StartServers(password)` (IL=106) gates on the platform user status +
+`IsMultiplayerAllowed` / `CanHostMultiplayer` (falling back to
+`StartOfflineServer`), validates `ServerPort` (GamePrefs 18) within
+1024..65530 (error code 74 otherwise), starts each server on the port,
+and on any `NetworkConnectionError` stops them all and resets the mode.
+`StopServersOnly` (IL=22) stops every server; `MakeServerOffline` (IL=11)
+does the same from online mode (2) and switches to mode 3.
+
 ### 4.2 Steam path (`NetConnectionSteam`)
 
 ```mermaid
