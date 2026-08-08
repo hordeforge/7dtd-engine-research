@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: drone activation commands (startInteraction + AllowActivationCommand)
+
+Verb dispatch (talk/service/repair/lock/keypad/take/orders/heal/storage/silent/light/ally-heal/attack), owner vs locked-password gates, per-command conditions (verified)
 ## 2026-08-08 - tier-C: drone owner/storage/repair plumbing
 
 SyncOwnerData/notifySyncOwner resolution, party buffs gate, HasStoredItem/TakeStoredItem counts, DoRepairAction repair-kit flow (verified)
