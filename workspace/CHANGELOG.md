@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: XmlExtensions XML helper leaves
 ## 2026-08-08 - tier-C: Astar grid/area internals
 
 GridGraph UpdateArea/RecalculateCell, connection pool, blocking-flag probe, area registry + FindLocation, OnBlockChanged routing (verified)
