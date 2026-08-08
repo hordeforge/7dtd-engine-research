@@ -41,8 +41,8 @@ type, every method body. It is git-ignored on purpose.
 ## The assembly by functional cluster
 
 All 89 namespaces grouped by role. Counts are methods-with-body / IL from
-`surface-namespaces.md` (regenerate to refresh). `<global>` (6,276 types /
-45,222 methods / 1.52M IL) is 85% of the code and is split by subsystem in the
+`surface-namespaces.md` (regenerate to refresh). `<global>` (6,291 types /
+45,385 methods / 1.52M IL) is 85% of the code and is split by subsystem in the
 narrated docs below, not by namespace.
 
 | Cluster | Namespaces | Coverage status |
