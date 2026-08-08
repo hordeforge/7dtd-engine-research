@@ -627,6 +627,27 @@ from the UI collect list, plays `craft_repair_item`, `TakeStoredItem`s the
 kit, `performRepair()` and `SendSyncData(16)`; without the item it plays
 the `misc/missingitemtorepair` head sound.
 
+**Activation commands (`startInteraction` IL=223 /
+`AllowActivationCommand` IL=298):** `startInteraction` dispatches the
+player-facing command verbs: `talk` -> `startDialog`; `service` -> open the
+`XUiC_DroneWindowGroup` plus `UseActions/service_vehicle` sound and
+`drone_command` VO; `repair` -> `DoRepairAction`; `lock` / `unlock` ->
+toggle `isLocked` with the locking/unlocking sounds; `keypad` ->
+`doKeypadAction`; `take` / `force_pickup` -> `pickup`; `drone_command_stay`
+/ `drone_command_follow` -> `ToggleOrderState`; `drone_command_heal` ->
+`HealRequest`; `storage` -> `openStorageWindow`; `drone_silent_on/off`,
+`drone_light_on/off`, `drone_heal_allies` / `drone_dont_heal_allies` and
+`drone_attack_mode_passive/aggressive` -> the respective `Toggle*` verbs;
+unknown verbs just stop the interaction. `AllowActivationCommand` gates the
+menu: the drone must be alive and the focusing player must own it
+(`belongsToPlayerId`) or - for a locked drone with a password - pass the
+`IsUserAllowed` / `HasPassword` check, in which case only `storage`
+(`bag != null`), `keypad` and `repair` (`Health < Max`) remain; owner
+commands are condition-gated (e.g. `repair` only when damaged, `heal`
+only with `TargetCanBeHealed` and not shut down, `stay` / `follow` only
+when the order would actually change, `attack_*` only with a weapon
+attached and `GamePrefs` 45 on, `light_*` only with the headlamp mod).
+
 **`updateDroneSystems` (IL=169):** the per-frame server systems pass: ticks
 `initSuppressVOTimer`; on the server with an owner it lazily registers the
 owner teleport hook (`PlayerTeleportedDelegates += TeleportIfFollowing`,
