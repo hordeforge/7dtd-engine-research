@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: fix OOS total to header-sum
 ## 2026-08-08 - tier-C: reconcile OOS supplement count + utility note
 ## 2026-08-08 - tier-C: INDEX row for stability.md
 ## 2026-08-08 - tier-C: fix SpawnEntry leaf key-method claim
