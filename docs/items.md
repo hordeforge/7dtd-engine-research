@@ -742,6 +742,42 @@ the runtime `actionData` list (the held path reads
 `GetBlockHit`; damage scaled by `EffectManager.GetValue` passive effects; server
 path applies entity/block damage (same authority model as melee `Hit`).
 
+**`ItemActionRanged` leaf helpers (all IL-verified):**
+`TryExecuteAction(data)` (IL=562) is the fire-trigger state machine: it
+drives the burst window (`burstShotStarted` / `burstShotFinished`), the
+`twitch_no_attack` and `ttCannotUseAtThisTime` gates, the auto-fire loop
+(`ConsumeAmmo` + `fireShot(idx, data, ref ...)` per shot) with
+`requestReload` on an empty magazine, and the burst-complete reload /
+release path. `triggerReleased(data, idx)` (IL=33) marks `bPressed` false /
+`bReleased` true, ships `ItemActionEffectsServer(entityId, slotIdx, idx, 0,
+zero, zero, 0)` and resets `state`.
+`GetIdealRangeForAI(data)` (IL=23) is
+`EffectManager.GetValue(11, itemValue, Range, holder, ...)` (the AI
+engagement distance); `getDamageBlock(data)` (IL=12) /
+`getDamageEntity(data)` (IL=11) delegate to
+`ItemActionAttack.GetDamageBlock/Entity` with the action index.
+`GetReloadFlags(data)` (IL=147) is the reload-status bitmask: bit 1 reload
+in progress, bit 2 local inventory-cancel, bit 3 jam, bit 4 no ammo in
+inventory/bag and not `HasInfiniteAmmo`, bit 5 magazine empty (`Meta == 0`),
+bit 6 magazine non-empty, bit 7 magazine full (`Meta == BulletsPerMagazine`);
+bit 0 is cleared at the end.
+`CycleAmmoType(data, excludeNonUnderwaterAmmoTypes)` (IL=85) walks the
+magazine list backward from `SelectedAmmoTypeIndex` to the first type with
+bag + inventory ammo (skipping non-underwater types when asked) and calls
+`SwapSelectedAmmo` (IL=41, same-index reload shortcut or the item-id
+`SwapAmmoType`); `SwapAmmoType(entity, ammoItemId)` (IL=149) cancels the
+reload, `removeCurrentlyLoadedAmmunition`s the chamber
+(IL=137: returns the `Meta` rounds to the bag / inventory or
+`ItemDropServer`s them with the `itemdropped` sound, zeroes `Meta`), cycles
+forward to the next type with ammo (`SetAmmoType` IL=55 for an explicit
+index), reloads, and re-holsters.
+`NotReloadCancelled(data)` (IL=10) is `!isReloadCancelled &&
+!isWeaponReloadCancelled`; `ResetBurstShot(data)` (IL=10) clears the burst
+flags and count; `ResetOldAccuracy()` (IL=3) restores `_oldAccuracy = 1`;
+`setSelectedAmmoById(ammoItemId, gun)` (IL=28) writes the gun's
+`SelectedAmmoTypeIndex` for the matching magazine entry; `get_aiBurstDelay`
+/ `get_aiBurstShot` (IL=3 each) expose the AI burst ranges.
+
 **`ItemActionMelee` (classic melee, `: ItemActionAttack`):**
 `ExecuteAction` (IL=116) is release-gated: a released click sets
 `bFirstHitInARow = true` and returns; a held tick passes the `Delay` gate
