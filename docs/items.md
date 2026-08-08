@@ -895,6 +895,14 @@ Magazine capacity is passive **9** applied over `BulletsPerMagazine`.
 sets `isReloadCancelled`, `isWeaponReloadCancelled = item.HasReloadAnim`,
 `isChangingAmmoType = false`, and when the firing state was non-idle resets
 it and fires `ItemActionEffects(..., 0, ...)` (the cancel effect).
+`EntityPlayer.IsReloadCancelled` (IL=36) reads that flag back: it scans the
+held item's `actionData` for an `ItemActionDataRanged` whose
+`isReloadCancelled` is set (the client-side gate that stops the reload
+sound/anim after a cancel).
+
+**Small `EntityPlayer` hooks:** `InvokeTeleportDelegates` (IL=8) is a
+null-guarded invoke of the `PlayerTeleportedDelegates` callback list;
+`IsSavedToNetwork` (IL=2) is false.
 
 **`ItemActionEat` leaves:** `NeedPrompt(data)` (IL=13) is
 `UsePrompt && !bPromptChecked` (the eat-confirmation gate).

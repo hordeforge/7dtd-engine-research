@@ -148,6 +148,15 @@ Each server handler mutates `PartyManager.Current`, then broadcasts the new stat
 `PlayerMoveController.updateRespawn` when the `AutoParty` (`EnumGameStats` 56) world
 stat is on, so players auto group after respawn.
 
+**`EntityPlayer` party hooks:** `HandleOnPartyChanged` / `HandleOnPartyJoined`
+(IL=11 each) are null-guarded invokes of the `PartyChanged` / `PartyJoined`
+delegates with `(party, this)`; `HandleOnPartyLeave(oldParty)` (IL=10)
+invokes `PartyLeave` with `(oldParty, this)` - the per-player event hooks
+the party code raises on membership change. Invite bookkeeping:
+`HasPendingPartyInvite(playerEntityID)` (IL=11) resolves the id to an
+`EntityPlayer` and checks `partyInvites.Contains`; `RemovePartyInvite(id)`
+(IL=17) removes it when present.
+
 ### 2.3 Shared party scope
 
 `Party` aggregates member state for shared mechanics:

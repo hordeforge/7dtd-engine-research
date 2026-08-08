@@ -78,6 +78,13 @@ participant is the primary player) or broadcasts a fresh
 `NetPackageTwitchVoteScheduling` on channel **192** to that participant,
 then dequeues it.
 
+**`EntityPlayer` Twitch hooks:** `HandleTwitchActionsTempEnabled(newState)`
+(IL=8) applies the new `TwitchActionsStates` only while a temporary state is
+active; `HasTwitchMember` (IL=9) is `Party?.HasTwitchMember() ?? false`;
+`HasTwitchVoteLockMember` (IL=9) is `Party?.HasTwitchVoteLock()` - the
+per-player gates that couple Twitch action availability to party
+composition.
+
 **`TwitchManager.Update` (IL=1585) init-state machine + running loop:** the
 manager's frame peer runs only with a live world and players. It is a
 `switch` over `InitState` (9 targets): state 0 subscribes
