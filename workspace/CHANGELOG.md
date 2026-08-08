@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: swim-mode client controller
+
+EntityPlayerLocal.SwimModeTick (IL=151, entity-ai.md): swim enter MinEvent 76,
+free-fly motor setup, idle sink 0.003 / move gravity 0 / sprint 0.0024 (78),
+60-tick stamina-exhausted slow (79 on exit). verified from IL. Commit 7319975.
 ## 2026-08-08 - tier-C: shelter enclosure scan
 
 EntityPlayerLocal.ShelterFrameUpdate (IL=184, weather-environment.md):
