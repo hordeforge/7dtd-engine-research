@@ -3752,6 +3752,15 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 | `EntityVHelicopter` | EntityDriveable | PhysicsInputMove, Update, SetWheelsForces, Init |
 | `EntityZombie` | EntityHuman | get_AimingGun, set_AimingGun |
 | `EntityZombieDog` | EntityEnemyAnimal | Init, OnUpdateLive, Awake, OnEntityTargeted |
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `AIDirectorSmellMarker` | Object | Tick, Construct, IntensityForPosition |
+| `AIDirectorZombieState` | Object | Construct, Reset, get_Zombie |
+| `BuffEntityUINotification` | Object | get_Units, get_DisplayMode, get_CurrentValue |
+| `EntityMeshCache` | MonoBehaviour | TryGetMeshData, EqualsCollection, InitData |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining

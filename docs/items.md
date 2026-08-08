@@ -2141,6 +2141,32 @@ The non-action leaves:
 | `ItemActionDataCatapult` |  |  |
 | `ItemActionDataSpawnEntity` |  |  |
 | `ItemActionDataZoom` |  |  |
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `ItemActionEntryAssemble` | BaseItemActionEntry | OnActivated, RefreshEnabled, setWindowsDirty |
+| `ItemActionEntryCraft` | BaseItemActionEntry | OnActivated, hasItems, RefreshEnabled |
+| `ItemActionEntryDrop` | BaseItemActionEntry | OnActivated, RefreshEnabled, OnDisabledActivate |
+| `ItemActionEntryEquip` | BaseItemActionEntry | OnActivated, RefreshEnabled |
+| `ItemActionEntryFavorite` | BaseItemActionEntry | OnActivated |
+| `ItemActionEntryMarkdown` | BaseItemActionEntry | OnActivated |
+| `ItemActionEntryMarkup` | BaseItemActionEntry | OnActivated |
+| `ItemActionEntryPurchase` | BaseItemActionEntry | OnActivated, RefreshEnabled, refreshBinding |
+| `ItemActionEntryRecipes` | BaseItemActionEntry | OnActivated, RefreshEnabled |
+| `ItemActionEntryRepair` | BaseItemActionEntry | OnActivated, RefreshEnabled, OnDisabledActivate |
+| `ItemActionEntryResetPrice` | BaseItemActionEntry | OnActivated |
+| `ItemActionEntryScrap` | BaseItemActionEntry | OnActivated, HandleRemoveAmmo, ItemStackController_TimeIntervalElapsedEvent |
+| `ItemActionEntrySell` | BaseItemActionEntry | OnActivated, RefreshEnabled, OnDisabledActivate |
+| `ItemActionEntryShowChallenge` | BaseItemActionEntry | OnActivated, RefreshEnabled |
+| `ItemActionEntryShowCosmetics` | BaseItemActionEntry | OnActivated, RefreshEnabled |
+| `ItemActionEntryShowPerk` | BaseItemActionEntry | OnActivated, RefreshEnabled |
+| `ItemActionEntryTake` | BaseItemActionEntry | getItemStack, RefreshEnabled, OnActivated |
+| `ItemActionEntryTrackRecipe` | BaseItemActionEntry | OnActivated |
+| `ItemActionEntryWear` | BaseItemActionEntry | OnActivated |
+| `ItemDisplayEntry` | Object |  |
+| `ItemStackExtensions` | Object | GetArrayHashCode |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining

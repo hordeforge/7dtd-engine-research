@@ -936,6 +936,20 @@ not (the parent/child split of the vertical sign).
 | `BlockShapeBillboardDiagonal` | BlockShapeBillboardAbstract | renderFull |
 | `BlockStatistics` |  |  |
 | `BlockTorch` | BlockParticle | OnBlockPickedUp, getParticleOffset |
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `BlockHighlighter` | Object | AddBlock, EnforceTemplateLoaded, EnforceGo |
+| `BlockParticleCreationData` | ValueType |  |
+| `BlockToolTerrainAdjust` | Object | CheckKeys, GetLocalDensityMap, ExecuteUseAction |
+| `BlockToolTerrainPaint` | Object | CheckKeys, GetLocalDensityMap, ExecuteUseAction |
+| `BlockToolTerrainSmoothing` | Object | HasValidNeighbor, SnapTerrain45, SnapTerrain22 |
+| `BlockTools` | Object | CubeRPC, HasValidNeighbor, CopyIntoStorage |
+| `BlockUVRect` | ValueType | ToString |
+| `BlockUtilityNavIcon` | Object | UpdateNavIcon, RemoveNavObject |
+| `BlocksTexture` | Object | ToString |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining

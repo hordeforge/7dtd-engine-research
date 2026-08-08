@@ -803,6 +803,19 @@ the sections above. The platform cloud-save backend is native (residual).
 | `ChunkProviderGenerateWorld.SaveAll` | 46 | prefab decorator save; spawn points; `RegionFileManager.MakePersistent` + `WaitSaveDone`; event prefabs |
 | `PersistentPlayerList.SavePersistentPlayerData` | 12 | server non-edit: write `{SaveGameDir}/players.xml` |
 
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `SaveDataLimit` | Object | ToPrefValue, FromPrefValue, SetLimitToPref |
+| `SaveDataLimitExtensions` | Object | TryGetSaveDataLimitType, GetRegionSizeLimit, CalculateTotalSize |
+| `SaveDataLimitUIHelper` | Object | SetCurrentValue, AddComboBoxInternal, Load |
+| `SaveDataMergedPlatformSaveGameIOProvider` | Object | CreateCachedManagedPathRegex, InitEnsureSameCacheUser, InitMoveToCache |
+| `SaveGameIOProvider` | Object | ManagedFileWrite, ManagedFileRead, ManagedDirectoryInfoEnumerateFiles |
+| `SaveGameIOProviderFixedRoot` | SaveGameIOProvider | GetPath |
+| `SaveGameProvider` | SaveGameIOProviderFixedRoot | UpdateSizes, ShouldLimitSize, add_Initialized |
+| `SaveGameProviderHelper` | Object | GetManagedPathFromBaseAndSubPath, GetManagedPathsFromBaseAndSubPaths |
+
 ## Changelog
 
 - **2026-08-08:** WorldChunkCache.NotifyOnChunkBeforeSave (IL=19):

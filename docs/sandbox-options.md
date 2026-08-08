@@ -464,6 +464,14 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
 | `EnumGamePrefGroup` |  |  |
 | `SandboxOptionValueSetBool` |  |  |
 | `SandboxOptionValueSetInt` |  |  |
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `SandboxOptionValue` | ValueType |  |
+| `SandboxPresetGroupData` | ValueType | Equals, GetHashCode, Equals |
+| `SandboxPresetInfo` | ValueType | Equals, GetHashCode, Equals |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining

@@ -847,6 +847,13 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 | `NetPackageEntityLookAt` | NetPackageEntityTargeted | ProcessPackage, write, read, Setup |
 | `NetPackageEntitySpawnResponse` | NetPackage | ProcessPackage, write, read, Setup |
 | `NetPackageLight` |  |  |
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `ConnectionInformation` | Object |  |
+| `ConnectionInformation` | Object |  |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining

@@ -1028,6 +1028,16 @@ if two weather packages arrive in the same `Time.frameCount`.
 | `RegionExtensions` |  |  |
 | `RegionFileAccessRaw` | RegionFileAccessMultipleChunks | OpenRegionFile, GetRegionCoords, ReadDirectory, get_ChunksPerRegionPerDimension |
 | `RegionFileAccessSectorBased` | RegionFileAccessMultipleChunks | GetRegionCoords, ReadDirectory, OpenRegionFile, get_ChunksPerRegionPerDimension |
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `ChunkPreviewData` | Object | set_WorldPosition, set_PrefabInstance, set_PrefabData |
+| `ChunkVertexLayer` | Object | Reset, setYPosAt, setAt |
+| `PrefabMarkerEntry` | XUiListEntry`1<XUiC_PrefabMarkerList/PrefabMarkerEntry> | CompareTo, MatchesSearch, get_Marker |
+| `WorldMove` | ValueType | PerformMove, get_CountOfAssociatedSavesInSameStorage, get_IsReady |
+| `WorldPreviewTerrain` | Object | createMesh, GenerateTerrain, destroyTerrain |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining

@@ -214,6 +214,12 @@ absent, else `chunk.GetTerrainNormal(toBlockXZ(x), toBlockXZ(z))`.
 sampling, int32 surface stamp) are RealEarth product knowledge, not stock RE:
 see `7days-realworld/docs/realearth-review.md`.
 
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `TerrainAndWater` | Object |  |
+
 ## Changelog
 
 - **2026-07-18:** Open-gaps section replaced with Closed managed table + product/ops list (residual policy).  

@@ -1273,6 +1273,12 @@ above.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Content and native residuals |
 
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `SpawnNearFriendsListEntryController` | XUiC_List`1/XUiC_ListEntry<XUiC_SpawnNearFriendsList/ListEntry> | bindingCanShowProfile, bindingBiomeName, Init |
+
 ## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.GetSpawnPoint (IL=24): SpawnPoints[0] ->

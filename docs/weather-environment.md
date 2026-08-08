@@ -374,6 +374,12 @@ from the same clock and the received weather snapshot.
 | [full-surface.md](full-surface.md) | Whole-assembly map |
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `BiomeAtmosphereEffects` | Object | Update, getColorFromSpectrum, Init |
+
 ## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.WeatherBuffUpdate (IL=45): weatherBuff

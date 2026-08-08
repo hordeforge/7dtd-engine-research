@@ -979,6 +979,14 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 | `TraderComparer` |  |  |
 | `TraderItem` |  |  |
 | `TraderItemEntry` |  |  |
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `CraftingCategoryDisplayEntry` | Object |  |
+| `Reward` | Object | set_Title, set_Id, set_Cost |
+| `TraderDisplayInfo` | Object | Refresh, GetTimeText, GetTimeTitle |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining

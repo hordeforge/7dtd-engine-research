@@ -499,6 +499,21 @@ else **1000** ticks.
 | `MeshGeneratorPrefab` | MeshGenerator | build, CalculateSecondaryPosition, calcLights, calcTopSoil |
 | `WaterPoint` |  |  |
 | `WaterSetInfo` |  |  |
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `DynamicMeshUnity` | Object | DeleteDynamicMeshData, GetOrCreateDynamicMeshChunksList, GetMeshSize |
+| `DynamicMeshVoxel` | Object | QefToFile, GetByteLength, GetByteLength |
+| `LightValues` | ValueType | IsEqual |
+| `Lighting3DArray` | Array3DWithOffset`1<Lighting> | SetPosition, get_Item, GetLight |
+| `LightingAround` | Object | SetStab, set_Item, get_Item |
+| `WaterClippingUtils` | Object | GetCubePlaneIntersectionEdgeLoop, DebugDrawIntersectionSurface, DebugDrawCubeVertPlaneOffsets |
+| `WaterClippingVolume` | Object | ApplyClipping, Prepare |
+| `WaterDebugRenderer` | Object | LoadFromChunk, GetOrCreateLayer, Clear |
+| `WaterDebugRendererLayer` | Object | RegenerateTransforms, Draw, SetWater |
+| `WaterMeshUtils` | Object | RenderFace |
+
 ## Changelog
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
