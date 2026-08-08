@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vending machine autobuy
+
+TileEntityVendingMachine (loot-economy.md): TryAutoBuy (IL=227) simulated-
+customer restock fired from XUiC_TraderWindow.OnOpen - threshold roll +
+minimumAutoBuyCount gate, RandomRange(1, count/10) purchases of eligible
+entries (Markup<=0, econ value>0, SellableToTrader), GetBuyPrice + 
+AvailableMoney, threshold reset on success / ramp on failure, one-day
+re-entry; UpdateTick (IL=25) is the separate rental-expiry
+ClearVendingMachine. verified from IL + Xref. Commit b2fefbd.
 ## 2026-08-08 - tier-C: dropped-item distraction mechanic
 
 EntityItem (loot-economy.md): SetItemStack (IL=115) distraction config from
