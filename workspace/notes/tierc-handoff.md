@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `d8d51e0` ItemAction leaves (Melee, Cancel, ExchangeItem, DisconnectPower) |
-| Commits since dry-run `3b61d9c` | ~1166 |
+| HEAD (at handoff write) | `00e7fc3` ItemAction leaves (UseOther, TextureBlock, spawn previews) |
+| Commits since dry-run `3b61d9c` | ~1167 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemAction leaves (UseOther, TextureBlock, spawn previews)
+
+ItemActionUseOther CanExecute/ExecuteAction (twitch 177 gate, medical guards, onSelfHealedOther 13, consume/create-item); ItemActionTextureBlock.GetUserData paint color; SpawnTurret/SpawnVehicle preview lifecycle (StartHolding/setupPreview/StopHolding) (verified)
 ## 2026-08-08 - tier-C: ItemAction leaves (Melee, Cancel, ExchangeItem, DisconnectPower)
 
 ItemActionMelee ExecuteAction/GetExecuteActionTarget/GetCrosshairType; ItemActionCancel prev-slot cancel; ItemActionExchangeItem ExecuteAction/OnHoldingUpdate/ReadFrom/isFocusingBlock; ItemActionDisconnectPower ExecuteAction/OnHoldingUpdate/GetPoweredBlock/IsActionRunning (verified)
