@@ -551,6 +551,32 @@ stateDiagram-v2
   Networking --> Ready
 ```
 
+**Flag/property leaves (all IL-verified):** `get_IsLocked()` (IL=34) is true
+when any of `InProgressCopying` / `Decorating` / `Lighting` /
+`Regeneration` / `Unloading` / `Saving` / `Networking` / `WaterSim` is set;
+`get_IsLockedExceptUnloading()` (IL=30) drops the `Unloading` member;
+`get_IsInitialized()` (IL=16) is `!NeedsLightCalculation &&
+!InProgressDecorating && !InProgressUnloading`.
+`get_NeedsRegeneration()` (IL=21) / `get_NeedsRegenerationAt()` (IL=19) are
+the Monitor-locked reads of the volatile `m_NeedsRegenerationAtY` bitmask
+(the `> 0` form vs the raw value); `set_NeedsRegenerationAt(value)` (IL=28)
+ORs `1 << ((value >> 4) & 31)` (the 16-block Y-slice bit, matching the
+delayed-regen layout); `set_NeedsRegeneration(value)` (IL=54) first frees
+every mesh layer (zeroes `MeshLayerCount`, clears `m_layerIndexQueue`,
+pool-frees `m_meshLayers`) under the layer lock, then under the regen lock
+sets `m_NeedsRegenerationAtY = 65535` (all layers) or 0, mirroring
+`NeedsRegenerationDebug`. `get_NeedsCopying()` (IL=3) is `HasMeshLayer()`;
+`get_StopStabilityCalculation()` (IL=3) reads `stopStabilityCalculation`.
+`get_ChunkPos()` (IL=8) builds `Vector3i(m_X, m_Y, m_Z)`; `set_ChunkPos(v)`
+(IL=14) / `set_X(v)` / `set_Z(v)` (IL=9 each) clear `cachedToString`, store
+the coordinate(s) and run `updateBounds()` (set_ChunkPos does not touch Y);
+`get_Y()` (IL=3) reads `m_Y`; `ExitWriteLock()` (IL=4) releases the
+`sync` `ReaderWriterLockSlim`.
+`IsEmptyLayer(idx)` (IL=22) is true when `idx >= m_BlockLayers.Length` or
+the layer is null with `chnWater.IsDefaultLayer(idx)` (`PrefabChunk`
+overrides it with a constant 0); `GetSizeOfMesh(idx)` (IL=26) sums
+`sizeOfMesh[channel][idx]` across channels (the mesh-budget read).
+
 ---
 
 ## 5. Mutation / dirty
