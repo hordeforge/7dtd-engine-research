@@ -868,6 +868,26 @@ within a per-frame byte budget; `AdminTools` and `StockFileHashes` use it
 for the world-file integrity checks. `WaveReader` (a WAV stream reader,
 `Read(float[])` IL=54) loads audio assets, client-side.
 
+## Threading-semantics and collider config leaves
+
+- **`IMapChunkDatabase/DirectoryPlayerId`** (fields `file`, `dir`): the
+  per-player directory record of the async map-chunk database, built by
+  `GameManager` when a player's map data is saved/loaded (`SavePlayerData`
+  on the dedicated path queues the map-chunk DB save task). The minimap
+  producer side is [protocol-packages.md](protocol-packages.md) §3.3.
+- **`NoThreadingSemantics`** (`Synchronize` / `InterlockedAdd` stubs): the
+  `IThreadingSemantics` fallback with no real locking; `World` builds its
+  `SharedChunkObserverCache(chunkManager, 3, new NoThreadingSemantics())`
+  with it, so the shared chunk-observer cache uses plain synchronous access
+  on the main thread.
+- **`PhysicsBodyColliderConfiguration`** (`Read` IL=160 / `Write` IL=100 /
+  `vecToString` / `vecFromString`): the XML collider config record the
+  `PhysicsBodyBoxCollider` / `PhysicsBodyCapsuleCollider` read (center /
+  size / radius / height vectors serialized as strings); the base
+  `PhysicsBodyColliderBase.enableRigidBody` (IL=40) toggles the entity
+  rigidbody, so the config only matters where entity physics bodies are
+  instantiated.
+
 ## TaskManager (the game-code async task layer)
 
 A small scheduling layer on top of `ThreadManager.AddSingleTask`
