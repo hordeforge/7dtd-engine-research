@@ -284,6 +284,15 @@ then `TryExit` / `ReleaseLock` under the wrapper's lock discipline.
 writers. (For the record the dead `WriteRegion` body still contains the old field
 layout and retry guards 5 / 10, but nothing outside the method invokes it.)
 
+**Dead generic template:** `DynamicMeshDataQueue<T>` (38 methods) is a
+load/save/cache lifecycle queue (`AddSaveRequest`, `TryLoadItem`, `SaveItem`,
+`ReleaseBytes`, `TryGetData`, byte accounting via `MBytesLive` /
+`MBytesReleased`, pooling, `LogMemoryUsage`). `tools/bin/RefScan.exe` reports
+**0 external references** on b14: nothing instantiates or calls it. The live
+queue is the `DynamicMeshChunkDataStorage<T>` described above
+(`DynamicMeshThread.ChunkDataQueue`); do not treat the dead template as the
+storage contract.
+
 ---
 
 ## 5. Streaming to clients
