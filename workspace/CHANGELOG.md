@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: join world-file filter
+
+GameUtils.GetWorldFilesToTransmitToClient (IL=85, chunk-providers.md): join
+download filter excluding _processed twins, GenerationInfo, Version.txt,
+checksums.txt, .bak; feeds NetPackageWorldFolder.prepareWorldFolderData and
+NetPackageWorldInfo.PrepareWorldHashes. verified from IL + Xref. Commit
+8f53e4f.
 ## 2026-08-08 - tier-C: harvest drop pipeline
 
 GameUtils.HarvestOnAttack (IL=623, items.md 4.2): local-player gate,
