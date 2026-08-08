@@ -198,6 +198,17 @@ queue record `RecipeQueueItem.Write` (IL=82, version 2) is:
 `Recipe` (full frame above). Recipes and queue items ride the workstation /
 backpack UI sync packages ([protocol.md](protocol.md)).
 
+`RecipeQueueItem.Read` (IL=116) mirrors it: version **u16** (below 2, one i32 is
+read and discarded), then the same fields; at version >= **2** the trailing
+recipe uses the full `Recipe.Read` frame, below it the inline legacy shape
+(`itemValueType`, `count`, ingredients count + `ItemStack.Read` each,
+`craftingTime`, `craftExpGain`, `IsScrap`). A missing trailing recipe with a
+non-zero discarded value warns
+`[RecipeQueueItem] In-progress recipe has outdata data and has been discarded.`
+`ReadLegacy` (IL=101) is the header-less v1 shape; `Clear` (IL=32) nulls the
+recipe, resets the fields (`OneItemCraftTime = -1`,
+`StartingEntityId = -1`) and clears the repair item.
+
 ---
 
 ## 3. Recipe unlock progression
@@ -270,6 +281,9 @@ report the sizes for the UI.
   CraftedItem hook.
 ## Changelog
 
+- **2026-08-08:** RecipeQueueItem read side: Read (IL=116) version u16 +
+  legacy inline recipe below v2 + outdata warning; ReadLegacy (IL=101)
+  header-less v1; Clear (IL=32) field resets.
 - **2026-08-08:** ProgressionClass: ModifyValue with calculated level;
   CalculatedCostForLevel multiplier/override; GetCalculatedMaxLevel
   requirement binary search + clamp (attribute 20 default); AddLevelRequirement/
