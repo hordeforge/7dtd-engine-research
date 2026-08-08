@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: AIDirector console-debug leaves
+
+DebugTick/FrameLateUpdate emitters, name/latency toggles via NetPackageDebug, DebugLatencyOff, freeze flag, LogAIExtra gate (verified)
 ## 2026-08-08 - tier-C: Chunk coroutine iteration + geometry/bounds leaves
 
 LoopOverAllBlocksCoroutine per-layer yield, updateBounds corner literals, GetSameDensityValue, GetBlockWorldPosZ (verified)
