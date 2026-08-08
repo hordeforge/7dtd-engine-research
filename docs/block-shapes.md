@@ -219,6 +219,16 @@ Middle=6, None=255`. `BlockFaceFlag` is the bitmask twin: `Top=1, Bottom=2,
 North=4, West=8, South=16, East=32`, with composites `All`/`Solid=63` and
 `Axials=60`.
 
+**Hit-face resolution (`GameUtils.GetBlockFaceFromHitInfo`, IL=385):** the
+raycast-hit-to-face mapping: with a readable `MeshCollider` it fetches the
+mesh vertices/triangles, computes the face center and the un-normalized
+cross-product normal from the hit triangle, then shifts the three vertices
+into block-local space (wrapping each axis by +/-16 across chunk borders,
+accounting for multiblock parents), and for a `BlockShapeNew` block
+rotates the vertices back by the inverse of `shape.GetRotation` before
+`GetBlockFaceFromColliderTriangle` picks the face (255 = none). This is
+the face the placement/`GetRotatedBlockFace` flows consume.
+
 `BlockFaceFlags` is a static helper: face-to-offset vectors, opposite faces,
 nearest-face-for-direction, yaw-for-face, and string (de)serialization via a
 face character table. The server-relevant core is `RotateFlags(mask, rotation)`:
