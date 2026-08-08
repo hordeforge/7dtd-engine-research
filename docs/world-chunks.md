@@ -265,6 +265,15 @@ mesh flags; clear `entityStubs`; for each of the 16 `entityLists`: move every
 `IsSavedToFile()` entity into `entityStubs` as `EntityCreationData(entity,
 true)` and clear the list (the stubs are re-spawned on next `OnLoad`).
 
+**Entity-band tracking (`Chunk.AdJustEntityTracking`, IL=50):** with the
+entity in the chunk, recomputes its y-band `floor(pos.y / 16)` (clamped
+0..15) and, when it differs from `chunkPosAddedEntityTo.y`, removes the
+entity from the old `entityLists[band]`, stores the new band, adds it to
+the new list and marks the chunk modified - the per-16-block-band entity
+bucket the unload/interest paths scan. `GetTileEntities` (IL=3) is the
+`tileEntities` `DictionaryList`; `RemoveAllTileEntities` (IL=11) clears it
+and flags the chunk modified when it was non-empty.
+
 **`Chunk.OnLoad(world)` (IL=97):** server side only: for each `entityStub`
 whose id is not already present in the world → `SpawnEntityAsync(world, stub,
 null)`; `removeExpiredCustomChunkDataEntries(worldTime)`; per block layer
