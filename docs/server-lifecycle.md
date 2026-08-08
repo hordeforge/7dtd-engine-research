@@ -251,6 +251,19 @@ live player via `PlayerToEntityMap` + `World.GetEntity` (null on miss).
 `HandlePlayerDetailsUpdate(userData, name)` (IL=14) refreshes
 `PlayerName.Update(name, primaryId)`.
 
+**Backing collection:** `Players` is an
+`ObservableDictionary<PlatformUserIdentifierAbs, PersistentPlayerData>` (28
+methods), the change-notifying dictionary template. Each mutation funnels into
+`OnEntryModified` with an `EChangeType` (0 = added, 1 = removed, 2 = value
+updated) and additionally fires the specific `EntryAdded` / `EntryRemoved` /
+`EntryUpdatedValue` events; the generic `EntryModified` event carries the
+`DictionaryChangedEventArgs<K,V>`. Server-side subscribers: the name-collision
+resolution below hooks `EntryModified`, `PlayerInteractions` reads `Values`,
+`PlatformUserManager` reads `Keys`; the same template backs the XUi data
+binding. The sibling `BiDictionary<K,V>` and `OneToOneDictionary<K,V>`
+templates are unreferenced (dead, see
+[dedicated-leftovers.md](dedicated-leftovers.md)).
+
 **Identity maps:** `MapPlayer(ppd)` (IL=18) fills `EntityToPlayerMap[EntityId]`
 and `PlayerToEntityMap[primaryId]` when `EntityId != -1`; `UnmapPlayer(user)`
 (IL=25) reverses both and resets `EntityId = -1`. `CreatePlayerData(primaryId,
