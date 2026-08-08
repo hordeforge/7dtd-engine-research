@@ -66,6 +66,14 @@ flowchart TB
 timer; there is no per-frame party logic. Party mutation is event driven off the
 command package, not polled.
 
+**`FactionManager.saveFactionDataThreaded` (IL=36):** the worker body behind
+the 60 s save: the `ThreadInfo.parameter` is the pooled
+`PooledExpandableMemoryStream` holding the serialized factions; it copies an
+existing `{saveDir}/factions.dat` to `factions.dat.bak` (only when the save
+dir exists), rewinds the stream, `WriteStreamToFile`s it, frees the pooled
+stream, and returns -1. `PrintData` (IL=25) logs every faction's
+`ToString` (the `printfactions`-style debug output).
+
 ---
 
 ## 2. Party model and lifecycle
