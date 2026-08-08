@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: mod + twitch + chunk-providers third spot-check (16 claims exact)
 ## 2026-08-08 - tier-C: save + network + weather third spot-check (18 claims exact)
 ## 2026-08-08 - tier-C: loot + quests + progression third spot-check (22 claims exact)
 ## 2026-08-08 - tier-C: combat third spot-check (9 claims exact)
