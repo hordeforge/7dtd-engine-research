@@ -192,6 +192,11 @@ stateDiagram-v2
   buffs not tagged to persist through death.
 - **Tag queries:** `HasBuffByTag` / `RemoveBuffsByTag` operate on `FastTags`, so
   effects and removals are tag-driven, not just name-driven.
+  `removeBuff(BuffValue)` (IL=4) is the direct mark: `buffValue.Remove = true`
+  (the tick drains it); `BuffClass.get_DurationMax` / `get_InitialDurationMax`
+  (IL=3 each) expose `durationMax` / `initialDurationMax`, and
+  `set_DurationMax(v)` (IL=14) seeds `initialDurationMax` from the value when
+  it is still 0 and `v > 0`.
 
 **Passive application (the buff layer of `EffectManager.GetValue`):**
 `EntityBuffs.ModifyValue(effect, ref value, ref perc, tags)` (IL=35) walks
