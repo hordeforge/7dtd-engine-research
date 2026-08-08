@@ -54,7 +54,7 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 | `LeafInfo.exe <asm> <namesFile> <out.tsv>` | Per-type IL fingerprint (base class + declared body-method count + largest-body method names) for a list of type names; backs the [`../docs/inventories/dedicated-leaves.md`](../docs/inventories/dedicated-leaves.md) leaf catalog. |
 | `Coverage.exe <asm> <docsDir> <out.md>` | Programmatic RE-coverage report: call-graph reachability from dedicated entry points vs docs name-mentions, per-namespace + top undocumented-reached gap list. Committable. Backs [`../docs/inventories/coverage-report.md`](../docs/inventories/coverage-report.md). |
 | `WireBodies.exe <asm> <out.md>` | Auto-extracted per-package wire-body catalog: ordered `write()` field/type sequence for every `NetPackage*` (183) + the nested serializers they delegate to (60). Committable. Backs [`../docs/inventories/netpackage-bodies.md`](../docs/inventories/netpackage-bodies.md). |
-| `FullSurface.exe <asm> <outDir>` | Whole-assembly **metadata** map (all 7,413 types): namespace summary + per-type signatures/sizes, no IL bodies. Committable. Backs [`../docs/full-surface.md`](../docs/full-surface.md). |
+| `FullSurface.exe <asm> <outDir>` | Whole-assembly **metadata** map (all 7,432 types): namespace summary + per-type signatures/sizes, no IL bodies. Committable. Backs [`../docs/full-surface.md`](../docs/full-surface.md). |
 | `DumpAll.exe <asm> <outDir> [ns]` | **Full local reversal**: every method body of every type, one file per type. Output is git-ignored (never redistribute); optional namespace prefix filter. |
 
 `src/IlFmt.cs` is a shared IL formatter compiled into each (`IL_XXXX: opcode operand`,

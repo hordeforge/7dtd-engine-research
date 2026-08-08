@@ -8,8 +8,8 @@ method / IL counts) and the honest ledger of how much has a hand-written narrati
 
 ## Scope and the two hard limits on "document 100% in minute detail"
 
-The shipped `Assembly-CSharp.dll` is **7,413 types (incl. nested), 53,011 methods with bodies,
-1,734,742 IL instructions**, across 87 namespaces (regenerate with
+The shipped `Assembly-CSharp.dll` is **7,432 types (incl. nested), 53,235 methods with bodies,
+1,740,737 IL instructions**, across 89 namespaces (regenerate with
 `tools/src/Census` and `FullSurface`). Two constraints shape what this repo can
 honestly hold:
 
@@ -40,7 +40,7 @@ type, every method body. It is git-ignored on purpose.
 
 ## The assembly by functional cluster
 
-All 87 namespaces grouped by role. Counts are methods-with-body / IL from
+All 89 namespaces grouped by role. Counts are methods-with-body / IL from
 `surface-namespaces.md` (regenerate to refresh). `<global>` (6,276 types /
 45,222 methods / 1.52M IL) is 85% of the code and is split by subsystem in the
 narrated docs below, not by namespace.
@@ -64,13 +64,13 @@ narrated docs below, not by namespace.
 | **Bundled third-party libraries** | `UniLinq`, `ICSharpCode.WpfDesign.XamlDom`, `ConcurrentCollections`, `Microsoft.CodeAnalysis`, `SandboxOptions`, `System.*` | Not game logic (vendored libs); out of scope by definition |
 
 Per-namespace counts: `il/surface-v3.1.0/surface-namespaces.md` (regenerate).
-Per-type inventory (all 7,413, names + sizes, no bodies): `surface-types.md` (local).
+Per-type inventory (all 7,432, names + sizes, no bodies): `surface-types.md` (local).
 
 ## Coverage ledger (hand-written narrative)
 
 The narrated corpus targets **the dedicated-relevant managed surface** (the
 project's stated bar, [`coverage.md`](coverage.md)), which is the dedicated sim
-core + wire protocol, a small but load-bearing slice of the 7,413 types.
+core + wire protocol, a small but load-bearing slice of the 7,432 types.
 
 | Subsystem | Narrative | Depth |
 |---|---|---|
