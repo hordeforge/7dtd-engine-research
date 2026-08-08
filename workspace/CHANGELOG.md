@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: refresh completion pin census numbers
 ## 2026-08-08 - tier-C: inert server-update channel
 ## 2026-08-08 - tier-C: Twitch viewer-points ledger
 ## 2026-08-08 - tier-C: GameStatsBridge static mirror
