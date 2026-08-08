@@ -43,6 +43,21 @@ channel 1** (the bulk / terrain / map band):
 | `NetPackagePOIAround` | POI/prefab region data |
 | `NetPackageWorldFolder` | world-folder file transfer |
 
+**`NetPackageWorldFolder.prepareWorldFolderData` (IL=389) is the server-side
+sender.** After a `WaitForSeconds` on `GamePrefs` 189 it logs `Preparing
+World chunks for clients` and streams the world folder through a
+`MemoryStream` + `DeflateOutputStream` (compression level 3): the file list
+comes from `GameUtils.GetWorldFilesToTransmitToClient` (the `_processed` /
+`GenerationInfo` / `Version.txt` / `checksums.txt` / `.bak` filter), each
+entry is written as `"/name"` + `length:i64` then copied in 4096-byte
+buffers, frame-budgeted by `get_MaxTimePerFrame`; `dtm.raw` is special-cased
+through the `writeDtmDelta` coroutine (delta-compressed heightmap). After
+the copy the zip is flushed and the compressed payload is split into
+**65536-byte (64 KiB) parts** (`totalParts = length / 65536`, with the
+remainder as the final shorter part), each shipped as a
+`NetPackageWorldFolder(seqNr, totalParts, part)` - the wire body the client
+reassembles in order.
+
 `protocol.md` previously said game packages use channel 0 and treated other
 channels as "later". Channel 1 is the real second band and it carries the
 heaviest bodies. A clone must bind/route both channels.
@@ -1637,6 +1652,12 @@ customReason    : string
 | [residuals.md](residuals.md) | Non-IL residuals |
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
+## Changelog
+
+- **2026-08-08:** NetPackageWorldFolder.prepareWorldFolderData (IL=389):
+  GamePrefs 189 delay, DeflateOutputStream level 3, filtered file list,
+  dtm.raw writeDtmDelta, 4096-byte frame-budgeted copy, 64 KiB part split
+  (seqNr/totalParts).
 ## Changelog
 
 - **2026-08-08:** NetPackageWorldAreas wire (write IL=31 / read IL=27):
