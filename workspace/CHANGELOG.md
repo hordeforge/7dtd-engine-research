@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ObservableDictionary backing registry
 ## 2026-08-08 - tier-C: OpenSimplex noise stack dead
 ## 2026-08-08 - tier-C: dead collection families (body-verified)
 ## 2026-08-08 - tier-C: AdminBlacklist ban sub-store
