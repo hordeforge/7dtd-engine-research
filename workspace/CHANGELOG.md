@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: entity bag sizing
+
+Entity.InitializeBagFromLootList (IL=39, combat-damage.md): bag allocated
+from the loot container size (size.x * size.y) when unset. verified from
+IL. Commit 78983aa.
 ## 2026-08-08 - tier-C: world file CRC pass
 
 ChunkProviderGenerateWorldFromRaw.<calcWorldFileCrcs>d__29.MoveNext (IL=121,
