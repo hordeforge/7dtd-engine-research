@@ -2380,6 +2380,12 @@ else stores `physicsVel` / `physicsAngVel`, applies them to the rigidbody
 when this is the physics master, and seeds `motion = vel * 0.05`.
 `SetIgnoredByAI` (IL=4) is the `isIgnoredByAI` flag (AI targeting skip);
 `WasAlive` (IL=5) is `!WasDead()` (the respawn-transition latch).
+`GetBlockPosition` (IL=4) is `worldToBlockPos(position)`;
+`GetSpawnerSourceBiomeIdHash` (IL=3) is the spawner biome hash field;
+`IsDriven` (IL=11) is `attachedEntities[0] != null`; `setBeenAttacked`
+(IL=1) is a no-op; `OnBagModified` (IL=15) ships `NetPackageBag` to the
+server when not already there; `CommandIs(given, compare)` (IL=6) is a
+case-insensitive `ReadOnlySpan` equality (the activation-command match).
 `World.GetAIDirector` / `GetDynamiceSpawnManager` / `GetLocalPlayers`
 (IL=3 each) are the field accessors for the director, the dynamic spawner
 and the local-player list; `GameManager.GetPersistentLocalPlayer` /
