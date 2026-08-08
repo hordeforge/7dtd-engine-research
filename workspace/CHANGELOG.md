@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: tooling: regen.sh one-shot regeneration script
 ## 2026-08-08 - tier-C: tooling: shared Seeds.cs (Reach/Coverage de-drift) + consistency test
 ## 2026-08-08 - tier-C: reflection/prefix seed follow-up (narrated 3651->3681; QuestCriteriaLevel + XML families)
 ## 2026-08-08 - tier-C: reachability seeds fixed (webserver 73 + reflection 4+ types reached; narrated 3574->3651)
