@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: RequirementItemTier dead leaf + CommandPermission record
 ## 2026-08-08 - tier-C: name HashSetLong PrimeHelper
 ## 2026-08-08 - tier-C: stability changelog entry
 ## 2026-08-08 - tier-C: stability clear/unspread mechanics closed
