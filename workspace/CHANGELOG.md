@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityFallingTree lifecycle
+
+Awake RB gravity/kinematic by remote; SetBlockPos (IL=111) deco/blockentity
+transform steal, collider disable, collHeight; OnUpdateEntity (IL=91) settle
+-> NetPackageTreeFade (ToClient, int32 id) channel 192 -> DestroyTree
+(IL=37) stump clear when type matches; damage coroutine 0.05s wait,
+External/Crushing, >10 gate. Verified from fresh dumps.
 ## 2026-08-08 - tier-C: EntityFallingTree impact damage
 
 EntityFallingTree.Collide (IL=101) server-only; rel-vel > 1 -> collidedWith;
