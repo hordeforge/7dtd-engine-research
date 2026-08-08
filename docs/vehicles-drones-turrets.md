@@ -302,6 +302,11 @@ layer / collider state, calls `DriverRemoved()` on slot 0, and on the server
 wakes the Rigidbody (`RBActive = true`, `RBNoDriverSleepTime = 0`,
 `isKinematic = false`, `velocity = vehicle.CurrentVelocity`).
 
+Dismount velocity: `GetExitVelocity()` (IL=17) takes `GetVelocityPerSecond()`,
+halves it when grounded (`GetWheelsOnGround() > 0`), then scales by **0.7** -
+the ejected rider keeps a damped share of the vehicle's motion.
+`GetWheelsOnGround` (IL=29) counts `wheels[i].isGrounded`.
+
 ### 4.2b Ownership, lock, password, fuel
 
 - **Owner:** `SetOwner(user)` (IL=5) / `GetOwner()` (IL=4) are
@@ -847,6 +852,10 @@ non-vehicle type is a content contract violation, not a graceful fallback.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native / content residuals |
 
+## Changelog
+
+- **2026-08-08:** EntityVehicle.GetExitVelocity (IL=17) damped dismount
+  velocity (x0.5 grounded, x0.7); GetWheelsOnGround (IL=29) grounded count.
 ## Changelog
 
 - **2026-08-08:** EntityVehicle.hasGasCan (IL=73): fuel item presence in bag
