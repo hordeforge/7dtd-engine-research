@@ -368,6 +368,17 @@ and stored in `m_ObservedEntities`. Join path sets
 `entityIdToSendChunksTo = player.entityId` and `viewDim` from the clamped
 client value ([protocol.md](protocol.md) section 5).
 
+**Shared observers (`SharedChunkObserver` / `SharedChunkObserverCache`,
+server-side):** the cache (`observers` dict keyed by chunk pos, `viewDim`,
+own `chunkManager` ref) hands out refcounted `SharedChunkObserver` records
+(`chunkPos`, `refCount`, `chunkRef: ChunkObserver`, back-refs to the cache
+and its `RemoveObserver` hook). `GetSharedObserverForChunk(pos)` returns the
+existing record (bumping `Reference()`) or creates one; `Dispose` decrements
+and removes at zero. Multiple entities pin one observer for the same chunk
+instead of each holding their own (`MovableSharedChunkObserver` per entity,
+[loop.md](loop.md) entity tick; the cache itself is
+`NoThreadingSemantics` on dedicated).
+
 | Field | Role |
 |---|---|
 | `entityIdToSendChunksTo` | target client entity id; **`-1`** skips network send |
