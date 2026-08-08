@@ -857,6 +857,63 @@ bound as it finds closer hits), null when none qualify.
 `PrefabInstance.Contains(entityId)` across `allPrefabs` (the POI-association
 gate behind quest/POI entity checks).
 
+**Registry list accessors:** `GetAllPrefabs(list)` / `GetPOIPrefabs(list)`
+(IL=19 each) `AddRange` the `allPrefabs` / `poiPrefabs` lists under
+`listsLock`. `HasPrefabsAtXZ(xMin, xMax, zMin, zMax)` (IL=69) binary-searches
+`allPrefabsSorted` from `xMin` and scans forward: true when a prefab's
+padded bbox spans the query rectangle.
+`GetPrefabAtPosition(position, excludeTags, requiredTags)` (IL=254) defaults
+`excludeTags` to `streetTileTag` and `requiredTags` to none when null, then
+binary-searches the x-sorted list for prefabs whose bbox contains the floored
+position and applies the tag filters (exclude = `Test_AnySet` skip, required =
+`Test_AllSet` keep); the trailing scan rule prefers a candidate whose bbox
+starts at a different x from the current pick or further right.
+`GetPrefabsFromWorldPosInside(pos, questTags)` (IL=83) pads `pos` by
+`boundsPad`, collects the quest-tagged prefabs whose padded bbox contains it,
+fans out through `GetPrefabsIntersecting` (IL=114, the parent plus every
+smaller-footprint prefab whose padded bbox intersects it, sorted by
+descending size) and returns the union ordered by descending size.
+
+**Quest POI pickers (all `listsLock`-free, QuestEventManager-driven):**
+`GetRandomPOINearTrader(trader, questTag, difficulty, usedPOILocations,
+entityIDforQuests, biomeFilterType, biomeFilter)` (IL=65) tries up to **3**
+offsets of `trader.PreferredDistanceIndex` (mod 3) through
+`QuestEventManager.GetPrefabsForTrader(traderArea, difficulty, idx, random)`,
+returning the first `ValidPrefabForQuest` pass.
+`ValidPrefabForQuest(trader, prefab, questTag, usedPOILocations,
+entityIDforQuests, biomeFilterType, biomeFilter)` (IL=156) fails when the
+prefab has a used sleeper volume and lacks the quest tag, when its bbox
+corner is in `usedPOILocations`, or when `CheckForPOILockouts` reports one;
+the biome filter is 1 = exact name match, 2 = name in the comma-split list,
+3 = different biome from the trader.
+`GetRandomPOINearWorldPos(...)` (IL=193) draws up to **50** random picks from
+`GetPrefabsByDifficultyTier(difficulty)` requiring a used sleeper volume,
+the quest tag and a matching `DifficultyTier`, plus the used-location /
+lockout / biome gates, and accepts the first pick with
+`minSearchDistance^2 < distSq < maxSearchDistance^2` (center distance).
+`GetClosestPOIToWorldPos(questTag, worldPos, excludeList,
+maxSearchDistanceSquared, ignoreCurrentPOI, biomeFilterType, biomeFilter,
+questKey)` (IL=230) scans `poiPrefabs` (skipping `rwg_tile` names, untagged
+prefabs when a quest tag is set, the current POI when `ignoreCurrentPOI`,
+excluded corners and biome-mismatched ones) into a candidate tuple list, then
+for `questKey == "traderquest"` picks via `chooseBestTrader` (IL=58, the
+candidate whose trader area has the fewest assigned quest POIs) else via
+`chooseClosestPrefab`.
+
+**RWG heightmap stamping:** `copyPrefabsIntoHeightMap(pi, width, height,
+heightData, scale, topTextures)` (IL=318) writes a POI's terrain into the
+raw heightmap: it creates a single-view over `heightData`, warns
+`Prefab {0} outside of the world bounds (position {1})` when the bbox leaves
+`[-w/2, w/2]`, then per column walks the prefab cells; a non-terrain or
+water cell skips the column when above `-yOffset`, a terrain cell computes
+`worldY = bbox.y + y - density/128 - 1` and stores
+`heightVal = worldY / 0.003891051` (the ushort height encoding) when it is
+above ground and higher than the current value (or unconditionally on an RWG
+world), and the top-face texture id
+(`Block.GetSideTextureId(bv, 0, 0)`) lands in `topTextures` - the array that
+feeds the `topTexMap` splat painting in
+[`chunk-providers.md`](chunk-providers.md) §4.1.
+
 **`Prefab` leaf queries:** `IsPosInSleeperVolume(volume, pos)` (IL=47) is the
 strict AABB test `startPos <= pos < startPos + size` (volume must be `Used`);
 `FindSleeperVolumeFreeGroupId()` (IL=31) is the max volume `groupId` plus one.
