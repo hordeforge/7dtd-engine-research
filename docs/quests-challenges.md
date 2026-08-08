@@ -463,6 +463,13 @@ touches in passing:
   activation gate); `HandleRallyMarkerActivation(questCode, prefabPos,
   activated, lockoutReason, extraData)` (IL=36) finds the active quest with
   that code and delegates to `Quest.HandleRallyMarkerActivation(...)`.
+  `ObjectiveRallyPoint.Current_BlockActivate` (IL=182) is the rally-block
+  trigger: it rejects while a Twitch vote is running (`ttWaitForVoteQuest`)
+  and enforces the `startTime` / `endTime` hour window (both -1 = unset;
+  outside the window shows `ObjectiveRallyPointInvalidStartTime` with the
+  bounds), then `OwnerQuest.RemoveSharedNotInRange()`, reads the quest's
+  position data type 2, and on the server claims the POI through
+  `QuestEventManager` before `RallyPointActivate`.
 - **`SharedQuestEntry`**: one party-shared quest offer in the recipient's
   `QuestJournal` (`QuestCode`, `QuestID`, POI name/position/size, `ReturnPos`,
   `SharedByPlayerID`, `QuestGiverID`, plus a `Clone` for journal copies);
@@ -675,6 +682,11 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 
 **Leaf catalog:** every instance in [`inventories/quest-objectives.md`](inventories/quest-objectives.md) (the 38 objective leaves).
 
+## Changelog
+
+- **2026-08-08:** ObjectiveRallyPoint.Current_BlockActivate (IL=182): twitch
+  vote gate, startTime/endTime window, RemoveSharedNotInRange, server POI
+  claim, RallyPointActivate.
 ## Changelog
 
 - **2026-08-08:** QuestJournal rally markers: CheckRallyMarkerActivation
