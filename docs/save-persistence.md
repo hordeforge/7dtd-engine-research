@@ -44,6 +44,18 @@ the managed root it dispatches to `ISaveDataManager.ManagedFileOpen` etc.; other
 falls through to the matching `System.IO.File`/`Directory` call. `SdFileInfo` /
 `SdDirectoryInfo` carry an optional `ManagedPath` so enumeration results stay managed.
 
+**`SdFile` leaf shapes (all IL-verified):** the `Managed*` twins route to
+`ISaveDataManager`: `ManagedReadAllBytes(path)` (IL=29) pools a
+`PooledExpandableMemoryStream`, `ManagedOpen`s the file
+(FileMode.Open / Read / ReadShare), `CopyTo`s and `ToArray`s it;
+`ManagedExists` (IL=4) is `SaveDataManager.ManagedFileExists`;
+`ManagedGetLastWriteTimeUtc` (IL=4) is the manager call and
+`ManagedGetLastWriteTime` (IL=6) converts it `ToLocalTime()`.
+The copy trio `ManagedToManagedCopy` / `ManagedToUnmanagedCopy` /
+`UnmanagedToManagedCopy` (IL=33 each) open the source (Read/ReadShare) and
+the destination (FileMode.Create when `overwrite` else OpenOrCreate,
+Write/ReadShare) and `StreamUtils.StreamCopy` between them.
+
 **Dedicated reality:** `SaveDataUtils.s_isManagementEnabled` is set to
 `MultiPlatform.SaveGameProvider != null` during init (§3). No code in the dedicated
 `Assembly-CSharp` ever assigns `AbsPlatform.SaveGameProvider` (the only
