@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: region extensions, pathing min-heap, regen bookkeeping leaves
+
+RegionFileAccessMultipleChunks dictionary, PathingUtils MinHeapBinned closed set, ChunkManager regen position snapshots (verified)
 ## 2026-08-08 - tier-C: threading/collider config leaves
 
 DirectoryPlayerId map-chunk per-player record, NoThreadingSemantics chunk-observer fallback, PhysicsBodyColliderConfiguration XML (verified)

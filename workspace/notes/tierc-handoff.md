@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `acebf25` threading/collider config leaves (DirectoryPlayerId, NoThreadingSemantics, physics config) |
-| Commits since dry-run `3b61d9c` | ~1209 |
+| HEAD (at handoff write) | `b867473` region extensions, pathing min-heap, regen bookkeeping leaves |
+| Commits since dry-run `3b61d9c` | ~1210 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
