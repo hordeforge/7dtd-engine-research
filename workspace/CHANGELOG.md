@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameManager server leaves (DoSpawn, invite sweep, player-data timer)
+
+Spawn-pref 262 direct spawn, persistent-list accessor, world invite sweep, countdown player-data send (verified)
 ## 2026-08-08 - tier-C: Twitch pimp-pot + blood-moon cooldown bookkeeping
 
 RewardPot/BitPot add/set + chat announce + largest-track, BM window from dusk/dawn offsets, kill leaderboard (verified)
