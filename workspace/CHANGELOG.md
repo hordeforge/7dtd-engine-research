@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: drone LoadMods (visual dispatch + cargo bag resize)
+
+roboticDrone capacity, 7-mod visual switch, bag resize preserves contents (verified)
 ## 2026-08-08 - tier-C: drone pathing (GetPath refinement, followPlannedPath unstick)
 
 Projected-path source, LOS refinement pass (lower/skip), stuck-unstick teleport (verified)
