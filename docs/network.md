@@ -166,6 +166,19 @@ error, shows `mmLblErrorConnectionFailed`, clears `IsConnected` and calls
 (IL=22) logs, runs `DisconnectFromServer()` and shows
 `mmLblErrorConnectionLost`.
 
+**`ProtocolManager` event leaves (all IL-verified):**
+`ConnectionFailedEv(msg)` (IL=34) walks `clients` by
+`currentConnectionAttemptIndex`: when another `INetworkClient` remains it
+tries `clients[idx].Connect(currentGameServerInfo)` (the connect-fallback
+chain), else it resets `CurrentMode` / the attempt index / the pending
+server info and forwards `ConnectionManager.Net_ConnectionFailed(msg)`.
+`DisconnectedFromServerEv(msg)` (IL=7) resets `CurrentMode` and forwards to
+`Net_DisconnectedFromServer`; `InvalidPasswordEv()` (IL=9) resets the mode
+and pending server info and forwards to `Net_InvalidPassword`.
+`ResetNetworkStatistics()` (IL=35) delegates to every client and server;
+`get_HasRunningServers()` (IL=3) reads the backing field;
+`resetStateLater(delay)` (IL=9) is the delayed state-reset coroutine shell.
+
 ---
 
 ## 2. Entity replication (from UpdateTick)
