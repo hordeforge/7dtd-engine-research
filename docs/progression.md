@@ -200,6 +200,33 @@ and `dropBackpack` (523893) ends at
 becomes `NetPackageRequestToSpawnEntity`. `dropBackpack` also reads the static
 `EntityPlayerLocal::DropOnDeathOption` to decide which slots to move.
 
+**`EntityPlayerLocal` death / quit slot handling:**
+- `dropItemOnQuit` (IL=4) is `dropBackpack(false)`.
+- `HandleRemoveRandomItems` (IL=33/34/35, one overload per container type)
+  walks `DestroyLocationSlotList` backwards and clears the recorded slots:
+  `LocationTypes` 0 clears the item-stack array element (`ItemStack.Clear`),
+  1 clears the `Inventory` slot (`SetItem(slot, Empty)`), 2 clears the
+  `Equipment` slot (`SetSlotItem(slot, null, true)`); each entry is removed
+  after clearing.
+- `ShouldRemoveEquipmentOnDeath` (IL=9) is true when the configured
+  `DropOption` is 1 or 6 (equipment is stripped on death for those modes).
+- `EmptyBackpack` (IL=25) sets every bag slot to `ItemStack.Empty` and
+  writes them back; `EmptyToolbelt(start, end)` (IL=21) clears the inventory
+  slot range (skipping `DUMMY_SLOT_IDX`); `EmptyBackpackAndToolbelt`
+  (IL=47) is the combination.
+- `RemoveSpawnPoints(showTooltip)` (IL=19) clears
+  `EntityAlive.SpawnPoints` (the `EntityBedrollPositionList`), shows the
+  `ttBedrollGone` tooltip when asked, and resets
+  `selectedSpawnPointKey = -1` (bedroll removal, [spawning.md](spawning.md) §4).
+- `TryAddRecoveryPosition(pos)` (IL=73) keeps the local `recoveryPositions`
+  list capped at 5, at least 100 m apart (`sqrMagnitude` 10000 from the
+  last entry), only at positions where `World.CanPlayersSpawnAtPos(pos,
+  false)` and no POI occupies the spot (`GetPOIAtPosition` returning null);
+  duplicate positions are rejected.
+- `AdjustItemsForSandboxOptions` (IL=40) runs the per-slot sandbox filter
+  (`ItemStack.AdjustForSandboxOptions`) over the drag-and-drop item, every
+  equipment slot, every inventory slot and every bag slot.
+
 ### The two progression packages a server must handle
 
 `NetPackageEntityAddExpServer::ProcessPackage` (813959) only applies XP when the
