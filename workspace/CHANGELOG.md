@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: un-classify HasParticle (minevent requirement)
 ## 2026-08-08 - tier-C: census numbers in completion-bar + residuals
 ## 2026-08-08 - tier-C: regenerate netpackage wire-body catalog
 ## 2026-08-08 - tier-C: minevent requirement catalog complete (67 leaves)

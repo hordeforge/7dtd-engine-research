@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `7c26917` census numbers in completion-bar + residuals |
+| HEAD (at handoff write) | `b09ac2b` un-classify HasParticle (minevent requirement) |
 | Commits since dry-run `3b61d9c` | ~1316 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
