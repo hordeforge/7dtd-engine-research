@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Equipment worn-gear leaves
+
+ModifyValue per-slot chain; updateInsulation waterProof sum; DropItems +
+DropItemOnGround server drop; insulation/waterproof getters. Verified fresh
+dumps.
 ## 2026-08-08 - tier-C: RecipeQueueItem read side
 
 Read (IL=116) version u16 + legacy inline recipe below v2 + outdata warning;
