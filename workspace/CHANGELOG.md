@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: swim-mode water probe
+
+EntityPlayerLocal.SwimModeUpdateThrottle (IL=258, entity-ai.md): camera duck
+on HasOverheadSpace fail, hip raycast swimClimbing latch. verified from IL.
+Commit 0b1b03c.
 ## 2026-08-08 - tier-C: indoor/outdoor weather buff
 
 EntityPlayerLocal.WeatherBuffUpdate (IL=45, weather-environment.md):
