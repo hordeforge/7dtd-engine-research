@@ -312,6 +312,17 @@ fallback). `GetInt`/`GetFloat`/`GetBool` first consult
 reference exists (the sandbox-override read path; the server uses the plain
 array).
 
+**`GameStatsBridge` (nested in `GameManager`):** mirrors a fixed set of
+`EnumGameStats` (60, 73, 74, 75, 77, 78, 79, 80) into static float fields
+that gameplay math reads instead of the store. `Init` (IL=49) re-subscribes
+`GameStats.OnChangedDelegates` and snapshots every stat via
+`UpdateStaticFields`, which writes `Progression.XPGain`,
+`EntityPlayer.GlobalGameStageModifier` / `BiomeGameStageModifier` /
+`GlobalLootStageModifier` / `BiomeLootStageModifier`,
+`ItemActionAttack.EntityBlockDamagePercent` / `BMBlockDamagePercent`, and
+`LootContainer.GlobalCountModifier` (percent stats converted with
+`ToFloatPercent` = `Convert.ToSingle(v) / 100`).
+
 ## 7. Presets
 
 `SandboxOptionPreset` is a named bag of changed options:
