@@ -295,7 +295,10 @@ this is what advances that player's quests and challenges.
 (trader name + item count), `ClosedContainer` -> `ContainerClosed`
 (container pos + `ITileEntityLootable`), `ClearedSleepers` ->
 `SleepersCleared` (prefab pos), `SleeperVolumePositionAdded` ->
-`SleeperVolumePositionAdd` (pos), `ChangedWindow` -> `WindowChanged`
+`SleeperVolumePositionAdd` (pos), `SleeperVolumePositionRemoved` ->
+`SleeperVolumePositionRemove` (pos), `NPCMet` -> `NPCMeet` (the `EntityNPC`),
+`TwitchEventReceived` -> `TwitchEventReceive`
+(`TwitchObjectiveTypes` + param string), `ChangedWindow` -> `WindowChanged`
 (window name). The `add_` / `remove_` accessors for all ~30 events are the
 standard `Interlocked.CompareExchange` delegate add/remove loops.
 Other leaves: `GetTraderPoiCount(traderArea, difficulty, index)` (IL=30)
