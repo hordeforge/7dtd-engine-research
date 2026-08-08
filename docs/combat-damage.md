@@ -118,6 +118,27 @@ crippled leg hit while alive and walkType not 5 and &lt; 20: `SetWalkType(5)`.
 `AvatarController.DismemberLimb(bodyDamage, restoreState)`; if
 `ShouldBeCrawler` call `SetupCrawler`.
 
+**`DismembermentManager` resolution leaves (all IL-verified):**
+`GetBodyPartHit(flag)` (IL=47) maps the body-damage flag bits to
+`EnumBodyPartHit` (1 -> 2 head, 2 -> 4, 4 -> 64, 8 -> 8, 16 -> 128, 32 ->
+16, 64 -> 256, 128 -> 32, 256 -> 512), with a name-based overload (IL=56)
+matching the `L_*Gore` transform names (head / left / right upper / lower
+arm and leg entries).
+`GetDamageTag(damageType, lastHitRanged)` (IL=21) resolves `blade` / `blunt`
+(null for other types); `IsDefaultGib(matName)` (IL=22) is membership in
+`DefaultBundleGibs`.
+`DismemberPart(flag, damageType, entity, isBiped, useLegacy)` (IL=8) runs
+`dismemberPart` (IL=259): it reads the entity class's `DynamicProperties`
+for the part's `propertyKey` (`Values` + `Data`, `;`-split pairs), chases
+`linked` targets, picks a part via `readRandomPart` (falling back to the
+`blade` variant when a `blunt`-keyed part is missing), copies every
+`DismemberedPartData` field (prefab path, scale / rot, targetBone,
+particles, detachable / mask / scale-out flags, solver target, child /
+insert / mask-scale objects, `DismemberMaterial`), and debug-logs the
+result. `getDismemberedPart(part, isBiped)` (IL=17) /
+`hasDismemberedPart(part, isBiped)` (IL=10) read the static
+`BipedDismemberments` / `QuadrupedDismemberments` tables.
+
 **`BodyDamage.IsAnyLegMissing`:** Flags & **480** != 0.
 **`IsAnyArmOrLegMissing`:** Flags & **510** != 0.
 **`IsCrippled`:** Flags & **12288** (4096|8192) != 0.
