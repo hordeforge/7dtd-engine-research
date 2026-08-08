@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: player persistence + spawn payload leaves
+
+PersistentPlayerData Read/ReadXML/trivials (bedroll sentinel, offline hours,
+quest positions); AllyStore GetStatus/HasAllies/CopyFrom/ApplyTransition;
+PlayerDataFile Read (IL=564) version gates, ToPlayer (IL=463) full apply +
+dummy-slot drop, FromPlayer (IL=300) extract, Save .bak/.tmp; ECD
+ApplyToEntity (IL=176), readXml/writeXml, copy ctor. All verified fresh dumps.
 ## 2026-08-08 - tier-C: PersistentPlayerList + catalog leaves
 
 PPL: identity maps (MapPlayer/UnmapPlayer/CreatePlayerData), FixNameCollisions
