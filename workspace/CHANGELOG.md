@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: requirement framework + leaves (RequirementBase family)
+
+RequirementBase contract (IsValid/@cvar, ParseXAttribute, ParseRequirement, ParseRequirementGroup, compareValues op table), TargetedCompareRequirementBase target resolution, all 26 catalog leaves (stat compare family, tag predicates, inventory/armor/progression counts, CVarCompare, NotHasBuff, HasAttachedPrefab, IsLookingAt*) (verified)
 ## 2026-08-08 - tier-C: ItemAction leaves (UseOther, TextureBlock, spawn previews)
 
 ItemActionUseOther CanExecute/ExecuteAction (twitch 177 gate, medical guards, onSelfHealedOther 13, consume/create-item); ItemActionTextureBlock.GetUserData paint color; SpawnTurret/SpawnVehicle preview lifecycle (StartHolding/setupPreview/StopHolding) (verified)
