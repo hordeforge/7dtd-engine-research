@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: MinEffectController leaves
+
+ModifyValue PassivesIndex gate + per-group pass with MinEventContext;
+GetModifiedValueData source twin with ParentType/Pointer; FireEvent ParentType
+stamp; HasEvents/HasTrigger/IsOwnerTiered OR scans. Verified fresh dumps.
 ## 2026-08-08 - tier-C: ItemValue.ModifyValue engine
 
 ModifyValue (IL=304): ammo + item MinEffectController passes, resistance
