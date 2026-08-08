@@ -421,6 +421,40 @@ desync and clipping are client-trust problems, not server-tick problems.
 `EntityVehicle.updateTasks` is a single `ret`: the AI throttle in
 [`entity-ai.md`](entity-ai.md) never does work for a vehicle.
 
+**World-boundary rescue (`CheckForOutOfWorld`, IL=474):** the vehicle's
+"fallen out of the world" recovery, run per frame: a dead vehicle skips it.
+The first branch is the world-bounds clamp: `World.AdjustBoundsForPlayers`
+(padding 0.2) fails -> halve the rigidbody x/z velocity, `SetPosition` at
+the clamped spot, and show the driver the `ttWorldEnd` tooltip. Otherwise
+it checks the chunk at the vehicle center: while that chunk lacks a
+collision mesh (`IsCollisionMeshGenerated` / `IsDisplayed` false) it zeros
+the rigidbody velocities, drops `RBActive` and sets `isTryToFall`. Once
+the chunk is valid and `RBActive` but `IsTerrainBelow` fails, it counts
+`worldTerrainFailCount`: at count **2** it flags `NeedsRegeneration` on
+the chunk (`{0}, {1}, center {2}, rbPos {3}, in ground. Chunk regen`),
+past **6** it walks back toward `worldValidPos` (position plus 0.1 of the
+grounded delta, rigidbody velocity re-aimed with a random y bounce,
+`in ground. back`), and with no valid position it probes terrain 257
+blocks up (`IsTerrainBelow(y=257)`) and lifts 3 when found (`out of
+world`). Terrain found resets the counter and refreshes `worldValidPos`
+once the vehicle moved more than 2. `isTryToFall` re-arms `RBActive` and
+`WakeUp`s the rigidbody. `TeleportToWithinBounds(min, max)` (IL=104) is
+the admin/console twin: it inflates the box by 66 on x/z, clamps the
+position, raycasts down from height 999 and lands on `hit.y + 1`
+(`Vehicle out of world. Teleporting to ...`).
+
+**Small helpers:** `VelocityFlip` (IL=45) negates the x/z velocity - on a
+remote the `vehicle.CurrentVelocity` field, on the local authority the
+rigidbody - the flip-recovery nudge. `UpdateAttachment` (IL=69) calls
+`DriverRemoved()` when the attached main entity vanished while
+`hasDriver`, detaches + `RemoveIKTargets` when the driver died, and drains
+the `delayedAttachments` list (attaching each pending entity when it
+spawned). State getters: `isDriveable` = `vehicle.IsDriveable()`,
+`isAllowedUser(id)` = `vehicle.AllowedUsers.Contains(id)`,
+`hasStorage` = `vehicle.HasStorage()`, `getStorageSize` (IL=16) is the
+loot container `size` with `y += storageModCount`, `isEntityStatic`
+(IL=2) and `hasLock` (IL=2) are true.
+
 ---
 
 ## 5. Drones: follow, sentry, attack, heal
