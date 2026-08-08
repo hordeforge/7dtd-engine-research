@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk flag/property leaves
+
+IsLocked/IsInitialized volatile chains, regen bitmask get/set + mesh-layer teardown, ChunkPos/X/Z setters, IsEmptyLayer/GetSizeOfMesh (verified)
 ## 2026-08-08 - tier-C: Entity attach/physics/query leaves
 
 GetAttachedPlayerLocal/SetAttachMaxCount/SendDetach, angular-velocity + rotation-stop, PhysicsSetHeight capsule, spawner-key/elevator/swimming/class/tags, activation-command reorder (verified)
