@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: chunk-load ticker restore + World query leaves
+
+WorldBlockTicker.OnChunkAdded wbt.sch restore (IL=93), OnChunkAdded/BeforeRemove + updateChunkAddedRemovedCallbacks, blockToTransformPos family, local-player helpers, IsMaterialInBounds (verified)
 ## 2026-08-08 - tier-C: World volume write-out/reset + creation/block-value accessors
 
 WriteTriggerVolumes/WriteWallVolumes (IL=52), ResetTriggerVolumes (IL=47), GetWorldCreationData, GetBlockValues (verified)
