@@ -191,7 +191,12 @@ failed action, and `IsValid` / `IsRefunded` plus the `HistoryType` /
 `Title` / `Description` / `Command` surface back the UI. The field-only
 `TwitchActionCooldownAddition` (`ActionName`, `CooldownTime`, `IsAction`) is
 the per-action cooldown modifier record appended by `TwitchAction.SetQueued`
-when the manager's cooldown preset adds delays.
+when the manager's cooldown preset adds delays. Spawn bookkeeping:
+`TwitchSpawnedEntityEntry` (`SpawnedEntity`, `SpawnedEntityID`, plus the
+originating `Action` / `Event` / `Vote` / `RespawnEntry`) and the
+countdown-bearing `TwitchRecentlyRemovedEntityEntry` (adds `TimeRemaining`)
+are the records of `TwitchManager`'s action-spawn list, pruned each frame as
+the manager's running loop reconciles `LiveActionEntries`.
 
 ---
 

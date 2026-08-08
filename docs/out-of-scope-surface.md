@@ -25,7 +25,7 @@ Total out-of-scope reached types classified: **1178** (base lists + 2026-07-28 s
 | Client render / mesh | 64 |
 | Audio / music | 20 |
 | Input (client) | 11 |
-| Twitch integration (client-driven) | 74 |
+| Twitch integration (client-driven) | 62 |
 | Discord GameSDK (client social) | 35 |
 | Platform SDK wrappers | 19 |
 | Platform services / store / news | 17 |
@@ -58,11 +58,11 @@ Keyboard/mouse/gamepad input + binding managers. No local player on a server.
 
 `ActionSetManager`, `BindingState`, `BindingsManager`, `InControlExtensions`, `InputUtils`, `KeysView`, `MouseLib`, `MovementInput`, `PlayerActionsBase`, `PlayerActionsGlobal`, `PlayerActionsLocal`
 
-## Twitch integration (client-driven) (74)
+## Twitch integration (client-driven) (62)
 
 Twitch viewer/point/subscription data + event clients. Server slice is in twitch-integration.md.
 
-`BaseTwitchCommand`, `BaseTwitchEventEntry`, `BaseTwitchOperationRequirement`, `BaseTwitchRequirement`, `ChannelCalculator`, `ChannelPointsRedemptionEvent`, `CooldownPreset`, `CreateCustomReward`, `DailyVoteEntry`, `EventSubClient`, `GiftSubEntry`, `StatEntry`, `SubscriptionEvent`, `SubscriptionEventBase`, `SubscriptionGiftEvent`, `SubscriptionMessageEvent`, `TwitchActionEntry`, `TwitchActionHistoryEntry`, `TwitchActionManager`, `TwitchActionPreset`, `TwitchChannelPointEventEntry`, `TwitchChatMessage`, `TwitchCommandAddBitCredit`, `TwitchCommandAddPoints`, `TwitchCommandAddSpecialPoints`, `TwitchCommandCheckCredit`, `TwitchCommandCheckPoints`, `TwitchCommandCommands`, `TwitchCommandDebug`, `TwitchCommandDisableCommand`, `TwitchCommandEnableCommand`, `TwitchCommandGamestage`, `TwitchCommandPauseCommand`, `TwitchCommandRedeemBits`, `TwitchCommandRedeemCharity`, `TwitchCommandRedeemCreatorGoal`, `TwitchCommandRedeemGiftSub`, `TwitchCommandRedeemHypeTrain`, `TwitchCommandRedeemRaid`, `TwitchCommandRedeemSub`, `TwitchCommandRemoveViewer`, `TwitchCommandResetCooldowns`, `TwitchCommandSetBitPot`, `TwitchCommandSetCooldown`, `TwitchCommandSetPot`, `TwitchCommandTeleportBackpack`, `TwitchCommandUnpauseCommand`, `TwitchCommandUseProgression`, `TwitchCreatorGoalEventEntry`, `TwitchDropEntry`, `TwitchEventActionEntry`, `TwitchEventEntry`, `TwitchEventPreset`, `TwitchLeaderboardEntry`, `TwitchLeaderboardStats`, `TwitchMessageEntry`, `TwitchPartyMemberInfo`, `TwitchRecentlyRemovedEntityEntry`, `TwitchRequirementHasBuff`, `TwitchRequirementHasProgression`, `TwitchRequirementIsNight`, `TwitchRequirementSandboxBool`, `TwitchRequirementSandboxFloat`, `TwitchRequirementSandboxInt`, `TwitchRespawnEntry`, `TwitchSpawnedBlocksEntry`, `TwitchSpawnedEntityEntry`, `TwitchSubEventEntry`, `TwitchViewerData`, `TwitchVoteEntry`, `TwitchVoteGroup`, `TwitchVoteType`, `ViewerEntry`, `VoteDayTimeRange`
+`BaseTwitchCommand`, `BaseTwitchEventEntry`, `BaseTwitchOperationRequirement`, `BaseTwitchRequirement`, `ChannelCalculator`, `ChannelPointsRedemptionEvent`, `CooldownPreset`, `CreateCustomReward`, `DailyVoteEntry`, `EventSubClient`, `GiftSubEntry`, `StatEntry`, `SubscriptionEvent`, `SubscriptionEventBase`, `SubscriptionGiftEvent`, `SubscriptionMessageEvent`, `TwitchActionManager`, `TwitchActionPreset`, `TwitchChannelPointEventEntry`, `TwitchChatMessage`, `TwitchCommandAddBitCredit`, `TwitchCommandAddPoints`, `TwitchCommandAddSpecialPoints`, `TwitchCommandCheckCredit`, `TwitchCommandCheckPoints`, `TwitchCommandCommands`, `TwitchCommandDebug`, `TwitchCommandDisableCommand`, `TwitchCommandEnableCommand`, `TwitchCommandGamestage`, `TwitchCommandPauseCommand`, `TwitchCommandRedeemBits`, `TwitchCommandRedeemCharity`, `TwitchCommandRedeemCreatorGoal`, `TwitchCommandRedeemGiftSub`, `TwitchCommandRedeemHypeTrain`, `TwitchCommandRedeemRaid`, `TwitchCommandRedeemSub`, `TwitchCommandRemoveViewer`, `TwitchCommandResetCooldowns`, `TwitchCommandSetBitPot`, `TwitchCommandSetCooldown`, `TwitchCommandSetPot`, `TwitchCommandTeleportBackpack`, `TwitchCommandUnpauseCommand`, `TwitchCommandUseProgression`, `TwitchCreatorGoalEventEntry`, `TwitchDropEntry`, `TwitchEventActionEntry`, `TwitchEventEntry`, `TwitchEventPreset`, `TwitchLeaderboardEntry`, `TwitchLeaderboardStats`, `TwitchMessageEntry`, `TwitchPartyMemberInfo`, `TwitchRespawnEntry`, `TwitchSpawnedBlocksEntry`, `TwitchSubEventEntry`, `TwitchVoteEntry`, `TwitchVoteGroup`, `TwitchVoteType`, `VoteDayTimeRange`
 
 ## Discord GameSDK (client social) (35)
 
@@ -151,9 +151,9 @@ reachable via shared `ConnectionManager.Update` but the heartbeat block is
 **skipped on dedicated** ([server-lifecycle.md](server-lifecycle.md) § Join analytics).
 They are not sim/wire surface.
 
-### Twitch (supplement) (29)
+### Twitch (supplement) (28)
 
-`ActionCategory`, `AuthenticationValues`, `BasePubSubMessage`, `CommandModel`, `ConfigContent`, `ConfigModel`, `Entitlement`, `ExtensionDeleteBitActionsRequestData`, `FulfillmentPayload`, `GoalData`, `PubSubBitRedemptionMessage`, `PubSubChannelPointMessage`, `PubSubGoalMessage`, `PubSubListenData`, `PubSubListenMessage`, `PubSubStatusMessage`, `PubSubStatusRequestData`, `PubSubSubscriptionRedemptionMessage`, `SetConfigRequestData`, `SetDevConfigRequestData`, `TwitchActionCooldownAddition`, `TwitchActionCooldownModifier`, `TwitchCooldownEntry`, `TwitchEntitlementManager`, `TwitchHypeTrainEventEntry`, `TwitchRandomActionGroup`, `TwitchTopic`, `TwitchVotePreset`, `UpdateMessage`
+`ActionCategory`, `AuthenticationValues`, `BasePubSubMessage`, `CommandModel`, `ConfigContent`, `ConfigModel`, `Entitlement`, `ExtensionDeleteBitActionsRequestData`, `FulfillmentPayload`, `GoalData`, `PubSubBitRedemptionMessage`, `PubSubChannelPointMessage`, `PubSubGoalMessage`, `PubSubListenData`, `PubSubListenMessage`, `PubSubStatusMessage`, `PubSubStatusRequestData`, `PubSubSubscriptionRedemptionMessage`, `SetConfigRequestData`, `SetDevConfigRequestData`, `TwitchActionCooldownModifier`, `TwitchCooldownEntry`, `TwitchEntitlementManager`, `TwitchHypeTrainEventEntry`, `TwitchRandomActionGroup`, `TwitchTopic`, `TwitchVotePreset`, `UpdateMessage`
 
 ### Utility / infra (supplement) (44)
 
