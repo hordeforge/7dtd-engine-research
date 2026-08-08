@@ -933,6 +933,21 @@ supply crates; ignore NPC unless TargetStrangers; ignore enemy if
 pitch = look x (unwrap >180); success only if yaw within
 `CenteredYaw + yawRange` and pitch within `CenteredPitch + pitchRange`.
 
+**Turret accessor leaves:** `EntityTurret.get_Health()` (IL=12) is
+`max(1, OriginalItemValue.MaxUseTimes - OriginalItemValue.UseTimes)` (the
+deployed ammo-as-health read); `get_IsValidAimAssistSlowdownTarget()` (IL=2)
+is false; `get_LocalizedEntityName()` (IL=6) is
+`Localization.Get(EntityName)`.
+`TurretTracker.GetServerTurretCount()` (IL=13) sums `turretsActive` +
+`turretsUnloaded` on the server, else returns the client's mirrored
+`serverTurretCount`; `SetServerTurretCount(count)` (IL=7) stores that mirror
+(client-only). `GetTurrets(list)` (IL=38) fills the caller's list with the
+active turret entity ids then the unloaded ids; `GetTurretsList()` (IL=7) is
+the allocator wrapper. `RemoveTrackedTurret(turret, reason)` (IL=29) removes
+the turret from `turretsActive`, keeps the id in `turretsUnloaded` on
+`Unloaded`, `TriggerSave()`s, and broadcasts `NetPackageVehicleCount.Setup()`
+(channel 192) so clients refresh their count mirror.
+
 **`canHitEntity` (IL=80):** require `trackTarget`; ray from cone/muzzle with
 `maxDistance`, layer mask `-538750989`; hit tag must start with `E_`; root
 transform entity must equal target and be alive.
