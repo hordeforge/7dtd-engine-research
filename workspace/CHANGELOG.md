@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PPD backpack cleanup + player-list handler registry
+
+ClearDroppedBackpacks reset, RemoveBackpacks predicate sweep, m_dispatch handler list (verified)
 ## 2026-08-08 - tier-C: Quest shared/position/reward leaves
 
 sharedWithList lifecycle + not-in-range gate, position data + location rect, binding variable parse, quest-giver proximity, delayed rewards (verified)
