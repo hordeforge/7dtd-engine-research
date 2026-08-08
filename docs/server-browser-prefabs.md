@@ -329,6 +329,15 @@ whose floored world position falls outside this chunk, then clones the
 allocates `id = EntityFactory.nextEntityID++`, and registers it via
 `chunk.AddEntityStub` (recording the id in `entityIds` when provided).
 
+**`Prefab.CopyIntoLocal(cluster, pos, bOverwrite, bCopyEntities, tags)`
+(IL=680) is the multi-chunk wrapper** behind `CopyIntoWorld`: it runs
+`CopyVolumesIntoWorld` first, then per chunk in the prefab's footprint
+stamps with a **position-seeded** `GameRandom`
+(`RandomFromSeedOnPos(chunkX, chunkZ)` + world time via
+`CreateGameRandom`) after `InitTerrainFillers` - the same random source
+`CopyBlocksIntoChunkNoEntities` consumes, so a prefab's POI contents are
+deterministic per world position and time.
+
 The spatial query `GetPrefabsAtXZ(xMin, xMax, zMin, zMax, list)` (IL=70,
 reached through `World.GetPOIsAtXZ`, a null-checked wrapper IL=15) clears the
 list under `listsLock`, starts at `PrefabBinarySearch(xMin)` (IL=58: resorts
@@ -498,6 +507,11 @@ surface is exactly sections 1 and 2.
 | [game-events.md](game-events.md) | `EventPrefabs` consumers of `PrefabInstance.Serializable` |
 | [protocol-packages.md](protocol-packages.md) | NetPackage inventory incl. the editor/world-init packages |
 
+## Changelog
+
+- **2026-08-08:** Prefab.CopyIntoLocal (IL=680): CopyVolumesIntoWorld first,
+  per-chunk RandomFromSeedOnPos + world-time seeded GameRandom for the
+  stamp.
 ## Changelog
 
 - **2026-08-08:** PrefabInstance.CopyIntoWorld (IL=85): rotation delta
