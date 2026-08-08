@@ -377,6 +377,31 @@ see cache (called from OnUpdateLive before AI).
 `CanEntityBeSeen(e, true)`: on success add positive (and if client-controlled,
 `lastTimeSeenAPlayer = Time.time`); on fail add negative.
 
+**Leaf getters / small state hooks (all IL-verified):**
+- Sense: `GetEntitySenses` (IL=3) = `seeCache`; `SetCanSee(other)` (IL=5)
+  forwards to `seeCache.SetCanSee`; `GetDamagedTarget` (IL=3) =
+  `damagedTarget`; `GetRevengeTarget` (IL=3) = `revengeEntity`;
+  `SetRevengeTimer(ticks)` (IL=4) stores `revengeTimer`.
+- Home: `getHomePosition` (IL=3) = `homePosition` (ChunkCoordinates);
+  `getMaximumHomeDistance` (IL=3) = `maximumHomeDistance`;
+  `isWithinHomeDistanceCurrentPosition` (IL=15) floors the entity position
+  and delegates to `isWithinHomeDistance(x, y, z)`.
+- Alert/sound: `GetAlertTicks` / `GetInvestigatePositionTicks` (IL=3 each)
+  read `alertTicks` / `investigatePositionTicks`;
+  `GetSoundAlertTicks` (IL=10) is
+  `rand.RandomRange(soundAlertTicks / 2, soundAlertTicks)`.
+- Death: `GetTimeStayAfterDeath` (IL=3) = `timeStayAfterDeath`;
+  `ClearEntityThatKilledMe` (IL=4) nulls `entityThatKilledMe`.
+- Stats/derived: `GetMaxStamina` / `GetMaxWater` (IL=6 each) are
+  `(int)Stats.Stamina/Water.Max`; `GetPushFactor` (IL=3) = `pushFactor`;
+  `GetOwnedEntities(classId)` (IL=28) filters `ownedEntities` by
+  `OwnedEntityData.ClassId` into a fresh list; `getNavigator` (IL=3) =
+  `navigator`.
+- Spawn/misc: `SetSpawnByData(id, name)` (IL=16) stores `spawnById` /
+  `spawnByName` and sets `bPlayerStatsChanged |= !isEntityRemote`;
+  `WillForceToFollow` (IL=2) is false; `CycleActivatableItems` (IL=1) is a
+  no-op.
+
 **`CanEntityBeSeen(other, checkViewCone)` (IL=133):**
 
 1. Head→head vector; `maxDist = GetSeeDistance()`; if other is player,
