@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: world hash validation blob
+
+NetPackageWorldInfo.PrepareWorldHashes (IL=83, protocol-packages.md):
+filtered name+crc:u32 blob from ChunkProviderGenerateWorldFromRaw.
+worldFileCrcs, worldDataSize, worldHashesData for client validation.
+verified from IL. Commit 6eec223.
 ## 2026-08-08 - tier-C: world-folder download sender
 
 NetPackageWorldFolder.prepareWorldFolderData (IL=389, protocol-packages.md):
