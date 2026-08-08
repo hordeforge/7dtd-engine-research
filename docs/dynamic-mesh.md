@@ -303,6 +303,12 @@ dequeues the queue, so even a produced record would sit unprocessed. Treat
 the channel as inert in this build (re-meshing of server block changes flows
 through the normal `PrimaryQueue`/`SecondaryQueue` staging instead).
 
+**Dead region-builder wrapper:** `DynamicMeshRegionBuilder` (4 methods:
+`AddNewItem`, `StartThread`, `RequestStop`, `get_world`; fields `Status` /
+`Result` / `Region` / `thread`) has **0 external references on b14** (both
+RefScan and signature scan); the live region-regen path runs inside the
+`DynamicMeshChunkProcessor` pool described above.
+
 ---
 
 ## 5. Streaming to clients
