@@ -67,6 +67,51 @@ and the list empty) it filters the CRC keys through the same
 `worldHashesData` byte array the `WorldInfo` package ships, so the client
 can verify its local world files match the server's.
 
+**The world-folder receive side (client):** `sendPacketsToClient(cInfo)`
+(IL=6, coroutine `<sendPacketsToClient>d__33` MoveNext IL=84) waits for the
+static `CompressedWorldDataChunks` list, logs `Starting to send world to
+{cInfo}...`, and per 64 KiB chunk ships
+`NetPackageWorldFolder.Setup(chunk, i, count)` through
+`ClientInfo.SendPackage`, pacing with `WaitForSeconds(PACKET_SEND_DELAY)`,
+then logs `Sending world to {cInfo} done`.
+`TestWorldValid(locationPath, hashes, callback)` (IL=12, `<TestWorldValid>d__17`
+MoveNext IL=129) verifies the client's local world against the
+`PrepareWorldHashes` blob: per `(file, crc)` entry a missing file logs
+`World file {0} does not exist` and fails, else `IOUtils.CalcCrcCoroutine`
+(15 ms budget, 8192-byte buffer) checks the crc against the expected value,
+and the callback gets `true` only when every entry matches.
+`uncompressWorld()` (IL=3, `<uncompressWorld>d__19` MoveNext IL=321) unpacks
+the received blob into `{save}/World`: it rewinds `ReceiveStream` through a
+`DeflateInputStream`, reads `fileCount:i32`, then per file the name
+(`string`) and size (`i64`); a name with a leading dot or a path separator
+is rejected (`Received world files contains file with parent path specifier
+or path separator: {name}`) and drained, `dtm*.raw` files are delta-decoded
+through the `readDtmDelta` coroutine (IL=15, `<readDtmDelta>d__20` MoveNext
+IL=165: `w = h = sqrt(fileSize / 2)`, ushort-per-pixel rows with a running
+delta sum, `Current out of range:` logged outside 0..65535, frame-budgeted
+by `get_MaxTimePerFrame`), and every other file is stream-copied in
+4096-byte pooled chunks; finally it writes an empty `{worldFolder}/completed`
+marker and sets `WorldReceivedAndUncompressed = true`.
+
+**`NetPackageLocalization`** (the patched-localization download, join-phase
+twin of the world folder): `prepareDataPackets(patchedData)` (IL=107) sets
+`PACKET_SEND_DELAY = WaitForSeconds(131072 / (pref 189 * 1024))` when the
+bandwidth pref is positive, logs `Preparing Localization chunks for clients`,
+splits the blob into **128 KiB** chunks (log `Localization size: {0} B, chunk
+count: {1}`) into the static `dataChunks`, and caches `cachedDataSize`;
+`Setup(data, seqNr, totalParts)` (IL=11) stores the three body fields; the
+`sendPacketsToClient(cInfo)` coroutine (`<sendPacketsToClient>d__21` MoveNext
+IL=84) is the Localization twin of the WorldFolder sender (same wait, per-
+chunk `Setup` + `SendPackage`, `PACKET_SEND_DELAY` pacing, `Sending
+Localization to {cInfo} done`).
+
+**`NetPackageDynamicClientArrive`** (client-side dynamic-mesh region list,
+one of the 8 `get_Compress = 1` bodies): `BuildData()` (IL=34) walks
+`DynamicMeshManager.Instance.ItemsDictionary` values, mapping each
+`DynamicMeshItem` through `FromPool` (IL=10) into
+`RegionItemData(worldPosition.x, worldPosition.z, item.UpdateTime)` appended
+to `Items`, logging `Client package items: {count}`.
+
 `protocol.md` previously said game packages use channel 0 and treated other
 channels as "later". Channel 1 is the real second band and it carries the
 heaviest bodies. A clone must bind/route both channels.
