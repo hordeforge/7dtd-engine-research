@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: prefab home-overlap probe
+
+PrefabInstance.CheckForAnyPlayerHome (IL=10) + GameUtils.CheckForAnyPlayerHome (IL=164, server-browser-prefabs.md 3.1): claim-size (GamePrefs 160) expanded box, bedroll overlap (OfflineHours < GameStats 63*24) -> Bedroll (2), land-claim overlap (46*24, claimHalf 44) -> Landclaim (1), else None (0). verified from IL. Commit 841d95d.
 ## 2026-08-08 - tier-C: delayed chunk regeneration
 
 ChunkCluster delayed/batched regen (world-chunks.md 5): ChunkPosNeedsRegeneration_DelayedStart (IL=28) refcount + batch clear, chunkRegenerateAt (IL=49) accumulates Y-slice bitmask 1 << ((yPos>>4)&31) in delayedRegenChunks while the refcount is up, DelayedStop (IL=48) flushes masks via chunk.NeedsRegenerationOrBits on the 1->0 transition. verified from IL. Commit 3ed5e32.
