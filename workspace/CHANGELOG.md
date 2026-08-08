@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: AutomationStep out-of-scope dev automation
 ## 2026-08-08 - tier-C: LiveStats dead survival-stat record
 ## 2026-08-08 - tier-C: XmlExtensions XML helper leaves
 ## 2026-08-08 - tier-C: Astar grid/area internals
