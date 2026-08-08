@@ -121,6 +121,31 @@ diminishing XP. It also bumps `totalItemsCrafted`, fires
 `QuestEventManager.CraftedItem(stack)`, and notifies the recipe UI
 (`XUiC_RecipeStack.HandleCraftXPGained`).
 
+**`Progression` leaves (V3.1.0 b14):** `AddLevelExp(exp, cvarXPName, xpType,
+useBonus, notifyUI, instigatorID, itemValue)` (IL=161) is the XP grant: a
+non-player parent returns the amount untouched; the instigator is resolved into
+`MinEventContext`, `amount = exp * XPGain` then
+`EffectManager.GetValue(XP = 87, itemValue, amount, parent, ..., <xpType name>
+tag, ...)` when `useBonus`, clamped to 2^31-1, a `GameSparksCollector`
+counter is bumped, the local player gets an XP icon notification, and the
+amount is applied by `AddLevelExpRecursive` (IL=179). A level-up logs
+`{0} made level {1} (was {2}), exp for next level {3}`. `getExpForLevel(level)`
+(IL=10) is `min(BaseExpToLevel * ExpMultiplier^level, int.MaxValue)`;
+`getLevelFloat` (IL=14) is `Level + 1 - ExpToNextLevel / GetExpForNextLevel()`.
+`AddXPDeficit` (IL=65) adds `GetValue(97) * nextLevelExp` then clamps the
+deficit via `GetValue(96)` (death XP-loss). `SpendSkillPoints(points, name)`
+(IL=16) routes `SkillPoints`-currency perks through
+`addProgressionCurrency` (IL=85), which clamps to `MaxLevel` and scales the
+grant by `GetValue(SkillPoints = 86, ...)` for the point-type class.
+`GetPerkList(list, skillName)` (IL=40) collects the perk/quest-class values
+whose parent matches. Persistence: `Write(bw, isNetwork)` (IL=51) emits version
+**3** + `Level` u16 + `ExpToNextLevel` i32 + `SkillPoints` u16 + count + per
+`ProgressionValue`; `Read(br, parent)` (IL=100) warns `Progression Read {0},
+new` and builds a fresh `Progression` when the entity has none.
+`SetupData` (IL=144) instantiates every `ProgressionClass` registry entry into a
+`ProgressionValue` (level + `CalculatedCostForLevel`) and rebuilds the quick
+list + passive-keys index.
+
 **Validation predicates (V3.1.0 b14).** `Recipe.CanCraft(stacks, ea,
 craftingTier)` (IL=128) starts by caching `GetCraftingTier(player)` into the
 shared recipe's `craftingTier` field, clamped down when the passed
@@ -222,6 +247,11 @@ report the sizes for the UI.
   CraftedItem hook.
 ## Changelog
 
+- **2026-08-08:** Progression leaves: AddLevelExp (IL=161) XPGain + XP(87)
+  bonus + clamp + GameSparks counter + recursive apply + level-up log;
+  getExpForLevel/getLevelFloat; AddXPDeficit 97/96; SpendSkillPoints +
+  addProgressionCurrency (SkillPoints 86, MaxLevel clamp); GetPerkList;
+  Write v3 / Read new-if-missing; SetupData registry instantiation.
 - **2026-08-08:** CraftingManager registry: AddRecipe lazy sort, PostInit
   cacheNonScrapable + backpack refresh, GetScrapableRecipe (IL=77) forge
   category + weight gate, UnlockRecipe (IL=21) sets the IsUnlocked cvar
