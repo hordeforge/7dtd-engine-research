@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PassiveEffect leaf
+
+ModifyValue cvar source resolution + ModValue dispatch; RequirementsMet tag
++ requirement gates; hasMatchingTag AllSet/AnySet invert; ValueModifierTypes
+0-5; CreateEmptyPassiveEffect perc_add; AddColoredInfoStrings. Verified fresh
+dumps.
 ## 2026-08-08 - tier-C: MinEffectGroup leaves
 
 ModifyValue canRun gate + per-passive Type/RequirementsMet; FireEvent
