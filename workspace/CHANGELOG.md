@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityStats tick + wire
+
+Init stat wiring (MaxPassive 104/109/122/114 + gain/loss); Tick 10-phase
+wheel + TickWait regen/change packets/stats-buff 10-tick sync; player 4 OT
+passes + per-stat packets; wire version 11 + CoreTemp sbyte/2. Verified
+fresh dumps.
 ## 2026-08-08 - tier-C: BuffValue wire format
 
 Write (IL=29) name/stack/duration/instigator/flags/updateTicks/pos; Read
