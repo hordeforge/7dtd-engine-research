@@ -891,6 +891,24 @@ list** inside the chosen action. Path requests still come from individual
 
 All pathing still hits `EntityAlive.FindPath` -> ASP queue (same as EAI).
 
+**Utility consideration leaves (`UAIConsideration*`, dormant in stock):** the
+scoring primitives exist but no stock UAI action wires them into a task; a mod
+would build utility AI from them. All return 0 for a target that is neither an
+`EntityAlive` nor a `Vector3` block position.
+
+| Consideration | Score formula (GetScore) |
+|---|---|
+| `SelfHealth` (IL=24) | `(Self.Health - min) / (max - min)`; `max` defaults NaN and is lazily resolved to `GetMaxHealth()` on first score |
+| `SelfVisible` (IL=41) | `(1 - headDistSqr / GetSeeDistance()^2) * (CanEntityBeSeen(target, true) ? 1 : 0)` |
+| `TargetDistance` (IL=59) | `Clamp01(Max(0, distSqr - min) / (max - min))`; `Init` squares the `min` / `max` params (the score works in squared distance) |
+| `TargetHealth` (IL=45) | entity: `Health / MaxHealth`; block target: `(MaxDamage - damage) / MaxDamage` (remaining HP fraction) |
+| `TargetType` (IL=49) | 1 if any comma-split `type` name has `Type.GetType(name).IsAssignableFrom(targetType)` (block targets compared via the block's type); else 0 |
+| `TargetVisible` (IL=37) | `CanEntityBeSeen(target, true)` for entities, `CanSee(pos)` for block targets; else 0 |
+
+`Init` parses the `min` / `max` / `type` string parameters with
+`StringParsers.ParseFloat` (start 0, length -1, styles 511) / `Split(',')` +
+`Trim` respectively.
+
 ---
 
 ## 6. Pathfinding (production path)
@@ -3500,6 +3518,12 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   && deathUpdateTime > 70.
 ## Changelog
 
+- **2026-08-08:** UAIConsideration* score leaves (dormant utility AI):
+  SelfHealth (Health-min)/(max-min) NaN-resolved max; SelfVisible see-dist
+  falloff * CanEntityBeSeen; TargetDistance Clamp01 over squared min/max,
+  Vector3 block targets; TargetHealth entity ratio or block (MaxDamage-damage)/
+  MaxDamage; TargetType IsAssignableFrom comma-split names; TargetVisible
+  CanEntityBeSeen / CanSee. Init parses min/max/type params.
 - **2026-08-08:** EntityFallingBlocks group variant: cctor statics Enabled
   false / MaxGroupSize 3 / renderOffsetV (-0.5)^3; Update (IL=117) box collider
   enable + massKg sum; CreateMesh (IL=295) merged VoxelMesh + per-block
