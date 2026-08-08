@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: GameServerInfo parse/derived-flag leaves
+
+ParseAny ingest + isBroken, IsDedicatedStock/Modded, AllowCrossplay/EACEnabled, PlayGroup parse (verified)
 ## 2026-08-08 - tier-C: Mod ModInfo parsing leaves
 
 parseModInfoV2 validation + fields, V1 rejection, getElementAttributeValue, DetectContents config marker, ContainsAssembly (verified)
