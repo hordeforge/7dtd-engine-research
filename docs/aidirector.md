@@ -321,6 +321,24 @@ playtest) set spawn flag, `StartCooldownOnNeighbors`, `SetLongDelay`,
 `SpawnUpdate` returns true and `hordeList` empty; else `UpdateHorde` and keep
 (false).
 
+**Scout internals:** `SpawnUpdate` (IL=129) is done when `!CanSpawn(1)` or the
+`EntitySpawner` already has a current wave; it runs
+`spawner.SpawnManually(world, WorldTimeToDays(worldTime), true, ...,
+spawnedList)` and turns each spawned `EntityEnemy` into a scout
+(`IsScoutZombie`, `IsBloodMoon = isBloodMoon`, horde flags) with a
+`ZombieCommand` investigate order toward `CalcRandomPos(director, endPos, 6)`
+(6000 ticks), logging `scout horde spawned '<zombie>'. Moving to point of
+interest`. `UpdateHorde` (IL=229) drives the per-command wander/attack cycle;
+when a scout finishes its leg it calls `spawnHordeNear` (IL=94): logs `Scout
+spawned a zombie horde`, lazily `CreateHorde`s via the chunk-event component,
+then with `canSpawnMore` spawns a **5**-zombie horde (a **12%** chance
+subtracts one and, when the base spawner had a wave, resets it to
+`numberToSpawnThisWave = 1` and re-runs `SpawnUpdate`, else bumps the wave
+count), plays the zombie's `GetSoundAlert()` one-shot, `SetSpawnPos(target)`,
+and keeps the horde active while `canSpawnMore || isSpawning`.
+`CalcRandomPos` (IL=15) is `target + RandomOnUnitCircle * radius` (y = 0);
+`Cleanup` (IL=27) releases the horde flags.
+
 **Chunk-event leaves:** `GetChunkDataFromPosition(pos, createIfNeeded)` (IL=33)
 keys the per-chunk bags by a **5x5-chunk district**
 (`MakeChunkKey(toChunkXZ(x) / 5, toChunkXZ(z) / 5)`), creating the entry when
@@ -961,6 +979,10 @@ minute<=59.
 
 ## Changelog
 
+- **2026-08-08:** AIScoutHordeSpawner internals: SpawnUpdate (IL=129)
+  SpawnManually + scout flags + investigate; UpdateHorde cycle;
+  spawnHordeNear (IL=94) 5-zombie horde with 12% wave-reset, sound alert,
+  SetSpawnPos; CalcRandomPos; Cleanup release.
 - **2026-08-08:** AIHordeSpawner ctor/cleanup: party-spawner build +
   playerSearchBounds; isSpawning = canSpawn; Cleanup releases horde flags.
 - **2026-08-08:** AIDirectorChunkData persistence/accessors: Write v2
