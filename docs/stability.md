@@ -145,6 +145,10 @@ for each pos `OnBlockStartsToFall` + `DynamicMeshManager.ChunkChanged` + remove
 from `groupedBlocks`; if first block `ShowModelOnFall`, spawn `fallingBlocks`
 entity at center with ±0.1 xz jitter.
 
+**`World.GetBlockValues(groupBlocks)` (IL=25)** is the snapshot helper behind
+the group snapshot: allocates a `BlockValue[count]` and fills index i with
+`GetBlock(groupBlocks[i])`.
+
 **`GroupFallingBlocks` (IL=292 high-level):** BFS over `fallingBlockSet`
 connected non-air non-terrain blocks; enforce `GroupBounds.IsWithinSize`;
 enqueue completed groups into `fallingGroups` and mark `groupedBlocks`.

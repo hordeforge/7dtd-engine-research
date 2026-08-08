@@ -144,6 +144,8 @@ ChunkCluster.Init`, which switches on it:
 `ProviderId` property is present - the world-creation record (provider id
 plus the `PropWorldEnvironment*` strings) used by the distant-terrain
 startup to pin which provider the generated world runs on.
+`World.GetWorldCreationData()` (IL=3) is the plain accessor for the
+`World.wcd` field.
 
 | Id | Concrete type | Source | Dedicated relevance |
 |---|---|---|---|

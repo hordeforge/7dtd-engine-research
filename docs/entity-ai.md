@@ -597,6 +597,16 @@ sequential ids (`next*VolumeId = count`), version >= 1 reads per-volume
 `VolumeKey` logs `Read*Volumes #{0} dup key ({1}) ({2}) {3}` and skips
 the record.
 
+**Volume write-out (`World.WriteTriggerVolumes` / `WriteWallVolumes`,
+IL=52 each):** the client-sync side: under the dict lock, write the
+count, then per entry `(id, TriggerVolume/WallVolume.Write(bw))`, then a
+trailing `nextTriggerVolumeId` / `nextWallVolumeId` (the mirror of the
+read-back layout). `World.ResetTriggerVolumes(chunkKey)` (IL=47) extracts
+the chunk XZ, builds the chunk AABB via `Chunk.CalculateAABB(x, 0, z)`,
+and under the lock calls `TriggerVolume.Reset()` on every volume whose
+bounds intersect it - the re-arm when a chunk reloads so triggers fire
+again.
+
 **`SleeperVolume.TouchGroup` (IL=52):** `mode = flags & 7`. If no `groupId` or no
 prefab: `Touch(world, player, setActive, mode)`. Else for each volume in
 `prefabInstance.sleeperVolumes` with same `groupId` and not
