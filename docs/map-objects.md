@@ -229,6 +229,42 @@ non-null**, runs `HandleActiveNavClass` per entry. On a dedicated server the
 primary player is always null, so the server's `NavObjectManager` degrades to a
 self-cleaning list.
 
+## 7b. Waypoint + WaypointCollection leaves
+
+**`Waypoint` binary format** (`Read(br, version)` IL=77 / `Write(bw)` IL=57,
+collection version **7**): `pos` Vector3i, `icon` string (empty when null),
+`name` `AuthoredText`, `bTracked`, `hiddenOnCompass`, `ownerId`
+(`ToStream(..., false)`), `lastKnownPositionEntityId` i32, `bIsAutoWaypoint`,
+`bUsingLocalizationId`, `inviterEntityId` i32, `hiddenOnMap`, and
+`lastKnownPositionEntityType` (i32). Reads gate each later field on the version
+(v > 2, v > 1, v > 3, v > 4, v > 5, v > 6); below v7 a non-negative
+`lastKnownPositionEntityId` implies `Vehicle (1)`. `Clone` (IL=64) copies every
+field including the `navObject` reference and `IsSaved`.
+
+**`WaypointCollection`:** `Write` (IL=61) emits version byte **7**, a u16 count
+of **saved-only** waypoints (`IsSaved` filter), then `Waypoint.Write` each;
+`Read` (IL=30) clears, reads the version, then `count x Waypoint.Read` +
+`Add`. `Clone` (IL=26) rebuilds via per-waypoint clones. Lookups scan the
+`HashSetList` list by `lastKnownPositionEntityId`
+(`ContainsLastKnownPositionWaypoint` IL=26 / `GetLastKnownPositionWaypoint`
+IL=28) or by `navObject` ref (`GetWaypointForNavObject` IL=28, used by
+`PlayerDataFile.ToggleWaypointHiddenStatus`).
+
+**Auto waypoints (vehicles/drones/animals):** `UpdateEntityVehicleWayPoint`
+(IL=85) and `UpdateEntityDroneWayPoint` (IL=85) require `LocalPlayerIsOwner`,
+then refresh the matching waypoint's pos (`Remove` + `navObject.TrackedPosition`
++ `Add` when the rounded position changed), set `hiddenOnCompass = !unloaded`,
+and `SetWaypointHiddenOnMap(id, !unloaded)`; the fallback path pokes
+`XUiC_MapArea.Refresh*Waypoint` (client UI). `UpdateEntityAnimalWayPoint`
+(IL=81) skips the owner gate. The manager-driven variants
+(`SetEntityVehicleWaypointFromVehicleManager` IL=118 /
+`SetDroneWaypointsFromDroneManager` IL=181) reconcile against the manager's
+`(entityId, position)` lists, updating moved waypoints in place and removing
+stale ones (`Collection.Remove` + `NavObjectManager.UnRegisterNavObject`).
+`TryRemoveLastKnownPositionWaypoint(id)` (IL=18) removes + unregisters and
+returns whether anything was removed. `SetWaypointHiddenOnMap` (IL=30) mirrors
+the flag onto both the waypoint and its nav object.
+
 ## 8. Server vs client: who is authoritative
 
 | Flow | Direction | Mechanism |
@@ -273,6 +309,12 @@ add/remove, override color, localization flag, entityId.
   auto-waypoint at prefab center + RegisterNavObject, local-player only.
 ## Changelog
 
+- **2026-08-08:** Waypoint/WaypointCollection leaves: Waypoint.Read (IL=77)
+  version-gated fields + legacy Vehicle inference; Write (IL=57); Collection
+  Write version 7 saved-only + Read + Clone; auto-waypoint refresh
+  (vehicle/drone owner gate + hidden flags), manager reconcile + stale removal
+  (SetEntityVehicleWaypointFromVehicleManager IL=118 /
+  SetDroneWaypointsFromDroneManager IL=181), TryRemoveLastKnownPositionWaypoint.
 - **2026-08-07:** Entity.GetMapObjectType (IL=2): base 0, EntitySupplyCrate 13
   (the RemoveEntityFromMap special-crate branch).
 - **2026-08-07:** Entity.HasUIIcon (IL=13): mapIcon/trackerIcon/compassIcon
