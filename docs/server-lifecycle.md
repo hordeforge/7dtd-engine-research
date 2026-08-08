@@ -656,6 +656,38 @@ vendingCount : i32
 XML twin (`Write(XmlElement)`, IL=313) emits the same logical fields as elements
 (`player`/`native`/`lpblock`/`backpack`/`bedroll`/...).
 
+**Binary `Read(BinaryReader)` (IL=167)** mirrors `Write` exactly: `primaryId` +
+`nativeId` via `FromStream(..., true, true)`, playGroup byte, `AuthoredText`,
+`LastLogin = new DateTime(ReadInt64)` (Ticks), `Position`, `EntityId`,
+`lpBlockCount` x `Vector3i`, `backpackCount` x
+`AddDroppedBackpack(entityId, pos, timestamp)`, `BedrollPos`, `questPosCount` x
+`QuestPositionData.Read`, `vendingCount` x `Vector3i`.
+
+**XML `ReadXML(root, readVersion, out legacyACL)` (IL=587):** `legacyACL`
+starts null. `FromXml(root, true, null)` yields `primaryId`; a missing or
+invalid user-identifier / `playername` / `playgroup` / `lastlogin` (parsed with
+`StringParsers.TryParseDateTime`, `DateTime.TryParse` fallback) / `position`
+attribute logs an error and calls `Application.Quit()` (hard abort), returning
+null. Child elements: `acl` (only when `readVersion == 0`) feeds the
+`legacyACL` set; `lpblock` / `backpack` / `bedroll` parse their `pos`/`id`/
+`timestamp` attributes (malformed entries log `Ignoring ...` warnings and are
+skipped, with `AddDroppedBackpack` enforcing the 3-cap on load);
+`questpositions` children (`id`, `positiondatatype`, `pos`) become
+`QuestPositionData`; `vendingmachinepositions` children populate the owned
+vending list.
+
+**Runtime leaves:** `AddQuestPosition(code, type, position)` (IL=52) updates an
+existing same-code/same-type entry in place, skips `PositionDataTypes` 3 / 8 /
+9, otherwise appends and flags `questPositionsChanged = true`;
+`RemovePositionsForQuest(code)` (IL=49) removes every matching entry and flags
+the same. `UpdatePositionFromEntity()` (IL=21) refreshes `Position` from the
+live entity (no-op offline). `ShowBedrollOnMap()` (IL=35) registers a
+`sleeping_bag` NavObject at `BedrollPos` (edit-mode gate, owner set from the
+entity); `ClearBedroll()` (IL=37) unregisters it, sets
+`BedrollPos.y = int.MaxValue` (the no-bedroll sentinel, `HasBedrollPos` = y !=
+MaxValue), and on the server broadcasts
+`NetPackageEntityMapMarkerRemove(SleepingBag = 1, entityId)` on channel 192.
+
 
 
 ### 6.2 `PersistentPlayerList` save formats (verified)
@@ -743,6 +775,13 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-08:** PersistentPlayerData read + runtime leaves: binary Read
+  (IL=167) mirrors Write; ReadXML (IL=587) version-0 acl -> legacyACL set,
+  malformed attr hard-abort (Quit), per-entry ignore warnings, backpack 3-cap
+  on load, questpositions/vendingmachinepositions; AddQuestPosition (IL=52)
+  in-place update + skips types 3/8/9 + questPositionsChanged; RemovePositionsForQuest
+  (IL=49); UpdatePositionFromEntity (IL=21); ShowBedrollOnMap/ClearBedroll
+  sleeping_bag nav + int.MaxValue sentinel + marker remove ch 192.
 - **2026-08-08:** PersistentPlayerList read paths: binary Read (IL=72) player
   count + lpMap rebuild (owner must exist) + Allies.Read; ReadXML (IL=153)
   version attr gate, per-player ReadXML + newIds ally discovery SetStatus 1,
