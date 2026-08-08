@@ -242,6 +242,16 @@ LoadRecipes, LoadTraders, ...) are 6-IL coroutine factories whose parse
 bodies live in the compiler-generated `MoveNext` of each iterator
 (`<LoadBlocks>d__16` etc.), invoked through the `XmlLoadInfo` table above.
 
+**The `Cleanup*` family** mirrors the loads on teardown/XML-reload:
+`CleanupBlocks` (IL=4) = `AIDirectorData.Cleanup` + `Block.Cleanup` +
+`TileEntityCompositeData.Cleanup`; `CleanupGamestages` (IL=3) =
+`GameStageDefinition.Clear` + `GameStageGroup.Clear`;
+`CleanupSpawning` (IL=3) = `EntitySpawnerClass.Cleanup` +
+`BiomeSpawningClass.Cleanup`; `CleanupChallenges` (IL=2) =
+`ChallengeClass.Cleanup`; `CleanupTwitch` (IL=5) /
+`CleanupTwitchEvents` (IL=5) guard on the `TwitchActionManager` /
+`TwitchManager` singletons before their `Cleanup` / `CleanupEventData`.
+
 
 ### 5.6 Config S2C (`SendXmlsToClient` / `NetPackageConfigFile`)
 
