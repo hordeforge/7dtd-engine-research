@@ -670,9 +670,13 @@ prob, stickChance, toolCategory, tag)` (IL=33) appends a `SItemDropProb` to the
 event's `itemsToDrop` list (lazy-created). `LootDropPick(rand)` (IL=44) returns
 the first entry when fewer than two drops, else a cumulative weighted pick over
 `lootDrops[].weight`. `CalculateEntityTier()` (IL=49) derives the tier purely
-from tags: `elite -> 5`, `radiated -> 4`, `feral -> 3`, `special -> 2`,
-`strong -> 1`, else `0`. `ParseEntityFlags(names, ref flags)` (IL=49) ORs
-comma-split `EntityFlags` names via `TryParse` (single name when no comma).
+from tags: `elite -> Elite (5)`, `radiated -> Radiated (4)`, `feral -> Feral
+(3)`, `special -> Special (2)`, `strong -> Strong (1)`, else `Normal (0)`.
+`ParseEntityFlags(names, ref flags)` (IL=49) ORs comma-split `EntityFlags`
+names via `TryParse` (single name when no comma). `CopyFrom(other, exclude)`
+(IL=171) copies the other class's `DynamicProperties` (Values / Params1 /
+Params2 / Data, skipping excluded keys, with a deep `Classes` copy) - the class
+variant / mod inheritance mechanism.
 
 **Tier substitution:** `GetEntityClassWithinMaxTier(ec, maxTier)` (IL=30):
 `ec.EntityTier <= maxTier` → as-is; else walk the `GetPreviousTierEntity()`
@@ -1147,6 +1151,8 @@ above.
   single, EntitySpawnerClass build + AddForDay, empty-spawner throw.
 ## Changelog
 
+- **2026-08-08:** EntityClass CopyFrom (IL=171) DynamicProperties deep copy
+  with exclude set; tier names pinned (EntityTierTypes Normal 0 .. Elite 5).
 - **2026-08-08:** EntityClass leaves: FromString/Add name-hash ids, GetId
   linear scan, Cleanup; AddDroppedId SItemDropProb append; LootDropPick
   weighted roll; CalculateEntityTier tag ladder elite 5 -> strong 1 -> 0;
