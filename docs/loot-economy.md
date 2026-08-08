@@ -433,6 +433,21 @@ stored **squared** (`distractionRadiusSq`), `DistractionLifetime` (**67**)
 `itemClass != null && itemClass.CanCollect(itemValue)` - the pick-up gate the
 collect action consults.
 
+**`EntityItem.tickDistraction()` (IL=147)** is the zombie-bait scan: it runs
+while `distractionLifetime > 0`, requires the item to be grounded when
+`IsRequireContactDistraction`, and throttles to once per **20** ticks
+(`nextDistractionTick`). It queries
+`GetEntitiesInBounds(typeof(EntityAlive), Bounds(position, r), ...)` and,
+per candidate, skips sleepers and entities that already track a
+`distraction`; when the item's `DistractionTags` are set the entity class
+must `Test_AnySet` them; the entity must be within `distractionRadiusSq`; a
+`pendingDistraction` only loses to a strictly closer item; and the resistance
+gate is `distractionResistance - distractionStrength` - when positive the
+attraction succeeds only on `rand.RandomFloat() * 100 < delta` (probabilistic
+when the bait is weaker than the entity's resistance), otherwise always. A
+successful candidate stores `pendingDistraction` + `pendingDistractionDistanceSq`
+on the entity, and the lifetime counter decrements each pass.
+
 **`EntityItem.OnUpdateEntity` (IL=114):** base update; create mesh if needed;
 `ItemClass.OnDroppedUpdate`; if |dy| &lt; 0.1 for **10** ticks set `onGround`;
 physics-master client odd ticks `PhysicsMasterSendToServer`;
@@ -859,6 +874,11 @@ or `ItemStack.Empty` when nothing rolled.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | XML content and native/framework residuals |
 
+## Changelog
+
+- **2026-08-08:** EntityItem.tickDistraction (IL=147): 20-tick throttle,
+  contact gate, DistractionTags filter, pendingDistraction takeover only
+  when closer, resistance-strength probability gate.
 ## Changelog
 
 - **2026-08-08:** EntityItem.SetItemStack (IL=115): distraction config from
