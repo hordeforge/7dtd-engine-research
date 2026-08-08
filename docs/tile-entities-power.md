@@ -876,6 +876,26 @@ After `TileEntityPoweredBlock.write`:
 | **ToServer (1)** | owner (always after base); then `bUserAccessing:bool`, `IsLocked:bool`, `ClientData.SendSlots:bool` (+ `WriteItemStack(ItemSlots)` if set, clear flag), `TargetType:i32` |
 | **ToClient (2)** | owner; `hasPowerRangedTrap:bool`; if true: `IsLocked`, `WriteItemStack(PowerRangedTrap.Stacks)`; always `TargetType:i32` |
 
+**`TileEntityPoweredRangedTrap` accessor leaves (all IL-verified):** the
+server/client split is uniform: `get_TargetType()` (IL=12) reads
+`(PowerItem as PowerRangedTrap).TargetType` on the server else
+`ClientData.TargetType` (`set_TargetType` IL=14 writes the matching side);
+`get_ItemSlots()` (IL=12) reads `PowerRangedTrap.Stacks` / `ClientData.ItemSlots`
+(`set_ItemSlots` IL=16 delegates to `PowerRangedTrap.SetSlots` on the server
+and flags `SetModified`); `set_IsLocked` (IL=16) likewise mirrors
+`PowerRangedTrap.IsLocked` / `ClientData.IsLocked` + `SetModified`.
+`get_AmmoItems()` (IL=40) lazily derives the ammo classes from the block at
+the TE position (`BlockLauncher.AmmoItemName` or `BlockRanged.AmmoItemName`
+via `ParseItemClassesFromString`). The target flags (IL=7 each) are the
+`TargetType` bit tests: `Self = 1`, `Allies = 2`, `Strangers = 4`,
+`Zombies = 8`. `get_OwnerEntityID()` (IL=9) lazily runs `SetOwnerEntityID()`
+(IL=27: `persistentPlayers.GetPlayerData(ownerID)?.EntityId`, -1 on a miss)
+when the cached id is -1; `set_OwnerEntityID` (IL=4) is the plain field
+write. `TileEntityPoweredBlock.get_PowerUsed()` (IL=8) is
+`IsToggled ? base.PowerUsed : 0`, and `set_IsToggled(value)` (IL=24)
+forwards to `PowerConsumerToggle.IsToggled` on the server, always stores
+`isToggled` and flags `SetModified`.
+
 #### `TileEntityPoweredMeleeTrap.write` (IL=15)
 
 After powered-block base: version u16 (persist) + `ownerID` ToStream only.
