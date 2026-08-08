@@ -517,6 +517,20 @@ stateDiagram-v2
 
 Prefer SetBlock over SetBlockRaw when mesh must update (product inject lesson).
 
+**Delayed / batched regeneration.** During bulk edits (POI placement and
+similar) the cluster coalesces regen requests instead of marking chunks one
+by one: `ChunkPosNeedsRegeneration_DelayedStart` (IL=28) increments a
+`delayedRegenCount` refcount and clears the batch dict on the 0->1
+transition; while `delayedRegenCount > 0`, `chunkRegenerateAt(chunk, yPos)`
+(IL=49) accumulates `delayedRegenChunks[chunk] |= 1 << ((yPos >> 4) & 31)`
+(a 16-block Y-slice bitmask, the same layout `Chunk.FormatRegenerationLayers`
+formats) instead of setting `NeedsRegenerationAt` directly;
+`ChunkPosNeedsRegeneration_DelayedStop` (IL=48) decrements the refcount and,
+on the 1->0 transition, flushes every accumulated mask through
+`chunk.NeedsRegenerationOrBits(mask)` and clears the batch. So a prefab
+write marks dirty layers in bulk and the real relight/remesh fallout runs
+once when the batch ends.
+
 ### 5.0 `Chunk.SetBlockRaw` (IL=386)
 
 Silent in-chunk write used by load, falling, inject, and some TE paths:
@@ -871,6 +885,12 @@ if two weather packages arrive in the same `Time.frameCount`.
 | [terrain-height.md](terrain-height.md) | YDim / height |
 | `realearth-surfaces.md` | Product surfaces |
 
+## Changelog
+
+- **2026-08-08:** Delayed/batched regeneration (5): DelayedStart (IL=28)
+  refcount + batch clear, chunkRegenerateAt (IL=49) Y-slice bitmask
+  accumulation (1 << (yPos>>4 & 31)), DelayedStop (IL=48) flush via
+  NeedsRegenerationOrBits.
 ## Changelog
 
 - **2026-08-08:** Chunk.GetBlock IL=100: POI-filler culling (IsInternalBlocksCulled + isInside -> cached bvPOIFiller from cPOIFillerBlock), else m_BlockLayers[y>>2] read.
