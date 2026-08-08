@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: prefab placement commit
+
+PrefabInstance.CopyIntoWorld (IL=85, server-browser-prefabs.md 3.1):
+rotation delta RotateY sync + bounding box refresh, CopyIntoLocal stamp,
+entity copy with IsEditor/GameStats 24 allow flag. verified from IL.
+Commit 39991d3.
 ## 2026-08-08 - tier-C: chunk-save callback
 
 WorldChunkCache.NotifyOnChunkBeforeSave (IL=19, save-region.md 4):
