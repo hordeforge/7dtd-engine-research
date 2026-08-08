@@ -52,7 +52,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
-| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1771 / catalogued 585 / classified 1343) |
+| Unaccounted reached types | `Coverage.exe` | **0** (3699 game types; narrated 1780 / catalogued 581 / classified 1338) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
@@ -78,6 +78,10 @@ Closed in recent sessions (still optional, not required for A+B):
 | Network leaves (unknown-package decode, NTP probe) | network §1.2 |
 | Save-region leaves (protection cache, chunk scopes) | save-region §3.1 |
 | EntityFlying base move; mesh helpers; fire spawn; HitLocation | entity-ai D15 / light-mesh-water §3 / dedicated-misc / minevents §7.0a |
+| Drone family depth (systems/pathing/mods/sync/commands/frame) | vehicles-drones-turrets §5 |
+| Vehicle rescue + EntityItem mesh/cache + EntityHuman leaves | vehicles-drones-turrets §4.3 / loot-economy §6b / weather-environment / entity-ai |
+| Twitch server slice (vote queue, manager update, player gates) | twitch-integration §2 |
+| EntityAlive/Player leaf hooks + TaskManager + infra records | entity-ai §5.1b / parties-factions / items / dedicated-misc-systems |
 | ModEvents payload structs (S- carriers) + SNetPackageInfo | dedicated-misc-systems |
 | Requirement framework + all 26 leaves | minevents §7.0a |
 | Power block wrappers (block to TE identity) | tile-entities-power §3.7 |
