@@ -44,6 +44,25 @@ produce exactly 7432 files, 0 missing, 0 extra (verified vs a new
 ListAllTypes.exe audit tool). Canonical `il/full-v3.1.0/` and `/tmp/full-il.txt`
 regenerated clean.
 
+Verification sweep completed after that: every docs/*.md IL claim spot-checked
+in 2-3 batches (entity-ai, items, vehicles, aidirector, spawning, world-chunks,
+blocks, tile-entities, dedicated-misc, combat, loot/quests/progression,
+network/save/weather, mod/twitch/chunk-providers, stealth/crafting/game-events,
+map-objects, sandbox/buffs, light/entity-stats/stability, leftovers/parties,
+loop, protocol join/spawn, signs/webserver, platform-auth, npc-dialog,
+world-gen, terrain-height, dynamic-mesh, chat/server-lifecycle, save-region,
+save-persistence, crafting, raycast-pathing, buffs, items 3rd, etc.). All
+exact. Additional stale-value fixes: ConnectionManager.Update 215->228
+(network.md x2 + manager-updates), WorldState.SetFrom 164->203 (save-region
+x2), World.GetTerrainHeight 21->19, loop diagram OnUpdateEntity 417->457,
+closed-gaps + terrain-height SaveLoad 884->926, terrain-height heightmap pair
+49/63->132/74. Netpackage bodies inventory IL-verified field-by-field
+(EntityRemove, PlayerId, ExplosionInitiate 9 fields); gmupdate-calls 182 rows
+and frame-entries 244 rows confirmed; 0xCA marker found in the LiteNetLib auth
+wrapper. Census unchanged 1846/558/1295, unaccounted 0, report in sync. Final
+state: tree clean at the closing commit, `make test` + `make stock-check`
+green, 2205+ commits.
+
 2026-08-07/08 session notes: doc structure pass (f1e6a34) - fixed duplicate
 section numbers (server-lifecycle, quests-challenges, managers, save-region),
 ordered entity-ai D8.x sections, moved `docs/stability-dump/` raw IL to
