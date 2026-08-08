@@ -1338,6 +1338,14 @@ capped by `ItemClass` derived `MaxUseTimes` (base `MaxUseTimesBase` scaled by
 quality and mods through `ModMaxUseTimes`). The exposed fraction is
 `PercentUsesLeft = 1 - clamp01(UseTimes / MaxUseTimes)`.
 
+**`Equipment.CheckBreakUseItems` (IL=85)** is the armor break-on-use pass: it
+zeroes `CurrentLowestDurability`, scans the equipment slots for the lowest
+`PercentUsesLeft`, then for every slot whose `MaxUseTimesBreaksAfter` is set
+with `UseTimes >= MaxUseTimes` calls `SetSlotItem(slot, empty, true)` - the
+worn-out piece is cleared from the slot - and broadcasts the matching break
+sound. `MaxUseTimesBreaksAfter` is the "breaks instead of just stops working"
+flag (the `DegradationBreaksAfter` XML key).
+
 **Chain bodies:** `get_MaxUseTimesBase()` (IL=25) is
 `(int)GetValue(passive 8 DegradationMax, this, 0, null, null, itemClass tags)`
 (the class's degradation cap through the passive; the `MaxUseTimesUI` read is
@@ -1717,6 +1725,10 @@ The non-action leaves:
   `OnDamagedByExplosion`, and `OnMeshCreated` hooks, letting an `ItemClass`
   customize its dropped-entity behavior.
 
+## Changelog
+
+- **2026-08-08:** Equipment.CheckBreakUseItems (IL=85): lowest-durability
+  scan, MaxUseTimesBreaksAfter slot clear + break sound.
 ## Changelog
 
 - **2026-08-08:** Equipment.UnlockCosmeticItem (IL=31): CosmeticMappingStringID
