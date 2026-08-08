@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: FireControllerUtils spawn path + HitLocation requirement
+
+FireControllerUtils.SpawnParticleEffect 3-branch (server-non-dedi client-spawn / client-to-server / dedi broadcast 192); HitLocation body_parts mask requirement (verified)
 ## 2026-08-08 - tier-C: terrain mesh build helpers
 
 TerrainSubMesh texture-id accumulator + MeshCalculations tangents/normals (0.01745329 deg-rad); client-only mesh math, dedi streams raw chunks (verified)
