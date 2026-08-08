@@ -156,6 +156,19 @@ level)` (IL=9) is `level <= MaxLevel`; `IsLocked(ea)` (IL=6) is
 `GetCalculatedMaxLevel(ea, this) == 0`. Wire: `Write` (IL=17) is version **1**
 + `name` + `level` (u8) + `costForNextLevel` (i32); `Read` (IL=16) mirrors it.
 
+**`ProgressionClass` (the definition):** `ModifyValue(ea, pv, effect, ...)`
+(IL=17) applies the class's `Effects` with `pv.GetCalculatedLevel(ea)` as the
+level - the perk-level-driven effect chain. `CalculatedCostForLevel(level)`
+(IL=31) is `(int)(CostMultiplier^level * BaseCostToLevel)` unless an
+`OverrideCost` array exists, then `OverrideCost[level - 1]` (0 out of range).
+`GetCalculatedMaxLevel(ea, pv)` (IL=78) binary-searches the `LevelRequirements`
+list for the last level whose `RequirementGroup` passes `canRun` (IL=8:
+null-gated `IsValid`), clamped to `[MinLevel, MaxLevel]`; with no requirements
+attributes default to 20 and everything else to `MaxLevel`. `AddLevelRequirement`
+(IL=7) keys by level; `GetRequirementsForLevel(level)` (IL=20) falls back to a
+fresh `LevelRequirement(level)`; `PostInit` (IL=14) sorts the requirements by
+level. `FireEvent` / `HasEvents` (IL=9 each) forward to the class `Effects`.
+
 **Validation predicates (V3.1.0 b14).** `Recipe.CanCraft(stacks, ea,
 craftingTier)` (IL=128) starts by caching `GetCraftingTier(player)` into the
 shared recipe's `craftingTier` field, clamped down when the passed
@@ -257,6 +270,10 @@ report the sizes for the UI.
   CraftedItem hook.
 ## Changelog
 
+- **2026-08-08:** ProgressionClass: ModifyValue with calculated level;
+  CalculatedCostForLevel multiplier/override; GetCalculatedMaxLevel
+  requirement binary search + clamp (attribute 20 default); AddLevelRequirement/
+  GetRequirementsForLevel; PostInit sort; FireEvent/HasEvents.
 - **2026-08-08:** ProgressionValue: set_Level frame-cache invalidation + skill
   pin; GetCalculatedLevel frame-cached + type passive 83/84/85 bonus;
   PercToNextLevel; CanPurchase MaxLevel; IsLocked; Write v1 / Read.
