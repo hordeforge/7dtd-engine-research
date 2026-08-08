@@ -150,7 +150,7 @@ Not required for sim optim; documents where net terminates below packages.
 From name hints on 242 MB Update types:
 
 - **Likely dedicated-relevant:** ~33 (GameManager, ConnectionManager, DynamicMeshManager, Entity*, turrets/traps, Origin, …)  
-- **Likely client/editor:** majority (vp_*, UI, Avatar, Camera, LocalPlayer, …)  
+- **Likely client/editor:** majority (vp_*, UI, Avatar, Camera, LocalPlayer, …); debug/test helpers `MemoryTracker` (OnGUI memory dump), `GameGraphManager` (EntityPlayerLocal debug graphs), `StringParsersTests` (unit-test class), `NetworkMonitor`/`SIdCnt*` (NGuiWdwDebugPanels) are client/debug-only  
 - **Unclassified:** remainder (see inventories/gaps.md §8)
 
 Heuristic only; presence still depends on whether component exists in dedicated scene/world.
