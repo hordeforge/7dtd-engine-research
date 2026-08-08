@@ -751,6 +751,10 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   `NetPackageDecoUpdate` / `NetPackageDecoResetWorldChunk` /
   `NetPackageDecoResetWorldRect`. Saves: `World.SaveDecorations →
   DecoManager.Save()` (async `WriteTask`).
+  `NetPackageDecoResetWorldChunk.ProcessPackage` (IL=39) reads the chunk key
+  (i64, pooled reader under the stream monitor) and calls
+  `DecoManager.ResetDecosForWorldChunk(key)` - the reset side of the
+  broadcast above.
   `SendDecosToClient` (IL=32) regenerates the write list under lock and loops
   `NetPackageDecoUpdate.Setup(decoWriteList, ref index)` →
   `ClientInfo.SendPackage` until the index reaches the end (the package

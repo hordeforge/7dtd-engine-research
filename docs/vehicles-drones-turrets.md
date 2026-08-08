@@ -839,6 +839,10 @@ then, when anything changes, syncs it:
 - When `TargetEntityId`, `IsOn`, or the item value changes versus the last tick,
   the server sends `NetPackageTurretSync(id, targetId, isOn, itemValue)` on
   channel `192`.
+  `NetPackageTurretSync.ProcessPackage` (IL=27) applies it on any receiver
+  with the turret entity: it copies `TargetEntityId`, `OriginalItemValue`
+  and `IsOn` straight onto the `EntityTurret` - the deployed-turret state
+  mirror.
 
 **`findTarget` (IL=173):** clear target; `GetEntitiesInBounds(EntityAlive,
 bounds centered on muzzle with size ~`range`×2 height 1)`; sort by
