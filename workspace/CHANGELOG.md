@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: items second spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: entity-ai second spot-check (7 claims exact)
 ## 2026-08-08 - tier-C: closed-gaps SaveLoad IL fix 884->926
 ## 2026-08-08 - tier-C: loop doc spot-check (8 claims exact)
