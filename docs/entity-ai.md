@@ -3374,6 +3374,22 @@ point) and calls `SeekYaw`.
 - **`AdjustWaypoint` (IL=46):** raise `waypoint.y` (and the probe block pos)
   until the block at the waypoint is air (probe cap 255); clamp `y <= 250`.
 
+**`EntityFlying` base override (`MoveEntityHeaded`, IL=135, `IsAirBorne`
+IL=2):** the generic airborne-motion model under the vulture class. It has
+no direct stock caller (the vulture's `updateTasks` integrates its own
+motion, D15 above) but is the virtual-dispatch target if the base movement
+path ever reaches a flying entity, so it is reachable but dormant. The body:
+attached entities and dead entities return early; a dead flyer runs
+`entityCollision(motion)` and decays `motion.y = (motion.y - 0.08) * 0.98`,
+`motion.x/z *= 0.91` (corpse settle). In water: `Move(direction, absolute,
+0.02, 1)` then `entityCollision(motion)` and `motion *= 0.8` (water drag).
+Otherwise `damp = 0.91`, replaced by `0.55` when `onGround`, then by the
+foot block's `blockMaterial.Friction` clamped to 0.01..1 when the block
+under the entity is solid; the move runs with acceleration
+`0.163 / (damp * damp)` (`0.1 * accel` move-scale when grounded, `0.02`
+when airborne), then `entityCollision(motion)` and `motion *= damp` - the
+damp factor both slows the entity and scales the next move.
+
 ---
 
 ## Addendum (2026-07-21): server-side zombie animators
