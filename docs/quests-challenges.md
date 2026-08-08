@@ -372,6 +372,50 @@ pushes `SetPosition(dataType, position)` to all of them.
 appends to `Rewards` when non-null; `ParseVariable(value)` (IL=39) replaces
 a `{name}` token with `DataVariables[name]` when present.
 
+**`QuestJournal` lookup / lifecycle leaves (all IL-verified):**
+`FindNonSharedQuest` (name IL=34, code IL=33) returns the first quest with a
+matching id and `SharedOwnerID == -1`; `FindSharedQuest(code)` (IL=26) is the
+first by code in any state; `GetSharedQuest(code)` (IL=33) requires state
+`InProgress`; `FindLatestNonSharedQuest(name)` (IL=52) keeps the most recent
+(active wins, then largest `FinishTime`); `FindActiveOrCompleteQuest(name,
+faction)` (IL=44) skips `Failed` and a mismatched faction;
+`FindReadyForTurnInQuestByGiver(giverID)` (IL=46) returns the first quest
+with `CheckIsQuestGiver`, state `ReadyForTurnIn` or `Completed`, and
+`RallyMarkerActivated`; `GetNextCompletedQuest(lastQuest, entityId)` (IL=48)
+scans past the reference quest for the first `Completed` + `ReturnToQuestGiver`
++ `QuestGiverID != -1` quest matching the entity.
+`FailedQuest(q)` (IL=22) and `ForceRemoveQuest(quest)` / `(questID)`
+(IL=21/47) share the teardown: set state / `UnhookQuest()`,
+`OwnerPlayer.TriggerQuest*Event(q)`, and
+`persistentPlayers.GetPlayerDataFromEntityID(...).RemovePositionsForQuest(
+code)`; `ForceRemoveAllQuests()` (IL=21) drains backwards.
+`GetQuestRecipes()` (IL=73) rebuilds `questRecipeList` from the active
+quests' current-phase `ObjectiveCraft` objectives that are not complete;
+`GetRewardedSkillPoints()` (IL=56) sums every `RewardSkillPoints.Value` of
+`Completed` quests.
+`HandleQuestCompleteToday(q)` (IL=60) stamps `QuestProgressDay = WorldDay`
+when the day's completed count is below `QuestsPerDay` (else -1), re-runs
+`ResetAddToProgression()` (IL=42, `CanAddProgression = count < QuestsPerDay`,
+true when -1), and adds the `buffShowQuestLimitReached` buff when the cap
+bites.
+`StartQuests()` (IL=87) starts challenges (outside editor / playtest) then
+per quest runs `StartQuest(false, true)`, with rally-activated shared quests
+below their highest phase failed via `CloseQuest(Failed, null)` instead
+(non-shared rally quests get `ResetToRallyPointObjective()` first).
+`RefreshTracked()` (IL=26) points `TrackedQuest` at the first tracked quest;
+`SetActivePositionData(dataType, position)` (IL=32) pushes
+`SetObjectivePosition` into every active rally-marked quest.
+`HandlePartyRemoveQuest(q)` (IL=77) is the party teardown: on the server it
+strips the quest from each party member locally
+(`RemoveSharedQuestByOwner` / `RemoveSharedQuestEntry`) or via
+`NetPackageSharedQuest.Setup(code, ownerId)` (channel 192) for remote
+members (clients `SendToServer` instead). `RemoveAllSharedQuests()` (IL=125)
+broadcasts the removal for every in-progress shared quest below its highest
+phase, `RemoveQuest`s each (tooltip `Shared quest {0} has been removed.`),
+then clears `sharedQuestEntries` (each `Quest.RemoveMapObject()`) and fires
+`TriggerSharedQuestRemovedEvent(null)`; `RemoveSharedQuestForOwner(entityID)`
+(IL=53) does the per-owner variant.
+
 The **client owns the quest object**: `Quest.OwnerJournal.OwnerPlayer` and
 `Challenge.Owner.Player` are `EntityPlayerLocal`, and the progression code calls
 `GameManager.ShowTooltip`, `Audio.Manager.PlayInsidePlayerHead`, and `XUi`
