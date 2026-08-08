@@ -312,6 +312,13 @@ descending chance); remaining `Modifications` are filled with
 `noPreinstallCosmeticItemTags`, each cosmetic slot rolls
 `GetCosmeticItemMod(itemTags, accumulated, random)` (or None).
 
+**`Equipment.UnlockCosmeticItem(itemClass)` (IL=31)** is the cosmetic-unlock
+path (the workstation craft-complete delivery calls it): it resolves the
+item name through the static `CosmeticMappingStringID` dictionary and, when
+the id is not already in `m_unlockedCosmetics`, appends it and fires the
+`CosmeticUnlocked(name)` event - so scrapping a crafted item at a
+workstation permanently unlocks its cosmetic variant for the player.
+
 **`ItemClassModifier` selection primitives (V3.1.0 b14):**
 `GetItemModWithAnyTags(tags, installedModTypes, random)` (IL=53) scans
 `ItemClass.list` for `ItemClassModifier` entries that are **not** tagged
@@ -1710,6 +1717,10 @@ The non-action leaves:
   `OnDamagedByExplosion`, and `OnMeshCreated` hooks, letting an `ItemClass`
   customize its dropped-entity behavior.
 
+## Changelog
+
+- **2026-08-08:** Equipment.UnlockCosmeticItem (IL=31): CosmeticMappingStringID
+  resolve, m_unlockedCosmetics append, CosmeticUnlocked event.
 ## Changelog
 
 - **2026-08-08:** ItemClass tag scans: GetItemWithTag (IL=30) first
