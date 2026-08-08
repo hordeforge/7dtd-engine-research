@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ProtocolManager server bring-up
+
+Protocol list build (prefs 144 + launch args), port validation 1024-65530, start/stop/mode reset (verified)
 ## 2026-08-08 - tier-C: ConnectionManager lifecycle leaves
 
 AddClient analytics keys, ServerReady reconnect reset, SendToClientsOrServer 192 broadcast, net-stat delegates (verified)
