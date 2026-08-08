@@ -1110,6 +1110,19 @@ server-only until `isGroundHit`): `ParticleEffect("impact_stone_on_" +
 groundSurfaceCategory, ...)` with material `<blockSurface>hit<groundSurface>`
 at the entity position.
 
+**Group variant (`EntityFallingBlocks`):** static defaults in the cctor:
+`Enabled = false` (group mode opt-in), `MaxGroupSize = 3`, `renderOffsetV =
+(-0.5, -0.5, -0.5)`. `Update` (IL=117) enables the per-block `BoxCollider`s when
+the first is still off and sums `massKg += FastMin(hardness * mass, 10) * 8`
+over `blockValues`, then server RB mass/vel/angular as in the singular.
+`CreateMesh` (IL=295) builds one merged mesh: `VoxelMesh.Create(meshIndex, ...)`
+from `blockValues[0].MeshIndex`, per block `shape.renderFull` (skipping
+`BlockShapeTerrain`) into a new `Block_<type>` GameObject with
+`UpdateLightOnChunkMesh`, then one `blockCollider{i}` GameObject per block with
+a 0.9-size `BoxCollider` at `worldToBlockPos(bp) - basePos`, sharing the
+entity's collider material. `OnContactEvent` (IL=79) and `SetDead` match the
+singular using `blockValues[0]`.
+
 **`EntityFallingTree` impact damage (Collide IL=101 / collidedWith IL=58):**
 Trees spawned through `RequestToSpawnEntityServer` (spawning.md §5) fall as a
 physics body. Each `Collision` event:
@@ -3487,6 +3500,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   && deathUpdateTime > 70.
 ## Changelog
 
+- **2026-08-08:** EntityFallingBlocks group variant: cctor statics Enabled
+  false / MaxGroupSize 3 / renderOffsetV (-0.5)^3; Update (IL=117) box collider
+  enable + massKg sum; CreateMesh (IL=295) merged VoxelMesh + per-block
+  blockCollider{i} 0.9 BoxColliders + UpdateLightOnChunkMesh.
 - **2026-08-08:** EntityFallingBlock landing + mesh: OnUpdateEntity (IL=344)
   full - every-other-tick bounds damage pass (entityHits < 3, passive 164,
   fallingBlock source, warning log), land path (ticks >= 60 + settled,
