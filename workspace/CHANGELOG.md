@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: animator audio stop
+
+Entity.StopAnimatorAudio (IL=16, dedicated-misc-systems.md) monitored-handle
+stop + removal. verified from IL. Commit 6141828.
 ## 2026-08-08 - tier-C: one-shot stop
 
 Entity.StopOneShot (IL=5, dedicated-misc-systems.md) BroadcastStop
