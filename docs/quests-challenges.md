@@ -416,6 +416,18 @@ then clears `sharedQuestEntries` (each `Quest.RemoveMapObject()`) and fires
 `TriggerSharedQuestRemovedEvent(null)`; `RemoveSharedQuestForOwner(entityID)`
 (IL=53) does the per-owner variant.
 
+**`BaseObjective` base leaves (all IL-verified):** `HandleCompleted()` (IL=1),
+`SetupObjective()` / `SetupDisplay()` / `SetupQuestTag()` (IL=1 each) and
+`SetupActivationList(prefabPos, activateList)` (IL=2, false) are the base
+no-ops / defaults the subclasses override. `HandleVariables()` (IL=15)
+resolves `{name}` tokens in `ID` and `Value` through
+`ownerQuest.ParseVariable`. `AddModifier(modifier)` (IL=14) lazily creates
+`Modifiers` and wires `modifier.OwnerObjective = this`;
+`DisableModifiers()` (IL=21) calls `HandleRemoveHooks()` on every modifier;
+`CopyValues(objective)` (IL=55) copies `ID` / `Value` / `Optional` /
+`currentValue` / `Phase` / `NavObjectName` / `HiddenObjective` /
+`ForcePhaseFinish` and re-adds cloned modifiers.
+
 The **client owns the quest object**: `Quest.OwnerJournal.OwnerPlayer` and
 `Challenge.Owner.Player` are `EntityPlayerLocal`, and the progression code calls
 `GameManager.ShowTooltip`, `Audio.Manager.PlayInsidePlayerHead`, and `XUi`
