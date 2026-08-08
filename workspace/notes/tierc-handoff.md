@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `e08c189` drone systems/pickup/storage leaves |
-| Commits since dry-run `3b61d9c` | ~1303 |
+| HEAD (at handoff write) | `8f0b5a6` QuestEventManager final notifiers |
+| Commits since dry-run `3b61d9c` | ~1304 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
