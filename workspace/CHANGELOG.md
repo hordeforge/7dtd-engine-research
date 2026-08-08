@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: QuestEntitySpawn/AttachType/TraderData wire re-verify (all exact)
 ## 2026-08-08 - tier-C: save-region sector codec re-verify (V1 180/46, V2 244/48, Raw 229/70/74)
 ## 2026-08-08 - tier-C: protocol-packages 6.21 world + entity-lifecycle process-IL (21 claims exact)
 ## 2026-08-08 - tier-C: protocol-packages 6.21 player/inventory process-IL (7 claims exact)
