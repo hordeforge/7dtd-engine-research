@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: trigger CreatePowerItem, composite capabilities, falling/car leaves
+
+Trigger-type round trip + power item ctor, composite capability OR + command refresh, falling launch velocity, car damage model index (verified)
 ## 2026-08-08 - tier-C: workstation/forge accessor leaves
 
 CanOperate/AcceptsMaterial/fuel-time/queue/input-empty/readItemStackArray/SetDataFromNet; forge fuel-left + forged-so-far formulas (verified)
