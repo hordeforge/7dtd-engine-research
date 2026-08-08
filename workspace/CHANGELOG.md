@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: PrefabInstance coordinate/bbox leaves
+
+Relative/offset transforms, Move/Rotate/Resize bbox, UpdateBoundingBoxPosAndScale + volumes + changed event, GetBox/Serializable (verified)
 ## 2026-08-08 - tier-C: GameUtils block/terrain/arg leaves
 
 FindPrefabForBlockPos/placement bounds, launch args, color pack/unpack, paint-id lookup, ItemValueArray wire, mesh/terrain normals (verified)
