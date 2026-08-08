@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: dropped time-bomb fuse machine
+
+ItemClassTimeBomb.OnDroppedUpdate (IL=188, items.md): remote Meta
+65535->-1, PhysicsMasterGetFinalPosition, MinEvent 97 arming on
+collide/water, PinPulled + Meta = explodeAfterTicks, per-tick SoundTick
+countdown, ExplosionServer detonation at Meta 0. verified from IL. Commit
+b2cfb6c.
 ## 2026-08-08 - tier-C: loot-bag despawn
 
 EntityLootContainer (loot-economy.md): OnUpdateEntity (IL=46) lock-skip,
