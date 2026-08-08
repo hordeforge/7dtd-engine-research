@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ItemActionAttack leaves
+
+StaminaModifier pass-through, hitmask read, tooltip damage strings, damage overlay, radial gates (verified)
 ## 2026-08-08 - tier-C: ItemActionTextureBlock painting internals
 
 getHitBlockFace/paintBlock/paintFace + SetBlockTextureServer, decreaseAmmo cost, floodFill BFS, eyedropper copies, radial paint modes (verified)
