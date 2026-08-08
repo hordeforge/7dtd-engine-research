@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: trigger manager list plumbing + GameUtils time/kick helpers
+
+UpdateList add/remove, layer union, nav-object test toggle, prefab teardown; day/hour formatting, 0.5s delayed kick (verified)
 ## 2026-08-08 - tier-C: trigger CreatePowerItem, composite capabilities, falling/car leaves
 
 Trigger-type round trip + power item ctor, composite capability OR + command refresh, falling launch velocity, car damage model index (verified)
