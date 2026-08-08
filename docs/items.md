@@ -1260,6 +1260,21 @@ fires `AvatarController.CancelEvent` for `WeaponFire`, `PowerAttack`,
 `UseItem`, and `ItemUse`, plus `UpdateBool("Reload", false, true)` - so a slot
 switch mid-swing/mid-reload drops the pending action pose.
 
+**`Inventory.SimulateActionExecution(actionIdx, itemStack, onComplete)`**
+(IL=15, coroutine `<SimulateActionExecution>d__138` MoveNext IL=277) is the
+context-menu "Use Item" flow (the only caller is
+`ItemActionEntryUse`'s use-with-animation coroutine): it waits for the
+`DUMMY_SLOT_IDX` slot to free up, clones `itemStack` into it, records the
+previous holding/focused indices, `SetHoldingItemIdx(DUMMY_SLOT_IDX)` and
+`CallOnToolbeltChangedInternal()` (0.1 s waits through the holster delay),
+then runs `Execute(actionIdx, false, null)` followed by
+`Execute(actionIdx, true, null)`, pumping `OnHoldingUpdate(GetItemActionDataInSlot(
+DUMMY_SLOT_IDX, actionIdx))` while `IsHoldingItemActionRunning()` and the
+holster delay settle (0.1 s polls). The `HandleComplete` helper (IL=43)
+returns the dummy slot's stack (or the original `_itemStack` when it still
+matches), restores the previous holding/focused indices when the focus was
+the dummy slot, clears the dummy slot, and invokes `onComplete(stack)`.
+
 **`Inventory.setHeldItemByIndex(idx, applyHolsterTime)` (IL=132)** - the slot
 switch behind `SetHoldingItemIdx` (IL=5, `applyHolsterTime=true`) and
 `SetHoldingItemIdxNoHolsterTime` (IL=5, `false`): after
