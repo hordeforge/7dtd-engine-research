@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: QuestJournal lookup/lifecycle/shared-quest leaves
+
+Find* quest scans, Failed/ForceRemove teardown, GetQuestRecipes/RewardedSkillPoints, daily cap + buff, StartQuests, shared-quest party removal (verified)
 ## 2026-08-08 - tier-C: Quest shared/event/state leaves
 
 SetupSharedQuest bootstrap, HandleQuestEvent fan-out, AddSharedKill/Location, HandleActivateListReceived, ResetToRallyPointObjective, ParseVariable (verified)
