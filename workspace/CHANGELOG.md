@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: protocol-packages 6.21 player/inventory process-IL (7 claims exact)
 ## 2026-08-08 - tier-C: console-commands framework spot-check (9 claims exact)
 ## 2026-08-08 - tier-C: completion-bar Tier C progress (TE ticks + per-flag framing closed)
 ## 2026-08-08 - tier-C: GameEventRequest wire body (write IL=83, u8-capped variables)
