@@ -210,8 +210,28 @@ cap candidate at 1; update stab0 set; `SetStability`; recurse.
 
 ## Remaining detail to pin down before implementing
 
-- `StabilityInitializer::unspreadHorizontal` / `clearHorizontal` / `clearDown`
-  exact stop conditions and the re-spread entry points.
+- **Closed 2026-08-08 (stability clear/unspread mechanics, IL-verified):**
+  the `StabilityInitializer` clear and unspread paths share one gate set.
+  Every neighbor test skips (leaves the block alone) when the block is air,
+  `!Block.StabilitySupport`, `MaterialBlock.IsLiquid`, `Block.StabilityIgnore`,
+  or `GetStability == 0`:
+  - `clearHorizontal(chunk, x, y, z, stabStop)` (IL=114) / `clearDown`
+    (IL=59): for each of the 4 `HORIZONTAL_DIRECTIONS` (clearHorizontal) or
+    the block below (clearDown, y-1, recursing down + horizontal at each
+    level), when the neighbor's `stab < stabStop` it `SetStability(..., 0)`
+    and recurses. Chunk-crossing neighbors are fetched via
+    `world.GetChunkFromWorldPos` and remapped with `World.toBlockXZ`.
+  - `unspreadHorizontal` (IL=136) / `unspreadVertical` (IL=154): propagate
+    the caller's `stab` value into the neighbor (`SetStability(..., stab)`),
+    add the affected position to the caller's `HashSet<Vector3i>`, and
+    recurse with the same `stab`.
+  - Entry points: `BlockRemovedAt` (IL=106) reads the removed block's old
+    stability, `SetStability(..., 0)` on the position, then
+    `unspreadHorizontal` + `unspreadVertical` with the old value and walks
+    the affected set (re-checking each position via `GetChunkFromWorldPos`);
+    `BlockPlacedAt` (IL=125) runs the `spreadHorizontal` / `spreadVertical`
+    (IL=127/152) counterpart; `DistributeStability` (IL=72) is the initial
+    distribution pass.
 - `Block.StabilitySupport`, `Block.StabilityIgnore`,
   `MaterialBlock.StabilityGlue` and `MaterialBlock.Mass` data sources in
   blocks.xml (properties on `<block>` and `<material>`), to be loaded into the
