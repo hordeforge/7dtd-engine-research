@@ -798,6 +798,14 @@ After `TileEntityPowered.write`:
 
 ### 4.7 Composite `TEFeature*` wire tails
 
+`TileEntityExtensions.TryGetSelfOrFeature<T>(te, out typed)` (IL=53) is the
+typed-access helper: null input -> default + false; `te is T` -> the TE
+itself; `te is TileEntityComposite` -> `GetFeature<T>()` on the composite;
+`te is ITileEntityFeature` -> `GetFeature<T>()` on the feature's `Parent`
+composite; otherwise default + false. `GetSelfOrFeature` (IL=6) is the same
+call with the bool discarded - this is how callers reach a storage / door /
+sign feature whether they hold the composite or the feature directly.
+
 `TileEntityComposite` ticks each `ITileEntityFeature` in `modulesInternalOrder`
 (§4.5). Feature Write/Read used inside composite TE payloads:
 
