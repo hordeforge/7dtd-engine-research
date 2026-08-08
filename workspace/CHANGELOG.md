@@ -6,6 +6,13 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityFallingTree impact damage
+
+EntityFallingTree.Collide (IL=101) server-only; rel-vel > 1 -> collidedWith;
+rel-vel > 0.2 + impulse/mass > 1.5 -> max-impulse contact, treefallimpact
+audio, treefall particle. collidedWith (IL=58) E_BP_ root resolve,
+treeCanDamageEntity gate (hitEntities / players / supply crates),
+damage = mass * 0.36 via coroutine. Verified from fresh dumps.
 ## 2026-08-08 - tier-C: player move-state machine
 
 EntityPlayerLocal.SetMoveState (IL=553) HoldType + condition-derived
