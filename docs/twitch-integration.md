@@ -78,6 +78,14 @@ participant is the primary player) or broadcasts a fresh
 `NetPackageTwitchVoteScheduling` on channel **192** to that participant,
 then dequeues it.
 
+**Server access gate (`NetPackageTwitchAccess`, ProcessPackage IL=55):**
+the client asks the server whether its Twitch integration may run; the
+server computes `allowed = !(AdminUsers.GetUserPermissionLevel(sender) >
+GamePrefs 211)` and replies `Setup(allowed)` to that sender on channel
+192. The client applies it: allowed -> `GameEventManager.
+HandleGameEventAccessApproved()` (Twitch actions unlock), denied ->
+`Misc/password_fail` head sound + `TwitchManager.DeniedPermission()`.
+
 **`EntityPlayer` Twitch hooks:** `HandleTwitchActionsTempEnabled(newState)`
 (IL=8) applies the new `TwitchActionsStates` only while a temporary state is
 active; `HasTwitchMember` (IL=9) is `Party?.HasTwitchMember() ?? false`;

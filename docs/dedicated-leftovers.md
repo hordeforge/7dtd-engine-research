@@ -158,8 +158,10 @@ targetCount : i32 + targets as above
 contextTypeFullName : string + optional ILockContext.Write
 ```
 
-Client `ProcessPackage`: unlock path → `UnlockResponse`; lock path →
-`LockResponse` then local UI/open via existing `OnLockedLocal` table.
+Client `ProcessPackage` (IL=27): `locking` true →
+`LockManager.LockResponse(success, errorMsg, targets.AsSpan(), context,
+channel)` (then the local UI/open via the existing `OnLockedLocal` table);
+else → `LockManager.UnlockResponse(success, errorMsg, isForceUnlocked)`.
 
 **`ForceUnlockByPlayer` (IL=11):** server-only; calls
 `UnlockRequestServer(playerId, force=true)` (used after failed inventory
