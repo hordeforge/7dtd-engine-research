@@ -484,6 +484,15 @@ override list for that player.
 
 Local player only: `GameManager.ShowTooltip` variants (presentation).
 
+#### `MinEventActionSetNavObject` (Execute IL=53 / ParseXmlAttribute IL=67)
+
+Per targeted `EntityAlive`: with `add` (default true), calls
+`target.AddNavObject(navObjectName, overrideSprite, cvarToText != ""
+? target.GetCVar(cvarToText).ToString() : overrideText)`; with `add` false,
+`target.RemoveNavObject(navObjectName)`. Attributes: `nav_object`, `sprite`,
+`text`, `cvar_to_text` (strings, all default empty), `add` (bool). This is the
+quest/event "show a tracker marker" verb.
+
 #### Presentation leaves (dedi residual)
 
 `PlaySound` (IL=101), `AttachPrefabToEntity` (IL=90), `SetTransformActive`
@@ -556,6 +565,9 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-08:** MinEventActionSetNavObject (Execute IL=53): AddNavObject
+  with sprite + cvar_to_text/overrideText resolution, RemoveNavObject on
+  add=false; nav_object/sprite/text/cvar_to_text/add attributes.
 - **2026-08-07:** GiveExp/GiveSkillExp/SetProgressionLevel; AwardChallenge/QuestStat
   local-only; SetItemInSlot armor gate; jam/reset held; Rage; SetOverrideLoot.
 - **2026-08-07:** EffectManager.GetValue IL=372 stack order; ItemValue.FireEvent
