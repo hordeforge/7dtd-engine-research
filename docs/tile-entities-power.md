@@ -595,6 +595,16 @@ queue entry. Requires fuel module off **or** `isBurning`. Decrements
 - If `Multiplier == 0`: `cycleRecipeQueue()` (shift queue down, clear tail, mark next
   `IsCrafting` if Multiplier and Recipe present).
 
+**`CheckForCraftComplete(player)` (IL=55) delivers finished crafts to the
+owner** (called on the workstation's client-UI open): it walks
+`CraftCompleteList` backward and, for each entry whose `CrafterEntityID`
+matches the player, unlocks the scrapped-item cosmetic
+(`equipment.UnlockCosmeticItem(GetItemClass(ItemScrapped))`), calls
+`player.GiveExp(entry)` (the `_xpFromCrafting` grant, see
+[crafting-recipes.md](crafting-recipes.md)), removes the entry, and marks the
+TE modified - so a player who crafted at a workstation and walked away gets
+the cosmetic unlock and XP when they next open it.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Idle
@@ -873,6 +883,11 @@ the matching `PowerItem` by world position and links the two.
 | [full-surface.md](full-surface.md) | Where this family sits in the whole-assembly map |
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 
+## Changelog
+
+- **2026-08-08:** TileEntityWorkstation.CheckForCraftComplete (IL=55):
+  per-owner CraftCompleteList delivery, cosmetic unlock, GiveExp, TE
+  modified flag.
 ## Changelog
 
 - **2026-08-08:** TileEntity.emitHeatMapEvent (IL=48): heapMapLastTime
