@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: server light manager, water mem stats, world checksums
+
+LightManager.Server singleton, WaterSimulationNative memory accounting, checksums.txt save/load (verified)
 ## 2026-08-08 - tier-C: PowerManager graph edit + save leaves
 
 FindPowerItems predicate, RemovePowerNode teardown, RemoveChild re-root, power.dat backup save, source slot add (verified)
