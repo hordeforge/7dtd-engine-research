@@ -1,6 +1,6 @@
 # Tier-C grind handoff / TODO
 
-**Updated:** 2026-08-08 ~10:00 UTC
+**Updated:** 2026-08-08 ~11:00 UTC
 **Repo:** `7dtd-research` (cwd this tree)  
 **Pin:** V **3.1.0 (b14)** via `tools/data/stock_facts.json`  
 **Managed bar:** tiers A+B met (unaccounted **0**). This grind is **tier C only**.
@@ -62,6 +62,17 @@ IsOnLadder=IsInElevator), Twitch requirement gates / viewer-points ledger /
 action-queue records / vote+cooldown presets / spawn-entry records / TwitchActionManager,
 OOS hygiene (HasParticle un-classified, 15 Twitch server records moved out,
 third-party families named). Census: narrated 1845 / unaccounted 0.
+
+2026-08-08 late-late continuation: verification/closure sweep reached
+absolute completion - uncovered server-relevant types = 0 at every threshold
+(n>=5, n>=3, n>=2). Closed the last IL-closable open item (stability
+clear/unspread mechanics), refreshed the full-surface census (7432 types /
+53235 methods / 1,740,737 IL / 89 namespaces across 4 docs), reconciled all
+OOS doc counts (supplement sections now match their lists; total 1168),
+verified every leaf-catalog key-method/referrer/base claim (1 real error
+fixed: SpawnEntry HandleUpdate), and verified all remaining doc structural
+claims (game-events 179/1014, quests 7/48, Twitch 117, Webserver 72/413,
+largest-maxIL order). Census: narrated 1846 / unaccounted 0.
 ## Resume checklist (next agent / next turn)
 
 1. `cd /home/maci/Desktop/7dtd/7dtd-research && git status && git log --oneline -5`
