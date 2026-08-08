@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: webserver leaves (registration tokens, request plumbing, mime)
+
+UserRegistrationTokens expiry purge + validate; RequestContext record; WebUtils response helpers; MimeType table (verified)
 ## 2026-08-08 - tier-C: census refresh
 
 Coverage.exe re-run: narrated 1509->1771, catalogued 585, classified 1343, unaccounted 0 (verified)
