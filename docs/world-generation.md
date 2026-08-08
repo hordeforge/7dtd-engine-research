@@ -700,6 +700,60 @@ cells inside a sleeper priority volume
 (IL_0387-IL_0394, ~921630) and after load, so multi-block child cells (raw bit
 0x40000000) are regenerated rather than being carried in the file.
 
+**Prefab data-model leaves (all IL-verified):** `GetBlockCount()` (IL=12) is
+`size.x * size.y * size.z`; `GetFirstIndexedBlockOffsetOfType(name)` (IL=19)
+returns the first `indexedBlockOffsets[name]` entry as `Vector3i?` (null on a
+miss); `PrefabExists(fileName)` (IL=15) resolves through
+`PathAbstractions.PrefabsSearchPaths` and is true when the location type is
+not `None`. The sparse/dense pair: `CellsToArrays()` (IL=43) packs the sparse
+`Cells<T>` fields (`blockCells` / `damageCells` / `densityCells` /
+`textureCells` / `waterCells`) into the `Prefab.Data` arrays
+(`m_Blocks` u32, `m_Damage` u16, `m_Density` sbyte, `m_Textures`,
+`m_Water`), and `CellsFromArrays(data)` (IL=154) is the inverse, walking y/z/x
+through `CoordToOffset` and re-allocating only the non-default cells.
+`writeBlockData(bw)` (IL=203) is the `.tts` block payload: `size` as 3 x i16,
+then the raw `m_Blocks`, the `m_Density` bytes, `m_Damage` as little-endian
+byte pairs, the `m_Textures` as a `SimpleBitStream` of `!IsDefault()` flags
+followed by the non-default `TextureFullArray.Write` bodies, and the
+`m_Water` as a `HasMass()` bit stream followed by the `WaterValue.Write`
+bodies for cells with mass. `writeTileEntities(bw)` (IL=65) writes the TE
+list as `count:i16` then per entry `length:i16` + `type:byte` +
+`te.write(StreamModeWrite)` bytes (pooled memory stream);
+`readTileEntities(br, blockIdMapping)` (IL=108) mirrors it via
+`TileEntity.InstantiateFromRead(reader, StreamModeRead, type, null,
+blockIdMapping, GetBlock)`, skipping entries whose block is null or not
+`IsTileEntitySavedInPrefab` (exceptions log
+`Skipping loading of active block data for {name} because of the following
+exception:`). `updateBlockStatistics(bv, b)` (IL=70) counts `cntWindows`
+(`BlockTag == 3`), `cntDoors` (`BlockTag == 2`), `cntBlockEntities`
+(`BlockShapeModelEntity`, non-child, not a meta-bearing `BlockModelTree`)
+and `cntSolid` (non-air) once `BlocksLoaded`. `RemoveAllChildAndOldBlocks()`
+(IL=85) clears every cell whose block is null, a child block, or a
+`BlockModelTree` with meta bit 0x1 (the rotation-cleanup pass).
+`ProcessMultiBlock(ref targetBV, chunk, prefabRelPos, chunkRelPos, questTags,
+overwriteExistingBlocks)` (IL=285) is the copy-into-world multi-block
+reconciliation: it resolves the parent world position (child values add their
+parent offset), reuses the tracked POI multi-block when
+`MultiBlockManager.TryGetPOIMultiBlock` hits, else replaces the block through
+`BlockPlaceholderMap.Replace` (air results stay air, else meta restored),
+deregisters and re-registers the tracked data, then reconciles the target
+value: a same-type block returns, an air result clears the target, a
+non-multi-block result copies type (and rotation when not a child), and a
+different-dimension multi-block warns
+`[MultiBlockManager] The replacement block "{0}" is larger than the original
+block "{1}" ...` (clearing the target when the smaller replacement falls
+outside the original footprint).
+`copyFromWorld(world, posStart, posEnd)` (IL=190) is the editor capture:
+size from the min/max corners, `localRotation = 0`, then per world cell it
+converts water blocks to `Air` + `WaterValue.Full`, copies density, block,
+water and textures (non-child cells only) and clones `IsTileEntitySavedInPrefab`
+tile entities rebased to prefab space;
+`CopyFromWorldWithEntities(world, posStart, posEnd, entityIds)` (IL=285) adds
+the entity capture (`Chunk.GetEntitiesInBounds(typeof(Entity))` across the
+covered chunks, `EntityCreationData` for non-`EntityPlayer` entities rebased
+by `bounds.min`), and rebuilds `indexedBlockOffsets` and `triggerData`
+(cloned `BlockTrigger`s rebased to prefab space).
+
 **Navezgane's baked terrain already contains POI pads.** `dtm_processed.raw` at the
 footprint centre equals `deco.y - 1` for 1272 of 1487 full-POI decorations, and
 1101 of 1487 footprints are already perfectly flat. Row convention for the `.raw`
