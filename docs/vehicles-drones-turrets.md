@@ -596,6 +596,37 @@ exists: repath via `followPlannedPath` when LOS blocked, path length >
 `RotateTo` + `Move` toward target. Success when not blocked and dist <=
 `seekDist`.
 
+**Drone server/order leaves (all IL-verified):** `GetNearestEnemyInRange(pos)`
+(IL=5) and `IsInRange(target, range)` (IL=6) delegate to `sensors` / `steering`;
+`IsOwnerSneaking()` (IL=16) is owner crouching with no current attack target
+(the sneak-follow gate). `isAlly(target)` (IL=71) is false under
+`debugFriendlyFire`, true for the owner, for a target whose
+`PersistentPlayerData` is an ally of the owner's, or for a party member when
+both are players.
+`setOrders(orders)` (IL=18) stores `orderState`, runs
+`initWorldValues(orderState == Follow)`, and refreshes the nav object for the
+local player; `get_AttackState()` / `get_OrderState()` (IL=3 each) expose
+`attackMode` / `orderState`.
+`ToggleAttackMode()` (IL=22) plays `drone_command` and cycles `AttackMode`
+0 -> 1 -> 0 via `SetAttacKMode`; `ToggleHealAllies()` (IL=15) flips
+`setHealAllies(!IsHealingAllies)` and syncs `SendSyncData(256)`;
+`ToggleLightAction()` (IL=14) flips `IsFlashlightOn` / `setFlashlightOn` and
+syncs `SendSyncData(64)`; `ToggleQuietMode()` (IL=27) flips `isQuietMode`,
+stops the `idleLoop` audio handle, and `stopInteraction(32)`.
+`TeleportToPosition(pos)` (IL=4, `teleportToPosition` IL=8) zeroes `motion`
+and `SetPosition(pos, true)`; `get_StorageCapacity()` (IL=4) is
+`bag.SlotCount`; `CanRemoveExtraStorage()` (IL=11) is
+`GetStoredItemCount() < StorageCapacity - 8`;
+`checkNotifityNeedsHealItem()` (IL=26) shows the `xuiDroneNeedsHealItemsStored`
+tooltip + `drone_empty` sound and returns true when the heal weapon lacks a
+healing item; `GetItemClassId()` (IL=30) scans `ItemClass.list` for
+`gunBotT3JunkDrone` (-1 when absent).
+`onVehicleState(entity, followPoint)` (IL=53) is the ride-follow: when the
+owner is attached to a vehicle it enables no-clip once, clears the path and
+`steerFollow`s to `vehicle.position - forward*10 + up*10` (true); when the
+owner dismounts it clears the flag and `SetPosition(followPoint, true)`
+(false).
+
 **Drone pathing (`GetPath` IL=318 / `GetProjectedPath` IL=93 /
 `followPlannedPath` IL=96):** `GetProjectedPath` clears the output and pulls
 the drone's `PathFinderThread.Instance` path (`GetPath(entityId).path`),
