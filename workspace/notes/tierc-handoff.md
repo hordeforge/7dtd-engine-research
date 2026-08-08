@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `ef66a37` sun/block light split |
-| Commits since dry-run `3b61d9c` | ~1088 |
+| HEAD (at handoff write) | `a56c211` crop growth rescheduler |
+| Commits since dry-run `3b61d9c` | ~1089 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |

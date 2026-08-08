@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: crop growth rescheduler
+
+BlockPlantGrowing.addScheduledTick (IL=63, blocks.md 7): deterministic
+GetTickRate schedule vs gaussian-jittered growthDeviation band 0.5x-1.5x.
+verified from IL. Commit a56c211.
 ## 2026-08-08 - tier-C: sun/block light split
 
 World.GetSunAndBlockColors (IL=41, light-mesh-water.md): sun (LIGHT_TYPE 1)
