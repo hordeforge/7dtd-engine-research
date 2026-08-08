@@ -713,6 +713,28 @@ configured lower-tier replacements.
    ≠ 1; `SetHeadSize(ecd.overrideHeadSize)` when `EntityAlive` and ≠ 1;
    `PostInit()`; store `entity`.
 
+**`ecd.ApplyToEntity(e)` (IL=176) detail:** `EntityAlive` first: `SetStats`
+when present; `Health <= 0 → HasDeathAnim = false`; `SetDeathTime`; `setHomeArea`;
+then per kind: `EntityPlayer` gets `playerProfile`, `EntityAlive` gets
+`bodyDamage`, `IsSleeper`, `IsSleeperPassive` (sleeper only),
+`CurrentHeadState(headState)`, `IsDancing`; every entity gets
+`spawnByAllowShare` / `spawnById` / `spawnByName`; `EntityTrader` gets
+`TraderData = (traderData ?? new TraderData()).Clone()`; a `sleeperPose != 255`
+triggers `TriggerSleeperPose(pose, false)`; `EntityDrone` gets
+`OnApplyToEntity(orderState)`; `StressAmount`; `SetSpawnerSource`; the bag is
+cloned onto the entity. Finally the `entityData` blob (when non-empty) is
+rewound and `e.Read(readFileVersion, reader)` feeds the entity-specific extra
+fields (exceptions log `Error loading entity`).
+
+**ECD XML + copy leaves:** `readXml(element)` (IL=47) requires `type` /
+`position` / `rotation` attributes (missing → throw `No 'type' element found in
+entity tag!` etc.), resolves `EntityClass.FromString(type)`, parses the two
+vectors, and sets `id = -1`. `writeXml(StreamWriter)` (IL=88) emits
+`<entity type="<class>" position="x,y,z" rotation="x,y,z" />` with
+culture-invariant floats. The copy ctor (IL=208) clones every field (stats,
+body damage, bag, profile, entityData stream, class-specific arrays);
+`ToString` (IL=41) is `<class> <entityName> id=<id> pos=<pos>`.
+
 `World.SpawnEntityInWorld` (**IL=178**) order:
 
 1. Null entity → warn and return.
@@ -1112,6 +1134,12 @@ above.
   single, EntitySpawnerClass build + AddForDay, empty-spawner throw.
 ## Changelog
 
+- **2026-08-08:** ECD apply + leaves: ApplyToEntity (IL=176) full order
+  (stats/health death-anim, home area, player profile, sleeper pair, head
+  state, trader clone, sleeper pose 255 gate, drone order state, stress,
+  spawner source, bag clone, entityData blob -> Entity.Read); readXml
+  (IL=47) type/position/rotation required + id -1; writeXml (IL=88) entity
+  tag culture-invariant; copy ctor IL=208 deep clone; ToString IL=41.
 - **2026-08-07:** Entity.IsSpawned (IL=2) base true; EntityAlive.IsSpawned
   (IL=3) bSpawned flag read (set in OnAddedToWorld).
 - **2026-08-07:** EntityClass lookup leaves: GetEntityClass (IL=7) list
