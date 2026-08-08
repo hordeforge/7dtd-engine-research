@@ -312,6 +312,20 @@ copy of its wire list and parent position; on load it reconnects by world positi
 | `PowerTriggers` | `List<PowerTrigger>` | trigger nodes, ticked after sources |
 | `PowerItemDictionary` | `Dictionary<Vector3i, PowerItem>` | O(1) lookup by world position |
 
+**Graph edit leaves:** `FindPowerItems(predicate, results)` (IL=25) filters
+the `PowerItemDictionary` values into the result list.
+`RemovePowerNode(node)` (IL=61) detaches every child
+(`SetParent(child, null)`), then the node itself, and removes it from
+`Circuits` plus `PowerSources` / `PowerTriggers` by type and from the
+dictionary - the full teardown. `RemoveChild(child)` (IL=14) detaches the
+child from its parent's `Children` and re-adds it as a circuit root (the
+un-wire action). `savePowerDataThreaded` (IL=31) is the 120 s save worker:
+pooled stream to `{saveDir}/power.dat` with a `.bak` backup first.
+`TileEntityPowerSource.HasSlottedItems` (IL=24) is any non-empty slot;
+`TryAddItemToSlot` (IL=50) delegates to `PowerSource.TryAddItemToSlot` on
+the server, else writes into the client `ClientData.ItemSlots` (setting
+`SendSlots`) when the source is off.
+
 `PowerItemTypes` is the node kind (`PowerItem.CreateItem` is the factory):
 
 | Value | Type | Node class |
