@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: name IncrementalHashExtensions helper
 ## 2026-08-08 - tier-C: IEnumerableExtensions dead utility
 ## 2026-08-08 - tier-C: census refresh (1827 narrated)
 ## 2026-08-08 - tier-C: PlayerEquippedSlots out-of-scope client avatar
