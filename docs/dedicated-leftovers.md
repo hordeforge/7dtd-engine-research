@@ -699,7 +699,8 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   `ParsingConverters` (7, color/action/string-list parsers) with its
   `ParsingMethodCache` singleton; `SimplexNoise` (6) and the vendored
   `OpenSimplex2` / `OpenSimplex2S` noise stack (33 methods, with the
-  field-only `LatticeVertex4D` helper). None are constructed or
+  field-only `LatticeVertex4D` helper); `IEnumerableExtensions` (3,
+  `IsEmpty` / `Join`). None are constructed or
   called by live server (or client) code; do not model them as part of any
   wire/file contract. (`UtilList<T>` is not dead but is reachable only from
   the client `DistantTerrain` render path.)
