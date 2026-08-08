@@ -73,6 +73,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | Cull group clustering + workstation config + action data records | save-region §3.1 / tile-entities-power §4 / items §4.2 |
 | World records (WorldCreationData pin, BackedArrays, POI map) | chunk-providers §2 / world-generation §3.5 |
 | NetPackage per-type pool record | network §3a |
+| TE subclass `UpdateTick` bodies (all 13 overrides, IL sizes + behavior) | tile-entities-power §1.4 |
+| Rare per-flag package framing: `SharedQuestData.write` (questEvent switch), `GameEventRequest.write` (u8-capped variables); QuestEvent/PartyActions/WireToolActions/QuestGotoPoint/TurretSpawn confirmed already covered | quests-challenges §8 / protocol-packages §6.18 / §6.21 |
 | Dynamic-mesh pipeline records | dynamic-mesh §3/§4 |
 | Static-data XML loaders (sounds/weather/materials/music/biome) | dedicated-misc-systems |
 | Network leaves (unknown-package decode, NTP probe) | network §1.2 |
