@@ -193,6 +193,19 @@ stateDiagram-v2
 - **Tag queries:** `HasBuffByTag` / `RemoveBuffsByTag` operate on `FastTags`, so
   effects and removals are tag-driven, not just name-driven.
 
+**Passive application (the buff layer of `EffectManager.GetValue`):**
+`EntityBuffs.ModifyValue(effect, ref value, ref perc, tags)` (IL=35) walks
+`ActiveBuffs`, skipping null classes and paused `BuffValue`s, and runs
+`BuffClass.ModifyValue(parent, effect, bv, ref value, ref perc, tags)` per
+buff. `BuffClass.ModifyValue` (IL=39) skips buffs flagged `Remove`, ORs the
+incoming tags into the entity's `MinEventContext.Tags`, gates on
+`canRun(MinEventContext)`, and applies the buff's `Effects` via
+`MinEffectController.ModifyValue(..., bv.DurationInSeconds, tags, StackType ==
+Effect (2) ? bv.StackEffectMultiplier : 1)` - the remaining duration is the
+effect level, and the stack multiplier only kicks in for the
+`BuffEffectStackTypes.Effect` stacking mode (`Ignore 0, Duration 1, Effect 2,
+Replace 3`).
+
 ---
 
 ## 3. Network sync
@@ -258,6 +271,10 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
+- **2026-08-08:** Buff passive application: EntityBuffs.ModifyValue (IL=35)
+  walks ActiveBuffs skipping paused; BuffClass.ModifyValue (IL=39) Remove skip,
+  tag OR into MinEventContext, canRun gate, duration-as-level, stack multiplier
+  only for StackType Effect (2).
 - **2026-08-07:** EntityBuffs.AddBuff (IL=238): BuffStatus codes, electrical
   instigator swap, editor/gamestat 81/immunity/friendly-fire gates, StackType
   merge (Ignore/Replace/Duration/Effect), buffLegBroken achievement stat 15,
