@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: save-region leaves (ProtectedPositionCache, ScopedChunkAccess, RegionItemData)
+
+9-category protection cache + cProtected margins, RAII chunk read/write scopes (ExitReadLock), DynamicMeshItem region record; Chunk Enter/Exit locks pinned (verified)
 ## 2026-08-08 - tier-C: EntityPlayerLocal death/quit leaves
 
 dropItemOnQuit, HandleRemoveRandomItems 3 overloads (LocationTypes 0/1/2), ShouldRemoveEquipmentOnDeath drop options 1/6, EmptyBackpack/Toolbelt/AndToolbelt, RemoveSpawnPoints, TryAddRecoveryPosition cap 5 + 100 m + no-POI, AdjustItemsForSandboxOptions (verified)
