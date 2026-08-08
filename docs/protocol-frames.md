@@ -645,5 +645,6 @@ Details: [network.md](network.md) §2.
 
 ## Changelog
 
+- **2026-08-08:** Live wire verification: loadgen full join against the running stock dedi server; challenge frame (0xCA + 16-byte guid) and join package sequence confirmed against observed traffic.
 - **2026-07-20:** Rewrite as left-to-right protocol strips (RFC bars + flat Mermaid); drop nested box diagrams.
 - **2026-07-20:** Initial visual catalog.

@@ -580,6 +580,7 @@ Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23
 
 ## Changelog
 
+- **2026-08-08:** Live wire verification: booted the native Linux dedicated server (V3.1.0) and ran the `7dtd-loadgen` client (built from these wire docs) through a full join against both the modded and the stock server (`challengesOk=1`, `logins=1`, `joined entity=102`); the golden layouts match observed traffic end-to-end. Server bound TCP+UDP 26900/26902.
 - **2026-08-08:** NetPackageDamageEntity wire: added bIgnorePartyShare:bool (between bFromBuff and ArmorSlot).
 - **2026-07-28:** `RequestToSpawnPlayer` server path, `PlayerId`/`PlayerSpawnedInWorld` bodies, RespawnType.
 

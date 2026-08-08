@@ -6,6 +6,10 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-09 - tier-C: quests §11 end-to-end wire flows (share/accept/progress/rally/complete)
+## 2026-08-09 - tier-C: AI director depth (chunk-data cooldowns; Constants vestigial; ZombieState orphaned)
+## 2026-08-09 - tier-C: cross-repo delivery (optimizer il/*-v3.0.1 links -> v3.1.0; zdtd refs verified)
+## 2026-08-09 - tier-C: live wire verification documented (loadgen join vs modded+stock dedi server)
 ## 2026-08-08 - tier-C: save round-trip IL-verified (WorldState codec order + PlayerDataFile 44/44)
 ## 2026-08-08 - tier-C: residuals 0-method model limitation noted; census history tracker
 ## 2026-08-08 - tier-C: tooling: committed-inventory staleness test (WireBodies/Coverage)

@@ -777,6 +777,96 @@ eventType : u8          // NPCQuestEventTypes
 Also `NetPackageQuestEntitySpawn` in [protocol-packages.md](protocol-packages.md)
 section 6.17.
 
+## 11. End-to-end wire flows (verified 2026-08-09)
+
+The lifecycle steps below are the package sequences the stock server actually
+uses. Each hop is grounded in `ProcessPackage` IL from the V3.1.0
+`netpackages-v3.1.0` dumps.
+
+### Offer and accept (trader -> player)
+
+1. Server generates the player's offered list (`QuestEventManager.GetQuestList`
+   / `SetupQuestList`, per-trader cached `npcQuestData`) and sends it in
+   `NetPackageNPCQuestList` (`NPCQuestEventTypes.FetchList` (0): tier + count +
+   `QuestPacketEntry[]`).
+2. Accepting a quest is a **client-side** journal action
+   (`QuestJournal.AddQuest` -> `StartQuest`), not a package: the server only
+   sees it indirectly when the quest later produces a mirrored event.
+3. `NetPackageQuestEntitySpawn` materializes quest-giver NPCs / spawned quest
+   entities on the connecting client (protocol-packages §6.17).
+
+### Share (party fan-out)
+
+1. `PartyQuests.ShareQuestWithParty` (client, `AutoShare`/`AutoAccept`
+   flags) calls `GameManager.QuestShareServer(sqd)` (IL=37), which packs
+   `NetPackageSharedQuest` with `questEvent = ShareQuest` (0), carrying
+   questCode + questID + poiName/position/size + returnPos + questGiverID +
+   sharedWithEntityID, and sends it to the server (`SendToServer`), also
+   running the local `QuestShareClient` copy.
+2. Server `ProcessPackage` (IL=371) dispatches to
+   `GameManager.QuestShareServer(data)`; the recipient's `QuestJournal`
+   installs a `SharedQuestEntry` (the offer) via `AddSharedQuestEntry`.
+3. Accepting the offer sends `questEvent = AddSharedMember` (2) with the
+   sharer's questCode. Server walks the sharer's `Party.MemberList`: a local
+   member resolves `GetSharedQuest(code)` and runs `Quest.AddSharedWith`
+   (`ttQuestSharedAccepted`); the quest becomes a live shared instance via
+   `Quest.SetupSharedQuest()` (all objectives hooked per member).
+4. `RemoveSharedMember` (3) and `RemoveQuest` (1) tear membership down:
+   `RemoveQuest` clears the recipient's entry (channel **192** fan-out per
+   member, `RemoveSharedQuestByOwner` + `RemoveSharedQuestEntry`); party
+   leave/kick purges via `Party.ServerHandle*` ->
+   `RemoveSharedQuestEntryByOwner`. `HandlePartyRemoveQuest` is the
+   journal-side teardown for remote members.
+
+### Progress (objective updates)
+
+1. `NetPackageQuestObjectiveUpdate` (write IL=21:
+   `senderEntityID, questCode, eventType:u8, blockPos`) is the progress
+   carrier: `ProcessPackage` (IL=180) fans out to the party and
+   `HandlePlayer` for local; treasure dig-finish goes through
+   `QuestEventManager.FinishTreasureQuest`.
+2. `NetPackagePartyQuestChange` (senderEntityID, objectiveIndex,
+   isComplete, questCode) lets one member's objective flip propagate to the
+   party: server `ProcessPackage` (IL=83) requires an `EntityPlayer` in a
+   party, then walks `MemberList` rebroadcasting to every other member.
+3. `NetPackageQuestEvent` (`QuestEventTypes` 0..16, §10) mirrors gameplay
+   events the server is authoritative over: `ClearSleeper` (9) subscribes a
+   sleeper volume, `SetupFetch` (12) / `SetupRestorePower` (13) place the
+   shared fetch / power-restore targets for the whole `SharedWithList`,
+   `LockPOI` (7) / `UnlockPOI` (8) reserve the POI instance.
+4. `NetPackageQuestGotoPoint` (`QuestGotoTypes`: Trader / Closest /
+   RandomPOI) resolves the goto objective's target: server `ProcessPackage`
+   (IL=312) looks up `GetEntity(playerId)` as `EntityAlive`, picks the
+   destination by type, and replies to the owning player.
+
+### Rally (blood-moon defense rally point)
+
+1. `NetPackageQuestEvent.TryRallyMarker` (0) asks to place the rally marker;
+   `QuestEventManager.CheckRallyMarkerActivation` (IL=56) gates it: no active
+   quest may already have an `ObjectiveRallyPoint`, or its point must not be
+   `IsActivated()`.
+2. `ConfirmRallyMarker` (1) -> `RallyMarkerActivated` (2) on success, or
+   `RallyMarkerLocked` (3, `extraData:u64`) on failure.
+3. `ObjectiveRallyPoint.Current_BlockActivate` (IL=182) is the block-side
+   trigger: rejects during a Twitch vote, enforces the start/end hour window,
+   then `OwnerQuest.RemoveSharedNotInRange()` (members > 15 m from the owner,
+   or outside the location rect, drop off the shared quest) before the server
+   claims the POI through `QuestEventManager` and `RallyPointActivate`.
+
+### Complete and turn-in
+
+1. `QuestEventManager.QuestCompleted(tags, class)` fires when the last phase
+   finishes (AutoComplete path) or the player hands in at the giver
+   (`CanTurnInQuest` verifies reward items fit first).
+2. The completion reward batch is scheduled via `ToolTipEvent`
+   (`QuestRewardsLater_Event`) - the journal/tooltip run on the owning
+   client, so a dedicated server schedules and mirrors, it does not execute
+   the payout locally.
+3. `NetPackageQuestEvent.FinishManagedQuest` (14, `questID` + shared list)
+   tears down a shared quest that reached its terminal state on the server
+   side; `ResetTraderQuests` (16) tells the trader to regenerate offers
+   (`QuestEventManager.ClearTraderResetQuestsForPlayer`).
+
 ## Quest XML inheritance, objective serialization shapes and fail-soft Read (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
@@ -990,6 +1080,12 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 **`QuestCriteriaLevel`** (2 IL): quest level criterion (XML-instantiated via the `QuestCriteria` reflection prefix).
 
 ## Changelog
+
+- **2026-08-09:** End-to-end wire flow section (§11): offer/accept, share
+  (NetPackageSharedQuest ShareQuest/AddSharedMember/RemoveSharedMember/
+  RemoveQuest, channel 192), progress (QuestObjectiveUpdate, PartyQuestChange,
+  QuestEvent, QuestGotoPoint), rally (TryRallyMarker gate + lock), complete/
+  turn-in. Grounded in ProcessPackage IL.
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).

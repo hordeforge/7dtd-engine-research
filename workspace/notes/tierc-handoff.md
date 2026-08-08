@@ -26,6 +26,17 @@ No em dashes. No AI attribution in commits.
 | Coverage (last pin text) | narrated 3681 / catalogued 0 / classified 0 / unaccounted **0** (100% narrated; webserver + reflection/prefix seeds) |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
 | Lab notebook | `workspace/CHANGELOG.md` |
+| Live wire check | 2026-08-08: native dedi server + loadgen full join (`challengesOk=1 logins=1 joined entity=102`) against modded AND stock; protocol.md changelog |
+
+2026-08-09 continuation: live verification documented (protocol.md /
+protocol-frames.md); cross-repo delivery (optimizer docs: stale `il/*-v3.0.1/`
+dump links repointed to `*-v3.1.0/` across ARCHITECTURE / OPTIMIZATION_CANDIDATES
+/ measured-scaling + changelogs; zdtd refs verified, all resolve); AI director
+depth (AIDirectorChunkData cooldown literals 240/1320/180-720 + DecayEvents
+linear decay; AIDirectorConstants verified vestigial - only DebugOutput live;
+AIDirectorZombieState verified orphaned); quests §11 end-to-end wire flows
+(offer/accept, share, progress, rally, complete/turn-in; every hop grounded in
+ProcessPackage IL). Gates green. Restore: server stopped, Mods/ restored.
 
 2026-08-08 final-stretch notes: full protocol-packages §6.x wire sweep
 (6.1/6.2/6.9-6.22; every claimed write/process IL size exact); Coverage census

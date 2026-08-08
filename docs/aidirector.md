@@ -242,6 +242,18 @@ Per-chunk heat / event bag used by the chunk-event horde path.
 - Persistence: `Write` emits version **2**, `activityLevel`, event count + each
   `AIDirectorChunkEvent.Write`, then `cooldownDelay`.
 
+**`DecayEvents(elapsed)` (IL=61):** zeroes `activityLevel`, then per event:
+`value -= value * (elapsed / duration)` (linear decay), `duration -= elapsed`;
+an event with `duration <= 0` or `value <= 0` is removed from the list; the
+survivors' values re-accumulate into `activityLevel` (so the chunk's activity
+is the sum of its live events after decay).
+
+**Cooldown values (verified literals):** `FindBestEventAndReset` (IL=44) picks
+the max-`Value` event, then stamps `cooldownDelay = 240` (s) before
+`ClearEvents()`. `SetLongDelay` (IL=4) stamps `cooldownDelay = 1320` (22 min).
+`StartNeighborCooldown(isLong)` (IL=13) sets the delay to **180** s (short) or
+**720** s (long), via `FastMax` against the current value.
+
 ## `AIDirectorChunkEvent` : Object
 
 **Fields:** `EventType` (`EnumAIDirectorChunkEvent`), `Position` (`Vector3i`),
@@ -418,6 +430,27 @@ Duration or Value ≤ 0; else re-sum Value into `activityLevel`.
 - `Tick(Double)` IL=1 (virtual base)
 
 ## AIDirectorConstants : Object
+
+Static constants carrier, **vestigial in V3.1.0** (verified against the full
+assembly dump): declares 29 fields (`DebugOutput`, `kFileVersion`,
+`kMaxSupplyCrates`, `kStealthSightDistanceMultiplier`,
+`kStealthNighttimeSightDistanceMultiplier`, `kHordeMeterWarn1Threshold`,
+`kHordeMeterWarn2Threshold`, `kHordeMeterWarnResetThreshold`,
+`kHordeDaySpawnRangeMin/Max`, `kHordeNightSpawnRangeMin/Max`,
+`kHordeMeterDecayDelay`, `kHordeMeterDecayRate`,
+`kWanderingHordeGlobalStartTime`, `kSpawnWanderingHordeMin/Max`,
+`kWanderingHordeGroupSize`, `kWanderingHordeSpawnDistance`,
+`kWanderingHordeSpawnMinDistance`, `kWanderingHordePlayerClusterSize`,
+`kSoundPriorityStart/Range`, `kScoutSpawnDistance`, `kScoutScreamGraceTime`,
+`kScoutScreamAgainTime`, `kScoutSpawnAnotherScoutChance`,
+`kScoutSummonedPerScream`, `kScoutSummonedTotal`), but only `DebugOutput` is
+ever read or written: `ldsfld` appears solely in `ConsoleCmdAIDirectorDebug`
+and `AIDirector` (the console `aidirector.debug` toggle), `stsfld` only in the
+`.cctor` and the console command. Every other field is dead in V3.1.0: the
+tuned numbers the components actually use are inline literals (wandering-horde
+schedule `Random(12000..24000)`, chunk-event cooldowns 180/240/720/1320,
+blood-moon party constants, etc. - see the sections above). The `.cctor`
+(IL=3) sets only `DebugOutput = 1`.
 
 ## `AIDirectorData` : Object
 
@@ -680,6 +713,16 @@ spawnerDefinition)` and stores `targetPos` + `playerSearchBounds`.
 `hordeList`.
 
 ## AIDirectorZombieState : Object
+
+`IMemoryPoolableObject` wrapper around a single `EntityEnemy m_zombie` field.
+**Orphaned in V3.1.0** (verified): the type is referenced from nowhere else in
+the full assembly dump - no `newobj`, no method call, no field use. It is a
+leftover of an earlier managed-zombie design; the current `ManagedZombie`
+entries in `AIDirectorBloodMoonParty` / `AIHordeSpawner` are a nested
+`(EntityPlayer player, EntityEnemy zombie, Single updateDelay)` carrier with
+their own iteration (see those sections). Methods: `Construct(EntityEnemy)`
+(IL=5) stores the reference, `Reset()` (IL=4) nulls it, `Cleanup()` (IL=1) is
+empty, `get_Zombie()` (IL=3) returns it.
 
 ## Network and save surfaces (verified)
 
@@ -1010,6 +1053,10 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-09:** Depth pass: AIDirectorChunkData cooldown literals (240 / 1320
+  long / 180-720 neighbor) + DecayEvents linear decay; AIDirectorConstants
+  verified vestigial (only DebugOutput read/written, rest dead); AIDirectorZombieState
+  verified orphaned (no references in full assembly).
 - **2026-08-08:** AIScoutHordeSpawner internals: SpawnUpdate (IL=129)
   SpawnManually + scout flags + investigate; UpdateHorde cycle;
   spawnHordeNear (IL=94) 5-zombie horde with 12% wave-reset, sound alert,
