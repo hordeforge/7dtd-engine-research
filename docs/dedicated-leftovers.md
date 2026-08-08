@@ -601,6 +601,23 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   left (3) / back-right (4) / back-left (5) / back (0) by angle bands;
   `GetHitDirection4Sides(fwd, targetDir, up)` (IL=63) is the 4-side variant
   (right 2 / left 3 / up 1 / front-back 0-1 via the atan2 difference).
+- **`Extensions` leaves (all IL-verified):** `EqualsCaseInsensitive(a, b)`
+  (IL=5) is `string.Equals(a, b, OrdinalIgnoreCase)`; `ContainsInclusive`
+  (IL=53) is the inclusive `BoundsInt` containment test;
+  `ContainsWithComparer(list, item, comparer)` (IL=31) is a linear scan with
+  the given comparer (default when null, `ArgumentNullException` on a null
+  list); `NormalizeReturnMagnitude(value, out magnitude)` (IL=19) returns
+  the normalized vector (zero for magnitudes below 1e-5);
+  `CalculatePersistableHash(bounds, hash)` (IL=31) appends the bounds
+  center and size floats (no-alloc) to an `IncrementalHash`;
+  `WriteToBuffer(guid, dest, offset)` (IL=49) copies the 16 Guid bytes via
+  two i64 stores (`buffer too small` on overflow); `ToUnicodeCodepoints`
+  (IL=28) renders `\uXXXX` per char; `GetOrAddComponent<T>` (IL=13) is
+  GetComponent-else-AddComponent; `UppercaseFirst` (IL=17) uppercases the
+  first char; `RemoveLineBreaks` (IL=11) strips `\r\n` / `\n` / `\r`;
+  `SeparateCamelCase` (IL=6) and `Unindent` (IL=24) are regex-driven text
+  transforms; `TrimStart` / `TrimEnd` (IL=33/38) trim `StringBuilder`
+  whitespace.
 
 ## Changelog
 
