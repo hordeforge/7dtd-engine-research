@@ -512,6 +512,22 @@ required, `Extends` merge with the exclude set seeded by
 default **"Miron"**, mesh files `PreloadBundle`d when `CanHold`, `HoldType`
 throws on unparseable, repair / `Degradation` / `EconomicValue` / `Preview`
 fields, then the identical `Action0..Action4` Actions fill and `Init()`).
+
+**Derived-value calc (all IL-verified):** `AutoCalcWeight(recipesByName)`
+(IL=195) computes the item weight from its recipe ingredients recursively
+(same-forge-category matching; the sum divided by `Recipe.count` when more
+than one ingredient), writing `Block.Weight` / the item `Weight`.
+`AutoCalcEcoVal(recipes, stack)` (IL=148) is the economic-value twin
+(ingredient values times count over recipe count, cycle-guarded by the
+`_recipeCalcStack`, -1 on a cycle), storing `EconomicValue`.
+`CalculateTechType` (IL=50) maps the `T3Tag` / `T2Tag` / `T1Tag` / `T0Tag`
+onto `ItemTechTypes` 4/3/2/1 (else 0). `SetCanDrop` (IL=4) is the drop
+flag. The game-stage stats: `FindGSStat(list, quality, gameStage, rand)`
+(IL=90) picks the nearest `GSStat` entry at or below the stage with the
+`chance` roll, and `AddGSStats(iv, stage, rand)` (IL=100) rolls the
+`min..max` range into `ItemValue.SetStat` per passive
+(`InitStats` / `RemoveUnusedStats` frame it) - the item stat scaling
+pipeline.
 Mod-specific extras: `CosmeticInstallChance` (default 1), a
 `RequirementGroup[3]` array filled from `class="ActionN"` properties (index
 from the trailing digit, `ParseRequirementGroup`), per-target
