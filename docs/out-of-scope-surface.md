@@ -25,7 +25,7 @@ Total out-of-scope reached types classified: **1178** (base lists + 2026-07-28 s
 | Client render / mesh | 64 |
 | Audio / music | 20 |
 | Input (client) | 11 |
-| Twitch integration (client-driven) | 62 |
+| Twitch integration (client-driven) | 61 |
 | Discord GameSDK (client social) | 35 |
 | Platform SDK wrappers | 19 |
 | Platform services / store / news | 17 |
