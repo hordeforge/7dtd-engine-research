@@ -175,7 +175,7 @@ null `actionSpawnLiveList` entries; the cooldown/leaderboard/blood-moon
 preset work shows up as `TwitchActionPreset.HandleCooldowns`,
 `TwitchLeaderboardStats.UpdateStats` and the `BMCooldown*` fields. On a
 dedicated host without Twitch configured the machine stalls in the init
-states, which is the managers.md "waste if constructed without Twitch"
+states, which is the [managers.md](managers.md) "waste if constructed without Twitch"
 note.
 
 **Viewer-points ledger (`TwitchViewerData`, server-side with Twitch

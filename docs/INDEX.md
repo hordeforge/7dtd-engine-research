@@ -178,6 +178,7 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 
 | [residuals.md](residuals.md) | What managed IL cannot close (the only open-item list) |
 | [out-of-scope-surface.md](out-of-scope-surface.md) | Reached-but-out-of-scope types classified by category (the boundary map) |
+| [client-side-surface.md](client-side-surface.md) | Client-executed surface (XUi, client-only subsystems) narrated for the census; authoritative classification in out-of-scope-surface.md |
 | [engine-limitations.md](engine-limitations.md) | Generic stock ceilings (sim, net, AI, height, GC, ops) |
 | [re-methodology.md](re-methodology.md) | How to RE: toolchain, dumping, reading IL into wire layouts |
 
@@ -375,6 +376,14 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
 
 ## Changelog
 
+- **2026-08-09:** Wiki cross-linking pass: added hub backlinks (`**Hub:**
+  INDEX.md`) to the 5 docs missing one; fixed `client-side-surface.md` orphan
+  (was 0 incoming, now INDEX row + narrated-twin links from out-of-scope-surface
+  and coverage); linked every bare `doc.md` / `§N` prose reference; added
+  Related docs sections to completion-bar, dedicated-leftovers,
+  dedicated-misc-systems, out-of-scope-surface. Result: 0 orphans, every doc
+  links INDEX, all 63 reachable from INDEX (BFS), 801 links / 12.7 per doc,
+  no dead links.
 - **2026-08-09:** Docs consistency pass: consolidated 22 docs' duplicate
   `## Changelog` runs into single sections (no content change); fixed the
   broken non-table row in the reading-paths table; repointed `zig-clone.md`

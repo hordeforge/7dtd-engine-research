@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-09 - tier-C: wiki cross-linking pass (hub backlinks, orphan fix, all docs reachable)
 ## 2026-08-09 - tier-C: docs consistency pass (changelog merge, table fix, ZIG_CLONE links, dead-link audit)
 ## 2026-08-09 - tier-C: quests §11 end-to-end wire flows (share/accept/progress/rally/complete)
 ## 2026-08-09 - tier-C: AI director depth (chunk-data cooldowns; Constants vestigial; ZombieState orphaned)

@@ -166,11 +166,11 @@ Closed in recent sessions (still optional, not required for A+B):
 | canDespawn / unloadEntity | entity-ai §5.1b |
 | AwardKill / AddScoreServer chain | combat-damage §3.1 |
 | SimpleRPC holding activate/reset | protocol-packages §6.21 |
-| ChatMessageServer / GameMessage | chat.md |
+| ChatMessageServer / GameMessage | [chat.md](chat.md) |
 | SendPackage client filters | network §1.5 |
 | GameTimer.updateTimer formula | entity-ai §D6 |
 | ThreadManager main-thread drain | loop-gmupdate |
-| Astar UpdateGraphs merge size 76 | loop.md |
+| Astar UpdateGraphs merge size 76 | [loop.md](loop.md) |
 | damageEntityLocal + ProcessDamageResponse | combat-damage §2.1-2.3 |
 | EffectManager.GetValue stack | minevents §7.0 |
 | ItemValue.FireEvent recursion | items §8 / minevents §7 |
@@ -194,8 +194,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | EAI Break/Wander/RunAway/Ranged leaves | entity-ai §D2 |
 | updateTasks freeze + GroupFallingBlocks | entity-ai §5.1b / §8 |
 | FallingBlock crush damage + land drops | entity-ai §8 |
-| Stability queueStabilityAvail cap 200 | stability.md |
-| getMaxStabilityAround + ChangeStability | stability.md |
+| Stability queueStabilityAvail cap 200 | [stability.md](stability.md) |
+| getMaxStabilityAround + ChangeStability | [stability.md](stability.md) |
 | TurretTracker 120s save; vehicle attach | vehicles-drones-turrets |
 | World.CanPlaceBlockAt claim/trader/bounds | blocks §6 |
 | IsLandProtectedBlock + bounds soft edge | server-lifecycle §3.1 |
@@ -233,7 +233,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | LootDropPick weighted + OnBlockStartsToFall Air | combat / stability |
 | AttackEntites body mult + DamageRecord apply | protocol-packages §6.14 |
 | explode ExplodeGroup delay=3 + FrameUpdate budget | protocol-packages §6.14 |
-| Interest enter package order (Speeds/Velocity) | network.md §2.1 |
+| Interest enter package order (Speeds/Velocity) | [network.md](network.md) §2.1 |
 | EntityBuffs.Tick MinEvent 0/1/2/3 order | buffs.md |
 | BuffClass.FireEvent canRun + StartSequence | buffs / game-events |
 | SeekTarget kill distances + OnEntityUnload | aidirector / entity-ai |
@@ -279,8 +279,8 @@ Closed in recent sessions (still optional, not required for A+B):
 | CheckPath + moveSpeed passives 133-135 + SetPath | entity-ai.md |
 | pathFollow radii + ImprovePath + hasHome | entity-ai.md |
 | DamageEntity consecutive 30 + passives 161/40 | combat-damage.md |
-| SpawnEntityInWorld registration + BuffValue.Tick | spawning.md / buffs.md |
-| NetEntityDistribution SEnts distances + Remove | network.md |
+| SpawnEntityInWorld registration + BuffValue.Tick | [spawning.md](spawning.md) / [buffs.md](buffs.md) |
+| NetEntityDistribution SEnts distances + Remove | [network.md](network.md) |
 | AIDirector AddPlayer + BM party join 80 m | aidirector.md |
 | CreateNewParty + RemovePlayer/AddMember | aidirector.md |
 | BloodMoonComponent.Tick party round-robin | aidirector.md |
@@ -308,18 +308,18 @@ Closed in recent sessions (still optional, not required for A+B):
 | DigUpdate digActionTicks 18/4/14 + organic Hit | entity-ai.md |
 | CopyPropertiesFromEntityClass IL=1128 full config copy | entity-ai.md D8.6 |
 | updatePauseState save-on-pause + pause apply | loop-gmupdate.md Phase A2 |
-| PlayerDisconnected path + MemoryPools.Cleanup + reason 2 | server-lifecycle.md §3.2 |
+| PlayerDisconnected path + MemoryPools.Cleanup + reason 2 | [server-lifecycle.md](server-lifecycle.md) §3.2 |
 | Spawn-near-friend InForest biome gate = Forest/PineForest only | protocol.md post-spawn |
 | EAIManager.CopyPropertiesFromEntityClass IL=213 + ParseTasks IL=111 | entity-ai.md D8.7 |
-| GetRandomSpawnPositionMinMaxToPosition IL=240 ring/disc sampler | spawning.md §6.1 |
+| GetRandomSpawnPositionMinMaxToPosition IL=240 ring/disc sampler | [spawning.md](spawning.md) §6.1 |
 | GetSpawnWalkType IL=9 + GameUtils.GetViewDistance IL=10 | entity-ai.md D8.6 / server-lifecycle |
-| SetupEntityCreationData ECD builder + CreateEntity wrapper | spawning.md §7 |
+| SetupEntityCreationData ECD builder + CreateEntity wrapper | [spawning.md](spawning.md) §7 |
 | ChunkManager.AddChunkObserver IL=15 + GetPlayerDataFromEntityID IL=10 | world-chunks §4.0 / spawning §6.1 |
 | Entity.CopyPropertiesFromEntityClass IL=238 custom commands + EntityPlayerLocal | entity-ai.md D8.6a |
-| PlayerSpawnedInWorld IL=127 full body (Died SetAlive, JoinedGame msg, waypoints) | server-lifecycle.md §3 |
+| PlayerSpawnedInWorld IL=127 full body (Died SetAlive, JoinedGame msg, waypoints) | [server-lifecycle.md](server-lifecycle.md) §3 |
 | EntityClass cctor prop-name table + GetActivationCommands IL=51 | inventories/entityclass-props.md / entity-ai D8.6a |
 | DynamicProperties.ParseData IL=82 + ParseKeyData IL=29 (k=v; pairs) | entity-ai.md D8.7 |
-| SendChunksToClients IL=216 body (cap 3/tick, reverse reloads, map pkgs) | world-chunks.md §4.0a |
+| SendChunksToClients IL=216 body (cap 3/tick, reverse reloads, map pkgs) | [world-chunks.md](world-chunks.md) §4.0a |
 | GameStats/GamePrefs index tables (82 + 317 rows) | inventories/gamestats-gameprefs.md |
 | Activation command defaults/reorder (grab, storage-after-heal/horn) | entity-ai.md D8.6a |
 | EntityVulture.updateTasks IL=1344 flight AI state machine | entity-ai.md D15 |
@@ -354,6 +354,14 @@ These stay in [residuals.md](residuals.md). Closing them is product/ops/runtime
 work, not more narrative RE.
 
 ---
+
+## Related docs
+
+| Doc | Role |
+|---|---|
+| [coverage.md](coverage.md) | The census tiers this bar defines |
+| [residuals.md](residuals.md) | What stays open regardless of narration |
+| [INDEX.md](INDEX.md) | Hub |
 
 ## Changelog
 

@@ -1,5 +1,6 @@
 # Block stability, structural support and falling blocks
 
+**Hub:** [`INDEX.md`](INDEX.md).  
 Status: **derived 2026-08-06** from the V3.1.0 b14 disassembly (dedi-complete
 dump). Raw IL in [`../il/stability-v3.1.0/`](../il/stability-v3.1.0/) (regenerable
 evidence, git-ignored). This is the server
@@ -237,7 +238,7 @@ cap candidate at 1; update stab0 set; `SetStability`; recurse.
   blocks.xml (properties on `<block>` and `<material>`), to be loaded into the
   block/material tables.
 
-Landing of `EntityFallingBlock` is resolved in entity-ai.md §8: no re-placement;
+Landing of `EntityFallingBlock` is resolved in [entity-ai.md](entity-ai.md) §8: no re-placement;
 settled on a non-air, stability > 0 block below, it plays `<surface>destroy`
 audio and drops items (Fall event prob from the first drop entry, Destroy pass
 at 0.7 early), gated on GamePrefs 148, then `SetDead` (also on 300 ticks or

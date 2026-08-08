@@ -4,6 +4,9 @@
 gameplay/sim/wire, classified by category with why each is out of scope. With
 [`inventories/dedicated-leaves.md`](inventories/dedicated-leaves.md) this closes the
 coverage loop: every reached game type is narrated, a dedicated leaf, or classified here.  
+**Narrated twin:** [`client-side-surface.md`](client-side-surface.md) gives each
+client/out-of-scope type a role line for the census; this doc is the authoritative
+classification.  
 **Not:** dedicated gameplay/sim/wire (own docs). This is the map of what the server does **not** run.  
 **Method:** name/namespace classification over the reachability set (`tools/src/Coverage`);
 a type is here because it is reachable via a shared base or devirtualized `callvirt` but
@@ -60,7 +63,7 @@ Keyboard/mouse/gamepad input + binding managers. No local player on a server.
 
 ## Twitch integration (client-driven) (61)
 
-Twitch viewer/point/subscription data + event clients. Server slice is in twitch-integration.md.
+Twitch viewer/point/subscription data + event clients. Server slice is in [twitch-integration.md](twitch-integration.md).
 
 `BaseTwitchCommand`, `BaseTwitchEventEntry`, `BaseTwitchOperationRequirement`, `BaseTwitchRequirement`, `ChannelCalculator`, `ChannelPointsRedemptionEvent`, `CooldownPreset`, `CreateCustomReward`, `DailyVoteEntry`, `EventSubClient`, `GiftSubEntry`, `StatEntry`, `SubscriptionEvent`, `SubscriptionEventBase`, `SubscriptionGiftEvent`, `SubscriptionMessageEvent`, `TwitchActionPreset`, `TwitchChannelPointEventEntry`, `TwitchChatMessage`, `TwitchCommandAddBitCredit`, `TwitchCommandAddPoints`, `TwitchCommandAddSpecialPoints`, `TwitchCommandCheckCredit`, `TwitchCommandCheckPoints`, `TwitchCommandCommands`, `TwitchCommandDebug`, `TwitchCommandDisableCommand`, `TwitchCommandEnableCommand`, `TwitchCommandGamestage`, `TwitchCommandPauseCommand`, `TwitchCommandRedeemBits`, `TwitchCommandRedeemCharity`, `TwitchCommandRedeemCreatorGoal`, `TwitchCommandRedeemGiftSub`, `TwitchCommandRedeemHypeTrain`, `TwitchCommandRedeemRaid`, `TwitchCommandRedeemSub`, `TwitchCommandRemoveViewer`, `TwitchCommandResetCooldowns`, `TwitchCommandSetBitPot`, `TwitchCommandSetCooldown`, `TwitchCommandSetPot`, `TwitchCommandTeleportBackpack`, `TwitchCommandUnpauseCommand`, `TwitchCommandUseProgression`, `TwitchCreatorGoalEventEntry`, `TwitchDropEntry`, `TwitchEventActionEntry`, `TwitchEventEntry`, `TwitchEventPreset`, `TwitchLeaderboardEntry`, `TwitchLeaderboardStats`, `TwitchMessageEntry`, `TwitchPartyMemberInfo`, `TwitchRespawnEntry`, `TwitchSpawnedBlocksEntry`, `TwitchSubEventEntry`, `TwitchVoteEntry`, `TwitchVoteGroup`, `TwitchVoteType`, `VoteDayTimeRange`
 
@@ -72,7 +75,7 @@ Discord rich presence/lobbies/invites/sign-in. Needs a local Discord client; nev
 
 ## Platform SDK wrappers (19)
 
-Steam/EOS user-data, remote/title storage, app wrappers. Identity slice is in platform-auth.md.
+Steam/EOS user-data, remote/title storage, app wrappers. Identity slice is in [platform-auth.md](platform-auth.md).
 
 `ActionUserData`, `CensoredTextResult`, `EPlayGroupExtensions`, `EUserBlockStateExtensions`, `EUserPermsExtensions`, `IPlatformApplication`, `IPlatformUserBlockedDataExtensions`, `IRemotePlayerFileStorage`, `ListEntry`, `PlatformOptimizations`, `PlatformUserBlockedData`, `PlatformUserBlockedResults`, `PlatformUserData`, `PlatformUserDetailsResult`, `PlayerReportCategoryEos`, `ServerKey`, `TitleStorageOverridesManager`, `UserIdentifierFactory`, `UserIdentifierLocal`
 
@@ -2601,6 +2604,15 @@ Counts by category:
 | `WorldBuilderConstants` | Object |  |
 | `WorldBuilderStatic` | Object |  |
 | `eCategory` | Object | ParseElement, CanShow, get_IsActive |
+
+## Related docs
+
+| Doc | Role |
+|---|---|
+| [client-side-surface.md](client-side-surface.md) | Narrated twin (role lines for the census) |
+| [dedicated-leftovers.md](dedicated-leftovers.md) | Server-side leaves promoted out of this list |
+| [coverage.md](coverage.md) | Census and how the tiers are counted |
+| [INDEX.md](INDEX.md) | Hub |
 
 ## Changelog
 

@@ -139,6 +139,7 @@ should be re-checked against IL before you rely on it.
 | [network.md](network.md) | audited (pass 1) |
 | [npc-dialog.md](npc-dialog.md) | audited (pass 2) |
 | [out-of-scope-surface.md](out-of-scope-surface.md) | generated + hand-corrected |
+| [client-side-surface.md](client-side-surface.md) | census narration of the client-executed surface (role lines for 100% narrated) |
 | [parties-factions.md](parties-factions.md) | audited (pass 1) |
 | [platform-auth.md](platform-auth.md) | audited (pass 1) |
 | [progression.md](progression.md) | audited (pass 1) |

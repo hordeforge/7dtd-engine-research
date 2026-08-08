@@ -710,6 +710,15 @@ Small dedicated-relevant types that extend an already-owned subsystem:
 **`AdminBlacklist`** (AdminSectionAbs): the ban list - `AddBan` / `RemoveBan` /
 `IsBanned` / `GetBanned` over the admin XML, with `Save`.
 
+## Related docs
+
+| Doc | Role |
+|---|---|
+| [dedicated-misc-systems.md](dedicated-misc-systems.md) | Sibling grab-bag of small dedicated systems |
+| [out-of-scope-surface.md](out-of-scope-surface.md) | The client/out-of-scope classification boundary |
+| [closed-gaps.md](closed-gaps.md) | Lock-request and other gap closes |
+| [INDEX.md](INDEX.md) | Hub |
+
 ## Changelog
 
 - **2026-08-08:** XmlExtensions XML helpers, LiveStats dead survival-stat record, body-verified dead collection/noise families (TList/TQueue, OneToOneDictionary, CollectionDebugWrapper, ParsingConverters, SimplexNoise, OpenSimplex2/2S, IEnumerableExtensions, BinaryReaderExtensions, IdPalette), ObservableDictionary live backing note.

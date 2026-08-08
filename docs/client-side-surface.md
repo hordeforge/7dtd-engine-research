@@ -1,5 +1,6 @@
 # Client-side surface (stock, narrated for the coverage census)
 
+**Hub:** [`INDEX.md`](INDEX.md).  
 **Framing:** the stock game's client-side subsystems - reachable from the dedicated
 boot + tick call graph (so they appear in the reached base) but executed on the
 client. The authoritative classification stays in

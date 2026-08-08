@@ -974,7 +974,7 @@ The full static set (`.cctor`) adds the second stream pool
 
 `StreamUtils` is the static helper layer behind every
 `StreamUtils.Read*` / `Write` call in the wire and save layouts
-(`protocol-packages.md`, `save-region.md`, this file). Two layers:
+([`protocol-packages.md`](protocol-packages.md), [`save-region.md`](save-region.md), this file). Two layers:
 `BinaryReader`/`BinaryWriter` helpers (component-wise) and raw
 `Stream` / `byte[]` readers. V3.1.0 b14 IL:
 
@@ -1360,6 +1360,14 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 | `ModEvent` | `ModEventAbs` | Invoke |
 | `NetPackageInformation` | `Object` (IPackageInformation) | package info record |
 | `ReadOnlyListWrapper` | `Object` (IReadOnlyList) | GetEnumerator |
+
+## Related docs
+
+| Doc | Role |
+|---|---|
+| [dedicated-leftovers.md](dedicated-leftovers.md) | Sibling grab-bag of small dedicated systems |
+| [out-of-scope-surface.md](out-of-scope-surface.md) | The client/out-of-scope classification boundary |
+| [INDEX.md](INDEX.md) | Hub |
 
 ## Changelog
 

@@ -703,7 +703,7 @@ the terrain floor renders **uniform grey clay** despite correct block ids on the
 wire. Stock maps with `splat*.png` under `Data/Worlds/<name>` need
 `fixedSizeCC=false` so NetworkClient selects FromRaw(bClientMode) and loads
 splats locally (client log: `GenWorldFromRaw splats took …ms`). See
-`protocol-packages.md` §4.2 `fixedSizeCC`.
+[`protocol-packages.md`](protocol-packages.md) §4.2 `fixedSizeCC`.
 
 ---
 

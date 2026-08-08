@@ -3,6 +3,7 @@
 **Owns:** per-`NetPackage` wire metadata (channel/compress/direction/auth) and
 hand-annotated `read`/`write` byte layouts beyond the join-critical set in
 [`protocol.md`](protocol.md).
+**Hub:** [`INDEX.md`](INDEX.md).  
 **Pin:** dedicated V **3.1.0 (b14)**; dump set dir name `il/netpackages-v3.1.0/`
 is historical (regenerate against live ASM).
 **Not:** framing/join/challenge (that is [`protocol.md`](protocol.md)); visual

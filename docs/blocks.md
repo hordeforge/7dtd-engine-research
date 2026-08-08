@@ -705,7 +705,7 @@ rotation from geometry, delegating every other mode to the base.
 requires both cells' floors (`pos - up` and `siblingPos - up`) to be non-air
 with `StabilitySupport` materials and the sibling cell to be air/replaceable.
 `PlaceBlock` (IL=52) sets `selectedSpawnPointKey = entityId` on the placing
-`EntityPlayerLocal` (the bedroll becomes the spawn point, spawning.md) and, for
+`EntityPlayerLocal` (the bedroll becomes the spawn point, [spawning.md](spawning.md)) and, for
 a non-multiblock bed, places the `SiblingBlock` half via `SetBlockRPC` at the
 rotation-adjusted position. `GetOwningPlayer(pos, out ownedByOther)` (IL=43)
 scans `PersistentPlayerList.Players` for a matching `BedrollPos` and reports

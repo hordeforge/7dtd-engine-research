@@ -48,12 +48,12 @@ flowchart TD
 | ASP path body → AstarPath | closed-gaps.md |
 | Net package distance bands | closed-gaps.md / network.md |
 | GameTimer 20 Hz | closed-gaps.md |
-| DynamicMesh version-160 WriteRegion as live path | dynamic-mesh.md: live `SaveRegion`; `WriteRegion` only self-retry (Xref, 2026-08-06) |
+| DynamicMesh version-160 WriteRegion as live path | [dynamic-mesh.md](dynamic-mesh.md): live `SaveRegion`; `WriteRegion` only self-retry (Xref, 2026-08-06) |
 | Region location/timestamp header bit packing | save-region.md §3.5 (Raw + sector) |
-| Chunk GetBlock/density index | terrain-height.md, world-chunks.md (IL dumps in realearth-surfaces-v3.1.0) |
+| Chunk GetBlock/density index | [terrain-height.md](terrain-height.md), [world-chunks.md](world-chunks.md) (IL dumps in realearth-surfaces-v3.1.0) |
 | Chunk write/read layer bound 64 | save-region.md |
 | WorldState.SaveLoad structure | save-region.md + dedi-complete §5 |
-| Origin.FixedUpdate on dedicated | **No-op:** `IsDedicatedServer` → early `ret` (loop.md) |
+| Origin.FixedUpdate on dedicated | **No-op:** `IsDedicatedServer` → early `ret` ([loop.md](loop.md)) |
 | Land claims / PPL accessor | dedi-complete + product `realearth-surfaces.md` (product SoloSlide) |
 | ModEvents field inventory | managers.md |
 | NetPackage type census (194: 193 wire + NetPackageManager) | network.md + dedi-complete §3 |
