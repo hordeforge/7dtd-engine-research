@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityAlive leaf getters (sense/home/alert/stats hooks)
+
+21 getter/small-state leaves verified: see cache, home distance, alert/sound ticks, death, max stats, owned entities filter, spawn-by-data (verified)
 ## 2026-08-08 - tier-C: TwitchManager.Update init-state machine + running loop
 
 InitStates 0/2/4/5/8 phases, login-timeout guards, running tail (extension poll, IRC drain, live-action reconcile, cooldowns) (verified)
