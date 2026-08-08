@@ -528,6 +528,24 @@ flag. The game-stage stats: `FindGSStat(list, quality, gameStage, rand)`
 `min..max` range into `ItemValue.SetStat` per passive
 (`InitStats` / `RemoveUnusedStats` frame it) - the item stat scaling
 pipeline.
+ItemClass leaves (all IL-verified): `SetId(id)` (IL=12) stores `pId` and,
+when `Effects` is non-null, sets `Effects.ParentPointer = (object)id`
+(boxed). `SetActivated(ref value, bool)` (IL=10) folds the bool into
+`value.Activated = (byte)(activated ? 1 : 0)`. `CheckKeys` (IL=1) and the
+base `OnPlacedAsCatalyst` (IL=1) are no-ops; the `ItemClassHeldEntity`
+override (IL=19) sets the `CVarLastHeldEntitySlot` cvar to -1, removes the
+buff, and unsubscribes `handleMountEvent` from `MountEvent`.
+`CleanupHoldingActions(data)` (IL=27) calls `action.Cleanup(data.actionData[i])`
+for each non-null `Actions[0..2]`. `GetItemsAndBlocks` (IL=184) is the
+creative-menu list builder: clamps `idStart` to 0 and `idEndExcl` to
+`ItemClass.list.Length` when negative, turns a `#N` name filter into a raw
+id, and per id resolves a block via `Block.list[id]` below `ItemsStartHere`
+or an item via `GetForId`; entries with `CreativeMode` 4/5 are always
+skipped, mode 2 requires `Platform.DeviceFlags.IsCurrent(56)`, the favorites
+filter keeps only ids in `playerUI.entityPlayer.favoriteCreativeStacks`, the
+`FilterItem[]` predicate array keeps the entry when any predicate returns
+true, the name filter matches the localized or raw name case-insensitively,
+and the list is `Sort`ed by sort order when requested.
 Mod-specific extras: `CosmeticInstallChance` (default 1), a
 `RequirementGroup[3]` array filled from `class="ActionN"` properties (index
 from the trailing digit, `ParseRequirementGroup`), per-target
