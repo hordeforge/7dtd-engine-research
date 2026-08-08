@@ -1,4 +1,4 @@
-# Workspace changelog — lab notebook
+# Workspace changelog - lab notebook
 
 Append-only research log. Not release notes. Each entry: date, active slug/objective,
 what changed / what was tried, verification state (`verified` / `unverified` /
@@ -4286,129 +4286,129 @@ Done (V3.1.0 b14 IL):
   maskList[bucket] |= 1UL << (bit & 63); whole multi-tag path under Monitor
   on the static scratch list, Clear() after ToArray() into the FastTags.
 
-## 2026-08-08 — tier-C: World.Cleanup
+## 2026-08-08 - tier-C: World.Cleanup
 
 Done (V3.1.0 b14 IL):
 - World.Cleanup IL=162: prefab cache, chunk manager, audio, conductor, light,
   entity GO destroy, Entities/EntityAlives clear, biomes.
-## 2026-08-08 — tier-C: World.UnloadWorld
+## 2026-08-08 - tier-C: World.UnloadWorld
 
 Done (V3.1.0 b14 IL):
 - World.UnloadWorld IL=62: environment destroy, chunk cluster cleanup,
   UnloadEntities(all, true), EntityFactory.Cleanup, selection categories,
   deco/block unload hooks.
-## 2026-08-08 — census refresh 8
+## 2026-08-08 - census refresh 8
 
 Done:
 - Coverage.exe re-run: narrated 1509, catalogued 811, unaccounted 0.
-## 2026-08-08 — tier-C: ShutdownMultiplayerServicesNow
+## 2026-08-08 - tier-C: ShutdownMultiplayerServicesNow
 
 Done (V3.1.0 b14 IL):
 - ShutdownMultiplayerServicesNow IL=33: advertise stop, AuthorizationManager.
   ServerStop, master announcer + ServerInformationTcpProvider stop, lobby
   exit, EndOnlineMultiplayer.
-## 2026-08-08 — tier-C: GameStateManager.EndGame
+## 2026-08-08 - tier-C: GameStateManager.EndGame
 
 Done (V3.1.0 b14 IL):
 - EndGame IL=13: GameState Loading, bDirty, bGameStarted/bServer cleared.
-## 2026-08-08 — tier-C: SaveAndCleanupWorld ordered chain
+## 2026-08-08 - tier-C: SaveAndCleanupWorld ordered chain
 
 Done (V3.1.0 b14 IL):
 - SaveAndCleanupWorld IL=499: WorldShuttingDown mod event first, async create
   drain, server save block (vehicles/drones/quests/player/world/persistent),
   nameIdMapping saves, client map DB async, multiplayer shutdown, world
   teardown (UnloadWorld + Cleanup), singleton cleanup sweep, GamePrefs.Save.
-## 2026-08-08 — tier-C: GamePrefs.notifyListeners
+## 2026-08-08 - tier-C: GamePrefs.notifyListeners
 
 Done (V3.1.0 b14 IL):
 - GamePrefs.notifyListeners IL=24: IGamePrefsChangedListener fan-out + static
   OnGamePrefChanged action.
-## 2026-08-08 — tier-C: EntityFallingBlock.SetBlockValue
+## 2026-08-08 - tier-C: EntityFallingBlock.SetBlockValue
 
 Done (V3.1.0 b14 IL):
 - SetBlockValue IL=32: isTerrain from shape, terrainScale rand(0.3, 0.98),
   collider selection.
-## 2026-08-08 — tier-C: EntityItem init leaves
+## 2026-08-08 - tier-C: EntityItem init leaves
 
 Done (V3.1.0 b14 IL):
 - EntityItem.Init IL=10 (itemRB), PostInit IL=37 (PhysicsSetRB, stickPercent
   from StickPercent prop, itemWorldData), InitLocalActivationCommands IL=15
   (take/search).
-## 2026-08-08 — tier-C: Entity.AddVelocity
+## 2026-08-08 - tier-C: Entity.AddVelocity
 
 Done (V3.1.0 b14 IL):
 - Entity.AddVelocity IL=10: motion += vel + SetAirBorne(true); noted on the
   NetPackageEntityAddVelocity row.
-## 2026-08-08 — tier-C: SeekYaw turning helper
+## 2026-08-08 - tier-C: SeekYaw turning helper
 
 Done (V3.1.0 b14 IL):
 - Entity.SeekYaw IL=136: 360 wrap, MaxTurnSpeed (water-scaled), quadratic
   slow-down near target (min 20), arms yawSeek* interpolation; IsSeekYaw IL=5.
-## 2026-08-08 — tier-C: EntityEnemy.PostInit blood moon flag
+## 2026-08-08 - tier-C: EntityEnemy.PostInit blood moon flag
 
 Done (V3.1.0 b14 IL):
 - EntityEnemy.PostInit IL=13: server IsBloodMoon from BloodMoonComponent.
-## 2026-08-08 — tier-C: EntityAnimal.OnEntityDeath
+## 2026-08-08 - tier-C: EntityAnimal.OnEntityDeath
 
 Done (V3.1.0 b14 IL):
 - EntityAnimal.OnEntityDeath IL=24: physics transform off, base, waypoint
   removal for local player.
-## 2026-08-08 — tier-C: EntityPlayer.OnUpdateLive
+## 2026-08-08 - tier-C: EntityPlayer.OnUpdateLive
 
 Done (V3.1.0 b14 IL):
 - EntityPlayer.OnUpdateLive IL=13: stamina regen zero, base, see-cache clear,
   CheckSleeperTriggers.
-## 2026-08-08 — tier-C: StartStopLivingSound
+## 2026-08-08 - tier-C: StartStopLivingSound
 
 Done (V3.1.0 b14 IL):
 - EntityAlive.StartStopLivingSound IL=55: soundLiving loop gate (spawned/
   alive/health), soundSpawn once unless SleeperSupressLivingSounds.
-## 2026-08-08 — census refresh 7
+## 2026-08-08 - census refresh 7
 
 Done:
 - Coverage.exe re-run: narrated 1505, catalogued 815, unaccounted 0.
-## 2026-08-08 — tier-C: SetBlocksRPC wrapper
+## 2026-08-08 - tier-C: SetBlocksRPC wrapper
 
 Done (V3.1.0 b14 IL):
 - GameManager.SetBlocksRPC IL=29: ChangeBlocks commit + NetPackageSetBlock
   replicate (SetBlocksOnClients on server / SendToServer).
-## 2026-08-08 — tier-C: PickupBlockServer replacement
+## 2026-08-08 - tier-C: PickupBlockServer replacement
 
 Done (V3.1.0 b14 IL):
 - GameManager.PickupBlockServer IL=77: type-verify gate, local/client split,
   PickupSource replacement (or Air) via SetBlocksRPC.
-## 2026-08-08 — tier-C: InitCommandLine + pref collisions
+## 2026-08-08 - tier-C: InitCommandLine + pref collisions
 
 Done (V3.1.0 b14 IL):
 - GameStartupHelper.InitCommandLine IL=85: version banner, PrintSystemInfo,
   LaunchPrefs start/end, parsedGamePrefs, ParseCommandLine.
 - GameEntrypoint.HasPrefCollisions IL=53: LaunchPref/GamePref name collision
   abort.
-## 2026-08-08 — tier-C: GameEntrypoint.FirstFrameInit
+## 2026-08-08 - tier-C: GameEntrypoint.FirstFrameInit
 
 Done (V3.1.0 b14 IL):
 - FirstFrameInit IL=65 boot chain: pref collisions abort, GamePrefs decls,
   InitCommandLine, automation logging, user data paths, platform/service init,
   analytics start, targetFrameRate = refresh rate.
-## 2026-08-08 — tier-C: ApplyParsedGamePrefs commit
+## 2026-08-08 - tier-C: ApplyParsedGamePrefs commit
 
 Done (V3.1.0 b14 IL):
 - ApplyParsedGamePrefs IL=57: SetObject each parsed pref, dedicated GameName
   validation (quit on invalid), SetDedicatedServerSettings on success.
-## 2026-08-08 — tier-C: GamePrefs.Parse typed conversion
+## 2026-08-08 - tier-C: GamePrefs.Parse typed conversion
 
 Done (V3.1.0 b14 IL):
 - GamePrefs.Parse IL=45: PropertyDecl.type switch (Int32 TryParse/Float/Bool/
   String, unknown -> null); ParseGamePref IL=24 stores to parsedGamePrefs or
   reports Could not parse config value.
-## 2026-08-08 — tier-C: config file load + pref parse
+## 2026-08-08 - tier-C: config file load + pref parse
 
 Done (V3.1.0 b14 IL):
 - GameStartupHelper.LoadConfigFile IL=146: ServerSettings XML -> Dynamic
   Properties -> ParsePref per key; missing/unparseable quits.
 - ParsePref IL=74: LaunchPrefs lookup -> ParseLaunchPref; EnumGamePrefs
   TryParse -> ParseGamePref; unknown ignored on cmdline, error in config.
-## 2026-08-08 — tier-C: GameStartupHelper boot leaves
+## 2026-08-08 - tier-C: GameStartupHelper boot leaves
 
 Done (V3.1.0 b14 IL):
 - ParseCommandLine IL=82: configfile load (+.xml), ParsePref each, dedicated
@@ -4417,48 +4417,48 @@ Done (V3.1.0 b14 IL):
   ApplyParsedGamePrefs.
 - SetDedicatedServerSettings IL=51: boot logs, all prefs non-persistent,
   OpenMainMenuAfterAwake = false.
-## 2026-08-08 — census refresh 6
+## 2026-08-08 - census refresh 6
 
 Done:
 - Coverage.exe re-run: narrated 1500, catalogued 815, unaccounted 0.
-## 2026-08-08 — tier-C: SetEntityName
+## 2026-08-08 - tier-C: SetEntityName
 
 Done (V3.1.0 b14 IL):
 - EntityAlive.SetEntityName IL=20: store + bPlayerStatsChanged when server-
   owned + HandleSetNavName.
-## 2026-08-08 — tier-C: max-tier zombie substitution
+## 2026-08-08 - tier-C: max-tier zombie substitution
 
 Done (V3.1.0 b14 IL):
 - EntityClass.GetEntityClassWithinMaxTier IL=30 (tier walk) and
   GetPreviousTierEntity IL=73 (PreviousTierZombieName chain, random pick);
   MaxEntityTier degradation documented in spawning §7.
-## 2026-08-08 — tier-C: CreateEntityOperation.LoadAssets
+## 2026-08-08 - tier-C: CreateEntityOperation.LoadAssets
 
 Done (V3.1.0 b14 IL):
 - LoadAssets IL=100: class resolve, MaxEntityTier substitution + id rewrite,
   isPlayer/isLocalPlayer detection, EntityInstanceAssets/EModelInstanceAssets
   async load.
-## 2026-08-08 — tier-C: CreateEntityOperation.Start
+## 2026-08-08 - tier-C: CreateEntityOperation.Start
 
 Done (V3.1.0 b14 IL):
 - Start IL=25: id alloc (nextEntityID++ or max(+1)), LoadAssets(isSync) async
   kickoff; added to spawning §7.
-## 2026-08-08 — tier-C: GetLookVector + GetMaxViewAngle
+## 2026-08-08 - tier-C: GetLookVector + GetMaxViewAngle
 
 Done (V3.1.0 b14 IL):
 - EntityAlive.GetLookVector IL=40: facing from yaw/pitch trig; GetMaxViewAngle
   IL=5 = maxViewAngle field.
-## 2026-08-08 — tier-C: SetModelLayer
+## 2026-08-08 - tier-C: SetModelLayer
 
 Done (V3.1.0 b14 IL):
 - EntityAlive.SetModelLayer IL=7 = Utils.SetLayerRecursively on the model
   transform (LOS ray self-exclusion).
-## 2026-08-08 — tier-C: switchModelView
+## 2026-08-08 - tier-C: switchModelView
 
 Done (V3.1.0 b14 IL):
 - EntityAlive.switchModelView IL=11: SwitchModelAndView(view==0, IsMale) +
   ReassignEquipmentTransforms.
-## 2026-08-08 — tier-C: EntityAlive init chain
+## 2026-08-08 - tier-C: EntityAlive init chain
 
 Done (V3.1.0 b14 IL):
 - EntityAlive.Init IL=13 (base + InitStats + switchModelView + InitPostCommon);
@@ -4466,138 +4466,138 @@ Done (V3.1.0 b14 IL):
   seen-by-player 20 ticks, UAI wiring, class buffs, invisible flags);
   PostInit IL=34 (ApplySpawnState, LOD 0.003, fall disabled, HandleSpawn
   Modifier); InitInventory IL=9.
-## 2026-08-08 — tier-C: SetAlive chain + game-stage born-at clock
+## 2026-08-08 - tier-C: SetAlive chain + game-stage born-at clock
 
 Done (V3.1.0 b14 IL):
 - Entity.SetAlive IL=34 (physics layers 20/3/15), EntityAlive IL=46
   (lastAliveTime), EntityPlayer IL=31 (gameStageBornAtWorldTime advance by
   DaysAliveChangeWhenKilled*24000 or reset on fresh respawn).
-## 2026-08-08 — tier-C: EntityAlive.OnAddedToWorld
+## 2026-08-08 - tier-C: EntityAlive.OnAddedToWorld
 
 Done (V3.1.0 b14 IL):
 - OnAddedToWorld IL=27: occlusion add (7), m_addedToWorld, bSpawned (server),
   MinEvent 61 for non-players, StartStopLivingSound.
-## 2026-08-08 — tier-C: InitBreadcrumbs
+## 2026-08-08 - tier-C: InitBreadcrumbs
 
 Done (V3.1.0 b14 IL):
 - EntityPlayer.InitBreadcrumbs IL=6: Utils.Fill(breadcrumbs, position).
-## 2026-08-08 — census refresh 5
+## 2026-08-08 - census refresh 5
 
 Done:
 - Coverage.exe re-run: narrated 1498, catalogued 817, unaccounted 0.
-## 2026-08-08 — tier-C: AddCustomVar
+## 2026-08-08 - tier-C: AddCustomVar
 
 Done (V3.1.0 b14 IL):
 - EntityBuffs.AddCustomVar IL=8 = SetCustomVar(netSync, Set, no force).
-## 2026-08-08 — tier-C: cvar readers
+## 2026-08-08 - tier-C: cvar readers
 
 Done (V3.1.0 b14 IL):
 - EntityBuffs.GetCustomVar IL=10 (CVars TryGetValue else 0) and
   GetCustomVarId IL=3 (GetHashCode); noted in buffs.md.
-## 2026-08-08 — tier-C: GetCVar
+## 2026-08-08 - tier-C: GetCVar
 
 Done (V3.1.0 b14 IL):
 - EntityAlive.GetCVar IL=10: Buffs.GetCustomVar or 0.
-## 2026-08-08 — tier-C: hazard contact damage
+## 2026-08-08 - tier-C: hazard contact damage
 
 Done (V3.1.0 b14 IL):
 - BlockDamage.OnEntityCollidedWithBlock IL=126: DamageSourceEntity with
   AttackingItem/BlockPosition, ignore-consecutive, hit transform for humans,
   DamageEntity(damage, false, 1).
-## 2026-08-08 — tier-C: walk-trigger block overrides
+## 2026-08-08 - tier-C: walk-trigger block overrides
 
 Done (V3.1.0 b14 IL):
 - Block.OnEntityWalking base no-op; BlockJumpPad IL=5 motion.y=3; BlockMine
   IL=113: LandMineImmunity 137 skip, spectator skip, trigger sound, delay 171,
   entity damage 172 (TrapIncomingDamage), scheduled detonate delay*20.
-## 2026-08-08 — tier-C: GamePrefs.GetObject
+## 2026-08-08 - tier-C: GamePrefs.GetObject
 
 Done (V3.1.0 b14 IL):
 - GamePrefs.GetObject IL=20: bounds check -> null, else propertyValues (no
   sandbox routing in the pref getter).
-## 2026-08-08 — tier-C: GamePrefs.SetObject
+## 2026-08-08 - tier-C: GamePrefs.SetObject
 
 Done (V3.1.0 b14 IL):
 - GamePrefs.SetObjectInternal IL=38: bounds check, null/equal skip, store +
   notifyListeners.
-## 2026-08-08 — tier-C: GameStats.SetObject
+## 2026-08-08 - tier-C: GameStats.SetObject
 
 Done (V3.1.0 b14 IL):
 - GameStats.SetObject IL=12: propertyValues store + OnChangedDelegates invoke;
   Set overloads box only (writes do not touch sandbox refs).
-## 2026-08-08 — tier-C: GameStats.GetInt sandbox routing
+## 2026-08-08 - tier-C: GameStats.GetInt sandbox routing
 
 Done (V3.1.0 b14 IL):
 - GameStats.GetInt IL=34: server reads sandboxReferences first (GetIntValue)
   then raw propertyValues; sandbox overrides live in the read path.
-## 2026-08-08 — tier-C: addEntityComponent
+## 2026-08-08 - tier-C: addEntityComponent
 
 Done (V3.1.0 b14 IL):
 - EntityFactory.addEntityComponent IL=5/11: Type.GetType + AddComponent cast
   Entity; null on bad type (CompleteEntity generic path).
-## 2026-08-08 — census refresh 4
+## 2026-08-08 - census refresh 4
 
 Done:
 - Coverage.exe re-run: narrated 1497, catalogued 818, classified 1384,
   unaccounted 0.
-## 2026-08-08 — tier-C: SetSupplyCratePosition cache
+## 2026-08-08 - tier-C: SetSupplyCratePosition cache
 
 Done (V3.1.0 b14 IL):
 - AIDirectorAirDropComponent.SetSupplyCratePosition IL=30: SupplyCrateCache
   blockPos update by entityId, warning when missing.
-## 2026-08-08 — tier-C: EnumStat mapping
+## 2026-08-08 - tier-C: EnumStat mapping
 
 Done (V3.1.0 b14 IL):
 - NetPackageEntityStatChanged/EnumStat pinned: Health 0, Stamina 1, Sickness 2,
   Gassiness 3, SpeedModifier 4, Wellness 5, CoreTempOLD 6, Food 7, Water 8.
-## 2026-08-08 — tier-C: stat max getters
+## 2026-08-08 - tier-C: stat max getters
 
 Done (V3.1.0 b14 IL):
 - Stat.get_ModifiedMax IL=6 = baseMax + maxModifier; ModifiedMaxPercent
   clamp01; EntityAlive.GetMaxHealth IL=6 = (int)Health.Max.
-## 2026-08-08 — tier-C: SetBareHandItem + GetInitialMetadata
+## 2026-08-08 - tier-C: SetBareHandItem + GetInitialMetadata
 
 Done (V3.1.0 b14 IL):
 - Inventory.SetBareHandItem IL=23: bareHandItemValue/ItemClass + inventory
   data from CreateInventoryData(stack 1, gm, entity, 0).
 - ItemClass.GetInitialMetadata IL=14: Actions[0].GetInitialMeta or 0.
-## 2026-08-08 — tier-C: SetupStartingItems grant
+## 2026-08-08 - tier-C: SetupStartingItems grant
 
 Done (V3.1.0 b14 IL):
 - EntityPlayerLocal.SetupStartingItems IL=39: itemsOnEnterGame granted to
   slots 1..N with GetInitialMetadata, holding index 0 (D8.6 step 8 consumer).
-## 2026-08-08 — tier-C: CompleteEntity pref 44 correction
+## 2026-08-08 - tier-C: CompleteEntity pref 44 correction
 
 Done:
 - CompleteEntity GUIHUDEntityName gate pref 44 = DebugMenuShowTasks (not an
   entity-name display pref); spawning.md §7 corrected.
-## 2026-08-08 — tier-C: EntityAnimal distress loop
+## 2026-08-08 - tier-C: EntityAnimal distress loop
 
 Done (V3.1.0 b14 IL):
 - EntityAnimal.OnUpdateLive IL=57: see-cache clear, distress sound timer
   rand(min,max), animal waypoint update for local player.
-## 2026-08-08 — tier-C: WorldTimeToElements
+## 2026-08-08 - tier-C: WorldTimeToElements
 
 Done (V3.1.0 b14 IL):
 - GameUtils.WorldTimeToElements IL=29: (day, hour, minute) = (wt/24000+1,
   (wt/1000)%24, (int)(wt*0.06)%60); noted in aidirector time gates.
-## 2026-08-08 — census refresh 3
+## 2026-08-08 - census refresh 3
 
 Done:
 - Coverage.exe re-run: narrated 1496, catalogued 817, unaccounted 0.
-## 2026-08-08 — tier-C: Stat.Tick regen + change flag
+## 2026-08-08 - tier-C: Stat.Tick regen + change flag
 
 Done (V3.1.0 b14 IL):
 - Stat.Tick IL=301: MaxPassive base, gain/loss passive clamp for
   Health/Stamina, regenAmount cap, food/water drain passives 127/119/126/120,
   UI regen, lastValue.
 - Stat.SetChangedFlag IL=15: m_changed || floor(new)!=floor(old).
-## 2026-08-08 — tier-C: Stat.set_Value + entity stat setters
+## 2026-08-08 - tier-C: Stat.set_Value + entity stat setters
 
 Done (V3.1.0 b14 IL):
 - Stat.set_Value IL=19: clamp 0..ModifiedMax + SetChangedFlag; EntityAlive
   set_Health/set_Stamina/set_Water one-line forwards (IL=7/6/6).
-## 2026-08-08 — tier-C: Constants pins
+## 2026-08-08 - tier-C: Constants pins
 
 Done (V3.1.0 b14 IL):
 - Constants.cctor values pinned: cDefaultMonsterSeeDistance 48 (D8.6b),
@@ -4605,18 +4605,18 @@ Done (V3.1.0 b14 IL):
   cItemDroppedOnDeathLifetime 300, cPlayerInteractDistance 5,
   cDigAndBuildDistance 4, cCollectItemDistance 2, cSneakDamageMultiplier 2,
   cMaxEntitiesPerMobSpawner 8.
-## 2026-08-08 — tier-C: ItemClass.GetItem resolver
+## 2026-08-08 - tier-C: ItemClass.GetItem resolver
 
 Done (V3.1.0 b14 IL):
 - ItemClass.GetItem IL=13 / GetItemClass IL=15: nameToItem(case-insensitive)
   dicts -> ItemValue(class.Id) or None; noted in D8.6 hand item.
-## 2026-08-08 — tier-C: entity tier calc + flags parse
+## 2026-08-08 - tier-C: entity tier calc + flags parse
 
 Done (V3.1.0 b14 IL):
 - EntityClass.CalculateEntityTier IL=49: tag priority elite/radiated/feral/
   special/strong -> EntityTierTypes 5..1 else Normal.
 - ParseEntityFlags IL=49: comma OR of EntityFlags (ignore-case).
-## 2026-08-08 — tier-C: EntityClass.Init config source
+## 2026-08-08 - tier-C: EntityClass.Init config source
 
 Done (V3.1.0 b14 IL):
 - EntityClass.Init IL=1465 phase map (entity-ai D8.6b): censor, mandatory
@@ -4626,7 +4626,7 @@ Done (V3.1.0 b14 IL):
   PhysicsBodyLayout.Find, damage model (dismember/knockdown/explosion mults),
   pain resist vec, AIPackages -> UseAIPackages, Buffs ';' list, Tags,
   explosionData, userSpawnType, token manager config, CalculateEntityTier.
-## 2026-08-08 — tier-C: CreateEntityOperation.CompleteEntity
+## 2026-08-08 - tier-C: CreateEntityOperation.CompleteEntity
 
 Done (V3.1.0 b14 IL):
 - EntityFactory/CreateEntityOperation.CompleteEntity IL=639: asset load gates;
@@ -4635,49 +4635,49 @@ Done (V3.1.0 b14 IL):
   paths; generic path (unknown class log, GUIHUD pref 44, collider layer 14,
   LargeEntityBlocker/Physics tags); convergence: ApplyToEntity, Delete source
   destroy, lifetime/id/pos/rot/onGround, scale/head size, PostInit.
-## 2026-08-08 — tier-C: RemoveChunkObserver force pass
+## 2026-08-08 - tier-C: RemoveChunkObserver force pass
 
 Done (V3.1.0 b14 IL):
 - ChunkManager.RemoveChunkObserver IL=29: id-match remove + isInternalForceUpdate.
-## 2026-08-08 — census refresh 2
+## 2026-08-08 - census refresh 2
 
 Done:
 - Coverage.exe re-run: narrated 1493, catalogued 820, classified 1386,
   unaccounted 0. completion-bar + handoff updated.
-## 2026-08-08 — tier-C: survival-mode Init overrides
+## 2026-08-08 - tier-C: survival-mode Init overrides
 
 Done (V3.1.0 b14 IL):
 - GameModeSurvival/MP/SP/PvP Init overrides: spawn window off, limits off,
   score mults 1/0/-5, spawn-near-other off, horde meter on, flying = pref 58,
   AutoParty off (survival); SP forces DropOnQuit 0, max players 1, not public,
   default port.
-## 2026-08-08 — tier-C: GameModeAbstract.Init GameStats bootstrap table
+## 2026-08-08 - tier-C: GameModeAbstract.Init GameStats bootstrap table
 
 Done (V3.1.0 b14 IL):
 - Init IL=205 full GameStats <- GamePrefs seed table (53 rows) added to
   server-lifecycle §2.1: GS 24/23/15/20/18/37/59/60/61/42/72-76/51/53/35/33/34/
   39-41/43-50/63/54/66/68/71/57/62/65/67 <- matching prefs; GS 14/27/19/21/22/
   4/2/6 consts; GS 11 = 24000/(DayNightLength*60); GS 77-80 const 100.
-## 2026-08-08 — tier-C: GameMode.StartRound per mode
+## 2026-08-08 - tier-C: GameMode.StartRound per mode
 
 Done (V3.1.0 b14 IL):
 - Survival/Creative/Edit StartRound IL=4 = GameStats.Set(GameState, Running);
   Deathmatch IL=62 / ZombieHorde IL=53 = 4-state round-index switches
   (time/frag limits, LoadScene transitions).
-## 2026-08-08 — tier-C: GameStateManager.InitGame mode instantiation
+## 2026-08-08 - tier-C: GameStateManager.InitGame mode instantiation
 
 Done (V3.1.0 b14 IL):
 - InitGame IL=50: GameState Running, mode from pref 29 type (default fallback)
   via Activator; GameModeId = GetID; server: round 0, timeRoundStarted,
   mode.Init + StartRound(0), bDirty.
-## 2026-08-08 — tier-C: chunk data expiry + unload skip rules
+## 2026-08-08 - tier-C: chunk data expiry + unload skip rules
 
 Done (V3.1.0 b14 IL):
 - Chunk.removeExpiredCustomChunkDataEntries IL=61: expire <= worldTime,
   OnRemove + key removal.
 - World.UnloadEntities IL=36: backward unloadEntity(reason 1), skip
   bWillRespawn entities (or attached-main bWillRespawn) unless force.
-## 2026-08-08 — tier-C: chunk load/unload lifecycle
+## 2026-08-08 - tier-C: chunk load/unload lifecycle
 
 Done (V3.1.0 b14 IL):
 - Chunk.OnLoadedFromCache IL=90 (flags clear, saved entities -> entityStubs);
@@ -4687,13 +4687,13 @@ Done (V3.1.0 b14 IL):
   OnUnload -> OnBlockUnloaded, waterSimHandle.Reset).
 - ChunkBlockLayer OnLoad/OnUnload IL=66 each (locked notifyLoadUnloadCallback
   Blocks fan-out).
-## 2026-08-08 — tier-C: supply plane server motion
+## 2026-08-08 - tier-C: supply plane server motion
 
 Done (V3.1.0 b14 IL):
 - EntitySupplyPlane.SetDirectionToFly IL=12 (ticks, motion = dir*6, no
   replication) and OnUpdatePosition IL=49 (advance motion*partial, unload at
   0, plane loop sound, SetAirBorne).
-## 2026-08-08 — tier-C: air-drop flight path build + plane spawn
+## 2026-08-08 - tier-C: air-drop flight path build + plane spawn
 
 Done (V3.1.0 b14 IL):
 - AIAirDrop.CreateFlightPaths IL=355: cluster pick, altitude min(y+180,276),
@@ -4703,47 +4703,47 @@ Done (V3.1.0 b14 IL):
   ChunkObserver(3,-1), cluster.Delay += rand(25,120).
 - AIAirDrop.SpawnPlane IL=74: supplyPlane entity at path.Start yaw Angle,
   SetDirectionToFly(dir, 20*(len/120)+10), SpawnEntityInWorld.
-## 2026-08-08 — tier-C: air-drop flight-path pump
+## 2026-08-08 - tier-C: air-drop flight-path pump
 
 Done (V3.1.0 b14 IL):
 - AIAirDrop.Tick IL=193: CreateFlightPaths first call; spawningCrates latch on
   chunk-loaded; per-path Delay -> SpawnPlane; per-crate Delay -> SpawnSupplyCrate
   + RemoveAt; done = flightPaths == null.
-## 2026-08-08 — tier-C: air-drop crate landing tick
+## 2026-08-08 - tier-C: air-drop crate landing tick
 
 Done (V3.1.0 b14 IL):
 - EntitySupplyCrate.OnUpdateEntity IL=103: parachute show/close countdowns 10,
   hide when (onGround||inWater) && close<=0; landing -> supply_crate_impact
   particle + SetSupplyCratePosition + RefreshCrates(-1) on server.
-## 2026-08-08 — tier-C: sleeper disturbed level + ranged range
+## 2026-08-08 - tier-C: sleeper disturbed level + ranged range
 
 Done (V3.1.0 b14 IL):
 - EntityAlive.GetSleeperDisturbedLevel IL=38: pct = dist/sightRangeBase; wake
   2 / groan 1 / 0 with Lerped threshold ranges.
 - ItemActionRanged.GetRange IL=23: EffectManager.GetValue(MaxRange 11, base
   Range, holder).
-## 2026-08-08 — tier-C: class-id + item-stack parse pins
+## 2026-08-08 - tier-C: class-id + item-stack parse pins
 
 Done (V3.1.0 b14 IL):
 - EntityClass.FromString IL=3 = String.GetHashCode: entityClass ids in save/
   wire are .NET string hash codes (noted in entity-ai D8.6).
 - ItemStack.FromString IL=38: "ItemName[=Count]", count default 1.
 ---
-## 2026-08-08 — tier-C: chunk force-update + ground-align leaves
+## 2026-08-08 - tier-C: chunk force-update + ground-align leaves
 
 Done (V3.1.0 b14 IL):
 - ChunkManager.IsForceUpdate IL=8 (isInternalForceUpdate || isChunkClusterChanged),
   ForceUpdate IL=4, GroundAlignFrameUpdate IL=42 (alternating 0/1 buckets,
   Block.GroundAlign per BlockEntityData).
 ---
-## 2026-08-08 — tier-C: EnumGameState pinning
+## 2026-08-08 - tier-C: EnumGameState pinning
 
 Done (V3.1.0 b14 IL):
 - EnumGameState pinned (Off -1 / Loading 0 / Running 1 / Over 2): pause path
   sets GameState Over(2) / Running(1); vulture prologue ret on Over(2);
   inventory note added.
 ---
-## 2026-08-08 — tier-C: EntityVulture helper leaves
+## 2026-08-08 - tier-C: EntityVulture helper leaves
 
 Done (V3.1.0 b14 IL):
 - StartAttackReposition IL=104 (fatigue 80-180 break vs reposition waypoint
@@ -4753,7 +4753,7 @@ Done (V3.1.0 b14 IL):
   IsCourseTraversable IL=102 (step bounds), StartHome IL=10, ClearTarget
   IL=11, AdjustWaypoint IL=46 (air probe, y <= 250).
 ---
-## 2026-08-08 — tier-C: EntityVulture flight AI
+## 2026-08-08 - tier-C: EntityVulture flight AI
 
 Done (V3.1.0 b14 IL):
 - EntityVulture.updateTasks IL=1344 full narration: prologue gates (pref 46,
@@ -4764,7 +4764,7 @@ Done (V3.1.0 b14 IL):
   gliding anim, talons strike + Voxel.Raycast 0.83 mask 1082198968, vomit
   attack2 (range, 20/25 deg gates, muzzle, numVomits -> reposition).
 ---
-## 2026-08-08 — tier-C: activation command defaults/reorder
+## 2026-08-08 - tier-C: activation command defaults/reorder
 
 Done (V3.1.0 b14 IL):
 - Entity.InitLocalActivationCommands base no-op; EntityAlive adds grab/hand when
@@ -4773,13 +4773,13 @@ Done (V3.1.0 b14 IL):
   vehicle storage-after-horn (owner allowed).
 - MoveActivationCommandAfter IL=64 reorder helper.
 ---
-## 2026-08-08 — census refresh
+## 2026-08-08 - census refresh
 
 Done:
 - Coverage.exe re-run: narrated 1488 -> 1491, catalogued 822 -> 821,
   classified 1387, unaccounted 0. completion-bar + handoff census updated.
 ---
-## 2026-08-08 — tier-C: GameStats/GamePrefs index tables
+## 2026-08-08 - tier-C: GameStats/GamePrefs index tables
 
 Done (V3.1.0 b14 IL):
 - New inventory docs/inventories/gamestats-gameprefs.md: full EnumGameStats (82)
@@ -4788,7 +4788,7 @@ Done (V3.1.0 b14 IL):
   GP 190 ServerMaxAllowedViewDistance, GP 235 OptionsAutoPartyWithFriends, ...).
 - Corrected GetViewDistance: pref 33 is GameWorld (not a graphics pref).
 ---
-## 2026-08-08 — tier-C: SendChunksToClients streaming body
+## 2026-08-08 - tier-C: SendChunksToClients streaming body
 
 Done (V3.1.0 b14 IL):
 - ChunkManager.SendChunksToClients IL=216: per-observer removes flush;
@@ -4796,7 +4796,7 @@ Done (V3.1.0 b14 IL):
   reloads walked backwards; mapDatabase GetMapChunkPackagesToSend; flags 192.
 - ResendChunksToClients IL=55: non-visual-mesh observers AddRange reload.
 ---
-## 2026-08-08 — tier-C: DynamicProperties k=v parse format
+## 2026-08-08 - tier-C: DynamicProperties k=v parse format
 
 Done (V3.1.0 b14 IL):
 - DynamicProperties.ParseData IL=82: ';' split then '=' split (equalSeparator/
@@ -4804,7 +4804,7 @@ Done (V3.1.0 b14 IL):
 - ParseKeyData IL=29: Data.TryGetValue -> ParseData; null when absent.
 - D8.7 ParseTasks entry format corrected to `ClassName k1=v1;k2=v2`.
 ---
-## 2026-08-08 — tier-C: EntityClass prop-name table + activation commands
+## 2026-08-08 - tier-C: EntityClass prop-name table + activation commands
 
 Done (V3.1.0 b14 IL):
 - New inventory docs/inventories/entityclass-props.md: 187 EntityClass Prop*
@@ -4814,7 +4814,7 @@ Done (V3.1.0 b14 IL):
 - Entity.GetActivationCommands IL=51: cache + InitLocalActivationCommands +
   customCmds + ReorderActivationCommands.
 ---
-## 2026-08-08 — tier-C: PlayerSpawnedInWorld full body
+## 2026-08-08 - tier-C: PlayerSpawnedInWorld full body
 
 Done (V3.1.0 b14 IL):
 - GameManager.PlayerSpawnedInWorld IL=127: id/entity/type guards; Died+remote
@@ -4822,7 +4822,7 @@ Done (V3.1.0 b14 IL):
   waypoint refresh on NewGame/Loaded/Enter/Join (not Died/Teleport/Unknown);
   ModEvents.PlayerSpawnedInWorld + OnClientSpawned; log.
 ---
-## 2026-08-08 — tier-C: base Entity config copy
+## 2026-08-08 - tier-C: base Entity config copy
 
 Done (V3.1.0 b14 IL):
 - Entity.CopyPropertiesFromEntityClass IL=238: RootMotion/HasDeathAnim/
@@ -4833,7 +4833,7 @@ Done (V3.1.0 b14 IL):
 - EntityPlayer override IL=3 pure base; EntityPlayerLocal IL=21 adds
   dropInventoryBlock key.
 ---
-## 2026-08-08 — tier-C: ECD builder, chunk observer attach
+## 2026-08-08 - tier-C: ECD builder, chunk observer attach
 
 Done (V3.1.0 b14 IL):
 - EntityFactory.SetupEntityCreationData IL=31/36/12/10: ECD fill (itemStack,
@@ -4844,7 +4844,7 @@ Done (V3.1.0 b14 IL):
   isInternalForceUpdate = true.
 - PersistentPlayerList.GetPlayerDataFromEntityID IL=10: EntityToPlayerMap.
 ---
-## 2026-08-07 — tier-C: spawn sampler, walk type, view distance
+## 2026-08-07 - tier-C: spawn sampler, walk type, view distance
 
 Done (V3.1.0 b14 IL):
 - World.GetRandomSpawnPositionMinMaxToPosition IL=240: square (dx/dz
@@ -4854,7 +4854,7 @@ Done (V3.1.0 b14 IL):
 - EntityAlive.GetSpawnWalkType IL=9: ParseInt WalkType prop default 0.
 - GameUtils.GetViewDistance IL=10: pref 33 "Empty" -> 12 else GameStats 62.
 ---
-## 2026-08-07 — tier-C: EAIManager AI task config parse
+## 2026-08-07 - tier-C: EAIManager AI task config parse
 
 Done (V3.1.0 b14 IL):
 - EAIManager.CopyPropertiesFromEntityClass IL=213: feralSense/groupCircle/
@@ -4864,7 +4864,7 @@ Done (V3.1.0 b14 IL):
   targetTasks; CreateInstance/Init/SetData/AddTask.
 - ParseTasks IL=111: pipe-delimited "ClassName [params]" entries, priority 1+.
 ---
-## 2026-08-07 — doc structure pass: numbering, D-order, stability dump policy
+## 2026-08-07 - doc structure pass: numbering, D-order, stability dump policy
 
 Done:
 - Fix duplicate section numbers: server-lifecycle (land-claim packages -> ##6,
@@ -4882,7 +4882,7 @@ Done:
 Verification: make stock-check OK; test_dedi_coverage_docs OK; zero duplicate
 numbered headers across docs/.
 ---
-## 2026-08-07 — tier-C: CopyPropertiesFromEntityClass, pause state, disconnect path
+## 2026-08-07 - tier-C: CopyPropertiesFromEntityClass, pause state, disconnect path
 
 Done (V3.1.0 b14 IL):
 - EntityAlive.CopyPropertiesFromEntityClass IL=1128: hand item, faction, sight +
@@ -4897,7 +4897,7 @@ Done (V3.1.0 b14 IL):
 - protocol.md post-spawn fix: spawn-near-friend mode 2 (InForest) accepts only
   BiomeType 2..3 (Forest/PineForest), not rejects; teamNumber local hard 0.
 ---
-## 2026-08-07 — tier-C: DropContentOf TE + local inventory send + handoff
+## 2026-08-07 - tier-C: DropContentOf TE + local inventory send + handoff
 
 Done (V3.1.0 b14 IL):
 - DropContentOfLootContainerServer lock/open/drop bag; CheckDestroyTileEntity.
@@ -4905,56 +4905,56 @@ Done (V3.1.0 b14 IL):
 - FinishGameMessageServer mod interrupt flags 192; HandleFirstSpawnInteractions party invite.
 - Handoff/TODO: workspace/notes/tierc-handoff.md
 ---
-## 2026-08-07 — tier-C: SaveLocalPlayerData and RequestToSpawnEntityServer
+## 2026-08-07 - tier-C: SaveLocalPlayerData and RequestToSpawnEntityServer
 
 Done (V3.1.0 b14 IL):
 - SaveWorld World.Save; SaveLocalPlayerData FromPlayer + map async.
 - RequestToSpawnEntityServer fallingTree dedupe; backpack AddDroppedBackpack.
 ---
-## 2026-08-07 — tier-C: bedroll range and CanMobsSpawnAtPos
+## 2026-08-07 - tier-C: bedroll range and CanMobsSpawnAtPos
 
 Done (V3.1.0 b14 IL):
 - isPositionInRangeOfBedrolls GamePrefs 160; isPositionFarFromPlayers.
 - GetTerrainOffset MarchingCubes; CanMobsSpawnAtPos y 2..251 trader/water/floor.
 - SendToPlayers tracked set exclude.
 ---
-## 2026-08-07 — tier-C: GetRandomSpawnPositionMinMaxToRandomPlayer
+## 2026-08-07 - tier-C: GetRandomSpawnPositionMinMaxToRandomPlayer
 
 Done (V3.1.0 b14 IL):
 - 10 tries unit-circle min..max band; height+1; bedroll/CanMobsSpawn/min-dist/CanSee rejects.
 - Success center + terrainOffset.
 ---
-## 2026-08-07 — tier-C: nextRound and DecoManager.UpdateTick
+## 2026-08-07 - tier-C: nextRound and DecoManager.UpdateTick
 
 Done (V3.1.0 b14 IL):
 - nextRound EndRound/wrap GameStats 10; SetBloodMoonDay GameStats 58 dirty.
 - DecoManager.UpdateTick drain add/remove/rect/chunk queues.
 ---
-## 2026-08-07 — tier-C: block ticker execute and GameStateManager gates
+## 2026-08-07 - tier-C: block ticker execute and GameStateManager gates
 
 Done (V3.1.0 b14 IL):
 - WorldBlockTicker.execute type-match UpdateTick; AddScheduledBlockUpdate replace hash.
 - GameStateManager OnUpdateTick: time/day/frag gates; NetPackageGameStats dirty broadcast.
 ---
-## 2026-08-07 — tier-C: WorldBlockTicker and SpawnManagerDynamic
+## 2026-08-07 - tier-C: WorldBlockTicker and SpawnManagerDynamic
 
 Done (V3.1.0 b14 IL):
 - tickScheduled max 100; reschedule 30..45 if chunk not area-loaded.
 - tickRandom 1200 tick period; countPerFrame active/100.
 - RestoreCulledBlocks edge face flags; SpawnManagerDynamic 64..96 night ES.
 ---
-## 2026-08-07 — tier-C: updateChunksToUncull restore path
+## 2026-08-07 - tier-C: updateChunksToUncull restore path
 
 Done (V3.1.0 b14 IL):
 - updateChunksToUncull: RestoreCulledBlocks; neighbor regenerate flags; 5 ms budget.
 ---
-## 2026-08-07 — tier-C: WorldEventUpdateTime and POI uncull
+## 2026-08-07 - tier-C: WorldEventUpdateTime and POI uncull
 
 Done (V3.1.0 b14 IL):
 - WorldEventUpdateTime blood-moon day/hour window; BloodMoonParticipation.
 - checkPOIUnculling every 38 ticks; GameStats 57; Overlaps radius 6.
 ---
-## 2026-08-07 — tier-C: TickEntitiesSlice and SaveDecorations
+## 2026-08-07 - tier-C: TickEntitiesSlice and SaveDecorations
 
 Done (V3.1.0 b14 IL):
 - TickEntitiesSlice advances tickEntityIndex; Flush drains remainder.
@@ -4962,74 +4962,74 @@ Done (V3.1.0 b14 IL):
 - SaveDecorations DecoManager.Save; AIDirector.AddEntity players only.
 - Census pin narrated 1488 / catalogued 822.
 ---
-## 2026-08-07 — tier-C: UpdateTick and GroupFallingBlocks
+## 2026-08-07 - tier-C: UpdateTick and GroupFallingBlocks
 
 Done (V3.1.0 b14 IL):
 - UpdateTick: elapsedTicks==0 slice path; partial*20; save 40 ticks / deco 60s.
 - SetBlocksOnClients flags 192 except placer.
 - GroupFallingBlocks BFS size-limited groups into fallingGroups.
 ---
-## 2026-08-07 — tier-C: support pos and land claim offline hours
+## 2026-08-07 - tier-C: support pos and land claim offline hours
 
 Done (V3.1.0 b14 IL):
 - FindSupportingBlockPos elevator/blocked/supportOrder octant.
 - AdjustBoundsForPlayers 50+80*pad clamp; IsLandProtectionValidForPlayer offline days.
 - Chunk.GetEntitiesAround y buckets; FindRandomSpawnPointNearPlayer wrapper.
 ---
-## 2026-08-07 — tier-C: Chunk player spawn and land claim bounds
+## 2026-08-07 - tier-C: Chunk player spawn and land claim bounds
 
 Done (V3.1.0 b14 IL):
 - Chunk.CanPlayersSpawnAtPos y 2..251; CanPlayersSpawnOn floor; solid/water reject.
 - InBoundsForPlayersPercent 50+80 edge fade; IsLandProtectedBlock lpblock deadZone.
 - GetPlayersAround / GetEntitiesAround chunk ring scan.
 ---
-## 2026-08-07 — tier-C: spawn pos helpers and falling groups
+## 2026-08-07 - tier-C: spawn pos helpers and falling groups
 
 Done (V3.1.0 b14 IL):
 - CanPlayersSpawnAtPos chunk gate; FindRandomSpawnPointNearRandomPlayer dist 32.
 - GetClosestLocalPlayer multi-local min dist; CheckEntityCollisionWithBlocks.
 - CanPlaceLandProtectionBlockAt bounds 0.5 + claim scan; CreateFallingBlockGroup.
 ---
-## 2026-08-07 — tier-C: Uncull and IsWorldEvent blood moon
+## 2026-08-07 - tier-C: Uncull and IsWorldEvent blood moon
 
 Done (V3.1.0 b14 IL):
 - UncullChunk queues culled chunks; UncullPOI AddChunksToUncull.
 - GetTraderAreaAt DynamicPrefabDecorator; IsWorldEvent only event 0 blood moon.
 ---
-## 2026-08-07 — tier-C: AddMotion and crouch height fixed update
+## 2026-08-07 - tier-C: AddMotion and crouch height fixed update
 
 Done (V3.1.0 b14 IL):
 - AddMotion root-motion xz accumulate.
 - Dropped backpack list helpers; ExecuteDestroyBlockBehavior stub false.
 - CrouchHeightFixedUpdate elevator 1.3 / default 1.06; sphere-cast push; SetHeight.
 ---
-## 2026-08-07 — tier-C: enclosure light and armor material
+## 2026-08-07 - tier-C: enclosure light and armor material
 
 Done (V3.1.0 b14 IL):
 - GetAmountEnclosed: 1 - max(blockLight y/y+1)/15.
 - GetChestTransformPosition eyeHeight*0.25 crouch/stun else 0.95.
 - GetArmorMaterial SurfaceCategory; impact graze/hit sounds; CameraFOV pref 16.
 ---
-## 2026-08-07 — tier-C: eye height and block damage scale
+## 2026-08-07 - tier-C: eye height and block damage scale
 
 Done (V3.1.0 b14 IL):
 - GetBlockDamageScale BM vs entity percents.
 - GetDropPosition parachute/jetpack up*0.3; GetEyeHeight crawler 0.15 / 22=0.6.
 - CanCollideWithBlocks sleeping false; CanLockLocally dead false.
 ---
-## 2026-08-07 — tier-C: block walk fall and ForceBigHead
+## 2026-08-07 - tier-C: block walk fall and ForceBigHead
 
 Done (V3.1.0 b14 IL):
 - updateCurrentBlockPosAndValue: stability-0 CanFallBelow AddFallingBlock; loot stage check.
 - ForceBigHead HeadState 2; ForceResetHead; InitInventory ctor.
 ---
-## 2026-08-07 — tier-C: GetActivatableItems MinEvent 91
+## 2026-08-07 - tier-C: GetActivatableItems MinEvent 91
 
 Done (V3.1.0 b14 IL):
 - GetActivatableItems: HasTrigger(91) on item and mods.
 - DeathHealth/Died setters dirty bPlayerStatsChanged; PlayGiveUpSound.
 ---
-## 2026-08-07 — tier-C: HoldingItem force and grab activation
+## 2026-08-07 - tier-C: HoldingItem force and grab activation
 
 Done (V3.1.0 b14 IL):
 - set_IsBreakingBlocks dirties bPlayerStatsChanged when local.
@@ -5037,13 +5037,13 @@ Done (V3.1.0 b14 IL):
 - EnqueueNetworkHoldingData queue; grab AllowActivationCommand bare-hand PickupItem.
 - CollectActivatableItems holding + equipment slots.
 ---
-## 2026-08-07 — tier-C: Electrocuted and stamina helpers
+## 2026-08-07 - tier-C: Electrocuted and stamina helpers
 
 Done (V3.1.0 b14 IL):
 - get/set Electrocuted via avatar remaining and StartAnimationElectrocute(0.6).
 - AddStamina health gate; AddWater; HarvestingAnimation; simple field getters.
 ---
-## 2026-08-07 — tier-C: CanNavigatePath and swim/ragdoll helpers
+## 2026-08-07 - tier-C: CanNavigatePath and swim/ragdoll helpers
 
 Done (V3.1.0 b14 IL):
 - CanNavigatePath: ground/swim/elevator/climb only.
@@ -5051,14 +5051,14 @@ Done (V3.1.0 b14 IL):
 - BeginDynamicRagdoll; FaceJumpTo 90-degree snap; ApplySpawnState dismember.
 - CalculateBlockDamage stompsSpikes tag 6 -> 999 bypass.
 ---
-## 2026-08-07 — tier-C: AddEnemyToWorld and stealth UI percent
+## 2026-08-07 - tier-C: AddEnemyToWorld and stealth UI percent
 
 Done (V3.1.0 b14 IL):
 - AddEnemyToWorld: source 3, passive sleeper, particle, optional WakeAttackLater.
 - AddSpawnPoint cap 255; EntitySpawner runtime reset fields.
 - PlayerStealth ValuePercentUI formula (light+noise+stress+smell+alert).
 ---
-## 2026-08-07 — tier-C: destroy-pos reuse and jump headroom
+## 2026-08-07 - tier-C: destroy-pos reuse and jump headroom
 
 Done (V3.1.0 b14 IL):
 - GetExistingDestroyPos / FindExistingDestroyPos ally share within 20 m.
@@ -5066,28 +5066,28 @@ Done (V3.1.0 b14 IL):
 - IsTriggerAndNoRespawn flags&7==3; WakeAttackLater async iterator.
 - BloodmoonZombiesRemain / IsMemberOfParty.
 ---
-## 2026-08-07 — tier-C: BossEvent switch and package Process leaves
+## 2026-08-07 - tier-C: BossEvent switch and package Process leaves
 
 Done (V3.1.0 b14 IL):
 - NetPackageBossEvent eventType 0..5 GameEventManager table.
 - LandClaimRepair beginRepair server RepairAll vs client clear IsRepairing.
 - BlockLimitTracking client-only; CloseAllWindows modal close; EmitSmell no-op.
 ---
-## 2026-08-07 — tier-C: SearchForDestroyPos and GetAttackHitInfo
+## 2026-08-07 - tier-C: SearchForDestroyPos and GetAttackHitInfo
 
 Done (V3.1.0 b14 IL):
 - GetAttackHitInfo: 30% stun MassKg*0.4 else *0.2 ragdoll; damageMpy 0 null hit.
 - IsABlockSideOpen: 4 cardinals movement blocked check.
 - SearchForDestroyPos: destroyData patterns, column scan, open-side score.
 ---
-## 2026-08-07 — tier-C: MoveHelper Push, area block, side-step
+## 2026-08-07 - tier-C: MoveHelper Push, area block, side-step
 
 Done (V3.1.0 b14 IL):
 - Push: MassKg*0.05 strength ragdoll type 3.
 - CheckAreaBlocked edge fan; CalcObstacleSideStep arcs.
 - SetSwimValues duration clamp 3..20; IsMoveToAbove 1.9; focusTicks 5.
 ---
-## 2026-08-07 — tier-C: MoveHelper entity block, door open, attack push
+## 2026-08-07 - tier-C: MoveHelper entity block, door open, attack push
 
 Done (V3.1.0 b14 IL):
 - CheckEntityBlocked sphere-cast layer 524288; radius sum +0.41 pad.
@@ -5095,52 +5095,52 @@ Done (V3.1.0 b14 IL):
 - AttackPush: damage type 3 + Attack press/release.
 - StartSwimStroke SetSwimValues; FindDestroyPos refresh 500; SelectBestHit 0.7.
 ---
-## 2026-08-07 — tier-C: IsAlert and SetMoveTo path expiry
+## 2026-08-07 - tier-C: IsAlert and SetMoveTo path expiry
 
 Done:
 - get_IsAlert remote vs local; SetAlertTicks stores only.
 - SetMoveTo path overload expiry 40 vs point 10; nextMoveToPos.
 ---
-## 2026-08-07 — tier-C: CheckBlocked and CheckBlockedUp
+## 2026-08-07 - tier-C: CheckBlocked and CheckBlockedUp
 
 Done (V3.1.0 b14 IL):
 - CheckBlocked: ray cap, slope normal.y 0.643 / horizontal dot -0.7 skip,
   BlockedFlags baseY bit, tempMoveToPos.
 - CheckBlockedUp: flags=4, obstacleCheckTickDelay=12.
 ---
-## 2026-08-07 — tier-C: SetRevengeTarget and IsInFrontOfMe
+## 2026-08-07 - tier-C: SetRevengeTarget and IsInFrontOfMe
 
 Done:
 - SetRevengeTarget: revengeTimer 500 when set.
 - IsInFrontOfMe: half maxViewAngle cone.
 - Recovered spawning.md after accidental wipe in bda930c (fix 2eff428).
 ---
-## 2026-08-07 — tier-C: CalcPartyLevel and IsSpawnNeeded
+## 2026-08-07 - tier-C: CalcPartyLevel and IsSpawnNeeded
 
 Done (V3.1.0 b14 IL):
 - CalcPartyLevel: sort stages; StartingWeight 1.0; DiminishingReturns 0.5; FloorToInt.
 - ChunkAreaBiomeSpawnData.IsSpawnNeeded: missing group / under max / past delay.
 ---
-## 2026-08-07 — tier-C: DigUpdate phase table
+## 2026-08-07 - tier-C: DigUpdate phase table
 
 Done (V3.1.0 b14 IL):
 - DigUpdate: digForTicks countdown; digActionTicks 18/4/14; move abort 0.25 sqr;
   DigTrigger then organic Hit type 3; digForwardCount 2; ray 1.1/1.4.
 ---
-## 2026-08-07 — tier-C: StartJumpSwimMotion and KillLootContainer
+## 2026-08-07 - tier-C: StartJumpSwimMotion and KillLootContainer
 
 Done (V3.1.0 b14 IL):
 - StartJumpSwimMotion: water 0.65 gate; gravity/pow swim scale formula.
 - IsWalkTypeACrawl: walkType >= 20.
 - KillLootContainer: snap deathUpdateTime to linger-1 when corpse block present.
 ---
-## 2026-08-07 — tier-C: trader eject teleport and dynamic ragdoll
+## 2026-08-07 - tier-C: trader eject teleport and dynamic ragdoll
 
 Done (V3.1.0 b14 IL):
 - checkForTeleportOutOfTraderArea: protect vs closed volumes, streak, NetPackageTeleportPlayer, game_on_trader_teleport.
 - UpdateDynamicRagdoll / ActivateDynamicRagdoll flag bits 1/2/4, impulse x20.
 ---
-## 2026-08-07 — post-update dry-run + tier-C crawler/SpawnParticle
+## 2026-08-07 - post-update dry-run + tier-C crawler/SpawnParticle
 
 Dry-run (live V3.1.0 b14 dedi):
 - StockFacts extract matches committed stock_facts.json (0 field diffs).
@@ -5154,7 +5154,7 @@ Tier-C (IL):
 - SleeperVolume.SpawnParticle: y+0.5, air-above skip, light brightness FX.
 - UpdateSpawn correction: GameStats index 12 log-only, not a spawn gate.
 ---
-## 2026-08-07 — layout: workspace/autoresearch + readiness make target
+## 2026-08-07 - layout: workspace/autoresearch + readiness make target
 
 Done:
 - Move root autoresearch session files into workspace/autoresearch/ (README, results.jsonl, run.sh).
@@ -5164,7 +5164,7 @@ Done:
 
 Verification: make stock-check; make readiness.
 ---
-## 2026-08-07 — autoresearch: version-update tooling readiness
+## 2026-08-07 - autoresearch: version-update tooling readiness
 
 Done (branch autoresearch/version-update-tooling):
 - Baseline readiness 83.04 → best 100.0 in 5 keep iterations.
@@ -5176,7 +5176,7 @@ Done (branch autoresearch/version-update-tooling):
 
 Verification: make stock-check OK; test_dedi_coverage_docs OK; readiness=100.0.
 ---
-## 2026-08-07 — tier-C: SetupCrawler and HeadshotMode
+## 2026-08-07 - tier-C: SetupCrawler and HeadshotMode
 
 Done (V3.1.0 b14 IL):
 - SetupCrawler: walkType 21; height 0.5; crawler hand item; TurnIntoCrawler.
@@ -5184,7 +5184,7 @@ Done (V3.1.0 b14 IL):
 - IsCrippled flags 12288; HeadshotMode 1/2; CelebrateMode 1/2.
 - Census pin narrated 1485 / catalogued 824.
 ---
-## 2026-08-07 — tier-C: GetDismemberChance and ExecuteDismember
+## 2026-08-07 - tier-C: GetDismemberChance and ExecuteDismember
 
 Done (V3.1.0 b14 IL):
 - GetDismemberChance: primary mult head/arms/legs; passive 143; source*damagePer*mult; debug force.
@@ -5193,7 +5193,7 @@ Done (V3.1.0 b14 IL):
 - BodyDamage leg/arm missing masks 480/510.
 - sleepingOrWakingUp: IsSleeping only (name overclaims).
 ---
-## 2026-08-07 — tier-C: CheckDismember crawler and Equipment.CalcDamage
+## 2026-08-07 - tier-C: CheckDismember crawler and Equipment.CalcDamage
 
 Done (V3.1.0 b14 IL):
 - GetDamageFraction: damage/maxHealth; Disintegrate: timeStayAfterDeath=0.
@@ -5201,20 +5201,20 @@ Done (V3.1.0 b14 IL):
 - Equipment.CalcDamage: physical armor rating vs passive 43 elemental.
 - FireAttackedEvents: MinEvent type 8; buff-sourced uses Progression only.
 ---
-## 2026-08-07 — tier-C: CalcIfInElevator and onNewBiomeEntered
+## 2026-08-07 - tier-C: CalcIfInElevator and onNewBiomeEntered
 
 Done (V3.1.0 b14 IL):
 - onNewBiomeEntered: store biomeStandingOn.
 - CalcIfInElevator: require bCanClimbLadders; sample stand block and y+1 IsElevator.
 ---
-## 2026-08-07 — tier-C: updateCurrentBlockPosAndValue and radiation
+## 2026-08-07 - tier-C: updateCurrentBlockPosAndValue and radiation
 
 Done (V3.1.0 b14 IL):
 - updateCurrentBlockPosAndValue: air/child resolve; biome enter; elevator; walk buffs; OnEntityWalking.
 - isRadiationSensitive: always true base.
 - Census pin narrated 1484 / catalogued 825 / unaccounted 0.
 ---
-## 2026-08-07 — tier-C: UpdateFall set_Crouching and aabb collision
+## 2026-08-07 - tier-C: UpdateFall set_Crouching and aabb collision
 
 Done (V3.1.0 b14 IL):
 - UpdateFall: onGround triggers fallHitGround; airborne accumulates distance.
@@ -5223,7 +5223,7 @@ Done (V3.1.0 b14 IL):
 - aabbEntityCollision: ClipBoundsMove colliding bounds; onGround resolve.
 - ConditionalScalePhysicsAddConstant: identity.
 ---
-## 2026-08-07 — tier-C: entityCollision Move and crouch/climb
+## 2026-08-07 - tier-C: entityCollision Move and crouch/climb
 
 Done (V3.1.0 b14 IL):
 - entityCollision: ragdoll fall track else CC or AABB.
@@ -5231,7 +5231,7 @@ Done (V3.1.0 b14 IL):
 - ConditionalScalePhysicsMulConstant: identity.
 - IsCrouching: Crouching || CrouchingLocked; set_Climbing movement tags.
 ---
-## 2026-08-07 — tier-C: JumpMove MaxVelocity and speed passives
+## 2026-08-07 - tier-C: JumpMove MaxVelocity and speed passives
 
 Done (V3.1.0 b14 IL):
 - JumpMove: collision then gravity; state3 full Gravity else *0.025 + 0.91 damp.
@@ -5239,7 +5239,7 @@ Done (V3.1.0 b14 IL):
 - GetPassiveEffectSpeedModifier: crouch/run table passives 133-135 with Constants bases.
 - ccEntityCollision: start/results; motionMultiplier when slowed.
 ---
-## 2026-08-07 — tier-C: SetMovementState and MoveEntityHeaded
+## 2026-08-07 - tier-C: SetMovementState and MoveEntityHeaded
 
 Done (V3.1.0 b14 IL):
 - getNextStepSoundDistance: 1.5 m.
@@ -5248,7 +5248,7 @@ Done (V3.1.0 b14 IL):
 - MoveEntityHeaded: JumpMove/root motion/DefaultMoveEntity.
 - DefaultMoveEntity: 0.91/0.546 friction; gravity*0.025; jump factor 0.163.
 ---
-## 2026-08-07 — tier-C: OnUpdatePosition step/speed and fall stub
+## 2026-08-07 - tier-C: OnUpdatePosition step/speed and fall stub
 
 Done (V3.1.0 b14 IL):
 - ExecuteFallBehavior: always false (stub).
@@ -5256,7 +5256,7 @@ Done (V3.1.0 b14 IL):
 - updateSpeedForwardAndStrafe: *0.5 decay; yaw-relative accumulate; SetMovementState.
 - updateStepSound: distance/yaw budgets; internalPlayStepSound.
 ---
-## 2026-08-07 — tier-C: ChooseFallBehavior and FallHitGround destroy
+## 2026-08-07 - tier-C: ChooseFallBehavior and FallHitGround destroy
 
 Done (V3.1.0 b14 IL):
 - ChooseFallBehavior: height/difficulty filter; weighted pick; ExecuteFallBehavior.
@@ -5264,13 +5264,13 @@ Done (V3.1.0 b14 IL):
 - EAI FallHitGround: wake 0.8; destroy-area path 2.5 + UnreachablePercent; ally spread.
 - SetMoveForward / WithModifiers speed and root scale.
 ---
-## 2026-08-07 — tier-C: UpdateJump states and fallHitGround
+## 2026-08-07 - tier-C: UpdateJump states and fallHitGround
 
 Done (V3.1.0 b14 IL):
 - UpdateJump: fly cancel; states 2 windup / 3 air / 4 land / 5-6 swim; jumpTicks 200/100.
 - fallHitGround: distance>2 damage (-vy-0.85)*160; fall DamageSource; land anim; EAI FallHitGround.
 ---
-## 2026-08-07 — tier-C: StartJumpMotion and DurationInSeconds
+## 2026-08-07 - tier-C: StartJumpMotion and DurationInSeconds
 
 Done (V3.1.0 b14 IL):
 - StartJump: jumpState 2 land / 5 swim; default distance 1; disable fall until ground.
@@ -5278,7 +5278,7 @@ Done (V3.1.0 b14 IL):
 - get_Jumping: passive 132 gate; EndJump land anim mode 1.
 - DurationInSeconds: durationTicks/20.
 ---
-## 2026-08-07 — tier-C: DigStop CalcMoveDist and BuffClass.Tick
+## 2026-08-07 - tier-C: DigStop CalcMoveDist and BuffClass.Tick
 
 Done (V3.1.0 b14 IL):
 - DigStop: EndTrigger; ClearTempMove.
@@ -5286,7 +5286,7 @@ Done (V3.1.0 b14 IL):
 - set_Jumping: StartJump/EndJump + movement tags; flags dirty.
 - BuffClass.Tick: DurationTick; Finished when past DurationMax.
 ---
-## 2026-08-07 — tier-C: DigStart DigUpdate and StartJump
+## 2026-08-07 - tier-C: DigStart DigUpdate and StartJump
 
 Done (V3.1.0 b14 IL):
 - DigStart: digActionTicks 18; DigStartTrigger; CanBreakBlocks gate.
@@ -5295,7 +5295,7 @@ Done (V3.1.0 b14 IL):
 - ClearBlocked / ResetStuckCheck field clears.
 - Census pin narrated 1483 / catalogued 826.
 ---
-## 2026-08-07 — tier-C: Wandering TickNextTime and MoveHelper gates
+## 2026-08-07 - tier-C: Wandering TickNextTime and MoveHelper gates
 
 Done (V3.1.0 b14 IL):
 - Wandering Tick: playtest skip; TickActiveSpawns; TickNextTime horde.
@@ -5303,14 +5303,14 @@ Done (V3.1.0 b14 IL):
 - ChooseNextTime: bandit 12k-24k+2k; horde 12k-24k.
 - UpdateMoveHelper: !IsActive/expiry/root-motion/dig/stun early structure.
 ---
-## 2026-08-07 — tier-C: ClearParties and CalcNextDay
+## 2026-08-07 - tier-C: ClearParties and CalcNextDay
 
 Done (V3.1.0 b14 IL):
 - ClearParties: nextParty 0; clear parties; null player.bloodMoonParty.
 - CalcNextDay: step = Frequency + Random(0..Range); walk last; optional seek keep.
 - SetDay: GameStateManager.SetBloodMoonDay + log.
 ---
-## 2026-08-07 — tier-C: Start/EndBloodMoon and KillPartyZombies
+## 2026-08-07 - tier-C: Start/EndBloodMoon and KillPartyZombies
 
 Done (V3.1.0 b14 IL):
 - IsBloodMoonTime: GameUtils with dusk/dawn/bmDay.
@@ -5318,7 +5318,7 @@ Done (V3.1.0 b14 IL):
 - EndBloodMoon: override day; CalcNextDay; ClearParties; clear observer/horde/BM flags.
 - KillPartyZombies: DecSpawnCount; Kill each; clear list; IsEmpty = no members.
 ---
-## 2026-08-07 — tier-C: BloodMoonComponent.Tick and party ctor
+## 2026-08-07 - tier-C: BloodMoonComponent.Tick and party ctor
 
 Done (V3.1.0 b14 IL):
 - Party ctor: BloodMoonHorde spawner; random spawnBaseDir; groupIndex -1.
@@ -5326,47 +5326,47 @@ Done (V3.1.0 b14 IL):
 - BloodMoonComponent.Tick: BM edge Start/End; stats 58/24; delay; party attach; round-robin Tick with delay=1/N.
 - AIDirector.Tick: ComponentsTick + DebugTick.
 ---
-## 2026-08-07 — tier-C: CreateNewParty and RemovePlayer pool
+## 2026-08-07 - tier-C: CreateNewParty and RemovePlayer pool
 
 Done (V3.1.0 b14 IL):
 - CreateNewParty: BloodMoonParty(player, component, BloodMoonEnemyCount).
 - RemovePlayer: management Reset+Free; BM players list + all parties PlayerLoggedOut.
 - AddMember/RemoveMember: members list + optional memberIDs hash.
 ---
-## 2026-08-07 — tier-C: AIDirector AddPlayer and BM party join
+## 2026-08-07 - tier-C: AIDirector AddPlayer and BM party join
 
 Done (V3.1.0 b14 IL):
 - AIDirector.Add/RemoveEntity: players only.
 - AddPlayer -> PlayerManagement tracked state + BloodMoonComponent players list.
 - AddPlayerToParty / TryAddPlayer: join within sqr 6400 (80 m) or CreateNewParty.
 ---
-## 2026-08-07 — tier-C: NetEntityDistribution SEnts and Remove
+## 2026-08-07 - tier-C: NetEntityDistribution SEnts and Remove
 
 Done (V3.1.0 b14 IL):
 - SEnts table: Player/Vehicle infinite; Enemy/NPC 80; Item 64; Falling 120; Supply 1200; Turret 60.
 - Add: type match -> entry; player updates all entries.
 - Remove: reason 1 unload vs destroy packages; AIDirector.AddEntity players only.
 ---
-## 2026-08-07 — tier-C: SpawnEntityInWorld and BuffValue ticks
+## 2026-08-07 - tier-C: SpawnEntityInWorld and BuffValue ticks
 
 Done (V3.1.0 b14 IL):
 - SpawnEntityInWorld: map/Entities/chunk; EntityAlives; vehicle/drone/turret track; audio/weather/light; net Add; player list; AIDirector.
 - BuffValue.DurationTick: updateRate gate; Tick -> BuffClass.Tick or Remove.
 ---
-## 2026-08-07 — tier-C: DamageEntity consecutive 30 and resist bank
+## 2026-08-07 - tier-C: DamageEntity consecutive 30 and resist bank
 
 Done (V3.1.0 b14 IL):
 - DamageEntity: type 26 limb cleanup; consecutive ignore 30 ticks non-Internal; FF; entityFlags&2 block; god.
 - Passive 161 attacking-item bonus mult; passive 40 resist fraction into accumulatedDamageResisted.
 ---
-## 2026-08-07 — tier-C: pathFollow radii and ImprovePath
+## 2026-08-07 - tier-C: pathFollow radii and ImprovePath
 
 Done (V3.1.0 b14 IL):
 - pathFollow: arrive max(0.15/0.33/0.49, radius*0.6); swim 0.9/0.7; elevator dy 0.2; advance sq 0.04.
 - ImprovePath: ProjectToGround all; first-step snap if dy < 0.6.
 - IsPathUsageBlocked default false; hasHome max>=0; detachHome -1.
 ---
-## 2026-08-07 — tier-C: CheckPath and moveSpeed passives
+## 2026-08-07 - tier-C: CheckPath and moveSpeed passives
 
 Done (V3.1.0 b14 IL):
 - EAIManager.CheckPath: reject if any executing task IsPathUsageBlocked.
@@ -5375,14 +5375,14 @@ Done (V3.1.0 b14 IL):
 - GetMoveSpeedAggro: night/BM 134 aggroMax else 133 aggro; Panic always 134.
 - ASP SetPath ImprovePath; UpdateNavigation pathFollow + SetMoveTo path.
 ---
-## 2026-08-07 — tier-C: EAILeap SetMoveTo and RandomPositionGenerator
+## 2026-08-07 - tier-C: EAILeap SetMoveTo and RandomPositionGenerator
 
 Done (V3.1.0 b14 IL):
 - EAILeap.CanExecute: limb/blocked/path; leapDist 2.8..jumpMax; y band; clear ray.
 - SetMoveTo: aggro speed; expiry 10 (pos) / 40 (path); Stop clears path.
 - CalcInDir/Around swim retry; CalcAway 80 deg; CalcAround 30 air/home tries.
 ---
-## 2026-08-07 — tier-C: DestroyArea ApproachSpot and Dodge
+## 2026-08-07 - tier-C: DestroyArea ApproachSpot and Dodge
 
 Done (V3.1.0 b14 IL):
 - DestroyArea.CanExecute: CanBreakBlocks; unreachable/pathCostScale long-path gates; sample focus.
@@ -5390,35 +5390,35 @@ Done (V3.1.0 b14 IL):
 - Dodge: tag bounds + IsAnimationToDodge; look head first half.
 - isWithinHomeDistance: max<0 always; else home distSq.
 ---
-## 2026-08-07 — tier-C: BreakBlock AttackBlock and FindEnemy
+## 2026-08-07 - tier-C: BreakBlock AttackBlock and FindEnemy
 
 Done (V3.1.0 b14 IL):
 - AttackBlock: zombie ally +0.2 in 1.7x1.5x1.7; delay (0.25+r*0.8[+0.5 unreachable]+0.75)*20; hitDelegate.
 - FindEnemy: type bounds by see distance; CanSee/stealth nearest.
 - RunAway.Update: path end 1.21; pathTicks 60 FindPath.
 ---
-## 2026-08-07 — tier-C: EAITarget.check Wander and Ranged CanExecute
+## 2026-08-07 - tier-C: EAITarget.check Wander and Ranged CanExecute
 
 Done (V3.1.0 b14 IL):
 - EAITarget.check: home distance; optional CanSee; player CanSeeStealth.
 - EAIWander.CanExecute: lookTime/stun/fade+120 ticks; executePercent; CalcInDir 90.
 - EAIRangedAttackTarget: cooldown; IsAttackValid; limbs; InRange+CanSee; Update anim states UseHoldingItem.
 ---
-## 2026-08-07 — tier-C: EAISetAsTargetIfHurt and Approach CanExecute
+## 2026-08-07 - tier-C: EAISetAsTargetIfHurt and Approach CanExecute
 
 Done (V3.1.0 b14 IL):
 - EAIApproachAndAttackTarget.CanExecute: sleep/stun/jump; targetClasses assignable + chaseTimeMax.
 - EAISetAsTargetIfHurt: revenge type filters; 66% keep attack; else SearchRadius*0.35 investigate + clear revenge.
 - CalcInvestigateTicks: ticks / passive 183 (self Tags).
 ---
-## 2026-08-07 — tier-C: EntityActivityUpdate top-N and cloth radii
+## 2026-08-07 - tier-C: EntityActivityUpdate top-N and cloth radii
 
 Done (V3.1.0 b14 IL):
 - EntityActivityUpdate: clear aiClosest; assign closest player; sort; N=FastClamp(60/P,4,20).
 - Scale bands 1.0 / 0.3 / 0.1 at 64/225; jiggle under 36.
 - Cloth: 625 (25 m) / 3025 (55 m) when AimingGun; skip attached others.
 ---
-## 2026-08-07 — tier-C: EntityDied ClearedUpdate and AddScore weights
+## 2026-08-07 - tier-C: EntityDied ClearedUpdate and AddScore weights
 
 Done (V3.1.0 b14 IL):
 - NotifySleeperVolumesEntityDied: lock + EntityDied all volumes.
@@ -5427,7 +5427,7 @@ Done (V3.1.0 b14 IL):
 - GetMaxAttackTime: 10 ticks.
 - AddScore: GameStats 28/29/30 weights; achievements 6/7/10/14; HandleClientDeath nop.
 ---
-## 2026-08-07 — tier-C: ClientKill OnDeathUpdate FireEvent
+## 2026-08-07 - tier-C: ClientKill OnDeathUpdate FireEvent
 
 Done (V3.1.0 b14 IL):
 - NotifySleeperDeath: server sleeper -> NotifySleeperVolumesEntityDied.
@@ -5436,7 +5436,7 @@ Done (V3.1.0 b14 IL):
 - FireEvent: class Effects, Progression, challenges, inv, equip, Buffs.
 - SetCVar: Buffs.SetCustomVar netSync true.
 ---
-## 2026-08-07 — tier-C: SetRevengeTarget and AwardKill magnum
+## 2026-08-07 - tier-C: SetRevengeTarget and AwardKill magnum
 
 Done (V3.1.0 b14 IL):
 - SetRevengeTarget: revengeTimer 500 when non-null.
@@ -5445,27 +5445,27 @@ Done (V3.1.0 b14 IL):
 - Kill: NotifySleeperDeath; death sound; ClientKill.
 - AwardKill: type 1/2 counters; magnum44 score flag 2; AddScoreServer.
 ---
-## 2026-08-07 — tier-C: UseHoldingItem and path FindPath enqueue
+## 2026-08-07 - tier-C: UseHoldingItem and path FindPath enqueue
 
 Done (V3.1.0 b14 IL):
 - UseHoldingItem: attack-anim gate; IsAttackValid; attack sound on release; attackingTime=60; ExecuteAction.
 - AStar FindPath: Monitor lock + wait handle pulse; ASP FindPath: no lock overwrite.
 ---
-## 2026-08-07 — tier-C: CanSee ray and Attack target-now
+## 2026-08-07 - tier-C: CanSee ray and Attack target-now
 
 Done (V3.1.0 b14 IL):
 - CanSee(Vector3): view cone + 0.2 origin pull; Voxel.Raycast clear LOS.
 - CanSeeStealth: light threshold FastLerp by dist/sightRange.
 - Attack: UseHoldingItem(0); timeout day/night; GetTargetIfAttackedNow range+0.3 and E_BP_/E_Vehicle.
 ---
-## 2026-08-07 — tier-C: CheckDespawn source bands and IsAttackValid
+## 2026-08-07 - tier-C: CheckDespawn source bands and IsAttackValid
 
 Done (V3.1.0 b14 IL):
 - CheckDespawn: remote/chunk-observer unload; 20-tick cadence; source 1/2/3 early and switch bands (48/80/96/128 m; 60/80/100/1800 ticks).
 - IsAttackValid: electrocute/stun 1-2; attack prevented; painResist>=1 free; hasBeenAttackedTime gate; hit anim.
 - GetAttackTargetLocal remote uses attackTargetClient.
 ---
-## 2026-08-07 — tier-C: isBestTask MutexBits and OnUpdateEntity path
+## 2026-08-07 - tier-C: isBestTask MutexBits and OnUpdateEntity path
 
 Done (V3.1.0 b14 IL):
 - areTasksCompatible: MutexBits AND == 0.
@@ -5473,7 +5473,7 @@ Done (V3.1.0 b14 IL):
 - OnUpdateEntity: Buffs.Tick then OnUpdateLive then inventory; radiation damage residual.
 - get_maxAlive: spawnGroup.maxAlive.
 ---
-## 2026-08-07 — tier-C: GetAliveCount and BloodMoonParty.Tick
+## 2026-08-07 - tier-C: GetAliveCount and BloodMoonParty.Tick
 
 Done (V3.1.0 b14 IL):
 - GetAliveCount: sum(groupCounts)-numSpawned+respawnMap.Count.
@@ -5481,28 +5481,28 @@ Done (V3.1.0 b14 IL):
 - SetScaling: FastLerp(1,2.5,(s-1)/3).
 - BloodMoonParty.Tick: updateDelay 1.8 SeekTarget; CanSpawn 1.9; +120 baseDir; min(3,members) spawn tries.
 ---
-## 2026-08-07 — tier-C: MinScript.Tick opcodes and CalcBestDir bins
+## 2026-08-07 - tier-C: MinScript.Tick opcodes and CalcBestDir bins
 
 Done (V3.1.0 b14 IL):
 - MinScript.Tick: sleep 0.05 steps; cmds 1 log, 2 nop, 3 loop, 4 sleep, 40 sound, 50 AddSpawnCount, 51 wait alive, 52 trigger.
 - CalcBestDir: 16x22.5 deg; 9 samples; score (s+2)/3; *3 if within 60 of spawnBaseDir; random among max.
 - InitParty IL=49 confirmed scaling path.
 ---
-## 2026-08-07 — tier-C: IsPlayerATarget and MinScript.Run
+## 2026-08-07 - tier-C: IsPlayerATarget and MinScript.Run
 
 Done (V3.1.0 b14 IL):
 - IsPlayerATarget: dead/spawned/id; IgnoreAI; Level<=1 or IsBloodMoonDead reject.
 - FindPartyTarget: reverse partyMembers nearest sqr among targets.
 - MinScript.Run: store player/countScale; curIndex=0 sleep=0; IsRunning curIndex>=0.
 ---
-## 2026-08-07 — tier-C: SeekTarget 1200 and SleeperVolume.Reset
+## 2026-08-07 - tier-C: SeekTarget 1200 and SleeperVolume.Reset
 
 Done (V3.1.0 b14 IL):
 - SeekTarget: 150 m teleport/kill branch; 100 m SetAttackTarget 1200; else investigate 1200; lootDropProb=0 on cull.
 - SleeperVolume.Reset: full field clear table + CancelPendingSpawns + minScript.Reset.
 - Census pin narrated 1480 / catalogued 829 / unaccounted 0.
 ---
-## 2026-08-07 — tier-C: UpdatePlayerTouched mult and SpawnZombie vulture
+## 2026-08-07 - tier-C: UpdatePlayerTouched mult and SpawnZombie vulture
 
 Done (V3.1.0 b14 IL):
 - UpdatePlayerTouched: early return gates; quest SpawnMultiplier * difficultyTierScale; banditTag 0.2; default counts 5..6; minScript.Run.
@@ -5510,7 +5510,7 @@ Done (V3.1.0 b14 IL):
 - Static padding chunk/trigger/unpadding; difficultyTierScale len 7.
 - SpawnZombie IL=181: mounted 50% animalZombieVultureRadiated skips bonus loot; Astar 40.
 ---
-## 2026-08-07 — tier-C: SleeperVolume.Spawn async and SetSleeper helpers
+## 2026-08-07 - tier-C: SleeperVolume.Spawn async and SetSleeper helpers
 
 Done (V3.1.0 b14 IL):
 - Spawn: pos +0.502/0.501; zombieArlene fallback; ExcludesWalkType fail; async create + pending maps; TickSpawnCount++.
@@ -5518,7 +5518,7 @@ Done (V3.1.0 b14 IL):
 - Despawn only sleeping respawnMap entities; DespawnAndReset = Despawn+Reset.
 - SetSleeper pathCostScale+0.2; SetSleeperSight defaults; SetSleeperHearing 1/percent scale.
 ---
-## 2026-08-07 — tier-C: CanSleeperSpawn floor/solid and CalcGameStageAround
+## 2026-08-07 - tier-C: CanSleeperSpawn floor/solid and CalcGameStageAround
 
 Done (V3.1.0 b14 IL):
 - Chunk.CanSleeperSpawnAtPos: below must collide; cell not collide/solid.
@@ -5526,7 +5526,7 @@ Done (V3.1.0 b14 IL):
 - AddSpawnCount: RandomRange min..max fractional ceil; min>0 forces at least 1.
 - RemoveSpawnAvailable: linear remove by index value.
 ---
-## 2026-08-07 — tier-C: FindFathestSpawn and ResetSpawnsAvailable
+## 2026-08-07 - tier-C: FindFathestSpawn and ResetSpawnsAvailable
 
 Done (V3.1.0 b14 IL):
 - FindFathestSpawnFromPlayers: max of min-player-dist among CanSleeperSpawnAtPos points.
@@ -5534,14 +5534,14 @@ Done (V3.1.0 b14 IL):
 - CanSleeperSpawnAtPos: chunk local CanSleeperSpawnAtPos.
 - GetGameStageAround: CalcGameStageAround.
 ---
-## 2026-08-07 — tier-C: SpawnPointIsHidden rays and stealth setters
+## 2026-08-07 - tier-C: SpawnPointIsHidden rays and stealth setters
 
 Done (V3.1.0 b14 IL):
 - SpawnPointIsHidden: center+0.5; pose5 offsets; per-player head rays layer 71; any clear LOS fails hidden.
 - SetSmellRadiusTarget: radius/eating/sheltered; radius<0 clears.
 - SetClientLevels + SetBarColor green/alert UI.
 ---
-## 2026-08-07 — tier-C: SmellCountItems radius and EntityStealth bits
+## 2026-08-07 - tier-C: SmellCountItems radius and EntityStealth bits
 
 Done (V3.1.0 b14 IL):
 - SmellCountItems: drag+inventory+bag ItemClass.Smell*count, min 50.
@@ -5549,14 +5549,14 @@ Done (V3.1.0 b14 IL):
 - SetSmellEat: eatRadius+dist cap 100, ticks 1800.
 - NetPackageEntityStealth: server smell-target vs crouch; client SetClientLevels.
 ---
-## 2026-08-07 — tier-C: SmellUpdateItemsAndBlood wet and shelter
+## 2026-08-07 - tier-C: SmellUpdateItemsAndBlood wet and shelter
 
 Done (V3.1.0 b14 IL):
 - SmellTickWet: _wetnessrate cvar accumulates smellWet when >= 0.01.
 - SmellClear: zero radius/eat/wet/sheltered fields.
 - SmellUpdateItemsAndBlood: wet>=3 or dead clears; dysenterySmell -> SetSmellEat(35); items radius; shelter *0.2.
 ---
-## 2026-08-07 — tier-C: CheckSleeperVolumeNoise and Attract/Smell ticks
+## 2026-08-07 - tier-C: CheckSleeperVolumeNoise and Attract/Smell ticks
 
 Done (V3.1.0 b14 IL):
 - CheckSleeperVolumeNoise: GameStats 24; y+0.1; per-volume CheckNoise.
@@ -5565,7 +5565,7 @@ Done (V3.1.0 b14 IL):
 - SmellTickServer outline: radius ease, cvar smell, emit flags 6 every 40 ticks.
 - FindNoise: noisySounds TryGetValue.
 ---
-## 2026-08-07 — tier-C: NotifyNoise heat map and AddNoise sort
+## 2026-08-07 - tier-C: NotifyNoise heat map and AddNoise sort
 
 Done (V3.1.0 b14 IL):
 - AddNoise: insert sorted descending by volume.
@@ -5573,7 +5573,7 @@ Done (V3.1.0 b14 IL):
 - AIDirector.NotifyNoise: ignore enemies/decoys; crouch muffling; CheckSleeperVolumeNoise; heat NotifyActivity type 3 duration 240.
 - OnSoundPlayedAtPosition -> NotifyNoise.
 ---
-## 2026-08-07 — tier-C: CalcVolume noise formula and stealth light
+## 2026-08-07 - tier-C: CalcVolume noise formula and stealth light
 
 Done (V3.1.0 b14 IL):
 - CalcVolume: 0.6 successive decay, (sum*2.35)^0.86 * 1.5 * passive 88.
@@ -5582,7 +5582,7 @@ Done (V3.1.0 b14 IL):
 - BlockTrigger.OnTriggered: flag + Block.OnTriggered + clear values.
 - SleeperVolume.OnTriggered: already D8.2b (triggerState + UpdatePlayerTouched).
 ---
-## 2026-08-07 — tier-C: PlayerStealth.TickServer and PrefabTriggerData
+## 2026-08-07 - tier-C: PlayerStealth.TickServer and PrefabTriggerData
 
 Done (V3.1.0 b14 IL):
 - SleeperWokeUp: zero all targetTasks executeTime.
@@ -5590,7 +5590,7 @@ Done (V3.1.0 b14 IL):
 - TickServer: speedAverage, light crouch 0.6, cvars _lightlevel/_noiselevel, passive 89, lightLevel 0..200.
 - PrefabTriggerData.Trigger: BlockTrigger.OnTriggered + SleeperVolume.OnTriggered by index.
 ---
-## 2026-08-07 — tier-C: sleeper wake net and crouch detect
+## 2026-08-07 - tier-C: sleeper wake net and crouch detect
 
 Done (V3.1.0 b14 IL):
 - ConditionalTriggerSleeperWakeUp: clear sleep/passive; pose -1/-2; SleeperWokeUp; NetPackageSleeperWakeup 192.
@@ -5598,7 +5598,7 @@ Done (V3.1.0 b14 IL):
 - CanSleeperAttackDetect: crouch Lerp(3,15,lightAttackPercent) distance gate.
 - TriggerManager.TriggerBlocks: PrefabTriggerData for BlockTrigger/TriggerVolume.
 ---
-## 2026-08-07 — tier-C: TouchGroup/Touch wake and GetClosestPlayerSeen
+## 2026-08-07 - tier-C: TouchGroup/Touch wake and GetClosestPlayerSeen
 
 Done (V3.1.0 b14 IL):
 - TouchGroup: same groupId fan-out Touch; solo Touch.
@@ -5608,7 +5608,7 @@ Done (V3.1.0 b14 IL):
 - TriggerVolume.Touch: isTriggered + TriggerBlocks.
 - GetClosestPlayerSeen: lightLevel >= lightMin and CanSee.
 ---
-## 2026-08-07 — tier-C: CalcSenseScale FeralSense and volume CheckTouching
+## 2026-08-07 - tier-C: CalcSenseScale FeralSense and volume CheckTouching
 
 Done (V3.1.0 b14 IL):
 - CalcSenseScale: FeralSense 1=day, 2=dark, 3=always -> 1 else 0.
@@ -5616,7 +5616,7 @@ Done (V3.1.0 b14 IL):
 - TriggerVolume.CheckTouching: y+0.8 strict AABB then Touch.
 - GetClosestPlayer: distMax<0 => inf; dead match + Spawned; min distSq.
 ---
-## 2026-08-07 — tier-C: GetSeeDistance senseScale and DetectUsScale
+## 2026-08-07 - tier-C: GetSeeDistance senseScale and DetectUsScale
 
 Done (V3.1.0 b14 IL):
 - GetSeeDistance: sleeperSightRange vs sightRangeBase * (1 + CalcSenseScale*feralSense).
@@ -5625,7 +5625,7 @@ Done (V3.1.0 b14 IL):
 - CheckSleeperVolumeTouching: GameStats 24 gate; chunk sleeper list + lock.
 - CheckTriggerVolumeTrigger: chunk trigger list + lock (no EnemySpawnMode gate).
 ---
-## 2026-08-07 — tier-C: FriendlyFireCheck PvP modes and CanEntityBeSeen
+## 2026-08-07 - tier-C: FriendlyFireCheck PvP modes and CanEntityBeSeen
 
 Done (V3.1.0 b14 IL):
 - EntityPlayer.FriendlyFireCheck: GameStats 23 modes 0/1/2 ally/stranger gates.
@@ -5633,26 +5633,26 @@ Done (V3.1.0 b14 IL):
 - CheckSleeperTriggers: sleeper + trigger volumes on server alive players.
 - EntityAlive.HasImmunity always false.
 ---
-## 2026-08-07 — tier-C: HasImmunity passive 197 and CanSee caches
+## 2026-08-07 - tier-C: HasImmunity passive 197 and CanSee caches
 
 Done (V3.1.0 b14 IL):
 - HasImmunity: dead+RemoveOnDeath; parent HasImmunity; passive 197 roll; infection InfectionChance.
 - CanSee: positive/negative HashSet caches; CanEntityBeSeen; client-controlled updates lastTimeSeenAPlayer.
 - Base FriendlyFireCheck always true (IL=2).
 ---
-## 2026-08-07 — tier-C: AddBuff BuffStatus gates and ResetDespawnTime
+## 2026-08-07 - tier-C: AddBuff BuffStatus gates and ResetDespawnTime
 
 Done (V3.1.0 b14 IL):
 - AddBuff IL=238: status 0 success, 1 unknown, 2 immune, 3 FF, 4 editor, 5 gamestat; stack event 4.
 - Despawn/ForceDespawn; ResetDespawnTime clears ticksNoPlayerAdjacent + seeCache seen time.
 ---
-## 2026-08-07 — tier-C: CheckDespawn distance/timer bands
+## 2026-08-07 - tier-C: CheckDespawn distance/timer bands
 
 Done (V3.1.0 b14 IL):
 - CheckDespawn every 20 ticks: 130/20 m far-flag; bands 48/80/96/128 m with 60/80/100/1800 tick timers.
 - EntityEnemy.canDespawn: horde zombies stay while players online.
 ---
-## 2026-08-07 — tier-C: CalcSpawnPos and unloadEntity pipeline
+## 2026-08-07 - tier-C: CalcSpawnPos and unloadEntity pipeline
 
 Done (V3.1.0 b14 IL):
 - CalcSpawnPos: radius yaw ±45°; GetMobRandomSpawnPosWithWater 0/10/30.
@@ -5660,7 +5660,7 @@ Done (V3.1.0 b14 IL):
 - unloadEntity: delegates, OnEntityUnload, dict/map/chunk, vehicle/drone/turret, NED/path/AIDirector.
 - RemoveBuff: mark Remove + optional RemoveBuffNetwork.
 ---
-## 2026-08-07 — tier-C: SeekTarget kill gates and OnEntityUnload
+## 2026-08-07 - tier-C: SeekTarget kill gates and OnEntityUnload
 
 Done (V3.1.0 b14 IL):
 - SeekTarget: 60 m no-player kill; 150 m / 70 m repath; 50% DecSpawnCount kill.
@@ -5668,99 +5668,99 @@ Done (V3.1.0 b14 IL):
 - RemoveEntity MarkToUnload+unloadEntity; EntityRemove Process always RemoveEntity.
 - BuffClass.canRun Requirements.IsValid.
 ---
-## 2026-08-07 — tier-C: BuffClass.FireEvent canRun and StartSequence
+## 2026-08-07 - tier-C: BuffClass.FireEvent canRun and StartSequence
 
 Done (V3.1.0 b14 IL):
 - BuffClass.FireEvent: Effects null / canRun gate then MinEffectController.FireEvent.
 - StartSequence: StartTime = Time.time only.
 ---
-## 2026-08-07 — tier-C: EntityBuffs.Tick MinEvent order
+## 2026-08-07 - tier-C: EntityBuffs.Tick MinEvent order
 
 Done (V3.1.0 b14 IL):
 - Tick: Invalid drop; Finished->event 2; Remove->event 3; Start event 0; Tick; Update event 1.
 - FireEvent skips paused; CanExecute Requirements.IsValid or true.
 ---
-## 2026-08-07 — tier-C: interest enter package order
+## 2026-08-07 - tier-C: interest enter package order
 
 Done (V3.1.0 b14 IL):
 - updatePlayerEntity enter: Spawn, AliveFlags, PlayerStats/Twitch/Equipment, Speeds, optional Velocity.
 - Census pins: narrated 1479 / catalogued 830 / unaccounted 0.
 ---
-## 2026-08-07 — tier-C: explode ExplodeGroup delay and FrameUpdate
+## 2026-08-07 - tier-C: explode ExplodeGroup delay and FrameUpdate
 
 Done (V3.1.0 b14 IL):
 - explode: ExplodeGroup delay=3; IsExplosionAffected fallings; heat map OnSoundPlayedAtPosition.
 - ExplodeGroupFrameUpdate: budget max(1,min(n,20*0.73^n)); DropItems 0.5; fallingBlock velocity.
 ---
-## 2026-08-07 — tier-C: AttackEntites body mult and DamageRecord
+## 2026-08-07 - tier-C: AttackEntites body mult and DamageRecord
 
 Done (V3.1.0 b14 IL):
 - AttackEntites: passives 20/21/22; Legs/Head/ChestExplosionDamageMultiplier; DamageRecord sum.
 - Apply: DismemberChance 0.5; damage vs 0.1 maxHealth; center sqr 0.67; stun bands 0.6/0.85.
 ---
-## 2026-08-07 — tier-C: LootDropPick weighted and OnBlockStartsToFall
+## 2026-08-07 - tier-C: LootDropPick weighted and OnBlockStartsToFall
 
 Done (V3.1.0 b14 IL):
 - LootDropPick: <2 entries -> [0]; else cumulative weight RandomFloat pick entityClass.
 - OnBlockStartsToFall base: SetBlockRPC Air; tree/composite overrides.
 ---
-## 2026-08-07 — tier-C: DropBagServer lootDrops vs bag
+## 2026-08-07 - tier-C: DropBagServer lootDrops vs bag
 
 Done (V3.1.0 b14 IL):
 - DropBagServer: server-only; y+0.9; class lootDrops pick OR DroppedLootContainer from bag.
 - quests BlockDestroyed changelog pin; dropItemOnDeath passive 80 already committed.
 ---
-## 2026-08-07 — tier-C: dropItemOnDeath passive 80 and BlockDestroyed
+## 2026-08-07 - tier-C: dropItemOnDeath passive 80 and BlockDestroyed
 
 Done (V3.1.0 b14 IL):
 - dropItemOnDeath: passive 80 scales lootDropProb from killer hold; * LootBagChance; DropBagServer roll.
 - BlockDestroyed: BlockDestroy event; HandleTrigger via closest player within 500 m.
 ---
-## 2026-08-07 — tier-C: GetCountMultiplier enum and BM weather defer
+## 2026-08-07 - tier-C: GetCountMultiplier enum and BM weather defer
 
 Done (V3.1.0 b14 IL):
 - GetCountMultiplierFromSandbox: types 1..11 map to count modifiers; else -1.
 - CalcGlobalWeatherType: bloodMoon + push stormWorldTime by 5000 when near.
 ---
-## 2026-08-07 — tier-C: RandomCountFromSandboxTags category table
+## 2026-08-07 - tier-C: RandomCountFromSandboxTags category table
 
 Done (V3.1.0 b14 IL):
 - RandomCountFromSandboxTags: food/drink/ammo/medical/junk/armor/melee/ranged/dukes/mag/books modifiers.
 - RandomCountFromSandbox: abundanceType mult then RandomSpawnCount.
 ---
-## 2026-08-07 — tier-C: GetSandboxProb and RandomSpawnCount
+## 2026-08-07 - tier-C: GetSandboxProb and RandomSpawnCount
 
 Done (V3.1.0 b14 IL):
 - GetSandboxProb: treasureTags -> TreasureMapChance else 1.
 - RandomSpawnCount: RandomRange(min-0.49,max+0.49)*abundance with frac ceil.
 ---
-## 2026-08-07 — tier-C: getProbability and SpawnLootItemsFromList
+## 2026-08-07 - tier-C: getProbability and SpawnLootItemsFromList
 
 Done (V3.1.0 b14 IL):
 - getProbability: requirements, lootProbTemplate stage bands, passive 79, GetSandboxProb.
 - SpawnLootItemsFromList: numToSpawn -1 all, weighted unique pick, sandbox counts.
 - MemberCountInRange: other members Distance < GameStats 54.
 ---
-## 2026-08-07 — tier-C: party highest loot stage wrappers
+## 2026-08-07 - tier-C: party highest loot stage wrappers
 
 Done (V3.1.0 b14 IL):
 - GetHighestPartyLootStage -> Party.GetHighestLootStage max over members.
 - GetHighestLootStage: max GetLootStage(containerMod, containerBonus).
 ---
-## 2026-08-07 — tier-C: GetLootStage POI/biome formula
+## 2026-08-07 - tier-C: GetLootStage POI/biome formula
 
 Done (V3.1.0 b14 IL):
 - GetLootStage: POITierMod/Bonus, biome LootStageMod/Bonus/Min/Max, passives 159/160, GameStats 66 clamp, GlobalLootStageModifier.
 - SharedPartyKill: server SharedKillServer scale 1; client SharedKillClient.
 - EntityAddExpServer: AddLevelExp only when isEntityRemote with _xpOther type 8.
 ---
-## 2026-08-07 — tier-C: get_gameStage formula and GameStage statics
+## 2026-08-07 - tier-C: get_gameStage formula and GameStage statics
 
 Done (V3.1.0 b14 IL):
 - EntityPlayer.get_gameStage: daysLived clamp to Level, biome/quest mods, passive 157, GlobalGameStageModifier.
 - GameStageDefinition.cctor: DifficultyBonus=1, StartingWeight=1, DiminishingReturns=0.5, DaysAliveChangeWhenKilled=2.
 ---
-## 2026-08-07 — tier-C: CalcPartyLevel diminishing returns and setState
+## 2026-08-07 - tier-C: CalcPartyLevel diminishing returns and setState
 
 Done (V3.1.0 b14 IL):
 - CalcPartyLevel: sort, weighted sum high-to-low with StartingWeight/DiminishingReturns.
@@ -5768,7 +5768,7 @@ Done (V3.1.0 b14 IL):
 - checkTeleportPos 32 m success log; setState lastState + owned clear + heal clear.
 - CanSpawn named EnemyCount / MaxSpawnedZombies.
 ---
-## 2026-08-07 — tier-C: CanSpawn cap, SetPartyLevel scaling, teleportState
+## 2026-08-07 - tier-C: CanSpawn cap, SetPartyLevel scaling, teleportState
 
 Done (V3.1.0 b14 IL):
 - CanSpawn: GameStats 12 < GamePrefs 99 * priority.
@@ -5777,7 +5777,7 @@ Done (V3.1.0 b14 IL):
 - teleportState: Teleport state, closest free group slot, Idle.
 - targetCanBeHealed / isTargetBleeding; empty exitAttack/onHealDone.
 ---
-## 2026-08-07 — tier-C: SetupGroup and heal type priority
+## 2026-08-07 - tier-C: SetupGroup and heal type priority
 
 Done (V3.1.0 b14 IL):
 - SetupGroup: interval, nextStageTime=worldTime+duration*1000, difficulty-scaled numToSpawn.
@@ -5785,7 +5785,7 @@ Done (V3.1.0 b14 IL):
 - findNeededHealType: types 2/3/4 priority for medical vs bleeding.
 - TeleportOutOfRange: exit attack/heal then teleportState.
 ---
-## 2026-08-07 — tier-C: drone weapon Fire paths and PartySpawner Tick
+## 2026-08-07 - tier-C: drone weapon Fire paths and PartySpawner Tick
 
 Done (V3.1.0 b14 IL):
 - MachineGunWeapon: passives 16/11/199/200/9/7, raycast Hit, ammo, UseTimes.
@@ -5793,14 +5793,14 @@ Done (V3.1.0 b14 IL):
 - HealBeam: inventory UseOther action1 + buffJunkDroneHealCooldownEffect.
 - AIDirectorGameStagePartySpawner Tick/canSpawn/IncSpawnCount; isValidDronePos NaN.
 ---
-## 2026-08-07 — tier-C: AIHordeSpawner.Tick and Weapon cooldown
+## 2026-08-07 - tier-C: AIHordeSpawner.Tick and Weapon cooldown
 
 Done (V3.1.0 b14 IL):
 - AIHordeSpawner.Tick IL=228: party init, day 45/55/45 night 55/70/55, one spawn/tick, investigate 2400.
 - Weapon.Fire stores target + RefreshCooldown (actionTime+cooldown).
 - VehicleDataSync Process: ReadSyncData; server GetSyncFlagsReplicated + SendPackage 192.
 ---
-## 2026-08-07 — tier-C: scout Update finish, Horde.Tick, drone CanAttack
+## 2026-08-07 - tier-C: scout Update finish, Horde.Tick, drone CanAttack
 
 Done (V3.1.0 b14 IL):
 - AIScoutHordeSpawner.Update finish: no players or SpawnUpdate done + empty horde.
@@ -5809,7 +5809,7 @@ Done (V3.1.0 b14 IL):
 - CanAttack bans Heal/Attack/Shutdown; Weapon.canFire = cooldown<=0.
 - updateTransitionState heal server path and cooldown refresh.
 ---
-## 2026-08-07 — tier-C: TickActiveSpawns drain and heal medical gate
+## 2026-08-07 - tier-C: TickActiveSpawns drain and heal medical gate
 
 Done (V3.1.0 b14 IL):
 - TickActiveSpawns reverse scout/horde lists; HasAnySpawns = horde only.
@@ -5817,119 +5817,119 @@ Done (V3.1.0 b14 IL):
 - HealBeamWeapon need: max-HealDamageThreshold or <0.67 ModifiedMax; medicalRegHealthAmount==0.
 - IsAttackValid: activeWeapon.canFire.
 ---
-## 2026-08-07 — tier-C: drone group slots and follow repath
+## 2026-08-07 - tier-C: drone group slots and follow repath
 
 Done (V3.1.0 b14 IL):
 - GetGroupPositions: 5 horizontal slots from chest/look; ScanVolume fallback.
 - DoMoveIntoFollowPos: GetPath when empty; repath seekDist+1 / +1.414; success dist.
 - TickPlayerState: Dead mirror only from Player.IsDead.
 ---
-## 2026-08-07 — tier-C: investigate pos and neighbor cooldown delays
+## 2026-08-07 - tier-C: investigate pos and neighbor cooldown delays
 
 Done (V3.1.0 b14 IL):
 - Set/ClearInvestigatePosition; alert ticks (20-35)*20, zombie half.
 - StartNeighborCooldown 180/720 s; SetLongDelay 1320 s; drone underwater surface seek.
 ---
-## 2026-08-07 — tier-C: trackTarget ranges, canHitEntity, FindScoutStartPos
+## 2026-08-07 - tier-C: trackTarget ranges, canHitEntity, FindScoutStartPos
 
 Done (V3.1.0 b14 IL):
 - trackTarget chest/head lerp + yaw/pitch range gates.
 - canHitEntity raycast E_ tag must match target.
 - FindScoutStartPos 80 m ring, 15 tries, 30 m player avoid; neighbor cooldown grid.
 ---
-## 2026-08-07 — tier-C: turret ignore flags, Fire ammo, spawnHordeNear
+## 2026-08-07 - tier-C: turret ignore flags, Fire ammo, spawnHordeNear
 
 Done (V3.1.0 b14 IL):
 - shouldIgnoreTarget: ally/party/owner/stranger/enemy flags; always skip traders/turrets/drones.
 - Fire: passives 16/11, rayCount Hit path, AmmoCount--, UseTimes.
 - spawnHordeNear: CreateHorde, base 5, 12% reduce, SpawnMore; healTargetServer.
 ---
-## 2026-08-07 — tier-C: scout horde update and drone state IL
+## 2026-08-07 - tier-C: scout horde update and drone state IL
 
 Done (V3.1.0 b14 IL):
 - Scout SpawnUpdate: CanSpawn, investigate 6000 ticks, random pos radius 6.
 - UpdateHorde: AttackDelay 18s, investigate 2000/6000, spawnHordeNear.
 - Drone idle/follow/sentry distance gates; MiniTurret findTarget raycast.
 ---
-## 2026-08-07 — tier-C: chunk activity decay and liquid Flow/Evap packing
+## 2026-08-07 - tier-C: chunk activity decay and liquid Flow/Evap packing
 
 Done (V3.1.0 b14 IL):
 - AddEvent merges same-type Value; DecayEvents proportional; best event cooldown 240s.
 - Evap damage 0..45; Flow = damage-50; PhysicsWakeNear 20 m wake.
 ---
-## 2026-08-07 — tier-C: liquid ChangeThis pack and SpawnScouts bands
+## 2026-08-07 - tier-C: liquid ChangeThis pack and SpawnScouts bands
 
 Done (V3.1.0 b14 IL):
 - ChangeThis: rotation 8, meta2 emissions, damage=evap+flow, WBT 60/1/1000.
 - CheckUpdate rate limit; CheckDeepWater 6-stack; NotifyEvent checkChunks.
 - SpawnScouts 120 m player, Scouts1/2/Feral/Radiated by gamestage.
 ---
-## 2026-08-07 — tier-C: NotifyActivity gates and liquid Emissions/ChangeToAir
+## 2026-08-07 - tier-C: NotifyActivity gates and liquid Emissions/ChangeToAir
 
 Done (V3.1.0 b14 IL):
 - NotifyActivity: GameStats 32/24, heat mod, skip BM/Twitch; chunk NotifyEvent.
 - CheckToSpawn: ActivityLevel 25, 20% SpawnScouts + neighbor cooldown.
 - BlockLiquidv2 Emissions rotation/meta2; ChangeToAir splash+WBT; HasHoles.
 ---
-## 2026-08-07 — tier-C: PlantGrowing, TorchHeatMap, WorldBlockTicker execute
+## 2026-08-07 - tier-C: PlantGrowing, TorchHeatMap, WorldBlockTicker execute
 
 Done (V3.1.0 b14 IL):
 - PlantGrowing lightLevelGrow, CanGrowOn, biome type remap, meta grow-on-top.
 - TorchHeatMap AIDirector.NotifyActivity enum 6 strength*0.4 duration 720.
 - WBT execute type-match; AddScheduled replace; Chunk.UpdateTick TE-only.
 ---
-## 2026-08-07 — tier-C: DecoManager.UpdateTick thread queues and ring
+## 2026-08-07 - tier-C: DecoManager.UpdateTick thread queues and ring
 
 Done (V3.1.0 b14 IL):
 - Drain add/remove/reset queues under lock; checkDelayTicks reset to 20.
 - Player deco-chunk ring via GamePrefs 173; start UpdateDecorationsCo.
 ---
-## 2026-08-07 — tier-C: Chunk.SetBlockRaw silent write path
+## 2026-08-07 - tier-C: Chunk.SetBlockRaw silent write path
 
 Done (V3.1.0 b14 IL):
 - SetBlockRaw IL=386: y>=255 air, water flow, IndexedBlocks, heightmap, tickedBlocks.
 - Dirty flags bMapDirty/isModified/bEmptyDirty; no light/mesh/stability RPC.
 ---
-## 2026-08-07 — tier-C: IsLandProtectedBlock and map-edge soft bounds
+## 2026-08-07 - tier-C: IsLandProtectedBlock and map-edge soft bounds
 
 Done (V3.1.0 b14 IL):
 - IsLandProtectedBlock: primary lpblock, deadZone, self allow, ally keystone flag.
 - InBoundsForPlayersPercent: edge inset 50 / span 80, min axis, threshold 0.5.
 ---
-## 2026-08-07 — tier-C: World.CanPlaceBlockAt claim and trader gates
+## 2026-08-07 - tier-C: World.CanPlaceBlockAt claim and trader gates
 
 Done (V3.1.0 b14 IL):
 - CanPlaceBlockAt: trader area, InBoundsForPlayersPercent 0.5, GameStats 1/44 claim ring.
 - CanPickupBlockAt: trader deny then CanPlaceBlockAt(traderAllowed=false).
 ---
-## 2026-08-07 — tier-C: getMaxStabilityAround and vehicle attach
+## 2026-08-07 - tier-C: getMaxStabilityAround and vehicle attach
 
 Done (V3.1.0 b14 IL):
 - getMaxStabilityAround: AllDirections, StabilitySupport max, bFromDownwards.
 - ChangeStability recursive stab-1 with non-support cap 1.
 - TurretTracker.Update save every 120s; Attach/Detach seat pose and driver flags.
 ---
-## 2026-08-07 — tier-C: Stability queueStabilityAvail cap 200
+## 2026-08-07 - tier-C: Stability queueStabilityAvail cap 200
 
 Done (V3.1.0 b14 IL):
 - BlockPlacedAt enqueues avail recompute only when queue count < 200.
 - BlockRemovedAt neighbor re-queue uses the same 200 hard cap.
 ---
-## 2026-08-07 — tier-C: FallingBlock crush damage and land drops
+## 2026-08-07 - tier-C: FallingBlock crush damage and land drops
 
 Done (V3.1.0 b14 IL):
 - AddFallingBlock dedupe/stability/oversized gates; OnBlockStartsToFall -> Air.
 - FallingBlock/Blocks hit damage min(40, massKg*-vy*0.05)*passive 164, max 3 hits.
 - Land: vel^2 < 0.0625; DropItemsOnEvent; SetDead.
 ---
-## 2026-08-07 — tier-C: updateTasks freeze and GroupFallingBlocks BFS
+## 2026-08-07 - tier-C: updateTasks freeze and GroupFallingBlocks BFS
 
 Done (V3.1.0 b14 IL):
 - updateTasks GamePrefs[46] freeze (non-drone); aiActiveDelay LOD; path apply order.
 - EAIManager interestDistance FastMoveTowards(10, 1/120).
 - GroupFallingBlocks 6-neighbor BFS size clamp; CreateFallingBlockGroup spawn.
 ---
-## 2026-08-07 — tier-C: EAI BreakBlock/Wander/RunAway/Ranged/FindTarget leaves
+## 2026-08-07 - tier-C: EAI BreakBlock/Wander/RunAway/Ranged/FindTarget leaves
 
 Done (V3.1.0 b14 IL):
 - EAIBreakBlock ally damageBoost +0.2 and attack delay formula.
@@ -5938,59 +5938,59 @@ Done (V3.1.0 b14 IL):
 - EAIRangedAttackTarget look/SeekYaw then UseHoldingItem state machine.
 - FindTarget see-distance, breadcrumb 15/24, bounds expand +4.
 ---
-## 2026-08-07 — tier-C: EAIApproachAndAttackTarget Update phases
+## 2026-08-07 - tier-C: EAIApproachAndAttackTarget Update phases
 
 Done (V3.1.0 b14 IL):
 - Home return FindPath 0.8 aggro, homeTimeout 0.05, give-up + sleeper pose.
 - Relocate/target vel EMA; eat DamageEntity 35; chase FindPath + CanSee look.
 - CanExecute sleep/stun/jump-swim and targetClasses chaseTimeMax.
 ---
-## 2026-08-07 — tier-C: DropItemsOnEvent and PartyQuestChange
+## 2026-08-07 - tier-C: DropItemsOnEvent and PartyQuestChange
 
 Done (V3.1.0 b14 IL):
 - DropItemsOnEvent IL=246 drop table, stick place vs ItemDropServer, scrap half.
 - PartyQuestChange fan-out; HandlePlayer location rect or 15 m; ChangeStatus.
 ---
-## 2026-08-07 — tier-C: EntityItem OnUpdateEntity lifetime and collect
+## 2026-08-07 - tier-C: EntityItem OnUpdateEntity lifetime and collect
 
 Done (V3.1.0 b14 IL):
 - OnUpdateEntity: lifetime -= 0.05, ground counter 10, distraction/Y death.
 - OnCollectServer: RemoveEntity reason 2 only.
 ---
-## 2026-08-07 — tier-C: AddKillXP and SharedKillServer party XP split
+## 2026-08-07 - tier-C: AddKillXP and SharedKillServer party XP split
 
 Done (V3.1.0 b14 IL):
 - AddKillXP: ExperienceValue, passive 193, modifier, GetPartyXP, _xpFromKill.
 - SharedKillServer: same base XP; other members within GameStats[54]; _xpFromParty.
 - Killer skipped in SharedKill loop; SharedKillClient quest EntityKilled hook.
 ---
-## 2026-08-07 — tier-C: console 300-char reject, EntityAliveFlags bits
+## 2026-08-07 - tier-C: console 300-char reject, EntityAliveFlags bits
 
 Done (V3.1.0 b14 IL):
 - ServerConsoleCommand rejects cmd length > 300 before resolve; deny msgServer25.
 - EntityAliveFlags Process bit setters corrected (god DataItem, alert remote-only).
 ---
-## 2026-08-07 — tier-C: LockRequestServer 5-target cap and lock maps
+## 2026-08-07 - tier-C: LockRequestServer 5-target cap and lock maps
 
 Done (V3.1.0 b14 IL):
 - LockRequestServer IL=239: stale unlock, max 5 targets, single vs shared maps.
 - CanLockOnServer gate; OnLockedServer; NetPackageLockResponse flags 192.
 - ForceUnlockLockTarget walks single+shared holders and force-unlocks.
 ---
-## 2026-08-07 — tier-C: EntityTrader OnUpdateLive + DropContent multi-bag
+## 2026-08-07 - tier-C: EntityTrader OnUpdateLive + DropContent multi-bag
 
 Done (V3.1.0 b14 IL):
 - EntityTrader.OnUpdateLive IL=315 quest list, 10m bounds unload/greet, open-close.
 - DropContentInLootContainerServer multi-bag by loot container size, y+0.25.
 ---
-## 2026-08-07 — tier-C: GetLandClaimOwner self/ally/other + offline hours
+## 2026-08-07 - tier-C: GetLandClaimOwner self/ally/other + offline hours
 
 Done (V3.1.0 b14 IL):
 - Outer GetLandClaimOwner GameStats[1] off / trader area / claim size GameStats[44].
 - Per-chunk lpblock primary TEFeatureLandClaim; deadZone half-extent.
 - Enum self=1 ally=2 other=3; IsLandProtectionValidForPlayer GameStats[46]*24h.
 ---
-## 2026-08-07 — tier-C: MinEvent GiveExp, loot override, rage, jam
+## 2026-08-07 - tier-C: MinEvent GiveExp, loot override, rage, jam
 
 Done (V3.1.0 b14 IL):
 - GiveExp/GiveSkillExp AddLevelExp + dirty flags; SetProgressionLevel max/-1.
@@ -5998,14 +5998,14 @@ Done (V3.1.0 b14 IL):
 - SetItemInSlot armor EquipSlot gate; ResetHeldItem; SetHeldItemJammed metadata.
 - Rage StartRage/StopRage on EntityHuman; SetOverrideLoot server comma list.
 ---
-## 2026-08-07 — tier-C: full UAI task Start+Update table (5 types)
+## 2026-08-07 - tier-C: full UAI task Start+Update table (5 types)
 
 Done (V3.1.0 b14 IL):
 - Enumerated all concrete UAITask* types (only 5).
 - Start+Update for MoveToTarget, Wander, AttackTargetEntity/Block, FleeFromTarget.
 - Flee sets home area radius 10 on path end; Attack dual Attack(false/true) pattern.
 ---
-## 2026-08-07 — tier-C: EntityStatChanged, StatsBuff, TE Process, QuestObjective
+## 2026-08-07 - tier-C: EntityStatChanged, StatsBuff, TE Process, QuestObjective
 
 Done (V3.1.0 b14 IL):
 - EntityStatChanged Process IL=88 self-echo skip, Health FireEvent 9, rebroadcast.
@@ -6013,7 +6013,7 @@ Done (V3.1.0 b14 IL):
 - NetPackageTileEntity Process IL=103 teBlockId drop + stream mode + rebroadcast.
 - QuestObjectiveUpdate eventType 0/1/2; HandlePlayer distance 15 treasure count.
 ---
-## 2026-08-07 — tier-C: sleeper TickSpawnCount, CheckSpawnPos, HandleFuel re-pin
+## 2026-08-07 - tier-C: sleeper TickSpawnCount, CheckSpawnPos, HandleFuel re-pin
 
 Done (V3.1.0 b14 IL):
 - TickSleeperVolumes zeros TickSpawnCount under lock; Tick gates UpdateSpawn <2.
@@ -6021,21 +6021,21 @@ Done (V3.1.0 b14 IL):
 - HandleFuel: not-burning early return; 0.01s quantize; fuel[0] consume path.
 - Corrected mid-wave restart: vanished mapped entity (GetEntity null), not live.
 ---
-## 2026-08-07 — tier-C: damageEntityLocal, ProcessDamage, EffectManager.GetValue
+## 2026-08-07 - tier-C: damageEntityLocal, ProcessDamage, EffectManager.GetValue
 
 Done (V3.1.0 b14 IL):
 - damageEntityLocal IL=484 DR build (armor, dismember, StunProne/Knee thresholds).
 - ProcessDamageResponse IL=86 net fan-out; ProcessDamageResponseLocal IL=903.
 - EffectManager.GetValue IL=372 stack; ItemValue.FireEvent IL=107 recursion.
 ---
-## 2026-08-07 — tier-C: GameTimer formula, ThreadManager drain, Astar merge 76
+## 2026-08-07 - tier-C: GameTimer formula, ThreadManager drain, Astar merge 76
 
 Done (V3.1.0 b14 IL):
 - GameTimer.updateTimer IL=74 stopwatch/timeScale/ticksPerSecond formula.
 - ThreadManager.UpdateMainThreadTasks double-buffer swap + invoke.
 - EntityEnemyAnimal electrocute early-out; Astar UpdateGraphs Merge size 76.
 ---
-## 2026-08-07 — tier-C: SimpleRPC, ChatMessageServer, SendPackage, OnDeathUpdate
+## 2026-08-07 - tier-C: SimpleRPC, ChatMessageServer, SendPackage, OnDeathUpdate
 
 Done (V3.1.0 b14 IL):
 - SimpleRPC IL=59 holding activate/reset + track fan-out.
@@ -6043,7 +6043,7 @@ Done (V3.1.0 b14 IL):
 - SendPackage list IL=168 attached/range filters.
 - OnDeathUpdate corpse DeadBodyHitPoints path.
 ---
-## 2026-08-07 — tier-C: canDespawn, unloadEntity, AwardKill/AddScore chain
+## 2026-08-07 - tier-C: canDespawn, unloadEntity, AwardKill/AddScore chain
 
 Done (V3.1.0 b14 IL):
 - canDespawn IL=14 (not client/dynamic/sleeping); Despawn IsDespawned;
@@ -6051,7 +6051,7 @@ Done (V3.1.0 b14 IL):
 - GameManager.AwardKill remote package vs QuestEvent; AddScoreServer remote/
   local fan-out; EntityAlive.AddScore counters/GameStats.
 ---
-## 2026-08-07 — tier-C: CheckDespawn, player OnUpdateLive, explosion attack, save chain
+## 2026-08-07 - tier-C: CheckDespawn, player OnUpdateLive, explosion attack, save chain
 
 Done (V3.1.0 b14 IL):
 - CheckDespawn IL=198 (20-tick sample, 130m/80m bands); IsInFrontOfMe half-angle;
@@ -6059,7 +6059,7 @@ Done (V3.1.0 b14 IL):
 - Explosion.AttackBlocks 553 / AttackEntites 691 EffectManager radii.
 - SaveWorld → ChunkProvider.SaveAll → RegionFileManager; players.xml.
 ---
-## 2026-08-07 — tier-C: explode AttackBlocks, LetBlocksFall, DurationTick, join pkgs
+## 2026-08-07 - tier-C: explode AttackBlocks, LetBlocksFall, DurationTick, join pkgs
 
 Done (V3.1.0 b14 IL):
 - GameManager.explode IL=194 AttackBlocks/Entities + ExplosionClient S2C.
@@ -6067,7 +6067,7 @@ Done (V3.1.0 b14 IL):
 - BuffValue.DurationTick UpdateRateTicks.
 - NetPackagePlayerId / PlayerSpawnedInWorld process.
 ---
-## 2026-08-07 — tier-C: FireEvent fan-out, SetAttackTarget, explosions, falling
+## 2026-08-07 - tier-C: FireEvent fan-out, SetAttackTarget, explosions, falling
 
 Done (V3.1.0 b14 IL):
 - FireEvent IL=57 full fan-out (class/progression/challenge/inv/equip/buffs).
@@ -6075,33 +6075,33 @@ Done (V3.1.0 b14 IL):
 - ExplosionServer delay/coroutine; ExplosionClient force+ChangeBlocks.
 - AddFallingBlock hashset dedupe + DynamicMesh observer.
 ---
-## 2026-08-07 — tier-C: AwardKill, SetDead, sleeper OnTriggered, Respawn
+## 2026-08-07 - tier-C: AwardKill, SetDead, sleeper OnTriggered, Respawn
 
 Done (V3.1.0 b14 IL):
 - AwardKill IL=66 score path; SetDead Health=0; OnTriggered IL=14;
   EntityPlayer.Respawn outline.
 ---
-## 2026-08-07 — tier-C: inventory Apply, party accept, AIDirector components
+## 2026-08-07 - tier-C: inventory Apply, party accept, AIDirector components
 
 Done (V3.1.0 b14 IL):
 - InventoryTransaction.Apply IL=126 InitialHash/ops/Finalize; RequestServer unlock.
 - Party.ServerHandleAcceptInvite IL=89; PartyManager.CreateParty IL=24.
 - AIDirector.CreateComponents IL=31 fixed list; GameStateManager.OnUpdateTick 198.
 ---
-## 2026-08-07 — tier-C: death loot path and ItemDropServer chunk cap
+## 2026-08-07 - tier-C: death loot path and ItemDropServer chunk cap
 
 Done (V3.1.0 b14 IL):
 - combat-damage §3.1: OnEntityDeath AwardKill/ModEvents/dropItemOnDeath.
 - loot-economy §6b: ItemDropServer IL=268 with 50 EntityItem/chunk cull;
   DropContentInLootContainerServer IL=104 bag spawn.
 ---
-## 2026-08-07 — tier-C: DisconnectClient and SavePlayerData order
+## 2026-08-07 - tier-C: DisconnectClient and SavePlayerData order
 
 Done (V3.1.0 b14 IL):
 - network: DisconnectClient IL=184 ordered disconnect/save/party/quest/unlock;
   SavePlayerData IL=91 + ModEvents.SavePlayerData.
 ---
-## 2026-08-07 — tier-C: join spawn/auth path, damage tags, CommandAllowedFor
+## 2026-08-07 - tier-C: join spawn/auth path, damage tags, CommandAllowedFor
 
 Done (V3.1.0 b14 IL):
 - server-lifecycle: Authorize IL=47, RequestToSpawnPlayer 496, PlayerSpawnedInWorld
@@ -6109,42 +6109,42 @@ Done (V3.1.0 b14 IL):
 - items: GetDamageEntity/Block FastTags + EffectManager + MaxIncomingDamage.
 - console-commands: CommandAllowedFor userLevel <= cmdLevel.
 ---
-## 2026-08-07 — tier-C: TickEntity order, path apply helpers, ChangeBlocks
+## 2026-08-07 - tier-C: TickEntity order, path apply helpers, ChangeBlocks
 
 Done (V3.1.0 b14 IL):
 - entity-ai §7: TickEntity IL=148 chunk membership + OnUpdateEntity gates;
   LookHelper pitch damp; ASPPathNavigate Update/SetPath; MoveHelper 1236 pointer.
 - world-chunks §5.1: ChangeBlocks IL=530 multi-block apply; SetBlocksOnClients 192.
 ---
-## 2026-08-07 — tier-C: more package Process (chat/quest/score/kill/skill)
+## 2026-08-07 - tier-C: more package Process (chat/quest/score/kill/skill)
 
 Done (V3.1.0 b14 IL):
 - EntityRemove, SimpleChat, SharedQuest, AwardKill, SetSkillLevel, AddScore,
   MapChunks, ConfigFile, WorldSpawnPoints, KeyExchangeComplete, PlayerDisconnect
   process notes; census 1454/853.
 ---
-## 2026-08-07 — tier-C: EAI leaf Update/CanExecute IL table
+## 2026-08-07 - tier-C: EAI leaf Update/CanExecute IL table
 
 Done (V3.1.0 b14 IL):
 - entity-ai §D2: ApproachAndAttack 846/CanExecute 70, RangedAttack 107,
   RunAway 105, Wander.CanExecute 94, DestroyArea 60, ApproachSpot 40,
   Dodge 27, Wander/Leap Update 7.
 ---
-## 2026-08-07 — tier-C: manager Update behaviour re-pins
+## 2026-08-07 - tier-C: manager Update behaviour re-pins
 
 Done (V3.1.0 b14 IL):
 - managers: Vehicle/Drone unloaded ECD reconcile; QuestEvent objectives;
   Turret 120s / Faction 60s save; GameEvent Handle* chain; Power 0.16/120;
   WorldBlockTicker scheduled+random; SendChunksToClients remove/send.
 ---
-## 2026-08-07 — tier-C: TickEntities slice math, console path, AddLevelExp
+## 2026-08-07 - tier-C: TickEntities slice math, console path, AddLevelExp
 
 Done (V3.1.0 b14 IL):
 - loop-gmupdate: exact TickEntities EMA/span/25/sliceCount formula.
 - console-commands: ServerConsoleCommand IL=125 ordered steps.
 - progression: AddLevelExp IL=161 bonus + recursive apply order.
 ---
-## 2026-08-07 — tier-C: stats waitTicks, buffs Tick, blood moon, eat consume
+## 2026-08-07 - tier-C: stats waitTicks, buffs Tick, blood moon, eat consume
 
 Done (V3.1.0 b14 IL):
 - entity-stats §1.1: waitTicks 10-phase TickWait (base + PlayerEntityStats).
@@ -6153,14 +6153,14 @@ Done (V3.1.0 b14 IL):
 - items: ItemActionEat.consume IL=154 quest/smell/refund.
 - tile-entities: Chunk.UpdateTick IL=26 TeTick confirmation.
 ---
-## 2026-08-07 — tier-C: OnUpdateEntity/Live phases + fireShot/melee
+## 2026-08-07 - tier-C: OnUpdateEntity/Live phases + fireShot/melee
 
 Done (V3.1.0 b14 IL):
 - entity-ai §2.0: OnUpdateEntity IL=457 then OnUpdateLive IL=363 ordered work.
 - items §4.2: fireShot IL=482 raycast/hit path; DynamicMelee ExecuteAction IL=210.
 - server-lifecycle: PlayerLoginRPC Authorize changelog.
 ---
-## 2026-08-07 — tier-C: DamageEntity gates, UAI tasks, OnUpdateTick order
+## 2026-08-07 - tier-C: DamageEntity gates, UAI tasks, OnUpdateTick order
 
 Done (V3.1.0 b14 IL):
 - combat-damage: DamageEntity IL=236 consecutive/FF/god/dead/mult/local apply.
@@ -6168,7 +6168,7 @@ Done (V3.1.0 b14 IL):
 - loop: OnUpdateTick always/server order re-pin.
 - server-lifecycle: PlayerLoginRPC -> AuthorizationManager.Authorize.
 ---
-## 2026-08-07 — tier-C: Chunk process + TEFeature wire + MinEvent leaves
+## 2026-08-07 - tier-C: Chunk process + TEFeature wire + MinEvent leaves
 
 Done (V3.1.0 b14 IL):
 - NetPackageChunk Process IL=126 (overwrite unload/read vs add NeedsRegeneration).
@@ -6176,14 +6176,14 @@ Done (V3.1.0 b14 IL):
 - MinEvent CallGameEvent, AddHealth, Ragdoll, AddProgressionLevel, ModifyStat,
   ShowToolbeltMessage Execute notes.
 ---
-## 2026-08-07 — tier-C: landclaim/sleeper/deco/auth/addExp process re-pins
+## 2026-08-07 - tier-C: landclaim/sleeper/deco/auth/addExp process re-pins
 
 Done (V3.1.0 b14 IL):
 - LandClaimRepair, PersistentPlayerState, SleeperWakeup, GameStats, DecoUpdate,
   SignDataRequest, DynamicMesh, AddExp Server/Client, AuthConfirmation,
   EncryptionRequest process notes; still-open table honesty update.
 ---
-## 2026-08-07 — tier-C: SetBlock + inventory hash cache process
+## 2026-08-07 - tier-C: SetBlock + inventory hash cache process
 
 Done (V3.1.0 b14 IL):
 - SetBlock Process IL=59 (ValidUser/Entity, SetBlocksOnClients, ChangeBlocks,
@@ -6191,7 +6191,7 @@ Done (V3.1.0 b14 IL):
 - InventoryDataRequest hash short-circuit vs full item dump; Response UpdateInventory.
 - PlayerInventory applies to Sender.latestPlayerData + dirty flag.
 ---
-## 2026-08-07 — tier-C: workstation/trigger wire + quest/party/gameevent process
+## 2026-08-07 - tier-C: workstation/trigger wire + quest/party/gameevent process
 
 Done (V3.1.0 b14 IL):
 - tile-entities-power: Workstation.write IL=246 stream modes; PoweredTrigger.write
@@ -6200,35 +6200,35 @@ Done (V3.1.0 b14 IL):
   TraderData, NPCQuestList, GameEventRequest/Response, BossEvent,
   EntityWaypointList Process IL sizes and authority notes.
 ---
-## 2026-08-07 — tier-C: UAIBase chooseAction/updateAction
+## 2026-08-07 - tier-C: UAIBase chooseAction/updateAction
 
 Done (V3.1.0 b14 IL):
 - entity-ai §5.3: UAIBase.Update IL=18, chooseAction IL=97 (package DecideAction
   weighted pick), updateAction IL=63 (Init/Start/Update/Reset task chain).
 - residuals/completion-bar census refresh (narrated 1439 / catalogued 868).
 ---
-## 2026-08-07 — tier-C: high-value console Execute IL table
+## 2026-08-07 - tier-C: high-value console Execute IL table
 
 Done (V3.1.0 b14 IL):
 - console-commands §2.1: KillAll, SpawnEntity, Teleport, SetTime, SaveWorld,
   Shutdown, Mem, Weather, Get/SetGamePref, CreateWebUser, LogGameState Execute
   sizes and authority notes.
 ---
-## 2026-08-07 — tier-C: DamageEntity early outs + AliveFlags/stat process
+## 2026-08-07 - tier-C: DamageEntity early outs + AliveFlags/stat process
 
 Done (V3.1.0 b14 IL):
 - DamageEntity Process IL=172 local-player discard gates (typ 15; ambient 1/25).
 - AliveFlags Process IL=109 apply + server rebroadcast 192.
 - StatChanged IL=88, StatsBuff IL=76, PlayerStats IL=70 process notes.
 ---
-## 2026-08-07 — tier-C: collector/light/trap TE wire + spawn bands re-pin
+## 2026-08-07 - tier-C: collector/light/trap TE wire + spawn bands re-pin
 
 Done (V3.1.0 b14 IL):
 - tile-entities-power §4.6: Collector write IL=278, Light IL=48, RangedTrap
   stream modes, MeleeTrap owner-only.
 - entity-ai §D3.6: SpawnUpdate distance/rect numbers cross-linked to spawning.md.
 ---
-## 2026-08-07 — tier-C: more ProcessPackage + MinEvent action leaves
+## 2026-08-07 - tier-C: more ProcessPackage + MinEvent action leaves
 
 Done (V3.1.0 b14 IL):
 - protocol-packages §6.21: process targets for ragdoll/velocity/speeds/stealth/
@@ -6237,14 +6237,14 @@ Done (V3.1.0 b14 IL):
 - minevents §7.1: AddBuff IL=211, ModifyCVar IL=154, Explode IL=83 (server
   ExplosionServer), presentation residual note.
 ---
-## 2026-08-07 — tier-C: package ProcessPackage paths (Collect/Attach/...)
+## 2026-08-07 - tier-C: package ProcessPackage paths (Collect/Attach/...)
 
 Done (V3.1.0 b14 IL):
 - protocol-packages §6.21 process notes for EntityCollect, EntityAttach
   (AttachType 0-3), ItemDrop, PickupBlock, SetBlockTexture, SimpleRPC,
   HordeEvent, PrimeDetonator, SetAttackTarget; EmitSmell Process IL=1 no-op.
 ---
-## 2026-08-07 — tier-C: workstation/forge ticks + sleeper spawn/despawn
+## 2026-08-07 - tier-C: workstation/forge ticks + sleeper spawn/despawn
 
 Objective: keep optional depth moving (never-stop C grind).
 
@@ -6257,7 +6257,7 @@ Done (V3.1.0 b14 IL):
 
 Coverage unaccounted remains 0.
 ---
-## 2026-08-07 — tier-C: PowerItem subtype ticks, WireActions, sleeper Tick, LookAt
+## 2026-08-07 - tier-C: PowerItem subtype ticks, WireActions, sleeper Tick, LookAt
 
 Objective: continue optional annotation depth (tier C) after A+B complete.
 
@@ -6272,7 +6272,7 @@ Done (verified live V3.1.0 b14 IL):
 
 Coverage unaccounted remains 0. stock-check expected green.
 ---
-## 2026-08-07 — tier-C depth: power ClientData, sector 7rg, BuffManager, audio fields
+## 2026-08-07 - tier-C depth: power ClientData, sector 7rg, BuffManager, audio fields
 
 Objective: continue optional annotation depth after A+B complete (unaccounted=0).
 
@@ -6286,7 +6286,7 @@ Done (verified live V3.1.0 b14 IL):
 
 Coverage unaccounted remains 0. stock-check green.
 ---
-## 2026-08-07 — completion bar + unaccounted=0 + Raw 11-byte header
+## 2026-08-07 - completion bar + unaccounted=0 + Raw 11-byte header
 
 Objective: drive Coverage unaccounted to 0 and define honest "100%" (tiers A+B).
 
@@ -6301,7 +6301,7 @@ Done (verified live V3.1.0 b14):
 
 Verification: Coverage.exe unaccounted=0; make stock-check exit 0.
 ---
-## 2026-08-07 — research: path drain, interest exit, chunk dirty, animator culling init
+## 2026-08-07 - research: path drain, interest exit, chunk dirty, animator culling init
 
 Objective: continue stock RE only (no zdtd). Close optim-facing research gaps
 from PERF brief §7 without inventing levers.
@@ -6316,14 +6316,14 @@ Done (verified live V3.1.0 b14 ASM):
 Verification: DumpMethod FindPaths>d__8 MoveNext; updatePlayerEntity; get_NeedsSaving;
 BodyAnimator.initBodyAnimator; EnumRemoveEntityReason DumpType.
 ---
-## 2026-08-06 — hygiene + optim evidence handoff
+## 2026-08-06 - hygiene + optim evidence handoff
 
 - residuals §5: optimizer residual pointer notes Clone/chunk ownership closed.
 - Sibling hygiene (separate trees): apm/loadgen measured-scaling + zig-clone link
   text/href fixed to optimizer/zdtd homes; optimizer PERF brief consumed research
   triage; optimizer .gitignore ignores local /server/ drop.
 ---
-## 2026-08-06 — RE annotation + optim evidence (research-only)
+## 2026-08-06 - RE annotation + optim evidence (research-only)
 
 Objective: close the location-table bit-packing residual and record stock IL
 facts the optimizer brief still treats as open research (Clone / chunk encode),
@@ -6345,7 +6345,7 @@ Xref ItemStack.Clone + ChunkManager.SendChunksToClients; make stock-check.
 
 State: verified. Path admission already closed in closed-gaps (not re-opened).
 ---
-## 2026-08-06 — research-docs-corpus hygiene + structure
+## 2026-08-06 - research-docs-corpus hygiene + structure
 
 Objective: fix all open findings from `workspace/outputs/research-docs-corpus-audit.md`
 and improve hub structure for V3.1.0 (b14).
@@ -6365,7 +6365,7 @@ broken links in touched files 0; em dashes 0.
 
 State: verified. Next: optional commit.
 ---
-## 2026-08-05 — stock-re-corpus audit fixes
+## 2026-08-05 - stock-re-corpus audit fixes
 
 Objective: fix all problems surfaced by `workspace/outputs/stock-re-corpus-audit.md`
 (paper/code audit of our RE corpus vs tools/consumers/live ASM).
@@ -6387,7 +6387,7 @@ stock-check --require-live). Live DumpMethod TE write still IL=27 (prior audit).
 State: verified. Next: optional commit of doc+gate fixes; re-run Coverage.exe only
 if unaccounted tier needs a fresh cite.
 ---
-## 2026-07-23 — re-audit-extend (audit all docs + extend RE + consolidate tooling)
+## 2026-07-23 - re-audit-extend (audit all docs + extend RE + consolidate tooling)
 
 Objective: audit all docs; do more RE (systems + wire protocol); consolidate RE
 tooling into this repo; document how to RE; add stock-research policy to sibling
@@ -6422,7 +6422,7 @@ contradictions surfaced, unresolved by design.
 Next: author decides the 5 analytical audit contradictions; optionally annotate
 EntityCreationData per-class tail and DynamicMesh/POIAround bodies.
 
-## 2026-07-23 (cont.) — scope split + reconciliation
+## 2026-07-23 (cont.) - scope split + reconciliation
 
 - **Scope boundary enforced.** Moved 6 optimization-mod docs to `7dtd-optimizer/docs/`:
   bottlenecks, algorithms, measured-scaling, runtime-tuning, allocation-reuse,
@@ -6445,7 +6445,7 @@ EntityCreationData per-class tail and DynamicMesh/POIAround bodies.
 - Next: after editorial subagent, finish F24 (coverage family 8 note) + F14 sweep
   of network/loop/entity-ai/loop-gmupdate/coverage; final cross-repo link check.
 
-## 2026-07-23 (cont.) — reconciliation complete
+## 2026-07-23 (cont.) - reconciliation complete
 
 - Editorial subagent done (F18-F21, F26): all changelog blocks deduped to 1,
   loop.md fence fixed, entity-ai/deeper single-H1, AI-LOD phrasing aligned.
@@ -6460,7 +6460,7 @@ EntityCreationData per-class tail and DynamicMesh/POIAround bodies.
   zdtd/ or keep as research-to-clone bridge? Not moved pending user confirm.
 - DEFERRED to optimizer repo (travel with moved docs): F2-F7, F12, F13, F15.
 
-## 2026-07-23 (cont.) — doc hierarchy review
+## 2026-07-23 (cont.) - doc hierarchy review
 
 Reviewed information architecture across all 18 narratives + 8 inventories.
 Findings: no orphans (every doc in-degree >= 1), every doc referenced by INDEX,
@@ -6472,7 +6472,7 @@ E net/wire) + F optimizer companion, each doc listed once. Kept docs/ physically
 flat (21 files) with grouped INDEX: standard for this size, avoids breaking 100+
 links for marginal gain. 0 broken links, all docs exactly 1 H1 (fence-aware).
 
-## 2026-07-23 (cont.) — RE tooling consolidation + documentation
+## 2026-07-23 (cont.) - RE tooling consolidation + documentation
 
 - **All RE tooling now in `7dtd-research/tools/`** (was split across optimizer/tools
   + il/zdtd_re_tools). Moved 39 legacy per-family dumpers -> `tools/legacy/`, the 2
@@ -6486,7 +6486,7 @@ links for marginal gain. 0 broken links, all docs exactly 1 H1 (fence-aware).
   rewritten as the complete tool+process catalog. 0 broken links across all repos.
 - Dispatched fresh full doc audit (re-audit-2) after the restructure; fixes pending.
 
-## 2026-07-23 (cont.) — re-audit-2 fully resolved
+## 2026-07-23 (cont.) - re-audit-2 fully resolved
 
 Fresh full audit (re-audit-2-doc-audit.md, 26 findings) after the restructure.
 All oracle numbers passed; findings were stale-structure debris + scope leakage.
@@ -6505,7 +6505,7 @@ Note: the L3 fix (dropping "(IL=1585)" from managers.md) removed the file's only
 gate; fixed by adding a column caption ("Update IL column is ... e.g. TwitchManager
 IL=1585"). Both gates green.
 
-## 2026-07-23 (cont.) — whole-assembly surface map (the "100%" request)
+## 2026-07-23 (cont.) - whole-assembly surface map (the "100%" request)
 
 User asked to "reverse 100% of the game code and document in minute detail."
 Two hard limits: (1) redistribution/copyright - a full transcription of 1.73M IL
@@ -6524,7 +6524,7 @@ Measured scope: 7,413 types / 53,011 methods-with-body / 1,734,742 IL / 87 ns;
 `<global>` = 6,276 types (85%). Verified: dumps git-ignored, tool sources tracked,
 0 broken links, 0 em dashes, coverage gate green.
 
-## 2026-07-23 (cont.) — reversing dedicated codepaths toward 100% (batch 1)
+## 2026-07-23 (cont.) - reversing dedicated codepaths toward 100% (batch 1)
 
 Incremental narrative coverage of dedicated-server subsystems beyond the hot path,
 each as transformative analysis (minimal IL quotes, policy-compliant) with mermaid
@@ -6542,7 +6542,7 @@ Verified: 2 new docs 0 em dashes / 0 broken links / 9 mermaid; dumps git-ignored
 Next: integrate the 4 subagent docs; then <global> subsystems (spawn, vehicles,
 buffs, weather, chat, persistence).
 
-## 2026-07-23 (cont.) — dedicated codepaths batch 2
+## 2026-07-23 (cont.) - dedicated codepaths batch 2
 
 Lead-written + verified (0 em/en dashes, 0 bulk IL, state-machine diagrams):
 - webserver.md (6), console-commands.md (3), server-lifecycle.md (4), buffs.md (2).
@@ -6554,7 +6554,7 @@ Narrated. Remaining dedicated: weather/sky, chat, loot/traders, game-modes, ques
 blocks/items + ItemAction + MinEvent frameworks, crafting, power (if not in tile-ent).
 Next: integrate the 6 in-flight docs as they land; dispatch batch 3.
 
-## 2026-07-23 (cont.) — dedicated codepaths batch 3
+## 2026-07-23 (cont.) - dedicated codepaths batch 3
 
 Integrated (verified 0 em/en, 0 bulk IL, state machines): platform-auth (5),
 spawning (5), tile-entities-power (10), vehicles-drones-turrets (7),
@@ -6566,7 +6566,7 @@ UAI, game-events, platform-auth, spawning, tile-entities+power, vehicles/drones/
 Remaining after batch 3: item-actions detail (in items), crafting/recipes,
 damage/combat consolidation, then full-corpus consistency+link+diagram audit.
 
-## 2026-07-23 (cont.) — dedicated codepaths COMPLETE
+## 2026-07-23 (cont.) - dedicated codepaths COMPLETE
 
 All dedicated-server codepaths are now hand-narrated (transformative analysis,
 full IL kept local/git-ignored per policy). 23 new subsystem docs this campaign
@@ -6588,7 +6588,7 @@ FINAL AUDIT (43 docs): 0 em/en dashes, 0 broken links (repo-wide), all single-H1
 mermaid fences balanced, 0 orphans, 145 state-machine/flow diagrams. Every state
 machine has a mermaid diagram (user requirement). State: verified.
 
-## 2026-07-23 (cont.) — dedicated codepaths COMPLETE (verified by gap analysis)
+## 2026-07-23 (cont.) - dedicated codepaths COMPLETE (verified by gap analysis)
 
 The premature "complete" claim was re-verified by systematic gap analysis, which
 found real misses (good). Closed them:
@@ -6614,7 +6614,7 @@ links repo-wide, all single-H1, no orphans. Every dedicated-server codepath is
 hand-narrated with diagrams; out-of-scope (client render/audio/editor/vendored) and
 native residuals honestly enumerated. State: verified. DEDICATED CODEPATHS DONE.
 
-## 2026-07-23 (cont.) — reachability verification + stealth gap
+## 2026-07-23 (cont.) - reachability verification + stealth gap
 
 User challenge "did you fully reverse everything the server needs" -> ran a deeper
 "heavy unreferenced types" lens which found a real miss: PlayerStealth (server
@@ -6633,7 +6633,7 @@ Honest status: no uncovered dedicated subsystem remains under 4 converging lense
 reversible locally (DumpAll) but not transcribed by policy; leaves covered by
 framework not exhaustively.
 
-## 2026-07-23 (cont.) — leaf-enumeration catalogs
+## 2026-07-23 (cont.) - leaf-enumeration catalogs
 
 Completed the enumeration layer beneath the framework narratives: generated 4
 metadata catalogs under inventories/ (names + base + IL, no bodies) so every leaf
@@ -6644,7 +6644,7 @@ Registered in INDEX inventories; cross-linked from blocks/items/minevents/
 console-commands. 427 leaves catalogued. Corpus clean (0 broken/dashes/badH1).
 Coverage now complete at both levels: subsystems narrated + leaves enumerated.
 
-## 2026-07-23 (cont.) — leaf catalogs made transitively accurate + extended
+## 2026-07-23 (cont.) - leaf catalogs made transitively accurate + extended
 
 Corrected the leaf catalogs to use transitive inheritance (was direct-base only, which
 over/under-counted). Accurate counts: block-behaviors 65, item-actions 38,
@@ -6654,7 +6654,7 @@ Fixed the now-stale counts in INDEX + framework cross-links. Corpus: 48 narrativ
 14 inventories = 62 docs, 158 diagrams, 0 broken/dashes/badH1.
 Coverage complete + accurate at both levels (subsystems narrated, leaves enumerated).
 
-## 2026-07-24 — per-leaf behavioral pass
+## 2026-07-24 - per-leaf behavioral pass
 
 Took the enumeration catalogs to per-leaf BEHAVIORAL descriptions (user request):
 - console-command-list.md: 186 commands, each with the game's own getDescription
@@ -6667,7 +6667,7 @@ Took the enumeration catalogs to per-leaf BEHAVIORAL descriptions (user request)
 descriptions; others name+code-derived, honestly labeled). 0 broken/dashes.
 Corpus: 48 narratives + 14 inventories.
 
-## 2026-07-24 — peer-review resolution (new docs)
+## 2026-07-24 - peer-review resolution (new docs)
 
 Ran a peer-review pass (reviewer lens) over the freshly written narratives and
 applied every finding, each re-verified against IL before the edit:
