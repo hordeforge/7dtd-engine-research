@@ -318,6 +318,21 @@ passes **16** (`BackedArraySingleView has opened a large amount of array
 views, this could indicate a memory issue`) - the large-splat-map buffers
 are file-backed to keep the generator's working set out of RAM.
 
+**Planner records:** `POIWeightData` (`PrefabManager` nested, ctor IL=25)
+is the POI weighting entry: it lower-cases `PartialPOIName` and stores
+`Tags`, `BiomeTags`, `Weight`, `Bias`, `MinCount` / `MaxCount` (the
+prefab weighting config the density budget scores against).
+`WildernessPathInfo` (`WildernessPlanner` nested, ctor IL=9) is
+`Position` (Vector2i) + `PathRadius` for the wilderness road records.
+`TownshipData` lives in `WorldBuilderStatic.idToTownshipData` (the
+per-township config, `Name`-keyed), `TownshipSpawnInfo` in
+`TownPlanner.townshipSpawnInfos` (id -> record filled by
+`getTownshipCounts` from the township properties), `BiomeStats` in
+`TownPlanner.biomeStats` (townshipCount + per-name counts) and
+`BiomeTypeData` (`WorldBuilder` nested, ctor `(BiomeType, float, int)`)
+in the biome-ratio lists. `IBiomeProvider` is the lookup interface
+(`GetBiomeOrSubAt(x, z)` + `Cleanup`).
+
 ### 3.6 Spawns, roads, water finalization
 
 - Player spawns: `CreatePlayerSpawn` over `CalcPlayerSpawnTiles` until **12**
