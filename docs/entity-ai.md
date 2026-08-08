@@ -129,6 +129,19 @@ and the same stats-buff sync. Wire: base `Write`/`Read` (IL=8 each) are version
 Food and `CoreTemp` as `sbyte(CoreTemp / 2)` (read back `* 2`, version >= 11);
 `NetPackageEntityStatsBuff` is `entityId i32 + length i32 + raw bytes`.
 
+**`Stat` (the per-stat record):** ctor (IL=36) stores the type, entity, value
+and base max. `Tick(dt)` (IL=301) is the regen pass: re-evaluates the max via
+`EffectManager.GetValue(MaxPassive, ..., originalBaseMax)`, adds
+`GetValue(GainPassive) * dt` when below the last value and subtracts
+`GetValue(LossPassive) * dt` above it, clamps to `[0, baseMax]`, applies
+`regenAmount`, and flags `Changed` when the value moved. `Write` (IL=24) is
+version **6** + `m_value, m_maxModifier, m_baseMax, m_originalBaseMax,
+m_originalValue` (f32 x5); `Read` (IL=32) mirrors it, pops an extra f32 at
+version <= **5**, and syncs `m_lastValue = m_value`.
+`GodModeEntity` (IL=19) and `SetChangedFlag(new, old)` (IL=15) round out the
+changed-tracking; the max accessors combine `baseMax` + `maxModifier`
+(`ModifiedMax`), and `ValuePercent` is `value / max`.
+
 **`EntityAnimal.OnUpdateLive` (IL=57) override:** `EntitySeeCache.Clear()`
 (animals keep no see cache), then base `OnUpdateLive`. While `isDistressed`
 and alive: `timer -= deltaTime`; at ≤ 0 rearm with
@@ -3537,6 +3550,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   && deathUpdateTime > 70.
 ## Changelog
 
+- **2026-08-08:** Stat record: Tick (IL=301) regen via MaxPassive/GainPassive/
+  LossPassive + clamp + regenAmount; Write v6 / Read v<=5 extra pop + lastValue
+  sync; GodModeEntity/SetChangedFlag; max accessors.
 - **2026-08-08:** EntityStats: Init stat wiring (MaxPassive 104/109/122/114 +
   gain/loss passives); Tick 10-phase wheel + TickWait regen/change packets/
   stats-buff 10-tick sync; player variant 4 OT passes + per-stat packets; wire
