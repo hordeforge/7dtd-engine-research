@@ -25,8 +25,23 @@ or render code are listed at the end instead.
 
 ---
 
-## GameStageGroup
+## BlockRadiusEffect (player-local proximity buffs)
 
+Blocks may carry a `BlockRadiusEffect[]` (`radiusSq`, `variable` buff name)
+applied to nearby players. `EntityPlayerLocal.BlockRadiusEffectsTick`
+(IL=83) is the scan: it rotates a `blockRadiusEffectsIndex` (0..2) and walks
+the three chunks around the player's chunk, and for every `TileEntity` that
+`IsActive(world)` with a non-null `Block.RadiusEffects` calls
+`BlockRadiusEffectsApply(block, tePos)`. The apply (IL=58) clamps the TE
+position's y toward the player's (`FastMoveTowards` step 1) and, per effect,
+`AddBuff(effect.variable, -1, true, false, -1)` when the player is within
+`radiusSq` and lacks the buff - the campfire-warmth style aura. The same
+file also hosts `EntityPlayerLocal.ResetBiomeWeatherOnDeath` (IL=15):
+`onNewBiomeEntered(null)`, `isIndoorsCurrent = true`, `WeatherBuffUpdate()`,
+and clears `weatherBuff` / `weatherGroup` so a respawned player starts with
+neutral weather state.
+
+## GameStageGroup
 Static registry of named gamestage groups (`AddGameStageGroup`, `TryGet`,
 `Groups`), populated by `GameStagesFromXml` from `gamestages.xml` during
 `WorldStaticData` load. `CleanName`/`MakeDisplayName` normalize names for the
@@ -749,6 +764,11 @@ a caller temp buffer (with optional exact-length and flush);
 `WriteStreamToFile` (IL=15/16) dumps a stream to a file (optional length),
 the dump path used for save/backup artifacts.
 
+## Changelog
+
+- **2026-08-08:** BlockRadiusEffect: EntityPlayerLocal.BlockRadiusEffectsTick
+  (IL=83) 3-chunk rotating scan + BlockRadiusEffectsApply (IL=58) radiusSq
+  buff apply; ResetBiomeWeatherOnDeath (IL=15) weather cvar reset.
 ## Changelog
 
 - **2026-08-08:** StreamUtils primitives: ReadVector3/3i/Quaterion
