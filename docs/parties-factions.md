@@ -189,6 +189,9 @@ other player - the pending-invite cleanup when a player leaves/disconnects.
      `Distance < GameStats[54]`, local `SharedKillClient` or
      `NetPackageSharedPartyKill.Setup(class, xp, killerId, entityId)` flags
      **192**. Killer is **skipped** in this loop (killer already got AddKillXP).
+     The package's `ProcessPackage` (IL=22) mirrors that split:
+     `ConnectionManager.IsServer` -> `GameManager.SharedKillServer`, else
+     `SharedKillClient`.
   3. **SharedKillClient** (**IL=65**): `AddLevelExp("_xpFromParty", XPTypes=0)`;
      optional tooltip; `QuestEventManager.EntityKilled` for the party member.
 - **Group gamestage / loot.** `get_GameStage` runs the member gamestages through

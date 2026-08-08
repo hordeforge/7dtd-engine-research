@@ -224,7 +224,8 @@ Client sends empty `NetPackageRequestToEnterGame` after accepting
 7. Yield `NetPackageLocalization.StartSendingPacketsToClient`.
 8. `WorldStaticData.SendXmlsToClient` (config S2C; [mod-loading.md](mod-loading.md) section 5.6).
 9. `NetPackageWorldInfo` (world name/seed/guid + relevant PPL + time bits).
-10. `NetPackageChunkClusterInfo` for the primary `ChunkCluster`.
+10. `NetPackageChunkClusterInfo` for the primary `ChunkCluster`
+    (`ProcessPackage` IL=13 -> `GameManager.ChunkClusterInfo`).
 11. `NetPackageWorldSpawnPoints` (`GameManager.GetSpawnPointList`).
 12. `NetPackageWorldAreas` (`World.TraderAreas`).
 13. `NetPackageGameStats` (`GameStats.Instance`).
