@@ -6,6 +6,8 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: DamageEntity wire re-verify (Setup 141 / write 176 / Process 172 / bIgnorePartyShare)
+## 2026-08-08 - tier-C: completion-bar cross-refs (consume 154, EAIManager 213/111, Vulture 1344)
 ## 2026-08-08 - tier-C: final 16h-session close (corpus complete; all gates green)
 ## 2026-08-08 - tier-C: map-objects third spot-check (8 claims exact)
 ## 2026-08-08 - tier-C: stealth + crafting + game-events third spot-check (18 claims exact)
