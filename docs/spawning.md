@@ -1102,6 +1102,18 @@ and `GameStageDefinition` has static `DifficultyBonus`, `LootBonusScale`,
 `LootBonusMaxCount` and `LootBonusEvery`. That is the whole surface a gamestage
 port needs.
 
+**Gamestage leaves:** `GetStage(stage)` (IL=43) is the bracket lookup: null for
+an empty list or a value below the first `stageNum`, else
+`stages[clamp(GetBoundIndex(stages, s => s.stageNum <= stage), 0, Count-1)]` -
+the highest stage whose `stageNum` is at or below the gamestage.
+`GetBoundIndex(list, f)` (IL=42) is the binary search for the **last** index
+where the monotone predicate holds (the `<=` predicate makes it a
+lower-bound-inverted search). `CalcGameStageAround(player)` (IL=38) collects
+`GetPlayersAround(position, 100)` and party-levels only the stages of players
+sharing the same `PrefabInstance` as the given player. `SortStages` (IL=13)
+orders the stage list ascending by `stageNum` (called after XML load);
+`AddStage` (IL=5) appends.
+
 This matters for sleeper volumes: the dominant `SleeperVolumeGroup` value in
 `Data/Prefabs/POIs` is `GroupGenericZombie` (4781 occurrences), which is **not** an
 entitygroup: it is a `gamestages.xml`
@@ -1181,6 +1193,10 @@ above.
   single, EntitySpawnerClass build + AddForDay, empty-spawner throw.
 ## Changelog
 
+- **2026-08-08:** GameStageDefinition leaves: GetStage (IL=43) bracket via
+  GetBoundIndex (IL=42, last index where stageNum <= stage) + clamp;
+  CalcGameStageAround (IL=38) same-prefab players within 100 m;
+  SortStages ascending; AddStage.
 - **2026-08-08:** EntitySpawner persistence + parse: Write v3 / Read v>1/v>2
   gates + DefaultClassName fallback; Spawn wrapper + CanSpawn gate;
   ModifySpawnCountByGameDifficulty EnemySpawnMode gate; burst path when
