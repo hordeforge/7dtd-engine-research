@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: rally block activation
+
+ObjectiveRallyPoint.Current_BlockActivate (IL=182, quests-challenges.md):
+twitch vote gate, startTime/endTime hour window with InvalidStartTime
+tooltip, RemoveSharedNotInRange, server POI claim, RallyPointActivate.
+verified from IL. Commit 4523eb2.
 ## 2026-08-08 - tier-C: rally marker quest gates
 
 QuestJournal.CheckRallyMarkerActivation (IL=56) share gate + HandleRallyMarkerActivation (IL=36) Quest delegate (quests-challenges.md).

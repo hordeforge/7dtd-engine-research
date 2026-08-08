@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `ed759d5` rally marker quest gates |
-| Commits since dry-run `3b61d9c` | ~1085 |
+| HEAD (at handoff write) | `4523eb2` rally block activation |
+| Commits since dry-run `3b61d9c` | ~1086 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
