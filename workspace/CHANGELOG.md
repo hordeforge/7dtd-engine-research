@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: BuffValue wire format
+
+Write (IL=29) name/stack/duration/instigator/flags/updateTicks/pos; Read
+(IL=75) version gates (hash-name < 2, byte/u16 updateTicks, pos >= 3) +
+class pointer cache. Verified fresh dumps.
 ## 2026-08-08 - tier-C: buff passive application
 
 EntityBuffs.ModifyValue (IL=35) active-buff walk skipping paused;
