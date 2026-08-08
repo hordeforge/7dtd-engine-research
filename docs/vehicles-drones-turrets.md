@@ -369,6 +369,15 @@ the ejected rider keeps a damped share of the vehicle's motion.
   vehicle.GetMaxHealth() * 0.03` (a 3% of-max buffer the remaining hits must
   drain). So a vehicle can never die from ordinary damage - destruction is
   always the explosion ending, gated by the buffer plus the 20% roll.
+
+The cargo drop: `DropItemsAsBackpack()` (IL=94) collects the bag's non-empty
+slots plus the vehicle item value's `CosmeticMods` and `Modifications` (each
+mod as a count-1 stack) and calls `dropLoot(stacks, 0.9)`; `dropLoot`
+(IL=23) is `GameManager.DropContentInLootContainerServer(-1,
+"DroppedVehicleContainer", position + y*height, items, false, null)` - the
+destroyed vehicle leaves a `DroppedVehicleContainer` loot bag 0.9 m above
+its position holding the bag + mods.
+
 - **Fractional collision damage** accumulates in `damageAccumulator`:
   `ApplyAccumulatedDamage()` (IL=19) converts the integer part to
   `ApplyDamage` and keeps the fraction; the collision path feeds it
@@ -852,6 +861,11 @@ non-vehicle type is a content contract violation, not a graceful fallback.
 | [re-methodology.md](re-methodology.md) | How this was reversed |
 | [residuals.md](residuals.md) | Native / content residuals |
 
+## Changelog
+
+- **2026-08-08:** Vehicle cargo drop: DropItemsAsBackpack (IL=94) bag +
+  cosmetic/mods stacks; dropLoot (IL=23) DroppedVehicleContainer at
+  position + y*0.9.
 ## Changelog
 
 - **2026-08-08:** EntityVehicle.GetExitVelocity (IL=17) damped dismount
