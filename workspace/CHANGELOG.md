@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: move Twitch server records out of OOS
 ## 2026-08-08 - tier-C: minevents changelog for requirement catalog
 ## 2026-08-08 - tier-C: note stressAmount read version gate
 ## 2026-08-08 - tier-C: add stressAmount tail field to EntityCreationData
