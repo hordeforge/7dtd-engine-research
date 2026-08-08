@@ -6,6 +6,15 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: dropped-item distraction mechanic
+
+EntityItem (loot-economy.md): SetItemStack (IL=115) distraction config from
+passives 66 DistractionRadius (squared) / 67 Lifetime / 68 Strength / 69
+EatTicks, lastCachedItemStack clone, itemClass resolve; CanCollect (IL=12)
+gate; tickDistraction (IL=147) 20-tick throttle, IsRequireContactDistraction
+grounding gate, DistractionTags entity-class filter, pendingDistraction only
+when strictly closer, resistance-strength probability gate, lifetime
+decrement. verified from IL. Commits 76839f7, 2ac4be9.
 ## 2026-08-08 - tier-C: NPC stat regen + trader waypoint
 
 EntityStats.UpdateNPCStatsOverTime (IL=128, entity-stats.md): HealthChangeOT (105) buff sources with buffDamageRemainder fractional carry, DamageEntity with buff DamageSource, heal / non-buff Value*dt paths. EntityPlayer.onNewPrefabEntered (IL=92, map-objects.md): trader-prefab auto-waypoint at prefab center + RegisterNavObject, local-player only. verified from IL. Commits 7220b4b, 39cfb64.
