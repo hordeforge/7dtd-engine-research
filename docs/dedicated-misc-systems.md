@@ -373,6 +373,48 @@ their tracking. This is the server's authority on which placed blocks span
 chunks or exceed one cell. Complements [blocks.md](blocks.md) and
 [block-shapes.md](block-shapes.md).
 
+**`MultiBlockManager` register/cull core (all IL-verified):**
+`TryRegisterPOIMultiBlock(parentPos, bv)` (IL=132) requires feature 1,
+rejects a `CrossChunk` conflict, a duplicate POI placement, or a non-parent,
+and stores `(pos, rawData, RectInt of the multi-block's chunk footprint, 1)`.
+`TryRegisterCrossChunkMultiBlock(parentPos, bv)` (IL=179) requires feature 4,
+rejects a POI conflict, non-multi-block, child, single-cell or same-chunk
+footprints, stores `(pos, rawData, rect, 2)`, and groups the covered chunks
+via `regionFileManager.AddGroupedChunks`.
+`TryRegisterOversizedBlock(pos, bv)` (IL=82) requires feature 8, errors on a
+non-oversized block, computes the rotated world-aligned extents via
+`OversizedBlockUtils.GetWorldAlignedBoundsExtents`, stores
+`(pos, rawData, chunk rect, 4)` and adds the pos to
+`oversizedBlocksWithDirtyStability`.
+`TryRegisterTerrainAlignedBlock(pos, bv)` (IL=5) -> `...Internal` (IL=154)
+requires feature 16, errors on non-terrain-aligned / child blocks, reuses an
+existing entry with matching raw data (raw-data mismatch logged), and for a
+new entry follows the multi-block or oversized rect path, storing
+`(pos, rawData, rect, 8)` plus the `blocksWithDirtyAlignment` add.
+`DeregisterTrackedBlockDataInternal(pos)` (IL=36) counts multi-block
+deregistrations, `RemoveTrackedData(pos, 15)` and drops both dirty sets;
+`ProcessDeregistrationCleanup()` (IL=84) runs when the count exceeds **20**:
+`regionFileManager.RebuildChunkGroupsFromPOIs()` then re-groups every chunk
+in each cross-chunk multi-block's footprint.
+`CullCompletePOIPlacements()` (IL=69) removes POI multi-blocks whose entire
+footprint is saved-and-dormant
+(`AllOverlappedChunksAreSavedAndDormant` helper); `CullChunklessData()`
+(IL=65) deregisters entries with no synced / save-dir overlapped chunk then
+runs the cleanup; `CullChunklessDataOnClient(removedChunks)` (IL=69) is the
+client (mode 5) twin.
+`SetOversizedStabilityDirty(pos)` (IL=100) marks every oversized block whose
+local stability bounds contain the position (error on chunk-bin / data
+mismatch); `SetTerrainAlignmentDirty(pos)` (IL=46, plus the `BlockValueRef`
+dispatcher IL=14) marks terrain-aligned blocks, warning when none is
+registered at the position; `OnChunkInitialized` (IL=51) and
+`OnChunkRegeneratedOrDisplayed` (IL=34) add the chunk-overlapping oversized /
+terrain-aligned blocks to the dirty sets.
+`TryGetOversizedBlock(worldPos, out oversizedBlock, out parent, out offset)`
+(IL=115) resolves the enclosing oversized block from the chunk bin
+(world-to-local matrix + center-within-bounds, rounded local offset);
+`GetMinMaxWorldPositions(parentPos, bv, out min, out max)` (IL=44) folds the
+rotated `multiBlockPos` offsets into the world bounds.
+
 ## OversizedBlockUtils
 
 Pure geometry helpers for oversized/rotated block bounds: world/local matrix
