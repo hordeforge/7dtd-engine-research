@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: world-generation doc spot-check (9 claims exact)
 ## 2026-08-08 - tier-C: light-mesh-water doc spot-check (10 claims exact)
 ## 2026-08-08 - tier-C: loot-economy trader-area spot-check (9 claims exact)
 ## 2026-08-08 - tier-C: protocol-frames 0xCA marker IL-verified (LiteNetLib auth wrapper)
