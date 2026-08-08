@@ -30,6 +30,7 @@ post-update:
 census: tools
 	@test -f "$(ASM)" || (echo "ASM not found: $(ASM)"; exit 2)
 	MONO_PATH="$(TOOLS)/bin" mono "$(TOOLS)/bin/Census.exe" "$(ASM)"
+	python3 "$(TOOLS)/census-pct.py" "$(ASM)"
 
 drift:
 	cd "$(TOOLS)/parity" && ./drift-check.sh "$(ASM)"
