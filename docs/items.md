@@ -818,6 +818,20 @@ with the `bReplacePaintNextTime` latch; `getCurrentPaintIdx` (IL=16) is
 `ProjectVectorOnPlane(normal, vector)` (IL=8) is
 `vector - dot(vector, normal) * normal`.
 
+**`ItemActionAttack` leaves (all IL-verified):** `StaminaModifier(stamina)`
+(IL=2) returns the value unchanged (base); `get_Hitmask()` (IL=3) reads
+`hitmaskOverride`; `ShowAmmoInUI()` (IL=5) is `BulletsPerMagazine > 0`.
+`GetItemValueActionInfo(infoList, itemValue, xui, actionIndex)` (IL=77)
+builds the tooltip damage strings (`lblEntDmg` = `GetDamageEntity` scaled by
+the ranged / melee damage percent via the `MeleeTag` check, `lblBlkDmg` =
+`GetDamageBlock` times `BlockDamagePercent`, then `BuffActionStrings`);
+`getOverlayData(actionData, out perc, out text)` (IL=51) is the damage
+overlay (`(damageMax - block.damage) / damageMax`, `{remaining}/{max}`
+text). `HasRadial()` (IL=11) is non-empty magazine names;
+`radialValidTest(sender, context)` (IL=34) accepts the radial entry only
+while holding the same gun with no action running; `showGunFire()` (IL=1)
+is the base particle no-op.
+
 **`ItemActionMelee` (classic melee, `: ItemActionAttack`):**
 `ExecuteAction` (IL=116) is release-gated: a released click sets
 `bFirstHitInARow = true` and returns; a held tick passes the `Delay` gate
