@@ -566,6 +566,26 @@ on the 1->0 transition, flushes every accumulated mask through
 write marks dirty layers in bulk and the real relight/remesh fallout runs
 once when the batch ends.
 
+**Chunk-loading / regeneration-state leaves:** `ChunkCluster.UpdateRegenerationState
+(chunkKey, state)` (IL=33) returns immediately on a dedicated server, else
+`chunkRegenerationHistories.GetOrAdd(key)` gets a per-chunk
+`StateHistory<ChunkState>` and (under the monitor) `Add`s the state - the
+client chunk-lifecycle history fed by `AddChunkSync` / `RemoveChunk` /
+`UnloadChunk` / `RegenerateChunk`.
+`SecondsSinceChunkStartedRegeneration(chunkKey)` /
+`SecondsSinceChunkEndedRegeneration(chunkKey)` (IL=20 each) look up a
+`(int, DateTime)` tuple in the `chunkRegenerationStartTimestamps` /
+`chunkRegenerationEndTimestamps` concurrent dicts and return
+`(startCount, (UtcNow - timestamp).TotalSeconds)`, or `(-1, -1)` on a miss.
+`NotifyOnChunksFinishedLoading()` (IL=10) invokes
+`OnChunksFinishedLoadingDelegates` when set (fired from `AddChunkSync`) and
+latches `bFinishedLoadingDelegateCalled`.
+`GetIndexedBlocks(name)` (IL=71, **0 call sites on b14**) scans
+`GetChunkArrayCopySync`, skips chunks with `InProgressUnloading` (under the
+chunk monitor), and collects `chunk.ToWorldPos(p)` for every entry of
+`chunk.IndexedBlocks[name]` into one world-position list - the named
+block-index query.
+
 ### 5.0 `Chunk.SetBlockRaw` (IL=386)
 
 Silent in-chunk write used by load, falling, inject, and some TE paths:
@@ -862,6 +882,11 @@ locally.
 `StabilityCalculator::BlockPlacedAt` / `BlockRemovedAt` (with `Block::StabilityFull`
 as the flag) for the block and for every `multiBlockPos` cell, on the client as
 well as the server.
+
+`ChunkCluster::ClearStabilityForChunks(chunks)` (IL=9) is the teardown twin:
+`stabilityCalcMainThread.ClearChunkStabilityQueues(chunks)` plus
+`world.ClearFallingBlocksForChunks(chunks)` (drops pending falls for the
+unloading set).
 
 `StabilityCalculator/UpdatePhysics` (1095820-1095900) is a coroutine gated on
 `GameStats.GetBool(EnumGameStats.ChunkStabilityEnabled)` at IL_0014 and on
