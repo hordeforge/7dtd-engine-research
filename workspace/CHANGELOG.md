@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: tile-entities + world-chunks third spot-check (16 claims exact)
 ## 2026-08-08 - tier-C: aidirector + spawning third spot-check (13 claims exact)
 ## 2026-08-08 - tier-C: entity-ai third spot-check (11 claims exact)
 ## 2026-08-08 - tier-C: items third spot-check (8 claims exact)
