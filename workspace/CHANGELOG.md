@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: drone pathing (GetPath refinement, followPlannedPath unstick)
+
+Projected-path source, LOS refinement pass (lower/skip), stuck-unstick teleport (verified)
 ## 2026-08-08 - tier-C: drone server systems (updateDroneSystems, procEnemies, shutdown descent, pickup)
 
 Hook registration (teleport/party), sensor follow-distance switch, heal-need check, debug enemy steer, powered-down descent, pickup collect path (verified)

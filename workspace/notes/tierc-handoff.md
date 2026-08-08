@@ -20,8 +20,8 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `3c0bd23` drone server systems (updateDroneSystems, procEnemies, shutdown descent, pickup) |
-| Commits since dry-run `3b61d9c` | ~1202 |
+| HEAD (at handoff write) | `5bd16ea` drone pathing (GetPath refinement, followPlannedPath unstick) |
+| Commits since dry-run `3b61d9c` | ~1203 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated ~1509 / catalogued ~814 / classified ~1376 / unaccounted **0** |
 | Session plan | `workspace/notes/tierc-grind-8h.md` |
