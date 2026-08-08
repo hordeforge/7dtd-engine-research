@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: server-start analytics + static-data boot wrapper
+
+ServerStartEventData build (sandbox preset, 25-pref settings, mods), ServerType split, loadStaticData coroutine (verified)
 ## 2026-08-08 - tier-C: world volume read-back + chunk coordinate helpers
 
 Sleeper/trigger/wall Read version split + dup-key errors, toChunk shift/mask family, pending downgrade consume (verified)
