@@ -678,6 +678,18 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   `AddXmlKeyValueProperty` (IL=10) is `<property name value>`; `AddXmlComment`
   (IL=21) appends a comment; `CreateXmlDeclaration` (IL=13) inserts
   `<?xml version="1.0" encoding="UTF-8"?>` before the document element.
+- **`LiveStats`** (18 methods): a survival-stat record (int `liveLevel`,
+  `maxLiveLevel`, `oversaturationLevel`; float `saturationLevel`,
+  `exhaustionLevel`; int `timer`) carrying the hunger/thirst drain simulation:
+  `OnUpdate(EntityPlayer)` burns `exhaustionLevel` at 1/sec while above 1,
+  consuming `saturationLevel` first and `liveLevel` when saturation is empty;
+  `AddStats(v)` converts life-level overflow into saturation capped at
+  `oversaturationLevel`; `AddExhaustion(v)` clamps at 40; the
+  `Read`/`Write` wire pair is `i16 liveLevel, i16 timer, f32 saturation,
+  f32 exhaustion`. **Dead in b14**: Xref shows the only call site of the
+  constructor is its own `Clone`, and no entity type holds an instance, so
+  the drain simulation never runs (the live system is
+  [entity-stats.md](entity-stats.md)).
 
 ## Changelog
 
