@@ -591,6 +591,31 @@ the player inventory (dropping when full) and removes the block via
 `World.SetBlockRPC(pos -> Air)`. The three denials and the timer UI are
 client-side; the block removal is the RPC that reaches the server.
 
+**`BlockPlacement*` rotation overrides (Auto mode):** base
+`BlockPlacement.OnPlaceBlock` handles `ToFace` / `Simple` / `Advanced`; six
+subclasses intercept only `EnumRotationMode.Auto` (3) and force the result
+rotation from geometry, delegating every other mode to the base.
+
+- **`BlockPlacementPlate` / `Spotlight` / `TowardsPlacer90` /
+  `TowardsPlacerInverted`** (IL=91 each): build the `Result` with
+  `rotation = 0`, then orient by where the placer stands relative to the hit
+  point: `dx = entityPos.x - hitInfo.pos.x`, `dz = entityPos.z - hitInfo.pos.z`;
+  the larger axis selects X vs Z, the sign picks the direction. Rotation
+  constants per class:
+
+| Class | `|dx|>|dz|, dx>0` | `|dx|>|dz|, dx<=0` | `|dz|>|dx|, dz>0` | `|dz|>|dx|, dz<=0` |
+|---|---:|---:|---:|---:|
+| `BlockPlacementPlate` | 5 | 7 | 4 | 6 |
+| `BlockPlacementSpotlight` | 2 | 0 | 1 | 3 |
+| `BlockPlacementTowardsPlacer90` | 0 | 2 | 3 | 1 |
+| `BlockPlacementTowardsPlacerInverted` | 1 | 3 | 0 | 2 |
+
+- **`BlockPlacementPineLeaves`** (IL=26): Auto forces `rotation = 0` (uniform
+  foliage, no facing).
+- **`BlockPlacementTorch`** (IL=53): Auto clears `meta`, keeps the block's own
+  rotation on `Top` / `Bottom` faces, and re-rotates by the wall face:
+  `North -> 0`, `West -> 3`, `South -> 2`, `East -> 1`.
+
 ```mermaid
 flowchart TB
   subgraph Placement
@@ -747,6 +772,11 @@ damage.
   GetTickRate schedule vs gaussian-jittered growthDeviation band 0.5x-1.5x.
 ## Changelog
 
+- **2026-08-08:** BlockPlacement* Auto-mode rotation overrides: Plate /
+  Spotlight / TowardsPlacer90 / TowardsPlacerInverted (IL=91 each) orient by
+  placer-vs-hit dx/dz with per-class rotation tables; PineLeaves (IL=26) forces
+  rotation 0; Torch (IL=53) wall-face rotation North 0 / West 3 / South 2 /
+  East 1, meta 0, Top/Bottom keep own rotation. Other modes delegate to base.
 - **2026-08-08:** OnBlockReset meta-state restore: base IL=1 no-op;
   BlockHazard (IL=33) re-arms runtime bit 1 to authored bit 0 via
   SetHazardState + SetBlockRPC; BlockLight (IL=35) promotes runtime bit 1
