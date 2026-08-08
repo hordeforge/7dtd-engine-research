@@ -80,7 +80,10 @@ then dequeues it. Vote configuration data: `TwitchVotePreset` (`Name`,
 `IsDefault`, `IsEmpty`, `Title`, `Description`, `BossVoteSettings`) and
 `TwitchRandomActionGroup` (`Name`, `RandomCount`, the random-action pick set)
 are the parsed `twitchevents.xml` records `TwitchVotingManager` and
-`TwitchManager` consult when a vote window opens.
+`TwitchManager` consult when a vote window opens. The registry that holds
+them is the `TwitchActionManager` singleton (`TwitchActions` +
+`TwitchVotes` dicts, `CategoryList`), populated by `TwitchActionsFromXml`
+and read by `TwitchManager` for action lookup during execution.
 
 **Server access gate (`NetPackageTwitchAccess`, ProcessPackage IL=55):**
 the client asks the server whether its Twitch integration may run; the
