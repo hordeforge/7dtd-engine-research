@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: protocol-packages 6.21 wire spot-check
 ## 2026-08-08 - tier-C: leftovers changelog IdPalette
 ## 2026-08-08 - tier-C: handoff session summary
 ## 2026-08-08 - tier-C: changelog wire-correction entry
