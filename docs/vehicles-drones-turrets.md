@@ -664,6 +664,23 @@ table:
 | 16384 | `OrderState` u8 + `SentryPos` 3 x f32 (only when Sentry) |
 | 32768 | `State` u8 + `userRequestedHeal` bool (only when Heal; the flag is cleared after send) |
 
+**Frame driver (`OnUpdateEntity`, IL=178):** base `EntityAlive.
+OnUpdateEntity` (skipped entirely under `DroneManager.Debug_LocalControl`),
+then `SyncOwnerData` -> `updateTransitionState` -> `updateAnimStates`. The
+shutdown gate runs `performShutdown` when `isShutdownPending` or the owner
+vanished while not already Shutdown, followed by `updateShutdownState`.
+The idle-hover loop sound starts only in `Idle` state for a local-owner
+drone that is not quiet and not on a dedicated server
+(`playSoundLoop("drone_idle_hover", 0.2)`). In Idle/Sentry/Follow states a
+periodic `areaScanTimer` runs `pathMan.IsConfinedSpace(pos, 3, false)`
+into `isInConfinedSpace`. Then `updatePartyBuffs` + `updateDroneSystems`.
+The focus-box node (Idle only, local owner, VO suppression done): when the
+player's `FocusBoxPosition` matches the drone's block and no node is
+cached, `ScanVolume` + `FindNodeType` cache `focusBoxNode`; with a cached
+node it moves toward its center while `isOutOfRange(center, 0.25)` and
+clears it otherwise (any non-Idle state also clears it). Ends with
+`updateDroneServiceMenu`.
+
 **`updateDroneSystems` (IL=169):** the per-frame server systems pass: ticks
 `initSuppressVOTimer`; on the server with an owner it lazily registers the
 owner teleport hook (`PlayerTeleportedDelegates += TeleportIfFollowing`,
