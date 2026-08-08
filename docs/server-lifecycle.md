@@ -688,6 +688,17 @@ entity); `ClearBedroll()` (IL=37) unregisters it, sets
 MaxValue), and on the server broadcasts
 `NetPackageEntityMapMarkerRemove(SleepingBag = 1, entityId)` on channel 192.
 
+**PPD trivials:** `IsAlly(other)` (IL=8/13) delegates to
+`persistentPlayers.Allies.IsAlly(primaryId, other)` (null-safe on a
+`PersistentPlayerData` argument). `AddLandProtectionBlock` / `GetLandProtectionBlocks`
+(IL=11/9) lazily allocate `LPBlocks`; `GetLandProtectionBlock(out pos)` (IL=21)
+returns `LPBlocks[0]` (or zero + false when empty); `RemoveLandProtectionBlock`
+(IL=6) is `LPBlocks.Remove`. `Update(nativeId, name, playGroup)` (IL=13) rebuilds
+the inner `PlayerData` keeping `PrimaryId` and refreshes `PlayerName`.
+`OfflineHours` / `OfflineMinutes` (IL=14 each) return **-1** while online
+(`EntityId != -1`), else `Now - LastLogin` in the unit. `MostRecentBackpackPosition`
+(IL=18) is the last timestamp-sorted backpack position (zero when none).
+
 
 
 ### 6.2 `PersistentPlayerList` save formats (verified)
@@ -775,6 +786,10 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-08:** PPD trivials: IsAlly x2 via AllyStore; LPBlocks lazy
+  alloc + GetLandProtectionBlock first-entry; Update rebuilds PlayerData
+  keeping PrimaryId; OfflineHours/Minutes -1 while online; MostRecentBackpackPosition
+  = last sorted. Adds to the PPD read/runtime entry above.
 - **2026-08-08:** PersistentPlayerData read + runtime leaves: binary Read
   (IL=167) mirrors Write; ReadXML (IL=587) version-0 acl -> legacyACL set,
   malformed attr hard-abort (Quit), per-entry ignore warnings, backpack 3-cap
