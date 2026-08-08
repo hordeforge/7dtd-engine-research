@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: vehicle dismount velocity
+
+EntityVehicle.GetExitVelocity (IL=17, vehicles-drones-turrets.md 4.2b):
+damped dismount velocity (x0.5 when grounded, x0.7); GetWheelsOnGround
+(IL=29) grounded-wheel count. verified from IL. Commit 306fc31.
 ## 2026-08-08 - tier-C: vehicle gas-can gate
 
 EntityVehicle.hasGasCan (IL=73, vehicles-drones-turrets.md 4.2b): fuel item
