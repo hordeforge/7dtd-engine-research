@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: Chunk coroutine iteration + geometry/bounds leaves
+
+LoopOverAllBlocksCoroutine per-layer yield, updateBounds corner literals, GetSameDensityValue, GetBlockWorldPosZ (verified)
 ## 2026-08-08 - tier-C: World event accessors + debug spawn ring + audio accessor
 
 EntityLoaded/Unloaded delegate add/remove (IL=20), DebugAddSpawnedEntity Last4Spawned ring, GetAudioManager (verified)
