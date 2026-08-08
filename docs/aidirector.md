@@ -983,6 +983,21 @@ day 1 12:00, `settime night` = day 2 00:00, `settime <time>` = raw world time wh
 1000 == one hour, and `settime <day> <hour> <minute>` with day>=1, hour<=23,
 minute<=59.
 
+**Console-debug leaves (all IL-verified):** `DebugTick()` (IL=7) and
+`DebugFrameLateUpdate()` (IL=7) drive the two debug emitters when the
+`debugSendNameInfoToPlayerIds` / `debugSendLatencyToPlayerIds` lists are
+non-empty. `DebugToggleSendNameInfo(playerId)` (IL=45) toggles the player in
+the name-info list, logs `DebugToggleSendNames {0} on/off` and on the off
+side broadcasts `NetPackageDebug.Setup(3, -1, null)` (channel 192);
+`DebugSendNameInfo()` (IL=110) is the throttled sender (a 5-tick
+`debugNameInfoTicks` counter). `DebugToggleSendLatency(playerId)` (IL=52)
+toggles the latency list, sending `NetPackageDebug.Setup(1, -1, null)` on
+the off side (falling back to `DebugLatencyOff()` for the primary player);
+`DebugLatencyOff()` (IL=42) destroys the `DebugLatency` child transform on
+every `EntityAlive`. `DebugToggleFreezePos()` (IL=14) flips the static
+`debugFreezePos` flag and logs it. `LogAIExtra(format, args)` (IL=6) routes
+to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
+
 ---
 
 ## Related docs
