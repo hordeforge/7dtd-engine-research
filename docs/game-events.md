@@ -548,6 +548,24 @@ of an existing non-permanent entry, otherwise appending a new one and calling
 (`HandleFlagChanged(flag, true, false)`). `CheckGameEventFlag(flag)` (IL=23)
 is a linear presence scan of the list.
 
+**Manager hooks and boss driver:** the event-registry plumbing -
+`AddSequence` (IL=11) dedupe-adds a `GameEventActionSequence` into
+`GameEventSequences`; `HandleGameEventApproved` / `HandleTwitchPartyGame
+EventApproved` (IL=11 each) and `HandleGameEventAccessApproved` (IL=7) are
+null-guarded invokes of the `OnGameEventStatus` / `OnGameEventAccessApproved`
+delegates; `HandleGameBlockRemoved` (IL=8) / `HandleGameBlocksAdded`
+(IL=11) fire the block-event delegates; `HandleTwitchSetOwner` (IL=15)
+runs `SetSpawnByData(targetEntityID, extraData)` on the spawned entity.
+`SendBlockDamageUpdate(pos)` (IL=32) finds every `blockEntries` record
+containing the position and bumps its sequence's `Damaged` event variable
+(`ModifyEventVariable("Damaged", Add, 1, int.MinValue, int.MaxValue)`).
+`UpdateCurrentBossGroup(player)` (IL=95) ticks the active `BossGroup` on a
+1-second cadence, clears it when `ReadyForRemove` or out of range, and
+picks the first in-range group from `BossGroups` as the current one; a
+client that has not initialized sends `NetPackageBossEvent(0, -1)` to the
+server first. `HandleForceBossDespawn(player)` (IL=31) `RemoveNavObjects` +
+`DespawnAll`s every boss group targeting the player.
+
 Request/response wire flow (packages annotated in
 [`protocol.md`](protocol.md)):
 
