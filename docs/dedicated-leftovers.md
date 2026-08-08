@@ -571,6 +571,10 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   pipeline ([dynamic-mesh.md](dynamic-mesh.md) §4).
 - **`PathNodePool`** (`WorldGenerationEngineFinal`): a pooled path-node allocator
   used during RWG road/path routing ([world-generation.md](world-generation.md)).
+- **`World.IsMaterialInBounds(aabb, material)`** (IL=79): a brute-force scan of
+  every integer cell inside the bounds (`Fastfloor(min)` .. `Fastfloor(max + 1)`
+  per axis) returning true when any `GetBlock(x, y, z).Block.blockMaterial`
+  matches; **0 call sites on b14** (an unused world-query leaf).
 
 ## Changelog
 

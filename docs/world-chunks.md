@@ -813,6 +813,22 @@ type still matches entry `blockID`, call
 **`AddScheduledBlockUpdate(pos, blockId, ticks)` (IL=39):** no-op if blockId 0;
 build entry at `GameTimer.ticks + ticks`; under lock replace existing same
 hash then `add(entry)`.
+
+**Chunk-load schedule restore (`World.OnChunkAdded` / `OnChunkBeforeRemove` /
+`updateChunkAddedRemovedCallbacks`):** `OnChunkAdded(chunk)` (IL=20) records
+the chunk key in the locked `newlyLoadedChunksThisUpdate` list; the first
+step of `World.OnUpdateTick` (loop.md §3.2), `updateChunkAddedRemovedCallbacks`
+(IL=67), drains it in reverse, calling `Chunk.OnLoad(world)` for chunks that
+are present and no longer `NeedsDecoration`, then on the server
+`worldBlockTicker.OnChunkAdded(world, chunk, rand)`.
+`WorldBlockTicker.OnChunkAdded` (IL=93) is the schedule restore: it pops the
+`wbt.sch` entry from the chunk's custom data, reads the count and per-entry
+tick data via a pooled reader (`WorldBlockTickerEntry.Read`), and under the
+ticker lock re-adds future entries (`scheduledTime > GameTimer.ticks`) or
+executes overdue ones immediately with the elapsed delay.
+`OnChunkBeforeRemove(chunk)` (IL=31) drops the key from
+`newlyLoadedChunksThisUpdate`, calls `worldBlockTicker.OnChunkRemoved(chunk)`,
+and `GameManager.Instance.prefabLODManager.TriggerUpdate()`.
 | `AddFallingBlock` / `LetBlocksFall` | 38 / 220 | Collapse storms |
 | `AddFallingBlock` detail | 38 | HashSet dedupe; skip child/air/`StabilityIgnore`/oversized (unless include); `DynamicMeshManager.AddFallingBlockObserver`; enqueue `fallingBlocks` |
 | `EntityFallingBlock` OnUpdateEntity | 300+ | Entity cost |

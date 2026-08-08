@@ -650,6 +650,11 @@ a `TryGetValue` under the lock and **throws** `SleeperVolume id {0} not found`
 on a miss (a hard-fail lookup, not a null return);
 `GetAllSleeperVolumes(volumes)` (IL=43) copies every `(id, volume)` tuple into
 the caller's list under the same lock.
+`RemoveSleeperVolumesFor(prefabInstance)` (IL=45) is the prefab-removal path:
+under the same lock it walks `prefabInstance.sleeperVolumes`, calls
+`SleeperVolume.DespawnAndReset(world)` on each, removes the
+`VolumeKey(volume)` from `sleeperVolumeMap`, and drops the id from
+`sleeperVolumes`.
 
 **Chunk-side links:** `Chunk.sleeperVolumes` is a `List<int>` of volume ids;
 `AddSleeperVolumeId(id)` (IL=18) dedupes and appends, logging
@@ -2415,7 +2420,14 @@ case-insensitive `ReadOnlySpan` equality (the activation-command match).
 and the local-player list; `GameManager.GetPersistentLocalPlayer` /
 `GetGameStateManager` (IL=3) are the persistent-data / game-state accessors;
 `GameManager.IsSafeToConnect` (IL=7) is `CurrentMode == 0` (offline).
-leaf).
+Local-player helpers: `GetVectorToClosestLocalPlayer(pos)` (IL=7) is
+`GetClosestLocalPlayer(pos).GetPosition() - pos`;
+`GetDistanceToClosestLocalPlayer` (IL=7) is its magnitude;
+`GetSquaredDistanceToClosestLocalPlayer` (IL=7) its sqrMagnitude;
+`GetLocalPlayerFromID(id)` (IL=5) is `GetEntity(id) as EntityPlayerLocal`.
+`SetLocalPlayer(player)` (IL=16) stores `m_LocalPlayerEntity` and attaches
+the player to the audio manager, `LightManager` and the occlusion camera;
+`RemoveLocalPlayer(player)` (IL=6) removes it from `m_LocalPlayerEntities`.
 
 **`FindValidExitPosition` (IL=14) / `GetFallingSavePosition` (IL=161):**
 vehicle dismount + fell-through-world rescue. `FindValidExitPosition` records

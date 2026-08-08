@@ -312,6 +312,17 @@ the batch commit machine picks the `SetBlockValue` vs position path.
 `PropRef.Read` (IL=12) is `ChunkPos : Vector2i` + `PropId : i32` - a prop is
 addressed by its prop chunk plus a per-chunk id.
 
+**`World.blockToTransformPos` (the ref-to-position resolution):** the
+`BlockValueRef` overload (IL=24) switches on `Type`: `None` returns
+`Vector3.zero`, `BlockPosition` goes to the `Vector3i` overload (IL=15) which
+returns the cell center `(x + 0.5, y, z + 0.5)`, and `PropReference` goes to
+the `(WorldBase, PropRef)` overload (IL=17) which reads the prop value from
+`GetChunkSync(propRef.ChunkPos)` and adds
+`chunk.GetWorldPos().ToVector3CenterXZ() + propValue.transform.position`; an
+unknown type throws `ArgumentOutOfRangeException`. The callers are the block
+FX / voxel / terrain-alignment paths (`SpawnDestroyParticleEffect`, `SpawnFX`,
+`Voxel.BlockHit`, `TerrainAlignmentUtils.AlignToTerrain`).
+
 ### 4.1 The batch commit machine (`SetBlocksRPC` -> `ChangeBlocks`)
 
 `World.SetBlocksRPC(changes)` (IL=6) is a one-line delegator:
