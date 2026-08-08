@@ -489,7 +489,7 @@ target - the one shared predicate shape (the XOR appears as
 - **`IsSleeping`** (IL=~30): target is an `EntityEnemy` with `IsSleeping`
   set (non-enemy fails).
 - **`WasAlive`** (IL=~30): `target.WasAlive()`.
-- **`IsBloodMoon`** (IL=17): `SkyManager.IsBloodMoonVisible()` XOR `invert`
+- **`IsBloodMoon`** (IL=11): `SkyManager.IsBloodMoonVisible()` XOR `invert`
   (the blood-moon sky state, not the game-stage check).
 - **`IsIndoors`** (IL=~30): `target.Stats.AmountEnclosed > 0` (the enclosure
   amount from the survival stats).
