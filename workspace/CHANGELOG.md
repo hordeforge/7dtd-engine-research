@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: connection send/queue leaves
+
+Writer wake, reliable-first drain, maxPacketSize split, server/client route, error re-queue retry (verified)
 ## 2026-08-08 - tier-C: ProtocolManager server bring-up
 
 Protocol list build (prefs 144 + launch args), port validation 1024-65530, start/stop/mode reset (verified)
