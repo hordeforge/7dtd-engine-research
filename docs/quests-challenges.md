@@ -570,6 +570,18 @@ Objectives and Events from the template and re-derives `HighestPhase` from the
 cloned objective phases, but does **not** copy Rewards. A template-derived quest's
 rewards come solely from its own `<reward>` children.
 
+**`QuestClass` leaves:** `CreateQuest()` (IL=147) builds the runtime `Quest`
+(`new Quest(ID)`, version / faction / tags copied) and clones every action,
+requirement, objective and reward with `OwnerQuest` set - the template-to-
+instance materialization. `CanActivate` (IL=26) is true with `EnemySpawnMode`
+on, else only when no objective `RequiresZombies`. `GetCurrentHint(phase)`
+(IL=52) returns the phase hint (1-indexed `QuestHints` list, localized; a
+non-keyboard input style first tries the `<hint>_alt` localization), empty when
+the configured `QuestHintRequirement` sandbox option is off (165 skips the
+check). `CheckCriteriaQuestGiver(npc)` / `CheckCriteriaOffer(player)` (IL=29
+each) AND the matching `CriteriaType` entries; `ResetObjectives` (IL=18)
+resets every objective.
+
 **`QuestsFromXml::ParseObjective` (1391043-1391246)** resolves the class purely by
 reflection: `ReflectionHelpers::GetTypeWithPrefix("Objective", typeString)` plus
 `Activator.CreateInstance`, so there are no objective-type string literals anywhere
@@ -698,6 +710,9 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
   TraderPOI linear scan.
 ## Changelog
 
+- **2026-08-08:** QuestClass leaves: CreateQuest (IL=147) template-to-instance
+  clones; CanActivate RequiresZombies gate; GetCurrentHint 1-indexed hints +
+  _alt localization + sandbox gate; CheckCriteria* AND pass; ResetObjectives.
 - **2026-08-07:** BlockDestroyed IL=49 BlockDestroy event + HandleTrigger via
   closest player within 500 m.
 - **2026-08-06:** Quest template inheritance (`ParseQuest` bTemplate skip +
