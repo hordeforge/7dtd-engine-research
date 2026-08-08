@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityGroups registry leaves
+
+IsEnemyGroup, Normalize(name, totalp), EntityGroupSpawnState roll + DidSpawn,
+EntityGroupsFromXml parseGroup text/element chain (prob default 1, none id 0,
+throws, normalize, empty-group reject). Verified fresh dumps.
 ## 2026-08-08 - tier-C: nav-object chain + AI director leaves
 
 MinEventActionSetNavObject (add/sprite/cvar_to_text) + Entity AddNavObject/
