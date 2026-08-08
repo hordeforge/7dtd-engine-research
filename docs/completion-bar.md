@@ -70,6 +70,12 @@ Closed in recent sessions (still optional, not required for A+B):
 
 | Topic | Doc |
 |---|---|
+| Requirement framework + all 26 leaves | minevents §7.0a |
+| Power block wrappers (block to TE identity) | tile-entities-power §3.7 |
+| Block behavior leaves (cactus/hay AABB, sibling remove, forge/sign) | blocks §8 |
+| ItemAction leaves (Melee/Cancel/ExchangeItem/DisconnectPower/UseOther/TextureBlock) | items §4.2 |
+| Spawn-turret/vehicle preview lifecycle | vehicles-drones-turrets §7.1 |
+| EntityPlayer leaves (trader stage, alive reset, quest events) | loot-economy §8 / entity-ai / quests-challenges |
 | ASP FindPaths FIFO + `ldc.i4.8` drain | entity-ai §D3.7 |
 | Interest exit = `NetPackageEntityRemove` / Unloaded | network §2.2 |
 | `Chunk.NeedsSaving` predicate | world-chunks |

@@ -777,7 +777,28 @@ up), rounds to a `Vector3i`, and clears the sibling at
 **Thin stubs worth knowing:** `BlockMusic.OnBlockAdded` / `OnBlockRemoved`
 are IL=1 no-ops (the music behaviour is not on the block);
 `BlockRanged.Init` (IL=16) only parses `AmmoItem` into `AmmoItemName`
-(the powered-ranged-trap base, [tile-entities-power.md](tile-entities-power.md) §3.7).
+(the powered-ranged-trap base, [tile-entities-power.md](tile-entities-power.md) §3.7);
+`BlockCampfire` has no overrides at all (pure `BlockWorkstation` config, the
+workstation TE owns the behavior).
+
+**Forge visuals (`BlockForge`):** `checkParticles` (IL=15) runs base
+`BlockWorkstation.checkParticles` then `MaterialUpdate` for non-child
+positions. `MaterialUpdate` (IL=64) sets `_EmissionMultiply` on the forge's
+first mesh-renderer material to **20** while the block `meta != 0`
+(burning) and 0 otherwise, then shares that material instance across every
+renderer of the block entity. `GetActivationText` (IL=29): with
+`XUiM_Recipes.DisableSmelter` (smelter disabled in options) and a non-empty
+workstation input it returns the `useForgeMaterials` string, else the
+localized block name plus `useWorkstation`.
+
+**Sign stack (`BlockSign`):** `Init` (IL=27) parses `UpwardsCount`
+(default 1), sets `IsTerrainDecoration = true` and
+`CanDecorateOnSlopes = false`. `OnBlockAdded` (IL=50), once (meta bit 1
+unset), runs the base shape add, sets meta bit 1, and writes the same
+block value into the `upwardsCount` rows above via `SetBlockRaw`.
+`RenderDecorations` (IL=17) forwards to the shape only when meta bit 1 is
+clear, so the top parent renders the decoration and the stacked boards do
+not (the parent/child split of the vertical sign).
 
 ---
 
