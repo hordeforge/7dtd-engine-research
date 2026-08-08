@@ -6,6 +6,12 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: craft-complete XP
+
+EntityPlayerLocal.GiveExp (IL=54, crafting-recipes.md 2): _craftCount_
+recipe var accumulation, AddLevelExp(CraftExpGain / total, _xpFromCrafting),
+totalItemsCrafted, QuestEventManager.CraftedItem hook. verified from IL.
+Commit 7422dc2.
 ## 2026-08-08 - tier-C: item tag-scan lookups
 
 ItemClass.GetItemWithTag (IL=30) / GetItemsWithTag (IL=33): linear
