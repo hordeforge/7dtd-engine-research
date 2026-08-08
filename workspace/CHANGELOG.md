@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: ChunkProviderGenerateWorldFromRaw file/heightmap pipeline
+
+loadDTM/getFilenameDTM/ctor defaults, verifyFileHashes + processFiles coroutine stages, ReloadAllChunks/Cleanup (verified)
 ## 2026-08-08 - tier-C: ItemClass id/activation/creative-list/cleanup leaves
 
 SetId parent-pointer, SetActivated flag fold, GetItemsAndBlocks creative list (mode/favorites/filter/sort), HeldEntity catalyst + cleanup leaves (verified)
