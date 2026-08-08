@@ -404,6 +404,28 @@ flowchart TD
   SnapTake --> Write[RegionFileChunkWriter.WriteStreamCompressed]
 ```
 
+**Protection cache (`RegionFileManager/ProtectedPositionCache`):** the ctor
+(IL=30) builds nine position lists: bedrolls, lpBlocks (land-claim),
+offlinePlayers, backpacks, quests, vendingMachines, vehicles, drones and
+supplyCrates. The manager's `ppdPositionCache` feeds the protection-level
+refresh (`s_UpdateProtectionLevels` marker) so `CullExpiredChunks` never
+evicts chunks that still protect player positions; the per-category margins
+are the static `cProtected*ChunkMargin` fields (land claim, bedroll,
+offline player, dropped backpack, vehicle, quest objective, supply crate).
+
+**Chunk access scopes:** `ScopedChunkAccess.GetChunkReadAccess(chunks, x, z)`
+(IL=6) wraps `GetChunkSync(x, z)` in a `ScopedChunkReadAccess`;
+`GetChunkWriteAccess` (IL=5/6) does the same for the write scope.
+`ScopedChunkReadAccess.Dispose` (IL=8) is a null-guarded
+`Chunk.ExitReadLock()` - the RAII read/write-lock pattern used around chunk
+mutations on the save thread (the lock entry point is
+`Chunk.EnterReadLock` / `EnterWriteLock`).
+
+**`RegionItemData`** (IL=10/15) is the dynamic-mesh region record:
+`Update(x, z, updateTime)` stores the triple, and the `DynamicMeshItem`
+overload copies `WorldPosition.x/z` plus `UpdateTime` from the item
+([dynamic-mesh.md](dynamic-mesh.md) §1).
+
 ### 3.2 Snapshot blob (in-memory before region write)
 
 `RegionFileChunkSnapshot.Update(Chunk, saveIfUnchanged)` IL=111:
