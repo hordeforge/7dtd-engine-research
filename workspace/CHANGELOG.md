@@ -6,6 +6,9 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: EntityFlying base MoveEntityHeaded
+
+Airborne motion model (corpse settle decay, water drag 0.8, damp 0.91/0.55/friction, accel 0.163/damp^2); no direct stock caller (vulture integrates its own motion), virtual-reachable (verified)
 ## 2026-08-08 - tier-C: save-region leaves (ProtectedPositionCache, ScopedChunkAccess, RegionItemData)
 
 9-category protection cache + cProtected margins, RAII chunk read/write scopes (ExitReadLock), DynamicMeshItem region record; Chunk Enter/Exit locks pinned (verified)
