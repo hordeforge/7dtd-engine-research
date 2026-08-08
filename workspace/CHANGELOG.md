@@ -6,6 +6,11 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-08 - tier-C: prefab stamp wrapper
+
+Prefab.CopyIntoLocal (IL=680, server-browser-prefabs.md 3.1):
+CopyVolumesIntoWorld first, per-chunk RandomFromSeedOnPos + world-time
+seeded GameRandom for the stamp. verified from IL. Commit 2215877.
 ## 2026-08-08 - tier-C: prefab placement commit
 
 PrefabInstance.CopyIntoWorld (IL=85, server-browser-prefabs.md 3.1):
