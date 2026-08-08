@@ -818,6 +818,16 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-08:** Round-trip symmetry IL-verified: `WorldState.SaveLoad(Stream)` is a
+  unified `IBinaryReaderOrWriter` codec (one path writes and reads, so write/read
+  can't diverge); the documented field order (version, gameVersionString,
+  VersionInformation, activeGameMode, water/chunk geometry incl. the Y/Z swap,
+  chunkCount, providerId, seed, worldTime, timeInTicks, SpawnPointList, nextEntityID,
+  saveDataLimit, dynamicSpawner/AIDirector blobs) matches the IL sequence exactly.
+  `PlayerDataFile.Write`/`Read`: all 44 serialized fields appear on both sides;
+  the 5 read-only references are runtime helpers (Save, WriteNetwork, metadata,
+  bModifiedSinceLastSave, rentalEndTime), not serialized state.
+
 - **2026-08-08:** WorldChunkCache.NotifyOnChunkBeforeSave (IL=19):
   IChunkCallback fan-out before chunk snapshot.
 ## Changelog
