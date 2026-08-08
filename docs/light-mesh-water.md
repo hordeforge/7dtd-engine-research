@@ -131,6 +131,21 @@ Full scan list: `7days-realworld/docs/realearth-surfaces.md` §7.1.
 | `ChunkCluster.RegenerateChunk` | | - | After dirty |
 | `doCopyChunksToUnity` | | 252 | **Skipped on dedicated** |
 
+**Terrain-mesh build helpers (client-side voxel meshing):**
+`TerrainSubMesh` is the per-texture submesh accumulator the terrain mesh
+generator feeds: `Contains` (IL=28) / `CanAdd` (IL=58) test a texture-id
+list against the submesh's tracked ids, `Add` (IL=60/61) appends a texture
+set, `GetColorForTextureId` (IL=16) resolves the atlas color, and
+`GetTextureIdCount` / `GetTextureId` read the list back.
+`MeshCalculations` is the procedural vertex post-pass: `CalculateMeshTangents`
+(IL=477-481, three collection overloads) computes tangents from
+vertices / indices / normals / uvs with an optional `_bIgnoreUvs` flag, and
+`RecalculateNormals` (IL=330-331) recomputes smoothed normals with an angle
+threshold (the `0.01745329` deg-to-rad constant converts the `angle`
+parameter). Both are pure Unity-mesh math; a dedicated server never runs
+them (it streams raw chunk data and the clients mesh), so they are engine
+surface only, catalogued for completeness.
+
 ---
 
 ## 4. Water
