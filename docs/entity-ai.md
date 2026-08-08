@@ -2045,6 +2045,15 @@ or default step at volume.
 `jumpMovementFactor` **0.163** path into `Move`; climb zeros some motion;
 `entityCollision`; gravity `World.Gravity * 0.025` on y; repeated 0.91 damp.
 
+**Player anti-stuck (`EntityPlayerLocal.pushOutOfBlocks`, IL=225 + 
+`shouldPushOutOfBlock` IL=50):** each frame the local player floors its
+position and probes the 3x3 cell neighborhood (plus the current cell, with
+a crouch variant) through `shouldPushOutOfBlock(x, y, z, pushOutOfTerrain)`:
+a cell whose `BlockShape.IsSolidSpace && !IsTerrain()` pushes the player
+out; with `pushOutOfTerrain` a solid-terrain cell pushes out only when the
+cell above is also solid terrain (the buried case). The matched cells push
+the player's position to the nearest free spot.
+
 **`Entity.GetVelocityPerSecond` (IL=21) / `EntityPlayer.GetVelocityPerSecond`
 (IL=13):** base: attached → delegate to the attached entity's own
 `GetVelocityPerSecond`; else `physicsRB.velocity` when a rigidbody exists; else
@@ -3268,6 +3277,11 @@ appends to `ownedEntities`, and on the server broadcasts
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
 [items.md](items.md) (held-entity item types).
 
+## Changelog
+
+- **2026-08-08:** Player anti-stuck: pushOutOfBlocks (IL=225) 3x3 neighborhood
+  probe; shouldPushOutOfBlock (IL=50) solid non-terrain always, buried
+  terrain when the cell above is solid too.
 ## Changelog
 
 - **2026-08-08:** EntityPlayerLocal.SwimModeUpdateThrottle (IL=258): camera
