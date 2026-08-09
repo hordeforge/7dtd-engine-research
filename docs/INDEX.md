@@ -1,7 +1,7 @@
 # 7DTD dedicated RE documentation (generic engine)
 
 **Owns:** hub for **generic** dedicated engine RE narratives + dump index.  
-**Not:** RealEarth product status/lessons (`7days-realworld`, private companion project, not published).  
+**Not:** RealEarth product status/lessons (`7dtd-realworld`, private companion project, not published).  
 **Game:** V3.1.0 (b14) dedicated `Assembly-CSharp.dll`.  
 **Policy:** research only. Do not redistribute game IL or managed DLLs.  
 **Coverage bar:** dedicated-relevant **managed** surfaces. Open leftovers: [`residuals.md`](residuals.md).
@@ -11,7 +11,7 @@ docs/              generic engine narratives (this folder)
 docs/inventories/  raw method/call inventories backing the narratives
 il/                regenerable Mono.Cecil dumps only (local; not in git)
 oss-tools/         survey notes on third-party server tools/mods
-7days-realworld/   RealEarth product docs (private companion, not published)
+7dtd-realworld/   RealEarth product docs (private companion, not published)
 ```
 
 ---
@@ -78,7 +78,7 @@ flowchart LR
   B --> C[generic family docs]
   C --> D[il/ dumps]
   B --> E[residuals]
-  C -.->|product only| RE[7days-realworld/docs]
+  C -.->|product only| RE[7dtd-realworld/docs]
 ```
 
 ---
@@ -100,8 +100,8 @@ flowchart LR
 | Light / mesh / water | light-mesh-water |
 | Managers / ModEvents | managers |
 | **Live APM scale / bottlenecks / tuning** | optimization mod: `../../7dtd-optimizer/docs/` (measured-scaling, bottlenecks, runtime-tuning) |
-| **RealEarth product limits** | `7days-realworld/docs/ENGINE_LIMITATIONS.md` |
-| **RealEarth product hub** | `7days-realworld/docs/INDEX.md` |
+| **RealEarth product limits** | `7dtd-realworld/docs/ENGINE_LIMITATIONS.md` |
+| **RealEarth product hub** | `7dtd-realworld/docs/INDEX.md` |
 | EfficientServer optim | [`../../7dtd-optimizer/docs/`](../../7dtd-optimizer/docs) |
 | **Perf research → optim backlog** | [`../../7dtd-optimizer/docs/PERF_RESEARCH_BRIEF.md`](../../7dtd-optimizer/docs/PERF_RESEARCH_BRIEF.md) |
 
@@ -151,7 +151,7 @@ GC/FPS tuning, allocation reuse, aggressive levers) live in the **companion
 architecture** (module map, M0-M6 milestones) is reimplementation design and lives
 in **`zdtd/docs/ZIG_CLONE.md`**, built from the wire/loop RE here.
 
-| Topic | File (product `7days-realworld/docs/`, private, not published) |
+| Topic | File (product `7dtd-realworld/docs/`, private, not published) |
 |---|---|
 | Streamed runtime lessons | `realearth-runtime.md` |
 | Engine surfaces used by RealEarth | `realearth-surfaces.md` |

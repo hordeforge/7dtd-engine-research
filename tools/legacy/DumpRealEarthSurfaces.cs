@@ -40,7 +40,7 @@ class DumpRealEarthSurfaces
     book.AppendLine("mono DumpRealEarthSurfaces.exe $ASM 7dtd-research/il/realearth-surfaces-VERSION");
     book.AppendLine("```");
     book.AppendLine();
-    book.AppendLine("Narrative: `7days-realworld/docs/realearth-surfaces.md`");
+    book.AppendLine("Narrative: `7dtd-realworld/docs/realearth-surfaces.md`");
     book.AppendLine();
 
     Section("1. Type inventory (name contains keywords)");
@@ -246,12 +246,12 @@ class DumpRealEarthSurfaces
     File.WriteAllText(Path.Combine(outDir, "INDEX.md"),
       "# RealEarth surfaces dump index\n\n"
       + "Auto narrative: `REALEARTH_SURFACES_auto.md`\n\n"
-      + "Human synthesis: **[`../../../7days-realworld/docs/realearth-surfaces.md`](../../../7days-realworld/docs/realearth-surfaces.md)**\n\n"
+      + "Human synthesis: **[`../../../7dtd-realworld/docs/realearth-surfaces.md`](../../../7dtd-realworld/docs/realearth-surfaces.md)**\n\n"
       + "UTC: " + DateTime.UtcNow.ToString("u") + "\n");
     File.WriteAllText(Path.Combine(outDir, "README.md"),
       "# Raw IL dump set: realearth-surfaces\n\n"
       + "Surfaces RealEarth Streamed inject/session/slide depends on.\n\n"
-      + "Human: [`../../../7days-realworld/docs/realearth-surfaces.md`](../../../7days-realworld/docs/realearth-surfaces.md)\n\n"
+      + "Human: [`../../../7dtd-realworld/docs/realearth-surfaces.md`](../../../7dtd-realworld/docs/realearth-surfaces.md)\n\n"
       + "Regenerable Cecil only. Do not redistribute game assemblies.\n");
     Console.WriteLine("OK → " + outDir);
   }

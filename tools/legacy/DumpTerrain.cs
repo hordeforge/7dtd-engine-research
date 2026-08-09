@@ -155,7 +155,7 @@ class DumpTerrain
     File.WriteAllText(Path.Combine(outDir, "README.md"),
       "# Raw IL dump set: `terrain`\n\n"
       + "Human research notes: **[`../../docs/terrain-height.md`](../../docs/terrain-height.md)** "
-      + "and RealEarth product docs under `7days-realworld/docs/`.\n\n"
+      + "and RealEarth product docs under `7dtd-realworld/docs/`.\n\n"
       + "Regenerable Cecil outputs only. Do not redistribute game assemblies.\n");
     Console.WriteLine("OK → " + outDir + " methods-ish hits height=" + n + " lit=" + hits);
   }

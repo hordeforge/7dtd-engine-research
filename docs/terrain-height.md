@@ -2,8 +2,8 @@
 
 **Owns:** WorldConstants YDim, height API inventory, stock vs expand pin (generic engine).  
 **Chunk index / save-64:** [`world-chunks.md`](world-chunks.md), [`save-region.md`](save-region.md).  
-**Product height policy:** `7days-realworld/docs/HEIGHT_LIMITS.md`.  
-**Product Streamed inject:** `7days-realworld/docs/realearth-runtime.md`.  
+**Product height policy:** `7dtd-realworld/docs/HEIGHT_LIMITS.md`.  
+**Product Streamed inject:** `7dtd-realworld/docs/realearth-runtime.md`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 ---
@@ -132,14 +132,14 @@ RealEarth Streamed product path: postfix/replace **provider GenerateTerrain** + 
 | Doc | Role |
 |---|---|
 | [`loop.md`](loop.md) | Dedicated frame/sim loop (entities, managers) |
-| `7days-realworld/docs/realearth-runtime.md` | Streamed inject/session lessons (tall crust, fail-closed, expand+inject) |
-| `7days-realworld/docs/realearth-review.md` | Adversarial failure classes (uint8 stamp, dual-fill hang, inject gate) |
+| `7dtd-realworld/docs/realearth-runtime.md` | Streamed inject/session lessons (tall crust, fail-closed, expand+inject) |
+| `7dtd-realworld/docs/realearth-review.md` | Adversarial failure classes (uint8 stamp, dual-fill hang, inject gate) |
 | [`../il/README.md`](../il/README.md) | Dump policy |
-| `7days-realworld/docs/HEIGHT_LIMITS.md` | Product vertical policy |
-| `7days-realworld/docs/MODIFICATIONS.md` | All mod classes beyond YDim |
-| `7days-realworld/docs/ENGINE_LIMITATIONS.md` | RealEarth 1:1 Earth limit map |
+| `7dtd-realworld/docs/HEIGHT_LIMITS.md` | Product vertical policy |
+| `7dtd-realworld/docs/MODIFICATIONS.md` | All mod classes beyond YDim |
+| `7dtd-realworld/docs/ENGINE_LIMITATIONS.md` | RealEarth 1:1 Earth limit map |
 | [engine-limitations.md](engine-limitations.md) | Generic dedi ceilings (height + others) |
-| `7days-realworld/DESIGN.md` | 1:1 product design |
+| `7dtd-realworld/DESIGN.md` | 1:1 product design |
 
 ## Managed RE status (height family)
 
@@ -148,7 +148,7 @@ Non-IL residuals only: [`residuals.md`](residuals.md). Product soak/ops items ar
 
 | Item | Status |
 |---|---|
-| Chunk GetBlock / density Y index | **CLOSED**, § Chunk indexing; `7days-realworld/docs/realearth-surfaces.md` §1 |
+| Chunk GetBlock / density Y index | **CLOSED**, § Chunk indexing; `7dtd-realworld/docs/realearth-surfaces.md` §1 |
 | Chunk write/read layer loop bound | **CLOSED**, hardcoded **64**; `World.toBlockY` = `y & 255` |
 | Height API inventory (byte vs float) | **CLOSED**, this doc + TERRAIN dumps |
 | Light/sun/mesh sites loading **255** | **CLOSED** inventory, [`light-mesh-water.md`](light-mesh-water.md), `realearth-surfaces.md` §7.1 |
@@ -160,7 +160,7 @@ Non-IL residuals only: [`residuals.md`](residuals.md). Product soak/ops items ar
 | Item | Class |
 |---|---|
 | Live inject soak under expand (H500 → Everest) | Product verification |
-| SoloSlide full chunk voxel reinject | Product residual (`7days-realworld/docs/realearth-review.md`) |
+| SoloSlide full chunk voxel reinject | Product residual (`7dtd-realworld/docs/realearth-review.md`) |
 | Stock Origin vs SoloSlide session policy | Product (pure dedi Origin FixedUpdate is no-op) |
 | Expand patcher regression after TFP update | Process residual (post-patch IL drift) |
 | Optional sector payload hand-annotation | [`residuals.md`](residuals.md) |
@@ -208,11 +208,11 @@ absent, else `chunk.GetTerrainNormal(toBlockXZ(x), toBlockXZ(z))`.
 |---|---|
 | [save-region.md](save-region.md) | Chunk write/read, WorldState |
 | [world-chunks.md](world-chunks.md) | Gen trampoline, dirty lifecycle |
-| `7days-realworld/docs/realearth-surfaces.md` | Product: GetBlock index, save-64, light 255 sites |
+| `7dtd-realworld/docs/realearth-surfaces.md` | Product: GetBlock index, save-64, light 255 sites |
 
 **Product inject lessons** (byte-API lossiness, tall-fill policy, fail-closed
 sampling, int32 surface stamp) are RealEarth product knowledge, not stock RE:
-see `7days-realworld/docs/realearth-review.md`.
+see `7dtd-realworld/docs/realearth-review.md`.
 
 **Server-relevant classified leaves (re-narrated for the coverage census):**
 

@@ -56,7 +56,7 @@ FAMILY_DOCS = [
 ]
 
 # Product RealEarth docs (not under 7dtd-research/docs)
-PRODUCT_DOCS = ROOT / "7days-realworld" / "docs"
+PRODUCT_DOCS = ROOT / "7dtd-realworld" / "docs"
 PRODUCT_REALEARTH = [
     "realearth-runtime.md",
     "realearth-surfaces.md",
@@ -189,7 +189,7 @@ def main() -> int:
             if old in text:
                 fails.append(f"{name} still references {old}")
 
-    # RealEarth product docs live under 7days-realworld/docs (not 7dtd-research/docs)
+    # RealEarth product docs live under 7dtd-realworld/docs (not 7dtd-research/docs)
     for name in PRODUCT_REALEARTH:
         p = PRODUCT_DOCS / name
         if not p.is_file() or p.stat().st_size < 200:
@@ -201,7 +201,7 @@ def main() -> int:
     idx = (DOCS / "INDEX.md").read_text(encoding="utf-8", errors="replace")
     if "generic engine" not in idx.lower() and "Generic engine" not in idx:
         fails.append("research INDEX missing generic-engine ownership language")
-    if "7days-realworld/docs" not in idx:
+    if "7dtd-realworld/docs" not in idx:
         fails.append("research INDEX should link product RealEarth docs")
 
     if fails:

@@ -31,7 +31,7 @@ project.
 |---|---|
 | Optimization levers, bottleneck-to-fix catalogs, cost/APM measurements, GC/FPS/process tuning, allocation-reduction | `7dtd-optimizer/docs/` (the mod that ships them) |
 | Reimplementation / clone architecture and milestones | the clone repo (`zdtd/`) |
-| RealEarth product status, streaming lessons, product surfaces | `7days-realworld/docs/` |
+| RealEarth product status, streaming lessons, product surfaces | `7dtd-realworld/docs/` |
 | Load-generation, APM tool internals, server-guard, connect-mod behavior | their own repos |
 
 Measuring or optimizing the game is not stock RE: it is work *about a change to*
@@ -69,7 +69,7 @@ justify a lever, put the RE here and link to it from the lever doc.
    with `tools/bin/Census.exe`.
 5. **No em dashes; no AI attribution** in any shipped text (workspace rule).
 6. **Generic engine only.** RealEarth product status/lessons live in
-   `7days-realworld/docs/`, not here. Keep the split.
+   `7dtd-realworld/docs/`, not here. Keep the split.
 7. Mark honest status: `verified` / `unverified` / `inferred` / `blocked`.
    Residuals that IL cannot close go in [`docs/residuals.md`](docs/residuals.md).
 

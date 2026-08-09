@@ -12,7 +12,7 @@ if [[ -z "$cecil" ]]; then
   for c in \
     "$here/Mono.Cecil.dll" \
     "$HOME/.cache/zdtd/Mono.Cecil.dll" \
-    "$HOME/Desktop/7dtd/7days-realworld/tools/network_protocol_inspector/bin/Release/net8.0/Mono.Cecil.dll" \
+    "$HOME/Desktop/7dtd/7dtd-realworld/tools/network_protocol_inspector/bin/Release/net8.0/Mono.Cecil.dll" \
     "$HOME/Desktop/7dtd/7dtd-research/il/zdtd_re_tools/Mono.Cecil.dll"; do
     [[ -f "$c" ]] && cecil="$c" && break
   done

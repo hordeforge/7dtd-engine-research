@@ -120,8 +120,8 @@ brtrue → ret    // dedicated: return immediately
 | [protocol.md](protocol.md) | Wire residuals vs closed golden packages |
 | [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md) | Clone readiness matrix |
 | [INDEX.md](INDEX.md) | Research hub |
-| Product status (not residuals) | `7days-realworld/docs/MODIFICATIONS.md` |
-| Product failure catalog | `7days-realworld/docs/realearth-review.md` |
+| Product status (not residuals) | `7dtd-realworld/docs/MODIFICATIONS.md` |
+| Product failure catalog | `7dtd-realworld/docs/realearth-review.md` |
 
 
 ## 5. Product / sibling residuals (not IL residuals)

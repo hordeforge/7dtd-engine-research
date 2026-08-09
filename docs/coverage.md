@@ -37,7 +37,7 @@ flowchart TB
 | 5 | Entities / AI / path | [entity-ai.md](entity-ai.md), [aidirector.md](aidirector.md) | il/deep-v3.1.0/, il/deeper-v3.1.0/, il/gaps-v3.1.0/ | Closed |
 | 6 | Networking | [network.md](network.md), [protocol.md](protocol.md), [protocol-packages.md](protocol-packages.md), closed-gaps.md | il/gaps-v3.1.0/, il/netpackages-v3.1.0/, il/dedi-complete-v3.1.0/, loadgen golden wire | Closed (framing/join, metadata census for all 193, P0/P1 bodies + encryption handshake); high-traffic + residual bulk catalog in protocol-packages.md 1-6.22; full flat write sequences in inventories/netpackage-bodies.md |
 | 7 | Save / region | [save-region.md](save-region.md) | il/loop-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed |
-| 8 | Origin / claims | `7days-realworld/docs/realearth-surfaces.md` (private companion; no published narrative in this repo) | il/realearth-surfaces-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed (dumped; narrative is product-owned) |
+| 8 | Origin / claims | `7dtd-realworld/docs/realearth-surfaces.md` (private companion; no published narrative in this repo) | il/realearth-surfaces-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed (dumped; narrative is product-owned) |
 | 9 | Managers | [managers.md](managers.md) | il/dedi-complete-v3.1.0/, il/loop-complete-v3.1.0/ | Closed |
 | 10 | Light / mesh / water | [light-mesh-water.md](light-mesh-water.md) | il/dedi-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
 | 11 | ModEvents | [managers.md](managers.md) | il/dedi-complete-v3.1.0/ | Closed (names; subscribers residual) |
@@ -51,9 +51,9 @@ and live outside this bar, in the companion docs:
 | 12 | Runtime APM scale (live measurement) | [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) |
 | 13 | Runtime / GC / FPS process knobs | [runtime-tuning.md](../../7dtd-optimizer/docs/runtime-tuning.md) |
 
-**RealEarth product** (not generic research ownership): `7days-realworld/docs/INDEX.md` (`realearth-runtime`, `realearth-surfaces`, `realearth-review`, MODIFICATIONS).
+**RealEarth product** (not generic research ownership): `7dtd-realworld/docs/INDEX.md` (`realearth-runtime`, `realearth-surfaces`, `realearth-review`, MODIFICATIONS).
 
-**Stock limitation maps:** generic dedi ceilings → [engine-limitations.md](engine-limitations.md); RealEarth 1:1 Earth blockers → `7days-realworld/docs/ENGINE_LIMITATIONS.md`.
+**Stock limitation maps:** generic dedi ceilings → [engine-limitations.md](engine-limitations.md); RealEarth 1:1 Earth blockers → `7dtd-realworld/docs/ENGINE_LIMITATIONS.md`.
 
 **Custom / Zig dedi clone:** architecture → [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md); wire → [protocol.md](protocol.md).
 
@@ -92,7 +92,7 @@ Prior V3.0.1 baseline was types 4401, methods 43901, SaveLoad IL 884 (see [re-me
 
 Jump list of state machines: [INDEX.md](INDEX.md) (Key state machines).  
 Dump tools and commands: [INDEX.md](INDEX.md) Tools section only.  
-Product Streamed machines: `7days-realworld/docs/INDEX.md` (Key state machines).
+Product Streamed machines: `7dtd-realworld/docs/INDEX.md` (Key state machines).
 
 ---
 
@@ -179,7 +179,7 @@ their correctness is the tool's, not prose. `inventories/dedicated-leaves.md` an
 |---|---|
 | [INDEX.md](INDEX.md) | Hub |
 | [residuals.md](residuals.md) | Non-IL residuals |
-| `7days-realworld/docs/INDEX.md` | Product RealEarth hub (private companion) |
+| `7dtd-realworld/docs/INDEX.md` | Product RealEarth hub (private companion) |
 
 ## Changelog
 
