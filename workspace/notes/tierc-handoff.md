@@ -20,7 +20,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `6938922` (small-repo audit committed in siblings) |
+| HEAD (at handoff write) | `c676371` (7dtd-realworld V3.1.0 update verified) |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 3681 / catalogued 0 / classified 0 / unaccounted **0** (100% narrated; webserver + reflection/prefix seeds) |
