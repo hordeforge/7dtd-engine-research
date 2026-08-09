@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-09 - tier-C: small-sister-repo audit (apm/connect/guard/playtest/loadgen/optimizer/zdtd; 1,245 links + backtick paths verified)
 ## 2026-08-09 - tier-C: sister-repo doc audit (all 1,237 cross-repo links verified; 7days-realworld research/ paths + loadgen zig-clone fixed)
 ## 2026-08-09 - tier-C: wiki cross-linking pass (hub backlinks, orphan fix, all docs reachable)
 ## 2026-08-09 - tier-C: docs consistency pass (changelog merge, table fix, ZIG_CLONE links, dead-link audit)
