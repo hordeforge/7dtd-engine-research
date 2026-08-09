@@ -89,7 +89,7 @@ flowchart TB
   FU --> U --> LU
 ```
 
-**Unknown absolute order** among GameManager / ConnectionManager / DynamicMeshManager depends on Unity script execution order (not hard-coded in these methods). Treat them as **peers in the same player-loop phase**.
+**Observed absolute order (2026-08-09, runtime probe, V3.1.0 dedi):** `GameManager.FixedUpdate`(+`Origin.FixedUpdate` no-op) → `SdtdConsole.Update` → **`ConnectionManager.Update`** → **`GameManager.Update`** → (`WorldEnvironment.Update` / `DynamicMeshManager.Update` when present) → `ConnectionManager.LateUpdate` → `GameManager.LateUpdate`. **ConnectionManager.Update always precedes GameManager.Update** (518 stable frames; probe in `workspace/experiments/script-order-probe`, git-ignored). Treat the net pump as running **before** the sim tick each frame; the peers otherwise share the player-loop phase.
 
 ---
 
@@ -551,6 +551,9 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-09:** Peer MonoBehaviour order pinned by runtime probe (was an IL
+  residual): SdtdConsole -> ConnectionManager -> GameManager in both Update and
+  LateUpdate; see §1.1. Probe in workspace/experiments/script-order-probe.
 - **2026-08-08:** Em-dash cleanup (repo-wide rule 5 pass).
 - **2026-08-07:** EntityPlayer.Update (IL=179) player frame body: generalTags
   cache, game-started gate, totalTimePlayed minutes + hourly GameSparks (< 301

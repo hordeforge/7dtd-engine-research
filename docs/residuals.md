@@ -22,7 +22,7 @@ flowchart TD
 
 | Residual | Why not closed by Assembly-CSharp RE |
 |---|---|
-| **Unity script execution order** among GameManager / ConnectionManager / DynamicMeshManager / Entity MBs | Stored in Unity project/prefab settings, not method IL |
+| **Unity script execution order** among GameManager / ConnectionManager / DynamicMeshManager / Entity MBs | **Closed (2026-08-09, runtime):** observed on the stock V3.1.0 dedicated server via a Harmony stamp probe (`workspace/experiments/script-order-probe`, git-ignored). Per-frame order: `GameManager.FixedUpdate`(+`Origin.FixedUpdate` no-op) -> `SdtdConsole.Update` -> **`ConnectionManager.Update`** -> **`GameManager.Update`** -> (`WorldEnvironment.Update` / `DynamicMeshManager.Update` when components present) -> `ConnectionManager.LateUpdate` -> `GameManager.LateUpdate`. **Invariant: ConnectionManager.Update always precedes GameManager.Update** (518 stable frames). Stored in Unity project settings, so it was not derivable from IL alone; now pinned by observation. See [loop.md](loop.md) §1.1 |
 | **Which Entity GameObjects stay `enabled` on pure dedicated** | Runtime observation; IL shows no mass `set_enabled(false)` at spawn (see [closed-gaps.md](closed-gaps.md)) |
 | **LiteNetLib native plugin** | Below managed wrappers; native binary |
 | **EAC / EOS AntiCheat wire protocol** | Types mapped (`NetPackageEAC`, `Platform.EOS.AntiCheatServer*`); protocol not in game DLL as reverseable sim logic |
@@ -139,6 +139,12 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
 
 ## Changelog
 
+- **2026-08-09:** Unity script execution order CLOSED by runtime probe on the
+  stock V3.1.0 dedi (Harmony stamp probe in workspace/experiments/script-order-probe,
+  git-ignored): per-frame order SdtdConsole -> ConnectionManager.Update ->
+  GameManager.Update -> (WorldEnvironment/DynamicMeshManager when present) ->
+  ConnectionManager.LateUpdate -> GameManager.LateUpdate; ConnectionManager
+  always precedes GameManager. 518 stable frames.
 - **2026-08-07:** Coverage unaccounted driven to 0 (analytics heartbeat + logenv);
   completion-bar.md; Raw region 11-byte header closed; §3 census refreshed.
 - **2026-08-06:** Region location/timestamp header packing closed (save-region §3.5); ItemStack.Clone triage + chunk encode ownership noted for optim evidence (items / engine-limitations / world-chunks).

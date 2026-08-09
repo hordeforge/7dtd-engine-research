@@ -27,7 +27,7 @@ flowchart TD
   CL --> PL[ProtocolManager.LateUpdate]
 ```
 
-These run as **peer MonoBehaviours** relative to `GameManager.Update` (script order = Unity residual).
+These run as **peer MonoBehaviours** relative to `GameManager.Update`. **Observed order (2026-08-09, runtime probe):** `ConnectionManager.Update` runs **before** `GameManager.Update` every frame (and `ConnectionManager.LateUpdate` before `GameManager.LateUpdate`); see [loop.md](loop.md) §1.1.
 
 `ProtocolManager.Update` / `LateUpdate` (IL=35 each) only walk
 `List` of `INetworkServer` and `INetworkClient` calling `Update` /
