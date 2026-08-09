@@ -27,7 +27,7 @@ flowchart TD
 | **LiteNetLib native plugin** | Below managed wrappers; native binary |
 | **EAC / EOS AntiCheat wire protocol** | Types mapped (`NetPackageEAC`, `Platform.EOS.AntiCheatServer*`); protocol not in game DLL as reverseable sim logic |
 | **Aron Granberg A\* library internals** | `AstarPath.StartPath` / `Pathfinding.*` third-party; 7DTD ASP wrapper closed |
-| **ModEvents subscriber sets** | Who registers handlers is mod/content dependent; **hook names closed** in [managers.md](managers.md) |
+| **ModEvents subscriber sets** | **Partially closed (2026-08-09, runtime):** observed on the stock V3.1.0 dedi with the standard mod set (EfficientServer 1.17.0 + 7dtd-apm-bridge): 15/22 events have GameCore subscribers (GameStartDone / WorldShuttingDown 3, GameStarting / GameShutdown / PlayerSpawnedInWorld 2, nine others 1; CreateWorldDone / PlayerLogin / SavePlayerData / GameMessage / ChatMessage / EntityKilled / GameAwake 0). One anonymous mod handler on GameStartDone. EfficientServer + apm-bridge subscribe nothing (they use Harmony directly). Hook names closed in [managers.md](managers.md); probe in `workspace/experiments/script-order-probe` (git-ignored). Note: the set is config-dependent (other mods change it), so this pins the observed configuration, not a universal answer |
 | **Post-patch IL drift** | TFP updates move offsets; regenerate dumps (process residual) |
 | **Region sector payload byte codec detail** | **Closed (2026-08-06/07):** Raw free-list + V1/V2 WriteData ([save-region.md](save-region.md) 3.3-3.4); location/timestamp packing (3.5); Raw **11-byte** header `7rr`+version:i32+paddingBytes:i32 from `New`/`Load` |
 | **Client-only UI / avatar / NGUI / camera** | Out of dedicated scope (non-goal) |
@@ -139,6 +139,11 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
 
 ## Changelog
 
+- **2026-08-09:** ModEvents subscriber sets observed at runtime (reflection
+  dump of ModEvent receivers): 15/22 events GameCore-subscribed on stock V3.1.0
+  + EfficientServer + apm-bridge; those two mods subscribe nothing (Harmony-
+  direct). Partially closes the subscriber-set residual; config-dependent note
+  kept. Probe in workspace/experiments/script-order-probe (git-ignored).
 - **2026-08-09:** Unity script execution order CLOSED by runtime probe on the
   stock V3.1.0 dedi (Harmony stamp probe in workspace/experiments/script-order-probe,
   git-ignored): per-frame order SdtdConsole -> ConnectionManager.Update ->

@@ -130,7 +130,7 @@ Type `ModEvents` static fields (complete inventory from dump):
 | `CalcChunkColorsDone` | ModEvent | |
 | `EntityKilled` | ModEvent | |
 
-**Residual:** *who* subscribes is content/mod dependent (cannot be closed from DLL alone). The **hook surface names** are closed.
+**Residual:** *who* subscribes is content/mod dependent (cannot be closed from DLL alone). The **hook surface names** are closed. **Observed set (2026-08-09, runtime, stock V3.1.0 + EfficientServer + apm-bridge):** 15/22 events have GameCore subscribers; see [residuals.md](residuals.md). EfficientServer and apm-bridge subscribe nothing (Harmony-direct).
 
 ---
 
@@ -154,6 +154,9 @@ Core types include `GameEventManager` and `GameEventAction` sequences (content-d
 
 ## Changelog
 
+- **2026-08-09:** ModEvents subscriber sets observed at runtime (reflection
+  receiver dump); 15/22 events GameCore-subscribed on stock V3.1.0 +
+  EfficientServer + apm-bridge; those mods subscribe nothing. See residuals.md.
 - **2026-08-07:** DecoManager.UpdateTick IL=330 (thread queues, checkDelay 20,
   player deco-chunk ring GamePrefs 173, UpdateDecorationsCo).
 - **2026-08-07:** Manager Update behaviour re-pins (Vehicle/Drone unload lists,
