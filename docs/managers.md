@@ -154,6 +154,7 @@ Core types include `GameEventManager` and `GameEventAction` sequences (content-d
 
 ## Changelog
 
+- **2026-08-10:** Manager Update IL sizes re-verified (8): DroneManager 305, VehicleManager 297, TriggerEffectManager 216, PowerManager 106, FactionManager 43, GameEventManager 25, TurretTracker 45 (all exact).
 - **2026-08-10:** ModEvents subscriber sets refined: pure-stock baseline pinned
   (15/22 GameCore, exact per-event counts); mod delta is exactly one anonymous
   GameStartDone handler. See residuals.md.
