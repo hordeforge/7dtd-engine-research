@@ -324,6 +324,8 @@ add/remove, override color, localization flag, entityId.
 
 ## Changelog
 
+- **2026-08-11:** NavObject IL re-verified: HasUIIcon IL=13, GetMapObjectType IL=2, set_TrackedEntity IL=20, SetupEntityOptions IL=28, IsValid IL=30, GetPosition IL=25, IsTracked* IL=11, GetCompassIconScale IL=17, get_DisplayName IL=20, get_Rotation IL=25, Reset IL=34, UnRegisterNavObjectByEntityID IL=16 / ByOwnerEntity IL=18 / ByPosition IL=19, GetNavObjectByEntityID IL=34, onNewPrefabEntered IL=92 (exact).
+- **2026-08-11:** Waypoint IL re-verified: Read IL=77 / Write IL=57 / Clone IL=64, WaypointCollection Write IL=61 / Read IL=30 / Clone IL=26 (exact).
 - **2026-08-10:** NavObject IL re-verified: SetupEntityOptions IL=28, IsValid IL=30 (exact).
 - **2026-08-10:** Map/NavObject IL sizes re-verified: Entity.HasUIIcon IL=13,
   GetMapObjectType IL=2, NavObject.set_TrackedEntity IL=20 (all exact).
