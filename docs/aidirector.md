@@ -1053,6 +1053,7 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-11:** AIAirDrop IL re-verified: Tick IL=193, CreateFlightPaths IL=355, MakePlayerClusters IL=70, CalcSupplyDropMetrics IL=53 (exact).
 - **2026-08-11:** Air-drop IL re-verified: AIDirectorAirDropComponent.SpawnAirDrop IL=59, SpawnSupplyCrate IL=77, canDespawn IL=2, MoveEntityHeaded IL=35 (exact).
 - **2026-08-11:** AIDirector IL re-verified: NotifyNoise IL=84, NotifyActivity IL=31, AddEntity IL=10, GetComponent IL=19 (exact).
 - **2026-08-10:** AIDirector IL sizes re-verified: CanSpawn IL=10, CreateComponents IL=31 (exact).
