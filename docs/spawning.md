@@ -1281,6 +1281,10 @@ above.
 
 ## Changelog
 
+- **2026-08-11:** Decorator query IL re-verified: GetPrefabsFromWorldPosInside IL=83, GetPrefabsIntersecting IL=114, GetRandomPOINearTrader IL=65, ValidPrefabForQuest IL=156, GetRandomPOINearWorldPos IL=193, GetClosestPOIToWorldPos IL=230, chooseBestTrader IL=58, copyPrefabsIntoHeightMap IL=318 (exact).
+- **2026-08-11:** Decorator lifecycle IL re-verified: CleanAllPrefabsFromWorld IL=34, ClearAllPrefabs IL=46, CreateBoundingBoxes IL=33, CallPrefabChangedEvent IL=25, CallPrefabRemovedEvent IL=8, CreateNewPrefabAndActivate IL=46, RemoveWorldPrefab IL=39, RemoveEventPrefab IL=25, IsActivePrefab IL=13, CalculateStats IL=133 (exact).
+- **2026-08-11:** PrefabInstance IL re-verified: GetPositionRelativeToPoi IL=81, GetWorldPositionOfPoiOffset IL=81, MoveBoundingBox IL=10, RotateAroundY IL=24, ResizeBoundingBox IL=33, UpdateBoundingBoxPosAndScale IL=82, SetBoundingBoxPosition/SetBoundingBoxSize IL=7, GetBox IL=9, GetSerializable IL=3; Prefab.IsPosInSleeperVolume IL=47, FindSleeperVolumeFreeGroupId IL=31, HasAnyQuestTag IL=5, IsAllowedZone IL=5 (exact).
+- **2026-08-11:** Spawner-class IL re-verified: EntitySpawnerClassForDay.Day IL=87 / AddForDay IL=26, EntitySpawnerClass.Init IL=333, EntitySupplyCrate.OnUpdateEntity IL=103, SetSupplyCratePosition IL=30 (exact).
 - **2026-08-11:** EntityClass leaves IL re-verified: GetEntityClass IL=7, GetEntityClassName IL=10, Add IL=9, GetId IL=30, Cleanup IL=3, AddDroppedId IL=33, LootDropPick IL=44, CalculateEntityTier IL=49, CopyFrom IL=171, GetEntityClassWithinMaxTier IL=30, GetPreviousTierEntity IL=73; CreateEntityOperation.LoadAssets IL=100 / CompleteEntity IL=639; addEntityComponent IL=5/11; HandleSetNavName IL=9 (exact).
 - **2026-08-11:** ECD IL re-verified: copy ctor IL=208, ApplyToEntity IL=176, readXml IL=47, writeXml IL=88, ToString IL=41 (exact).
 - **2026-08-11:** Spawn-in-world IL re-verified: SpawnEntityInWorld IL=178, OnAddedToWorld IL=27, IsSpawned IL=2/3, RemoveEntityFromMap IL=123, SetEntityName IL=20 (exact).
