@@ -521,6 +521,9 @@ and the exact cipher. Those are third-party binaries, not game logic.
 
 ## Changelog
 
+- **2026-08-10:** Authorizer orders re-verified from IL: NativePlatform 400,
+  Crossplatform 490, Eac 600, AntiCheatEncryptionAgreement 601, AuthFinalizer
+  999 (all `get_Order` ldc.i4 literals exact).
 - **2026-08-07:** KickPlayerForClientInfo (IL=24): NetPackagePlayerDenied +
   Kicking player log + 0.5 s delayed disconnectLater coroutine.
 - **2026-07-28:** `playerAllowed` step list + `UpgradeToFullConnection` (full streams + compression).
