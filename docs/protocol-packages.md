@@ -1765,6 +1765,11 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-10:** §6.23 inverse spot-check round 4: 10 always-present packages
+  re-scanned for hidden branches (BlockLimitTracking/ConsoleCmdClient
+  count-loops, GameEventRequest variables-null guard, NavObject/PartyActions
+  null-coalesces, DynamicClientArrive/VehiclePositions/WorldAreas branch-free)
+  - all match the table.
 - **2026-08-10:** §6.23 conditional-dispatch spot-verification round 3:
   `NetPackageGameEventResponse` (6 always + responseType 12/8/9 tails exact,
   IL_0058/006E/00CE) matches the table. All three complex dispatches
