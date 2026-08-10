@@ -262,8 +262,8 @@ sequenceDiagram
 - **Per-tick dedicated path:** every alive entity's `EntityBuffs.Tick` runs on the
   server; buff-driven stat changes are server-authoritative.
 - **Residual / content:** `buffs.xml` effect definitions (data); the `MinEvent`
-  action framework (`MinEventActionBuffModifierBase` and siblings) that triggers
-  buffs from items/blocks/attacks (candidate for its own doc); `EntityStats` math.
+  action framework that triggers buffs from items/blocks/attacks is owned by
+  [minevents.md](minevents.md); `EntityStats` math.
 
 ---
 
@@ -278,6 +278,7 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 | Doc | Role |
 |---|---|
 | [entity-ai.md](entity-ai.md) | The entity update that ticks buffs |
+| [minevents.md](minevents.md) | The MinEvent trigger/action framework that applies buffs |
 | [server-lifecycle.md](server-lifecycle.md) | Player persistence (buffs saved with the profile) |
 | [protocol-packages.md](protocol-packages.md) | Buff add/remove packages on the wire |
 | [full-surface.md](full-surface.md) | Whole-assembly map |
