@@ -317,6 +317,7 @@ dump-derived.
 
 ## Changelog
 
+- **2026-08-10:** Webserver.Web.RegisterDefaultHandlers IL=60 re-verified (exact).
 - **2026-08-08:** Newly-reached webserver leaves narrated (reachability-seed pass).
 
 - **2026-08-08:** AdminWebModules/WebModule per-module record (name + level, ParseElement/Save round-trip).

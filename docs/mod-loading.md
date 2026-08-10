@@ -376,6 +376,7 @@ scan), not by the steady sim loop.
 
 ## Changelog
 
+- **2026-08-10:** ModManager.LoadMods IL=71, Mod.parseModInfoV2 IL=148 re-verified (exact).
 - **2026-07-28:** Config S2C path (`SendXmlsToClient`, Deflate cache, `NetPackageConfigFile`).
 - **2026-07-28:** `xmlsToLoad` 49-entry census (flags + load/cleanup/reload delegates).
 - **2026-07-28:** XmlFile/XmlPatcher xpath pipeline, XmlPatchMethods catalog, WorldStaticData/LoadPatchStuff callers, MapVisitor console visitor.
