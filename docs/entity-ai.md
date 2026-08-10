@@ -2081,7 +2081,7 @@ climbing; else false (airborne without those supports cannot repath).
 **`CalcIfSwimming` (IL=17):** threshold = **0.5** if air and not jumping, else
 **0.7**; swimming ⇔ `inWaterPercent >= threshold`.
 
-**`CalcWaterLevel()` (IL=157)** computes that `inWaterPercent`: it scans the
+**`CalcWaterLevel()` (Entity, IL=157)** computes that `inWaterPercent`: it scans the
 entity's vertical span from `floor(pos.y) - 2` up to `floor(pos.y +
 GetHeight())`, sampling `World.GetWaterPercent` per column with an 8-direction
 horizontal offset (`waterLevelDirOffsets * 0.28`) for cells at/above the feet,
@@ -3762,6 +3762,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** Move/damage leaf IL re-verified: SetFocusPos IL=7, IsMoveToAbove IL=14, CalcObstacleSideStep IL=146, IsABlockSideOpen IL=69, SearchForDestroyPos IL=325, GetExistingDestroyPos IL=47, FindExistingDestroyPos IL=66, Push(blocker) IL=40, CanNavigatePath IL=14, CalcIfSwimming IL=17, CalcWaterLevel IL=157 (Entity), BeginDynamicRagdoll IL=13, FaceJumpTo IL=27, ApplySpawnState IL=15, ClearDamagedTarget IL=4, ClearDistressed IL=1, CanBePushed IL=5, CanEntityJump IL=2, CalculateBlockDamage IL=17, get/set_Electrocuted IL=20/41, AddStamina IL=17, AddWater IL=9 (exact).
+- **2026-08-11:** SleeperVolume/stealth leaf IL re-verified: get_IsTriggerAndNoRespawn IL=14, WakeAttackLater IL=9, AddEnemyToWorld IL=47, AddSpawnPoint IL=19, PlayerStealth.get_ValuePercentUI IL=40 (exact).
 - **2026-08-11:** Move/EAI IL re-verified: EAILeap.CanExecute IL=136 / Start IL=19, EAIManager.CheckPath IL=27 / GetSeeDistance IL=8, EAISetAsTargetIfHurt.CanExecute IL=170, EAILook.Continue IL=116, EAIApproachAndAttackTarget.Update IL=846, setHomeArea IL=8, hasHome IL=7, detachHome IL=4, get_IsAlert IL=9, SetAlertTicks IL=4, GetMoveSpeed/GetMoveSpeedAggro IL=45, GetMoveSpeedPanic IL=19, SetLookPosition IL=43, CalcInvestigateTicks IL=26 (exact).
 - **2026-08-11:** Move-helper IL re-verified: SetMoveTo(pos) IL=29 / SetMoveTo(path) IL=78, CalcIfUnreachablePos IL=105, CheckForDoorAndOpen IL=66, AttackPush IL=44, StartSwimStroke IL=50, ResetStuckCheck IL=22, FindDestroyPos IL=21, SelectBestHit IL=35, UpdateMoveHelper IL=1236 (exact).
 - **2026-08-11:** Swim IL re-verified: OnHeadUnderwaterStateChanged IL=15, SwimChanged IL=12, SetSwimValues IL=15, updatePlayerLandSound IL=51, Entity.TickInWater IL=50, EntityPlayerLocal.SwimModeTick IL=151 / SwimModeUpdateThrottle IL=258, ASPPathNavigate.SetPath IL=46 / UpdateNavigation IL=21 / ImprovePath IL=56 (exact).
