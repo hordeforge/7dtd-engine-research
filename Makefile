@@ -13,7 +13,9 @@ help:
 	@echo "make census       - Census.exe against ASM"
 	@echo "make drift        - parity drift-check vs baseline"
 	@echo "make readiness    - version-update tooling readiness bench (0-100)"
-	@echo "make test         - structural + stock-check (no live dump regen)"
+	@echo "make test         - full suite (structural, stock-check, reach, inventories, surface, links)"
+	@echo "make test-docs    - DLL-free corpus invariants (runs in CI)"
+	@echo "make regen-check  - regenerate-inventory check (needs mcs/mono + live DLL)"
 
 tools:
 	cd "$(TOOLS)" && ./build.sh --skip-legacy
