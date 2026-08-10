@@ -55,8 +55,10 @@ FAMILY_DOCS = [
     "INDEX.md",
 ]
 
-# Product RealEarth docs (not under 7dtd-research/docs)
+# Product RealEarth docs (not under 7dtd-research/docs). The sibling repo is
+# absent in a single-repo CI checkout; its checks run locally only.
 PRODUCT_DOCS = ROOT / "7dtd-realworld" / "docs"
+PRODUCT_PRESENT = PRODUCT_DOCS.is_dir()
 PRODUCT_REALEARTH = [
     "realearth-runtime.md",
     "realearth-surfaces.md",
@@ -166,11 +168,10 @@ def main() -> int:
         (r"(?i)Dedicated path is \*\*not a no-op\*\*", "Origin dedicated wrong"),
         (r"(?i)GAME_LOOP open gap #8", "stale GAME_LOOP gap #8"),
     ]
-    for name, base in (
-        ("realearth-surfaces.md", PRODUCT_DOCS),
-        ("terrain-height.md", DOCS),
-        ("loop.md", DOCS),
-    ):
+    ban_targets = [("terrain-height.md", DOCS), ("loop.md", DOCS)]
+    if PRODUCT_PRESENT:
+        ban_targets.append(("realearth-surfaces.md", PRODUCT_DOCS))
+    for name, base in ban_targets:
         text = (base / name).read_text(encoding="utf-8", errors="replace")
         for pat, label in ban_patterns:
             if re.search(pat, text):
@@ -190,12 +191,13 @@ def main() -> int:
                 fails.append(f"{name} still references {old}")
 
     # RealEarth product docs live under 7dtd-realworld/docs (not 7dtd-research/docs)
-    for name in PRODUCT_REALEARTH:
-        p = PRODUCT_DOCS / name
-        if not p.is_file() or p.stat().st_size < 200:
-            fails.append(f"missing product RealEarth doc: {p}")
-        if (DOCS / name).exists():
-            fails.append(f"RealEarth doc still under 7dtd-research/docs: {name}")
+    if PRODUCT_PRESENT:
+        for name in PRODUCT_REALEARTH:
+            p = PRODUCT_DOCS / name
+            if not p.is_file() or p.stat().st_size < 200:
+                fails.append(f"missing product RealEarth doc: {p}")
+            if (DOCS / name).exists():
+                fails.append(f"RealEarth doc still under 7dtd-research/docs: {name}")
 
     # research INDEX should not own product RealEarth as primary
     idx = (DOCS / "INDEX.md").read_text(encoding="utf-8", errors="replace")
