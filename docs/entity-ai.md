@@ -3762,6 +3762,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** Vulture/flying tail IL re-verified: FindTarget IL=69, IsCourseTraversable IL=102, StartHome IL=10, AdjustWaypoint IL=46, EntityFlying.MoveEntityHeaded IL=135 / IsAirBorne IL=2, EAISetNearestCorpseAsTarget.CanExecute IL=110, EntityAlive.AddOwnedEntity(OwnedEntityData) IL=35, AddPart/AddParticle IL=17 (exact).
 - **2026-08-11:** Sleeper config IL re-verified: GetAliveCount IL=34, MinScript.Tick IL=261, cctor IL=48, DespawnAndReset IL=6, Write/Read IL=332/350, SpawnPoint.Write/Read IL=25/70, EntityAlive.SetSleeper IL=11, SetSleeperSight IL=23, SetSleeperHearing IL=22 (exact).
 - **2026-08-11:** Config-init IL re-verified: EntityAlive.CopyPropertiesFromEntityClass IL=1128 / Init IL=13 / InitStats IL=9 / switchModelView IL=11 / InitPostCommon IL=97 / PostInit IL=34 (EntityEnemy IL=13), Entity.CopyPropertiesFromEntityClass IL=238 (EntityPlayer IL=3, EntityPlayerLocal IL=21), EntityClass.FromString IL=3 / Init IL=1465 / ParseEntityFlags IL=49, ItemClass.GetItem IL=13, Inventory.SetBareHandItem IL=23, EntityPlayerLocal.SetupStartingItems IL=39, StartStopLivingSound IL=55, ItemStack.FromString IL=38 (exact).
 - **2026-08-11:** Activation-command IL re-verified: Entity.GetActivationCommands IL=51, InitLocalActivationCommands IL=14 (EntityAlive) / IL=1 (Entity), ReorderActivationCommands IL=9 (EntityDrone) / IL=1 (Entity), MoveActivationCommandBefore IL=64, MoveActivationCommandAfter IL=64 (exact).
