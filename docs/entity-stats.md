@@ -219,6 +219,7 @@ Each `Stat` record (`Stat.Write` IL=24 / `Read` IL=32) is version **6** with
 
 ## Changelog
 
+- **2026-08-11:** Stat IL re-verified: SimpleClone IL=7/26, ResetStats IL=1, set_Value IL=19, set_Health IL=7, set_Stamina/set_Water IL=6, get_ModifiedMax IL=6, get_ModifiedMaxPercent IL=7, GetMaxHealth IL=6, Tick IL=301, SetChangedFlag IL=15, Tick IL=27, UpdateNPCStatsOverTime IL=128, TickWait IL=75/133, Write IL=8/27/24/32 (exact).
 - **2026-08-10:** Stat IL re-verified: get_ModifiedMax IL=6, Stat.Tick IL=301, EntityStats.Tick IL=27, GetMaxHealth IL=6 (exact).
 - **2026-08-10:** EntityStats IL sizes re-verified: SimpleClone IL=7/26, ResetStats IL=1, Stat.set_Value IL=19 (exact).
 - **2026-08-08:** UpdateNPCStatsOverTime (IL=128): HealthChangeOT (105)

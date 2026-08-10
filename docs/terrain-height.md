@@ -222,6 +222,7 @@ see `7dtd-realworld/docs/realearth-review.md`.
 
 ## Changelog
 
+- **2026-08-11:** Terrain IL re-verified: GetHeightAt IL=22, GetMaxHeight IL=29, GetHeight IL=9/5, RecalcHeightAt IL=55, AddWallVolumeId IL=18, GetWallVolumes IL=3, GetTerrainHeight IL=9, SetTerrainHeight IL=10, ConvertDTMToHeightData IL=81/96/155, ConvertDTMToTerrainStampData IL=46, LoadRAWToHeightData IL=60, LoadHeightMapRAW IL=132, LoadHeightMapRAWAsUnityHeightMap IL=90, LoadHeightMapRAWAsStampData IL=101, MarchingCubes.cctor IL=9, Chunk.SetTerrainNormal IL=43 / GetTerrainNormalY IL=15, IsOpenSkyAbove IL=9, GetTopMostTerrainHeight IL=28 (exact).
 - **2026-08-10:** Chunk height IL re-verified: AddWallVolumeId IL=18, GetWallVolumes IL=3, GetTerrainHeight IL=9, SetTerrainHeight IL=10 (exact).
 - **2026-08-10:** Height-query IL sizes re-verified: GetHeightAt IL=22, GetTerrainHeight IL=19, Chunk.GetMaxHeight IL=29, GetHeight IL=9, RecalcHeightAt IL=55 (exact).
 - **2026-07-18:** Open-gaps section replaced with Closed managed table + product/ops list (residual policy).  
