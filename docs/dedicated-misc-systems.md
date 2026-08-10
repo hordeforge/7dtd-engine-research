@@ -1371,6 +1371,7 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 
 ## Changelog
 
+- **2026-08-10:** Entity sound-dispatch IL sizes re-verified: PlayOneShot IL=38, StopOneShot IL=5, StopAnimatorAudio IL=16 (exact).
 - **2026-08-08:** Support/utility leaf index added (narrates 211 catalogued
   global support leaves for the coverage census).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
