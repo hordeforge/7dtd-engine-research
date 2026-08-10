@@ -72,6 +72,15 @@ def main():
     if dead:
         raise AssertionError("dead internal doc links:\n" + "\n".join(sorted(set(dead))[:20]))
 
+    # 3. Every root doc carries the canonical hub backlink ("**Hub:** INDEX.md").
+    no_hub = sorted(
+        d
+        for d in doc_root
+        if "**Hub:**" not in open(os.path.join(DOCS, d), encoding="utf-8").read()
+    )
+    if no_hub:
+        raise AssertionError(f"docs missing **Hub:** backlink: {no_hub}")
+
     print(f"OK: {len(doc_root)} docs reachable from INDEX.md, 0 dead internal links ({len(all_docs)} doc files)")
 
 
