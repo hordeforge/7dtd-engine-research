@@ -11,7 +11,7 @@ docs/              generic engine narratives (this folder)
 docs/inventories/  raw method/call inventories backing the narratives
 il/                regenerable Mono.Cecil dumps only (local; not in git)
 oss-tools/         survey notes on third-party server tools/mods
-7dtd-realworld/   RealEarth product docs (private companion, not published)
+7dtd-realworld/    RealEarth product docs (sibling repo, private companion, not published)
 ```
 
 ---
@@ -100,8 +100,8 @@ flowchart LR
 | Light / mesh / water | light-mesh-water |
 | Managers / ModEvents | managers |
 | **Live APM scale / bottlenecks / tuning** | optimization mod: `../../7dtd-optimizer/docs/` (measured-scaling, bottlenecks, runtime-tuning) |
-| **RealEarth product limits** | `7dtd-realworld/docs/ENGINE_LIMITATIONS.md` |
-| **RealEarth product hub** | `7dtd-realworld/docs/INDEX.md` |
+| **RealEarth product limits** | `../../7dtd-realworld/docs/ENGINE_LIMITATIONS.md` |
+| **RealEarth product hub** | `../../7dtd-realworld/docs/INDEX.md` |
 | EfficientServer optim | [`../../7dtd-optimizer/docs/`](../../7dtd-optimizer/docs) |
 | **Perf research → optim backlog** | [`../../7dtd-optimizer/docs/PERF_RESEARCH_BRIEF.md`](../../7dtd-optimizer/docs/PERF_RESEARCH_BRIEF.md) |
 
