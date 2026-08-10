@@ -904,6 +904,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-11:** Transport IL re-verified: InitConfig IL=22, InitStreams Steam IL=131 / Simple IL=190, NetConnectionAbs.FlushSendQueue IL=1 / IsDisconnected IL=4, NetConnectionSimple.FlushSendQueue IL=19 / SendBuffers IL=22 / sendBuffersFromQueue IL=63, SetupProtocols IL=128, StartServers IL=106, StopServersOnly IL=22, MakeServerOffline IL=11, SendQueueHandled IL=7, Task_CommWriter IL=251 / Task_CommReader IL=213, taskSerialize IL=392 / taskDeserialize IL=437, WriteToStream IL=435, StreamToBuffer IL=194 (exact).
 - **2026-08-11:** Distribution IL re-verified: OnUpdateEntities IL=322, NetEntityDistribution ctor IL=141, Add(entity) IL=66, Remove(entity,reason) IL=48, SendToPlayers IL=42, getSpawnPacket IL=7, updatePlayerEntity IL=222, SendChunksToClients IL=216, ChunkManager.AddChunkObserver IL=15 (exact).
 - **2026-08-11:** Validation/package-manager IL re-verified: ValidEntityIdForSender IL=49, ValidUserIdForSender IL=29, AddPackageMapping IL=29, GetPackageName IL=5, ResetMappings IL=7, getPackageInfoByType IL=16, LogStats IL=70 (exact).
 - **2026-08-11:** LiteNetLib wrapper IL re-verified: GetServerPorts IL=9, SetServerPassword IL=8, DropClient IL=17, OnPlayerDisconnected IL=11, OnPeerConnectedEvent IL=35, OnDisconnectedFromServer IL=100, ConnectionRequestCheck IL=86, OnNetworkReceiveEvent IL=134 (server) / IL=36 (client wrapper), wrapper disconnect event IL=6, CreateRejectMessage IL=27 (exact).
