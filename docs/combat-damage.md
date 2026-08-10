@@ -531,6 +531,8 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-11:** Crawler/response IL re-verified: EntityHuman.TurnIntoCrawler IL=33, AvatarHumanController.TurnIntoCrawler IL=23, SetWalkType IL=36, ProcessDamageResponse IL=86, ServerNetSendRangeCheckedDamage IL=27, NetPackageRangeCheckDamageEntity.ProcessPackage IL=151, ProcessDamageResponseLocal IL=903, FireAttackedEvents IL=61 (exact).
+- **2026-08-11:** Death/kill IL re-verified: Kill IL=40, AwardKill IL=66, OnEntityDeath IL=146, dropItemOnDeath IL=105, DropBagServer IL=99, InitializeBagFromLootList IL=39, SetDead IL=8, SetAlive IL=34/46/31, KillLootContainer IL=24, GameManager.AwardKill IL=27 / AddScoreServer IL=56, AddScore IL=97, HandleClientDeath IL=1, NotifySleeperDeath IL=11, ClientKill IL=216, OnDeathUpdate IL=76 (exact).
 - **2026-08-11:** Damage-apply IL re-verified: DamageEntity IL=236, damageEntityLocal IL=484, Equipment.CalcDamage IL=83, GetDamageFraction IL=6, Disintegrate IL=7, CheckDismember IL=125, get_sleepingOrWakingUp IL=3, GetDismemberChance IL=128, GetTotalPhysicalArmorRating IL=47, ExecuteDismember IL=49 (exact).
 - **2026-08-11:** Dismemberment IL re-verified: GetBodyPartHit IL=47/56, GetDamageTag IL=21, IsDefaultGib IL=22, DismemberPart IL=8, dismemberPart IL=259, getDismemberedPart IL=17, hasDismemberedPart IL=10, BodyDamage HasLeftLeg/HasRightLeg IL=7, IsAnyLegMissing/IsAnyArmOrLegMissing/IsCrippled IL=7, Write IL=12, ApplyLocalBodyDamage IL=188, SetupCrawler IL=49 (exact).
 - **2026-08-11:** DismembermentManager IL re-verified: IsDefaultGib IL=22, GetBodyPartHit IL=47/56, GetDamageTag IL=21 (exact).
