@@ -916,7 +916,7 @@ ORs them into a fresh `UInt64[]` through a lock-guarded scratch buffer
 (`maskList` under `Monitor`, cleared after use). `SetBit(bit, extended)`
 (IL=18) = `extended[bit >> 6] |= 1 << (bit & 63)`. `CombineTags` ORs two to
 five sets: the 2-arg is `op_BitwiseOr` (IL=4); the 3/4/5-arg forms allocate a
-max-length array and OR word-by-word. `Remove(other)` (IL=138) is the
+max-length array and OR word-by-word. `Remove(other)` (IL=136) is the
 bitwise-AND-NOT.
 
 **Tests:** `Test_Bit(bit)` (IL=46) handles empty / single-bit / array paths
@@ -1371,6 +1371,8 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 
 ## Changelog
 
+- **2026-08-11:** Particle IL re-verified: ParticleEffect.Read IL=53, ToId IL=3, SpawnParticleEffectServer IL=41, SpawnParticleEffectClient IL=7 / ForceCreation IL=6, FireControllerUtils.SpawnParticleEffect IL=40, ParticleEffect.SpawnParticleEffect IL=339, PlaySoundInServer IL=18, GetParentTransform IL=58, Init IL=10, IsAvailable IL=5, Localization.GetLanguageEntry IL=38 / FormatListAnd/Or IL=7 (exact).
+- **2026-08-11:** FastTags tail IL re-verified: CombineTags 2-arg IL=4, SetBit IL=18, Remove IL=136 (corrected from stale 138), Test_AllSet IL=99, Parse IL=90 (exact).
 - **2026-08-11:** DynamicProperties leaves IL re-verified: Clear IL=16, Deserialize IL=214, ParseByte IL=26, ParseColorHex IL=10, TryParseRange IL=22, SetParam1 IL=29, TryGetParam1 IL=8/18, RegisterFormatter IL=25, PrettyPrint IL=9/133 (exact).
 - **2026-08-11:** StringParsers IL re-verified: TryParseSInt32(String) IL=7, TryParseFloat(String) IL=7, ParseFloat IL=19, TryParseFloat(5-arg) IL=33, internalParseDouble IL=632, internalParseBool IL=180, GetSeparatorPositions IL=182, findOther IL=16 (exact).
 - **2026-08-11:** Localization IL re-verified: LoadAndSelectLanguage IL=14, loadBaseDictionaries IL=25, selectLanguage IL=32, findUserLanguageColumns IL=45, loadCsv IL=166, addCsv IL=201, LoadPatchDictionaries IL=26, LoadServerPatchDictionary IL=14, ReloadBaseLocalization IL=3, checkLoaded IL=15, updateLanguages IL=36, get_TotalKeys IL=5, get_ActiveLanguage IL=17 (exact).
