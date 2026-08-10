@@ -2169,6 +2169,8 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-11:** Armor/AddItem IL re-verified: GetArmorGroupLowestQuality IL=13, HasAnyItems IL=22, ResetArmorGroups IL=51, AddArmorGroup IL=36, Inventory.AddItem IL=121/5, AddItemAtSlot IL=84, TryTakeItem IL=83, CanTakeItem IL=37, CanStackNoEmpty IL=24, ReturnItem IL=36, PreferredItemSlot IL=23, GetSlotWithItemValue IL=25, UsingBareHand IL=6, GetBareHandItemValue IL=3, DecItem IL=132, clearSlotByIndex IL=41, CheckBreakUseItems IL=85 (exact).
+- **2026-08-11:** Durability chain IL re-verified: get_MaxUseTimesBase IL=25, get_MaxUseTimes IL=5, ModMaxUseTimes IL=24, get/set_MaxDurabilityModifier IL=9/13, AdjustForSandboxOptions IL=7 (ItemValue) / IL=8 (ItemStack), get_PermaDegrationOn IL=12 (exact).
 - **2026-08-11:** Equipment IL re-verified: ApplyTempCosmeticSlot IL=24, ClearTempCosmeticSlot IL=7, FireEventsForChangedSlots IL=137, ModifyValue IL=39, updateInsulation IL=32, DropItems IL=31, GetTotalInsulation/GetTotalWaterproof IL=3, SetSlotItem IL=191, SetSlotItemRaw IL=13, SetCosmeticSlot IL=50/72, DropItemOnGround IL=21 (exact).
 - **2026-08-11:** Inventory slot IL re-verified: SetItem IL=166/9, notifyListeners IL=24, GetItem IL=6, GetItemStack IL=6, GetItemInSlot IL=15, GetItemDataInSlot IL=14, GetItemCount IL=5/92/86, XUiM_PlayerInventory.GetItemCount IL=19 (exact).
 - **2026-08-11:** Held-slot IL re-verified: get_holdingItemIdx IL=3, get_holdingItem IL=20, get_holdingItemItemValue IL=16, get_holdingItemStack IL=17, get_holdingItemData IL=23, IsHoldingGun IL=9, get_INVENTORY_SLOTS IL=5, get_PUBLIC_SLOTS IL=11, get_DUMMY_SLOT_IDX IL=5, ForceHoldingItemUpdate IL=91 (exact).
