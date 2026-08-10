@@ -904,6 +904,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-11:** Peer pump IL re-verified: ConnectionManager.LateUpdate IL=4, ProtocolManager.LateUpdate IL=35, ProcessPackages IL=116, DisconnectClient IL=184 (exact).
 - **2026-08-10:** Siege-scale live test (12 bots, 8 zeds/player/5s, ramp): 77 zombie spawns, 27 EntitySpawn events, 36 MinEventFire NREs (zombie-cop null itemValue) but **0 RemoteConnectionClose** - the graceful per-package write recovery holds under real horde pressure; ramp keeps the join-churn race at 0.
 - **2026-08-10:** Band thresholds re-verified from IL: interest distSq ldc.r4 16 (NetEntityDistributionEntry IL_0019), teleport ldc.r4 256 (IL_0001), view-angle distSq ldc.r4 16384=128^2 (NetEntityDistribution IL_015B) - exact match to 2.
 - **2026-08-10:** Replication IL sizes re-verified: NetEntityDistributionEntry.updatePlayerEntity IL=222, updatePlayerList IL=509 (exact match to 4b).
