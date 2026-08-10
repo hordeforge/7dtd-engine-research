@@ -955,6 +955,7 @@ or `ItemStack.Empty` when nothing rolled.
 
 ## Changelog
 
+- **2026-08-10:** Trader-area IL re-verified: TraderComparer.Compare IL=8, GetTraderAtPosition IL=68, IsWithinProtectArea IL=47, GetProtectPadding IL=22 (exact).
 - **2026-08-10:** Trader-area IL sizes re-verified: get_TraderAreas IL=12, IsWithinTraderPlacingProtection IL=20 (exact).
 - **2026-08-08:** EntityLootContainer.OnUpdateEntity (IL=46): lock-skip,
   touched-and-empty / timeStayAfterDeath-1 despawn, removeBackpack (IL=10)
