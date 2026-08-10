@@ -37,7 +37,7 @@ limit, or process).
 | **Post-patch IL drift** | TFP updates move offsets; regenerate dumps (process residual) |
 | **Region sector payload byte codec detail** | **Closed (2026-08-06/07):** Raw free-list + V1/V2 WriteData ([save-region.md](save-region.md) 3.3-3.4); location/timestamp packing (3.5); Raw **11-byte** header `7rr`+version:i32+paddingBytes:i32 from `New`/`Load` |
 | **Client-only UI / avatar / NGUI / camera** | Out of dedicated scope (non-goal) |
-| **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.21; per-flag framing for all 37 conditional-heavy packages verified from write IL in §6.23 (2026-08-10) |
+| **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.23; per-flag framing for all 37 conditional-heavy packages verified from write IL in §6.23 (2026-08-10) |
 | **Encryption cipher / KDF primitives** | **Managed session transform closed; native primitives permanent.** Closed: the handshake package bodies and the managed `AesEncryptAndMac` session transform (AES + HMAC, [network.md](network.md) §4.5). Not closable: RSA key wrap and platform RNG quality - anything below `System.Security.Cryptography` providers (OS/OpenSSL native crypto), which has no game sim logic |
 | **XML content semantics** | Blocks/items/biomes/prefabs are data, not loop IL |
 | **Discord GameSDK integration (`DiscordManager`, 140 methods)** | **Closed (2026-08-10, IL + runtime):** IL shows multiple `GameManager.get_IsDedicatedServer()` gates in `DiscordManager` (lines 874, 2007, 2469, 2605) - the Discord paths skip on dedicated. Runtime confirms: across 12 dedicated boots the log contains only static `libdiscord_partner_sdk.so` preload + 16 `GamePref.Discord*` defaults, **zero live activity** (no connection, presence, lobby, auth). The manager is instantiated but never activates on a headless server. A client social feature, not a dedicated codepath |
@@ -94,7 +94,7 @@ For **dedicated managed** surfaces under the coverage bar (families 1-11 in
 Also:
 
 - All **193** `NetPackage*` census names appear in narrative docs
-- High-traffic package bodies + bulk residual catalog: [protocol-packages.md](protocol-packages.md) 1-6.22
+- High-traffic package bodies + bulk residual catalog: [protocol-packages.md](protocol-packages.md) 1-6.23
 - Flat write sequences for every package: [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md)
 - Region Raw header + location packing closed (save-region §3.5)
 
@@ -149,6 +149,7 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
 
 ## Changelog
 
+- **2026-08-11:** Corrected stale protocol-packages section ranges in the NetPackage-catalog rows (1-6.21 / 1-6.22 -> 1-6.23, matching the doc's §6.23 per-flag framing section).
 - **2026-08-10:** LiteNetLib residual corrected + join-churn flake root cause
   closed: `LiteNetLib.dll` is a managed assembly (was wrongly classified
   "native internals permanent"). Event machinery (`CreateEvent` pool/pending
