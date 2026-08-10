@@ -227,6 +227,7 @@ them (the Zig clone's clean-room stack avoids the first by construction, ADR
 
 ## Changelog
 
+- **2026-08-11:** DynamicMeshManager.Update IL=404 re-verified (exact).
 - **2026-08-10:** Stock-defects section added (join-churn race + MinEventFire
   null-itemValue NRE, both IL + runtime evidenced).
 - **2026-07-19:** Initial generic dedicated limitation map (sim, scale, net, AI, height, GC, content, modding).

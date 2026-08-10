@@ -317,6 +317,7 @@ dump-derived.
 
 ## Changelog
 
+- **2026-08-11:** Webserver IL re-verified: RegisterDefaultHandlers IL=60, UserRegistrationTokens.CreateToken IL=31 / TryValidate IL=13, WebUtils WriteText IL=40 / WriteJsonData IL=26 / SendEnvelopedResult IL=70 / IsSslRedirected IL=15 / GenerateGuid IL=6, MimeType.GetMimeType IL=22 (exact).
 - **2026-08-10:** Webserver.Web.RegisterDefaultHandlers IL=60 re-verified (exact).
 - **2026-08-08:** Newly-reached webserver leaves narrated (reachability-seed pass).
 
