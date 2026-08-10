@@ -953,6 +953,7 @@ not (the parent/child split of the vertical sign).
 
 ## Changelog
 
+- **2026-08-11:** Block leaves IL re-verified (32): assignIdsFromMapping IL=42, assignLeftOverBlocks IL=107, AlternateBlockCount IL=5, ContainsAlternateBlock IL=24, GetPathOffset IL=11, GetExplosionResistance IL=4, GetHardness IL=5, ActivateBlockOnce IL=2, GetPlaceAltBlockValue IL=21, HasItemsToDropForEvent IL=5, IsPlant IL=9, SetSideTextureId IL=13/39, SetLightValue IL=8, SetBlockName/GetBlockName IL=4/3, StringToVector3 IL=79, GetBlockValueFromProperty IL=40, BlockIdsByName IL=26, get_UnlockedBy IL=55, GetShownMaxDamage IL=15, GetActivationDistanceSq IL=14, GetAlternateBlockIndex IL=24, GetIconName IL=8, GetCustomDescription IL=2, GetUVMode IL=18, CopyDroppedFrom IL=89, HasCollidingAABB IL=33, CacheStats IL=7, ForceAnimationState IL=1 (Single IL=69) (exact).
 - **2026-08-10:** Block query leaves re-verified (5): BlockIdsByName 26, GetShownMaxDamage 15, GetActivationDistanceSq 14, GetIconName 8, GetCustomDescription 2 (exact).
 - **2026-08-10:** Block id-assign IL sizes re-verified: assignIdsFromMapping IL=42, assignLeftOverBlocks IL=107 (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
