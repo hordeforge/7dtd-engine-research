@@ -15,7 +15,7 @@ drive unaccounted → 0 after each game patch or doc edit.
 | **A. Managed map closed** | Every **reached game type** is narrated, catalogued, or classified OOS | `Coverage.exe` **unaccounted = 0** |
 | **B. Dedi-critical behaviour closed** | Families 1-11 in [coverage.md](coverage.md): loop, wire, entities, world, save, net, managers, light/mesh/water, ModEvents | Status **Closed** + residual only non-IL |
 | **C. Optional annotation depth** | Per-flag package framing, every console command prose, every TE subclass tick | Never "required" for interop; backlog only |
-| **D. Non-IL residuals** | Unity order, native LiteNet/EAC, A* library, content XML, client UI | Listed in [residuals.md](residuals.md); **cannot** be closed by more managed RE |
+| **D. Non-IL residuals** | EAC wire, A* library, content XML, client UI (Unity order + LiteNet event dispatch closed 2026-08-09/10) | Listed in [residuals.md](residuals.md); **cannot** be closed by more managed RE |
 
 **"100% of dedicated managed behaviour"** in this project means **A + B**.  
 It does **not** mean C (infinite), and does **not** mean D (impossible from IL alone).
@@ -345,7 +345,7 @@ Promote only when a clone or optim lever needs the behaviour.
 |---|---|
 | Unity MB execution order | Prefab/project settings, not CIL |
 | Entity GO `enabled` on pure dedi | Runtime observation |
-| LiteNet native / EAC wire | Native / anti-cheat black box |
+| LiteNet event dispatch (managed) | Closed 2026-08-10 ([network.md](network.md) §4.0); EAC wire | Native / anti-cheat black box |
 | A* Pathfinding Project internals | Third-party library |
 | XML content (blocks, loot, buffs) | Data files, not loop IL |
 | ModEvents who registers | Content/mod dependent |

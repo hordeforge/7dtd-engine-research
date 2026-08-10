@@ -4,7 +4,7 @@
 
 
 **Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, `NetPackageRequestToSpawnPlayer` / RequestToSpawnPlayer/PlayerId/PlayerSpawnedInWorld, golden package body layouts.  
-**Not:** the exhaustive per-package body catalog + protocol-wide metadata census (that is [`protocol-packages.md`](protocol-packages.md)); native LiteNet internals (residual); EAC wire (residual).  
+**Not:** the exhaustive per-package body catalog + protocol-wide metadata census (that is [`protocol-packages.md`](protocol-packages.md)); LiteNet event dispatch internals (closed 2026-08-10, [network.md](network.md) §4.0); EAC wire (residual).  
 **Hub:** [INDEX.md](INDEX.md).  
 **Visual frames (RFC bars + Mermaid):** [`protocol-frames.md`](protocol-frames.md).  
 **Full package bodies + census (channels, compress, pre-auth, encryption handshake):** [`protocol-packages.md`](protocol-packages.md).  
@@ -559,7 +559,7 @@ Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23
 | P2 | TileEntity / vehicles | Features | Open |
 | P3 | Quest/Party/Twitch | Completeness | Open |
 | residual | EAC | Out of scope | Residual |
-| residual | LiteNet native | Black box | Residual |
+| residual | LiteNet event dispatch | Closed 2026-08-10 ([network.md](network.md) §4.0) | Closed |
 
 ---
 
