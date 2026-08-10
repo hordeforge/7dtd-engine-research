@@ -531,6 +531,8 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-11:** Damage-apply IL re-verified: DamageEntity IL=236, damageEntityLocal IL=484, Equipment.CalcDamage IL=83, GetDamageFraction IL=6, Disintegrate IL=7, CheckDismember IL=125, get_sleepingOrWakingUp IL=3, GetDismemberChance IL=128, GetTotalPhysicalArmorRating IL=47, ExecuteDismember IL=49 (exact).
+- **2026-08-11:** Dismemberment IL re-verified: GetBodyPartHit IL=47/56, GetDamageTag IL=21, IsDefaultGib IL=22, DismemberPart IL=8, dismemberPart IL=259, getDismemberedPart IL=17, hasDismemberedPart IL=10, BodyDamage HasLeftLeg/HasRightLeg IL=7, IsAnyLegMissing/IsAnyArmOrLegMissing/IsCrippled IL=7, Write IL=12, ApplyLocalBodyDamage IL=188, SetupCrawler IL=49 (exact).
 - **2026-08-11:** DismembermentManager IL re-verified: IsDefaultGib IL=22, GetBodyPartHit IL=47/56, GetDamageTag IL=21 (exact).
 - **2026-08-10:** Combat IL re-verified: damageEntityLocal IL=484, Equipment.CalcDamage IL=83, GetDamageFraction IL=6, Disintegrate IL=7, CheckDismember IL=125 (exact).
 - **2026-08-10:** FriendlyFireCheck IL=77 re-verified (exact).
