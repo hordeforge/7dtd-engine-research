@@ -1018,7 +1018,7 @@ shot). `loadNewAmmunition(gun, ammo, entity)` (IL=20) reads the holding
 action slot 0 as `ItemActionDataRanged`, resets `SelectedAmmoTypeIndex` to 0
 when it exceeds `MagazineItemNames.Length`, and sets
 `isChangingAmmoType = true` (the ammo-type-swap latch consumed by
-`CompleteReload`, IL=178).
+`CompleteReload`, IL=176).
 
 **The reload gate and cancel (V3.1.0 b14):** `CanReload(data)` (IL=93) is
 true only when all of: not already reloading (`NotReloading`), a local
@@ -2169,6 +2169,8 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-11:** Config-tail IL re-verified: Quest.ReadFrom IL=49, Repair IL=43, UseOther IL=57, MakeFertile IL=66, ExchangeBlock IL=55, SpawnEntity IL=34 (exact).
+- **2026-08-11:** Reload/accuracy IL re-verified: ConsumeAmmo IL=9, loadNewAmmunition IL=20, CompleteReload IL=176 (corrected from stale 178), CanReload IL=93, CancelReload IL=57, EntityPlayer.IsReloadCancelled IL=36, InvokeTeleportDelegates IL=8, IsSavedToNetwork IL=2, updateAccuracy IL=175, AccuracyExpDecay IL=29, getDirectionRandomOffset IL=86, ItemActionEat.NeedPrompt IL=13 / IsValidConditions IL=94 / PercentDone IL=24 (exact).
 - **2026-08-11:** Melee/action IL re-verified: ItemActionMelee.ExecuteAction IL=116, GetExecuteActionTarget IL=152, GetCrosshairType IL=9, ItemActionCancel.ExecuteAction IL=26, ExchangeItem.ExecuteAction IL=75 / isFocusingBlock IL=29 / OnHoldingUpdate IL=93 / ReadFrom IL=83, DisconnectPower.ExecuteAction IL=19 / IsActionRunning IL=25 / OnHoldingUpdate IL=193 / GetPoweredBlock IL=99, UseOther.CanExecute IL=102 / ExecuteAction IL=287, TextureBlock.getUserData IL=51, ChannelMask IncludesChannel IL=11 / ToggleChannel IL=19 / SetExclusiveChannel IL=8 (exact).
 - **2026-08-11:** ReadFrom IL re-verified: base ItemAction IL=107, Attack IL=482, Ranged IL=126, Eat IL=152, Dynamic IL=495, ThrownWeapon IL=162, OpenBundle IL=191, GainSkill IL=53, LearnRecipe IL=75 (exact).
 - **2026-08-11:** Ranged leaves IL re-verified: SetAmmoType IL=55, NotReloadCancelled IL=10, ResetBurstShot IL=10, ResetOldAccuracy IL=3, setSelectedAmmoById IL=28, get_aiBurstShot IL=3 (exact).
