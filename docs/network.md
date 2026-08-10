@@ -18,7 +18,7 @@
 
 ```mermaid
 flowchart TD
-  CU[ConnectionManager.Update IL≈215]
+  CU[ConnectionManager.Update IL=228]
   CU --> PU[ProtocolManager.Update]
   PU --> PP[ProcessPackages × clients × channels]
   PP --> FL[FlushClientSendQueues]
