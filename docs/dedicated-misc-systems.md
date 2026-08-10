@@ -1371,6 +1371,8 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 
 ## Changelog
 
+- **2026-08-11:** Sound IL re-verified: Entity.PlayOneShot IL=38 (EntityPlayer IL=16), StopOneShot IL=5, StopAnimatorAudio IL=16, SequenceStopper ctor IL=9, BlockRadiusEffectsTick IL=83 / Apply IL=58, ResetBiomeWeatherOnDeath IL=15, SoundsFromXml.CreateSounds IL=6 / ParseNode IL=70 / Parse IL=544 (exact).
+- **2026-08-11:** Admin IL re-verified: InitFileWatcher IL=33, OnFileChanged IL=5, DestroyFileWatcher IL=10, ParseSection IL=41, WriteSections IL=24, ParseUserIdentifier IL=39, AdminUsers.HasEntry IL=30, AdminWhitelist.IsWhitelisted IL=58 / IsWhiteListEnabled IL=29, AdminBlacklist AddBan IL=40, RemoveBan IL=26, IsBanned IL=50, GetBanned IL=31, ParseElement IL=11, Save IL=31, Clear IL=4 (exact).
 - **2026-08-10:** Misc IL re-verified: ResetBiomeWeatherOnDeath IL=15, AdminTools.InitFileWatcher IL=33, OnFileChanged IL=5 (exact).
 - **2026-08-10:** Entity sound-dispatch IL sizes re-verified: PlayOneShot IL=38, StopOneShot IL=5, StopAnimatorAudio IL=16 (exact).
 - **2026-08-08:** Support/utility leaf index added (narrates 211 catalogued
