@@ -3761,6 +3761,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** EAI accessor IL re-verified: GetAlertTicks IL=3, GetSoundAlertTicks IL=10, ClearEntityThatKilledMe IL=4, GetPushFactor IL=3 (exact).
 - **2026-08-11:** AI targeting IL re-verified: SetAttackTarget IL=70, SetRevengeTarget IL=14, IsInFrontOfMe IL=28, EntitySeeCache.CanSee IL=49 (exact).
 - **2026-08-10:** EntityAlive task IL re-verified: ForceBigHead IL=22, ForceResetHead IL=28, snake aim IL=13, isRadiationSensitive IL=2, onNewBiomeEntered IL=4 (exact).
 - **2026-08-10:** EntityPlayer IL re-verified: OnUpdateLive IL=13, SetAlive IL=31/38, TurnOffLightFlares IL=4 (exact).
