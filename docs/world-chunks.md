@@ -1042,6 +1042,8 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-11:** Tick/deco IL re-verified: GameManager.UpdateTick IL=150, World.TickEntities IL=117, SaveDecorations IL=3, DecoManager.UpdateTick IL=330 (exact).
+- **2026-08-11:** Block-read IL re-verified: World.GetBlock IL=13, WorldBase.GetBlock IL=4, World.GetBlockData IL=10 / AddBlockData IL=6 / ClearBlockData IL=6, WorldBiomes.GetBlockValueForName IL=15, ChunkCluster.GetBlock IL=21, GetBlockEntities IL=59, GetBlockEntity IL=12, GetBlockFaceTexture IL=23, Chunk.GetBlock IL=100, GetBlockNoDamage IL=73, GetBlockId IL=17, GetBlockColumn IL=101, CheckSameLight/CheckSameDensity IL=4, HasSameDensityValue IL=5, SetDensity IL=10, IsOnlyTerrain IL=8, IsOnlyTerrainLayer IL=24, AddInsideDevicePosition IL=20, isInside IL=12, EnableInsideBlockEntities IL=45, EnableEntityBlocks IL=51 (exact).
 - **2026-08-11:** Chunk/block-data IL re-verified: AddBlockData IL=6, ClearBlockData IL=6, GetBlockValueForName IL=15, Chunk.GetBlock IL=100 (exact).
 - **2026-08-10:** Chunk/block-read IL re-verified (6): HasSameDensityValue 5, SetDensity 10, IsOnlyTerrain 8, World.GetBlock 13, GetBlockData 10, ChunkCluster.GetBlock 21 (exact).
 - **2026-08-10:** GameManager.UpdateTick IL=150, DecoManager.UpdateTick IL=330 re-verified (exact).
