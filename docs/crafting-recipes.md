@@ -296,6 +296,8 @@ report the sizes for the UI.
 
 ## Changelog
 
+- **2026-08-11:** ProgressionValue IL re-verified: SpendSkillPoints IL=16, addProgressionCurrency IL=85, GetPerkList IL=40, Write IL=51, Read IL=100, SetupData IL=144, set_Level IL=24, GetCalculatedLevel IL=79, get_PercToNextLevel IL=15, CanPurchase IL=9, IsLocked IL=6, Write IL=17, Read IL=16, ProgressionClass ModifyValue IL=17, CalculatedCostForLevel IL=31, GetCalculatedMaxLevel IL=78, canRun IL=8, AddLevelRequirement IL=7, GetRequirementsForLevel IL=20, PostInit IL=14, FireEvent/HasEvents IL=9 (exact).
+- **2026-08-11:** Craft/wire IL re-verified: CanCraft IL=128, CanCraftAny IL=134, ContainsIngredients IL=39, Recipe.Write IL=56, RecipeQueueItem.Write IL=82 / Read IL=116 / ReadLegacy IL=101 / Clear IL=32, IsUnlocked IL=31, GetCraftingTier IL=22, ModifyValue IL=15, UnlockRecipe IL=21/18, LockRecipe IL=40 (exact).
 - **2026-08-11:** Recipe IL re-verified: <LoadRecipies>d__1.MoveNext IL=436, SaveRecipes IL=123, Recipe.Init IL=79, RecipeUnlockData.Init IL=56, CraftingManager AddRecipe IL=6, PostInit IL=6, GetScrapableRecipe IL=77, GetRecipe IL=24, GetRecipes IL=3/27, ClearAllRecipes IL=3, ClearAllGeneralRecipes IL=30, ClearCraftAreaRecipes IL=36, ClearRecipe IL=5, InitForNewGame IL=10, RecipeIsFavorite IL=5, ToggleFavoriteRecipe IL=17, GetFavoriteRecipesFromList IL=31, ClearLockedData IL=5, AddWorkstationData IL=17, GetWorkstationData IL=12 (exact).
 - **2026-08-11:** Progression IL re-verified: GiveExp(CraftCompleteData) IL=54, AddLevelExp IL=161, AddLevelExpRecursive IL=179, getExpForLevel IL=10, getLevelFloat IL=14, AddXPDeficit IL=65 (exact).
 - **2026-08-10:** CraftingManager IL re-verified: AddRecipe IL=6, PostInit IL=6, GetRecipe IL=24, GetRecipes IL=3 (exact).
