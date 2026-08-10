@@ -1053,6 +1053,8 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-11:** Blood-moon party tail IL re-verified: IsPlayerATarget IL=29, FindPartyTarget IL=46, SeekTarget IL=167, get_BloodmoonZombiesRemain IL=6, IsMemberOfParty IL=5 (exact).
+- **2026-08-11:** Console-debug IL re-verified: DebugTick IL=7, DebugFrameLateUpdate IL=7, DebugToggleSendNameInfo IL=45, DebugSendNameInfo IL=110, DebugToggleSendLatency IL=52, DebugLatencyOff IL=42, DebugToggleFreezePos IL=14, LogAIExtra IL=6 (exact).
 - **2026-08-11:** Blood-moon party leaves IL re-verified: ctor IL=41, CalcBestDir IL=161, PlayerLoggedOut IL=16, KillPartyZombies IL=48, get_IsEmpty IL=9, InitParty IL=49, CreateNewParty IL=8, ClearParties IL=25, SetDay IL=45, CalcNextDay IL=82, StartBloodMoon IL=70, EndBloodMoon IL=73, IsBloodMoonTime IL=10, Component.Write IL=20 (exact).
 - **2026-08-11:** Time-conversion IL re-verified (GameUtils): DaysToWorldTime IL=15, DaysToWorldTimeMidnight IL=6, WorldTimeToTotalSeconds IL=4, WorldTimeToTotalMinutes IL=7, TotalMinutesToWorldTime IL=7, WorldTimeToHourMinutesString IL=14; World.DuskDawnInit IL=13, SetTimeJump IL=14; AIDirectorZombieState Construct IL=5 / Reset IL=4 / Cleanup IL=1 / get_Zombie IL=3 (exact).
 - **2026-08-11:** Player-management IL re-verified: Tick IL=7, TickPlayerStates IL=24, TickPlayerState IL=6, UpdatePlayerInventory IL=11/7, AddPlayer IL=23, RemovePlayer IL=21; NetPackagePlayerInventoryForAI Setup IL=9, GetLength IL=30, write IL=18, WriteInventorySet IL=33, read IL=15, ReadInventorySet IL=25, ProcessPackage IL=23 (exact).
