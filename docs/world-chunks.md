@@ -1042,6 +1042,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-10:** GameManager.UpdateTick IL=150, DecoManager.UpdateTick IL=330 re-verified (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
 
