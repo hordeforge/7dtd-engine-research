@@ -608,7 +608,7 @@ the spot still passes when `IsOpenSkyAbove(x, y, z)`. The final gate is
 supported soil/farm block. The consumer is `BlockPlant.CheckPlantAlive`
 (IL=20), which on a failed check commits `SetBlockRPC(pos -> Air)` - an
 unsupported plant is destroyed, not merely flagged - and `BlockTallgrass`
-(IL=4) reuses the same gate.
+(IL=15) reuses the same gate.
 
 **`World.CanPlaceBlockAt` (IL=129)** is a separate land-claim / world gate used
 by pickup and placement callers (not the Block virtual above):
@@ -953,6 +953,8 @@ not (the parent/child split of the vertical sign).
 
 ## Changelog
 
+- **2026-08-11:** Damage IL re-verified: OnBlockDamaged IL=497, OnBlockDestroyedByExplosion IL=15 (Mine IL=14, ModelTree IL=10, TNT IL=22, TrapDoor IL=23, Composite IL=54), explode IL=18, TNT.OnBlockDamaged IL=31, Mine.TriggerMine IL=99 / UpdateTick IL=8 / IsMovementBlocked IL=2 / OnBlockDamaged IL=44, BlockDamage.OnEntityCollidedWithBlock IL=126 (Spikes IL=38, Barbed IL=51) (exact).
+- **2026-08-11:** Placeholder/plant IL re-verified: Replace IL=292/19/36, IsReplaceableBlockType IL=10, CanPlantStay IL=41 (base IL=2), CheckPlantAlive IL=20, BlockTallgrass IL=15 (corrected from stale 4), CanPlaceBlockAt IL=129, CanPickupBlockAt IL=14, PickupBlockServer IL=77, TakeItemWithTimer IL=62, takeItemWithTimer IL=10, takeItemWithTimerCanTake IL=2 (Collector/Workstation IL=24), BlockValueRef.Read IL=23, PropRef.Read IL=12, SetBlocksRPC IL=6 (exact).
 - **2026-08-11:** Auto-shape/conversion IL re-verified: GetAutoShape* IL=3 each, AutoShapeAlternateShapeNameIndex IL=14, AutoShapeSupportsShapeName IL=14, GetLocalizedAutoShapeShapeName IL=8, GetShapeCategories IL=47, Init IL=2136, LateInit IL=275, BlockValue.ToItemValue IL=6, ItemValue.ToBlockValue IL=26, GetAltBlock IL=19, GetAltBlocks IL=39, GetAltBlockValue IL=5, GetAltBlockNames IL=3, GetBlockByName IL=19, ToBlockValue IL=8, WaterDataToBlockValue IL=28, DropItemsOnEvent IL=246, OnBlockReset IL=1 (Hazard IL=33, Light IL=35) (exact).
 - **2026-08-11:** Set-block IL re-verified: World.SetBlock IL=9, ChunkCluster.SetBlock IL=13/48/828, SetBlockValue IL=32, SetBlockRaw IL=25, BlockChangeInfo.Write IL=89 / Read IL=76 (exact).
 - **2026-08-11:** Block leaves IL re-verified (32): assignIdsFromMapping IL=42, assignLeftOverBlocks IL=107, AlternateBlockCount IL=5, ContainsAlternateBlock IL=24, GetPathOffset IL=11, GetExplosionResistance IL=4, GetHardness IL=5, ActivateBlockOnce IL=2, GetPlaceAltBlockValue IL=21, HasItemsToDropForEvent IL=5, IsPlant IL=9, SetSideTextureId IL=13/39, SetLightValue IL=8, SetBlockName/GetBlockName IL=4/3, StringToVector3 IL=79, GetBlockValueFromProperty IL=40, BlockIdsByName IL=26, get_UnlockedBy IL=55, GetShownMaxDamage IL=15, GetActivationDistanceSq IL=14, GetAlternateBlockIndex IL=24, GetIconName IL=8, GetCustomDescription IL=2, GetUVMode IL=18, CopyDroppedFrom IL=89, HasCollidingAABB IL=33, CacheStats IL=7, ForceAnimationState IL=1 (Single IL=69) (exact).
