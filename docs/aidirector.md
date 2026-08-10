@@ -1053,6 +1053,9 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-11:** Player-management IL re-verified: Tick IL=7, TickPlayerStates IL=24, TickPlayerState IL=6, UpdatePlayerInventory IL=11/7, AddPlayer IL=23, RemovePlayer IL=21; NetPackagePlayerInventoryForAI Setup IL=9, GetLength IL=30, write IL=18, WriteInventorySet IL=33, read IL=15, ReadInventorySet IL=25, ProcessPackage IL=23 (exact).
+- **2026-08-11:** Wandering-horde IL re-verified: Tick IL=17, TickActiveSpawns IL=43, TickNextTime IL=74, StartSpawning IL=124, get_HasAnySpawns IL=6, get_OtherHordesAreActive IL=9, SetNextTime IL=13, ChooseNextTime IL=40, InitNewGame IL=12, Write IL=12, Read IL=16, CleanupType IL=30, LogTimes IL=17, FindScoutStartPos IL=192 (AIDirectorHordeComponent) (exact).
+- **2026-08-11:** Spawner IL re-verified: AIWanderingHordeSpawner ctor IL=76, Update IL=101, UpdateSpawn IL=158, UpdateHorde IL=189, Cleanup IL=24, RandomPos IL=15; AIHordeSpawner Tick IL=228, ctor IL=20, get_isSpawning IL=4, Cleanup IL=25; AIDirectorSmellMarker.Tick IL=71, AIDirectorPooledMarker.Update IL=1 (exact).
 - **2026-08-11:** ChunkData leaves IL re-verified: AddEvent IL=46, get_IsReady IL=7, get_ActivityLevel IL=3, Write/Read IL=35/36 (inner version 2), ctor IL=6; AIDirectorData.InitStatic IL=3, AddNoisySound IL=5, FindNoise IL=11; AIDirectorEventsFromXml.Update IL=1 (exact).
 - **2026-08-11:** Marker IL re-verified: Tick IL=7, TickMarkers IL=43 (AIDirectorMarkerManagementComponent, exact).
 - **2026-08-11:** Game-stage party spawner IL re-verified: Tick IL=52, CalcStageSpawnMax IL=30, IncSpawnCount IL=7, DecSpawnCount IL=15, get_canSpawn IL=11, SetupGroup IL=57, get_maxAlive IL=9, ResetPartyLevel IL=13, CalcPartyLevel IL=26, SetPartyLevel IL=123, SetScaling IL=11, AddMember IL=22, RemoveMember IL=14, get_IsDone IL=11, GameStageDefinition.cctor IL=12, EntitySpawner.ModifySpawnCountByGameDifficulty IL=6 (exact).
