@@ -545,7 +545,8 @@ Any Zig clone should pass the same golden sizes for PosAndRot / RelPos / AliveFl
 
 ## 11. RE backlog (protocol)
 
-Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23):
+Status refreshed 2026-08-10 (rows re-verified against the current
+[`protocol-packages.md`](protocol-packages.md) sections):
 
 | Priority | Item | Why | Status |
 |---:|---|---|---|
