@@ -1042,6 +1042,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-11:** Chunk/block-data IL re-verified: AddBlockData IL=6, ClearBlockData IL=6, GetBlockValueForName IL=15, Chunk.GetBlock IL=100 (exact).
 - **2026-08-10:** Chunk/block-read IL re-verified (6): HasSameDensityValue 5, SetDensity 10, IsOnlyTerrain 8, World.GetBlock 13, GetBlockData 10, ChunkCluster.GetBlock 21 (exact).
 - **2026-08-10:** GameManager.UpdateTick IL=150, DecoManager.UpdateTick IL=330 re-verified (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
