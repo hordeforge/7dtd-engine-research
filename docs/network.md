@@ -904,6 +904,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-10:** Band thresholds re-verified from IL: interest distSq ldc.r4 16 (NetEntityDistributionEntry IL_0019), teleport ldc.r4 256 (IL_0001), view-angle distSq ldc.r4 16384=128^2 (NetEntityDistribution IL_015B) - exact match to 2.
 - **2026-08-10:** Replication IL sizes re-verified: NetEntityDistributionEntry.updatePlayerEntity IL=222, updatePlayerList IL=509 (exact match to 4b).
 - **2026-08-10:** AesEncryptAndMac IL sizes re-verified: EncryptStream IL=102, DecryptStream IL=148, `MAC did not match` string at IL_0123 (exact match to 4.5).
 - **2026-08-10:** Challenge reply layout verified from IL: `byte[0]=202`
