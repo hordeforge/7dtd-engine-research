@@ -497,6 +497,7 @@ the whole reason this system works headless at all.
 
 ## Changelog
 
+- **2026-08-11:** A* grid IL re-verified: ScanInternal IL=6, UpdateArea IL=102, CalcBlockingFlags IL=99, AddConnection IL=85, RemoveConnection IL=84, AllocConnection IL=33, ClearConnections IL=38, AddArea IL=64, AddAreaBlock IL=26, FindLocation IL=47, OnBlockChanged IL=209, IsBlockOrTerrain IL=22, GetDirByNormal IL=11/22, GetClosestDirection IL=74, OneVoxelStep IL=264, GetCellsOnRay IL=242 (corrected from stale 244), Raycast IL=8/20/8, raycastNew IL=525, GetNextBlockHit IL=549 (exact).
 - **2026-08-10:** AstarVoxelGrid IL sizes re-verified: ScanInternal IL=6, CalcBlockingFlags IL=99, AddConnection IL=85 (exact).
 - **2026-08-08:** Voxel.raycastNew (IL=525) physics-march core: 10-iteration
   loop, sphere-cast when radius > 0.01, full hitMask bit table (1 see-through,
