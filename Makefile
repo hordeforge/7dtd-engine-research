@@ -38,6 +38,11 @@ drift:
 readiness:
 	python3 "$(TOOLS)/tests/bench_version_update_tooling.py"
 
+# Regenerate-inventory check: compiles legacy/DumpFrameEntries and re-derives
+# the frame-entries inventories from the live DLL (needs mcs + mono).
+regen-check:
+	python3 "$(TOOLS)/tests/test_re_dump_regen.py"
+
 test:
 	python3 "$(TOOLS)/tests/test_dedi_coverage_docs.py"
 	python3 "$(TOOLS)/tests/check_stock_facts.py" --require-live
