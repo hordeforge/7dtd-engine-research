@@ -434,6 +434,7 @@ stateDiagram-v2
 
 ## Changelog
 
+- **2026-08-11:** Dynamic-mesh IL re-verified: Update IL=404, CreateMeshSync IL=52, CopyTerrain IL=209, SaveRegion IL=69, SaveRegionToFile IL=7, ChunkData.Write IL=201, LoadRegion IL=167, TryGetData IL=15, GetLock IL=73, ReleaseLock/ThreadHasLock IL=4, IsReadyForRelease IL=49, Path/RawPath IL=13, Exists IL=4, Reset IL=4, IsUpdating/MarkAsUpdating/MarkAsUpdated/MarkAsGenerating IL=11-15, ClearQueues IL=15, IsReadyThreaded IL=13, TryLoadItem IL=192, DynamicMeshFile.WriteRegion IL=159 / WriteRegionHeaderData IL=133, AddChunkUpdateFromServer IL=15, DynamicMeshServer.Update IL=452 (exact).
 - **2026-08-10:** Dynamic-mesh IL re-verified: DynamicMeshManager.Update IL=404, DynamicMeshRegionDataStorage.SaveRegion IL=69, SaveRegionToFile IL=7, DynamicMeshChunkData.Write IL=201 (exact).
 - **2026-08-10:** `MaxActiveSyncs` default verified = **10** (`ldc.i4.s 10` +
   `stsfld` in the `DynamicMeshServer` static ctor), console-settable
