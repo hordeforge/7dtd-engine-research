@@ -382,6 +382,9 @@ from the same clock and the received weather snapshot.
 
 ## Changelog
 
+- **2026-08-10:** Weather method IL sizes re-verified: SetStorm IL=32,
+  IsStormEffected IL=22, BiomeDefinition.AddWeatherGroup IL=57,
+  WeatherRandomize IL=32/14 (all exact).
 - **2026-08-08:** EntityPlayerLocal.WeatherBuffUpdate (IL=45): weatherBuff
   removed indoors / re-added outdoors, driven by isIndoorsCurrent.
 
