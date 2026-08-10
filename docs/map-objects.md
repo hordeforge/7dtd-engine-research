@@ -324,6 +324,7 @@ add/remove, override color, localization flag, entityId.
 
 ## Changelog
 
+- **2026-08-10:** NavObject IL re-verified: SetupEntityOptions IL=28, IsValid IL=30 (exact).
 - **2026-08-10:** Map/NavObject IL sizes re-verified: Entity.HasUIIcon IL=13,
   GetMapObjectType IL=2, NavObject.set_TrackedEntity IL=20 (all exact).
 - **2026-08-08:** EntityPlayer.onNewPrefabEntered (IL=92): trader-prefab
