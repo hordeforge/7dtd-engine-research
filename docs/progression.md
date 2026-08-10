@@ -362,6 +362,7 @@ player's own `get_gameStage`.
 
 ## Changelog
 
+- **2026-08-11:** Progression/store IL re-verified: GetDict IL=4, CalcId IL=4, ToBytes IL=28, FromBytes IL=31, ClearProgressionClassLinks IL=27, Update IL=32, UpdateForSandbox IL=22/52, get_gameStage IL=124, get_unModifiedGameStage IL=45, GetTraderStage IL=46, get_HighestPartyGameStage IL=10, Party.get_HighestGameStage IL=26, dropItemOnQuit IL=4, HandleRemoveRandomItems IL=33/34/35, ShouldRemoveEquipmentOnDeath IL=9, EmptyBackpack IL=25, EmptyToolbelt IL=21, EmptyBackpackAndToolbelt IL=47, RemoveSpawnPoints IL=19, TryAddRecoveryPosition IL=73, AdjustItemsForSandboxOptions IL=40 (exact).
 - **2026-08-10:** Progression IL re-verified: addProgressionCurrency IL=85, ToBytes IL=28, FromBytes IL=31, Update IL=32, UpdateForSandbox IL=22 (exact).
 - **2026-08-10:** Progression IL sizes re-verified: AddLevelExp IL=161, CalcId IL=4 (exact).
 - **2026-08-07:** Progression.Update (IL=32) 1-s cadence MinEvent(5) fire +

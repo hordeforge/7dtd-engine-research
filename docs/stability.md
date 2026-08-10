@@ -253,6 +253,7 @@ channel today; the plane can be recomputed on load with
 
 ## Changelog
 
+- **2026-08-11:** Stability IL re-verified: BlockPlacedAt IL=19, BuildStabilityBlocks ctor IL=11 + RegisterWhenDone MoveNext IL=1304, getMaxStabilityAround IL=61, ChangeStability IL=111, clearHorizontal IL=114, clearDown IL=59, GetBlockValues IL=25, GetBlockTextureFullArrays IL=34 (exact).
 - **2026-08-10:** Stability/failing-block IL sizes re-verified: BlockPlacedAt
   IL=19, World.AddFallingBlocks IL=18, ClearFallingBlocksForChunks IL=111,
   CreateFallingBlockGroup IL=107, GetBlockValues IL=25 (all exact).

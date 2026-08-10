@@ -241,6 +241,7 @@ records are `TwitchEventActionEntry`, `TwitchVoteEntry` and
 
 ## Changelog
 
+- **2026-08-11:** Twitch IL re-verified: NetPackageTwitchVoteScheduling.ProcessPackage IL=16, TwitchVoteScheduler.AddParticipant IL=10 / Update IL=68, NetPackageTwitchAccess.ProcessPackage IL=55, HandleTwitchActionsTempEnabled IL=8, HasTwitchMember IL=9, HasTwitchVoteLockMember IL=9, ParseRequirement IL=83, BaseTwitchRequirement.ParseProperties IL=14, CheckAllowed IL=34, IsReady IL=308, BaseTwitchVoteOperationRequirement.CanPerform IL=48, AddToBitPot IL=23, SetPot/SetBitPot IL=28, SetupBloodMoonData IL=23, WithinBloodMoonPeriod IL=33, AddKillToLeaderboard IL=44, TwitchManager.Update IL=1585, SetupHistoryEntry IL=41, CanRefund IL=19, Refund IL=26 (exact).
 - **2026-08-10:** Twitch IL re-verified: NetPackageTwitchAccess.ProcessPackage IL=55, TwitchAction.CheckAllowed IL=34, TwitchActionsFromXml.ParseRequirement IL=83 (exact).
 - **2026-08-10:** Twitch IL sizes re-verified: NetPackageTwitchVoteScheduling.ProcessPackage IL=16, TwitchVoteScheduler.Update IL=68 (exact).
 - **2026-08-08:** Vote/cooldown config records (TwitchVotePreset, TwitchRandomActionGroup, CooldownPreset/TwitchCooldownEntry, TwitchActionCooldownModifier), TwitchActionManager registry, spawn-entry records (TwitchSpawnedEntityEntry/TwitchRecentlyRemovedEntityEntry + originating event/vote/respawn records); 15 server records moved out of the OOS client-driven list.
