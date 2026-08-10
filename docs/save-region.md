@@ -818,6 +818,7 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-10:** WorldState IL sizes re-verified: SetFrom IL=203, Save(String) IL=21 (exact).
 - **2026-08-08:** Round-trip symmetry IL-verified: `WorldState.SaveLoad(Stream)` is a
   unified `IBinaryReaderOrWriter` codec (one path writes and reads, so write/read
   can't diverge); the documented field order (version, gameVersionString,

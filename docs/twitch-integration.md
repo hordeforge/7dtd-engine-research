@@ -241,6 +241,7 @@ records are `TwitchEventActionEntry`, `TwitchVoteEntry` and
 
 ## Changelog
 
+- **2026-08-10:** Twitch IL sizes re-verified: NetPackageTwitchVoteScheduling.ProcessPackage IL=16, TwitchVoteScheduler.Update IL=68 (exact).
 - **2026-08-08:** Vote/cooldown config records (TwitchVotePreset, TwitchRandomActionGroup, CooldownPreset/TwitchCooldownEntry, TwitchActionCooldownModifier), TwitchActionManager registry, spawn-entry records (TwitchSpawnedEntityEntry/TwitchRecentlyRemovedEntityEntry + originating event/vote/respawn records); 15 server records moved out of the OOS client-driven list.
 - **2026-08-08:** Twitch requirement gates (BaseTwitchRequirement family + vote mirrors), TwitchViewerData points ledger, TwitchActionEntry/TwitchActionHistoryEntry queue records.
 - **2026-07-23:** Initial Twitch-integration reversal (server action/vote execution via game events, client-hosted connection residual) with state machines.
