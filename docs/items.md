@@ -348,8 +348,8 @@ mods); `GetCosmeticItemMod` is the cosmetic-pool twin.
 mod override from `PropertyOverrides : Dictionary<string, DynamicProperties>`
 keyed by item name: the exact-name entry first, then the `"*"` wildcard entry
 (the `Values` dict of each must contain the property) - the backend of
-`ItemValue.GetPropertyOverride` above. `HasAllTags` / `HasAnyTags` (IL=5/7)
-are `ModifierTags` subset / overlap tests.
+`ItemValue.GetPropertyOverride` above. `HasAllTags` / `HasAnyTags` (IL=5
+each) are `ModifierTags` subset / overlap tests.
 
 **Stat-value leaves:** `GetStatPercent(type, onlyBoosted)` (IL=12) starts at
 **1** and, when stats exist, runs `StatModifyValue`. `StatModifyValue(effect,
@@ -2169,6 +2169,7 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-11:** Stacking/mod IL re-verified: CanStackPartlyWith IL=15, get_MaxCount IL=23, CanStack IL=6 (Quest IL=2), CanMoveToLocation IL=41, StackTransferCount IL=21, EqualsForMerging IL=47, CalcModSlotCount IL=29, MergeBest IL=115, MergeBestStats IL=109, CloneModsTo/CloneCosmeticModsTo IL=34, get_HasModSlots IL=6, HasMods/HasCosmetics IL=30, createDefaultModItems IL=187, UnlockCosmeticItem IL=31, GetItemModWithAnyTags IL=53, GetDesiredItemModWithAnyTags IL=67, GetPropertyOverride IL=50, HasAllTags/HasAnyTags IL=5 (corrected from stale 5/7), GetStatPercent IL=12, StatModifyValue IL=47, IsStatLowerBetter IL=9 (exact).
 - **2026-08-11:** Id/wire IL re-verified: GetItemOrBlockId IL=12, GetItemId IL=5, assignIdsFromXml IL=29, assignIdsLinear IL=14, assignLeftOverItems IL=87, createFullMappingForClients IL=31, ItemStack.ReadDelta IL=15 / WriteDelta IL=23, ItemValue.ReadOrNull IL=13 / ReadOld IL=1, ItemStack.ReadOld IL=10, Block.PlaceBlock IL=67 (exact).
 - **2026-08-11:** Metadata/stacking IL re-verified: HasMetadata IL=25, TryGetMetadata IL=17 (x3) / core IL=36, GetMetadata IL=17, RemoveMetaData IL=12, SetMetadata core IL=86, CanStackWith IL=46, CanMoveTo IL=15, CanStack IL=19, CanStackPartly IL=24 (exact).
 - **2026-08-11:** ItemClass IL re-verified: GetItemClass IL=15, GetItem IL=13, GetItemWithTag IL=30, GetItemsWithTag IL=33, CreateItemValue IL=17, GetForId IL=15, CanCollect IL=2 (TimeBomb IL=5), IsGun/IsDynamicMelee IL=8, IsLightSource IL=5, ItemValue get_ItemClassOrMissing IL=9 / get_HasQuality IL=17 / get_IsMod IL=12 / get_IsShapeHelperBlock IL=12, ItemClassBlock.GetBlock IL=5 / GetBlockValueFromItemValue IL=15 (exact).
