@@ -1767,6 +1767,7 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-11:** Verification: PartyData/Weather/EntityWaypointList writes re-checked (PartyData LeaderIndex u8, Weather no-outer-length inferred, WaypointList i16+count) - 6.23 exact; full 37-package set individually verified.
 - **2026-08-10:** Verification: always-present package writes re-checked (GameEventRequest varCount 255-cap IL_007E, ClientInfo count+triples, Audio soundGroupName null-coalesce, NavObject 8 fields) - all 6.23 exact.
 - **2026-08-10:** Verification: NetPackageRangeCheckDamageEntity write IL=216 (38 scalars + buffActions brfalse IL_021D null-guard) - 6.23 exact; all 18 conditionals now double-verified.
 - **2026-08-10:** Verification complete: all 18 §6.23 conditional packages now individually IL-verified (final: InventoryTransactionResponse hasInventory guard, Localization data-null guard).
