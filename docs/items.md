@@ -2169,6 +2169,8 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-11:** ItemClass IL re-verified: GetItemClass IL=15, GetItem IL=13, GetItemWithTag IL=30, GetItemsWithTag IL=33, CreateItemValue IL=17, GetForId IL=15, CanCollect IL=2 (TimeBomb IL=5), IsGun/IsDynamicMelee IL=8, IsLightSource IL=5, ItemValue get_ItemClassOrMissing IL=9 / get_HasQuality IL=17 / get_IsMod IL=12 / get_IsShapeHelperBlock IL=12, ItemClassBlock.GetBlock IL=5 / GetBlockValueFromItemValue IL=15 (exact).
+- **2026-08-11:** Item-action IL re-verified: ItemActionPlaceAsBlock.ExecuteAction IL=353, ItemActionGainSkill.ExecuteAction IL=24 / OnHoldingUpdate IL=143, ItemActionLearnRecipe.ExecuteAction IL=24, BlockPlacement.OnPlaceBlock IL=235 (exact).
 - **2026-08-10:** Item metadata IL re-verified (7): ReadOrNull 13, ReadOld 1, ItemStack.ReadOld 10, HasMetadata 25, RemoveMetaData 12, SetMetadata(String,Object,TypeTag) 86 core, Int32/Single/String overloads 6-7 (exact).
 - **2026-08-10:** Item id-assign pipeline re-verified: assignIdsFromXml IL=29, assignIdsLinear IL=14, assignLeftOverItems IL=87, createFullMappingForClients IL=31 (exact).
 - **2026-08-10:** Item IL sizes re-verified (10): GetItemClass 15, GetItem 13, GetItemsWithTag 33, GetForId 15, IsGun 8, GetItemOrBlockId 12, GetItemId 5, ItemStack.FromString 38, ReadDelta 15, WriteDelta 23 (all exact).
