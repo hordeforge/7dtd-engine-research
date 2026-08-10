@@ -1768,6 +1768,7 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-11:** Residual-table Process IL re-verified (28): RequestToSpawnPlayer write IL=17, EntityCollect IL=51, EntityAttach IL=104, EntityRagdoll IL=56, EntityAddVelocity IL=11, EntitySpeeds IL=37, EntityAnimationData IL=64, EntitySetPartActive IL=38, EntityPrimeDetonator IL=23, SetAttackTarget IL=24, OwnedEntitySync IL=34, PlayerEquipment IL=56, ItemDrop IL=23, DropItemsContainer IL=19, ItemActionEffects IL=42, ItemReload IL=18, ModifyCVar IL=26, EntityAddExpClient IL=36 / Server IL=31, EntitySetSkillLevelClient IL=22 / Server IL=26, EntityAwardKillServer IL=24, EntityAddScoreClient IL=25 / Server IL=17, SetBlockTexture IL=46, AnimateBlock IL=33, PickupBlock IL=41, WallVolume IL=16 (all exact).
 - **2026-08-11:** Explosion detail IL re-verified: Explosion.AttackBlocks IL=553, AttackEntites IL=691, ExplosionData.ToByteArray IL=21, GameManager.ExplodeGroupFrameUpdate IL=220 / ExplosionClient IL=51 (exact).
 - **2026-08-11:** Stats/party package IL re-verified: NetPackageEntityStatChanged.Process IL=88, EntityStatsBuff.Process IL=76, PlayerStats.Process IL=70, PartyActions.Process IL=176, PartyData.Process IL=243 (exact).
 - **2026-08-11:** Quest/trader IL re-verified: QuestObjectiveUpdate.Process IL=180 + HandlePlayer IL=108, QuestEvent write IL=205 / Process IL=368, NPCQuestList.Process IL=180, TraderData.Process IL=50, GameEventRequest write IL=83 / Process IL=211, GameEventResponse.Process IL=135, BossEvent.Process IL=55, EntityWaypointList.Process IL=22 (exact).
