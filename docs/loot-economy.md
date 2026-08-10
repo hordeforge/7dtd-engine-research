@@ -955,6 +955,8 @@ or `ItemStack.Empty` when nothing rolled.
 
 ## Changelog
 
+- **2026-08-11:** Trader-area IL re-verified: get_TraderAreas IL=12, GetTraderAreaAt IL=14, IsWithinTraderPlacingProtection IL=20/29, TraderComparer.Compare IL=8, IsWithinTraderArea IL=6/19, GetTraderAtPosition IL=68, TraderArea.IsWithinProtectArea IL=47, GetProtectPadding IL=22, checkForTeleportOutOfTraderArea IL=241 (exact).
+- **2026-08-11:** Vending/drop IL re-verified: SetAutoBuyTime IL=21, get_IsRentable IL=5, get_RentTimeRemaining IL=9, get_RentalEndDay IL=3, GetUsers IL=3, GetPasswordHash IL=3, TryAutoBuy IL=227, UpdateTick IL=25, ItemDropServer(8-arg) IL=268, DropContentInLootContainerServer IL=104, DropContentOfLootContainerServer IL=99, EntityItem OnLoadedFromEntityCache IL=73 / createMesh IL=249 / GetModelTransform IL=3 / playThrowSound IL=15, NetPackageTraderData.write IL=38 (exact).
 - **2026-08-10:** Trader-area IL re-verified: TraderComparer.Compare IL=8, GetTraderAtPosition IL=68, IsWithinProtectArea IL=47, GetProtectPadding IL=22 (exact).
 - **2026-08-10:** Trader-area IL sizes re-verified: get_TraderAreas IL=12, IsWithinTraderPlacingProtection IL=20 (exact).
 - **2026-08-08:** EntityLootContainer.OnUpdateEntity (IL=46): lock-skip,
