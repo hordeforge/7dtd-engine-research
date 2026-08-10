@@ -122,10 +122,12 @@ generation, and the server slice of Twitch. See the ledger table above (23 new
 narratives this pass, 158 diagrams corpus-wide).
 
 **Caveat (not "every method"), with the honest numbers.** The reachability pass
-reaches ~45k methods / 3,775 game types, far more than any per-method narration could
+reaches ~45k methods / 3,681 game types in the RE surface, far more than any per-method narration could
 cover. As of the current [coverage report](inventories/coverage-report.md):
-**1,400 (37%) are narrated** in a narrative doc, 901 are catalogued only, 1,398 are
-classified out of scope, and **0 are unaccounted**....................... Server-side support and
+**3,681 (100% of the 3,681-type RE surface) are narrated** in a narrative doc,
+**0 are catalogued only, 0 classified out of scope, and 0 are unaccounted**.
+(A larger whole-assembly base of 7,432 types incl. nested/third-party is
+partitioned separately; narrated there is ~49.5%.) Server-side support and
 utility code that the reachable set includes but no narrative singles out
 (e.g. `Configuration.*` parsing, `StringParsers`, `TEFeatureAbs` helpers) is
 captured at the framework level, not with a dedicated section each.
