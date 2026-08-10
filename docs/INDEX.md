@@ -376,6 +376,15 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
 
 ## Changelog
 
+- **2026-08-10:** LiteNetLib join-churn race closed as a managed defect
+  ([network.md](network.md) §4.0: `UnsyncedEvents=true` + receive-thread
+  `Clients.List` enumeration; ramp workaround validated), `NetPackageMinEventFire`
+  null-itemValue NRE documented + audited as the unique reachable instance-callvirt
+  write defect ([protocol-packages.md](protocol-packages.md) §6.23), stock-defects
+  section added to [engine-limitations.md](engine-limitations.md), ModEvents
+  subscriber baseline pinned in [managers.md](managers.md) §2, stale
+  native-LiteNetLib labels purged corpus-wide, regression test wired into
+  `make test`.
 - **2026-08-09:** Wiki cross-linking pass: added hub backlinks (`**Hub:**
   INDEX.md`) to the 5 docs missing one; fixed `client-side-surface.md` orphan
   (was 0 incoming, now INDEX row + narrated-twin links from out-of-scope-surface
