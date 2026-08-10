@@ -3762,6 +3762,11 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** Sleeper-wakeup IL re-verified: GetSleeperDisturbedLevel IL=38, ConditionalTriggerSleeperWakeUp IL=55, SetSleeperActive IL=26, TriggerSleeperPose IL=52, ResumeSleeperPose IL=6, CanSleeperAttackDetect IL=20 (exact).
+- **2026-08-11:** Sleeper registry IL re-verified: GetAllSleeperVolumes IL=43, RemoveSleeperVolumesFor IL=45, Chunk.AddSleeperVolumeId IL=18, Chunk.GetSleeperVolumes IL=3, GetSleeperVolume IL=30, NotifySleeperVolumesEntityDied IL=32, SleeperVolume.EntityDied IL=31, ClearedUpdate IL=33 (exact).
+- **2026-08-11:** Stealth/smell IL re-verified: NoiseCleanup IL=43, AddNoise IL=35, NotifyNoise IL=71, CalcVolume IL=68, AttractTickServer IL=106, SmellTickWet IL=19, SmellClear IL=19, SmellUpdateItemsAndBlood IL=79, SmellCountItems IL=110, SmellCountToRadius IL=18, SetSmellEat IL=21, SetSmellRadiusTarget IL=21, SetClientLevels IL=13, GetStealthLightLevel IL=30 (exact).
+- **2026-08-11:** Noise/AI-director IL re-verified: AIDirector.OnSoundPlayedAtPosition IL=17, NotifyNoise IL=84, AIDirectorData.FindNoise IL=11, CheckSleeperVolumeNoise IL=62, SleeperVolume.CheckNoise IL=69, NetPackageSleeperWakeup.ProcessPackage IL=20, NetPackageSleeperPassiveChange.ProcessPackage IL=21, NetPackageEntityStealth.ProcessPackage IL=92 (exact).
+- **2026-08-11:** Despawn IL re-verified: CheckDespawn IL=198, canDespawn IL=14, EntityEnemy.canDespawn IL=13, Despawn IL=6, ForceDespawn IL=3, ResetDespawnTime IL=7, IsAttackValid IL=70, GetLightLevel IL=14, updateTasks IL=125, TriggerManager.TriggerBlocks IL=17/27, Chunk.GetBlockTrigger IL=9, SetLastTimePlayerSeen IL=4 (exact).
 - **2026-08-11:** Combat IL re-verified: Attack IL=5, UseHoldingItem IL=64, GetAttackTimeoutTicks IL=10, GetMaxAttackTime IL=2, GetTargetIfAttackedNow IL=98, SetModelLayer IL=7, HasImmunity IL=2, Utils.GetAngleBetween IL=34 (exact).
 - **2026-08-11:** Collision IL re-verified: GameUtils.GetHitRootTransform IL=29, EntityVehicle.FindCollisionEntity IL=18, EntityDrone.FindCollisionEntity IL=13, EntityDrone.IgnoreCollisionEntity IL=38 (exact).
 - **2026-08-11:** SleeperVolume rest IL re-verified: Touch IL=112, CheckTrigger IL=136, SetMinMax IL=19, GetPlayerTouchedToUpdateId/GetPlayerTouchedTriggerId IL=13, GetSpawnPoints IL=3, SetScript IL=15 (exact).
