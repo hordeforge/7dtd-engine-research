@@ -531,6 +531,7 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-10:** Combat IL re-verified: damageEntityLocal IL=484, Equipment.CalcDamage IL=83, GetDamageFraction IL=6, Disintegrate IL=7, CheckDismember IL=125 (exact).
 - **2026-08-10:** FriendlyFireCheck IL=77 re-verified (exact).
 - **2026-08-08:** DamageSource.IgnorePartyShare linked to the NetPackageDamageEntity bIgnorePartyShare wire field.
 - **2026-08-08:** Entity.InitializeBagFromLootList (IL=39): bag sized from
