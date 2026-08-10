@@ -953,6 +953,7 @@ not (the parent/child split of the vertical sign).
 
 ## Changelog
 
+- **2026-08-10:** Block query leaves re-verified (5): BlockIdsByName 26, GetShownMaxDamage 15, GetActivationDistanceSq 14, GetIconName 8, GetCustomDescription 2 (exact).
 - **2026-08-10:** Block id-assign IL sizes re-verified: assignIdsFromMapping IL=42, assignLeftOverBlocks IL=107 (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
