@@ -1917,10 +1917,11 @@ lerp / RandomFloat ×9. Full **locomotion + dig + combat assist**. Far skip of
 `moveToFailCnt`; recompute `moveToDistance` via `CalcTempMoveDist` or
 `CalcMoveDist`.
 
-**`StartJump(calcYaw, distance, heightDiff)` (IL=66):** require not already
+**`StartJump(calcYaw, distance, heightDiff)`:** require not already
 jumping; on ground or elevator; not electrocuted. Store `JumpToPos = moveToPos`;
-yaw from entity or Atan2 to moveTo; `Jumping=true`; `SetJumpDistance`;
-`ClearBlocked`.
+yaw from entity or Atan2 to moveTo; `Jumping=true`; `SetJumpDistance(distance,
+heightDiff)` (IL=7); `ClearBlocked`. (Entry via `set_Jumping` IL=46; body
+`StartJump()` IL=45.)
 
 **`CheckBlocked(pos, endPos, baseY, checkSlope, hitInfo)` (IL=192):** lower end
 y by **0.01**; dir = end-pos, len = |dir|+0.001, unit dir. Ray origin = pos −
