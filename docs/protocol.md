@@ -550,8 +550,8 @@ Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23
 | Priority | Item | Why | Status |
 |---:|---|---|---|
 | P0 | NetPackageChunk body | Client terrain | **Done** ([protocol-packages.md](protocol-packages.md) §3.1) |
-| P0 | EntitySpawn / SpawnResponse | Visible zombies/players | Header done; class tail partial (§5.1-5.2) |
-| P0 | WorldInfo / WorldTime / WorldInit* | Client world ready | WorldInfo/WorldTime **done**; WorldInitInfo partial (§4) |
+| P0 | EntitySpawn / SpawnResponse | Visible zombies/players | **Done** (§5.1-5.2: header + entityClass-switched middle incl. shared-count trap + tail) |
+| P0 | WorldInfo / WorldTime / WorldInit* | Client world ready | WorldInfo/WorldTime **done**; WorldInitInfo **done** (§4.3 + WorldFolder §6.22) |
 | P1 | SetBlock / SetBlockResponse | Building | **Done** (§6) |
 | P1 | PlayerInventory / HoldingItem | Play loop | **Done** (§5.3-5.4) |
 | P1 | ChunkRemove* | Unload | **Done** (§3.2) |
