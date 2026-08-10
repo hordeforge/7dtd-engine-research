@@ -1082,6 +1082,8 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 
 ## Changelog
 
+- **2026-08-11:** Quest registry IL re-verified: NewClass IL=16, AddCriteria IL=8, BlockDestroyed IL=49, BlockChanged IL=10, ItemAdded IL=8, HarvestedItem IL=10, OpenedContainer IL=9, CheckResetQuestTrader IL=24, GetTraderPoiCount IL=30, AddQuestTierReward IL=11, ClearTraderResetQuestsForPlayer IL=11, NetPackageQuestTreasurePoint.ProcessPackage IL=176 (exact).
+- **2026-08-11:** Quest leaves IL re-verified: SetupQuestCode IL=48, SetupTags IL=41, get_HasPosition IL=10, GetActionIndex/GetObjectiveIndex IL=23, get_IsShareable IL=18, AddSharedWith IL=16, HasSharedWith IL=28, RemoveSharedWith IL=44, BaseReward.GetRewardText IL=2 / SetupGlobalRewardSettings IL=1, RewardItem.GetRewardText IL=12, RewardSkillPoints.GetRewardText IL=7 (exact).
 - **2026-08-10:** Quest shared IL re-verified: Quest.AddSharedWith IL=16, HasSharedWith IL=28, QuestEventManager.AddQuestTierReward IL=11 (exact).
 - **2026-08-10:** Quest/reward IL sizes re-verified: get_HasPosition IL=10, get_IsShareable IL=18, BaseReward.GetRewardText IL=2, RewardItem IL=12, RewardSkillPoints IL=7 (exact).
 - **2026-08-10:** QuestClass IL sizes re-verified: NewClass IL=16, AddCriteria IL=8 (exact).
