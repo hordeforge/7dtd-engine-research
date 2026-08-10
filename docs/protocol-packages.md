@@ -1689,7 +1689,7 @@ layout. Null-coalesced strings below are always-present.
 | `NetPackageLocalization` | 30 | `seqNr`, `totalParts`; `dataLen:i32` (-1 when null); `data` bytes only when `data != null` |
 | `NetPackageLockRequest` | 62 | `targets` count + per-target info only when `targets != null`; `context` type-name always (empty when null), `context` payload only when `context != null` |
 | `NetPackageLockResponse` | 74 | same two null-guards as LockRequest |
-| `NetPackageMinEventFire` | 35 | `eventPackageType==0 ItemEvent`: `itemValue`; `==1 BlockEvent`: `blockValue.rawData:u32` (mutually exclusive) |
+| `NetPackageMinEventFire` | 35 | `eventPackageType==0 ItemEvent`: `itemValue`; `==1 BlockEvent`: `blockValue.rawData:u32` (mutually exclusive). **Stock defect (2026-08-10):** the ItemEvent branch callvirt-dereferences `itemValue` with no null guard, and entity explosions queue it with null: `EntityZombieCop` death -> `GameManager.ExplosionServer(..., itemValue=null)` (ldnull, EntityZombieCop IL_0156) -> `Explosion.AttackEntites` -> `NetPackageMinEventFire.Setup(remoteEntityId, ..., MinEventTypes=19, null)` -> serialize-thread NRE at `write` IL_0041 under churn (108 observed in one 28-bot run), cascading into `Failed writing first package` + client drop. See [network.md](network.md) §4.0 |
 | `NetPackageNPCQuestList` | 99 | `eventType==0 FetchList`: `tierLevel`, entries count + `QuestPacketEntry` list; `==1 RemoveQuest`: `tierLevel`, `removeIndex:u8`; `==3 AddUsedPOI`: `tierLevel`, `questGiverPos`, `prefabPos`; `==4 ClearUsedPOI`: `tierLevel`, `questGiverPos`; `==2 ResetQuests`: no tail fields |
 | `NetPackagePackageIds` | 62 | `compatVersion` (from `Constants::cVersionInformation`), mapping count + type names, `serverUseEAC`; `hasHostUserAndToken:bool`; when true: `hostUserAndToken` (ToStream + token string, null-coalesced) |
 | `NetPackageQuestEvent` | 205 | 5 always: `entityID`, `prefabPos`, `eventType:u8`, `questTags`, `questCode`. Tail by `eventType`: `==3`: `extraData:u64`; `==7`: `questID`, `SharedWithList` count+ids; `==9`: `SubscribeTo:bool`; `==12`: `FetchModeType:u8`, `SharedWithList` count+ids; `==13`: `blockIndex`, `eventName`, `SharedWithList` count+ids, `activateList` count+Vector3i; `==16`: `factionPointOverride:i32`; 8/10/11/other: no tail |
@@ -1773,6 +1773,11 @@ customReason    : string
   RangeCheckDamageEntity, SignDataResponse, TraderData), 19 always-present;
   null-coalescing strings and ProcessPackage-only branches explicitly excluded.
   Closes the "per-flag framing optional" row in §8.
+
+- **2026-08-10:** NetPackageMinEventFire stock defect documented (§6.23):
+  ItemEvent branch writes `itemValue` with no null guard; EntityZombieCop
+  explosions pass null (ExplosionServer ldnull) -> serialize-thread NRE under
+  churn (108 in one 28-bot run). Cross-refs [network.md](network.md) §4.0.
 
 - **2026-08-08:** NetPackageWorldInfo.PrepareWorldHashes (IL=83): filtered
   name+crc:u32 blob from ChunkProviderGenerateWorldFromRaw.worldFileCrcs,
