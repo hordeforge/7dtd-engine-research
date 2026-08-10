@@ -433,5 +433,6 @@ MONO_PATH=bin mono bin/DumpAll.exe "$ASM" ../il/full-v3.1.0 UAI
 
 ## Changelog
 
+- **2026-08-10:** UAIBase.Update IL=18 two-rate driver re-verified (updateTimer<=0 -> ActionChoiceDelay + chooseAction; always updateAction; decrement).
 - **2026-07-24:** Per-leaf consideration narration (`UAIConsideration*` GetScore mechanics).
 - **2026-07-23:** Initial `UAI.*` reversal: registry + context architecture, two-rate decision cadence, scoring pipeline (integer-division compensation quirk, last-positive-package selection quirk), response-curve formulas, task lifecycle state machine, PathBlocked waypoint injection, XML pipeline, stock-dormant status.
