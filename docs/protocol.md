@@ -556,8 +556,8 @@ Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23
 | P1 | PlayerInventory / HoldingItem | Play loop | **Done** (§5.3-5.4) |
 | P1 | ChunkRemove* | Unload | **Done** (§3.2) |
 | P2 | Encryption handshake | Public servers | **Done** (§2); cipher/KDF native (residual) |
-| P2 | TileEntity / vehicles | Features | Open |
-| P3 | Quest/Party/Twitch | Completeness | Open |
+| P2 | TileEntity / vehicles | Features | **Done** (§6.12, §6.21) |
+| P3 | Quest/Party/Twitch | Completeness | Quest/Party **done** (§6.17-6.18); Twitch server slice in twitch-integration.md |
 | residual | EAC | Out of scope | Residual |
 | residual | LiteNet event dispatch | Closed 2026-08-10 ([network.md](network.md) §4.0) | Closed |
 
@@ -580,6 +580,8 @@ Status after the [`protocol-packages.md`](protocol-packages.md) pass (2026-07-23
 
 ## Changelog
 
+- **2026-08-10:** RE-backlog table refreshed: TileEntity/vehicles + Quest/Party
+  rows closed (were "Open", covered by §6.12/§6.21/§6.17-6.18).
 - **2026-08-08:** Live wire verification: booted the native Linux dedicated server (V3.1.0) and ran the `7dtd-loadgen` client (built from these wire docs) through a full join against both the modded and the stock server (`challengesOk=1`, `logins=1`, `joined entity=102`); the golden layouts match observed traffic end-to-end. Server bound TCP+UDP 26900/26902.
 - **2026-08-08:** NetPackageDamageEntity wire: added bIgnorePartyShare:bool (between bFromBuff and ArmorSlot).
 - **2026-07-28:** `RequestToSpawnPlayer` server path, `PlayerId`/`PlayerSpawnedInWorld` bodies, RespawnType.
