@@ -681,6 +681,7 @@ Full field lists in inventories/netpackage-bodies.md; tick pipeline above.
 
 ## Changelog
 
+- **2026-08-11:** Game-event IL re-verified: CanPerform IL=44, SetupTarget IL=97, HasTarget IL=41, ParseProperties IL=70, StartSequence IL=4, Update IL=287, GetEntityGroupLiveCount IL=44, ClearEntityGroup IL=15, SpawnEntity IL=84, ActionRespawnEntity.OnPerformAction IL=213 / Entities IL=254, PerformTargetAction IL=163, HandleFlagBuffUpdates IL=69, Update IL=25, HandleSpawnUpdates IL=148, RegisterSpawnedEntity IL=19, HandleBlockUpdates IL=53, SpawnedBlocksEntry ctor IL=16 (exact).
 - **2026-08-10:** GameEventActionSequence IL sizes re-verified: CanPerform IL=44, SetupTarget IL=97, HasTarget IL=41, ParseProperties IL=70 (exact).
 - **2026-08-08:** Sequence-link leaves: SequenceLink.CheckLink owner+tag
   match; MinEventActionUnregisterSequenceLink per-player UnRegisterLink with
