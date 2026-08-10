@@ -531,6 +531,7 @@ surface is exactly sections 1 and 2.
 
 ## Changelog
 
+- **2026-08-10:** Server-browser/prefab IL re-verified: get_PlayGroup IL=11, get_Version IL=3, CheckForAnyPlayerHome IL=10, CopyIntoLocal IL=680 (exact).
 - **2026-08-10:** GameServerInfo IL sizes re-verified: get_IsDedicatedStock
   IL=16, get_AllowsCrossplay IL=4, get_EACEnabled IL=4 (all exact).
 - **2026-08-08:** Prefab.CopyIntoLocal (IL=680): CopyVolumesIntoWorld first,
