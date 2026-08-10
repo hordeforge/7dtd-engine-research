@@ -64,7 +64,7 @@ Campaign audit (V3.1.0 evidence + residual map): [`../workspace/outputs/docs-res
 |---|---|---|
 | 0 | [`architecture-map.md`](architecture-map.md) | **Start here.** Whole-system visual map: layers, boot, frame phases, sim core, wire, persistence |
 | 1 | [`coverage.md`](coverage.md) | Is engine family X documented? Which dump? |
-| 2 | [`engine-limitations.md`](engine-limitations.md) | What stock ceilings bind any dedicated server? |
+| 2 | [`engine-limitations.md`](engine-limitations.md) | What stock ceilings bind any dedicated server? (+ known stock defects) |
 | 3 | [`loop.md`](loop.md) | How the dedicated frame/sim runs |
 | 4 | [`protocol.md`](protocol.md) | Wire framing, join, golden package bodies |
 | 5 | [`protocol-frames.md`](protocol-frames.md) | Visual RFC/Mermaid byte frames per package |
