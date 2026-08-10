@@ -5,7 +5,7 @@
 zombies), the values that feed sleeper/zombie sensing, and their net sync.
 **Not:** the AI decision that consumes them ([entity-ai.md](entity-ai.md) CanSee /
 sleeper wake); the stealth HUD meter (client); XML tuning content.
-**Evidence:** `PlayerStealth` IL (`TickServer` 430, `SmellTickServer` 257; dump
+**Evidence:** `PlayerStealth` IL (`TickServer` 432, `SmellTickServer` 259; dump
 locally with `tools/src/DumpMethod`, git-ignored). **Hub:** [`INDEX.md`](INDEX.md).
 **Method:** [`re-methodology.md`](re-methodology.md).
 
