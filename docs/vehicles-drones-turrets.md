@@ -1266,6 +1266,7 @@ no `RootMotion`, else builds the normal avatar controller and calls
 
 ## Changelog
 
+- **2026-08-10:** Vehicle IL re-verified: CalcMods IL=77, CalcEffects IL=182, SetupProperties IL=17, CreateParts IL=86, OnXMLChanged IL=41 (exact).
 - **2026-08-10:** VehicleManager save-path IL sizes re-verified:
   SaveAndClear IL=15, WaitOnSave IL=11, SaveThread IL=41, GetServerVehicleCount
   IL=13 (all exact).
