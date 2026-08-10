@@ -434,6 +434,10 @@ stateDiagram-v2
 
 ## Changelog
 
+- **2026-08-10:** `MaxActiveSyncs` default verified = **10** (`ldc.i4.s 10` +
+  `stsfld` in the `DynamicMeshServer` static ctor), console-settable
+  (`activesyncs` param, DynamicMeshConsoleCmd IL_0BB2). Matches the doc's
+  budget claim and the optimizer's 2-vs-10 audit.
 - **2026-08-08:** DynamicMeshDataQueue<T> dead template, inert ServerUpdates channel, DynamicMeshRegionBuilder dead wrapper (all 0-ref verified).
 - **2026-07-28:** `GetNextChunkToLoad` queue sentinel contract for GenerateChunksThread.
 
