@@ -1016,6 +1016,9 @@ the map or any cell is `>= v`.
 
 ## Changelog
 
+- **2026-08-11:** Biome IL re-verified: World.IsPositionRadiated IL=24, GetBiomeInWorld IL=23, GetBiomeIntensity IL=28, Chunk.GetBiomeIntensity IL=16, ResetBiomeIntensity IL=19, CalcDominantBiome IL=55, CalcBiomeIntensity IL=150, GetBiomeId IL=9, SetBiomeId IL=10 (exact).
+- **2026-08-11:** Deco IL re-verified: GetDecoAllowedAt IL=44, GetDecoAllowedSlopeAt/SizeAt/StreetOnlyAt IL=6, SetDecoAllowedAt IL=49, SetDecoAllowedSlopeAt/SizeAt/StreetOnlyAt IL=19, EnsureDecoBiomeArray IL=8, EnumDecoAllowedExtensions GetSlope/WithSlope/GetSize IL=7, WithSize IL=9, GetStreetOnly IL=6, WithStreetOnly IL=12, AllowBigDeco/AllowSmallDeco IL=5, IsNothing IL=10 (exact).
+- **2026-08-11:** Bounds/biome-registry IL re-verified: World.IsPositionInBounds IL=66, ClampToValidWorldPos IL=82, ClampToValidWorldPosForMap IL=28, IsPositionWithinPOI IL=15, WorldCreationData.Apply IL=15, WorldBiomes.GetBiome IL=34/5/12, TryGetBiome IL=11 (exact).
 - **2026-08-10:** World.GetBiomeInWorld IL=23, GetBiomeIntensity IL=28 re-verified (exact).
 - **2026-08-08:** calcWorldFileCrcs coroutine (MoveNext IL=121): zeroes
   worldFileTotalSize, clears worldFileCrcs, per-file size + chunked CRC
