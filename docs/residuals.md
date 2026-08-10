@@ -34,7 +34,7 @@ flowchart TD
 | **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.21. Residual: only optional per-flag framing for rare conditional-heavy packages |
 | **Encryption cipher / KDF primitives** | Handshake package bodies decoded ([protocol-packages.md](protocol-packages.md) §2). Session transform is managed `AesEncryptAndMac` (AES + HMAC; [network.md](network.md) §4.5). Residual: RSA key wrap / platform RNG quality and anything below `System.Security.Cryptography` providers |
 | **XML content semantics** | Blocks/items/biomes/prefabs are data, not loop IL |
-| **Discord GameSDK integration (`DiscordManager`, 140 methods)** | Rich presence, lobbies, invites, voice device list (`inGameUpdate`, `updateAudioDeviceList`, `EDiscordStatus`, `UserAuthorizationResult`); needs a local Discord client, so it is a **client** social feature, not a dedicated codepath. Reachable in the assembly but never active on a headless server |
+| **Discord GameSDK integration (`DiscordManager`, 140 methods)** | **Closed (2026-08-10, IL + runtime):** IL shows multiple `GameManager.get_IsDedicatedServer()` gates in `DiscordManager` (lines 874, 2007, 2469, 2605) - the Discord paths skip on dedicated. Runtime confirms: across 12 dedicated boots the log contains only static `libdiscord_partner_sdk.so` preload + 16 `GamePref.Discord*` defaults, **zero live activity** (no connection, presence, lobby, auth). The manager is instantiated but never activates on a headless server. A client social feature, not a dedicated codepath |
 | **Server-side support/utility code (enumeration-level, not per-method narrated)** | Cross-cutting helpers the reachability set includes but no subsystem doc singles out: `Configuration.*` XML/option parsing, `StringParsers`, `TEFeatureAbs` base helpers. Covered by their owning frameworks ([blocks.md](blocks.md)/[tile-entities-power.md](tile-entities-power.md)) and the [full-surface.md](full-surface.md) caveat; a per-method narrative would not add sim understanding |
 | **0-method data-carrier types can never be "reached"** | The reachability model is method-based (`reached = declaring types of visited method bodies`). Types with **no method bodies** (`QuestEvent_*` payload structs, enum holders, DTO records) are structurally absent from the reached set no matter what seeds are added. They are classified with roles in [out-of-scope-surface.md](out-of-scope-surface.md) and enumerated in the full-surface census, but the graph will always report them as unreached. This is a model limitation, not a documentation gap |
 
@@ -139,6 +139,9 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
 
 ## Changelog
 
+- **2026-08-10:** Discord GameSDK residual CLOSED (IL IsDedicatedServer gates +
+  runtime: zero live Discord activity across 12 dedicated boots; only static
+  lib preload + GamePref defaults).
 - **2026-08-10:** Entity-GO enabled-state residual partially closed by runtime
   probe: World.Entities/Players stay empty on pure dedicated even with connected
   players (player entities live in the ConnectionManager client list). Probe in
