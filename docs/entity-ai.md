@@ -3761,6 +3761,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** Sleep-sense IL re-verified: IsInViewCone IL=40, GetSeeDistance IL=41 (exact).
 - **2026-08-11:** EntityEnemy.OnEntityTargeted IL=21 re-verified (matches aidirector's NotifyIntentToAttack caller note).
 - **2026-08-11:** View-cone IL re-verified: CanEntityBeSeen IL=133, GetMaxViewAngle IL=3 (exact).
 - **2026-08-11:** Sleeper-touch IL re-verified: CheckSleeperTriggers IL=16, World.CheckSleeperVolumeTouching IL=57, SleeperVolume.CheckTouching IL=165 (exact).
