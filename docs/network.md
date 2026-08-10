@@ -635,7 +635,7 @@ Heavier framing and batching (this is the path named in the O(N) serialize note 
 
 1. Wait on writer event (timeout **500** ms appears in backoff paths).
 2. Swap filling/processing package lists under lock.
-3. Batch packages into reliable vs unreliable streams via `WriteToStream` (IL=435): writes **Int32** length prefix, `NetPackage.write`, rewrites length, registers stats, may requeue on failure.
+3. Batch packages into reliable vs unreliable streams via `WriteToStream` (IL=435): writes **Int32** length prefix, `NetPackage.write`, rewrites length, registers stats, may requeue on failure. **Write-failure recovery (IL_037E-IL_0400):** a `write()` exception is caught per package - `Log.Exception`, then warning `Failed writing first package: <type> of size <len>. <N> remaining packages in queue.`, then `package.SendQueueHandled()` (`NetPackage` IL=7: interlocked decrement + `FreePackage`) and the loop continues with the rest of the queue. So a single bad package (e.g. `NetPackageMinEventFire` null `itemValue`, §6.23) is dropped without killing the connection.
 4. `StreamToBuffer` (IL=194): compress (optional) → encrypt → build wire buffer with header fields written as `Int32` + two `Byte` flags + `UInt16` + payload copy.
 5. `sendBuffersFromQueue` / `splitSendBuffer` respect `maxPacketSize` / `INetworkServer.GetMaximumPacketSize`.
 
