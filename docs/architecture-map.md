@@ -26,7 +26,7 @@ flowchart TB
   end
 
   subgraph TRANSPORT[Transport and session]
-    LNL[LiteNetLib UDP<br/>vendored, native-adjacent]
+    LNL[LiteNetLib UDP<br/>vendored, managed]
     AUTH[Authorizer chain<br/>Native 400 - Crossplat 490 - EAC 600 - Enc 601 - Final 999]
     CONN[ConnectionManager<br/>ClientInfo registry]
   end

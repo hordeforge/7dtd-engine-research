@@ -510,7 +510,7 @@ Coverage of managed families: [`coverage.md`](coverage.md).
 |---|---|
 | Unity script order | peers not ordered in IL |
 | Entity GO enabled on dedi | **closed** (2026-08-10 runtime: spawned entities keep GO active + MB enabled, 17/17 observed; registries populate on `SpawnEntityInWorld`, empty only on idle world; see [residuals.md](residuals.md)) |
-| LiteNetLib native | below managed wrappers |
+| LiteNetLib internals | **closed 2026-08-10** (managed assembly; event machinery + join-churn flake root cause in network.md §4.0) |
 | EAC protocol | types only |
 | A* library body | black box after StartPath |
 | ModEvents subscribers | content-dependent |

@@ -145,9 +145,11 @@ Individual leaf **blocks** (e.g. `BlockMine`, `BlockLiquidSource`, `BlockSpawnEn
 (`SharpEXR`, `MicroSplat`, `PI.NGSS`, post effects, `MapRendering`, GUI), audio /
 music, editor/clipping tools, and vendored third-party libraries. These are
 enumerated in the surface map (`surface-types.md`) but do not run on a headless
-server. Native residuals (LiteNetLib transport, EAC/EOS crypto + anticheat, Unity
+server. Native residuals (EAC/EOS crypto + anticheat, Unity
 physics/jobs, Aron Granberg A\*) are managed-wrapped where the server touches them
-and listed in [residuals.md](residuals.md).
+and listed in [residuals.md](residuals.md). LiteNetLib is a managed assembly;
+its event machinery and the join-churn flake root cause are closed in
+[network.md](network.md) §4.0.
 
 ## Coverage roadmap (dedicated subsystems: done)
 

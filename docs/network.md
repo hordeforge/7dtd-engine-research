@@ -479,7 +479,7 @@ Port: LiteNet often **ServerPort+2** (26902). Details and binary layouts: [proto
 | `NetConnectionAbs` + Simple/Steam | Yes | reader/writer threads, compress, encrypt (this section) |
 | `AesEncryptAndMac` (`IEncryptionModule`) | Yes (AES + HMACSHA256) | stream layout below; handshake packages in [protocol-packages.md](protocol-packages.md) §2 |
 | LiteNetLib **managed** wrappers | Partial type map | Present where named |
-| LiteNetLib **native** plugin | No | **Residual** ([`residuals.md`](residuals.md)) |
+| LiteNetLib.dll internals (managed) | **Yes** | Event machinery + flake root cause closed (§4.0); third-party algo set not re-narrated |
 
 **LiteNetLib wrapper leaves:** `NetworkServerLiteNetLib.GetServerPorts`
 (IL=9) is `(basePort + 2)/UDP`; `SetServerPassword` (IL=8) stores the
@@ -509,6 +509,45 @@ challenge back (`OnNetworkReceiveEvent` IL=36) and forwards disconnect
 events to `OnDisconnectedFromServer` (IL=6).
 `NetworkCommonLiteNetLib.CreateRejectMessage(text)` (IL=27) builds the
 reject payload (`0xFF` header + UTF8 length byte + text).
+
+### 4.0 LiteNetLib join-churn flake: root cause (2026-08-10, IL + runtime)
+
+The join flake that blocked live multi-bot validation is a **stock managed
+concurrency bug**, not a native transport defect:
+
+1. `NetworkCommonLiteNetLib.InitConfig` (IL=22) sets **`UnsyncedEvents =
+   true`** on the NetManager (plus `UnsyncedDeliveryEvent`/`UnsyncedReceiveEvent`
+   true, `AutoRecycle` true, and `UseNativeSockets` on dedicated).
+2. With `UnsyncedEvents=true`, `LiteNetLib.NetManager.CreateEvent` takes the
+   `ldloc.1; brtrue.s → ProcessEvent` branch (IL_00ce-IL_00e0) and dispatches
+   the event **inline on the socket-receive thread** (no `_eventLock` queue, no
+   main-thread hand-off).
+3. Inline dispatch reaches the game listener `OnConnectionRequest` →
+   `NetworkServerLiteNetLib/LiteNetLibAuthWrapperServer.ConnectionRequestCheck`
+   (IL=86), which at IL_006e-007d reads `ConnectionManager.Clients.List` (a
+   `ReadOnlyCollection<ClientInfo>` over the live `ClientInfoCollection.list`)
+   and **enumerates it** (`GetEnumerator`/`get_Current`/`MoveNext`,
+   IL_007d-00cb) to reject duplicate in-flight IPs.
+4. The main thread mutates that same list concurrently during join churn
+   (`Clients.Add` on login, remove on disconnect), so the receive-thread
+   enumeration throws `InvalidOperationException: Collection was modified`.
+   The exception escapes `CreateEvent` on the receive thread, dropping the
+   packets being processed and cascading into `RemoteConnectionClose` for the
+   affected clients.
+
+Runtime evidence (2026-08-10, 16-28 bot churn on stock V3.1.0 dedi): repeated
+`NET: LiteNetLib: Client disconnect ... (RemoteConnectionClose)` bursts and
+`Failed writing first package` warnings, with a second stock bug also firing
+under churn (`NetPackageMinEventFire.write` NRE when `itemValue` is null on the
+ItemEvent path, IL_0041 - see §6.23). The LiteNetLib event machinery itself
+(`CreateEvent` pool pop + pending-list push, `PollEvents` drain) is
+`_eventLock`-guarded and race-free; the race is the **game's receive-thread
+enumeration of a main-thread-mutated collection**.
+
+Fix direction (not stock): run `ConnectionRequestCheck`'s client-list scan on
+the main thread (post the duplicate-IP check via a queue / `PollEvents`), or
+copy the IP set under lock before enumeration. This is a stock RE finding;
+the optimizer/loadgen repos consume it as the blocker for >12-bot cohorts.
 
 ### 4.1 Connection hierarchy
 
@@ -856,6 +895,11 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 | `ConnectionInformation` | Object |  |
 
 ## Changelog
+
+- **2026-08-10:** §4.0 LiteNetLib join-churn flake root cause closed: stock
+  race between receive-thread `ConnectionRequestCheck` enumeration of
+  `ConnectionManager.Clients.List` and main-thread mutations, enabled by
+  `UnsyncedEvents=true`; event machinery itself lock-guarded.
 
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).

@@ -30,7 +30,7 @@ limit, or process).
 |---|---|
 | **Unity script execution order** among GameManager / ConnectionManager / DynamicMeshManager / Entity MBs | **Closed (2026-08-09, runtime):** observed on the stock V3.1.0 dedicated server via a Harmony stamp probe (`workspace/experiments/script-order-probe`, git-ignored). Per-frame order: `GameManager.FixedUpdate`(+`Origin.FixedUpdate` no-op) -> `SdtdConsole.Update` -> **`ConnectionManager.Update`** -> **`GameManager.Update`** -> (`WorldEnvironment.Update` / `DynamicMeshManager.Update` when components present) -> `ConnectionManager.LateUpdate` -> `GameManager.LateUpdate`. **Invariant: ConnectionManager.Update always precedes GameManager.Update** (518 stable frames). Stored in Unity project settings, so it was not derivable from IL alone; now pinned by observation. See [loop.md](loop.md) §1.1 |
 | **Which Entity GameObjects stay `enabled` on pure dedicated** | **Closed (2026-08-10, runtime):** with a live dedicated sim (loadgen join-mode player + AI/scout + telnet-spawned zombies), the stock V3.1.0 dedi keeps every spawned entity GameObject **active and enabled**: repeated probe dumps showed `World.Entities` Count 9->17, `World.Players` Count=1, and `total=17 goActive=17 goInactive=0 mbEnabled=17 mbDisabled=0` (EntityPlayer, EntityZombie, EntityAnimalSnake all `activeInHierarchy=True` + MB `enabled=True`). So entities on dedicated tick with active GOs and enabled MBs (matches `EntityAlive.Update` GO-enabled path, [loop.md](loop.md) §3.2); the engine does **not** mass-disable entity GOs on headless. Caveat: an earlier probe session (2026-08-10) recorded `World.Entities`/`World.Players` empty on an idle dedi - that was the true state with **no sim population** (the loadgen self-test bot drowned in ~1.5 s and never registered in the world; telnet `spawnentity` silently no-ops when no valid entity id exists), not a general property of the registry. The registries populate exactly when `SpawnEntityInWorld` -> `Entities.Add` runs ([spawning.md](spawning.md) §7); on an empty world they are legitimately empty. Probe: `workspace/experiments/script-order-probe` (git-ignored) |
-| **LiteNetLib native plugin** | **Managed surface closed; native internals permanent.** Closed: `NetworkServerLiteNetLib`/`NetworkClientLiteNetLib` wrappers, `LiteNetLibAuthWrapperServer.ConnectionRequestCheck` rate-limit + challenge (17-byte 202+Guid, [network.md](network.md) §4), port+2, disconnect messages. Not closable: the **native** `LiteNetLib.dll` congestion/reliability/MTU internals - below the managed wrappers, a compiled third-party binary with no managed sim logic to reverse |
+| **LiteNetLib transport internals** | **Managed surface closed; flake root cause closed (2026-08-10).** `LiteNetLib.dll` is a **managed .NET assembly** (not native - the previous "native internals permanent" reading was wrong). Closed: `NetManager` event machinery (pool pop + pending-list push + `PollEvents` drain, all `_eventLock`-guarded), the `UnsyncedEvents=true` config in `NetworkCommonLiteNetLib.InitConfig` (IL=22), and the join-churn flake root cause: `ConnectionRequestCheck` (IL=86) enumerates `ConnectionManager.Clients.List` **on the socket-receive thread** while the main thread mutates it -> `Collection was modified` -> `RemoteConnectionClose` ([network.md](network.md) §4.0). Not re-narrated line-by-line: the full third-party LiteNetLib algorithm set (congestion/reliability/MTU) - managed and dumpable, but third-party code outside the game's `Assembly-CSharp`, not needed for the flake |
 | **EAC / EOS AntiCheat wire protocol** | **Managed envelope closed; EAC protocol permanent.** Closed: `NetPackageEAC` (Setup(len,data), IsServer routing, ClientInfo.SendPackage), the managed `HandleMessageFromClient` -> EAC bridge, EOS wrappers ([platform-auth.md](platform-auth.md) §8). Not closable: the EAC **anti-cheat protocol itself** (what the EAC client/server exchange, hashes, challenges) - that runs in the EAC native service outside the game DLL; the game only passes opaque bytes |
 | **Aron Granberg A\* library internals** | **7DTD usage closed; third-party internals permanent.** Closed: the ASP -> A* handoff (`AstarVoxelGrid` / `AstarManager` / `AstarPath.StartPath` call sites, all IL-verified, [raycast-pathing.md](raycast-pathing.md) §5), grid/frontier semantics. Not closable: the internals of the **third-party Granberg `Pathfinding.dll`** (heuristics, open/closed-list internals) - separate compiled third-party code, not the game's `Assembly-CSharp`, and redistributing its RE would not be stock-game research |
 | **ModEvents subscriber sets** | **Closed for stock + standard mod set (2026-08-09/10, runtime):** **pure-stock** V3.1.0 dedi (no mods): 15/22 events have GameCore subscribers, all `mod=(null) core=True` (WorldShuttingDown 3; GameStarting / GameStartDone / GameShutdown / PlayerSpawnedInWorld 2; GameFocus / MainMenuOpening / MainMenuOpened / GameUpdate / ServerRegistered / UnityUpdate / PlayerJoinedGame / PlayerSpawning / PlayerDisconnected / CalcChunkColorsDone 1; GameAwake / CreateWorldDone / PlayerLogin / SavePlayerData / GameMessage / ChatMessage / EntityKilled 0). With EfficientServer 1.17.0 + 7dtd-apm-bridge: **identical except GameStartDone 2 -> 3** (one anonymous mod handler added). So the stock baseline is fully pinned and the delta for the standard mod set is exactly one anonymous GameStartDone handler; both subscribe via Harmony directly, not ModEvents. Hook names closed in [managers.md](managers.md); probe in `workspace/experiments/script-order-probe` (git-ignored). Note: any other mod set can add handlers, so this pins the stock baseline + this delta, not a universal answer |
@@ -99,11 +99,12 @@ Also:
 - Region Raw header + location packing closed (save-region §3.5)
 
 What remains open is **only** the section-1 table rows not marked Closed /
-Partially closed (native plugins, EAC/EOS wire, A* library internals, content
+Partially closed (EAC/EOS wire, A* library internals, content
 XML, client UI, model limits) plus **optional** annotation depth (per-flag
 package framing, per-console-command prose). Several previously-open rows were
 closed by runtime observation in 2026-08-09/10 (Unity script order, Discord
-GameSDK, ModEvents subscriber sets, entity-GO registry state). Those cannot be
+GameSDK, ModEvents subscriber sets, entity-GO registry state, LiteNetLib
+event machinery + join-churn flake root cause). Those cannot be
 finished by "more managed RE until every IL line is prose."
 
 ## 4. Origin dedicated gate (correction)
@@ -148,6 +149,16 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
 
 ## Changelog
 
+- **2026-08-10:** LiteNetLib residual corrected + join-churn flake root cause
+  closed: `LiteNetLib.dll` is a managed assembly (was wrongly classified
+  "native internals permanent"). Event machinery (`CreateEvent` pool/pending
+  push + `PollEvents` drain) is `_eventLock`-guarded; the flake is a stock race
+  where `ConnectionRequestCheck` (IL=86) enumerates
+  `ConnectionManager.Clients.List` on the socket-receive thread
+  (`UnsyncedEvents=true` from `InitConfig` IL=22) while the main thread mutates
+  it -> `Collection was modified` -> `RemoteConnectionClose` ([network.md](network.md)
+  §4.0). Secondary stock bug under churn: `NetPackageMinEventFire.write` NRE on
+  null `itemValue` (ItemEvent path, IL_0041).
 - **2026-08-10:** Discord GameSDK residual CLOSED (IL IsDedicatedServer gates +
   runtime: zero live Discord activity across 12 dedicated boots; only static
   lib preload + GamePref defaults).
