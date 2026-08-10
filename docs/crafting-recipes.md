@@ -296,6 +296,8 @@ report the sizes for the UI.
 
 ## Changelog
 
+- **2026-08-11:** Recipe IL re-verified: <LoadRecipies>d__1.MoveNext IL=436, SaveRecipes IL=123, Recipe.Init IL=79, RecipeUnlockData.Init IL=56, CraftingManager AddRecipe IL=6, PostInit IL=6, GetScrapableRecipe IL=77, GetRecipe IL=24, GetRecipes IL=3/27, ClearAllRecipes IL=3, ClearAllGeneralRecipes IL=30, ClearCraftAreaRecipes IL=36, ClearRecipe IL=5, InitForNewGame IL=10, RecipeIsFavorite IL=5, ToggleFavoriteRecipe IL=17, GetFavoriteRecipesFromList IL=31, ClearLockedData IL=5, AddWorkstationData IL=17, GetWorkstationData IL=12 (exact).
+- **2026-08-11:** Progression IL re-verified: GiveExp(CraftCompleteData) IL=54, AddLevelExp IL=161, AddLevelExpRecursive IL=179, getExpForLevel IL=10, getLevelFloat IL=14, AddXPDeficit IL=65 (exact).
 - **2026-08-10:** CraftingManager IL re-verified: AddRecipe IL=6, PostInit IL=6, GetRecipe IL=24, GetRecipes IL=3 (exact).
 - **2026-08-10:** RecipesFromXml.SaveRecipes IL=123, Recipe.Init IL=79 re-verified (exact).
 - **2026-08-08:** EntityPlayerLocal.GiveExp (IL=54): _craftCount_ recipe var
