@@ -35,12 +35,12 @@ flowchart TB
 | 3 | World / chunks | [world-chunks.md](world-chunks.md) | il/dedi-complete-v3.1.0/, il/loop-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
 | 4 | Terrain / height | [terrain-height.md](terrain-height.md), `realearth-surfaces.md` | il/terrain-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
 | 5 | Entities / AI / path | [entity-ai.md](entity-ai.md), [aidirector.md](aidirector.md) | il/deep-v3.1.0/, il/deeper-v3.1.0/, il/gaps-v3.1.0/ | Closed |
-| 6 | Networking | [network.md](network.md), [protocol.md](protocol.md), [protocol-packages.md](protocol-packages.md), closed-gaps.md | il/gaps-v3.1.0/, il/netpackages-v3.1.0/, il/dedi-complete-v3.1.0/, loadgen golden wire | Closed (framing/join, metadata census for all 193, P0/P1 bodies + encryption handshake); high-traffic + residual bulk catalog in protocol-packages.md 1-6.22; full flat write sequences in inventories/netpackage-bodies.md |
+| 6 | Networking | [network.md](network.md), [protocol.md](protocol.md), [protocol-packages.md](protocol-packages.md), closed-gaps.md | il/gaps-v3.1.0/, il/netpackages-v3.1.0/, il/dedi-complete-v3.1.0/, loadgen golden wire | Closed (framing/join, metadata census for all 193, P0/P1 bodies + encryption handshake, per-flag framing for all 37 conditional-heavy packages in protocol-packages.md §6.23, LiteNetLib join-churn race in network.md §4.0); high-traffic + residual bulk catalog in protocol-packages.md 1-6.22; full flat write sequences in inventories/netpackage-bodies.md |
 | 7 | Save / region | [save-region.md](save-region.md) | il/loop-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed |
 | 8 | Origin / claims | `7dtd-realworld/docs/realearth-surfaces.md` (private companion; no published narrative in this repo) | il/realearth-surfaces-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed (dumped; narrative is product-owned) |
 | 9 | Managers | [managers.md](managers.md) | il/dedi-complete-v3.1.0/, il/loop-complete-v3.1.0/ | Closed |
 | 10 | Light / mesh / water | [light-mesh-water.md](light-mesh-water.md) | il/dedi-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
-| 11 | ModEvents | [managers.md](managers.md) | il/dedi-complete-v3.1.0/ | Closed (names; subscribers residual) |
+| 11 | ModEvents | [managers.md](managers.md) | il/dedi-complete-v3.1.0/ | Closed (names; subscriber sets observed stock + mod delta, managers.md §2) |
 
 Families 1-11 are managed DLL surfaces (the coverage bar above). Runtime **cost/scaling
 and process-tuning** are not managed surfaces; they are measured by the optimizer mod
