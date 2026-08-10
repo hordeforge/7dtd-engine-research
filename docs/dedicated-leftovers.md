@@ -721,6 +721,8 @@ Small dedicated-relevant types that extend an already-owned subsystem:
 
 ## Changelog
 
+- **2026-08-11:** Lock IL re-verified: NetPackageLockRequest write IL=62 / ProcessPackage IL=24, LockRequestServer IL=239, ForceUnlockLockTarget IL=124, NetPackageLockResponse write IL=74 / ProcessPackage IL=27, ForceUnlockByPlayer IL=11 (exact).
+- **2026-08-11:** Volume/util IL re-verified: AddVolumeServer IL=115, CloneVolumeServer IL=76, GetPrefabIdAndVolumeId IL=76, TryGetSelectedVolume IL=50, getBoxVolumeType IL=27, TraderArea Write IL=111 / Read IL=91 / GetReadWriteSize IL=10 / SetClosed IL=222 / Overlaps IL=38 / IsWithinTeleportArea IL=93, World.IsMaterialInBounds IL=79, Utils WrapFloat IL=21 / WrapInt IL=22 / WrapIndex IL=18 / FastAbsInt IL=13 / FastLerpUnclamped IL=8 / Saturate IL=44 / FastRoundToIntAndMod IL=25 / ToCelsius IL=6 / ToRelativeCelsius IL=4 (exact).
 - **2026-08-10:** LockManager IL re-verified: LockRequestServer IL=239, ForceUnlockLockTarget IL=124 (exact).
 - **2026-08-10:** EntityVBlimp dead-config claim re-verified: 0 external ctor call sites (only its own dump, no newobj refs elsewhere).
 - **2026-08-08:** XmlExtensions XML helpers, LiveStats dead survival-stat record, body-verified dead collection/noise families (TList/TQueue, OneToOneDictionary, CollectionDebugWrapper, ParsingConverters, SimplexNoise, OpenSimplex2/2S, IEnumerableExtensions, BinaryReaderExtensions, IdPalette), ObservableDictionary live backing note.
