@@ -376,6 +376,7 @@ scan), not by the steady sim loop.
 
 ## Changelog
 
+- **2026-08-11:** Mod-load IL re-verified: LoadMods IL=71, LoadMod IL=69, parseModInfoV2 IL=148, parseModInfoV1 IL=7, DetectContents IL=46, ContainsAssembly IL=5, LoadPatchStuff IL=6, WorldStaticData.cctor IL=871, XmlPatcher.PatchXml IL=71 / singlePatch IL=120, CleanupBlocks IL=4, CleanupGamestages IL=3, CleanupSpawning IL=3, CleanupChallenges IL=2, CleanupTwitch/CleanupTwitchEvents IL=5, SendXmlsToClient IL=41, ReceivedConfigFile IL=42, handleReceivedConfigs IL=3 (exact).
 - **2026-08-10:** Mod IL re-verified: parseModInfoV1 IL=7, DetectContents IL=46, ContainsAssembly IL=5 (exact).
 - **2026-08-10:** ModManager.LoadMods IL=71, Mod.parseModInfoV2 IL=148 re-verified (exact).
 - **2026-07-28:** Config S2C path (`SendXmlsToClient`, Deflate cache, `NetPackageConfigFile`).

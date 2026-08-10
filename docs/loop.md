@@ -551,6 +551,7 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-11:** Loop IL re-verified: WorldEventUpdateTime IL=110, checkPOIUnculling IL=67, EntityAlive.Update IL=171 / LateUpdate IL=6 / updateNetworkStats IL=55, Entity.Update IL=105, updateTransform IL=183, FixedUpdate IL=71, PhysicsMasterTargetFrameUpdate IL=52, EntityPlayer.Update IL=179 (exact).
 - **2026-08-11:** Loop diagram IL re-verified: EntityAlive.updateTasks IL=125, EntityMoveHelper.UpdateMoveHelper IL=1236 (exact).
 - **2026-08-10:** Entity frame IL re-verified: Entity.Update IL=105, updateNetworkStats IL=55, updateTransform IL=183, EntityPlayer.Update IL=179 (exact).
 - **2026-08-10:** World.OnUpdateTick (IL=189) call order re-verified: updateChunkAddedRemovedCallbacks, WorldEventUpdateTime, WaterSplashCubes.Update, DecoManager.UpdateTick, MultiBlockManager.MainThreadUpdate, (non-editor) DynamicMusic.Conductor, checkPOIUnculling, updateChunksToUncull - exact match to 3.2.
