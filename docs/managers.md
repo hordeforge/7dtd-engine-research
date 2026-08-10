@@ -130,7 +130,7 @@ Type `ModEvents` static fields (complete inventory from dump):
 | `CalcChunkColorsDone` | ModEvent | |
 | `EntityKilled` | ModEvent | |
 
-**Residual:** *who* subscribes is content/mod dependent (cannot be closed from DLL alone). The **hook surface names** are closed. **Observed set (2026-08-09, runtime, stock V3.1.0 + EfficientServer + apm-bridge):** 15/22 events have GameCore subscribers; see [residuals.md](residuals.md). EfficientServer and apm-bridge subscribe nothing (Harmony-direct).
+**Residual:** *who* subscribes is content/mod dependent (cannot be closed from DLL alone). The **hook surface names** are closed. **Observed sets (runtime):** pure-stock V3.1.0 (2026-08-10): 15/22 events GameCore-subscribed, all `mod=(null) core=True` (WorldShuttingDown 3; GameStarting/GameStartDone/GameShutdown/PlayerSpawnedInWorld 2; GameFocus/MainMenuOpening/MainMenuOpened/GameUpdate/ServerRegistered/UnityUpdate/PlayerJoinedGame/PlayerSpawning/PlayerDisconnected/CalcChunkColorsDone 1; GameAwake/CreateWorldDone/PlayerLogin/SavePlayerData/GameMessage/ChatMessage/EntityKilled 0). With EfficientServer 1.17.0 + apm-bridge: **identical except GameStartDone 2->3** (one anonymous handler); both subscribe nothing else (Harmony-direct). See [residuals.md](residuals.md).
 
 ---
 
@@ -154,6 +154,9 @@ Core types include `GameEventManager` and `GameEventAction` sequences (content-d
 
 ## Changelog
 
+- **2026-08-10:** ModEvents subscriber sets refined: pure-stock baseline pinned
+  (15/22 GameCore, exact per-event counts); mod delta is exactly one anonymous
+  GameStartDone handler. See residuals.md.
 - **2026-08-09:** ModEvents subscriber sets observed at runtime (reflection
   receiver dump); 15/22 events GameCore-subscribed on stock V3.1.0 +
   EfficientServer + apm-bridge; those mods subscribe nothing. See residuals.md.
