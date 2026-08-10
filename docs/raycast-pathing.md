@@ -497,6 +497,7 @@ the whole reason this system works headless at all.
 
 ## Changelog
 
+- **2026-08-10:** AstarVoxelGrid IL sizes re-verified: ScanInternal IL=6, CalcBlockingFlags IL=99, AddConnection IL=85 (exact).
 - **2026-08-08:** Voxel.raycastNew (IL=525) physics-march core: 10-iteration
   loop, sphere-cast when radius > 0.01, full hitMask bit table (1 see-through,
   2 water, 4 non-movement, 8 bullets, 16 rockets, 32 arrows, 64 movement, 128
