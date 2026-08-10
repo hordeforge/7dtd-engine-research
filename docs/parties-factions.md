@@ -495,6 +495,7 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 
 ## Changelog
 
+- **2026-08-11:** Faction/party IL re-verified: saveFactionDataThreaded IL=36, PrintData IL=25, IsPartyLead IL=11, GetTeamColor IL=5, HandleFirstSpawnInteractions IL=116, ServerHandleAcceptInvite IL=89, CreateParty IL=24, HandleOnPartyChanged/Joined IL=11, HandleOnPartyLeave IL=10, HasPendingPartyInvite IL=11, RemovePartyInvite IL=17, RemovePartyInvitesFromAllPlayers IL=30, AddKillXP IL=99, MemberCountInRange IL=40, SharedKillServer IL=162, NetPackageSharedPartyKill.ProcessPackage IL=22, SharedKillClient IL=65, NetPackagePartyActions.write IL=25, NetPackagePartyQuestChange.ProcessPackage IL=83 / HandlePlayer IL=70 (exact).
 - **2026-08-10:** Party/kill IL re-verified: EntityPlayer.HandleOnPartyLeave IL=10, AddKillXP IL=99, SharedKillServer IL=162 (exact).
 - **2026-08-10:** Party IL sizes re-verified: ServerHandleAcceptInvite IL=89, PartyManager.CreateParty IL=24, GetTeamColor IL=5 (exact).
 - **2026-08-10:** Faction/party IL sizes re-verified: saveFactionDataThreaded IL=36, IsPartyLead IL=11 (exact).
