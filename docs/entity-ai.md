@@ -3762,6 +3762,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** SpawnPointIsHidden IL=139 re-verified (SleeperVolume, exact).
 - **2026-08-11:** Block-trigger IL re-verified: BlockTrigger.OnTriggered IL=27, PrefabTriggerData.Trigger(BlockTrigger) IL=85 / (TriggerVolume) IL=90, GetBlockTriggers IL=3 (exact).
 - **2026-08-11:** Trigger-volume IL re-verified: CheckTriggerVolumeTrigger IL=53, TriggerVolume.CheckTouching IL=61, Touch IL=11 (exact).
 - **2026-08-11:** Sleeper/trigger IL re-verified: TouchGroup IL=52, World.FindTriggerVolume IL=29 (exact).
