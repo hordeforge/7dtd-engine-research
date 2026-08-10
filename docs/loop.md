@@ -551,6 +551,7 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 
 ## Changelog
 
+- **2026-08-10:** World.OnUpdateTick (IL=189) call order re-verified: updateChunkAddedRemovedCallbacks, WorldEventUpdateTime, WaterSplashCubes.Update, DecoManager.UpdateTick, MultiBlockManager.MainThreadUpdate, (non-editor) DynamicMusic.Conductor, checkPOIUnculling, updateChunksToUncull - exact match to 3.2.
 - **2026-08-09:** Peer MonoBehaviour order pinned by runtime probe (was an IL
   residual): SdtdConsole -> ConnectionManager -> GameManager in both Update and
   LateUpdate; see §1.1. Probe in workspace/experiments/script-order-probe.
