@@ -1170,6 +1170,7 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-11:** TE registry IL re-verified: Chunk.UpdateTick IL=26, GetBlockEntity IL=10/30, ChunkCluster.GetBlockEntity IL=12, AddEntityStub IL=5, AddEntityBlockStub IL=21, RemoveEntityBlockStub IL=30, removeBlockEntitesMarkedForRemoval IL=133, AddTileEntity IL=7, GetTileEntity IL=11, RemoveTileEntityAt IL=28, RemoveTileEntity IL=29, GameUtils.Vector3iToUInt64 IL=29 / UInt64ToVector3i IL=27, UpgradeDowngradeFrom IL=3 (Composite IL=34, VendingMachine IL=29, Collector IL=73), UseLocalVersioning IL=15, NetPackageTileEntity write IL=27 / read IL=24 (exact).
 - **2026-08-10:** PowerManager IL sizes re-verified: AddPowerNode IL=31, RemovePowerNode IL=61, SavePowerManager IL=41, LoadPowerManager IL=70 (exact).
 - **2026-08-10:** Chunk.GetBlockEntity IL sizes re-verified: Vector3i overload IL=10, Transform overload IL=30; Chunk.UpdateTick IL=26, TileEntityCollector.HandleUpdate IL=120 (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
