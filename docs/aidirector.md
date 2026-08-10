@@ -1053,6 +1053,7 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-11:** Scout-horde IL re-verified (6): CheckToSpawn 18, NotifyEvent 22, AIScoutHordeSpawner.Update 22, SpawnUpdate 129, UpdateHorde 229, spawnHordeNear 94 (exact).
 - **2026-08-11:** Zombie-sense IL re-verified: ChunkEventComponent.TickActiveSpawns IL=66, SpawnScouts IL=76, ChunkData.DecayEvents IL=61, FindBestEventAndReset IL=44 (exact).
 - **2026-08-11:** Chunk-event IL re-verified: AIDirectorChunkEventComponent.Read IL=37, Write IL=33, Clear IL=7, CreateHorde IL=10, ChunkData.Tick IL=23 (exact).
 - **2026-08-11:** Blood-moon party IL re-verified: CalcSpawnPos IL=28, TryAddPlayer IL=34, AddPlayer IL=8, Component.AddPlayerToParty IL=55 (exact).
