@@ -1665,6 +1665,53 @@ size); `GetReadWriteSize` (IL=10) = **21 + count*6**. `Setup(list)`
 `world.SetWorldAreas(list)` - the client replaces its trader-area set, which
 is what the placement/repair/dump-water gates then consult.
 
+### 6.23 Per-flag framing, conditional-heavy packages (write-IL verified)
+
+All conditional-heavy packages from the census, with the exact branch framing
+of their `write(PooledBinaryWriter)` body (IL offsets from
+`il/full-v3.1.0/_global/`). Two prior confusions resolved: a `dup; brtrue;
+pop; ldstr ""` pattern is **null-coalescing** (field always on the wire), not a
+condition; and a conditional in `ProcessPackage` does not change the write
+layout. Null-coalesced strings below are always-present.
+
+**Genuinely conditional (field omitted from wire when condition false):**
+
+| Package | write IL | Framing |
+|---|---:|---|
+| `NetPackageBossEvent` | 53 | `minionIDs` count + elements only when `eventType==1 (AddGroup)`; other eventTypes end after `bossIcon1` |
+| `NetPackageConfigFile` | 25 | `name`; `dataLen:i32` (-1 when null); `data` bytes only when `data != null` |
+| `NetPackageDiscordIdMappings` | 56 | flag `entityId > 0`: when true write `entityId`, `remove:bool`, `discordId:u64`; when false write `entityIds` count+list and `discordIds` list (exactly one shape present) |
+| `NetPackageEntityMapMarkerRemove` | 24 | `RemoveByType==EntityID(0)`: write `entityId`; `==Position(1)`: write `position:Vector3` (mutually exclusive); `mapObjectType` always |
+| `NetPackageEntityPosAndRot` | 76 | `bUseQRotation==false`: `rot:Vector3`; `==true`: `qrot:Quaternion` (mutually exclusive); `pos`, `bUseQRotation`, `onGround` always |
+| `NetPackageEntityRotation` | 54 | same `bUseQRotation` split: `rot:Vector3i` (3x i16) vs `qrot:Quaternion` (mutually exclusive) |
+| `NetPackageGameEventResponse` | 102 | `responseType==12 ClientSequenceAction`: `actionKey`; `==8 BlocksAdded`: `index`, `blockList` count + Vector3i list; `==9 BlocksRemoved`: `index`, `isDespawn`; `==11 BlockDamaged` (guard `==9\|\|==11`): `blockPos`; all other types: no tail fields |
+| `NetPackageInventoryTransactionResponse` | 66 | per entry: `guid`, `hasInventory:bool`; `inventory:ItemStack[]` only when `hasInventory` true |
+| `NetPackageLocalization` | 30 | `seqNr`, `totalParts`; `dataLen:i32` (-1 when null); `data` bytes only when `data != null` |
+| `NetPackageLockRequest` | 62 | `targets` count + per-target info only when `targets != null`; `context` type-name always (empty when null), `context` payload only when `context != null` |
+| `NetPackageLockResponse` | 74 | same two null-guards as LockRequest |
+| `NetPackageMinEventFire` | 35 | `eventPackageType==0 ItemEvent`: `itemValue`; `==1 BlockEvent`: `blockValue.rawData:u32` (mutually exclusive) |
+| `NetPackageNPCQuestList` | 99 | `eventType==0 FetchList`: `tierLevel`, entries count + `QuestPacketEntry` list; `==1 RemoveQuest`: `tierLevel`, `removeIndex:u8`; `==3 AddUsedPOI`: `tierLevel`, `questGiverPos`, `prefabPos`; `==4 ClearUsedPOI`: `tierLevel`, `questGiverPos`; `==2 ResetQuests`: no tail fields |
+| `NetPackagePackageIds` | 62 | `compatVersion` (from `Constants::cVersionInformation`), mapping count + type names, `serverUseEAC`; `hasHostUserAndToken:bool`; when true: `hostUserAndToken` (ToStream + token string, null-coalesced) |
+| `NetPackageQuestEvent` | 205 | 5 always: `entityID`, `prefabPos`, `eventType:u8`, `questTags`, `questCode`. Tail by `eventType`: `==3`: `extraData:u64`; `==7`: `questID`, `SharedWithList` count+ids; `==9`: `SubscribeTo:bool`; `==12`: `FetchModeType:u8`, `SharedWithList` count+ids; `==13`: `blockIndex`, `eventName`, `SharedWithList` count+ids, `activateList` count+Vector3i; `==16`: `factionPointOverride:i32`; 8/10/11/other: no tail |
+| `NetPackageRangeCheckDamageEntity` | 216 | 38 scalar fields always; `buffActions` count:u8 always (0 when empty), string elements only when count > 0 |
+| `NetPackageSignDataResponse` | 28 | `isLastBatch`; `dataLen:i32` (0 when null); `data` bytes only when length > 0 |
+| `NetPackageTraderData` | 38 | flag `entityId != -1`: when true `entityId:i32`; when false `tePosition:Vector3i` (mutually exclusive); then `traderData != null` flag + `traderData` payload only when non-null |
+
+**Always-present framing (count-prefixed lists / fixed scalars only, no wire
+condition):** `NetPackageAudio` (10 fields; `soundGroupName` null-coalesced),
+`NetPackageBlockLimitTracking` (amounts count+list), `NetPackageChat`
+(7 fields; `recipientEntityIds` count null-coalesced to 0), `NetPackageClientInfo`
+(per-player triples), `NetPackageConsoleCmdClient`, `NetPackageDeleteChunkData`
+(chunkKeys count+list), `NetPackageDynamicClientArrive`, `NetPackageEAC`
+(len+bytes), `NetPackageEntityWaypointList`, `NetPackageGameEventRequest`
+(11 fields; `varCount:u8` capped 255), `NetPackageNavObject` (8 fields),
+`NetPackagePartyActions` (4 fields), `NetPackagePartyData` (8 fields),
+`NetPackagePersistentPlayerPositions`, `NetPackagePlayerLogin` (8 fields),
+`NetPackagePlayerLoginAnswer` (7 fields; the `bAllowed` branch is in
+`ProcessPackage`, not `write`), `NetPackageVehiclePositions`,
+`NetPackageWeather` (neither list length written - inferred by reader),
+`NetPackageWorldAreas` (version:u8=1, count:i16).
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -1701,7 +1748,7 @@ customReason    : string
 | Encryption cipher/KDF | handshake bodies decoded; crypto primitives native (residual) |
 | Quest/Party process | re-pinned 2026-08-07 (§6.17-6.18); Twitch still low priority |
 | `NetPackageDynamicMesh`, `POIAround` | Process re-pinned (mesh ack IL=24; POIAround IL=156 prefab dict fill) |
-| Per-flag conditional framing on every package | optional tier-C only |
+| Per-flag conditional framing on every package | **closed 2026-08-10** in §6.23 (all 37 conditional-heavy write bodies verified from IL; always-present vs conditional distinguished) |
 
 ---
 
@@ -1717,6 +1764,15 @@ customReason    : string
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
 ## Changelog
+
+- **2026-08-10:** §6.23 per-flag framing for all 37 conditional-heavy packages
+  (write-IL verified): 18 genuinely conditional (BossEvent, ConfigFile,
+  DiscordIdMappings, EntityMapMarkerRemove, EntityPosAndRot, EntityRotation,
+  GameEventResponse, InventoryTransactionResponse, Localization, LockRequest,
+  LockResponse, MinEventFire, NPCQuestList, PackageIds, QuestEvent,
+  RangeCheckDamageEntity, SignDataResponse, TraderData), 19 always-present;
+  null-coalescing strings and ProcessPackage-only branches explicitly excluded.
+  Closes the "per-flag framing optional" row in §8.
 
 - **2026-08-08:** NetPackageWorldInfo.PrepareWorldHashes (IL=83): filtered
   name+crc:u32 blob from ChunkProviderGenerateWorldFromRaw.worldFileCrcs,

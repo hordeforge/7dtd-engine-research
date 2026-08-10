@@ -37,7 +37,7 @@ limit, or process).
 | **Post-patch IL drift** | TFP updates move offsets; regenerate dumps (process residual) |
 | **Region sector payload byte codec detail** | **Closed (2026-08-06/07):** Raw free-list + V1/V2 WriteData ([save-region.md](save-region.md) 3.3-3.4); location/timestamp packing (3.5); Raw **11-byte** header `7rr`+version:i32+paddingBytes:i32 from `New`/`Load` |
 | **Client-only UI / avatar / NGUI / camera** | Out of dedicated scope (non-goal) |
-| **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.21. Residual: only optional per-flag framing for rare conditional-heavy packages |
+| **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.21; per-flag framing for all 37 conditional-heavy packages verified from write IL in §6.23 (2026-08-10) |
 | **Encryption cipher / KDF primitives** | **Managed session transform closed; native primitives permanent.** Closed: the handshake package bodies and the managed `AesEncryptAndMac` session transform (AES + HMAC, [network.md](network.md) §4.5). Not closable: RSA key wrap and platform RNG quality - anything below `System.Security.Cryptography` providers (OS/OpenSSL native crypto), which has no game sim logic |
 | **XML content semantics** | Blocks/items/biomes/prefabs are data, not loop IL |
 | **Discord GameSDK integration (`DiscordManager`, 140 methods)** | **Closed (2026-08-10, IL + runtime):** IL shows multiple `GameManager.get_IsDedicatedServer()` gates in `DiscordManager` (lines 874, 2007, 2469, 2605) - the Discord paths skip on dedicated. Runtime confirms: across 12 dedicated boots the log contains only static `libdiscord_partner_sdk.so` preload + 16 `GamePref.Discord*` defaults, **zero live activity** (no connection, presence, lobby, auth). The manager is instantiated but never activates on a headless server. A client social feature, not a dedicated codepath |
@@ -157,6 +157,9 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
   Earlier "empty registry" reading was the true state of an idle world (no sim
   population), not a headless property. Probe in
   workspace/experiments/script-order-probe (git-ignored).
+- **2026-08-10:** §6.23 per-flag framing closed for all 37 conditional-heavy
+  NetPackages (write-IL verified, 18 conditional + 19 always-present);
+  residual row updated (was "optional per-flag framing").
 - **2026-08-10:** ModEvents subscriber set CLOSED for stock + standard mod set:
   pure-stock boot pins 15/22 events GameCore-subscribed; EfficientServer +
   apm-bridge add exactly one anonymous GameStartDone handler (2->3), subscribe
