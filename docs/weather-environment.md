@@ -382,6 +382,7 @@ from the same clock and the received weather snapshot.
 
 ## Changelog
 
+- **2026-08-11:** Weather IL re-verified: SetStorm IL=32, IsStormEffected IL=22, AddWeatherGroup IL=57, SetupWeather IL=53, WeatherRandomize IL=32/14, SelectWeatherGroup IL=40, FindWeatherGroup IL=26 / Index IL=24, WeatherGetValue IL=5, WeatherSetValue IL=6, WeatherGetDuration IL=11/18, InitWeather IL=1, Probabilities AddProbability IL=14, Normalize IL=62, GetRandomValue IL=54, CalcMinMaxPossibleValue IL=44, CalcGlobalWeatherType IL=36, NetPackageWeather.ProcessPackage IL=1, ShelterFrameUpdate IL=184, WeatherBuffUpdate IL=45, SeaLevel IL=2, GetCurrentTemperatureValue IL=2, GetCurrentCloudThicknessPercent IL=4, EntityRemovedFromWorld IL=1, IsStorming IL=15 (exact).
 - **2026-08-10:** Weather group IL re-verified: SelectWeatherGroup IL=40, FindWeatherGroup IL=26, FindWeatherGroupIndex IL=24, WeatherSetValue IL=6 (exact).
 - **2026-08-10:** Weather method IL sizes re-verified: SetStorm IL=32,
   IsStormEffected IL=22, BiomeDefinition.AddWeatherGroup IL=57,
