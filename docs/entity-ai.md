@@ -3762,6 +3762,10 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** Stats IL re-verified: EntityStats.Tick IL=27, PlayerEntityStats.TickWait IL=133, Stat ctor IL=36 / Tick IL=301 / Write IL=24 / Read IL=32 / GodModeEntity IL=19 / SetChangedFlag IL=15 (exact).
+- **2026-08-11:** Distress IL re-verified: SetDistressed IL=16, getEntityPlayerLocal IL=16, isGameMessageOnDeath IL=2, EntityAnimal.OnUpdateLive IL=57 (exact).
+- **2026-08-11:** World.EntityActivityUpdate IL=229 re-verified (the aiActiveScale bands source, exact).
+- **2026-08-11:** EntitySeeCache.ClearIfExpired IL=17 re-verified (exact).
 - **2026-08-11:** SpawnPointIsHidden IL=139 re-verified (SleeperVolume, exact).
 - **2026-08-11:** Block-trigger IL re-verified: BlockTrigger.OnTriggered IL=27, PrefabTriggerData.Trigger(BlockTrigger) IL=85 / (TriggerVolume) IL=90, GetBlockTriggers IL=3 (exact).
 - **2026-08-11:** Trigger-volume IL re-verified: CheckTriggerVolumeTrigger IL=53, TriggerVolume.CheckTouching IL=61, Touch IL=11 (exact).
