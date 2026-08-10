@@ -181,6 +181,7 @@ over time rather than instantly.
 
 ## Changelog
 
+- **2026-08-11:** Stealth tail IL re-verified: Entity.GetBrightness IL=53, SmellTickEat IL=36 (exact).
 - **2026-08-10:** Stealth IL sizes re-verified: GetBrightness IL=53, NotifyNoise IL=71, AddNoise IL=35, CalcVolume IL=68 (exact).
 - **2026-08-07:** PlayerStealth.SetSmellEat (IL=21): radius + distance cap
   100, smellEatTicks = 1800, smellRadius floor 1, update ticks reset.
