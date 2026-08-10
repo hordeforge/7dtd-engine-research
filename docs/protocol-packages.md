@@ -1767,6 +1767,7 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-10:** Verification complete: all 18 §6.23 conditional packages now individually IL-verified (final: InventoryTransactionResponse hasInventory guard, Localization data-null guard).
 - **2026-08-10:** Verification: NetPackageTraderData write IL=38 (entityId xor tePosition IL_001C, traderData guard IL_004D); NetPackageSignDataResponse write IL=28 (data-length+bytes gate IL_0019) - both match 6.23.
 - **2026-08-10:** Verification: NetPackageDiscordIdMappings write IL=56 (entityId>0 single-vs-list split, IL_0019 brfalse); NetPackageLockRequest write IL=62 (targets null-guard IL_003A, context gate) - both match 6.23.
 - **2026-08-10:** Verification: NetPackagePlayerId write IL=21 (id:i32, teamNumber:i16, PlayerDataFile.WriteNetwork IL=8 - safe by construction post-login); NetPackageBossEvent write IL=53 (5 always + eventType==1 minionIDs tail, IL_004B-004C).
