@@ -362,6 +362,7 @@ player's own `get_gameStage`.
 
 ## Changelog
 
+- **2026-08-10:** Progression IL sizes re-verified: AddLevelExp IL=161, CalcId IL=4 (exact).
 - **2026-08-07:** Progression.Update (IL=32) 1-s cadence MinEvent(5) fire +
   per-frame _expdeficit cvar; UpdateForSandbox fan-out + ProgressionClass
   Enabled/MaxLevel recompute (IL=22/52).
