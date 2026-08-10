@@ -434,6 +434,7 @@ stateDiagram-v2
 
 ## Changelog
 
+- **2026-08-10:** Dynamic-mesh IL re-verified: DynamicMeshManager.Update IL=404, DynamicMeshRegionDataStorage.SaveRegion IL=69, SaveRegionToFile IL=7, DynamicMeshChunkData.Write IL=201 (exact).
 - **2026-08-10:** `MaxActiveSyncs` default verified = **10** (`ldc.i4.s 10` +
   `stsfld` in the `DynamicMeshServer` static ctor), console-settable
   (`activesyncs` param, DynamicMeshConsoleCmd IL_0BB2). Matches the doc's
