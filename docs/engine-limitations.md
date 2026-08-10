@@ -43,7 +43,7 @@ flowchart TB
 | **Single-thread-dominated sim** | [loop.md](loop.md), [ARCHITECTURE](../../7dtd-optimizer/docs/ARCHITECTURE.md) | Extra cores do not parallelize `gmUpdate` / `UpdateTick` | **Hard** | Starve work (LOD, caps); host pin one L3 ([HOST_TUNING](../../7dtd-optimizer/docs/HOST_TUNING.md)); do not invent full MT sim in a Harmony mod |
 | **Target ~20 game ticks/s** | [closed-gaps.md](closed-gaps.md) `GameTimer(20)` | ~50 ms budget per tick under load | **Hard** | Measure tick p99; reduce sim volume before chasing topology |
 | **Net and mesh are peer Updates** | ConnectionManager / DynamicMeshManager **not** children of gmUpdate | Hijacking only `gmUpdate` does not own packages or dynamic mesh | **Hard** | Patch the real owners; APM by section |
-| **Unknown peer script order** | Unity settings, not method IL | Absolute order among GM / CM / DM residual | **Residual** | Treat as same-phase peers |
+| **Peer script order** | **Closed 2026-08-09 (runtime)** | SdtdConsole -> ConnectionManager.Update -> GameManager.Update -> (WorldEnvironment/DynamicMeshManager) -> CM.LateUpdate -> GM.LateUpdate; CM always precedes GM (518 frames, [loop.md](loop.md) §1.1) | **Closed** | Treat as same-phase peers |
 | **Dual entity paths** | [loop.md](loop.md) §3, [entity-ai.md](entity-ai.md) | Authority is `World.TickEntity`; Unity `Entity.Update` may still run if GO enabled | **Hard** | Optim must not assume one path; measure dual cost |
 | **Entity work is sliced** | UpdateTick slice/flush | Not every entity runs every Unity frame | **Soft** | LOD/stride interact with slice budget |
 | **Entities observer-gated** | [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) §2 | Zero players → zombies exist but barely tick | **Soft** | Load tests need observer bots; empty server is not AI cost |
@@ -73,7 +73,7 @@ Live APM + loadgen ladders (2026-07-17/18). Detail: [measured-scaling.md](../../
 | Limit (stock) | Evidence | Why it matters | Severity | What you can do |
 |---|---|---|---|---|
 | **LiteNetLib + managed wrappers** | [network.md](network.md) | Protocol pump on main peer Update | **Hard** | Measure package cost; do not reimplement combat net |
-| **Native LiteNet plugin** | residuals | Below managed; not fully RE'd | **Residual** | Treat as black box |
+| **LiteNetLib event dispatch (managed)** | **Closed 2026-08-10** | `UnsyncedEvents=true`; receive-thread `ConnectionRequestCheck` races `Clients.List` under join churn ([network.md](network.md) §4.0) | **Closed** | Ramp bot joins (`--ramp-ms`); fix direction documented |
 | **Entity interest + package bands** | distSq interest **16**; teleport ±**256**; pos/rot ±**128**; age **100** | Wrong assumptions break optim or custom entities | **Soft** | Document thresholds; measure under loadgen |
 | **194 NetPackage* types** (193 wire + manager) | dedi-complete census | Large surface; many client-only | **Soft** | Touch only hot packages |
 | **Chunk transfer bandwidth** | SendChunksToClients; kernel UDP | Join burst + tall columns + dense urban | **Hard** | View distance, density caps; RealEarth small host |
