@@ -222,6 +222,7 @@ see `7dtd-realworld/docs/realearth-review.md`.
 
 ## Changelog
 
+- **2026-08-10:** Chunk height IL re-verified: AddWallVolumeId IL=18, GetWallVolumes IL=3, GetTerrainHeight IL=9, SetTerrainHeight IL=10 (exact).
 - **2026-08-10:** Height-query IL sizes re-verified: GetHeightAt IL=22, GetTerrainHeight IL=19, Chunk.GetMaxHeight IL=29, GetHeight IL=9, RecalcHeightAt IL=55 (exact).
 - **2026-07-18:** Open-gaps section replaced with Closed managed table + product/ops list (residual policy).  
 - **2026-07-18:** Closed GetBlock/density index math via realearth-surfaces dump; link Origin/claims; note live dedi stock again.  
