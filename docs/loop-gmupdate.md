@@ -421,6 +421,7 @@ Entity → AI → path → fall → net interest deep dive: [`entity-ai.md`](ent
 
 ## Changelog
 
+- **2026-08-10:** gmUpdate IL=631 + updatePauseState IL=94 re-verified (exact).
 - **2026-08-07:** ThreadManager main-thread double-buffer drain; TickEntities
   slice formula exact IL (EMA 0.8/0.2, +0.4 span, 25 accounting).
 - **2026-07-16:** Link entity-ai for entity/AI/path.

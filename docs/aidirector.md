@@ -1053,6 +1053,7 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-10:** AIDirector IL sizes re-verified: CanSpawn IL=10, CreateComponents IL=31 (exact).
 - **2026-08-09:** Depth pass: AIDirectorChunkData cooldown literals (240 / 1320
   long / 180-720 neighbor) + DecayEvents linear decay; AIDirectorConstants
   verified vestigial (only DebugOutput read/written, rest dead); AIDirectorZombieState
