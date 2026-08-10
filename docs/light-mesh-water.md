@@ -517,6 +517,8 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-11:** Light-query IL re-verified: LightManager.CreateServer IL=8, World.GetLightBrightness IL=32, GetSunAndBlockColors IL=41, GetBlockLightValue IL=34, Chunk.GetLightBrightness IL=10, GetLightValue IL=30, GetLight IL=28, ChunkCluster.GetLight IL=21, SetLight IL=56, ResetLights IL=6, IsOpenSkyAbove IL=23/9, IsWaterInBounds IL=74, IsNeighbourChunksLit/Decorated IL=26, BlockLight.IsLightOn IL=7 / SetLightState IL=15 (exact).
+- **2026-08-11:** Mesh/water IL re-verified: TerrainSubMesh Contains IL=28 / CanAdd IL=58 / Add IL=60/61 / GetColorForTextureId IL=16, MeshCalculations CalculateMeshTangents IL=477/479/481 / RecalculateNormals IL=330/331, World.GetWaterPercent IL=14, ChunkCluster.GetWater IL=23 (exact).
 - **2026-08-10:** Light IL sizes re-verified: LightManager.CreateServer IL=8, World.GetLightBrightness IL=32, GetSunAndBlockColors IL=41, Chunk.GetLightValue IL=30 (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
