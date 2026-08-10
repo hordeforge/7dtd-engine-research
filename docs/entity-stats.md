@@ -219,6 +219,7 @@ Each `Stat` record (`Stat.Write` IL=24 / `Read` IL=32) is version **6** with
 
 ## Changelog
 
+- **2026-08-10:** EntityStats IL sizes re-verified: SimpleClone IL=7/26, ResetStats IL=1, Stat.set_Value IL=19 (exact).
 - **2026-08-08:** UpdateNPCStatsOverTime (IL=128): HealthChangeOT (105)
   buff sources with buffDamageRemainder fractional carry, DamageEntity with
   buff DamageSource, heal / non-buff Value*dt paths.
