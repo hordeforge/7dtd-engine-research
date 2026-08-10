@@ -904,6 +904,10 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-10:** Challenge reply layout verified from IL: `byte[0]=202`
+  (`ldc.i4 202` + `stelem.i1`) then `Guid.WriteToBuffer(buf, 1)` = 16 bytes at
+  offset 1, 17 bytes total (auth wrapper IL_0076-0084). Matches the join-path
+  "0xCA + Guid" summary and the 17-byte reply note.
 - **2026-08-10:** §4.0 LiteNetLib join-churn flake root cause closed: stock
   race between receive-thread `ConnectionRequestCheck` enumeration of
   `ConnectionManager.Clients.List` and main-thread mutations, enabled by
