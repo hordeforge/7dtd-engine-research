@@ -2169,6 +2169,8 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-11:** Melee/action IL re-verified: ItemActionMelee.ExecuteAction IL=116, GetExecuteActionTarget IL=152, GetCrosshairType IL=9, ItemActionCancel.ExecuteAction IL=26, ExchangeItem.ExecuteAction IL=75 / isFocusingBlock IL=29 / OnHoldingUpdate IL=93 / ReadFrom IL=83, DisconnectPower.ExecuteAction IL=19 / IsActionRunning IL=25 / OnHoldingUpdate IL=193 / GetPoweredBlock IL=99, UseOther.CanExecute IL=102 / ExecuteAction IL=287, TextureBlock.getUserData IL=51, ChannelMask IncludesChannel IL=11 / ToggleChannel IL=19 / SetExclusiveChannel IL=8 (exact).
+- **2026-08-11:** ReadFrom IL re-verified: base ItemAction IL=107, Attack IL=482, Ranged IL=126, Eat IL=152, Dynamic IL=495, ThrownWeapon IL=162, OpenBundle IL=191, GainSkill IL=53, LearnRecipe IL=75 (exact).
 - **2026-08-11:** Ranged leaves IL re-verified: SetAmmoType IL=55, NotReloadCancelled IL=10, ResetBurstShot IL=10, ResetOldAccuracy IL=3, setSelectedAmmoById IL=28, get_aiBurstShot IL=3 (exact).
 - **2026-08-11:** Painting IL re-verified: getHitBlockFace IL=222, paintBlock IL=88, getParentBlock IL=28, checkBlockCanBePainted IL=23, paintFace IL=48, decreaseAmmo IL=76, floodFill IL=207, CopyTextureFromWorld IL=91, CopyBlockFromWorld IL=81, SetupRadial IL=149, handleRadialCommand IL=182, getCurrentPaintIdx IL=16, ProjectVectorOnPlane IL=8 (exact).
 - **2026-08-11:** Attack leaves IL re-verified: StaminaModifier IL=2, get_Hitmask IL=3, ShowAmmoInUI IL=5, GetItemValueActionInfo IL=77, getOverlayData IL=51, HasRadial IL=11, radialValidTest IL=34, showGunFire IL=1 (exact).
