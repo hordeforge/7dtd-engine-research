@@ -1082,6 +1082,7 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 
 ## Changelog
 
+- **2026-08-10:** Quest/reward IL sizes re-verified: get_HasPosition IL=10, get_IsShareable IL=18, BaseReward.GetRewardText IL=2, RewardItem IL=12, RewardSkillPoints IL=7 (exact).
 - **2026-08-10:** QuestClass IL sizes re-verified: NewClass IL=16, AddCriteria IL=8 (exact).
 - **2026-08-09:** End-to-end wire flow section (§11): offer/accept, share
   (NetPackageSharedQuest ShareQuest/AddSharedMember/RemoveSharedMember/
