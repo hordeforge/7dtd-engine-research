@@ -1669,7 +1669,9 @@ is what the placement/repair/dump-water gates then consult.
 
 All conditional-heavy packages from the census, with the exact branch framing
 of their `write(PooledBinaryWriter)` body (IL offsets from
-`il/full-v3.1.0/_global/`). Two prior confusions resolved: a `dup; brtrue;
+`il/full-v3.1.0/_global/`). **Verification status (2026-08-10): all 37 rows
+(18 conditional + 19 always-present) re-checked against write IL across five
+rounds - every claim below is exact.** Two prior confusions resolved: a `dup; brtrue;
 pop; ldstr ""` pattern is **null-coalescing** (field always on the wire), not a
 condition; and a conditional in `ProcessPackage` does not change the write
 layout. Null-coalesced strings below are always-present.
@@ -1765,6 +1767,13 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-10:** §6.23 conditional spot-check round 5 (complete): 13 remaining
+  conditional packages branch-verified (BossEvent eventType==1, ConfigFile/Localization
+  data-null, DiscordIdMappings entityId>0 split, MapMarkerRemove type split,
+  InventoryTransactionResponse hasInventory, LockRequest/Response targets-null,
+  MinEventFire ItemEvent/BlockEvent, PackageIds host-token, SignDataResponse
+  data-null, TraderData entityId-xor-tePosition). Combined with rounds 2-4, all
+  18 conditional + 19 always-present claims are now IL-verified.
 - **2026-08-10:** §6.23 inverse spot-check round 4: 10 always-present packages
   re-scanned for hidden branches (BlockLimitTracking/ConsoleCmdClient
   count-loops, GameEventRequest variables-null guard, NavObject/PartyActions
