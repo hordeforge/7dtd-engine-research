@@ -3761,6 +3761,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** Pathing re-verified: EntityAlive.FindPath IL=49 (the path-admission target).
 - **2026-08-11:** Entity accessor IL re-verified: GetOwnedEntities IL=28, get_Health IL=6, IsAttackImpact IL=16, GetForwardVector IL=32 (exact).
 - **2026-08-11:** EAI IL re-verified: CalcSenseScale IL=23, SleeperWokeUp IL=21, EAIManager.Update IL=16, OnUpdateTasks IL=137 (exact).
 - **2026-08-11:** EAI accessor IL re-verified: GetAlertTicks IL=3, GetSoundAlertTicks IL=10, ClearEntityThatKilledMe IL=4, GetPushFactor IL=3 (exact).
