@@ -1261,7 +1261,7 @@ registers the entity in the static `fallingBlocksByChunk[chunkKey]` list
 (`WorldChunkCache.MakeChunkKey(toChunkXZ(pos))`); server places the RB at
 `pos - Origin.position` / `Euler(rot)`. `SetDead` (IL=20) cleans up the sign
 canvas and removes the entity from that list. The static
-`ClearFallingBlocksForChunks(chunks)` (IL=57) kills every in-flight falling
+`ClearFallingBlocksForChunks(chunks)` (IL=111) kills every in-flight falling
 block whose `chunkKey` is in the set (chunk-clear / unload path).
 
 **`CreateMesh` (IL=172):** resolves `ItemClass.GetForId(blockValue.ToItemType())`;
@@ -3762,6 +3762,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** Pathing IL re-verified: AStarPathFinderThread.FindPath IL=42, ASPPathFinderThread.FindPath IL=17 (single-target) / IL=22 (start+target), base PathFinderThread.FindPath IL=1 no-op, World.TickEntity IL=148 (exact).
+- **2026-08-11:** Falling-block IL re-verified: EntityFallingBlock Awake IL=27 / InitLocation IL=45 / SetBlockValue IL=32 / SetStartVelocity IL=7 / SetCanvasState IL=4 / Update IL=147 / OnUpdateEntity IL=344 / SetDead IL=20 / CreateMesh IL=172 / OnContactEvent IL=77; group EntityFallingBlocks OnUpdateEntity IL=302 / Update IL=117 / CreateMesh IL=295 / OnContactEvent IL=79; Block.OnBlockStartsToFall IL=6; World GroupFallingBlocks IL=292 / CreateFallingBlockGroup IL=107 / AddFallingBlock IL=38; EntityFallingTree Collide IL=101 / collidedWith IL=58 / treeCanDamageEntity IL=20; Chunk AddEntityToChunk IL=116 / RemoveEntityFromChunk IL=41; EntityCar.updateDamageModel IL=53 (exact).
+- **2026-08-11:** Corrected drift: ClearFallingBlocksForChunks is instance IL=111 (was claimed static IL=57); stale 2026-08-08 changelog entry fixed to match.
 - **2026-08-11:** EntityAlive head IL re-verified: OnEntityUnload IL=29, OnUpdateLive IL=363, updateCurrentBlockPosAndValue IL=318, InitInventory IL=9, CalcIfInElevator IL=59, Entity.CheckDistance(Entity, Entity) IL=8, EntityPlayer.DetectUsScale IL=26 / getHeadPosition IL=32, EntityAnimal.OnEntityDeath IL=24 (exact).
 - **2026-08-11:** EAI task IL re-verified: EAITaskList.areTasksCompatible IL=10, isBestTask IL=38, EAITaskEntry ctor IL=9, UAIBase.Update IL=18 / chooseAction IL=97 / updateAction IL=63 (exact).
 - **2026-08-11:** UAIConsideration GetScore IL re-verified: SelfHealth IL=24, SelfVisible IL=41, TargetDistance IL=59, TargetHealth IL=45, TargetType IL=49, TargetVisible IL=37 (exact).
@@ -3871,7 +3874,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
   (ticks < 16) gated on GamePrefs 148, no re-placement, SetDead on 300 ticks /
   y < 2; Update (IL=147) client mesh + massKg hardness*mass min10 *8 * scale,
   server RB mass/vel/angular; Awake/InitLocation fallingBlocksByChunk registry,
-  SetDead cleanup, static ClearFallingBlocksForChunks (IL=57); CreateMesh
+  SetDead cleanup, ClearFallingBlocksForChunks (IL=111); CreateMesh
   (IL=172) Terrain1.prefab / CloneModel MeshPurpose 3, collider+animator off,
   layer 13, sign canvas; OnContactEvent (IL=77) impact_stone_on_ particle.
 - **2026-08-08:** EntityFallingTree lifecycle: Collide (IL=101) server-only,
