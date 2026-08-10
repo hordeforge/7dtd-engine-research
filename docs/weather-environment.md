@@ -382,6 +382,7 @@ from the same clock and the received weather snapshot.
 
 ## Changelog
 
+- **2026-08-10:** Weather group IL re-verified: SelectWeatherGroup IL=40, FindWeatherGroup IL=26, FindWeatherGroupIndex IL=24, WeatherSetValue IL=6 (exact).
 - **2026-08-10:** Weather method IL sizes re-verified: SetStorm IL=32,
   IsStormEffected IL=22, BiomeDefinition.AddWeatherGroup IL=57,
   WeatherRandomize IL=32/14 (all exact).
