@@ -153,7 +153,7 @@ From name hints on 242 MB Update types:
 - **Likely client/editor:** majority (vp_*, UI, Avatar, Camera, LocalPlayer, …); debug/test helpers `MemoryTracker` (OnGUI memory dump), `GameGraphManager` (EntityPlayerLocal debug graphs), `StringParsersTests` (unit-test class), `NetworkMonitor`/`SIdCnt*` (NGuiWdwDebugPanels) are client/debug-only  
 - **Unclassified:** remainder (see inventories/gaps.md §8)
 
-Heuristic only; presence still depends on whether component exists in dedicated scene/world.
+Heuristic only; presence still depends on whether component exists in dedicated scene/world. **Superseded in part (2026-08-09/10, runtime):** the peer Update order for the components that *do* exist on a stock dedicated server is now observed, not heuristic - SdtdConsole -> ConnectionManager.Update -> GameManager.Update -> (WorldEnvironment/DynamicMeshManager) -> CM.LateUpdate -> GM.LateUpdate, with `ConnectionManager.Update` always before `GameManager.Update` (518 stable frames; [loop.md](loop.md) §1.1). Entity MBs also run (GO active + MB enabled, 17/17 observed). The heuristic remains useful only for *which* of the 242 types a dedicated scene instantiates.
 
 ---
 
@@ -225,6 +225,8 @@ implementing the wrong path. All narrated at their family docs:
 
 ## Changelog
 
+- **2026-08-10:** §7 MB Update classification cross-referenced to the observed
+  peer order (heuristic superseded in part by the runtime probe).
 - **2026-08-08:** Dead/inert path sweep synthesis (section 10).
 - **2026-07-19:** Related docs table.
 - **2026-07-16:** Closed GameTimer=20, AIDirector CreateComponents list, ASP→AstarPath path body, net package thresholds, MB classification, EAC/LiteNet type map.
