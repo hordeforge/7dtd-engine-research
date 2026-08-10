@@ -2169,6 +2169,7 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-10:** Item metadata IL re-verified (7): ReadOrNull 13, ReadOld 1, ItemStack.ReadOld 10, HasMetadata 25, RemoveMetaData 12, SetMetadata(String,Object,TypeTag) 86 core, Int32/Single/String overloads 6-7 (exact).
 - **2026-08-10:** Item id-assign pipeline re-verified: assignIdsFromXml IL=29, assignIdsLinear IL=14, assignLeftOverItems IL=87, createFullMappingForClients IL=31 (exact).
 - **2026-08-10:** Item IL sizes re-verified (10): GetItemClass 15, GetItem 13, GetItemsWithTag 33, GetForId 15, IsGun 8, GetItemOrBlockId 12, GetItemId 5, ItemStack.FromString 38, ReadDelta 15, WriteDelta 23 (all exact).
 - **2026-08-10:** ItemClass IL sizes re-verified: GetItemClass IL=15, GetItem IL=13, GetItemWithTag IL=30, GetItemsWithTag IL=33 (exact).
