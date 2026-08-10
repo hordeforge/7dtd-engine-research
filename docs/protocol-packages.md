@@ -44,7 +44,8 @@ channel 1** (the bulk / terrain / map band):
 | `NetPackagePOIAround` | POI/prefab region data |
 | `NetPackageWorldFolder` | world-folder file transfer |
 
-**`NetPackageWorldFolder.prepareWorldFolderData` (IL=389) is the server-side
+**`NetPackageWorldFolder.prepareWorldFolderData` (IL=3 async stub;
+`<prepareWorldFolderData>d__31::MoveNext` IL=387) is the server-side
 sender.** After a `WaitForSeconds` on `GamePrefs` 189 it logs `Preparing
 World chunks for clients` and streams the world folder through a
 `MemoryStream` + `DeflateOutputStream` (compression level 3): the file list
@@ -1767,6 +1768,10 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-11:** World-folder IL re-verified: prepareWorldFolderData IL=3 stub + MoveNext IL=387 (corrected from stale IL=389), PrepareWorldHashes IL=83, TestWorldValid IL=12 + MoveNext IL=129, uncompressWorld IL=3 + MoveNext IL=321, readDtmDelta IL=15 + MoveNext IL=165, sendPacketsToClient IL=6 + MoveNext IL=84, Setup IL=11 (exact).
+- **2026-08-11:** Dynamic-client-arrive IL re-verified: BuildData IL=34, FromPool IL=10; NetPackageLocalization.prepareDataPackets IL=107 (exact).
+- **2026-08-11:** Auth/chunk package IL re-verified: EncryptionRequest.Process IL=4, AuthConfirmation IL=17, KeyExchangeComplete IL=8, ConfigFile IL=6, WorldSpawnPoints IL=5, NetPackageChunk.ProcessPackage IL=126, ChunkRemove IL=8, ChunkRemoveAll IL=8 (exact).
+- **2026-08-11:** Map-chunk IL re-verified: write IL=109, ProcessPackage IL=26 (x2), GetLength IL=24, Setup IL=13, MapChunkDatabase.GetMapChunkPackagesToSend IL=96 (exact).
 - **2026-08-11:** Verification: PartyData/Weather/EntityWaypointList writes re-checked (PartyData LeaderIndex u8, Weather no-outer-length inferred, WaypointList i16+count) - 6.23 exact; full 37-package set individually verified.
 - **2026-08-10:** Verification: always-present package writes re-checked (GameEventRequest varCount 255-cap IL_007E, ClientInfo count+triples, Audio soundGroupName null-coalesce, NavObject 8 fields) - all 6.23 exact.
 - **2026-08-10:** Verification: NetPackageRangeCheckDamageEntity write IL=216 (38 scalars + buffActions brfalse IL_021D null-guard) - 6.23 exact; all 18 conditionals now double-verified.
