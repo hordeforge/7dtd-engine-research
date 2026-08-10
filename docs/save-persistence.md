@@ -406,6 +406,7 @@ of the dedicated shutdown chain.
 
 ## Changelog
 
+- **2026-08-10:** SdFile managed-path IL re-verified: ManagedExists IL=4, ManagedGetLastWriteTime IL=6, ManagedGetLastWriteTimeUtc IL=4 (exact).
 - **2026-08-10:** Save-path IL sizes re-verified: TryGetManagedPath IL=47, SdFile.ManagedReadAllBytes IL=29 (exact).
 - **2026-08-07:** GamePrefs.Save overloads (IL=78 / 29 / 92): parameterless
   SdPlayerPrefs path (persistent prefs, bool to 0/1 int, Binary to base64) is
