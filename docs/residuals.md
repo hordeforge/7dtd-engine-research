@@ -18,21 +18,27 @@ flowchart TD
 
 ---
 
-## 1. Residuals (honest, permanent from IL alone)
+## 1. Residuals (honest; closed via IL or runtime where possible)
 
-| Residual | Why not closed by Assembly-CSharp RE |
+Status legend: **Closed** = resolved with evidence; **Partially closed** = key
+question answered, a narrow nuance remains; **Permanent** = structurally not
+closable from this corpus (native/third-party/OS layer), with the closed
+managed surface stated; unmarked = non-residual (data, out of scope, model
+limit, or process).
+
+| Residual | Status / why not closed by Assembly-CSharp RE |
 |---|---|
 | **Unity script execution order** among GameManager / ConnectionManager / DynamicMeshManager / Entity MBs | **Closed (2026-08-09, runtime):** observed on the stock V3.1.0 dedicated server via a Harmony stamp probe (`workspace/experiments/script-order-probe`, git-ignored). Per-frame order: `GameManager.FixedUpdate`(+`Origin.FixedUpdate` no-op) -> `SdtdConsole.Update` -> **`ConnectionManager.Update`** -> **`GameManager.Update`** -> (`WorldEnvironment.Update` / `DynamicMeshManager.Update` when components present) -> `ConnectionManager.LateUpdate` -> `GameManager.LateUpdate`. **Invariant: ConnectionManager.Update always precedes GameManager.Update** (518 stable frames). Stored in Unity project settings, so it was not derivable from IL alone; now pinned by observation. See [loop.md](loop.md) §1.1 |
 | **Which Entity GameObjects stay `enabled` on pure dedicated** | **Partially closed (2026-08-10, runtime):** on the stock V3.1.0 dedi, `World.Entities` and `World.Players` (DictionaryList registries) stay **empty** even with a connected loadgen player (entity 101, `SpawnedInWorld` confirmed client-side) and telnet-spawned zombies. Connected player entities live in the **ConnectionManager client list** (the dedicated authority), not `World.Players` (which is the local/client player context); world entities register via `SpawnEntityInWorld` -> `Entities.Add` (spawning.md §7) only when actually spawned into the sim. So on an idle headless server there are **no entity GameObjects in World at all**; the "stays enabled vs disabled" question is moot for the world registry. Probe: `workspace/experiments/script-order-probe` (git-ignored). Residual nuance: the enabled-state of a *spawned-and-ticking* zombie GO on dedicated (GO active, MB enabled) remains unobserved - needs a stable multi-entity sim, which the LiteNetLib join flake blocks |
-| **LiteNetLib native plugin** | Below managed wrappers; native binary |
-| **EAC / EOS AntiCheat wire protocol** | Types mapped (`NetPackageEAC`, `Platform.EOS.AntiCheatServer*`); protocol not in game DLL as reverseable sim logic |
-| **Aron Granberg A\* library internals** | `AstarPath.StartPath` / `Pathfinding.*` third-party; 7DTD ASP wrapper closed |
+| **LiteNetLib native plugin** | **Managed surface closed; native internals permanent.** Closed: `NetworkServerLiteNetLib`/`NetworkClientLiteNetLib` wrappers, `LiteNetLibAuthWrapperServer.ConnectionRequestCheck` rate-limit + challenge (17-byte 202+Guid, [network.md](network.md) §4), port+2, disconnect messages. Not closable: the **native** `LiteNetLib.dll` congestion/reliability/MTU internals - below the managed wrappers, a compiled third-party binary with no managed sim logic to reverse |
+| **EAC / EOS AntiCheat wire protocol** | **Managed envelope closed; EAC protocol permanent.** Closed: `NetPackageEAC` (Setup(len,data), IsServer routing, ClientInfo.SendPackage), the managed `HandleMessageFromClient` -> EAC bridge, EOS wrappers ([platform-auth.md](platform-auth.md) §8). Not closable: the EAC **anti-cheat protocol itself** (what the EAC client/server exchange, hashes, challenges) - that runs in the EAC native service outside the game DLL; the game only passes opaque bytes |
+| **Aron Granberg A\* library internals** | **7DTD usage closed; third-party internals permanent.** Closed: the ASP -> A* handoff (`AstarVoxelGrid` / `AstarManager` / `AstarPath.StartPath` call sites, all IL-verified, [raycast-pathing.md](raycast-pathing.md) §5), grid/frontier semantics. Not closable: the internals of the **third-party Granberg `Pathfinding.dll`** (heuristics, open/closed-list internals) - separate compiled third-party code, not the game's `Assembly-CSharp`, and redistributing its RE would not be stock-game research |
 | **ModEvents subscriber sets** | **Partially closed (2026-08-09, runtime):** observed on the stock V3.1.0 dedi with the standard mod set (EfficientServer 1.17.0 + 7dtd-apm-bridge): 15/22 events have GameCore subscribers (GameStartDone / WorldShuttingDown 3, GameStarting / GameShutdown / PlayerSpawnedInWorld 2, nine others 1; CreateWorldDone / PlayerLogin / SavePlayerData / GameMessage / ChatMessage / EntityKilled / GameAwake 0). One anonymous mod handler on GameStartDone. EfficientServer + apm-bridge subscribe nothing (they use Harmony directly). Hook names closed in [managers.md](managers.md); probe in `workspace/experiments/script-order-probe` (git-ignored). Note: the set is config-dependent (other mods change it), so this pins the observed configuration, not a universal answer |
 | **Post-patch IL drift** | TFP updates move offsets; regenerate dumps (process residual) |
 | **Region sector payload byte codec detail** | **Closed (2026-08-06/07):** Raw free-list + V1/V2 WriteData ([save-region.md](save-region.md) 3.3-3.4); location/timestamp packing (3.5); Raw **11-byte** header `7rr`+version:i32+paddingBytes:i32 from `New`/`Load` |
 | **Client-only UI / avatar / NGUI / camera** | Out of dedicated scope (non-goal) |
 | **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.21. Residual: only optional per-flag framing for rare conditional-heavy packages |
-| **Encryption cipher / KDF primitives** | Handshake package bodies decoded ([protocol-packages.md](protocol-packages.md) §2). Session transform is managed `AesEncryptAndMac` (AES + HMAC; [network.md](network.md) §4.5). Residual: RSA key wrap / platform RNG quality and anything below `System.Security.Cryptography` providers |
+| **Encryption cipher / KDF primitives** | **Managed session transform closed; native primitives permanent.** Closed: the handshake package bodies and the managed `AesEncryptAndMac` session transform (AES + HMAC, [network.md](network.md) §4.5). Not closable: RSA key wrap and platform RNG quality - anything below `System.Security.Cryptography` providers (OS/OpenSSL native crypto), which has no game sim logic |
 | **XML content semantics** | Blocks/items/biomes/prefabs are data, not loop IL |
 | **Discord GameSDK integration (`DiscordManager`, 140 methods)** | **Closed (2026-08-10, IL + runtime):** IL shows multiple `GameManager.get_IsDedicatedServer()` gates in `DiscordManager` (lines 874, 2007, 2469, 2605) - the Discord paths skip on dedicated. Runtime confirms: across 12 dedicated boots the log contains only static `libdiscord_partner_sdk.so` preload + 16 `GamePref.Discord*` defaults, **zero live activity** (no connection, presence, lobby, auth). The manager is instantiated but never activates on a headless server. A client social feature, not a dedicated codepath |
 | **Server-side support/utility code (enumeration-level, not per-method narrated)** | Cross-cutting helpers the reachability set includes but no subsystem doc singles out: `Configuration.*` XML/option parsing, `StringParsers`, `TEFeatureAbs` base helpers. Covered by their owning frameworks ([blocks.md](blocks.md)/[tile-entities-power.md](tile-entities-power.md)) and the [full-surface.md](full-surface.md) caveat; a per-method narrative would not add sim understanding |
@@ -92,10 +98,13 @@ Also:
 - Flat write sequences for every package: [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md)
 - Region Raw header + location packing closed (save-region §3.5)
 
-What remains open is **only** the non-IL residual table in section 1 (Unity order,
-native plugins, EAC/EOS wire, A* library internals, content XML, client UI) plus
-**optional** annotation depth (per-flag package framing, per-console-command prose).
-Those cannot be finished by "more managed RE until every IL line is prose."
+What remains open is **only** the section-1 table rows not marked Closed /
+Partially closed (native plugins, EAC/EOS wire, A* library internals, content
+XML, client UI, model limits) plus **optional** annotation depth (per-flag
+package framing, per-console-command prose). Several previously-open rows were
+closed by runtime observation in 2026-08-09/10 (Unity script order, Discord
+GameSDK, ModEvents subscriber sets, entity-GO registry state). Those cannot be
+finished by "more managed RE until every IL line is prose."
 
 ## 4. Origin dedicated gate (correction)
 
