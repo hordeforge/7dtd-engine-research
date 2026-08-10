@@ -47,10 +47,10 @@ test:
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
 
-# CI variant: the corpus-invariant gates that need no live DLL or mono.
-# The full `make test` additionally needs the installed game assembly.
+# CI variant: the corpus-invariant gates that need no live DLL, mono, local
+# il/ dumps, or the realworld sibling. test_dedi_coverage_docs.py stays in the
+# local `make test` (it needs the git-ignored il/ dump sets).
 test-docs:
-	python3 "$(TOOLS)/tests/test_dedi_coverage_docs.py"
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
