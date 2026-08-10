@@ -285,6 +285,7 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
+- **2026-08-10:** EntityBuffs.HasImmunity IL=63 re-verified (exact).
 - **2026-08-08:** BuffValue wire format: Write (IL=29) name/stack/duration/
   instigator/flags/updateTicks/pos; Read (IL=75) version gates (hash-name
   below 2, byte/u16 updateTicks, pos from 3) + class pointer cache.

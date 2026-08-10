@@ -681,6 +681,7 @@ Full field lists in inventories/netpackage-bodies.md; tick pipeline above.
 
 ## Changelog
 
+- **2026-08-10:** GameEventActionSequence IL sizes re-verified: CanPerform IL=44, SetupTarget IL=97, HasTarget IL=41, ParseProperties IL=70 (exact).
 - **2026-08-08:** Sequence-link leaves: SequenceLink.CheckLink owner+tag
   match; MinEventActionUnregisterSequenceLink per-player UnRegisterLink with
   sequence_link attr; RequirementHasSequenceLink = HasSequenceLink == !Invert;
