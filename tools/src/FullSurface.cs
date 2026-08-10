@@ -15,6 +15,8 @@ using System.Text;
 using Mono.Cecil;
 
 class FullSurface {
+  static string Esc(string s) => s.Replace("|", "\\|");
+
   static string Kind(TypeDefinition t) =>
     t.IsInterface ? "interface" : t.IsEnum ? "enum" : t.IsValueType ? "struct" :
     (t.BaseType != null && t.BaseType.Name == "MulticastDelegate") ? "delegate" : "class";
@@ -35,7 +37,7 @@ class FullSurface {
     types.AppendLine("|---|---|---|---|--:|--:|--:|");
     foreach (var t in all) {
       int il = t.Methods.Where(m => m.HasBody).Sum(m => m.Body.Instructions.Count);
-      types.AppendLine("| " + t.Name + " | " + (t.Namespace == "" ? "-" : t.Namespace) + " | " + Kind(t) +
+      types.AppendLine("| " + Esc(t.Name) + " | " + (t.Namespace == "" ? "-" : Esc(t.Namespace)) + " | " + Kind(t) +
         " | " + (t.BaseType == null ? "-" : t.BaseType.Name) + " | " + t.Fields.Count + " | " +
         t.Methods.Count(m => m.HasBody) + " | " + il + " |");
     }
@@ -51,7 +53,7 @@ class FullSurface {
       int m = g.SelectMany(t => t.Methods).Count(x => x.HasBody);
       long il = g.SelectMany(t => t.Methods).Where(x => x.HasBody).Sum(x => (long)x.Body.Instructions.Count);
       int f = g.Sum(t => t.Fields.Count);
-      ns.AppendLine("| " + g.Key + " | " + g.Count() + " | " + m + " | " + il + " | " + f + " |");
+      ns.AppendLine("| " + Esc(g.Key) + " | " + g.Count() + " | " + m + " | " + il + " | " + f + " |");
     }
     File.WriteAllText(Path.Combine(a[1], "surface-namespaces.md"), ns.ToString());
     Console.Error.WriteLine("wrote surface-types.md (" + all.Count + " types) + surface-namespaces.md to " + a[1]);

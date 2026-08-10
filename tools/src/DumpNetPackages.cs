@@ -11,6 +11,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 class DumpNetPackages {
+  static string Esc(string s) => s.Replace("|", "\\|");
   static readonly string[] Methods = {
     "Setup", "read", "write", "GetLength", "ProcessPackage",
     "get_Channel", "get_Compress", "get_ReliableDelivery", "get_PackageDirection", "ShouldProcess"
@@ -48,7 +49,7 @@ class DumpNetPackages {
       sb.AppendLine();
       foreach (var mn in Methods) Dump(sb, t, mn);
       File.WriteAllText(Path.Combine(a[1], t.Name + "_il.txt"), sb.ToString());
-      idx.AppendLine("| " + t.Name + " | " + t.Fields.Count + " | " + IL(t, "read") + " | " + IL(t, "write") +
+      idx.AppendLine("| " + Esc(t.Name) + " | " + t.Fields.Count + " | " + IL(t, "read") + " | " + IL(t, "write") +
         " | " + IL(t, "Setup") + " | " + IL(t, "GetLength") + " | " + IL(t, "ProcessPackage") + " |");
     }
     File.WriteAllText(Path.Combine(a[1], "INDEX.md"), idx.ToString());

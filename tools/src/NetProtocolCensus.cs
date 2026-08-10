@@ -31,6 +31,7 @@ class NetProtocolCensus {
     }
   }
   static string S(int? v) => v == null ? "inherit" : v == -999 ? "expr" : v.ToString();
+  static string Esc(string s) => s.Replace("|", "\\|");
   static void Main(string[] a) {
     if (a.Length < 2) { Console.Error.WriteLine("usage: NetProtocolCensus <asm> <outFile>"); Environment.Exit(2); }
     var r = new DefaultAssemblyResolver();
@@ -45,7 +46,7 @@ class NetProtocolCensus {
     sb.AppendLine("| Package | Chan | Compress | Dir | Delivery | BeforeAuth |");
     sb.AppendLine("|---|--:|--:|--:|--:|--:|");
     foreach (var t in pkgs)
-      sb.AppendLine("| " + t.Name + " | " + S(ConstOf(t, "get_Channel")) + " | " + S(ConstOf(t, "get_Compress")) +
+      sb.AppendLine("| " + Esc(t.Name) + " | " + S(ConstOf(t, "get_Channel")) + " | " + S(ConstOf(t, "get_Compress")) +
         " | " + S(ConstOf(t, "get_PackageDirection")) + " | " + S(ConstOf(t, "get_ReliableDelivery")) +
         " | " + S(ConstOf(t, "get_AllowedBeforeAuth")) + " |");
     File.WriteAllText(a[1], sb.ToString());
