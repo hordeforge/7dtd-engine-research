@@ -1170,6 +1170,7 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-08-10:** PowerManager IL sizes re-verified: AddPowerNode IL=31, RemovePowerNode IL=61, SavePowerManager IL=41, LoadPowerManager IL=70 (exact).
 - **2026-08-10:** Chunk.GetBlockEntity IL sizes re-verified: Vector3i overload IL=10, Transform overload IL=30; Chunk.UpdateTick IL=26, TileEntityCollector.HandleUpdate IL=120 (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
