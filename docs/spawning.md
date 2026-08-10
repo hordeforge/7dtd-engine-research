@@ -1281,6 +1281,7 @@ above.
 
 ## Changelog
 
+- **2026-08-10:** EntityFactory IL sizes re-verified: CreateEntityAsync IL=4, CreateEntity(EntityCreationData) IL=7 (exact).
 - **2026-08-08:** EntityPlayerLocal.GetSpawnPoint (IL=24): SpawnPoints[0] ->
   block-center + (0.5,0,0.5), yaw 0, else SpawnPosition.Undef.
 
