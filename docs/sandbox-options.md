@@ -475,6 +475,7 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
 
 ## Changelog
 
+- **2026-08-10:** GamePrefs/GameStats IL sizes re-verified: SetObjectInternal IL=38, GetObject IL=20, GameStats.GetInt IL=34 (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
 
