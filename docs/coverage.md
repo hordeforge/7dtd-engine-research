@@ -108,6 +108,7 @@ should be re-checked against IL before you rely on it.
 | Doc | Audit tier |
 |---|---|
 | [aidirector.md](aidirector.md) | audited (pass 1) |
+| [architecture-map.md](architecture-map.md) | map of corpus narratives (no direct IL claims) |
 | [block-shapes.md](block-shapes.md) | audited (pass 2) |
 | [blocks.md](blocks.md) | audited (pass 1) |
 | [buffs.md](buffs.md) | audited (pass 1) |
@@ -115,6 +116,7 @@ should be re-checked against IL before you rely on it.
 | [chunk-providers.md](chunk-providers.md) | audited (pass 2) |
 | [closed-gaps.md](closed-gaps.md) | audited (pass 1) |
 | [combat-damage.md](combat-damage.md) | audited (pass 1) |
+| [completion-bar.md](completion-bar.md) | completion-bar definition (census refs to verified claims) |
 | [console-commands.md](console-commands.md) | audited (pass 1) |
 | [coverage.md](coverage.md) | audited (pass 1) |
 | [crafting-recipes.md](crafting-recipes.md) | audited (pass 1) |
@@ -157,6 +159,7 @@ should be re-checked against IL before you rely on it.
 | [server-lifecycle.md](server-lifecycle.md) | audited (pass 1) |
 | [signs.md](signs.md) | audited (pass 2) |
 | [spawning.md](spawning.md) | audited (pass 1) |
+| [stability.md](stability.md) | IL re-verified 2026-08-11 sweep (not in audit passes) |
 | [stealth-smell.md](stealth-smell.md) | audited (pass 1) |
 | [terrain-height.md](terrain-height.md) | audited (pass 1) |
 | [tile-entities-power.md](tile-entities-power.md) | audited (pass 1) |
@@ -183,5 +186,6 @@ their correctness is the tool's, not prose. `inventories/dedicated-leaves.md` an
 
 ## Changelog
 
+- **2026-08-11:** Census table re-verified against live `Census.exe` + `stock_facts.json` (4414 / 44107 / 193+manager / 20 / 631 / 926 / 23, all exact); audit-status table completed with the three post-pass docs (architecture-map, completion-bar, stability).
 - **2026-07-19:** Related docs table.
 - **2026-07-18:** Origin/claims + ModEvents rows link full paths; product hub callout.
