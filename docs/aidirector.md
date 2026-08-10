@@ -1053,6 +1053,7 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-11:** Chunk-event IL re-verified: AIDirectorChunkEventComponent.Read IL=37, Write IL=33, Clear IL=7, CreateHorde IL=10, ChunkData.Tick IL=23 (exact).
 - **2026-08-11:** Blood-moon party IL re-verified: CalcSpawnPos IL=28, TryAddPlayer IL=34, AddPlayer IL=8, Component.AddPlayerToParty IL=55 (exact).
 - **2026-08-11:** Plane/blood-moon IL re-verified: SetDirectionToFly IL=12, OnUpdatePosition IL=49, UpdateFarDraw IL=35, BloodMoonComponent.Tick IL=170 (exact).
 - **2026-08-11:** AIAirDrop IL re-verified: Tick IL=193, CreateFlightPaths IL=355, MakePlayerClusters IL=70, CalcSupplyDropMetrics IL=53 (exact).
