@@ -68,7 +68,7 @@ Prior V3.0.1 baseline was types 4401, methods 43901, SaveLoad IL 884 (see [re-me
 |---|---:|
 | Top-level types | 4414 |
 | Methods with body | 44107 |
-| NetPackage* types | 194 name-prefixed (193 + `NetPackageManager`), from `Census.exe`; ~189 are registered wire packages (the rest are name-prefixed helpers: `NetPackageDirection` enum, `Logger`, `Metrics`). The exact "189 in live id-map" is a runtime observation from an earlier live join, not reproducible from static IL. |
+| NetPackage* types | 194 name-prefixed (193 + `NetPackageManager`), from `Census.exe`; ~189 are registered wire packages (the rest are name-prefixed helpers: `NetPackageDirection` enum, `Logger`, `Metrics`). The "189 in live id-map" was a runtime observation, **re-confirmed live 2026-08-10** (`PackageIdsReceived: maps=189` on a stock V3.1.0 join). |
 | GameTimer Hz | 20 |
 | gmUpdate IL | 631 |
 | WorldState.SaveLoad(Stream) IL | 926 |
