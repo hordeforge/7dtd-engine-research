@@ -1765,6 +1765,9 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-10:** §6.23 spot-verification: 4 additional always-present claims
+  re-checked against write IL (EAC len+loop, PartyData/PlayerLogin
+  null-coalesced strings, Weather no-branch) - all exact.
 - **2026-08-10:** §6.23 per-flag framing for all 37 conditional-heavy packages
   (write-IL verified): 18 genuinely conditional (BossEvent, ConfigFile,
   DiscordIdMappings, EntityMapMarkerRemove, EntityPosAndRot, EntityRotation,
