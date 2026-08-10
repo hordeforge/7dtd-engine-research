@@ -517,6 +517,7 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-10:** Light IL sizes re-verified: LightManager.CreateServer IL=8, World.GetLightBrightness IL=32, GetSunAndBlockColors IL=41, Chunk.GetLightValue IL=30 (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
 
