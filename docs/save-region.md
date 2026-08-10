@@ -818,6 +818,8 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-11:** WorldState IL re-verified: SaveWorldState IL=16, SetFrom IL=203, Save(path) IL=21, SaveLoad(Stream) IL=926, get_Guid IL=9, CalculatePlayerMapSize IL=28 (exact).
+- **2026-08-11:** PlayerDataFile IL re-verified: Save IL=129, Load IL=223, Write IL=372, Read IL=564, FromPlayer IL=300, ToPlayer IL=463, WriteNetwork IL=8, Exists IL=25, ToggleWaypointHiddenStatus IL=12, PlayerMetaInfo Write(path) IL=43 / TryRead IL=133 / Write(BW) IL=38 / FromStream IL=30, ChunkBlockChannel.Write IL=120 / Read IL=151 (exact).
 - **2026-08-11:** Region codec re-verified: RegionFileRaw.WriteData IL=229, sectorsStartOffset ldc.i4 779 at ReadData/WriteData/InitUsedSectors (exact).
 - **2026-08-10:** Save IL re-verified: World.get_Guid IL=9, CalculatePlayerMapSize IL=28 (exact).
 - **2026-08-10:** WorldState IL sizes re-verified: SetFrom IL=203, Save(String) IL=21 (exact).
