@@ -406,6 +406,7 @@ of the dedicated shutdown chain.
 
 ## Changelog
 
+- **2026-08-11:** Save-path IL re-verified: TryGetManagedPath IL=47, ManagedReadAllBytes IL=29, ManagedExists IL=4, ManagedGetLastWriteTimeUtc IL=4 / LastWriteTime IL=6, UnmanagedToManagedCopy IL=33, EnumerateFiles/Entries IL=22-24, GetFileSystemEntries IL=4-6, ManagedDirectoryDelete IL=5, GetCurrentDirectory IL=2, GetSaveGameDir() IL=8, GetDefaultUserGameDataPath IL=18, GetDeviceLocalUserGameDataDir IL=4, GetPlayerDataLocalDir IL=4, GetPlayerSaves IL=26 + SearchSaveDir IL=132, IsWorldGenerated IL=7, SetSaveGameLocalGuid IL=28, GetNormalizedPath IL=5 (exact).
 - **2026-08-10:** SdFile managed-path IL re-verified: ManagedExists IL=4, ManagedGetLastWriteTime IL=6, ManagedGetLastWriteTimeUtc IL=4 (exact).
 - **2026-08-10:** Save-path IL sizes re-verified: TryGetManagedPath IL=47, SdFile.ManagedReadAllBytes IL=29 (exact).
 - **2026-08-07:** GamePrefs.Save overloads (IL=78 / 29 / 92): parameterless
