@@ -1053,6 +1053,8 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-11:** ChunkData/chunk-event IL re-verified: FindBestEventAndReset IL=44, SetLongDelay IL=4, StartNeighborCooldown IL=13, AIDirectorChunkEvent.Write/Read IL=32/39, Tick IL=79, TickActiveSpawns IL=66, CheckToSpawn IL=18/46, SpawnScouts IL=76, NotifyEvent IL=22, GetChunkDataFromPosition IL=33, StartCooldownOnNeighbors IL=55, CreateHorde IL=10, Component Write/Read IL=33/37, Clear IL=7, GetActiveCount IL=4 (exact).
+- **2026-08-11:** Scout/horde IL re-verified: AIScoutHordeSpawner.Update IL=22, SpawnUpdate IL=129, UpdateHorde IL=229, spawnHordeNear IL=94, CalcRandomPos IL=15, Cleanup IL=27, Horde.Tick IL=21 (exact).
 - **2026-08-11:** Air-drop IL re-verified: SpawnAirDrop IL=59, SpawnSupplyCrate IL=77, Tick IL=75, AIAirDrop.Tick IL=193, CreateFlightPaths IL=355, MakePlayerClusters IL=70, CalcSupplyDropMetrics IL=53, FindSafePoint IL=70, SpawnPlane IL=74 (exact).
 - **2026-08-11:** Supply-crate IL re-verified: PostInit IL=35, OnEntityActivated IL=18, canDespawn IL=2, MoveEntityHeaded IL=35, Update IL=39, ValidateResources IL=23, StopSmokeAndLights IL=77, RequiresChunkObserver IL=8, InitLocalActivationCommands IL=8, AllowActivationCommand IL=20, GetActivationText IL=81, HandleNavObject IL=64, OnEntityUnload IL=17 (exact).
 - **2026-08-11:** Supply-plane IL re-verified: SetDirectionToFly IL=12, OnUpdatePosition IL=49, UpdateFarDraw IL=35, MoveBoundsInsideFrustrum IL=31 (exact).
