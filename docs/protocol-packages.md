@@ -890,7 +890,7 @@ payload : payloadLen bytes   // TileEntity.write(network stream mode)
 `Setup(te, streamMode[, handle])`: `te.ToWorldPos()`, write TE into pooled
 stream via `TileEntity.write(writer, streamMode)`.
 
-`ProcessPackage` (IL=90):
+`ProcessPackage` (IL=103):
 
 1. `World.GetTileEntity(teWorldPos)`; no-op if missing.
 2. `SetHandle(handle)`.
@@ -1768,6 +1768,10 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-11:** World-init/entity-spawn IL re-verified: NetPackageWorldInitInfo write IL=57 / read IL=58, WorldInitInfoRequest write IL=4, RequestToSpawnEntityServer IL=101, EntitySpawn.ProcessPackage IL=60, EntitySpawnResponse write IL=12 / ProcessPackage IL=153, EntityLookAt write IL=22 / Process IL=31, PlayerInventory.ProcessPackage IL=36 (exact).
+- **2026-08-11:** Motion-family IL re-verified: PosAndRot write IL=76 / Process IL=61, Teleport.Process IL=60, Rotation write IL=54, RelPosAndRot write IL=30 / Process IL=94, Velocity write IL=23, AliveFlags write IL=8 / Setup IL=91 / Process IL=109 (exact).
+- **2026-08-11:** Building/damage IL re-verified: SetBlock.Process IL=59, SetBlockResponse.Process IL=28, WaterSimChunkUpdate write IL=15, WaterSet.Process IL=29, DamageEntity write IL=176 / Setup IL=141 / Process IL=172, TileEntity.ProcessPackage corrected 90->103, InventoryTransactionRequest.Process IL=8 / Response.Process IL=1, InventoryTransaction.Write IL=75, TransactionRequestServer IL=46, InventoryDataRequest.Process IL=92 / Response.Process IL=30 (exact).
+- **2026-08-11:** Explosion IL re-verified: GameManager.ExplosionServer IL=50, explode IL=194, ExplosionData Write IL=88 / Read IL=82 (exact).
 - **2026-08-11:** World-folder IL re-verified: prepareWorldFolderData IL=3 stub + MoveNext IL=387 (corrected from stale IL=389), PrepareWorldHashes IL=83, TestWorldValid IL=12 + MoveNext IL=129, uncompressWorld IL=3 + MoveNext IL=321, readDtmDelta IL=15 + MoveNext IL=165, sendPacketsToClient IL=6 + MoveNext IL=84, Setup IL=11 (exact).
 - **2026-08-11:** Dynamic-client-arrive IL re-verified: BuildData IL=34, FromPool IL=10; NetPackageLocalization.prepareDataPackets IL=107 (exact).
 - **2026-08-11:** Auth/chunk package IL re-verified: EncryptionRequest.Process IL=4, AuthConfirmation IL=17, KeyExchangeComplete IL=8, ConfigFile IL=6, WorldSpawnPoints IL=5, NetPackageChunk.ProcessPackage IL=126, ChunkRemove IL=8, ChunkRemoveAll IL=8 (exact).
