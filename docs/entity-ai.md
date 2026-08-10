@@ -3762,6 +3762,9 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** EntityAlive head IL re-verified: OnEntityUnload IL=29, OnUpdateLive IL=363, updateCurrentBlockPosAndValue IL=318, InitInventory IL=9, CalcIfInElevator IL=59, Entity.CheckDistance(Entity, Entity) IL=8, EntityPlayer.DetectUsScale IL=26 / getHeadPosition IL=32, EntityAnimal.OnEntityDeath IL=24 (exact).
+- **2026-08-11:** EAI task IL re-verified: EAITaskList.areTasksCompatible IL=10, isBestTask IL=38, EAITaskEntry ctor IL=9, UAIBase.Update IL=18 / chooseAction IL=97 / updateAction IL=63 (exact).
+- **2026-08-11:** UAIConsideration GetScore IL re-verified: SelfHealth IL=24, SelfVisible IL=41, TargetDistance IL=59, TargetHealth IL=45, TargetType IL=49, TargetVisible IL=37 (exact).
 - **2026-08-11:** Sleeper-wakeup IL re-verified: GetSleeperDisturbedLevel IL=38, ConditionalTriggerSleeperWakeUp IL=55, SetSleeperActive IL=26, TriggerSleeperPose IL=52, ResumeSleeperPose IL=6, CanSleeperAttackDetect IL=20 (exact).
 - **2026-08-11:** Sleeper registry IL re-verified: GetAllSleeperVolumes IL=43, RemoveSleeperVolumesFor IL=45, Chunk.AddSleeperVolumeId IL=18, Chunk.GetSleeperVolumes IL=3, GetSleeperVolume IL=30, NotifySleeperVolumesEntityDied IL=32, SleeperVolume.EntityDied IL=31, ClearedUpdate IL=33 (exact).
 - **2026-08-11:** Stealth/smell IL re-verified: NoiseCleanup IL=43, AddNoise IL=35, NotifyNoise IL=71, CalcVolume IL=68, AttractTickServer IL=106, SmellTickWet IL=19, SmellClear IL=19, SmellUpdateItemsAndBlood IL=79, SmellCountItems IL=110, SmellCountToRadius IL=18, SetSmellEat IL=21, SetSmellRadiusTarget IL=21, SetClientLevels IL=13, GetStealthLightLevel IL=30 (exact).
