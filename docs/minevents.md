@@ -872,6 +872,7 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-11:** Requirement IL re-verified: CVarCompare.IsValid IL=23 / ParseXAttribute IL=20, IsStatAtMax.IsValid IL=100 (exact).
 - **2026-08-10:** MinEvent IL sizes re-verified: EntityAlive.FireEvent IL=57, ItemValue.FireEvent IL=107, RequirementBase.IsValid IL=13, ParseXAttribute IL=64, ParseRequirement IL=76 (exact).
 - **2026-08-08:** Catalogued MinEventAction/Requirement leaf index (7.0b) - 83 leaves
   narrated for the coverage census.
