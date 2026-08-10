@@ -1371,6 +1371,8 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 
 ## Changelog
 
+- **2026-08-11:** Memory-pool IL re-verified: MemoryPools.InitStatic IL=45, MemoryPooledObject Alloc IL=33 / AllocSync IL=20 / Cleanup IL=43 / GetPoolSize IL=3 (exact).
+- **2026-08-11:** StreamUtils IL re-verified: ReadVector3/ReadVector3i IL=8, ReadQuaterion IL=10, ReadColor32 IL=39, WriteColor32 IL=34, ReadString IL=8, Write(BinaryWriter,String) IL=11, ReadGuid IL=18, Read7BitEncodedInt IL=37, Write7BitEncodedInt IL=24 / Signed IL=70, ReadInt32 IL=28/56, ReadByte IL=12, Write(Stream,Int32) IL=31 / Write(Byte[],Int32,ref) IL=67, StreamCopy IL=42/48, WriteStreamToFile IL=15/16 (exact).
 - **2026-08-11:** Particle IL re-verified: ParticleEffect.Read IL=53, ToId IL=3, SpawnParticleEffectServer IL=41, SpawnParticleEffectClient IL=7 / ForceCreation IL=6, FireControllerUtils.SpawnParticleEffect IL=40, ParticleEffect.SpawnParticleEffect IL=339, PlaySoundInServer IL=18, GetParentTransform IL=58, Init IL=10, IsAvailable IL=5, Localization.GetLanguageEntry IL=38 / FormatListAnd/Or IL=7 (exact).
 - **2026-08-11:** FastTags tail IL re-verified: CombineTags 2-arg IL=4, SetBit IL=18, Remove IL=136 (corrected from stale 138), Test_AllSet IL=99, Parse IL=90 (exact).
 - **2026-08-11:** DynamicProperties leaves IL re-verified: Clear IL=16, Deserialize IL=214, ParseByte IL=26, ParseColorHex IL=10, TryParseRange IL=22, SetParam1 IL=29, TryGetParam1 IL=8/18, RegisterFormatter IL=25, PrettyPrint IL=9/133 (exact).
