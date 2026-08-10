@@ -114,7 +114,11 @@ All under `src/SdtdServerKit/HarmonyPatchers/PerformanceTuning/`. **Every file i
 
 - LiteNetLib / connection objects rarely tolerate concurrent `AddToSendQueue` / flush.  
 - Ordering and channel 0/1 semantics matter.  
-- Parallelism over a few dozen clients is often **slower** than a tight loop.
+- Parallelism over a few dozen clients is often **slower** than a tight loop.  
+- Confirmed for stock V3.1.0: `UnsyncedEvents=true` dispatches events inline on
+  the socket-receive thread; any cross-thread access to `ConnectionManager.
+  Clients` races ([network.md](../docs/network.md) §4.0, 2026-08-10) - the
+  stock engine itself is not concurrent-safe on that path.
 
 **Our takeaway:** research **interest management / package LOD** (fewer packages), not parallel send, unless profiling proves serial fan-out dominant and API is proven thread-safe.
 
