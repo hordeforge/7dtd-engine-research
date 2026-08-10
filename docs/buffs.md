@@ -285,6 +285,7 @@ see [protocol-packages.md](protocol-packages.md) section 6.16 and
 
 ## Changelog
 
+- **2026-08-11:** Buff IL re-verified: FriendlyFireCheck IL=2 (EntityAlive) / IL=77 (EntityPlayer), EntityBuffs.Tick IL=179, FireEvent IL=30, BuffClass.FireEvent IL=15, canRun IL=10, MinEventActionBase.CanExecute IL=10, removeBuff IL=4, get_DurationMax/get_InitialDurationMax IL=3, set_DurationMax IL=14, RemoveBuff IL=56, ModifyValue IL=35/39, SetCustomVar IL=130, GetCustomVar IL=10, AddCustomVar IL=8, SetCustomVarNetwork IL=33, IncrementCustomVar IL=8, HasCustomVar IL=5, CountCustomVars IL=4, EnumerateCustomVars IL=12, RemoveCustomVar IL=21, TrackCustomVar IL=39, SetBuff IL=17, UnPauseAll IL=19, ClearBuffClassLinks IL=21 (all exact).
 - **2026-08-10:** Buff IL re-verified: BuffValue.DurationTick IL=27, Tick IL=13, BuffClass.Tick IL=15, get_DurationInSeconds IL=7, AddBuffNetwork IL=34 (exact).
 - **2026-08-10:** EntityBuffs.HasImmunity IL=63 re-verified (exact).
 - **2026-08-08:** BuffValue wire format: Write (IL=29) name/stack/duration/
