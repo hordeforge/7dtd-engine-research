@@ -43,6 +43,7 @@ test:
 	python3 "$(TOOLS)/tests/check_stock_facts.py" --require-live
 	python3 "$(TOOLS)/tests/test_reach_consistency.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_committed_inventories_current.py" "$(ASM)"
+	python3 "$(TOOLS)/tests/test_surface_wellformed.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
