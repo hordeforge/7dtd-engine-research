@@ -1053,6 +1053,9 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-11:** ChunkData leaves IL re-verified: AddEvent IL=46, get_IsReady IL=7, get_ActivityLevel IL=3, Write/Read IL=35/36 (inner version 2), ctor IL=6; AIDirectorData.InitStatic IL=3, AddNoisySound IL=5, FindNoise IL=11; AIDirectorEventsFromXml.Update IL=1 (exact).
+- **2026-08-11:** Marker IL re-verified: Tick IL=7, TickMarkers IL=43 (AIDirectorMarkerManagementComponent, exact).
+- **2026-08-11:** Game-stage party spawner IL re-verified: Tick IL=52, CalcStageSpawnMax IL=30, IncSpawnCount IL=7, DecSpawnCount IL=15, get_canSpawn IL=11, SetupGroup IL=57, get_maxAlive IL=9, ResetPartyLevel IL=13, CalcPartyLevel IL=26, SetPartyLevel IL=123, SetScaling IL=11, AddMember IL=22, RemoveMember IL=14, get_IsDone IL=11, GameStageDefinition.cctor IL=12, EntitySpawner.ModifySpawnCountByGameDifficulty IL=6 (exact).
 - **2026-08-11:** ChunkData/chunk-event IL re-verified: FindBestEventAndReset IL=44, SetLongDelay IL=4, StartNeighborCooldown IL=13, AIDirectorChunkEvent.Write/Read IL=32/39, Tick IL=79, TickActiveSpawns IL=66, CheckToSpawn IL=18/46, SpawnScouts IL=76, NotifyEvent IL=22, GetChunkDataFromPosition IL=33, StartCooldownOnNeighbors IL=55, CreateHorde IL=10, Component Write/Read IL=33/37, Clear IL=7, GetActiveCount IL=4 (exact).
 - **2026-08-11:** Scout/horde IL re-verified: AIScoutHordeSpawner.Update IL=22, SpawnUpdate IL=129, UpdateHorde IL=229, spawnHordeNear IL=94, CalcRandomPos IL=15, Cleanup IL=27, Horde.Tick IL=21 (exact).
 - **2026-08-11:** Air-drop IL re-verified: SpawnAirDrop IL=59, SpawnSupplyCrate IL=77, Tick IL=75, AIAirDrop.Tick IL=193, CreateFlightPaths IL=355, MakePlayerClusters IL=70, CalcSupplyDropMetrics IL=53, FindSafePoint IL=70, SpawnPlane IL=74 (exact).
