@@ -3761,6 +3761,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-10:** Entity-unload IL sizes re-verified: World.RemoveEntity IL=16, unloadEntity IL=216, Entity.MarkToUnload IL=4, EntityAlive.OnUpdateEntity IL=457 (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
 
