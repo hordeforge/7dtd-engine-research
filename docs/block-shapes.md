@@ -497,6 +497,9 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-10:** Movement-block IL sizes re-verified: Block.get_IsCollideMovement
+  IL=7, BlockShape.IsMovementBlocked IL=7, Block.IsMovementBlocked(BlockFaceFlag)
+  IL=90, Block.IsMovementBlocked(Vector3) IL=94 (all exact).
 - **2026-08-08:** Named IncrementalHashExtensions.AppendDataNoAlloc in the collision-hash path.
 - **2026-08-08:** Sight contract: Block.IsSeeThrough (IL=61) multiblock parent
   resolution + !IsCollideSight && !IsWater; BlockPoweredDoor (IL=63)
