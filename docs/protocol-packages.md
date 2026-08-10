@@ -1745,7 +1745,7 @@ customReason    : string
 
 | Item | State |
 |---|---|
-| `EntityCreationData` class-conditional tail | fully extracted (56 fields, per-class branches) in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) + §5.1 table |
+| `EntityCreationData` class-conditional tail | fully extracted (**57** wire fields, per-class branches) in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) + §5.1 table |
 | Bulk-package compression codec (LZ variant) | flag known; byte codec in native/StreamUtils (residual) |
 | Encryption cipher/KDF | handshake bodies decoded; crypto primitives native (residual) |
 | Quest/Party process | re-pinned 2026-08-07 (§6.17-6.18); Twitch still low priority |
