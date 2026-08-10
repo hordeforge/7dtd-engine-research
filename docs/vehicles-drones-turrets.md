@@ -1266,6 +1266,9 @@ no `RootMotion`, else builds the normal avatar controller and calls
 
 ## Changelog
 
+- **2026-08-10:** VehicleManager save-path IL sizes re-verified:
+  SaveAndClear IL=15, WaitOnSave IL=11, SaveThread IL=41, GetServerVehicleCount
+  IL=13 (all exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
 
