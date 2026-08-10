@@ -193,6 +193,18 @@ Generic ceilings (this file)
 
 ---
 
+## Stock defects (2026-08-10, IL + runtime)
+
+Two genuine stock-engine bugs found under loadgen churn; both are
+`Assembly-CSharp` managed code, so a clone should fix rather than reproduce
+them (the Zig clone's clean-room stack avoids the first by construction, ADR
+0013):
+
+| Defect | Evidence | Consequence | Workaround / fix direction |
+|---|---|---|---|
+| LiteNetLib join-churn race | `NetworkCommonLiteNetLib.InitConfig` sets `UnsyncedEvents=true`; `ConnectionRequestCheck` (IL=86) enumerates `ConnectionManager.Clients.List` on the socket-receive thread while the main thread mutates it | `Collection was modified` -> `RemoteConnectionClose` bursts under >12-bot join churn (302 drops in one 28-bot run) | `--ramp-ms` join staggering (validated: 24 bots @ 3 s -> 0 drops); fix: main-thread duplicate-IP check or copy IP set under lock ([network.md](network.md) §4.0) |
+| `NetPackageMinEventFire.write` null `itemValue` | ItemEvent branch callvirt-writes `ItemValue::Write(BinaryWriter)` with no null guard (IL_0048); `EntityZombieCop` explosions pass null (`ExplosionServer` ldnull) | Serialize-thread NRE, lost MinEvent (108 in one run); graceful - package dropped, connection survives | Guard `itemValue` before the callvirt, or use the static null-safe `ItemValue::Write(ItemValue,BinaryWriter)` ([protocol-packages.md](protocol-packages.md) §6.23) |
+
 ## Related docs
 
 | Doc | Role |
@@ -215,4 +227,6 @@ Generic ceilings (this file)
 
 ## Changelog
 
+- **2026-08-10:** Stock-defects section added (join-churn race + MinEventFire
+  null-itemValue NRE, both IL + runtime evidenced).
 - **2026-07-19:** Initial generic dedicated limitation map (sim, scale, net, AI, height, GC, content, modding).
