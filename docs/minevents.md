@@ -872,6 +872,7 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-11:** Requirement IL re-verified: RequirementBase.IsValid IL=13, ParseXAttribute IL=64, ParseRequirement IL=76, ParseRequirementGroup IL=148, compareValues IL=37, TargetedCompareRequirementBase.IsValid IL=51 / ParseXAttribute IL=22, CVarCompare IL=23/20, IsStatAtMax IL=100, StatCompareAbs IL=10, Current IL=52, Max/ModMax IL=46, PercCurrentToMax IL=120, PercCurrentToModMax IL=66, PercModMaxToMax IL=42, NotHasBuff IL=25, RequirementItemTier IL=36, BlockStandingOn IL=37, IsLookingAtBlock.IsValid IL=8 / raycast IL=1, IsLookingAtBlock/Entity ParseXAttribute IL=38, PerksUnlocked IL=68 (exact).
 - **2026-08-11:** Requirement IL re-verified: CVarCompare.IsValid IL=23 / ParseXAttribute IL=20, IsStatAtMax.IsValid IL=100 (exact).
 - **2026-08-10:** MinEvent IL sizes re-verified: EntityAlive.FireEvent IL=57, ItemValue.FireEvent IL=107, RequirementBase.IsValid IL=13, ParseXAttribute IL=64, ParseRequirement IL=76 (exact).
 - **2026-08-08:** Catalogued MinEventAction/Requirement leaf index (7.0b) - 83 leaves
