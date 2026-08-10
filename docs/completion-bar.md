@@ -20,9 +20,10 @@ drive unaccounted → 0 after each game patch or doc edit.
 **"100% of dedicated managed behaviour"** in this project means **A + B**.  
 It does **not** mean C (infinite), and does **not** mean D (impossible from IL alone).
 
-Narrated **37%** of the Coverage *base* is expected and healthy: the base
-over-includes client UI and under-includes reflection; many types are correctly
-**catalogued** or **classified**, not fully narrated.
+Narrating **100% of the 3681 game-type surface** (of 7432 all types incl. nested
+= ~49.5%) is the achieved, healthy end state: the larger base over-includes
+client UI and under-includes reflection; the remaining types are correctly
+**catalogued** or **classified OOS**, not unaccounted (unaccounted = 0).
 
 ---
 
