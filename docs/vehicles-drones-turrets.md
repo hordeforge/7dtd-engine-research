@@ -1266,6 +1266,8 @@ no `RootMotion`, else builds the normal avatar controller and calls
 
 ## Changelog
 
+- **2026-08-11:** EntityVehicle runtime IL re-verified: AddMaxFuel IL=7, hasHandlebars IL=4, CalcWaterDepth IL=49, GetCenterPosition IL=9, GetRBVelocity/GetVehicle/get_HasDriver IL=3, PhysicsResetAndSleep IL=44, PhysicsRevertCollisionMotion IL=91 (exact).
+- **2026-08-11:** Attach chain IL re-verified: StartAttachToEntity IL=43, AttachToEntity IL=64 (Alive IL=60, Player IL=21, PlayerLocal IL=88, Vehicle IL=2), AttachEntityToSelf IL=56 (Vehicle IL=100), DetachEntity IL=157 (Vehicle), Detach IL=79 (Alive IL=27), GetAttachedToInfo IL=2 (Vehicle IL=158), IsAttached IL=8, IsAttachedToVehicle IL=11, FindAttachSlot IL=27, GetAttachFreeCount IL=31 (exact).
 - **2026-08-11:** VehicleManager IL re-verified: SaveAndClear IL=15, WaitOnSave IL=11, SaveThread IL=41, GetServerVehicleCount IL=13 (exact).
 - **2026-08-11:** Vehicle IL re-verified: CalcMods IL=77, CalcEffects IL=182, VehiclePart.SetMods IL=68, SetItemValueMods IL=22, SetupProperties IL=17, CreateParts IL=86, ParseGeneralProperties IL=133, OnXMLChanged IL=41 (EntityVehicle wrapper IL=6), GetPartProperty IL=12, GetParts/GetMeshTransform IL=3, GetParticleTransformPaths IL=30, GetHornSoundName IL=5, HasHorn IL=6, IsSteeringBroken IL=10, GetBatteryLevel/GetEngineQualityPercent IL=2, SetBatteryLevel IL=1, MakeItemValue IL=28 (exact).
 - **2026-08-11:** EntityVehicle IL re-verified: AttachEntityToSelf IL=100, EnterVehicle IL=39, SetupDevices IL=14, SetWheelsForces IL=74, UseHorn IL=40, ToggleHeadlight IL=7, HasHeadlight IL=19 (exact).
