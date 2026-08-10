@@ -210,13 +210,18 @@ def score_update_entrypoint() -> tuple[float, str]:
 
 
 def score_tooling_hardcode_debt() -> tuple[float, str]:
-    """Lower debt in .py/.sh/.cs (exclude README dump path tables and stock_facts)."""
+    """Lower debt in .py/.sh/.cs (exclude dump path tables and stock_facts)."""
     pats = [re.compile(r"3\.1\.0"), re.compile(r"V3\.0\.1"), re.compile(r"\bb14\b")]
     hits = 0
     files = 0
     skip_names = {
         "bench_version_update_tooling.py",  # detector itself mentions example versions
         "stock_facts.json",
+        # regen.sh is the dump-path table in script form (il/<set>-v3.1.0
+        # directory names), the scripted equivalent of the README dump path
+        # table this scorer already excludes; the names are bumped by the
+        # post-update flow, not silently drifting literals.
+        "regen.sh",
     }
     for p in TOOLS.rglob("*"):
         if not p.is_file():
