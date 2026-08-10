@@ -470,7 +470,7 @@ target - the one shared predicate shape (the XOR appears as
 - **`RoundsInMagazine`** (IL=45): the held item's first action is an
   `ItemActionRanged`; compares its magazine state with `compareValues`
   (empty item or non-ranged action fails).
-- **`CatapultStrainAmount`** (IL=~50): the held item's first action is an
+- **`CatapultStrainAmount`** (IL=79): the held item's first action is an
   `ItemActionCatapult`; compares `GetStrainPercent(actionData[0])` with
   `compareValues`.
 - **`CompareLightLevel`** (IL=36): `compareValues(target.
@@ -481,33 +481,33 @@ target - the one shared predicate shape (the XOR appears as
 - **`HasTrackedEntity`** (IL=93): target is an `EntityPlayerLocal`; scans
   the world's entity list for any entity matching `trackerTags`
   (`HasAnyTags`), invert-aware.
-- **`IsSDCS`** (IL=~15): target is an `EModelSDCS` avatar (the SDCS
+- **`IsSDCS`** (IL=27): target is an `EModelSDCS` avatar (the SDCS
   character system present check).
-- **`IsMale`** (IL=~25): `target.IsMale` field, invert-aware.
-- **`IsCorpse`** (IL=~25): `target.IsCorpse()`.
-- **`IsLocalPlayer`** (IL=~30): target is an `EntityPlayerLocal`.
-- **`IsSleeping`** (IL=~30): target is an `EntityEnemy` with `IsSleeping`
+- **`IsMale`** (IL=19): `target.IsMale` field, invert-aware.
+- **`IsCorpse`** (IL=16): `target.IsCorpse()`.
+- **`IsLocalPlayer`** (IL=23): target is an `EntityPlayerLocal`.
+- **`IsSleeping`** (IL=27): target is an `EntityEnemy` with `IsSleeping`
   set (non-enemy fails).
-- **`WasAlive`** (IL=~30): `target.WasAlive()`.
+- **`WasAlive`** (IL=26): `target.WasAlive()`.
 - **`IsBloodMoon`** (IL=11): `SkyManager.IsBloodMoonVisible()` XOR `invert`
   (the blood-moon sky state, not the game-stage check).
-- **`IsIndoors`** (IL=~30): `target.Stats.AmountEnclosed > 0` (the enclosure
+- **`IsIndoors`** (IL=25): `target.Stats.AmountEnclosed > 0` (the enclosure
   amount from the survival stats).
-- **`InSafeZone`** (IL=~40): despite the name, the check is
+- **`InSafeZone`** (IL=25): despite the name, the check is
   `target is EntityPlayer && TwitchSafe` (the Twitch-safe flag), not a
   land-claim zone test.
-- **`IsAlly`** (IL=~46): `target is EntityPlayer && IsFriendOfLocalPlayer()`
+- **`IsAlly`** (IL=36): `target is EntityPlayer && IsFriendOfLocalPlayer()`
   with a local-player refinement (friend-of-local-player, not the
   `PersistentPlayerList` ally store; see [parties-factions.md](parties-factions.md)).
 - **`InBiome`** (IL=30): `biomeID == params.Biome.m_Id` (needs a non-null
   `params.Biome`).
-- **`GameStatFloat`** / **`GameStatInt`** (IL=~30 each):
+- **`GameStatFloat`** / **`GameStatInt`** (IL=29/31):
   `compareValues(GameStats.GetFloat / GetInt(GameStat), operation, value)`
   against a configured `EnumGameStats`.
-- **`SandboxOptionFloat`** / **`SandboxOptionInt`** (IL=~30 each):
+- **`SandboxOptionFloat`** / **`SandboxOptionInt`** (IL=29/31):
   `compareValues(SandboxOptionManager.GetFloat / GetInt(Option),
   operation, value)` against a configured `SandboxOptions`.
-- **`TimeOfDay`** (IL=~85): lazily converts the configured `value`
+- **`TimeOfDay`** (IL=60): lazily converts the configured `value`
   (hours*100 + minutes) via `GameUtils.DayTimeToWorldTime(h, m, 0)` into
   `timeValue`, then `compareValues(world.worldTime % 24000, operation,
   timeValue)`.
@@ -872,6 +872,8 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-11:** Requirement leaves IL re-verified (28, approximations upgraded to exact): IsItemActive IL=30, HoldingItemBroken IL=32, IsPrimaryAttack/IsSecondaryAttack IL=65, RoundsInMagazine IL=45, CatapultStrainAmount IL=79, CompareLightLevel IL=36, TargetRange IL=59, HasTrackedEntity IL=93, IsSDCS IL=27, IsMale IL=19, IsCorpse IL=16, IsLocalPlayer IL=23, IsSleeping IL=27, WasAlive IL=26, IsBloodMoon IL=11, IsIndoors IL=25, InSafeZone IL=25, IsAlly IL=36, InBiome IL=30, GameStatFloat IL=29 / GameStatInt IL=31, SandboxOptionFloat IL=29 / SandboxOptionInt IL=31, TimeOfDay IL=60, RandomRoll IL=71, HasParticle IL=23, BurstRoundCount IL=61 (exact).
+- **2026-08-11:** EffectManager/action IL re-verified: GetValue IL=372, GetValuesAndSources IL=208, GetDisplayValues IL=216, MinEventActionAddBuff.Execute IL=211, RemoveBuff IL=4, ModifyCVar IL=154, Explode IL=83, CallGameEvent IL=46, AddHealth IL=55, Ragdoll IL=130 (exact).
 - **2026-08-11:** Requirement leaves IL re-verified (31): PlayerItemCount IL=67, PlayerItemCountByTags IL=49, ArmorGroupCount/ArmorGroupLowestQuality IL=34, WornItems IL=54, WornItemMods IL=80, RecipeUnlocked IL=48, ProgressionLevel IL=50, RequirementItemModTier IL=84, ItemHasTags IL=43, HoldingItemHasTags IL=37, BlockHasTags IL=45, TriggerHasTags IL=33, ProjectileHasTags IL=45, EntityHasMovementTag/EntityHasStanceTag IL=47, EntityTagCompare IL=43, HasAttachedPrefab IL=53, HitLocation IL=27 + ParseXAttribute IL=48, CompareItemMetaFloat IL=44 + ParseXAttribute IL=20, IsDay/IsNight IL=19, IsDayNumber IL=32, PlayerLevel IL=38, IsFPV IL=34, IsSheltered IL=24, IsInstigator IL=17, IsAttachedToEntity IL=23 (corrected from stale 19), IsOnLadder IL=19, NPCIsAlert IL=25, IsHeldItem IL=24, IsEquipped IL=97 (exact).
 - **2026-08-11:** Requirement IL re-verified: RequirementBase.IsValid IL=13, ParseXAttribute IL=64, ParseRequirement IL=76, ParseRequirementGroup IL=148, compareValues IL=37, TargetedCompareRequirementBase.IsValid IL=51 / ParseXAttribute IL=22, CVarCompare IL=23/20, IsStatAtMax IL=100, StatCompareAbs IL=10, Current IL=52, Max/ModMax IL=46, PercCurrentToMax IL=120, PercCurrentToModMax IL=66, PercModMaxToMax IL=42, NotHasBuff IL=25, RequirementItemTier IL=36, BlockStandingOn IL=37, IsLookingAtBlock.IsValid IL=8 / raycast IL=1, IsLookingAtBlock/Entity ParseXAttribute IL=38, PerksUnlocked IL=68 (exact).
 - **2026-08-11:** Requirement IL re-verified: CVarCompare.IsValid IL=23 / ParseXAttribute IL=20, IsStatAtMax.IsValid IL=100 (exact).
