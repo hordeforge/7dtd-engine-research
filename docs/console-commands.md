@@ -427,6 +427,7 @@ is in the framework sections above; per-command effects are the catalog's role.
 
 ## Changelog
 
+- **2026-08-10:** Console IL sizes re-verified: SdtdConsole.Update IL=60, executeCommand IL=149, ConnectionManager.ServerConsoleCommand IL=125, NetPackageConsoleCmdClient.ProcessPackage IL=19 (exact).
 - **2026-08-08:** Command index section added (narrates the 141 catalogued
   `ConsoleCmdAbstract` leaves for the coverage census).
 
