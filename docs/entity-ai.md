@@ -3762,6 +3762,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** Trigger-volume IL re-verified: CheckTriggerVolumeTrigger IL=53, TriggerVolume.CheckTouching IL=61, Touch IL=11 (exact).
 - **2026-08-11:** Sleeper/trigger IL re-verified: TouchGroup IL=52, World.FindTriggerVolume IL=29 (exact).
 - **2026-08-11:** CheckBlocked IL=192 re-verified (EntityMoveHelper.CheckBlocked, exact).
 - **2026-08-11:** Search/see IL re-verified: CanSee(Vector3) IL=62, CanSeeStealth IL=21 (exact).
