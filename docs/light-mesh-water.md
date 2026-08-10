@@ -517,6 +517,8 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-08-11:** Water IL re-verified: ChunkCluster.SetWater IL=34, WaterValue HasMass IL=5 / SetMass IL=8 / get_RawData IL=4 / FromRawData IL=8 / Write/Read IL=5, WaterUtils GetVoxelKey2D IL=8 / GetVoxelKey IL=10 / IsVoxelOutsideChunk IL=15 / IsChunkSafeToUpdate IL=16 / TryOpenChunkForUpdate IL=33, World.IsWater IL=31/9/5, Chunk.SetWaterRaw IL=55 / SetWater IL=13 / ResetWaterSimHandle IL=4 / IsWater IL=9, World.GetWaterAt IL=53, getPoiForColor IL=10, AddPoiMapElement IL=13 (exact).
+- **2026-08-11:** Water sim IL re-verified: WaterSimulationNative.Update IL=229 / InitializeChunk IL=51, WaterDataHandle.InitializeFromChunk IL=154, WaterSimulationCalcFlows ProcessFlowBelow IL=105 / ProcessOverfull IL=85 / ProcessFlowSide IL=168, ApplyChanges IL=254, Chunk.SetWaterSimUpdate IL=75 (exact).
 - **2026-08-11:** Light-query IL re-verified: LightManager.CreateServer IL=8, World.GetLightBrightness IL=32, GetSunAndBlockColors IL=41, GetBlockLightValue IL=34, Chunk.GetLightBrightness IL=10, GetLightValue IL=30, GetLight IL=28, ChunkCluster.GetLight IL=21, SetLight IL=56, ResetLights IL=6, IsOpenSkyAbove IL=23/9, IsWaterInBounds IL=74, IsNeighbourChunksLit/Decorated IL=26, BlockLight.IsLightOn IL=7 / SetLightState IL=15 (exact).
 - **2026-08-11:** Mesh/water IL re-verified: TerrainSubMesh Contains IL=28 / CanAdd IL=58 / Add IL=60/61 / GetColorForTextureId IL=16, MeshCalculations CalculateMeshTangents IL=477/479/481 / RecalculateNormals IL=330/331, World.GetWaterPercent IL=14, ChunkCluster.GetWater IL=23 (exact).
 - **2026-08-10:** Light IL sizes re-verified: LightManager.CreateServer IL=8, World.GetLightBrightness IL=32, GetSunAndBlockColors IL=41, Chunk.GetLightValue IL=30 (exact).
