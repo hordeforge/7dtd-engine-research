@@ -3762,7 +3762,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
-- **2026-08-11:** Stats IL re-verified: EntityStats.Tick IL=27, PlayerEntityStats.TickWait IL=133, Stat ctor IL=36 / Tick IL=301 / Write IL=24 / Read IL=32 / GodModeEntity IL=19 / SetChangedFlag IL=15 (exact).
+- **2026-08-11:** EntityAlive leaf-getter IL re-verified (29 accessors): GetEntitySenses/GetDamagedTarget/GetRevengeTarget/getNavigator/GetHandItem/GetWalkType/GetTimeStayAfterDeath/GetInvestigatePositionTicks/getHomePosition/getMaximumHomeDistance IL=3, SetCanSee IL=5, SetRevengeTimer IL=4, get_Water IL=5, GetMaxStamina/GetMaxWater IL=6, GetStaminaMultiplier IL=2, GetOwnedEntity IL=12, GetForwardVector2 IL=12, SetSightLightThreshold IL=4, GetModelLayer IL=6, isWithinHomeDistanceCurrentPosition IL=15, OnFired/OnReloadStart IL=11, OnReloadEnd IL=1, SetInventorySlots IL=69, AnalyticsSendDeath IL=1, SetSpawnByData IL=16, WillForceToFollow IL=2, CycleActivatableItems IL=1 (all exact).
 - **2026-08-11:** Distress IL re-verified: SetDistressed IL=16, getEntityPlayerLocal IL=16, isGameMessageOnDeath IL=2, EntityAnimal.OnUpdateLive IL=57 (exact).
 - **2026-08-11:** World.EntityActivityUpdate IL=229 re-verified (the aiActiveScale bands source, exact).
 - **2026-08-11:** EntitySeeCache.ClearIfExpired IL=17 re-verified (exact).
