@@ -253,6 +253,9 @@ channel today; the plane can be recomputed on load with
 
 ## Changelog
 
+- **2026-08-10:** Stability/failing-block IL sizes re-verified: BlockPlacedAt
+  IL=19, World.AddFallingBlocks IL=18, ClearFallingBlocksForChunks IL=111,
+  CreateFallingBlockGroup IL=107, GetBlockValues IL=25 (all exact).
 - **2026-08-08:** StabilityInitializer clear/unspread mechanics closed (shared gates: air / !StabilitySupport / liquid / StabilityIgnore / stab==0; clear sets 0 below stabStop, unspread propagates the caller stab via HashSet tracking; BlockRemovedAt/BlockPlacedAt entries).
 - **2026-08-08:** BuildStabilityBlocks (StabilityViewer F9 overlay) leaf:
   ctor coroutine RegisterWhenDone IL=1304, 16^3 scan of solid non-terrain
