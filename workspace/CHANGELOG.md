@@ -6,6 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
+## 2026-08-10 - tier-C: 8h autonomous run: LiteNetLib join-churn flake root cause closed (managed race, network.md §4.0; `UnsyncedEvents=true` + receive-thread `Clients.List` enumeration), ramp workaround validated live (24 bots @ 3 s: 0 drops vs 302), MinEventFire null-itemValue NRE documented + audited as the unique reachable instance-callvirt defect (protocol-packages §6.23), write-failure recovery documented (per-package drop), blood-moon path-admission re-observation completed (join PASS, no_win), cross-repo delivery (optimizer/loadgen/zdtd linked), regression test + ramp/gate unit tests added, stale native-LiteNetLib labels purged. Verified: make test/stock-check green, 26 commits pushed.
 ## 2026-08-09 - tier-C: 7dtd-realworld mod updated V3.0.1 -> V3.1.0 (build, patcher, install, tests verified)
 ## 2026-08-09 - tier-C: rename 7days-realworld -> 7dtd-realworld (dir + all live refs; historical changelog lines keep old name)
 ## 2026-08-09 - tier-C: small-sister-repo audit (apm/connect/guard/playtest/loadgen/optimizer/zdtd; 1,245 links + backtick paths verified)
