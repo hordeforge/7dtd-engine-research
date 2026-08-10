@@ -1281,6 +1281,9 @@ above.
 
 ## Changelog
 
+- **2026-08-11:** Chunk spawn-probe IL re-verified: CanMobsSpawnAtPos IL=94, IsPositionOnTerrain IL=18, FindRandomTopSoilPoint IL=80, FindRandomCavePoint IL=95, FindSpawnPointAtXZ IL=54 (exact).
+- **2026-08-11:** Area-master IL re-verified: LockAreaMasterChunksAround IL=71, ToAreaMasterChunkPos IL=19, IsAreaMaster IL=14, IsAreaMasterCornerChunksLoaded IL=44, IsAreaMasterDominantBiomeInitialized IL=107, GetChunkBiomeSpawnData IL=40, IsTraderArea IL=22, EntityPlayer.onSpawnStateChanged IL=52 (Local IL=35), IsSafeZoneActive IL=14, PersistentPlayerList.GetPlayerDataFromEntityID IL=10 (exact).
+- **2026-08-11:** Spawn-point sampling IL re-verified: GetRandomSpawnPointPositions IL=74, FindRandomSpawnPointNearPositionUnderground IL=135, GetRandomSpawnPositionMinMaxToPosition IL=240 (exact).
 - **2026-08-11:** EntityFactory IL re-verified: SetupEntityCreationData IL=10 (2-arg) / IL=31/36 (full), CreateEntityAsync IL=4, CreateEntityOperation.Start IL=25, CreateEntity(ecd) IL=7 / convenience IL=17, Chunk.SpawnEntityAsync IL=40 (exact).
 - **2026-08-11:** EntitySpawner IL re-verified: IsSpawnNeeded IL=57, BeforeWrite IL=32, resetRuntimeVariables IL=19, Write IL=86 / Read IL=111, Spawn(world,day,enemies) IL=31, LoadEntitySpawnerClasses IL=204, SpawnManagerDynamic.Update IL=75 (exact).
 - **2026-08-11:** Spawn-position IL re-verified: World.CanPlayersSpawnAtPos IL=25, Chunk.CanPlayersSpawnAtPos IL=76, FindRandomSpawnPointNearRandomPlayer IL=64, GetClosestLocalPlayer IL=45, GetPlayersAround IL=38, GetEntitiesAround IL=65 (World) / IL=92 (Chunk), GetRandomSpawnPositionMinMaxToRandomPlayer IL=212, isPositionInRangeOfBedrolls IL=58, CheckSpawnPointStillThere IL=30, GetSpawnPoint IL=24, isPositionFarFromPlayers IL=31, GetTerrainOffset IL=27, IsLandProtectionValidForPlayer IL=14 (exact).
