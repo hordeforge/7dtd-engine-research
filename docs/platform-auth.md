@@ -521,6 +521,7 @@ and the exact cipher. Those are third-party binaries, not game logic.
 
 ## Changelog
 
+- **2026-08-11:** Auth IL re-verified: AuthorizationAccepted IL=24, AuthorizationDenied IL=17, KickPlayerForClientInfo IL=24, NetConnectionAbs.UpgradeToFullConnection IL=7 (exact).
 - **2026-08-10:** Authorizer orders re-verified from IL: NativePlatform 400,
   Crossplatform 490, Eac 600, AntiCheatEncryptionAgreement 601, AuthFinalizer
   999 (all `get_Order` ldc.i4 literals exact).

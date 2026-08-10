@@ -117,6 +117,7 @@ handled: log only.
 
 ## Changelog
 
+- **2026-08-11:** Chat IL re-verified: NetPackageChat.write IL=63, ChatMessageServer IL=195, GameMessage IL=61, FinishGameMessageServer IL=69 (exact).
 - **2026-08-10:** Chat IL re-verified: NetPackageChat write IL=63, ChatMessageServer IL=195, GameManager.GameMessage IL=61 (exact).
 - **2026-08-07:** FinishGameMessageServer IL=69 mod interrupt + flags 192.
 

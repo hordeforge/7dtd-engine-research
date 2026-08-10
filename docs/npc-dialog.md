@@ -325,6 +325,7 @@ objective's lifetime:
 
 ## Changelog
 
+- **2026-08-11:** Trader/dialog IL re-verified: NetPackageNPCQuestList.write IL=99, GetQuestFactionPoints IL=4, CanDamageEntity IL=2, get_IsValidAimAssistSnapTarget IL=2 (exact).
 - **2026-08-10:** EntityTrader leaf constants re-verified: GetQuestFactionPoints IL=4, CanDamageEntity IL=2 (exact).
 - **2026-08-08:** EntityTrader.PlayVoiceSetEntry (IL=98): TraderDialog gate,
   5 s voice cooldown, voiceSet_name clip, StopAllSequencesOnEntity,

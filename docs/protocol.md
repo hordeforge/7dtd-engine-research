@@ -581,6 +581,7 @@ Status refreshed 2026-08-10 (rows re-verified against the current
 
 ## Changelog
 
+- **2026-08-11:** Join IL re-verified: RequestToEnterGame IL=9 + <RequestToEnterGame>d__195.MoveNext IL=248, ChunkClusterInfo.ProcessPackage IL=13, NetPackagePlayerLoginAnswer.write IL=46, NetPackagePlayerId.write IL=21, NetPackagePlayerSpawnedInWorld.write IL=16, PlayerSpawnedInWorld IL=127 (exact).
 - **2026-08-10:** RE-backlog table refreshed: TileEntity/vehicles + Quest/Party
   rows closed (were "Open", covered by §6.12/§6.21/§6.17-6.18).
 - **2026-08-08:** Live wire verification: booted the native Linux dedicated server (V3.1.0) and ran the `7dtd-loadgen` client (built from these wire docs) through a full join against both the modded and the stock server (`challengesOk=1`, `logins=1`, `joined entity=102`); the golden layouts match observed traffic end-to-end. Server bound TCP+UDP 26900/26902.

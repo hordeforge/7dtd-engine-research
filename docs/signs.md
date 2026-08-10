@@ -286,6 +286,7 @@ entities, and answer `NetPackageSignDataRequest` with batched compressed
 
 ## Changelog
 
+- **2026-08-11:** Sign wire IL re-verified: SignDataRequest.write IL=4, SignDataResponse.write IL=28 (exact).
 - **2026-08-10:** Sign wire IL re-verified: NetPackageSignDataRequest write IL=4 (empty), NetPackageSignDataResponse write IL=28 (exact).
 - **2026-08-08:** Bake leaves: SignBakeRequest {GroupIndex, Tier,
   GroupMinDistanceSquared} CompareTo tier-then-distance; SignComplexityInfo
