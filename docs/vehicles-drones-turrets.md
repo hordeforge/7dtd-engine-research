@@ -449,7 +449,7 @@ its position holding the bag + mods.
 - **Fractional collision damage** accumulates in `damageAccumulator`:
   `ApplyAccumulatedDamage()` (IL=19) converts the integer part to
   `ApplyDamage` and keeps the fraction; the collision path feeds it
-  (`OnCollisionForward` IL=611, `ApplyCollisionsCoroutine`).
+  (`OnCollisionForward` IL=738, `ApplyCollisionsCoroutine`).
 - **Crash riders:** `ApplyCollisionDamageToAttached(damage)` (IL=32) deals
   `DamageSource(Internal, VehicleInside)` (source 1, type 27) to every
   attached rider - distinct from the external splash above. The same
@@ -1266,6 +1266,8 @@ no `RootMotion`, else builds the normal avatar controller and calls
 
 ## Changelog
 
+- **2026-08-11:** Owner/fuel IL re-verified: SetOwner IL=5, GetOwner IL=4, SetLocked IL=4, IsUserAllowed IL=11, HasPassword IL=7, GetHashForPassword IL=3, SetPasswordHash IL=33, CheckPasswordHash IL=29, GetFuelCount IL=7, needsFuel IL=12, takeFuel IL=67, AddFuelFromInventory IL=45, hasGasCan IL=73 (exact).
+- **2026-08-11:** Vehicle damage IL re-verified: damageEntityLocal IL=31, ProcessDamageResponseLocal IL=120, ApplyDamage IL=86, DropItemsAsBackpack IL=94, dropLoot IL=23, ApplyAccumulatedDamage IL=19, OnCollisionForward IL=738 (corrected from stale 611), ApplyCollisionDamageToAttached IL=32, GetBlockDamageScale IL=13, CheckForOutOfWorld IL=474, TeleportToWithinBounds IL=104, VelocityFlip IL=45, UpdateAttachment IL=69, getStorageSize IL=16, isEntityStatic IL=2, hasLock IL=2, GetExitVelocity IL=17, GetWheelsOnGround IL=29 (exact).
 - **2026-08-11:** EntityVehicle runtime IL re-verified: AddMaxFuel IL=7, hasHandlebars IL=4, CalcWaterDepth IL=49, GetCenterPosition IL=9, GetRBVelocity/GetVehicle/get_HasDriver IL=3, PhysicsResetAndSleep IL=44, PhysicsRevertCollisionMotion IL=91 (exact).
 - **2026-08-11:** Attach chain IL re-verified: StartAttachToEntity IL=43, AttachToEntity IL=64 (Alive IL=60, Player IL=21, PlayerLocal IL=88, Vehicle IL=2), AttachEntityToSelf IL=56 (Vehicle IL=100), DetachEntity IL=157 (Vehicle), Detach IL=79 (Alive IL=27), GetAttachedToInfo IL=2 (Vehicle IL=158), IsAttached IL=8, IsAttachedToVehicle IL=11, FindAttachSlot IL=27, GetAttachFreeCount IL=31 (exact).
 - **2026-08-11:** VehicleManager IL re-verified: SaveAndClear IL=15, WaitOnSave IL=11, SaveThread IL=41, GetServerVehicleCount IL=13 (exact).
