@@ -1281,6 +1281,10 @@ above.
 
 ## Changelog
 
+- **2026-08-11:** EntityClass leaves IL re-verified: GetEntityClass IL=7, GetEntityClassName IL=10, Add IL=9, GetId IL=30, Cleanup IL=3, AddDroppedId IL=33, LootDropPick IL=44, CalculateEntityTier IL=49, CopyFrom IL=171, GetEntityClassWithinMaxTier IL=30, GetPreviousTierEntity IL=73; CreateEntityOperation.LoadAssets IL=100 / CompleteEntity IL=639; addEntityComponent IL=5/11; HandleSetNavName IL=9 (exact).
+- **2026-08-11:** ECD IL re-verified: copy ctor IL=208, ApplyToEntity IL=176, readXml IL=47, writeXml IL=88, ToString IL=41 (exact).
+- **2026-08-11:** Spawn-in-world IL re-verified: SpawnEntityInWorld IL=178, OnAddedToWorld IL=27, IsSpawned IL=2/3, RemoveEntityFromMap IL=123, SetEntityName IL=20 (exact).
+- **2026-08-11:** Prefab leaves IL re-verified: GetCenterXZ IL=24, IsBBInSyncWithPrefab IL=24, chooseClosestPrefab IL=35, IsEntityInPrefab IL=40, GetAllPrefabs/GetPOIPrefabs IL=19, HasPrefabsAtXZ IL=69, GetPrefabAtPosition IL=254 (exact).
 - **2026-08-11:** Chunk spawn-probe IL re-verified: CanMobsSpawnAtPos IL=94, IsPositionOnTerrain IL=18, FindRandomTopSoilPoint IL=80, FindRandomCavePoint IL=95, FindSpawnPointAtXZ IL=54 (exact).
 - **2026-08-11:** Area-master IL re-verified: LockAreaMasterChunksAround IL=71, ToAreaMasterChunkPos IL=19, IsAreaMaster IL=14, IsAreaMasterCornerChunksLoaded IL=44, IsAreaMasterDominantBiomeInitialized IL=107, GetChunkBiomeSpawnData IL=40, IsTraderArea IL=22, EntityPlayer.onSpawnStateChanged IL=52 (Local IL=35), IsSafeZoneActive IL=14, PersistentPlayerList.GetPlayerDataFromEntityID IL=10 (exact).
 - **2026-08-11:** Spawn-point sampling IL re-verified: GetRandomSpawnPointPositions IL=74, FindRandomSpawnPointNearPositionUnderground IL=135, GetRandomSpawnPositionMinMaxToPosition IL=240 (exact).
