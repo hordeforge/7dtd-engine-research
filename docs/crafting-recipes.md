@@ -296,6 +296,7 @@ report the sizes for the UI.
 
 ## Changelog
 
+- **2026-08-10:** CraftingManager IL re-verified: AddRecipe IL=6, PostInit IL=6, GetRecipe IL=24, GetRecipes IL=3 (exact).
 - **2026-08-10:** RecipesFromXml.SaveRecipes IL=123, Recipe.Init IL=79 re-verified (exact).
 - **2026-08-08:** EntityPlayerLocal.GiveExp (IL=54): _craftCount_ recipe var
   accumulation, AddLevelExp(CraftExpGain / total, _xpFromCrafting), quest
