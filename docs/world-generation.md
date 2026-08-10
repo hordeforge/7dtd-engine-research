@@ -785,6 +785,7 @@ order (row 0 = +Z).
 
 ## Changelog
 
+- **2026-08-10:** WorldBuilder IL sizes re-verified: GenerateTask IL=203, GenerateBiomeTiles IL=436 (exact).
 - **2026-08-08:** Prefab.Cells<T> dead sparse cell grid (0 external refs).
 - **2026-08-08:** Prefab.CountSleeperSpawnsInVolume (IL=116): sleeper-stack
   census (IsSleeperBlock with non-sleeper below, priority volumes excluded)

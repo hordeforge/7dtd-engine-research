@@ -1016,6 +1016,7 @@ the map or any cell is `>= v`.
 
 ## Changelog
 
+- **2026-08-10:** World.GetBiomeInWorld IL=23, GetBiomeIntensity IL=28 re-verified (exact).
 - **2026-08-08:** calcWorldFileCrcs coroutine (MoveNext IL=121): zeroes
   worldFileTotalSize, clears worldFileCrcs, per-file size + chunked CRC
   accumulation, frame-budgeted.
