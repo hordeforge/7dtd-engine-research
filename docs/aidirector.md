@@ -1053,6 +1053,11 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-11:** Air-drop IL re-verified: SpawnAirDrop IL=59, SpawnSupplyCrate IL=77, Tick IL=75, AIAirDrop.Tick IL=193, CreateFlightPaths IL=355, MakePlayerClusters IL=70, CalcSupplyDropMetrics IL=53, FindSafePoint IL=70, SpawnPlane IL=74 (exact).
+- **2026-08-11:** Supply-crate IL re-verified: PostInit IL=35, OnEntityActivated IL=18, canDespawn IL=2, MoveEntityHeaded IL=35, Update IL=39, ValidateResources IL=23, StopSmokeAndLights IL=77, RequiresChunkObserver IL=8, InitLocalActivationCommands IL=8, AllowActivationCommand IL=20, GetActivationText IL=81, HandleNavObject IL=64, OnEntityUnload IL=17 (exact).
+- **2026-08-11:** Supply-plane IL re-verified: SetDirectionToFly IL=12, OnUpdatePosition IL=49, UpdateFarDraw IL=35, MoveBoundsInsideFrustrum IL=31 (exact).
+- **2026-08-11:** Blood-moon IL re-verified: Tick(Double) IL=170, Tick(World,Double,Boolean) IL=162, SpawnZombie IL=181, CalcSpawnPos IL=28, AddPlayerToParty IL=55, TryAddPlayer IL=34, AddPlayer(Party) IL=8, RemovePlayer IL=24, AIDirectorChunkData.Tick(Single) IL=23, DecayEvents IL=61 (exact).
+- **2026-08-11:** AIDirector core IL re-verified: Tick IL=6, ComponentsTick IL=21, DebugTick IL=7, CreateComponents IL=31, CanSpawn IL=10, UpdatePlayerInventory IL=5/6, GetActivityWorldTimeDelay IL=16, ComponentsInitNewGame IL=20, NotifyIntentToAttack IL=1, AddEntity IL=10, AddPlayer IL=9, RemovePlayer IL=9, GetComponent IL=19, Save IL=7 / ComponentsSave IL=21 / Load IL=14 / ComponentsLoad IL=22, NotifyNoise IL=84, NotifyActivity IL=31 (exact).
 - **2026-08-11:** CreateComponents install order re-verified: Marker, Player, WanderingHorde, AirDrop, ChunkEvent, BloodMoon (IL_0001-0024, exact).
 - **2026-08-11:** Sleeper IL re-verified: NetPackageSleeperPose.ProcessPackage IL=23 (exact).
 - **2026-08-11:** Scout-horde IL re-verified (6): CheckToSpawn 18, NotifyEvent 22, AIScoutHordeSpawner.Update 22, SpawnUpdate 129, UpdateHorde 229, spawnHordeNear 94 (exact).
