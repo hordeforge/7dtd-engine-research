@@ -3761,6 +3761,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-11:** Entity-stats IL re-verified: Init IL=40, PlayerEntityStats.Init IL=166, TickWait IL=75, Write IL=8 (exact).
 - **2026-08-11:** Movement re-verified: EntityMoveHelper.Stop IL=7, EntityLookHelper.onUpdateLook IL=32 (exact).
 - **2026-08-11:** Pathing re-verified: EntityAlive.FindPath IL=49 (the path-admission target).
 - **2026-08-11:** Entity accessor IL re-verified: GetOwnedEntities IL=28, get_Health IL=6, IsAttackImpact IL=16, GetForwardVector IL=32 (exact).
