@@ -497,6 +497,7 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
 
 ## Changelog
 
+- **2026-08-11:** Trigger leaves IL re-verified: GetTriggerLayers IL=71, HandleNavObjects IL=25, RemovePrefabData IL=16, AddTriggeredBy IL=34, BlockTrigger.OnTriggered IL=27 / CheckIsTriggered IL=59, BlockTriggerDowngrade.OnTriggered IL=15, per-block OnTriggered: ActivateSwitch IL=24, GameEvent IL=60, Hazard IL=49, Light IL=26, TrapDoor IL=26, Downgrade IL=15, Composite IL=53, BlockHazard.IsHazardOn IL=29 / SetHazardState IL=15 (exact).
 - **2026-08-11:** Collision/sight IL re-verified: get_IsCollideMovement IL=7, IsMovementBlocked IL=70/90/94, FrontSidesFromPosition IL=70, BlockPoweredDoor IL=66, BlockCompositeTileEntity IL=44, IsSeeThrough IL=61 (Door IL=63, Composite IL=42), intersectRayWithBlock IL=45, Max/MinStepHeight IL=46/9, GetBlockFaceFromHitInfo IL=385 (exact).
 - **2026-08-11:** Trigger IL re-verified: Chunk.AddBlockTrigger IL=10, GetBlockTriggers IL=3, GetBlockTrigger IL=9, HasAnyTriggers IL=6, TriggerBlocks IL=17/27, HandleTrigger IL=41, PrefabTriggerData.Trigger IL=63/85/90, set_NeedsTriggerUpdate IL=26, HandleNeedTriggers IL=33, RefreshTriggers/RefreshTriggersForQuest/ResetTriggers IL=22, AddToUpdateList IL=10, RemoveFromUpdateList IL=11/26 (exact).
 - **2026-08-10:** Movement-block IL sizes re-verified: Block.get_IsCollideMovement
