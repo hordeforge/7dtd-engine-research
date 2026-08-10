@@ -721,6 +721,7 @@ Small dedicated-relevant types that extend an already-owned subsystem:
 
 ## Changelog
 
+- **2026-08-10:** EntityVBlimp dead-config claim re-verified: 0 external ctor call sites (only its own dump, no newobj refs elsewhere).
 - **2026-08-08:** XmlExtensions XML helpers, LiveStats dead survival-stat record, body-verified dead collection/noise families (TList/TQueue, OneToOneDictionary, CollectionDebugWrapper, ParsingConverters, SimplexNoise, OpenSimplex2/2S, IEnumerableExtensions, BinaryReaderExtensions, IdPalette), ObservableDictionary live backing note.
 - **2026-08-07:** LockRequestServer IL=239 (5-target cap, single/shared maps, CanLockOnServer, OnLockedServer, response 192); ForceUnlockLockTarget multi-player unlock.
 
