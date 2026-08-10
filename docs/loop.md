@@ -509,7 +509,7 @@ Coverage of managed families: [`coverage.md`](coverage.md).
 | Residual class | One line |
 |---|---|
 | Unity script order | peers not ordered in IL |
-| Entity GO enabled on dedi | runtime observation |
+| Entity GO enabled on dedi | runtime observation (2026-08-10: World.Entities/Players empty on dedi even with connected players; see [residuals.md](residuals.md)) |
 | LiteNetLib native | below managed wrappers |
 | EAC protocol | types only |
 | A* library body | black box after StartPath |

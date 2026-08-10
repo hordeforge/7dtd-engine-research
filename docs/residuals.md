@@ -23,7 +23,7 @@ flowchart TD
 | Residual | Why not closed by Assembly-CSharp RE |
 |---|---|
 | **Unity script execution order** among GameManager / ConnectionManager / DynamicMeshManager / Entity MBs | **Closed (2026-08-09, runtime):** observed on the stock V3.1.0 dedicated server via a Harmony stamp probe (`workspace/experiments/script-order-probe`, git-ignored). Per-frame order: `GameManager.FixedUpdate`(+`Origin.FixedUpdate` no-op) -> `SdtdConsole.Update` -> **`ConnectionManager.Update`** -> **`GameManager.Update`** -> (`WorldEnvironment.Update` / `DynamicMeshManager.Update` when components present) -> `ConnectionManager.LateUpdate` -> `GameManager.LateUpdate`. **Invariant: ConnectionManager.Update always precedes GameManager.Update** (518 stable frames). Stored in Unity project settings, so it was not derivable from IL alone; now pinned by observation. See [loop.md](loop.md) §1.1 |
-| **Which Entity GameObjects stay `enabled` on pure dedicated** | Runtime observation; IL shows no mass `set_enabled(false)` at spawn (see [closed-gaps.md](closed-gaps.md)) |
+| **Which Entity GameObjects stay `enabled` on pure dedicated** | **Partially closed (2026-08-10, runtime):** on the stock V3.1.0 dedi, `World.Entities` and `World.Players` (DictionaryList registries) stay **empty** even with a connected loadgen player (entity 101, `SpawnedInWorld` confirmed client-side) and telnet-spawned zombies. Connected player entities live in the **ConnectionManager client list** (the dedicated authority), not `World.Players` (which is the local/client player context); world entities register via `SpawnEntityInWorld` -> `Entities.Add` (spawning.md §7) only when actually spawned into the sim. So on an idle headless server there are **no entity GameObjects in World at all**; the "stays enabled vs disabled" question is moot for the world registry. Probe: `workspace/experiments/script-order-probe` (git-ignored). Residual nuance: the enabled-state of a *spawned-and-ticking* zombie GO on dedicated (GO active, MB enabled) remains unobserved - needs a stable multi-entity sim, which the LiteNetLib join flake blocks |
 | **LiteNetLib native plugin** | Below managed wrappers; native binary |
 | **EAC / EOS AntiCheat wire protocol** | Types mapped (`NetPackageEAC`, `Platform.EOS.AntiCheatServer*`); protocol not in game DLL as reverseable sim logic |
 | **Aron Granberg A\* library internals** | `AstarPath.StartPath` / `Pathfinding.*` third-party; 7DTD ASP wrapper closed |
@@ -139,6 +139,10 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
 
 ## Changelog
 
+- **2026-08-10:** Entity-GO enabled-state residual partially closed by runtime
+  probe: World.Entities/Players stay empty on pure dedicated even with connected
+  players (player entities live in the ConnectionManager client list). Probe in
+  workspace/experiments/script-order-probe (git-ignored).
 - **2026-08-09:** ModEvents subscriber sets observed at runtime (reflection
   dump of ModEvent receivers): 15/22 events GameCore-subscribed on stock V3.1.0
   + EfficientServer + apm-bridge; those two mods subscribe nothing (Harmony-
