@@ -1053,6 +1053,7 @@ to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
 
 ## Changelog
 
+- **2026-08-11:** CreateComponents install order re-verified: Marker, Player, WanderingHorde, AirDrop, ChunkEvent, BloodMoon (IL_0001-0024, exact).
 - **2026-08-11:** Sleeper IL re-verified: NetPackageSleeperPose.ProcessPackage IL=23 (exact).
 - **2026-08-11:** Scout-horde IL re-verified (6): CheckToSpawn 18, NotifyEvent 22, AIScoutHordeSpawner.Update 22, SpawnUpdate 129, UpdateHorde 229, spawnHordeNear 94 (exact).
 - **2026-08-11:** Zombie-sense IL re-verified: ChunkEventComponent.TickActiveSpawns IL=66, SpawnScouts IL=76, ChunkData.DecayEvents IL=61, FindBestEventAndReset IL=44 (exact).
