@@ -495,6 +495,7 @@ and pending `OutgoingInvite` states are persisted; declined / removed pairs are 
 
 ## Changelog
 
+- **2026-08-10:** Party IL sizes re-verified: ServerHandleAcceptInvite IL=89, PartyManager.CreateParty IL=24, GetTeamColor IL=5 (exact).
 - **2026-08-10:** Faction/party IL sizes re-verified: saveFactionDataThreaded IL=36, IsPartyLead IL=11 (exact).
 - **2026-08-08:** AllyStore trivials: GetStatus nested TryGetValue; HasAllies
   any Allies row (CleanupPlayers gate); ClearStatus both directions / ClearAll;
