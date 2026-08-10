@@ -2169,6 +2169,8 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-11:** Id/wire IL re-verified: GetItemOrBlockId IL=12, GetItemId IL=5, assignIdsFromXml IL=29, assignIdsLinear IL=14, assignLeftOverItems IL=87, createFullMappingForClients IL=31, ItemStack.ReadDelta IL=15 / WriteDelta IL=23, ItemValue.ReadOrNull IL=13 / ReadOld IL=1, ItemStack.ReadOld IL=10, Block.PlaceBlock IL=67 (exact).
+- **2026-08-11:** Metadata/stacking IL re-verified: HasMetadata IL=25, TryGetMetadata IL=17 (x3) / core IL=36, GetMetadata IL=17, RemoveMetaData IL=12, SetMetadata core IL=86, CanStackWith IL=46, CanMoveTo IL=15, CanStack IL=19, CanStackPartly IL=24 (exact).
 - **2026-08-11:** ItemClass IL re-verified: GetItemClass IL=15, GetItem IL=13, GetItemWithTag IL=30, GetItemsWithTag IL=33, CreateItemValue IL=17, GetForId IL=15, CanCollect IL=2 (TimeBomb IL=5), IsGun/IsDynamicMelee IL=8, IsLightSource IL=5, ItemValue get_ItemClassOrMissing IL=9 / get_HasQuality IL=17 / get_IsMod IL=12 / get_IsShapeHelperBlock IL=12, ItemClassBlock.GetBlock IL=5 / GetBlockValueFromItemValue IL=15 (exact).
 - **2026-08-11:** Item-action IL re-verified: ItemActionPlaceAsBlock.ExecuteAction IL=353, ItemActionGainSkill.ExecuteAction IL=24 / OnHoldingUpdate IL=143, ItemActionLearnRecipe.ExecuteAction IL=24, BlockPlacement.OnPlaceBlock IL=235 (exact).
 - **2026-08-10:** Item metadata IL re-verified (7): ReadOrNull 13, ReadOld 1, ItemStack.ReadOld 10, HasMetadata 25, RemoveMetaData 12, SetMetadata(String,Object,TypeTag) 86 core, Int32/Single/String overloads 6-7 (exact).
