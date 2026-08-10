@@ -548,9 +548,12 @@ Fix direction (not stock): run `ConnectionRequestCheck`'s client-list scan on
 the main thread (post the duplicate-IP check via a queue / `PollEvents`), or
 copy the IP set under lock before enumeration. This is a stock RE finding;
 the optimizer/loadgen repos consume it as the blocker for >12-bot cohorts.
-**Validated workaround (2026-08-10, loadgen 24-bot ramp):** staggering joins
+**Validated workaround (2026-08-10, loadgen):** staggering joins
 with `--ramp-ms 3000` avoids the race entirely (0 `Collection was modified`, ~0
-drops over 4 min vs 302 `RemoteConnectionClose` non-ramped); the
+drops over 4 min vs 302 `RemoteConnectionClose` non-ramped); a second run at
+`--ramp-ms 2500` also showed **0 race exceptions** (the residual
+`RemoteConnectionClose` there was loadgen bots drowning in Navezgane's spawn
+lake + rejoin churn, not the race). The
 `NetPackageMinEventFire` null-itemValue NRE (§6.23) is pacing-independent and
 still fires under zombie-cop explosions.
 
