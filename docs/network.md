@@ -904,6 +904,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-10:** Replication IL sizes re-verified: NetEntityDistributionEntry.updatePlayerEntity IL=222, updatePlayerList IL=509 (exact match to 4b).
 - **2026-08-10:** AesEncryptAndMac IL sizes re-verified: EncryptStream IL=102, DecryptStream IL=148, `MAC did not match` string at IL_0123 (exact match to 4.5).
 - **2026-08-10:** Challenge reply layout verified from IL: `byte[0]=202`
   (`ldc.i4 202` + `stelem.i1`) then `Guid.WriteToBuffer(buf, 1)` = 16 bytes at
