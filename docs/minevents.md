@@ -452,7 +452,7 @@ target - the one shared predicate shape (the XOR appears as
 - **`IsSheltered`** (IL=24): target is an `EntityPlayerLocal` with
   `shelterPercent > 0` (inverted XOR; a non-player target fails).
 - **`IsInstigator`** (IL=17): `target == params.Instigator`.
-- **`IsAttachedToEntity`** (IL=19): `target.AttachedToEntity != null`.
+- **`IsAttachedToEntity`** (IL=23): `target.AttachedToEntity != null`.
 - **`IsOnLadder`** (IL=19): despite the name, tests `target.IsInElevator()`
   (inverted); the elevator flag is the "on ladder" signal.
 - **`NPCIsAlert`** (IL=25): `target.IsAlive() && target.IsAlert` (inverted).
@@ -872,6 +872,7 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
+- **2026-08-11:** Requirement leaves IL re-verified (31): PlayerItemCount IL=67, PlayerItemCountByTags IL=49, ArmorGroupCount/ArmorGroupLowestQuality IL=34, WornItems IL=54, WornItemMods IL=80, RecipeUnlocked IL=48, ProgressionLevel IL=50, RequirementItemModTier IL=84, ItemHasTags IL=43, HoldingItemHasTags IL=37, BlockHasTags IL=45, TriggerHasTags IL=33, ProjectileHasTags IL=45, EntityHasMovementTag/EntityHasStanceTag IL=47, EntityTagCompare IL=43, HasAttachedPrefab IL=53, HitLocation IL=27 + ParseXAttribute IL=48, CompareItemMetaFloat IL=44 + ParseXAttribute IL=20, IsDay/IsNight IL=19, IsDayNumber IL=32, PlayerLevel IL=38, IsFPV IL=34, IsSheltered IL=24, IsInstigator IL=17, IsAttachedToEntity IL=23 (corrected from stale 19), IsOnLadder IL=19, NPCIsAlert IL=25, IsHeldItem IL=24, IsEquipped IL=97 (exact).
 - **2026-08-11:** Requirement IL re-verified: RequirementBase.IsValid IL=13, ParseXAttribute IL=64, ParseRequirement IL=76, ParseRequirementGroup IL=148, compareValues IL=37, TargetedCompareRequirementBase.IsValid IL=51 / ParseXAttribute IL=22, CVarCompare IL=23/20, IsStatAtMax IL=100, StatCompareAbs IL=10, Current IL=52, Max/ModMax IL=46, PercCurrentToMax IL=120, PercCurrentToModMax IL=66, PercModMaxToMax IL=42, NotHasBuff IL=25, RequirementItemTier IL=36, BlockStandingOn IL=37, IsLookingAtBlock.IsValid IL=8 / raycast IL=1, IsLookingAtBlock/Entity ParseXAttribute IL=38, PerksUnlocked IL=68 (exact).
 - **2026-08-11:** Requirement IL re-verified: CVarCompare.IsValid IL=23 / ParseXAttribute IL=20, IsStatAtMax.IsValid IL=100 (exact).
 - **2026-08-10:** MinEvent IL sizes re-verified: EntityAlive.FireEvent IL=57, ItemValue.FireEvent IL=107, RequirementBase.IsValid IL=13, ParseXAttribute IL=64, ParseRequirement IL=76 (exact).
