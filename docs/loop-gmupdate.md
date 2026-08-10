@@ -421,6 +421,7 @@ Entity → AI → path → fall → net interest deep dive: [`entity-ai.md`](ent
 
 ## Changelog
 
+- **2026-08-10:** UpdateTick chain re-verified from IL: gmUpdate calls UpdateTick (IL_04FD); UpdateTick runs TickEntitiesSlice/Flush, then OnUpdateTick, GameStateManager.OnUpdateTick, TickEntities, LetBlocksFall, (non-dedi) SetEntitiesVisibleNearToLocalPlayer - exact match to loop.md 3.2.
 - **2026-08-10:** Phase A prologue re-verified from gmUpdate IL=631: all 12 calls in order (frameCount/time, updatePauseState, CheckResolution, SUnityUpdateData, handleGlobalActions, ReportUnusedAssets, SyncTransforms-on-pause, LoadManager, PlatformManager, InviteManager, LockManager, Stopwatch+FPS, BlockLiquidv2.UpdateTime).
 - **2026-08-10:** gmUpdate IL=631 + updatePauseState IL=94 re-verified (exact).
 - **2026-08-07:** ThreadManager main-thread double-buffer drain; TickEntities
