@@ -2169,6 +2169,8 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-11:** Dynamic-melee IL re-verified: Raycast IL=203, hitTarget IL=454, Eat.consume IL=154, ExecuteInstantAction: Eat IL=179, OpenBundle IL=493, OpenLootBundle IL=183, Quest IL=87, GetDamageEntity IL=52 / GetDamageBlock IL=70 (ItemActionAttack), createItemInventoryData IL=7, CanPlaceInContainer IL=2, HandleSandboxTechType IL=21 (exact).
+- **2026-08-11:** Inventory IL re-verified: updateHoldingItem IL=172, ShowHeldItem IL=19, HoldingItemHasChanged IL=51, SimulateActionExecution IL=15 + MoveNext IL=277 + HandleComplete IL=43, setHeldItemByIndex IL=132, SetHoldingItemIdx IL=5 / NoHolsterTime IL=5, DecHoldingItem IL=45, GetBestQuickSwapSlot IL=50 (exact).
 - **2026-08-11:** Catapult/launcher IL re-verified: ItemActionCatapult.ExecuteAction IL=163, GetStrainPercent IL=10, CanReload IL=15, ItemActionLauncher.fireShot IL=5, instantiateProjectile IL=136, ItemActionEffects IL=72, ProjectileMoveScript.Fire IL=236, FixedUpdate IL=196, SetState IL=33, checkCollision IL=616, TryCollect IL=40, ItemActionProjectile.ReadFrom IL=51 (exact).
 - **2026-08-11:** Ammo/dynamic-melee IL re-verified: GetMaxAmmoCount IL=25, checkAmmo IL=12, HasInfiniteAmmo IL=24, GetBurstCount IL=23, IsAmmoUsableUnderwater IL=19, requestReload IL=12, isJammed IL=5, ThrownWeapon.ExecuteAction IL=117 / instantiateProjectile IL=122 / throwAway IL=96, DynamicMelee.ExecuteAction IL=210, canStartAttack IL=198, canContinueAttack IL=5, SetAttackFinished IL=53, GameUtils.HarvestOnAttack IL=623, collectHarvestedItem IL=138 (exact).
 - **2026-08-11:** Config-tail IL re-verified: Quest.ReadFrom IL=49, Repair IL=43, UseOther IL=57, MakeFertile IL=66, ExchangeBlock IL=55, SpawnEntity IL=34 (exact).
