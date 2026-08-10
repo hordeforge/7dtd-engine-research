@@ -848,6 +848,8 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-08-11:** Boot IL re-verified: FirstFrameInit IL=65, HasPrefCollisions IL=53, InitCommandLine IL=85, <startGameCo>d__138.MoveNext IL=378, GameStateManager.OnUpdateTick IL=198, nextRound IL=29, SetBloodMoonDay IL=13, InitGame IL=50, ModeGamePref ctor IL=22, GameMode.StartRound IL=4 (Survival/Creative/EditWorld), Deathmatch IL=62, ZombieHorde IL=53, GameModeAbstract.Init IL=205, Survival Init IL=41 / MP IL=38 / SP IL=50 / PvP IL=34 (exact).
+- **2026-08-11:** Player-registry IL re-verified: GetLandProtectionHardnessModifierForPlayer IL=97, RequestToSpawnPlayer IL=496, GetEntityPlayerFromUserId IL=18, SetPlayerData IL=43, SpawnPointRemoved IL=28, HandlePlayerDetailsUpdate IL=14, MapPlayer IL=18, UnmapPlayer IL=25, CreatePlayerData IL=21 (exact).
 - **2026-08-10:** GameStateManager IL re-verified: OnUpdateTick IL=198, nextRound IL=29, SetBloodMoonDay IL=13, InitGame IL=50 (exact).
 - **2026-08-10:** Boot IL sizes re-verified: FirstFrameInit IL=65, InitCommandLine IL=85 (exact).
 - **2026-08-08:** ObservableDictionary<K,V> backing collection for PersistentPlayerList.Players (event funnel + EChangeType).
