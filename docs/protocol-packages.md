@@ -1767,6 +1767,11 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-10:** Verification: `NetPackageSharedQuest.ProcessPackage` IL=371
+  with `IsServer()` -> `QuestShareServer(SharedQuestData)` else
+  `QuestShareClient(SharedQuestData, EntityPlayerLocal)` (exact, §6.21 row);
+  `PlayerProfile.Write` v5 fields exact; `CalcPartyLevel` IL=35 weight
+  accumulation confirmed.
 - **2026-08-10:** §6.23 conditional spot-check round 5 (complete): 13 remaining
   conditional packages branch-verified (BossEvent eventType==1, ConfigFile/Localization
   data-null, DiscordIdMappings entityId>0 split, MapMarkerRemove type split,
