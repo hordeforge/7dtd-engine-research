@@ -531,6 +531,8 @@ surface is exactly sections 1 and 2.
 
 ## Changelog
 
+- **2026-08-11:** Server-list IL re-verified: ParseAny IL=80, get_IsDedicatedStock IL=16, get_IsDedicatedModded IL=10, get_AllowsCrossplay IL=4, get_EACEnabled IL=4, get_PlayGroup IL=11, get_Version IL=3, BlockStatistics Clear IL=16 / ToString IL=29 (exact).
+- **2026-08-11:** Prefab IL re-verified: CheckForAnyPlayerHome IL=10, GameUtils.CheckForAnyPlayerHome IL=164, CopyIntoWorld IL=85, GetPrefab IL=47, GetPrefabRotated IL=79, GetOccupiedChunks IL=65, AddWorldPrefab IL=32, DecorateChunk IL=70/6, prefabInstanceSizeComparison IL=20, SortPrefabs IL=38, CopyIntoChunk IL=34, CopyBlocksIntoChunkNoEntities IL=715, InitTerrainFillers IL=17, IsCullThisPrefab IL=5 (exact).
 - **2026-08-10:** Server-browser/prefab IL re-verified: get_PlayGroup IL=11, get_Version IL=3, CheckForAnyPlayerHome IL=10, CopyIntoLocal IL=680 (exact).
 - **2026-08-10:** GameServerInfo IL sizes re-verified: get_IsDedicatedStock
   IL=16, get_AllowsCrossplay IL=4, get_EACEnabled IL=4 (all exact).
