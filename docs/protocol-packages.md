@@ -1765,6 +1765,10 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-10:** §6.23 conditional-dispatch spot-verification round 3:
+  `NetPackageGameEventResponse` (6 always + responseType 12/8/9 tails exact,
+  IL_0058/006E/00CE) matches the table. All three complex dispatches
+  (NPCQuestList, QuestEvent, GameEventResponse) now IL-verified.
 - **2026-08-10:** §6.23 conditional-dispatch spot-verification round 2:
   `NetPackageNPCQuestList` (eventType 0/1/3/4 tails exact, IL_0032/008B/00AD/00DB)
   and `NetPackageQuestEvent` (5 always-written + `==3`/`switch(7)`/`==16`
