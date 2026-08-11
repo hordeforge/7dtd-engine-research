@@ -149,6 +149,32 @@ around; save-region reads/writes work on both).
 | Weather manager | version &gt; 11 | if version &gt; 15: size prefix; if version &gt;= 22: `weatherManagerState` blob (try/catch; seek-recover on fail) |
 | Guid | version &gt; 13 (and weather ok / version &gt; 15) | string; generate if empty on load |
 
+**Nested blob layouts (all byte-exact-verified 2026-08-12 on live saves; the
+round-trip tool decodes every one):**
+- `aiDirectorState`: version i32 10 + component Write bodies in install order
+  (Marker/Player none, WanderingHorde 16 B, AirDrop 37 B + crates, ChunkEvent
+  8 B, BloodMoon 12 B) - see aidirector.md "AIDirector save blob".
+- `weatherManagerState`: version u16 4 + gate byte (GamePrefs 60) + biome count
+  u8 + per biome 40 B (m_Id u8, weather group u8, stormWorldTime i32,
+  stormDuration i16, nextRandWorldTime i32, 5 param f32 in [T,P,C,W,F] order,
+  rain f32, snow f32) - see weather-environment.md 6.
+- `dynamicSpawnerState`: version u8 1 + bool currentSpawnerActive
+  (`SpawnManagerDynamic.Write` IL=21; the universal 2-byte `01 00`).
+- `sleeperVolumes`: i32 count + per volume (key id i32 + `SleeperVolume.Write`
+  IL=332: version u8 21, groupName string, groupId i16, spawnCountMin/Max i16,
+  BoxMin/Max 6xi32, respawnTime u64, numSpawned i32, literal i32 0, gameStage
+  i32, empty string, literal i32 0, ticksUntilDespawn i32, flags u16
+  (isQuestExclude 1 | isPriority 2 | isSpawning 4 | wasCleared 8), flags i32
+  (16 = MinScript data), spawnPoints count u8 + (pos Vector3i, rot f32,
+  blockName string), spawnsAvailable count u8 + u8s, literal byte 0,
+  respawnMap count u8 + (key i32, className string, spawnPointIndex u8),
+  groupCountList count u8 + (groupName string, count i32),
+  TriggeredByIndices count u8 + u8s, optional `MinScript.Write` bytecode when
+  flags & 16) + trailing `nextSleeperVolumeId` i32
+  (`World.WriteSleeperVolumes` IL=52).
+- `triggerVolumes` / `wallVolumes`: same container pattern; empty in the probe
+  saves (count 0 + nextId 0 = 8 B).
+
 **V3.1.0 vs V3.0.1 growth (884 -> 926 IL):** not a new top-level field list, but
 tighter **version-23** gates that serialize per-subsystem
 `sleeper/trigger/wallVolumesSaveVersion` integers before those blobs, plus the
