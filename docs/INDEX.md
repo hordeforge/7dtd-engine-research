@@ -337,6 +337,9 @@ Generic engine dumps plus surfaces dump consumed by RealEarth product docs.
 | Directory | Focus | Used by |
 |---|---|---|
 | gmUpdate / frame-entries / deep / deeper / gaps / loop-complete / opt-scan / dedi-complete | Generic loop RE | research narratives |
+| full-v3.1.0 | **Canonical whole-assembly IL dump** (7432 types; DumpAll, pipe-safe) | the IL-citation sweep, every `docs/*.md` claim |
+| surface-v3.1.0 | FullSurface metadata (surface-types + surface-namespaces; whole-assembly IL totals) | full-surface.md, test_surface_wellformed |
+| netpackages-v3.1.0 | NetPackage body dumps + protocol META | protocol-packages.md, RE_GAP_CLOSURE |
 | stability-v3.1.0 | Stability calculator / falling blocks | stability.md |
 | terrain-v3.1.0 | Stock vs expanded height | research + product |
 | realearth-surfaces-v3.1.0 | Chunk, Origin, PPL, region | product realearth-surfaces.md |
