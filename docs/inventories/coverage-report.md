@@ -1,7 +1,6 @@
 # RE coverage report (auto-generated)
 
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
-**Hub:** [`INDEX.md`](../INDEX.md).  
 dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced
 against docs name-mentions. Regenerate:
 `mono tools/bin/Coverage.exe "$ASM" docs docs/inventories/coverage-report.md` (from the repo root, matching the other generated inventories).
