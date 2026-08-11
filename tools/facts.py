@@ -26,6 +26,9 @@ if os.path.isfile(xp):
     tr = xd.get("traders_root", {})
     if tr:
         print(f"  xml: traders buy_markup={tr.get('buy_markup')} sell_markdown={tr.get('sell_markdown')}")
+    bs = xd.get("buffs_survival", {})
+    if bs:
+        print(f"  xml: survival well-fed threshold {bs.get('food_wellfed_threshold')} ({bs.get('hunger_buff')}/{bs.get('thirst_buff')})")
 lite = d.get("litenet", {})
 if lite:
     print(f"  litenet: protocol={lite.get('protocol_id')} header={lite.get('header_size')} mtu={lite.get('possible_mtu')} max_packet={lite.get('max_packet_size')}")

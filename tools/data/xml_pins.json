@@ -1,4 +1,10 @@
 {
+ "buffs_survival": {
+  "food_wellfed_threshold": 0.52,
+  "hunger_buff": "buffStatusHungry01",
+  "thirst_buff": "buffStatusThirsty01",
+  "water_wellfed_threshold": 0.52
+ },
  "entityclasses_health": {
   "healthBrute": 950,
   "healthBruteCharged": 2500,
@@ -55,7 +61,8 @@
  },
  "sources": [
   "Data/Config/entityclasses.xml",
-  "Data/Config/traders.xml"
+  "Data/Config/traders.xml",
+  "Data/Config/buffs.xml"
  ],
  "traders_root": {
   "buy_markup": 3.0,

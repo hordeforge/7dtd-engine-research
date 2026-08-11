@@ -26,6 +26,7 @@ DEFAULT_GAME = os.path.expanduser(
 )
 CFG_ENTITIES = "Data/Config/entityclasses.xml"
 CFG_TRADERS = "Data/Config/traders.xml"
+CFG_BUFFS = "Data/Config/buffs.xml"
 
 HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="(\d+)"')
 
@@ -49,10 +50,25 @@ def extract(game_dir: str) -> dict:
                 am = re.search(rf'\b{attr}="([^"]+)"', m.group(0))
                 if am:
                     trader[attr] = float(am.group(1))
+    buffs = {}
+    bpath = os.path.join(game_dir, CFG_BUFFS)
+    if os.path.isfile(bpath):
+        btext = open(bpath, encoding="utf-8", errors="replace").read()
+        # survival thresholds: StatComparePercCurrentToMax on Food/Water
+        for stat in ("Food", "Water"):
+            m = re.search(
+                rf'StatComparePercCurrentToMax"[^>]*stat="{stat}"[^>]*operation="GT"[^>]*value="([^"]+)"',
+                btext,
+            )
+            if m:
+                buffs[f"{stat.lower()}_wellfed_threshold"] = float(m.group(1))
+        buffs["hunger_buff"] = "buffStatusHungry01"
+        buffs["thirst_buff"] = "buffStatusThirsty01"
     return {
-        "sources": [CFG_ENTITIES, CFG_TRADERS],
+        "sources": [CFG_ENTITIES, CFG_TRADERS, CFG_BUFFS],
         "entityclasses_health": hp,
         "traders_root": trader,
+        "buffs_survival": buffs,
     }
 
 

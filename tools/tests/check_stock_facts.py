@@ -115,6 +115,11 @@ def check_research(facts: dict, errors: list[str]) -> None:
             errors.append(f"xml_pins traders_root.sell_markdown={tr.get('sell_markdown')} != 0.2")
         if prov and tr.get("sell_markdown"):
             must_match("zdtd PROVENANCE sell_markdown", prov, r"sell_markdown|SellMarkdown", errors)
+        bs = pins.get("buffs_survival", {})
+        if abs(bs.get("food_wellfed_threshold", 0) - 0.52) > 1e-9:
+            errors.append(f"xml_pins buffs food_wellfed_threshold={bs.get('food_wellfed_threshold')} != 0.52")
+        if prov and bs.get("hunger_buff"):
+            must_match("zdtd PROVENANCE buffStatusHungry", prov, r"buffStatusHungry", errors)
 
     # WaterLevel pin: facts must carry the IL-verified value and save-region.md
     # must document it (the zdtd divergence register consumes the same number).
