@@ -74,6 +74,8 @@ chunks: `ChunkAreaBiomeSpawnData` covers an 80 m by 80 m `Rect` anchored at the
 master chunk origin. `World.OnUpdateTick` calls
 `SpawnManagerBiomes.Update(name, spawnEnemies, chunkAreaSpawnData)` once per
 active area, which forwards to `SpawnUpdate` unless the world is playtesting.
+(The three `LogSpawn` overloads, IL=10/17/31, are debug logging only - no
+spawn logic.)
 
 **Spawn-distance rings (`SpawnManagerBiomes` consts, IL):** enemies spawn in the
 `cEnemyMinDistance` **28** to `cEnemyMaxDistance` **54** m ring, animals in the
@@ -908,6 +910,9 @@ prefab-stamped volume (filled via
 255 `SpawnPoint` entries - a hard stock ceiling (engine-limitations registry
 caps). Each `SpawnPoint` records `pos:Vector3i`, `rotation` from
 `BlockSleeper.GetSleeperRotation(blockValue)`, and the `BlockValue.type`.
+Debug/accessor surface: `get_PrefabInstance` (IL=3), `LogSleeper` (IL=12),
+`DrawDebugLines` (IL=41, editor visual), `DurationToString` (IL=84, timer
+formatting) - logging/visual only, no spawn logic.
 
 **`PrefabInstance` leaf helpers:** `GetCenterXZ()` (IL=24) is
 `(bboxPos.x + bboxSize.x * 0.5, bboxPos.z + bboxSize.z * 0.5)` as a `Vector2`
