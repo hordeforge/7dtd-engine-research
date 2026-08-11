@@ -754,6 +754,7 @@ Read reconstructs world XZ as `local + chunk*16`.
 | `GameManager.SaveAndCleanupWorld` | 499 |
 | `ChunkProviderGenerateWorld.SaveRandomChunks` | 99 |
 | `World.SaveDecorations` | 3 |
+| `blockmappings.nim` / `itemmappings.nim` | id-name mapping files (observed real save): `version:u32` (1) + `count:u32` + entries of `id:u32` + `nameLen:u8` + name. E.g. air=0, terrStone=1, terrBedrock=4, terrDirt=5 (the terrain id band) |
 
 **Chunk save callback:** `WorldChunkCache.NotifyOnChunkBeforeSave(chunk)`
 (IL=19) is the fan-out the save path drives before a chunk writes: it calls
