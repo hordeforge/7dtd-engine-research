@@ -3,13 +3,14 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check post-update census drift test readiness help cross-links sibling-cites save-roundtrip
+.PHONY: tools stock-sync stock-check post-update census drift test readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
 	@echo "make cross-links  - resolve every cross-repo .md link in the sibling workspace"
 	@echo "make sibling-cites - verify every sibling repo's research citations resolve against docs/"
 	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
+	@echo "make save-roundtrip-all - verify EVERY probe save + the shipped Navezgane world (full fleet round-trip)"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
 	@echo "make stock-check  - pin check only (committed JSON)"
 	@echo "make facts        - view the machine-checked stock pins (census/save/behaviour)"
@@ -106,3 +107,17 @@ sibling-cites:
 # sessions, e.g. ~/.cache/7dtd-loadgen-*/Saves/*/*/); fails gracefully if none.
 save-roundtrip:
 	python3 "$(TOOLS)/save_roundtrip_check.py"
+
+# Every probe save plus the TFP-shipped Navezgane world header. Fails on the
+# first broken save; skips gracefully when no probe saves exist.
+save-roundtrip-all:
+	@fail=0; found=0; \
+	for d in $$HOME/.cache/7dtd-loadgen-*/Saves/*/*/; do \
+	  [ -f "$$d/main.ttw" ] || continue; found=1; \
+	  echo "== $$(basename "$$d")"; \
+	  python3 "$(TOOLS)/save_roundtrip_check.py" "$$d" >/dev/null || fail=1; \
+	done; \
+	[ "$$found" = 1 ] || echo "no probe saves found (run a live session first)"; \
+	echo "== shipped Navezgane"; \
+	python3 "$(TOOLS)/save_roundtrip_check.py" --shipped "$${SEVENDTD_SERVER_DIR:-$$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server}/Data/Worlds/Navezgane" >/dev/null || fail=1; \
+	exit $$fail
