@@ -429,9 +429,12 @@ input recorder):
 - bare `pirs <saveName>` - refuses in a running game ("Please start recording
   from the main menu") and when connected to a server ("Recording only possible
   in SP"); otherwise copies `<saveDir>` to `<saveDir>_perftest` (deleting an
-  existing copy) and switches `GameName`/`GameMode` gameprefs so a recording
-  session can start from a throwaway creative-mode copy. Only the Navezgane
-  world is supported ("Only Navezgane is supported for now").
+  existing copy), sets `GamePrefs.GameWorld` (33) to "Navezgane" and
+  `GamePrefs.GameMode` (29) to `EnumGameMode.Survival` (member 1; the enum
+  starts at 1 - Survival, Creative, Deathmatch, Horde, SurvivalPVP, SurvivalSP,
+  SurvivalMP, EditWorld - there is no 0 member), so the recording session
+  starts from a throwaway survival-mode copy. Only the Navezgane world is
+  supported ("Only Navezgane is supported for now").
 
 ---
 
