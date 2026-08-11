@@ -369,6 +369,14 @@ Leaves (all V3.1.0 b14 IL):
   string→object conversion by `PropertyDecl.type` (Int32 TryParse default 0 /
   Float / Bool / String; unknown pref → null) and reports
   `Could not parse config value '{value}'` on failure.
+- **`GamePrefs.HasStockSettings()` (IL=162, exact):** true iff every declared
+  property's current value is within its stock range - iterates
+  `s_propertyList`, and for each property with a `minStockValue` checks the
+  value against the stock `[min, max]` per type (float `Approximately` /
+  in-range, int/bool/string/vector branches); the first out-of-stock pref logs
+  `PrintNonStockWarning` and returns false. This is the per-pref stock check
+  behind non-stock server-config detection (the browser tag derives separately
+  from the preset, [sandbox-options.md](sandbox-options.md) 8).
 - **`ApplyParsedGamePrefs()` (IL=57):** `parsedGamePrefs` missing → "Expected
   parsed game prefs." + quit + false; else `GamePrefs.SetObject` each parsed
   (enum, value) and clear the dict. Dedicated: `GameUtils.ValidateGameName(pref
