@@ -180,7 +180,10 @@ file, not a save-time snapshot. Live-observed: a fresh world keeps a 264 B
 boot-state `.ext.bak` (header-only, worldTime 7000) while `main.ttw` grows;
 after the game-reader round-trip session re-booted the airdrop save, its
 `.ext.bak` holds the full pre-reload 24008 B file (worldTime 84635) with
-`main.ttw` unchanged - exactly the "last successful load" copy.
+`main.ttw` unchanged - exactly the "last successful load" copy. The regular
+`.bak` is the save-time rotation (previous file copied before the new write):
+BMGSProbe's `.bak` carries worldTime 167661 vs `main.ttw` 167761 (100 units
+earlier), the cleanest rotation evidence.
 | `SaveLoad(string,…)` | 76 | lock; open read or buffered create; call stream `SaveLoad` |
 
 ---
