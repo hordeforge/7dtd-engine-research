@@ -115,6 +115,28 @@ plane `kMaxDropsPerPlane` = **3**; player-cluster radius `kMinPlayerClusterRadiu
 = **30** / `kMaxPlayerClusterRadius` = **70**; plane flight vector `kMinPlaneFlightVector`
 = **1500** / `kMaxPlaneFlightVector` = **2000**; tangent-point radius `kMinPlaneTangentPointRadius`
 = **30** / `kMaxPlaneTangentPointRadius` = **750**; spawn altitude `kSpawnYUp` = **180**.
+
+**Airdrop schedule (cctor IL=18, exact):** `MinDayCount` = `MaxDayCount` = **3**,
+`MinTimeOfDay` = `MaxTimeOfDay` = **12000** (12:00), `crateTypes = ["sc_General"]`.
+`InitNewGame` (IL=21) arms `nextAirDropTime = calcNextAirdrop(worldTime)`.
+`calcNextAirdrop(t)` (IL=39): `nextDay = WorldTimeToDays(t) + RandomRange(MinDayCount,
+MaxDayCount+1) - 1`; `nextTOD = (u64)RandomRange(MinTimeOfDay, MaxTimeOfDay+1)`;
+`next = nextDay*24000 + nextTOD`; logs `Warning("Next Airdrop: ...")`.
+`WorldTimeToDays` (IL=9) is `t/24000 + 1` (1-based), and `GameRandom.RandomRange`
+is max-exclusive, so with the stock defaults the first drop is **day 3 at 12:00**
+and every subsequent drop lands **2 days later at 12:00** (the `-1` makes the
+gap `RandomRange(3, 4) - 1 = 2` days; the Min/MaxDay=3 constants are the "every
+3 days" knob, not the gap). `Tick` (IL=75) spawns when `worldTime >=
+nextAirDropTime`, skipping while `MaxDayCount == 0` (disabled),
+`LootContainer.NoLoot`, playtesting, or editor; a frequency change or time
+rollback recomputes the schedule (`packDropFrequency` (IL=21) packs the four
+u16s into one u64 for save/compare). `AddSupplyCrate` (IL=27/25) dedupes by
+entityId and adds a `SupplyCrateCache(entityId, Vector3i.zero, false)` (or the
+passed cache) to the `supplyCrates` list - the landed crates the component
+keeps observed; `RemoveSupplyCrate(entityId)` (IL=54) reverses it. The schedule
+persists in the AIDirector save: `Write` (IL=72) stores `nextAirDropTime` u64 +
+`lastFrequency` u64 + the crate list; `Read` (IL=83) restores them
+(`lastFrequency` only for save version >= 9, else recomputed).
 - **Loot UI:** `InitLocalActivationCommands` (IL=8) registers one `search`
   command; `AllowActivationCommand` (IL=20) allows it only when `bag != null`
   and alive; `GetActivationText` (IL=81) shows `lootTooltipNew` / `Empty` /
@@ -1071,7 +1093,11 @@ the off side (falling back to `DebugLatencyOff()` for the primary player);
 `DebugLatencyOff()` (IL=42) destroys the `DebugLatency` child transform on
 every `EntityAlive`. `DebugToggleFreezePos()` (IL=14) flips the static
 `debugFreezePos` flag and logs it. `LogAIExtra(format, args)` (IL=6) routes
-to `LogAI` only when `AIDirectorConstants.DebugOutput` is set.
+to `LogAI` only when `AIDirectorConstants.DebugOutput` is set. Receive-side /
+remaining debug surface: `DebugSendLatency` (IL=175) / `DebugReceiveLatency`
+(IL=147) / `DebugReceiveNameInfo` (IL=25) marshal the debug data
+(`NetPackageDebug`); `get_BloodMoonComponent` (IL=3) is the cached-field
+accessor (closed-gaps.md).
 
 ---
 

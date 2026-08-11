@@ -87,6 +87,12 @@ CONSTS = {
         "kMaxPlaneTangentPointRadius": 750,
         "kSpawnYUp": 180,
     }),
+    "AIDirectorAirDropComponent": ("aidirector.md", {
+        "MinDayCount": 3,
+        "MaxDayCount": 3,
+        "MinTimeOfDay": 12000,
+        "MaxTimeOfDay": 12000,
+    }),
     "AstarVoxelGrid": ("raycast-pathing.md", {
         "cGridHeight": 320,
         "cCollisionMask": 1073807360,
@@ -697,9 +703,14 @@ class TunedConsts {
             var fr = ins[i + 1].Operand as FieldReference;
             if (fr != null && fr.DeclaringType.Name == tn) {
               object val = null;
-              var c = ins[i].OpCode.Code;
+              int j = i;
+              var c = ins[j].OpCode.Code;
+              // skip a trailing conv (u64/u8 statics: ldc.i4 12000; conv.i8; stsfld)
+              if ((c == Code.Conv_I8 || c == Code.Conv_U8 || c == Code.Conv_I4 || c == Code.Conv_U4 ||
+                   c == Code.Conv_I || c == Code.Conv_U || c == Code.Conv_R4 || c == Code.Conv_R8) && j > 0)
+                c = ins[--j].OpCode.Code;
               if (c == Code.Ldc_I4 || c == Code.Ldc_I4_S || c == Code.Ldc_R4 || c == Code.Ldstr)
-                val = ins[i].Operand;
+                val = ins[j].Operand;
               else if (c >= Code.Ldc_I4_0 && c <= Code.Ldc_I4_8)
                 val = (int)(c - Code.Ldc_I4_0);
               else if (c == Code.Ldc_I4_M1)

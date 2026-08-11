@@ -71,7 +71,7 @@ def main() -> int:
     asm = sys.argv[1]
 
     if not os.path.exists(EXE):
-        src = os.path.join(TOOLS, "tests", "_console_classification_check.cs")
+        src = "/tmp/console_classification_check.cs"
         with open(src, "w", encoding="utf-8") as f:
             f.write(SRC)
         r = subprocess.run(["csc", "-r:" + os.path.join(BIN, "Mono.Cecil.dll"), src,
