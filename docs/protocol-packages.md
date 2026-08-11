@@ -228,10 +228,13 @@ if bOverwriteExisting:
 dataLen : i32       // == serializedData.Length
 data    : dataLen bytes   // Chunk.write() blob (same codec as save), then StreamCopy
 ```
-The `data` blob is produced in `Setup()` by `Chunk::write(PooledBinaryWriter)`
-into a pooled `serializedData` stream, so the chunk-serialization codec is shared
-with the save path ([`save-region.md`](save-region.md)). `GetLength` = 14 +
-serializedData.Length.
+The `data` blob is produced in `Setup()` by `Chunk::write(PooledBinaryWriter)` -
+the 1-arg wrapper (IL=5) forwards to `write(stream, bNetworkWrite=true)`, so the
+wire blob is the **network variant** of the shared codec, not the save variant
+([`save-region.md`](save-region.md) §2): stability channel skipped, custom-data
+count network-filtered, tile entities written in `StreamModeWrite 2`,
+sleeper/trigger volumes skipped while **wall volumes are always written**, and
+a trailing `false` network flag. `GetLength` = 14 + serializedData.Length.
 
 **ProcessPackage (IL=126):**
 
