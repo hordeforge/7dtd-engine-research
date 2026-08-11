@@ -3,12 +3,12 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check post-update census drift test readiness help cross-links zdtd-cites
+.PHONY: tools stock-sync stock-check post-update census drift test readiness help cross-links sibling-cites
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
 	@echo "make cross-links  - resolve every cross-repo .md link in the sibling workspace"
-	@echo "make zdtd-cites   - verify zdtd's research citations resolve against docs/"
+	@echo "make sibling-cites - verify every sibling repo's research citations resolve against docs/"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
 	@echo "make stock-check  - pin check only (committed JSON)"
 	@echo "make facts        - view the machine-checked stock pins (census/save/behaviour)"
@@ -98,5 +98,5 @@ verify: test-docs stock-check readiness facts
 cross-links:
 	python3 "$(TOOLS)/cross_repo_links.py"
 
-zdtd-cites:
+sibling-cites:
 	python3 "$(TOOLS)/zdtd_cite_check.py"
