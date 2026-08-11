@@ -110,6 +110,18 @@ flowchart TB
   `forceClouds` / `forceRain` / `forceSnowfall` / `forceTemperature`
   (`-100` = off) / `forceWind` / `SetSimRandom`, which the accessors and
   `BiomeWeather.FrameUpdate` honor.
+
+**Live-verified 2026-08-12 (stock V3.1.0 dedicated, `weather` telnet dump):**
+- 5 Navezgane biomes each print the documented 5-slot vector
+  (`Temperature` / `Precipitation` / `CloudThickness` / `Wind` / `Fog`) plus
+  `rain` / `snow`, `storm WT / dur / state` - all 0 in the day-1 grace period,
+  weather group `default`, `nxtT0`. Biome temps spread correctly (desert
+  95.3 F, snow 28.4 F) with precipitation 0 so rain and snow are both 0.
+- Mutator: `weather clouds 100` logs `Cloud thickness set to 1.` and the dump
+  then reads `Clouds 1` (`forceClouds` = value/100 -> `GetCloudThickness`).
+  `weather clouds 0` resets. `debugweather` prints nothing on dedicated.
+  The grace-period claim (no weather before `cGracePeriodWorldTime` 22000)
+  matches: no storms fire while `worldTime` is day-1.
 - **Immediate storm.** `SetStorm(biomeName, duration)` (IL=32) walks every
   `BiomeWeather` and, for the named biome (or **all** when `biomeName` is
   null), stamps `stormWorldTime = worldTime` and `stormDuration = duration` -
