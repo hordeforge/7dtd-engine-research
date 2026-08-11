@@ -87,6 +87,15 @@ def check_research(facts: dict, errors: list[str]) -> None:
         # coverage mentions ChunkBlockYDim=256 historically
         must_match("docs/coverage.md YDim", cov, rf"ChunkBlockYDim\s*=\s*{ydim}|YDim.*{ydim}", errors)
 
+    # LiteNetLib pins: facts carry the library constants; network.md must
+    # document them (protocol 13, MaxPacketSize 1432, PossibleMtu).
+    lite = facts.get("litenet", {})
+    net = read(ROOT / "docs" / "network.md")
+    if net and lite:
+        must_match("docs/network.md ProtocolId", net, r"ProtocolId", errors)
+        must_match("docs/network.md 1432", net, r"1432", errors)
+        must_match("docs/network.md 1024", net, r"1024", errors)
+
     # WaterLevel pin: facts must carry the IL-verified value and save-region.md
     # must document it (the zdtd divergence register consumes the same number).
     water = facts["behaviour"].get("world_water_level")
