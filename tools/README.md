@@ -169,6 +169,7 @@ local install. See `re-scratch/README.md`.
 | `tests/test_subclass_counts.py` | Per-leaf inventories (sequence-requirements 38, item-actions 38, quest-objectives 38, minevent-actions 71, block-behaviors 65, te-features 11, challenge-objectives 28+1, sequence-actions 123) match the DLL's concrete-subclass closures / namespace composition. |
 | `tests/test_console_cmd_inventory.py` | Console-command inventory primary rows equal `CmdMap.exe` output exactly; alias rows are real registered names (getCommands ldstrs + cctor string-field values); the committed `console-command-list.tsv` equals fresh output. |
 | `tests/test_gamestats_gameprefs_current.py` | `gamestats-gameprefs.md` EnumGameStats (82) + EnumGamePrefs (317) index tables equal the DLL's enum members by name, not just count. |
+| `tests/test_inventory_type_existence.py` | Every type row in `dedicated-leaves.md` (371, existence) and `netpackages.md` (194, existence + direct base) resolves in the DLL; generic names normalized; `(not found)` markers tolerated. |
 | `tests/test_committed_inventories_current.py` | Generated inventories (`netpackage-bodies`, `coverage-report`, `state-machines`) are current against the live DLL. |
 | `tests/test_state_machines_current.py` | `state-machines.md` lifecycle tables are current against the live DLL (skips without mono; CI-safe). |
 | `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (11 claims). |
