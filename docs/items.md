@@ -783,6 +783,10 @@ flags and count; `ResetOldAccuracy()` (IL=3) restores `_oldAccuracy = 1`;
 `setSelectedAmmoById(ammoItemId, gun)` (IL=28) writes the gun's
 `SelectedAmmoTypeIndex` for the matching magazine entry; `get_aiBurstDelay`
 / `get_aiBurstShot` (IL=3 each) expose the AI burst ranges.
+`OnModificationsChanged` (IL=334) re-parses the action's `DynamicProperties`
+(`Delay`, `Sound_start`, `Sound_loop`, ...) through
+`ItemValue.GetPropertyOverride` on every mod attach/detach - the
+mod-override stat rebuild behind modded weapon behavior.
 
 **`ItemActionTextureBlock` painting internals (all IL-verified):**
 `getHitBlockFace(data, out blockPos, out bv, out face, out hitInfo)`
