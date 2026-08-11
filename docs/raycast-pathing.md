@@ -88,6 +88,16 @@ through `AllocConnection(count)` (IL=33, pooled per array length < 16) and
 `AstarManager` (the per-world path manager) owns the area registry:
 `AddArea(pos, noNext)` (IL=64) aligns to 16-block cells, reuses or news an
 `Area` (updateDelay 2) and chains a follow-up area while the delay is low;
+
+**`AstarVoxelGrid` tuned constants (IL):** `cGridHeight` = **320** (scan
+height), `cCollisionMask` = **1073807360** (physics mask), climb `cClimbMinHeight`
+= **0.6** / `cClimbMaxHeight` = **1.51** m, drop `cDropOnTopHeight` = **0.95** /
+`cDropMaxHeight` = **9.4** m, `cDoorPenalty` = **2** (extra cost through doors),
+`cConnectionPoolMax` = **16** (per-node connection pool). Walkability blocker
+flags (`cBlockerFlag*`): low `15` (0x0F), low0 `1`, high `240` (0xF0), high0
+`16`, high-low `255`, high-low0 `17`, slope dir0 `256`, ladder `8192` (0x2000),
+door `16384` (0x4000), floor `4096` (0x1000).
+
 `AddAreaBlock(pos)` (IL=26) merges the block into the area's bounds
 (partial-flag set); `FindLocation(pos, size)` (IL=47) returns the nearest
 registered `Location` whose `size` fits and lies within

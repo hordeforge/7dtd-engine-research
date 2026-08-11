@@ -74,6 +74,39 @@ CONSTS = {
         "cActivityDuration": 720,
         "cActivityNoiseDuration": 240,
     }),
+    "AIAirDrop": ("aidirector.md", {
+        "cPlaneMetersPerSecond": 120,
+        "kMinDropRange": 150,
+        "kMaxDropRange": 700,
+        "kMaxDropsPerPlane": 3,
+        "kMinPlayerClusterRadius": 30,
+        "kMaxPlayerClusterRadius": 70,
+        "kMinPlaneFlightVector": 1500,
+        "kMaxPlaneFlightVector": 2000,
+        "kMinPlaneTangentPointRadius": 30,
+        "kMaxPlaneTangentPointRadius": 750,
+        "kSpawnYUp": 180,
+    }),
+    "AstarVoxelGrid": ("raycast-pathing.md", {
+        "cGridHeight": 320,
+        "cCollisionMask": 1073807360,
+        "cClimbMinHeight": 0.6,
+        "cClimbMaxHeight": 1.51,
+        "cDropOnTopHeight": 0.95,
+        "cDropMaxHeight": 9.4,
+        "cDoorPenalty": 2,
+        "cConnectionPoolMax": 16,
+        "cBlockerFlagLow": 15,
+        "cBlockerFlagLow0": 1,
+        "cBlockerFlagHigh": 240,
+        "cBlockerFlagHigh0": 16,
+        "cBlockerFlagHighLow": 255,
+        "cBlockerFlagHighLow0": 17,
+        "cBlockerFlagSlopeDir0": 256,
+        "cBlockerFlagLadder": 8192,
+        "cBlockerFlagDoor": 16384,
+        "cBlockerFlagFloor": 4096,
+    }),
     "BlockLiquidv2": ("light-mesh-water.md", {
         "MAX_EMISSIONS": 3,
         "blockUpdatesPerSecond": 16,
@@ -160,8 +193,9 @@ def main() -> int:
             elif have != str(want):
                 bad.append(f"{cls}.{name}: DLL {have} != expected {want}")
             # the doc must state the name (and ideally the value); derived *Sq
-            # constants are documented by value only ("(sq 6400)")
-            if not name.endswith("Sq") and not re.search(rf"`?{name}`?", doc):
+            # constants and the grouped cBlockerFlag* masks are value-only
+            grouped = name.endswith("Sq") or name.startswith("cBlockerFlag")
+            if not grouped and not re.search(rf"`?{name}`?", doc):
                 bad.append(f"{doc_name}: does not mention {name}")
             if str(want) not in doc:
                 bad.append(f"{doc_name}: does not state {want} (for {name})")

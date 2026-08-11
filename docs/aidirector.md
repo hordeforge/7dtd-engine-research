@@ -108,6 +108,13 @@ More `EntitySupplyCrate` runtime (V3.1.0 b14):
   `SupplyLit` children (lights). `RequiresChunkObserver` (IL=8) is `true` while
   airborne, and `isSmokeOn` once landed (the smoke keeps the crate's chunk
   observed until it goes off).
+
+**Supply-plane tuning (`AIAirDrop` consts):** `cPlaneMetersPerSecond` = **120**;
+drop range `kMinDropRange` = **150** / `kMaxDropRange` = **700** m; drops per
+plane `kMaxDropsPerPlane` = **3**; player-cluster radius `kMinPlayerClusterRadius`
+= **30** / `kMaxPlayerClusterRadius` = **70**; plane flight vector `kMinPlaneFlightVector`
+= **1500** / `kMaxPlaneFlightVector` = **2000**; tangent-point radius `kMinPlaneTangentPointRadius`
+= **30** / `kMaxPlaneTangentPointRadius` = **750**; spawn altitude `kSpawnYUp` = **180**.
 - **Loot UI:** `InitLocalActivationCommands` (IL=8) registers one `search`
   command; `AllowActivationCommand` (IL=20) allows it only when `bag != null`
   and alive; `GetActivationText` (IL=81) shows `lootTooltipNew` / `Empty` /
