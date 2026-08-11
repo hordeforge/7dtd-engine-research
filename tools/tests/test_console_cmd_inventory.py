@@ -119,12 +119,6 @@ def main() -> int:
         name, _, typ = line.partition("\t")
         dll_primary[name] = typ
 
-    # the committed CmdMap tsv (regen.sh artifact) must equal fresh output
-    if os.path.exists(TSV):
-        committed_tsv = open(TSV, encoding="utf-8").read()
-        if committed_tsv != cmdmap:
-            bad.append("docs/inventories/console-command-list.tsv stale vs CmdMap.exe (rerun regen.sh)")
-
     src = "/tmp/cmdnames_check.cs"
     with open(src, "w") as f:
         f.write(SRC)
@@ -142,6 +136,9 @@ def main() -> int:
 
     primaries, aliases = parse_inventory()
     bad = []
+    # the committed CmdMap tsv (regen.sh artifact) must equal fresh output
+    if os.path.exists(TSV) and open(TSV, encoding="utf-8").read() != cmdmap:
+        bad.append("docs/inventories/console-command-list.tsv stale vs CmdMap.exe (rerun regen.sh)")
     if len(dll_primary) != EXPECTED_PRIMARY:
         bad.append(f"DLL primary commands = {len(dll_primary)} != expected {EXPECTED_PRIMARY}")
     if len(primaries) != EXPECTED_PRIMARY:
