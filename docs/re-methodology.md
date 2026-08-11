@@ -273,9 +273,10 @@ drop, the wandering horde, and the blood-moon start; evidence notes in
 - **Observe** the game log (the wrapper's logfile path): scheduled events log
   at INFO/WRN (e.g. `Next Airdrop:`, `BloodMoon starting for day N`,
   `AIDirector: Wandering StartSpawning Horde`).
-- **The live run is the arbiter of IL readings**: it caught `GameRandom`'s
-  `Sample() == 1.0` inclusive-max quirk (airdrop gap {2, 3} days, not 2) and
-  the alive-player requirement (a dead bot holds the drop).
+- **The live run is the arbiter of IL readings**: it caught the option-driven
+  nature of the airdrop schedule (`SetupAirDropTimeRanges` overrides the cctor
+  day-counts; the observed 3-day gap vs the cctor-derived 2-day gap) and the
+  alive-player requirement (a dead bot holds the drop).
 
 ## 6. Cost / loop RE (non-protocol systems)
 

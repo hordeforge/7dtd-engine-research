@@ -117,35 +117,43 @@ plane `kMaxDropsPerPlane` = **3**; player-cluster radius `kMinPlayerClusterRadiu
 = **30** / `kMaxPlaneTangentPointRadius` = **750**; spawn altitude `kSpawnYUp` = **180**.
 
 **Airdrop schedule (cctor IL=18, exact):** `MinDayCount` = `MaxDayCount` = **3**,
-`MinTimeOfDay` = `MaxTimeOfDay` = **12000** (12:00), `crateTypes = ["sc_General"]`.
-`InitNewGame` (IL=21) arms `nextAirDropTime = calcNextAirdrop(worldTime)`.
+`MinTimeOfDay` = `MaxTimeOfDay` = **12000** (12:00), `crateTypes = ["sc_General"]` -
+but the cctor values are only the fallback: `SandboxOptions.SandboxOptionManager.
+SetupAirDropTimeRanges` (IL=124) **overwrites them from the sandbox options**
+at every option application: `GetInt(54)` `AirDropRandomTime` picks the
+time-of-day range (1 -> 4:00-10:00, 2 -> 10:00-14:00, 3 -> 15:00-20:00,
+4 -> 20:00-23:59, 5 -> 4:00-20:00, 6 -> 0:00-23:59, 0/other -> 12:00 fixed),
+`GetInt(52)` `AirDropFrequency` picks the day range (1 -> 1/1, 2 -> 1/3,
+3 -> 3/3, 4 -> 3/7, 5 -> 7/7, 6 -> 1/7, 0/other -> 3/3), then it mirrors
+`GameStats.AirDropFrequency` (51) / `AirDropMarker` (53) and writes the four
+statics. `InitNewGame` (IL=21) arms `nextAirDropTime = calcNextAirdrop(worldTime)`.
 `calcNextAirdrop(t)` (IL=39): `nextDay = WorldTimeToDays(t) + RandomRange(MinDayCount,
 MaxDayCount+1) - 1`; `nextTOD = (u64)RandomRange(MinTimeOfDay, MaxTimeOfDay+1)`;
 `next = nextDay*24000 + nextTOD`; logs `Warning("Next Airdrop: ...")`.
-`WorldTimeToDays` (IL=9) is `t/24000 + 1` (1-based). `GameRandom.RandomRange`
-is `Next(maxExclusive - min) + min` with `Next(m)` = `(int)(Sample() * m)` and
-`Sample()` = `InternalSample() * (1/2147483647)` - the classic .NET generator,
-so a full-scale `InternalSample` makes `Sample() == 1.0` and `Next(1)` draw 1:
-the gap is `RandomRange(3, 4) - 1` in **{2, 3} days**, not exactly 2. The
-Min/MaxDay=3 constants are the "every 3 days" knob. **Live-verified 2026-08-11**
+`WorldTimeToDays` (IL=9) is `t/24000 + 1` (1-based), and `GameRandom.RandomRange`
+is strictly max-exclusive (`InternalSample` carries the classic
+`ret == 2147483647 -> ret--` guard, so `Sample() < 1` and `Next(1) == 0`
+always). **Live-verified 2026-08-11**
 (stock V3.1.0 dedicated, Navezgane, telnet `settime`): first drop scheduled
-"Next Airdrop: 4 12:00" (init gap drew 3 days); at the scheduled noon the
+"Next Airdrop: 4 12:00"; at the scheduled noon the
 server logged `AIAirDrop: Computed flight paths for 1 aircraft` ->
 `Spawned aircraft` -> `Spawned supply crate` -> `EntitySupplyCrate goActive`,
-then rescheduled "Next Airdrop: 7 12:00" (day 4 + 3). The drop needs at least
+then rescheduled "Next Airdrop: 7 12:00" (day 4 + 3). The observed **3-day gap
+at exactly 12:00 implies the runtime day-count statics were 4/4-equivalent**
+(`RandomRange(4, 5) - 1 = 3` deterministically), i.e. under the loadgen config
+the applied `AirDropFrequency` option mapped outside the switch default - the
+statics are option-driven, not cctor-driven (the cctor 3/3 would give a
+2-day gap). The drop needs at least
 one **alive** tracked player: `SpawnAirDrop` (IL=59) returns false when the
 alive-player list is empty (a dead loadgen bot held the drop). `Tick` (IL=75)
 spawns when `worldTime >=
 nextAirDropTime`, skipping while `MaxDayCount == 0` (disabled),
 `LootContainer.NoLoot`, playtesting, or editor; a frequency change or time
 rollback recomputes the schedule (`packDropFrequency` (IL=21) packs the four
-u16s into one u64 for save/compare). **`AirDropFrequency` is a no-op for the
-schedule (V3.1.0):** a live run with `GamePref.AirDropFrequency = 0` /
-`GameStat.AirDropFrequency (51) = 0` (loadgen config) still dropped on the
-cctor schedule, and no instruction reads `GameStats.AirDropFrequency` (Cecil
-probe 2026-08-11) - the option is mirrored into the stat but never consumed;
-the cctor `MinDayCount`/`MaxDayCount`/`MinTimeOfDay`/`MaxTimeOfDay` rule is the
-only schedule input. `AddSupplyCrate` (IL=27/25) dedupes by
+u16s into one u64 for save/compare). The `AirDropFrequency` / `AirDropMarker` /
+`AirDropRandomTime` sandbox options drive the schedule through
+`SetupAirDropTimeRanges` (above) and are mirrored into `GameStats` 51/53 there -
+so the option is **consumed**, not a no-op. `AddSupplyCrate` (IL=27/25) dedupes by
 entityId and adds a `SupplyCrateCache(entityId, Vector3i.zero, false)` (or the
 passed cache) to the `supplyCrates` list - the landed crates the component
 keeps observed; `RemoveSupplyCrate(entityId)` (IL=54) reverses it. The schedule

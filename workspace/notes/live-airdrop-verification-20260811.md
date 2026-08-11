@@ -28,13 +28,18 @@
 ## Confirmed facts (see aidirector.md / dedicated-misc-systems.md)
 
 - Schedule: `nextDay = WorldTimeToDays(t) + RandomRange(MinDayCount, MaxDayCount+1) - 1`,
-  `nextTOD = RandomRange(MinTimeOfDay, MaxTimeOfDay+1)`, defaults 3/3/12000/12000.
-- Gap is in {2, 3} days, not exactly 2: `GameRandom.Sample()` can be exactly
-  1.0 (full-scale InternalSample), so `Next(1)` can draw 1 and
-  `RandomRange(3, 4)` can return 4. Both observed draws hit 4.
+  `nextTOD = RandomRange(MinTimeOfDay, MaxTimeOfDay+1)`.
+- The runtime day-count / time-of-day statics come from
+  `SandboxOptions.SetupAirDropTimeRanges` (options 52/54), not the cctor
+  defaults (3/3, noon). The observed **3-day gap at 12:00** (day 4, then day 7)
+  implies the applied day-count was 4/4-equivalent
+  (`RandomRange(4, 5) - 1 = 3` deterministically); the cctor 3/3 would give a
+  2-day gap. `GameRandom` int ranges are strictly max-exclusive (the classic
+  `ret == 2147483647 -> ret--` guard is present in `InternalSample`).
 - Drop requires at least one alive tracked player (`SpawnAirDrop` IL=59).
-- `AirDropFrequency` (stat 51 / pref) is a no-op: no reader in the assembly,
-  drop fired with it at 0.
+- `AirDropFrequency` (option 52 / stat 51 / pref) **is consumed**: it feeds
+  `SetupAirDropTimeRanges`, which writes the day-count statics and mirrors the
+  stat.
 
 ## Teardown
 

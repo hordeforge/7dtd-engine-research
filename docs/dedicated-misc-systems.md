@@ -581,14 +581,13 @@ validates `min <= max`, uses `(int)(Sample() * range)` when the range fits in
 `int` and the two-draw `GetSampleForLargeRange` otherwise;
 `NextBytes(buffer)` (IL=26) fills with `(byte)(InternalSample() % 256)`.
 
-Float ranges are **max-exclusive** like the int ones. **Int caveat
-(discovered 2026-08-11, live airdrop run):** `Sample()` is
-`InternalSample() * (1/2147483647)` - the classic .NET subtractive generator
-can return a full-scale sample, making `Sample() == 1.0`, so
-`Next(max)` (and therefore the int `RandomRange`) is effectively **inclusive
-of max with probability ~1/2^31**, not strictly `[0, max)`. Any port that
-assumes strict exclusivity will be off by one on rare draws; the airdrop
-schedule (gap `RandomRange(3,4)-1` in {2, 3} days) exposed it. Every gameplay caller
+Float ranges are **max-exclusive** like the int ones. **Int exclusivity is
+strict (IL-verified 2026-08-11):** `InternalSample()` carries the classic
+`ret == 2147483647 -> ret--` guard, so `Sample()` is strictly `< 1` and
+`Next(max)` / the int `RandomRange` never return the max - `[0, max)` is
+exact, no off-by-one. (An earlier live-reading suggested an inclusive max
+from the airdrop gap, but the gap traces to the option-driven day-count
+statics, not the RNG; see aidirector.md.) Every gameplay caller
 (AIDirector components, spawners, loot rolls, party/group picks) funnels
 through these, so a single seeded `GameRandom` instance drives each
 deterministic subsystem.
