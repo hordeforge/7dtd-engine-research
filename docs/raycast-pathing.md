@@ -167,7 +167,12 @@ table: splits on `hitMaskSeparator` and ORs each name's bit -
 `Transparent` 1, `LiquidOnly` 2, `Moveable` 4, `Bullet` 8, `Rocket` 16,
 `Arrow` 32 (the `HM_Arrows` bit), `NotMoveable` 64, `Melee` 128; unknown
 names are ignored. This is how mask strings (AI/weapon config, `Voxel.Raycast`
-callers) become the `HM_*` bitmask.
+callers) become the `HM_*` bitmask. Related raycast leaves:
+`calcBestNormalToRaycastHit(cc)` (IL=37) picks from the static `phyxRaycastHit`
+normal the `normals[i]` with the largest positive dot (the best axis-aligned
+face normal for placement/stick); `GoBackOnVoxels(cc, ray, out bv)` (IL=47)
+steps the ray back one voxel from the hit via `OneVoxelStep` with a 0.01
+back-off, returning the empty edge cell (for placing against a surface).
 with no finite `tMax` logs the same `Voxel error: GetNextBlockHit` string
 (shared source) and returns `Vector3i.zero`. Consumers: `Block.GetFreePlacementPosition`
 walks cells with it to push a placement away from the player, and
