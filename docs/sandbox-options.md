@@ -188,12 +188,12 @@ both values null or `existing.Equals(value)`, else store and
 
 ---
 
-## 5. Applying options: one pass, ~119 static fields
+## 5. Applying options: one pass, ~130 static fields
 
 Nothing reads option objects per-frame. After the options are loaded,
 `UpdateInGameValuesWithSandboxOptions` performs one push of every value into
-cached static fields on the consuming systems (119 distinct `stsfld` targets),
-plus a few side effects:
+cached static fields on the consuming systems (130 distinct `stsfld` targets
+at 132 sites, machine-counted 2026-08-11), plus a few side effects:
 
 - **Combat/items:** `ItemActionAttack.{RangedDamagePercent, MeleeDamagePercent,
   BlockDamagePercent, HeadshotMultiplier, IncomingDamageModifier, ...}`,
@@ -377,7 +377,7 @@ flowchart TD
   GP --> SAS[GameManager.StartAsServer]
   SAS -->|LoadOptionsFromCode GetString 296| MGR[live options]
   SAS --> IG[GameStateManager.InitGame\nGameModeAbstract.Init copies\npref 296 to GameStats.SandboxCode 71]
-  MGR --> UPD[UpdateInGameValuesWithSandboxOptions\n119 static fields + GameStats/GamePrefs mirror]
+  MGR --> UPD[UpdateInGameValuesWithSandboxOptions\n130 static fields + GameStats/GamePrefs mirror]
   UPD --> GSI[GameServerInfo.BuildGameServerInfo\npublishes SandboxPreset/SandboxCode\n+ StockSettings flag]
   IG --> SYNC[GameStats sync to clients]
   SYNC --> CL[client AfterPlayerRespawn:\nLoadOptionsFromCode GameStats 71\n+ local Update pass]
@@ -489,5 +489,5 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
   DisabledOptionsOnValue links), sandbox-code codec (version char + base-26
   triples), preset sources (internal asset, sandbox_overrides.xml, user
   Presets dir), the GamePrefs/GameStats name-bridge redirect, the dedicated
-  StartAsServer apply path with its 119-field fan-out and one-string client
+  StartAsServer apply path with its 130-field fan-out and one-string client
   sync, mod overrides, and the getsandboxoptions/REST admin surface.
