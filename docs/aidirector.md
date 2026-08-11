@@ -122,11 +122,20 @@ plane `kMaxDropsPerPlane` = **3**; player-cluster radius `kMinPlayerClusterRadiu
 `calcNextAirdrop(t)` (IL=39): `nextDay = WorldTimeToDays(t) + RandomRange(MinDayCount,
 MaxDayCount+1) - 1`; `nextTOD = (u64)RandomRange(MinTimeOfDay, MaxTimeOfDay+1)`;
 `next = nextDay*24000 + nextTOD`; logs `Warning("Next Airdrop: ...")`.
-`WorldTimeToDays` (IL=9) is `t/24000 + 1` (1-based), and `GameRandom.RandomRange`
-is max-exclusive, so with the stock defaults the first drop is **day 3 at 12:00**
-and every subsequent drop lands **2 days later at 12:00** (the `-1` makes the
-gap `RandomRange(3, 4) - 1 = 2` days; the Min/MaxDay=3 constants are the "every
-3 days" knob, not the gap). `Tick` (IL=75) spawns when `worldTime >=
+`WorldTimeToDays` (IL=9) is `t/24000 + 1` (1-based). `GameRandom.RandomRange`
+is `Next(maxExclusive - min) + min` with `Next(m)` = `(int)(Sample() * m)` and
+`Sample()` = `InternalSample() * (1/2147483647)` - the classic .NET generator,
+so a full-scale `InternalSample` makes `Sample() == 1.0` and `Next(1)` draw 1:
+the gap is `RandomRange(3, 4) - 1` in **{2, 3} days**, not exactly 2. The
+Min/MaxDay=3 constants are the "every 3 days" knob. **Live-verified 2026-08-11**
+(stock V3.1.0 dedicated, Navezgane, telnet `settime`): first drop scheduled
+"Next Airdrop: 4 12:00" (init gap drew 3 days); at the scheduled noon the
+server logged `AIAirDrop: Computed flight paths for 1 aircraft` ->
+`Spawned aircraft` -> `Spawned supply crate` -> `EntitySupplyCrate goActive`,
+then rescheduled "Next Airdrop: 7 12:00" (day 4 + 3). The drop needs at least
+one **alive** tracked player: `SpawnAirDrop` (IL=59) returns false when the
+alive-player list is empty (a dead loadgen bot held the drop). `Tick` (IL=75)
+spawns when `worldTime >=
 nextAirDropTime`, skipping while `MaxDayCount == 0` (disabled),
 `LootContainer.NoLoot`, playtesting, or editor; a frequency change or time
 rollback recomputes the schedule (`packDropFrequency` (IL=21) packs the four
