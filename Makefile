@@ -70,6 +70,7 @@ test:
 	python3 "$(TOOLS)/tests/test_inventory_type_existence.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_entityclass_props_current.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_il_citations.py" "$(ASM)"
+	python3 "$(TOOLS)/tests/test_netprotocol_census.py" "$(ASM)"
 
 # CI variant: the corpus-invariant gates that need no live DLL, mono, local
 # il/ dumps, or the realworld sibling. test_dedi_coverage_docs.py stays in the

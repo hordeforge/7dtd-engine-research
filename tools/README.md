@@ -172,6 +172,7 @@ local install. See `re-scratch/README.md`.
 | `tests/test_inventory_type_existence.py` | Every type row in `dedicated-leaves.md` (371, existence) and `netpackages.md` (194, existence + base + method count + max method IL) resolves in the DLL; generic names normalized; `(not found)` markers tolerated. |
 | `tests/test_entityclass_props_current.py` | `entityclass-props.md` 167 `ldstr`+`stsfld` pairs match the `EntityClass..cctor` exactly; IL=394 pin + 187 self-state. |
 | `tests/test_il_citations.py` | Every parseable `Type::Method`/`Type.Method` + `IL=N` claim in the docs matches the DLL (any overload); dated changelog notes and shorthand-suffix types are skipped. Caught `GetCellsOnRay` 244->242 and `PersistentPlayerLogin` 5->37. |
+| `tests/test_netprotocol_census.py` | `NetProtocolCensus` re-derives the per-package channel census (193 packages; exactly 6 on channel 1) and the doc's §1.1 channel list must match. |
 | `tests/test_committed_inventories_current.py` | Generated inventories (`netpackage-bodies`, `coverage-report`, `state-machines`) are current against the live DLL. |
 | `tests/test_state_machines_current.py` | `state-machines.md` lifecycle tables are current against the live DLL (skips without mono; CI-safe). |
 | `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (11 claims). |
