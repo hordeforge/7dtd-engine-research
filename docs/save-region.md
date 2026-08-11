@@ -109,6 +109,14 @@ activeInGameMode i32 (+ u16 only when list version == 2); `nextEntityID` 243-494
 (1) + i32 byte-length + blob (sleeper volumes grow as POIs load: 5 KiB fresh ->
 23-59 KiB explored); **weather size prefix counts itself** (observed 208 =
 4 + 204 B payload, read consumes size-4); trailing `Guid` string (32 chars).
+
+**Game-reader round-trip (2026-08-12, live):** the stock dedicated server was
+booted directly on an existing probe save (`RE_DEDICATED_USERDATA` =
+airdrop probe dir). It loaded cleanly (zero `Invalid magic` / `Incorrect` /
+load-failure lines; 9722 chunks from the saved region files) and `gettime`
+reported **Day 4, 12:38** - exactly the `worldTime = 84635` (day 4 12:38)
+read from that save's `main.ttw` by the byte parser. The game's own reader and
+the documented codec agree end-to-end.
 | Active game mode | version &gt; 6 | `activeGameMode:i32` |
 | Water + chunk geometry | always after mode pad | `waterLevel`, `chunkSizeX`, then Y/Z **swapped on store** (Y field written from Z read and vice versa - stock quirk), `chunkCount`, `providerId`, `seed`, `worldTime` |
 | `timeInTicks` | version &gt; 8 | u64 |
