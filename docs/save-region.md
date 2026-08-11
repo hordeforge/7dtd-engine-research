@@ -379,6 +379,19 @@ Factories: RegionFileFactoryRaw / RegionFileFactorySectorBased
 `GetOffsetFromXz`: `(x%8) + (z%8)*8` with negative adjust.  
 `RegionFileManager.cChunkFileExt` = **`.ttc`**.
 
+**Standalone chunk files (`r.<x>.<z>.ttc`) are legacy-unwired in V3.1.0:**
+`RegionFileAccessAbstract` carries the full filename contract but nothing in the
+assembly calls it (Xref=0 on both). `MakeFilename(x,z)` (IL=26, exact) builds
+`"r." + x + "." + z + ".ttc"`; `ExtractKey(filename)` (IL=53, exact) parses it
+back: requires the `r.` prefix and `.ttc` suffix, strips the extension via
+`GameIO::RemoveExtension`, splits the remainder on the first `.`, `TryParse`s
+both ints, and returns `WorldChunkCache::MakeChunkKey(x, z)`; false on any
+shape mismatch. All live chunk writes route through
+`RegionFile::WriteData` instead - the standalone `.ttc` surface is
+present-but-dead, and the region accessor's `GetChunkByteCount` throws
+`NotImplementedException`. (The `ZCH3` magic seen on hand-made fixture saves
+belongs to the zdtd clone, not stock; see [stability.md](stability.md).)
+
 Protection margins (cull): land claim / bedroll / offline / backpack / vehicle / quest / supply = **1** chunk each.
 
 **`RegionFileManager` memory/cull constants (IL):** `cHeadroomBytes` = **5242880**
