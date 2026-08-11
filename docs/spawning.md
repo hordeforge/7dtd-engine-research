@@ -154,6 +154,12 @@ zero rotation; the full overloads (IL=31/36) copy `entityClass`, `id`, `pos`,
 allocation: an `ecd.id == -1` grabs `nextEntityID++`, otherwise
 `nextEntityID = max(nextEntityID, ecd.id + 1)`, then it builds the operation
 and runs `LoadAssets(isSync)`.
+
+**Entity-id conventions (`Entity` consts, IL):** `EntityIdInvalid` = **-1**,
+`cClientIdCreate` / `cIdCreatorIsServer` = **-2** (creator marker),
+`cClientIdStart` = **-2**, `cClientIdNone` = **0**, `cAttachSlotNone` = **-1**,
+`cIgnoreDamage` = **-1**, `cKillAnythingDamage` = **99999** (the universal
+damage value), `cPhysicsMasterTickRate` = **2**, `cWaterHeightScale` = **1.1**.
 `CreateEntity(ecd)` (IL=7) is the **sync** counterpart:
 `Start(ecd, true)` then `CompleteEntity()`, returning `op.entity`; the
 convenience overload (IL=17) allocates `nextEntityID++` and builds the

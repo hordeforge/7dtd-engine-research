@@ -63,6 +63,15 @@ countdown (default 120 s, clamped to 10 s after any mutating change via
 **500**, `cMaxActiveDronePlayerRange` = **32** m (active-range limit for
 teleporting far followers), `cVersion` = 1.
 
+**`EntityDrone` flight constants (IL):** `cBaseFollowDistance` = **5** m,
+`cCombatFollowRange` = **10** m, `cAvoidRange` = **2.5** m, `cMaxSpeedFlying` =
+**15**, `cFollowHoverHeight` = **1** m, `cAttackEnterTime` = **1** /
+`cAttackExitTime` = **1.5** s, `cOwnerFocusTime` = **0.2** s, `cAddPathDist` =
+**1.414**, `cPathLayer` = **1073807360**, `cInitSuppressVOTime` = **5** s,
+`cNotifyNeedsHealItemCooldown` = **30** s / `cNotifyNeedsHealMaxNotifyCount` =
+**2**, `cSync*` wire flags (`OwnerKey` 1, `InteractAndSecurity` 2, `LightMod`
+64, `HealAllies` 256, `OrderState` 16384).
+
 ---
 
 ## 2. The per-frame manager loop (streaming model)
