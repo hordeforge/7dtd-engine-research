@@ -91,6 +91,12 @@ compared to that on load (reject newer).
 | Version | always | `uint version` vs `CurrentSaveVersion` |
 | Game version string | version &gt; 11 | `gameVersionString` + warn if != `Constants.cVersionInformation.LongString` |
 | Structured `VersionInformation` | version &gt; 14 | ReleaseType, Major, Minor, Build as i32s (else legacy string parse) |
+
+**Live-verified 2026-08-11 (real `main.ttw`, V3.1.0 b14):** the file header is
+`ttw\0` + `version:u32 = 23` + `gameVersionString = "V 3.1.0 (b14)"` +
+`VersionInformation (1, 3, 10, 14)` - every field matches the layout above. The
+`waterLevel` float (after the active-game-mode + mode pad) reads **62.88**,
+confirming the `behaviour` water-level pin in a real save.
 | Active game mode | version &gt; 6 | `activeGameMode:i32` |
 | Water + chunk geometry | always after mode pad | `waterLevel`, `chunkSizeX`, then Y/Z **swapped on store** (Y field written from Z read and vice versa - stock quirk), `chunkCount`, `providerId`, `seed`, `worldTime` |
 | `timeInTicks` | version &gt; 8 | u64 |
