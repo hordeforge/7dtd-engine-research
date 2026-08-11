@@ -256,6 +256,27 @@ Product rules (still enforced in those repos):
 - zdtd: `version.zig stock_wire`, `protocol.zig` challenge/ticks, AssignIds embed tests
 - never bare NetPackage **numeric** ids on production send paths (`lint-wire.sh`)
 
+## 5e. Live event verification (scheduled stock behavior)
+
+IL pins a schedule; a live run proves it. The stock dedicated server can be
+driven deterministically for scheduled events (proven 2026-08-11 for the air
+drop, the wandering horde, and the blood-moon start; evidence notes in
+`workspace/notes/`):
+
+- **Boot** the stock server via the 7dtd-loadgen wrapper
+  (`scripts/start_dedicated_navezgane.sh`); telnet on 8081 (password `retest`).
+- **World time** pauses with zero connected players - join a loadgen bot
+  (`LOADGEN_MODE=join LOADGEN_COUNT=1`) to advance the sim, and note the bot
+  may drown at Navezgane spawn (a fresh join + immediate settime catches it
+  alive). `settime` takes 1 arg (`day`/`night`/raw u64) or 3 (day hour
+  minute); other counts rejected. Rate ~400 world units/s (DayNightLength 60).
+- **Observe** the game log (the wrapper's logfile path): scheduled events log
+  at INFO/WRN (e.g. `Next Airdrop:`, `BloodMoon starting for day N`,
+  `AIDirector: Wandering StartSpawning Horde`).
+- **The live run is the arbiter of IL readings**: it caught `GameRandom`'s
+  `Sample() == 1.0` inclusive-max quirk (airdrop gap {2, 3} days, not 2) and
+  the alive-player requirement (a dead bot holds the drop).
+
 ## 6. Cost / loop RE (non-protocol systems)
 
 Same tools, different questions. For hot-path anatomy:
