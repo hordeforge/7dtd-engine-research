@@ -216,6 +216,10 @@ class StockFacts {
     // WorldConstants.WaterLevel is cctor-initialized from Block.cWaterLevel
     // (Block cctor ldc.r4 62.88). Pin the float so zdtd/realworld can compare.
     float worldWaterLevel = StsfldR4(Exact(mod, "Block"), "cWaterLevel") ?? 62.88f;
+    // Death-loot lifetime (s) and per-frame XML load budget (ms), both
+    // Constants cctor-initialized (ldc.r4 300 / ldc.i4.s 50).
+    float itemDroppedOnDeathLifetime = StsfldR4(c, "cItemDroppedOnDeathLifetime") ?? 300f;
+    int maxLoadTimePerFrameMillis = StsfldInt(c, "cMaxLoadTimePerFrameMillis") ?? 50;
     // Party fields may be metadata const on some builds; optional.
     int? maxPartySize = null;
     float? partyActivationRange = null;
@@ -345,7 +349,9 @@ class StockFacts {
     sb.AppendLine("    \"enemy_sense_memory\": " + enemySenseMemory + ",");
     sb.AppendLine("    \"default_monster_see_distance\": " + defaultMonsterSeeDistance.ToString(CultureInfo.InvariantCulture) + ",");
     sb.AppendLine("    \"send_world_tick_time_to_clients\": " + sendWorldTickTimeToClients.ToString(CultureInfo.InvariantCulture) + ",");
-    sb.AppendLine("    \"world_water_level\": " + worldWaterLevel.ToString(CultureInfo.InvariantCulture) +
+    sb.AppendLine("    \"world_water_level\": " + worldWaterLevel.ToString(CultureInfo.InvariantCulture) + ",");
+    sb.AppendLine("    \"item_dropped_on_death_lifetime_s\": " + itemDroppedOnDeathLifetime.ToString(CultureInfo.InvariantCulture) + ",");
+    sb.AppendLine("    \"max_load_time_per_frame_ms\": " + maxLoadTimePerFrameMillis +
       (maxPartySize.HasValue || partyActivationRange.HasValue ? "," : ""));
     if (maxPartySize.HasValue)
       sb.AppendLine("    \"max_party_size\": " + maxPartySize.Value +

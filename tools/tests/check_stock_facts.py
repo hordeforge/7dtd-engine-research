@@ -102,6 +102,19 @@ def check_research(facts: dict, errors: list[str]) -> None:
             errors,
         )
 
+    # Death-loot lifetime + per-frame load budget (cctor-pinned IL values).
+    for key, val, doc, pat, label in [
+        ("item_dropped_on_death_lifetime_s", 300.0, "docs/combat-damage.md", r"300", "item lifetime"),
+        ("max_load_time_per_frame_ms", 50, "docs/crafting-recipes.md", r"50", "load budget"),
+    ]:
+        got = facts["behaviour"].get(key)
+        if got is None:
+            errors.append(f"stock_facts behaviour.{key} missing")
+        elif abs(float(got) - val) > 1e-6:
+            errors.append(f"stock_facts {key}={got} != {val}")
+        else:
+            must_match(f"docs pin {label}", read(ROOT / doc), pat, errors)
+
     closed = read(ROOT / "docs" / "closed-gaps.md")
     must_match("docs/closed-gaps.md GameTimer", closed, rf"ticksPerSecond\s*=\s*\*\*{tps}\*\*|GameTimer\({tps}|ticksPerSecond.*{tps}", errors)
 

@@ -303,7 +303,7 @@ kill log; **`ModEvents.SEntityKilled`**; **`dropItemOnDeath()`**.
 
 **`dropItemOnDeath` (IL=105):** walk inventory slots; if `ItemClass.CanDrop`,
 `ItemDropServer` at pos + (0.5,0,0.5) with lifetime
-`Constants.cItemDroppedOnDeathLifetime` and clear slot; flashlight off;
+`Constants.cItemDroppedOnDeathLifetime` (**300 s**) and clear slot; flashlight off;
 `Equipment.DropItems()`. If `entityThatKilledMe` set:
 `lootDropProb = EffectManager(passive **80**, killer.holdingItem,
 lootDropProb, killer)`. Then `lootDropProb *= LootContainer.LootBagChance`.
@@ -531,6 +531,7 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-11:** cItemDroppedOnDeathLifetime pinned 300 s (Constants cctor IL).
 - **2026-08-11:** Hit/stat IL re-verified: ItemActionAttack.Hit IL=1614, GetBlockHit IL=84, FindHitEntityNoTagCheck IL=49, CanHeal IL=12, AddHealth IL=12, EntityEnemyAnimal.CanDamageEntity IL=17, EntityAnimal/EntityEnemy.DamageEntity IL=7, SetCVar IL=13, GetCVar IL=10, difficultyModifier IL=44, GetDamageMultiplier IL=3, GetIdealAIRange IL=3, CanReload IL=2, ReloadGun IL=1, GetKickbackForce IL=2, GetEntityFromHit IL=6 (exact).
 - **2026-08-11:** Crawler/response IL re-verified: EntityHuman.TurnIntoCrawler IL=33, AvatarHumanController.TurnIntoCrawler IL=23, SetWalkType IL=36, ProcessDamageResponse IL=86, ServerNetSendRangeCheckedDamage IL=27, NetPackageRangeCheckDamageEntity.ProcessPackage IL=151, ProcessDamageResponseLocal IL=903, FireAttackedEvents IL=61 (exact).
 - **2026-08-11:** Death/kill IL re-verified: Kill IL=40, AwardKill IL=66, OnEntityDeath IL=146, dropItemOnDeath IL=105, DropBagServer IL=99, InitializeBagFromLootList IL=39, SetDead IL=8, SetAlive IL=34/46/31, KillLootContainer IL=24, GameManager.AwardKill IL=27 / AddScoreServer IL=56, AddScore IL=97, HandleClientDeath IL=1, NotifySleeperDeath IL=11, ClientKill IL=216, OnDeathUpdate IL=76 (exact).

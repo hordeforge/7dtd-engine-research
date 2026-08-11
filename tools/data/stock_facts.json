@@ -2,7 +2,7 @@
   "schema": 1,
   "generated_by": "tools/src/StockFacts.cs",
   "asm": "Assembly-CSharp.dll",
-  "extracted_utc": "2026-08-11T03:20:45.8690970Z",
+  "extracted_utc": "2026-08-11T03:22:10.0807600Z",
   "version": {
     "release_type": 1,
     "major": 3,
@@ -74,6 +74,8 @@
     "default_monster_see_distance": 48,
     "send_world_tick_time_to_clients": 1.5,
     "world_water_level": 62.88,
+    "item_dropped_on_death_lifetime_s": 300,
+    "max_load_time_per_frame_ms": 50,
     "max_party_size": 8,
     "party_activation_range": 15
   }
