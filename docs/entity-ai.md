@@ -587,7 +587,7 @@ difference: `Atan2(dir.z, dir.x) * 57.29578` for each, difference wrapped to
 `World.CheckSleeperVolumeTouching` then `CheckTriggerVolumeTrigger`.
 
 **`World.CheckSleeperVolumeTouching` (IL=57):** no-op if GameStats **24**
-(EnemySpawnMode) false. Else lock `sleeperVolumes` and for each volume id on the
+`IsSpawnEnemies` false. Else lock `sleeperVolumes` and for each volume id on the
 player's chunk call `SleeperVolume.CheckTouching`.
 
 **`SleeperVolume.CheckTouching` (IL=165):** no-op if `IsTriggerAndNoRespawn` or

@@ -834,7 +834,8 @@ relative to the frequency multiple. `InitNewGame` (412068) seeds
 the stat changed underneath it, resets `bmDay` and logs
 `Blood Moon day stat changed {0}`: the server-side component itself follows an
 externally set BloodMoonDay stat. It gates all party spawning on
-`GameStats.GetBool(24)` (EnemySpawnMode).
+`GameStats.GetBool(24)` `IsSpawnEnemies` (the `EnemySpawnMode` server option,
+GamePref 82; [server-lifecycle.md](server-lifecycle.md)).
 
 There is **no `bloodmoon` console command in V3.1.0**. The only caller of
 `SetForToday` is the gameevents sequence action

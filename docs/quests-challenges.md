@@ -469,7 +469,8 @@ coordination above, and mirrors events over `NetPackageQuestEvent`
 `BaseRequirementObjectiveGroup` (the staged variant, §7).
 
 `StartChallenge` auto-completes any objective that qualifies immediately
-(`HandleAutoComplete`, e.g. a kill objective while `EnemySpawnMode` is off), runs
+(`HandleAutoComplete`, e.g. a kill objective while `IsSpawnEnemies` (24, the
+`EnemySpawnMode` option) is off), runs
 `HandleComplete`, and if still `Active` calls `HandleAddHooks` on every objective
 to begin tracking. Each `BaseChallengeObjective` counts a `current` toward
 `MaxCount`; the hook handler calls `set_Current`, which fires `HandleValueChanged`
