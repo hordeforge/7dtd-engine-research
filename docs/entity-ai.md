@@ -204,6 +204,15 @@ longer than 60 seconds (`Time.time - prefabTimeIn > 60`), and the target is an
 `cCombatThreshold` = **0.75**, `cMaxThreatLevel` = **1** (the threat-level
 band thresholds).
 
+**`ThreatLevelTracker` increments (IL):** `cBaseIncrement` = **0.0015**,
+`cInactiveIncrement` = **0.0625**, `cSleeperIncrement` = **0.03125**,
+`cAlertIncrement` = **0.125**, `cTargetIncrement` = **0.25** (the per-tick
+threat accumulation rates).
+
+**`ThreatLevelUtility` (IL):** `LOOKBACK` = **300** ticks, `THREAT_PER_ENEMY` =
+**0.03333334** (1/30), `ZOMBIE_COMBAT_QUANTITY` = **4**, 
+`PLAYER_HOME_MINIMUM_DISTANCE` = **50** m.
+
 **`EntityPlayer.getHeadPosition()` (IL=32):** `emodel.GetHeadTransform().
 position + Origin.position` when the model and head transform exist, else
 `transform.position + (0, height - 0.15, 0) + Origin.position`.

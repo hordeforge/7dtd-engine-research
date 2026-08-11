@@ -514,6 +514,31 @@ CONSTS = {
         "cHeightSmoothDecreasePer": 0.3,
         "cHeightSmoothAverageBias": 8,
     }),
+    "TurretTracker": ("vehicles-drones-turrets.md", {
+        "cMaxTurrets": 500,
+        "cSaveTime": 120,
+        "cChangeSaveDelay": 10,
+        "cVersion": 1,
+    }),
+    "MiniTurretFireController": ("vehicles-drones-turrets.md", {
+        "baseConeDistance": 5.25,
+        "baseConePitch": 22.5,
+        "baseConeYaw": 22.5,
+        "cSeekRayRadius": 0.05,
+    }),
+    "ThreatLevelTracker": ("entity-ai.md", {
+        "cBaseIncrement": 0.0015,
+        "cInactiveIncrement": 0.0625,
+        "cSleeperIncrement": 0.03125,
+        "cAlertIncrement": 0.125,
+        "cTargetIncrement": 0.25,
+    }),
+    "ThreatLevelUtility": ("entity-ai.md", {
+        "LOOKBACK": 300,
+        "PLAYER_HOME_MINIMUM_DISTANCE": 50,
+        "THREAT_PER_ENEMY": 0.03333334,
+        "ZOMBIE_COMBAT_QUANTITY": 4,
+    }),
     "BlockLiquidv2": ("light-mesh-water.md", {
         "MAX_EMISSIONS": 3,
         "blockUpdatesPerSecond": 16,
