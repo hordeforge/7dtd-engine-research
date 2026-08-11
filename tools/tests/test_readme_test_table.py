@@ -33,6 +33,13 @@ def main() -> int:
     readme = open(README, encoding="utf-8").read()
     table = set(re.findall(r"tests/([A-Za-z0-9_.-]+\.py)", readme))
     bad = []
+    # make help parity: every non-help target has a help line and vice versa
+    targets = set(re.findall(r"^([a-z0-9-]+):", mk, re.M))
+    helped = set(re.findall(r"@echo \"make ([a-z0-9-]+) ", mk))
+    for t in sorted(targets - helped - {"help"}):
+        bad.append(f"target `{t}` has no make help line")
+    for t in sorted(helped - targets):
+        bad.append(f"make help mentions `{t}` but no such target exists")
     for f in sorted(run - table):
         bad.append(f"{f}: run by make but missing from tools/README.md Tests table")
     for f in sorted(table - run):
