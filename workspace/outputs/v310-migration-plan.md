@@ -1,5 +1,7 @@
 # V3.1.0 research migration plan
 
+> **ARCHIVED (2026-08-11):** pre-V3.1.0-retarget research artifact; superseded by the current corpus. Historical record only.
+
 **Date:** 2026-08-02  
 **From:** V3.0.1 (b4)  
 **To:** V3.1.0 (b14) Henpocalypse  

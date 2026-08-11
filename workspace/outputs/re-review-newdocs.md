@@ -1,5 +1,7 @@
 # Adversarial accuracy review: session-written subsystem docs (V3.0.1 corpus)
 
+> **ARCHIVED (2026-08-11):** pre-V3.1.0-retarget research artifact; superseded by the current corpus. Historical record only.
+
 **Reviewer pass:** evidence audit against the shipped DLLs, not a style review.
 **Method:** for each of the 28 in-scope docs, the highest-risk verifiable claims
 (wire byte layouts, named methods/enums/constants, IL sizes, counts, state-machine

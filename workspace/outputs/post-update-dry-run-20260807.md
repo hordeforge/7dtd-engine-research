@@ -1,5 +1,7 @@
 # Post-update dry-run (2026-08-07)
 
+> **ARCHIVED (2026-08-11):** pre-V3.1.0-retarget research artifact; superseded by the current corpus. Historical record only.
+
 **ASM:** Steam dedicated `Assembly-CSharp.dll` (live install)  
 **Committed pin:** V 3.1.0 (b14)  
 **Mode:** dry-run (no commit of regenerated facts; no baseline rewrite)

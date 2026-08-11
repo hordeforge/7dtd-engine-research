@@ -1,5 +1,7 @@
 # Stock hardcode sync (2026-08-04)
 
+> **ARCHIVED (2026-08-11):** pre-V3.1.0-retarget research artifact; superseded by the current corpus. Historical record only.
+
 ## Delivered
 - `tools/src/StockFacts.cs` → `tools/data/stock_facts.json` (committed)
 - `tools/stock-sync.sh` + `tools/tests/check_stock_facts.py`

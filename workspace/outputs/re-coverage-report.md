@@ -1,5 +1,7 @@
 # RE coverage report (V3.0.1, auto-generated)
 
+> **ARCHIVED (2026-08-11):** pre-V3.1.0-retarget research artifact; superseded by the current corpus. Historical record only.
+
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
 dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced
 against docs name-mentions. Regenerate:

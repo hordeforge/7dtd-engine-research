@@ -1,5 +1,7 @@
 # Review: 7DTD dedicated-server reverse-engineering corpus
 
+> **ARCHIVED (2026-08-11):** pre-V3.1.0-retarget research artifact; superseded by the current corpus. Historical record only.
+
 **Artifact:** `/home/maci/Desktop/7dtd/7dtd-research` (branch `re-corpus-audit-tooling`),
 60 narrative docs + 20 inventory catalogs (26,087 lines, 176 diagrams), 16 maintained
 Mono.Cecil tools, 2 Python gates, consumed by the sibling `../zdtd` clone.
