@@ -716,6 +716,17 @@ tracked players; on fail delay +4000; `FindTargets` → on fail delay +1000 and
 `ChooseNextTime`; else create `AIWanderingHordeSpawner` and add to list
 (+12000 residual schedule in IL).
 
+**Live-verified 2026-08-11** (stock V3.1.0 dedicated, Navezgane, one loadgen
+bot, telnet `settime` into the horde window): the server logged
+`AIDirector: Wandering StartSpawning Horde` -> `FindWanderingTargets at player
+'id=239', dist 53.66` -> `Party of 1, GS 1 (1), scaling 1, enemy max 5, bonus
+every 12` -> repeated `Spawned wandering horde (group wanderingHordeStageGS1,
+zombie Darlene/Boe/FemaleFat...)` -> `Wandering spawner finished Horde` ~41 s
+later. This confirms the whole chain end-to-end: the world-time gate, the
+alive-player requirement, `FindTargets` target selection at ~54 m, the
+gamestage group (`wanderingHordeStageGS1`) and the party-spawner scaling line
+(GS 1, enemy max 5, bonus every 12).
+
 **Leaves:** `InitNewGame` (IL=12) latches `isPlaytest = IsPlaytesting()` and
 zeroes both next-times. `Write` (IL=12) persists `HordeNextTime` then
 `BanditNextTime` (u64 each) after the base; `Read` (IL=16) mirrors and gates
