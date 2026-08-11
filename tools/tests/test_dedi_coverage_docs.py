@@ -214,6 +214,27 @@ def main() -> int:
                 "docs/inventories/gaps.md stale vs the gaps dump's GAPS_CLOSED.md (regenerate with the >4-line IL elision policy)"
             )
 
+    # opt-scan.md and loop-complete.md mirror their dump masters verbatim (the
+    # masters carry no raw-IL bodies, so no elision policy applies); a stale
+    # V3.0.1-era body (old IL= sizes) fails here.
+    mirror_pairs = {
+        "opt-scan.md": IL / f"opt-scan-{dump_label_suffix()}" / "OPT_SCAN.md",
+        "loop-complete.md": IL / f"loop-complete-{dump_label_suffix()}" / "inventory-loop-complete.md",
+    }
+    for doc_name, master in mirror_pairs.items():
+        doc_p = DOCS / "inventories" / doc_name
+        if not master.is_file():
+            fails.append(f"missing {master}")
+        elif doc_p.is_file():
+            doc_t = doc_p.read_text(encoding="utf-8", errors="replace")
+            mas_t = master.read_text(encoding="utf-8", errors="replace")
+            d1 = doc_t.find("\n- **") if doc_name == "opt-scan.md" else doc_t.find("\n## ")
+            m1 = mas_t.find("\n- **") if doc_name == "opt-scan.md" else mas_t.find("\n## ")
+            if d1 < 0 or m1 < 0 or doc_t[d1 + 1 :] != mas_t[m1 + 1 :]:
+                fails.append(
+                    f"docs/inventories/{doc_name} stale vs {master.name} (regenerate from the dump)"
+                )
+
     # every il/ reference in the docs must resolve (markdown links + bare file
     # mentions); il/ is git-ignored, so this gate runs locally only.
     il_ref_pat = re.compile(r"il/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\.(?:md|txt)")

@@ -26,16 +26,16 @@ UTC: 2026-07-16 10:27:14Z
 - `AIDirectorPlayerManagementComponent::Tick(Double)` IL=7
 - `AIDirectorPlayerManagementComponent::TickPlayerStates(Double)` IL=24
 - `AIDirectorPlayerManagementComponent::TickPlayerState(AIDirectorPlayerState,Double)` IL=6
-- `AIHordeSpawner::Tick(Double)` IL=210
+- `AIHordeSpawner::Tick(Double)` IL=228
 - no method `AIHordeSpawner::*Update*`
 - `AIScoutHordeSpawner::Update(World,Single)` IL=22
 - `AIScoutHordeSpawner::SpawnUpdate(World)` IL=129
 - `AIScoutHordeSpawner::UpdateHorde(World,Single)` IL=229
 - `AIScoutHordeSpawner::UpdateHorde(World,Single)` IL=229
 - `AIWanderingHordeSpawner::Update(World,Single)` IL=101
-- `AIWanderingHordeSpawner::UpdateSpawn(World,Single)` IL=140
+- `AIWanderingHordeSpawner::UpdateSpawn(World,Single)` IL=158
 - `AIWanderingHordeSpawner::UpdateHorde(Single)` IL=189
-- `AIWanderingHordeSpawner::UpdateSpawn(World,Single)` IL=140
+- `AIWanderingHordeSpawner::UpdateSpawn(World,Single)` IL=158
 - `AIWanderingHordeSpawner::UpdateHorde(Single)` IL=189
 - `GameManager::SaveLocalPlayerData()` IL=45
 - `GameManager::SaveWorld()` IL=7
@@ -53,15 +53,15 @@ UTC: 2026-07-16 10:27:14Z
 - `PersistentPlayerList::Write(BinaryWriter)` IL=73
 - `PersistentPlayerList::Write(String)` IL=44
 - `WorldState::SaveLoad(String,Boolean,Boolean,Boolean)` IL=76
-- `WorldState::SaveLoad(Stream,Boolean,Boolean,Boolean)` IL=884
+- `WorldState::SaveLoad(Stream,Boolean,Boolean,Boolean)` IL=926
 - `WorldState::Save(String)` IL=21
 - `WorldState::Save(Stream)` IL=7
 - `WorldState::SaveLoad(String,Boolean,Boolean,Boolean)` IL=76
-- `WorldState::SaveLoad(Stream,Boolean,Boolean,Boolean)` IL=884
+- `WorldState::SaveLoad(Stream,Boolean,Boolean,Boolean)` IL=926
 - `WorldState::Load(String,Boolean,Boolean,Boolean)` IL=102
-- `WorldState::<Load>g__DoExtraBackup|32_0(String,<>c__DisplayClass32_0&)` IL=23
+- `WorldState::<Load>g__DoExtraBackup|33_0(String,<>c__DisplayClass33_0&)` IL=23
 - `WorldState::SaveLoad(String,Boolean,Boolean,Boolean)` IL=76
-- `WorldState::SaveLoad(Stream,Boolean,Boolean,Boolean)` IL=884
+- `WorldState::SaveLoad(Stream,Boolean,Boolean,Boolean)` IL=926
 - no method `IChunkProvider::*Update*`
 - no method `IChunkProvider::*SaveRandomChunks*`
 - `ChunkProviderGenerateWorld::updateDecosAllowedForChunk(Chunk,Chunk,Chunk)` IL=306
@@ -271,7 +271,7 @@ UTC: 2026-07-16 10:27:14Z
 - `World::Save` IL=49
 - `World::SaveWorldState` IL=16
 - `WorldState::SaveLoad` IL=76
-- `WorldState::SaveLoad` IL=884
+- `WorldState::SaveLoad` IL=926
 - `WorldState::Save` IL=21
 - `GameManager::SaveAndCleanupWorld` IL=499
 - `GameManager::SaveLocalPlayerData` IL=45
@@ -316,7 +316,7 @@ UTC: 2026-07-16 10:27:14Z
 - 1x `Transform::SetPositionAndRotation`
 - 1x `EntityAlive::CrouchHeightFixedUpdate`
 
-### EntityAlive::Update IL=170
+### EntityAlive::Update IL=171
 - 2x `Utils::FastAbs`
 - 2x `Time::get_deltaTime`
 - 1x `Entity::Update`
