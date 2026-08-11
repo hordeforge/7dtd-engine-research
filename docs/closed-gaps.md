@@ -174,16 +174,23 @@ Merged into the optimizer project (do not keep optim narrative under `docs/` or 
 ## 9. Remaining open (still)
 
 Canonical open-item list is [`residuals.md`](residuals.md); this is a pointer for
-the gap-closing context only. All items here are **non-IL** residuals:
+the gap-closing context only. All items here are **non-IL** residuals.
+**Updated 2026-08-12:** items 1, 2, 4 and 5 below are now **closed** (see
+residuals.md for the closure evidence); the genuinely-open list is down to the
+third-party / native items (3, 6, and the EAC/A* internals in residuals.md):
 
-1. Unity **script execution order** among peers (not in IL).  
-2. Runtime **entity Behaviour.enabled** population on dedi (needs runtime or deeper spawn).  
+1. ~~Unity **script execution order** among peers~~ **Closed** (2026-08-09, runtime
+   Harmony probe; see residuals.md).  
+2. ~~Runtime **entity Behaviour.enabled** population on dedi~~ **Closed** (2026-08-10,
+   runtime; see residuals.md).  
 3. Full line-by-line **AstarPath** library (third-party; treat as black box).  
-4. **Region sector payload byte codec** only. The WorldState/Region **managed
-   structure is CLOSED** ([`save-region.md`](save-region.md), `WorldState.SaveLoad` IL=926);
-   just the compressed sector payload is left un-annotated ([`residuals.md`](residuals.md)).  
-5. ModEvents subscriber sets.  
-6. Post-V3.0.1 IL drift.
+4. ~~Region sector payload byte codec~~ **Closed (2026-08-12, byte-exact):** the
+   sector payload is fully decoded - V2 framing (len + 12-byte gap + data), the
+   `ttc\0` + Chunk.CurrentSaveVersion preamble, raw Noemax deflate, and the whole
+   `Chunk.save` body (layers, maps, channels, volumes) parse byte-exactly on 16
+   probe saves; the stock server boots the saves back (game-reader round-trip).  
+5. ~~ModEvents subscriber sets~~ **Closed** (2026-08-09/10, runtime; see residuals.md).  
+6. Post-V3.0.1 IL drift (process residual).
 
 ---
 
