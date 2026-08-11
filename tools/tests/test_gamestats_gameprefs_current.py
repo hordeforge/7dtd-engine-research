@@ -16,6 +16,7 @@ import sys
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
 DOC = os.path.join(REPO, "docs", "inventories", "gamestats-gameprefs.md")
+DOCS_DIR = os.path.join(REPO, "docs")
 ENUMS = ["EnumGameStats", "EnumGamePrefs", "EnumGameState"]
 
 SRC = r"""
@@ -96,12 +97,27 @@ def main() -> int:
                 bad.append(f"{enum}: doc rows {len(rows)} != DLL members {len(dll[enum])}")
             if not bad or all(enum not in b for b in bad):
                 bad.append(f"{enum}: tables diverge from the DLL (regenerate the doc)")
+    # the note + tables above; also: every `GameStats[N]` / `GamePrefs.Get*(N)`
+    # index cited anywhere in the corpus must be in enum range (82 / 317)
+    n_state = len(dll["EnumGameStats"])
+    n_prefs = len(dll["EnumGamePrefs"])
+    for root, _dirs, files in os.walk(DOCS_DIR):
+        for fn in files:
+            if not fn.endswith(".md"):
+                continue
+            txt = open(os.path.join(root, fn), encoding="utf-8", errors="replace").read()
+            for m in re.finditer(r"GameStats\[(\d+)\]", txt):
+                if int(m.group(1)) >= n_state:
+                    bad.append(f"{fn}: GameStats[{m.group(1)}] out of range (< {n_state})")
+            for m in re.finditer(r"(?:GetInt|GetFloat|GetBool)\((\d+)\)", txt):
+                if int(m.group(1)) >= n_prefs:
+                    bad.append(f"{fn}: GamePrefs index {m.group(1)} out of range (< {n_prefs})")
     if bad:
         for b in bad:
             print("FAIL:", b)
         return 1
     total = sum(len(v) for v in dll.values())
-    print(f"OK: {ENUMS[0]} ({len(dll[ENUMS[0]])}) + {ENUMS[1]} ({len(dll[ENUMS[1]])}) tables match the DLL")
+    print(f"OK: {ENUMS[0]} ({len(dll[ENUMS[0]])}) + {ENUMS[1]} ({len(dll[ENUMS[1]])}) tables match the DLL; cited indices in range")
     return 0
 
 
