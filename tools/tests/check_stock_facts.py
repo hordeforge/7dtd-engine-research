@@ -273,6 +273,17 @@ def check_zdtd(facts: dict, errors: list[str]) -> None:
     store = read(WS / "zdtd" / "src" / "world" / "store.zig")
     if store:
         must_match("zdtd y_dim", store, rf"pub const y_dim: i32 = {ydim};", errors)
+    # Cross-repo: the divergence register must carry the machine-checked
+    # WaterLevel so zdtd's sea_level=64 divergence stays tied to the pin.
+    water = facts["behaviour"].get("world_water_level")
+    prov = read(WS / "zdtd" / "docs" / "PROVENANCE.md")
+    if water is not None and prov:
+        must_match(
+            "zdtd PROVENANCE WaterLevel register",
+            prov,
+            r"62\.88",
+            errors,
+        )
 
 
 def main() -> int:
