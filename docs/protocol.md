@@ -97,13 +97,16 @@ Constants:
 
 ### Live capture head (PackageIds, channel 0)
 
-Hex prefix validated in loadgen golden:
+Hex prefix validated in loadgen golden (V3.0.1-era capture; V3.1.0 re-captured
+in-session 2026-08-11 - only the version triple differs):
 
 ```text
-00 BC 12 00 00  00 00  01 00  B8 12 00 00  00 00  ...
+V3.1.0 live:  00 BC 12 00 00  00 00  01 00  B8 12 00 00  00 00  01 03 00 00 00  0A 00 00 00  0E 00 00 00  BD 00 00 00  14 ...
+V3.0.1 era:  00 BC 12 00 00  00 00  01 00  B8 12 00 00  00 00  01 03 00 00 00  01 00 00 00  04 00 00 00  BD 00 00 00  ...
 ch payload=0x12BC  c e  cnt=1  content=0x12B8  pkgId=0
-version: release=1 major=3 minor=1 build=4
-map count: 0xBD = 189
+version (V3.1.0): release=1 major=3 minor=10 build=14
+version (V3.0.1): release=1 major=3 minor=1 build=4
+map count: 0xBD = 189   first name: len 0x14 "NetPackagePackageIds"
 ```
 
 Display version packing: `VersionLongString` → **`V 3.1.0`** for Minor=10 Build=14 (see loadgen; Constants.cVersion*).
