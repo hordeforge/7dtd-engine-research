@@ -628,6 +628,12 @@ flowchart TB
 
 - **Core dedicated path:** boot, game-state tick, player persistence, and save all
   run on the headless server every session.
+- **World time pauses with zero connected players (runtime-observed 2026-08-11):**
+  on a stock V3.1.0 dedicated server, `worldTime` does not advance while no
+  player is connected (telnet `settime` jumps apply, then the clock freezes until
+  the next player joins). Any live-sim observation (air drops, hordes, chunk
+  activity) therefore needs a connected client; a dead client does not count
+  (see the airdrop run in [aidirector.md](aidirector.md)).
 - **Residual:** EAC integrity verification (native anticheat, not a managed boot
   gate; see [platform-auth.md](platform-auth.md)); the save byte codec detail
   ([save-region.md](save-region.md)); XML game-mode/content config.
