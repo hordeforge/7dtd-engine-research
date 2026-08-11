@@ -21,6 +21,7 @@ import sys
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
 INV = os.path.join(REPO, "docs", "inventories", "console-command-list.md")
+TSV = os.path.join(REPO, "docs", "inventories", "console-command-list.tsv")
 CMDMAP = os.path.join(TOOLS, "bin", "CmdMap.exe")
 
 # Number of primary commands (one per concrete ConsoleCmdAbstract subclass).
@@ -117,6 +118,12 @@ def main() -> int:
     for line in cmdmap.splitlines()[1:]:  # skip header
         name, _, typ = line.partition("\t")
         dll_primary[name] = typ
+
+    # the committed CmdMap tsv (regen.sh artifact) must equal fresh output
+    if os.path.exists(TSV):
+        committed_tsv = open(TSV, encoding="utf-8").read()
+        if committed_tsv != cmdmap:
+            bad.append("docs/inventories/console-command-list.tsv stale vs CmdMap.exe (rerun regen.sh)")
 
     src = "/tmp/cmdnames_check.cs"
     with open(src, "w") as f:
