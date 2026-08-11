@@ -14,6 +14,7 @@ tools/
   parity/     cross-version wire-surface snapshot + diff (steamcmd)
   re-scratch/ one-off Zig reversers for on-disk file formats
   tests/      dump-regen + coverage regression tests
+  facts.py    quick view of the machine-checked stock pins (make facts)
   build.sh    compiles src/ (and best-effort legacy/) into bin/
 ```
 
