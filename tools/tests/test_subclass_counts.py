@@ -131,6 +131,58 @@ def main() -> int:
     subprocess.run(["mcs", "-r:%s" % cecil, src, "-out:" + EXE], check=True)
     env = dict(os.environ)
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
+
+    # key-methods fingerprint column (item-actions / minevent-actions): every
+    # listed method must exist on the leaf type or its base chain
+    meth_src = r"""
+using System;
+using System.Linq;
+using Mono.Cecil;
+class LeafMeth {
+  static void Main(string[] a) {
+    var r = new DefaultAssemblyResolver();
+    r.AddSearchDirectory(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(a[0])));
+    var asm = AssemblyDefinition.ReadAssembly(a[0], new ReaderParameters { AssemblyResolver = r });
+    foreach (var t in asm.MainModule.GetTypes()) {
+      var names = t.Methods.Select(m => m.Name).Distinct().OrderBy(x => x).ToList();
+      Console.WriteLine(t.Name + "\t" + (t.BaseType == null ? "" : t.BaseType.Name) + "\t" + string.Join(",", names));
+    }
+  }
+}
+"""
+    mexe = "/tmp/leafmeth_check.exe"
+    with open("/tmp/leafmeth_check.cs", "w") as f:
+        f.write(meth_src)
+    subprocess.run(["mcs", "-r:%s" % cecil, "/tmp/leafmeth_check.cs", "-out:" + mexe], check=True)
+    mout = subprocess.run(
+        ["mono", mexe, asm], capture_output=True, text=True, env=env, check=True,
+    ).stdout
+    methods, base_of = {}, {}
+    for line in mout.splitlines():
+        parts = line.split("\t")
+        if len(parts) != 3:
+            continue
+        methods[parts[0]] = set(parts[2].split(",")) if parts[2] else set()
+        base_of[parts[0]] = parts[1]
+
+    def has_method(typ, meth):
+        seen = set()
+        while typ and typ not in seen:
+            seen.add(typ)
+            if meth in methods.get(typ, set()):
+                return True
+            typ = base_of.get(typ, "")
+        return False
+
+    key_bad = []
+    for inv in ("item-actions.md", "minevent-actions.md"):
+        text = open(os.path.join(INV, inv), encoding="utf-8").read()
+        for m in re.finditer(r"^\| `([^`]+)` \| [^|]+ \| [^|]+ \| ([^|]+) \|", text, re.M):
+            typ, kms = m.group(1), m.group(2)
+            for km in [x.strip() for x in kms.split(",") if x.strip()]:
+                if not has_method(typ, km):
+                    key_bad.append(f"{inv}: `{typ}` key method `{km}` not found on type or bases")
+
     args = [",".join(
         ("closed:" if mode == "closed" else "seq:") + target
         for _, mode, target, _, _, _ in CHECKS)]
@@ -181,7 +233,11 @@ def main() -> int:
         for b in bad:
             print("FAIL:", b)
         return 1
-    print(f"OK: {len(CHECKS)} leaf inventories consistent with the DLL")
+    if key_bad:
+        for b in key_bad:
+            print("FAIL:", b)
+        return 1
+    print(f"OK: {len(CHECKS)} leaf inventories consistent with the DLL, key-method fingerprints valid")
     return 0
 
 
