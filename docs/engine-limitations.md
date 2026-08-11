@@ -60,6 +60,7 @@ Live APM + loadgen ladders (2026-07-17/18). Detail: [measured-scaling.md](../../
 |---|---|---|---|---|
 | **Player axis** | `ConnectionManager.Update` ~**O(N^2.27)** per-call; `NetEntityDistribution.OnUpdateEntities` ~**O(N^2.26)** | Death spiral near **~450-500** bots (gmUpdate multi-second) | **Hard** | Spatial interest cull, batch serialize, lower player count, EfficientServer net work |
 | **Entity axis** | TickEntities / AI ~**O(N)** | Volume wall, not bad complexity | **Hard** | MaxSpawnedZombies, AI LOD, path admission, blood-moon shape |
+| **Registry caps** | stock constants (machine-pinned): `ChunkManager.cMaxChunksSupported` **100000**, `cMaxChunksAroundPlayers` **15**, `VehicleManager.cMaxVehicles` **500**, `DroneManager.cMaxDrones` **500**, `TurretTracker.cMaxTurrets` **500** (all RE-pinned in `test_tuned_constants.py`) | hard registries: hit the cap and creation fails | **Soft** | stay under the caps; a clone must match or raise them |
 | **Chunk load/send vs players** | DetermineChunks / SendChunks super-linear in player ladder | Spread players open more chunks and bandwidth | **Hard** | View distance, world choice, mesh budgets |
 | **Path / graph rebuild churn** | Top alloc sites under heavy load (`AstarVoxelGrid.InitScan`, …) | GC STW follows alloc, not just entity count | **Hard** | Path throttle, graph budgets; GC guard only helps moderate churn |
 | **No free lunch from cores** | Single main loop | Dual-socket / huge core counts do not buy TPS | **Ops** | Prefer high clock + one CCD + multi-channel RAM |
