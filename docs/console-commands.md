@@ -53,6 +53,14 @@ frames on the main thread.
 
 ## 2. Command dispatch (state machine)
 
+**Live registry verified 2026-08-12:** a stock V3.1.0 dedicated `help` dump
+lists every command in the catalog
+([inventories/console-command-list.md](inventories/console-command-list.md),
+188 rows) plus the standard mod set (`apm`/`apmbridge` from 7dtd-apm-bridge,
+`efficientserver`, `dynamic mesh`/`dynamic mesh debug` with aliases `zz`/`zd`).
+No documented command is absent from the live registry; no undocumented command
+appears on a clean server. The registry matches the IL-derived catalog exactly.
+
 `ExecuteAsync`/`ExecuteSync` funnel into `executeCommand(line, senderInfo)`, which
 tokenizes the line (quote-aware, `tokenizeCommand`), looks up the command by its
 first token, gates on `CanExecuteForDevice` / `AllowedInMainMenu`, and runs
