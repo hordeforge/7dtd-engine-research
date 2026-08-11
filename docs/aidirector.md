@@ -984,6 +984,15 @@ player; `partySpawner = new GameStagePartySpawner(world, "BloodMoonHorde")` +
 `AddMember(player)`; set `player.bloodMoonParty`; random `spawnBaseDir` 0..359;
 `groupIndex = -1`. Third ctor arg unused.
 
+**Gamestage data gate (stock `gamestages.xml`, verified 2026-08-12):** the
+`BloodMoonHorde` spawner's **stage 1 carries the comment `GS1 DOESN'T SPAWN`**
+(`<spawn group="feralHordeStageGS1" num="2" maxAlive="3" duration="1"/>` with
+the GS1-no-spawn note) - at gamestage 1 the blood-moon party forms but spawns
+no zombies, which is why a live session with GS-1 bots observed the party line
+("Party of 1, GS 1 ... enemy max 2") with zero party zombie spawns. Stage 2+
+spawns the feral horde stages. Any live BM-spawn probe must set the player's
+gamestage above 1 (`gamestage <id> <stage>`).
+
 **`PlayerLoggedOut` (IL=16):** `RemoveMember(player, removeID=false)` (keeps id
 in set); clamp `nextPlayer` into member count.
 
