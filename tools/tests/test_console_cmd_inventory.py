@@ -72,10 +72,15 @@ class NameSet {
           if (v != null) names.Add(v);
         }
       }
-      // de-dup while keeping order (a name may appear via both forms)
       var seen = new HashSet<string>();
       var uniq = names.Where(x => seen.Add(x)).ToList();
-      Console.WriteLine(t.Name + "\t" + string.Join("|", uniq));
+      var dm = t.Methods.FirstOrDefault(x => x.HasBody && x.Name == "getDescription");
+      string desc = "";
+      if (dm != null) {
+        var l = dm.Body.Instructions.FirstOrDefault(i => i.OpCode.Code == Code.Ldstr);
+        if (l != null) desc = (string)l.Operand;
+      }
+      Console.WriteLine(t.Name + "\t" + string.Join("|", uniq) + "\t" + desc.Replace("\n", "\\n"));
     }
   }
 }
@@ -130,9 +135,14 @@ def main() -> int:
         ["mono", EXE, asm], capture_output=True, text=True, env=env, check=True,
     ).stdout
     name_sets = {}
+    descriptions = {}
     for line in probe.splitlines():
-        typ, _, names = line.partition("\t")
+        parts = line.split("\t")
+        if len(parts) != 3:
+            continue
+        typ, names, desc = parts[0], parts[1], parts[2].replace("\\n", "\n")
         name_sets[typ] = set(names.split("|")) if names else set()
+        descriptions[typ] = desc
 
     primaries, aliases = parse_inventory()
     bad = []
@@ -158,6 +168,19 @@ def main() -> int:
             bad.append(f"alias `{name}` names unknown type {typ}")
         elif name not in name_sets[typ]:
             bad.append(f"alias `{name}` is not a registered name of {typ} (have {sorted(name_sets[typ])})")
+    # Does-column descriptions must equal getDescription (whitespace-normalized:
+    # the doc renders embedded newlines as spaces; empty getDescription becomes
+    # "(no description)")
+    text_inv = open(INV, encoding="utf-8").read()
+    norm_ws = lambda s: re.sub(r"\s+", " ", s).strip()
+    for m in re.finditer(r"^\| `([^`]+)` \| `([^`]+)`(?: \(alias\))? \| [^|]* \| (.*?) \|$", text_inv, re.M):
+        name, typ, does = m.group(1), m.group(2), m.group(3).strip()
+        if typ not in descriptions:
+            continue
+        want = "" if does in ("(no description)", "") else does
+        have = descriptions[typ].replace("\\n", "\n")
+        if norm_ws(have) != norm_ws(want):
+            bad.append(f"`{name}` description: doc `{want[:50]}` != getDescription `{have[:50]}`")
     # the inventory must self-state the primary count
     text = open(INV, encoding="utf-8").read()
     if not re.search(rf"\b{EXPECTED_PRIMARY}\b", text):
@@ -166,7 +189,7 @@ def main() -> int:
         for b in bad:
             print("FAIL:", b)
         return 1
-    print(f"OK: {len(dll_primary)} primary commands + {len(aliases)} aliases consistent with the DLL")
+    print(f"OK: {len(dll_primary)} primary commands + {len(aliases)} aliases, descriptions consistent with the DLL")
     return 0
 
 
