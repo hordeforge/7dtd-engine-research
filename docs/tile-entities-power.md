@@ -337,6 +337,10 @@ copy of its wire list and parent position; on load it reconnects by world positi
 (the wire-node `Vector3EqualityComparer` singleton is the position comparer
 `WireNode`/`WireManager` use for wire-point containment checks on their
 `List<Vector3>` points).
+
+**`FastWireNode` constants (IL):** `BASE_WIRE_RADIUS` = **0.01**,
+`BASE_MIN_WIRE_DIP` = **0**, `BASE_MAX_WIRE_DIP` = **0.25** (the wire sag),
+`NODE_COUNT` = **15** (max nodes per wire), `cLayerMaskRayCast` = **65537**.
 the `PowerItemDictionary` values into the result list.
 `GetPowerItemByWorldPos(pos)` (IL=12) is the dictionary lookup (null on
 miss); `SetTileEntityUpdate(te, shouldUpdate)` (IL=14) adds/removes the TE

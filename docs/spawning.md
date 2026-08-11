@@ -160,6 +160,10 @@ and runs `LoadAssets(isSync)`.
 `cClientIdStart` = **-2**, `cClientIdNone` = **0**, `cAttachSlotNone` = **-1**,
 `cIgnoreDamage` = **-1**, `cKillAnythingDamage` = **99999** (the universal
 damage value), `cPhysicsMasterTickRate` = **2**, `cWaterHeightScale` = **1.1**.
+
+**`EntityFactory` constants (IL):** `cFirstEntityID` = **1**, `StartEntityID` =
+**171**, cached pools `cNumberOfCachedFallingBlocks` = **150** /
+`cNumberOfCachedItems` = **20**.
 `CreateEntity(ecd)` (IL=7) is the **sync** counterpart:
 `Start(ecd, true)` then `CompleteEntity()`, returning `op.entity`; the
 convenience overload (IL=17) allocates `nextEntityID++` and builds the

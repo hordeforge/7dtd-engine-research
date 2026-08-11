@@ -821,6 +821,10 @@ Generic infrastructure, collections, DTOs, and delegates used across the game (c
 | `UniqueIdEqualityComparer` | Object | Equals, GetHashCode |
 | `UnityDistantTerrain` | Object | UpdateVoxelChunkInfo, BuildAroundPos, UpdateChunkHeights |
 | `UnityDistantTerrainWaterPlane` | Object | createDynamicWaterPlane_Step1, createDynamicWaterPlane_Step2, Cleanup |
+
+**`DistantTerrain` constants (IL):** world size `cWorldSizeX`/`cWorldSizeZ` =
+**20000**, `DT_ViewDistance` = **2000**, `NbChunkToBeUpdated` = **15**,
+`MaxNbDChunkOnAsyncUpdate` = **50** (the distant-terrain LOD update tuning).
 | `UnixLinkFile` | Object | Dispose, set_Context, set_Name |
 | `UpgradeableReadScope` | ValueType | Dispose |
 | `UpscalerMode` | Object | ToString |

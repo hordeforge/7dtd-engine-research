@@ -390,6 +390,26 @@ CONSTS = {
         "cUpdateCoMaxTimeUs": 900,
         "FILEVERSION": 6,
     }),
+    "EntityFactory": ("spawning.md", {
+        "cFirstEntityID": 1,
+        "StartEntityID": 171,
+        "cNumberOfCachedFallingBlocks": 150,
+        "cNumberOfCachedItems": 20,
+    }),
+    "DistantTerrain": ("client-side-surface.md", {
+        "cWorldSizeX": 20000,
+        "cWorldSizeZ": 20000,
+        "DT_ViewDistance": 2000,
+        "NbChunkToBeUpdated": 15,
+        "MaxNbDChunkOnAsyncUpdate": 50,
+    }),
+    "FastWireNode": ("tile-entities-power.md", {
+        "BASE_WIRE_RADIUS": 0.01,
+        "BASE_MIN_WIRE_DIP": 0,
+        "BASE_MAX_WIRE_DIP": 0.25,
+        "NODE_COUNT": 15,
+        "cLayerMaskRayCast": 65537,
+    }),
     "BlockLiquidv2": ("light-mesh-water.md", {
         "MAX_EMISSIONS": 3,
         "blockUpdatesPerSecond": 16,
