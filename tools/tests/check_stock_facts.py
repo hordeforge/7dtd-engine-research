@@ -87,6 +87,8 @@ def check_research(facts: dict, errors: list[str]) -> None:
     if str(ydim) not in cov and f"ChunkBlockYDim={ydim}" not in cov:
         # coverage mentions ChunkBlockYDim=256 historically
         must_match("docs/coverage.md YDim", cov, rf"ChunkBlockYDim\s*=\s*{ydim}|YDim.*{ydim}", errors)
+    if str(layers) not in cov and f"ChunkBlockLayers={layers}" not in cov:
+        must_match("docs/coverage.md layers", cov, rf"ChunkBlockLayers\s*=\s*{layers}|Layers.*{layers}", errors)
 
     # Enum index sizes: EnumGameStats/EnumGamePrefs member counts pin the
     # gamestats-gameprefs inventory; the docs must cite 82 + 317.
