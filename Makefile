@@ -69,3 +69,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
+
+# Everything in one command: doc gates (no DLL), pins, readiness, facts view.
+# make test (the DLL-dependent suite) is separate: it needs the live game.
+verify: test-docs stock-check readiness facts
