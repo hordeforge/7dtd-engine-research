@@ -167,7 +167,7 @@ local install. See `re-scratch/README.md`.
 | `tests/test_committed_inventories_current.py` | Generated inventories (`netpackage-bodies`, `coverage-report`) are current against the live DLL. |
 | `tests/test_transport_closure_claims.py` | No stale native-LiteNetLib / unknown-peer-order claims in the docs. |
 | `tests/test_coverage_consistency.py` | `docs/coverage.md` audit table lists every narrative doc; census rows match `stock_facts.json`. |
-| `tests/test_doc_link_integrity.py` | Every doc reachable from `INDEX.md`; 0 dead internal links; every root doc carries the `**Hub:**` backlink. |
+| `tests/test_doc_link_integrity.py` | Every doc reachable from `INDEX.md`; 0 dead internal links; every root doc carries the `**Hub:**` backlink; every `../` cross-repo link resolves to a real file (wrong-depth citations fail). |
 | `tests/test_re_dump_regen.py` | Compiles `legacy/DumpFrameEntries` and regenerates non-empty inventory dumps from the local dedicated DLL (needs install + mcs/mono). |
 | `tests/bench_version_update_tooling.py` | Version-update tooling benchmark (`make readiness`). |
 
