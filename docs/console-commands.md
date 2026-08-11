@@ -446,6 +446,12 @@ world, `Origin.Reposition(Vector3.zero)` ("Set floating origin to off"); bare
 the Origin reposition itself is gated off (`IsDedicatedServer` early-ret,
 [residuals.md](residuals.md) 4), so `off` only flips the flag there.
 
+**`ConsoleCmdPathTest` (`pathtest`) is client-only** (Execute IL=103 begins
+with `if (GameManager.IsDedicatedServer) return;` - a dedicated no-op), so it
+is irrelevant to the server surface despite its stock description. Client-side
+it toggles path-test flags (`canBreakBlocks`, `climbladders`, ...) with
+`+`/`-`-prefixed arguments.
+
 ---
 
 ## Related docs
