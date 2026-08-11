@@ -104,7 +104,11 @@ fields confirmed: `SpawnPointList.Read` starts with a **version byte** (0 here)
 + i32 count (0 - Navezgane spawn points come from `spawnpoints.xml`, not the
 state file), per point = Vector3 (3xf32) + heading f32 + team i32 +
 activeInGameMode i32 (+ u16 only when list version == 2); `nextEntityID` 243-494;
-`saveDataLimit -1`; `dynamicSpawnerState` 2 B (`01 00`), `aiDirectorState`
+`saveDataLimit -1`; `providerId` **4 = ChunkDataDriven** on every probe save
+(consistent with chunk-providers.md: Navezgane and RWG output run
+`ChunkProviderGenerateWorldFromRaw`, not Disc - the cctor Disc=1 default only
+survives for world folders that ship their own `/Region` files);
+`dynamicSpawnerState` 2 B (`01 00`), `aiDirectorState`
 77 B; the three volume blobs each carry the **version-23 save-version i32**
 (1) + i32 byte-length + blob (sleeper volumes grow as POIs load: 5 KiB fresh ->
 23-59 KiB explored); **weather size prefix counts itself** (observed 208 =

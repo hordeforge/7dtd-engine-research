@@ -94,7 +94,8 @@ def check_main_ttw(path, checks):
     off += 8
     ticks = struct.unpack_from("<Q", buf, off)[0]
     off += 8
-    checks.append(f"  chunkCount={chunk_count} providerId={provider} (1=Disc) seed={seed} "
+    checks.append(f"  chunkCount={chunk_count} providerId={provider} (4=ChunkDataDriven, "
+                  f"the Navezgane/RWG value; 1=Disc) seed={seed} "
                   f"worldTime={world_time} timeInTicks={ticks}")
 
     # --- full WorldState tail (version 23 gates; WorldState.SaveLoad IL=926) ---
