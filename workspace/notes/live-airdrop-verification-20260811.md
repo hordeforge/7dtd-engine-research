@@ -32,9 +32,10 @@
 - The runtime day-count / time-of-day statics come from
   `SandboxOptions.SetupAirDropTimeRanges` (options 52/54), not the cctor
   defaults (3/3, noon). The observed **3-day gap at 12:00** (day 4, then day 7)
-  implies the applied day-count was 4/4-equivalent
-  (`RandomRange(4, 5) - 1 = 3` deterministically); the cctor 3/3 would give a
-  2-day gap. `GameRandom` int ranges are strictly max-exclusive (the classic
+  reflects the applied option-driven statics; a live `getgamestat
+  AirDropFrequency` read **3** (not the config pref 0 - the sandbox
+  option/preset default overrides the pref). The cctor 3/3 would give a 2-day
+  gap. `GameRandom` int ranges are strictly max-exclusive (the classic
   `ret == 2147483647 -> ret--` guard is present in `InternalSample`).
 - Drop requires at least one alive tracked player (`SpawnAirDrop` IL=59).
 - `AirDropFrequency` (option 52 / stat 51 / pref) **is consumed**: it feeds

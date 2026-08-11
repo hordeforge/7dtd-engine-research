@@ -139,10 +139,10 @@ always). **Live-verified 2026-08-11**
 server logged `AIAirDrop: Computed flight paths for 1 aircraft` ->
 `Spawned aircraft` -> `Spawned supply crate` -> `EntitySupplyCrate goActive`,
 then rescheduled "Next Airdrop: 7 12:00" (day 4 + 3). The observed **3-day gap
-at exactly 12:00 implies the runtime day-count statics were 4/4-equivalent**
-(`RandomRange(4, 5) - 1 = 3` deterministically), i.e. under the loadgen config
-the applied `AirDropFrequency` option mapped outside the switch default - the
-statics are option-driven, not cctor-driven (the cctor 3/3 would give a
+at exactly 12:00** reflects the applied option-driven statics, and a live
+`getgamestat AirDropFrequency` read **3** (not the config's pref 0) - the pref
+is overridden by the sandbox option/preset default, so the runtime day-counts
+were the option-mapped values, not the cctor 3/3 fallback (which would give a
 2-day gap). The drop needs at least
 one **alive** tracked player: `SpawnAirDrop` (IL=59) returns false when the
 alive-player list is empty (a dead loadgen bot held the drop). `Tick` (IL=75)
