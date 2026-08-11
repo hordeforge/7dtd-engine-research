@@ -155,13 +155,20 @@ capped at 258 MiB for the map data.
 Path: `{playerDir}/{playerId}.{EXT}` with atomic `*.tmp` write and `*.bak` backup
 (Save IL=129). Separate `*.meta` via `PlayerMetaInfo.Write`.
 
-**On-disk header (verified):**
+**On-disk header (verified, IL):**
 
 ```text
 't' 't' 'p' 0x00     // magic ttp\0
 version : u8         // written as literal 59 on current Save
 // then PlayerDataFile.Write body
 ```
+
+**Dedicated observation (2026-08-12):** 8 live stock V3.1.0 sessions with
+Local-platform test clients (join, wander, `saveworld`, clean disconnect)
+produced **zero** `Player/*.ttp` files - the live player surface on dedicated is
+`players.xml` (persistent player data) plus the per-world files; the `.ttp`
+codec above stays IL-pinned (not yet live-observed). No `Player/` directory is
+ever created in these sessions.
 
 Load (IL=223) checks magic; on failure rolls to `*.bak`. Network form used by
 `NetPackagePlayerData` / join `PlayerId`:
