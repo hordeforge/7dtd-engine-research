@@ -47,3 +47,15 @@ spawned a party zombie with the loadgen bots (they wander/drown; a
 stationary no-action bot survived but the party still produced no
 "SpawnZombie grp" line - a spawn-position/gamestage nuance, not the cap
 gate). Night scout hordes (zombieScreamer) spawn independently.
+
+## Addendum 2026-08-12: GS1 data gate confirmed live
+
+The BM party never spawned a zombie across three sessions (BMSpawnProbe,
+BMGSProbe). Root cause is STOCK DATA, not the probe: the BloodMoonHorde
+spawner's gamestage-1 stage carries the explicit comment `GS1 DOESN'T SPAWN`
+(`gamestages.xml`, aidirector.md). The loadgen bots sit at gamestage 1, so
+stock legitimately spawns nothing. Attempts to raise the bot's gamestage via
+`givexp <id> 5000000` + reconnect did NOT change the party line (stays
+"GS 1") - the loadgen bot's gamestage does not rise in this setup, another
+loadgen-side limitation for BM probes. Night scout hordes (zombieScreamer)
+spawn independently of the party.
