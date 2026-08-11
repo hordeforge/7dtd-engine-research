@@ -16,7 +16,7 @@ import sys
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
 DOC = os.path.join(REPO, "docs", "inventories", "gamestats-gameprefs.md")
-ENUMS = ["EnumGameStats", "EnumGamePrefs"]
+ENUMS = ["EnumGameStats", "EnumGamePrefs", "EnumGameState"]
 
 SRC = r"""
 using System;
@@ -31,7 +31,7 @@ class EnumNames {
       var t = asm.MainModule.GetTypes().First(x => x.Name == tn);
       var names = t.Fields.Where(f => f.HasConstant)
                    .OrderBy(f => Convert.ToInt64(f.Constant))
-                   .Select(f => f.Name);
+                   .Select(f => f.Name + "=" + f.Constant);
       Console.WriteLine(tn + ":" + string.Join(",", names));
     }
   }
@@ -72,16 +72,22 @@ def main() -> int:
 
     doc = open(DOC, encoding="utf-8").read()
     bad = []
-    for i, enum in enumerate(ENUMS):
-        nxt = ENUMS[i + 1] if i + 1 < len(ENUMS) else "ZZZ_NO_SUCH_SECTION"
+    # the hand-annotated EnumGameState values in the doc's note must match the DLL
+    want_state = ["Off=-1", "Loading=0", "Running=1", "Over=2"]
+    have_state = [m for m in dll.get("EnumGameState", []) if "=" in m]
+    if have_state != want_state:
+        bad.append(f"EnumGameState values: DLL {have_state} != doc note {want_state}")
+    for i, enum in enumerate(ENUMS[:2]):
+        nxt = ENUMS[i + 1] if i + 1 < 2 else "ZZZ_NO_SUCH_SECTION"
         rows = table_rows(doc, enum, nxt)
-        if rows != dll[enum]:
+        dll_names = [m.split("=")[0] for m in dll[enum]]
+        if rows != dll_names:
             # report first divergence compactly
-            for j, (a, b) in enumerate(zip(rows, dll[enum])):
+            for j, (a, b) in enumerate(zip(rows, dll_names)):
                 if a != b:
                     bad.append(f"{enum}[{j}]: doc `{a}` != DLL `{b}`")
                     break
-            if len(rows) != len(dll[enum]):
+            if len(rows) != len(dll_names):
                 bad.append(f"{enum}: doc rows {len(rows)} != DLL members {len(dll[enum])}")
             if not bad or all(enum not in b for b in bad):
                 bad.append(f"{enum}: tables diverge from the DLL (regenerate the doc)")
