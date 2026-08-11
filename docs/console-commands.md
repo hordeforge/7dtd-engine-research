@@ -412,6 +412,27 @@ is in the framework sections above; per-command effects are the catalog's role.
 | `ConsoleCmdWorldChunkReset` | `worldchunkreset` | Resets all unprotected chunks across the world. |
 | `ConsoleCmdXui` | `xui` | Execute XUi operations |
 
+**`ConsoleCmdPIRS` (the `pirs` command) decoded from `Execute` IL=274:** the
+stock `getDescription` is literally `tbd`, so the row above is faithful, but the
+command is real. It drives the Player Input Recording System (a perf-testing
+input recorder):
+- `pirs reset <world>` - deletes `<saveDir>/auto.rec` ("Deleted auto.rec from X"
+  / "Savegame had no recordings").
+- `pirs play` - `PlayerInputRecordingSystem.Instance.Reset(false)` then
+  `GameManager.bPlayRecordedSession = true`, `bRecordNextSession = false`
+  ("Start playing").
+- `pirs record` - `Reset(true)`, `bPlayRecordedSession = false`,
+  `bRecordNextSession = true` ("Start recording").
+- `pirs stop` - clears both `GameManager` flags ("Stop recording").
+- `pirs save <name>` / `pirs load <name>` - `PlayerInputRecordingSystem`
+  `Save` / `load` ("Saving to" / "Loading from").
+- bare `pirs <saveName>` - refuses in a running game ("Please start recording
+  from the main menu") and when connected to a server ("Recording only possible
+  in SP"); otherwise copies `<saveDir>` to `<saveDir>_perftest` (deleting an
+  existing copy) and switches `GameName`/`GameMode` gameprefs so a recording
+  session can start from a throwaway creative-mode copy. Only the Navezgane
+  world is supported ("Only Navezgane is supported for now").
+
 ---
 
 ## Related docs
@@ -427,6 +448,7 @@ is in the framework sections above; per-command effects are the catalog's role.
 
 ## Changelog
 
+- **2026-08-11:** `ConsoleCmdPIRS` (`pirs`) decoded from `Execute` IL=274: the Player Input Recording System (reset/play/record/stop/save/load + bare `pirs <saveName>` perftest-copy flow; stock getDescription is literally `tbd`).
 - **2026-08-11:** Console IL re-verified: SdtdConsole.Update IL=60, executeCommand IL=149, ConnectionManager.ServerConsoleCommand IL=125, NetPackageConsoleCmdClient write IL=31 / ProcessPackage IL=19, NetPackageConsoleCmdServer write IL=8, CommandAllowedFor IL=12, TelnetConnection HandlerThread IL=66 / handleReading IL=60, LoginAttempts.LogAttempt IL=14 / IsBanned IL=20 (exact).
 - **2026-08-10:** Console IL sizes re-verified: SdtdConsole.Update IL=60, executeCommand IL=149, ConnectionManager.ServerConsoleCommand IL=125, NetPackageConsoleCmdClient.ProcessPackage IL=19 (exact).
 - **2026-08-08:** Command index section added (narrates the 141 catalogued
