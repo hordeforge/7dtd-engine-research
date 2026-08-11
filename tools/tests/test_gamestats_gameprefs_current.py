@@ -109,6 +109,13 @@ def main() -> int:
             for m in re.finditer(r"GameStats\[(\d+)\]", txt):
                 if int(m.group(1)) >= n_state:
                     bad.append(f"{fn}: GameStats[{m.group(1)}] out of range (< {n_state})")
+            # named citations (GameStats[N] (Name) / GameStats[N] Name) must match the table
+            for m in re.finditer(r"GameStats\[(\d+)\]\s*\(?`?([A-Za-z][A-Za-z0-9_]*)", txt):
+                idx, name = int(m.group(1)), m.group(2)
+                if idx < n_state:
+                    rows_i = table_rows(open(os.path.join(DOCS_DIR, "inventories", "gamestats-gameprefs.md"), encoding="utf-8").read(), "EnumGameStats", "EnumGamePrefs")
+                    if idx < len(rows_i) and rows_i[idx] != name and name not in ("GameState", "GameModeId"):
+                        bad.append(f"{fn}: GameStats[{idx}] named `{name}`, table says `{rows_i[idx]}`")
             for m in re.finditer(r"(?:GetInt|GetFloat|GetBool)\((\d+)\)", txt):
                 if int(m.group(1)) >= n_prefs:
                     bad.append(f"{fn}: GamePrefs index {m.group(1)} out of range (< {n_prefs})")
