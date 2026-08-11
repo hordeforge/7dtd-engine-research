@@ -38,7 +38,7 @@ post-update:
 census: tools
 	@test -f "$(ASM)" || (echo "ASM not found: $(ASM)"; exit 2)
 	MONO_PATH="$(TOOLS)/bin" mono "$(TOOLS)/bin/Census.exe" "$(ASM)"
-	python3 "$(TOOLS)/census-pct.py" "$(ASM)"
+	python3 "$(TOOLS)/census-pct.py" "$(ASM)" --history "$(ROOT)/workspace/outputs/census-history.csv"
 	@echo "--- machine-checked stock pins ---"
 	python3 "$(TOOLS)/facts.py"
 
