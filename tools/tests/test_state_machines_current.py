@@ -18,6 +18,10 @@ COMMITTED = os.path.join(REPO, "docs", "inventories", "state-machines.md")
 
 
 def main() -> int:
+    import shutil
+    if shutil.which("mono") is None:
+        print("SKIP: mono not installed (state-machines regen is a local gate)")
+        return 0
     env = dict(os.environ)
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
     with tempfile.TemporaryDirectory() as td:
