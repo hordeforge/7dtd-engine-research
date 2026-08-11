@@ -26,6 +26,10 @@ stock-sync:
 stock-check:
 	cd "$(TOOLS)" && ./stock-sync.sh --check-only
 
+# Quick view of the machine-checked stock pins (version, sim, behaviour).
+facts:
+	python3 "$(TOOLS)/facts.py"
+
 post-update:
 	cd "$(TOOLS)" && ASM="$(ASM)" ./post-update.sh
 
