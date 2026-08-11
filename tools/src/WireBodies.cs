@@ -162,6 +162,13 @@ static class WireBodies {
     sb.AppendLine("cloning.");
     sb.AppendLine();
     sb.AppendLine("Total packages with an extractable `write()` body: **" + types.Count + "**.");
+    var withWrite = new HashSet<string>(types.Select(t => t.Name));
+    var noWrite = all.Values
+      .Where(t => t.DeclaringType == null && t.Name.StartsWith("NetPackage") && t.Name != "NetPackageManager" && !withWrite.Contains(t.Name))
+      .OrderBy(t => t.Name).Select(t => t.Name).ToList();
+    if (noWrite.Count > 0)
+      sb.AppendLine("Not listed (no own `write()` body - inherited serialization, abstract bases, enums, or helpers): " +
+        string.Join(", ", noWrite.Select(n => "`" + n + "`")) + ".");
     sb.AppendLine();
 
     var nested = new HashSet<string>();

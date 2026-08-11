@@ -22,6 +22,7 @@ own doc/dump. Verify a load-bearing body against its `write`/`read` IL before
 cloning.
 
 Total packages with an extractable `write()` body: **183**.
+Not listed (no own `write()` body - inherited serialization, abstract bases, enums, or helpers): `NetPackageDirection`, `NetPackageEncryptionRequest`, `NetPackageEntityAddExpServer`, `NetPackageEntityAddScoreServer`, `NetPackageEntitySetSkillLevelServer`, `NetPackageEntityTeleport`, `NetPackageEntry`, `NetPackageInfo`, `NetPackageInventoryKeepOpen`, `NetPackageLogger`, `NetPackageMeasure`, `NetPackageMetrics`, `NetPackagePlayerDisconnect`, `NetPackageSleeperPassiveChange`.
 
 ## NetPackage
 `write` IL=6, 1 wire field(s).
