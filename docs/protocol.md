@@ -518,6 +518,16 @@ path (they set `get_Compress` themselves). The encryption handshake
 KeyExchangeComplete`) is now mapped; the cipher/KDF primitives remain native
 (residual).
 
+**Live-observed pre-auth order (2026-08-11 in-session capture):**
+`PackageIds` → client `PlayerLogin` → `AuthState` `authstate_nativeplatform`
+→ `AuthState` `authstate_encryption` → `AuthConfirmation` (empty body) →
+`AuthState` `authstate_authenticated` → traffic switches to encrypted
+(channel framing `enc=1`), then `PlayerLoginAnswer` + the chunk/map stream.
+The `AuthState.stateKey` values are stage strings; all three observed values
+match the documented agreement flow. `DiscordIdMappings` arrives right after
+`PlayerLoginAnswer` (body 5 bytes = `entityId:u32` + `remove:bool` shape when
+`entityId > 0`).
+
 ---
 
 ## 9. Channels
