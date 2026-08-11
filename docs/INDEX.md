@@ -50,6 +50,7 @@ delta file):
 | NetPackageTileEntity `teBlockId` + i32 length | [protocol-packages.md](protocol-packages.md) §6.12, [tile-entities-power.md](tile-entities-power.md) |
 | Held entities / wild chicken grab | [items.md](items.md) § Held entities, [entity-ai.md](entity-ai.md) |
 | WorldState.SaveLoad IL=926 / CurrentSaveVersion=23 | [save-region.md](save-region.md) |
+| Behaviour pins: WaterLevel **62.88**, item-drop lifetime **300 s**, per-frame load budget **50 ms** | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) `behaviour.*` (machine-checked by `check_stock_facts`) |
 | Join analytics `PlayerJoinServerEventData` | [server-lifecycle.md](server-lifecycle.md) |
 | Sandbox day/night density+respawn, chicken coop knobs, infection/hunger/thirst/stack | [sandbox-options.md](sandbox-options.md) §2 |
 | EOS/browse filters, GSI sandbox fields | [server-browser-prefabs.md](server-browser-prefabs.md), [network.md](network.md) |
