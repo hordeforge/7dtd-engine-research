@@ -1036,6 +1036,12 @@ per-task slot the `EAITaskList` loop above drives, and the unit the
 
 **0.05** is a fixed step (independent of `deltaTime` in this method), i.e. assumes ~20 Hz task list cadence when ticked.
 
+**`EAIBase` contract surface (all IL-verified):** `IsContinuous` (IL=2)
+marks a task that does not block others (checked by `isBestTask`); the
+targeting contract is `GetTargetPos` (IL=12) / `EntityHasTarget` (IL=10);
+`get_Random` (IL=4) / `get_RandomFloat` (IL=5) hand the shared `GameRandom`
+to tasks for their rolls.
+
 Path requests originate inside individual `EAIBase` / UAI task `Update`/`Start` methods via `EntityAlive.FindPath`.
 
 ### 5.3 UAI package path (`UAIBase`, when `UseAIPackages`)
