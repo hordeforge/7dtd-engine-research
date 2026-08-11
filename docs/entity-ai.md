@@ -112,6 +112,21 @@ more equipment / held-item / animation residual in later IL.
 6. Stun clear/set via avatar controller; can-see updates; dynamic ragdoll;
    trader-area teleport check.
 
+**`EntityAlive` tuning constants (IL):** `cTraderTeleportCheckTime` = **0.1** s,
+`cDamageImmunityOnRespawnSeconds` = **1**, `cSoundRandomMaxDist` = **20**,
+`kSnoreGroanMinCD` = **20** s, swim `cSwimGravityPer` **0.025** / `cSwimDrag` &
+`cSwimDragY` **0.91** / `cSwimAnimDelay` **6**, `CLIMB_LADDER_SPEED` = **1234**
+(internal speed units). Walk-type ids (`cWalkType*`): `Fat` 1, `Cripple` 5,
+`Crouch` 8, `Bandit` 15, `CrawlFirst` 20, `Crawler` 21, `Spider` 22,
+`Swim` -1.
+
+**`EntityVulture` tuning constants (IL):** `cTargetDistanceClose` = **0.9** m /
+`cTargetDistanceMax` = **80** m, `cTargetAttackOffsetY` = **-0.1**,
+`cFlyingMinimumSpeed` = **0.02**, `cVomitMinRange` = **3** m, `cAttackDelay` =
+**18** s, battle fatigue `cBattleFatigueMin` **30** / `cBattleFatigueMax` **60** /
+`cBattleFatigueCooldownMin` **80** / `cBattleFatigueCooldownMax` **180** s,
+`cCollisionMask` **1082195968**.
+
 **`EntityStats` tick + sync:** `Init` (base IL=40) builds the `Health` `Stat`
 with `MaxPassive = MaxHealth (104)`, `GainPassive 106`, `LossPassive 107` and
 max seeded from `EffectManager.GetValue(104, null, 100, entity, ...)`.
