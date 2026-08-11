@@ -845,7 +845,12 @@ property stashes the old `bmDay` into `bmDayNextOverride`.
 ### Start / end and the party spawner
 
 **`IsBloodMoonTime(worldTime)` (IL=10):**
-`GameUtils.IsBloodMoonTime(worldTime, (duskHour, dawnHour), bmDay)`.
+`GameUtils.IsBloodMoonTime(worldTime, (duskHour, dawnHour), bmDay)`. The
+component's own `duskHour`/`dawnHour` fields come from
+`ComputeDawnAndDuskTimes` (IL=13): `CalcDuskDawnHours(GameStats.GetInt(42)
+DayLightLength)` - the same formula as `World.DuskDawnInit`; it runs at
+`InitNewGame` and `Read` ([weather-environment.md](weather-environment.md)
+boundary derivation).
 
 **`StartBloodMoon` (IL=70):** log day; `ClearParties()`; clear
 `IsBloodMoonDead` on every tracked player; `delay = 0`; for every world
