@@ -162,6 +162,12 @@ the smallest-`tMax` axis, and reports the face from the axis and sign
 **`Voxel` hit-mask flags (`HM_*`, IL):** `Transparent` 1, `LiquidOnly` 2,
 `Moveable` 4, `Bullet` 8, `Rocket` 16, `Arrows` 32, `NotMoveable` 64,
 `Melee` 128, `FirstNotEmptyBlock` 256, `All` 4095, `IgnoreFragile` 4096.
+**`Voxel.ToHitMask(maskNames)` (IL=148, exact)** is the string-side of the same
+table: splits on `hitMaskSeparator` and ORs each name's bit -
+`Transparent` 1, `LiquidOnly` 2, `Moveable` 4, `Bullet` 8, `Rocket` 16,
+`Arrow` 32 (the `HM_Arrows` bit), `NotMoveable` 64, `Melee` 128; unknown
+names are ignored. This is how mask strings (AI/weapon config, `Voxel.Raycast`
+callers) become the `HM_*` bitmask.
 with no finite `tMax` logs the same `Voxel error: GetNextBlockHit` string
 (shared source) and returns `Vector3i.zero`. Consumers: `Block.GetFreePlacementPosition`
 walks cells with it to push a placement away from the player, and
