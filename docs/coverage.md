@@ -182,10 +182,12 @@ their correctness is the tool's, not prose. `inventories/dedicated-leaves.md` an
 |---|---|
 | [INDEX.md](INDEX.md) | Hub |
 | [residuals.md](residuals.md) | Non-IL residuals |
+| [`../../zdtd/docs/PROVENANCE.md`](../../zdtd/docs/PROVENANCE.md) | zdtd provenance ledger: every clone behavior/perk/value -> stock source |
 | `7dtd-realworld/docs/INDEX.md` | Product RealEarth hub (private companion) |
 
 ## Changelog
 
+- **2026-08-11:** Related docs links the zdtd provenance ledger.
 - **2026-08-11:** Census table re-verified against live `Census.exe` + `stock_facts.json` (4414 / 44107 / 193+manager / 20 / 631 / 926 / 23, all exact); audit-status table completed with the three post-pass docs (architecture-map, completion-bar, stability).
 - **2026-07-19:** Related docs table.
 - **2026-07-18:** Origin/claims + ModEvents rows link full paths; product hub callout.
