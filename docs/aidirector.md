@@ -913,7 +913,9 @@ boundary derivation).
 `EntityEnemy` set `IsBloodMoon = true` and `timeStayAfterDeath /= 3`.
 **Live-verified 2026-08-11** (stock V3.1.0 dedicated, Navezgane, one loadgen
 bot): with the world set to blood-moon eve (day 7 21:59, the day the
-`SetDay` log had computed from `freq 7`), the server logged at dusk
+`SetDay` log had computed from `freq 7`; a live `getgamestat BloodMoonDay`
+read **7** on a server whose config sets `BloodMoonFrequency=0`), the server
+logged at dusk
 `BloodMoon starting for day 7` followed by the party line
 `Party of 1, GS 1 (1), scaling 1, enemy max 2, bonus every 12` and
 `Player id 267, gameStage 1` - the dusk gate, the party creation, and the
