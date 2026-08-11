@@ -265,6 +265,12 @@ for network and UI fuel/slot sync. Fields (DumpType):
 | `SendSlots` | bool | whether `ItemSlots` follow on ToServer |
 | `ItemSlots` | `ItemStack[]` | fuel/battery inventory slots |
 
+`PowerSource.RefreshPowerStats` (IL=98, exact): on every fuel/battery change it
+zeroes `SlotCount`/`MaxOutput` and re-sums the non-empty `Stacks`, each
+contributing `OutputPerStack * RandomRange(0.5, 1)` to `MaxOutput` - the
+0.5-1.0 output jitter per inserted cell. `SetValuesFromBlock` (IL=40) pulls
+the power-item values (output/slots) from the block's `Properties`.
+
 `StreamModeWrite` / `StreamModeRead` enum order: **Persistency=0**, **ToServer/FromClient=1**,
 **ToClient/FromServer=2** (DumpType field order).
 
