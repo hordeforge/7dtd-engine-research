@@ -107,7 +107,12 @@ activeInGameMode i32 (+ u16 only when list version == 2); `nextEntityID` 243-494
 `saveDataLimit -1`; `providerId` **4 = ChunkDataDriven** on every probe save
 (consistent with chunk-providers.md: Navezgane and RWG output run
 `ChunkProviderGenerateWorldFromRaw`, not Disc - the cctor Disc=1 default only
-survives for world folders that ship their own `/Region` files);
+survives for world folders that ship their own `/Region` files). A fresh RWG
+4096 save (2026-08-12) confirms: providerId 4, `main.ttw` stays at the 470 B
+minimal header (worldTime 7000, world paused with zero players) and
+**`saveworld` writes 0 chunk region files** (`Saving 0 of chunks`) until a
+player joins and materializes chunks - while the world-wide `decoration.7dt`
+(30,935 records) and `blockmappings.nim` are written immediately;
 `dynamicSpawnerState` 2 B (`01 00`), `aiDirectorState`
 77 B; the three volume blobs each carry the **version-23 save-version i32**
 (1) + i32 byte-length + blob (sleeper volumes grow as POIs load: 5 KiB fresh ->
