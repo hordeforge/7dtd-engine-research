@@ -43,7 +43,7 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 
 | Tool | Purpose |
 |---|---|
-| `StockFacts.exe <asm> [out.json]` | Small JSON of stock hardcodes (version, TPS, chunk dims, save version, NetPackage count). Feeds `data/stock_facts.json` + pin check. |
+| `StockFacts.exe <asm> [out.json]` | Small JSON of stock hardcodes (version, TPS, chunk dims, save version, NetPackage count, behaviour pins: WaterLevel 62.88, item-drop lifetime 300 s, per-frame load budget 50 ms). Feeds `data/stock_facts.json` + pin check. |
 | `Census.exe <asm>` | Whole-assembly ground-truth counts (types, methods-with-body, gmUpdate IL, WorldState.SaveLoad IL). Re-run after a game patch to re-check `docs/coverage.md`. |
 | `DumpMethod.exe <asm> <typeFilter> <methodFilter> [out]` | IL for any method by case-insensitive substring filters (nested types included). The workhorse; replaces most one-off legacy dumpers. |
 | `DumpType.exe <asm> <outDir> <Type>...` | Fields + `read/write/Read/Write` bodies for wire payload structs (`EntityCreationData`, `BlockChangeInfo`, `ItemValue`, ...). |
