@@ -145,7 +145,8 @@ static class WireBodies {
     sb.AppendLine("[`../protocol-packages.md`](../protocol-packages.md) and the census in");
     sb.AppendLine("[`netpackages.md`](netpackages.md).  ");
     sb.AppendLine("**Regenerate:** `mono tools/bin/WireBodies.exe \"$ASM\" docs/inventories/netpackage-bodies.md`.  ");
-    sb.AppendLine("**Method:** [`../re-methodology.md`](../re-methodology.md).");
+    sb.AppendLine("**Method:** [`../re-methodology.md`](../re-methodology.md).  ");
+    sb.AppendLine("**Hub:** [`INDEX.md`](../INDEX.md).");
     sb.AppendLine();
     sb.AppendLine("Each row is one `BinaryWriter.Write(T)` or nested `.Write(writer)` in emit order.");
     sb.AppendLine("**Source** is the nearest preceding field/getter (best-effort; inside a loop it");

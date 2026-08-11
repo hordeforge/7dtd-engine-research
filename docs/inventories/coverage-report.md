@@ -3,7 +3,8 @@
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
 dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced
 against docs name-mentions. Regenerate:
-`mono tools/bin/Coverage.exe "$ASM" docs docs/inventories/coverage-report.md` (from the repo root, matching the other generated inventories).
+`mono tools/bin/Coverage.exe "$ASM" docs docs/inventories/coverage-report.md` (from the repo root, matching the other generated inventories).  
+**Hub:** [`INDEX.md`](../INDEX.md).
 
 ## What this measures, and what it does not
 

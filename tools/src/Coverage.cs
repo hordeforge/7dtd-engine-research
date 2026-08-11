@@ -199,7 +199,8 @@ class Coverage {
     sb.AppendLine("**Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the");
     sb.AppendLine("dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced");
     sb.AppendLine("against docs name-mentions. Regenerate:");
-    sb.AppendLine("`mono tools/bin/Coverage.exe \"$ASM\" docs docs/inventories/coverage-report.md` (from the repo root, matching the other generated inventories).");
+    sb.AppendLine("`mono tools/bin/Coverage.exe \"$ASM\" docs docs/inventories/coverage-report.md` (from the repo root, matching the other generated inventories).  ");
+    sb.AppendLine("**Hub:** [`INDEX.md`](../INDEX.md).");
     sb.AppendLine();
     sb.AppendLine("## What this measures, and what it does not");
     sb.AppendLine();

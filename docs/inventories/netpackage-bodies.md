@@ -5,7 +5,8 @@ sequence). Not a hand-narrative; complements the annotated bodies in
 [`../protocol-packages.md`](../protocol-packages.md) and the census in
 [`netpackages.md`](netpackages.md).  
 **Regenerate:** `mono tools/bin/WireBodies.exe "$ASM" docs/inventories/netpackage-bodies.md`.  
-**Method:** [`../re-methodology.md`](../re-methodology.md).
+**Method:** [`../re-methodology.md`](../re-methodology.md).  
+**Hub:** [`INDEX.md`](../INDEX.md).
 
 Each row is one `BinaryWriter.Write(T)` or nested `.Write(writer)` in emit order.
 **Source** is the nearest preceding field/getter (best-effort; inside a loop it
