@@ -867,6 +867,23 @@ a placed bedroll clears the volume's owned sleepers), `cDespawnDelay` = **900**
 `cFlagsPriority` 2 / `cFlagsSpawning` 4 / `cFlagsCleared` 8 / `cFlagsHasScript`
 16, `cTriggerFlagsMask` = 7, `cRespawnNever` = **4294967295** (0xFFFFFFFF).
 
+**`SleeperVolume::UpdateSpawn` is capped by `AIDirector::CanSpawn(2.1f)`:**
+each tick decrements `spawnDelay`; at zero it resets `spawnDelay = 2`
+(`cSpawnDelay`) and enters the respawn/spawn block only if
+`AIDirector::CanSpawn(2.1f)` returns true (IL_001c-IL_0026, gate at IL_0250).
+So sleepers restore against a **2.1x** headroom over the configured
+`EnumGamePrefs.MaxSpawnedZombies`, not the raw cap.
+
+**`AIDirector::CanSpawn(float _priority)` (IL=10, exact):**
+`(float)GameStats.GetInt(EnumGameStats.EnemyCount) <
+(float)GamePrefs.GetInt(EnumGamePrefs.MaxSpawnedZombies) * _priority` -
+a single multiply-`clt` comparison with no cache. The three priority call
+sites are: **2.1f** `SleeperVolume::UpdateSpawn` (sleeper restores, above),
+**1.9f** `AIDirectorBloodMoonParty::Tick` (blood-moon horde spawns get 1.9x
+headroom over the configured cap), and **1.0f** `SpawnManagerBiomes::SpawnUpdate`
+(plain cap, §2). `EnumGameStats.EnemyCount` is index 12;
+`EnumGamePrefs.MaxSpawnedZombies` is index 99.
+
 **`PrefabInstance` leaf helpers:** `GetCenterXZ()` (IL=24) is
 `(bboxPos.x + bboxSize.x * 0.5, bboxPos.z + bboxSize.z * 0.5)` as a `Vector2`
 (the POI center used for trader-area / quest-distance math).
