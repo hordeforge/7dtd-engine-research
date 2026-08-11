@@ -237,6 +237,16 @@ When running as server (not client), the pass also mirrors six values into the
 `BlockDamageAIBM`, `LootAbundance`, `LootRespawnDays`, `XPMultiplier`) and the
 matching `GameStats`, which keeps the server browser and old consumers coherent.
 
+**Operational consequence (live-verified 2026-08-11):** a `0`/`false` value in
+`serverconfig.xml` for a sandbox-driven option does **not** disable it - the
+option value comes from the sandbox preset/default, not the raw pref. On a
+stock server whose config sets `AirDropFrequency=0`, `AirDropMarker=false`,
+`BloodMoonFrequency=0`, live `getgamestat` reads `AirDropFrequency = 3`,
+`AirDropMarker = True`, `BloodMoonDay = 7` and the stock cadence applies.
+Real control needs the sandbox preset or non-zero values (see the
+`SetupAirDropTimeRanges` / `SetupBloodMoonWarningTimes` helpers above and
+[aidirector.md](aidirector.md)).
+
 A second, per-entity slice exists: `EntityStats.UpdateSandboxOptions` copies
 `StaminaRegen`/`StaminaUsage` into `Stat.GainSandboxModifier`/`LossSandboxModifier`
 ([entity-stats.md](entity-stats.md)), and `EntityPlayer.StartJumpMotion` reads
