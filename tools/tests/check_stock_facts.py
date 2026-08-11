@@ -273,6 +273,21 @@ def check_zdtd(facts: dict, errors: list[str]) -> None:
     store = read(WS / "zdtd" / "src" / "world" / "store.zig")
     if store:
         must_match("zdtd y_dim", store, rf"pub const y_dim: i32 = {ydim};", errors)
+    # LiteNetLib wire pins: facts carry the library constants; zdtd's packet.zig
+    # must acknowledge the max_packet_size divergence (1327 vs stock 1432).
+    lite = facts.get("litenet", {})
+    if lite.get("max_packet_size") != 1432:
+        errors.append(f"stock_facts litenet.max_packet_size={lite.get('max_packet_size')} != 1432")
+    if lite.get("protocol_id") != 13:
+        errors.append(f"stock_facts litenet.protocol_id={lite.get('protocol_id')} != 13")
+    pkt = read(WS / "zdtd" / "src" / "litenet" / "packet.zig")
+    if pkt and lite.get("max_packet_size"):
+        must_match(
+            "zdtd packet.zig max_packet_size divergence",
+            pkt,
+            r"1432",
+            errors,
+        )
     # Cross-repo: the divergence register must carry the machine-checked
     # WaterLevel so zdtd's sea_level=64 divergence stays tied to the pin.
     water = facts["behaviour"].get("world_water_level")

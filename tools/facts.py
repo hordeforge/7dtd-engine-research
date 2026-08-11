@@ -17,5 +17,8 @@ c = d.get("census", {})
 s = d.get("save", {})
 print(f"  census: top_types={c.get('top_level_types')} methods={c.get('methods_with_body_top_level')} gmupdate_il={c.get('gmupdate_il')}")
 print(f"  save: current_save_version={s.get('current_save_version')} saveload_il={s.get('worldstate_saveload_stream_il')}")
+lite = d.get("litenet", {})
+if lite:
+    print(f"  litenet: protocol={lite.get('protocol_id')} header={lite.get('header_size')} mtu={lite.get('possible_mtu')} max_packet={lite.get('max_packet_size')}")
 for k, val in d["behaviour"].items():
     print(f"  behaviour.{k} = {val}")

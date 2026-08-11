@@ -2,7 +2,7 @@
   "schema": 1,
   "generated_by": "tools/src/StockFacts.cs",
   "asm": "Assembly-CSharp.dll",
-  "extracted_utc": "2026-08-11T03:22:10.0807600Z",
+  "extracted_utc": "2026-08-11T04:24:28.0393810Z",
   "version": {
     "release_type": 1,
     "major": 3,
@@ -78,5 +78,16 @@
     "max_load_time_per_frame_ms": 50,
     "max_party_size": 8,
     "party_activation_range": 15
+  },
+  "litenet": {
+    "protocol_id": 13,
+    "header_size": 1,
+    "channeled_header_size": 4,
+    "fragment_header_size": 6,
+    "max_sequence": 32768,
+    "default_window_size": 64,
+    "possible_mtu": [1024,1164,1392,1404,1424,1432],
+    "initial_mtu": 1024,
+    "max_packet_size": 1432
   }
 }

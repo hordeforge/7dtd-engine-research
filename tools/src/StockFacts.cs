@@ -182,6 +182,39 @@ class StockFacts {
     return d;
   }
 
+  static int? FieldConstInt(TypeDefinition t, string name) {
+    var f = t.Fields.FirstOrDefault(x => x.Name == name && x.HasConstant);
+    return f == null ? (int?)null : Convert.ToInt32(f.Constant);
+  }
+
+  static AssemblyDefinition LoadLiteNetLib(string managedDir) {
+    var path = Path.Combine(managedDir, "LiteNetLib.dll");
+    if (!File.Exists(path)) return null;
+    var r = new DefaultAssemblyResolver();
+    r.AddSearchDirectory(managedDir);
+    return AssemblyDefinition.ReadAssembly(path, new ReaderParameters { AssemblyResolver = r });
+  }
+
+  // Decode NetConstants.PossibleMtu from the cctor's InitializeArray token
+  // (the int32[] lives in <PrivateImplementationDetails> RVA data).
+  static int[] PossibleMtu(AssemblyDefinition ln, TypeDefinition nc) {
+    var cctor = nc.Methods.FirstOrDefault(m => m.IsConstructor && m.IsStatic && m.HasBody);
+    if (cctor == null) return null;
+    // find the PrivateImplementationDetails field the cctor initializes
+    foreach (var i in cctor.Body.Instructions) {
+      if (i.OpCode.Code == Code.Ldtoken && i.Operand is FieldReference fr) {
+        var fdef = fr.Resolve();
+        if (fdef != null && fdef.InitialValue != null && fdef.InitialValue.Length >= 24) {
+          var outv = new int[fdef.InitialValue.Length / 4];
+          for (int k = 0; k < outv.Length; k++)
+            outv[k] = BitConverter.ToInt32(fdef.InitialValue, k * 4);
+          return outv;
+        }
+      }
+    }
+    return null;
+  }
+
   static void Main(string[] a) {
     if (a.Length < 1) {
       Console.Error.WriteLine("usage: StockFacts <asm> [out.json]");
@@ -358,6 +391,39 @@ class StockFacts {
         (partyActivationRange.HasValue ? "," : ""));
     if (partyActivationRange.HasValue)
       sb.AppendLine("    \"party_activation_range\": " + partyActivationRange.Value.ToString(CultureInfo.InvariantCulture));
+    sb.AppendLine("  },");
+    sb.AppendLine("  \"litenet\": {");
+    try {
+      var ln = LoadLiteNetLib(Path.GetDirectoryName(asmPath));
+      if (ln != null) {
+        var nc = Exact(ln.MainModule, "NetConstants");
+        int? proto = FieldConstInt(nc, "ProtocolId");
+        int? hdr = FieldConstInt(nc, "HeaderSize");
+        int? chan = FieldConstInt(nc, "ChanneledHeaderSize");
+        int? frag = FieldConstInt(nc, "FragmentHeaderSize");
+        int? seq = FieldConstInt(nc, "MaxSequence");
+        int? win = FieldConstInt(nc, "DefaultWindowSize");
+        int[] mtu = PossibleMtu(ln, nc);
+        sb.AppendLine("    \"protocol_id\": " + (proto ?? 13) + ",");
+        sb.AppendLine("    \"header_size\": " + (hdr ?? 1) + ",");
+        sb.AppendLine("    \"channeled_header_size\": " + (chan ?? 4) + ",");
+        sb.AppendLine("    \"fragment_header_size\": " + (frag ?? 6) + ",");
+        sb.AppendLine("    \"max_sequence\": " + (seq ?? 32768) + ",");
+        sb.AppendLine("    \"default_window_size\": " + (win ?? 64) + ",");
+        if (mtu != null) {
+          sb.AppendLine("    \"possible_mtu\": [" + string.Join(",", mtu) + "],");
+          sb.AppendLine("    \"initial_mtu\": " + mtu[0] + ",");
+          sb.AppendLine("    \"max_packet_size\": " + mtu[mtu.Length - 1]);
+        } else {
+          sb.AppendLine("    \"possible_mtu\": []");
+        }
+      } else {
+        sb.AppendLine("    \"protocol_id\": 13");
+      }
+    } catch (Exception e) {
+      sb.AppendLine("    \"protocol_id\": 13");
+      Console.Error.WriteLine("stock-facts: litenet extraction failed: " + e.Message);
+    }
     sb.AppendLine("  }");
     sb.AppendLine("}");
 
