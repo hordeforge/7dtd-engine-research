@@ -360,19 +360,20 @@ them via `WaitForComplete` so unload never races creation; `SleeperVolume`
 spawns sleepers through it; `NetPackageEntitySpawn.ProcessPackage` uses it for
 package-driven spawns.
 
-**Create path (verified):** `StartCreateEntity(EntityCreationData, onComplete)`
-builds `EntityFactory.CreateEntityAsync`, allocates `EntityCreateHandle`, stores
-it in a pending `Dictionary<Int32, EntityCreateHandle>` by entity id, and enqueues
+**Create path (IL-pinned):** `StartCreateEntity(EntityCreationData, onComplete)`
+(IL=29) builds `EntityFactory.CreateEntityAsync`, allocates `EntityCreateHandle`,
+stores it in a pending `Dictionary<Int32, EntityCreateHandle>` by entity id, and enqueues
 the handle for `Update` polling.
 
 **Package hold-back:** entity-targeted packages can arrive before the entity
 exists. `NetPackageEntityTargeted.ShouldProcess` asks
-`NetEntityPackageQueue.HasPackagesForEntity`; if the entity is still pending,
+`NetEntityPackageQueue.HasPackagesForEntity` (IL=5); if the entity is still pending,
 `HandleSkipped` calls `EnqueueNetPackageForEntity`. When create finishes,
-`EntityAsyncManager.OnCreateEntityRequestFinalized(id)` removes the handle and
-calls `NetEntityPackageQueue.ProcessPackagesForEntity(id)`, which dequeues each
+`EntityAsyncManager.OnCreateEntityRequestFinalized(id)` (IL=10) removes the handle and
+calls `NetEntityPackageQueue.ProcessPackagesForEntity(id)` (IL=20), which dequeues each
 held `NetPackage`, runs `ProcessPackage(world, GameManager)`, and
-`NetPackageManager.FreePackage`.
+`NetPackageManager.FreePackage`. The polled completion handle is
+`EntityCreateHandle.TryComplete` (IL=38).
 
 `NetEntityPackageQueue` itself:
 
