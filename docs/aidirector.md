@@ -824,8 +824,27 @@ empty, `get_Zombie()` (IL=3) returns it.
 `AIDirector.Save` (IL=7): writes version int **10**, then
 `ComponentsSave` walks installed components and calls each `Write`.
 
-`AIDirectorBloodMoonComponent.Write` (IL=20): base component write, then
-`bmDayLast:i32`, `bmDay:i32`, `BloodMoonFrequency:i16`, `BloodMoonRange:i16`.
+Component install order (`CreateComponents` IL=31) and per-component `Write`
+sizes (each is base `AIDirectorComponent.Write` IL=1 stub + fields; components
+without an override write nothing):
+
+| # | Component | Write fields |
+|---|---|---|
+| 1 | `AIDirectorMarkerManagementComponent` | (none - no override) |
+| 2 | `AIDirectorPlayerManagementComponent` | (none - no override) |
+| 3 | `AIDirectorWanderingHordeComponent` (IL=12) | `HordeNextTime:u64`, `BanditNextTime:u64` |
+| 4 | `AIDirectorAirDropComponent` (IL=72) | `nextAirDropTime:u64`, `lastFrequency:u64` (packed 4x u16 via `packDropFrequency`), `supplyCrates` count:i32, per crate `entityId:i32` + `blockPos:Vector3i` + `requiresObserver:bool` (17 B) |
+| 5 | `AIDirectorChunkEventComponent` (IL=33) | version **1**:i32, `activeChunks` count:i32, per chunk `chunkKey:i64` + `AIDirectorChunkData.Write` |
+| 6 | `AIDirectorBloodMoonComponent` (IL=20) | `bmDayLast:i32`, `bmDay:i32`, `BloodMoonFrequency:i16`, `BloodMoonRange:i16` |
+
+**Live-decoded 2026-08-12 (77-byte blob from a real save, byte-exact):**
+`version 10` + WanderingHorde `(100708, 0)` + AirDrop
+`(nextAirDropTime 156000 = day 7 12:00, lastFrequency packed (3,3,12000,12000)`
+- the option-mapped schedule - `, 1 crate (entityId 423, blockPos (1572,85,936),
+requiresObserver 1)` - the landed airdrop crate - + ChunkEvent `(version 1,
+activeChunks 0)` + BloodMoon `(bmDayLast 0, bmDay 7, freq 7, range 0)`.
+Every field matches the IL layout; the airdrop schedule constants confirm the
+option-driven `SetupAirDropTimeRanges` values are what persists.
 This blob rides `WorldState` nested `aiDirectorState` ([save-region.md](save-region.md)).
 
 ### Sleeper / bloodmoon packages

@@ -47,6 +47,48 @@ def read_net_string(buf, off):
     return buf[off:off + length].decode("utf-8", "replace"), off + length
 
 
+def check_ai_director_blob(blob, checks):
+    """Parse the AIDirector save blob (doc aidirector.md 'AIDirector save
+    blob'): version 10 + component Write bodies in install order. Byte-exact."""
+    if not blob:
+        return
+    try:
+        p = 0
+        ver = struct.unpack_from("<i", blob, p)[0]
+        p += 4
+        horde_next, bandit_next = struct.unpack_from("<QQ", blob, p)
+        p += 16
+        airdrop_next = struct.unpack_from("<Q", blob, p)[0]
+        p += 8
+        last_freq = struct.unpack_from("<Q", blob, p)[0]
+        p += 8
+        freq = [(last_freq >> (16 * i)) & 0xFFFF for i in range(4)]
+        crates = struct.unpack_from("<i", blob, p)[0]
+        p += 4
+        crate_d = []
+        for _ in range(crates):
+            eid = struct.unpack_from("<i", blob, p)[0]
+            bx, by, bz = struct.unpack_from("<3i", blob, p + 4)
+            obs = blob[p + 16]
+            p += 17
+            crate_d.append((eid, (bx, by, bz), obs))
+        ce_ver = struct.unpack_from("<i", blob, p)[0]
+        ce_count = struct.unpack_from("<i", blob, p + 4)[0]
+        p += 8
+        bm_last, bm_day = struct.unpack_from("<2i", blob, p)
+        bm_freq, bm_range = struct.unpack_from("<2h", blob, p + 8)
+        p += 12
+        exact = p == len(blob)
+        checks.append(
+            f"  aiDirectorState: version {ver}, wandering({horde_next},{bandit_next}), "
+            f"airdrop(next {airdrop_next}, freq {freq}, {crates} crate(s) {crate_d}), "
+            f"chunkEvent(ver {ce_ver}, active {ce_count}), "
+            f"bloodMoon(last {bm_last}, next {bm_day}, freq {bm_freq}, range {bm_range}) "
+            f"{'byte-exact' if exact else f'MISMATCH ({p}/{len(blob)})'}")
+    except (struct.error, IndexError) as exc:
+        checks.append(f"  aiDirectorState parse error: {exc}")
+
+
 def check_main_ttw(path, checks):
     """Verify the main.ttw header codec (doc save-region.md 1.1b)."""
     with open(path, "rb") as fh:
@@ -120,10 +162,12 @@ def check_main_ttw(path, checks):
         checks.append(f"  spawnList(ver {sp_ver}, {sp_cnt}) nextEntityID={next_id} "
                       f"saveDataLimit={sdl}")
         blob_sizes = []
+        blob_bodies = []
         for name in ("dynamicSpawnerState", "aiDirectorState"):
             ln = struct.unpack_from("<i", buf, off)[0]
             off += 4
             blob_sizes.append(ln)
+            blob_bodies.append(buf[off:off + ln])
             off += ln
         vol_sizes = []
         for name in ("sleeperVolumes", "triggerVolumes", "wallVolumes"):
@@ -135,6 +179,7 @@ def check_main_ttw(path, checks):
             off += ln
         checks.append(f"  blobs dyn={blob_sizes[0]} ai={blob_sizes[1]} "
                       f"volumes(v,bytes)={vol_sizes}")
+        check_ai_director_blob(blob_bodies[1], checks)
         w_sz = struct.unpack_from("<i", buf, off)[0]
         off += 4
         checks.append(f"  weather size prefix {w_sz} (includes itself: {w_sz - 4} B payload)")
