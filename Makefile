@@ -16,6 +16,7 @@ help:
 	@echo "make readiness    - version-update tooling readiness bench (0-100)"
 	@echo "make test         - full suite (structural, stock-check, reach, inventories, surface, links)"
 	@echo "make test-docs    - DLL-free corpus invariants (runs in CI)"
+	@echo "make verify       - one-command gate: doc links, pins, readiness, facts, xml data"
 	@echo "make regen-check  - regenerate-inventory check (needs mcs/mono + live DLL)"
 
 tools:
