@@ -33,3 +33,17 @@
 
 Server killed via `dedicated.pid`; no stray processes/ports. Probe userdata in
 `~/.cache/7dtd-loadgen-bm/`.
+
+## Addendum 2026-08-12: CanSpawn(1.9) headroom live-confirmed
+
+Second BM session (BMSpawnProbe, MaxSpawnedZombies=16): while the blood moon
+was active (day 7 22:00+), a live `getgamestat EnemyCount` read **18** -
+the world held MORE than the configured 16 cap, because the blood-moon
+party gate `AIDirector.CanSpawn(1.9f)` allows up to `16 * 1.9 = 30.4`. This
+is the first live observation of the priority headroom pushing the world
+above `MaxSpawnedZombies`. The party itself formed on each bot join
+("Party of 1, GS 1 (1), scaling 1, enemy max 2, bonus every 12") but never
+spawned a party zombie with the loadgen bots (they wander/drown; a
+stationary no-action bot survived but the party still produced no
+"SpawnZombie grp" line - a spawn-position/gamestage nuance, not the cap
+gate). Night scout hordes (zombieScreamer) spawn independently.

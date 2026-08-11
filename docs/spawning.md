@@ -63,7 +63,10 @@ flowchart TB
 All five share the same global gate: `AIDirector.CanSpawn(1.0)`, which is simply
 `GameStats.EnemyCount < GamePrefs.MaxSpawnedZombies * priority`. This is the
 server-wide living-zombie cap; when it is hit, biome enemy spawns fall back to
-animals-only and the horde/dynamic paths abort for the tick.
+animals-only and the horde/dynamic paths abort for the tick. The priority
+headroom was live-confirmed 2026-08-12: with `MaxSpawnedZombies=16` the active
+blood moon held `EnemyCount=18` (over the cap, under the `16 * 1.9 = 30.4`
+party gate).
 
 ---
 
