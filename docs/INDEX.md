@@ -62,6 +62,12 @@ delta file):
 
 Campaign audit (V3.1.0 evidence + residual map): [`../workspace/outputs/docs-research-audit-20260803.md`](../workspace/outputs/docs-research-audit-20260803.md).
 
+Live scheduled-event evidence (2026-08-11, stock V3.1.0 dedicated runs):
+[air drop](../workspace/notes/live-airdrop-verification-20260811.md),
+[wandering horde](../workspace/notes/live-horde-verification-20260811.md),
+[blood-moon start](../workspace/notes/live-bloodmoon-verification-20260811.md);
+the method (boot/settime/join/observe) is in [re-methodology.md](re-methodology.md) 5e.
+
 
 | # | Doc | Use when |
 |---|---|---|
