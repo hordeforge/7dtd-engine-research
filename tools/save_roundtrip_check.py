@@ -212,6 +212,12 @@ def check_main_ttw(path, checks):
             off += ln
         checks.append(f"  blobs dyn={blob_sizes[0]} ai={blob_sizes[1]} "
                       f"volumes(v,bytes)={vol_sizes}")
+        if blob_bodies[0]:
+            dyn = blob_bodies[0]
+            dyn_note = (f"  dynamicSpawner: version {dyn[0]} currentSpawnerActive "
+                        f"{bool(dyn[1]) if len(dyn) > 1 else '?'} "
+                        f"{'byte-exact' if len(dyn) == 2 else f'({len(dyn)} B)'}")
+            checks.append(dyn_note)
         check_ai_director_blob(blob_bodies[1], checks)
         w_sz = struct.unpack_from("<i", buf, off)[0]
         off += 4

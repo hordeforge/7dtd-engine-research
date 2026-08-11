@@ -164,6 +164,14 @@ persists in the AIDirector save: `Write` (IL=72) stores `nextAirDropTime` u64 +
   command; `AllowActivationCommand` (IL=20) allows it only when `bag != null`
   and alive; `GetActivationText` (IL=81) shows `lootTooltipNew` / `Empty` /
   `Touched` localized text prefixed with the Activate binding markup.
+- **`spawnsupplycrate` console bypass (live-verified 2026-08-12):** the command
+  (`ConsoleCmdAIDirectorSpawnSupplyCrate` IL=52) resolves the sender player,
+  adds 8 to its `position.y`, and calls
+  `EntityFactory.CreateEntity(id, pos, zero)` + `World.SpawnEntityInWorld`
+  directly - it **does not** call `SpawnAirDrop` / `AddSupplyCrate`. The
+  `supplyCrates` cache in the AIDirector save blob therefore stays empty after
+  a forced spawn (observed: save decode shows `0 crate(s)`); the cache records
+  only real airdrops.
 - **Map marker:** `HandleNavObject` (IL=64), gated on
   `GameStats.GetBool(AirDropMarker = 53)`: re-registers the `NavObject` from
   `EntityClass.NavObject` and, on the server, pushes
