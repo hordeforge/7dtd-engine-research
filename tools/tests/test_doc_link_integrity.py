@@ -84,6 +84,16 @@ def main():
             text = open(path, encoding="utf-8").read()
             for m in re.finditer(r"\]\((\.\./[^)]+\.md)\)", text):
                 target = os.path.normpath(os.path.join(sub, m.group(1)))
+                # Sibling repo name = first non-".." path component (e.g. 7dtd-optimizer).
+                parts = [p for p in m.group(1).split("/") if p not in ("", ".")]
+                sibling = next((p for p in parts if p != ".."), None)
+                if sibling is None:
+                    continue
+                # In a single-repo CI checkout the sibling repos are absent; skip
+                # those links (verified by the cross-repo pass) instead of failing.
+                correct_sibling = os.path.normpath(os.path.join(REPO, "..", sibling))
+                if not os.path.isdir(correct_sibling):
+                    continue
                 if not os.path.isfile(target):
                     dead_x.append(f"{os.path.relpath(path, DOCS)} -> {m.group(1)}")
     if dead_x:
