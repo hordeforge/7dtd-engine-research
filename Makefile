@@ -9,6 +9,7 @@ help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
 	@echo "make stock-check  - pin check only (committed JSON)"
+	@echo "make facts        - view the machine-checked stock pins (census/save/behaviour)"
 	@echo "make post-update  - after TFP patch: stock-sync + drift (tools/post-update.sh)"
 	@echo "make census       - Census.exe against ASM"
 	@echo "make drift        - parity drift-check vs baseline"
