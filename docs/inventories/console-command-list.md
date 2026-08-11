@@ -4,6 +4,7 @@
 `ConsoleCmdAbstract` subclass; function text is each command's own `getDescription`.  
 **Framework:** dispatch / permissions / telnet in [`../console-commands.md`](../console-commands.md).  
 **Regenerate:** `mono tools/bin/CmdMap.exe "$ASM"` emits the `command -> type` mapping (it follows the static-field form, so `exportprefab`, whose name lives in a static `CommandName` field rather than an `ldstr`, is not missed); descriptions and permissions come from each command's `getDescription` / `get_DefaultPermissionLevel`. The **Type** column exists so the coverage tool can see these types: the rows are command *names*, and without the type name all 187 read as undocumented.
+**Hub:** [`INDEX.md`](../INDEX.md).  
 
 Permission: blank = inherits default (0 = highest admin; higher number = less privileged).
 

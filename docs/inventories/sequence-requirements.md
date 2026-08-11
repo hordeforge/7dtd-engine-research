@@ -3,6 +3,7 @@
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name/base/code signals; no bodies).  
 **Framework:** [`../game-events.md`](../game-events.md) owns the contract; this describes each `BaseRequirement` leaf.  
 **Regenerate:** hint extractor over transitive subclasses.
+**Hub:** [`INDEX.md`](../INDEX.md).  
 
 Every `GameEvent.SequenceRequirements.BaseRequirement` subclass (game-event gate: cvar, event-active, operation compare, ...). Contract: [game-events.md](../game-events.md).
 

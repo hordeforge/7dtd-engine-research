@@ -3,6 +3,7 @@
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name/base/code signals; no bodies).  
 **Framework:** [`../quests-challenges.md`](../quests-challenges.md) owns the contract; this describes each `BaseObjective` leaf.  
 **Regenerate:** hint extractor over transitive subclasses.
+**Hub:** [`INDEX.md`](../INDEX.md).  
 
 Every `BaseObjective` subclass (quest objective leaf: fetch, clear, goto, activate, ...). Contract: [quests-challenges.md](../quests-challenges.md).
 

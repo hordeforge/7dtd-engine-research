@@ -3,6 +3,7 @@
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name/base/code signals; no bodies).  
 **Framework:** [`../blocks.md`](../blocks.md) owns the contract; this describes each `Block` leaf.  
 **Regenerate:** hint extractor over transitive subclasses.
+**Hub:** [`INDEX.md`](../INDEX.md).  
 
 Every transitive `Block` subclass (block behavior leaf: doors, plants, powered, traps, loot, hazards, ...). Contract: [blocks.md](../blocks.md).
 

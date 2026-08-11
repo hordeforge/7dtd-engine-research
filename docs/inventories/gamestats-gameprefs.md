@@ -2,6 +2,7 @@
 
 **Kind:** raw reference table (not primary narrative).
 **Source:** `EnumDump.exe` over `EnumGameStats` / `EnumGamePrefs` in
+**Hub:** [`INDEX.md`](../INDEX.md).  
 the V3.1.0 b14 assembly. Docs cite indices like `GameStats[24]` or
 `GamePrefs.GetInt(190)`; look them up here.
 

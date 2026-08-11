@@ -2,6 +2,7 @@
 
 **Kind:** raw reference table (not primary narrative).
 **Source:** `EntityClass::.cctor` (IL=394) - each row is a
+**Hub:** [`INDEX.md`](../INDEX.md).  
 `ldstr <value>` + `stsfld String EntityClass::PropX` pair; non-string
 statics (class ids, `FastTags`) listed at the end. Regenerate with
 `tools/bin/DumpMethod.exe <asm> EntityClass .cctor`.

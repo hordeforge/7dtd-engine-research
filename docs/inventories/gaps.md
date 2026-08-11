@@ -3,6 +3,7 @@
 **Kind:** auto dump notes (not primary narrative).  
 **Prefer:** [`closed-gaps.md`](../closed-gaps.md).  
 **Raw IL:** [`../il/gaps-v3.1.0/`](../../il/gaps-v3.1.0/).
+**Hub:** [`INDEX.md`](../INDEX.md).  
 
 UTC: 2026-08-08 14:49:18Z
 

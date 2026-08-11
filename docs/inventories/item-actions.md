@@ -3,6 +3,7 @@
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name, base, and code signals; no bodies).  
 **Framework:** [`../items.md`](../items.md) owns the contract; this describes each `ItemAction` leaf.  
 **Regenerate:** `tools` hint extractor over transitive subclasses.
+**Hub:** [`INDEX.md`](../INDEX.md).  
 
 Every `ItemAction` subclass: the use behavior bound to an item's primary/secondary action (attack, ranged, eat, place, tool, power-wire, ...). Function is derived from the class name and its overridden verb methods.
 
