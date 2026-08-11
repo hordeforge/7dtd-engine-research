@@ -139,7 +139,13 @@ spawns when `worldTime >=
 nextAirDropTime`, skipping while `MaxDayCount == 0` (disabled),
 `LootContainer.NoLoot`, playtesting, or editor; a frequency change or time
 rollback recomputes the schedule (`packDropFrequency` (IL=21) packs the four
-u16s into one u64 for save/compare). `AddSupplyCrate` (IL=27/25) dedupes by
+u16s into one u64 for save/compare). **`AirDropFrequency` is a no-op for the
+schedule (V3.1.0):** a live run with `GamePref.AirDropFrequency = 0` /
+`GameStat.AirDropFrequency (51) = 0` (loadgen config) still dropped on the
+cctor schedule, and no instruction reads `GameStats.AirDropFrequency` (Cecil
+probe 2026-08-11) - the option is mirrored into the stat but never consumed;
+the cctor `MinDayCount`/`MaxDayCount`/`MinTimeOfDay`/`MaxTimeOfDay` rule is the
+only schedule input. `AddSupplyCrate` (IL=27/25) dedupes by
 entityId and adds a `SupplyCrateCache(entityId, Vector3i.zero, false)` (or the
 passed cache) to the `supplyCrates` list - the landed crates the component
 keeps observed; `RemoveSupplyCrate(entityId)` (IL=54) reverses it. The schedule
