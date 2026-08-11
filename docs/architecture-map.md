@@ -10,6 +10,9 @@ diagram); measured performance ([`../../7dtd-optimizer/docs/`](../../7dtd-optimi
 which are IL-derived. Where a number appears (IL size, tick rate, channel) it comes
 from the owning doc.
 **Hub:** [`INDEX.md`](INDEX.md). **Method:** [`re-methodology.md`](re-methodology.md).
+**Live evidence:** scheduled stock behavior is proven on a booted dedicated
+server (air drop, wandering horde, blood-moon start; method 5e, notes in
+[`../workspace/notes/`](../workspace/notes/)).
 
 ---
 
