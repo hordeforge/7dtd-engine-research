@@ -97,6 +97,18 @@ compared to that on load (reject newer).
 `VersionInformation (1, 3, 10, 14)` - every field matches the layout above. The
 `waterLevel` float (after the active-game-mode + mode pad) reads **62.88**,
 confirming the `behaviour` water-level pin in a real save.
+
+**Full-file round-trip 2026-08-12 (4 real saves, `tools/save_roundtrip_check.py`):**
+the complete WorldState parses byte-exactly to EOF on every probe save. Tail
+fields confirmed: `SpawnPointList.Read` starts with a **version byte** (0 here)
++ i32 count (0 - Navezgane spawn points come from `spawnpoints.xml`, not the
+state file), per point = Vector3 (3xf32) + heading f32 + team i32 +
+activeInGameMode i32 (+ u16 only when list version == 2); `nextEntityID` 243-494;
+`saveDataLimit -1`; `dynamicSpawnerState` 2 B (`01 00`), `aiDirectorState`
+77 B; the three volume blobs each carry the **version-23 save-version i32**
+(1) + i32 byte-length + blob (sleeper volumes grow as POIs load: 5 KiB fresh ->
+23-59 KiB explored); **weather size prefix counts itself** (observed 208 =
+4 + 204 B payload, read consumes size-4); trailing `Guid` string (32 chars).
 | Active game mode | version &gt; 6 | `activeGameMode:i32` |
 | Water + chunk geometry | always after mode pad | `waterLevel`, `chunkSizeX`, then Y/Z **swapped on store** (Y field written from Z read and vice versa - stock quirk), `chunkCount`, `providerId`, `seed`, `worldTime` |
 | `timeInTicks` | version &gt; 8 | u64 |
@@ -938,6 +950,7 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-12:** main.ttw full-file round-trip: the tool now parses the entire WorldState to EOF byte-exactly on 4 probe saves. Tail pins: SpawnPointList.Read starts with a version byte + i32 count (per-point Vector3+heading+team+mode, +u16 only when list version 2); weather size prefix counts itself (N = 4 + payload); volume blobs carry version-23 save-version i32 + len; dynamicSpawner 2 B, aiDirector 77 B, weather 208 B consistent across saves; nextEntityID 243-494; saveDataLimit -1; trailing 32-char Guid.
 - **2026-08-12:** Full chunk-body round-trip added (`tools/save_roundtrip_check.py`
   parses every decompressed `Chunk.save` body byte-exactly: layers, maps, all 6
   channels, volumes, insideDevices). New pins in §2: `PooledBinaryWriter.Write(Byte[])`

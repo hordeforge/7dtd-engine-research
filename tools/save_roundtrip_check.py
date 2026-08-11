@@ -96,6 +96,52 @@ def check_main_ttw(path, checks):
     off += 8
     checks.append(f"  chunkCount={chunk_count} providerId={provider} (1=Disc) seed={seed} "
                   f"worldTime={world_time} timeInTicks={ticks}")
+
+    # --- full WorldState tail (version 23 gates; WorldState.SaveLoad IL=926) ---
+    try:
+        sp_ver = buf[off]
+        off += 1
+        sp_cnt = struct.unpack_from("<i", buf, off)[0]
+        off += 4
+        for _ in range(sp_cnt):
+            if sp_ver == 2:
+                off += 2  # legacy u16
+            off += 12 + 4  # Vector3 + heading
+            off += 8  # team + activeInGameMode
+        next_id = struct.unpack_from("<i", buf, off)[0]
+        off += 4
+        sdl = struct.unpack_from("<q", buf, off)[0]
+        off += 8
+        checks.append(f"  spawnList(ver {sp_ver}, {sp_cnt}) nextEntityID={next_id} "
+                      f"saveDataLimit={sdl}")
+        blob_sizes = []
+        for name in ("dynamicSpawnerState", "aiDirectorState"):
+            ln = struct.unpack_from("<i", buf, off)[0]
+            off += 4
+            blob_sizes.append(ln)
+            off += ln
+        vol_sizes = []
+        for name in ("sleeperVolumes", "triggerVolumes", "wallVolumes"):
+            sv = struct.unpack_from("<i", buf, off)[0]
+            off += 4
+            ln = struct.unpack_from("<i", buf, off)[0]
+            off += 4
+            vol_sizes.append((sv, ln))
+            off += ln
+        checks.append(f"  blobs dyn={blob_sizes[0]} ai={blob_sizes[1]} "
+                      f"volumes(v,bytes)={vol_sizes}")
+        w_sz = struct.unpack_from("<i", buf, off)[0]
+        off += 4
+        checks.append(f"  weather size prefix {w_sz} (includes itself: {w_sz - 4} B payload)")
+        if w_sz > 4:
+            off += w_sz - 4
+        guid, off = read_net_string(buf, off)
+        checks.append(f"  guid: {guid[:8]}... len {len(guid)}")
+        exact = off == len(buf)
+        checks.append(f"  full WorldState parse {'byte-exact' if exact else 'MISMATCH'} "
+                      f"({off}/{len(buf)})")
+    except (struct.error, IndexError) as exc:
+        checks.append(f"  WorldState tail parse error: {exc}")
     return off
 
 
