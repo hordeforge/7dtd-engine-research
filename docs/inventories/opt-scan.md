@@ -1,7 +1,7 @@
 # Optimization scan RE (V3.1.0)
 
 **Kind:** auto dump notes (not primary narrative).  
-**Prefer:** [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md).  
+**Prefer:** [`../../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md).  
 **Raw IL:** [`../il/opt-scan-v3.1.0/`](../../il/opt-scan-v3.1.0/).
 
 Generated: 2026-07-16 10:19:44Z
