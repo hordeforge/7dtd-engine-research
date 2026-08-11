@@ -36,9 +36,32 @@ CLAIMS = {
 }
 
 
+def check_package_framing_counts(bad: list) -> None:
+    """protocol-packages.md §6.23 self-claims '37 rows (18 conditional + 19
+    always-present)'. The 18 live in a table; the 19 are a prose name list.
+    If either half drifts the stated total must too."""
+    text = open(os.path.join(REPO, "docs", "protocol-packages.md"), encoding="utf-8").read()
+    m = re.search(r"all 37 rows\s*\((\d+) conditional \+ (\d+) always-present\)", text, re.S)
+    if not m:
+        bad.append("protocol-packages.md: §6.23 no 'all 37 rows (N conditional + M always-present)' claim")
+        return
+    want_cond, want_always = int(m.group(1)), int(m.group(2))
+    seg = text[text.index("**Genuinely conditional"): text.index("## 7.")]
+    cond_rows = len(re.findall(r"^\| `NetPackage[A-Za-z0-9]+` \| \d+ \|", seg, re.M))
+    # always-present: backticked NetPackage names in the prose paragraph before
+    # the "## 7." heading, excluding the table rows already counted
+    para = text[text.index("**Always-present"): text.index("## 7.")]
+    always_names = set(re.findall(r"`(NetPackage[A-Za-z0-9]+)`", para))
+    if cond_rows != want_cond:
+        bad.append(f"protocol-packages.md: §6.23 conditional table has {cond_rows} rows, claim says {want_cond}")
+    if len(always_names) != want_always:
+        bad.append(f"protocol-packages.md: §6.23 always-present list has {len(always_names)} names, claim says {want_always}")
+
+
 def main() -> int:
     idx = open(IDX, encoding="utf-8").read()
     bad = []
+    check_package_framing_counts(bad)
     for name, (pat, expected) in CLAIMS.items():
         text = open(os.path.join(INV, name), encoding="utf-8", errors="replace").read()
         m = re.search(pat, idx)
