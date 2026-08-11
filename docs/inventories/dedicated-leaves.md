@@ -446,7 +446,7 @@ before treating a row as a behavioral claim. Infra collections are classified in
 | `BlockSwitchController` | Block Switch Controller | `MonoBehaviour` | UpdateLights, SetState, Start |
 | `ShapeCategory` | Shape Category | `Object` | CompareTo, CompareTo |
 | `BlockSwitchSingleController` | Block Switch Single Controller | `MonoBehaviour` | SetState, SetState, Start |
-| `BlockingQueue` | Blocking Queue | `Object` | (generic/nested; see IL) |
+| `BlockingQueue` | Blocking Queue | `Object` | `BlockingQueue<T>`: Enqueue, Dequeue, HasData, Clear (generic queue wrapper) |
 | `POIBoundsSideHelper` | POIBounds Side Helper | `MonoBehaviour` | SetSize, OnTriggerEnter, OnTriggerExit, Setup |
 | `BlockActivationCommand` | Block Activation Command | `ValueType` | (fields only) |
 | `BlockPlacementDrawBridge` | Block Placement Draw Bridge | `BlockPlacementTowardsPlacer` | LimitRotation |
@@ -518,13 +518,13 @@ before treating a row as a behavioral claim. Infra collections are classified in
 | `ProfilerUtils` | Profiler Utils | `Object` | GetAvailableMetricsCsv, AppendLastValue, CalculateTextureSizeBytes, CalculateUnsafeParallelHashMapBytes |
 | `EnumDecoAllowedExtensions` | Enum Deco Allowed Extensions | `Object` | ToStringInternal, ToStringFriendlyCached, WithStreetOnly, IsNothing |
 | `SmartArray` | Smart Array | `Object` | set, get, clear, read |
-| `RingBuffer` | Ring Buffer | `Object` | (generic/nested; see IL) |
-| `ArrayWithOffset` | Array With Offset | `Object` | (generic/nested; see IL) |
+| `RingBuffer` | Ring Buffer | `Object` | `RingBuffer<T>`: Add, GetNext, GetPrev, Peek, GetCount (generic ring) |
+| `ArrayWithOffset` | Array With Offset | `Object` | `ArrayWithOffset<T>`: array + offset window wrapper |
 | `ProceduralGridMover` | Procedural Grid Mover | `Object` | UpdateGraph, PointToGraphSpace, UpdateGraphCoroutine |
 | `UnsafeBitArraySetIndicesEnumerator` | Unsafe Bit Array Set Indices Enumerator | `ValueType` | MoveNext, Reset, Dispose |
 | `UpdatePhysics` | Update Physics | `Object` | MoveNext, Dispose, Reset |
 | `Contextual` | Contextual | `Object` | DoesWorldExist, FindWorld, FindActiveWorld, FindDownloadedRemoteWorld |
-| `ReadOnlyListWrapper` | Read Only List Wrapper | `Object` | (generic/nested; see IL) |
+| `ReadOnlyListWrapper` | Read Only List Wrapper | `Object` | `ReadOnlyListWrapper<T,U>`: read-only list facade |
 | `RegionData` | Region Data | `Object` | Load, Save, SetChunkData, GetChunkData |
 | `ThreadInfo` | Thread Info | `Object` | WaitForEnd, RequestTermination, TerminationRequested, HasTerminated |
 | `VoxelNode` | Voxel Node | `LevelGridNode` | UpdateRecursiveG, ClearCustomConnections, Reset, Cleanup |
