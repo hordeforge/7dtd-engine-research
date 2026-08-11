@@ -173,7 +173,7 @@ local install. See `re-scratch/README.md`.
 | `tests/test_entityclass_props_current.py` | `entityclass-props.md` 167 `ldstr`+`stsfld` pairs match the `EntityClass..cctor` exactly; IL=394 pin + 187 self-state. |
 | `tests/test_il_citations.py` | Every parseable `Type::Method`/`Type.Method` + `IL=N` claim in the docs matches the DLL (any overload); dated changelog notes and shorthand-suffix types are skipped. Caught `GetCellsOnRay` 244->242 and `PersistentPlayerLogin` 5->37. |
 | `tests/test_netprotocol_census.py` | `NetProtocolCensus` re-derives the per-package census (193 packages; 6 channel-1, 8 compressed, 5 not-before-auth, 4 non-map) and the docs must match on all four axes. |
-| `tests/test_horde_constants.py` | 17 AI-director horde constants (blood-moon party geometry/timing, wandering-horde scheduling gates) pinned against the DLL and stated in aidirector.md. |
+| `tests/test_tuned_constants.py` | 40 tuned game constants (AI-director horde/placement/cooldown/activity, water-sim) pinned against the DLL and stated in aidirector.md / light-mesh-water.md. |
 | `tests/test_committed_inventories_current.py` | Generated inventories (`netpackage-bodies`, `coverage-report`, `state-machines`) are current against the live DLL. |
 | `tests/test_state_machines_current.py` | `state-machines.md` lifecycle tables are current against the live DLL (skips without mono; CI-safe). |
 | `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (11 claims). |

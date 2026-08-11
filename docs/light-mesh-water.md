@@ -469,6 +469,11 @@ water-collection harvest.
 `SetBlockRPC`. WBT schedule delay: state 0 → **60** ticks, state 2 → **1** tick,
 else **1000** ticks.
 
+**Water-sim constants (IL):** `MAX_EMISSIONS` = **3**, `blockUpdatesPerSecond`
+= **16** (the `CheckUpdate` rate limit is `blockUpdates > 16/2` = 8), `AUTO_GENERATED`
+= **8** (the auto-generated rotation marker), `ZERO_EMISSIONS` = `ZERO_EVAPORATION`
+= **0**.
+
 **Damage packing helpers:**
 
 - `Evap` (IL=9): if `damage <= 45` return damage else 0 (evap lives in 0..45).
