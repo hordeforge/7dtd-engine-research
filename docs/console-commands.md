@@ -129,7 +129,7 @@ Selected dedi-critical Execute bodies:
 | `ConsoleCmdKillAll` | 92 | Optional `alive` / `all` filters; walk world entities; `Entity.DamageEntity` with large strength; log damage lines |
 | `ConsoleCmdSpawnEntity` | 280 | Lists players/entity numbers when short args; otherwise builds spawn near player/pos via entity class lookup (large help/list branch) |
 | `ConsoleCmdTeleport` | 141 | **Client-only** for local player (`"use teleportplayer instead"` on remote); offset/player destination via `ConsoleCmdTeleportsAbs.ExecuteTeleport` |
-| `ConsoleCmdSetTime` | 145 | `day` / `night` presets via `GameUtils.DayTimeToWorldTime`, or raw u64 parse; multi-arg day/hour/min variants |
+| `ConsoleCmdSetTime` | 145 | 1 arg: `day` = `DayTimeToWorldTime(1, 12, 0)` (Day 1 noon), `night` = `DayTimeToWorldTime(2, 0, 0)` (Day 2 midnight), else raw u64 world-time parse ("Invalid value for single argument variant"); 3 args: day/hour/minute. Other arg counts rejected ("expected 1 or 3"). Live-tested 2026-08-11 |
 | `ConsoleCmdSaveWorld` | 12 | If server: `SaveLocalPlayerData` + `SaveWorld`; output `World saved` |
 | `ConsoleCmdShutdown` | 5 | Output `Shutting server down...` then `Application.Quit()` |
 | `ConsoleCmdMem` | 480 | Subcommands: `gc` (GC stats / incremental collector), editor/mem dump branches (large) |
