@@ -99,6 +99,31 @@ def main():
     if dead_x:
         raise AssertionError("broken cross-repo links:\n" + "\n".join(sorted(set(dead_x))[:15]))
 
+    # 3b. Section references ([doc](path) §N[.M]) must resolve to a header in
+    # the target doc (anchors drift when sections are renumbered).
+    sect_pat = re.compile(r"\[[A-Za-z0-9_.-]+\.md\]\(([^)]*\.md)\)\s*§\s*([0-9]+(?:\.[0-9]+)?)")
+    bad_sec = []
+    n_sec = 0
+    for sub, _dirs, names in os.walk(DOCS):
+        for name in names:
+            if not name.endswith(".md"):
+                continue
+            path = os.path.join(sub, name)
+            text = open(path, encoding="utf-8").read()
+            for m in sect_pat.finditer(text):
+                target = os.path.normpath(os.path.join(sub, m.group(1)))
+                sec = m.group(2)
+                n_sec += 1
+                if not os.path.isfile(target):
+                    bad_sec.append(f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no file)")
+                    continue
+                hdr = re.compile(rf"^#{{1,4}} {re.escape(sec)}(?:[ .:]|$)")
+                tlines = open(target, encoding="utf-8").read().splitlines()
+                if not any(hdr.match(l) for l in tlines):
+                    bad_sec.append(f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no header)")
+    if bad_sec:
+        raise AssertionError("broken section references:\n" + "\n".join(sorted(set(bad_sec))[:15]))
+
     # 4. Every root doc carries the canonical hub backlink ("**Hub:** INDEX.md").
     no_hub = sorted(
         d
@@ -108,7 +133,7 @@ def main():
     if no_hub:
         raise AssertionError(f"docs missing **Hub:** backlink: {no_hub}")
 
-    print(f"OK: {len(doc_root)} docs reachable from INDEX.md, 0 dead internal links ({len(all_docs)} doc files)")
+    print(f"OK: {len(doc_root)} docs reachable from INDEX.md, 0 dead internal links ({len(all_docs)} doc files, {n_sec} section refs)")
 
 
 if __name__ == "__main__":
