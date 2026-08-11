@@ -49,7 +49,8 @@ delta file):
 | Machine pin (version, TPS, census, TE widths) | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json), [coverage.md](coverage.md), [re-methodology.md](re-methodology.md) §1 |
 | NetPackageTileEntity `teBlockId` + i32 length | [protocol-packages.md](protocol-packages.md) §6.12, [tile-entities-power.md](tile-entities-power.md) |
 | Held entities / wild chicken grab | [items.md](items.md) § Held entities, [entity-ai.md](entity-ai.md) |
-| WorldState.SaveLoad IL=926 / CurrentSaveVersion=23 | [save-region.md](save-region.md) |
+| WorldState.SaveLoad IL=926 / CurrentSaveVersion=23 | [save-region.md](save-region.md) §1 (full-file byte-exact round-trip; game-reader round-trip; shipped V4.0-tooled world skew) |
+| Save codecs verified byte-exact on real saves | `make save-roundtrip-all` ([tools/save_roundtrip_check.py](../tools/save_roundtrip_check.py)): main.ttw (all nested blobs), region files, chunk bodies, decoration/multiblocks, id mappings, plus the shipped Navezgane world - 16 probe saves + shipped, 2026-08-12 |
 | LiteNetLib wire pins: `ProtocolId` **13**, `MaxPacketSize` **1432**, `PossibleMtu` [1024..1432], PacketProperty ordinals 0-17 | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) `litenet.*` (machine-checked; zdtd `max_packet_size` 1327 divergence flagged) |
 | XML data pins: zombie HP ladder (healthSlim **125** ... infernal **1600**), trader economy (**3.0**/**0.2**), survival well-fed threshold **0.52** | [`../tools/data/xml_pins.json`](../tools/data/xml_pins.json) (machine-checked by `check_stock_facts`) |
 | Behaviour pins: WaterLevel **62.88**, item-drop lifetime **300 s**, per-frame load budget **50 ms** | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) `behaviour.*` (machine-checked by `check_stock_facts`; WaterLevel 62.88 also observed live in a real `main.ttw` save header, save-region.md §1) |
