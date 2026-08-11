@@ -121,6 +121,18 @@ load-failure lines; 9722 chunks from the saved region files) and `gettime`
 reported **Day 4, 12:38** - exactly the `worldTime = 84635` (day 4 12:38)
 read from that save's `main.ttw` by the byte parser. The game's own reader and
 the documented codec agree end-to-end.
+
+**Shipped-world version skew (2026-08-12, live):** the TFP-shipped Navezgane
+`Data/Worlds/Navezgane/main.ttw` (7.9 MB) parses with the same codec - magic
+`ttw\0`, version 23, waterLevel 62.88, chunkSize 16, providerId 4
+(ChunkDataDriven), seed -1634985719 - but its `gameVersionString` is
+**"V 4.0 (b8)"** (`VersionInformation (1, 4, 0, 8)`), i.e. the world data was
+tooled with a V4.0 build while the dedicated server is V3.1.0 (b14). Every
+V3.1.0 boot of the shipped world logs
+`Loaded world file from different version: 'V 4.0 (b8)'` and proceeds -
+the mismatch is a warning only, and the **save-version 23 codec is shared**
+across the two builds (the version gate reads the string, not the other way
+around; save-region reads/writes work on both).
 | Active game mode | version &gt; 6 | `activeGameMode:i32` |
 | Water + chunk geometry | always after mode pad | `waterLevel`, `chunkSizeX`, then Y/Z **swapped on store** (Y field written from Z read and vice versa - stock quirk), `chunkCount`, `providerId`, `seed`, `worldTime` |
 | `timeInTicks` | version &gt; 8 | u64 |
