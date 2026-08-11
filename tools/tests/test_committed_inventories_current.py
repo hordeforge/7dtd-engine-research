@@ -79,6 +79,17 @@ def main():
         if fresh != committed:
             raise AssertionError("docs/inventories/coverage-report.md is STALE: run tools/regen.sh")
         print("OK: coverage-report.md is current")
+    # StateMachines.exe is DLL-free: it scans the docs for mermaid diagrams, so
+    # this check also runs in CI (test-docs gate).
+    with tempfile.TemporaryDirectory() as td:
+        out = os.path.join(td, "state-machines.md")
+        rc, _, err = run("StateMachines.exe", docs, out)
+        assert rc == 0, f"StateMachines.exe failed: {err}"
+        fresh = open(out).read()
+        committed = open(os.path.join(REPO, "docs/inventories/state-machines.md")).read()
+        if fresh != committed:
+            raise AssertionError("docs/inventories/state-machines.md is STALE: run tools/regen.sh")
+        print("OK: state-machines.md is current")
     print("ALL COMMITTED INVENTORIES ARE CURRENT")
 
 if __name__ == "__main__":

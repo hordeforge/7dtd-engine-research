@@ -61,6 +61,7 @@ test:
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
+	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 
 # CI variant: the corpus-invariant gates that need no live DLL, mono, local
 # il/ dumps, or the realworld sibling. test_dedi_coverage_docs.py stays in the
@@ -69,6 +70,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
+	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 
 # Everything in one command: doc gates (no DLL), pins, readiness, facts view.
 # make test (the DLL-dependent suite) is separate: it needs the live game.
