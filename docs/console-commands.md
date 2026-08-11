@@ -142,8 +142,8 @@ Selected dedi-critical Execute bodies:
 | `ConsoleCmdShutdown` | 5 | Output `Shutting server down...` then `Application.Quit()` |
 | `ConsoleCmdMem` | 480 | Subcommands: `gc` (GC stats / incremental collector), editor/mem dump branches (large). Live 2026-08-12: `mem gc` -> `gc Enabled, mem 1353512k, count 101, isInc True, inc time 3ms` (Mono incremental GC, ~1.35 GB, 101 collections) |
 | `ConsoleCmdWeather` | 465 | Dumps biome weather / WeatherManager state; mutator subcommands for weather params |
-| `ConsoleCmdGetGamePrefs` | 73 | Optional filter string; lists allowed prefs `GamePref.X = value` via `prefAccessAllowed`. Live 2026-08-12: `getgamepref MaxSpawnedZombies` -> `GamePref.MaxSpawnedZombies = 16` |
-| `ConsoleCmdGetGameStats` | 73 | Optional filter; lists all `EnumGameStats` as `GameStat.X = value` (live-tested 2026-08-11: `getgamestat AirDropFrequency` -> `GameStat.AirDropFrequency = 3`) |
+| `ConsoleCmdGetGamePrefs` | 73 | Optional filter string; lists allowed prefs `GamePref.X = value` via `prefAccessAllowed`. Live 2026-08-12: `getgamepref MaxSpawnedZombies` -> `GamePref.MaxSpawnedZombies = 16`; full dump lists **307** allowed prefs (the `prefAccessAllowed` subset of the 317 enum) |
+| `ConsoleCmdGetGameStats` | 73 | Optional filter; lists all `EnumGameStats` as `GameStat.X = value` (live-tested 2026-08-11: `getgamestat AirDropFrequency` -> `GameStat.AirDropFrequency = 3`; full-dump 2026-08-12: 81 stats in the server log, `UNUSED_GameDifficultyBonus` / `UNUSED_ShowZombieCounter` print empty) |
 | `ConsoleCmdSetGamePref` | 58 | `GamePrefs.Parse` + `SetObject`; errors on bad pref/value. Live 2026-08-12: `setgamepref MaxSpawnedZombies 32` -> `MaxSpawnedZombies set to 32`, read-back 32 (round-trip verified) |
 | `ConsoleCmdCreateWebUser` | 96 | In-game console only; server builds registration token/URL for web dashboard user |
 | `ConsoleCmdLogGameState` | 97 | 1-2 args; optional bool; client restriction on second param |
