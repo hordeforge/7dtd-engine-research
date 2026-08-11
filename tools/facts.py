@@ -13,5 +13,9 @@ facts_path = os.path.join(TOOLS, "data", "stock_facts.json")
 d = json.load(open(facts_path, encoding="utf-8"))
 v = d["version"]
 print(f"pin: {v['display']} (b{v['build']}) tps={d['sim']['constants_ticks_per_second']}")
+c = d.get("census", {})
+s = d.get("save", {})
+print(f"  census: top_types={c.get('top_level_types')} methods={c.get('methods_with_body_top_level')} gmupdate_il={c.get('gmupdate_il')}")
+print(f"  save: current_save_version={s.get('current_save_version')} saveload_il={s.get('worldstate_saveload_stream_il')}")
 for k, val in d["behaviour"].items():
     print(f"  behaviour.{k} = {val}")
