@@ -559,10 +559,12 @@ a real join end-to-end (challenge → PackageIds → auth stages → PlayerLogin
 §3 and §8.
 
 **Codec-vs-corpus cross-check (2026-08-11):** the loadgen `PackageCodec`'s
-`BuildPlayerLogin` (8 fields) and `BuildPlayerLoginAnswer` (7 fields) field
-orders equal the IL-derived bodies in
+`BuildPlayerLogin` (8 fields), `BuildPlayerLoginAnswer` (7 fields), and the
+empty-body `BuildAuthConfirmation`/`BuildRequestToEnterGame` layouts equal the
+IL-derived bodies in
 [`inventories/netpackage-bodies.md`](inventories/netpackage-bodies.md) exactly -
-the reference implementation and the RE corpus agree on both login packages.
+the reference implementation and the RE corpus agree on the login handshake
+packages.
 
 Any Zig clone should pass the same golden sizes for PosAndRot / RelPos / AliveFlags / envelope, then accept loadgen probe.
 
