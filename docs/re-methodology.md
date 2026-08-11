@@ -221,6 +221,32 @@ new JSON together with doc/code pin edits. Pair with §5b `drift-check.sh` for f
 surface drift; stock-sync is the **small constant** gate, not a replacement for
 parity dumps.
 
+## 5d. Corpus self-verification (the gates that keep the docs honest)
+
+Beyond the pins, the corpus is machine-checked against the live DLL so a game
+patch or a careless edit cannot silently drift the docs:
+
+| Gate | What it verifies |
+|---|---|
+| `make test` (20 checks) | the full local suite: reach/coverage consistency, committed-inventory currency (`WireBodies`/`Coverage`/`StateMachines` regeneration), surface well-formedness, doc-link + section-ref integrity, inventory count claims, and the DLL-side guards below |
+| `tests/test_subclass_counts.py` | per-leaf inventory counts (sequence-requirements 38, item-actions 38, quest-objectives 38, minevent-actions 71, block-behaviors 65, te-features 11, challenge-objectives 28+1, sequence-actions 123) match the concrete-subclass closures / namespace composition |
+| `tests/test_console_cmd_inventory.py` | console catalog primary rows == `CmdMap.exe` output, alias rows are real names, the committed `.tsv` is current, and every Does-column description equals `getDescription` |
+| `tests/test_il_citations.py` | **every** parseable `Type::Method` + `IL=N` claim in the docs (2237 claims, incl. dated "(exact)" re-verification notes) matches some overload of the method in the live DLL; `IL=~` approximations are banned |
+| `tests/test_inventory_type_existence.py` | every type row in `dedicated-leaves.md` (371) and `netpackages.md` (194, incl. base/method-count/max-IL columns and top-level completeness) resolves in the DLL |
+| `tests/test_entityclass_props_current.py`, `test_gamestats_gameprefs_current.py` | EntityClass `.cctor` prop pairs (167) and the EnumGameStats/EnumGamePrefs member-name tables (82/317) equal the DLL |
+| dump-mirror guards in `test_dedi_coverage_docs.py` | `deeper.md`/`gaps.md`/`opt-scan.md`/`loop-complete.md` bodies equal their regenerated dump masters (gaps with the >4-line raw-IL elision policy); every `il/` reference resolves; `tools/bin` exes are not older than `tools/src` |
+| `test_re_dump_regen.py` | `frame-entries`/`gmupdate-calls`/`manager-updates` committed bodies equal the regenerated dumper output |
+
+This loop's findings: 6 stale V3.0.1-era inventories regenerated (deeper, gaps,
+opt-scan, loop-complete, frame-entries, manager-updates), 5 stale doc claims
+fixed (SaveLoad 884→926, GetCellsOnRay 244→242, PersistentPlayerLogin 5→37,
+3 netpackages max-IL values, residuals §8→§4), 4 unresolvable base markers
+resolved, and the wire docs **live-verified**: a real join against a stock
+V3.1.0 dedicated server produced the exact documented PackageIds framing
+(`[ch][size][comp][enc][cnt]`, VersionInformation 1/3/10/14, map count 0xBD=189)
+and pre-auth stage strings (`authstate_nativeplatform` / `authstate_encryption`
+/ `authstate_authenticated`).
+
 Product rules (still enforced in those repos):
 
 - loadgen: `PackageCodec.GameVersion` + golden-wire fixtures
