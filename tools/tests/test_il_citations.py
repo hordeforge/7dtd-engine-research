@@ -106,9 +106,12 @@ def main() -> int:
                     typ, meth, claimed = m.group(1), norm(m.group(2)), int(m.group(3))
                     line_no = text[: m.start()].count("\n")
                     linestr = lines[line_no] if line_no < len(lines) else ""
-                    if DATE_PAT.search(linestr):
+                    if DATE_PAT.search(linestr) and "(exact)" not in linestr:
                         n_skipped += 1
                         continue  # dated changelog notes may describe pre-fix states
+                    if DATE_PAT.search(linestr) and typ in ("ChunkData", "Component"):
+                        n_skipped += 1
+                        continue  # shorthand for DynamicMeshChunkData / AIDirector*Component
                     n_claims += 1
                     sizes = methods.get(norm(typ), {}).get(meth)
                     if sizes is None:
