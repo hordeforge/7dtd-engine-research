@@ -597,6 +597,14 @@ CONSTS = {
         "groundHeight": 35,
         "HeightMax": 255,
     }),
+    "PathingUtils": ("world-generation.md", {
+        "PATHING_GRID_TILE_SIZE": 10,
+        "stepSize": 10,
+        "cNeighborsCount": 8,
+        "cHeightCostScale": 0.2,
+        "cRoadHighwayMaxStepH": 11,
+        "cRoadCountryMaxStepH": 12,
+    }),
     "Voxel": ("raycast-pathing.md", {
         "HM_Transparent": 1,
         "HM_LiquidOnly": 2,

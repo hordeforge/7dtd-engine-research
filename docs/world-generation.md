@@ -297,6 +297,10 @@ After both complete, `ClearWaterUnderTerrain` iterates `waterRects` and clears
   `FindDetailedPath`), producing `highwayPaths`; `RunTownshipDirtRoads` adds
   country roads. `PathingUtils` runs its node search on a
   `MinHeapBinned` (the binned priority queue: `Init` IL=19 / `Add` IL=97 /
+
+**`PathingUtils` constants (IL):** `PATHING_GRID_TILE_SIZE` / `stepSize` =
+**10**, `cNeighborsCount` = **8**, `cHeightCostScale` = **0.2**, road max-step
+heights `cRoadHighwayMaxStepH` = **11** / `cRoadCountryMaxStepH` = **12**.
   `ExtractFirst` IL=62 / `Reset` IL=36 with `cBins` / `cScale` bin
   geometry over a `NativeArray`), the closed node bookkeeping for the
   pathfinding pass.
