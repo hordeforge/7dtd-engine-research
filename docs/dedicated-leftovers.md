@@ -271,6 +271,13 @@ when POIs are placed, this legacy shim is dedicated code on any world using
 older prefabs. Complements [blocks.md](blocks.md) (current `BlockValue` layout)
 and [server-browser-prefabs.md](server-browser-prefabs.md) (.tts reader).
 
+**Legacy V3 bit layout (IL consts):** type `15` bits (mask 0x7FFF, `TypeMask`),
+rotation `5` bits at shift **15** (`RotationShift`), meta `4` bits at shift
+**20** (`MetadataShift`), meta2 `4` bits at shift **24** (`Metadata2Shift`),
+meta3 `2` bits at shift **28** (`Metadata3Shift`, max 3), child shift **30**
+(`ChildShift`), hasdecal shift **31** (`HasDecalShift`) - versus the current
+layout's 16-bit type at shift 0, rotation 16, meta3 21, meta 22, meta2 26.
+
 ## 7. AesEncryptAndMac
 
 The managed symmetric channel cipher behind the join key exchange: `Aes.Create()`

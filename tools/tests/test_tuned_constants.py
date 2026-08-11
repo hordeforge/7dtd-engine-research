@@ -265,6 +265,28 @@ CONSTS = {
         "cMaxActiveDronePlayerRange": 32,
         "cVersion": 1,
     }),
+    "BlockValue": ("blocks.md", {
+        "RotationShift": 16,
+        "Metadata3Shift": 21,
+        "Metadata1Shift": 22,
+        "Metadata2Shift": 26,
+        "ChildShift": 30,
+        "HasDecalShift": 31,
+        "TypeMask": 65535,
+        "RotationMax": 31,
+        "MetadataMax": 15,
+        "Metadata3Max": 1,
+    }),
+    "BlockValueV3": ("dedicated-leftovers.md", {
+        "RotationShift": 15,
+        "MetadataShift": 20,
+        "Metadata2Shift": 24,
+        "Metadata3Shift": 28,
+        "TypeMask": 32767,
+        "Metadata3Max": 3,
+        "ChildShift": 30,
+        "HasDecalShift": 31,
+    }),
     "BlockLiquidv2": ("light-mesh-water.md", {
         "MAX_EMISSIONS": 3,
         "blockUpdatesPerSecond": 16,
@@ -352,10 +374,10 @@ def main() -> int:
                 bad.append(f"{cls}.{name}: DLL {have} != expected {want}")
             # the doc must state the name (and ideally the value); derived *Sq
             # constants and grouped mask families (cBlockerFlag*, BlockFaceDrawn_*,
-            # BT_*, cPath*) are value-only
+            # BT_*, cPath*, *Max width bounds) are value-only
             grouped = (name.endswith("Sq") or name.startswith("cBlockerFlag")
                        or name.startswith("BlockFaceDrawn") or name.startswith("BT_")
-                       or name.startswith("cPath"))
+                       or name.startswith("cPath") or name.endswith("Max"))
             if not grouped and not re.search(rf"`?{name}`?", doc):
                 bad.append(f"{doc_name}: does not mention {name}")
             if str(want) not in doc:

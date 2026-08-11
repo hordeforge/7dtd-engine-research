@@ -146,13 +146,13 @@ over `rawData`, so the layout is unambiguous:
 
 | Bits | Field | Width | Mask | Accessor |
 |---:|---|---:|---|---|
-| 0..15 | **type** (block id) | 16 | `0x0000FFFF` | `get/set_type` |
-| 16..20 | **rotation** | 5 (0..31) | `0x001F0000` | `get/set_rotation` |
-| 21 | **meta3** | 1 | `0x00200000` | `get/set_meta3` |
-| 22..25 | **meta** | 4 (0..15) | `0x03C00000` | `get/set_meta` |
-| 26..29 | **meta2** | 4 (0..15) | `0x3C000000` | `get/set_meta2` |
-| 30 | **ischild** | 1 | `0x40000000` | `get/set_ischild` |
-| 31 | **hasdecal** | 1 | `0x80000000` | `get/set_hasdecal` |
+| 0..15 | **type** (block id) | 16 | `0x0000FFFF` (`TypeMask`) | `get/set_type` |
+| 16..20 | **rotation** | 5 (0..31) | `0x001F0000` (`RotationMask`) | `get/set_rotation` (`RotationShift` 16) |
+| 21 | **meta3** | 1 | `0x00200000` (`Metadata3Mask`) | `get/set_meta3` (`Metadata3Shift` 21) |
+| 22..25 | **meta** | 4 (0..15) | `0x03C00000` (`Metadata1Mask`) | `get/set_meta` (`Metadata1Shift` 22) |
+| 26..29 | **meta2** | 4 (0..15) | `0x3C000000` (`Metadata2Mask`) | `get/set_meta2` (`Metadata2Shift` 26) |
+| 30 | **ischild** | 1 | `0x40000000` (`ChildMask`) | `get/set_ischild` (`ChildShift` 30) |
+| 31 | **hasdecal** | 1 | `0x80000000` (`HasDecalMask`) | `get/set_hasdecal` (`HasDecalShift` 31) |
 
 `damage` is **not** in `rawData`. It is a distinct `int` clamped to the block's
 `MaxDamage`. This matters for serialization: `BlockValue.Write` emits `rawData`
