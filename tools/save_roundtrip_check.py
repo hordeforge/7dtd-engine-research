@@ -99,6 +99,143 @@ def check_main_ttw(path, checks):
     return off
 
 
+def parse_chunk_body(body, name, idx, checks):
+    """Fully parse a decompressed Chunk.save body (Chunk.write IL=601) and
+    require it to consume the body byte-exactly.
+
+    Returns (coords_ok, exact_ok). When entities or tile entities are present
+    (variable-length nested formats not deep-parsed here), exact_ok is False
+    with a reason recorded.
+    """
+    p = 0
+    n = len(body)
+
+    def need(k):
+        return p + k <= n
+
+    def rd(fmt, k):
+        nonlocal p
+        if not need(k):
+            raise ValueError(f"truncated at {p}/{n}")
+        v = struct.unpack_from(fmt, body, p)
+        p += k
+        return v
+
+    x, y, z = rd("<iii", 12)
+    ticks = rd("<Q", 8)[0]
+    coords_ok = True
+    # C# remainder semantics (Python % differs for negatives): r = a - trunc(a/b)*b
+    x_mod = x - int(x / 32) * 32
+    if x < 0:
+        x_mod += 31
+    z_mod = z - int(z / 32) * 32
+    if z < 0:
+        z_mod += 31
+    if x_mod + z_mod * 32 != idx:
+        coords_ok = False
+        checks.append(f"  slot {idx}: stored chunk ({x},{z}) maps to slot "
+                      f"{x_mod + z_mod * 32}, not {idx}")
+
+    layers = 0
+    for _ in range(64):
+        if rd("<b", 1)[0]:
+            layers += 1
+            if rd("<b", 1)[0]:
+                p += 1024
+            else:
+                p += 1
+            if rd("<b", 1)[0]:
+                p += 3072
+    if not need(0):
+        raise ValueError("truncated in layer block")
+
+    def channel(bpv):
+        nonlocal p
+        for _ in range(64):
+            flag = rd("<b", 1)[0]
+            if flag == 0:
+                p += bpv * 1024
+            elif flag == 1:
+                p += bpv
+            else:
+                raise ValueError(f"bad channel flag {flag}")
+
+    channel(1)  # chnStability (file only)
+
+    # Maps are written RAW: PooledBinaryWriter.Write(byte[]) (IL=14) emits no
+    # length prefix. Sizes from Chunk.read IL=775: HeightMap 256, TerrainHeight
+    # 256, TopSoilBroken 32 (version > 41), Biomes 256, BiomeIntensities 1536.
+    p += 256 + 256 + 32 + 256 + 1536
+    d_biome, am_biome = rd("<bb", 2)
+
+    custom = rd("<H", 2)[0]
+    for _ in range(custom):
+        _, p = read_net_string(body, p)
+        p += 8  # expiresInWorldTime u64
+        p += 1  # isSavedToNetwork bool
+        dlen = rd("<H", 2)[0]
+        p += dlen  # data bytes
+
+    # normal maps: 3 x 256 raw (no length prefix)
+    p += 256 * 3
+
+    channel(1)  # chnDensity
+    channel(1)  # chnLight
+    channel(2)  # chnDamage
+    channel(6)  # chnTextures[0]
+    channel(2)  # chnWater
+
+    rd("<b", 1)  # NeedsLightCalculation
+
+    entities = rd("<i", 4)[0]
+    reason = ""
+    if entities:
+        reason += f"{entities} entities present (format not deep-parsed); "
+        return coords_ok, False, reason
+    te_count = rd("<i", 4)[0]
+    if te_count:
+        reason += f"{te_count} tile entities present (format not deep-parsed); "
+        return coords_ok, False, reason
+    rd("<b", 1)  # always false (file path)
+
+    def volume():
+        nonlocal p
+        cnt = rd("<B", 1)[0]
+        p += cnt * 4
+
+    volume()  # sleeperVolumes
+    volume()  # triggerVolumes
+    volume()  # wallVolumes
+
+    dev_count = rd("<h", 2)[0]
+    for _ in range(dev_count):  # insideDevices runs: x, z, len, len y bytes
+        xb, zb, ln = rd("<BBB", 3)
+        p += ln
+
+    rd("<b", 1)  # IsInternalBlocksCulled
+
+    td_count = rd("<h", 2)[0]
+    if td_count:
+        reason += f"{td_count} triggerData present; "
+        return coords_ok, False, reason
+    for _ in range(td_count):
+        p += 12  # Vector3i LocalChunkPos
+        p += 2 + 1 + 1  # version u16 + NeedsTriggered byte + TriggersIndices count byte
+        p += body[p - 1]
+        p += 1  # TriggeredByIndices count byte
+        p += body[p - 1]
+
+    if p != n:
+        raise ValueError(f"body parse ended at {p}/{n}")
+
+    check_str = (f"  slot {idx}: chunk ({x},{z}) ticks={ticks} layers={layers}/64 "
+                 f"biome=({d_biome},{am_biome}) custom={custom} "
+                 f"entities=0 te=0 devices={dev_count} culled ok; byte-exact "
+                 f"body parse ({n} B)")
+    checks.append(check_str if coords_ok else check_str + " [coord mismatch above]")
+    return coords_ok, True, ""
+
+
 def check_region_v2(path, checks):
     """Verify a .7rg sector-based V2 region file (doc save-region.md 3.4/3.5)."""
     with open(path, "rb") as fh:
@@ -163,23 +300,17 @@ def check_region_v2(path, checks):
         if len(dec) < 20:
             checks.append(f"  slot {idx}: decompressed body too short ({len(dec)})")
             continue
-        x, y, z = struct.unpack_from("<iii", dec, 0)
-        # Forward check via the documented GetOffsetFromXz formula (doc 3.5):
-        # x_mod = cX % 32 (negative coords: +31), slot idx = x_mod + z_mod*32.
-        x_mod = x % 32
-        if x < 0:
-            x_mod += 31
-        z_mod = z % 32
-        if z < 0:
-            z_mod += 31
-        exp_idx = x_mod + z_mod * 32
-        if exp_idx == idx:
+        try:
+            coords_ok, exact_ok, reason = parse_chunk_body(dec, name, idx, checks)
+        except (ValueError, struct.error) as exc:
+            checks.append(f"  slot {idx}: body parse error: {exc}")
+            continue
+        if exact_ok and coords_ok:
             ok += 1
-        else:
-            checks.append(f"  slot {idx}: stored chunk ({x},{z}) maps to slot {exp_idx} "
-                          f"per GetOffsetFromXz (x_mod {x_mod}, z_mod {z_mod})")
-    checks.append(f"  chunk coord round-trip: {ok}/{len(slots)} stored coords map back to "
-                  f"their slot via GetOffsetFromXz (x_mod cX%32, +31 if negative)")
+        elif reason:
+            checks.append(f"  slot {idx}: {reason}")
+    checks.append(f"  full body round-trip: {ok}/{len(slots)} chunks parse byte-exactly "
+                  f"(coords + layers + maps + channels + volumes + devices)")
 
 
 def check_region_raw(path, checks):
@@ -240,7 +371,8 @@ def main():
 
     print("\n".join(checks))
     failed = any(("MISMATCH" in c or "VIOLATED" in c or " != " in c or "failed" in c
-                  or "MISSING" in c or "bounds" in c or "too short" in c or "!= expected" in c)
+                  or "MISSING" in c or "bounds" in c or "too short" in c or "!= expected" in c
+                  or "parse error" in c)
                  for c in checks)
     print(f"\n{'FAIL' if failed else 'PASS'}: {len(checks)} checks")
     return 1 if failed else 0

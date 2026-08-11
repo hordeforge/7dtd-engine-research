@@ -238,13 +238,39 @@ name with presence bools before the i32 level and f32 distance - used by
 | `CurrentSaveVersion` | 47 | |
 | `SupportedSaveVersion` | 32 | read throws if version &lt; 32 |
 
-Write order (measured):
+Write order (measured, byte-exact round-trip verified 2026-08-12 on live saves):
 
 1. `m_X`, `m_Y`, `m_Z`, `SavedInWorldTicks`  
 2. For `i in 0..63`: bool present + optional `ChunkBlockLayer.Write`  
 3. Optional `chnStability.Write`  
-4. Byte arrays: `m_HeightMap`, `m_TerrainHeight`, topsoil, biomes, intensities (256-byte maps)  
-5. Dominant biomes, custom data, density/light/damage/texture/water channels, entities, TEs, …
+4. Maps (raw, no length prefix): `m_HeightMap` 256, `m_TerrainHeight` 256,
+   `m_bTopSoilBroken` **32**, `m_Biomes` 256, `m_BiomeIntensities` **1536**
+   (sizes from `Chunk.read` IL=775: version > 41 reads 32 topsoil bytes; the
+   1536 biome-intensity bytes = 3 bytes per cell)
+5. `DominantBiome`, `AreaMasterDominantBiome` bytes, custom-data count u16 + entries, `m_NormalX/Y/Z` 256 raw each  
+6. Channels: `chnDensity` (bpv 1), `chnLight` (bpv 1), `chnDamage` (bpv 2),
+   `chnTextures[0]` (bpv 6), `chnWater` (bpv 2)  
+7. `NeedsLightCalculation` bool, entity count i32 + `EntityCreationData.write`,
+   TE count i32 + per-TE (type i32 + `TileEntity.write`), bool false,
+   sleeper/trigger/wall volume counts, `insideDevices` runs, `IsInternalBlocksCulled`, triggerData  
+
+**Raw-map pin:** maps and normal arrays are written by
+`PooledBinaryWriter.Write(Byte[])` (IL=14), which writes the bytes **raw with
+no length prefix** (the base `BinaryWriter.Write(byte[])` length-prefix is
+overridden away). The reader (`Chunk.read` IL=775) uses raw `Read(buf, 0, N)`.
+A reader that assumes length-prefixed maps will desync immediately.
+
+**`SavedInWorldTicks` first-save quirk:** `Chunk.save` (IL=14) calls
+`write(stream, false)` and only *then* sets `SavedInWorldTicks = GameTimer.ticks`
+— so a chunk's first save carries ticks **0** (observed: all probe chunks read
+0), and the value persists only from the second save onward.
+
+**Layer write (`ChunkBlockLayer.Write` IL=36):** `bool lower8 != null`; if
+present 1024 raw bytes else 1 byte `lower8BitSameValue`; then
+`bool upper24 != null`; if present 3072 raw bytes (24-bit block ids) else
+nothing. **Channel write (`ChunkBlockChannel.Write` IL=120):** per band
+(64): 1 flag byte (0 = `layers[bandStart] != null` data, 1 = compressed), then
+per sub-layer `bytesPerVal` count: 1024 data bytes or 1 `sameValue` byte.
 
 **Expand note:** changing only `WorldConstants.ChunkBlockLayers` does **not** change this loop; patcher must rewrite the `ldc.i4.s 64` sites. Detail: `7dtd-realworld/docs/realearth-surfaces.md` §5.0.
 
@@ -912,6 +938,16 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-12:** Full chunk-body round-trip added (`tools/save_roundtrip_check.py`
+  parses every decompressed `Chunk.save` body byte-exactly: layers, maps, all 6
+  channels, volumes, insideDevices). New pins in §2: `PooledBinaryWriter.Write(Byte[])`
+  (IL=14) writes maps **raw with no length prefix**; exact map sizes 256/256/32/256/1536
+  (topsoil 32 for version > 41, biome intensities 1536) from `Chunk.read` IL=775;
+  `ChunkBlockLayer.Write` IL=36 and `ChunkBlockChannel.Write` IL=120 serialization
+  shapes (1 flag byte per band, bpv table light/density/stability 1, damage/water 2,
+  textures 6); `SavedInWorldTicks` set *after* write (first save carries 0). ~1390
+  chunks across three probe saves parse byte-exactly; TE/entity chunks honestly
+  marked (subclass bodies are the known annotation backlog).
 - **2026-08-12:** Save format round-trip live-verified (`tools/save_roundtrip_check.py`). V2 on-disk layout corrected: location table at **4096**, timestamp at **8192** (V2 ctor IL=89 Seek(4096)+Read), payload sectors from 12288 — the earlier 4/4100 layout is V1-only. V2 payload framing pinned: Int32 length + **12-byte gap** (WriteData/ReadData Seek(+12)) + data; data = `"ttc\0"` + Chunk.CurrentSaveVersion u32 (47) as Int64 + raw Noemax deflate (level 3, no header) of the Chunk.save body (RegionFileChunkSnapshot.Update IL=111, WriteStreamCompressed IL=48). Negative-coordinate slot wrap documented (chunk -32 sits at slot 31 of region -1). 620+ real slots across three probe saves round-trip, m_X/m_Y/m_Z map back via GetOffsetFromXz; main.ttw header re-confirmed on each (waterLevel 62.88, chunkSize 16).
 - **2026-08-11:** WaterLevel pinned: WorldConstants.WaterLevel = Block.cWaterLevel = 62.88 (Block cctor ldc.r4 62.88).
 - **2026-08-11:** Channel/SmartArray IL re-verified: ctor IL=27, calcOffset IL=12, getData IL=39, GetSet IL=79, getSetData IL=49, checkSameValue IL=49, CheckSameValue IL=17, GetByte IL=31, Get IL=44, SmartArray get IL=46 / set IL=71 / clear IL=19 / copyFrom IL=7 / GetUsedMem IL=5 / write IL=5 / read IL=7, TileEntity write IL=19 / read IL=37 / UpdateTick IL=1 / CopyFrom IL=3 / OnLoad/OnReadComplete/OnUnload IL=1, InstantiateFromRead IL=88, TryReadLegacyType IL=81 (exact).
