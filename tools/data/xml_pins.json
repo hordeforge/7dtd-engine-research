@@ -53,5 +53,12 @@
   "healthWightInfernal": 3000,
   "healthWightRadiated": 2200
  },
- "source": "Data/Config/entityclasses.xml <replace_passive_effect>"
+ "sources": [
+  "Data/Config/entityclasses.xml",
+  "Data/Config/traders.xml"
+ ],
+ "traders_root": {
+  "buy_markup": 3.0,
+  "sell_markdown": 0.2
+ }
 }

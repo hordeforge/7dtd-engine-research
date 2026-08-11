@@ -108,6 +108,13 @@ def check_research(facts: dict, errors: list[str]) -> None:
         prov = read(WS / "zdtd" / "docs" / "PROVENANCE.md")
         if prov:
             must_match("zdtd PROVENANCE healthSlim", prov, r"125", errors)
+        tr = pins.get("traders_root", {})
+        if abs(tr.get("buy_markup", 0) - 3.0) > 1e-9:
+            errors.append(f"xml_pins traders_root.buy_markup={tr.get('buy_markup')} != 3.0")
+        if abs(tr.get("sell_markdown", 0) - 0.2) > 1e-9:
+            errors.append(f"xml_pins traders_root.sell_markdown={tr.get('sell_markdown')} != 0.2")
+        if prov and tr.get("sell_markdown"):
+            must_match("zdtd PROVENANCE sell_markdown", prov, r"sell_markdown|SellMarkdown", errors)
 
     # WaterLevel pin: facts must carry the IL-verified value and save-region.md
     # must document it (the zdtd divergence register consumes the same number).

@@ -24,23 +24,36 @@ PINS = os.path.join(TOOLS, "data", "xml_pins.json")
 DEFAULT_GAME = os.path.expanduser(
     "~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
 )
-CFG = "Data/Config/entityclasses.xml"
+CFG_ENTITIES = "Data/Config/entityclasses.xml"
+CFG_TRADERS = "Data/Config/traders.xml"
 
 HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="(\d+)"')
 
 
 def extract(game_dir: str) -> dict:
-    path = os.path.join(game_dir, CFG)
-    if not os.path.isfile(path):
-        raise FileNotFoundError(f"missing {path}")
-    text = open(path, encoding="utf-8", errors="replace").read()
-    # only the replace_passive_effect block (the HP variable ladder)
-    m = re.search(r"<replace_passive_effect>.*?</replace_passive_effect>", text, re.S)
-    block = m.group(0) if m else ""
     hp = {}
-    for name, val in HEALTH_RE.findall(block):
-        hp[name] = int(val)
-    return {"source": f"{CFG} <replace_passive_effect>", "entityclasses_health": hp}
+    epath = os.path.join(game_dir, CFG_ENTITIES)
+    if os.path.isfile(epath):
+        text = open(epath, encoding="utf-8", errors="replace").read()
+        m = re.search(r"<replace_passive_effect>.*?</replace_passive_effect>", text, re.S)
+        block = m.group(0) if m else ""
+        for name, val in HEALTH_RE.findall(block):
+            hp[name] = int(val)
+    trader = {}
+    tpath = os.path.join(game_dir, CFG_TRADERS)
+    if os.path.isfile(tpath):
+        ttext = open(tpath, encoding="utf-8", errors="replace").read()
+        m = re.search(r"<traders\b[^>]*>", ttext)
+        if m:
+            for attr in ("buy_markup", "sell_markdown"):
+                am = re.search(rf'\b{attr}="([^"]+)"', m.group(0))
+                if am:
+                    trader[attr] = float(am.group(1))
+    return {
+        "sources": [CFG_ENTITIES, CFG_TRADERS],
+        "entityclasses_health": hp,
+        "traders_root": trader,
+    }
 
 
 def main() -> int:
