@@ -59,3 +59,17 @@ stock legitimately spawns nothing. Attempts to raise the bot's gamestage via
 "GS 1") - the loadgen bot's gamestage does not rise in this setup, another
 loadgen-side limitation for BM probes. Night scout hordes (zombieScreamer)
 spawn independently of the party.
+
+## Addendum 2026-08-12: givexp boost verified + GS2 party formed
+
+GSProbe session: `givexp <id> 5000000` on the loadgen bot, then a reconnect
+(the same player name REFake1) produced a blood-moon party line of
+"Party of 1, GS 2 (2), scaling 1, enemy max 1030, bonus every 34" - the XP
+PERSISTS by player name across reconnects, so the loadgen profile's
+gamestage boost works (earlier "stays GS 1" readings were flawed tests with
+different bot entities). The stock `gamestage` console command is read-only
+(client-side formula display, Execute IL=115, GetPrimaryPlayer). Even at GS 2
+the party still produced no "SpawnZombie grp" line in this session - the
+party-zombie spawn has an additional gate (spawn position / player targeting)
+not hit by the stationary loadgen bot; left as an open residual for a future
+probe with a mobile survivor.
