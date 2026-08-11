@@ -34,18 +34,23 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
 INV = os.path.join(REPO, "docs", "inventories")
 
-# (inventory, mode, target, expected, extra)
+# (inventory, mode, target, expected, extra, self_state)
 #   mode "closed": target is a base full name; expected is the closure total;
 #   extra may be ("abstract", N) to lock the abstract-member count.
 #   mode "seq": target is a namespace; expected is the leaf count derived as
 #   namespace classes - in-namespace base classes + known leaf-parents.
+#   self_state is the number the inventory text must state (defaults to
+#   expected; differs for challenge-objectives, whose closure of 29 = 28 leaves
+#   + the ChallengeBaseTrackedItemObjective intermediate).
 CHECKS = [
-    ("sequence-requirements.md", "closed", "GameEvent.SequenceRequirements.BaseRequirement", 38, None),
-    ("item-actions.md", "closed", "ItemAction", 38, ("abstract", 1)),
-    ("quest-objectives.md", "closed", "BaseObjective", 38, None),
-    ("minevent-actions.md", "closed", "MinEventActionBase", 71, None),
-    ("block-behaviors.md", "closed", "Block", 65, None),
-    ("sequence-actions.md", "seq", "GameEvent.SequenceActions", 123, None),
+    ("sequence-requirements.md", "closed", "GameEvent.SequenceRequirements.BaseRequirement", 38, None, None),
+    ("item-actions.md", "closed", "ItemAction", 38, ("abstract", 1), None),
+    ("quest-objectives.md", "closed", "BaseObjective", 38, None, None),
+    ("minevent-actions.md", "closed", "MinEventActionBase", 71, None, None),
+    ("block-behaviors.md", "closed", "Block", 65, None, None),
+    ("te-features.md", "closed", "TEFeatureAbs", 11, None, None),
+    ("challenge-objectives.md", "closed", "Challenges.BaseChallengeObjective", 29, None, 28),
+    ("sequence-actions.md", "seq", "GameEvent.SequenceActions", 123, None, None),
 ]
 
 # Sibling-namespace members of the BaseAction closure (documented caveat).
@@ -128,7 +133,7 @@ def main() -> int:
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
     args = [",".join(
         ("closed:" if mode == "closed" else "seq:") + target
-        for _, mode, target, _, _ in CHECKS)]
+        for _, mode, target, _, _, _ in CHECKS)]
     out = subprocess.run(
         ["mono", EXE, asm] + args, capture_output=True, text=True, env=env, check=True,
     ).stdout
@@ -147,7 +152,7 @@ def main() -> int:
             d["closuretotal"] = int(d["closuretotal"])
             stats[parts[1]] = d
     bad = []
-    for inventory, mode, target, expected, extra in CHECKS:
+    for inventory, mode, target, expected, extra, self_state in CHECKS:
         d = stats[target]
         if mode == "closed":
             if d["total"] != expected:
@@ -167,10 +172,11 @@ def main() -> int:
                 bad.append(f"{inventory}: out-of-namespace closure {d['outclosure']} != documented {SEQ_OUT_CLOSURE}")
             if len(leaf_parents) != len(SEQ_LEAF_PARENTS):
                 bad.append(f"{inventory}: leaf-parents used as bases = {leaf_parents}, expected all of {SEQ_LEAF_PARENTS}")
-        # the inventory must self-state the expected number
+        # the inventory must self-state the count (leaves for challenge-objectives)
         text = open(os.path.join(INV, inventory), encoding="utf-8").read()
-        if not re.search(rf"\b{expected}\b", text):
-            bad.append(f"{inventory}: does not self-state {expected}")
+        stated = self_state if self_state is not None else expected
+        if not re.search(rf"\b{stated}\b", text):
+            bad.append(f"{inventory}: does not self-state {stated}")
     if bad:
         for b in bad:
             print("FAIL:", b)
