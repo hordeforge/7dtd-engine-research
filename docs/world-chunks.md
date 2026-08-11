@@ -205,6 +205,15 @@ negative-world-coordinate worlds rely on the arithmetic-shift floor.
 `0.99999988079071`. It is the floor applied before every float-to-chunk
 conversion, so the negative-half semantics compose with `toChunkXZ`.
 
+**`WorldChunkCache::GetNeighborChunkKeys(key, includeDiagonals, neighbours)`
+(IL=112, exact):** decodes `key` via `extractX`/`extractZ` and repacks the
+neighbour offsets in a **fixed order** (not a rotating ring):
+`[0]=(x,z-1)` north, `[1]=(x,z+1)` south, `[2]=(x-1,z)` west, `[3]=(x+1,z)`
+east, and when `includeDiagonals` also `[4]=(x-1,z-1)` NW, `[5]=(x-1,z+1)` SW,
+`[6]=(x+1,z-1)` NE, `[7]=(x+1,z+1)` SE. The output array must have length 8
+(with diagonals) or 4 (without); a wrong-length array is reallocated to match
+before filling.
+
 ---
 
 ## 3. Generation
