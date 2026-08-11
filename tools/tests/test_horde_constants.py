@@ -70,6 +70,10 @@ CONSTS = {
     "AIDirectorSmellMarker": {
         "kMax": 256,
     },
+    "AIDirector": {
+        "cActivityDuration": 720,
+        "cActivityNoiseDuration": 240,
+    },
 }
 
 SRC = r"""

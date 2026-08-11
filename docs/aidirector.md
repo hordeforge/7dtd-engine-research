@@ -38,6 +38,9 @@ flowchart TB
 - `GetActivityWorldTimeDelay()` IL=16: `clamp(GameStats[11]
   TimeOfDayIncPerSec / 6, 0.2, 5) * 1000` world-time ticks between activity
   passes (scales with the day-speed stat)
+- Activity constants: `cActivityDuration` = **720** world-time ticks (12 game
+  hours, dead const - no live literal in V3.1.0) and `cActivityNoiseDuration` =
+  **240** (live: `NotifyNoise` heat-map chunk event duration, IL_00D9)
 - `ComponentsInitNewGame()` IL=20: `InitNewGame()` on every registered
   component; `NotifyIntentToAttack(zombie, player)` IL=1 is an empty residual
   (its only caller, `EntityEnemy.OnEntityTargeted` IL=21, fires it for
