@@ -44,6 +44,14 @@ NOT_BEFORE_AUTH = [
     "NetPackageEntitySpeeds",
     "NetPackageEntityStatsBuff",
 ]
+# the 4 top-level NetPackage* types that are NOT registered wire packages
+# (193 top-level - 4 = 189 in the live id-map; network.md §3)
+NON_MAP = [
+    "NetPackage",  # abstract base
+    "NetPackageDirection",  # enum
+    "NetPackageEntityTargeted",  # abstract intermediate
+    "NetPackageLogger",  # abstract helper
+]
 EXPECTED_TOTAL = 193
 
 
@@ -77,6 +85,35 @@ def main() -> int:
             compressed.add(parts[1])
         if parts[5] == "0":
             not_before_auth.add(parts[1])
+    # kind (abstract/enum) of the top-level NetPackage* types - the 4 non-map
+    # helpers (the META has no kind column)
+    kind_src = r"""
+using System;
+using System.Linq;
+using Mono.Cecil;
+class NpKind {
+  static void Main(string[] a) {
+    var asm = AssemblyDefinition.ReadAssembly(a[0]);
+    foreach (var t in asm.MainModule.Types.Where(t => t.Name.StartsWith("NetPackage") && t.Name != "NetPackageManager")) {
+      if (t.IsAbstract) Console.WriteLine(t.Name + "\tABSTRACT");
+      else if (t.IsEnum) Console.WriteLine(t.Name + "\tENUM");
+    }
+  }
+}
+"""
+    with open("/tmp/npkind_check.cs", "w") as f:
+        f.write(kind_src)
+    subprocess.run(
+        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"), "/tmp/npkind_check.cs", "-out:/tmp/npkind_check.exe"],
+        check=True,
+    )
+    kout = subprocess.run(
+        ["mono", "/tmp/npkind_check.exe", asm], capture_output=True, text=True, env=env, check=True,
+    ).stdout
+    non_map = set()
+    for line in kout.splitlines():
+        name, _, kind = line.partition("\t")
+        non_map.add(name)
     doc = open(DOC, encoding="utf-8").read()
     bad = []
     if total != EXPECTED_TOTAL:
@@ -87,6 +124,17 @@ def main() -> int:
         bad.append(f"compressed packages {sorted(compressed)} != documented {COMPRESSED}")
     if not_before_auth != set(NOT_BEFORE_AUTH):
         bad.append(f"not-before-auth packages {sorted(not_before_auth)} != documented {NOT_BEFORE_AUTH}")
+    if non_map != set(NON_MAP):
+        bad.append(f"non-map packages {sorted(non_map)} != expected {NON_MAP}")
+    # network.md §3 must state the 189-in-map / 4-helpers accounting
+    net = open(os.path.join(REPO, "docs", "network.md"), encoding="utf-8").read()
+    if "**189**" not in net:
+        bad.append("network.md: no '**189**' live id-map claim")
+    if "remaining **4**" not in net:
+        bad.append("network.md: no 'remaining **4**' helper claim")
+    for p in NON_MAP:
+        if not re.search(rf"`{p}`", net):
+            bad.append(f"network.md: does not name helper `{p}`")
     if not re.search(r"[Ee]xactly \*{0,2}6\*{0,2} override", doc):
         bad.append("protocol-packages.md: no 'exactly 6 override to channel 1' claim")
     if not re.search(r"\*\*8 packages set", doc):
@@ -98,7 +146,7 @@ def main() -> int:
         for b in bad:
             print("FAIL:", b)
         return 1
-    print(f"OK: census {total} packages; {len(chan1)} channel-1, {len(compressed)} compressed, {len(not_before_auth)} not-before-auth - all match the doc")
+    print(f"OK: census {total} packages; {len(chan1)} channel-1, {len(compressed)} compressed, {len(not_before_auth)} not-before-auth, {len(non_map)} non-map - all match the doc")
     return 0
 
 

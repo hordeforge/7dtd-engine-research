@@ -357,7 +357,7 @@ would play the wrong client teardown.
 
 ## 3. NetPackage type inventory
 
-Live census (tools/bin/Census.exe): **194** types with the `NetPackage*` name prefix = **193 + `NetPackageManager`**. Of those 193, the **189** in the live id-map are the actual registered wire packages; the remaining ~4-6 are name-prefixed helpers (e.g. `NetPackageDirection` [enum], `Logger`, `Metrics`), not wire packages.
+Live census (tools/bin/Census.exe): **194** types with the `NetPackage*` name prefix = **193 + `NetPackageManager`**. Of those 193, the **189** in the live id-map are the actual registered wire packages; the remaining **4** are the abstract base `NetPackage`, the abstract intermediate `NetPackageEntityTargeted`, the abstract helper `NetPackageLogger`, and the `NetPackageDirection` enum (verified: 193 - 4 = 189, the map count observed live 2026-08-11). `NetPackageMetrics` is a concrete class and *is* registered.
 
 Representative dedi-relevant packages (from inventory dump):
 
