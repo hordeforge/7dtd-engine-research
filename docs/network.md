@@ -479,7 +479,7 @@ Port: LiteNet often **ServerPort+2** (26902). Details and binary layouts: [proto
 | `NetConnectionAbs` + Simple/Steam | Yes | reader/writer threads, compress, encrypt (this section) |
 | `AesEncryptAndMac` (`IEncryptionModule`) | Yes (AES + HMACSHA256) | stream layout below; handshake packages in [protocol-packages.md](protocol-packages.md) §2 |
 | LiteNetLib **managed** wrappers | Partial type map | Present where named |
-| LiteNetLib.dll internals (managed) | **Yes** | Event machinery + flake root cause closed (§4.0); third-party algo set not re-narrated |
+| LiteNetLib.dll internals (managed) | **Yes** | Event machinery + flake root cause closed (§4.0); third-party algo set not re-narrated. `NetConstants.ProtocolId` = **13** (metadata const, Cecil-verified on the game's Managed LiteNetLib.dll); zdtd `packet.zig` pins the same value |
 
 **LiteNetLib wrapper leaves:** `NetworkServerLiteNetLib.GetServerPorts`
 (IL=9) is `(basePort + 2)/UDP`; `SetServerPassword` (IL=8) stores the
@@ -904,6 +904,7 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ## Changelog
 
+- **2026-08-11:** NetConstants.ProtocolId pinned 13 (Cecil-verified on the game's Managed LiteNetLib.dll).
 - **2026-08-11:** Added canonical `**Hub:** INDEX.md` backlink (was prose "Hub map:" only).
 - **2026-08-11:** Transport IL re-verified: InitConfig IL=22, InitStreams Steam IL=131 / Simple IL=190, NetConnectionAbs.FlushSendQueue IL=1 / IsDisconnected IL=4, NetConnectionSimple.FlushSendQueue IL=19 / SendBuffers IL=22 / sendBuffersFromQueue IL=63, SetupProtocols IL=128, StartServers IL=106, StopServersOnly IL=22, MakeServerOffline IL=11, SendQueueHandled IL=7, Task_CommWriter IL=251 / Task_CommReader IL=213, taskSerialize IL=392 / taskDeserialize IL=437, WriteToStream IL=435, StreamToBuffer IL=194 (exact).
 - **2026-08-11:** Distribution IL re-verified: OnUpdateEntities IL=322, NetEntityDistribution ctor IL=141, Add(entity) IL=66, Remove(entity,reason) IL=48, SendToPlayers IL=42, getSpawnPacket IL=7, updatePlayerEntity IL=222, SendChunksToClients IL=216, ChunkManager.AddChunkObserver IL=15 (exact).
