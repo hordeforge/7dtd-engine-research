@@ -733,6 +733,13 @@ timestamp headers. Verified on V3.1.0 b14 via `DumpMethod` (`GetLocationInfo` /
 
 #### Raw (`RegionFileRaw`)
 
+**Dead path on stock dedicated (pinned 2026-08-12):** `RegionFileManager`'s
+cctor calls `RegionFilePlatform.CreateFactory()` (IL=2), which unconditionally
+returns `RegionFileFactorySectorBased` - every stock dedicated world uses the
+sector-based `.7rg` format; Raw `.7rr` files are never produced on this build
+(0 observed across 10 probe saves). The Raw layout below stays documented as
+the IL-pinned alternative (used on other platforms/builds).
+
 | Piece | Layout |
 |---|---|
 | Region size | **8×8** chunks (64 entries) |
