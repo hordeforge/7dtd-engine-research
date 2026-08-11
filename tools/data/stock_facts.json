@@ -2,7 +2,7 @@
   "schema": 1,
   "generated_by": "tools/src/StockFacts.cs",
   "asm": "Assembly-CSharp.dll",
-  "extracted_utc": "2026-08-11T04:24:28.0393810Z",
+  "extracted_utc": "2026-08-11T05:45:47.6731180Z",
   "version": {
     "release_type": 1,
     "major": 3,
@@ -78,6 +78,10 @@
     "max_load_time_per_frame_ms": 50,
     "max_party_size": 8,
     "party_activation_range": 15
+  },
+  "enums": {
+    "game_stats_members": 82,
+    "game_prefs_members": 317
   },
   "litenet": {
     "protocol_id": 13,

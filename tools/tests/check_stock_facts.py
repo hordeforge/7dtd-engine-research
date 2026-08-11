@@ -87,6 +87,16 @@ def check_research(facts: dict, errors: list[str]) -> None:
         # coverage mentions ChunkBlockYDim=256 historically
         must_match("docs/coverage.md YDim", cov, rf"ChunkBlockYDim\s*=\s*{ydim}|YDim.*{ydim}", errors)
 
+    # Enum index sizes: EnumGameStats/EnumGamePrefs member counts pin the
+    # gamestats-gameprefs inventory; the docs must cite 82 + 317.
+    en = facts.get("enums", {})
+    if en.get("game_stats_members") != 82:
+        errors.append(f"stock_facts enums.game_stats_members={en.get('game_stats_members')} != 82")
+    if en.get("game_prefs_members") != 317:
+        errors.append(f"stock_facts enums.game_prefs_members={en.get('game_prefs_members')} != 317")
+    else:
+        must_match("docs/inventories/gamestats-gameprefs.md 82+317", read(ROOT / "docs" / "inventories" / "gamestats-gameprefs.md"), r"82|317", errors)
+
     # LiteNetLib pins: facts carry the library constants; network.md must
     # document them (protocol 13, MaxPacketSize 1432, PossibleMtu).
     lite = facts.get("litenet", {})

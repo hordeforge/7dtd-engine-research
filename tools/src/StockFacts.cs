@@ -182,6 +182,11 @@ class StockFacts {
     return d;
   }
 
+  static int EnumMembers(ModuleDefinition mod, string typeName) {
+    var t = Exact(mod, typeName);
+    return t.Fields.Count(f => f.IsStatic && f.HasConstant);
+  }
+
   static int? FieldConstInt(TypeDefinition t, string name) {
     var f = t.Fields.FirstOrDefault(x => x.Name == name && x.HasConstant);
     return f == null ? (int?)null : Convert.ToInt32(f.Constant);
@@ -391,6 +396,14 @@ class StockFacts {
         (partyActivationRange.HasValue ? "," : ""));
     if (partyActivationRange.HasValue)
       sb.AppendLine("    \"party_activation_range\": " + partyActivationRange.Value.ToString(CultureInfo.InvariantCulture));
+    sb.AppendLine("  },");
+    // Enum member counts (EnumGameStats / EnumGamePrefs) - the gamestats-gameprefs
+    // inventory index sizes, machine-checked from the DLL.
+    int enumStats = EnumMembers(mod, "EnumGameStats");
+    int enumPrefs = EnumMembers(mod, "EnumGamePrefs");
+    sb.AppendLine("  \"enums\": {");
+    sb.AppendLine("    \"game_stats_members\": " + enumStats + ",");
+    sb.AppendLine("    \"game_prefs_members\": " + enumPrefs);
     sb.AppendLine("  },");
     sb.AppendLine("  \"litenet\": {");
     try {
