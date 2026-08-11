@@ -258,6 +258,14 @@ this doc owns the framework, not each leaf command's full prose.
 - **Shared with the web server:** `WebConnection` (`Webserver`) is a console
   connection, so the web dashboard's Command endpoint is this system with an HTTP
   front (see [webserver.md](webserver.md) §3).
+- **Client-executable set:** 82 of the 188 leaves carry
+  `get_IsExecuteOnClient = true` (their `Execute` runs on the client) and/or an
+  explicit `GameManager.IsDedicatedServer` gate at the top of `Execute`.
+  Machine-swept 2026-08-11 (Cecil probe over `Execute` prologues): the 10
+  dedicated-gated ones are `Challenges`, `GiveQualityItem`, `GiveQuest`,
+  `Occlusion`, `PathTest`, `RemoveQuest`, `ResetAchievementStats`, `SelfExp`,
+  `SpectatorMode`, `Spectrum` - `pathtest` is a pure dedicated no-op (see above),
+  the rest branch to client behavior on the gate.
 - **Residual:** telnet TCP socket internals; the in-game `GUIWindowConsole` UI
   (client-only); individual command effects (feature/content).
 
