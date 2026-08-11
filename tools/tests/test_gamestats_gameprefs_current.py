@@ -78,8 +78,10 @@ def main() -> int:
     if have_state != want_state:
         bad.append(f"EnumGameState values: DLL {have_state} != doc note {want_state}")
     note = re.search(r"EnumGameState\` \((.*?)\)", doc, re.S)
-    if not note or note.group(1) != ", ".join(want_state):
-        bad.append(f"EnumGameState note in doc: `{note.group(1) if note else 'missing'}` != `{', '.join(want_state)}`")
+    note_ws = re.sub(r"\s+", " ", note.group(1)).strip() if note else ""
+    want_ws = ", ".join(want_state)
+    if not note or note_ws != want_ws:
+        bad.append(f"EnumGameState note in doc: `{note_ws or 'missing'}` != `{want_ws}`")
     for i, enum in enumerate(ENUMS[:2]):
         nxt = ENUMS[i + 1] if i + 1 < 2 else "ZZZ_NO_SUCH_SECTION"
         rows = table_rows(doc, enum, nxt)
