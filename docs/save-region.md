@@ -65,7 +65,7 @@ stateDiagram-v2
 | `saveDataLimit` | long | |
 | `Guid` | string | world identity |
 
-`SetFrom(World, EnumChunkProviderId)` (IL=203) snapshots water level (`WorldConstants.WaterLevel`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
+`SetFrom(World, EnumChunkProviderId)` (IL=203) snapshots water level (`WorldConstants.WaterLevel` = `Block.cWaterLevel` = **62.88**, Block cctor `ldc.r4 62.88`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
 `World.get_Guid()` (IL=9) is the world-identity accessor: `worldState?.get_Guid()` (null world state -> null).
 
 ### 1.1b `main.ttw` header codec (`SaveLoad(Stream)`, IL=926 on V3.1.0)
@@ -818,6 +818,7 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-11:** WaterLevel pinned: WorldConstants.WaterLevel = Block.cWaterLevel = 62.88 (Block cctor ldc.r4 62.88).
 - **2026-08-11:** Channel/SmartArray IL re-verified: ctor IL=27, calcOffset IL=12, getData IL=39, GetSet IL=79, getSetData IL=49, checkSameValue IL=49, CheckSameValue IL=17, GetByte IL=31, Get IL=44, SmartArray get IL=46 / set IL=71 / clear IL=19 / copyFrom IL=7 / GetUsedMem IL=5 / write IL=5 / read IL=7, TileEntity write IL=19 / read IL=37 / UpdateTick IL=1 / CopyFrom IL=3 / OnLoad/OnReadComplete/OnUnload IL=1, InstantiateFromRead IL=88, TryReadLegacyType IL=81 (exact).
 - **2026-08-11:** Region-file IL re-verified: ProtectedPositionCache ctor IL=30, GetChunkReadAccess IL=6, GetChunkWriteAccess IL=5/6, ScopedChunkReadAccess.Dispose IL=8, MergeOrCreateGroup IL=100, ThreadInfo.WaitForEnd IL=47, RegionItemData.Update IL=10/15, RegionFileChunkSnapshot.Update IL=111, WriteStreamCompressed IL=48, readIntoLoadStream IL=123, RegionFileAccessMultipleChunks.Write IL=20, RegionFileRaw.WriteData IL=229 / ReadData IL=96 / FindBestFreeSpace IL=77, ChunkMemoryStreamReader.Close IL=7, ChunkMemoryStreamWriter.Init IL=22 / Close IL=17 (exact).
 - **2026-08-11:** WorldState IL re-verified: SaveWorldState IL=16, SetFrom IL=203, Save(path) IL=21, SaveLoad(Stream) IL=926, get_Guid IL=9, CalculatePlayerMapSize IL=28 (exact).
