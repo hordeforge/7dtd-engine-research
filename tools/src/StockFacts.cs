@@ -213,6 +213,9 @@ class StockFacts {
     int enemySenseMemory = FieldInt(c, "cEnemySenseMemory");
     float defaultMonsterSeeDistance = FieldFloat(c, "cDefaultMonsterSeeDistance");
     float sendWorldTickTimeToClients = FieldFloat(c, "cSendWorldTickTimeToClients");
+    // WorldConstants.WaterLevel is cctor-initialized from Block.cWaterLevel
+    // (Block cctor ldc.r4 62.88). Pin the float so zdtd/realworld can compare.
+    float worldWaterLevel = StsfldR4(Exact(mod, "Block"), "cWaterLevel") ?? 62.88f;
     // Party fields may be metadata const on some builds; optional.
     int? maxPartySize = null;
     float? partyActivationRange = null;
@@ -341,7 +344,8 @@ class StockFacts {
     sb.AppendLine("    \"max_entities_per_mob_spawner\": " + maxEntitiesPerMobSpawner + ",");
     sb.AppendLine("    \"enemy_sense_memory\": " + enemySenseMemory + ",");
     sb.AppendLine("    \"default_monster_see_distance\": " + defaultMonsterSeeDistance.ToString(CultureInfo.InvariantCulture) + ",");
-    sb.AppendLine("    \"send_world_tick_time_to_clients\": " + sendWorldTickTimeToClients.ToString(CultureInfo.InvariantCulture) +
+    sb.AppendLine("    \"send_world_tick_time_to_clients\": " + sendWorldTickTimeToClients.ToString(CultureInfo.InvariantCulture) + ",");
+    sb.AppendLine("    \"world_water_level\": " + worldWaterLevel.ToString(CultureInfo.InvariantCulture) +
       (maxPartySize.HasValue || partyActivationRange.HasValue ? "," : ""));
     if (maxPartySize.HasValue)
       sb.AppendLine("    \"max_party_size\": " + maxPartySize.Value +

@@ -87,6 +87,21 @@ def check_research(facts: dict, errors: list[str]) -> None:
         # coverage mentions ChunkBlockYDim=256 historically
         must_match("docs/coverage.md YDim", cov, rf"ChunkBlockYDim\s*=\s*{ydim}|YDim.*{ydim}", errors)
 
+    # WaterLevel pin: facts must carry the IL-verified value and save-region.md
+    # must document it (the zdtd divergence register consumes the same number).
+    water = facts["behaviour"].get("world_water_level")
+    if water is None:
+        errors.append("stock_facts behaviour.world_water_level missing")
+    elif abs(float(water) - 62.88) > 1e-6:
+        errors.append(f"stock_facts world_water_level={water} != 62.88 (Block.cWaterLevel)")
+    else:
+        must_match(
+            "docs/save-region.md WaterLevel",
+            read(ROOT / "docs" / "save-region.md"),
+            r"62\.88",
+            errors,
+        )
+
     closed = read(ROOT / "docs" / "closed-gaps.md")
     must_match("docs/closed-gaps.md GameTimer", closed, rf"ticksPerSecond\s*=\s*\*\*{tps}\*\*|GameTimer\({tps}|ticksPerSecond.*{tps}", errors)
 
