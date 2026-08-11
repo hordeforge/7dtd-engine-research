@@ -628,6 +628,9 @@ flowchart TB
 
 - **Core dedicated path:** boot, game-state tick, player persistence, and save all
   run on the headless server every session.
+- **Initial world time is Day 1, 07:00** (runtime-observed 2026-08-11: a fresh
+  stock V3.1.0 dedicated server's `gettime` reads "Day 1, 07:00" = worldTime
+  7000 before any player joins; the day is 1-based per `WorldTimeToElements`).
 - **World time pauses with zero connected players (runtime-observed 2026-08-11):**
   on a stock V3.1.0 dedicated server, `worldTime` does not advance while no
   player is connected (telnet `settime` jumps apply, then the clock freezes until
