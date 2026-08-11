@@ -3,10 +3,11 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check post-update census drift test readiness help
+.PHONY: tools stock-sync stock-check post-update census drift test readiness help cross-links
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
+	@echo "make cross-links  - resolve every cross-repo .md link in the sibling workspace"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
 	@echo "make stock-check  - pin check only (committed JSON)"
 	@echo "make facts        - view the machine-checked stock pins (census/save/behaviour)"
@@ -92,3 +93,6 @@ verify: test-docs stock-check readiness facts
 	@test -f "$(ASM)" || (echo "ASM not found: $(ASM) (make verify needs the live game)"; exit 2)
 	python3 "$(TOOLS)/xml_pins.py" --check --game-dir "$$(dirname "$$(dirname "$$(dirname "$(ASM)")")")"
 	@echo "verify: ALL GATES GREEN (doc links, pins, readiness, facts, xml data)"
+
+cross-links:
+	python3 "$(TOOLS)/cross_repo_links.py"
