@@ -112,7 +112,8 @@ flowchart TB
   `BiomeWeather.FrameUpdate` honor.
 
 **Live-verified 2026-08-12 (stock V3.1.0 dedicated, `weather` telnet dump):**
-- 5 Navezgane biomes each print the documented 5-slot vector
+- `WeatherManager #5` (the `ToString` = `"#{biomeWeather.Count}"`, IL=32) then
+  5 Navezgane biomes each print the documented 5-slot vector
   (`Temperature` / `Precipitation` / `CloudThickness` / `Wind` / `Fog`) plus
   `rain` / `snow`, `storm WT / dur / state` - all 0 in the day-1 grace period,
   weather group `default`, `nxtT0`. Biome temps spread correctly (desert
