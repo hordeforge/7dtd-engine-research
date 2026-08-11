@@ -235,6 +235,19 @@ def main() -> int:
                     f"docs/inventories/{doc_name} stale vs {master.name} (regenerate from the dump)"
                 )
 
+    # tools/bin exes must not be older than their tools/src sources (a source
+    # edit without `make tools` would silently gate against the stale binary).
+    # IlFmt.cs / Seeds.cs are shared libraries (no exe); git-ignored bin/ means
+    # the check only runs where the exes exist (local), so missing exes skip.
+    tool_src_dir = RESEARCH / "tools" / "src"
+    tool_bin_dir = RESEARCH / "tools" / "bin"
+    for cs in sorted(tool_src_dir.glob("*.cs")):
+        exe = tool_bin_dir / (cs.stem + ".exe")
+        if not exe.is_file():
+            continue
+        if cs.stat().st_mtime > exe.stat().st_mtime + 5:
+            fails.append(f"tools/src/{cs.name} newer than tools/bin/{exe.name} (run make tools)")
+
     # every il/ reference in the docs must resolve (markdown links + bare file
     # mentions); il/ is git-ignored, so this gate runs locally only.
     il_ref_pat = re.compile(r"il/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\.(?:md|txt)")
