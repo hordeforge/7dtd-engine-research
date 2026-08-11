@@ -4,7 +4,7 @@
 **Prefer:** [`closed-gaps.md`](../closed-gaps.md).  
 **Raw IL:** [`../il/gaps-v3.1.0/`](../../il/gaps-v3.1.0/).
 
-UTC: 2026-07-16 10:36:51Z
+UTC: 2026-08-08 14:49:18Z
 
 
 ## 1. GameTimer fields and initialization
@@ -924,11 +924,11 @@ IL_0012: ret
 ```
 
 ### `EntityCreationData`
-- `read` IL=500
-- `write` IL=358
-- `.ctor` IL=310
-- `.ctor` IL=204
-- `ApplyToEntity` IL=169
+- `read` IL=507
+- `write` IL=362
+- `.ctor` IL=314
+- `.ctor` IL=208
+- `ApplyToEntity` IL=176
 - `writeXml` IL=88
 - `.ctor` IL=49
 - `readXml` IL=47
@@ -1004,13 +1004,13 @@ IL_0012: ret
   - 1x `ReadOnlyCollection`1::get_Item`
   - 1x `ClientInfo::UpdatePing`
   - 1x `ReadOnlyCollection`1::get_Count`
-- dump `ConnectionManager::Update` IL=215
+- dump `ConnectionManager::Update` IL=228
   - 4x `ConnectionManager::ProcessPackages`
   - 3x `INetConnection::IsDisconnected`
+  - 3x `GameManager::get_World`
   - 2x `Time::get_time`
   - 2x `ClientInfoCollection::get_Count`
   - 2x `CountdownTimer::HasPassed`
-  - 2x `GameManager::get_World`
   - 2x `CountdownTimer::ResetAndRestart`
   - 2x `INetConnection::FlushSendQueue`
   - 1x `ProtocolManager::Update`
@@ -1489,8 +1489,8 @@ IL_0012: ret
 - dump `GameManager::startGameCo` IL=9
   - 1x `new <startGameCo>d__138::.ctor`
 - dump `GameManager::createWorld` IL=18
-  - 1x `new <createWorld>d__214::.ctor`
-- dump `GameManager::Awake` IL=354
+  - 1x `new <createWorld>d__215::.ctor`
+- dump `GameManager::Awake` IL=364
   - 14x `GameManager::get_IsDedicatedServer`
   - 8x `Log::Out`
   - 4x `RoamingPrefs::get_Store`

@@ -168,6 +168,52 @@ def main() -> int:
                 "docs/inventories/deeper.md stale vs the deeper dump's DEEPER.md (regenerate from the dump)"
             )
 
+    # gaps.md mirrors GAPS_CLOSED.md with raw-IL bodies (>4 lines) elided for
+    # publication (AGENTS no-bulk-IL rule); the rest must match the regenerated
+    # dump, so a stale V3.0.1-era body (old IL= sizes) fails here.
+    gaps_dump = IL / f"gaps-{dump_label_suffix()}" / "GAPS_CLOSED.md"
+    gaps_doc = DOCS / "inventories" / "gaps.md"
+    if not gaps_dump.is_file():
+        fails.append(f"missing {gaps_dump}")
+    elif gaps_doc.is_file():
+        dump_lines = gaps_dump.read_text(encoding="utf-8", errors="replace").splitlines()
+        elided, cur, in_fence, il_lines = [], [], False, 0
+        for l in dump_lines:
+            if l.strip().startswith("```"):
+                if in_fence:
+                    if il_lines > 4:
+                        elided.append("```")
+                        elided.append("*(raw IL listing elided for publication - regenerate locally with the Cecil dump tools; see INDEX.md)*")
+                        elided.append("```")
+                    else:
+                        elided.append("```")
+                        elided.extend(cur)
+                        elided.append("```")
+                in_fence = not in_fence
+                cur, il_lines = [], 0
+                continue
+            if in_fence:
+                cur.append(l)
+                if l.strip().startswith("IL_"):
+                    il_lines += 1
+            else:
+                elided.append(l)
+        if in_fence:
+            if il_lines > 4:
+                elided.append("```")
+                elided.append("*(raw IL listing elided for publication - regenerate locally with the Cecil dump tools; see INDEX.md)*")
+                elided.append("```")
+            else:
+                elided.append("```")
+                elided.extend(cur)
+                elided.append("```")
+        g1 = gaps_doc.read_text(encoding="utf-8", errors="replace").find("## 1.")
+        g2 = next((k for k, l in enumerate(elided) if l.startswith("## 1.")), -1)
+        if g1 < 0 or g2 < 0 or gaps_doc.read_text(encoding="utf-8", errors="replace")[g1:] != "\n".join(elided[g2:]) + "\n":
+            fails.append(
+                "docs/inventories/gaps.md stale vs the gaps dump's GAPS_CLOSED.md (regenerate with the >4-line IL elision policy)"
+            )
+
     # every il/ reference in the docs must resolve (markdown links + bare file
     # mentions); il/ is git-ignored, so this gate runs locally only.
     il_ref_pat = re.compile(r"il/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\.(?:md|txt)")
