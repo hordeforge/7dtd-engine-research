@@ -47,6 +47,89 @@ def read_net_string(buf, off):
     return buf[off:off + length].decode("utf-8", "replace"), off + length
 
 
+def check_sleeper_volumes(blob, checks):
+    """Parse the sleeperVolumes blob (World.WriteSleeperVolumes IL=52 +
+    SleeperVolume.Write IL=332): i32 count + per volume byte-exact."""
+    if not blob:
+        return
+    try:
+        p = 0
+        count = struct.unpack_from("<i", blob, p)[0]
+        p += 4
+        seen = []
+        for _ in range(count):
+            start = p
+            vol_id = struct.unpack_from("<i", blob, p)[0]
+            p += 4
+            ver = blob[p]
+            p += 1
+            gname, p = read_net_string(blob, p)
+            gid, smin, smax = struct.unpack_from("<3h", blob, p)
+            p += 6
+            bx1, by1, bz1, bx2, by2, bz2 = struct.unpack_from("<6i", blob, p)
+            p += 24
+            respawn_t = struct.unpack_from("<Q", blob, p)[0]
+            p += 8
+            num_spawned = struct.unpack_from("<i", blob, p)[0]
+            p += 4
+            p += 4  # literal i32 0
+            gamestage = struct.unpack_from("<i", blob, p)[0]
+            p += 4
+            _, p = read_net_string(blob, p)  # literal empty string
+            p += 4  # literal i32 0
+            ticks = struct.unpack_from("<i", blob, p)[0]
+            p += 4
+            flags16 = struct.unpack_from("<H", blob, p)[0]
+            p += 2
+            flags32 = struct.unpack_from("<i", blob, p)[0]
+            p += 4
+            sp_cnt = blob[p]
+            p += 1
+            for _ in range(sp_cnt):
+                p += 12 + 4  # pos Vector3i + rot f32
+                _, p = read_net_string(blob, p)  # blockType string
+            avail_cnt = blob[p]
+            p += 1 + avail_cnt
+            p += 1  # literal byte 0
+            rm_cnt = blob[p]
+            p += 1
+            for _ in range(rm_cnt):
+                p += 4  # key i32
+                _, p = read_net_string(blob, p)  # className
+                p += 1  # spawnPointIndex u8
+            gc_cnt = blob[p]
+            p += 1
+            for _ in range(gc_cnt):
+                _, p = read_net_string(blob, p)  # groupName
+                p += 4  # count i32
+            tbi_cnt = blob[p]
+            p += 1 + tbi_cnt  # TriggeredByIndices count u8 + indices
+            has_min_script = bool(flags32 & 16)
+            if has_min_script:
+                # MinScript.Write (IL=107) is a variable-length bytecode script;
+                # not deep-parsed. Record presence and stop the strict walk.
+                seen.append((vol_id, gname, gid, (smin, smax), (bx1, by1, bz1, bx2, by2, bz2),
+                             ver, num_spawned, gamestage, sp_cnt, rm_cnt, gc_cnt, True))
+                checks.append(f"  sleeperVolumes: volume {vol_id} carries a MinScript "
+                              f"(bytecode not deep-parsed); strict end-check skipped")
+                return
+            seen.append((vol_id, gname, gid, (smin, smax), (bx1, by1, bz1, bx2, by2, bz2),
+                         ver, num_spawned, gamestage, sp_cnt, rm_cnt, gc_cnt, False))
+        next_id = struct.unpack_from("<i", blob, p)[0]
+        p += 4
+        exact = p == len(blob)
+        checks.append(
+            f"  sleeperVolumes: {count} volume(s) nextId {next_id} "
+            f"{'byte-exact' if exact else f'MISMATCH ({p}/{len(blob)})'}"
+            + (f"; first: id {seen[0][0]} {seen[0][1]!r} gid {seen[0][2]} "
+               f"minmax {seen[0][3]} box {seen[0][4]} v{seen[0][5]} "
+               f"spawned {seen[0][6]} gs {seen[0][7]} pts {seen[0][8]} "
+               f"respawn {seen[0][9]} groups {seen[0][10]}"
+               f"{' +MinScript' if seen[0][11] else ''}" if seen else ""))
+    except (struct.error, IndexError) as exc:
+        checks.append(f"  sleeperVolumes parse error: {exc}")
+
+
 def check_ai_director_blob(blob, checks):
     """Parse the AIDirector save blob (doc aidirector.md 'AIDirector save
     blob'): version 10 + component Write bodies in install order. Byte-exact."""
@@ -203,15 +286,28 @@ def check_main_ttw(path, checks):
             blob_bodies.append(buf[off:off + ln])
             off += ln
         vol_sizes = []
+        vol_bodies = []
         for name in ("sleeperVolumes", "triggerVolumes", "wallVolumes"):
             sv = struct.unpack_from("<i", buf, off)[0]
             off += 4
             ln = struct.unpack_from("<i", buf, off)[0]
             off += 4
             vol_sizes.append((sv, ln))
+            vol_bodies.append(buf[off:off + ln])
             off += ln
         checks.append(f"  blobs dyn={blob_sizes[0]} ai={blob_sizes[1]} "
                       f"volumes(v,bytes)={vol_sizes}")
+        check_sleeper_volumes(vol_bodies[0], checks)
+        for name, body in (("triggerVolumes", vol_bodies[1]), ("wallVolumes", vol_bodies[2])):
+            if len(body) >= 4:
+                cnt = struct.unpack_from("<i", body, 0)[0]
+                note = ""
+                if len(body) == 8:
+                    nxt = struct.unpack_from("<i", body, 4)[0]
+                    note = f" count {cnt} nextId {nxt} (empty container, byte-exact)"
+                else:
+                    note = f" count {cnt} ({len(body)} B, per-entry format not deep-parsed)"
+                checks.append(f"  {name}:{note}")
         if blob_bodies[0]:
             dyn = blob_bodies[0]
             dyn_note = (f"  dynamicSpawner: version {dyn[0]} currentSpawnerActive "
