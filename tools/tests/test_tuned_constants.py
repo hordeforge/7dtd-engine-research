@@ -734,13 +734,8 @@ CONST_ALLOWLIST = {
     "SignalProcessing", "SignDataManager", "SleeperVolumeToolManager",
     "StreetTile", "TextureDynamicLoader", "TileEntityWorkstation", "Transvoxel",
     "UnixLinkFile", "UpscalerMode", "vp_Layer", "WaterDebugRendererLayer",
-    "XUiC_MapArea", "XUiC_Radial", "TriggerEffectManager",
-    # high-value families pending pinning (pinned in follow-up slices):
+    "XUiC_MapArea", "XUiC_Radial", "TriggerEffectManager", "RegionFileSectorBased",
     "AIDirectorConstants", "Chunk", "ItemActionAttack", "ItemClass",
-    "MapChunkDatabaseByRegion", "MiniTurretFireController", "PathingUtils",
-    "RegionFileRaw", "RegionFileSectorBased",
-    "ThreatLevelTracker", "ThreatLevelUtility", "TurretTracker", "Voxel",
-    "World", "WorldBuilder", "WorldBuilderConstants", "WorldConstants",
 }
 
 COMPLETE_SRC = r"""
