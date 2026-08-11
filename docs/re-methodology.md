@@ -194,8 +194,10 @@ Full delta map: [INDEX.md](INDEX.md) § V3.1.0 shipped delta map.
 ## 5c. Stock facts pin (hardcodes across docs + products)
 
 Hardcoded stock values (version triple, TPS, challenge `0xCA`, chunk YDim,
-`CurrentSaveVersion`, NetPackage count, …) must not drift independently in
-research narratives, loadgen, and zdtd. Single regenerable table:
+`CurrentSaveVersion`, NetPackage count, behaviour pins: WaterLevel 62.88,
+item-drop lifetime 300 s, per-frame load budget 50 ms, …) must not drift
+independently in research narratives, loadgen, and zdtd. Single regenerable
+table:
 
 ```bash
 cd tools
@@ -208,8 +210,9 @@ cd tools
 |---|---|
 | `tools/src/StockFacts.cs` | Cecil extract from live `Assembly-CSharp.dll` |
 | `tools/data/stock_facts.json` | **Committed** facts table (schema 1) |
-| `tools/tests/check_stock_facts.py` | Greps research docs + sibling pins against JSON |
+| `tools/tests/check_stock_facts.py` | Greps research docs + sibling pins against JSON (incl. zdtd's provenance register carrying the pinned WaterLevel) |
 | `tools/stock-sync.sh` | extract + check wrapper |
+| `tools/facts.py` / `make facts` | Quick view of the machine-checked pins |
 
 After a game update: prefer `tools/post-update.sh` (or `make post-update`), which
 runs `stock-sync.sh` then §5b `drift-check.sh`. Fix any FAIL pin sites, commit the
