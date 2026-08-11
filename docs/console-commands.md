@@ -135,6 +135,7 @@ Selected dedi-critical Execute bodies:
 | `ConsoleCmdMem` | 480 | Subcommands: `gc` (GC stats / incremental collector), editor/mem dump branches (large) |
 | `ConsoleCmdWeather` | 465 | Dumps biome weather / WeatherManager state; mutator subcommands for weather params |
 | `ConsoleCmdGetGamePrefs` | 73 | Optional filter string; lists allowed prefs `GamePref.X = value` via `prefAccessAllowed` |
+| `ConsoleCmdGetGameStats` | 73 | Optional filter; lists all `EnumGameStats` as `GameStat.X = value` (live-tested 2026-08-11: `getgamestat AirDropFrequency` -> `GameStat.AirDropFrequency = 3`) |
 | `ConsoleCmdSetGamePref` | 58 | `GamePrefs.Parse` + `SetObject`; errors on bad pref/value |
 | `ConsoleCmdCreateWebUser` | 96 | In-game console only; server builds registration token/URL for web dashboard user |
 | `ConsoleCmdLogGameState` | 97 | 1-2 args; optional bool; client restriction on second param |
