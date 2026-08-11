@@ -98,6 +98,12 @@ flags (`cBlockerFlag*`): low `15` (0x0F), low0 `1`, high `240` (0xF0), high0
 `16`, high-low `255`, high-low0 `17`, slope dir0 `256`, ladder `8192` (0x2000),
 door `16384` (0x4000), floor `4096` (0x1000).
 
+**`AstarManager` grid constants (IL):** character `cCharDiameter` = **0.3** m /
+`cCharHeight` = **1.8** m (the walkability probe), grid `cGridXZSize` = **76**
+cells, `cGridY` = **-32**, `cGridHeight` = **320**; merge `cPlayerMergeDist` =
+**19** (sq 361); movement `cMoveDist` = **10**, `cUpdateDeltaTime` = **0.1** s,
+location `cLocationDuration` = **4** s / `cLocationFindPer` = **0.2**.
+
 `AddAreaBlock(pos)` (IL=26) merges the block into the area's bounds
 (partial-flag set); `FindLocation(pos, size)` (IL=47) returns the nearest
 registered `Location` whose `size` fits and lies within

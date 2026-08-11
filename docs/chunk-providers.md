@@ -267,7 +267,10 @@ decoration on the lighting worker rather than only at generation time.
 biome-deco driver, guarded by its own `rwlock` write lock. It builds a
 per-chunk seeded `GameRandom` via `Utils.RandomFromSeedOnPos(chunk.X, chunk.Z,
 seed)`, lazily creates `resourceNoise = new PerlinNoise(seed)`, clears the
-`biomePositions[biomeId]` cell buckets, then resolves a `BiomeDefinition` per
+`biomePositions[biomeId]` cell buckets (the `BiomeType` enum ids:
+`Snow`=1, `Forest`=2, `PineForest`=3, `Plains`=4, `Desert`=5, `Water`=6,
+`Radiated`=7, `Wasteland`=8, `burnt_forest`=9, `city`=10, `city_wasteland`=11,
+`wasteland_hub`=12, `caveFloor`=13, `caveCeiling`=14, `Any`=0), then resolves a `BiomeDefinition` per
 cell into the linear `chunkBiomes[x + z*16]` array: cells inside a trader area
 (`prefabDecorator.IsWithinTraderArea` / `GetTraderAtPosition`) are stored as
 null; a liquid `GetPOIBlockIdOverride` falls back to the `underwater` biome;
