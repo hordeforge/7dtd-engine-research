@@ -366,6 +366,9 @@ Factories: RegionFileFactoryRaw / RegionFileFactorySectorBased
 | timestampHeaderLength | **64** (array **element** count: `UInt32[64]` = 256 bytes on disk) |
 | sectorsStartOffset | **779** (= 11+512+256; free-list / payload base) |
 | reservedBytesPerEntry | 4 (sector-based location slot size; see §3.5) |
+| CurrentVersion | 1 |
+| FileHeaderMagicBytesLength | 3 |
+| `MapChunkDatabaseByRegion` | `CHUNK_DATA_LENGTH` 256, `CHUNK_TO_REGION_SHIFT` 5, `REGION_CHUNK_WIDTH` 32, `REGION_CHUNK_AREA` 1024 |
 
 `GetOffsetFromXz`: `(x%8) + (z%8)*8` with negative adjust.  
 `RegionFileManager.cChunkFileExt` = **`.ttc`**.

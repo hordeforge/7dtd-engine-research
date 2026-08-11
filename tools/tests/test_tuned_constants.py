@@ -576,6 +576,55 @@ CONSTS = {
         "cHitEffectOff": 8,
         "cHitToolBeltNotify": 1,
     }),
+    "WorldBuilderConstants": ("world-generation.md", {
+        "ForestBiomeWeightDefault": 13,
+        "BurntForestBiomeWeightDefault": 18,
+        "DesertBiomeWeightDefault": 22,
+        "SnowBiomeWeightDefault": 23,
+        "WastelandBiomeWeightDefault": 24,
+        "PlainsWeightDefault": 4,
+        "HillsWeightDefault": 4,
+        "MountainsWeightDefault": 2,
+    }),
+    "WorldBuilder": ("world-generation.md", {
+        "WorldTileSize": 1024,
+        "TerrainTileSize": 256,
+        "BiomeTileSize": 256,
+        "RadTileSize": 32,
+        "BiomeSizeDiv": 8,
+        "terrainToBiomeTileScale": 1,
+        "cPlayerSpawnsNeeded": 12,
+        "groundHeight": 35,
+        "HeightMax": 255,
+    }),
+    "Voxel": ("raycast-pathing.md", {
+        "HM_Transparent": 1,
+        "HM_LiquidOnly": 2,
+        "HM_Moveable": 4,
+        "HM_Bullet": 8,
+        "HM_Rocket": 16,
+        "HM_Arrows": 32,
+        "HM_NotMoveable": 64,
+        "HM_Melee": 128,
+        "HM_FirstNotEmptyBlock": 256,
+        "HM_All": 4095,
+        "HM_IgnoreFragile": 4096,
+    }),
+    "RegionFileRaw": ("save-region.md", {
+        "ChunksPerRegionPerDimension": 8,
+        "ChunksPerRegion": 64,
+        "fileHeaderLength": 11,
+        "locationHeaderLength": 128,
+        "reservedBytesPerEntry": 4,
+        "CurrentVersion": 1,
+        "FileHeaderMagicBytesLength": 3,
+    }),
+    "MapChunkDatabaseByRegion": ("save-region.md", {
+        "CHUNK_DATA_LENGTH": 256,
+        "CHUNK_TO_REGION_SHIFT": 5,
+        "REGION_CHUNK_WIDTH": 32,
+        "REGION_CHUNK_AREA": 1024,
+    }),
     "WorldConstants": ("world-chunks.md", {
         "cDuskHour": 22,
         "ChunkAreaDim": 256,
@@ -731,7 +780,7 @@ def main() -> int:
                        or name.startswith("BlockFaceDrawn") or name.startswith("BT_")
                        or name.startswith("cPath") or name.endswith("Max")
                        or name.startswith("cWalkType") or name.startswith("cSync")
-                       or name.startswith("ChunkBlock"))
+                       or name.startswith("ChunkBlock") or name.startswith("HM_"))
             if not grouped and not re.search(rf"`?{name}`?", doc):
                 bad.append(f"{doc_name}: does not mention {name}")
             if str(want) not in doc:

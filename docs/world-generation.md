@@ -76,6 +76,7 @@ is a one-shot object holding the entire generation state:
 | State | Content |
 |---|---|
 | Settings | `WorldSize` (default 8192), `Seed` (12345 default), `WaterHeight` = **30**, terrain mix `Plains/Hills/Mountains` = 4/4/2, feature `GenerationSelections` (`None/Few/Default/Many` = 0..3) for Canyons, Craters, Lakes, Rivers, Towns, Wilderness (all `Default`), biome weights (forest 13 / burnt 18 / desert 22 / snow 23 / wasteland 24, summing 100) |
+| Tile sizes (`WorldBuilderConstants`) | `WorldTileSize` **1024**, `TerrainTileSize` **256**, `BiomeTileSize` **256**, `RadTileSize` **32**, `BiomeSizeDiv` **8**, `terrainToBiomeTileScale` 1, `cPlayerSpawnsNeeded` **12**, `groundHeight` **35**, `HeightMax` **255** |
 | Biome layout | `BiomeLayout` enum: `CenterForest` 0, `CenterWasteland` 1, `Circle` 2, `Circle2` 3, `Line` 4 (the RWG biome-placement modes) |
 | Sub-planners | `DistrictPlanner`, `HighwayPlanner`, `PathingUtils`, `PathShared`, `POISmoother`, `PrefabManager`, `StampManager`, `StreetTileShared`, `TownPlanner`, `TownshipShared`, `WildernessPathPlanner`, `WildernessPlanner` (all constructed in the ctor, each back-referencing the builder) |
 | Bulk data | nested struct `Data`: `HeightMap` `NativeArray<float>` (WorldSize², Persistent), `waterDest` `NativeArray<float>` (WorldSize²), `PathTileGrid` `NativeArray<PathTile>` at WorldSize/10 resolution, street-tile grid width = WorldSize/**150** |

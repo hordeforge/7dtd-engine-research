@@ -152,13 +152,16 @@ Layer names live in Unity project settings, not in IL; bit 16 is the collider
 layer every world-geometry probe here uses. Water is special-cased by block
 type id `240` (`isPosUnderWater`), not by raycast.
 
-**`Voxel.OneVoxelStep` (IL=264) is the single-step DDA primitive.** Given the
-current cell, an origin and a direction it returns the next cell along the
+**`Voxel.OneVoxelStep` (IL=264) is the single-step DDA primitive.** Given thecurrent cell, an origin and a direction it returns the next cell along the
 ray plus the crossed `blockFace` and the hit position on the ray: it
 computes `sign` per axis, `tMax = (firstBoundary - origin) / dir` and
 `tDelta = sign / dir` (both `+Infinity` for near-zero directions), advances
 the smallest-`tMax` axis, and reports the face from the axis and sign
 (x: 3/5, y: 1/0, z: 4/2, same mapping as `GetNextBlockHit`). A degenerate ray
+
+**`Voxel` hit-mask flags (`HM_*`, IL):** `Transparent` 1, `LiquidOnly` 2,
+`Moveable` 4, `Bullet` 8, `Rocket` 16, `Arrows` 32, `NotMoveable` 64,
+`Melee` 128, `FirstNotEmptyBlock` 256, `All` 4095, `IgnoreFragile` 4096.
 with no finite `tMax` logs the same `Voxel error: GetNextBlockHit` string
 (shared source) and returns `Vector3i.zero`. Consumers: `Block.GetFreePlacementPosition`
 walks cells with it to push a placement away from the player, and
