@@ -208,7 +208,7 @@ cd tools
 
 | Piece | Role |
 |---|---|
-| `tools/src/StockFacts.cs` | Cecil extract from live `Assembly-CSharp.dll` |
+| `tools/src/StockFacts.cs` | Cecil extract from live `Assembly-CSharp.dll` **and the sibling `LiteNetLib.dll`** (protocol/MTU/header pins) |
 | `tools/data/stock_facts.json` | **Committed** facts table (schema 1) |
 | `tools/tests/check_stock_facts.py` | Greps research docs + sibling pins against JSON (incl. zdtd's provenance register carrying the pinned WaterLevel) |
 | `tools/stock-sync.sh` | extract + check wrapper |

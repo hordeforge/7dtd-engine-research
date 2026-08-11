@@ -50,6 +50,7 @@ delta file):
 | NetPackageTileEntity `teBlockId` + i32 length | [protocol-packages.md](protocol-packages.md) §6.12, [tile-entities-power.md](tile-entities-power.md) |
 | Held entities / wild chicken grab | [items.md](items.md) § Held entities, [entity-ai.md](entity-ai.md) |
 | WorldState.SaveLoad IL=926 / CurrentSaveVersion=23 | [save-region.md](save-region.md) |
+| LiteNetLib wire pins: `ProtocolId` **13**, `MaxPacketSize` **1432**, `PossibleMtu` [1024..1432], PacketProperty ordinals 0-17 | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) `litenet.*` (machine-checked; zdtd `max_packet_size` 1327 divergence flagged) |
 | Behaviour pins: WaterLevel **62.88**, item-drop lifetime **300 s**, per-frame load budget **50 ms** | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) `behaviour.*` (machine-checked by `check_stock_facts`) |
 | Join analytics `PlayerJoinServerEventData` | [server-lifecycle.md](server-lifecycle.md) |
 | Sandbox day/night density+respawn, chicken coop knobs, infection/hunger/thirst/stack | [sandbox-options.md](sandbox-options.md) §2 |
