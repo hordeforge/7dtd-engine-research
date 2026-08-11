@@ -129,7 +129,12 @@ content (hardness, drops, upgrade targets, tags) is a **residual**, not method I
 `Top` 1, `Bottom` 2, `North` 4, `West` 8, `South` 16, `East` 32, `All` 255,
 `AllORD` 63 (the six non-opposing faces); block-type flags `BT_*`: `Sight` 1,
 `Movement` 2, `Bullets` 4, `Rockets` 8, `Melee` 16, `Arrows` 32, `All` 255,
-`None` 0. Pathing markers `cPathSolid` 1 / `cPathScan` -1.
+`None` 0. Pathing markers `cPathSolid` 1 / `cPathScan` -1. The `BlockFaceFlag`
+enum (the per-face side mask used by the shape/trigger code, same bit values as
+the face-drawn set): `Top` 1, `Bottom` 2, `North` 4, `West` 8, `South` 16,
+`East` 32, `Axials` 60, `Solid` 63, `All` 63, `None` 0. Block tags `BlockTags`:
+`GrowablePlant` 1, `Door` 2, `Window` 3, `TreeTrunk` 4, `Gore` 5, `Spike` 6,
+`ClosetDoor` 7, `None` 0.
 
 ---
 
