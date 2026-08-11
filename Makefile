@@ -66,6 +66,7 @@ test:
 	python3 "$(TOOLS)/tests/test_inventory_counts.py"
 	python3 "$(TOOLS)/tests/test_subclass_counts.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_console_cmd_inventory.py" "$(ASM)"
+	python3 "$(TOOLS)/tests/test_console_classification.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_gamestats_gameprefs_current.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_inventory_type_existence.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_entityclass_props_current.py" "$(ASM)"
