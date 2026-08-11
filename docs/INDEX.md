@@ -69,6 +69,7 @@ Campaign audit (V3.1.0 evidence + residual map): [`../workspace/outputs/docs-res
 | 4 | [`protocol.md`](protocol.md) | Wire framing, join, golden package bodies |
 | 5 | [`protocol-frames.md`](protocol-frames.md) | Visual RFC/Mermaid byte frames per package |
 | 6 | [`ZIG_CLONE.md`](../../zdtd/docs/ZIG_CLONE.md) | Zig clone architecture from RE (companion `zdtd/docs/`) |
+| 6b | [`PROVENANCE.md`](../../zdtd/docs/PROVENANCE.md) | zdtd provenance ledger: every behavior/perk/value -> stock source (file map 187/187, constants, divergences; gated by zdtd `tools/provenance_scan.py`) |
 | 7 | [`residuals.md`](residuals.md) | What IL cannot close |
 | 7b | [`completion-bar.md`](completion-bar.md) | What "100% documented" means (tiers A-D) |
 
