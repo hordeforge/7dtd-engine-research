@@ -311,7 +311,7 @@ live with the mod that ships them.
 | [inventories/loop-complete.md](inventories/loop-complete.md) | loop.md, save-region.md |
 | [inventories/deeper.md](inventories/deeper.md) | entity-ai.md |
 | [inventories/gaps.md](inventories/gaps.md) | closed-gaps.md |
-| [inventories/opt-scan.md](inventories/opt-scan.md) | optim [OPTIMIZATION_CANDIDATES.md](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md) |
+| [inventories/opt-scan.md](inventories/opt-scan.md) | 7dtd-optimizer [OPTIMIZATION_CANDIDATES.md](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md) |
 | [inventories/netpackages.md](inventories/netpackages.md) | protocol.md, protocol-packages.md, network.md |
 | [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) | protocol-packages.md (auto-extracted wire bodies; regenerate with WireBodies.exe) |
 | [inventories/coverage-report.md](inventories/coverage-report.md) | coverage.md (auto-generated reachability vs doc-mention coverage) |
