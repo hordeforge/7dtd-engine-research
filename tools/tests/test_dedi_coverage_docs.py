@@ -168,6 +168,28 @@ def main() -> int:
                 "docs/inventories/deeper.md stale vs the deeper dump's DEEPER.md (regenerate from the dump)"
             )
 
+    # every il/ reference in the docs must resolve (markdown links + bare file
+    # mentions); il/ is git-ignored, so this gate runs locally only.
+    il_ref_pat = re.compile(r"il/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\.(?:md|txt)")
+    link_pat = re.compile(r"\]\(([^)]*?il/[^)]*)\)")
+    seen = set()
+    for p in sorted(DOCS.glob("*.md")) + sorted((DOCS / "inventories").glob("*.md")):
+        text = p.read_text(encoding="utf-8", errors="replace")
+        for m in link_pat.finditer(text):
+            target = (p.parent / m.group(1)).resolve()
+            if target not in seen:
+                seen.add(target)
+                if not target.exists():
+                    fails.append(f"{p.name}: il/ link -> {m.group(1)} missing")
+            text = text.replace(m.group(0), "")
+        for m in il_ref_pat.finditer(text):
+            tok = m.group(0)
+            if tok in seen:
+                continue
+            seen.add(tok)
+            if not (IL / tok.split("il/", 1)[1]).exists():
+                fails.append(f"{p.name}: bare il/ mention -> {tok} missing")
+
     for tool in TOOLS:
         if not (tools / tool).is_file():
             fails.append(f"missing dump tool: {tool}")
