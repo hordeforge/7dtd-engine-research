@@ -6,13 +6,12 @@
 
 ---
 
-## Deeper RE notes (V3.0.1 dedicated)
+## Deeper RE notes (V3.1.0 dedicated)
 
-Generated UTC: 2026-07-18 04:55:06Z
+Generated UTC: 2026-08-08 14:49:21Z
 Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`
 
 Documentation only. No game IL redistribution as product.
-
 
 ## 1. All EAI* / UAI* task methods by IL size
 
@@ -84,9 +83,9 @@ Documentation only. No game IL redistribution as product.
 - `Entity::Update` IL=105 base=MonoBehaviour
 - `EntityAlive::updateTasks` IL=125 base=Entity
 - `EntityAlive::OnUpdateLive` IL=363 base=Entity
-- `EntityAlive::OnUpdateEntity` IL=417 base=Entity
+- `EntityAlive::OnUpdateEntity` IL=457 base=Entity
 - `EntityAlive::OnUpdatePosition` IL=107 base=Entity
-- `EntityAlive::Update` IL=170 base=Entity
+- `EntityAlive::Update` IL=171 base=Entity
 - `EntityAnimal::OnUpdateLive` IL=57 base=EntityAlive
 - `EntityAsyncManager::Update` IL=22 base=Object
 - `EntityBackpack::OnUpdateEntity` IL=172 base=EntityItem
@@ -106,9 +105,9 @@ Documentation only. No game IL redistribution as product.
 - `EntityHuman::OnUpdateLive` IL=157 base=EntityEnemy
 - `EntityItem::OnUpdateEntity` IL=114 base=Entity
 - `EntityLootContainer::OnUpdateEntity` IL=46 base=EntityItem
-- `EntityPlayer::OnUpdateEntity` IL=176 base=EntityAlive
+- `EntityPlayer::OnUpdateEntity` IL=179 base=EntityAlive
 - `EntityPlayer::Update` IL=179 base=EntityAlive
-- `EntityPlayerLocal::OnUpdateLive` IL=879 base=EntityPlayer
+- `EntityPlayerLocal::OnUpdateLive` IL=880 base=EntityPlayer
 - `EntityPlayerLocal::OnUpdateEntity` IL=153 base=EntityPlayer
 - `EntityPlayerLocal::OnUpdatePosition` IL=182 base=EntityPlayer
 - `EntityPlayerLocal::Update` IL=675 base=EntityPlayer
@@ -188,7 +187,7 @@ Documentation only. No game IL redistribution as product.
 - dumped `AIDirectorBloodMoonComponent::Tick(Double)` IL=170
 - dumped `AIDirectorBloodMoonComponent::get_BloodMoonActive()` IL=3
 - dumped `AIDirector::ComponentsTick(Double)` IL=21
-- dumped `AIHordeSpawner::Tick(Double)` IL=210
+- dumped `AIHordeSpawner::Tick(Double)` IL=228
 - dumped `SleeperVolume::Tick(World)` IL=137
 - dumped `SleeperVolume::UpdateSpawn(World)` IL=516
 - dumped `SleeperVolume::DespawnAndReset(World)` IL=6
@@ -335,6 +334,7 @@ _(6 caller types)_
 - `EntityItem::tickDistraction` → `World::GetEntitiesInBounds`
 - `EntityTrader::OnUpdateLive` → `World::GetEntitiesInBounds`
 - `EntityVulture::updateTasks` → `World::GetEntitiesInBounds`
+- `ItemClassWildChicken::HandleFullStress` → `World::GetEntitiesInBounds`
 - `HasTrackedEntity::IsValid` → `World::GetEntitiesInBounds`
 - `Prefab::CopyFromWorldWithEntities` → `Chunk::GetEntitiesInBounds`
 - `ObjectiveInteractWithNPC::AddHooks` → `World::GetEntitiesInBounds`
@@ -359,7 +359,7 @@ _(6 caller types)_
 - `ThreatLevelUtility::GetThreatLevelOn` → `World::GetEntitiesInBounds`
 - `ThreatLevelTracker::TickTrackThreatLevel` → `World::GetEntitiesInBounds`
 
-_(44 caller types)_
+_(45 caller types)_
 
 ### `FindPath`
 

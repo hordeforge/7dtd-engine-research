@@ -153,6 +153,21 @@ def main() -> int:
             if needle not in t:
                 fails.append(f"DEDI_COMPLETE_auto missing {needle}")
 
+    # deeper.md must mirror the regenerated dump's DEEPER.md body (stale-pin guard:
+    # the doc once carried V3.0.1 IL sizes under a v3.1.0 dump pointer).
+    deeper_dump = IL / f"deeper-{dump_label_suffix()}" / "DEEPER.md"
+    deeper_doc = DOCS / "inventories" / "deeper.md"
+    if not deeper_dump.is_file():
+        fails.append(f"missing {deeper_dump}")
+    elif deeper_doc.is_file():
+        doc_t = deeper_doc.read_text(encoding="utf-8", errors="replace")
+        dump_t = deeper_dump.read_text(encoding="utf-8", errors="replace")
+        i1, i2 = doc_t.find("## 1."), dump_t.find("## 1.")
+        if i1 < 0 or i2 < 0 or doc_t[i1:] != dump_t[i2:]:
+            fails.append(
+                "docs/inventories/deeper.md stale vs the deeper dump's DEEPER.md (regenerate from the dump)"
+            )
+
     for tool in TOOLS:
         if not (tools / tool).is_file():
             fails.append(f"missing dump tool: {tool}")
