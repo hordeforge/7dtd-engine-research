@@ -214,6 +214,23 @@ first and, for a version-1 stream, reads and discards the legacy entries
 chunk's `ChunkCustomData`, so the budget rides the chunk save blob with no extra
 region field.
 
+**`ResetRespawn(idHash, world, maxCount)` (IL=147, exact):** the per-band
+day/night knobs the sandbox writes into the eight static
+`ChunkAreaBiomeSpawnData::Respawn*Override` fields (only writer
+`SandboxOptions.UpdateInGameValuesWithSandboxOptions`; only reader this
+method). Delay index: when `respawnDelayInWorldTime.Length > 1`, the group
+type (1 = animal) picks `RespawnDay/NightDelayIndexAnimals`, else the
+`*DelayIndexEnemies` index, by `World.IsDaytime()`. Count override sentinels
+(day band shown; night mirrors): `RespawnDayEnemyCountOverride == -1` forces
+`maxCount = 0` (band disabled - no respawns that day/night); `> 0` overrides
+`maxCount` for enemy groups only; the `*AnimalCountOverride` (> 0) applies to
+non-enemy groups; **0 leaves the default** (no override). Then
+`CountsAndTime.delayWorldTime = worldTime + respawnDelay[index] *
+World.RandomRange(0.9f, 1.1f)` (+-10% jitter) and `maxCount` is stored.
+The `-1 / 0 / N` sentinel contract is what the `BiomeDayEnemyDensity` /
+`BiomeNight*` / `*Respawn` sandbox options
+([sandbox-options.md](sandbox-options.md)) map into.
+
 **`EntitySpawner.resetRuntimeVariables` (IL=19):** zero `totalSpawnedThisWave`,
 both delay timers, clear `entityIdSpawned`, `currentWave=0`,
 `numberToSpawnThisWave=0`. **`ResetSpawner`** just calls that.
