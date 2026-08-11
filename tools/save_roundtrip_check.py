@@ -282,6 +282,46 @@ def parse_chunk_body(body, name, idx, checks):
     return coords_ok, True, ""
 
 
+def check_decoration_7dt(path, checks):
+    """Verify decoration.7dt: version byte 6 + i32 count + 17-byte records
+    (packedPos u64 + realYPos f32 + bv.rawData u32 + state u8)."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    name = os.path.basename(path)
+    ver = data[0]
+    cnt = struct.unpack_from("<i", data, 1)[0]
+    expect = 5 + cnt * 17
+    ok = ver == 6 and expect == len(data)
+    checks.append(f"{name}: version byte {ver} count {cnt} "
+                  f"{'byte-exact' if ok else f'MISMATCH ({expect} expected, {len(data)} got)'} "
+                  f"(17 B records: packedPos u64 + realYPos f32 + rawData u32 + state u8)")
+    if cnt and ok:
+        pos, ry, raw, state = struct.unpack_from("<QfIB", data, 5)
+        checks.append(f"  first record: packedPos={pos} realY={ry:.1f} raw=0x{raw:x} state={state}")
+
+
+def check_nim_mapping(path, checks):
+    """Verify *.nim id-name mapping: u32 version + u32 count + (u32 id + u8
+    nameLen + name), byte-exact."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    name = os.path.basename(path)
+    ver, cnt = struct.unpack_from("<II", data, 0)
+    p = 8
+    ids = set()
+    try:
+        for _ in range(cnt):
+            bid = struct.unpack_from("<I", data, p)[0]
+            ids.add(bid)
+            nl = data[p + 4]
+            p += 5 + nl
+    except (struct.error, IndexError):
+        p = -1
+    ok = p == len(data)
+    checks.append(f"{name}: version {ver} count {cnt} unique_ids {len(ids)} "
+                  f"{'byte-exact' if ok else f'MISMATCH (consumed {p}/{len(data)})'}")
+
+
 def check_region_v2(path, checks):
     """Verify a .7rg sector-based V2 region file (doc save-region.md 3.4/3.5)."""
     with open(path, "rb") as fh:
@@ -414,6 +454,14 @@ def main():
         checks.append(f"  ({len(rr) - 2} further .7rr files not expanded)")
     if not rg and not rr:
         checks.append("Region/: no region files")
+
+    deco = os.path.join(save_dir, "decoration.7dt")
+    if os.path.exists(deco):
+        check_decoration_7dt(deco, checks)
+    for nim in ("blockmappings.nim", "itemmappings.nim"):
+        np_ = os.path.join(save_dir, nim)
+        if os.path.exists(np_):
+            check_nim_mapping(np_, checks)
 
     print("\n".join(checks))
     failed = any(("MISMATCH" in c or "VIOLATED" in c or " != " in c or "failed" in c

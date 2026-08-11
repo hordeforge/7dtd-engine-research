@@ -731,9 +731,11 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   `DecoState`:
   `GeneratedActive`, `GeneratedInactive` (block currently realized in a loaded
   chunk, model hidden), `Dynamic` (player-placed).
-  The `decoration.7dt` container (`DecoManager.Write` IL=56) is an `int32`
-  count followed by one `DecoObject.Write` record per entry (list built under
-  lock via `GenerateDecoWriteList`, then cleared); `WriteTask` (IL=38) copies
+  The `decoration.7dt` container is a **version byte (6)** + `int32` count +
+  one `DecoObject.Write` record per entry (the version byte is written by the
+  save method at `IL_0063-0064` of the `DecoManager` write dispatch before
+  `Write` IL=56; the list is built under lock via
+  `GenerateDecoWriteList`, then cleared); `WriteTask` (IL=38) copies
   the prepared `writeStream` to the file and truncates.
   `DecoObject.Write` (IL=43) logs `Writing DecoObject '{0}', no block!` for a
   null block before the `NameIdMapping.AddMapping(blockID, name, false)` bookkeeping.
