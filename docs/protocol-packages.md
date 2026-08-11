@@ -191,6 +191,16 @@ IntegrityKey  : i32 len + byte[len]    // separate MAC/integrity key
 `WorldStaticData.ReceivedConfigFile(name, bytes)`;
 `NetPackageWorldSpawnPoints` Process IL=5 -> `GameManager.SetSpawnPointList`.
 
+**`NetPackageWorldSpawnPoints` body** (`SpawnPointList.Write` IL=25): version
+byte **2** (`SpawnPointList.CurrentSaveVersion`, cctor) + count i32 + per point
+26 B: `u16 0` (`SpawnPosition.Write` IL=23 writes it unconditionally) +
+`Vector3` 3xf32 + heading f32 + team i32 + activeInGameMode i32.
+**Divergence from the on-disk form** (save-region.md §1.1b): the WorldState
+`main.ttw` save path writes the same list with a **hardcoded version byte 0**
+(`SpawnPointList.Read(IBinaryReaderOrWriter)` IL=33 feeds `ldc.i4.0` into
+`ReadWrite(Byte)`), so disk per-point records omit the u16 (24 B). A reader
+must not assume the two serializers agree on the version byte or the u16.
+
 **NetPackageKeyExchangeComplete**
 ```text
 wasSuccessful : bool
