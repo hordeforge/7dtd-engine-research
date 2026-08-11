@@ -372,6 +372,10 @@ Factories: RegionFileFactoryRaw / RegionFileFactorySectorBased
 
 Protection margins (cull): land claim / bedroll / offline / backpack / vehicle / quest / supply = **1** chunk each.
 
+**`RegionFileManager` memory/cull constants (IL):** `cHeadroomBytes` = **5242880**
+(5 MB), `cMinimumByteAllowance` = **20971520** (20 MB), `cMaxChunksToCull` =
+**10000**.
+
 ### 3.1 Runtime path (manager)
 
 `RegionFileManager` is the live cache + save orchestrator (extends

@@ -478,6 +478,17 @@ vector; `seeDist = GetSeeDistance()` is **scaled by the target's
 `DetectUsScale(self)`** when the target is a player (stealth shrinks how far
 you are seen); distance beyond it or (with `checkViewCone`) outside the view
 cone returns false. The ray starts `-0.1` behind the self head
+
+**`PlayerStealth` constants (IL):** smell `cSmellRadiusMin` **10** /
+`cSmellRadiusMax` **100** / `cSmellBleedRadius` **25** / `cSmellDysenteryRadius`
+**35**, emit `cSmellEmitChance` **0.2** / `cSmellEmitRate` **2** /
+`cSmellCountMin` **5** / `cSmellCountMax` **50**, decay `cSmellRadiusPerSecondUp`
+**5** / `cSmellRadiusPerSecondDown` **2** / `cSmellEatRadiusPerSecondDown`
+**0.1428571** / `cSmellDuration` **90**; sound `cAttractEmitChance` **0.2** /
+`cAttractEmitRate` **2** / `cAttractRadiusMax` **100**, sleeper noise
+`cSleeperNoiseHear` **360** / `cSleeperNoiseDecay` **50** /
+`cSleeperNoiseWaitTicks` **20**; light `cLightMpyBase` **0.32** /
+`cLightLevelMax` **200**, `cNextSoundPercent` **0.6**.
 (`origin + dir*-0.1`), the self model layer is temporarily switched to **2**
 and restored after, and `Voxel.Raycast(world, ray, seeDist, -1612492829, 64,
 0)` runs. Hit handling: an `E_Vehicle` hit resolves via

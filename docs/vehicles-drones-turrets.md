@@ -63,6 +63,9 @@ countdown (default 120 s, clamped to 10 s after any mutating change via
 **500**, `cMaxActiveDronePlayerRange` = **32** m (active-range limit for
 teleporting far followers), `cVersion` = 1.
 
+**`VehicleManager` constants (IL):** `cMaxVehicles` = **500**, `cSaveTime` =
+**120** s, `cChangeSaveDelay` = **10** s, `cVersion` = 1.
+
 **`EntityDrone` flight constants (IL):** `cBaseFollowDistance` = **5** m,
 `cCombatFollowRange` = **10** m, `cAvoidRange` = **2.5** m, `cMaxSpeedFlying` =
 **15**, `cFollowHoverHeight` = **1** m, `cAttackEnterTime` = **1** /

@@ -163,7 +163,6 @@ enqueue completed groups into `fallingGroups` and mark `groupedBlocks`.
 `TileEntityComposite.OnBlockStartsToFall` then base.
 
 ## The stability viewer BFS (GetBlockStability)
-
 `GetBlockStability(pos, newBV)` (293 IL) is the debug/UI measure (StabilityViewer
 F9 overlay) and the `GetBlockStabilityIfPlaced` preview; it is not the fall
 decision. It runs a 25-iteration BFS from the position over
@@ -208,6 +207,10 @@ Non-support blocks never contribute to the max even if they have high bytes.
 Recursive: for each neighbor non-air/non-liquid/non-`StabilityIgnore`, candidate
 `stab-1`; if current stability already >= candidate, stop; non-support blocks
 cap candidate at 1; update stab0 set; `SetStability`; recurse.
+
+**`StabilityCalculator` constants (IL):** `cInfiniteSupport` = **100000**,
+`cSupportScale` = **1.01**, `isolatedBlockLimit` = **1000**, `maxIterations` =
+**20**, `stabilityQueueLimit` = **200**.
 
 ## Remaining detail to pin down before implementing
 
