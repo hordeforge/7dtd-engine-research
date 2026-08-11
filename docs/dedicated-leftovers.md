@@ -324,6 +324,10 @@ resolution. Complements [platform-auth.md](platform-auth.md) (platform
 abstraction) and [server-lifecycle.md](server-lifecycle.md) (StartAsServer /
 SaveAndCleanupWorld hooks).
 
+**`Platform.BlockedPlayerList` constants (IL):** `TimeoutHours` = **168** (7
+days), `MaxBlockedPlayerEntries` = **500**, `MaxRecentPlayerEntries` = **100**,
+`Version` = 1 (the persisted list file version).
+
 ## 11. CraftCompleteData
 
 Persistence record for a finished workstation craft: written and read only by

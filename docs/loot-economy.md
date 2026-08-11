@@ -80,7 +80,9 @@ via `FireEvent`) before the roll and `MinEvent` 100 after.
 `RandomSpawnCount(minCount, maxCount, abundance)` clamped to the container slot count,
 where `abundance` comes from the static `GlobalCountModifier` (the `LootAbundance`
 sandbox setting, `EnumGamePrefs.LootAbundance` = 87; there are also per-category
-`Food`/`Drink`/`AmmoCountModifier`). `SpawnLootItemsFromList` then walks the loot
+`Food`/`Drink`/`AmmoCountModifier`). `AbundanceLootModTypes` ids: `Food` 1,
+`Drinks` 2, `Ammo` 3, `Meds` 4, `Resources` 5, `Armor` 6, `Melee` 7, `Ranged` 8,
+`Dukes` 9, `Magazines` 10, `Books` 11, `None` 0. `SpawnLootItemsFromList` then walks the loot
 entries, applying:
 
 - **Loot stage:** the effective loot stage is
