@@ -35,14 +35,28 @@ COMPRESSED = [
     "NetPackageIdMapping",
     "NetPackageSignDataResponse",
 ]
-# packages that explicitly override AllowedBeforeAuth to false (all others
-# inherit the base's true; network.md §5 documents exactly this set)
-NOT_BEFORE_AUTH = [
+# packages that explicitly override Delivery to unreliable (0); all others keep
+# the reliable default (network.md §5)
+UNRELIABLE = [
     "NetPackageEntityPosAndRot",
     "NetPackageEntityRelPosAndRot",
     "NetPackageEntityRotation",
     "NetPackageEntitySpeeds",
     "NetPackageEntityStatsBuff",
+]
+# packages that override AllowedBeforeAuth to true (the pre-auth handshake set;
+# the base NetPackage getter returns false, network.md §5)
+ALLOWED_BEFORE_AUTH = [
+    "NetPackagePlayerLogin",
+    "NetPackagePlayerDenied",
+    "NetPackagePackageIds",
+    "NetPackageKeyExchangeComplete",
+    "NetPackageEncryptionRequest",
+    "NetPackageEncryptionPublicKey",
+    "NetPackageEncryptionSharedKey",
+    "NetPackageEAC",
+    "NetPackageAuthState",
+    "NetPackageAuthConfirmation",
 ]
 # the 4 top-level NetPackage* types that are NOT registered wire packages
 # (193 top-level - 4 = 189 in the live id-map; network.md §3)
@@ -72,7 +86,8 @@ def main() -> int:
         return 1
     chan1 = set()
     compressed = set()
-    not_before_auth = set()
+    unreliable = set()
+    allowed_before_auth = set()
     total = 0
     for line in meta.splitlines()[2:]:
         parts = [c.strip() for c in line.split("|")]
@@ -84,7 +99,9 @@ def main() -> int:
         if parts[3] == "1":
             compressed.add(parts[1])
         if parts[5] == "0":
-            not_before_auth.add(parts[1])
+            unreliable.add(parts[1])
+        if parts[6] == "1":
+            allowed_before_auth.add(parts[1])
     # kind (abstract/enum) of the top-level NetPackage* types - the 4 non-map
     # helpers (the META has no kind column)
     kind_src = r"""
@@ -122,8 +139,10 @@ class NpKind {
         bad.append(f"channel-1 packages {sorted(chan1)} != documented {CHANNEL1}")
     if compressed != set(COMPRESSED):
         bad.append(f"compressed packages {sorted(compressed)} != documented {COMPRESSED}")
-    if not_before_auth != set(NOT_BEFORE_AUTH):
-        bad.append(f"not-before-auth packages {sorted(not_before_auth)} != documented {NOT_BEFORE_AUTH}")
+    if allowed_before_auth != set(ALLOWED_BEFORE_AUTH):
+        bad.append(f"allowed-before-auth packages {sorted(allowed_before_auth)} != documented {ALLOWED_BEFORE_AUTH}")
+    if unreliable != set(UNRELIABLE):
+        bad.append(f"unreliable packages {sorted(unreliable)} != documented {UNRELIABLE}")
     if non_map != set(NON_MAP):
         bad.append(f"non-map packages {sorted(non_map)} != expected {NON_MAP}")
     # network.md §3 must state the 189-in-map / 4-helpers accounting
@@ -139,14 +158,14 @@ class NpKind {
         bad.append("protocol-packages.md: no 'exactly 6 override to channel 1' claim")
     if not re.search(r"\*\*8 packages set", doc):
         bad.append("protocol-packages.md: no '**8 packages set get_Compress = 1**' claim")
-    for p in CHANNEL1 + COMPRESSED + NOT_BEFORE_AUTH:
+    for p in CHANNEL1 + COMPRESSED + ALLOWED_BEFORE_AUTH + UNRELIABLE:
         if not re.search(rf"`{p}`", doc):
             bad.append(f"protocol-packages.md: does not mention `{p}`")
     if bad:
         for b in bad:
             print("FAIL:", b)
         return 1
-    print(f"OK: census {total} packages; {len(chan1)} channel-1, {len(compressed)} compressed, {len(not_before_auth)} not-before-auth, {len(non_map)} non-map - all match the doc")
+    print(f"OK: census {total} packages; {len(chan1)} channel-1, {len(compressed)} compressed, {len(unreliable)} unreliable, {len(allowed_before_auth)} allowed-before-auth, {len(non_map)} non-map - all match the doc")
     return 0
 
 
