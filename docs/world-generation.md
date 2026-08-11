@@ -83,6 +83,12 @@ is a one-shot object holding the entire generation state:
 | Image buffers | `roadDest Color32[WorldSize²]`, `biomeDest Color32[BiomeSize²]` (BiomeSize = WorldSize), `radDest Color32[RadSize²]` (RadSize = WorldSize/32) |
 | Results | `StreetTileMap` (grid of 150 m `StreetTile`s), `Townships`, `highwayPaths`/`wildernessPaths` (`Path` lists), `playerSpawns`, `waterRects` |
 
+**`Path` road/surface constants (IL):** `CountryId` 1, `HighwayId` 2,
+`HighwayDirtId` 3, `WaterId` 4, `FreeId` 0, `HighwayBlendIdMask` 128,
+`cSingleLaneRadius` = **4.5**, `cShoulderWidth` = **1**, blend distances
+`cBlendDistHighway` = **10** / `cBlendDistCountry` = **6**, height smoothing
+`cHeightSmoothDecreasePer` = **0.3** / `cHeightSmoothAverageBias` = **8**.
+
 `WorldSizeDistDiv` scales distance rules by map size: <=2500 -> 4, <=3500 -> 3,
 <=4500 -> 2, else 1.
 

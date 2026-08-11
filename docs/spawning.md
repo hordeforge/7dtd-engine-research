@@ -75,6 +75,10 @@ master chunk origin. `World.OnUpdateTick` calls
 `SpawnManagerBiomes.Update(name, spawnEnemies, chunkAreaSpawnData)` once per
 active area, which forwards to `SpawnUpdate` unless the world is playtesting.
 
+**Spawn-distance rings (`SpawnManagerBiomes` consts, IL):** enemies spawn in the
+`cEnemyMinDistance` **28** to `cEnemyMaxDistance` **54** m ring, animals in the
+`cAnimalMinDistance` **48** to `cAnimalMaxDistance` **70** m ring.
+
 The single `SpawnUpdate` call decides at most ONE spawn. It is gated at every
 step and returns early the instant any gate fails.
 
