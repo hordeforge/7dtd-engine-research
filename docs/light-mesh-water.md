@@ -184,7 +184,7 @@ see [loop-gmupdate.md](loop-gmupdate.md)).
 | `WaterDataHandle` | struct (native-ish) | per-chunk sim state: mass grid, solid flags, active bits, flow map, cross-chunk queues |
 | `WaterVoxelState` | struct | `Byte stateBits` solid faces (Y+/Y-/XZ) |
 | `WaterNeighborCacheNative` | helper | resolve neighbor chunk handles by `int2` offset |
-| `WaterConstants` | static | mass thresholds (`MIN_MASS`, `MAX_MASS`, `OVERFULL_MAX`, `MIN_FLOW`, `FLOW_SPEED`, `MIN_MASS_SIDE_SPREAD`) |
+| `WaterConstants` | static | mass thresholds: `MIN_MASS` **195**, `MIN_FLOW` **195**, `MAX_MASS` **19500**, `OVERFULL_MAX` **58500**, `MIN_MASS_SIDE_SPREAD` **4875**, `FLOW_SPEED` **0.5** |
 | `WaterSimulationNative/ChunkHandle` | nested | `Chunk.AssignWaterSimHandle` facade: `SetVoxelSolid`, `SetWaterMass`, `WakeNeighbours` |
 | `WaterSimulationApplyChanges` | class | change queue + **ThreadLoop** write-back + net send |
 | `NetPackageWaterSimChunkUpdate` | wire | per-chunk packed voxel mass updates |
@@ -443,7 +443,7 @@ water-collection harvest.
 
 | Item | Why |
 |---|---|
-| Exact numeric values of all `WaterConstants` static fields beyond 19500 / 195 / 15600 | need static ctor / literal dump per field (only `GetStableMassBelow` and percent math closed) |
+| Exact numeric values of all `WaterConstants` static fields beyond 19500 / 195 / 15600 | **closed 2026-08-11**: full set extracted from the static ctor - `MIN_MASS` 195, `MIN_FLOW` 195, `MAX_MASS` 19500, `OVERFULL_MAX` 58500, `MIN_MASS_SIDE_SPREAD` 4875, `FLOW_SPEED` 0.5 |
 | Full bit layout of `WaterVoxelState.stateBits` | methods `IsSolidYNeg` etc. named; bit indices not fully tabulated this pass |
 | Native Burst/job safety details | Unity Jobs black box below managed schedule calls |
 | `WaterSplashCubes` particle content | client VFX |

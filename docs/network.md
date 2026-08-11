@@ -286,6 +286,9 @@ registered here).
    - distSq &lt; **25** (5 m) → priority **0**
    - distSq &gt; **625** (25 m) → priority **3**
    - distSq &gt; **324** (18 m) → priority **2**
+   (the range constants: `cHighPriorityRange` 5, `cLowPriorityRange` 18,
+   `cLowestPriorityRange` 25, `priorityViewAngleMinDistance` 128; update ticks
+   `lowestPriorityTick` 10, `lowPriorityTick` 6, `MobsUpdateTicks` 3)
    - else leave default
 3. For each distribution entry: `updatePlayerList(players)` (motion packages).
 4. For each player × each entry: `updatePlayerEntity(player)` (interest enter/exit,

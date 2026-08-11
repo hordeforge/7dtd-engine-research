@@ -199,6 +199,11 @@ longer than 60 seconds (`Time.time - prefabTimeIn > 60`), and the target is an
 `EntityEnemy` spawned by the biome (`GetSpawnerSource() == Biome`); otherwise
 1.
 
+**`ThreatLevelConstants` (IL):** `cMinThreatLevel` = **0**,
+`cSuspenseThreshold` = **0.25**, `cCombatReadyThreshold` = **0.5**,
+`cCombatThreshold` = **0.75**, `cMaxThreatLevel` = **1** (the threat-level
+band thresholds).
+
 **`EntityPlayer.getHeadPosition()` (IL=32):** `emodel.GetHeadTransform().
 position + Origin.position` when the model and head transform exist, else
 `transform.position + (0, height - 0.15, 0) + Origin.position`.

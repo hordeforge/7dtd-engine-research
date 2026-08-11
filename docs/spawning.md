@@ -851,6 +851,15 @@ Sleeper volumes themselves tick in `SleeperVolume.Tick`
 sleeper population enters the world through prefab placement here, then through
 `EntitySpawner` (§4) when a player trips the volume.
 
+**`SleeperVolume` constants (IL):** `cBedrollClearTime` = **24000** (a full day;
+a placed bedroll clears the volume's owned sleepers), `cDespawnDelay` = **900**
+/ `cDespawnPassiveDelay` = **200** (sleeper despawn timers), `cPlayerInsideDelayTime`
+= **1000**, `cPlayerYOffset` = **0.8**, padding `cPassivePaddingXZ` **-0.3** /
+`cAttackPaddingXZ` **-0.1** / `cPassiveNoisePadding` **0.9**, spawn `cSpawnDelay`
+= **2** / `cSpawnPerTickMax` = **2**, flags `cFlagsQuestExclude` 1 /
+`cFlagsPriority` 2 / `cFlagsSpawning` 4 / `cFlagsCleared` 8 / `cFlagsHasScript`
+16, `cTriggerFlagsMask` = 7, `cRespawnNever` = **4294967295** (0xFFFFFFFF).
+
 **`PrefabInstance` leaf helpers:** `GetCenterXZ()` (IL=24) is
 `(bboxPos.x + bboxSize.x * 0.5, bboxPos.z + bboxSize.z * 0.5)` as a `Vector2`
 (the POI center used for trader-area / quest-distance math).
