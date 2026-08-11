@@ -77,7 +77,7 @@ def main() -> int:
     have_state = [m for m in dll.get("EnumGameState", []) if "=" in m]
     if have_state != want_state:
         bad.append(f"EnumGameState values: DLL {have_state} != doc note {want_state}")
-    note = re.search(r"EnumGameState\` \((.*?)\)", doc)
+    note = re.search(r"EnumGameState\` \((.*?)\)", doc, re.S)
     if not note or note.group(1) != ", ".join(want_state):
         bad.append(f"EnumGameState note in doc: `{note.group(1) if note else 'missing'}` != `{', '.join(want_state)}`")
     for i, enum in enumerate(ENUMS[:2]):
