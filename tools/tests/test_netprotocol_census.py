@@ -75,7 +75,7 @@ def main() -> int:
         bad.append(f"compressed packages {sorted(compressed)} != documented {COMPRESSED}")
     if not re.search(r"[Ee]xactly \*{0,2}6\*{0,2} override", doc):
         bad.append("protocol-packages.md: no 'exactly 6 override to channel 1' claim")
-    if not re.search(r"\*\*8 packages\*\*", doc):
+    if not re.search(r"\*\*8 packages set", doc):
         bad.append("protocol-packages.md: no '**8 packages set get_Compress = 1**' claim")
     for p in CHANNEL1 + COMPRESSED:
         if not re.search(rf"`{p}`", doc):
