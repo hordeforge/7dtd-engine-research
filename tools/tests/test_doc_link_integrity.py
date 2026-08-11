@@ -72,7 +72,24 @@ def main():
     if dead:
         raise AssertionError("dead internal doc links:\n" + "\n".join(sorted(set(dead))[:20]))
 
-    # 3. Every root doc carries the canonical hub backlink ("**Hub:** INDEX.md").
+    # 3. Cross-repo links (../sibling/...) must resolve to a real file. Wrong
+    #    depth (e.g. ../../ from docs/ root when the sibling is ../) silently
+    #    breaks the delivery loop, so resolve the full relative path.
+    dead_x = []
+    for sub, _dirs, names in os.walk(DOCS):
+        for name in names:
+            if not name.endswith(".md"):
+                continue
+            path = os.path.join(sub, name)
+            text = open(path, encoding="utf-8").read()
+            for m in re.finditer(r"\]\((\.\./[^)]+\.md)\)", text):
+                target = os.path.normpath(os.path.join(sub, m.group(1)))
+                if not os.path.isfile(target):
+                    dead_x.append(f"{os.path.relpath(path, DOCS)} -> {m.group(1)}")
+    if dead_x:
+        raise AssertionError("broken cross-repo links:\n" + "\n".join(sorted(set(dead_x))[:15]))
+
+    # 4. Every root doc carries the canonical hub backlink ("**Hub:** INDEX.md").
     no_hub = sorted(
         d
         for d in doc_root
