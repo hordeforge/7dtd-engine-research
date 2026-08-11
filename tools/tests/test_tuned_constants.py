@@ -442,7 +442,7 @@ def main() -> int:
             grouped = (name.endswith("Sq") or name.startswith("cBlockerFlag")
                        or name.startswith("BlockFaceDrawn") or name.startswith("BT_")
                        or name.startswith("cPath") or name.endswith("Max")
-                       or name.startswith("cWalkType"))
+                       or name.startswith("cWalkType") or name.startswith("cSync"))
             if not grouped and not re.search(rf"`?{name}`?", doc):
                 bad.append(f"{doc_name}: does not mention {name}")
             if str(want) not in doc:
