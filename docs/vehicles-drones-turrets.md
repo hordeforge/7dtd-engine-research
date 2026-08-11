@@ -63,6 +63,11 @@ countdown (default 120 s, clamped to 10 s after any mutating change via
 **500**, `cMaxActiveDronePlayerRange` = **32** m (active-range limit for
 teleporting far followers), `cVersion` = 1.
 
+**Manager-save file format (observed in a real V3.1.0 save):** `drones.dat`,
+`vehicles.dat` and `turrets.dat` each start with the magic **`vda\0`** + a
+`u32` version (**1**, matching the pinned `cVersion`) + a `u8` entry count.
+`power.dat` starts with just a `u32` version (**2**).
+
 **`VehicleManager` constants (IL):** `cMaxVehicles` = **500**, `cSaveTime` =
 **120** s, `cChangeSaveDelay` = **10** s, `cVersion` = 1.
 
