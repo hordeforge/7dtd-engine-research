@@ -89,6 +89,39 @@ def check_ai_director_blob(blob, checks):
         checks.append(f"  aiDirectorState parse error: {exc}")
 
 
+def check_weather_blob(blob, checks):
+    """Parse the WeatherManager save blob (weather-environment.md 6): version
+    u16 4 + gate byte (GamePrefs 60) + biome count u8 + per biome 40 B
+    (id u8, weather group u8, stormWorldTime i32, stormDuration i16,
+    nextRandWorldTime i32, 5 param f32 in [T,P,C,W,F] slot order, rain f32,
+    snow f32). Byte-exact: 4 + 40*count."""
+    if not blob:
+        return
+    try:
+        ver = struct.unpack_from("<H", blob, 0)[0]
+        gate = blob[2]
+        count = blob[3]
+        p = 4
+        recs = []
+        for _ in range(count):
+            bid = blob[p]
+            grp = blob[p + 1]
+            swt, sdur, nrwt = struct.unpack_from("<ihi", blob, p + 2)
+            params = struct.unpack_from("<5f", blob, p + 12)
+            rain, snow = struct.unpack_from("<2f", blob, p + 32)
+            p += 40
+            recs.append((bid, grp, swt, sdur, nrwt,
+                         [round(x, 2) for x in params], round(rain, 3), round(snow, 3)))
+        exact = p == len(blob)
+        checks.append(
+            f"  weatherState: version {ver} gate {gate} biomes {count} "
+            f"{'byte-exact' if exact else f'MISMATCH ({p}/{len(blob)})'}: "
+            + "; ".join(f"id {r[0]} grp {r[1]} storm({r[2]},{r[3]},{r[4]}) "
+                        f"params {r[5]} rain {r[6]} snow {r[7]}" for r in recs))
+    except (struct.error, IndexError) as exc:
+        checks.append(f"  weatherState parse error: {exc}")
+
+
 def check_main_ttw(path, checks):
     """Verify the main.ttw header codec (doc save-region.md 1.1b)."""
     with open(path, "rb") as fh:
@@ -183,8 +216,10 @@ def check_main_ttw(path, checks):
         w_sz = struct.unpack_from("<i", buf, off)[0]
         off += 4
         checks.append(f"  weather size prefix {w_sz} (includes itself: {w_sz - 4} B payload)")
+        w_body = buf[off:off + w_sz - 4] if w_sz > 4 else b""
         if w_sz > 4:
             off += w_sz - 4
+        check_weather_blob(w_body, checks)
         guid, off = read_net_string(buf, off)
         checks.append(f"  guid: {guid[:8]}... len {len(guid)}")
         exact = off == len(buf)

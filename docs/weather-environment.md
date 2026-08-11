@@ -382,10 +382,20 @@ stat's readers include `DuskDawnInit`, blood-moon dawn/dusk,
 
   **`ReadWriteData` (IL=193):** version u16 (**4**); on load abort if version &lt; 4.
   Next byte must match `GamePrefs` int **60** (gate) or load returns. Then biome
-  count (u8) and per biome: biome id (u8), weather group (u8), `stormWorldTime`
-  (i32), `stormDuration` (i16), `nextRandWorldTime` (i32), **5** param floats,
-  rain float, snow float. See [save-region.md](save-region.md) for the surrounding
+  count (u8) and per biome: biome id (u8, the `BiomeDefinition.m_Id`),
+  weather group (u8, `currentWeatherGroupIndex`), `stormWorldTime`
+  (i32), `stormDuration` (i16), `nextRandWorldTime` (i32), **5** param floats
+  (in §1.1 slot order: temperature, precipitation, cloud, wind, fog), rain
+  float, snow float. See [save-region.md](save-region.md) for the surrounding
   world header.
+
+  **Live-decoded 2026-08-12 (byte-exact, `tools/save_roundtrip_check.py`):**
+  `version 4, gate 60, 5 biomes` (ids 3/9/5/1/8 = the Navezgane biomes.xml
+  `m_Id`s), each record exactly 40 B (4 + 5x40 = 204 B payload). A day-4 save
+  shows the desert biome at `[102.95, 0.0, ...]` temperature, the snow biome
+  at `30.02`, all precipitation 0 (no active precip at save), scheduled storms
+  ahead of the saved worldTime; the shipped Navezgane world state is pristine
+  (`stormWorldTime/duration/nextRand = 0`).
 - **Core dedicated path:** the biome storm state machine, weather rerolls, grace
   period, save/load, and the per-tick `NetPackageWeather` broadcast all run on
   the headless server.
