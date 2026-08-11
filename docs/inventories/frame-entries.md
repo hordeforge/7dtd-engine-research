@@ -45,7 +45,7 @@
 | `CharacterGazeController` | MonoBehaviour | `LateUpdate` | 23 |
 | `CharacterShaderLODControl` | MonoBehaviour | `Update` | 39 |
 | `CloneToTransform` | MonoBehaviour | `LateUpdate` | 192 |
-| `ConnectionManager` | SingletonMonoBehaviour`1 | `Update` | 215 |
+| `ConnectionManager` | SingletonMonoBehaviour`1 | `Update` | 228 |
 | `ConnectionManager` | SingletonMonoBehaviour`1 | `LateUpdate` | 4 |
 | `ContactShadows` | MonoBehaviour | `Update` | 8 |
 | `ControllerCamera` | MonoBehaviour | `LateUpdate` | 179 |
@@ -69,7 +69,7 @@
 | `EModelSDCS` | EModelPlayer | `LateUpdate` | 32 |
 | `Entity` | MonoBehaviour | `Update` | 105 |
 | `Entity` | MonoBehaviour | `FixedUpdate` | 71 |
-| `EntityAlive` | Entity | `Update` | 170 |
+| `EntityAlive` | Entity | `Update` | 171 |
 | `EntityAlive` | Entity | `LateUpdate` | 6 |
 | `EntityBackpack` | EntityItem | `Update` | 38 |
 | `EntityCar` | EntityAlive | `Update` | 66 |
@@ -95,6 +95,7 @@
 | `FlexibleCursor` | CursorControllerAbs | `Update` | 24 |
 | `Fluctuating` | LightState | `Update` | 135 |
 | `FrameRateLimiter` | MonoBehaviour | `Update` | 29 |
+| `PerformanceProfiler/FrameTimeCapture (nested)` | MonoBehaviour | `LateUpdate` | 25 |
 | `FreeCamera` | MonoBehaviour | `Update` | 231 |
 | `GameManager` | MonoBehaviour | `FixedUpdate` | 5 |
 | `GameManager` | MonoBehaviour | `Update` | 3 |
@@ -137,7 +138,6 @@
 | `Origin` | MonoBehaviour | `FixedUpdate` | 256 |
 | `PanWithMouse` | MonoBehaviour | `Update` | 81 |
 | `ParticleLifetimeSwitch` | MonoBehaviour | `Update` | 88 |
-| `PerformanceProfiler/FrameTimeCapture` (nested) | MonoBehaviour | `LateUpdate` | 25 |
 | `PlayerMoveController` | MonoBehaviour | `Update` | 2706 |
 | `PlayerReflectionProbe` | MonoBehaviour | `Update` | 181 |
 | `PlayIdleAnimations` | MonoBehaviour | `Update` | 77 |
@@ -177,6 +177,7 @@
 | `TextureDynamicLoader` | MonoBehaviour | `Update` | 77 |
 | `TextureLoadingManager` | MonoBehaviour | `Update` | 65 |
 | `ThrownWeaponMoveScript` | MonoBehaviour | `FixedUpdate` | 119 |
+| `XUiC_ItemActionEntry/TimedAction (nested)` | MonoBehaviour | `Update` | 17 |
 | `TimeRotateObject` | MonoBehaviour | `Update` | 56 |
 | `TransformDebug` | MonoBehaviour | `Update` | 55 |
 | `TurnTable` | MonoBehaviour | `Update` | 54 |
@@ -248,6 +249,5 @@
 | `WireNode` | MonoBehaviour | `FixedUpdate` | 3 |
 | `WireNode` | MonoBehaviour | `LateUpdate` | 3 |
 | `WorldEnvironment` | MonoBehaviour | `Update` | 83 |
-| `XUiC_ItemActionEntry/TimedAction` (nested) | MonoBehaviour | `Update` | 17 |
 | `XUi_FallThrough` | MonoBehaviour | `Update` | 213 |
 | `XUiUpdateHelper` | MonoBehaviour | `LateUpdate` | 2 |

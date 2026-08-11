@@ -18,6 +18,7 @@ import tempfile
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parents[1]
+DOCS = TOOLS.parent / "docs"
 # Mono.Cecil is copied into bin/ by build.sh; legacy dumpers live in legacy/.
 CECIL = TOOLS / "bin" / "Mono.Cecil.dll"
 DUMPER = TOOLS / "legacy" / "DumpFrameEntries.cs"
@@ -94,6 +95,34 @@ def main() -> int:
                 if needle not in text:
                     print("FAIL:", f, "missing", needle, file=sys.stderr)
                     return 1
+
+    # staleness guard: the committed docs must carry the regenerated bodies
+    # (the committed wrappers - title, Kind/Prefer/Hub - may differ; the table
+    # and leaf-list content from the first body row onward must match).
+    committed = {
+        out / "inventory-frame-entries.md": DOCS / "inventories" / "frame-entries.md",
+        out / "inventory-gmupdate-calls.md": DOCS / "inventories" / "gmupdate-calls.md",
+        out / "inventory-manager-updates.md": DOCS / "inventories" / "manager-updates.md",
+    }
+    for gen, doc in committed.items():
+        if not doc.is_file():
+            print("FAIL: missing committed", doc, file=sys.stderr)
+            return 1
+        gl = gen.read_text(encoding="utf-8", errors="replace").splitlines()
+        dl = doc.read_text(encoding="utf-8", errors="replace").splitlines()
+        body_pat = ("|", "- `", "1. IL_")
+        gi = next((k for k, l in enumerate(gl) if l.strip().startswith(body_pat)), -1)
+        di = next((k for k, l in enumerate(dl) if l.strip().startswith(body_pat)), -1)
+        gbody = [l for l in gl[gi:] if l.strip()]
+        dbody = [l for l in dl[di:] if l.strip()]
+        if gi < 0 or di < 0 or gbody != dbody:
+            print(
+                "FAIL: committed doc stale vs regenerated dump:",
+                doc.name,
+                "(regenerate from the dumper output)",
+                file=sys.stderr,
+            )
+            return 1
 
     print("OK: regenerated", out)
     for f in required:
