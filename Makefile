@@ -37,6 +37,8 @@ census: tools
 	@test -f "$(ASM)" || (echo "ASM not found: $(ASM)"; exit 2)
 	MONO_PATH="$(TOOLS)/bin" mono "$(TOOLS)/bin/Census.exe" "$(ASM)"
 	python3 "$(TOOLS)/census-pct.py" "$(ASM)"
+	@echo "--- machine-checked stock pins ---"
+	python3 "$(TOOLS)/facts.py"
 
 drift:
 	cd "$(TOOLS)/parity" && ./drift-check.sh "$(ASM)"
