@@ -402,6 +402,11 @@ stateDiagram-v2
   pool, the `DynamicMeshes/` disk cache, and the `DynamicMeshServer` send/sync loop
   are all server-side. The `IsServer` branch in `DynamicMeshManager.Update` is what
   activates the send half; a client only receives, caches, renders, and acks.
+- **Client-only gates (IL-verified):** `AddRegionLoadMeshes(key)` (IL=27)
+  begins with `if (GameManager.IsDedicatedServer) return;` - the region-mesh
+  load-queue add is client-only; `CreateUnityTerrainOld` (IL=961, the Unity
+  terrain builder) and the `create*` environment creators are likewise client
+  renderer surface.
 - **Two independent stores.** Dynamic meshes live in their own `DynamicMeshes/`
   directory keyed by chunk key, separate from the chunk region save
   ([`save-region.md`](save-region.md)). Deleting a `.group` file loses that
