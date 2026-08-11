@@ -86,6 +86,9 @@ def main() -> int:
     bad = []
     n_claims = 0
     n_skipped = 0
+    # the corpus convention bans IL approximations in live prose ("IL=~N" was
+    # upgraded to exact values in the 2026-08-11 sweep; a regression fails here).
+    approx = re.compile(r"IL\s*=\s*~")
     for root, _, files in os.walk(DOCS):
         for fn in files:
             if not fn.endswith(".md"):
@@ -93,6 +96,11 @@ def main() -> int:
             p = os.path.join(root, fn)
             text = open(p, encoding="utf-8", errors="replace").read()
             lines = text.splitlines()
+            for no, ls in enumerate(lines):
+                if DATE_PAT.search(ls):
+                    continue
+                if approx.search(ls):
+                    bad.append(f"{p}:{no + 1}: IL approximation `IL=~` (must be exact)")
             for pat in (CLAIM_PAT, TABLE_PAT):
                 for m in pat.finditer(text):
                     typ, meth, claimed = m.group(1), norm(m.group(2)), int(m.group(3))
