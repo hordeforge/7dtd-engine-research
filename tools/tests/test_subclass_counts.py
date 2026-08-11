@@ -7,7 +7,7 @@ game-event actions), minus intermediate bases / sibling-namespace types per the
 inventory's own stated convention. A game patch that adds/removes a leaf
 without updating the inventory fails here.
 
-Conventions encoded (verified against the DLL, V3.1.0):
+Conventions encoded (verified against the current DLL):
 - sequence-requirements: closure of GameEvent.SequenceRequirements.BaseRequirement
   = 38 (37 concrete leaves + the BaseOperationRequirement intermediate). The
   same-named Quests.Requirements.* and Challenges.BaseRequirementObjectiveGroup
