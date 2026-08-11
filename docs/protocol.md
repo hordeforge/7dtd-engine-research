@@ -558,6 +558,12 @@ a real join end-to-end (challenge → PackageIds → auth stages → PlayerLogin
 `RECV` hex logs in a join run are the wire evidence; decode them against
 §3 and §8.
 
+**Codec-vs-corpus cross-check (2026-08-11):** the loadgen `PackageCodec`'s
+`BuildPlayerLogin` (8 fields) and `BuildPlayerLoginAnswer` (7 fields) field
+orders equal the IL-derived bodies in
+[`inventories/netpackage-bodies.md`](inventories/netpackage-bodies.md) exactly -
+the reference implementation and the RE corpus agree on both login packages.
+
 Any Zig clone should pass the same golden sizes for PosAndRot / RelPos / AliveFlags / envelope, then accept loadgen probe.
 
 ---
