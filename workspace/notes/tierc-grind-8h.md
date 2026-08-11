@@ -1,5 +1,7 @@
 # Tier-C continuous grind (8h target)
 
+> **ARCHIVED (2026-08-11):** completed-session working notes (2026-08-07/08 grind). The live record is workspace/CHANGELOG.md; the current goal loop is the active TODO.
+
 **Start:** 2026-08-07  
 **Goal:** dump live V3.1.0 b14 IL → narrate high-value leaves → pin census → stock-check → commit; never-stop until interrupted.
 

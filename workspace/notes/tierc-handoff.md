@@ -1,5 +1,7 @@
 # Tier-C grind handoff / TODO
 
+> **ARCHIVED (2026-08-11):** completed-session working notes (2026-08-07/08 grind). The live record is workspace/CHANGELOG.md; the current goal loop is the active TODO.
+
 **Updated:** 2026-08-08 ~13:20 UTC
 **Repo:** `7dtd-research` (cwd this tree)  
 **Pin:** V **3.1.0 (b14)** via `tools/data/stock_facts.json`  
