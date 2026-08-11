@@ -154,6 +154,15 @@ capped at 258 MiB for the map data.
 | `Save(string)` | 21 | if file exists and size &gt; 0, copy to `*.bak`; then `SaveLoad(path, load=false)` |
 | `Save(Stream)` | 7 | `SaveLoad(stream, load=false)` |
 | `Load(string, …)` | 102 | try primary; on fail copy to `*.loadFailed`, try `*.bak`, then `*.ext.bak` (last successful load extra backup) |
+
+**`main.ttw.ext.bak` mechanism (IL + live, 2026-08-12):** `DoExtraBackup`
+(IL=23) copies the loaded `main.ttw` to `.ext.bak` **after a successful load**
+(when `makeExtraBackupOnSuccess`), so `.ext.bak` holds the previous session's
+file, not a save-time snapshot. Live-observed: a fresh world keeps a 264 B
+boot-state `.ext.bak` (header-only, worldTime 7000) while `main.ttw` grows;
+after the game-reader round-trip session re-booted the airdrop save, its
+`.ext.bak` holds the full pre-reload 24008 B file (worldTime 84635) with
+`main.ttw` unchanged - exactly the "last successful load" copy.
 | `SaveLoad(string,…)` | 76 | lock; open read or buffered create; call stream `SaveLoad` |
 
 ---
