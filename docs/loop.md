@@ -462,7 +462,7 @@ Full manager Update inventory: [`inventories/manager-updates.md`](inventories/ma
 | GC.Collect | gmUpdate dedicated dt-gated path; also Cleanup/console |
 | SaveWorldState / NameIdMapping / EventPrefabs | Gated in gmUpdate / UpdateTick |
 | PlayerDataFile.Save / GameManager.SavePlayerData | Session/player |
-| WorldState.SaveLoad | **884 IL** large serializer |
+| WorldState.SaveLoad | **926 IL** large serializer |
 | RegionFile* / ChunkProvider.Save* | Disk; host NVMe matters |
 | MemoryPools.Cleanup | Idle cache clear path |
 
