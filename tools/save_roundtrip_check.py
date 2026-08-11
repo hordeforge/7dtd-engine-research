@@ -322,6 +322,25 @@ def check_nim_mapping(path, checks):
                   f"{'byte-exact' if ok else f'MISMATCH (consumed {p}/{len(data)})'}")
 
 
+def check_multiblocks_7dt(path, checks):
+    """Verify multiblocks.7dt: version byte 6 + i32 count + 17-byte records
+    (Vector3i pos + rawData u32 + trackingTypeFlags u8). MultiBlockManager
+    SaveIfDirty IL=107."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    name = os.path.basename(path)
+    ver = data[0]
+    cnt = struct.unpack_from("<i", data, 1)[0]
+    expect = 5 + cnt * 17
+    ok = ver == 6 and expect == len(data)
+    checks.append(f"{name}: version byte {ver} count {cnt} "
+                  f"{'byte-exact' if ok else f'MISMATCH ({expect} expected, {len(data)} got)'} "
+                  f"(17 B records: Vector3i + rawData u32 + flags u8)")
+    if cnt and ok:
+        x, y, z, raw, flags = struct.unpack_from("<iiiIB", data, 5)
+        checks.append(f"  first record: pos=({x},{y},{z}) raw=0x{raw:x} flags={flags}")
+
+
 def check_region_v2(path, checks):
     """Verify a .7rg sector-based V2 region file (doc save-region.md 3.4/3.5)."""
     with open(path, "rb") as fh:
@@ -458,6 +477,9 @@ def main():
     deco = os.path.join(save_dir, "decoration.7dt")
     if os.path.exists(deco):
         check_decoration_7dt(deco, checks)
+    mb = os.path.join(save_dir, "multiblocks.7dt")
+    if os.path.exists(mb):
+        check_multiblocks_7dt(mb, checks)
     for nim in ("blockmappings.nim", "itemmappings.nim"):
         np_ = os.path.join(save_dir, nim)
         if os.path.exists(np_):

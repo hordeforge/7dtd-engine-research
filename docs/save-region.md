@@ -871,7 +871,9 @@ Read reconstructs world XZ as `local + chunk*16`.
 | `GameManager.SaveAndCleanupWorld` | 499 |
 | `ChunkProviderGenerateWorld.SaveRandomChunks` | 99 |
 | `World.SaveDecorations` | 3 |
-| `blockmappings.nim` / `itemmappings.nim` | id-name mapping files (observed real save): `version:u32` (1) + `count:u32` + entries of `id:u32` + `nameLen:u8` + name. E.g. air=0, terrStone=1, terrBedrock=4, terrDirt=5 (the terrain id band) |
+| `blockmappings.nim` / `itemmappings.nim` | id-name mapping files (observed real save, byte-exact): `version:u32` (1) + `count:u32` + entries of `id:u32` + `nameLen:u8` + name. E.g. air=0, terrStone=1, terrBedrock=4, terrDirt=5 (the terrain id band) |
+| `decoration.7dt` | distant-deco records: **version byte 6** + `count:i32` + per record `packedPos:u64` + `realYPos:f32` + `bv.rawData:u32` + `state:u8` (17 B); live-verified byte-exact on 7 saves (75-76k records) |
+| `multiblocks.7dt` | MultiBlockManager tracked data (`SaveIfDirty` IL=107): **version byte 6** + `count:i32` + per record `pos:Vector3i` (3xi32) + `rawData:u32` + `trackingTypeFlags:u8` (17 B); live-verified byte-exact on 7 saves (92-1240 records) |
 
 **Chunk save callback:** `WorldChunkCache.NotifyOnChunkBeforeSave(chunk)`
 (IL=19) is the fan-out the save path drives before a chunk writes: it calls
