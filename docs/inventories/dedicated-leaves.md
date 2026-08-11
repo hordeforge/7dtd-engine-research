@@ -227,13 +227,13 @@ sits in the server authorizer path. Referrers are the evidence column.
 
 | Leaf | Base | Key methods | Server referrers |
 |---|---|---|---|
-| `DynamicMeshChunkDataStorage` | `(not found)` | (fields only) | `NetPackageDynamicMesh` |
+| `DynamicMeshChunkDataStorage` | `Object` | (fields only) | `NetPackageDynamicMesh` |
 
 ### entity-ai / entities (6)
 
 | Leaf | Base | Key methods | Server referrers |
 |---|---|---|---|
-| `AIFocus` | `(not found)` | (fields only) | `EntityBandit` |
+| `AIFocus` | `ValueType` | (fields only) | `EntityBandit` |
 | `AttachedToEntitySlotInfo` | `Object` | (fields only) | `Entity`, `EntityAlive`, `EntityVehicle` |
 | `FallBehavior` | `Object` | (fields only) | `EntityAlive`, `EntityHuman` |
 | `NetworkStatChange` | `Object` | (fields only) | `EntityAlive` |
@@ -290,7 +290,7 @@ sits in the server authorizer path. Referrers are the evidence column.
 
 | Leaf | Base | Key methods | Server referrers |
 |---|---|---|---|
-| `PList` | `(not found)` | (fields only) | `EntitySpawner` |
+| `PList` | `List<T>` | (fields only) | `EntitySpawner` |
 
 ### tile-entities-power (1)
 
@@ -314,7 +314,7 @@ sits in the server authorizer path. Referrers are the evidence column.
 |---|---|---|---|
 | `BitConverterLE` | `Object` | GetULongBytes, UIntFromBytes, GetUIntBytes, ULongFromBytes | `PooledBinaryReader`, `PooledBinaryWriter` |
 | `ByteLengthUtils` | `Object` | GetBinaryWriter7BitEncodedIntLength, GetBinaryWriterLength | `NetPackagePlayerLoginAnswer` |
-| `NetPackageInformation` | `(not found)` | (fields only) | `NetPackageManager` |
+| `NetPackageInformation` | `Object` | (fields only) | `NetPackageManager` |
 | `StreamReadSizeMarker` | `ValueType` | (fields only) | `PooledBinaryReader`, `TileEntityComposite` |
 | `StreamWriteSizeMarker` | `ValueType` | (fields only) | `PooledBinaryWriter` |
 | `UnknownNetPackageException` | `Exception` | (fields only) | `NetPackageManager` |

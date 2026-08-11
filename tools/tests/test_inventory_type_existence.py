@@ -72,6 +72,8 @@ def main() -> int:
         total += 1
         row = text.splitlines()[text[: text.index(m.group(0))].count("\n")]
         if "(not found)" in row:
+            if norm(typ) in dll:
+                bad.append(f"dedicated-leaves.md: `{typ}` now resolves in the DLL (base {dll[norm(typ)]}); update the (not found) marker")
             continue  # documented unresolvable state
         if norm(typ) not in dll:
             bad.append(f"dedicated-leaves.md: type `{typ}` does not exist in the DLL")
