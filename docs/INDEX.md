@@ -368,7 +368,7 @@ mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.1.0
 mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.1.0
 ```
 
-Gates: `make test` (full suite, needs the live DLL), `make test-docs` (DLL-free corpus invariants; runs in CI on every push), `make stock-check` (pins vs live DLL + siblings), `make regen-check` (dump-regeneration check).  
+Gates: `make test` (full suite, needs the live DLL), `make test-docs` (DLL-free corpus invariants; runs in CI on every push), `make stock-check` (pins vs live DLL + siblings), `make regen-check` (dump-regeneration check), `make facts` (machine-checked stock pins).  
 IL policy: [`../il/README.md`](../il/README.md).
 
 Host topology (not IL): [`../../7dtd-optimizer/docs/HOST_TUNING.md`](../../7dtd-optimizer/docs/HOST_TUNING.md).  
