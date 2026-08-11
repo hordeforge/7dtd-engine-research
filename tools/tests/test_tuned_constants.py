@@ -220,6 +220,16 @@ CONSTS = {
         "IsOnBroken": 5,
         "IsStopping": 6,
     }),
+    "WeatherManager": ("weather-environment.md", {
+        "BaseTemperature": 70,
+        "cForceTempDefault": -100,
+        "cGracePeriodWorldTime": 22000,
+        "cLightningDelayMin": 30,
+        "cLightningDelayMax": 60,
+        "cStormWarningDuration": 60,
+        "cWeatherTransitionSeconds": 10,
+        "cVersion": 4,
+    }),
     "BlockLiquidv2": ("light-mesh-water.md", {
         "MAX_EMISSIONS": 3,
         "blockUpdatesPerSecond": 16,

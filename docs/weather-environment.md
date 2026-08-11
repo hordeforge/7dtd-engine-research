@@ -38,7 +38,12 @@ parallel array of wire packages.
 | `SkyManager` | Time-of-day + celestial state; server uses only the clock/query surface, the rest is rendering |
 
 `InitBiomeWeather` builds one `BiomeWeather` per biome that declares
-`weatherGroups`, and one `WeatherPackage` per `BiomeWeather` (same index).
+
+**Weather-sim constants (IL):** `BaseTemperature` = **70**, `cForceTempDefault` =
+**-100** (the no-weather fallback temp), `cGracePeriodWorldTime` = **22000**
+(grace until this world-time), `cLightningDelayMin` = **30** / `cLightningDelayMax`
+= **60** s, `cStormWarningDuration` = **60** s, `cWeatherTransitionSeconds` =
+**10** s (param easing), `cVersion` = 4 (weather state version).`weatherGroups`, and one `WeatherPackage` per `BiomeWeather` (same index).
 
 ### 1.1 The 5-slot parameter vector
 
