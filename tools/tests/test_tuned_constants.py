@@ -566,6 +566,49 @@ class TunedConsts {
 """
 EXE = "/tmp/tunedconsts_check.exe"
 
+# Const-rich classes (>= 4 numeric const fields) that are intentionally NOT
+# pinned: animation/UI/render/noise/enum internals (client-side or data-shape),
+# or families pinned elsewhere (stock_facts.json / other gates). A NEW tuned
+# family added by a game patch fails the completeness check until it is either
+# pinned here or explicitly allowed.
+CONST_ALLOWLIST = {
+    "AdminWebModules", "AvatarController", "Cell", "ConsoleCmdProfileNetwork",
+    "Constants", "DefaultSignData", "DeviceFlags", "EAIApproachSpot",
+    "EModelBase", "EntityPlayerLocal", "Explosion", "Fluctuating",
+    "GameLightManager", "GameObjectPool", "GameRenderManager", "HashSetLong",
+    "ItemActionTerrainTool", "KinematicCharacterMotor", "LightLODHeld",
+    "LightManager", "Manager", "Mask", "MeshDescription", "MeshGenerator",
+    "MetricConversion", "OcclusionManager", "OpenSimplex2", "OpenSimplex2S",
+    "PerformanceProfiler", "PlatformOptimizations", "PlatformUserManager",
+    "PlayerMoveController", "PrefabPreviewManager", "ReflectionManager",
+    "SignalProcessing", "SignDataManager", "SleeperVolumeToolManager",
+    "StreetTile", "TextureDynamicLoader", "TileEntityWorkstation", "Transvoxel",
+    "UnixLinkFile", "UpscalerMode", "vp_Layer", "WaterDebugRendererLayer",
+    "XUiC_MapArea", "XUiC_Radial", "TriggerEffectManager",
+    # high-value families pending pinning (pinned in follow-up slices):
+    "AIDirectorConstants", "Chunk", "ItemActionAttack", "ItemClass",
+    "MapChunkDatabaseByRegion", "MiniTurretFireController", "PathingUtils",
+    "RegionFileRaw", "RegionFileSectorBased",
+    "ThreatLevelTracker", "ThreatLevelUtility", "TurretTracker", "Voxel",
+    "World", "WorldBuilder", "WorldBuilderConstants", "WorldConstants",
+}
+
+COMPLETE_SRC = r"""
+using System;
+using System.Linq;
+using Mono.Cecil;
+class ConstComplete {
+  static void Main(string[] a) {
+    var asm = AssemblyDefinition.ReadAssembly(a[0]);
+    foreach (var t in asm.MainModule.GetTypes().Where(t => !t.Name.Contains("<") && !t.IsEnum)) {
+      var cs = t.Fields.Where(f => f.HasConstant && (f.Constant is int || f.Constant is float || f.Constant is double)).ToList();
+      if (cs.Count >= 4)
+        Console.WriteLine(t.Name);
+    }
+  }
+}
+"""
+
 
 def main() -> int:
     if len(sys.argv) < 2:
@@ -610,6 +653,26 @@ def main() -> int:
                 bad.append(f"{doc_name}: does not mention {name}")
             if str(want) not in doc:
                 bad.append(f"{doc_name}: does not state {want} (for {name})")
+
+    # completeness: every const-rich class (>= 4 numeric consts) must be pinned
+    # or allowlisted - a new tuned family from a game patch fails here
+    with open("/tmp/constcomplete_check.cs", "w") as f:
+        f.write(COMPLETE_SRC)
+    subprocess.run(
+        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"),
+         "/tmp/constcomplete_check.cs", "-out:/tmp/constcomplete_check.exe"],
+        check=True,
+    )
+    cenv = dict(os.environ)
+    cenv["MONO_PATH"] = os.path.join(TOOLS, "bin")
+    cout = subprocess.run(
+        ["mono", "/tmp/constcomplete_check.exe", asm], capture_output=True, text=True, env=cenv, check=True,
+    ).stdout
+    pinned_fams = set(CONSTS.keys())
+    for fam in cout.splitlines():
+        fam = fam.strip()
+        if fam and fam not in pinned_fams and fam not in CONST_ALLOWLIST:
+            bad.append(f"const-rich class `{fam}` is neither pinned nor allowlisted (pin it or add to CONST_ALLOWLIST)")
     if bad:
         for b in bad[:25]:
             print("FAIL:", b)
