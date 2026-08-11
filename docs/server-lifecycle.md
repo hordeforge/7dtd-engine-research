@@ -657,7 +657,7 @@ reason : u8    // EnumPersistentPlayerDataReason
 PersistentPlayerData.Write(...)
 ```
 
-`ProcessPackage` → `GameManager.PersistentPlayerLogin(ppData)` (IL=5).
+`ProcessPackage` → `GameManager.PersistentPlayerLogin(ppData)` (IL=37).
 
 ### `NetPackagePersistentPlayerPositions`
 

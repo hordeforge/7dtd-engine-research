@@ -148,7 +148,7 @@ with no finite `tMax` logs the same `Voxel error: GetNextBlockHit` string
 walks cells with it to push a placement away from the player, and
 `Voxel.GetCellsOnRay` iterates a ray cell by cell with it.
 
-`Voxel.GetCellsOnRay` (IL=244) iterates a ray cell by cell via
+`Voxel.GetCellsOnRay` (IL=242) iterates a ray cell by cell via
 `OneVoxelStep` but has **no callers on b14** (dead leaf). `Voxel.RaycastOnVoxels`
 (IL=290) is the physics ray/sphere-cast twin of `raycastNew` with the same tag
 dispatch (plus a `GameManager.bVolumeBlocksEditing` gate), used only by the
