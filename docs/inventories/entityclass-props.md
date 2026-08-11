@@ -6,6 +6,8 @@
 statics (class ids, `FastTags`) listed at the end. Regenerate with
 `tools/bin/DumpMethod.exe <asm> EntityClass .cctor`.
 
+**187 rows: 167 `ldstr`+`stsfld` string pairs + 20 non-string statics.**
+
 These are the **XML property names** read by `Entity.*CopyProperties
 FromEntityClass` ([entity-ai.md](../entity-ai.md) D8.6-D8.7) and the
 spawn/config paths. Note the dashes: `AITask-1`, `AITarget-1`; the
