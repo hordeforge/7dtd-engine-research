@@ -549,6 +549,11 @@ Shared placement helpers for scout/wandering/chunk hordes.
 `FindTargets` pulls the player list exclusively from
 `AIDirectorPlayerManagementComponent` (not a raw world player scan).
 
+**Placement constants (IL):** `cPitstopSideMin` = **40**, `cPitstopSideRange` =
+**20** (pit stop offset from the horde line), `cPlayerClosestDist` = **30**
+(min player distance for placement), `cSinglePlayerSkipPer` = **0.3** (single-
+player skip probability).
+
 ## AIDirectorMarkerManagementComponent : AIDirectorComponent
 - `Tick(Double)` IL=7
 
@@ -593,7 +598,7 @@ state to the pool.
 
 **Fields:** `EntityPlayer Player`, `AIDirectorPlayerInventory m_inventory`,
 `Boolean m_dead`, plus underground-check constants
-(`kCheckUndergroundTime`, `kNumBlocksUnderground`).
+(`kCheckUndergroundTime` = 5 s, `kNumBlocksUnderground` = 10 blocks).
 
 | Method | IL |
 |---|---:|
@@ -614,6 +619,7 @@ target list.
 ## AIDirectorSmellMarker : Object
 - `Tick(Double)` IL=71
 - 22 methods in the type surface (pathing/smell bookkeeping); static noise names resolve through `AIDirectorData.FindNoise`
+- pool cap `kMax` = **256** markers
 
 **`Tick(dt)` (IL=71):** decays `m_ttl` and `m_validTime` (both clamped at 0) and
 advances `m_time` (capped at `m_lifetime`). The effective model:

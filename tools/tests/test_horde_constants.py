@@ -57,6 +57,19 @@ CONSTS = {
         "cSpawnChance": 0.2,
         "cVersion": 1,
     },
+    "AIDirectorHordeComponent": {
+        "cPitstopSideMin": 40,
+        "cPitstopSideRange": 20,
+        "cPlayerClosestDist": 30,
+        "cSinglePlayerSkipPer": 0.3,
+    },
+    "AIDirectorPlayerState": {
+        "kCheckUndergroundTime": 5,
+        "kNumBlocksUnderground": 10,
+    },
+    "AIDirectorSmellMarker": {
+        "kMax": 256,
+    },
 }
 
 SRC = r"""
