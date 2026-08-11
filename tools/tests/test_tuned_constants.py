@@ -205,6 +205,21 @@ CONSTS = {
         "Books": 11,
         "None": 0,
     }),
+    "AutoTurretFireController": ("vehicles-drones-turrets.md", {
+        "baseConeDistance": 5.25,
+        "baseConePitch": 22.5,
+        "baseConeYaw": 22.5,
+        "cTimeBetweenSoundDispatch": 1,
+    }),
+    "BladeTrapStates": ("dedicated-misc-systems.md", {
+        "IsOff": 0,
+        "RandomWaitToStart": 1,
+        "IsStarting": 2,
+        "IsOn": 3,
+        "IsOnPartlyBroken": 4,
+        "IsOnBroken": 5,
+        "IsStopping": 6,
+    }),
     "BlockLiquidv2": ("light-mesh-water.md", {
         "MAX_EMISSIONS": 3,
         "blockUpdatesPerSecond": 16,

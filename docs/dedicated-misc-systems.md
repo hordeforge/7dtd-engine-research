@@ -1306,6 +1306,10 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 | `SoftCursor` | CursorControllerAbs | HandleMovement, Awake, Snap, SetNavigationTarget |
 | `SpinningBladeTrapBladeController` | MonoBehaviour | Update, Init, GetEntityFromCollider, OnTriggerExit |
 | `SpinningBladeTrapController` | MonoBehaviour | Update, Init, EnterState, DamageSelf |
+
+`BladeTrapStates` (the controller's state machine): `IsOff` 0,
+`RandomWaitToStart` 1, `IsStarting` 2, `IsOn` 3, `IsOnPartlyBroken` 4,
+`IsOnBroken` 5, `IsStopping` 6.
 | `TextureLoadingManager` | MonoBehaviour | LoadTexture, Update, UnloadTexture, Cleanup |
 | `TierItemGroup` |  |  |
 | `TierSpec` |  |  |

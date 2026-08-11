@@ -1042,6 +1042,10 @@ and **11** (distance) with item tags; loop `rayCount` hits via
 `ItemActionAttack.FindHitEntityNoTagCheck` / `GetBlockHit` / `Hit`; decrement
 `AmmoCount` and apply `UseTimes` degradation.
 
+**`AutoTurretFireController` cone constants (IL):** `baseConeDistance` = **5.25**,
+`baseConePitch` = **22.5**°, `baseConeYaw` = **22.5**° (the target-acquisition
+cone), `cTimeBetweenSoundDispatch` = **1** s (fire-sound throttling).
+
 Leaf constants: `get_AmmoCount` (IL=4) / `set_AmmoCount` (IL=5) read and write
 `OriginalItemValue.Meta` - the deployed turret's ammo rides the item-value meta
 field, exactly like a gun's magazine. `InitTurret` (IL=8) is
