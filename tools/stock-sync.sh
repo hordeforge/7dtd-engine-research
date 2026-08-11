@@ -47,6 +47,9 @@ extract() {
   mkdir -p "$DATA"
   echo "stock-sync: extracting from $ASM"
   MONO_PATH="$BIN" mono "$BIN/StockFacts.exe" "$ASM" "$FACTS"
+  # XML data pins (zombie HP ladder etc.) from the same install's Data/Config.
+  python3 "$HERE/xml_pins.py" --game-dir "$(dirname "$(dirname "$ASM")")" >/dev/null && \
+    echo "stock-sync: wrote $HERE/data/xml_pins.json"
   echo "stock-sync: wrote $FACTS"
 }
 

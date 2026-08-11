@@ -96,6 +96,19 @@ def check_research(facts: dict, errors: list[str]) -> None:
         must_match("docs/network.md 1432", net, r"1432", errors)
         must_match("docs/network.md 1024", net, r"1024", errors)
 
+    # XML data pins: the committed hp ladder must carry the key zombie values,
+    # and the zdtd divergence register must cite healthSlim 125.
+    pins_path = ROOT / "tools" / "data" / "xml_pins.json"
+    if pins_path.is_file():
+        pins = json.loads(pins_path.read_text(encoding="utf-8"))
+        hp = pins.get("entityclasses_health", {})
+        for key, val in [("healthSlim", 125), ("healthSlimFeral", 500), ("healthSlimInfernal", 1600)]:
+            if hp.get(key) != val:
+                errors.append(f"xml_pins entityclasses_health.{key}={hp.get(key)} != {val}")
+        prov = read(WS / "zdtd" / "docs" / "PROVENANCE.md")
+        if prov:
+            must_match("zdtd PROVENANCE healthSlim", prov, r"125", errors)
+
     # WaterLevel pin: facts must carry the IL-verified value and save-region.md
     # must document it (the zdtd divergence register consumes the same number).
     water = facts["behaviour"].get("world_water_level")
