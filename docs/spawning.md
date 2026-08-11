@@ -884,6 +884,14 @@ headroom over the configured cap), and **1.0f** `SpawnManagerBiomes::SpawnUpdate
 (plain cap, §2). `EnumGameStats.EnemyCount` is index 12;
 `EnumGamePrefs.MaxSpawnedZombies` is index 99.
 
+**`SleeperVolume::AddSpawnPoint` caps a volume at 255 spawn points (IL=19):**
+`if (spawnPointList.Count >= 255) return;` (IL_000b `ldc.i4 255; bge`), so a
+prefab-stamped volume (filled via
+`Prefab::CopySleeperBlocksContainedInVolume`, the only caller) stores at most
+255 `SpawnPoint` entries - a hard stock ceiling (engine-limitations registry
+caps). Each `SpawnPoint` records `pos:Vector3i`, `rotation` from
+`BlockSleeper.GetSleeperRotation(blockValue)`, and the `BlockValue.type`.
+
 **`PrefabInstance` leaf helpers:** `GetCenterXZ()` (IL=24) is
 `(bboxPos.x + bboxSize.x * 0.5, bboxPos.z + bboxSize.z * 0.5)` as a `Vector2`
 (the POI center used for trader-area / quest-distance math).
