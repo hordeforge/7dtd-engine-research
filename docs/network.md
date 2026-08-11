@@ -479,7 +479,7 @@ Port: LiteNet often **ServerPort+2** (26902). Details and binary layouts: [proto
 | `NetConnectionAbs` + Simple/Steam | Yes | reader/writer threads, compress, encrypt (this section) |
 | `AesEncryptAndMac` (`IEncryptionModule`) | Yes (AES + HMACSHA256) | stream layout below; handshake packages in [protocol-packages.md](protocol-packages.md) §2 |
 | LiteNetLib **managed** wrappers | Partial type map | Present where named |
-| LiteNetLib.dll internals (managed) | **Yes** | Event machinery + flake root cause closed (§4.0); third-party algo set not re-narrated. `NetConstants.ProtocolId` = **13** (metadata const, Cecil-verified on the game's Managed LiteNetLib.dll); zdtd `packet.zig` pins the same value |
+| LiteNetLib.dll internals (managed) | **Yes** | Event machinery + flake root cause closed (§4.0); third-party algo set not re-narrated. `NetConstants.ProtocolId` = **13** (metadata const, Cecil-verified on the game's Managed LiteNetLib.dll); zdtd `packet.zig` pins the same value. Wire-framing consts (same DLL): `HeaderSize` = **1**, `ChanneledHeaderSize` = **4**, `FragmentHeaderSize` = **6**, `FragmentedHeaderTotalSize` = **10**, `MaxSequence` = **32768**, `DefaultWindowSize` = **64**, `SocketBufferSize` = **1048576** |
 
 **LiteNetLib wrapper leaves:** `NetworkServerLiteNetLib.GetServerPorts`
 (IL=9) is `(basePort + 2)/UDP`; `SetServerPassword` (IL=8) stores the
