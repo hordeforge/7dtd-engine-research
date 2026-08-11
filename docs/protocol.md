@@ -552,6 +552,12 @@ and per-package channel/compress/direction/auth: [`protocol-packages.md`](protoc
 make join
 ```
 
+**Live-validated 2026-08-11** (stock V3.1.0 dedicated): the loadgen codec parsed
+a real join end-to-end (challenge → PackageIds → auth stages → PlayerLoginAnswer
+→ spawn), and the captured PackageIds bytes match the golden layouts above. The
+`RECV` hex logs in a join run are the wire evidence; decode them against
+§3 and §8.
+
 Any Zig clone should pass the same golden sizes for PosAndRot / RelPos / AliveFlags / envelope, then accept loadgen probe.
 
 ---
