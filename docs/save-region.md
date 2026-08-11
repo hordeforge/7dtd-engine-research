@@ -385,7 +385,9 @@ assembly calls either helper (`RegionFileAccessAbstract::MakeFilename` (Xref=0)
 / `ExtractKey` (Xref=0)). `MakeFilename(x,z)` (IL=26, exact) builds
 `"r." + x + "." + z + ".ttc"`; `ExtractKey(filename)` (IL=53, exact) parses it
 back: requires the `r.` prefix and `.ttc` suffix, strips the extension via
-`GameIO::RemoveExtension`, splits the remainder on the first `.`, `TryParse`s
+`GameIO::RemoveExtension` (IL=21: `OrdinalIgnoreCase` `EndsWith`, returns the
+filename unchanged when it does not match), splits the remainder on the first
+`.`, `TryParse`s
 both ints, and returns `WorldChunkCache::MakeChunkKey(x, z)`; false on any
 shape mismatch. All live chunk writes route through
 `RegionFile::WriteData` instead - the standalone `.ttc` surface is
