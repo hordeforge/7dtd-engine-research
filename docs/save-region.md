@@ -395,6 +395,12 @@ present-but-dead, and the region accessor's `GetChunkByteCount` throws
 `NotImplementedException`. (The `ZCH3` magic seen on hand-made fixture saves
 belongs to the zdtd clone, not stock; see [stability.md](stability.md).)
 
+**`RegionFileRaw` occupancy queries (exact):** `HasChunk(cX, cZ)` (IL=15) is
+`GetLocationInfo(...) -> offset > 0 && length > 0` - the location-table
+presence test. `ChunkCount()` (IL=41) locks, enumerates `usedSectors`
+values, and counts the entries with value `> 0` - populated chunk slots in
+the raw region.
+
 Protection margins (cull): land claim / bedroll / offline / backpack / vehicle / quest / supply = **1** chunk each.
 
 **`RegionFileManager` memory/cull constants (IL):** `cHeadroomBytes` = **5242880**
