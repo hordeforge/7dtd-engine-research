@@ -28,7 +28,7 @@ CLAIMS = {
     "te-features.md": (r"(\d+)\s+TEFeatureAbs leaves", 11),
     "challenge-objectives.md": (r"(\d+)\s+objective leaves", 28),
     "quest-objectives.md": (r"(\d+)\s+objectives", 38),
-    "console-command-list.md": (r"(\d+)\s+commands", 187),
+    "console-command-list.md": (r"(\d+)\s+commands", 188),
     "xmlsToLoad.md": (r"(\d+)\s+WorldStaticData XmlLoadInfo rows", 49),
     "dedicated-leaves.md": (r"\((\d+)\)", 88),
     "state-machines.md": (r"all (\d+) modelled lifecycles", 74),

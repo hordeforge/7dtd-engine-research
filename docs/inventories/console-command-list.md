@@ -7,12 +7,13 @@
 
 Permission: blank = inherits default (0 = highest admin; higher number = less privileged).
 
-**187 commands.**
+**188 commands** (primary name per command class; short aliases like `as`/`zd`/`zz` are listed as extra `(alias)` rows).
 
 | Command | Type | Perm | Does |
 |---|---|---|---|
 | `AccDecay` | `ConsoleCmdAccDecay` |  | Accuracy Decay for guns, show/hide/reset/<Decimal value> |
 | `admin` | `ConsoleCmdAdmin` |  | Manage user permission levels |
+| `AdminSpeed` | `AdminSpeedConsoleCmd` |  | (no description) |
 | `agemap` | `ConsoleCmdSaveChunkAgeMap` |  | Output debug map for chunk age/protection/save status. |
 | `ai` | `ConsoleCmdAI` |  | AI commands |
 | `aiddebug` | `ConsoleCmdAIDirectorDebug` |  | Toggles AIDirector debug output. |
@@ -47,6 +48,8 @@ Permission: blank = inherits default (0 = highest admin; higher number = less pr
 | `decomgr` | `ConsoleCmdDecoMgr` | 1000 | "decomgr": Saves a debug texture visualising the DecoOccupiedMap. "decomgr state": Saves a debug texture visualising the location/state of all of the DecoObjects saved in decorations.7dtd. |
 | `discord` | `ConsoleCmdDiscord` |  | Toggle Discord debug window |
 | `dms` | `ConsoleCmdDMS` |  | Gives control over Dynamic Music functionality. |
+| `Dynamic mesh` | `DynamicMeshConsoleCmd` |  | (no description) |
+| `Dynamic mesh debug` | `DynamicMeshDebugConsoleCmd` |  | (no description) |
 | `dynamicproperties` | `ConsoleCmdDynamicProperties` |  | Dynamic Properties debugging |
 | `enablerendering` | `EnableRendering` |  | Disable live map rendering |
 | `exhausted` | `ConsoleCmdExhausted` |  | Makes the player exhausted. |

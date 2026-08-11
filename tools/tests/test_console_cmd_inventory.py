@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+"""Guard the console-command inventory against the DLL's command registry.
+
+The inventory (docs/inventories/console-command-list.md) lists one primary row
+per concrete ConsoleCmdAbstract subclass, plus short aliases as extra rows
+marked "(alias)". The primary names are computed (first ldstr in getCommands,
+or the static CommandName-style field value), so the check runs CmdMap.exe -
+the same tool the inventory's Regenerate line documents - and compares its
+output exactly against the inventory's primary rows. Alias rows must be real
+names of the class they name (all ldstrs in getCommands + static-field string
+values from the class .cctor). A game patch that adds/removes/renames a
+command without updating the inventory fails here.
+
+Usage: python3 tools/tests/test_console_cmd_inventory.py <asm>
+"""
+import os
+import re
+import subprocess
+import sys
+
+TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = os.path.dirname(TOOLS)
+INV = os.path.join(REPO, "docs", "inventories", "console-command-list.md")
+CMDMAP = os.path.join(TOOLS, "bin", "CmdMap.exe")
+
+# Number of primary commands (one per concrete ConsoleCmdAbstract subclass).
+EXPECTED_PRIMARY = 188
+
+SRC = r"""
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+class NameSet {
+  static bool Derives(TypeDefinition t) {
+    var b = t.BaseType; int g = 0;
+    while (b != null && g++ < 24) {
+      if (b.Name == "ConsoleCmdAbstract") return true;
+      TypeDefinition r = null; try { r = b.Resolve(); } catch { }
+      if (r == null) break; b = r.BaseType;
+    }
+    return false;
+  }
+  // value assigned to a static field in the class .cctor (ldstr; stsfld field)
+  static string FieldValue(TypeDefinition t, string field) {
+    var cctor = t.Methods.FirstOrDefault(x => x.Name == ".cctor" && x.HasBody);
+    if (cctor == null) return null;
+    var ins = cctor.Body.Instructions;
+    for (int i = 0; i < ins.Count; i++) {
+      if (ins[i].OpCode.Code == Code.Stsfld) {
+        var fr = ins[i].Operand as FieldReference;
+        if (fr != null && fr.Name == field && i > 0 && ins[i-1].OpCode.Code == Code.Ldstr)
+          return (string)ins[i-1].Operand;
+      }
+    }
+    return null;
+  }
+  static void Main(string[] a) {
+    var asm = AssemblyDefinition.ReadAssembly(a[0]);
+    foreach (var t in asm.MainModule.GetTypes().Where(Derives)) {
+      if (t.IsAbstract) continue;
+      var m = t.Methods.FirstOrDefault(x => x.HasBody && (x.Name == "getCommands" || x.Name == "GetCommands"));
+      if (m == null) continue;
+      var names = new List<string>();
+      foreach (var i in m.Body.Instructions) {
+        if (i.OpCode.Code == Code.Ldstr) names.Add((string)i.Operand);
+        else if (i.OpCode.Code == Code.Ldsfld) {
+          var fr = i.Operand as FieldReference; if (fr == null) continue;
+          var v = FieldValue(t, fr.Name);
+          if (v != null) names.Add(v);
+        }
+      }
+      // de-dup while keeping order (a name may appear via both forms)
+      var seen = new HashSet<string>();
+      var uniq = names.Where(x => seen.Add(x)).ToList();
+      Console.WriteLine(t.Name + "\t" + string.Join("|", uniq));
+    }
+  }
+}
+"""
+EXE = "/tmp/cmdnames_check.exe"
+
+
+def parse_inventory() -> tuple[dict, list]:
+    primaries = {}
+    aliases = []
+    for l in open(INV, encoding="utf-8").read().splitlines():
+        s = l.strip()
+        if not (s.startswith("| `") or s.startswith("|`")):
+            continue
+        parts = s.split("|")
+        name = parts[1].strip().strip("`")
+        typ = parts[2].strip()
+        is_alias = typ.endswith(" (alias)")
+        if is_alias:
+            typ = typ[: -len(" (alias)")]
+        typ = typ.strip("`")
+        if is_alias:
+            aliases.append((name, typ))
+        else:
+            primaries[name] = typ
+    return primaries, aliases
+
+
+def main() -> int:
+    if len(sys.argv) < 2:
+        print("usage: test_console_cmd_inventory.py <asm>", file=sys.stderr)
+        return 2
+    asm = sys.argv[1]
+    env = dict(os.environ)
+    env["MONO_PATH"] = os.path.join(TOOLS, "bin")
+    cmdmap = subprocess.run(
+        ["mono", CMDMAP, asm], capture_output=True, text=True, env=env, check=True,
+    ).stdout
+    dll_primary = {}
+    for line in cmdmap.splitlines()[1:]:  # skip header
+        name, _, typ = line.partition("\t")
+        dll_primary[name] = typ
+
+    src = "/tmp/cmdnames_check.cs"
+    with open(src, "w") as f:
+        f.write(SRC)
+    subprocess.run(
+        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"), src, "-out:" + EXE],
+        check=True,
+    )
+    probe = subprocess.run(
+        ["mono", EXE, asm], capture_output=True, text=True, env=env, check=True,
+    ).stdout
+    name_sets = {}
+    for line in probe.splitlines():
+        typ, _, names = line.partition("\t")
+        name_sets[typ] = set(names.split("|")) if names else set()
+
+    primaries, aliases = parse_inventory()
+    bad = []
+    if len(dll_primary) != EXPECTED_PRIMARY:
+        bad.append(f"DLL primary commands = {len(dll_primary)} != expected {EXPECTED_PRIMARY}")
+    if len(primaries) != EXPECTED_PRIMARY:
+        bad.append(f"inventory primary rows = {len(primaries)} != expected {EXPECTED_PRIMARY}")
+    if len(primaries) != len(dll_primary):
+        bad.append(f"inventory primary rows {len(primaries)} != DLL primary commands {len(dll_primary)}")
+    # exact set equality of primary rows (name+type)
+    only_inv = {k: v for k, v in primaries.items() if dll_primary.get(k) != v}
+    only_dll = {k: v for k, v in dll_primary.items() if primaries.get(k) != v}
+    for k, v in sorted(only_inv.items()):
+        bad.append(f"inventory-only primary row: `{k}` -> {v}")
+    for k, v in sorted(only_dll.items()):
+        bad.append(f"missing primary row (DLL has it): `{k}` -> {v}")
+    # alias rows must be real names of the class they name
+    for name, typ in aliases:
+        if typ not in name_sets:
+            bad.append(f"alias `{name}` names unknown type {typ}")
+        elif name not in name_sets[typ]:
+            bad.append(f"alias `{name}` is not a registered name of {typ} (have {sorted(name_sets[typ])})")
+    # the inventory must self-state the primary count
+    text = open(INV, encoding="utf-8").read()
+    if not re.search(rf"\b{EXPECTED_PRIMARY}\b", text):
+        bad.append(f"inventory does not self-state {EXPECTED_PRIMARY}")
+    if bad:
+        for b in bad:
+            print("FAIL:", b)
+        return 1
+    print(f"OK: {len(dll_primary)} primary commands + {len(aliases)} aliases consistent with the DLL")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

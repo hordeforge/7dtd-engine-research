@@ -323,7 +323,7 @@ live with the mod that ships them.
 | [inventories/block-behaviors.md](inventories/block-behaviors.md) | blocks.md (65 Block leaves) |
 | [inventories/item-actions.md](inventories/item-actions.md) | items.md (38 ItemAction leaves) |
 | [inventories/minevent-actions.md](inventories/minevent-actions.md) | minevents.md (71 triggered-effect leaves) |
-| [inventories/console-command-list.md](inventories/console-command-list.md) | console-commands.md (187 commands, with descriptions) |
+| [inventories/console-command-list.md](inventories/console-command-list.md) | console-commands.md (188 commands, with descriptions) |
 | [inventories/xmlsToLoad.md](inventories/xmlsToLoad.md) | mod-loading.md (49 WorldStaticData XmlLoadInfo rows) |
 | [inventories/entityclass-props.md](inventories/entityclass-props.md) | entity-ai.md D8.6-D8.7 (187 EntityClass prop-name constants from the cctor) |
 | [inventories/gamestats-gameprefs.md](inventories/gamestats-gameprefs.md) | every doc that cites `GameStats[i]` / `GamePrefs.Get*(i)` (82 + 317 index rows) |
