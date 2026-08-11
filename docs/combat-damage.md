@@ -128,6 +128,11 @@ crippled leg hit while alive and walkType not 5 and &lt; 20: `SetWalkType(5)`.
 matching the `L_*Gore` transform names (head / left / right upper / lower
 arm and leg entries).
 `GetDamageTag(damageType, lastHitRanged)` (IL=21) resolves `blade` / `blunt`
+
+**Dismemberment tuning constants (IL):** `cDefaultDetachLimbLifeTime` = **10** s,
+`cDefaultDetachLimbMax` = **25**, `cDefaultDetachLimbCleanupCount` = **5**,
+`cMaxLimbsFromExplosiveDeath` = **3**, `MaxForce` = **1.5** (detach force
+threshold).
 (null for other types); `IsDefaultGib(matName)` (IL=22) is membership in
 `DefaultBundleGibs`.
 `DismemberPart(flag, damageType, entity, isBiped, useLegacy)` (IL=8) runs

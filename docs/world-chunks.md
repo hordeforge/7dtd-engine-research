@@ -49,6 +49,10 @@ rect resets → `ResetDecosInWorldRect`; chunk-key resets →
 `ResetDecosForWorldChunk`. Then server: rebuild player list for deco interest
 residual / coroutine path.
 
+**`DecoManager` constants (IL):** `cChunkSize` = **128** (deco grid), `cUpdateDelay`
+= **1** s (update cadence), `cUpdateCoMaxTimeUs` = **900** us (per-update budget),
+`FILEVERSION` = 6 (deco file version).
+
 ```mermaid
 flowchart LR
   GMu[gmUpdate] --> UT[UpdateTick]

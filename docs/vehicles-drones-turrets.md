@@ -474,6 +474,17 @@ its position holding the bag + mods.
 `EntityAlive`'s block-damage scale when a driver exists, else **1.0** -
 vehicle block damage inherits the driver's multiplier.
 
+**`EntityVehicle` damage/sync constants (IL):** block damage `cDamageBlockScale`
+= **0.05833333** (1/17.14, ~0.0583), `cDamageBlockMin` = **5**, `cDamageBlockVelReduction` =
+**1.5**, `cDamageBlockSelfPer` = **2.5**; entity `cDamageEntityScale` = **12**,
+`cDamageEntitySelfScale` = **28**; terrain `cDamageTerrainSelfPer` = **0.1**;
+exit velocity `cExitVelScale` = **0.5**, fuel `cFuelItemScale` = **25**, XP
+`cKillEntityXPPer` = **0.5**, sleep `cSleepTime` = **3** s. Sync wire flags:
+`Attachment` 1, `Item` 4, `Storage` 8, `AllNonRates` 15, `LowRate` 16384,
+`HighRate` 32768, `Save` 16398, `LowRateAndNonRates` 16399, `Replicate` 49159;
+low-rate duration **2** s, high-rate **0.5** s. Camera: `cVehicleCameraOffset`
+= **1.8**, `cVehicleCameraChaseSpeed` = **7**.
+
 ### 4.3 Movement authority: client-authoritative physics
 
 This is the load-bearing distinction. `EntityVehicle.PhysicsFixedUpdate` (1509
