@@ -73,3 +73,5 @@ test-docs:
 # Everything in one command: doc gates (no DLL), pins, readiness, facts view.
 # make test (the DLL-dependent suite) is separate: it needs the live game.
 verify: test-docs stock-check readiness facts
+	@test -f "$(ASM)" || (echo "ASM not found: $(ASM) (make verify needs the live game)"; exit 2)
+	python3 "$(TOOLS)/xml_pins.py" --check --game-dir "$$(dirname "$$(dirname "$$(dirname "$(ASM)")")")"
