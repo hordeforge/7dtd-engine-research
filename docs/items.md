@@ -38,6 +38,12 @@ server is the source of truth.
 | `ItemClass` | `ItemData` | The **definition** loaded from `items.xml`: the `ItemAction[] Actions`, hold type, stack size, repair rules, tags, `MinEffectController Effects` |
 | `ItemAction` | `XMLData.Item.ItemActionData` | Abstract **behavior**: what pressing primary/secondary does. `ItemClass.Actions` holds the concrete subclasses |
 
+**`ItemClass` constants (IL):** `cMaxActionNames` = **5**, `cActionUpdateCount` =
+**3**, gamestage-stat conversion `cGSStatScale` = **0.005** /
+`cGSStatMax` = **163.835**. **`ItemActionAttack` hit-effect flags (IL):**
+`cHitDefault` 1, `cHitElectricTrap` 2, `cHitHarvestParticles` 4, `cHitEffectOff`
+8, `cHitToolBeltNotify` 1.
+
 There is a name collision worth flagging up front: two distinct types are both
 called `ItemActionData`.
 

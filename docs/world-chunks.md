@@ -786,6 +786,12 @@ return **1**. Else distance-to-edge soft bands: 50 m hard margin + 80 m fade on
 x and z from world center; return min of clamped x/z fractions (1 = deep
 interior, 0 = at edge).
 
+**`World` constants (IL):** `cEdgeHard` = **50** / `cEdgeSoft` = **80** (the
+soft/hard edge bands above), `cEdgeMinWorldSize` = **1024**, `cWorldRWGBorder` =
+**90**, `cWorldNavExtent` = **2900**, `cCollCacheSize` = **50**,
+`cCollisionBlocks` = **5**, `cTraderPlacingProtection` = **2**, the
+`*WorldStateSaveVersion` trio = **1**.
+
 **`IsLandProtectedBlock(chunk, pos, relative, claimSize, deadZone, forKeystone)`
 (IL=104 high-level):** walk chunk `IndexedBlocks["lpblock"]` primary land-claim
 TEs; if within deadZone of claim and owner valid: self not protected against
