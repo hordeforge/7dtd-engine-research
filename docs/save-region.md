@@ -127,7 +127,9 @@ the documented codec agree end-to-end.
 `ttw\0`, version 23, waterLevel 62.88, chunkSize 16, providerId 4
 (ChunkDataDriven), seed -1634985719 - but its `gameVersionString` is
 **"V 4.0 (b8)"** (`VersionInformation (1, 4, 0, 8)`), i.e. the world data was
-tooled with a V4.0 build while the dedicated server is V3.1.0 (b14). Every
+tooled with a V4.0 build while the dedicated server is V3.1.0 (b14), and its
+`activeGameMode` is **8 = `EditWorld`** (`EnumGameMode`; probe saves carry
+1 = `Survival`) - the file was exported from the world-editor tooling. Every
 V3.1.0 boot of the shipped world logs
 `Loaded world file from different version: 'V 4.0 (b8)'` and proceeds -
 the mismatch is a warning only, and the **save-version 23 codec is shared**
