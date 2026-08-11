@@ -31,7 +31,7 @@ class TypeBase {
       var bodies = t.Methods.Where(m => m.HasBody).ToList();
       int maxIl = bodies.Count == 0 ? 0 : bodies.Max(m => m.Body.Instructions.Count);
       Console.WriteLine(t.Name + "\t" + (t.BaseType == null ? "" : t.BaseType.Name)
-        + "\t" + bodies.Count + "\t" + maxIl);
+        + "\t" + bodies.Count + "\t" + maxIl + "\t" + (t.FullName.Contains("/") ? "N" : "T"));
     }
   }
 }
@@ -62,12 +62,15 @@ def main() -> int:
         ["mono", EXE, asm], capture_output=True, text=True, env=env, check=True,
     ).stdout
     dll = {}
+    top_level_netpkg = set()
     for line in out.splitlines():
         parts = line.split("\t")
-        if len(parts) != 4:
+        if len(parts) != 5:
             continue
-        name, base, nb, mx = parts[0], parts[1], int(parts[2]), int(parts[3])
+        name, base, nb, mx, lvl = parts[0], parts[1], int(parts[2]), int(parts[3]), parts[4]
         dll[norm(name)] = (base, nb, mx)
+        if lvl == "T" and name.startswith("NetPackage") and name != "NetPackageManager":
+            top_level_netpkg.add(norm(name))
 
     bad = []
     total = 0
@@ -86,8 +89,16 @@ def main() -> int:
             bad.append(f"dedicated-leaves.md: type `{typ}` does not exist in the DLL")
 
     # netpackages.md: type existence + direct base + method count + max method
-    # IL (uniform Type|Base|Methods|Max method IL table)
+    # IL + completeness (the table must list every top-level NetPackage* type,
+    # excluding NetPackageManager; nested types like DroneWeapons/
+    # NetPackageDroneParticleEffect live in dedicated-leaves.md instead)
     text = open(os.path.join(INV, "netpackages.md"), encoding="utf-8").read()
+    doc_np_rows = set(
+        norm(m.group(1))
+        for m in re.finditer(r"^\| `(NetPackage[A-Za-z0-9]*)` \|", text, re.M)
+    )
+    for missing in sorted(top_level_netpkg - doc_np_rows):
+        bad.append(f"netpackages.md: top-level `{missing}` missing from the table")
     for m in re.finditer(r"^\| `([^`]+)` \| ([^|]+) \| (\d+) \| (\d+) \|", text, re.M):
         typ, want_base, want_n, want_max = m.group(1), m.group(2).strip().strip("`"), int(m.group(3)), int(m.group(4))
         total += 1
