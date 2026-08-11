@@ -939,8 +939,10 @@ if day changed store `bmDay` and log freq/range. **Operational note
 (live-observed 2026-08-11):** with `BloodMoonFrequency=0` in the serverconfig
 (`GamePref.BloodMoonFrequency = 0`), the sandbox sync still wrote **7** to the
 static (the stock default) - the live `SetDay` log read `freq 7` and the
-blood moon fired on day 7. Setting the option to 0 does **not** disable the
-blood moon; it falls back to the 7-day default (the sandbox default value
+blood moon fired on day 7. The static is written from `SandboxOptions.
+BloodMoonFrequency` (option 48) / `BloodMoonRange` (49) by the fan-out; a 0
+pref does **not** disable the blood moon; it falls back to the 7-day default
+(the sandbox default value
 applies over a 0 pref, [sandbox-options.md](sandbox-options.md) 7).
 
 **`CalcNextDay(isSeek)` (IL=82):** if `BloodMoonFrequency <= 0` set day **0**.
