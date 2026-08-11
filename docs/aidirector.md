@@ -648,6 +648,14 @@ players present `StartSpawning`, else `ChooseNextTime`.
 Random(12000..24000) + 2000`. Type 1 horde: `HordeNextTime = now +
 Random(12000..24000)` (no +2000).
 
+**Scheduling constants (IL):** `cNextHourMin` = **7** game-hours - the minimum
+elapsed time before a new horde is scheduled: `TickNextTime` (IL=74) computes
+`(worldTime - nextTime) / 1000` (game-hours, 1000 units/hour) and only re-schedules
+when that is `>= 7`; when it is not, the pending time is pushed by
+`(7 - hours) * 1000`. `AIWanderingHordeSpawner.cInvestigateTime` = **6000 ms** -
+the investigate-position duration horde zombies receive at the stop point
+(`Update` IL_0164: `ldc.i4 6000` -> `EntityAlive.SetInvestigatePosition(pos, 6000, true)`).
+
 **`StartSpawning` (IL=124 high-level):** log; `CleanupType`; require living
 tracked players; on fail delay +4000; `FindTargets` → on fail delay +1000 and
 `ChooseNextTime`; else create `AIWanderingHordeSpawner` and add to list
