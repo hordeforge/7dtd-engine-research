@@ -176,10 +176,15 @@ class LeafMeth {
 
     key_bad = []
     for inv in ("item-actions.md", "minevent-actions.md", "sequence-requirements.md",
-                "quest-objectives.md", "block-behaviors.md", "challenge-objectives.md"):
+                "quest-objectives.md", "block-behaviors.md", "challenge-objectives.md",
+                "dedicated-leaves.md"):
         text = open(os.path.join(INV, inv), encoding="utf-8").read()
         for m in re.finditer(r"^\| `([^`]+)` \| [^|]+ \| [^|]+ \| ([^|]+) \|", text, re.M):
             typ, kms = m.group(1), m.group(2)
+            # dedicated-leaves mixes formats: skip rows whose fingerprint column
+            # is a marker/prose or a referrer list (backticked type names)
+            if any(x in kms for x in ("(fields only)", "(not found)", "(generic/nested", "`")):
+                continue
             for km in [x.strip() for x in kms.split(",") if x.strip()]:
                 km_name = km.split("(")[0].strip()
                 if not has_method(typ, km_name):
