@@ -175,13 +175,15 @@ class LeafMeth {
         return False
 
     key_bad = []
-    for inv in ("item-actions.md", "minevent-actions.md"):
+    for inv in ("item-actions.md", "minevent-actions.md", "sequence-requirements.md",
+                "quest-objectives.md", "block-behaviors.md", "challenge-objectives.md"):
         text = open(os.path.join(INV, inv), encoding="utf-8").read()
         for m in re.finditer(r"^\| `([^`]+)` \| [^|]+ \| [^|]+ \| ([^|]+) \|", text, re.M):
             typ, kms = m.group(1), m.group(2)
             for km in [x.strip() for x in kms.split(",") if x.strip()]:
-                if not has_method(typ, km):
-                    key_bad.append(f"{inv}: `{typ}` key method `{km}` not found on type or bases")
+                km_name = km.split("(")[0].strip()
+                if not has_method(typ, km_name):
+                    key_bad.append(f"{inv}: `{typ}` key method `{km_name}` (from `{km}`) not found on type or bases")
 
     args = [",".join(
         ("closed:" if mode == "closed" else "seq:") + target
