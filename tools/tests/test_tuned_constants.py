@@ -539,6 +539,37 @@ CONSTS = {
         "THREAT_PER_ENEMY": 0.03333334,
         "ZOMBIE_COMBAT_QUANTITY": 4,
     }),
+    "Chunk": ("world-chunks.md", {
+        "cAreaMasterSizeBlocks": 80,
+        "cAreaMasterSizeChunks": 5,
+        "cEntityListCount": 16,
+        "cEntityListHeight": 16,
+        "cTextureChannelCount": 1,
+        "CurrentSaveVersion": 47,
+        "SupportedSaveVersion": 32,
+        "dbChunkX": 136,
+        "dbChunkZ": 25,
+    }),
+    "WorldConstants": ("world-chunks.md", {
+        "cDuskHour": 22,
+        "ChunkAreaDim": 256,
+        "ChunkBlockLayerHeight": 4,
+        "ChunkBlockLayerHeightMask": 3,
+        "ChunkBlockLayerHeightPow": 2,
+        "ChunkBlockLayers": 64,
+        "ChunkBlockXDim": 16,
+        "ChunkBlockXDimM1": 15,
+        "ChunkBlockXMask": 15,
+        "ChunkBlockXPow": 4,
+        "ChunkBlockYDim": 256,
+        "ChunkBlockYDimM1": 255,
+        "ChunkBlockYMask": 255,
+        "ChunkBlockYPow": 8,
+        "ChunkBlockZDim": 16,
+        "ChunkBlockZDimM1": 15,
+        "ChunkBlockZMask": 15,
+        "ChunkBlockZPow": 4,
+    }),
     "BlockLiquidv2": ("light-mesh-water.md", {
         "MAX_EMISSIONS": 3,
         "blockUpdatesPerSecond": 16,
@@ -673,7 +704,8 @@ def main() -> int:
             grouped = (name.endswith("Sq") or name.startswith("cBlockerFlag")
                        or name.startswith("BlockFaceDrawn") or name.startswith("BT_")
                        or name.startswith("cPath") or name.endswith("Max")
-                       or name.startswith("cWalkType") or name.startswith("cSync"))
+                       or name.startswith("cWalkType") or name.startswith("cSync")
+                       or name.startswith("ChunkBlock"))
             if not grouped and not re.search(rf"`?{name}`?", doc):
                 bad.append(f"{doc_name}: does not mention {name}")
             if str(want) not in doc:

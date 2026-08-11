@@ -82,6 +82,16 @@ flowchart TB
 
 Live stock: `ChunkBlockYDim=256`, `ChunkBlockLayers=64`, `ChunkAreaDim=256` (XZ plane map size).
 
+**Chunk/World constants (IL):** `ChunkBlockXDim`/`ChunkBlockZDim` = **16**
+(`ChunkBlockXPow`/`ZPow` 4, masks 15), `ChunkBlockYDim` = **256** (`YPow` 8,
+mask 255), `ChunkBlockLayerHeight` = **4** (pow 2, mask 3), `ChunkAreaDim` =
+**256**, `Chunk.cAreaMasterSizeBlocks` = **80** / `cAreaMasterSizeChunks` =
+**5** (the 5x5 master-chunk area), `Chunk.cEntityListCount` = **16** /
+`cEntityListHeight` = **16**, `Chunk.cTextureChannelCount` = **1**,
+`Chunk.dbChunkX` = **136** / `dbChunkZ` = **25** (region-file chunk counts),
+`Chunk.CurrentSaveVersion` = **47** / `SupportedSaveVersion` = **32**,
+`WorldConstants.cDuskHour` = **22**.
+
 **Channel compaction:** the light and density channels compact whole layers:
 `Chunk.CheckSameLight` (IL=4) / `CheckSameDensity` (IL=4) run the channel's
 `CheckSameValue` pass, and `Chunk.HasSameDensityValue(y)` (IL=5) is
