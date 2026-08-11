@@ -44,6 +44,19 @@ CONSTS = {
     "AIWanderingHordeSpawner": {
         "cInvestigateTime": 6000,
     },
+    "AIDirectorChunkData": {
+        "cCooldownDelay": 240,
+        "cCooldownLongDelay": 1320,
+        "cCooldownNeighborDelay": 180,
+        "cCooldownNeighborLongDelay": 720,
+        "cVersion": 2,
+    },
+    "AIDirectorChunkEventComponent": {
+        "cActivityLevelToSpawn": 25,
+        "cEventDelay": 5,
+        "cSpawnChance": 0.2,
+        "cVersion": 1,
+    },
 }
 
 SRC = r"""

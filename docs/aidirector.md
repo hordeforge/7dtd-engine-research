@@ -235,8 +235,9 @@ the player from the list and calls `PlayerLoggedOut` on every party.
 Per-chunk heat / event bag used by the chunk-event horde path.
 
 **Fields:** `activityLevel` (single), `events` (`List<AIDirectorChunkEvent>`),
-`cooldownDelay`, plus static delay constants (`cDataDelay`, `cDataLongDelay`,
-`cDataNeighborDelay`, `cDataNeighborLongDelay`), `cVersion`.
+`cooldownDelay`, plus static delay constants (`cCooldownDelay` 240,
+`cCooldownLongDelay` 1320, `cCooldownNeighborDelay` 180,
+`cCooldownNeighborLongDelay` 720), `cVersion`.
 
 - `Tick(Single)` IL=23 (returns whether still alive in the map)
 - Persistence: `Write` emits version **2**, `activityLevel`, event count + each
@@ -282,7 +283,7 @@ Scout / activity-driven hordes (see also [spawning.md](spawning.md)).
 **`Tick` body (verified):**
 
 1. Base `AIDirectorComponent.Tick`.
-2. Every **5 s** accumulated: `CheckToSpawn()`.
+2. Every **5 s** accumulated (`cEventDelay` = 5): `CheckToSpawn()`.
 3. Walk `Dictionary<Int64, AIDirectorChunkData>`; `AIDirectorChunkData.Tick(dt)`;
    remove entries that expire.
 4. `TickActiveSpawns(dt)`.
@@ -317,7 +318,8 @@ heatMapStrength * volumeScale, 240)`.
 `CheckToSpawn(chunkData)` (one chunk per 5 s pulse).
 
 **`CheckToSpawn(AIDirectorChunkData)` (IL=46):** require GameStats 32+24;
-`ActivityLevel >= 25`; `FindBestEventAndReset`; with **20%** random (and not
+`ActivityLevel >= 25` (`cActivityLevelToSpawn`); `FindBestEventAndReset`; with
+**20%** (`cSpawnChance`) random (and not
 playtest) set spawn flag, `StartCooldownOnNeighbors`, `SetLongDelay`,
 `SpawnScouts`. Otherwise neighbor cooldown only.
 
