@@ -35,6 +35,15 @@ COMPRESSED = [
     "NetPackageIdMapping",
     "NetPackageSignDataResponse",
 ]
+# packages that explicitly override AllowedBeforeAuth to false (all others
+# inherit the base's true; network.md §5 documents exactly this set)
+NOT_BEFORE_AUTH = [
+    "NetPackageEntityPosAndRot",
+    "NetPackageEntityRelPosAndRot",
+    "NetPackageEntityRotation",
+    "NetPackageEntitySpeeds",
+    "NetPackageEntityStatsBuff",
+]
 EXPECTED_TOTAL = 193
 
 
@@ -55,16 +64,19 @@ def main() -> int:
         return 1
     chan1 = set()
     compressed = set()
+    not_before_auth = set()
     total = 0
     for line in meta.splitlines()[2:]:
         parts = [c.strip() for c in line.split("|")]
-        if len(parts) < 4 or not parts[1].startswith("NetPackage"):
+        if len(parts) < 7 or not parts[1].startswith("NetPackage"):
             continue
         total += 1
         if parts[2] == "1":
             chan1.add(parts[1])
         if parts[3] == "1":
             compressed.add(parts[1])
+        if parts[5] == "0":
+            not_before_auth.add(parts[1])
     doc = open(DOC, encoding="utf-8").read()
     bad = []
     if total != EXPECTED_TOTAL:
@@ -73,18 +85,20 @@ def main() -> int:
         bad.append(f"channel-1 packages {sorted(chan1)} != documented {CHANNEL1}")
     if compressed != set(COMPRESSED):
         bad.append(f"compressed packages {sorted(compressed)} != documented {COMPRESSED}")
+    if not_before_auth != set(NOT_BEFORE_AUTH):
+        bad.append(f"not-before-auth packages {sorted(not_before_auth)} != documented {NOT_BEFORE_AUTH}")
     if not re.search(r"[Ee]xactly \*{0,2}6\*{0,2} override", doc):
         bad.append("protocol-packages.md: no 'exactly 6 override to channel 1' claim")
     if not re.search(r"\*\*8 packages set", doc):
         bad.append("protocol-packages.md: no '**8 packages set get_Compress = 1**' claim")
-    for p in CHANNEL1 + COMPRESSED:
+    for p in CHANNEL1 + COMPRESSED + NOT_BEFORE_AUTH:
         if not re.search(rf"`{p}`", doc):
             bad.append(f"protocol-packages.md: does not mention `{p}`")
     if bad:
         for b in bad:
             print("FAIL:", b)
         return 1
-    print(f"OK: census {total} packages; exactly {len(chan1)} on channel 1 and {len(compressed)} compressed, matching the doc")
+    print(f"OK: census {total} packages; {len(chan1)} channel-1, {len(compressed)} compressed, {len(not_before_auth)} not-before-auth - all match the doc")
     return 0
 
 
