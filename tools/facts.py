@@ -17,6 +17,12 @@ c = d.get("census", {})
 s = d.get("save", {})
 print(f"  census: top_types={c.get('top_level_types')} methods={c.get('methods_with_body_top_level')} gmupdate_il={c.get('gmupdate_il')}")
 print(f"  save: current_save_version={s.get('current_save_version')} saveload_il={s.get('worldstate_saveload_stream_il')}")
+xp = os.path.join(TOOLS, "data", "xml_pins.json")
+if os.path.isfile(xp):
+    xd = json.load(open(xp, encoding="utf-8"))
+    hp = xd.get("entityclasses_health", {})
+    if hp:
+        print(f"  xml: healthSlim={hp.get('healthSlim')} feral={hp.get('healthSlimFeral')} infernal={hp.get('healthSlimInfernal')} ({len(hp)} vars)")
 lite = d.get("litenet", {})
 if lite:
     print(f"  litenet: protocol={lite.get('protocol_id')} header={lite.get('header_size')} mtu={lite.get('possible_mtu')} max_packet={lite.get('max_packet_size')}")
