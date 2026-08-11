@@ -125,6 +125,12 @@ during load. The 16-bit type field (below) is the hard cap: ids cannot exceed
 content (hardness, drops, upgrade targets, tags) is a **residual**, not method IL
 (see [`BlocksFromXml`], §9).
 
+**Constant masks on `Block` (IL):** face-drawn bits `BlockFaceDrawn_*`:
+`Top` 1, `Bottom` 2, `North` 4, `West` 8, `South` 16, `East` 32, `All` 255,
+`AllORD` 63 (the six non-opposing faces); block-type flags `BT_*`: `Sight` 1,
+`Movement` 2, `Bullets` 4, `Rockets` 8, `Melee` 16, `Arrows` 32, `All` 255,
+`None` 0. Pathing markers `cPathSolid` 1 / `cPathScan` -1.
+
 ---
 
 ## 2. `BlockValue`: the packed voxel word

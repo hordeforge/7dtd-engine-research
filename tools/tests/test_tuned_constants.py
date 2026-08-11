@@ -107,6 +107,26 @@ CONSTS = {
         "cBlockerFlagDoor": 16384,
         "cBlockerFlagFloor": 4096,
     }),
+    "Block": ("blocks.md", {
+        "BlockFaceDrawn_Top": 1,
+        "BlockFaceDrawn_Bottom": 2,
+        "BlockFaceDrawn_North": 4,
+        "BlockFaceDrawn_West": 8,
+        "BlockFaceDrawn_South": 16,
+        "BlockFaceDrawn_East": 32,
+        "BlockFaceDrawn_All": 255,
+        "BlockFaceDrawn_AllORD": 63,
+        "BT_Sight": 1,
+        "BT_Movement": 2,
+        "BT_Bullets": 4,
+        "BT_Rockets": 8,
+        "BT_Melee": 16,
+        "BT_Arrows": 32,
+        "BT_All": 255,
+        "BT_None": 0,
+        "cPathSolid": 1,
+        "cPathScan": -1,
+    }),
     "BlockLiquidv2": ("light-mesh-water.md", {
         "MAX_EMISSIONS": 3,
         "blockUpdatesPerSecond": 16,
@@ -193,8 +213,11 @@ def main() -> int:
             elif have != str(want):
                 bad.append(f"{cls}.{name}: DLL {have} != expected {want}")
             # the doc must state the name (and ideally the value); derived *Sq
-            # constants and the grouped cBlockerFlag* masks are value-only
-            grouped = name.endswith("Sq") or name.startswith("cBlockerFlag")
+            # constants and grouped mask families (cBlockerFlag*, BlockFaceDrawn_*,
+            # BT_*, cPath*) are value-only
+            grouped = (name.endswith("Sq") or name.startswith("cBlockerFlag")
+                       or name.startswith("BlockFaceDrawn") or name.startswith("BT_")
+                       or name.startswith("cPath"))
             if not grouped and not re.search(rf"`?{name}`?", doc):
                 bad.append(f"{doc_name}: does not mention {name}")
             if str(want) not in doc:
