@@ -199,6 +199,12 @@ components; the `Vector3` overload (IL=12) `Fastfloor`s each component first.
 This is the chunk-coordinate conversion used by every keyed chunk lookup, so
 negative-world-coordinate worlds rely on the arithmetic-shift floor.
 
+**`Utils::Fastfloor(float)` (IL=11, exact):** `x >= 0` returns `(int)x`, else
+`(int)(x - 0.9999999f)` - floor via truncate-after-epsilon-subtract:
+`-0.5 -> -1`, `-1.0 -> -1`, `-1.5 -> -2`. The `Double` overload (IL=11) uses
+`0.99999988079071`. It is the floor applied before every float-to-chunk
+conversion, so the negative-half semantics compose with `toChunkXZ`.
+
 ---
 
 ## 3. Generation
