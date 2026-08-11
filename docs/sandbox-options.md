@@ -222,7 +222,12 @@ at 132 sites, machine-counted 2026-08-11), plus a few side effects:
   [tile-entities-power.md](tile-entities-power.md)).
 - **Helpers:** `SetupBloodMoonWarningTimes`, `SetupAirDropTimeRanges`,
   `SetupLostItemsOnDeathValues` compute derived values and write them into
-  `GameStats`.
+  `GameStats`. `SetupLostItemsOnDeathValues` (IL=70, exact) maps the
+  `DropOnDeath` option (SandboxOptions 23) to
+  `EntityPlayerLocal.LostItemOnDeathMin/Max`: option 1 -> [1,3], 2 -> [1,5],
+  3 -> [1,10], 4 -> [1,20], 5 -> [3,5], 6 -> [5,7], 7 -> [5,10], 8 -> [7,10],
+  9 -> [10,15], 10 -> [15,20], else unchanged; then mirrors options 26/27/28
+  into `GameStats` 35/33/34.
 - **Silly world options** (`SillyBigHeads`, `SillyTinyZombies`) are applied by
   the nested `UpdateWorldOptionsWithSandboxOptions` through `GameEventManager`
   sequences ([game-events.md](game-events.md)).
