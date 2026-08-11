@@ -70,6 +70,7 @@ test:
 	python3 "$(TOOLS)/tests/test_inventory_type_existence.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_entityclass_props_current.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_il_citations.py" "$(ASM)"
+	python3 "$(TOOLS)/tests/test_xref_claims.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_netprotocol_census.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_tuned_constants.py" "$(ASM)"
 

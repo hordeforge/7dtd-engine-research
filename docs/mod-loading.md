@@ -288,7 +288,7 @@ byte cache per table row and ships S2C-eligible configs during join.
 
 **Send (join path):**
 
-Caller (Xref=1): `GameManager.RequestToEnterGame` coroutine, **after**
+Caller: `GameManager.RequestToEnterGame` coroutine (Xref=1), **after**
 `NetPackageLocalization.StartSendingPacketsToClient` and **before**
 `NetPackageWorldInfo` / chunk-cluster / spawn points.
 

@@ -381,7 +381,8 @@ Factories: RegionFileFactoryRaw / RegionFileFactorySectorBased
 
 **Standalone chunk files (`r.<x>.<z>.ttc`) are legacy-unwired in V3.1.0:**
 `RegionFileAccessAbstract` carries the full filename contract but nothing in the
-assembly calls it (Xref=0 on both). `MakeFilename(x,z)` (IL=26, exact) builds
+assembly calls either helper (`RegionFileAccessAbstract::MakeFilename` (Xref=0)
+/ `ExtractKey` (Xref=0)). `MakeFilename(x,z)` (IL=26, exact) builds
 `"r." + x + "." + z + ".ttc"`; `ExtractKey(filename)` (IL=53, exact) parses it
 back: requires the `r.` prefix and `.ttc` suffix, strips the extension via
 `GameIO::RemoveExtension`, splits the remainder on the first `.`, `TryParse`s
