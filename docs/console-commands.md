@@ -345,7 +345,7 @@ is in the framework sections above; per-command effects are the catalog's role.
 | `ConsoleCmdListEntities` | `listents` | lists all entities |
 | `ConsoleCmdListGameObjects` | `lgo` | List all active game objects |
 | `ConsoleCmdListPlayerIds` | `listplayerids` | Lists all players with their IDs for ingame commands |
-| `ConsoleCmdListPlayers` | `listplayers` | lists all players |
+| `ConsoleCmdListPlayers` | `listplayers` | lists all players. Live 2026-08-12: `0. id=298, EntityPlayer, pos=(269.3, 72.0, 258.3), rot=(0.0, -42.2, 0.0), remote=True, health=100, deaths=0, zombies=0, players=0, score=0, level=1, pltfmid=Local_REFake1, crossid=Local_REFake1, ip=127.0.0.19, ping=0` (index, id, type, pos, rot, remote flag, stats, platform ids, source ip, ping) |
 | `ConsoleCmdListThreads` | `listthreads` | lists all threads |
 | `ConsoleCmdLogFellThroughWorldDebugInfo` | `ftw` | Log the fell through world debug information for testing purposes. |
 | `ConsoleCmdLogLevel` | `loglevel` | Telnet/Web only: Select which types of log messages are shown |
