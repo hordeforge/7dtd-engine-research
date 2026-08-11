@@ -36,7 +36,7 @@ Count: **194** types with `NetPackage` name prefix in live dedi dump (193 wire-o
 | `NetPackageConfigFile` | NetPackage | 8 | 25 |
 | `NetPackageConsoleCmdClient` | NetPackage | 8 | 31 |
 | `NetPackageConsoleCmdServer` | NetPackage | 7 | 10 |
-| `NetPackageDamageEntity` | NetPackage | 6 | 172 |
+| `NetPackageDamageEntity` | NetPackage | 6 | 176 |
 | `NetPackageDebug` | NetPackage | 7 | 34 |
 | `NetPackageDecoResetWorldChunk` | NetPackage | 8 | 39 |
 | `NetPackageDecoResetWorldRect` | NetPackage | 8 | 58 |
@@ -122,7 +122,7 @@ Count: **194** types with `NetPackage` name prefix in live dedi dump (193 wire-o
 | `NetPackageMeasure` | Object | 4 | 40 |
 | `NetPackageMetrics` | Object | 16 | 501 |
 | `NetPackageMinEventFire` | NetPackage | 8 | 45 |
-| `NetPackageModifyCVar` | NetPackage | 6 | 25 |
+| `NetPackageModifyCVar` | NetPackage | 6 | 26 |
 | `NetPackageNavObject` | NetPackage | 9 | 77 |
 | `NetPackageNetMetrics` | NetPackage | 7 | 28 |
 | `NetPackageNPCQuestList` | NetPackage | 12 | 180 |
@@ -180,7 +180,7 @@ Count: **194** types with `NetPackage` name prefix in live dedi dump (193 wire-o
 | `NetPackageSleeperWakeup` | NetPackage | 7 | 20 |
 | `NetPackageSoundAtPosition` | NetPackage | 6 | 36 |
 | `NetPackageTeleportPlayer` | NetPackage | 6 | 56 |
-| `NetPackageTileEntity` | NetPackage | 8 | 90 |
+| `NetPackageTileEntity` | NetPackage | 8 | 103 |
 | `NetPackageTraderData` | NetPackage | 9 | 50 |
 | `NetPackageTurretSpawn` | NetPackage | 6 | 207 |
 | `NetPackageTurretSync` | NetPackage | 7 | 27 |

@@ -27,8 +27,12 @@ class TypeBase {
     var r = new DefaultAssemblyResolver();
     r.AddSearchDirectory(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(a[0])));
     var asm = AssemblyDefinition.ReadAssembly(a[0], new ReaderParameters { AssemblyResolver = r });
-    foreach (var t in asm.MainModule.GetTypes())
-      Console.WriteLine(t.Name + "\t" + (t.BaseType == null ? "" : t.BaseType.Name));
+    foreach (var t in asm.MainModule.GetTypes()) {
+      var bodies = t.Methods.Where(m => m.HasBody).ToList();
+      int maxIl = bodies.Count == 0 ? 0 : bodies.Max(m => m.Body.Instructions.Count);
+      Console.WriteLine(t.Name + "\t" + (t.BaseType == null ? "" : t.BaseType.Name)
+        + "\t" + bodies.Count + "\t" + maxIl);
+    }
   }
 }
 """
@@ -59,8 +63,11 @@ def main() -> int:
     ).stdout
     dll = {}
     for line in out.splitlines():
-        name, _, base = line.partition("\t")
-        dll[norm(name)] = base
+        parts = line.split("\t")
+        if len(parts) != 4:
+            continue
+        name, base, nb, mx = parts[0], parts[1], int(parts[2]), int(parts[3])
+        dll[norm(name)] = (base, nb, mx)
 
     bad = []
     total = 0
@@ -78,16 +85,23 @@ def main() -> int:
         if norm(typ) not in dll:
             bad.append(f"dedicated-leaves.md: type `{typ}` does not exist in the DLL")
 
-    # netpackages.md: type existence + direct base (uniform Type|Base table)
+    # netpackages.md: type existence + direct base + method count + max method
+    # IL (uniform Type|Base|Methods|Max method IL table)
     text = open(os.path.join(INV, "netpackages.md"), encoding="utf-8").read()
-    for m in re.finditer(r"^\| `([^`]+)` \| ([^|]+) \|", text, re.M):
-        typ, want_base = m.group(1), m.group(2).strip().strip("`")
+    for m in re.finditer(r"^\| `([^`]+)` \| ([^|]+) \| (\d+) \| (\d+) \|", text, re.M):
+        typ, want_base, want_n, want_max = m.group(1), m.group(2).strip().strip("`"), int(m.group(3)), int(m.group(4))
         total += 1
-        if norm(typ) not in dll:
+        info = dll.get(norm(typ))
+        if info is None:
             bad.append(f"netpackages.md: type `{typ}` does not exist in the DLL")
             continue
-        if want_base and dll[norm(typ)] != want_base:
-            bad.append(f"netpackages.md: `{typ}` base is {dll[norm(typ)]} in DLL, doc says {want_base}")
+        base, nb, mx = info
+        if want_base and base != want_base:
+            bad.append(f"netpackages.md: `{typ}` base is {base} in DLL, doc says {want_base}")
+        if nb != want_n:
+            bad.append(f"netpackages.md: `{typ}` has {nb} method bodies in DLL, doc says {want_n}")
+        if mx != want_max:
+            bad.append(f"netpackages.md: `{typ}` max method IL is {mx} in DLL, doc says {want_max}")
 
     if bad:
         for b in bad[:30]:
