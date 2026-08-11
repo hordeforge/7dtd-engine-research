@@ -10,6 +10,13 @@ optimization levers live in the companion `7dtd-optimizer/docs/`, not here (see
 
 Start at [`docs/INDEX.md`](docs/INDEX.md).
 
+Gates: `make verify` runs the doc-link, pin, readiness, facts and XML-data
+checks in one command; `make test` adds the DLL-dependent suite (reach,
+inventories, surface); `make test-docs` is the CI gate. Machine-checked stock
+facts (constants + LiteNetLib wire + XML data) live in
+[`tools/data/stock_facts.json`](tools/data/stock_facts.json) and
+[`tools/data/xml_pins.json`](tools/data/xml_pins.json); `make facts` shows them.
+
 ## Highlights
 
 - **The dedicated game loop** ([`docs/loop.md`](docs/loop.md)):
