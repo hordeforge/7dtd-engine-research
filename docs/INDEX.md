@@ -377,7 +377,7 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
 
 ## Changelog
 
-- **2026-08-11:** Tools section now names both gates (`make test` full suite, `make test-docs` CI variant); research CI added (`.github/workflows/ci.yml`).
+- **2026-08-11:** Tools section now names both gates (`make test` full suite, `make test-docs` CI variant); research CI added (`.github/workflows/ci.yml`); reading-path table links the zdtd provenance ledger (`zdtd/docs/PROVENANCE.md`).
 - **2026-08-10:** LiteNetLib join-churn race closed as a managed defect
   ([network.md](network.md) §4.0: `UnsyncedEvents=true` + receive-thread
   `Clients.List` enumeration; ramp workaround validated), `NetPackageMinEventFire`
