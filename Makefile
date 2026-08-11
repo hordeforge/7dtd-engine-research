@@ -3,12 +3,13 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check post-update census drift test readiness help cross-links sibling-cites
+.PHONY: tools stock-sync stock-check post-update census drift test readiness help cross-links sibling-cites save-roundtrip
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
 	@echo "make cross-links  - resolve every cross-repo .md link in the sibling workspace"
 	@echo "make sibling-cites - verify every sibling repo's research citations resolve against docs/"
+	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
 	@echo "make stock-check  - pin check only (committed JSON)"
 	@echo "make facts        - view the machine-checked stock pins (census/save/behaviour)"
@@ -100,3 +101,8 @@ cross-links:
 
 sibling-cites:
 	python3 "$(TOOLS)/zdtd_cite_check.py"
+
+# Not in `make test`: needs a stock-written probe save (created by the live
+# sessions, e.g. ~/.cache/7dtd-loadgen-*/Saves/*/*/); fails gracefully if none.
+save-roundtrip:
+	python3 "$(TOOLS)/save_roundtrip_check.py"

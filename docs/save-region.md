@@ -586,21 +586,35 @@ Magic: `FileHeaderMagicBytes` = ASCII **`7rg`** (`.cctor`).
 3. Read **1** version byte (`Stream.ReadByte` → u8).
 4. **`version < 1` → `RegionFileV1`**, else **`RegionFileV2`** (same stream).
 
-`RegionFileV1.SaveHeaderData` (IL=46) / empty-file ctor path:
+`RegionFileV1.SaveHeaderData` (IL=46) / empty-file ctor path (V1 layout):
 
 ```text
 offset 0..2 : magic "7rg"
 offset 3    : version:u8 = 0 for V1 writes (WriteByte(0))
 offset 4    : regionLocationHeader  4096 bytes  (1024 chunks × 4-byte slots)
 offset 4100 : regionTimestampHeader 4096 bytes  (1024 × u32 via BitConverter base)
-offset 8196 : first payload sector (sector index 0 would be inside header;
-              WriteData validates sector offset >= 3 on V2)
+offset 8196 : first payload sector
 ```
 
-`3 + 1 + 4096 + 4096 = 8196` matches the V1 ctor header buffer size. V2 ctor
-allocates **12288** bytes for its working header buffer (extra room beyond the
-8196 on-disk prefix used at open); location/timestamp still use 4096-byte tables
-in the Get/SetLocationInfo packing (§3.5).
+`3 + 1 + 4096 + 4096 = 8196` matches the V1 ctor header buffer size.
+
+**V2 on-disk layout differs (corrected 2026-08-12, IL + live):** the
+`RegionFileV2` ctor (IL=89) writes magic+version at 0, then reads its tables
+from **offset 4096** (`Seek(4096)` + Read 4096, then Read 4096) — the sector-0
+space after the 4-byte header is left as padding, not tables:
+
+```text
+offset 0..3  : magic "7rg" + version:u8 (>= 1; new files write 1)
+offset 4096  : regionLocationHeader  4096 bytes  (sector 1)
+offset 8192  : regionTimestampHeader 4096 bytes  (sector 2)
+offset 12288 : first payload sector (index 3; WriteData/ReadData validate
+               sector offset >= 3, logged "Sector offset < 3" / "ChunkRead:")
+```
+
+V2 ctor allocates **12288** bytes for its working header buffer (the 12288
+on-disk prefix above); location/timestamp use the same 4-byte-slot packing as
+V1 (§3.5). Live files (stock V3.1.0 saves) show exactly this: sector 0 holds
+only the 4 header bytes, sectors 1-2 the tables.
 
 | | **RegionFileV1** | **RegionFileV2** |
 |---|---|---|
@@ -608,7 +622,7 @@ in the Get/SetLocationInfo packing (§3.5).
 | file version byte | **0** | **>= 1** (new files use 1) |
 | free space | reuse existing location when fits; else grow | `findFreeSectorOfSize` + `usedSectors` map |
 | WriteData IL | **180** | **244** |
-| payload write | length Int32 + compression byte + data + pad byte | length Int32 + data; validates sector offset **>= 3** and write-end vs file size |
+| payload write | length Int32 + compression byte + data + pad byte | **length Int32 + 12-byte gap + data** (WriteData IL=244 does `Seek(+12)` after the length; ReadData IL=239 mirrors it) |
 | SaveHeaderData IL | 46 | 48 |
 
 **V1 WriteData (IL=180):** if existing allocation has enough sectors, overwrite
@@ -619,8 +633,41 @@ payload, trailing byte, optional `SaveHeaderData`.
 **V2 WriteData (IL=244):** always consult free-sector allocator
 (`findFreeSectorOfSize`); maintains `usedSectors` for layout; logs
 `Sector offset < 3` and `Wrong write end` if layout invariants break; writes
-length + payload (compression handled in access layer / header differently from
-V1's inline compression byte path).
+length + 12-byte gap + payload (compression handled in access layer / header
+differently from V1's inline compression byte path).
+
+**Chunk payload preamble (closed 2026-08-12, IL + live round-trip):** the
+`data` behind the V2 `length` is produced by the access layer, not the chunk
+serializer alone:
+
+1. `RegionFileChunkSnapshot.Update` (IL=111) writes the snapshot stream:
+   `"ttc\0"` (4 bytes) + `Chunk.CurrentSaveVersion` as **u32** (**47**), then
+   `Chunk.save` (doc §2 field order).
+2. `RegionFileChunkWriter.WriteStreamCompressed` (IL=48) reads the first
+   **Int64** of that stream (the `"ttc\0"` + version packed little-endian) and
+   writes it raw, then copies the remainder through a
+   **`Noemax.GZip.DeflateOutputStream`** (level 3, no header/footer = raw
+   deflate).
+3. `RegionFileAccessMultipleChunks.Write` (IL=20) forwards the result to
+   `RegionFile::WriteData` (framing above).
+
+On-disk payload at `sectorOffset * 4096`:
+
+```text
++0   Int32 dataLength            (== 8 + len(deflate body))
++4   12 bytes gap                (WriteData/ReadData Seek(+12); zeros in fresh files)
++16  Int64 "ttc\0" + version 47  (region snapshot magic + Chunk.CurrentSaveVersion)
++24  raw deflate of Chunk.save body (Noemax level 3, no header)
+pad  zeros to the sector run end
+```
+
+**Live-verified 2026-08-12** (`tools/save_roundtrip_check.py`, three real stock
+saves from the live-probe sessions): 620+ allocated slots across `r.*.7rg`
+files all round-trip — `"7rg"` + version 1, sector offset >= 3 everywhere,
+`ttc\0` + 47 preamble, raw deflate decompresses, and the stored `m_X/m_Y/m_Z`
+map back to the exact slot via the `GetOffsetFromXz` formula (including
+negative coords). `main.ttw` header (magic/version/string/VI/pads/agm/
+waterLevel 62.88/chunk sizes 16) re-confirmed on every save.
 
 Raw vs sector: Raw uses byte-offset free list from **779** (section 3.3);
 sector formats use **4 KiB** sector indices and larger per-region headers.
@@ -691,6 +738,16 @@ counts**, not byte lengths.
 
 `ToShort(byteLo, byteHi)` = `(byteHi << 8) + byteLo`. `FromShort(value, &lo, &hi)`
 stores `lo = value & 0xFF`, `hi = value >> 8` into the two header bytes (LE).
+
+**Negative-coordinate wrap (live-observed 2026-08-12):** `GetOffsetFromXz` uses
+C# remainder + a `+31` adjust for negative coords, while `GetRegionCoords`
+uses `floor(cX/32)` — the two disagree at exact multiples of 32 on the negative
+side, so chunk **-32** lives at slot **31** of region **-1** (not region 0
+slot 0). Consequence: slot `x_mod` of a negative region holds chunk
+`regionX*32 + (x_mod + 1)` for `x_mod in 0..30`, and chunk `regionX*32` sits at
+slot 31. A reader that assumes a plain `region*32 + slot` map will mis-seek
+negative regions; the round-trip checker validates with the forward formula
+instead.
 Empty/unallocated: sectorOffset 0 and/or sectorLength 0 (callers treat 0 offset as free).
 
 ```text
@@ -821,6 +878,7 @@ used by e.g. the backpack-expiry path).
 | [loop.md](loop.md) | When SaveWorldState is invoked |
 | [light-mesh-water.md](light-mesh-water.md) | Water sim also schedules via WorldBlockTicker |
 | [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) | RegionFile* / ticker leaf rows |
+| `tools/save_roundtrip_check.py` | Machine-verifies a real stock save against these codecs (`make save-roundtrip`) |
 
 ## Save-data file layer (`SaveDataManager`)
 
@@ -854,6 +912,7 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-08-12:** Save format round-trip live-verified (`tools/save_roundtrip_check.py`). V2 on-disk layout corrected: location table at **4096**, timestamp at **8192** (V2 ctor IL=89 Seek(4096)+Read), payload sectors from 12288 — the earlier 4/4100 layout is V1-only. V2 payload framing pinned: Int32 length + **12-byte gap** (WriteData/ReadData Seek(+12)) + data; data = `"ttc\0"` + Chunk.CurrentSaveVersion u32 (47) as Int64 + raw Noemax deflate (level 3, no header) of the Chunk.save body (RegionFileChunkSnapshot.Update IL=111, WriteStreamCompressed IL=48). Negative-coordinate slot wrap documented (chunk -32 sits at slot 31 of region -1). 620+ real slots across three probe saves round-trip, m_X/m_Y/m_Z map back via GetOffsetFromXz; main.ttw header re-confirmed on each (waterLevel 62.88, chunkSize 16).
 - **2026-08-11:** WaterLevel pinned: WorldConstants.WaterLevel = Block.cWaterLevel = 62.88 (Block cctor ldc.r4 62.88).
 - **2026-08-11:** Channel/SmartArray IL re-verified: ctor IL=27, calcOffset IL=12, getData IL=39, GetSet IL=79, getSetData IL=49, checkSameValue IL=49, CheckSameValue IL=17, GetByte IL=31, Get IL=44, SmartArray get IL=46 / set IL=71 / clear IL=19 / copyFrom IL=7 / GetUsedMem IL=5 / write IL=5 / read IL=7, TileEntity write IL=19 / read IL=37 / UpdateTick IL=1 / CopyFrom IL=3 / OnLoad/OnReadComplete/OnUnload IL=1, InstantiateFromRead IL=88, TryReadLegacyType IL=81 (exact).
 - **2026-08-11:** Region-file IL re-verified: ProtectedPositionCache ctor IL=30, GetChunkReadAccess IL=6, GetChunkWriteAccess IL=5/6, ScopedChunkReadAccess.Dispose IL=8, MergeOrCreateGroup IL=100, ThreadInfo.WaitForEnd IL=47, RegionItemData.Update IL=10/15, RegionFileChunkSnapshot.Update IL=111, WriteStreamCompressed IL=48, readIntoLoadStream IL=123, RegionFileAccessMultipleChunks.Write IL=20, RegionFileRaw.WriteData IL=229 / ReadData IL=96 / FindBestFreeSpace IL=77, ChunkMemoryStreamReader.Close IL=7, ChunkMemoryStreamWriter.Init IL=22 / Close IL=17 (exact).
