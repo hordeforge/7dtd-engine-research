@@ -546,7 +546,7 @@ load path a dedicated server runs at startup:
   `<processFiles>b__0` task, IL=13) to a `ThreadManager` thread; the splat
   stage then loads `splat3.png` / `.tga` (RGBA32 or ARGB32 required, else
   the log error and early false), builds a fresh `splat4` texture, and per
-  pixel (frame-budgeted by the `Constants.cMaxLoadTime*` pair) paints the
+  pixel (frame-budgeted by the `Constants.cMaxLoadTime*` pair: `cMaxLoadTimePixelsPerTest` = **4096**, `cMaxLoadTimePerFrameMillis` = **50 ms**) paints the
   `topTexMap` codes into the raw splat arrays (2 -> `splat4.g`, 8 ->
   `splat3.b`, 10 -> `splat3.r`, 11 -> `splat3.g`, 185 -> `splat3.a`, 200 ->
   `splat4.r`), builds the `WorldDecoratorPOIFromImage` (added to
@@ -1016,6 +1016,7 @@ the map or any cell is `>= v`.
 
 ## Changelog
 
+- **2026-08-11:** cMaxLoadTime pair pinned (4096 px / 50 ms, Constants cctor IL).
 - **2026-08-11:** Raw-generator IL re-verified: GetWorldFilesToTransmitToClient IL=85, generateHalfResTexture IL=27, ARGB32ToColor IL=10, GetPOIBlockIdOverride IL=51, GetPOIHeightOverride IL=66, GetChunkProtectionLevel IL=5, GetWorldSize IL=12, ReloadAllChunks IL=17, Cleanup IL=54, loadSplatMaps IL=883, RebuildTerrain IL=210 (GenerateFlat) (exact).
 - **2026-08-11:** Radiation/biome-image IL re-verified: LoadRadiationMap IL=8, LoadRadiationMapToFile IL=24, RadiationTileArrayFromTexture IL=50, RadiationTileArrayFileFromTexture IL=37, FillRadiationResult IL=83, FillRadiationFileBackedArray IL=104, ProcessColor IL=22, InitData IL=6 + <InitData>d__23 MoveNext IL=315, BiomeImageLoader.Load IL=7 + <Load>d__11 MoveNext IL=229, BiomeIdToColor32 IL=23 (exact).
 - **2026-08-11:** Deco IL re-verified: DecoManager.Write IL=56 / Read IL=29, WriteTask IL=38, DecoObject.Write IL=43, decorateChunkRandom IL=243, GetDecoOccupiedAt IL=87, GetDecoOccupiedFromMap IL=26, AddDecorationAt IL=142, RemoveDecorationAt IL=52, ResetDecosForWorldChunk IL=73, SetBlock IL=19, GetDecorationsOnChunk IL=143, UpdateTick IL=330, DecoChunk.AddDecoObject IL=67, SendDecosToClient IL=32, NetPackageDecoResetWorldChunk.ProcessPackage IL=39 / WorldRect IL=58 (exact).
