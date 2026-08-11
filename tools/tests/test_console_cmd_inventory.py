@@ -80,7 +80,14 @@ class NameSet {
         var l = dm.Body.Instructions.FirstOrDefault(i => i.OpCode.Code == Code.Ldstr);
         if (l != null) desc = (string)l.Operand;
       }
-      Console.WriteLine(t.Name + "\t" + string.Join("|", uniq) + "\t" + desc.Replace("\n", "\\n"));
+      var pm = t.Methods.FirstOrDefault(x => x.HasBody && x.Name == "get_DefaultPermissionLevel");
+      string perm = "INHERIT";
+      if (pm != null) {
+        var ldc = pm.Body.Instructions.FirstOrDefault(i =>
+          i.OpCode.Code == Code.Ldc_I4 || i.OpCode.Code == Code.Ldc_I4_S);
+        if (ldc != null) perm = ldc.Operand.ToString();
+      }
+      Console.WriteLine(t.Name + "\t" + string.Join("|", uniq) + "\t" + desc.Replace("\n", "\\n") + "\t" + perm);
     }
   }
 }
@@ -136,13 +143,15 @@ def main() -> int:
     ).stdout
     name_sets = {}
     descriptions = {}
+    permissions = {}
     for line in probe.splitlines():
         parts = line.split("\t")
-        if len(parts) != 3:
+        if len(parts) != 4:
             continue
-        typ, names, desc = parts[0], parts[1], parts[2].replace("\\n", "\n")
+        typ, names, desc, perm = parts[0], parts[1], parts[2].replace("\\n", "\n"), parts[3]
         name_sets[typ] = set(names.split("|")) if names else set()
         descriptions[typ] = desc
+        permissions[typ] = perm
 
     primaries, aliases = parse_inventory()
     bad = []
@@ -173,14 +182,20 @@ def main() -> int:
     # "(no description)")
     text_inv = open(INV, encoding="utf-8").read()
     norm_ws = lambda s: re.sub(r"\s+", " ", s).strip()
-    for m in re.finditer(r"^\| `([^`]+)` \| `([^`]+)`(?: \(alias\))? \| [^|]* \| (.*?) \|$", text_inv, re.M):
-        name, typ, does = m.group(1), m.group(2), m.group(3).strip()
+    for m in re.finditer(r"^\| `([^`]+)` \| `([^`]+)`(?: \(alias\))? \| ([^|]*) \| (.*?) \|$", text_inv, re.M):
+        name, typ, perm_col, does = m.group(1), m.group(2), m.group(3).strip(), m.group(4).strip()
         if typ not in descriptions:
             continue
         want = "" if does in ("(no description)", "") else does
         have = descriptions[typ].replace("\\n", "\n")
         if norm_ws(have) != norm_ws(want):
             bad.append(f"`{name}` description: doc `{want[:50]}` != getDescription `{have[:50]}`")
+        # Perm column: blank = inherits the base default (no override);
+        # a number = the class's get_DefaultPermissionLevel ldc
+        want_perm = perm_col
+        have_perm = "" if permissions.get(typ) == "INHERIT" else permissions.get(typ, "")
+        if have_perm != want_perm:
+            bad.append(f"`{name}` perm: doc `{want_perm}` != DLL `{have_perm or '(inherited)'}`")
     # the inventory must self-state the primary count
     text = open(INV, encoding="utf-8").read()
     if not re.search(rf"\b{EXPECTED_PRIMARY}\b", text):
