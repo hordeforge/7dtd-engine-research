@@ -227,9 +227,12 @@ false; `Chunk.CanPlayersSpawnAtPos(local, allowAir)`.
 (`y+1`): fail if solid collide-movement space, or water at cell. Floor: if
 `allowAir` and below is air (blockID 0) OK; else below must `IsCollideMovement`.
 
-**`World.FindRandomSpawnPointNearRandomPlayer(maxLight, ref x,y,z)` (IL=64):** no
-players → zeros and false; else pick a random player (decrementing counter walk)
+**`World.FindRandomSpawnPointNearRandomPlayer(maxLight, ref x,y,z)` (IL=64):** noplayers → zeros and false; else pick a random player (decrementing counter walk)
 and `FindRandomSpawnPointNearPlayer(..., maxDist=**32**)`.
+
+**Trader spawn distances (`GameManager` consts, IL):** player spawn points are
+kept `cMinSpawnDistanceFromTrader` = **250** to `cMaxSpawnDistanceFromTrader` =
+**750** m from traders.
 
 **`World.GetClosestLocalPlayer(pos)` (IL=45):** primary local player, or min
 sqr-dist among `m_LocalPlayerEntities` when more than one.

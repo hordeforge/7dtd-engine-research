@@ -137,6 +137,10 @@ client) keys everything on it and holds a `Dictionary<string, SignLibrary>`:
 | `[I]` | Internal: generated error placeholder sign (`SignData.GetErrorSignData`, a red polygon layer) | `LoadDefaultLibrary` epilogue |
 | `<prefab name>` | Per-POI sign library, `<prefab>_signs.xml` next to the prefab | `Prefab.loadWorldSignData` (server only, `ConnectionManager.IsServer` gated); written back by `Prefab.Save` via `SignLibrary.WriteXml` |
 
+**`SignDataManager` constants (IL):** `cSignSyncBatchBytes` = **1048576** (1 MB
+per sync batch), `cMaxComplexity` = **600**, `cMaxCompStackIndex`/`cMaxUVStackIndex`
+= **7**, `baseDescriptorComplexity` = **0.5**.
+
 `EnumeratePublicSignLibraries` yields every library except `[I]` and `[U]`;
 that is exactly the set a server replicates. `MoveSignToLibrary` duplicates a
 sign into another library under a fresh guid (used by

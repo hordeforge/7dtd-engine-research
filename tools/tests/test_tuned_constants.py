@@ -605,6 +605,17 @@ CONSTS = {
         "cRoadHighwayMaxStepH": 11,
         "cRoadCountryMaxStepH": 12,
     }),
+    "GameManager": ("spawning.md", {
+        "cMinSpawnDistanceFromTrader": 250,
+        "cMaxSpawnDistanceFromTrader": 750,
+    }),
+    "SignDataManager": ("signs.md", {
+        "cSignSyncBatchBytes": 1048576,
+        "cMaxComplexity": 600,
+        "cMaxCompStackIndex": 7,
+        "cMaxUVStackIndex": 7,
+        "baseDescriptorComplexity": 0.5,
+    }),
     "Voxel": ("raycast-pathing.md", {
         "HM_Transparent": 1,
         "HM_LiquidOnly": 2,
