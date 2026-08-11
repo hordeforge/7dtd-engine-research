@@ -1,10 +1,27 @@
 #!/usr/bin/env python3
 """Guard the leaf-count inventories against the DLL's concrete subclass counts.
 
-Each per-leaf inventory (item-actions 38, sequence-requirements 37, ...)
-counts concrete subclasses of a base class, minus the *Data payload classes,
-plus any listed abstract base leaves. A game patch that adds/removes a leaf
+Each per-leaf inventory (item-actions 38, sequence-requirements 38, ...)
+counts the classes in a base's subclass closure (or a namespace for the
+game-event actions), minus intermediate bases / sibling-namespace types per the
+inventory's own stated convention. A game patch that adds/removes a leaf
 without updating the inventory fails here.
+
+Conventions encoded (verified against the DLL, V3.1.0):
+- sequence-requirements: closure of GameEvent.SequenceRequirements.BaseRequirement
+  = 38 (37 concrete leaves + the BaseOperationRequirement intermediate). The
+  same-named Quests.Requirements.* and Challenges.BaseRequirementObjectiveGroup
+  types are different bases and must NOT be counted (name-prefix matching does
+  count them; full-name closure does not).
+- item-actions: closure of ItemAction = 38 (37 concrete + ItemActionAttack, the
+  only abstract member).
+- quest-objectives / minevent-actions / block-behaviors: closures of
+  BaseObjective / MinEventActionBase / Block = 38 / 71 / 65.
+- sequence-actions: namespace GameEvent.SequenceActions has 132 classes (all
+  concrete); BaseAction's closure is 136 (137 with the root), of which exactly
+  5 live in sibling namespaces (SequenceDecisions/SequenceLoops); leaves = 132
+  classes - 12 in-namespace base classes + 3 leaf-parents that are themselves
+  listed = 123.
 
 Usage: python3 tools/tests/test_subclass_counts.py <asm>
 """
@@ -12,35 +29,84 @@ import os
 import re
 import subprocess
 import sys
-import tempfile
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
 INV = os.path.join(REPO, "docs", "inventories")
 
-# base -> (inventory, expected total, exclude-DATA, extra base leaves)
+# (inventory, mode, target, expected, extra)
+#   mode "closed": target is a base full name; expected is the closure total;
+#   extra may be ("abstract", N) to lock the abstract-member count.
+#   mode "seq": target is a namespace; expected is the leaf count derived as
+#   namespace classes - in-namespace base classes + known leaf-parents.
 CHECKS = [
-    ("BaseRequirement", "sequence-requirements.md", 37, False, []),
-    ("ItemAction", "item-actions.md", 38, True, ["ItemActionAttack"]),
+    ("sequence-requirements.md", "closed", "GameEvent.SequenceRequirements.BaseRequirement", 38, None),
+    ("item-actions.md", "closed", "ItemAction", 38, ("abstract", 1)),
+    ("quest-objectives.md", "closed", "BaseObjective", 38, None),
+    ("minevent-actions.md", "closed", "MinEventActionBase", 71, None),
+    ("block-behaviors.md", "closed", "Block", 65, None),
+    ("sequence-actions.md", "seq", "GameEvent.SequenceActions", 123, None),
 ]
 
+# Sibling-namespace members of the BaseAction closure (documented caveat).
+SEQ_OUT_CLOSURE = [
+    "GameEvent.SequenceDecisions.BaseDecision",
+    "GameEvent.SequenceDecisions.DecisionIf",
+    "GameEvent.SequenceLoops.BaseLoop",
+    "GameEvent.SequenceLoops.LoopFor",
+    "GameEvent.SequenceLoops.LoopWhile",
+]
+# SequenceActions leaves that parent one subclass each yet are still leaves.
+SEQ_LEAF_PARENTS = ["ActionBlockReplace", "ActionRemoveEntities", "ActionSpawnEntity"]
 
 SRC = r"""
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using Mono.Cecil;
 class SubCount {
+  static string Full(TypeReference t) {
+    return t == null ? "" : (t.Namespace.Length > 0 ? t.Namespace + "." + t.Name : t.Name);
+  }
+  static bool ClosedUnder(TypeDefinition t, string baseFullName) {
+    var c = t.BaseType;
+    while (c != null) {
+      if (Full(c) == baseFullName) return true;
+      var rb = c.Resolve();
+      c = rb == null ? null : rb.BaseType;
+    }
+    return false;
+  }
   static void Main(string[] a) {
     var r = new DefaultAssemblyResolver();
     r.AddSearchDirectory(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(a[0])));
     var asm = AssemblyDefinition.ReadAssembly(a[0], new ReaderParameters { AssemblyResolver = r });
-    foreach (var b in a[1].Split(',')) {
-      bool nodata = b.EndsWith("_nodata");
-      string prefix = nodata ? b.Substring(0, b.Length - 7) : b;
-      int n = asm.MainModule.GetTypes().Count(t =>
-        t.IsClass && !t.IsAbstract && t.BaseType != null && t.BaseType.Name.StartsWith(prefix) &&
-        (!nodata || !t.Name.Contains("Data")));
-      Console.WriteLine(b + "=" + n);
+    var types = asm.MainModule.GetTypes().ToList();
+    foreach (var arg in a[1].Split(',')) {
+      if (arg.StartsWith("closed:")) {
+        string baseName = arg.Substring(7);
+        var cl = types.Where(t => t.IsClass && ClosedUnder(t, baseName)).ToList();
+        Console.WriteLine("closed {0} total={1} concrete={2} abstract={3}",
+          baseName, cl.Count, cl.Count(t => !t.IsAbstract), cl.Count(t => t.IsAbstract));
+      } else if (arg.StartsWith("seq:")) {
+        string ns = arg.Substring(4);
+        var inNs = types.Where(t => t.IsClass && t.Namespace == ns).ToList();
+        var used = new HashSet<string>();
+        foreach (var t in inNs) {
+          var b = t.BaseType;
+          while (b != null) {
+            if (b.Namespace == ns) used.Add(b.Name);
+            var rb = b.Resolve();
+            b = rb == null ? null : rb.BaseType;
+          }
+        }
+        string baseName = ns + ".BaseAction";
+        var cl = types.Where(t => t.IsClass && ClosedUnder(t, baseName)).ToList();
+        var outClosure = cl.Where(t => t.Namespace != ns).Select(t => Full(t)).OrderBy(x => x).ToList();
+        Console.WriteLine("seq {0} total={1} concrete={2} abstract={3} usedbase={4} outclosure={5} closuretotal={6}",
+          ns, inNs.Count, inNs.Count(t => !t.IsAbstract), inNs.Count(t => t.IsAbstract),
+          string.Join("|", used.OrderBy(x => x)), string.Join("|", outClosure), cl.Count);
+      }
     }
   }
 }
@@ -48,53 +114,60 @@ class SubCount {
 EXE = "/tmp/subcount_check.exe"
 
 
-def count_rows(inventory: str) -> int:
-    n = 0
-    for l in open(os.path.join(INV, inventory), encoding="utf-8").read().splitlines():
-        s = l.strip()
-        if s.startswith("| `") or s.startswith("|`"):
-            n += 1
-    return n
-
-
 def main() -> int:
     if len(sys.argv) < 2:
         print("usage: test_subclass_counts.py <asm>", file=sys.stderr)
         return 2
     asm = sys.argv[1]
-    with open("/tmp/subcount_check.cs", "w") as f:
+    src = "/tmp/subcount_check.cs"
+    with open(src, "w") as f:
         f.write(SRC)
-    subprocess.run(["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"), "/tmp/subcount_check.cs", "-out:" + EXE], check=True)
-    exe = EXE
+    cecil = os.path.join(TOOLS, "bin", "Mono.Cecil.dll")
+    subprocess.run(["mcs", "-r:%s" % cecil, src, "-out:" + EXE], check=True)
     env = dict(os.environ)
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
+    args = [",".join(
+        ("closed:" if mode == "closed" else "seq:") + target
+        for _, mode, target, _, _ in CHECKS)]
     out = subprocess.run(
-        ["mono", exe, asm, ",".join(c[0] for c in CHECKS)],
-        capture_output=True, text=True, env=env, check=True,
+        ["mono", EXE, asm] + args, capture_output=True, text=True, env=env, check=True,
     ).stdout
-    counts = {}
+    stats = {}
     for line in out.splitlines():
-        k, _, v = line.partition("=")
-        counts[k] = int(v)
+        parts = line.split()
+        if parts[0] == "closed":
+            d = dict(kv.split("=") for kv in parts[2:])
+            d["total"] = int(d["total"]); d["concrete"] = int(d["concrete"]); d["abstract"] = int(d["abstract"])
+            stats[parts[1]] = d
+        elif parts[0] == "seq":
+            d = dict(kv.split("=") for kv in parts[2:])
+            d["total"] = int(d["total"]); d["concrete"] = int(d["concrete"]); d["abstract"] = int(d["abstract"])
+            d["usedbase"] = d["usedbase"].split("|") if d["usedbase"] else []
+            d["outclosure"] = d["outclosure"].split("|") if d["outclosure"] else []
+            d["closuretotal"] = int(d["closuretotal"])
+            stats[parts[1]] = d
     bad = []
-    for base, inventory, expected, drop_data, extra in CHECKS:
-        concrete = counts[base]
-        # drop *Data payload classes: re-derive by excluding names containing
-        # "Data" (ItemActionData*/InventoryData* are payloads, not leaves)
-        if drop_data:
-            env2 = dict(os.environ)
-            env2["MONO_PATH"] = os.path.join(TOOLS, "bin")
-            out2 = subprocess.run(
-                ["mono", exe, asm, base + "_nodata"],
-                capture_output=True, text=True, env=env2, check=True,
-            ).stdout
-            concrete = int(out2.split("=")[-1])
-        # concrete + listed base leaves must cover the self-stated count
-        if concrete + len(extra) != expected:
-            bad.append(
-                f"{inventory}: concrete {base}={concrete} + bases {len(extra)} != stated {expected}"
-            )
-        # and the inventory must self-state the expected number
+    for inventory, mode, target, expected, extra in CHECKS:
+        d = stats[target]
+        if mode == "closed":
+            if d["total"] != expected:
+                bad.append(f"{inventory}: closure of {target} = {d['total']} (concrete {d['concrete']}, abstract {d['abstract']}) != stated {expected}")
+            if extra and d[extra[0]] != extra[1]:
+                bad.append(f"{inventory}: {target} {extra[0]} count = {d[extra[0]]} != {extra[1]}")
+        else:
+            leaf_parents = [n for n in SEQ_LEAF_PARENTS if n in d["usedbase"]]
+            leaves = d["total"] - len(d["usedbase"]) + len(leaf_parents)
+            if leaves != expected:
+                bad.append(f"{inventory}: derived leaves = {leaves} (ns {d['total']} - {len(d['usedbase'])} bases + {len(leaf_parents)} leaf-parents) != stated {expected}")
+            if d["abstract"] != 0:
+                bad.append(f"{inventory}: namespace has {d['abstract']} abstract classes, expected 0")
+            if d["closuretotal"] != d["total"] - 1 + len(d["outclosure"]):
+                bad.append(f"{inventory}: BaseAction closure = {d['closuretotal']}, expected {d['total'] - 1 + len(d['outclosure'])} (ns {d['total']} - root + {len(d['outclosure'])} out-of-ns)")
+            if d["outclosure"] != SEQ_OUT_CLOSURE:
+                bad.append(f"{inventory}: out-of-namespace closure {d['outclosure']} != documented {SEQ_OUT_CLOSURE}")
+            if len(leaf_parents) != len(SEQ_LEAF_PARENTS):
+                bad.append(f"{inventory}: leaf-parents used as bases = {leaf_parents}, expected all of {SEQ_LEAF_PARENTS}")
+        # the inventory must self-state the expected number
         text = open(os.path.join(INV, inventory), encoding="utf-8").read()
         if not re.search(rf"\b{expected}\b", text):
             bad.append(f"{inventory}: does not self-state {expected}")
