@@ -35,3 +35,14 @@
 
 Server killed via `dedicated.pid`; no stray processes/ports. Probe userdata in
 `~/.cache/7dtd-loadgen-horde/`.
+
+## Addendum 2026-08-12: GS1 horde re-confirmed
+
+HordeGSProbe: settime into the wandering-horde window (day 5 23:00) with a
+reconnected loadgen bot fired the horde again - "Party of 1, GS 1 (1),
+scaling 1, enemy max 5, bonus every 12" with group
+`wanderingHordeStageGS1` (zombieArlene/Skateboarder/Darlene). The givexp ->
+reconnect GS boost is INCONSISTENT (worked in the BM-GS probe, not here): the
+boosted party line depends on the rejoin producing the same player identity -
+a loadgen-side nuance, not a stock behavior. Stock wandering-horde size is
+gamestage-group driven (GS1 = 5); a higher-GS observation still pending.
