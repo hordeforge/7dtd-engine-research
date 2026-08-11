@@ -17,8 +17,10 @@ docs/save-region.md:
               (64 x u32)   (doc 3.5; no live sample in the probe corpus yet)
 
 Usage: python3 tools/save_roundtrip_check.py [save_dir]
+  or: python3 tools/save_roundtrip_check.py --shipped <worlddir-or-main.ttw>
   With no argument, auto-discovers the most recent probe save under
   ~/.cache/7dtd-loadgen-*/Saves/*/*/ that contains main.ttw + Region/.
+  --shipped checks just a main.ttw (e.g. the TFP-shipped Navezgane world).
   Exit code 0 = all checks passed; 1 = any check failed.
 """
 
@@ -62,8 +64,10 @@ def check_main_ttw(path, checks):
     checks.append(f"  gameVersionString: {gvs!r}")
     vi = struct.unpack_from("<4i", buf, off)
     off += 16
-    checks.append(f"  VersionInformation (ReleaseType,Major,Minor,Build): {vi} == (1,3,10,14)"
-                  if vi == (1, 3, 10, 14) else f"  VersionInformation: {vi} != (1,3,10,14)")
+    known = {(1, 3, 10, 14): "V3.1.0 (b14)", (1, 4, 0, 8): "V4.0 (b8) shipped world data"}
+    vi_note = known.get(vi, "unknown build")
+    checks.append(f"  VersionInformation (ReleaseType,Major,Minor,Build): {vi} [{vi_note}]"
+                  if vi in known else f"  VersionInformation: {vi} not in {{(1,3,10,14),(1,4,0,8)}}")
     pad0 = struct.unpack_from("<I", buf, off)[0]
     off += 4
     agm = struct.unpack_from("<i", buf, off)[0]
@@ -447,13 +451,27 @@ def discover_save_dir():
 
 def main():
     argv = sys.argv[1:]
+    shipped = None
+    if argv and argv[0] == "--shipped":
+        shipped = argv[1] if len(argv) > 1 else None
+        argv = argv[2:]
     save_dir = argv[0] if argv else discover_save_dir()
+    checks = []
+    if shipped:
+        ttw = shipped if os.path.isfile(shipped) else os.path.join(shipped, "main.ttw")
+        print(f"Shipped world header check: {ttw}\n")
+        check_main_ttw(ttw, checks)
+        failed = any(("MISMATCH" in c or "VIOLATED" in c or " != " in c or "failed" in c
+                      or "MISSING" in c or "bounds" in c or "too short" in c or "!= expected" in c
+                      or "parse error" in c) for c in checks)
+        print("\n".join(checks))
+        print(f"\n{'FAIL' if failed else 'PASS'}: {len(checks)} checks")
+        return 1 if failed else 0
     if not save_dir:
         print("No save dir given and none found under ~/.cache/7dtd-loadgen-*/Saves/*/*/")
         return 1
     print(f"Round-trip checking save: {save_dir}\n")
 
-    checks = []
     ttw = os.path.join(save_dir, "main.ttw")
     if os.path.exists(ttw):
         check_main_ttw(ttw, checks)
