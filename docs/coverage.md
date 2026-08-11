@@ -74,6 +74,7 @@ Prior V3.0.1 baseline was types 4401, methods 43901, SaveLoad IL 884 (see [re-me
 | WorldState.SaveLoad(Stream) IL | 926 |
 | CurrentSaveVersion | 23 |
 | Machine-checked behaviour pins (WaterLevel 62.88, item-drop 300 s, load budget 50 ms, ...) | `make facts` (extracted by StockFacts.exe, asserted by `check_stock_facts`) |
+| Machine-checked wire + data pins (LiteNetLib protocol/MTU, XML hp ladder, enum sizes) | `make facts` (`litenet.*`, `xml_pins.json`, `enums.*` sections) |
 
 ---
 
