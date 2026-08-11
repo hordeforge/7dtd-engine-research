@@ -179,6 +179,18 @@ world block coordinate into chunk-local in place by masking: `x & 15`,
 `y & 255`, `z & 15`; the mask is exact because all three dimensions are
 powers of two (16/256/16), so no division is needed.
 
+**Packed chunk key (`WorldChunkCache::MakeChunkKey(x, z)`, IL=14, exact):**
+`((long)(z & 0xFFFFFF) << 24) | (long)(x & 0xFFFFFF)` - a 64-bit key holding a
+signed **24-bit chunk coordinate per axis** (range +-8,388,608 chunks,
+far beyond the +-2048 km world edge, so the mask never truncates live keys).
+Decode helpers: `extractX(key)` (IL=7) = `(int)(key << 8) >> 8` (sign-extends
+the low 24 bits), `extractZ(key)` (IL=7) = `(int)(key >> 16) >> 8`
+(sign-extends bits 24-47), `extractXZ(key)` (IL=10) = the `(x, z)` pair as a
+`Vector2i`. `ToLocalKey` rebases by subtracting the cluster origin chunk
+indices then repacking through the same `MakeChunkKey`, so a key is
+cluster-relative only after that rebase; raw keys are world-chunk keys. This
+is the key shape used everywhere chunk keys cross the wire or a save boundary.
+
 ---
 
 ## 3. Generation
