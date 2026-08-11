@@ -73,6 +73,7 @@ Prior V3.0.1 baseline was types 4401, methods 43901, SaveLoad IL 884 (see [re-me
 | gmUpdate IL | 631 |
 | WorldState.SaveLoad(Stream) IL | 926 |
 | CurrentSaveVersion | 23 |
+| Machine-checked behaviour pins (WaterLevel 62.88, item-drop 300 s, load budget 50 ms, ...) | `make facts` (extracted by StockFacts.exe, asserted by `check_stock_facts`) |
 
 ---
 
@@ -187,6 +188,7 @@ their correctness is the tool's, not prose. `inventories/dedicated-leaves.md` an
 
 ## Changelog
 
+- **2026-08-11:** Census table notes the machine-checked behaviour pins (`make facts`).
 - **2026-08-11:** Related docs links the zdtd provenance ledger.
 - **2026-08-11:** Census table re-verified against live `Census.exe` + `stock_facts.json` (4414 / 44107 / 193+manager / 20 / 631 / 926 / 23, all exact); audit-status table completed with the three post-pass docs (architecture-map, completion-bar, stability).
 - **2026-07-19:** Related docs table.
