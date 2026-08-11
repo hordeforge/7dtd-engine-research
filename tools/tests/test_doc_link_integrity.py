@@ -133,6 +133,18 @@ def main():
     if no_hub:
         raise AssertionError(f"docs missing **Hub:** backlink: {no_hub}")
 
+    # 4b. Every inventory carries the hub backlink too (the auto-generated ones
+    # emit it from WireBodies/Coverage; the hand-maintained ones carry it inline).
+    inv_dir = os.path.join(DOCS, "inventories")
+    no_hub_inv = sorted(
+        n
+        for n in os.listdir(inv_dir)
+        if n.endswith(".md")
+        and "**Hub:**" not in open(os.path.join(inv_dir, n), encoding="utf-8").read()
+    )
+    if no_hub_inv:
+        raise AssertionError(f"inventories missing **Hub:** backlink: {no_hub_inv}")
+
     print(f"OK: {len(doc_root)} docs reachable from INDEX.md, 0 dead internal links ({len(all_docs)} doc files, {n_sec} section refs)")
 
 
