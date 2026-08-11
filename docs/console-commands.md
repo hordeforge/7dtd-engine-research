@@ -436,6 +436,16 @@ input recorder):
   starts from a throwaway survival-mode copy. Only the Navezgane world is
   supported ("Only Navezgane is supported for now").
 
+**`ConsoleCmdFloatingOrigin` decoded from `Execute` IL=70** (stock description
+is `(no description)`; `get_IsExecuteOnClient` = true, so it also runs
+client-side): `floatingorigin on` sets `Origin.Instance.isAuto = true` ("Set
+floating origin to on"); `floatingorigin off` clears `isAuto` and, with a live
+world, `Origin.Reposition(Vector3.zero)` ("Set floating origin to off"); bare
+`floatingorigin` prints "Floating origin is on/off and is at position X" from
+`Origin.position`; without an Origin instance, "No FO instance!". On dedicated
+the Origin reposition itself is gated off (`IsDedicatedServer` early-ret,
+[residuals.md](residuals.md) 4), so `off` only flips the flag there.
+
 ---
 
 ## Related docs
