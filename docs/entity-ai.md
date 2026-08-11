@@ -1910,6 +1910,16 @@ Call themes in the bulk: stuck / jump / dig / blocked clear / Attack ×2 / angle
 lerp / RandomFloat ×9. Full **locomotion + dig + combat assist**. Far skip of
 `updateTasks` avoids this entirely.
 
+**`EntityMoveHelper` tuning constants (IL):** done-distance `cDoneXZDistSq` =
+**0.0009** (0.03 m), movement thresholds `cTempMoveDist` **0.4** / `cMoveSlowDist`
+**0.6** / `cMoveDirectDist` **0.65**, blocked/sidestep checks `cCheckBlockedDist`
+**0.35** / `cCheckBlockedRadius` **0.125** / `cCheckSidestepDist` **0.35** /
+`cCheckSidestepRadius` **0.1**, dig `cDigAngleCos` **0.86** / `cDigXZDistSq` **0.01** /
+`cDigDiagonalXZDistSq` **2.25** / `cDigMovedDist` **0.5**, jump `cJumpUpXZDistSq`
+**0.16** / `cUnreachJumpMin` **1.2**, ladder `cLadderXZDistSq` **0.1089**, yaw
+`cYawNextDist` **1.5**, other-AI destroy `cDestroyOtherAIDist` **20** /
+`cDestroyRefreshAfter` **25**, `cCollisionMask` **1082195968**.
+
 **`ClearBlocked` (IL=10):** zero `BlockedFlags`, `BlockedFlagsAfterCrouch`,
 `BlockedTime`.
 

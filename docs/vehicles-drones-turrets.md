@@ -58,6 +58,11 @@ saved on a background `ThreadManager` thread (`vehicleDataSave` /
 countdown (default 120 s, clamped to 10 s after any mutating change via
 `TriggerSave`).
 
+**`DroneManager` constants (IL):** `cSaveTime` = **120** s (the save countdown),
+`cChangeSaveDelay` = **10** s (clamp after a mutating change), `cMaxDrones` =
+**500**, `cMaxActiveDronePlayerRange` = **32** m (active-range limit for
+teleporting far followers), `cVersion` = 1.
+
 ---
 
 ## 2. The per-frame manager loop (streaming model)

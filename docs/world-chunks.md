@@ -491,6 +491,10 @@ coverage (`viewDim+2 <= 15`). Manager-level
 `m_ViewingChunkPositions` / `m_AllChunkPositions` / `m_CollisionChunkPositions`
 are also 15-bucket `BucketHashSetList`s (ctor).
 
+**`ChunkManager` constants (IL):** `cMaxChunksSupported` = **100000**,
+`cMaxChunksAroundPlayers` = **15** (matches the ring array), `cMaxCGOsToUnloadPerFrame`
+= **8**, `cReloadPosY` = **-1**, `MinLogThresholdSeconds` = **1** s.
+
 **Phase 2 - global union when any observer dirty (`loc.1`):**
 
 Under `lockObject`:
