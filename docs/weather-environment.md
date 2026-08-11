@@ -350,7 +350,7 @@ GameUtils::CalcDuskDawnHours(GameStats.GetInt(42) DayLightLength)`
 `CalcDuskDawnHours(len)` (IL=45): `len == 0 || len == 24` -> dusk 22 / dawn 4
 (the default vanilla 18 h of light); else dusk starts 22, `len > 22` ->
 `dusk = clamp(len, 0, 23)`, `len < 18` -> `dusk = 12 + len / 2`, and always
-`dawn = dusk - len`. `DuskDawnInit` runs at world init, so the boundary is
+`dawn = clamp(dusk - len, 0, 23)` (IL_004b-IL_005d). `DuskDawnInit` runs at world init, so the boundary is
 fixed per world; no in-assembly `GameStats.Set(42, ...)` call exists (the
 stat's readers include `DuskDawnInit`, blood-moon dawn/dusk,
 `World.WorldEventUpdateTime`, SkyManager, Twitch, TraderInfo), so
