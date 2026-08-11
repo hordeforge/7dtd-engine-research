@@ -191,6 +191,14 @@ indices then repacking through the same `MakeChunkKey`, so a key is
 cluster-relative only after that rebase; raw keys are world-chunk keys. This
 is the key shape used everywhere chunk keys cross the wire or a save boundary.
 
+**`World::toChunkXZ` (IL=4, exact):** `_v >> 4` - an **arithmetic** shift, so
+the negative half floors, not truncates: `-1 >> 4 = -1`, `-16 >> 4 = -1`,
+`-17 >> 4 = -2` (the containing 16-block cell, same as
+`Math.Floor(v / 16.0)`). The `Vector2i` overload (IL=10) applies it to both
+components; the `Vector3` overload (IL=12) `Fastfloor`s each component first.
+This is the chunk-coordinate conversion used by every keyed chunk lookup, so
+negative-world-coordinate worlds rely on the arithmetic-shift floor.
+
 ---
 
 ## 3. Generation
