@@ -254,7 +254,9 @@ spawnDirectionV)` (only when `IsPlayerATarget`), stopping at the first
 successful spawn.
 
 **`SpawnZombie(world, target, focusPos, radiusV)` (IL=181):** `CalcSpawnPos`
-fails → false. Class pick:
+(IL=28: rotate `_radiusV` by `(RandomFloat-0.5)*90` degrees about up, then
+`GetMobRandomSpawnPosWithWater(center, 0, 10, 30, false)`) **fails silently
+-> false** (no log). Class pick:
 `EntityGroups.GetRandomEntityFromGroupMaxTier(partySpawner.spawnGroupName,
 EntityFactory.MaxEntityTier, ref lastClassId, ...)`; when the pick is an
 attached entity, 50% of the time it is overridden to
