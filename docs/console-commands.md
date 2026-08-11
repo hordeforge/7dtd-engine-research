@@ -140,11 +140,11 @@ Selected dedi-critical Execute bodies:
 | `ConsoleCmdSetTime` | 145 | 1 arg: `day` = `DayTimeToWorldTime(1, 12, 0)` (Day 1 noon), `night` = `DayTimeToWorldTime(2, 0, 0)` (Day 2 midnight), else raw u64 world-time parse ("Invalid value for single argument variant"); 3 args: day/hour/minute. Other arg counts rejected ("expected 1 or 3"). Live-tested 2026-08-11 |
 | `ConsoleCmdSaveWorld` | 12 | If server: `SaveLocalPlayerData` + `SaveWorld`; output `World saved` |
 | `ConsoleCmdShutdown` | 5 | Output `Shutting server down...` then `Application.Quit()` |
-| `ConsoleCmdMem` | 480 | Subcommands: `gc` (GC stats / incremental collector), editor/mem dump branches (large) |
+| `ConsoleCmdMem` | 480 | Subcommands: `gc` (GC stats / incremental collector), editor/mem dump branches (large). Live 2026-08-12: `mem gc` -> `gc Enabled, mem 1353512k, count 101, isInc True, inc time 3ms` (Mono incremental GC, ~1.35 GB, 101 collections) |
 | `ConsoleCmdWeather` | 465 | Dumps biome weather / WeatherManager state; mutator subcommands for weather params |
-| `ConsoleCmdGetGamePrefs` | 73 | Optional filter string; lists allowed prefs `GamePref.X = value` via `prefAccessAllowed` |
+| `ConsoleCmdGetGamePrefs` | 73 | Optional filter string; lists allowed prefs `GamePref.X = value` via `prefAccessAllowed`. Live 2026-08-12: `getgamepref MaxSpawnedZombies` -> `GamePref.MaxSpawnedZombies = 16` |
 | `ConsoleCmdGetGameStats` | 73 | Optional filter; lists all `EnumGameStats` as `GameStat.X = value` (live-tested 2026-08-11: `getgamestat AirDropFrequency` -> `GameStat.AirDropFrequency = 3`) |
-| `ConsoleCmdSetGamePref` | 58 | `GamePrefs.Parse` + `SetObject`; errors on bad pref/value |
+| `ConsoleCmdSetGamePref` | 58 | `GamePrefs.Parse` + `SetObject`; errors on bad pref/value. Live 2026-08-12: `setgamepref MaxSpawnedZombies 32` -> `MaxSpawnedZombies set to 32`, read-back 32 (round-trip verified) |
 | `ConsoleCmdCreateWebUser` | 96 | In-game console only; server builds registration token/URL for web dashboard user |
 | `ConsoleCmdLogGameState` | 97 | 1-2 args; optional bool; client restriction on second param |
 | `ConsoleCmdAdmin` | 70 | `add` / `remove` / `addgroup` / `removegroup` / `list` on `AdminTools.Users`: `ExecuteAdd` parses name/id via `ConsoleHelper.ParseParamPartialNameOrId` + int level -> `AdminUsers.AddUser(name, id, level)`; `ExecuteAddGroup` -> `AdminUsers.AddGroup(name, groupId, regularLevel, moderatorLevel)`; `ExecuteList` prints the `Defined User/Group Permissions:` tables |
