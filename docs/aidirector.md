@@ -388,6 +388,15 @@ playtest) set spawn flag, `StartCooldownOnNeighbors`, `SetLongDelay`,
 `ScoutsFeral` (&lt;125), else `ScoutsRadiated`; queue `AIScoutHordeSpawner` on
 `scoutSpawnList`.
 
+**Live-verified 2026-08-12 (telnet `spawnscouts <entityId>`):** with a joined
+player, the forced spawn logs `AIDirector: Spawning Scouts1 at (201.0, 80.0,
+275.0), to (272.2, 72.0, 237.4)` (start position to player target) then
+`AIDirector: Scout horde spawn finished (all mobs spawned)` - group `Scouts1`
+at GS 1 as documented. The bare `spawnscouts` (no entity id) silently no-ops
+with no player target; `spawnentity <id> <name>` separately re-confirmed its
+silent CalcSpawnPos fail near the water-heavy Navezgane spawn (aidirector.md
+SpawnZombie pin).
+
 **`AIScoutHordeSpawner.Update` (IL=22):** finished (true) if no players, or
 `SpawnUpdate` returns true and `hordeList` empty; else `UpdateHorde` and keep
 (false).
