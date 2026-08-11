@@ -44,6 +44,14 @@ and the output folder is
 (`GetWorldPath`, IL=7). The numeric seed used everywhere is
 `Seed = WorldSeedName.GetHashCode() + WorldSize` (set in `Init`), pushed into the
 `Rand` singleton (`Rand.SetSeed`); stage logs print `r={x}` from
+
+**Live-verified 2026-08-12 (RWG 4096, seed `rwtprobe`):** the pipeline produced
+`GeneratedWorlds/Bogexe Valley/` (county-name generator) containing
+`biomes.png`, `dtm.raw`, `dtm_processed.raw`, `main.ttw` (a pristine **264 B**
+header: `V 3.1.0 (b14)` VI (1,3,10,14), waterLevel 62.88, providerId 4, seed 0 -
+byte-exact via `save_roundtrip_check.py --shipped`), `map_info.xml`,
+`prefabs.xml`, `radiation.png`, and the splash PNGs. `createWorld() done` ~53 s
+after boot (4096; the world then generates chunks on demand).
 `Rand.PeekSample()` so a run's determinism is checkable in the log.
 
 ```mermaid
