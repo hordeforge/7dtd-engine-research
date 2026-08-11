@@ -272,7 +272,9 @@ drop, the wandering horde, and the blood-moon start; evidence notes in
   minute); other counts rejected. Rate ~400 world units/s (DayNightLength 60).
 - **Observe** the game log (the wrapper's logfile path): scheduled events log
   at INFO/WRN (e.g. `Next Airdrop:`, `BloodMoon starting for day N`,
-  `AIDirector: Wandering StartSpawning Horde`).
+  `AIDirector: Wandering StartSpawning Horde`). Read runtime state directly
+  via `gettime` and `getgamestat <name>` (e.g. `getgamestat AirDropFrequency`
+  -> 3 on a 0-config server - the sandbox option default, not the pref).
 - **The live run is the arbiter of IL readings**: it caught the option-driven
   nature of the airdrop schedule (`SetupAirDropTimeRanges` overrides the cctor
   day-counts; the observed 3-day gap vs the cctor-derived 2-day gap) and the
