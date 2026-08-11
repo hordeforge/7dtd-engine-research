@@ -79,3 +79,4 @@ test-docs:
 verify: test-docs stock-check readiness facts
 	@test -f "$(ASM)" || (echo "ASM not found: $(ASM) (make verify needs the live game)"; exit 2)
 	python3 "$(TOOLS)/xml_pins.py" --check --game-dir "$$(dirname "$$(dirname "$$(dirname "$(ASM)")")")"
+	@echo "verify: ALL GATES GREEN (doc links, pins, readiness, facts, xml data)"
