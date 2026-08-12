@@ -8129,3 +8129,9 @@ axes. All committed + pushed.
 bench suite 41/41 PASS both servers; zdtd completes the same benchmark in
 84.6s vs stock 129s (~34% faster). All 7 playtest suites now compared (smoke,
 core, demo, persist, mp, soak_long, bench). Evidence committed + pushed.
+## 2026-08-12 - toolset: session 2i - cross-world comparison finds zdtd Pregen06k01 join bug.
+COMPARE_WORLD knob added (compare on any world). Pregen06k01 join-fast:
+stock joins (1 PASS), zdtd consistently fails (2/2 runs): challenge ok, client
+LoginSent, then "payload failed error=Overflow n=1" and a 356-byte LoginAnswer
+- the NetPackagePlayerLogin decode overflows on this world. A reproducible
+zdtd bug found by the cross-world comparison; recorded HIGH in loadgen TODO.
