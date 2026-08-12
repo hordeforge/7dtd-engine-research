@@ -147,7 +147,6 @@ should be re-checked against IL before you rely on it.
 | [parties-factions.md](parties-factions.md) | audited (pass 1) |
 | [platform-auth.md](platform-auth.md) | audited (pass 1) |
 | [progression.md](progression.md) | audited (pass 1) |
-| [provenance-review-prompt.md](provenance-review-prompt.md) | reusable agent prompt (process doc, no IL claims) |
 | [protocol-frames.md](protocol-frames.md) | audited (pass 1) |
 | [protocol-packages.md](protocol-packages.md) | audited (pass 1) |
 | [protocol.md](protocol.md) | audited (pass 1) |

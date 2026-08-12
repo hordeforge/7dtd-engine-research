@@ -103,7 +103,7 @@ flowchart LR
 | **Zig / custom dedi clone** | [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
 | Wire / join / golden packages | protocol → **protocol-frames** → **protocol-packages** → network → loadgen PackageCodec |
 | How to reverse-engineer | **re-methodology** → [`../tools/`](../tools) → coverage |
-| Re-run the zdtd provenance review | [provenance-review-prompt.md](provenance-review-prompt.md) (copy-paste prompt: method, gates, honesty rules) |
+| Re-run the zdtd provenance review | `../../zdtd/docs/PROVENANCE_REVIEW_PROMPT.md` (copy-paste prompt: method, gates, honesty rules) |
 | **Stock hardcode pin** | [`../tools/stock-sync.sh`](../tools/stock-sync.sh) → [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) (see re-methodology §5c) |
 | Frame / gmUpdate | loop → loop-gmupdate → inventories/gmupdate-calls |
 | Entities / AI / path | entity-ai → closed-gaps → aidirector |
