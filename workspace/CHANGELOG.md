@@ -8125,3 +8125,7 @@ findings; zdtd APM cost captured in the report (6000 ticks, 27k packets in,
 join_ok 4). loadgen catalog now 6 scenarios, all live-validated. The report
 gains a zdtd APM section (reported not compared) alongside the behavioral
 axes. All committed + pushed.
+## 2026-08-12 - toolset: session 2h - bench compared; playtest-compare coverage complete.
+bench suite 41/41 PASS both servers; zdtd completes the same benchmark in
+84.6s vs stock 129s (~34% faster). All 7 playtest suites now compared (smoke,
+core, demo, persist, mp, soak_long, bench). Evidence committed + pushed.
