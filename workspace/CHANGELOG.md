@@ -8103,3 +8103,9 @@ The playtest-compare smoke stall (Steam-auth + BotMod client stuck in loading sc
 playtest-compare with CLIENT_PLATFORM=local and SUITE=core: 18/18 gameplay cases PASS on BOTH stock (95.8s) and zdtd (68.3s), zero per-case differences - motors, inventory, block damage, dig/place, buffs, quests journal, stamina. Evidence committed + pushed (7dtd-playtest). Also: horde-lite spawn-pressure scenario added + live-validated (both sides 1 PASS, spawn knobs now catalog-resolvable). loadgen catalog now 5 scenarios, all live-validated.
 ## 2026-08-12 - toolset: session 2d - playtest-compare demo delivers first real per-case findings.
 Demo suite compared on both servers (CLIENT_PLATFORM=local): 79 PASS / 4 FAIL each. Findings: melee_damage_out fails on both (shared); 3 stock-only fails = stock zombie-spawn flakiness (sleeper_wake, zombie_or_npc_nearby, zombie_target_has_health); 3 zdtd-only fails = open zdtd gameplay gaps (combat/zombie_death_loot, economy/item_drop_entity, economy/loot_bag_pickup). The playtest-compare tool now demonstrably delivers per-case stock-vs-zdtd diffs with triageable findings. Fixed the compare target to run both sides despite failures (a failing diff is the point). Evidence committed + pushed.
+## 2026-08-12 - toolset: session 2e - playtest-compare suite coverage complete.
+mp suite 6/6 PASS both servers (multi-peer + loadgen integration). Coverage now:
+smoke 5/5, core 18/18, mp 6/6 clean; demo 79/4 and persist surfaced real zdtd
+findings (recorded in loadgen TODO + reports). All evidence committed + pushed
+continuously. The playtest-compare tool + CLIENT_PLATFORM=local client mode are
+the validated stock-vs-zdtd comparison stack.
