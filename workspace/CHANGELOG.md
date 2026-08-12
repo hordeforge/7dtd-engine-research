@@ -8153,3 +8153,8 @@ Pregen06k01 1/0 (join FAILS); Pregen06k02/08k01/08k02 1/1 each but ALL log the
 same C2S payload Overflow (1/join). Signature: overflow fires on every pregen,
 fatal only on Pregen06k01. A precise, reproducible zdtd defect for the fix.
 Per-world evidence committed. make compare-worlds reproduces the matrix.
+## 2026-08-12 - toolset: session 2m - all 8 playtest suites compared.
+full suite: stock 80/5, zdtd 81/4; the known findings plus a new
+vehicle/vehicle_drive (stock 0.38m vs zdtd 0.51m over 15s, threshold 0.4 -
+razor-thin, likely a flake, queued). playtest-compare coverage now complete
+across every suite; the consolidated findings ledger is current.
