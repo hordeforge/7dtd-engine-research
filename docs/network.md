@@ -876,6 +876,49 @@ preset that used to be individual serverconfig properties. The shipped V3.1.0
 
 ---
 
+### 4.6 LiteNetLib transport algorithms (reliability / flow / MTU) (closed 2026-08-12)
+
+Dumped from the game's shipped `LiteNetLib.dll` (managed; 138 types). This
+closes the "third-party algo set not re-narrated" note in
+[residuals.md](residuals.md): the transport algorithms the dedicated server
+actually runs.
+
+**Reliability (`ReliableChannel`, IL per method):** a **64-packet sliding
+window** (`_windowSize = 64` = `NetConstants.DefaultWindowSize`) over a
+**32768**-wide sequence space (`NetConstants.MaxSequence`; `_localSeqence =
+(seq + 1) % 32768`). Sender stores each in-flight packet in a
+`PendingPacket[64]` ring (slot `seq % 64`) with a send timestamp, and stops
+once `RelativeSequenceNumber(_localSeqence, _localWindowStart) >= 64` - this
+window bound is the flow control ("congestion" in the old residual wording);
+LiteNetLib has **no AIMD / TCP-style congestion window**, it is a fixed 64
+window plus a resend timer. **Retransmit:** `PendingPacket.TrySend` (IL=34)
+resends when `now - _timeStamp >= _resendDelay * 10000` (ticks; the ctor
+default `_resendDelay = 27` ms); `SendNextPackets` (IL=147) sweeps the window
+calling `TrySend` per slot. **Acks:** `ProcessAck` (IL=126) matches an Ack
+packet against `_outgoingAcks` (an `Ack` NetPacket sized
+`2 + (64 - 1) / 8 + 2` bytes = a 64-bit sliding-window bitmap), validates
+`seq < 32768` and inside-window, then frees the acked pending slots; the
+`_mustSendAcks` flag flushes it via `Peer.SendUserData`. **Ordered receive:**
+`_receivedPackets[64]` reorders by `_remoteSequence` (unreliable-ordered is
+`_earlyReceived[64]` marks instead). `SequencedChannel` is the keep-latest
+delivery with a `_reliable` variant (own `_ackPacket` + `_lastPacketSendTime`).
+`NetworkSorter` is NOT packet ordering - it ranks `NetworkInterface`s by type
+(237/243/244) for interface selection; do not read it as the channel sorter.
+
+**MTU (`NetPeer`, IL per method):** `NetConstants.PossibleMtu` =
+`[1024, 1164, 1392, 1404, 1424, 1432]` (cctor: `InitialMtu = PossibleMtu[0] =
+1024`, `MaxPacketSize = PossibleMtu[last] = 1432`, `MaxUnreliableDataSize =
+1431`). `SetMtu(idx)` (IL=13) does `_mtu = PossibleMtu[_mtuIdx] -
+ExtraPacketSizeForLayer`. Discovery (`UpdateMtuLogic` IL=98): every
+`_mtuCheckTimer >= 1000` ms it increments `_mtuCheckAttempts` and probes the
+next size with `MtuCheck`/`MtuOk` packets, stopping on `_finishMtu`.
+`ResetMtu` (IL=22): if `NetManager.MtuDiscovery` is off it finishes
+immediately; if `MtuOverride > 0` it overrides, else `SetMtu(0)` (1024).
+The game's `InitConfig` (IL=22) sets neither, so the stock dedicated runs the
+discovery loop from 1024 up to 1432 minus the layer overhead.
+
+---
+
 ## 5. See also
 
 | Doc | Why |
