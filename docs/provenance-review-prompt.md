@@ -1,5 +1,8 @@
 # Reusable prompt: zdtd provenance re-review
 
+**Hub:** [`INDEX.md`](INDEX.md). **Owns:** the copy-paste agent prompt for
+re-running the zdtd provenance review against the current research corpus.
+
 Copy the block below into a fresh agent session to re-run the provenance review
 against the current research corpus. It encodes the method, the gates, and the
 honesty rules that make the review repeatable. Adjust the "stock pin" line if
