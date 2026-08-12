@@ -8182,3 +8182,21 @@ timings within 0.6% (client-driven); server-side wall time stock 157.1s vs
 zdtd 128.0s - zdtd ~18.5% faster, 2-of-2 evidence (matches the single-run 129
 vs 84.6s direction). Zero flakes in the repeat.
 Loadgen CI green (pytest 21 passed). All pushed.
+## 2026-08-12 - toolset: session 2p - consolidated overview + wall axis + cost-axis caveats.
+(1) tools/consolidated_report.py + make compare-consolidated: one overview over
+ALL committed evidence (every loadgen scenario diff.json + every playtest suite
+playtest-compare.json), classified CLEAN / DELTAS / ONE-SIDE per entry -
+computed, never hand-maintained, so the view cannot drift from the runs. 19
+entries; all loadgen scenarios carry the known 3-finding divergence set; bench
+CLEAN. (2) playtest-compare now surfaces the orchestrator wall_sec as a
+wall-time axis (reported, never a per-case finding - zdtd being faster is a
+known divergence). (3) cost axes documented as host-relative (busy hosts skew
+wall/APM, not behavior). (4) LESSON: editing a bash script while it is
+executing corrupts the running process (compare-all died mid-run with
+unexpected EOF); do not touch running scripts - re-ran compare-all after the
+file was stable.
+(5) full compare-all refresh with the stock cost axis on every canonical
+scenario: 6/6 scenarios, join PASS both sides, apmStock in every stock
+surface, findings unchanged (known divergence set). run-meta now records
+hostLoad (this run happened under a parallel 500% CPU session - behavior
+axes unaffected, cost numbers host-relative, as documented).
