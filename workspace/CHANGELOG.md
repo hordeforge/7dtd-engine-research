@@ -8135,3 +8135,10 @@ stock joins (1 PASS), zdtd consistently fails (2/2 runs): challenge ok, client
 LoginSent, then "payload failed error=Overflow n=1" and a 356-byte LoginAnswer
 - the NetPackagePlayerLogin decode overflows on this world. A reproducible
 zdtd bug found by the cross-world comparison; recorded HIGH in loadgen TODO.
+## 2026-08-12 - toolset: session 2j - world matrix; COMPARE_WORLD generalization.
+COMPARE_WORLD knob lets the harness compare on any world. Matrix: Navezgane
+join OK (0 C2S overflows); Pregen06k01 join FAILS (C2S payload Overflow,
+reproduced 2/2); Pregen08k01 join OK but logs the same Overflow (recovered);
+RWG unsupported by zdtd (world not found - missing capability, recorded);
+Pregen04k01 absent from the install (honest failure). The pregen-specific C2S
+decode overflow is a high-value reproducible zdtd defect handed to the team.
