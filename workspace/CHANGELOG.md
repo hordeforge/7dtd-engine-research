@@ -8211,3 +8211,11 @@ FPS-bot work); added a bot section. (3) SCENARIOS.md Counts table was stale
 machine-checks 'catalog total' == parsed Live set. (4) test_playtest_compare
 was not in make test and had no __main__ runner (direct execution was a
 silent no-op); now wired via uv --with pytest. Fleet: 7 CI-able repos green.
+## 2026-08-12 - toolset: session 2r - compare-verify triage re-run target.
+make compare-verify = compare-all + compare-consolidated + a per-entry verdict
+printout (CLEAN/DELTAS/ONE-SIDE). One command for the triage loop's re-run
+phase: after a zdtd fix lands, a delta that disappears is fixed, one that
+stays is still a finding. awk verdict line smoked against the committed
+CONSISTENT.md (19 entries, verdicts correct). Note: the smoke accidentally
+triggered the full chain first (make dependency) - stopped immediately; no
+server runs were started (verified 0 processes).
