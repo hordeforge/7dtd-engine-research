@@ -8219,3 +8219,13 @@ stays is still a finding. awk verdict line smoked against the committed
 CONSISTENT.md (19 entries, verdicts correct). Note: the smoke accidentally
 triggered the full chain first (make dependency) - stopped immediately; no
 server runs were started (verified 0 processes).
+## 2026-08-12 - toolset: session 2s - pipeline regeneration audit + audit lesson.
+Deterministic-reproduction check: sut_report.py regenerated over all 10 compared
+scenario dirs reproduces the committed REPORT.md/diff.json byte-identically
+(git status 0 after regen) - the repeatability claim is verified. AUDIT LESSON:
+regenerating reports over ALL comparison/* dirs (including the world-matrix
+02k finding dirs, which are intentionally zdtd-side-only evidence) creates
+misleading ONE-SIDE rows with an empty scenario name (trailing-slash basename
+bug in my loop); the consolidated collector already ignores dirs without a
+diff.json, which is the correct behavior. The 4 stray regenerated files were
+discarded; committed evidence untouched (git status 0).
