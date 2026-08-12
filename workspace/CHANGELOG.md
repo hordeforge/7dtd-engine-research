@@ -8109,3 +8109,13 @@ smoke 5/5, core 18/18, mp 6/6 clean; demo 79/4 and persist surfaced real zdtd
 findings (recorded in loadgen TODO + reports). All evidence committed + pushed
 continuously. The playtest-compare tool + CLIENT_PLATFORM=local client mode are
 the validated stock-vs-zdtd comparison stack.
+## 2026-08-12 - toolset: session 2f - soak compared; playtest-compare coverage complete.
+soak_long diff: stock 15-min soak PASS (player alive 900s), zdtd FAIL (player
+dead/missing at 12s - seeded ambient zombies near spawn kill the fresh player;
+a consequence of the known ambient-seed divergence). Finding recorded in
+loadgen TODO + report. playtest-compare suite coverage now: smoke 5/5, core
+18/18, mp 6/6 clean; demo 79/4 (3 zdtd gaps: zombie_death_loot,
+item_drop_entity, loot_bag_pickup; shared melee_damage_out; 3 stock-flaky
+combat cases), persist (blockmeta + TE persistence gaps), soak (seed-zombie
+kill). All evidence + findings committed and pushed continuously; all repos
+synced 0/0.
