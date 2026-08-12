@@ -183,7 +183,12 @@ third-party / native items (3, 6, and the EAC/A* internals in residuals.md):
    Harmony probe; see residuals.md).  
 2. ~~Runtime **entity Behaviour.enabled** population on dedi~~ **Closed** (2026-08-10,
    runtime; see residuals.md).  
-3. Full line-by-line **AstarPath** library (third-party; treat as black box).  
+3. ~~Full line-by-line **AstarPath** library~~ **Closed (2026-08-12):** the
+   managed search internals (node state, BinaryHeap open list, heuristics) are
+   narrated in raycast-pathing.md §5.1 - the last managed third-party
+   transport/pathfinding surface is now mapped alongside LiteNetLib (network.md
+   §4.6). The remaining genuinely-open items are the native/third-party
+   black boxes: EAC protocol, OS crypto, and the IL-drift process residual.  
 4. ~~Region sector payload byte codec~~ **Closed (2026-08-12, byte-exact):** the
    sector payload is fully decoded - V2 framing (len + 12-byte gap + data), the
    `ttc\0` + Chunk.CurrentSaveVersion preamble, raw Noemax deflate, and the whole

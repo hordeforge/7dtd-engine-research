@@ -380,6 +380,36 @@ normal EAI/UAI task tick that `EAIDroneItemTask` runs under) on
 the shared A* system end to end; `RaycastPathing` contributes only the raycast
 projection and validation around it.
 
+### 5.1 Granberg A* search internals (managed, closed 2026-08-12)
+
+`AstarPathfindingProject.dll` is a **managed .NET assembly** (349 types) - the
+same status as LiteNetLib, so the earlier "third-party internals permanent"
+reading is retracted ([residuals.md](residuals.md)). The search algorithm the
+game's `AstarPath.StartPath` handoff drives is dumped and narrated here
+(algorithm level, per the corpus quote-only rule):
+
+- **Node state (`PathNode`):** packed `flags:u32` (G cost in the high bits,
+  `flag1`/`flag2` boolean bits via `get_cost` / `get_flag1` / `get_flag2`
+  IL=7-9), `parent`, `node`, `heapIndex:u16` with **65535 = not-in-heap**
+  sentinel.
+- **Open list (`BinaryHeap`, 12 methods):** min-heap ordered on F over a
+  `Tuple[]` (F + node). `Add` (IL=43): if `node.heapIndex != 65535` call
+  `DecreaseKey` (sift-up, the F-decrease path), else append at
+  `numberOfItems` and sift-up; `Expand` (IL=38) doubles the array;
+  `SetF`/`GetNode` address the tuple slots; the root pop (`Remove`) yields the
+  min-F frontier.
+- **Heuristic (`Path.CalculateHScore` IL=153):** switch on `Path.heuristic`
+  (`Heuristic` enum: `Manhattan=0`, `DiagonalManhattan=1`, `Euclidean=2`,
+  `None=3`). Manhattan = `(|dx| + |dy| + |dz|) * heuristicScale` (Abs on each
+  Int3 axis); Euclidean = `Int3.costMagnitude(target - node.pos) *
+  heuristicScale`; each result is `max`'d with
+  `EuclideanEmbedding.GetHeuristic(nodeIndex, targetIndex)` when `hTargetNode`
+  is set. `heuristicScale` (single) weights the estimate; F = G + H, the heap
+  orders on F, and the goal check + path unwind follow the parent chain.
+
+The game's grid (`AstarVoxelGrid` extends `GridGraph`, §5) supplies the node
+positions/costs; the search itself is this stock Granberg loop.
+
 ## 6. Steering layer
 
 `SteeringMan` is stateless vector math:
