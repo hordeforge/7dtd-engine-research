@@ -8229,3 +8229,32 @@ misleading ONE-SIDE rows with an empty scenario name (trailing-slash basename
 bug in my loop); the consolidated collector already ignores dirs without a
 diff.json, which is the correct behavior. The 4 stray regenerated files were
 discarded; committed evidence untouched (git status 0).
+## 2026-08-13 - toolset: 8h session complete.
+8-hour continuous-improvement session on the loadgen/playtest/connect/apm
+tool fleet closed. Commits this session (--since 2026-08-12T04:00:00Z, all
+pushed): 7dtd-loadgen 95, 7dtd-playtest 26, 7dtd-connect 7, 7dtd-research 25,
+7dtd-apm 1, 7dtd-server-guard 0 (out of scope, only read).
+Core deliverables: (1) server-under-test abstraction in loadgen
+(compare_sut.sh) booting stock dedicated server or zdtd from one scenario
+config, diff reporter (sut_report.py) normalizing log categories, join
+outcome, telnet gamestats, entity counts, save-file presence into
+REPORT.md/diff.json per scenario; (2) playtest-compare: all 9 playtest suites
+now comparable stock-vs-zdtd incl. wall-clock axis (soak, bench, combat,
+join-probe, mp, core, smoke, world matrix); (3) world matrix over 5 worlds
+isolated the Pregen06k01 join-overflow signature (P1, zdtd-side, recorded in
+zdtd PROVENANCE 3.9); (4) stock cost axis via 7dtd-apm capture
+(COMPARE_APM) + zdtd tick JSON - bench 2-lap evidence 82/82 both sides,
+zdtd wall 128.0s vs stock 157.1s (-18.5%, host-contended, 2/2 repeat);
+(5) STOCK_AUTH.md: stock auth chain fully bypassable with -autogen/anon +
+telnet-local mode - no steam bypass mod needed for local-network testing
+(steam integration simply disabled); empty-player-name refusal documented and
+probed on both servers; (6) drift gates: playtest CI (.github/workflows/ci.yml),
+catalog-surface machine check, world-tagging clobber guard, compare-verify
+one-command triage re-run. Fleet end state: 6 repos 0/0 with origin, 7
+CI-able repos green, no stray processes.
+zdtd-side handover (not our repos to fix): Pregen06k01 join Overflow P1,
+demo/persist/soak gaps, club-65k not reproduced (probe added) - all recorded
+in loadgen TODO + zdtd PROVENANCE register for the zdtd repo to pick up.
+Rules respected throughout: differences are findings recorded, never faked
+into matches; a scenario that runs on only one side is reported ONE-SIDE,
+never as compared.
