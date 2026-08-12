@@ -114,6 +114,15 @@ def main():
                 target = os.path.normpath(os.path.join(sub, m.group(1)))
                 sec = m.group(2)
                 n_sec += 1
+                # Single-repo CI checkout: skip cross-repo section refs whose
+                # sibling repo is absent, exactly like the cross-repo link
+                # check above (the delivery loop verifies them locally).
+                parts = [p for p in m.group(1).split("/") if p not in ("", ".")]
+                sibling = next((p for p in parts if p != ".."), None)
+                if sibling is not None:
+                    correct_sibling = os.path.normpath(os.path.join(REPO, "..", sibling))
+                    if not os.path.isdir(correct_sibling):
+                        continue
                 if not os.path.isfile(target):
                     bad_sec.append(f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no file)")
                     continue
