@@ -8142,3 +8142,8 @@ reproduced 2/2); Pregen08k01 join OK but logs the same Overflow (recovered);
 RWG unsupported by zdtd (world not found - missing capability, recorded);
 Pregen04k01 absent from the install (honest failure). The pregen-specific C2S
 decode overflow is a high-value reproducible zdtd defect handed to the team.
+## 2026-08-12 - toolset: session 2k - per-world matrix evidence.
+make compare-worlds (join-fast across worlds, per-world evidence dirs):
+Navezgane 1/1, Pregen06k01 1/0 (zdtd join fails - C2S payload Overflow),
+Pregen08k01 1/1 (same Overflow logged but recovered). A repeatable world
+matrix handing the zdtd team a precise, reproducible defect signature.
