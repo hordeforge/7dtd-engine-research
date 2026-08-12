@@ -8147,3 +8147,9 @@ make compare-worlds (join-fast across worlds, per-world evidence dirs):
 Navezgane 1/1, Pregen06k01 1/0 (zdtd join fails - C2S payload Overflow),
 Pregen08k01 1/1 (same Overflow logged but recovered). A repeatable world
 matrix handing the zdtd team a precise, reproducible defect signature.
+## 2026-08-12 - toolset: session 2l - world matrix COMPLETE.
+All 5 installed worlds tested on zdtd: Navezgane 1/1 (0 overflows);
+Pregen06k01 1/0 (join FAILS); Pregen06k02/08k01/08k02 1/1 each but ALL log the
+same C2S payload Overflow (1/join). Signature: overflow fires on every pregen,
+fatal only on Pregen06k01. A precise, reproducible zdtd defect for the fix.
+Per-world evidence committed. make compare-worlds reproduces the matrix.
