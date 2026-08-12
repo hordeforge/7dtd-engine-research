@@ -120,8 +120,8 @@ heaviest bodies. A clone must bind/route both channels.
 
 ### 1.2 Compressed packages
 
-**8 packages set `get_Compress = 1`** (payload LZ-compressed regardless of the
-envelope bot path): `NetPackageChunk`, `NetPackageMapChunks`,
+**8 packages set `get_Compress = 1`** (payload deflate-compressed regardless of
+the envelope bot path): `NetPackageChunk`, `NetPackageMapChunks`,
 `NetPackageDynamicMesh`, `NetPackagePOIAround`, `NetPackageConfigFile`,
 `NetPackageDynamicClientArrive`, `NetPackageIdMapping`,
 `NetPackageSignDataResponse`. So bulk terrain/map/config is compressed on the
@@ -1760,7 +1760,7 @@ customReason    : string
 | Item | State |
 |---|---|
 | `EntityCreationData` class-conditional tail | fully extracted (**57** wire fields, per-class branches) in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) + §5.1 table |
-| Bulk-package compression codec (LZ variant) | flag known; byte codec in native/StreamUtils (residual) |
+| Bulk-package compression codec | **Closed (2026-08-12):** the "LZ/native" reading was wrong - `NetConnectionSteam` fields + `NetConnectionAbs.Compress` (IL=59) / `Decompress` (IL=22) run the **managed `Noemax.GZip.DeflateOutputStream`** (level 3, raw deflate, no header) over the package stream, the same codec as the region payload ([save-region.md](save-region.md) §3.4, byte-exact-verified). No native codec |
 | Encryption cipher/KDF | handshake bodies decoded; crypto primitives native (residual) |
 | Quest/Party process | re-pinned 2026-08-07 (§6.17-6.18); Twitch still low priority |
 | `NetPackageDynamicMesh`, `POIAround` | Process re-pinned (mesh ack IL=24; POIAround IL=156 prefab dict fill) |

@@ -421,8 +421,9 @@ stateDiagram-v2
 - **Residual (content).** Block texture indices and UV tiling tables consumed by
   the mesh writers come from block data, not from these method bodies.
 - **Compression codec.** The channel-1 payload compression flag is known; the
-  concrete LZ byte codec lives in `StreamUtils`/native (protocol residual, see
-  [`protocol-packages.md`](protocol-packages.md)).
+  codec is the **managed Noemax.GZip deflate** (`NetConnectionAbs.Compress`
+  IL=59, level 3 raw deflate - same as the region payload, byte-exact-verified;
+  [protocol-packages.md](protocol-packages.md) §1.2).
 
 ---
 

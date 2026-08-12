@@ -175,9 +175,9 @@ Merged into the optimizer project (do not keep optim narrative under `docs/` or 
 
 Canonical open-item list is [`residuals.md`](residuals.md); this is a pointer for
 the gap-closing context only. All items here are **non-IL** residuals.
-**Updated 2026-08-12:** items 1, 2, 4 and 5 below are now **closed** (see
+**Updated 2026-08-12:** items 1, 2, 3, 4 and 5 below are now **closed** (see
 residuals.md for the closure evidence); the genuinely-open list is down to the
-third-party / native items (3, 6, and the EAC/A* internals in residuals.md):
+native black boxes (EAC protocol, OS crypto) and the IL-drift process item:
 
 1. ~~Unity **script execution order** among peers~~ **Closed** (2026-08-09, runtime
    Harmony probe; see residuals.md).  

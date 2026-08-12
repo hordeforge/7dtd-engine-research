@@ -49,7 +49,7 @@ narrated docs below, not by namespace.
 |---|---|---|
 | **Dedicated sim core** | `<global>` (GameManager, World, Chunk*, Entity*, EntityAlive, Tick*, managers, save) | **Narrated** for the dedicated hot path (see ledger); rest of `<global>` enumerated in `il/surface-v3.1.0/surface-types.md` (local) |
 | **Networking / wire** | `<global>` NetPackage*/ConnectionManager/NetEntity* | **Narrated** (protocol, protocol-frames, protocol-packages, network): 193 packages + framing + encryption |
-| **Pathfinding** | `GamePath`, `RaycastPathing` | **Narrated** ([entity-ai.md](entity-ai.md) §6 ASP wrapper, [closed-gaps.md](closed-gaps.md) ASP->A*); Aron Granberg A* library internals third-party residual |
+| **Pathfinding** | `GamePath`, `RaycastPathing` | **Narrated** ([entity-ai.md](entity-ai.md) §6 ASP wrapper, [closed-gaps.md](closed-gaps.md) ASP->A*); Aron Granberg A* search internals **closed 2026-08-12** (raycast-pathing.md §5.1) |
 | **Utility AI** | `UAI` | **Narrated** ([uai.md](uai.md)): packages, considerations, tasks, decision/selection cycle |
 | **World generation** | `WorldGenerationEngineFinal`, `PrefabVolumes`, `SDF` | **Narrated** ([world-generation.md](world-generation.md)); `MapRendering`/clipping tools client-render residual |
 | **Content: events / quests / challenges** | `GameEvent.*`, `Quests`, `Challenges` | **Narrated** ([game-events.md](game-events.md), [quests-challenges.md](quests-challenges.md)) |
@@ -157,9 +157,12 @@ its event machinery and the join-churn flake root cause are closed in
 
 All dedicated-server **subsystems** are narrated and their leaves enumerated (see
 the ledger). The remaining surface is out-of-scope by policy (client render, audio,
-editor, vendored libs), native residual, or server-side support/utility code
-captured at the enumeration level (see the caveat above); those are enumerated, not
-hand-narrated, by design. Future work is
+editor), native residual (EAC/anticheat protocol, OS crypto), or server-side
+support/utility code captured at the enumeration level (see the caveat above);
+those are enumerated, not hand-narrated, by design. The three managed
+third-party libraries the dedicated server actually drives (LiteNetLib transport,
+Granberg A* search, SpaceWizards.HttpListener) were closed 2026-08-12 (network.md
+§4.6, raycast-pathing.md §5.1, webserver.md §1.1). Future work is
 maintenance: after a game update, regenerate `Census` + `FullSurface`, diff the
 per-namespace counts, and re-verify the affected narratives.
 
