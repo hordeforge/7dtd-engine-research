@@ -3,7 +3,8 @@
 **Owns:** the managed `Webserver.*` surface, the HTTP admin/API server a dedicated
 server runs when the web dashboard is enabled: request pipeline, session auth,
 permission model, REST API host, and Server-Sent Events (SSE) push.
-**Not:** the `SpaceWizards.HttpListener` native/socket internals (residual); Steam
+**Not:** `SpaceWizards.HttpListener` internals are managed and mapped in §1.1
+(closed 2026-08-12); Steam
 OpenID's remote verification (external); the web UI assets (content).
 **Evidence:** `Webserver.*` IL (72 types / 413 methods; dump locally with
 `tools/src/DumpAll Webserver`, git-ignored). **Hub:** [`INDEX.md`](INDEX.md).
@@ -46,6 +47,35 @@ Handlers (registered in `RegisterDefaultHandlers`, IL=60, in this order):
 | # | Handler | Base path | Role |
 |---|---|---|---|
 | 1 | `RewriteHandler` | `/` | Rewrites the root to `/files/` (so `/` serves the dashboard) |
+
+### 1.1 `SpaceWizards.HttpListener` internals (managed, closed 2026-08-12)
+
+`SpaceWizards_HttpListener.dll` is a **managed .NET assembly** (88 types, the
+classic Mono `System.Net.HttpListener` fork) - the earlier "native/socket
+internals" residual label is retracted, same mislabel pattern as the LiteNetLib
+row. Dumped surface (algorithm level):
+
+- `HttpListener` (226 methods): `AddPrefix` (IL=168) registers a URI prefix
+  with `HttpEndPointManager`; `Start` opens the endpoint listeners; the pump is
+  `GetContextAsync` (IL=22) -> `BeginGetContext`/`EndGetContext`; `Close` tears
+  down.
+- `HttpEndPointManager`: `AddListener`/`AddPrefix` (IL=59/79) route a prefix to
+  a per-endpoint `HttpEndPointListener` (host:port) - the **accept loop** that
+  spins `Socket.AcceptAsync` and hands each connection to `HttpConnection`.
+- `HttpConnection` (30 methods): per-socket state machine - ctor(Socket, epl,
+  secure, cert), `Init` (IL=32, optional TLS), the request-head read/parse
+  (`ReadRequest`) producing `HttpListenerContext`, keep-alive reuse
+  (`get_Reuses`), timeout, and the response write.
+- `ChunkStream` / `ChunkedInputStream`: chunked transfer-encoding framing
+  (`Chunk` + state machines) for request/response bodies.
+- The only native layer underneath is the OS socket behind
+  `System.Net.Sockets.Socket` (the same for any .NET socket); that is not
+  game logic and stays out of the corpus.
+
+The game's `Webserver.Web` drives only `AddPrefix` + the `BeginGetContext`
+pump (above); it does not touch the listener's internals directly, so the
+dedicated behavior of the web API is fully captured by the `Web` layer docs.
+
 | 2 | `RewriteHandler` | `/app` | Rewrites `/app` to `/files/index.html` (SPA entry) |
 | 3 | `SessionHandler` | `/session/` | Login / logout (userpass, Steam OpenID, userId) |
 | 4 | `UserStatusHandler` | `/userstatus` | Current session's identity + permission status |
@@ -273,9 +303,10 @@ the browser.
 
 - **Runs on dedicated** in-process when the web dashboard is enabled; the console
   commands run regardless.
-- **Residual (native/external):** `SpaceWizards.HttpListener` socket internals;
-  Steam OpenID `check_authentication` (remote); TLS/X509 verification primitives;
-  the dashboard's static web assets (content, not loop IL).
+- **Residual (external/black box):** Steam OpenID `check_authentication` (remote
+  service); TLS/X509 verification primitives; the dashboard's static web assets
+  (content, not loop IL). The `SpaceWizards.HttpListener` internals are managed
+  and closed (§1.1).
 - **Content:** `WebModules` / permission defaults are config-driven.
 
 ---
