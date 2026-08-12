@@ -8119,3 +8119,9 @@ item_drop_entity, loot_bag_pickup; shared melee_damage_out; 3 stock-flaky
 combat cases), persist (blockmeta + TE persistence gaps), soak (seed-zombie
 kill). All evidence + findings committed and pushed continuously; all repos
 synced 0/0.
+## 2026-08-12 - toolset: session 2g - soak-4bot + APM cost axis.
+soak-4bot (4 bots, 5 min) compared: matched joins both sides, only known
+findings; zdtd APM cost captured in the report (6000 ticks, 27k packets in,
+join_ok 4). loadgen catalog now 6 scenarios, all live-validated. The report
+gains a zdtd APM section (reported not compared) alongside the behavioral
+axes. All committed + pushed.
