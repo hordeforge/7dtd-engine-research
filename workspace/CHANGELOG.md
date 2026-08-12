@@ -8164,3 +8164,21 @@ in zdtd/docs/PROVENANCE.md 3.9: Pregen C2S payload Overflow (P1, join breaks on
 Pregen06k01), demo gameplay gaps, persist gaps, soak seed-zombie kill. The
 objective's record-in-the-provenance-map step is done; provenance gate green
 (188/188), pushed.
+## 2026-08-12 - toolset: session 2o - evidence-clobber fix, stock cost axis, bench repeat.
+(1) compare_sut.sh world tagging: --world/COMPARE_WORLD previously wrote into the
+canonical per-scenario dir, so a world-matrix-style run silently clobbered the
+canonical Navezgane evidence (observed live: a Pregen08k01 run overwrote
+join-fast). A non-default world now tags its own dir (join-fast-pregen08k01)
+unless the scenario id already carries the tag; an id/world mismatch is warned.
+(2) stock cost axis: the stock phase now runs a 30s (COMPARE_APM_SECONDS)
+7dtd-apm capture (--no-app) over the connected window, aligned with the telnet
+snapshot; the finalized session lands in stock/apm/ and is summarized into the
+surface as apmStock (layer scores, IPC, GC alloc rate, lag verdict) and rendered
+in REPORT.md. Reported side-by-side with zdtd's tick-based APM JSON, never
+diffed (formats differ by design). COMPARE_APM=0 disables. Offline pipeline
+tests cover the axis.
+(3) bench 2-lap repeat: 82/82 PASS on BOTH servers, both laps; per-case action
+timings within 0.6% (client-driven); server-side wall time stock 157.1s vs
+zdtd 128.0s - zdtd ~18.5% faster, 2-of-2 evidence (matches the single-run 129
+vs 84.6s direction). Zero flakes in the repeat.
+Loadgen CI green (pytest 21 passed). All pushed.
