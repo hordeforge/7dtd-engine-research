@@ -8200,3 +8200,14 @@ scenario: 6/6 scenarios, join PASS both sides, apmStock in every stock
 surface, findings unchanged (known divergence set). run-meta now records
 hostLoad (this run happened under a parallel 500% CPU session - behavior
 axes unaffected, cost numbers host-relative, as documented).
+## 2026-08-12 - toolset: session 2q - playtest CI + two catalog<->docs drift fixes.
+(1) 7dtd-playtest got its first CI (.github/workflows/ci.yml, make test) - the
+4 offline gates are pure Python, no game install; first run green in 17s.
+The drift fixes below slipped through earlier precisely because there was no
+push-time gate. (2) SCENARIOS.md was missing live rows for the 4 bot_* cases
+(bot_spawn_visible/bot_moves/bot_physics_parity/bot_player_near - parallel
+FPS-bot work); added a bot section. (3) SCENARIOS.md Counts table was stale
+(104 vs 108 Live); added the bot row + the catalog-surface gate now
+machine-checks 'catalog total' == parsed Live set. (4) test_playtest_compare
+was not in make test and had no __main__ runner (direct execution was a
+silent no-op); now wired via uv --with pytest. Fleet: 7 CI-able repos green.
