@@ -8158,3 +8158,9 @@ full suite: stock 80/5, zdtd 81/4; the known findings plus a new
 vehicle/vehicle_drive (stock 0.38m vs zdtd 0.51m over 15s, threshold 0.4 -
 razor-thin, likely a flake, queued). playtest-compare coverage now complete
 across every suite; the consolidated findings ledger is current.
+## 2026-08-12 - toolset: session 2n - comparison findings recorded in the zdtd provenance register.
+All confirmed stock-vs-zdtd comparison findings now have divergence-register rows
+in zdtd/docs/PROVENANCE.md 3.9: Pregen C2S payload Overflow (P1, join breaks on
+Pregen06k01), demo gameplay gaps, persist gaps, soak seed-zombie kill. The
+objective's record-in-the-provenance-map step is done; provenance gate green
+(188/188), pushed.
