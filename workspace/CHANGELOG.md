@@ -8258,3 +8258,36 @@ in loadgen TODO + zdtd PROVENANCE register for the zdtd repo to pick up.
 Rules respected throughout: differences are findings recorded, never faked
 into matches; a scenario that runs on only one side is reported ONE-SIDE,
 never as compared.
+## 2026-08-18 - toolset: harness integrity + horde-lite triage round.
+Post-8h follow-up on the SUT compare stack. Three findings, two harness
+integrity bugs fixed, one zdtd capability gap characterized:
+(1) playtest-compare PHANTOM DIFF (fixed, 7dtd-playtest 911b61f): a re-run
+where both server sides refused to start (docker containers now own host
+ports 8081/8082) was swallowed by the per-side `|| true`, and the diff
+re-diffed 6-day-old logs, regenerating the committed combat evidence with
+only the template's new wall-time row. Fix: side dirs wiped before each side
+runs (a failed side leaves NO report), playtest_compare refuses missing/stale
+sides (exit 2/3, names the side), reports carry ran_epoch + a `ran (UTC)`
+axis, failed diffs remove the stale md/json. 3 new offline gates.
+(2) Combat re-run (evidence 1be5818): CLIENT_PLATFORM=local required (the
+Steam-auth client stalls in the loading screen; my first re-run missed the
+env and stalled ~150s - stopped, cleaned, re-ran). Fresh both sides:
+sleeper_wake FAIL/PASS - stock-only STABLE (4/4 runs), mechanism "no AI
+within 96m", wake path never exercised on stock (fixture timing, not a wake
+mechanics divergence); zombie_or_npc_nearby + zombie_target_has_health now
+PASS/PASS - confirmed stock flakes; zombie_death_loot PASS/FAIL - known
+zdtd-side finding. wall 208.1s vs 105.3s (host-contended).
+(3) horde-lite triage (7dtd-loadgen 378f297, b2b5705, b073fff): the
+spawn-pressure delta was TWO layered causes. (a) HARNESS BUG: the loadgen
+spawn loop targeted fixed --telnet-port 8081 on both sides; zdtd admin is
+8082, so the zdtd side logged "Connection refused" and pressure never
+landed. Fixed: per-side LOADGEN_TELNET_* wiring. (b) HOST/ENV: docker owns
+8081+8082, so BOTH servers failed to bind their admin console (stock
+"Address already in use", zdtd "admin TCP ... AddressInUse") and every
+telnet axis silently degraded (empty snapshots, phantom 0/0 entities).
+Fixed: COMPARE_TELNET_PORT_STOCK/ZDTD overrides + loud pre-flight bind
+check + RE_TELNET_PORT in the stock prefab launcher. Re-validated on
+8084/8085: stock spawns 9 zombieBoe from the same commands; zdtd counts
+admin_commands=9 but silently ignores spawnscouts/spawnentity (no audit
+line, zero spawns) - a REAL zdtd capability gap recorded for the zdtd lane
+(not a harness artifact). Rules held: deltas recorded, never faked.
