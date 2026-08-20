@@ -498,6 +498,19 @@ cone returns false. The ray starts `-0.1` behind the self head
 `cSleeperNoiseHear` **360** / `cSleeperNoiseDecay` **50** /
 `cSleeperNoiseWaitTicks` **20**; light `cLightMpyBase` **0.32** /
 `cLightLevelMax` **200**, `cNextSoundPercent` **0.6**.
+
+**Sense defaults (IL):** `EntityAlive` cctor (full-v3.1.0 `EntityAlive.il.txt`)
+seeds `maxViewAngle` to **180** (`ldc.r4 180; stfld maxViewAngle`) then
+`DynamicProperties.ParseFloat(PropMaxViewAngle, ref maxViewAngle)` lets
+entityclasses.xml `MaxViewAngle` override it (so the default cone is 180 full
+= only strictly-behind is out; `IsInFrontOfMe` compares against half). Its
+`sightLightThreshold` Vector2 is copied from `EntityClass.sightLightThreshold`,
+whose default is **(30, 100)** (`ldc.r4 30; ldc.r4 100; newobj Vector2` in the
+`EntityClass` cctor) overridden by the entityclasses `SightLightThreshold`
+property via `StringParsers.ParseMinMaxCount`. Consumed by the zdtd sense gate
+(LOS + view cone + hearing + smell, `ecs/systems.zig`); the `CanSeeStealth`
+light-level leg needs the client's light channel and is not evaluated server-
+side (zdtd marks that sub-note RE-blocked).
 (`origin + dir*-0.1`), the self model layer is temporarily switched to **2**
 and restored after, and `Voxel.Raycast(world, ray, seeDist, -1612492829, 64,
 0)` runs. Hit handling: an `E_Vehicle` hit resolves via
