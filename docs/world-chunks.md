@@ -49,6 +49,14 @@ rect resets → `ResetDecosInWorldRect`; chunk-key resets →
 `ResetDecosForWorldChunk`. Then server: rebuild player list for deco interest
 residual / coroutine path.
 
+**Client deco updates beyond the join window:** `NetPackageDecoUpdate.ProcessPackage`
+(IL=39) calls `DecoManager.Read(reader, int.MaxValue, firstPackage)`; `Read`
+(IL=29) only REPLACES `loadedDecos` when `_resetExisting` (firstPackage=true) -
+a post-join firstPackage=false update ADDS its objects to the existing
+HashSet (deduped by DecoObject equality). The client therefore renders
+decoration updates sent as the view moves; a server that only sends deco at
+join leaves everything beyond the join window bare.
+
 **`DecoManager` constants (IL):** `cChunkSize` = **128** (deco grid), `cUpdateDelay`
 = **1** s (update cadence), `cUpdateCoMaxTimeUs` = **900** us (per-update budget),
 `FILEVERSION` = 6 (deco file version).
