@@ -169,6 +169,13 @@ regions are grown with edge preference and neighbor checks
 world edges become water border. `BiomeType`: forest=0, burntForest=1, desert=2,
 snow=3, wasteland=4, waterDebug=6.
 
+**RE gap:** the runtime humidity/temperature grids feeding `GetHumidityAt` /
+`GetTemperatureAt` (IL sizes pinned, 808) - the 6-axis climate
+generation that maps (temp, moisture) to a biome per the biomes.xml
+`<climate>` section - are not captured in the corpus (the generation IL for
+those grids is unpinned). The BiomeType weights (13/18/22/23/24) are pinned
+(settings, 86); the moisture/temperature synthesis is not.
+
 The runtime registry `WorldBiomes` (loaded from `biomes.xml` by `readXML`)
 keeps `m_Color2BiomeMap : Dictionary<UInt32, BiomeDefinition>` (color-keyed
 lookup for image splats) and `m_Id2BiomeArr : BiomeDefinition[]`. `GetBiomeCount`
