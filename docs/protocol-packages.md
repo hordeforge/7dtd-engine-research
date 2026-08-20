@@ -961,6 +961,21 @@ count : i32
   if hasStacks: ItemStack.WriteArray
 ```
 
+`ItemStack.WriteArray` / `ReadArray` (ItemStack.il.txt): `i16 count`, `-1` = null
+(array), else count x `ItemStack.Write` (u16 stack count + ItemValue).
+
+`InventoryTransaction.Read` (InventoryTransaction.il.txt IL=74): per entry Guid +
+initialHash + finalHash + opCount + ops, then `TryGetTransactionalInventory(Guid)`;
+**unknown key logs `[InventoryTransaction] Could not find inventory with key
+{...}` and clears the whole op map** - the transaction then fails `Apply` (empty
+map returns false) and `TransactionRequestServer` runs the failure path
+(ForceUnlockByPlayer). Open RE gap: `InventoryManager.CreateInventoryServer`
+(Guid.NewGuid) has **no callers in the corpus**, so the server-side registry
+population path (who creates a TransactionalInventory for a container, and how
+the client learns the container's Guid key) is unpinned; candidate capture: the
+container-open sequence (NetPackageInventoryDataRequest + TE stream) against a
+stock dedi.
+
 Client `ProcessPackage` is currently a no-op (`ret` IL=1) on this build; server
 still emits the ack for remote players.
 
