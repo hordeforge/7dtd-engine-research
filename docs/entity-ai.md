@@ -1304,6 +1304,36 @@ keep their collider (setup for the land/crush path).
    (throttled **0.15s** via `lastTimeEndParticleSpawned`, gated on the block
    having a destroy particle), then item drops (below) and `SetDead()`.
 
+### 9.x Demolition (EntityZombieCop) prime-and-explode
+
+`EntityZombieCop.OnUpdateEntity` (IL=190, full-v3.1.0) - the Demolition
+zombie (`zombieCop` class, `explosionData` from EntityClass):
+
+1. Server-side only (`isEntityRemote` ret), skip while sleeping, `buffShocked`,
+   or dead.
+2. Not primed and `Health < MaxHealth * explodeHealthThreshold` -> PRIME:
+   `isPrimed = true`; `ticksToStartToExplode = explodeDelay * 20`; play the
+   `warnSoundName` one-shot (local entity audio, no wire).
+3. Primed and alive: `ticksToStartToExplode--`; at 0 -> `SpecialAttack2 =
+   true`, `ticksToExplode = (explodeDelay / 5) * 1.5 * 20`. Then
+   `ticksToExplode--`; at 0 -> `NotifySleeperDeath`, `SetModelLayer(2)`,
+   `GameManager.ExplosionServer(GetPosition(), worldToBlockPos(GetPosition()),
+   transform.rotation, EntityClass.list[entityClass].explosionData,
+   entityId, 0, false, null)`, `timeStayAfterDeath = 0`, `SetDead()`.
+4. `CopyPropertiesFromEntityClass` (IL=69) parses `ExplodeDelay` and
+   `ExplodeHealthThreshold` from entityclasses.xml (DynamicProperties.ParseFloat
+   via `PropExplodeDelay` / `PropExplodeHealthThreshold`); `explosionData`
+   itself is parsed in the `EntityClass` ctor from the `ExplosionData`
+   property (`newobj ExplosionData(DynamicProperties, MinEffectController)`,
+   EntityClass.il.txt:4581-4585). The ExplosionData value string fields
+   (radius, block/entity damage) are data-driven and not tabulated here.
+   Death during the countdown does NOT explode via this path (the `IsDead`
+   check skips the countdown); a death-time explosion, if any, is elsewhere.
+   Consumed by zdtd `ecs/systems.zig` (prime + countdown, explode request
+   ring drained by the Game: entity AoE + block damage via the
+   `addBlockDamage` choke point).
+
+
 **`Update()` (IL=147) client mesh + server mass:** non-dedicated clients lazily
 call `CreateMesh()` and enable `meshRenderer`; terrain blocks get
 `localScale = (terrainScale, terrainScale, terrainScale)` plus a
