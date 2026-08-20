@@ -164,13 +164,18 @@ valid empty encoding.
 
 ### XP curve
 
-`Progression::getExpForLevel` (1083482) is
-`BaseExpToLevel * Mathf.Pow(ExpMultiplier, L)`, clamped by `Math.Min` to
-2.14748365e9. `Progression::GetExpForNextLevel` (1083513) calls it with
-`Mathf.Clamp(Level + 1, 0, ClampExpCostAtLevel)`, so the exponent is `Level+1`, not
-`Level-1`. `ProgressionFromXml::parseLevelNode` (1088481) hardcoded fallbacks when
-the attribute is absent: `BaseExpToLevel = 500` (0x1f4),
-`ClampExpCostAtLevel = 300` (0x12c).
+`Progression::getExpForLevel(Single)` (1083482) is
+`Math.Min((float)BaseExpToLevel * Mathf.Pow(ExpMultiplier, L), 2.147484e9f)` then
+`conv.i4` (truncate; values >= 2^31 saturate to int.MaxValue). `Mathf.Pow`
+computes `(float)Math.Pow(f, p)` - double exponentiation rounded to float - so
+the result is not bit-identical to a pure float32 pow. `GetExpForNextLevel`
+(1083513) calls it with `Mathf.Clamp(Level + 1, 0, ClampExpCostAtLevel)`
+(int clamp, then `conv.r4`), so the exponent is `Level+1`, not `Level-1`.
+Golden: with the stock 10000/1.05/60 defaults, level 1->2 costs 11024
+(`10000f * (float)1.05f^2` in float32, truncation), and the clamp freezes the
+cost at 186791 from level 59 on. `ProgressionFromXml::parseLevelNode`
+(1088481) hardcoded fallbacks when the attribute is absent:
+`BaseExpToLevel = 500` (0x1f4), `ClampExpCostAtLevel = 300` (0x12c).
 
 ### Death penalty in V3.1.0
 
