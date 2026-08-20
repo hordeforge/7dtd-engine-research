@@ -1262,6 +1262,15 @@ DynamicMeshManager.ChunkChanged
 if ShowModelOnFall: EntityFactory "fallingBlock" + random motion → spawn
 ```
 
+`Block.ShowModelOnFall` (Block.il.txt 1876-18A2): `bShowModelOnFall` defaults
+to **true** when the blocks.xml property is absent; explicit
+`<property name="ShowModelOnFall" value="false"/>` disables the falling model
+for that block (stock blocks.xml: 13 explicit true / 67 explicit false; all
+other blocks default true). The singular spawn is `EntityFactory "fallingBlock"`
+at the cell center + (0.5, random Y -0.1..0.1, 0.5) with a random motion
+impulse; group mode is opt-in (`EntityFallingBlocks.Enabled` cctor default
+false).
+
 **`GroupFallingBlocks` (IL=292):** BFS from each ungrouped falling cell; 6-neighbor
 expand while neighbor is falling and not terrain; group size clamped by
 `GroupBounds.IsWithinSize`; enqueue finished groups.
