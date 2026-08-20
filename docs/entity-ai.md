@@ -439,7 +439,9 @@ see cache (called from OnUpdateLive before AI).
 - Movement/combat: `GetStaminaMultiplier` (IL=2) is 1 (base);
   `GetWalkType` (IL=3) = `walkType`; `IsAttackImpact` (IL=16) is the
   avatar controller's attack-impact flag; `GetMaxViewAngle` (IL=3) =
-  `maxViewAngle` (the `IsInFrontOfMe` cone half-angle);
+  `maxViewAngle` (the `IsInFrontOfMe` cone half-angle); the full move
+  chain (MoveHelper -> Entity::Move -> CharacterController, friction,
+  gravity, collision) is [entity-movement.md](entity-movement.md);
   `GetForwardVector` (IL=32) is the yaw-derived 3D forward
   (`cos(rotation.y * 0.0175 - pi), 0, -sin(...)` shape), with the 2D
   variant `GetForwardVector2` (IL=12); `GetHandItem` (IL=3) =

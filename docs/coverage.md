@@ -127,6 +127,7 @@ should be re-checked against IL before you rely on it.
 | [dynamic-mesh.md](dynamic-mesh.md) | audited (pass 1) |
 | [engine-limitations.md](engine-limitations.md) | audited (pass 1) |
 | [entity-ai.md](entity-ai.md) | audited (pass 1) |
+| [entity-movement.md](entity-movement.md) | audited (2026-08-20, movement chain + physics surface) |
 | [entity-stats.md](entity-stats.md) | audited (pass 1) |
 | [INDEX.md](INDEX.md) V3.1.0 shipped delta map (replaces retired experimental-delta) | audited (pass 1; map refreshed 2026-08-06) |
 | [full-surface.md](full-surface.md) | audited (pass 1) |

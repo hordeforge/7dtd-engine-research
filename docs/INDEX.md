@@ -221,6 +221,7 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 | [uai.md](uai.md) | Utility AI (UseAIPackages branch): packages, considerations, tasks, decision cycle |
 | [entity-stats.md](entity-stats.md) | Entity + survival stats: health/food/water/stamina over-time, damage |
 | [stealth-smell.md](stealth-smell.md) | Stealth/noise/smell: server detection inputs driving zombie sensing |
+| [entity-movement.md](entity-movement.md) | Move chain + physics surface: MoveHelper → Entity::Move → CC collision, gravity, friction |
 
 ### D. World, terrain, save
 
