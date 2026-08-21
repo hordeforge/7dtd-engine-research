@@ -857,6 +857,24 @@ A malformed version string is not fatal: `GameServerInfo`'s ctor seeds
 `get_IsCompatibleVersion` returns true whenever `Major < 0` (793930-793950). The
 browser row simply shows no version.
 
+### Login version gate: LongStringNoBuild vs compatibilityVersion
+
+The **client** sends the same value for both `version` and `compVersion` in
+`NetPackagePlayerLogin`: `Constants.cVersionInformation.LongStringNoBuild`
+(ConnectionManager 190595-ish: two `ldfld VersionInformation::LongStringNoBuild`
+immediately before `NetPackagePlayerLogin::Setup`). `LongStringNoBuild` is
+`String.Format("{0} {1}.{2}", ReleaseType, Major, Minor)` with the **raw**
+`Minor` (VersionInformation `ldstr {0} {1}.{2}` at IL_00BE), so for V3.1.0 b14
+it is **`V 3.10`** - NOT the display form "V 3.1.0" (Minor/10-Minor%10 split is
+only the display path).
+
+The **server** compares the client's `compVersion` (stored as
+`ClientInfo.compatibilityVersion`) against its own `LongStringNoBuild` with
+`String.Equals(..., OrdinalIgnoreCase)` in `VersionAuthorizer`; a mismatch
+returns `KickPlayerData(EKickReason.VersionMismatch=4, ...)` which becomes a
+`NetPackagePlayerDenied`. So a strict `compVersion == "V 3.10"` (case-insensitive)
+check is the stock gate; zdtd mirrors it (`version.zig` `stock_wire_comp`).
+
 `GameInfoString` has 20 members (796457-796476), including `SandboxPreset = 0x12`
 and `SandboxCode = 0x13`, which is where V3.1.0 keeps the difficulty/loot/XP
 preset that used to be individual serverconfig properties. The shipped V3.1.0
