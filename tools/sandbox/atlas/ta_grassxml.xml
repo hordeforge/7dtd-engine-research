@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<uvmapping>
+  <uv id="39" x="0.008300781" y="0.008300781" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1529412,0.1843137,0.07058824" globaluv="False" index="0" material="plants" texture="tallgrass.tga" />
+  <uv id="40" x="0.1499023" y="0.008300781" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1254902,0.1647059,0.01960784" globaluv="False" index="0" material="plants" texture="tallgrass2.tga" />
+  <uv id="177" x="0.2915039" y="0.008300781" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1333333,0.09803922,0.08627451" globaluv="False" index="0" material="wood" texture="deadpinebranch01.tga" />
+  <uv id="201" x="0.4331055" y="0.008300781" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2745098,0.2392157,0.2" globaluv="True" index="0" material="plants" texture="grass_brown.tga" />
+  <uv id="244" x="0.574707" y="0.008300781" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1411765,0.145098,0.08235294" globaluv="True" index="0" material="plants" texture="plant_chrysanthemum.tga" />
+  <uv id="306" x="0.7163086" y="0.008300781" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2588235,0.2509804,0.2352941" globaluv="True" index="0" material="plants" texture="grass_greenbrown.tga" />
+  <uv id="350" x="0.8579102" y="0.008300781" w="0.125" h="0.125" blockw="1" blockh="1" color="0.4156863,0.4313726,0.4352942" globaluv="False" index="0" material="plants" texture="grass_snowy.tga" />
+  <uv id="351" x="0.008300781" y="0.1499023" w="0.125" h="0.125" blockw="1" blockh="1" color="0.5333334,0.509804,0.4784314" globaluv="False" index="0" material="plants" texture="snowydeadbush.tga" />
+  <uv id="362" x="0.008300781" y="0.2915039" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1764706,0.1803922,0.07843138" globaluv="False" index="0" material="plants" texture="goldenrod.tga" />
+  <uv id="364" x="0.008300781" y="0.4331055" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1294118,0.1607843,0.05882353" globaluv="False" index="0" material="plants" texture="tallgrass3.tga" />
+  <uv id="365" x="0.008300781" y="0.574707" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1960784,0.1921569,0.1411765" globaluv="False" index="0" material="plants" texture="tallgrass4.tga" />
+  <uv id="368" x="0.008300781" y="0.7163086" w="0.125" h="0.125" blockw="1" blockh="1" color="0.3764706,0.372549,0.3686275" globaluv="False" index="0" material="plants" texture="grass_snowy02.tga" />
+  <uv id="369" x="0.008300781" y="0.8579102" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2862745,0.3019608,0.2705882" globaluv="False" index="0" material="plants" texture="grass_snowy03.tga" />
+  <uv id="370" x="0.1499023" y="0.1499023" w="0.125" h="0.125" blockw="1" blockh="1" color="0.3254902,0.3372549,0.3490196" globaluv="False" index="0" material="plants" texture="grass_snowy04.tga" />
+  <uv id="371" x="0.2915039" y="0.1499023" w="0.125" h="0.125" blockw="1" blockh="1" color="0,0,0" globaluv="False" index="0" material="plants" texture="grass_greenbrown02.tga" />
+  <uv id="377" x="0.4331055" y="0.1499023" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1960784,0.1960784,0.1372549" globaluv="False" index="0" material="plants" texture="desert_shrub.tga" />
+  <uv id="395" x="0.574707" y="0.1499023" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2313726,0.2313726,0.1058824" globaluv="False" index="0" material="plants" texture="coffee_plant.tga" />
+  <uv id="401" x="0.7163086" y="0.1499023" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1764706,0.1843137,0.07843138" globaluv="False" index="0" material="plants" texture="goldenrod_sprout.tga" />
+  <uv id="402" x="0.8579102" y="0.1499023" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1764706,0.1843137,0.07843138" globaluv="False" index="0" material="plants" texture="goldenrod_young.tga" />
+  <uv id="550" x="0.1499023" y="0.2915039" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2588235,0.254902,0.1607843" globaluv="False" index="0" material="plants" texture="plant_chrysanthemum_sprout.tga" />
+  <uv id="551" x="0.1499023" y="0.4331055" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2588235,0.2666667,0.172549" globaluv="False" index="0" material="plants" texture="plant_chrysanthemum_growing.tga" />
+  <uv id="561" x="0.1499023" y="0.574707" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2431373,0.1686275,0.1058824" globaluv="False" index="0" material="plants" texture="forestgrass01.tga" />
+  <uv id="562" x="0.1499023" y="0.7163086" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2980392,0.2627451,0.1333333" globaluv="False" index="0" material="plants" texture="forestgrass02.tga" />
+  <uv id="563" x="0.1499023" y="0.8579102" w="0.125" h="0.125" blockw="1" blockh="1" color="0.3960785,0.3411765,0.227451" globaluv="False" index="0" material="plants" texture="forestgrass03.tga" />
+  <uv id="564" x="0.2915039" y="0.2915039" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2980392,0.254902,0.1843137" globaluv="False" index="0" material="plants" texture="forestgrass04.tga" />
+  <uv id="565" x="0.4331055" y="0.2915039" w="0.125" h="0.125" blockw="1" blockh="1" color="0.3568628,0.345098,0.2745098" globaluv="False" index="0" material="plants" texture="forestgrass05.tga" />
+  <uv id="567" x="0.574707" y="0.2915039" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2235294,0.1803922,0.1019608" globaluv="False" index="0" material="plants" texture="forestflower01.tga" />
+  <uv id="568" x="0.7163086" y="0.2915039" w="0.125" h="0.125" blockw="1" blockh="1" color="0.2901961,0.2941177,0.2509804" globaluv="False" index="0" material="plants" texture="snowberry.tga" />
+  <uv id="573" x="0.8579102" y="0.2915039" w="0.125" h="0.125" blockw="1" blockh="1" color="0.1607843,0.1960784,0.07843138" globaluv="False" index="0" material="plants" texture="grassShort1.tga" />
+</uvmapping>

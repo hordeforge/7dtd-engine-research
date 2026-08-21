@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<uvmapping>
+    <uv  id="223" x="0" y="0" w="1" h="1" blockw="4" blockh="4" color="0.45703125,0.45703125,0.3359375" material="water" />
+</uvmapping>
