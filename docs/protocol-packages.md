@@ -1788,6 +1788,23 @@ condition):** `NetPackageAudio` (10 fields; `soundGroupName` null-coalesced),
 `NetPackageWeather` (neither list length written - inferred by reader),
 `NetPackageWorldAreas` (version:u8=1, count:i16).
 
+#### `NetPackageTurretSync` (ToClient)
+
+Body (read IL=20, re-verified 2026-08-21):
+
+```text
+entityId       : i32
+targetEntityId : i32
+isOn           : bool
+itemValue      : ItemValue (null-safe write; byte 0 for None)
+```
+
+**Sender:** `EntityTurret` (re-broadcast to tracked players when
+`TargetEntityId` / `IsOn` / `OriginalItemValue` change - the lastX/lastY
+comparison in the entity update); the client aims the turret at the target
+and plays the fire state. zdtd emits the item value as None (the sim turret
+stats come from zdtd defaults, not a weapon item).
+
 #### `NetPackagePlayerSetBackpackPosition` (ToClient)
 
 Body (read IL=29, re-verified 2026-08-21):
@@ -1894,6 +1911,8 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-21:** TurretSync pinned: body (entityId + targetEntityId + isOn +
+  ItemValue) and the EntityTurret change-gated broadcast.
 - **2026-08-21:** PlayerSetBackpackPosition pinned: body (playerId + count u8
   + Vector3i list), senders (EntityBackpack placement / PersistentPlayerData
   cleanup).
