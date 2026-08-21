@@ -251,6 +251,14 @@ Concrete rewards: `RewardExp`, `RewardItem`, `RewardLootItem`, `RewardTreasureIt
 `RewardRecipe`, `RewardSkill`, `RewardSkillPoints`, `RewardLevel`, `RewardQuest`
 (chain: `IsChainQuest` unlocks the next quest), `RewardShowMessageWindow`.
 
+**Reward parsing (verified 2026-08-22 against the shipped quests.xml):**
+`RewardLootItem` entries use a **loot-group id** in the `id` attribute
+(`groupQuestWeapons`, `groupChallengeRewardSkillMagazinesAll`, ...) with
+`value` = pick count and `ischosen`/`isfixed` selecting the entries
+(`ischosen="true"` = prob-weighted picks; `isfixed="true"` = the first
+`value` entries deterministically). `RewardQuest` entries carry the chained
+quest id in `id`; the turn-in grants it to the player's journal.
+
 **Reward leaves (all IL-verified):** `BaseReward.GetRewardText()` (IL=2)
 returns "" and `SetupGlobalRewardSettings()` (IL=1) is a no-op (the subclass
 hooks); `RewardItem.GetRewardText()` (IL=12) is
