@@ -923,6 +923,25 @@ entity (discards when not an EntityPlayer), and on the server applies
 that computes stealth authoritatively (crouch from movement frames, smell
 from buffs) can treat the report as a redundant echo.
 
+### 5.13 NetPackageQuestGotoPoint / NetPackageQuestTreasurePoint (ToServer)
+
+`QuestGotoPoint` (`read` IL=43): traderId i32, playerId i32, questCode i32,
+questTags (FastTags), position Vector2, size Vector3, difficulty u8,
+GotoType u8, biomeFilterType u8, biomeFilter string. The client reports
+reaching the goto marker; `ProcessPackage` (IL=312) validates the player is
+at the point and completes the objective. A server that completes goto
+objectives by proximity (each tick, radius^2 check against the quest
+target/POI) can treat the report as a redundant echo.
+
+`QuestTreasurePoint` (`read` IL=54): playerId i32, distance f32, offset
+i32, treasureRadius f32, questCode i32, position Vector3i, useNearby bool,
+treasureOffset Vector3, blocksPerReduction i32, ActionType u8. The client
+reports treasure-dig progress (`QuestPointActions` SetTreasureContainerPosition
+etc.); the fetch/treasure objectives complete through the client's
+`QuestObjectiveUpdate` treasure_complete event on the same server. A server
+that advances the fetch phase from that event can treat this package as a
+redundant echo.
+
 
 ---
 
@@ -2134,6 +2153,12 @@ editor/prefab tooling. So sending `bInfinite=false` with disc-formula bounds
 cannot wedge or visibly alter the b14 client.
 
 ## Changelog
+
+- **2026-08-21:** NetPackageQuestGotoPoint/QuestTreasurePoint pinned: the
+  goto-marker report body + proximity-completion semantics, and the
+  treasure-dig report (redundant echoes for servers that complete goto
+  objectives by proximity and fetch phases from QuestObjectiveUpdate
+  treasure_complete).
 
 - **2026-08-21:** NetPackageParticleEffect pinned: ParticleEffect.Write body
   + entityThatCausedIt/forceCreation/worldSpawn, and the
