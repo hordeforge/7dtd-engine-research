@@ -195,6 +195,20 @@ JSON; `AddBan` / `GetBanned` back `ConsoleCmdBan` and the webserver
 `Permissions.Blacklist` REST API. Complements
 [console-commands.md](console-commands.md) and [webserver.md](webserver.md).
 
+**`BansAndWhitelistAuthorizer.Authorize` (IL=71) - the exact login gate:**
+1. `Blacklist.IsBanned(PlatformId)` -> deny `EKickReason.Banned(6)` with
+   bannedUntil + reason.
+2. `Blacklist.IsBanned(CrossplatformId)` -> same.
+3. `Whitelist.IsWhiteListEnabled()` (IL=29: whitelistedUsers or
+   whitelistedGroups non-empty) -> if disabled, allow.
+4. `Whitelist.IsWhitelisted(client)` (IL=58: PlatformId or CrossplatformId
+   in whitelistedUsers, or any `groupMemberships` key in
+   whitelistedGroups) -> allow.
+5. `AdminUsers.HasEntry(client)` (IL=30) -> allow (**admins bypass the
+   whitelist**).
+6. Otherwise deny `EKickReason.NotOnWhitelist(7)` with an empty DateTime
+   and reason.
+
 ## EntitlementManager
 
 Singleton gating DLC/cosmetic entitlement sets (`HasEntitlement`,
@@ -1398,6 +1412,12 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 | [INDEX.md](INDEX.md) | Hub |
 
 ## Changelog
+
+- **2026-08-21:** BansAndWhitelistAuthorizer.Authorize pinned: the exact
+  login gate (Banned(6) on platform/crossplatform id, whitelist enabled ->
+  IsWhitelisted or HasEntry bypass, else NotOnWhitelist(7)); and the
+  on-disk serveradmin.xml element names (top-level `<users>`, `<whitelist>`,
+  `<blacklist>`, `<commands>`).
 
 - **2026-08-11:** Memory-pool IL re-verified: MemoryPools.InitStatic IL=45, MemoryPooledObject Alloc IL=33 / AllocSync IL=20 / Cleanup IL=43 / GetPoolSize IL=3 (exact).
 - **2026-08-11:** StreamUtils IL re-verified: ReadVector3/ReadVector3i IL=8, ReadQuaterion IL=10, ReadColor32 IL=39, WriteColor32 IL=34, ReadString IL=8, Write(BinaryWriter,String) IL=11, ReadGuid IL=18, Read7BitEncodedInt IL=37, Write7BitEncodedInt IL=24 / Signed IL=70, ReadInt32 IL=28/56, ReadByte IL=12, Write(Stream,Int32) IL=31 / Write(Byte[],Int32,ref) IL=67, StreamCopy IL=42/48, WriteStreamToFile IL=15/16 (exact).
