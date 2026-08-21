@@ -140,6 +140,16 @@ edits); `DestroyFileWatcher()` (IL=10) disposes and nulls it.
 known module via `AdminSectionAbs.Parse` and collects unknown ones into
 `unknownSections` with `Ignoring unknown section in permissions file:`;
 `WriteSections(root)` (IL=24) saves every module under the root.
+**On-disk element names (verified against a shipped V3.1.0
+`serveradmin.xml`):** the admin users live in a top-level `<users>` section
+(`<user platform="Steam" userid="76561198021925107" name="..."
+permission_level="0" />`; `ParseSection`'s `admins` label is the module
+name, not the element), followed by `<whitelist>` (`<whitelisted .../>`),
+`<blacklist>` (`<blacklisted platform= userid= name= unbandate= reason=/>`)
+and `<commands>` (`<permission cmd= permission_level=/>`). Users default to
+permission level 1000 when unlisted; the level is 0-1000 and commands gate
+at the user's level. Older builds nested `<users>` under `<admins>`;
+readers should accept both.
 `ParseUserIdentifier(element)` (IL=39) uses
 `PlatformUserIdentifierAbs.FromXml` with a legacy `steamID` attribute
 fallback (`UserIdentifierSteam`), warning on invalid / missing attributes.
