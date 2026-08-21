@@ -816,6 +816,7 @@
  "options": [
   {
    "id": 0,
+   "name": "RangedDamage",
    "display": "Ranged Damage",
    "category": "General",
    "valueset": "DamageValues",
@@ -824,6 +825,7 @@
   },
   {
    "id": 1,
+   "name": "MeleeDamage",
    "display": "Melee Damage",
    "category": "General",
    "valueset": "DamageValues",
@@ -832,6 +834,7 @@
   },
   {
    "id": 2,
+   "name": "BlockDamage",
    "display": "Block Damage",
    "category": "General",
    "valueset": "DamageValues",
@@ -840,6 +843,7 @@
   },
   {
    "id": 3,
+   "name": "TerrainDamage",
    "display": "Terrain Damage",
    "category": "General",
    "valueset": "DamageValues",
@@ -848,6 +852,7 @@
   },
   {
    "id": 4,
+   "name": "HeadshotMultiplier",
    "display": "Headshot Multiplier",
    "category": "General",
    "valueset": "DamageValues",
@@ -856,6 +861,7 @@
   },
   {
    "id": 5,
+   "name": "CrouchSpeed",
    "display": "Crouch Speed",
    "category": "General",
    "valueset": "PlayerSpeedValues",
@@ -864,6 +870,7 @@
   },
   {
    "id": 6,
+   "name": "WalkSpeed",
    "display": "Walk Speed",
    "category": "General",
    "valueset": "PlayerSpeedValuesWithNone",
@@ -872,6 +879,7 @@
   },
   {
    "id": 7,
+   "name": "RunSpeed",
    "display": "Run Speed",
    "category": "General",
    "valueset": "PlayerSpeedValues",
@@ -880,6 +888,7 @@
   },
   {
    "id": 8,
+   "name": "JumpStrength",
    "display": "Jump Height",
    "category": "General",
    "valueset": "JumpStrength",
@@ -888,6 +897,7 @@
   },
   {
    "id": 9,
+   "name": "StaminaUsage",
    "display": "Stamina Usage",
    "category": "General",
    "valueset": "StaminaUsage",
@@ -896,6 +906,7 @@
   },
   {
    "id": 10,
+   "name": "StaminaRegen",
    "display": "Stamina Regen",
    "category": "General",
    "valueset": "StaminaRegen",
@@ -904,6 +915,7 @@
   },
   {
    "id": 11,
+   "name": "PlayerLevelBonusApplied",
    "display": "Level Health/Stam Bonus",
    "category": "General",
    "valueset": "YesNo",
@@ -912,6 +924,7 @@
   },
   {
    "id": 12,
+   "name": "JarRefund",
    "display": "Jar Refund",
    "category": "General",
    "valueset": "JarRefund",
@@ -920,6 +933,7 @@
   },
   {
    "id": 13,
+   "name": "ShowHealthBars",
    "display": "Entity Health Bars",
    "category": "Entities",
    "valueset": "YesNo",
@@ -928,6 +942,7 @@
   },
   {
    "id": 14,
+   "name": "ShowEnemyDamage",
    "display": "Show Entity Damage",
    "category": "Entities",
    "valueset": "YesNo",
@@ -936,6 +951,7 @@
   },
   {
    "id": 15,
+   "name": "NewbieCoat",
    "display": "Allow Newbie Coat",
    "category": "General",
    "valueset": "YesNo",
@@ -944,6 +960,7 @@
   },
   {
    "id": 16,
+   "name": "HeadshotMode",
    "display": "Headshot Mode",
    "category": "Entities",
    "valueset": "HeadshotMode",
@@ -952,6 +969,7 @@
   },
   {
    "id": 17,
+   "name": "IncomingDamage",
    "display": "Incoming Damage",
    "category": "General",
    "valueset": "DamageValues",
@@ -960,6 +978,7 @@
   },
   {
    "id": 18,
+   "name": "XPMultiplier",
    "display": "XP Multiplier",
    "category": "General",
    "valueset": "XPGain",
@@ -968,6 +987,7 @@
   },
   {
    "id": 19,
+   "name": "ShowXP",
    "display": "Show XP",
    "category": "General",
    "valueset": "ShowXP",
@@ -976,6 +996,7 @@
   },
   {
    "id": 20,
+   "name": "EncumbranceModifier",
    "display": "Encumbrance Modifier",
    "category": "General",
    "valueset": "Encumbrance",
@@ -984,6 +1005,7 @@
   },
   {
    "id": 21,
+   "name": "ItemDegradation",
    "display": "Item Degradation",
    "category": "Crafting",
    "valueset": "DisabledLowDefaultHigh",
@@ -992,6 +1014,7 @@
   },
   {
    "id": 22,
+   "name": "LoseItemsOnDeathType",
    "display": "Lose Items Death Type",
    "category": "General",
    "valueset": "LoseItemsOnDeathType",
@@ -1000,6 +1023,7 @@
   },
   {
    "id": 23,
+   "name": "LoseItemsOnDeathCount",
    "display": "Lose Items Death Count",
    "category": "General",
    "valueset": "LoseItemCount",
@@ -1008,6 +1032,7 @@
   },
   {
    "id": 24,
+   "name": "DegradeItemsOnDeath",
    "display": "Degrade Items On Death",
    "category": "General",
    "valueset": "DegradeItemsOnDeath",
@@ -1016,6 +1041,7 @@
   },
   {
    "id": 25,
+   "name": "DegradeAmountOnDeath",
    "display": "Degrade Amount On Death",
    "category": "General",
    "valueset": "MaxDegradationAmounts",
@@ -1024,6 +1050,7 @@
   },
   {
    "id": 26,
+   "name": "DeathPenalty",
    "display": "Death Penalty",
    "category": "General",
    "valueset": "DeathPenalty",
@@ -1032,6 +1059,7 @@
   },
   {
    "id": 27,
+   "name": "DropOnDeath",
    "display": "Drop On Death",
    "category": "General",
    "valueset": "DropOnDeath",
@@ -1040,6 +1068,7 @@
   },
   {
    "id": 28,
+   "name": "DropOnQuit",
    "display": "Drop On Quit",
    "category": "General",
    "valueset": "DropOnQuit",
@@ -1048,6 +1077,7 @@
   },
   {
    "id": 29,
+   "name": "InfectionRate",
    "display": "Infection Rate",
    "category": "General",
    "valueset": "SpeedValues",
@@ -1056,6 +1086,7 @@
   },
   {
    "id": 30,
+   "name": "EnemySpawnMode",
    "display": "Enemy Spawn",
    "category": "Entities",
    "valueset": "YesNo",
@@ -1064,6 +1095,7 @@
   },
   {
    "id": 31,
+   "name": "EntityDamage",
    "display": "Entity Damage",
    "category": "Entities",
    "valueset": "DamageValues",
@@ -1072,6 +1104,7 @@
   },
   {
    "id": 32,
+   "name": "BlockDamageAI",
    "display": "Entity Block Damage",
    "category": "Entities",
    "valueset": "DamageValues",
@@ -1080,6 +1113,7 @@
   },
   {
    "id": 33,
+   "name": "BlockDamageAIBM",
    "display": "Blood Moon Block Damage",
    "category": "Entities",
    "valueset": "DamageValues",
@@ -1088,6 +1122,7 @@
   },
   {
    "id": 34,
+   "name": "ZombieMove",
    "display": "Zombie Day Speed",
    "category": "Entities",
    "valueset": "ZombieSpeeds",
@@ -1096,6 +1131,7 @@
   },
   {
    "id": 35,
+   "name": "ZombieMoveNight",
    "display": "Zombie Night Speed",
    "category": "Entities",
    "valueset": "ZombieSpeeds",
@@ -1104,6 +1140,7 @@
   },
   {
    "id": 36,
+   "name": "ZombieFeralMove",
    "display": "Zombie Feral Speed",
    "category": "Entities",
    "valueset": "ZombieSpeeds",
@@ -1112,6 +1149,7 @@
   },
   {
    "id": 37,
+   "name": "ZombieBMMove",
    "display": "Zombie Blood Moon Speed",
    "category": "Entities",
    "valueset": "ZombieSpeeds",
@@ -1120,6 +1158,7 @@
   },
   {
    "id": 38,
+   "name": "ZombieFeralSense",
    "display": "Zombie Feral Sense",
    "category": "Entities",
    "valueset": "ZombieFeralSense",
@@ -1128,6 +1167,7 @@
   },
   {
    "id": 39,
+   "name": "AISmellMode",
    "display": "Zombie AI Smell Mode",
    "category": "Entities",
    "valueset": "AISmellMode",
@@ -1136,6 +1176,7 @@
   },
   {
    "id": 40,
+   "name": "AllowZombieDigging",
    "display": "Allow Zombie Digging",
    "category": "Entities",
    "valueset": "YesNo",
@@ -1144,6 +1185,7 @@
   },
   {
    "id": 41,
+   "name": "ZombieRageChance",
    "display": "Zombie Rage Chance",
    "category": "Entities",
    "valueset": "ZombieRageChance",
@@ -1152,6 +1194,7 @@
   },
   {
    "id": 42,
+   "name": "EntityIncomingDamage",
    "display": "Entity Incoming Damage",
    "category": "Entities",
    "valueset": "DamageValuesNoNone",
@@ -1160,6 +1203,7 @@
   },
   {
    "id": 43,
+   "name": "MaxEnemyTier",
    "display": "Max Enemy Type",
    "category": "Entities",
    "valueset": "MaxEnemyType",
@@ -1168,6 +1212,7 @@
   },
   {
    "id": 44,
+   "name": "BiomeDayZombieRespawn",
    "display": "Day Enemy Respawn",
    "category": "Entities",
    "valueset": "SlowToFast",
@@ -1176,6 +1221,7 @@
   },
   {
    "id": 45,
+   "name": "BiomeDayAnimalRespawn",
    "display": "Day Animal Respawn",
    "category": "Entities",
    "valueset": "SlowToFast",
@@ -1184,6 +1230,7 @@
   },
   {
    "id": 46,
+   "name": "BiomeDayEnemyDensity",
    "display": "Day Enemy Density",
    "category": "Entities",
    "valueset": "BiomeEnemyDensity",
@@ -1192,6 +1239,7 @@
   },
   {
    "id": 47,
+   "name": "ZombiesEatAnimals",
    "display": "Zombies Eat Animals",
    "category": "Entities",
    "valueset": "YesNo",
@@ -1200,6 +1248,7 @@
   },
   {
    "id": 48,
+   "name": "BloodMoonFrequency",
    "display": "Blood Moon Frequency",
    "category": "World",
    "valueset": "BloodMoonFrequency",
@@ -1208,6 +1257,7 @@
   },
   {
    "id": 49,
+   "name": "BloodMoonRange",
    "display": "Blood Moon Range",
    "category": "World",
    "valueset": "BloodMoonRange",
@@ -1216,6 +1266,7 @@
   },
   {
    "id": 50,
+   "name": "BloodMoonWarning",
    "display": "Blood Moon Warning",
    "category": "World",
    "valueset": "BloodMoonWarning",
@@ -1224,6 +1275,7 @@
   },
   {
    "id": 51,
+   "name": "BloodMoonEnemyCount",
    "display": "Blood Moon Count",
    "category": "World",
    "valueset": "BloodMoonCount",
@@ -1232,6 +1284,7 @@
   },
   {
    "id": 52,
+   "name": "AirDropFrequency",
    "display": "Air Drops",
    "category": "World",
    "valueset": "AirDrops",
@@ -1240,6 +1293,7 @@
   },
   {
    "id": 53,
+   "name": "AirDropMarker",
    "display": "Mark Air Drops",
    "category": "World",
    "valueset": "YesNo",
@@ -1248,6 +1302,7 @@
   },
   {
    "id": 54,
+   "name": "AirDropRandomTime",
    "display": "Air Drop Random Time",
    "category": "World",
    "valueset": "AirDropRandomTime",
@@ -1256,6 +1311,7 @@
   },
   {
    "id": 55,
+   "name": "BiomeProgression",
    "display": "Biome Progression",
    "category": "World",
    "valueset": "YesNo",
@@ -1264,6 +1320,7 @@
   },
   {
    "id": 56,
+   "name": "TemperatureSurvival",
    "display": "Temperature Survival",
    "category": "World",
    "valueset": "YesNo",
@@ -1272,6 +1329,7 @@
   },
   {
    "id": 57,
+   "name": "StormFreq",
    "display": "Storm Frequency",
    "category": "World",
    "valueset": "StormFrequency",
@@ -1280,6 +1338,7 @@
   },
   {
    "id": 58,
+   "name": "StormWarning",
    "display": "Storm Warning",
    "category": "World",
    "valueset": "YesNo",
@@ -1288,6 +1347,7 @@
   },
   {
    "id": 59,
+   "name": "HeatMapSensitivity",
    "display": "Heatmap Sensitivity",
    "category": "World",
    "valueset": "DisabledLowDefaultHigh",
@@ -1296,6 +1356,7 @@
   },
   {
    "id": 60,
+   "name": "GlobalGSModifier",
    "display": "Global GameStage",
    "category": "World",
    "valueset": "LowDefaultHigh",
@@ -1304,6 +1365,7 @@
   },
   {
    "id": 61,
+   "name": "BiomeGSModifier",
    "display": "Biome GameStage",
    "category": "World",
    "valueset": "LowDefaultHigh",
@@ -1312,6 +1374,7 @@
   },
   {
    "id": 62,
+   "name": "GlobalLSModifier",
    "display": "Global LootStage",
    "category": "Resources",
    "valueset": "LowDefaultHigh",
@@ -1320,6 +1383,7 @@
   },
   {
    "id": 63,
+   "name": "BiomeLSModifier",
    "display": "Biome LootStage",
    "category": "Resources",
    "valueset": "LowDefaultHigh",
@@ -1328,6 +1392,7 @@
   },
   {
    "id": 64,
+   "name": "POITierLSModifier",
    "display": "POI Tier LootStage",
    "category": "Resources",
    "valueset": "LowDefaultHigh",
@@ -1336,6 +1401,7 @@
   },
   {
    "id": 65,
+   "name": "GlobalTSModifier",
    "display": "Global TraderStage",
    "category": "Traders",
    "valueset": "LowDefaultHigh",
@@ -1344,6 +1410,7 @@
   },
   {
    "id": 66,
+   "name": "DayNightLength",
    "display": "24 Day Cycle",
    "category": "World",
    "valueset": "DayNightLength",
@@ -1352,6 +1419,7 @@
   },
   {
    "id": 67,
+   "name": "DayLightLength",
    "display": "Day Light Length",
    "category": "World",
    "valueset": "DayLightLength",
@@ -1360,6 +1428,7 @@
   },
   {
    "id": 68,
+   "name": "AllowMap",
    "display": "Allow Map",
    "category": "World",
    "valueset": "YesNo",
@@ -1368,6 +1437,7 @@
   },
   {
    "id": 69,
+   "name": "AllowCompass",
    "display": "Allow Compass",
    "category": "World",
    "valueset": "YesNo",
@@ -1376,6 +1446,7 @@
   },
   {
    "id": 70,
+   "name": "AllowScreenMarkers",
    "display": "Allow Screen Markers",
    "category": "World",
    "valueset": "YesNo",
@@ -1384,6 +1455,7 @@
   },
   {
    "id": 71,
+   "name": "ShowLocationInfo",
    "display": "Show Location Info",
    "category": "World",
    "valueset": "ShowLocationTypes",
@@ -1392,6 +1464,7 @@
   },
   {
    "id": 72,
+   "name": "ShowDayTime",
    "display": "Show Day/Time",
    "category": "World",
    "valueset": "YesNo",
@@ -1400,6 +1473,7 @@
   },
   {
    "id": 73,
+   "name": "WorkstationsInTheWild",
    "display": "Workstations in the Wild",
    "category": "World",
    "valueset": "JarRefund",
@@ -1408,6 +1482,7 @@
   },
   {
    "id": 74,
+   "name": "MaxTechType",
    "display": "Max Tech Type",
    "category": "World",
    "valueset": "MaxTechType",
@@ -1416,6 +1491,7 @@
   },
   {
    "id": 75,
+   "name": "LootRespawnDays",
    "display": "Loot Respawn Days",
    "category": "Resources",
    "valueset": "LootRespawnDays",
@@ -1424,6 +1500,7 @@
   },
   {
    "id": 76,
+   "name": "LootTimer",
    "display": "Loot Time",
    "category": "Resources",
    "valueset": "SpeedValues",
@@ -1432,6 +1509,7 @@
   },
   {
    "id": 77,
+   "name": "LootMaxTier",
    "display": "Loot Max Tier",
    "category": "Resources",
    "valueset": "ItemTierOptions",
@@ -1440,6 +1518,7 @@
   },
   {
    "id": 78,
+   "name": "GlobalLootCount",
    "display": "Global Loot Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1448,6 +1527,7 @@
   },
   {
    "id": 79,
+   "name": "FoodLootCount",
    "display": "Food Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1456,6 +1536,7 @@
   },
   {
    "id": 80,
+   "name": "DrinkLootCount",
    "display": "Drink Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1464,6 +1545,7 @@
   },
   {
    "id": 81,
+   "name": "MedicalLootCount",
    "display": "Medical Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1472,6 +1554,7 @@
   },
   {
    "id": 82,
+   "name": "AmmoLootCount",
    "display": "Ammo Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1480,6 +1563,7 @@
   },
   {
    "id": 83,
+   "name": "ResourceLootCount",
    "display": "Resource Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1488,6 +1572,7 @@
   },
   {
    "id": 84,
+   "name": "ArmorLootCount",
    "display": "Armor Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1496,6 +1581,7 @@
   },
   {
    "id": 85,
+   "name": "MeleeLootCount",
    "display": "Melee Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1504,6 +1590,7 @@
   },
   {
    "id": 86,
+   "name": "RangedLootCount",
    "display": "Ranged Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1512,6 +1599,7 @@
   },
   {
    "id": 87,
+   "name": "DukesLootCount",
    "display": "Dukes Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1520,6 +1608,7 @@
   },
   {
    "id": 88,
+   "name": "CraftingMagazinesLootCount",
    "display": "Magazines Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1528,6 +1617,7 @@
   },
   {
    "id": 89,
+   "name": "TreasureMapChance",
    "display": "Treasure Map Chance",
    "category": "Resources",
    "valueset": "PlayerSpeedValues",
@@ -1536,6 +1626,7 @@
   },
   {
    "id": 90,
+   "name": "LootBagChance",
    "display": "Loot Bag Chance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1544,6 +1635,7 @@
   },
   {
    "id": 91,
+   "name": "CropOutput",
    "display": "Crop Output",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1552,6 +1644,7 @@
   },
   {
    "id": 92,
+   "name": "SeedDropOutput",
    "display": "Seed Drop Output",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1560,6 +1653,7 @@
   },
   {
    "id": 93,
+   "name": "CropGrowthSpeed",
    "display": "Crop Growth",
    "category": "Resources",
    "valueset": "CropGrowthSpeed",
@@ -1568,6 +1662,7 @@
   },
   {
    "id": 94,
+   "name": "BackpackCrafting",
    "display": "Backpack Crafting",
    "category": "Crafting",
    "valueset": "BackpackCrafting",
@@ -1576,6 +1671,7 @@
   },
   {
    "id": 95,
+   "name": "WorkstationCrafting",
    "display": "Workstation Crafting",
    "category": "Crafting",
    "valueset": "YesNo",
@@ -1584,6 +1680,7 @@
   },
   {
    "id": 96,
+   "name": "CraftingProgression",
    "display": "Crafting Progression",
    "category": "Crafting",
    "valueset": "YesNo",
@@ -1592,6 +1689,7 @@
   },
   {
    "id": 97,
+   "name": "CraftingTime",
    "display": "Crafting Time",
    "category": "Crafting",
    "valueset": "SpeedValues",
@@ -1600,6 +1698,7 @@
   },
   {
    "id": 98,
+   "name": "CraftingInput",
    "display": "Crafting Input",
    "category": "Crafting",
    "valueset": "SpeedValues",
@@ -1608,6 +1707,7 @@
   },
   {
    "id": 99,
+   "name": "CraftingOutput",
    "display": "Crafting Output",
    "category": "Crafting",
    "valueset": "StaminaRegen",
@@ -1616,6 +1716,7 @@
   },
   {
    "id": 100,
+   "name": "CraftingMaxTier",
    "display": "Crafting Max Tier",
    "category": "Crafting",
    "valueset": "ItemTierOptions",
@@ -1624,6 +1725,7 @@
   },
   {
    "id": 101,
+   "name": "MiningOutput",
    "display": "Mining Output",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1632,6 +1734,7 @@
   },
   {
    "id": 102,
+   "name": "HarvestingOutput",
    "display": "Harvesting Output",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1640,6 +1743,7 @@
   },
   {
    "id": 103,
+   "name": "ScrappingOutput",
    "display": "Scrapping Output",
    "category": "Crafting",
    "valueset": "SpeedValues",
@@ -1648,6 +1752,7 @@
   },
   {
    "id": 104,
+   "name": "SmeltingType",
    "display": "Smelter Type",
    "category": "Crafting",
    "valueset": "SmeltingType",
@@ -1656,6 +1761,7 @@
   },
   {
    "id": 105,
+   "name": "DewCollectorTime",
    "display": "Dew Collector Time",
    "category": "Crafting",
    "valueset": "SpeedValues",
@@ -1664,6 +1770,7 @@
   },
   {
    "id": 106,
+   "name": "DewCollectorOutput",
    "display": "Dew Collector Output",
    "category": "Crafting",
    "valueset": "CollectorOutput",
@@ -1672,6 +1779,7 @@
   },
   {
    "id": 107,
+   "name": "DewCollectorInput",
    "display": "Dew Collector Input",
    "category": "Crafting",
    "valueset": "DewCollectorInput",
@@ -1680,6 +1788,7 @@
   },
   {
    "id": 108,
+   "name": "ApiaryTime",
    "display": "Apiary Time",
    "category": "Crafting",
    "valueset": "SpeedValues",
@@ -1688,6 +1797,7 @@
   },
   {
    "id": 109,
+   "name": "ApiaryOutput",
    "display": "Apiary Output",
    "category": "Crafting",
    "valueset": "CollectorOutput",
@@ -1696,6 +1806,7 @@
   },
   {
    "id": 110,
+   "name": "ApiaryInput",
    "display": "Apiary Input",
    "category": "Crafting",
    "valueset": "ApiaryInput",
@@ -1704,6 +1815,7 @@
   },
   {
    "id": 111,
+   "name": "BookLootCount",
    "display": "Book Abundance",
    "category": "Resources",
    "valueset": "LootAbundanceValues",
@@ -1712,6 +1824,7 @@
   },
   {
    "id": 112,
+   "name": "CrouchRunSpeed",
    "display": "Crouch Run Speed",
    "category": "General",
    "valueset": "PlayerSpeedValues",
@@ -1720,6 +1833,7 @@
   },
   {
    "id": 113,
+   "name": "RepairTypes",
    "display": "Item Repair Types",
    "category": "Crafting",
    "valueset": "RepairTypes",
@@ -1728,6 +1842,7 @@
   },
   {
    "id": 114,
+   "name": "MaxDegradationAmount",
    "display": "Max Degrade Amount",
    "category": "Crafting",
    "valueset": "MaxDegradationAmounts",
@@ -1736,6 +1851,7 @@
   },
   {
    "id": 115,
+   "name": "PointsPerMagazine",
    "display": "Magazine Points",
    "category": "Crafting",
    "valueset": "PointsPer",
@@ -1744,6 +1860,7 @@
   },
   {
    "id": 116,
+   "name": "SkillGainRate",
    "display": "Skill Gain Rate",
    "category": "General",
    "valueset": "SkillGainRate",
@@ -1752,6 +1869,7 @@
   },
   {
    "id": 117,
+   "name": "SkillPointsPerLevel",
    "display": "Skill Gain Amount",
    "category": "General",
    "valueset": "PointsPer",
@@ -1760,6 +1878,7 @@
   },
   {
    "id": 118,
+   "name": "QuestsEnabled",
    "display": "Quests Enabled",
    "category": "Tasks",
    "valueset": "YesNo",
@@ -1768,6 +1887,7 @@
   },
   {
    "id": 119,
+   "name": "IntroQuestEnabled",
    "display": "Intro Quest Enabled",
    "category": "Tasks",
    "valueset": "YesNo",
@@ -1776,6 +1896,7 @@
   },
   {
    "id": 120,
+   "name": "TraderToTraderQuestsEnabled",
    "display": "Trader to Trader Quests",
    "category": "Tasks",
    "valueset": "YesNo",
@@ -1784,6 +1905,7 @@
   },
   {
    "id": 121,
+   "name": "StarterSkillPoints",
    "display": "Starter Skill Points",
    "category": "Tasks",
    "valueset": "StarterSkillPoints",
@@ -1792,6 +1914,7 @@
   },
   {
    "id": 122,
+   "name": "QuestsPerTier",
    "display": "Quests per Tier",
    "category": "Tasks",
    "valueset": "QuestPerTier",
@@ -1800,6 +1923,7 @@
   },
   {
    "id": 123,
+   "name": "QuestProgressionDailyLimit",
    "display": "Quests per Day",
    "category": "Tasks",
    "valueset": "QuestPerDay",
@@ -1808,6 +1932,7 @@
   },
   {
    "id": 124,
+   "name": "BuriedQuestsEnabled",
    "display": "Buried Quests Enabled",
    "category": "Tasks",
    "valueset": "YesNo",
@@ -1816,6 +1941,7 @@
   },
   {
    "id": 125,
+   "name": "POIQuestsEnabled",
    "display": "POI Quests Enabled",
    "category": "Tasks",
    "valueset": "YesNo",
@@ -1824,6 +1950,7 @@
   },
   {
    "id": 126,
+   "name": "TraderDialog",
    "display": "Trading Dialog",
    "category": "Traders",
    "valueset": "YesNo",
@@ -1832,6 +1959,7 @@
   },
   {
    "id": 127,
+   "name": "TraderHours",
    "display": "Trader Hours",
    "category": "Traders",
    "valueset": "TraderHourPresets",
@@ -1840,6 +1968,7 @@
   },
   {
    "id": 128,
+   "name": "TradersEnabled",
    "display": "Trading Enabled",
    "category": "Traders",
    "valueset": "YesNo",
@@ -1848,6 +1977,7 @@
   },
   {
    "id": 129,
+   "name": "VendingEnabled",
    "display": "Vending Machines Enabled",
    "category": "Traders",
    "valueset": "YesNo",
@@ -1856,6 +1986,7 @@
   },
   {
    "id": 130,
+   "name": "TraderSellPrices",
    "display": "Traders Sell Price",
    "category": "Traders",
    "valueset": "BarterValues",
@@ -1864,6 +1995,7 @@
   },
   {
    "id": 131,
+   "name": "TraderBuyPrices",
    "display": "Traders Buy Price",
    "category": "Traders",
    "valueset": "BarterValues",
@@ -1872,6 +2004,7 @@
   },
   {
    "id": 132,
+   "name": "TraderProtection",
    "display": "Trader Protection",
    "category": "Traders",
    "valueset": "TraderArea",
@@ -1880,6 +2013,7 @@
   },
   {
    "id": 133,
+   "name": "TraderResetInterval",
    "display": "Trader Reset Interval",
    "category": "Traders",
    "valueset": "TraderResetInterval",
@@ -1888,6 +2022,7 @@
   },
   {
    "id": 134,
+   "name": "TraderItemAbundance",
    "display": "Trader Item Abundance",
    "category": "Traders",
    "valueset": "LowDefaultHigh",
@@ -1896,6 +2031,7 @@
   },
   {
    "id": 135,
+   "name": "TraderBuyLimit",
    "display": "Trader Buy Limit",
    "category": "Traders",
    "valueset": "StarterSkillPoints",
@@ -1904,6 +2040,7 @@
   },
   {
    "id": 136,
+   "name": "TraderMaxTier",
    "display": "Trader Max Tier",
    "category": "Traders",
    "valueset": "ItemTierOptions",
@@ -1912,6 +2049,7 @@
   },
   {
    "id": 137,
+   "name": "VendingResetInterval",
    "display": "Vending Reset Interval",
    "category": "Traders",
    "valueset": "TraderResetInterval",
@@ -1920,6 +2058,7 @@
   },
   {
    "id": 138,
+   "name": "VendingItemAbundance",
    "display": "Vending Item Abundance",
    "category": "Traders",
    "valueset": "LowDefaultHigh",
@@ -1928,6 +2067,7 @@
   },
   {
    "id": 139,
+   "name": "ChallengesEnabled",
    "display": "Challenges Enabled",
    "category": "Tasks",
    "valueset": "YesNo",
@@ -1936,6 +2076,7 @@
   },
   {
    "id": 140,
+   "name": "IntroChallengesEnabled",
    "display": "Intro Challenges Enabled",
    "category": "Tasks",
    "valueset": "YesNo",
@@ -1944,6 +2085,7 @@
   },
   {
    "id": 141,
+   "name": "VehicleFuelUsage",
    "display": "Vehicle Fuel Usage",
    "category": "Misc",
    "valueset": "DamageValues",
@@ -1952,6 +2094,7 @@
   },
   {
    "id": 142,
+   "name": "VehicleEntityDamage",
    "display": "Vehicle Entity Damage",
    "category": "Misc",
    "valueset": "DamageValues",
@@ -1960,6 +2103,7 @@
   },
   {
    "id": 143,
+   "name": "VehicleBlockDamage",
    "display": "Vehicle Block Damage",
    "category": "Misc",
    "valueset": "DamageValues",
@@ -1968,6 +2112,7 @@
   },
   {
    "id": 144,
+   "name": "VehicleSelfDamage",
    "display": "Vehicle Self Damage",
    "category": "Misc",
    "valueset": "DamageValues",
@@ -1976,6 +2121,7 @@
   },
   {
    "id": 145,
+   "name": "ElectricalOutput",
    "display": "Electrical Output",
    "category": "Misc",
    "valueset": "StaminaRegen",
@@ -1984,6 +2130,7 @@
   },
   {
    "id": 146,
+   "name": "SillyCelebrate",
    "display": "Celebrate Kills",
    "category": "Misc",
    "valueset": "Celebrate",
@@ -1992,6 +2139,7 @@
   },
   {
    "id": 147,
+   "name": "SillyBigHeads",
    "display": "Big Heads",
    "category": "Misc",
    "valueset": "YesNo",
@@ -2000,6 +2148,7 @@
   },
   {
    "id": 148,
+   "name": "SillyTinyZombies",
    "display": "Tiny Zombies",
    "category": "Misc",
    "valueset": "YesNo",
@@ -2008,6 +2157,7 @@
   },
   {
    "id": 149,
+   "name": "SillySounds",
    "display": "Silly Sounds",
    "category": "Misc",
    "valueset": "YesNo",
@@ -2016,6 +2166,7 @@
   },
   {
    "id": 150,
+   "name": "SillyLowGravity",
    "display": "Gravity",
    "category": "Misc",
    "valueset": "Gravity",
@@ -2024,6 +2175,7 @@
   },
   {
    "id": 151,
+   "name": "SillyBlackandWhite",
    "display": "Black and White",
    "category": "Misc",
    "valueset": "YesNo",
@@ -2032,6 +2184,7 @@
   },
   {
    "id": 152,
+   "name": "ChickenCoopTime",
    "display": "Chicken Coop Time",
    "category": "Crafting",
    "valueset": "SpeedValues",
@@ -2040,6 +2193,7 @@
   },
   {
    "id": 153,
+   "name": "ChickenCoopOutput",
    "display": "Chicken Coop Output",
    "category": "Crafting",
    "valueset": "CollectorOutput",
@@ -2048,6 +2202,7 @@
   },
   {
    "id": 154,
+   "name": "ChickenCoopInput",
    "display": "Chicken Coop Input",
    "category": "Crafting",
    "valueset": "ApiaryInput",
@@ -2056,6 +2211,7 @@
   },
   {
    "id": 155,
+   "name": "BiomeDayAnimalDensity",
    "display": "Day Animal Density",
    "category": "Entities",
    "valueset": "BiomeEnemyDensity",
@@ -2064,6 +2220,7 @@
   },
   {
    "id": 156,
+   "name": "BiomeNightZombieRespawn",
    "display": "Night Enemy Respawn",
    "category": "Entities",
    "valueset": "SlowToFast",
@@ -2072,6 +2229,7 @@
   },
   {
    "id": 157,
+   "name": "BiomeNightAnimalRespawn",
    "display": "Night Animal Respawn",
    "category": "Entities",
    "valueset": "SlowToFast",
@@ -2080,6 +2238,7 @@
   },
   {
    "id": 158,
+   "name": "BiomeNightEnemyDensity",
    "display": "Night Enemy Density",
    "category": "Entities",
    "valueset": "BiomeEnemyDensity",
@@ -2088,6 +2247,7 @@
   },
   {
    "id": 159,
+   "name": "BiomeNightAnimalDensity",
    "display": "Night Animal Density",
    "category": "Entities",
    "valueset": "BiomeEnemyDensity",
@@ -2096,6 +2256,7 @@
   },
   {
    "id": 160,
+   "name": "InfectionChance",
    "display": "Infection Chance",
    "category": "General",
    "valueset": "SpeedValues",
@@ -2104,6 +2265,7 @@
   },
   {
    "id": 161,
+   "name": "HungerMultiplier",
    "display": "Hunger Multiplier",
    "category": "General",
    "valueset": "StaminaUsage",
@@ -2112,6 +2274,7 @@
   },
   {
    "id": 162,
+   "name": "ThirstMultiplier",
    "display": "Thirst Multiplier",
    "category": "General",
    "valueset": "StaminaUsage",
@@ -2120,6 +2283,7 @@
   },
   {
    "id": 163,
+   "name": "StackSizeMultiplier",
    "display": "Stack Size Multiplier",
    "category": "General",
    "valueset": "MaxStackSize",
@@ -2128,6 +2292,7 @@
   },
   {
    "id": 164,
+   "name": "FullChickenStressEvent",
    "display": "Full Chicken Stress Event",
    "category": "Crafting",
    "valueset": "FullChickenStressEvent",

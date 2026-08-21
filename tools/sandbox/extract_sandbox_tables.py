@@ -82,6 +82,29 @@ def extract(pe):
             break
     if tgt is None:
         raise SystemExit("SandboxOptionManager not found")
+
+    # enum member name by value (Constant table -> Field rows of SandboxOptions)
+    enum_names = {}
+    for row in md.TypeDef.rows:
+        if s(row.TypeName) != "SandboxOptions":
+            continue
+        flds = row.FieldList
+        # build field rid -> constant value
+        field_const = {}
+        for r in md.Constant.rows:
+            p = r.Parent
+            if p.table is md.Field:
+                field_const[p.row_index] = r.Value.value
+        for fidx in flds:
+            rid = fidx.row_index
+            nm = s(fidx.row.Name)
+            if nm == "value__":
+                continue
+            cv = field_const.get(rid)
+            if cv is not None:
+                enum_names[int.from_bytes(cv, "little", signed=True)] = nm
+        break
+
     mrow = None
     for m in tgt.MethodList:
         if s(m.row.Name) == "SetupOptions":
@@ -223,7 +246,8 @@ def extract(pe):
             otype = ("float" if "Float" in owner else
                      "int" if "Int" in owner else "bool")
             if idv is not None and len(strs) >= 3:
-                options.append({"id": idv, "display": strs[0],
+                options.append({"id": idv, "name": enum_names.get(idv, ""),
+                                "display": strs[0],
                                 "category": strs[1], "valueset": strs[2],
                                 "type": otype, "default": default})
         i += 1
