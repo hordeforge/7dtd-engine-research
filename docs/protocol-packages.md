@@ -850,6 +850,30 @@ plays locally and feeds `AIDirector.NotifyNoise`; on a dedicated server the
 C2S relay does not add AI noise. A verbatim relay excluding that entity's
 client is byte-identical to the stock rebuild.
 
+### 5.10 NetPackageEntityAwardKillServer (ToServer, kill-credit report)
+
+`write` IL=12, `read` IL=9, body:
+
+```text
+killerEntityId : i32
+killedEntityId : i32
+```
+
+Sender: `GameManager.AwardKill(killer, killedEntity)` (IL=27), called from
+`EntityAlive.OnEntityDeath` (IL=146) when `isGameMessageOnDeath` and the
+killer is the local player. `ProcessPackage` (IL=24) on the server:
+`World.GetEntity(killerEntityId) is EntityPlayerLocal` and
+`GetEntity(killedEntityId) is EntityAlive`, then
+`QuestEventManager.EntityKilled(killer, killed)`.
+
+**Stock credit flow:** the server's kill credit is routed through the client -
+the server sends `SharedKillClient` to the killer, whose client displays the
+XP tooltip, calls `QuestEventManager.EntityKilled` locally for the journal,
+and reports the kill back via this package so the server journal credits it.
+A server that credits kill objectives authoritatively at the death path must
+treat this package as a redundant echo (applying it double-credits); the
+deduplicated server-side credit makes it a validated no-op.
+
 
 ---
 
@@ -2062,6 +2086,11 @@ cannot wedge or visibly alter the b14 client.
 
 ## Changelog
 
+- **2026-08-21:** NetPackageEntityAwardKillServer pinned: 8-byte body
+  (killerEntityId, killedEntityId), the OnEntityDeath -> AwardKill sender
+  and the QuestEventManager.EntityKilled server credit; the stock credit
+  flow routes through SharedKillClient -> client report, so an
+  authoritative server-side credit makes this a validated no-op.
 - **2026-08-21:** NetPackageSoundAtPosition pinned: body (pos Vector3, clip
   string, mode u8 AudioRolloffMode, distance, entityId, volumeScale) and the
   PlaySoundAtPositionServer dedicated relay (allButAttachedToEntityId =
