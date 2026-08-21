@@ -795,6 +795,34 @@ unfiltered per-target send. The client applies the invite locally
 (`WaypointInviteClient`); local waypoint creation never hits the server
 (waypoints are client-local; only invites do).
 
+### 5.8 NetPackageGameMessage (ToClient / ToServer, game announcements)
+
+`write` IL=17, `read` IL=13, body:
+
+```text
+msgType          : u8      // EnumGameMessages
+                          //   PlainTextLocal=0, EntityWasKilled=1,
+                          //   JoinedGame=2, LeftGame=3, ChangedTeam=4, Chat=5
+mainEntityId     : i32
+secondaryEntityId: i32
+```
+
+Client senders (GameManager.GameMessage, IL=61): EntityAlive.OnEntityDeath
+when `isGameMessageOnDeath` (EntityWasKilled, main = the dead entity,
+secondary = entityThatKilledMe if an EntityPlayer), EntityAlive.set_TeamNumber
+(ChangedTeam), ConnectionManager.DisconnectClient (LeftGame), plus the
+JoinedGame/Chat forms.
+
+**Server relay (GameManager.GameMessageServer IL=51 ->
+FinishGameMessageServer IL=69):** resolves the main entity's display name
+(player display name, else localized entity name, else `xuiChatServer`),
+fires the interruptible `ModEvents.GameMessage` hook, and unless a mod
+handled it broadcasts `NetPackageWaypoint`-style unfiltered `SendPackage` of
+`NetPackageGameMessage.Setup(msgType, mainEntityId, secondaryEntityId)` to
+every client - including the sender, whose client displays it via
+`ProcessPackage -> DisplayGameMessage` (the local send displays nothing).
+A verbatim relay of the 9-byte body is byte-identical to the stock rebuild.
+
 
 ---
 
@@ -2007,6 +2035,11 @@ cannot wedge or visibly alter the b14 client.
 
 ## Changelog
 
+- **2026-08-21:** NetPackageGameMessage pinned: 9-byte body (msgType u8
+  EnumGameMessages, mainEntityId, secondaryEntityId), client senders
+  (OnEntityDeath isGameMessageOnDeath, set_TeamNumber, DisconnectClient),
+  and the FinishGameMessageServer unfiltered re-broadcast to every client
+  including the sender (verbatim relay is byte-identical).
 - **2026-08-21:** NetPackageWaypoint pinned: Waypoint v7 body (pos/icon/
   AuthoredText name/bools/ownerId platform stream/type enum) + inviteMode u8 +
   inviterEntityId, and WaypointInviteServer relay semantics (clone + clear
