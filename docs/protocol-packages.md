@@ -1524,6 +1524,16 @@ blockPos : Vector3i
 `<= 15` to sender; for incomplete treasure objectives call
 `ObjectiveTreasureChest.AddToDestroyCount()`.
 
+**Mirror semantics (verified 2026-08-22):** the client reports its own quest
+progress events via this package (event 1 = the treasure container closed and
+the objective completed, event 2 = a block was activated), the server applies
+the event to the sender's journal AND fans it to the sender's party members
+(events 0 and 2 rebroadcast the Setup; event 1 runs
+`FinishTreasureQuest`), so a party's shared quest advances for every member.
+A server with an authoritative journal that already applies the event to the
+sender applies the same fan-out to members and re-sends the package to each
+member's client for their local quest object.
+
 #### `NetPackageQuestEvent`
 
 ```text
@@ -2211,6 +2221,10 @@ cannot wedge or visibly alter the b14 client.
 
 ## Changelog
 
+- **2026-08-22:** NetPackageQuestObjectiveUpdate mirror semantics pinned:
+  the client reports its own objective events; the server applies them and
+  fans to the sender's party (rebroadcast / FinishTreasureQuest), so a
+  party's shared quest advances for every member.
 - **2026-08-21:** NetPackageEntityRagdoll pinned: the flag-gated body
   (duration/bodyPart/three vectors + mode/state) and the owner-client
   sender with the tracked-player re-broadcast (verbatim relay excluding
