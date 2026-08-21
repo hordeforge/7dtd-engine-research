@@ -971,8 +971,33 @@ mod API surface** (ModifyCVar, SetProp, SimpleRPC, Debug),
 **Twitch integration** (PlayerTwitchStats, TwitchAccess,
 TwitchVoteScheduling, PlayerLaserSight),
 **headless mesh** (DynamicMesh), and
-**deferred cosmetic/depth** (EntityRagdoll - buff-triggered ragdoll relay;
-DroneDataSync, DroneParticleEffect - junk-drone companion state).
+**deferred cosmetic/depth** (DroneDataSync, DroneParticleEffect - junk-drone
+companion state).
+
+### 5.15 NetPackageEntityRagdoll (ToClient / ToServer, ragdoll impulse)
+
+`write` IL=59, body:
+
+```text
+entityId    : i32
+flags       : u8
+if flags & 1:
+  duration  : f32
+  bodyPart  : i16      // EnumBodyPartHit
+  forceVec  : Vector3 (3 x f32)
+  forceWorldPos : Vector3 (3 x f32)
+  hipPos    : Vector3 (3 x f32)
+if flags & 2: mode     : u8    // EModelBase.RagdollMode
+if flags & 4: state    : u8
+```
+
+Sender: the entity's owner client forces the local ragdoll
+(`EModelBase.DoRagdoll`, IL=170; `EntityBuffs` buff triggers).
+`ProcessPackage` (IL=56): resolves the entity, discards when not an
+EntityAlive, then applies `DoRagdoll` / `SetRagdollState` server-side and
+re-broadcasts via `NetEntityDistribution.SendPacketToTrackedPlayersAndTrackedEntity`
+so observers see the impulse. A verbatim relay to the other clients (the
+owner already ragdolled locally) matches the intent.
 
 
 ---
@@ -2185,6 +2210,11 @@ editor/prefab tooling. So sending `bInfinite=false` with disc-formula bounds
 cannot wedge or visibly alter the b14 client.
 
 ## Changelog
+
+- **2026-08-21:** NetPackageEntityRagdoll pinned: the flag-gated body
+  (duration/bodyPart/three vectors + mode/state) and the owner-client
+  sender with the tracked-player re-broadcast (verbatim relay excluding
+  the owner matches stock).
 
 - **2026-08-21:** NetPackageEntityPhysics pinned: the physics-master report
   body + isPhysicsMaster gate (redundant echo for authoritative sims); the
