@@ -102,6 +102,12 @@ def main():
     for name, entries in atlases:
         print(f"{name}: {len(entries)} entries")
     print(f"wrote {out_path}")
+    # Best-effort: keep the output zig fmt clean (regeneration is manual).
+    try:
+        import subprocess
+        subprocess.run(["zig", "fmt", out_path], check=False)
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":
