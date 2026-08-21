@@ -874,6 +874,55 @@ A server that credits kill objectives authoritatively at the death path must
 treat this package as a redundant echo (applying it double-credits); the
 deduplicated server-side credit makes it a validated no-op.
 
+### 5.11 NetPackageParticleEffect (ToClient / ToServer, particle relay)
+
+`write` IL=20, `read` IL=20, body:
+
+```text
+ParticleEffect.Write            // ParticleEffect::Write IL=47
+  ParticleId            : i32
+  pos                   : Vector3 (3 x f32)
+  rot                   : Quaternion (4 x f32)
+  color                 : Color32 (4 bytes)
+  soundName             : string            // "" when null
+  additionalHitSoundName: string            // "" when null
+  volumeScale           : f32
+entityThatCausedIt      : i32
+forceCreation           : bool
+worldSpawn              : bool
+```
+
+`ProcessPackage` (IL=30) on the server calls
+`GameManager.SpawnParticleEffectServer(pe, entityId, forceCreation,
+worldSpawn)` (IL=41). The dedicated branch re-broadcasts
+`NetPackageParticleEffect.Setup(...)` via `SendPackage(pkg, false, -1,
+entityId, -1, null, 192, false)` - `allButAttachedToEntityId = entityId`,
+so every client except the causing entity's owner sees the effect (the
+owner already spawned it locally). A verbatim relay excluding that
+entity's client is byte-identical to the stock rebuild.
+
+### 5.12 NetPackageEntityStealth (ToServer, stealth report)
+
+`read` IL=9, body:
+
+```text
+id               : i32
+cFIsCrouching    : u16
+cFIsSmellData    : u16
+cFIsEating       : u16
+cFIsSheltered    : u16
+cFIsAlert        : u16
+data             : u16
+cSmellRadiusMin  : i32
+```
+
+The client reports its stealth state for AI detection.
+`ProcessPackage` (IL=92): `ValidEntityIdForSender(id)`, resolves the
+entity (discards when not an EntityPlayer), and on the server applies
+`PlayerStealth.SetSmellRadiusTarget(...)` from the packed flags. A server
+that computes stealth authoritatively (crouch from movement frames, smell
+from buffs) can treat the report as a redundant echo.
+
 
 ---
 
@@ -2086,6 +2135,11 @@ cannot wedge or visibly alter the b14 client.
 
 ## Changelog
 
+- **2026-08-21:** NetPackageParticleEffect pinned: ParticleEffect.Write body
+  + entityThatCausedIt/forceCreation/worldSpawn, and the
+  SpawnParticleEffectServer dedicated relay (allButAttachedToEntityId =
+  entityId). NetPackageEntityStealth pinned: the 8-field stealth report and
+  the SetSmellRadiusTarget apply (redundant echo for authoritative sims).
 - **2026-08-21:** NetPackageEntityAwardKillServer pinned: 8-byte body
   (killerEntityId, killedEntityId), the OnEntityDeath -> AwardKill sender
   and the QuestEventManager.EntityKilled server credit; the stock credit
