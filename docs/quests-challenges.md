@@ -1027,6 +1027,163 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 
 ---
 
+## Quest POI selection (verified 2026-08-21)
+
+How a quest gets its POI rect, position data, and `POIName`. All IL sizes from
+`il/full-v3.1.0/_global/` unless noted. This is the engine behind the
+`QuestPrefabManager`-style tag/tier matching the trader offers and the
+RandomPOIGoto/ClosestPOIGoto/Goto objectives.
+
+### Entry point: `Quest::SetupPosition` (IL=26)
+
+`SetupPosition(EntityNPC ownerNPC, EntityPlayer player, List<Vector2> usedPOILocations,
+int entityIDforQuests)` loops the quest's objectives in order and returns true on
+the **first** `BaseObjective.SetupPosition(...)` that returns true; all-false =
+false. So one positioned objective (usually the first RandomPOIGoto/Goto phase)
+pins the whole quest's POI.
+
+### Objective side
+
+- `BaseObjective::SetupPosition` (IL=2) is a hard `false` — only position-aware
+  subclasses override it.
+- `ObjectiveRandomPOIGoto::SetupPosition` (IL=9) → `ObjectiveGoto::GetPosition`
+  (IL=339) + `op_Inequality(position, zero)`.
+- `ObjectiveClosestPOIGoto::SetupPosition` → the base `ObjectiveGoto::GetPosition`
+  (IL=232 wrapper; the "closest" behavior is ObjectiveGoto's).
+- `get_NeedsNPCSetPosition` is true only for RandomPOIGoto; `SetupTags` (IL=41)
+  sets `NeedsNPCSetPosition` if any objective needs it.
+
+### `ObjectiveRandomPOIGoto::GetPosition` (IL=339)
+
+1. If `Quest.GetPositionData(out, POIPosition /*2*/)` is set (restart / journal
+   reload path): recompute the center, `GetHeightAt`, set `position`, re-raise
+   the NavObject and `CurrentValue=2`, and return — no reselection.
+2. Server path (`ConnectionManager.IsServer`):
+   - Anchor `entityPlayer` falls back to `OwnerJournal.OwnerPlayer`.
+   - `ownerNPC is EntityTrader` →
+     `DynamicPrefabDecorator.GetRandomPOINearTrader(trader, QuestTags, POITier,
+     usedPOILocations, entityIDforQuests, biomeFilterType, biomeFilter)`.
+   - otherwise →
+     `GetRandomPOINearWorldPos(player.positionXZ, minSearchDistance=1000,
+     maxSearchDistance=4000000, QuestTags, POITier, usedPOILocations,
+     entityIDforQuests, biomeFilterType, biomeFilter)`.
+   - `null` → log "No POI found" / return `Vector3.zero` (SetupPosition false).
+3. On a hit: center = `bboxPos + bboxSize/2`; `objective.position = (center.x,
+   GetHeightAt(center), center.z)`; in-bounds check; `quest.Position =
+   position`; `FinalizePoint(bboxPos, bboxSize)`; `quest.QuestPrefab = prefab`;
+   `DataVariables["POIName"] = prefab.location.Name`; `usedPOILocations.Add(bboxPos
+   xz)`; return position.
+
+`ObjectiveGoto::FinalizePoint` (IL=74) is what actually writes the wire-visible
+state: `distanceOffset = max(size.x, size.z)`, `SetPositionData(POIPosition /*2*/,
+POIPosition)` (the **bbox origin**, not the center), `SetPositionData(POISize /*3*/,
+POISize)`, `objective.position = GetMidPOIPosition(...)` (center), `positionSet =
+true`, `quest.HandleMapObject(2, NavObjectName, -1)`. So `Quest.Position` (the
+`QuestLocation` on the wire) is the **center at terrain height**, while
+`PositionData[2]` is the bbox origin and `PositionData[3]` the bbox size.
+PositionDataTypes: `0=QuestGiver, 1=Location, 2=POIPosition, 3=POISize,
+4=TreasurePoint, 5=FetchContainer, 6=HiddenCache, 7=Activate, 8=TreasureOffset,
+9=TraderPosition`.
+
+### `ObjectiveGoto::GetPosition` (plain Goto / ClosestPOIGoto)
+
+Both go through `GetClosestPOIToWorldPos(questTags, player.positionXZ,
+usedPOILocations, maxSearchDistanceSquared=-1, ignoreCurrentPoi=!allowCurrentPoi,
+biomeFilterType, biomeFilter, questKey)`; a `-1` max distance means unbounded.
+On no hit, one retry forces `biomeFilterType=SameBiome` (the quest-giver-biome
+variant) with the same anchor. No prefab → "No Trader found" → zero.
+
+### The selector: `DynamicPrefabDecorator`
+
+`GetRandomPOINearWorldPos` (IL=193):
+1. `prefabs = QuestEventManager.GetPrefabsByDifficultyTier(difficulty)`; null → null.
+2. Up to **50 attempts**: `pi = prefabs[GameRandom.RandomRange(prefabs.Count)]`.
+3. Per-attempt filters, in order (any fail → next attempt):
+   - `prefab.SleeperVolumeList.AnyUsedEntry` — the prefab XML must define at
+     least one sleeper volume (`PrefabSleeperVolumeList.ReadFromProperties` calls
+     `Volume.Use(start, size)` per parsed volume, so "used" ≈ "has sleeper
+     volumes").
+   - `prefab.GetQuestTag(questTag)` = `questTags.Test_AllSet` — the prefab must
+     carry **every** tag the quest carries (HasAnyQuestTag is the lenient
+     variant, unused here).
+   - `prefab.DifficultyTier == difficulty` — exact byte match.
+   - bbox origin not in `usedPOILocations`.
+   - `QuestEventManager.CheckForPOILockouts(entityIDforQuests, bboxPos, out
+     extraData)` false (bedroll / land claim / quest-lock / player-inside, with
+     the party-member exemption).
+   - biome filter on the POI **bbox origin** for the random/trader paths
+     (V_7 in GetRandomPOINearWorldPos / V_0 in ValidPrefabForQuest) and the
+     **center** for the closest path (V_11 in GetClosestPOIToWorldPos):
+     type 1 (`ExcludeBiome`) skips when the
+     probe biome name equals the filter; type 2 (`OnlyBiome`) requires the
+     name to be in `filter.split(',')`; type 3 (`SameBiome`) requires the same
+     `BiomeDefinition` reference as the anchor position (player pos here).
+   - squared distance `(worldPos - center)` must satisfy
+     `minSearchDistance < d² < maxSearchDistance` — i.e. (1000, 4000000)², so
+     31.6–2000 m from the player, center to center.
+
+`GetRandomPOINearTrader` (IL=65): `idx = trader.PreferredDistanceIndex % 3`;
+three attempts, incrementing the trader's `PreferredDistanceIndex` after each
+offer; per attempt `GetPrefabsForTrader(traderArea, difficulty, idx, GameRandom)`
+then the first entry passing `ValidPrefabForQuest`.
+
+`ValidPrefabForQuest` (IL=156, trader path): AnyUsedEntry + AllSet tag test,
+bbox origin not used, lockout false, then the same biome-filter switch with the
+anchor = the **trader's** position for the SameBiome case. No distance check —
+the band list already handles proximity.
+
+`GetClosestPOIToWorldPos` (IL=230): full pass over `poiPrefabs` (lock-guarded);
+excludes `rwg_tile` names; keeps prefabs passing `GetQuestTag || questTag.IsEmpty`
+and (unless `ignoreCurrentPoi`) not overlapping the anchor; collects candidates
+with the center; `maxSearchDistanceSquared < 0` → unbounded. The tail switches
+on `questKey == "traderquest"` (the starter's `unique_key`): `chooseBestTrader`
+maximizes the trader POI count near the candidate, plain
+`chooseClosestPrefab` returns the candidate with the strictly-minimum
+`sqrMagnitude(worldPos - center)` below the max distance; both return null when
+no candidate qualifies. No minimum distance.
+
+### QuestEventManager caches
+
+`GetPrefabsByDifficultyTier` (IL=63): lazily builds `tierPrefabList` from
+`DynamicPrefabDecorator.GetPOIPrefabs` keyed by `prefab.DifficultyTier`; returns
+the tier's list or null.
+
+`GetPrefabsForTrader` (IL=35): lazily `SetupTraderPrefabList(area)`; picks the
+`index`-th `PrefabListData`; `ShuffleDifficulty(difficulty, GameRandom)` (a
+`Extensions.Shuffle` of that tier's list — so every offer rerolls the order);
+returns `TierData[difficulty]` or null.
+
+`SetupTraderPrefabList` (IL=80): three `PrefabListData` distance bands around
+`traderArea.Position` by `Vector3.Distance(areaPos, prefab.bboxPos)`:
+`<= 500` → band 0, `<= 1500` → band 1, else band 2. Each band groups prefabs by
+`DifficultyTier` via `PrefabListData.AddPOI`.
+
+### Quest tags
+
+`Quest.SetupTags` (IL=41) builds `QuestTags` from the objectives:
+`BaseObjective.SetupQuestTag` is empty by default; the overrides are
+ClearSleepers→`clear`, FetchFromContainer (fetch mode 0)/FetchKeep/FetchAnyContainer/
+BaseFetchContainer→`fetch`, FetchFromContainer hidden-cache mode→`hidden_cache`,
+Craft and TreasureChest→`crafting`, POIBlockActivate/POIBlockUpgrade→`restore_power`.
+`QuestEventManager` static tags: `manual, trader, clear, treasure, fetch, crafting,
+restore_power, infested, bandit`; `allQuestTags` is the OR of all but `manual`/
+`trader`.
+
+`Quest::AddQuestTag` (IL=7) ORs into `QuestTags`.
+
+### EntityTrader offer loop
+
+During offer generation (the `GetQuestOffers`/`SetupQuestList` flow, EntityTrader
+IL ~1130-1360) each rolled quest gets `SetPositionData(QuestGiver /*0*/,
+trader.position)` and `SetPositionData(TraderPosition /*9*/, traderArea.Position
+or trader.position)`, then `SetupTags()`. Unless the quest is a special list row
+or already carries the `clear` tag, `Quest.SetupPosition(this, player,
+usedPOILocations, player.entityId)` runs; on failure
+`preferredDistanceIndex = (preferredDistanceIndex + 1) % 3` and the loop retries
+(next quest roll, up to 100 per tier). So **offers are pre-positioned**: the
+`QuestPacketEntry` the client gets for a listed quest already carries the real
+`QuestLocation` (center at height), `QuestSize` (bbox size) and `POIName`.
+
 ## Related docs
 
 | Doc | Role |
@@ -1091,6 +1248,7 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 
 ## Changelog
 
+- **2026-08-21:** New "Quest POI selection" section: Quest.SetupPosition IL=26, ObjectiveRandomPOIGoto.SetupPosition IL=9 / GetPosition IL=339, ObjectiveGoto.FinalizePoint IL=74, GetRandomPOINearWorldPos IL=193 / GetRandomPOINearTrader IL=65, ValidPrefabForQuest IL=156, GetClosestPOIToWorldPos IL=230, QuestEventManager GetPrefabsByDifficultyTier IL=63 / GetPrefabsForTrader IL=35 / SetupTraderPrefabList IL=80, PrefabListData ShuffleDifficulty IL=10, PrefabVolumeListAbs`2.get_AnyUsedEntry IL=24 (Use per parsed volume), Prefab.GetQuestTag IL=5 (Test_AllSet), objective SetupQuestTag tag map, EntityTrader offer-loop SetupPosition flow (exact).
 - **2026-08-11:** Shared/rally IL re-verified: ObjectiveRallyPoint.Current_BlockActivate IL=182, SharedQuestData.write IL=63, NetPackageSharedQuest.ProcessPackage IL=371, FailAllSharedQuests IL=46, FailAllActivatedQuests IL=45, QuestIsActive IL=36, FindQuest/FindCompletedQuest IL=37, FindActiveQuest IL=33/40, AddTraderPOI IL=33, HasTraderPOI IL=5, GetTraderList IL=12, TriggerQuest*Event IL=9, TriggerSharedQuestAddedEvent IL=13, QuestShareServer IL=37, NetPackagePartyQuestChange.ProcessPackage IL=83, NetPackageQuestGotoPoint.ProcessPackage IL=312, NetPackageQuestObjectiveUpdate.write IL=21, QuestClass.CreateQuest IL=147, CanActivate IL=26, GetCurrentHint IL=52, CheckCriteriaQuestGiver/CheckCriteriaOffer IL=29, ResetObjectives IL=18 (exact).
 - **2026-08-11:** QuestJournal lifecycle IL re-verified: StartQuests IL=87, RefreshTracked IL=26, SetActivePositionData IL=32, HandlePartyRemoveQuest IL=77, RemoveAllSharedQuests IL=125, RemoveSharedQuestForOwner IL=53, AddQuestFactionPoint IL=34, GetQuestFactionMax IL=20, HasCraftingQuest IL=29, HasActiveQuestByQuestCode IL=30, GetObjectiveForQuest IL=43, GetCurrentFactionTier IL=46, GetTraderData IL=27, CheckRallyMarkerActivation IL=56, HandleRallyMarkerActivation IL=36 (exact).
 - **2026-08-11:** Objective/challenge IL re-verified: BaseObjective HandleCompleted/SetupObjective/SetupDisplay/SetupQuestTag IL=1, SetupActivationList IL=2, HandleVariables IL=15, AddModifier IL=14, DisableModifiers IL=21, CopyValues IL=55, ChallengeJournal StartChallenges IL=160 / ModifyValue IL=88 / HandleChallengeRedeemed IL=12 / GetNextChallenge IL=52 / EndChallenges IL=19 / ResetChallenges IL=30 / RemoveChallengesForGroup IL=38 / Write IL=103 / Read IL=176 / Clone IL=56, Challenge StartChallenge IL=55 / get_ReadyToComplete IL=17 / Write IL=43 / Read IL=60 (exact).
