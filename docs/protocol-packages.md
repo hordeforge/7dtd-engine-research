@@ -751,6 +751,50 @@ Disk layout of `PlayerDataFile` (`ttp\0` + version **59**) is in
 [save-region.md](save-region.md) section 1.3; this package is the C2S transport
 only (`WriteNetwork` = `Write` + `PlayerMetaInfo`).
 
+### 5.7 NetPackageWaypoint (ToClient / ToServer, party waypoint invites)
+
+`write` IL=17, `read` IL=17 (both call `Waypoint.Read(_br, version=7)`), body:
+
+```text
+Waypoint (version 7, all version-gated fields present) :
+  pos                  : Vector3i (3 x i32)     // StreamUtils.Write
+  icon                 : string                 // "" when null
+  name                 : AuthoredText           // bool present; if true:
+                                                //   string text
+                                                //   PlatformUserIdentifierAbs.ToStream(,false)
+  bTracked             : bool
+  hiddenOnCompass      : bool                   // version > 2
+  ownerId              : PlatformUserIdentifierAbs.ToStream(,false)   // version > 1
+  lastKnownPositionEntityId : i32               // version > 1
+  bIsAutoWaypoint      : bool                   // version > 3
+  bUsingLocalizationId : bool                   // version > 3
+  inviterEntityId      : i32                    // version > 4
+  hiddenOnMap          : bool                   // version > 5
+  lastKnownPositionEntityType : i32             // version > 6
+                                                    // eLastKnownPositionEntityType
+                                                    //   None=0/Vehicle=1/Drone=2/Animal=3
+inviteMode             : u8                     // EnumWaypointInviteMode Friends=0/Everyone=1
+inviterEntityId        : i32
+```
+
+`AuthoredText.ToStream` (IL=22): `bool present`; when present `string text` then
+`PlatformUserIdentifierAbs.ToStream(author, false)`; a null instance writes a
+lone 0 byte. `Waypoint.Read` version gates match every field above for 7.
+
+**ProcessPackage (IL=29):** `ValidEntityIdForSender(inviterEntityId)`; on the
+server, `GameManager.WaypointInviteServer(waypoint, inviteMode, inviterEntityId)`
+(IL=164): clones the waypoint and clears `bTracked`, then for
+`inviteMode == Friends` (0) iterates every world player and relays to those
+whose `PersistentPlayerData.IsAlly` (AllyStore on primary ids) matches the
+inviter, skipping the inviter; for `Everyone` (1) relays to all players.
+The relay sends `NetPackageWaypoint.Setup(waypoint, inviteMode,
+inviterEntityId)` (which sets the waypoint's `inviterEntityId` too) via
+`SendPackage(..., onlyClientsAttachedToAnEntity=false, -1, -1, -1, null,
+range=192, false)` - the 192 is a range filter with no anchor, i.e. an
+unfiltered per-target send. The client applies the invite locally
+(`WaypointInviteClient`); local waypoint creation never hits the server
+(waypoints are client-local; only invites do).
+
 
 ---
 
@@ -1962,6 +2006,12 @@ editor/prefab tooling. So sending `bInfinite=false` with disc-formula bounds
 cannot wedge or visibly alter the b14 client.
 
 ## Changelog
+
+- **2026-08-21:** NetPackageWaypoint pinned: Waypoint v7 body (pos/icon/
+  AuthoredText name/bools/ownerId platform stream/type enum) + inviteMode u8 +
+  inviterEntityId, and WaypointInviteServer relay semantics (clone + clear
+  bTracked, allies vs everyone, unfiltered per-target send; local waypoints
+  never hit the server, only invites).
 
 - **2026-08-21:** ChunkClusterInfo pinned: body (name, cMinPos, cMaxPos,
   bInfinite, pos), `chunkClusterInfoCo` client semantics (Position/bounds
