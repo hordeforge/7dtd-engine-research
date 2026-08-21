@@ -823,6 +823,33 @@ every client - including the sender, whose client displays it via
 `ProcessPackage -> DisplayGameMessage` (the local send displays nothing).
 A verbatim relay of the 9-byte body is byte-identical to the stock rebuild.
 
+### 5.9 NetPackageSoundAtPosition (ToClient / ToServer, positional audio)
+
+`write` IL=25, `read` IL=21, body:
+
+```text
+pos          : Vector3 (3 x f32)   // StreamUtils.Write
+audioClipName: string
+mode         : u8                  // UnityEngine.AudioRolloffMode
+                                   //   Logarithmic=0, Linear=1, Custom=2
+distance     : i32
+entityId     : i32
+volumeScale  : f32
+```
+
+`ProcessPackage` (IL=36): server side calls
+`GameManager.PlaySoundAtPositionServer(pos, clip, mode, distance, entityId,
+volumeScale)` (IL=60). The dedicated-server branch re-broadcasts
+`NetPackageSoundAtPosition.Setup(...)` via `SendPackage(pkg, false, -1,
+entityId, -1, null, 192, false)` - `allButAttachedToEntityId = entityId`, so
+**every client except the owning player** hears the sound (the owner already
+played it locally through `PlaySoundAtPositionClient`). The `distance` field
+drives the receiving client's rolloff (`Audio.Manager.Play(pos, clip,
+distance, ...)`), not the fan-out. On non-dedicated hosts the method also
+plays locally and feeds `AIDirector.NotifyNoise`; on a dedicated server the
+C2S relay does not add AI noise. A verbatim relay excluding that entity's
+client is byte-identical to the stock rebuild.
+
 
 ---
 
@@ -2035,6 +2062,11 @@ cannot wedge or visibly alter the b14 client.
 
 ## Changelog
 
+- **2026-08-21:** NetPackageSoundAtPosition pinned: body (pos Vector3, clip
+  string, mode u8 AudioRolloffMode, distance, entityId, volumeScale) and the
+  PlaySoundAtPositionServer dedicated relay (allButAttachedToEntityId =
+  entityId - every client except the owner hears it; distance drives the
+  receiver's rolloff, not the fan-out; no AI noise on a dedicated host).
 - **2026-08-21:** NetPackageGameMessage pinned: 9-byte body (msgType u8
   EnumGameMessages, mainEntityId, secondaryEntityId), client senders
   (OnEntityDeath isGameMessageOnDeath, set_TeamNumber, DisconnectClient),
