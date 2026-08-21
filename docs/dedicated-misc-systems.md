@@ -129,6 +129,23 @@ who enforces it: `ConsoleCmdAdmin`, the webserver session/permission handlers,
 [console-commands.md](console-commands.md) (command permission levels) and
 [webserver.md](webserver.md) (web session permissions).
 
+**`PlayerSlotsAuthorizer.Authorize` (IL=174) - the tiered player-cap gate:**
+reads `GamePrefs` 26 (ServerMaxPlayerCount), 155 (ServerReservedSlots),
+156 (ServerReservedSlotsPermission), 157 (ServerAdminSlots), 158
+(ServerAdminSlotsPermission), then for each connected client counts
+`occupied` (perm <= reserved-perm) vs the rest, with the incoming client's
+`GetUserPermissionLevel` (1000 default when unlisted):
+1. normal (perm > reserved-perm): allowed while `total < max`;
+2. reserved-tier (perm <= reserved-perm): allowed while
+   `total < max AND occupied < max - reserved`;
+3. admin tier (only when 2 fails, `adminSlots > 0` and
+   `perm <= adminSlotsPerm`): allowed while `total < max + adminSlots`;
+4. deny `EKickReason.PlayerLimitExceeded(5)` with a "Server is full"
+   message (the reserved-tier denial text carries `max - reserved`).
+The reserved/admin prefs default to 0 (disabled), so the gate degenerates to
+the plain cap.
+
+
 **`AdminTools` file/lifecycle leaves (all IL-verified):**
 `InitFileWatcher()` (IL=33) watches `GetFilePath()` / `GetFileName()`
 (GamePref 66, `GetSaveGameRootDir(adminFileStorage)`) with Changed /
@@ -1412,6 +1429,11 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 | [INDEX.md](INDEX.md) | Hub |
 
 ## Changelog
+
+- **2026-08-21:** PlayerSlotsAuthorizer.Authorize pinned: the tiered
+  player-cap gate (normal under max; reserved-tier under max with
+  occupied < max - reserved; admin tier under max + adminSlots with the
+  permission thresholds; PlayerLimitExceeded(5) deny).
 
 - **2026-08-21:** BansAndWhitelistAuthorizer.Authorize pinned: the exact
   login gate (Banned(6) on platform/crossplatform id, whitelist enabled ->
