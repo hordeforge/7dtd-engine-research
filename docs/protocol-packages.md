@@ -1783,6 +1783,25 @@ condition):** `NetPackageAudio` (10 fields; `soundGroupName` null-coalesced),
 `NetPackageWeather` (neither list length written - inferred by reader),
 `NetPackageWorldAreas` (version:u8=1, count:i16).
 
+#### `NetPackagePersistentPlayerPositions` (ToClient)
+
+Body (write IL=38 / read IL=27, re-verified 2026-08-21):
+
+```text
+count : i32
+// count x:
+  platform id : PlatformUserIdentifierAbs.ToStream (bool present; null = lone 0 byte)
+  position    : Vector3i (3 x i32)
+```
+
+`Setup(PersistentPlayerList)` (IL=39) snapshots every `PersistentPlayerData`
+with `EntityId != -1` (online players), calling `UpdatePositionFromEntity()`
+for the live position. **Sender:** `GameManager` update loop, broadcast to all
+clients every **6 s** (`playerPositionsCountdownTimer = 6`, reset on expiry,
+reliable=false, toEntityId=-1); the client's map shows the markers. The map
+trio: [protocol-packages.md §3.3](protocol-packages.md) MapChunks (terrain)
++ this package (player markers) + `NetPackageWorldAreas` (trader areas).
+
 ## 7. Reference enums (IL constants)
 
 **NetPackageDirection:** 0 Both, 1 ToServer, 2 ToClient.
@@ -1836,6 +1855,9 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-21:** PersistentPlayerPositions pinned: body (count + platform
+  id stream + Vector3i), the 6 s GameManager broadcast cadence, and the
+  EntityId != -1 online-only filter.
 - **2026-08-21:** EntityLookAt sender pinned: `EntityAlive::SetLookPosition`
   (0.0016 sqr-delta gate, `SendPacketToTrackedPlayers` - tracking broadcast,
   not server-wide). ShowToolbeltMessage corrected: sole sender
