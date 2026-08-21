@@ -573,9 +573,15 @@ lookAt.y : i32
 lookAt.z : i32
 ```
 
-Process: resolve `EntityAlive` by id; if `emodel.avatarController` present,
-`AvatarController.SetLookPosition(lookAtPosition)`. Cosmetic aim/look only;
-no sim authority.
+Sender (**`EntityAlive::SetLookPosition`**, IL=30, re-verified 2026-08-21):
+stores the new look and returns unless it moved past the **0.0016 sqr-delta
+gate** (0.04 blocks), then
+`World.entityDistributer.SendPacketToTrackedPlayers(entityId, primaryPlayerId,
+pkg, false)` - a broadcast to tracking players, not a full-server broadcast.
+Called by the AI when an entity acquires/keeps a target, so combat zombies
+track the player's head. Process: resolve `EntityAlive` by id; if
+`emodel.avatarController` present, `AvatarController.SetLookPosition
+(lookAtPosition)`. Cosmetic aim/look only; no sim authority.
 
 ### 5.3 NetPackageHoldingItem (ToClient)
 ```text
@@ -1555,7 +1561,7 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageSimpleChat` | 44 | msg, recipientEntityIds | Process IL=116: remote UI chat; server fans to recipient ClientInfos |
 | `NetPackageSharedQuest` | (large) | SharedQuestData | Process IL=371: server `QuestShareServer` / client `QuestShareClient`; party journal remove/share |
 | `NetPackageGameMessage` | 17 | msgType, mainEntityId, secondaryEntityId | Process IL=28: remote `GameMessageServer` else `DisplayGameMessage` |
-| `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | Process IL=18: local players HUD |
+| `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | Process IL=18: local players HUD. **Sole sender `GameManager.ShowTooltipMP`** (IL=31): unicast (toEntityId=player) to a remote player, direct ShowTooltip for the local one; its only V3.1.0 b14 caller is the Homerun minigame event (HomerunData) - pickup notifications do NOT ride this package |
 | `NetPackageCloseAllWindows` | 8 | _playerIdToClose | Process IL=21: server no-op path; client `CloseAllOpenModalWindows` |
 | `NetPackageSoundAtPosition` | 25 | pos, audioClipName, mode, distance, entityId | Process IL=36: `PlaySoundAtPositionServer/Client` |
 | `NetPackageParticleEffect` | 20 | pe, entityThatCausedIt, forceCreation, worldSpawn | Process IL=30: `SpawnParticleEffectServer/Client` |
@@ -1830,6 +1836,11 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-21:** EntityLookAt sender pinned: `EntityAlive::SetLookPosition`
+  (0.0016 sqr-delta gate, `SendPacketToTrackedPlayers` - tracking broadcast,
+  not server-wide). ShowToolbeltMessage corrected: sole sender
+  `GameManager.ShowTooltipMP` (unicast), only called by the Homerun minigame
+  in V3.1.0 b14 - pickup feedback does not ride this package.
 - **2026-08-21:** Sleeper trio re-verified from `EntityAlive.il.txt` /
   `SleeperVolume.il.txt`: exact bodies (Wakeup i32, Pose i32+u8, PassiveChange
   i32 via base), send semantics (`AddEnemyToWorld` spawns passive; wake =
