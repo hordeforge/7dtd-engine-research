@@ -942,6 +942,38 @@ etc.); the fetch/treasure objectives complete through the client's
 that advances the fetch phase from that event can treat this package as a
 redundant echo.
 
+### 5.14 NetPackageEntityPhysics (ToServer, physics-master report)
+
+`read` IL=74, body:
+
+```text
+cFlagIsMaster    : u16
+cFlagIsCollided  : u16
+cFlagOnGround    : u16
+EntityId         : i32
+Pos              : Vector3 (3 x f32)
+QRot             : Quaternion (4 x f32)
+Velocity         : Vector3 (3 x f32)
+AngularVelocity  : Vector3 (3 x f32)
+Flags            : u16
+```
+
+`ProcessPackage` (IL=87): resolves the entity, drops when it is not the
+sender's physics master (`isPhysicsMaster`), and mirrors the reported
+pos/rot/velocity. A server with authoritative movement, falling-block and
+vehicle sims (broadcast PosAndRot / VehiclePositions / EntityVelocity) can
+treat the report as a redundant echo.
+
+**Remaining client-sent names without handlers, by scope (V3.1.0 b14):
+mod API surface** (ModifyCVar, SetProp, SimpleRPC, Debug),
+**EAC/encryption waivers** (EAC, EncryptionPublicKey, KeyExchangeComplete),
+**creative/editor** (EditorUpdateVolume, WorldFolder),
+**Twitch integration** (PlayerTwitchStats, TwitchAccess,
+TwitchVoteScheduling, PlayerLaserSight),
+**headless mesh** (DynamicMesh), and
+**deferred cosmetic/depth** (EntityRagdoll - buff-triggered ragdoll relay;
+DroneDataSync, DroneParticleEffect - junk-drone companion state).
+
 
 ---
 
@@ -2153,6 +2185,11 @@ editor/prefab tooling. So sending `bInfinite=false` with disc-formula bounds
 cannot wedge or visibly alter the b14 client.
 
 ## Changelog
+
+- **2026-08-21:** NetPackageEntityPhysics pinned: the physics-master report
+  body + isPhysicsMaster gate (redundant echo for authoritative sims); the
+  remaining client-sent names are categorized by scope (mod API, EAC
+  waivers, creative editor, Twitch, headless mesh, deferred cosmetic).
 
 - **2026-08-21:** NetPackageQuestGotoPoint/QuestTreasurePoint pinned: the
   goto-marker report body + proximity-completion semantics, and the
