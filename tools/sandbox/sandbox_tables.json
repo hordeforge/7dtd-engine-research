@@ -1,0 +1,2138 @@
+{
+ "valuesets": {
+  "DamageValues": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.25,
+    0.3499999940395355,
+    0.5,
+    0.6499999761581421,
+    0.75,
+    0.8500000238418579,
+    1.0,
+    1.25,
+    1.5,
+    2.0,
+    2.5,
+    3.0
+   ]
+  },
+  "DamageValuesNoNone": {
+   "type": "float",
+   "values": [
+    0.25,
+    0.3499999940395355,
+    0.5,
+    0.6499999761581421,
+    0.75,
+    0.8500000238418579,
+    1.0,
+    1.25,
+    1.5,
+    2.0,
+    2.5,
+    3.0
+   ]
+  },
+  "PlayerSpeedValues": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.25,
+    0.5,
+    0.6000000238418579,
+    0.699999988079071,
+    0.800000011920929,
+    0.8999999761581421,
+    1.0,
+    1.100000023841858,
+    1.2000000476837158,
+    1.2999999523162842,
+    1.399999976158142,
+    1.5,
+    2.0,
+    3.0
+   ]
+  },
+  "PlayerSpeedValuesWithNone": {
+   "type": "float",
+   "values": [
+    0.25,
+    0.5,
+    0.6000000238418579,
+    0.699999988079071,
+    0.800000011920929,
+    0.8999999761581421,
+    1.0,
+    1.100000023841858,
+    1.2000000476837158,
+    1.2999999523162842,
+    1.399999976158142,
+    1.5,
+    2.0,
+    3.0
+   ]
+  },
+  "SpeedValues": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    2.0,
+    3.0
+   ]
+  },
+  "StaminaUsage": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0
+   ]
+  },
+  "LootAbundanceValues": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.25,
+    0.3499999940395355,
+    0.5,
+    0.6499999761581421,
+    0.75,
+    0.8500000238418579,
+    1.0,
+    1.25,
+    1.5,
+    2.0,
+    3.0,
+    4.0,
+    5.0
+   ]
+  },
+  "ZombieRageChance": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.15000000596046448,
+    0.30000001192092896,
+    0.3499999940395355,
+    0.4000000059604645,
+    0.5,
+    0.6000000238418579,
+    0.75,
+    0.8999999761581421,
+    1.0
+   ]
+  },
+  "ZombieSpeeds": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  "AISmellMode": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "JumpStrength": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.5,
+    1.0,
+    1.25,
+    1.5,
+    2.0,
+    3.0
+   ]
+  },
+  "StaminaRegen": {
+   "type": "float",
+   "values": [
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    2.0,
+    3.0
+   ]
+  },
+  "XPGain": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+    3.0,
+    5.0
+   ]
+  },
+  "JarRefund": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.05000000074505806,
+    0.10000000149011612,
+    0.20000000298023224,
+    0.30000001192092896,
+    0.4000000059604645,
+    0.5,
+    0.6000000238418579,
+    0.699999988079071,
+    0.800000011920929,
+    0.8999999761581421,
+    1.0
+   ]
+  },
+  "BarterValues": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+    3.0,
+    4.0
+   ]
+  },
+  "DisabledLowDefaultHigh": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    1.5,
+    2.0
+   ]
+  },
+  "LowDefaultHigh": {
+   "type": "float",
+   "values": [
+    0.25,
+    0.5,
+    1.0,
+    1.5,
+    2.0
+   ]
+  },
+  "Encumbrance": {
+   "type": "float",
+   "values": [
+    10.0,
+    1.350000023841858,
+    1.0,
+    0.699999988079071,
+    0.3499999940395355,
+    0.0
+   ]
+  },
+  "SkillGainRate": {
+   "type": "int",
+   "values": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "PointsPer": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "StarterSkillPoints": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  },
+  "BloodMoonFrequency": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    14,
+    20,
+    30
+   ]
+  },
+  "BloodMoonRange": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    7,
+    10,
+    14,
+    20
+   ]
+  },
+  "BloodMoonWarning": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  "BloodMoonCount": {
+   "type": "int",
+   "values": [
+    4,
+    6,
+    8,
+    10,
+    12,
+    16,
+    24,
+    32,
+    64
+   ]
+  },
+  "AirDrops": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  "AirDropRandomTime": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  "StormFrequency": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.5,
+    1.0,
+    1.5,
+    2.0,
+    3.0,
+    4.0,
+    5.0
+   ]
+  },
+  "QuestPerTier": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ]
+  },
+  "QuestPerDay": {
+   "type": "int",
+   "values": [
+    -1,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  },
+  "TraderArea": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  "TraderResetInterval": {
+   "type": "int",
+   "values": [
+    -1,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    14
+   ]
+  },
+  "ItemTierOptions": {
+   "type": "int",
+   "values": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  "DewCollectorInput": {
+   "type": "float",
+   "values": [
+    0.0,
+    1.0,
+    2.0,
+    3.0
+   ]
+  },
+  "ApiaryInput": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.20000000298023224,
+    0.4000000059604645,
+    0.6000000238418579,
+    0.800000011920929,
+    1.0,
+    1.5,
+    2.0,
+    3.0
+   ]
+  },
+  "CollectorOutput": {
+   "type": "float",
+   "values": [
+    1.0,
+    2.0,
+    3.0,
+    4.0,
+    5.0
+   ]
+  },
+  "BackpackCrafting": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "DeathPenalty": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "DropOnDeath": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  "DropOnQuit": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "LoseItemsOnDeathType": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "DegradeItemsOnDeath": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "TraderHourPresets": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  "YesNo": {
+   "type": "bool",
+   "values": null
+  },
+  "Celebrate": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  "ShowXP": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "HeadshotMode": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  "MaxEnemyType": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "MaxTechType": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  "LoseItemCount": {
+   "type": "int",
+   "values": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  },
+  "DayNightLength": {
+   "type": "int",
+   "values": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    90,
+    120
+   ]
+  },
+  "DayLightLength": {
+   "type": "int",
+   "values": [
+    0,
+    4,
+    6,
+    8,
+    10,
+    12,
+    14,
+    16,
+    18,
+    20,
+    24
+   ]
+  },
+  "LootRespawnDays": {
+   "type": "int",
+   "values": [
+    -1,
+    5,
+    7,
+    10,
+    15,
+    20,
+    30,
+    40,
+    50
+   ]
+  },
+  "MaxChunkAge": {
+   "type": "int",
+   "values": [
+    -1,
+    1,
+    3,
+    5,
+    7,
+    10,
+    20,
+    30,
+    40,
+    50,
+    75,
+    100
+   ]
+  },
+  "Gravity": {
+   "type": "float",
+   "values": [
+    0.5,
+    0.6000000238418579,
+    0.699999988079071,
+    0.800000011920929,
+    0.8999999761581421,
+    1.0
+   ]
+  },
+  "SlowToFast": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "BiomeEnemyDensity": {
+   "type": "int",
+   "values": [
+    -1,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "SmeltingType": {
+   "type": "bool",
+   "values": null
+  },
+  "RepairTypes": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "MaxDegradationAmounts": {
+   "type": "float",
+   "values": [
+    0.0,
+    0.05000000074505806,
+    0.10000000149011612,
+    0.15000000596046448,
+    0.20000000298023224,
+    0.25
+   ]
+  },
+  "CropGrowthSpeed": {
+   "type": "float",
+   "values": [
+    1000.0,
+    0.0,
+    0.20000000298023224,
+    0.5,
+    0.75,
+    1.0,
+    1.5,
+    2.0,
+    3.0
+   ]
+  },
+  "ZombieFeralSense": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "FullChickenStressEvent": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "ShowLocationTypes": {
+   "type": "int",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  "MaxStackSize": {
+   "type": "float",
+   "values": [
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+    2.5,
+    3.0,
+    4.0,
+    5.0
+   ]
+  }
+ },
+ "options": [
+  {
+   "id": 0,
+   "display": "Ranged Damage",
+   "category": "General",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 1,
+   "display": "Melee Damage",
+   "category": "General",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 2,
+   "display": "Block Damage",
+   "category": "General",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 3,
+   "display": "Terrain Damage",
+   "category": "General",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 4,
+   "display": "Headshot Multiplier",
+   "category": "General",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 5,
+   "display": "Crouch Speed",
+   "category": "General",
+   "valueset": "PlayerSpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 6,
+   "display": "Walk Speed",
+   "category": "General",
+   "valueset": "PlayerSpeedValuesWithNone",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 7,
+   "display": "Run Speed",
+   "category": "General",
+   "valueset": "PlayerSpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 8,
+   "display": "Jump Height",
+   "category": "General",
+   "valueset": "JumpStrength",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 9,
+   "display": "Stamina Usage",
+   "category": "General",
+   "valueset": "StaminaUsage",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 10,
+   "display": "Stamina Regen",
+   "category": "General",
+   "valueset": "StaminaRegen",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 11,
+   "display": "Level Health/Stam Bonus",
+   "category": "General",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 12,
+   "display": "Jar Refund",
+   "category": "General",
+   "valueset": "JarRefund",
+   "type": "float",
+   "default": 0.6000000238418579
+  },
+  {
+   "id": 13,
+   "display": "Entity Health Bars",
+   "category": "Entities",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 0
+  },
+  {
+   "id": 14,
+   "display": "Show Entity Damage",
+   "category": "Entities",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 0
+  },
+  {
+   "id": 15,
+   "display": "Allow Newbie Coat",
+   "category": "General",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 16,
+   "display": "Headshot Mode",
+   "category": "Entities",
+   "valueset": "HeadshotMode",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 17,
+   "display": "Incoming Damage",
+   "category": "General",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 18,
+   "display": "XP Multiplier",
+   "category": "General",
+   "valueset": "XPGain",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 19,
+   "display": "Show XP",
+   "category": "General",
+   "valueset": "ShowXP",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 20,
+   "display": "Encumbrance Modifier",
+   "category": "General",
+   "valueset": "Encumbrance",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 21,
+   "display": "Item Degradation",
+   "category": "Crafting",
+   "valueset": "DisabledLowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 22,
+   "display": "Lose Items Death Type",
+   "category": "General",
+   "valueset": "LoseItemsOnDeathType",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 23,
+   "display": "Lose Items Death Count",
+   "category": "General",
+   "valueset": "LoseItemCount",
+   "type": "int",
+   "default": 1
+  },
+  {
+   "id": 24,
+   "display": "Degrade Items On Death",
+   "category": "General",
+   "valueset": "DegradeItemsOnDeath",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 25,
+   "display": "Degrade Amount On Death",
+   "category": "General",
+   "valueset": "MaxDegradationAmounts",
+   "type": "float",
+   "default": 0.10000000149011612
+  },
+  {
+   "id": 26,
+   "display": "Death Penalty",
+   "category": "General",
+   "valueset": "DeathPenalty",
+   "type": "int",
+   "default": 1
+  },
+  {
+   "id": 27,
+   "display": "Drop On Death",
+   "category": "General",
+   "valueset": "DropOnDeath",
+   "type": "int",
+   "default": 1
+  },
+  {
+   "id": 28,
+   "display": "Drop On Quit",
+   "category": "General",
+   "valueset": "DropOnQuit",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 29,
+   "display": "Infection Rate",
+   "category": "General",
+   "valueset": "SpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 30,
+   "display": "Enemy Spawn",
+   "category": "Entities",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 31,
+   "display": "Entity Damage",
+   "category": "Entities",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 32,
+   "display": "Entity Block Damage",
+   "category": "Entities",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 33,
+   "display": "Blood Moon Block Damage",
+   "category": "Entities",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 34,
+   "display": "Zombie Day Speed",
+   "category": "Entities",
+   "valueset": "ZombieSpeeds",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 35,
+   "display": "Zombie Night Speed",
+   "category": "Entities",
+   "valueset": "ZombieSpeeds",
+   "type": "int",
+   "default": 3
+  },
+  {
+   "id": 36,
+   "display": "Zombie Feral Speed",
+   "category": "Entities",
+   "valueset": "ZombieSpeeds",
+   "type": "int",
+   "default": 3
+  },
+  {
+   "id": 37,
+   "display": "Zombie Blood Moon Speed",
+   "category": "Entities",
+   "valueset": "ZombieSpeeds",
+   "type": "int",
+   "default": 3
+  },
+  {
+   "id": 38,
+   "display": "Zombie Feral Sense",
+   "category": "Entities",
+   "valueset": "ZombieFeralSense",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 39,
+   "display": "Zombie AI Smell Mode",
+   "category": "Entities",
+   "valueset": "AISmellMode",
+   "type": "int",
+   "default": 3
+  },
+  {
+   "id": 40,
+   "display": "Allow Zombie Digging",
+   "category": "Entities",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 41,
+   "display": "Zombie Rage Chance",
+   "category": "Entities",
+   "valueset": "ZombieRageChance",
+   "type": "float",
+   "default": 0.15000000596046448
+  },
+  {
+   "id": 42,
+   "display": "Entity Incoming Damage",
+   "category": "Entities",
+   "valueset": "DamageValuesNoNone",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 43,
+   "display": "Max Enemy Type",
+   "category": "Entities",
+   "valueset": "MaxEnemyType",
+   "type": "int",
+   "default": 5
+  },
+  {
+   "id": 44,
+   "display": "Day Enemy Respawn",
+   "category": "Entities",
+   "valueset": "SlowToFast",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 45,
+   "display": "Day Animal Respawn",
+   "category": "Entities",
+   "valueset": "SlowToFast",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 46,
+   "display": "Day Enemy Density",
+   "category": "Entities",
+   "valueset": "BiomeEnemyDensity",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 47,
+   "display": "Zombies Eat Animals",
+   "category": "Entities",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 48,
+   "display": "Blood Moon Frequency",
+   "category": "World",
+   "valueset": "BloodMoonFrequency",
+   "type": "int",
+   "default": 7
+  },
+  {
+   "id": 49,
+   "display": "Blood Moon Range",
+   "category": "World",
+   "valueset": "BloodMoonRange",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 50,
+   "display": "Blood Moon Warning",
+   "category": "World",
+   "valueset": "BloodMoonWarning",
+   "type": "int",
+   "default": 1
+  },
+  {
+   "id": 51,
+   "display": "Blood Moon Count",
+   "category": "World",
+   "valueset": "BloodMoonCount",
+   "type": "int",
+   "default": 8
+  },
+  {
+   "id": 52,
+   "display": "Air Drops",
+   "category": "World",
+   "valueset": "AirDrops",
+   "type": "int",
+   "default": 3
+  },
+  {
+   "id": 53,
+   "display": "Mark Air Drops",
+   "category": "World",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 54,
+   "display": "Air Drop Random Time",
+   "category": "World",
+   "valueset": "AirDropRandomTime",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 55,
+   "display": "Biome Progression",
+   "category": "World",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 56,
+   "display": "Temperature Survival",
+   "category": "World",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 57,
+   "display": "Storm Frequency",
+   "category": "World",
+   "valueset": "StormFrequency",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 58,
+   "display": "Storm Warning",
+   "category": "World",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 59,
+   "display": "Heatmap Sensitivity",
+   "category": "World",
+   "valueset": "DisabledLowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 60,
+   "display": "Global GameStage",
+   "category": "World",
+   "valueset": "LowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 61,
+   "display": "Biome GameStage",
+   "category": "World",
+   "valueset": "LowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 62,
+   "display": "Global LootStage",
+   "category": "Resources",
+   "valueset": "LowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 63,
+   "display": "Biome LootStage",
+   "category": "Resources",
+   "valueset": "LowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 64,
+   "display": "POI Tier LootStage",
+   "category": "Resources",
+   "valueset": "LowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 65,
+   "display": "Global TraderStage",
+   "category": "Traders",
+   "valueset": "LowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 66,
+   "display": "24 Day Cycle",
+   "category": "World",
+   "valueset": "DayNightLength",
+   "type": "int",
+   "default": 60
+  },
+  {
+   "id": 67,
+   "display": "Day Light Length",
+   "category": "World",
+   "valueset": "DayLightLength",
+   "type": "int",
+   "default": 18
+  },
+  {
+   "id": 68,
+   "display": "Allow Map",
+   "category": "World",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 69,
+   "display": "Allow Compass",
+   "category": "World",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 70,
+   "display": "Allow Screen Markers",
+   "category": "World",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 71,
+   "display": "Show Location Info",
+   "category": "World",
+   "valueset": "ShowLocationTypes",
+   "type": "int",
+   "default": 1
+  },
+  {
+   "id": 72,
+   "display": "Show Day/Time",
+   "category": "World",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 73,
+   "display": "Workstations in the Wild",
+   "category": "World",
+   "valueset": "JarRefund",
+   "type": "float",
+   "default": 0.0
+  },
+  {
+   "id": 74,
+   "display": "Max Tech Type",
+   "category": "World",
+   "valueset": "MaxTechType",
+   "type": "int",
+   "default": 4
+  },
+  {
+   "id": 75,
+   "display": "Loot Respawn Days",
+   "category": "Resources",
+   "valueset": "LootRespawnDays",
+   "type": "int",
+   "default": 7
+  },
+  {
+   "id": 76,
+   "display": "Loot Time",
+   "category": "Resources",
+   "valueset": "SpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 77,
+   "display": "Loot Max Tier",
+   "category": "Resources",
+   "valueset": "ItemTierOptions",
+   "type": "int",
+   "default": 6
+  },
+  {
+   "id": 78,
+   "display": "Global Loot Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 79,
+   "display": "Food Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 80,
+   "display": "Drink Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 81,
+   "display": "Medical Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 82,
+   "display": "Ammo Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 83,
+   "display": "Resource Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 84,
+   "display": "Armor Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 85,
+   "display": "Melee Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 86,
+   "display": "Ranged Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 87,
+   "display": "Dukes Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 88,
+   "display": "Magazines Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 89,
+   "display": "Treasure Map Chance",
+   "category": "Resources",
+   "valueset": "PlayerSpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 90,
+   "display": "Loot Bag Chance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 91,
+   "display": "Crop Output",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 92,
+   "display": "Seed Drop Output",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 93,
+   "display": "Crop Growth",
+   "category": "Resources",
+   "valueset": "CropGrowthSpeed",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 94,
+   "display": "Backpack Crafting",
+   "category": "Crafting",
+   "valueset": "BackpackCrafting",
+   "type": "int",
+   "default": 1
+  },
+  {
+   "id": 95,
+   "display": "Workstation Crafting",
+   "category": "Crafting",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 96,
+   "display": "Crafting Progression",
+   "category": "Crafting",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 97,
+   "display": "Crafting Time",
+   "category": "Crafting",
+   "valueset": "SpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 98,
+   "display": "Crafting Input",
+   "category": "Crafting",
+   "valueset": "SpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 99,
+   "display": "Crafting Output",
+   "category": "Crafting",
+   "valueset": "StaminaRegen",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 100,
+   "display": "Crafting Max Tier",
+   "category": "Crafting",
+   "valueset": "ItemTierOptions",
+   "type": "int",
+   "default": 6
+  },
+  {
+   "id": 101,
+   "display": "Mining Output",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 102,
+   "display": "Harvesting Output",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 103,
+   "display": "Scrapping Output",
+   "category": "Crafting",
+   "valueset": "SpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 104,
+   "display": "Smelter Type",
+   "category": "Crafting",
+   "valueset": "SmeltingType",
+   "type": "bool",
+   "default": 0
+  },
+  {
+   "id": 105,
+   "display": "Dew Collector Time",
+   "category": "Crafting",
+   "valueset": "SpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 106,
+   "display": "Dew Collector Output",
+   "category": "Crafting",
+   "valueset": "CollectorOutput",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 107,
+   "display": "Dew Collector Input",
+   "category": "Crafting",
+   "valueset": "DewCollectorInput",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 108,
+   "display": "Apiary Time",
+   "category": "Crafting",
+   "valueset": "SpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 109,
+   "display": "Apiary Output",
+   "category": "Crafting",
+   "valueset": "CollectorOutput",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 110,
+   "display": "Apiary Input",
+   "category": "Crafting",
+   "valueset": "ApiaryInput",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 111,
+   "display": "Book Abundance",
+   "category": "Resources",
+   "valueset": "LootAbundanceValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 112,
+   "display": "Crouch Run Speed",
+   "category": "General",
+   "valueset": "PlayerSpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 113,
+   "display": "Item Repair Types",
+   "category": "Crafting",
+   "valueset": "RepairTypes",
+   "type": "int",
+   "default": 3
+  },
+  {
+   "id": 114,
+   "display": "Max Degrade Amount",
+   "category": "Crafting",
+   "valueset": "MaxDegradationAmounts",
+   "type": "float",
+   "default": 0.0
+  },
+  {
+   "id": 115,
+   "display": "Magazine Points",
+   "category": "Crafting",
+   "valueset": "PointsPer",
+   "type": "int",
+   "default": 1
+  },
+  {
+   "id": 116,
+   "display": "Skill Gain Rate",
+   "category": "General",
+   "valueset": "SkillGainRate",
+   "type": "int",
+   "default": 1
+  },
+  {
+   "id": 117,
+   "display": "Skill Gain Amount",
+   "category": "General",
+   "valueset": "PointsPer",
+   "type": "int",
+   "default": 1
+  },
+  {
+   "id": 118,
+   "display": "Quests Enabled",
+   "category": "Tasks",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 119,
+   "display": "Intro Quest Enabled",
+   "category": "Tasks",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 120,
+   "display": "Trader to Trader Quests",
+   "category": "Tasks",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 121,
+   "display": "Starter Skill Points",
+   "category": "Tasks",
+   "valueset": "StarterSkillPoints",
+   "type": "int",
+   "default": 4
+  },
+  {
+   "id": 122,
+   "display": "Quests per Tier",
+   "category": "Tasks",
+   "valueset": "QuestPerTier",
+   "type": "int",
+   "default": 10
+  },
+  {
+   "id": 123,
+   "display": "Quests per Day",
+   "category": "Tasks",
+   "valueset": "QuestPerDay",
+   "type": "int",
+   "default": 4
+  },
+  {
+   "id": 124,
+   "display": "Buried Quests Enabled",
+   "category": "Tasks",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 125,
+   "display": "POI Quests Enabled",
+   "category": "Tasks",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 126,
+   "display": "Trading Dialog",
+   "category": "Traders",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 127,
+   "display": "Trader Hours",
+   "category": "Traders",
+   "valueset": "TraderHourPresets",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 128,
+   "display": "Trading Enabled",
+   "category": "Traders",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 129,
+   "display": "Vending Machines Enabled",
+   "category": "Traders",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 130,
+   "display": "Traders Sell Price",
+   "category": "Traders",
+   "valueset": "BarterValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 131,
+   "display": "Traders Buy Price",
+   "category": "Traders",
+   "valueset": "BarterValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 132,
+   "display": "Trader Protection",
+   "category": "Traders",
+   "valueset": "TraderArea",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 133,
+   "display": "Trader Reset Interval",
+   "category": "Traders",
+   "valueset": "TraderResetInterval",
+   "type": "int",
+   "default": -1
+  },
+  {
+   "id": 134,
+   "display": "Trader Item Abundance",
+   "category": "Traders",
+   "valueset": "LowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 135,
+   "display": "Trader Buy Limit",
+   "category": "Traders",
+   "valueset": "StarterSkillPoints",
+   "type": "int",
+   "default": 3
+  },
+  {
+   "id": 136,
+   "display": "Trader Max Tier",
+   "category": "Traders",
+   "valueset": "ItemTierOptions",
+   "type": "int",
+   "default": 6
+  },
+  {
+   "id": 137,
+   "display": "Vending Reset Interval",
+   "category": "Traders",
+   "valueset": "TraderResetInterval",
+   "type": "int",
+   "default": -1
+  },
+  {
+   "id": 138,
+   "display": "Vending Item Abundance",
+   "category": "Traders",
+   "valueset": "LowDefaultHigh",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 139,
+   "display": "Challenges Enabled",
+   "category": "Tasks",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 140,
+   "display": "Intro Challenges Enabled",
+   "category": "Tasks",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 1
+  },
+  {
+   "id": 141,
+   "display": "Vehicle Fuel Usage",
+   "category": "Misc",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 142,
+   "display": "Vehicle Entity Damage",
+   "category": "Misc",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 143,
+   "display": "Vehicle Block Damage",
+   "category": "Misc",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 144,
+   "display": "Vehicle Self Damage",
+   "category": "Misc",
+   "valueset": "DamageValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 145,
+   "display": "Electrical Output",
+   "category": "Misc",
+   "valueset": "StaminaRegen",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 146,
+   "display": "Celebrate Kills",
+   "category": "Misc",
+   "valueset": "Celebrate",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 147,
+   "display": "Big Heads",
+   "category": "Misc",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 0
+  },
+  {
+   "id": 148,
+   "display": "Tiny Zombies",
+   "category": "Misc",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 0
+  },
+  {
+   "id": 149,
+   "display": "Silly Sounds",
+   "category": "Misc",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 0
+  },
+  {
+   "id": 150,
+   "display": "Gravity",
+   "category": "Misc",
+   "valueset": "Gravity",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 151,
+   "display": "Black and White",
+   "category": "Misc",
+   "valueset": "YesNo",
+   "type": "bool",
+   "default": 0
+  },
+  {
+   "id": 152,
+   "display": "Chicken Coop Time",
+   "category": "Crafting",
+   "valueset": "SpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 153,
+   "display": "Chicken Coop Output",
+   "category": "Crafting",
+   "valueset": "CollectorOutput",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 154,
+   "display": "Chicken Coop Input",
+   "category": "Crafting",
+   "valueset": "ApiaryInput",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 155,
+   "display": "Day Animal Density",
+   "category": "Entities",
+   "valueset": "BiomeEnemyDensity",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 156,
+   "display": "Night Enemy Respawn",
+   "category": "Entities",
+   "valueset": "SlowToFast",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 157,
+   "display": "Night Animal Respawn",
+   "category": "Entities",
+   "valueset": "SlowToFast",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 158,
+   "display": "Night Enemy Density",
+   "category": "Entities",
+   "valueset": "BiomeEnemyDensity",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 159,
+   "display": "Night Animal Density",
+   "category": "Entities",
+   "valueset": "BiomeEnemyDensity",
+   "type": "int",
+   "default": 0
+  },
+  {
+   "id": 160,
+   "display": "Infection Chance",
+   "category": "General",
+   "valueset": "SpeedValues",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 161,
+   "display": "Hunger Multiplier",
+   "category": "General",
+   "valueset": "StaminaUsage",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 162,
+   "display": "Thirst Multiplier",
+   "category": "General",
+   "valueset": "StaminaUsage",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 163,
+   "display": "Stack Size Multiplier",
+   "category": "General",
+   "valueset": "MaxStackSize",
+   "type": "float",
+   "default": 1.0
+  },
+  {
+   "id": 164,
+   "display": "Full Chicken Stress Event",
+   "category": "Crafting",
+   "valueset": "FullChickenStressEvent",
+   "type": "int",
+   "default": 1
+  }
+ ]
+}
