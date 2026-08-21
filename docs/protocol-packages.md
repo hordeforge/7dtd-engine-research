@@ -1788,6 +1788,24 @@ condition):** `NetPackageAudio` (10 fields; `soundGroupName` null-coalesced),
 `NetPackageWeather` (neither list length written - inferred by reader),
 `NetPackageWorldAreas` (version:u8=1, count:i16).
 
+#### `NetPackageClientInfo` (ToClient)
+
+Body (write IL=41 / read IL=38, re-verified 2026-08-21):
+
+```text
+count : u16
+// count x:
+  entityId : i32
+  pingTime : i16   // conv.i2 of the server-measured ping
+  admin    : bool
+```
+
+`Setup(World, IList<ClientInfo>)` (IL=55) snapshots every connected client
+(plus the local player in non-dedicated). **Sender:** `ConnectionManager.Update`
+every **5 s** (`updateClientInfo` CountdownTimer = 5.0, auto-restart), after
+`UpdatePings()`; broadcast to all clients (reliable=true, toEntityId=-1).
+Drives the player-list UI and admin crowns.
+
 #### `NetPackagePersistentPlayerPositions` (ToClient)
 
 Body (write IL=38 / read IL=27, re-verified 2026-08-21):
@@ -1860,6 +1878,9 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-21:** ClientInfo pinned: body (count u16 + entityId/ping i16/
+  admin per player), the 5 s ConnectionManager.updateClientInfo broadcast
+  cadence and UpdatePings interplay.
 - **2026-08-21:** EntityVelocity sender pinned: NetEntityDistributionEntry,
   shouldSendMotionUpdates, bAdd=false (replace) with the entity's motion.
 - **2026-08-21:** PersistentPlayerPositions pinned: body (count + platform
