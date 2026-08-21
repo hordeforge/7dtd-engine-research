@@ -692,6 +692,11 @@ bAdd : bool
 motion.x,y,z : f32 x3   // Setup clamps each axis to [-8, 8]
 ```
 
+Sender (re-verified 2026-08-21): `NetEntityDistributionEntry` sends it to
+tracking players when `shouldSendMotionUpdates` is set - the entity's current
+`motion` with `bAdd=false` (the package replaces, not adds). zdtd streams the
+vertical component for falling/jumping zombies, delta-gated.
+
 #### 5.5.6 `NetPackageEntityAliveFlags` (write IL=8)
 
 ```text
@@ -1855,6 +1860,8 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-21:** EntityVelocity sender pinned: NetEntityDistributionEntry,
+  shouldSendMotionUpdates, bAdd=false (replace) with the entity's motion.
 - **2026-08-21:** PersistentPlayerPositions pinned: body (count + platform
   id stream + Vector3i), the 6 s GameManager broadcast cadence, and the
   EntityId != -1 online-only filter.
