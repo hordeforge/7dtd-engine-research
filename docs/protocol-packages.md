@@ -1345,11 +1345,45 @@ State: `reason:u8` + `PersistentPlayerData.Write`. Positions: count + platform i
 
 #### `NetPackageSleeperWakeup` / `Pose` / `PassiveChange`
 
-Wakeup: `entityId:i32`. Pose: `entityId` + `pose:u8`. PassiveChange: EntityTargeted
-id; client clears `IsSleeperPassive`.
+Bodies (write IL sizes in parens; all ToClient, channel 0 default):
 
-Wakeup Process (**IL=20**): if not remote world, resolve entity,
-`EntityAlive.ConditionalTriggerSleeperWakeUp()`.
+```text
+NetPackageSleeperWakeup (IL=8):        entityId : i32
+NetPackageSleeperPose (IL=12):         entityId : i32, pose : u8
+NetPackageSleeperPassiveChange (IL=8): entityId : i32   (via NetPackageEntityTargeted base)
+```
+
+Send-side semantics (server, re-verified 2026-08-21 from
+`EntityAlive.il.txt` / `SleeperVolume.il.txt` / `EntityZombieSleeper`):
+
+- **Spawn** (`SleeperVolume::AddEnemyToWorld` IL=47): the volume's zombie
+  spawns with `IsSleeperPassive = true`, `SetSleeper()`, and a client-side
+  `TriggerSleeperPose(pose, false)`; the passive flag rides the EntitySpawn
+  `EntityCreationData` so the client renders the sleeper lying down. Sleeper
+  spawns are staggered by the volume's MinScript (max `TickSpawnCount` 2/tick,
+  `SleeperVolume::Tick` IL=137).
+- **Wake** (`EntityAlive::ConditionalTriggerSleeperWakeUp` IL=55): plays the
+  wake pose, calls `EAIManager.SleeperWokeUp()`, and broadcasts
+  `NetPackageSleeperWakeup(entityId)` (unreliable, toEntityId=-1). Fired by:
+  volume Touch on player detection (`PlayerStealth.CanSleeperAttackDetect`,
+  `SleeperVolume::Touch` IL=112), the wandering-countdown expiry (trigger 4),
+  `EAISetNearestEntityAsTarget`, explosions (`Explosion` IL), vultures, and -
+  critically - **any damage** (`EntityAlive::ProcessDamageResponseLocal`
+  IL=903: `ConditionalTriggerSleeperWakeUp()` unconditionally, plus
+  `World.CheckSleeperVolumeNoise` while still passive).
+- **Stand-up** (`EntityAlive::SetSleeperActive` IL=26): clears
+  `IsSleeperPassive` and broadcasts `NetPackageSleeperPassiveChange(entityId)`.
+  `SleeperVolume::Touch` calls it for volume zombies that do NOT wake on
+  trigger (the player is not detectable yet): they stand idle, then wake via
+  the countdown. A zombie that wakes via `ConditionalTriggerSleeperWakeUp`
+  keeps `IsSleeperPassive` set.
+- **`NetPackageSleeperPose` is dead code in V3.1.0 b14**: no
+  `GetPackage<NetPackageSleeperPose>` call exists anywhere in the dump; the
+  sleep pose is carried by the EntitySpawn flags, not a pose package.
+
+Client process: Wakeup Process (**IL=20**) resolves the entity and calls
+`EntityAlive.ConditionalTriggerSleeperWakeUp()` (wake pose + `SleeperWokeUp`);
+PassiveChange Process (**IL=21**) clears `IsSleeperPassive`.
 
 #### `NetPackageBloodmoonMusic`
 
@@ -1796,6 +1830,14 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-21:** Sleeper trio re-verified from `EntityAlive.il.txt` /
+  `SleeperVolume.il.txt`: exact bodies (Wakeup i32, Pose i32+u8, PassiveChange
+  i32 via base), send semantics (`AddEnemyToWorld` spawns passive; wake =
+  `ConditionalTriggerSleeperWakeUp` broadcast Wakeup - proximity, wandering
+  countdown, target acquisition, explosion, damage; stand-up =
+  `SetSleeperActive` broadcast PassiveChange), and the finding that
+  **NetPackageSleeperPose is never emitted** in the V3.1.0 b14 dump (the sleep
+  pose rides EntitySpawn flags, not a pose package).
 - **2026-08-11:** Residual-table Process IL re-verified (28): RequestToSpawnPlayer write IL=17, EntityCollect IL=51, EntityAttach IL=104, EntityRagdoll IL=56, EntityAddVelocity IL=11, EntitySpeeds IL=37, EntityAnimationData IL=64, EntitySetPartActive IL=38, EntityPrimeDetonator IL=23, SetAttackTarget IL=24, OwnedEntitySync IL=34, PlayerEquipment IL=56, ItemDrop IL=23, DropItemsContainer IL=19, ItemActionEffects IL=42, ItemReload IL=18, ModifyCVar IL=26, EntityAddExpClient IL=36 / Server IL=31, EntitySetSkillLevelClient IL=22 / Server IL=26, EntityAwardKillServer IL=24, EntityAddScoreClient IL=25 / Server IL=17, SetBlockTexture IL=46, AnimateBlock IL=33, PickupBlock IL=41, WallVolume IL=16 (all exact).
 - **2026-08-11:** Explosion detail IL re-verified: Explosion.AttackBlocks IL=553, AttackEntites IL=691, ExplosionData.ToByteArray IL=21, GameManager.ExplodeGroupFrameUpdate IL=220 / ExplosionClient IL=51 (exact).
 - **2026-08-11:** Stats/party package IL re-verified: NetPackageEntityStatChanged.Process IL=88, EntityStatsBuff.Process IL=76, PlayerStats.Process IL=70, PartyActions.Process IL=176, PartyData.Process IL=243 (exact).
