@@ -1788,6 +1788,22 @@ condition):** `NetPackageAudio` (10 fields; `soundGroupName` null-coalesced),
 `NetPackageWeather` (neither list length written - inferred by reader),
 `NetPackageWorldAreas` (version:u8=1, count:i16).
 
+#### `NetPackagePlayerSetBackpackPosition` (ToClient)
+
+Body (read IL=29, re-verified 2026-08-21):
+
+```text
+playerId : i32
+count    : u8
+// count x: Vector3i position (3 x i32)
+```
+
+**Senders:** `EntityBackpack` (broadcast on placement / position sync) and
+`PersistentPlayerData` (backpack-cap cleanup, > 3 protected backpacks drops
+the oldest and re-broadcasts the list); all unreliable broadcast, the client
+shows the dropped-backpack markers. zdtd tracks one marker per player (the
+DropOnDeath bag), broadcast on drop and cleared on collect.
+
 #### `NetPackageClientInfo` (ToClient)
 
 Body (write IL=41 / read IL=38, re-verified 2026-08-21):
@@ -1878,6 +1894,9 @@ customReason    : string
 
 ## Changelog
 
+- **2026-08-21:** PlayerSetBackpackPosition pinned: body (playerId + count u8
+  + Vector3i list), senders (EntityBackpack placement / PersistentPlayerData
+  cleanup).
 - **2026-08-21:** ClientInfo pinned: body (count u16 + entityId/ping i16/
   admin per player), the 5 s ConnectionManager.updateClientInfo broadcast
   cadence and UpdatePings interplay.
