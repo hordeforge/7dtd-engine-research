@@ -1909,7 +1909,64 @@ customReason    : string
 | [residuals.md](residuals.md) | Non-IL residuals |
 | [../tools/README.md](../tools/README.md) | Dumpers that generated this |
 
+### 4.4 NetPackageChunkClusterInfo (join world cluster descriptor)
+
+`write` order (`write` IL=36, `read` IL=27, `Setup(ChunkCluster)` IL=24,
+`GetLength` = 40):
+```text
+name       : string          // ChunkCluster.Name = GamePrefs GameWorld
+cMinPos    : i32, i32        // WorldChunkCache.ChunkMinPos (x, z)
+cMaxPos    : i32, i32        // WorldChunkCache.ChunkMaxPos (x, z)
+bInfinite  : bool            // !ChunkCluster.IsFixedSize
+pos        : f32, f32, f32   // ChunkCluster.Position
+```
+
+`ProcessPackage` (IL=13) forwards all five to `GameManager.ChunkClusterInfo`
+which starts `chunkClusterInfoCo` (IL=129). The coroutine waits for
+`worldCreated`, then:
+1. Stores `pos` into `ChunkCluster.Position`, `cMin`/`cMax` into
+   `WorldChunkCache.ChunkMinPos/ChunkMaxPos`.
+2. Only when `bInfinite == false` (fixed world): if
+   `World.m_WorldEnvironment != null`, calls `SetColliders(...)` with the box
+   `((cMin.x+1)*16, (cMin.y+1)*16, (cMax.x-cMin.x-1)*16, (cMax.y-cMin.y-1)*16,
+   Constants.cSizePlanesAround, 0)`, then `CreateLevelBorderBox(World)`, then
+   sets `ChunkCluster.IsFixedSize = true`.
+   **Both border methods are empty no-ops in V3.1.0 b14** (`IL=1: ret`), so on
+   this build the border branch has no visible effect.
+3. Sets `GameManager.chunkClusterLoaded = true` regardless of branch.
+
+`name` is never read client-side (dropped in `ChunkClusterInfo`, unused in the
+coroutine). Ordering matters: `setSpawnPointListCo` (the
+`NetPackageWorldSpawnPoints` handler, IL=18/129) waits on `chunkClusterLoaded`
+before applying spawn points, so ChunkClusterInfo must precede WorldSpawnPoints.
+
+**Bounds sources:**
+- `WorldChunkCache` ctor sets `ChunkMinPos = ChunkMaxPos = Vector2i.zero`; only
+  `ChunkProviderDisc::Init` (`Init` d11 IL_0250/IL_028B) overwrites them, for
+  fixed maps. With the centered map box min = `-half`, max = `+half` (blocks):
+  ```
+  ChunkMinPos = ((min-1)/16 - 3, (min-1)/16 - 6)   // (2,5) pad folded in
+  ChunkMaxPos = (max/16 + 3,     max/16 + 3)        // (2,2) pad folded in
+  ```
+  truncating (toward-zero) division. Navezgane (6144², half 3072) →
+  `(-195,-198)`/`(195,195)`; Pregen08k (8192², half 4096) →
+  `(-259,-262)`/`(259,259)`.
+- Infinite worlds (RWG): bounds stay `(0,0)`/`(0,0)`, `bInfinite = true`,
+  `pos = (0,0,0)` (primary cluster `Position` default).
+
+**Fixed-size engagement risk:** with `bInfinite=false` the client's
+`AddChunkSync` schedules an `OnChunksFinishedLoading` delegate gated on all
+in-bounds chunks, but no client code subscribes to it (grep across the full
+dump: only `ChunkCluster` itself), and `IsOnBorder` is referenced only by
+editor/prefab tooling. So sending `bInfinite=false` with disc-formula bounds
+cannot wedge or visibly alter the b14 client.
+
 ## Changelog
+
+- **2026-08-21:** ChunkClusterInfo pinned: body (name, cMinPos, cMaxPos,
+  bInfinite, pos), `chunkClusterInfoCo` client semantics (Position/bounds
+  store, no-op border box in b14, `chunkClusterLoaded` gate), the
+  ChunkProviderDisc bounds formula, and the infinite-world (0,0) defaults.
 
 - **2026-08-21:** TurretSync pinned: body (entityId + targetEntityId + isOn +
   ItemValue) and the EntityTurret change-gated broadcast.
