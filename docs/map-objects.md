@@ -174,6 +174,17 @@ parses each class into a static registry queried by name via
 
 ## 6. NavObject: a tracked thing wearing classes
 
+**Quest marker classes come from `quests.xml`:** each `<objective>` carries a
+`<property name="nav_object" value="..."/>`; the stock quests.xml uses the
+values `quest`, `rally`, `sleeper_volume`, `treasure`, `restore_power`,
+`fetch_container`, `go_to_trader` and `return_to_trader` (counted on the
+shipped file: 40 return_to_trader, 15 rally, 11 sleeper_volume, 7 quest, 6
+go_to_trader, 5 fetch_container, 3 treasure, 2 restore_power). The server's
+`NetPackageNavObject` for an active quest must carry the CURRENT phase's
+class (not a legacy kind guess) at the objective's real position (POI
+center / objective target), so the compass/map marker tracks the actual
+quest target.
+
 A `NavObject` tracks exactly one of: an `Entity` (`TrackedEntity`), a
 `Transform`, or a fixed `Vector3` (`TrackedPosition`), plus optional
 `OwnerEntity`, `EntityID`, `OverrideSpriteName`, and `hiddenOnCompass`.
