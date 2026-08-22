@@ -454,6 +454,15 @@ row (the harvest/tool-category drops a looter rolls from an entity corpse).
 **`CheckDestroyTileEntity(te, blockPos)` (IL=37):** require `ITileEntityLootable`
 and `ShouldDestroyOnClose`. Call `DropContentOfLootContainerServer` then
 `Block.DamageBlock(..., MaxDamage, ...)` to destroy the block.
+**Caller (2026-08-22):** `TEFeatureStorage.OnUnlockedServer(playerId, channel)`
+(IL=6) fires `GameManager.Instance.CheckDestroyTileEntity(this, ToWorldPos())`
+- the container unlock (client LockRequest with locking=false) is the close
+event. `ShouldDestroyOnClose` (IL=19) reads the loot def's `destroyOnClose`
+enum: `1` (loot.xml `destroy_on_close="true"`, the airdrop crate) destroys
+always; `2` (`"empty"`, safes/backpacks/junk) destroys only when
+`IsEmpty()`. zdtd: `maybeDestroyContainerOnClose` (chunk_fill.zig) drops the
+contents as a bag at +0.5,0.75,+0.5 and airs the block; scenario
+destroy-on-close.
 
 **`EntityItem.OnCollectServer` (IL=8):** `World.RemoveEntity(id, reason=2)` only
 (inventory add is elsewhere on the collect package path).
