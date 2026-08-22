@@ -49,8 +49,14 @@ def check_package_framing_counts(bad: list) -> None:
     seg = text[text.index("**Genuinely conditional"): text.index("## 7.")]
     cond_rows = len(re.findall(r"^\| `NetPackage[A-Za-z0-9]+` \| \d+ \|", seg, re.M))
     # always-present: backticked NetPackage names in the prose paragraph before
-    # the "## 7." heading, excluding the table rows already counted
-    para = text[text.index("**Always-present"): text.index("## 7.")]
+    # the first "#### " body subsection (the "## 7." boundary would sweep in
+    # later-added ToClient body subsections such as NetPackageTurretSync)
+    seg_start = text.index("**Always-present")
+    seg_end = text.index("## 7.")
+    sub = re.search(r"\n#### ", text[seg_start:seg_end])
+    if sub:
+        seg_end = seg_start + sub.start()
+    para = text[seg_start:seg_end]
     always_names = set(re.findall(r"`(NetPackage[A-Za-z0-9]+)`", para))
     if cond_rows != want_cond:
         bad.append(f"protocol-packages.md: §6.23 conditional table has {cond_rows} rows, claim says {want_cond}")

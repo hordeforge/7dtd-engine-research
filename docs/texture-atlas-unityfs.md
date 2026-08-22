@@ -4,6 +4,7 @@ Reference for the `meshdescriptions_assets_all.bundle` container format, as
 validated on the stock V3.1.0 b14 operator install (Unity 2022.3.62f2).
 Backs [texture-atlas.md](texture-atlas.md); the atlas TextAssets live inside
 this bundle.
+**Hub:** [`INDEX.md`](INDEX.md). **Method:** [`re-methodology.md`](re-methodology.md).
 
 ## Header (big-endian)
 
