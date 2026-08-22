@@ -1334,8 +1334,17 @@ zombie (`zombieCop` class, `explosionData` from EntityClass):
    via `PropExplodeDelay` / `PropExplodeHealthThreshold`); `explosionData`
    itself is parsed in the `EntityClass` ctor from the `ExplosionData`
    property (`newobj ExplosionData(DynamicProperties, MinEffectController)`,
-   EntityClass.il.txt:4581-4585). The ExplosionData value string fields
-   (radius, block/entity damage) are data-driven and not tabulated here.
+   EntityClass.il.txt:4581-4585). **The blast data is a nested `<property
+   class="Explosion">` block** (not a flat string): `RadiusBlocks`,
+   `RadiusEntities`, `BlockDamage`, `EntityDamage` plus a nested
+   `<property class="DamageBonus">` of damage_category multipliers.
+   V3.1.0 b14 stock values (ConfigsDump entityclasses.xml, zombieFatCop
+   chain): base ships RadiusBlocks 5 / RadiusEntities 6 / BlockDamage 500 /
+   EntityDamage 150 and DamageBonus `earth → 0`; the feral tier overrides
+   BlockDamage 650 / EntityDamage 200, radiated 750 / 250, infernal
+   1000 (radius + bonus inherited via Extends). Other Explosion carriers:
+   a 5/6 block with 5000/800 (earth → 0.1) and vehicle/entity variants with
+   radius 1-5 and low damages.
    Death during the countdown does NOT explode via this path (the `IsDead`
    check skips the countdown); a death-time explosion, if any, is elsewhere.
    Consumed by zdtd `ecs/systems.zig` (prime + countdown, explode request
