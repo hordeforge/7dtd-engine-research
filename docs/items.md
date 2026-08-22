@@ -1751,7 +1751,23 @@ listener in the `listeners` hash set (a null set skips the fan-out).
 Durability lives on `ItemValue.UseTimes` (a float counting uses **consumed**),
 capped by `ItemClass` derived `MaxUseTimes` (base `MaxUseTimesBase` scaled by
 quality and mods through `ModMaxUseTimes`). The exposed fraction is
-`PercentUsesLeft = 1 - clamp01(UseTimes / MaxUseTimes)`.
+`PercentUsesLeft = 1 - clamp01(UseTimes / MaxUseTimes)`, and
+`get_PercentUsesLeft` (IL=17, `il/items-scratch/ItemValue.txt`) **short-
+circuits to 1 when `MaxUseTimes <= 0`** (non-durable items: `ble.s` before
+the division) - the trader sell price multiplies by this fraction, so a
+worn tool sells for less and a non-durable item prices full.
+
+**The `DegradationMax` XML value is the quality tier pair.** `get_MaxUseTimesBase`
+(IL=25) reads the item's `passive_effect name="DegradationMax"` through
+`EffectManager.GetValue`; in the stock items.xml the value is written as the
+quality-tier pair `"min,max"` with `tier="1,6"` (tier == quality 1..6), so
+MaxUseTimes lerps `min + (max-min) * (quality-1)/5` - the same lerp shape as
+`TraderQualityMinMod/MaxMod`. Data scan (V3.1.0 items.xml): 133 items carry
+the pair, 15 carry a single constant (no quality scaling; e.g.
+`vehicleMinibikePlaceable` 2000, admin tools 9999), the rest have no
+DegradationMax at all (non-durable; PercentUsesLeft stays 1). Examples:
+`meleeToolRepairT0StoneAxe` 250,500; `meleeToolPickT2SteelPickaxe`
+1000,2000; `meleeToolAxeT3Chainsaw` 2000,5000.
 
 **`Equipment.CheckBreakUseItems` (IL=85)** is the armor break-on-use pass: it
 zeroes `CurrentLowestDurability`, scans the equipment slots for the lowest
@@ -2179,6 +2195,12 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-23:** §7 durability: DegradationMax passive value is the quality-tier
+  pair "min,max" (tier 1..6 = quality; MaxUseTimes lerps like
+  TraderQualityMinMod/MaxMod; stock items.xml scan: 133 pairs + 15 single
+  constants, stone axe 250,500, chainsaw 2000,5000); get_PercentUsesLeft
+  (IL=17) short-circuits to 1 when MaxUseTimes <= 0 (non-durable items price
+  full; worn items sell for less via GetSellPrice).
 - **2026-08-11:** Transaction/repair IL re-verified: ItemValue.FireEvent IL=107, ForceUnlockByPlayer IL=11, InventoryTransaction.Apply IL=126, ItemStack.Clone IL=15/35, ItemActionRepair.ExecuteAction IL=631, CanRemoveRequiredResource IL=106, GetRepairAmount IL=3, ExchangeBlock.ExecuteAction IL=82, MakeFertile.hitTheTarget IL=175, CollectWater.ExecuteAction IL=89, DumpWater.ExecuteAction IL=118, OnConvertToBlockValue IL=2 (Torch IL=20), Activate.ExecuteAction IL=79, Zoom.ExecuteAction IL=103, SpawnEntity.Spawn IL=61, TerrainTool.ExecuteAction IL=46 / GetRange IL=2 (exact).
 - **2026-08-11:** Armor/AddItem IL re-verified: GetArmorGroupLowestQuality IL=13, HasAnyItems IL=22, ResetArmorGroups IL=51, AddArmorGroup IL=36, Inventory.AddItem IL=121/5, AddItemAtSlot IL=84, TryTakeItem IL=83, CanTakeItem IL=37, CanStackNoEmpty IL=24, ReturnItem IL=36, PreferredItemSlot IL=23, GetSlotWithItemValue IL=25, UsingBareHand IL=6, GetBareHandItemValue IL=3, DecItem IL=132, clearSlotByIndex IL=41, CheckBreakUseItems IL=85 (exact).
 - **2026-08-11:** Durability chain IL re-verified: get_MaxUseTimesBase IL=25, get_MaxUseTimes IL=5, ModMaxUseTimes IL=24, get/set_MaxDurabilityModifier IL=9/13, AdjustForSandboxOptions IL=7 (ItemValue) / IL=8 (ItemStack), get_PermaDegrationOn IL=12 (exact).

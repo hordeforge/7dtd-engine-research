@@ -880,6 +880,49 @@ commit+replicate wrapper: `ChangeBlocks(persistentPlayerId, changes)`, then
 myPlayerId)`; on the server `SetBlocksOnClients(-1, package)`, else
 `SendToServer`.
 
+## 5.2 Network-mode `Chunk.write` body layout (V3.1.0)
+
+The `serializedData` payload inside `NetPackageChunk` is the **network-mode
+`Chunk.write(PooledBinaryWriter, Boolean)`** (IL=601, dump
+[`../il/realearth-surfaces-v3.1.0/Chunk_write_PooledBinaryWriter_Boolean_il.txt`](../il/realearth-surfaces-v3.1.0/Chunk_write_PooledBinaryWriter_Boolean_il.txt)).
+This differs from the save format (save-region.md §2): the network body is
+the map+channel plane order below, the save file additionally carries
+stability and raw map arrays. Field order (IL-cited at each step):
+
+```text
+m_X:i32 | m_Y:i32 | m_Z:i32 | SavedInWorldTicks:u64
+64 × (present:bool + optional ChunkBlockLayer.Write)   // y-band 0..63, 4 cells each
+m_HeightMap:u8[256]            // IL_008E, column-height byte map
+m_TerrainHeight:u8[256]        // IL_009A, terrain-height byte map
+m_bTopSoilBroken:u8[32]        // IL_00A6, 1 bit per XZ column (see §5.1)
+m_Biomes:u8[256]               // IL_00B2, per-cell biome id
+m_BiomeIntensities:u8[1536]    // IL_00BE, 6 bytes per column (id0..3 + packed i0..i3)
+DominantBiome:u8 | AreaMasterDominantBiome:u8        // IL_00CA / IL_00D6
+customDataCount:u16 + entries  // IL_00E2+, ChunkCustomData pair (id string + value bytes)
+m_NormalX:u8[256] | m_NormalY:u8[256] | m_NormalZ:u8[256]  // terrain normals (sbyte*127)
+chnDensity | chnLight | chnDamage | chnTextures[0] | chnWater   // ChunkBlockChannel.Write
+NeedsLightCalculation:bool     // IL_0210
+entityCount:i32 + EntityCreationData.write | teCount:i32 + TileEntity.write
+...sleeper/trigger/wall volume counts, insideDevices runs, IsInternalBlocksCulled, triggerData
+```
+
+Notes pinned by the same dump:
+
+- The **topsoil bitfield sits between the two heightmaps and the biome
+  arrays**; it is a plain byte-array write, so its 32-byte length is fixed
+  (256 columns, one bit each). A fresh stock chunk ships all-clear bits, and
+  the client then splat-renders the top terrain block via MicroSplat.
+  Disturbed columns (dig/upgrade/explosion at or above the column surface)
+  set their bit server-side and the client falls back to block textures for
+  that column.
+- `ChunkBlockLayer.Write` is the same-array/lower8+upper24 form the save
+  format uses (world-chunks.md §5.0a); `ChunkBlockChannel.Write` carries
+  presence bits plus same-value or per-layer data (bpv: density 1, light 1,
+  damage 2, textures[0] 6, water 2).
+- The header Y is `m_Y` (chunk Y index); stock worlds are single-column
+  (Y=0), the expanded RealEarth snapshot keeps the same writer with the
+  same 256-byte maps.
+
 `SetBlocksOnClients(exceptEntityId, package)` (IL=13):
 `ConnectionManager.SendPackage(package, false, -1, exceptEntityId, -1, null,
 **192**, false)` excluding the placing entity.
@@ -1111,6 +1154,14 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-08-23:** §5.2 added: the network-mode `Chunk.write(PooledBinaryWriter,
+  Boolean)` body layout (IL=601, realearth-surfaces-v3.1.0 dump) - header
+  X/Y/Z + SavedInWorldTicks, 64 block layers, then the maps region in order
+  heightmap / terrain height / m_bTopSoilBroken(32) / biomes(256) /
+  biome intensities(1536) / dominant biomes / custom data / normals, then the
+  five ChunkBlockChannel planes and NeedsLightCalculation. Topsoil sits
+  between the two heightmaps and the biome arrays; fresh chunks ship
+  all-clear bits (client splat-renders), disturbed columns set their bit.
 - **2026-08-11:** Block-ticker IL re-verified: Tick IL=20, AddScheduledBlockUpdate IL=39, execute IL=24, tickScheduled IL=151, tickRandom IL=97, OnChunkAdded IL=93, get_NeedsTicking IL=13, GetTickRefCount IL=13, Chunk.RestoreCulledBlocks IL=58, ChangeProps IL=121, SetPropsRPC IL=29, SetPropsOnClients IL=13, World.OnChunkAdded IL=20 / OnChunkBeforeRemove IL=31 / updateChunkAddedRemovedCallbacks IL=67, ClearStabilityForChunks IL=9 (exact).
 - **2026-08-11:** Block-array IL re-verified: Chunk.SetBlockRaw IL=386, ChunkBlockLayer CalcOffset IL=12, GetAt(offs) IL=61, SetAt(offs) IL=294, CheckOnlyTerrain IL=153, GetHeight IL=9/5, IsWater IL=9, SetTopSoilBroken IL=36, GetWater IL=8 (Chunk) / IL=23 (Cluster), recalcIndexedBlocks IL=26, saveBlockIds IL=53, SetDensity IL=14 / SetDensityRaw IL=27, notifyBlocksOfNeighborChange IL=23 / single-cell IL=24 (exact).
 - **2026-08-11:** Cull/land-claim IL re-verified: UncullChunk IL=8, UncullPOI IL=26, updateChunksToUncull IL=191, GetTraderAreaAt IL=14, IsWorldEvent IL=7, CheckEntityCollisionWithBlocks IL=19, CanPlaceLandProtectionBlockAt IL=138, IsLandProtectedBlock IL=104, InBoundsForPlayersPercent IL=100, AdjustBoundsForPlayers IL=112, FindSupportingBlockPos IL=175, ChangeBlocks IL=530, SetBlocksOnClients IL=13, SetBlocksRPC IL=29 (exact).
