@@ -8294,3 +8294,32 @@ admin_commands=9 but silently ignores spawnscouts/spawnentity (no audit
 line, zero spawns) - a REAL zdtd capability gap recorded for the zdtd lane
 (not a harness artifact). Rules held: deltas recorded, never faked.
 ## 2026-08-20 - surface-parity: Demolition prime-and-explode RE (EntityZombieCop.OnUpdateEntity IL=190). Full-v3.1.0: prime when Health < MaxHealth * explodeHealthThreshold (parsed from entityclasses `ExplodeHealthThreshold`), ticksToStartToExplode = explodeDelay*20; at 0 -> SpecialAttack2 + ticksToExplode = (explodeDelay/5)*1.5*20; at 0 -> ExplosionServer(EntityClass.explosionData) + SetDead (timeStayAfterDeath=0). ExplodeDelay/ExplodeHealthThreshold via PropExplodeDelay/PropExplodeHealthThreshold; explosionData parsed in EntityClass ctor from the ExplosionData property (value-string fields not tabulated). IsDead skips the countdown (no death-time explosion via this path - documented). `verified` (IL). Consumed by zdtd ecs/systems.zig (prime/countdown + explode request ring) and the Game (entity/block AoE via addBlockDamage).
+## 2026-08-22 - toolset: stock bench mode + bench-stock lane (goal).
+7dtd-loadgen is now a first-class stock-server benching tool:
+(1) Client bench mode: --profile bench (16 bots, 15s ramp, 30s warm-up, 60s
+window, no telnet world pressure) + --bench-warmup-ms/--bench-window-ms.
+BenchClock counts action iterations/deaths/respawns inside the window and
+samples the active-cohort curve per second; stats-json gets a bench block
+(actionsInWindow, actionsPerSec, joinRatePerSec, active min/max/edges) and
+the console a BENCH_SUMMARY line. 5 unit tests. Live validation 16/16 join
+PASS (stock V3.1.0 b14, Navezgane, admin 8084).
+(2) bench-stock lane: one stock dedicated (fixed world, fresh save per lap)
+runs the matrix (probe-15s, join-fast, join-probe, wander-2bot, soak-4bot,
+bench, horde-lite) with per-scenario 7dtd-apm capture (aligned to the bench
+window) + run-meta (git hashes, hostLoad, timestamps). make bench-stock
+LAP=N -> workspace/bench/lapN/; tools/bench_report.py consolidates with a
++-20% per-scenario wall repeatability section (+ actions/s for the bench
+profile). 3 offline gates. run_loadgen.sh now forwards caller args last
+(CLI-overrides-profile) and the single-bot join path writes stats-json, so
+the evidence is uniform.
+(3) 2-lap repeatability (96d6c0c): all 7 scenarios pass on both laps; wall
+delta 0.0-2.4% per scenario (bound +-20%) and bench actions/s 40.87 -> 41.37
+(+1.2%). soak-4bot ran under hostLoad up to 20.9 (parallel zig/msvc builds
+on the host) - recorded, verdict still OK.
+(4) REGRESSION FIX (also in loadgen 6602654 + network.md): b5c3069
+(2026-08-21) switched the login version/compVersion to LongStringNoBuild
+"V 3.10" and broke EVERY stock join (NetPackagePlayerDenied reason=4
+VersionMismatch). The stock V3.1.0 VersionAuthorizer empirically accepts the
+display form "V 3.1.0" and kicks "V 3.10" - the opposite of the IL-only
+reading. Reverted to VersionLongString + pin test; network.md corrected with
+the empirical evidence.
