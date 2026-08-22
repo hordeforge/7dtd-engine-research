@@ -338,6 +338,29 @@ terrain and then runs `snapTerrainToPosition` on the four cardinal neighbors
 (`liftUp=false`, `halfDensity=true`), normalizing the border density around a
 placed block.
 
+**Surface density is binary; the client height-smooths (2026-08-23, IL-pinned).**
+`TerrainGeneratorWithBiomeResource::fillDensityInBlock(Chunk, x, y, z, BlockValue)`
+(IL=16, dump
+[`../il/terrain-v3.1.0/TerrainGeneratorWithBiomeResource_fillDensityInBlock_Chunk_Int32_Int32_Int32_BlockValue_il.txt`](../il/terrain-v3.1.0/TerrainGeneratorWithBiomeResource_fillDensityInBlock_Chunk_Int32_Int32_Int32_BlockValue_il.txt))
+sets exactly `IsTerrain() ? MarchingCubes.DensityTerrain(-128) :
+DensityAir(127)` per cell, and `GenerateTerrain` (7-arg, IL dump in the same
+dir) stamps the surface cell with that same binary value and the cell above
+with `DensityAir`. There is **no sub-block density on the wire**: the terrain
+heightmap (`m_HeightMap`/`m_TerrainHeight`) is byte[256] and the density
+channel is binary, so a server cannot encode the 1/256 DTM height fraction.
+
+The client's smooth rolling surface comes from the meshers interpolating the
+byte heightmap **across columns**, not from density:
+`MeshGenerator.CreateMesh` (IL=1083) reads `IChunk.GetHeight` into a
+5-column `heights` array (center + 4 neighbors, `MeshGenerator::heights`)
+and `MeshGeneratorMC2.build` (IL=1662) fills a `terrainHeightsCache` via
+`GetTerrainHeight` plus a `topSoilCache` via `isTopSoil`/`calcTopSoil`
+(surface cell vs the column and 4 neighbors' terrain heights) and generates
+the surface deck from those caches, using `getDensity` only for the cell
+classification. Consequence for clones: emitting binary density + the byte
+heightmaps is exactly stock; "voxel stairs" on slopes are not caused by the
+server's density values.
+
 `WorldDecoratorPOIFromImage.DecorateChunkOverlapping` (IL=472) is the static
 POI stamping from the `poi_processed` color map. It warns and returns when any
 neighbor chunk is missing, seeds a chunk-local `GameRandom` like the biome
@@ -1021,6 +1044,14 @@ the map or any cell is `>= v`.
 
 ## Changelog
 
+- **2026-08-23:** Surface density is binary (fillDensityInBlock IL=16 dumped:
+  IsTerrain ? DensityTerrain : DensityAir; GenerateTerrain stamps the surface
+  cell with it and the cell above with DensityAir). No sub-block density on
+  the wire: heightmaps are byte[256]. The client smooths across columns:
+  MeshGenerator.CreateMesh (IL=1083) reads a 5-column heights array;
+  MeshGeneratorMC2.build (IL=1662) fills terrainHeightsCache + topSoilCache
+  via GetTerrainHeight/isTopSoil/calcTopSoil and decks the surface from
+  them, using getDensity only for cell classification.
 - **2026-08-11:** cMaxLoadTime pair pinned (4096 px / 50 ms, Constants cctor IL).
 - **2026-08-11:** Raw-generator IL re-verified: GetWorldFilesToTransmitToClient IL=85, generateHalfResTexture IL=27, ARGB32ToColor IL=10, GetPOIBlockIdOverride IL=51, GetPOIHeightOverride IL=66, GetChunkProtectionLevel IL=5, GetWorldSize IL=12, ReloadAllChunks IL=17, Cleanup IL=54, loadSplatMaps IL=883, RebuildTerrain IL=210 (GenerateFlat) (exact).
 - **2026-08-11:** Radiation/biome-image IL re-verified: LoadRadiationMap IL=8, LoadRadiationMapToFile IL=24, RadiationTileArrayFromTexture IL=50, RadiationTileArrayFileFromTexture IL=37, FillRadiationResult IL=83, FillRadiationFileBackedArray IL=104, ProcessColor IL=22, InitData IL=6 + <InitData>d__23 MoveNext IL=315, BiomeImageLoader.Load IL=7 + <Load>d__11 MoveNext IL=229, BiomeIdToColor32 IL=23 (exact).
