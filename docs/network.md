@@ -875,6 +875,16 @@ returns `KickPlayerData(EKickReason.VersionMismatch=4, ...)` which becomes a
 `NetPackagePlayerDenied`. So a strict `compVersion == "V 3.10"` (case-insensitive)
 check is the stock gate; zdtd mirrors it (`version.zig` `stock_wire_comp`).
 
+EMPIRICAL CORRECTION (2026-08-22, live stock V3.1.0 b14 dedicated): the
+authorizer in the shipped binary **accepts the display form "V 3.1.0" and
+kicks "V 3.10"** with VersionMismatch=4 - the opposite of the IL-only reading
+above. A loadgen login switched to "V 3.10" (commit b5c3069) failed every
+join; reverting to "V 3.1.0" restored 16/16 PASS. The stock
+`cVersionInformation.LongStringNoBuild` evidently evaluates to the display
+form in practice (the IL shows the format, not the runtime constant value);
+the "V 3.10" claim should be re-verified against the runtime constant before
+it is relied on again. zdtd's gate behavior was not re-tested on that date.
+
 `GameInfoString` has 20 members (796457-796476), including `SandboxPreset = 0x12`
 and `SandboxCode = 0x13`, which is where V3.1.0 keeps the difficulty/loot/XP
 preset that used to be individual serverconfig properties. The shipped V3.1.0
