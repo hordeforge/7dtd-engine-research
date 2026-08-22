@@ -13,13 +13,16 @@ if [[ -z "$cecil" ]]; then
     "$here/Mono.Cecil.dll" \
     "$HOME/.cache/zdtd/Mono.Cecil.dll" \
     "$HOME/Desktop/7dtd/7dtd-realworld/tools/network_protocol_inspector/bin/Release/net8.0/Mono.Cecil.dll" \
-    "$HOME/Desktop/7dtd/7dtd-research/il/zdtd_re_tools/Mono.Cecil.dll"; do
+    "$HOME/Desktop/7dtd/7dtd-research/il/zdtd_re_tools/Mono.Cecil.dll" \
+    /usr/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll \
+    /usr/local/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll; do
     [[ -f "$c" ]] && cecil="$c" && break
   done
 fi
 if [[ -z "$cecil" || ! -f "$cecil" ]]; then
   echo "Mono.Cecil.dll not found. Set MONO_CECIL=/path/to/Mono.Cecil.dll, or restore it via:" >&2
-  echo "  dotnet add package Mono.Cecil  (then point MONO_CECIL at the restored dll)" >&2
+  echo "  install your distribution's Mono.Cecil package, or use dotnet add package Mono.Cecil" >&2
+  echo "  (then point MONO_CECIL at the restored dll)" >&2
   exit 1
 fi
 cp -f "$cecil" bin/Mono.Cecil.dll

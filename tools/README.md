@@ -27,8 +27,9 @@ cd tools
 ```
 
 Requires `mono` (`mcs`) and a `Mono.Cecil.dll` (build.sh searches known local
-copies; override with `MONO_CECIL=/path/to/Mono.Cecil.dll`, or restore via
-`dotnet add package Mono.Cecil`). `bin/`, the Cecil binary, and `*.exe` are
+copies and the standard Mono GAC under `/usr/lib` or `/usr/local/lib`; override
+with `MONO_CECIL=/path/to/Mono.Cecil.dll`, or restore via `dotnet add package
+Mono.Cecil`). `bin/`, the Cecil binary, and `*.exe` are
 git-ignored and regenerable. Nothing here ships game bytes; point `ASM` at your
 own copy:
 
@@ -162,6 +163,7 @@ local install. See `re-scratch/README.md`.
 
 | Test | Checks |
 |---|---|
+| `tests/test_tool_bootstrap.py` | The tool builder discovers distribution-provided Mono.Cecil assemblies in the standard `/usr/lib` and `/usr/local/lib` Mono GAC paths. |
 | `tests/test_dedi_coverage_docs.py` | Structural proof that the coverage docs, dump sets, and dumpers all exist and are IL-backed (no game constant is the pass condition). |
 | `tests/check_stock_facts.py --require-live` | `tools/data/stock_facts.json` matches the live dedicated DLL (`make stock-check`). |
 | `tests/test_reach_consistency.py` | Reach and Coverage report identical reached-method counts (shared `src/Seeds.cs`), so the two lenses cannot drift. |
