@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 static class Seeds {
   // GameManager boot + tick drivers (the dedicated entry points).
@@ -86,5 +87,83 @@ static class Seeds {
     if (string.IsNullOrEmpty(constant) || byConstantName == null) return null;
     TypeDefinition t;
     return byConstantName.TryGetValue(constant, out t) ? t : null;
+  }
+
+  // --- Shared call graph -------------------------------------------------------
+  // Reach.exe and Coverage.exe must walk the SAME graph or their "reached methods"
+  // counts drift (test_reach_consistency.py fails). The devirtualization map and the
+  // BFS below therefore live here, next to the seeds, not in either tool.
+
+  // Devirtualization map for callvirt. Two edge kinds:
+  //  (a) class overrides, by walking BaseType chains
+  //  (b) INTERFACE implementations. Without (b) whole families that dispatch through
+  //      an interface are invisible: the ~187 ConsoleCmdAbstract commands all run via
+  //      IConsoleCommand.Execute, and only one of them was reached before this was added.
+  public static Dictionary<string, List<MethodDefinition>> BuildOverrideMap(List<TypeDefinition> all) {
+    var overrides = new Dictionary<string, List<MethodDefinition>>();
+    foreach (var t in all) foreach (var m in t.Methods.Where(x => x.IsVirtual && x.HasBody)) {
+      var bt = t.BaseType;
+      while (bt != null) { var btd = bt.Resolve(); if (btd == null) break;
+        var bm = btd.Methods.FirstOrDefault(x => x.Name == m.Name && x.Parameters.Count == m.Parameters.Count && x.IsVirtual);
+        if (bm != null) AddEdge(overrides, btd.FullName + "::" + m.Name + "/" + m.Parameters.Count, m);
+        bt = btd.BaseType; }
+    }
+    foreach (var t in all) {
+      if (!t.HasInterfaces) continue;
+      foreach (var ii in t.Interfaces) {
+        TypeDefinition itd = null; try { itd = ii.InterfaceType.Resolve(); } catch { }
+        if (itd == null) continue;
+        foreach (var im in itd.Methods) {
+          var impl = t.Methods.FirstOrDefault(x => x.HasBody && x.Name == im.Name && x.Parameters.Count == im.Parameters.Count);
+          if (impl == null) continue;
+          AddEdge(overrides, itd.FullName + "::" + im.Name + "/" + im.Parameters.Count, impl);
+        }
+      }
+    }
+    return overrides;
+  }
+
+  static void AddEdge(Dictionary<string, List<MethodDefinition>> map, string k, MethodDefinition m) {
+    List<MethodDefinition> l; if (!map.TryGetValue(k, out l)) { l = new List<MethodDefinition>(); map[k] = l; }
+    if (!l.Contains(m)) l.Add(m);
+  }
+
+  // The reachability BFS: call/callvirt/newobj edges, callvirt devirtualized through
+  // `overrides`, plus reflection-following on constant strings:
+  //   - ReflectionHelpers.GetTypeWithPrefix(constPrefix, ...): seed every type whose
+  //     name starts with the constant prefix (the xmlName half is runtime data).
+  //   - Type.GetType / Activator.CreateInstance on a constant name: seed that type.
+  public static void WalkCallGraph(List<TypeDefinition> all, HashSet<MethodDefinition> visited,
+      Queue<MethodDefinition> work, Dictionary<string, List<MethodDefinition>> overrides,
+      List<TypeDefinition> reflTargets) {
+    IndexTypes(all);
+    string lastLdstr = null;
+    while (work.Count > 0) { var m = work.Dequeue();
+      foreach (var i in m.Body.Instructions) {
+        if (i.OpCode.Code == Code.Ldstr) { lastLdstr = i.Operand as string; }
+        var mr = i.Operand as MethodReference; if (mr == null) continue;
+        MethodDefinition md = null; try { md = mr.Resolve(); } catch { }
+        if (md != null && md.HasBody && visited.Add(md)) work.Enqueue(md);
+        if (i.OpCode.Code == Code.Callvirt) { var k = mr.DeclaringType.FullName + "::" + mr.Name + "/" + mr.Parameters.Count;
+          List<MethodDefinition> ovs; if (overrides.TryGetValue(k, out ovs)) foreach (var ov in ovs) if (visited.Add(ov)) work.Enqueue(ov); }
+        if (!string.IsNullOrEmpty(lastLdstr)) {
+          if (md != null && md.DeclaringType.Name == "ReflectionHelpers" && md.Name == "GetTypeWithPrefix") {
+            foreach (var tt in reflTargets.Where(t => t.Name.StartsWith(lastLdstr)))
+              foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm);
+          }
+          if (mr.DeclaringType.FullName == "System.Type" &&
+              (mr.Name == "GetType" || mr.Name == "GetTypeFromHandle"))
+            SeedByConstantName(lastLdstr, visited, work);
+          if (mr.DeclaringType.FullName == "System.Activator" && mr.Name == "CreateInstance")
+            SeedByConstantName(lastLdstr, visited, work);
+        }
+      }
+    }
+  }
+
+  static void SeedByConstantName(string constant, HashSet<MethodDefinition> visited,
+      Queue<MethodDefinition> work) {
+    var tt = FindByConstantName(constant);
+    if (tt != null) foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm);
   }
 }

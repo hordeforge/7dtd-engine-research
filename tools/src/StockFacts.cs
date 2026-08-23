@@ -189,7 +189,7 @@ class StockFacts {
 
   static int? FieldConstInt(TypeDefinition t, string name) {
     var f = t.Fields.FirstOrDefault(x => x.Name == name && x.HasConstant);
-    return f == null ? (int?)null : Convert.ToInt32(f.Constant);
+    return f == null ? (int?)null : AsInt(f.Constant);
   }
 
   static AssemblyDefinition LoadLiteNetLib(string managedDir) {

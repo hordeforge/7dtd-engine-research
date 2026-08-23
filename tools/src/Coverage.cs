@@ -13,11 +13,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 
 class Coverage {
-  static Dictionary<string, List<MethodDefinition>> overrides = new Dictionary<string, List<MethodDefinition>>();
-
   static bool Generated(TypeDefinition t) {
     string n = t.Name;
     // '#'-named types are obfuscated/mangled compiler artifacts (no stable identity).
@@ -38,13 +35,18 @@ class Coverage {
     // game calls them) but they are not game code to reverse engineer, exactly like
     // System/UnityEngine above. LiteNetLib is the UDP transport, Antlr/NCalc back the
     // expression parser. Leaving them in silently inflated the "game type" base.
-    "LiteNetLib", "Antlr", "NCalc", "Mono", "MS"
+    "LiteNetLib", "Antlr", "NCalc"
   };
   // Namespace of the outermost declaring type (nested types report an empty own ns).
   static string NsOf(TypeDefinition t) {
     var cur = t;
     while (cur.DeclaringType != null) cur = cur.DeclaringType;
     return cur.Namespace;
+  }
+  // Display label for the outermost namespace: "<global>" when there is none.
+  static string NsLabel(TypeDefinition t) {
+    string ns = NsOf(t);
+    return string.IsNullOrEmpty(ns) ? "<global>" : ns;
   }
   static bool IsLibrary(TypeDefinition t) {
     string ns = NsOf(t);
@@ -66,75 +68,15 @@ class Coverage {
     var asm = AssemblyDefinition.ReadAssembly(a[0], new ReaderParameters { AssemblyResolver = r });
     var mod = asm.MainModule; var all = mod.GetTypes().ToList();
 
-    // Devirtualization map for callvirt. Two edge kinds:
-    //  (a) class overrides, by walking BaseType chains
-    //  (b) INTERFACE implementations. Without (b) whole families that dispatch through
-    //      an interface are invisible: the ~187 ConsoleCmdAbstract commands all run via
-    //      IConsoleCommand.Execute, and only one of them was reached before this was added.
-    foreach (var t in all) foreach (var m in t.Methods.Where(x => x.IsVirtual && x.HasBody)) {
-      var bt = t.BaseType;
-      while (bt != null) { var btd = bt.Resolve(); if (btd == null) break;
-        var bm = btd.Methods.FirstOrDefault(x => x.Name == m.Name && x.Parameters.Count == m.Parameters.Count && x.IsVirtual);
-        if (bm != null) { var k = btd.FullName + "::" + m.Name + "/" + m.Parameters.Count; List<MethodDefinition> l;
-          if (!overrides.TryGetValue(k, out l)) { l = new List<MethodDefinition>(); overrides[k] = l; } l.Add(m); }
-        bt = btd.BaseType; }
-    }
-    foreach (var t in all) {
-      if (!t.HasInterfaces) continue;
-      foreach (var ii in t.Interfaces) {
-        TypeDefinition itd = null; try { itd = ii.InterfaceType.Resolve(); } catch { }
-        if (itd == null) continue;
-        foreach (var im in itd.Methods) {
-          var impl = t.Methods.FirstOrDefault(x => x.HasBody && x.Name == im.Name && x.Parameters.Count == im.Parameters.Count);
-          if (impl == null) continue;
-          var k = itd.FullName + "::" + im.Name + "/" + im.Parameters.Count; List<MethodDefinition> l;
-          if (!overrides.TryGetValue(k, out l)) { l = new List<MethodDefinition>(); overrides[k] = l; }
-          if (!l.Contains(impl)) l.Add(impl);
-        }
-      }
-    }
-
     var visited = new HashSet<MethodDefinition>(); var work = new Queue<MethodDefinition>();
     Seeds.EnqueueSeeds(all, visited, work);
 
-    // Reflection targets: XML loaders resolve classes via Type.GetType /
-    // Activator.CreateInstance on a constant string (dialog actions, quest criteria,
-    // twitch vote requirements, game events). Follow the string to its type and seed
-    // the type's method bodies so reflection-instantiated dedicated code is reached.
-    // Reflection-instantiated server XML families: the loaders call
-    // ReflectionHelpers.GetTypeWithPrefix(constPrefix, xmlName) to build class names
-    // ("DialogAction" + "AddBuff" = DialogActionAddBuff). The xmlName is runtime data,
-    // so a constant prefix means EVERY game type starting with it is instantiable.
-    // Seed those families (server-relevant only; XUiC_/ItemAction/Block are client or
-    // already reached, and seeding them would flood the base).
-    var reflTypes = Seeds.ReflTargets(all);
-    Seeds.IndexTypes(all);
-    string lastLdstr = null;
-    while (work.Count > 0) { var m = work.Dequeue();
-      foreach (var i in m.Body.Instructions) {
-        if (i.OpCode.Code == Code.Ldstr) { lastLdstr = i.Operand as string; }
-        var mr = i.Operand as MethodReference; if (mr == null) continue;
-        MethodDefinition md = null; try { md = mr.Resolve(); } catch { }
-        if (md != null && md.HasBody && visited.Add(md)) work.Enqueue(md);
-        if (i.OpCode.Code == Code.Callvirt) { var k = mr.DeclaringType.FullName + "::" + mr.Name + "/" + mr.Parameters.Count;
-          List<MethodDefinition> ovs; if (overrides.TryGetValue(k, out ovs)) foreach (var ov in ovs) if (visited.Add(ov)) work.Enqueue(ov); }
-        // ReflectionHelpers.GetTypeWithPrefix(constPrefix, ...): seed the whole family.
-        if (md != null && md.DeclaringType.Name == "ReflectionHelpers" && md.Name == "GetTypeWithPrefix"
-            && !string.IsNullOrEmpty(lastLdstr)) {
-          foreach (var tt in reflTypes.Where(t => t.Name.StartsWith(lastLdstr)))
-            foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm);
-        }
-        // Type.GetType / Activator.CreateInstance on a constant name: seed that type.
-        if (mr.DeclaringType.FullName == "System.Type" && (mr.Name == "GetType" || mr.Name == "GetTypeFromHandle")) {
-          if (!string.IsNullOrEmpty(lastLdstr)) { var tt = Seeds.FindByConstantName(lastLdstr);
-            if (tt != null) foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm); }
-        }
-        if (mr.DeclaringType.FullName == "System.Activator" && mr.Name == "CreateInstance" && !string.IsNullOrEmpty(lastLdstr)) {
-          var tt = Seeds.FindByConstantName(lastLdstr);
-          if (tt != null) foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm);
-        }
-      }
-    }
+    // Same graph walk as Reach.exe: shared devirtualization map (class overrides +
+    // interface implementations), BFS, and reflection-following (constant-prefix XML
+    // families via ReflectionHelpers.GetTypeWithPrefix; Type.GetType /
+    // Activator.CreateInstance on constant names). Seeds.WalkCallGraph keeps the two
+    // coverage lenses from drifting.
+    Seeds.WalkCallGraph(all, visited, work, Seeds.BuildOverrideMap(all), Seeds.ReflTargets(all));
 
     var reached = new HashSet<TypeDefinition>(visited.Select(m => m.DeclaringType));
     var nonGen = reached.Where(t => !Generated(t)).ToList();
@@ -182,7 +124,7 @@ class Coverage {
     // Bucket by namespace (top-level segment; <global> for no namespace).
     var byNs = new Dictionary<string, List<TypeDefinition>>();
     foreach (var t in gameReached) {
-      string nsf = NsOf(t); string ns = string.IsNullOrEmpty(nsf) ? "<global>" : nsf.Split('.')[0];
+      string ns = NsLabel(t).Split('.')[0];
       List<TypeDefinition> l; if (!byNs.TryGetValue(ns, out l)) { l = new List<TypeDefinition>(); byNs[ns] = l; } l.Add(t);
     }
 
@@ -325,7 +267,7 @@ class Coverage {
     sb.AppendLine();
     sb.AppendLine("| Namespace | count |");
     sb.AppendLine("|---|---:|");
-    foreach (var g in unGame.GroupBy(t => { string ns = NsOf(t); return string.IsNullOrEmpty(ns) ? "<global>" : ns.Split('.')[0]; }).OrderByDescending(x => x.Count()))
+    foreach (var g in unGame.GroupBy(t => NsLabel(t).Split('.')[0]).OrderByDescending(x => x.Count()))
       sb.AppendLine("| `" + g.Key + "` | " + g.Count() + " |");
     sb.AppendLine();
     // An unreached game type is still ACCOUNTED if it is mentioned in any doc
@@ -340,14 +282,14 @@ class Coverage {
     sb.AppendLine("Gap list (no mention in any doc):");
     sb.AppendLine();
     foreach (var t in unGame.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t))).OrderBy(t => NsOf(t)).ThenBy(t => t.Name))
-      sb.AppendLine("- `" + BaseName(t) + "` (" + (string.IsNullOrEmpty(NsOf(t)) ? "<global>" : NsOf(t)) + ")");
+      sb.AppendLine("- `" + BaseName(t) + "` (" + NsLabel(t) + ")");
     sb.AppendLine();
     sb.AppendLine("Full unreached game-type list (" + unGame.Count + "):");
     sb.AppendLine();
     sb.AppendLine("| Type | Namespace | methods |");
     sb.AppendLine("|---|---|---:|");
     foreach (var t in unGame.OrderBy(t => NsOf(t)).ThenBy(t => t.Name))
-      sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(NsOf(t)) ? "<global>" : NsOf(t)) + " | " + t.Methods.Count(x => x.HasBody) + " |");
+      sb.AppendLine("| `" + t.Name + "` | " + NsLabel(t) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     sb.AppendLine();
 
     sb.AppendLine("## Per-namespace coverage (reached game types)");
@@ -380,7 +322,7 @@ class Coverage {
     sb.AppendLine("|---|---|---:|");
     foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
                                  .OrderByDescending(t => t.Methods.Count(x => x.HasBody)).Take(60)) {
-      sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
+      sb.AppendLine("| `" + t.Name + "` | " + NsLabel(t) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     }
     sb.AppendLine();
 
@@ -393,8 +335,8 @@ class Coverage {
     sb.AppendLine("| Type | Namespace | methods |");
     sb.AppendLine("|---|---|---:|");
     var catOnly = gameReached.Where(t => !narrated.Contains(BaseName(t)) && catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t))).ToList();
-    foreach (var t in catOnly.OrderBy(t => string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace).ThenBy(t => t.Name)) {
-      sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
+    foreach (var t in catOnly.OrderBy(NsLabel).ThenBy(t => t.Name)) {
+      sb.AppendLine("| `" + t.Name + "` | " + NsLabel(t) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     }
     sb.AppendLine();
 
@@ -407,8 +349,8 @@ class Coverage {
     sb.AppendLine("| Type | Namespace | methods |");
     sb.AppendLine("|---|---|---:|");
     var clsOnly = gameReached.Where(t => !narrated.Contains(BaseName(t)) && classified.Contains(BaseName(t))).ToList();
-    foreach (var t in clsOnly.OrderBy(t => string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace).ThenBy(t => t.Name)) {
-      sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
+    foreach (var t in clsOnly.OrderBy(NsLabel).ThenBy(t => t.Name)) {
+      sb.AppendLine("| `" + t.Name + "` | " + NsLabel(t) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     }
     sb.AppendLine();
 
@@ -419,7 +361,7 @@ class Coverage {
     tsv.AppendLine("methods\tnamespace\ttype");
     foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
                                  .OrderByDescending(t => t.Methods.Count(x => x.HasBody)))
-      tsv.AppendLine(t.Methods.Count(x => x.HasBody) + "\t" + (string.IsNullOrEmpty(NsOf(t)) ? "<global>" : NsOf(t)) + "\t" + t.Name);
+      tsv.AppendLine(t.Methods.Count(x => x.HasBody) + "\t" + NsLabel(t) + "\t" + t.Name);
     File.WriteAllText(a[2] + ".gaps.tsv", tsv.ToString());
 
     Console.Error.WriteLine("reached methods=" + visited.Count + " game types=" + gameReached.Count + " narrated=" + docd + " catalogued=" + catd + " classified=" + classd + " unaccounted=" + undoc);

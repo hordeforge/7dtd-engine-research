@@ -24,6 +24,9 @@ Usage:
 Exit code is 0 unless the census itself fails; unaccounted > 0 is reported
 loudly but is not a hard failure (this is a report, not a gate).
 """
+import argparse
+import datetime
+import json
 import os
 import re
 import subprocess
@@ -121,22 +124,33 @@ def parse_report_accounted(report_path):
     return out
 
 
+def parse_args(argv):
+    ap = argparse.ArgumentParser(
+        description="Compute the RE-coverage percentages for the corpus (live census).")
+    ap.add_argument("asm", nargs="?", default=None,
+                    help="path to Assembly-CSharp.dll (default: $ASM or the Steam path, "
+                         "same resolution as tools/stock-sync.sh)")
+    ap.add_argument("docs", nargs="?", default=None,
+                    help="docs directory to scan (default: docs)")
+    ap.add_argument("--json", action="store_true",
+                    help="emit a machine-readable JSON object instead of the human report")
+    ap.add_argument("--history", nargs="?", const="census-history.csv", default=None,
+                    metavar="FILE",
+                    help="append the percentages to a CSV so census numbers can be "
+                         "tracked over time (default name: census-history.csv)")
+    return ap.parse_args(argv)
+
+
 def pct(n, total):
     return 100.0 * n / total if total else 0.0
 
 
 def main():
-    history = None
-    if "--history" in sys.argv:
-        i = sys.argv.index("--history")
-        history = sys.argv[i + 1] if i + 1 < len(sys.argv) else "census-history.csv"
-    skip = {"--json", "--history"}
-    if history:
-        skip.add(history)
-    args = [a for a in sys.argv[1:] if a not in skip and not a.startswith("--")]
-    as_json = "--json" in sys.argv
-    asm = args[0] if len(args) > 0 else default_asm()
-    docs = args[1] if len(args) > 1 else os.path.join(REPO, "docs")
+    args = parse_args(sys.argv[1:])
+    history = args.history
+    as_json = args.json
+    asm = args.asm if args.asm else default_asm()
+    docs = args.docs if args.docs else os.path.join(REPO, "docs")
 
     if not os.path.isfile(asm):
         print(f"error: assembly not found at {asm}", file=sys.stderr)
@@ -216,7 +230,6 @@ def main():
         "narrated_pct": round(pct(cov["narrated"], cov["game_types"]), 1),
     }
     if history:
-        import datetime
         row = "%s,%d,%d,%d,%d,%d,%.1f%%\n" % (
             datetime.datetime.now().strftime("%Y-%m-%d"),
             result["reached_game_types"], result["narrated"], result["catalogued"],
@@ -229,8 +242,7 @@ def main():
         print("history appended to", history)
         return 0
     if as_json:
-        import json as _json
-        print(_json.dumps(result, indent=2))
+        print(json.dumps(result, indent=2))
         return 0
 
     if cov["unaccounted"]:

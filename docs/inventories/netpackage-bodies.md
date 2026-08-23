@@ -270,7 +270,7 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 1 | `cmd` | string |
 
 ## NetPackageDamageEntity
-`write` IL=176, 38 wire field(s).
+`write` IL=172, 37 wire field(s).
 
 > Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
 
@@ -308,12 +308,11 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 30 | `StunType` | u8 |
 | 31 | `StunDuration` | f32 |
 | 32 | `bFromBuff` | bool |
-| 33 | `bIgnorePartyShare` | bool |
-| 34 | `ArmorSlot` | u8 |
-| 35 | `ArmorSlotGroup` | u8 |
-| 36 | `ArmorDamage` | u16 |
-| 37 | `attackingItem` | bool |
-| 38 | `attackingItem` | `ItemValue.Write` |
+| 33 | `ArmorSlot` | u8 |
+| 34 | `ArmorSlotGroup` | u8 |
+| 35 | `ArmorDamage` | u16 |
+| 36 | `attackingItem` | bool |
+| 37 | `attackingItem` | `ItemValue.Write` |
 
 ## NetPackageDebug
 `write` IL=34, 5 wire field(s).
@@ -1796,14 +1795,13 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 8 | `onlyIfNotFlying` | bool |
 
 ## NetPackageTileEntity
-`write` IL=27, 4 wire field(s).
+`write` IL=23, 3 wire field(s).
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
 | 1 | `handle` | u8 |
 | 2 | `teWorldPos` | `StreamUtils.Write` |
-| 3 | `teBlockId` | i32 |
-| 4 | `ms` | i32 (list/array count) |
+| 3 | `ms` | u16 (list/array count) |
 
 ## NetPackageTraderData
 `write` IL=38, 5 wire field(s).
@@ -2151,7 +2149,7 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 22 | `progressionsData` | bytes[] |
 
 ## EntityCreationData
-`write` IL=362, 57 wire field(s).
+`write` IL=358, 56 wire field(s).
 
 > Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
 
@@ -2213,7 +2211,6 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 54 | `isSleeperPassive` | bool |
 | 55 | `belongsPlayerId` | i32 |
 | 56 | `orderState` | i32 |
-| 57 | `stressAmount` | f32 |
 
 ## Equipment
 `Write` IL=77, 6 wire field(s).

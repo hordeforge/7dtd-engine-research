@@ -451,12 +451,6 @@ def parse_chunk_body(body, name, idx, checks):
     if td_count:
         reason += f"{td_count} triggerData present; "
         return coords_ok, False, reason
-    for _ in range(td_count):
-        p += 12  # Vector3i LocalChunkPos
-        p += 2 + 1 + 1  # version u16 + NeedsTriggered byte + TriggersIndices count byte
-        p += body[p - 1]
-        p += 1  # TriggeredByIndices count byte
-        p += body[p - 1]
 
     if p != n:
         raise ValueError(f"body parse ended at {p}/{n}")
@@ -631,6 +625,14 @@ def discover_save_dir():
     return os.path.dirname(best) if best else None
 
 
+FAILED_MARKERS = ("MISMATCH", "VIOLATED", " != ", "failed", "MISSING",
+                  "bounds", "too short", "!= expected", "parse error")
+
+
+def any_failed(checks):
+    return any(marker in c for c in checks for marker in FAILED_MARKERS)
+
+
 def main():
     argv = sys.argv[1:]
     shipped = None
@@ -643,9 +645,7 @@ def main():
         ttw = shipped if os.path.isfile(shipped) else os.path.join(shipped, "main.ttw")
         print(f"Shipped world header check: {ttw}\n")
         check_main_ttw(ttw, checks)
-        failed = any(("MISMATCH" in c or "VIOLATED" in c or " != " in c or "failed" in c
-                      or "MISSING" in c or "bounds" in c or "too short" in c or "!= expected" in c
-                      or "parse error" in c) for c in checks)
+        failed = any_failed(checks)
         print("\n".join(checks))
         print(f"\n{'FAIL' if failed else 'PASS'}: {len(checks)} checks")
         return 1 if failed else 0
@@ -687,10 +687,7 @@ def main():
             check_nim_mapping(np_, checks)
 
     print("\n".join(checks))
-    failed = any(("MISMATCH" in c or "VIOLATED" in c or " != " in c or "failed" in c
-                  or "MISSING" in c or "bounds" in c or "too short" in c or "!= expected" in c
-                  or "parse error" in c)
-                 for c in checks)
+    failed = any_failed(checks)
     print(f"\n{'FAIL' if failed else 'PASS'}: {len(checks)} checks")
     return 1 if failed else 0
 

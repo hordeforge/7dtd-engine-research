@@ -35,11 +35,14 @@ static class WireBodies {
     }
   }
 
+  static bool IsWriterType(string dt) {
+    return dt == "BinaryWriter" || dt == "PooledBinaryWriter" || dt == "BinaryWriterExtensions";
+  }
+
   static bool IsWriterWrite(MethodReference m) {
     // BinaryWriter / PooledBinaryWriter primitive Write(T)
     if (m.Name != "Write") return false;
-    string dt = m.DeclaringType.Name;
-    return dt == "BinaryWriter" || dt == "PooledBinaryWriter" || dt == "BinaryWriterExtensions";
+    return IsWriterType(m.DeclaringType.Name);
   }
 
   static bool IsBaseChain(MethodReference m) {
@@ -53,8 +56,7 @@ static class WireBodies {
     string n = m.Name;
     if (n != "Write" && n != "write" && n != "WriteNetwork" && n != "WriteToStream" &&
         n != "ToStream" && n != "Serialize") return false;
-    string dt = m.DeclaringType.Name;
-    if (dt == "BinaryWriter" || dt == "PooledBinaryWriter" || dt == "BinaryWriterExtensions") return false;
+    if (IsWriterType(m.DeclaringType.Name)) return false;
     foreach (var p in m.Parameters) {
       string pt = p.ParameterType.Name;
       if (pt == "BinaryWriter" || pt == "PooledBinaryWriter" || pt == "Stream") return true;
@@ -91,7 +93,8 @@ static class WireBodies {
         }
       } else if (code == Code.Br || code == Code.Br_S || code == Code.Brtrue || code == Code.Brtrue_S ||
                  code == Code.Brfalse || code == Code.Brfalse_S || code == Code.Blt || code == Code.Blt_S ||
-                 code == Code.Ble || code == Code.Ble_S || code == Code.Bge || code == Code.Bgt) {
+                 code == Code.Ble || code == Code.Ble_S || code == Code.Bge || code == Code.Bge_S ||
+                 code == Code.Bgt || code == Code.Bgt_S) {
         var tgt = ins.Operand as Instruction;
         if (tgt != null && tgt.Offset < ins.Offset) loop = true; else cond = true;
       }
