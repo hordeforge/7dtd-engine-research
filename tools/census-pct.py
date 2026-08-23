@@ -31,6 +31,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -157,9 +158,10 @@ def main():
         print("pass the path as argv[1] or set $ASM", file=sys.stderr)
         return 2
 
-    # 1. Live coverage census over the docs tree (report to /tmp so the scan
-    #    never sees a stale extra file inside docs/).
-    tmp_report = "/tmp/census-pct-coverage-report.md"
+    # 1. Live coverage census over the docs tree (report to a private temp
+    #    file so the scan never sees a stale extra file inside docs/).
+    fd, tmp_report = tempfile.mkstemp(prefix="census-pct-coverage-", suffix=".md")
+    os.close(fd)
     try:
         rc, _, stderr = run_mono("Coverage.exe", asm, docs, tmp_report)
         if rc != 0:

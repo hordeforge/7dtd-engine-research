@@ -48,7 +48,7 @@ class DumpNetPackages {
       sb.AppendLine("// fields: " + string.Join(", ", t.Fields.Select(f => f.FieldType.Name + " " + f.Name)));
       sb.AppendLine();
       foreach (var mn in Methods) Dump(sb, t, mn);
-      File.WriteAllText(Path.Combine(a[1], t.Name + "_il.txt"), sb.ToString());
+      File.WriteAllText(Path.Combine(a[1], IlFmt.Safe(t.Name) + "_il.txt"), sb.ToString());
       idx.AppendLine("| " + Esc(t.Name) + " | " + t.Fields.Count + " | " + IL(t, "read") + " | " + IL(t, "write") +
         " | " + IL(t, "Setup") + " | " + IL(t, "GetLength") + " | " + IL(t, "ProcessPackage") + " |");
     }

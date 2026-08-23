@@ -9,10 +9,13 @@ toggle or a dedicated gate without updating the doc fails here.
 
 Usage: python3 tools/tests/test_console_classification.py <asm>
 """
+import atexit
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
@@ -58,7 +61,11 @@ class Cls {
   }
 }
 """
-EXE = "/tmp/console_classification_check.exe"
+# Private scratch dir: a fixed /tmp name for a probe we compile and execute
+# would let any local user pre-create or symlink it.
+SCRATCH = tempfile.mkdtemp(prefix="console-classification-")
+atexit.register(shutil.rmtree, SCRATCH, True)
+EXE = os.path.join(SCRATCH, "console_classification_check.exe")
 
 
 def main() -> int:
@@ -71,24 +78,26 @@ def main() -> int:
     asm = sys.argv[1]
 
     if not os.path.exists(EXE):
-        src = "/tmp/console_classification_check.cs"
+        src = os.path.join(SCRATCH, "console_classification_check.cs")
         with open(src, "w", encoding="utf-8") as f:
             f.write(SRC)
+        # The probe links Mono.Cecil; mono needs MONO_PATH to load it at runtime.
         r = subprocess.run(["csc", "-r:" + os.path.join(BIN, "Mono.Cecil.dll"), src,
                             "-out:" + EXE], capture_output=True, text=True)
         if r.returncode != 0:
             print("FAIL: csc compile error: " + r.stderr[:500])
             return 1
 
+    env = dict(os.environ, MONO_PATH=BIN)
     r = subprocess.run(["mono", XREF, asm], capture_output=True, text=True)
     if r.returncode != 0:
         print("FAIL: CmdMap.exe error")
         return 1
-    mapf = "/tmp/cmdmap_classify.txt"
+    mapf = os.path.join(SCRATCH, "cmdmap_classify.txt")
     with open(mapf, "w", encoding="utf-8") as f:
         f.write(r.stdout)
 
-    r = subprocess.run(["mono", EXE, asm, mapf], capture_output=True, text=True)
+    r = subprocess.run(["mono", EXE, asm, mapf], capture_output=True, text=True, env=env)
     out = r.stdout
     m = re.search(r"leaves=(\d+) onClient=(\d+) dediGate=(\d+) either=(\d+)", out)
     if not m:

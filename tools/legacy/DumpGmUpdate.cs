@@ -85,8 +85,10 @@ static class DumpGmUpdate
         return 0;
     }
 
-    static void DumpMethod(MethodDefinition m, string outDir, string baseName, StringBuilder index)
+    static void DumpMethod(MethodDefinition m, string outDir, string rawBase, StringBuilder index)
     {
+        // assembly-supplied names must not escape outDir
+        var baseName = new string(rawBase.Select(c => char.IsLetterOrDigit(c) || c == '_' || c == '.' ? c : '_').ToArray());
         var body = m.Body;
         int ilCount = body.Instructions.Count;
 
@@ -196,8 +198,22 @@ static class DumpGmUpdate
         flow.AppendLine("```");
         foreach (var ins in body.Instructions)
         {
-            return "\"" + s + "\"";
+            string op = ins.Operand == null ? "" : " " + FormatOperand(ins);
+            flow.AppendLine($"IL_{ins.Offset:X4}: {ins.OpCode.Name}{op}");
+        }
+        File.WriteAllText(Path.Combine(outDir, baseName + "_flow.md"), flow.ToString());
+    }
+
+    static string FormatOperand(Instruction ins)
+    {
         return ins.Operand != null ? ins.Operand.ToString() : "";
+    }
+
+    static string FormatMethodRef(object operand)
+    {
+        return operand is MethodReference mr
+            ? mr.DeclaringType.FullName + "::" + mr.Name
+            : operand?.ToString() ?? "";
     }
 
     static string Escape(string s) => s.Replace("|", "\\|");
