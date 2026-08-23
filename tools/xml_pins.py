@@ -18,7 +18,6 @@ import re
 import sys
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(TOOLS)
 PINS = os.path.join(TOOLS, "data", "xml_pins.json")
 
 DEFAULT_GAME = os.path.expanduser(

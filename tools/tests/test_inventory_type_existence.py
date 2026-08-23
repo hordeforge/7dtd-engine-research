@@ -11,11 +11,12 @@ Usage: python3 tools/tests/test_inventory_type_existence.py <asm>
 """
 import os
 import re
-import subprocess
 import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 INV = os.path.join(REPO, "docs", "inventories")
 
 SRC = r"""
@@ -36,7 +37,6 @@ class TypeBase {
   }
 }
 """
-EXE = "/tmp/typebase_check.exe"
 
 
 def norm(name: str) -> str:
@@ -49,18 +49,7 @@ def main() -> int:
         print("usage: test_inventory_type_existence.py <asm>", file=sys.stderr)
         return 2
     asm = sys.argv[1]
-    src = "/tmp/typebase_check.cs"
-    with open(src, "w") as f:
-        f.write(SRC)
-    subprocess.run(
-        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"), src, "-out:" + EXE],
-        check=True,
-    )
-    env = dict(os.environ)
-    env["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    out = subprocess.run(
-        ["mono", EXE, asm], capture_output=True, text=True, env=env, check=True,
-    ).stdout
+    out = _common.run_probe(_common.compile_probe(SRC, "typebase_check"), asm)
     dll = {}
     top_level_netpkg = set()
     for line in out.splitlines():

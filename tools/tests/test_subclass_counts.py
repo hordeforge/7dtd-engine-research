@@ -27,11 +27,12 @@ Usage: python3 tools/tests/test_subclass_counts.py <asm>
 """
 import os
 import re
-import subprocess
 import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 INV = os.path.join(REPO, "docs", "inventories")
 
 # (inventory, mode, target, expected, extra, self_state)
@@ -116,7 +117,6 @@ class SubCount {
   }
 }
 """
-EXE = "/tmp/subcount_check.exe"
 
 
 def main() -> int:
@@ -124,13 +124,6 @@ def main() -> int:
         print("usage: test_subclass_counts.py <asm>", file=sys.stderr)
         return 2
     asm = sys.argv[1]
-    src = "/tmp/subcount_check.cs"
-    with open(src, "w") as f:
-        f.write(SRC)
-    cecil = os.path.join(TOOLS, "bin", "Mono.Cecil.dll")
-    subprocess.run(["mcs", "-r:%s" % cecil, src, "-out:" + EXE], check=True)
-    env = dict(os.environ)
-    env["MONO_PATH"] = os.path.join(TOOLS, "bin")
 
     # key-methods fingerprint column (item-actions / minevent-actions): every
     # listed method must exist on the leaf type or its base chain
@@ -150,13 +143,7 @@ class LeafMeth {
   }
 }
 """
-    mexe = "/tmp/leafmeth_check.exe"
-    with open("/tmp/leafmeth_check.cs", "w") as f:
-        f.write(meth_src)
-    subprocess.run(["mcs", "-r:%s" % cecil, "/tmp/leafmeth_check.cs", "-out:" + mexe], check=True)
-    mout = subprocess.run(
-        ["mono", mexe, asm], capture_output=True, text=True, env=env, check=True,
-    ).stdout
+    mout = _common.run_probe(_common.compile_probe(meth_src, "leafmeth_check"), asm)
     methods, base_of = {}, {}
     for line in mout.splitlines():
         parts = line.split("\t")
@@ -193,9 +180,9 @@ class LeafMeth {
     args = [",".join(
         ("closed:" if mode == "closed" else "seq:") + target
         for _, mode, target, _, _, _ in CHECKS)]
-    out = subprocess.run(
-        ["mono", EXE, asm] + args, capture_output=True, text=True, env=env, check=True,
-    ).stdout
+    out = _common.run_probe(
+        _common.compile_probe(SRC, "subcount_check"), asm, *args
+    )
     stats = {}
     for line in out.splitlines():
         parts = line.split()

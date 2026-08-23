@@ -10,11 +10,12 @@ Usage: python3 tools/tests/test_tuned_constants.py <asm>
 """
 import os
 import re
-import subprocess
 import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DOCS = os.path.join(REPO, "docs")
 
 # family -> (doc, { const name: expected value })  (values from the V3.1.0 DLL)
@@ -728,7 +729,6 @@ class TunedConsts {
   }
 }
 """
-EXE = "/tmp/tunedconsts_check.exe"
 
 # Const-rich classes (>= 4 numeric const fields) that are intentionally NOT
 # pinned: animation/UI/render/noise/enum internals (client-side or data-shape),
@@ -774,18 +774,9 @@ def main() -> int:
         print("usage: test_tuned_constants.py <asm>", file=sys.stderr)
         return 2
     asm = sys.argv[1]
-    src = "/tmp/tunedconsts_check.cs"
-    with open(src, "w") as f:
-        f.write(SRC)
-    subprocess.run(
-        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"), src, "-out:" + EXE],
-        check=True,
+    out = _common.run_probe(
+        _common.compile_probe(SRC, "tunedconsts_check"), asm, ",".join(CONSTS)
     )
-    env = dict(os.environ)
-    env["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    out = subprocess.run(
-        ["mono", EXE, asm, ",".join(CONSTS)], capture_output=True, text=True, env=env, check=True,
-    ).stdout
     dll = {}
     for line in out.splitlines():
         cls, _, rest = line.partition(".")
@@ -821,18 +812,7 @@ def main() -> int:
 
     # completeness: every const-rich class (>= 4 numeric consts) must be pinned
     # or allowlisted - a new tuned family from a game patch fails here
-    with open("/tmp/constcomplete_check.cs", "w") as f:
-        f.write(COMPLETE_SRC)
-    subprocess.run(
-        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"),
-         "/tmp/constcomplete_check.cs", "-out:/tmp/constcomplete_check.exe"],
-        check=True,
-    )
-    cenv = dict(os.environ)
-    cenv["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    cout = subprocess.run(
-        ["mono", "/tmp/constcomplete_check.exe", asm], capture_output=True, text=True, env=cenv, check=True,
-    ).stdout
+    cout = _common.run_probe(_common.compile_probe(COMPLETE_SRC, "constcomplete_check"), asm)
     pinned_fams = set(CONSTS.keys())
     for fam in cout.splitlines():
         fam = fam.strip()

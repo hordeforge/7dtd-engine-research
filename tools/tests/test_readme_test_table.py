@@ -18,16 +18,9 @@ MAKEFILE = os.path.join(REPO, "Makefile")
 README = os.path.join(TOOLS, "README.md")
 TESTDIR = os.path.join(TOOLS, "tests")
 
-# scripts that are run directly (not via python3 <path>), e.g. stock-sync.sh
-SKIP = {"stock-sync.sh"}
-
-
 def main() -> int:
     mk = open(MAKEFILE, encoding="utf-8").read()
     run = set()
-    for m in re.finditer(r"python3 \"\$\(TOOLS\)/tests/([A-Za-z0-9_.-]+\.py)\"", mk):
-        run.add(m.group(1))
-    # also the bench/check scripts invoked by the targets above
     for m in re.finditer(r"python3 \"\$\(TOOLS\)/tests/([A-Za-z0-9_.-]+\.py)\"", mk):
         run.add(m.group(1))
     readme = open(README, encoding="utf-8").read()

@@ -14,11 +14,12 @@ Usage: python3 tools/tests/test_il_citations.py <asm>
 """
 import os
 import re
-import subprocess
 import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DOCS = os.path.join(REPO, "docs")
 
 SRC = r"""
@@ -36,7 +37,6 @@ class IlCite {
   }
 }
 """
-EXE = "/tmp/ilcite_check.exe"
 
 CLAIM_PAT = re.compile(
     r"(?<![A-Za-z0-9_>])([A-Za-z_][A-Za-z0-9_]*)(?:::|\.)"
@@ -60,18 +60,7 @@ def main() -> int:
         print("usage: test_il_citations.py <asm>", file=sys.stderr)
         return 2
     asm = sys.argv[1]
-    src = "/tmp/ilcite_check.cs"
-    with open(src, "w") as f:
-        f.write(SRC)
-    subprocess.run(
-        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"), src, "-out:" + EXE],
-        check=True,
-    )
-    env = dict(os.environ)
-    env["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    out = subprocess.run(
-        ["mono", EXE, asm], capture_output=True, text=True, env=env, check=True,
-    ).stdout
+    out = _common.run_probe(_common.compile_probe(SRC, "ilcite_check"), asm)
     # type full-name (normalized) -> method name (normalized) -> set of IL sizes
     methods = {}
     for line in out.splitlines():

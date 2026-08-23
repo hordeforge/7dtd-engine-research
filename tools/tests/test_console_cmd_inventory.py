@@ -15,14 +15,14 @@ Usage: python3 tools/tests/test_console_cmd_inventory.py <asm>
 """
 import os
 import re
-import subprocess
 import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 INV = os.path.join(REPO, "docs", "inventories", "console-command-list.md")
 TSV = os.path.join(REPO, "docs", "inventories", "console-command-list.tsv")
-CMDMAP = os.path.join(TOOLS, "bin", "CmdMap.exe")
 
 # Number of primary commands (one per concrete ConsoleCmdAbstract subclass).
 EXPECTED_PRIMARY = 188
@@ -92,7 +92,6 @@ class NameSet {
   }
 }
 """
-EXE = "/tmp/cmdnames_check.exe"
 
 
 def parse_inventory() -> tuple[dict, list]:
@@ -121,26 +120,16 @@ def main() -> int:
         print("usage: test_console_cmd_inventory.py <asm>", file=sys.stderr)
         return 2
     asm = sys.argv[1]
-    env = dict(os.environ)
-    env["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    cmdmap = subprocess.run(
-        ["mono", CMDMAP, asm], capture_output=True, text=True, env=env, check=True,
-    ).stdout
+    rc, cmdmap, cerr = _common.run_tool("CmdMap.exe", asm)
+    if rc != 0:
+        print(f"FAIL: CmdMap.exe exited {rc}: {cerr[:300]}", file=sys.stderr)
+        return 1
     dll_primary = {}
     for line in cmdmap.splitlines()[1:]:  # skip header
         name, _, typ = line.partition("\t")
         dll_primary[name] = typ
 
-    src = "/tmp/cmdnames_check.cs"
-    with open(src, "w") as f:
-        f.write(SRC)
-    subprocess.run(
-        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"), src, "-out:" + EXE],
-        check=True,
-    )
-    probe = subprocess.run(
-        ["mono", EXE, asm], capture_output=True, text=True, env=env, check=True,
-    ).stdout
+    probe = _common.run_probe(_common.compile_probe(SRC, "cmdnames_check"), asm)
     name_sets = {}
     descriptions = {}
     permissions = {}

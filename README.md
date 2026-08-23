@@ -2,6 +2,12 @@
 
 > **Part of [HordeForge](https://github.com/hordeforge)** — High-Performance Systems Engineering for 7 Days to Die.
 
+![CI](https://github.com/hordeforge/7dtd-engine-research/actions/workflows/ci.yml/badge.svg)
+![license](https://img.shields.io/github/license/hordeforge/7dtd-engine-research)
+![release](https://img.shields.io/github/v/release/hordeforge/7dtd-engine-research)
+![languages](https://img.shields.io/github/languages/count/hordeforge/7dtd-engine-research)
+![top language](https://img.shields.io/github/languages/top/hordeforge/7dtd-engine-research)
+
 Reverse-engineering research on the **7 Days to Die dedicated server** (V **3.1.0 (b14)** Henpocalypse): how the stock, unmodified server is built and behaves, and its wire/file formats, derived from the shipped `Assembly-CSharp.dll`. Produced alongside a server performance-optimization suite; the cost/scaling **measurement** program and optimization levers live in the companion `7dtd-server-optimizer/docs/`, not here.
 
 Start at [`docs/INDEX.md`](docs/INDEX.md).

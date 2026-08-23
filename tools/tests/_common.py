@@ -4,6 +4,7 @@ Every tools/tests script that drives the Mono.Cecil binaries needs the same
 three things: locate the local dedicated Assembly-CSharp.dll, decide whether a
 missing prerequisite means "nothing to assert here" (SKIP) versus "you have the
 game, so regenerate" (FAIL), and invoke bin/*.exe with MONO_PATH wired.
+Tests that compile an ad-hoc C# probe share compile_probe/run_probe.
 
 Convention (mirrors test_re_dump_regen.py):
   - dedicated DLL absent            -> SKIP (machine-local, git-ignored inputs)
@@ -95,3 +96,30 @@ def run_tool(exe: str, *args: str) -> tuple[int, str, str]:
         env=env,
     )
     return proc.returncode, proc.stdout, proc.stderr
+
+
+def compile_probe(cs_text: str, stem: str) -> str:
+    """Write cs_text to /tmp/<stem>.cs, compile against bin/Mono.Cecil.dll.
+
+    Returns the /tmp/<stem>.exe path; a compile error raises (CalledProcessError).
+    """
+    exe = f"/tmp/{stem}.exe"
+    src = f"/tmp/{stem}.cs"
+    with open(src, "w") as f:
+        f.write(cs_text)
+    subprocess.run(
+        ["mcs", "-r:%s" % (BIN / "Mono.Cecil.dll"), src, "-out:" + exe], check=True
+    )
+    return exe
+
+
+def run_probe(exe: str, *args: str) -> str:
+    """Run a compiled probe under mono with MONO_PATH wired; returns stdout."""
+    proc = subprocess.run(
+        ["mono", exe, *args],
+        capture_output=True,
+        text=True,
+        env=dict(os.environ, MONO_PATH=str(BIN)),
+        check=True,
+    )
+    return proc.stdout
