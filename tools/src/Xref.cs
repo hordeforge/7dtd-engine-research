@@ -12,6 +12,7 @@
 // form, so use this tool for them.
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -26,11 +27,57 @@ static class Xref {
     foreach (var t in ts) { into.Add(t); if (t.HasNestedTypes) Walk(t.NestedTypes, into); }
   }
 
+  // Batch mode: count call sites for every requested Type::Member pair in ONE
+  // assembly pass. Matching is identical to single-target mode (exact member
+  // name; declaring type on simple name with the generic-arity suffix stripped;
+  // call/callvirt/newobj/ldftn/ldvirtftn opcodes). test_xref_claims.py drives
+  // this so N doc claims cost one assembly load, not N.
+  static void RunBatch(string asmPath, string claimsPath) {
+    var order = new List<string>();
+    var counts = new Dictionary<string, int>();
+    foreach (var raw in File.ReadAllLines(claimsPath)) {
+      var line = raw.Trim();
+      if (line.Length == 0 || line.StartsWith("#")) continue;
+      var parts = line.Split('\t');
+      if (parts.Length != 2 || parts[0].Length == 0 || parts[1].Length == 0) {
+        Console.Error.WriteLine("bad claim line (want '<Type><TAB><Member>'): " + raw);
+        Environment.Exit(2);
+      }
+      string key = parts[0] + "::" + parts[1];
+      if (!counts.ContainsKey(key)) { counts[key] = 0; order.Add(key); }
+    }
+
+    var asm = AssemblyDefinition.ReadAssembly(asmPath);
+    var all = new List<TypeDefinition>();
+    foreach (var mod in asm.Modules) Walk(mod.Types, all);
+
+    foreach (var t in all) {
+      foreach (var m in t.Methods) {
+        if (!m.HasBody) continue;
+        foreach (var ins in m.Body.Instructions) {
+          var mr = ins.Operand as MethodReference;
+          if (mr == null) continue;
+          var c = ins.OpCode.Code;
+          if (c != Code.Call && c != Code.Callvirt && c != Code.Newobj && c != Code.Ldftn && c != Code.Ldvirtftn) continue;
+          string dn = mr.DeclaringType.Name;
+          int tick = dn.IndexOf('`');
+          if (tick >= 0) dn = dn.Substring(0, tick);
+          string key = dn + "::" + mr.Name;
+          if (counts.ContainsKey(key)) counts[key]++;
+        }
+      }
+    }
+    foreach (var k in order) Console.WriteLine(k + " = " + counts[k]);
+  }
+
   static void Main(string[] a) {
+    if (a.Length >= 3 && a[1] == "--batch") { RunBatch(a[0], a[2]); return; }
     if (a.Length < 3) {
       Console.Error.WriteLine("usage: Xref <asm> <Type> <Member> [--field]");
+      Console.Error.WriteLine("       Xref <asm> --batch <claims.tsv>   (one '<Type><TAB><Member>' pair per line)");
       Console.Error.WriteLine("  default: find calls to Type::Member");
       Console.Error.WriteLine("  --field: find reads/writes of the field Type::Member");
+      Console.Error.WriteLine("  --batch: one assembly pass for every claim; prints '<Type>::<Member> = <count>' per input line");
       Environment.Exit(2);
     }
     string wantType = a[1], wantMember = a[2];

@@ -19,12 +19,16 @@ Field-access claims are not supported (no (Xref=...) field form in the docs);
 use the --field flag of Xref.exe and write the claim as (field Xref=N) if a
 field claim is ever added.
 
+All claims are verified with ONE `Xref <asm> --batch` invocation (a single
+assembly pass), not one process per claim.
+
 Usage: python3 tools/tests/test_xref_claims.py <asm>
 """
 import os
 import re
 import subprocess
 import sys
+import tempfile
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
@@ -43,15 +47,28 @@ def claims_in(path: str) -> list[tuple[str, str, int]]:
     return out
 
 
-def xref_count(asm: str, typ: str, member: str) -> int | None:
-    r = subprocess.run(["mono", XREF, asm, typ, member], capture_output=True, text=True)
+def xref_counts(asm: str, pairs: list[tuple[str, str]]) -> dict[tuple[str, str], int]:
+    """One Xref.exe invocation for every claim.
+
+    --batch reads '<Type><TAB><Member>' lines and prints '<Type>::<Member> = N'
+    totals from a single assembly pass; per-claim subprocesses would each pay a
+    full mono + Cecil load (the test was ~6x slower that way).
+    """
+    with tempfile.TemporaryDirectory(prefix="xref-batch-") as td:
+        claims_path = os.path.join(td, "claims.tsv")
+        with open(claims_path, "w", encoding="utf-8") as f:
+            for typ, member in pairs:
+                f.write(f"{typ}\t{member}\n")
+        r = subprocess.run(["mono", XREF, asm, "--batch", claims_path],
+                           capture_output=True, text=True)
     if r.returncode != 0:
-        return None
-    for line in r.stderr.splitlines():
-        m = re.match(r"call sites for " + re.escape(typ) + r"::" + re.escape(member) + r" = (\d+)", line)
+        return {}
+    out: dict[tuple[str, str], int] = {}
+    for line in r.stdout.splitlines():
+        m = re.match(r"(.+)::(.+) = (\d+)$", line)
         if m:
-            return int(m.group(1))
-    return None
+            out[(m.group(1), m.group(2))] = int(m.group(3))
+    return out
 
 
 def main() -> int:
@@ -63,19 +80,32 @@ def main() -> int:
         return 0
     asm = sys.argv[1]
 
-    bad = []
-    total = 0
+    found = []
     for name in sorted(os.listdir(DOCS)):
         path = os.path.join(DOCS, name)
         if not name.endswith(".md") or os.path.isdir(path):
             continue
         for typ, member, want in claims_in(path):
-            total += 1
-            got = xref_count(asm, typ, member)
-            if got is None:
-                bad.append(f"{name}: {typ}::{member} - Xref tool error")
-            elif got != want:
-                bad.append(f"{name}: `{typ}::{member}` doc Xref={want} but DLL Xref={got}")
+            found.append((name, typ, member, want))
+
+    # One assembly pass for all unique claims.
+    pairs: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for _, typ, member, _ in found:
+        if (typ, member) not in seen:
+            seen.add((typ, member))
+            pairs.append((typ, member))
+    counts = xref_counts(asm, pairs)
+
+    bad = []
+    total = 0
+    for name, typ, member, want in found:
+        total += 1
+        key = (typ, member)
+        if key not in counts:
+            bad.append(f"{name}: {typ}::{member} - Xref tool error")
+        elif counts[key] != want:
+            bad.append(f"{name}: `{typ}::{member}` doc Xref={want} but DLL Xref={counts[key]}")
     if bad:
         for b in bad:
             print("FAIL: " + b)

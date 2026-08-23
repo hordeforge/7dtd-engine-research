@@ -793,8 +793,13 @@ def main() -> int:
         dll[(cls, name)] = val
 
     bad = []
+    # ~60 families share ~40 docs (aidirector.md alone owns 13); read each once.
+    doc_text = {}
     for cls, (doc_name, consts) in CONSTS.items():
-        doc = open(os.path.join(DOCS, doc_name), encoding="utf-8").read()
+        if doc_name not in doc_text:
+            with open(os.path.join(DOCS, doc_name), encoding="utf-8") as f:
+                doc_text[doc_name] = f.read()
+        doc = doc_text[doc_name]
         for name, want in consts.items():
             have = dll.get((cls, name))
             if have is None:
