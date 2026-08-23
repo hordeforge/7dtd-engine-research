@@ -299,6 +299,7 @@ class StockFacts {
     }
 
     var te = TileEntityWire(mod);
+    bool tePresent = (bool)te["present"];
 
     // Pre-auth challenge is not a Constants field; fixed in ConnectionManager / loadgen.
     // Document as research-confirmed wire fact (0xCA), not extracted from Constants.
@@ -352,8 +353,8 @@ class StockFacts {
     sb.AppendLine("    \"gmupdate_il\": " + gmUpdateIl);
     sb.AppendLine("  },");
     sb.AppendLine("  \"tile_entity_package\": {");
-    sb.AppendLine("    \"present\": " + ((bool)te["present"] ? "true" : "false") + ",");
-    if ((bool)te["present"]) {
+    sb.AppendLine("    \"present\": " + (tePresent ? "true" : "false") + (tePresent ? "," : ""));
+    if (tePresent) {
       sb.AppendLine("    \"write_il\": " + te["write_il"] + ",");
       sb.AppendLine("    \"write_i32_count\": " + te["write_i32_count"] + ",");
       sb.AppendLine("    \"write_u16_count\": " + te["write_u16_count"] + ",");

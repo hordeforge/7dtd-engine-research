@@ -56,4 +56,35 @@ static class Seeds {
   public static List<TypeDefinition> ReflTargets(List<TypeDefinition> all) {
     return all.Where(t => ReflPrefixes.Any(p => t.Name.StartsWith(p))).ToList();
   }
+
+  // Constant-string -> type lookup for the Type.GetType / Activator.CreateInstance
+  // reflection seeds. Built once per run: the BFS hits those call sites for every
+  // visited method body, and rescanning `all` per hit (with FullName formatting plus
+  // a Replace allocation for every type on every scan) dominated tool runtime.
+  // Accepts exactly the three forms the linear scan matched before: FullName, simple
+  // Name, and the nested '+' form of FullName. First match in `all` order wins: each
+  // key maps to the earliest type that produces it under any accepted form, which is
+  // what FirstOrDefault returned.
+  static Dictionary<string, TypeDefinition> byConstantName;
+
+  public static void IndexTypes(List<TypeDefinition> all) {
+    var idx = new Dictionary<string, TypeDefinition>(all.Count * 3);
+    foreach (var t in all) {
+      AddKey(idx, t.FullName, t);
+      AddKey(idx, t.Name, t);
+      AddKey(idx, t.FullName.Replace('/', '+'), t);
+    }
+    byConstantName = idx;
+  }
+
+  static void AddKey(Dictionary<string, TypeDefinition> idx, string k, TypeDefinition t) {
+    if (!idx.ContainsKey(k)) idx[k] = t;
+  }
+
+  // Resolve a ldstr constant to its type (null when no type matches the string).
+  public static TypeDefinition FindByConstantName(string constant) {
+    if (string.IsNullOrEmpty(constant) || byConstantName == null) return null;
+    TypeDefinition t;
+    return byConstantName.TryGetValue(constant, out t) ? t : null;
+  }
 }

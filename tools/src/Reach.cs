@@ -38,6 +38,7 @@ class Reach {
     var visited=new HashSet<MethodDefinition>(); var work=new Queue<MethodDefinition>();
     Seeds.EnqueueSeeds(all, visited, work);
     var reflTypes = Seeds.ReflTargets(all);
+    Seeds.IndexTypes(all);
     string lastLdstr=null;
     while(work.Count>0){ var m=work.Dequeue();
       foreach(var i in m.Body.Instructions){
@@ -53,11 +54,11 @@ class Reach {
             foreach(var tm in tt.Methods.Where(x=>x.HasBody)) if(visited.Add(tm)) work.Enqueue(tm);
         }
         if(mr.DeclaringType.FullName=="System.Type" && (mr.Name=="GetType"||mr.Name=="GetTypeFromHandle") && !string.IsNullOrEmpty(lastLdstr)){
-          var tt=all.FirstOrDefault(t=>t.FullName==lastLdstr||t.Name==lastLdstr||t.FullName.Replace('/','+')==lastLdstr);
+          var tt=Seeds.FindByConstantName(lastLdstr);
           if(tt!=null) foreach(var tm in tt.Methods.Where(x=>x.HasBody)) if(visited.Add(tm)) work.Enqueue(tm);
         }
         if(mr.DeclaringType.FullName=="System.Activator" && mr.Name=="CreateInstance" && !string.IsNullOrEmpty(lastLdstr)){
-          var tt=all.FirstOrDefault(t=>t.FullName==lastLdstr||t.Name==lastLdstr||t.FullName.Replace('/','+')==lastLdstr);
+          var tt=Seeds.FindByConstantName(lastLdstr);
           if(tt!=null) foreach(var tm in tt.Methods.Where(x=>x.HasBody)) if(visited.Add(tm)) work.Enqueue(tm);
         }
       }

@@ -376,7 +376,8 @@ class DumpDeeper {
       var floats = new List<float>();
       foreach (var ins in m.Body.Instructions)
         if (ins.OpCode.Code == Code.Ldc_R4 && ins.Operand is float f) floats.Add(f);
-      book.AppendLine("constants floats: " + string.Join(", ", floats.Distinct()));
+      book.AppendLine("constants floats: " + string.Join(", ",
+        floats.Distinct().Select(x => x.ToString(System.Globalization.CultureInfo.InvariantCulture))));
     }
   }
 }
