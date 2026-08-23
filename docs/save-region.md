@@ -1,7 +1,7 @@
 # Save, WorldState, and region files (dedicated V3.1.0)
 
 **Owns:** WorldState, Chunk write/read, `RegionFile`* managed layout, snapshot/Deflate path, WorldBlockTicker schedule wire (generic engine).  
-**Product expand/inject notes:** `7dtd-realworld/docs/realearth-surfaces.md`.  
+**Product expand/inject notes:** `7dtd-realearth/docs/realearth-surfaces.md`.  
 **Dumps:** `../il/loop-complete-v3.1.0/`, `../il/realearth-surfaces-v3.1.0/`, `../il/dedi-complete-v3.1.0/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
@@ -360,7 +360,7 @@ nothing. **Channel write (`ChunkBlockChannel.Write` IL=120):** per band
 (64): 1 flag byte (0 = `layers[bandStart] != null` data, 1 = compressed), then
 per sub-layer `bytesPerVal` count: 1024 data bytes or 1 `sameValue` byte.
 
-**Expand note:** changing only `WorldConstants.ChunkBlockLayers` does **not** change this loop; patcher must rewrite the `ldc.i4.s 64` sites. Detail: `7dtd-realworld/docs/realearth-surfaces.md` §5.0.
+**Expand note:** changing only `WorldConstants.ChunkBlockLayers` does **not** change this loop; patcher must rewrite the `ldc.i4.s 64` sites. Detail: `7dtd-realearth/docs/realearth-surfaces.md` §5.0.
 
 ```mermaid
 flowchart LR

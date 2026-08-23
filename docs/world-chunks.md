@@ -3,7 +3,7 @@
 **Owns:** world tick, generateTerrain trampoline, load/send (observer streaming), SetBlock path (generic engine).  
 **Index math:** §2 below + [`terrain-height.md`](terrain-height.md).  
 **Save path:** [`save-region.md`](save-region.md).  
-**Product Streamed inject:** `7dtd-realworld/docs/realearth-runtime.md`.  
+**Product Streamed inject:** `7dtd-realearth/docs/realearth-runtime.md`.  
 **Dumps:** `../il/loop-complete-v3.1.0/`, `../il/realearth-surfaces-v3.1.0/`, `../il/dedi-complete-v3.1.0/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 

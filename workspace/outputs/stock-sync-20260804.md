@@ -22,6 +22,6 @@ NetPackage=193, CurrentSaveVersion=23, challenge=0xCA, port=26900.
 
 ## Ops after TFP patch
 ```bash
-cd 7dtd-research && make stock-sync   # refresh JSON + pin FAIL sites
+cd 7dtd-engine-research && make stock-sync   # refresh JSON + pin FAIL sites
 # fix docs / loadgen GameVersion / zdtd stock_wire as needed
 ```

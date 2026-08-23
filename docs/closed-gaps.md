@@ -160,7 +160,7 @@ Heuristic only; presence still depends on whether component exists in dedicated 
 ## 8. Optim map updates from this pass
 
 Merged into the optimizer project (do not keep optim narrative under `docs/` or `il/`):  
-[`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)
+[`../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md)
 
 | Idea | New RE detail folded there |
 |---|---|

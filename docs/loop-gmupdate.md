@@ -7,7 +7,7 @@
 
 **Assembly:** dedicated `Assembly-CSharp.dll` V **3.1.0 (b14)** (gmUpdate IL=631 unchanged from V3.0.1)  
 **Tool:** `tools/legacy/DumpGmUpdate.cs` (pre-corrupted; use `tools/src/DumpMethod` instead, see §10)  
-**Optim summary:** [`../../7dtd-optimizer/docs/ARCHITECTURE.md`](../../7dtd-optimizer/docs/ARCHITECTURE.md)
+**Optim summary:** [`../../7dtd-server-optimizer/docs/ARCHITECTURE.md`](../../7dtd-server-optimizer/docs/ARCHITECTURE.md)
 
 ---
 
@@ -381,8 +381,8 @@ Harmony `Prefix` on `gmUpdate` runs **before** both.
 
 A structural fact useful to any patcher or clone: where you hook determines what
 you intercept. Lever *selection* and patch strategy are optimizer-owned
-([`../../7dtd-optimizer/docs/ARCHITECTURE.md`](../../7dtd-optimizer/docs/ARCHITECTURE.md),
-[`../../7dtd-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-optimizer/docs/SIM_PARALLELISM.md) §5.6.1);
+([`../../7dtd-server-optimizer/docs/ARCHITECTURE.md`](../../7dtd-server-optimizer/docs/ARCHITECTURE.md),
+[`../../7dtd-server-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-server-optimizer/docs/SIM_PARALLELISM.md) §5.6.1);
 this table is only the RE-derived coverage of each interception point.
 
 | Interception point | Covers |

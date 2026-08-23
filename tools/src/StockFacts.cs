@@ -381,7 +381,7 @@ class StockFacts {
     // Machine-checked pin sites (mirrors check_stock_facts.py consumers).
     sb.AppendLine("  \"pins\": {");
     sb.AppendLine("    \"research\": [\"docs/coverage.md\", \"docs/protocol.md\", \"docs/closed-gaps.md\", \"docs/save-region.md\", \"README.md\", \"docs/tile-entities-power.md\", \"docs/protocol-packages.md\"],");
-    sb.AppendLine("    \"siblings\": [\"7dtd-loadgen/src/LoadGen/PackageCodec.cs\", \"zdtd/src/version.zig\", \"zdtd/src/protocol.zig\", \"zdtd/src/world/store.zig\"]");
+    sb.AppendLine("    \"siblings\": [\"7dtd-loadgen/src/LoadGen/PackageCodec.cs\", \"zdtd-server/src/version.zig\", \"zdtd-server/src/protocol.zig\", \"zdtd-server/src/world/store.zig\"]");
     sb.AppendLine("  },");
     sb.AppendLine("  \"behaviour\": {");
     sb.AppendLine("    \"max_entities_per_mob_spawner\": " + maxEntitiesPerMobSpawner + ",");

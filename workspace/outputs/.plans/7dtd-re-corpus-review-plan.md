@@ -1,8 +1,8 @@
 # Review plan: 7DTD dedicated-server RE corpus
 
 ## Artifact
-- **Identifier:** the reverse-engineering corpus in `/home/maci/Desktop/7dtd/7dtd-research`
-  (branch `re-corpus-audit-tooling`), plus its sibling consumer `../zdtd`.
+- **Identifier:** the reverse-engineering corpus in `/home/maci/Desktop/7dtd/7dtd-engine-research`
+  (branch `re-corpus-audit-tooling`), plus its sibling consumer `../zdtd-server`.
 - **Source type:** local repository. Markdown research corpus (`docs/`, 80 files) +
   C#/Mono.Cecil tooling (`tools/src/`) + Python test gates (`tools/tests/`).
 - **Target of study:** the shipped, proprietary `Assembly-CSharp.dll` of 7 Days to Die

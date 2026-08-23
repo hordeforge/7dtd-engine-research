@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Verify sibling-repo RESEARCH citations resolve against this corpus.
 
-The sibling repos (zdtd, 7dtd-optimizer, 7dtd-loadgen, 7dtd-realworld,
-7dtd-apm) map their values and behaviors back to the stock dedicated server
+The sibling repos (zdtd, 7dtd-server-optimizer, 7dtd-loadgen, 7dtd-realearth,
+7dtd-server-apm) map their values and behaviors back to the stock dedicated server
 through the research docs. This gate extracts every EXPLICIT research
-citation - an `RE:` marker or a `7dtd-research/docs/` path prefix - from each
+citation - an `RE:` marker or a `7dtd-engine-research/docs/` path prefix - from each
 sibling and checks the cited file exists in this repo's docs/. Bare names of a
 sibling's OWN docs are not research citations and are ignored (resolved
 against that repo's docs/ + root + zdtd docs/adr).
@@ -18,11 +18,11 @@ import os
 import re
 import sys
 
-REPOS = ["zdtd", "7dtd-optimizer", "7dtd-loadgen", "7dtd-realworld", "7dtd-apm"]
+REPOS = ["zdtd", "7dtd-server-optimizer", "7dtd-loadgen", "7dtd-realearth", "7dtd-server-apm"]
 RES_PATH = re.compile(
-    r"(?:(?:\.\./)*7dtd-research/docs/)([A-Za-z0-9][A-Za-z0-9_-]+\.md)"
+    r"(?:(?:\.\./)*7dtd-engine-research/docs/)([A-Za-z0-9][A-Za-z0-9_-]+\.md)"
 )
-BARE_AFTER_RE = re.compile(r"RE(?::|\s+)(?:../7dtd-research/docs/)?([A-Za-z0-9][A-Za-z0-9_-]+\.md)")
+BARE_AFTER_RE = re.compile(r"RE(?::|\s+)(?:../7dtd-engine-research/docs/)?([A-Za-z0-9][A-Za-z0-9_-]+\.md)")
 BARE = re.compile(r"(?<![\w./-])([A-Za-z0-9][A-Za-z0-9_-]+\.md)(?![A-Za-z0-9])")
 # Known non-citation bare names: report/artifact filenames emitted by tools
 # (not references to docs that must resolve).

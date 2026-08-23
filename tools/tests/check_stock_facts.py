@@ -23,7 +23,7 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]  # 7dtd-research
+ROOT = Path(__file__).resolve().parents[2]  # 7dtd-engine-research
 WS = ROOT.parent  # 7dtd workspace
 DEFAULT_FACTS = ROOT / "tools" / "data" / "stock_facts.json"
 

@@ -66,7 +66,7 @@
   },
   "pins": {
     "research": ["docs/coverage.md", "docs/protocol.md", "docs/closed-gaps.md", "docs/save-region.md", "README.md", "docs/tile-entities-power.md", "docs/protocol-packages.md"],
-    "siblings": ["7dtd-loadgen/src/LoadGen/PackageCodec.cs", "zdtd/src/version.zig", "zdtd/src/protocol.zig", "zdtd/src/world/store.zig"]
+    "siblings": ["7dtd-loadgen/src/LoadGen/PackageCodec.cs", "zdtd-server/src/version.zig", "zdtd-server/src/protocol.zig", "zdtd-server/src/world/store.zig"]
   },
   "behaviour": {
     "max_entities_per_mob_spawner": 8,

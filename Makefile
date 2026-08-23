@@ -1,4 +1,4 @@
-# 7dtd-research: stock RE tooling + pin gates.
+# 7dtd-engine-research: stock RE tooling + pin gates.
 ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll

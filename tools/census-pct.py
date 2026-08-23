@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compute the RE-coverage percentages for the 7dtd-research corpus.
+"""Compute the RE-coverage percentages for the 7dtd-engine-research corpus.
 
 Runs the live census tools against the game assembly and prints how much of
 the code is known at each layer:
@@ -168,7 +168,7 @@ def main():
 
     if not as_json:
         g = cov["game_types"]
-        print("RE coverage of the 7dtd-research corpus (live census)\n")
+        print("RE coverage of the 7dtd-engine-research corpus (live census)\n")
         print("Reached game types (dedicated-server RE surface): %d" % g)
         print("  narrated      %6d  %5.1f%%  (hand-written narrative prose)" % (
             cov["narrated"], pct(cov["narrated"], g)))

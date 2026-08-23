@@ -75,7 +75,7 @@ manager's `Update`/`UpdateTick` method instruction count from the dump (e.g.
 
 Always-path cost on dedicated (optim skip candidate; not sim correctness).
 
-Also from peers / LateUpdate: `MeshDataManager`, `ConnectionManager`, `DynamicMeshManager`, `SdtdConsole`, `LoadManager`, `PlatformManager`, `AstarManager.UpdateGraphs` (185). The last is player-following and the top measured CPU + heap allocator at load: [`measured-scaling.md`](../../7dtd-optimizer/docs/measured-scaling.md) §1/§4b.
+Also from peers / LateUpdate: `MeshDataManager`, `ConnectionManager`, `DynamicMeshManager`, `SdtdConsole`, `LoadManager`, `PlatformManager`, `AstarManager.UpdateGraphs` (185). The last is player-following and the top measured CPU + heap allocator at load: [`measured-scaling.md`](../../7dtd-server-optimizer/docs/measured-scaling.md) §1/§4b.
 
 ---
 

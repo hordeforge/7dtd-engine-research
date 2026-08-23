@@ -1,4 +1,4 @@
-# Documentation audit: 7dtd-research RE corpus (V3.0.1)
+# Documentation audit: 7dtd-engine-research RE corpus (V3.0.1)
 
 **Scope:** 24 narrative docs in `docs/` (incl. INDEX.md), 8 inventories in `docs/inventories/`, `README.md`, 3 files in `oss-tools/`. All 36 files read in full. Oracle values (verified live via Mono.Cecil): top-level types = 4401; methods with body = 43901; NetPackage* top-level types = 194 exactly (199 with nested; 189 = runtime id-map count, a distinct quantity); gmUpdate IL = 631; WorldState.SaveLoad(Stream) IL = 884; GameTimer = 20 Hz/TPS.
 
@@ -212,7 +212,7 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 
 - **Read in full:** all 24 `docs/*.md`, all 8 `docs/inventories/*.md`, `README.md`, all 3 `oss-tools/*.md` (36/36 files).
 - **Grep-verified corpus-wide:** oracle numerics (194/196/189, 4401, 43901, 631, 884, 20 Hz), em dash character, TODO/FIXME/placeholder markers (none in docs; one benign mention in NOTES.md:186 about placeholder models), `.md#anchor` links (3, all broken), duplicate headings per file, AI-attribution phrasing (none).
-- **Not verified (out of scope / not possible from this repo):** external pointers into `7dtd-optimizer/docs/RESULTS.md`, `ALLOCATION_UPSTREAM.md`, APM session files, and the private `7days-realworld/` docs — claims delegated to those artifacts were treated as provenanced-if-pointed, unprovenanced otherwise (F11). Link/URL validity was explicitly out of scope per the task ("claims, not links"), except anchors (F9) which are content claims about target sections.
+- **Not verified (out of scope / not possible from this repo):** external pointers into `7dtd-server-optimizer/docs/RESULTS.md`, `ALLOCATION_UPSTREAM.md`, APM session files, and the private `7days-realworld/` docs — claims delegated to those artifacts were treated as provenanced-if-pointed, unprovenanced otherwise (F11). Link/URL validity was explicitly out of scope per the task ("claims, not links"), except anchors (F9) which are content claims about target sections.
 
 ---
 
@@ -226,7 +226,7 @@ GC-disabled heap, ~5.6 GB live).
 | Finding | Status |
 |---|---|
 | F1 count 194 | FIXED (coverage/network/engine-limitations/residuals/protocol) |
-| F2, F3, F5, F13 | DEFERRED to `7dtd-optimizer` (bottlenecks/algorithms/allocation-reuse moved there) |
+| F2, F3, F5, F13 | DEFERRED to `7dtd-server-optimizer` (bottlenecks/algorithms/allocation-reuse moved there) |
 | F4 chunk % | DEFERRED (moved docs); truth recorded: 56-60% section-relative vs 5% full-tick |
 | F6 GC knobs | DEFERRED (runtime-tuning moved) |
 | F7 heap size | DEFERRED (moved docs); truth: forced collect 6.9 GB / ~5.6 GB live |
@@ -235,7 +235,7 @@ GC-disabled heap, ~5.6 GB live).
 | F10 residuals policy | FIXED (annotation-backlog class added) |
 | F11 provenance | PARTIAL: moved-doc cases deferred; 2 stay-doc numbers left flagged (unverified) |
 | F12 66 vs 66.6 | DEFERRED (moved docs) |
-| F14 stale paths | FIXED (all `research/` -> `il/`/`docs/`/`7dtd-research/`) |
+| F14 stale paths | FIXED (all `research/` -> `il/`/`docs/`/`7dtd-engine-research/`) |
 | F15 RAM | DEFERRED (allocation-reuse/runtime-tuning moved); truth: 123.4 GiB / 128 GB nominal |
 | F16 damageType 16 | FIXED (Suffocation, DLL-verified) |
 | F17 2 channels | RESOLVED (substantiated: channel 1 real, 6 packages) |
@@ -246,4 +246,4 @@ GC-disabled heap, ~5.6 GB live).
 | F25 | SKIPPED (optional auto-dump noise) |
 
 **Scope note:** F2-F7, F12, F13, F15 physically travel with the 6 optimization
-docs moved to `7dtd-optimizer/docs/`; reconcile them in that repo.
+docs moved to `7dtd-server-optimizer/docs/`; reconcile them in that repo.

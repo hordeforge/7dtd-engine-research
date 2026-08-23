@@ -291,9 +291,9 @@ Same tools, different questions. For hot-path anatomy:
   data structures, allocation sites) from **cost** (what only a profiler
   proves). Never state a percentage or big-O as "measured" from IL alone; that
   belongs to APM/profiler artifacts. See
-  [`measured-scaling.md`](../../7dtd-optimizer/docs/measured-scaling.md) and [`bottlenecks.md`](../../7dtd-optimizer/docs/bottlenecks.md).
+  [`measured-scaling.md`](../../7dtd-server-optimizer/docs/measured-scaling.md) and [`bottlenecks.md`](../../7dtd-server-optimizer/docs/bottlenecks.md).
 - Allocation RE: look for `newobj`, `newarr`, boxing, and LINQ closures in hot
-  methods ([allocation-reuse.md](../../7dtd-optimizer/docs/allocation-reuse.md)).
+  methods ([allocation-reuse.md](../../7dtd-server-optimizer/docs/allocation-reuse.md)).
 
 ---
 

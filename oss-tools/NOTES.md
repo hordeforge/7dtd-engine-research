@@ -370,7 +370,7 @@ Our split remains better: **APM owns measurement**, EfficientServer stays free o
 ## 11. What to add to EfficientServer / research backlog
 
 Evidence-gated only (same rules as `OPTIMIZATION_IDEAS.md`).  
-Threading / extract-sim / full hot-path catalog: [`../../7dtd-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-optimizer/docs/SIM_PARALLELISM.md) §5-7.
+Threading / extract-sim / full hot-path catalog: [`../../7dtd-server-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-server-optimizer/docs/SIM_PARALLELISM.md) §5-7.
 
 ### Promote for **measurement experiments**
 

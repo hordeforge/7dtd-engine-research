@@ -5,7 +5,7 @@ and how its parts connect: process lifecycle, the frame, the simulation core, th
 wire, and persistence. This is the map you read **first**, then follow into the
 subsystem doc that owns each box.
 **Not:** the detail behind any single box (each has its own doc, linked from every
-diagram); measured performance ([`../../7dtd-optimizer/docs/`](../../7dtd-optimizer/docs)).
+diagram); measured performance ([`../../7dtd-server-optimizer/docs/`](../../7dtd-server-optimizer/docs)).
 **Evidence:** every box and edge below is drawn from the narratives in this corpus,
 which are IL-derived. Where a number appears (IL size, tick rate, channel) it comes
 from the owning doc.

@@ -8,7 +8,7 @@
 **Visual frames:** [`protocol-frames.md`](protocol-frames.md).  
 **Companion:** [`closed-gaps.md`](closed-gaps.md) §4 (threshold decode).  
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md) §2-3 (player O(N²), packages).  
-**Clone design:** [`ZIG_CLONE.md`](../../zdtd/docs/ZIG_CLONE.md).  
+**Clone design:** [`ZIG_CLONE.md`](../../zdtd-server-server/docs/ZIG_CLONE.md).  
 **Loop:** [`loop.md`](loop.md) §6.  
 **Dumps:** `il/gaps-v3.1.0/`, `il/dedi-complete-v3.1.0/` §3-4.
 
@@ -715,8 +715,8 @@ shared buffer across N writer threads. `SendPackage` signature:
 
 The measured egress share (bytes/s at load), the allocator ranking, and whether
 any of this is worth a lever are optimizer-owned measurements/decisions:
-[`measured-scaling.md`](../../7dtd-optimizer/docs/measured-scaling.md),
-[`bottlenecks.md`](../../7dtd-optimizer/docs/bottlenecks.md).
+[`measured-scaling.md`](../../7dtd-server-optimizer/docs/measured-scaling.md),
+[`bottlenecks.md`](../../7dtd-server-optimizer/docs/bottlenecks.md).
 
 ## 4c. Package registry, direction gate, per-package channel/compress/reliability (2026-08-06)
 
@@ -881,9 +881,12 @@ kicks "V 3.10"** with VersionMismatch=4 - the opposite of the IL-only reading
 above. A loadgen login switched to "V 3.10" (commit b5c3069) failed every
 join; reverting to "V 3.1.0" restored 16/16 PASS. The stock
 `cVersionInformation.LongStringNoBuild` evidently evaluates to the display
-form in practice (the IL shows the format, not the runtime constant value);
-the "V 3.10" claim should be re-verified against the runtime constant before
-it is relied on again. zdtd's gate behavior was not re-tested on that date.
+form in practice (the IL shows the format, not the runtime constant value).
+Re-verified 2026-08-23 with a live V3.1.0 b14 client: it sends compVersion
+"V 3.1.0" (zdtd server logged it verbatim); zdtd previously expected the
+IL-reading "V 3.10" and kicked the real client with VersionMismatch=4 until
+the gate was switched to "V 3.1.0" (`zdtd src/version.zig` `stock_wire_comp`),
+after which the client joined and spawned normally.
 
 `GameInfoString` has 20 members (796457-796476), including `SandboxPreset = 0x12`
 and `SandboxCode = 0x13`, which is where V3.1.0 keeps the difficulty/loot/XP
@@ -954,7 +957,7 @@ discovery loop from 1024 up to 1432 minus the layer overhead.
 | [loop.md](loop.md) | UpdateTick placement of replication; frame peers |
 | [closed-gaps.md](closed-gaps.md) | Distance-band threshold decode evidence |
 | [entity-ai.md](entity-ai.md) | What is being replicated |
-| [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) | Super-linear player-axis cost (optimizer) |
+| [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md) | Super-linear player-axis cost (optimizer) |
 | [protocol-packages.md](protocol-packages.md) | Encryption handshake package bodies |
 | [dedicated-leftovers.md](dedicated-leftovers.md) | AesEncryptAndMac install from SendSharedKey |
 

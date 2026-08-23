@@ -6,7 +6,7 @@ Ground-truth basis: a Cecil dumper (`scratchpad/TypeBases.cs`) emitted every typ
 (`typebases.tsv`, 7413 rows incl. nested) from
 `"/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"`,
 and `scratchpad/closure.py typebases.tsv <RootFullName>` computed each family's transitive closure.
-Scratchpad = `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-research/0b44a842-ae93-414f-9c41-1f1f1f54c21b/scratchpad`.
+Scratchpad = `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-engine-research/0b44a842-ae93-414f-9c41-1f1f1f54c21b/scratchpad`.
 
 ## Findings
 

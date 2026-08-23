@@ -509,7 +509,7 @@ header fields**; a zombie spawn writes header + tail with the middle empty. The 
 per-write sequence in
 [`inventories/netpackage-bodies.md`](inventories/netpackage-bodies.md) is the union
 of all branches; use the switch above for the real per-class body. (Cross-checked
-against the [zdtd](../../zdtd/docs/) clone's zombie spawn, which correctly writes the
+against the [zdtd](../../zdtd-server-server/docs/) clone's zombie spawn, which correctly writes the
 empty middle.)
 
 ### 5.1.1 Wire envelope and client process

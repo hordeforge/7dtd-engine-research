@@ -1,7 +1,7 @@
 # 7DTD dedicated RE documentation (generic engine)
 
 **Owns:** hub for **generic** dedicated engine RE narratives + dump index.  
-**Not:** RealEarth product status/lessons (`7dtd-realworld`, private companion project, not published).  
+**Not:** RealEarth product status/lessons (`7dtd-realearth`, private companion project, not published).  
 **Game:** V3.1.0 (b14) dedicated `Assembly-CSharp.dll`.  
 **Policy:** research only. Do not redistribute game IL or managed DLLs.  
 **Coverage bar:** dedicated-relevant **managed** surfaces. Open leftovers: [`residuals.md`](residuals.md).
@@ -11,7 +11,7 @@ docs/              generic engine narratives (this folder)
 docs/inventories/  raw method/call inventories backing the narratives
 il/                regenerable Mono.Cecil dumps only (local; not in git)
 oss-tools/         survey notes on third-party server tools/mods
-7dtd-realworld/    RealEarth product docs (sibling repo, private companion, not published)
+7dtd-realearth/    RealEarth product docs (sibling repo, private companion, not published)
 ```
 
 ---
@@ -78,8 +78,8 @@ the method (boot/settime/join/observe) is in [re-methodology.md](re-methodology.
 | 3 | [`loop.md`](loop.md) | How the dedicated frame/sim runs |
 | 4 | [`protocol.md`](protocol.md) | Wire framing, join, golden package bodies |
 | 5 | [`protocol-frames.md`](protocol-frames.md) | Visual RFC/Mermaid byte frames per package |
-| 6 | [`ZIG_CLONE.md`](../../zdtd/docs/ZIG_CLONE.md) | Zig clone architecture from RE (companion `zdtd/docs/`) |
-| 6b | [`PROVENANCE.md`](../../zdtd/docs/PROVENANCE.md) | zdtd provenance ledger: every behavior/perk/value -> stock source (file map 187/187, constants, divergences; gated by zdtd `tools/provenance_scan.py`) |
+| 6 | [`ZIG_CLONE.md`](../../zdtd-server-server/docs/ZIG_CLONE.md) | Zig clone architecture from RE (companion `zdtd-server/docs/`) |
+| 6b | [`PROVENANCE.md`](../../zdtd-server-server/docs/PROVENANCE.md) | zdtd provenance ledger: every behavior/perk/value -> stock source (file map 187/187, constants, divergences; gated by zdtd `tools/provenance_scan.py`) |
 | 7 | [`residuals.md`](residuals.md) | What IL cannot close |
 | 7b | [`completion-bar.md`](completion-bar.md) | What "100% documented" means (tiers A-D) |
 
@@ -89,7 +89,7 @@ flowchart LR
   B --> C[generic family docs]
   C --> D[il/ dumps]
   B --> E[residuals]
-  C -.->|product only| RE[7dtd-realworld/docs]
+  C -.->|product only| RE[7dtd-realearth/docs]
 ```
 
 ---
@@ -100,10 +100,10 @@ flowchart LR
 |---|---|
 | Whole engine map | coverage → loop → family docs → residuals |
 | **Stock ceilings (any dedi)** | [engine-limitations.md](engine-limitations.md) → loop (scaling laws: optimizer `measured-scaling.md`) |
-| **Zig / custom dedi clone** | [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
+| **Zig / custom dedi clone** | [ZIG_CLONE.md](../../zdtd-server-server/docs/ZIG_CLONE.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
 | Wire / join / golden packages | protocol → **protocol-frames** → **protocol-packages** → network → loadgen PackageCodec |
 | How to reverse-engineer | **re-methodology** → [`../tools/`](../tools) → coverage |
-| Re-run the zdtd provenance review | `../../zdtd/docs/provenance-review.md` (copy-paste prompt; picked up by `~/review-prompts` as `*-review.md`) |
+| Re-run the zdtd provenance review | `../../zdtd-server-server/docs/provenance-review.md` (copy-paste prompt; picked up by `~/review-prompts` as `*-review.md`) |
 | **Stock hardcode pin** | [`../tools/stock-sync.sh`](../tools/stock-sync.sh) → [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) (see re-methodology §5c) |
 | Frame / gmUpdate | loop → loop-gmupdate → inventories/gmupdate-calls |
 | Entities / AI / path | entity-ai → closed-gaps → aidirector |
@@ -112,11 +112,11 @@ flowchart LR
 | Light / mesh / water | light-mesh-water |
 | **Tuned game constants (exact numbers)** | the owning topic doc (constants pinned by `tools/tests/test_tuned_constants.py`, 524 pins: horde geometry + airdrop schedule, block masks, entity ids, spawn rings, stealth, caps) |
 | Managers / ModEvents | managers |
-| **Live APM scale / bottlenecks / tuning** | optimization mod: `../../7dtd-optimizer/docs/` (measured-scaling, bottlenecks, runtime-tuning) |
-| **RealEarth product limits** | `../../7dtd-realworld/docs/ENGINE_LIMITATIONS.md` |
-| **RealEarth product hub** | `../../7dtd-realworld/docs/INDEX.md` |
-| EfficientServer optim | [`../../7dtd-optimizer/docs/`](../../7dtd-optimizer/docs) |
-| **Perf research → optim backlog** | [`../../7dtd-optimizer/docs/PERF_RESEARCH_BRIEF.md`](../../7dtd-optimizer/docs/PERF_RESEARCH_BRIEF.md) |
+| **Live APM scale / bottlenecks / tuning** | optimization mod: `../../7dtd-server-optimizer/docs/` (measured-scaling, bottlenecks, runtime-tuning) |
+| **RealEarth product limits** | `../../7dtd-realearth/docs/ENGINE_LIMITATIONS.md` |
+| **RealEarth product hub** | `../../7dtd-realearth/docs/INDEX.md` |
+| EfficientServer optim | [`../../7dtd-server-optimizer/docs/`](../../7dtd-server-optimizer/docs) |
+| **Perf research → optim backlog** | [`../../7dtd-server-optimizer/docs/PERF_RESEARCH_BRIEF.md`](../../7dtd-server-optimizer/docs/PERF_RESEARCH_BRIEF.md) |
 
 ### Key engine state machines (generic)
 
@@ -160,11 +160,11 @@ Product Streamed state machines (tiles, inject gate, SoloSlide): see product ``r
 
 Optimization-mod topics (bottlenecks, algorithm cost anatomy, APM scaling laws,
 GC/FPS tuning, allocation reuse, aggressive levers) live in the **companion
-`7dtd-optimizer/docs/`**, not this repo. See the table below. The **Zig clone
+`7dtd-server-optimizer/docs/`**, not this repo. See the table below. The **Zig clone
 architecture** (module map, M0-M6 milestones) is reimplementation design and lives
-in **`zdtd/docs/ZIG_CLONE.md`**, built from the wire/loop RE here.
+in **`zdtd-server/docs/ZIG_CLONE.md`**, built from the wire/loop RE here.
 
-| Topic | File (product `7dtd-realworld/docs/`, private, not published) |
+| Topic | File (product `7dtd-realearth/docs/`, private, not published) |
 |---|---|
 | Streamed runtime lessons | `realearth-runtime.md` |
 | Engine surfaces used by RealEarth | `realearth-surfaces.md` |
@@ -296,7 +296,7 @@ complete against a call-graph reachability pass ([re-methodology.md](re-methodol
 | [parties-factions.md](parties-factions.md) | Parties (session), faction standing matrix, ally handshake |
 | [twitch-integration.md](twitch-integration.md) | Twitch: server action/vote execution via game events (connection is client residual) |
 
-### G. Optimization-mod companion (`7dtd-optimizer/docs/`, not this repo)
+### G. Optimization-mod companion (`7dtd-server-optimizer/docs/`, not this repo)
 
 These consume the stock RE above and belong to the EfficientServer optimization
 mod, not stock-game research. Cost measurements, lever catalogs, and tuning knobs
@@ -304,12 +304,12 @@ live with the mod that ships them.
 
 | Doc | Role |
 |---|---|
-| [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) | Live APM scaling laws |
-| [bottlenecks.md](../../7dtd-optimizer/docs/bottlenecks.md) | Consolidated ranked bottleneck catalog (super-linear walls, bad data structures, serial stages) |
-| [algorithms.md](../../7dtd-optimizer/docs/algorithms.md) | Every hot-subsystem algorithm + data structure (path scan, net interest, chunk RLE, Boehm GC, spatial queries) |
-| [aggressive-optimizations.md](../../7dtd-optimizer/docs/aggressive-optimizations.md) | Unsafe/beyond-Harmony lever catalog: risk classes, per-cost targets, gain/risk hierarchy |
-| [runtime-tuning.md](../../7dtd-optimizer/docs/runtime-tuning.md) | Process knobs: Boehm GC env, GC.Collect gate, ModEvents lifecycle, settargetfps |
-| [allocation-reuse.md](../../7dtd-optimizer/docs/allocation-reuse.md) | Buffer reuse / preallocation to cut churn; what is pooled vs what still churns |
+| [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md) | Live APM scaling laws |
+| [bottlenecks.md](../../7dtd-server-optimizer/docs/bottlenecks.md) | Consolidated ranked bottleneck catalog (super-linear walls, bad data structures, serial stages) |
+| [algorithms.md](../../7dtd-server-optimizer/docs/algorithms.md) | Every hot-subsystem algorithm + data structure (path scan, net interest, chunk RLE, Boehm GC, spatial queries) |
+| [aggressive-optimizations.md](../../7dtd-server-optimizer/docs/aggressive-optimizations.md) | Unsafe/beyond-Harmony lever catalog: risk classes, per-cost targets, gain/risk hierarchy |
+| [runtime-tuning.md](../../7dtd-server-optimizer/docs/runtime-tuning.md) | Process knobs: Boehm GC env, GC.Collect gate, ModEvents lifecycle, settargetfps |
+| [allocation-reuse.md](../../7dtd-server-optimizer/docs/allocation-reuse.md) | Buffer reuse / preallocation to cut churn; what is pooled vs what still churns |
 
 ---
 
@@ -323,7 +323,7 @@ live with the mod that ships them.
 | [inventories/loop-complete.md](inventories/loop-complete.md) | loop.md, save-region.md |
 | [inventories/deeper.md](inventories/deeper.md) | entity-ai.md |
 | [inventories/gaps.md](inventories/gaps.md) | closed-gaps.md |
-| [inventories/opt-scan.md](inventories/opt-scan.md) | 7dtd-optimizer [OPTIMIZATION_CANDIDATES.md](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md) |
+| [inventories/opt-scan.md](inventories/opt-scan.md) | 7dtd-server-optimizer [OPTIMIZATION_CANDIDATES.md](../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md) |
 | [inventories/netpackages.md](inventories/netpackages.md) | protocol.md, protocol-packages.md, network.md |
 | [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) | protocol-packages.md (auto-extracted wire bodies; regenerate with WireBodies.exe) |
 | [inventories/coverage-report.md](inventories/coverage-report.md) | coverage.md (auto-generated reachability vs doc-mention coverage) |
@@ -388,15 +388,15 @@ mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.1.0
 Gates: `make test` (full suite, needs the live DLL), `make test-docs` (DLL-free corpus invariants; runs in CI on every push), `make stock-check` (pins vs live DLL + siblings), `make regen-check` (dump-regeneration check), `make facts` (machine-checked stock pins).  
 IL policy: [`../il/README.md`](../il/README.md).
 
-Host topology (not IL): [`../../7dtd-optimizer/docs/HOST_TUNING.md`](../../7dtd-optimizer/docs/HOST_TUNING.md).  
-Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md).
+Host topology (not IL): [`../../7dtd-server-optimizer/docs/HOST_TUNING.md`](../../7dtd-server-optimizer/docs/HOST_TUNING.md).  
+Live scale laws: [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md).
 
 ---
 
 ## Changelog
 
 - **2026-08-22:** Wire the texture-atlas docs into the hub (section D rows; the docs shipped in 24c8199 without INDEX or audit-table entries).
-- **2026-08-11:** Tools section now names both gates (`make test` full suite, `make test-docs` CI variant); research CI added (`.github/workflows/ci.yml`); reading-path table links the zdtd provenance ledger (`zdtd/docs/PROVENANCE.md`).
+- **2026-08-11:** Tools section now names both gates (`make test` full suite, `make test-docs` CI variant); research CI added (`.github/workflows/ci.yml`); reading-path table links the zdtd provenance ledger (`zdtd-server/docs/PROVENANCE.md`).
 - **2026-08-10:** LiteNetLib join-churn race closed as a managed defect
   ([network.md](network.md) §4.0: `UnsyncedEvents=true` + receive-thread
   `Clients.List` enumeration; ramp workaround validated), `NetPackageMinEventFire`
@@ -442,8 +442,8 @@ Live scale laws: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scalin
 - **2026-08-02:** Retarget hub to V3.1.0 (b14) Henpocalypse; experimental-delta promoted to shipped (later retired into topic docs + delta map above).
 
 - **2026-07-23:** Narratives regrouped into topical clusters (A meta/method, B loop, C entities/AI, D world/terrain/save, E net/wire); fixed aidirector second H1.
-- **2026-07-23:** zig-clone.md moved to `zdtd/docs/` (reimplementation design, not stock RE).
-- **2026-07-23:** Scope split: optimization-mod docs (bottlenecks, algorithms, measured-scaling, runtime-tuning, allocation-reuse, aggressive-optimizations) moved to `7dtd-optimizer/docs/`; this repo keeps stock-game RE only (see [`../AGENTS.md`](../AGENTS.md) doc scope).
+- **2026-07-23:** zig-clone.md moved to `zdtd-server/docs/` (reimplementation design, not stock RE).
+- **2026-07-23:** Scope split: optimization-mod docs (bottlenecks, algorithms, measured-scaling, runtime-tuning, allocation-reuse, aggressive-optimizations) moved to `7dtd-server-optimizer/docs/`; this repo keeps stock-game RE only (see [`../AGENTS.md`](../AGENTS.md) doc scope).
 - **2026-07-23:** protocol-packages.md (per-package body catalog, channel/compress/auth census, encryption handshake); re-methodology.md (how to RE); RE tooling consolidated into tracked `../tools/`.
 - **2026-07-20:** protocol-frames.md visual wire catalog (RFC + Mermaid).
 - **2026-07-20:** protocol.md + zig-clone.md (wire RE + Zig high-perf clone architecture).

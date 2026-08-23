@@ -1,6 +1,6 @@
 # Evidence notes: 7DTD dedicated-server RE corpus review
 
-All commands run from `/home/maci/Desktop/7dtd/7dtd-research` with
+All commands run from `/home/maci/Desktop/7dtd/7dtd-engine-research` with
 `ASM="/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"`.
 
 **Conflict of interest:** the reviewer authored this artifact in the same session.
@@ -60,8 +60,8 @@ output is `.drafts/7dtd-re-corpus-independent-review.md`.
 
 ## 5. External consumer check (strongest validity evidence)
 
-The sibling `../zdtd` clone consumes these specs and must interoperate with the stock
-client. `cd ../zdtd && zig build test` -> **PASS**; 11 tests in the
+The sibling `../zdtd-server` clone consumes these specs and must interoperate with the stock
+client. `cd ../zdtd-server && zig build test` -> **PASS**; 11 tests in the
 `EntityCreationData` module alone. This is a falsifiable external check: a wrong wire
 spec would surface as a failing byte-offset assertion, not just a doc opinion.
 

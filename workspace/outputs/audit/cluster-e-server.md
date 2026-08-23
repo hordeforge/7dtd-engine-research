@@ -170,7 +170,7 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
 
 - loop.md §3 "Measured confirmation (2026-07-21)" (20 Hz vs frame-rate
   independence, LiteNetLib thread pacing percentages) cites live measurements in
-  `7dtd-optimizer/docs/RESULTS.md` §3k — file exists but the runtime numbers
+  `7dtd-server-optimizer/docs/RESULTS.md` §3k — file exists but the runtime numbers
   cannot be checked from IL. The static side (20 Hz constant, slice/flush
   structure) is confirmed below.
 - webserver.md "413 methods": 72 top-level `Webserver.*` types confirmed

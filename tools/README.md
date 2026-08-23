@@ -1,4 +1,4 @@
-# RE tooling (7dtd-research)
+# RE tooling (7dtd-engine-research)
 
 The single home for **stock-game reverse-engineering tooling**. Everything that
 inspects the shipped `Assembly-CSharp.dll` (dumpers, census, protocol extractors,

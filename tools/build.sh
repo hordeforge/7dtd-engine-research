@@ -25,8 +25,8 @@ else
     "$here/Mono.Cecil.dll" \
     "$here/bin/Mono.Cecil.dll" \
     "$HOME/.cache/zdtd/Mono.Cecil.dll" \
-    "$HOME/Desktop/7dtd/7dtd-realworld/tools/network_protocol_inspector/bin/Release/net8.0/Mono.Cecil.dll" \
-    "$HOME/Desktop/7dtd/7dtd-research/il/zdtd_re_tools/Mono.Cecil.dll" \
+    "$HOME/Desktop/7dtd/7dtd-realearth/tools/network_protocol_inspector/bin/Release/net8.0/Mono.Cecil.dll" \
+    "$HOME/Desktop/7dtd/7dtd-engine-research/il/zdtd_re_tools/Mono.Cecil.dll" \
     /usr/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll \
     /usr/local/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll; do
     [[ -f "$c" ]] && candidates+=("$c")

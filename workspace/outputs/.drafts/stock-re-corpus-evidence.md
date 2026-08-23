@@ -1,7 +1,7 @@
 # Evidence: stock-re-corpus audit
 
 **Date:** 2026-08-05  
-**Repo:** `/home/maci/Desktop/7dtd/7dtd-research`  
+**Repo:** `/home/maci/Desktop/7dtd/7dtd-engine-research`  
 **Plan:** `workspace/outputs/.plans/stock-re-corpus.md`  
 **Note:** Parent wrote this evidence after the async `researcher` idled post-tooling without writing the draft; all rows below cite commands/files re-run in this session.
 
@@ -57,8 +57,8 @@
 
 | Claim | Evidence | Observation | Status |
 |---|---|---|---|
-| zdtd stock_wire | `zdtd/src/version.zig` | `stock_wire = "V3.1.0 b14"`; announce `V 3.1.0` | match |
-| zdtd challenge/tps | `zdtd/src/protocol.zig` | challenge_marker 0xCA; size 17; ticks_per_second 20 | match |
+| zdtd stock_wire | `zdtd-server/src/version.zig` | `stock_wire = "V3.1.0 b14"`; announce `V 3.1.0` | match |
+| zdtd challenge/tps | `zdtd-server/src/protocol.zig` | challenge_marker 0xCA; size 17; ticks_per_second 20 | match |
 | loadgen GameVersion | `7dtd-loadgen/.../PackageCodec.cs` L87 | `new(1, 3, 10, 14)` | match |
 | loadgen dual PackageIds fixtures | PackageCodec golden-wire comments L407-439 | 3.0.1 minor=1 build=4 + 3.1.0 minor=10 build=14; maps=189 | match (doc/TODO) |
 | max_mp_players_constant=8 | stock_facts + server-browser-prefabs | Crossplay refuse >8; not absolute dedicated max | ambiguous (name honest if read as constant; easy to misread as hard cap) |

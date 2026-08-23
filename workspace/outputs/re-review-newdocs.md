@@ -9,7 +9,7 @@ gates) were checked against
 `~/.local/share/Steam/.../7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` (stable
 V3.0.1) and `~/.cache/zdtd-scratch/exp-Assembly-CSharp.dll` (experimental), using
 `tools/bin/{DumpMethod,DumpType,EnumDump,Census,NetProtocolCensus,FullSurface,FindCallers}`.
-Raw dumps: `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-research/.../scratchpad/`.
+Raw dumps: `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-engine-research/.../scratchpad/`.
 Baseline census re-run: gmUpdate IL=631, WorldState.SaveLoad=884, 193 top-level
 NetPackage types, 4401 types / 43901 method bodies. All match `docs/coverage.md`-era
 claims.
@@ -383,5 +383,5 @@ IL; no discrepancies found in the sampled set:
 
 ## Sources
 
-- Local IL dumps under `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-research/0b44a842-ae93-414f-9c41-1f1f1f54c21b/scratchpad/` (chat-write.il, chatserver.il, chatproc.il, te-write-stable.il, te-write-exp.il, te-read-exp.il, exp-setcustomvar.il, eb-CustomVar.il, rc.il, vmall.il, iv.il, bv1-3.il, bvw.il, smb.il, cab.il, ord.il, af.il, lco.il, vm.il, pxp.il, uai-gs.il, uai-c.il, wt2.il, wg.il, dmf-wr.il, sdt2.il, META.md, fs/)
+- Local IL dumps under `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-engine-research/0b44a842-ae93-414f-9c41-1f1f1f54c21b/scratchpad/` (chat-write.il, chatserver.il, chatproc.il, te-write-stable.il, te-write-exp.il, te-read-exp.il, exp-setcustomvar.il, eb-CustomVar.il, rc.il, vmall.il, iv.il, bv1-3.il, bvw.il, smb.il, cab.il, ord.il, af.il, lco.il, vm.il, pxp.il, uai-gs.il, uai-c.il, wt2.il, wg.il, dmf-wr.il, sdt2.il, META.md, fs/)
 - `tools/bin/Census.exe` output for both DLLs (stable: 4401/43901/884/631; exp: 4414/44094/926/631)

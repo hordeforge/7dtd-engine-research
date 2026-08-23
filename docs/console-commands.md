@@ -56,7 +56,7 @@ frames on the main thread.
 **Live registry verified 2026-08-12:** a stock V3.1.0 dedicated `help` dump
 lists every command in the catalog
 ([inventories/console-command-list.md](inventories/console-command-list.md),
-188 rows) plus the standard mod set (`apm`/`apmbridge` from 7dtd-apm-bridge,
+188 rows) plus the standard mod set (`apm`/`apmbridge` from 7dtd-server-apm-bridge,
 `efficientserver`, `dynamic mesh`/`dynamic mesh debug` with aliases `zz`/`zd`).
 No documented command is absent from the live registry; no undocumented command
 appears on a clean server. The registry matches the IL-derived catalog exactly.

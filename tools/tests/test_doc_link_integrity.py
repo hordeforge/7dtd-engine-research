@@ -139,7 +139,7 @@ def main():
             text = open(path, encoding="utf-8").read()
             for m in re.finditer(r"\]\((\.\./[^)]+\.md)\)", text):
                 target = os.path.normpath(os.path.join(sub, m.group(1)))
-                # Sibling repo name = first non-".." path component (e.g. 7dtd-optimizer).
+                # Sibling repo name = first non-".." path component (e.g. 7dtd-server-optimizer).
                 parts = [p for p in m.group(1).split("/") if p not in ("", ".")]
                 sibling = next((p for p in parts if p != ".."), None)
                 if sibling is None:

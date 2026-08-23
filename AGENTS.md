@@ -1,4 +1,4 @@
-# AGENTS.md - 7dtd-research
+# AGENTS.md - 7dtd-engine-research
 
 Stock-game RE for 7 Days to Die dedicated server (V3.1.0). All study of shipped `Assembly-CSharp.dll` lives here: RE narratives, dump tooling, wire/protocol analysis, engine cost/loop RE. Reimplementations/mods live in siblings, linking here for RE facts (see [`../AGENTS.md`](../AGENTS.md) boundaries).
 
@@ -19,9 +19,9 @@ A doc belongs here **iff** it describes the **stock, unmodified** dedicated serv
 **Does NOT live here (route elsewhere):**
 | Content | Home |
 |---|---|
-| Optimization levers, bottleneck-to-fix catalogs, cost/APM measurements, GC/FPS/process tuning, allocation-reduction | `7dtd-optimizer/docs/` (the mod that ships them) |
+| Optimization levers, bottleneck-to-fix catalogs, cost/APM measurements, GC/FPS/process tuning, allocation-reduction | `7dtd-server-optimizer/docs/` (the mod that ships them) |
 | Reimplementation/clone architecture and milestones | clone repo (`zdtd/`) |
-| RealEarth product status, streaming lessons, product surfaces | `7dtd-realworld/docs/` |
+| RealEarth product status, streaming lessons, product surfaces | `7dtd-realearth/docs/` |
 | Load-generation, APM tool internals, server-guard, connect-mod behavior | their own repos |
 
 Measuring/optimizing the game is not stock RE: work *about a change to* the game belongs with the tool making it. Describing stock behavior is RE and stays here. To justify a lever, put stock RE here and link from the lever doc.
@@ -49,7 +49,7 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 3. **Trace every wire/RE claim to an instruction.** Each field maps to a `ldfld`/`Write` pair. Method: [`docs/re-methodology.md`](docs/re-methodology.md).
 4. **Regenerate, do not hand-edit dumps.** After an update, re-run `tools/build.sh` + dumpers and re-check `docs/coverage.md` census via `tools/bin/Census.exe`.
 5. **No em dashes; no AI attribution** in shipped text (workspace rule).
-6. **Generic engine only.** RealEarth product status/lessons belong in `7dtd-realworld/docs/`, not here.
+6. **Generic engine only.** RealEarth product status/lessons belong in `7dtd-realearth/docs/`, not here.
 7. Mark status honestly: `verified` / `unverified` / `inferred` / `blocked`. Residuals beyond IL go in [`docs/residuals.md`](docs/residuals.md).
 
 ## Start here

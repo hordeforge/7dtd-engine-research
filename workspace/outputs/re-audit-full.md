@@ -152,4 +152,4 @@ byte-identical); no fabricated per-leaf content found anywhere.
 4. Re-verify corpus health (links/dashes/H1) + record resolution in CHANGELOG.
 
 Findings drive the zdtd clone too: C1/C3 change wire bodies the clone must match;
-update `../zdtd/docs/RE_GAP_CLOSURE.md` §2 rows for WorldInfo and ItemValue.
+update `../zdtd-server/docs/RE_GAP_CLOSURE.md` §2 rows for WorldInfo and ItemValue.

@@ -4,7 +4,7 @@
 **Role:** Feynman verifier (fresh context; re-checked primary paths)  
 **Plan:** `workspace/outputs/.plans/stock-re-corpus.md`  
 **Evidence draft:** `workspace/outputs/.drafts/stock-re-corpus-evidence.md`  
-**Repo:** `/home/maci/Desktop/7dtd/7dtd-research`  
+**Repo:** `/home/maci/Desktop/7dtd/7dtd-engine-research`  
 **ASM:** `$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` (present, 11579904 bytes, mtime Aug 2 21:25)
 
 This report re-runs load-bearing checks. It does not trust the parent summary. Status codes: **pass** / **fail** / **blocked** / **ambiguous**.
@@ -32,7 +32,7 @@ This report re-runs load-bearing checks. It does not trust the parent summary. S
 | 6 | Sim 20 TPS / 50 ms | stock_facts, closed-gaps, loop | JSON + rg | **pass** | `sim.constants_ticks_per_second=20`, `tick_duration_sec=0.05`; `docs/closed-gaps.md:24-26`; `docs/loop.md:228` |
 | 7 | Chunk 16×256×16, 64 layers × 4 height | stock_facts | JSON | **pass** | `chunk.block_x/y/z_dim=16/256/16`, `block_layers=64`, `layer_height=4` |
 | 8 | `CurrentSaveVersion=23` | stock_facts, save-region | JSON + rg | **pass** | `save.current_save_version=23`; `docs/save-region.md:85` |
-| 9 | Default port 26900; challenge `0xCA` size 17 | stock_facts, protocol.md, zdtd | JSON + rg | **pass** | `network.default_port=26900`, `challenge_marker_hex='0xCA'`, `challenge_size=17`; `zdtd/src/protocol.zig:11-12` |
+| 9 | Default port 26900; challenge `0xCA` size 17 | stock_facts, protocol.md, zdtd | JSON + rg | **pass** | `network.default_port=26900`, `challenge_marker_hex='0xCA'`, `challenge_size=17`; `zdtd-server/src/protocol.zig:11-12` |
 | 10 | TE wire: teBlockId i32 + payloadLen i32; write IL=27 | live DumpMethod, protocol-packages §6.12, stock_facts | `DumpMethod NetPackageTileEntity write` | **pass** (IL + protocol-packages + JSON) | IL writes `teBlockId Int32`, `Length conv.i4 Write(Int32)`; `docs/protocol-packages.md:698-712`; `tile_entity_package.write_il=27`, `payload_len_likely_i32=true` |
 | 11 | `make stock-check` passes against committed JSON | Makefile / stock-sync | `make stock-check` | **pass** | Exit 0: `OK: research + sibling pins match stock_facts.json` |
 | 12 | Live StockFacts re-extract equals committed (sans timestamp) | StockFacts.exe | write `/tmp/stock_facts_live.json`; python equality | **pass** | `equal_sans_timestamp True` |
@@ -49,7 +49,7 @@ This report re-runs load-bearing checks. It does not trust the parent summary. S
 | 23 | protocol-packages §6.12 TE layout matches live IL | protocol-packages + DumpMethod | cross-check | **pass** | §6.12: teBlockId i32, payloadLen i32, write=27; matches IL |
 | 24 | tile-entities-power TE package layout matches live IL | `docs/tile-entities-power.md` | read L126-132 vs IL | **fail** | Parenthetical says V3.1 teBlockId+i32, but layout still `payloadLen : u16`, **no teBlockId**, write IL=**23** (stale) |
 | 25 | stock-check does not scan TE layout / README version | `tools/tests/check_stock_facts.py` | rg script + green exit | **pass** (as limitation claim) | Greps coverage banner, 0xCA, save version, loadgen GameVersion, zdtd stock_wire; no tile-entities-power / README.md version pin |
-| 26 | zdtd version/protocol pins match stock_facts | `zdtd/src/version.zig`, `protocol.zig` | rg | **pass** | `stock_wire = "V3.1.0 b14"`; announce `V 3.1.0`; `challenge_marker=0xCA`; size 17; `ticks_per_second=20` |
+| 26 | zdtd version/protocol pins match stock_facts | `zdtd-server/src/version.zig`, `protocol.zig` | rg | **pass** | `stock_wire = "V3.1.0 b14"`; announce `V 3.1.0`; `challenge_marker=0xCA`; size 17; `ticks_per_second=20` |
 | 27 | loadgen GameVersion = (1,3,10,14) | `7dtd-loadgen/.../PackageCodec.cs` | rg | **pass** | L87: `new(1, 3, 10, 14) // … V3.1.0 (b14)` |
 | 28 | loadgen dual PackageIds fixtures 3.0.1 + 3.1.0; maps=189 | PackageCodec.cs | rg L407-439 | **pass** | Comments + checks: minor=1 build=4 and minor=10 build=14; map count 189 |
 | 29 | Package titles still say V3.0.1 (protocol-packages, protocol-frames, loop-gmupdate) | docs heads | head | **fail** (framing drift) | Titles: protocol-packages “V3.0.1”; protocol-frames “V3.0.1”; loop-gmupdate “V3.0.1” while body may mix 3.1 content |
@@ -172,7 +172,7 @@ python3 tools/tests/check_stock_facts.py
 12. `docs/residuals.md`  
 13. `docs/experimental-delta.md` (TE wire delta table)  
 14. `docs/INDEX.md`, `README.md`  
-15. `zdtd/src/version.zig`, `zdtd/src/protocol.zig`  
+15. `zdtd-server/src/version.zig`, `zdtd-server/src/protocol.zig`  
 16. `7dtd-loadgen/src/LoadGen/PackageCodec.cs`  
 17. `.gitignore`, git index  
 

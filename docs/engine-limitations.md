@@ -1,9 +1,9 @@
 # Stock dedicated engine limitations (V3.1.0)
 
 **Owns:** generic stock engine ceilings and structural limits for dedicated multiplayer (sim, net, world, memory, process).  
-**Not:** RealEarth product attack plan (`product ENGINE_LIMITATIONS`), optim backlog ([OPTIMIZATION_CANDIDATES](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)), permanent non-IL residuals only ([residuals.md](residuals.md)).  
+**Not:** RealEarth product attack plan (`product ENGINE_LIMITATIONS`), optim backlog ([OPTIMIZATION_CANDIDATES](../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md)), permanent non-IL residuals only ([residuals.md](residuals.md)).  
 **Hub:** [INDEX.md](INDEX.md).  
-**Live scale numbers:** [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md).  
+**Live scale numbers:** [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md).  
 **Loop map:** [loop.md](loop.md).
 
 This is a **limitation map** for anyone running or modding dedicated V3.1.0. It does not re-list every IL detail; each row points at the narrative that owns the evidence.
@@ -40,13 +40,13 @@ flowchart TB
 
 | Limit (stock) | Evidence | Why it matters | Severity | What you can do |
 |---|---|---|---|---|
-| **Single-thread-dominated sim** | [loop.md](loop.md), [ARCHITECTURE](../../7dtd-optimizer/docs/ARCHITECTURE.md) | Extra cores do not parallelize `gmUpdate` / `UpdateTick` | **Hard** | Starve work (LOD, caps); host pin one L3 ([HOST_TUNING](../../7dtd-optimizer/docs/HOST_TUNING.md)); do not invent full MT sim in a Harmony mod |
+| **Single-thread-dominated sim** | [loop.md](loop.md), [ARCHITECTURE](../../7dtd-server-optimizer/docs/ARCHITECTURE.md) | Extra cores do not parallelize `gmUpdate` / `UpdateTick` | **Hard** | Starve work (LOD, caps); host pin one L3 ([HOST_TUNING](../../7dtd-server-optimizer/docs/HOST_TUNING.md)); do not invent full MT sim in a Harmony mod |
 | **Target ~20 game ticks/s** | [closed-gaps.md](closed-gaps.md) `GameTimer(20)` | ~50 ms budget per tick under load | **Hard** | Measure tick p99; reduce sim volume before chasing topology |
 | **Net and mesh are peer Updates** | ConnectionManager / DynamicMeshManager **not** children of gmUpdate | Hijacking only `gmUpdate` does not own packages or dynamic mesh | **Hard** | Patch the real owners; APM by section |
 | **Peer script order** | **Closed 2026-08-09 (runtime)** | SdtdConsole -> ConnectionManager.Update -> GameManager.Update -> (WorldEnvironment/DynamicMeshManager) -> CM.LateUpdate -> GM.LateUpdate; CM always precedes GM (518 frames, [loop.md](loop.md) §1.1) | **Closed** | Treat as same-phase peers |
 | **Dual entity paths** | [loop.md](loop.md) §3, [entity-ai.md](entity-ai.md) | Authority is `World.TickEntity`; Unity `Entity.Update` may still run if GO enabled | **Hard** | Optim must not assume one path; measure dual cost |
 | **Entity work is sliced** | UpdateTick slice/flush | Not every entity runs every Unity frame | **Soft** | LOD/stride interact with slice budget |
-| **Entities observer-gated** | [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) §2 | Zero players → zombies exist but barely tick | **Soft** | Load tests need observer bots; empty server is not AI cost |
+| **Entities observer-gated** | [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md) §2 | Zero players → zombies exist but barely tick | **Soft** | Load tests need observer bots; empty server is not AI cost |
 | **`Origin.FixedUpdate` dedi no-op** | early `IsDedicatedServer` ret | Floating origin cost is client/listen, not pure dedi FixedUpdate | **Soft** | Product SoloSlide must not assume stock Origin does dedi work |
 | **Manager chain always walked** | gmUpdate phase B | Twitch, SpeedTree, edit managers null-checked but still call chain | **Soft** | EfficientServer dedicated skips for known dead presentation |
 
@@ -54,7 +54,7 @@ flowchart TB
 
 ## 2. Scaling walls (measured)
 
-Live APM + loadgen ladders (2026-07-17/18). Detail: [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md).
+Live APM + loadgen ladders (2026-07-17/18). Detail: [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md).
 
 | Limit | Measured shape | Why it matters | Severity | Levers |
 |---|---|---|---|---|
@@ -93,7 +93,7 @@ Combat across chunks **already works** if coordinates are shared. Per-player pri
 | **Path enqueue off main, drain ≤8** | ASPPathFinderThread | Path backlog under horde pressure | **Hard** | Path admission / skip distant FindPath |
 | **A\* is third-party** | `AstarPath.StartPath` / `Pathfinding.*` | Internals not 7DTD-owned | **Residual** | Throttle at 7DTD ASP wrapper |
 | **AIDirector always installed** | CreateComponents full set | Blood moon, wandering horde, airdrop always present | **Soft** | Config/content; measure BM separately |
-| **World mutation is main-thread culture** | [SIM_PARALLELISM](../../7dtd-optimizer/docs/SIM_PARALLELISM.md) | Random `Task.Run` into EntityAlive races | **Hard** | Starve work; do not evacuate stock sim |
+| **World mutation is main-thread culture** | [SIM_PARALLELISM](../../7dtd-server-optimizer/docs/SIM_PARALLELISM.md) | Random `Task.Run` into EntityAlive races | **Hard** | Starve work; do not evacuate stock sim |
 | **Prefabs / sleepers expect RWG Y** | content | Floating/buried on tall DEM | **Soft→Hard** | Surface Y stamps after inject (RealEarth) |
 
 ---
@@ -123,8 +123,8 @@ Combat across chunks **already works** if coordinates are shared. Per-player pri
 
 | Limit (stock) | Evidence | Why it matters | Severity | What you can do |
 |---|---|---|---|---|
-| **Boehm Mono GC** (conservative, non-generational STW) | [runtime-tuning.md](../../7dtd-optimizer/docs/runtime-tuning.md) | Cannot swap collector under stock Unity | **Hard** | Cut alloc; optional incremental env (EAC-safe); measure STW |
-| **Forced `GC.Collect` ~every 120 s** in gmUpdate | [runtime-tuning](../../7dtd-optimizer/docs/runtime-tuning.md), A7 | Self-inflicted hitch under moderate load | **Soft** | EfficientServer GcGuardPatch (skip + heap safety) |
+| **Boehm Mono GC** (conservative, non-generational STW) | [runtime-tuning.md](../../7dtd-server-optimizer/docs/runtime-tuning.md) | Cannot swap collector under stock Unity | **Hard** | Cut alloc; optional incremental env (EAC-safe); measure STW |
+| **Forced `GC.Collect` ~every 120 s** in gmUpdate | [runtime-tuning](../../7dtd-server-optimizer/docs/runtime-tuning.md), A7 | Self-inflicted hitch under moderate load | **Soft** | EfficientServer GcGuardPatch (skip + heap safety) |
 | **GC tuning ≠ alloc cut** | measured-scaling | At heavy churn, Boehm collects anyway | **Hard** | Fix path/net alloc sites first |
 | **`settargetfps` not in serverconfig** | ConsoleCmdSetTargetFps | FPS target ephemeral over telnet | **Ops** | Document ops; not a mod feature |
 | **DynamicMesh still runs on dedi** | DynamicMeshManager.Update IL=404 | Mesh pipeline cost without client GPU | **Hard** | Mesh budgets (EfficientServer); disable where safe |
@@ -216,15 +216,15 @@ them (the Zig clone's clean-room stack avoids the first by construction, ADR
 | [terrain-height.md](terrain-height.md) | YDim / height APIs |
 | [save-region.md](save-region.md) | Save 64 / WorldState |
 | [light-mesh-water.md](light-mesh-water.md) | 255 light/mesh sites |
-| [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) | Live O(N) laws |
-| [runtime-tuning.md](../../7dtd-optimizer/docs/runtime-tuning.md) | GC / FPS knobs |
+| [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md) | Live O(N) laws |
+| [runtime-tuning.md](../../7dtd-server-optimizer/docs/runtime-tuning.md) | GC / FPS knobs |
 | [residuals.md](residuals.md) | Non-IL permanent gaps |
 | `product ENGINE_LIMITATIONS` | 1:1 Earth blockers + attack path |
 | [protocol.md](protocol.md) | Wire framing (clone / custom dedi) |
-| [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md) | Zig redesign that avoids these walls |
-| [HOST_TUNING](../../7dtd-optimizer/docs/HOST_TUNING.md) | CCD / NUMA / disk |
-| [ARCHITECTURE](../../7dtd-optimizer/docs/ARCHITECTURE.md) | Optim-oriented hot path |
-| [SIM_PARALLELISM](../../7dtd-optimizer/docs/SIM_PARALLELISM.md) | Why not MT sim in a mod |
+| [ZIG_CLONE.md](../../zdtd-server-server/docs/ZIG_CLONE.md) | Zig redesign that avoids these walls |
+| [HOST_TUNING](../../7dtd-server-optimizer/docs/HOST_TUNING.md) | CCD / NUMA / disk |
+| [ARCHITECTURE](../../7dtd-server-optimizer/docs/ARCHITECTURE.md) | Optim-oriented hot path |
+| [SIM_PARALLELISM](../../7dtd-server-optimizer/docs/SIM_PARALLELISM.md) | Why not MT sim in a mod |
 
 ## Changelog
 

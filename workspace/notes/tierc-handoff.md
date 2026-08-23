@@ -3,7 +3,7 @@
 > **ARCHIVED (2026-08-11):** completed-session working notes (2026-08-07/08 grind). The live record is workspace/CHANGELOG.md; the current goal loop is the active TODO.
 
 **Updated:** 2026-08-08 ~13:20 UTC
-**Repo:** `7dtd-research` (cwd this tree)  
+**Repo:** `7dtd-engine-research` (cwd this tree)  
 **Pin:** V **3.1.0 (b14)** via `tools/data/stock_facts.json`  
 **Managed bar:** tiers A+B met (unaccounted **0**). This grind is **tier C only**.
 
@@ -22,7 +22,7 @@ No em dashes. No AI attribution in commits.
 
 | Item | Value |
 |---|---|
-| HEAD (at handoff write) | `c676371` (7dtd-realworld V3.1.0 update verified) |
+| HEAD (at handoff write) | `c676371` (7dtd-realearth V3.1.0 update verified) |
 | Commits since dry-run `3b61d9c` | ~1350 |
 | stock-check | green expected |
 | Coverage (last pin text) | narrated 3681 / catalogued 0 / classified 0 / unaccounted **0** (100% narrated; webserver + reflection/prefix seeds) |
@@ -124,7 +124,7 @@ claims (game-events 179/1014, quests 7/48, Twitch 117, Webserver 72/413,
 largest-maxIL order). Census: narrated 1841 / unaccounted 0.
 ## Resume checklist (next agent / next turn)
 
-1. `cd /home/maci/Desktop/7dtd/7dtd-research && git status && git log --oneline -5`
+1. `cd /home/maci/Desktop/7dtd/7dtd-engine-research && git status && git log --oneline -5`
 2. Read this file + tail of `workspace/CHANGELOG.md`
 3. Confirm ASM path exists:
    `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`

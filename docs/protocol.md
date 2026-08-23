@@ -8,7 +8,7 @@
 **Hub:** [INDEX.md](INDEX.md).  
 **Visual frames (RFC bars + Mermaid):** [`protocol-frames.md`](protocol-frames.md).  
 **Full package bodies + census (channels, compress, pre-auth, encryption handshake):** [`protocol-packages.md`](protocol-packages.md).  
-**Clone use:** [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md) · implementation [`../../zdtd/`](../../zdtd).  
+**Clone use:** [ZIG_CLONE.md](../../zdtd-server-server/docs/ZIG_CLONE.md) · implementation [`../../zdtd-server-server/`](../../zdtd-server-server).  
 **Replication policy:** [network.md](network.md).  
 **Evidence:** `7dtd-loadgen` `PackageCodec.cs` / `JoinStateMachine.cs` / `GameJoinClient.cs` (live joins); `il/dedi-complete-v3.1.0/` NetPackage census; ConnectionManager dumps.
 
@@ -598,7 +598,7 @@ Status refreshed 2026-08-10 (rows re-verified against the current
 | **[protocol-frames.md](protocol-frames.md)** | **Visual frame catalog (RFC + Mermaid)** |
 | **[protocol-packages.md](protocol-packages.md)** | **Per-package body catalog + metadata census + encryption handshake** |
 | [re-methodology.md](re-methodology.md) | How the bodies were derived from IL |
-| [ZIG_CLONE.md](../../zdtd/docs/ZIG_CLONE.md) | Clone architecture |
+| [ZIG_CLONE.md](../../zdtd-server-server/docs/ZIG_CLONE.md) | Clone architecture |
 | [network.md](network.md) | Interest + scale |
 | [closed-gaps.md](closed-gaps.md) | Package band thresholds |
 | [engine-limitations.md](engine-limitations.md) | Net ceilings |

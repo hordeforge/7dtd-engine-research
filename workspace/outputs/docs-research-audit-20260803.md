@@ -1,6 +1,6 @@
 # Docs and research findings audit (2026-08-03)
 
-**Scope:** stock RE corpus (`7dtd-research`), EfficientServer evidence (`7dtd-optimizer`), zdtd product gates, loadgen/apm residuals.  
+**Scope:** stock RE corpus (`7dtd-engine-research`), EfficientServer evidence (`7dtd-server-optimizer`), zdtd product gates, loadgen/apm residuals.  
 **Pin:** V **3.1.0 (b14)** Henpocalypse.  
 **Method:** primary docs + TODO ledgers + live session IDs from this campaign. Not a full re-dump of Assembly-CSharp.
 
@@ -72,15 +72,15 @@
 
 | Project | Residual hub |
 |---|---|
-| Research non-IL | `7dtd-research/docs/residuals.md` §1 |
+| Research non-IL | `7dtd-engine-research/docs/residuals.md` §1 |
 | Research product pointer | `residuals.md` §5 |
 | zdtd open + playtest 8 | `zdtd/TODO.md` Open now + Residual playtest fails |
-| zdtd gap inventory | `zdtd/docs/MISSING_FEATURES.md` |
-| Optimizer | `7dtd-optimizer/TODO.md` Residual section |
+| zdtd gap inventory | `zdtd-server/docs/MISSING_FEATURES.md` |
+| Optimizer | `7dtd-server-optimizer/TODO.md` Residual section |
 | Loadgen | `7dtd-loadgen/TODO.md` Residual section |
-| APM | `7dtd-apm/TODO.md` Residual section |
-| Playtest evidence | `zdtd/docs/PLAYTEST_V310_20260803.md` |
-| APM evidence | `7dtd-optimizer/docs/V310_APM_BASELINE.md` |
+| APM | `7dtd-server-apm/TODO.md` Residual section |
+| Playtest evidence | `zdtd-server/docs/PLAYTEST_V310_20260803.md` |
+| APM evidence | `7dtd-server-optimizer/docs/V310_APM_BASELINE.md` |
 
 ---
 
@@ -107,13 +107,13 @@
 
 | Artifact | Path |
 |---|---|
-| Coverage | `7dtd-research/docs/coverage.md` |
-| Residuals | `7dtd-research/docs/residuals.md` |
-| Experimental delta | `7dtd-research/docs/experimental-delta.md` |
-| V3.1 APM baseline | `7dtd-optimizer/docs/V310_APM_BASELINE.md` |
-| RESULTS | `7dtd-optimizer/docs/RESULTS.md` |
-| zdtd STATUS | `zdtd/docs/STATUS.md` |
-| Playtest report | `zdtd/docs/PLAYTEST_V310_20260803.md` |
+| Coverage | `7dtd-engine-research/docs/coverage.md` |
+| Residuals | `7dtd-engine-research/docs/residuals.md` |
+| Experimental delta | `7dtd-engine-research/docs/experimental-delta.md` |
+| V3.1 APM baseline | `7dtd-server-optimizer/docs/V310_APM_BASELINE.md` |
+| RESULTS | `7dtd-server-optimizer/docs/RESULTS.md` |
+| zdtd STATUS | `zdtd-server/docs/STATUS.md` |
+| Playtest report | `zdtd-server/docs/PLAYTEST_V310_20260803.md` |
 | Playtest log | `zdtd/server/logs/playtest_zdtd_demo_20260803f.log` |
 | Workspace pin | `AGENTS.md`, `MODDING_BEST_PRACTICES.md` |
 

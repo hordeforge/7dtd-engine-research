@@ -1,4 +1,4 @@
-# Independent adversarial review: 7dtd-research RE corpus (V3.0.1)
+# Independent adversarial review: 7dtd-engine-research RE corpus (V3.0.1)
 
 Reviewer: independent pass, no prior stake in the corpus. Subject assembly:
 `/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`.
@@ -281,4 +281,4 @@ classification, not verification, and this entry appears misclassified.
 ## Sources
 
 - Assembly: `/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` (local, V3.0.1 dedicated)
-- All other evidence: files and tools inside `/home/maci/Desktop/7dtd/7dtd-research` as cited above; scratch artifacts (patched Coverage2.cs, audit scripts, IL dumps) in the session scratchpad.
+- All other evidence: files and tools inside `/home/maci/Desktop/7dtd/7dtd-engine-research` as cited above; scratch artifacts (patched Coverage2.cs, audit scripts, IL dumps) in the session scratchpad.

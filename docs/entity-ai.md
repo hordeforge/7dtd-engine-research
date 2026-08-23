@@ -1559,8 +1559,8 @@ gmUpdate manager fan-out (power, vehicles, drones, twitch, …)
 
 Where a patcher/clone could hook, and what stock already does there, is a
 structural fact; which of these is worth a lever (and its measured payoff/risk) is
-optimizer-owned: see [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)
-and [`../../7dtd-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-optimizer/docs/SIM_PARALLELISM.md).
+optimizer-owned: see [`../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md)
+and [`../../7dtd-server-optimizer/docs/SIM_PARALLELISM.md`](../../7dtd-server-optimizer/docs/SIM_PARALLELISM.md).
 
 RE facts relevant to any such hook:
 
@@ -1588,9 +1588,9 @@ Stock `EAITaskList.OnUpdateTasks` is exactly the serial loop IceCoffee wrapped i
 | [closed-gaps.md](closed-gaps.md) | Timer, path ASP, net bands |
 | [aidirector.md](aidirector.md) | Component inventory |
 | [network.md](network.md) | Entity replication cost |
-| [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) | Live AI vs player exponents |
+| [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md) | Live AI vs player exponents |
 
-Graded optim candidates + APM probe list: [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md).
+Graded optim candidates + APM probe list: [`../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md).
 
 ## 15. Regenerate
 
@@ -3525,7 +3525,7 @@ the stored value; null when the key is absent.
 ## D12. Optim ideas derived here
 
 Graded candidates and experiment order live in the optimizer project (not under `docs/` or `il/`):  
-[`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)
+[`../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md)
 
 ---
 
@@ -3724,7 +3724,7 @@ frames (~550 voluntary switch-outs/s = engine job-fence ping-pong), and disablin
 animators sends it to 95% busy - the animation jobs' FENCES, not just their
 compute, dominate the 64p engine mass. GC stop-the-world is exonerated (179 ms per
 120 s window). Lever status (which mitigations help, and when) is optimizer-owned:
-see [`../../7dtd-optimizer/docs/RESULTS.md`](../../7dtd-optimizer/docs/RESULTS.md) §3m-3o.
+see [`../../7dtd-server-optimizer/docs/RESULTS.md`](../../7dtd-server-optimizer/docs/RESULTS.md) §3m-3o.
 
 **Per-zombie tick cost, fully attributed (2026-07-21, 8p + ~224z):** OnUpdateLive
 is 22.1 us/zombie/tick (vs 36 at 64p - the delta is player-linked fence share):

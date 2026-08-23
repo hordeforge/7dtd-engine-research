@@ -4,17 +4,17 @@
 **Coverage map:** [`coverage.md`](coverage.md).  
 **Residuals:** [`residuals.md`](residuals.md).  
 **Hub:** [`INDEX.md`](INDEX.md).  
-**Host topology (ops):** [`../../7dtd-optimizer/docs/HOST_TUNING.md`](../../7dtd-optimizer/docs/HOST_TUNING.md).  
-**Live scale:** [`measured-scaling.md`](../../7dtd-optimizer/docs/measured-scaling.md).  
+**Host topology (ops):** [`../../7dtd-server-optimizer/docs/HOST_TUNING.md`](../../7dtd-server-optimizer/docs/HOST_TUNING.md).  
+**Live scale:** [`measured-scaling.md`](../../7dtd-server-optimizer/docs/measured-scaling.md).  
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md).  
-**Zig clone redesign:** [`ZIG_CLONE.md`](../../zdtd/docs/ZIG_CLONE.md).
+**Zig clone redesign:** [`ZIG_CLONE.md`](../../zdtd-server-server/docs/ZIG_CLONE.md).
 
 **Scope:** headless dedicated tick under `-dedicated -batchmode -nographics`.  
 **Not in scope:** client-only UI/camera/rendering (unless proven on dedi); RealEarth product status.  
 **Pin:** Steam dedicated `Assembly-CSharp.dll` V3.1.0 (b14).
 
 **Optim product (not this folder):**  
-[`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md) · [`../../7dtd-optimizer/docs/ARCHITECTURE.md`](../../7dtd-optimizer/docs/ARCHITECTURE.md)
+[`../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md) · [`../../7dtd-server-optimizer/docs/ARCHITECTURE.md`](../../7dtd-server-optimizer/docs/ARCHITECTURE.md)
 
 ---
 
@@ -141,7 +141,7 @@ The world clock is fps-invariant. Consequently the server frame rate is a
 housekeeping/slice cadence only - it does not raise TPS, and network I/O is paced
 by dedicated LiteNetLib threads (recv ~1,200/s, send ~1,600/s, 86-96% of gaps
 < 2 ms under 24-client load), not by frames. Full evidence:
-`7dtd-optimizer/docs/RESULTS.md` §3k.
+`7dtd-server-optimizer/docs/RESULTS.md` §3k.
 
 ### 3.1 UpdateTick (150 IL)
 
@@ -476,7 +476,7 @@ Full manager Update inventory: [`inventories/manager-updates.md`](inventories/ma
 | SkyManager.Update | 456 | Present if component exists; mostly visual |
 | WorldEnvironment.Update | 83 | Environment |
 | GameLightManager.UpdateLightFrameUpdate | 159 | Lights |
-| AstarManager.UpdateGraphs | 185 | Per player `Merge(pos.xz, size=76)`; decay timed `locations`; mark graphs dirty; top CPU + heap at load (`AstarVoxelGrid.InitScan`), see [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) §1/§4b |
+| AstarManager.UpdateGraphs | 185 | Per player `Merge(pos.xz, size=76)`; decay timed `locations`; mark graphs dirty; top CPU + heap at load (`AstarVoxelGrid.InitScan`), see [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md) §1/§4b |
 | LoadManager.Update | 56 | Async loads |
 | PlatformManager.Update | - | Platform |
 | SdtdConsole.Update | 60 | Admin console |
@@ -491,9 +491,9 @@ Full manager Update inventory: [`inventories/manager-updates.md`](inventories/ma
 
 Optim research is maintained under the **EfficientServer project**, not under `il/` (dumps only):
 
-- Graded candidates, APM probes, experiment order: [`../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md)  
-- Idea map / threading / OSS: [`../../7dtd-optimizer/docs/OPTIMIZATION_IDEAS.md`](../../7dtd-optimizer/docs/OPTIMIZATION_IDEAS.md)  
-- Host ops: [`../../7dtd-optimizer/docs/HOST_TUNING.md`](../../7dtd-optimizer/docs/HOST_TUNING.md)  
+- Graded candidates, APM probes, experiment order: [`../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md)  
+- Idea map / threading / OSS: [`../../7dtd-server-optimizer/docs/OPTIMIZATION_IDEAS.md`](../../7dtd-server-optimizer/docs/OPTIMIZATION_IDEAS.md)  
+- Host ops: [`../../7dtd-server-optimizer/docs/HOST_TUNING.md`](../../7dtd-server-optimizer/docs/HOST_TUNING.md)  
 
 This file stays a **loop RE map**. IL dumps here are evidence only.
 
@@ -544,10 +544,10 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 | [loop-gmupdate.md](loop-gmupdate.md) | gmUpdate phase narrative |
 | [entity-ai.md](entity-ai.md) | TickEntity / AI |
 | [network.md](network.md) | ConnectionManager / packages |
-| [measured-scaling.md](../../7dtd-optimizer/docs/measured-scaling.md) | Live scale laws |
-| [runtime-tuning.md](../../7dtd-optimizer/docs/runtime-tuning.md) | GC / FPS knobs |
-| [HOST_TUNING.md](../../7dtd-optimizer/docs/HOST_TUNING.md) | Host topology |
-| [ARCHITECTURE.md](../../7dtd-optimizer/docs/ARCHITECTURE.md) | Optim-oriented hot path |
+| [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md) | Live scale laws |
+| [runtime-tuning.md](../../7dtd-server-optimizer/docs/runtime-tuning.md) | GC / FPS knobs |
+| [HOST_TUNING.md](../../7dtd-server-optimizer/docs/HOST_TUNING.md) | Host topology |
+| [ARCHITECTURE.md](../../7dtd-server-optimizer/docs/ARCHITECTURE.md) | Optim-oriented hot path |
 
 ## Changelog
 
@@ -587,6 +587,6 @@ Peer MBs (not under gmUpdate): `ConnectionManager.Update`, `DynamicMeshManager.U
 - **2026-07-18:** §14 residuals-only; managed gaps closed into coverage hub + family docs.
 - **2026-07-18:** Origin + region type map partially closed via RealEarth surfaces dump; link new research docs.
 - **2026-07-16:** Relocated with other research narratives to `docs/` (IL dumps stay in `il/`).
-- **2026-07-16:** Optim narrative moved to `7dtd-optimizer/docs/OPTIMIZATION_CANDIDATES.md`; §13 is a pointer only.
+- **2026-07-16:** Optim narrative moved to `7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md`; §13 is a pointer only.
 - **2026-07-16:** Gap-close pass: ticks/sec=20, `AIDirector` CreateComponents list, ASP→AstarPath, net package thresholds, MB classification; update §14.
 - **2026-07-16:** Initial complete dedicated loop map: peers, phases, dual entity paths, all subsystem families, optim anchors, open gaps.

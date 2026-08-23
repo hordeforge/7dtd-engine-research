@@ -1,7 +1,7 @@
 // Regenerable RE dump: surfaces RealEarth Streamed path depends on.
 // Chunk storage, height/index math, claims/PPL, Origin, region files, prefab place,
 // chunk gen/load pipeline, light/stability hooks, World height APIs.
-// Output: 7dtd-research/il/realearth-surfaces-VERSION/
+// Output: 7dtd-engine-research/il/realearth-surfaces-VERSION/
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,10 +37,10 @@ class DumpRealEarthSurfaces
     book.AppendLine("Regenerate:");
     book.AppendLine("```");
     book.AppendLine("mcs -r:Mono.Cecil.dll -out:DumpRealEarthSurfaces.exe DumpRealEarthSurfaces.cs");
-    book.AppendLine("mono DumpRealEarthSurfaces.exe $ASM 7dtd-research/il/realearth-surfaces-VERSION");
+    book.AppendLine("mono DumpRealEarthSurfaces.exe $ASM 7dtd-engine-research/il/realearth-surfaces-VERSION");
     book.AppendLine("```");
     book.AppendLine();
-    book.AppendLine("Narrative: `7dtd-realworld/docs/realearth-surfaces.md`");
+    book.AppendLine("Narrative: `7dtd-realearth/docs/realearth-surfaces.md`");
     book.AppendLine();
 
     Section("1. Type inventory (name contains keywords)");
@@ -246,12 +246,12 @@ class DumpRealEarthSurfaces
     File.WriteAllText(Path.Combine(outDir, "INDEX.md"),
       "# RealEarth surfaces dump index\n\n"
       + "Auto narrative: `REALEARTH_SURFACES_auto.md`\n\n"
-      + "Human synthesis: **[`../../../7dtd-realworld/docs/realearth-surfaces.md`](../../../7dtd-realworld/docs/realearth-surfaces.md)**\n\n"
+      + "Human synthesis: **[`../../../7dtd-realearth/docs/realearth-surfaces.md`](../../../7dtd-realearth/docs/realearth-surfaces.md)**\n\n"
       + "UTC: " + DateTime.UtcNow.ToString("u") + "\n");
     File.WriteAllText(Path.Combine(outDir, "README.md"),
       "# Raw IL dump set: realearth-surfaces\n\n"
       + "Surfaces RealEarth Streamed inject/session/slide depends on.\n\n"
-      + "Human: [`../../../7dtd-realworld/docs/realearth-surfaces.md`](../../../7dtd-realworld/docs/realearth-surfaces.md)\n\n"
+      + "Human: [`../../../7dtd-realearth/docs/realearth-surfaces.md`](../../../7dtd-realearth/docs/realearth-surfaces.md)\n\n"
       + "Regenerable Cecil only. Do not redistribute game assemblies.\n");
     Console.WriteLine("OK → " + outDir);
   }

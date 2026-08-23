@@ -1,5 +1,5 @@
 // Regenerable RE: WorldConstants vertical dims + terrain height / generate surfaces.
-// Output: 7dtd-research/il/terrain-VERSION/ (raw) + feeds 7dtd-research/docs/terrain-height.md
+// Output: 7dtd-engine-research/il/terrain-VERSION/ (raw) + feeds 7dtd-engine-research/docs/terrain-height.md
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,7 +32,7 @@ class DumpTerrain
     book.AppendLine("UTC: " + DateTime.UtcNow.ToString("u"));
     book.AppendLine("Assembly: `" + args[0] + "`");
     book.AppendLine();
-    book.AppendLine("Regenerate: `mcs -r:Mono.Cecil.dll -out:DumpTerrain.exe DumpTerrain.cs && mono DumpTerrain.exe $ASM 7dtd-research/il/terrain-VERSION`");
+    book.AppendLine("Regenerate: `mcs -r:Mono.Cecil.dll -out:DumpTerrain.exe DumpTerrain.cs && mono DumpTerrain.exe $ASM 7dtd-engine-research/il/terrain-VERSION`");
     book.AppendLine();
 
     Section("1. WorldConstants and related literals");
@@ -155,7 +155,7 @@ class DumpTerrain
     File.WriteAllText(Path.Combine(outDir, "README.md"),
       "# Raw IL dump set: `terrain`\n\n"
       + "Human research notes: **[`../../docs/terrain-height.md`](../../docs/terrain-height.md)** "
-      + "and RealEarth product docs under `7dtd-realworld/docs/`.\n\n"
+      + "and RealEarth product docs under `7dtd-realearth/docs/`.\n\n"
       + "Regenerable Cecil outputs only. Do not redistribute game assemblies.\n");
     Console.WriteLine("OK → " + outDir + " methods-ish hits height=" + n + " lit=" + hits);
   }
