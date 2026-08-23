@@ -54,10 +54,12 @@ def self_test_patterns() -> None:
         )
     problems = []
     for (pat, _reason), sample in zip(STALE_PATTERNS, STALE_SAMPLES):
-        if not re.search(pat, sample):
+        # Same flags as the doc scan below: the self-test must prove the
+        # deployed detector fires, not a stricter case-sensitive variant.
+        if not re.search(pat, sample, re.IGNORECASE):
             problems.append(f"pattern cannot fire: {pat!r}")
     for pat, _reason in STALE_PATTERNS:
-        m = re.search(pat, CLEAN_SAMPLE)
+        m = re.search(pat, CLEAN_SAMPLE, re.IGNORECASE)
         if m:
             problems.append(f"pattern flags clean text: {pat!r} matched {m.group(0)!r}")
     if problems:
