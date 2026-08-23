@@ -40,6 +40,7 @@ docs/re-methodology.md  how to RE: toolchain, dumping, reading IL into wire layo
 docs/inventories/  raw method/call inventories backing the narratives
 tools/             tracked Mono.Cecil dump tooling (build.sh + general dumpers)
 oss-tools/         survey notes on third-party server tools and mods
+workspace/         research artifacts: lab notebook, session notes, audits
 il/                regenerable IL dump output (local only, never committed)
 ```
 

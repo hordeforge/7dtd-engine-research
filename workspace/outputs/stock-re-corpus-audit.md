@@ -273,8 +273,8 @@ Tool and narrative both state this is **documentation-mention overlap on a stati
 | stock-sync | [`tools/stock-sync.sh`](../../tools/stock-sync.sh) |
 | Coverage tool | [`tools/src/Coverage.cs`](../../tools/src/Coverage.cs) |
 | Dumpers catalog | [`tools/README.md`](../../tools/README.md) |
-| zdtd version | [`../zdtd-server-server/src/version.zig`](../../../zdtd-server-server-server-server/src/version.zig) |
-| zdtd protocol constants | [`../zdtd-server-server/src/protocol.zig`](../../../zdtd-server-server-server-server/src/protocol.zig) |
+| zdtd version | [`../zdtd-server-server/src/version.zig`](../../../zdtd-server/src/version.zig) |
+| zdtd protocol constants | [`../zdtd-server-server/src/protocol.zig`](../../../zdtd-server/src/protocol.zig) |
 | loadgen PackageCodec | [`../7dtd-loadgen/src/LoadGen/PackageCodec.cs`](../../../7dtd-loadgen/src/LoadGen/PackageCodec.cs) |
 | Live dedicated ASM (local only, not redistributed) | `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` |
 

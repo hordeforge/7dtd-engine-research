@@ -166,7 +166,7 @@ All exact matches to the doc's field table and enum claims.
 
 **C9. INDEX.md structural integrity:**
 - Every file in docs/ and docs/inventories/ (61 besides INDEX) is referenced in INDEX.md (scripted basename check: zero misses).
-- Zero dead links in INDEX.md, including cross-repo relative links (`../../7dtd-server-optimizer/docs/*`, `../../zdtd-server-server-server-server/docs/zig-clone.md` all resolve on disk).
+- Zero dead links in INDEX.md, including cross-repo relative links (`../../7dtd-server-optimizer/docs/*`, `../../zdtd-server/docs/zig-clone.md` all resolve on disk).
 - Inventory leaf counts cited in INDEX (65 block / 38 item-action / 71 minevent / 38 quest-objective / 43 sequence-requirement / 186 commands) each match the row count and self-declared header of the corresponding inventories/ file.
 
 **C10. Honesty framing spot-checks that hold:** re-methodology §6 explicitly forbids stating cost percentages as "measured" from IL; full-surface.md states the two hard limits (redistribution, effort) instead of claiming transcription; residuals.md restricts itself to non-IL reasons and its "closed" claims each point at a family doc; coverage.md family table carries residual tails inline (row 6, row 11) rather than claiming clean closure.

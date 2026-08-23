@@ -78,8 +78,8 @@ the method (boot/settime/join/observe) is in [re-methodology.md](re-methodology.
 | 3 | [`loop.md`](loop.md) | How the dedicated frame/sim runs |
 | 4 | [`protocol.md`](protocol.md) | Wire framing, join, golden package bodies |
 | 5 | [`protocol-frames.md`](protocol-frames.md) | Visual RFC/Mermaid byte frames per package |
-| 6 | [`ZIG_CLONE.md`](../../zdtd-server-server-server-server/docs/ZIG_CLONE.md) | Zig clone architecture from RE (companion `zdtd-server/docs/`) |
-| 6b | [`PROVENANCE.md`](../../zdtd-server-server-server-server/docs/PROVENANCE.md) | zdtd provenance ledger: every behavior/perk/value -> stock source (file map 187/187, constants, divergences; gated by zdtd `tools/provenance_scan.py`) |
+| 6 | [`ZIG_CLONE.md`](../../zdtd-server/docs/ZIG_CLONE.md) | Zig clone architecture from RE (companion `zdtd-server/docs/`) |
+| 6b | [`PROVENANCE.md`](../../zdtd-server/docs/PROVENANCE.md) | zdtd provenance ledger: every behavior/perk/value -> stock source (file map 187/187, constants, divergences; gated by zdtd `tools/provenance_scan.py`) |
 | 7 | [`residuals.md`](residuals.md) | What IL cannot close |
 | 7b | [`completion-bar.md`](completion-bar.md) | What "100% documented" means (tiers A-D) |
 
@@ -100,10 +100,10 @@ flowchart LR
 |---|---|
 | Whole engine map | coverage → loop → family docs → residuals |
 | **Stock ceilings (any dedi)** | [engine-limitations.md](engine-limitations.md) → loop (scaling laws: optimizer `measured-scaling.md`) |
-| **Zig / custom dedi clone** | [ZIG_CLONE.md](../../zdtd-server-server-server-server/docs/ZIG_CLONE.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
+| **Zig / custom dedi clone** | [ZIG_CLONE.md](../../zdtd-server/docs/ZIG_CLONE.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
 | Wire / join / golden packages | protocol → **protocol-frames** → **protocol-packages** → network → loadgen PackageCodec |
 | How to reverse-engineer | **re-methodology** → [`../tools/`](../tools) → coverage |
-| Re-run the zdtd provenance review | `../../zdtd-server-server-server-server/docs/provenance-review.md` (copy-paste prompt; picked up by `~/review-prompts` as `*-review.md`) |
+| Re-run the zdtd provenance review | `../../zdtd-server/docs/provenance-review.md` (copy-paste prompt; picked up by `~/review-prompts` as `*-review.md`) |
 | **Stock hardcode pin** | [`../tools/stock-sync.sh`](../tools/stock-sync.sh) → [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) (see re-methodology §5c) |
 | Frame / gmUpdate | loop → loop-gmupdate → inventories/gmupdate-calls |
 | Entities / AI / path | entity-ai → closed-gaps → aidirector |

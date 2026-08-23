@@ -5,7 +5,7 @@
 **Pin:** V **3.1.0 (b14)** (golden live: major=3, minor=10, build=14).  
 **Companion:** narrative join/policy in [protocol.md](protocol.md).  
 **Evidence:** loadgen `PackageCodec` · dedi-complete census.  
-**Clone:** [`../../zdtd-server-server-server-server/`](../../zdtd-server-server-server-server).
+**Clone:** [`../../zdtd-server/`](../../zdtd-server).
 
 ## How to read these diagrams
 

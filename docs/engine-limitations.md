@@ -221,7 +221,7 @@ them (the Zig clone's clean-room stack avoids the first by construction, ADR
 | [residuals.md](residuals.md) | Non-IL permanent gaps |
 | `product ENGINE_LIMITATIONS` | 1:1 Earth blockers + attack path |
 | [protocol.md](protocol.md) | Wire framing (clone / custom dedi) |
-| [ZIG_CLONE.md](../../zdtd-server-server-server-server/docs/ZIG_CLONE.md) | Zig redesign that avoids these walls |
+| [ZIG_CLONE.md](../../zdtd-server/docs/ZIG_CLONE.md) | Zig redesign that avoids these walls |
 | [HOST_TUNING](../../7dtd-server-optimizer/docs/HOST_TUNING.md) | CCD / NUMA / disk |
 | [ARCHITECTURE](../../7dtd-server-optimizer/docs/ARCHITECTURE.md) | Optim-oriented hot path |
 | [SIM_PARALLELISM](../../7dtd-server-optimizer/docs/SIM_PARALLELISM.md) | Why not MT sim in a mod |

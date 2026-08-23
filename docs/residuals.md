@@ -132,7 +132,7 @@ brtrue → ret    // dedicated: return immediately
 | [coverage.md](coverage.md) | Family closed checklist |
 | [engine-limitations.md](engine-limitations.md) | Stock ceilings (including residual-tagged rows) |
 | [protocol.md](protocol.md) | Wire residuals vs closed golden packages |
-| [ZIG_CLONE.md](../../zdtd-server-server-server-server/docs/ZIG_CLONE.md) | Clone readiness matrix |
+| [ZIG_CLONE.md](../../zdtd-server/docs/ZIG_CLONE.md) | Clone readiness matrix |
 | [INDEX.md](INDEX.md) | Research hub |
 | Product status (not residuals) | `7dtd-realearth/docs/MODIFICATIONS.md` |
 | Product failure catalog | `7dtd-realearth/docs/realearth-review.md` |
@@ -144,7 +144,7 @@ These are **not** stock RE open items. They live in sibling TODO lists. Pointed 
 
 | Sibling | Residual class | Hub |
 |---|---|---|
-| `zdtd` | Demo **pass=83 fail=0** (20260804q stackDrop + Food ≥+5; power TE hard). Residual: full chili +15 Food S2C, IsSpawned lag, empty deco S2C, M11 scale | `zdtd/TODO.md`, `zdtd-server/docs/PLAYTEST_V310_20260803.md` |
+| `zdtd-server` | Demo **pass=83 fail=0** (20260804q stackDrop + Food ≥+5; power TE hard). Residual: full chili +15 Food S2C, IsSpawned lag, empty deco S2C, M11 scale | `zdtd-server/TODO.md`, `zdtd-server/docs/CLIENT_PLAYTEST.md` |
 | `7dtd-server-optimizer` | AnimatorEmergency **human soak** before default-on; path-admission BM measure; packaging tests. Clone triage + chunk encode ownership **closed in research** (2026-08-06) | `7dtd-server-optimizer/TODO.md`, `PERF_RESEARCH_BRIEF.md` |
 | `7dtd-loadgen` | H500 expanded-world validate; EAC unsupported | `7dtd-loadgen/TODO.md` |
 | `7dtd-server-apm` | Absolute forensic budgets under spawn (expected fail); disk ops | `7dtd-server-apm/TODO.md` |

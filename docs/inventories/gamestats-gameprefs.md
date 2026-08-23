@@ -1,10 +1,12 @@
 # GameStats and GamePrefs index tables (V3.1.0 b14)
 
-**Kind:** raw reference table (not primary narrative).
-**Source:** `EnumDump.exe` over `EnumGameStats` / `EnumGamePrefs` in
-**Hub:** [`INDEX.md`](../INDEX.md).  
-the V3.1.0 b14 assembly. Docs cite indices like `GameStats[24]` or
-`GamePrefs.GetInt(190)`; look them up here.
+**Kind:** raw reference table (not primary narrative).  
+**Source:** the `EnumGameStats` / `EnumGamePrefs` enums of the V3.1.0 b14
+assembly; currency is gated by `tools/tests/test_gamestats_gameprefs_current.py`
+and members can be re-listed with `tools/src/EnumList.cs` (`EnumList.exe`).
+Docs cite indices like `GameStats[24]` or `GamePrefs.GetInt(190)`; look them
+up here.  
+**Hub:** [`INDEX.md`](../INDEX.md).
 
 ## EnumGameStats
 
