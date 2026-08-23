@@ -60,8 +60,8 @@ output is `.drafts/7dtd-re-corpus-independent-review.md`.
 
 ## 5. External consumer check (strongest validity evidence)
 
-The sibling `../zdtd-server` clone consumes these specs and must interoperate with the stock
-client. `cd ../zdtd-server && zig build test` -> **PASS**; 11 tests in the
+The sibling `../zdtd-server-server` clone consumes these specs and must interoperate with the stock
+client. `cd ../zdtd-server-server && zig build test` -> **PASS**; 11 tests in the
 `EntityCreationData` module alone. This is a falsifiable external check: a wrong wire
 spec would surface as a failing byte-offset assertion, not just a doc opinion.
 

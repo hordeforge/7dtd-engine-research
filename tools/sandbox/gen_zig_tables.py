@@ -7,7 +7,7 @@ arrays); see docs/sandbox-options.md and extract_sandbox_tables.py in this
 repo. zdtd embeds them at comptime so the server can decode an operator's
 sandbox code without re-extraction; the JSON here is the source of truth.
 
-Usage: python3 gen_zig_tables.py sandbox_tables.json ../zdtd-server/src/assets/sandbox_data.zig
+Usage: python3 gen_zig_tables.py sandbox_tables.json ../zdtd-server-server/src/assets/sandbox_data.zig
 """
 import json
 import sys

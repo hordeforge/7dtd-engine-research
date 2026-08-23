@@ -1,4 +1,4 @@
-# 📜 Codex (7DTD Engine Research)
+# 📜 Schematics (7DTD Engine Research)
 
 > **Part of [HordeForge](https://github.com/hordeforge)** — High-Performance Systems Engineering for 7 Days to Die.
 

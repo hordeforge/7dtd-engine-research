@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-23. **Repo:** `/home/maci/Desktop/7dtd/7dtd-engine-research`.
 **Scope read in full:** docs/*.md (19 files incl INDEX; task premise said 20, see O1), docs/inventories/*.md (8), README.md, AGENTS.md, tools/README.md, tools/re-scratch/README.md, il/README.md, oss-tools/*.md (3). ~10,400 lines.
-**Method:** every file read end-to-end; oracle numbers cross-checked in every occurrence; mechanical scans for em/en dashes, AI attribution, multiple H1s (fence-aware), unclosed fences, duplicate H2s, stale-path greps; filesystem existence checks for every cross-repo path class (`../7dtd-server-optimizer/docs/*`, `../zdtd-server/docs/zig-clone.md`, `7dtd-server-optimizer/tools`, `research/`, `7dtd-il`, `tools/legacy/*`).
+**Method:** every file read end-to-end; oracle numbers cross-checked in every occurrence; mechanical scans for em/en dashes, AI attribution, multiple H1s (fence-aware), unclosed fences, duplicate H2s, stale-path greps; filesystem existence checks for every cross-repo path class (`../7dtd-server-optimizer/docs/*`, `../zdtd-server-server/docs/zig-clone.md`, `7dtd-server-optimizer/tools`, `research/`, `7dtd-il`, `tools/legacy/*`).
 
 ## Severity-ranked findings table
 
@@ -56,7 +56,7 @@ Checked every occurrence of every oracle value; zero numeric contradictions foun
 ## Restructure verification (the move landed cleanly at the link level)
 
 - All 6 optimization docs + zig-clone.md **absent** from `docs/` (verified by filesystem).
-- Every referenced `../../7dtd-server-optimizer/docs/*.md` target exists (measured-scaling, bottlenecks, algorithms, aggressive-optimizations, runtime-tuning, allocation-reuse, HOST_TUNING, OPTIMIZATION_CANDIDATES, ARCHITECTURE, SIM_PARALLELISM, OPTIMIZATION_IDEAS, RESULTS). `../../zdtd-server-server/docs/zig-clone.md` resolves from `docs/`.
+- Every referenced `../../7dtd-server-optimizer/docs/*.md` target exists (measured-scaling, bottlenecks, algorithms, aggressive-optimizations, runtime-tuning, allocation-reuse, HOST_TUNING, OPTIMIZATION_CANDIDATES, ARCHITECTURE, SIM_PARALLELISM, OPTIMIZATION_IDEAS, RESULTS). `../../zdtd-server-server-server-server/docs/zig-clone.md` resolves from `docs/`.
 - `7dtd-server-optimizer/tools/` no longer exists, `tools/legacy/` holds exactly 39 .cs dumpers incl. DumpGmUpdate/DumpTerrain/DumpDeep/DumpDeeper/DumpGaps - which is what makes H1/H2/M1/M2 stale rather than merely cosmetic.
 - No multiple-H1 files (fence-aware scan clean; aidirector's former second H1 confirmed fixed), no unclosed fences, no exactly-duplicated H2 headings (the network.md/terrain-height.md issues are semantic duplicates with different titles).
 - No AI-attribution phrasing anywhere in scope.
@@ -185,7 +185,7 @@ Low priority:
 ## Coverage status
 
 - **Checked directly:** all 33 in-scope files read in full; every oracle value cross-checked at every occurrence; filesystem existence verified for every cross-repo path family, the 39 legacy dumpers, and the absence of the 7 moved docs; fence-aware structural scan (H1s, fences, duplicate H2s); character-level dash and AI-attribution scans; INDEX cluster/one-home/reading-path completeness; anchor spot-checks for the INDEX state-machine table and protocol.md -> protocol-frames.md fragments.
-- **Not checked / out of scope:** contents of `../7dtd-server-optimizer/docs/*` and `../../zdtd-server-server/docs/zig-clone.md` (existence verified only, per task focus); `7days-realworld/` private-companion targets (referenced as prose paths by design, not links); il/ dump-set internals beyond the stale-string grep (git-ignored, regenerable); running `tools/tests/*` or `Census.exe` (oracle values supplied by requester as ground truth); rendered-markdown anchor resolution for every fragment link (mechanical link check reported 0-broken by requester; only high-traffic anchors spot-verified).
+- **Not checked / out of scope:** contents of `../7dtd-server-optimizer/docs/*` and `../../zdtd-server-server-server-server/docs/zig-clone.md` (existence verified only, per task focus); `7days-realworld/` private-companion targets (referenced as prose paths by design, not links); il/ dump-set internals beyond the stale-string grep (git-ignored, regenerable); running `tools/tests/*` or `Census.exe` (oracle values supplied by requester as ground truth); rendered-markdown anchor resolution for every fragment link (mechanical link check reported 0-broken by requester; only high-traffic anchors spot-verified).
 - **Uncertain:** whether the task's "20 docs" count intended an additional file (none is referenced-but-missing anywhere, so 19 appears correct); whether oss-tools' optimizer-lens surveys should eventually route to the optimizer repo (AGENTS.md currently sanctions the folder here).
 
 ---

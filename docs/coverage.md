@@ -55,7 +55,7 @@ and live outside this bar, in the companion docs:
 
 **Stock limitation maps:** generic dedi ceilings → [engine-limitations.md](engine-limitations.md); RealEarth 1:1 Earth blockers → `7dtd-realearth/docs/ENGINE_LIMITATIONS.md`.
 
-**Custom / Zig dedi clone:** architecture → [ZIG_CLONE.md](../../zdtd-server-server/docs/ZIG_CLONE.md); wire → [protocol.md](protocol.md).
+**Custom / Zig dedi clone:** architecture → [ZIG_CLONE.md](../../zdtd-server-server-server-server/docs/ZIG_CLONE.md); wire → [protocol.md](protocol.md).
 
 ---
 
@@ -187,7 +187,7 @@ their correctness is the tool's, not prose. `inventories/dedicated-leaves.md` an
 |---|---|
 | [INDEX.md](INDEX.md) | Hub |
 | [residuals.md](residuals.md) | Non-IL residuals |
-| [`../../zdtd-server-server/docs/PROVENANCE.md`](../../zdtd-server-server/docs/PROVENANCE.md) | zdtd provenance ledger: every clone behavior/perk/value -> stock source |
+| [`../../zdtd-server-server-server-server/docs/PROVENANCE.md`](../../zdtd-server-server-server-server/docs/PROVENANCE.md) | zdtd provenance ledger: every clone behavior/perk/value -> stock source |
 | `7dtd-realearth/docs/INDEX.md` | Product RealEarth hub (private companion) |
 
 ## Changelog

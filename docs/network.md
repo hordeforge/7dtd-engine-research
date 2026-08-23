@@ -8,7 +8,7 @@
 **Visual frames:** [`protocol-frames.md`](protocol-frames.md).  
 **Companion:** [`closed-gaps.md`](closed-gaps.md) §4 (threshold decode).  
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md) §2-3 (player O(N²), packages).  
-**Clone design:** [`ZIG_CLONE.md`](../../zdtd-server-server/docs/ZIG_CLONE.md).  
+**Clone design:** [`ZIG_CLONE.md`](../../zdtd-server-server-server-server/docs/ZIG_CLONE.md).  
 **Loop:** [`loop.md`](loop.md) §6.  
 **Dumps:** `il/gaps-v3.1.0/`, `il/dedi-complete-v3.1.0/` §3-4.
 

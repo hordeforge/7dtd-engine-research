@@ -27,7 +27,7 @@ There is no external academic paper. The publishable research surface is:
 | Mono.Cecil dumpers | `tools/src/*.cs`, `tools/build.sh` | Method claims in re-methodology |
 | Stock pin gate | `tools/src/StockFacts.cs`, `tools/stock-sync.sh`, `tools/tests/check_stock_facts.py`, root `Makefile` | JSON fields vs live ASM when present |
 | Coverage tooling | `tools/src/Coverage.cs`, `Reach.cs`, `FullSurface.cs` | Whether “narrated %” measures what docs claim |
-| External consumer: zdtd | `../zdtd-server/src/version.zig`, `protocol.zig`, wire/TE paths | stock_facts consumers list |
+| External consumer: zdtd | `../zdtd-server-server/src/version.zig`, `protocol.zig`, wire/TE paths | stock_facts consumers list |
 | External consumer: loadgen | `../7dtd-loadgen` PackageIds / GameVersion / golden-wire | Version + package count pins |
 | Policy | `.gitignore`, no `il/` in git | No game DLL / bulk IL redistribution |
 

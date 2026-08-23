@@ -4,7 +4,7 @@
 
 **Artifact:** `/home/maci/Desktop/7dtd/7dtd-engine-research` (branch `re-corpus-audit-tooling`),
 60 narrative docs + 20 inventory catalogs (26,087 lines, 176 diagrams), 16 maintained
-Mono.Cecil tools, 2 Python gates, consumed by the sibling `../zdtd-server` clone.
+Mono.Cecil tools, 2 Python gates, consumed by the sibling `../zdtd-server-server` clone.
 **Subject of study:** the shipped 7 Days to Die V3.0.1 dedicated-server
 `Assembly-CSharp.dll` (read locally; never redistributed).
 **Review date:** 2026-07-24.
@@ -229,7 +229,7 @@ or move hand-maintained catalogs out of `inventories/`.
 | Nuanced authority claims | **PASS 2/2** | `Recipe.CanCraft` (1 call site, client UI); `AddBuffNetwork` (2 sends, 0 list mutations) |
 | Structural gate | **PASS** | `test_dedi_coverage_docs.py`: docs 11, dump sets 8, tools 8 |
 | Dump-regen gate | **PASS** | `test_re_dump_regen.py` (exit 0, non-empty regeneration) |
-| External consumer | **PASS** | `../zdtd-server` `zig build test` green, 11 ECD tests |
+| External consumer | **PASS** | `../zdtd-server-server` `zig build test` green, 11 ECD tests |
 | Policy (no game bytes tracked) | **PASS** | 0 of 158 tracked files are IL/DLL/EXE |
 | Link/format hygiene | **PASS** | 0 broken links, 0 odd fences, 0 em dashes, INDEX complete |
 | Experimental-delta refresh | **Verification: BLOCKED** | `steamcmd` not installed; a fresh `latest_experimental` pull needs Steam credentials. External dependency + user decision, **not** a corpus defect. |

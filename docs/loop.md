@@ -7,7 +7,7 @@
 **Host topology (ops):** [`../../7dtd-server-optimizer/docs/HOST_TUNING.md`](../../7dtd-server-optimizer/docs/HOST_TUNING.md).  
 **Live scale:** [`measured-scaling.md`](../../7dtd-server-optimizer/docs/measured-scaling.md).  
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md).  
-**Zig clone redesign:** [`ZIG_CLONE.md`](../../zdtd-server-server/docs/ZIG_CLONE.md).
+**Zig clone redesign:** [`ZIG_CLONE.md`](../../zdtd-server-server-server-server/docs/ZIG_CLONE.md).
 
 **Scope:** headless dedicated tick under `-dedicated -batchmode -nographics`.  
 **Not in scope:** client-only UI/camera/rendering (unless proven on dedi); RealEarth product status.  
