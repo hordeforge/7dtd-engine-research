@@ -6,10 +6,21 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$here"
 mkdir -p bin
 
-# Locate Mono.Cecil.dll: env override, then vendored, then known local copies,
-# then a previous verified copy in bin/ (re-checked by the pin gate below).
-cecil="${MONO_CECIL:-}"
-if [[ -z "$cecil" ]]; then
+# Integrity gate: compile only against the pinned Mono.Cecil (data/cecil.pin).
+# Every dumper links and runs against this dll, so a swapped binary is a
+# supply-chain risk; re-pin deliberately via ./cecil-pin.sh <dll> after review.
+sha256_of() { # GNU coreutils, falling back to macOS shasum
+  if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1
+  else shasum -a 256 "$1" | cut -d' ' -f1; fi
+}
+pin_sha="$(sed -n 's/^sha256=//p' "$here/data/cecil.pin")"
+
+# Candidates: env override, then vendored, then a previously verified copy in
+# bin/, then known local copies, then the distribution's Mono GAC.
+candidates=()
+if [[ -n "${MONO_CECIL:-}" ]]; then
+  candidates=("$MONO_CECIL")
+else
   for c in \
     "$here/Mono.Cecil.dll" \
     "$here/bin/Mono.Cecil.dll" \
@@ -18,34 +29,32 @@ if [[ -z "$cecil" ]]; then
     "$HOME/Desktop/7dtd/7dtd-research/il/zdtd_re_tools/Mono.Cecil.dll" \
     /usr/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll \
     /usr/local/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll; do
-    [[ -f "$c" ]] && cecil="$c" && break
+    [[ -f "$c" ]] && candidates+=("$c")
   done
 fi
-if [[ -z "$cecil" || ! -f "$cecil" ]]; then
+if (( ${#candidates[@]} == 0 )); then
   echo "Mono.Cecil.dll not found. Set MONO_CECIL=/path/to/Mono.Cecil.dll, or restore it via:" >&2
   echo "  install your distribution's Mono.Cecil package, or use dotnet add package Mono.Cecil" >&2
   echo "  (then point MONO_CECIL at the restored dll)" >&2
   exit 1
 fi
 
-# Integrity gate: compile only against the pinned Mono.Cecil (data/cecil.pin).
-# Every dumper links and runs against this dll, so a swapped binary is a
-# supply-chain risk; re-pin deliberately via ./cecil-pin.sh <dll> after review.
-sha256_of() { # GNU coreutils, falling back to macOS perl shasum
-  if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1
-  else shasum -a 256 "$1" | cut -d' ' -f1; fi
-}
-pin_sha="$(sed -n 's/^sha256=//p' "$here/data/cecil.pin")"
-got_sha="$(sha256_of "$cecil")"
-if [[ "$got_sha" != "$pin_sha" ]]; then
+# Prefer whichever candidate matches the pin: a distro GAC rebuild has the same
+# assembly version but different bytes, and must not shadow the reviewed copy.
+cecil=""
+for c in "${candidates[@]}"; do
+  [[ "$(sha256_of "$c")" == "$pin_sha" ]] && { cecil="$c"; break; }
+done
+if [[ -z "$cecil" ]]; then
+  cecil="${candidates[0]}"
   if [[ "${MONO_CECIL_UNVERIFIED:-0}" == "1" ]]; then
-    echo "WARNING: Mono.Cecil hash mismatch, building UNVERIFIED (MONO_CECIL_UNVERIFIED=1)" >&2
+    echo "WARNING: no Mono.Cecil matches the pin, building UNVERIFIED (MONO_CECIL_UNVERIFIED=1)" >&2
   else
-    echo "Mono.Cecil.dll failed the integrity pin (data/cecil.pin):" >&2
+    echo "No Mono.Cecil.dll matches the integrity pin (data/cecil.pin):" >&2
     echo "  want $pin_sha" >&2
-    echo "  got  $got_sha" >&2
-    echo "  at   $cecil" >&2
-    echo "Re-pin after reviewing the new dll: ./cecil-pin.sh \"$cecil\"" >&2
+    for c in "${candidates[@]}"; do echo "  got  $(sha256_of "$c")  $c" >&2; done
+    echo "Re-pin after reviewing the dll you intend to use:" >&2
+    echo "  ./cecil-pin.sh \"${candidates[0]}\"" >&2
     exit 1
   fi
 fi
