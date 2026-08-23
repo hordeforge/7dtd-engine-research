@@ -55,6 +55,23 @@ def corrupt_region_dir(dirpath):
         f.write(data)
 
 
+def slot0_past_eof_region_dir(dirpath):
+    """Save dir whose only allocated .7rg slot points past EOF.
+
+    The bound check fires before any payload read, so it must produce a
+    FAIL-marker line itself (a plain note used to slip through as PASS).
+    """
+    region = os.path.join(dirpath, "Region")
+    os.makedirs(region)
+    data = bytearray(b"\x00" * (4096 * 12))
+    data[0:3] = b"7rg"
+    data[3] = 2
+    struct.pack_into("<H", data, 4096, 20000)  # slot 0 -> sector 20000 (past EOF)
+    data[4096 + 3] = 1
+    with open(os.path.join(region, "slot0bad.7rg"), "wb") as f:
+        f.write(data)
+
+
 def main():
     bad = []
     with tempfile.TemporaryDirectory(prefix="srt-robustness-") as tmp:
@@ -74,6 +91,14 @@ def main():
             bad.append(f"corrupt region dir: no parse-error FAIL verdict:\n{out}")
         if "main.ttw: MISSING" not in out:
             bad.append("corrupt region dir: missing-main.ttw check not reported")
+
+        save0 = os.path.join(tmp, "save0")
+        os.makedirs(save0)
+        slot0_past_eof_region_dir(save0)
+        rc, out = run(save0)
+        assert_no_traceback(rc, out, "slot0 past-EOF region dir", bad)
+        if "exceeds file bounds" not in out or "\nFAIL:" not in out:
+            bad.append(f"slot0 past-EOF region dir: no bounds FAIL verdict:\n{out}")
 
         rc, _ = run("--shipped")
         if rc != 2:

@@ -681,6 +681,7 @@ CONSTS = {
 
 SRC = r"""
 using System;
+using System.Globalization;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -693,7 +694,8 @@ class TunedConsts {
       var t = asm.MainModule.GetTypes().FirstOrDefault(x => x.Name == tn);
       if (t == null) continue;
       foreach (var f in t.Fields.Where(f => f.HasConstant))
-        Console.WriteLine(tn + "." + f.Name + "=" + f.Constant);
+        Console.WriteLine(tn + "." + f.Name + "=" +
+          Convert.ToString(f.Constant, CultureInfo.InvariantCulture));
       // static fields initialized in the .cctor (ldc/ldstr + stsfld)
       var cctor = t.Methods.FirstOrDefault(x => x.Name == ".cctor" && x.HasBody);
       if (cctor != null) {
@@ -716,7 +718,8 @@ class TunedConsts {
               else if (c == Code.Ldc_I4_M1)
                 val = -1;
               if (val != null)
-                Console.WriteLine(tn + "." + fr.Name + "=" + val);
+                Console.WriteLine(tn + "." + fr.Name + "=" +
+                  Convert.ToString(val, CultureInfo.InvariantCulture));
             }
           }
         }

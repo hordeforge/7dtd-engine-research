@@ -559,7 +559,8 @@ def check_region_v2(path, checks):
     stamps = [s[3] for s in slots]
     checks.append(f"  timestamp {min(stamps)}..{max(stamps)} (WorldTimeToTotalMinutes)")
     if slots[0][1] * 4096 + 4 > len(data):
-        checks.append(f"  first slot payload start beyond EOF: {slots[0][1] * 4096}")
+        checks.append(f"  first slot payload start {slots[0][1] * 4096} "
+                      f"exceeds file bounds ({len(data)} B)")
         return
 
     ok = 0
