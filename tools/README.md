@@ -24,12 +24,19 @@ tools/
 cd tools
 ./build.sh                 # -> bin/*.exe + bin/legacy/*.exe (+ bin/Mono.Cecil.dll)
 ./build.sh --skip-legacy   # only the general src/ tools
+./cecil-pin.sh <dll>       # re-pin data/cecil.pin after a reviewed Cecil upgrade
 ```
 
 Requires `mono` (`mcs`) and a `Mono.Cecil.dll` (build.sh searches known local
 copies and the standard Mono GAC under `/usr/lib` or `/usr/local/lib`; override
 with `MONO_CECIL=/path/to/Mono.Cecil.dll`, or restore via `dotnet add package
-Mono.Cecil`). `bin/`, the Cecil binary, and `*.exe` are
+Mono.Cecil`). Mono.Cecil is this repo's only third-party dependency, and it is
+**pinned**: build.sh checks the candidate's SHA-256 against
+[`data/cecil.pin`](data/cecil.pin) and refuses a mismatch (every dumper links
+and runs against that dll, so a silently swapped binary is a supply-chain risk).
+After deliberately upgrading Cecil, review it and re-pin with
+`./cecil-pin.sh /path/to/Mono.Cecil.dll`; `MONO_CECIL_UNVERIFIED=1` bypasses the
+check for one build. `bin/`, the Cecil binary, and `*.exe` are
 git-ignored and regenerable. Nothing here ships game bytes; point `ASM` at your
 own copy:
 
@@ -56,11 +63,15 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 | `LeafInfo.exe <asm> <namesFile> <out.tsv>` | Per-type IL fingerprint (base class + declared body-method count + largest-body method names) for a list of type names; backs the [`../docs/inventories/dedicated-leaves.md`](../docs/inventories/dedicated-leaves.md) leaf catalog. |
 | `Coverage.exe <asm> <docsDir> <out.md>` | Programmatic RE-coverage report: call-graph reachability from dedicated entry points vs docs name-mentions, per-namespace + top undocumented-reached gap list. Committable. Backs [`../docs/inventories/coverage-report.md`](../docs/inventories/coverage-report.md). |
 | `Reach.exe <asm> <outFile>` | Reached types/methods from the same seed set as `Coverage.exe` (shared `src/Seeds.cs`), TSV output for cross-filtering against `surface-types.md`. `tests/test_reach_consistency.py` asserts Reach and Coverage report identical reached-method counts so the two lenses cannot drift. |
-
-| `census-pct.py [asm] [docsDir] [--json]` | Percentage view of the coverage census: narrated / catalogued / classified / unaccounted fractions of reached game types, plus the whole-assembly reached-type/method fractions. `--json` emits a machine-readable object; `--history FILE` appends a dated row to the census-history CSV. Runs `Coverage.exe` + `Census.exe` live (Python 3, no build step). |
-| `WireBodies.exe <asm> <out.md>` | Auto-extracted per-package wire-body catalog: ordered `write()` field/type sequence for every `NetPackage*` (183) + the nested serializers they delegate to (60). Committable. Backs [`../docs/inventories/netpackage-bodies.md`](../docs/inventories/netpackage-bodies.md). |
+| `WireBodies.exe <asm> <out.md>` | Auto-extracted per-package wire-body catalog: ordered `write()` field/type sequence for every `NetPackage*` with an extractable body (183) + the nested serializers they delegate to (60). Committable. Backs [`../docs/inventories/netpackage-bodies.md`](../docs/inventories/netpackage-bodies.md). |
 | `FullSurface.exe <asm> <outDir>` | Whole-assembly **metadata** map (all 7,432 types): namespace summary + per-type signatures/sizes, no IL bodies. Committable. Backs [`../docs/full-surface.md`](../docs/full-surface.md). |
 | `DumpAll.exe <asm> <outDir> [ns]` | **Full local reversal**: every method body of every type, one file per type. Output is git-ignored (never redistribute); optional namespace prefix filter. |
+| `RefScan.exe <asm> <typeNamesFile> [out.tsv]` | Batch reverse-reference scan: every site that references each listed type, attributed to its outermost owner type; bulk server-vs-client classification (see re-methodology §8b). Complements single-member `Xref`. |
+| `StateMachines.exe <docsDir> <out.md>` | Indexes every mermaid `stateDiagram` in the docs tree with owning section + state count. Docs in, assembly not involved; backs [`../docs/inventories/state-machines.md`](../docs/inventories/state-machines.md). |
+| `EnumList.exe <asm> <outFile>` | Emits `Enum.Member=value` for every enum member; feeds the drift-check enum diff. |
+| `MethodList.exe <asm> <outFile>` | Emits `Type::Method(params)` for every method-with-body; feeds the drift-check method-surface diff. |
+| `ListAllTypes.exe <asm> <outFile>` | One-off audit helper: every type FullName sorted to a file (used to audit DumpAll completeness). |
+| `census-pct.py [asm] [docsDir] [--json] [--history FILE]` | Percentage view of the coverage census: narrated / catalogued / classified / unaccounted fractions of reached game types, plus the whole-assembly reached-type/method fractions. `--json` emits a machine-readable object; `--history FILE` appends a dated row to the census-history CSV. Lives in `tools/`, runs `Coverage.exe` + `Census.exe` live (Python 3, no build step). |
 
 `src/IlFmt.cs` is a shared IL formatter compiled into each (`IL_XXXX: opcode operand`,
 fully-qualified operands, `IL_offset` branch targets: the corpus dump format).
@@ -164,9 +175,10 @@ local install. See `re-scratch/README.md`.
 | Test | Checks |
 |---|---|
 | `tests/test_tool_bootstrap.py` | The tool builder discovers distribution-provided Mono.Cecil assemblies in the standard `/usr/lib` and `/usr/local/lib` Mono GAC paths. |
-| `tests/test_dedi_coverage_docs.py` | Structural proof that the coverage docs, dump sets, and dumpers all exist and are IL-backed (no game constant is the pass condition). |
+| `tests/test_cecil_pin.py` | Mono.Cecil supply-chain pin: `data/cecil.pin` is well-formed, `build.sh` still enforces the SHA-256 gate, and any built `bin/Mono.Cecil.dll` matches it. |
+| `tests/test_dedi_coverage_docs.py` | Structural proof that the coverage docs, dump sets, and dumpers all exist and are IL-backed (no game constant is the pass condition). Detector self-tests prove the banned-phrase and IL-claim greps can fire. |
 | `tests/check_stock_facts.py --require-live` | `tools/data/stock_facts.json` matches the live dedicated DLL (`make stock-check`). |
-| `tests/test_reach_consistency.py` | Reach and Coverage report identical reached-method counts (shared `src/Seeds.cs`), so the two lenses cannot drift. |
+| `tests/test_reach_consistency.py` | Reach and Coverage report identical reached-method counts (shared `src/Seeds.cs`), so the two lenses cannot drift. Census bucket arithmetic sums. |
 | `tests/test_surface_wellformed.py` | `full-surface.md` type rows sum to the 1,740,737 IL-instruction pin (per-type vs per-namespace totals must agree). |
 | `tests/test_subclass_counts.py` | Per-leaf inventories (sequence-requirements 38, item-actions 38, quest-objectives 38, minevent-actions 71, block-behaviors 65, te-features 11, challenge-objectives 28+1, sequence-actions 123) match the DLL's concrete-subclass closures / namespace composition; six inventories' key-method fingerprints exist on the leaf or its base chain (args stripped; te-features' annotated prose excluded). |
 | `tests/test_console_cmd_inventory.py` | Console-command inventory primary rows equal `CmdMap.exe` output exactly; alias rows are real registered names (getCommands ldstrs + cctor string-field values); the committed `console-command-list.tsv` equals fresh output; the Does column equals each `getDescription` (whitespace-normalized); the Perm column equals each `get_DefaultPermissionLevel` (blank = inherited). |
@@ -182,11 +194,16 @@ local install. See `re-scratch/README.md`.
 | `tests/test_state_machines_current.py` | `state-machines.md` lifecycle tables are current against the live DLL (skips without mono; CI-safe). |
 | `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (11 claims). |
 | `tests/test_readme_test_table.py` | Every test script run by `make test`/`test-docs`/`verify` is documented in this table, and every entry is a real file. |
-| `tests/test_transport_closure_claims.py` | No stale native-LiteNetLib / unknown-peer-order claims in the docs. |
+| `tests/test_transport_closure_claims.py` | No stale native-LiteNetLib / unknown-peer-order claims in the docs. Pattern liveness self-tested. |
 | `tests/test_coverage_consistency.py` | `docs/coverage.md` audit table lists every narrative doc; census rows match `stock_facts.json`. |
-| `tests/test_doc_link_integrity.py` | Every doc reachable from `INDEX.md`; 0 dead internal links; every root doc carries the `**Hub:**` backlink; every `../` cross-repo link resolves to a real file (wrong-depth citations fail). |
+| `tests/test_doc_link_integrity.py` | Every doc reachable from `INDEX.md`; 0 dead internal links; every root doc carries the `**Hub:**` backlink; every `../` cross-repo link resolves to a real file (wrong-depth citations fail). Synthetic-tree self-tests prove orphan/dead detection. |
 | `tests/test_re_dump_regen.py` | Compiles `legacy/DumpFrameEntries` and regenerates non-empty inventory dumps from the local dedicated DLL (needs install + mcs/mono). |
-| `tests/bench_version_update_tooling.py` | Version-update tooling benchmark (`make readiness`). |
+| `tests/bench_version_update_tooling.py` | Version-update tooling benchmark (`make readiness`). Includes mutation checks of the Mono.Cecil pin gate. |
+
+Tests that need the local dedicated DLL or built binaries SKIP with a reason on
+machines without them, and FAIL with the fix command when the DLL is present but
+the prerequisite is missing (`make tools`). Nothing here asserts game constants
+as pass conditions.
 
 ```bash
 make test        # the full gate suite above

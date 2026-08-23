@@ -59,6 +59,7 @@ regen-check:
 
 test:
 	python3 "$(TOOLS)/tests/test_tool_bootstrap.py"
+	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_dedi_coverage_docs.py"
 	python3 "$(TOOLS)/tests/check_stock_facts.py" --require-live
 	python3 "$(TOOLS)/tests/test_reach_consistency.py" "$(ASM)"
@@ -85,6 +86,7 @@ test:
 # local `make test` (it needs the git-ignored il/ dump sets).
 test-docs:
 	python3 "$(TOOLS)/tests/test_tool_bootstrap.py"
+	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"

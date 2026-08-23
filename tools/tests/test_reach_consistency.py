@@ -9,53 +9,55 @@ Also asserts the census arithmetic invariants:
   - narrated + catalogued + classified + unaccounted == game types (reached surface)
   - the whole-assembly partition sums exactly to all types.
 
+Prerequisites: mono + tools/bin/{Coverage,Reach}.exe + the local dedicated
+Assembly-CSharp.dll. With no local DLL the test SKIPs (nothing to assert);
+with a DLL but unbuilt bin it FAILs with the build command.
+
 Usage: python3 tools/tests/test_reach_consistency.py [asm]
 """
+from __future__ import annotations
+
 import os
 import re
-import subprocess
 import sys
+import tempfile
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-TOOLS = os.path.dirname(HERE)
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
 
-def default_asm():
-    env = os.environ.get("ASM")
-    if env:
-        return env
-    home = os.path.expanduser("~")
-    return os.path.join(
-        home,
-        ".local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/"
-        "7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
+
+def main() -> int:
+    msg, is_skip = _common.prereq(["Coverage.exe", "Reach.exe"])
+    if msg:
+        print(("SKIP: " if is_skip else "FAIL: ") + msg)
+        return 0 if is_skip else 1
+
+    asm_path, asm_label = _common.resolve_asm(
+        sys.argv[1] if len(sys.argv) > 1 else None
     )
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
 
-def run(exe, *args):
-    env = dict(os.environ)
-    env["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    proc = subprocess.run(
-        ["mono", os.path.join(TOOLS, "bin", exe), *args],
-        capture_output=True, text=True, env=env,
-    )
-    return proc.returncode, proc.stdout, proc.stderr
+    docs = os.path.join(_common.REPO, "docs")
+    with tempfile.TemporaryDirectory(prefix="reach-consistency-") as td:
+        report = os.path.join(td, "coverage-report.md")
+        tsv = os.path.join(td, "reach.tsv")
 
-def main():
-    asm = sys.argv[1] if len(sys.argv) > 1 else default_asm()
-    docs = os.path.join(REPO, "docs")
-    report = "/tmp/test-reach-consistency-report.md"
+        rc, _, cov_err = _common.run_tool("Coverage.exe", str(asm_path), docs, report)
+        assert rc == 0, f"Coverage.exe failed: {cov_err}"
+        m = re.search(r"reached methods=(\d+)", cov_err)
+        assert m, f"could not parse Coverage reached methods: {cov_err}"
+        cov_methods = int(m.group(1))
 
-    rc, _, cov_err = run("Coverage.exe", asm, docs, report)
-    assert rc == 0, f"Coverage.exe failed: {cov_err}"
-    m = re.search(r"reached methods=(\d+)", cov_err)
-    assert m, f"could not parse Coverage reached methods: {cov_err}"
-    cov_methods = int(m.group(1))
+        rc, _, reach_err = _common.run_tool("Reach.exe", str(asm_path), tsv)
+        assert rc == 0, f"Reach.exe failed: {reach_err}"
+        m = re.search(r"reached methods=(\d+)", reach_err)
+        assert m, f"could not parse Reach reached methods: {reach_err}"
+        reach_methods = int(m.group(1))
 
-    rc, _, reach_err = run("Reach.exe", asm, "/tmp/test-reach-consistency.tsv")
-    assert rc == 0, f"Reach.exe failed: {reach_err}"
-    m = re.search(r"reached methods=(\d+)", reach_err)
-    assert m, f"could not parse Reach reached methods: {reach_err}"
-    reach_methods = int(m.group(1))
+        with open(report, encoding="utf-8") as f:
+            text = f.read()
 
     assert cov_methods == reach_methods, (
         f"SEED/BFS DRIFT: Coverage reached methods={cov_methods} != Reach {reach_methods}. "
@@ -64,10 +66,10 @@ def main():
     print(f"OK: Coverage and Reach agree on reached methods ({cov_methods})")
 
     # Bucket invariant from the report.
-    text = open(report).read()
     def row(key):
         m = re.search(r"\| \.\.\.\*\*" + re.escape(key) + r"\*\*[^|]*\| \*{0,2}(\d+)(?: \([^)]*\))?\*{0,2} \|", text)
         return int(m.group(1)) if m else None
+
     game = row("game types")
     narrated = row("narrated")
     catalogued = row("catalogued only")
@@ -92,6 +94,8 @@ def main():
     )
     print(f"OK: whole-assembly partition sums to all types ({all_types})")
     print("ALL CONSISTENCY CHECKS PASSED")
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

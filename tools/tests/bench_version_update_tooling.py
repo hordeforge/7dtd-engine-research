@@ -51,15 +51,6 @@ def score_current_pin_green() -> tuple[float, str]:
 
 def score_no_soft_literals() -> tuple[float, str]:
     text = CHECKER.read_text(encoding="utf-8", errors="replace")
-    # Soft paths that ignore live facts and hard-code current line versions.
-    bad_patterns = [
-        r"V 3\\\\\.1\\\\\.0",
-        r"V 3\\.1\\.0",
-        r'(?<![\\w])3\\.1\\.0(?![\\w])',
-        r'"3\.1\.0"',
-        r"'3\.1\.0'",
-        r"V3\.0\.1-only",  # ok as historical comment if not used as accept path
-    ]
     # Count only non-comment code lines that accept a fixed version without using display/build vars.
     soft_hits = []
     for i, line in enumerate(text.splitlines(), 1):
@@ -121,6 +112,15 @@ def score_mutation_doc_fail() -> tuple[float, str]:
     return 0.0, "mutated census still passes"
 
 
+def _path_present(facts: dict, path: tuple[str, ...]) -> bool:
+    cur = facts
+    for k in path:
+        if not isinstance(cur, dict) or k not in cur:
+            return False
+        cur = cur[k]
+    return True
+
+
 def score_schema_breadth() -> tuple[float, str]:
     if not FACTS.is_file():
         return 0.0, "no facts"
@@ -152,29 +152,9 @@ def score_schema_breadth() -> tuple[float, str]:
         ("update",),
         ("pins",),
     ]
-    ok = 0
-    for path in required_paths:
-        cur = facts
-        good = True
-        for k in path:
-            if not isinstance(cur, dict) or k not in cur:
-                good = False
-                break
-            cur = cur[k]
-        if good:
-            ok += 1
+    ok = sum(1 for path in required_paths if _path_present(facts, path))
     base = ok / len(required_paths)
-    bonus_ok = 0
-    for path in bonus_paths:
-        cur = facts
-        good = True
-        for k in path:
-            if not isinstance(cur, dict) or k not in cur:
-                good = False
-                break
-            cur = cur[k]
-        if good:
-            bonus_ok += 1
+    bonus_ok = sum(1 for path in bonus_paths if _path_present(facts, path))
     bonus = 0.15 * (bonus_ok / len(bonus_paths))
     s = min(1.0, base * 0.85 + bonus)
     return s, f"required={ok}/{len(required_paths)} bonus={bonus_ok}/{len(bonus_paths)}"

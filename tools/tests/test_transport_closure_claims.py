@@ -26,14 +26,56 @@ STALE_PATTERNS = [
     (r"Unknown\s+peer\s+script\s+order", "peer order observed (loop.md 1.1)"),
 ]
 
+# One stale sentence per pattern, same order. The self-test proves each regex
+# can actually fire; without it a typo'd pattern would make this gate pass
+# forever while stale claims crept back in.
+STALE_SAMPLES = [
+    "the join uses the native LiteNetLib plugin directly",
+    "LiteNetLib native transport layer",
+    "packets cross the LiteNet native stack",
+    "a native LiteNet wrapper module",
+    "Unknown peer script order was assumed",
+]
+
+# Must never match any pattern, or every clean doc would fail the gate.
+CLEAN_SAMPLE = (
+    "# network\n"
+    "LiteNetLib is a managed .NET assembly.\n"
+    "Unity peer script order was observed directly.\n"
+    "The join-churn flake root cause is a managed race.\n"
+)
+
+
+def self_test_patterns() -> None:
+    if len(STALE_SAMPLES) != len(STALE_PATTERNS):
+        raise AssertionError(
+            f"self-test misconfigured: {len(STALE_SAMPLES)} samples for "
+            f"{len(STALE_PATTERNS)} patterns"
+        )
+    problems = []
+    for (pat, _reason), sample in zip(STALE_PATTERNS, STALE_SAMPLES):
+        if not re.search(pat, sample):
+            problems.append(f"pattern cannot fire: {pat!r}")
+    for pat, _reason in STALE_PATTERNS:
+        m = re.search(pat, CLEAN_SAMPLE)
+        if m:
+            problems.append(f"pattern flags clean text: {pat!r} matched {m.group(0)!r}")
+    if problems:
+        raise AssertionError(
+            "stale-claim detector self-test failed:\n  " + "\n  ".join(problems)
+        )
+
+
 def main():
+    self_test_patterns()
     bad = []
     for root, _dirs, files in os.walk(DOCS):
         for name in files:
             if not name.endswith(".md"):
                 continue
             path = os.path.join(root, name)
-            text = open(path, encoding="utf-8").read()
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
             for pat, reason in STALE_PATTERNS:
                 for m in re.finditer(pat, text, re.IGNORECASE):
                     line_no = text[: m.start()].count("\n") + 1
