@@ -14,8 +14,10 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
 
 TOOLS = Path(__file__).resolve().parents[1]
 DOCS = TOOLS.parent / "docs"
@@ -25,32 +27,8 @@ DUMPER = TOOLS / "legacy" / "DumpFrameEntries.cs"
 EXE = TOOLS / "bin" / "legacy" / "DumpFrameEntries.exe"
 
 
-def find_asm() -> Path | None:
-    env = os.environ.get("SEVENDTD_DS_DIR") or os.environ.get("SEVENDTD_ASM")
-    candidates = []
-    if env:
-        p = Path(env)
-        if p.is_file() and p.name.endswith(".dll"):
-            candidates.append(p)
-        else:
-            candidates.append(p / "7DaysToDieServer_Data/Managed/Assembly-CSharp.dll")
-    home = Path.home()
-    candidates.extend(
-        [
-            home
-            / ".local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
-            home
-            / ".steam/steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
-        ]
-    )
-    for c in candidates:
-        if c.is_file():
-            return c
-    return None
-
-
 def main() -> int:
-    asm = find_asm()
+    asm = _common.find_asm()
     if asm is None:
         print("SKIP: dedicated Assembly-CSharp.dll not found (set SEVENDTD_DS_DIR)")
         return 0

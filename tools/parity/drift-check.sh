@@ -25,6 +25,9 @@ build_helper() { # <name> <src>
   [[ -f "$exe" && "$exe" -nt "$2" ]] || mcs -nologo -r:"$CECIL" "$2" -out:"$exe" 2>/dev/null
 }
 build_helper MethodList "$TOOLS/src/MethodList.cs" 2>/dev/null || true
+# ParitySurface feeds the NetPackage wire diff below; build it like the other
+# helpers so a fresh checkout gets the full drift report (not a silent skip).
+build_helper ParitySurface "$here/ParitySurface.cs" 2>/dev/null || true
 run() { MONO_PATH="$BIN" mono "$@"; }
 
 mkdir -p "$BASELINE_DIR"
@@ -35,8 +38,8 @@ run "$BIN/FullSurface.exe"      "$ASM" "$cur/surface" >/dev/null 2>&1
 [[ -f "$BIN/MethodList.exe" ]] && run "$BIN/MethodList.exe" "$ASM" "$cur/methods.txt" 2>/dev/null
 [[ -f "$BIN/EnumList.exe"   ]] && run "$BIN/EnumList.exe"   "$ASM" "$cur/enums.txt"   2>/dev/null
 # Mono may print "mono_thread_internal_set_priority..." on stdout; keep only JSON.
-if [[ -f "$here/ParitySurface.exe" ]]; then
-  run "$here/ParitySurface.exe" "$ASM" 2>/dev/null | sed -n '/^{/,$p' > "$cur/parity.json"
+if [[ -f "$BIN/ParitySurface.exe" ]]; then
+  run "$BIN/ParitySurface.exe" "$ASM" 2>/dev/null | sed -n '/^{/,$p' > "$cur/parity.json"
   # Reject empty/non-JSON captures so parity_diff does not throw.
   if ! python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$cur/parity.json" 2>/dev/null; then
     echo "drift: warning: ParitySurface output not valid JSON; skipping package wire diff" >&2
@@ -76,6 +79,6 @@ fi
 echo
 if [[ "$drift" -eq 0 ]]; then echo "drift: NONE (build matches baseline)"; else
   echo "drift: DETECTED. Update baseline after review:  cp -r $cur/. $BASELINE_DIR/"
-  echo "Then re-verify affected narratives (see docs/experimental-delta.md for the workflow)."; fi
+  echo "Then re-verify affected narratives (see docs/re-methodology.md §5b for the workflow)."; fi
 rm -rf "$cur"
 exit $drift

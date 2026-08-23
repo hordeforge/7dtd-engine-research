@@ -108,6 +108,7 @@ class Coverage {
     // Seed those families (server-relevant only; XUiC_/ItemAction/Block are client or
     // already reached, and seeding them would flood the base).
     var reflTypes = Seeds.ReflTargets(all);
+    Seeds.IndexTypes(all);
     string lastLdstr = null;
     while (work.Count > 0) { var m = work.Dequeue();
       foreach (var i in m.Body.Instructions) {
@@ -125,11 +126,11 @@ class Coverage {
         }
         // Type.GetType / Activator.CreateInstance on a constant name: seed that type.
         if (mr.DeclaringType.FullName == "System.Type" && (mr.Name == "GetType" || mr.Name == "GetTypeFromHandle")) {
-          if (!string.IsNullOrEmpty(lastLdstr)) { var tt = all.FirstOrDefault(t => t.FullName == lastLdstr || t.Name == lastLdstr || t.FullName.Replace('/','+') == lastLdstr);
+          if (!string.IsNullOrEmpty(lastLdstr)) { var tt = Seeds.FindByConstantName(lastLdstr);
             if (tt != null) foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm); }
         }
         if (mr.DeclaringType.FullName == "System.Activator" && mr.Name == "CreateInstance" && !string.IsNullOrEmpty(lastLdstr)) {
-          var tt = all.FirstOrDefault(t => t.FullName == lastLdstr || t.Name == lastLdstr || t.FullName.Replace('/','+') == lastLdstr);
+          var tt = Seeds.FindByConstantName(lastLdstr);
           if (tt != null) foreach (var tm in tt.Methods.Where(x => x.HasBody)) if (visited.Add(tm)) work.Enqueue(tm);
         }
       }
@@ -138,11 +139,14 @@ class Coverage {
     var reached = new HashSet<TypeDefinition>(visited.Select(m => m.DeclaringType));
     var nonGen = reached.Where(t => !Generated(t)).ToList();
     var libReached = nonGen.Where(IsLibrary).ToList();
+    // Set-view of `all` for O(1) membership: several whole-assembly passes below test
+    // type membership per element, and List.Contains over ~7.4k types is quadratic.
+    var allSet = new HashSet<TypeDefinition>(all);
     // Restrict to Assembly-CSharp's own types: `reached` also contains types resolved
     // from REFERENCED assemblies (callvirt targets in System/Unity/etc.), and a few of
     // those live in non-library namespaces. Counting them as game types would inflate
     // the base and break the whole-assembly 100% accounting (types must sum to all).
-    var gameReached = nonGen.Where(t => !IsLibrary(t) && all.Contains(t)).ToList();
+    var gameReached = nonGen.Where(t => !IsLibrary(t) && allSet.Contains(t)).ToList();
 
     // Build two mention sets: "narrated" = named in any subsystem doc; "classified" =
     // named only in the out-of-scope classification doc. A type is "accounted for" if
@@ -265,8 +269,9 @@ class Coverage {
     // assemblies (System/Unity etc. reached via callvirt); this section restricts to
     // Assembly-CSharp's own types (`all`) so the whole-assembly % is honest.
     var reachedAc = all.Where(t => reached.Contains(t)).ToList();
-    var visitedAc = visited.Where(m => m.DeclaringType != null && all.Contains(m.DeclaringType)).ToList();
-    var unreached = all.Where(t => !reachedAc.Contains(t)).ToList();
+    var reachedAcSet = new HashSet<TypeDefinition>(reachedAc);
+    var visitedAc = visited.Where(m => m.DeclaringType != null && allSet.Contains(m.DeclaringType)).ToList();
+    var unreached = all.Where(t => !reachedAcSet.Contains(t)).ToList();
     var unGen = unreached.Where(t => Generated(t)).ToList();
     var unLib = unreached.Where(t => !Generated(t) && IsLibrary(t)).ToList();
     var unGame = unreached.Where(t => !Generated(t) && !IsLibrary(t)).ToList();
@@ -403,10 +408,6 @@ class Coverage {
     sb.AppendLine("|---|---|---:|");
     var clsOnly = gameReached.Where(t => !narrated.Contains(BaseName(t)) && classified.Contains(BaseName(t))).ToList();
     foreach (var t in clsOnly.OrderBy(t => string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace).ThenBy(t => t.Name)) {
-      sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
-    }
-    sb.AppendLine();
-    foreach (var t in catOnly.OrderBy(t => string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace).ThenBy(t => t.Name)) {
       sb.AppendLine("| `" + t.Name + "` | " + (string.IsNullOrEmpty(t.Namespace) ? "<global>" : t.Namespace) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     }
     sb.AppendLine();

@@ -13,11 +13,13 @@ the code is known at each layer:
      third-party/BCL types are excluded by design.
 
 Usage:
-  python3 tools/census-pct.py [asm] [docsDir] [--json]
+  python3 tools/census-pct.py [asm] [docsDir] [--json] [--history FILE]
     asm     path to Assembly-CSharp.dll (default: $ASM or the Steam path
             under ~/.local/share/Steam; same resolution as tools/stock-sync.sh)
     docsDir docs directory to scan (default: docs)
     --json  emit a machine-readable JSON object instead of the human report
+    --history FILE  append the percentages to a CSV (default name:
+            census-history.csv) so census numbers can be tracked over time
 
 Exit code is 0 unless the census itself fails; unaccounted > 0 is reported
 loudly but is not a hard failure (this is a report, not a gate).

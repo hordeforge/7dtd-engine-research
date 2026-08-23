@@ -9,7 +9,8 @@ Usage:
   python3 tools/tests/check_stock_facts.py --facts path/to/stock_facts.json
   python3 tools/tests/check_stock_facts.py --require-live   # fail if facts missing
 
-Exit 0 = in sync (or soft-skip if no facts and not --require-live).
+Exit 0 = in sync (or soft-skip if no facts and not --require-live, or if a
+sibling repo directory is entirely absent).
 Exit 1 = mismatch.
 Exit 2 = usage / missing required facts.
 """
@@ -299,30 +300,38 @@ def check_research(facts: dict, errors: list[str]) -> None:
         )
 
 
-def check_loadgen(facts: dict, errors: list[str]) -> None:
-    path = WS / "7dtd-loadgen" / "src" / "LoadGen" / "PackageCodec.cs"
+def check_loadgen(facts: dict, errors: list[str]) -> str | None:
+    """Check loadgen pins; return a skip note when the sibling repo is absent."""
+    proj = WS / "7dtd-loadgen"
+    path = proj / "src" / "LoadGen" / "PackageCodec.cs"
     text = read(path)
     if not text:
+        if not proj.is_dir():
+            return f"sibling repo absent, loadgen pins skipped: {proj}"
         errors.append(f"loadgen missing: {path}")
-        return
+        return None
     v = facts["version"]
     # GameVersion = new(1, 3, 10, 14)
     pat = rf"GameVersion\s*=\s*new\s*\(\s*{v['release_type']}\s*,\s*{v['major']}\s*,\s*{v['minor']}\s*,\s*{v['build']}\s*\)"
     must_match("loadgen PackageCodec.GameVersion", text, pat, errors)
-    must_contain("loadgen challenge marker comment or const", text, "0xCA", errors) if "Challenge" in text or "0xCA" in text else None
     if "0xCA" not in text and "202" not in text:
         # ChallengeChannelMarker = 202
         must_match("loadgen challenge", text, r"ChallengeChannelMarker\s*=\s*202|0xCA", errors)
+    return None
 
 
-def check_zdtd(facts: dict, errors: list[str]) -> None:
-    ver_path = WS / "zdtd" / "src" / "version.zig"
-    proto_path = WS / "zdtd" / "src" / "protocol.zig"
+def check_zdtd(facts: dict, errors: list[str]) -> str | None:
+    """Check zdtd pins; return a skip note when the sibling repo is absent."""
+    proj = WS / "zdtd"
+    ver_path = proj / "src" / "version.zig"
+    proto_path = proj / "src" / "protocol.zig"
     ver = read(ver_path)
     proto = read(proto_path)
     if not ver:
+        if not proj.is_dir():
+            return f"sibling repo absent, zdtd pins skipped: {proj}"
         errors.append(f"zdtd missing: {ver_path}")
-        return
+        return None
     stock = facts["version"]["stock_wire"]
     must_match(
         "zdtd stock_wire",
@@ -332,7 +341,7 @@ def check_zdtd(facts: dict, errors: list[str]) -> None:
     )
     if not proto:
         errors.append(f"zdtd missing: {proto_path}")
-        return
+        return None
     tps = facts["sim"]["constants_ticks_per_second"]
     must_match(
         "zdtd ticks_per_second",
@@ -401,11 +410,14 @@ def main() -> int:
 
     facts = load_facts(args.facts)
     errors: list[str] = []
+    skips: list[str] = []
 
     check_research(facts, errors)
     if not args.skip_siblings:
-        check_loadgen(facts, errors)
-        check_zdtd(facts, errors)
+        for check in (check_loadgen, check_zdtd):
+            note = check(facts, errors)
+            if note:
+                skips.append(note)
 
     v = facts["version"]
     print(
@@ -414,12 +426,14 @@ def main() -> int:
         f"netpkg={facts['network']['netpackage_top_level_count']} "
         f"ydim={facts['chunk']['block_y_dim']}"
     )
+    for s in skips:
+        print(f"SKIP: {s}")
     if errors:
         print(f"FAIL: {len(errors)} pin mismatch(es)")
         for e in errors:
             print(f"  - {e}")
         return 1
-    print("OK: research + sibling pins match stock_facts.json")
+    print("OK: research + available sibling pins match stock_facts.json")
     return 0
 
 
