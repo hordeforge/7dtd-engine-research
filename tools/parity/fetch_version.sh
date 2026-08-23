@@ -41,6 +41,10 @@ if [[ "$BRANCH" =~ ^[0-9]{6,}$ ]]; then
   # steamcmd drops it under steamapps/content; copy DLL out
   SRC=$(find "$STEAMCMD/linux32/steamapps/content/app_$APP/depot_$DEPOT" \
         -name Assembly-CSharp.dll 2>/dev/null | head -1)
+  if [[ -z "$SRC" ]]; then
+    echo "[parity] no Assembly-CSharp.dll from depot manifest $BRANCH under $STEAMCMD/linux32/steamapps/content (download failed?)" >&2
+    exit 1
+  fi
   cp -f "$SRC" "$INSTALL/Assembly-CSharp.dll"
 else
   "$STEAMCMD/steamcmd.sh" +force_install_dir "$INSTALL" +login anonymous \

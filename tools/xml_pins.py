@@ -79,7 +79,18 @@ def main() -> int:
     args = ap.parse_args()
 
     if not args.check:
+        epath = os.path.join(args.game_dir, CFG_ENTITIES)
+        if not os.path.isfile(epath):
+            print(f"error: {epath} not found; pass the dedicated-server root via --game-dir",
+                  file=sys.stderr)
+            return 2
         data = extract(args.game_dir)
+        # A wrong --game-dir (or a renamed config section) must not wipe the
+        # committed pins with empty values while reporting success.
+        if not data["entityclasses_health"]:
+            print(f"error: no health* values parsed from {epath}; "
+                  f"refusing to overwrite {PINS} with empty pins", file=sys.stderr)
+            return 2
         os.makedirs(os.path.dirname(PINS), exist_ok=True)
         with open(PINS, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=1, sort_keys=True)
@@ -87,6 +98,9 @@ def main() -> int:
         print(f"wrote {PINS} ({len(data['entityclasses_health'])} hp vars)")
         return 0
 
+    if not os.path.isdir(args.game_dir):
+        print(f"error: game dir not found: {args.game_dir} (--game-dir)", file=sys.stderr)
+        return 2
     live = extract(args.game_dir)
     if not os.path.isfile(PINS):
         print(f"FAIL: {PINS} missing (run xml_pins.py --game-dir first)")

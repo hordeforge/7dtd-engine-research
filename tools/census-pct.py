@@ -160,21 +160,24 @@ def main():
     # 1. Live coverage census over the docs tree (report to /tmp so the scan
     #    never sees a stale extra file inside docs/).
     tmp_report = "/tmp/census-pct-coverage-report.md"
-    rc, _, stderr = run_mono("Coverage.exe", asm, docs, tmp_report)
-    if rc != 0:
-        print("error: Coverage.exe failed:", file=sys.stderr)
-        print(stderr, file=sys.stderr)
-        return rc
-    cov = parse_coverage(stderr)
-    reached_types = parse_report_reached_types(tmp_report)
-    accounted = parse_report_accounted(tmp_report)
-    if os.path.exists(tmp_report):
-        os.unlink(tmp_report)
+    try:
+        rc, _, stderr = run_mono("Coverage.exe", asm, docs, tmp_report)
+        if rc != 0:
+            print("error: Coverage.exe failed:", file=sys.stderr)
+            print(stderr, file=sys.stderr)
+            return rc
+        cov = parse_coverage(stderr)
+        reached_types = parse_report_reached_types(tmp_report)
+        accounted = parse_report_accounted(tmp_report)
+    finally:
+        if os.path.exists(tmp_report):
+            os.unlink(tmp_report)
 
     # 2. Whole-assembly census (for the unreached remainder).
-    rc, stdout, _ = run_mono("Census.exe", asm)
+    rc, stdout, census_stderr = run_mono("Census.exe", asm)
     if rc != 0:
-        print("error: Census.exe failed", file=sys.stderr)
+        print("error: Census.exe failed:", file=sys.stderr)
+        print(census_stderr, file=sys.stderr)
         return rc
     cen = parse_census(stdout)
     all_types = cen.get("AllTypes (incl nested)", 0)

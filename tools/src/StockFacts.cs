@@ -136,6 +136,13 @@ class StockFacts {
     throw new Exception(t.Name + "." + name + " not a metadata const or simple cctor float");
   }
 
+  // A baked fallback silently published as an extracted pin is how stock_facts
+  // drifts from the live DLL; every fallback substitution must be visible.
+  static void WarnFallback(string what, string def) {
+    Console.Error.WriteLine("stock-facts: warning: " + what +
+      " not extractable; publishing baked default " + def + " (verify against the live DLL)");
+  }
+
   static float? GameTimerTicksPerSecond(ModuleDefinition mod) {
     var gt = Exact(mod, "GameTimer");
     var m = gt.Methods.FirstOrDefault(x => x.Name == "get_Instance" && x.HasBody);
@@ -244,7 +251,9 @@ class StockFacts {
     int gameReset = AsInt(FieldConst(c, "cGameResetRevision"));
     string product = Convert.ToString(FieldConst(c, "cProduct"));
     // cDefaultPort is cctor-init (not a metadata constant on this build).
-    int defaultPort = StsfldInt(c, "cDefaultPort") ?? 26900;
+    int? stsfldPort = StsfldInt(c, "cDefaultPort");
+    if (!stsfldPort.HasValue) WarnFallback("Constants.cDefaultPort", "26900");
+    int defaultPort = stsfldPort ?? 26900;
 
     // High-value dedicated behaviour hardcodes (const or simple cctor stsfld).
     int maxEntitiesPerMobSpawner = FieldInt(c, "cMaxEntitiesPerMobSpawner");
@@ -253,11 +262,17 @@ class StockFacts {
     float sendWorldTickTimeToClients = FieldFloat(c, "cSendWorldTickTimeToClients");
     // WorldConstants.WaterLevel is cctor-initialized from Block.cWaterLevel
     // (Block cctor ldc.r4 62.88). Pin the float so zdtd/realworld can compare.
-    float worldWaterLevel = StsfldR4(Exact(mod, "Block"), "cWaterLevel") ?? 62.88f;
+    float? blockWaterLevel = StsfldR4(Exact(mod, "Block"), "cWaterLevel");
+    if (!blockWaterLevel.HasValue) WarnFallback("Block.cWaterLevel", "62.88");
+    float worldWaterLevel = blockWaterLevel ?? 62.88f;
     // Death-loot lifetime (s) and per-frame XML load budget (ms), both
     // Constants cctor-initialized (ldc.r4 300 / ldc.i4.s 50).
-    float itemDroppedOnDeathLifetime = StsfldR4(c, "cItemDroppedOnDeathLifetime") ?? 300f;
-    int maxLoadTimePerFrameMillis = StsfldInt(c, "cMaxLoadTimePerFrameMillis") ?? 50;
+    float? stsfldLifetime = StsfldR4(c, "cItemDroppedOnDeathLifetime");
+    if (!stsfldLifetime.HasValue) WarnFallback("Constants.cItemDroppedOnDeathLifetime", "300");
+    float itemDroppedOnDeathLifetime = stsfldLifetime ?? 300f;
+    int? stsfldLoadBudget = StsfldInt(c, "cMaxLoadTimePerFrameMillis");
+    if (!stsfldLoadBudget.HasValue) WarnFallback("Constants.cMaxLoadTimePerFrameMillis", "50");
+    int maxLoadTimePerFrameMillis = stsfldLoadBudget ?? 50;
     // Party fields may be metadata const on some builds; optional.
     int? maxPartySize = null;
     float? partyActivationRange = null;
@@ -418,6 +433,10 @@ class StockFacts {
         int? seq = FieldConstInt(nc, "MaxSequence");
         int? win = FieldConstInt(nc, "DefaultWindowSize");
         int[] mtu = PossibleMtu(ln, nc);
+        if (!proto.HasValue || !hdr.HasValue || !chan.HasValue || !frag.HasValue ||
+            !seq.HasValue || !win.HasValue)
+          Console.Error.WriteLine("stock-facts: warning: some LiteNetLib NetConstants " +
+            "fields not extractable; baked defaults substituted");
         sb.AppendLine("    \"protocol_id\": " + (proto ?? 13) + ",");
         sb.AppendLine("    \"header_size\": " + (hdr ?? 1) + ",");
         sb.AppendLine("    \"channeled_header_size\": " + (chan ?? 4) + ",");
@@ -432,6 +451,8 @@ class StockFacts {
           sb.AppendLine("    \"possible_mtu\": []");
         }
       } else {
+        Console.Error.WriteLine("stock-facts: warning: LiteNetLib.dll not found next to " +
+          asmPath + "; emitting protocol_id only");
         sb.AppendLine("    \"protocol_id\": 13");
       }
     } catch (Exception e) {

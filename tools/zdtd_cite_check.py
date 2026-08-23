@@ -101,11 +101,18 @@ def main() -> int:
     bad_total = 0
     local = set()
     for name in REPOS:
-        collect_local(os.path.join(args.root, name), local)
+        repo_dir = os.path.join(args.root, name)
+        if not os.path.isdir(repo_dir):
+            print(f"{name}: sibling repo directory absent, skipped")
+            continue
+        collect_local(repo_dir, local)
     for name in REPOS:
+        repo_dir = os.path.join(args.root, name)
+        if not os.path.isdir(repo_dir):
+            continue
         if args.repo and name != args.repo:
             continue
-        total, broken = scan(os.path.join(args.root, name), local)
+        total, broken = scan(repo_dir, local)
         grand += total
         bad_total += len(broken)
         for b in broken:

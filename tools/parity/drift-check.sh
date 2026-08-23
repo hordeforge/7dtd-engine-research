@@ -22,21 +22,38 @@ CECIL="$BIN/Mono.Cecil.dll"
 # helper builders (compiled on demand into bin/)
 build_helper() { # <name> <src>
   local exe="$BIN/$1.exe"
-  [[ -f "$exe" && "$exe" -nt "$2" ]] || mcs -nologo -r:"$CECIL" "$2" -out:"$exe" 2>/dev/null
+  [[ -f "$exe" && "$exe" -nt "$2" ]] && return 0
+  # A failed helper build must not look like "no drift" on that axis; say so.
+  if ! mcs -nologo -r:"$CECIL" "$2" -out:"$exe"; then
+    echo "drift: warning: failed to compile $1.exe; its drift axis will be skipped" >&2
+    return 1
+  fi
 }
-build_helper MethodList "$TOOLS/src/MethodList.cs" 2>/dev/null || true
+build_helper MethodList "$TOOLS/src/MethodList.cs"
 # ParitySurface feeds the NetPackage wire diff below; build it like the other
 # helpers so a fresh checkout gets the full drift report (not a silent skip).
-build_helper ParitySurface "$here/ParitySurface.cs" 2>/dev/null || true
+build_helper ParitySurface "$here/ParitySurface.cs"
 run() { MONO_PATH="$BIN" mono "$@"; }
 
 mkdir -p "$BASELINE_DIR"
 cur="$(mktemp -d)"
 # snapshot the current build: census, per-type surface, methods, enums, parity
-run "$BIN/Census.exe"           "$ASM" > "$cur/census.txt" 2>/dev/null
-run "$BIN/FullSurface.exe"      "$ASM" "$cur/surface" >/dev/null 2>&1
-[[ -f "$BIN/MethodList.exe" ]] && run "$BIN/MethodList.exe" "$ASM" "$cur/methods.txt" 2>/dev/null
-[[ -f "$BIN/EnumList.exe"   ]] && run "$BIN/EnumList.exe"   "$ASM" "$cur/enums.txt"   2>/dev/null
+run "$BIN/Census.exe"           "$ASM" > "$cur/census.txt" || \
+  echo "drift: warning: Census.exe failed; census diff unreliable" >&2
+run "$BIN/FullSurface.exe"      "$ASM" "$cur/surface" >/dev/null || \
+  echo "drift: warning: FullSurface.exe failed; type drift unreliable" >&2
+if [[ -f "$BIN/MethodList.exe" ]]; then
+  run "$BIN/MethodList.exe" "$ASM" "$cur/methods.txt" || \
+    echo "drift: warning: MethodList.exe failed; method diff unreliable" >&2
+else
+  echo "drift: warning: MethodList.exe unavailable; method drift NOT compared" >&2
+fi
+if [[ -f "$BIN/EnumList.exe" ]]; then
+  run "$BIN/EnumList.exe"   "$ASM" "$cur/enums.txt"   || \
+    echo "drift: warning: EnumList.exe failed; enum diff unreliable" >&2
+else
+  echo "drift: warning: EnumList.exe unavailable; enum drift NOT compared" >&2
+fi
 # Mono may print "mono_thread_internal_set_priority..." on stdout; keep only JSON.
 if [[ -f "$BIN/ParitySurface.exe" ]]; then
   run "$BIN/ParitySurface.exe" "$ASM" 2>/dev/null | sed -n '/^{/,$p' > "$cur/parity.json"
@@ -45,6 +62,8 @@ if [[ -f "$BIN/ParitySurface.exe" ]]; then
     echo "drift: warning: ParitySurface output not valid JSON; skipping package wire diff" >&2
     rm -f "$cur/parity.json"
   fi
+else
+  echo "drift: warning: ParitySurface.exe unavailable; package wire drift NOT compared" >&2
 fi
 
 if [[ ! -f "$BASELINE_DIR/surface/surface-types.md" ]]; then
