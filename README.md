@@ -1,12 +1,8 @@
-# 7dtd-research
+# 📜 Codex (7DTD Engine Research)
 
-Reverse-engineering research on the **7 Days to Die dedicated server**
-(V **3.1.0 (b14)** Henpocalypse):
-how the stock, unmodified server is built and behaves, and its wire/file formats,
-derived from the shipped `Assembly-CSharp.dll`. Produced alongside a server
-performance-optimization suite; the cost/scaling **measurement** program and
-optimization levers live in the companion `7dtd-optimizer/docs/`, not here (see
-[`AGENTS.md`](AGENTS.md) doc scope). Machine pin: [`tools/data/stock_facts.json`](tools/data/stock_facts.json).
+> **Part of [HordeForge](https://github.com/hordeforge)** — High-Performance Systems Engineering for 7 Days to Die.
+
+Reverse-engineering research on the **7 Days to Die dedicated server** (V **3.1.0 (b14)** Henpocalypse): how the stock, unmodified server is built and behaves, and its wire/file formats, derived from the shipped `Assembly-CSharp.dll`. Produced alongside a server performance-optimization suite; the cost/scaling **measurement** program and optimization levers live in the companion `7dtd-server-optimizer/docs/`, not here.
 
 Start at [`docs/INDEX.md`](docs/INDEX.md).
 
@@ -33,7 +29,7 @@ facts (constants + LiteNetLib wire + XML data) live in
 - **RE method + tooling** ([`docs/re-methodology.md`](docs/re-methodology.md),
   [`tools/`](tools/)): the Mono.Cecil dumpers and the dump-to-wire-layout process.
 - The named bottlenecks, scaling laws, and optimization levers are cross-linked
-  into the companion optimizer docs (e.g. `7dtd-optimizer/docs/bottlenecks.md`).
+  into the companion optimizer docs (e.g. `7dtd-server-optimizer/docs/bottlenecks.md`).
 
 ## Layout
 
