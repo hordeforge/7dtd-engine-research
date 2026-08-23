@@ -633,18 +633,38 @@ def any_failed(checks):
     return any(marker in c for c in checks for marker in FAILED_MARKERS)
 
 
+def run_file_check(parse, path, checks):
+    """Run one per-file parser, converting a hard parse crash into a FAIL line.
+
+    These parsers read stock-written but potentially truncated/corrupt files;
+    a malformed input must degrade to a failed check, never abort the whole
+    run with a traceback (which would also skip the remaining files' checks).
+    """
+    try:
+        parse(path, checks)
+    except (struct.error, IndexError) as exc:
+        checks.append(f"{os.path.basename(path)}: parse error: {exc}")
+
+
 def main():
     argv = sys.argv[1:]
     shipped = None
     if argv and argv[0] == "--shipped":
-        shipped = argv[1] if len(argv) > 1 else None
+        if len(argv) < 2:
+            print("usage: save_roundtrip_check.py --shipped <worlddir-or-main.ttw>",
+                  file=sys.stderr)
+            return 2
+        shipped = argv[1]
         argv = argv[2:]
     save_dir = argv[0] if argv else discover_save_dir()
     checks = []
     if shipped:
         ttw = shipped if os.path.isfile(shipped) else os.path.join(shipped, "main.ttw")
+        if not os.path.isfile(ttw):
+            print(f"error: no main.ttw at {ttw}", file=sys.stderr)
+            return 2
         print(f"Shipped world header check: {ttw}\n")
-        check_main_ttw(ttw, checks)
+        run_file_check(check_main_ttw, ttw, checks)
         failed = any_failed(checks)
         print("\n".join(checks))
         print(f"\n{'FAIL' if failed else 'PASS'}: {len(checks)} checks")
@@ -656,7 +676,7 @@ def main():
 
     ttw = os.path.join(save_dir, "main.ttw")
     if os.path.exists(ttw):
-        check_main_ttw(ttw, checks)
+        run_file_check(check_main_ttw, ttw, checks)
     else:
         checks.append("main.ttw: MISSING")
 
@@ -665,11 +685,11 @@ def main():
     rr = sorted(glob.glob(os.path.join(region, "*.7rr"))) if os.path.isdir(region) else []
     print(f"Region files: {len(rg)} .7rg (sector V2), {len(rr)} .7rr (raw)\n")
     for p in rg[:6]:
-        check_region_v2(p, checks)
+        run_file_check(check_region_v2, p, checks)
     if len(rg) > 6:
         checks.append(f"  ({len(rg) - 6} further .7rg files not expanded)")
     for p in rr[:2]:
-        check_region_raw(p, checks)
+        run_file_check(check_region_raw, p, checks)
     if rr and len(rr) > 2:
         checks.append(f"  ({len(rr) - 2} further .7rr files not expanded)")
     if not rg and not rr:
@@ -677,14 +697,14 @@ def main():
 
     deco = os.path.join(save_dir, "decoration.7dt")
     if os.path.exists(deco):
-        check_decoration_7dt(deco, checks)
+        run_file_check(check_decoration_7dt, deco, checks)
     mb = os.path.join(save_dir, "multiblocks.7dt")
     if os.path.exists(mb):
-        check_multiblocks_7dt(mb, checks)
+        run_file_check(check_multiblocks_7dt, mb, checks)
     for nim in ("blockmappings.nim", "itemmappings.nim"):
         np_ = os.path.join(save_dir, nim)
         if os.path.exists(np_):
-            check_nim_mapping(np_, checks)
+            run_file_check(check_nim_mapping, np_, checks)
 
     print("\n".join(checks))
     failed = any_failed(checks)
