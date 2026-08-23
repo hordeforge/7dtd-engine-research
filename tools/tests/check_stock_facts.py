@@ -150,7 +150,7 @@ def check_research(facts: dict, errors: list[str]) -> None:
         for key, val in [("healthSlim", 125), ("healthSlimFeral", 500), ("healthSlimInfernal", 1600)]:
             if hp.get(key) != val:
                 errors.append(f"xml_pins entityclasses_health.{key}={hp.get(key)} != {val}")
-        prov = read(WS / "zdtd" / "docs" / "PROVENANCE.md")
+        prov = read(WS / "zdtd-server" / "docs" / "PROVENANCE.md")
         if prov:
             must_match("zdtd PROVENANCE healthSlim", prov, r"125", errors)
         tr = pins.get("traders_root", {})
@@ -322,7 +322,7 @@ def check_loadgen(facts: dict, errors: list[str]) -> str | None:
 
 def check_zdtd(facts: dict, errors: list[str]) -> str | None:
     """Check zdtd pins; return a skip note when the sibling repo is absent."""
-    proj = WS / "zdtd"
+    proj = WS / "zdtd-server"
     ver_path = proj / "src" / "version.zig"
     proto_path = proj / "src" / "protocol.zig"
     ver = read(ver_path)
@@ -357,7 +357,7 @@ def check_zdtd(facts: dict, errors: list[str]) -> str | None:
         errors,
     )
     ydim = facts["chunk"]["block_y_dim"]
-    store = read(WS / "zdtd" / "src" / "world" / "store.zig")
+    store = read(WS / "zdtd-server" / "src" / "world" / "store.zig")
     if store:
         must_match("zdtd y_dim", store, rf"pub const y_dim: i32 = {ydim};", errors)
     # LiteNetLib wire pins: facts carry the library constants; zdtd's packet.zig
@@ -367,7 +367,7 @@ def check_zdtd(facts: dict, errors: list[str]) -> str | None:
         errors.append(f"stock_facts litenet.max_packet_size={lite.get('max_packet_size')} != 1432")
     if lite.get("protocol_id") != 13:
         errors.append(f"stock_facts litenet.protocol_id={lite.get('protocol_id')} != 13")
-    pkt = read(WS / "zdtd" / "src" / "litenet" / "packet.zig")
+    pkt = read(WS / "zdtd-server" / "src" / "litenet" / "packet.zig")
     if pkt and lite.get("max_packet_size"):
         must_match(
             "zdtd packet.zig max_packet_size divergence",
@@ -378,7 +378,7 @@ def check_zdtd(facts: dict, errors: list[str]) -> str | None:
     # Cross-repo: the divergence register must carry the machine-checked
     # WaterLevel so zdtd's sea_level=64 divergence stays tied to the pin.
     water = facts["behaviour"].get("world_water_level")
-    prov = read(WS / "zdtd" / "docs" / "PROVENANCE.md")
+    prov = read(WS / "zdtd-server" / "docs" / "PROVENANCE.md")
     if water is not None and prov:
         must_match(
             "zdtd PROVENANCE WaterLevel register",
@@ -411,6 +411,16 @@ def main() -> int:
     facts = load_facts(args.facts)
     errors: list[str] = []
     skips: list[str] = []
+
+    # A value under provenance.baked was published as a hard-coded default
+    # because IL extraction failed; it must never pass as a verified pin.
+    baked = (facts.get("provenance") or {}).get("baked") or []
+    for name in baked:
+        errors.append(
+            f"stock_facts {name} is a baked default, not extracted from the DLL "
+            "(re-run tools/stock-sync.sh against the live game, or verify the "
+            "value by hand and update StockFacts.cs extraction)"
+        )
 
     check_research(facts, errors)
     if not args.skip_siblings:

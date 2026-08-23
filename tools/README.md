@@ -106,7 +106,10 @@ python3 tests/check_stock_facts.py --require-live
 
 Commit `data/stock_facts.json` when the game pin changes. The checker fails if
 `docs/coverage.md`, loadgen `GameVersion`, or zdtd `stock_wire` / challenge /
-ticks disagree with the JSON. See [`../docs/re-methodology.md`](../docs/re-methodology.md) §5c.
+ticks disagree with the JSON. Values that could not be extracted from IL and
+were published as hard-coded defaults are listed under `provenance.baked`; a
+non-empty list always fails the pin check (re-extract against the live game).
+See [`../docs/re-methodology.md`](../docs/re-methodology.md) §5c.
 
 ### After a TFP game update
 

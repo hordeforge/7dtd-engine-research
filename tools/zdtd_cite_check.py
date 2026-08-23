@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Verify sibling-repo RESEARCH citations resolve against this corpus.
 
-The sibling repos (zdtd, 7dtd-server-optimizer, 7dtd-loadgen, 7dtd-realearth,
-7dtd-server-apm) map their values and behaviors back to the stock dedicated server
-through the research docs. This gate extracts every EXPLICIT research
+The sibling repos (zdtd-server, 7dtd-server-optimizer, 7dtd-loadgen,
+7dtd-realearth, 7dtd-server-apm) map their values and behaviors back to the stock
+dedicated server through the research docs. This gate extracts every EXPLICIT research
 citation - an `RE:` marker or a `7dtd-engine-research/docs/` path prefix - from each
 sibling and checks the cited file exists in this repo's docs/. Bare names of a
 sibling's OWN docs are not research citations and are ignored (resolved
-against that repo's docs/ + root + zdtd docs/adr).
+against that repo's docs/ + root + zdtd-server docs/adr).
 
 Usage: python3 tools/zdtd_cite_check.py [--root <workspace>]
   --root defaults to the parent of this repo (the sibling layout root).
@@ -18,7 +18,7 @@ import os
 import re
 import sys
 
-REPOS = ["zdtd", "7dtd-server-optimizer", "7dtd-loadgen", "7dtd-realearth", "7dtd-server-apm"]
+REPOS = ["zdtd-server", "7dtd-server-optimizer", "7dtd-loadgen", "7dtd-realearth", "7dtd-server-apm"]
 RES_PATH = re.compile(
     r"(?:(?:\.\./)*7dtd-engine-research/docs/)([A-Za-z0-9][A-Za-z0-9_-]+\.md)"
 )
@@ -26,7 +26,8 @@ BARE_AFTER_RE = re.compile(r"RE(?::|\s+)(?:../7dtd-engine-research/docs/)?([A-Za
 BARE = re.compile(r"(?<![\w./-])([A-Za-z0-9][A-Za-z0-9_-]+\.md)(?![A-Za-z0-9])")
 # Known non-citation bare names: report/artifact filenames emitted by tools
 # (not references to docs that must resolve).
-ALLOW_BARE = {"csharp_bridge.md", "compare.md"}
+ALLOW_BARE = {"csharp_bridge.md", "compare.md", "REPORT.md", "CONSOLIDATED.md",
+              "bench-stock.md"}
 SKIP_DIRS = {".git", ".zig-cache", ".claude", "zig-pkg", "node_modules", ".venv",
              "bin", "obj", "__pycache__", "target", "dist", "build", ".pytest_cache",
              ".uv-cache", ".cache"}
@@ -38,8 +39,9 @@ def docs_dir() -> str:
 
 
 def collect_local(root: str, into: set) -> None:
-    """Every repo-local doc name across the fleet (roots, docs/ and subdirs,
-    zdtd docs/adr stripped), so cross-repo-local references resolve."""
+    """Every repo-local doc name across the fleet (roots, the full docs/ tree
+    incl. nested dirs like docs/reviews/, and docs/adr names prefix-stripped),
+    so cross-repo-local references resolve."""
     for d in os.listdir(root):
         if d.endswith(".md"):
             into.add(d)
@@ -50,11 +52,11 @@ def collect_local(root: str, into: set) -> None:
             for fn in filenames:
                 if fn.endswith(".md"):
                     into.add(fn)
-    adr = os.path.join(ddir, "adr")
-    if os.path.isdir(adr):
-        for d in os.listdir(adr):
-            if d.endswith(".md"):
-                into.add(re.sub(r"^\d+-", "", d))
+        adr = os.path.join(ddir, "adr")
+        if os.path.isdir(adr):
+            for d in os.listdir(adr):
+                if d.endswith(".md"):
+                    into.add(re.sub(r"^\d+-", "", d))
 
 
 def scan(root: str, local: set) -> tuple[int, list[str]]:

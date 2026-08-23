@@ -2,6 +2,8 @@
 // Regenerable source of truth for cross-repo pin checks (research docs, loadgen,
 // zdtd). Does not ship game bytes; only numeric/string constants from metadata
 // and a few well-known IL sites (GameTimer.get_Instance, WorldState cctor).
+// Any value published as a baked default (extraction failed) is listed under
+// provenance.baked so consumers can refuse to treat it as verified.
 //
 //   mono StockFacts.exe <Assembly-CSharp.dll> [out.json]
 //
@@ -238,6 +240,11 @@ class StockFacts {
     var asm = AssemblyDefinition.ReadAssembly(asmPath, new ReaderParameters { AssemblyResolver = r });
     var mod = asm.MainModule;
 
+    // Dotted names of values published as baked defaults instead of IL
+    // extraction (mirrors the stderr warnings; survives into the committed
+    // artifact so check_stock_facts.py can refuse to pin on them).
+    var baked = new List<string>();
+
     var c = Exact(mod, "Constants");
     var wc = Exact(mod, "WorldConstants");
 
@@ -252,7 +259,10 @@ class StockFacts {
     string product = Convert.ToString(FieldConst(c, "cProduct"));
     // cDefaultPort is cctor-init (not a metadata constant on this build).
     int? stsfldPort = StsfldInt(c, "cDefaultPort");
-    if (!stsfldPort.HasValue) WarnFallback("Constants.cDefaultPort", "26900");
+    if (!stsfldPort.HasValue) {
+      WarnFallback("Constants.cDefaultPort", "26900");
+      baked.Add("network.default_port");
+    }
     int defaultPort = stsfldPort ?? 26900;
 
     // High-value dedicated behaviour hardcodes (const or simple cctor stsfld).
@@ -263,15 +273,24 @@ class StockFacts {
     // WorldConstants.WaterLevel is cctor-initialized from Block.cWaterLevel
     // (Block cctor ldc.r4 62.88). Pin the float so zdtd/realworld can compare.
     float? blockWaterLevel = StsfldR4(Exact(mod, "Block"), "cWaterLevel");
-    if (!blockWaterLevel.HasValue) WarnFallback("Block.cWaterLevel", "62.88");
+    if (!blockWaterLevel.HasValue) {
+      WarnFallback("Block.cWaterLevel", "62.88");
+      baked.Add("behaviour.world_water_level");
+    }
     float worldWaterLevel = blockWaterLevel ?? 62.88f;
     // Death-loot lifetime (s) and per-frame XML load budget (ms), both
     // Constants cctor-initialized (ldc.r4 300 / ldc.i4.s 50).
     float? stsfldLifetime = StsfldR4(c, "cItemDroppedOnDeathLifetime");
-    if (!stsfldLifetime.HasValue) WarnFallback("Constants.cItemDroppedOnDeathLifetime", "300");
+    if (!stsfldLifetime.HasValue) {
+      WarnFallback("Constants.cItemDroppedOnDeathLifetime", "300");
+      baked.Add("behaviour.item_dropped_on_death_lifetime_s");
+    }
     float itemDroppedOnDeathLifetime = stsfldLifetime ?? 300f;
     int? stsfldLoadBudget = StsfldInt(c, "cMaxLoadTimePerFrameMillis");
-    if (!stsfldLoadBudget.HasValue) WarnFallback("Constants.cMaxLoadTimePerFrameMillis", "50");
+    if (!stsfldLoadBudget.HasValue) {
+      WarnFallback("Constants.cMaxLoadTimePerFrameMillis", "50");
+      baked.Add("behaviour.max_load_time_per_frame_ms");
+    }
     int maxLoadTimePerFrameMillis = stsfldLoadBudget ?? 50;
     // Party fields may be metadata const on some builds; optional.
     int? maxPartySize = null;
@@ -421,6 +440,11 @@ class StockFacts {
     sb.AppendLine("    \"game_stats_members\": " + enumStats + ",");
     sb.AppendLine("    \"game_prefs_members\": " + enumPrefs);
     sb.AppendLine("  },");
+    // Provenance: empty baked list = every published value was read from the
+    // live assemblies; non-empty = the pin gate must refuse these values.
+    sb.AppendLine("  \"provenance\": {");
+    sb.AppendLine("    \"baked\": [" + string.Join(",", baked.Select(JsonEsc)) + "]");
+    sb.AppendLine("  },");
     sb.AppendLine("  \"litenet\": {");
     try {
       var ln = LoadLiteNetLib(Path.GetDirectoryName(asmPath));
@@ -433,8 +457,14 @@ class StockFacts {
         int? seq = FieldConstInt(nc, "MaxSequence");
         int? win = FieldConstInt(nc, "DefaultWindowSize");
         int[] mtu = PossibleMtu(ln, nc);
-        if (!proto.HasValue || !hdr.HasValue || !chan.HasValue || !frag.HasValue ||
-            !seq.HasValue || !win.HasValue)
+        int?[] lnVals = { proto, hdr, chan, frag, seq, win };
+        string[] lnNames = {
+          "protocol_id", "header_size", "channeled_header_size",
+          "fragment_header_size", "max_sequence", "default_window_size"
+        };
+        for (int k = 0; k < lnVals.Length; k++)
+          if (!lnVals[k].HasValue) baked.Add("litenet." + lnNames[k]);
+        if (baked.Count > 0 && baked.Any(b => b.StartsWith("litenet.", StringComparison.Ordinal)))
           Console.Error.WriteLine("stock-facts: warning: some LiteNetLib NetConstants " +
             "fields not extractable; baked defaults substituted");
         sb.AppendLine("    \"protocol_id\": " + (proto ?? 13) + ",");
@@ -453,10 +483,15 @@ class StockFacts {
       } else {
         Console.Error.WriteLine("stock-facts: warning: LiteNetLib.dll not found next to " +
           asmPath + "; emitting protocol_id only");
+        baked.AddRange(new[] {
+          "litenet.protocol_id", "litenet.header_size", "litenet.channeled_header_size",
+          "litenet.fragment_header_size", "litenet.max_sequence", "litenet.default_window_size"
+        });
         sb.AppendLine("    \"protocol_id\": 13");
       }
     } catch (Exception e) {
       sb.AppendLine("    \"protocol_id\": 13");
+      baked.Add("litenet.protocol_id");
       Console.Error.WriteLine("stock-facts: litenet extraction failed: " + e.Message);
     }
     sb.AppendLine("  }");

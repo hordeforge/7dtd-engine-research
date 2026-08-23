@@ -3,7 +3,7 @@
 
 Scans every *.md in the sibling repos next to 7dtd-engine-research (7dtd-server-apm,
 7dtd-fastconnect, 7dtd-loadgen, 7dtd-server-optimizer, 7dtd-playtest, 7dtd-realearth,
-7dtd-engine-research, 7dtd-server-guard, zdtd) and resolves every relative
+7dtd-engine-research, 7dtd-server-guard, zdtd-server) and resolves every relative
 markdown link that crosses the owning repo's boundary (a `../` chain leaving
 the repo root). Broken links are reported with the owning file.
 
@@ -26,7 +26,7 @@ LINK = re.compile(r"\]\(((?:\.\./)+[^) ]+\.md)\)")
 REPOS = [
     "7dtd-server-apm", "7dtd-fastconnect", "7dtd-loadgen", "7dtd-server-optimizer",
     "7dtd-playtest", "7dtd-realearth", "7dtd-engine-research", "7dtd-server-guard",
-    "zdtd",
+    "zdtd-server",
 ]
 
 
