@@ -49,3 +49,8 @@ worlds/
 /AvatarController
 /Chunk
 workspace/experiments/script-order-probe/
+
+# Accidental non-repo artifacts: an ImageMagick PS written as `pathlib`, and
+# 7dtd-fps-bots ga sweep output that landed here via a wrong-cwd run.
+/pathlib
+/tools/ga/

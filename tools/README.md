@@ -13,10 +13,22 @@ tools/
   legacy/     per-family dumpers that generated the historical il/ dump sets
   parity/     cross-version wire-surface snapshot + diff (steamcmd)
   re-scratch/ one-off Zig reversers for on-disk file formats
+  sandbox/    experimental asset extractors (mesh-atlas XMLs, zdtd Zig-table generators)
+  data/       committed pins: cecil.pin, stock_facts.json, xml_pins.json, promoted-types.txt
   tests/      dump-regen + coverage regression tests
-  facts.py    quick view of the machine-checked stock pins (make facts)
   build.sh    compiles src/ (and best-effort legacy/) into bin/
 ```
+
+Standalone Python entry points (no build step; each wired to a make target):
+
+| Script | Purpose |
+|---|---|
+| `facts.py` | Quick view of the machine-checked stock pins (`make facts`). |
+| `census-pct.py` | Percentage view of the coverage census (`make census`). |
+| `save_roundtrip_check.py` | Verify real saves against the documented codecs (`make save-roundtrip[-all]`). |
+| `cross_repo_links.py` | Cross-repo markdown link sweep (`make cross-links`). |
+| `zdtd_cite_check.py` | Sibling-repo research citation check (`make sibling-cites`). |
+| `xml_pins.py` | XML data pins vs the game dir (`make verify`). |
 
 ## Build
 
