@@ -25,6 +25,7 @@ worlds/
 
 /ChunkManager
 /NetPackageEntityAction
+/WorldBiomes
 
 # Accidental empty type-name dirs at repo root (DumpMethod cwd mistakes)
 /SleeperVolume/

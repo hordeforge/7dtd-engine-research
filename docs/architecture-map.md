@@ -48,7 +48,7 @@ flowchart TB
   end
 
   subgraph PERSIST[Persistence]
-    REG[Region files + WorldState<br/>SaveLoad 884 IL]
+    REG[Region files + WorldState<br/>SaveLoad 926 IL]
     AUX[decoration.7dt, power.dat, factions.dat,<br/>players, prefabs.xml, dynamic mesh .group]
   end
 
@@ -197,7 +197,7 @@ which is the entire pre-auth attack surface
 
 ```mermaid
 flowchart LR
-  SIM[Simulation state] --> WS["WorldState main.ttw<br/>SaveLoad 884 IL"]
+  SIM[Simulation state] --> WS["WorldState main.ttw<br/>SaveLoad 926 IL"]
   SIM --> RF["Region files<br/>chunk blocks + entities"]
   SIM --> DEC["decoration.7dt<br/>DecoObject records"]
   SIM --> PWR["power.dat<br/>PowerManager root forest"]
