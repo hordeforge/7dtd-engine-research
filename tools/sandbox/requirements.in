@@ -1,0 +1,6 @@
+# Direct third-party deps of tools/sandbox/*.py (stdlib otherwise).
+# Compile to requirements.txt with hashes:
+#   uv pip compile --generate-hashes requirements.in -o requirements.txt
+dnfile
+dncil
+UnityPy
