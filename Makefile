@@ -92,6 +92,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
 	python3 "$(TOOLS)/tests/test_save_roundtrip_robustness.py"
+	python3 "$(TOOLS)/tests/test_xml_pins_gate.py"
 	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 	python3 "$(TOOLS)/tests/test_inventory_counts.py"
 	python3 "$(TOOLS)/tests/test_readme_test_table.py"

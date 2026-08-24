@@ -195,29 +195,30 @@ def check_research(facts: dict, errors: list[str]) -> None:
     # must match the inventory's XmlName rows exactly.
     try:
         _tools = ROOT / "tools"
-        _env = dict(os.environ); _env["MONO_PATH"] = str(_tools / "bin")
-        _asm = os.environ.get("SEVENDTD_ASM") or str(
-            Path.home() / ".local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
-            / "7DaysToDieServer_Data/Managed/Assembly-CSharp.dll")
-        _out = subprocess.run(
-            ["mono", str(_tools / "bin" / "DumpMethod.exe"), _asm, "WorldStaticData", ".cctor"],
-            capture_output=True, text=True, env=_env, timeout=60,
-        ).stdout
-        _cctor_names = re.findall(r"ldc\.i4(?:\.\d+|\.s \d+)\n\s*IL_\w+: ldstr (\w+)", _out)
-        _core = sorted(n for n in _cctor_names if not n.startswith("loadAction") and not n.startswith("XUi"))
-        _inv = []
-        _inv_lines = read(ROOT / "docs" / "inventories" / "xmlsToLoad.md").splitlines()
-        _in_table = False
-        for _l in _inv_lines:
-            if _l.strip().startswith("| XmlName"):
-                _in_table = True; continue
-            if _in_table:
-                if not _l.strip().startswith("|"): break
-                _m = re.match(r"\|\s*`([^`]+)`", _l.strip())
-                if _m: _inv.append(_m.group(1))
-        _inv_core = sorted(n for n in _inv if not n.startswith("XUi"))
-        if _core != _inv_core:
-            errors.append(f"xmlsToLoad: cctor core ({len(_core)}) != inventory core ({len(_inv_core)})")
+        _asm = find_asm()
+        if _asm is None:
+            print("SKIP: xmlsToLoad cctor check skipped (dedicated Assembly-CSharp.dll not found)")
+        else:
+            _env = dict(os.environ); _env["MONO_PATH"] = str(_tools / "bin")
+            _out = subprocess.run(
+                ["mono", str(_tools / "bin" / "DumpMethod.exe"), str(_asm), "WorldStaticData", ".cctor"],
+                capture_output=True, text=True, env=_env, timeout=60,
+            ).stdout
+            _cctor_names = re.findall(r"ldc\.i4(?:\.\d+|\.s \d+)\n\s*IL_\w+: ldstr (\w+)", _out)
+            _core = sorted(n for n in _cctor_names if not n.startswith("loadAction") and not n.startswith("XUi"))
+            _inv = []
+            _inv_lines = read(ROOT / "docs" / "inventories" / "xmlsToLoad.md").splitlines()
+            _in_table = False
+            for _l in _inv_lines:
+                if _l.strip().startswith("| XmlName"):
+                    _in_table = True; continue
+                if _in_table:
+                    if not _l.strip().startswith("|"): break
+                    _m = re.match(r"\|\s*`([^`]+)`", _l.strip())
+                    if _m: _inv.append(_m.group(1))
+            _inv_core = sorted(n for n in _inv if not n.startswith("XUi"))
+            if _core != _inv_core:
+                errors.append(f"xmlsToLoad: cctor core ({len(_core)}) != inventory core ({len(_inv_core)})")
     except Exception as _e:
         errors.append(f"xmlsToLoad check failed: {_e}")
 
