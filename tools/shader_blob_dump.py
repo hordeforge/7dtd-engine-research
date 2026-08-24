@@ -71,6 +71,140 @@ def parse_subprogram(buf, pos):
     }
 
 
+class _Reader:
+    """Little-endian reader with Unity's 4-byte string alignment."""
+
+    def __init__(self, buf):
+        self.buf, self.pos = buf, 0
+
+    def i32(self):
+        value = struct.unpack_from("<i", self.buf, self.pos)[0]
+        self.pos += 4
+        return value
+
+    def u32(self):
+        value = struct.unpack_from("<I", self.buf, self.pos)[0]
+        self.pos += 4
+        return value
+
+    def string(self):
+        n = self.i32()
+        value = bytes(self.buf[self.pos:self.pos + n])
+        self.pos += n
+        self.pos = (self.pos + 3) & ~3
+        return value
+
+
+class _Writer:
+    def __init__(self):
+        self.out = bytearray()
+
+    def i32(self, v):
+        self.out += struct.pack("<i", v)
+
+    def u32(self, v):
+        self.out += struct.pack("<I", v)
+
+    def string(self, v):
+        self.i32(len(v))
+        self.out += v
+        while len(self.out) % 4:
+            self.out += b"\x00"
+
+
+def _read_cb_param(r):
+    return {"name": r.string(), "type": r.i32(), "rows": r.i32(), "columns": r.i32(),
+            "is_matrix": r.i32(), "array_size": r.i32(), "index": r.i32()}
+
+
+def _write_cb_param(w, p):
+    w.string(p["name"])
+    for key in ("type", "rows", "columns", "is_matrix", "array_size", "index"):
+        w.i32(p[key])
+
+
+def _read_struct_param(r):
+    s = {"name": r.string(), "index": r.i32(), "array_size": r.i32(), "size": r.i32()}
+    s["params"] = [_read_cb_param(r) for _ in range(r.i32())]
+    return s
+
+
+def _write_struct_param(w, s):
+    w.string(s["name"])
+    for key in ("index", "array_size", "size"):
+        w.i32(s[key])
+    w.i32(len(s["params"]))
+    for p in s["params"]:
+        _write_cb_param(w, p)
+
+
+def _read_constant_buffer(r):
+    cb = {"name": r.string(), "used_size": r.i32()}
+    cb["params"] = [_read_cb_param(r) for _ in range(r.i32())]
+    cb["structs"] = [_read_struct_param(r) for _ in range(r.i32())]
+    return cb
+
+
+def _write_constant_buffer(w, cb):
+    w.string(cb["name"])
+    w.i32(cb["used_size"])
+    w.i32(len(cb["params"]))
+    for p in cb["params"]:
+        _write_cb_param(w, p)
+    w.i32(len(cb["structs"]))
+    for s in cb["structs"]:
+        _write_struct_param(w, s)
+
+
+def parse_parameter_blob(raw):
+    """Decode a parameter blob; returns (fields, bytes consumed).
+
+    Layout per USCSandbox ShaderParams.cs with readBlobVersion=true.
+    """
+    r = _Reader(raw)
+    version = r.i32()
+    buffers = [_read_constant_buffer(r) for _ in range(r.i32())]
+    entries = []
+    for _ in range(r.i32()):
+        name = r.string()
+        kind = r.i32()
+        if kind == 0:      # texture
+            e = {"kind": 0, "name": name, "index": r.i32(),
+                 "sampler_index": r.i32(), "extra": r.u32()}
+        elif kind in (1, 2):   # constant-buffer binding / buffer binding
+            e = {"kind": kind, "name": name, "index": r.i32(), "array_size": r.i32()}
+        elif kind == 3:    # UAV
+            e = {"kind": 3, "name": name, "index": r.i32(), "original_index": r.i32()}
+        elif kind == 4:    # sampler
+            e = {"kind": 4, "name": name, "bind_point": r.i32(), "sampler": r.u32()}
+        else:
+            raise ValueError(f"unknown parameter kind {kind}")
+        entries.append(e)
+    return {"version": version, "buffers": buffers, "entries": entries}, r.pos
+
+
+def build_parameter_blob(fields):
+    """Re-emit a parameter blob. Round-trips stock blobs byte for byte."""
+    w = _Writer()
+    w.i32(fields["version"])
+    w.i32(len(fields["buffers"]))
+    for cb in fields["buffers"]:
+        _write_constant_buffer(w, cb)
+    w.i32(len(fields["entries"]))
+    for e in fields["entries"]:
+        w.string(e["name"])
+        w.i32(e["kind"])
+        if e["kind"] == 0:
+            w.i32(e["index"]); w.i32(e["sampler_index"]); w.u32(e["extra"])
+        elif e["kind"] in (1, 2):
+            w.i32(e["index"]); w.i32(e["array_size"])
+        elif e["kind"] == 3:
+            w.i32(e["index"]); w.i32(e["original_index"])
+        elif e["kind"] == 4:
+            w.i32(e["bind_point"]); w.u32(e["sampler"])
+    return bytes(w.out)
+
+
 def dxbc_chunks(data):
     """{fourcc: payload} for a DXBC container."""
     count = u32(data, 0x1C)
@@ -104,7 +238,7 @@ def decode_bundle(path, only=None, verbose=False):
     from UnityPy.helpers import CompressionHelper
 
     env = UnityPy.load(path)
-    rows, skipped = [], []
+    rows, skipped, parameters = [], [], []
     for obj in env.objects:
         if obj.type.name != "Shader":
             continue
@@ -133,6 +267,7 @@ def decode_bundle(path, only=None, verbose=False):
         records = [struct.unpack_from("<III", data, 4 + i * 12) for i in range(count)]
 
         wanted = {}
+        parameter_indices = set()
         for sub_shader in shader.m_ParsedForm.m_SubShaders:
             for a_pass in sub_shader.m_Passes:
                 for prog_name in PROGRAMS:
@@ -143,6 +278,16 @@ def decode_bundle(path, only=None, verbose=False):
                         for sub in group:
                             if sub.m_GpuProgramType in DX11_TYPES:
                                 wanted.setdefault(sub.m_BlobIndex, sub.m_GpuProgramType)
+                    # m_ParameterBlobIndices runs PARALLEL to the sub-program
+                    # list, which mixes platforms; a position's parameter blob
+                    # lives in the same platform blob as its sub-program, so
+                    # only the d3d11 positions index this table.
+                    for gi, group in enumerate(program.m_ParameterBlobIndices):
+                        subs = (program.m_PlayerSubPrograms[gi]
+                                if gi < len(program.m_PlayerSubPrograms) else [])
+                        for k, idx in enumerate(group):
+                            if k < len(subs) and subs[k].m_GpuProgramType in DX11_TYPES:
+                                parameter_indices.add(int(idx))
 
         for blob_index, gpu_type in sorted(wanted.items()):
             if blob_index >= len(records):
@@ -178,7 +323,30 @@ def decode_bundle(path, only=None, verbose=False):
                 print(f"  {name} blob={blob_index} type={gpu_type} "
                       f"header={code[:6].hex(' ')} srv={counts[OP_DCL_RESOURCE]} "
                       f"cb={counts[OP_DCL_CONSTANT_BUFFER]} smp={counts[OP_DCL_SAMPLER]}")
-    return rows, skipped
+        for blob_index in sorted(parameter_indices):
+            if blob_index >= len(records):
+                continue
+            offset, length, _segment = records[blob_index]
+            raw = bytes(data[offset:offset + length])
+            if len(raw) < 8 or u32(raw, 0) != BLOB_VERSION:
+                continue
+            try:
+                fields, consumed = parse_parameter_blob(raw)
+            except Exception as exc:
+                parameters.append({"shader": name, "blob_index": blob_index,
+                                   "status": f"parse failed: {exc}"})
+                continue
+            rebuilt = build_parameter_blob(fields)
+            exact = rebuilt == raw[:len(rebuilt)] and consumed == len(rebuilt)
+            parameters.append({
+                "shader": name, "blob_index": blob_index,
+                "status": "exact" if exact else "re-emit differs",
+                "trailing": len(raw) - consumed,
+                "buffers": len(fields["buffers"]), "entries": len(fields["entries"]),
+                "kinds": collections.Counter(e["kind"] for e in fields["entries"]),
+            })
+
+    return rows, skipped, parameters
 
 
 def check(rows):
@@ -221,7 +389,7 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     try:
-        rows, skipped = decode_bundle(args.bundle, args.shader, args.verbose)
+        rows, skipped, parameters = decode_bundle(args.bundle, args.shader, args.verbose)
     except ImportError:
         print("UnityPy is not installed; this reproduction tool needs it "
               "(pip install UnityPy).", file=sys.stderr)
@@ -249,6 +417,20 @@ def main(argv=None):
         match = sum(1 for r in rows if r["header"][byte] == r[field])
         print(f"  {label}: {match}/{len(rows)}")
 
+    if parameters:
+        exact = sum(1 for p in parameters if p["status"] == "exact")
+        kinds = collections.Counter()
+        for p in parameters:
+            kinds.update(p.get("kinds", {}))
+        print()
+        print(f"parameter blobs      : {len(parameters)}")
+        print(f"  re-emitted exactly : {exact}/{len(parameters)}")
+        print(f"  trailing bytes     : {dict(collections.Counter(p.get('trailing') for p in parameters))}")
+        print(f"  entry kinds        : {dict(kinds)}  (0 texture, 1 cbuffer-binding, 2 buffer, 3 UAV, 4 sampler)")
+        for p in parameters:
+            if p["status"] != "exact":
+                print(f"  PARAMETER BLOB FAIL {p['shader']} blob={p['blob_index']}: {p['status']}")
+
     bad, noted = check(rows)
     print()
     if noted:
@@ -256,12 +438,14 @@ def main(argv=None):
         for r, why in noted:
             print(f"  {r['shader']} blob={r['blob_index']}: {why}")
         print()
-    if bad:
-        print(f"LAYOUT VIOLATIONS: {len(bad)}")
+    param_bad = [p for p in parameters if p["status"] != "exact"]
+    if bad or param_bad:
+        print(f"LAYOUT VIOLATIONS: {len(bad)} header, {len(param_bad)} parameter blob")
         for r, why in bad[:10]:
             print(f"  {r['shader']} blob={r['blob_index']}: {why}")
         return 1
-    print(f"OK: all {len(rows)} sub-programs match the documented layout")
+    print(f"OK: {len(rows)} sub-programs match the documented layout; "
+          f"{len(parameters)} parameter blobs re-emitted byte for byte")
     return 0
 
 

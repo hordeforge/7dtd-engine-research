@@ -8362,3 +8362,32 @@ tools/shader_blob_dump.py is the tracked reproduction; it re-derives and
 re-checks every claim and exits non-zero on disagreement. re-methodology.md
 gains section 7b for asset-format RE, where IL is not the source and the
 open-source parser is the specification.
+
+
+## 2026-08-24 - Shader parameter blob decoded
+
+Follow-up to the sub-program blob page. A blob record is one of two kinds and
+only the code blob was decoded; this closes the other one.
+
+The parameter blob carries the binding table that the DXBC RDEF chunk would
+normally hold - Unity strips RDEF and STAT from every container, so the
+constant buffers, texture/buffer/UAV bindings and samplers live here instead.
+Layout follows USCSandbox ShaderParams.cs with readBlobVersion true: version,
+a constant-buffer array (each with its members and struct members), then a
+tagged entry array with five kinds.
+
+Evidence is a byte-for-byte round trip rather than a parse: 3403 of 3403 stock
+parameter blobs (729 from trees, 2674 from the player's data.unity3d) re-emit
+identically with zero trailing bytes. A reader can skip a field it
+misunderstands and still look correct; a writer that misplaces one byte
+cannot. tools/shader_blob_dump.py now performs that round trip as a gate.
+
+Also documented: the index space that makes this format look broken. Group 3
+of m_PlayerSubPrograms MIXES platforms (d3d11, OpenGLCore and Vulkan variants
+back to back, each indexing its own platform blob), and m_ParameterBlobIndices
+runs parallel to that list position by position rather than being a list of
+parameter blobs in its own right. Read flat against one platform's table, 2936
+of 3403 records resolve to code blobs and appear to be corrupt.
+
+Not measured: parameter entry kind 3 (UAV). No UAV entry appears in either
+stock sample, so its layout is marked as taken from the parser.
