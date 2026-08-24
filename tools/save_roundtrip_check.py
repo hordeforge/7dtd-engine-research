@@ -612,7 +612,7 @@ def check_region_raw(path, checks):
     version = struct.unpack_from("<i", data, 3)[0]
     pad = struct.unpack_from("<i", data, 7)[0]
     checks.append(f"  magic b'7rr'; version:i32={version} paddingBytes:i32={pad}")
-    checks.append(f"  header 11 bytes; location table 512 B @11; timestamp 256 B @523; payload @779")
+    checks.append("  header 11 bytes; location table 512 B @11; timestamp 256 B @523; payload @779")
 
 
 def discover_save_dir():

@@ -6,7 +6,7 @@
 **Hub:** [`INDEX.md`](INDEX.md).
 
 **Assembly:** dedicated `Assembly-CSharp.dll` V **3.1.0 (b14)** (gmUpdate IL=631 unchanged from V3.0.1)  
-**Tool:** `tools/legacy/DumpGmUpdate.cs` (pre-corrupted; use `tools/src/DumpMethod` instead, see §10)  
+**Tool:** `tools/legacy/DumpGmUpdate.cs` (or the general `tools/src/DumpMethod`, see §10)  
 **Optim summary:** [`../../7dtd-server-optimizer/docs/ARCHITECTURE.md`](../../7dtd-server-optimizer/docs/ARCHITECTURE.md)
 
 ---
@@ -401,8 +401,9 @@ stock design.
 
 ## 10. Regenerate dump
 
-The legacy `tools/legacy/DumpGmUpdate.cs` is pre-corrupted and does not build; use
-the general `DumpMethod` (see [`../tools/README.md`](../tools/README.md)):
+The legacy `tools/legacy/DumpGmUpdate.cs` builds with `./build.sh` and writes the
+per-method files itself; for a quick single-method dump use the general
+`DumpMethod` (see [`../tools/README.md`](../tools/README.md)):
 
 ```bash
 cd tools && ./build.sh

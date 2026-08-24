@@ -133,11 +133,11 @@ Session notes for the readiness experiment: [`../workspace/autoresearch/`](../wo
 
 ## 2. Legacy per-family dumpers (`legacy/`)
 
-39 archival dumpers that generated the historical `il/` dump sets. Each emits a
+38 archival dumpers that generated the historical `il/` dump sets. Each emits a
 whole family at once (many files + an auto-narrative). Kept for regenerating those
-specific sets; for anything new, prefer `src/DumpMethod`/`DumpType`. `build.sh`
-compiles them to `bin/legacy/` best-effort (**37 build; 2 are pre-corrupted:
-`DumpGmUpdate`, `DumpExtra2`, use `DumpMethod`/`DumpType` instead**).
+specific sets; for anything new, prefer `src/DumpMethod`/`src/DumpType`. `build.sh`
+compiles them to `bin/legacy/` best-effort (**all 38 build**; a source that stops
+compiling is reported, not fatal).
 
 Canonical family dumpers (map to `il/` dump sets):
 

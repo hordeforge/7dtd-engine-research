@@ -85,7 +85,7 @@ def main() -> int:
     env = dict(os.environ)
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
     meta_path = os.path.join(SCRATCH, "npc_check_META.md")
-    out = subprocess.run(
+    subprocess.run(
         ["mono", NPC, asm, meta_path],
         capture_output=True, text=True, env=env,
     )

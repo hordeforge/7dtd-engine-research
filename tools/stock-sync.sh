@@ -12,7 +12,6 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="$(cd "$HERE/.." && pwd)"
 BIN="$HERE/bin"
 DATA="$HERE/data"
 FACTS="$DATA/stock_facts.json"

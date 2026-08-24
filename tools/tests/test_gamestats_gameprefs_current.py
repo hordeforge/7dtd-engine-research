@@ -116,7 +116,6 @@ def main() -> int:
         for b in bad:
             print("FAIL:", b)
         return 1
-    total = sum(len(v) for v in dll.values())
     print(f"OK: {ENUMS[0]} ({len(dll[ENUMS[0]])}) + {ENUMS[1]} ({len(dll[ENUMS[1]])}) tables match the DLL; cited indices in range")
     return 0
 
