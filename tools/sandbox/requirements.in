@@ -1,4 +1,5 @@
-# Direct third-party deps of tools/sandbox/*.py (stdlib otherwise).
+# Direct third-party deps of tools/sandbox/*.py and tools/shader_blob_dump.py
+# (stdlib otherwise).
 # Compile to requirements.txt with hashes:
 #   uv pip compile --generate-hashes requirements.in -o requirements.txt
 dnfile

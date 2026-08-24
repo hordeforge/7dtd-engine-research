@@ -63,8 +63,9 @@ Run: `MONO_PATH=bin mono bin/<Tool>.exe ...` (Cecil resolves from `bin/`).
 ## Python dependencies
 
 Everything under `tools/` runs on the stdlib except the `sandbox/` asset
-extractors, whose third-party imports (`dnfile`, `dncil`, `UnityPy`) are
-hash-pinned in [`sandbox/requirements.txt`](sandbox/requirements.txt)
+extractors and `shader_blob_dump.py`, whose third-party imports (`dnfile`,
+`dncil`, `UnityPy`) are hash-pinned in
+[`sandbox/requirements.txt`](sandbox/requirements.txt)
 (recompile from [`sandbox/requirements.in`](sandbox/requirements.in) with
 `uv pip compile --generate-hashes requirements.in -o requirements.txt`).
 Install into a venv with `uv pip install -r sandbox/requirements.txt`;
@@ -95,7 +96,8 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 | `EnumList.exe <asm> <outFile>` | Emits `Enum.Member=value` for every enum member; feeds the drift-check enum diff. |
 | `MethodList.exe <asm> <outFile>` | Emits `Type::Method(params)` for every method-with-body; feeds the drift-check method-surface diff. |
 | `ListAllTypes.exe <asm> <outFile>` | One-off audit helper: every type FullName sorted to a file (used to audit DumpAll completeness). |
-| `shader_blob_dump.py <bundle> [--shader NAME] [--verbose]` | Decodes Shader (class 48) sub-program blobs from a stock UnityFS bundle and re-checks the documented layout: LZ4 per-platform blobs, the 12-byte record table, the code-blob record, and the 38-byte DX11 program-data header whose SRV/constant-buffer/sampler bytes are cross-checked against the DXBC `SHDR`/`SHEX` declaration opcodes. Exits non-zero on any disagreement. Backs [`../docs/shader-subprogram-blob.md`](../docs/shader-subprogram-blob.md). Needs UnityPy (`uv pip install UnityPy`); no assembly, no mono, exits 77 if UnityPy is absent. |
+| `shader_blob_dump.py <bundle> [--shader NAME] [--verbose]` | Decodes Shader (class 48) sub-program blobs from a stock UnityFS bundle and re-checks the documented layout: LZ4 per-platform blobs, the 12-byte record table, the code-blob record, and the 38-byte DX11 program-data header whose SRV/constant-buffer/sampler bytes are cross-checked against the DXBC `SHDR`/`SHEX` declaration opcodes. Exits non-zero on any disagreement. Backs [`../docs/shader-subprogram-blob.md`](../docs/shader-subprogram-blob.md). Needs UnityPy from the pinned sandbox requirements
+(`uv pip install -r sandbox/requirements.txt`); no assembly, no mono, exits 77 if UnityPy is absent. |
 | `census-pct.py [asm] [docsDir] [--json] [--history FILE]` | Percentage view of the coverage census: narrated / catalogued / classified / unaccounted fractions of reached game types, plus the whole-assembly reached-type/method fractions. `--json` emits a machine-readable object; `--history FILE` appends a dated row to the census-history CSV. Lives in `tools/`, runs `Coverage.exe` + `Census.exe` live (Python 3, no build step). |
 | `mention_depth.py [docsDir]` | DLL-free mention-depth histogram over the narrative docs: how many times each type-shaped backticked identifier occurs (exactly-1 / 2-4 / 5-19 / 20+). The depth behind any "narrated" fraction; published in `docs/re-methodology.md` §1. `Coverage.exe` emits the reached-type version into the generated report and stamps that report with the studied build's version consts. |
 

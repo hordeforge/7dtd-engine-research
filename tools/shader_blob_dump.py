@@ -6,9 +6,10 @@ per-platform blobs, the 12-byte record table, the sub-program header, and the
 DX11 program-data header whose three count bytes are cross-checked against the
 DXBC SHDR/SHEX declarations they describe.
 
-Needs UnityPy (not a repo dependency; this is a reproduction tool, not a gate):
+Needs UnityPy; use the repo's hash-pinned set (this is a reproduction tool,
+not a gate):
 
-    uv pip install UnityPy
+    uv pip install -r tools/sandbox/requirements.txt
 
 Usage:
     python3 tools/shader_blob_dump.py <bundle> [--shader NAME] [--verbose]
@@ -472,7 +473,8 @@ def main(argv=None):
         rows, skipped, parameters = decode_bundle(args.bundle, args.shader, args.verbose)
     except ImportError:
         print("UnityPy is not installed; this reproduction tool needs it "
-              "(uv pip install UnityPy).", file=sys.stderr)
+              "(uv pip install -r tools/sandbox/requirements.txt).",
+              file=sys.stderr)
         return 77
 
     print(f"bundle              : {args.bundle}")
