@@ -59,17 +59,25 @@ def docs_dir() -> str:
 
 
 def known_doc_names() -> set:
-    """Top-level docs/ filenames, resolved once.
+    """Every docs/ filename in this repo (top level + nested inventories),
+    resolved once.
 
     The scan tests every citation against this set; an isfile per match made
-    the walk pay one syscall per citation over whole sibling repos.
+    the walk pay one syscall per citation over whole sibling repos. Nested
+    trees count: docs/inventories/netpackage-bodies.md is a research doc, so
+    an `RE netpackage-bodies.md` marker must resolve against its basename.
     """
     ddir = docs_dir()
+    names = set()
     try:
-        names = os.listdir(ddir)
+        for _dirpath, dirnames, filenames in os.walk(ddir):
+            dirnames[:] = [d for d in dirnames if not d.startswith(".")]
+            for n in filenames:
+                if n.endswith(".md"):
+                    names.add(n)
     except OSError:
         return set()
-    return {n for n in names if os.path.isfile(os.path.join(ddir, n))}
+    return names
 
 
 def collect_local(root: str, into: set) -> None:

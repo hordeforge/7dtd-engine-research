@@ -23,10 +23,16 @@ fn readAll(a: std.mem.Allocator, path: []const u8) ![]u8 {
     return buf[0..off];
 }
 
-pub fn main() !void {
+pub fn main(init: std.process.Init.Minimal) !void {
     var gpa = std.heap.DebugAllocator(.{}){};
     const a = gpa.allocator();
-    const data = try readAll(a, "/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/Data/Prefabs/POIs/abandoned_house_07.tts");
+    var argv = init.args.iterate();
+    _ = argv.next(); // program name
+    const path = argv.next() orelse {
+        std.debug.print("usage: texdump <prefab.tts>\n", .{});
+        return error.Usage;
+    };
+    const data = try readAll(a, path);
     const version = std.mem.readInt(u32, data[4..8], .little);
     const sx: i32 = std.mem.readInt(i16, data[8..10], .little);
     const sy: i32 = std.mem.readInt(i16, data[10..12], .little);

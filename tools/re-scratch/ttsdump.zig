@@ -23,10 +23,20 @@ fn readAll(a: std.mem.Allocator, path: []const u8) ![]u8 {
     return buf[0..off];
 }
 
-pub fn main() !void {
+pub fn main(init: std.process.Init.Minimal) !void {
     var gpa = std.heap.DebugAllocator(.{}){};
     const a = gpa.allocator();
-    const data = try readAll(a, "/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/Data/Prefabs/POIs/abandoned_house_07.tts");
+    var argv = init.args.iterate();
+    _ = argv.next(); // program name
+    const tts_path = argv.next() orelse {
+        std.debug.print("usage: ttsdump <prefab.tts> <assignids_dump.txt>\n", .{});
+        return error.Usage;
+    };
+    const dump_path = argv.next() orelse {
+        std.debug.print("usage: ttsdump <prefab.tts> <assignids_dump.txt>\n", .{});
+        return error.Usage;
+    };
+    const data = try readAll(a, tts_path);
     const sx: i32 = std.mem.readInt(i16, data[8..10], .little);
     const sy: i32 = std.mem.readInt(i16, data[10..12], .little);
     const sz: i32 = std.mem.readInt(i16, data[12..14], .little);
@@ -43,7 +53,7 @@ pub fn main() !void {
         gop.value_ptr.* = (if (gop.found_existing) gop.value_ptr.* else 0) + 1;
     }
 
-    const dump = try readAll(a, "/home/maci/Desktop/7dtd/zdtd/assets/fixtures/assignids_v314.txt");
+    const dump = try readAll(a, dump_path);
     var names = std.AutoHashMap(u16, []const u8).init(a);
     var lines = std.mem.splitScalar(u8, dump, '\n');
     while (lines.next()) |ln| {

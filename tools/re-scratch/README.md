@@ -10,4 +10,6 @@ client wire and file formats. Run with `zig run <file>.zig`.
 | `dem_probe.zig` | Probe a Copernicus GLO-30 COG tile (elevation sanity check). |
 | `chunk_size.zig` | Scratch size math for the stock chunk wire. |
 
-Paths inside these are hardcoded to a local Steam install; adjust as needed.
+Paths come from `argv` (`zig run <file>.zig -- <paths>`); nothing here reads a
+hardcoded install location. These tools use raw Linux syscalls and only build
+on Linux targets.

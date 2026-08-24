@@ -296,7 +296,7 @@ def main():
     pe = dnfile.dnPE(args.dll)
     out = extract(pe)
     if args.out:
-        with open(args.out, "w") as f:
+        with open(args.out, "w", encoding="utf-8") as f:
             json.dump(out, f, indent=1)
     else:
         print(json.dumps(out, indent=1))

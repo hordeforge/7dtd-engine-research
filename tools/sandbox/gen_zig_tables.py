@@ -16,7 +16,7 @@ from json import dumps as zstr
 
 
 def emit(json_path: str, out_path: str) -> None:
-    t = json.load(open(json_path))
+    t = json.load(open(json_path, encoding="utf-8"))
     vs = t["valuesets"]
     opts = t["options"]
 
@@ -98,7 +98,7 @@ def emit(json_path: str, out_path: str) -> None:
     out.append("};")
     out.append("")
 
-    with open(out_path, "w") as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         f.write("\n".join(out))
     print(f"wrote {out_path}: {len(vs)} value sets, {len(opts)} options")
 

@@ -9,6 +9,10 @@
 # First run with no baseline snapshots writes them and reports "baseline created".
 # Requires: mono (mcs), Mono.Cecil, the tools built (../build.sh).
 set -uo pipefail
+# sort/comm below compare baseline vs current listings byte-wise; both sides
+# must collate identically, so pin the locale instead of inheriting the
+# invoker's (C vs en_US.UTF-8 order differently and turn real drift into noise).
+export LC_ALL=C
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLS="$(cd "$here/.." && pwd)"
 BIN="$TOOLS/bin"

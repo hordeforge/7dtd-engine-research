@@ -142,7 +142,7 @@ def main():
     lines.append("    try std.testing.expectEqual(@as(u16, 434), water_color5);")
     lines.append("}")
     lines.append("")
-    with open(out_path, "w") as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     for name, entries in atlases:
         print(f"{name}: {len(entries)} entries")

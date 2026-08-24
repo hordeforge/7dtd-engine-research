@@ -289,9 +289,9 @@ def main():
         )
         header = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
         if not os.path.exists(history):
-            with open(history, "w") as fh:
+            with open(history, "w", encoding="utf-8", newline="") as fh:
                 fh.write(header)
-        with open(history, "a") as fh:
+        with open(history, "a", encoding="utf-8", newline="") as fh:
             fh.write(row)
         # Keep stdout pure JSON under --json: consumers pipe the report
         # straight into a parser.

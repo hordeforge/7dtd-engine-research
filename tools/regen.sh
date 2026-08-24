@@ -35,7 +35,9 @@ step "wire-body catalog (committed)"
 MONO_PATH="$here/bin" mono "$here/bin/WireBodies.exe" "$asm" "$root/docs/inventories/netpackage-bodies.md"
 
 step "console-command registry"
-MONO_PATH="$here/bin" mono "$here/bin/CmdMap.exe" "$asm" "$root/docs/inventories/console-command-list.tsv" || true
+# Committed inventory like WireBodies/StateMachines/Coverage below: a failed
+# run must abort the regen, not leave a stale tsv looking freshly regenerated.
+MONO_PATH="$here/bin" mono "$here/bin/CmdMap.exe" "$asm" "$root/docs/inventories/console-command-list.tsv"
 
 step "NetPackage channel/compress census (META)"
 MONO_PATH="$here/bin" mono "$here/bin/NetProtocolCensus.exe" "$asm" "$root/il/netpackages-v3.1.0/META.md"
@@ -47,25 +49,40 @@ step "RE coverage report (committed)"
 MONO_PATH="$here/bin" mono "$here/bin/Coverage.exe" "$asm" "$root/docs" "$root/docs/inventories/coverage-report.md"
 
 step "legacy per-family dumpers"
-# explicit tool -> output-dir mapping (dirs are lowercase in il/)
-declare -A legacy_dirs=(
-  [DumpDediComplete]=dedi-complete-v3.1.0
-  [DumpDeep]=deep-v3.1.0
-  [DumpDeeper]=deeper-v3.1.0
-  [DumpGaps]=gaps-v3.1.0
-  [DumpFrameEntries]=frame-entries-v3.1.0
-  [DumpLoopComplete]=loop-complete-v3.1.0
-  [DumpOptScan]=opt-scan-v3.1.0
-  [DumpTerrain]=terrain-v3.1.0
-  [DumpRealEarthSurfaces]=realearth-surfaces-v3.1.0
+# explicit tool -> output-dir mapping (dirs are lowercase in il/). Parallel
+# indexed arrays, not an associative array: declare -A needs bash 4+ while the
+# tool family otherwise runs on stock bash 3.2 (macOS); this also keeps the
+# dump order stable run to run.
+legacy_tools=(
+  DumpDediComplete
+  DumpDeep
+  DumpDeeper
+  DumpGaps
+  DumpFrameEntries
+  DumpLoopComplete
+  DumpOptScan
+  DumpTerrain
+  DumpRealEarthSurfaces
+)
+legacy_outdirs=(
+  dedi-complete-v3.1.0
+  deep-v3.1.0
+  deeper-v3.1.0
+  gaps-v3.1.0
+  frame-entries-v3.1.0
+  loop-complete-v3.1.0
+  opt-scan-v3.1.0
+  terrain-v3.1.0
+  realearth-surfaces-v3.1.0
 )
 # Legacy dumps stay best-effort (archival tools, superseded by src/), but a
 # failed run must be reported like build.sh does for unbuildable sources:
 # a silently missing dump set would look identical to a clean regeneration.
-for t in "${!legacy_dirs[@]}"; do
+for i in "${!legacy_tools[@]}"; do
+  t="${legacy_tools[i]}"
   exe="$here/bin/legacy/$t.exe"
   [[ -f "$exe" ]] || { echo "skip $t (missing)"; continue; }
-  if ! out="$(MONO_PATH="$here/bin" mono "$exe" "$asm" "$root/il/${legacy_dirs[$t]}" 2>&1)"; then
+  if ! out="$(MONO_PATH="$here/bin" mono "$exe" "$asm" "$root/il/${legacy_outdirs[i]}" 2>&1)"; then
     printf 'regen: warning: %s dump FAILED:\n%s\n' "$t" "$out" >&2
     legacy_fail=1
   fi

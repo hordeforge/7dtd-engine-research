@@ -1,10 +1,16 @@
 const std = @import("std");
 const dem = @import("dem");
-pub fn main() !void {
+pub fn main(init: std.process.Init.Minimal) !void {
     var gpa = std.heap.DebugAllocator(.{}){};
     const a = gpa.allocator();
+    var argv = init.args.iterate();
+    _ = argv.next(); // program name
+    const cache_dir = argv.next() orelse {
+        std.debug.print("usage: dem_probe <scratch-cache-dir>\n", .{});
+        return error.Usage;
+    };
     var f: dem.Fetcher = undefined;
-    f.init(a, "/home/maci/.cache/zdtd-scratch");
+    f.init(a, cache_dir);
     defer f.deinit();
     const out = try a.alloc(f32, 1024 * 1024);
     defer a.free(out);
