@@ -5,7 +5,7 @@ Usage:
   parity_diff.py old.json new.json          # what TFP changed between versions
   parity_diff.py --coverage new.json GAMEDIR # what zdtd handles vs stock
 """
-import json, sys, re, subprocess, os
+import json, sys, re, os
 
 def load(p): return json.load(open(p))
 
@@ -53,8 +53,11 @@ def coverage(new, gamedir):
     for k in missing_c2s: print(f"  {k}  read={new['packages'][k]['read'][:80]}")
 
 if __name__ == "__main__":
-    if sys.argv[1] == "--coverage":
+    if len(sys.argv) >= 4 and sys.argv[1] == "--coverage":
         coverage(load(sys.argv[2]), sys.argv[3])
-    else:
+    elif len(sys.argv) >= 3:
         n = diff(load(sys.argv[1]), load(sys.argv[2]))
         sys.exit(1 if n else 0)
+    else:
+        print(__doc__.strip(), file=sys.stderr)
+        sys.exit(2)

@@ -229,6 +229,61 @@ class StockFacts {
     return null;
   }
 
+  // LiteNetLib wire constants, extracted from the sibling assembly when it
+  // sits next to Assembly-CSharp.dll; documented defaults (recorded in baked)
+  // otherwise. Emits the section body between the "litenet" braces; the last
+  // field never carries a trailing comma.
+  static void EmitLiteNet(StringBuilder sb, string asmPath, List<string> baked) {
+    try {
+      var ln = LoadLiteNetLib(Path.GetDirectoryName(asmPath));
+      if (ln != null) {
+        var nc = Exact(ln.MainModule, "NetConstants");
+        int? proto = FieldConstInt(nc, "ProtocolId");
+        int? hdr = FieldConstInt(nc, "HeaderSize");
+        int? chan = FieldConstInt(nc, "ChanneledHeaderSize");
+        int? frag = FieldConstInt(nc, "FragmentHeaderSize");
+        int? seq = FieldConstInt(nc, "MaxSequence");
+        int? win = FieldConstInt(nc, "DefaultWindowSize");
+        int[] mtu = PossibleMtu(ln, nc);
+        int?[] lnVals = { proto, hdr, chan, frag, seq, win };
+        string[] lnNames = {
+          "protocol_id", "header_size", "channeled_header_size",
+          "fragment_header_size", "max_sequence", "default_window_size"
+        };
+        for (int k = 0; k < lnVals.Length; k++)
+          if (!lnVals[k].HasValue) baked.Add("litenet." + lnNames[k]);
+        if (baked.Any(b => b.StartsWith("litenet.", StringComparison.Ordinal)))
+          Console.Error.WriteLine("stock-facts: warning: some LiteNetLib NetConstants " +
+            "fields not extractable; baked defaults substituted");
+        sb.AppendLine("    \"protocol_id\": " + (proto ?? 13) + ",");
+        sb.AppendLine("    \"header_size\": " + (hdr ?? 1) + ",");
+        sb.AppendLine("    \"channeled_header_size\": " + (chan ?? 4) + ",");
+        sb.AppendLine("    \"fragment_header_size\": " + (frag ?? 6) + ",");
+        sb.AppendLine("    \"max_sequence\": " + (seq ?? 32768) + ",");
+        sb.AppendLine("    \"default_window_size\": " + (win ?? 64) + ",");
+        if (mtu != null) {
+          sb.AppendLine("    \"possible_mtu\": [" + string.Join(",", mtu) + "],");
+          sb.AppendLine("    \"initial_mtu\": " + mtu[0] + ",");
+          sb.AppendLine("    \"max_packet_size\": " + mtu[mtu.Length - 1]);
+        } else {
+          sb.AppendLine("    \"possible_mtu\": []");
+        }
+      } else {
+        Console.Error.WriteLine("stock-facts: warning: LiteNetLib.dll not found next to " +
+          asmPath + "; emitting protocol_id only");
+        baked.AddRange(new[] {
+          "litenet.protocol_id", "litenet.header_size", "litenet.channeled_header_size",
+          "litenet.fragment_header_size", "litenet.max_sequence", "litenet.default_window_size"
+        });
+        sb.AppendLine("    \"protocol_id\": 13");
+      }
+    } catch (Exception e) {
+      sb.AppendLine("    \"protocol_id\": 13");
+      baked.Add("litenet.protocol_id");
+      Console.Error.WriteLine("stock-facts: litenet extraction failed: " + e.Message);
+    }
+  }
+
   static void Main(string[] a) {
     if (a.Length < 1) {
       Console.Error.WriteLine("usage: StockFacts <asm> [out.json]");
@@ -446,54 +501,7 @@ class StockFacts {
     sb.AppendLine("    \"baked\": [" + string.Join(",", baked.Select(JsonEsc)) + "]");
     sb.AppendLine("  },");
     sb.AppendLine("  \"litenet\": {");
-    try {
-      var ln = LoadLiteNetLib(Path.GetDirectoryName(asmPath));
-      if (ln != null) {
-        var nc = Exact(ln.MainModule, "NetConstants");
-        int? proto = FieldConstInt(nc, "ProtocolId");
-        int? hdr = FieldConstInt(nc, "HeaderSize");
-        int? chan = FieldConstInt(nc, "ChanneledHeaderSize");
-        int? frag = FieldConstInt(nc, "FragmentHeaderSize");
-        int? seq = FieldConstInt(nc, "MaxSequence");
-        int? win = FieldConstInt(nc, "DefaultWindowSize");
-        int[] mtu = PossibleMtu(ln, nc);
-        int?[] lnVals = { proto, hdr, chan, frag, seq, win };
-        string[] lnNames = {
-          "protocol_id", "header_size", "channeled_header_size",
-          "fragment_header_size", "max_sequence", "default_window_size"
-        };
-        for (int k = 0; k < lnVals.Length; k++)
-          if (!lnVals[k].HasValue) baked.Add("litenet." + lnNames[k]);
-        if (baked.Count > 0 && baked.Any(b => b.StartsWith("litenet.", StringComparison.Ordinal)))
-          Console.Error.WriteLine("stock-facts: warning: some LiteNetLib NetConstants " +
-            "fields not extractable; baked defaults substituted");
-        sb.AppendLine("    \"protocol_id\": " + (proto ?? 13) + ",");
-        sb.AppendLine("    \"header_size\": " + (hdr ?? 1) + ",");
-        sb.AppendLine("    \"channeled_header_size\": " + (chan ?? 4) + ",");
-        sb.AppendLine("    \"fragment_header_size\": " + (frag ?? 6) + ",");
-        sb.AppendLine("    \"max_sequence\": " + (seq ?? 32768) + ",");
-        sb.AppendLine("    \"default_window_size\": " + (win ?? 64) + ",");
-        if (mtu != null) {
-          sb.AppendLine("    \"possible_mtu\": [" + string.Join(",", mtu) + "],");
-          sb.AppendLine("    \"initial_mtu\": " + mtu[0] + ",");
-          sb.AppendLine("    \"max_packet_size\": " + mtu[mtu.Length - 1]);
-        } else {
-          sb.AppendLine("    \"possible_mtu\": []");
-        }
-      } else {
-        Console.Error.WriteLine("stock-facts: warning: LiteNetLib.dll not found next to " +
-          asmPath + "; emitting protocol_id only");
-        baked.AddRange(new[] {
-          "litenet.protocol_id", "litenet.header_size", "litenet.channeled_header_size",
-          "litenet.fragment_header_size", "litenet.max_sequence", "litenet.default_window_size"
-        });
-        sb.AppendLine("    \"protocol_id\": 13");
-      }
-    } catch (Exception e) {
-      sb.AppendLine("    \"protocol_id\": 13");
-      baked.Add("litenet.protocol_id");
-      Console.Error.WriteLine("stock-facts: litenet extraction failed: " + e.Message);
-    }
+    EmitLiteNet(sb, asmPath, baked);
     sb.AppendLine("  }");
     sb.AppendLine("}");
 

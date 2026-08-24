@@ -12,7 +12,7 @@ help:
 	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
 	@echo "make save-roundtrip-all - verify EVERY probe save + the shipped Navezgane world (full fleet round-trip)"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
-	@echo "make stock-check  - pin check only (committed JSON)"
+	@echo "make stock-check  - pin check only (committed JSON; also diffs facts vs the live DLL when present)"
 	@echo "make facts        - view the machine-checked stock pins (census/save/behaviour)"
 	@echo "make post-update  - after TFP patch: stock-sync + drift (tools/post-update.sh)"
 	@echo "make census       - Census.exe against ASM"

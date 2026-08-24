@@ -7,7 +7,10 @@ only reads the committed (or just-regenerated) JSON and greps known pin sites.
 Usage:
   python3 tools/tests/check_stock_facts.py
   python3 tools/tests/check_stock_facts.py --facts path/to/stock_facts.json
-  python3 tools/tests/check_stock_facts.py --require-live   # fail if facts missing
+  python3 tools/tests/check_stock_facts.py --require-live   # fail if facts missing;
+                            # also re-extract the facts from the local dedicated
+                            # DLL (bin/StockFacts.exe) and diff every field, so a
+                            # game-build drift cannot pass silently
 
 Exit 0 = in sync (or soft-skip if no facts and not --require-live, or if a
 sibling repo directory is entirely absent).
@@ -20,12 +23,99 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _common import find_asm  # noqa: E402  (shared game-assembly discovery)
 
 ROOT = Path(__file__).resolve().parents[2]  # 7dtd-engine-research
 WS = ROOT.parent  # 7dtd workspace
-DEFAULT_FACTS = ROOT / "tools" / "data" / "stock_facts.json"
+TOOLS = ROOT / "tools"
+DEFAULT_FACTS = TOOLS / "data" / "stock_facts.json"
+
+# Fields that legitimately differ between the committed artifact and a fresh
+# extraction without indicating game drift: timestamps, provenance bookkeeping,
+# schema metadata. Everything else must match byte-for-value.
+VOLATILE_FACT_KEYS = {"extracted_utc", "asm", "generated_by", "schema", "provenance"}
+
+_MISSING = object()
+
+
+def _diff(left: object, right: object, path: str, into: list[str]) -> None:
+    if isinstance(left, dict) and isinstance(right, dict):
+        for k in sorted(set(left) | set(right)):
+            _diff(left.get(k, _MISSING), right.get(k, _MISSING),
+                  f"{path}.{k}" if path else k, into)
+    elif left != right:
+        fmt = lambda v: "<absent>" if v is _MISSING else repr(v)
+        into.append(f"{path}: live={fmt(left)} committed={fmt(right)}")
+
+
+def check_live_against_dll(facts: dict, errors: list[str]) -> None:
+    """Re-extract stock_facts from the local dedicated DLL and diff every field.
+
+    This is the teeth behind the 'facts match the live dedicated DLL' claim: a
+    Steam update (or a stale pin) shows up as a named field diff instead of a
+    silent pass or a cryptic downstream census mismatch. Skipped (with a note)
+    on machines without the game; FAILs with the build command when the game is
+    present but the extractor is not.
+    """
+    asm = find_asm()
+    if asm is None:
+        print("SKIP: live DLL not found; facts-vs-DLL comparison skipped "
+              "(set ASM=<Assembly-CSharp.dll> to enable)")
+        return
+    exe = TOOLS / "bin" / "StockFacts.exe"
+    mono = shutil.which("mono")
+    if not exe.is_file():
+        errors.append(
+            f"live facts comparison skipped: {exe} missing "
+            f"(dedicated DLL found at {asm}; cd tools && ./build.sh --skip-legacy)"
+        )
+        return
+    if mono is None:
+        errors.append("live facts comparison skipped: mono not on PATH")
+        return
+    env = dict(os.environ, MONO_PATH=str(TOOLS / "bin"))
+    with tempfile.TemporaryDirectory(prefix="stock-facts-live-") as td:
+        out = Path(td) / "live_facts.json"
+        try:
+            proc = subprocess.run(
+                [mono, str(exe), str(asm), str(out)],
+                capture_output=True, text=True, env=env, timeout=120,
+            )
+        except subprocess.TimeoutExpired:
+            errors.append("live facts extraction timed out after 120s")
+            return
+        if proc.returncode != 0 or not out.is_file():
+            errors.append(
+                "live facts extraction failed: " + (proc.stderr or "").strip()[:400]
+            )
+            return
+        live = json.loads(out.read_text(encoding="utf-8"))
+    strip = lambda d: {k: v for k, v in d.items() if k not in VOLATILE_FACT_KEYS}
+    diffs: list[str] = []
+    _diff(strip(live), strip(facts), "", diffs)
+    if diffs:
+        lv = (live.get("version") or {})
+        cm = (facts.get("version") or {})
+        errors.append(
+            f"committed facts do not match the live DLL: local build "
+            f"{lv.get('display')} (b{lv.get('build')}) vs pinned "
+            f"{cm.get('display')} (b{cm.get('build')}); {len(diffs)} field(s) differ:"
+        )
+        for dline in diffs[:20]:
+            errors.append(dline)
+        if len(diffs) > 20:
+            errors.append(f"... and {len(diffs) - 20} more")
+        errors.append(
+            "after a TFP patch re-sync: ASM=<dll> tools/post-update.sh "
+            "(then re-pin docs/siblings); or point ASM at the studied build"
+        )
 
 
 def load_facts(path: Path) -> dict:
@@ -104,13 +194,12 @@ def check_research(facts: dict, errors: list[str]) -> None:
     # xmlsToLoad list: the WorldStaticData cctor's load names (non-XUi core)
     # must match the inventory's XmlName rows exactly.
     try:
-        import subprocess as _sp
         _tools = ROOT / "tools"
         _env = dict(os.environ); _env["MONO_PATH"] = str(_tools / "bin")
         _asm = os.environ.get("SEVENDTD_ASM") or str(
             Path.home() / ".local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
             / "7DaysToDieServer_Data/Managed/Assembly-CSharp.dll")
-        _out = _sp.run(
+        _out = subprocess.run(
             ["mono", str(_tools / "bin" / "DumpMethod.exe"), _asm, "WorldStaticData", ".cctor"],
             capture_output=True, text=True, env=_env, timeout=60,
         ).stdout
@@ -411,6 +500,11 @@ def main() -> int:
     facts = load_facts(args.facts)
     errors: list[str] = []
     skips: list[str] = []
+
+    # The documented contract for --require-live: the facts under test match the
+    # live dedicated DLL (skipped with a note where there is no local game).
+    if args.require_live:
+        check_live_against_dll(facts, errors)
 
     # A value under provenance.baked was published as a hard-coded default
     # because IL extraction failed; it must never pass as a verified pin.

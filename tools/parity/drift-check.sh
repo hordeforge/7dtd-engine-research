@@ -88,8 +88,11 @@ if [[ -f "$BASELINE_DIR/methods.txt" && -f "$cur/methods.txt" ]]; then
 fi
 if [[ -f "$BASELINE_DIR/enums.txt" && -f "$cur/enums.txt" ]]; then
   sec "enum members (added/removed)"
-  comm -13 <(sort -u "$BASELINE_DIR/enums.txt") <(sort -u "$cur/enums.txt") | grep -vE '_0000' | sed 's/^/    +/'
-  comm -23 <(sort -u "$BASELINE_DIR/enums.txt") <(sort -u "$cur/enums.txt") | grep -vE '_0000' | sed 's/^/    -/'
+  ea=$(comm -13 <(sort -u "$BASELINE_DIR/enums.txt") <(sort -u "$cur/enums.txt") | grep -vE '_0000')
+  er=$(comm -23 <(sort -u "$BASELINE_DIR/enums.txt") <(sort -u "$cur/enums.txt") | grep -vE '_0000')
+  [[ -n "$ea" ]] && { echo "  ADDED:";   echo "$ea" | sed 's/^/    +/'; drift=1; }
+  [[ -n "$er" ]] && { echo "  REMOVED:"; echo "$er" | sed 's/^/    -/'; drift=1; }
+  [[ -z "$ea" && -z "$er" ]] && echo "  (unchanged)"
 fi
 if [[ -f "$BASELINE_DIR/parity.json" && -f "$cur/parity.json" ]]; then
   sec "NetPackage wire (added/removed/changed)"

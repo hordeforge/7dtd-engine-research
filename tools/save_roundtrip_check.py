@@ -279,7 +279,7 @@ def check_main_ttw(path, checks):
                       f"saveDataLimit={sdl}")
         blob_sizes = []
         blob_bodies = []
-        for name in ("dynamicSpawnerState", "aiDirectorState"):
+        for _ in ("dynamicSpawnerState", "aiDirectorState"):
             ln = struct.unpack_from("<i", buf, off)[0]
             off += 4
             blob_sizes.append(ln)
@@ -336,9 +336,9 @@ def parse_chunk_body(body, name, idx, checks):
     """Fully parse a decompressed Chunk.save body (Chunk.write IL=601) and
     require it to consume the body byte-exactly.
 
-    Returns (coords_ok, exact_ok). When entities or tile entities are present
-    (variable-length nested formats not deep-parsed here), exact_ok is False
-    with a reason recorded.
+    Returns (coords_ok, exact_ok, reason). When entities or tile entities are
+    present (variable-length nested formats not deep-parsed here), exact_ok is
+    False with a reason recorded.
     """
     p = 0
     n = len(body)

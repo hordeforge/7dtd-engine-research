@@ -241,7 +241,8 @@ def main():
             result["classified"], result["unaccounted"], result["narrated_pct"])
         header = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
         if not os.path.exists(history):
-            open(history, "w").write(header)
+            with open(history, "w") as fh:
+                fh.write(header)
         with open(history, "a") as fh:
             fh.write(row)
         print("history appended to", history)
