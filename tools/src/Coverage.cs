@@ -418,15 +418,7 @@ class Coverage {
 
     File.WriteAllText(a[2], sb.ToString());
 
-    // Full undocumented-reached list (sidecar TSV): methods, namespace, type.
-    var tsv = new StringBuilder();
-    tsv.AppendLine("methods\tnamespace\ttype");
-    foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
-                                 .OrderByDescending(t => t.Methods.Count(x => x.HasBody)))
-      tsv.AppendLine(t.Methods.Count(x => x.HasBody) + "\t" + NsLabel(t) + "\t" + t.Name);
-    File.WriteAllText(a[2] + ".gaps.tsv", tsv.ToString());
-
     Console.Error.WriteLine("reached methods=" + visited.Count + " game types=" + gameReached.Count + " narrated=" + docd + " catalogued=" + catd + " classified=" + classd + " unaccounted=" + undoc);
-    Console.WriteLine("wrote " + a[2] + " (+ " + a[2] + ".gaps.tsv, " + undoc + " undocumented)");
+    Console.WriteLine("wrote " + a[2] + " (" + undoc + " undocumented)");
   }
 }
