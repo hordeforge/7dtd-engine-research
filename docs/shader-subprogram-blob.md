@@ -95,6 +95,7 @@ keywordCount   : u32
 per keyword    : length u32, bytes, padded to 4
 programData    : length u32, then that many bytes
 align to 4
+bindChannels   : ParserBindChannels (below) - closes the record
 ```
 
 There is **no local-keyword array** at this version: Unity carried one only
@@ -104,6 +105,51 @@ the byte array is found at all.
 This ordering is what both open-source parsers of the format read:
 [USCSandbox `ShaderSubProgram.cs`](https://github.com/nesrak1/USCSandbox/blob/main/USCSandbox/Processor/ShaderSubProgram.cs)
 and [UnityPy `ShaderConverter.py`](https://github.com/K0lb3/UnityPy/blob/master/UnityPy/export/ShaderConverter.py).
+
+## Bind channels
+
+Every code-blob record **ends** with a `ParserBindChannels` block, after the
+program data and its alignment. It is easy to miss: the program data is the
+last field that looks like content, and a record is 8 to 40 bytes longer than
+the program data alone accounts for.
+
+```text
+sourceMap : i32   a stored mask of mesh channels
+count     : i32
+per bind  : source i32, target i32
+```
+
+`source` is the mesh channel the engine reads; `target` is the shader input it
+feeds. The mapping was derived by correlating every stock vertex blob's
+channel list against its own DXBC input signature:
+
+| Semantic | source | target |
+|---|---|---|
+| `POSITION` 0 | 0 | 0 |
+| `NORMAL` 0 | 1 | 1 |
+| `TANGENT` 0 | 2 | 2 |
+| `COLOR` 0 | 3 | 3 |
+| `TEXCOORD` *n* | 4 + *n* | 5 + *n* |
+
+Two things about it are not what they look like:
+
+- **The channel list is a subset of the input signature.** Only the inputs the
+  program actually reads get a channel. `Legacy Shaders/Specular` declares
+  eight signature elements and binds three.
+- **`sourceMap` is not derived from the channel list.** It is a stored base
+  mask that a reader ORs each bound channel's bit into
+  (`SourceMap |= 1 << channel.Source` in USCSandbox), so the stored value can
+  name channels the program never binds - `Nature/SpeedTree Billboard` stores
+  63 while binding channels that imply 49. The invariant that holds over both
+  samples is containment: every bound channel's bit is set in `sourceMap`.
+
+A **pixel** program writes the block with `sourceMap` 0 and `count` 0 - eight
+bytes, still present. Its inputs come from the vertex program's outputs, not
+from mesh channels.
+
+This block is why a record that ends at its program data is rejected. Omitting
+it produces `Failed to load GpuProgram from binary shader data` from the
+runtime - a refusal, not a mis-draw, which is the good failure mode.
 
 ## DX11 program-data header
 
@@ -237,6 +283,7 @@ the first shader that uses an immediate constant buffer - 72 of the 1894
 ## Status
 
 `verified` for the container, the record table, the code-blob record, the
+bind-channel block and its semantic mapping, the
 38-byte offset, header bytes 0, 2, 3 and 5, the parallel index space between
 `m_ParameterBlobIndices` and `m_PlayerSubPrograms`, and the parameter-blob
 layout (round-tripped byte for byte over 3403 records). `inferred` for byte 1
@@ -253,6 +300,14 @@ entry appears in either sample. **Not decoded:** the quantity in header byte
   bytes 1 to 3 newly identified as the SRV, constant-buffer and sampler counts
   by walking the DXBC token stream. Reproduction tool:
   [`tools/shader_blob_dump.py`](../tools/shader_blob_dump.py).
+- **2026-08-24:** Bind channels decoded - the `ParserBindChannels` block that
+  closes every code-blob record, its semantic-to-channel mapping, and the two
+  traps in it (the channel list is a subset of the input signature;
+  `sourceMap` is a stored base mask, not a derived one). Confirmed by
+  construction: a synthesized shader whose records omitted this block was
+  refused by a real 2022.3.62f2 runtime with `Failed to load GpuProgram from
+  binary shader data`, and adding it made the same shader report
+  `Shader.isSupported = true`.
 - **2026-08-24:** Parameter blob decoded - the other record kind, carrying the
   binding table the stripped `RDEF` chunk would hold. 3403 of 3403 stock
   parameter blobs re-emit byte for byte. Also documents how

@@ -39,6 +39,7 @@ OP_DCL_RESOURCE_STRUCTURED = 162   # dcl_resource_structured (StructuredBuffer)
 SRV_OPCODES = (OP_DCL_RESOURCE, OP_DCL_RESOURCE_RAW, OP_DCL_RESOURCE_STRUCTURED)
 UAV_OPCODES = (156, 157, 158)      # dcl_uav_typed / _raw / _structured
 GEOMETRY_TYPES = {19, 20}          # kShaderGpuProgramDX11GeometrySM40 / SM50
+VERTEX_TYPES = {13, 15, 16}        # DX10Level9Vertex, DX11VertexSM40/SM50
 
 
 def u32(buf, off):
@@ -68,7 +69,7 @@ def parse_subprogram(buf, pos):
         "flow": u32(buf, pos + 16), "temp": u32(buf, pos + 20),
         "keywords": keywords, "size": size,
         "data": bytes(buf[off + 4:off + 4 + size]),
-    }
+    }, off + 4
 
 
 class _Reader:
@@ -154,6 +155,47 @@ def _write_constant_buffer(w, cb):
     w.i32(len(cb["structs"]))
     for s in cb["structs"]:
         _write_struct_param(w, s)
+
+
+# Unity's vertex bind channels: `source` is the mesh channel the engine
+# reads, `target` the shader input it feeds. Derived by correlating each
+# stock vertex blob's channel list against its own DXBC input signature.
+BIND_CHANNEL_SOURCES = {
+    ("POSITION", 0): (0, 0),
+    ("NORMAL", 0): (1, 1),
+    ("TANGENT", 0): (2, 2),
+    ("COLOR", 0): (3, 3),
+}
+
+
+def parse_bind_channels(raw):
+    """Decode the `ParserBindChannels` block that closes a code-blob record."""
+    source_map, count = struct.unpack_from("<ii", raw, 0)
+    channels = [struct.unpack_from("<ii", raw, 8 + i * 8) for i in range(count)]
+    return {"source_map": source_map, "channels": channels}, 8 + count * 8
+
+
+def input_semantics(dxbc):
+    """`(semantic, index)` per element of a DXBC input signature."""
+    isgn = dxbc_chunks(dxbc).get("ISGN")
+    if isgn is None:
+        return []
+    out = []
+    for i in range(u32(isgn, 0)):
+        name_offset, index = struct.unpack_from("<II", isgn, 8 + i * 24)
+        out.append((isgn[name_offset:isgn.index(b"\x00", name_offset)].decode("ascii"), index))
+    return out
+
+
+def expected_channels(dxbc):
+    """The channel list a vertex program's input signature implies."""
+    channels = []
+    for semantic, index in input_semantics(dxbc):
+        if semantic == "TEXCOORD":
+            channels.append((4 + index, 5 + index))
+        elif (semantic, index) in BIND_CHANNEL_SOURCES:
+            channels.append(BIND_CHANNEL_SOURCES[(semantic, index)])
+    return channels
 
 
 def parse_parameter_blob(raw):
@@ -297,7 +339,7 @@ def decode_bundle(path, only=None, verbose=False):
                 continue
             if u32(data, offset) != BLOB_VERSION or u32(data, offset + 4) != gpu_type:
                 continue
-            sub = parse_subprogram(data, offset)
+            sub, data_offset = parse_subprogram(data, offset)
             code = sub["data"]
             if code[38:42] != b"DXBC":
                 skipped.append((name, f"blob {blob_index}: DXBC not at offset 38"))
@@ -309,6 +351,11 @@ def decode_bundle(path, only=None, verbose=False):
                 skipped.append((name, f"blob {blob_index}: no SHDR/SHEX chunk"))
                 continue
             counts = shdr_declaration_counts(code_chunk)
+            data_end = (data_offset + sub["size"] + 3) & ~3
+            trailing = bytes(data[data_end:offset + length])
+            channels = None
+            if len(trailing) >= 8:
+                channels, _consumed = parse_bind_channels(trailing)
             rows.append({
                 "shader": name, "blob_index": blob_index, "gpu_type": gpu_type,
                 "segment": segment, "record_length": length,
@@ -317,6 +364,9 @@ def decode_bundle(path, only=None, verbose=False):
                 "cbuffer": counts[OP_DCL_CONSTANT_BUFFER],
                 "sampler": counts[OP_DCL_SAMPLER],
                 "gs_primitive": code[5],
+                "trailing": len(trailing),
+                "channels": channels,
+                "expected_channels": expected_channels(code[38:]),
                 "uav": sum(counts[op] for op in UAV_OPCODES),
             })
             if verbose:
@@ -377,6 +427,31 @@ def check(rows):
             noted.append((r, f"header[5]={h[5]} GS input primitive"))
         if h[6:38] != b"\x00" * 32:
             bad.append((r, "header[6:38] not zero"))
+        # Every code-blob record closes with a ParserBindChannels block. A
+        # record that lacks it is short by at least those eight bytes, and the
+        # runtime refuses the program rather than mis-drawing it.
+        if r["channels"] is None:
+            bad.append((r, f"no ParserBindChannels block ({r['trailing']} trailing bytes)"))
+            continue
+        got = [tuple(c) for c in r["channels"]["channels"]]
+        # sourceMap is a stored base mask, not a checksum of the channel list:
+        # USCSandbox ORs each channel's source bit into it after reading, so
+        # the stored value can name channels the program does not bind. The
+        # invariant that does hold is containment.
+        source_map = 0
+        for source, _target in got:
+            source_map |= 1 << source
+        if r["channels"]["source_map"] & source_map != source_map:
+            bad.append((r, f"sourceMap {r['channels']['source_map']} omits a bound channel "
+                           f"(channels imply {source_map})"))
+        # A vertex program binds a SUBSET of what its signature declares:
+        # only the inputs it actually reads get a channel. Every bound pair
+        # must still be one the semantic mapping predicts.
+        if r["gpu_type"] in VERTEX_TYPES:
+            unexpected = [c for c in got if c not in r["expected_channels"]]
+            if unexpected:
+                bad.append((r, f"channels {unexpected} not derivable from the input "
+                               f"signature {r['expected_channels']}"))
     return bad, noted
 
 
@@ -407,6 +482,7 @@ def main(argv=None):
 
     print(f"DXBC chunk sets     : {dict(collections.Counter(r['chunks'] for r in rows))}")
     print(f"record segment word : {dict(collections.Counter(r['segment'] for r in rows))}")
+    print(f"bind-channel counts : {dict(collections.Counter(len(r['channels']['channels']) if r['channels'] else -1 for r in rows))}")
     print(f"header versions     : {dict(collections.Counter(r['header'][0] for r in rows))}")
     print(f"header[5] GS prim   : {dict(collections.Counter(r['header'][5] for r in rows))}")
     print()
