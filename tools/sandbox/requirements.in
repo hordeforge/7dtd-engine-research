@@ -3,5 +3,7 @@
 # Compile to requirements.txt with hashes:
 #   uv pip compile --generate-hashes requirements.in -o requirements.txt
 dnfile
+# Stale upstream (last release Dec 2022) but stable and complete as a CIL
+# disassembler; Mandiant-maintained and still the standard Python option.
 dncil
 UnityPy

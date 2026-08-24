@@ -60,8 +60,18 @@ regen-check:
 
 # Static analysis gate: same commands in CI (ci.yml lint job). ruff reads
 # ruff.toml at the repo root; format --check keeps the tree formatter-clean;
-# shellcheck runs at its strictest severity.
+# shellcheck runs at its strictest severity. The ruff binary must match the
+# CI pin (single source of truth: .github/workflows/ci.yml), because format
+# and lint rules drift between releases.
 lint:
+	@expected=$$(sed -n 's/^ *pipx install ruff==\([0-9][0-9.]*\)/\1/p' .github/workflows/ci.yml | head -1); \
+	actual=$$(ruff --version | awk '{print $$2}'); \
+	if [ -z "$$expected" ]; then \
+	  echo "lint: cannot read the ruff pin from .github/workflows/ci.yml" >&2; exit 2; \
+	fi; \
+	if [ "$$actual" != "$$expected" ]; then \
+	  echo "lint: local ruff $$actual != CI pin ruff==$$expected; align both together (.github/workflows/ci.yml)" >&2; exit 2; \
+	fi
 	ruff check .
 	ruff format --check .
 	for f in $$(git ls-files '*.sh'); do shellcheck "$$f"; done
