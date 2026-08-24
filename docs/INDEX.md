@@ -240,6 +240,7 @@ Grouped by subsystem. Each doc is the single home for its topic; inventories
 | [dynamic-mesh.md](dynamic-mesh.md) | Dynamic mesh: destroyed-geometry regen, threading, DynamicMeshes/ persistence, channel-1 streaming |
 | [texture-atlas.md](texture-atlas.md) | Block texture-atlas metadata + minimap color chain: uvmapping XML in meshdescriptions_assets_all.bundle, CalcChunkColors → GetMapColor → ToColor5 (map chunks) |
 | [texture-atlas-unityfs.md](texture-atlas-unityfs.md) | UnityFS container layout of meshdescriptions_assets_all.bundle (backs texture-atlas.md) |
+| [shader-subprogram-blob.md](shader-subprogram-blob.md) | Shader (class 48) sub-program blob: LZ4 per-platform blobs, 12-byte record table, code-blob record, and the 38-byte DX11 program-data header before the DXBC |
 
 ### E. Networking and wire protocol
 
@@ -395,6 +396,7 @@ Live scale laws: [measured-scaling.md](../../7dtd-server-optimizer/docs/measured
 
 ## Changelog
 
+- **2026-08-24:** New page [shader-subprogram-blob.md](shader-subprogram-blob.md): Shader (class 48) compiled-code container, including the 38-byte DX11 program-data header decoded over 7366 sub-programs (`tools/shader_blob_dump.py`). Method added as [re-methodology.md](re-methodology.md) 7b.
 - **2026-08-22:** Wire the texture-atlas docs into the hub (section D rows; the docs shipped in 24c8199 without INDEX or audit-table entries).
 - **2026-08-11:** Tools section now names both gates (`make test` full suite, `make test-docs` CI variant); research CI added (`.github/workflows/ci.yml`); reading-path table links the zdtd provenance ledger (`zdtd-server/docs/PROVENANCE.md`).
 - **2026-08-10:** LiteNetLib join-churn race closed as a managed defect
