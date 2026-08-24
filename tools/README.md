@@ -29,6 +29,7 @@ Standalone Python entry points (no build step; each wired to a make target):
 | `cross_repo_links.py` | Cross-repo markdown link sweep (`make cross-links`). |
 | `zdtd_cite_check.py` | Sibling-repo research citation check (`make sibling-cites`). |
 | `xml_pins.py` | XML data pins vs the game dir (`make verify`). |
+| `regen.sh` | One-shot full regeneration: builds the dumpers, then re-dumps every `il/` set and refreshes every committed inventory (`docs/inventories/*`), ending with `make test`. Needs `ASM=<dedicated Assembly-CSharp.dll>`. |
 
 ## Build
 
@@ -42,8 +43,8 @@ cd tools
 Requires `mono` (`mcs`) and a `Mono.Cecil.dll` (build.sh searches known local
 copies and the standard Mono GAC under `/usr/lib` or `/usr/local/lib`; override
 with `MONO_CECIL=/path/to/Mono.Cecil.dll`, or restore via `dotnet add package
-Mono.Cecil`). Mono.Cecil is this repo's only third-party dependency, and it is
-**pinned**: build.sh checks the candidate's SHA-256 against
+Mono.Cecil`). Mono.Cecil is the only third-party dependency of the C# tooling,
+and it is **pinned**: build.sh checks the candidate's SHA-256 against
 [`data/cecil.pin`](data/cecil.pin) and refuses a mismatch (every dumper links
 and runs against that dll, so a silently swapped binary is a supply-chain risk).
 After deliberately upgrading Cecil, review it and re-pin with
@@ -57,6 +58,16 @@ ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7D
 ```
 
 Run: `MONO_PATH=bin mono bin/<Tool>.exe ...` (Cecil resolves from `bin/`).
+
+## Python dependencies
+
+Everything under `tools/` runs on the stdlib except the `sandbox/` asset
+extractors, whose third-party imports (`dnfile`, `dncil`, `UnityPy`) are
+hash-pinned in [`sandbox/requirements.txt`](sandbox/requirements.txt)
+(recompile from [`sandbox/requirements.in`](sandbox/requirements.in) with
+`uv pip compile --generate-hashes requirements.in -o requirements.txt`).
+Install into a venv with `uv pip install -r sandbox/requirements.txt`;
+the hashes gate every download.
 
 ## 1. General dumpers (`src/`): prefer these
 
@@ -106,7 +117,10 @@ python3 tests/check_stock_facts.py --require-live
 
 Commit `data/stock_facts.json` when the game pin changes. The checker fails if
 `docs/coverage.md`, loadgen `GameVersion`, or zdtd `stock_wire` / challenge /
-ticks disagree with the JSON. See [`../docs/re-methodology.md`](../docs/re-methodology.md) §5c.
+ticks disagree with the JSON. Values that could not be extracted from IL and
+were published as hard-coded defaults are listed under `provenance.baked`; a
+non-empty list always fails the pin check (re-extract against the live game).
+See [`../docs/re-methodology.md`](../docs/re-methodology.md) §5c.
 
 ### After a TFP game update
 
@@ -117,6 +131,9 @@ Preferred one-shot path (facts + pin gate + optional surface drift):
 ./post-update.sh --no-drift     # extract + pins only
 make post-update                # same from repo root
 ```
+
+For the whole corpus (dump sets + committed inventories + gates), run
+`ASM="<dll>" ./tools/regen.sh` instead of invoking each dumper by hand.
 
 `stock_facts.json` also carries:
 - `update.dump_label_suffix` / `update.dump_sets` for `il/<set>-<suffix>/` regen
@@ -130,11 +147,11 @@ Session notes for the readiness experiment: [`../workspace/autoresearch/`](../wo
 
 ## 2. Legacy per-family dumpers (`legacy/`)
 
-39 archival dumpers that generated the historical `il/` dump sets. Each emits a
+38 archival dumpers that generated the historical `il/` dump sets. Each emits a
 whole family at once (many files + an auto-narrative). Kept for regenerating those
-specific sets; for anything new, prefer `src/DumpMethod`/`DumpType`. `build.sh`
-compiles them to `bin/legacy/` best-effort (**37 build; 2 are pre-corrupted:
-`DumpGmUpdate`, `DumpExtra2`, use `DumpMethod`/`DumpType` instead**).
+specific sets; for anything new, prefer `src/DumpMethod`/`src/DumpType`. `build.sh`
+compiles them to `bin/legacy/` best-effort (**all 38 build**; a source that stops
+compiling is reported, not fatal).
 
 Canonical family dumpers (map to `il/` dump sets):
 
@@ -153,7 +170,8 @@ Canonical family dumpers (map to `il/` dump sets):
 | `DumpAIDirector` | (aidirector) | AIDirector component types |
 | `DumpSaveLight` | (save/light) | WorldState + light sites |
 
-The remaining `legacy/*.cs` (`DumpMethod(ByName)`, `DumpType(s)`, `DumpOne(Method)`,
+The remaining `legacy/*.cs` (`DumpMethods`, `DumpMethodByName`, `DumpType(s)`,
+`DumpOne`, `DumpOneMethod(2)`,
 `DumpNamed`, `DumpNested`, `DumpNodes`, `DumpReg`, `DumpMgr`, `DumpScan`, `DumpIter`,
 `DumpFull`, `DumpAstar`, `DumpAuth`, `DumpVoxel`, `DumpTps`, `DumpTypeBases`,
 `DumpExtra*`, `Find{FieldWrite,Log,Sub,Type}`, `ListMethods`) are ad-hoc single-target
@@ -187,9 +205,10 @@ local install. See `re-scratch/README.md`.
 | Test | Checks |
 |---|---|
 | `tests/test_tool_bootstrap.py` | The tool builder discovers distribution-provided Mono.Cecil assemblies in the standard `/usr/lib` and `/usr/local/lib` Mono GAC paths. |
+| `tests/test_ilfmt_safe.py` | `IlFmt.Safe` (the filename sanitizer for assembly-supplied namespace/type names in DumpAll/DumpType/DumpNetPackages) never yields a fragment that escapes the dump out-dir: a crafted name of `.` or `..` is defused while namespace dots survive. Compiles a probe against `src/IlFmt.cs`; skips without mcs/mono. |
 | `tests/test_cecil_pin.py` | Mono.Cecil supply-chain pin: `data/cecil.pin` is well-formed, `build.sh` still enforces the SHA-256 gate, and any built `bin/Mono.Cecil.dll` matches it. |
 | `tests/test_dedi_coverage_docs.py` | Structural proof that the coverage docs, dump sets, and dumpers all exist and are IL-backed (no game constant is the pass condition). Detector self-tests prove the banned-phrase and IL-claim greps can fire. |
-| `tests/check_stock_facts.py --require-live` | `tools/data/stock_facts.json` matches the live dedicated DLL (`make stock-check`). |
+| `tests/check_stock_facts.py --require-live` | `tools/data/stock_facts.json` matches the live dedicated DLL (`make stock-check`): re-extracts via `bin/StockFacts.exe` and diffs every field, so a Steam-side build update fails with a named diff instead of passing silently. The facts-vs-DLL diff skips (with a note) on machines without the game; the docs/siblings checks always run. |
 | `tests/test_reach_consistency.py` | Reach and Coverage report identical reached-method counts (shared `src/Seeds.cs`), so the two lenses cannot drift. Census bucket arithmetic sums. |
 | `tests/test_surface_wellformed.py` | `full-surface.md` type rows sum to the 1,740,737 IL-instruction pin (per-type vs per-namespace totals must agree). |
 | `tests/test_subclass_counts.py` | Per-leaf inventories (sequence-requirements 38, item-actions 38, quest-objectives 38, minevent-actions 71, block-behaviors 65, te-features 11, challenge-objectives 28+1, sequence-actions 123) match the DLL's concrete-subclass closures / namespace composition; six inventories' key-method fingerprints exist on the leaf or its base chain (args stripped; te-features' annotated prose excluded). |
@@ -200,16 +219,17 @@ local install. See `re-scratch/README.md`.
 | `tests/test_il_citations.py` | Every parseable `Type::Method`/`Type.Method` + `IL=N` claim in the docs matches the DLL (any overload); dated changelog notes and shorthand-suffix types are skipped. Caught `GetCellsOnRay` 244->242 and `PersistentPlayerLogin` 5->37. |
 | `tests/test_xref_claims.py` | Every `Xref=N` call-site claim in the docs (tight ``Type.Method (Xref=N)`` form) matches `Xref.exe` on the live DLL. |
 | `tests/test_console_classification.py` | The console client-executable / dedicated-gate split (188 leaves; 83 `get_IsExecuteOnClient`, 84 either, 10 gated classes) matches a Cecil prologue probe over `CmdMap` rows. |
-| `tests/test_netprotocol_census.py` | `NetProtocolCensus` re-derives the per-package census (193 packages; 6 channel-1, 8 compressed, 5 not-before-auth, 4 non-map) and the docs must match on all four axes. |
+| `tests/test_netprotocol_census.py` | `NetProtocolCensus` re-derives the per-package census (193 packages; 6 channel-1, 8 compressed, 5 unreliable-delivery, 10 allowed-before-auth, 4 non-map) and the docs must match on every axis. |
 | `tests/test_tuned_constants.py` | 524 tuned game constants across ~56 families (AI-director horde/placement/cooldown + airdrop schedule, water-sim, block masks + BlockValue layouts, entity/walk-type ids, spawn rings, stealth/smell, vehicle/drone/turret, region/chunk/world, RWG, threat levels) pinned against the DLL and stated in the owning docs; completeness scan fails on any un-allowlisted const-rich class. |
 | `tests/test_committed_inventories_current.py` | Generated inventories (`netpackage-bodies`, `coverage-report`, `state-machines`) are current against the live DLL. |
 | `tests/test_state_machines_current.py` | `state-machines.md` lifecycle tables are current against the live DLL (skips without mono; CI-safe). |
-| `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (11 claims). |
+| `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (12 claims). |
 | `tests/test_readme_test_table.py` | Every test script run by `make test`/`test-docs`/`verify` is documented in this table, and every entry is a real file. |
 | `tests/test_transport_closure_claims.py` | No stale native-LiteNetLib / unknown-peer-order claims in the docs. Pattern liveness self-tested. |
 | `tests/test_coverage_consistency.py` | `docs/coverage.md` audit table lists every narrative doc; census rows match `stock_facts.json`. |
 | `tests/test_doc_link_integrity.py` | Every doc reachable from `INDEX.md`; 0 dead internal links; every root doc carries the `**Hub:**` backlink; every `../` cross-repo link resolves to a real file (wrong-depth citations fail). Synthetic-tree self-tests prove orphan/dead detection. |
 | `tests/test_save_roundtrip_robustness.py` | `save_roundtrip_check.py` degrades malformed/truncated saves to `"parse error"` FAIL verdicts instead of escaping a traceback (which would abort the remaining files' checks), and `--shipped` usage-errors with exit 2 when its path argument is missing or absent. Fixture-driven, DLL-free. |
+| `tests/test_xml_pins_gate.py` | `xml_pins.py --check` diffs every committed section (`entityclasses_health`, `traders_root`, `buffs_survival`) against the install, so drift in any pinned value fails; regeneration refuses to overwrite populated sections when a source file parses to nothing (wrong `--game-dir`, renamed config header). Synthetic Data/Config fixtures in a temp dir via `--pins`; DLL-free, never touches `tools/data`. |
 | `tests/test_re_dump_regen.py` | Compiles `legacy/DumpFrameEntries` and regenerates non-empty inventory dumps from the local dedicated DLL (needs install + mcs/mono). |
 | `tests/bench_version_update_tooling.py` | Version-update tooling benchmark (`make readiness`). Includes mutation checks of the Mono.Cecil pin gate. |
 

@@ -2,5 +2,5 @@
 # repo's RE tooling (compiled against by tools/build.sh, never redistributed).
 # build.sh refuses a candidate whose SHA-256 differs; re-pin deliberately:
 #   tools/cecil-pin.sh /path/to/Mono.Cecil.dll
-version=0.11.1.0
-sha256=b2d02479592f5ff67c6673feb5e6527809229e982daa1c1a553d15a7ca3eb053
+version=0.11.5.0
+sha256=71c8b01208ab37a5164f5bacd69054899db9fc00f2da87dbd07dc1ee40fc06a8

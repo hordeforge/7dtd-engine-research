@@ -1044,7 +1044,7 @@ pins the whole quest's POI.
 
 ### Objective side
 
-- `BaseObjective::SetupPosition` (IL=2) is a hard `false` — only position-aware
+- `BaseObjective::SetupPosition` (IL=2) is a hard `false`; only position-aware
   subclasses override it.
 - `ObjectiveRandomPOIGoto::SetupPosition` (IL=9) → `ObjectiveGoto::GetPosition`
   (IL=339) + `op_Inequality(position, zero)`.
@@ -1057,7 +1057,7 @@ pins the whole quest's POI.
 
 1. If `Quest.GetPositionData(out, POIPosition /*2*/)` is set (restart / journal
    reload path): recompute the center, `GetHeightAt`, set `position`, re-raise
-   the NavObject and `CurrentValue=2`, and return — no reselection.
+   the NavObject and `CurrentValue=2`, and return; no reselection.
 2. Server path (`ConnectionManager.IsServer`):
    - Anchor `entityPlayer` falls back to `OwnerJournal.OwnerPlayer`.
    - `ownerNPC is EntityTrader` →
@@ -1099,14 +1099,14 @@ variant) with the same anchor. No prefab → "No Trader found" → zero.
 1. `prefabs = QuestEventManager.GetPrefabsByDifficultyTier(difficulty)`; null → null.
 2. Up to **50 attempts**: `pi = prefabs[GameRandom.RandomRange(prefabs.Count)]`.
 3. Per-attempt filters, in order (any fail → next attempt):
-   - `prefab.SleeperVolumeList.AnyUsedEntry` — the prefab XML must define at
+   - `prefab.SleeperVolumeList.AnyUsedEntry`: the prefab XML must define at
      least one sleeper volume (`PrefabSleeperVolumeList.ReadFromProperties` calls
      `Volume.Use(start, size)` per parsed volume, so "used" ≈ "has sleeper
      volumes").
-   - `prefab.GetQuestTag(questTag)` = `questTags.Test_AllSet` — the prefab must
+   - `prefab.GetQuestTag(questTag)` = `questTags.Test_AllSet`: the prefab must
      carry **every** tag the quest carries (HasAnyQuestTag is the lenient
      variant, unused here).
-   - `prefab.DifficultyTier == difficulty` — exact byte match.
+   - `prefab.DifficultyTier == difficulty`: exact byte match.
    - bbox origin not in `usedPOILocations`.
    - `QuestEventManager.CheckForPOILockouts(entityIDforQuests, bboxPos, out
      extraData)` false (bedroll / land claim / quest-lock / player-inside, with
@@ -1119,7 +1119,7 @@ variant) with the same anchor. No prefab → "No Trader found" → zero.
      name to be in `filter.split(',')`; type 3 (`SameBiome`) requires the same
      `BiomeDefinition` reference as the anchor position (player pos here).
    - squared distance `(worldPos - center)` must satisfy
-     `minSearchDistance < d² < maxSearchDistance` — i.e. (1000, 4000000)², so
+     `minSearchDistance < d² < maxSearchDistance`, i.e. (1000, 4000000)², so
      31.6–2000 m from the player, center to center.
 
 `GetRandomPOINearTrader` (IL=65): `idx = trader.PreferredDistanceIndex % 3`;
@@ -1129,7 +1129,7 @@ then the first entry passing `ValidPrefabForQuest`.
 
 `ValidPrefabForQuest` (IL=156, trader path): AnyUsedEntry + AllSet tag test,
 bbox origin not used, lockout false, then the same biome-filter switch with the
-anchor = the **trader's** position for the SameBiome case. No distance check —
+anchor = the **trader's** position for the SameBiome case. No distance check;
 the band list already handles proximity.
 
 `GetClosestPOIToWorldPos` (IL=230): full pass over `poiPrefabs` (lock-guarded);
@@ -1150,7 +1150,7 @@ the tier's list or null.
 
 `GetPrefabsForTrader` (IL=35): lazily `SetupTraderPrefabList(area)`; picks the
 `index`-th `PrefabListData`; `ShuffleDifficulty(difficulty, GameRandom)` (a
-`Extensions.Shuffle` of that tier's list — so every offer rerolls the order);
+`Extensions.Shuffle` of that tier's list, so every offer rerolls the order);
 returns `TierData[difficulty]` or null.
 
 `SetupTraderPrefabList` (IL=80): three `PrefabListData` distance bands around

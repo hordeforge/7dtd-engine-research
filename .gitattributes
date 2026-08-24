@@ -1,0 +1,6 @@
+# Text is stored with LF and checked out with LF on every OS: CRLF breaks the
+# bash tools (*.sh), Makefile recipes, and byte-exact comparisons in tests.
+* text=auto eol=lf
+
+# Verbatim copies of game XML kept for research diffing; never normalize.
+tools/sandbox/atlas/*.xml -text

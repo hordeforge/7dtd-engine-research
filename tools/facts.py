@@ -10,7 +10,8 @@ import os
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
 facts_path = os.path.join(TOOLS, "data", "stock_facts.json")
-d = json.load(open(facts_path, encoding="utf-8"))
+with open(facts_path, encoding="utf-8") as fh:
+    d = json.load(fh)
 v = d["version"]
 print(f"pin: {v['display']} (b{v['build']}) tps={d['sim']['constants_ticks_per_second']}")
 c = d.get("census", {})
@@ -19,7 +20,8 @@ print(f"  census: top_types={c.get('top_level_types')} methods={c.get('methods_w
 print(f"  save: current_save_version={s.get('current_save_version')} saveload_il={s.get('worldstate_saveload_stream_il')}")
 xp = os.path.join(TOOLS, "data", "xml_pins.json")
 if os.path.isfile(xp):
-    xd = json.load(open(xp, encoding="utf-8"))
+    with open(xp, encoding="utf-8") as fh:
+        xd = json.load(fh)
     hp = xd.get("entityclasses_health", {})
     if hp:
         print(f"  xml: healthSlim={hp.get('healthSlim')} feral={hp.get('healthSlimFeral')} infernal={hp.get('healthSlimInfernal')} ({len(hp)} vars)")

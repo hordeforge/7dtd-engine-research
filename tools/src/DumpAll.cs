@@ -13,7 +13,6 @@ using System.Text;
 using Mono.Cecil;
 
 class DumpAll {
-  static string Safe(string s) => string.Concat(s.Select(c => char.IsLetterOrDigit(c) || c == '_' || c == '.' ? c : '_'));
   static void Main(string[] a) {
     if (a.Length < 2) { Console.Error.WriteLine("usage: DumpAll <asm> <outDir> [nsFilter]"); Environment.Exit(2); }
     string nsFilter = a.Length >= 3 ? a[2] : null;
@@ -46,11 +45,11 @@ class DumpAll {
       // before the fix).
       string scope = "";
       var root = t;
-      for (var p = t.DeclaringType; p != null; p = p.DeclaringType) { scope = Safe(p.Name) + "_" + scope; root = p; }
+      for (var p = t.DeclaringType; p != null; p = p.DeclaringType) { scope = IlFmt.Safe(p.Name) + "_" + scope; root = p; }
       string ns = root.Namespace;
-      string dir = Path.Combine(a[1], Safe(ns == "" ? "_global" : ns));
+      string dir = Path.Combine(a[1], IlFmt.Safe(ns == "" ? "_global" : ns));
       Directory.CreateDirectory(dir);
-      File.WriteAllText(Path.Combine(dir, scope + Safe(t.Name) + ".il.txt"), sb.ToString());
+      File.WriteAllText(Path.Combine(dir, scope + IlFmt.Safe(t.Name) + ".il.txt"), sb.ToString());
       nt++;
     }
     Console.Error.WriteLine("dumped " + nt + " types / " + nm + " method bodies to " + a[1]);

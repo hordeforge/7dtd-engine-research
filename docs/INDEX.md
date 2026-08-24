@@ -371,7 +371,7 @@ catalog: [`../tools/README.md`](../tools/README.md). How to RE:
 | Group | What |
 |---|---|
 | `tools/src/` | General maintained dumpers: `Census`, `DumpMethod`, `DumpType`, `DumpNetPackages`, `NetProtocolCensus`, `FullSurface` (whole-assembly metadata), `DumpAll` (full local IL) |
-| `tools/legacy/` | 39 dumpers (12 canonical per-family + ad-hoc helpers) that generated the `il/` dump sets (`DumpDediComplete`, `DumpGmUpdate`, `DumpTerrain`, ...) |
+| `tools/legacy/` | 38 dumpers (12 canonical per-family + ad-hoc helpers) that generated the `il/` dump sets (`DumpDediComplete`, `DumpGmUpdate`, `DumpTerrain`, ...) |
 | `tools/parity/` | Cross-version wire-surface snapshot + diff (steamcmd) |
 | `tools/re-scratch/` | One-off Zig reversers for on-disk formats |
 | `tools/tests/` | Dump-regen + coverage regression tests |

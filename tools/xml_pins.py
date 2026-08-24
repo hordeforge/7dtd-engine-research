@@ -4,12 +4,14 @@
 StockFacts.exe pins DLL constants; this pins selected XML data values that
 the corpus and zdtd's provenance register cite (the zombie HP ladder from
 entityclasses.xml replace_passive_effect, etc.). Values are pinned against the
-installed game so a data change (or wrong claim) fails the gate.
+installed game so a data change (or wrong claim) fails the gate. Every section
+written to the pins file is verified by --check: a section that is extracted
+and committed but never diffed against the install would let silent drift pass
+as a green gate.
 
 Usage:
-  python3 tools/xml_pins.py                 # check committed pins vs install (needs --game-dir)
-  python3 tools/xml_pins.py --game-dir DIR  # regenerate tools/data/xml_pins.json from DIR
-  python3 tools/xml_pins.py --check         # check committed pins vs the pinned install path
+  python3 tools/xml_pins.py [--pins FILE] --game-dir DIR  # regenerate pins from DIR
+  python3 tools/xml_pins.py --check [--pins FILE]         # check committed pins vs the pinned install path
 """
 import argparse
 import json
@@ -18,7 +20,11 @@ import re
 import sys
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
-PINS = os.path.join(TOOLS, "data", "xml_pins.json")
+DEFAULT_PINS = os.path.join(TOOLS, "data", "xml_pins.json")
+
+# Every extracted section is part of the gate contract: --check diffs each one,
+# and regeneration refuses to overwrite a populated section with an empty parse.
+SECTIONS = ("entityclasses_health", "traders_root", "buffs_survival")
 
 DEFAULT_GAME = os.path.expanduser(
     "~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
@@ -71,11 +77,25 @@ def extract(game_dir: str) -> dict:
     }
 
 
+def section_diffs(live: dict, committed: dict) -> list:
+    """Per-key diffs across every pinned section (install value vs committed)."""
+    diffs = []
+    for sec in SECTIONS:
+        lv, cv = live.get(sec) or {}, committed.get(sec) or {}
+        for k in sorted(set(lv) | set(cv)):
+            if lv.get(k) != cv.get(k):
+                diffs.append(f"{sec}.{k}: install={lv.get(k)!r} pinned={cv.get(k)!r}")
+    return diffs
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--game-dir", default=DEFAULT_GAME)
     ap.add_argument("--check", action="store_true", help="verify committed pins vs the install")
+    ap.add_argument("--pins", default=DEFAULT_PINS,
+                    help="pins JSON path (default: tools/data/xml_pins.json)")
     args = ap.parse_args()
+    pins_path = args.pins
 
     if not args.check:
         epath = os.path.join(args.game_dir, CFG_ENTITIES)
@@ -85,35 +105,47 @@ def main() -> int:
             return 2
         data = extract(args.game_dir)
         # A wrong --game-dir (or a renamed config section) must not wipe the
-        # committed pins with empty values while reporting success.
+        # committed pins with empty values while reporting success. Same rule
+        # for every section whose source file exists but parses to nothing.
+        refusals = []
         if not data["entityclasses_health"]:
-            print(f"error: no health* values parsed from {epath}; "
-                  f"refusing to overwrite {PINS} with empty pins", file=sys.stderr)
+            refusals.append(f"no health* values parsed from {epath}")
+        tpath = os.path.join(args.game_dir, CFG_TRADERS)
+        if os.path.isfile(tpath) and not data["traders_root"]:
+            refusals.append(
+                f"{tpath} present but no buy_markup/sell_markdown parsed "
+                "(traders <traders> header changed?)")
+        if refusals:
+            for r in refusals:
+                print(f"error: {r}; refusing to overwrite {pins_path} with empty pins",
+                      file=sys.stderr)
             return 2
-        os.makedirs(os.path.dirname(PINS), exist_ok=True)
-        with open(PINS, "w", encoding="utf-8") as f:
+        os.makedirs(os.path.dirname(os.path.abspath(pins_path)), exist_ok=True)
+        with open(pins_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=1, sort_keys=True)
             f.write("\n")
-        print(f"wrote {PINS} ({len(data['entityclasses_health'])} hp vars)")
+        print(f"wrote {pins_path} ({len(data['entityclasses_health'])} hp vars, "
+              f"{len(data['traders_root'])} trader attrs, "
+              f"{len(data['buffs_survival'])} survival keys)")
         return 0
 
     if not os.path.isdir(args.game_dir):
         print(f"error: game dir not found: {args.game_dir} (--game-dir)", file=sys.stderr)
         return 2
     live = extract(args.game_dir)
-    if not os.path.isfile(PINS):
-        print(f"FAIL: {PINS} missing (run xml_pins.py --game-dir first)")
+    if not os.path.isfile(pins_path):
+        print(f"FAIL: {pins_path} missing (run xml_pins.py --game-dir first)")
         return 1
-    committed = json.load(open(PINS, encoding="utf-8"))
-    if live["entityclasses_health"] != committed["entityclasses_health"]:
-        diffs = {
-            k: (committed["entityclasses_health"].get(k), live["entityclasses_health"].get(k))
-            for k in set(live["entityclasses_health"]) | set(committed["entityclasses_health"])
-            if committed["entityclasses_health"].get(k) != live["entityclasses_health"].get(k)
-        }
-        print(f"FAIL: xml pins drift from install ({len(diffs)} diffs): {diffs}")
+    committed = json.load(open(pins_path, encoding="utf-8"))
+    diffs = section_diffs(live, committed)
+    if diffs:
+        print(f"FAIL: xml pins drift from install ({len(diffs)} diffs):")
+        for d in diffs:
+            print(f"  - {d}")
         return 1
-    print(f"OK: xml pins match install ({len(committed['entityclasses_health'])} hp vars)")
+    print(f"OK: xml pins match install ({len(committed.get('entityclasses_health', {}))} hp vars, "
+          f"{len(committed.get('traders_root', {}))} trader attrs, "
+          f"{len(committed.get('buffs_survival', {}))} survival keys)")
     return 0
 
 

@@ -9,13 +9,14 @@ Usage: python3 tools/tests/test_netprotocol_census.py <asm>
 """
 import os
 import re
-import subprocess
 import sys
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
 DOC = os.path.join(REPO, "docs", "protocol-packages.md")
-NPC = os.path.join(TOOLS, "bin", "NetProtocolCensus.exe")
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
 
 CHANNEL1 = [
     "NetPackageChunk",
@@ -74,13 +75,9 @@ def main() -> int:
         print("usage: test_netprotocol_census.py <asm>", file=sys.stderr)
         return 2
     asm = sys.argv[1]
-    env = dict(os.environ)
-    env["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    out = subprocess.run(
-        ["mono", NPC, asm, "/tmp/npc_check_META.md"],
-        capture_output=True, text=True, env=env,
-    )
-    meta = open("/tmp/npc_check_META.md", encoding="utf-8").read() if os.path.exists("/tmp/npc_check_META.md") else ""
+    meta_path = str(_common.probe_dir() / "npc_check_META.md")
+    _common.run_tool("NetProtocolCensus.exe", asm, meta_path)
+    meta = open(meta_path, encoding="utf-8").read() if os.path.exists(meta_path) else ""
     if not meta:
         print("FAIL: NetProtocolCensus produced no output", file=sys.stderr)
         return 1
@@ -118,15 +115,8 @@ class NpKind {
   }
 }
 """
-    with open("/tmp/npkind_check.cs", "w") as f:
-        f.write(kind_src)
-    subprocess.run(
-        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"), "/tmp/npkind_check.cs", "-out:/tmp/npkind_check.exe"],
-        check=True,
-    )
-    kout = subprocess.run(
-        ["mono", "/tmp/npkind_check.exe", asm], capture_output=True, text=True, env=env, check=True,
-    ).stdout
+    kind_exe = _common.compile_probe(kind_src, "npkind_check")
+    kout = _common.run_probe(kind_exe, asm)
     non_map = set()
     for line in kout.splitlines():
         name, _, kind = line.partition("\t")

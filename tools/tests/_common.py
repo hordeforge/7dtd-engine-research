@@ -12,14 +12,29 @@ Convention (mirrors test_re_dump_regen.py):
 """
 from __future__ import annotations
 
+import atexit
 import os
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parents[1]
 REPO = TOOLS.parent
 BIN = TOOLS / "bin"
+
+# Private scratch dir for ad-hoc probe sources/binaries. A fixed name under
+# the shared /tmp would let any local user pre-create (or symlink) the file a
+# later run compiles and executes; mkdtemp is 0700 and unique per process.
+_PROBE_DIR: str | None = None
+
+
+def probe_dir() -> Path:
+    global _PROBE_DIR
+    if _PROBE_DIR is None:
+        _PROBE_DIR = tempfile.mkdtemp(prefix="7dtd-research-probe-")
+        atexit.register(shutil.rmtree, _PROBE_DIR, True)
+    return Path(_PROBE_DIR)
 
 
 def find_asm() -> Path | None:
@@ -99,12 +114,14 @@ def run_tool(exe: str, *args: str) -> tuple[int, str, str]:
 
 
 def compile_probe(cs_text: str, stem: str) -> str:
-    """Write cs_text to /tmp/<stem>.cs, compile against bin/Mono.Cecil.dll.
+    """Write cs_text to a private tempdir as <stem>.cs, compile against
+    bin/Mono.Cecil.dll.
 
-    Returns the /tmp/<stem>.exe path; a compile error raises (CalledProcessError).
+    Returns the compiled exe path; a compile error raises (CalledProcessError).
     """
-    exe = f"/tmp/{stem}.exe"
-    src = f"/tmp/{stem}.cs"
+    d = probe_dir()
+    exe = str(d / f"{stem}.exe")
+    src = str(d / f"{stem}.cs")
     with open(src, "w") as f:
         f.write(cs_text)
     subprocess.run(

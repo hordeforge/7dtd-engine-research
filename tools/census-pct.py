@@ -20,6 +20,7 @@ Usage:
     --json  emit a machine-readable JSON object instead of the human report
     --history FILE  append the percentages to a CSV (default name:
             census-history.csv) so census numbers can be tracked over time
+            (date column is UTC so rows from different hosts stay comparable)
 
 Exit code is 0 unless the census itself fails; unaccounted > 0 is reported
 loudly but is not a hard failure (this is a report, not a gate).
@@ -31,6 +32,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -137,7 +139,8 @@ def parse_args(argv):
     ap.add_argument("--history", nargs="?", const="census-history.csv", default=None,
                     metavar="FILE",
                     help="append the percentages to a CSV so census numbers can be "
-                         "tracked over time (default name: census-history.csv)")
+                         "tracked over time (default name: census-history.csv; "
+                         "date column is UTC)")
     return ap.parse_args(argv)
 
 
@@ -157,9 +160,10 @@ def main():
         print("pass the path as argv[1] or set $ASM", file=sys.stderr)
         return 2
 
-    # 1. Live coverage census over the docs tree (report to /tmp so the scan
-    #    never sees a stale extra file inside docs/).
-    tmp_report = "/tmp/census-pct-coverage-report.md"
+    # 1. Live coverage census over the docs tree (report to a private temp
+    #    file so the scan never sees a stale extra file inside docs/).
+    fd, tmp_report = tempfile.mkstemp(prefix="census-pct-coverage-", suffix=".md")
+    os.close(fd)
     try:
         rc, _, stderr = run_mono("Coverage.exe", asm, docs, tmp_report)
         if rc != 0:
@@ -234,12 +238,13 @@ def main():
     }
     if history:
         row = "%s,%d,%d,%d,%d,%d,%.1f%%\n" % (
-            datetime.datetime.now().strftime("%Y-%m-%d"),
+            datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
             result["reached_game_types"], result["narrated"], result["catalogued"],
             result["classified"], result["unaccounted"], result["narrated_pct"])
         header = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
         if not os.path.exists(history):
-            open(history, "w").write(header)
+            with open(history, "w") as fh:
+                fh.write(header)
         with open(history, "a") as fh:
             fh.write(row)
         print("history appended to", history)

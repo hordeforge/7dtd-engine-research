@@ -196,9 +196,10 @@ class DumpLoopComplete {
   }
 
   static void Dump(MethodDefinition m) {
-    string safe = m.DeclaringType.Name.Replace("`", "_") + "_" + m.Name;
+    // assembly-supplied names must not escape outDir
+    string safe = (m.DeclaringType.Name + "_" + m.Name).Replace("`", "_").Replace("<", "_").Replace(">", "_").Replace("/", "_").Replace("\\", "_");
     if (m.Parameters.Count > 0)
-      safe += "_" + string.Join("_", m.Parameters.Select(p => p.ParameterType.Name.Replace("`", "_").Replace("<", "_").Replace(">", "_")));
+      safe += "_" + string.Join("_", m.Parameters.Select(p => p.ParameterType.Name.Replace("`", "_").Replace("<", "_").Replace(">", "_").Replace("/", "_").Replace("\\", "_")));
     if (safe.Length > 120) safe = safe.Substring(0, 120);
     var sb = new StringBuilder();
     sb.AppendLine("# " + m.DeclaringType.FullName + "::" + m.Name);

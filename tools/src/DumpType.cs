@@ -30,7 +30,7 @@ class DumpType {
         foreach (var i in m.Body.Instructions) sb.AppendLine(IlFmt.Op(i));
         sb.AppendLine();
       }
-      File.WriteAllText(Path.Combine(a[1], t.Name + "_il.txt"), sb.ToString());
+      File.WriteAllText(Path.Combine(a[1], IlFmt.Safe(t.Name) + "_il.txt"), sb.ToString());
       Console.Error.WriteLine("dumped " + t.Name);
     }
   }

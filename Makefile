@@ -12,7 +12,7 @@ help:
 	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
 	@echo "make save-roundtrip-all - verify EVERY probe save + the shipped Navezgane world (full fleet round-trip)"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
-	@echo "make stock-check  - pin check only (committed JSON)"
+	@echo "make stock-check  - pin check only (committed JSON; also diffs facts vs the live DLL when present)"
 	@echo "make facts        - view the machine-checked stock pins (census/save/behaviour)"
 	@echo "make post-update  - after TFP patch: stock-sync + drift (tools/post-update.sh)"
 	@echo "make census       - Census.exe against ASM"
@@ -59,6 +59,7 @@ regen-check:
 
 test:
 	python3 "$(TOOLS)/tests/test_tool_bootstrap.py"
+	python3 "$(TOOLS)/tests/test_ilfmt_safe.py"
 	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_dedi_coverage_docs.py"
 	python3 "$(TOOLS)/tests/check_stock_facts.py" --require-live
@@ -92,6 +93,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
 	python3 "$(TOOLS)/tests/test_save_roundtrip_robustness.py"
+	python3 "$(TOOLS)/tests/test_xml_pins_gate.py"
 	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 	python3 "$(TOOLS)/tests/test_inventory_counts.py"
 	python3 "$(TOOLS)/tests/test_readme_test_table.py"
