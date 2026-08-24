@@ -23,6 +23,11 @@ static class IlFmt {
 
   // Filesystem-safe fragment for filenames derived from assembly-supplied
   // type/method names: a crafted assembly must not escape the output directory.
-  public static string Safe(string s) =>
-    string.Concat(s.Select(c => char.IsLetterOrDigit(c) || c == '_' || c == '.' ? c : '_'));
+  // Dots survive (namespaces carry them), so a whole fragment of "." or ".."
+  // would combine into a parent directory; prefix it to pin every fragment
+  // strictly below the output root.
+  public static string Safe(string s) {
+    var t = string.Concat(s.Select(c => char.IsLetterOrDigit(c) || c == '_' || c == '.' ? c : '_'));
+    return t == "." || t == ".." ? "_" + t : t;
+  }
 }

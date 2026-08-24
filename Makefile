@@ -59,6 +59,7 @@ regen-check:
 
 test:
 	python3 "$(TOOLS)/tests/test_tool_bootstrap.py"
+	python3 "$(TOOLS)/tests/test_ilfmt_safe.py"
 	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_dedi_coverage_docs.py"
 	python3 "$(TOOLS)/tests/check_stock_facts.py" --require-live
