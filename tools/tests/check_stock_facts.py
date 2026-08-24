@@ -30,7 +30,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import find_asm  # noqa: E402  (shared game-assembly discovery)
+from _common import find_asm
 
 ROOT = Path(__file__).resolve().parents[2]  # 7dtd-engine-research
 WS = ROOT.parent  # 7dtd workspace
@@ -108,8 +108,7 @@ def check_live_against_dll(facts: dict, errors: list[str]) -> None:
             f"{lv.get('display')} (b{lv.get('build')}) vs pinned "
             f"{cm.get('display')} (b{cm.get('build')}); {len(diffs)} field(s) differ:"
         )
-        for dline in diffs[:20]:
-            errors.append(dline)
+        errors.extend(diffs[:20])
         if len(diffs) > 20:
             errors.append(f"... and {len(diffs) - 20} more")
         errors.append(
@@ -138,6 +137,39 @@ def must_contain(label: str, text: str, needle: str, errors: list[str]) -> None:
 def must_match(label: str, text: str, pattern: str, errors: list[str]) -> None:
     if not re.search(pattern, text):
         errors.append(f"{label}: no match for /{pattern}/")
+
+
+def check_xmls_to_load_inventory(errors: list[str]) -> None:
+    """xmlsToLoad list: the WorldStaticData cctor's load names (non-XUi core)
+    must match the inventory's XmlName rows exactly."""
+    asm = find_asm()
+    if asm is None:
+        print("SKIP: xmlsToLoad cctor check skipped (dedicated Assembly-CSharp.dll not found)")
+        return
+    env = dict(os.environ)
+    env["MONO_PATH"] = str(TOOLS / "bin")
+    out = subprocess.run(
+        ["mono", str(TOOLS / "bin" / "DumpMethod.exe"), str(asm), "WorldStaticData", ".cctor"],
+        capture_output=True, text=True, env=env, timeout=60,
+    ).stdout
+    cctor_names = re.findall(r"ldc\.i4(?:\.\d+|\.s \d+)\n\s*IL_\w+: ldstr (\w+)", out)
+    core = sorted(n for n in cctor_names
+                  if not n.startswith("loadAction") and not n.startswith("XUi"))
+    inv = []
+    in_table = False
+    for line in read(ROOT / "docs" / "inventories" / "xmlsToLoad.md").splitlines():
+        if line.strip().startswith("| XmlName"):
+            in_table = True
+            continue
+        if in_table:
+            if not line.strip().startswith("|"):
+                break
+            m = re.match(r"\|\s*`([^`]+)`", line.strip())
+            if m:
+                inv.append(m.group(1))
+    inv_core = sorted(n for n in inv if not n.startswith("XUi"))
+    if core != inv_core:
+        errors.append(f"xmlsToLoad: cctor core ({len(core)}) != inventory core ({len(inv_core)})")
 
 
 def check_research(facts: dict, errors: list[str]) -> None:
@@ -194,33 +226,9 @@ def check_research(facts: dict, errors: list[str]) -> None:
     # xmlsToLoad list: the WorldStaticData cctor's load names (non-XUi core)
     # must match the inventory's XmlName rows exactly.
     try:
-        _tools = ROOT / "tools"
-        _asm = find_asm()
-        if _asm is None:
-            print("SKIP: xmlsToLoad cctor check skipped (dedicated Assembly-CSharp.dll not found)")
-        else:
-            _env = dict(os.environ); _env["MONO_PATH"] = str(_tools / "bin")
-            _out = subprocess.run(
-                ["mono", str(_tools / "bin" / "DumpMethod.exe"), str(_asm), "WorldStaticData", ".cctor"],
-                capture_output=True, text=True, env=_env, timeout=60,
-            ).stdout
-            _cctor_names = re.findall(r"ldc\.i4(?:\.\d+|\.s \d+)\n\s*IL_\w+: ldstr (\w+)", _out)
-            _core = sorted(n for n in _cctor_names if not n.startswith("loadAction") and not n.startswith("XUi"))
-            _inv = []
-            _inv_lines = read(ROOT / "docs" / "inventories" / "xmlsToLoad.md").splitlines()
-            _in_table = False
-            for _l in _inv_lines:
-                if _l.strip().startswith("| XmlName"):
-                    _in_table = True; continue
-                if _in_table:
-                    if not _l.strip().startswith("|"): break
-                    _m = re.match(r"\|\s*`([^`]+)`", _l.strip())
-                    if _m: _inv.append(_m.group(1))
-            _inv_core = sorted(n for n in _inv if not n.startswith("XUi"))
-            if _core != _inv_core:
-                errors.append(f"xmlsToLoad: cctor core ({len(_core)}) != inventory core ({len(_inv_core)})")
-    except Exception as _e:
-        errors.append(f"xmlsToLoad check failed: {_e}")
+        check_xmls_to_load_inventory(errors)
+    except Exception as exc:
+        errors.append(f"xmlsToLoad check failed: {exc}")
 
     # LiteNetLib pins: facts carry the library constants; network.md must
     # document them (protocol 13, MaxPacketSize 1432, PossibleMtu).

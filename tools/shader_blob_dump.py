@@ -442,16 +442,16 @@ def check(rows):
         for source, _target in got:
             source_map |= 1 << source
         if r["channels"]["source_map"] & source_map != source_map:
-            bad.append((r, f"sourceMap {r['channels']['source_map']} omits a bound channel "
-                           f"(channels imply {source_map})"))
+            bad.append((r, (f"sourceMap {r['channels']['source_map']} omits a bound channel "
+                            f"(channels imply {source_map})")))
         # A vertex program binds a SUBSET of what its signature declares:
         # only the inputs it actually reads get a channel. Every bound pair
         # must still be one the semantic mapping predicts.
         if r["gpu_type"] in VERTEX_TYPES:
             unexpected = [c for c in got if c not in r["expected_channels"]]
             if unexpected:
-                bad.append((r, f"channels {unexpected} not derivable from the input "
-                               f"signature {r['expected_channels']}"))
+                bad.append((r, (f"channels {unexpected} not derivable from the input "
+                                f"signature {r['expected_channels']}")))
     return bad, noted
 
 

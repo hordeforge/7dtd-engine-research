@@ -83,17 +83,15 @@ def scan(root: str, local: set, docs: set) -> tuple[int, list[str]]:
                 continue
             p = os.path.join(dirpath, fn)
             try:
-                txt = open(p, encoding="utf-8", errors="replace").read()
+                with open(p, encoding="utf-8", errors="replace") as fh:
+                    txt = fh.read()
             except OSError:
                 continue
-            for m in RES_PATH.finditer(txt):
-                total += 1
-                if m.group(1) not in docs:
-                    broken.append(f"{p}: cites {m.group(1)}")
-            for m in BARE_AFTER_RE.finditer(txt):
-                total += 1
-                if m.group(1) not in docs:
-                    broken.append(f"{p}: cites {m.group(1)}")
+            for pat in (RES_PATH, BARE_AFTER_RE):
+                for m in pat.finditer(txt):
+                    total += 1
+                    if m.group(1) not in docs:
+                        broken.append(f"{p}: cites {m.group(1)}")
             # src files: a bare `X.md` name must be a research doc or a
             # repo-local doc (incl. zdtd docs/adr stripped).
             if any(fn.endswith(e) for e in SRC_EXTS):

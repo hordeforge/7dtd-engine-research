@@ -12,7 +12,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import _common  # noqa: E402
+import _common
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DOC = os.path.join(REPO, "docs", "inventories", "entityclass-props.md")
@@ -59,13 +59,13 @@ def main() -> int:
     lines = out.splitlines()
     il = int(next(l for l in lines if l.startswith("IL=")).split("=")[1])
     npairs = int(next(l for l in lines if l.startswith("PAIRS=")).split("=")[1])
-    dll = set(l for l in lines if "=" in l and not l.startswith(("IL=", "PAIRS=")))
+    dll = {l for l in lines if "=" in l and not l.startswith(("IL=", "PAIRS="))}
 
     doc = open(DOC, encoding="utf-8").read()
-    doc_rows = set(
+    doc_rows = {
         m.group(1) + "=" + m.group(2)
         for m in re.finditer(r"^\| `(Prop[A-Za-z0-9_]+)` \| `([^`]+)` \|", doc, re.M)
-    )
+    }
     bad = []
     if il != EXPECTED_IL:
         bad.append(f"cctor IL = {il}, doc pins {EXPECTED_IL}")

@@ -37,18 +37,23 @@ HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="(\d+)"')
 
 
 def extract(game_dir: str) -> dict:
+    def read_if_present(path: str) -> str | None:
+        if not os.path.isfile(path):
+            return None
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            return fh.read()
+
     hp = {}
     epath = os.path.join(game_dir, CFG_ENTITIES)
-    if os.path.isfile(epath):
-        text = open(epath, encoding="utf-8", errors="replace").read()
+    text = read_if_present(epath)
+    if text is not None:
         m = re.search(r"<replace_passive_effect>.*?</replace_passive_effect>", text, re.S)
         block = m.group(0) if m else ""
         for name, val in HEALTH_RE.findall(block):
             hp[name] = int(val)
     trader = {}
-    tpath = os.path.join(game_dir, CFG_TRADERS)
-    if os.path.isfile(tpath):
-        ttext = open(tpath, encoding="utf-8", errors="replace").read()
+    ttext = read_if_present(os.path.join(game_dir, CFG_TRADERS))
+    if ttext is not None:
         m = re.search(r"<traders\b[^>]*>", ttext)
         if m:
             for attr in ("buy_markup", "sell_markdown"):
@@ -56,9 +61,8 @@ def extract(game_dir: str) -> dict:
                 if am:
                     trader[attr] = float(am.group(1))
     buffs = {}
-    bpath = os.path.join(game_dir, CFG_BUFFS)
-    if os.path.isfile(bpath):
-        btext = open(bpath, encoding="utf-8", errors="replace").read()
+    btext = read_if_present(os.path.join(game_dir, CFG_BUFFS))
+    if btext is not None:
         # survival thresholds: StatComparePercCurrentToMax on Food/Water
         for stat in ("Food", "Water"):
             m = re.search(
@@ -136,7 +140,8 @@ def main() -> int:
     if not os.path.isfile(pins_path):
         print(f"FAIL: {pins_path} missing (run xml_pins.py --game-dir first)")
         return 1
-    committed = json.load(open(pins_path, encoding="utf-8"))
+    with open(pins_path, encoding="utf-8") as fh:
+        committed = json.load(fh)
     diffs = section_diffs(live, committed)
     if diffs:
         print(f"FAIL: xml pins drift from install ({len(diffs)} diffs):")

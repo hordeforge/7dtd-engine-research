@@ -19,7 +19,7 @@ DOC = os.path.join(REPO, "docs", "console-commands.md")
 XREF = os.path.join(TOOLS, "bin", "CmdMap.exe")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import _common  # noqa: E402
+import _common
 
 # The 10 dedicated-gated leaves, as documented (console-commands.md 6).
 GATED = [

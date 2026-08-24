@@ -86,7 +86,7 @@ def score_mutation_facts_fail() -> tuple[float, str]:
     with tempfile.TemporaryDirectory() as td:
         path = Path(td) / "facts.json"
         path.write_text(json.dumps(facts, indent=2), encoding="utf-8")
-        code, out = run_checker(path, skip_siblings=True)
+        code, _out = run_checker(path, skip_siblings=True)
     if code != 0:
         return 1.0, "mutated facts correctly fail"
     return 0.0, "mutated facts still pass (checker not version-sensitive)"

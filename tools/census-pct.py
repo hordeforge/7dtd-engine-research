@@ -248,7 +248,6 @@ def main():
         with open(history, "a") as fh:
             fh.write(row)
         print("history appended to", history)
-        return 0
     if as_json:
         print(json.dumps(result, indent=2))
         return 0

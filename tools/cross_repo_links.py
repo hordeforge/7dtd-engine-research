@@ -42,7 +42,8 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, list[str]]:
             continue
         base = os.path.dirname(f)
         try:
-            txt = open(f, encoding="utf-8").read()
+            with open(f, encoding="utf-8") as fh:
+                txt = fh.read()
         except OSError:
             continue
         for m in LINK.finditer(txt):

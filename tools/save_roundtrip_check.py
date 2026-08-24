@@ -58,7 +58,6 @@ def check_sleeper_volumes(blob, checks):
         p += 4
         seen = []
         for _ in range(count):
-            start = p
             vol_id = struct.unpack_from("<i", blob, p)[0]
             p += 4
             ver = blob[p]
@@ -68,8 +67,7 @@ def check_sleeper_volumes(blob, checks):
             p += 6
             bx1, by1, bz1, bx2, by2, bz2 = struct.unpack_from("<6i", blob, p)
             p += 24
-            respawn_t = struct.unpack_from("<Q", blob, p)[0]
-            p += 8
+            p += 8  # respawnTimer u64
             num_spawned = struct.unpack_from("<i", blob, p)[0]
             p += 4
             p += 4  # literal i32 0
@@ -77,10 +75,8 @@ def check_sleeper_volumes(blob, checks):
             p += 4
             _, p = read_net_string(blob, p)  # literal empty string
             p += 4  # literal i32 0
-            ticks = struct.unpack_from("<i", blob, p)[0]
-            p += 4
-            flags16 = struct.unpack_from("<H", blob, p)[0]
-            p += 2
+            p += 4  # ticks i32
+            p += 2  # flags u16
             flags32 = struct.unpack_from("<i", blob, p)[0]
             p += 4
             sp_cnt = blob[p]
@@ -205,62 +201,9 @@ def check_weather_blob(blob, checks):
         checks.append(f"  weatherState parse error: {exc}")
 
 
-def check_main_ttw(path, checks):
-    """Verify the main.ttw header codec (doc save-region.md 1.1b)."""
-    with open(path, "rb") as fh:
-        buf = fh.read()
-    checks.append(f"{os.path.basename(path)}: size {len(buf)}")
-
-    magic = buf[0:4]
-    checks.append(f"  magic: {magic!r} == b'ttw\\x00'" if magic == b"ttw\x00"
-                  else "  magic: MISMATCH " + repr(magic))
-    version = struct.unpack_from("<I", buf, 4)[0]
-    checks.append(f"  version: {version} == 23 (CurrentSaveVersion)" if version == 23
-                  else f"  version: {version} != 23")
-    off = 8
-    gvs, off = read_net_string(buf, off)
-    checks.append(f"  gameVersionString: {gvs!r}")
-    vi = struct.unpack_from("<4i", buf, off)
-    off += 16
-    known = {(1, 3, 10, 14): "V3.1.0 (b14)", (1, 4, 0, 8): "V4.0 (b8) shipped world data"}
-    vi_note = known.get(vi, "unknown build")
-    checks.append(f"  VersionInformation (ReleaseType,Major,Minor,Build): {vi} [{vi_note}]"
-                  if vi in known else f"  VersionInformation: {vi} not in {{(1,3,10,14),(1,4,0,8)}}")
-    pad0 = struct.unpack_from("<I", buf, off)[0]
-    off += 4
-    agm = struct.unpack_from("<i", buf, off)[0]
-    off += 4
-    pad1 = struct.unpack_from("<I", buf, off)[0]
-    off += 4
-    checks.append(f"  pad0={pad0} activeGameMode={agm} pad1={pad1} (pads must be 0)"
-                  if pad0 == 0 and pad1 == 0
-                  else f"  pad0={pad0} activeGameMode={agm} pad1={pad1}: non-zero pad")
-    water = struct.unpack_from("<f", buf, off)[0]
-    off += 4
-    # Navezgane water level pin (behaviour water-level, live-observed 62.88)
-    checks.append(f"  waterLevel: {water:.3f}" + (" (matches Navezgane pin 62.88)"
-                  if abs(water - 62.88) < 0.01 else " (Navezgane pin expected 62.88)"))
-    csx = struct.unpack_from("<i", buf, off)[0]
-    csy = struct.unpack_from("<i", buf, off + 4)[0]
-    csz = struct.unpack_from("<i", buf, off + 8)[0]
-    off += 12
-    checks.append(f"  chunkSizeX/Y/Z: {csx}/{csy}/{csz} == 16/16/16 (Y/Z swapped on store)"
-                  if (csx, csy, csz) == (16, 16, 16) else f"  chunkSize: {csx}/{csy}/{csz}")
-    chunk_count = struct.unpack_from("<i", buf, off)[0]
-    off += 4
-    provider = struct.unpack_from("<i", buf, off)[0]
-    off += 4
-    seed = struct.unpack_from("<i", buf, off)[0]
-    off += 4
-    world_time = struct.unpack_from("<Q", buf, off)[0]
-    off += 8
-    ticks = struct.unpack_from("<Q", buf, off)[0]
-    off += 8
-    checks.append(f"  chunkCount={chunk_count} providerId={provider} (4=ChunkDataDriven, "
-                  f"the Navezgane/RWG value; 1=Disc) seed={seed} "
-                  f"worldTime={world_time} timeInTicks={ticks}")
-
-    # --- full WorldState tail (version 23 gates; WorldState.SaveLoad IL=926) ---
+def check_worldstate_tail(buf, off, checks):
+    """Walk the full WorldState tail after the ttw header fields (version 23
+    gates; WorldState.SaveLoad IL=926). Returns the offset consumed."""
     try:
         sp_ver = buf[off]
         off += 1
@@ -332,6 +275,64 @@ def check_main_ttw(path, checks):
     return off
 
 
+def check_main_ttw(path, checks):
+    """Verify the main.ttw header codec (doc save-region.md 1.1b)."""
+    with open(path, "rb") as fh:
+        buf = fh.read()
+    checks.append(f"{os.path.basename(path)}: size {len(buf)}")
+
+    magic = buf[0:4]
+    checks.append(f"  magic: {magic!r} == b'ttw\\x00'" if magic == b"ttw\x00"
+                  else "  magic: MISMATCH " + repr(magic))
+    version = struct.unpack_from("<I", buf, 4)[0]
+    checks.append(f"  version: {version} == 23 (CurrentSaveVersion)" if version == 23
+                  else f"  version: {version} != 23")
+    off = 8
+    gvs, off = read_net_string(buf, off)
+    checks.append(f"  gameVersionString: {gvs!r}")
+    vi = struct.unpack_from("<4i", buf, off)
+    off += 16
+    known = {(1, 3, 10, 14): "V3.1.0 (b14)", (1, 4, 0, 8): "V4.0 (b8) shipped world data"}
+    vi_note = known.get(vi, "unknown build")
+    checks.append(f"  VersionInformation (ReleaseType,Major,Minor,Build): {vi} [{vi_note}]"
+                  if vi in known else f"  VersionInformation: {vi} not in {{(1,3,10,14),(1,4,0,8)}}")
+    pad0 = struct.unpack_from("<I", buf, off)[0]
+    off += 4
+    agm = struct.unpack_from("<i", buf, off)[0]
+    off += 4
+    pad1 = struct.unpack_from("<I", buf, off)[0]
+    off += 4
+    checks.append(f"  pad0={pad0} activeGameMode={agm} pad1={pad1} (pads must be 0)"
+                  if pad0 == 0 and pad1 == 0
+                  else f"  pad0={pad0} activeGameMode={agm} pad1={pad1}: non-zero pad")
+    water = struct.unpack_from("<f", buf, off)[0]
+    off += 4
+    # Navezgane water level pin (behaviour water-level, live-observed 62.88)
+    checks.append(f"  waterLevel: {water:.3f}" + (" (matches Navezgane pin 62.88)"
+                  if abs(water - 62.88) < 0.01 else " (Navezgane pin expected 62.88)"))
+    csx = struct.unpack_from("<i", buf, off)[0]
+    csy = struct.unpack_from("<i", buf, off + 4)[0]
+    csz = struct.unpack_from("<i", buf, off + 8)[0]
+    off += 12
+    checks.append(f"  chunkSizeX/Y/Z: {csx}/{csy}/{csz} == 16/16/16 (Y/Z swapped on store)"
+                  if (csx, csy, csz) == (16, 16, 16) else f"  chunkSize: {csx}/{csy}/{csz}")
+    chunk_count = struct.unpack_from("<i", buf, off)[0]
+    off += 4
+    provider = struct.unpack_from("<i", buf, off)[0]
+    off += 4
+    seed = struct.unpack_from("<i", buf, off)[0]
+    off += 4
+    world_time = struct.unpack_from("<Q", buf, off)[0]
+    off += 8
+    ticks = struct.unpack_from("<Q", buf, off)[0]
+    off += 8
+    checks.append(f"  chunkCount={chunk_count} providerId={provider} (4=ChunkDataDriven, "
+                  f"the Navezgane/RWG value; 1=Disc) seed={seed} "
+                  f"worldTime={world_time} timeInTicks={ticks}")
+
+    return check_worldstate_tail(buf, off, checks)
+
+
 def parse_chunk_body(body, name, idx, checks):
     """Fully parse a decompressed Chunk.save body (Chunk.write IL=601) and
     require it to consume the body byte-exactly.
@@ -354,7 +355,7 @@ def parse_chunk_body(body, name, idx, checks):
         p += k
         return v
 
-    x, y, z = rd("<iii", 12)
+    x, _, z = rd("<iii", 12)
     ticks = rd("<Q", 8)[0]
     coords_ok = True
     # C# remainder semantics (Python % differs for negatives): r = a - trunc(a/b)*b
@@ -442,7 +443,7 @@ def parse_chunk_body(body, name, idx, checks):
 
     dev_count = rd("<h", 2)[0]
     for _ in range(dev_count):  # insideDevices runs: x, z, len, len y bytes
-        xb, zb, ln = rd("<BBB", 3)
+        _, _, ln = rd("<BBB", 3)
         p += ln
 
     rd("<b", 1)  # IsInternalBlocksCulled
@@ -463,22 +464,30 @@ def parse_chunk_body(body, name, idx, checks):
     return coords_ok, True, ""
 
 
-def check_decoration_7dt(path, checks):
-    """Verify decoration.7dt: version byte 6 + i32 count + 17-byte records
-    (packedPos u64 + realYPos f32 + bv.rawData u32 + state u8)."""
+def check_17b_record_file(path, checks, record_desc, describe_first):
+    """Shared shape of decoration.7dt / multiblocks.7dt: version byte 6 +
+    i32 count + fixed 17-byte records. Reports the first record when exact."""
     with open(path, "rb") as fh:
         data = fh.read()
-    name = os.path.basename(path)
     ver = data[0]
     cnt = struct.unpack_from("<i", data, 1)[0]
     expect = 5 + cnt * 17
     ok = ver == 6 and expect == len(data)
-    checks.append(f"{name}: version byte {ver} count {cnt} "
+    checks.append(f"{os.path.basename(path)}: version byte {ver} count {cnt} "
                   f"{'byte-exact' if ok else f'MISMATCH ({expect} expected, {len(data)} got)'} "
-                  f"(17 B records: packedPos u64 + realYPos f32 + rawData u32 + state u8)")
+                  f"(17 B records: {record_desc})")
     if cnt and ok:
+        checks.append("  " + describe_first(data))
+
+
+def check_decoration_7dt(path, checks):
+    """Verify decoration.7dt: version byte 6 + i32 count + 17-byte records
+    (packedPos u64 + realYPos f32 + bv.rawData u32 + state u8)."""
+    def first(data):
         pos, ry, raw, state = struct.unpack_from("<QfIB", data, 5)
-        checks.append(f"  first record: packedPos={pos} realY={ry:.1f} raw=0x{raw:x} state={state}")
+        return f"first record: packedPos={pos} realY={ry:.1f} raw=0x{raw:x} state={state}"
+    check_17b_record_file(
+        path, checks, "packedPos u64 + realYPos f32 + rawData u32 + state u8", first)
 
 
 def check_nim_mapping(path, checks):
@@ -507,19 +516,12 @@ def check_multiblocks_7dt(path, checks):
     """Verify multiblocks.7dt: version byte 6 + i32 count + 17-byte records
     (Vector3i pos + rawData u32 + trackingTypeFlags u8). MultiBlockManager
     SaveIfDirty IL=107."""
-    with open(path, "rb") as fh:
-        data = fh.read()
-    name = os.path.basename(path)
-    ver = data[0]
-    cnt = struct.unpack_from("<i", data, 1)[0]
-    expect = 5 + cnt * 17
-    ok = ver == 6 and expect == len(data)
-    checks.append(f"{name}: version byte {ver} count {cnt} "
-                  f"{'byte-exact' if ok else f'MISMATCH ({expect} expected, {len(data)} got)'} "
-                  f"(17 B records: Vector3i + rawData u32 + flags u8)")
-    if cnt and ok:
+    def first(data):
         x, y, z, raw, flags = struct.unpack_from("<iiiIB", data, 5)
-        checks.append(f"  first record: pos=({x},{y},{z}) raw=0x{raw:x} flags={flags}")
+        return f"first record: pos=({x},{y},{z}) raw=0x{raw:x} flags={flags}"
+    check_17b_record_file(
+        path, checks, "Vector3i pos + rawData u32 + flags u8 "
+        "(MultiBlockManager SaveIfDirty IL=107)", first)
 
 
 def check_region_v2(path, checks):
@@ -634,6 +636,14 @@ def any_failed(checks):
     return any(marker in c for c in checks for marker in FAILED_MARKERS)
 
 
+def report(checks):
+    """Print every check line and the PASS/FAIL verdict; exit 1 on failure."""
+    failed = any_failed(checks)
+    print("\n".join(checks))
+    print(f"\n{'FAIL' if failed else 'PASS'}: {len(checks)} checks")
+    return 1 if failed else 0
+
+
 def run_file_check(parse, path, checks):
     """Run one per-file parser, converting a hard parse crash into a FAIL line.
 
@@ -666,10 +676,7 @@ def main():
             return 2
         print(f"Shipped world header check: {ttw}\n")
         run_file_check(check_main_ttw, ttw, checks)
-        failed = any_failed(checks)
-        print("\n".join(checks))
-        print(f"\n{'FAIL' if failed else 'PASS'}: {len(checks)} checks")
-        return 1 if failed else 0
+        return report(checks)
     if not save_dir:
         print("No save dir given and none found under ~/.cache/7dtd-loadgen-*/Saves/*/*/")
         return 1
@@ -707,10 +714,7 @@ def main():
         if os.path.exists(np_):
             run_file_check(check_nim_mapping, np_, checks)
 
-    print("\n".join(checks))
-    failed = any_failed(checks)
-    print(f"\n{'FAIL' if failed else 'PASS'}: {len(checks)} checks")
-    return 1 if failed else 0
+    return report(checks)
 
 
 if __name__ == "__main__":

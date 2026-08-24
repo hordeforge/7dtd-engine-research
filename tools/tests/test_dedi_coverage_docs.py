@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import _common  # noqa: E402
+import _common
 
 ROOT = Path(__file__).resolve().parents[2]  # 7dtd-engine-research
 RESEARCH = ROOT

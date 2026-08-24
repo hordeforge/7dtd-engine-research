@@ -16,7 +16,7 @@ REPO = os.path.dirname(TOOLS)
 DOC = os.path.join(REPO, "docs", "protocol-packages.md")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import _common  # noqa: E402
+import _common
 
 CHANNEL1 = [
     "NetPackageChunk",
@@ -119,7 +119,7 @@ class NpKind {
     kout = _common.run_probe(kind_exe, asm)
     non_map = set()
     for line in kout.splitlines():
-        name, _, kind = line.partition("\t")
+        name, _, _kind = line.partition("\t")
         non_map.add(name)
     doc = open(DOC, encoding="utf-8").read()
     bad = []

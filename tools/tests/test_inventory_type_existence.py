@@ -14,7 +14,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import _common  # noqa: E402
+import _common
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 INV = os.path.join(REPO, "docs", "inventories")
@@ -84,10 +84,10 @@ def main() -> int:
     # excluding NetPackageManager; nested types like DroneWeapons/
     # NetPackageDroneParticleEffect live in dedicated-leaves.md instead)
     text = open(os.path.join(INV, "netpackages.md"), encoding="utf-8").read()
-    doc_np_rows = set(
+    doc_np_rows = {
         norm(m.group(1))
         for m in re.finditer(r"^\| `(NetPackage[A-Za-z0-9]*)` \|", text, re.M)
-    )
+    }
     for missing in sorted(top_level_netpkg - doc_np_rows):
         bad.append(f"netpackages.md: top-level `{missing}` missing from the table")
     for m in re.finditer(r"^\| `([^`]+)` \| ([^|]+) \| (\d+) \| (\d+) \|", text, re.M):

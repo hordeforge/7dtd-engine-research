@@ -85,8 +85,8 @@ def prereq(tool_names: list[str]) -> tuple[str, bool]:
     """
     if find_asm() is None:
         return (
-            "dedicated Assembly-CSharp.dll not found "
-            "(set ASM=<path to Assembly-CSharp.dll>)",
+            ("dedicated Assembly-CSharp.dll not found "
+             "(set ASM=<path to Assembly-CSharp.dll>)"),
             True,
         )
     missing = [t for t in tool_names if not (BIN / t).is_file()]
