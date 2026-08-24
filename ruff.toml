@@ -15,11 +15,21 @@ select = [
     "W",   # pycodestyle warnings
     "F",   # pyflakes
     "B",   # flake8-bugbear (bug-prone constructs)
+    "A",   # flake8-builtins (builtin shadowing)
+    "N",   # pep8-naming
     "I",   # import sorting
     "C4",  # flake8-comprehensions
     "ICN", # import conventions
     "PT",  # pytest style
     "TID", # tidy imports
+    "ISC", # implicit string concat (accidental literal joining)
+    "G",   # logging format-string correctness
+    "PGH", # blanket noqa/fixme suppression hygiene
+    "PLE", # pylint errors (real-defect subset)
+    "RSE", # unnecessary parens on raised exceptions
+    "SLF", # private member access from outside the class
+    "YTT", # sys.version/version_info misuse
+    "DTZ", # naive datetime (missing tz)
     "FLY", # literal joins
     "RUF", # ruff-specific rules
 ]

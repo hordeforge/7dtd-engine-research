@@ -14,5 +14,9 @@ jobs:
       - name: install pinned analyzers
         run: |
           pipx install ruff==0.16.4
-          sudo apt-get update -q && sudo apt-get install -y -q shellcheck
+          # Pinned so local `make lint` and CI agree (same policy as ruff);
+          # ubuntu-latest's apt shellcheck trails the current release.
+          sc_ver=0.11.0
+          curl -sSfL "https://github.com/koalaman/shellcheck/releases/download/v${sc_ver}/shellcheck-v${sc_ver}.linux.x86_64.tar.xz" | tar -xJ -C /tmp
+          sudo install /tmp/shellcheck-v${sc_ver}/shellcheck /usr/local/bin/shellcheck
       - run: make lint

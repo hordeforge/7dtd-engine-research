@@ -19,7 +19,8 @@ tools/
   build.sh    compiles src/ (and best-effort legacy/) into bin/
 ```
 
-Standalone Python entry points (no build step; each wired to a make target):
+Standalone entry points (no build step; each Python script is wired to a make
+target):
 
 | Script | Purpose |
 |---|---|

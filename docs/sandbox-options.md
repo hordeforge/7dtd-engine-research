@@ -132,9 +132,9 @@ the summary.
 | Tasks | `ChallengesEnabled`, `QuestsEnabled`, intro quest/challenge toggles, `TraderToTraderQuestsEnabled`, `BuriedQuestsEnabled`, `POIQuestsEnabled`, `QuestsPerTier`, `QuestProgressionDailyLimit`, `StarterSkillPoints` |
 | Misc | vehicle fuel/entity/block/self damage, `ElectricalOutput`, and the silly suite: `SillyCelebrate`, `SillyBigHeads`, `SillyTinyZombies`, `SillySounds`, `SillyLowGravity` (drives `Physics.gravity` scaling), `SillyBlackandWhite` (client rendering) |
 
-The full id list is the enum itself (`EnumDump SandboxOptions`); ids are wire-
-and code-stable because the sandbox code addresses options by enum value (next
-section).
+The full id list is the enum itself (`mono bin/EnumList.exe "$ASM" <out>`,
+then filter `SandboxOptions.` rows); ids are wire- and code-stable because the
+sandbox code addresses options by enum value (next section).
 
 ### 2.1 Value sets (decoded 2026-08-21)
 

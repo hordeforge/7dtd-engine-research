@@ -6,7 +6,9 @@ Regenerable Mono.Cecil output from this repo's `tools/src/` + `tools/legacy/` du
 
 Do not redistribute game assemblies or treat bulk IL as a product artifact.
 
-Dump sets: loop/gmUpdate/deep/deeper/gaps/frame-entries/opt-scan, terrain-*, realearth-surfaces, dedi-complete. Full table: docs INDEX.
+Dump sets: dedi-complete, deep, deeper, gaps, frame-entries, gmUpdate,
+loop-complete, opt-scan, terrain-*, realearth-surfaces, plus the src/-generated
+netpackages / surface / full sets. Full table: docs INDEX.
 
 ## Version policy: latest release only
 

@@ -4,7 +4,7 @@
 Reproduces every measurement in docs/shader-subprogram-blob.md: the LZ4
 per-platform blobs, the 12-byte record table, the sub-program header, and the
 DX11 program-data header whose three count bytes are cross-checked against the
-DXBC SHDR declarations they describe.
+DXBC SHDR/SHEX declarations they describe.
 
 Needs UnityPy (not a repo dependency; this is a reproduction tool, not a gate):
 
