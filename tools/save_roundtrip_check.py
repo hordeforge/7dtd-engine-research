@@ -32,6 +32,32 @@ import zlib
 
 RAW_DEFLATE = -15  # no zlib/gzip wrapper (Noemax.GZip.DeflateOutputStream, no header)
 
+# A region slot's compressed length is whatever the file says; without a cap a
+# crafted slot makes zlib.decompress allocate attacker-chosen gigabytes. Real
+# chunk bodies are well under 1 MiB, so 64 MiB leaves generous headroom.
+MAX_INFLATED = 64 * 1024 * 1024
+
+
+def inflate_raw_capped(data, cap=MAX_INFLATED):
+    """RAW_DEFLATE-inflate `data` with a hard cap on decompressed size.
+
+    Raises ValueError when the cap would be exceeded or the stream is
+    truncated, so a crafted slot degrades to the normal 'deflate failed'
+    check line instead of an OOM.
+    """
+    d = zlib.decompressobj(RAW_DEFLATE)
+    out = bytearray()
+    while not d.eof:
+        before = len(out)
+        out += d.decompress(data, 1 << 20)
+        data = d.unconsumed_tail
+        if len(out) > cap:
+            raise ValueError(f"inflated body exceeds {cap} B cap")
+        if not data and len(out) == before:
+            # No input left and no output progress: the stream is truncated.
+            raise ValueError("incomplete or truncated stream")
+    return bytes(out)
+
 
 def read_net_string(buf, off):
     """.NET BinaryReader.ReadString: 7-bit encoded length prefix + UTF-8."""
@@ -582,7 +608,7 @@ def check_region_v2(path, checks):
             checks.append(f"  slot {idx}: body len {len(body)} != length-8 {length - 8}")
             continue
         try:
-            dec = zlib.decompress(body, RAW_DEFLATE)
+            dec = inflate_raw_capped(body)
         except Exception as exc:
             checks.append(f"  slot {idx}: deflate failed: {exc}")
             continue

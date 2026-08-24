@@ -16,7 +16,12 @@ jobs:
           pipx install ruff==0.16.4
           # Pinned so local `make lint` and CI agree (same policy as ruff);
           # ubuntu-latest's apt shellcheck trails the current release.
+          # Checksum-gated like the Mono.Cecil pin: a swapped release artifact
+          # must fail the download, not run in the lint job.
           sc_ver=0.11.0
-          curl -sSfL "https://github.com/koalaman/shellcheck/releases/download/v${sc_ver}/shellcheck-v${sc_ver}.linux.x86_64.tar.xz" | tar -xJ -C /tmp
-          sudo install /tmp/shellcheck-v${sc_ver}/shellcheck /usr/local/bin/shellcheck
+          sc_sha=8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198
+          curl -sSfL "https://github.com/koalaman/shellcheck/releases/download/v${sc_ver}/shellcheck-v${sc_ver}.linux.x86_64.tar.xz" -o /tmp/sc.tar.xz
+          echo "${sc_sha}  /tmp/sc.tar.xz" | sha256sum -c -
+          tar -xJ -C /tmp -f /tmp/sc.tar.xz
+          sudo install "/tmp/shellcheck-v${sc_ver}/shellcheck" /usr/local/bin/shellcheck
       - run: make lint

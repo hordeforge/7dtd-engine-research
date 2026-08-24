@@ -121,11 +121,16 @@ class DumpDeep {
   }
 
   static void Dump(MethodDefinition m, StringBuilder index) {
+    // Assembly-supplied names are untrusted: strip path separators too, so a
+    // crafted type/method name cannot escape outDir (Path.Combine hands a
+    // rooted fragment straight through).
     string safe = m.DeclaringType.Name + "_" + m.Name;
-    safe = safe.Replace("`", "_").Replace("<", "_").Replace(">", "_");
+    safe = safe.Replace("`", "_").Replace("<", "_").Replace(">", "_")
+               .Replace("/", "_").Replace("\\", "_");
     if (m.Parameters.Count > 0) {
       safe += "_" + string.Join("_", m.Parameters.Select(p =>
-        p.ParameterType.Name.Replace("`", "_").Replace("<", "_").Replace(">", "_")));
+        p.ParameterType.Name.Replace("`", "_").Replace("<", "_").Replace(">", "_")
+                             .Replace("/", "_").Replace("\\", "_")));
     }
     int il = m.Body.Instructions.Count;
     index.AppendLine("- `" + m.Name + "(" + string.Join(", ", m.Parameters.Select(p => p.ParameterType.Name)) + ")` IL=" + il + " → `" + safe + "_*`");

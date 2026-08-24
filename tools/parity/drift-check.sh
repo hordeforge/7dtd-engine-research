@@ -58,7 +58,7 @@ fi
 if [[ -f "$BIN/ParitySurface.exe" ]]; then
   run "$BIN/ParitySurface.exe" "$ASM" 2>/dev/null | sed -n '/^{/,$p' > "$cur/parity.json"
   # Reject empty/non-JSON captures so parity_diff does not throw.
-  if ! python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$cur/parity.json" 2>/dev/null; then
+  if ! python3 -m json.tool "$cur/parity.json" >/dev/null 2>&1; then
     echo "drift: warning: ParitySurface output not valid JSON; skipping package wire diff" >&2
     rm -f "$cur/parity.json"
   fi
@@ -75,7 +75,7 @@ fi
 drift=0
 sec() { echo; echo "== $1 =="; }
 sec "census"
-diff <(cat "$BASELINE_DIR/census.txt") <(cat "$cur/census.txt") && echo "  (unchanged)" || drift=1
+diff "$BASELINE_DIR/census.txt" "$cur/census.txt" && echo "  (unchanged)" || drift=1
 sec "types (added/removed)"
 tlist() { awk -F'|' 'NR>3{gsub(/ /,"",$2);print $2}' "$1/surface/surface-types.md" | grep -vE '\$|<>|__' | sort -u; }
 added=$(comm -13 <(tlist "$BASELINE_DIR") <(tlist "$cur"))

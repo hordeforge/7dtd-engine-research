@@ -268,9 +268,13 @@ class DumpDeeper {
     string s = m.DeclaringType.Name + "_" + m.Name;
     if (m.DeclaringType.IsNested)
       s = m.DeclaringType.DeclaringType.Name + "_" + m.DeclaringType.Name.Replace("<", "_").Replace(">", "_").Replace("/", "_") + "_" + m.Name;
-    s = s.Replace("`", "_").Replace("<", "_").Replace(">", "_").Replace("|", "_");
+    // Strip path separators as well: assembly-supplied names are untrusted,
+    // and a `/`-bearing name would escape outDir (rooted fragments bypass
+    // Path.Combine entirely).
+    s = s.Replace("`", "_").Replace("<", "_").Replace(">", "_").Replace("|", "_")
+         .Replace("/", "_").Replace("\\", "_");
     if (m.Parameters.Count > 0)
-      s += "_" + string.Join("_", m.Parameters.Select(p => p.ParameterType.Name.Replace("`", "_").Replace("<", "_").Replace(">", "_")));
+      s += "_" + string.Join("_", m.Parameters.Select(p => p.ParameterType.Name.Replace("`", "_").Replace("<", "_").Replace(">", "_").Replace("/", "_").Replace("\\", "_")));
     if (s.Length > 140) s = s.Substring(0, 140);
     return s;
   }

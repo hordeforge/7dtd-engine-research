@@ -61,7 +61,9 @@ def score_no_soft_literals() -> tuple[float, str]:
             # bad if it is a regex/accept path not built from variables
             if "display" in line or "pin_display" in line or "re.escape" in line:
                 # still bad if it ORs a fixed literal after a dynamic one
-                if re.search(r"\|V 3\\\\?\.1\\\\?\.0|\\|V 3\\.1\\.0", line):
+                # (an alternation arm like `|V 3\.1\.0` accepts the stale
+                # version alongside the facts-driven display)
+                if re.search(r"\|\s*V\s*3", line):
                     soft_hits.append(i)
             else:
                 soft_hits.append(i)

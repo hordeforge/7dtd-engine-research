@@ -256,9 +256,12 @@ def extract(pe):
         i += 1
 
     opt_by_id = {o["id"]: o for o in options}
-    missing = [x for x in range(max(opt_by_id) + 1) if x not in opt_by_id]
-    if missing:
-        print(f"warning: enum ids not registered: {missing}", file=sys.stderr)
+    if opt_by_id:
+        missing = [x for x in range(max(opt_by_id) + 1) if x not in opt_by_id]
+        if missing:
+            print(f"warning: enum ids not registered: {missing}", file=sys.stderr)
+    else:
+        print("warning: no sandbox options recovered from SetupOptions", file=sys.stderr)
     return {"valuesets": valuesets,
             "options": [opt_by_id[k] for k in sorted(opt_by_id)]}
 
