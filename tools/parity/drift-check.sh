@@ -67,7 +67,9 @@ else
 fi
 
 if [[ ! -f "$BASELINE_DIR/surface/surface-types.md" ]]; then
-  cp -r "$cur/." "$BASELINE_DIR/"; echo "drift: baseline created at $BASELINE_DIR (no comparison this run)"; exit 0
+  cp -r "$cur/." "$BASELINE_DIR/"
+  rm -rf "$cur"
+  echo "drift: baseline created at $BASELINE_DIR (no comparison this run)"; exit 0
 fi
 
 drift=0
