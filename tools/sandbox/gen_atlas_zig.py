@@ -137,10 +137,12 @@ def main():
         print(f"{name}: {len(entries)} entries")
     print(f"wrote {out_path}")
     # Best-effort: keep the output zig fmt clean (regeneration is manual).
+    # Only the expected "zig not installed" case is tolerated silently; any
+    # other failure (e.g. malformed generated output) must surface.
     try:
         import subprocess
         subprocess.run(["zig", "fmt", out_path], check=False)
-    except Exception:
+    except OSError:
         pass
 
 

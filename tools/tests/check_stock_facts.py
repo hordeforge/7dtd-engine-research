@@ -97,7 +97,11 @@ def check_live_against_dll(facts: dict, errors: list[str]) -> None:
                 "live facts extraction failed: " + (proc.stderr or "").strip()[:400]
             )
             return
-        live = json.loads(out.read_text(encoding="utf-8"))
+        try:
+            live = json.loads(out.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            errors.append(f"live facts extraction produced invalid JSON: {exc}")
+            return
     def strip(d):
         return {k: v for k, v in d.items() if k not in VOLATILE_FACT_KEYS}
     diffs: list[str] = []
@@ -150,10 +154,26 @@ def check_xmls_to_load_inventory(errors: list[str]) -> None:
         return
     env = dict(os.environ)
     env["MONO_PATH"] = str(TOOLS / "bin")
-    out = subprocess.run(
+    proc = subprocess.run(
         ["mono", str(TOOLS / "bin" / "DumpMethod.exe"), str(asm), "WorldStaticData", ".cctor"],
         capture_output=True, text=True, env=env, timeout=60,
-    ).stdout
+    )
+    # An extractor failure must not masquerade as an inventory drift: an empty
+    # cctor dump would otherwise report "core (0) != inventory core (N)" and
+    # send the operator hunting through docs instead of at the tool failure.
+    if proc.returncode != 0:
+        errors.append(
+            "xmlsToLoad: DumpMethod.exe failed (rc="
+            f"{proc.returncode}): {(proc.stderr or '').strip()[:400]}"
+        )
+        return
+    if not proc.stdout.strip():
+        errors.append(
+            "xmlsToLoad: DumpMethod.exe returned no IL for WorldStaticData..cctor "
+            "(type renamed or extractor stale?)"
+        )
+        return
+    out = proc.stdout
     cctor_names = re.findall(r"ldc\.i4(?:\.\d+|\.s \d+)\n\s*IL_\w+: ldstr (\w+)", out)
     core = sorted(n for n in cctor_names
                   if not n.startswith("loadAction") and not n.startswith("XUi"))

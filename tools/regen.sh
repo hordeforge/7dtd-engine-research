@@ -59,11 +59,20 @@ declare -A legacy_dirs=(
   [DumpTerrain]=terrain-v3.1.0
   [DumpRealEarthSurfaces]=realearth-surfaces-v3.1.0
 )
+# Legacy dumps stay best-effort (archival tools, superseded by src/), but a
+# failed run must be reported like build.sh does for unbuildable sources:
+# a silently missing dump set would look identical to a clean regeneration.
 for t in "${!legacy_dirs[@]}"; do
   exe="$here/bin/legacy/$t.exe"
   [[ -f "$exe" ]] || { echo "skip $t (missing)"; continue; }
-  MONO_PATH="$here/bin" mono "$exe" "$asm" "$root/il/${legacy_dirs[$t]}" 2>/dev/null || true
+  if ! out="$(MONO_PATH="$here/bin" mono "$exe" "$asm" "$root/il/${legacy_dirs[$t]}" 2>&1)"; then
+    printf 'regen: warning: %s dump FAILED:\n%s\n' "$t" "$out" >&2
+    legacy_fail=1
+  fi
 done
+if [[ "${legacy_fail:-0}" == "1" ]]; then
+  echo "regen: warning: one or more legacy dumps failed; their il/ sets may be stale or absent" >&2
+fi
 
 step "consistency + gates"
 (cd "$root" && make test)

@@ -72,6 +72,19 @@ def slot0_past_eof_region_dir(dirpath):
         f.write(data)
 
 
+def unreadable_region_entry(dirpath):
+    """Save dir whose Region/ holds a '*.7rg' that is a DIRECTORY.
+
+    glob matches it, open() raises IsADirectoryError (an OSError, raised even
+    for root); run_file_check must degrade that to a parse-error FAIL line,
+    not abort the remaining files' checks with a traceback.
+    """
+    region = os.path.join(dirpath, "Region")
+    os.makedirs(os.path.join(region, "dir.7rg"))
+    with open(os.path.join(region, "good.7rg"), "wb") as f:
+        f.write(b"")
+
+
 def main():
     bad = []
     with tempfile.TemporaryDirectory(prefix="srt-robustness-") as tmp:
@@ -99,6 +112,16 @@ def main():
         assert_no_traceback(rc, out, "slot0 past-EOF region dir", bad)
         if "exceeds file bounds" not in out or "\nFAIL:" not in out:
             bad.append(f"slot0 past-EOF region dir: no bounds FAIL verdict:\n{out}")
+
+        save1 = os.path.join(tmp, "save1")
+        os.makedirs(save1)
+        unreadable_region_entry(save1)
+        rc, out = run(save1)
+        assert_no_traceback(rc, out, "directory-named .7rg", bad)
+        if "parse error" not in out or "\nFAIL:" not in out:
+            bad.append(f"directory-named .7rg: no parse-error FAIL verdict:\n{out}")
+        if "main.ttw: MISSING" not in out:
+            bad.append("directory-named .7rg: later checks skipped (run aborted early)")
 
         rc, _ = run("--shipped")
         if rc != 2:

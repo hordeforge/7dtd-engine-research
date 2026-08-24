@@ -679,10 +679,12 @@ def run_file_check(parse, path, checks):
     These parsers read stock-written but potentially truncated/corrupt files;
     a malformed input must degrade to a failed check, never abort the whole
     run with a traceback (which would also skip the remaining files' checks).
+    OSError covers a file that vanished between the glob and the open or is
+    unreadable (including a *.7rg path that is a directory): same degrade.
     """
     try:
         parse(path, checks)
-    except (struct.error, IndexError) as exc:
+    except (struct.error, IndexError, OSError) as exc:
         checks.append(f"{os.path.basename(path)}: parse error: {exc}")
 
 
