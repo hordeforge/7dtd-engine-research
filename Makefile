@@ -3,7 +3,7 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check post-update census drift test readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all
+.PHONY: tools stock-sync stock-check post-update census drift test test-docs verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"

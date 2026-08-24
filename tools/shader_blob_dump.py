@@ -8,7 +8,7 @@ DXBC SHDR declarations they describe.
 
 Needs UnityPy (not a repo dependency; this is a reproduction tool, not a gate):
 
-    pip install UnityPy
+    uv pip install UnityPy
 
 Usage:
     python3 tools/shader_blob_dump.py <bundle> [--shader NAME] [--verbose]
@@ -467,7 +467,7 @@ def main(argv=None):
         rows, skipped, parameters = decode_bundle(args.bundle, args.shader, args.verbose)
     except ImportError:
         print("UnityPy is not installed; this reproduction tool needs it "
-              "(pip install UnityPy).", file=sys.stderr)
+              "(uv pip install UnityPy).", file=sys.stderr)
         return 77
 
     print(f"bundle              : {args.bundle}")

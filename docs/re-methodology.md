@@ -229,7 +229,8 @@ table:
 cd tools
 ./build.sh --skip-legacy
 ./stock-sync.sh                 # StockFacts.exe → data/stock_facts.json + pin check
-./stock-sync.sh --check-only    # CI / pre-commit without touching the DLL
+./stock-sync.sh --check-only    # pin check without regenerating; still diffs
+                                # facts vs the live DLL when it is installed
 ```
 
 | Piece | Role |
@@ -254,11 +255,11 @@ patch or a careless edit cannot silently drift the docs:
 
 | Gate | What it verifies |
 |---|---|
-| `make test` (23 checks) | the full local suite: reach/coverage consistency, committed-inventory currency (`WireBodies`/`Coverage`/`StateMachines` regeneration), surface well-formedness, doc-link + section-ref integrity, inventory count claims, and the DLL-side guards below |
+| `make test` (25 checks) | the full local suite: reach/coverage consistency, committed-inventory currency (`WireBodies`/`Coverage`/`StateMachines` regeneration), surface well-formedness, doc-link + section-ref integrity, inventory count claims, and the DLL-side guards below |
 | `tests/test_subclass_counts.py` | per-leaf inventory counts (sequence-requirements 38, item-actions 38, quest-objectives 38, minevent-actions 71, block-behaviors 65, te-features 11, challenge-objectives 28+1, sequence-actions 123) match the concrete-subclass closures / namespace composition |
 | `tests/test_console_cmd_inventory.py` | console catalog primary rows == `CmdMap.exe` output, alias rows are real names, the committed `.tsv` is current, and every Does-column description equals `getDescription` |
 | `tests/test_console_classification.py` | the console client-executable / dedicated-gate split (188 leaves; 83 `get_IsExecuteOnClient`, 84 either, 10 `IsDedicatedServer`-gated classes listed in console-commands.md 6) matches a Cecil prologue probe over the `CmdMap` population |
-| `tests/test_il_citations.py` | **every** parseable `Type::Method` + `IL=N` claim in the docs (2237 claims, incl. dated "(exact)" re-verification notes) matches some overload of the method in the live DLL; approximate IL claims (a tilde form) are banned |
+| `tests/test_il_citations.py` | **every** parseable `Type::Method` + `IL=N` claim in the docs (2367 claims, incl. dated "(exact)" re-verification notes) matches some overload of the method in the live DLL; approximate IL claims (a tilde form) are banned |
 | `tests/test_xref_claims.py` | every `Xref=N` call-site claim in the docs (5, tight ``Type.Method (Xref=N)`` form, backtick-gapped) matches `Xref.exe` against the live DLL |
 | `tests/test_inventory_type_existence.py` | every type row in `dedicated-leaves.md` (371) and `netpackages.md` (194, incl. base/method-count/max-IL columns and top-level completeness) resolves in the DLL |
 | `tests/test_entityclass_props_current.py`, `test_gamestats_gameprefs_current.py` | EntityClass `.cctor` prop pairs (167) and the EnumGameStats/EnumGamePrefs member-name tables (82/317) equal the DLL |
