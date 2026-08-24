@@ -7,7 +7,7 @@ ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Serve
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
-	@echo "make lint         - static analysis: ruff (Python) + shellcheck (shell)"
+	@echo "make lint         - static analysis: ruff check+format (Python) + shellcheck (shell)"
 	@echo "make cross-links  - resolve every cross-repo .md link in the sibling workspace"
 	@echo "make sibling-cites - verify every sibling repo's research citations resolve against docs/"
 	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
@@ -59,9 +59,11 @@ regen-check:
 	python3 "$(TOOLS)/tests/test_re_dump_regen.py"
 
 # Static analysis gate: same commands in CI (ci.yml lint job). ruff reads
-# ruff.toml at the repo root; shellcheck runs at its strictest severity.
+# ruff.toml at the repo root; format --check keeps the tree formatter-clean;
+# shellcheck runs at its strictest severity.
 lint:
 	ruff check .
+	ruff format --check .
 	for f in $$(git ls-files '*.sh'); do shellcheck "$$f"; done
 
 test:

@@ -12,6 +12,7 @@ With the DLL present but dumps stale/missing they still FAIL.
 
 Usage: python3 tools/tests/test_dedi_coverage_docs.py
 """
+
 from __future__ import annotations
 
 import os
@@ -126,15 +127,9 @@ BAN_WITNESSES = {
     "stale GAME_LOOP gap #8": "see GAME_LOOP open gap #8 for details.",
 }
 
-IL_CLAIM_POSITIVE = (
-    "gmUpdate measured IL = 4210 (../il/deep-v3.1.0/GameManager_il.txt)"
-)
-IL_CLAIM_POSITIVE_MARKER = (
-    "Full inventory: ../il/dedi-complete-v3.1.0/DEDI_COMPLETE_auto.md"
-)
-IL_CLAIM_NEGATIVE = (
-    "This family describes behavior only; numbers live in the inventories."
-)
+IL_CLAIM_POSITIVE = "gmUpdate measured IL = 4210 (../il/deep-v3.1.0/GameManager_il.txt)"
+IL_CLAIM_POSITIVE_MARKER = "Full inventory: ../il/dedi-complete-v3.1.0/DEDI_COMPLETE_auto.md"
+IL_CLAIM_NEGATIVE = "This family describes behavior only; numbers live in the inventories."
 
 
 def self_test_detectors(fails: list[str]) -> None:

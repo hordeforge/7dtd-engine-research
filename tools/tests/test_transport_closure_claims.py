@@ -10,6 +10,7 @@ or calls peer order "unknown" is stale relative to the residual table.
 
 Usage: python3 tools/tests/test_transport_closure_claims.py
 """
+
 import os
 import re
 
@@ -62,9 +63,7 @@ def self_test_patterns() -> None:
         if m:
             problems.append(f"pattern flags clean text: {pat!r} matched {m.group(0)!r}")
     if problems:
-        raise AssertionError(
-            "stale-claim detector self-test failed:\n  " + "\n  ".join(problems)
-        )
+        raise AssertionError("stale-claim detector self-test failed:\n  " + "\n  ".join(problems))
 
 
 def main():
@@ -80,13 +79,16 @@ def main():
             for pat, reason in STALE_PATTERNS:
                 for m in re.finditer(pat, text, re.IGNORECASE):
                     line_no = text[: m.start()].count("\n") + 1
-                    bad.append(f"{os.path.relpath(path, REPO)}:{line_no}: {m.group(0)!r} ({reason})")
+                    bad.append(
+                        f"{os.path.relpath(path, REPO)}:{line_no}: {m.group(0)!r} ({reason})"
+                    )
     if bad:
         raise AssertionError(
             "Stale stock-transport claims found (see docs/network.md 4.0, docs/loop.md 1.1):\n"
             + "\n".join(bad)
         )
     print("OK: no stale native-LiteNetLib / unknown-peer-order claims in docs")
+
 
 if __name__ == "__main__":
     main()

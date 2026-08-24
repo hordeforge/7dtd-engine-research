@@ -16,6 +16,7 @@ Usage: python3 tools/cross_repo_links.py [--root <workspace>] [--repo NAME]
   --repo limits the scan to one repo name.
 Exit 0 = all links resolve; 1 = at least one broken link.
 """
+
 import argparse
 import glob
 import os
@@ -24,8 +25,14 @@ import sys
 
 LINK = re.compile(r"\]\(((?:\.\./)+[^) ]+\.md)\)")
 REPOS = [
-    "7dtd-server-apm", "7dtd-fastconnect", "7dtd-loadgen", "7dtd-server-optimizer",
-    "7dtd-playtest", "7dtd-realearth", "7dtd-engine-research", "7dtd-server-guard",
+    "7dtd-server-apm",
+    "7dtd-fastconnect",
+    "7dtd-loadgen",
+    "7dtd-server-optimizer",
+    "7dtd-playtest",
+    "7dtd-realearth",
+    "7dtd-engine-research",
+    "7dtd-server-guard",
     "zdtd-server",
 ]
 
@@ -57,8 +64,12 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, list[str]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--root", default=os.path.normpath(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")))
+    ap.add_argument(
+        "--root",
+        default=os.path.normpath(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+        ),
+    )
     ap.add_argument("--repo")
     args = ap.parse_args()
     root = args.root

@@ -17,6 +17,7 @@ sibling repo directory is entirely absent).
 Exit 1 = mismatch.
 Exit 2 = usage / missing required facts.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -48,11 +49,12 @@ _MISSING = object()
 def _diff(left: object, right: object, path: str, into: list[str]) -> None:
     if isinstance(left, dict) and isinstance(right, dict):
         for k in sorted(set(left) | set(right)):
-            _diff(left.get(k, _MISSING), right.get(k, _MISSING),
-                  f"{path}.{k}" if path else k, into)
+            _diff(left.get(k, _MISSING), right.get(k, _MISSING), f"{path}.{k}" if path else k, into)
     elif left != right:
+
         def fmt(v):
             return "<absent>" if v is _MISSING else repr(v)
+
         into.append(f"{path}: live={fmt(left)} committed={fmt(right)}")
 
 
@@ -67,8 +69,10 @@ def check_live_against_dll(facts: dict, errors: list[str]) -> None:
     """
     asm = find_asm()
     if asm is None:
-        print("SKIP: live DLL not found; facts-vs-DLL comparison skipped "
-              "(set ASM=<Assembly-CSharp.dll> to enable)")
+        print(
+            "SKIP: live DLL not found; facts-vs-DLL comparison skipped "
+            "(set ASM=<Assembly-CSharp.dll> to enable)"
+        )
         return
     exe = TOOLS / "bin" / "StockFacts.exe"
     mono = shutil.which("mono")
@@ -87,28 +91,31 @@ def check_live_against_dll(facts: dict, errors: list[str]) -> None:
         try:
             proc = subprocess.run(
                 [mono, str(exe), str(asm), str(out)],
-                capture_output=True, text=True, env=env, timeout=120,
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=120,
             )
         except subprocess.TimeoutExpired:
             errors.append("live facts extraction timed out after 120s")
             return
         if proc.returncode != 0 or not out.is_file():
-            errors.append(
-                "live facts extraction failed: " + (proc.stderr or "").strip()[:400]
-            )
+            errors.append("live facts extraction failed: " + (proc.stderr or "").strip()[:400])
             return
         try:
             live = json.loads(out.read_text(encoding="utf-8"))
         except json.JSONDecodeError as exc:
             errors.append(f"live facts extraction produced invalid JSON: {exc}")
             return
+
     def strip(d):
         return {k: v for k, v in d.items() if k not in VOLATILE_FACT_KEYS}
+
     diffs: list[str] = []
     _diff(strip(live), strip(facts), "", diffs)
     if diffs:
-        lv = (live.get("version") or {})
-        cm = (facts.get("version") or {})
+        lv = live.get("version") or {}
+        cm = facts.get("version") or {}
         errors.append(
             f"committed facts do not match the live DLL: local build "
             f"{lv.get('display')} (b{lv.get('build')}) vs pinned "
@@ -156,7 +163,10 @@ def check_xmls_to_load_inventory(errors: list[str]) -> None:
     env["MONO_PATH"] = str(TOOLS / "bin")
     proc = subprocess.run(
         ["mono", str(TOOLS / "bin" / "DumpMethod.exe"), str(asm), "WorldStaticData", ".cctor"],
-        capture_output=True, text=True, env=env, timeout=60,
+        capture_output=True,
+        text=True,
+        env=env,
+        timeout=60,
     )
     # An extractor failure must not masquerade as an inventory drift: an empty
     # cctor dump would otherwise report "core (0) != inventory core (N)" and
@@ -175,8 +185,9 @@ def check_xmls_to_load_inventory(errors: list[str]) -> None:
         return
     out = proc.stdout
     cctor_names = re.findall(r"ldc\.i4(?:\.\d+|\.s \d+)\n\s*IL_\w+: ldstr (\w+)", out)
-    core = sorted(n for n in cctor_names
-                  if not n.startswith("loadAction") and not n.startswith("XUi"))
+    core = sorted(
+        n for n in cctor_names if not n.startswith("loadAction") and not n.startswith("XUi")
+    )
     inv = []
     in_table = False
     for line in read(ROOT / "docs" / "inventories" / "xmlsToLoad.md").splitlines():
@@ -231,9 +242,16 @@ def check_research(facts: dict, errors: list[str]) -> None:
     # Chunk dims
     if str(ydim) not in cov and f"ChunkBlockYDim={ydim}" not in cov:
         # coverage mentions ChunkBlockYDim=256 historically
-        must_match("docs/coverage.md YDim", cov, rf"ChunkBlockYDim\s*=\s*{ydim}|YDim.*{ydim}", errors)
+        must_match(
+            "docs/coverage.md YDim", cov, rf"ChunkBlockYDim\s*=\s*{ydim}|YDim.*{ydim}", errors
+        )
     if str(layers) not in cov and f"ChunkBlockLayers={layers}" not in cov:
-        must_match("docs/coverage.md layers", cov, rf"ChunkBlockLayers\s*=\s*{layers}|Layers.*{layers}", errors)
+        must_match(
+            "docs/coverage.md layers",
+            cov,
+            rf"ChunkBlockLayers\s*=\s*{layers}|Layers.*{layers}",
+            errors,
+        )
 
     # Enum index sizes: EnumGameStats/EnumGamePrefs member counts pin the
     # gamestats-gameprefs inventory; the docs must cite 82 + 317.
@@ -243,7 +261,12 @@ def check_research(facts: dict, errors: list[str]) -> None:
     if en.get("game_prefs_members") != 317:
         errors.append(f"stock_facts enums.game_prefs_members={en.get('game_prefs_members')} != 317")
     else:
-        must_match("docs/inventories/gamestats-gameprefs.md 82+317", read(ROOT / "docs" / "inventories" / "gamestats-gameprefs.md"), r"82|317", errors)
+        must_match(
+            "docs/inventories/gamestats-gameprefs.md 82+317",
+            read(ROOT / "docs" / "inventories" / "gamestats-gameprefs.md"),
+            r"82|317",
+            errors,
+        )
 
     # xmlsToLoad list: the WorldStaticData cctor's load names (non-XUi core)
     # must match the inventory's XmlName rows exactly.
@@ -267,7 +290,11 @@ def check_research(facts: dict, errors: list[str]) -> None:
     if pins_path.is_file():
         pins = json.loads(pins_path.read_text(encoding="utf-8"))
         hp = pins.get("entityclasses_health", {})
-        for key, val in [("healthSlim", 125), ("healthSlimFeral", 500), ("healthSlimInfernal", 1600)]:
+        for key, val in [
+            ("healthSlim", 125),
+            ("healthSlimFeral", 500),
+            ("healthSlimInfernal", 1600),
+        ]:
             if hp.get(key) != val:
                 errors.append(f"xml_pins entityclasses_health.{key}={hp.get(key)} != {val}")
         prov = read(WS / "zdtd-server" / "docs" / "PROVENANCE.md")
@@ -282,7 +309,9 @@ def check_research(facts: dict, errors: list[str]) -> None:
             must_match("zdtd PROVENANCE sell_markdown", prov, r"sell_markdown|SellMarkdown", errors)
         bs = pins.get("buffs_survival", {})
         if abs(bs.get("food_wellfed_threshold", 0) - 0.52) > 1e-9:
-            errors.append(f"xml_pins buffs food_wellfed_threshold={bs.get('food_wellfed_threshold')} != 0.52")
+            errors.append(
+                f"xml_pins buffs food_wellfed_threshold={bs.get('food_wellfed_threshold')} != 0.52"
+            )
         if prov and bs.get("hunger_buff"):
             must_match("zdtd PROVENANCE buffStatusHungry", prov, r"buffStatusHungry", errors)
 
@@ -303,7 +332,13 @@ def check_research(facts: dict, errors: list[str]) -> None:
 
     # Death-loot lifetime + per-frame load budget (cctor-pinned IL values).
     for key, val, doc, pat, label in [
-        ("item_dropped_on_death_lifetime_s", 300.0, "docs/combat-damage.md", r"300", "item lifetime"),
+        (
+            "item_dropped_on_death_lifetime_s",
+            300.0,
+            "docs/combat-damage.md",
+            r"300",
+            "item lifetime",
+        ),
         ("max_load_time_per_frame_ms", 50, "docs/crafting-recipes.md", r"50", "load budget"),
     ]:
         got = facts["behaviour"].get(key)
@@ -315,7 +350,12 @@ def check_research(facts: dict, errors: list[str]) -> None:
             must_match(f"docs pin {label}", read(ROOT / doc), pat, errors)
 
     closed = read(ROOT / "docs" / "closed-gaps.md")
-    must_match("docs/closed-gaps.md GameTimer", closed, rf"ticksPerSecond\s*=\s*\*\*{tps}\*\*|GameTimer\({tps}|ticksPerSecond.*{tps}", errors)
+    must_match(
+        "docs/closed-gaps.md GameTimer",
+        closed,
+        rf"ticksPerSecond\s*=\s*\*\*{tps}\*\*|GameTimer\({tps}|ticksPerSecond.*{tps}",
+        errors,
+    )
 
     proto = read(ROOT / "docs" / "protocol.md")
     must_contain("docs/protocol.md challenge", proto, "0xCA", errors)
@@ -339,7 +379,9 @@ def check_research(facts: dict, errors: list[str]) -> None:
     if str(npkg) not in cov and str(npkg) not in proto:
         inv = read(ROOT / "docs" / "protocol-packages.md")
         if str(npkg) not in inv:
-            errors.append(f"research docs: NetPackage count {npkg} not mentioned in coverage/protocol/protocol-packages")
+            errors.append(
+                f"research docs: NetPackage count {npkg} not mentioned in coverage/protocol/protocol-packages"
+            )
 
     # Live census table under coverage.md must not keep V3.0.1 counts as "live"
     census = facts.get("census") or {}

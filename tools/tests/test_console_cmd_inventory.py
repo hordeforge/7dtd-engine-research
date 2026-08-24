@@ -13,6 +13,7 @@ command without updating the inventory fails here.
 
 Usage: python3 tools/tests/test_console_cmd_inventory.py <asm>
 """
+
 import os
 import re
 import sys
@@ -142,7 +143,9 @@ def main() -> int:
         descriptions[typ] = desc
         permissions[typ] = perm
 
-    text_inv = open(INV, encoding="utf-8").read()  # read once; parse_inventory + self-state check reuse it
+    text_inv = open(
+        INV, encoding="utf-8"
+    ).read()  # read once; parse_inventory + self-state check reuse it
     primaries, aliases = parse_inventory(text_inv)
     bad = []
     # the committed CmdMap tsv (regen.sh artifact) must equal fresh output
@@ -153,7 +156,9 @@ def main() -> int:
     if len(primaries) != EXPECTED_PRIMARY:
         bad.append(f"inventory primary rows = {len(primaries)} != expected {EXPECTED_PRIMARY}")
     if len(primaries) != len(dll_primary):
-        bad.append(f"inventory primary rows {len(primaries)} != DLL primary commands {len(dll_primary)}")
+        bad.append(
+            f"inventory primary rows {len(primaries)} != DLL primary commands {len(dll_primary)}"
+        )
     # exact set equality of primary rows (name+type)
     only_inv = {k: v for k, v in primaries.items() if dll_primary.get(k) != v}
     only_dll = {k: v for k, v in dll_primary.items() if primaries.get(k) != v}
@@ -166,13 +171,19 @@ def main() -> int:
         if typ not in name_sets:
             bad.append(f"alias `{name}` names unknown type {typ}")
         elif name not in name_sets[typ]:
-            bad.append(f"alias `{name}` is not a registered name of {typ} (have {sorted(name_sets[typ])})")
+            bad.append(
+                f"alias `{name}` is not a registered name of {typ} (have {sorted(name_sets[typ])})"
+            )
+
     # Does-column descriptions must equal getDescription (whitespace-normalized:
     # the doc renders embedded newlines as spaces; empty getDescription becomes
     # "(no description)")
     def norm_ws(s):
         return re.sub(r"\s+", " ", s).strip()
-    for m in re.finditer(r"^\| `([^`]+)` \| `([^`]+)`(?: \(alias\))? \| ([^|]*) \| (.*?) \|$", text_inv, re.M):
+
+    for m in re.finditer(
+        r"^\| `([^`]+)` \| `([^`]+)`(?: \(alias\))? \| ([^|]*) \| (.*?) \|$", text_inv, re.M
+    ):
         name, typ, perm_col, does = m.group(1), m.group(2), m.group(3).strip(), m.group(4).strip()
         if typ not in descriptions:
             continue
@@ -193,7 +204,9 @@ def main() -> int:
         for b in bad:
             print("FAIL:", b)
         return 1
-    print(f"OK: {len(dll_primary)} primary commands + {len(aliases)} aliases, descriptions consistent with the DLL")
+    print(
+        f"OK: {len(dll_primary)} primary commands + {len(aliases)} aliases, descriptions consistent with the DLL"
+    )
     return 0
 
 

@@ -70,7 +70,7 @@ def read_net_string(buf, off):
         if not (b & 0x80):
             break
         shift += 7
-    return buf[off:off + length].decode("utf-8", "replace"), off + length
+    return buf[off : off + length].decode("utf-8", "replace"), off + length
 
 
 def check_sleeper_volumes(blob, checks):
@@ -130,24 +130,59 @@ def check_sleeper_volumes(blob, checks):
             if has_min_script:
                 # MinScript.Write (IL=107) is a variable-length bytecode script;
                 # not deep-parsed. Record presence and stop the strict walk.
-                seen.append((vol_id, gname, gid, (smin, smax), (bx1, by1, bz1, bx2, by2, bz2),
-                             ver, num_spawned, gamestage, sp_cnt, rm_cnt, gc_cnt, True))
-                checks.append(f"  sleeperVolumes: volume {vol_id} carries a MinScript "
-                              f"(bytecode not deep-parsed); strict end-check skipped")
+                seen.append(
+                    (
+                        vol_id,
+                        gname,
+                        gid,
+                        (smin, smax),
+                        (bx1, by1, bz1, bx2, by2, bz2),
+                        ver,
+                        num_spawned,
+                        gamestage,
+                        sp_cnt,
+                        rm_cnt,
+                        gc_cnt,
+                        True,
+                    )
+                )
+                checks.append(
+                    f"  sleeperVolumes: volume {vol_id} carries a MinScript "
+                    f"(bytecode not deep-parsed); strict end-check skipped"
+                )
                 return
-            seen.append((vol_id, gname, gid, (smin, smax), (bx1, by1, bz1, bx2, by2, bz2),
-                         ver, num_spawned, gamestage, sp_cnt, rm_cnt, gc_cnt, False))
+            seen.append(
+                (
+                    vol_id,
+                    gname,
+                    gid,
+                    (smin, smax),
+                    (bx1, by1, bz1, bx2, by2, bz2),
+                    ver,
+                    num_spawned,
+                    gamestage,
+                    sp_cnt,
+                    rm_cnt,
+                    gc_cnt,
+                    False,
+                )
+            )
         next_id = struct.unpack_from("<i", blob, p)[0]
         p += 4
         exact = p == len(blob)
         checks.append(
             f"  sleeperVolumes: {count} volume(s) nextId {next_id} "
             f"{'byte-exact' if exact else f'MISMATCH ({p}/{len(blob)})'}"
-            + (f"; first: id {seen[0][0]} {seen[0][1]!r} gid {seen[0][2]} "
-               f"minmax {seen[0][3]} box {seen[0][4]} v{seen[0][5]} "
-               f"spawned {seen[0][6]} gs {seen[0][7]} pts {seen[0][8]} "
-               f"respawn {seen[0][9]} groups {seen[0][10]}"
-               f"{' +MinScript' if seen[0][11] else ''}" if seen else ""))
+            + (
+                f"; first: id {seen[0][0]} {seen[0][1]!r} gid {seen[0][2]} "
+                f"minmax {seen[0][3]} box {seen[0][4]} v{seen[0][5]} "
+                f"spawned {seen[0][6]} gs {seen[0][7]} pts {seen[0][8]} "
+                f"respawn {seen[0][9]} groups {seen[0][10]}"
+                f"{' +MinScript' if seen[0][11] else ''}"
+                if seen
+                else ""
+            )
+        )
     except (struct.error, IndexError) as exc:
         checks.append(f"  sleeperVolumes parse error: {exc}")
 
@@ -189,7 +224,8 @@ def check_ai_director_blob(blob, checks):
             f"airdrop(next {airdrop_next}, freq {freq}, {crates} crate(s) {crate_d}), "
             f"chunkEvent(ver {ce_ver}, active {ce_count}), "
             f"bloodMoon(last {bm_last}, next {bm_day}, freq {bm_freq}, range {bm_range}) "
-            f"{'byte-exact' if exact else f'MISMATCH ({p}/{len(blob)})'}")
+            f"{'byte-exact' if exact else f'MISMATCH ({p}/{len(blob)})'}"
+        )
     except (struct.error, IndexError) as exc:
         checks.append(f"  aiDirectorState parse error: {exc}")
 
@@ -215,14 +251,28 @@ def check_weather_blob(blob, checks):
             params = struct.unpack_from("<5f", blob, p + 12)
             rain, snow = struct.unpack_from("<2f", blob, p + 32)
             p += 40
-            recs.append((bid, grp, swt, sdur, nrwt,
-                         [round(x, 2) for x in params], round(rain, 3), round(snow, 3)))
+            recs.append(
+                (
+                    bid,
+                    grp,
+                    swt,
+                    sdur,
+                    nrwt,
+                    [round(x, 2) for x in params],
+                    round(rain, 3),
+                    round(snow, 3),
+                )
+            )
         exact = p == len(blob)
         checks.append(
             f"  weatherState: version {ver} gate {gate} biomes {count} "
             f"{'byte-exact' if exact else f'MISMATCH ({p}/{len(blob)})'}: "
-            + "; ".join(f"id {r[0]} grp {r[1]} storm({r[2]},{r[3]},{r[4]}) "
-                        f"params {r[5]} rain {r[6]} snow {r[7]}" for r in recs))
+            + "; ".join(
+                f"id {r[0]} grp {r[1]} storm({r[2]},{r[3]},{r[4]}) "
+                f"params {r[5]} rain {r[6]} snow {r[7]}"
+                for r in recs
+            )
+        )
     except (struct.error, IndexError) as exc:
         checks.append(f"  weatherState parse error: {exc}")
 
@@ -244,15 +294,16 @@ def check_worldstate_tail(buf, off, checks):
         off += 4
         sdl = struct.unpack_from("<q", buf, off)[0]
         off += 8
-        checks.append(f"  spawnList(ver {sp_ver}, {sp_cnt}) nextEntityID={next_id} "
-                      f"saveDataLimit={sdl}")
+        checks.append(
+            f"  spawnList(ver {sp_ver}, {sp_cnt}) nextEntityID={next_id} saveDataLimit={sdl}"
+        )
         blob_sizes = []
         blob_bodies = []
         for _ in ("dynamicSpawnerState", "aiDirectorState"):
             ln = struct.unpack_from("<i", buf, off)[0]
             off += 4
             blob_sizes.append(ln)
-            blob_bodies.append(buf[off:off + ln])
+            blob_bodies.append(buf[off : off + ln])
             off += ln
         vol_sizes = []
         vol_bodies = []
@@ -262,10 +313,11 @@ def check_worldstate_tail(buf, off, checks):
             ln = struct.unpack_from("<i", buf, off)[0]
             off += 4
             vol_sizes.append((sv, ln))
-            vol_bodies.append(buf[off:off + ln])
+            vol_bodies.append(buf[off : off + ln])
             off += ln
-        checks.append(f"  blobs dyn={blob_sizes[0]} ai={blob_sizes[1]} "
-                      f"volumes(v,bytes)={vol_sizes}")
+        checks.append(
+            f"  blobs dyn={blob_sizes[0]} ai={blob_sizes[1]} volumes(v,bytes)={vol_sizes}"
+        )
         check_sleeper_volumes(vol_bodies[0], checks)
         for name, body in (("triggerVolumes", vol_bodies[1]), ("wallVolumes", vol_bodies[2])):
             if len(body) >= 4:
@@ -279,23 +331,26 @@ def check_worldstate_tail(buf, off, checks):
                 checks.append(f"  {name}:{note}")
         if blob_bodies[0]:
             dyn = blob_bodies[0]
-            dyn_note = (f"  dynamicSpawner: version {dyn[0]} currentSpawnerActive "
-                        f"{bool(dyn[1]) if len(dyn) > 1 else '?'} "
-                        f"{'byte-exact' if len(dyn) == 2 else f'({len(dyn)} B)'}")
+            dyn_note = (
+                f"  dynamicSpawner: version {dyn[0]} currentSpawnerActive "
+                f"{bool(dyn[1]) if len(dyn) > 1 else '?'} "
+                f"{'byte-exact' if len(dyn) == 2 else f'({len(dyn)} B)'}"
+            )
             checks.append(dyn_note)
         check_ai_director_blob(blob_bodies[1], checks)
         w_sz = struct.unpack_from("<i", buf, off)[0]
         off += 4
         checks.append(f"  weather size prefix {w_sz} (includes itself: {w_sz - 4} B payload)")
-        w_body = buf[off:off + w_sz - 4] if w_sz > 4 else b""
+        w_body = buf[off : off + w_sz - 4] if w_sz > 4 else b""
         if w_sz > 4:
             off += w_sz - 4
         check_weather_blob(w_body, checks)
         guid, off = read_net_string(buf, off)
         checks.append(f"  guid: {guid[:8]}... len {len(guid)}")
         exact = off == len(buf)
-        checks.append(f"  full WorldState parse {'byte-exact' if exact else 'MISMATCH'} "
-                      f"({off}/{len(buf)})")
+        checks.append(
+            f"  full WorldState parse {'byte-exact' if exact else 'MISMATCH'} ({off}/{len(buf)})"
+        )
     except (struct.error, IndexError) as exc:
         checks.append(f"  WorldState tail parse error: {exc}")
     return off
@@ -308,11 +363,17 @@ def check_main_ttw(path, checks):
     checks.append(f"{os.path.basename(path)}: size {len(buf)}")
 
     magic = buf[0:4]
-    checks.append(f"  magic: {magic!r} == b'ttw\\x00'" if magic == b"ttw\x00"
-                  else "  magic: MISMATCH " + repr(magic))
+    checks.append(
+        f"  magic: {magic!r} == b'ttw\\x00'"
+        if magic == b"ttw\x00"
+        else "  magic: MISMATCH " + repr(magic)
+    )
     version = struct.unpack_from("<I", buf, 4)[0]
-    checks.append(f"  version: {version} == 23 (CurrentSaveVersion)" if version == 23
-                  else f"  version: {version} != 23")
+    checks.append(
+        f"  version: {version} == 23 (CurrentSaveVersion)"
+        if version == 23
+        else f"  version: {version} != 23"
+    )
     off = 8
     gvs, off = read_net_string(buf, off)
     checks.append(f"  gameVersionString: {gvs!r}")
@@ -320,28 +381,42 @@ def check_main_ttw(path, checks):
     off += 16
     known = {(1, 3, 10, 14): "V3.1.0 (b14)", (1, 4, 0, 8): "V4.0 (b8) shipped world data"}
     vi_note = known.get(vi, "unknown build")
-    checks.append(f"  VersionInformation (ReleaseType,Major,Minor,Build): {vi} [{vi_note}]"
-                  if vi in known else f"  VersionInformation: {vi} not in {{(1,3,10,14),(1,4,0,8)}}")
+    checks.append(
+        f"  VersionInformation (ReleaseType,Major,Minor,Build): {vi} [{vi_note}]"
+        if vi in known
+        else f"  VersionInformation: {vi} not in {{(1,3,10,14),(1,4,0,8)}}"
+    )
     pad0 = struct.unpack_from("<I", buf, off)[0]
     off += 4
     agm = struct.unpack_from("<i", buf, off)[0]
     off += 4
     pad1 = struct.unpack_from("<I", buf, off)[0]
     off += 4
-    checks.append(f"  pad0={pad0} activeGameMode={agm} pad1={pad1} (pads must be 0)"
-                  if pad0 == 0 and pad1 == 0
-                  else f"  pad0={pad0} activeGameMode={agm} pad1={pad1}: non-zero pad")
+    checks.append(
+        f"  pad0={pad0} activeGameMode={agm} pad1={pad1} (pads must be 0)"
+        if pad0 == 0 and pad1 == 0
+        else f"  pad0={pad0} activeGameMode={agm} pad1={pad1}: non-zero pad"
+    )
     water = struct.unpack_from("<f", buf, off)[0]
     off += 4
     # Navezgane water level pin (behaviour water-level, live-observed 62.88)
-    checks.append(f"  waterLevel: {water:.3f}" + (" (matches Navezgane pin 62.88)"
-                  if abs(water - 62.88) < 0.01 else " (Navezgane pin expected 62.88)"))
+    checks.append(
+        f"  waterLevel: {water:.3f}"
+        + (
+            " (matches Navezgane pin 62.88)"
+            if abs(water - 62.88) < 0.01
+            else " (Navezgane pin expected 62.88)"
+        )
+    )
     csx = struct.unpack_from("<i", buf, off)[0]
     csy = struct.unpack_from("<i", buf, off + 4)[0]
     csz = struct.unpack_from("<i", buf, off + 8)[0]
     off += 12
-    checks.append(f"  chunkSizeX/Y/Z: {csx}/{csy}/{csz} == 16/16/16 (Y/Z swapped on store)"
-                  if (csx, csy, csz) == (16, 16, 16) else f"  chunkSize: {csx}/{csy}/{csz}")
+    checks.append(
+        f"  chunkSizeX/Y/Z: {csx}/{csy}/{csz} == 16/16/16 (Y/Z swapped on store)"
+        if (csx, csy, csz) == (16, 16, 16)
+        else f"  chunkSize: {csx}/{csy}/{csz}"
+    )
     chunk_count = struct.unpack_from("<i", buf, off)[0]
     off += 4
     provider = struct.unpack_from("<i", buf, off)[0]
@@ -352,9 +427,11 @@ def check_main_ttw(path, checks):
     off += 8
     ticks = struct.unpack_from("<Q", buf, off)[0]
     off += 8
-    checks.append(f"  chunkCount={chunk_count} providerId={provider} (4=ChunkDataDriven, "
-                  f"the Navezgane/RWG value; 1=Disc) seed={seed} "
-                  f"worldTime={world_time} timeInTicks={ticks}")
+    checks.append(
+        f"  chunkCount={chunk_count} providerId={provider} (4=ChunkDataDriven, "
+        f"the Navezgane/RWG value; 1=Disc) seed={seed} "
+        f"worldTime={world_time} timeInTicks={ticks}"
+    )
 
     return check_worldstate_tail(buf, off, checks)
 
@@ -393,8 +470,9 @@ def parse_chunk_body(body, name, idx, checks):
         z_mod += 31
     if x_mod + z_mod * 32 != idx:
         coords_ok = False
-        checks.append(f"  slot {idx}: stored chunk ({x},{z}) maps to slot "
-                      f"{x_mod + z_mod * 32}, not {idx}")
+        checks.append(
+            f"  slot {idx}: stored chunk ({x},{z}) maps to slot {x_mod + z_mod * 32}, not {idx}"
+        )
 
     layers = 0
     for _ in range(64):
@@ -482,10 +560,12 @@ def parse_chunk_body(body, name, idx, checks):
     if p != n:
         raise ValueError(f"body parse ended at {p}/{n}")
 
-    check_str = (f"  slot {idx}: chunk ({x},{z}) ticks={ticks} layers={layers}/64 "
-                 f"biome=({d_biome},{am_biome}) custom={custom} "
-                 f"entities=0 te=0 devices={dev_count} culled ok; byte-exact "
-                 f"body parse ({n} B)")
+    check_str = (
+        f"  slot {idx}: chunk ({x},{z}) ticks={ticks} layers={layers}/64 "
+        f"biome=({d_biome},{am_biome}) custom={custom} "
+        f"entities=0 te=0 devices={dev_count} culled ok; byte-exact "
+        f"body parse ({n} B)"
+    )
     checks.append(check_str if coords_ok else check_str + " [coord mismatch above]")
     return coords_ok, True, ""
 
@@ -499,9 +579,11 @@ def check_17b_record_file(path, checks, record_desc, describe_first):
     cnt = struct.unpack_from("<i", data, 1)[0]
     expect = 5 + cnt * 17
     ok = ver == 6 and expect == len(data)
-    checks.append(f"{os.path.basename(path)}: version byte {ver} count {cnt} "
-                  f"{'byte-exact' if ok else f'MISMATCH ({expect} expected, {len(data)} got)'} "
-                  f"(17 B records: {record_desc})")
+    checks.append(
+        f"{os.path.basename(path)}: version byte {ver} count {cnt} "
+        f"{'byte-exact' if ok else f'MISMATCH ({expect} expected, {len(data)} got)'} "
+        f"(17 B records: {record_desc})"
+    )
     if cnt and ok:
         checks.append("  " + describe_first(data))
 
@@ -509,11 +591,14 @@ def check_17b_record_file(path, checks, record_desc, describe_first):
 def check_decoration_7dt(path, checks):
     """Verify decoration.7dt: version byte 6 + i32 count + 17-byte records
     (packedPos u64 + realYPos f32 + bv.rawData u32 + state u8)."""
+
     def first(data):
         pos, ry, raw, state = struct.unpack_from("<QfIB", data, 5)
         return f"first record: packedPos={pos} realY={ry:.1f} raw=0x{raw:x} state={state}"
+
     check_17b_record_file(
-        path, checks, "packedPos u64 + realYPos f32 + rawData u32 + state u8", first)
+        path, checks, "packedPos u64 + realYPos f32 + rawData u32 + state u8", first
+    )
 
 
 def check_nim_mapping(path, checks):
@@ -534,20 +619,27 @@ def check_nim_mapping(path, checks):
     except (struct.error, IndexError):
         p = -1
     ok = p == len(data)
-    checks.append(f"{name}: version {ver} count {cnt} unique_ids {len(ids)} "
-                  f"{'byte-exact' if ok else f'MISMATCH (consumed {p}/{len(data)})'}")
+    checks.append(
+        f"{name}: version {ver} count {cnt} unique_ids {len(ids)} "
+        f"{'byte-exact' if ok else f'MISMATCH (consumed {p}/{len(data)})'}"
+    )
 
 
 def check_multiblocks_7dt(path, checks):
     """Verify multiblocks.7dt: version byte 6 + i32 count + 17-byte records
     (Vector3i pos + rawData u32 + trackingTypeFlags u8). MultiBlockManager
     SaveIfDirty IL=107."""
+
     def first(data):
         x, y, z, raw, flags = struct.unpack_from("<iiiIB", data, 5)
         return f"first record: pos=({x},{y},{z}) raw=0x{raw:x} flags={flags}"
+
     check_17b_record_file(
-        path, checks, "Vector3i pos + rawData u32 + flags u8 "
-        "(MultiBlockManager SaveIfDirty IL=107)", first)
+        path,
+        checks,
+        "Vector3i pos + rawData u32 + flags u8 (MultiBlockManager SaveIfDirty IL=107)",
+        first,
+    )
 
 
 def check_region_v2(path, checks):
@@ -583,12 +675,15 @@ def check_region_v2(path, checks):
         return
 
     bad_off = [s for s in slots if s[1] < 3]
-    checks.append(f"  sector offset >= 3 invariant: {'OK' if not bad_off else 'VIOLATED ' + str(bad_off[:3])}")
+    checks.append(
+        f"  sector offset >= 3 invariant: {'OK' if not bad_off else 'VIOLATED ' + str(bad_off[:3])}"
+    )
     stamps = [s[3] for s in slots]
     checks.append(f"  timestamp {min(stamps)}..{max(stamps)} (WorldTimeToTotalMinutes)")
     if slots[0][1] * 4096 + 4 > len(data):
-        checks.append(f"  first slot payload start {slots[0][1] * 4096} "
-                      f"exceeds file bounds ({len(data)} B)")
+        checks.append(
+            f"  first slot payload start {slots[0][1] * 4096} exceeds file bounds ({len(data)} B)"
+        )
         return
 
     ok = 0
@@ -598,12 +693,12 @@ def check_region_v2(path, checks):
         if length + 16 > len(data) - pay:
             checks.append(f"  slot {idx}: length {length} exceeds file bounds")
             continue
-        magic4 = data[pay + 16:pay + 20]
+        magic4 = data[pay + 16 : pay + 20]
         cver = struct.unpack_from("<I", data, pay + 20)[0]
         if magic4 != b"ttc\x00" or cver != 47:
             checks.append(f"  slot {idx}: payload preamble {magic4!r} ver {cver} != ('ttc\\0', 47)")
             continue
-        body = data[pay + 24:pay + 16 + length]
+        body = data[pay + 24 : pay + 16 + length]
         if len(body) != length - 8:
             checks.append(f"  slot {idx}: body len {len(body)} != length-8 {length - 8}")
             continue
@@ -624,8 +719,10 @@ def check_region_v2(path, checks):
             ok += 1
         elif reason:
             checks.append(f"  slot {idx}: {reason}")
-    checks.append(f"  full body round-trip: {ok}/{len(slots)} chunks parse byte-exactly "
-                  f"(coords + layers + maps + channels + volumes + devices)")
+    checks.append(
+        f"  full body round-trip: {ok}/{len(slots)} chunks parse byte-exactly "
+        f"(coords + layers + maps + channels + volumes + devices)"
+    )
 
 
 def check_region_raw(path, checks):
@@ -656,9 +753,19 @@ def discover_save_dir():
 
 # Substrings that mark a check line as failed. Keep in sync with the failure
 # messages below: every violation text must contain at least one marker.
-FAILED_MARKERS = ("MISMATCH", "VIOLATED", " != ", "failed", "MISSING",
-                  "bounds", "too short", "!= expected", "parse error",
-                  "non-zero pad", "coord mismatch")
+FAILED_MARKERS = (
+    "MISMATCH",
+    "VIOLATED",
+    " != ",
+    "failed",
+    "MISSING",
+    "bounds",
+    "too short",
+    "!= expected",
+    "parse error",
+    "non-zero pad",
+    "coord mismatch",
+)
 
 
 def any_failed(checks):
@@ -693,8 +800,9 @@ def main():
     shipped = None
     if argv and argv[0] == "--shipped":
         if len(argv) < 2:
-            print("usage: save_roundtrip_check.py --shipped <worlddir-or-main.ttw>",
-                  file=sys.stderr)
+            print(
+                "usage: save_roundtrip_check.py --shipped <worlddir-or-main.ttw>", file=sys.stderr
+            )
             return 2
         shipped = argv[1]
         argv = argv[2:]

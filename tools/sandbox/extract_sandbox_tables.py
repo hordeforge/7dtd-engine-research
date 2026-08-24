@@ -17,6 +17,7 @@ Evidence: docs/sandbox-options.md (this repo). The option ids and value sets
 are the wire-visible contract of the sandbox code (see sandbox-options.md §3);
 they must match the stock DLL exactly for zdtd's SandboxCode decode.
 """
+
 import argparse
 import json
 import struct
@@ -123,8 +124,7 @@ def extract(pe):
 
     def find_newarr_len(j):
         m = j - 1
-        while m >= 0 and insns[m].opcode.name not in (
-            "newobj", "call", "callvirt", "stfld"):
+        while m >= 0 and insns[m].opcode.name not in ("newobj", "call", "callvirt", "stfld"):
             v = ldc4_val(insns[m])
             if v is not None and insns[m].opcode.name != "ldloc.s":
                 return v
@@ -169,8 +169,7 @@ def extract(pe):
                     name = us_str(insns[k].operand)
                     break
                 k -= 1
-            vstype = ("float" if "Float" in owner else
-                      "int" if "Int" in owner else "bool")
+            vstype = "float" if "Float" in owner else "int" if "Int" in owner else "bool"
             arr = None
             if vstype != "bool":
                 j = i + 1
@@ -178,20 +177,38 @@ def extract(pe):
                     opj = insns[j].opcode.name
                     if opj == "callvirt":
                         break
-                    if (opj == "stfld" and isinstance(insns[j].operand, Token)
-                            and (insns[j].operand.value & 0xFFFFFF) in VALUES_FIELDS):
+                    if (
+                        opj == "stfld"
+                        and isinstance(insns[j].operand, Token)
+                        and (insns[j].operand.value & 0xFFFFFF) in VALUES_FIELDS
+                    ):
                         break
-                    if (opj == "ldtoken" and isinstance(insns[j].operand, Token)
-                            and j + 1 < n and insns[j + 1].opcode.name == "call"):
+                    if (
+                        opj == "ldtoken"
+                        and isinstance(insns[j].operand, Token)
+                        and j + 1 < n
+                        and insns[j + 1].opcode.name == "call"
+                    ):
                         frid = insns[j].operand.value & 0xFFFFFF
                         m = j - 2
                         while m > i and insns[m].opcode.name not in (
-                                "newarr", "stfld", "call", "callvirt", "newobj"):
+                            "newarr",
+                            "stfld",
+                            "call",
+                            "callvirt",
+                            "newobj",
+                        ):
                             m -= 1
-                        cnt = (find_newarr_len(m) if m > i
-                               and insns[m].opcode.name == "newarr" else None)
-                        arr = read_array(frid, cnt,
-                                         "f" if vstype == "float" else "i") if cnt else None
+                        cnt = (
+                            find_newarr_len(m)
+                            if m > i and insns[m].opcode.name == "newarr"
+                            else None
+                        )
+                        arr = (
+                            read_array(frid, cnt, "f" if vstype == "float" else "i")
+                            if cnt
+                            else None
+                        )
                         break
                     j += 1
                 if arr is None:
@@ -241,18 +258,24 @@ def extract(pe):
                 if a[0] == "s":
                     sc += 1
                     if sc == 3:
-                        for a2 in args[ai + 1:]:
+                        for a2 in args[ai + 1 :]:
                             if a2[0] in ("f", "i"):
                                 default = a2[1]
                                 break
                         break
-            otype = ("float" if "Float" in owner else
-                     "int" if "Int" in owner else "bool")
+            otype = "float" if "Float" in owner else "int" if "Int" in owner else "bool"
             if idv is not None and len(strs) >= 3:
-                options.append({"id": idv, "name": enum_names.get(idv, ""),
-                                "display": strs[0],
-                                "category": strs[1], "valueset": strs[2],
-                                "type": otype, "default": default})
+                options.append(
+                    {
+                        "id": idv,
+                        "name": enum_names.get(idv, ""),
+                        "display": strs[0],
+                        "category": strs[1],
+                        "valueset": strs[2],
+                        "type": otype,
+                        "default": default,
+                    }
+                )
         i += 1
 
     opt_by_id = {o["id"]: o for o in options}
@@ -262,8 +285,7 @@ def extract(pe):
             print(f"warning: enum ids not registered: {missing}", file=sys.stderr)
     else:
         print("warning: no sandbox options recovered from SetupOptions", file=sys.stderr)
-    return {"valuesets": valuesets,
-            "options": [opt_by_id[k] for k in sorted(opt_by_id)]}
+    return {"valuesets": valuesets, "options": [opt_by_id[k] for k in sorted(opt_by_id)]}
 
 
 def main():

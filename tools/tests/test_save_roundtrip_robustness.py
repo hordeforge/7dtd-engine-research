@@ -10,6 +10,7 @@ exit 2 when its required path argument is missing or absent on disk.
 
 Usage: python3 tools/tests/test_save_roundtrip_robustness.py
 """
+
 import os
 import struct
 import subprocess
@@ -21,9 +22,7 @@ SCRIPT = os.path.join(TOOLS, "save_roundtrip_check.py")
 
 
 def run(*argv):
-    proc = subprocess.run(
-        [sys.executable, SCRIPT, *argv], capture_output=True, text=True
-    )
+    proc = subprocess.run([sys.executable, SCRIPT, *argv], capture_output=True, text=True)
     return proc.returncode, proc.stdout + proc.stderr
 
 

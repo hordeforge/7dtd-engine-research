@@ -25,6 +25,7 @@ Usage:
 Exit code is 0 unless the census itself fails; unaccounted > 0 is reported
 loudly but is not a hard failure (this is a report, not a gate).
 """
+
 import argparse
 import datetime
 import json
@@ -101,7 +102,9 @@ def parse_report_reached_types(report_path):
     try:
         with open(report_path, encoding="utf-8") as fh:
             for line in fh:
-                m = re.match(r"\|\s*Reached types \(incl\. compiler-generated\)\s*\|\s*(\d+)\s*\|", line)
+                m = re.match(
+                    r"\|\s*Reached types \(incl\. compiler-generated\)\s*\|\s*(\d+)\s*\|", line
+                )
                 if m:
                     return int(m.group(1))
     except OSError:
@@ -115,10 +118,16 @@ def parse_report_accounted(report_path):
     try:
         with open(report_path, encoding="utf-8") as fh:
             for line in fh:
-                m = re.match(r"\|\s*Accounted game types \(reached documented \+ unreached classified\)\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|", line)
+                m = re.match(
+                    r"\|\s*Accounted game types \(reached documented \+ unreached classified\)\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|",
+                    line,
+                )
                 if m:
                     out["acct_types"] = int(m.group(1))
-                m = re.match(r"\|\s*Methods in accounted game types\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|", line)
+                m = re.match(
+                    r"\|\s*Methods in accounted game types\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|",
+                    line,
+                )
                 if m:
                     out["acct_methods"] = int(m.group(1))
     except OSError:
@@ -128,19 +137,31 @@ def parse_report_accounted(report_path):
 
 def parse_args(argv):
     ap = argparse.ArgumentParser(
-        description="Compute the RE-coverage percentages for the corpus (live census).")
-    ap.add_argument("asm", nargs="?", default=None,
-                    help="path to Assembly-CSharp.dll (default: $ASM or the Steam path, "
-                         "same resolution as tools/stock-sync.sh)")
-    ap.add_argument("docs", nargs="?", default=None,
-                    help="docs directory to scan (default: docs)")
-    ap.add_argument("--json", action="store_true",
-                    help="emit a machine-readable JSON object instead of the human report")
-    ap.add_argument("--history", nargs="?", const="census-history.csv", default=None,
-                    metavar="FILE",
-                    help="append the percentages to a CSV so census numbers can be "
-                         "tracked over time (default name: census-history.csv; "
-                         "date column is UTC)")
+        description="Compute the RE-coverage percentages for the corpus (live census)."
+    )
+    ap.add_argument(
+        "asm",
+        nargs="?",
+        default=None,
+        help="path to Assembly-CSharp.dll (default: $ASM or the Steam path, "
+        "same resolution as tools/stock-sync.sh)",
+    )
+    ap.add_argument("docs", nargs="?", default=None, help="docs directory to scan (default: docs)")
+    ap.add_argument(
+        "--json",
+        action="store_true",
+        help="emit a machine-readable JSON object instead of the human report",
+    )
+    ap.add_argument(
+        "--history",
+        nargs="?",
+        const="census-history.csv",
+        default=None,
+        metavar="FILE",
+        help="append the percentages to a CSV so census numbers can be "
+        "tracked over time (default name: census-history.csv; "
+        "date column is UTC)",
+    )
     return ap.parse_args(argv)
 
 
@@ -191,35 +212,55 @@ def main():
         g = cov["game_types"]
         print("RE coverage of the 7dtd-engine-research corpus (live census)\n")
         print("Reached game types (dedicated-server RE surface): %d" % g)
-        print("  narrated      %6d  %5.1f%%  (hand-written narrative prose)" % (
-            cov["narrated"], pct(cov["narrated"], g)))
-        print("  catalogued    %6d  %5.1f%%  (generated inventory: enumerated, not explained)" % (
-            cov["catalogued"], pct(cov["catalogued"], g)))
-        print("  classified    %6d  %5.1f%%  (verified out-of-scope: client/3rd-party, not dedi work)" % (
-            cov["classified"], pct(cov["classified"], g)))
-        print("  UNACCOUNTED   %6d  %5.1f%%  (appears nowhere)" % (
-            cov["unaccounted"], pct(cov["unaccounted"], g)))
+        print(
+            "  narrated      %6d  %5.1f%%  (hand-written narrative prose)"
+            % (cov["narrated"], pct(cov["narrated"], g))
+        )
+        print(
+            "  catalogued    %6d  %5.1f%%  (generated inventory: enumerated, not explained)"
+            % (cov["catalogued"], pct(cov["catalogued"], g))
+        )
+        print(
+            "  classified    %6d  %5.1f%%  (verified out-of-scope: client/3rd-party, not dedi work)"
+            % (cov["classified"], pct(cov["classified"], g))
+        )
+        print(
+            "  UNACCOUNTED   %6d  %5.1f%%  (appears nowhere)"
+            % (cov["unaccounted"], pct(cov["unaccounted"], g))
+        )
 
         known = cov["narrated"] + cov["catalogued"] + cov["classified"]
-        print("\nAccounted-for reached game types: %d / %d (%.1f%%)" % (
-            known, g, pct(known, g)))
-        print("Completely unknown (unaccounted):  %d / %d (%.1f%%)" % (
-            cov["unaccounted"], g, pct(cov["unaccounted"], g)))
-        print("Not deeply narrated (catalogued + classified): %d / %d (%.1f%%)" % (
-            cov["catalogued"] + cov["classified"], g,
-            pct(cov["catalogued"] + cov["classified"], g)))
+        print("\nAccounted-for reached game types: %d / %d (%.1f%%)" % (known, g, pct(known, g)))
+        print(
+            "Completely unknown (unaccounted):  %d / %d (%.1f%%)"
+            % (cov["unaccounted"], g, pct(cov["unaccounted"], g))
+        )
+        print(
+            "Not deeply narrated (catalogued + classified): %d / %d (%.1f%%)"
+            % (
+                cov["catalogued"] + cov["classified"],
+                g,
+                pct(cov["catalogued"] + cov["classified"], g),
+            )
+        )
 
         if all_types and all_methods:
             print("\nWhole assembly (100% view, Assembly-CSharp only):")
             if accounted["acct_types"]:
-                print("  types   %6d total; %d accounted (100%%) - reached documented + unreached classified" % (
-                    all_types, accounted["acct_types"]))
+                print(
+                    "  types   %6d total; %d accounted (100%%) - reached documented + unreached classified"
+                    % (all_types, accounted["acct_types"])
+                )
             if reached_types:
-                print("  reached in the server call graph: %d types / %d methods" % (
-                    reached_types, cov["reached_methods"]))
+                print(
+                    "  reached in the server call graph: %d types / %d methods"
+                    % (reached_types, cov["reached_methods"])
+                )
             if accounted["acct_methods"]:
-                print("  methods %6d total; %d in accounted game types (100%%)" % (
-                    all_methods, accounted["acct_methods"]))
+                print(
+                    "  methods %6d total; %d in accounted game types (100%%)"
+                    % (all_methods, accounted["acct_methods"])
+                )
             print("  compiler-generated and third-party/BCL types are excluded by design")
 
     result = {
@@ -239,8 +280,13 @@ def main():
     if history:
         row = "%s,%d,%d,%d,%d,%d,%.1f%%\n" % (
             datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
-            result["reached_game_types"], result["narrated"], result["catalogued"],
-            result["classified"], result["unaccounted"], result["narrated_pct"])
+            result["reached_game_types"],
+            result["narrated"],
+            result["catalogued"],
+            result["classified"],
+            result["unaccounted"],
+            result["narrated_pct"],
+        )
         header = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
         if not os.path.exists(history):
             with open(history, "w") as fh:

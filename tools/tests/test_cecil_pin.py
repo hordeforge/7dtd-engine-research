@@ -11,6 +11,7 @@ run arbitrary code inside every dump/regen job. This gate fails if:
 
 Usage: python3 tools/tests/test_cecil_pin.py
 """
+
 import os
 import re
 import sys

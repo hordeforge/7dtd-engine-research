@@ -6,6 +6,7 @@ names stay readable, which means a fragment that is empty or wholly '.'/'..'
 would combine into a parent-directory component under os.path.join; prefix
 '_' to pin every fragment strictly below the caller's output directory.
 """
+
 from __future__ import annotations
 
 

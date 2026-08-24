@@ -9,6 +9,7 @@ sandbox code without re-extraction; the JSON here is the source of truth.
 
 Usage: python3 gen_zig_tables.py sandbox_tables.json ../zdtd-server/src/assets/sandbox_data.zig
 """
+
 import json
 import sys
 from json import dumps as zstr
@@ -43,7 +44,9 @@ def emit(json_path: str, out_path: str) -> None:
     out.append("};")
     out.append("")
     out.append("pub const Option = struct {")
-    out.append("    /// SandboxOptions enum value (wire-stable; the codec addresses options by it).")
+    out.append(
+        "    /// SandboxOptions enum value (wire-stable; the codec addresses options by it)."
+    )
     out.append("    id: u16,")
     out.append("    /// SandboxOptions enum member name.")
     out.append("    name: []const u8,")
@@ -59,12 +62,18 @@ def emit(json_path: str, out_path: str) -> None:
         v = vs[name]
         if v["type"] == "float":
             floats = ", ".join(val_literal(x) for x in v["values"])
-            out.append(f"    .{{ .name = {zstr(name)}, .kind = .float, .floats = &.{{ {floats} }}, .ints = &.{{}} }},")
+            out.append(
+                f"    .{{ .name = {zstr(name)}, .kind = .float, .floats = &.{{ {floats} }}, .ints = &.{{}} }},"
+            )
         elif v["type"] == "int":
             ints = ", ".join(val_literal(x) for x in v["values"])
-            out.append(f"    .{{ .name = {zstr(name)}, .kind = .int, .floats = &.{{}}, .ints = &.{{ {ints} }} }},")
+            out.append(
+                f"    .{{ .name = {zstr(name)}, .kind = .int, .floats = &.{{}}, .ints = &.{{ {ints} }} }},"
+            )
         else:
-            out.append(f"    .{{ .name = {zstr(name)}, .kind = .boolean, .floats = &.{{}}, .ints = &.{{}} }},")
+            out.append(
+                f"    .{{ .name = {zstr(name)}, .kind = .boolean, .floats = &.{{}}, .ints = &.{{}} }},"
+            )
     out.append("};")
     out.append("")
     out.append("/// All 165 options, in id order (stock data).")
@@ -82,8 +91,8 @@ def emit(json_path: str, out_path: str) -> None:
             di = "0"
         kind = "float" if o["type"] == "float" else ("int" if o["type"] == "int" else "boolean")
         out.append(
-            f'    .{{ .id = {o["id"]}, .name = {zstr(o["name"])}, '
-            f'.set_name = {zstr(o["valueset"])}, .kind = .{kind}, '
+            f"    .{{ .id = {o['id']}, .name = {zstr(o['name'])}, "
+            f".set_name = {zstr(o['valueset'])}, .kind = .{kind}, "
             f".default_f = {df}, .default_i = {di} }},"
         )
     out.append("};")

@@ -8,6 +8,7 @@ check_stock_facts gate only pins the member *counts*).
 
 Usage: python3 tools/tests/test_gamestats_gameprefs_current.py <asm>
 """
+
 import os
 import re
 import sys
@@ -43,10 +44,7 @@ class EnumNames {
 
 def table_rows(doc: str, section: str, next_section: str) -> list[str]:
     sec = doc.split("## " + section)[1].split("## " + next_section)[0]
-    return [
-        m.group(2)
-        for m in re.finditer(r"^\| (\d+) \| `([^`]+)`", sec, re.M)
-    ]
+    return [m.group(2) for m in re.finditer(r"^\| (\d+) \| `([^`]+)`", sec, re.M)]
 
 
 def main() -> int:
@@ -54,9 +52,7 @@ def main() -> int:
         print("usage: test_gamestats_gameprefs_current.py <asm>", file=sys.stderr)
         return 2
     asm = sys.argv[1]
-    out = _common.run_probe(
-        _common.compile_probe(SRC, "enumnames_check"), asm, ",".join(ENUMS)
-    )
+    out = _common.run_probe(_common.compile_probe(SRC, "enumnames_check"), asm, ",".join(ENUMS))
     dll = {}
     for line in out.splitlines():
         name, _, members = line.partition(":")
@@ -107,8 +103,14 @@ def main() -> int:
                 idx, name = int(m.group(1)), m.group(2)
                 if idx < n_state:
                     rows_i = stats_rows
-                    if idx < len(rows_i) and rows_i[idx] != name and name not in ("GameState", "GameModeId"):
-                        bad.append(f"{fn}: GameStats[{idx}] named `{name}`, table says `{rows_i[idx]}`")
+                    if (
+                        idx < len(rows_i)
+                        and rows_i[idx] != name
+                        and name not in ("GameState", "GameModeId")
+                    ):
+                        bad.append(
+                            f"{fn}: GameStats[{idx}] named `{name}`, table says `{rows_i[idx]}`"
+                        )
             for m in re.finditer(r"(?:GetInt|GetFloat|GetBool)\((\d+)\)", txt):
                 if int(m.group(1)) >= n_prefs:
                     bad.append(f"{fn}: GamePrefs index {m.group(1)} out of range (< {n_prefs})")
@@ -116,7 +118,9 @@ def main() -> int:
         for b in bad:
             print("FAIL:", b)
         return 1
-    print(f"OK: {ENUMS[0]} ({len(dll[ENUMS[0]])}) + {ENUMS[1]} ({len(dll[ENUMS[1]])}) tables match the DLL; cited indices in range")
+    print(
+        f"OK: {ENUMS[0]} ({len(dll[ENUMS[0]])}) + {ENUMS[1]} ({len(dll[ENUMS[1]])}) tables match the DLL; cited indices in range"
+    )
     return 0
 
 

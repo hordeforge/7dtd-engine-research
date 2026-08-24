@@ -1,6 +1,6 @@
 # Static analysis for the Python RE tooling and gates (ruff).
-# Enforced by `make lint` locally and the ci.yml lint job; keep both on the
-# same pinned version (see the workflow) so local and CI agree.
+# Enforced by `make lint` locally (check + format) and the ci.yml lint job;
+# keep both on the same pinned version (see the workflow) so local and CI agree.
 line-length = 100
 
 [lint]
@@ -31,6 +31,7 @@ select = [
     "YTT", # sys.version/version_info misuse
     "DTZ", # naive datetime (missing tz)
     "FLY", # literal joins
+    "EXE", # shebang/executable-bit consistency for script-style gates
     "RUF", # ruff-specific rules
 ]
 
@@ -39,3 +40,9 @@ select = [
 # importing the shared _common helper, so module-level imports legitimately
 # follow executable setup statements there.
 "tools/tests/**" = ["E402"]
+
+[format]
+# De-facto Python formatter, same pinned ruff binary as the lint gate
+# (`ruff format --check .` in `make lint`). Defaults: magic trailing comma,
+# double quotes; whitespace and indentation style is mechanical from here on.
+quote-style = "double"

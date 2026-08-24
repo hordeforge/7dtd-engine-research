@@ -24,6 +24,7 @@ assembly pass), not one process per claim.
 
 Usage: python3 tools/tests/test_xref_claims.py <asm>
 """
+
 import os
 import re
 import subprocess
@@ -59,8 +60,9 @@ def xref_counts(asm: str, pairs: list[tuple[str, str]]) -> dict[tuple[str, str],
         with open(claims_path, "w", encoding="utf-8") as f:
             for typ, member in pairs:
                 f.write(f"{typ}\t{member}\n")
-        r = subprocess.run(["mono", XREF, asm, "--batch", claims_path],
-                           capture_output=True, text=True)
+        r = subprocess.run(
+            ["mono", XREF, asm, "--batch", claims_path], capture_output=True, text=True
+        )
     if r.returncode != 0:
         return {}
     out: dict[tuple[str, str], int] = {}

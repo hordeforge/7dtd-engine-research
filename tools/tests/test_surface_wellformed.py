@@ -10,6 +10,7 @@ documented pin.
 
 Usage: python3 tools/tests/test_surface_wellformed.py <asm>
 """
+
 import os
 import re
 import subprocess
@@ -53,14 +54,18 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         proc = subprocess.run(
             ["mono", os.path.join(TOOLS, "bin", "FullSurface.exe"), sys.argv[1], tmp],
-            capture_output=True, text=True, env=env,
+            capture_output=True,
+            text=True,
+            env=env,
         )
         assert proc.returncode == 0, f"FullSurface failed: {proc.stderr}"
         types = open(os.path.join(tmp, "surface-types.md"), encoding="utf-8").read()
         namespaces = open(os.path.join(tmp, "surface-namespaces.md"), encoding="utf-8").read()
 
     rows, type_total, malformed = parse_types_table(types)
-    assert not malformed, f"{len(malformed)} malformed surface-types rows:\n" + "\n".join(malformed[:5])
+    assert not malformed, f"{len(malformed)} malformed surface-types rows:\n" + "\n".join(
+        malformed[:5]
+    )
 
     ns_total = 0
     for line in namespaces.splitlines():
@@ -70,13 +75,14 @@ def main() -> int:
         if len(cells) == 7:  # '', ns, types, methods, IL, fields, ''
             ns_total += int(cells[4])
     assert type_total == ns_total, (
-        f"per-type IL sum {type_total} != per-namespace IL sum {ns_total} "
-        "(pipe-escape regression?)"
+        f"per-type IL sum {type_total} != per-namespace IL sum {ns_total} (pipe-escape regression?)"
     )
     assert type_total == EXPECTED_IL_TOTAL, (
         f"IL total {type_total} != documented {EXPECTED_IL_TOTAL} (full-surface.md)"
     )
-    print(f"OK: surface well-formed; {rows} type rows, IL total {type_total} matches full-surface.md")
+    print(
+        f"OK: surface well-formed; {rows} type rows, IL total {type_total} matches full-surface.md"
+    )
     return 0
 
 

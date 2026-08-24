@@ -7,6 +7,7 @@ crafted assembly naming a type or namespace "." or ".." used to produce a
 parent-directory component (write outside il/<label>). Requires mcs + mono +
 bin/Mono.Cecil.dll; SKIPs cleanly without them so CI stays green.
 """
+
 from __future__ import annotations
 
 import os
@@ -67,8 +68,7 @@ def main() -> int:
     probe_exe = WORK / "probe.exe"
     probe_cs.write_text(PROBE_CS, encoding="utf-8")
 
-    compile_cmd = ["mcs", "-nologo", f"-r:{CECIL}", str(ILFMT), str(probe_cs),
-                   f"-out:{probe_exe}"]
+    compile_cmd = ["mcs", "-nologo", f"-r:{CECIL}", str(ILFMT), str(probe_cs), f"-out:{probe_exe}"]
     r = subprocess.run(compile_cmd, capture_output=True, text=True)
     if r.returncode != 0:
         print("FAIL: probe compile failed:", r.stderr.strip(), file=sys.stderr)
@@ -76,7 +76,8 @@ def main() -> int:
 
     run = subprocess.run(
         ["mono", str(probe_exe), str(base)] + [c for c, _ in CASES],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
         env=dict(os.environ, MONO_PATH=str(CECIL.parent)),
     )
     if run.returncode != 0:
@@ -95,7 +96,9 @@ def main() -> int:
         if got != want:
             print(f"FAIL: Safe({name!r}) = {got!r}, want {want!r}", file=sys.stderr)
             return 1
-    print(f"OK: IlFmt.Safe contains all {len(CASES)} hostile fragments below the out dir; dots preserved")
+    print(
+        f"OK: IlFmt.Safe contains all {len(CASES)} hostile fragments below the out dir; dots preserved"
+    )
     return 0
 
 

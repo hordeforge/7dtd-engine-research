@@ -5,13 +5,16 @@ Usage:
   parity_diff.py old.json new.json          # what TFP changed between versions
   parity_diff.py --coverage new.json GAMEDIR # what zdtd handles vs stock
 """
+
 import json
 import os
 import re
 import sys
 
 
-def load(p): return json.load(open(p))
+def load(p):
+    return json.load(open(p))
+
 
 def diff(old, new):
     o, n = old["packages"], new["packages"]
@@ -19,7 +22,11 @@ def diff(old, new):
     removed = sorted(set(o) - set(n))
     changed = []
     for k in sorted(set(o) & set(n)):
-        if o[k]["read"] != n[k]["read"] or o[k]["write"] != n[k]["write"] or o[k]["dir"] != n[k]["dir"]:
+        if (
+            o[k]["read"] != n[k]["read"]
+            or o[k]["write"] != n[k]["write"]
+            or o[k]["dir"] != n[k]["dir"]
+        ):
             changed.append(k)
     print("=== PACKAGE DIFF ===")
     print(f"added ({len(added)}):", ", ".join(added) or "-")
@@ -46,6 +53,7 @@ def diff(old, new):
             print(f"  {e}: {ov} -> {nv}")
     return len(added) + len(removed) + len(changed) + enum_changed
 
+
 def coverage(new, gamedir):
     # which packages zdtd's game.zig handles + which our default_mappings names
     src = os.path.join(gamedir, "src/server/game.zig")
@@ -53,7 +61,7 @@ def coverage(new, gamedir):
     handled = set(re.findall(r'std\.mem\.eql\(u8, name, "(NetPackage\w+)"\)', txt))
     stock = set(new["packages"])
     # weight by direction: dir 1 (ToServer) = client sends it, must handle
-    tosrv = {k for k,v in new["packages"].items() if v["dir"] == 1}
+    tosrv = {k for k, v in new["packages"].items() if v["dir"] == 1}
     missing_c2s = sorted(tosrv - handled)
     print("=== ZDTD COVERAGE ===")
     print(f"stock packages: {len(stock)}  handled in game.zig: {len(handled & stock)}")
@@ -61,6 +69,7 @@ def coverage(new, gamedir):
     print(f"UNHANDLED client->server ({len(missing_c2s)}):")
     for k in missing_c2s:
         print(f"  {k}  read={new['packages'][k]['read'][:80]}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "--coverage":

@@ -10,6 +10,7 @@ Convention (mirrors test_re_dump_regen.py):
   - dedicated DLL absent            -> SKIP (machine-local, git-ignored inputs)
   - DLL present, bin tools missing  -> FAIL (actionable: cd tools && ./build.sh)
 """
+
 from __future__ import annotations
 
 import atexit
@@ -48,17 +49,13 @@ def find_asm() -> Path | None:
         if p.is_file() and p.name.endswith(".dll"):
             candidates.append(p)
         else:
-            candidates.append(
-                p / "7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
-            )
+            candidates.append(p / "7DaysToDieServer_Data/Managed/Assembly-CSharp.dll")
     home = Path.home()
     candidates.extend(
         [
-            home
-            / ".local/share/Steam/steamapps/common/"
+            home / ".local/share/Steam/steamapps/common/"
             "7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
-            home
-            / ".steam/steam/steamapps/common/"
+            home / ".steam/steam/steamapps/common/"
             "7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
         ]
     )
@@ -85,14 +82,14 @@ def prereq(tool_names: list[str]) -> tuple[str, bool]:
     """
     if find_asm() is None:
         return (
-            ("dedicated Assembly-CSharp.dll not found "
-             "(set ASM=<path to Assembly-CSharp.dll>)"),
+            ("dedicated Assembly-CSharp.dll not found (set ASM=<path to Assembly-CSharp.dll>)"),
             True,
         )
     missing = [t for t in tool_names if not (BIN / t).is_file()]
     if missing:
         return (
-            "bin tools not built: " + ", ".join(missing)
+            "bin tools not built: "
+            + ", ".join(missing)
             + " (cd tools && ./build.sh --skip-legacy)",
             False,
         )
@@ -124,9 +121,7 @@ def compile_probe(cs_text: str, stem: str) -> str:
     src = str(d / f"{stem}.cs")
     with open(src, "w") as f:
         f.write(cs_text)
-    subprocess.run(
-        ["mcs", "-r:%s" % (BIN / "Mono.Cecil.dll"), src, "-out:" + exe], check=True
-    )
+    subprocess.run(["mcs", "-r:%s" % (BIN / "Mono.Cecil.dll"), src, "-out:" + exe], check=True)
     return exe
 
 

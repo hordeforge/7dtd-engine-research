@@ -9,18 +9,21 @@ hand-edit the output.
 
 Usage: python3 gen_atlas_zig.py <out.zig>
 """
+
 import glob
 import os
 import re
 import sys
 
-COLOR_RE = re.compile(
-    r'<uv\s+id="(\d+)"[^>]*color="([0-9.eE+-]+),([0-9.eE+-]+),([0-9.eE+-]+)"'
-)
+COLOR_RE = re.compile(r'<uv\s+id="(\d+)"[^>]*color="([0-9.eE+-]+),([0-9.eE+-]+),([0-9.eE+-]+)"')
 
 
 def to_color5(r, g, b):
-    return ((int(r * 31 + 0.5) & 0x1F) << 10) | ((int(g * 31 + 0.5) & 0x1F) << 5) | (int(b * 31 + 0.5) & 0x1F)
+    return (
+        ((int(r * 31 + 0.5) & 0x1F) << 10)
+        | ((int(g * 31 + 0.5) & 0x1F) << 5)
+        | (int(b * 31 + 0.5) & 0x1F)
+    )
 
 
 def main():
@@ -65,7 +68,7 @@ def main():
     lines.append("};")
     lines.append("")
     lines.append("")
-    lines.append("const std = @import(\"std\");")
+    lines.append('const std = @import("std");')
     lines.append("")
     lines.append("/// Minimap water color (BlockLiquidv2.Color = Color32(0,105,148))")
     lines.append("/// packed RGB555 (RE texture-atlas.md CalcChunkColors).")
@@ -75,14 +78,14 @@ def main():
     lines.append("pub const gray_color5: u16 = 16816;")
     lines.append("")
     lines.append("/// blocks.xml Mesh property name -> atlas table name. Empty (no")
-    lines.append("/// Mesh property) = default mesh 0 = \"opaque\" (RE texture-atlas.md).")
+    lines.append('/// Mesh property) = default mesh 0 = "opaque" (RE texture-atlas.md).')
     lines.append("pub fn atlasForMesh(mesh: []const u8) []const u8 {")
-    lines.append("    if (std.mem.eql(u8, mesh, \"terrain\")) return \"terrainxml\";")
-    lines.append("    if (std.mem.eql(u8, mesh, \"grass\")) return \"grassxml\";")
-    lines.append("    if (std.mem.eql(u8, mesh, \"water\")) return \"waterxml\";")
-    lines.append("    if (std.mem.eql(u8, mesh, \"transparent\")) return \"transparentxml\";")
-    lines.append("    if (std.mem.eql(u8, mesh, \"decals\")) return \"decalsxml\";")
-    lines.append("    return \"opaquexml\";")
+    lines.append('    if (std.mem.eql(u8, mesh, "terrain")) return "terrainxml";')
+    lines.append('    if (std.mem.eql(u8, mesh, "grass")) return "grassxml";')
+    lines.append('    if (std.mem.eql(u8, mesh, "water")) return "waterxml";')
+    lines.append('    if (std.mem.eql(u8, mesh, "transparent")) return "transparentxml";')
+    lines.append('    if (std.mem.eql(u8, mesh, "decals")) return "decalsxml";')
+    lines.append('    return "opaquexml";')
     lines.append("}")
     lines.append("")
     lines.append("/// A block's minimap color: the MapColor property wins (stock")
@@ -109,7 +112,7 @@ def main():
     lines.append('test "terrain atlas colors match the extracted XML" {')
     lines.append("    // terrDirt texture id 2 (blocks.xml Texture=2): stock color")
     lines.append("    // 0.3529412,0.3176471,0.2784314 -> RGB555 r=11 g=10 b=9.")
-    lines.append("    const c = color5(\"terrainxml\", 2).?;")
+    lines.append('    const c = color5("terrainxml", 2).?;')
     lines.append("    const r = (c >> 10) & 0x1f;")
     lines.append("    const g = (c >> 5) & 0x1f;")
     lines.append("    const b = c & 0x1f;")
@@ -117,17 +120,25 @@ def main():
     lines.append("    try std.testing.expectEqual(@as(u16, 10), g);")
     lines.append("    try std.testing.expectEqual(@as(u16, 9), b);")
     lines.append("    // terrForestGround top face id 195.")
-    lines.append("    try std.testing.expect(color5(\"terrainxml\", 195) != null);")
+    lines.append('    try std.testing.expect(color5("terrainxml", 195) != null);')
     lines.append("    // Unknown id in a known atlas: null.")
-    lines.append("    try std.testing.expect(color5(\"terrainxml\", 9999) == null);")
+    lines.append('    try std.testing.expect(color5("terrainxml", 9999) == null);')
     lines.append("    // Unknown atlas: null.")
-    lines.append("    try std.testing.expect(color5(\"nope\", 1) == null);")
+    lines.append('    try std.testing.expect(color5("nope", 1) == null);')
     lines.append("    // Resolver: MapColor property wins; else the mesh atlas.")
-    lines.append("    try std.testing.expectEqual(@as(?u16, 2243), blockColor5(\"terrain\", 2, 2243));")
-    lines.append("    try std.testing.expect(blockColor5(\"terrain\", 195, 0) != null); // terrForestGround top face")
-    lines.append("    try std.testing.expect(blockColor5(\"opaque\", 52, 0) != null); // wood in the opaque atlas")
-    lines.append("    try std.testing.expect(blockColor5(\"terrain\", 9999, 0) == null); // no atlas color")
-    lines.append("    try std.testing.expectEqualStrings(\"opaquexml\", atlasForMesh(\"\"));")
+    lines.append(
+        '    try std.testing.expectEqual(@as(?u16, 2243), blockColor5("terrain", 2, 2243));'
+    )
+    lines.append(
+        '    try std.testing.expect(blockColor5("terrain", 195, 0) != null); // terrForestGround top face'
+    )
+    lines.append(
+        '    try std.testing.expect(blockColor5("opaque", 52, 0) != null); // wood in the opaque atlas'
+    )
+    lines.append(
+        '    try std.testing.expect(blockColor5("terrain", 9999, 0) == null); // no atlas color'
+    )
+    lines.append('    try std.testing.expectEqualStrings("opaquexml", atlasForMesh(""));')
     lines.append("    try std.testing.expectEqual(@as(u16, 434), water_color5);")
     lines.append("}")
     lines.append("")
@@ -141,6 +152,7 @@ def main():
     # other failure (e.g. malformed generated output) must surface.
     try:
         import subprocess
+
         subprocess.run(["zig", "fmt", out_path], check=False)
     except OSError:
         pass

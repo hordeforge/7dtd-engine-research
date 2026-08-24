@@ -7,6 +7,7 @@ adds/renames/removes a prop name constant without updating the doc fails here.
 
 Usage: python3 tools/tests/test_entityclass_props_current.py <asm>
 """
+
 import os
 import re
 import sys

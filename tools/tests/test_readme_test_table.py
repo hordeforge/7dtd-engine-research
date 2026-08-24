@@ -8,6 +8,7 @@ script without cleaning the table) fails here.
 
 Usage: python3 tools/tests/test_readme_test_table.py
 """
+
 import os
 import re
 import sys
@@ -17,6 +18,7 @@ REPO = os.path.dirname(TOOLS)
 MAKEFILE = os.path.join(REPO, "Makefile")
 README = os.path.join(TOOLS, "README.md")
 TESTDIR = os.path.join(TOOLS, "tests")
+
 
 def main() -> int:
     mk = open(MAKEFILE, encoding="utf-8").read()

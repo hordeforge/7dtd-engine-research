@@ -15,6 +15,7 @@ is the DLL-free corpus-level view and needs no assembly.
 
 Usage: python3 tools/mention_depth.py [docsDir]
 """
+
 from __future__ import annotations
 
 import os
@@ -55,14 +56,18 @@ def main(argv: list[str]) -> int:
                 if name[0].isupper():  # type-shaped; lowercase words are prose/IL ops
                     counts[name] = counts.get(name, 0) + 1
 
-    buckets = [("exactly 1", lambda n: n == 1),
-               ("2-4", lambda n: 2 <= n <= 4),
-               ("5-19", lambda n: 5 <= n <= 19),
-               ("20+", lambda n: n >= 20)]
+    buckets = [
+        ("exactly 1", lambda n: n == 1),
+        ("2-4", lambda n: 2 <= n <= 4),
+        ("5-19", lambda n: 5 <= n <= 19),
+        ("20+", lambda n: n >= 20),
+    ]
     names = sorted(counts.values())
-    print(f"Mention depth over {files} narrative docs "
-          f"({len(names)} distinct type-shaped identifiers, "
-          f"{sum(names)} mentions total)")
+    print(
+        f"Mention depth over {files} narrative docs "
+        f"({len(names)} distinct type-shaped identifiers, "
+        f"{sum(names)} mentions total)"
+    )
     print("| Mentions | Names | Share |")
     print("|---|---:|---:|")
     total = len(names)

@@ -15,6 +15,7 @@ without redownloading Steam builds. Components:
 Prints one line: version_update_readiness=<float>
 Also prints component breakdown on stderr / trailing lines for logs.
 """
+
 from __future__ import annotations
 
 import json
@@ -106,7 +107,11 @@ def score_mutation_doc_fail() -> tuple[float, str]:
         path = Path(td) / "facts.json"
         path.write_text(json.dumps(facts, indent=2), encoding="utf-8")
         code, out = run_checker(path, skip_siblings=True)
-    if code != 0 and ("top-level" in out.lower() or "methods with body" in out.lower() or "pin mismatch" in out.lower()):
+    if code != 0 and (
+        "top-level" in out.lower()
+        or "methods with body" in out.lower()
+        or "pin mismatch" in out.lower()
+    ):
         return 1.0, "mutated census correctly fails"
     if code != 0:
         return 0.7, "fails but message not census-specific"
@@ -176,9 +181,11 @@ def score_update_entrypoint() -> tuple[float, str]:
     elif re.search(r"^drift:|post-update|version-update", make, re.M):
         points += 0.15
         notes.append("make has drift/post-update")
-    if (TOOLS / "tests" / "post_update_checklist.sh").is_file() or (
-        TOOLS / "post-update.sh"
-    ).is_file() or re.search(r"post-update|version-update", make):
+    if (
+        (TOOLS / "tests" / "post_update_checklist.sh").is_file()
+        or (TOOLS / "post-update.sh").is_file()
+        or re.search(r"post-update|version-update", make)
+    ):
         points += 0.25
         notes.append("post-update entrypoint exists")
     if re.search(r"stock-sync|After a TFP|game update", readme):

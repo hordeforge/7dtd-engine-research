@@ -13,24 +13,44 @@ Usage: python3 tools/zdtd_cite_check.py [--root <workspace>]
   --root defaults to the parent of this repo (the sibling layout root).
 Exit 0 when every research citation resolves; 1 with the broken list otherwise.
 """
+
 import argparse
 import os
 import re
 import sys
 
-REPOS = ["zdtd-server", "7dtd-server-optimizer", "7dtd-loadgen", "7dtd-realearth", "7dtd-server-apm"]
-RES_PATH = re.compile(
-    r"(?:(?:\.\./)*7dtd-engine-research/docs/)([A-Za-z0-9][A-Za-z0-9_-]+\.md)"
+REPOS = [
+    "zdtd-server",
+    "7dtd-server-optimizer",
+    "7dtd-loadgen",
+    "7dtd-realearth",
+    "7dtd-server-apm",
+]
+RES_PATH = re.compile(r"(?:(?:\.\./)*7dtd-engine-research/docs/)([A-Za-z0-9][A-Za-z0-9_-]+\.md)")
+BARE_AFTER_RE = re.compile(
+    r"RE(?::|\s+)(?:../7dtd-engine-research/docs/)?([A-Za-z0-9][A-Za-z0-9_-]+\.md)"
 )
-BARE_AFTER_RE = re.compile(r"RE(?::|\s+)(?:../7dtd-engine-research/docs/)?([A-Za-z0-9][A-Za-z0-9_-]+\.md)")
 BARE = re.compile(r"(?<![\w./-])([A-Za-z0-9][A-Za-z0-9_-]+\.md)(?![A-Za-z0-9])")
 # Known non-citation bare names: report/artifact filenames emitted by tools
 # (not references to docs that must resolve).
-ALLOW_BARE = {"csharp_bridge.md", "compare.md", "REPORT.md", "CONSOLIDATED.md",
-              "bench-stock.md"}
-SKIP_DIRS = {".git", ".zig-cache", ".claude", "zig-pkg", "node_modules", ".venv",
-             "bin", "obj", "__pycache__", "target", "dist", "build", ".pytest_cache",
-             ".uv-cache", ".cache"}
+ALLOW_BARE = {"csharp_bridge.md", "compare.md", "REPORT.md", "CONSOLIDATED.md", "bench-stock.md"}
+SKIP_DIRS = {
+    ".git",
+    ".zig-cache",
+    ".claude",
+    "zig-pkg",
+    "node_modules",
+    ".venv",
+    "bin",
+    "obj",
+    "__pycache__",
+    "target",
+    "dist",
+    "build",
+    ".pytest_cache",
+    ".uv-cache",
+    ".cache",
+}
 SRC_EXTS = {".zig", ".cs", ".rs", ".py", ".ts", ".js", ".go"}
 
 
@@ -107,8 +127,12 @@ def scan(root: str, local: set, docs: set) -> tuple[int, list[str]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--root", default=os.path.normpath(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")))
+    ap.add_argument(
+        "--root",
+        default=os.path.normpath(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+        ),
+    )
     ap.add_argument("--repo")
     args = ap.parse_args()
     grand = 0

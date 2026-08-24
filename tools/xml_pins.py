@@ -13,6 +13,7 @@ Usage:
   python3 tools/xml_pins.py [--pins FILE] --game-dir DIR  # regenerate pins from DIR
   python3 tools/xml_pins.py --check [--pins FILE]         # check committed pins vs the pinned install path
 """
+
 import argparse
 import json
 import os
@@ -96,16 +97,19 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--game-dir", default=DEFAULT_GAME)
     ap.add_argument("--check", action="store_true", help="verify committed pins vs the install")
-    ap.add_argument("--pins", default=DEFAULT_PINS,
-                    help="pins JSON path (default: tools/data/xml_pins.json)")
+    ap.add_argument(
+        "--pins", default=DEFAULT_PINS, help="pins JSON path (default: tools/data/xml_pins.json)"
+    )
     args = ap.parse_args()
     pins_path = args.pins
 
     if not args.check:
         epath = os.path.join(args.game_dir, CFG_ENTITIES)
         if not os.path.isfile(epath):
-            print(f"error: {epath} not found; pass the dedicated-server root via --game-dir",
-                  file=sys.stderr)
+            print(
+                f"error: {epath} not found; pass the dedicated-server root via --game-dir",
+                file=sys.stderr,
+            )
             return 2
         data = extract(args.game_dir)
         # A wrong --game-dir (or a renamed config section) must not wipe the
@@ -118,19 +122,24 @@ def main() -> int:
         if os.path.isfile(tpath) and not data["traders_root"]:
             refusals.append(
                 f"{tpath} present but no buy_markup/sell_markdown parsed "
-                "(traders <traders> header changed?)")
+                "(traders <traders> header changed?)"
+            )
         if refusals:
             for r in refusals:
-                print(f"error: {r}; refusing to overwrite {pins_path} with empty pins",
-                      file=sys.stderr)
+                print(
+                    f"error: {r}; refusing to overwrite {pins_path} with empty pins",
+                    file=sys.stderr,
+                )
             return 2
         os.makedirs(os.path.dirname(os.path.abspath(pins_path)), exist_ok=True)
         with open(pins_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=1, sort_keys=True)
             f.write("\n")
-        print(f"wrote {pins_path} ({len(data['entityclasses_health'])} hp vars, "
-              f"{len(data['traders_root'])} trader attrs, "
-              f"{len(data['buffs_survival'])} survival keys)")
+        print(
+            f"wrote {pins_path} ({len(data['entityclasses_health'])} hp vars, "
+            f"{len(data['traders_root'])} trader attrs, "
+            f"{len(data['buffs_survival'])} survival keys)"
+        )
         return 0
 
     if not os.path.isdir(args.game_dir):
@@ -148,9 +157,11 @@ def main() -> int:
         for d in diffs:
             print(f"  - {d}")
         return 1
-    print(f"OK: xml pins match install ({len(committed.get('entityclasses_health', {}))} hp vars, "
-          f"{len(committed.get('traders_root', {}))} trader attrs, "
-          f"{len(committed.get('buffs_survival', {}))} survival keys)")
+    print(
+        f"OK: xml pins match install ({len(committed.get('entityclasses_health', {}))} hp vars, "
+        f"{len(committed.get('traders_root', {}))} trader attrs, "
+        f"{len(committed.get('buffs_survival', {}))} survival keys)"
+    )
     return 0
 
 

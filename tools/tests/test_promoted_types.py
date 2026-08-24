@@ -12,6 +12,7 @@ DLL-free; runs in CI.
 
 Usage: python3 tools/tests/test_promoted_types.py
 """
+
 from __future__ import annotations
 
 import os
@@ -62,8 +63,10 @@ def main() -> int:
         "out-of-scope-surface.md header no longer references "
         "tools/data/promoted-types.txt; regenerators will not know the input"
     )
-    print(f"OK: {len(names)} promoted types absent from out-of-scope-surface.md; "
-          "maintenance note intact")
+    print(
+        f"OK: {len(names)} promoted types absent from out-of-scope-surface.md; "
+        "maintenance note intact"
+    )
     return 0
 
 

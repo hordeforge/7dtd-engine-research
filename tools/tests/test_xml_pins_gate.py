@@ -17,6 +17,7 @@ Runs entirely in a temp dir via --pins/--game-dir; never touches tools/data.
 
 Usage: python3 tools/tests/test_xml_pins_gate.py
 """
+
 import json
 import os
 import subprocess
@@ -47,9 +48,7 @@ BUFFS = """<buffs>
 
 
 def run(*argv):
-    proc = subprocess.run(
-        [sys.executable, SCRIPT, *argv], capture_output=True, text=True
-    )
+    proc = subprocess.run([sys.executable, SCRIPT, *argv], capture_output=True, text=True)
     return proc.returncode, proc.stdout + proc.stderr
 
 
@@ -103,17 +102,24 @@ def main():
 
         # 4. Buff-threshold drift must FAIL too.
         write_config(game, "traders.xml", TRADERS)
-        write_config(game, "buffs.xml", BUFFS.replace('stat="Food" operation="GT" value="0.52"',
-                                                      'stat="Food" operation="GT" value="0.6"'))
+        write_config(
+            game,
+            "buffs.xml",
+            BUFFS.replace(
+                'stat="Food" operation="GT" value="0.52"', 'stat="Food" operation="GT" value="0.6"'
+            ),
+        )
         rc, out = run("--check", "--game-dir", game, "--pins", pins)
         if rc != 1 or "buffs_survival.food_wellfed_threshold" not in out:
             bad.append(f"buff drift not detected (rc={rc}):\n{out}")
 
         # 5. Health drift still FAILS.
         write_config(game, "buffs.xml", BUFFS)
-        write_config(game, "entityclasses.xml",
-                     ENTITYCLASSES.replace('name="healthSlim" value="125"',
-                                           'name="healthSlim" value="400"'))
+        write_config(
+            game,
+            "entityclasses.xml",
+            ENTITYCLASSES.replace('name="healthSlim" value="125"', 'name="healthSlim" value="400"'),
+        )
         rc, out = run("--check", "--game-dir", game, "--pins", pins)
         if rc != 1 or "entityclasses_health.healthSlim" not in out:
             bad.append(f"health drift not detected (rc={rc}):\n{out}")

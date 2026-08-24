@@ -12,6 +12,7 @@ bin it FAILs with the build command.
 
 Usage: python3 tools/tests/test_committed_inventories_current.py [asm]
 """
+
 from __future__ import annotations
 
 import os
@@ -36,7 +37,9 @@ def check_generated(exe, args, committed_rel, label, out_path):
         a, b = current.splitlines(), fresh.splitlines()
         for i, (x, y) in enumerate(zip(a, b, strict=False)):
             if x != y:
-                print(f"  first diff at line {i+1}:\n    committed: {x[:100]}\n    fresh:     {y[:100]}")
+                print(
+                    f"  first diff at line {i + 1}:\n    committed: {x[:100]}\n    fresh:     {y[:100]}"
+                )
                 break
         raise AssertionError(
             f"{label} ({committed_rel}) is STALE: regenerate with the matching tool."
@@ -50,9 +53,7 @@ def main() -> int:
         print(("SKIP: " if is_skip else "FAIL: ") + msg)
         return 0 if is_skip else 1
 
-    asm_path, asm_label = _common.resolve_asm(
-        sys.argv[1] if len(sys.argv) > 1 else None
-    )
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
     if asm_path is None:
         print(f"SKIP: assembly not found: {asm_label}")
         return 0

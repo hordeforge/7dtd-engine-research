@@ -13,6 +13,7 @@ Usage: python3 extract_mesh_atlas.py <meshdescriptions_assets_all.bundle>
 Deps: UnityPy, hash-pinned in requirements.txt next to this script
 (uv pip install -r requirements.txt).
 """
+
 import os
 import sys
 

@@ -8,6 +8,7 @@ coverage map's headline numbers cannot drift from the pinned tool output.
 
 Usage: python3 tools/tests/test_coverage_consistency.py
 """
+
 import json
 import os
 import re
@@ -30,9 +31,7 @@ def test_audit_table_lists_every_doc():
     # comma-separated table cells (e.g. the family table) do not match because
     # they do not put " |" immediately after the closing paren.
     audited = set(re.findall(r"\| \[([a-z0-9-]+\.md)\]\([^)]+\) \|", text))
-    root_docs = {
-        n for n in os.listdir(DOCS) if n.endswith(".md") and n != "INDEX.md"
-    }
+    root_docs = {n for n in os.listdir(DOCS) if n.endswith(".md") and n != "INDEX.md"}
     missing = sorted(root_docs - audited)
     assert not missing, f"docs missing from coverage.md audit table: {missing}"
 

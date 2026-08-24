@@ -12,6 +12,7 @@ suffix (NetPackage*/AIDirector* shorthand) resolve via prefix.
 
 Usage: python3 tools/tests/test_il_citations.py <asm>
 """
+
 import os
 import re
 import sys
@@ -120,7 +121,9 @@ def main() -> int:
             print(f"...and {len(bad) - 40} more")
         print(f"({len(bad)} mismatches of {n_claims} live claims, {n_skipped} skipped)")
         return 1
-    print(f"OK: {n_claims} IL citations verified against the DLL ({n_skipped} changelog/shorthand skipped)")
+    print(
+        f"OK: {n_claims} IL citations verified against the DLL ({n_skipped} changelog/shorthand skipped)"
+    )
     return 0
 
 

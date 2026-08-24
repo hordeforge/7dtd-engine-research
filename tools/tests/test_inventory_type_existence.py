@@ -9,6 +9,7 @@ even though these inventories are hand-maintained.
 
 Usage: python3 tools/tests/test_inventory_type_existence.py <asm>
 """
+
 import os
 import re
 import sys
@@ -74,7 +75,9 @@ def main() -> int:
         total += 1
         if "(not found)" in row:
             if norm(typ) in dll:
-                bad.append(f"dedicated-leaves.md: `{typ}` now resolves in the DLL (base {dll[norm(typ)]}); update the (not found) marker")
+                bad.append(
+                    f"dedicated-leaves.md: `{typ}` now resolves in the DLL (base {dll[norm(typ)]}); update the (not found) marker"
+                )
             continue  # documented unresolvable state
         if norm(typ) not in dll:
             bad.append(f"dedicated-leaves.md: type `{typ}` does not exist in the DLL")
@@ -85,13 +88,17 @@ def main() -> int:
     # NetPackageDroneParticleEffect live in dedicated-leaves.md instead)
     text = open(os.path.join(INV, "netpackages.md"), encoding="utf-8").read()
     doc_np_rows = {
-        norm(m.group(1))
-        for m in re.finditer(r"^\| `(NetPackage[A-Za-z0-9]*)` \|", text, re.M)
+        norm(m.group(1)) for m in re.finditer(r"^\| `(NetPackage[A-Za-z0-9]*)` \|", text, re.M)
     }
     for missing in sorted(top_level_netpkg - doc_np_rows):
         bad.append(f"netpackages.md: top-level `{missing}` missing from the table")
     for m in re.finditer(r"^\| `([^`]+)` \| ([^|]+) \| (\d+) \| (\d+) \|", text, re.M):
-        typ, want_base, want_n, want_max = m.group(1), m.group(2).strip().strip("`"), int(m.group(3)), int(m.group(4))
+        typ, want_base, want_n, want_max = (
+            m.group(1),
+            m.group(2).strip().strip("`"),
+            int(m.group(3)),
+            int(m.group(4)),
+        )
         total += 1
         info = dll.get(norm(typ))
         if info is None:

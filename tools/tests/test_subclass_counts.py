@@ -25,6 +25,7 @@ Conventions encoded (verified against the current DLL):
 
 Usage: python3 tools/tests/test_subclass_counts.py <asm>
 """
+
 import os
 import re
 import sys
@@ -44,7 +45,14 @@ INV = os.path.join(REPO, "docs", "inventories")
 #   expected; differs for challenge-objectives, whose closure of 29 = 28 leaves
 #   + the ChallengeBaseTrackedItemObjective intermediate).
 CHECKS = [
-    ("sequence-requirements.md", "closed", "GameEvent.SequenceRequirements.BaseRequirement", 38, None, None),
+    (
+        "sequence-requirements.md",
+        "closed",
+        "GameEvent.SequenceRequirements.BaseRequirement",
+        38,
+        None,
+        None,
+    ),
     ("item-actions.md", "closed", "ItemAction", 38, ("abstract", 1), None),
     ("quest-objectives.md", "closed", "BaseObjective", 38, None, None),
     ("minevent-actions.md", "closed", "MinEventActionBase", 71, None, None),
@@ -162,9 +170,15 @@ class LeafMeth {
         return False
 
     key_bad = []
-    for inv in ("item-actions.md", "minevent-actions.md", "sequence-requirements.md",
-                "quest-objectives.md", "block-behaviors.md", "challenge-objectives.md",
-                "dedicated-leaves.md"):
+    for inv in (
+        "item-actions.md",
+        "minevent-actions.md",
+        "sequence-requirements.md",
+        "quest-objectives.md",
+        "block-behaviors.md",
+        "challenge-objectives.md",
+        "dedicated-leaves.md",
+    ):
         text = open(os.path.join(INV, inv), encoding="utf-8").read()
         for m in re.finditer(r"^\| `([^`]+)` \| [^|]+ \| [^|]+ \| ([^|]+) \|", text, re.M):
             typ, kms = m.group(1), m.group(2)
@@ -175,14 +189,17 @@ class LeafMeth {
             for km in [x.strip() for x in kms.split(",") if x.strip()]:
                 km_name = km.split("(")[0].strip()
                 if not has_method(typ, km_name):
-                    key_bad.append(f"{inv}: `{typ}` key method `{km_name}` (from `{km}`) not found on type or bases")
+                    key_bad.append(
+                        f"{inv}: `{typ}` key method `{km_name}` (from `{km}`) not found on type or bases"
+                    )
 
-    args = [",".join(
-        ("closed:" if mode == "closed" else "seq:") + target
-        for _, mode, target, _, _, _ in CHECKS)]
-    out = _common.run_probe(
-        _common.compile_probe(SRC, "subcount_check"), asm, *args
-    )
+    args = [
+        ",".join(
+            ("closed:" if mode == "closed" else "seq:") + target
+            for _, mode, target, _, _, _ in CHECKS
+        )
+    ]
+    out = _common.run_probe(_common.compile_probe(SRC, "subcount_check"), asm, *args)
     stats = {}
     for line in out.splitlines():
         parts = line.split()
@@ -206,22 +223,34 @@ class LeafMeth {
         d = stats[target]
         if mode == "closed":
             if d["total"] != expected:
-                bad.append(f"{inventory}: closure of {target} = {d['total']} (concrete {d['concrete']}, abstract {d['abstract']}) != stated {expected}")
+                bad.append(
+                    f"{inventory}: closure of {target} = {d['total']} (concrete {d['concrete']}, abstract {d['abstract']}) != stated {expected}"
+                )
             if extra and d[extra[0]] != extra[1]:
                 bad.append(f"{inventory}: {target} {extra[0]} count = {d[extra[0]]} != {extra[1]}")
         else:
             leaf_parents = [n for n in SEQ_LEAF_PARENTS if n in d["usedbase"]]
             leaves = d["total"] - len(d["usedbase"]) + len(leaf_parents)
             if leaves != expected:
-                bad.append(f"{inventory}: derived leaves = {leaves} (ns {d['total']} - {len(d['usedbase'])} bases + {len(leaf_parents)} leaf-parents) != stated {expected}")
+                bad.append(
+                    f"{inventory}: derived leaves = {leaves} (ns {d['total']} - {len(d['usedbase'])} bases + {len(leaf_parents)} leaf-parents) != stated {expected}"
+                )
             if d["abstract"] != 0:
-                bad.append(f"{inventory}: namespace has {d['abstract']} abstract classes, expected 0")
+                bad.append(
+                    f"{inventory}: namespace has {d['abstract']} abstract classes, expected 0"
+                )
             if d["closuretotal"] != d["total"] - 1 + len(d["outclosure"]):
-                bad.append(f"{inventory}: BaseAction closure = {d['closuretotal']}, expected {d['total'] - 1 + len(d['outclosure'])} (ns {d['total']} - root + {len(d['outclosure'])} out-of-ns)")
+                bad.append(
+                    f"{inventory}: BaseAction closure = {d['closuretotal']}, expected {d['total'] - 1 + len(d['outclosure'])} (ns {d['total']} - root + {len(d['outclosure'])} out-of-ns)"
+                )
             if d["outclosure"] != SEQ_OUT_CLOSURE:
-                bad.append(f"{inventory}: out-of-namespace closure {d['outclosure']} != documented {SEQ_OUT_CLOSURE}")
+                bad.append(
+                    f"{inventory}: out-of-namespace closure {d['outclosure']} != documented {SEQ_OUT_CLOSURE}"
+                )
             if len(leaf_parents) != len(SEQ_LEAF_PARENTS):
-                bad.append(f"{inventory}: leaf-parents used as bases = {leaf_parents}, expected all of {SEQ_LEAF_PARENTS}")
+                bad.append(
+                    f"{inventory}: leaf-parents used as bases = {leaf_parents}, expected all of {SEQ_LEAF_PARENTS}"
+                )
         # the inventory must self-state the count (leaves for challenge-objectives)
         text = open(os.path.join(INV, inventory), encoding="utf-8").read()
         stated = self_state if self_state is not None else expected
@@ -235,7 +264,9 @@ class LeafMeth {
         for b in key_bad:
             print("FAIL:", b)
         return 1
-    print(f"OK: {len(CHECKS)} leaf inventories consistent with the DLL, key-method fingerprints valid")
+    print(
+        f"OK: {len(CHECKS)} leaf inventories consistent with the DLL, key-method fingerprints valid"
+    )
     return 0
 
 

@@ -9,6 +9,7 @@ Requires:
 Does not redistribute game IL; writes only under a caller-supplied out dir or
 tools/tests/_out (gitignored).
 """
+
 from __future__ import annotations
 
 import os

@@ -8,6 +8,7 @@ and hostile characters become '_', dots survive for namespace-style names,
 and a fragment that is empty or wholly '.'/'..' is prefixed so os.path.join
 can never produce a parent-directory component. Stdlib only, DLL-free.
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -17,9 +18,7 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parents[1]
 
-_spec = importlib.util.spec_from_file_location(
-    "safe_name", TOOLS / "sandbox" / "safe_name.py"
-)
+_spec = importlib.util.spec_from_file_location("safe_name", TOOLS / "sandbox" / "safe_name.py")
 assert _spec is not None
 assert _spec.loader is not None
 _mod = importlib.util.module_from_spec(_spec)
@@ -56,13 +55,16 @@ def main() -> int:
             bad = True
     for name, want in CASES:
         if fragments[name] != want:
-            print(f"FAIL: safe_name({name!r}) = {fragments[name]!r}, "
-                  f"want {want!r}", file=sys.stderr)
+            print(
+                f"FAIL: safe_name({name!r}) = {fragments[name]!r}, want {want!r}", file=sys.stderr
+            )
             bad = True
     if bad:
         return 1
-    print(f"OK: sandbox.safe_name contains all {len(CASES)} hostile fragments "
-          f"below the out dir; dots preserved")
+    print(
+        f"OK: sandbox.safe_name contains all {len(CASES)} hostile fragments "
+        f"below the out dir; dots preserved"
+    )
     return 0
 
 

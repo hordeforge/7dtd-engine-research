@@ -15,6 +15,7 @@ with a DLL but unbuilt bin it FAILs with the build command.
 
 Usage: python3 tools/tests/test_reach_consistency.py [asm]
 """
+
 from __future__ import annotations
 
 import os
@@ -32,9 +33,7 @@ def main() -> int:
         print(("SKIP: " if is_skip else "FAIL: ") + msg)
         return 0 if is_skip else 1
 
-    asm_path, asm_label = _common.resolve_asm(
-        sys.argv[1] if len(sys.argv) > 1 else None
-    )
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
     if asm_path is None:
         print(f"SKIP: assembly not found: {asm_label}")
         return 0
@@ -67,7 +66,12 @@ def main() -> int:
 
     # Bucket invariant from the report.
     def row(key):
-        m = re.search(r"\| \.\.\.\*\*" + re.escape(key) + r"\*\*[^|]*\| \*{0,2}(\d+)(?: \([^)]*\))?\*{0,2} \|", text)
+        m = re.search(
+            r"\| \.\.\.\*\*"
+            + re.escape(key)
+            + r"\*\*[^|]*\| \*{0,2}(\d+)(?: \([^)]*\))?\*{0,2} \|",
+            text,
+        )
         return int(m.group(1)) if m else None
 
     game = row("game types")
@@ -75,18 +79,26 @@ def main() -> int:
     catalogued = row("catalogued only")
     classified = row("classified")
     unaccounted = row("unaccounted")
-    assert None not in (game, narrated, catalogued, classified, unaccounted), "missing bucket row in report"
+    assert None not in (game, narrated, catalogued, classified, unaccounted), (
+        "missing bucket row in report"
+    )
     assert narrated + catalogued + classified + unaccounted == game, (
         f"bucket invariant broken: {narrated}+{catalogued}+{classified}+{unaccounted} != {game}"
     )
     print(f"OK: reached-surface buckets sum to game types ({game})")
 
     # Whole-assembly partition: accounted + excluded == all types.
-    m = re.search(r"Accounted game types \(reached documented \+ unreached classified\) \| \*\*(\d+) / (\d+) \(100%\)\*\*", text)
+    m = re.search(
+        r"Accounted game types \(reached documented \+ unreached classified\) \| \*\*(\d+) / (\d+) \(100%\)\*\*",
+        text,
+    )
     assert m, "missing whole-assembly accounted row"
     accounted, total = int(m.group(1)), int(m.group(2))
     assert accounted == total, f"whole-assembly accounting not 100%: {accounted}/{total}"
-    m = re.search(r"excluded by design: (\d+) compiler-generated, (\d+) third-party/BCL, (\d+) both; sums to (\d+) of (\d+)", text)
+    m = re.search(
+        r"excluded by design: (\d+) compiler-generated, (\d+) third-party/BCL, (\d+) both; sums to (\d+) of (\d+)",
+        text,
+    )
     assert m, "missing excluded-by-design partition row"
     gen, lib, both, partition, all_types = (int(m.group(i)) for i in range(1, 6))
     assert accounted + gen + lib + both == all_types == partition, (

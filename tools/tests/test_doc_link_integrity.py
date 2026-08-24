@@ -13,6 +13,7 @@ this gate pass vacuously on the real docs.
 
 Usage: python3 tools/tests/test_doc_link_integrity.py
 """
+
 import os
 import re
 import tempfile
@@ -179,12 +180,16 @@ def main():
                     if not os.path.isdir(correct_sibling):
                         continue
                 if not os.path.isfile(target):
-                    bad_sec.append(f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no file)")
+                    bad_sec.append(
+                        f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no file)"
+                    )
                     continue
                 hdr = re.compile(rf"^#{{1,4}} {re.escape(sec)}(?:[ .:]|$)")
                 tlines = open(target, encoding="utf-8").read().splitlines()
                 if not any(hdr.match(ln) for ln in tlines):
-                    bad_sec.append(f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no header)")
+                    bad_sec.append(
+                        f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no header)"
+                    )
     if bad_sec:
         raise AssertionError("broken section references:\n" + "\n".join(sorted(set(bad_sec))[:15]))
 

@@ -9,6 +9,7 @@ toggle or a dedicated gate without updating the doc fails here.
 
 Usage: python3 tools/tests/test_console_classification.py <asm>
 """
+
 import os
 import re
 import sys
@@ -23,10 +24,16 @@ import _common
 
 # The 10 dedicated-gated leaves, as documented (console-commands.md 6).
 GATED = [
-    "ConsoleCmdChallenges", "ConsoleCmdGiveQualityItem", "ConsoleCmdGiveQuest",
-    "ConsoleCmdOcclusion", "ConsoleCmdPathTest", "ConsoleCmdRemoveQuest",
-    "ConsoleCmdResetAchievementStats", "ConsoleCmdSelfExp",
-    "ConsoleCmdSpectatorMode", "ConsoleCmdSpectrum",
+    "ConsoleCmdChallenges",
+    "ConsoleCmdGiveQualityItem",
+    "ConsoleCmdGiveQuest",
+    "ConsoleCmdOcclusion",
+    "ConsoleCmdPathTest",
+    "ConsoleCmdRemoveQuest",
+    "ConsoleCmdResetAchievementStats",
+    "ConsoleCmdSelfExp",
+    "ConsoleCmdSpectatorMode",
+    "ConsoleCmdSpectrum",
 ]
 
 SRC = r"""
@@ -86,11 +93,7 @@ def main() -> int:
         print("FAIL: probe output unparsable: " + out[:300])
         return 1
     leaves, on_client, dedi, either = (int(m.group(i)) for i in range(1, 5))
-    gated = sorted(
-        ln.split(" ", 1)[1]
-        for ln in out.splitlines()
-        if ln.startswith("GATED ")
-    )
+    gated = sorted(ln.split(" ", 1)[1] for ln in out.splitlines() if ln.startswith("GATED "))
 
     doc = open(DOC, encoding="utf-8").read()
     bad = []
@@ -108,7 +111,9 @@ def main() -> int:
         for b in bad:
             print("FAIL: " + b)
         return 1
-    print(f"OK: console classification (188 leaves; 83 client-exec, {either} either, {dedi} gated) matches the doc")
+    print(
+        f"OK: console classification (188 leaves; 83 client-exec, {either} either, {dedi} gated) matches the doc"
+    )
     return 0
 
 

@@ -25,22 +25,22 @@ import collections
 import struct
 import sys
 
-BLOB_VERSION = 202012090          # Unity 2021.2+ LoadGpuProgramFromData tag
-DX11_TYPES = set(range(13, 23))   # kShaderGpuProgramDX10Level9Vertex .. DX11DomainSM50
-PLATFORM_D3D11 = 4                # ShaderCompilerPlatform.d3d11
+BLOB_VERSION = 202012090  # Unity 2021.2+ LoadGpuProgramFromData tag
+DX11_TYPES = set(range(13, 23))  # kShaderGpuProgramDX10Level9Vertex .. DX11DomainSM50
+PLATFORM_D3D11 = 4  # ShaderCompilerPlatform.d3d11
 PROGRAMS = ("progVertex", "progFragment", "progGeometry", "progHull", "progDomain")
 
 # D3D10/11 shader-bytecode opcodes (d3d10TokenizedProgramFormat.hpp)
 OP_CUSTOMDATA = 53
-OP_DCL_RESOURCE = 88               # dcl_resource (typed SRV)
+OP_DCL_RESOURCE = 88  # dcl_resource (typed SRV)
 OP_DCL_CONSTANT_BUFFER = 89
 OP_DCL_SAMPLER = 90
-OP_DCL_RESOURCE_RAW = 161          # dcl_resource_raw (ByteAddressBuffer)
-OP_DCL_RESOURCE_STRUCTURED = 162   # dcl_resource_structured (StructuredBuffer)
+OP_DCL_RESOURCE_RAW = 161  # dcl_resource_raw (ByteAddressBuffer)
+OP_DCL_RESOURCE_STRUCTURED = 162  # dcl_resource_structured (StructuredBuffer)
 SRV_OPCODES = (OP_DCL_RESOURCE, OP_DCL_RESOURCE_RAW, OP_DCL_RESOURCE_STRUCTURED)
-UAV_OPCODES = (156, 157, 158)      # dcl_uav_typed / _raw / _structured
-GEOMETRY_TYPES = {19, 20}          # kShaderGpuProgramDX11GeometrySM40 / SM50
-VERTEX_TYPES = {13, 15, 16}        # DX10Level9Vertex, DX11VertexSM40/SM50
+UAV_OPCODES = (156, 157, 158)  # dcl_uav_typed / _raw / _structured
+GEOMETRY_TYPES = {19, 20}  # kShaderGpuProgramDX11GeometrySM40 / SM50
+VERTEX_TYPES = {13, 15, 16}  # DX10Level9Vertex, DX11VertexSM40/SM50
 
 
 def u32(buf, off):
@@ -61,15 +61,19 @@ def parse_subprogram(buf, pos):
     keywords = []
     for _ in range(keyword_count):
         length = u32(buf, off)
-        keywords.append(bytes(buf[off + 4:off + 4 + length]))
+        keywords.append(bytes(buf[off + 4 : off + 4 + length]))
         off = (off + 4 + length + 3) & ~3
     size = u32(buf, off)
     return {
-        "version": u32(buf, pos), "program_type": u32(buf, pos + 4),
-        "alu": u32(buf, pos + 8), "tex": u32(buf, pos + 12),
-        "flow": u32(buf, pos + 16), "temp": u32(buf, pos + 20),
-        "keywords": keywords, "size": size,
-        "data": bytes(buf[off + 4:off + 4 + size]),
+        "version": u32(buf, pos),
+        "program_type": u32(buf, pos + 4),
+        "alu": u32(buf, pos + 8),
+        "tex": u32(buf, pos + 12),
+        "flow": u32(buf, pos + 16),
+        "temp": u32(buf, pos + 20),
+        "keywords": keywords,
+        "size": size,
+        "data": bytes(buf[off + 4 : off + 4 + size]),
     }, off + 4
 
 
@@ -91,7 +95,7 @@ class _Reader:
 
     def string(self):
         n = self.i32()
-        value = bytes(self.buf[self.pos:self.pos + n])
+        value = bytes(self.buf[self.pos : self.pos + n])
         self.pos += n
         self.pos = (self.pos + 3) & ~3
         return value
@@ -115,8 +119,15 @@ class _Writer:
 
 
 def _read_cb_param(r):
-    return {"name": r.string(), "type": r.i32(), "rows": r.i32(), "columns": r.i32(),
-            "is_matrix": r.i32(), "array_size": r.i32(), "index": r.i32()}
+    return {
+        "name": r.string(),
+        "type": r.i32(),
+        "rows": r.i32(),
+        "columns": r.i32(),
+        "is_matrix": r.i32(),
+        "array_size": r.i32(),
+        "index": r.i32(),
+    }
 
 
 def _write_cb_param(w, p):
@@ -184,7 +195,7 @@ def input_semantics(dxbc):
     out = []
     for i in range(u32(isgn, 0)):
         name_offset, index = struct.unpack_from("<II", isgn, 8 + i * 24)
-        out.append((isgn[name_offset:isgn.index(b"\x00", name_offset)].decode("ascii"), index))
+        out.append((isgn[name_offset : isgn.index(b"\x00", name_offset)].decode("ascii"), index))
     return out
 
 
@@ -211,14 +222,19 @@ def parse_parameter_blob(raw):
     for _ in range(r.i32()):
         name = r.string()
         kind = r.i32()
-        if kind == 0:      # texture
-            e = {"kind": 0, "name": name, "index": r.i32(),
-                 "sampler_index": r.i32(), "extra": r.u32()}
-        elif kind in (1, 2):   # constant-buffer binding / buffer binding
+        if kind == 0:  # texture
+            e = {
+                "kind": 0,
+                "name": name,
+                "index": r.i32(),
+                "sampler_index": r.i32(),
+                "extra": r.u32(),
+            }
+        elif kind in (1, 2):  # constant-buffer binding / buffer binding
             e = {"kind": kind, "name": name, "index": r.i32(), "array_size": r.i32()}
-        elif kind == 3:    # UAV
+        elif kind == 3:  # UAV
             e = {"kind": 3, "name": name, "index": r.i32(), "original_index": r.i32()}
-        elif kind == 4:    # sampler
+        elif kind == 4:  # sampler
             e = {"kind": 4, "name": name, "bind_point": r.i32(), "sampler": r.u32()}
         else:
             raise ValueError(f"unknown parameter kind {kind}")
@@ -259,7 +275,7 @@ def dxbc_chunks(data):
     out = {}
     for off in struct.unpack_from(f"<{count}I", data, 0x20):
         size = u32(data, off + 4)
-        out[data[off:off + 4].decode("ascii", "replace")] = data[off + 8:off + 8 + size]
+        out[data[off : off + 4].decode("ascii", "replace")] = data[off + 8 : off + 8 + size]
     return out
 
 
@@ -272,7 +288,7 @@ def shdr_declaration_counts(chunk):
         token = words[i]
         opcode = token & 0x7FF
         length = (token >> 24) & 0x7F
-        if opcode == OP_CUSTOMDATA:          # length lives in the next dword
+        if opcode == OP_CUSTOMDATA:  # length lives in the next dword
             length = words[i + 1] if i + 1 < len(words) else 2
         if length == 0:
             raise ValueError(f"zero-length token {token:#x} (opcode {opcode}) at dword {i}")
@@ -310,7 +326,8 @@ def decode_bundle(path, only=None, verbose=False):
         decompressed = shader.decompressedLengths[index][0]
         blob = bytes(shader.compressedBlob)
         data = CompressionHelper.decompress_lz4(
-            blob[offsets[0]:offsets[0] + compressed], decompressed)
+            blob[offsets[0] : offsets[0] + compressed], decompressed
+        )
         count = u32(data, 0)
         records = [struct.unpack_from("<III", data, 4 + i * 12) for i in range(count)]
 
@@ -331,8 +348,11 @@ def decode_bundle(path, only=None, verbose=False):
                     # lives in the same platform blob as its sub-program, so
                     # only the d3d11 positions index this table.
                     for gi, group in enumerate(program.m_ParameterBlobIndices):
-                        subs = (program.m_PlayerSubPrograms[gi]
-                                if gi < len(program.m_PlayerSubPrograms) else [])
+                        subs = (
+                            program.m_PlayerSubPrograms[gi]
+                            if gi < len(program.m_PlayerSubPrograms)
+                            else []
+                        )
                         for k, idx in enumerate(group):
                             if k < len(subs) and subs[k].m_GpuProgramType in DX11_TYPES:
                                 parameter_indices.add(int(idx))
@@ -358,49 +378,62 @@ def decode_bundle(path, only=None, verbose=False):
                 continue
             counts = shdr_declaration_counts(code_chunk)
             data_end = (data_offset + sub["size"] + 3) & ~3
-            trailing = bytes(data[data_end:offset + length])
+            trailing = bytes(data[data_end : offset + length])
             channels = None
             if len(trailing) >= 8:
                 channels, _consumed = parse_bind_channels(trailing)
-            rows.append({
-                "shader": name, "blob_index": blob_index, "gpu_type": gpu_type,
-                "segment": segment, "record_length": length,
-                "header": code[:38], "chunks": tuple(sorted(chunks)),
-                "srv": sum(counts[op] for op in SRV_OPCODES),
-                "cbuffer": counts[OP_DCL_CONSTANT_BUFFER],
-                "sampler": counts[OP_DCL_SAMPLER],
-                "gs_primitive": code[5],
-                "trailing": len(trailing),
-                "channels": channels,
-                "expected_channels": expected_channels(code[38:]),
-                "uav": sum(counts[op] for op in UAV_OPCODES),
-            })
+            rows.append(
+                {
+                    "shader": name,
+                    "blob_index": blob_index,
+                    "gpu_type": gpu_type,
+                    "segment": segment,
+                    "record_length": length,
+                    "header": code[:38],
+                    "chunks": tuple(sorted(chunks)),
+                    "srv": sum(counts[op] for op in SRV_OPCODES),
+                    "cbuffer": counts[OP_DCL_CONSTANT_BUFFER],
+                    "sampler": counts[OP_DCL_SAMPLER],
+                    "gs_primitive": code[5],
+                    "trailing": len(trailing),
+                    "channels": channels,
+                    "expected_channels": expected_channels(code[38:]),
+                    "uav": sum(counts[op] for op in UAV_OPCODES),
+                }
+            )
             if verbose:
-                print(f"  {name} blob={blob_index} type={gpu_type} "
-                      f"header={code[:6].hex(' ')} srv={counts[OP_DCL_RESOURCE]} "
-                      f"cb={counts[OP_DCL_CONSTANT_BUFFER]} smp={counts[OP_DCL_SAMPLER]}")
+                print(
+                    f"  {name} blob={blob_index} type={gpu_type} "
+                    f"header={code[:6].hex(' ')} srv={counts[OP_DCL_RESOURCE]} "
+                    f"cb={counts[OP_DCL_CONSTANT_BUFFER]} smp={counts[OP_DCL_SAMPLER]}"
+                )
         for blob_index in sorted(parameter_indices):
             if blob_index >= len(records):
                 continue
             offset, length, _segment = records[blob_index]
-            raw = bytes(data[offset:offset + length])
+            raw = bytes(data[offset : offset + length])
             if len(raw) < 8 or u32(raw, 0) != BLOB_VERSION:
                 continue
             try:
                 fields, consumed = parse_parameter_blob(raw)
             except Exception as exc:
-                parameters.append({"shader": name, "blob_index": blob_index,
-                                   "status": f"parse failed: {exc}"})
+                parameters.append(
+                    {"shader": name, "blob_index": blob_index, "status": f"parse failed: {exc}"}
+                )
                 continue
             rebuilt = build_parameter_blob(fields)
-            exact = rebuilt == raw[:len(rebuilt)] and consumed == len(rebuilt)
-            parameters.append({
-                "shader": name, "blob_index": blob_index,
-                "status": "exact" if exact else "re-emit differs",
-                "trailing": len(raw) - consumed,
-                "buffers": len(fields["buffers"]), "entries": len(fields["entries"]),
-                "kinds": collections.Counter(e["kind"] for e in fields["entries"]),
-            })
+            exact = rebuilt == raw[: len(rebuilt)] and consumed == len(rebuilt)
+            parameters.append(
+                {
+                    "shader": name,
+                    "blob_index": blob_index,
+                    "status": "exact" if exact else "re-emit differs",
+                    "trailing": len(raw) - consumed,
+                    "buffers": len(fields["buffers"]),
+                    "entries": len(fields["entries"]),
+                    "kinds": collections.Counter(e["kind"] for e in fields["entries"]),
+                }
+            )
 
     return rows, skipped, parameters
 
@@ -448,22 +481,37 @@ def check(rows):
         for source, _target in got:
             source_map |= 1 << source
         if r["channels"]["source_map"] & source_map != source_map:
-            bad.append((r, (f"sourceMap {r['channels']['source_map']} omits a bound channel "
-                            f"(channels imply {source_map})")))
+            bad.append(
+                (
+                    r,
+                    (
+                        f"sourceMap {r['channels']['source_map']} omits a bound channel "
+                        f"(channels imply {source_map})"
+                    ),
+                )
+            )
         # A vertex program binds a SUBSET of what its signature declares:
         # only the inputs it actually reads get a channel. Every bound pair
         # must still be one the semantic mapping predicts.
         if r["gpu_type"] in VERTEX_TYPES:
             unexpected = [c for c in got if c not in r["expected_channels"]]
             if unexpected:
-                bad.append((r, (f"channels {unexpected} not derivable from the input "
-                                f"signature {r['expected_channels']}")))
+                bad.append(
+                    (
+                        r,
+                        (
+                            f"channels {unexpected} not derivable from the input "
+                            f"signature {r['expected_channels']}"
+                        ),
+                    )
+                )
     return bad, noted
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("bundle", help="a stock UnityFS bundle containing Shader objects")
     ap.add_argument("--shader", help="only shaders whose name contains this")
     ap.add_argument("--verbose", action="store_true", help="one line per sub-program")
@@ -472,9 +520,11 @@ def main(argv=None):
     try:
         rows, skipped, parameters = decode_bundle(args.bundle, args.shader, args.verbose)
     except ImportError:
-        print("UnityPy is not installed; this reproduction tool needs it "
-              "(uv pip install -r tools/sandbox/requirements.txt).",
-              file=sys.stderr)
+        print(
+            "UnityPy is not installed; this reproduction tool needs it "
+            "(uv pip install -r tools/sandbox/requirements.txt).",
+            file=sys.stderr,
+        )
         return 77
 
     print(f"bundle              : {args.bundle}")
@@ -489,14 +539,18 @@ def main(argv=None):
 
     print(f"DXBC chunk sets     : {dict(collections.Counter(r['chunks'] for r in rows))}")
     print(f"record segment word : {dict(collections.Counter(r['segment'] for r in rows))}")
-    print(f"bind-channel counts : {dict(collections.Counter(len(r['channels']['channels']) if r['channels'] else -1 for r in rows))}")
+    print(
+        f"bind-channel counts : {dict(collections.Counter(len(r['channels']['channels']) if r['channels'] else -1 for r in rows))}"
+    )
     print(f"header versions     : {dict(collections.Counter(r['header'][0] for r in rows))}")
     print(f"header[5] GS prim   : {dict(collections.Counter(r['header'][5] for r in rows))}")
     print()
     print("header byte vs SHDR declaration count:")
-    for label, byte, field in (("header[1] SRV declarations   ", 1, "srv"),
-                               ("header[2] dcl_constantbuffer ", 2, "cbuffer"),
-                               ("header[3] dcl_sampler        ", 3, "sampler")):
+    for label, byte, field in (
+        ("header[1] SRV declarations   ", 1, "srv"),
+        ("header[2] dcl_constantbuffer ", 2, "cbuffer"),
+        ("header[3] dcl_sampler        ", 3, "sampler"),
+    ):
         match = sum(1 for r in rows if r["header"][byte] == r[field])
         print(f"  {label}: {match}/{len(rows)}")
 
@@ -508,8 +562,12 @@ def main(argv=None):
         print()
         print(f"parameter blobs      : {len(parameters)}")
         print(f"  re-emitted exactly : {exact}/{len(parameters)}")
-        print(f"  trailing bytes     : {dict(collections.Counter(p.get('trailing') for p in parameters))}")
-        print(f"  entry kinds        : {dict(kinds)}  (0 texture, 1 cbuffer-binding, 2 buffer, 3 UAV, 4 sampler)")
+        print(
+            f"  trailing bytes     : {dict(collections.Counter(p.get('trailing') for p in parameters))}"
+        )
+        print(
+            f"  entry kinds        : {dict(kinds)}  (0 texture, 1 cbuffer-binding, 2 buffer, 3 UAV, 4 sampler)"
+        )
         for p in parameters:
             if p["status"] != "exact":
                 print(f"  PARAMETER BLOB FAIL {p['shader']} blob={p['blob_index']}: {p['status']}")
@@ -527,8 +585,10 @@ def main(argv=None):
         for r, why in bad[:10]:
             print(f"  {r['shader']} blob={r['blob_index']}: {why}")
         return 1
-    print(f"OK: {len(rows)} sub-programs match the documented layout; "
-          f"{len(parameters)} parameter blobs re-emitted byte for byte")
+    print(
+        f"OK: {len(rows)} sub-programs match the documented layout; "
+        f"{len(parameters)} parameter blobs re-emitted byte for byte"
+    )
     return 0
 
 

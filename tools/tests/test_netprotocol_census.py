@@ -7,6 +7,7 @@ moves channels, or a census the doc mis-states, fails here.
 
 Usage: python3 tools/tests/test_netprotocol_census.py <asm>
 """
+
 import os
 import re
 import sys
@@ -130,7 +131,9 @@ class NpKind {
     if compressed != set(COMPRESSED):
         bad.append(f"compressed packages {sorted(compressed)} != documented {COMPRESSED}")
     if allowed_before_auth != set(ALLOWED_BEFORE_AUTH):
-        bad.append(f"allowed-before-auth packages {sorted(allowed_before_auth)} != documented {ALLOWED_BEFORE_AUTH}")
+        bad.append(
+            f"allowed-before-auth packages {sorted(allowed_before_auth)} != documented {ALLOWED_BEFORE_AUTH}"
+        )
     if unreliable != set(UNRELIABLE):
         bad.append(f"unreliable packages {sorted(unreliable)} != documented {UNRELIABLE}")
     if non_map != set(NON_MAP):
@@ -155,7 +158,9 @@ class NpKind {
         for b in bad:
             print("FAIL:", b)
         return 1
-    print(f"OK: census {total} packages; {len(chan1)} channel-1, {len(compressed)} compressed, {len(unreliable)} unreliable, {len(allowed_before_auth)} allowed-before-auth, {len(non_map)} non-map - all match the doc")
+    print(
+        f"OK: census {total} packages; {len(chan1)} channel-1, {len(compressed)} compressed, {len(unreliable)} unreliable, {len(allowed_before_auth)} allowed-before-auth, {len(non_map)} non-map - all match the doc"
+    )
     return 0
 
 
