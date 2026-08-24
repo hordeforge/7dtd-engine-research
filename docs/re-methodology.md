@@ -310,6 +310,48 @@ Some things are genuinely not in the managed method bodies. Keep these in
 
 ---
 
+## 7b. Asset file formats: the parser is the specification
+
+Unity asset containers are not in `Assembly-CSharp.dll` at all - they are read
+by the native engine - so §4's `ldfld`/`Write` loop has nothing to bite on.
+The method that works instead, used to decode
+[`shader-subprogram-blob.md`](shader-subprogram-blob.md):
+
+1. **Find the open-source parsers first, and read them as a specification.**
+   Every reader of a format is a spec someone already paid for. Prefer two
+   independent ones: agreement is corroboration, and disagreement tells you
+   exactly which field is version-dependent. For Unity that means
+   [UnityPy](https://github.com/K0lb3/UnityPy),
+   [AssetStudio](https://github.com/Perfare/AssetStudio),
+   [AssetRipper](https://github.com/AssetRipper/AssetRipper) and
+   [USCSandbox](https://github.com/nesrak1/USCSandbox). Search the **format**
+   and the **artifact** by name, not your framing of the problem.
+2. **Notice what the parsers skip.** A parser that seeks past a region has not
+   decoded it, it has stepped over it. Those regions are where the open
+   questions live, and no amount of re-reading the parser will answer them.
+3. **Decode a skipped region by correlating it against something already
+   understood.** Dump the region across the whole corpus and test candidate
+   meanings against a quantity you can compute independently - here, the
+   declaration opcodes in the shader bytecode the header describes.
+4. **Prove the assignment is discriminated, not coincidental.** Report how
+   often the *wrong* pairings match too. A field that matches 100% while its
+   neighbours match 5% is decoded; three fields that all match is a tautology
+   if they are all the same number.
+5. **Widen the sample before believing it.** One bundle is not the format. The
+   shader header looked like six constant bytes across two sub-programs and
+   resolved into four distinct fields only at 7366.
+6. **Chase every exception individually.** The four sub-programs that broke
+   the rule each *confirmed* a field once inspected. An exception waved off as
+   noise is a field you have not found yet.
+7. **Track the tool, not the dump** (rule 2): a reproduction script in
+   `tools/` that re-derives and re-checks the claim, so the next game version
+   re-verifies it in one command.
+
+Status such work earns: `verified` for a field measured over the corpus with
+the wrong pairings excluded, `inferred` for one that only bounds another
+quantity, and an explicit **not decoded** for regions that stay opaque. Do not
+launder the third into the first.
+
 ## 8. Discipline
 
 - **`write` is truth for byte order; `read` confirms widths.** If they disagree,
@@ -385,4 +427,6 @@ mono bin/RefScan.exe "$ASM" types.txt refs.tsv    # batch reverse references
 | [`protocol-frames.md`](protocol-frames.md) | Visual byte frames |
 | [`coverage.md`](coverage.md) | Family -> narrative -> dump map |
 | [`residuals.md`](residuals.md) | What IL cannot close |
+| [`shader-subprogram-blob.md`](shader-subprogram-blob.md) | Shader (class 48) compiled-code container |
+| [`texture-atlas-unityfs.md`](texture-atlas-unityfs.md) | UnityFS container + SerializedFile tables |
 | [`INDEX.md`](INDEX.md) | Hub |

@@ -8323,3 +8323,42 @@ VersionMismatch). The stock V3.1.0 VersionAuthorizer empirically accepts the
 display form "V 3.1.0" and kicks "V 3.10" - the opposite of the IL-only
 reading. Reverted to VersionLongString + pin test; network.md corrected with
 the empirical evidence.
+
+
+## 2026-08-24 - Shader (class 48) sub-program blob decoded
+
+New docs/shader-subprogram-blob.md picks up where texture-atlas-unityfs.md
+stopped (that page ends at TextAsset, class 49). Covers the LZ4 per-platform
+blobs, the 12-byte (offset, length, segment) record table, the code-blob
+record for version tag 202012090, and the DX11 program-data header.
+
+The open question going in was the 38 bytes between the code array and the
+DXBC magic. Resolved in two moves. USCSandbox's GetDirectXDataOffset gives the
+SIZE arithmetic (6-byte base header + 0x20 when header version >= 2 = 38), but
+no parser reads the CONTENT: AssetStudio and UnityPy both stop at "shader
+disassembly not supported on DXBC" and USCSandbox seeks past it. Bytes 1-3
+were decoded here by walking the DXBC SHDR/SHEX token stream of every
+sub-program and counting declaration opcodes: byte 1 = SRV count
+(dcl_resource + _raw + _structured), byte 2 = dcl_constantbuffer, byte 3 =
+dcl_sampler.
+
+Sample: 7366 d3d11 sub-programs over two independent stock sources (the trees
+bundle, 1894; the player's data.unity3d, 5472). The wrong pairings mismatch
+1644/1651/124 times on trees alone, so the assignment is discriminated.
+
+Widening the sample from 2 sub-programs to 7366 changed the answer twice:
+byte 1 counts structured buffers as well as typed textures (110 shaders), and
+the four remaining exceptions each confirmed a field rather than breaking one
+(the single geometry program sets byte 5, the two UAV programs set byte 4, and
+two shaders bind an SRV the compiler optimized out).
+
+Also recorded: Unity strips RDEF and STAT from every DXBC container, keeping
+only ISGN/OSGN/SHDR(SHEX), which is why the Unity-side header exists at all.
+
+Not decoded, and marked so: the quantity in byte 4, and the meaning of the
+three empty m_PlayerSubPrograms groups.
+
+tools/shader_blob_dump.py is the tracked reproduction; it re-derives and
+re-checks every claim and exits non-zero on disagreement. re-methodology.md
+gains section 7b for asset-format RE, where IL is not the source and the
+open-source parser is the specification.

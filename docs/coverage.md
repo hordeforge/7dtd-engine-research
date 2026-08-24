@@ -167,6 +167,7 @@ should be re-checked against IL before you rely on it.
 | [terrain-height.md](terrain-height.md) | audited (pass 1) |
 | [texture-atlas.md](texture-atlas.md) | not-independently-audited |
 | [texture-atlas-unityfs.md](texture-atlas-unityfs.md) | not-independently-audited |
+| [shader-subprogram-blob.md](shader-subprogram-blob.md) | not-independently-audited |
 | [tile-entities-power.md](tile-entities-power.md) | audited (pass 1) |
 | [twitch-integration.md](twitch-integration.md) | audited (pass 1) |
 | [uai.md](uai.md) | audited (pass 1) |
@@ -192,6 +193,7 @@ their correctness is the tool's, not prose. `inventories/dedicated-leaves.md` an
 
 ## Changelog
 
+- **2026-08-24:** Audit table adds shader-subprogram-blob (not-independently-audited); self-checking reproduction in tools/shader_blob_dump.py.
 - **2026-08-22:** Audit table adds the texture-atlas docs (texture-atlas, texture-atlas-unityfs; not-independently-audited).
 - **2026-08-11:** Census table notes the machine-checked behaviour pins (`make facts`).
 - **2026-08-11:** Related docs links the zdtd provenance ledger.
