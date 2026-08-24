@@ -156,6 +156,12 @@ class Coverage {
     }
     catalogued.ExceptWith(narrated);   // narrated wins over merely-catalogued
 
+    // The single accounting predicate every section below must share: a type
+    // is accounted when any of the three mention sets names it. Kept in one
+    // place so the tiers cannot drift apart between report sections.
+    Func<TypeDefinition, bool> unaccounted = t =>
+      !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t));
+
     // Bucket by namespace (top-level segment; <global> for no namespace).
     var byNs = new Dictionary<string, List<TypeDefinition>>();
     foreach (var t in gameReached) {
@@ -336,14 +342,14 @@ class Coverage {
     // (narrative, inventory, or OOS classification) - reflection/XML-instantiated
     // and documented-but-uncalled types land here. Only the unmentioned ones are
     // the true whole-assembly gap.
-    int unGameDocd = unGame.Count(t => narrated.Contains(BaseName(t)) || catalogued.Contains(BaseName(t)) || classified.Contains(BaseName(t)));
+    int unGameDocd = unGame.Count(t => !unaccounted(t));
     int unGameGap = unGame.Count - unGameDocd;
     sb.AppendLine("Unreached game types already mentioned in docs: **" + unGameDocd + "** (accounted).");
     sb.AppendLine("Unreached game types with **no mention anywhere**: **" + unGameGap + "** (the whole-assembly gap).");
     sb.AppendLine();
     sb.AppendLine("Gap list (no mention in any doc):");
     sb.AppendLine();
-    foreach (var t in unGame.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t))).OrderBy(t => NsOf(t)).ThenBy(t => t.Name))
+    foreach (var t in unGame.Where(unaccounted).OrderBy(t => NsOf(t)).ThenBy(t => t.Name))
       sb.AppendLine("- `" + BaseName(t) + "` (" + NsLabel(t) + ")");
     sb.AppendLine();
     sb.AppendLine("Full unreached game-type list (" + unGame.Count + "):");
@@ -359,7 +365,7 @@ class Coverage {
     sb.AppendLine("| Namespace | reached | narrated+catalogued+classified | remaining | % |");
     sb.AppendLine("|---|---:|---:|---:|---:|");
     foreach (var kv in byNs.OrderByDescending(x => x.Value.Count)) {
-      int d = kv.Value.Count(t => narrated.Contains(BaseName(t)) || catalogued.Contains(BaseName(t)) || classified.Contains(BaseName(t)));
+      int d = kv.Value.Count(t => !unaccounted(t));
       int u = kv.Value.Count - d;
       sb.AppendLine("| `" + kv.Key + "` | " + kv.Value.Count + " | " + d + " | " + u + " | " + (100 * d / kv.Value.Count) + "% |");
     }
@@ -382,7 +388,7 @@ class Coverage {
     sb.AppendLine();
     sb.AppendLine("| Type | Namespace | methods (reached-set) |");
     sb.AppendLine("|---|---|---:|");
-    foreach (var t in gameReached.Where(t => !narrated.Contains(BaseName(t)) && !catalogued.Contains(BaseName(t)) && !classified.Contains(BaseName(t)))
+    foreach (var t in gameReached.Where(unaccounted)
                                  .OrderByDescending(t => t.Methods.Count(x => x.HasBody)).Take(60)) {
       sb.AppendLine("| `" + t.Name + "` | " + NsLabel(t) + " | " + t.Methods.Count(x => x.HasBody) + " |");
     }

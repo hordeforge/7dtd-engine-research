@@ -123,10 +123,12 @@ def extract(pe):
     n = len(insns)
 
     def find_newarr_len(j):
+        # First ldc.i4 constant walking back from the newarr (its element
+        # count); stops at the nearest call/newobj/stfld boundary.
         m = j - 1
         while m >= 0 and insns[m].opcode.name not in ("newobj", "call", "callvirt", "stfld"):
             v = ldc4_val(insns[m])
-            if v is not None and insns[m].opcode.name != "ldloc.s":
+            if v is not None:
                 return v
             m -= 1
         return None
@@ -145,11 +147,9 @@ def extract(pe):
                     idx = ldc4_val(insns[k - 2])
                     if idx is not None:
                         pairs.append((idx, insns[k - 1].operand))
+            if opk == "stfld" or opk in ("call", "callvirt", "newobj"):
+                break
             k += 1
-            if insns[k - 1].opcode.name == "stfld":
-                break
-            if opk in ("call", "callvirt", "newobj"):
-                break
         return pairs
 
     valuesets = {}

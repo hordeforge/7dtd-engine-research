@@ -127,30 +127,6 @@ def check_sleeper_volumes(blob, checks):
             tbi_cnt = blob[p]
             p += 1 + tbi_cnt  # TriggeredByIndices count u8 + indices
             has_min_script = bool(flags32 & 16)
-            if has_min_script:
-                # MinScript.Write (IL=107) is a variable-length bytecode script;
-                # not deep-parsed. Record presence and stop the strict walk.
-                seen.append(
-                    (
-                        vol_id,
-                        gname,
-                        gid,
-                        (smin, smax),
-                        (bx1, by1, bz1, bx2, by2, bz2),
-                        ver,
-                        num_spawned,
-                        gamestage,
-                        sp_cnt,
-                        rm_cnt,
-                        gc_cnt,
-                        True,
-                    )
-                )
-                checks.append(
-                    f"  sleeperVolumes: volume {vol_id} carries a MinScript "
-                    f"(bytecode not deep-parsed); strict end-check skipped"
-                )
-                return
             seen.append(
                 (
                     vol_id,
@@ -164,9 +140,17 @@ def check_sleeper_volumes(blob, checks):
                     sp_cnt,
                     rm_cnt,
                     gc_cnt,
-                    False,
+                    has_min_script,
                 )
             )
+            if has_min_script:
+                # MinScript.Write (IL=107) is a variable-length bytecode script;
+                # not deep-parsed. Record presence and stop the strict walk.
+                checks.append(
+                    f"  sleeperVolumes: volume {vol_id} carries a MinScript "
+                    f"(bytecode not deep-parsed); strict end-check skipped"
+                )
+                return
         next_id = struct.unpack_from("<i", blob, p)[0]
         p += 4
         exact = p == len(blob)
@@ -279,7 +263,7 @@ def check_weather_blob(blob, checks):
 
 def check_worldstate_tail(buf, off, checks):
     """Walk the full WorldState tail after the ttw header fields (version 23
-    gates; WorldState.SaveLoad IL=926). Returns the offset consumed."""
+    gates; WorldState.SaveLoad IL=926)."""
     try:
         sp_ver = buf[off]
         off += 1
@@ -353,7 +337,6 @@ def check_worldstate_tail(buf, off, checks):
         )
     except (struct.error, IndexError) as exc:
         checks.append(f"  WorldState tail parse error: {exc}")
-    return off
 
 
 def check_main_ttw(path, checks):
@@ -433,7 +416,7 @@ def check_main_ttw(path, checks):
         f"worldTime={world_time} timeInTicks={ticks}"
     )
 
-    return check_worldstate_tail(buf, off, checks)
+    check_worldstate_tail(buf, off, checks)
 
 
 def parse_chunk_body(body, name, idx, checks):
