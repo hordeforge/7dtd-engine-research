@@ -219,7 +219,7 @@ def main() -> int:
 
     # research INDEX should not own product RealEarth as primary
     idx = (DOCS / "INDEX.md").read_text(encoding="utf-8", errors="replace")
-    if "generic engine" not in idx.lower() and "Generic engine" not in idx:
+    if "generic engine" not in idx.lower():
         fails.append("research INDEX missing generic-engine ownership language")
     if "7dtd-realearth/docs" not in idx:
         fails.append("research INDEX should link product RealEarth docs")

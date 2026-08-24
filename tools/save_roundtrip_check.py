@@ -419,7 +419,7 @@ def check_main_ttw(path, checks):
     check_worldstate_tail(buf, off, checks)
 
 
-def parse_chunk_body(body, name, idx, checks):
+def parse_chunk_body(body, idx, checks):
     """Fully parse a decompressed Chunk.save body (Chunk.write IL=601) and
     require it to consume the body byte-exactly.
 
@@ -694,7 +694,7 @@ def check_region_v2(path, checks):
             checks.append(f"  slot {idx}: decompressed body too short ({len(dec)})")
             continue
         try:
-            coords_ok, exact_ok, reason = parse_chunk_body(dec, name, idx, checks)
+            coords_ok, exact_ok, reason = parse_chunk_body(dec, idx, checks)
         except (ValueError, struct.error) as exc:
             checks.append(f"  slot {idx}: body parse error: {exc}")
             continue
