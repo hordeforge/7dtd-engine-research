@@ -188,11 +188,15 @@ class LeafMeth {
         parts = line.split()
         if parts[0] == "closed":
             d = dict(kv.split("=") for kv in parts[2:])
-            d["total"] = int(d["total"]); d["concrete"] = int(d["concrete"]); d["abstract"] = int(d["abstract"])
+            d["total"] = int(d["total"])
+            d["concrete"] = int(d["concrete"])
+            d["abstract"] = int(d["abstract"])
             stats[parts[1]] = d
         elif parts[0] == "seq":
             d = dict(kv.split("=") for kv in parts[2:])
-            d["total"] = int(d["total"]); d["concrete"] = int(d["concrete"]); d["abstract"] = int(d["abstract"])
+            d["total"] = int(d["total"])
+            d["concrete"] = int(d["concrete"])
+            d["abstract"] = int(d["abstract"])
             d["usedbase"] = d["usedbase"].split("|") if d["usedbase"] else []
             d["outclosure"] = d["outclosure"].split("|") if d["outclosure"] else []
             d["closuretotal"] = int(d["closuretotal"])

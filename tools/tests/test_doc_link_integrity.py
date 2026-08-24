@@ -183,7 +183,7 @@ def main():
                     continue
                 hdr = re.compile(rf"^#{{1,4}} {re.escape(sec)}(?:[ .:]|$)")
                 tlines = open(target, encoding="utf-8").read().splitlines()
-                if not any(hdr.match(l) for l in tlines):
+                if not any(hdr.match(ln) for ln in tlines):
                     bad_sec.append(f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no header)")
     if bad_sec:
         raise AssertionError("broken section references:\n" + "\n".join(sorted(set(bad_sec))[:15]))

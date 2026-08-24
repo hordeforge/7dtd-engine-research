@@ -230,7 +230,7 @@ def check_worldstate_tail(buf, off, checks):
             off += ln
         vol_sizes = []
         vol_bodies = []
-        for name in ("sleeperVolumes", "triggerVolumes", "wallVolumes"):
+        for _name in ("sleeperVolumes", "triggerVolumes", "wallVolumes"):
             sv = struct.unpack_from("<i", buf, off)[0]
             off += 4
             ln = struct.unpack_from("<i", buf, off)[0]
@@ -566,7 +566,7 @@ def check_region_v2(path, checks):
         return
 
     ok = 0
-    for idx, soff, scnt, _ in slots:
+    for idx, soff, _scnt, _ in slots:
         pay = soff * 4096
         length = struct.unpack_from("<I", data, pay)[0]
         if length + 16 > len(data) - pay:

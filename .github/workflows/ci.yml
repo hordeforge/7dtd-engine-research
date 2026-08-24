@@ -6,3 +6,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: make test-docs
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: install pinned analyzers
+        run: |
+          pipx install ruff==0.16.4
+          sudo apt-get update -q && sudo apt-get install -y -q shellcheck
+      - run: make lint

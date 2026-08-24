@@ -52,7 +52,7 @@ def self_test_patterns() -> None:
             f"{len(STALE_PATTERNS)} patterns"
         )
     problems = []
-    for (pat, _reason), sample in zip(STALE_PATTERNS, STALE_SAMPLES):
+    for (pat, _reason), sample in zip(STALE_PATTERNS, STALE_SAMPLES, strict=True):
         # Same flags as the doc scan below: the self-test must prove the
         # deployed detector fires, not a stricter case-sensitive variant.
         if not re.search(pat, sample, re.IGNORECASE):

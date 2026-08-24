@@ -5,7 +5,11 @@ Usage:
   parity_diff.py old.json new.json          # what TFP changed between versions
   parity_diff.py --coverage new.json GAMEDIR # what zdtd handles vs stock
 """
-import json, sys, re, os
+import json
+import os
+import re
+import sys
+
 
 def load(p): return json.load(open(p))
 
@@ -23,7 +27,8 @@ def diff(old, new):
     print(f"changed wire ({len(changed)}):")
     for k in changed:
         print(f"  {k}")
-        if o[k]["dir"] != n[k]["dir"]: print(f"    dir {o[k]['dir']} -> {n[k]['dir']}")
+        if o[k]["dir"] != n[k]["dir"]:
+            print(f"    dir {o[k]['dir']} -> {n[k]['dir']}")
         if o[k]["read"] != n[k]["read"]:
             print(f"    read OLD {o[k]['read']}")
             print(f"    read NEW {n[k]['read']}")
@@ -33,8 +38,10 @@ def diff(old, new):
     # enum drift
     print("=== ENUM DIFF ===")
     for e in sorted(set(new["enums"]) | set(old.get("enums", {}))):
-        ov = old.get("enums", {}).get(e); nv = new["enums"].get(e)
-        if ov != nv: print(f"  {e}: {ov} -> {nv}")
+        ov = old.get("enums", {}).get(e)
+        nv = new["enums"].get(e)
+        if ov != nv:
+            print(f"  {e}: {ov} -> {nv}")
     return len(added) + len(removed) + len(changed)
 
 def coverage(new, gamedir):
@@ -50,7 +57,8 @@ def coverage(new, gamedir):
     print(f"stock packages: {len(stock)}  handled in game.zig: {len(handled & stock)}")
     print(f"client->server (dir=1) packages: {len(tosrv)}")
     print(f"UNHANDLED client->server ({len(missing_c2s)}):")
-    for k in missing_c2s: print(f"  {k}  read={new['packages'][k]['read'][:80]}")
+    for k in missing_c2s:
+        print(f"  {k}  read={new['packages'][k]['read'][:80]}")
 
 if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "--coverage":

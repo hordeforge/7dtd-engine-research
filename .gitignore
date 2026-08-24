@@ -16,6 +16,8 @@ il/*
 /VersionInformation
 .pi-subagents/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
 # Runtime scenario/save worlds (local only)
 worlds/

@@ -237,13 +237,18 @@ def build_parameter_blob(fields):
         w.string(e["name"])
         w.i32(e["kind"])
         if e["kind"] == 0:
-            w.i32(e["index"]); w.i32(e["sampler_index"]); w.u32(e["extra"])
+            w.i32(e["index"])
+            w.i32(e["sampler_index"])
+            w.u32(e["extra"])
         elif e["kind"] in (1, 2):
-            w.i32(e["index"]); w.i32(e["array_size"])
+            w.i32(e["index"])
+            w.i32(e["array_size"])
         elif e["kind"] == 3:
-            w.i32(e["index"]); w.i32(e["original_index"])
+            w.i32(e["index"])
+            w.i32(e["original_index"])
         elif e["kind"] == 4:
-            w.i32(e["bind_point"]); w.u32(e["sampler"])
+            w.i32(e["bind_point"])
+            w.u32(e["sampler"])
     return bytes(w.out)
 
 

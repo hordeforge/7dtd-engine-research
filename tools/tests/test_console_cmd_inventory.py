@@ -97,8 +97,8 @@ class NameSet {
 def parse_inventory(text: str) -> tuple[dict, list]:
     primaries = {}
     aliases = []
-    for l in text.splitlines():
-        s = l.strip()
+    for ln in text.splitlines():
+        s = ln.strip()
         if not (s.startswith("| `") or s.startswith("|`")):
             continue
         parts = s.split("|")
@@ -170,7 +170,8 @@ def main() -> int:
     # Does-column descriptions must equal getDescription (whitespace-normalized:
     # the doc renders embedded newlines as spaces; empty getDescription becomes
     # "(no description)")
-    norm_ws = lambda s: re.sub(r"\s+", " ", s).strip()
+    def norm_ws(s):
+        return re.sub(r"\s+", " ", s).strip()
     for m in re.finditer(r"^\| `([^`]+)` \| `([^`]+)`(?: \(alias\))? \| ([^|]*) \| (.*?) \|$", text_inv, re.M):
         name, typ, perm_col, does = m.group(1), m.group(2), m.group(3).strip(), m.group(4).strip()
         if typ not in descriptions:

@@ -57,9 +57,9 @@ def main() -> int:
     asm = sys.argv[1]
     out = _common.run_probe(_common.compile_probe(SRC, "ecprops_check"), asm)
     lines = out.splitlines()
-    il = int(next(l for l in lines if l.startswith("IL=")).split("=")[1])
-    npairs = int(next(l for l in lines if l.startswith("PAIRS=")).split("=")[1])
-    dll = {l for l in lines if "=" in l and not l.startswith(("IL=", "PAIRS="))}
+    il = int(next(ln for ln in lines if ln.startswith("IL=")).split("=")[1])
+    npairs = int(next(ln for ln in lines if ln.startswith("PAIRS=")).split("=")[1])
+    dll = {ln for ln in lines if "=" in ln and not ln.startswith(("IL=", "PAIRS="))}
 
     doc = open(DOC, encoding="utf-8").read()
     doc_rows = {

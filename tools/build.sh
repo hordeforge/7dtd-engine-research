@@ -77,7 +77,9 @@ for f in src/*.cs; do
   name="$(basename "$f" .cs)"
   # src/ is the maintained surface: a compile failure here must stop the build,
   # otherwise tests keep running against a stale exe that predates the breakage.
-  if ! out="$(mcs -nologo -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"bin/$name.exe" 2>&1)"; then
+  # -warn:4 -warnaserror: the tree compiles warning-clean at max severity; keep
+  # it that way (new warnings fail the build instead of scrolling past).
+  if ! out="$(mcs -nologo -warn:4 -warnaserror -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"bin/$name.exe" 2>&1)"; then
     [[ -n "$out" ]] && printf '%s\n' "$out" >&2
     rm -f "bin/$name.exe"
     echo "build: FAILED bin/$name.exe (compiler output above)" >&2

@@ -89,10 +89,10 @@ def main() -> int:
         gl = gen.read_text(encoding="utf-8", errors="replace").splitlines()
         dl = doc.read_text(encoding="utf-8", errors="replace").splitlines()
         body_pat = ("|", "- `", "1. IL_")
-        gi = next((k for k, l in enumerate(gl) if l.strip().startswith(body_pat)), -1)
-        di = next((k for k, l in enumerate(dl) if l.strip().startswith(body_pat)), -1)
-        gbody = [l for l in gl[gi:] if l.strip()]
-        dbody = [l for l in dl[di:] if l.strip()]
+        gi = next((k for k, ln in enumerate(gl) if ln.strip().startswith(body_pat)), -1)
+        di = next((k for k, ln in enumerate(dl) if ln.strip().startswith(body_pat)), -1)
+        gbody = [ln for ln in gl[gi:] if ln.strip()]
+        dbody = [ln for ln in dl[di:] if ln.strip()]
         if gi < 0 or di < 0 or gbody != dbody:
             print(
                 "FAIL: committed doc stale vs regenerated dump:",

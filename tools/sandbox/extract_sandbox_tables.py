@@ -23,7 +23,7 @@ import struct
 import sys
 
 import dnfile
-from dncil.cil.body.reader import read_method_body_from_bytes, Token
+from dncil.cil.body.reader import Token, read_method_body_from_bytes
 
 IMPLICIT = {"ldc.i4.m1": -1}
 for _i in range(9):
@@ -51,7 +51,9 @@ def is_ldcr4(ins):
 
 def extract(pe):
     md = pe.net.mdtables
-    s = lambda x: str(x) if x is not None else ""
+
+    def s(x):
+        return str(x) if x is not None else ""
 
     # method row -> declaring type name (MethodDef has no Parent column)
     mtype = {}

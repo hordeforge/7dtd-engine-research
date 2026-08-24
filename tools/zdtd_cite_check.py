@@ -61,7 +61,7 @@ def collect_local(root: str, into: set) -> None:
             into.add(d)
     ddir = os.path.join(root, "docs")
     if os.path.isdir(ddir):
-        for dirpath, dirnames, filenames in os.walk(ddir):
+        for _dirpath, dirnames, filenames in os.walk(ddir):
             dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
             for fn in filenames:
                 if fn.endswith(".md"):

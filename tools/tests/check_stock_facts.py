@@ -51,7 +51,8 @@ def _diff(left: object, right: object, path: str, into: list[str]) -> None:
             _diff(left.get(k, _MISSING), right.get(k, _MISSING),
                   f"{path}.{k}" if path else k, into)
     elif left != right:
-        fmt = lambda v: "<absent>" if v is _MISSING else repr(v)
+        def fmt(v):
+            return "<absent>" if v is _MISSING else repr(v)
         into.append(f"{path}: live={fmt(left)} committed={fmt(right)}")
 
 
@@ -97,7 +98,8 @@ def check_live_against_dll(facts: dict, errors: list[str]) -> None:
             )
             return
         live = json.loads(out.read_text(encoding="utf-8"))
-    strip = lambda d: {k: v for k, v in d.items() if k not in VOLATILE_FACT_KEYS}
+    def strip(d):
+        return {k: v for k, v in d.items() if k not in VOLATILE_FACT_KEYS}
     diffs: list[str] = []
     _diff(strip(live), strip(facts), "", diffs)
     if diffs:

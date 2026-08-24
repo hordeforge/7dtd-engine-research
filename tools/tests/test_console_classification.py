@@ -86,7 +86,11 @@ def main() -> int:
         print("FAIL: probe output unparsable: " + out[:300])
         return 1
     leaves, on_client, dedi, either = (int(m.group(i)) for i in range(1, 5))
-    gated = sorted(l.split(" ", 1)[1] for l in out.splitlines() if l.startswith("GATED "))
+    gated = sorted(
+        ln.split(" ", 1)[1]
+        for ln in out.splitlines()
+        if ln.startswith("GATED ")
+    )
 
     doc = open(DOC, encoding="utf-8").read()
     bad = []

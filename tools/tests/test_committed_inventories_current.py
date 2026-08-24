@@ -34,7 +34,7 @@ def check_generated(exe, args, committed_rel, label, out_path):
     if fresh != current:
         # find the first differing line for the message
         a, b = current.splitlines(), fresh.splitlines()
-        for i, (x, y) in enumerate(zip(a, b)):
+        for i, (x, y) in enumerate(zip(a, b, strict=False)):
             if x != y:
                 print(f"  first diff at line {i+1}:\n    committed: {x[:100]}\n    fresh:     {y[:100]}")
                 break

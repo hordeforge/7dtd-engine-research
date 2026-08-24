@@ -1,0 +1,31 @@
+# Static analysis for the Python RE tooling and gates (ruff).
+# Enforced by `make lint` locally and the ci.yml lint job; keep both on the
+# same pinned version (see the workflow) so local and CI agree.
+line-length = 100
+
+[lint]
+# Correctness core (pycodestyle errors, pyflakes), bug-prone patterns
+# (bugbear), import hygiene, and groups the tree already passes clean.
+# Raise this set only together with the fixes that keep the tree green;
+# never park a red rule group here.
+select = [
+    "E4",  # pycodestyle errors (imports, indentation, whitespace)
+    "E7",  # pycodestyle statement-level errors
+    "E9",  # pycodestyle runtime/syntax errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "B",   # flake8-bugbear (bug-prone constructs)
+    "I",   # import sorting
+    "C4",  # flake8-comprehensions
+    "ICN", # import conventions
+    "PT",  # pytest style
+    "TID", # tidy imports
+    "FLY", # literal joins
+    "RUF", # ruff-specific rules
+]
+
+[lint.per-file-ignores]
+# Script-style gates insert their own directory into sys.path before
+# importing the shared _common helper, so module-level imports legitimately
+# follow executable setup statements there.
+"tools/tests/**" = ["E402"]

@@ -80,7 +80,7 @@ def main() -> int:
         dll_names = [m.split("=")[0] for m in dll[enum]]
         if rows != dll_names:
             # report first divergence compactly
-            for j, (a, b) in enumerate(zip(rows, dll_names)):
+            for j, (a, b) in enumerate(zip(rows, dll_names, strict=False)):
                 if a != b:
                     bad.append(f"{enum}[{j}]: doc `{a}` != DLL `{b}`")
                     break

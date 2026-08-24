@@ -78,20 +78,20 @@ sec "types (added/removed)"
 tlist() { awk -F'|' 'NR>3{gsub(/ /,"",$2);print $2}' "$1/surface/surface-types.md" | grep -vE '\$|<>|__' | sort -u; }
 added=$(comm -13 <(tlist "$BASELINE_DIR") <(tlist "$cur"))
 removed=$(comm -23 <(tlist "$BASELINE_DIR") <(tlist "$cur"))
-[[ -n "$added" ]]   && { echo "  ADDED:";   echo "$added"   | sed 's/^/    +/'; drift=1; } || echo "  no new types"
-[[ -n "$removed" ]] && { echo "  REMOVED:"; echo "$removed" | sed 's/^/    -/'; drift=1; }
+[[ -n "$added" ]]   && { echo "  ADDED:";   echo "$added"   | awk '{print "    +" $0}'; drift=1; } || echo "  no new types"
+[[ -n "$removed" ]] && { echo "  REMOVED:"; echo "$removed" | awk '{print "    -" $0}'; drift=1; }
 if [[ -f "$BASELINE_DIR/methods.txt" && -f "$cur/methods.txt" ]]; then
   sec "methods (added/removed on existing+new types)"
-  ma=$(comm -13 <(sort -u "$BASELINE_DIR/methods.txt") <(sort -u "$cur/methods.txt") | grep -vE '\$|<>|__|b__|g__' | wc -l)
-  mr=$(comm -23 <(sort -u "$BASELINE_DIR/methods.txt") <(sort -u "$cur/methods.txt") | grep -vE '\$|<>|__|b__|g__' | wc -l)
+  ma=$(comm -13 <(sort -u "$BASELINE_DIR/methods.txt") <(sort -u "$cur/methods.txt") | grep -cvE '\$|<>|__|b__|g__' || true)
+  mr=$(comm -23 <(sort -u "$BASELINE_DIR/methods.txt") <(sort -u "$cur/methods.txt") | grep -cvE '\$|<>|__|b__|g__' || true)
   echo "  +$ma methods / -$mr methods"; [[ "$ma" -gt 0 || "$mr" -gt 0 ]] && drift=1
 fi
 if [[ -f "$BASELINE_DIR/enums.txt" && -f "$cur/enums.txt" ]]; then
   sec "enum members (added/removed)"
   ea=$(comm -13 <(sort -u "$BASELINE_DIR/enums.txt") <(sort -u "$cur/enums.txt") | grep -vE '_0000')
   er=$(comm -23 <(sort -u "$BASELINE_DIR/enums.txt") <(sort -u "$cur/enums.txt") | grep -vE '_0000')
-  [[ -n "$ea" ]] && { echo "  ADDED:";   echo "$ea" | sed 's/^/    +/'; drift=1; }
-  [[ -n "$er" ]] && { echo "  REMOVED:"; echo "$er" | sed 's/^/    -/'; drift=1; }
+  [[ -n "$ea" ]] && { echo "  ADDED:";   echo "$ea" | awk '{print "    +" $0}'; drift=1; }
+  [[ -n "$er" ]] && { echo "  REMOVED:"; echo "$er" | awk '{print "    -" $0}'; drift=1; }
   [[ -z "$ea" && -z "$er" ]] && echo "  (unchanged)"
 fi
 if [[ -f "$BASELINE_DIR/parity.json" && -f "$cur/parity.json" ]]; then

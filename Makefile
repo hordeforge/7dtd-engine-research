@@ -3,10 +3,11 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check post-update census drift test test-docs verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all
+.PHONY: tools stock-sync stock-check post-update census drift test test-docs lint verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
+	@echo "make lint         - static analysis: ruff (Python) + shellcheck (shell)"
 	@echo "make cross-links  - resolve every cross-repo .md link in the sibling workspace"
 	@echo "make sibling-cites - verify every sibling repo's research citations resolve against docs/"
 	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
@@ -56,6 +57,12 @@ readiness:
 # the frame-entries inventories from the live DLL (needs mcs + mono).
 regen-check:
 	python3 "$(TOOLS)/tests/test_re_dump_regen.py"
+
+# Static analysis gate: same commands in CI (ci.yml lint job). ruff reads
+# ruff.toml at the repo root; shellcheck runs at its strictest severity.
+lint:
+	ruff check .
+	for f in $$(git ls-files '*.sh'); do shellcheck "$$f"; done
 
 test:
 	python3 "$(TOOLS)/tests/test_tool_bootstrap.py"
