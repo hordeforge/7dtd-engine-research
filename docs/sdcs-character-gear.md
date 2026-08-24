@@ -905,19 +905,27 @@ bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`
    `hands`, `feet` (or `<part>_<variant>` when the piece participates in the gear
    variant matrix, §9). `getClothingPartWithName` matches direct children only,
    case-insensitively, exactly.
-3. **`GearBoneMap`** on the prefab root, baked (`Bake()`), or accept the
+3. **An `Origin` above the bone chain.** `MatchRigs` (§7) resolves `Origin` on
+   both the source and the target before it walks, and the base rig parents
+   `Hips` to one. A prefab whose chain starts at `Hips` under the prefab root
+   gives that walk nothing to match. Verified 2026-08-24 by building a garment
+   without one: it loaded, the renderer reported the right count of correctly
+   named non-null bones, `rootBone` was `Hips` and `localBounds` was sensible,
+   and the piece stood still in world space while the wearer turned under it.
+   Nothing was logged. Adding `Origin` fixed it with no other change.
+4. **`GearBoneMap`** on the prefab root, baked (`Bake()`), or accept the
    all-SMR-bones fallback and its warning.
-4. **Materials:** give any skin-adjacent material a `_Tint` colour property to
+5. **Materials:** give any skin-adjacent material a `_Tint` colour property to
    inherit the wearer's skin tone; name it with `_Body` / `_Head` / `_Hand` so the
    right base material is consulted (§6). Hair-coloured parts need the
    `Game/SDCS/Hair` shader and a `ColorSwatchApplicator`.
-5. **First-person body gear:** paint the vertex-colour **red channel** non-zero on
+6. **First-person body gear:** paint the vertex-colour **red channel** non-zero on
    the triangles that should survive in FP, and give the material a `_ClipFPV` float.
-6. **Headgear:** if it needs per-skull fitting, add a `Morphable` with `MorphSetPath`
+7. **Headgear:** if it needs per-skull fitting, add a `Morphable` with `MorphSetPath`
    / `MorphName` and ship `{MorphSetPath}/{Race}{VV}/{MorphName}.asset` per
    race/variant; put `HeadGearMorphMatrix` in the prefab path so `setupEquipment`
    takes the morph branch.
-7. **`items.xml`:**
+8. **`items.xml`:**
 
 ```xml
 <property class="SDCS">
@@ -929,10 +937,10 @@ bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`
 
    Remember: `{race}`, `{variant}` and `{hair}` only substitute on the `head` part
    (§4.4); everything else gets `{sex}` only.
-8. **Hair masking** only takes effect for `ItemClassArmor` with
+9. **Hair masking** only takes effect for `ItemClassArmor` with
    `EquipSlot == Head`; supply a `_hat` hair asset variant for every hair style, or
    accept the `Bald` fallback for styles outside `shortHairNames`.
-9. **Restart, don't reload.** `archetypes.xml` has no reload delegate and no cleanup
+10. **Restart, don't reload.** `archetypes.xml` has no reload delegate and no cleanup
    delegate in `xmlsToLoad`; equipment changes rebuild the rig, but archetype and
    item data are boot-time.
 
