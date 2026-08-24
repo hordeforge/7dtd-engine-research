@@ -82,10 +82,10 @@ def main() -> int:
         with open(src, "w", encoding="utf-8") as f:
             f.write(SRC)
         # The probe links Mono.Cecil; mono needs MONO_PATH to load it at runtime.
-        r = subprocess.run(["csc", "-r:" + os.path.join(BIN, "Mono.Cecil.dll"), src,
+        r = subprocess.run(["mcs", "-r:" + os.path.join(BIN, "Mono.Cecil.dll"), src,
                             "-out:" + EXE], capture_output=True, text=True)
         if r.returncode != 0:
-            print("FAIL: csc compile error: " + r.stderr[:500])
+            print("FAIL: mcs compile error: " + r.stderr[:500])
             return 1
 
     env = dict(os.environ, MONO_PATH=BIN)
