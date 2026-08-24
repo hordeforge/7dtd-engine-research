@@ -67,7 +67,9 @@ case "$MODE" in
   all) extract; check ;;
 esac
 
-# Optional drift hook for callers that set STOCK_SYNC_DRIFT=1 (post-update.sh).
+# Optional drift hook for manual callers: STOCK_SYNC_DRIFT=1 ./stock-sync.sh
+# appends parity/drift-check.sh after extract+check. The usual orchestration is
+# tools/post-update.sh, which calls drift-check.sh directly (and handles rc).
 if [[ "${STOCK_SYNC_DRIFT:-0}" == "1" ]]; then
   echo "stock-sync: STOCK_SYNC_DRIFT=1 -> parity/drift-check.sh"
   "$HERE/parity/drift-check.sh" "$ASM"

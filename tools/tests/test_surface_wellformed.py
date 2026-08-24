@@ -17,7 +17,6 @@ import sys
 import tempfile
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
 EXPECTED_IL_TOTAL = 1740737  # docs/full-surface.md: "1,740,737 IL instructions"
 
 PIPE_AWARE = re.compile(r"(?<!\\)\|")  # split on | not preceded by backslash

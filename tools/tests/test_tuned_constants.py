@@ -745,11 +745,11 @@ CONST_ALLOWLIST = {
     "MetricConversion", "OcclusionManager", "OpenSimplex2", "OpenSimplex2S",
     "PerformanceProfiler", "PlatformOptimizations", "PlatformUserManager",
     "PlayerMoveController", "PrefabPreviewManager", "ReflectionManager",
-    "SignalProcessing", "SignDataManager", "SleeperVolumeToolManager",
+    "SignalProcessing", "SleeperVolumeToolManager",
     "StreetTile", "TextureDynamicLoader", "TileEntityWorkstation", "Transvoxel",
     "UnixLinkFile", "UpscalerMode", "vp_Layer", "WaterDebugRendererLayer",
     "XUiC_MapArea", "XUiC_Radial", "TriggerEffectManager", "RegionFileSectorBased",
-    "AIDirectorConstants", "Chunk", "ItemActionAttack", "ItemClass",
+    "AIDirectorConstants",
 }
 
 COMPLETE_SRC = r"""
