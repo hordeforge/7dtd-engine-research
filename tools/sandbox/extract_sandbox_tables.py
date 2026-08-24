@@ -10,7 +10,8 @@ inline stelem fills). Output: JSON written to stdout or --out.
 Usage:
   python3 extract_sandbox_tables.py /path/to/Assembly-CSharp.dll --out out.json
 
-Deps (pip install in a venv): dnfile, dncil.
+Deps: dnfile, dncil; hash-pinned in requirements.txt next to this script
+(uv pip install -r requirements.txt).
 
 Evidence: docs/sandbox-options.md (this repo). The option ids and value sets
 are the wire-visible contract of the sandbox code (see sandbox-options.md §3);

@@ -43,8 +43,8 @@ cd tools
 Requires `mono` (`mcs`) and a `Mono.Cecil.dll` (build.sh searches known local
 copies and the standard Mono GAC under `/usr/lib` or `/usr/local/lib`; override
 with `MONO_CECIL=/path/to/Mono.Cecil.dll`, or restore via `dotnet add package
-Mono.Cecil`). Mono.Cecil is this repo's only third-party dependency, and it is
-**pinned**: build.sh checks the candidate's SHA-256 against
+Mono.Cecil`). Mono.Cecil is the only third-party dependency of the C# tooling,
+and it is **pinned**: build.sh checks the candidate's SHA-256 against
 [`data/cecil.pin`](data/cecil.pin) and refuses a mismatch (every dumper links
 and runs against that dll, so a silently swapped binary is a supply-chain risk).
 After deliberately upgrading Cecil, review it and re-pin with
@@ -58,6 +58,16 @@ ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7D
 ```
 
 Run: `MONO_PATH=bin mono bin/<Tool>.exe ...` (Cecil resolves from `bin/`).
+
+## Python dependencies
+
+Everything under `tools/` runs on the stdlib except the `sandbox/` asset
+extractors, whose third-party imports (`dnfile`, `dncil`, `UnityPy`) are
+hash-pinned in [`sandbox/requirements.txt`](sandbox/requirements.txt)
+(recompile from [`sandbox/requirements.in`](sandbox/requirements.in) with
+`uv pip compile --generate-hashes requirements.in -o requirements.txt`).
+Install into a venv with `uv pip install -r sandbox/requirements.txt`;
+the hashes gate every download.
 
 ## 1. General dumpers (`src/`): prefer these
 

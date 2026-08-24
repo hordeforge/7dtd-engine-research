@@ -9,6 +9,9 @@ tools/sandbox/atlas/*.xml for provenance + regeneration of the zdtd comptime
 atlas table. Uses UnityPy (a reference UnityFS/SerializedFile parser).
 
 Usage: python3 extract_mesh_atlas.py <meshdescriptions_assets_all.bundle>
+
+Deps: UnityPy, hash-pinned in requirements.txt next to this script
+(uv pip install -r requirements.txt).
 """
 import os
 import sys

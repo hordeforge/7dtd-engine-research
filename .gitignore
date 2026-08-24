@@ -54,3 +54,6 @@ workspace/experiments/script-order-probe/
 # 7dtd-fps-bots ga sweep output that landed here via a wrong-cwd run.
 /pathlib
 /tools/ga/
+
+# Scratch space (ephemeral venvs, probes); never tracked.
+/.scratch/
