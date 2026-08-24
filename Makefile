@@ -102,6 +102,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_promoted_types.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
 	python3 "$(TOOLS)/tests/test_save_roundtrip_robustness.py"
+	python3 "$(TOOLS)/tests/test_sandbox_safe_name.py"
 	python3 "$(TOOLS)/tests/test_xml_pins_gate.py"
 	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 	python3 "$(TOOLS)/tests/test_inventory_counts.py"

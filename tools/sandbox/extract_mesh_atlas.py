@@ -17,6 +17,7 @@ import os
 import sys
 
 import UnityPy
+from safe_name import safe_name
 
 
 def main():
@@ -35,7 +36,10 @@ def main():
                 if sf.types[obj.type_id].class_id != 49:  # TextAsset
                     continue
                 data = obj.read()
-                target = os.path.join(out_dir, f"{data.m_Name}.xml")
+                # m_Name comes from the bundle, not the filesystem: sanitize
+                # like the C# dumpers (src/IlFmt.cs Safe) so a crafted name
+                # cannot escape out_dir or form a parent-path fragment.
+                target = os.path.join(out_dir, safe_name(data.m_Name) + ".xml")
                 with open(target, "w", encoding="utf-8") as fh:
                     fh.write(data.m_Script)
                 n += 1

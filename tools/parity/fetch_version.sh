@@ -39,8 +39,11 @@ if [[ "$BRANCH" =~ ^[0-9]{6,}$ ]]; then
   "$STEAMCMD/steamcmd.sh" +login anonymous \
     +download_depot "$APP" "$DEPOT" "$BRANCH" +quit
   # steamcmd drops it under steamapps/content; copy DLL out
-  SRC=$(find "$STEAMCMD/linux32/steamapps/content/app_$APP/depot_$DEPOT" \
-        -name Assembly-CSharp.dll 2>/dev/null | head -1)
+  # -print -quit: stop at the first hit; piping a full depot walk into head
+  # would SIGPIPE find and pipefail+set -e would abort before the error check.
+  # || true: a missing depot dir must reach the friendly message, not die silently.
+  SRC="$(find "$STEAMCMD/linux32/steamapps/content/app_$APP/depot_$DEPOT" \
+        -name Assembly-CSharp.dll -print -quit 2>/dev/null || true)"
   if [[ -z "$SRC" ]]; then
     echo "[parity] no Assembly-CSharp.dll from depot manifest $BRANCH under $STEAMCMD/linux32/steamapps/content (download failed?)" >&2
     exit 1
@@ -52,7 +55,7 @@ else
 fi
 
 # 3) locate the DLL + extract the parity surface
-DLL=$(find "$INSTALL" -name Assembly-CSharp.dll | head -1)
+DLL="$(find "$INSTALL" -name Assembly-CSharp.dll -print -quit || true)"
 if [[ -z "$DLL" ]]; then echo "[parity] DLL not found in $INSTALL"; exit 1; fi
 if [[ ! -f "$SCRATCH/ParitySurface.exe" ]]; then
   mcs -r:"$CECIL" "$SCRIPTDIR/ParitySurface.cs" -out:"$SCRATCH/ParitySurface.exe"
