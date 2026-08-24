@@ -85,10 +85,7 @@ class Coverage {
   }
   // Simple name without the generic-arity backtick suffix (List`1 -> List), which is
   // how a type is written in docs and tokenized from them.
-  static string BaseName(TypeDefinition t) {
-    string n = t.Name; int i = n.IndexOf('`');
-    return i >= 0 ? n.Substring(0, i) : n;
-  }
+  static string BaseName(TypeDefinition t) => AsmWalk.SimpleName(t.Name);
 
   static void Main(string[] a) {
     if (a.Length < 3) { Console.Error.WriteLine("usage: Coverage <asm> <docsDir> <out.md>"); Environment.Exit(2); }

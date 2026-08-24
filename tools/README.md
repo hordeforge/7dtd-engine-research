@@ -103,6 +103,10 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 
 `src/IlFmt.cs` is a shared IL formatter compiled into each (`IL_XXXX: opcode operand`,
 fully-qualified operands, `IL_offset` branch targets: the corpus dump format).
+`src/Seeds.cs` (shared reachability graph) and `src/AsmWalk.cs` (nested-type walk,
+outermost-owner attribution, generic-arity strip) compile into each src/ tool the
+same way; `StockFacts`/`MethodList`/`ParitySurface` are also compiled standalone by
+stock-sync.sh/drift-check.sh and must stay free of them.
 
 ```bash
 mono bin/Census.exe "$ASM"

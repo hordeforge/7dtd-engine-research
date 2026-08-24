@@ -15,7 +15,6 @@ using System.Text;
 using Mono.Cecil;
 
 class DumpMethod {
-  static void Walk(TypeDefinition t, List<TypeDefinition> acc) { acc.Add(t); foreach (var n in t.NestedTypes) Walk(n, acc); }
   static void Main(string[] a) {
     if (a.Length < 3) { Console.Error.WriteLine("usage: DumpMethod <asm> <typeFilter> <methodFilter> [outFile]"); Environment.Exit(2); }
     var r = new DefaultAssemblyResolver();
@@ -23,7 +22,7 @@ class DumpMethod {
     var asm = AssemblyDefinition.ReadAssembly(a[0], new ReaderParameters { AssemblyResolver = r });
     string tf = a[1], mf = a[2];
     var all = new List<TypeDefinition>();
-    foreach (var t in asm.MainModule.Types) Walk(t, all);
+    AsmWalk.Collect(asm.MainModule.Types, all);
 
     var sb = new StringBuilder();
     int hits = 0;

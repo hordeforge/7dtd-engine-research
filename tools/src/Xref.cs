@@ -13,24 +13,39 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 static class Xref {
-  static TypeDefinition Outermost(TypeDefinition t) {
-    while (t.DeclaringType != null) t = t.DeclaringType;
-    return t;
-  }
-
-  static void Walk(IEnumerable<TypeDefinition> ts, List<TypeDefinition> into) {
-    foreach (var t in ts) { into.Add(t); if (t.HasNestedTypes) Walk(t.NestedTypes, into); }
+  // The member one candidate site instruction references: the called method for
+  // call-family opcodes, or the accessed field for field opcodes. kind stays
+  // null when the instruction is not a site in the requested mode.
+  static void SiteTarget(Instruction ins, bool fieldMode, out string kind,
+      out string declName, out string memberName) {
+    kind = null; declName = null; memberName = null;
+    if (!fieldMode) {
+      var mr = ins.Operand as MethodReference;
+      if (mr == null) return;
+      var c = ins.OpCode.Code;
+      if (c != Code.Call && c != Code.Callvirt && c != Code.Newobj && c != Code.Ldftn && c != Code.Ldvirtftn) return;
+      declName = mr.DeclaringType.Name;
+      memberName = mr.Name;
+    } else {
+      var fr = ins.Operand as FieldReference;
+      if (fr == null) return;
+      var c = ins.OpCode.Code;
+      if (c != Code.Ldfld && c != Code.Ldflda && c != Code.Ldsfld && c != Code.Ldsflda &&
+          c != Code.Stfld && c != Code.Stsfld) return;
+      declName = fr.DeclaringType.Name;
+      memberName = fr.Name;
+    }
+    kind = ins.OpCode.Name;
   }
 
   // Batch mode: count call sites for every requested Type::Member pair in ONE
   // assembly pass. Matching is identical to single-target mode (exact member
   // name; declaring type on simple name with the generic-arity suffix stripped;
-  // call/callvirt/newobj/ldftn/ldvirtftn opcodes). test_xref_claims.py drives
+  // call/callvirt/newobj/ldftn/ldvirtftn opcodes, via SiteTarget). test_xref_claims.py drives
   // this so N doc claims cost one assembly load, not N.
   static void RunBatch(string asmPath, string claimsPath) {
     var order = new List<string>();
@@ -48,8 +63,7 @@ static class Xref {
     }
 
     var asm = AssemblyDefinition.ReadAssembly(asmPath);
-    var all = new List<TypeDefinition>();
-    foreach (var mod in asm.Modules) Walk(mod.Types, all);
+    var all = AsmWalk.AllTypes(asm);
 
     // Member-name prefilter (same order as single-target mode): a site can only
     // count when its callee NAME is claimed, so test that before building any
@@ -65,14 +79,9 @@ static class Xref {
       foreach (var m in t.Methods) {
         if (!m.HasBody) continue;
         foreach (var ins in m.Body.Instructions) {
-          var mr = ins.Operand as MethodReference;
-          if (mr == null || !claimedNames.Contains(mr.Name)) continue;
-          var c = ins.OpCode.Code;
-          if (c != Code.Call && c != Code.Callvirt && c != Code.Newobj && c != Code.Ldftn && c != Code.Ldvirtftn) continue;
-          string dn = mr.DeclaringType.Name;
-          int tick = dn.IndexOf('`');
-          if (tick >= 0) dn = dn.Substring(0, tick);
-          string key = dn + "::" + mr.Name;
+          SiteTarget(ins, false, out string kind, out string declName, out string memberName);
+          if (kind == null || !claimedNames.Contains(memberName)) continue;
+          string key = AsmWalk.SimpleName(declName) + "::" + memberName;
           if (counts.ContainsKey(key)) counts[key]++;
         }
       }
@@ -94,43 +103,21 @@ static class Xref {
     bool fieldMode = a.Length > 3 && a[3] == "--field";
 
     var asm = AssemblyDefinition.ReadAssembly(a[0]);
-    var all = new List<TypeDefinition>();
-    foreach (var mod in asm.Modules) Walk(mod.Types, all);
+    var all = AsmWalk.AllTypes(asm);
 
     int hits = 0;
     foreach (var t in all) {
       foreach (var m in t.Methods) {
         if (!m.HasBody) continue;
         foreach (var ins in m.Body.Instructions) {
-          string kind = null;
-          string declName = null, memberName = null;
-
-          if (!fieldMode) {
-            var mr = ins.Operand as MethodReference;
-            if (mr == null) continue;
-            var c = ins.OpCode.Code;
-            if (c != Code.Call && c != Code.Callvirt && c != Code.Newobj && c != Code.Ldftn && c != Code.Ldvirtftn) continue;
-            declName = mr.DeclaringType.Name;
-            memberName = mr.Name;
-            kind = ins.OpCode.Name;
-          } else {
-            var fr = ins.Operand as FieldReference;
-            if (fr == null) continue;
-            var c = ins.OpCode.Code;
-            if (c != Code.Ldfld && c != Code.Ldflda && c != Code.Ldsfld && c != Code.Ldsflda &&
-                c != Code.Stfld && c != Code.Stsfld) continue;
-            declName = fr.DeclaringType.Name;
-            memberName = fr.Name;
-            kind = ins.OpCode.Name;
-          }
+          SiteTarget(ins, fieldMode, out string kind, out string declName, out string memberName);
+          if (kind == null) continue;
 
           // exact member name; declaring type matched on simple name (handles nesting/generics)
           if (memberName != wantMember) continue;
-          string dn = declName; int tick = dn.IndexOf('`');
-          if (tick >= 0) dn = dn.Substring(0, tick);
-          if (dn != wantType) continue;
+          if (AsmWalk.SimpleName(declName) != wantType) continue;
 
-          var owner = Outermost(t);
+          var owner = AsmWalk.Outermost(t);
           string site = t.FullName + "::" + m.Name;
           string ownerNote = ReferenceEquals(owner, t) ? "" : "   [owner: " + owner.FullName + "]";
           Console.WriteLine(kind + "  " + site + "  IL_" + ins.Offset.ToString("X4") + ownerNote);
