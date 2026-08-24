@@ -349,8 +349,8 @@ overridden away). The reader (`Chunk.read` IL=775) uses raw `Read(buf, 0, N)`.
 A reader that assumes length-prefixed maps will desync immediately.
 
 **`SavedInWorldTicks` first-save quirk:** `Chunk.save` (IL=14) calls
-`write(stream, false)` and only *then* sets `SavedInWorldTicks = GameTimer.ticks`
-— so a chunk's first save carries ticks **0** (observed: all probe chunks read
+`write(stream, false)` and only *then* sets `SavedInWorldTicks = GameTimer.ticks`,
+so a chunk's first save carries ticks **0** (observed: all probe chunks read
 0), and the value persists only from the second save onward.
 
 **Layer write (`ChunkBlockLayer.Write` IL=36):** `bool lower8 != null`; if
@@ -714,7 +714,7 @@ offset 8196 : first payload sector
 
 **V2 on-disk layout differs (corrected 2026-08-12, IL + live):** the
 `RegionFileV2` ctor (IL=89) writes magic+version at 0, then reads its tables
-from **offset 4096** (`Seek(4096)` + Read 4096, then Read 4096) — the sector-0
+from **offset 4096** (`Seek(4096)` + Read 4096, then Read 4096); the sector-0
 space after the 4-byte header is left as padding, not tables:
 
 ```text
@@ -777,7 +777,7 @@ pad  zeros to the sector run end
 
 **Live-verified 2026-08-12** (`tools/save_roundtrip_check.py`, three real stock
 saves from the live-probe sessions): 620+ allocated slots across `r.*.7rg`
-files all round-trip — `"7rg"` + version 1, sector offset >= 3 everywhere,
+files all round-trip: `"7rg"` + version 1, sector offset >= 3 everywhere,
 `ttc\0` + 47 preamble, raw deflate decompresses, and the stored `m_X/m_Y/m_Z`
 map back to the exact slot via the `GetOffsetFromXz` formula (including
 negative coords). `main.ttw` header (magic/version/string/VI/pads/agm/
@@ -862,7 +862,7 @@ stores `lo = value & 0xFF`, `hi = value >> 8` into the two header bytes (LE).
 
 **Negative-coordinate wrap (live-observed 2026-08-12):** `GetOffsetFromXz` uses
 C# remainder + a `+31` adjust for negative coords, while `GetRegionCoords`
-uses `floor(cX/32)` — the two disagree at exact multiples of 32 on the negative
+uses `floor(cX/32)`; the two disagree at exact multiples of 32 on the negative
 side, so chunk **-32** lives at slot **31** of region **-1** (not region 0
 slot 0). Consequence: slot `x_mod` of a negative region holds chunk
 `regionX*32 + (x_mod + 1)` for `x_mod in 0..30`, and chunk `regionX*32` sits at
@@ -1046,7 +1046,7 @@ the sections above. The platform cloud-save backend is native (residual).
   textures 6); `SavedInWorldTicks` set *after* write (first save carries 0). ~1390
   chunks across three probe saves parse byte-exactly; TE/entity chunks honestly
   marked (subclass bodies are the known annotation backlog).
-- **2026-08-12:** Save format round-trip live-verified (`tools/save_roundtrip_check.py`). V2 on-disk layout corrected: location table at **4096**, timestamp at **8192** (V2 ctor IL=89 Seek(4096)+Read), payload sectors from 12288 — the earlier 4/4100 layout is V1-only. V2 payload framing pinned: Int32 length + **12-byte gap** (WriteData/ReadData Seek(+12)) + data; data = `"ttc\0"` + Chunk.CurrentSaveVersion u32 (47) as Int64 + raw Noemax deflate (level 3, no header) of the Chunk.save body (RegionFileChunkSnapshot.Update IL=111, WriteStreamCompressed IL=48). Negative-coordinate slot wrap documented (chunk -32 sits at slot 31 of region -1). 620+ real slots across three probe saves round-trip, m_X/m_Y/m_Z map back via GetOffsetFromXz; main.ttw header re-confirmed on each (waterLevel 62.88, chunkSize 16).
+- **2026-08-12:** Save format round-trip live-verified (`tools/save_roundtrip_check.py`). V2 on-disk layout corrected: location table at **4096**, timestamp at **8192** (V2 ctor IL=89 Seek(4096)+Read), payload sectors from 12288 (the earlier 4/4100 layout is V1-only). V2 payload framing pinned: Int32 length + **12-byte gap** (WriteData/ReadData Seek(+12)) + data; data = `"ttc\0"` + Chunk.CurrentSaveVersion u32 (47) as Int64 + raw Noemax deflate (level 3, no header) of the Chunk.save body (RegionFileChunkSnapshot.Update IL=111, WriteStreamCompressed IL=48). Negative-coordinate slot wrap documented (chunk -32 sits at slot 31 of region -1). 620+ real slots across three probe saves round-trip, m_X/m_Y/m_Z map back via GetOffsetFromXz; main.ttw header re-confirmed on each (waterLevel 62.88, chunkSize 16).
 - **2026-08-11:** WaterLevel pinned: WorldConstants.WaterLevel = Block.cWaterLevel = 62.88 (Block cctor ldc.r4 62.88).
 - **2026-08-11:** Channel/SmartArray IL re-verified: ctor IL=27, calcOffset IL=12, getData IL=39, GetSet IL=79, getSetData IL=49, checkSameValue IL=49, CheckSameValue IL=17, GetByte IL=31, Get IL=44, SmartArray get IL=46 / set IL=71 / clear IL=19 / copyFrom IL=7 / GetUsedMem IL=5 / write IL=5 / read IL=7, TileEntity write IL=19 / read IL=37 / UpdateTick IL=1 / CopyFrom IL=3 / OnLoad/OnReadComplete/OnUnload IL=1, InstantiateFromRead IL=88, TryReadLegacyType IL=81 (exact).
 - **2026-08-11:** Region-file IL re-verified: ProtectedPositionCache ctor IL=30, GetChunkReadAccess IL=6, GetChunkWriteAccess IL=5/6, ScopedChunkReadAccess.Dispose IL=8, MergeOrCreateGroup IL=100, ThreadInfo.WaitForEnd IL=47, RegionItemData.Update IL=10/15, RegionFileChunkSnapshot.Update IL=111, WriteStreamCompressed IL=48, readIntoLoadStream IL=123, RegionFileAccessMultipleChunks.Write IL=20, RegionFileRaw.WriteData IL=229 / ReadData IL=96 / FindBestFreeSpace IL=77, ChunkMemoryStreamReader.Close IL=7, ChunkMemoryStreamWriter.Init IL=22 / Close IL=17 (exact).

@@ -253,7 +253,7 @@ def main() -> int:
     for name, w in weights.items():
         s, note = scorers[name]()
         total += w * s
-        details.append(f"  {name}: {s:.3f} (w={w}) — {note}")
+        details.append(f"  {name}: {s:.3f} (w={w}) - {note}")
     readiness = round(100.0 * total, 2)
     print(f"version_update_readiness={readiness}")
     for d in details:

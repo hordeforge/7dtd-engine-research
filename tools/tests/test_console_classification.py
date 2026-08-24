@@ -9,19 +9,17 @@ toggle or a dedicated gate without updating the doc fails here.
 
 Usage: python3 tools/tests/test_console_classification.py <asm>
 """
-import atexit
 import os
 import re
-import shutil
-import subprocess
 import sys
-import tempfile
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
 DOC = os.path.join(REPO, "docs", "console-commands.md")
-BIN = os.path.join(TOOLS, "bin")
-XREF = os.path.join(BIN, "CmdMap.exe")
+XREF = os.path.join(TOOLS, "bin", "CmdMap.exe")
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
 
 # The 10 dedicated-gated leaves, as documented (console-commands.md 6).
 GATED = [
@@ -61,11 +59,6 @@ class Cls {
   }
 }
 """
-# Private scratch dir: a fixed /tmp name for a probe we compile and execute
-# would let any local user pre-create or symlink it.
-SCRATCH = tempfile.mkdtemp(prefix="console-classification-")
-atexit.register(shutil.rmtree, SCRATCH, True)
-EXE = os.path.join(SCRATCH, "console_classification_check.exe")
 
 
 def main() -> int:
@@ -77,28 +70,17 @@ def main() -> int:
         return 0
     asm = sys.argv[1]
 
-    if not os.path.exists(EXE):
-        src = os.path.join(SCRATCH, "console_classification_check.cs")
-        with open(src, "w", encoding="utf-8") as f:
-            f.write(SRC)
-        # The probe links Mono.Cecil; mono needs MONO_PATH to load it at runtime.
-        r = subprocess.run(["mcs", "-r:" + os.path.join(BIN, "Mono.Cecil.dll"), src,
-                            "-out:" + EXE], capture_output=True, text=True)
-        if r.returncode != 0:
-            print("FAIL: mcs compile error: " + r.stderr[:500])
-            return 1
+    exe = _common.compile_probe(SRC, "console_classification_check")
 
-    env = dict(os.environ, MONO_PATH=BIN)
-    r = subprocess.run(["mono", XREF, asm], capture_output=True, text=True)
-    if r.returncode != 0:
+    rc, out, _ = _common.run_tool("CmdMap.exe", asm)
+    if rc != 0:
         print("FAIL: CmdMap.exe error")
         return 1
-    mapf = os.path.join(SCRATCH, "cmdmap_classify.txt")
+    mapf = str(_common.probe_dir() / "cmdmap_classify.txt")
     with open(mapf, "w", encoding="utf-8") as f:
-        f.write(r.stdout)
+        f.write(out)
 
-    r = subprocess.run(["mono", EXE, asm, mapf], capture_output=True, text=True, env=env)
-    out = r.stdout
+    out = _common.run_probe(exe, asm, mapf)
     m = re.search(r"leaves=(\d+) onClient=(\d+) dediGate=(\d+) either=(\d+)", out)
     if not m:
         print("FAIL: probe output unparsable: " + out[:300])

@@ -25,7 +25,7 @@ class DumpOptScan {
     report.AppendLine();
 
     // --- large methods on hot types ---
-    Section("Largest methods (IL count) — scan selected type name prefixes");
+    Section("Largest methods (IL count) - scan selected type name prefixes");
     string[] prefixes = {
       "World","GameManager","Entity","EAI","UAI","Path","Astar","ASP","Chunk","Spawn","Sleeper",
       "NetEntity","Connection","DynamicMesh","Deco","Power","Vehicle","Drone","AIDirector",

@@ -7,23 +7,16 @@ moves channels, or a census the doc mis-states, fails here.
 
 Usage: python3 tools/tests/test_netprotocol_census.py <asm>
 """
-import atexit
 import os
 import re
-import shutil
-import subprocess
 import sys
-import tempfile
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
 DOC = os.path.join(REPO, "docs", "protocol-packages.md")
-NPC = os.path.join(TOOLS, "bin", "NetProtocolCensus.exe")
 
-# Private scratch dir: a fixed /tmp name for files we compile and execute
-# would let any local user pre-create or symlink them.
-SCRATCH = tempfile.mkdtemp(prefix="npkind-check-")
-atexit.register(shutil.rmtree, SCRATCH, True)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
 
 CHANNEL1 = [
     "NetPackageChunk",
@@ -82,13 +75,8 @@ def main() -> int:
         print("usage: test_netprotocol_census.py <asm>", file=sys.stderr)
         return 2
     asm = sys.argv[1]
-    env = dict(os.environ)
-    env["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    meta_path = os.path.join(SCRATCH, "npc_check_META.md")
-    subprocess.run(
-        ["mono", NPC, asm, meta_path],
-        capture_output=True, text=True, env=env,
-    )
+    meta_path = str(_common.probe_dir() / "npc_check_META.md")
+    _common.run_tool("NetProtocolCensus.exe", asm, meta_path)
     meta = open(meta_path, encoding="utf-8").read() if os.path.exists(meta_path) else ""
     if not meta:
         print("FAIL: NetProtocolCensus produced no output", file=sys.stderr)
@@ -127,17 +115,8 @@ class NpKind {
   }
 }
 """
-    kind_src_path = os.path.join(SCRATCH, "npkind_check.cs")
-    kind_exe_path = os.path.join(SCRATCH, "npkind_check.exe")
-    with open(kind_src_path, "w") as f:
-        f.write(kind_src)
-    subprocess.run(
-        ["mcs", "-r:%s" % os.path.join(TOOLS, "bin", "Mono.Cecil.dll"), kind_src_path, "-out:" + kind_exe_path],
-        check=True,
-    )
-    kout = subprocess.run(
-        ["mono", kind_exe_path, asm], capture_output=True, text=True, env=env, check=True,
-    ).stdout
+    kind_exe = _common.compile_probe(kind_src, "npkind_check")
+    kout = _common.run_probe(kind_exe, asm)
     non_map = set()
     for line in kout.splitlines():
         name, _, kind = line.partition("\t")

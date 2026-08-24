@@ -1,6 +1,6 @@
-# 📜 Schematics (7DTD Engine Research)
+# Schematics (7DTD Engine Research)
 
-> **Part of [HordeForge](https://github.com/hordeforge)** — High-Performance Systems Engineering for 7 Days to Die.
+> **Part of [HordeForge](https://github.com/hordeforge)**: High-Performance Systems Engineering for 7 Days to Die.
 
 ![CI](https://github.com/hordeforge/7dtd-engine-research/actions/workflows/ci.yml/badge.svg)
 ![license](https://img.shields.io/github/license/hordeforge/7dtd-engine-research)

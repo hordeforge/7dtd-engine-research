@@ -29,7 +29,7 @@ BIN = TOOLS / "bin"
 _PROBE_DIR: str | None = None
 
 
-def _probe_dir() -> Path:
+def probe_dir() -> Path:
     global _PROBE_DIR
     if _PROBE_DIR is None:
         _PROBE_DIR = tempfile.mkdtemp(prefix="7dtd-research-probe-")
@@ -119,7 +119,7 @@ def compile_probe(cs_text: str, stem: str) -> str:
 
     Returns the compiled exe path; a compile error raises (CalledProcessError).
     """
-    d = _probe_dir()
+    d = probe_dir()
     exe = str(d / f"{stem}.exe")
     src = str(d / f"{stem}.cs")
     with open(src, "w") as f:
