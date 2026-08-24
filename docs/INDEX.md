@@ -396,6 +396,7 @@ Live scale laws: [measured-scaling.md](../../7dtd-server-optimizer/docs/measured
 
 ## Changelog
 
+- **2026-08-24:** [shader-subprogram-blob.md](shader-subprogram-blob.md) adds the `ParserBindChannels` block that closes every code-blob record, with the mesh-channel to shader-input mapping; a record without it is refused by the runtime.
 - **2026-08-24:** [shader-subprogram-blob.md](shader-subprogram-blob.md) adds the parameter blob (the binding table Unity keeps instead of the stripped DXBC `RDEF` chunk), round-tripped byte for byte over 3403 stock records, and the parallel index space between `m_ParameterBlobIndices` and `m_PlayerSubPrograms`.
 - **2026-08-24:** New page [shader-subprogram-blob.md](shader-subprogram-blob.md): Shader (class 48) compiled-code container, including the 38-byte DX11 program-data header decoded over 7366 sub-programs (`tools/shader_blob_dump.py`). Method added as [re-methodology.md](re-methodology.md) 7b.
 - **2026-08-22:** Wire the texture-atlas docs into the hub (section D rows; the docs shipped in 24c8199 without INDEX or audit-table entries).

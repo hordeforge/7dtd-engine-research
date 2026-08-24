@@ -8391,3 +8391,32 @@ of 3403 records resolve to code blobs and appear to be corrupt.
 
 Not measured: parameter entry kind 3 (UAV). No UAV entry appears in either
 stock sample, so its layout is marked as taken from the parser.
+
+
+## 2026-08-24 - Shader bind channels decoded
+
+The last undocumented field of the code-blob record. Every record ends with a
+ParserBindChannels block after the program data: a stored sourceMap, a count,
+and (source, target) pairs binding mesh channels to shader inputs. The mapping
+(POSITION 0->0, NORMAL 1->1, TANGENT 2->2, COLOR 3->3, TEXCOORD n -> 4+n/5+n)
+was derived by correlating every stock vertex blob's channel list against its
+own DXBC input signature.
+
+Two traps recorded, both of which produced a wrong first inference here:
+the channel list is a SUBSET of the input signature (only inputs the program
+reads are bound), and sourceMap is a stored base mask rather than a checksum
+of the channel list - a reader ORs the channel bits into it, so the stored
+value can name channels the program never binds.
+
+This one has runtime confirmation rather than corpus-only evidence. A
+synthesized shader built in 7dtd-asset-pipeline whose records ended at the
+program data was refused by a real Unity 2022.3.62f2 runtime with "Failed to
+load GpuProgram from binary shader data"; adding this block made the same
+shader report Shader.isSupported = true. The block is also what a bisect
+isolated it to: stock blob contents in a synthesized container loaded fine,
+which ruled out the container, the record table, the parameter blobs and the
+Shader object.
+
+shader_blob_dump.py gates it: the block must be present, sourceMap must
+contain every bound channel's bit, and every bound pair must be derivable
+from the program's own input signature. Green over 7366 stock sub-programs.
