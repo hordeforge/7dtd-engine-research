@@ -57,12 +57,28 @@ The stride is 12, not 8, from Unity 2019.3 on; `segment` is 0 in all 7366
 samples. The table tiles the payload contiguously: `count * 12 + 4` is the
 first record's offset, and each `offset + length` is the next offset.
 
-A record is either a **parameter blob** (constant-buffer and texture-parameter
-names, indexed by `m_ParameterBlobIndices`) or a **code blob** (indexed by
-`m_BlobIndex` on a sub-program). Both begin with the same `u32` version tag
-`202012090` (`ba 75 0a 0c` on disk, which is that integer and not a magic), so
-the two kinds are told apart by which index list reaches them, never by
-sniffing the bytes.
+A record is either a **parameter blob** (indexed by `m_ParameterBlobIndices`)
+or a **code blob** (indexed by `m_BlobIndex` on a sub-program). Both begin with
+the same `u32` version tag `202012090` (`ba 75 0a 0c` on disk, which is that
+integer and not a magic), so the two kinds are told apart by which index list
+reaches them, never by sniffing the bytes. In practice a platform blob holds
+its parameter blobs at the low indices and its code blobs above them.
+
+### How the two index spaces line up
+
+This is the part that is easy to get wrong, because one list is not what it
+looks like. `m_PlayerSubPrograms` group 3 **mixes platforms**: a single group
+holds the d3d11, OpenGLCore and Vulkan variants of the same program back to
+back, each carrying an `m_BlobIndex` into *its own* platform blob.
+
+`m_ParameterBlobIndices` group 3 is **parallel to that list, position by
+position** - not a list of parameter blobs in its own right. Position `k`'s
+parameter blob lives in the same platform blob as position `k`'s sub-program.
+
+Reading `m_ParameterBlobIndices` as a flat set and resolving it against one
+platform's table is the natural mistake, and it silently resolves to code
+blobs: 2936 of 3403 parameter records "fail to parse" that way, which looks
+like a broken format rather than a wrong index space.
 
 ## Code-blob record
 
@@ -150,6 +166,53 @@ program's `m_CommonParameters` - and the three count bytes are the runtime's
 summary of it. `SHDR` is shader model 4 and `SHEX` shader model 5; the token
 stream is identical.
 
+## Parameter blob
+
+The other record kind. It carries the binding table the stripped `RDEF` chunk
+would otherwise hold: the constant buffers and their members, and the texture,
+buffer, UAV and sampler bindings.
+
+```text
+version        : i32    202012090, same tag as a code blob
+bufferCount    : i32
+per buffer     : name (i32 length + bytes, padded to 4)
+                 usedSize i32
+                 paramCount i32, then that many constant-buffer params
+                 structCount i32, then that many struct params
+constant-buffer param:
+                 name (padded string), type i32, rows i32, columns i32,
+                 isMatrix i32, arraySize i32, index i32
+struct param   : name (padded string), index i32, arraySize i32, size i32,
+                 paramCount i32, then that many constant-buffer params
+entryCount     : i32
+per entry      : name (padded string), kind i32, then by kind:
+                 0 texture : index i32, samplerIndex i32, extra u32
+                             (extra & 1 = multi-sampled, extra >> 1 = dimension)
+                 1 cbuffer binding : index i32, arraySize i32
+                 2 buffer binding  : index i32, arraySize i32
+                 3 UAV             : index i32, originalIndex i32
+                 4 sampler         : bindPoint i32, sampler u32
+```
+
+Every string is length-prefixed and padded to a 4-byte boundary, and the
+record ends exactly on the last field - no trailing padding inside the record.
+
+**Evidence: 3403 of 3403 stock parameter blobs parse and re-emit byte for
+byte, with zero trailing bytes** (729 from `trees`, 2674 from the player).
+Round-tripping is a stronger check than parsing: a reader can skip a field it
+misunderstands and still appear to work, but a writer that misplaces one byte
+cannot reproduce the original. `tools/shader_blob_dump.py` performs this
+round-trip as a gate and exits non-zero on any difference.
+
+Entry kinds observed: texture and constant-buffer bindings dominate (15200 and
+11371 across both samples), with 287 samplers and 58 buffer bindings. No UAV
+entry appears in either sample, so kind 3's layout is **taken from the parser,
+not measured here**.
+
+This layout is [USCSandbox `ShaderParams.cs`](https://github.com/nesrak1/USCSandbox/blob/main/USCSandbox/Processor/ShaderParams.cs)
+with `readBlobVersion` true; up to Unity 2021 the same structure was written
+inline after the code blob instead of in a record of its own.
+
 ## Sub-program grouping
 
 Compiled variants live in `m_PlayerSubPrograms` on each `SerializedProgram`,
@@ -174,10 +237,13 @@ the first shader that uses an immediate constant buffer - 72 of the 1894
 ## Status
 
 `verified` for the container, the record table, the code-blob record, the
-38-byte offset, and header bytes 0, 2, 3 and 5. `inferred` for byte 1 (a
-binding count that bounds the declaration count from above). **Not decoded:**
-the quantity in byte 4, and the meaning of the three empty `m_PlayerSubPrograms`
-groups.
+38-byte offset, header bytes 0, 2, 3 and 5, the parallel index space between
+`m_ParameterBlobIndices` and `m_PlayerSubPrograms`, and the parameter-blob
+layout (round-tripped byte for byte over 3403 records). `inferred` for byte 1
+(a binding count that bounds the declaration count from above) and for
+parameter entry kind 3, whose layout comes from the parser because no UAV
+entry appears in either sample. **Not decoded:** the quantity in header byte
+4, and the meaning of the three empty `m_PlayerSubPrograms` groups.
 
 ## Changelog
 
@@ -187,3 +253,9 @@ groups.
   bytes 1 to 3 newly identified as the SRV, constant-buffer and sampler counts
   by walking the DXBC token stream. Reproduction tool:
   [`tools/shader_blob_dump.py`](../tools/shader_blob_dump.py).
+- **2026-08-24:** Parameter blob decoded - the other record kind, carrying the
+  binding table the stripped `RDEF` chunk would hold. 3403 of 3403 stock
+  parameter blobs re-emit byte for byte. Also documents how
+  `m_ParameterBlobIndices` runs parallel to the platform-mixed
+  `m_PlayerSubPrograms` list, which is the index space that makes the format
+  look broken when read flat.
