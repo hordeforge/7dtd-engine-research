@@ -92,6 +92,7 @@ def main() -> int:
     # index cited anywhere in the corpus must be in enum range (82 / 317)
     n_state = len(dll["EnumGameStats"])
     n_prefs = len(dll["EnumGamePrefs"])
+    stats_rows = table_rows(doc, "EnumGameStats", "EnumGamePrefs")
     for root, _dirs, files in os.walk(DOCS_DIR):
         for fn in files:
             if not fn.endswith(".md"):
@@ -100,11 +101,12 @@ def main() -> int:
             for m in re.finditer(r"GameStats\[(\d+)\]", txt):
                 if int(m.group(1)) >= n_state:
                     bad.append(f"{fn}: GameStats[{m.group(1)}] out of range (< {n_state})")
-            # named citations (GameStats[N] (Name) / GameStats[N] Name) must match the table
+            # named citations (GameStats[N] (Name) / GameStats[N] Name) must match
+            # the table; parsed once below the loop, not per citation
             for m in re.finditer(r"GameStats\[(\d+)\]\s*\(?`?([A-Za-z][A-Za-z0-9_]*)", txt):
                 idx, name = int(m.group(1)), m.group(2)
                 if idx < n_state:
-                    rows_i = table_rows(open(os.path.join(DOCS_DIR, "inventories", "gamestats-gameprefs.md"), encoding="utf-8").read(), "EnumGameStats", "EnumGamePrefs")
+                    rows_i = stats_rows
                     if idx < len(rows_i) and rows_i[idx] != name and name not in ("GameState", "GameModeId"):
                         bad.append(f"{fn}: GameStats[{idx}] named `{name}`, table says `{rows_i[idx]}`")
             for m in re.finditer(r"(?:GetInt|GetFloat|GetBool)\((\d+)\)", txt):

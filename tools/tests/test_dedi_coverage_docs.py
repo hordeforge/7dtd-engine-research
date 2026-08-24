@@ -164,6 +164,7 @@ def main() -> int:
     tools = _common.TOOLS / "legacy"
     fails: list[str] = []
     notes: list[str] = []
+    doc_texts: dict[str, str] = {}  # read each family doc once, reuse below
 
     asm_present = _common.find_asm() is not None
 
@@ -175,6 +176,7 @@ def main() -> int:
             fails.append(f"missing family doc: {p}")
             continue
         txt = p.read_text(encoding="utf-8", errors="replace")
+        doc_texts[name] = txt
         if len(txt) < 300:
             fails.append(f"family doc too short (<300 bytes): {name}")
         if name not in EVIDENCE_EXEMPT_DOCS:
@@ -207,8 +209,7 @@ def main() -> int:
             fails.append(f"missing Mono.Cecil dump tool: {tp}")
 
     for old in ["A21", "Alpha 21", "a21"]:
-        for name in FAMILY_DOCS:
-            text = (DOCS / name).read_text(encoding="utf-8", errors="replace")
+        for name, text in doc_texts.items():
             if old in text:
                 fails.append(f"{name} still references {old}")
 

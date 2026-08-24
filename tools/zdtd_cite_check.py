@@ -38,6 +38,20 @@ def docs_dir() -> str:
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
 
 
+def known_doc_names() -> set:
+    """Top-level docs/ filenames, resolved once.
+
+    The scan tests every citation against this set; an isfile per match made
+    the walk pay one syscall per citation over whole sibling repos.
+    """
+    ddir = docs_dir()
+    try:
+        names = os.listdir(ddir)
+    except OSError:
+        return set()
+    return {n for n in names if os.path.isfile(os.path.join(ddir, n))}
+
+
 def collect_local(root: str, into: set) -> None:
     """Every repo-local doc name across the fleet (roots, the full docs/ tree
     incl. nested dirs like docs/reviews/, and docs/adr names prefix-stripped),
@@ -59,7 +73,7 @@ def collect_local(root: str, into: set) -> None:
                     into.add(re.sub(r"^\d+-", "", d))
 
 
-def scan(root: str, local: set) -> tuple[int, list[str]]:
+def scan(root: str, local: set, docs: set) -> tuple[int, list[str]]:
     total = 0
     broken = []
     for dirpath, dirnames, filenames in os.walk(root):
@@ -74,11 +88,11 @@ def scan(root: str, local: set) -> tuple[int, list[str]]:
                 continue
             for m in RES_PATH.finditer(txt):
                 total += 1
-                if not os.path.isfile(os.path.join(docs_dir(), m.group(1))):
+                if m.group(1) not in docs:
                     broken.append(f"{p}: cites {m.group(1)}")
             for m in BARE_AFTER_RE.finditer(txt):
                 total += 1
-                if not os.path.isfile(os.path.join(docs_dir(), m.group(1))):
+                if m.group(1) not in docs:
                     broken.append(f"{p}: cites {m.group(1)}")
             # src files: a bare `X.md` name must be a research doc or a
             # repo-local doc (incl. zdtd docs/adr stripped).
@@ -88,7 +102,7 @@ def scan(root: str, local: set) -> tuple[int, list[str]]:
                     if name in local or name in ALLOW_BARE:
                         continue
                     total += 1
-                    if not os.path.isfile(os.path.join(docs_dir(), name)):
+                    if name not in docs:
                         broken.append(f"{p}: cites {name} (not a research doc)")
     return total, broken
 
@@ -102,6 +116,7 @@ def main() -> int:
     grand = 0
     bad_total = 0
     local = set()
+    docs = known_doc_names()
     for name in REPOS:
         repo_dir = os.path.join(args.root, name)
         if not os.path.isdir(repo_dir):
@@ -114,7 +129,7 @@ def main() -> int:
             continue
         if args.repo and name != args.repo:
             continue
-        total, broken = scan(repo_dir, local)
+        total, broken = scan(repo_dir, local, docs)
         grand += total
         bad_total += len(broken)
         for b in broken:

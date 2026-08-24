@@ -94,10 +94,10 @@ class NameSet {
 """
 
 
-def parse_inventory() -> tuple[dict, list]:
+def parse_inventory(text: str) -> tuple[dict, list]:
     primaries = {}
     aliases = []
-    for l in open(INV, encoding="utf-8").read().splitlines():
+    for l in text.splitlines():
         s = l.strip()
         if not (s.startswith("| `") or s.startswith("|`")):
             continue
@@ -142,7 +142,8 @@ def main() -> int:
         descriptions[typ] = desc
         permissions[typ] = perm
 
-    primaries, aliases = parse_inventory()
+    text_inv = open(INV, encoding="utf-8").read()  # read once; parse_inventory + self-state check reuse it
+    primaries, aliases = parse_inventory(text_inv)
     bad = []
     # the committed CmdMap tsv (regen.sh artifact) must equal fresh output
     if os.path.exists(TSV) and open(TSV, encoding="utf-8").read() != cmdmap:
@@ -169,7 +170,6 @@ def main() -> int:
     # Does-column descriptions must equal getDescription (whitespace-normalized:
     # the doc renders embedded newlines as spaces; empty getDescription becomes
     # "(no description)")
-    text_inv = open(INV, encoding="utf-8").read()
     norm_ws = lambda s: re.sub(r"\s+", " ", s).strip()
     for m in re.finditer(r"^\| `([^`]+)` \| `([^`]+)`(?: \(alias\))? \| ([^|]*) \| (.*?) \|$", text_inv, re.M):
         name, typ, perm_col, does = m.group(1), m.group(2), m.group(3).strip(), m.group(4).strip()
@@ -186,8 +186,7 @@ def main() -> int:
         if have_perm != want_perm:
             bad.append(f"`{name}` perm: doc `{want_perm}` != DLL `{have_perm or '(inherited)'}`")
     # the inventory must self-state the primary count
-    text = open(INV, encoding="utf-8").read()
-    if not re.search(rf"\b{EXPECTED_PRIMARY}\b", text):
+    if not re.search(rf"\b{EXPECTED_PRIMARY}\b", text_inv):
         bad.append(f"inventory does not self-state {EXPECTED_PRIMARY}")
     if bad:
         for b in bad:

@@ -66,10 +66,12 @@ def main() -> int:
 
     # dedicated-leaves.md: type existence (normalized), tolerate "(not found)" rows
     text = open(os.path.join(INV, "dedicated-leaves.md"), encoding="utf-8").read()
-    for m in re.finditer(r"^\| `([^`]+)` \|", text, re.M):
+    for row in text.splitlines():
+        m = re.match(r"^\| `([^`]+)` \|", row)
+        if not m:
+            continue
         typ = m.group(1)
         total += 1
-        row = text.splitlines()[text[: text.index(m.group(0))].count("\n")]
         if "(not found)" in row:
             if norm(typ) in dll:
                 bad.append(f"dedicated-leaves.md: `{typ}` now resolves in the DLL (base {dll[norm(typ)]}); update the (not found) marker")
