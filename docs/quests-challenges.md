@@ -1046,10 +1046,11 @@ pins the whole quest's POI.
 
 - `BaseObjective::SetupPosition` (IL=2) is a hard `false`; only position-aware
   subclasses override it.
-- `ObjectiveRandomPOIGoto::SetupPosition` (IL=9) → `ObjectiveGoto::GetPosition`
-  (IL=339) + `op_Inequality(position, zero)`.
-- `ObjectiveClosestPOIGoto::SetupPosition` → the base `ObjectiveGoto::GetPosition`
-  (IL=232 wrapper; the "closest" behavior is ObjectiveGoto's).
+- `ObjectiveRandomPOIGoto::SetupPosition` (IL=9) → its own `GetPosition` override
+  (`ObjectiveRandomPOIGoto::GetPosition`, IL=339) + `op_Inequality(position, zero)`.
+- `ObjectiveClosestPOIGoto::SetupPosition` (IL=9) → its own `GetPosition` override
+  (`ObjectiveClosestPOIGoto::GetPosition`, IL=232), which resolves the POI via
+  `DynamicPrefabDecorator::GetClosestPOIToWorldPos`.
 - `get_NeedsNPCSetPosition` is true only for RandomPOIGoto; `SetupTags` (IL=41)
   sets `NeedsNPCSetPosition` if any objective needs it.
 
@@ -1248,6 +1249,11 @@ usedPOILocations, player.entityId)` runs; on failure
 
 ## Changelog
 
+- **2026-08-24:** Objective-side `GetPosition` citations re-attributed to the
+  correct classes: IL=339 is `ObjectiveRandomPOIGoto::GetPosition` and IL=232 is
+  `ObjectiveClosestPOIGoto::GetPosition` (its own override calling
+  `GetClosestPOIToWorldPos`); the base `ObjectiveGoto::GetPosition` is IL=363.
+  Numbers were real, class prefixes were not (caught by `test_il_citations`).
 - **2026-08-21:** New "Quest POI selection" section: Quest.SetupPosition IL=26, ObjectiveRandomPOIGoto.SetupPosition IL=9 / GetPosition IL=339, ObjectiveGoto.FinalizePoint IL=74, GetRandomPOINearWorldPos IL=193 / GetRandomPOINearTrader IL=65, ValidPrefabForQuest IL=156, GetClosestPOIToWorldPos IL=230, QuestEventManager GetPrefabsByDifficultyTier IL=63 / GetPrefabsForTrader IL=35 / SetupTraderPrefabList IL=80, PrefabListData ShuffleDifficulty IL=10, PrefabVolumeListAbs`2.get_AnyUsedEntry IL=24 (Use per parsed volume), Prefab.GetQuestTag IL=5 (Test_AllSet), objective SetupQuestTag tag map, EntityTrader offer-loop SetupPosition flow (exact).
 - **2026-08-11:** Shared/rally IL re-verified: ObjectiveRallyPoint.Current_BlockActivate IL=182, SharedQuestData.write IL=63, NetPackageSharedQuest.ProcessPackage IL=371, FailAllSharedQuests IL=46, FailAllActivatedQuests IL=45, QuestIsActive IL=36, FindQuest/FindCompletedQuest IL=37, FindActiveQuest IL=33/40, AddTraderPOI IL=33, HasTraderPOI IL=5, GetTraderList IL=12, TriggerQuest*Event IL=9, TriggerSharedQuestAddedEvent IL=13, QuestShareServer IL=37, NetPackagePartyQuestChange.ProcessPackage IL=83, NetPackageQuestGotoPoint.ProcessPackage IL=312, NetPackageQuestObjectiveUpdate.write IL=21, QuestClass.CreateQuest IL=147, CanActivate IL=26, GetCurrentHint IL=52, CheckCriteriaQuestGiver/CheckCriteriaOffer IL=29, ResetObjectives IL=18 (exact).
 - **2026-08-11:** QuestJournal lifecycle IL re-verified: StartQuests IL=87, RefreshTracked IL=26, SetActivePositionData IL=32, HandlePartyRemoveQuest IL=77, RemoveAllSharedQuests IL=125, RemoveSharedQuestForOwner IL=53, AddQuestFactionPoint IL=34, GetQuestFactionMax IL=20, HasCraftingQuest IL=29, HasActiveQuestByQuestCode IL=30, GetObjectiveForQuest IL=43, GetCurrentFactionTier IL=46, GetTraderData IL=27, CheckRallyMarkerActivation IL=56, HandleRallyMarkerActivation IL=36 (exact).
