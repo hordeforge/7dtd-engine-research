@@ -247,7 +247,9 @@ def main():
                 fh.write(header)
         with open(history, "a") as fh:
             fh.write(row)
-        print("history appended to", history)
+        # Keep stdout pure JSON under --json: consumers pipe the report
+        # straight into a parser.
+        print("history appended to", history, file=sys.stderr if as_json else sys.stdout)
     if as_json:
         print(json.dumps(result, indent=2))
         return 0
