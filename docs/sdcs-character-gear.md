@@ -226,7 +226,9 @@ project, not a shipped build:
 
 | Method | IL | Scans |
 |---|---:|---|
+| `LoadRaceDataFromResources()` | 7 | clear `VariantData`, then `ParseRaceVariantFromResources` per sex |
 | `ParseRaceVariantFromResources(Boolean)` | 75 | `{dataPath}/AssetBundles/Player/{Male\|Female}/Heads/<race>/<variant>` — directory names become race + variant int |
+| `LoadHairTypeFromResources(Dictionary,HairTypes)` | 69 | clear the per-type dictionary, then fill it from `GetHairNamesFromResources` per sex |
 | `GetHairNamesFromResources(Boolean,HairTypes)` | 55 | `{dataPath}/AssetBundles/Player/{sex}/` + `Hair/` (Hair) or `FacialHair/{HairTypes}/` (the other three) |
 | `GetEyeColorNamesFromResources()` | 38 | `{dataPath}/AssetBundles/Player/Common/Eyes/Materials/*.mat` (skips `.meta`, strips `.mat`) |
 | `GetHairColorNamesFromResources()` | 40 | `{dataPath}/AssetBundles/Player/Common/HairColorSwatches/*.asset` (skips `.meta`, strips `.asset`) |
@@ -645,7 +647,8 @@ slot needs and no more.
    taken instead. This works but grafts far more bones than needed.
 3. `BuildAllowedWithAncestors` (IL=49) closes the set upward: for each allowed name,
    walk parents to the source origin adding every ancestor, so the graft is a
-   connected subtree.
+   connected subtree. (Name lookup goes through `MapSourceByName` (IL=10), an
+   ordinal name→`Transform` map of the source subtree.)
 4. Add every `HingeJoint` transform under the slot **and** its `connectedBody`
    transform.
 5. Add the `sourceObjectA` / `sourceObjectB` of every `BlendConstraint` under the
@@ -973,6 +976,14 @@ bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`
 
 ## Changelog
 
+- **2026-08-24 (validation):** Five full validation sweeps against a fresh
+  pinned-Cecil `il/full-v3.1.0` regeneration: (1) all 123 `IL=` claims exact;
+  (2) all 33 quoted literals/paths ground out in `ldstr` operands; (3) the three
+  XML contracts re-derived attribute-for-attribute from parser IL; (4) every
+  behavioral claim in §§1–13 re-checked against method bodies — zero drift;
+  (5) completeness: all 76 methods of `SDCSUtils`/`SDCSDataUtils`/`SDCSArchetypesFromXml`
+  now accounted for (added `MapSourceByName`, `LoadRaceDataFromResources`,
+  `LoadHairTypeFromResources`).
 - **2026-08-24:** First edition. Closes the last SDCS gap: `SDCSUtils`,
   `SDCSDataUtils` and `SDCSArchetypesFromXml` were catalogued but not researched in
   [`out-of-scope-surface.md`](out-of-scope-surface.md) / [`client-side-surface.md`](client-side-surface.md);
