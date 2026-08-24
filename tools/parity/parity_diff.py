@@ -37,12 +37,14 @@ def diff(old, new):
             print(f"    write NEW {n[k]['write']}")
     # enum drift
     print("=== ENUM DIFF ===")
+    enum_changed = 0
     for e in sorted(set(new["enums"]) | set(old.get("enums", {}))):
         ov = old.get("enums", {}).get(e)
         nv = new["enums"].get(e)
         if ov != nv:
+            enum_changed += 1
             print(f"  {e}: {ov} -> {nv}")
-    return len(added) + len(removed) + len(changed)
+    return len(added) + len(removed) + len(changed) + enum_changed
 
 def coverage(new, gamedir):
     # which packages zdtd's game.zig handles + which our default_mappings names

@@ -628,8 +628,11 @@ def discover_save_dir():
     return os.path.dirname(best) if best else None
 
 
+# Substrings that mark a check line as failed. Keep in sync with the failure
+# messages below: every violation text must contain at least one marker.
 FAILED_MARKERS = ("MISMATCH", "VIOLATED", " != ", "failed", "MISSING",
-                  "bounds", "too short", "!= expected", "parse error")
+                  "bounds", "too short", "!= expected", "parse error",
+                  "non-zero pad", "coord mismatch")
 
 
 def any_failed(checks):
