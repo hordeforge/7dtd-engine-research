@@ -599,6 +599,11 @@ true in the base and `ItemActionRanged` (IL=4) restricts it to
 - `ItemClassArmor` (IL=61) parses `ArmorGroup` (comma-split), `EquipSlot`
   (parsed as `EquipmentSlots`), `IsCosmetic`, `KeepOnDeath`, `AllowUnEquip`,
   `AutoEquip`, `ReplaceByTag`.
+- The `SDCS` **property class** (`ItemClass::Init`, IL=1196) is parsed on every
+  peer into `ItemClass::SDCSData` (`SDCSUtils/SlotData`): `Prefab`,
+  `TransformName`, `Excludes`, `HairMaskType`, `FacialHairMaskType`. It carries no
+  server behaviour - it is the skinned-armor authoring contract, reversed in
+  [sdcs-character-gear.md](sdcs-character-gear.md) §3.1.
 - `ItemClassTimeBomb` (IL=62) builds `explosion = new ExplosionData(
   Properties, Effects)` and reads `ExplodeOnHit`, `FuseStartOnDrop`,
   `FusePrimeOnActivate`, `ActivationTransformToHide` (split on ';'),

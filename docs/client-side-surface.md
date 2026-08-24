@@ -732,9 +732,9 @@ Generic infrastructure, collections, DTOs, and delegates used across the game (c
 | `Row` | Object |  |
 | `RtOwner` | ValueType |  |
 | `RuntimeRenderingInfo` | ValueType |  |
-| `SDCSArchetypesFromXml` | Object | parseArchetype, Save, parseEquipment |
-| `SDCSDataUtils` | Object | Load, Save, ParseRaceVariantFromResources |
-| `SDCSUtils` | Object | setupEquipment, Stitch, setupHairObjects |
+| `SDCSArchetypesFromXml` | Object | parseArchetype, Save, parseEquipment — narrated in [sdcs-character-gear.md](sdcs-character-gear.md) §3.2 |
+| `SDCSDataUtils` | Object | Load, Save, ParseRaceVariantFromResources — narrated in [sdcs-character-gear.md](sdcs-character-gear.md) §3.3 |
+| `SDCSUtils` | Object | setupEquipment, Stitch, setupHairObjects — narrated in [sdcs-character-gear.md](sdcs-character-gear.md) §§4-8 |
 | `SHandlerData` | ValueType |  |
 | `SMainMenuOpenedData` | ValueType |  |
 | `SMainMenuOpeningData` | ValueType |  |
