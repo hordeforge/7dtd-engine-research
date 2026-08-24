@@ -228,7 +228,7 @@ patch or a careless edit cannot silently drift the docs:
 
 | Gate | What it verifies |
 |---|---|
-| `make test` (20 checks) | the full local suite: reach/coverage consistency, committed-inventory currency (`WireBodies`/`Coverage`/`StateMachines` regeneration), surface well-formedness, doc-link + section-ref integrity, inventory count claims, and the DLL-side guards below |
+| `make test` (23 checks) | the full local suite: reach/coverage consistency, committed-inventory currency (`WireBodies`/`Coverage`/`StateMachines` regeneration), surface well-formedness, doc-link + section-ref integrity, inventory count claims, and the DLL-side guards below |
 | `tests/test_subclass_counts.py` | per-leaf inventory counts (sequence-requirements 38, item-actions 38, quest-objectives 38, minevent-actions 71, block-behaviors 65, te-features 11, challenge-objectives 28+1, sequence-actions 123) match the concrete-subclass closures / namespace composition |
 | `tests/test_console_cmd_inventory.py` | console catalog primary rows == `CmdMap.exe` output, alias rows are real names, the committed `.tsv` is current, and every Does-column description equals `getDescription` |
 | `tests/test_console_classification.py` | the console client-executable / dedicated-gate split (188 leaves; 83 `get_IsExecuteOnClient`, 84 either, 10 `IsDedicatedServer`-gated classes listed in console-commands.md 6) matches a Cecil prologue probe over the `CmdMap` population |

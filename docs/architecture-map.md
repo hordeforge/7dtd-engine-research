@@ -256,16 +256,16 @@ generated inventories: [`INDEX.md`](INDEX.md).
 ## 7b. Every modelled lifecycle
 
 The diagrams above are the system's skeleton. The behaviour lives in **74 state
-machines** spread across 42 docs, indexed in
+machines** spread across 41 docs, indexed in
 [`inventories/state-machines.md`](inventories/state-machines.md) and grouped there by
 the same clusters used below.
 
 ```mermaid
 flowchart TB
   SM["74 state machines"] --> C1["Gameplay systems<br/>27"]
-  SM --> C2["Ops, admin, integrations<br/>15"]
+  SM --> C2["Ops, admin, integrations<br/>14"]
   SM --> C3["Entities, AI, combat<br/>14"]
-  SM --> C4["World, chunks, persistence<br/>10"]
+  SM --> C4["World, chunks, persistence<br/>11"]
   SM --> C5["Frame and lifecycle<br/>4"]
   SM --> C6["Wire and session<br/>4"]
   C1 --> G1["quests, loot, power, items,<br/>crafting, game events, vehicles"]

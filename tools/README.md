@@ -29,6 +29,7 @@ Standalone Python entry points (no build step; each wired to a make target):
 | `cross_repo_links.py` | Cross-repo markdown link sweep (`make cross-links`). |
 | `zdtd_cite_check.py` | Sibling-repo research citation check (`make sibling-cites`). |
 | `xml_pins.py` | XML data pins vs the game dir (`make verify`). |
+| `regen.sh` | One-shot full regeneration: builds the dumpers, then re-dumps every `il/` set and refreshes every committed inventory (`docs/inventories/*`), ending with `make test`. Needs `ASM=<dedicated Assembly-CSharp.dll>`. |
 
 ## Build
 
@@ -121,6 +122,9 @@ Preferred one-shot path (facts + pin gate + optional surface drift):
 make post-update                # same from repo root
 ```
 
+For the whole corpus (dump sets + committed inventories + gates), run
+`ASM="<dll>" ./tools/regen.sh` instead of invoking each dumper by hand.
+
 `stock_facts.json` also carries:
 - `update.dump_label_suffix` / `update.dump_sets` for `il/<set>-<suffix>/` regen
 - `pins.*` machine-checked path inventory
@@ -156,7 +160,8 @@ Canonical family dumpers (map to `il/` dump sets):
 | `DumpAIDirector` | (aidirector) | AIDirector component types |
 | `DumpSaveLight` | (save/light) | WorldState + light sites |
 
-The remaining `legacy/*.cs` (`DumpMethod(ByName)`, `DumpType(s)`, `DumpOne(Method)`,
+The remaining `legacy/*.cs` (`DumpMethods`, `DumpMethodByName`, `DumpType(s)`,
+`DumpOne`, `DumpOneMethod(2)`,
 `DumpNamed`, `DumpNested`, `DumpNodes`, `DumpReg`, `DumpMgr`, `DumpScan`, `DumpIter`,
 `DumpFull`, `DumpAstar`, `DumpAuth`, `DumpVoxel`, `DumpTps`, `DumpTypeBases`,
 `DumpExtra*`, `Find{FieldWrite,Log,Sub,Type}`, `ListMethods`) are ad-hoc single-target
@@ -203,11 +208,11 @@ local install. See `re-scratch/README.md`.
 | `tests/test_il_citations.py` | Every parseable `Type::Method`/`Type.Method` + `IL=N` claim in the docs matches the DLL (any overload); dated changelog notes and shorthand-suffix types are skipped. Caught `GetCellsOnRay` 244->242 and `PersistentPlayerLogin` 5->37. |
 | `tests/test_xref_claims.py` | Every `Xref=N` call-site claim in the docs (tight ``Type.Method (Xref=N)`` form) matches `Xref.exe` on the live DLL. |
 | `tests/test_console_classification.py` | The console client-executable / dedicated-gate split (188 leaves; 83 `get_IsExecuteOnClient`, 84 either, 10 gated classes) matches a Cecil prologue probe over `CmdMap` rows. |
-| `tests/test_netprotocol_census.py` | `NetProtocolCensus` re-derives the per-package census (193 packages; 6 channel-1, 8 compressed, 5 not-before-auth, 4 non-map) and the docs must match on all four axes. |
+| `tests/test_netprotocol_census.py` | `NetProtocolCensus` re-derives the per-package census (193 packages; 6 channel-1, 8 compressed, 5 unreliable-delivery, 10 allowed-before-auth, 4 non-map) and the docs must match on every axis. |
 | `tests/test_tuned_constants.py` | 524 tuned game constants across ~56 families (AI-director horde/placement/cooldown + airdrop schedule, water-sim, block masks + BlockValue layouts, entity/walk-type ids, spawn rings, stealth/smell, vehicle/drone/turret, region/chunk/world, RWG, threat levels) pinned against the DLL and stated in the owning docs; completeness scan fails on any un-allowlisted const-rich class. |
 | `tests/test_committed_inventories_current.py` | Generated inventories (`netpackage-bodies`, `coverage-report`, `state-machines`) are current against the live DLL. |
 | `tests/test_state_machines_current.py` | `state-machines.md` lifecycle tables are current against the live DLL (skips without mono; CI-safe). |
-| `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (11 claims). |
+| `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (12 claims). |
 | `tests/test_readme_test_table.py` | Every test script run by `make test`/`test-docs`/`verify` is documented in this table, and every entry is a real file. |
 | `tests/test_transport_closure_claims.py` | No stale native-LiteNetLib / unknown-peer-order claims in the docs. Pattern liveness self-tested. |
 | `tests/test_coverage_consistency.py` | `docs/coverage.md` audit table lists every narrative doc; census rows match `stock_facts.json`. |
