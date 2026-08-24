@@ -48,6 +48,34 @@ class Coverage {
     string ns = NsOf(t);
     return string.IsNullOrEmpty(ns) ? "<global>" : ns;
   }
+
+  // Mention-depth bucket index: 0 / exactly-1 / 2-4 / 5-19 / 20+.
+  static int DepthBucket(int mentions) =>
+    mentions == 0 ? 0 : mentions == 1 ? 1 : mentions <= 4 ? 2 : mentions <= 19 ? 3 : 4;
+  static readonly string[] DepthLabel = {
+    "0 (catalogued, classified, or unaccounted)", "exactly 1", "2-4", "5-19", "20+"
+  };
+
+  // Game builds do not version the image (0.0.0.0), so stamp the report from the
+  // same Constants.cVersion* consts StockFacts pins; else any file can pass for
+  // the studied build and drift goes unnoticed. Display follows the corpus
+  // convention "V {major}.{minor/10}.{minor%10} (b{build})" (check_stock_facts).
+  static string ConstVersion(ModuleDefinition mod) {
+    TypeDefinition c = mod.Types.FirstOrDefault(t => t.Name == "Constants" && string.IsNullOrEmpty(t.Namespace))
+                   ?? mod.Types.FirstOrDefault(t => t.Name == "Constants");
+    if (c == null) return null;
+    int[] v = new int[3]; string[] names = { "cVersionMajor", "cVersionMinor", "cVersionBuild" };
+    for (int i = 0; i < names.Length; i++) {
+      bool found = false;
+      foreach (var f in c.Fields)
+        if (f.Name == names[i] && f.HasConstant) {
+          try { v[i] = Convert.ToInt32(f.Constant); found = true; } catch { return null; }
+          break;
+        }
+      if (!found) return i < 2 ? null : "V" + v[0] + "." + v[1] / 10 + "." + v[1] % 10;
+    }
+    return "V" + v[0] + "." + v[1] / 10 + "." + v[1] % 10 + " (b" + v[2] + ")";
+  }
   static bool IsLibrary(TypeDefinition t) {
     string ns = NsOf(t);
     if (string.IsNullOrEmpty(ns)) return false; // <global> is game code
@@ -103,11 +131,15 @@ class Coverage {
     var narrated = new HashSet<string>();
     var catalogued = new HashSet<string>();
     var classified = new HashSet<string>();
+    // Per-name occurrence counts over narrative docs only: the depth behind the
+    // narrated tier (one passing cross-reference vs a dedicated section).
+    var narratedMentions = new Dictionary<string, int>();
     foreach (var f in Directory.GetFiles(a[1], "*.md", SearchOption.AllDirectories)) {
       string fn = Path.GetFileName(f);
       if (fn == "coverage-report.md") continue;   // never let the tool read its own output
       bool isInventory = f.Replace('\\','/').Contains("/inventories/");
       var target = (fn == "out-of-scope-surface.md") ? classified : (isInventory ? catalogued : narrated);
+      bool isNarrative = ReferenceEquals(target, narrated);
       string text = File.ReadAllText(f);
       // Credit the leading type identifier in any backticked token:
       //   `EAIManager`              -> EAIManager
@@ -116,8 +148,11 @@ class Coverage {
       //   `List`1` is not matched as a whole by this; BaseName strips arity on the type side.
       // Still requires a backtick so bare prose and markdown table headers cannot credit
       // real types named Field/Entry/Data.
-      foreach (Match mt in Regex.Matches(text, "`([A-Za-z_][A-Za-z0-9_]*)(?:[./:][^`]*)?`"))
-        target.Add(mt.Groups[1].Value);
+      foreach (Match mt in Regex.Matches(text, "`([A-Za-z_][A-Za-z0-9_]*)(?:[./:][^`]*)?`")) {
+        string name = mt.Groups[1].Value;
+        target.Add(name);
+        if (isNarrative) narratedMentions[name] = narratedMentions.TryGetValue(name, out int n) ? n + 1 : 1;
+      }
     }
     catalogued.ExceptWith(narrated);   // narrated wins over merely-catalogued
 
@@ -139,8 +174,22 @@ class Coverage {
     int uiInBase = gameReached.Count(t => BaseName(t).StartsWith("XUiC_") || BaseName(t).StartsWith("XUi"));
     int cmdInBase = gameReached.Count(t => BaseName(t).StartsWith("ConsoleCmd"));
 
+    // Mention-depth histogram over the reached game types (the depth behind the
+    // narrated figure): 0 mentions means catalogued/classified/unaccounted.
+    var depth = new int[5];
+    foreach (var t in gameReached) {
+      narratedMentions.TryGetValue(BaseName(t), out int hits);
+      depth[DepthBucket(hits)]++;
+    }
+
     var sb = new StringBuilder();
     sb.AppendLine("# RE coverage report (auto-generated)");
+    sb.AppendLine();
+    string ver = ConstVersion(mod) ?? ("image V" + asm.Name.Version);
+    sb.AppendLine("**Assembly studied:** " + asm.Name.Name + " " + ver + ", file mtime "
+                  + File.GetLastWriteTimeUtc(a[0]).ToString("yyyy-MM-dd HH:mm 'UTC'")
+                  + ". The numbers below are for THIS build only: if the corpus pin");
+    sb.AppendLine("moved (`docs/coverage.md` header), regenerate before quoting any number here.");
     sb.AppendLine();
     sb.AppendLine("**Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the");
     sb.AppendLine("dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced");
@@ -200,6 +249,19 @@ class Coverage {
     sb.AppendLine("**Do not add these rows together and present the sum as coverage.** \"Narrated\"");
     sb.AppendLine("and \"classified\" are different epistemic states (reverse engineered vs judged");
     sb.AppendLine("out of scope), and the base itself is the approximation described above.");
+    sb.AppendLine();
+    sb.AppendLine("## Mention-depth distribution (reached game types)");
+    sb.AppendLine();
+    sb.AppendLine("The depth behind the narrated figure: how many backticked mentions a reached");
+    sb.AppendLine("game type received across hand-written narrative docs. A type named once in");
+    sb.AppendLine("passing scores identically to one with a dedicated section, so read narrated %");
+    sb.AppendLine("as an upper bound; this table is its actual depth.");
+    sb.AppendLine();
+    sb.AppendLine("| Narrative mentions | Types | Share of base |");
+    sb.AppendLine("|---|---:|---:|");
+    for (int i = 0; i < depth.Length; i++)
+      sb.AppendLine("| " + DepthLabel[i] + " | " + depth[i] + " | "
+                    + (100 * depth[i] / Math.Max(1, gameReached.Count)) + "% |");
     sb.AppendLine();
 
     // Whole-assembly accounting: every type and every method body is either reached

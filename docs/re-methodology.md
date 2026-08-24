@@ -62,6 +62,32 @@ mono bin/Census.exe "$ASM"
 A changed count is the first signal that a doc, not the game, is now wrong.
 Do not quote the historical V3.0.1 column as "live dedi" after the 3.1 retarget.
 
+### Mention depth: how thin is one "narrated" credit
+
+A narrated tier built from name mentions has a known weakness: a type named
+once in passing scores identically to one with a dedicated section. Measure
+that depth instead of asserting it:
+
+```bash
+python3 tools/mention_depth.py
+```
+
+Live distribution over the narrative docs (DLL-free; distinct type-shaped
+backtick-quoted identifiers):
+
+| Mentions | Names | Share |
+|---|---:|---:|
+| exactly 1 | 6316 | 66% |
+| 2-4 | 2395 | 25% |
+| 5-19 | 709 | 7% |
+| 20+ | 87 | 1% |
+
+Two thirds of mentioned names appear exactly once: cross-reference density,
+not explanation depth. Treat any narrated/catalogued percentage as an upper
+bound and read [`inventories/coverage-report.md`](inventories/coverage-report.md)
+(the generated four-tier view) for the reached-type split; `Coverage.exe`
+emits the same histogram restricted to reached game types into that report.
+
 ---
 
 ## 2. Dump a method
