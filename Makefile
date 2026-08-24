@@ -106,6 +106,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_save_roundtrip_robustness.py"
 	python3 "$(TOOLS)/tests/test_sandbox_safe_name.py"
 	python3 "$(TOOLS)/tests/test_sandbox_requirements_sync.py"
+	python3 "$(TOOLS)/tests/test_sandbox_zig_tables.py"
 	python3 "$(TOOLS)/tests/test_xml_pins_gate.py"
 	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 	python3 "$(TOOLS)/tests/test_inventory_counts.py"

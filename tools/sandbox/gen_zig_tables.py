@@ -11,19 +11,37 @@ Usage: python3 gen_zig_tables.py sandbox_tables.json ../zdtd-server/src/assets/s
 """
 
 import json
+import struct
 import sys
 from json import dumps as zstr
+
+
+def f32(x: float) -> float:
+    """`x` rounded to the nearest IEEE-754 binary32 value (Zig `f32` width)."""
+    return struct.unpack("<f", struct.pack("<f", x))[0]
+
+
+def val_literal(v):
+    """JSON value -> Zig literal; floats as the shortest decimal that
+    re-parses to the same binary32 value.
+
+    A fixed-precision round loses f32 values that sit further than half an
+    ulp from any 6-decimal number (binary32 1.0000001 would emit as 1.0).
+    """
+    if isinstance(v, float):
+        want = f32(v)
+        for digits in range(10):
+            r = round(v, digits)
+            if f32(r) == want:
+                return repr(r)
+        return repr(want)
+    return str(v)
 
 
 def emit(json_path: str, out_path: str) -> None:
     t = json.load(open(json_path, encoding="utf-8"))
     vs = t["valuesets"]
     opts = t["options"]
-
-    def val_literal(v):
-        if isinstance(v, float):
-            return repr(round(v, 6))
-        return str(v)
 
     out = []
     out.append("//! Stock sandbox value-set and option tables, generated from")
