@@ -101,22 +101,55 @@ static class Seeds {
   //      IConsoleCommand.Execute, and only one of them was reached before this was added.
   public static Dictionary<string, List<MethodDefinition>> BuildOverrideMap(List<TypeDefinition> all) {
     var overrides = new Dictionary<string, List<MethodDefinition>>();
-    foreach (var t in all) foreach (var m in t.Methods.Where(x => x.IsVirtual && x.HasBody)) {
-      var bt = t.BaseType;
-      while (bt != null) { var btd = bt.Resolve(); if (btd == null) break;
-        var bm = btd.Methods.FirstOrDefault(x => x.Name == m.Name && x.Parameters.Count == m.Parameters.Count && x.IsVirtual);
-        if (bm != null) AddEdge(overrides, btd.FullName + "::" + m.Name + "/" + m.Parameters.Count, m);
-        bt = btd.BaseType; }
+    // Every virtual method of a type resolves the SAME ancestor chain, and every
+    // descendant probes the SAME per-ancestor method set. Resolving each chain and
+    // indexing each type's methods ONCE (keyed name/arity, first declared wins -
+    // exactly what the previous per-pair FirstOrDefault scans returned) keeps the
+    // map identical while dropping the repeated Resolve()/scan work.
+    var chains = new Dictionary<TypeDefinition, List<TypeDefinition>>();
+    var virtIdx = new Dictionary<TypeDefinition, Dictionary<string, MethodDefinition>>();
+    foreach (var t in all) {
+      List<TypeDefinition> chain;
+      if (!chains.TryGetValue(t, out chain)) {
+        chain = new List<TypeDefinition>();
+        var bt = t.BaseType;
+        while (bt != null) { var btd = bt.Resolve(); if (btd == null) break;
+          chain.Add(btd); bt = btd.BaseType; }
+        chains[t] = chain;
+      }
+      foreach (var m in t.Methods) {
+        if (!m.IsVirtual || !m.HasBody) continue;
+        string sig = m.Name + "/" + m.Parameters.Count;
+        foreach (var btd in chain) {
+          Dictionary<string, MethodDefinition> vi;
+          if (!virtIdx.TryGetValue(btd, out vi)) {
+            vi = new Dictionary<string, MethodDefinition>();
+            foreach (var x in btd.Methods)
+              if (x.IsVirtual) { var k = x.Name + "/" + x.Parameters.Count; if (!vi.ContainsKey(k)) vi[k] = x; }
+            virtIdx[btd] = vi;
+          }
+          if (vi.ContainsKey(sig))
+            AddEdge(overrides, btd.FullName + "::" + m.Name + "/" + m.Parameters.Count, m);
+        }
+      }
     }
+    var implIdx = new Dictionary<TypeDefinition, Dictionary<string, MethodDefinition>>();
     foreach (var t in all) {
       if (!t.HasInterfaces) continue;
       foreach (var ii in t.Interfaces) {
         TypeDefinition itd = null; try { itd = ii.InterfaceType.Resolve(); } catch { }
         if (itd == null) continue;
         foreach (var im in itd.Methods) {
-          var impl = t.Methods.FirstOrDefault(x => x.HasBody && x.Name == im.Name && x.Parameters.Count == im.Parameters.Count);
-          if (impl == null) continue;
-          AddEdge(overrides, itd.FullName + "::" + im.Name + "/" + im.Parameters.Count, impl);
+          Dictionary<string, MethodDefinition> impls;
+          if (!implIdx.TryGetValue(t, out impls)) {
+            impls = new Dictionary<string, MethodDefinition>();
+            foreach (var x in t.Methods)
+              if (x.HasBody) { var k = x.Name + "/" + x.Parameters.Count; if (!impls.ContainsKey(k)) impls[k] = x; }
+            implIdx[t] = impls;
+          }
+          MethodDefinition impl;
+          if (impls.TryGetValue(im.Name + "/" + im.Parameters.Count, out impl))
+            AddEdge(overrides, itd.FullName + "::" + im.Name + "/" + im.Parameters.Count, impl);
         }
       }
     }

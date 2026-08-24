@@ -51,12 +51,22 @@ static class Xref {
     var all = new List<TypeDefinition>();
     foreach (var mod in asm.Modules) Walk(mod.Types, all);
 
+    // Member-name prefilter (same order as single-target mode): a site can only
+    // count when its callee NAME is claimed, so test that before building any
+    // "Type::Member" key. Keying every operand of ~1.7M instructions dominated
+    // batch mode otherwise.
+    var claimedNames = new HashSet<string>();
+    foreach (var k in counts.Keys) {
+      int sep = k.IndexOf("::");
+      if (sep > 0) claimedNames.Add(k.Substring(sep + 2));
+    }
+
     foreach (var t in all) {
       foreach (var m in t.Methods) {
         if (!m.HasBody) continue;
         foreach (var ins in m.Body.Instructions) {
           var mr = ins.Operand as MethodReference;
-          if (mr == null) continue;
+          if (mr == null || !claimedNames.Contains(mr.Name)) continue;
           var c = ins.OpCode.Code;
           if (c != Code.Call && c != Code.Callvirt && c != Code.Newobj && c != Code.Ldftn && c != Code.Ldvirtftn) continue;
           string dn = mr.DeclaringType.Name;
