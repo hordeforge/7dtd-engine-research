@@ -12,7 +12,6 @@ Usage: python3 tools/tests/test_transport_closure_claims.py
 """
 import os
 import re
-import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS = os.path.join(REPO, "docs")

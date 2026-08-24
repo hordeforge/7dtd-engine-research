@@ -17,7 +17,7 @@ def diff(old, new):
     for k in sorted(set(o) & set(n)):
         if o[k]["read"] != n[k]["read"] or o[k]["write"] != n[k]["write"] or o[k]["dir"] != n[k]["dir"]:
             changed.append(k)
-    print(f"=== PACKAGE DIFF ===")
+    print("=== PACKAGE DIFF ===")
     print(f"added ({len(added)}):", ", ".join(added) or "-")
     print(f"removed ({len(removed)}):", ", ".join(removed) or "-")
     print(f"changed wire ({len(changed)}):")
@@ -31,7 +31,7 @@ def diff(old, new):
             print(f"    write OLD {o[k]['write']}")
             print(f"    write NEW {n[k]['write']}")
     # enum drift
-    print(f"=== ENUM DIFF ===")
+    print("=== ENUM DIFF ===")
     for e in sorted(set(new["enums"]) | set(old.get("enums", {}))):
         ov = old.get("enums", {}).get(e); nv = new["enums"].get(e)
         if ov != nv: print(f"  {e}: {ov} -> {nv}")
@@ -46,7 +46,7 @@ def coverage(new, gamedir):
     # weight by direction: dir 1 (ToServer) = client sends it, must handle
     tosrv = {k for k,v in new["packages"].items() if v["dir"] == 1}
     missing_c2s = sorted(tosrv - handled)
-    print(f"=== ZDTD COVERAGE ===")
+    print("=== ZDTD COVERAGE ===")
     print(f"stock packages: {len(stock)}  handled in game.zig: {len(handled & stock)}")
     print(f"client->server (dir=1) packages: {len(tosrv)}")
     print(f"UNHANDLED client->server ({len(missing_c2s)}):")
