@@ -55,5 +55,7 @@ workspace/experiments/script-order-probe/
 /pathlib
 /tools/ga/
 
+
 # Scratch space (ephemeral venvs, probes); never tracked.
 /.scratch/
+*.lock
