@@ -158,6 +158,7 @@ should be re-checked against IL before you rely on it.
 | [sandbox-options.md](sandbox-options.md) | audited (pass 2) |
 | [save-persistence.md](save-persistence.md) | audited (pass 2) |
 | [save-region.md](save-region.md) | audited (pass 1) |
+| [sdcs-character-gear.md](sdcs-character-gear.md) | not-independently-audited |
 | [server-browser-prefabs.md](server-browser-prefabs.md) | audited (pass 2) |
 | [server-lifecycle.md](server-lifecycle.md) | audited (pass 1) |
 | [signs.md](signs.md) | audited (pass 2) |

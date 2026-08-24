@@ -157,6 +157,7 @@ Product Streamed state machines (tiles, inject gate, SoloSlide): see product ``r
 | Light / stability / mesh / water | light-mesh-water.md |
 | Managers + ModEvents | managers.md |
 | AIDirector types | aidirector.md |
+| SDCS character/armor authoring | sdcs-character-gear.md |
 
 Optimization-mod topics (bottlenecks, algorithm cost anatomy, APM scaling laws,
 GC/FPS tuning, allocation reuse, aggressive levers) live in the **companion
@@ -287,6 +288,7 @@ complete against a call-graph reachability pass ([re-methodology.md](re-methodol
 | [game-events.md](game-events.md) | Scripted-event interpreter: sequences, actions, requirements, decisions, loops |
 | [minevents.md](minevents.md) | Triggered-effect framework: FireEvent dispatch, action/requirement/target model |
 | [quests-challenges.md](quests-challenges.md) | Quest + challenge template/instance lifecycles, objectives, rewards, QuestEventManager |
+| [sdcs-character-gear.md](sdcs-character-gear.md) | SDCS skinned character system: archetype/items.xml authoring contracts, asset-path grammar, rig-stitching pipeline (client-executed, server-loaded data) |
 
 **Social and integration**
 

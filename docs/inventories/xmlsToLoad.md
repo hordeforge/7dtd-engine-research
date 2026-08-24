@@ -62,7 +62,7 @@ server-side, not sent). Pure client UI rows (`XUi_*`, `loadingscreen`,
 | `vehicles` | S2C, reload | `VehiclesFromXml::Load(XmlFile)` | `Vehicle::Cleanup()` | `-` | `VehiclesFromXml::Reload(XmlFile)` | `-` |
 | `rwgmixer` | boot | `WorldGenerationEngineFinal.WorldGenerationFromXml::Load(XmlFile)` | `WorldGenerationEngineFinal.WorldGenerationFromXml::Cleanup()` | `-` | `-` | `-` |
 | `weathersurvival` | S2C | `WorldStaticData::LoadWeather(XmlFile)` | `-` | `-` | `-` | `-` |
-| `archetypes` | boot, S2C, clientFile | `WorldStaticData::LoadSDCSArchetypes(XmlFile)` | `-` | `-` | `-` | `-` |
+| `archetypes` | boot, S2C, clientFile | `WorldStaticData::LoadSDCSArchetypes(XmlFile)` ([schema](../sdcs-character-gear.md)) | `-` | `-` | `-` | `-` |
 | `challenges` | S2C, reload | `ChallengesFromXml::CreateChallenges(XmlFile)` | `WorldStaticData::CleanupChallenges()` | `-` | `-` | `-` |
 | `quests` | S2C | `QuestsFromXml::CreateQuests(XmlFile)` | `-` | `-` | `-` | `-` |
 | `traders` | S2C, reload | `WorldStaticData::LoadTraders(XmlFile)` | `TraderInfo::Cleanup()` | `-` | `-` | `-` |

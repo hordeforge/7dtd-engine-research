@@ -47,6 +47,12 @@ The in-game HUD, menus, windows, widgets, NGUI framework. A headless server rend
 
 Mesh/texture/material/shader/particle/lighting/imposter/avatar/warp code. Server has no renderer.
 
+The SDCS trio (`SDCSUtils`, `SDCSDataUtils`, `SDCSArchetypesFromXml`) stays
+classified here — a headless server never builds a character rig — but it is no
+longer merely catalogued: [`sdcs-character-gear.md`](sdcs-character-gear.md)
+narrates it, because the **data** it consumes (`archetypes.xml`, the `items.xml`
+`SDCS` property class) is server-loaded and server-shipped.
+
 `AnimationStates`, `BiomeAtmosphereEffects`, `BiomeParticleManager`, `BlockHighlighter`, `BlockTextureData`, `BlockUVRect`, `BlockUtilityNavIcon`, `BlocksTexture`, `BodyAnimator`, `CachedMeshData`, `ChangedAnimationParameters`, `CharAtlasData`, `CollisionParticleController`, `DismembermentAccessoryMan`1`, `DynamicMeshUnity`, `DynamicMeshVoxel`, `EntityMeshCache`, `FirstPersonAnimator`, `GearBoneMap`, `IKController`, `ImposterCanvas`, `ItemActionTextureBlockData`, `LocalPlayerCamera`, `MaterialBlock`, `MeshDescription`, `MeshLists`, `MeshMorph`, `MeshPrefabSet`, `MeshStats`, `MeshUnsafeCopyHelper`, `MicroSplatProceduralTextureConfig`, `MicroSplatPropData`, `MultiSourceAtlasManager`, `MySimpleMesh`, `Occludee`, `OccludeeEntity`, `OccludeeLayer`, `OccludeeRenderers`, `Perspective`, `ProfileSDF`, `ReleaseAssetsOnDestroy`, `RenderTextureSystem`, `RootTransformRefParent`, `RuntimeRenderingInfo`, `SDCSDataUtils`, `SDCSUtils`, `SharedMaterialGroup`, `SignFontData`, `SignRenderingData`, `SimpleMeshDataArray`, `SimpleMeshDataWrapper`, `SimpleMeshFile`, `SimpleMeshInfo`, `SlotAllowedBonesCache`, `TextEllipsisAnimator`, `UMACharacterBodyAnimator`, `UVRectTiling`, `UnityDistantTerrain`, `UnityDistantTerrainWaterPlane`, `VoxelMeshExt3dModel`, `VoxelMeshLayer`, `VoxelMeshTerrain`, `WaterMeshUtils`, `WaterVoxelState`
 
 ## Audio / music (20)
