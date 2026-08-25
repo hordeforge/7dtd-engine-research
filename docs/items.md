@@ -2200,6 +2200,21 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-25:** passive value curves pinned (PassiveEffect.il.txt): ModValue
+  (IL=796) walks the curve segments from the top and piecewise-linearly
+  interpolates between (Levels[i-1], Values[i-1]) and (Levels[i], Values[i])
+  via Mathf.Lerp on the level fraction when `InLevelRange(_level, l_prev,
+  l_cur)` (`_level >= min && _level <= max`); a level outside every segment
+  applies nothing, and single-value curves apply only when
+  `floor(level) == floor(Levels[0])`. The item effect level is the raw
+  `ItemValue.Quality` (EffectManager.GetValue IL_0393-IL_0398, passed as the
+  level into MinEffectController.ModifyValue). The XML comma-split Levels
+  derivation is not in the corpus (parser not dumped); the empirical pattern
+  (armorPreacherOutfit 6-value `.02,.04,.06,.08,.1,.15` = per-quality values;
+  the standard armor sets' 2-value `8,12.3` must span Q1..Q6) pins the
+  zdtd implementation as value[0] = Q1, value[n-1] = Q6, linearly scaled.
+- 
+
 - **2026-08-23:** §7 durability: DegradationMax passive value is the quality-tier
   pair "min,max" (tier 1..6 = quality; MaxUseTimes lerps like
   TraderQualityMinMod/MaxMod; stock items.xml scan: 133 pairs + 15 single
