@@ -77,7 +77,15 @@ def main() -> int:
         return 2
     asm = sys.argv[1]
     meta_path = str(_common.probe_dir() / "npc_check_META.md")
-    _common.run_tool("NetProtocolCensus.exe", asm, meta_path)
+    rc_census, _out, census_err = _common.run_tool("NetProtocolCensus.exe", asm, meta_path)
+    if rc_census != 0:
+        # A crashed census must read as a tool failure: a partial table would
+        # otherwise parse as wrong counts and masquerade as doc drift.
+        print(
+            f"FAIL: NetProtocolCensus.exe exited {rc_census}: {census_err.strip()[:300]}",
+            file=sys.stderr,
+        )
+        return 1
     meta = open(meta_path, encoding="utf-8").read() if os.path.exists(meta_path) else ""
     if not meta:
         print("FAIL: NetProtocolCensus produced no output", file=sys.stderr)

@@ -23,7 +23,11 @@ import os
 import re
 import sys
 
-LINK = re.compile(r"\]\(((?:\.\./)+[^) ]+\.md)\)")
+# The optional #fragment suffix must be matched (and stripped before the
+# existence check): a link like ../repo/docs/x.md#section crosses the repo
+# boundary just the same, and leaving it unmatched would print "OK: all links
+# resolve" while that link was never checked.
+LINK = re.compile(r"\]\(((?:\.\./)+[^) ]+\.md(?:#[^) ]*)?)\)")
 REPOS = [
     "7dtd-server-apm",
     "7dtd-fastconnect",
@@ -59,7 +63,7 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str
             unreadable.append(f"  UNREADABLE {f}: {exc}")
             continue
         for m in LINK.finditer(txt):
-            p = os.path.normpath(os.path.join(base, m.group(1)))
+            p = os.path.normpath(os.path.join(base, m.group(1).split("#", 1)[0]))
             if not p.startswith(os.path.normpath(repo) + os.sep):
                 total += 1
                 if not os.path.exists(p):
