@@ -60,10 +60,17 @@ def inflate_raw_capped(data, cap=MAX_INFLATED):
 
 
 def read_net_string(buf, off):
-    """.NET BinaryReader.ReadString: 7-bit encoded length prefix + UTF-8."""
+    """.NET BinaryReader.ReadString: 7-bit encoded length prefix + UTF-8.
+
+    Raises struct.error (not IndexError) on a prefix that runs past the end:
+    every blob walker catches struct.error to degrade one entry/file to a FAIL
+    line, and parse_chunk_body's caller catches exactly that pair.
+    """
     length = 0
     shift = 0
     while True:
+        if off >= len(buf):
+            raise struct.error("truncated string length prefix")
         b = buf[off]
         off += 1
         length |= (b & 0x7F) << shift
@@ -269,6 +276,11 @@ def check_worldstate_tail(buf, off, checks):
         off += 1
         sp_cnt = struct.unpack_from("<i", buf, off)[0]
         off += 4
+        # sp_cnt is file-controlled: bound the walk by the buffer so a crafted
+        # count cannot spin this loop for minutes before the next unpack fails.
+        step = (2 if sp_ver == 2 else 0) + 12 + 4 + 8
+        if sp_cnt * step > len(buf):
+            raise struct.error(f"spawnList count {sp_cnt} exceeds buffer")
         for _ in range(sp_cnt):
             if sp_ver == 2:
                 off += 2  # legacy u16
@@ -543,13 +555,18 @@ def parse_chunk_body(body, idx, checks):
     if p != n:
         raise ValueError(f"body parse ended at {p}/{n}")
 
-    check_str = (
+    # A FAIL-marked line must not also claim byte-exactness: FAILED_MARKERS
+    # are the verdict contract, so the marker and the claim stay exclusive.
+    body_note = (
+        f"byte-exact body parse ({n} B)"
+        if coords_ok
+        else f"body parse consumed all {n} B [coord mismatch]"
+    )
+    checks.append(
         f"  slot {idx}: chunk ({x},{z}) ticks={ticks} layers={layers}/64 "
         f"biome=({d_biome},{am_biome}) custom={custom} "
-        f"entities=0 te=0 devices={dev_count} culled ok; byte-exact "
-        f"body parse ({n} B)"
+        f"entities=0 te=0 devices={dev_count} culled ok; {body_note}"
     )
-    checks.append(check_str if coords_ok else check_str + " [coord mismatch above]")
     return coords_ok, True, ""
 
 

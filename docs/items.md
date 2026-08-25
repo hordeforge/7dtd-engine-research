@@ -1236,6 +1236,21 @@ player inventory (dropping it on the ground via `ItemDropServer` with
 lifetime 60 when full), and grants `AddLevelExp(material.Experience *
 count, "_xpFromHarvesting", ...)`.
 
+**The HarvestCount (passive 141) count scaling (pinned 2026-08-26, `GameUtils.
+HarvestOnAttack` IL=623 IL_02E5-03EC):** for each resolved drop row the
+count is `(int)(RandomRange(min, max+1) * GetValue(141, heldTool, 1,
+holder, null, dropRowTag) * outputModifier)`. The GetValue base is `1`
+(IL_022D `ldc.r4 1`), so items.xml ops fold as: `base_add X` -> `1+X`,
+`base_set X` -> `X`, `perc_add Y` -> `1+Y` (quality curves evaluate at the
+tool quality, PassiveEffect.ModValue); the drop row's `tag` attribute is
+the FastTags filter (an untagged passive applies to every drop, a tagged
+passive needs a shared tag). `outputModifier` is the XUiM_Recipes
+seed/crop/mining/harvesting static selected by the item/block tags
+(seedMultiTag / cropTag / oreTag, else the harvesting modifier; defaults
+1.0, driven by the sandbox "harvest output" options). The equipped-armor
+HarvestCount rows (farmer/lumberjack/miner/scavenger sets) aggregate over
+worn items through the same GetValue call's entity context.
+
 **zdtd wiring (2026-08-26):** the dedi clone rolls the same table
 server-side at the dig choke instead of trusting the client's
 `HarvestOnAttack` (authority rule): `BlockDef.harvest_drops` parses the
