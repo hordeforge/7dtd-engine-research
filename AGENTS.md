@@ -35,6 +35,7 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 | [`tools/`](tools) | **Tracked** Mono.Cecil dump tooling ([`tools/README.md`](tools/README.md)) |
 | [`tools/data/`](tools/data) | Committed pins (`stock_facts.json`) |
 | [`tools/tests/`](tools/tests) | Pin gate, dump-set structural tests, readiness bench |
+| [`Makefile`](Makefile) | Gate entry points: `verify`, `test`, `test-docs`, `lint`, `post-update`, `census` |
 | `il/` | Regenerable Cecil dumps. **git-ignored** (may contain game IL); never redistribute |
 | [`oss-tools/`](oss-tools) | Third-party server-tool/mod survey notes |
 | [`workspace/`](workspace) | Research artifacts only (no product code) |
@@ -47,7 +48,7 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 1. **Do not redistribute** game assemblies or bulk IL. `il/` dumps are regenerable, git-ignored evidence. Quote at most a few disassembly lines for commentary.
 2. **Tooling is tracked, dumps are not.** RE dumpers in `tools/` (tracked); output in `il/` (git-ignored). Never commit `Assembly-CSharp.dll`.
 3. **Trace every wire/RE claim to an instruction.** Each field maps to a `ldfld`/`Write` pair. Method: [`docs/re-methodology.md`](docs/re-methodology.md).
-4. **Regenerate, do not hand-edit dumps.** After an update, re-run `tools/build.sh` + dumpers and re-check `docs/coverage.md` census via `tools/bin/Census.exe`.
+4. **Regenerate, do not hand-edit dumps.** After a game update run `make post-update` (stock facts + pins + drift), then `make census`; re-dump only changed families into `il/<label>/`. Commit `tools/data/stock_facts.json` and pin-site doc edits together.
 5. **No em dashes; no AI attribution** in shipped text (workspace rule).
 6. **Generic engine only.** RealEarth product status/lessons belong in `7dtd-realearth/docs/`, not here.
 7. Mark status honestly: `verified` / `unverified` / `inferred` / `blocked`. Residuals beyond IL go in [`docs/residuals.md`](docs/residuals.md).
@@ -55,3 +56,5 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 ## Start here
 
 [`docs/INDEX.md`](docs/INDEX.md) -> [`docs/coverage.md`](docs/coverage.md) (what is mapped) -> family narrative -> `il/` dump. For new RE: [`docs/re-methodology.md`](docs/re-methodology.md) + [`tools/`](tools).
+
+Gates: `make test-docs` (no DLL needed, same as CI), `make lint`; with the live game also `make test`, `make verify`.
