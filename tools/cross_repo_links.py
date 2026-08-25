@@ -72,14 +72,17 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(
+        description="Resolve every cross-repo relative .md link from the sibling repos."
+    )
     ap.add_argument(
         "--root",
         default=os.path.normpath(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
         ),
+        help="workspace root holding the sibling repos (default: the parent of this repo)",
     )
-    ap.add_argument("--repo")
+    ap.add_argument("--repo", help="limit the scan to one repo name")
     args = ap.parse_args()
     root = args.root
     grand = 0

@@ -142,14 +142,17 @@ def scan(root: str, local: set, docs: set) -> tuple[int, list[str], int]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(
+        description="Verify sibling-repo research citations resolve against this corpus's docs/."
+    )
     ap.add_argument(
         "--root",
         default=os.path.normpath(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
         ),
+        help="workspace root holding the sibling repos (default: the parent of this repo)",
     )
-    ap.add_argument("--repo")
+    ap.add_argument("--repo", help="limit the scan to one repo name")
     args = ap.parse_args()
     grand = 0
     bad_total = 0

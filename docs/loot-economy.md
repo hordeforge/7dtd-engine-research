@@ -880,6 +880,17 @@ player's level, multiplied by `(1 + mod)`.
      `template.prob * sandbox` (`_ignoreLootProb`) or
      `EffectManager(passive **79**, template.prob, item tags) * sandbox`.
    - else entry tags: raw `template.prob` or passive **79** on entry tags.
+
+**Passive 79 (LootProb) is data-inert in V3.1.0 b14 (audited 2026-08-26).**
+The only stock `LootProb` row is on `armorFarmerHelmet`
+(`perc_add` quality curve 2..20, `tags="seedSkill"`); the GetValue context
+tags are the looted item's class tags (or the loot entry's tags), and a
+full-file scan finds no stock item `Tags` property and no loot.xml entry tag
+containing `seedSkill` - so the passive can never intersect the roll's tag
+context, and the probability is always the template/entry base. A modded
+items.xml/loot.xml that adds a matching tag would activate it (the roll
+reads the receiving player's equipped items through the entity context);
+the stock game never exercises that path.
 3. No template: same item/tags branches using **entry** `prob` (not template).
 
 ### 8.2 `SpawnLootItemsFromList` (IL=270)

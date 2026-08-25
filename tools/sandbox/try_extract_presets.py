@@ -16,16 +16,27 @@ tools/sandbox/requirements.txt):
     python3 tools/sandbox/try_extract_presets.py [game_dir]
 """
 
+import argparse
 import os
-import sys
-
-import UnityPy
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser(
+        description="Scan the shipped Unity bundles for the sandbox_presets TextAsset "
+        "(re-scan helper for future game updates)."
+    )
+    ap.add_argument(
+        "game_dir",
+        nargs="?",
+        help="game install root (default: the Steam dedicated-server dir)",
+    )
+    args = ap.parse_args()
+
+    import UnityPy
+
     root = (
-        sys.argv[1]
-        if len(sys.argv) > 1
+        args.game_dir
+        if args.game_dir
         else os.path.expanduser(
             "~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
         )

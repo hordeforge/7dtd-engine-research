@@ -65,9 +65,23 @@ def decode(code: str, opts: dict, sets: dict) -> dict:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("xml", nargs="?", type=Path, default=HERE / "sandbox_presets.xml")
-    ap.add_argument("tables", nargs="?", type=Path, default=HERE / "sandbox_tables.json")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument(
+        "xml",
+        nargs="?",
+        type=Path,
+        default=HERE / "sandbox_presets.xml",
+        help="sandbox_presets TextAsset XML (default: sandbox/sandbox_presets.xml next to this script)",
+    )
+    ap.add_argument(
+        "tables",
+        nargs="?",
+        type=Path,
+        default=HERE / "sandbox_tables.json",
+        help="option/value-set tables (default: sandbox/sandbox_tables.json next to this script)",
+    )
     args = ap.parse_args()
     with args.tables.open(encoding="utf-8") as fh:
         tables = json.load(fh)

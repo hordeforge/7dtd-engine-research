@@ -31,9 +31,21 @@ else:
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("bundle", type=Path)
-    ap.add_argument("--out-dir", type=Path, default=Path(__file__).resolve().parent / "atlas")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument(
+        "bundle",
+        type=Path,
+        help="the meshdescriptions_assets_all.bundle from the install's "
+        "Data/Addressables/Standalone/",
+    )
+    ap.add_argument(
+        "--out-dir",
+        type=Path,
+        default=Path(__file__).resolve().parent / "atlas",
+        help="directory for the extracted ta_*.xml files (default: tools/sandbox/atlas)",
+    )
     args = ap.parse_args()
     if IMPORT_ERROR:
         ap.error(f"missing dependency {IMPORT_ERROR.name!r}; install sandbox/requirements.txt")

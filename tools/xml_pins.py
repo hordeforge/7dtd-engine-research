@@ -95,8 +95,14 @@ def section_diffs(live: dict, committed: dict) -> list:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--game-dir", default=DEFAULT_GAME)
+    ap = argparse.ArgumentParser(
+        description="Machine-checked XML data pins: key values from the operator's Data/Config."
+    )
+    ap.add_argument(
+        "--game-dir",
+        default=DEFAULT_GAME,
+        help="dedicated-server install root (default: the Steam path)",
+    )
     ap.add_argument("--check", action="store_true", help="verify committed pins vs the install")
     ap.add_argument(
         "--pins", default=DEFAULT_PINS, help="pins JSON path (default: tools/data/xml_pins.json)"

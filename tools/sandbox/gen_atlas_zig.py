@@ -10,10 +10,10 @@ hand-edit the output.
 Usage: python3 gen_atlas_zig.py <out.zig>
 """
 
+import argparse
 import glob
 import os
 import re
-import sys
 
 COLOR_RE = re.compile(r'<uv\s+id="(\d+)"[^>]*color="([0-9.eE+-]+),([0-9.eE+-]+),([0-9.eE+-]+)"')
 
@@ -27,8 +27,16 @@ def to_color5(r, g, b):
 
 
 def main():
+    ap = argparse.ArgumentParser(
+        description="Generate src/assets/map_atlas.zig in zdtd from the extracted atlas XMLs "
+        "(tools/sandbox/atlas/ta_*.xml)."
+    )
+    ap.add_argument(
+        "out", help="path of the .zig table to write (e.g. ../zdtd-server/src/assets/map_atlas.zig)"
+    )
+    args = ap.parse_args()
     here = os.path.dirname(__file__)
-    out_path = sys.argv[1]
+    out_path = args.out
     atlases = []
     for xml in sorted(glob.glob(os.path.join(here, "atlas", "ta_*.xml"))):
         name = os.path.basename(xml)[3:-4]  # strip ta_ and .xml

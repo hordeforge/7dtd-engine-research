@@ -10,9 +10,9 @@ sandbox code without re-extraction; the JSON here is the source of truth.
 Usage: python3 gen_zig_tables.py sandbox_tables.json ../zdtd-server/src/assets/sandbox_data.zig
 """
 
+import argparse
 import json
 import struct
-import sys
 from json import dumps as zstr
 
 
@@ -122,4 +122,13 @@ def emit(json_path: str, out_path: str) -> None:
 
 
 if __name__ == "__main__":
-    emit(sys.argv[1], sys.argv[2])
+    ap = argparse.ArgumentParser(
+        description="Generate src/assets/sandbox_data.zig in zdtd from sandbox_tables.json."
+    )
+    ap.add_argument("tables", help="sandbox_tables.json extracted by extract_sandbox_tables.py")
+    ap.add_argument(
+        "out",
+        help="path of the .zig table to write (e.g. ../zdtd-server/src/assets/sandbox_data.zig)",
+    )
+    args = ap.parse_args()
+    emit(args.tables, args.out)

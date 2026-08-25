@@ -133,6 +133,11 @@ def main():
         rc, _ = run("--shipped", os.path.join(tmp, "no-such-world"))
         if rc != 2:
             bad.append(f"--shipped nonexistent path: expected exit 2, got {rc}")
+        rc, out = run("--bogus")
+        if rc != 2:
+            bad.append(f"unknown flag: expected exit 2, got {rc}")
+        if "PASS" in out or "FAIL:" in out:
+            bad.append(f"unknown flag: ran a check report instead of usage-erroring:\n{out}")
 
     if bad:
         print("FAIL: save_roundtrip robustness")

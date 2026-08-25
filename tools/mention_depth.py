@@ -18,6 +18,7 @@ Usage: python3 tools/mention_depth.py [docsDir]
 
 from __future__ import annotations
 
+import argparse
 import os
 import re
 import sys
@@ -45,10 +46,19 @@ def narrative_docs(docs_dir: str):
 
 
 def main(argv: list[str]) -> int:
-    docs_dir = argv[1] if len(argv) > 1 else DEFAULT_DOCS
+    ap = argparse.ArgumentParser(
+        description="Mention-depth histogram over the narrative docs (DLL-free corpus view)."
+    )
+    ap.add_argument(
+        "docs_dir",
+        nargs="?",
+        default=DEFAULT_DOCS,
+        help="docs directory to scan (default: docs)",
+    )
+    args = ap.parse_args(argv)
     counts: dict[str, int] = {}
     files = 0
-    for path in narrative_docs(docs_dir):
+    for path in narrative_docs(args.docs_dir):
         files += 1
         with open(path, encoding="utf-8") as fh:
             for m in TOKEN.finditer(fh.read()):
@@ -79,4 +89,4 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    sys.exit(main(sys.argv[1:]))

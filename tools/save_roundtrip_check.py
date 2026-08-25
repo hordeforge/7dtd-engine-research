@@ -21,9 +21,10 @@ Usage: python3 tools/save_roundtrip_check.py [save_dir]
   With no argument, auto-discovers the most recent probe save under
   ~/.cache/7dtd-loadgen-*/Saves/*/*/ that contains main.ttw + Region/.
   --shipped checks just a main.ttw (e.g. the TFP-shipped Navezgane world).
-  Exit code 0 = all checks passed; 1 = any check failed.
+  Exit code 0 = all checks passed; 1 = any check failed; 2 = usage error.
 """
 
+import argparse
 import glob
 import os
 import struct
@@ -807,18 +808,38 @@ def run_file_check(parse, path, checks):
         checks.append(f"{os.path.basename(path)}: parse error: {exc}")
 
 
+def parse_args(argv):
+    """CLI contract: -h/--help free, usage errors exit 2 via argparse.
+
+    The parsers above take paths, not options; an argument that starts with
+    '-' is far more likely a mistyped flag than a save dir, so argparse must
+    reject it instead of running a bogus report against a file named --help.
+    """
+    ap = argparse.ArgumentParser(
+        description="Verify a real stock save against the codecs documented in docs/save-region.md.",
+        epilog="exit 0 = all checks passed; 1 = any check failed; 2 = usage error",
+    )
+    ap.add_argument(
+        "save_dir",
+        nargs="?",
+        default=None,
+        help="save directory to check (default: newest probe save under "
+        "~/.cache/7dtd-loadgen-*/Saves/*/*/ containing main.ttw + Region/)",
+    )
+    ap.add_argument(
+        "--shipped",
+        metavar="WORLD",
+        default=None,
+        help="check just a main.ttw (a world dir or a main.ttw path), e.g. the "
+        "TFP-shipped Navezgane world",
+    )
+    return ap.parse_args(argv)
+
+
 def main():
-    argv = sys.argv[1:]
-    shipped = None
-    if argv and argv[0] == "--shipped":
-        if len(argv) < 2:
-            print(
-                "usage: save_roundtrip_check.py --shipped <worlddir-or-main.ttw>", file=sys.stderr
-            )
-            return 2
-        shipped = argv[1]
-        argv = argv[2:]
-    save_dir = argv[0] if argv else discover_save_dir()
+    args = parse_args(sys.argv[1:])
+    shipped = args.shipped
+    save_dir = args.save_dir if not shipped else None
     checks = []
     if shipped:
         ttw = shipped if os.path.isfile(shipped) else os.path.join(shipped, "main.ttw")
@@ -829,7 +850,10 @@ def main():
         run_file_check(check_main_ttw, ttw, checks)
         return report(checks)
     if not save_dir:
-        print("No save dir given and none found under ~/.cache/7dtd-loadgen-*/Saves/*/*/")
+        print(
+            "error: no save dir given and none found under ~/.cache/7dtd-loadgen-*/Saves/*/*/",
+            file=sys.stderr,
+        )
         return 1
     print(f"Round-trip checking save: {save_dir}\n")
 

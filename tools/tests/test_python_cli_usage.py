@@ -8,9 +8,15 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parents[1]
 SCRIPTS = (
     "shader_blob_dump.py",
+    "save_roundtrip_check.py",
+    "facts.py",
+    "mention_depth.py",
     "sandbox/extract_mesh_atlas.py",
     "sandbox/extract_sandbox_tables.py",
     "sandbox/extract_preset_codes.py",
+    "sandbox/gen_atlas_zig.py",
+    "sandbox/gen_zig_tables.py",
+    "sandbox/try_extract_presets.py",
 )
 
 

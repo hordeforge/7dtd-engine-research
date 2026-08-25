@@ -299,9 +299,11 @@ def extract(pe):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("dll")
-    ap.add_argument("--out")
+    ap = argparse.ArgumentParser(
+        description="Extract SandboxOptions value sets + option table from Assembly-CSharp.dll IL."
+    )
+    ap.add_argument("dll", help="path to the stock Assembly-CSharp.dll")
+    ap.add_argument("--out", help="write the JSON here instead of stdout (atomic replace)")
     args = ap.parse_args()
     if IMPORT_ERROR:
         ap.error(f"missing dependency {IMPORT_ERROR.name!r}; install sandbox/requirements.txt")
