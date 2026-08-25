@@ -536,6 +536,16 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-25:** perk-tag-gated item passives: items.xml rows carrying a
+  `tags="perkX"` attribute (e.g. meleeWpnSpearT0StoneSpear TargetArmor -.3
+  tagged perkJavelinMaster) apply only when the wearer/attacker owns that
+  perk - the tag names the gating perk (zdtd checks the attacker's perk level
+  at the choke). BlockDamage on tools/perks is client-computed locally (the
+  client's ItemActionAttack.Hit includes its own perks and tool passives and
+  claims the resulting strength/block damage), so a server-side re-scaling
+  would double-apply - the same trust shape as the difficulty-modifier
+  finding on NetPackageDamageEntity.ProcessPackage.
+
 - **2026-08-25:** difficultyModifier scope pinned: the only call is inside
   ItemActionAttack.Hit (IL_0A4A, on the attack strength before the damage
   apply, ItemActionAttack.il.txt:1819); explosions and falling-block damage do
