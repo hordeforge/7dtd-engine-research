@@ -55,26 +55,27 @@ def parse_subprogram(buf, pos):
     ShaderSubProgram.cs and UnityPy ShaderConverter.py for 2021.2+, where the
     local-keyword array is gone.
     """
-    off = pos + 24
-    keyword_count = u32(buf, off)
-    off += 4
-    keywords = []
-    for _ in range(keyword_count):
-        length = u32(buf, off)
-        keywords.append(bytes(buf[off + 4 : off + 4 + length]))
-        off = (off + 4 + length + 3) & ~3
-    size = u32(buf, off)
+    r = _Reader(buf)
+    r.pos = pos
+    version = r.u32()
+    program_type = r.u32()
+    alu = r.u32()
+    tex = r.u32()
+    flow = r.u32()
+    temp = r.u32()
+    keywords = [r.string() for _ in range(r.u32())]
+    size = r.u32()
     return {
-        "version": u32(buf, pos),
-        "program_type": u32(buf, pos + 4),
-        "alu": u32(buf, pos + 8),
-        "tex": u32(buf, pos + 12),
-        "flow": u32(buf, pos + 16),
-        "temp": u32(buf, pos + 20),
+        "version": version,
+        "program_type": program_type,
+        "alu": alu,
+        "tex": tex,
+        "flow": flow,
+        "temp": temp,
         "keywords": keywords,
         "size": size,
-        "data": bytes(buf[off + 4 : off + 4 + size]),
-    }, off + 4
+        "data": bytes(buf[r.pos : r.pos + size]),
+    }, r.pos
 
 
 class _Reader:

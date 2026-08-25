@@ -245,6 +245,22 @@ The 45 `Objective*` rows resolve to a handful of families:
   completion `ToolTipEvent` in `CloseQuest` (this is why `CanTurnInQuest` checks
   inventory space first). `RewardChoicesCount` > 0 and `isChosenReward` implement
   pick-one-of-N reward choices.
+
+**The reward choice has no server wire field (pinned 2026-08-26, fresh DLL
+dumps).** `CloseQuest(finalState, rewardChoice)` only grants a
+`isChosenReward` reward when the `rewardChoice` list contains it, but every
+caller passes `null`: the objective-completion paths
+(`BaseObjective.ChangeStatus`, `Objective*.Refresh`) and the dialog turn-in
+(`DialogActionCompleteQuest.PerformAction` IL=37, whose `Value` string is
+parsed with `Convert.ToInt32` and immediately discarded) all call
+`RefreshQuestCompletion(type, null, ...)`. `NetPackageQuestEvent` (17 event
+types: rally markers, POI locks, sleepers, shared-with) carries no
+reward-choice field. So the dedi never receives the player's pick: the
+chosen reward is granted client-side and rides the player's inventory sync,
+the same trust model as the client-rolled harvest loot
+(`GameUtils.HarvestOnAttack`) and the stock `NetPackagePlayerInventory`
+snapshot. A server implementing the payout with `rewardChoice = null`
+reproduces stock exactly; there is no missing C2S field to wire.
 - `AfterCompleteNotification` rewards fire after the completion popup.
 
 Concrete rewards: `RewardExp`, `RewardItem`, `RewardLootItem`, `RewardTreasureItem`,

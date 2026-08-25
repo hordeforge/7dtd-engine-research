@@ -680,15 +680,15 @@ def check_region_v2(path, checks):
     )
     stamps = [s[3] for s in slots]
     checks.append(f"  timestamp {min(stamps)}..{max(stamps)} (WorldTimeToTotalMinutes)")
-    if slots[0][1] * 4096 + 4 > len(data):
-        checks.append(
-            f"  first slot payload start {slots[0][1] * 4096} exceeds file bounds ({len(data)} B)"
-        )
-        return
 
     ok = 0
     for idx, soff, _scnt, _ in slots:
         pay = soff * 4096
+        # Per-slot bounds first: one slot pointing past EOF must cost only its
+        # own check line, not struct.error-abort the remaining slots' checks.
+        if pay + 24 > len(data):
+            checks.append(f"  slot {idx}: payload start {pay} exceeds file bounds ({len(data)} B)")
+            continue
         length = struct.unpack_from("<I", data, pay)[0]
         if length + 16 > len(data) - pay:
             checks.append(f"  slot {idx}: length {length} exceeds file bounds")

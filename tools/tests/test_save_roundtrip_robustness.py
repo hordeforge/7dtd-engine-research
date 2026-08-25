@@ -99,8 +99,13 @@ def main():
         corrupt_region_dir(save)
         rc, out = run(save)
         assert_no_traceback(rc, out, "corrupt region dir", bad)
-        if "parse error" not in out or "\nFAIL:" not in out:
-            bad.append(f"corrupt region dir: no parse-error FAIL verdict:\n{out}")
+        # The past-EOF slot costs only its own check line; slot 0 is still
+        # checked (its zero preamble yields a preamble FAIL) rather than the
+        # whole file collapsing into one parse-error line.
+        if "exceeds file bounds" not in out or "\nFAIL:" not in out:
+            bad.append(f"corrupt region dir: no bounds FAIL verdict:\n{out}")
+        if "slot 0: payload preamble" not in out:
+            bad.append(f"corrupt region dir: in-bounds slot 0 checks skipped:\n{out}")
         if "main.ttw: MISSING" not in out:
             bad.append("corrupt region dir: missing-main.ttw check not reported")
 
