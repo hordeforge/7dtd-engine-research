@@ -604,14 +604,24 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
   earlier "152 options / 63 sets / Max=152" census (undercount) and the
   Adventurer code decode (last group `BNC` is option 39 ZombieFeralSense, not
   13). Added the complete value-set table (2.1) and per-option defaults.
-- **2026-08-25:** IncomingDamage/EntityIncomingDamage per-difficulty ladder not
-  extracted: SetupOptions builds the six difficulty presets via indexed fills
-  (not literal codes), so a GameDifficulty 0..5 ladder needs a targeted Cecil
-  read. Pinned so far: option 17 (IncomingDamage) = 0.75 at Adventurer via the
-  shipped serverconfig code (section 3); option 42 (EntityIncomingDamage)
-  default 1.0; both statics default to 1.0 in ItemActionAttack .cctor
-  (ItemActionAttack.il.txt:3035) and are set per-world from options 17/42 in
-  UpdateInGameValuesWithSandboxOptions (SandboxOptionManager.il.txt IL_040C-IL_041F).
+- **2026-08-25:** IncomingDamage/EntityIncomingDamage per-difficulty ladder
+  extraction BLOCKED (asset access): the six difficulty presets come from a
+  Unity Resources TextAsset - LoadInternalPresets (IL=43) runs
+  `Resources.Load("Data/Sandbox/sandbox_presets")`, parses the text as XML and
+  feeds `<preset name=... code=.../>` elements to LoadPresetFromXml (IL=154,
+  code via LoadOptionsFromCode, section 3). The asset is not extractable from
+  either shipped install: resources.resource returns 0 objects under
+  UnityPy 1.25.3 in both the dedicated server and the full client, and no
+  sandbox TextAsset exists in data.unity3d (8255 objects, zero TextAssets),
+  Data/Bundles, the Addressables bundles, or StreamingAssets/aa (catalog
+  empty on the dedi). Pinned instead: the two value sets (section 2.1,
+  DamageValues / DamageValuesNoNone for options 17/42), option 17
+  (IncomingDamage) = 0.75 at Adventurer via the shipped serverconfig code
+  (section 3), option 42 (EntityIncomingDamage) default 1.0, both statics
+  default 1.0 in ItemActionAttack .cctor (ItemActionAttack.il.txt:3035), set
+  per-world from options 17/42 in UpdateInGameValuesWithSandboxOptions
+  (SandboxOptionManager.il.txt IL_040C-IL_041F). A future extraction needs the
+  Unity bundle containing the presets (or an in-game dump of the preset codes).
 - **2026-08-11:** GamePrefs/GameStats IL re-verified: SetObject IL=5, SetObjectInternal IL=38, notifyListeners IL=24, GetObject IL=20, GameStats.GetInt/GetFloat/GetBool IL=34, GetString IL=18, SetObject IL=12, initPropertyDecl IL=702, Write IL=60, SetupSandboxReferences IL=65, initDefault IL=29, GetStatType IL=31, GameStatsBridge.Init IL=49 (exact).
 - **2026-08-10:** GameStats IL re-verified: initPropertyDecl IL=702, Write IL=60, SetupSandboxReferences IL=65, initDefault IL=29 (exact).
 - **2026-08-10:** GamePrefs/GameStats IL sizes re-verified: SetObjectInternal IL=38, GetObject IL=20, GameStats.GetInt IL=34 (exact).
