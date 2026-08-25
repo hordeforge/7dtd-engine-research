@@ -23,10 +23,12 @@ for arg in "$@"; do
     --check-only)
       [[ "$MODE" == "all" ]] || { echo "post-update: choose one mode" >&2; exit 2; }
       MODE="check"
+      DO_DRIFT=0
       ;;
     --extract-only)
       [[ "$MODE" == "all" ]] || { echo "post-update: choose one mode" >&2; exit 2; }
       MODE="extract"
+      DO_DRIFT=0
       ;;
     -h|--help)
       sed -n '2,14p' "$0"

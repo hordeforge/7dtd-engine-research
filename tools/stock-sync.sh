@@ -51,13 +51,19 @@ extract() {
     mcs -nologo -r:"$BIN/Mono.Cecil.dll" "$HERE/src/StockFacts.cs" -out:"$BIN/StockFacts.exe"
   fi
   mkdir -p "$DATA"
+  tmpdir="$(mktemp -d "$DATA/.stock-sync.XXXXXX")"
+  trap 'rm -rf "$tmpdir"' EXIT
   echo "stock-sync: extracting from $ASM"
-  MONO_PATH="$BIN" mono "$BIN/StockFacts.exe" "$ASM" "$FACTS"
+  MONO_PATH="$BIN" mono "$BIN/StockFacts.exe" "$ASM" "$tmpdir/stock_facts.json"
   # XML data pins (zombie HP ladder etc.) from the same install's Data/Config.
   GAME_ROOT="$(dirname "$(dirname "$(dirname "$ASM")")")"  # Managed -> 7DaysToDieServer_Data -> server root
-  python3 "$HERE/xml_pins.py" --game-dir "$GAME_ROOT" >/dev/null && \
-    echo "stock-sync: wrote $HERE/data/xml_pins.json"
+  python3 "$HERE/xml_pins.py" --game-dir "$GAME_ROOT" --pins "$tmpdir/xml_pins.json" >/dev/null
+  mv "$tmpdir/stock_facts.json" "$FACTS"
+  mv "$tmpdir/xml_pins.json" "$DATA/xml_pins.json"
+  rmdir "$tmpdir"
+  trap - EXIT
   echo "stock-sync: wrote $FACTS"
+  echo "stock-sync: wrote $DATA/xml_pins.json"
 }
 
 check() {

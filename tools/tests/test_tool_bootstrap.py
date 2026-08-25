@@ -29,6 +29,11 @@ def main() -> None:
             subprocess.run([path, "--check-only", "--extract-only"], capture_output=True).returncode
             == 2
         )
+    post_update = (ROOT / "tools" / "post-update.sh").read_text(encoding="utf-8")
+    assert post_update.count("DO_DRIFT=0") == 3
+    stock_sync = (ROOT / "tools" / "stock-sync.sh").read_text(encoding="utf-8")
+    assert 'mktemp -d "$DATA/.stock-sync.' in stock_sync
+    assert '--pins "$tmpdir/xml_pins.json"' in stock_sync
     fetch = ROOT / "tools" / "parity" / "fetch_version.sh"
     fetch_text = fetch.read_text(encoding="utf-8")
     assert "curl " not in fetch_text
