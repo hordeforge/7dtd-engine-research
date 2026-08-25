@@ -22,13 +22,14 @@ tools/
   build.sh    compiles src/ (and best-effort legacy/) into bin/
 ```
 
-Standalone entry points (no build step; each Python script is wired to a make
-target):
+Standalone entry points (no build step; make targets noted inline where wired):
 
 | Script | Purpose |
 |---|---|
 | `facts.py` | Quick view of the machine-checked stock pins (`make facts`). |
-| `census-pct.py` | Percentage view of the coverage census (`make census`). |
+| `census-pct.py [asm] [docsDir] [--json] [--history FILE]` | Percentage view of the coverage census: narrated / catalogued / classified / unaccounted fractions of reached game types, plus the whole-assembly reached-type/method fractions. `--json` emits a machine-readable object; `--history FILE` appends a dated row to the census-history CSV. Runs `Coverage.exe` + `Census.exe` live (`make census`; Python 3, no build step). |
+| `mention_depth.py [docsDir]` | DLL-free mention-depth histogram over the narrative docs: how many times each type-shaped backticked identifier occurs (exactly-1 / 2-4 / 5-19 / 20+). The depth behind any "narrated" fraction; published in [`../docs/re-methodology.md`](../docs/re-methodology.md) §1. `Coverage.exe` emits the reached-type version into the generated report and stamps that report with the studied build's version consts. |
+| `shader_blob_dump.py <bundle> [--shader NAME] [--verbose]` | Decodes Shader (class 48) sub-program blobs from a stock UnityFS bundle and re-checks the documented layout: LZ4 per-platform blobs, the 12-byte record table, the code-blob record, and the 38-byte DX11 program-data header whose SRV/constant-buffer/sampler bytes are cross-checked against the DXBC `SHDR`/`SHEX` declaration opcodes. Exits non-zero on any disagreement; no assembly, no mono; exits 77 if UnityPy is absent. Backs [`../docs/shader-subprogram-blob.md`](../docs/shader-subprogram-blob.md). Needs UnityPy from the pinned sandbox requirements (`uv pip install -r sandbox/requirements.txt`). |
 | `save_roundtrip_check.py` | Verify real saves against the documented codecs (`make save-roundtrip[-all]`). |
 | `cross_repo_links.py` | Cross-repo markdown link sweep (`make cross-links`). |
 | `zdtd_cite_check.py` | Sibling-repo research citation check (`make sibling-cites`). |
@@ -99,10 +100,10 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 | `EnumList.exe <asm> <outFile>` | Emits `Enum.Member=value` for every enum member; feeds the drift-check enum diff. |
 | `MethodList.exe <asm> <outFile>` | Emits `Type::Method(params)` for every method-with-body; feeds the drift-check method-surface diff. |
 | `ListAllTypes.exe <asm> <outFile>` | One-off audit helper: every type FullName sorted to a file (used to audit DumpAll completeness). |
-| `shader_blob_dump.py <bundle> [--shader NAME] [--verbose]` | Decodes Shader (class 48) sub-program blobs from a stock UnityFS bundle and re-checks the documented layout: LZ4 per-platform blobs, the 12-byte record table, the code-blob record, and the 38-byte DX11 program-data header whose SRV/constant-buffer/sampler bytes are cross-checked against the DXBC `SHDR`/`SHEX` declaration opcodes. Exits non-zero on any disagreement. Backs [`../docs/shader-subprogram-blob.md`](../docs/shader-subprogram-blob.md). Needs UnityPy from the pinned sandbox requirements
-(`uv pip install -r sandbox/requirements.txt`); no assembly, no mono, exits 77 if UnityPy is absent. |
-| `census-pct.py [asm] [docsDir] [--json] [--history FILE]` | Percentage view of the coverage census: narrated / catalogued / classified / unaccounted fractions of reached game types, plus the whole-assembly reached-type/method fractions. `--json` emits a machine-readable object; `--history FILE` appends a dated row to the census-history CSV. Lives in `tools/`, runs `Coverage.exe` + `Census.exe` live (Python 3, no build step). |
-| `mention_depth.py [docsDir]` | DLL-free mention-depth histogram over the narrative docs: how many times each type-shaped backticked identifier occurs (exactly-1 / 2-4 / 5-19 / 20+). The depth behind any "narrated" fraction; published in `docs/re-methodology.md` §1. `Coverage.exe` emits the reached-type version into the generated report and stamps that report with the studied build's version consts. |
+
+The no-build-step Python helpers (`census-pct.py`, `mention_depth.py`,
+`shader_blob_dump.py`) are not `src/` tools; they are listed in the standalone
+entry-points table at the top of this file.
 
 `src/IlFmt.cs` is a shared IL formatter compiled into each (`IL_XXXX: opcode operand`,
 fully-qualified operands, `IL_offset` branch targets: the corpus dump format).
