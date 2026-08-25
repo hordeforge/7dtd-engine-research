@@ -38,11 +38,7 @@ class Coverage {
     "LiteNetLib", "Antlr", "NCalc"
   };
   // Namespace of the outermost declaring type (nested types report an empty own ns).
-  static string NsOf(TypeDefinition t) {
-    var cur = t;
-    while (cur.DeclaringType != null) cur = cur.DeclaringType;
-    return cur.Namespace;
-  }
+  static string NsOf(TypeDefinition t) => AsmWalk.Outermost(t).Namespace;
   // Display label for the outermost namespace: "<global>" when there is none.
   static string NsLabel(TypeDefinition t) {
     string ns = NsOf(t);

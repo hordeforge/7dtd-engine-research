@@ -15,7 +15,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+REPO = str(_common.REPO)
 DOC = os.path.join(REPO, "docs", "inventories", "entityclass-props.md")
 EXPECTED_IL = 394
 EXPECTED_PAIRS = 167

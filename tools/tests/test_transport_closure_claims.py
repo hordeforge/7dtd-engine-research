@@ -14,7 +14,8 @@ Usage: python3 tools/tests/test_transport_closure_claims.py
 import os
 import re
 
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = os.path.dirname(TOOLS)
 DOCS = os.path.join(REPO, "docs")
 
 # (pattern, reason) - a match means the doc contradicts a closed claim.
@@ -68,6 +69,10 @@ def self_test_patterns() -> None:
 
 def main():
     self_test_patterns()
+    # os.walk on a missing directory yields nothing and the gate would pass
+    # having scanned zero docs; fail loudly instead.
+    if not os.path.isdir(DOCS):
+        raise AssertionError(f"docs tree not found: {DOCS}")
     bad = []
     for root, _dirs, files in os.walk(DOCS):
         for name in files:

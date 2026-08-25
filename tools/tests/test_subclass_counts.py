@@ -33,7 +33,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+REPO = str(_common.REPO)
 INV = os.path.join(REPO, "docs", "inventories")
 
 # (inventory, mode, target, expected, extra, self_state)

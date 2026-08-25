@@ -16,7 +16,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+REPO = str(_common.REPO)
 DOCS = os.path.join(REPO, "docs")
 
 # family -> (doc, { const name: expected value })  (values from the V3.1.0 DLL)
