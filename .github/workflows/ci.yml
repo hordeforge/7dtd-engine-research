@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
       - name: install pinned analyzers
         run: |
-          pipx install ruff==0.16.4
+          uv tool install ruff==0.16.4
           # Pinned so local `make lint` and CI agree (same policy as ruff);
           # ubuntu-latest's apt shellcheck trails the current release.
           # Checksum-gated like the Mono.Cecil pin: a swapped release artifact

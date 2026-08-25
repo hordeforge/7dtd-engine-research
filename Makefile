@@ -64,7 +64,7 @@ regen-check:
 # CI pin (single source of truth: .github/workflows/ci.yml), because format
 # and lint rules drift between releases.
 lint:
-	@expected=$$(sed -n 's/^ *pipx install ruff==\([0-9][0-9.]*\)/\1/p' .github/workflows/ci.yml | head -1); \
+	@expected=$$(sed -n 's/^ *uv tool install ruff==\([0-9][0-9.]*\)/\1/p' .github/workflows/ci.yml | head -1); \
 	actual=$$(ruff --version | awk '{print $$2}'); \
 	if [ -z "$$expected" ]; then \
 	  echo "lint: cannot read the ruff pin from .github/workflows/ci.yml" >&2; exit 2; \
