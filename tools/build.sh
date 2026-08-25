@@ -3,6 +3,14 @@
 # Output: tools/bin/*.exe (run with mono). Requires: mono (mcs), Mono.Cecil.dll.
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+skip_legacy=0
+for arg in "$@"; do
+  case "$arg" in
+    --skip-legacy) skip_legacy=1 ;;
+    -h|--help) sed -n '2,3p' "$0"; exit 0 ;;
+    *) echo "build: unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
 cd "$here"
 mkdir -p bin
 
@@ -93,7 +101,7 @@ done
 # to its own exe (class names collide across files, so never combined). Best-effort:
 # some legacy sources predate this mcs and may not rebuild; failures are reported,
 # not fatal. Pass --skip-legacy to skip this stage.
-if [[ "${1:-}" != "--skip-legacy" && -d legacy ]]; then
+if [[ "$skip_legacy" -eq 0 && -d legacy ]]; then
   mkdir -p bin/legacy
   ok=0; fail=0; failed=""
   for f in legacy/*.cs; do

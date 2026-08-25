@@ -1,15 +1,19 @@
-"""Attempt to extract the sandbox_presets TextAsset (the six difficulty
-presets, LoadInternalPresets IL=43 Resources.Load("Data/Sandbox/
-sandbox_presets")) from the shipped Unity bundles.
+"""Scan the shipped Unity bundles for the sandbox_presets TextAsset (the six
+difficulty presets, LoadInternalPresets IL=43 Resources.Load("Data/Sandbox/
+sandbox_presets")). Walks every .bundle/.unity3d/.resource under the game dir
+(dedicated layout 7DaysToDieServer_Data, client fallback 7DaysToDie_Data) and
+prints any TextAsset whose name mentions sandbox/preset.
 
-Status 2026-08-25: BLOCKED - no sandbox TextAsset found in either install.
-resources.resource returns 0 objects under UnityPy 1.25.3; data.unity3d
-(8255 objects) holds no TextAsset; Bundles/Addressables/StreamingAssets
-hold none either (dedicated catalog is empty). Run with a UnityPy venv:
-    python3 -m venv /tmp/uv && /tmp/uv/bin/pip install UnityPy
-    /tmp/uv/bin/python tools/sandbox/try_extract_presets.py [game_dir]
-Re-run after a game update or with a different bundle extractor; the preset
-codes (section 3 codec) would fill the GameDifficulty 0..5 ladder directly.
+Historical note 2026-08-25: the dedicated install held no such TextAsset
+(resources.resource parsed to 0 objects under UnityPy 1.25.3; the dedicated
+catalog is empty). The asset was recovered from the CLIENT install's
+data.unity3d and is committed as sandbox/sandbox_presets.xml; decode it with
+extract_preset_codes.py. This probe stays as a re-scan helper for future game
+updates.
+
+Run with the repo's hash-pinned UnityPy (uv pip install -r
+tools/sandbox/requirements.txt):
+    python3 tools/sandbox/try_extract_presets.py [game_dir]
 """
 
 import os

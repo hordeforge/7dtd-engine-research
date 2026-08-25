@@ -3,12 +3,11 @@
 
 The six GameDifficulty presets (Scavenger..Insane) live in the bundled
 TextAsset `Data/Sandbox/sandbox_presets` (SandboxOptionManager.
-LoadInternalPresets IL=43 -> Resources.Load). The dedi ships no copy and
-the bundles were previously unparseable; the TextAsset is present in the
-CLIENT install's data.unity3d and extracts with UnityPy:
+LoadInternalPresets IL=43 -> Resources.Load). The dedi ships no copy;
+the TextAsset is present in the CLIENT install's data.unity3d and extracts
+with UnityPy (hash-pinned: uv pip install -r tools/sandbox/requirements.txt):
 
-    python3 -m venv /tmp/uv && /tmp/uv/bin/pip install UnityPy
-    /tmp/uv/bin/python - <<'EOF'
+    python3 - <<'EOF'
     import UnityPy, os
     env = UnityPy.load(os.path.join(CLIENT, "7DaysToDie_Data", "data.unity3d"))
     for obj in env.objects:

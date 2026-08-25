@@ -265,11 +265,11 @@ code turns the zombie feral-sense smell mode up to 2. Option enum value 0 is
 **The six difficulty preset codes (extracted 2026-08-26).** The presets live
 in the bundled TextAsset `Data/Sandbox/sandbox_presets`
 (`LoadInternalPresets` IL=43 `Resources.Load`); the dedi ships no copy and
-the bundles were previously unparseable. The TextAsset is present in the
-CLIENT install's `7DaysToDie_Data/data.unity3d` and extracts with UnityPy
-(see `tools/sandbox/extract_preset_codes.py`; raw XML committed as
-`tools/sandbox/sandbox_presets.xml`). Decoding the Difficulty-category
-presets with the §3 codec + the §2.1 value sets:
+its bundles hold no TextAsset (the dedicated catalog is empty). The TextAsset
+is present in the CLIENT install's `7DaysToDie_Data/data.unity3d` and
+extracts with UnityPy (see `tools/sandbox/extract_preset_codes.py`; raw XML
+committed as `tools/sandbox/sandbox_presets.xml`). Decoding the
+Difficulty-category presets with the §3 codec + the §2.1 value sets:
 
 | Difficulty | code | IncomingDamage (17) | EntityIncomingDamage (42) | Ranged/MeleeDamage (0/1) |
 |---|---|---|---|---|
@@ -484,7 +484,7 @@ Its `SandboxCode` property re-encodes `PresetValues` via `saveOptionsToCode`.
 
 | Source | Loader | Group |
 |---|---|---|
-| Built-in asset `Data/Sandbox/sandbox_presets` (Unity `Resources.Load` TextAsset; contents live in the compressed bundle, not inspected here) | `LoadInternalPresets` -> `LoadPresetFromXml` per `<preset>` | from `category` attr |
+| Built-in asset `Data/Sandbox/sandbox_presets` (Unity `Resources.Load` TextAsset; extracted 2026-08-26, raw XML committed as `tools/sandbox/sandbox_presets.xml`) | `LoadInternalPresets` -> `LoadPresetFromXml` per `<preset>` | from `category` attr |
 | Mod XML `Data/Config/sandbox_overrides.xml` `<preset>` elements | `SandboxOverridesFromXml.CreateOverrides` (hooked into `WorldStaticData`, so config-mod patchable) | `"Modded"` |
 | User files `<UserDataDir>/Presets/*.xml` | `LoadPreset(`XmlFile`)` (`<preset><property name="code|description|icon" value=.../></preset>`) | `"User"` |
 
@@ -624,6 +624,12 @@ XML gate effects on sandbox settings ([minevents.md](minevents.md),
 
 ## Changelog
 
+- **2026-08-26:** The 2026-08-25 BLOCKED note is resolved: the
+  `sandbox_presets` TextAsset is present in the CLIENT install's
+  `data.unity3d` and extracts with the pinned UnityPy; raw XML committed as
+  `tools/sandbox/sandbox_presets.xml` with the decoder
+  `tools/sandbox/extract_preset_codes.py`. All six difficulty preset codes
+  are now pinned (section 3 table above).
 - **2026-08-21:** Full IL census of `SetupOptions`: 165 options (81 float / 52
   int / 32 bool), 65 value sets, all decoded from `<PrivateImplementationDetails>`
   FieldRVA arrays (or inline stelem fills) into

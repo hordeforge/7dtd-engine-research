@@ -89,7 +89,8 @@ typo in the original field name).
 
 `EnumMapObjectType` (18 values, `Last = 17`) indexes the manager's buckets.
 Constructor IL pins each subclass to its enum value; caller lists are from
-`FindCallers` against the dedi assembly.
+`FindCallers` against the dedi assembly (that tool is since retired for
+`Xref`; the lists stand as recorded evidence).
 
 | Subclass | Enum (value) | Represents | Key source | Constructed by (dedi DLL) |
 |---|---|---|---|---|

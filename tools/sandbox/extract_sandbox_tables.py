@@ -20,11 +20,19 @@ they must match the stock DLL exactly for zdtd's SandboxCode decode.
 
 import argparse
 import json
+import os
 import struct
 import sys
+import tempfile
 
-import dnfile
-from dncil.cil.body.reader import Token, read_method_body_from_bytes
+try:
+    import dnfile
+    from dncil.cil.body.reader import Token, read_method_body_from_bytes
+except ModuleNotFoundError as exc:
+    dnfile = Token = read_method_body_from_bytes = None
+    IMPORT_ERROR = exc
+else:
+    IMPORT_ERROR = None
 
 IMPLICIT = {"ldc.i4.m1": -1}
 for _i in range(9):
@@ -284,7 +292,9 @@ def extract(pe):
         if missing:
             print(f"warning: enum ids not registered: {missing}", file=sys.stderr)
     else:
-        print("warning: no sandbox options recovered from SetupOptions", file=sys.stderr)
+        raise ValueError("no sandbox options recovered from SetupOptions")
+    if not valuesets:
+        raise ValueError("no sandbox value sets recovered")
     return {"valuesets": valuesets, "options": [opt_by_id[k] for k in sorted(opt_by_id)]}
 
 
@@ -293,11 +303,23 @@ def main():
     ap.add_argument("dll")
     ap.add_argument("--out")
     args = ap.parse_args()
+    if IMPORT_ERROR:
+        ap.error(f"missing dependency {IMPORT_ERROR.name!r}; install sandbox/requirements.txt")
     pe = dnfile.dnPE(args.dll)
     out = extract(pe)
     if args.out:
-        with open(args.out, "w", encoding="utf-8") as f:
-            json.dump(out, f, indent=1)
+        out_dir = os.path.dirname(os.path.abspath(args.out))
+        os.makedirs(out_dir, exist_ok=True)
+        tmp = None
+        try:
+            with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=out_dir, delete=False) as f:
+                tmp = f.name
+                json.dump(out, f, indent=1)
+                f.write("\n")
+            os.replace(tmp, args.out)
+        finally:
+            if tmp and os.path.exists(tmp):
+                os.unlink(tmp)
     else:
         print(json.dumps(out, indent=1))
 

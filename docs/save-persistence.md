@@ -337,6 +337,9 @@ flowchart TD
 
 ## 6. Who calls this on the dedicated server (FindCallers)
 
+(`FindCallers` is since retired for `Xref`; this table stands as recorded
+evidence from the tool that produced it.)
+
 | Caller | What it uses | Dedicated? |
 |---|---|---|
 | `GameEntrypoint` boot coroutine | `SaveDataUtils.InitStaticCoroutine` | yes (boot) |

@@ -17,7 +17,8 @@ whose entire caller set is UI, editor, avatar, or client render code (listed at
 the end); dead config (`EntityVBlimp`).
 **Evidence:** IL of the types above plus their caller sets (`FindCallers` walked
 back to server systems, world lifecycle, or net packages for every documented
-type; dump locally with `tools/src/DumpMethod`, git-ignored), and the stock
+type; that tool is since retired for `Xref`; dump locally with
+`tools/src/DumpMethod`, git-ignored), and the stock
 `Data/Config` XML shipped with the dedicated server where reachability depends
 on config. **Hub:** [`INDEX.md`](INDEX.md).
 **Method:** [`re-methodology.md`](re-methodology.md).

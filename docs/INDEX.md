@@ -55,7 +55,7 @@ delta file):
 | XML data pins: zombie HP ladder (healthSlim **125** ... infernal **1600**), trader economy (**3.0**/**0.2**), survival well-fed threshold **0.52** | [`../tools/data/xml_pins.json`](../tools/data/xml_pins.json) (machine-checked by `check_stock_facts`) |
 | Behaviour pins: WaterLevel **62.88**, item-drop lifetime **300 s**, per-frame load budget **50 ms** | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) `behaviour.*` (machine-checked by `check_stock_facts`; WaterLevel 62.88 also observed live in a real `main.ttw` save header, save-region.md §1) |
 | Join analytics `PlayerJoinServerEventData` | [server-lifecycle.md](server-lifecycle.md) |
-| Sandbox day/night density+respawn, chicken coop knobs, infection/hunger/thirst/stack | [sandbox-options.md](sandbox-options.md) §2 |
+| Sandbox day/night density+respawn, chicken coop knobs, six difficulty preset codes, infection/hunger/thirst/stack | [sandbox-options.md](sandbox-options.md) §2 + §3 |
 | EOS/browse filters, GSI sandbox fields | [server-browser-prefabs.md](server-browser-prefabs.md), [network.md](network.md) |
 | Official product notes (content, not IL) | https://7daystodie.com/v3-1-0-henpocalypse-release-notes/ |
 

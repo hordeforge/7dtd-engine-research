@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Patch-drift check: compare the current game build against a stored baseline and
 # report what changed (types, methods, enum members, NetPackage wire). Run after a
-# game update; exits non-zero if drift is detected (for cron/CI alerting).
+# game update; exits 1 if drift is detected (for cron/CI alerting), and fails
+# closed with exit 2 if any axis cannot be measured (no partial comparison).
 #
 #   drift-check.sh [ASM]           # ASM defaults to the local stable dedicated DLL
 #   BASELINE_DIR=... drift-check.sh
@@ -14,6 +15,11 @@ set -uo pipefail
 # invoker's (C vs en_US.UTF-8 order differently and turn real drift into noise).
 export LC_ALL=C
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  sed -n '2,10p' "$0"
+  exit 0
+fi
+[[ $# -le 1 ]] || { echo "usage: drift-check.sh [Assembly-CSharp.dll]" >&2; exit 2; }
 TOOLS="$(cd "$here/.." && pwd)"
 BIN="$TOOLS/bin"
 ASM="${1:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll}"
@@ -27,9 +33,10 @@ CECIL="$BIN/Mono.Cecil.dll"
 build_helper() { # <name> <src>
   local exe="$BIN/$1.exe"
   [[ -f "$exe" && "$exe" -nt "$2" ]] && return 0
-  # A failed helper build must not look like "no drift" on that axis; say so.
+  # A failed helper build must not look like "no drift" on that axis; the run
+  # fails closed below instead of comparing a partial surface.
   if ! mcs -nologo -r:"$CECIL" "$2" -out:"$exe"; then
-    echo "drift: warning: failed to compile $1.exe; its drift axis will be skipped" >&2
+    echo "drift: error: failed to compile $1.exe; refusing to compare an incomplete surface" >&2
     return 1
   fi
 }

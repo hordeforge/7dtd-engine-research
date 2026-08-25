@@ -7,6 +7,11 @@
 # Usage: ./cecil-pin.sh /path/to/Mono.Cecil.dll
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  sed -n '2,8p' "$0"
+  exit 0
+fi
+[[ $# -eq 1 ]] || { echo "usage: cecil-pin.sh /path/to/Mono.Cecil.dll" >&2; exit 2; }
 dll="${1:?usage: cecil-pin.sh /path/to/Mono.Cecil.dll}"
 [[ -f "$dll" ]] || { echo "cecil-pin: not found: $dll" >&2; exit 2; }
 if command -v sha256sum >/dev/null 2>&1; then

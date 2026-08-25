@@ -308,7 +308,8 @@ flowchart TB
 
 ## 4. Production reality: the generator is debug-only
 
-`FindCallers` over the whole assembly finds exactly **one** call site for
+`FindCallers` (since retired for `Xref`) over the whole assembly finds exactly
+**one** call site for
 `RaycastEntityPathGenerator.CreatePath`: `EntityDrone.LateUpdate`, inside a
 branch gated on `DroneManager.Debug_LocalControl`. That flag is flipped only by
 `EntityDrone.Debug_ToggleReconMode`, reached from the `ConsoleCmdJunkDrone`

@@ -13,6 +13,11 @@
 # Requires SteamCMD installed by the operator (`STEAMCMD=/path/to/steamcmd.sh`).
 set -euo pipefail
 
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  sed -n '2,11p' "$0"
+  exit 0
+fi
+[[ $# -le 2 ]] || { echo "usage: fetch_version.sh <branch|manifestid> [label]" >&2; exit 2; }
 BRANCH="${1:?usage: fetch_version.sh <branch|manifestid> [label]}"
 LABEL="${2:-$BRANCH}"
 [[ "$LABEL" =~ ^[A-Za-z0-9._-]+$ ]] || {

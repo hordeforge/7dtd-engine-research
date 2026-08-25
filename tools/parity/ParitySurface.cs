@@ -1,4 +1,4 @@
-// Extract the zdtd-relevant wire surface from an Assembly-CSharp.dll into a
+// Extract the stock wire surface from an Assembly-CSharp.dll into a
 // stable JSON snapshot: every NetPackage's read/write BinaryReader/Writer call
 // sequence (the wire layout), package directions, and selected enum values.
 // Diff two snapshots to see exactly what TFP changed between server versions.
@@ -38,6 +38,7 @@ class ParitySurface {
         return -1;
     }
     static void Main(string[] a) {
+        if (a.Length < 1) { Console.Error.WriteLine("usage: ParitySurface <asm>"); Environment.Exit(2); }
         var r = new DefaultAssemblyResolver(); r.AddSearchDirectory(Path.GetDirectoryName(a[0]));
         var asm = AssemblyDefinition.ReadAssembly(a[0], new ReaderParameters { AssemblyResolver = r });
         var sb = new StringBuilder(); sb.Append("{\n");

@@ -19,7 +19,8 @@ with `tools/src/DumpMethod`, git-ignored). **Hub:** [`INDEX.md`](INDEX.md).
 **Method:** [`re-methodology.md`](re-methodology.md).
 
 Every type below was confirmed dedicated-relevant by walking its callers
-(`FindCallers`) back to server-side systems (world/managers/net packages), not
+(`FindCallers`, since retired for `Xref`; see [re-methodology.md](re-methodology.md) §8b)
+back to server-side systems (world/managers/net packages), not
 just by existing in the assembly. Types whose entire caller set is UI, avatar,
 or render code are listed at the end instead.
 

@@ -7,6 +7,11 @@
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(dirname "$here")"
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  sed -n '2,7p' "$0"
+  exit 0
+fi
+[[ $# -eq 0 ]] || { echo "regen: unknown argument: $1" >&2; exit 2; }
 asm="${ASM:?set ASM to the dedicated Assembly-CSharp.dll path}"
 
 # Dump-set label from the machine pin (update.dump_label_suffix), not a

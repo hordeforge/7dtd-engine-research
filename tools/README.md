@@ -216,6 +216,9 @@ are explicit. See `re-scratch/README.md`.
 | Test | Checks |
 |---|---|
 | `tests/test_tool_bootstrap.py` | The tool builder discovers distribution-provided Mono.Cecil assemblies in the standard `/usr/lib` and `/usr/local/lib` Mono GAC paths. |
+| `tests/test_tool_cli_usage.py` | Every maintained C# executable reports usage and exits 2 when required arguments are missing. Skips until the tools are built or Mono is available. |
+| `tests/test_shell_cli_usage.py` | Supported shell entry points provide side-effect-free `--help`; strict no-positional commands reject unknown options. DLL-free. |
+| `tests/test_python_cli_usage.py` | Optional-dependency Python extractors provide `--help` without importing their third-party runtime packages. DLL-free. |
 | `tests/test_ilfmt_safe.py` | `IlFmt.Safe` (the filename sanitizer for assembly-supplied namespace/type names in DumpAll/DumpType/DumpNetPackages) never yields a fragment that escapes the dump out-dir: a crafted name of `.` or `..` is defused while namespace dots survive. Compiles a probe against `src/IlFmt.cs`; skips without mcs/mono. |
 | `tests/test_cecil_pin.py` | Mono.Cecil supply-chain pin: `data/cecil.pin` is well-formed, `build.sh` still enforces the SHA-256 gate, and any built `bin/Mono.Cecil.dll` matches it. |
 | `tests/test_dedi_coverage_docs.py` | Structural proof that the coverage docs, dump sets, and dumpers all exist and are IL-backed (no game constant is the pass condition). Detector self-tests prove the banned-phrase and IL-claim greps can fire. |

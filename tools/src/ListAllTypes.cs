@@ -7,6 +7,7 @@ using Mono.Cecil;
 
 class ListAllTypes {
   static void Main(string[] a) {
+    if (a.Length < 2) { Console.Error.WriteLine("usage: ListAllTypes <asm> <outFile>"); Environment.Exit(2); }
     var r = new DefaultAssemblyResolver();
     r.AddSearchDirectory(Path.GetDirectoryName(Path.GetFullPath(a[0])));
     var asm = AssemblyDefinition.ReadAssembly(a[0], new ReaderParameters { AssemblyResolver = r });
