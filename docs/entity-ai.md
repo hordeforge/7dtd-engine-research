@@ -511,8 +511,14 @@ whose default is **(30, 100)** (`ldc.r4 30; ldc.r4 100; newobj Vector2` in the
 `EntityClass` cctor) overridden by the entityclasses `SightLightThreshold`
 property via `StringParsers.ParseMinMaxCount`. Consumed by the zdtd sense gate
 (LOS + view cone + hearing + smell, `ecs/systems.zig`); the `CanSeeStealth`
-light-level leg needs the client's light channel and is not evaluated server-
-side (zdtd marks that sub-note RE-blocked).
+light-level leg IS evaluated server-side (corrected 2026-08-26): the dedi's
+`PlayerStealth::TickServer` (IL=432) computes `lightLevel` every tick from
+`LightManager.GetStealthLightLevel` (IL=30: world light at head +1.68 +
+moving lights + held-item light, FastClamp01) with dark adaptation, crouch
+x0.6, movement visibility, passive 89 and the final FastClamp(...,0,200);
+the AI targets read it (`EAITarget.check` IL=71). The world-light leg needs
+the sky-luma/block-light model (SkyManager.GetLuma + the light-entity
+dictionary) - a clone-side subsystem, not RE-blocked.
 (`origin + dir*-0.1`), the self model layer is temporarily switched to **2**
 and restored after, and `Voxel.Raycast(world, ray, seeDist, -1612492829, 64,
 0)` runs. Hit handling: an `E_Vehicle` hit resolves via
