@@ -8,7 +8,7 @@ read 1,738,381 instead of the true 1,740,737 (full-surface.md). Since the
 2026-08-11 escape fix the two tables must agree and the total must match the
 documented pin.
 
-Usage: python3 tools/tests/test_surface_wellformed.py <asm>
+Usage: python3 tools/tests/test_surface_wellformed.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -16,6 +16,8 @@ import re
 import subprocess
 import sys
 import tempfile
+
+import _common
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXPECTED_IL_TOTAL = 1740737  # docs/full-surface.md: "1,740,737 IL instructions"
@@ -46,14 +48,16 @@ def parse_types_table(text: str):
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: test_surface_wellformed.py <asm>", file=sys.stderr)
-        return 2
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
+    asm = str(asm_path)
     env = dict(os.environ)
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
     with tempfile.TemporaryDirectory() as tmp:
         proc = subprocess.run(
-            ["mono", os.path.join(TOOLS, "bin", "FullSurface.exe"), sys.argv[1], tmp],
+            ["mono", os.path.join(TOOLS, "bin", "FullSurface.exe"), asm, tmp],
             capture_output=True,
             text=True,
             env=env,

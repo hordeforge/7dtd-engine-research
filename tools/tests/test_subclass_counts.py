@@ -23,7 +23,7 @@ Conventions encoded (verified against the current DLL):
   classes - 12 in-namespace base classes + 3 leaf-parents that are themselves
   listed = 123.
 
-Usage: python3 tools/tests/test_subclass_counts.py <asm>
+Usage: python3 tools/tests/test_subclass_counts.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -128,10 +128,11 @@ class SubCount {
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: test_subclass_counts.py <asm>", file=sys.stderr)
-        return 2
-    asm = sys.argv[1]
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
+    asm = str(asm_path)
 
     # key-methods fingerprint column (item-actions / minevent-actions): every
     # listed method must exist on the leaf type or its base chain

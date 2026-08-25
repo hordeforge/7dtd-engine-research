@@ -14,6 +14,15 @@ done
 cd "$here"
 mkdir -p bin
 
+# Compiler prerequisite: mcs ships with the mono development packages; a bare
+# mono runtime can run the dumpers but not compile them. Fail once, by name,
+# instead of as a confusing per-file compiler-not-found error below.
+if ! command -v mcs >/dev/null 2>&1; then
+  echo "build: mcs (Mono C# compiler) not on PATH; install a mono development package, e.g.:" >&2
+  echo "  sudo apt install mono-mcs   # or mono-devel / mono-complete" >&2
+  exit 1
+fi
+
 # Integrity gate: compile only against the pinned Mono.Cecil (data/cecil.pin).
 # Every dumper links and runs against this dll, so a swapped binary is a
 # supply-chain risk; re-pin deliberately via ./cecil-pin.sh <dll> after review.

@@ -6,7 +6,7 @@ EnumGamePrefs (317) member by array index. A game patch that adds, renames,
 or removes a member without updating the doc fails here (the existing
 check_stock_facts gate only pins the member *counts*).
 
-Usage: python3 tools/tests/test_gamestats_gameprefs_current.py <asm>
+Usage: python3 tools/tests/test_gamestats_gameprefs_current.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -48,10 +48,11 @@ def table_rows(doc: str, section: str, next_section: str) -> list[str]:
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: test_gamestats_gameprefs_current.py <asm>", file=sys.stderr)
-        return 2
-    asm = sys.argv[1]
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
+    asm = str(asm_path)
     out = _common.run_probe(_common.compile_probe(SRC, "enumnames_check"), asm, ",".join(ENUMS))
     dll = {}
     for line in out.splitlines():

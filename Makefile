@@ -65,13 +65,19 @@ regen-check:
 # and lint rules drift between releases.
 lint:
 	@expected=$$(sed -n 's/^ *uv tool install ruff==\([0-9][0-9.]*\)/\1/p' .github/workflows/ci.yml | head -1); \
-	actual=$$(ruff --version | awk '{print $$2}'); \
 	if [ -z "$$expected" ]; then \
 	  echo "lint: cannot read the ruff pin from .github/workflows/ci.yml" >&2; exit 2; \
 	fi; \
+	command -v ruff >/dev/null 2>&1 || { \
+	  echo "lint: ruff not on PATH; install the CI pin: uv tool install ruff==$$expected" >&2; exit 2; \
+	}; \
+	actual=$$(ruff --version | awk '{print $$2}'); \
 	if [ "$$actual" != "$$expected" ]; then \
 	  echo "lint: local ruff $$actual != CI pin ruff==$$expected; align both together (.github/workflows/ci.yml)" >&2; exit 2; \
-	fi
+	fi; \
+	command -v shellcheck >/dev/null 2>&1 || { \
+	  echo "lint: shellcheck not on PATH; CI pins $(shell sed -n 's/^ *sc_ver=\([0-9][0-9.]*\)/\1/p' .github/workflows/ci.yml | head -1) (.github/workflows/ci.yml); any recent distro package is fine locally, e.g.: sudo apt install shellcheck" >&2; exit 2; \
+	}
 	ruff check .
 	ruff format --check .
 	for f in $$(git ls-files '*.sh'); do shellcheck "$$f"; done

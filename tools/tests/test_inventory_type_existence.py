@@ -7,7 +7,7 @@ netpackages.md (194 rows; uniform Type|Base table) -> existence + direct base.
 A typo, a removed/renamed type, or a base change after a game patch fails here,
 even though these inventories are hand-maintained.
 
-Usage: python3 tools/tests/test_inventory_type_existence.py <asm>
+Usage: python3 tools/tests/test_inventory_type_existence.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -46,10 +46,11 @@ def norm(name: str) -> str:
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: test_inventory_type_existence.py <asm>", file=sys.stderr)
-        return 2
-    asm = sys.argv[1]
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
+    asm = str(asm_path)
     out = _common.run_probe(_common.compile_probe(SRC, "typebase_check"), asm)
     dll = {}
     top_level_netpkg = set()

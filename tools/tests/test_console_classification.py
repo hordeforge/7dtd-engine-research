@@ -7,7 +7,7 @@ how many start Execute with a GameManager.IsDedicatedServer gate, and the exact
 10 dedicated-gated class names. A game patch that adds or removes a client
 toggle or a dedicated gate without updating the doc fails here.
 
-Usage: python3 tools/tests/test_console_classification.py <asm>
+Usage: python3 tools/tests/test_console_classification.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -69,13 +69,14 @@ class Cls {
 
 
 def main() -> int:
-    if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
-        print("SKIP: no ASM path (or missing file); pass <asm>")
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
         return 0
+    asm = str(asm_path)
     if not os.path.exists(XREF):
         print("SKIP: CmdMap.exe not built (run make tools)")
         return 0
-    asm = sys.argv[1]
 
     exe = _common.compile_probe(SRC, "console_classification_check")
 

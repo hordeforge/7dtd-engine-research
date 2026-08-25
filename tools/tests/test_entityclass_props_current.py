@@ -5,7 +5,7 @@ The doc tables every `ldstr` + `stsfld EntityClass::PropX` pair in the cctor
 (167 rows) plus the non-string statics (20) and pins IL=394. A game patch that
 adds/renames/removes a prop name constant without updating the doc fails here.
 
-Usage: python3 tools/tests/test_entityclass_props_current.py <asm>
+Usage: python3 tools/tests/test_entityclass_props_current.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -52,10 +52,11 @@ class EcProps {
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: test_entityclass_props_current.py <asm>", file=sys.stderr)
-        return 2
-    asm = sys.argv[1]
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
+    asm = str(asm_path)
     out = _common.run_probe(_common.compile_probe(SRC, "ecprops_check"), asm)
     lines = out.splitlines()
     il = int(next(ln for ln in lines if ln.startswith("IL=")).split("=")[1])

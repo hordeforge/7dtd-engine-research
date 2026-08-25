@@ -6,7 +6,7 @@ are const fields in the game classes. A game patch that retunes them without
 updating the doc fails here. The doc-side check requires the constant name and
 value to appear in the owning doc (derived *Sq constants are value-only).
 
-Usage: python3 tools/tests/test_tuned_constants.py <asm>
+Usage: python3 tools/tests/test_tuned_constants.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -1007,10 +1007,11 @@ class ConstComplete {
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: test_tuned_constants.py <asm>", file=sys.stderr)
-        return 2
-    asm = sys.argv[1]
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
+    asm = str(asm_path)
     out = _common.run_probe(_common.compile_probe(SRC, "tunedconsts_check"), asm, ",".join(CONSTS))
     dll = {}
     for line in out.splitlines():

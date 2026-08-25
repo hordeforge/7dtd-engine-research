@@ -10,7 +10,7 @@ carried SaveLoad IL=884 vs 926) and body lines next to corrected changelog notes
 gaps. Dated changelog notes are skipped (historical records); types cited by
 suffix (NetPackage*/AIDirector* shorthand) resolve via prefix.
 
-Usage: python3 tools/tests/test_il_citations.py <asm>
+Usage: python3 tools/tests/test_il_citations.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -57,10 +57,11 @@ def norm(s: str) -> str:
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: test_il_citations.py <asm>", file=sys.stderr)
-        return 2
-    asm = sys.argv[1]
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
+    asm = str(asm_path)
     out = _common.run_probe(_common.compile_probe(SRC, "ilcite_check"), asm)
     # type full-name (normalized) -> method name (normalized) -> set of IL sizes
     methods = {}

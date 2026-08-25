@@ -22,7 +22,7 @@ field claim is ever added.
 All claims are verified with ONE `Xref <asm> --batch` invocation (a single
 assembly pass), not one process per claim.
 
-Usage: python3 tools/tests/test_xref_claims.py <asm>
+Usage: python3 tools/tests/test_xref_claims.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -30,6 +30,8 @@ import re
 import subprocess
 import sys
 import tempfile
+
+import _common
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
@@ -74,13 +76,14 @@ def xref_counts(asm: str, pairs: list[tuple[str, str]]) -> dict[tuple[str, str],
 
 
 def main() -> int:
-    if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
-        print("SKIP: no ASM path (or missing file); pass <asm>")
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
         return 0
+    asm = str(asm_path)
     if not os.path.exists(XREF):
         print("SKIP: Xref.exe not built (run make tools)")
         return 0
-    asm = sys.argv[1]
 
     found = []
     for name in sorted(os.listdir(DOCS)):

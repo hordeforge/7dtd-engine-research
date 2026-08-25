@@ -5,7 +5,7 @@ The doc claims "exactly 6 packages override to channel 1" and names them.
 NetProtocolCensus.exe re-derives the per-package channel census; a package that
 moves channels, or a census the doc mis-states, fails here.
 
-Usage: python3 tools/tests/test_netprotocol_census.py <asm>
+Usage: python3 tools/tests/test_netprotocol_census.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -72,10 +72,11 @@ EXPECTED_TOTAL = 193
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: test_netprotocol_census.py <asm>", file=sys.stderr)
-        return 2
-    asm = sys.argv[1]
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
+    asm = str(asm_path)
     meta_path = str(_common.probe_dir() / "npc_check_META.md")
     rc_census, _out, census_err = _common.run_tool("NetProtocolCensus.exe", asm, meta_path)
     if rc_census != 0:

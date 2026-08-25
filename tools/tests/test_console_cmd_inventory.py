@@ -11,7 +11,7 @@ names of the class they name (all ldstrs in getCommands + static-field string
 values from the class .cctor). A game patch that adds/removes/renames a
 command without updating the inventory fails here.
 
-Usage: python3 tools/tests/test_console_cmd_inventory.py <asm>
+Usage: python3 tools/tests/test_console_cmd_inventory.py [<asm>] (defaults to ASM env / standard install discovery)
 """
 
 import os
@@ -117,10 +117,11 @@ def parse_inventory(text: str) -> tuple[dict, list]:
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: test_console_cmd_inventory.py <asm>", file=sys.stderr)
-        return 2
-    asm = sys.argv[1]
+    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    if asm_path is None:
+        print(f"SKIP: assembly not found: {asm_label}")
+        return 0
+    asm = str(asm_path)
     rc, cmdmap, cerr = _common.run_tool("CmdMap.exe", asm)
     if rc != 0:
         print(f"FAIL: CmdMap.exe exited {rc}: {cerr[:300]}", file=sys.stderr)

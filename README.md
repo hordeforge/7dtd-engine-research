@@ -14,7 +14,9 @@ Start at [`docs/INDEX.md`](docs/INDEX.md).
 
 Gates: `make verify` runs the doc-link, pin, readiness, facts and XML-data
 checks in one command; `make test` adds the DLL-dependent suite (reach,
-inventories, surface); `make test-docs` is the CI gate. Machine-checked stock
+inventories, surface); `make test-docs` is the CI gate. Any single gate also
+runs standalone (`python3 tools/tests/test_doc_link_integrity.py`;
+DLL-dependent scripts auto-discover your game install). Machine-checked stock
 facts (constants + LiteNetLib wire + XML data) live in
 [`tools/data/stock_facts.json`](tools/data/stock_facts.json) and
 [`tools/data/xml_pins.json`](tools/data/xml_pins.json); `make facts` shows them.

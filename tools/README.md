@@ -261,6 +261,20 @@ machines without them, and FAIL with the fix command when the DLL is present but
 the prerequisite is missing (`make tools`). Nothing here asserts game constants
 as pass conditions.
 
+Every script in this table is runnable directly, so the edit-check loop during a
+doc change can be a single gate instead of the whole suite:
+
+```bash
+python3 tests/test_doc_link_integrity.py    # one gate, no arguments
+python3 tests/test_il_citations.py          # DLL-dependent scripts auto-discover
+```
+
+DLL-dependent scripts take an optional `<asm>` argument and otherwise resolve
+the dedicated assembly from the `ASM` / `SEVENDTD_ASM` / `SEVENDTD_DS_DIR` env
+vars or the standard Steam dedicated-server install paths
+(`tools/tests/_common.py::find_asm`); with none found they print
+`SKIP: assembly not found: ...` rather than silently passing.
+
 ```bash
 make test        # the full gate suite above
 make stock-check # stock_facts pins vs live DLL + sibling pins
