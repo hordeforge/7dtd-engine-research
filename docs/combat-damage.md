@@ -536,6 +536,15 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-25:** melee per-attack stamina cost pinned (ItemActionMelee.il.txt
+  IL_00A3-IL_00AD): the swing drains `AddStamina(-(EffectManager.GetValue(
+  StaminaLoss, item, 0, entity, primary/secondary) * ItemActionAttack.
+  StaminaUsageMultiplier))` - the items.xml StaminaLoss passive (base_set) IS
+  the per-swing cost (stone axe 8, steel axe ~26; 2-value rows are the
+  normal/power pair), and StaminaUsageMultiplier is the sandbox option
+  (default 1.0). The negative quality-curve StaminaLoss rows (e.g. -.05..-.3
+  on some melee weapons) need a targeted read before wiring - recorded.
+
 - **2026-08-25:** perk-tag-gated item passives: items.xml rows carrying a
   `tags="perkX"` attribute (e.g. meleeWpnSpearT0StoneSpear TargetArmor -.3
   tagged perkJavelinMaster) apply only when the wearer/attacker owns that
