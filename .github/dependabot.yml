@@ -1,0 +1,9 @@
+# The tree carries no package manifests (the .csproj probes reference only
+# framework assemblies), so the SHA-pinned CI actions are the whole
+# dependency surface.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
