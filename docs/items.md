@@ -1236,6 +1236,18 @@ player inventory (dropping it on the ground via `ItemDropServer` with
 lifetime 60 when full), and grants `AddLevelExp(material.Experience *
 count, "_xpFromHarvesting", ...)`.
 
+**zdtd wiring (2026-08-26):** the dedi clone rolls the same table
+server-side at the dig choke instead of trusting the client's
+`HarvestOnAttack` (authority rule): `BlockDef.harvest_drops` parses the
+block's `<drop event="Harvest">` rows (count via `ParseMinMaxCount`, prob ×
+the block's `ResourceScale` property — zero b14 blocks set it), inherits
+through `Extends` per `CopyDroppedFrom` (own wins per item name), and rolls
+per `Block.DropItemsOnEvent` IL=246 (RandomRange(min,max+1), skip 0, drop
+when random < prob; the `tool_category`/`tag` fields are stored but never
+read by the roll — they feed the item-side bonus legs). Rolled stacks grant
+to the breaker's inventory; overflow becomes a ground `ItemDropServer`
+bag. The `[recipe]`/`*` names appear on no b14 Harvest row (fail closed).
+
 **`ItemActionDynamicMelee.Raycast` (IL=203)** is the sweep that resolves a
 swing: no melee from a vehicle; a local player pays the stamina cost here
 (`Stamina.Value -= StaminaUsage`); `waterCollisionParticles.Reset()`; then a
