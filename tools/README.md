@@ -13,7 +13,9 @@ tools/
   legacy/     per-family dumpers that generated the historical il/ dump sets
   parity/     cross-version wire-surface snapshot + diff (steamcmd)
   re-scratch/ one-off Zig reversers for on-disk file formats
-  sandbox/    experimental asset extractors (mesh-atlas XMLs, zdtd Zig-table generators)
+  sandbox/    experimental asset extractors + zdtd Zig-table generators
+              (extract_mesh_atlas.py -> atlas/*.xml -> gen_atlas_zig.py;
+               extract_sandbox_tables.py -> sandbox_tables.json -> gen_zig_tables.py)
   data/       committed pins: cecil.pin, stock_facts.json, xml_pins.json, promoted-types.txt
   tests/      dump-regen + coverage regression tests
   build.sh    compiles src/ (and best-effort legacy/) into bin/

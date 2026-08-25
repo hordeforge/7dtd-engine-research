@@ -31,7 +31,9 @@ blocks; header layout in [texture-atlas-unityfs.md](texture-atlas-unityfs.md)),
 containing one CAB serialized file with 40 objects. Six of them are the atlas
 TextAssets (`ta_*`); the mesh descriptions and materials reference them.
 Extract them with `tools/sandbox/extract_mesh_atlas.py` (UnityPy reference
-parser); the extracted XMLs are committed under `tools/sandbox/atlas/`:
+parser); the extracted XMLs are committed under `tools/sandbox/atlas/` and
+regenerate the clone-side comptime minimap-color table via
+[`../tools/sandbox/gen_atlas_zig.py`](../tools/sandbox/gen_atlas_zig.py):
 
 | TextAsset | uv entries | Role |
 |---|---|---|
