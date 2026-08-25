@@ -2213,6 +2213,11 @@ The non-action leaves:
   (armorPreacherOutfit 6-value `.02,.04,.06,.08,.1,.15` = per-quality values;
   the standard armor sets' 2-value `8,12.3` must span Q1..Q6) pins the
   zdtd implementation as value[0] = Q1, value[n-1] = Q6, linearly scaled.
+  **Update 2026-08-25:** progression.xml rows carry the anchors explicitly -
+  640/649 passive rows use `level="1,5" value="2,10"` pairs (value[i] sits at
+  level[i], piecewise-linear, out-of-range applies nothing); buffs.xml (8
+  rows) and items.xml (1 row) use the same form. Armor resist rows carry no
+  `level=` attr, so the Q1..Q6 scaled-implicit reading stands for them.
 - 
 
 - **2026-08-23:** §7 durability: DegradationMax passive value is the quality-tier
