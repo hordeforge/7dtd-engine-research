@@ -536,6 +536,15 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-25:** difficultyModifier scope pinned: the only call is inside
+  ItemActionAttack.Hit (IL_0A4A, on the attack strength before the damage
+  apply, ItemActionAttack.il.txt:1819); explosions and falling-block damage do
+  not pass through it. NetPackageDamageEntity.ProcessPackage (IL=172) stores
+  the client's claimed strength verbatim into DamageResponse::Strength
+  (IL_00F0-IL_00F6) and never re-applies the modifier, so on the
+  client-attack direction the client-side modifier is the only scaling.
+  EntityPlayer.DamageEntity (IL=15) gates all player damage off when
+  `IncomingDamageModifier <= 0` (GameStats 21 + ldsfld gate, EntityPlayer.il.txt:1813).
 - **2026-08-11:** cItemDroppedOnDeathLifetime pinned 300 s (Constants cctor IL).
 - **2026-08-11:** Hit/stat IL re-verified: ItemActionAttack.Hit IL=1614, GetBlockHit IL=84, FindHitEntityNoTagCheck IL=49, CanHeal IL=12, AddHealth IL=12, EntityEnemyAnimal.CanDamageEntity IL=17, EntityAnimal/EntityEnemy.DamageEntity IL=7, SetCVar IL=13, GetCVar IL=10, difficultyModifier IL=44, GetDamageMultiplier IL=3, GetIdealAIRange IL=3, CanReload IL=2, ReloadGun IL=1, GetKickbackForce IL=2, GetEntityFromHit IL=6 (exact).
 - **2026-08-11:** Crawler/response IL re-verified: EntityHuman.TurnIntoCrawler IL=33, AvatarHumanController.TurnIntoCrawler IL=23, SetWalkType IL=36, ProcessDamageResponse IL=86, ServerNetSendRangeCheckedDamage IL=27, NetPackageRangeCheckDamageEntity.ProcessPackage IL=151, ProcessDamageResponseLocal IL=903, FireAttackedEvents IL=61 (exact).
