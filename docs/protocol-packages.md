@@ -2322,6 +2322,7 @@ cannot wedge or visibly alter the b14 client.
 - **2026-08-10:** Verification: NetPackageTraderData write IL=38 (entityId xor tePosition IL_001C, traderData guard IL_004D); NetPackageSignDataResponse write IL=28 (data-length+bytes gate IL_0019) - both match 6.23.
 - **2026-08-10:** Verification: NetPackageDiscordIdMappings write IL=56 (entityId>0 single-vs-list split, IL_0019 brfalse); NetPackageLockRequest write IL=62 (targets null-guard IL_003A, context gate) - both match 6.23.
 - **2026-08-10:** Verification: NetPackagePlayerId write IL=21 (id:i32, teamNumber:i16, PlayerDataFile.WriteNetwork IL=8 - safe by construction post-login); NetPackageBossEvent write IL=53 (5 always + eventType==1 minionIDs tail, IL_004B-004C).
+- **2026-08-26:** Verification: NetPackagePlayerSpawnedInWorld write IL=16 (respawnReason:i32, position Vector3i, entityId:i32); NetPackageRequestToSpawnPlayer read IL=13 (chunkViewDim:i16, PlayerProfile.Read, nearEntityId:i32) - the zdtd join reads the dim, skips the client profile blob (server owns the profile), and best-effort-reads nearEntityId.
 - **2026-08-10:** Verification: `NetPackageSharedQuest.ProcessPackage` IL=371
   with `IsServer()` -> `QuestShareServer(SharedQuestData)` else
   `QuestShareClient(SharedQuestData, EntityPlayerLocal)` (exact, §6.21 row);
