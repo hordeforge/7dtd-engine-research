@@ -724,13 +724,25 @@ def check_region_raw(path, checks):
 
 
 def discover_save_dir():
-    """Newest probe save containing main.ttw + Region/, or None."""
+    """Newest probe save containing main.ttw + Region/, or None.
+
+    Probe saves live under active loadgen sessions; a file that vanishes
+    between the glob and its stat degrades to "not newest" instead of
+    aborting discovery, keeping the documented None-on-no-save contract.
+    """
     best = None
+    best_mtime = -1.0
     for ttw in glob.glob(os.path.expanduser("~/.cache/7dtd-loadgen-*/Saves/*/*/main.ttw")):
         d = os.path.dirname(ttw)
-        if os.path.isdir(os.path.join(d, "Region")):
-            if best is None or os.path.getmtime(ttw) > os.path.getmtime(best):
-                best = ttw
+        if not os.path.isdir(os.path.join(d, "Region")):
+            continue
+        try:
+            mtime = os.path.getmtime(ttw)
+        except OSError:
+            continue
+        if mtime > best_mtime:
+            best_mtime = mtime
+            best = ttw
     return os.path.dirname(best) if best else None
 
 

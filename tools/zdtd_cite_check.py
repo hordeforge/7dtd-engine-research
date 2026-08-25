@@ -68,15 +68,17 @@ def known_doc_names() -> set:
     an `RE netpackage-bodies.md` marker must resolve against its basename.
     """
     ddir = docs_dir()
+    # The docs set is the gate's reference side: a missing/unreadable docs
+    # tree would flag every sibling citation as broken (a misleading "docs
+    # missing" verdict instead of the real tooling problem), so refuse loudly.
+    if not os.path.isdir(ddir):
+        raise SystemExit(f"zdtd_cite_check: docs tree not found: {ddir}")
     names = set()
-    try:
-        for _dirpath, dirnames, filenames in os.walk(ddir):
-            dirnames[:] = [d for d in dirnames if not d.startswith(".")]
-            for n in filenames:
-                if n.endswith(".md"):
-                    names.add(n)
-    except OSError:
-        return set()
+    for _dirpath, dirnames, filenames in os.walk(ddir):
+        dirnames[:] = [d for d in dirnames if not d.startswith(".")]
+        for n in filenames:
+            if n.endswith(".md"):
+                names.add(n)
     return names
 
 
@@ -101,9 +103,11 @@ def collect_local(root: str, into: set) -> None:
                     into.add(re.sub(r"^\d+-", "", d))
 
 
-def scan(root: str, local: set, docs: set) -> tuple[int, list[str]]:
+def scan(root: str, local: set, docs: set) -> tuple[int, list[str], int]:
+    """(citation count, broken-citation lines, unreadable-file count)."""
     total = 0
     broken = []
+    unreadable = 0
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for fn in filenames:
@@ -113,7 +117,11 @@ def scan(root: str, local: set, docs: set) -> tuple[int, list[str]]:
             try:
                 with open(p, encoding="utf-8", errors="replace") as fh:
                     txt = fh.read()
-            except OSError:
+            except OSError as exc:
+                # A gate must not pass a file it could not read: its citations
+                # were never checked. Count it as a failure, not a skip.
+                unreadable += 1
+                broken.append(f"{p}: UNREADABLE ({exc})")
                 continue
             for pat in (RES_PATH, BARE_AFTER_RE):
                 for m in pat.finditer(txt):
@@ -130,7 +138,7 @@ def scan(root: str, local: set, docs: set) -> tuple[int, list[str]]:
                     total += 1
                     if name not in docs:
                         broken.append(f"{p}: cites {name} (not a research doc)")
-    return total, broken
+    return total, broken, unreadable
 
 
 def main() -> int:
@@ -159,12 +167,15 @@ def main() -> int:
             continue
         if args.repo and name != args.repo:
             continue
-        total, broken = scan(repo_dir, local, docs)
+        total, broken, unreadable = scan(repo_dir, local, docs)
         grand += total
         bad_total += len(broken)
         for b in broken:
             print("BROKEN: " + b)
-        print(f"{name}: {total} explicit research citations, {len(broken)} broken")
+        print(
+            f"{name}: {total} explicit research citations, {len(broken)} broken"
+            + (f" ({unreadable} unreadable)" if unreadable else "")
+        )
     if bad_total:
         print(f"FAIL: {bad_total} broken research citations of {grand}")
         return 1

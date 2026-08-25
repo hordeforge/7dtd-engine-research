@@ -118,6 +118,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_sandbox_requirements_sync.py"
 	python3 "$(TOOLS)/tests/test_sandbox_zig_tables.py"
 	python3 "$(TOOLS)/tests/test_xml_pins_gate.py"
+	python3 "$(TOOLS)/tests/test_gate_unreadable_files.py"
 	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 	python3 "$(TOOLS)/tests/test_inventory_counts.py"
 	python3 "$(TOOLS)/tests/test_readme_test_table.py"

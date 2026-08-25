@@ -144,6 +144,23 @@ def main():
             if f.read() != before:
                 bad.append("committed pins were modified by refused regenerations")
 
+    # 8. Corrupt pins JSON -> clean FAIL verdict + repair hint (exit 1), not a
+    #    traceback with no verdict.
+    with tempfile.TemporaryDirectory(prefix="xml-pins-gate-") as tmp:
+        corrupt = os.path.join(tmp, "corrupt.json")
+        game = os.path.join(tmp, "game")
+        os.makedirs(os.path.join(game, "Data", "Config"))
+        write_config(game, "entityclasses.xml", ENTITYCLASSES)
+        write_config(game, "traders.xml", TRADERS)
+        write_config(game, "buffs.xml", BUFFS)
+        with open(corrupt, "w", encoding="utf-8") as f:
+            f.write("{not json")
+        rc, out = run("--check", "--game-dir", game, "--pins", corrupt)
+        if rc != 1 or "FAIL" not in out or "Traceback" in out:
+            bad.append(f"corrupt pins not a clean FAIL (rc={rc}):\n{out}")
+        if "regenerate" not in out:
+            bad.append(f"corrupt pins FAIL lacks repair hint:\n{out}")
+
     if bad:
         print("FAIL: xml_pins gate")
         for b in bad:

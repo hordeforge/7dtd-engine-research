@@ -15,6 +15,7 @@ Usage: python3 tools/tests/test_dedi_coverage_docs.py
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import sys
@@ -61,13 +62,17 @@ PRODUCT_REALEARTH = [
     "realearth-review.md",
 ]
 
+# Dump-set dirs carry the studied build's label (il/<set>-<label>/). The label
+# comes from stock_facts.update.dump_label_suffix -- the same machine pin
+# regen.sh derives its output dirs from -- so a TFP update retargets both by
+# refreshing one JSON, and this test cannot keep asserting a stale version.
 DEDICATED_DUMPS = [
-    "dedi-complete-v3.1.0/DEDI_COMPLETE_auto.md",
-    "deep-v3.1.0/GameManager_il.txt",
-    "deep-v3.1.0/NetPackage_il.txt",
-    "deep-v3.1.0/World_il.txt",
-    "terrain-v3.1.0/TERRAIN_auto.md",
-    "realearth-surfaces-v3.1.0/REALEARTH_SURFACES_auto.md",
+    ("dedi-complete", "DEDI_COMPLETE_auto.md"),
+    ("deep", "GameManager_il.txt"),
+    ("deep", "NetPackage_il.txt"),
+    ("deep", "World_il.txt"),
+    ("terrain", "TERRAIN_auto.md"),
+    ("realearth-surfaces", "REALEARTH_SURFACES_auto.md"),
 ]
 
 # Truncation floors (bytes). Per-type IL dumps vary hugely in size: the
@@ -75,11 +80,21 @@ DEDICATED_DUMPS = [
 # floor would false-positive on a genuine dump while a low global one would
 # miss a truncated large dump.
 DUMP_MIN_BYTES = {
-    "deep-v3.1.0/GameManager_il.txt": 3000,
-    "deep-v3.1.0/NetPackage_il.txt": 300,
-    "deep-v3.1.0/World_il.txt": 2500,
+    ("deep", "GameManager_il.txt"): 3000,
+    ("deep", "NetPackage_il.txt"): 300,
+    ("deep", "World_il.txt"): 2500,
 }
 DEFAULT_DUMP_MIN_BYTES = 1000
+
+
+def dump_label() -> str | None:
+    """The studied build's il/ label from the facts pin (None when unreadable)."""
+    try:
+        suffix = json.loads(FACTS.read_text(encoding="utf-8"))["update"]["dump_label_suffix"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    return suffix if isinstance(suffix, str) and re.fullmatch(r"v[0-9.]+", suffix) else None
+
 
 TOOLS = [
     "DumpDediComplete.cs",
@@ -186,12 +201,19 @@ def main() -> int:
     # When Assembly-CSharp.dll is available locally, missing dumps are an error.
     # On CI / single-repo checkouts without the game install, we skip.
     if asm_present:
-        for rel in DEDICATED_DUMPS:
-            p = IL / rel
-            if not p.is_file():
-                fails.append(f"missing dedicated dump artifact: {p}")
-            elif p.stat().st_size < DUMP_MIN_BYTES.get(rel, DEFAULT_DUMP_MIN_BYTES):
-                fails.append(f"dedicated dump artifact too small: {p}")
+        label = dump_label()
+        if label is None:
+            fails.append(f"cannot derive il/ dump label from {FACTS} (update.dump_label_suffix)")
+        else:
+            for set_name, artifact in DEDICATED_DUMPS:
+                rel = f"{set_name}-{label}/{artifact}"
+                p = IL / rel
+                if not p.is_file():
+                    fails.append(f"missing dedicated dump artifact: {p}")
+                elif p.stat().st_size < DUMP_MIN_BYTES.get(
+                    (set_name, artifact), DEFAULT_DUMP_MIN_BYTES
+                ):
+                    fails.append(f"dedicated dump artifact too small: {p}")
     else:
         notes.append("game assembly absent: skipping il/ dump-set size assertions")
 

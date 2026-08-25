@@ -204,12 +204,7 @@ def score_tooling_hardcode_debt() -> tuple[float, str]:
     files = 0
     skip_names = {
         "bench_version_update_tooling.py",  # detector itself mentions example versions
-        "stock_facts.json",
-        # regen.sh is the dump-path table in script form (il/<set>-v3.1.0
-        # directory names), the scripted equivalent of the README dump path
-        # table this scorer already excludes; the names are bumped by the
-        # post-update flow, not silently drifting literals.
-        "regen.sh",
+        "stock_facts.json",  # the pin itself carries the studied build's label
     }
     for p in TOOLS.rglob("*"):
         if not p.is_file():

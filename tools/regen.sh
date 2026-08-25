@@ -9,6 +9,16 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(dirname "$here")"
 asm="${ASM:?set ASM to the dedicated Assembly-CSharp.dll path}"
 
+# Dump-set label from the machine pin (update.dump_label_suffix), not a
+# hand-bumped literal: after a TFP update stock-sync refreshes the suffix and
+# this script re-targets every il/<set>-<label>/ dir without edits. Same field
+# test_dedi_coverage_docs.py derives its dump paths from.
+label="$(sed -n 's/^ *"dump_label_suffix": *"\([^"]*\)",*/\1/p' "$here/data/stock_facts.json" | head -1)"
+[[ -n "$label" ]] || {
+  echo "regen: update.dump_label_suffix missing from $here/data/stock_facts.json" >&2
+  exit 2
+}
+
 step() { printf '\n== %s ==\n' "$*"; }
 
 step "build tools"
@@ -21,15 +31,15 @@ step "stock facts (live pin)"
 (cd "$root" && ./tools/stock-sync.sh)
 
 step "NetPackage wire surface + companion types"
-MONO_PATH="$here/bin" mono "$here/bin/DumpNetPackages.exe" "$asm" "$root/il/netpackages-v3.1.0"
-MONO_PATH="$here/bin" mono "$here/bin/DumpType.exe" "$asm" "$root/il/netpackages-v3.1.0" \
+MONO_PATH="$here/bin" mono "$here/bin/DumpNetPackages.exe" "$asm" "$root/il/netpackages-$label"
+MONO_PATH="$here/bin" mono "$here/bin/DumpType.exe" "$asm" "$root/il/netpackages-$label" \
      EntityCreationData ItemValue ItemStack BlockChangeInfo
 
 step "full surface metadata (committable)"
-MONO_PATH="$here/bin" mono "$here/bin/FullSurface.exe" "$asm" "$root/il/surface-v3.1.0"
+MONO_PATH="$here/bin" mono "$here/bin/FullSurface.exe" "$asm" "$root/il/surface-$label"
 
 step "full local IL reversal (git-ignored)"
-MONO_PATH="$here/bin" mono "$here/bin/DumpAll.exe" "$asm" "$root/il/full-v3.1.0"
+MONO_PATH="$here/bin" mono "$here/bin/DumpAll.exe" "$asm" "$root/il/full-$label"
 
 step "wire-body catalog (committed)"
 MONO_PATH="$here/bin" mono "$here/bin/WireBodies.exe" "$asm" "$root/docs/inventories/netpackage-bodies.md"
@@ -40,7 +50,7 @@ step "console-command registry"
 MONO_PATH="$here/bin" mono "$here/bin/CmdMap.exe" "$asm" "$root/docs/inventories/console-command-list.tsv"
 
 step "NetPackage channel/compress census (META)"
-MONO_PATH="$here/bin" mono "$here/bin/NetProtocolCensus.exe" "$asm" "$root/il/netpackages-v3.1.0/META.md"
+MONO_PATH="$here/bin" mono "$here/bin/NetProtocolCensus.exe" "$asm" "$root/il/netpackages-$label/META.md"
 
 step "state-machine index (committed)"
 MONO_PATH="$here/bin" mono "$here/bin/StateMachines.exe" "$root/docs" "$root/docs/inventories/state-machines.md"
@@ -65,15 +75,15 @@ legacy_tools=(
   DumpRealEarthSurfaces
 )
 legacy_outdirs=(
-  dedi-complete-v3.1.0
-  deep-v3.1.0
-  deeper-v3.1.0
-  gaps-v3.1.0
-  frame-entries-v3.1.0
-  loop-complete-v3.1.0
-  opt-scan-v3.1.0
-  terrain-v3.1.0
-  realearth-surfaces-v3.1.0
+  "dedi-complete-$label"
+  "deep-$label"
+  "deeper-$label"
+  "gaps-$label"
+  "frame-entries-$label"
+  "loop-complete-$label"
+  "opt-scan-$label"
+  "terrain-$label"
+  "realearth-surfaces-$label"
 )
 # Legacy dumps stay best-effort (archival tools, superseded by src/), but a
 # failed run must be reported like build.sh does for unbuildable sources:

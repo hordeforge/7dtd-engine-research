@@ -37,13 +37,15 @@ REPOS = [
 ]
 
 
-def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, list[str]]:
+def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str]]:
+    """(external-link count, broken count, unreadable-file count, report lines)."""
     if not os.path.isdir(repo):
-        return 0, 0, []
+        return 0, 0, 0, []
     if only_name and os.path.basename(repo) != only_name:
-        return 0, 0, []
+        return 0, 0, 0, []
     total = 0
     broken = []
+    unreadable = []
     for f in glob.glob(os.path.join(repo, "**", "*.md"), recursive=True):
         if ".git" in f:
             continue
@@ -51,7 +53,10 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, list[str]]:
         try:
             with open(f, encoding="utf-8") as fh:
                 txt = fh.read()
-        except OSError:
+        except OSError as exc:
+            # A gate must not pass a file it could not read: its links were
+            # never checked. Report and fail rather than silently skipping.
+            unreadable.append(f"  UNREADABLE {f}: {exc}")
             continue
         for m in LINK.finditer(txt):
             p = os.path.normpath(os.path.join(base, m.group(1)))
@@ -59,7 +64,7 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, list[str]]:
                 total += 1
                 if not os.path.exists(p):
                     broken.append(f"  BROKEN {f}: {m.group(1)}")
-    return total, len(broken), broken
+    return total, len(broken), len(unreadable), broken + unreadable
 
 
 def main() -> int:
@@ -75,15 +80,23 @@ def main() -> int:
     root = args.root
     grand = 0
     bad_total = 0
+    unread_total = 0
     for name in REPOS:
-        total, bad, rows = scan_repo(os.path.join(root, name), args.repo)
+        total, bad, unreadable, rows = scan_repo(os.path.join(root, name), args.repo)
         grand += total
         bad_total += bad
+        unread_total += unreadable
         for r in rows:
             print(r)
-        print(f"{name}: {total} external .md links, {bad} broken")
-    if bad_total:
-        print(f"FAIL: {bad_total} broken cross-repo links of {grand}")
+        print(
+            f"{name}: {total} external .md links, {bad} broken"
+            + (f", {unreadable} UNREADABLE" if unreadable else "")
+        )
+    if bad_total or unread_total:
+        parts = [f"{bad_total} broken cross-repo links of {grand}"]
+        if unread_total:
+            parts.append(f"{unread_total} unreadable files (links unchecked)")
+        print("FAIL: " + "; ".join(parts))
         return 1
     print(f"OK: {grand} cross-repo .md links all resolve")
     return 0

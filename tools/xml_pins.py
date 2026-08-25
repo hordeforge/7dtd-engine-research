@@ -149,8 +149,15 @@ def main() -> int:
     if not os.path.isfile(pins_path):
         print(f"FAIL: {pins_path} missing (run xml_pins.py --game-dir first)")
         return 1
-    with open(pins_path, encoding="utf-8") as fh:
-        committed = json.load(fh)
+    try:
+        with open(pins_path, encoding="utf-8") as fh:
+            committed = json.load(fh)
+    except (json.JSONDecodeError, OSError) as exc:
+        # A corrupt pins file must read as a failed gate (with the repair
+        # hint), not as a traceback with no verdict.
+        print(f"FAIL: {pins_path}: {exc}")
+        print("  regenerate with: python3 tools/xml_pins.py --game-dir <dir>")
+        return 1
     diffs = section_diffs(live, committed)
     if diffs:
         print(f"FAIL: xml pins drift from install ({len(diffs)} diffs):")
