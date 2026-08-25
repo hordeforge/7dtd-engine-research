@@ -262,6 +262,34 @@ BNC  -> option 39 ZombieFeralSense index 2 -> 2
 code turns the zombie feral-sense smell mode up to 2. Option enum value 0 is
 `RangedDamage`; there is no reserved id 0 in the codec.)
 
+**The six difficulty preset codes (extracted 2026-08-26).** The presets live
+in the bundled TextAsset `Data/Sandbox/sandbox_presets`
+(`LoadInternalPresets` IL=43 `Resources.Load`); the dedi ships no copy and
+the bundles were previously unparseable. The TextAsset is present in the
+CLIENT install's `7DaysToDie_Data/data.unity3d` and extracts with UnityPy
+(see `tools/sandbox/extract_preset_codes.py`; raw XML committed as
+`tools/sandbox/sandbox_presets.xml`). Decoding the Difficulty-category
+presets with the §3 codec + the §2.1 value sets:
+
+| Difficulty | code | IncomingDamage (17) | EntityIncomingDamage (42) | Ranged/MeleeDamage (0/1) |
+|---|---|---|---|---|
+| Scavenger | `AAAKABKARDBNB` | 0.5 | 1.0 | 2.0 |
+| Adventurer | `AAAJABJARFBNC` (default) | 0.75 | 1.0 | 1.5 |
+| Nomad | (empty = all defaults) | 1.0 | 1.0 | 1.0 |
+| Warrior | `AAAGABGARJ` | 1.5 | 1.0 | 0.85 |
+| True Survivalist | `AAAEABEARKBNE` | 2.0 | 1.0 | 0.65 |
+| Insane | `AAADABDARLBNF` | 2.5 | 1.0 | 0.5 |
+
+`EntityIncomingDamage` never appears in a difficulty code, so it stays at
+its default 1.0 on every tier. The `IncomingDamage` (17) ladder is the
+zombie→player damage multiplier consumed by
+`ItemActionAttack.difficultyModifier` (IL=44) via
+`UpdateInGameValuesWithSandboxOptions`; the Ranged/MeleeDamage columns are
+the client-side attack-percent legs (the dedi never re-scales claimed C2S
+strength). This unblocks the previously RE-blocked GameDifficulty ladder
+(GAP row "World borders / difficulty tiers"): the six preset codes + value
+sets fully determine the per-difficulty modifiers.
+
 ---
 
 ## 4. SandboxOptionManager: lifecycle and accessors

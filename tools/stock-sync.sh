@@ -20,12 +20,19 @@ ASM="${ASM:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Se
 MODE="all"
 for arg in "$@"; do
   case "$arg" in
-    --check-only) MODE="check" ;;
-    --extract-only) MODE="extract" ;;
+    --check-only)
+      [[ "$MODE" == "all" ]] || { echo "stock-sync: choose one mode" >&2; exit 2; }
+      MODE="check"
+      ;;
+    --extract-only)
+      [[ "$MODE" == "all" ]] || { echo "stock-sync: choose one mode" >&2; exit 2; }
+      MODE="extract"
+      ;;
     -h|--help)
       sed -n '2,14p' "$0"
       exit 0
       ;;
+    *) echo "stock-sync: unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
 

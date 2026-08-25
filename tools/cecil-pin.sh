@@ -19,7 +19,9 @@ if command -v monodis >/dev/null 2>&1; then
   ver="$(monodis --assembly "$dll" 2>/dev/null | awk '/^Version:/{print $2; exit}')"
 fi
 
-cat > "$here/data/cecil.pin" <<EOF
+tmp="$(mktemp "$here/data/.cecil.pin.XXXXXX")"
+trap 'rm -f "$tmp"' EXIT
+cat > "$tmp" <<EOF
 # Integrity pin for Mono.Cecil.dll, the only third-party dependency of this
 # repo's RE tooling (compiled against by tools/build.sh, never redistributed).
 # build.sh refuses a candidate whose SHA-256 differs; re-pin deliberately:
@@ -27,5 +29,7 @@ cat > "$here/data/cecil.pin" <<EOF
 version=$ver
 sha256=$hash
 EOF
+mv "$tmp" "$here/data/cecil.pin"
+trap - EXIT
 echo "cecil-pin: pinned Mono.Cecil $ver ($hash) -> data/cecil.pin"
 echo "cecil-pin: commit data/cecil.pin with the upgrade."

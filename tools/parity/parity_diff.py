@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-"""Diff two ParitySurface snapshots and/or report zdtd coverage.
+"""Diff two stock ParitySurface snapshots.
 
 Usage:
-  parity_diff.py old.json new.json          # what TFP changed between versions
-  parity_diff.py --coverage new.json GAMEDIR # what zdtd handles vs stock
+  parity_diff.py old.json new.json  # what TFP changed between versions
 """
 
 import json
-import os
-import re
 import sys
 
 
 def load(p):
-    return json.load(open(p))
+    with open(p, encoding="utf-8") as fh:
+        return json.load(fh)
 
 
 def diff(old, new):
@@ -54,27 +52,8 @@ def diff(old, new):
     return len(added) + len(removed) + len(changed) + enum_changed
 
 
-def coverage(new, gamedir):
-    # which packages zdtd's game.zig handles + which our default_mappings names
-    src = os.path.join(gamedir, "src/server/game.zig")
-    txt = open(src).read()
-    handled = set(re.findall(r'std\.mem\.eql\(u8, name, "(NetPackage\w+)"\)', txt))
-    stock = set(new["packages"])
-    # weight by direction: dir 1 (ToServer) = client sends it, must handle
-    tosrv = {k for k, v in new["packages"].items() if v["dir"] == 1}
-    missing_c2s = sorted(tosrv - handled)
-    print("=== ZDTD COVERAGE ===")
-    print(f"stock packages: {len(stock)}  handled in game.zig: {len(handled & stock)}")
-    print(f"client->server (dir=1) packages: {len(tosrv)}")
-    print(f"UNHANDLED client->server ({len(missing_c2s)}):")
-    for k in missing_c2s:
-        print(f"  {k}  read={new['packages'][k]['read'][:80]}")
-
-
 if __name__ == "__main__":
-    if len(sys.argv) >= 4 and sys.argv[1] == "--coverage":
-        coverage(load(sys.argv[2]), sys.argv[3])
-    elif len(sys.argv) >= 3:
+    if len(sys.argv) == 3:
         n = diff(load(sys.argv[1]), load(sys.argv[2]))
         sys.exit(1 if n else 0)
     else:

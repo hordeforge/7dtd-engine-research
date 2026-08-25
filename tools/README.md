@@ -6,6 +6,7 @@ version-diff, dump-regen tests) lives here and is tracked in git. Reimplementati
 code and mods live in their own sibling repos; RE tooling does not.
 
 Method (how to use these to reverse a system): [`../docs/re-methodology.md`](../docs/re-methodology.md).
+Maintainer status and audit log: [`STATUS.md`](STATUS.md).
 
 ```
 tools/
@@ -196,20 +197,19 @@ mono bin/legacy/DumpTerrain.exe "$ASM" ../il/terrain-v3.1.0
 ## 3. Cross-version parity (`parity/`)
 
 Snapshots the whole wire surface to diffable JSON, so you can see exactly what The
-Fun Pimps changed between game versions and measure clone coverage.
+Fun Pimps changed between game versions.
 
 | File | Purpose |
 |---|---|
 | `parity/ParitySurface.cs` | Extract every `NetPackage` read/write call sequence + directions + selected enums into a stable JSON snapshot. |
 | `parity/fetch_version.sh <branch\|manifest> [label]` | Download a specific dedicated build (app 294420) via steamcmd and emit its `ParitySurface` snapshot. |
-| `parity/parity_diff.py old.json new.json` | Diff two snapshots (added/removed/wire-changed packages). `--coverage new.json GAMEDIR` reports clone-vs-stock coverage. |
+| `parity/parity_diff.py old.json new.json` | Diff two stock snapshots (added/removed/wire-changed packages). |
 
 ## 4. One-off reversers (`re-scratch/`)
 
-Small standalone Zig programs used while reversing the client wire and on-disk
-file formats (prefab `.tts` block ids and texture channels, DEM tiles, chunk size
-math). Run with `zig run re-scratch/<file>.zig`; paths inside are hardcoded to a
-local install. See `re-scratch/README.md`.
+Small standalone Zig programs used while reversing stock prefab `.tts` block ids
+and texture channels. Run with `zig run re-scratch/<file>.zig -- <paths>`; inputs
+are explicit. See `re-scratch/README.md`.
 
 ## 5. Tests (`tests/`)
 
@@ -243,9 +243,12 @@ local install. See `re-scratch/README.md`.
 | `tests/test_save_roundtrip_robustness.py` | `save_roundtrip_check.py` degrades malformed/truncated saves to `"parse error"` FAIL verdicts instead of escaping a traceback (which would abort the remaining files' checks), and `--shipped` usage-errors with exit 2 when its path argument is missing or absent. Fixture-driven, DLL-free. |
 | `tests/test_sandbox_safe_name.py` | `sandbox/safe_name.py` (the filename sanitizer for bundle-supplied TextAsset names in extract_mesh_atlas) never yields a fragment that escapes the atlas out-dir: crafted names of `.`, `..`, separators, or absolute paths are defused while namespace dots survive. Python twin of the `IlFmt.Safe` pin; stdlib-only, DLL-free. |
 | `tests/test_sandbox_requirements_sync.py` | `sandbox/requirements.txt` (the uv-compiled, sha256-hashed dependency lock for dnfile/dncil/UnityPy) stays in sync with `sandbox/requirements.in`: every declared dep is an exact pin in the lock with at least one hash, no ranged/wildcard specifiers, and every entry the lock marks direct is declared. Mutation-tested against missing deps, stripped hashes, ghost directs, and range specifiers; stdlib-only, DLL-free, network-free. |
+| `tests/test_sandbox_preset_codes.py` | The built-in difficulty preset decoder resolves its committed inputs independently of the working directory, emits all six tiers, and rejects malformed codes. Stdlib-only, DLL-free. |
 | `tests/test_sandbox_zig_tables.py` | Every float in `sandbox/sandbox_tables.json` emits from `gen_zig_tables.py` as the shortest Zig literal that re-parses to the identical binary32 value, so a fixed-precision round can never silently shift a stock sandbox default (binary32 successors of 0.5/1.0/2.0 are pinned as collapse probes); stdlib-only, DLL-free. |
 | `tests/test_xml_pins_gate.py` | `xml_pins.py --check` diffs every committed section (`entityclasses_health`, `traders_root`, `buffs_survival`) against the install, so drift in any pinned value fails; regeneration refuses to overwrite populated sections when a source file parses to nothing (wrong `--game-dir`, renamed config header). Synthetic Data/Config fixtures in a temp dir via `--pins`; DLL-free, never touches `tools/data`. |
 | `tests/test_gate_unreadable_files.py` | The link/citation gates (`cross_repo_links.py`, `zdtd_cite_check.py`) FAIL with an explicit UNREADABLE line when a scanned file cannot be read, instead of silently skipping it (which would pass the gate while that file's links/citations were never checked). Dangling-symlink fixtures in a temp root; clean-tree positive controls; DLL-free. |
+| `tests/test_parity_diff.py` | Stock snapshot parity CLI: unchanged snapshots exit 0, wire drift exits 1, malformed/removed modes exit 2. DLL-free. |
+| `tests/test_parity_drift_fail_closed.py` | Drift orchestration rejects an unreadable assembly with exit 2 and never creates an incomplete baseline. Skips unless the C# tools, Mono, and mcs are available. |
 | `tests/test_re_dump_regen.py` | Compiles `legacy/DumpFrameEntries` and regenerates non-empty inventory dumps from the local dedicated DLL (needs install + mcs/mono). |
 | `tests/bench_version_update_tooling.py` | Version-update tooling benchmark (`make readiness`). Includes mutation checks of the Mono.Cecil pin gate. |
 

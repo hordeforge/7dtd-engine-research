@@ -20,12 +20,19 @@ MODE="all"
 for arg in "$@"; do
   case "$arg" in
     --no-drift) DO_DRIFT=0 ;;
-    --check-only) MODE="check" ;;
-    --extract-only) MODE="extract" ;;
+    --check-only)
+      [[ "$MODE" == "all" ]] || { echo "post-update: choose one mode" >&2; exit 2; }
+      MODE="check"
+      ;;
+    --extract-only)
+      [[ "$MODE" == "all" ]] || { echo "post-update: choose one mode" >&2; exit 2; }
+      MODE="extract"
+      ;;
     -h|--help)
       sed -n '2,14p' "$0"
       exit 0
       ;;
+    *) echo "post-update: unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
 

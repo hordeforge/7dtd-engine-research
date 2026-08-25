@@ -204,8 +204,8 @@ tools/parity/parity_diff.py parity_v3.0.1.json parity_exp.json   # added/removed
 call sequence, so a changed wire layout shows up as a changed call string even
 when the field names are stable. This is the fastest drift check: re-snapshot
 after every update, diff against the pinned baseline, and only re-annotate the
-packages the diff flags. Coverage mode (`--coverage new.json GAMEDIR`) reports
-what a clone handles vs stock.
+packages the diff flags. Clone implementation coverage belongs in the clone
+repository, not this stock RE tool.
 
 The package parity diff only covers `NetPackage` wire and enums. For a **full**
 cross-version diff also run a per-method **signature** diff (emit

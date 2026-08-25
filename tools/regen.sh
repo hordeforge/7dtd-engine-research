@@ -28,7 +28,7 @@ step "Census (ground-truth counts)"
 MONO_PATH="$here/bin" mono "$here/bin/Census.exe" "$asm" 2>&1 | head -10
 
 step "stock facts (live pin)"
-(cd "$root" && ./tools/stock-sync.sh)
+(cd "$root" && ASM="$asm" ./tools/stock-sync.sh)
 
 step "NetPackage wire surface + companion types"
 MONO_PATH="$here/bin" mono "$here/bin/DumpNetPackages.exe" "$asm" "$root/il/netpackages-$label"
@@ -85,20 +85,25 @@ legacy_outdirs=(
   "terrain-$label"
   "realearth-surfaces-$label"
 )
-# Legacy dumps stay best-effort (archival tools, superseded by src/), but a
-# failed run must be reported like build.sh does for unbuildable sources:
-# a silently missing dump set would look identical to a clean regeneration.
+# Full regeneration requires every mapped archival dump set. build.sh keeps its
+# general legacy stage best-effort, but this workflow must not report success
+# with a stale or missing canonical set.
 for i in "${!legacy_tools[@]}"; do
   t="${legacy_tools[i]}"
   exe="$here/bin/legacy/$t.exe"
-  [[ -f "$exe" ]] || { echo "skip $t (missing)"; continue; }
+  if [[ ! -f "$exe" ]]; then
+    echo "regen: error: missing required legacy dumper $exe" >&2
+    legacy_fail=1
+    continue
+  fi
   if ! out="$(MONO_PATH="$here/bin" mono "$exe" "$asm" "$root/il/${legacy_outdirs[i]}" 2>&1)"; then
     printf 'regen: warning: %s dump FAILED:\n%s\n' "$t" "$out" >&2
     legacy_fail=1
   fi
 done
 if [[ "${legacy_fail:-0}" == "1" ]]; then
-  echo "regen: warning: one or more legacy dumps failed; their il/ sets may be stale or absent" >&2
+  echo "regen: FAILED (one or more canonical legacy dump sets are stale or absent)" >&2
+  exit 2
 fi
 
 step "consistency + gates"

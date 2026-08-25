@@ -19,7 +19,13 @@ import UnityPy
 
 
 def main() -> int:
-    root = sys.argv[1] if len(sys.argv) > 1 else "/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
+    root = (
+        sys.argv[1]
+        if len(sys.argv) > 1
+        else os.path.expanduser(
+            "~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
+        )
+    )
     data_dir = os.path.join(root, "7DaysToDieServer_Data")
     if not os.path.isdir(data_dir):
         data_dir = os.path.join(root, "7DaysToDie_Data")
@@ -38,7 +44,7 @@ def main() -> int:
             continue
         try:
             env = UnityPy.load(p)
-        except Exception as exc:  # noqa: BLE001 - best-effort scan
+        except Exception as exc:
             print("load fail", p, exc)
             continue
         for obj in env.objects:
@@ -52,7 +58,7 @@ def main() -> int:
                     text = bytes(d.m_Script) if hasattr(d, "m_Script") else b""
                     print("=== TextAsset:", name, "in", p, "len", len(text))
                     print(text.decode("utf-8", "replace")[:2000])
-            except Exception:  # noqa: BLE001
+            except Exception:
                 pass
     print("textassets seen:", seen, "- presets found:", "no" if seen == 0 else "maybe above")
     return 0

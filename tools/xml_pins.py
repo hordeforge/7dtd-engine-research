@@ -19,6 +19,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_PINS = os.path.join(TOOLS, "data", "xml_pins.json")
@@ -131,10 +132,20 @@ def main() -> int:
                     file=sys.stderr,
                 )
             return 2
-        os.makedirs(os.path.dirname(os.path.abspath(pins_path)), exist_ok=True)
-        with open(pins_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=1, sort_keys=True)
-            f.write("\n")
+        pins_dir = os.path.dirname(os.path.abspath(pins_path))
+        os.makedirs(pins_dir, exist_ok=True)
+        tmp = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                "w", encoding="utf-8", dir=pins_dir, delete=False
+            ) as f:
+                tmp = f.name
+                json.dump(data, f, indent=1, sort_keys=True)
+                f.write("\n")
+            os.replace(tmp, pins_path)
+        finally:
+            if tmp and os.path.exists(tmp):
+                os.unlink(tmp)
         print(
             f"wrote {pins_path} ({len(data['entityclasses_health'])} hp vars, "
             f"{len(data['traders_root'])} trader attrs, "
