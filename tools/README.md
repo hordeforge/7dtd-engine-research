@@ -202,7 +202,7 @@ Fun Pimps changed between game versions.
 | File | Purpose |
 |---|---|
 | `parity/ParitySurface.cs` | Extract every `NetPackage` read/write call sequence + directions + selected enums into a stable JSON snapshot. |
-| `parity/fetch_version.sh <branch\|manifest> [label]` | Download a specific dedicated build (app 294420) via steamcmd and emit its `ParitySurface` snapshot. |
+| `parity/fetch_version.sh <branch\|manifest> [label]` | Download a specific dedicated build (app 294420) via operator-installed SteamCMD and atomically emit a validated `ParitySurface` snapshot. Set `STEAMCMD` when it is not on `PATH`. |
 | `parity/parity_diff.py old.json new.json` | Diff two stock snapshots (added/removed/wire-changed packages). |
 
 ## 4. One-off reversers (`re-scratch/`)

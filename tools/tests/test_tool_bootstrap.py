@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Ensure the RE tool bootstrap discovers a normal system Mono.Cecil install."""
 
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -19,9 +20,20 @@ def main() -> None:
     assert 'ASM="$asm" ./tools/stock-sync.sh' in regen
     assert "regen: FAILED (one or more canonical legacy dump sets" in regen
     for script in ("post-update.sh", "stock-sync.sh"):
-        text = (ROOT / "tools" / script).read_text(encoding="utf-8")
+        path = ROOT / "tools" / script
+        text = path.read_text(encoding="utf-8")
         assert "unknown argument" in text
         assert "choose one mode" in text
+        assert subprocess.run([path, "--bad-option"], capture_output=True).returncode == 2
+        assert (
+            subprocess.run([path, "--check-only", "--extract-only"], capture_output=True).returncode
+            == 2
+        )
+    fetch = ROOT / "tools" / "parity" / "fetch_version.sh"
+    fetch_text = fetch.read_text(encoding="utf-8")
+    assert "curl " not in fetch_text
+    assert 'python3 -m json.tool "$tmp"' in fetch_text
+    assert subprocess.run([fetch, "public", "../escape"], capture_output=True).returncode == 2
     assert "standard Mono GAC" in docs
     print("OK: tool bootstrap searches the system Mono.Cecil GAC")
 
