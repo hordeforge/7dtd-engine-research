@@ -1,8 +1,8 @@
 # AGENTS.md - 7dtd-engine-research
 
-Stock-game RE for 7 Days to Die dedicated server (V3.1.0). All study of shipped `Assembly-CSharp.dll` lives here: RE narratives, dump tooling, wire/protocol analysis, engine cost/loop RE. Reimplementations/mods live in siblings, linking here for RE facts (see [`../AGENTS.md`](../AGENTS.md) boundaries).
+Stock-game RE for 7 Days to Die dedicated server (V3.1.0). All study of shipped `Assembly-CSharp.dll` lives here: RE narratives, dump tooling, wire/protocol analysis, engine cost/loop RE. Reimplementations/mods live in siblings, linking here for RE facts (see [`hordeforge/.github` AGENTS.md](https://github.com/hordeforge/.github/blob/main/AGENTS.md) boundaries).
 
-Workspace root: [`../MODDING_BEST_PRACTICES.md`](../MODDING_BEST_PRACTICES.md).
+Workspace root: [`hordeforge/.github` MODDING_BEST_PRACTICES.md](https://github.com/hordeforge/.github/blob/main/MODDING_BEST_PRACTICES.md).
 
 ## Doc scope
 
