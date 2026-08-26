@@ -800,16 +800,27 @@ TriggerVolume overload (IL=27) same with prefab required (warn if null).
 **`NetPackageSleeperPassiveChange.ProcessPackage` (IL=21):** remote only; set
 `IsSleeperPassive = false` on target (no full wake).
 
-**`PlayerStealth.TickServer` (IL=432) (high level):**
+**`PlayerStealth.TickServer` (IL=432) (high level; exact chain re-pinned
+2026-08-26 from the full-v3.1.0 dump):**
 
 1. `speedAverage` lerp toward `sqrt(speedForward²+speedStrafe²)` at 0.2 when
    moving, else decay `*0.5`.
-2. `LightManager.GetStealthLightLevel` → ambient/boost ratio clamped
-   **0.5..3.2**; crouch multiplies light by **0.6**.
-3. Cvar `_lightlevel = light * 100` (netSync true).
-4. Scale light by `(1 + speedAverage * 0.15)`; passive **89** for
-   `lightAttackPercent` (if ambient &lt; 0.1 use passive else 1).
-5. `lightLevel = clamp((light * (0.32 + 0.68*passive89)) * 100, 0, 200)`.
+2. `light = GetStealthLightLevel(player, out selfLight)` (world light at head
+   +1.68; `selfLight` = the held-item light). Ratio =
+   `FastClamp(selfLight / (light + 0.05), 0.5, 3.2)`; `light += selfLight ×
+   ratio` (IL_0078-0097). Without a held light the ratio is unused (0 × t).
+3. Crouch multiplies light by **0.6** (IL_00A6); cvar `_lightlevel =
+   light * 100` (netSync true); light ×= `(1 + speedAverage * 0.15)`
+   (IL_00CD-00E0, movement visibility).
+4. `passive89 = EffectManager.GetValue(PassiveEffects 89, ...)` (IL_00E2);
+   `lightAttackPercent = selfLight < 0.1 ? passive89 : 1` (IL_010A-011C, the
+   check is on the **held-item light**, not the day/night ambient).
+5. `lightLevel = FastClamp(light * (0.32 + 0.68 × passive89) * 100, 0, 200)`
+   (IL_0121-014F). Standing with no held item: lightLevel = ambient ×
+   92.52. This field feeds both the S2C light byte
+   (`NetPackageEntityStealth.Setup(player, lightLevel, noiseVolume, alert)`
+   IL=26: `data = (byte)lightLevel | (noiseVolume&127)<<8 | alert<<15`) and
+   `CanSeeStealth`.
 6. `NoiseCleanup` + `CalcVolume` → cvar `_noiselevel`.
 7. Decay `sleeperNoiseVolume` by **2.5** when wait ticks hit 0; noise fan-out
    uses `CalcSenseScale` scaled radius `min(vol*0.6*(1+sense*1.6), 40+15*sense)`
