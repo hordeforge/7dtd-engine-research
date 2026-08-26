@@ -2299,6 +2299,11 @@ cannot wedge or visibly alter the b14 client.
   not server-wide). ShowToolbeltMessage corrected: sole sender
   `GameManager.ShowTooltipMP` (unicast), only called by the Homerun minigame
   in V3.1.0 b14 - pickup feedback does not ride this package.
+- **2026-08-27:** C2S read pins for the drop-only validators:
+  `NetPackageEntityStealth` read IL=9 is id i32 | data u16 (6 bytes, same
+  two fields as write IL=12) and `NetPackageEntityPhysics` read IL=74 is
+  Flags u16 | EntityId i32 | 14xf32 (62 bytes); zdtd's validated-no-op
+  handlers use the true minimums now.
 - **2026-08-27:** `NetPackageSoundAtPosition` wire re-pinned from
   `NetPackageSoundAtPosition.il.txt` (write IL=25 / read IL=21): the body is
   **5 fields** (pos, audioClipName, mode u8, distance, entityId);
