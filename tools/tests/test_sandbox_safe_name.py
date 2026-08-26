@@ -14,9 +14,11 @@ from __future__ import annotations
 import importlib.util
 import os
 import sys
-from pathlib import Path
 
-TOOLS = Path(__file__).resolve().parents[1]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = _common.TOOLS
 
 _spec = importlib.util.spec_from_file_location("safe_name", TOOLS / "sandbox" / "safe_name.py")
 assert _spec is not None

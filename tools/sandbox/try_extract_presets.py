@@ -53,7 +53,7 @@ def main() -> int:
         os.path.join(data_dir, "Resources", "resources.resource"),
         os.path.join(data_dir, "data.unity3d"),
     ]
-    for base in ("Data", data_dir):
+    for base in (os.path.join(root, "Data"), data_dir):
         for dp, _, files in os.walk(base):
             for fn in files:
                 if fn.endswith((".bundle", ".unity3d", ".resource")):

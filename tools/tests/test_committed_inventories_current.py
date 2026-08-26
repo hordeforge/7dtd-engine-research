@@ -23,6 +23,7 @@ import json
 import os
 import sys
 import tempfile
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -30,7 +31,7 @@ import _common
 FACTS = os.path.join(_common.TOOLS, "data", "stock_facts.json")
 
 
-def live_build_matches_pin(asm_path) -> tuple[bool, str]:
+def live_build_matches_pin(asm_path: Path) -> tuple[bool, str]:
     """True when the local assembly is the build the corpus pins.
 
     The generated inventories are pinned to the studied build (stock_facts.json
@@ -38,7 +39,9 @@ def live_build_matches_pin(asm_path) -> tuple[bool, str]:
     a fresh regeneration WRONG, so a version mismatch must skip the staleness
     comparison instead of reporting the inventory stale.
     """
-    with tempfile.TemporaryDirectory(prefix="inventories-version-") as td:
+    with tempfile.TemporaryDirectory(
+        prefix="inventories-version-", dir=_common.scratch_dir()
+    ) as td:
         out = os.path.join(td, "live_facts.json")
         rc, _, err = _common.run_tool("StockFacts.exe", str(asm_path), out)
         if rc != 0:
@@ -61,7 +64,9 @@ def live_build_matches_pin(asm_path) -> tuple[bool, str]:
         )
 
 
-def check_generated(exe, args, committed_rel, label, out_path):
+def check_generated(
+    exe: str, args: list[str], committed_rel: str, label: str, out_path: str
+) -> None:
     committed = os.path.join(_common.REPO, committed_rel)
     assert os.path.isfile(committed), f"missing committed file: {committed_rel}"
     rc, _, err = _common.run_tool(exe, *args, out_path)
@@ -102,7 +107,9 @@ def main() -> int:
         return 0
 
     docs = os.path.join(_common.REPO, "docs")
-    with tempfile.TemporaryDirectory(prefix="inventories-current-") as td:
+    with tempfile.TemporaryDirectory(
+        prefix="inventories-current-", dir=_common.scratch_dir()
+    ) as td:
         check_generated(
             "WireBodies.exe",
             [str(asm_path)],

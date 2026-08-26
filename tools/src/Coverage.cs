@@ -2,7 +2,7 @@
 // dedicated boot+tick drivers (same seeds as Reach), then cross-references the
 // reached game types against which are name-mentioned in the docs tree. Emits a
 // markdown report: reachability totals, per-namespace documented/undocumented split,
-// and the top undocumented reached types (the actionable gaps).
+// and the top undocumented reached types (the gaps left to close).
 //   mono Coverage.exe <asm> <docsDir> <out.md>
 // The "documented" signal is a name mention in any docs/*.md (an upper bound: a type
 // named in passing counts). Treat undocumented-reached as the honest gap list.
@@ -65,6 +65,9 @@ class Coverage {
       bool found = false;
       foreach (var f in c.Fields)
         if (f.Name == names[i] && f.HasConstant) {
+          // A cVersion* constant of an unexpected literal type (Convert throws
+          // InvalidCast/Format/Overflow): report "no version" rather than a
+          // partly-filled one.
           try { v[i] = Convert.ToInt32(f.Constant); found = true; } catch { return null; }
           break;
         }

@@ -39,7 +39,8 @@ class NameSet {
     var b = t.BaseType; int g = 0;
     while (b != null && g++ < 24) {
       if (b.Name == "ConsoleCmdAbstract") return true;
-      TypeDefinition r = null; try { r = b.Resolve(); } catch { }
+      // Base outside the loaded assembly set: Resolve throws, null ends the walk.
+      TypeDefinition r = null; try { r = b.Resolve(); } catch (AssemblyResolutionException) { }
       if (r == null) break; b = r.BaseType;
     }
     return false;
@@ -95,9 +96,9 @@ class NameSet {
 """
 
 
-def parse_inventory(text: str) -> tuple[dict, list]:
-    primaries = {}
-    aliases = []
+def parse_inventory(text: str) -> tuple[dict[str, str], list[tuple[str, str]]]:
+    primaries: dict[str, str] = {}
+    aliases: list[tuple[str, str]] = []
     for ln in text.splitlines():
         s = ln.strip()
         if not (s.startswith("| `") or s.startswith("|`")):
@@ -179,7 +180,7 @@ def main() -> int:
     # Does-column descriptions must equal getDescription (whitespace-normalized:
     # the doc renders embedded newlines as spaces; empty getDescription becomes
     # "(no description)")
-    def norm_ws(s):
+    def norm_ws(s: str) -> str:
         return re.sub(r"\s+", " ", s).strip()
 
     for m in re.finditer(

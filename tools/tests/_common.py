@@ -8,7 +8,7 @@ Tests that compile an ad-hoc C# probe share compile_probe/run_probe.
 
 Convention (mirrors test_re_dump_regen.py):
   - dedicated DLL absent            -> SKIP (machine-local, git-ignored inputs)
-  - DLL present, bin tools missing  -> FAIL (actionable: cd tools && ./build.sh)
+  - DLL present, bin tools missing  -> FAIL (fix: cd tools && ./build.sh)
 """
 
 from __future__ import annotations
@@ -20,20 +20,48 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-TOOLS = Path(__file__).resolve().parents[1]
-REPO = TOOLS.parent
+ROOT_MARKERS = ("Makefile", "AGENTS.md")
+
+
+def _repo_root() -> Path:
+    """Nearest ancestor holding every root marker.
+
+    Walking for markers instead of counting parent hops keeps a moved script
+    pointing at the same repo instead of silently resolving one level off.
+    """
+    here = Path(__file__).resolve()
+    for d in here.parents:
+        if all((d / m).is_file() for m in ROOT_MARKERS):
+            return d
+    raise RuntimeError(f"repo root ({', '.join(ROOT_MARKERS)}) not found above {here}")
+
+
+REPO = _repo_root()
+TOOLS = REPO / "tools"
 BIN = TOOLS / "bin"
 
-# Private scratch dir for ad-hoc probe sources/binaries. A fixed name under
-# the shared /tmp would let any local user pre-create (or symlink) the file a
-# later run compiles and executes; mkdtemp is 0700 and unique per process.
+
+def scratch_dir() -> Path:
+    """Disk-backed base for temp trees, under the gitignored .scratch/.
+
+    The system temp dir is tmpfs on the dev machines, so probe binaries,
+    fixture trees and regenerated inventories would be charged to RAM.
+    """
+    d = REPO / ".scratch" / "tmp"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+# Private scratch dir for ad-hoc probe sources/binaries. A fixed name under a
+# world-writable base would let any local user pre-create (or symlink) the file
+# a later run compiles and executes; mkdtemp is 0700 and unique per process.
 _PROBE_DIR: str | None = None
 
 
 def probe_dir() -> Path:
     global _PROBE_DIR
     if _PROBE_DIR is None:
-        _PROBE_DIR = tempfile.mkdtemp(prefix="7dtd-research-probe-")
+        _PROBE_DIR = tempfile.mkdtemp(prefix="probe-", dir=scratch_dir())
         atexit.register(shutil.rmtree, _PROBE_DIR, True)
     return Path(_PROBE_DIR)
 
@@ -78,7 +106,7 @@ def prereq(tool_names: list[str]) -> tuple[str, bool]:
 
     Returns (message, is_skip): a missing dedicated DLL is a SKIP (nothing
     regenerable locally to assert); a missing built binary while the DLL is
-    present is an actionable FAIL.
+    present is a FAIL carrying the build command.
     """
     if find_asm() is None:
         return (

@@ -29,12 +29,26 @@ Usage: python3 tools/tests/test_subclass_counts.py [<asm>] (defaults to ASM env 
 import os
 import re
 import sys
+from dataclasses import dataclass
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 REPO = str(_common.REPO)
 INV = os.path.join(REPO, "docs", "inventories")
+
+
+@dataclass(frozen=True)
+class Stats:
+    """One `closed:`/`seq:` row from the subclass-count probe."""
+
+    total: int
+    concrete: int
+    abstract: int
+    usedbase: list[str]
+    outclosure: list[str]
+    closuretotal: int
+
 
 # (inventory, mode, target, expected, extra, self_state)
 #   mode "closed": target is a base full name; expected is the closure total;
@@ -153,7 +167,8 @@ class LeafMeth {
 }
 """
     mout = _common.run_probe(_common.compile_probe(meth_src, "leafmeth_check"), asm)
-    methods, base_of = {}, {}
+    methods: dict[str, set[str]] = {}
+    base_of: dict[str, str] = {}
     for line in mout.splitlines():
         parts = line.split("\t")
         if len(parts) != 3:
@@ -161,8 +176,8 @@ class LeafMeth {
         methods[parts[0]] = set(parts[2].split(",")) if parts[2] else set()
         base_of[parts[0]] = parts[1]
 
-    def has_method(typ, meth):
-        seen = set()
+    def has_method(typ: str, meth: str) -> bool:
+        seen: set[str] = set()
         while typ and typ not in seen:
             seen.add(typ)
             if meth in methods.get(typ, set()):
@@ -170,7 +185,7 @@ class LeafMeth {
             typ = base_of.get(typ, "")
         return False
 
-    key_bad = []
+    key_bad: list[str] = []
     for inv in (
         "item-actions.md",
         "minevent-actions.md",
@@ -201,52 +216,49 @@ class LeafMeth {
         )
     ]
     out = _common.run_probe(_common.compile_probe(SRC, "subcount_check"), asm, *args)
-    stats = {}
+    stats: dict[str, Stats] = {}
     for line in out.splitlines():
         parts = line.split()
-        if parts[0] == "closed":
-            d = dict(kv.split("=") for kv in parts[2:])
-            d["total"] = int(d["total"])
-            d["concrete"] = int(d["concrete"])
-            d["abstract"] = int(d["abstract"])
-            stats[parts[1]] = d
-        elif parts[0] == "seq":
-            d = dict(kv.split("=") for kv in parts[2:])
-            d["total"] = int(d["total"])
-            d["concrete"] = int(d["concrete"])
-            d["abstract"] = int(d["abstract"])
-            d["usedbase"] = d["usedbase"].split("|") if d["usedbase"] else []
-            d["outclosure"] = d["outclosure"].split("|") if d["outclosure"] else []
-            d["closuretotal"] = int(d["closuretotal"])
-            stats[parts[1]] = d
-    bad = []
+        if parts[0] not in ("closed", "seq"):
+            continue
+        kv = dict(f.split("=", 1) for f in parts[2:])
+        stats[parts[1]] = Stats(
+            total=int(kv["total"]),
+            concrete=int(kv["concrete"]),
+            abstract=int(kv["abstract"]),
+            # seq rows alone carry the namespace-closure columns.
+            usedbase=kv["usedbase"].split("|") if kv.get("usedbase") else [],
+            outclosure=kv["outclosure"].split("|") if kv.get("outclosure") else [],
+            closuretotal=int(kv.get("closuretotal", 0)),
+        )
+    bad: list[str] = []
     for inventory, mode, target, expected, extra, self_state in CHECKS:
         d = stats[target]
         if mode == "closed":
-            if d["total"] != expected:
+            if d.total != expected:
                 bad.append(
-                    f"{inventory}: closure of {target} = {d['total']} (concrete {d['concrete']}, abstract {d['abstract']}) != stated {expected}"
+                    f"{inventory}: closure of {target} = {d.total} (concrete {d.concrete}, abstract {d.abstract}) != stated {expected}"
                 )
-            if extra and d[extra[0]] != extra[1]:
-                bad.append(f"{inventory}: {target} {extra[0]} count = {d[extra[0]]} != {extra[1]}")
+            if extra and getattr(d, extra[0]) != extra[1]:
+                bad.append(
+                    f"{inventory}: {target} {extra[0]} count = {getattr(d, extra[0])} != {extra[1]}"
+                )
         else:
-            leaf_parents = [n for n in SEQ_LEAF_PARENTS if n in d["usedbase"]]
-            leaves = d["total"] - len(d["usedbase"]) + len(leaf_parents)
+            leaf_parents = [n for n in SEQ_LEAF_PARENTS if n in d.usedbase]
+            leaves = d.total - len(d.usedbase) + len(leaf_parents)
             if leaves != expected:
                 bad.append(
-                    f"{inventory}: derived leaves = {leaves} (ns {d['total']} - {len(d['usedbase'])} bases + {len(leaf_parents)} leaf-parents) != stated {expected}"
+                    f"{inventory}: derived leaves = {leaves} (ns {d.total} - {len(d.usedbase)} bases + {len(leaf_parents)} leaf-parents) != stated {expected}"
                 )
-            if d["abstract"] != 0:
+            if d.abstract != 0:
+                bad.append(f"{inventory}: namespace has {d.abstract} abstract classes, expected 0")
+            if d.closuretotal != d.total - 1 + len(d.outclosure):
                 bad.append(
-                    f"{inventory}: namespace has {d['abstract']} abstract classes, expected 0"
+                    f"{inventory}: BaseAction closure = {d.closuretotal}, expected {d.total - 1 + len(d.outclosure)} (ns {d.total} - root + {len(d.outclosure)} out-of-ns)"
                 )
-            if d["closuretotal"] != d["total"] - 1 + len(d["outclosure"]):
+            if d.outclosure != SEQ_OUT_CLOSURE:
                 bad.append(
-                    f"{inventory}: BaseAction closure = {d['closuretotal']}, expected {d['total'] - 1 + len(d['outclosure'])} (ns {d['total']} - root + {len(d['outclosure'])} out-of-ns)"
-                )
-            if d["outclosure"] != SEQ_OUT_CLOSURE:
-                bad.append(
-                    f"{inventory}: out-of-namespace closure {d['outclosure']} != documented {SEQ_OUT_CLOSURE}"
+                    f"{inventory}: out-of-namespace closure {d.outclosure} != documented {SEQ_OUT_CLOSURE}"
                 )
             if len(leaf_parents) != len(SEQ_LEAF_PARENTS):
                 bad.append(

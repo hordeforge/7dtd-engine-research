@@ -7,7 +7,7 @@ ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Serve
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
-	@echo "make lint         - static analysis: ruff check+format (Python) + shellcheck (shell)"
+	@echo "make lint         - static analysis: ruff check+format + mypy (Python) + shellcheck (shell)"
 	@echo "make cross-links  - resolve every cross-repo .md link in the sibling workspace"
 	@echo "make sibling-cites - verify every sibling repo's research citations resolve against docs/"
 	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
@@ -59,27 +59,30 @@ regen-check:
 	python3 "$(TOOLS)/tests/test_re_dump_regen.py"
 
 # Static analysis gate: same commands in CI (ci.yml lint job). ruff reads
-# ruff.toml at the repo root; format --check keeps the tree formatter-clean;
-# shellcheck runs at its strictest severity. The ruff binary must match the
-# CI pin (single source of truth: .github/workflows/ci.yml), because format
-# and lint rules drift between releases.
+# ruff.toml and mypy reads mypy.ini at the repo root; format --check keeps the
+# tree formatter-clean; shellcheck runs at its strictest severity. The ruff and
+# mypy binaries must match the CI pins (single source of truth:
+# .github/workflows/ci.yml), because their rules drift between releases.
 lint:
-	@expected=$$(sed -n 's/^ *uv tool install ruff==\([0-9][0-9.]*\)/\1/p' .github/workflows/ci.yml | head -1); \
-	if [ -z "$$expected" ]; then \
-	  echo "lint: cannot read the ruff pin from .github/workflows/ci.yml" >&2; exit 2; \
-	fi; \
-	command -v ruff >/dev/null 2>&1 || { \
-	  echo "lint: ruff not on PATH; install the CI pin: uv tool install ruff==$$expected" >&2; exit 2; \
-	}; \
-	actual=$$(ruff --version | awk '{print $$2}'); \
-	if [ "$$actual" != "$$expected" ]; then \
-	  echo "lint: local ruff $$actual != CI pin ruff==$$expected; align both together (.github/workflows/ci.yml)" >&2; exit 2; \
-	fi; \
+	@for tool in ruff mypy; do \
+	  expected=$$(sed -n "s/^ *uv tool install $$tool==\([0-9][0-9.]*\)/\1/p" .github/workflows/ci.yml | head -1); \
+	  if [ -z "$$expected" ]; then \
+	    echo "lint: cannot read the $$tool pin from .github/workflows/ci.yml" >&2; exit 2; \
+	  fi; \
+	  command -v $$tool >/dev/null 2>&1 || { \
+	    echo "lint: $$tool not on PATH; install the CI pin: uv tool install $$tool==$$expected" >&2; exit 2; \
+	  }; \
+	  actual=$$($$tool --version | awk '{print $$2}'); \
+	  if [ "$$actual" != "$$expected" ]; then \
+	    echo "lint: local $$tool $$actual != CI pin $$tool==$$expected; align both together (.github/workflows/ci.yml)" >&2; exit 2; \
+	  fi; \
+	done; \
 	command -v shellcheck >/dev/null 2>&1 || { \
 	  echo "lint: shellcheck not on PATH; CI pins $(shell sed -n 's/^ *sc_ver=\([0-9][0-9.]*\)/\1/p' .github/workflows/ci.yml | head -1) (.github/workflows/ci.yml); any recent distro package is fine locally, e.g.: sudo apt install shellcheck" >&2; exit 2; \
 	}
 	ruff check .
 	ruff format --check .
+	mypy $$(git ls-files '*.py')
 	for f in $$(git ls-files '*.sh'); do shellcheck "$$f"; done
 
 test:

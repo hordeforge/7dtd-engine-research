@@ -29,10 +29,10 @@ def split_cells(line: str) -> list[str]:
     return [c.strip() for c in PIPE_AWARE.split(line.strip())]
 
 
-def parse_types_table(text: str):
+def parse_types_table(text: str) -> tuple[int, int, list[str]]:
     rows = 0
     total = 0
-    malformed = []
+    malformed: list[str] = []
     for line in text.splitlines():
         if not line.startswith("|") or line.startswith("|---"):
             continue
@@ -55,7 +55,7 @@ def main() -> int:
     asm = str(asm_path)
     env = dict(os.environ)
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    with tempfile.TemporaryDirectory() as tmp:
+    with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as tmp:
         proc = subprocess.run(
             ["mono", os.path.join(TOOLS, "bin", "FullSurface.exe"), asm, tmp],
             capture_output=True,

@@ -25,7 +25,7 @@ def _coverage_text() -> str:
         return f.read()
 
 
-def test_audit_table_lists_every_doc():
+def test_audit_table_lists_every_doc() -> None:
     text = _coverage_text()
     # audit rows are of the form "| [name.md](name.md) | tier |"; prose and
     # comma-separated table cells (e.g. the family table) do not match because
@@ -36,7 +36,7 @@ def test_audit_table_lists_every_doc():
     assert not missing, f"docs missing from coverage.md audit table: {missing}"
 
 
-def test_census_table_matches_stock_facts():
+def test_census_table_matches_stock_facts() -> None:
     text = _coverage_text()
     with open(FACTS, encoding="utf-8") as f:
         facts = json.load(f)

@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """Require a consistent missing-argument contract from maintained C# tools."""
 
+import os
 import shutil
 import subprocess
-from pathlib import Path
+import sys
 
-TOOLS = Path(__file__).resolve().parents[1]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = _common.TOOLS
 SHARED = {"AsmWalk", "IlFmt", "Seeds"}
 
 

@@ -18,7 +18,7 @@ import re
 COLOR_RE = re.compile(r'<uv\s+id="(\d+)"[^>]*color="([0-9.eE+-]+),([0-9.eE+-]+),([0-9.eE+-]+)"')
 
 
-def to_color5(r, g, b):
+def to_color5(r: float, g: float, b: float) -> int:
     return (
         ((int(r * 31 + 0.5) & 0x1F) << 10)
         | ((int(g * 31 + 0.5) & 0x1F) << 5)
@@ -26,7 +26,7 @@ def to_color5(r, g, b):
     )
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(
         description="Generate src/assets/map_atlas.zig in zdtd from the extracted atlas XMLs "
         "(tools/sandbox/atlas/ta_*.xml)."

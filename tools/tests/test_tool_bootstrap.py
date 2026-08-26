@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Ensure the RE tool bootstrap discovers a normal system Mono.Cecil install."""
 
+import os
 import subprocess
-from pathlib import Path
+import sys
 
-ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+ROOT = _common.REPO
 
 
 def main() -> None:

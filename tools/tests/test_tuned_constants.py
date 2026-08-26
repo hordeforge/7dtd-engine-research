@@ -20,7 +20,7 @@ REPO = str(_common.REPO)
 DOCS = os.path.join(REPO, "docs")
 
 # family -> (doc, { const name: expected value })  (values from the V3.1.0 DLL)
-CONSTS = {
+CONSTS: dict[str, tuple[str, dict[str, int | float | str]]] = {
     "AIDirectorBloodMoonParty": (
         "aidirector.md",
         {
@@ -1013,15 +1013,15 @@ def main() -> int:
         return 0
     asm = str(asm_path)
     out = _common.run_probe(_common.compile_probe(SRC, "tunedconsts_check"), asm, ",".join(CONSTS))
-    dll = {}
+    dll: dict[tuple[str, str], str] = {}
     for line in out.splitlines():
         cls, _, rest = line.partition(".")
         name, _, val = rest.partition("=")
         dll[(cls, name)] = val
 
-    bad = []
+    bad: list[str] = []
     # ~60 families share ~40 docs (aidirector.md alone owns 13); read each once.
-    doc_text = {}
+    doc_text: dict[str, str] = {}
     for cls, (doc_name, consts) in CONSTS.items():
         if doc_name not in doc_text:
             with open(os.path.join(DOCS, doc_name), encoding="utf-8") as f:

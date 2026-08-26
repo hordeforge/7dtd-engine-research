@@ -22,6 +22,7 @@ import argparse
 import os
 import re
 import sys
+from collections.abc import Callable, Iterator
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -32,7 +33,7 @@ DEFAULT_DOCS = os.path.join(REPO, "docs")
 TOKEN = re.compile(r"`([A-Za-z_][A-Za-z0-9_]*)(?:[./:][^`]*)?`")
 
 
-def narrative_docs(docs_dir: str):
+def narrative_docs(docs_dir: str) -> Iterator[str]:
     for root, _dirs, files in os.walk(docs_dir):
         norm = root.replace(os.sep, "/")
         if norm.endswith("/inventories"):
@@ -66,7 +67,7 @@ def main(argv: list[str]) -> int:
                 if name[0].isupper():  # type-shaped; lowercase words are prose/IL ops
                     counts[name] = counts.get(name, 0) + 1
 
-    buckets = [
+    buckets: list[tuple[str, Callable[[int], bool]]] = [
         ("exactly 1", lambda n: n == 1),
         ("2-4", lambda n: 2 <= n <= 4),
         ("5-19", lambda n: 5 <= n <= 19),

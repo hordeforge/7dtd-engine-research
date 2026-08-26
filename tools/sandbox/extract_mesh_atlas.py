@@ -21,16 +21,15 @@ from pathlib import Path
 
 from safe_name import safe_name
 
+IMPORT_ERROR: ModuleNotFoundError | None = None
 try:
     import UnityPy
 except ModuleNotFoundError as exc:
     UnityPy = None
     IMPORT_ERROR = exc
-else:
-    IMPORT_ERROR = None
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )

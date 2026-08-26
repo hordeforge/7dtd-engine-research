@@ -39,7 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 
 
-def default_asm():
+def default_asm() -> str:
     env = os.environ.get("ASM")
     if env:
         return env
@@ -52,7 +52,7 @@ def default_asm():
     return cand
 
 
-def run_mono(exe, *args):
+def run_mono(exe: str, *args: str) -> tuple[int, str, str]:
     """Run a tools/bin exe under mono with MONO_PATH set, return stdout+stderr."""
     bin_dir = os.path.join(REPO, "tools", "bin")
     env = dict(os.environ)
@@ -66,7 +66,7 @@ def run_mono(exe, *args):
     return proc.returncode, proc.stdout, proc.stderr
 
 
-def parse_coverage(stderr):
+def parse_coverage(stderr: str) -> dict[str, int]:
     """Parse the Coverage.exe summary line:
     'reached methods=N game types=N narrated=N catalogued=N classified=N unaccounted=N'
     """
@@ -87,9 +87,9 @@ def parse_coverage(stderr):
     }
 
 
-def parse_census(stdout):
+def parse_census(stdout: str) -> dict[str, int]:
     """Parse Census.exe key/value lines: 'AllTypes (incl nested)       = 7432'."""
-    out = {}
+    out: dict[str, int] = {}
     for line in stdout.splitlines():
         m = re.match(r"([A-Za-z0-9 ().*]+?)\s*=\s*(\d+)", line)
         if m:
@@ -97,7 +97,7 @@ def parse_census(stdout):
     return out
 
 
-def parse_report_reached_types(report_path):
+def parse_report_reached_types(report_path: str) -> int:
     """Grab 'Reached types (incl. compiler-generated)' from the Coverage report."""
     try:
         with open(report_path, encoding="utf-8") as fh:
@@ -108,13 +108,16 @@ def parse_report_reached_types(report_path):
                 if m:
                     return int(m.group(1))
     except OSError:
+        # Unreadable report: the caller prints "reached in the server call
+        # graph" only for a non-zero count, so 0 suppresses the row instead of
+        # reporting a made-up one.
         pass
     return 0
 
 
-def parse_report_accounted(report_path):
+def parse_report_accounted(report_path: str) -> dict[str, int | None]:
     """Grab the whole-assembly 100% rows: accounted types and methods in them."""
-    out = {"acct_types": None, "acct_methods": None}
+    out: dict[str, int | None] = {"acct_types": None, "acct_methods": None}
     try:
         with open(report_path, encoding="utf-8") as fh:
             for line in fh:
@@ -131,11 +134,14 @@ def parse_report_accounted(report_path):
                 if m:
                     out["acct_methods"] = int(m.group(1))
     except OSError:
+        # Unreadable report: the None entries stay, and main() prints the
+        # "could not parse the whole-assembly accounting rows" warning rather
+        # than claiming a 100% partition it never read.
         pass
     return out
 
 
-def parse_args(argv):
+def parse_args(argv: list[str]) -> argparse.Namespace:
     ap = argparse.ArgumentParser(
         description="Compute the RE-coverage percentages for the corpus (live census)."
     )
@@ -165,11 +171,11 @@ def parse_args(argv):
     return ap.parse_args(argv)
 
 
-def pct(n, total):
+def pct(n: int, total: int) -> float:
     return 100.0 * n / total if total else 0.0
 
 
-def main():
+def main() -> int:
     args = parse_args(sys.argv[1:])
     history = args.history
     as_json = args.json
@@ -182,8 +188,11 @@ def main():
         return 2
 
     # 1. Live coverage census over the docs tree (report to a private temp
-    #    file so the scan never sees a stale extra file inside docs/).
-    fd, tmp_report = tempfile.mkstemp(prefix="census-pct-coverage-", suffix=".md")
+    #    file so the scan never sees a stale extra file inside docs/). The
+    #    scratch base is disk-backed: the system temp dir is tmpfs here.
+    scratch = os.path.join(REPO, ".scratch", "tmp")
+    os.makedirs(scratch, exist_ok=True)
+    fd, tmp_report = tempfile.mkstemp(prefix="census-pct-coverage-", suffix=".md", dir=scratch)
     os.close(fd)
     try:
         rc, _, stderr = run_mono("Coverage.exe", asm, docs, tmp_report)
@@ -263,7 +272,8 @@ def main():
                 )
             print("  compiler-generated and third-party/BCL types are excluded by design")
 
-    result = {
+    narrated_pct = round(pct(cov["narrated"], cov["game_types"]), 1)
+    result: dict[str, int | float | None] = {
         "reached_game_types": cov["game_types"],
         "narrated": cov["narrated"],
         "catalogued": cov["catalogued"],
@@ -275,17 +285,17 @@ def main():
         "all_methods": all_methods,
         "accounted_methods": accounted.get("acct_methods"),
         "reached_methods": cov["reached_methods"],
-        "narrated_pct": round(pct(cov["narrated"], cov["game_types"]), 1),
+        "narrated_pct": narrated_pct,
     }
     if history:
         row = "%s,%d,%d,%d,%d,%d,%.1f%%\n" % (
             datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
-            result["reached_game_types"],
-            result["narrated"],
-            result["catalogued"],
-            result["classified"],
-            result["unaccounted"],
-            result["narrated_pct"],
+            cov["game_types"],
+            cov["narrated"],
+            cov["catalogued"],
+            cov["classified"],
+            cov["unaccounted"],
+            narrated_pct,
         )
         header = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
         if not os.path.exists(history):

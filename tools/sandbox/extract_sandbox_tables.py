@@ -24,15 +24,15 @@ import os
 import struct
 import sys
 import tempfile
+from typing import Any
 
+IMPORT_ERROR: ModuleNotFoundError | None = None
 try:
     import dnfile
     from dncil.cil.body.reader import Token, read_method_body_from_bytes
 except ModuleNotFoundError as exc:
     dnfile = Token = read_method_body_from_bytes = None
     IMPORT_ERROR = exc
-else:
-    IMPORT_ERROR = None
 
 IMPLICIT = {"ldc.i4.m1": -1}
 for _i in range(9):
@@ -42,7 +42,7 @@ VALUES_FIELDS = (37607, 37608)  # SandboxOptionValueSet.FloatValues / IntValues
 ELEM_TYPEREF = (52, 265)  # System.Int32 / System.Single type refs
 
 
-def ldc4_val(ins):
+def ldc4_val(ins: Any) -> int | None:
     if ins.opcode.name in IMPLICIT:
         return IMPLICIT[ins.opcode.name]
     if ins.opcode.name in ("ldc.i4", "ldc.i4.s"):
@@ -50,36 +50,36 @@ def ldc4_val(ins):
     return None
 
 
-def is_ldc4(ins):
-    return ins.opcode.name.startswith("ldc.i4")
+def is_ldc4(ins: Any) -> bool:
+    return bool(ins.opcode.name.startswith("ldc.i4"))
 
 
-def is_ldcr4(ins):
+def is_ldcr4(ins: Any) -> bool:
     return ins.opcode.name == "ldc.r4" and isinstance(ins.operand, float)
 
 
-def extract(pe):
+def extract(pe: Any) -> dict[str, Any]:
     md = pe.net.mdtables
 
-    def s(x):
+    def s(x: object) -> str:
         return str(x) if x is not None else ""
 
     # method row -> declaring type name (MethodDef has no Parent column)
-    mtype = {}
+    mtype: dict[int, str] = {}
     for td in md.TypeDef.rows:
         tn = s(td.TypeName)
         for m in td.MethodList:
             mtype[m.row_index] = tn
 
     # field row -> RVA for <PrivateImplementationDetails> arrays
-    frva = {}
+    frva: dict[int, int] = {}
     for r in md.FieldRva.rows:
         frva[r.Field.row_index] = r.Rva
 
-    def us_str(tok):
-        return pe.net.user_strings.get(tok.value & 0xFFFFFF).value
+    def us_str(tok: Any) -> str:
+        return str(pe.net.user_strings.get(tok.value & 0xFFFFFF).value)
 
-    def read_array(rid, count, fmt):
+    def read_array(rid: int, count: int, fmt: str) -> list[float] | None:
         rva = frva.get(rid)
         if rva is None:
             return None
@@ -96,13 +96,13 @@ def extract(pe):
         raise SystemExit("SandboxOptionManager not found")
 
     # enum member name by value (Constant table -> Field rows of SandboxOptions)
-    enum_names = {}
+    enum_names: dict[int, str] = {}
     for row in md.TypeDef.rows:
         if s(row.TypeName) != "SandboxOptions":
             continue
         flds = row.FieldList
         # build field rid -> constant value
-        field_const = {}
+        field_const: dict[int, bytes] = {}
         for r in md.Constant.rows:
             p = r.Parent
             if p.table is md.Field:
@@ -130,7 +130,7 @@ def extract(pe):
     insns = body.instructions
     n = len(insns)
 
-    def find_newarr_len(j):
+    def find_newarr_len(j: int) -> int | None:
         # First ldc.i4 constant walking back from the newarr (its element
         # count); stops at the nearest call/newobj/stfld boundary.
         m = j - 1
@@ -141,8 +141,8 @@ def extract(pe):
             m -= 1
         return None
 
-    def inline_stelem(j):
-        pairs = []
+    def inline_stelem(j: int) -> list[tuple[int, float]]:
+        pairs: list[tuple[int, float]] = []
         k = j
         while k < n:
             opk = insns[k].opcode.name
@@ -160,8 +160,8 @@ def extract(pe):
             k += 1
         return pairs
 
-    valuesets = {}
-    options = []
+    valuesets: dict[str, dict[str, Any]] = {}
+    options: list[dict[str, Any]] = []
     i = 0
     while i < n:
         ins = insns[i]
@@ -240,7 +240,7 @@ def extract(pe):
             if name:
                 valuesets[name] = {"type": vstype, "values": arr}
         elif owner.startswith("SandboxOption") and "ValueSet" not in owner:
-            args = []
+            args: list[tuple[str, Any]] = []
             k = i - 1
             while k >= 0:
                 opk = insns[k].opcode.name
@@ -298,7 +298,7 @@ def extract(pe):
     return {"valuesets": valuesets, "options": [opt_by_id[k] for k in sorted(opt_by_id)]}
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(
         description="Extract SandboxOptions value sets + option table from Assembly-CSharp.dll IL."
     )

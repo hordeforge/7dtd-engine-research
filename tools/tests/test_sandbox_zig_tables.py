@@ -18,11 +18,14 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import struct
 import sys
-from pathlib import Path
 
-TOOLS = Path(__file__).resolve().parents[1]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = _common.TOOLS
 
 _spec = importlib.util.spec_from_file_location(
     "gen_zig_tables", TOOLS / "sandbox" / "gen_zig_tables.py"
@@ -38,7 +41,8 @@ val_literal = _mod.val_literal
 def next_f32_up(x: float) -> float:
     """Smallest binary32 value greater than `x` (`x` must be positive)."""
     bits = struct.unpack("<I", struct.pack("<f", x))[0]
-    return struct.unpack("<f", struct.pack("<I", bits + 1))[0]
+    value: float = struct.unpack("<f", struct.pack("<I", bits + 1))[0]
+    return value
 
 
 def dataset_floats() -> list[float]:

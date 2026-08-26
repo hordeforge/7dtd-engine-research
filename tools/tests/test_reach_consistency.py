@@ -39,7 +39,7 @@ def main() -> int:
         return 0
 
     docs = os.path.join(_common.REPO, "docs")
-    with tempfile.TemporaryDirectory(prefix="reach-consistency-") as td:
+    with tempfile.TemporaryDirectory(prefix="reach-consistency-", dir=_common.scratch_dir()) as td:
         report = os.path.join(td, "coverage-report.md")
         tsv = os.path.join(td, "reach.tsv")
 
@@ -65,23 +65,21 @@ def main() -> int:
     print(f"OK: Coverage and Reach agree on reached methods ({cov_methods})")
 
     # Bucket invariant from the report.
-    def row(key):
+    def row(key: str) -> int:
         m = re.search(
             r"\| \.\.\.\*\*"
             + re.escape(key)
             + r"\*\*[^|]*\| \*{0,2}(\d+)(?: \([^)]*\))?\*{0,2} \|",
             text,
         )
-        return int(m.group(1)) if m else None
+        assert m, f"missing bucket row in report: {key}"
+        return int(m.group(1))
 
     game = row("game types")
     narrated = row("narrated")
     catalogued = row("catalogued only")
     classified = row("classified")
     unaccounted = row("unaccounted")
-    assert None not in (game, narrated, catalogued, classified, unaccounted), (
-        "missing bucket row in report"
-    )
     assert narrated + catalogued + classified + unaccounted == game, (
         f"bucket invariant broken: {narrated}+{catalogued}+{classified}+{unaccounted} != {game}"
     )

@@ -3,22 +3,12 @@
 
 The six GameDifficulty presets (Scavenger..Insane) live in the bundled
 TextAsset `Data/Sandbox/sandbox_presets` (SandboxOptionManager.
-LoadInternalPresets IL=43 -> Resources.Load). The dedi ships no copy;
-the TextAsset is present in the CLIENT install's data.unity3d and extracts
-with UnityPy (hash-pinned: uv pip install -r tools/sandbox/requirements.txt):
+LoadInternalPresets IL=43 -> Resources.Load). The dedi ships no copy; the
+TextAsset is present in the CLIENT install's data.unity3d, and the committed
+sandbox/sandbox_presets.xml is re-extracted from there with:
 
-    python3 - <<'EOF'
-    import UnityPy, os
-    env = UnityPy.load(os.path.join(CLIENT, "7DaysToDie_Data", "data.unity3d"))
-    for obj in env.objects:
-        if obj.type.name != "TextAsset":
-            continue
-        d = obj.read()
-        if (getattr(d, "m_Name", "") or "") == "sandbox_presets":
-            s = getattr(d, "m_Script", b"")
-            open("sandbox_presets.xml", "wb").write(
-                s.encode("utf-8") if isinstance(s, str) else bytes(s))
-    EOF
+    python3 tools/sandbox/try_extract_presets.py <client_dir> \
+        --out tools/sandbox/sandbox_presets.xml
 
 Each preset carries a SandboxCode (sandbox-options.md §3 codec: 'A' +
 3-letter groups of base-26 option id + value-set index). Decoding the six
@@ -36,12 +26,15 @@ import json
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 HERE = Path(__file__).resolve().parent
 
 
-def decode(code: str, opts: dict, sets: dict) -> dict:
-    out: dict = {}
+def decode(
+    code: str, opts: dict[int, dict[str, Any]], sets: dict[str, dict[str, Any]]
+) -> dict[str, float]:
+    out: dict[str, float] = {}
     if not code:
         return out
     if not code.startswith("A") or (len(code) - 1) % 3:

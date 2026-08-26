@@ -58,7 +58,7 @@ def docs_dir() -> str:
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
 
 
-def known_doc_names() -> set:
+def known_doc_names() -> set[str]:
     """Every docs/ filename in this repo (top level + nested inventories),
     resolved once.
 
@@ -73,7 +73,7 @@ def known_doc_names() -> set:
     # missing" verdict instead of the real tooling problem), so refuse loudly.
     if not os.path.isdir(ddir):
         raise SystemExit(f"zdtd_cite_check: docs tree not found: {ddir}")
-    names = set()
+    names: set[str] = set()
     for _dirpath, dirnames, filenames in os.walk(ddir):
         dirnames[:] = [d for d in dirnames if not d.startswith(".")]
         for n in filenames:
@@ -82,7 +82,7 @@ def known_doc_names() -> set:
     return names
 
 
-def collect_local(root: str, into: set) -> None:
+def collect_local(root: str, into: set[str]) -> None:
     """Every repo-local doc name across the fleet (roots, the full docs/ tree
     incl. nested dirs like docs/reviews/, and docs/adr names prefix-stripped),
     so cross-repo-local references resolve."""
@@ -103,10 +103,10 @@ def collect_local(root: str, into: set) -> None:
                     into.add(re.sub(r"^\d+-", "", d))
 
 
-def scan(root: str, local: set, docs: set) -> tuple[int, list[str], int]:
+def scan(root: str, local: set[str], docs: set[str]) -> tuple[int, list[str], int]:
     """(citation count, broken-citation lines, unreadable-file count)."""
     total = 0
-    broken = []
+    broken: list[str] = []
     unreadable = 0
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
@@ -156,7 +156,7 @@ def main() -> int:
     args = ap.parse_args()
     grand = 0
     bad_total = 0
-    local = set()
+    local: set[str] = set()
     docs = known_doc_names()
     for name in REPOS:
         repo_dir = os.path.join(args.root, name)

@@ -20,6 +20,7 @@ import os
 import re
 import sys
 import tempfile
+from typing import Any
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_PINS = os.path.join(TOOLS, "data", "xml_pins.json")
@@ -38,14 +39,14 @@ CFG_BUFFS = "Data/Config/buffs.xml"
 HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="(\d+)"')
 
 
-def extract(game_dir: str) -> dict:
+def extract(game_dir: str) -> dict[str, Any]:
     def read_if_present(path: str) -> str | None:
         if not os.path.isfile(path):
             return None
         with open(path, encoding="utf-8", errors="replace") as fh:
             return fh.read()
 
-    hp = {}
+    hp: dict[str, int] = {}
     epath = os.path.join(game_dir, CFG_ENTITIES)
     text = read_if_present(epath)
     if text is not None:
@@ -53,7 +54,7 @@ def extract(game_dir: str) -> dict:
         block = m.group(0) if m else ""
         for name, val in HEALTH_RE.findall(block):
             hp[name] = int(val)
-    trader = {}
+    trader: dict[str, float] = {}
     ttext = read_if_present(os.path.join(game_dir, CFG_TRADERS))
     if ttext is not None:
         m = re.search(r"<traders\b[^>]*>", ttext)
@@ -62,7 +63,7 @@ def extract(game_dir: str) -> dict:
                 am = re.search(rf'\b{attr}="([^"]+)"', m.group(0))
                 if am:
                     trader[attr] = float(am.group(1))
-    buffs = {}
+    buffs: dict[str, float | str] = {}
     btext = read_if_present(os.path.join(game_dir, CFG_BUFFS))
     if btext is not None:
         # survival thresholds: StatComparePercCurrentToMax on Food/Water
@@ -83,9 +84,9 @@ def extract(game_dir: str) -> dict:
     }
 
 
-def section_diffs(live: dict, committed: dict) -> list:
+def section_diffs(live: dict[str, Any], committed: dict[str, Any]) -> list[str]:
     """Per-key diffs across every pinned section (install value vs committed)."""
-    diffs = []
+    diffs: list[str] = []
     for sec in SECTIONS:
         lv, cv = live.get(sec) or {}, committed.get(sec) or {}
         for k in sorted(set(lv) | set(cv)):

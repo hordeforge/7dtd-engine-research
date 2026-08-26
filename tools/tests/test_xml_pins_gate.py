@@ -24,7 +24,10 @@ import subprocess
 import sys
 import tempfile
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = str(_common.TOOLS)
 SCRIPT = os.path.join(TOOLS, "xml_pins.py")
 
 ENTITYCLASSES = """<configs>
@@ -47,27 +50,27 @@ BUFFS = """<buffs>
 """
 
 
-def run(*argv):
+def run(*argv: str) -> tuple[int, str]:
     proc = subprocess.run([sys.executable, SCRIPT, *argv], capture_output=True, text=True)
     return proc.returncode, proc.stdout + proc.stderr
 
 
-def write_config(game_dir, name, text):
+def write_config(game_dir: str, name: str, text: str) -> None:
     cfg = os.path.join(game_dir, "Data", "Config")
     os.makedirs(cfg, exist_ok=True)
     with open(os.path.join(cfg, name), "w", encoding="utf-8") as f:
         f.write(text)
 
 
-def build_install(game_dir):
+def build_install(game_dir: str) -> None:
     write_config(game_dir, "entityclasses.xml", ENTITYCLASSES)
     write_config(game_dir, "traders.xml", TRADERS)
     write_config(game_dir, "buffs.xml", BUFFS)
 
 
-def main():
-    bad = []
-    with tempfile.TemporaryDirectory(prefix="xml-pins-gate-") as tmp:
+def main() -> int:
+    bad: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="xml-pins-gate-", dir=_common.scratch_dir()) as tmp:
         game = os.path.join(tmp, "game")
         pins = os.path.join(tmp, "pins.json")
         build_install(game)
@@ -79,11 +82,12 @@ def main():
         else:
             with open(pins, encoding="utf-8") as f:
                 data = json.load(f)
-            for sec, want in [
+            expected: list[tuple[str, dict[str, float]]] = [
                 ("entityclasses_health", {"healthSlim": 125}),
                 ("traders_root", {"buy_markup": 3.0, "sell_markdown": 0.2}),
                 ("buffs_survival", {"food_wellfed_threshold": 0.52}),
-            ]:
+            ]
+            for sec, want in expected:
                 for k, v in want.items():
                     if data.get(sec, {}).get(k) != v:
                         bad.append(f"{sec}.{k}={data.get(sec, {}).get(k)!r} != {v!r}")
@@ -146,7 +150,7 @@ def main():
 
     # 8. Corrupt pins JSON -> clean FAIL verdict + repair hint (exit 1), not a
     #    traceback with no verdict.
-    with tempfile.TemporaryDirectory(prefix="xml-pins-gate-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="xml-pins-gate-", dir=_common.scratch_dir()) as tmp:
         corrupt = os.path.join(tmp, "corrupt.json")
         game = os.path.join(tmp, "game")
         os.makedirs(os.path.join(game, "Data", "Config"))

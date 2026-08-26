@@ -29,13 +29,15 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
 from _common import find_asm
 
-ROOT = Path(__file__).resolve().parents[2]  # 7dtd-engine-research
+ROOT = _common.REPO
 WS = ROOT.parent  # 7dtd workspace
-TOOLS = ROOT / "tools"
+TOOLS = _common.TOOLS
 DEFAULT_FACTS = TOOLS / "data" / "stock_facts.json"
 
 # Fields that legitimately differ between the committed artifact and a fresh
@@ -52,13 +54,13 @@ def _diff(left: object, right: object, path: str, into: list[str]) -> None:
             _diff(left.get(k, _MISSING), right.get(k, _MISSING), f"{path}.{k}" if path else k, into)
     elif left != right:
 
-        def fmt(v):
+        def fmt(v: object) -> str:
             return "<absent>" if v is _MISSING else repr(v)
 
         into.append(f"{path}: live={fmt(left)} committed={fmt(right)}")
 
 
-def check_live_against_dll(facts: dict, errors: list[str]) -> None:
+def check_live_against_dll(facts: dict[str, Any], errors: list[str]) -> None:
     """Re-extract stock_facts from the local dedicated DLL and diff every field.
 
     This is the teeth behind the 'facts match the live dedicated DLL' claim: a
@@ -86,7 +88,7 @@ def check_live_against_dll(facts: dict, errors: list[str]) -> None:
         errors.append("live facts comparison skipped: mono not on PATH")
         return
     env = dict(os.environ, MONO_PATH=str(TOOLS / "bin"))
-    with tempfile.TemporaryDirectory(prefix="stock-facts-live-") as td:
+    with tempfile.TemporaryDirectory(prefix="stock-facts-live-", dir=_common.scratch_dir()) as td:
         out = Path(td) / "live_facts.json"
         try:
             proc = subprocess.run(
@@ -108,7 +110,7 @@ def check_live_against_dll(facts: dict, errors: list[str]) -> None:
             errors.append(f"live facts extraction produced invalid JSON: {exc}")
             return
 
-    def strip(d):
+    def strip(d: dict[str, Any]) -> dict[str, Any]:
         return {k: v for k, v in d.items() if k not in VOLATILE_FACT_KEYS}
 
     diffs: list[str] = []
@@ -130,9 +132,10 @@ def check_live_against_dll(facts: dict, errors: list[str]) -> None:
         )
 
 
-def load_facts(path: Path) -> dict:
+def load_facts(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as f:
-        return json.load(f)
+        data: dict[str, Any] = json.load(f)
+    return data
 
 
 def read(path: Path) -> str:
@@ -205,7 +208,7 @@ def check_xmls_to_load_inventory(errors: list[str]) -> None:
         errors.append(f"xmlsToLoad: cctor core ({len(core)}) != inventory core ({len(inv_core)})")
 
 
-def check_research(facts: dict, errors: list[str]) -> None:
+def check_research(facts: dict[str, Any], errors: list[str]) -> None:
     v = facts["version"]
     display = v["display"]  # facts-driven, e.g. "V {major}.{minor/10}.{minor%10}"
     major, minor, build = v["major"], v["minor"], v["build"]
@@ -331,7 +334,7 @@ def check_research(facts: dict, errors: list[str]) -> None:
         )
 
     # Death-loot lifetime + per-frame load budget (cctor-pinned IL values).
-    for key, val, doc, pat, label in [
+    tuned: list[tuple[str, float, str, str, str]] = [
         (
             "item_dropped_on_death_lifetime_s",
             300.0,
@@ -339,13 +342,14 @@ def check_research(facts: dict, errors: list[str]) -> None:
             r"300",
             "item lifetime",
         ),
-        ("max_load_time_per_frame_ms", 50, "docs/crafting-recipes.md", r"50", "load budget"),
-    ]:
+        ("max_load_time_per_frame_ms", 50.0, "docs/crafting-recipes.md", r"50", "load budget"),
+    ]
+    for key, want, doc, pat, label in tuned:
         got = facts["behaviour"].get(key)
         if got is None:
             errors.append(f"stock_facts behaviour.{key} missing")
-        elif abs(float(got) - val) > 1e-6:
-            errors.append(f"stock_facts {key}={got} != {val}")
+        elif abs(float(got) - want) > 1e-6:
+            errors.append(f"stock_facts {key}={got} != {want}")
         else:
             must_match(f"docs pin {label}", read(ROOT / doc), pat, errors)
 
@@ -462,7 +466,7 @@ def check_research(facts: dict, errors: list[str]) -> None:
         )
 
 
-def check_loadgen(facts: dict, errors: list[str]) -> str | None:
+def check_loadgen(facts: dict[str, Any], errors: list[str]) -> str | None:
     """Check loadgen pins; return a skip note when the sibling repo is absent."""
     proj = WS / "7dtd-loadgen"
     path = proj / "src" / "LoadGen" / "PackageCodec.cs"
@@ -482,7 +486,7 @@ def check_loadgen(facts: dict, errors: list[str]) -> str | None:
     return None
 
 
-def check_zdtd(facts: dict, errors: list[str]) -> str | None:
+def check_zdtd(facts: dict[str, Any], errors: list[str]) -> str | None:
     """Check zdtd pins; return a skip note when the sibling repo is absent."""
     proj = WS / "zdtd-server"
     ver_path = proj / "src" / "version.zig"
@@ -548,6 +552,7 @@ def check_zdtd(facts: dict, errors: list[str]) -> str | None:
             r"62\.88",
             errors,
         )
+    return None
 
 
 def main() -> int:

@@ -4,10 +4,14 @@
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
-TOOLS = Path(__file__).resolve().parents[1]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = _common.TOOLS
 
 
 def main() -> None:
@@ -18,7 +22,7 @@ def main() -> None:
     ):
         print("SKIP: drift fail-closed runtime probe needs built tools, mono, and mcs")
         return
-    with tempfile.TemporaryDirectory() as td:
+    with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         root = Path(td)
         bad_asm = root / "not-an-assembly.dll"
         bad_asm.touch()
