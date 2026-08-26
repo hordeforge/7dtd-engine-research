@@ -3312,6 +3312,12 @@ that i32 is what save files and the spawn wire carry. Order in IL:
    `sleeperNoiseToSense` from `SleeperNoiseToSense`;
    `sleeperNoiseToSenseSoundChance` = class scalar;
    `sleeperNoiseToWake` from `SleeperNoiseToWake`.
+   (Stock zombieTemplateMale pins `SleeperSightToWakeMin="-40,5"` ("light value
+   at point blank") / `SleeperSightToWakeMax="340,480"` ("at SightRange");
+   consumed by the zdtd wake gate 2026-08-26: `GetSleeperDisturbedLevel`
+   wake = Lerp(rolledNear, rolledFar, dist/sightRangeBase) vs the player's
+   TickServer lightLevel, which puts the noon wake reach at ~15% of sightRange
+   and the night reach at ~1 m.)
 6. **Timing / movement fields** (seconds values ×**20** become ticks):
    - `attackTimeoutDay/Night`: float default **1** (props `AttackTimeoutDay/Night`) ×20.
    - `stompsSpikes` prop (bool); `weight` default **1**, then `FastMax(weight, 0.5)`;
