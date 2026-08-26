@@ -17,7 +17,8 @@ static class CmdMap {
     int guard = 0;
     while (b != null && guard++ < 24) {
       if (b.Name == "ConsoleCmdAbstract") return true;
-      TypeDefinition r = null; try { r = b.Resolve(); } catch { }
+      // Base outside the loaded assembly set: Resolve throws, null ends the walk.
+      TypeDefinition r = null; try { r = b.Resolve(); } catch (AssemblyResolutionException) { }
       if (r == null) break;
       b = r.BaseType;
     }

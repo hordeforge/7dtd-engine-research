@@ -143,21 +143,21 @@ Live `NetPackageTileEntity.write` IL=27 sequence:
 
 ## Mismatches and reproduction risks
 
-### Critical (wire) — fixed
+### Critical (wire): fixed
 
 **Was:** `docs/tile-entities-power.md` TE package layout V3.0.1-shaped (u16, no teBlockId).  
 **Now:** matches §6.12 / IL=27 (teBlockId i32, payloadLen i32). stock-check greps enforce this.
 
-### High (quantitative drift) — fixed
+### High (quantitative drift): fixed
 
 **Was:** coverage “Census (live dedi)” 4401 / 43901 / SaveLoad 884.  
 **Now:** 4414 / 44107 / 926 + CurrentSaveVersion 23; gate greps live counts.
 
-### Medium (framing) — fixed
+### Medium (framing): fixed
 
 README and package/loop titles pin V3.1.0 (b14); re-methodology shows live vs historical columns.
 
-### Process / gate gaps — reduced
+### Process / gate gaps: reduced
 
 stock-check now covers TE layout, README pin, and coverage live census numbers in addition to the prior pin set. It is still not a full narrative consistency proof; do not infer “every sentence in every doc is correct” from a green gate.
 
@@ -223,7 +223,7 @@ Tool and narrative both state this is **documentation-mention overlap on a stati
 
 ---
 
-## Recommended fix order — completed 2026-08-05
+## Recommended fix order: completed 2026-08-05
 
 1. ~~Rewrite tile-entities-power TE layout~~ **done**  
 2. ~~Refresh coverage live census~~ **done**  

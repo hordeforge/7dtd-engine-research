@@ -7,18 +7,20 @@ Usage:
 
 import json
 import sys
+from typing import Any
 
 
-def load(p):
+def load(p: str) -> dict[str, Any]:
     with open(p, encoding="utf-8") as fh:
-        return json.load(fh)
+        data: dict[str, Any] = json.load(fh)
+    return data
 
 
-def diff(old, new):
+def diff(old: dict[str, Any], new: dict[str, Any]) -> int:
     o, n = old["packages"], new["packages"]
     added = sorted(set(n) - set(o))
     removed = sorted(set(o) - set(n))
-    changed = []
+    changed: list[str] = []
     for k in sorted(set(o) & set(n)):
         if (
             o[k]["read"] != n[k]["read"]

@@ -13,8 +13,11 @@ import subprocess
 import sys
 import tempfile
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = str(_common.TOOLS)
+REPO = str(_common.REPO)
 COMMITTED = os.path.join(REPO, "docs", "inventories", "state-machines.md")
 
 
@@ -26,7 +29,7 @@ def main() -> int:
         return 0
     env = dict(os.environ)
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
-    with tempfile.TemporaryDirectory() as td:
+    with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         out = os.path.join(td, "state-machines.md")
         proc = subprocess.run(
             [

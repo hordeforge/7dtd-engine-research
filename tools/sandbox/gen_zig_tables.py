@@ -18,10 +18,11 @@ from json import dumps as zstr
 
 def f32(x: float) -> float:
     """`x` rounded to the nearest IEEE-754 binary32 value (Zig `f32` width)."""
-    return struct.unpack("<f", struct.pack("<f", x))[0]
+    value: float = struct.unpack("<f", struct.pack("<f", x))[0]
+    return value
 
 
-def val_literal(v):
+def val_literal(v: object) -> str:
     """JSON value -> Zig literal; floats as the shortest decimal that
     re-parses to the same binary32 value.
 

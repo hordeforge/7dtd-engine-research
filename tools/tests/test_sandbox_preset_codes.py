@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """Verify the sandbox preset decoder and its path-independent CLI."""
 
+import os
 import subprocess
 import sys
 import tempfile
-from pathlib import Path
 
-TOOL = Path(__file__).resolve().parents[1] / "sandbox" / "extract_preset_codes.py"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOL = _common.TOOLS / "sandbox" / "extract_preset_codes.py"
 
 
 def main() -> None:
-    with tempfile.TemporaryDirectory() as td:
+    with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         result = subprocess.run([sys.executable, str(TOOL)], cwd=td, text=True, capture_output=True)
     assert result.returncode == 0, result.stderr
     rows = result.stdout.splitlines()

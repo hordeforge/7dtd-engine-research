@@ -24,6 +24,12 @@ import argparse
 import collections
 import struct
 import sys
+from typing import Any
+
+# Decoded Unity/DXBC records are heterogeneous by construction (ints, byte
+# strings, nested record lists), and the field names ARE the on-disk schema, so
+# the payloads stay plain dicts rather than growing a class per record kind.
+Fields = dict[str, Any]
 
 BLOB_VERSION = 202012090  # Unity 2021.2+ LoadGpuProgramFromData tag
 DX11_TYPES = set(range(13, 23))  # kShaderGpuProgramDX10Level9Vertex .. DX11DomainSM50
@@ -43,11 +49,12 @@ GEOMETRY_TYPES = {19, 20}  # kShaderGpuProgramDX11GeometrySM40 / SM50
 VERTEX_TYPES = {13, 15, 16}  # DX10Level9Vertex, DX11VertexSM40/SM50
 
 
-def u32(buf, off):
-    return struct.unpack_from("<I", buf, off)[0]
+def u32(buf: bytes, off: int) -> int:
+    value: int = struct.unpack_from("<I", buf, off)[0]
+    return value
 
 
-def parse_subprogram(buf, pos):
+def parse_subprogram(buf: bytes, pos: int) -> tuple[Fields, int]:
     """The sub-program record layout for blob version 202012090.
 
     version, programType, three stat ints, a requirements word, a keyword
@@ -81,20 +88,20 @@ def parse_subprogram(buf, pos):
 class _Reader:
     """Little-endian reader with Unity's 4-byte string alignment."""
 
-    def __init__(self, buf):
+    def __init__(self, buf: bytes) -> None:
         self.buf, self.pos = buf, 0
 
-    def i32(self):
-        value = struct.unpack_from("<i", self.buf, self.pos)[0]
+    def i32(self) -> int:
+        value: int = struct.unpack_from("<i", self.buf, self.pos)[0]
         self.pos += 4
         return value
 
-    def u32(self):
-        value = struct.unpack_from("<I", self.buf, self.pos)[0]
+    def u32(self) -> int:
+        value: int = struct.unpack_from("<I", self.buf, self.pos)[0]
         self.pos += 4
         return value
 
-    def string(self):
+    def string(self) -> bytes:
         n = self.i32()
         value = bytes(self.buf[self.pos : self.pos + n])
         self.pos += n
@@ -103,23 +110,23 @@ class _Reader:
 
 
 class _Writer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.out = bytearray()
 
-    def i32(self, v):
+    def i32(self, v: int) -> None:
         self.out += struct.pack("<i", v)
 
-    def u32(self, v):
+    def u32(self, v: int) -> None:
         self.out += struct.pack("<I", v)
 
-    def string(self, v):
+    def string(self, v: bytes) -> None:
         self.i32(len(v))
         self.out += v
         while len(self.out) % 4:
             self.out += b"\x00"
 
 
-def _read_cb_param(r):
+def _read_cb_param(r: _Reader) -> Fields:
     return {
         "name": r.string(),
         "type": r.i32(),
@@ -131,19 +138,19 @@ def _read_cb_param(r):
     }
 
 
-def _write_cb_param(w, p):
+def _write_cb_param(w: _Writer, p: Fields) -> None:
     w.string(p["name"])
     for key in ("type", "rows", "columns", "is_matrix", "array_size", "index"):
         w.i32(p[key])
 
 
-def _read_struct_param(r):
-    s = {"name": r.string(), "index": r.i32(), "array_size": r.i32(), "size": r.i32()}
+def _read_struct_param(r: _Reader) -> Fields:
+    s: Fields = {"name": r.string(), "index": r.i32(), "array_size": r.i32(), "size": r.i32()}
     s["params"] = [_read_cb_param(r) for _ in range(r.i32())]
     return s
 
 
-def _write_struct_param(w, s):
+def _write_struct_param(w: _Writer, s: Fields) -> None:
     w.string(s["name"])
     for key in ("index", "array_size", "size"):
         w.i32(s[key])
@@ -152,14 +159,14 @@ def _write_struct_param(w, s):
         _write_cb_param(w, p)
 
 
-def _read_constant_buffer(r):
-    cb = {"name": r.string(), "used_size": r.i32()}
+def _read_constant_buffer(r: _Reader) -> Fields:
+    cb: Fields = {"name": r.string(), "used_size": r.i32()}
     cb["params"] = [_read_cb_param(r) for _ in range(r.i32())]
     cb["structs"] = [_read_struct_param(r) for _ in range(r.i32())]
     return cb
 
 
-def _write_constant_buffer(w, cb):
+def _write_constant_buffer(w: _Writer, cb: Fields) -> None:
     w.string(cb["name"])
     w.i32(cb["used_size"])
     w.i32(len(cb["params"]))
@@ -181,14 +188,14 @@ BIND_CHANNEL_SOURCES = {
 }
 
 
-def parse_bind_channels(raw):
+def parse_bind_channels(raw: bytes) -> tuple[Fields, int]:
     """Decode the `ParserBindChannels` block that closes a code-blob record."""
     source_map, count = struct.unpack_from("<ii", raw, 0)
     channels = [struct.unpack_from("<ii", raw, 8 + i * 8) for i in range(count)]
     return {"source_map": source_map, "channels": channels}, 8 + count * 8
 
 
-def input_semantics(dxbc):
+def input_semantics(dxbc: bytes) -> list[tuple[str, int]]:
     """`(semantic, index)` per element of a DXBC input signature."""
     isgn = dxbc_chunks(dxbc).get("ISGN")
     if isgn is None:
@@ -200,7 +207,7 @@ def input_semantics(dxbc):
     return out
 
 
-def expected_channels(dxbc):
+def expected_channels(dxbc: bytes) -> list[tuple[int, int]]:
     """The channel list a vertex program's input signature implies."""
     channels = []
     for semantic, index in input_semantics(dxbc):
@@ -211,7 +218,7 @@ def expected_channels(dxbc):
     return channels
 
 
-def parse_parameter_blob(raw):
+def parse_parameter_blob(raw: bytes) -> tuple[Fields, int]:
     """Decode a parameter blob; returns (fields, bytes consumed).
 
     Layout per USCSandbox ShaderParams.cs with readBlobVersion=true.
@@ -223,6 +230,7 @@ def parse_parameter_blob(raw):
     for _ in range(r.i32()):
         name = r.string()
         kind = r.i32()
+        e: Fields
         if kind == 0:  # texture
             e = {
                 "kind": 0,
@@ -243,7 +251,7 @@ def parse_parameter_blob(raw):
     return {"version": version, "buffers": buffers, "entries": entries}, r.pos
 
 
-def build_parameter_blob(fields):
+def build_parameter_blob(fields: Fields) -> bytes:
     """Re-emit a parameter blob. Round-trips stock blobs byte for byte."""
     w = _Writer()
     w.i32(fields["version"])
@@ -270,7 +278,7 @@ def build_parameter_blob(fields):
     return bytes(w.out)
 
 
-def dxbc_chunks(data):
+def dxbc_chunks(data: bytes) -> dict[str, bytes]:
     """{fourcc: payload} for a DXBC container."""
     count = u32(data, 0x1C)
     out = {}
@@ -280,11 +288,11 @@ def dxbc_chunks(data):
     return out
 
 
-def shdr_declaration_counts(chunk):
+def shdr_declaration_counts(chunk: bytes) -> collections.Counter[int]:
     """Count dcl_resource / dcl_constantbuffer / dcl_sampler in an SHDR/SHEX chunk."""
     declared = u32(chunk, 4)
     words = struct.unpack_from(f"<{min(declared, len(chunk) // 4)}I", chunk, 0)
-    i, counts = 2, collections.Counter()
+    i, counts = 2, collections.Counter[int]()
     while i < len(words):
         token = words[i]
         opcode = token & 0x7FF
@@ -298,12 +306,16 @@ def shdr_declaration_counts(chunk):
     return counts
 
 
-def decode_bundle(path, only=None, verbose=False):
+def decode_bundle(
+    path: str, only: str | None = None, verbose: bool = False
+) -> tuple[list[Fields], list[tuple[str, str]], list[Fields]]:
     import UnityPy
     from UnityPy.helpers import CompressionHelper
 
     env = UnityPy.load(path)
-    rows, skipped, parameters = [], [], []
+    rows: list[Fields] = []
+    skipped: list[tuple[str, str]] = []
+    parameters: list[Fields] = []
     for obj in env.objects:
         if obj.type.name != "Shader":
             continue
@@ -332,8 +344,8 @@ def decode_bundle(path, only=None, verbose=False):
         count = u32(data, 0)
         records = [struct.unpack_from("<III", data, 4 + i * 12) for i in range(count)]
 
-        wanted = {}
-        parameter_indices = set()
+        wanted: dict[int, int] = {}
+        parameter_indices: set[int] = set()
         for sub_shader in shader.m_ParsedForm.m_SubShaders:
             for a_pass in sub_shader.m_Passes:
                 for prog_name in PROGRAMS:
@@ -439,9 +451,10 @@ def decode_bundle(path, only=None, verbose=False):
     return rows, skipped, parameters
 
 
-def check(rows):
+def check(rows: list[Fields]) -> tuple[list[tuple[Fields, str]], list[tuple[Fields, str]]]:
     """Assert the documented layout; return (violations, noted_exceptions)."""
-    bad, noted = [], []
+    bad: list[tuple[Fields, str]] = []
+    noted: list[tuple[Fields, str]] = []
     for r in rows:
         h = r["header"]
         if h[0] != 2:
@@ -509,7 +522,7 @@ def check(rows):
     return bad, noted
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -557,7 +570,7 @@ def main(argv=None):
 
     if parameters:
         exact = sum(1 for p in parameters if p["status"] == "exact")
-        kinds = collections.Counter()
+        kinds = collections.Counter[int]()
         for p in parameters:
             kinds.update(p.get("kinds", {}))
         print()

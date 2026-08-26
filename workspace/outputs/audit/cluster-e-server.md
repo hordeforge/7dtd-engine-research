@@ -21,7 +21,7 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
 
 ## Findings
 
-### [F1] MAJOR — console-commands.md §2 (+ dispatch diagram): permission check is NOT in `executeCommand`
+### [F1] MAJOR: console-commands.md §2 (+ dispatch diagram): permission check is NOT in `executeCommand`
 
 - **Claim:** "`executeCommand(line, senderInfo)` ... checks the sender's
   permission level against the command's required level, and runs `Execute` only
@@ -45,7 +45,7 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
   into the per-source layer (ServerConsoleCommand for in-game clients, Command
   API for web); state explicitly that telnet/stdin bypass per-command levels.
 
-### [F2] MAJOR — console-commands.md header/§4/inventory: command count is 187, not 186; `exportprefab` missing
+### [F2] MAJOR: console-commands.md header/§4/inventory: command count is 187, not 186; `exportprefab` missing
 
 - **Claim:** "the 186-command contract"; "There are 186 concrete commands";
   inventory `docs/inventories/console-command-list.md` says "**186 commands.**"
@@ -61,11 +61,11 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
 - **Fix:** update all "186" occurrences to 187 and add `exportprefab` to the
   inventory; harden the regen script to resolve `ldsfld String ...::CommandName`.
 - Sub-point (MINOR): §4 "plus mod-added ones like the web and optimizer
-  commands" — the web commands (`Webserver.Commands.*`, `webtokens`,
+  commands", the web commands (`Webserver.Commands.*`, `webtokens`,
   `webpermission`, `invalidatecaches`, `openiddebug`, `createwebuser`) are in
   the **base Assembly-CSharp**, not mod-added.
 
-### [F3] MAJOR — server-lifecycle.md §1: EAC boot gate misattributed; cited strings live in the client-only gmUpdate UI block
+### [F3] MAJOR: server-lifecycle.md §1: EAC boot gate misattributed; cited strings live in the client-only gmUpdate UI block
 
 - **Claim:** "Before the game starts it checks EAC integrity
   (`eacIntegrityViolation` / `eacUnableToPlayOnProtected`), then creates or
@@ -75,7 +75,7 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
   (`mono scratch/FindStr.exe "$ASM" eacIntegrityViolation eacUnableToPlayOnProtected`)
   → both strings appear **only in `GameManager::gmUpdate()`**, at IL_026E /
   IL_029E, i.e. inside the client-only violation-message UI block between
-  `IL_01F0: get_IsDedicatedServer / brtrue IL_0337` and IL_0337 — **skipped
+  `IL_01F0: get_IsDedicatedServer / brtrue IL_0337` and IL_0337, **skipped
   entirely on dedicated**. The boot coroutine
   (`DumpMethod.exe "$ASM" "startGameCo>d__138" MoveNext`, IL=378) checks
   `GameServerInfo::get_EACEnabled()` + `ldstr eacWarning`, then routes to
@@ -85,12 +85,12 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
   `EACEnabled`/`eacWarning` check; move the violation-message strings to a
   client-only note (they are a per-frame gmUpdate UI popup, not a boot gate).
 
-### [F4] MAJOR — mod-loading.md §1: `InitModCode` is not run by `Mod.LoadMod`; content patching is not part of `LoadMods`
+### [F4] MAJOR: mod-loading.md §1: `InitModCode` is not run by `Mod.LoadMod`; content patching is not part of `LoadMods`
 
 - **Claim:** "then `Mod.LoadMod` runs `LoadAssemblies` (load each DLL via
   `loadAssembly`) **and `InitModCode`** ... Content patching (`LoadPatchStuff`,
-  `LoadUiAtlases`, `LoadLocalizations`) merges XML, atlases, and localization"
-  — diagram flows ASM → INIT → PATCH → DONE per mod inside `LoadMods`.
+  `LoadUiAtlases`, `LoadLocalizations`) merges XML, atlases, and localization";
+  diagram flows ASM → INIT → PATCH → DONE per mod inside `LoadMods`.
 - **Ground truth:** `mono tools/bin/DumpMethod.exe "$ASM" ModManager ""`:
   `Mod::LoadMod()` (IL=69) calls only `LoadAssemblies` + `DetectContents`;
   `ModManager::LoadMods()` (IL=71) then runs a **second pass**
@@ -99,15 +99,15 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
   `GameManager::Awake()` and `<startGameCo>d__138::MoveNext()` (Cecil caller
   scan), **not** from the LoadMods pipeline at all.
 - **Fix:** split the pipeline into (a) per-mod scan+assembly load, (b) global
-  InitModCode pass ("all DLLs load before any `InitMod` runs" — this matters
+  InitModCode pass ("all DLLs load before any `InitMod` runs", this matters
   for cross-mod type references), (c) content patch at game start from
   GameManager, outside LoadMods.
-- Confirmed within same doc: EAC gate location is right —
+- Confirmed within same doc: EAC gate location is right,
   `Mod::LoadAssemblies` (IL=84) checks `ClientAntiCheatEnabled()` →
   `SkipLoadingWithAntiCheat` → state 3, `AntiCheatCompatible` → state 2, load
   failure → 5 (`DumpMethod.exe "$ASM" Mod LoadAssemblies`).
 
-### [F5] MINOR — webserver.md §6: both non-token console command names are wrong
+### [F5] MINOR: webserver.md §6: both non-token console command names are wrong
 
 - **Claim:** commands `webpermissions` and `webcache invalidate`.
 - **Ground truth:** `DumpMethod.exe "$ASM" WebPermissionsCmd getCommands` →
@@ -117,7 +117,7 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
   webserver.md is internally inconsistent with it.
 - **Fix:** rename to `webpermission` and `invalidatecaches`.
 
-### [F6] MINOR — webserver.md §3: REST API table is materially incomplete
+### [F6] MINOR: webserver.md §3: REST API table is materially incomplete
 
 - **Claim:** table of "Concrete APIs (each an `AbsRestApi`)" lists
   ServerState = ServerStats/SandboxSettings/KeyValueListAbs, WorldState =
@@ -130,7 +130,7 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
   not an endpoint.
 - **Fix:** regenerate the table from the type list; mark KeyValueListAbs as base.
 
-### [F7] MINOR — webserver.md §1: handler table omits registered handlers and misstates the static mount
+### [F7] MINOR: webserver.md §1: handler table omits registered handlers and misstates the static mount
 
 - **Claim:** handlers = ApiHandler /api, SessionHandler /session, SseHandler
   /sse, ItemIconHandler /itemicons, "static file / WebMods" at `/`.
@@ -143,7 +143,7 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
   missing from the doc.
 - **Fix:** add RewriteHandler×2 + UserStatusHandler rows; correct static path.
 
-### [F8] MINOR — parties-factions.md Evidence header: wrong owner cited for the `PartyActions` enum constants
+### [F8] MINOR: parties-factions.md Evidence header: wrong owner cited for the `PartyActions` enum constants
 
 - **Claim:** "enum constants for ... `NetPackagePartyData.PartyActions`" backing
   the §2.2 dispatch table that names entry 6 `JoinAutoParty`.
@@ -155,14 +155,14 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
 - **Fix:** cite `NetPackagePartyActions.PartyActions`; note the sibling enum's
   divergent member name.
 
-### [F9] MINOR — managers.md §1: `EntityAsyncManager` listed in the "gmUpdate manager chain" table
+### [F9] MINOR: managers.md §1: `EntityAsyncManager` listed in the "gmUpdate manager chain" table
 
 - **Claim:** table titled "gmUpdate manager chain" (phase B, null-checked chain)
   includes `EntityAsyncManager | 22`.
 - **Ground truth:** full gmUpdate dump (`DumpMethod.exe "$ASM" GameManager gmUpdate`):
   `EntityAsyncManager::Update()` is called **after** the game-started gate
   (pre-sim phase F, immediately before `GameTimer::updateTimer`), not in the
-  phase-B chain — loop-gmupdate.md §2 Phase F places it correctly, so the two
+  phase-B chain, loop-gmupdate.md §2 Phase F places it correctly, so the two
   docs disagree.
 - **Fix:** footnote it as phase-F, or move to a separate row group.
 
@@ -170,15 +170,15 @@ client-only gmUpdate UI block, and a mod-load pipeline that misattributes
 
 - loop.md §3 "Measured confirmation (2026-07-21)" (20 Hz vs frame-rate
   independence, LiteNetLib thread pacing percentages) cites live measurements in
-  `7dtd-server-optimizer/docs/RESULTS.md` §3k — file exists but the runtime numbers
+  `7dtd-server-optimizer/docs/RESULTS.md` §3k, file exists but the runtime numbers
   cannot be checked from IL. The static side (20 Hz constant, slice/flush
   structure) is confirmed below.
 - webserver.md "413 methods": 72 top-level `Webserver.*` types confirmed
   exactly (Cecil census: all=87, named=82, topLevel=72); method count lands
-  412–433 depending on nested/compiler-generated counting convention — treated
+  412–433 depending on nested/compiler-generated counting convention, treated
   as consistent, exact convention undocumented.
 - twitch-integration.md §2 vote-window mechanics (client-side
-  `TwitchVotingManager` behavior) — server-side package and gate verified; the
+  `TwitchVotingManager` behavior), server-side package and gate verified; the
   client-hosted vote flow is out of dedicated IL scope as the doc itself states.
 
 ---
@@ -202,7 +202,7 @@ Loop core (`mono tools/bin/DumpMethod.exe "$ASM" <Type> <Method>` unless noted):
   Power → Party → Vehicle → Drone → Dismemberment → TurretTracker → RaycastPath
   → Token → TrajectorySimulation → Faction → NavObject → BlockedPlayerList →
   PrefabEditMode → TriggerEffect → SpeedTree → `ThreadManager::UpdateMainThreadTasks`).
-- `GameManager`: `Update` IL=3, `UpdateTick` IL=150 (returns `Boolean` — the
+- `GameManager`: `Update` IL=3, `UpdateTick` IL=150 (returns `Boolean`, the
   documented abort), `FixedUpdate` IL=5, `LateUpdate` IL=18
   (`ThreadManager.LateUpdate` + `MeshDataManager.LateUpdate`).
 - `UpdateTick` ordered body matches §3.1 exactly: slice-only branch

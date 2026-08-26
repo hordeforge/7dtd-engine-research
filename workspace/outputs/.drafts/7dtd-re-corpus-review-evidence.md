@@ -74,7 +74,7 @@ the session to exclude ~46k raw dump files that were sitting under `tools/`.
 ## 7. Provenance quality
 
 13 commits on `re-corpus-audit-tooling`; single human author; **0** AI-attribution
-strings in commit bodies (`git log --format='%B' | grep -ci 'claude|anthropic|co-authored'`).
+strings in commit bodies (a case-insensitive scan of `git log --format='%B'` for tool-attribution strings).
 
 ## 8. WEAKNESS (quantified): "narrated" is a shallow proxy
 

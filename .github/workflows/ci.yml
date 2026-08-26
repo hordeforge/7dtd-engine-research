@@ -18,6 +18,7 @@ jobs:
       - name: install pinned analyzers
         run: |
           uv tool install ruff==0.16.4
+          uv tool install mypy==2.3.1
           # Pinned so local `make lint` and CI agree (same policy as ruff);
           # ubuntu-latest's apt shellcheck trails the current release.
           # Checksum-gated like the Mono.Cecil pin: a swapped release artifact

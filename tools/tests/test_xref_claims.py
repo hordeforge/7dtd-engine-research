@@ -57,7 +57,7 @@ def xref_counts(asm: str, pairs: list[tuple[str, str]]) -> dict[tuple[str, str],
     totals from a single assembly pass; per-claim subprocesses would each pay a
     full mono + Cecil load (the test was ~6x slower that way).
     """
-    with tempfile.TemporaryDirectory(prefix="xref-batch-") as td:
+    with tempfile.TemporaryDirectory(prefix="xref-batch-", dir=_common.scratch_dir()) as td:
         claims_path = os.path.join(td, "claims.tsv")
         with open(claims_path, "w", encoding="utf-8") as f:
             for typ, member in pairs:

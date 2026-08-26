@@ -20,7 +20,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-TOOLS = Path(__file__).resolve().parents[1]
+TOOLS = _common.TOOLS
 DOCS = TOOLS.parent / "docs"
 # Mono.Cecil is copied into bin/ by build.sh; legacy dumpers live in legacy/.
 CECIL = TOOLS / "bin" / "Mono.Cecil.dll"

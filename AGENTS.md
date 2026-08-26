@@ -36,7 +36,9 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 | [`tools/data/`](tools/data) | Committed pins (`stock_facts.json`) |
 | [`tools/tests/`](tools/tests) | Pin gate, dump-set structural tests, readiness bench |
 | [`Makefile`](Makefile) | Gate entry points: `verify`, `test`, `test-docs`, `lint`, `post-update`, `census` |
+| [`ruff.toml`](ruff.toml), [`mypy.ini`](mypy.ini) | Static-analysis config for `make lint`; versions pinned in [`ci.yml`](.github/workflows/ci.yml) |
 | `il/` | Regenerable Cecil dumps. **git-ignored** (may contain game IL); never redistribute |
+| `.scratch/` | Ephemeral probes and gate temp trees (`.scratch/tmp`). **git-ignored**; never the system temp dir, which is tmpfs here |
 | [`oss-tools/`](oss-tools) | Third-party server-tool/mod survey notes |
 | [`workspace/`](workspace) | Research artifacts only (no product code) |
 | [`workspace/outputs/`](workspace/outputs) | Audits, plans, review drafts |
@@ -57,4 +59,6 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 
 [`docs/INDEX.md`](docs/INDEX.md) -> [`docs/coverage.md`](docs/coverage.md) (what is mapped) -> family narrative -> `il/` dump. For new RE: [`docs/re-methodology.md`](docs/re-methodology.md) + [`tools/`](tools).
 
-Gates: `make test-docs` (no DLL needed, same as CI), `make lint`; with the live game also `make test`, `make verify`.
+Gates: `make test-docs` (no DLL needed, same as CI), `make lint` (`ruff` check + format, `mypy --strict`, `shellcheck`); with the live game also `make test`, `make verify`.
+
+Python tooling rules: every parameter and return annotated (`mypy --strict` is a gate, not advice); scripts take the repo root from `_common.REPO` (a marker walk) rather than counting parent directories; temp trees go under `_common.scratch_dir()`.

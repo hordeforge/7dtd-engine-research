@@ -19,12 +19,11 @@ import json
 import os
 import re
 import sys
-from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-ROOT = Path(__file__).resolve().parents[2]  # 7dtd-engine-research
+ROOT = _common.REPO
 RESEARCH = ROOT
 DOCS = RESEARCH / "docs"
 IL = RESEARCH / "il"
@@ -201,12 +200,12 @@ def main() -> int:
     # When Assembly-CSharp.dll is available locally, missing dumps are an error.
     # On CI / single-repo checkouts without the game install, we skip.
     if asm_present:
-        label = dump_label()
-        if label is None:
+        build_label = dump_label()
+        if build_label is None:
             fails.append(f"cannot derive il/ dump label from {FACTS} (update.dump_label_suffix)")
         else:
             for set_name, artifact in DEDICATED_DUMPS:
-                rel = f"{set_name}-{label}/{artifact}"
+                rel = f"{set_name}-{build_label}/{artifact}"
                 p = IL / rel
                 if not p.is_file():
                     fails.append(f"missing dedicated dump artifact: {p}")

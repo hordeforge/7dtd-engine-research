@@ -137,7 +137,8 @@ static class Seeds {
     foreach (var t in all) {
       if (!t.HasInterfaces) continue;
       foreach (var ii in t.Interfaces) {
-        TypeDefinition itd = null; try { itd = ii.InterfaceType.Resolve(); } catch { }
+        // Resolve throws AssemblyResolutionException for a type outside the loaded set; null is the "not ours" answer the loop below handles.
+        TypeDefinition itd = null; try { itd = ii.InterfaceType.Resolve(); } catch (AssemblyResolutionException) { }
         if (itd == null) continue;
         foreach (var im in itd.Methods) {
           Dictionary<string, MethodDefinition> impls;
@@ -184,7 +185,8 @@ static class Seeds {
         MethodDefinition md;
         if (!resolved.TryGetValue(mr, out md)) {
           md = mr as MethodDefinition;
-          if (md == null) { try { md = mr.Resolve(); } catch { } }
+          // Same out-of-set case: an unresolvable ref stays null and is skipped.
+          if (md == null) { try { md = mr.Resolve(); } catch (AssemblyResolutionException) { } }
           resolved[mr] = md;
         }
         if (md != null && md.HasBody && visited.Add(md)) work.Enqueue(md);

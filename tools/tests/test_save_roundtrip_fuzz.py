@@ -32,9 +32,13 @@ import sys
 import tempfile
 import time
 import zlib
+from collections.abc import Callable
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TOOLS = os.path.join(REPO, "tools")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+REPO = str(_common.REPO)
+TOOLS = str(_common.TOOLS)
 sys.path.insert(0, TOOLS)
 
 import save_roundtrip_check as src
@@ -44,17 +48,17 @@ ROUNDS = 240  # mutation rounds per target family
 TIME_BUDGET_S = 5.0  # hard ceiling for ONE parser call (hang-class guard)
 
 
-def netstr(s):
+def netstr(s: str) -> bytes:
     """read_net_string encoding: u8/u32-prefixed UTF-8 (u8 fits fixtures)."""
     raw = s.encode()
     return bytes([len(raw)]) + raw
 
 
-def build_chunk_body(slot):
+def build_chunk_body(slot: int) -> bytes:
     """Minimal Chunk.save body that parse_chunk_body accepts byte-exactly."""
     x, z = slot % 32, slot // 32  # C# remainder mapping for slot < 1024
 
-    def chan(bpv):
+    def chan(bpv: int) -> bytes:
         return b"\x01" + b"\x07" * bpv  # one RLE flag+value per slice
 
     parts = [struct.pack("<iii", x, 0, z), struct.pack("<Q", 1000)]
@@ -77,12 +81,12 @@ def build_chunk_body(slot):
     return b"".join(parts)
 
 
-def deflate_raw(data):
+def deflate_raw(data: bytes) -> bytes:
     c = zlib.compressobj(9, zlib.DEFLATED, -15)
     return c.compress(data) + c.flush()
 
 
-def build_region(slot, body):
+def build_region(slot: int, body: bytes) -> bytes:
     """V2 .7rg: header + location@4096 + timestamp@8192 + one ttc slot."""
     frame = (
         struct.pack("<I", len(body) + 8)
@@ -103,13 +107,13 @@ def build_region(slot, body):
     return bytes(data)
 
 
-def build_ai_blob():
+def build_ai_blob() -> bytes:
     # version 10, wandering next (horde, bandit), airdrop next, packed freq
     # word, crate count 0, chunkEvent ver/active, bloodMoon last/next/freq/range
     return struct.pack("<iQQQQiiiii2h", 10, 1, 2, 3, 0, 0, 1, 0, 5, 8, 2, 3)
 
 
-def build_worldstate_tail():
+def build_worldstate_tail() -> bytes:
     dyn = bytes([1, 0])
     sleeper = struct.pack("<ii", 0, 1)  # count 0, nextId 1
     empty_vol = struct.pack("<ii", 0, 1)
@@ -127,7 +131,7 @@ def build_worldstate_tail():
     return tail
 
 
-def build_ttw(spawn_count=None, tail=None):
+def build_ttw(spawn_count: int | None = None, tail: bytes | None = None) -> bytes:
     head = b"ttw\x00" + struct.pack("<I", 23)
     head += netstr("V3.1.0")
     head += struct.pack("<4i", 1, 3, 10, 14)
@@ -141,19 +145,19 @@ def build_ttw(spawn_count=None, tail=None):
     return head + (tail if tail is not None else build_worldstate_tail())
 
 
-def build_record(count=1):
+def build_record(count: int = 1) -> bytes:
     rec = struct.pack("<QfIB", 99, 62.5, 3735928559, 3)
     return bytes([6]) + struct.pack("<i", count) + rec * count
 
 
-def build_nim(count=2):
+def build_nim(count: int = 2) -> bytes:
     out = struct.pack("<II", 3, count)
     for i in range(count):
         out += struct.pack("<I", 1000 + i) + netstr(f"block{i}")
     return out
 
 
-def mutate(rng, data):
+def mutate(rng: random.Random, data: bytes) -> bytes:
     b = bytearray(data if data else b"\x00")
     for _ in range(rng.randint(1, 8)):
         op = rng.choice(("flip", "set", "trunc", "grow", "count"))
@@ -180,7 +184,7 @@ class BudgetError(Exception):
     pass
 
 
-def timed(call):
+def timed(call: Callable[[], object]) -> None:
     t0 = time.monotonic()
     call()
     dt = time.monotonic() - t0
@@ -188,17 +192,21 @@ def timed(call):
         raise BudgetError(f"call took {dt:.1f}s (budget {TIME_BUDGET_S}s)")
 
 
-def run_path_parser(parser, data, tmpdir):
+def run_path_parser(
+    parser: Callable[[str, list[str]], None], data: bytes, tmpdir: str
+) -> list[str]:
     path = os.path.join(tmpdir, "fuzz.bin")
     with open(path, "wb") as fh:
         fh.write(data)
-    checks = []
+    checks: list[str] = []
     timed(lambda: src.run_file_check(parser, path, checks))
     return checks
 
 
-def run_blob_parser(parser, data, off=None):
-    checks = []
+def run_blob_parser(
+    parser: Callable[..., object], data: bytes, off: int | None = None
+) -> list[str]:
+    checks: list[str] = []
     args = (data, off, checks) if off is not None else (data, checks)
     timed(lambda: parser(*args))
     return checks
@@ -207,21 +215,28 @@ def run_blob_parser(parser, data, off=None):
 ALLOWED_CHUNK_BODY = (ValueError, struct.error)
 
 
-def assert_contract(checks, label, bad):
+def assert_contract(checks: list[str], label: str, bad: list[str]) -> None:
     for line in checks:
         if "byte-exact" in line and any(m in line for m in src.FAILED_MARKERS):
             bad.append(f"{label}: contradictory line claims byte-exact + FAIL: {line!r}")
             return
 
 
-def deterministic(checks_factory, label, bad):
+def deterministic(checks_factory: Callable[[], list[str]], label: str, bad: list[str]) -> None:
     a = checks_factory()
     b = checks_factory()
     if a != b:
         bad.append(f"{label}: parser not deterministic:\n  {a}\n  {b}")
 
 
-def fuzz_family(name, seed_builder, invoker, rng, rounds, bad):
+def fuzz_family(
+    name: str,
+    seed_builder: Callable[[int], bytes],
+    invoker: Callable[[bytes], list[str]],
+    rng: random.Random,
+    rounds: int,
+    bad: list[str],
+) -> None:
     seeds = [seed_builder(i) for i in range(3)]
     # parse_chunk_body documents ValueError/struct.error as its caller-caught
     # degradation path; every other surface must swallow malformed bytes whole.
@@ -244,7 +259,7 @@ def fuzz_family(name, seed_builder, invoker, rng, rounds, bad):
             return
         if k % 8 == 0:
 
-            def rerun(data=data):
+            def rerun(data: bytes = data) -> list[str]:
                 try:
                     return invoker(data)
                 except allowed:
@@ -255,10 +270,10 @@ def fuzz_family(name, seed_builder, invoker, rng, rounds, bad):
                 return
 
 
-def main():
+def main() -> int:
     rng = random.Random(SEED)
-    bad = []
-    with tempfile.TemporaryDirectory(prefix="srt-fuzz-") as tmp:
+    bad: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="srt-fuzz-", dir=_common.scratch_dir()) as tmp:
         families = [
             (
                 "main.ttw",
@@ -326,7 +341,7 @@ def main():
         ttw = os.path.join(tmp, "hang.ttw")
         with open(ttw, "wb") as fh:
             fh.write(build_ttw(spawn_count=0x7FFFFFFF))
-        checks = []
+        checks: list[str] = []
         try:
             timed(lambda: src.run_file_check(src.check_main_ttw, ttw, checks))
         except BudgetError:
@@ -364,7 +379,7 @@ def main():
         bomb += c.compress(unit)
     bomb += c.flush()
     try:
-        src.inflate_raw_capped(bomb)
+        src.inflate_raw_capped(bytes(bomb))
         bad.append("inflate: bomb over cap was not rejected")
     except ValueError:
         pass

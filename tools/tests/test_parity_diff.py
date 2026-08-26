@@ -2,12 +2,16 @@
 """Exercise the supported stock-snapshot parity CLI."""
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-TOOL = Path(__file__).resolve().parents[1] / "parity" / "parity_diff.py"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOL = _common.TOOLS / "parity" / "parity_diff.py"
 
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
@@ -17,7 +21,7 @@ def run(*args: str) -> subprocess.CompletedProcess[str]:
 def main() -> None:
     base = {"packages": {"NetPackagePing": {"read": "A", "write": "B", "dir": 1}}, "enums": {}}
     changed = {"packages": {"NetPackagePing": {"read": "C", "write": "B", "dir": 1}}, "enums": {}}
-    with tempfile.TemporaryDirectory() as td:
+    with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         old, new = Path(td) / "old.json", Path(td) / "new.json"
         old.write_text(json.dumps(base), encoding="utf-8")
         new.write_text(json.dumps(changed), encoding="utf-8")

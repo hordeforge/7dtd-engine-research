@@ -30,6 +30,8 @@ import os
 import struct
 import sys
 import zlib
+from collections.abc import Callable
+from typing import Any
 
 RAW_DEFLATE = -15  # no zlib/gzip wrapper (Noemax.GZip.DeflateOutputStream, no header)
 
@@ -39,7 +41,7 @@ RAW_DEFLATE = -15  # no zlib/gzip wrapper (Noemax.GZip.DeflateOutputStream, no h
 MAX_INFLATED = 64 * 1024 * 1024
 
 
-def inflate_raw_capped(data, cap=MAX_INFLATED):
+def inflate_raw_capped(data: bytes, cap: int = MAX_INFLATED) -> bytes:
     """RAW_DEFLATE-inflate `data` with a hard cap on decompressed size.
 
     Raises ValueError when the cap would be exceeded or the stream is
@@ -60,7 +62,7 @@ def inflate_raw_capped(data, cap=MAX_INFLATED):
     return bytes(out)
 
 
-def read_net_string(buf, off):
+def read_net_string(buf: bytes, off: int) -> tuple[str, int]:
     """.NET BinaryReader.ReadString: 7-bit encoded length prefix + UTF-8.
 
     Raises struct.error (not IndexError) on a prefix that runs past the end:
@@ -81,7 +83,7 @@ def read_net_string(buf, off):
     return buf[off : off + length].decode("utf-8", "replace"), off + length
 
 
-def check_sleeper_volumes(blob, checks):
+def check_sleeper_volumes(blob: bytes, checks: list[str]) -> None:
     """Parse the sleeperVolumes blob (World.WriteSleeperVolumes IL=52 +
     SleeperVolume.Write IL=332): i32 count + per volume byte-exact."""
     if not blob:
@@ -179,7 +181,7 @@ def check_sleeper_volumes(blob, checks):
         checks.append(f"  sleeperVolumes parse error: {exc}")
 
 
-def check_ai_director_blob(blob, checks):
+def check_ai_director_blob(blob: bytes, checks: list[str]) -> None:
     """Parse the AIDirector save blob (doc aidirector.md 'AIDirector save
     blob'): version 10 + component Write bodies in install order. Byte-exact."""
     if not blob:
@@ -222,7 +224,7 @@ def check_ai_director_blob(blob, checks):
         checks.append(f"  aiDirectorState parse error: {exc}")
 
 
-def check_weather_blob(blob, checks):
+def check_weather_blob(blob: bytes, checks: list[str]) -> None:
     """Parse the WeatherManager save blob (weather-environment.md 6): version
     u16 4 + gate byte (GamePrefs 60) + biome count u8 + per biome 40 B
     (id u8, weather group u8, stormWorldTime i32, stormDuration i16,
@@ -269,7 +271,7 @@ def check_weather_blob(blob, checks):
         checks.append(f"  weatherState parse error: {exc}")
 
 
-def check_worldstate_tail(buf, off, checks):
+def check_worldstate_tail(buf: bytes, off: int, checks: list[str]) -> None:
     """Walk the full WorldState tail after the ttw header fields (version 23
     gates; WorldState.SaveLoad IL=926)."""
     try:
@@ -352,7 +354,7 @@ def check_worldstate_tail(buf, off, checks):
         checks.append(f"  WorldState tail parse error: {exc}")
 
 
-def check_main_ttw(path, checks):
+def check_main_ttw(path: str, checks: list[str]) -> None:
     """Verify the main.ttw header codec (doc save-region.md 1.1b)."""
     with open(path, "rb") as fh:
         buf = fh.read()
@@ -432,7 +434,7 @@ def check_main_ttw(path, checks):
     check_worldstate_tail(buf, off, checks)
 
 
-def parse_chunk_body(body, idx, checks):
+def parse_chunk_body(body: bytes, idx: int, checks: list[str]) -> tuple[bool, bool, str]:
     """Fully parse a decompressed Chunk.save body (Chunk.write IL=601) and
     require it to consume the body byte-exactly.
 
@@ -443,10 +445,10 @@ def parse_chunk_body(body, idx, checks):
     p = 0
     n = len(body)
 
-    def need(k):
+    def need(k: int) -> bool:
         return p + k <= n
 
-    def rd(fmt, k):
+    def rd(fmt: str, k: int) -> tuple[Any, ...]:
         nonlocal p
         if not need(k):
             raise ValueError(f"truncated at {p}/{n}")
@@ -483,7 +485,7 @@ def parse_chunk_body(body, idx, checks):
     if not need(0):
         raise ValueError("truncated in layer block")
 
-    def channel(bpv):
+    def channel(bpv: int) -> None:
         nonlocal p
         for _ in range(64):
             flag = rd("<b", 1)[0]
@@ -532,7 +534,7 @@ def parse_chunk_body(body, idx, checks):
         return coords_ok, False, reason
     rd("<b", 1)  # always false (file path)
 
-    def volume():
+    def volume() -> None:
         nonlocal p
         cnt = rd("<B", 1)[0]
         p += cnt * 4
@@ -571,7 +573,9 @@ def parse_chunk_body(body, idx, checks):
     return coords_ok, True, ""
 
 
-def check_17b_record_file(path, checks, record_desc, describe_first):
+def check_17b_record_file(
+    path: str, checks: list[str], record_desc: str, describe_first: Callable[[bytes], str]
+) -> None:
     """Shared shape of decoration.7dt / multiblocks.7dt: version byte 6 +
     i32 count + fixed 17-byte records. Reports the first record when exact."""
     with open(path, "rb") as fh:
@@ -589,11 +593,11 @@ def check_17b_record_file(path, checks, record_desc, describe_first):
         checks.append("  " + describe_first(data))
 
 
-def check_decoration_7dt(path, checks):
+def check_decoration_7dt(path: str, checks: list[str]) -> None:
     """Verify decoration.7dt: version byte 6 + i32 count + 17-byte records
     (packedPos u64 + realYPos f32 + bv.rawData u32 + state u8)."""
 
-    def first(data):
+    def first(data: bytes) -> str:
         pos, ry, raw, state = struct.unpack_from("<QfIB", data, 5)
         return f"first record: packedPos={pos} realY={ry:.1f} raw=0x{raw:x} state={state}"
 
@@ -602,7 +606,7 @@ def check_decoration_7dt(path, checks):
     )
 
 
-def check_nim_mapping(path, checks):
+def check_nim_mapping(path: str, checks: list[str]) -> None:
     """Verify *.nim id-name mapping: u32 version + u32 count + (u32 id + u8
     nameLen + name), byte-exact."""
     with open(path, "rb") as fh:
@@ -626,12 +630,12 @@ def check_nim_mapping(path, checks):
     )
 
 
-def check_multiblocks_7dt(path, checks):
+def check_multiblocks_7dt(path: str, checks: list[str]) -> None:
     """Verify multiblocks.7dt: version byte 6 + i32 count + 17-byte records
     (Vector3i pos + rawData u32 + trackingTypeFlags u8). MultiBlockManager
     SaveIfDirty IL=107."""
 
-    def first(data):
+    def first(data: bytes) -> str:
         x, y, z, raw, flags = struct.unpack_from("<iiiIB", data, 5)
         return f"first record: pos=({x},{y},{z}) raw=0x{raw:x} flags={flags}"
 
@@ -643,7 +647,7 @@ def check_multiblocks_7dt(path, checks):
     )
 
 
-def check_region_v2(path, checks):
+def check_region_v2(path: str, checks: list[str]) -> None:
     """Verify a .7rg sector-based V2 region file (doc save-region.md 3.4/3.5)."""
     with open(path, "rb") as fh:
         data = fh.read()
@@ -726,7 +730,7 @@ def check_region_v2(path, checks):
     )
 
 
-def check_region_raw(path, checks):
+def check_region_raw(path: str, checks: list[str]) -> None:
     """Verify a .7rr Raw region file header/tables (doc save-region.md 3.5)."""
     with open(path, "rb") as fh:
         data = fh.read()
@@ -741,7 +745,7 @@ def check_region_raw(path, checks):
     checks.append("  header 11 bytes; location table 512 B @11; timestamp 256 B @523; payload @779")
 
 
-def discover_save_dir():
+def discover_save_dir() -> str | None:
     """Newest probe save containing main.ttw + Region/, or None.
 
     Probe saves live under active loadgen sessions; a file that vanishes
@@ -781,11 +785,11 @@ FAILED_MARKERS = (
 )
 
 
-def any_failed(checks):
+def any_failed(checks: list[str]) -> bool:
     return any(marker in c for c in checks for marker in FAILED_MARKERS)
 
 
-def report(checks):
+def report(checks: list[str]) -> int:
     """Print every check line and the PASS/FAIL verdict; exit 1 on failure."""
     failed = any_failed(checks)
     print("\n".join(checks))
@@ -793,7 +797,7 @@ def report(checks):
     return 1 if failed else 0
 
 
-def run_file_check(parse, path, checks):
+def run_file_check(parse: Callable[[str, list[str]], None], path: str, checks: list[str]) -> None:
     """Run one per-file parser, converting a hard parse crash into a FAIL line.
 
     These parsers read stock-written but potentially truncated/corrupt files;
@@ -808,7 +812,7 @@ def run_file_check(parse, path, checks):
         checks.append(f"{os.path.basename(path)}: parse error: {exc}")
 
 
-def parse_args(argv):
+def parse_args(argv: list[str]) -> argparse.Namespace:
     """CLI contract: -h/--help free, usage errors exit 2 via argparse.
 
     The parsers above take paths, not options; an argument that starts with
@@ -836,11 +840,11 @@ def parse_args(argv):
     return ap.parse_args(argv)
 
 
-def main():
+def main() -> int:
     args = parse_args(sys.argv[1:])
     shipped = args.shipped
     save_dir = args.save_dir if not shipped else None
-    checks = []
+    checks: list[str] = []
     if shipped:
         ttw = shipped if os.path.isfile(shipped) else os.path.join(shipped, "main.ttw")
         if not os.path.isfile(ttw):

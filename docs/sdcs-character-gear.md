@@ -5,10 +5,10 @@ model, the three XML/asset contracts a modder authors against (`items.xml` `SDCS
 property class, `archetypes.xml`, `Resources/sdcs.xml`), the asset-path grammar,
 and the runtime rig-stitching pipeline that turns an equipped armor item into
 skinned geometry on the player rig.  
-**Not:** how armor *behaves* (`ItemClassArmor` stats, damage mitigation) — that is
+**Not:** how armor *behaves* (`ItemClassArmor` stats, damage mitigation); that is
 [`items.md`](items.md) and [`combat-damage.md`](combat-damage.md). Not equipment
-slot bookkeeping (`Equipment`) — [`items.md`](items.md).  
-**Server relevance — read this first:** a dedicated server **never executes** the
+slot bookkeeping (`Equipment`): [`items.md`](items.md).  
+**Server relevance, read this first:** a dedicated server **never executes** the
 rig pipeline. `SDCSUtils`, `SDCSDataUtils` and `SDCSArchetypesFromXml` stay
 classified client-render in [`out-of-scope-surface.md`](out-of-scope-surface.md);
 this doc narrates them. What *is* server-side is the **data**: `archetypes.xml` is
@@ -38,7 +38,7 @@ baseRigPrefab.prefab            one skeleton: Origin/Hips/Spine.../Neck/Head, Ri
 Every added mesh is *stitched*: instantiated under the rig, then its
 `SkinnedMeshRenderer.bones[]` array is rewritten to point at the **base rig's**
 transforms of the same name. This is why bone naming is the single hardest
-authoring constraint in SDCS — a name mismatch silently drops the bone.
+authoring constraint in SDCS, a name mismatch silently drops the bone.
 
 Three type families do the work:
 
@@ -64,7 +64,7 @@ Fields (from `DumpType`): `s_Archetypes` (static `CaseInsensitiveStringDictionar
 | Member | IL | Behaviour |
 |---|---:|---|
 | `Archetype::.ctor(String,Boolean,Boolean)` | 30 | Hair/HairColor/Mustache/Chops/Beard default to `""`; `EyeColorName` defaults to `"Blue01"` |
-| `Archetype::get_Sex()` | 7 | `IsMale ? "Male" : "Female"` — this string is the `{sex}` substitution everywhere |
+| `Archetype::get_Sex()` | 7 | `IsMale ? "Male" : "Female"`, this string is the `{sex}` substitution everywhere |
 | `Archetype::set_Sex(String)` | 7 | `IsMale = value.ToLower() == "male"` |
 | `Archetype::get_ShowInList()` | 12 | false for `BaseMale` / `BaseFemale` (the two reserved templates) |
 | `Archetype::GetArchetype(String)` | 14 | lookup in `s_Archetypes` (case-insensitive), null when absent |
@@ -74,7 +74,7 @@ Fields (from `DumpType`): `s_Archetypes` (static `CaseInsensitiveStringDictionar
 | `Archetype::InitializeStatics()` | 3 | allocates `s_Archetypes` |
 | `Archetype::SaveArchetypesToFile()` | 6 | writes every registered archetype back through `SDCSArchetypesFromXml::Save` |
 
-`Variant` is formatted **everywhere** as `Variant.ToString("00")` — a two-digit,
+`Variant` is formatted **everywhere** as `Variant.ToString("00")`, a two-digit,
 zero-padded folder name (`01`, `02`, ...). Authoring a variant `1` folder named
 `1` will not resolve.
 
@@ -88,7 +88,7 @@ The per-gear-piece record. Fields: `PrefabName`, `PartName`, `BaseToTurnOff`,
 | `PrefabName` | Asset path of the gear prefab, **with substitution markers** (§4) |
 | `PartName` | Which child transform inside that prefab is the mesh to stitch (`head`, `body`, `hands`, `feet`, `helmet`, `torso`, `gloves`, `boots`, ...) |
 | `BaseToTurnOff` | Comma-separated list of rig child transforms to **destroy** when this piece is worn (hides the bare body under the armor) |
-| `HairMaskType` | `Full` (0) / `Hat` (1) / `None` (2) — how head hair is masked while worn |
+| `HairMaskType` | `Full` (0) / `Hat` (1) / `None` (2), how head hair is masked while worn |
 | `FacialHairMaskType` | same enum, for mustache/chops/beard |
 
 `HairMaskTypes` is a nested enum of `SlotData`: `Full=0, Hat=1, None=2`. `Full` is
@@ -99,7 +99,7 @@ asset (§4.4).
 
 ## 3. The three authoring contracts
 
-### 3.1 `items.xml` — the `SDCS` property class (the armor authoring contract)
+### 3.1 `items.xml`: the `SDCS` property class (the armor authoring contract)
 
 This is the one that matters for authoring a wearable. `ItemClass::Init` (IL=1196)
 checks `Properties.Classes` for a class named `SDCS`; when present it allocates
@@ -136,7 +136,7 @@ renders nothing (silently, for non-`head` parts).
 throws during item load rather than falling back. Values are exactly `Full`,
 `Hat`, `None`.
 
-### 3.2 `archetypes.xml` — `SDCSArchetypesFromXml`
+### 3.2 `archetypes.xml`: `SDCSArchetypesFromXml`
 
 Loaded through `WorldStaticData::LoadSDCSArchetypes(XmlFile)` (IL=6; the state
 machine's `MoveNext` IL=15 just calls `SDCSArchetypesFromXml::Load`).
@@ -180,7 +180,7 @@ The parsed archetype is registered with `Archetype::SetArchetype`.
 
 `SDCSArchetypesFromXml::Save(String,List<Archetype>)` (IL=69) writes
 `GameIO::GetGameDir("Data/Config")/<name>.xml` with one self-closing line per
-archetype and **only four attributes** — `name`, `male`, `race`, `variant`:
+archetype and **only four attributes**, `name`, `male`, `race`, `variant`:
 
 ```text
 <archetypes>
@@ -192,7 +192,7 @@ The writer is therefore **lossy**: hair, facial hair, eye colour and every
 `<equipment>` child are dropped on round-trip. Do not use in-game save as a way to
 edit a hand-authored `archetypes.xml`.
 
-### 3.3 `Resources/sdcs.xml` — `SDCSDataUtils` (the value catalog)
+### 3.3 `Resources/sdcs.xml`: `SDCSDataUtils` (the value catalog)
 
 `SDCSDataUtils::Load()` (IL=260) reads the `sdcs` `TextAsset` out of Unity
 `Resources`, clears all seven static dictionaries and dispatches per element name:
@@ -227,17 +227,17 @@ project, not a shipped build:
 | Method | IL | Scans |
 |---|---:|---|
 | `LoadRaceDataFromResources()` | 7 | clear `VariantData`, then `ParseRaceVariantFromResources` per sex |
-| `ParseRaceVariantFromResources(Boolean)` | 75 | `{dataPath}/AssetBundles/Player/{Male\|Female}/Heads/<race>/<variant>` — directory names become race + variant int |
+| `ParseRaceVariantFromResources(Boolean)` | 75 | `{dataPath}/AssetBundles/Player/{Male\|Female}/Heads/<race>/<variant>`, directory names become race + variant int |
 | `LoadHairTypeFromResources(Dictionary,HairTypes)` | 69 | clear the per-type dictionary, then fill it from `GetHairNamesFromResources` per sex |
 | `GetHairNamesFromResources(Boolean,HairTypes)` | 55 | `{dataPath}/AssetBundles/Player/{sex}/` + `Hair/` (Hair) or `FacialHair/{HairTypes}/` (the other three) |
 | `GetEyeColorNamesFromResources()` | 38 | `{dataPath}/AssetBundles/Player/Common/Eyes/Materials/*.mat` (skips `.meta`, strips `.mat`) |
 | `GetHairColorNamesFromResources()` | 40 | `{dataPath}/AssetBundles/Player/Common/HairColorSwatches/*.asset` (skips `.meta`, strips `.asset`) |
-| `LoadHairColorFromResources(Dictionary)` | 50 | splits each swatch filename as `Index = int(name.Substring(0,2))`, `Name = name.Substring(3)`, `PrefabName = name` — so a swatch file is named `NN<sep>Name` (two digits, one separator character, then the display name) |
+| `LoadHairColorFromResources(Dictionary)` | 50 | splits each swatch filename as `Index = int(name.Substring(0,2))`, `Name = name.Substring(3)`, `PrefabName = name`, so a swatch file is named `NN<sep>Name` (two digits, one separator character, then the display name) |
 
 The **directory layout is the schema**: adding a race means adding a
 `Heads/<Race>/<NN>/` folder; adding a hair style means adding a folder under
 `Hair/`. `SDCSDataUtils::get_baseHairColorLoc()` (IL=2) is
-`AssetBundles/Player/Common/HairColorSwatches` — note it is the *editor* path form,
+`AssetBundles/Player/Common/HairColorSwatches`. Note it is the *editor* path form,
 distinct from the runtime `@:`-prefixed `SDCSUtils::get_baseHairColorLoc()` (IL=2)
 which is `@:Entities/Player/Common/HairColorSwatches`.
 
@@ -247,7 +247,7 @@ which is `@:Entities/Player/Common/HairColorSwatches`.
 
 All runtime loads go through `DataLoader::LoadAsset<T>` / `LoadManager::LoadAsset<T>`
 with the `@:` bundle-relative prefix. Paths are rebuilt from
-`SDCSUtils::tmpArchetype`, the static "archetype currently being built" — set once
+`SDCSUtils::tmpArchetype`, the static "archetype currently being built", set once
 at the top of each `CreateViz*` call.
 
 ### 4.1 Fixed roots
@@ -293,7 +293,7 @@ an incomplete race/variant is a no-op rather than a broken model.
 | `SDCSUtils::get_baseBeardLoc()` | 38 | `@:Entities/Player/{S}/FacialHair/Beard/{BeardName}/HairMorphMatrix/{R}{V}` |
 
 The `HairMorphMatrix/{Race}{Variant}` level is why every hair style must be
-authored **per race/variant head shape** — the loaded asset is a `MeshMorph`
+authored **per race/variant head shape**, the loaded asset is a `MeshMorph`
 pre-fitted to that skull, not a generic mesh.
 
 ### 4.4 The substitution markers
@@ -302,7 +302,7 @@ pre-fitted to that skull, not a generic mesh.
 
 | Constant | Value | Replaced with |
 |---|---|---|
-| `SEX_MARKER` | `{sex}` | `Archetype::get_Sex()` — `Male` / `Female` |
+| `SEX_MARKER` | `{sex}` | `Archetype::get_Sex()`, `Male` / `Female` |
 | `RACE_MARKER` | `{race}` | `Archetype::Race` |
 | `VARIANT_MARKER` | `{variant}` | `Archetype::Variant.ToString("00")` |
 | `HAIR_MARKER` | `{hair}` | `Bald` or `""` (see below) |
@@ -331,7 +331,7 @@ a headgear morph asks for the short-hair mask.
 ### 4.5 Headgear morph paths
 
 `Morphable::MorphHeadgear(Archetype,Boolean)` (IL=111) loads
-`{MorphSetPath}/{Race}{Variant:00}/{MorphName}.asset` as a `MeshMorph` — the
+`{MorphSetPath}/{Race}{Variant:00}/{MorphName}.asset` as a `MeshMorph`, the
 per-skull fitted version of a helmet mesh. `MorphSetPath` and `MorphName` are
 serialised on the `Morphable` component inside the gear prefab, so they are set in
 the Unity project, not in XML.
@@ -356,11 +356,11 @@ EModelSDCS::GenerateMeshes
 It is called from `EModelSDCS::createModel` (IL=80), `SwitchModelAndView` (IL=23)
 and `UpdateEquipment` (IL=17). `UpdateEquipment` is driven by the XUi event
 `XUiM_PlayerEquipment::HandleRefreshEquipment`, subscribed in `EModelSDCS::Init`
-(IL=58) and unsubscribed in `OnDestroy` (IL=5) — **equipping armor rebuilds the
+(IL=58) and unsubscribed in `OnDestroy` (IL=5), **equipping armor rebuilds the
 entire rig**, it is not an incremental swap. `EModelSDCS::Init` also takes the
 archetype from `PlayerProfile::CreateTempArchetype()`.
 
-`SDCSUtils::CreateVizTP` (IL=57) — third person:
+`SDCSUtils::CreateVizTP` (IL=57), third person:
 
 ```text
 RemoveAssetOwnerForRig(baseRig); DestroyViz(baseRig, keepRig: true)
@@ -376,7 +376,7 @@ if (!isFPV) {
 oldOwner?.ReleaseAssets()
 ```
 
-`SDCSUtils::CreateVizFP` (IL=171) — first person — differs: it parents the rig
+`SDCSUtils::CreateVizFP` (IL=171), the first-person path, differs: it parents the rig
 under `Camera/UFPSRoot` (erroring out with `"Unable to find first person camera!"`
 if neither the entity's `Camera` child nor a global `GameObject.Find("Camera")`
 resolves), uses `baseRigFPPrefab` + `FPAnimController`, uses `basePartsFP` and
@@ -390,7 +390,7 @@ entity-less `setupEquipment(GameObject,TransformCatalog,String[],Boolean,List,Bo
 (IL=158) overload, and the 5-argument form (IL=103) takes an `EntityAlive`. Both use
 `baseRigPrefab` + `UIAnimController` with `isUI: true`, then:
 
-- find the `IKRig` child and set its `Rig::weight = 0` — the UI preview runs with IK
+- find the `IKRig` child and set its `Rig::weight = 0`, the UI preview runs with IK
   **off**, it does not "keep" that layer;
 - disable (`SetActive(false)`) every `HingeJoint` whose `connectedBody` is null,
   warning
@@ -415,7 +415,7 @@ returns null for any `PartName` containing `head`, `helmet`, `feet` or `boots`
 while the FP rig is being built.
 
 The cctor also allocates the reusable scratch buffers `_smrBuf` (capacity 64),
-`_hingeBuf` (32), `_bcBuf` (32) and the `tempCloths`/`tempMats`/`tempSMRs` lists —
+`_hingeBuf` (32), `_bcBuf` (32) and the `tempCloths`/`tempMats`/`tempSMRs` lists,
 SDCS assembles into shared static buffers, so it is not re-entrant.
 
 ### 5.3 `setupRig`
@@ -426,14 +426,14 @@ SDCS assembles into shared static buffers, so it is not re-entrant.
 - If the rig object does not exist yet: `DataLoader::LoadAsset<GameObject>(prefabLocation)`
   → `Instantiate(parent)`, build a fresh `TransformCatalog`, and disable every
   `BoneRenderer` in the hierarchy.
-- If it does exist: `cleanupEquipment` instead (§8) — the rig is reused.
+- If it does exist: `cleanupEquipment` instead (§8), the rig is reused.
 - Set the `Animator`'s `runtimeAnimatorController` if it differs.
 - **Female-only:** `GetOrAddComponent<CapsuleCollider>` on the `Hips` bone with
   `center = (0, 0, -0.03)`, `radius = 0.15`, `height = 0.375`. (This is the cloth
   collider for the female body; male rigs get none here.)
 
 `SDCSUtils/TransformCatalog` is a `Dictionary<string, Transform>` built by
-`AddRecursive` (IL=40) over the whole rig — **keyed by transform name only**, with
+`AddRecursive` (IL=40) over the whole rig, **keyed by transform name only**, with
 later duplicates overwriting earlier ones. Two bones with the same name anywhere in
 the rig collapse to one entry. This dictionary is the sole bone-resolution
 mechanism for the rest of the pipeline.
@@ -464,7 +464,7 @@ Those eight bone names (`Origin`, `Neck`, `Head`, `LeftEye`, `RightEye`,
 `Dictionary::get_Item`, so a head mesh missing any of them throws
 `KeyNotFoundException` during assembly rather than degrading.
 
-### 5.5 `setupEquipment` — equipment slots to `SlotData` list
+### 5.5 `setupEquipment`: equipment slots to `SlotData` list
 
 `SDCSUtils::setupEquipment(GameObject,TransformCatalog,String[],EntityAlive,Boolean,Boolean,Boolean)`
 (IL=289). Phase one, per equipment slot `i` in `0..Equipment::GetSlotCount()`:
@@ -486,14 +486,14 @@ If neither `hasWorn` nor `useCosmetic`, or the **cosmetic** class is
 `ItemClass::MissingItem`, the slot is skipped. If a cosmetic exists but
 `useCosmetic` came out false (the usual cause: the entitlement is not unlocked),
 the slot's cosmetic is cleared (`SetCosmeticSlot(i, 0)`) and
-`EntityAlive::bPlayerStatsChanged` is set — i.e. the model rebuild is also where a
+`EntityAlive::bPlayerStatsChanged` is set, i.e. the model rebuild is also where a
 revoked entitlement gets scrubbed from the save.
 
 The chosen `ItemClass`'s `SDCSData` is appended to `tmpArchetype.Equipment` (which
 is cleared first). Additionally, if the class is an `ItemClassArmor` whose
 `EquipSlot == EquipmentSlots.Head` (0), that piece's `HairMaskType` and
 `FacialHairMaskType` are copied onto `EModelSDCS::HairMaskType` /
-`FacialHairMaskType`. **Only head-slot armor can mask hair** — the fields are read
+`FacialHairMaskType`. **Only head-slot armor can mask hair**, the fields are read
 off any part's `SlotData` but only committed for `EquipSlot == Head`.
 
 Phase two, per collected `SlotData`:
@@ -504,15 +504,15 @@ Phase two, per collected `SlotData`:
 - otherwise → `setupEquipmentSlot`, then `Stitch(..., isGear: true)`; if the
   stitched object has a `Morphable` in children, `MorphHeadgear(tmpArchetype, ...)`.
 - Either way, a `ColorSwatchApplicator` found in the stitched children gets
-  `ApplyColorSwatch(tmpArchetype.HairColor)` — this is how hair-colour-matched
+  `ApplyColorSwatch(tmpArchetype.HairColor)`, this is how hair-colour-matched
   gear (wigs, hair sticking out of hats) works.
 
 Before phase one it destroys every child of `Origin` whose name starts with
-`RigConstraints` (`findStartsWith`, IL=32) — a full constraint teardown.
+`RigConstraints` (`findStartsWith`, IL=32), a full constraint teardown.
 
 Finally `setupEquipmentCommon` (§7).
 
-### 5.6 `setupEquipmentSlot` — one gear piece
+### 5.6 `setupEquipmentSlot`: one gear piece
 
 `SDCSUtils::setupEquipmentSlot(GameObject,TransformCatalog,String[],SlotData,List<Transform>,Boolean)`
 (IL=196):
@@ -520,10 +520,10 @@ Finally `setupEquipmentCommon` (§7).
 1. `GetPathForSlotData(wornItem, _headgearShortHairMask: true)`; null/empty → return null.
 2. `LoadManager::LoadAsset<GameObject>(path, ...)`. **Fallback:** if the asset is
    null *and* `PartName == "head"`, retry once with `_headgearShortHairMask: false`
-   — i.e. try the non-`Bald` head. Still null → `Log::Warning`
+   (i.e. try the non-`Bald` head). Still null → `Log::Warning`
    `"SDCSUtils::<path> not found for item <PrefabName>!"` and return null.
 3. Register the asset handle on `tmpAssetsOwner` (`AssetRefs::AddAssetHandle`) and
-   `Release()` the request task — the rig now owns the reference (§8).
+   `Release()` the request task, the rig now owns the reference (§8).
 4. Find the *body* gear path: scan `tmpArchetype.Equipment` for the entry whose
    `PartName == "body"` and resolve its path (mask off). This becomes
    `targetBodyPath` for variant selection.
@@ -562,7 +562,7 @@ That overload:
   `{baseMustacheLoc}/hair_facial_mustache{suffix}.asset`,
   `{baseChopsLoc}/hair_facial_sideburns{suffix}.asset`,
   `{baseBeardLoc}/hair_facial_beard{suffix}.asset`.
-  Note the **filename does not carry the style name** — the style is already in the
+  Note the **filename does not carry the style name**, the style is already in the
   directory (`FacialHair/Beard/{BeardName}/...`), and `sideburns` is the on-disk
   name for what the XML calls `chops`.
 - Finally `ApplySwatchToGameObject(rig, swatch)`.
@@ -580,7 +580,7 @@ authored colours.
 
 ---
 
-## 6. `Stitch` — the bone rebind
+## 6. `Stitch`: the bone rebind
 
 `SDCSUtils::Stitch(GameObject,GameObject,TransformCatalog,EModelSDCS,Boolean,Boolean,Material,Boolean)`
 (IL=256). This is the core of the system.
@@ -603,7 +603,7 @@ capsuleColliders of every Cloth = boneCatalog["Hips"].GetComponentsInChildren<Ca
 bone **by name** through the catalog; a null entry in the source bone array logs
 `"Null transform in bone list"` and is left alone. `SDCSUtils::Find<TKey,TValue>`
 (IL=7) is a `TryGetValue`-or-default helper, so an **unmatched bone name becomes
-`null`** — the mesh loads, the bone silently does nothing. This is the failure mode
+`null`**, the mesh loads, the bone silently does nothing. This is the failure mode
 to look for when a custom armor piece deforms wrongly.
 
 Material handling per SMR:
@@ -616,7 +616,7 @@ Material handling per SMR:
    wearer's race/variant skin colour automatically.
 2. **Eyes.** If the renderer's GameObject is named exactly `eyes` and an
    `eyeMat` was passed, `sharedMaterials[0] = eyeMat`.
-3. Every material is then cloned (`new Material(m)`) and reassigned — SDCS never
+3. Every material is then cloned (`new Material(m)`) and reassigned, SDCS never
    shares material instances between characters.
 4. **FP clipping.** When `isBody && isGear && emodel != null && !isUI && isFPV`:
    every material with a `_ClipFPV` float gets it set to `1`, its submesh index is
@@ -639,7 +639,7 @@ slot needs and no more.
 
 `SDCSUtils::CollectRequiredNamesForSlot(Transform root,Transform slotSubRoot)` (IL=236):
 
-1. **Primary source — `GearBoneMap`.** `root.GetComponent<GearBoneMap>()`, then
+1. **Primary source: `GearBoneMap`.** `root.GetComponent<GearBoneMap>()`, then
    `GetPartBones(slotSubRoot.name)`; every returned transform's name enters the set.
 2. **Fallback.** No `GearBoneMap` → `Debug.LogWarning`
    `"[SDCSUtils] No GearBoneMap found on root <name>, falling back to collecting all
@@ -669,7 +669,7 @@ authored in the Unity project:
 | `GearBoneMap::ClearAll()` | 4 | drop the bake |
 
 The `_`-truncation in both `Bake` and `GetPartBones` is what lets a gear part be
-named `body_02` while its bone map is keyed `body` — the same convention
+named `body_02` while its bone map is keyed `body`, the same convention
 `getPartNameWithVariant` produces (§9).
 
 Grafting is `MatchRigs` → `AddRequiredChildren`:
@@ -732,7 +732,7 @@ unloaded and immediately reloaded.
 `Utils::CleanupMaterials` over the shared materials. With `_keepRig: false` the rig
 object itself is `DestroyImmediate`d.
 
-`SDCSUtils::cleanupEquipment(GameObject,TransformCatalog)` (IL=57) — the reuse path:
+`SDCSUtils::cleanupEquipment(GameObject,TransformCatalog)` (IL=57), the reuse path:
 clear `SlotAllowedBonesCache`, strip every `RigLayer` except `IKRig` from the
 `RigBuilder`, `RigBuilder::Clear()`, `AnimatorJobExtensions::UnbindAllStreamHandles`,
 `GameUtils::DestroyAllChildrenImmediatelyBut(rig, { "Origin", "IKRig" })`, then
@@ -744,7 +744,7 @@ removes them from the catalog, clears the tracker, and finally prunes every cata
 entry whose `Transform` is now a destroyed Unity object.
 
 `SDCSUtils::SetVisible(GameObject,Boolean)` (IL=48) toggles `SetActive` on every SMR
-GameObject under every non-`Origin` child — used by `EModelSDCS::SetVisible` (IL=15).
+GameObject under every non-`Origin` child, used by `EModelSDCS::SetVisible` (IL=15).
 
 ---
 
@@ -785,13 +785,13 @@ falls back to the plain part name.
 | `GearVariantMatrixSO::TryParsePart(String,GearPart&)` | 69 | `head`/`hands`/`feet`, exact then trimmed-lowercase; `GearPart` is `Head=0, Hands=1, Feet=2` |
 | `GearVariantMatrixSO::EnsureIndex(Sex)` | 95 | build/refresh `gearPaths[i] -> i` (ordinal), invalidated by row-count change |
 | `GearVariantMatrixSO::TryGetIndices(Sex,String,String,Int32&,Int32&)` | 43 | both row and column resolve through the **same** `gearPaths` index |
-| `GearVariantMatrixSO::GetTable(Sex,GearPart)` | 11 | `SexGearTables::GetTable(GearPart)` (IL=15) — switch, defaulting to `hands` |
+| `GearVariantMatrixSO::GetTable(Sex,GearPart)` | 11 | `SexGearTables::GetTable(GearPart)` (IL=15), switch, defaulting to `hands` |
 | `GearVariantMatrixSO::GetVariantOrEmpty(Sex,GearPart,String,String)` | 61 | bounds-checked cell fetch, `""` on any miss |
 | `GearVariantMatrixSO::GetVariantOrEmpty(String,String,String,String)` | 19 | string-keyed wrapper used by `SDCSUtils` |
 | `GearVariantMatrixSO::TryGetVariant(Sex,GearPart,String,String,String&)` | 64 | bool-returning form |
 | `StringTable2D::Get(Int32,Int32)` | 8 | `rows[row].cellValues[col]` |
 
-Note the part space here is only `head`/`hands`/`feet` — there is no `body` table,
+Note the part space here is only `head`/`hands`/`feet`: there is no `body` table,
 because the body *is* the column key.
 
 ---
@@ -810,7 +810,7 @@ the animation layer needs off the assembled rig:
   overwritten by `spine3`.
 - `meshTransform` = recursive `body`, falling back to `TraderBob`.
 
-So the FP SDCS rig deliberately runs with no spine chain bound — FP animation comes
+So the FP SDCS rig deliberately runs with no spine chain bound, FP animation comes
 entirely from `FPPlayerController`.
 
 `AvatarSDCSController::SwitchModelAndView(String,Boolean,Boolean)` (IL=148) swaps the
@@ -826,7 +826,7 @@ active biped between `modelTransform` and its `baseRigFP` child, re-runs
 the cost framing.
 
 `EModelSDCS::LateUpdate()` (IL=32) pushes `_ClipCenter` (the FP head world position)
-into every material in `ClipMaterialsFP` each frame — the runtime half of the
+into every material in `ClipMaterialsFP` each frame, the runtime half of the
 `_ClipFPV` mechanism from §6.
 
 ---
@@ -844,7 +844,7 @@ take the first child `<property>` whose `class` attribute equals `SDCS`
 | Entry field | Source |
 |---|---|
 | `ItemName` | `<item name="...">` |
-| `PrefabName` | `SDCS` block, `Prefab` (required — item skipped when empty) |
+| `PrefabName` | `SDCS` block, `Prefab` (required, item skipped when empty) |
 | `PartName` | `NormalizePart(SDCS/TransformName, item/EquipSlot)` (required) |
 | `EquipSlot` | item-level `EquipSlot` property |
 | `GearKey` | `NormalizeGearKey(item/ArmorGroup, item/DisplayType, item name)` (required) |
@@ -868,9 +868,9 @@ block.
 case-insensitively, preserving first-seen key order in `orderedKeys`;
 `TryGetPart(String,String,Entry&)` (IL=23) is the lookup.
 
-The naming rules encoded here — the four canonical part names, the
+The naming rules encoded here, the four canonical part names, the
 `group`/`armor` prefix and `Helmet|Outfit|Gloves|Boots` suffix conventions on
-`ArmorGroup`/`DisplayType` — are the de-facto authoring style for stock armor.
+`ArmorGroup`/`DisplayType`, are the de-facto authoring style for stock armor.
 
 ---
 
@@ -878,7 +878,7 @@ The naming rules encoded here — the four canonical part names, the
 
 `ConsoleCmdSDCS` (`getCommands()` IL=7 → `sdcs`; `getDescription()` IL=2 →
 "Control entity sex, race, and variant"). `Execute` (IL=166) operates on
-`GetLocalPlayers()[0]`'s `EModelSDCS`, so it is **local-client only** — on a
+`GetLocalPlayers()[0]`'s `EModelSDCS`, so it is **local-client only**, on a
 dedicated server there are no local players and it prints `"No local players found"`.
 
 ```text
@@ -890,7 +890,7 @@ sdcs variant <1|2|3|4>          EModelSDCS::SetVariant (rejected outside 1..4)
 
 The three argument enums are hardcoded: `cTypes { Sex, Race, Variant }`,
 `sTypes { Male, Female }`, `rTypes { White, Black, Asian, Native }`. Adding a race
-via `sdcs.xml` and asset folders does **not** extend this command — the console
+via `sdcs.xml` and asset folders does **not** extend this command, the console
 parse is a closed enum even though `SetRace` takes an arbitrary string. The variant
 bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`.
 
@@ -988,7 +988,7 @@ bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`
   pinned-Cecil `il/full-v3.1.0` regeneration: (1) all 123 `IL=` claims exact;
   (2) all 33 quoted literals/paths ground out in `ldstr` operands; (3) the three
   XML contracts re-derived attribute-for-attribute from parser IL; (4) every
-  behavioral claim in §§1–13 re-checked against method bodies — zero drift;
+  behavioral claim in §§1–13 re-checked against method bodies, zero drift;
   (5) completeness: all 76 methods of `SDCSUtils`/`SDCSDataUtils`/`SDCSArchetypesFromXml`
   now accounted for (added `MapSourceByName`, `LoadRaceDataFromResources`,
   `LoadHairTypeFromResources`).

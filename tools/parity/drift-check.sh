@@ -48,7 +48,11 @@ build_helper ParitySurface "$here/ParitySurface.cs" || axis_fail=1
 run() { MONO_PATH="$BIN" mono "$@"; }
 
 mkdir -p "$BASELINE_DIR"
-cur="$(mktemp -d)"
+# Snapshot dirs hold whole-assembly surface dumps; the system temp dir is tmpfs
+# here, so stage them on disk under the gitignored .scratch/.
+SCRATCH="$(cd "$TOOLS/.." && pwd)/.scratch/tmp"
+mkdir -p "$SCRATCH"
+cur="$(mktemp -d "$SCRATCH/drift.XXXXXX")"
 trap 'rm -rf "$cur"' EXIT
 # snapshot the current build: census, per-type surface, methods, enums, parity
 run "$BIN/Census.exe" "$ASM" > "$cur/census.txt" || {

@@ -22,19 +22,22 @@ import subprocess
 import sys
 import tempfile
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = str(_common.TOOLS)
 CROSS = os.path.join(TOOLS, "cross_repo_links.py")
 CITES = os.path.join(TOOLS, "zdtd_cite_check.py")
 # A real docs/ file in this repo, used as the resolves-fine citation control.
 REAL_DOC = "network.md"
 
 
-def run(script, *argv):
+def run(script: str, *argv: str) -> tuple[int, str]:
     proc = subprocess.run([sys.executable, script, *argv], capture_output=True, text=True)
     return proc.returncode, proc.stdout + proc.stderr
 
 
-def build_repo(root):
+def build_repo(root: str) -> str:
     """A minimal 7dtd-loadgen stand-in: one clean doc, one clean src file."""
     repo = os.path.join(root, "7dtd-loadgen")
     os.makedirs(repo)
@@ -45,14 +48,14 @@ def build_repo(root):
     return repo
 
 
-def write(path, text):
+def write(path: str, text: str) -> None:
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
 
 
-def main():
-    bad = []
-    with tempfile.TemporaryDirectory(prefix="gate-unreadable-") as tmp:
+def main() -> int:
+    bad: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="gate-unreadable-", dir=_common.scratch_dir()) as tmp:
         repo = build_repo(tmp)
 
         # Positive controls: clean tree passes both gates.

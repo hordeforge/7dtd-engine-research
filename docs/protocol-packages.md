@@ -849,7 +849,7 @@ distance, ...)`), not the fan-out. On non-dedicated hosts the method also
 plays locally and feeds `AIDirector.NotifyNoise`; on a dedicated server the
 C2S relay does not add AI noise (pinned 2026-08-26: `PlaySoundAtPositionServer`
 IL=60's `IsDedicatedServer` branch skips BroadcastPlay + NotifyNoise; the
-dedi evaluates noise only for sounds it plays itself — explosions, mines,
+dedi evaluates noise only for sounds it plays itself: explosions, mines,
 animals, minibike via `Audio.Manager.SignalAI` / `GameManager.explode`, see
 entity-ai.md "Dedicated-server emission map"). A verbatim relay excluding
 that entity's client is byte-identical to the stock rebuild.

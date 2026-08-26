@@ -37,7 +37,7 @@ CLAIMS = {
 }
 
 
-def check_package_framing_counts(bad: list) -> None:
+def check_package_framing_counts(bad: list[str]) -> None:
     """protocol-packages.md §6.23 self-claims '37 rows (18 conditional + 19
     always-present)'. The 18 live in a table; the 19 are a prose name list.
     If either half drifts the stated total must too."""
@@ -73,7 +73,7 @@ def check_package_framing_counts(bad: list) -> None:
 
 def main() -> int:
     idx = open(IDX, encoding="utf-8").read()
-    bad = []
+    bad: list[str] = []
     check_package_framing_counts(bad)
     for name, (pat, expected) in CLAIMS.items():
         text = open(os.path.join(INV, name), encoding="utf-8", errors="replace").read()

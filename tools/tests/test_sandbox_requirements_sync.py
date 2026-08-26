@@ -19,11 +19,15 @@ future refactor cannot turn it into a no-op.
 
 from __future__ import annotations
 
+import os
 import re
 import sys
-from pathlib import Path
+from typing import Any
 
-TOOLS = Path(__file__).resolve().parents[1]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = _common.TOOLS
 IN_FILE = TOOLS / "sandbox" / "requirements.in"
 LOCK = TOOLS / "sandbox" / "requirements.txt"
 
@@ -44,10 +48,10 @@ def parse_in(text: str) -> set[str]:
     }
 
 
-def parse_lock(text: str) -> dict[str, dict]:
+def parse_lock(text: str) -> dict[str, dict[str, Any]]:
     """Map canonical name -> {version, hashes, direct} from uv compile output."""
-    pins: dict[str, dict] = {}
-    current: dict | None = None
+    pins: dict[str, dict[str, Any]] = {}
+    current: dict[str, Any] | None = None
     for raw in text.splitlines():
         line = raw.strip()
         if not line:

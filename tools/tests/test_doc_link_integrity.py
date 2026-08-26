@@ -16,19 +16,23 @@ Usage: python3 tools/tests/test_doc_link_integrity.py
 
 import os
 import re
+import sys
 import tempfile
 from collections import deque
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = str(_common.TOOLS)
+REPO = str(_common.REPO)
 DOCS = os.path.join(REPO, "docs")
 LINK_RE = re.compile(r"\]\(([^)]+\.md)")
 
 
-def collect(docs):
+def collect(docs: str) -> tuple[dict[str, list[str]], set[str]]:
     """Return ({doc_basename: [link basenames]}, {doc_basename} of docs/ root)."""
-    out = {}
-    doc_root = set()
+    out: dict[str, list[str]] = {}
+    doc_root: set[str] = set()
     for sub, is_root in (("", True), ("inventories", False)):
         d = os.path.join(docs, sub)
         if not os.path.isdir(d):
@@ -51,7 +55,9 @@ def collect(docs):
     return out, doc_root
 
 
-def reachable_from(graph, doc_root, start="INDEX.md"):
+def reachable_from(
+    graph: dict[str, list[str]], doc_root: set[str], start: str = "INDEX.md"
+) -> set[str]:
     """BFS over internal .md links; raises when the hub is missing."""
     if start not in graph:
         raise AssertionError(f"docs/{start} missing")
@@ -66,10 +72,10 @@ def reachable_from(graph, doc_root, start="INDEX.md"):
     return reachable
 
 
-def dead_links(graph):
+def dead_links(graph: dict[str, list[str]]) -> list[str]:
     """Internal link targets that exist nowhere under docs/ or docs/inventories/."""
     all_docs = set(graph)
-    dead = []
+    dead: list[str] = []
     for src, targets in graph.items():
         for t in targets:
             if t not in all_docs:
@@ -77,13 +83,13 @@ def dead_links(graph):
     return sorted(set(dead))
 
 
-def _write(path, text):
+def _write(path: str, text: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
 
 
-def self_test(tmp_parent):
+def self_test(tmp_parent: str) -> None:
     """Prove the detectors fire: happy tree passes, orphan/dead trees fail."""
     # Happy tree: INDEX -> a -> b.
     tree = os.path.join(tmp_parent, "happy")
@@ -111,8 +117,10 @@ def self_test(tmp_parent):
     assert dead_links(graph) == ["INDEX.md -> ghost.md"], dead_links(graph)
 
 
-def main():
-    with tempfile.TemporaryDirectory(prefix="link-integrity-selftest-") as td:
+def main() -> None:
+    with tempfile.TemporaryDirectory(
+        prefix="link-integrity-selftest-", dir=_common.scratch_dir()
+    ) as td:
         self_test(td)
 
     graph, doc_root = collect(DOCS)

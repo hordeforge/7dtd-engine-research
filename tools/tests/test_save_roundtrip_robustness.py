@@ -17,28 +17,31 @@ import subprocess
 import sys
 import tempfile
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = str(_common.TOOLS)
 SCRIPT = os.path.join(TOOLS, "save_roundtrip_check.py")
 
 
-def run(*argv):
+def run(*argv: str) -> tuple[int, str]:
     proc = subprocess.run([sys.executable, SCRIPT, *argv], capture_output=True, text=True)
     return proc.returncode, proc.stdout + proc.stderr
 
 
-def assert_no_traceback(rc, out, label, bad):
+def assert_no_traceback(rc: int, out: str, label: str, bad: list[str]) -> None:
     if "Traceback" in out:
         bad.append(f"{label}: raw traceback escaped:\n{out}")
     if rc != 1:
         bad.append(f"{label}: expected exit 1, got {rc}")
 
 
-def truncated_ttw(path):
+def truncated_ttw(path: str) -> None:
     with open(path, "wb") as f:
         f.write(b"ttw\x00\x17\x00\x00\x00V")  # magic + version, header cut mid-string
 
 
-def corrupt_region_dir(dirpath):
+def corrupt_region_dir(dirpath: str) -> None:
     """Save dir whose .7rg has an in-bounds slot 0 then a slot pointing past EOF."""
     region = os.path.join(dirpath, "Region")
     os.makedirs(region)
@@ -54,7 +57,7 @@ def corrupt_region_dir(dirpath):
         f.write(data)
 
 
-def slot0_past_eof_region_dir(dirpath):
+def slot0_past_eof_region_dir(dirpath: str) -> None:
     """Save dir whose only allocated .7rg slot points past EOF.
 
     The bound check fires before any payload read, so it must produce a
@@ -71,7 +74,7 @@ def slot0_past_eof_region_dir(dirpath):
         f.write(data)
 
 
-def unreadable_region_entry(dirpath):
+def unreadable_region_entry(dirpath: str) -> None:
     """Save dir whose Region/ holds a '*.7rg' that is a DIRECTORY.
 
     glob matches it, open() raises IsADirectoryError (an OSError, raised even
@@ -84,9 +87,9 @@ def unreadable_region_entry(dirpath):
         f.write(b"")
 
 
-def main():
-    bad = []
-    with tempfile.TemporaryDirectory(prefix="srt-robustness-") as tmp:
+def main() -> int:
+    bad: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="srt-robustness-", dir=_common.scratch_dir()) as tmp:
         ttw = os.path.join(tmp, "trunc.ttw")
         truncated_ttw(ttw)
         rc, out = run("--shipped", ttw)

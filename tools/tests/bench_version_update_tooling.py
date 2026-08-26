@@ -19,14 +19,19 @@ Also prints component breakdown on stderr / trailing lines for logs.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
-ROOT = Path(__file__).resolve().parents[2]
-TOOLS = ROOT / "tools"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+ROOT = _common.REPO
+TOOLS = _common.TOOLS
 FACTS = TOOLS / "data" / "stock_facts.json"
 CHECKER = TOOLS / "tests" / "check_stock_facts.py"
 
@@ -86,7 +91,7 @@ def score_mutation_facts_fail() -> tuple[float, str]:
     facts["version"]["build"] = 1
     facts["version"]["display"] = "V 99.0.0"
     facts["version"]["stock_wire"] = "V99.0.0 b1"
-    with tempfile.TemporaryDirectory() as td:
+    with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         path = Path(td) / "facts.json"
         path.write_text(json.dumps(facts, indent=2), encoding="utf-8")
         code, _out = run_checker(path, skip_siblings=True)
@@ -103,7 +108,7 @@ def score_mutation_doc_fail() -> tuple[float, str]:
     facts.setdefault("census", {})
     facts["census"]["top_level_types"] = 1
     facts["census"]["methods_with_body_top_level"] = 1
-    with tempfile.TemporaryDirectory() as td:
+    with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         path = Path(td) / "facts.json"
         path.write_text(json.dumps(facts, indent=2), encoding="utf-8")
         code, out = run_checker(path, skip_siblings=True)
@@ -118,7 +123,7 @@ def score_mutation_doc_fail() -> tuple[float, str]:
     return 0.0, "mutated census still passes"
 
 
-def _path_present(facts: dict, path: tuple[str, ...]) -> bool:
+def _path_present(facts: dict[str, Any], path: tuple[str, ...]) -> bool:
     cur = facts
     for k in path:
         if not isinstance(cur, dict) or k not in cur:
@@ -229,8 +234,8 @@ def score_tooling_hardcode_debt() -> tuple[float, str]:
                     hits += 1
                     break
     # 0 hits => 1.0; each hit costs 0.08
-    s = max(0.0, 1.0 - 0.08 * hits)
-    return s, f"code_version_literal_hits={hits} files_scanned={files}"
+    score = max(0.0, 1.0 - 0.08 * hits)
+    return score, f"code_version_literal_hits={hits} files_scanned={files}"
 
 
 def main() -> int:

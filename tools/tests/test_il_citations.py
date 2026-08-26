@@ -64,7 +64,7 @@ def main() -> int:
     asm = str(asm_path)
     out = _common.run_probe(_common.compile_probe(SRC, "ilcite_check"), asm)
     # type full-name (normalized) -> method name (normalized) -> set of IL sizes
-    methods = {}
+    methods: dict[str, dict[str, set[int]]] = {}
     for line in out.splitlines():
         parts = line.split("\t")
         if len(parts) != 3:

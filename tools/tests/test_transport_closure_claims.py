@@ -67,7 +67,7 @@ def self_test_patterns() -> None:
         raise AssertionError("stale-claim detector self-test failed:\n  " + "\n  ".join(problems))
 
 
-def main():
+def main() -> None:
     self_test_patterns()
     # os.walk on a missing directory yields nothing and the gate would pass
     # having scanned zero docs; fail loudly instead.

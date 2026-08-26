@@ -14,9 +14,11 @@ import os
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 
-TOOLS = Path(__file__).resolve().parents[1]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = _common.TOOLS
 CECIL = TOOLS / "bin" / "Mono.Cecil.dll"
 ILFMT = TOOLS / "src" / "IlFmt.cs"
 WORK = TOOLS.parent / ".scratch" / "ilfmt-safe"
