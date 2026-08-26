@@ -974,6 +974,39 @@ entity reads `inventory.GetLightLevel()` - the held item's light
 (flashlight/glowstick) - which is the `selfLight` the stealth model blends
 in.
 
+**Sky day/night model (`SkyManager` + `LightManager.GetLightLevel`, pinned
+2026-08-26, clone-side `world/sky.zig`):** the world-light leg of the stealth
+model (see the CanSeeEntity note above). Slice 1 (day/night ambient) ships;
+the position-dependent terms are recorded as slices.
+
+- `SkyManager.TimeOfDay`: `(timeOfDay % 24000) / 1000` → hour 0..24.
+- `SkyManager.UpdateSunMoonAngles` (IL=348): with stock dawn 4 / dusk 22
+  (cctor IL_002C-0034):
+  `dawn <= hour < dusk` → `target = (hour - dawn) / (dusk - dawn)`;
+  else (night) `V5 = 24 - dusk; V6 = V5 + dawn; hour < dawn → (V5 + hour)/V6,
+  else (hour - dusk)/V6; target += 1`. Then `target = Clamp01(target × 0.5)`
+  (so worldRotation: 0 at dawn, 0.5 at dusk, 1.0 at the next dawn);
+  `worldRotation = Lerp(worldRotation, target, 0.05)` per frame, wrapped;
+  `dayPercent = CalcDayPercent(worldRotation)`.
+- `SkyManager.CalcDayPercent` (IL=54): `isAllTimeNight` → 1; else
+  `worldRotation < 0.5` → `dayPct = (1 - |0.25 - rot|×4)^0.6 × 0.68 + 0.5`
+  capped 1; `>= 0.5` → `dayPct = 0.5 - (1 - |0.75 - rot|×4)^0.6 × 0.68`
+  floored 0. Curve: 0.5 at dawn/dusk, 1.0 at 13:00, 0.0 at ~1:00.
+- `LightManager.GetLightLevel(pos)` (IL=117): `light = Σ GetLightLevel(light,
+  pos, false)` over the light-entity dictionary (not ported); `light +=
+  AmbientTotal^0.6 × 0.5`; `light += BlockLight(pos) × AmbientTotal^0.6 ×
+  0.5`; plus `CalcShadeLight` and `GetMoonBrightness` terms; FastClamp01.
+  `BlockLight(pos)` = `max(chunk.GetLight(cell), chunk.GetLight(cell +
+  (0,1,0))) / 15` (chunk light array - not ported, slice 2).
+- `AmbientTotal` (`WorldEnvironment.AmbientSpectrumFrameUpdate` tail): sky
+  luma = `GetLuma(skyColor) × skyScale × dayNightBrightness × moonScale` etc.
+  (complex, `dataAmbient*` constants); slice 1 collapses it to the
+  `dayPercent` curve (documented simplification in `world/sky.zig
+  ambientLuma`).
+- `LightManager.GetStealthLightLevel` (IL=30) consumes the above at head
+  height +1.68 (see its pin above); `PlayerStealth.TickServer` (IL=432)
+  packs `lightLevel` into the S2C stealth byte.
+
 **`BlockTrigger.OnTriggered` (IL=27):** `SetTriggeredValueFlag(index)`; if
 `CheckIsTriggered` then `Block.OnTriggered(...)` and clear `TriggeredValues`.
 
