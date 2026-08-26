@@ -31,7 +31,7 @@ Status terms:
   supported, experimental, archival, and test surfaces.
 - Confirmed the maintained C# surface builds warning-clean against pinned
   Mono.Cecil 0.11.5.0 (`make tools`: 19 executables).
-- Confirmed all DLL-free product gates pass (`make test-docs`: 21 scripts).
+- Confirmed all DLL-free product gates pass (`make test-docs`: 22 scripts).
 - Found and removed two stale Ruff suppressions in
   `sandbox/try_extract_presets.py`; they made the documented lint gate fail.
 - Replaced that probe's developer-specific `/home/maci` default with a portable
@@ -89,6 +89,9 @@ Status terms:
   installed and report missing dependencies as usage errors. Atlas extraction
   now supports `--out-dir`, stages a complete non-empty result, rejects filename
   collisions, removes stale XMLs, and replaces each output atomically.
+- Tightened the future-update sandbox-preset scanner to target the exact client
+  `sandbox_presets` TextAsset, require a unique match, and atomically save only
+  when `--out` is explicit.
 - Removed an inert three-line Zig fragment and a non-building RealEarth DEM
   probe from `re-scratch/`; the two remaining stock `.tts` probes build.
 - Kept the executable-script test model. Converting 33 purpose-built gates to

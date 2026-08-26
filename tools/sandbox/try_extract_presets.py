@@ -18,6 +18,9 @@ tools/sandbox/requirements.txt):
 
 import argparse
 import os
+import sys
+import tempfile
+from pathlib import Path
 
 
 def main() -> int:
@@ -28,22 +31,24 @@ def main() -> int:
     ap.add_argument(
         "game_dir",
         nargs="?",
-        help="game install root (default: the Steam dedicated-server dir)",
+        help="game install root (default: the Steam client dir)",
     )
+    ap.add_argument("--out", type=Path, help="write the matched TextAsset XML here")
     args = ap.parse_args()
 
-    import UnityPy
+    try:
+        import UnityPy
+    except ModuleNotFoundError:
+        ap.error("missing UnityPy; install tools/sandbox/requirements.txt")
 
     root = (
         args.game_dir
         if args.game_dir
-        else os.path.expanduser(
-            "~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
-        )
+        else os.path.expanduser("~/.local/share/Steam/steamapps/common/7 Days To Die")
     )
-    data_dir = os.path.join(root, "7DaysToDieServer_Data")
+    data_dir = os.path.join(root, "7DaysToDie_Data")
     if not os.path.isdir(data_dir):
-        data_dir = os.path.join(root, "7DaysToDie_Data")
+        data_dir = os.path.join(root, "7DaysToDieServer_Data")
     targets = [
         os.path.join(data_dir, "Resources", "resources.resource"),
         os.path.join(data_dir, "data.unity3d"),
@@ -53,29 +58,48 @@ def main() -> int:
             for fn in files:
                 if fn.endswith((".bundle", ".unity3d", ".resource")):
                     targets.append(os.path.join(dp, fn))
-    seen = 0
-    for p in targets:
+    matches = []
+    for p in sorted(set(targets)):
         if not os.path.exists(p):
             continue
         try:
             env = UnityPy.load(p)
         except Exception as exc:
-            print("load fail", p, exc)
+            print(f"skip unreadable bundle {p}: {exc}", file=sys.stderr)
             continue
         for obj in env.objects:
             if obj.type.name != "TextAsset":
                 continue
-            seen += 1
             try:
                 d = obj.read()
                 name = getattr(d, "m_Name", "") or ""
-                if "sandbox" in name.lower() or "preset" in name.lower():
-                    text = bytes(d.m_Script) if hasattr(d, "m_Script") else b""
-                    print("=== TextAsset:", name, "in", p, "len", len(text))
-                    print(text.decode("utf-8", "replace")[:2000])
-            except Exception:
-                pass
-    print("textassets seen:", seen, "- presets found:", "no" if seen == 0 else "maybe above")
+                if name == "sandbox_presets":
+                    text = getattr(d, "m_Script", b"")
+                    matches.append(
+                        (p, text.encode("utf-8") if isinstance(text, str) else bytes(text))
+                    )
+            except Exception as exc:
+                print(f"skip unreadable TextAsset in {p}: {exc}", file=sys.stderr)
+    if len(matches) != 1:
+        print(
+            f"error: expected one sandbox_presets TextAsset, found {len(matches)}", file=sys.stderr
+        )
+        return 1
+    source, text = matches[0]
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        tmp = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=args.out.parent, delete=False) as fh:
+                fh.write(text)
+                tmp = Path(fh.name)
+            os.replace(tmp, args.out)
+        finally:
+            if tmp and tmp.exists():
+                tmp.unlink()
+        print(f"wrote {args.out} ({len(text)} bytes) from {source}")
+    else:
+        print(f"found sandbox_presets in {source} ({len(text)} bytes); pass --out to save it")
     return 0
 
 
