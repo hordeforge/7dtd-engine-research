@@ -1324,6 +1324,18 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 |---:|---|---|
 | 1 | `equipment` | `Equipment.Write` |
 
+Pinned 2026-08-26: body = `NetPackageEntityTargeted` base (entityId i32) +
+`Equipment` body. `Equipment.Write` (IL=77) / `Equipment.Read` (IL=93),
+symmetric: `byte` count-marker (always **4** from the stock writer; the
+reader maps <= 2 → 5 slots, == 3 → 8, >= 4 → `m_slots.Length` = **12**) |
+N × (`ItemValue.Write`/`ReadOrNull`: byte 0 = empty, 1 = the value) | N ×
+cosmetic i32 (item-type id or 0, `CosmeticMappingStringID`) | i32 unlocked
+count | count × i32. The client sends it whenever `bPlayerEquipmentChanged`
+flips (an armor swap, items.md); `ProcessPackage` (IL=56) applies via
+`Equipment.Apply(equipment, false)` on the target + rebroadcasts flags 192
+excluding the sender. The server's role is apply + relay (zdtd
+`applyEquipmentBody` + the C2S handler).
+
 ## NetPackagePlayerId
 `write` IL=21, 4 wire field(s).
 
