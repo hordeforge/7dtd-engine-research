@@ -1781,7 +1781,7 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 |---|---:|---|---|
 | `NetPackagePlayerEquipment` | 8 | `Equipment` blob | Process IL=56: `Equipment.Apply` + server rebroadcast |
 | `NetPackagePlayerSetBackpackPosition` | 39 | playerId, positions list | `SetDroppedBackpackPositions` |
-| `NetPackagePlayerQuestPositions` | 30 | entityId, questPositions | Quest map markers |
+| `NetPackagePlayerQuestPositions` | 30 | entityId, questPositions | C2S Process IL=24: sender-gated `QuestPositions.Clear() + AddRange` into the PPD cache; S2C via `Setup(entityId, ppd)` re-broadcast |
 | `NetPackagePlayerTwitchStats` | 26 | twitchEnabled, twitchSafe, twitchVoteLock, twitchVisionDisabled, twitchActionsEnabled | Twitch integration flags |
 | `NetPackagePlayerVendingMachine` | 28 | userId, x,y,z, removing | Vending access |
 | `NetPackagePlayerLaserSight` | 19 | entityId, laserSightActive, laserSightPosition | Cosmetic aim |
@@ -1891,6 +1891,7 @@ conditional still lives in [inventories/netpackage-bodies.md](inventories/netpac
 | EntitySetPartActive | 38 | `SetTransformActive` |
 | OwnedEntitySync | 34 | Add/RemoveOwnedEntity |
 | PlayerEquipment | 56 | Apply + rebroadcast |
+| PlayerQuestPositions | 24 | sender-gated Clear+AddRange into PPD marker cache; no sim consumer (client-rendered map markers) |
 | ItemActionEffects / ItemReload | 42 / 18 | Server/Client split |
 | ModifyCVar | 26 | server `SetCustomVar` |
 | DropItemsContainer | 19 | `DropContentInLootContainerServer` |
@@ -2294,6 +2295,14 @@ cannot wedge or visibly alter the b14 client.
   not server-wide). ShowToolbeltMessage corrected: sole sender
   `GameManager.ShowTooltipMP` (unicast), only called by the Homerun minigame
   in V3.1.0 b14 - pickup feedback does not ride this package.
+- **2026-08-27:** `NetPackagePlayerQuestPositions` C2S verified from
+  `NetPackagePlayerQuestPositions.il.txt` (Process IL=24) and
+  `PersistentPlayerData.il.txt`: sender-own-id gate
+  (`ValidEntityIdForSender(entityId, allowSelf=false)`) then
+  `PPD.QuestPositions.Clear() + AddRange(client list)`; the list persists via
+  PPD binary Write/Read + XML Write/ReadXML and re-broadcasts S2C through
+  `Setup(entityId, ppd)`; no server sim behavior consumes it (client-rendered
+  quest map markers).
 - **2026-08-21:** Sleeper trio re-verified from `EntityAlive.il.txt` /
   `SleeperVolume.il.txt`: exact bodies (Wakeup i32, Pose i32+u8, PassiveChange
   i32 via base), send semantics (`AddEnemyToWorld` spawns passive; wake =
