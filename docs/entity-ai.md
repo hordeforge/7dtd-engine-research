@@ -847,6 +847,16 @@ duration=**240**)`.
 **`AIDirectorData.FindNoise` (IL=11):** null name → false; else
 `noisySounds.TryGetValue(name, out noise)`.
 
+**EntityPhysics physics-master pin (2026-08-26):** the dedi sends
+`NetPackageEntityPhysics` from `Entity.PhysicsMasterSetupBroadcast` (IL=31),
+called by `NetEntityDistributionEntry.updatePlayerList` when an entity enters
+a player's view - but only when the entity moved > 0.05 units or rotated > 1
+degree since the last send (the threshold gate IL_0019-0036). The receiving
+client becomes the physics master for that entity (runs its physics, sends
+`PhysicsMasterSendToServer` updates back). It is a client-interpolation
+optimization, not an authoritative sim channel: the PosAndRot frames already
+carry the motion; without it, non-master clients interpolate the frames.
+
 **Noise-table source (pinned 2026-08-26):** `AIDirectorData.noisySounds` is
 populated from **`Data/Config/sounds.xml`** — `SoundsFromXml.Parse` builds one
 `Audio.XmlData` per `SoundDataNode name`, and `Audio.Manager.AddAudioData`
