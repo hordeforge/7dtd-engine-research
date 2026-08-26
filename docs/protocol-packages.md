@@ -834,8 +834,12 @@ mode         : u8                  // UnityEngine.AudioRolloffMode
                                    //   Logarithmic=0, Linear=1, Custom=2
 distance     : i32
 entityId     : i32
-volumeScale  : f32
 ```
+
+`volumeScale` is a **Setup-only** field and never crosses the wire: both
+`write` (IL=25, stops after entityId) and `read` (IL=21, stops after
+entityId) omit it, so a client-side receiver sees the field default 0.0
+(the wire-body extractor agrees: 5 wire fields). Pinned 2026-08-27.
 
 `ProcessPackage` (IL=36): server side calls
 `GameManager.PlaySoundAtPositionServer(pos, clip, mode, distance, entityId,
@@ -2295,6 +2299,11 @@ cannot wedge or visibly alter the b14 client.
   not server-wide). ShowToolbeltMessage corrected: sole sender
   `GameManager.ShowTooltipMP` (unicast), only called by the Homerun minigame
   in V3.1.0 b14 - pickup feedback does not ride this package.
+- **2026-08-27:** `NetPackageSoundAtPosition` wire re-pinned from
+  `NetPackageSoundAtPosition.il.txt` (write IL=25 / read IL=21): the body is
+  **5 fields** (pos, audioClipName, mode u8, distance, entityId);
+  `volumeScale` is a Setup-only field that never crosses the wire (the
+  wire-body extractor agrees). Section 5.9 corrected accordingly.
 - **2026-08-27:** `NetPackagePlayerQuestPositions` C2S verified from
   `NetPackagePlayerQuestPositions.il.txt` (Process IL=24) and
   `PersistentPlayerData.il.txt`: sender-own-id gate
