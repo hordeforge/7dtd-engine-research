@@ -1467,6 +1467,25 @@ the dump-derived base + key methods; each family doc owns the substantive groups
   distribution (EntityAlive inventory broadcast on change) is needed before
   wiring.
 
+- **2026-08-27 (vehicle storage pin v2, DumpMethod/DumpType from the client
+  assembly):** the 2026-08-26 pin's open question is answered. The basket
+  contents live in **`Entity.bag`**, not the VehicleInventory:
+  `EntityVehicle.UpdateContainerSize` (IL=143) builds the storage from
+  `getStorageSize()` and `Bag.SetSlots` on `Entity.bag`. The sync carrier is
+  **`NetPackageBag`**: wire (write IL=19 / read IL=16) = entityId i32 +
+  blobLen u16 + `Bag.Write` blob. `Bag.Write` (IL=71) = version byte 1 +
+  u16 slot count + N x ItemStack.Write + hasLocked bool + PackedBoolArray +
+  Touched bool + hasPreferences bool + PreferenceTracker (PooledBinaryWriter
+  only). The only named caller of `NetPackageBag.Setup` in the dump set is
+  the client-side `Entity.OnBagModified` (IL=15: `!IsServer` ->
+  `SendToServer(NetPackageBag(entityId, bag))`); the server's ProcessPackage
+  (IL=61) does `GetEntity(entityId).bag.ReadInto(reader)` with no sender
+  gate, warning "Entity <id> with bag not found" when absent. The S2C
+  broadcast sender is still unpinned (DumpAll sanitizes type names, so a
+  GetPackage<NetPackageBag> caller in a server path cannot be excluded by
+  string search); wire a zdtd implementation as C2S-apply + S2C echo to
+  tracked players until a named server-side Setup caller surfaces.
+
 - **2026-08-11:** Sound IL re-verified: Entity.PlayOneShot IL=38 (EntityPlayer IL=16), StopOneShot IL=5, StopAnimatorAudio IL=16, SequenceStopper ctor IL=9, BlockRadiusEffectsTick IL=83 / Apply IL=58, ResetBiomeWeatherOnDeath IL=15, SoundsFromXml.CreateSounds IL=6 / ParseNode IL=70 / Parse IL=544 (exact).
 - **2026-08-11:** Admin IL re-verified: InitFileWatcher IL=33, OnFileChanged IL=5, DestroyFileWatcher IL=10, ParseSection IL=41, WriteSections IL=24, ParseUserIdentifier IL=39, AdminUsers.HasEntry IL=30, AdminWhitelist.IsWhitelisted IL=58 / IsWhiteListEnabled IL=29, AdminBlacklist AddBan IL=40, RemoveBan IL=26, IsBanned IL=50, GetBanned IL=31, ParseElement IL=11, Save IL=31, Clear IL=4 (exact).
 - **2026-08-10:** Misc IL re-verified: ResetBiomeWeatherOnDeath IL=15, AdminTools.InitFileWatcher IL=33, OnFileChanged IL=5 (exact).
