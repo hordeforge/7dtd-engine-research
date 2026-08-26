@@ -9,7 +9,7 @@ gates) were checked against
 `~/.local/share/Steam/.../7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` (stable
 V3.0.1) and `~/.cache/zdtd-scratch/exp-Assembly-CSharp.dll` (experimental), using
 `tools/bin/{DumpMethod,DumpType,EnumDump,Census,NetProtocolCensus,FullSurface,FindCallers}`.
-Raw dumps: `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-engine-research/.../scratchpad/`.
+Raw dumps: the session scratchpad (not committed).
 Baseline census re-run: gmUpdate IL=631, WorldState.SaveLoad=884, 193 top-level
 NetPackage types, 4401 types / 43901 method bodies. All match `docs/coverage.md`-era
 claims.
@@ -36,7 +36,7 @@ and their own linked inventories.
 
 ## Findings (severity-ranked)
 
-### F1. chat.md §2: the server routing state machine is invented — WRONG
+### F1. chat.md §2: the server routing state machine is invented, WRONG
 
 > "the server (`ChatMessageServer`) decides the recipient set from the channel"
 > "Routed --> Global: EChatType.Global -> all clients / Party -> party members /
@@ -66,13 +66,13 @@ all verify exactly. The doc's §2 needs a rewrite to "recipient-list-or-broadcas
 channel is advisory", which is also a security-relevant fact (a client can address
 arbitrary entity ids on any channel).
 
-Minor in the same section: "a handler returns false -> drop" — the actual mechanism
+Minor in the same section: "a handler returns false -> drop", the actual mechanism
 is `ModEventInterruptible<SChatMessageData>.Invoke` returning
 `(EModEventResult, Mod)` with result==2 suppressing the fan-out, not a bool return.
 Also note `ChatMessageClient` is invoked locally at IL_0075 regardless of the mod
 result; only the network fan-out is gated.
 
-### F2. experimental-delta.md §4: CVarOperation is not new — WRONG
+### F2. experimental-delta.md §4: CVarOperation is not new, WRONG
 
 > "New enum **`CVarOperation`** { 0 set ... 7 percentsubtract }, and
 > `EntityBuffs.SetCustomVar(name, value, ..., CVarOperation, bool)` **gained the
@@ -88,7 +88,7 @@ parameter (exp IL=130). The claimed "real behavior change" (arithmetic cvar ops
 being new) is wrong; the actual delta is a net-sync forcing flag. §4 must be
 rewritten and the buffs/minevents cross-references corrected.
 
-### F3. crafting-recipes.md: server-authority framing — WRONG / UNSUPPORTED
+### F3. crafting-recipes.md: server-authority framing, WRONG / UNSUPPORTED
 
 > "Crafting is validated and executed on the server (it consumes real inventory and
 > produces real items), so it is a dedicated codepath"
@@ -110,7 +110,7 @@ unlock via `RecipeUnlockData`) is fine. The doc needs the honest split: definiti
 workstation queue are server-relevant; validation and the backpack queue are client
 paths whose results are synced.
 
-### F4. parties-factions.md §2.3: party chat routing — WRONG (propagated from F1)
+### F4. parties-factions.md §2.3: party chat routing, WRONG (propagated from F1)
 
 > "**Party chat.** `EChatType.Party` (channel 2) fans a message to party members
 > only, routed server side in `GameManager.ChatMessageServer` ([chat.md] §2)."
@@ -123,7 +123,7 @@ nested enums), `AllyStatus` 0..3, `AllyEvent` 0..10, `Relationship`
 constants 1, 0.1), `EnumGameStats` PartySharedKillRange=54 / AutoParty=56 /
 BloodMoonDay=58.
 
-### F5. experimental-delta.md §1: census note arithmetic + omitted SaveLoad change — MAJOR
+### F5. experimental-delta.md §1: census note arithmetic + omitted SaveLoad change, MAJOR
 
 > "methods-with-body 43901 -> **44094** (+193, of which ~72 are the new types and
 > **~105 are new methods on existing types**; **29 methods removed**)"
@@ -145,7 +145,7 @@ TwitchWatcherCosmetic=20, `ELogType` (absent in stable; note it is **nested in
 `EntityAnimalRabbit.OnEntityActivated` present in stable, absent in exp;
 `ItemClassHeldEntity.StartHolding` present), `ConsoleCmdLogEnvironment` new in exp.
 
-### F6. Tool artifacts leaked into four published docs — MAJOR (hygiene)
+### F6. Tool artifacts leaked into four published docs: MAJOR (hygiene)
 
 `dynamic-mesh.md`, `platform-auth.md`, `loot-economy.md`, `weather-environment.md`
 end with literal lines:
@@ -158,7 +158,7 @@ These are serialization artifacts of the writing tool left in tracked files
 weather-environment.md:298-299). Trivial to fix, but they are exactly the kind of
 "survived from an earlier draft" content an external reader will notice first.
 
-### F7. Count drift between docs and their own linked inventories — MINOR (recurring)
+### F7. Count drift between docs and their own linked inventories: MINOR (recurring)
 
 - **console-commands.md**: "the 190-command contract" and "~190 concrete commands"
   vs its own linked catalog line "all 186 commands" and the catalog's own header
@@ -182,14 +182,14 @@ weather-environment.md:298-299). Trivial to fix, but they are exactly the kind o
 
 ### F8. Assorted OK-but-imprecise details
 
-- **dynamic-mesh.md §4**: "Both save paths retry (up to `tryCount` 5)" —
+- **dynamic-mesh.md §4**: "Both save paths retry (up to `tryCount` 5)",
   `WriteRegion` compares against 5, but `WriteRegionHeaderData` compares against
   **10** (`ldc.i4.s 10`). One number, two paths.
-- **vehicles-drones-turrets.md §1**: "a `vd.a\0` char signature" — the header is
+- **vehicles-drones-turrets.md §1**: "a `vd.a\0` char signature", the header is
   three chars `'v','d','a'` then a **zero byte**, then version byte 1 (`ldc.i4.s
   118/100/97` + `Write(Char)` x3 + `Write(Byte 0)` + `Write(Byte 1)`). The stray
   dot in "vd.a" does not exist on disk; render it as `"vda" 0x00 0x01`.
-- **buffs.md §2**: "`EntityStats.EntityBuffRemoved` recomputes the affected stats" —
+- **buffs.md §2**: "`EntityStats.EntityBuffRemoved` recomputes the affected stats",
   the base `EntityStats.EntityBuffRemoved` is an IL=1 no-op; the recompute lives in
   the `PlayerEntityStats` override (IL=63). Fine for players, silently nothing for
   non-players; say so.
@@ -204,7 +204,7 @@ weather-environment.md:298-299). Trivial to fix, but they are exactly the kind o
   entry-count byte (`min(dict.Count, 255)` written as u8 before the entries);
   packing `(maxCount << 8) | count` as u16 + `delayWorldTime:u64` + version byte 2
   all verified exactly.
-- **experimental-delta.md §6**: "new enum `ELogType`" — true, but it is nested in
+- **experimental-delta.md §6**: "new enum `ELogType`", true, but it is nested in
   `ConsoleCmdGetSandboxOptions`; worth stating since a reader will not find a
   top-level `ELogType`.
 
@@ -331,57 +331,57 @@ IL; no discrepancies found in the sampled set:
 ## Inline annotations (quick reference)
 
 > chat.md: "Routed --> Party: EChatType.Party -> party members"
-**[F1] WRONG** — no such branch; `ChatMessageServer` sends to client-supplied ids or broadcasts.
+**[F1] WRONG**, no such branch; `ChatMessageServer` sends to client-supplied ids or broadcasts.
 
 > chat.md: "it does not trust the client's recipient list for broadcast channels"
-**[F1] WRONG** — it sends to exactly that list whenever it is non-null, on any channel.
+**[F1] WRONG**, it sends to exactly that list whenever it is non-null, on any channel.
 
 > chat.md: "CommandRoute --> [*]: SdtdConsole.ExecuteAsync"
-**[F1] UNSUPPORTED** — no command-prefix check exists in the server chat path.
+**[F1] UNSUPPORTED**, no command-prefix check exists in the server chat path.
 
 > experimental-delta.md: "New enum `CVarOperation` ... gained the operation parameter"
-**[F2] WRONG** — enum and parameter exist identically in stable; the new thing is `_forceSendToClients`.
+**[F2] WRONG**, enum and parameter exist identically in stable; the new thing is `_forceSendToClients`.
 
 > experimental-delta.md: "+193, of which ~72 ... ~105 ... 29 methods removed"
-**[F5] WRONG (arithmetic)** — 72+105-29 = 148 != 193.
+**[F5] WRONG (arithmetic)**, 72+105-29 = 148 != 193.
 
 > experimental-delta.md: "**Owns:** the complete reverse-engineered diff"
-**[F5] OVERCLAIM** — omits the WorldState.SaveLoad 884->926 save-format change its own census lens reports.
+**[F5] OVERCLAIM**, omits the WorldState.SaveLoad 884->926 save-format change its own census lens reports.
 
 > crafting-recipes.md: "validation, ingredient consumption, output production, and XP all happen on the server"
-**[F3] WRONG** — `Recipe.CanCraft`'s only caller is `XUiC_ItemActionList` (client UI).
+**[F3] WRONG**, `Recipe.CanCraft`'s only caller is `XUiC_ItemActionList` (client UI).
 
 > crafting-recipes.md: "Queued: valid -> RecipeQueueItem enqueued, ingredients reserved"
-**[F3] UNSUPPORTED** — no cited IL for reservation/refund semantics.
+**[F3] UNSUPPORTED**, no cited IL for reservation/refund semantics.
 
 > parties-factions.md: "`EChatType.Party` (channel 2) fans a message to party members only, routed server side"
-**[F4] WRONG** — see F1.
+**[F4] WRONG**, see F1.
 
 > dynamic-mesh.md / platform-auth.md / loot-economy.md / weather-environment.md: "</content></invoke>"
-**[F6]** — leaked tool artifact at EOF.
+**[F6]**, leaked tool artifact at EOF.
 
 > console-commands.md: "the 190-command contract" vs "(all 186 commands ...)"
-**[F7] INCONSISTENT** — same doc, two counts.
+**[F7] INCONSISTENT**, same doc, two counts.
 
 > minevents.md: "the 72 concrete `MinEventAction*` leaves" vs "(all 71 triggered-effect leaves)"
-**[F7] INCONSISTENT** — 72 includes the 4 abstract bases; concrete leaves are 68.
+**[F7] INCONSISTENT**, 72 includes the 4 abstract bases; concrete leaves are 68.
 
 > items.md: "~122 `Item*` leaves and ~92 `ItemAction*` subclasses" vs "103 `Item*` types, 41 concrete `ItemAction*` leaves"
-**[F7] INCONSISTENT** — both sets differ from the surface census (106 / 76 / 68-with-ItemAction-base).
+**[F7] INCONSISTENT**, both sets differ from the surface census (106 / 76 / 68-with-ItemAction-base).
 
 > dynamic-mesh.md: "Both save paths retry (up to `tryCount` 5)"
-**[F8] OK-but-imprecise** — WriteRegion 5, WriteRegionHeaderData 10.
+**[F8] OK-but-imprecise**, WriteRegion 5, WriteRegionHeaderData 10.
 
 > vehicles-drones-turrets.md: "a `vd.a\0` char signature, a version byte `1`"
-**[F8] OK-but-imprecise** — actual bytes: 'v' 'd' 'a' 0x00, then version 0x01.
+**[F8] OK-but-imprecise**, actual bytes: 'v' 'd' 'a' 0x00, then version 0x01.
 
 > buffs.md: "`EntityStats.EntityBuffRemoved` recomputes the affected stats"
-**[F8] OK-but-imprecise** — base override is a no-op (IL=1); `PlayerEntityStats` does the work.
+**[F8] OK-but-imprecise**, base override is a no-op (IL=1); `PlayerEntityStats` does the work.
 
 > mod-loading.md: "Discovered --> DefinitionLoaded --> ... --> Loaded"
-**[F8] OK-but-imprecise** — labels do not correspond to the named `EModLoadState` members.
+**[F8] OK-but-imprecise**, labels do not correspond to the named `EModLoadState` members.
 
 ## Sources
 
-- Local IL dumps under `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-engine-research/0b44a842-ae93-414f-9c41-1f1f1f54c21b/scratchpad/` (chat-write.il, chatserver.il, chatproc.il, te-write-stable.il, te-write-exp.il, te-read-exp.il, exp-setcustomvar.il, eb-CustomVar.il, rc.il, vmall.il, iv.il, bv1-3.il, bvw.il, smb.il, cab.il, ord.il, af.il, lco.il, vm.il, pxp.il, uai-gs.il, uai-c.il, wt2.il, wg.il, dmf-wr.il, sdt2.il, META.md, fs/)
+- Local IL dumps in the uncommitted session scratchpad: chat-write.il, chatserver.il, chatproc.il, te-write-stable.il, te-write-exp.il, te-read-exp.il, exp-setcustomvar.il, eb-CustomVar.il, rc.il, vmall.il, iv.il, bv1-3.il, bvw.il, smb.il, cab.il, ord.il, af.il, lco.il, vm.il, pxp.il, uai-gs.il, uai-c.il, wt2.il, wg.il, dmf-wr.il, sdt2.il, META.md, fs/
 - `tools/bin/Census.exe` output for both DLLs (stable: 4401/43901/884/631; exp: 4414/44094/926/631)

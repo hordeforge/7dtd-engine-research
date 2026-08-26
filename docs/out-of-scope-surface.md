@@ -52,7 +52,7 @@ The in-game HUD, menus, windows, widgets, NGUI framework. A headless server rend
 Mesh/texture/material/shader/particle/lighting/imposter/avatar/warp code. Server has no renderer.
 
 The SDCS trio (`SDCSUtils`, `SDCSDataUtils`, `SDCSArchetypesFromXml`) stays
-classified here — a headless server never builds a character rig — but it is no
+classified here, a headless server never builds a character rig, but it is no
 longer merely catalogued: [`sdcs-character-gear.md`](sdcs-character-gear.md)
 narrates it, because the **data** it consumes (`archetypes.xml`, the `items.xml`
 `SDCS` property class) is server-loaded and server-shipped.

@@ -10,7 +10,7 @@ Ground truth: `ASM="/home/maci/.local/share/Steam/steamapps/common/7 Days to Die
 
 ## Findings
 
-### [W1] MAJOR (overstated completeness language) — full-surface.md "Honest coverage" + "Coverage roadmap (dedicated: done)"
+### [W1] MAJOR (overstated completeness language): full-surface.md "Honest coverage" + "Coverage roadmap (dedicated: done)"
 
 Claim: "**Honest coverage (dedicated codepaths complete):** every codepath a headless server executes is now hand-narrated." and "All dedicated-server codepaths are narrated".
 
@@ -30,7 +30,7 @@ The doc's own next paragraph (leaves "covered without a doc each") and workspace
 
 Fix: reword the bolded sentence and roadmap heading to the subsystem-level claim the evidence supports (subsystems narrated, leaves enumerated, plumbing/out-of-scope enumerated only).
 
-### [W2] MINOR (classification omission) — full-surface.md "What is NOT narrated is genuinely not a dedicated codepath"
+### [W2] MINOR (classification omission): full-surface.md "What is NOT narrated is genuinely not a dedicated codepath"
 
 Claim: the not-narrated remainder is fully classified (client render, audio, editor, vendored libs, native residuals).
 
@@ -38,7 +38,7 @@ Ground truth: `DiscordManager` (140 methods-with-body, reachable per Reach.exe o
 
 Fix: add Discord (and the utility-plumbing category) to the not-narrated enumeration in full-surface.md or to residuals.md.
 
-### [W3] MINOR (stale number) — full-surface.md coverage ledger
+### [W3] MINOR (stale number): full-surface.md coverage ledger
 
 Claim: "(23 new narratives this pass, 145 diagrams corpus-wide)".
 
@@ -46,7 +46,7 @@ Ground truth: `grep -c '```mermaid' docs/*.md docs/inventories/*.md | awk -F: '{
 
 Fix: update to 158 (or drop the count) and remove "this pass" phrasing.
 
-### [W4] MINOR (broken documented command) — re-methodology.md §5
+### [W4] MINOR (broken documented command): re-methodology.md §5
 
 Claim: after §0 establishes `cd tools && ./build.sh`, §5 instructs:
 `mono bin/NetProtocolCensus.exe "$ASM" il/netpackages-v3.0.1/META.md`
@@ -62,7 +62,7 @@ Unhandled Exception: System.IO.DirectoryNotFoundException ... at NetProtocolCens
 
 Fix: prefix `../` and make the cwd convention consistent across §1-§5b.
 
-### [W5] MINOR (wrong path) — AGENTS.md rule 4
+### [W5] MINOR (wrong path): AGENTS.md rule 4
 
 Claim: "re-check `docs/coverage.md` census numbers with `tools/Census.exe`".
 
@@ -70,7 +70,7 @@ Ground truth: `ls tools/Census.exe` -> No such file or directory. The binary is 
 
 Fix: `tools/bin/Census.exe`.
 
-### [W6] MINOR (UNVERIFIABLE-HERE label) — coverage.md census table
+### [W6] MINOR (UNVERIFIABLE-HERE label): coverage.md census table
 
 Claim: "NetPackage* types | 194 (193 wire + `NetPackageManager`); **189 in live id-map**".
 
@@ -78,11 +78,11 @@ Ground truth: 194 = 193 + manager is confirmed statically (see C5). The "189 in 
 
 Fix: cite the runtime dump artifact that produced 189, or mark it as a live-observation pin with date.
 
-### [W7] MINOR (polish) — residuals.md §1
+### [W7] MINOR (polish): residuals.md §1
 
 Stray empty table row (`| `) after the "XML content semantics" row (line 36), rendering artifact from an earlier edit.
 
-### [W8] MINOR (provenance caveat) — experimental-delta.md
+### [W8] MINOR (provenance caveat): experimental-delta.md
 
 All census/enum/wire deltas verified against `/home/maci/.cache/zdtd-scratch/exp-Assembly-CSharp.dll` (see C4/C6). The doc says "both DLLs local, git-ignored" but does not record the experimental build id/manifest at diff time; if the local artifact were re-fetched after an experimental push, the doc's numbers would silently refer to a different build. Fix: pin the steam manifest/build id in the doc header. (Not a wrong number: every checkable number matched this artifact.)
 
@@ -94,7 +94,7 @@ All census/enum/wire deltas verified against `/home/maci/.cache/zdtd-scratch/exp
 
 ## Spot-verified CONFIRMED
 
-**C1. Stable census — all eight numbers exact** (cited in coverage.md §Census, re-methodology.md §1, full-surface.md):
+**C1. Stable census, all eight numbers exact** (cited in coverage.md §Census, re-methodology.md §1, full-surface.md):
 
 ```
 $ mono tools/bin/Census.exe "$ASM"
@@ -108,7 +108,7 @@ WorldState.SaveLoad(Stream)  = 884       # OK
 GameManager.gmUpdate IL      = 631       # OK
 ```
 
-**C2. FullSurface — namespace map numbers exact** (full-surface.md):
+**C2. FullSurface, namespace map numbers exact** (full-surface.md):
 
 ```
 $ mono tools/bin/FullSurface.exe "$ASM" <outdir>   # wrote surface-types.md (7413 types) + surface-namespaces.md
@@ -117,7 +117,7 @@ $ awk -F'|' 'NR>3 && NF>4 {n++; t+=$3; m+=$4; il+=$5} END{print n, t, m, il}' su
 # <global> row: 6276 types / 45222 methods / 1518349 IL  -> "6,276 / 45,222 / 1.52M" OK; 45222/53011 = 85.3% ("85% of the code") OK
 ```
 
-**C3. Reachability — exact reproduction** (workspace/CHANGELOG claim; INDEX.md §F "verified complete against a call-graph reachability pass"):
+**C3. Reachability, exact reproduction** (workspace/CHANGELOG claim; INDEX.md §F "verified complete against a call-graph reachability pass"):
 
 ```
 $ mono tools/bin/Reach.exe "$ASM" reach-out.txt
@@ -126,7 +126,7 @@ reached methods=28374 reached types=4516          # claimed 28,374 / 4,516 OK
 
 Honesty framing of the lens itself is accurate: re-methodology §8 calls reached-but-undocumented types "a candidate gap" (over-approximation acknowledged; devirtualization visits all overrides, so XUi/editor types appear in the reached set).
 
-**C4. Experimental census delta — exact** (experimental-delta.md §1):
+**C4. Experimental census delta, exact** (experimental-delta.md §1):
 
 ```
 $ mono tools/bin/Census.exe /home/maci/.cache/zdtd-scratch/exp-Assembly-CSharp.dll

@@ -82,5 +82,5 @@ Method: dumped every type + base via a Mono.Cecil script (`TypeBases.exe`, scrat
 
 ## Sources
 - Assembly: `/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`
-- Scratch scripts/artifacts: `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-engine-research/0b44a842-ae93-414f-9c41-1f1f1f54c21b/scratchpad/` (`TypeBases.cs/.exe`, `closure.py`, `CmdStrings.cs/.exe`, `FrameEntries.cs/.exe`, `typebases.txt`, diff lists)
+- Scratch scripts/artifacts in the uncommitted session scratch dir: `TypeBases.cs/.exe`, `closure.py`, `CmdStrings.cs/.exe`, `FrameEntries.cs/.exe`, `typebases.txt`, diff lists
 - Repo tools: `tools/bin/DumpMethod.exe`, `tools/bin/DumpType.exe`

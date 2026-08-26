@@ -13,7 +13,7 @@ dump used for grepping lives at `~/.cache/7dtd-audit/all-il.txt`
 
 ## Findings
 
-### F1. CRITICAL (format) — chunk-providers.md §5: DecoObject.Write field list omits `realYPos`
+### F1. CRITICAL (format): chunk-providers.md §5: DecoObject.Write field list omits `realYPos`
 
 > "`DecoObject` is `{Vector3i pos, float realYPos, BlockValue bv, DecoState
 > state}` (`Write` serializes pos as packed uint64, raw block data, state byte,
@@ -37,7 +37,7 @@ NameIdMapping registration. Anyone parsing `decoration.7dt` records from the
 doc's sentence misaligns by 4 bytes after the first field. **Fix:** insert
 "`realYPos` float" between the packed pos and raw block data in the Write list.
 
-### F2. MAJOR (wrong behavior) — chunk-providers.md §3.1/§4.1: base Init runs FIRST, not last
+### F2. MAJOR (wrong behavior): chunk-providers.md §3.1/§4.1: base Init runs FIRST, not last
 
 > §3.1: "Subclass Inits run their file loading first and call this via `<>n__0` (§4)."
 > §4.1: "`Init` (coroutine `<Init>d__17`, calling base Init at the end) ..."
@@ -64,7 +64,7 @@ manager. **Fix:** state that base Init (prefab decorator, spawn points,
 GenerateChunks thread) is yielded first, then the subclass loads its files; the
 thread idles on the null region manager until the subclass finishes.
 
-### F3. MAJOR (wrong behavior) — chunk-providers.md §4.4: GenerateFlat does NOT delete the region dir
+### F3. MAJOR (wrong behavior): chunk-providers.md §4.4: GenerateFlat does NOT delete the region dir
 
 > "deletes any stale save region dir and `decoration.7dt` on Init"
 
@@ -88,7 +88,7 @@ delete); there is no `SdDirectory::Delete` anywhere in `ChunkProviderGenerateFla
 `decoration.7dt`; the save region dir is only existence-checked (together with
 IsEditor) to decide whether to load the playtest prefab into the cluster."
 
-### F4. MINOR (label) — save-persistence.md §2.2: `IsParentOf` IL count
+### F4. MINOR (label): save-persistence.md §2.2: `IsParentOf` IL count
 
 > "`IsParentOf`/`GetChildPath`/`TryGetParentPath` (string-segment operations on
 > the normalized form, IL=42/9/33)"
@@ -196,7 +196,7 @@ and TryGetParentPath=33 are correct. **Fix:** "IL=6 (helper 42)/9/33".
 - **Interface call map:** callvirt sites for Update/SaveAll/StopUpdate+Cleanup/
   UnloadChunk/SaveRandomChunks/RebuildTerrain resolve to `GameManager::gmUpdate`,
   `ChunkCluster::Save`, `ChunkCluster::Cleanup` (2 calls), `ChunkCluster::UnloadChunk`,
-  `GameManager::UpdateTick`, `World::RebuildTerrain` — exactly the doc's list.
+  `GameManager::UpdateTick`, `World::RebuildTerrain`, exactly the doc's list.
 - **GenerateChunksThread:** `World.GetNextChunkToProvide()` → fallback
   `DynamicMeshThread.GetNextChunkToLoad()` → `ldc.i4.s 15` idle return (15 ms),
   guard `m_RegionFileManager == null → 15`.
@@ -237,7 +237,7 @@ and TryGetParentPath=33 are correct. **Fix:** "IL=6 (helper 42)/9/33".
   `ChunkResetCommandHelpers::ExecuteReset`, `GameEvent...ActionResetRegions`,
   `GameManager::ResetUnprotectedChunksOnLoad`,
   `QuestEventManager::FinishTreasureQuest`, `ConsoleCmdPrintChunkExpiryInfo`
-  (full-dump caller mapping) — exactly the doc's list.
+  (full-dump caller mapping), exactly the doc's list.
 - **FromRaw Init contents:** `<Init>d__17` IL=1032: `.raw` preference,
   `HeightMapUtils::ConvertDTMToHeightData` for `.tga`, `.png` fallback,
   `WorldBiomeProviderFromImage`, `splat3/4_processed.png` + `_half.png`,
@@ -249,8 +249,8 @@ and TryGetParentPath=33 are correct. **Fix:** "IL=6 (helper 42)/9/33".
 - **Disc Init:** `RegionFileManager::GetAllChunkKeys` loop + `FillBiomeId` +
   `AddChunkSync` + `CopyAllPrefabsIntoWorld`; Dummy `UnloadChunk` IL=4 =
   `MemoryPools.PoolChunks.FreeSync`.
-- **Dead code:** `ChunkBlockLayerLegacy::Read`/`::Write` — zero call sites;
-  `ChunkBlockChannel::Convert(ChunkBlockLayerLegacy[])` — zero call sites; no
+- **Dead code:** `ChunkBlockLayerLegacy::Read`/`::Write`, zero call sites;
+  `ChunkBlockChannel::Convert(ChunkBlockLayerLegacy[])`, zero call sites; no
   `newobj ChunkBlockLayerLegacy` anywhere; `ChunkBlockChannel::Read` gates old
   format on `_version <= 34` (`ldc.i4.s 34; ble.un`); static
   `ChunkBlockLayerLegacy::CalcOffset` live in MeshGenerator/MC2 and many others.
@@ -281,7 +281,7 @@ and TryGetParentPath=33 are correct. **Fix:** "IL=6 (helper 42)/9/33".
 ## Not verified (out of scope / no tooling)
 
 - Runtime log strings and behavior of console builds (real `SaveDataManager`
-  commit thread semantics beyond IL structure) — IL structure matches the doc
+  commit thread semantics beyond IL structure), IL structure matches the doc
   but no console platform provider exists in this assembly to observe.
-- `SaveDataPrefsFile` escaping details ("escaped key/value text store") — not
+- `SaveDataPrefsFile` escaping details ("escaped key/value text store"), not
   dumped; low risk.

@@ -306,7 +306,7 @@ corpus that decays on its own.
 All local; no external URLs were needed for this review.
 
 - Artifact root: `/home/maci/Desktop/7dtd/7dtd-engine-research`
-- Docs reviewed: `docs/*.md` (60), `docs/inventories/*.md` (20), notably
+- Docs reviewed: `docs/*.md` (60), `docs/inventories/*.md` (20), including
   `docs/re-methodology.md`, `docs/protocol-packages.md`, `docs/items.md`,
   `docs/coverage.md`, `docs/inventories/coverage-report.md`,
   `docs/out-of-scope-surface.md`, `docs/inventories/dedicated-leaves.md`,

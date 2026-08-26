@@ -61,7 +61,7 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 ### docs/coverage.md
 - **F1 (High).** Line 58: `| NetPackage* types | ~196 |` in the "Census (live dedi)" table. Every other census row in this table matches the oracle exactly (4401, 43901, 631, 884, 20); this is the lone wrong value, and it sits in the file positioned as the authoritative census. Should be 194 (or "194 top-level / 199 incl. nested").
 - **F18 (Low).** Two `## Changelog` headings (lines 83 and 94) with the Related-docs table between them.
-- **F14 (Medium).** Line 69: "Open the cited `research/il/...` path" — the published tree is `il/` (INDEX.md:12).
+- **F14 (Medium).** Line 69: "Open the cited `research/il/...` path", the published tree is `il/` (INDEX.md:12).
 - **F24 (Low).** Line 37: family 8 "Origin / claims" narrative is `realearth-surfaces.md` (private, unpublished); line 92 Related-docs row `` `INDEX.md` | Product RealEarth `` is ambiguous with the hub link two rows above.
 
 ### docs/residuals.md
@@ -72,7 +72,7 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 ### docs/network.md
 - **F1 (High).** Line 73: "Live census: **~196** types named `NetPackage*`". Conflicts with 194.
 - **F14 (Medium).** Line 90: "Full name list: `research/il/dedi-complete-v3.0.1/...`".
-- **F11 (Medium).** Line 137: "**Where the ~15 MB/s at 128p actually comes from**" — the 15 MB/s @128p figure appears nowhere else with a session/artifact pointer (measured-scaling's alloc data is 64p + ~300z).
+- **F11 (Medium).** Line 137: "**Where the ~15 MB/s at 128p actually comes from**", the 15 MB/s @128p figure appears nowhere else with a session/artifact pointer (measured-scaling's alloc data is 64p + ~300z).
 - **F18 (Low).** Two `## Changelog` blocks (158, 170).
 - Positive: §4b CORRECTION (lines 126-135) is explicit and dated; zig-clone.md §4.1 agrees with it.
 
@@ -82,17 +82,17 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 
 ### docs/bottlenecks.md
 - **F2 (High).** Lines 217-234 (CORRECTION, 2026-07-20): "a spatial grid does **not** collapse `NetEntityDistribution.OnUpdateEntities` ... **there is no safe EfficientServer lever for this wall**." But line 213-215 (§5 item 1, immediately above the correction) still says "Two moves collapse most of the board: **Spatial bucketing** ...", and lines 354-358 (Tier 4 #10) still say "Shared spatial interest grid ... (**collapses the O(N^2.26) wall**) ... Collapses both quadratic walls toward linear". The correction was inserted without updating the surrounding claims.
-- **F3 (High).** Lines 331-335: "**~~`PooledExpandableMemoryStream` presize + retain~~ - DOWNGRADED**". Lines 360-363: "After that, **#5 buffer presize-and-retain** for allocation" — recommends the item the same section struck out.
+- **F3 (High).** Lines 331-335: "**~~`PooledExpandableMemoryStream` presize + retain~~ - DOWNGRADED**". Lines 360-363: "After that, **#5 buffer presize-and-retain** for allocation", recommends the item the same section struck out.
 - **F4 (High).** Lines 36-37: "**~56-60% of instrumented tick in every loaded scenario**" (also line 349: "the chunk pipeline is **56-60% of tick**") vs line 204 (§4b campaign-final, 2026-07-21): "**chunk send 5%**, all else < 2%". Even if these reflect different instrumentation eras or load shapes, the doc presents both as current with no reconciliation.
 - **F7 (Medium).** Line 48-49: "measured **479 ms megapause** on a **~5.6 GB** live heap" vs line 172-173: "the 479 ms figure is a *forced* full collect on a GC-disabled **6.9 GB** heap". Same number, two heap sizes, same file.
 - **F11 (Medium).** Line 5: "**42 findings** verified" (count not derivable from the doc); lines 50-51: "15.16 / 14.84 / 14.52 MB/s across forced / guard / incremental" (no session/RESULTS pointer at that sentence); line 116: "~15 MB/s@128p" (see F11 above).
 - **F12 (Medium).** Line 42-43: "**66.6 ms/tick** at 64p+**340z**" vs measured-scaling.md:132/144: heavy standard load "64p + **~300z**", "top CPU section (§1, **66 ms**)".
-- **F17 (Low).** Line 31-32: "`ProcessPackages x2 channels x clients`" — see protocol.md §9.
+- **F17 (Low).** Line 31-32: "`ProcessPackages x2 channels x clients`", see protocol.md §9.
 
 ### docs/algorithms.md
 - **F5 (High).** Line 64-65: "The missing structure is a spatial bucket (chunk-cell grid)"; line 131: "A single uniform grid keyed on chunk cell would serve all of these **+ network interest**." Both contradict the bottlenecks.md correction (interest already distance-gated; wall is inherent replication) and aggressive-optimizations.md §2 ("inherent, not an index problem").
-- **F4 (High).** Line 115: "**~56-60% of instrumented tick** in every loaded scenario" — same stale figure as bottlenecks §1 (vs campaign-final 5%).
-- F7 context: lines 140-142 correctly separate "live working heap ~5.6 GB" from "forced full collect of a 6.91 GB heap = 479 ms" — this is the wording bottlenecks §1 #6 garbled.
+- **F4 (High).** Line 115: "**~56-60% of instrumented tick** in every loaded scenario", same stale figure as bottlenecks §1 (vs campaign-final 5%).
+- F7 context: lines 140-142 correctly separate "live working heap ~5.6 GB" from "forced full collect of a 6.91 GB heap = 479 ms", this is the wording bottlenecks §1 #6 garbled.
 
 ### docs/runtime-tuning.md
 - **F6 (High/Medium).** Lines 33-38 present `GC_PAUSE_TIME_TARGET` and `GC_MARKERS` as usable env vars, with the example `GC_ENABLE_INCREMENTAL=1 GC_PAUSE_TIME_TARGET=5 GC_MARKERS=4 ...`. Lines 40-45 then say honored vars include `GC_PAUSE_TIME_TARGET`, and "**NOT honored:** `GC_MARKERS` / `GC_PAUSE_TIME_TARGET` alone (use `GC_NPROCS` ...)". `GC_PAUSE_TIME_TARGET` appears in both the honored and not-honored lists; the recommended example uses a knob the verification paragraph says does nothing. Needs one authoritative statement.
@@ -101,30 +101,30 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 
 ### docs/measured-scaling.md
 - Best-provenanced doc in the corpus (session IDs, JSON paths, method description).
-- **F12 (Medium).** Line 144: "top CPU section (§1, **66 ms**)" — no 66 ms value exists in §1's tables (they hold exponents only); bottlenecks says 66.6 at a different zombie count.
+- **F12 (Medium).** Line 144: "top CPU section (§1, **66 ms**)", no 66 ms value exists in §1's tables (they hold exponents only); bottlenecks says 66.6 at a different zombie count.
 - **F14 (Medium).** Line 10: `research/il/gaps-v3.0.1/` etc.
 
 ### docs/zig-clone.md
 - **F5 (High).** Lines 217-221: "Interest (the real stock wall - O(N^2.26) all-pairs, **no spatial index**): grid hash ... **this is the single biggest ceiling raise vs stock (collapses the 450-500p death spiral)**". The 2026-07-20 correction (bottlenecks.md:217-234) argues the wall persists when players cluster because interest is genuinely satisfied, so a grid cannot cull it, for any server. At minimum the clone claim needs the clustered-case caveat; as written it contradicts the correction published the same day.
-- **F11 (Medium).** Line 266: "rate limit **~500 ms per IP** on stock (loadgen uses unique 127.x binds)" — no pointer.
+- **F11 (Medium).** Line 266: "rate limit **~500 ms per IP** on stock (loadgen uses unique 127.x binds)", no pointer.
 - **F14 (Medium).** Line 512: "keep regenerable dumps under `research/il/` policy".
-- NetPackage counts (lines 41, 245, 478) use "~194" — consistent with oracle.
+- NetPackage counts (lines 41, 245, 478) use "~194", consistent with oracle.
 
 ### docs/aggressive-optimizations.md
-- **F4 (High).** Lines 123, 129: "Chunk pipeline (**56-60% of tick**)", "reclaims most of 56-60% off the tick" — stale vs campaign-final 5%.
-- **F11 (Medium).** Line 34: "Entity tick (**~32 s** at 334 zombies)"; line 61: "Network replication (**~15 s**, O(N^2.26))" — units/measurement window (per what interval? aggregate section ms per capture?) are never defined, and no artifact is cited for either number.
+- **F4 (High).** Lines 123, 129: "Chunk pipeline (**56-60% of tick**)", "reclaims most of 56-60% off the tick", stale vs campaign-final 5%.
+- **F11 (Medium).** Line 34: "Entity tick (**~32 s** at 334 zombies)"; line 61: "Network replication (**~15 s**, O(N^2.26))", units/measurement window (per what interval? aggregate section ms per capture?) are never defined, and no artifact is cited for either number.
 - Positive: §2 verdict agrees with the bottlenecks correction; §3 P4 status cites RESULTS §3c-3d.
 
 ### docs/allocation-reuse.md
-- **F13 (Medium).** Lines 47-53 and 63-69: pooled stream "**mostly self-solved** ... NOT the target — see section 1's correction". Line 121-123 (§4 table, first row): `PooledExpandableMemoryStream byte[] ... | **a** presize + retain | ALLOCATION_UPSTREAM Lever B / this doc` — reinstates the deprecated lever as the first "application to the measured top allocators".
+- **F13 (Medium).** Lines 47-53 and 63-69: pooled stream "**mostly self-solved** ... NOT the target, see section 1's correction". Line 121-123 (§4 table, first row): `PooledExpandableMemoryStream byte[] ... | **a** presize + retain | ALLOCATION_UPSTREAM Lever B / this doc`, reinstates the deprecated lever as the first "application to the measured top allocators".
 - **F15 (Medium).** Line 6: "128 GB RAM" (vs 123 GB, runtime-tuning).
 - **F7 (Medium).** Line 15-16: "one forced collect of a **~7 GB** heap freezes the server **~479 ms**" (third variant of the heap size).
 
 ### docs/protocol.md
-- **F9 (Medium).** Line 45: `protocol-frames.md#1-challenge-pre-auth-raw-no-envelope` — actual heading is "1. Challenge (raw, before game envelope)" (protocol-frames.md:32); slug does not match. Line 58: `#2-channel-envelope-every-game-message-after-challenge` — actual: "2. Game channel envelope + package stream" (:61). Line 206: `#8-entity-packages-golden-fixed-bodies` — actual §8 is "EntityRelPosAndRot body (!bUseQ) · 20 bytes" (:355); there is no combined "entity packages" section, and §6.1 (PosAndRot, §7 in frames) links to the RelPos section. All three anchors predate the 2026-07-20 frames rewrite.
+- **F9 (Medium).** Line 45: `protocol-frames.md#1-challenge-pre-auth-raw-no-envelope`, actual heading is "1. Challenge (raw, before game envelope)" (protocol-frames.md:32); slug does not match. Line 58: `#2-channel-envelope-every-game-message-after-challenge`, actual: "2. Game channel envelope + package stream" (:61). Line 206: `#8-entity-packages-golden-fixed-bodies`, actual §8 is "EntityRelPosAndRot body (!bUseQ) · 20 bytes" (:355); there is no combined "entity packages" section, and §6.1 (PosAndRot, §7 in frames) links to the RelPos section. All three anchors predate the 2026-07-20 frames rewrite.
 - **F16 (Low).** Line 276: `damageType:u8 // 3 Bashing, 16 Suffocation, 26 Suicide` vs protocol-frames.md:520 "3 Bash, **16 Drown**, 26 Suicide". One enum, two names for value 16.
 - **F14 (Medium).** Lines 9, 90(via network), 142: `research/il/dedi-complete-v3.0.1/`.
-- Line 125 "DLL census: **~194**" — the tilde is unnecessary (count is exact) but not wrong; note the family table (lines 129-138) sums to exactly 194.
+- Line 125 "DLL census: **~194**", the tilde is unnecessary (count is exact) but not wrong; note the family table (lines 129-138) sums to exactly 194.
 
 ### docs/protocol-frames.md
 - Internally consistent (envelope invariant, §13 full-frame math, §4 hex decode: 0x12BC=4796, 0x12B8=4792, 0xBD=189).
@@ -137,14 +137,14 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 - All oracle numbers correct (631, 884, 20 Hz, 189-IL OnUpdateTick, Origin no-op).
 
 ### docs/loop-gmupdate.md
-- **F26 (Low).** Lines 283-285: "Else if dist² < 225 (~15 m): scale **0.3 or 0.1** (branch picks 0.1 vs 0.3)" — entity-ai.md:155-159 and loop.md:218-222 give the clean bands (<225 → 0.3; else 0.1). The hedged phrasing here reads as a different decode.
+- **F26 (Low).** Lines 283-285: "Else if dist² < 225 (~15 m): scale **0.3 or 0.1** (branch picks 0.1 vs 0.3)", entity-ai.md:155-159 and loop.md:218-222 give the clean bands (<225 → 0.3; else 0.1). The hedged phrasing here reads as a different decode.
 - **F17 (Low).** Line 297: "**ProcessPackages** (both channels)".
 - **F14 (Medium).** Line 366: example output path `research/il/gmUpdate-v3.0.1`.
 
 ### docs/entity-ai.md
-- **F20 (Low).** Merge artifacts: §14 "See also" (line 369) plus a second "## See also" (line 392); "## Changelog" (line 396) plus "## Changelog (merged source 2)" (line 661); a second H1 "# Deeper synthesis" mid-file (line 402); line 654: "`SYNTHESIS.md`, this file" — stale name from the pre-merge dump doc.
+- **F20 (Low).** Merge artifacts: §14 "See also" (line 369) plus a second "## See also" (line 392); "## Changelog" (line 396) plus "## Changelog (merged source 2)" (line 661); a second H1 "# Deeper synthesis" mid-file (line 402); line 654: "`SYNTHESIS.md`, this file", stale name from the pre-merge dump doc.
 - **F14 (Medium).** Line 385: regenerate output `../../research/il/deep-VERSION`.
-- Addendum measurements (lines 664-695) all cite RESULTS §3m-3q — good provenance; README's 54%/27% claim traces here.
+- Addendum measurements (lines 664-695) all cite RESULTS §3m-3q, good provenance; README's 54%/27% claim traces here.
 
 ### docs/terrain-height.md
 - **F8 (Medium).** Lines 15-17: `../il/terrain-v3.0.1/` = "Dedicated live | **Expanded** on this machine (RealEarth YDim)". coverage.md:10: "**Live pin (2026-07-18 dedi):** stock ... Expanded dumps in `terrain-v3.0.1` are historical." The table's "live/this machine" labels predate the revert to stock; the doc's own line 55 ("Always probe or dump") and changelog line 176 ("note live dedi stock again") acknowledge the issue without fixing the table.
@@ -155,18 +155,18 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 - **F18 (Low).** closed-gaps.md (183+194), world-chunks.md (143+154), light-mesh-water.md (105+115), managers.md (115+125): duplicate `## Changelog` blocks.
 
 ### docs/INDEX.md
-- **F23 (Low).** "One home per topic" (lines 79-101) omits bottlenecks.md, algorithms.md, aggressive-optimizations.md, allocation-reuse.md (all present in the narratives table, lines 135-139). The NetPackage census effectively has three homes with two different values (network.md ~196, protocol.md ~194, netpackages.md 194) — the ownership table names network.md for "Networking" but the census number was forked. The package-band threshold table is duplicated near-verbatim in five docs (loop.md:279; network.md:55-66; closed-gaps.md §4; protocol-frames.md §14; zig-clone.md §7); only closed-gaps is the declared home.
+- **F23 (Low).** "One home per topic" (lines 79-101) omits bottlenecks.md, algorithms.md, aggressive-optimizations.md, allocation-reuse.md (all present in the narratives table, lines 135-139). The NetPackage census effectively has three homes with two different values (network.md ~196, protocol.md ~194, netpackages.md 194), the ownership table names network.md for "Networking" but the census number was forked. The package-band threshold table is duplicated near-verbatim in five docs (loop.md:279; network.md:55-66; closed-gaps.md §4; protocol-frames.md §14; zig-clone.md §7); only closed-gaps is the declared home.
 - Line 4 declares `7days-realworld/` private/unpublished while line 14's tree shows it as a sibling directory; benign but slightly confusing for external readers.
 
 ### docs/inventories/*
-- **netpackages.md** — the census anchor: line 8 "Count: **194** types with `NetPackage` name prefix in live dedi dump"; table contains exactly 194 rows. Matches oracle. (Note the count includes infrastructure types with the prefix — `NetPackageDirection` (Enum), `NetPackageManager`, `NetPackageEntry`, `NetPackageInfo`, `NetPackageLogger`, `NetPackageMeasure`, `NetPackageMetrics` — which is what "name prefix" honestly states.)
-- **gmupdate-calls.md** — **F21 (Low)**: duplicated header blocks (lines 3-5 and 8-10). 182 entries, matching loop.md's claim.
-- **manager-updates.md** — **F21 (Low)**: duplicated header blocks (lines 3-5 and 8-11).
-- **frame-entries.md** — 242 rows; matches loop.md:59.
-- **deeper.md** — **F21 (Low)**: line 4 "Prefer: [`entity-ai.md`], [`entity-ai.md`]" (duplicate); two H1s (lines 1, 9). Threshold constants cross-check against entity-ai.md §3 (0.05, 1225, ±45, 64/225/36/625/3025, updatePlayerList 0.04/2/16/128/192/256/10/100). Consistent.
-- **loop-complete.md** — **F25 (Low)**: raw tool output with many duplicated lines (e.g. `AIDirector::ComponentsTick` at 11+13, `WorldState::SaveLoad` x3 at 55-64) and a duplicated section heading (245, 460). Harmless but noisy.
-- **gaps.md** — **F25 (Low)**: duplicate headings (`#### callers of AIDirector::.ctor` at 100 and 1515; two `### Annotated EntityFactory::CreateEntity IL=7` at 895/917 for different overloads). Elision placeholders ("raw IL listing elided for publication") are deliberate and fine. §8 classification (33/96/77) consistent with closed-gaps.md §7.
-- **opt-scan.md** — **F25 (Low)**: "MISSING `EntityActivity`" (185), "MISSING `Physics`" (234) tool markers; empty "Callers of `World::AddFallingBlocks`" (272-274). IL sizes cross-check cleanly (884, 631, 601, 775, 1236, 846, 1344...).
+- **netpackages.md**, the census anchor: line 8 "Count: **194** types with `NetPackage` name prefix in live dedi dump"; table contains exactly 194 rows. Matches oracle. (Note the count includes infrastructure types with the prefix, `NetPackageDirection` (Enum), `NetPackageManager`, `NetPackageEntry`, `NetPackageInfo`, `NetPackageLogger`, `NetPackageMeasure`, `NetPackageMetrics`, which is what "name prefix" honestly states.)
+- **gmupdate-calls.md**, **F21 (Low)**: duplicated header blocks (lines 3-5 and 8-10). 182 entries, matching loop.md's claim.
+- **manager-updates.md**, **F21 (Low)**: duplicated header blocks (lines 3-5 and 8-11).
+- **frame-entries.md**, 242 rows; matches loop.md:59.
+- **deeper.md**, **F21 (Low)**: line 4 "Prefer: [`entity-ai.md`], [`entity-ai.md`]" (duplicate); two H1s (lines 1, 9). Threshold constants cross-check against entity-ai.md §3 (0.05, 1225, ±45, 64/225/36/625/3025, updatePlayerList 0.04/2/16/128/192/256/10/100). Consistent.
+- **loop-complete.md**, **F25 (Low)**: raw tool output with many duplicated lines (e.g. `AIDirector::ComponentsTick` at 11+13, `WorldState::SaveLoad` x3 at 55-64) and a duplicated section heading (245, 460). Harmless but noisy.
+- **gaps.md**, **F25 (Low)**: duplicate headings (`#### callers of AIDirector::.ctor` at 100 and 1515; two `### Annotated EntityFactory::CreateEntity IL=7` at 895/917 for different overloads). Elision placeholders ("raw IL listing elided for publication") are deliberate and fine. §8 classification (33/96/77) consistent with closed-gaps.md §7.
+- **opt-scan.md**, **F25 (Low)**: "MISSING `EntityActivity`" (185), "MISSING `Physics`" (234) tool markers; empty "Callers of `World::AddFallingBlocks`" (272-274). IL sizes cross-check cleanly (884, 631, 601, 775, 1236, 846, 1344...).
 
 ### README.md
 - All highlight numbers trace to in-corpus sources: ~20 Hz (loop.md §3), 0.4% residual (bottlenecks.md:199), 54%/27% (entity-ai.md:690-692), O(N^2.26) (measured-scaling.md §1). No conflicts. Note it inherits F4's tension indirectly by advertising "campaign-final attribution" while three docs still carry the pre-campaign 56-60% figure.
@@ -174,7 +174,7 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 ### oss-tools/
 - **F22 (Low).** Em dashes: NOTES.md 17 occurrences on lines 65, 176, 204, 218, 237, 257, 309, 313 (x2), 315, 316, 318 (x2), 319, 320, 321 (plus table cells); servertools.md 9 occurrences on lines 98, 115, 132, 146, 154, 162, 170, 176, 180. naiwazi.md: 0. `docs/` and `README.md`: 0.
 - No AI-attribution phrasing found anywhere in the corpus (scanned for the usual markers).
-- naiwazi.md correctly labels vendor numbers as "Claim only" — good practice. servertools.md:4 and naiwazi.md:118 carry stale `research/...` local paths (F14).
+- naiwazi.md correctly labels vendor numbers as "Claim only", good practice. servertools.md:4 and naiwazi.md:118 carry stale `research/...` local paths (F14).
 
 ---
 
@@ -212,7 +212,7 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 
 - **Read in full:** all 24 `docs/*.md`, all 8 `docs/inventories/*.md`, `README.md`, all 3 `oss-tools/*.md` (36/36 files).
 - **Grep-verified corpus-wide:** oracle numerics (194/196/189, 4401, 43901, 631, 884, 20 Hz), em dash character, TODO/FIXME/placeholder markers (none in docs; one benign mention in NOTES.md:186 about placeholder models), `.md#anchor` links (3, all broken), duplicate headings per file, AI-attribution phrasing (none).
-- **Not verified (out of scope / not possible from this repo):** external pointers into `7dtd-server-optimizer/docs/RESULTS.md`, `ALLOCATION_UPSTREAM.md`, APM session files, and the private `7days-realworld/` docs — claims delegated to those artifacts were treated as provenanced-if-pointed, unprovenanced otherwise (F11). Link/URL validity was explicitly out of scope per the task ("claims, not links"), except anchors (F9) which are content claims about target sections.
+- **Not verified (out of scope / not possible from this repo):** external pointers into `7dtd-server-optimizer/docs/RESULTS.md`, `ALLOCATION_UPSTREAM.md`, APM session files, and the private `7days-realworld/` docs, claims delegated to those artifacts were treated as provenanced-if-pointed, unprovenanced otherwise (F11). Link/URL validity was explicitly out of scope per the task ("claims, not links"), except anchors (F9) which are content claims about target sections.
 
 ---
 

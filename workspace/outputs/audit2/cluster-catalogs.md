@@ -6,11 +6,11 @@ Ground-truth basis: a Cecil dumper (`scratchpad/TypeBases.cs`) emitted every typ
 (`typebases.tsv`, 7413 rows incl. nested) from
 `"/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"`,
 and `scratchpad/closure.py typebases.tsv <RootFullName>` computed each family's transitive closure.
-Scratchpad = `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-engine-research/0b44a842-ae93-414f-9c41-1f1f1f54c21b/scratchpad`.
+Scratchpad: the uncommitted session scratch dir.
 
 ## Findings
 
-### [F1] MAJOR — sequence-actions.md: transitive count and "every concrete subclass" claim are both wrong
+### [F1] MAJOR: sequence-actions.md: transitive count and "every concrete subclass" claim are both wrong
 
 - **Doc claim** (line 10): "**123 actions** (132 types transitively: the root `BaseAction`, 8 shared intermediate bases, and 123 concrete leaves)"; (line 8) "Every concrete `GameEvent.SequenceActions.BaseAction` subclass".
 - **Ground truth:** `python3 closure.py typebases.tsv GameEvent.SequenceActions.BaseAction` -> **136 subtypes + root = 137 types transitively**, not 132. The 5 extra types are outside the `SequenceActions` namespace but derive from `BaseAction`:
@@ -20,25 +20,25 @@ Scratchpad = `/tmp/claude-1000/-home-maci-Desktop-7dtd-7dtd-engine-research/0b44
 - **Worst count drift in this audit: claimed 132 transitive types, actual 137 (5 types / 3 concrete XML-wired verbs missing).**
 - **Fix:** rescope line 10 to "132 types in the `GameEvent.SequenceActions` namespace" and line 8 to "every concrete subclass in the namespace", and either add a Decisions/Loops section (3 concrete verbs + 2 bases) or an explicit pointer that `SequenceDecisions`/`SequenceLoops` also derive from `BaseAction` and are parsed by `ParseGameEventSequenceDecision`/`ParseGameEventSequenceLoop`.
 
-### [F2] MINOR — challenge-objectives.md: `ChallengeBaseTrackedItemObjective` is not IL-abstract
+### [F2] MINOR: challenge-objectives.md: `ChallengeBaseTrackedItemObjective` is not IL-abstract
 
 - **Doc claim** (lines 55, 71): "**`ChallengeBaseTrackedItemObjective`** (abstract, 5 subclasses)" / "the abstract intermediate".
 - **Ground truth:** `typebases.tsv` row: `Challenges.ChallengeBaseTrackedItemObjective  Challenges.BaseChallengeObjective  concrete  class` (the dumper prints `TypeDefinition.IsAbstract`, and it correctly flags e.g. `TEFeatureAbs` as abstract). It is de-facto abstract (its only `.ctor` callers are the 5 subclass ctors, `FindCallers ... ChallengeBaseTrackedItemObjective .ctor`), but the IL abstract flag is absent.
 - **Fix:** say "never instantiated directly (not IL-abstract)".
 
-### [F3] MINOR — cross-consistency: quests-challenges.md says "29 `ChallengeObjective*`", actual prefix count is 28
+### [F3] MINOR: cross-consistency: quests-challenges.md says "29 `ChallengeObjective*`", actual prefix count is 28
 
 - **Doc claim** (docs/quests-challenges.md lines 52, 315): "+ 29 `ChallengeObjective*`" / "The 29 `ChallengeObjective*` verbs".
 - **Ground truth:** `closure.py typebases.tsv Challenges.BaseChallengeObjective` -> 29 subtypes, of which **28** are named `ChallengeObjective*`; the 29th is `ChallengeBaseTrackedItemObjective` (does not match the glob). The catalog and INDEX.md line 266 both correctly say 28 leaves.
 - **Fix:** in quests-challenges.md, change to "28 `ChallengeObjective*` leaves + `ChallengeBaseTrackedItemObjective`".
 
-### [F4] MINOR — dedicated-leaves.md: two distinct `PrefabGameObject` types exist; row is ambiguous
+### [F4] MINOR: dedicated-leaves.md: two distinct `PrefabGameObject` types exist; row is ambiguous
 
 - **Doc row** (line 199): `PrefabGameObject` | POI imposter mesh holder (LOD) | `Object` | (fields only).
 - **Ground truth:** `grep PrefabGameObject typebases.tsv` -> `PrefabLODManager/PrefabGameObject` AND `PrefabPreviewManager/PrefabGameObject`. `LeafInfo` is simple-name keyed ("first wins"), so the fingerprint verified only one of them; the stated role matches the LOD one (`FindCallers` shows `PrefabLODManager::GetInstance`/`UpdatePrefabsAround` and `ChunkPreviewManager::SetPrefab` as users). Client-only marking still holds for both.
 - **Fix:** qualify the row as `PrefabLODManager/PrefabGameObject`. (Same nesting nit applies to `BodyParts` = `BodyAnimator/BodyParts`, but that name is unique.)
 
-Also noted, not graded: docs/game-events.md line 305 "nine abstract bases" — none of the 9 (`BaseAction` + 8) carries the IL abstract flag (`closure.py` reports 0 abstract in the family); they are bases by position only.
+Also noted, not graded: docs/game-events.md line 305 "nine abstract bases", none of the 9 (`BaseAction` + 8) carries the IL abstract flag (`closure.py` reports 0 abstract in the family); they are bases by position only.
 
 ## Spot-verified CONFIRMED
 

@@ -51,7 +51,7 @@
 | Prebuilt bins | `tools/bin/` | Census/StockFacts/DumpMethod present | match |
 | FindCallers | `tools/bin/FindCallers.exe.BROKEN-see-Xref` | Broken; Xref is replacement | match (honest breakage) |
 | Coverage numerator | `Coverage.cs` L124-159 | backtick mention in narrative vs inventories vs OOS | match prior critique + current caveat |
-| stock pin gate greps limited set | `tools/tests/check_stock_facts.py` | coverage banner, closed-gaps TPS, protocol 0xCA, save version, loadgen GameVersion, zdtd stock_wire — **does not** scan tile-entities-power TE layout or README version | ambiguous (gate passes while stale TE layout remains) |
+| stock pin gate greps limited set | `tools/tests/check_stock_facts.py` | coverage banner, closed-gaps TPS, protocol 0xCA, save version, loadgen GameVersion, zdtd stock_wire, **does not** scan tile-entities-power TE layout or README version | ambiguous (gate passes while stale TE layout remains) |
 
 ## E. Consumers
 

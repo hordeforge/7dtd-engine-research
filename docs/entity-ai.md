@@ -858,24 +858,24 @@ optimization, not an authoritative sim channel: the PosAndRot frames already
 carry the motion; without it, non-master clients interpolate the frames.
 
 **Noise-table source (pinned 2026-08-26):** `AIDirectorData.noisySounds` is
-populated from **`Data/Config/sounds.xml`** — `SoundsFromXml.Parse` builds one
+populated from **`Data/Config/sounds.xml`**: `SoundsFromXml.Parse` builds one
 `Audio.XmlData` per `SoundDataNode name`, and `Audio.Manager.AddAudioData`
 (IL=85) pushes `AIDirectorData.AddNoisySound(soundGroupName, Noise(volume,
 time, muffledWhenCrouched, heatMapStrength, heatMapTime*10))` (the *10 = IL
 `ldc.i4.s 10; mul`). V3.1.4 ships **1312** `<Noise>` rows (footsteps
 `stepdirt` 5/1/0.507, `stepbush` 11/3/0.507; gunfire `pipe_pistol_fire`
 62/2/0.8/heat 0.75/180s; `Auger_Fire_Start` 60/2/heat 1.0/90s; explosions
-120). The key is the SoundDataNode name — the same value the client sends as
+120). The key is the SoundDataNode name, the same value the client sends as
 `NetPackageSoundAtPosition.audioClipName`, so `NotifyNoise(clipName)` resolves
 by group name. `items.xml` `<noise>` elements (ItemClassesFromXml.parseNoise)
-are a **second, empty** feed in V3.1.4 (0 rows) — the real table is
+are a **second, empty** feed in V3.1.4 (0 rows); the real table is
 sounds.xml.
 
 **Dedicated-server emission map (pinned 2026-08-26):** `NotifyNoise` is
 reached only from server-side sound sources on a dedi:
 - `GameManager.PlaySoundAtPositionServer` (IL=60): the `IsDedicatedServer`
   branch **skips** `BroadcastPlay` + `NotifyNoise` and only fans out
-  `NetPackageSoundAtPosition` to the other clients — so the **C2S sound relay
+  `NetPackageSoundAtPosition` to the other clients, so the **C2S sound relay
   never feeds AI noise on a dedicated server** (callers: BlockMine
   walking/trigger, BlockTrapDoor collision, EntityAnimal.OnUpdateLive,
   MinScript.Tick).
@@ -886,7 +886,7 @@ reached only from server-side sound sources on a dedi:
   (IL_0027) → `OnSoundPlayedAtPosition` → `NotifyNoise` (player-caused
   explosions/decoys carry the noise; EntityEnemy blasts early-return).
 - `NetPackageEntityStealth.ProcessPackage` (IL=92): the server branch applies
-  only the crouch bit (1) and smell bits (2) — the client-sent
+  only the crouch bit (1) and smell bits (2); the client-sent
   light/noise levels (SetClientLevels) are **ignored server-side**, so the
   server recomputes each remote player's stealth itself and client noise
   never feeds dedi AI.

@@ -563,8 +563,8 @@ itself carries no world data; the generated world is entirely the §5 artifacts.
 ## Prefab/decoration data leaves
 
 Small prefab/decoration types adjacent to this doc (inventoried in
-[`inventories/dedicated-leaves.md`](inventories/dedicated-leaves.md)). Notably,
-none of them are RWG-time: the first three are runtime server logic, the last
+[`inventories/dedicated-leaves.md`](inventories/dedicated-leaves.md)).
+None of them are RWG-time: the first three are runtime server logic, the last
 three are client render/UI and out of scope here.
 
 - **`BiomeBlockDecoration`** (base `Object`) is one parsed `biomes.xml`

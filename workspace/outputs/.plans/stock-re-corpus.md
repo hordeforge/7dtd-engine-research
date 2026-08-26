@@ -33,7 +33,7 @@ There is no external academic paper. The publishable research surface is:
 
 ## Claims to check (priority)
 
-### P0 — reproducibility / hard pins
+### P0: reproducibility / hard pins
 1. Display version `V 3.1.0 (b14)`: Major=3, Minor=10, Build=14 from Constants / stock_facts.
 2. Census: top-level types 4414, methods-with-body 44107, gmUpdate IL 631, SaveLoad IL 926, NetPackage* = 193.
 3. Sim: 20 TPS / 50 ms tick (`constants_ticks_per_second`, GameTimer).
@@ -42,25 +42,25 @@ There is no external academic paper. The publishable research surface is:
 6. Network: default port 26900, challenge marker `0xCA`, challenge size 17.
 7. TE wire delta: `NetPackageTileEntity` payload length **i32** (not u16); teBlockId i32 present.
 
-### P1 — method / tooling honesty
+### P1: method / tooling honesty
 8. `make stock-check` / `stock-sync --check-only` passes against committed JSON.
 9. Dumpers exist and build (`make tools`) without shipping game bytes.
 10. re-methodology census table: still V3.0.1 baseline numbers vs V3.1 live pin (doc drift risk).
 11. README still says V3.0.1 while INDEX/AGENTS say V3.1.0 (framing mismatch).
 
-### P2 — claim vs consumer code
+### P2: claim vs consumer code
 12. zdtd `stock_wire` / version / challenge / ticks match stock_facts.
 13. loadgen GameVersion / package map dual-fixture notes match 3.1.0.
 14. Coverage metric construction vs prior Critical finding (narrated % denominator/numerator artifacts).
 
-### P3 — residual / prior-audit status
-15. Prior C1/C2 wire errors (WorldInfo hashes, DynamicMesh dead WriteRegion) — fixed in docs or still open?
+### P3: residual / prior-audit status
+15. Prior C1/C2 wire errors (WorldInfo hashes, DynamicMesh dead WriteRegion), fixed in docs or still open?
 16. residuals.md: managed unaccounted 0; open items non-IL only?
 17. Policy: git has no Assembly-CSharp.dll / bulk il dumps.
 
 ## Method
 
-1. **Plan** (this file) — written first; do not wait for user confirm.
+1. **Plan** (this file), written first; do not wait for user confirm.
 2. **Researcher** (fresh): gather evidence for P0–P3 from docs, tools, consumers, live ASM if present; command outputs preferred over memory.
 3. **Parent synthesis** of mismatches / missing code / ambiguous defaults / reproduction risks.
 4. **Verifier** (fresh): re-check load-bearing claims and force inline citations / source paths.
