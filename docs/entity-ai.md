@@ -985,6 +985,17 @@ entity reads `inventory.GetLightLevel()` - the held item's light
 (flashlight/glowstick) - which is the `selfLight` the stealth model blends
 in.
 
+**`Inventory.GetLightLevel()` (IL=76, pinned 2026-08-27):** collects the
+entity's activatable items, then: if the holding item's `AlwaysActive`
+DataItem is true, `selfLight = clamp01(Parse(holdingItemItemValue.
+GetPropertyOverride("LightValue", "")))`; otherwise the active torch in the
+toolbelt contributes its LightValue. The stock LightValue items:
+`meleeToolTorch` .35 (AlwaysActive), `meleeToolFlashlight02` .55,
+handgun-mounted lights .45 (gunHandgunT0PipePistol etc.). zdtd parses
+LightValue into the item defs and folds the held item's value into the
+stealth light blend + the lightAttackPercent crouch-reach switch
+(2026-08-27).
+
 **Sky day/night model (`SkyManager` + `LightManager.GetLightLevel`, pinned
 2026-08-26, clone-side `world/sky.zig`):** the world-light leg of the stealth
 model (see the CanSeeEntity note above). Slice 1 (day/night ambient) ships;
