@@ -884,9 +884,12 @@ join; reverting to "V 3.1.0" restored 16/16 PASS. The stock
 form in practice (the IL shows the format, not the runtime constant value).
 Re-verified 2026-08-23 with a live V3.1.0 b14 client: it sends compVersion
 "V 3.1.0" (zdtd server logged it verbatim); zdtd previously expected the
-IL-reading "V 3.10" and kicked the real client with VersionMismatch=4 until
-the gate was switched to "V 3.1.0" (`zdtd src/version.zig` `stock_wire_comp`),
-after which the client joined and spawned normally.
+IL-reading "V 3.10" and kicked the real client with VersionMismatch=4. The
+zdtd source had NOT actually been switched at the time of that note (the
+`stock_wire_comp` constant stayed "V 3.10" through 2026-08-27, when a
+loadgen join smoke re-exposed the gate and the fix landed:
+`stock_wire_comp = "V 3.1.0"`, verified with a live loadgen join). A
+client sending "V 3.10" is kicked.
 
 `GameInfoString` has 20 members (796457-796476), including `SandboxPreset = 0x12`
 and `SandboxCode = 0x13`, which is where V3.1.0 keeps the difficulty/loot/XP
