@@ -372,6 +372,27 @@ stat's readers include `DuskDawnInit`, blood-moon dawn/dusk,
 
 ---
 
+**Moon brightness term (pinned 2026-08-27, SkyManager cctor + Update):**
+the moon's ambient contribution is data-driven from two 7-element static
+tables: `sMoonPhases` = `{0.05, 0.35, 0.55, 0.70, 1.40, 1.63, 1.82}` and
+`sMoonBrights` = `{1.0, 0.65, 0.45, 0.25, 0.40, 0.60, 0.90}` (extracted
+from the PE static data via Mono.Cecil FieldRVA). `SkyManager.Update`
+computes the phase index as `((int)(dayCount + 5.5)) % 7` (a blood-moon
+window forces index 0, the full moon), then `moonBright =
+sMoonBrights[index]`. Cloud dimming: when `cloudThickness > 45` and
+`GamePrefs.GetFloat(195) < 0.49`, `moonBright *= FastLerp(1, 0.15,
+(cloudThickness - 45) / 55)`. `GetMoonBrightness()` =
+`moonLightColor.grayscale * moonBright`; `GetMoonAmbientScale(add, mpy)`
+= `FastLerp(1, moonBright * mpy + add, dayPercent * 3.030303)` is the
+ambient fold `AmbientSpectrumFrameUpdate` multiplies into the day/night
+brightness (then `LerpUnclamped(scale, 1, insideCurrent)` and
+`+ nightVisionBrightness`). The moon direction for the sprite: angle =
+`sMoonPhases[index] * pi`, dir = `(-sin(angle), 0, cos(angle))`.
+Server-side relevance: the stealth-light ambient leg and night-time AI
+sight can fold `moonBright` without any client channel.
+
+---
+
 ## 6. Save/load and dedicated relevance
 
 - **Persistence.** Weather is part of the world header: `WorldState` calls
