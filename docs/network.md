@@ -901,10 +901,12 @@ client sending the raw-Minor form is kicked.
 
 V3.2.0 pin (2026-08-28): the display form is "V 3.2.0" (Minor=20 -> the
 Minor/10-Minor%10 display split) and the raw-Minor form would be "V 3.20".
-zdtd and 7dtd-loadgen both use "V 3.2.0"; the 3.2.0 gate itself is
+zdtd and 7dtd-loadgen both use "V 3.2.0"; the 3.2.0 gate itself was
 **inferred** to keep the display-form behavior (the same shape the 3.1.0
-captures proved) and has not yet been re-probed against a live V3.2.0
-client.
+captures proved) until 2026-08-29, when a live 7dtd-loadgen join against
+zdtd (PackageIds numeric Minor=20 -> the client echoes "V 3.2.0" -> the gate
+accepts; the previous Minor=10 advertising was rejected with
+VersionMismatch=4) **re-probed and confirmed the gate** end to end.
 
 `GameInfoString` has 20 members (796457-796476), including `SandboxPreset = 0x12`
 and `SandboxCode = 0x13`, which is where V3.2.0 keeps the difficulty/loot/XP
