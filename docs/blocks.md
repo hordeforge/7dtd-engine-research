@@ -45,9 +45,24 @@ word.
 `NameIdMapping` its mapped id, queueing the rest;
 `assignLeftOverBlocks` (IL=107) first honors the `fixedBlockIds` map, then
 fills terrain blocks by scanning **upward from id 0** for free ids and
-non-terrain blocks **downward from 255**, logging
+non-terrain blocks **upward from 255** (the 3.1.0-era "downward from 255"
+reading was wrong: the general counter increments 255, 256, ... like the
+terrain counter, per IL_0076-00C0), logging
 `Block IDs total {0}, terr {1}, last {2}` (the mirror of the ItemClass
-pipeline, [items.md](items.md) §2). `AlternateBlockCount` (IL=5) /
+pipeline, [items.md](items.md) §2). Concrete pins from the V3.2.0 cctor:
+`fixedBlockIds` = `air 0, water 240, terrWaterPOI 241, waterdata 242`;
+`BlockShapeTerrain::IsTerrain` is the **only** shape class returning true
+(every other `BlockShape*`, including `BlockShapeNew`, returns false), so
+a block's terrain-ness is exactly `Shape=Terrain`.
+**Shape-group expansion:** a `<block shapes="All">` group expands to every
+`shapes.xml` `<shape name>` in document order as `{block}:{shape}`
+variants; `shapes="Bulletproof">` expands to the `tag="Bulletproof"`
+subset; the group block itself gets no id (it is an expansion template,
+not in `nameToBlock`). Verified 2026-08-28 against the 3.1.0 client
+capture (`woodShapes:cube` is the first woodShapes id, no bare
+`woodShapes` row) and replicated by
+[`tools/assignids_dump.py`](../tools/assignids_dump.py).
+`AlternateBlockCount` (IL=5) /
 `ContainsAlternateBlock(name)` (IL=24) read the `placeAltBlockNames` list;
 `GetPathOffset(rotation)` (IL=11) returns `shape.GetPathOffset` when
 `PathType == -1` (the `BlockShapeNew` variant indexes

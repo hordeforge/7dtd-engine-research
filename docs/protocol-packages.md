@@ -1963,6 +1963,12 @@ Process (**IL=6**): `GameManager.GetDynamicPrefabDecorator().SendPOIMetadataToCl
 Replaces `NetPackagePOIAround` (removed in V3.2.0). Driven by
 `DynamicPrefabDecorator.RequestWorldPOIMetadataFromServer()` on the client
 (custom-POI metadata for LOD/trader rendering).
+**Timing (live-observed 2026-08-28 against a zdtd server):** the client asks
+during world creation, i.e. after `RequestToEnterGame` but before the
+play-world phase; a server that drops the request in the pre-play phase can
+stall a client that blocks on the response. A compliant server serves it
+from the joined phase (like `SignDataRequest`) and answers with
+`POIMetadataResponse` (compressed, channel 1).
 
 #### `NetPackagePOIMetadataResponse` (S2C, V3.2.0)
 

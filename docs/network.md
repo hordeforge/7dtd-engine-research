@@ -871,32 +871,40 @@ The **client** sends the same value for both `version` and `compVersion` in
 (ConnectionManager 190595-ish: two `ldfld VersionInformation::LongStringNoBuild`
 immediately before `NetPackagePlayerLogin::Setup`). `LongStringNoBuild` is
 `String.Format("{0} {1}.{2}", ReleaseType, Major, Minor)` with the **raw**
-`Minor` (VersionInformation `ldstr {0} {1}.{2}` at IL_00BE), so for V3.2.0 b9
-it is **`V 3.10`** - NOT the display form "V 3.2.0" (Minor/10-Minor%10 split is
-only the display path).
+`Minor` (VersionInformation `ldstr {0} {1}.{2}` at IL_00BE), so the
+IL-only reading for V3.2.0 b9 (Minor=20) is **`V 3.20`**, NOT the display
+form "V 3.2.0" (Minor/10-Minor%10 split is only the display path).
 
 The **server** compares the client's `compVersion` (stored as
 `ClientInfo.compatibilityVersion`) against its own `LongStringNoBuild` with
 `String.Equals(..., OrdinalIgnoreCase)` in `VersionAuthorizer`; a mismatch
 returns `KickPlayerData(EKickReason.VersionMismatch=4, ...)` which becomes a
-`NetPackagePlayerDenied`. So a strict `compVersion == "V 3.10"` (case-insensitive)
-check is the stock gate; zdtd mirrors it (`version.zig` `stock_wire_comp`).
+`NetPackagePlayerDenied`. zdtd mirrors the empirically-accepted gate
+(`version.zig` `stock_wire_comp`).
 
 EMPIRICAL CORRECTION (2026-08-22, live stock V3.1.0 b14 dedicated): the
-authorizer in the shipped binary **accepts the display form "V 3.2.0" and
-kicks "V 3.10"** with VersionMismatch=4 - the opposite of the IL-only reading
-above. A loadgen login switched to "V 3.10" (commit b5c3069) failed every
-join; reverting to "V 3.2.0" restored 16/16 PASS. The stock
+authorizer in the shipped binary **accepts the display form and kicks the
+raw-Minor form** with VersionMismatch=4 - the opposite of the IL-only
+reading above. A loadgen login switched to the raw-Minor form (commit
+b5c3069, "V 3.10" for the V3.1.0 pin) failed every join; reverting to the
+display form restored 16/16 PASS. The stock
 `cVersionInformation.LongStringNoBuild` evidently evaluates to the display
 form in practice (the IL shows the format, not the runtime constant value).
 Re-verified 2026-08-23 with a live V3.1.0 b14 client: it sends compVersion
-"V 3.2.0" (zdtd server logged it verbatim); zdtd previously expected the
+"V 3.1.0" (zdtd server logged it verbatim); zdtd previously expected the
 IL-reading "V 3.10" and kicked the real client with VersionMismatch=4. The
 zdtd source had NOT actually been switched at the time of that note (the
 `stock_wire_comp` constant stayed "V 3.10" through 2026-08-27, when a
 loadgen join smoke re-exposed the gate and the fix landed:
 `stock_wire_comp = "V 3.2.0"`, verified with a live loadgen join). A
-client sending "V 3.10" is kicked.
+client sending the raw-Minor form is kicked.
+
+V3.2.0 pin (2026-08-28): the display form is "V 3.2.0" (Minor=20 -> the
+Minor/10-Minor%10 display split) and the raw-Minor form would be "V 3.20".
+zdtd and 7dtd-loadgen both use "V 3.2.0"; the 3.2.0 gate itself is
+**inferred** to keep the display-form behavior (the same shape the 3.1.0
+captures proved) and has not yet been re-probed against a live V3.2.0
+client.
 
 `GameInfoString` has 20 members (796457-796476), including `SandboxPreset = 0x12`
 and `SandboxCode = 0x13`, which is where V3.2.0 keeps the difficulty/loot/XP
