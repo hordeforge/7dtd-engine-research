@@ -1,4 +1,4 @@
-# AIDirector component types (V3.1.0)
+# AIDirector component types (V3.2.0)
 
 **Owns:** AIDirector type inventory + player-state/horde targeting/chunk-event heat pipeline.  
 **Tick path:** [`entity-ai.md`](entity-ai.md), [`loop.md`](loop.md) §5.  
@@ -39,7 +39,7 @@ flowchart TB
   TimeOfDayIncPerSec / 6, 0.2, 5) * 1000` world-time ticks between activity
   passes (scales with the day-speed stat)
 - Activity constants: `cActivityDuration` = **720** world-time ticks (12 game
-  hours, dead const - no live literal in V3.1.0) and `cActivityNoiseDuration` =
+  hours, dead const - no live literal in V3.2.0) and `cActivityNoiseDuration` =
   **240** (live: `NotifyNoise` heat-map chunk event duration, IL_00D9)
 - `ComponentsInitNewGame()` IL=20: `InitNewGame()` on every registered
   component; `NotifyIntentToAttack(zombie, player)` IL=1 is an empty residual
@@ -76,7 +76,7 @@ IL=17); full bodies in the chunk-event section below.
 - `SpawnAirDrop()` IL=59
 - `SpawnSupplyCrate(Vector3,ChunkObserver)` IL=77
 
-**Supply crate entity (`EntitySupplyCrate`, V3.1.0 b14):** `fallHitGround`
+**Supply crate entity (`EntitySupplyCrate`, V3.2.0 b9):** `fallHitGround`
 (IL=15) clamps the impact speed to 5 and forces the vertical fall component
 to `max(fallMotion.y, -0.75)` before delegating to the base - the crate
 always lands softly. `OnEntityDeath` (IL=30) removes the map marker
@@ -88,7 +88,7 @@ EntityLockContext(commandId, bag), 0)` - the crate opens via the same lock
 system as loot bags. `canDespawn()` (IL=2) is **always false**: landed
 crates persist until looted or removed.
 
-More `EntitySupplyCrate` runtime (V3.1.0 b14):
+More `EntitySupplyCrate` runtime (V3.2.0 b9):
 
 - **Parachute flight:** `MoveEntityHeaded` (IL=35) adds
   `motion.y += ScalePhysicsAddConstant(world.Gravity * 0.95)` each tick while
@@ -134,7 +134,7 @@ MaxDayCount+1) - 1`; `nextTOD = (u64)RandomRange(MinTimeOfDay, MaxTimeOfDay+1)`;
 is strictly max-exclusive (`InternalSample` carries the classic
 `ret == 2147483647 -> ret--` guard, so `Sample() < 1` and `Next(1) == 0`
 always). **Live-verified 2026-08-11**
-(stock V3.1.0 dedicated, Navezgane, telnet `settime`): first drop scheduled
+(stock V3.2.0 dedicated, Navezgane, telnet `settime`): first drop scheduled
 "Next Airdrop: 4 12:00"; at the scheduled noon the
 server logged `AIAirDrop: Computed flight paths for 1 aircraft` ->
 `Spawned aircraft` -> `Spawned supply crate` -> `EntitySupplyCrate goActive`,
@@ -187,7 +187,7 @@ persists in the AIDirector save: `Write` (IL=72) stores `nextAirDropTime` u64 +
   `CanBePushed` / `isRadiationSensitive` / `get_IsValidAimAssistSnapTarget` are
   all `false`.
 
-**Air drop flight logic (`AIAirDrop`, V3.1.0 b14):** `SpawnAirDrop`
+**Air drop flight logic (`AIAirDrop`, V3.2.0 b9):** `SpawnAirDrop`
 (IL=59) builds an `AIAirDrop` (players + controller), whose `Tick` (IL=193)
 drives the whole drop. `CreateFlightPaths` (IL=355) runs once:
 `MakePlayerClusters` (IL=70) groups players within **30 m** (`Radius`,
@@ -507,7 +507,7 @@ Duration or Value ≤ 0; else re-sum Value into `activityLevel`.
 
 ## AIDirectorConstants : Object
 
-Static constants carrier, **vestigial in V3.1.0** (verified against the full
+Static constants carrier, **vestigial in V3.2.0** (verified against the full
 assembly dump): declares 29 fields (`DebugOutput`, `kFileVersion`,
 `kMaxSupplyCrates`, `kStealthSightDistanceMultiplier`,
 `kStealthNighttimeSightDistanceMultiplier`, `kHordeMeterWarn1Threshold`,
@@ -522,7 +522,7 @@ assembly dump): declares 29 fields (`DebugOutput`, `kFileVersion`,
 `kScoutSummonedPerScream`, `kScoutSummonedTotal`), but only `DebugOutput` is
 ever read or written: `ldsfld` appears solely in `ConsoleCmdAIDirectorDebug`
 and `AIDirector` (the console `aidirector.debug` toggle), `stsfld` only in the
-`.cctor` and the console command. Every other field is dead in V3.1.0: the
+`.cctor` and the console command. Every other field is dead in V3.2.0: the
 tuned numbers the components actually use are inline literals (wandering-horde
 schedule `Random(12000..24000)`, chunk-event cooldowns 180/240/720/1320,
 blood-moon party constants, etc. - see the sections above). The `.cctor`
@@ -816,7 +816,7 @@ spawnerDefinition)` and stores `targetPos` + `playerSearchBounds`.
 ## AIDirectorZombieState : Object
 
 `IMemoryPoolableObject` wrapper around a single `EntityEnemy m_zombie` field.
-**Orphaned in V3.1.0** (verified): the type is referenced from nowhere else in
+**Orphaned in V3.2.0** (verified): the type is referenced from nowhere else in
 the full assembly dump - no `newobj`, no method call, no field use. It is a
 leftover of an earlier managed-zombie design; the current `ManagedZombie`
 entries in `AIDirectorBloodMoonParty` / `AIHordeSpawner` are a nested
@@ -874,7 +874,7 @@ applied when a client syncs a sleeper's animation state.
 ## Blood-moon window, party spawner and client-side FX (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus).
+numbers are from that dump; the tracked `il/` sets are the V3.2.0 corpus).
 
 ### Time and the blood-moon window
 
@@ -931,7 +931,7 @@ externally set BloodMoonDay stat. It gates all party spawning on
 `GameStats.GetBool(24)` `IsSpawnEnemies` (the `EnemySpawnMode` server option,
 GamePref 82; [server-lifecycle.md](server-lifecycle.md)).
 
-There is **no `bloodmoon` console command in V3.1.0**. The only caller of
+There is **no `bloodmoon` console command in V3.2.0**. The only caller of
 `SetForToday` is the gameevents sequence action
 `GameEvent.SequenceActions.ActionSetHordeNight` (2573467), whose `keepBMDay`
 property stashes the old `bmDay` into `bmDayNextOverride`.
@@ -1164,9 +1164,9 @@ write, so on a dedicated server the client never learns it.
 
 `NetPackageHordeEvent` now occupies 822185-822359 in this dump. There is still no
 `GetPackage<NetPackageHordeEvent>()` anywhere, confirming the class is vestigial in
-V3.1.0 b14.
+V3.2.0 b9.
 
-### Where the options come from in V3.1.0
+### Where the options come from in V3.2.0
 
 The shipped dedicated-server `serverconfig.xml` no longer exposes
 `BloodMoonFrequency` / `BloodMoonRange` / `BloodMoonEnemyCount` as properties at
@@ -1338,7 +1338,7 @@ accessor (closed-gaps.md).
   constants, InitParty formulas, CanSpawn(1.9f) budget and the +120 degree spawn
   arc; SpawnZombie bonus-loot and chunk-observer effects; SkyManager /
   XUiC_CompassWindow client-local FX driven by GameStats 58 + 42 with no packet;
-  Conductor as the only BloodmoonMusic sender; SandboxCode as the V3.1.0 source of
+  Conductor as the only BloodmoonMusic sender; SandboxCode as the V3.2.0 source of
   Frequency/Range/EnemyCount; ConsoleCmdSetTime four forms; no `bloodmoon` command.
 
 - **2026-07-28:** AIDirector save v10; bloodmoon/sleeper/GameStats packages.

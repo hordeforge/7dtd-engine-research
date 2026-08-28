@@ -1,4 +1,4 @@
-# Web admin server (dedicated V3.1.0)
+# Web admin server (dedicated V3.2.0)
 
 **Owns:** the managed `Webserver.*` surface, the HTTP admin/API server a dedicated
 server runs when the web dashboard is enabled: request pipeline, session auth,

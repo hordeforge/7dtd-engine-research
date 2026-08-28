@@ -1,4 +1,4 @@
-# Chunk providers and decoration (dedicated V3.1.0)
+# Chunk providers and decoration (dedicated V3.2.0)
 
 **Owns:** the `ChunkProviderAbstract` hierarchy (provider selection, the
 GenerateChunks thread, chunk generate/decorate/save/unload driving) and the
@@ -341,7 +341,7 @@ placed block.
 **Surface density is binary; the client height-smooths (2026-08-23, IL-pinned).**
 `TerrainGeneratorWithBiomeResource::fillDensityInBlock(Chunk, x, y, z, BlockValue)`
 (IL=16, dump
-[`../il/terrain-v3.1.0/TerrainGeneratorWithBiomeResource_fillDensityInBlock_Chunk_Int32_Int32_Int32_BlockValue_il.txt`](../il/terrain-v3.1.0/TerrainGeneratorWithBiomeResource_fillDensityInBlock_Chunk_Int32_Int32_Int32_BlockValue_il.txt))
+[`../il/terrain-v3.2.0/TerrainGeneratorWithBiomeResource_fillDensityInBlock_Chunk_Int32_Int32_Int32_BlockValue_il.txt`](../il/terrain-v3.2.0/TerrainGeneratorWithBiomeResource_fillDensityInBlock_Chunk_Int32_Int32_Int32_BlockValue_il.txt))
 sets exactly `IsTerrain() ? MarchingCubes.DensityTerrain(-128) :
 DensityAir(127)` per cell, and `GenerateTerrain` (7-arg, IL dump in the same
 dir) stamps the surface cell with that same binary value and the cell above
@@ -720,7 +720,7 @@ the pool, chunks arrive via net packages only. **Does not** load DTM, biomes, or
 **splat control textures**. Together with `bClientMode=true` FromRaw (the
 non-fixed-size client case) this branch never executes on a dedicated server.
 
-**Terrain MicroSplat implication (zdtd 2026-08 playtest, V3.1.0 client):** if a
+**Terrain MicroSplat implication (zdtd 2026-08 playtest, V3.2.0 client):** if a
 clone advertises `fixedSizeCC=true` for Navezgane, the client installs Dummy and
 never fills `ChunkProviderGenerateWorldFromRaw.splats[]`.
 `VoxelMeshTerrain.ConfigureTerrainMaterial` still runs when

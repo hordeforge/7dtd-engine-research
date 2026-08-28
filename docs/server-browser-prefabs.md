@@ -1,4 +1,4 @@
-# Server advertisement + prefab instance data (dedicated V3.1.0)
+# Server advertisement + prefab instance data (dedicated V3.2.0)
 
 **Owns:** the server-info data layer a dedicated server publishes (`GameServerInfo`,
 `ConnectionManager.LocalServerInfo`, the Steam/EOS/LAN announcers, the TCP info
@@ -189,7 +189,7 @@ changes into an update `SessionModification` that `Update()` commits on a
 `AuthServer` calls `RegisterUser`/`UnregisterUser` per authenticated client so
 EOS tracks real occupancy. Note: `SessionsClient.matchesFilters` (client-side
 re-filtering of `GameServerInfo` against browse filters) exists only in the
-experimental build and shipped in V3.1.0 b14. In
+experimental build and shipped in V3.2.0 b9. In
 stable, filtering is purely server-side via EOS attribute comparisons
 (`setSearchParameters`).
 

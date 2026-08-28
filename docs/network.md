@@ -1,4 +1,4 @@
-# Dedicated networking (V3.1.0 pin)
+# Dedicated networking (V3.2.0 pin)
 
 **Current pin:** V **3.1.0 (b14)**. Managed net architecture was first RE'd on V3.0.1 and re-checked on the live 3.1.0 assembly. V3.1 wire/join deltas live in topic docs: TE outer wire in [protocol-packages.md](protocol-packages.md) §6.12; PackageIds version minor=10 build=14 in [protocol.md](protocol.md) / loadgen fixtures; GSI / sandbox browser fields in [server-browser-prefabs.md](server-browser-prefabs.md). Hub map: [INDEX.md](INDEX.md) § V3.1.0 shipped delta map. **Hub:** [`INDEX.md`](INDEX.md).
 
@@ -10,7 +10,7 @@
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md) §2-3 (player O(N²), packages).  
 **Clone design:** [`ZIG_CLONE.md`](../../zdtd-server/docs/ZIG_CLONE.md).  
 **Loop:** [`loop.md`](loop.md) §6.  
-**Dumps:** `il/gaps-v3.1.0/`, `il/dedi-complete-v3.1.0/` §3-4.
+**Dumps:** `il/gaps-v3.2.0/`, `il/dedi-complete-v3.2.0/` §3-4.
 
 ---
 
@@ -302,7 +302,7 @@ Placement request path: section 5.0 below is in protocol-packages; server create
 
 ### 2.2 Interest enter / exit packages (spatial-grid critical)
 
-**Re-pinned V3.1.0 b14** (`NetEntityDistributionEntry.updatePlayerEntity` IL=222).
+**Re-pinned V3.2.0 b9** (`NetEntityDistributionEntry.updatePlayerEntity` IL=222).
 
 Per full tick, for each tracked entity entry × each player:
 
@@ -377,12 +377,12 @@ Representative dedi-relevant packages (from inventory dump):
 | `NetPackagePlayer*` family | Player data |
 | Encryption packages | Auth handshake |
 
-Full name list: `il/dedi-complete-v3.1.0/DEDI_COMPLETE_auto.md` §3.  
+Full name list: `il/dedi-complete-v3.2.0/DEDI_COMPLETE_auto.md` §3.  
 Join + envelope + golden entity package bodies: [protocol.md](protocol.md).
 
 ---
 
-## 3a. The `NetPackage` base contract (V3.1.0 b14)
+## 3a. The `NetPackage` base contract (V3.2.0 b9)
 
 Every wire package derives from `NetPackage`; the base supplies the transport
 defaults and the sender-validation helpers every `ProcessPackage` runs
@@ -721,7 +721,7 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 ## 4c. Package registry, direction gate, per-package channel/compress/reliability (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus). Note LiteNetLib itself is a
+numbers are from that dump; the tracked `il/` sets are the V3.2.0 corpus). Note LiteNetLib itself is a
 separate assembly and is **not** in the dump (only `.assembly extern LiteNetLib`),
 so nothing below covers LiteNet's own framing.
 
@@ -731,8 +731,12 @@ so nothing below covers LiteNet's own framing.
 by reflection over every **concrete** subclass of `NetPackage`, keyed on
 `MemberInfo.Name` (805088-805100, 805117-805140). Abstract types are excluded
 because `ReflectionHelpers.FindTypesImplementingBase` defaults `_allowAbstract` to
-false (2133289-2133345, `.param [3] = bool(false)`). The concrete count for V3.1.0
-b14 is exactly **189**; the three abstract ones are `NetPackage`,
+false (2133289-2133345, `.param [3] = bool(false)`). The concrete count on V3.1.0
+b14 was exactly **189** (live join capture); for V3.2.0 b9 the census delta is
++3 concrete packages (`POIMetadataRequest`, `POIMetadataResponse`,
+`ConfirmSpawnEntity`) −1 (`POIAround`) = **191** concrete (inferred from the
+type census; the live join id-map was not re-captured). The three abstract ones
+are `NetPackage`,
 `NetPackageEntityTargeted` and `DynamicMeshServerData`. Nested packages register
 under their **short** name, so `Audio.NetPackageAudio` and
 `DroneWeapons/NetPackageDroneParticleEffect` are valid map entries.
@@ -840,7 +844,7 @@ then `WriteCustomData` when `inclCustomData` is set. `GetToStreamLength` mirrors
 `VersionInformation.SerializableString` is
 `String.Format("{0}.{1}.{2}.{3}", ReleaseType, Major, Minor, Build)`
 (2009306-2009320), and `GameServerInfo` sets `GameInfoString.ServerVersion` (key 9)
-to exactly that (795818-795822). For V3.1.0 b14 the correct GSI value is
+to exactly that (795818-795822). For V3.2.0 b9 the correct GSI value is
 **`V.3.10.14`** (Constants `cReleaseType=1`/'V', `cVersionMajor=3`,
 `cVersionMinor=0xA`, `cVersionBuild=0xE`, 1865686-1865690).
 
@@ -850,7 +854,8 @@ ints. `EGameReleaseType` has only `Alpha=0` and `V=1` (2008981-2008982).
 
 The **displayed** minor is an encoding, not the wire minor: for `ReleaseType == V`
 and `Major >= 3` the ctor splits `Minor` into `Minor/10` and `Minor%10`
-(2009148-2009157), so "V 3.1.0 (b14)" is Major=3, Minor=10, Build=14.
+(2009148-2009157), so "V 3.2.0 (b9)" is Major=3, Minor=20, Build=9 (and the
+V3.1.0 pair "V 3.1.0 (b14)" was Minor=10, Build=14).
 
 A malformed version string is not fatal: `GameServerInfo`'s ctor seeds
 `version = new VersionInformation(Alpha, -1, -1, -1)` (793967-793971), and
@@ -864,8 +869,8 @@ The **client** sends the same value for both `version` and `compVersion` in
 (ConnectionManager 190595-ish: two `ldfld VersionInformation::LongStringNoBuild`
 immediately before `NetPackagePlayerLogin::Setup`). `LongStringNoBuild` is
 `String.Format("{0} {1}.{2}", ReleaseType, Major, Minor)` with the **raw**
-`Minor` (VersionInformation `ldstr {0} {1}.{2}` at IL_00BE), so for V3.1.0 b14
-it is **`V 3.10`** - NOT the display form "V 3.1.0" (Minor/10-Minor%10 split is
+`Minor` (VersionInformation `ldstr {0} {1}.{2}` at IL_00BE), so for V3.2.0 b9
+it is **`V 3.10`** - NOT the display form "V 3.2.0" (Minor/10-Minor%10 split is
 only the display path).
 
 The **server** compares the client's `compVersion` (stored as
@@ -876,24 +881,24 @@ returns `KickPlayerData(EKickReason.VersionMismatch=4, ...)` which becomes a
 check is the stock gate; zdtd mirrors it (`version.zig` `stock_wire_comp`).
 
 EMPIRICAL CORRECTION (2026-08-22, live stock V3.1.0 b14 dedicated): the
-authorizer in the shipped binary **accepts the display form "V 3.1.0" and
+authorizer in the shipped binary **accepts the display form "V 3.2.0" and
 kicks "V 3.10"** with VersionMismatch=4 - the opposite of the IL-only reading
 above. A loadgen login switched to "V 3.10" (commit b5c3069) failed every
-join; reverting to "V 3.1.0" restored 16/16 PASS. The stock
+join; reverting to "V 3.2.0" restored 16/16 PASS. The stock
 `cVersionInformation.LongStringNoBuild` evidently evaluates to the display
 form in practice (the IL shows the format, not the runtime constant value).
 Re-verified 2026-08-23 with a live V3.1.0 b14 client: it sends compVersion
-"V 3.1.0" (zdtd server logged it verbatim); zdtd previously expected the
+"V 3.2.0" (zdtd server logged it verbatim); zdtd previously expected the
 IL-reading "V 3.10" and kicked the real client with VersionMismatch=4. The
 zdtd source had NOT actually been switched at the time of that note (the
 `stock_wire_comp` constant stayed "V 3.10" through 2026-08-27, when a
 loadgen join smoke re-exposed the gate and the fix landed:
-`stock_wire_comp = "V 3.1.0"`, verified with a live loadgen join). A
+`stock_wire_comp = "V 3.2.0"`, verified with a live loadgen join). A
 client sending "V 3.10" is kicked.
 
 `GameInfoString` has 20 members (796457-796476), including `SandboxPreset = 0x12`
-and `SandboxCode = 0x13`, which is where V3.1.0 keeps the difficulty/loot/XP
-preset that used to be individual serverconfig properties. The shipped V3.1.0
+and `SandboxCode = 0x13`, which is where V3.2.0 keeps the difficulty/loot/XP
+preset that used to be individual serverconfig properties. The shipped V3.2.0
 `serverconfig.xml` has 69 `<property>` names and no longer contains
 `GameDifficulty`, `BloodMoonFrequency`, `DayNightLength`, `XPMultiplier`,
 `LootAbundance`, `BlockDamage*`, `DropOnDeath`, `AirDropFrequency` or

@@ -1,4 +1,4 @@
-# Mod loading and ModEvents lifecycle (dedicated V3.1.0)
+# Mod loading and ModEvents lifecycle (dedicated V3.2.0)
 
 **Owns:** how the dedicated server discovers and loads mods at boot: `ModManager`
 (scan + load pipeline), `Mod` (per-mod load state, assembly load, `InitModCode`),

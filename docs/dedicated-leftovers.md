@@ -1,4 +1,4 @@
-# Dedicated leftovers (V3.1.0)
+# Dedicated leftovers (V3.2.0)
 
 **Owns:** the final batch of reached-but-undocumented server types: the
 transactional-inventory orchestrator (`InventoryManager` + `LockEntry`), the
@@ -608,7 +608,7 @@ Small dedicated-relevant types that extend an already-owned subsystem:
 - **`World.IsMaterialInBounds(aabb, material)`** (IL=79): a brute-force scan of
   every integer cell inside the bounds (`Fastfloor(min)` .. `Fastfloor(max + 1)`
   per axis) returning true when any `GetBlock(x, y, z).Block.blockMaterial`
-  matches; **0 call sites on b14** (an unused world-query leaf).
+  matches; **0 call sites on b9** (an unused world-query leaf).
 - **`Utils` server leaves (all IL-verified):** the wrap trio `WrapFloat` /
   `WrapInt` (IL=21/22, wrap into `[min, max]`) and `WrapIndex` (IL=18, wrap
   into `[0, arraySize)`); `FastAbsInt` (IL=13, with the `int.MinValue`
@@ -700,12 +700,12 @@ Small dedicated-relevant types that extend an already-owned subsystem:
   `AddStats(v)` converts life-level overflow into saturation capped at
   `oversaturationLevel`; `AddExhaustion(v)` clamps at 40; the
   `Read`/`Write` wire pair is `i16 liveLevel, i16 timer, f32 saturation,
-  f32 exhaustion`. **Dead in b14**: Xref shows the only call site of the
+  f32 exhaustion`. **Dead in b9**: Xref shows the only call site of the
   constructor is its own `Clone`, and no entity type holds an instance, so
   the drain simulation never runs (the live system is
   [entity-stats.md](entity-stats.md)).
 - **Dead collection/utility families (no in-assembly references outside their
-  own family on b14, verified against the full IL dump):** the
+  own family on b9, verified against the full IL dump):** the
   `TList<T>` / `TQueue<T>` pair (self-contained, 78 methods together with
   their iterator state machines); `OneToOneDictionary<K,V>` (10, only its own
   `_get_Keys/_get_Values` iterators reference it); `CollectionDebugWrapper<T>`

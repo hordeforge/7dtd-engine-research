@@ -1,8 +1,8 @@
-# All MonoBehaviour-like Update/LateUpdate/FixedUpdate (V3.1.0)
+# All MonoBehaviour-like Update/LateUpdate/FixedUpdate (V3.2.0)
 
 **Kind:** inventory table (not primary narrative).  
 **Prefer:** [`loop.md`](../loop.md) §1.  
-**Raw:** [`../il/frame-entries-v3.1.0/`](../../il/frame-entries-v3.1.0/).  
+**Raw:** [`../il/frame-entries-v3.2.0/`](../../il/frame-entries-v3.2.0/).  
 **Count:** 244 zero-arg `Update`/`LateUpdate`/`FixedUpdate` bodies over the transitive `MonoBehaviour` closure (including 2 nested types, marked). Almost all are client/render/UI; the loop doc owns the dedicated-relevant ones.
 **Hub:** [`INDEX.md`](../INDEX.md).  
 

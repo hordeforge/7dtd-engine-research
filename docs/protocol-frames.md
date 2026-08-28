@@ -1,8 +1,8 @@
-# Wire frames (visual) · 7DTD V3.1.0
+# Wire frames (visual) · 7DTD V3.2.0
 
 **Owns:** left-to-right byte/field strips for envelope + golden packages (classic protocol style).  
 **Hub:** [`INDEX.md`](INDEX.md).  
-**Pin:** V **3.1.0 (b14)** (golden live: major=3, minor=10, build=14).  
+**Pin:** V **3.2.0 (b9)** (golden live capture is V3.1.0-era: major=3, minor=10, build=14; the 3.2.0 triple is major=3, minor=20, build=9).  
 **Companion:** narrative join/policy in [protocol.md](protocol.md).  
 **Evidence:** loadgen `PackageCodec` · dedi-complete census.  
 **Clone:** [`../../zdtd-server/`](../../zdtd-server).
@@ -508,48 +508,70 @@ block-beta
 Fixed head through `blockPos` (then variable string + tail; see protocol.md for full tail):
 
 ```text
- 0        4  5  6    8  9   11 12 13 14 15       19              31              43
- +--------+--+--+----+--+---+--+--+--+--+--------+---------------+---------------+
- |entityId|s |t |str |hd|bp |ms|p |f |c |attacker|    dirV 3×f32 | blockPos 3×i32|
- |  i32   |u8|u8|u16 |u8|i16|u8|… bools…|  i32   |      12 B     |     12 B      |
- +--------+--+--+----+--+---+--+--+--+--+--------+---------------+---------------+
+ 0        4       8  9   11 12 13 15 16       20              32              44
+ +--------+-------+--+--+----+--+---+--+--------+---------------+---------------+
+ |entityId| flags |s |t |str |hd|bp |ms|attacker|    dirV 3×f32 | blockPos 3×i32|
+ |  i32   |  u32  |u8|u8|u16 |u8|i16|u8|  i32   |      12 B     |     12 B      |
+ +--------+-------+--+--+----+--+---+--+--------+---------------+---------------+
 ```
 
 | Off | Len | Field | Protocol bits |
 |---:|---:|---|---|
 | 0 | 4 | entityId | target |
-| 4 | 1 | damageSource | 0 External, 1 Internal |
-| 5 | 1 | damageType | 3 Bash, 16 Suffocation (drown), 26 Suicide, … |
-| 6 | 2 | strength | u16 |
-| 8 | 1 | hitDirection | |
-| 9 | 2 | hitBodyPart | i16 |
-| 11 | 1 | movementState | |
-| 12 | 1 | bPainHit | |
-| 13 | 1 | bFatal | |
-| 14 | 1 | bCritical | |
-| 15 | 4 | attackerEntityId | |
-| 19 | 12 | dirV | 3×f32 |
-| 31 | 12 | blockPos | 3×i32 |
-| 43 | * | hitTransformName + tail | var |
+| 4 | 4 | flags | **V3.2.0 packed bitfield** (see bit table below; replaces 10 bools) |
+| 8 | 1 | damageSource | 0 External, 1 Internal |
+| 9 | 1 | damageType | 3 Bash, 16 Suffocation (drown), 26 Suicide, … |
+| 10 | 2 | strength | u16 |
+| 12 | 1 | hitDirection | |
+| 13 | 2 | hitBodyPart | i16 |
+| 15 | 1 | movementState | |
+| 16 | 4 | attackerEntityId | (V3.2.0 moved here; was after bCritical) |
+| 20 | 12 | dirV | 3×f32 |
+| 32 | 12 | blockPos | 3×i32 |
+| 44 | * | hitTransformName + tail | var (tail includes KillXPScale:f32 before damageMultiplier) |
+
+`flags` u32 (bit 0 = LSB):
+
+```text
+ bit:   0   1   2   3   4   5   6   7   8   9  10  11…31
+      +---+---+---+---+---+---+---+---+---+---+---+------
+      | CS| CL| CR| DI| FA| FB| IC| IP| PH| TC| TK| 0…
+      +---+---+---+---+---+---+---+---+---+---+---+------
+ CS  canHitSpecialBodyParts   0x001
+ CL  CrippleLegs              0x002
+ CR  Critical                 0x004
+ DI  Dismember                0x008
+ FA  Fatal                    0x010
+ FB  FromBuff                 0x020
+ IC  IgnoreConsecutiveDamages 0x040
+ IP  IgnorePartyShare         0x080
+ PH  PainHit                  0x100
+ TC  TurnIntoCrawler          0x200
+ TK  TrapKillXP               0x400  (V3.2.0 new)
+```
 
 ```mermaid
 block-beta
   columns 16
   e["eid"]:3
+  fl["flags"]:4
   s["src"]:1
   t["typ"]:1
   st["str"]:2
   hd["hd"]:1
   bp["bp"]:2
   ms["ms"]:1
-  b["pfc"]:2
   a["atk"]:3
   style e fill:#c0392b,color:#fff
+  style fl fill:#e67e22,color:#fff
   style s fill:#d35400,color:#fff
   style t fill:#d35400,color:#fff
-  style b fill:#e74c3c,color:#fff
   style a fill:#8e44ad,color:#fff
 ```
+
+(V3.1.0 frame: `flags` absent; `bPainHit`/`bFatal`/`bCritical` bools at
+offsets 12-14, `attackerEntityId` at 15, and ten booleans near the tail —
+wire-breaking vs 3.2.0.)
 
 ---
 

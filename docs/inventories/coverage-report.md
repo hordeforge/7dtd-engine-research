@@ -1,5 +1,8 @@
 # RE coverage report (auto-generated)
 
+**Assembly studied:** Assembly-CSharp V3.2.0 (b9), file mtime 2026-08-28 05:01 UTC. The numbers below are for THIS build only: if the corpus pin
+moved (`docs/coverage.md` header), regenerate before quoting any number here.
+
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
 dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced
 against docs name-mentions. Regenerate:
@@ -16,7 +19,7 @@ quoting any number here.
 
 - *Over-approximation:* `callvirt` is devirtualized to every override regardless of
   whether the receiver is ever instantiated on a server, so client-only trees get
-  pulled in. This run has **502 XUi/XUiC_ client-UI types** inside the base even
+  pulled in. This run has **503 XUi/XUiC_ client-UI types** inside the base even
   though a headless server renders nothing.
 - *Under-approximation:* code reached only by **reflection** (XML-instantiated
   classes) is invisible. Interface dispatch IS devirtualized as of this version
@@ -42,22 +45,37 @@ The tiers are reported separately and deliberately **not summed into a headline*
 
 | Metric | Value |
 |---|---:|
-| Reached methods (with body) | 46699 |
-| Reached types (incl. compiler-generated) | 7330 |
-| Reached, non-generated | 6188 |
+| Reached methods (with body) | 46830 |
+| Reached types (incl. compiler-generated) | 7342 |
+| Reached, non-generated | 6199 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2366 (excluded from %) |
-| ...**game types** (the RE surface) | **3681** |
-| ...**narrated** (backticked in a narrative doc) | **3681 (100%)** |
+| ...**game types** (the RE surface) | **3692** |
+| ...**narrated** (backticked in a narrative doc) | **3687 (99%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 0 |
 | ...**classified** out-of-scope | 0 |
-| ...**unaccounted** (appears nowhere) | 0 |
-| of the base: XUi/XUiC_ client-UI types (over-approximation) | 502 |
+| ...**unaccounted** (appears nowhere) | 5 |
+| of the base: XUi/XUiC_ client-UI types (over-approximation) | 503 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 179 |
 
 Third-party/BCL and obfuscated `#`-named types are excluded from the base.
 **Do not add these rows together and present the sum as coverage.** "Narrated"
 and "classified" are different epistemic states (reverse engineered vs judged
 out of scope), and the base itself is the approximation described above.
+
+## Mention-depth distribution (reached game types)
+
+The depth behind the narrated figure: how many backticked mentions a reached
+game type received across hand-written narrative docs. A type named once in
+passing scores identically to one with a dedicated section, so read narrated %
+as an upper bound; this table is its actual depth.
+
+| Narrative mentions | Types | Share of base |
+|---|---:|---:|
+| 0 (catalogued, classified, or unaccounted) | 5 | 0% |
+| exactly 1 | 2401 | 65% |
+| 2-4 | 785 | 21% |
+| 5-19 | 420 | 11% |
+| 20+ | 81 | 2% |
 
 ## Whole-assembly accounting (all types and methods)
 
@@ -67,36 +85,36 @@ reached-and-documented plus unreached-and-classified (client / editor / dead).
 
 | Metric | Value |
 |---|---:|
-| All types (incl. nested) | 7432 |
-| Reached (Assembly-CSharp own types) | 4767 (64%) |
-| Unreached | 2665 (35%) |
-| ...compiler-generated / obfuscated | 352 (excluded) |
+| All types (incl. nested) | 7451 |
+| Reached (Assembly-CSharp own types) | 4779 (64%) |
+| Unreached | 2672 (35%) |
+| ...compiler-generated / obfuscated | 354 (excluded) |
 | ...third-party / BCL | 57 (excluded) |
-| ...**unreached game types** (need classification) | **2256** |
-| All methods with body | 53235 |
-| Reached methods (Assembly-CSharp own) | 31418 (59%) |
-| Unreached methods | 21817 (40%) |
-| ...in reached game types (uncalled members) | 13060 |
-| ...in unreached game types | 4460 |
+| ...**unreached game types** (need classification) | **2261** |
+| All methods with body | 53418 |
+| Reached methods (Assembly-CSharp own) | 31544 (59%) |
+| Unreached methods | 21874 (40%) |
+| ...in reached game types (uncalled members) | 13103 |
+| ...in unreached game types | 4469 |
 
 **Whole-assembly accounting (the 100% view):**
 
 | Metric | Value |
 |---|---:|
-| Accounted game types (reached documented + unreached classified) | **5937 / 5937 (100%)** |
-| Methods in accounted game types | **46331 / 46331 (100%)** |
-| (excluded by design: 1358 compiler-generated, 99 third-party/BCL, 38 both; sums to 7432 of 7432) | |
+| Accounted game types (reached documented + unreached classified) | **5953 / 5953 (100%)** |
+| Methods in accounted game types | **46504 / 46504 (100%)** |
+| (excluded by design: 1361 compiler-generated, 99 third-party/BCL, 38 both; sums to 7451 of 7451) | |
 
-Unreached game types (2256), grouped by top namespace:
+Unreached game types (2261), grouped by top namespace:
 
 | Namespace | count |
 |---|---:|
-| `<global>` | 1775 |
+| `<global>` | 1778 |
 | `Platform` | 155 |
 | `Twitch` | 57 |
 | `DynamicMusic` | 45 |
+| `GameEvent` | 41 |
 | `XMLData` | 40 |
-| `GameEvent` | 40 |
 | `WorldGenerationEngineFinal` | 20 |
 | `JBooth` | 20 |
 | `MusicUtils` | 13 |
@@ -112,6 +130,7 @@ Unreached game types (2256), grouped by top namespace:
 | `Assets` | 4 |
 | `ModInfo` | 3 |
 | `PrefabVolumes` | 3 |
+| `Services` | 2 |
 | `GearVariants` | 2 |
 | `Quests` | 2 |
 | `RaycastPathing` | 2 |
@@ -119,19 +138,21 @@ Unreached game types (2256), grouped by top namespace:
 | `PostEffects` | 2 |
 | `ShinyScreenSpaceRaytracedReflections` | 1 |
 | `WaterClippingTool` | 1 |
-| `Services` | 1 |
 | `TriggerEffects` | 1 |
 | `SDF` | 1 |
 | `GUI_2` | 1 |
 | `UAI` | 1 |
 
-Unreached game types already mentioned in docs: **2256** (accounted).
-Unreached game types with **no mention anywhere**: **0** (the whole-assembly gap).
+Unreached game types already mentioned in docs: **2258** (accounted).
+Unreached game types with **no mention anywhere**: **3** (the whole-assembly gap).
 
 Gap list (no mention in any doc):
 
+- `HonkOpenTypes` (<global>)
+- `OpenDoorStates` (GameEvent.SequenceActions)
+- `EntitlementData` (Services.Analytics.Events)
 
-Full unreached game-type list (2256):
+Full unreached game-type list (2261):
 
 | Type | Namespace | methods |
 |---|---|---:|
@@ -821,6 +842,7 @@ Full unreached game-type list (2256):
 | `HitDelegate` | <global> | 0 |
 | `HoldingItemBroken` | <global> | 2 |
 | `HolsterState` | <global> | 0 |
+| `HonkOpenTypes` | <global> | 0 |
 | `HordeArrivedDelegate` | <global> | 0 |
 | `HordeEvent` | <global> | 0 |
 | `HostMpAllowedAuthorizer` | <global> | 5 |
@@ -849,6 +871,7 @@ Full unreached game-type list (2256):
 | `IDataItem` | <global> | 0 |
 | `IDataItemFormatter` | <global> | 0 |
 | `Identifier` | <global> | 0 |
+| `IDesignatedArea` | <global> | 0 |
 | `IdPalette` | <global> | 4 |
 | `IDynamicDecorator` | <global> | 0 |
 | `IEncryptionModule` | <global> | 0 |
@@ -1583,6 +1606,7 @@ Full unreached game-type list (2256):
 | `TraderActionTypes` | <global> | 0 |
 | `TraderAreaStates` | <global> | 0 |
 | `TraderDaysPresets` | <global> | 0 |
+| `TraderDoorController` | <global> | 9 |
 | `TraderHourPresets` | <global> | 0 |
 | `TraderWindowState` | <global> | 0 |
 | `TransformDebug` | <global> | 8 |
@@ -2007,6 +2031,7 @@ Full unreached game-type list (2256):
 | `ItemLocations` | GameEvent.SequenceActions | 0 |
 | `ModifyTypes` | GameEvent.SequenceActions | 0 |
 | `OffsetTypes` | GameEvent.SequenceActions | 0 |
+| `OpenDoorStates` | GameEvent.SequenceActions | 0 |
 | `OperationTypes` | GameEvent.SequenceActions | 0 |
 | `OperationTypes` | GameEvent.SequenceActions | 0 |
 | `RecipientTypes` | GameEvent.SequenceActions | 0 |
@@ -2253,6 +2278,7 @@ Full unreached game-type list (2256):
 | `SandboxOptions` | SandboxOptions | 0 |
 | `SdfTagType` | SDF | 0 |
 | `EventTypes` | Services.Analytics | 1 |
+| `EntitlementData` | Services.Analytics.Events | 0 |
 | `Rotate` | ShinyScreenSpaceRaytracedReflections | 2 |
 | `TriggerEffectDualsense` | TriggerEffects | 14 |
 | `BaseTwitchVoteOperationRequirement` | Twitch | 7 |
@@ -2396,7 +2422,7 @@ Full unreached game-type list (2256):
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2891 | 2891 | 0 | 100% |
+| `<global>` | 2898 | 2897 | 1 | 99% |
 | `GameEvent` | 180 | 180 | 0 | 100% |
 | `Platform` | 147 | 147 | 0 | 100% |
 | `Twitch` | 110 | 110 | 0 | 100% |
@@ -2406,12 +2432,12 @@ Full unreached game-type list (2256):
 | `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100% |
 | `UAI` | 24 | 24 | 0 | 100% |
 | `PrefabVolumes` | 16 | 16 | 0 | 100% |
+| `Services` | 13 | 9 | 4 | 69% |
 | `GamePath` | 13 | 13 | 0 | 100% |
 | `SandboxOptions` | 13 | 13 | 0 | 100% |
 | `Audio` | 12 | 12 | 0 | 100% |
 | `SDF` | 11 | 11 | 0 | 100% |
 | `RaycastPathing` | 10 | 10 | 0 | 100% |
-| `Services` | 9 | 9 | 0 | 100% |
 | `XMLData` | 7 | 7 | 0 | 100% |
 | `Quests` | 7 | 7 | 0 | 100% |
 | `MapRendering` | 7 | 7 | 0 | 100% |
@@ -2441,6 +2467,11 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
+| `ChallengeClaimedEventData` | Services.Analytics.Events | 24 |
+| `ChallengeCompletedEventData` | Services.Analytics.Events | 22 |
+| `CosmeticUsageEventData` | Services.Analytics.Events | 14 |
+| `DlcOwnershipEventData` | Services.Analytics.Events | 6 |
+| `SpawnRequest` | <global> | 1 |
 
 ## Catalogued-only reached types (narrate these to reach 100% narration)
 

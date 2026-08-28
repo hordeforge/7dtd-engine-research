@@ -1,4 +1,4 @@
-# Block shapes and block triggers (dedicated V3.1.0)
+# Block shapes and block triggers (dedicated V3.2.0)
 
 **Owns:** the `BlockShape` delegate family (the per-block geometry object that
 answers rotation, bounds, movement blocking, and mesh-emission questions for a
@@ -122,7 +122,7 @@ BlockShape::IsMovementBlocked -> GetStepHeight(bv, face) > 0.5f
 `Block.get_IsCollideMovement` (IL=7) is the flag read: `(BlockingType & 2) != 0`
 (bit 1 of the blocking-type mask selects "blocks movement").
 
-**`Block.IsMovementBlocked` dispatch (V3.1.0 b14):** the single-face overload
+**`Block.IsMovementBlocked` dispatch (V3.2.0 b9):** the single-face overload
 (IL=70) resolves multi-block children first (`isMultiBlock && bv.ischild` ->
 `GetParentPos` -> read the parent block; a parent that is itself a child logs
 `IsMovementBlocked {0} at {1} has child parent, {2} at {3}` and returns true,
@@ -172,7 +172,7 @@ origin as the hit point.
 2..5, bit test against `stepSides & 31`) with max / min aggregation and a
 `>= 0` clamp; the 3-arg form derives the mask via
 `BlockFaceFlags.FrontSidesFromPosition(blockPos, entityPos)`. Xref finds no
-caller of either family outside its own overload delegation on V3.1.0 b14 -
+caller of either family outside its own overload delegation on V3.2.0 b9 -
 the vehicle/entity step-height query they appear built for is not wired up
 in the stock binary.
 
@@ -274,7 +274,7 @@ chunk in a `DictionaryList<Vector3i, BlockTrigger>` (`Chunk.GetBlockTriggers`,
 | `TriggeredValues : List<byte>` | channels currently toggled on (latched inputs) |
 | `UseOrForMultipleTriggers` | OR vs AND combination of listened channels |
 
-**Registry accessors (V3.1.0 b14):** `Chunk.AddBlockTrigger(td)` (IL=10)
+**Registry accessors (V3.2.0 b9):** `Chunk.AddBlockTrigger(td)` (IL=10)
 stores into `triggerData` keyed by `LocalChunkPos` and marks `isModified`;
 `GetBlockTriggers()` (IL=3) returns the `DictionaryList`; `GetBlockTrigger(pos)`
 (IL=9) is the `triggerData.dict` `TryGetValue` (null when absent).
@@ -323,7 +323,7 @@ flowchart TD
   BC --> UB["UpdateBlocks -> World.SetBlocksRPC<br/>(committed + replicated)"]
 ```
 
-**`TriggerManager.TriggerBlocks` dispatch (V3.1.0 b14):** the block-trigger
+**`TriggerManager.TriggerBlocks` dispatch (V3.2.0 b9):** the block-trigger
 overload (IL=17) early-outs on `!trigger.HasAnyTriggers()`, then routes
 `PrefabDataDict[instance].Trigger(player, trigger)`. The `TriggerVolume`
 overload (IL=27) gates the same way, warns
@@ -337,7 +337,7 @@ resolves `chunk.GetBlockTrigger(world.toBlock(pos))` and, when a trigger
 exists and the player is valid, calls
 `world.triggerManager.TriggerBlocks(player, player.prefab, trigger)`.
 
-**`PrefabTriggerData.Trigger` fan-out (V3.1.0 b14):** all three overloads -
+**`PrefabTriggerData.Trigger` fan-out (V3.2.0 b9):** all three overloads -
 `(player, Byte index)` (IL=63), `(player, BlockTrigger source)` (IL=85), and
 `(player, TriggerVolume volume)` (IL=90) - share one shape: for each fired
 channel (the byte, the source's `TriggersIndices`, or the volume's), every
@@ -383,7 +383,7 @@ combination: in OR mode (`UseOrForMultipleTriggers`) it is true when **any**
 `TriggeredByIndices` channel sits in `TriggeredValues`; in AND mode it is true
 only when **all** of them do.
 
-**Per-block `OnTriggered` behaviors (V3.1.0 b14, all call the empty base
+**Per-block `OnTriggered` behaviors (V3.2.0 b9, all call the empty base
 IL=1 first):** `BlockActivateSwitch` (IL=24) toggles `meta` (`(meta & ~2) |
 1`); `BlockGameEvent` (IL=60) requires the game event's target type to be
 **Block** (else error log), runs
@@ -510,7 +510,7 @@ friends), `XUiC_TriggerProperties` (the in-game prefab editor UI that edits
   Voxel.raycastNew / GetNextBlockHit; Block.intersectRayWithBlock (IL=45)
   GetCollisionAABB + Bounds.IntersectRay. Dead step-height helpers: MaxStepHeight
   / MinStepHeight (IL=46 + IL=9) aggregate GetStepHeight over
-  FrontSidesFromPosition faces, no external callers on b14 (Xref).
+  FrontSidesFromPosition faces, no external callers on b9 (Xref).
 - **2026-08-07:** BlockHazard state: IsHazardOn (IL=29) multiblock recursion +
   meta & 2; SetHazardState (IL=15) same bit-1 pattern - trigger/light/hazard
   share meta bit 1.

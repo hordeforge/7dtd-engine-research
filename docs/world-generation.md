@@ -1,4 +1,4 @@
-# World generation / RWG (dedicated V3.1.0)
+# World generation / RWG (dedicated V3.2.0)
 
 **Owns:** the `WorldGenerationEngineFinal.*` surface: the random world generation
 (RWG) pipeline a dedicated server runs at world creation. Generator driver
@@ -48,7 +48,7 @@ and the output folder is
 **Live-verified 2026-08-12 (RWG 4096, seed `rwtprobe`):** the pipeline produced
 `GeneratedWorlds/Bogexe Valley/` (county-name generator) containing
 `biomes.png`, `dtm.raw`, `dtm_processed.raw`, `main.ttw` (a pristine **264 B**
-header: `V 3.1.0 (b14)` VI (1,3,10,14), waterLevel 62.88, providerId 4, seed 0 -
+header: `V 3.2.0 (b9)` VI (1,3,10,14), waterLevel 62.88, providerId 4, seed 0 -
 byte-exact via `save_roundtrip_check.py --shipped`), `map_info.xml`,
 `prefabs.xml`, `radiation.png`, and the splash PNGs. `createWorld() done` ~53 s
 after boot (4096; the world then generates chunks on demand).
@@ -222,7 +222,7 @@ world coords to a biome through `m_BiomeMap : GridCompressedData<Byte>`:
 the grid, treats value **255** as "no biome", and maps the byte through
 `WorldBiomes.GetBiome(byte)`. The 3-arg overload (IL=8) just sets the intensity
 (the height-based sibling `WorldBiomeProviderFromHeight` is not constructed
-by any live provider on b14: it is referenced only from its own `_InitData`
+by any live provider on b9: it is referenced only from its own `_InitData`
 iterator, so treat it as unused).
 ref to **1** and delegates. `GetHumidityAt`/`GetTemperatureAt` (IL=2 each) are
 **stubs returning 0** in this build; per-cell climate comes from
@@ -608,7 +608,7 @@ three are client render/UI and out of scope here.
 - **`Prefab.Cells<T>`** (nested `CellsAtZ` / `CellsAtX` / `Cell`): a sparse
   3-level cell grid (`CellsAtZ[] -> CellsAtX[] -> Cell<T>[]`, coordinates
   `>> 2` = cell size 4, `Cell.empty` sentinel for unallocated cells), with a
-  `Cell.Save` / `Cell.Load` wire pair. **Dead in b14**: `tools/bin/RefScan.exe`
+  `Cell.Save` / `Cell.Load` wire pair. **Dead in b9**: `tools/bin/RefScan.exe`
   reports **0 external references**; live RWG prefab placement happens entirely
   in `WorldGenerationEngineFinal` (this doc §2-§5), so nothing touches this grid.
 
@@ -617,7 +617,7 @@ three are client render/UI and out of scope here.
 ## Prefab rotation, id mapping and YOffset placement (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus) plus the shipped Navezgane
+numbers are from that dump; the tracked `il/` sets are the V3.2.0 corpus) plus the shipped Navezgane
 world data.
 
 ### RotateY does not permute the cell array
@@ -713,7 +713,7 @@ Loot=5, Trader=6, VendingMachine=7, Forge=8, Campfire=9, SecureLoot=0x0A,
 SecureDoor=0x0B, Workstation=0x0C, Sign=0x0D, GoreBlock=0x0E, Powered=0x0F,
 PowerSource=0x10, PowerRangeTrap=0x11, Light=0x12, Trigger=0x13, Sleeper=0x14,
 PowerMeleeTrap=0x15, SecureLootSigned=0x16, Composite=0x19, Taskboard=0x1B`. The
-`.tts` tile-entity list uses these same values: real V3.1.0 prefabs contain only
+`.tts` tile-entity list uses these same values: real V3.2.0 prefabs contain only
 types 18 (Light), 20 (Sleeper) and 25 (Composite).
 
 `Block::IsSleeperBlock` is set true by `BlockSleeper::.ctor` (133430-133460), i.e.

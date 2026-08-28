@@ -1,4 +1,4 @@
-# Out-of-scope reached surface (V3.1.0)
+# Out-of-scope reached surface (V3.2.0)
 
 **Owns:** the reached types a headless server touches that are **not** dedicated
 gameplay/sim/wire, classified by category with why each is out of scope. With
@@ -186,7 +186,7 @@ They are not sim/wire surface.
 `AIDirectorSmellMarker`, `AIDirectorZombieState`, `AtomicCounter`, `AtomicSafeHandleScope`, `BackedArrayHandleModeExtensions`, `BackedArraySingleView`, `CC`, `CallbackMetric`, `CharSplitEnumerator`, `ChunkCache`, `ChunkVertexLayer`, `ConstantValueMetric`, `DebugWrapper`, `DebugWrapperException`, `DummyHandle`, `DummyScope`, `EnumerableDebugWrapper`, `FileBackedArrayHandle`, `FileBackedArrayMemoryManager`, `GlobalCultureInfo`, `LiteNetLibAuthWrapperClient`, `LiteNetLibAuthWrapperServer`, `MemoryBackedArray`, `MemoryBackedArrayHandle`, `MemoryBackedArrayUnsafeHandle`, `MemoryBackedArrayView`, `PinnedBufferRef`, `Pool`, `PooledMemoryStream`, `ProfilerPlatformCorrections`, `ProfilerRecorderMetric`, `ProfilingMetricCapture`, `ReadWriteScope`, `ScopedChunkReadAccess`, `SharedChunkObserver`, `StockFileHashes`, `TList`, `TQueue`, `ThreadSafeSemantics`, `TileArea`, `TileAreaUtils`, `TileFile`, `WorldBiomeProviderFromHeight`, `XmlLoadException`
 
 
-### V3.1.0 client UI reached by call-graph (not dedicated work)
+### V3.2.0 client UI reached by call-graph (not dedicated work)
 
 These appear in the Coverage reachability base via `callvirt` over-approx but
 only implement client XUi; headless dedicated does not present them:

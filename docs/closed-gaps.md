@@ -1,4 +1,4 @@
-# Gap-closing synthesis (V3.1.0)
+# Gap-closing synthesis (V3.2.0)
 
 **Owns:** closed IL-solvable gaps (timer 20 Hz, AIDirector install, ASP→A*, net bands).
 **Loop:** [`loop.md`](loop.md). **Auto:** [`inventories/gaps.md`](inventories/gaps.md).

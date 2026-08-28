@@ -1,4 +1,4 @@
-# Progression: levels, skills, perks (dedicated V3.1.0)
+# Progression: levels, skills, perks (dedicated V3.2.0)
 
 **Owns:** the server-authoritative player progression: `Progression` (per-player
 level + XP + skill points + owned skills/perks), `ProgressionValue` (a skill /
@@ -136,7 +136,7 @@ backwards, sets the class `Enabled` from `HandleCheckEnabled()` and derives
 ## Progression blob layout, XP curve and the V3.1.0 death penalty (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus).
+numbers are from that dump; the tracked `il/` sets are the V3.2.0 corpus).
 
 ### PlayerDataFile.progressionData blob
 
@@ -177,9 +177,9 @@ cost at 186791 from level 59 on. `ProgressionFromXml::parseLevelNode`
 (1088481) hardcoded fallbacks when the attribute is absent:
 `BaseExpToLevel = 500` (0x1f4), `ClampExpCostAtLevel = 300` (0x12c).
 
-### Death penalty in V3.1.0
+### Death penalty in V3.2.0
 
-`Progression::OnDeath` (1084035) is an **empty method** in V3.1.0 (code size 1,
+`Progression::OnDeath` (1084035) is an **empty method** in V3.2.0 (code size 1,
 just `ret`). The death penalty does not run through it.
 
 The live path is `EntityPlayer::HandleClientDeath` (507993): it reads
@@ -293,7 +293,7 @@ Perks live in their own
 `<perks min_level="0" max_level="5" base_skill_point_cost="1"
 cost_multiplier_per_level="1" max_level_ratio_to_parent="5">` block (line 875), and
 each `<perk>` carries `parent="skill*"` naming one of the 16 `<skill>` rows (lines
-193-214), which in turn carry `parent="att*"`. The V3.1.0 file has 8 attributes
+193-214), which in turn carry `parent="att*"`. The V3.2.0 file has 8 attributes
 (3 of them hidden and zero-cost: `attGeneralPerks`, `attBooks`, `attCrafting`), 16
 skills, 23 crafting_skills with max_level 20-100 driven by magazines, 57 live perks
 (2 more commented out), 99 `unlock_entry` rows, 152 book rows and 19 book_groups.
@@ -378,7 +378,7 @@ player's own `get_gameStage`.
 - **2026-08-07:** AddLevelExp IL=161 apply order (bonus EffectManager, recursive).
 - **2026-08-06:** Progression::Write blob layout (the PlayerDataFile
   progressionData stream) and ProgressionValue::Write; getExpForLevel exponent is
-  Level+1 with 500/300 XML fallbacks; Progression::OnDeath is empty in V3.1.0 and
+  Level+1 with 500/300 XML fallbacks; Progression::OnDeath is empty in V3.2.0 and
   the penalty runs through EntityPlayer::HandleClientDeath into the
   game_on_death_* gameevent sequences; AddXPDeficit formula and the two
   PassiveEffects ids; the death backpack is a client-side
@@ -386,6 +386,6 @@ player's own `get_gameStage`.
   NetPackagePlayerStats and its ToEntity writeback; EntityAddExpServer applies
   only to isEntityRemote; EntityAddExpClient / EntitySetSkillLevelClient bodies;
   NetPackageAddRemoveBuff server relay branch; EntityStats::SendStatChangePacket
-  dedicated-server path; EnumStat literals; progression.xml V3.1.0 census.
+  dedicated-server path; EnumStat literals; progression.xml V3.2.0 census.
 
 - **2026-07-23:** Initial progression reversal (XP/level-up, perk purchase, calculated level, respec) with state machines.

@@ -1,4 +1,4 @@
-# MinEvent triggered-effect framework (dedicated V3.1.0)
+# MinEvent triggered-effect framework (dedicated V3.2.0)
 
 **Owns:** the `MinEvent*` surface, the data-driven trigger/effect engine that lets
 items, entities, buffs, progression, and challenges react to named in-game
@@ -16,7 +16,7 @@ data, not IL); the `EntityBuffs` runtime that one action family drives
 **Evidence:** `MinEffectController`, `MinEffectGroup`, `MinEventActionBase`,
 `MinEventActionTargetedBase`, `MinEventActionBuffModifierBase`, `MinEventParams`
 IL plus the `MinEventTypes` / `TargetTypes` / `SourceParentType` enums and the
-`MinEventAction*` leaves (transitive subclasses; see catalog) in the V3.1.0 b14 type surface (73 matches). Dump locally with
+`MinEventAction*` leaves (transitive subclasses; see catalog) in the V3.2.0 b9 type surface (73 matches). Dump locally with
 `tools/src/DumpMethod` (git-ignored). **Hub:** [`INDEX.md`](INDEX.md).
 **Method:** [`re-methodology.md`](re-methodology.md).
 
@@ -387,7 +387,7 @@ target - the one shared predicate shape (the XOR appears as
 - **`RequirementItemTier`** (IL=36): a plain `RequirementBase` leaf (no
   `target` attribute): needs a non-empty `params.ItemValue` and compares
   `ItemValue.Quality` with `compareValues` (invert-aware). **0 external
-  references on b14** (never instantiated; the live item-quality gates are
+  references on b9** (never instantiated; the live item-quality gates are
   the `RequirementItemModTier` and `ItemHasTags` leaves above).
 - **`BlockStandingOn`** (IL=37): `target.blockValueStandingOn.Block`
   matches `blockTags` with `HasAllFastTags` (`has_all_tags`) or

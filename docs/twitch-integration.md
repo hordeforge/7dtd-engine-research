@@ -1,4 +1,4 @@
-# Twitch integration (dedicated V3.1.0)
+# Twitch integration (dedicated V3.2.0)
 
 **Owns:** the server-relevant part of Twitch integration: how viewer-triggered
 `TwitchAction`s and votes execute on the server (through the game-event system) and

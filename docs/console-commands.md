@@ -1,4 +1,4 @@
-# Console and telnet command system (dedicated V3.1.0)
+# Console and telnet command system (dedicated V3.2.0)
 
 **Owns:** the server admin command surface: `SdtdConsole` (command registry +
 dispatch), `ConsoleCmdAbstract` (the 187-command contract), the connection sources
@@ -250,7 +250,7 @@ Every command subclasses `ConsoleCmdAbstract` and provides:
 | `GetDescription()` / `GetHelp()` | `help` output |
 | `IsExecuteOnClient` / `AllowedInMainMenu` / `AllowedDeviceTypes` | run-context gates |
 
-There are **188** concrete commands in the V3.1.0 catalog (e.g. `admin`, `whitelist`,
+There are **188** concrete commands in the V3.2.0 catalog (e.g. `admin`, `whitelist`,
 `help`, `cvar`, `logenv`, `prefab`, `loot`, `visitmap`, `profiler`). This count includes
 the web-dashboard commands (`webtokens`, `webpermission`, `invalidatecaches`,
 `createwebuser`, `openiddebug`), which ship in the **base `Assembly-CSharp`**, not as a

@@ -1,4 +1,4 @@
-# Crafting and recipes (dedicated V3.1.0)
+# Crafting and recipes (dedicated V3.2.0)
 
 **Owns:** the recipe model: `Recipe` (ingredients, output, crafting tier, unlock),
 `CanCraft` validation, the `RecipeQueueItem` craft queue, and recipe unlock
@@ -57,7 +57,7 @@ block for recipe-level effects. Child elements are `<ingredient name count>`
 with `Recipe.Init()` then `CraftingManager.AddRecipe(recipe)`; the whole load
 finishes with `CraftingManager.PostInit()`. The editor export twin
 `RecipesFromXml.SaveRecipes` (IL=123) writes `CraftingManager.GetAllRecipes()`
-back to `<recipes>` XML and has no production callers on b14.
+back to `<recipes>` XML and has no production callers on b9.
 
 **`Recipe.Init` (IL=79)** derives the defaults left at -1 from the
 ingredients: it sums each ingredient's `ItemClass.CraftComponentExp` and
@@ -141,7 +141,7 @@ diminishing XP. It also bumps `totalItemsCrafted`, fires
 `QuestEventManager.CraftedItem(stack)`, and notifies the recipe UI
 (`XUiC_RecipeStack.HandleCraftXPGained`).
 
-**`Progression` leaves (V3.1.0 b14):** `AddLevelExp(exp, cvarXPName, xpType,
+**`Progression` leaves (V3.2.0 b9):** `AddLevelExp(exp, cvarXPName, xpType,
 useBonus, notifyUI, instigatorID, itemValue)` (IL=161) is the XP grant: a
 non-player parent returns the amount untouched; the instigator is resolved into
 `MinEventContext`, `amount = exp * XPGain` then
@@ -189,7 +189,7 @@ attributes default to 20 and everything else to `MaxLevel`. `AddLevelRequirement
 fresh `LevelRequirement(level)`; `PostInit` (IL=14) sorts the requirements by
 level. `FireEvent` / `HasEvents` (IL=9 each) forward to the class `Effects`.
 
-**Validation predicates (V3.1.0 b14).** `Recipe.CanCraft(stacks, ea,
+**Validation predicates (V3.2.0 b9).** `Recipe.CanCraft(stacks, ea,
 craftingTier)` (IL=128) starts by caching `GetCraftingTier(player)` into the
 shared recipe's `craftingTier` field, clamped down when the passed
 `_craftingTier >= 0` is lower (a caller may force a lower tier). Each

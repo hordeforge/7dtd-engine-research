@@ -1,6 +1,6 @@
-# Dedicated wire protocol (V3.1.0 pin; V3.0.1-era golden still cited)
+# Dedicated wire protocol (V3.2.0 pin; V3.1.0/V3.0.1-era goldens still cited)
 
-**Current game pin:** V **3.1.0 (b14)**. Framing/join and most package bodies are stable from the V3.0.1 corpus; the TE outer wire and PackageIds VersionInformation (minor=10 build=14) are in [protocol-packages.md](protocol-packages.md). Loadgen dual fixtures cover both heads.
+**Current game pin:** V **3.2.0 (b9)**. Framing/join and most package bodies are stable from the V3.0.1 corpus; the TE outer wire and PackageIds VersionInformation (minor=20 build=9) are in [protocol-packages.md](protocol-packages.md). Loadgen dual fixtures cover both heads.
 
 
 **Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, `NetPackageRequestToSpawnPlayer` / RequestToSpawnPlayer/PlayerId/PlayerSpawnedInWorld, golden package body layouts.  
@@ -10,7 +10,7 @@
 **Full package bodies + census (channels, compress, pre-auth, encryption handshake):** [`protocol-packages.md`](protocol-packages.md).  
 **Clone use:** [ZIG_CLONE.md](../../zdtd-server/docs/ZIG_CLONE.md) · implementation [`../../zdtd-server/`](../../zdtd-server).  
 **Replication policy:** [network.md](network.md).  
-**Evidence:** `7dtd-loadgen` `PackageCodec.cs` / `JoinStateMachine.cs` / `GameJoinClient.cs` (live joins); `il/dedi-complete-v3.1.0/` NetPackage census; ConnectionManager dumps.
+**Evidence:** `7dtd-loadgen` `PackageCodec.cs` / `JoinStateMachine.cs` / `GameJoinClient.cs` (live joins); `il/dedi-complete-v3.2.0/` NetPackage census; ConnectionManager dumps.
 
 **Endianness:** little-endian (BinaryWriter / .NET). Strings: length-prefixed UTF-8 as .NET `BinaryWriter.Write(string)`.
 
@@ -98,7 +98,9 @@ Constants:
 ### Live capture head (PackageIds, channel 0)
 
 Hex prefix validated in loadgen golden (V3.0.1-era capture; V3.1.0 re-captured
-in-session 2026-08-11 - only the version triple differs):
+in-session 2026-08-11 - only the version triple differs). The 3.2.0 b9
+PackageIds head was not re-captured live this cycle; by the same packing the
+version triple is minor=20 (0x14) build=9 (0x09), everything else identical:
 
 ```text
 V3.1.0 live:  00 BC 12 00 00  00 00  01 00  B8 12 00 00  00 00  01 03 00 00 00  0A 00 00 00  0E 00 00 00  BD 00 00 00  14 ...
@@ -109,7 +111,7 @@ version (V3.0.1): release=1 major=3 minor=1 build=4
 map count: 0xBD = 189   first name: len 0x14 "NetPackagePackageIds"
 ```
 
-Display version packing: `VersionLongString` → **`V 3.1.0`** for Minor=10 Build=14 (see loadgen; Constants.cVersion*).
+Display version packing: `VersionLongString` → **`V 3.2.0`** for Minor=20 Build=9 (see loadgen; Constants.cVersion*).
 
 ---
 
@@ -149,7 +151,7 @@ helpers (`NetPackageDirection` [enum], `Logger`, `Metrics`, ...), not wire packa
 
 Largest maxIL (complexity signal, not wire size): Metrics, SharedQuest, QuestEvent, QuestGotoPoint, WireToolActions, PartyData, RangeCheckDamageEntity, GameEventRequest, TurretSpawn, Audio, DynamicMesh, …
 
-Full name list: `il/dedi-complete-v3.1.0/DEDI_COMPLETE_auto.md` §3.
+Full name list: `il/dedi-complete-v3.2.0/DEDI_COMPLETE_auto.md` §3.
 
 ---
 
@@ -443,42 +445,63 @@ lookX,Y,Z:i32   // floats cast to int on write
 
 ### 6.5 NetPackageDamageEntity (write order)
 
-Used for suicide / drown / external kill bots. Order from IL:
+Used for suicide / drown / external kill bots. Order from IL (V3.2.0 b9,
+`write` IL=144; the V3.1.0 layout wrote ten separate booleans and a
+`bIsDamageTransfer` field that no longer exists):
 
 ```text
 entityId:i32
+flags:u32          // packed bitfield, see below (V3.2.0 new; replaces 10 bools)
 damageSource:u8      // 0 External, 1 Internal
 damageType:u8        // 3 Bashing, 16 Suffocation, 26 Suicide, …
 strength:u16
 hitDirection:u8
 hitBodyPart:i16
 movementState:u8
-bPainHit:bool
-bFatal:bool
-bCritical:bool
 attackerEntityId:i32
 dirV: 3×f32
 blockPos: 3×i32
 hitTransformName:string
 hitTransformPosition: 3×f32
 uvHit: 2×f32
+KillXPScale:f32    // V3.2.0 new (DamageSource.KillXPScale)
 damageMultiplier:f32
 random:f32
-bIgnoreConsecutiveDamages:bool
-bIsDamageTransfer:bool
-bDismember:bool
-bCrippleLegs:bool
-bTurnIntoCrawler:bool
 bonusDamageType:u8
 StunType:u8
 StunDuration:f32
-bFromBuff:bool
-bIgnorePartyShare:bool
 ArmorSlot:u8
 ArmorSlotGroup:u8
 ArmorDamage:u16
 attackingItem present:bool (+ item if true)
 ```
+
+`flags` bit assignments (from `Setup` IL, inline `or` constants; also exposed
+as `cFlags*` static fields used by `read`):
+
+| Bit | Mask | Meaning (source field) |
+|---|---|---|
+| 0 | 0x001 | canHitSpecialBodyParts (`DamageSource.canHitSpecialBodyParts`) |
+| 1 | 0x002 | CrippleLegs (`DamageResponse.CrippleLegs`) |
+| 2 | 0x004 | Critical (`DamageResponse.Critical`) |
+| 3 | 0x008 | Dismember (`DamageResponse.Dismember`) |
+| 4 | 0x010 | Fatal (`DamageResponse.Fatal`) |
+| 5 | 0x020 | FromBuff (`DamageSource.BuffClass != null`) |
+| 6 | 0x040 | IgnoreConsecutiveDamages (`DamageSource.IsIgnoreConsecutiveDamages()`) |
+| 7 | 0x080 | IgnorePartyShare (`DamageSource.bIgnorePartyShare`) |
+| 8 | 0x100 | PainHit (`DamageResponse.PainHit`) |
+| 9 | 0x200 | TurnIntoCrawler (`DamageResponse.TurnIntoCrawler`) |
+| 10 | 0x400 | TrapKillXP (`DamageSource.bTrapKillXP`, V3.2.0 new) |
+
+V3.1.0 wire compat: the old layout interleaved `bFatal`/`bCritical` after
+`movementState` and wrote `bIgnoreConsecutiveDamages`, `bIsDamageTransfer`,
+`bDismember`, `bCrippleLegs`, `bTurnIntoCrawler`, `bPainHit`, `bFromBuff`,
+`bIgnorePartyShare` as individual bools near the tail, with `attackerEntityId`
+after `bCritical` and `damageMultiplier` before `random`. The 3.2.0 build packs
+all but `bIsDamageTransfer` into `flags`, moves `attackerEntityId` up, and adds
+`KillXPScale` (f32) before `damageMultiplier`. This is a **wire-breaking
+change**: a V3.1.0 peer cannot parse a V3.2.0 `DamageEntity` body.
+
 
 ### 6.6 NetPackageExplosionInitiate (dynamite)
 
@@ -608,6 +631,7 @@ Status refreshed 2026-08-10 (rows re-verified against the current
 
 ## Changelog
 
+- **2026-08-28:** V3.2.0 pin: version display V 3.2.0; §6.5 NetPackageDamageEntity rewritten (packed flags table + KillXPScale; V3.1.0 bool layout retained as compat note).
 - **2026-08-11:** Join IL re-verified: RequestToEnterGame IL=9 + <RequestToEnterGame>d__195.MoveNext IL=248, ChunkClusterInfo.ProcessPackage IL=13, NetPackagePlayerLoginAnswer.write IL=46, NetPackagePlayerId.write IL=21, NetPackagePlayerSpawnedInWorld.write IL=16, PlayerSpawnedInWorld IL=127 (exact).
 - **2026-08-10:** RE-backlog table refreshed: TileEntity/vehicles + Quest/Party
   rows closed (were "Open", covered by §6.12/§6.21/§6.17-6.18).

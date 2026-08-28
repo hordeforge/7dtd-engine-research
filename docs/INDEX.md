@@ -2,7 +2,7 @@
 
 **Owns:** hub for **generic** dedicated engine RE narratives + dump index.  
 **Not:** RealEarth product status/lessons (`7dtd-realearth`, private companion project, not published).  
-**Game:** V3.1.0 (b14) dedicated `Assembly-CSharp.dll`.  
+**Game:** V3.2.0 (b9) dedicated `Assembly-CSharp.dll`.  
 **Policy:** research only. Do not redistribute game IL or managed DLLs.  
 **Coverage bar:** dedicated-relevant **managed** surfaces. Open leftovers: [`residuals.md`](residuals.md).
 
@@ -25,20 +25,45 @@ are deleted in the same change, so a citation can never quietly refer to an old
 build. Regenerate before deleting: an assembly that is no longer installed
 cannot be dumped again.
 
-**Current pin:** V **3.1.0 b14**. Every tracked set in [`../il/`](../il/) is
-V3.1.0; the V3.0.1 sets were removed on 2026-08-06.
+**Current pin:** V **3.2.0 b9**. Every tracked set in [`../il/`](../il/) is
+V3.2.0; the V3.1.0 sets were retained for the 3.1.0→3.2.0 diff and the V3.0.1
+sets were removed on 2026-08-06.
 
 | Citation form | Means |
 |---|---|
-| `il/<set>-v3.1.0/...` | the tracked V3.1.0 dump sets |
-| `asm.il:NNNN` | a V3.1.0 single-file dump kept outside the repo, identified by MD5 in [`../il/README.md`](../il/README.md) |
+| `il/<set>-v3.2.0/...` | the tracked V3.2.0 dump sets |
+| `asm.il:NNNN` | a V3.2.0 single-file dump kept outside the repo, identified by MD5 in [`../il/README.md`](../il/README.md) |
 
-Mentions of V3.0.1 in these documents are deliberate history (what changed
-between releases, what a prior corpus measured), not stale pins. Line numbers
-written before 2026-08-06 may still be V3.0.1 numbers, which drift from the
-V3.1.0 dump by roughly 3500 lines in the NetPackage region.
+Mentions of V3.0.1 and V3.1.0 in these documents are deliberate history (what
+changed between releases, what a prior corpus measured), not stale pins. Line
+numbers written before 2026-08-06 may still be V3.0.1 numbers, which drift from
+the V3.2.0 dump by roughly 3500 lines in the NetPackage region.
 
-### V3.1.0 shipped delta map
+### V3.2.0 shipped delta map
+
+The 3.1.0→3.2.0 diff was RE'd from the tracked dumps (3.1.0 sets vs the
+regenerated 3.2.0 sets); the full evidence trail is the standalone
+[`changelog-3.2.0.md`](changelog-3.2.0.md). The per-fact homes in the topic
+docs:
+
+| Topic | Home |
+|---|---|
+| Machine pin (version, TPS, census, TE widths) | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json), [coverage.md](coverage.md), [re-methodology.md](re-methodology.md) §1 |
+| Wire: `NetPackageDamageEntity` packed `UInt32 flags` bitfield + `KillXPScale` (drops 10 bools, drops `bIsDamageTransfer`) | [protocol.md](protocol.md) §6.5, [protocol-packages.md](protocol-packages.md) §6.11 |
+| Wire: `NetPackagePOIAround` removed → `NetPackagePOIMetadataRequest/Response` + `PrefabInstance.POIMetadata` (server pushes POI metadata to clients) | [protocol-packages.md](protocol-packages.md) § POI metadata, [protocol.md](protocol.md) §6 |
+| Wire: `NetPackageConfirmSpawnEntity` (S2C) + `EntityCreationData.requestedBy`/`requestKey` (spawn request correlation) | [protocol-packages.md](protocol-packages.md) § ConfirmSpawnEntity, [spawning.md](spawning.md) |
+| Kill XP rework: `DamageSource.bTrapKillXP`/`KillXPScale`, `EntityAlive.AwardKillXPServer`/`PartyShareKillServer`, `EntityPlayer.AddKillXP` | [combat-damage.md](combat-damage.md), [entity-stats.md](entity-stats.md) |
+| Trader doors: `TEFeatureDoor.HonkOpenType`/`HonkOpenDistance`, `TraderDoorController` (new), `Vehicle.GetHornEventName` | [tile-entities-power.md](tile-entities-power.md), [vehicles-drones-turrets.md](vehicles-drones-turrets.md) |
+| Item combining: `ItemValue.Flags` + `cFlagsWasCombined`, `ItemActionEntryCombine` (new), `XUiC_CombineGrid` rework | [items.md](items.md) § Combining |
+| Decoration suppression: `DecoSuppressArea` (new), `DynamicPrefabDecorator` deco-suppress store, `AllowDecorations` prop, `AllowTopSoilDecorations` removed | [world-generation.md](world-generation.md), [spawning.md](spawning.md) |
+| AI: `EntityFlags.Timid = 32` (new), `EAIRunawayFromEntity` flag-based threat + `dangerDistance` | [entity-ai.md](entity-ai.md) |
+| Misc: `Challenge.CompleteChallenge(..., forceComplete)`, sandbox option display API (`GetDisplayAtIndex(index, languageName)`), analytics sandbox-delta events, `StockFileHashes` all regenerated | [quests-challenges.md](quests-challenges.md), [sandbox-options.md](sandbox-options.md) |
+
+Prior-release feature inventories (official changelogs mapped to RE homes):
+[`changelog-3.1.0.md`](changelog-3.1.0.md) (Henpocalypse) ·
+[`changelog-3.0.0.md`](changelog-3.0.0.md) (Dead Hot Summer).
+
+### V3.1.0 shipped delta map (history)
 
 The standalone `experimental-delta.md` doc was **retired** once Henpocalypse
 shipped as stable V3.1.0 (b14). Facts live in the topic docs (not a separate
@@ -46,7 +71,6 @@ delta file):
 
 | Topic | Home |
 |---|---|
-| Machine pin (version, TPS, census, TE widths) | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json), [coverage.md](coverage.md), [re-methodology.md](re-methodology.md) §1 |
 | NetPackageTileEntity `teBlockId` + i32 length | [protocol-packages.md](protocol-packages.md) §6.12, [tile-entities-power.md](tile-entities-power.md) |
 | Held entities / wild chicken grab | [items.md](items.md) § Held entities, [entity-ai.md](entity-ai.md) |
 | WorldState.SaveLoad IL=926 / CurrentSaveVersion=23 | [save-region.md](save-region.md) §1 (full-file byte-exact round-trip; game-reader round-trip; shipped V4.0-tooled world skew) |
@@ -61,7 +85,7 @@ delta file):
 
 ## Start here
 
-Campaign audit (V3.1.0 evidence + residual map): [`../workspace/outputs/docs-research-audit-20260803.md`](../workspace/outputs/docs-research-audit-20260803.md).
+Campaign audit (V3.2.0 evidence + residual map): [`../workspace/outputs/docs-research-audit-20260803.md`](../workspace/outputs/docs-research-audit-20260803.md).
 
 Live scheduled-event evidence (2026-08-11, stock V3.1.0 dedicated runs):
 [air drop](../workspace/notes/live-airdrop-verification-20260811.md),
@@ -354,12 +378,12 @@ Generic engine dumps plus surfaces dump consumed by RealEarth product docs.
 | Directory | Focus | Used by |
 |---|---|---|
 | gmUpdate / frame-entries / deep / deeper / gaps / loop-complete / opt-scan / dedi-complete | Generic loop RE | research narratives |
-| full-v3.1.0 | **Canonical whole-assembly IL dump** (7432 types; DumpAll, pipe-safe) | the IL-citation sweep, every `docs/*.md` claim |
-| surface-v3.1.0 | FullSurface metadata (surface-types + surface-namespaces; whole-assembly IL totals) | full-surface.md, test_surface_wellformed |
-| netpackages-v3.1.0 | NetPackage body dumps + protocol META | protocol-packages.md, RE_GAP_CLOSURE |
-| stability-v3.1.0 | Stability calculator / falling blocks | stability.md |
-| terrain-v3.1.0 | Stock vs expanded height | research + product |
-| realearth-surfaces-v3.1.0 | Chunk, Origin, PPL, region | product realearth-surfaces.md |
+| full-v3.2.0 | **Canonical whole-assembly IL dump** (7432 types; DumpAll, pipe-safe) | the IL-citation sweep, every `docs/*.md` claim |
+| surface-v3.2.0 | FullSurface metadata (surface-types + surface-namespaces; whole-assembly IL totals) | full-surface.md, test_surface_wellformed |
+| netpackages-v3.2.0 | NetPackage body dumps + protocol META | protocol-packages.md, RE_GAP_CLOSURE |
+| stability-v3.2.0 | Stability calculator / falling blocks | stability.md |
+| terrain-v3.2.0 | Stock vs expanded height | research + product |
+| realearth-surfaces-v3.2.0 | Chunk, Origin, PPL, region | product realearth-surfaces.md |
 
 Policy: [`../il/README.md`](../il/README.md).
 
@@ -384,8 +408,8 @@ catalog: [`../tools/README.md`](../tools/README.md). How to RE:
 cd tools && ./build.sh
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 mono bin/Census.exe "$ASM"
-mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.1.0
-mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.1.0
+mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.2.0
+mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.2.0
 ```
 
 Gates: `make test` (full suite, needs the live DLL), `make test-docs` (DLL-free corpus invariants; runs in CI on every push), `make stock-check` (pins vs live DLL + siblings), `make regen-check` (dump-regeneration check), `make facts` (machine-checked stock pins).  
@@ -440,6 +464,17 @@ Live scale laws: [measured-scaling.md](../../7dtd-server-optimizer/docs/measured
   format). Line numbers in those sections are from the 2026-08-05 dump and drift
   from the tracked `il/` V3.1.0 sets.
 
+- **2026-08-28:** Retarget corpus to **V3.2.0 (b9)**: regenerated all dump
+  sets + committed inventories + `stock_facts.json`/`xml_pins.json` from the
+  live dedicated build; diffed every type against the retained V3.1.0 sets
+  (exact 3.1.0→3.2.0 delta: [`changelog-3.2.0.md`](changelog-3.2.0.md)); wire
+  facts updated for `NetPackageDamageEntity` (packed flags + KillXPScale),
+  POI metadata packages (POIAround removed), `NetPackageConfirmSpawnEntity` +
+  `EntityCreationData.requestedBy/requestKey`, `ItemValue.Flags`; feature docs
+  updated (trader-door honk, combine, kill-XP rework, Timid AI, deco
+  suppression); § V3.2.0 shipped delta map added (V3.1.0 map kept as history).
+  Sibling pins (loadgen `GameVersion`, zdtd `stock_wire`) intentionally NOT
+  bumped here; the siblings pull the new facts from this repo.
 - **2026-08-06:** Corpus hygiene pass after research-docs-corpus audit: inventory titles
   (gmupdate-calls, netpackages) retitled to V3.1.0; vague "delta removed" pointers
   replaced by this § V3.1.0 shipped delta map + topic links; sandbox catalog names

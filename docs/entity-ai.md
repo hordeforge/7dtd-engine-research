@@ -1,10 +1,10 @@
-# Entity, AI, and path (dedicated V3.1.0)
+# Entity, AI, and path (dedicated V3.2.0)
 
 **Owns:** authority entity tick chain, AI/path onion, thresholds (merged deep + deeper synthesis).  
 **Loop context:** [`loop.md`](loop.md), [`loop-gmupdate.md`](loop-gmupdate.md).  
 **Ceiling map:** [`engine-limitations.md`](engine-limitations.md) §4 (AI volume, path ≤8, dual paths).  
 **Auto inventory:** [`inventories/deeper.md`](inventories/deeper.md).  
-**Dumps:** `il/deep-v3.1.0/`, `il/deeper-v3.1.0/`.  
+**Dumps:** `il/deep-v3.2.0/`, `il/deeper-v3.2.0/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 Do not redistribute game IL.
@@ -501,7 +501,7 @@ cone returns false. The ray starts `-0.1` behind the self head
 `cSleeperNoiseWaitTicks` **20**; light `cLightMpyBase` **0.32** /
 `cLightLevelMax` **200**, `cNextSoundPercent` **0.6**.
 
-**Sense defaults (IL):** `EntityAlive` cctor (full-v3.1.0 `EntityAlive.il.txt`)
+**Sense defaults (IL):** `EntityAlive` cctor (full-v3.2.0 `EntityAlive.il.txt`)
 seeds `maxViewAngle` to **180** (`ldc.r4 180; stfld maxViewAngle`) then
 `DynamicProperties.ParseFloat(PropMaxViewAngle, ref maxViewAngle)` lets
 entityclasses.xml `MaxViewAngle` override it (so the default cone is 180 full
@@ -801,7 +801,7 @@ TriggerVolume overload (IL=27) same with prefab required (warn if null).
 `IsSleeperPassive = false` on target (no full wake).
 
 **`PlayerStealth.TickServer` (IL=432) (high level; exact chain re-pinned
-2026-08-26 from the full-v3.1.0 dump):**
+2026-08-26 from the full-v3.2.0 dump):**
 
 1. `speedAverage` lerp toward `sqrt(speedForward²+speedStrafe²)` at 0.2 when
    moving, else decay `*0.5`.
@@ -1204,7 +1204,7 @@ So UAI is a **utility-scored action chooser** on a timer, then a **linear task
 list** inside the chosen action. Path requests still come from individual
 `UAITaskBase` Start/Update via `FindPath`, same ASP queue as EAI.
 
-**Concrete UAI task types in V3.1.0 b14** (only these five subclasses exist):
+**Concrete UAI task types in V3.2.0 b9** (only these five subclasses exist):
 `MoveToTarget`, `Wander`, `AttackTargetEntity`, `AttackTargetBlock`, `FleeFromTarget`.
 
 | Task | Start IL | Update IL | Start behaviour | Update behaviour |
@@ -1333,7 +1333,7 @@ Ordered when entity spawned and not unload-marked:
 
 Falling block **entities** go through same `OnUpdateEntity` chain (`EntityFallingBlock` overrides). `EntityFallingBlock.SetStartVelocity(vel, angularVel)` (IL=7) stores `startVel` / `startAngularVel` (the launch impulse from `World.AddFallingBlock`), and `SetCanvasState(state)` (IL=4) stores `pendingCanvasState` (applied on the render pass). `EntityCar.updateDamageModel` (IL=53) picks the damage model child: `modelIdx = floor((1 - max(0, health/maxHealth)) * (modelCount - 1))`, activating the new child and deactivating the old (`UpdateLightOnAllMaterials.Reset` after the swap).
 
-**Chunk membership (V3.1.0 b14):** `Chunk.AddEntityToChunk(entity)` (IL=116)
+**Chunk membership (V3.2.0 b9):** `Chunk.AddEntityToChunk(entity)` (IL=116)
 sets the volatile `hasEntities` flag, derives the entity's chunk coords from
 `position` and logs `Wrong entity chunk position! {entity} x={x} z={z}/{chunk}`
 when they mismatch this chunk (the add still proceeds), maps the entity to the
@@ -1424,7 +1424,7 @@ keep their collider (setup for the land/crush path).
 
 ### 9.x Demolition (EntityZombieCop) prime-and-explode
 
-`EntityZombieCop.OnUpdateEntity` (IL=190, full-v3.1.0) - the Demolition
+`EntityZombieCop.OnUpdateEntity` (IL=190, full-v3.2.0) - the Demolition
 zombie (`zombieCop` class, `explosionData` from EntityClass):
 
 1. Server-side only (`isEntityRemote` ret), skip while sleeping, `buffShocked`,
@@ -1447,7 +1447,7 @@ zombie (`zombieCop` class, `explosionData` from EntityClass):
    class="Explosion">` block** (not a flat string): `RadiusBlocks`,
    `RadiusEntities`, `BlockDamage`, `EntityDamage` plus a nested
    `<property class="DamageBonus">` of damage_category multipliers.
-   V3.1.0 b14 stock values (ConfigsDump entityclasses.xml, zombieFatCop
+   V3.2.0 b9 stock values (ConfigsDump entityclasses.xml, zombieFatCop
    chain): base ships RadiusBlocks 5 / RadiusEntities 6 / BlockDamage 500 /
    EntityDamage 150 and DamageBonus `earth → 0`; the feral tier overrides
    BlockDamage 650 / EntityDamage 200, radiated 750 / 250, infernal
@@ -1706,10 +1706,10 @@ Graded optim candidates + APM probe list: [`../../7dtd-server-optimizer/docs/OPT
 ```bash
 cd tools && ./build.sh
 mono bin/legacy/DumpDeep.exe "$DS/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll" \
-  ../il/deep-v3.1.0
+  ../il/deep-v3.2.0
 ```
 
-Also keep [`../il/loop-complete-v3.1.0/`](../il/loop-complete-v3.1.0) for frame-level dump.
+Also keep [`../il/loop-complete-v3.2.0/`](../il/loop-complete-v3.2.0) for frame-level dump.
 
 ---
 
@@ -1824,9 +1824,15 @@ per other zombie `damageBoostPercent += 0.2`. `Attack(false)`; on success
 **`EAIBreakBlock.Update` (IL=21):** countdown `attackDelay`; when 0 call
 `AttackBlock`.
 
-**`EAIRunawayFromEntity.FindEnemy` (IL=166):** for each enemy type in list,
-`GetEntitiesInBounds` around self using see-distance-sized box; prefer seen
-(CanSee / player CanSeeStealth) non-ignored; pick min `GetDistanceSq`.
+**`EAIRunawayFromEntity.FindEnemy` (IL=136 on V3.2.0, was 166):** V3.1.0
+matched a `targetClasses` list (entity-class names parsed from the `class`
+property). V3.2.0 reworked it to **`EntityFlags` matching**: fields
+`flags`/`safeFlags` (e.g. `Timid`), `safeDistance` + new `dangerDistance`,
+`entityList`; the `class` property parsing and `minSneakDistance` are gone.
+`SetData` (IL=34) now reads `safeDistance` + `dangerDistance` floats only.
+`EntityFlags.Timid = 32` was added in V3.2.0 (was absent); the flag-based
+threat filter is what drives the "timid animals have improved threat
+detection" change. Full IL in `il/full-v3.2.0/_global/EAIRunawayFromEntity.il.txt`.
 
 **`EAIRunAway.Update` (IL=105):** if near path end (planar sq &lt; **1.21**)
 re-pick flee; `pathTicks` countdown; when 0 set **60** and `FindPath` at
@@ -1856,7 +1862,7 @@ bounds expand `(maxXZ, 8, maxXZ)` for living entity with
 **`EAIDodge.Update` (IL=27):** first half of action duration look at target head
 if in front.
 
-**`EAIMeleeAttackTarget` (the melee swing task, V3.1.0 b14):** `CanExecute`
+**`EAIMeleeAttackTarget` (the melee swing task, V3.2.0 b9):** `CanExecute`
 (IL=69) gates on: not dancing; cooldown drain (subtract `executeWaitTime` per
 check, false while `cooldown > 0`); `IsAttackValid()`; caches
 `entityTarget = GetAttackTarget()`; rejects null / dead targets; rejects when
@@ -2060,7 +2066,7 @@ Full cycle narrative: [spawning.md](spawning.md) §2 (IL=441). Re-pin numbers:
 
 ### D3.7 Path worker budget (critical)
 
-**Re-pinned V3.1.0 b14** (`DumpMethod` filter `FindPaths>d__8` / `MoveNext`, IL=87).
+**Re-pinned V3.2.0 b9** (`DumpMethod` filter `FindPaths>d__8` / `MoveNext`, IL=87).
 
 `GamePath.ASPPathFinderThread/<FindPaths>d__8.MoveNext`:
 
@@ -2188,7 +2194,7 @@ must expose `TEFeatureDoor` not open; if `TEFeatureLockable` locked skip; else
 `jumpYaw` Atan2 to moveTo; `Jumping=true`; `SetSwimValues(swimStrokeDelayTicks,
 moveTo−pos)`.
 
-**Swim/underwater state (V3.1.0 b14):** `OnHeadUnderwaterStateChanged(
+**Swim/underwater state (V3.2.0 b9):** `OnHeadUnderwaterStateChanged(
 bUnderwater)` (IL=15) runs the base then fires MinEvent **81** (underwater)
 or **80** (surfaced) on the entity - the drowning/breath hooks. `SwimChanged()`
 (IL=12) pushes `isSwimming` into the avatar (`SetSwim`). `SetSwimValues`
@@ -2424,7 +2430,7 @@ pick over `_destroyBlockBehaviors` whose `Difficulty` IntRange contains **1**
 (weighted sum in a static `weightBehaviorTemp` list, then
 `rand.RandomFloat() * totalWeight` walk) and, on a hit, calls
 `ExecuteDestroyBlockBehavior(picked, attackHitInfo)` (the stub above, so the
-pick machinery is live but the executor is a no-op on b14).
+pick machinery is live but the executor is a no-op on b9).
 
 **`Snore` (IL=36)** is the sleeper snore/groan cycle: when not snoring but
 `isGroan` and the `snoreGroanCD` counter has elapsed, it flips `isSnore`,
@@ -2648,7 +2654,7 @@ bomb tracks the client-simulated physics-master position for its fuse.
 `SetRotFromNetwork` / `SetQRotFromNetwork` (IL=7 each) store the network
 rotation / quaternion plus the `interpolateTargetRot` / `interpolateTargetQRot`
 step counts for client interpolation. `GetSoundTravelTime(pos)` (IL=10) is
-`|position - pos| / 343` (speed of sound) with **no callers on b14** (dead
+`|position - pos| / 343` (speed of sound) with **no callers on b9** (dead
 
 **Entity attach/physics accessors (all IL-verified):** `CanAttach(other)`
 (IL=15) is `FindAttachSlot`-driven (false when the slot scan finds a
@@ -2874,7 +2880,7 @@ vector. Each per-axis clip (single-collider `Bounds` variants IL=72-87, list
 stepHeight)` (IL=573).** A second movement-clip implementation that pools per
 block `World.ClipBlock` records (`New(bv, block, _, pos, bounds)` /
 `Init` / `ResetStorage`, static pool) over the entity's expanded bounds.
-`tools/bin/RefScan.exe` reports **0 external call sites** on b14; the live
+`tools/bin/RefScan.exe` reports **0 external call sites** on b9; the live
 resolution path is `aabbEntityCollision` -> `BoundsUtils.ClipBoundsMove`
 above, so treat this World method as unused in this build.
 
@@ -3772,7 +3778,7 @@ Clamp01(yawSeekTime / yawSeekTimeMax))`; when the window elapses it snaps
 (IL=36) computes `Atan2(dx, dz) × 57.29578` (guarding against standing on the
 point) and calls `SeekYaw`.
 
-**Helper leaves (all V3.1.0 b14 IL):**
+**Helper leaves (all V3.2.0 b9 IL):**
 
 - **`ClearTarget` (IL=11):** `SetAttackTarget(null, 0)` + `SetRevengeTarget(null)`
   + `currentTarget = null`.
@@ -3871,7 +3877,7 @@ Measured live (`es animstate` probe, optimizer RESULTS 3s):
 - **Culling correction:** live healthy zombies sit at `cullingMode =
   CullUpdateTransforms` (the earlier "forced AlwaysAnimate" note is not the
   steady state), and the wight class runs `applyRootMotion=false` entirely.
-- **Spawn init (IL, V3.1.0 b14):** `BodyAnimator.initBodyAnimator` stores
+- **Spawn init (IL, V3.2.0 b9):** `BodyAnimator.initBodyAnimator` stores
   `defaultCullingMode = ldc.i4.0` (**Unity `AnimatorCullingMode.AlwaysAnimate`**)
   and grabs the child `Animator` from `BodyParts.BodyObj`. That is the **stored
   default field**, not proof of the live runtime mode. Three call sites write
@@ -3957,7 +3963,7 @@ appends to `ownedEntities`, and on the server broadcasts
 `AddPart`/`AddParticle` (IL=17 each) upsert the named transform into the
 `parts`/`particles` dicts.
 
-## Activation / grab (V3.1.0)
+## Activation / grab (V3.2.0)
 
 `EntityAlive.InitLocalActivationCommands` registers `"grab"` / `"hand"` on the
 base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-entity feature:
@@ -3996,6 +4002,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 ## Changelog
 
+- **2026-08-28:** V3.2.0: EntityFlags.Timid=32 added; EAIRunawayFromEntity reworked to flag-based threat (flags/safeFlags, dangerDistance, entityList; class-list + minSneakDistance removed; FindEnemy IL=136).
 - **2026-08-11:** Vulture/flying tail IL re-verified: FindTarget IL=69, IsCourseTraversable IL=102, StartHome IL=10, AdjustWaypoint IL=46, EntityFlying.MoveEntityHeaded IL=135 / IsAirBorne IL=2, EAISetNearestCorpseAsTarget.CanExecute IL=110, EntityAlive.AddOwnedEntity(OwnedEntityData) IL=35, AddPart/AddParticle IL=17 (exact).
 - **2026-08-11:** Sleeper config IL re-verified: GetAliveCount IL=34, MinScript.Tick IL=261, cctor IL=48, DespawnAndReset IL=6, Write/Read IL=332/350, SpawnPoint.Write/Read IL=25/70, EntityAlive.SetSleeper IL=11, SetSleeperSight IL=23, SetSleeperHearing IL=22 (exact).
 - **2026-08-11:** Config-init IL re-verified: EntityAlive.CopyPropertiesFromEntityClass IL=1128 / Init IL=13 / InitStats IL=9 / switchModelView IL=11 / InitPostCommon IL=97 / PostInit IL=34 (EntityEnemy IL=13), Entity.CopyPropertiesFromEntityClass IL=238 (EntityPlayer IL=3, EntityPlayerLocal IL=21), EntityClass.FromString IL=3 / Init IL=1465 / ParseEntityFlags IL=49, ItemClass.GetItem IL=13, Inventory.SetBareHandItem IL=23, EntityPlayerLocal.SetupStartingItems IL=39, StartStopLivingSound IL=55, ItemStack.FromString IL=38 (exact).
@@ -4089,7 +4096,7 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 - **2026-08-08:** PhysicsMasterGetFinalPosition (IL=10) time-bomb fuse
   position; SetRotFromNetwork/SetQRotFromNetwork interpolation targets;
-  GetSoundTravelTime (IL=10) 343 m/s sound delay, no callers on b14.
+  GetSoundTravelTime (IL=10) 343 m/s sound delay, no callers on b9.
 
 - **2026-08-08:** Entity.ReplicateSpeeds (IL=66): 3-tick throttle, 4e-6
   delta gate, NetPackageEntitySpeeds to server / SendPacketToTrackedPlayers;

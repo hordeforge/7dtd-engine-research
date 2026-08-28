@@ -1,4 +1,4 @@
-# Combat and damage application (dedicated V3.1.0)
+# Combat and damage application (dedicated V3.2.0)
 
 **Owns:** the server-authoritative damage pipeline: `DamageSource` (the damage
 descriptor), `EntityAlive.DamageEntity` (armor mitigation, modifiers, health,
@@ -70,7 +70,7 @@ Sources that build a `DamageSource`: melee/ranged item actions
 
 ### 2.1 `damageEntityLocal` (IL=484) builds `DamageResponse`
 
-Live IL order (V3.1.0 b14):
+Live IL order (V3.2.0 b9):
 
 1. Init `DamageResponse`: Source, Strength, Critical, HitDirection default 5,
    MovementState, Random float, ImpulseScale; body part + ArmorSlot +
@@ -379,12 +379,43 @@ if `_conditions & 2` (magnum path) achievement **14** += 1.
 **`NotifySleeperDeath` (IL=11):** server + `IsSleeper` only →
 `World.NotifySleeperVolumesEntityDied(this)`.
 
-**`ClientKill` (IL=216 high-level):** set `lastHitDirection`; resolve
+**`ClientKill` (IL=205 on V3.2.0, was 216):** set `lastHitDirection`; resolve
 `entityThatKilledMe` from source if missing; if not already dead: `SetDead`;
 `Buffs.OnDeath` (attacking item, is-crushing type **4**, damage tags default
-`crushing`); `Progression.OnDeath`; analytics; `HandleClientDeath`;
-`OnEntityDeath`; enemy killed by player may spawn celebrate FX via passive
-**181** / celebrate flags.
+`crushing`); `Progression.OnDeath`; analytics; **`AwardKillXPServer(Source, killer)`
+then `PartyShareKillServer(Source, killer)`** (both V3.2.0 new, replacing the
+inline XP grant); `HandleClientDeath`; `OnEntityDeath`; enemy killed by player
+may spawn celebrate FX via passive **181** / celebrate flags.
+
+### 3.1a Kill XP server flow (V3.2.0 rework)
+
+`EntityAlive` gained two server methods in V3.2.0. The kill XP grant moved from
+per-source call sites (V3.1.0: `BlockProjectileMoveScript`, `EntityVehicle`,
+`Explosion`, `ItemActionAttack` called `EntityPlayer.AddKillXP` directly on
+every hit) to a single centralized death-path award. In V3.2.0 the only callers
+of `AddKillXP` are `EntityAlive.AwardKillXPServer` and `EntityBuffs` (buff-death
+exception), and the party share is funneled through `PartyShareKillServer` →
+`GameManager.SharedKillServer`:
+
+**`AwardKillXPServer(source, killingEntity)` (IL=62):**
+1. `source == null` or `source.BuffClass != null` → **ret** (buff kills award no XP).
+2. Killer must be a distinct `EntityPlayer` (`isinst EntityPlayer`, `!= self`).
+3. `EntityClass.list` must contain the victim class → else ret.
+4. `scale = source.KillXPScale` (V3.2.0 new field on `DamageSource`).
+5. If `source.bTrapKillXP` (V3.2.0 new): `scale *= EffectManager.GetValue(PassiveEffects.ElectricalTrapXP = 169, killer.holdingItem, ...)` — the killer's held item's electrical-trap XP passive scales the trap kill.
+6. `scale <= 0` → ret; else `killer.AddKillXP(this, source.AttackingItem, scale)`.
+   `EntityPlayer.AddKillXP` (IL=89, was 99) is the XP application entry.
+
+**`PartyShareKillServer(source, killingEntity)` (IL=47):**
+1. Killer must be a distinct `EntityPlayer`; victim must have a `DamageSource`.
+2. `source.bIgnorePartyShare` or `source.bTrapKillXP` → **ret** (trap kills do not share XP).
+3. `(int)source.KillXPScale != 1` → **ret** (only scale 1.0 shares).
+4. If `source.BuffClass != null` **and** `Buffs.GetCustomVar("ETrapHit") == 1` → **ret** (buff-tag trap hits already credited elsewhere).
+5. `GameManager.SharedKillServer(victimId, killerId, 1.0)` — the party XP share.
+
+Both ride the new `NetPackageDamageEntity` wire fields `bTrapKillXP` (flags bit
+10) and `KillXPScale` (f32), so the client sends the trap/XPScale metadata with
+each damage event ([protocol.md](protocol.md) §6.5).
 
 **`OnDeathUpdate` (IL=76):** if `deathUpdateTime < timeStayAfterDeath`
 increment by 1. If `DeadBodyHitPoints > 0` and `DeathHealth <= -DeadBodyHitPoints`,
@@ -475,7 +506,7 @@ Leaf types on the edges of the damage flow above:
 - **`EntityPlayer.CanHeal` (IL=12):** the heal-side gate
   `Health > 0 && Health < GetMaxHealth()`: the entity must be alive and not
   already at full health. (Healing itself runs through `AddHealth` in §2.1.)
-- **The stat adders (V3.1.0 b14):** `EntityAlive.AddHealth(v)` (IL=12) is a
+- **The stat adders (V3.2.0 b9):** `EntityAlive.AddHealth(v)` (IL=12) is a
   **dead gate** - `Health <= 0` returns without touching anything - then
   `set_Health(Health + v)` (negative values damage through the same path).
   `AddStamina(v)` (IL=17) needs `entityStats.Stamina != null` plus the same
@@ -536,6 +567,7 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-08-28:** V3.2.0: kill-XP rework documented (§3.1a): DamageSource.bTrapKillXP/KillXPScale, EntityAlive.AwardKillXPServer (IL=62, ElectricalTrapXP=169 scaling) + PartyShareKillServer (IL=47), AddKillXP callers consolidated to EntityAlive/EntityBuffs.
 - **2026-08-25:** melee per-attack stamina cost pinned (ItemActionMelee.il.txt
   IL_00A3-IL_00AD): the swing drains `AddStamina(-(EffectManager.GetValue(
   StaminaLoss, item, 0, entity, primary/secondary) * ItemActionAttack.

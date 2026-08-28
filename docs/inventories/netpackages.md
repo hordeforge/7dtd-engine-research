@@ -1,13 +1,13 @@
-# NetPackage type inventory (V3.1.0 dedicated)
+# NetPackage type inventory (V3.2.0 dedicated)
 
 **Kind:** inventory table (not primary narrative).  
-**Pin:** V **3.1.0 (b14)**; static top-level `NetPackage*` census **193** (+ `NetPackageManager` → 194 name-prefixed; see [coverage.md](../coverage.md)).  
+**Pin:** V **3.2.0 (b9)**; static top-level `NetPackage*` census **195** (+ `NetPackageManager` → 196 name-prefixed; see [coverage.md](../coverage.md)).  
 **Prefer:** [`protocol.md`](../protocol.md), [`protocol-packages.md`](../protocol-packages.md), [`protocol-frames.md`](../protocol-frames.md) (visual), [`network.md`](../network.md).  
 **Wire bodies:** ordered `write()` field sequence per package in [`netpackage-bodies.md`](netpackage-bodies.md) (auto-extracted).  
-**Raw:** [`../../il/netpackages-v3.1.0/`](../../il/netpackages-v3.1.0/), [`../../il/dedi-complete-v3.1.0/`](../../il/dedi-complete-v3.1.0/).  
+**Raw:** [`../../il/netpackages-v3.2.0/`](../../il/netpackages-v3.2.0/), [`../../il/dedi-complete-v3.2.0/`](../../il/dedi-complete-v3.2.0/).  
 **Hub:** [`INDEX.md`](../INDEX.md).
 
-Count: **194** types with `NetPackage` name prefix in live dedi dump (193 wire-oriented types + manager/helpers as named in the table).
+Count: **196** types with `NetPackage` name prefix in live dedi dump (195 wire-oriented types + manager/helpers as named in the table).
 
 | Type | Base | Methods | Max method IL |
 |---|---|---:|---:|
@@ -151,8 +151,10 @@ Count: **194** types with `NetPackage` name prefix in live dedi dump (193 wire-o
 | `NetPackagePlayerStats` | NetPackageEntityTargeted | 7 | 70 |
 | `NetPackagePlayerTwitchStats` | NetPackageEntityTargeted | 6 | 52 |
 | `NetPackagePlayerVendingMachine` | NetPackage | 6 | 30 |
-| `NetPackagePOIAround` | NetPackage | 9 | 156 |
+| `NetPackagePOIMetadataRequest` | NetPackage | 7 | 6 |
+| `NetPackagePOIMetadataResponse` | NetPackage | 8 | 34 |
 | `NetPackagePOIWaypoint` | NetPackage | 7 | 39 |
+| `NetPackageConfirmSpawnEntity` | NetPackage | 7 | 24 |
 | `NetPackageQuestEntitySpawn` | NetPackage | 9 | 37 |
 | `NetPackageQuestEvent` | NetPackage | 17 | 368 |
 | `NetPackageQuestGotoPoint` | NetPackage | 6 | 312 |

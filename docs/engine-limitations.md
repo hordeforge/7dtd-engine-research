@@ -1,4 +1,4 @@
-# Stock dedicated engine limitations (V3.1.0)
+# Stock dedicated engine limitations (V3.2.0)
 
 **Owns:** generic stock engine ceilings and structural limits for dedicated multiplayer (sim, net, world, memory, process).  
 **Not:** RealEarth product attack plan (`product ENGINE_LIMITATIONS`), optim backlog ([OPTIMIZATION_CANDIDATES](../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md)), permanent non-IL residuals only ([residuals.md](residuals.md)).  
@@ -6,7 +6,7 @@
 **Live scale numbers:** [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md).  
 **Loop map:** [loop.md](loop.md).
 
-This is a **limitation map** for anyone running or modding dedicated V3.1.0. It does not re-list every IL detail; each row points at the narrative that owns the evidence.
+This is a **limitation map** for anyone running or modding dedicated V3.2.0. It does not re-list every IL detail; each row points at the narrative that owns the evidence.
 
 **Severity**
 

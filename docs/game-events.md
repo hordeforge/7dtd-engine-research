@@ -1,4 +1,4 @@
-# GameEvent sequence framework (dedicated V3.1.0)
+# GameEvent sequence framework (dedicated V3.2.0)
 
 **Owns:** the `GameEvent.*` surface, the server-side scripted-event engine that
 runs XML-defined action sequences against players and the world: the
@@ -455,7 +455,7 @@ sequence tick of §2:
 
 | Pass | Tracks | Behavior (IL-observed) |
 |---|---|---|
-| `HandleSpawnUpdates` | `spawnEntries` (spawned entity, requester, owning sequence) | 2 s cadence while the list is non-empty; reaps despawned entries (flags `HasDespawn` on the owning sequence) and dead or model-less entries, notifying the requester (`EntityDespawned` / `EntityKilled`) in-process or via `NetPackageGameEventResponse` on 192; the per-entry re-aggro pass exists but is inert on b14 (§7.1) |
+| `HandleSpawnUpdates` | `spawnEntries` (spawned entity, requester, owning sequence) | 2 s cadence while the list is non-empty; reaps despawned entries (flags `HasDespawn` on the owning sequence) and dead or model-less entries, notifying the requester (`EntityDespawned` / `EntityKilled`) in-process or via `NetPackageGameEventResponse` on 192; the per-entry re-aggro pass exists but is inert on b9 (§7.1) |
 | `HandleBlockUpdates` | `blockEntries` (`SpawnedBlocksEntry`) | Counts down `TimeAlive` (`-1` = permanent) and bulk-removes expired event blocks (`TryRemoveBlocks`); periodic block-damage sync |
 | `HandleEventFlagUpdates` | `GameEventFlags` (`GameEventFlagTypes`: BigHead, Dancing, BucketHead, TinyZombies, ...) | 1 s cadence; timed global flags with buff application on flag change |
 
@@ -501,9 +501,9 @@ value (the four spawn/respawn/replace/twitch actions pass `true`;
 regression. Consequence: the re-aggro branch of `SpawnEntry.HandleUpdate`
 (IL=32: when `IsAggressive`, `SetAttackTarget(World.GetClosestPlayer(entity,
 500, false), 1000)`; with an existing player target it re-issues
-`SetAttackTarget(player, 1000)`) is **structurally dead on V3.1.0 b14** - the
+`SetAttackTarget(player, 1000)`) is **structurally dead on V3.2.0 b9** - the
 500 m search and 1000 ms reaction time are the intended behavior, not what a
-stock server runs. The spawn-entry machinery's real work on b14 is the
+stock server runs. The spawn-entry machinery's real work on b9 is the
 despawn/death reap and the requester notification above.
 
 ### 7.2 Block-entry tracking (event-placed blocks)
@@ -693,7 +693,7 @@ Full field lists in inventories/netpackage-bodies.md; tick pipeline above.
   (7) requester notify on 192; RegisterSpawnedEntity (IL=19) drops its
   isAggressive argument (all 5 callers pass a value, ActionBaseSpawn from
   PropIsAggressive XML) and nothing writes SpawnEntry.IsAggressive, so
-  HandleUpdate's 500 m / 1000 ms re-aggro is structurally dead on b14;
+  HandleUpdate's 500 m / 1000 ms re-aggro is structurally dead on b9;
   ActionRespawnEntity (IL=213) / ActionRespawnEntities (IL=254) snapshot,
   delay/checkTime gates, CreateEntity + SetSpawnerSource 3 + RemoveEntity
   (Killed), 12000 ms retarget, Spawned (4) notify, AddToGroups, respawnSound;

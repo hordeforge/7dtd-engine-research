@@ -25,6 +25,18 @@ Status terms:
 
 ## Log
 
+### 2026-08-28
+
+- Retargeted the whole corpus to the V3.2.0 b9 dedicated build: regenerated all
+  `il/*-v3.2.0/` dump sets and the committed inventories (`netpackage-bodies.md`,
+  `console-command-list.tsv`, `state-machines.md`, `coverage-report.md`) via
+  `regen.sh` (pin check fails by design until docs re-pinned; dump steps then
+  run), re-extracted `stock_facts.json` + `xml_pins.json` (xml pins byte-identical).
+- Added `dump_diff.py` (supported, top-level): method-level diff of two
+  `il/full-<version>/` trees; used for the exact 3.1.0->3.2.0 diff (115 changed
+  types, 70 new, 51 removed files). Ruff + mypy `--strict` clean; smoke-tested
+  against the retained 3.1.0 sets.
+
 ### 2026-08-26
 
 - Inventoried all tracked C#, Python, shell, and Zig tooling source across the

@@ -1,4 +1,4 @@
-# SDCS: skinned character system, archetypes and armor authoring (V3.1.0)
+# SDCS: skinned character system, archetypes and armor authoring (V3.2.0)
 
 **Owns:** the **S**kinned **D**ynamic **C**haracter **S**ystem: the archetype data
 model, the three XML/asset contracts a modder authors against (`items.xml` `SDCS`
@@ -985,7 +985,7 @@ bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`
 ## Changelog
 
 - **2026-08-24 (validation):** Five full validation sweeps against a fresh
-  pinned-Cecil `il/full-v3.1.0` regeneration: (1) all 123 `IL=` claims exact;
+  pinned-Cecil `il/full-v3.2.0` regeneration: (1) all 123 `IL=` claims exact;
   (2) all 33 quoted literals/paths ground out in `ldstr` operands; (3) the three
   XML contracts re-derived attribute-for-attribute from parser IL; (4) every
   behavioral claim in §§1–13 re-checked against method bodies, zero drift;
@@ -996,4 +996,4 @@ bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`
   `SDCSDataUtils` and `SDCSArchetypesFromXml` were catalogued but not researched in
   [`out-of-scope-surface.md`](out-of-scope-surface.md) / [`client-side-surface.md`](client-side-surface.md);
   they are now narrated. Derived from a full IL dump of the SDCS type family against
-  the V3.1.0 (b14) dedicated `Assembly-CSharp.dll`.
+  the V3.2.0 (b9) dedicated `Assembly-CSharp.dll`.

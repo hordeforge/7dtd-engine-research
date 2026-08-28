@@ -1,8 +1,8 @@
-# Save, WorldState, and region files (dedicated V3.1.0)
+# Save, WorldState, and region files (dedicated V3.2.0)
 
 **Owns:** WorldState, Chunk write/read, `RegionFile`* managed layout, snapshot/Deflate path, WorldBlockTicker schedule wire (generic engine).  
 **Product expand/inject notes:** `7dtd-realearth/docs/realearth-surfaces.md`.  
-**Dumps:** `../il/loop-complete-v3.1.0/`, `../il/realearth-surfaces-v3.1.0/`, `../il/dedi-complete-v3.1.0/`.  
+**Dumps:** `../il/loop-complete-v3.2.0/`, `../il/realearth-surfaces-v3.2.0/`, `../il/dedi-complete-v3.2.0/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 ---
@@ -68,7 +68,7 @@ stateDiagram-v2
 `SetFrom(World, EnumChunkProviderId)` (IL=203) snapshots water level (`WorldConstants.WaterLevel` = `Block.cWaterLevel` = **62.88**, Block cctor `ldc.r4 62.88`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
 `World.get_Guid()` (IL=9) is the world-identity accessor: `worldState?.get_Guid()` (null world state -> null).
 
-### 1.1b `main.ttw` header codec (`SaveLoad(Stream)`, IL=926 on V3.1.0)
+### 1.1b `main.ttw` header codec (`SaveLoad(Stream)`, IL=926 on V3.2.0)
 
 Symmetric reader/writer via `IBinaryReaderOrWriter` under a lock on `this`.
 
@@ -81,7 +81,7 @@ Symmetric reader/writer via `IBinaryReaderOrWriter` under a lock on `this`.
 On save, those four values are written first. On load, four reads are compared to
 `116,116,119,0`; mismatch logs `Invalid magic bytes in world header` and fails.
 
-**Then (high level, version-gated; verified V3.1.0 IL=926):**
+**Then (high level, version-gated; verified V3.2.0 IL=926):**
 
 `WorldState.CurrentSaveVersion` = **23** (`0x17`, cctor). File `version:u32` is
 compared to that on load (reject newer).
@@ -93,7 +93,7 @@ compared to that on load (reject newer).
 | Structured `VersionInformation` | version &gt; 14 | ReleaseType, Major, Minor, Build as i32s (else legacy string parse) |
 
 **Live-verified 2026-08-11 (real `main.ttw`, V3.1.0 b14):** the file header is
-`ttw\0` + `version:u32 = 23` + `gameVersionString = "V 3.1.0 (b14)"` +
+`ttw\0` + `version:u32 = 23` + `gameVersionString = "V 3.2.0 (b9)"` +
 `VersionInformation (1, 3, 10, 14)` - every field matches the layout above. The
 `waterLevel` float (after the active-game-mode + mode pad) reads **62.88**,
 confirming the `behaviour` water-level pin in a real save.
@@ -132,10 +132,10 @@ the documented codec agree end-to-end.
 `ttw\0`, version 23, waterLevel 62.88, chunkSize 16, providerId 4
 (ChunkDataDriven), seed -1634985719 - but its `gameVersionString` is
 **"V 4.0 (b8)"** (`VersionInformation (1, 4, 0, 8)`), i.e. the world data was
-tooled with a V4.0 build while the dedicated server is V3.1.0 (b14), and its
+tooled with a V4.0 build while the dedicated server is V3.2.0 (b9), and its
 `activeGameMode` is **8 = `EditWorld`** (`EnumGameMode`; probe saves carry
 1 = `Survival`) - the file was exported from the world-editor tooling. Every
-V3.1.0 boot of the shipped world logs
+V3.2.0 boot of the shipped world logs
 `Loaded world file from different version: 'V 4.0 (b8)'` and proceeds -
 the mismatch is a warning only, and the **save-version 23 codec is shared**
 across the two builds (the version gate reads the string, not the other way
@@ -376,7 +376,7 @@ flowchart LR
 ### Density/light channel persistence
 
 `ChunkBlockChannel.Write` IL=120, `Read` IL=151. The storage model behind
-them (V3.1.0 b14 IL):
+them (V3.2.0 b9 IL):
 
 **Layout:** the channel is `defaultValue : i64`, `bytesPerVal : i32`, and two
 arrays of length `64 * bytesPerVal`: `CBCLayer[] layers` (allocated cell
@@ -493,7 +493,7 @@ Factories: RegionFileFactoryRaw / RegionFileFactorySectorBased
 `GetOffsetFromXz`: `(x%8) + (z%8)*8` with negative adjust.  
 `RegionFileManager.cChunkFileExt` = **`.ttc`**.
 
-**Standalone chunk files (`r.<x>.<z>.ttc`) are legacy-unwired in V3.1.0:**
+**Standalone chunk files (`r.<x>.<z>.ttc`) are legacy-unwired in V3.2.0:**
 `RegionFileAccessAbstract` carries the full filename contract but nothing in the
 assembly calls either helper (`RegionFileAccessAbstract::MakeFilename` (Xref=0)
 / `ExtractKey` (Xref=0)). `MakeFilename(x,z)` (IL=26, exact) builds
@@ -727,7 +727,7 @@ offset 12288 : first payload sector (index 3; WriteData/ReadData validate
 
 V2 ctor allocates **12288** bytes for its working header buffer (the 12288
 on-disk prefix above); location/timestamp use the same 4-byte-slot packing as
-V1 (§3.5). Live files (stock V3.1.0 saves) show exactly this: sector 0 holds
+V1 (§3.5). Live files (stock V3.2.0 saves) show exactly this: sector 0 holds
 only the 4 header bytes, sectors 1-2 the tables.
 
 | | **RegionFileV1** | **RegionFileV2** |
@@ -789,7 +789,7 @@ sector formats use **4 KiB** sector indices and larger per-region headers.
 ### 3.5 Location / timestamp header packing (bit-level, closed)
 
 Residual from the annotation backlog: exact packing of the per-chunk location and
-timestamp headers. Verified on V3.1.0 b14 via `DumpMethod` (`GetLocationInfo` /
+timestamp headers. Verified on V3.2.0 b9 via `DumpMethod` (`GetLocationInfo` /
 `SetLocationInfo` / `ToShort` / `FromShort` / `GetTimestampInfo` / `GetOffsetFromXz`).
 
 #### Raw (`RegionFileRaw`)

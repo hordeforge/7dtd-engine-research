@@ -1,4 +1,4 @@
-# Tile entities and the power system (dedicated V3.1.0)
+# Tile entities and the power system (dedicated V3.2.0)
 
 **Owns:** the `TileEntity` model (the per-block state objects a chunk carries),
 the `TileEntityType` registry and `InstantiateFromRead` factory, per-tick update
@@ -49,7 +49,7 @@ flowchart LR
 concrete types override it; the base is a no-op. So a chunk with
 no active machines still pays a bounded loop over its tile-entity list.
 
-**Per-subclass `UpdateTick` bodies (V3.1.0 b14, IL-verified):**
+**Per-subclass `UpdateTick` bodies (V3.2.0 b9, IL-verified):**
 
 | Subclass | UpdateTick IL | What the body does (called methods) |
 |---|---:|---|
@@ -70,7 +70,7 @@ no active machines still pays a bounded loop over its tile-entity list.
 The forge (340) and workstation (134) dominate per-tick cost; everything else is
 a bounded flag/refresher body.
 
-**`Chunk.GetBlockEntity` (V3.1.0 b14)** is the read side of the registry:
+**`Chunk.GetBlockEntity` (V3.2.0 b9)** is the read side of the registry:
 the `Vector3i` overload (IL=10) looks up `blockEntityStubs.dict` keyed by
 `GameUtils.Vector3iToUInt64(pos)` (null when absent); the `Transform`
 overload (IL=30) linearly scans `blockEntityStubs.list` for the matching
@@ -210,7 +210,7 @@ Each subclass chains to the base then appends its own body (inventories, owner,
 flags, power data). `TileEntityLegacyUtils.TryReadLegacyType` is consulted first
 during instantiate so older saves upgrade cleanly.
 
-Replication uses `NetPackageTileEntity` (V3.1.0 wire; [protocol-packages.md](protocol-packages.md) §6.12; write IL=27 / read IL=24):
+Replication uses `NetPackageTileEntity` (V3.2.0 wire; [protocol-packages.md](protocol-packages.md) §6.12; write IL=27 / read IL=24):
 
 ```text
 handle : u8              // Setup default 255 when omitted
@@ -289,7 +289,7 @@ IsOn/fuel/solar/slots/MaxOutput/LastOutput for UI. Disk path uses base TE versio
 
 This is the wire shape inside `NetPackageTileEntity` payloads for power sources,
 
-### 2.2 The `TileEntityComposite` envelope (V3.1.0 b14)
+### 2.2 The `TileEntityComposite` envelope (V3.2.0 b9)
 
 `TileEntityComposite` (TE type 25) wraps its feature modules in a versioned,
 size-marked envelope (`write` IL=74 / `read` IL=479 with the save-id
@@ -434,7 +434,7 @@ flowchart TB
 ```
 
 `PowerItem.PowerChildren` (base IL=2) always returns **true**. Subtypes do **not**
-override it for the common switch/trigger cases on V3.1.0 b14 (verified: no
+override it for the common switch/trigger cases on V3.2.0 b9 (verified: no
 `PowerConsumerToggle.PowerChildren` method; `PowerTrigger.PowerChildren` also
 returns true). Branch gating is therefore **not** via `PowerChildren`:
 
@@ -1029,9 +1029,24 @@ the editor, and any other command delegates to the owning feature's
 | `TEFeatureAreaRepair` | 10 | version u16 only (state mostly live `isRepairing`) |
 | `TEFeatureDoor` | 23 | disk: version u16 **18** + `isOpen:bool`; net: `isOpen` + `animateOnSync` (cleared after write). `CanOpen(ref canPickToOpen)` (IL=29): open -> true; `canPickToOpen = lockpickFeature?.NeedsLockpicking()`; `lockFeature.IsLocked()` -> false |
 
+**TEFeatureDoor honk-open (V3.2.0 new):** the door TE gained
+`PropHonkOpenType`/`PropHonkOpenDistance` properties parsed into
+`HonkOpenType` (enum: `None, Trader, TraderOuter, LandClaim, Both, All`) and
+`HonkOpenDistance` (`Single`). `SetBlockEntityData` (IL=104, was 10) registers
+the door with `TraderDoorController.AddTraderDoorController(pos, go)` when the
+type permits it, and `OnUnload` (IL=20, new) removes the registration.
+`TraderDoorController` (MonoBehaviour, V3.2.0 new type) holds a static
+`ControllerDictionary` keyed by door position; `OnTriggerEnter/Exit` detect a
+vehicle inside the door's trigger collider (`GetVehicleFromCollider`, IL=54)
+and `Activate()` opens the door. Combined with `Vehicle.GetHornEventName()` /
+`EntityVehicle.UseHorn` honk event ([vehicles-drones-turrets.md](vehicles-drones-turrets.md)),
+this is the V3.2.0 "open trader doors with your vehicle's horn" feature:
+outer trader doors (`TraderOuter`) react, interior doors use the new
+`oldWoodDoorNoHonk` variant (`HonkOpenType None`).
+
 Land-claim repair package drives `TEFeatureAreaRepair.RepairAll` (protocol
 §6.19). Storage/lock features are the composite replacement for classic
-`TileEntitySecureLootContainer` in V3.1.0 where the composite TE type is used.
+`TileEntitySecureLootContainer` in V3.2.0 where the composite TE type is used.
 `TEFeatureStorage.CountItem(class)` (IL=33) sums `count` over matching
 `ItemClass` slots; `AddItem(stack)` (IL=29) writes the first empty slot via
 `UpdateSlot` + `SetModified` (false when full).

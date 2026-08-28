@@ -45,7 +45,7 @@ visible:
 mono bin/Census.exe "$ASM"
 ```
 
-**Live pin (V3.1.0 b14)** from `tools/data/stock_facts.json` / `Census.exe`
+**Live pin (V3.2.0 b9)** from `tools/data/stock_facts.json` / `Census.exe`
 (regenerate after any game update with `make stock-sync`):
 
 | Metric | V3.1.0 live | V3.0.1 baseline (historical) |
@@ -176,7 +176,7 @@ Per-package behaviour lives in trivial overrides. Rather than open 193 files,
 census the constants:
 
 ```bash
-mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.1.0/META.md
+mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.2.0/META.md
 ```
 
 This resolves each `get_Channel` / `get_Compress` / `get_PackageDirection` /
@@ -213,9 +213,9 @@ cross-version diff also run a per-method **signature** diff (emit
 catches new/removed methods on existing types) and an **enum-member** diff (emit
 `Enum.Member=value` and `comm`: catches inserted/renumbered enum values). The
 held-entity feature ([items.md](items.md) § Held entities) and join analytics
-([server-lifecycle.md](server-lifecycle.md) `PlayerJoinServerEventData`) in the V3.1.0
+([server-lifecycle.md](server-lifecycle.md) `PlayerJoinServerEventData`) in the V3.2.0
 shipped surface were only visible through those two lenses, not the package parity alone.
-Full delta map: [INDEX.md](INDEX.md) § V3.1.0 shipped delta map.
+Full delta map: [INDEX.md](INDEX.md) § V3.2.0 shipped delta map.
 
 ## 5c. Stock facts pin (hardcodes across docs + products)
 
@@ -272,7 +272,7 @@ opt-scan, loop-complete, frame-entries, manager-updates), 5 stale doc claims
 fixed (SaveLoad 884→926, GetCellsOnRay 244→242, PersistentPlayerLogin 5→37,
 3 netpackages max-IL values, residuals §8→§4), 4 unresolvable base markers
 resolved, and the wire docs **live-verified**: a real join against a stock
-V3.1.0 dedicated server produced the exact documented PackageIds framing
+V3.2.0 dedicated server produced the exact documented PackageIds framing
 (`[ch][size][comp][enc][cnt]`, VersionInformation 1/3/10/14, map count 0xBD=189)
 and pre-auth stage strings (`authstate_nativeplatform` / `authstate_encryption`
 / `authstate_authenticated`).

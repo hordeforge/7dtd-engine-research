@@ -1,6 +1,6 @@
-# Dedicated-server engine coverage map (V3.1.0)
+# Dedicated-server engine coverage map (V3.2.0)
 
-**Current pin:** V **3.1.0 (b14)** Henpocalypse (Major=3 Minor=10 Build=14). Prior corpus was V3.0.1 (b4). Shipped-delta map (where V3.1 facts live after `experimental-delta.md` was retired): [INDEX.md](INDEX.md) § V3.1.0 shipped delta map.
+**Current pin:** V **3.2.0 (b9)** (Major=3 Minor=20 Build=9). Prior corpus was V3.1.0 (b14) Henpocalypse, before that V3.0.1 (b4). Shipped-delta maps: [INDEX.md](INDEX.md) § V3.2.0 shipped delta map (current), § V3.1.0 shipped delta map (history).
 
 **Owns:** family → narrative → dump checklist.  
 **Hub:** [`INDEX.md`](INDEX.md).  
@@ -10,7 +10,7 @@
 **Bar:** 100% of dedicated-relevant **managed** surfaces in `Assembly-CSharp.dll`.  
 **Not in bar:** Unity native, native net plugins, EAC wire protocol, client-only UI.
 
-**Live pin (2026-08-08 re-verified dedi V3.1.0):** stock `ChunkBlockYDim=256`, `ChunkBlockLayers=64`. Expanded dumps in `terrain-v3.1.0` are historical.  
+**Live pin (2026-08-28 re-verified dedi V3.2.0):** stock `ChunkBlockYDim=256`, `ChunkBlockLayers=64`. Expanded dumps in `terrain-v3.2.0` are historical.  
 **Runtime pin:** Unity 2022 Mono (Boehm `libmonobdwgc-2.0.so`, conservative non-generational STW GC), sim target 20 TPS. GC / FPS / lifecycle knobs: [`runtime-tuning.md`](../../7dtd-server-optimizer/docs/runtime-tuning.md).
 
 ```mermaid
@@ -30,17 +30,17 @@ flowchart TB
 
 | # | Family | Narrative | Dump evidence | Status |
 |---|---|---|---|---|
-| 1 | Frame / gmUpdate | [loop.md](loop.md), [loop-gmupdate.md](loop-gmupdate.md) | il/loop-complete-v3.1.0/, il/frame-entries-v3.1.0/ | Closed |
-| 2 | Timers / dual entity tick | loop.md §3, [entity-ai.md](entity-ai.md), [closed-gaps.md](closed-gaps.md) | il/gaps-v3.1.0/, il/deep-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed |
-| 3 | World / chunks | [world-chunks.md](world-chunks.md) | il/dedi-complete-v3.1.0/, il/loop-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
-| 4 | Terrain / height | [terrain-height.md](terrain-height.md), `realearth-surfaces.md` | il/terrain-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
-| 5 | Entities / AI / path | [entity-ai.md](entity-ai.md), [aidirector.md](aidirector.md) | il/deep-v3.1.0/, il/deeper-v3.1.0/, il/gaps-v3.1.0/ | Closed |
-| 6 | Networking | [network.md](network.md), [protocol.md](protocol.md), [protocol-packages.md](protocol-packages.md), closed-gaps.md | il/gaps-v3.1.0/, il/netpackages-v3.1.0/, il/dedi-complete-v3.1.0/, loadgen golden wire | Closed (framing/join, metadata census for all 193, P0/P1 bodies + encryption handshake, per-flag framing for all 37 conditional-heavy packages in protocol-packages.md §6.23, LiteNetLib join-churn race in network.md §4.0); high-traffic + residual bulk catalog in protocol-packages.md 1-6.22; full flat write sequences in inventories/netpackage-bodies.md |
-| 7 | Save / region | [save-region.md](save-region.md) | il/loop-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed |
-| 8 | Origin / claims | `7dtd-realearth/docs/realearth-surfaces.md` (private companion; no published narrative in this repo) | il/realearth-surfaces-v3.1.0/, il/dedi-complete-v3.1.0/ | Closed (dumped; narrative is product-owned) |
-| 9 | Managers | [managers.md](managers.md) | il/dedi-complete-v3.1.0/, il/loop-complete-v3.1.0/ | Closed |
-| 10 | Light / mesh / water | [light-mesh-water.md](light-mesh-water.md) | il/dedi-complete-v3.1.0/, il/realearth-surfaces-v3.1.0/ | Closed |
-| 11 | ModEvents | [managers.md](managers.md) | il/dedi-complete-v3.1.0/ | Closed (names; subscriber sets observed stock + mod delta, managers.md §2) |
+| 1 | Frame / gmUpdate | [loop.md](loop.md), [loop-gmupdate.md](loop-gmupdate.md) | il/loop-complete-v3.2.0/, il/frame-entries-v3.2.0/ | Closed |
+| 2 | Timers / dual entity tick | loop.md §3, [entity-ai.md](entity-ai.md), [closed-gaps.md](closed-gaps.md) | il/gaps-v3.2.0/, il/deep-v3.2.0/, il/dedi-complete-v3.2.0/ | Closed |
+| 3 | World / chunks | [world-chunks.md](world-chunks.md) | il/dedi-complete-v3.2.0/, il/loop-complete-v3.2.0/, il/realearth-surfaces-v3.2.0/ | Closed |
+| 4 | Terrain / height | [terrain-height.md](terrain-height.md), `realearth-surfaces.md` | il/terrain-v3.2.0/, il/realearth-surfaces-v3.2.0/ | Closed |
+| 5 | Entities / AI / path | [entity-ai.md](entity-ai.md), [aidirector.md](aidirector.md) | il/deep-v3.2.0/, il/deeper-v3.2.0/, il/gaps-v3.2.0/ | Closed |
+| 6 | Networking | [network.md](network.md), [protocol.md](protocol.md), [protocol-packages.md](protocol-packages.md), closed-gaps.md | il/gaps-v3.2.0/, il/netpackages-v3.2.0/, il/dedi-complete-v3.2.0/, loadgen golden wire | Closed (framing/join, metadata census for all 193, P0/P1 bodies + encryption handshake, per-flag framing for all 37 conditional-heavy packages in protocol-packages.md §6.23, LiteNetLib join-churn race in network.md §4.0); high-traffic + residual bulk catalog in protocol-packages.md 1-6.22; full flat write sequences in inventories/netpackage-bodies.md |
+| 7 | Save / region | [save-region.md](save-region.md) | il/loop-complete-v3.2.0/, il/realearth-surfaces-v3.2.0/, il/dedi-complete-v3.2.0/ | Closed |
+| 8 | Origin / claims | `7dtd-realearth/docs/realearth-surfaces.md` (private companion; no published narrative in this repo) | il/realearth-surfaces-v3.2.0/, il/dedi-complete-v3.2.0/ | Closed (dumped; narrative is product-owned) |
+| 9 | Managers | [managers.md](managers.md) | il/dedi-complete-v3.2.0/, il/loop-complete-v3.2.0/ | Closed |
+| 10 | Light / mesh / water | [light-mesh-water.md](light-mesh-water.md) | il/dedi-complete-v3.2.0/, il/realearth-surfaces-v3.2.0/ | Closed |
+| 11 | ModEvents | [managers.md](managers.md) | il/dedi-complete-v3.2.0/ | Closed (names; subscriber sets observed stock + mod delta, managers.md §2) |
 
 Families 1-11 are managed DLL surfaces (the coverage bar above). Runtime **cost/scaling
 and process-tuning** are not managed surfaces; they are measured by the optimizer mod
@@ -59,16 +59,16 @@ and live outside this bar, in the companion docs:
 
 ---
 
-## Census (live dedi V3.1.0)
+## Census (live dedi V3.2.0)
 
-From `Census.exe` / `tools/data/stock_facts.json` on dedicated V **3.1.0 (b14)**.
+From `Census.exe` / `tools/data/stock_facts.json` on dedicated V **3.2.0 (b9)**.
 Prior V3.0.1 baseline was types 4401, methods 43901, SaveLoad IL 884 (see [re-methodology.md](re-methodology.md) §1).
 
 | Metric | Value |
 |---|---:|
-| Top-level types | 4414 |
-| Methods with body | 44107 |
-| NetPackage* types | 194 name-prefixed (193 + `NetPackageManager`), from `Census.exe`; ~189 are registered wire packages (the rest are name-prefixed helpers: `NetPackageDirection` enum, `Logger`, `Metrics`). The "189 in live id-map" was a runtime observation, **re-confirmed live 2026-08-10** (`PackageIdsReceived: maps=189` on a stock V3.1.0 join). |
+| Top-level types | 4426 |
+| Methods with body | 44277 |
+| NetPackage* types | 196 name-prefixed (195 + `NetPackageManager`), from `Census.exe`; ~191 are registered wire packages (the rest are name-prefixed helpers: `NetPackageDirection` enum, `Logger`, `Metrics`). The "189 in live id-map" was a runtime observation on V3.1.0; the V3.2.0 join id-map was not re-probed live, so the registered count is inferred from the 3.1.0 ratio (2 added, 1 removed net packages). |
 | GameTimer Hz | 20 |
 | gmUpdate IL | 631 |
 | WorldState.SaveLoad(Stream) IL | 926 |
@@ -111,6 +111,9 @@ should be re-checked against IL before you rely on it.
 |---|---|
 | [aidirector.md](aidirector.md) | audited (pass 1) |
 | [architecture-map.md](architecture-map.md) | map of corpus narratives (no direct IL claims) |
+| [changelog-3.0.0.md](changelog-3.0.0.md) | V3.0 Dead Hot Summer feature inventory + RE map (digest; RE homes verified 2026-08-28) |
+| [changelog-3.1.0.md](changelog-3.1.0.md) | V3.1.0 Henpocalypse feature inventory + RE map (digest; RE homes verified 2026-08-28) |
+| [changelog-3.2.0.md](changelog-3.2.0.md) | exact 3.1.0→3.2.0 delta, IL-verified (2026-08-28; regenerated dumps vs retained 3.1.0 sets) |
 | [block-shapes.md](block-shapes.md) | audited (pass 2) |
 | [blocks.md](blocks.md) | audited (pass 1) |
 | [buffs.md](buffs.md) | audited (pass 1) |
@@ -129,7 +132,7 @@ should be re-checked against IL before you rely on it.
 | [entity-ai.md](entity-ai.md) | audited (pass 1) |
 | [entity-movement.md](entity-movement.md) | audited (2026-08-20, movement chain + physics surface) |
 | [entity-stats.md](entity-stats.md) | audited (pass 1) |
-| [INDEX.md](INDEX.md) V3.1.0 shipped delta map (replaces retired experimental-delta) | audited (pass 1; map refreshed 2026-08-06) |
+| [INDEX.md](INDEX.md) V3.2.0 shipped delta map (replaces the retired V3.1.0 map + experimental-delta) | audited (pass 1; map refreshed 2026-08-28) |
 | [full-surface.md](full-surface.md) | audited (pass 1) |
 | [game-events.md](game-events.md) | audited (pass 1) |
 | [items.md](items.md) | audited (pass 1) |
@@ -194,6 +197,7 @@ their correctness is the tool's, not prose. `inventories/dedicated-leaves.md` an
 
 ## Changelog
 
+- **2026-08-28:** Retargeted to V3.2.0 (b9): census 4426 types / 44277 methods / 195 NetPackage; pin V 3.2.0 (b9); V3.2.0 delta map lives in INDEX.md + changelog-3.2.0.md.
 - **2026-08-25:** Programmatic-coverage note links the mention-depth measurement (re-methodology §1; `tools/mention_depth.py`): two thirds of mentioned type names appear exactly once, so narrated % stays an upper bound.
 - **2026-08-24:** Audit table adds shader-subprogram-blob (not-independently-audited); self-checking reproduction in tools/shader_blob_dump.py.
 - **2026-08-22:** Audit table adds the texture-atlas docs (texture-atlas, texture-atlas-unityfs; not-independently-audited).

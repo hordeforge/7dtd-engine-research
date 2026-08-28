@@ -1,4 +1,4 @@
-# Signs, authored text, and drawings (dedicated V3.1.0)
+# Signs, authored text, and drawings (dedicated V3.2.0)
 
 **Owns:** the layered vector-sign ("drawing") content system: `SignData` and its
 layer tree (`SignLayer`, `TextSignLayer`, `PolygonSignLayer`, `NoiseSignLayer`,

@@ -1,4 +1,4 @@
-# Sandbox options and presets (dedicated V3.1.0)
+# Sandbox options and presets (dedicated V3.2.0)
 
 **Owns:** the `SandboxOptions` namespace: `BaseSandboxOption` and its typed
 subclasses (`SandboxOptionFloat` / `SandboxOptionInt` / `SandboxOptionBoolean`),
@@ -68,7 +68,7 @@ get/set surface in all three primitive flavors (`GetIntValue`, `GetFloatValue`,
 `GetBoolValue`, plus index- and string-based accessors). Each concrete subclass
 stores only `CurrentValue`/`DefaultValue` of its own primitive and implements
 the virtuals; `OptionTypes` is `{Invalid, Int, Float, String, Bool}` but **no
-`SandboxOptionString` class exists in V3.1.0 b14 either** (re-checked against the
+`SandboxOptionString` class exists in V3.2.0 b9 either** (re-checked against the
 V3.1.0 surface on 2026-08-06), so the `String=3` slot is still unused.
 
 ### 1.2 Discrete value sets, not min/max clamping
@@ -501,7 +501,7 @@ writes `<UserDataDir>/Presets/<name>.xml`; this is menu-side machinery, present
 but idle on a headless server. The experimental branch adds
 `GetOptionNameValueDictionaryFromPreset(preset)` (name -> value dictionary
 export). It was experimental-only on V3.0.1 and **has since shipped**: it is
-present in V3.1.0 b14 on `SandboxOptionManager` and called from `GameManager`
+present in V3.2.0 b9 on `SandboxOptionManager` and called from `GameManager`
 (re-checked 2026-08-06; it was experimental-only on V3.0.1).
 
 ### 7.1 Mod overrides (`sandbox_overrides.xml`)

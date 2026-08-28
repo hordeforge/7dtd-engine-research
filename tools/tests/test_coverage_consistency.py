@@ -29,8 +29,9 @@ def test_audit_table_lists_every_doc() -> None:
     text = _coverage_text()
     # audit rows are of the form "| [name.md](name.md) | tier |"; prose and
     # comma-separated table cells (e.g. the family table) do not match because
-    # they do not put " |" immediately after the closing paren.
-    audited = set(re.findall(r"\| \[([a-z0-9-]+\.md)\]\([^)]+\) \|", text))
+    # they do not put " |" immediately after the closing paren. Dots allowed so
+    # versioned docs like changelog-3.2.0.md participate.
+    audited = set(re.findall(r"\| \[([a-z0-9.\-]+\.md)\]\([^)]+\) \|", text))
     root_docs = {n for n in os.listdir(DOCS) if n.endswith(".md") and n != "INDEX.md"}
     missing = sorted(root_docs - audited)
     assert not missing, f"docs missing from coverage.md audit table: {missing}"

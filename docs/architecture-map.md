@@ -1,4 +1,4 @@
-# Architecture map: the dedicated server at a glance (V3.1.0)
+# Architecture map: the dedicated server at a glance (V3.2.0)
 
 **Owns:** the visual, whole-system view of what a headless 7 Days to Die server is
 and how its parts connect: process lifecycle, the frame, the simulation core, the

@@ -2,12 +2,12 @@
 
 **Kind:** auto dump notes (not primary narrative).
 **Prefer:** [`entity-ai.md`](../entity-ai.md).
-**Raw IL:** [`../il/deeper-v3.1.0/`](../../il/deeper-v3.1.0/) (`DEEPER.md` source).
+**Raw IL:** [`../il/deeper-v3.2.0/`](../../il/deeper-v3.2.0/) (`DEEPER.md` source).
 **Hub:** [`INDEX.md`](../INDEX.md).  
 
 ---
 
-## Deeper RE notes (V3.1.0 dedicated)
+## Deeper RE notes (V3.2.0 dedicated)
 
 Generated UTC: 2026-08-08 14:49:21Z
 Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`

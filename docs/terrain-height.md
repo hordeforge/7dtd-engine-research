@@ -1,4 +1,4 @@
-# Terrain and height engine map (V3.1.0)
+# Terrain and height engine map (V3.2.0)
 
 **Owns:** WorldConstants YDim, height API inventory, stock vs expand pin (generic engine).  
 **Chunk index / save-64:** [`world-chunks.md`](world-chunks.md), [`save-region.md`](save-region.md).  
@@ -12,9 +12,9 @@
 
 | Directory | Assembly | Role |
 |---|---|---|
-| [`../il/terrain-v3.1.0/`](../il/terrain-v3.1.0) | Dedicated `.re_stock_bak` | **Stock** vertical constants (pre-expand) |
-| [`../il/terrain-v3.1.0/`](../il/terrain-v3.1.0) | Dedicated, expanded snapshot | **Historical** expanded YDim (RealEarth); live dedi is stock again, see [`coverage.md`](coverage.md) live pin |
-| [`../il/terrain-v3.1.0/`](../il/terrain-v3.1.0) | Client, expanded snapshot | Historical expanded client dump |
+| [`../il/terrain-v3.2.0/`](../il/terrain-v3.2.0) | Dedicated `.re_stock_bak` | **Stock** vertical constants (pre-expand) |
+| [`../il/terrain-v3.2.0/`](../il/terrain-v3.2.0) | Dedicated, expanded snapshot | **Historical** expanded YDim (RealEarth); live dedi is stock again, see [`coverage.md`](coverage.md) live pin |
+| [`../il/terrain-v3.2.0/`](../il/terrain-v3.2.0) | Client, expanded snapshot | Historical expanded client dump |
 
 Auto narrative: `TERRAIN_auto.md` in each dump dir.  
 Tool: `tools/legacy/DumpTerrain.cs` (build via [`../tools/`](../tools/)).
@@ -23,9 +23,9 @@ Tool: `tools/legacy/DumpTerrain.cs` (build via [`../tools/`](../tools/)).
 DS="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
 ASM="$DS/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 cd tools && ./build.sh
-mono bin/legacy/DumpTerrain.exe "$ASM" ../il/terrain-v3.1.0
+mono bin/legacy/DumpTerrain.exe "$ASM" ../il/terrain-v3.2.0
 # stock backup:
-mono bin/legacy/DumpTerrain.exe "$ASM.re_stock_bak" ../il/terrain-v3.1.0
+mono bin/legacy/DumpTerrain.exe "$ASM.re_stock_bak" ../il/terrain-v3.2.0
 ```
 
 ## Stock vs expanded constants (Measured)
@@ -67,7 +67,7 @@ Interfaces **cannot** be patched directly (RealEarth already avoids that). Concr
 | `TerrainFromDTM` | `GetTerrainHeightByteAt` / `GetTerrainHeightAt` | byte / float | Baked DTM path |
 | `TerrainFromRaw` | same | byte / float | Raw heightmap path |
 
-**Bodies (V3.1.0 b14):** `World.GetHeightAt(x, z)` (IL=22) delegates to
+**Bodies (V3.2.0 b9):** `World.GetHeightAt(x, z)` (IL=22) delegates to
 `GetTerrainGenerator().GetTerrainHeightAt((int)x, (int)z)` (the generator
 oracle, no chunk load; **0** without a generator). `World.GetTerrainHeight(x,
 z)` (IL=19) reads the live chunk's byte heightmap via `GetChunkSync` +
@@ -167,7 +167,7 @@ Non-IL residuals only: [`residuals.md`](residuals.md). Product soak/ops items ar
 
 ## Chunk indexing (closed)
 
-From live stock IL (`realearth-surfaces-v3.1.0`):
+From live stock IL (`realearth-surfaces-v3.2.0`):
 
 ```text
 // blocks

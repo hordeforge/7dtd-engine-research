@@ -205,6 +205,7 @@ Fun Pimps changed between game versions.
 | `parity/ParitySurface.cs` | Extract every `NetPackage` read/write call sequence + directions + selected enums into a stable JSON snapshot. |
 | `parity/fetch_version.sh <branch\|manifest> [label]` | Download a specific dedicated build (app 294420) via operator-installed SteamCMD and atomically emit a validated `ParitySurface` snapshot. Set `STEAMCMD` when it is not on `PATH`. |
 | `parity/parity_diff.py old.json new.json` | Diff two stock snapshots (added/removed/wire-changed packages). |
+| `dump_diff.py old-full new-full [filter]` | Method-level diff of two `il/full-<version>/` dump trees: per-type added/removed/changed methods + field/base/interface drift. Used for the 3.1.0→3.2.0 diff; `filter` is a regex on the relative type path. |
 
 ## 4. One-off reversers (`re-scratch/`)
 

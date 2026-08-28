@@ -1,4 +1,4 @@
-# Entity spawning subsystem (dedicated V3.1.0)
+# Entity spawning subsystem (dedicated V3.2.0)
 
 **Owns:** how entities are placed INTO the world: the spawn-manager family
 (`SpawnManagerBiomes`, `SpawnManagerDynamic`, `SpawnManagerAbstract`), the
@@ -699,6 +699,14 @@ persistent record, then `EntityFactory.CreateEntity` +
 `World.SpawnEntityInWorld`). See [protocol-packages.md](protocol-packages.md)
 section 5.0.
 
+**V3.2.0 requested-spawn correlation:** `GameManager.RequestToSpawnEntityServer`
+(IL=37, was 101) now routes through the new `GameManager.SpawnEntityServer(ecd)`
+(V3.2.0 new); `EntityCreationData` gained `requestedBy` (Int32) + `requestKey`
+(Guid) carried at the end of the spawn body ([protocol-packages.md](protocol-packages.md)
+§5.1 tail), and the server acks the created entity with the new
+`NetPackageConfirmSpawnEntity` so the client can correlate via
+`EntityPlayerLocal.HandleRequestedEntitySpawn(key, entity)` (§5.1.2).
+
 **`EntityFactory.SetupEntityCreationData` (ECD builder):** the rich overload
 (IL=31) fills `entityClass`, `id`, `itemStack = ItemStack(itemValue, count)`,
 `pos`/`rot`, `lifetime`, `belongsPlayerId`, `spawnById`, `spawnByName`. The
@@ -726,7 +734,7 @@ GetId(ec.entityClassName)`. `isPlayer` = class is `playerMaleClass`/
 ecd.belongsPlayerId`. Kick `EntityInstanceAssets.Load(isSync, ec,
 isLocalPlayer)` and `EModelInstanceAssets.Load(isSync, ecd, ec)`.
 
-**Class lookup leaves (V3.1.0 b14):** `EntityClass.GetEntityClass(id)` (IL=7)
+**Class lookup leaves (V3.2.0 b9):** `EntityClass.GetEntityClass(id)` (IL=7)
 is `list.TryGetValue` (null when absent). `GetEntityClassName(id)` (IL=10)
 returns the class's `entityClassName` or the string `"null"` when missing.
 The class **id is the name's hash**: `FromString(name)` (IL=3) is
@@ -1188,7 +1196,7 @@ spawner '...' contains invalid group`). The rest: `StartSound`,
 ## Biome spawn manager, director constants and the gamestage indirection (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus).
+numbers are from that dump; the tracked `il/` sets are the V3.2.0 corpus).
 
 ### AIDirectorConstants: the whole horde/scout tuning block
 
@@ -1463,7 +1471,7 @@ above.
   `GameEventManager/SpawnEntry`, `AIAirDrop/SupplyCrateSpawn`, and the two
   `ModEvents` player-spawn payload structs.
 
-## Spawn-group max-tier selection (V3.1.0 b14)
+## Spawn-group max-tier selection (V3.2.0 b9)
 
 `EntityGroups.GetRandomEntityFromGroupMaxTier(name, maxTier, ref lastClassId,
 isEnemy, isAnimal, random)` (IL=120) picks a weighted entity from a spawn group

@@ -1,7 +1,7 @@
 # Residuals: what cannot be closed from dedicated managed IL
 
 **Owns:** non-IL residual list (only place for permanent open items).  
-**Pin:** V3.1.0 (b14) dedicated.  
+**Pin:** V3.2.0 (b9) dedicated.  
 **Coverage of managed families:** [`coverage.md`](coverage.md).  
 **Hub:** [`INDEX.md`](INDEX.md).
 
@@ -28,6 +28,7 @@ limit, or process).
 
 | Residual | Status / why not closed by Assembly-CSharp RE |
 |---|---|
+| **V3.1.0-era bugfix guards not narrated** (annotation backlog): (a) EOS exception guard in the `TileEntityNetPackage`/POI-reset path; (b) pooled "memory stream" server-side EXC guard; (c) chunk load/unload rapid-cycle corruption guard; (d) `RequirementItemModTier` null-slot guard | Managed and present in the 3.2.0 dump; not individually narrated (edge-case guards; wire/loop understanding does not depend on them). Tracked from the V3.1.0 changelog cross-check ([changelog-3.2.0.md](changelog-3.2.0.md) §5a) |
 | **Unity script execution order** among GameManager / ConnectionManager / DynamicMeshManager / Entity MBs | **Closed (2026-08-09, runtime):** observed on the stock V3.1.0 dedicated server via a Harmony stamp probe (`workspace/experiments/script-order-probe`, git-ignored). Per-frame order: `GameManager.FixedUpdate`(+`Origin.FixedUpdate` no-op) -> `SdtdConsole.Update` -> **`ConnectionManager.Update`** -> **`GameManager.Update`** -> (`WorldEnvironment.Update` / `DynamicMeshManager.Update` when components present) -> `ConnectionManager.LateUpdate` -> `GameManager.LateUpdate`. **Invariant: ConnectionManager.Update always precedes GameManager.Update** (518 stable frames). Stored in Unity project settings, so it was not derivable from IL alone; now pinned by observation. See [loop.md](loop.md) §1.1 |
 | **Which Entity GameObjects stay `enabled` on pure dedicated** | **Closed (2026-08-10, runtime):** with a live dedicated sim (loadgen join-mode player + AI/scout + telnet-spawned zombies), the stock V3.1.0 dedi keeps every spawned entity GameObject **active and enabled**: repeated probe dumps showed `World.Entities` Count 9->17, `World.Players` Count=1, and `total=17 goActive=17 goInactive=0 mbEnabled=17 mbDisabled=0` (EntityPlayer, EntityZombie, EntityAnimalSnake all `activeInHierarchy=True` + MB `enabled=True`). So entities on dedicated tick with active GOs and enabled MBs (matches `EntityAlive.Update` GO-enabled path, [loop.md](loop.md) §3.2); the engine does **not** mass-disable entity GOs on headless. Caveat: an earlier probe session (2026-08-10) recorded `World.Entities`/`World.Players` empty on an idle dedi - that was the true state with **no sim population** (the loadgen self-test bot drowned in ~1.5 s and never registered in the world; telnet `spawnentity` silently no-ops when no valid entity id exists), not a general property of the registry. The registries populate exactly when `SpawnEntityInWorld` -> `Entities.Add` runs ([spawning.md](spawning.md) §7); on an empty world they are legitimately empty. Probe: `workspace/experiments/script-order-probe` (git-ignored) |
 | **LiteNetLib transport internals** | **Closed (2026-08-10 + 2026-08-12).** `LiteNetLib.dll` is a **managed .NET assembly**. Closed: `NetManager` event machinery (pool pop + pending-list push + `PollEvents` drain, all `_eventLock`-guarded), the `UnsyncedEvents=true` config in `NetworkCommonLiteNetLib.InitConfig` (IL=22), and the join-churn flake root cause: `ConnectionRequestCheck` (IL=86) enumerates `ConnectionManager.Clients.List` **on the socket-receive thread** while the main thread mutates it -> `Collection was modified` -> `RemoteConnectionClose` ([network.md](network.md) §4.0). 2026-08-12: the **reliability / flow / MTU algorithms are now narrated** ([network.md](network.md) §4.6) - 64-packet sliding window over a 32768 sequence space, bitmap acks, 27 ms default resend, no AIMD, MTU discovery from 1024 up to 1432 every 1 s. Remaining un-narrated surface is the generic serializer family (`NetSerializer`/`NetPacketProcessor`, unused by the game's wire which has its own pooled reader/writer) |
@@ -56,7 +57,7 @@ limit, or process).
 | GameTimer 20 Hz | closed-gaps.md |
 | DynamicMesh version-160 WriteRegion as live path | [dynamic-mesh.md](dynamic-mesh.md): live `SaveRegion`; `WriteRegion` only self-retry (Xref, 2026-08-06) |
 | Region location/timestamp header bit packing | save-region.md §3.5 (Raw + sector) |
-| Chunk GetBlock/density index | [terrain-height.md](terrain-height.md), [world-chunks.md](world-chunks.md) (IL dumps in realearth-surfaces-v3.1.0) |
+| Chunk GetBlock/density index | [terrain-height.md](terrain-height.md), [world-chunks.md](world-chunks.md) (IL dumps in realearth-surfaces-v3.2.0) |
 | Chunk write/read layer bound 64 | save-region.md |
 | WorldState.SaveLoad structure | save-region.md + dedi-complete §5 |
 | Origin.FixedUpdate on dedicated | **No-op:** `IsDedicatedServer` → early `ret` ([loop.md](loop.md)) |
@@ -182,7 +183,7 @@ Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
   nothing else (Harmony-direct). Stock baseline + delta now both observed. Probe
   in workspace/experiments/script-order-probe (git-ignored).
 - **2026-08-09:** Unity script execution order CLOSED by runtime probe on the
-  stock V3.1.0 dedi (Harmony stamp probe in workspace/experiments/script-order-probe,
+  stock V3.2.0 dedi (Harmony stamp probe in workspace/experiments/script-order-probe,
   git-ignored): per-frame order SdtdConsole -> ConnectionManager.Update ->
   GameManager.Update -> (WorldEnvironment/DynamicMeshManager when present) ->
   ConnectionManager.LateUpdate -> GameManager.LateUpdate; ConnectionManager

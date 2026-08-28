@@ -52,11 +52,11 @@ For each unaccounted type:
 
 | Check | How | Result |
 |---|---|---|
-| stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.1.0 b14) |
+| stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.2.0 b9) |
 | Unaccounted reached types | `Coverage.exe` | **100%** narrated (3681 game types; narrated 3681 / catalogued 0 / classified 0) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
-| Tier A+B | this doc | **Met** for V3.1.0 b14 managed dedi bar |
+| Tier A+B | this doc | **Met** for V3.2.0 b9 managed dedi bar |
 
 Optional depth (C) still open by design: rare NetPackage per-flag framing,
 full console-command prose beyond the catalog, TE subclass tick minutiae.

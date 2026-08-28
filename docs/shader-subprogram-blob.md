@@ -1,7 +1,7 @@
 # Shader (class 48) sub-program blob layout
 
 Reference for the compiled-shader container inside a stock UnityFS bundle, as
-validated on the stock V3.1.0 b14 install (Unity 2022.3.62f2). Picks up where
+validated on the stock V3.2.0 b9 install (Unity 2022.3.62f2). Picks up where
 [texture-atlas-unityfs.md](texture-atlas-unityfs.md) stops: that page decodes
 the container, the SerializedFile header/type/object tables and TextAsset
 (class 49); this one decodes Shader (class 48) down to the driver bytecode.

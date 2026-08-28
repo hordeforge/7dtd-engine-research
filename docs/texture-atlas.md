@@ -1,4 +1,4 @@
-# Texture atlas and minimap colors (V3.1.0 b14)
+# Texture atlas and minimap colors (V3.2.0 b9)
 
 **Owns:** the block texture atlas metadata that feeds the minimap colors:
 where the `uvmapping` XML lives (`MeshDescription.MetaData` TextAssets inside

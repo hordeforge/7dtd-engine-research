@@ -12,13 +12,16 @@ netpackages / surface / full sets. Full table: docs INDEX.
 
 ## Version policy: latest release only
 
-These dumps track the **latest stock release**, currently **V3.1.0 b14**. When
+These dumps track the **latest stock release**, currently **V3.2.0 b9**. When
 the game updates, regenerate every set against the new dedicated
 `Assembly-CSharp.dll` and delete the previous version's sets in the same change,
 so there is only ever one corpus and a citation cannot silently refer to an old
 one.
 
-The V3.0.1 sets were removed on 2026-08-06 after the V3.1.0 sets were generated
+The V3.1.0 sets were retained through the 3.1.0→3.2.0 diff (2026-08-28;
+evidence captured in [`docs/changelog-3.2.0.md`](../docs/changelog-3.2.0.md))
+and are expected to be deleted once that delta is absorbed. The V3.0.1 sets
+were removed on 2026-08-06 after the V3.1.0 sets were generated
 and verified. They are not recoverable from this machine (the 3.0.1 assembly is
 no longer installed), which is the reason to regenerate before deleting, never
 after.
@@ -27,14 +30,14 @@ Regenerate with the dedicated assembly path in `$ASM`:
 
 ```sh
 ASM=".../7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
-mono tools/bin/DumpNetPackages.exe "$ASM" il/netpackages-v3.1.0
-mono tools/bin/DumpType.exe "$ASM" il/netpackages-v3.1.0 \
+mono tools/bin/DumpNetPackages.exe "$ASM" il/netpackages-v3.2.0
+mono tools/bin/DumpType.exe "$ASM" il/netpackages-v3.2.0 \
      EntityCreationData ItemValue ItemStack BlockChangeInfo
-mono tools/bin/FullSurface.exe "$ASM" il/surface-v3.1.0
-mono tools/bin/DumpAll.exe     "$ASM" il/full-v3.1.0
+mono tools/bin/FullSurface.exe "$ASM" il/surface-v3.2.0
+mono tools/bin/DumpAll.exe     "$ASM" il/full-v3.2.0
 for t in DumpDediComplete DumpDeep DumpDeeper DumpGaps DumpFrameEntries \
          DumpLoopComplete DumpOptScan DumpTerrain DumpRealEarthSurfaces; do
-  mono "tools/bin/legacy/$t.exe" "$ASM" "il/<set>-v3.1.0"
+  mono "tools/bin/legacy/$t.exe" "$ASM" "il/<set>-v3.2.0"
 done
 ```
 

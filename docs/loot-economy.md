@@ -1,4 +1,4 @@
-# Loot, traders and economy (dedicated V3.1.0)
+# Loot, traders and economy (dedicated V3.2.0)
 
 **Owns:** the server-authoritative loot and trade subsystem: how a placed container
 rolls its contents on first open (`LootContainer` definitions + `TEFeatureStorage`
@@ -601,7 +601,7 @@ elements dispatch to the item / tier / group / stage-template parsers
 ## Trader delivery paths, package direction and TEFeatureStorage (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus).
+numbers are from that dump; the tracked `il/` sets are the V3.2.0 corpus).
 
 **`NetPackageTraderData` is client-to-server only.** `get_PackageDirection` returns
 1 = `ToServer` (843057-843064) and its `ProcessPackage` early-returns unless
@@ -749,7 +749,7 @@ are field reads.
 
 `LoadLootContainers(xmlFile)` (IL=6) is the `<LoadLootContainers>` coroutine
 entry (a state-0 iterator); the `MoveNext` walks the document's
-`lootcontainer` elements and calls the per-element loaders below. V3.1.0 b14
+`lootcontainer` elements and calls the per-element loaders below. V3.2.0 b9
 IL:
 
 **`LoadLootContainer(element)` (IL=275):** `new LootContainer`; `name` is
@@ -881,7 +881,7 @@ player's level, multiplied by `(1 + mod)`.
      `EffectManager(passive **79**, template.prob, item tags) * sandbox`.
    - else entry tags: raw `template.prob` or passive **79** on entry tags.
 
-**Passive 79 (LootProb) is data-inert in V3.1.0 b14 (audited 2026-08-26).**
+**Passive 79 (LootProb) is data-inert in V3.2.0 b9 (audited 2026-08-26).**
 The only stock `LootProb` row is on `armorFarmerHelmet`
 (`perc_add` quality curve 2..20, `tags="seedSkill"`); the GetValue context
 tags are the looted item's class tags (or the loot entry's tags), and a

@@ -1,4 +1,4 @@
-# Weather, sky, and environment (dedicated V3.1.0)
+# Weather, sky, and environment (dedicated V3.2.0)
 
 **Owns:** the server-authoritative weather simulation, `WeatherManager` (the
 per-biome weather state machine, storm scheduling, temperature/precipitation

@@ -1,4 +1,4 @@
-# Block behavior catalog (V3.1.0)
+# Block behavior catalog (V3.2.0)
 
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name/base/code signals; no bodies).  
 **Framework:** [`../blocks.md`](../blocks.md) owns the contract; this describes each `Block` leaf.  

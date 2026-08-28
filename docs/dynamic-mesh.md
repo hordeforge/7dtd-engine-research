@@ -1,4 +1,4 @@
-# Dynamic mesh subsystem (dedicated V3.1.0)
+# Dynamic mesh subsystem (dedicated V3.2.0)
 
 **Owns:** the server-authoritative regeneration, persistence, and streaming of
 deformed and destroyed block geometry, the geometry that diverges from the base
@@ -275,7 +275,7 @@ then `TryExit` / `ReleaseLock` under the wrapper's lock discipline.
 
 **Dead legacy path (not executed from live producers).** `DynamicMeshFile.WriteRegion`
 (IL=159) / `WriteRegionHeaderData` (IL=133) / `Write16BitVoxelMeshes` /
-`LoadRegionGameObjectSync` are an older version-`160` region format. On V3.1.0 b14,
+`LoadRegionGameObjectSync` are an older version-`160` region format. On V3.2.0 b9,
 `tools/bin/Xref.exe` reports **exactly one** call site for `WriteRegion` and for
 `WriteRegionHeaderData`: each method's own catch-path **self-retry** (`tryCount++`,
 `Thread.Sleep`, recurse). There is **no external caller** from
@@ -288,7 +288,7 @@ layout and retry guards 5 / 10, but nothing outside the method invokes it.)
 load/save/cache lifecycle queue (`AddSaveRequest`, `TryLoadItem`, `SaveItem`,
 `ReleaseBytes`, `TryGetData`, byte accounting via `MBytesLive` /
 `MBytesReleased`, pooling, `LogMemoryUsage`). `tools/bin/RefScan.exe` reports
-**0 external references** on b14: nothing instantiates or calls it. The live
+**0 external references** on b9: nothing instantiates or calls it. The live
 queue is the `DynamicMeshChunkDataStorage<T>` described above
 (`DynamicMeshThread.ChunkDataQueue`); do not treat the dead template as the
 storage contract.
@@ -298,14 +298,14 @@ storage contract.
 (chunk X/Z, `StartY`/`EndY`, deflated `Bytes`, `UpdateTime`, with
 `WriteAir` / `WriteEmptyLayer` / `WriteLayer` / `WriteBinaryBlock` writers).
 `AddChunkUpdateFromServer(data)` (IL=15) enqueues into it, but the method
-has **0 external call sites on b14** and nothing in the generation loop ever
+has **0 external call sites on b9** and nothing in the generation loop ever
 dequeues the queue, so even a produced record would sit unprocessed. Treat
 the channel as inert in this build (re-meshing of server block changes flows
 through the normal `PrimaryQueue`/`SecondaryQueue` staging instead).
 
 **Dead region-builder wrapper:** `DynamicMeshRegionBuilder` (4 methods:
 `AddNewItem`, `StartThread`, `RequestStop`, `get_world`; fields `Status` /
-`Result` / `Region` / `thread`) has **0 external references on b14** (both
+`Result` / `Region` / `thread`) has **0 external references on b9** (both
 RefScan and signature scan); the live region-regen path runs inside the
 `DynamicMeshChunkProcessor` pool described above.
 

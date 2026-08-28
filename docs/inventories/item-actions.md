@@ -1,4 +1,4 @@
-# Item action catalog (V3.1.0)
+# Item action catalog (V3.2.0)
 
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name, base, and code signals; no bodies).  
 **Framework:** [`../items.md`](../items.md) owns the contract; this describes each `ItemAction` leaf.  

@@ -1,4 +1,4 @@
-# Block framework (dedicated V3.1.0)
+# Block framework (dedicated V3.2.0)
 
 **Owns:** the `Block` base contract (the virtual-call surface every block type
 overrides), the `BlockValue` packed voxel word, the block-change / damage /
@@ -278,7 +278,7 @@ flowchart TB
   CVC --> CU[CheckUpdate<br/>relight / remesh / notify]
 ```
 
-**`OnBlockReset` restores meta state (V3.1.0 b14).** The base is a no-op
+**`OnBlockReset` restores meta state (V3.2.0 b9).** The base is a no-op
 (IL=1). `BlockHazard.OnBlockReset` (IL=33) and `BlockLight.OnBlockReset`
 (IL=35) are both server-gated and skip multiblock children. The two share a
 meta-bit split: **bit 0 = original (prefab) state, bit 1 = runtime state**
@@ -347,7 +347,7 @@ is **server-authoritative**: a client-originated change is a request, answered b
 `NetPackageSetBlockResponse` (`0 Success`, `1 PowerBlockLimitExceeded`,
 `2 StorageBlockLimitExceeded`).
 
-**Entry chain (V3.1.0 b14):** `World.SetBlock(pos, bv, bNotify, updateLight)`
+**Entry chain (V3.2.0 b9):** `World.SetBlock(pos, bv, bNotify, updateLight)`
 (IL=9) delegates straight to `ChunkCluster.SetBlock(BlockValueRef(pos), bv,
 bNotify, updateLight)` (IL=13), which fills the defaults (change BV only, no
 density) and calls the 10-arg dispatcher (IL=48). That dispatcher switches on
@@ -463,7 +463,7 @@ fires, then the outcome branches on `d`:
 - **`d >= MaxDamage`:** call `OnBlockDestroyedBy`, whose `DestroyedResult` decides
   the fate.
 
-**Explosion destruction (`OnBlockDestroyedByExplosion`, V3.1.0 b14):** the
+**Explosion destruction (`OnBlockDestroyedByExplosion`, V3.2.0 b9):** the
 base (IL=15) fires `ChunkCluster.InvokeOnBlockDamagedDelegates(bvRef, bv,
 MaxDamage, playerThatStartedExpl)` and returns `DestroyedResult 2`. The
 per-block overrides add the reactions: `BlockMine` (IL=14) rolls a **33%**

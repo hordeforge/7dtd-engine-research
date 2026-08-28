@@ -22,7 +22,7 @@ source; nested `.Write` rows name the serializer type, whose own layout is in it
 own doc/dump. Verify a load-bearing body against its `write`/`read` IL before
 cloning.
 
-Total packages with an extractable `write()` body: **183**.
+Total packages with an extractable `write()` body: **185**.
 Not listed (no own `write()` body - inherited serialization, abstract bases, enums, or helpers): `NetPackageDirection`, `NetPackageEncryptionRequest`, `NetPackageEntityAddExpServer`, `NetPackageEntityAddScoreServer`, `NetPackageEntitySetSkillLevelServer`, `NetPackageEntityTeleport`, `NetPackageEntry`, `NetPackageInfo`, `NetPackageInventoryKeepOpen`, `NetPackageLogger`, `NetPackageMeasure`, `NetPackageMetrics`, `NetPackagePlayerDisconnect`, `NetPackageSleeperPassiveChange`.
 
 ## NetPackage
@@ -251,6 +251,14 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 3 | `data` | bytes[] |
 | 4 | `-` | i32 |
 
+## NetPackageConfirmSpawnEntity
+`write` IL=14, 2 wire field(s).
+
+| # | Source (field/getter) | Wire |
+|---:|---|---|
+| 1 | `createdEntityId` | i64 |
+| 2 | `key` | bytes[] |
+
 ## NetPackageConsoleCmdClient
 `write` IL=31, 3 wire field(s).
 
@@ -270,50 +278,42 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 1 | `cmd` | string |
 
 ## NetPackageDamageEntity
-`write` IL=176, 38 wire field(s).
+`write` IL=144, 30 wire field(s).
 
 > Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
 | 1 | `entityId` | i32 |
-| 2 | `damageSrc` | u8 |
-| 3 | `damageTyp` | u8 |
-| 4 | `strength` | u16 |
-| 5 | `hitDirection` | u8 |
-| 6 | `hitBodyPart` | i16 |
-| 7 | `movementState` | u8 |
-| 8 | `bPainHit` | bool |
-| 9 | `bFatal` | bool |
-| 10 | `bCritical` | bool |
-| 11 | `attackerEntityId` | i32 |
-| 12 | `x` | f32 |
-| 13 | `y` | f32 |
-| 14 | `z` | f32 |
-| 15 | `blockPos` | `StreamUtils.Write` |
-| 16 | `hitTransformName` | string |
-| 17 | `x` | f32 |
-| 18 | `y` | f32 |
-| 19 | `z` | f32 |
-| 20 | `x` | f32 |
-| 21 | `y` | f32 |
-| 22 | `damageMultiplier` | f32 |
-| 23 | `random` | f32 |
-| 24 | `bIgnoreConsecutiveDamages` | bool |
-| 25 | `bIsDamageTransfer` | bool |
-| 26 | `bDismember` | bool |
-| 27 | `bCrippleLegs` | bool |
-| 28 | `bTurnIntoCrawler` | bool |
-| 29 | `bonusDamageType` | u8 |
-| 30 | `StunType` | u8 |
-| 31 | `StunDuration` | f32 |
-| 32 | `bFromBuff` | bool |
-| 33 | `bIgnorePartyShare` | bool |
-| 34 | `ArmorSlot` | u8 |
-| 35 | `ArmorSlotGroup` | u8 |
-| 36 | `ArmorDamage` | u16 |
-| 37 | `attackingItem` | bool |
-| 38 | `attackingItem` | `ItemValue.Write` |
+| 2 | `flags` | u32 |
+| 3 | `damageSrc` | u8 |
+| 4 | `damageTyp` | u8 |
+| 5 | `strength` | u16 |
+| 6 | `hitDirection` | u8 |
+| 7 | `hitBodyPart` | i16 |
+| 8 | `movementState` | u8 |
+| 9 | `attackerEntityId` | i32 |
+| 10 | `x` | f32 |
+| 11 | `y` | f32 |
+| 12 | `z` | f32 |
+| 13 | `blockPos` | `StreamUtils.Write` |
+| 14 | `hitTransformName` | string |
+| 15 | `x` | f32 |
+| 16 | `y` | f32 |
+| 17 | `z` | f32 |
+| 18 | `x` | f32 |
+| 19 | `y` | f32 |
+| 20 | `KillXPScale` | f32 |
+| 21 | `damageMultiplier` | f32 |
+| 22 | `random` | f32 |
+| 23 | `bonusDamageType` | u8 |
+| 24 | `StunType` | u8 |
+| 25 | `StunDuration` | f32 |
+| 26 | `ArmorSlot` | u8 |
+| 27 | `ArmorSlotGroup` | u8 |
+| 28 | `ArmorDamage` | u16 |
+| 29 | `attackingItem` | bool |
+| 30 | `attackingItem` | `ItemValue.Write` |
 
 ## NetPackageDebug
 `write` IL=34, 5 wire field(s).
@@ -1324,18 +1324,6 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 |---:|---|---|
 | 1 | `equipment` | `Equipment.Write` |
 
-Pinned 2026-08-26: body = `NetPackageEntityTargeted` base (entityId i32) +
-`Equipment` body. `Equipment.Write` (IL=77) / `Equipment.Read` (IL=93),
-symmetric: `byte` count-marker (always **4** from the stock writer; the
-reader maps <= 2 → 5 slots, == 3 → 8, >= 4 → `m_slots.Length` = **12**) |
-N × (`ItemValue.Write`/`ReadOrNull`: byte 0 = empty, 1 = the value) | N ×
-cosmetic i32 (item-type id or 0, `CosmeticMappingStringID`) | i32 unlocked
-count | count × i32. The client sends it whenever `bPlayerEquipmentChanged`
-flips (an armor swap, items.md); `ProcessPackage` (IL=56) applies via
-`Equipment.Apply(equipment, false)` on the target + rebroadcasts flags 192
-excluding the sender. The server's role is apply + relay (zdtd
-`applyEquipmentBody` + the C2S handler).
-
 ## NetPackagePlayerId
 `write` IL=21, 4 wire field(s).
 
@@ -1472,12 +1460,20 @@ excluding the sender. The server's role is apply + relay (zdtd
 | 4 | `z` | i32 |
 | 5 | `removing` | bool |
 
-## NetPackagePOIAround
-`write` IL=15, 1 wire field(s).
+## NetPackagePOIMetadataRequest
+`write` IL=4, 0 wire field(s).
+
+_No BinaryWriter/nested Write calls detected (empty body: only the base handle, or fully helper-delegated)._
+
+## NetPackagePOIMetadataResponse
+`write` IL=27, 2 wire field(s).
+
+> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
-| 1 | `ms` | i32 (list/array count) |
+| 1 | `metadatas` | i32 (list/array count) |
+| 2 | `Item` | `POIMetadata.Write` |
 
 ## NetPackagePOIWaypoint
 `write` IL=31, 5 wire field(s).
@@ -2163,7 +2159,7 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 22 | `progressionsData` | bytes[] |
 
 ## EntityCreationData
-`write` IL=362, 57 wire field(s).
+`write` IL=372, 59 wire field(s).
 
 > Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
 
@@ -2226,6 +2222,8 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 55 | `belongsPlayerId` | i32 |
 | 56 | `orderState` | i32 |
 | 57 | `stressAmount` | f32 |
+| 58 | `requestedBy` | i64 |
+| 59 | `requestKey` | bytes[] |
 
 ## Equipment
 `Write` IL=77, 6 wire field(s).
@@ -2482,6 +2480,20 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 9 | `chopsName` | string |
 | 10 | `beardName` | string |
 | 11 | `eyeColor` | string |
+
+## POIMetadata
+`Write` IL=33, 8 wire field(s).
+
+| # | Source (field/getter) | Wire |
+|---:|---|---|
+| 1 | `position` | `StreamUtils.Write` |
+| 2 | `size` | `StreamUtils.Write` |
+| 3 | `rotation` | u8 |
+| 4 | `tier` | u8 |
+| 5 | `traderArea` | bool |
+| 6 | `prefabName` | string |
+| 7 | `tags` | string |
+| 8 | `questTags` | string |
 
 ## Serializable
 `Write` IL=17, 4 wire field(s).

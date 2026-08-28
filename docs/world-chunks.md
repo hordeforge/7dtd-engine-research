@@ -1,10 +1,10 @@
-# World and chunk pipeline (dedicated V3.1.0)
+# World and chunk pipeline (dedicated V3.2.0)
 
 **Owns:** world tick, generateTerrain trampoline, load/send (observer streaming), SetBlock path (generic engine).  
 **Index math:** §2 below + [`terrain-height.md`](terrain-height.md).  
 **Save path:** [`save-region.md`](save-region.md).  
 **Product Streamed inject:** `7dtd-realearth/docs/realearth-runtime.md`.  
-**Dumps:** `../il/loop-complete-v3.1.0/`, `../il/realearth-surfaces-v3.1.0/`, `../il/dedi-complete-v3.1.0/`.  
+**Dumps:** `../il/loop-complete-v3.2.0/`, `../il/realearth-surfaces-v3.2.0/`, `../il/dedi-complete-v3.2.0/`.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 ---
@@ -111,7 +111,7 @@ value widened to a `ulong` (`PrefabChunk` stubs no-op).
 layer's `bOnlyTerrain` compaction flag (out-of-range index → true, missing
 layer → false; `PrefabChunk` stubs false).
 
-**Block read surface (V3.1.0 b14):** `World.GetBlock(x, y, z)` (IL=13)
+**Block read surface (V3.2.0 b9):** `World.GetBlock(x, y, z)` (IL=13)
 delegates to `ChunkCluster.GetBlock` and returns `BlockValue.Air` when the
 `ChunkCache` is null (uninitialized world). `WorldBase.GetBlock(Vector3i)` /
 `GetBlock(BlockValueRef)` (both IL=4) are the `IBlockAccess`
@@ -256,7 +256,7 @@ Interfaces are unpatchable; patch concrete generators / provider.
 ### 4.0 Client chunk streaming (verified)
 
 **When:** every full `UpdateTick`, after `NetEntityDistribution.OnUpdateEntities`
-(Xref V3.1.0 b14: sole caller of `SendChunksToClients` is `GameManager.UpdateTick`
+(Xref V3.2.0 b9: sole caller of `SendChunksToClients` is `GameManager.UpdateTick`
 IL_00E6). `NetPackageChunk.Setup` call sites (4): two from `SendChunksToClients`
 (first-load and reload paths), plus flat/disc terrain `RebuildTerrain` paths that
 re-push overwrite chunks. There is no side-thread `write` of the package body
@@ -408,7 +408,7 @@ survive a non-forced unload).
 So a chunk with **any TE or trigger** always needs saving, even if `isModified`
 is false. Pure air + no entities can be clean.
 
-**`isModified` writers (field Xref, V3.1.0 b14 sample):** set true (or cleared)
+**`isModified` writers (field Xref, V3.2.0 b9 sample):** set true (or cleared)
 from block/light/water/texture mutators (`SetBlockRaw`, `SetLight`, `SetWater*`,
 `SetTextureFull`, `FillBlockRaw`, …), TE add/remove, entity tracking adjust,
 load/save/reset/ctor paths, and biome spawn count helpers. A network chunk blob
@@ -692,7 +692,7 @@ client chunk-lifecycle history fed by `AddChunkSync` / `RemoveChunk` /
 `NotifyOnChunksFinishedLoading()` (IL=10) invokes
 `OnChunksFinishedLoadingDelegates` when set (fired from `AddChunkSync`) and
 latches `bFinishedLoadingDelegateCalled`.
-`GetIndexedBlocks(name)` (IL=71, **0 call sites on b14**) scans
+`GetIndexedBlocks(name)` (IL=71, **0 call sites on b9**) scans
 `GetChunkArrayCopySync`, skips chunks with `InProgressUnloading` (under the
 chunk monitor), and collects `chunk.ToWorldPos(p)` for every entry of
 `chunk.IndexedBlocks[name]` into one world-position list - the named
@@ -718,7 +718,7 @@ Silent in-chunk write used by load, falling, inject, and some TE paths:
 Does **not** fire light/mesh/stability RPC; callers that need those use full
 `SetBlock` / `SetBlockRPC`.
 
-### 5.0a `ChunkBlockLayer` storage (V3.1.0 b14)
+### 5.0a `ChunkBlockLayer` storage (V3.2.0 b9)
 
 Each of the 64 `ChunkBlockLayer` objects (one per 4-block Y band) stores the
 block words with a **split-byte layout** and a same-value compression:
@@ -749,7 +749,7 @@ non-terrain block landing in the layer clears `bOnlyTerrain`;
 `CheckOnlyTerrain()` (IL=153) re-derives it by scanning the 24-bit array for
 all-zero upper words.
 
-**Chunk map leaves (V3.1.0 b14):** `GetHeight(x, z)` (IL=9) reads
+**Chunk map leaves (V3.2.0 b9):** `GetHeight(x, z)` (IL=9) reads
 `m_HeightMap[z*16 + x]` (the 256-byte column-height byte map) and
 `GetHeight(blockOffset)` (IL=5) is the direct index. `IsWater(x, y, z)`
 (IL=9) is `GetWater(x, y, z).HasMass()`. `SetTopSoilBroken(x, z)` (IL=36)
@@ -758,7 +758,7 @@ sets a bit in the `m_bTopSoilBroken` bitfield
 "topsoil disturbed" marker the terrain-dig/upgrade and explosion paths set
 on affected columns.
 
-**Water reads (V3.1.0 b14):** `Chunk.GetWater(x, y, z)` (IL=8) is
+**Water reads (V3.2.0 b9):** `Chunk.GetWater(x, y, z)` (IL=8) is
 `WaterValue.FromRawData(chnWater.Get(x, y, z))` - the water cell decoded
 from the `ChunkBlockChannel` storage (see
 [`save-region.md`](save-region.md) §2); `ChunkCluster.GetWater(pos)`
@@ -880,11 +880,11 @@ commit+replicate wrapper: `ChangeBlocks(persistentPlayerId, changes)`, then
 myPlayerId)`; on the server `SetBlocksOnClients(-1, package)`, else
 `SendToServer`.
 
-## 5.2 Network-mode `Chunk.write` body layout (V3.1.0)
+## 5.2 Network-mode `Chunk.write` body layout (V3.2.0)
 
 The `serializedData` payload inside `NetPackageChunk` is the **network-mode
 `Chunk.write(PooledBinaryWriter, Boolean)`** (IL=601, dump
-[`../il/realearth-surfaces-v3.1.0/Chunk_write_PooledBinaryWriter_Boolean_il.txt`](../il/realearth-surfaces-v3.1.0/Chunk_write_PooledBinaryWriter_Boolean_il.txt)).
+[`../il/realearth-surfaces-v3.2.0/Chunk_write_PooledBinaryWriter_Boolean_il.txt`](../il/realearth-surfaces-v3.2.0/Chunk_write_PooledBinaryWriter_Boolean_il.txt)).
 This differs from the save format (save-region.md §2): the network body is
 the map+channel plane order below, the save file additionally carries
 stability and raw map arrays. Field order (IL-cited at each step):
@@ -1019,7 +1019,7 @@ and `GameManager.Instance.prefabLODManager.TriggerUpdate()`.
 ## Stability, falling blocks, DamageBlock and deco subbiomes (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus).
+numbers are from that dump; the tracked `il/` sets are the V3.2.0 corpus).
 
 ### Stability runs on clients too
 
@@ -1155,7 +1155,7 @@ if two weather packages arrive in the same `Time.frameCount`.
 ## Changelog
 
 - **2026-08-23:** §5.2 added: the network-mode `Chunk.write(PooledBinaryWriter,
-  Boolean)` body layout (IL=601, realearth-surfaces-v3.1.0 dump) - header
+  Boolean)` body layout (IL=601, realearth-surfaces-v3.2.0 dump) - header
   X/Y/Z + SavedInWorldTicks, 64 block layers, then the maps region in order
   heightmap / terrain height / m_bTopSoilBroken(32) / biomes(256) /
   biome intensities(1536) / dominant biomes / custom data / normals, then the

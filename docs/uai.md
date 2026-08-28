@@ -1,4 +1,4 @@
-# Utility AI packages (`UAI.*`) (dedicated V3.1.0)
+# Utility AI packages (`UAI.*`) (dedicated V3.2.0)
 
 **Owns:** the managed `UAI.*` namespace, the data-driven utility AI that runs when
 an entity class declares `AIPackages`: the package/action/consideration/task data
@@ -249,7 +249,7 @@ not an `EntityAlive`) and never read; `Finished`, `TaskStartTimeStamp`, and
 `Data` are only touched by `ClearData`. The per-action scratch slot exists but no
 stock task uses it.
 
-### 5.2 Built-in tasks (V3.1.0)
+### 5.2 Built-in tasks (V3.2.0)
 
 All five subclasses parse their XML attributes lazily in
 `initializeParameters` (guarded by `parmsInitialized`, once per shared instance).
@@ -428,7 +428,7 @@ decision once `AIPackages` is enabled.
 
 ```bash
 cd tools && ./build.sh --skip-legacy
-MONO_PATH=bin mono bin/DumpAll.exe "$ASM" ../il/full-v3.1.0 UAI
+MONO_PATH=bin mono bin/DumpAll.exe "$ASM" ../il/full-v3.2.0 UAI
 ```
 
 ## Changelog

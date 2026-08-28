@@ -1,9 +1,9 @@
-# Managers and ModEvents (dedicated V3.1.0)
+# Managers and ModEvents (dedicated V3.2.0)
 
 **Owns:** gmUpdate-relevant manager Update ILs + full `ModEvents` field list.  
 **Hub:** [`INDEX.md`](INDEX.md).  
 **Raw inventory (all Update* names):** [`inventories/manager-updates.md`](inventories/manager-updates.md).  
-**Dumps:** [`../il/dedi-complete-v3.1.0/`](../il/dedi-complete-v3.1.0) §2, §11; [`../il/loop-complete-v3.1.0/`](../il/loop-complete-v3.1.0).  
+**Dumps:** [`../il/dedi-complete-v3.2.0/`](../il/dedi-complete-v3.2.0) §2, §11; [`../il/loop-complete-v3.2.0/`](../il/loop-complete-v3.2.0).  
 **Loop context:** [`loop.md`](loop.md) §10.
 
 ---
@@ -160,7 +160,7 @@ Core types include `GameEventManager` and `GameEventAction` sequences (content-d
   (15/22 GameCore, exact per-event counts); mod delta is exactly one anonymous
   GameStartDone handler. See residuals.md.
 - **2026-08-09:** ModEvents subscriber sets observed at runtime (reflection
-  receiver dump); 15/22 events GameCore-subscribed on stock V3.1.0 +
+  receiver dump); 15/22 events GameCore-subscribed on stock V3.2.0 +
   EfficientServer + apm-bridge; those mods subscribe nothing. See residuals.md.
 - **2026-08-07:** DecoManager.UpdateTick IL=330 (thread queues, checkDelay 20,
   player deco-chunk ring GamePrefs 173, UpdateDecorationsCo).

@@ -1,4 +1,4 @@
-# Quest and challenge systems (dedicated V3.1.0)
+# Quest and challenge systems (dedicated V3.2.0)
 
 **Owns:** the two player-progression scripting systems: the quest engine
 (`Quest`, `QuestClass`, `QuestJournal`, `BaseObjective` + objective verbs,
@@ -510,6 +510,13 @@ calls `EndChallenge` (remove hooks), fires
 challenge reward is a `GameEvent.*` sequence, not an inline reward list. Groups
 with `RedeemAlways` redeem automatically; others wait for the player to claim.
 
+**V3.2.0 signature change:** `Challenge.CompleteChallenge` and
+`Challenge.HandleComplete` gained a `forceComplete` parameter
+(`CompleteChallenge(forceRedeem, giveReward, forceComplete)` /
+`HandleComplete(showTooltip, forceComplete)`); `Redeem()` grew from IL=27 to
+IL=111 (conditional reward paths). `CheckObjectiveComplete(handleComplete)`
+on the objective base classes grew one IL (skip-trigger re-entry guard).
+
 ```mermaid
 stateDiagram-v2
   [*] --> Active: ChallengeClass.Clone -> StartChallenge<br/>(auto-complete qualifying objectives, add hooks)
@@ -805,8 +812,8 @@ section 6.17.
 ## 11. End-to-end wire flows (verified 2026-08-09)
 
 The lifecycle steps below are the package sequences the stock server actually
-uses. Each hop is grounded in `ProcessPackage` IL from the V3.1.0
-`netpackages-v3.1.0` dumps.
+uses. Each hop is grounded in `ProcessPackage` IL from the V3.2.0
+`netpackages-v3.2.0` dumps.
 
 ### Offer and accept (trader -> player)
 
@@ -895,7 +902,7 @@ uses. Each hop is grounded in `ProcessPackage` IL from the V3.1.0
 ## Quest XML inheritance, objective serialization shapes and fail-soft Read (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers below are from that dump; the tracked `il/` sets are the V3.1.0 corpus, and older citations drift by
+numbers below are from that dump; the tracked `il/` sets are the V3.2.0 corpus, and older citations drift by
 roughly 3500 lines in the NetPackage region).
 
 **`QuestsFromXml::ParseQuest` template branch (~1390310-1390582).** A quest with a
@@ -1046,7 +1053,7 @@ In the 2026-08-05 dump: `Quest::AdvancePhase` ends at 986686;
 ## Quest POI selection (verified 2026-08-21)
 
 How a quest gets its POI rect, position data, and `POIName`. All IL sizes from
-`il/full-v3.1.0/_global/` unless noted. This is the engine behind the
+`il/full-v3.2.0/_global/` unless noted. This is the engine behind the
 `QuestPrefabManager`-style tag/tier matching the trader offers and the
 RandomPOIGoto/ClosestPOIGoto/Goto objectives.
 

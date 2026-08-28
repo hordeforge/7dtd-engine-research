@@ -1,4 +1,4 @@
-# Item framework (dedicated V3.1.0)
+# Item framework (dedicated V3.2.0)
 
 **Owns:** the item system core that runs on the server: `ItemValue` (the packed
 item instance), `ItemStack` (value plus count), `ItemClass` (the definition and
@@ -18,7 +18,7 @@ rendering); the `MinEvent` action framework internals (see
 **Evidence:** `ItemValue`, `ItemStack`, `ItemClass`, `ItemAction`,
 `ItemActionAttack`, `ItemActionRanged`, `ItemActionEat`, `ItemActionDynamic`,
 `Inventory`, `Equipment` IL (dump locally with `tools/src/DumpMethod`,
-git-ignored). Type census from `il/surface-v3.1.0/surface-types.md` (103 `Item*`
+git-ignored). Type census from `il/surface-v3.2.0/surface-types.md` (103 `Item*`
 types; 38 concrete `ItemAction` leaves, see catalog). **Hub:** [`INDEX.md`](INDEX.md).
 **Method:** [`re-methodology.md`](re-methodology.md).
 
@@ -68,7 +68,7 @@ Tag scans are linear walks of the static `ItemClass.list`:
 `HasAllTags(tags)` (null when none); `GetItemsWithTag(tags)` (IL=33)
 collects every matching class into a new list.
 
-**ItemClass leaves (V3.1.0 b14):** `CreateItemValue(name, quality,
+**ItemClass leaves (V3.2.0 b9):** `CreateItemValue(name, quality,
 caseInsensitive)` (IL=17) resolves the class and builds a fresh
 `ItemValue(id, quality, quality, false, null, 1f)`, `ItemValue.None` on a
 miss. `GetForId(id)` (IL=15) indexes the static `list` (null when out of
@@ -90,7 +90,7 @@ delegating to `Block.GetLocalizedBlockName`.
 `value is ItemClassModifier`; `get_IsShapeHelperBlock` (IL=12) is
 `value is ItemClassBlock && block.SelectAlternates`.
 
-**The block bridge (V3.1.0 b14):** `ItemClassBlock.GetBlock()` (IL=5) is
+**The block bridge (V3.2.0 b9):** `ItemClassBlock.GetBlock()` (IL=5) is
 `Block.list[itemId]`; `GetBlockValueFromItemValue(iv)` (IL=15) is the
 item->block conversion every held/placed block item goes through - with
 `Block.SelectAlternates` it returns `GetAltBlockValue(iv.Meta)` (the item's
@@ -118,7 +118,7 @@ ItemActionData/BlockValue/Position context, `QuestEventManager.BlockPlaced`,
 `decInventoryLater` coroutine consumes one, and the `placeblock` sound fires
 with `DropTimeDelay = 0.5`.
 
-**Skill book (`ItemActionGainSkill`, V3.1.0 b14):** `ExecuteAction`
+**Skill book (`ItemActionGainSkill`, V3.2.0 b9):** `ExecuteAction`
 (IL=24) is the read latch - release + `Delay` gate, `RightArmAnimationUse =
 true`, `bReadingStarted = true`. `OnHoldingUpdate` (IL=143) grants once the
 read time passes the hold-type `RayCast` animation delay: for each
@@ -131,7 +131,7 @@ with the `ProgressionValue` context, the `ttSkillLevelUp` tooltip, and
 shares the identical read-latch `ExecuteAction` (IL=24) with its own
 recipe-grant path.
 
-**Placement math and commit (V3.1.0 b14):** `BlockPlacement.OnPlaceBlock`
+**Placement math and commit (V3.2.0 b9):** `BlockPlacement.OnPlaceBlock`
 (IL=235) is the base position/rotation resolver the placement action drives:
 a hit block that `CanBlocksReplaceOrGroundCover` snaps the face to Top; the
 hit `blockFace` supplies the initial rotation (`face << 2`), then the
@@ -190,7 +190,7 @@ recursive nested `ItemValue`s for installed mods.
 | 9a | Modifications | per slot: `bool` present + recursive `ItemValue.Write` | installed mods/parts, one nested `ItemValue` each |
 | 10 | CosmeticMods count | `byte` | as above (also skipped for `ItemClassModifier`) |
 | 10a | CosmeticMods | per slot: `bool` present + recursive `ItemValue.Write` | |
-| 11 | `Activated` | `byte` | on/off toggle (flashlight, etc.) |
+| 11 | `Flags` | `byte` | **V3.2.0:** bitfield replacing the plain `Activated` byte. bit0 = activated (on/off toggle: flashlight, etc.), bit1 = `WasCombined` (item was combined in the combine station). Exposed as `ItemValue.Activated`/`ItemValue.WasCombined` property pairs; same wire position and width as the V3.1.0 `Activated` byte, so the wire layout is unchanged |
 | 12 | `SelectedAmmoTypeIndex` | `byte` | which ammo type is loaded |
 | 13 | `Seed` | `u16` | procedural seed (zeroed when `type == 0`) |
 | 14 | TextureFullArray present | `bool` | `!IsDefault`; if present, `TextureFullArray.Write` follows (painted textures) |
@@ -261,7 +261,7 @@ with the quirk that a **null dict** yields a boxed `false` instead of null.
 trace), and `TryCreate`s + `Add`s new keys (the typed overloads carry the tag
 1/2/3 for float/int/string).
 
-**Stacking predicates (V3.1.0 b14):** `ItemStack.CanStackWith(other,
+**Stacking predicates (V3.2.0 b9):** `ItemStack.CanStackWith(other,
 allowPartialStack)` (IL=46) requires both stacks non-empty, same `type`, and
 for block ids (`type < Block.ItemsStartHere`) an equal `TextureFullArray` -
 unless the item is an `IsShapeHelperBlock` (shape helpers stack regardless of
@@ -338,7 +338,7 @@ the id is not already in `m_unlockedCosmetics`, appends it and fires the
 `CosmeticUnlocked(name)` event - so scrapping a crafted item at a
 workstation permanently unlocks its cosmetic variant for the player.
 
-**`ItemClassModifier` selection primitives (V3.1.0 b14):**
+**`ItemClassModifier` selection primitives (V3.2.0 b9):**
 `GetItemModWithAnyTags(tags, installedModTypes, random)` (IL=53) scans
 `ItemClass.list` for `ItemClassModifier` entries that are **not** tagged
 `installedModTypes` (`HasAnyTags` false), whose `InstallableTags` overlaps
@@ -436,7 +436,7 @@ the given level).
 
 ### ItemValue metadata and property overrides
 
-**Typed metadata (V3.1.0 b14):** `ItemValue.Metadata :
+**Typed metadata (V3.2.0 b9):** `ItemValue.Metadata :
 Dictionary<string, TypedMetadataValue>` is lazy-allocated on the first write.
 `TypedMetadataValue` pairs a value with a `TypeTag` (`Float=1`, `Int=2`,
 `String=3`). The typed setters box into `SetMetadata(key, value, typeTag)`
@@ -577,7 +577,7 @@ draws or uses the item: `StartHolding`, `OnHoldingUpdate`, `StopHolding`,
 that slot's runtime `ItemActionData` (pulled from
 `ItemInventoryData.actionData[slot]`).
 
-**`ItemAction` base gates (V3.1.0 b14):** `CanRepair(item)` (IL=37) returns a
+**`ItemAction` base gates (V3.2.0 b9):** `CanRepair(item)` (IL=37) returns a
 status code: **0** when `ItemMaxDegrationAmount == 0` (no degradation in this
 game) or the item has no `DurabilityModifier` metadata; **1** when
 `DurabilityModifier - ItemMaxDegrationAmount < ItemMaxDegrationAmount`; **2**
@@ -588,7 +588,7 @@ holds the action until consumption completes). `IsAimingGunPossible(data)` is
 true in the base and `ItemActionRanged` (IL=4) restricts it to
 `NotReloading(data)` (no aiming while reloading).
 
-**`ItemClass` subclass `Init` overrides (V3.1.0 b14)** run after the base
+**`ItemClass` subclass `Init` overrides (V3.2.0 b9)** run after the base
 1196-IL `Init` and parse the subclass's tail properties:
 
 - `ItemClassBlock` (IL=56) mirrors the linked `Block` definition onto the
@@ -1035,7 +1035,7 @@ when it exceeds `MagazineItemNames.Length`, and sets
 `isChangingAmmoType = true` (the ammo-type-swap latch consumed by
 `CompleteReload`, IL=176).
 
-**The reload gate and cancel (V3.1.0 b14):** `CanReload(data)` (IL=93) is
+**The reload gate and cancel (V3.2.0 b9):** `CanReload(data)` (IL=93) is
 true only when all of: not already reloading (`NotReloading`), a local
 player is not `CancellingInventoryActions`, the magazine is below capacity or
 the gun is jammed (`isJammed` forces a reload), and ammo is available - the
@@ -1084,7 +1084,7 @@ snapping to the target once the delta is below 1e-5 (the
 `getDirectionRandomOffset` above, so aim steadies while aiming/crouching/
 still and blooms while moving or right after firing.
 
-**Throw family (V3.1.0 b14):** `ItemActionThrowAway.ExecuteAction`
+**Throw family (V3.2.0 b9):** `ItemActionThrowAway.ExecuteAction`
 (IL=137) is the charge/release state machine: press latches
 `m_bActivated` + `m_ActivateTime`; release (not in cooldown) sets
 `m_bReleased`, fires the avatar `itemThrownAwayTriggerHash` event, and
@@ -1103,7 +1103,7 @@ projectile entity. `ItemActionThrownWeapon.ExecuteAction` (IL=117) is the
 ranged twin: same charge/release but with `WeaponPreFire`/`WeaponFire`
 avatar events and `HandleJamSound` on an empty release.
 
-**Catapult (bow) family (V3.1.0 b14):** `ItemActionCatapult.ExecuteAction`
+**Catapult (bow) family (V3.2.0 b9):** `ItemActionCatapult.ExecuteAction`
 (IL=163) is the draw-and-release state machine over the ranged base. While
 reloading it only stamps `m_LastShotTime` (no fire); the rate gate is the
 inherited `Delay`. An empty weapon (`!InfiniteAmmo && Meta == 0`) with
@@ -1121,7 +1121,7 @@ charged. `GetStrainPercent` (IL=10) reads `lastAttackStrainPercent` off the
 launcher data (0 without it); `CanReload` (IL=15) cancels a drawn bow first,
 then delegates to the ranged gate.
 
-**Launcher (rocket) family (V3.1.0 b14):** `ItemActionLauncher.fireShot`
+**Launcher (rocket) family (V3.2.0 b9):** `ItemActionLauncher.fireShot`
 (IL=5) is a stub - it sets `hitEntity = true` and returns zero, because the
 launcher does not use the hit ray. The projectile is a **GameObject with a
 `ProjectileMoveScript`**, not an entity: `instantiateProjectile(data,
@@ -1140,7 +1140,7 @@ holdingEntity, hitmaskOverride, 0, false)` per burst and removes it - the
 rocket flies through the projectile script (physics + the ammo's
 `ItemActionProjectile`).
 
-**Projectile runtime (`ProjectileMoveScript`, V3.1.0 b14):** the
+**Projectile runtime (`ProjectileMoveScript`, V3.2.0 b9):** the
 GameObject script the launcher wires (above) flies and detonates the shot.
 `Fire(idealStartPos, dirOrPos, firingEntity, hmOverride, radius,
 isBallistic)` (IL=236): `hitMask = hmOverride != 0 ? hmOverride : 80`;
@@ -1172,7 +1172,7 @@ parses the ammo XML that feeds the runtime above - `Explosion` from
 data), `FlyTime` / `LifeTime` / `DeadTime` / `Velocity` / `CollisionRadius`
 floats, and `Gravity` defaulting to **-9.81** before the optional override.
 
-**Ranged ammo leaves (V3.1.0 b14):** `GetMaxAmmoCount(data)` (IL=25) is
+**Ranged ammo leaves (V3.2.0 b9):** `GetMaxAmmoCount(data)` (IL=25) is
 `GetValue(passive 9 MagazineSize, iv, BulletsPerMagazine, holder, ...)` - the
 magazine capacity goes through the `MagazineSize` passive against the class's
 base. `checkAmmo` (IL=12) is `InfiniteAmmo || iv.Meta > 0`; `HasInfiniteAmmo`
@@ -1185,7 +1185,7 @@ and calls `GameManager.ItemReloadServer(entityId)` (server-authoritative
 reload). `isJammed(iv)` (IL=5) reads the `scGunIsJammed` metadata key (the jam
 flag lives in item metadata).
 
-**`ItemActionThrownWeapon` (V3.1.0 b14):** `instantiateProjectile(data)`
+**`ItemActionThrownWeapon` (V3.2.0 b9):** `instantiateProjectile(data)`
 (IL=122) clones the held item's model game object, detaches it, forces material
 instances, positions it at the model transform, moves it to layer 0, and adds a
 `ThrownWeaponMoveScript` bound to the action / item / value / owner id; it then
@@ -1201,7 +1201,7 @@ hitmaskOverride, m_ThrowStrength)` and `inventory.DecHoldingItem(1)`.
 PowerAttack trigger; `FireEvent` MinEvents; set `Attacking` on data. Per-frame hit
 resolution continues in dynamic `Raycast`/`hitTarget` while `Attacking`.
 
-**Dynamic-melee attack gate and end (V3.1.0 b14):** `canStartAttack`
+**Dynamic-melee attack gate and end (V3.2.0 b9):** `canStartAttack`
 (IL=198) allows a swing only when all of: not already `Attacking`; a
 third-person local player passes the TP-camera check
 (`StartTPCameraLockTimer` + `TPCameraCheckResult`); the attack interval has
@@ -1255,13 +1255,13 @@ worn items through the same GetValue call's entity context.
 server-side at the dig choke instead of trusting the client's
 `HarvestOnAttack` (authority rule): `BlockDef.harvest_drops` parses the
 block's `<drop event="Harvest">` rows (count via `ParseMinMaxCount`, prob ×
-the block's `ResourceScale` property; zero b14 blocks set it), inherits
+the block's `ResourceScale` property; zero b9 blocks set it), inherits
 through `Extends` per `CopyDroppedFrom` (own wins per item name), and rolls
 per `Block.DropItemsOnEvent` IL=246 (RandomRange(min,max+1), skip 0, drop
 when random < prob; the `tool_category`/`tag` fields are stored but never
 read by the roll; they feed the item-side bonus legs). Rolled stacks grant
 to the breaker's inventory; overflow becomes a ground `ItemDropServer`
-bag. The `[recipe]`/`*` names appear on no b14 Harvest row (fail closed).
+bag. The `[recipe]`/`*` names appear on no b9 Harvest row (fail closed).
 
 **`ItemActionDynamicMelee.Raycast` (IL=203)** is the sweep that resolves a
 swing: no melee from a vehicle; a local player pays the stamina cost here
@@ -1495,7 +1495,7 @@ only): on emptying it runs `HandleTurningOffHoldingFlashlight()` +
 `quickSwapSlotIdx` when it still holds the same item id, else scans for the
 first slot with that id (**-1** when absent or never armed).
 
-**Held-slot accessors (V3.1.0 b14):** `get_holdingItemIdx()` (IL=3) is the raw
+**Held-slot accessors (V3.2.0 b9):** `get_holdingItemIdx()` (IL=3) is the raw
 `m_HoldingItemIdx`. `get_holdingItem()` (IL=20),
 `get_holdingItemItemValue()` (IL=16), `get_holdingItemStack()` (IL=17), and
 `get_holdingItemData()` (IL=23) all read `slots[m_HoldingItemIdx]` and fall
@@ -1658,7 +1658,7 @@ server-authoritative slot write; `SetItem(idx, ItemStack)` IL=9 wraps it with
 (`HashSet<IInventoryChangedListener>`) calling `OnInventoryChanged(this)` on
 each - the single fan-out point behind every slot write.
 
-**Read accessors (V3.1.0 b14):** `GetItem(idx)` (IL=6) / `GetItemStack(idx)`
+**Read accessors (V3.2.0 b9):** `GetItem(idx)` (IL=6) / `GetItemStack(idx)`
 (IL=6) read `slots[idx].itemStack`; `GetItemInSlot` (IL=15) and
 `GetItemDataInSlot` (IL=14) fall back to `bareHandItem` /
 `bareHandItemInventoryData` when the slot's item class is null (empty slots
@@ -1794,7 +1794,7 @@ worn tool sells for less and a non-durable item prices full.
 `EffectManager.GetValue`; in the stock items.xml the value is written as the
 quality-tier pair `"min,max"` with `tier="1,6"` (tier == quality 1..6), so
 MaxUseTimes lerps `min + (max-min) * (quality-1)/5` - the same lerp shape as
-`TraderQualityMinMod/MaxMod`. Data scan (V3.1.0 items.xml): 133 items carry
+`TraderQualityMinMod/MaxMod`. Data scan (V3.2.0 items.xml): 133 items carry
 the pair, 15 carry a single constant (no quality scaling; e.g.
 `vehicleMinibikePlaceable` 2000, admin tools 9999), the rest have no
 DegradationMax at all (non-durable; PercentUsesLeft stays 1). Examples:
@@ -1843,6 +1843,22 @@ metadata at exactly **1** and stores it otherwise.
 scratch (magazine ammo for guns, state for other items). Both are packed in the
 `ItemValue` body (§2), so durability and quality survive save/load and replicate
 on the wire.
+
+### 7.1 Combine station (V3.2.0)
+
+Combine Station rework (V3.2.0): merging two worn items into one restored item
+now goes through a button press and marks the result. The mechanics:
+
+- `ItemValue.WasCombined` (V3.2.0 new) reads `Flags` bit 1; the wire byte at
+  the old `Activated` position now carries the combined bit (§2 row 11). A
+  combined item keeps its `cFlagsWasCombined` marker through save/load and
+  replication.
+- `ItemActionCombine` + the new `ItemActionEntryCombine` (V3.2.0 type) expose
+  the combine as a context-menu action; `TEFeatureCombine` remains the TE
+  backing the station.
+- UI: `XUiC_CombineGrid` was reworked (V3.2.0): the `result` stack is shown
+  with live durability/icon bindings and an explicit `btnCombine` button
+  (previously the grid auto-combined). See `il/full-v3.2.0/_global/XUiC_CombineGrid.il.txt`.
 
 ---
 
@@ -1929,14 +1945,14 @@ clients via `NetPackageInventoryTransactionResponse` (see
 `NetPackageItemDrop`, `NetPackageDropItemsContainer`, `NetPackageItemActionEffects`,
 `NetPackageItemReload`, `NetPackagePickupBlock` ([protocol-packages.md](protocol-packages.md) 6.21).
 
-## Held entities (V3.1.0 Henpocalypse)
+## Held entities (V3.1.0 Henpocalypse feature; unchanged on V3.2.0)
 
 New item classes: `ItemClassHeldEntity` (base), `ItemClassWildChicken`, plus
 `ItemStackGrid` for 2D stacks. Grab activation lives on `EntityAlive`
 (`InitLocalActivationCommands` / `OnEntityActivated("grab")`). Full feature
 state machine: [items.md](items.md) (held-entity item types).
 
-## ItemStack.Clone call-site triage (V3.1.0 b14)
+## ItemStack.Clone call-site triage (V3.2.0 b9)
 
 **Owns:** stock IL census of who calls `ItemStack.Clone` (instance + array overloads),
 so alloc work is attributed to real owners. Not an EfficientServer lever list
@@ -1972,7 +1988,7 @@ array and clones each non-null entry (null → `ItemStack.Empty`).
 ## ItemClass stack defaults, recipe sentinels, fuel time and the transaction wire (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the tracked `il/` sets are the V3.1.0 corpus).
+numbers are from that dump; the tracked `il/` sets are the V3.2.0 corpus).
 
 ### Stack size
 
@@ -2004,7 +2020,7 @@ default. 506 of the 630 stock recipes hit this branch.
 
 ### Item repair goes through the crafting queue
 
-**`ItemActionRepair` (V3.1.0 b14)** is the repair-tool action driving that
+**`ItemActionRepair` (V3.2.0 b9)** is the repair-tool action driving that
 path. `ExecuteAction` (IL=631) gates on: release-only, the `Delay` rate, the
 hit distance (`cDigAndBuildDistance^2`), the passive-177 `twitch_no_attack`
 gate, the TP-camera lock, and a **trader-area gate** (a valid hit inside a
@@ -2059,14 +2075,14 @@ resolves the dump cell via `TryFindDumpPosition`, and gates on the
 `ttCannotUseAtThisTime` tooltip), then latches `lastUseTime` +
 `RightArmAnimationUse`; the water is written back in `OnHoldingUpdate`.
 
-**`ItemClass.OnConvertToBlockValue(iv, blueprintBV)` (V3.1.0 b14)** is the
+**`ItemClass.OnConvertToBlockValue(iv, blueprintBV)` (V3.2.0 b9)** is the
 item->placed-block state carrier: the base (IL=2) returns the blueprint
 value unchanged; `ItemClassTorch` (IL=20) packs the item's `UseTimes` into
 the placed block's `meta = UseTimes & 15` and `meta2 = (UseTimes >> 4) &
 15` - the torch's burn state survives placement (this is the conversion
 `ItemActionPlaceAsBlock` calls with its `blockToPlace`).
 
-**Small action leaves (V3.1.0 b14):** `ItemActionActivate.ExecuteAction`
+**Small action leaves (V3.2.0 b9):** `ItemActionActivate.ExecuteAction`
 (IL=79) is press-only + `Delay` + the passive-177 twitch gate, plays
 `soundStart`, and calls `holdingItem.OnHoldingItemActivated(
 holdingItemData)` - the per-class activation hook (flashlight/candle
@@ -2085,7 +2101,7 @@ spawn takes over the holder's attack target
 (`SetAttackTarget(holder.GetAttackTarget(), 600)`) and the `soundAttack`
 plays.
 
-**`ItemActionTerrainTool` (V3.1.0 b14)** is the terrain-sculpt tool
+**`ItemActionTerrainTool` (V3.2.0 b9)** is the terrain-sculpt tool
 (dig/flatten): `ExecuteAction` (IL=46) latches `bActivated` +
 `activateTime` on press and forwards `GameManager.ItemActionEffectsServer
 (entityId, slotIdx, actionIdx, 1, zero, zero, 0)` (0 on release) - the
@@ -2227,6 +2243,7 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-08-28:** V3.2.0: ItemValue.Activated byte -> Flags bitfield (bit0 activated, bit1 WasCombined; wire-compatible); §7.1 combine-station section added (ItemActionEntryCombine, XUiC_CombineGrid rework, TEFeatureCombine).
 - **2026-08-25:** passive value curves pinned (PassiveEffect.il.txt): ModValue
   (IL=796) walks the curve segments from the top and piecewise-linearly
   interpolates between (Levels[i-1], Values[i-1]) and (Levels[i], Values[i])

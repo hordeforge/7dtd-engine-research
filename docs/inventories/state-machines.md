@@ -18,7 +18,7 @@ that is only ever a target reads one lower.
 |---|---|---:|
 | 2. Buff instance lifecycle (state machine) | [buffs.md](../buffs.md) | 6 |
 | 2.3 `ProcessDamageResponseLocal` (IL=903) apply side effects | [combat-damage.md](../combat-damage.md) | 10 |
-| 3.1 `OnEntityDeath` (IL=146) / `dropItemOnDeath` (IL=105) | [combat-damage.md](../combat-damage.md) | 9 |
+| 3.1a Kill XP server flow (V3.2.0 rework) | [combat-damage.md](../combat-damage.md) | 9 |
 | 2.0 Parent chain: `OnUpdateEntity` (IL=457) then `OnUpdateLive` (IL=363) | [entity-ai.md](../entity-ai.md) | 7 |
 | Path request lifecycle | [entity-ai.md](../entity-ai.md) | 6 |
 | 2. Survival over-time loop (state machine) | [entity-stats.md](../entity-stats.md) | 7 |
@@ -113,7 +113,7 @@ that is only ever a target reads one lower.
 | 1.1 World save state machine (managed) | [save-region.md](../save-region.md) | 7 |
 | 2.1 Storm state machine (per biome) | [weather-environment.md](../weather-environment.md) | 4 |
 | 4.1 Chunk progress flags (stock `InProgress*` volatiles) | [world-chunks.md](../world-chunks.md) | 11 |
-| 5.2 Network-mode `Chunk.write` body layout (V3.1.0) | [world-chunks.md](../world-chunks.md) | 5 |
+| 5.2 Network-mode `Chunk.write` body layout (V3.2.0) | [world-chunks.md](../world-chunks.md) | 5 |
 | 4.1 Coroutine driver and worker task | [world-generation.md](../world-generation.md) | 8 |
 
 ## Changelog

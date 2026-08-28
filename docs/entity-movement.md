@@ -6,7 +6,7 @@ Stock entity movement for walkers (zombies, animals, traders): the AI
 `MoveHelper` -> `Entity::Move` -> CharacterController chain the dedicated
 server runs each tick, and the physics surface a clone must reproduce for the
 client-visible result (positions, falls, wall collisions). `verified` from
-full-v3.1.0 dumps unless marked.
+full-v3.2.0 dumps unless marked.
 
 ## Call chain (per tick, `OnUpdateLive`)
 
@@ -22,7 +22,7 @@ Entity.ccMove(vel)                         (motion * dt -> hitMove)
                                                       stepOffset, gravity, onGround)
 ```
 
-`EntityMoveHelper_UpdateMoveHelper_il.txt` (deeper-v3.1.0) maps the behavior
+`EntityMoveHelper_UpdateMoveHelper_il.txt` (deeper-v3.2.0) maps the behavior
 half: stuck checks (`ResetStuckCheck`), jump (`StartJump` when blocked up /
 `CanEntityJump`), dig (`DigStart`/`DigUpdate`), `CheckAreaBlocked` /
 `CheckBlockedUp` / `CheckEntityBlocked` / `CheckWorldBlocked`,

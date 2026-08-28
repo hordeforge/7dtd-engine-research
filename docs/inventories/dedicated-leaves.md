@@ -1,4 +1,4 @@
-# Dedicated leaf types (V3.1.0)
+# Dedicated leaf types (V3.2.0)
 
 **Kind:** per-leaf reference for small dedicated-relevant types that execute on a
 headless server but are each too minor for their own doc. Each row is a reachable

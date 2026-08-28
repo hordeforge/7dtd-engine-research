@@ -1,10 +1,10 @@
-# Wire package body catalog (V3.1.0 pin; IL-derived)
+# Wire package body catalog (V3.2.0 pin; IL-derived)
 
 **Owns:** per-`NetPackage` wire metadata (channel/compress/direction/auth) and
 hand-annotated `read`/`write` byte layouts beyond the join-critical set in
 [`protocol.md`](protocol.md).
 **Hub:** [`INDEX.md`](INDEX.md).  
-**Pin:** dedicated V **3.1.0 (b14)**; dump set dir name `il/netpackages-v3.1.0/`
+**Pin:** dedicated V **3.2.0 (b9)**; dump set dir name `il/netpackages-v3.2.0/`
 is historical (regenerate against live ASM).
 **Not:** framing/join/challenge (that is [`protocol.md`](protocol.md)); visual
 frames ([`protocol-frames.md`](protocol-frames.md)).
@@ -21,8 +21,8 @@ All widths little-endian. `string` = .NET 7-bit length prefix + UTF-8. `bool` =
 
 ## 1. Protocol-wide metadata census
 
-Full table: `il/netpackages-v3.1.0/META.md` (193 packages). Regenerate with
-`mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.1.0/META.md`.
+Full table: `il/netpackages-v3.2.0/META.md` (193 packages). Regenerate with
+`mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.2.0/META.md`.
 
 **Per-package wire bodies:** this doc hand-annotates the load-bearing packages; the
 **complete** ordered `write()` field sequence for every package (183 bodies + 61
@@ -41,7 +41,8 @@ channel 1** (the bulk / terrain / map band):
 | `NetPackageChunkRemove` | chunk unload |
 | `NetPackageMapChunks` | compressed map (minimap) tiles |
 | `NetPackageDynamicMesh` | dynamic mesh (destroyed-block geometry) |
-| `NetPackagePOIAround` | POI/prefab region data |
+| `NetPackagePOIMetadataRequest` | C2S: ask server for POI metadata (V3.2.0; replaces `NetPackagePOIAround`) |
+| `NetPackagePOIMetadataResponse` | S2C: compressed POI metadata list (`PrefabInstance.POIMetadata`) |
 | `NetPackageWorldFolder` | world-folder file transfer |
 
 **`NetPackageWorldFolder.prepareWorldFolderData` (IL=3 async stub;
@@ -122,7 +123,7 @@ heaviest bodies. A clone must bind/route both channels.
 
 **8 packages set `get_Compress = 1`** (payload deflate-compressed regardless of
 the envelope bot path): `NetPackageChunk`, `NetPackageMapChunks`,
-`NetPackageDynamicMesh`, `NetPackagePOIAround`, `NetPackageConfigFile`,
+`NetPackageDynamicMesh`, `NetPackagePOIMetadataResponse`, `NetPackageConfigFile`,
 `NetPackageDynamicClientArrive`, `NetPackageIdMapping`,
 `NetPackageSignDataResponse`. So bulk terrain/map/config is compressed on the
 wire even though the join handshake packets are not. This nuances
@@ -493,7 +494,16 @@ if entityClass == EntityClass.junkDroneClass:
 // FINAL, every entity (after the junk-drone block, no guard):
 stressAmount : f32
 // (write always emits it; read only consumes it when readFileVersion >= 36)
+// V3.2.0 tail additions (after stressAmount):
+requestedBy : i64       // write always emits (Int32 field, conv.i8 before Write(Int64)); read consumes only when readFileVersion >= 37
+requestKey : bytes[16]  // Guid.ToByteArray(); read consumes only when readFileVersion >= 37
 ```
+
+The `requestedBy`/`requestKey` pair (V3.2.0 new) correlates a server-side
+requested spawn with the client: `GameManager.SpawnEntityServer(ecd)` /
+`RequestToSpawnEntityServer` set them, and the server confirms the created
+entity with `NetPackageConfirmSpawnEntity` (see §5.1b), which the client routes
+to `EntityPlayerLocal.HandleRequestedEntitySpawn(key, entity)`.
 
 Two gating details a clone must honour (both cost stream sync if missed):
 `isSleeperPassive` is written **only when `isSleeper` is true** (`brfalse` at
@@ -540,6 +550,22 @@ entityId : i32     // Setup copies EntityCreationData.id
 So S2C spawn is **async create**, not a synchronous `EntityFactory.CreateEntity`
 on the package thread. The ECD body layout remains the clone-critical surface
 (section 5.1 header/middle/tail).
+
+### 5.1.2 NetPackageConfirmSpawnEntity (ToClient, V3.2.0 new)
+
+Server→client ack for the requested-spawn path (paired with
+`EntityCreationData.requestedBy`/`requestKey`, §5.1 tail). Direction **ToClient**
+(2). Write IL=14 / read IL=19 / Process IL=24 / GetLength=20.
+
+```text
+createdEntityId : i64     // Int32 field, conv.i8 before Write(Int64)
+key : bytes[16]           // Guid.ToByteArray()
+```
+
+**Client `ProcessPackage`:** null world → ret; resolve primary local player and
+`world.GetEntity(createdEntityId)`; if both non-null call
+`EntityPlayerLocal.HandleRequestedEntitySpawn(key, entity)` (V3.2.0 new), which
+correlates the pending client-side spawn request with the created entity.
 
 ### 5.2 NetPackageEntitySpawnResponse (ToClient)
 
@@ -972,7 +998,7 @@ pos/rot/velocity. A server with authoritative movement, falling-block and
 vehicle sims (broadcast PosAndRot / VehiclePositions / EntityVelocity) can
 treat the report as a redundant echo.
 
-**Remaining client-sent names without handlers, by scope (V3.1.0 b14):
+**Remaining client-sent names without handlers, by scope (V3.2.0 b9):
 mod API surface** (ModifyCVar, SetProp, SimpleRPC, Debug),
 **EAC/encryption waivers** (EAC, EncryptionPublicKey, KeyExchangeComplete),
 **creative/editor** (EditorUpdateVolume, WorldFolder),
@@ -1100,41 +1126,44 @@ count          : u16
 ### 6.11 NetPackageDamageEntity
 
 Authoritative damage event for clients (and some C2S external paths). Full field
-order also in [protocol.md](protocol.md) section 6.5; re-verified against
-`write` IL=176.
+order also in [protocol.md](protocol.md) section 6.5; V3.2.0 b9 `write` IL=144
+(V3.1.0 was IL=176).
 
 ```text
 entityId : i32
+flags : u32          // packed bitfield (V3.2.0; replaces 10 bools)
 damageSrc : u8          // EnumDamageSource
 damageTyp : u8          // EnumDamageTypes
 strength : u16
 hitDirection : u8
 hitBodyPart : i16
 movementState : u8
-bPainHit, bFatal, bCritical : bool x3
 attackerEntityId : i32
 dirV : f32 x3
 blockPos : Vector3i
 hitTransformName : string
 hitTransformPosition : f32 x3
 uvHit : f32 x2
+KillXPScale : f32     // V3.2.0 new
 damageMultiplier : f32
 random : f32
-bIgnoreConsecutiveDamages, bIsDamageTransfer : bool x2
-bDismember, bCrippleLegs, bTurnIntoCrawler : bool x3
 bonusDamageType : u8
 StunType : u8
 StunDuration : f32
-bFromBuff : bool
-bIgnorePartyShare : bool
 ArmorSlot : u8
 ArmorSlotGroup : u8
 ArmorDamage : u16
 attackingItem present : bool (+ ItemValue.Write if true)
 ```
 
-`Setup(targetId, DamageResponse)` (IL=141) flattens `DamageResponse` + nested
-`DamageSource` into those fields. `ProcessPackage` (**IL=172**):
+`flags` bits: 0 canHitSpecialBodyParts, 1 CrippleLegs, 2 Critical, 3 Dismember,
+4 Fatal, 5 FromBuff, 6 IgnoreConsecutiveDamages, 7 IgnorePartyShare, 8 PainHit,
+9 TurnIntoCrawler, 10 TrapKillXP (new). Removed vs V3.1.0: `bIsDamageTransfer`
+(bool). Wire-breaking between 3.1.0 and 3.2.0 peers.
+
+`Setup(targetId, DamageResponse)` (IL=235 on V3.2.0, was 141) flattens
+`DamageResponse` + nested `DamageSource` into those fields (including the new
+`flags` packing and `KillXPScale`). `ProcessPackage` (**IL=226**, was 172):
 
 1. Null world -> ret.
 2. **Local-player early outs** (when primary local player exists and
@@ -1150,14 +1179,15 @@ attackingItem present : bool (+ ItemValue.Write if true)
 
 Apply path owned by [combat-damage.md](combat-damage.md).
 
-### 6.12 NetPackageTileEntity (V3.1.0 wire)
+### 6.12 NetPackageTileEntity (V3.2.0 wire)
 
 Live TE replication (not the chunk-blob type+body list).
 
-**V3.1.0 change (from 3.0.1):** added `teBlockId:i32` after world pos; payload
-length widened from **u16** to **i32** so TE blobs can exceed 64 KiB. Fields
-`MaxPackageSize`, `teBlockId` on the package type. Verified IL write=27 / read=24
-on live 3.1.0.
+**V3.1.0 change (from 3.0.1; unchanged on V3.2.0 b9):** added
+`teBlockId:i32` after world pos; payload length widened from **u16** to **i32**
+so TE blobs can exceed 64 KiB. Fields `MaxPackageSize`, `teBlockId` on the
+package type. Verified IL write=27 / read=24 on live 3.1.0 and re-checked
+against the 3.2.0 dump (identical).
 
 ```text
 handle : u8             // Setup default 255 when omitted
@@ -1654,7 +1684,7 @@ Send-side semantics (server, re-verified 2026-08-21 from
   trigger (the player is not detectable yet): they stand idle, then wake via
   the countdown. A zombie that wakes via `ConditionalTriggerSleeperWakeUp`
   keeps `IsSleeperPassive` set.
-- **`NetPackageSleeperPose` is dead code in V3.1.0 b14**: no
+- **`NetPackageSleeperPose` is dead code in V3.2.0 b9**: no
   `GetPackage<NetPackageSleeperPose>` call exists anywhere in the dump; the
   sleep pose is carried by the EntitySpawn flags, not a pose package.
 
@@ -1832,7 +1862,7 @@ Process path already in [protocol.md](protocol.md) section 5 / RequestToSpawnPla
 | `NetPackageSimpleChat` | 44 | msg, recipientEntityIds | Process IL=116: remote UI chat; server fans to recipient ClientInfos |
 | `NetPackageSharedQuest` | (large) | SharedQuestData | Process IL=371: server `QuestShareServer` / client `QuestShareClient`; party journal remove/share |
 | `NetPackageGameMessage` | 17 | msgType, mainEntityId, secondaryEntityId | Process IL=28: remote `GameMessageServer` else `DisplayGameMessage` |
-| `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | Process IL=18: local players HUD. **Sole sender `GameManager.ShowTooltipMP`** (IL=31): unicast (toEntityId=player) to a remote player, direct ShowTooltip for the local one; its only V3.1.0 b14 caller is the Homerun minigame event (HomerunData) - pickup notifications do NOT ride this package |
+| `NetPackageShowToolbeltMessage` | 12 | toolbeltMessage, sound | Process IL=18: local players HUD. **Sole sender `GameManager.ShowTooltipMP`** (IL=31): unicast (toEntityId=player) to a remote player, direct ShowTooltip for the local one; its only V3.2.0 b9 caller is the Homerun minigame event (HomerunData) - pickup notifications do NOT ride this package |
 | `NetPackageCloseAllWindows` | 8 | _playerIdToClose | Process IL=21: server no-op path; client `CloseAllOpenModalWindows` |
 | `NetPackageSoundAtPosition` | 25 | pos, audioClipName, mode, distance, entityId | Process IL=36: `PlaySoundAtPositionServer/Client` |
 | `NetPackageParticleEffect` | 20 | pe, entityThatCausedIt, forceCreation, worldSpawn | Process IL=30: `SpawnParticleEffectServer/Client` |
@@ -1924,15 +1954,41 @@ Process (**IL=24**): if server, `DynamicMeshServer.ClientReadyForNextMesh` (ack)
 If client and valid, `DynamicMeshManager.AddDataFromServer` then send empty ack package to
 server. Detail: [dynamic-mesh.md](dynamic-mesh.md).
 
-#### `NetPackagePOIAround` (channel 1)
+#### `NetPackagePOIMetadataRequest` (C2S, V3.2.0)
+
+Empty body (Setup/read IL=1, write only calls base). `get_PackageDirection` = 1.
+Process (**IL=6**): `GameManager.GetDynamicPrefabDecorator().SendPOIMetadataToClient(Sender)`.
+Replaces `NetPackagePOIAround` (removed in V3.2.0). Driven by
+`DynamicPrefabDecorator.RequestWorldPOIMetadataFromServer()` on the client
+(custom-POI metadata for LOD/trader rendering).
+
+#### `NetPackagePOIMetadataResponse` (S2C, V3.2.0)
+
+`get_Compress` = 1, direction 2. Fields: `List<PrefabInstance.POIMetadata> metadatas`.
 
 ```text
-payloadLen : i32
-payload : bytes    // count-prefixed prefab descriptors
+count : i32
+metadatas[count] : POIMetadata record
 ```
 
-Client Process IL=156 reads pairs of entries (u16/i32/u8/string/Vector3i×2/f32)
-into `prefabLODManager`. Server builds blob of nearby prefab instances.
+Each `POIMetadata` record (from `PrefabInstance.POIMetadata` read ctor IL=35):
+
+```text
+position : Vector3i (3×i32)   // boundingBoxPosition
+size : Vector3i (3×i32)       // boundingBoxSize
+rotation : u8
+tier : u8                     // Prefab.DifficultyTier
+traderArea : bool             // Prefab.bTraderArea
+prefabName : string
+tags : string                 // Prefab.Tags (Poi tag group)
+questTags : string            // Prefab.GetQuestTags() (Global tag group)
+```
+
+Process on client feeds `DynamicPrefabDecorator.ProcessPOIMetadataReceived(...)`;
+the server side populates it via `SendPOIMetadataToClient(ClientInfo)` from the
+decorator's `poiPrefabs` + trader areas. Companion types added in V3.2.0:
+`PrefabInstance.POIMetadata`, `World.GetTraderAreaOuterAt`,
+`DynamicPrefabDecorator.GetTraderOuterAtPosition`.
 
 #### `NetPackageNavObject`
 
@@ -2140,7 +2196,7 @@ trio: [protocol-packages.md §3.3](protocol-packages.md) MapChunks (terrain)
 10 ManualKick (also used for platform-blocked enter), 26 BadMTUPackets (ConnectionManager bad-packet threshold 3/s),
 31 PersistentPlayerDataExceeded (PPL cap 100 on RequestToEnterGame),
 33 EncryptionAgreementInvalidSignature, 34 EncryptionAgreementError. Full list in
-`il/netpackages-v3.1.0/` enum dump.
+`il/netpackages-v3.2.0/` enum dump.
 
 **NetPackagePlayerDenied** body (`KickPlayerData`):
 ```text
@@ -2198,7 +2254,7 @@ which starts `chunkClusterInfoCo` (IL=129). The coroutine waits for
    `((cMin.x+1)*16, (cMin.y+1)*16, (cMax.x-cMin.x-1)*16, (cMax.y-cMin.y-1)*16,
    Constants.cSizePlanesAround, 0)`, then `CreateLevelBorderBox(World)`, then
    sets `ChunkCluster.IsFixedSize = true`.
-   **Both border methods are empty no-ops in V3.1.0 b14** (`IL=1: ret`), so on
+   **Both border methods are empty no-ops in V3.2.0 b9** (`IL=1: ret`), so on
    this build the border branch has no visible effect.
 3. Sets `GameManager.chunkClusterLoaded = true` regardless of branch.
 
@@ -2226,10 +2282,11 @@ before applying spawn points, so ChunkClusterInfo must precede WorldSpawnPoints.
 in-bounds chunks, but no client code subscribes to it (grep across the full
 dump: only `ChunkCluster` itself), and `IsOnBorder` is referenced only by
 editor/prefab tooling. So sending `bInfinite=false` with disc-formula bounds
-cannot wedge or visibly alter the b14 client.
+cannot wedge or visibly alter the b9 client.
 
 ## Changelog
 
+- **2026-08-28:** V3.2.0 wire diff: NetPackageDamageEntity packed `flags:u32` bitfield (10 bools folded, bit 10 TrapKillXP new, `bIsDamageTransfer` dropped) + `KillXPScale:f32` (write IL=144); NetPackagePOIAround removed -> NetPackagePOIMetadataRequest/Response (+ PrefabInstance.POIMetadata record); NetPackageConfirmSpawnEntity added (i64 + Guid, S2C); EntityCreationData requestedBy/requestKey tail (read gated >= 37); compress set POIAround -> POIMetadataResponse (still 8).
 - **2026-08-22:** NetPackageQuestObjectiveUpdate mirror semantics pinned:
   the client reports its own objective events; the server applies them and
   fans to the sender's party (rebroadcast / FinishTreasureQuest), so a
@@ -2278,7 +2335,7 @@ cannot wedge or visibly alter the b14 client.
 
 - **2026-08-21:** ChunkClusterInfo pinned: body (name, cMinPos, cMaxPos,
   bInfinite, pos), `chunkClusterInfoCo` client semantics (Position/bounds
-  store, no-op border box in b14, `chunkClusterLoaded` gate), the
+  store, no-op border box in b9, `chunkClusterLoaded` gate), the
   ChunkProviderDisc bounds formula, and the infinite-world (0,0) defaults.
 
 - **2026-08-21:** TurretSync pinned: body (entityId + targetEntityId + isOn +
@@ -2298,7 +2355,7 @@ cannot wedge or visibly alter the b14 client.
   (0.0016 sqr-delta gate, `SendPacketToTrackedPlayers` - tracking broadcast,
   not server-wide). ShowToolbeltMessage corrected: sole sender
   `GameManager.ShowTooltipMP` (unicast), only called by the Homerun minigame
-  in V3.1.0 b14 - pickup feedback does not ride this package.
+  in V3.2.0 b9 - pickup feedback does not ride this package.
 - **2026-08-27:** C2S read pins for the drop-only validators:
   `NetPackageEntityStealth` read IL=9 is id i32 | data u16 (6 bytes, same
   two fields as write IL=12) and `NetPackageEntityPhysics` read IL=74 is
@@ -2323,7 +2380,7 @@ cannot wedge or visibly alter the b14 client.
   `ConditionalTriggerSleeperWakeUp` broadcast Wakeup - proximity, wandering
   countdown, target acquisition, explosion, damage; stand-up =
   `SetSleeperActive` broadcast PassiveChange), and the finding that
-  **NetPackageSleeperPose is never emitted** in the V3.1.0 b14 dump (the sleep
+  **NetPackageSleeperPose is never emitted** in the V3.2.0 b9 dump (the sleep
   pose rides EntitySpawn flags, not a pose package).
 - **2026-08-11:** Residual-table Process IL re-verified (28): RequestToSpawnPlayer write IL=17, EntityCollect IL=51, EntityAttach IL=104, EntityRagdoll IL=56, EntityAddVelocity IL=11, EntitySpeeds IL=37, EntityAnimationData IL=64, EntitySetPartActive IL=38, EntityPrimeDetonator IL=23, SetAttackTarget IL=24, OwnedEntitySync IL=34, PlayerEquipment IL=56, ItemDrop IL=23, DropItemsContainer IL=19, ItemActionEffects IL=42, ItemReload IL=18, ModifyCVar IL=26, EntityAddExpClient IL=36 / Server IL=31, EntitySetSkillLevelClient IL=22 / Server IL=26, EntityAwardKillServer IL=24, EntityAddScoreClient IL=25 / Server IL=17, SetBlockTexture IL=46, AnimateBlock IL=33, PickupBlock IL=41, WallVolume IL=16 (all exact).
 - **2026-08-11:** Explosion detail IL re-verified: Explosion.AttackBlocks IL=553, AttackEntites IL=691, ExplosionData.ToByteArray IL=21, GameManager.ExplodeGroupFrameUpdate IL=220 / ExplosionClient IL=51 (exact).

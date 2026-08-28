@@ -1,4 +1,4 @@
-# Vehicles, drones, and turrets (dedicated V3.1.0)
+# Vehicles, drones, and turrets (dedicated V3.2.0)
 
 **Owns:** the three deployable-entity subsystems a dedicated server persists and
 drives: player vehicles (`VehicleManager` / `EntityVehicle` / `Vehicle`), junk
@@ -63,7 +63,7 @@ countdown (default 120 s, clamped to 10 s after any mutating change via
 **500**, `cMaxActiveDronePlayerRange` = **32** m (active-range limit for
 teleporting far followers), `cVersion` = 1.
 
-**Manager-save file format (observed in a real V3.1.0 save):** `drones.dat`,
+**Manager-save file format (observed in a real V3.2.0 save):** `drones.dat`,
 `vehicles.dat` and `turrets.dat` each start with the magic **`vda\0`** + a
 `u32` version (**1**, matching the pinned `cVersion`) + a `u8` entry count.
 `power.dat` starts with just a `u32` version (**2**).
@@ -302,6 +302,10 @@ wheel sets `WheelCollider.motorTorque` / `brakeTorque` scaled by the wheel's
 and `sideStiffnessBase * friction`.
 `UseHorn(player)` (IL=40) plays the `GetHornSoundName()` one-shot when set,
 then runs the `onHonkEvent` game event at the vehicle position.
+`GetHornEventName()` (IL=3, **V3.2.0 new**) is `onHonkEvent` (the
+`PropOnHonkEvent` property parsed in `SetupDevices`); the horn event is what
+opens trader doors (see [tile-entities-power.md](tile-entities-power.md) §
+TEFeatureDoor honk-open).
 `ToggleHeadlight()` (IL=7) flips `IsHeadlightOn`; `HasHeadlight()` (IL=19) is
 a `VPHeadlight` part with a transform or `modInstalled`;
 `AddMaxFuel()` (IL=7) tops the tank up (`vehicle.AddFuel(GetMaxFuelLevel())`);
@@ -319,7 +323,7 @@ by `lastRBVel * fixedDeltaTime * 0.5` (beyond a 0.0001 threshold), blends
 the rigidbody velocity into `lastRBVel` (x/z 0.9, y 0.6/0.4 mix) and re-applies
 `lastRBAngVel`.
 
-**The generic attach pipeline behind it (V3.1.0 b14):**
+**The generic attach pipeline behind it (V3.2.0 b9):**
 `Entity.StartAttachToEntity(other, slot)` (IL=43) is the entry: a client sends
 `NetPackageEntityAttach(0, selfId, otherId, slot)` to the server; the server
 runs `AttachToEntity(other, slot)` and, on a valid slot, broadcasts
@@ -379,7 +383,7 @@ and copies `isEntityRemote = _other.isEntityRemote` onto the occupant - the
 driver inherits the vehicle's authority flag for the ride. `GetAttachFreeCount()`
 (IL=31) counts null slots; `EntityVehicle` derives `isInteractionLocked` from it.
 
-**The detach chain (V3.1.0 b14 IL):** `EntityAlive.Detach()` (IL=27) restores
+**The detach chain (V3.2.0 b9 IL):** `EntityAlive.Detach()` (IL=27) restores
 the swapped inventory (`inventory = saveInventory`,
 `SetHoldingItemIdxNoHolsterTime(saveHoldingItemIdxBeforeAttach)`, clears
 `saveInventory`) and ORs `bPlayerStatsChanged |= !isEntityRemote`, then calls

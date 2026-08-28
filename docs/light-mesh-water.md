@@ -1,8 +1,8 @@
-# Light, stability, mesh, water, deco (dedicated V3.1.0)
+# Light, stability, mesh, water, deco (dedicated V3.2.0)
 
 **Owns:** light/stability/mesh/water/deco method maps + stock 255 ceilings (generic engine); water section includes the jobified sim pipeline.  
 **Product expand checklist:** `7dtd-realearth/docs/realearth-surfaces.md` §7.1.  
-**Dumps:** `../il/dedi-complete-v3.1.0/` §7, `../il/realearth-surfaces-v3.1.0/` SAVE_LIGHT.  
+**Dumps:** `../il/dedi-complete-v3.2.0/` §7, `../il/realearth-surfaces-v3.2.0/` SAVE_LIGHT.  
 **Hub:** [`INDEX.md`](INDEX.md).
 
 ---
@@ -90,7 +90,7 @@ twin `IsNeighbourChunksDecorated` (IL=26) tests the same pattern against
 `NeedsDecoration`. `Chunk.CheckSameLight` (IL=4) runs the light channel's
 `CheckSameValue` fast-path compaction check.
 
-**Light-block state bits (V3.1.0 b14):** `BlockLight.IsLightOn(bv)` (IL=7)
+**Light-block state bits (V3.2.0 b9):** `BlockLight.IsLightOn(bv)` (IL=7)
 is `(meta & 2) != 0` - bit 1 of the block's meta is the light-on flag;
 `BlockLight.SetLightState(world, pos, bv, isOn)` (IL=15) writes it with
 `meta = (meta & ~3) | (isOn ? 2 : 0)` (the trigger and light state share the
@@ -350,7 +350,7 @@ stateDiagram-v2
 
 `Chunk.SetWaterSimUpdate` (IL=75): refuses flow into non-flow-through blocks; stores via `ChunkBlockChannel.GetSet` of `WaterValue.RawData`; fires `HandleWaterLevelChanged` when mass changes.
 
-**The direct water writes (V3.1.0 b14):** `Chunk.SetWater(x, y, z, data)`
+**The direct water writes (V3.2.0 b9):** `Chunk.SetWater(x, y, z, data)`
 (IL=13) is `SetWaterRaw` plus `waterSimHandle.WakeNeighbours(x, y, z)`.
 `Chunk.SetWaterRaw` (IL=55) is the channel commit: a cell whose block fails
 `WaterUtils.CanWaterFlowThrough(GetBlockNoDamage(...))` forces `data.SetMass(0)`

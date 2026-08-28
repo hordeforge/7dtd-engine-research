@@ -1,4 +1,4 @@
-# Server lifecycle, game state, and player persistence (dedicated V3.1.0)
+# Server lifecycle, game state, and player persistence (dedicated V3.2.0)
 
 **Owns:** the dedicated process lifecycle (boot -> world create/load -> run ->
 save + shutdown), the `GameStateManager` game-mode/round tick, and player
@@ -629,10 +629,10 @@ flowchart TB
 - **Core dedicated path:** boot, game-state tick, player persistence, and save all
   run on the headless server every session.
 - **Initial world time is Day 1, 07:00** (runtime-observed 2026-08-11: a fresh
-  stock V3.1.0 dedicated server's `gettime` reads "Day 1, 07:00" = worldTime
+  stock V3.2.0 dedicated server's `gettime` reads "Day 1, 07:00" = worldTime
   7000 before any player joins; the day is 1-based per `WorldTimeToElements`).
 - **World time pauses with zero connected players (runtime-observed 2026-08-11):**
-  on a stock V3.1.0 dedicated server, `worldTime` does not advance while no
+  on a stock V3.2.0 dedicated server, `worldTime` does not advance while no
   player is connected (telnet `settime` jumps apply, then the clock freezes until
   the next player joins). Any live-sim observation (air drops, hordes, chunk
   activity) therefore needs a connected client; a dead client does not count
@@ -794,7 +794,7 @@ inside the player element) become `Allies.SetStatus(primaryId, newId, 1)`.
 A top-level `allies` element (version >= 1) loads via `AllyStore.ReadXml`.
 
 
-## 7. Join analytics (V3.1.0)
+## 7. Join analytics (V3.2.0)
 
 On player join the dedicated server may emit platform analytics via
 `GameManager.LogPlayerJoinServerEventAnalyticsCoroutine` into
@@ -918,9 +918,9 @@ third-party/analytics.
 
 - **2026-07-23:** Initial server lifecycle / game-state / player-persistence reversal (boot, rounds, join+persistence, shutdown) with state machines.
 
-## 8. EOS server-list filters (V3.1.0 b14)
+## 8. EOS server-list filters (V3.2.0 b9)
 
 `Platform.EOS.SessionsClient.matchesFilters(GameServerInfo, filters)` gates which
 sessions the server browser shows, so a server that never registers with EOS is
 invisible to browse regardless of its own state.
-*Anchor:* `il/full-v3.1.0/Platform.EOS/SessionsClient.il.txt`.
+*Anchor:* `il/full-v3.2.0/Platform.EOS/SessionsClient.il.txt`.

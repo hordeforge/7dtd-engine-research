@@ -1,4 +1,4 @@
-# Dedicated misc systems (V3.1.0)
+# Dedicated misc systems (V3.2.0)
 
 **Owns:** a grab-bag of small dedicated systems each too small for its own doc:
 gamestage groups, water-sim apply, boss/companion groups, admin users,
@@ -111,7 +111,7 @@ icon classes clients display (see NavObjectClass below). Complements
 ## CompanionGroup
 
 Thin list wrapper (`Add`, `Remove`, `IndexOf`, indexer) held by
-`EntityPlayer.Companions`, which lazily constructs it. **Still an unpopulated stub on V3.1.0 b14
+`EntityPlayer.Companions`, which lazily constructs it. **Still an unpopulated stub on V3.2.0 b9
 (re-checked 2026-08-06):** `Add` and `Remove` have zero call sites anywhere in the
 assembly, so the list is never filled and the only readers are
 `XUiC_CompanionEntry*` (client view of an always-empty group). Treat it as
@@ -158,7 +158,7 @@ edits); `DestroyFileWatcher()` (IL=10) disposes and nulls it.
 known module via `AdminSectionAbs.Parse` and collects unknown ones into
 `unknownSections` with `Ignoring unknown section in permissions file:`;
 `WriteSections(root)` (IL=24) saves every module under the root.
-**On-disk element names (verified against a shipped V3.1.0
+**On-disk element names (verified against a shipped V3.2.0
 `serveradmin.xml`):** the admin users live in a top-level `<users>` section
 (`<user platform="Steam" userid="76561198021925107" name="..."
 permission_level="0" />`; `ParseSection`'s `admins` label is the module
@@ -384,7 +384,7 @@ name, max players from `GamePrefs`). Linux-specific checks (`checkLinuxLimits`,
 [server-lifecycle.md](server-lifecycle.md) and
 [sandbox-options.md](sandbox-options.md).
 
-Leaves (all V3.1.0 b14 IL):
+Leaves (all V3.2.0 b9 IL):
 
 - **`ParseCommandLine(args)` (IL=82):** parse raw `key=value` args; a
   `configfile` value gets `.xml` appended when it has no dot and is loaded via
@@ -614,7 +614,7 @@ classification). They were found by scanning the disassembly for
 ## GameRandom (the shared RNG primitive surface)
 
 `GameRandom` wraps the underlying `Random` instance; every public method is a
-thin `NextDouble()` / `Next(int)` wrapper (V3.1.0 b14 IL):
+thin `NextDouble()` / `Next(int)` wrapper (V3.2.0 b9 IL):
 
 | Method | IL | Value |
 |---|---|---|
@@ -650,7 +650,7 @@ Callers include `AIDirector.Init`, `GameEventManager`'s ctor, `ItemValue`'s
 procedural-seed ctor, `DynamicMusicManager.Init`, and `EModelInstanceAssets.Load`.
 
 **The generator itself is the classic .NET `Random` (Knuth subtractive),
-implemented inline** (V3.1.0 b14 IL): `InternalSample()` (IL=61) advances a
+implemented inline** (V3.2.0 b9 IL): `InternalSample()` (IL=61) advances a
 56-entry `SeedArray` with wrap-around indices `inext`/`inextp` (both reset to
 1 at 56), computes `value = SeedArray[inext] - SeedArray[inextp]` with the
 `int.MaxValue` clamp and `+ int.MaxValue` re-wrap for negatives, stores and
@@ -671,7 +671,7 @@ the same seed - deterministic and portable.
 `DynamicProperties` is the generic `name`/`value` bag every XML-defined object
 carries (block properties, entity classes, vehicle parts, buffs, game events,
 loot, quests - see each family doc). It is one struct with **six
-dictionaries** (V3.1.0 b14 IL):
+dictionaries** (V3.2.0 b9 IL):
 
 | Field | Type | Filled by |
 |---|---|---|
@@ -786,7 +786,7 @@ NumberStyles style)`; the short overloads fix the defaults:
   accept decimal points, exponents, thousands separators, or currency
   (verified on `TryParseSInt32` IL=7 and `TryParseFloat` IL=7).
 
-**The internal engines** (V3.1.0 b14 IL): `internalParseDouble` (IL=632)
+**The internal engines** (V3.2.0 b9 IL): `internalParseDouble` (IL=632)
 rejects `AllowHexSpecifier` outright (throws `ArgumentException: Double
 doesn't support parsing with 'AllowHexSpecifier'`), rejects style values
 above 511, and writes the failure exception into an out `Exception` when
@@ -953,7 +953,7 @@ parts are:
 `FastTags<TTagGroup>` is the shared tag set used across the engine for
 "is this tagged X" checks (item tags, entity groups, buff tags, quest tags,
 `MovementTagIdle`, `ignoreWhenHeld`, loot tags; each `TagGroup` - e.g.
-`TagGroup.Global` - is its own registry). V3.1.0 b14 IL:
+`TagGroup.Global` - is its own registry). V3.2.0 b9 IL:
 
 **Storage:** the value is a `UInt64[] bits` with a **single-bit fast path**:
 a one-bit tag stores the bit number in the `singleBit` field instead of an
@@ -990,7 +990,7 @@ round-trips to the same string it was built from.
 `MemoryPools` is the static registry of the engine's object and array pools;
 `MemoryPooledObject<T>` is the pool primitive behind every
 `AllocSync`/`FreeSync` call site (chunks, `CBCLayer`, `GameRandom`, network
-streams, `VoxelMeshLayer`, ...). V3.1.0 b14 IL:
+streams, `VoxelMeshLayer`, ...). V3.2.0 b9 IL:
 
 **`MemoryPooledObject<T>` is a stack-style free list** (`List<T> pool` +
 `int poolSize` free count). `Alloc(bReset)` (IL=33): with the pool empty it
@@ -1032,7 +1032,7 @@ The full static set (`.cctor`) adds the second stream pool
 `StreamUtils.Read*` / `Write` call in the wire and save layouts
 ([`protocol-packages.md`](protocol-packages.md), [`save-region.md`](save-region.md), this file). Two layers:
 `BinaryReader`/`BinaryWriter` helpers (component-wise) and raw
-`Stream` / `byte[]` readers. V3.1.0 b14 IL:
+`Stream` / `byte[]` readers. V3.2.0 b9 IL:
 
 **Vectors and quaternions:** `ReadVector3` (IL=8) = 3 x `ReadSingle`;
 `ReadVector3i` (IL=8) = 3 x `ReadInt32`; `ReadQuaterion` (IL=10) = 4 x

@@ -2,14 +2,14 @@
   "schema": 1,
   "generated_by": "tools/src/StockFacts.cs",
   "asm": "Assembly-CSharp.dll",
-  "extracted_utc": "2026-08-11T06:46:33.2894420Z",
+  "extracted_utc": "2026-08-28T03:33:13.9914060Z",
   "version": {
     "release_type": 1,
     "major": 3,
-    "minor": 10,
-    "build": 14,
-    "display": "V 3.1.0",
-    "stock_wire": "V3.1.0 b14",
+    "minor": 20,
+    "build": 9,
+    "display": "V 3.2.0",
+    "stock_wire": "V3.2.0 b9",
     "product": "7 Days To Die",
     "game_reset_revision": 13
   },
@@ -21,7 +21,7 @@
   "network": {
     "default_port": 26900,
     "max_mp_players_constant": 8,
-    "netpackage_top_level_count": 193,
+    "netpackage_top_level_count": 195,
     "challenge_marker": 202,
     "challenge_size": 17,
     "challenge_marker_hex": "0xCA",
@@ -39,8 +39,8 @@
     "worldstate_saveload_stream_il": 926
   },
   "census": {
-    "top_level_types": 4414,
-    "methods_with_body_top_level": 44107,
+    "top_level_types": 4426,
+    "methods_with_body_top_level": 44277,
     "gmupdate_il": 631
   },
   "tile_entity_package": {
@@ -60,7 +60,7 @@
     "entrypoint": "tools/post-update.sh",
     "stock_sync": "tools/stock-sync.sh",
     "drift_check": "tools/parity/drift-check.sh",
-    "dump_label_suffix": "v3.1.0",
+    "dump_label_suffix": "v3.2.0",
     "dump_sets": ["deep", "deeper", "gaps", "loop-complete", "terrain", "realearth-surfaces", "dedi-complete"],
     "note": "After TFP patch: post-update.sh then re-Dump* into il/<set>-<dump_label_suffix>/"
   },
@@ -82,6 +82,9 @@
   "enums": {
     "game_stats_members": 82,
     "game_prefs_members": 317
+  },
+  "provenance": {
+    "baked": []
   },
   "litenet": {
     "protocol_id": 13,
