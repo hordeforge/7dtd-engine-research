@@ -55,6 +55,13 @@ Literals on `WorldConstants` / `ChunkProviderGenerateWorldFromRaw.cMaxHeight`:
 
 **Implication for patcher:** expanding Y while leaving `ChunkAreaDim=256` is correct (validated by stock vs expanded dumps).
 
+**zdtd mirrors this as data (ADR 0036):** `src/protocol.zig` `WireProfile`
+models the column-height dialect (one source of truth `y_dim`; layers, plane
+stride and `c_max_height` derive); `[wire] profile` in zdtd.toml selects it
+(stock default), and the chunk store / wire builder / ZCH4 save follow it.
+Stock stays byte-pinned; non-stock needs a paired client mod (this table is
+the RE grounding for the expanded values).
+
 ## Height API inventory (Harmony targets)
 
 Interfaces **cannot** be patched directly (RealEarth already avoids that). Concrete types:
@@ -222,6 +229,7 @@ see `7dtd-realearth/docs/realearth-review.md`.
 
 ## Changelog
 
+- **2026-08-28:** zdtd ADR 0036 note (WireProfile dialects mirror this table as data).
 - **2026-08-11:** Terrain IL re-verified: GetHeightAt IL=22, GetMaxHeight IL=29, GetHeight IL=9/5, RecalcHeightAt IL=55, AddWallVolumeId IL=18, GetWallVolumes IL=3, GetTerrainHeight IL=9, SetTerrainHeight IL=10, ConvertDTMToHeightData IL=81/96/155, ConvertDTMToTerrainStampData IL=46, LoadRAWToHeightData IL=60, LoadHeightMapRAW IL=132, LoadHeightMapRAWAsUnityHeightMap IL=90, LoadHeightMapRAWAsStampData IL=101, MarchingCubes.cctor IL=9, Chunk.SetTerrainNormal IL=43 / GetTerrainNormalY IL=15, IsOpenSkyAbove IL=9, GetTopMostTerrainHeight IL=28 (exact).
 - **2026-08-10:** Chunk height IL re-verified: AddWallVolumeId IL=18, GetWallVolumes IL=3, GetTerrainHeight IL=9, SetTerrainHeight IL=10 (exact).
 - **2026-08-10:** Height-query IL sizes re-verified: GetHeightAt IL=22, GetTerrainHeight IL=19, Chunk.GetMaxHeight IL=29, GetHeight IL=9, RecalcHeightAt IL=55 (exact).
