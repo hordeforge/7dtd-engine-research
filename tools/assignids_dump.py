@@ -24,12 +24,12 @@ import re
 import sys
 
 
-def parse_shapes(path):
+def parse_shapes(path: str) -> tuple[list[str], set[str]]:
     """Return (all_names_in_order, bulletproof_set)."""
     with open(path, encoding="utf-8-sig") as f:
         xml = f.read()
-    all_names = []
-    bulletproof = set()
+    all_names: list[str] = []
+    bulletproof: set[str] = set()
     for m in re.finditer(r"<shape\s+name=\"([^\"]+)\"([^>]*)/?>", xml):
         name, attrs = m.group(1), m.group(2)
         all_names.append(name)
@@ -38,11 +38,11 @@ def parse_shapes(path):
     return all_names, bulletproof
 
 
-def parse_blocks(path, shapes, bulletproof):
+def parse_blocks(path: str, shapes: list[str], bulletproof: set[str]) -> list[str]:
     """Return the emitted block names in document order (shape groups expanded)."""
     with open(path, encoding="utf-8-sig") as f:
         xml = f.read()
-    out = []
+    out: list[str] = []
     for m in re.finditer(r"<block\s+name=\"([^\"]+)\"([^>]*)/?>", xml):
         name, attrs = m.group(1), m.group(2)
         sm = re.search(r'shapes="([^"]+)"', attrs)
@@ -59,11 +59,10 @@ def parse_blocks(path, shapes, bulletproof):
     return out
 
 
-def terrain_shape(block_name, xml):
+def terrain_shape(block_name: str, xml: str) -> bool:
     """True when the block's Shape property resolves to BlockShapeTerrain."""
     # Find the block element and read its Shape property value.
-    m = re.search(
-        re.escape(block_name) + r'"([^>]*)>(.*?)</block>', xml, re.S)
+    m = re.search(re.escape(block_name) + r'"([^>]*)>(.*?)</block>', xml, re.S)
     if not m:
         return False
     body = m.group(2)
@@ -71,7 +70,7 @@ def terrain_shape(block_name, xml):
     return pm is not None and pm.group(1) == "Terrain"
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 3:
         raise SystemExit(__doc__)
     cfg_dir, out_path = sys.argv[1], sys.argv[2]
@@ -83,8 +82,9 @@ def main():
     fixed = {"air": 0, "water": 240, "terrWaterPOI": 241, "waterdata": 242}
     used = set(fixed.values())
     # Pre-scan terrain-ness once per unique name (shape variants are non-terrain).
-    terrain_cache = {}
-    def is_terrain(n):
+    terrain_cache: dict[str, bool] = {}
+
+    def is_terrain(n: str) -> bool:
         if n in terrain_cache:
             return terrain_cache[n]
         v = terrain_shape(n, blocks_xml)
@@ -93,7 +93,7 @@ def main():
 
     terr_next = 0
     gen_next = 255
-    rows = {}
+    rows: dict[int, str] = {}
     for n in names:
         if n in fixed:
             rows[fixed[n]] = n
@@ -114,7 +114,9 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         f.write("# V3.2.0 AssignIds id\tname: regenerated from blocks.xml + shapes.xml\n")
         f.write("# Pins: air=0 terrStone=1 (Block.fixedBlockIds + assignLeftOverBlocks).\n")
-        f.write("# Source: stock id-assignment pipeline (Block IL), tool: 7dtd-engine-research/tools.\n")
+        f.write(
+            "# Source: stock id-assignment pipeline (Block IL), tool: 7dtd-engine-research/tools.\n"
+        )
         for i in sorted(rows):
             f.write(f"{i}\t{rows[i]}\n")
     print(f"wrote {len(rows)} entries to {out_path}")
