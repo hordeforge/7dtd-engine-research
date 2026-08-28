@@ -291,8 +291,9 @@ and applies it via `SetItemValue`.
 `EnterVehicle(entity)` (IL=39) fires `MountEvent.Invoke(true)` for a local
 player, `StartAttachToEntity(this, -1)`, deactivates the vehicle `NavObject`
 when a player is mounting, and refreshes the player's owned-vehicle waypoint.
-`SetupDevices()` (IL=14) chains `SetupMotors` / `SetupForces` / `SetupWheels`
-and parses `PropOnHonkEvent` into `onHonkEvent`.
+`SetupDevices()` (IL=7 on V3.2.0, was 14) chains `SetupMotors` / `SetupForces` /
+`SetupWheels` only (the `PropOnHonkEvent`/`onHonkEvent` string props were
+removed in V3.2.0; horn interaction is now the `HornActivation` ref).
 `SetWheelsForces(motorTorque, motorTorqueBase, brakeTorque, frictionPercent)`
 (IL=74) stores `CurrentMotorTorquePercent = motorTorque / motorTorqueBase`,
 derives the side-friction scale (`1` at full friction else `* 0.33`), and per

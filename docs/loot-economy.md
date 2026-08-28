@@ -39,7 +39,7 @@ folded into the composite tile-entity feature system. A lootable block is a
 | `TraderData` | Per-trader **runtime** state: `PrimaryInventory` (`List<Entry>`), `TierItemGroups`, and `lastInventoryUpdate` (world time of last restock). An `Entry` is `{ ItemStack Item, sbyte Markup, bool addedByPlayer }` |
 | `TraderManager` | World singleton. `TraderInventoryRequested` decides whether to restock; `HandleFullReset` rebuilds the inventory |
 | `EntityTrader` | The trader **NPC** (`EntityNPC`). Owns a `TraderData`, drives open/close in `OnUpdateLive`, and steps the per-player trade window (`TraderWindowState`) |
-| `TraderArea` | The physical trader **compound**: protect/teleport volumes, `SetClosed`, `HandleWarning`. When trader areas are enabled, this teleports players out at closing time |
+| `TraderArea` | The physical trader **compound**: protect/teleport volumes, `SetClosed`, `HandleWarning`. Implements `IDesignatedArea` (V3.2.0; stored in `DynamicPrefabDecorator.traderStore`). When trader areas are enabled, this teleports players out at closing time |
 | `TileEntityVendingMachine` | A rentable player-facing vending machine (`TileEntity`). Wraps a `TraderData`, plus owner identity, password, and a `rentalEndDay` |
 | `XUiM_Trader` | Shared UI model that computes `GetBuyPrice` / `GetSellPrice` from the synced definition and economic values |
 
@@ -195,20 +195,20 @@ warning marks. `EntityTrader.OnUpdateLive` samples `TraderInfo.IsOpen` /
 **Trader stock records:** `TraderItemGroup` (fields `name`,
 `minCount` / `maxCount`, `minQuality` / `maxQuality`, `modsToInstall[]`,
 `modChance`, `uniqueOnly`, `items`) is the per-group stock definition the
-trader inventory generates from; `DynamicPrefabDecorator/TraderComparer`
-(`Compare` IL=8) sorts `TraderArea`s by `ProtectPosition.x`, the ordering
+trader inventory generates from; `DynamicPrefabDecorator` `traderStore` (`DesignatedAreaStore<TraderArea>`, V3.2.0;
+replaces the removed `TraderComparer`) keeps `TraderArea`s X-sorted, the ordering
 used when the decorator lays out trader compounds.
 `World.IsWithinTraderArea(pos)` (IL=6) is `GetTraderAreaAt(pos) != null`; the
 2-pos overload (IL=19) is false in sandbox mode, else
 `DynamicPrefabDecorator.IsWithinTraderArea(min, max)` (the point queries
 behind the placement/repair/dump-water gates).
 `DynamicPrefabDecorator.GetTraderAtPosition(pos, padding)` (IL=9) is the
-lookup core: a `TraderBinarySearch(x - padding)` over the X-sorted
-`traderAreas`, then an X/Z containment test against
+lookup core: `traderStore.GetAt(x, z, padding)` over the X-sorted
+store, then an X/Z containment test against
 `[ProtectPosition - padding, ProtectPosition + ProtectSize + padding)`
 (Y unchecked) - the first matching `TraderArea`, else null.
 `TraderArea.IsWithinProtectArea(pos)` (IL=59) is the full 3D containment
-against the cached `ProtectBounds`; `GetProtectPadding()` (IL=22) is
+against the cached `AreaBounds` (V3.2.0; was `ProtectBounds`); `GetProtectPadding()` (IL=22) is
 `ProtectSize - PrefabSize` with x/z minus 2 - the protection margin around
 the prefab footprint.
 
@@ -677,7 +677,7 @@ background timer.
 **`NetPackageWorldAreas` (847341-847513)** is the ToClient package that ships
 TraderAreas: `byte cVersion=1`, `i16 count`, then `TraderArea::Write` each;
 `ProcessPackage` calls `World::SetWorldAreas`. `TraderArea` carries `Position`,
-`PrefabSize`, `ProtectPosition`/`ProtectSize`/`ProtectBounds`, `IsClosed`, a
+`PrefabSize`, `ProtectPosition`/`ProtectSize`/`AreaBounds`, `IsClosed`, a
 `PrefabTeleportVolumeList` and `owningTrader` (1207080+). `TraderAreaStates` is
 `Default=0, Claimable=1, NotClaimable=2` (1207071-1207078).
 
@@ -1006,7 +1006,7 @@ or `ItemStack.Empty` when nothing rolled.
   EatTicks; CanCollect (IL=12) itemClass gate.
 
 - **2026-08-08:** TraderArea leaves: IsWithinProtectArea IL=47 full 3D
-  ProtectBounds test; GetProtectPadding IL=22 ProtectSize - PrefabSize with
+  AreaBounds test; GetProtectPadding IL=22 ProtectSize - PrefabSize with
   x/z minus 2.
 - **2026-08-08:** DynamicPrefabDecorator.GetTraderAtPosition IL=68:
   TraderBinarySearch + X/Z containment against padded Protect rect (Y

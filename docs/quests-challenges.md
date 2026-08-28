@@ -1256,7 +1256,7 @@ usedPOILocations, player.entityId)` runs; on failure
 | `DialogResponseEntry` | BaseResponseEntry |  |
 | `ObjectiveRallyPointData` | MonoBehaviour | UpdateAllFlags, Start, RemoveFlag, AddFlag |
 | `QuestPacketEntry` |  |  |
-| `TraderComparer` |  |  |
+| `TraderComparer` (removed V3.2.0) |  |  |
 | `TraderItem` |  |  |
 | `TraderItemEntry` |  |  |
 

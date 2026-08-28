@@ -461,7 +461,7 @@ target - the one shared predicate shape (the XOR appears as
 - **`IsEquipped`** (IL=97): for a mod item, scans `target.equipment.
   GetItems()` for it; otherwise tests the held item (equipped-or-held
   gate, invert-aware).
-- **`IsItemActive`** (IL=30): `params.ItemValue.Activated > 0`.
+- **`IsItemActive`** (IL=29): `params.ItemValue.get_Activated()` (Flags bit 0).
 - **`HoldingItemBroken`** (IL=32):
   `target.inventory.holdingItemItemValue.PercentUsesLeft <= 0` (inverted).
 - **`IsPrimaryAttack`** / **`IsSecondaryAttack`** (IL=65 each): the held

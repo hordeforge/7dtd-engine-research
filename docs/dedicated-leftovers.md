@@ -231,11 +231,11 @@ throws).
 `startPos` (3x sbyte) + `size` (3x byte); `Read` (IL=91) mirrors it and
 rebuilds each volume via `Use(start, size)` +
 `AddExistingVolume`. `GetReadWriteSize` (IL=10) is `22 + count * 6`;
-`IsWithinProtectArea` (IL=59) is the `ProtectBounds` AABB test.
+`IsWithinProtectArea` (IL=59) is the `AreaBounds` AABB test (V3.2.0; was `ProtectBounds`).
 `SetClosed(world, closed, trader, playSound)` (IL=224) stores
 `owningTrader`/`IsClosed`, requires every chunk of the prefab span to be
 loaded, then per chunk walks `IndexedBlocks["TraderOnOff"]`: non-child blocks
-inside `ProtectBounds` resolve their `TileEntityComposite` and toggle the
+inside `AreaBounds` resolve their `TileEntityComposite` and toggle the
 `TEFeatureDoor` feature (plus the teleport/sound side).
 `Overlaps(min, max)` (IL=38) is the 2D AABB test against
 `ProtectPosition + ProtectSize`; `IsWithinTeleportArea(pos, ref tpVolume)`

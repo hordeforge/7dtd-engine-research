@@ -542,7 +542,7 @@ before treating a row as a behavioral claim. Infra collections are classified in
 | `ParsingMethodData` | Parsing Method Data | `Object` | TryGetDelegateForSourceType |
 | `TaskGroup` | Task Group | `Object` | (fields only) |
 | `TierSpec` | Tier Spec | `ValueType` | (fields only) |
-| `TraderComparer` | Trader Comparer | `Object` | Compare |
+| `TraderComparer` | Trader Comparer (removed V3.2.0; replaced by `DesignatedAreaStore<TraderArea>`) | `Object` | Compare |
 | `Trajectory` | Trajectory | `Object` | Calculate, SuggestVelocity_CustomArc |
 | `UnlockData` | Unlock Data | `Object` | (fields only) |
 | `VoxeChunkInfo` | Voxe Chunk Info | `Object` | IsEmpty |

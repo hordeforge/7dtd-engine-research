@@ -537,7 +537,7 @@ pipeline.
 ItemClass leaves (all IL-verified): `SetId(id)` (IL=12) stores `pId` and,
 when `Effects` is non-null, sets `Effects.ParentPointer = (object)id`
 (boxed). `SetActivated(ref value, bool)` (IL=5) folds the bool into
-`value.Activated = (byte)(activated ? 1 : 0)`. `CheckKeys` (IL=1) and the
+`value.set_Activated(activated)` (Flags bit 0). `CheckKeys` (IL=1) and the
 base `OnPlacedAsCatalyst` (IL=1) are no-ops; the `ItemClassHeldEntity`
 override (IL=19) sets the `CVarLastHeldEntitySlot` cvar to -1, removes the
 buff, and unsubscribes `handleMountEvent` from `MountEvent`.

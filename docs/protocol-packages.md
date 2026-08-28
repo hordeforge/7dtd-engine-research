@@ -2214,7 +2214,7 @@ customReason    : string
 
 | Item | State |
 |---|---|
-| `EntityCreationData` class-conditional tail | fully extracted (**57** wire fields, per-class branches) in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) + §5.1 table |
+| `EntityCreationData` class-conditional tail | fully extracted (**59** wire fields, per-class branches; V3.2.0 added the `requestedBy`/`requestKey` tail, was 57) in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md) + §5.1 table |
 | Bulk-package compression codec | **Closed (2026-08-12):** the "LZ/native" reading was wrong - `NetConnectionSteam` fields + `NetConnectionAbs.Compress` (IL=59) / `Decompress` (IL=22) run the **managed `Noemax.GZip.DeflateOutputStream`** (level 3, raw deflate, no header) over the package stream, the same codec as the region payload ([save-region.md](save-region.md) §3.4, byte-exact-verified). No native codec |
 | Encryption cipher/KDF | handshake bodies decoded; crypto primitives native (residual) |
 | Quest/Party process | re-pinned 2026-08-07 (§6.17-6.18); Twitch still low priority |
