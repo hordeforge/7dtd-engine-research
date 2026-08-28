@@ -149,7 +149,7 @@ helpers (`NetPackageDirection` [enum], `Logger`, `Metrics`, ...), not wire packa
 | Inventory* | 5 |
 | Other | ~106 |
 
-Largest maxIL (complexity signal, not wire size): Metrics, SharedQuest, QuestEvent, QuestGotoPoint, WireToolActions, PartyData, RangeCheckDamageEntity, GameEventRequest, TurretSpawn, Audio, DynamicMesh, …
+Largest maxIL (complexity signal, not wire size; V3.2.0): Metrics (501), SharedQuest (371), QuestEvent (368), QuestGotoPoint (312), WireToolActions (254), PartyData (243), DamageEntity (235 — grew from 176 in V3.1.0), RangeCheckDamageEntity (216), GameEventRequest (211), TurretSpawn (207), Audio (206), DynamicMesh (192), …
 
 Full name list: `il/dedi-complete-v3.2.0/DEDI_COMPLETE_auto.md` §3.
 
@@ -557,9 +557,9 @@ match the documented agreement flow. `DiscordIdMappings` arrives right after
 
 Loadgen uses **channel 0** for game packages. Challenge is **outside** the envelope (raw 0xCA).
 
-Most packages inherit **channel 0**, but exactly **6 override to channel 1** (the
-bulk/terrain/map band): `NetPackageChunk`, `NetPackageChunkRemove`,
-`NetPackageMapChunks`, `NetPackageDynamicMesh`, `NetPackagePOIAround`,
+Most packages inherit **channel 0**, but exactly **5 override to channel 1**
+(V3.2.0; was 6 before `NetPackagePOIAround` was removed): `NetPackageChunk`,
+`NetPackageChunkRemove`, `NetPackageMapChunks`, `NetPackageDynamicMesh`,
 `NetPackageWorldFolder`. These carry the heaviest bodies and several are
 compressed (`get_Compress = 1`). A clone must route both channels. Full census
 and per-package channel/compress/direction/auth: [`protocol-packages.md`](protocol-packages.md) §1.

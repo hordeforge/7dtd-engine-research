@@ -261,7 +261,7 @@ static `PropertyMap` by `vehicleName`, erroring `Vehicle properties for
 `SetVehicle(this)` + `SetTag(className)` + `SetProperties(props)` and joins
 `vehicleParts` (a bad class name rethrows `No vehicle part class 'VP{name}'
 found!`), then every part gets `InitPrefabConnections()`.
-`ParseGeneralProperties(properties)` (IL=133) reads the physics/config
+`ParseGeneralProperties(properties)` (IL=138) reads the physics/config
 fields: the `cameraDistance` / `cameraTurnRate` / `hopForce` Vector2s, the
 `steerAngleMax` / `steerRate` / `steerCenteringRate` / `tiltAngleMax` /
 `tiltThreshold` / `tiltDampening` / `tiltDampenThreshold` / `tiltUpForce` /
@@ -300,11 +300,14 @@ wheel sets `WheelCollider.motorTorque` / `brakeTorque` scaled by the wheel's
 `motorTorqueScale` / `brakeTorqueScale`, plus the forward / sideways
 `WheelFrictionCurve.stiffness` from `forwardStiffnessBase * frictionPercent`
 and `sideStiffnessBase * friction`.
-`UseHorn(player)` (IL=40) plays the `GetHornSoundName()` one-shot when set,
-then runs the `onHonkEvent` game event at the vehicle position.
+`UseHorn(player)` (IL=61 on V3.2.0, was 40) plays the `GetHornSoundName()`
+one-shot when set, then on a **1 s cooldown** (`lastHonkEventTime`): if
+`HornActivation` (`TraderDoorController` ref, set while inside a door trigger)
+is live, calls `HornActivation.Activate()` (opens the trader door), then fires
+the `onHonkEvent` game event at the vehicle position.
 `GetHornEventName()` (IL=3, **V3.2.0 new**) is `onHonkEvent` (the
-`PropOnHonkEvent` property parsed in `SetupDevices`); the horn event is what
-opens trader doors (see [tile-entities-power.md](tile-entities-power.md) §
+`PropOnHonkEvent` property parsed in `SetupDevices`); the door opening itself
+is the `HornActivation.Activate()` call (see [tile-entities-power.md](tile-entities-power.md) §
 TEFeatureDoor honk-open).
 `ToggleHeadlight()` (IL=7) flips `IsHeadlightOn`; `HasHeadlight()` (IL=19) is
 a `VPHeadlight` part with a transform or `modInstalled`;
@@ -481,7 +484,7 @@ its position holding the bag + mods.
 - **Fractional collision damage** accumulates in `damageAccumulator`:
   `ApplyAccumulatedDamage()` (IL=19) converts the integer part to
   `ApplyDamage` and keeps the fraction; the collision path feeds it
-  (`OnCollisionForward` IL=738, `ApplyCollisionsCoroutine`).
+  (`OnCollisionForward` IL=730, `ApplyCollisionsCoroutine`).
 - **Crash riders:** `ApplyCollisionDamageToAttached(damage)` (IL=32) deals
   `DamageSource(Internal, VehicleInside)` (source 1, type 27) to every
   attached rider - distinct from the external splash above. The same

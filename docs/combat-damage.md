@@ -6,7 +6,7 @@ crit/dismember), and the death/kill path. This consolidates the damage threads
 that touch items, blocks, stats, buffs, and progression.
 **Not:** the wire package body layout ([protocol-packages.md](protocol-packages.md)
 section 6.11 / [protocol.md](protocol.md) section 6.5, `NetPackageDamageEntity`
-write IL=172); item attack authoring ([items.md](items.md)); block
+write IL=144 (V3.2.0; V3.1.0 was 176)); item attack authoring ([items.md](items.md)); block
 damage ([blocks.md](blocks.md)); the ragdoll/hit VFX (client).
 **Evidence:** `DamageSource`, `EntityAlive.DamageEntity` /
 `ProcessDamageResponse` IL (dump locally with `tools/src/DumpMethod`, git-ignored).
@@ -468,7 +468,7 @@ the server validates and applies them uniformly.
 
 Leaf types on the edges of the damage flow above:
 
-- **`ItemActionAttack.Hit` (IL=1614)** is the melee/ranged hit
+- **`ItemActionAttack.Hit` (IL=1564)** is the melee/ranged hit
   orchestration every attack funnels through (27 params: damages, crit and
   dismember chances, `DamageMultiplier`, buffs, `AttackHitInfo`, tool
   bonuses, attack mode, hit-sound overrides, owned entity, `ItemValue`,
@@ -587,12 +587,15 @@ Leaf types on the edges of the damage flow above:
   would double-apply - the same trust shape as the difficulty-modifier
   finding on NetPackageDamageEntity.ProcessPackage.
 
+- **2026-08-28:** Repinned to V3.2.0: `NetPackageDamageEntity.ProcessPackage` IL=226
+  (was 172), `write` IL=144 (was 176); kill-XP rework documented in §3.1a.
 - **2026-08-25:** difficultyModifier scope pinned: the only call is inside
   ItemActionAttack.Hit (IL_0A4A, on the attack strength before the damage
   apply, ItemActionAttack.il.txt:1819); explosions and falling-block damage do
-  not pass through it. NetPackageDamageEntity.ProcessPackage (IL=172) stores
-  the client's claimed strength verbatim into DamageResponse::Strength
-  (IL_00F0-IL_00F6) and never re-applies the modifier, so on the
+  not pass through it. NetPackageDamageEntity.ProcessPackage (IL=226 on V3.2.0,
+  was 172) stores the client's claimed strength verbatim into
+  DamageResponse::Strength (IL_00F0-IL_00F6) and never re-applies the modifier,
+  so on the
   client-attack direction the client-side modifier is the only scaling.
   EntityPlayer.DamageEntity (IL=15) gates all player damage off when
   `IncomingDamageModifier <= 0` (GameStats 21 + ldsfld gate, EntityPlayer.il.txt:1813).

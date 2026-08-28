@@ -221,9 +221,12 @@ implementing the wrong path. All narrated at their family docs:
   `ObservableDictionary<K,V>` are **live**; the latter backs
   `PersistentPlayerList.Players`, [server-lifecycle.md](server-lifecycle.md).)
 - **Wire-body corrections** from the regenerated catalog: `NetPackageDamageEntity`
-  writes `bIgnorePartyShare` (IL=176, not 172); `EntityCreationData` writes a
-  final `stressAmount : f32` for every entity (read gated on version >= 36);
-  `NetPackageTileEntity` writes `teBlockId` + `i32` length ([protocol-packages.md](protocol-packages.md)).
+  writes `bIgnorePartyShare` (IL=176 on V3.1.0; **V3.2.0 packs it into the
+  `flags` u32 bit 7, write IL=144**, [protocol.md](protocol.md) §6.5);
+  `EntityCreationData` writes a final `stressAmount : f32` for every entity
+  (read gated on version >= 36) and `requestedBy`/`requestKey` on V3.2.0
+  (read gated >= 37); `NetPackageTileEntity` writes `teBlockId` + `i32` length
+  ([protocol-packages.md](protocol-packages.md)).
 
 ---
 

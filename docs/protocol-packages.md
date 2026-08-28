@@ -21,7 +21,7 @@ All widths little-endian. `string` = .NET 7-bit length prefix + UTF-8. `bool` =
 
 ## 1. Protocol-wide metadata census
 
-Full table: `il/netpackages-v3.2.0/META.md` (193 packages). Regenerate with
+Full table: `il/netpackages-v3.2.0/META.md` (195 packages). Regenerate with
 `mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.2.0/META.md`.
 
 **Per-package wire bodies:** this doc hand-annotates the load-bearing packages; the
@@ -32,8 +32,10 @@ nested serializers) is auto-extracted in
 
 ### 1.1 Channels (correction to the "channel 0 only" assumption)
 
-Most packages inherit the base **channel 0**. Exactly **6 override to
-channel 1** (the bulk / terrain / map band):
+Most packages inherit the base **channel 0**. Exactly **5 override to
+channel 1** (the bulk / terrain / map band; was 6 before `NetPackagePOIAround`
+was removed in V3.2.0 — its replacements `POIMetadataRequest/Response` are
+channel 0):
 
 | Channel-1 package | Role |
 |---|---|
@@ -41,8 +43,6 @@ channel 1** (the bulk / terrain / map band):
 | `NetPackageChunkRemove` | chunk unload |
 | `NetPackageMapChunks` | compressed map (minimap) tiles |
 | `NetPackageDynamicMesh` | dynamic mesh (destroyed-block geometry) |
-| `NetPackagePOIMetadataRequest` | C2S: ask server for POI metadata (V3.2.0; replaces `NetPackagePOIAround`) |
-| `NetPackagePOIMetadataResponse` | S2C: compressed POI metadata list (`PrefabInstance.POIMetadata`) |
 | `NetPackageWorldFolder` | world-folder file transfer |
 
 **`NetPackageWorldFolder.prepareWorldFolderData` (IL=3 async stub;
@@ -133,8 +133,10 @@ join set, false for these bulk packages.
 ### 1.3 Direction tally
 
 `NetPackageDirection`: `0 = Both`, `1 = ToServer`, `2 = ToClient`.
-Of 193 packages: **66 ToClient, 33 ToServer, 7 Both (explicit), 87 inherit**
-(base default = Both).
+Of 195 packages: **68 ToClient, 34 ToServer, 7 Both (explicit), 86 inherit**
+(base default = Both). (V3.1.0 was 66/33/7/87 — the removed `POIAround` was
+inherit; the three added packages are explicit: Request=ToServer,
+Response/ConfirmSpawn=ToClient.)
 
 ### 1.4 Pre-auth surface (`AllowedBeforeAuth = 1`)
 
@@ -408,7 +410,7 @@ EntityCreationData.write(_bw, networkWrite=true)   // same codec as 5.1
 - `Setup` stores `ecd`; `ProcessPackage` calls
   `IGameManager.RequestToSpawnEntityServer(ecd)` when world non-null.
 
-**`GameManager.RequestToSpawnEntityServer` (IL=101):**
+**`GameManager.RequestToSpawnEntityServer` (IL=37):**
 
 1. If **not** server: re-wrap as this package and `SendToServer` (host client
    path).
@@ -1353,7 +1355,7 @@ when a causer exists, with linear falloff
 fraction, the center takes the full scaled amount, and the `BlockTags` set
 filters which blocks are touched.
 
-**`Explosion.AttackEntites` model (IL=691):** `entityDamage` and
+**`Explosion.AttackEntites` model (IL=680):** `entityDamage` and
 `EntityRadius` come from passives **20** / **21** over the source item; the
 scan is `Physics.OverlapSphere(worldPos, radius, -538480653)`. Two target
 classes: an **`Item`-tagged** collider resolves to an `EntityItem` (via
@@ -1382,7 +1384,7 @@ spin **2..15**); remove finished groups.
 21); optional BlockTags filter; walk blocks in radius; terrain Y adjust; damage
 via block damage path into `ChangedBlockPositions`.
 
-**`Explosion.AttackEntites` (IL=691):** EffectManager-scaled entity damage
+**`Explosion.AttackEntites` (IL=680):** EffectManager-scaled entity damage
 (passive **20**) and radius (passive **21**); Physics overlap layer mask
 `-538480653`; per hit transform tag → body-part multiplier
 (`Legs`/`Head`/`ChestExplosionDamageMultiplier`, else 1); passive **22** scales
@@ -2216,7 +2218,7 @@ customReason    : string
 | Bulk-package compression codec | **Closed (2026-08-12):** the "LZ/native" reading was wrong - `NetConnectionSteam` fields + `NetConnectionAbs.Compress` (IL=59) / `Decompress` (IL=22) run the **managed `Noemax.GZip.DeflateOutputStream`** (level 3, raw deflate, no header) over the package stream, the same codec as the region payload ([save-region.md](save-region.md) §3.4, byte-exact-verified). No native codec |
 | Encryption cipher/KDF | handshake bodies decoded; crypto primitives native (residual) |
 | Quest/Party process | re-pinned 2026-08-07 (§6.17-6.18); Twitch still low priority |
-| `NetPackageDynamicMesh`, `POIAround` | Process re-pinned (mesh ack IL=24; POIAround IL=156 prefab dict fill) |
+| `NetPackageDynamicMesh` | Process re-pinned (mesh ack IL=24). `NetPackagePOIAround` (removed V3.2.0; its Process IL=156 prefab dict fill is replaced by `NetPackagePOIMetadataRequest/Response`) |
 | Per-flag conditional framing on every package | **closed 2026-08-10** in §6.23 (all 37 conditional-heavy write bodies verified from IL; always-present vs conditional distinguished) |
 
 ---

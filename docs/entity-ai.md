@@ -967,7 +967,7 @@ store `smellSheltered`; if radius &lt; 0 call `SmellClear`.
 `alertEnemy`; `SetBarColor(isAlert)` (UI bar green **50,135** or alert
 **180,180**).
 
-**`SpawnPointIsHidden` (IL=139):** spawn sample at block center xz **+0.5**;
+**`SpawnPointIsHidden` (IL=147):** spawn sample at block center xz **+0.5**;
 pose **5** selects second offset table from `isHiddenOffsets`. For every player:
 temp model layer **2**, ray from player head through each offset pair
 (horizontal side offset + vertical lift); `Voxel.Raycast` layer **71**. Any clear

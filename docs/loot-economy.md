@@ -202,12 +202,12 @@ used when the decorator lays out trader compounds.
 2-pos overload (IL=19) is false in sandbox mode, else
 `DynamicPrefabDecorator.IsWithinTraderArea(min, max)` (the point queries
 behind the placement/repair/dump-water gates).
-`DynamicPrefabDecorator.GetTraderAtPosition(pos, padding)` (IL=68) is the
+`DynamicPrefabDecorator.GetTraderAtPosition(pos, padding)` (IL=9) is the
 lookup core: a `TraderBinarySearch(x - padding)` over the X-sorted
 `traderAreas`, then an X/Z containment test against
 `[ProtectPosition - padding, ProtectPosition + ProtectSize + padding)`
 (Y unchecked) - the first matching `TraderArea`, else null.
-`TraderArea.IsWithinProtectArea(pos)` (IL=47) is the full 3D containment
+`TraderArea.IsWithinProtectArea(pos)` (IL=59) is the full 3D containment
 against the cached `ProtectBounds`; `GetProtectPadding()` (IL=22) is
 `ProtectSize - PrefabSize` with x/z minus 2 - the protection margin around
 the prefab footprint.

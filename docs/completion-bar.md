@@ -20,8 +20,8 @@ drive unaccounted → 0 after each game patch or doc edit.
 **"100% of dedicated managed behaviour"** in this project means **A + B**.  
 It does **not** mean C (infinite), and does **not** mean D (impossible from IL alone).
 
-Narrating **100% of the 3681 game-type surface** (of 7432 all types incl. nested
-= ~49.5%) is the achieved, healthy end state: the larger base over-includes
+Narrating **100% of the 3692 game-type surface** (of 7451 all types incl. nested
+= ~49.6%) is the achieved, healthy end state: the larger base over-includes
 client UI and under-includes reflection; the remaining types are correctly
 **catalogued** or **classified OOS**, not unaccounted (unaccounted = 0).
 
@@ -53,7 +53,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.2.0 b9) |
-| Unaccounted reached types | `Coverage.exe` | **100%** narrated (3681 game types; narrated 3681 / catalogued 0 / classified 0) |
+| Unaccounted reached types | `Coverage.exe` | **100%** narrated (3692 game types; narrated 3692 / catalogued 0 / classified 0) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.2.0 b9 managed dedi bar |

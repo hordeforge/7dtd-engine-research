@@ -76,7 +76,7 @@ Live APM + loadgen ladders (2026-07-17/18). Detail: [measured-scaling.md](../../
 | **LiteNetLib + managed wrappers** | [network.md](network.md) | Protocol pump on main peer Update | **Hard** | Measure package cost; do not reimplement combat net |
 | **LiteNetLib event dispatch (managed)** | **Closed 2026-08-10** | `UnsyncedEvents=true`; receive-thread `ConnectionRequestCheck` races `Clients.List` under join churn ([network.md](network.md) §4.0) | **Closed** | Ramp bot joins (`--ramp-ms`); fix direction documented |
 | **Entity interest + package bands** | distSq interest **16**; teleport ±**256**; pos/rot ±**128**; age **100** | Wrong assumptions break optim or custom entities | **Soft** | Document thresholds; measure under loadgen |
-| **194 NetPackage* types** (193 wire + manager) | dedi-complete census | Large surface; many client-only | **Soft** | Touch only hot packages |
+| **196 NetPackage* types** (195 wire + manager) | dedi-complete census | Large surface; many client-only | **Soft** | Touch only hot packages |
 | **Chunk transfer bandwidth** | SendChunksToClients; kernel UDP | Join burst + tall columns + dense urban | **Hard** | View distance, density caps; RealEarth small host |
 | **EAC / anti-cheat** | NetPackageEAC, EOS types | C# mods and loadgen bots require EAC off | **Ops** | Document; never claim EAC-on for DLL mods |
 | **SteamNetworking optional** | serverconfig disable list | Extra path complexity | **Soft** | Dedicated usually LiteNet only |

@@ -413,11 +413,11 @@ and returns false. `ValidUserIdForSender(userId)` (IL=29) accepts
 
 **The concrete overrides (all IL=2, per type):**
 
-- **Channel 1** (the big-data channel): `NetPackageChunk`, `ChunkRemove`,
-  `MapChunks`, `POIAround`, `WorldFolder`, `DynamicMesh`; everything else
-  stays 0.
-- **Compress true**: `Chunk`, `ConfigFile`, `IdMapping`, `MapChunks`,
-  `POIAround`, `SignDataResponse`, `DynamicClientArrive`, `DynamicMesh`;
+- **Channel 1** (the big-data channel, **5** packages in V3.2.0; was 6 before
+  `NetPackagePOIAround` removed): `NetPackageChunk`, `ChunkRemove`,
+  `MapChunks`, `WorldFolder`, `DynamicMesh`; everything else stays 0.
+- **Compress true** (8 packages): `Chunk`, `ConfigFile`, `IdMapping`, `MapChunks`,
+  `POIMetadataResponse`, `SignDataResponse`, `DynamicClientArrive`, `DynamicMesh`;
   `WorldFolder` and `Localization` explicitly false.
 - **ReliableDelivery false** (the per-tick fire-and-forget set):
   `EntityPosAndRot`, `EntityRelPosAndRot`, `EntityRotation`, `EntitySpeeds`,
@@ -790,14 +790,16 @@ defaults to true and is overridden to **false** by exactly five classes:
 `NetworkServerLiteNetLib.SendData` maps it to DeliveryMethod 2 (ReliableOrdered) or
 4 (Unreliable) on channelNumber 0 (854255-854262).
 
-**Compression** via `get_Compress() == true`: `NetPackageChunk` (808641),
-`ConfigFile` (809975), `DynamicClientArrive` (347114), `DynamicMesh` (373452),
-`IdMapping` (822370), `MapChunks` (826004), `POIAround` (833771) and
-`SignDataResponse` (841321); false everywhere else.
+**Compression** via `get_Compress() == true` (8 packages, all IL=2):
+`NetPackageChunk`, `NetPackageConfigFile`, `NetPackageDynamicClientArrive`,
+`NetPackageDynamicMesh`, `NetPackageIdMapping`, `NetPackageMapChunks`,
+`NetPackagePOIMetadataResponse`, `NetPackageSignDataResponse`; false everywhere
+else. (V3.1.0 had `NetPackagePOIAround` instead of `NetPackagePOIMetadataResponse`.)
 
-**Second envelope stream** via `get_Channel() == 1`: `NetPackageChunk` (808632),
-`ChunkRemove`, `DynamicMesh`, `MapChunks` (826004) and `POIAround` (833771). All
-other packages are channel 0.
+**Second envelope stream** via `get_Channel() == 1` (5 packages, all IL=2):
+`NetPackageChunk`, `ChunkRemove`, `DynamicMesh`, `MapChunks`, `WorldFolder`.
+All other packages are channel 0. (V3.1.0 had `POIAround` as the 6th channel-1
+package.)
 
 ### Auth wrapper and connect limits
 

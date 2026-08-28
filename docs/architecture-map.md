@@ -185,11 +185,12 @@ sequenceDiagram
   end
 ```
 
-Two bands: **channel 0** for everything by default, **channel 1** for the six bulk
-packages (`Chunk`, `ChunkRemove`, `MapChunks`, `DynamicMesh`, `POIAround`,
-`WorldFolder`). Eight packages self-compress. Exactly ten are legal before auth,
-which is the entire pre-auth attack surface
-([`protocol-packages.md`](protocol-packages.md)).
+Two bands: **channel 0** for everything by default, **channel 1** for the five bulk
+packages (`Chunk`, `ChunkRemove`, `MapChunks`, `DynamicMesh`, `WorldFolder`).
+`NetPackagePOIAround` was removed in V3.2.0 (replaced by
+`NetPackagePOIMetadataRequest/Response` on channel 0). Eight packages
+self-compress. Exactly ten are legal before auth, which is the entire pre-auth
+attack surface ([`protocol-packages.md`](protocol-packages.md)).
 
 ---
 

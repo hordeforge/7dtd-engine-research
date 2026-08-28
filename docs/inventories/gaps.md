@@ -925,13 +925,13 @@ IL_0012: ret
 ```
 
 ### `EntityCreationData`
-- `read` IL=507
-- `write` IL=362
-- `.ctor` IL=314
-- `.ctor` IL=208
+- `read` IL=528 (V3.2.0; was 507)
+- `write` IL=372 (V3.2.0; was 362)
+- `.ctor` IL=317 (V3.2.0; was 314)
+- `.ctor` IL=219 (V3.2.0; was 208)
 - `ApplyToEntity` IL=176
 - `writeXml` IL=88
-- `.ctor` IL=49
+- `.ctor` IL=52 (V3.2.0; was 49)
 - `readXml` IL=47
 ### `EntityFactory`
 - `GetEntityType` IL=137

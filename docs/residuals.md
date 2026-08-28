@@ -38,7 +38,7 @@ limit, or process).
 | **Post-patch IL drift** | TFP updates move offsets; regenerate dumps (process residual) |
 | **Region sector payload byte codec detail** | **Closed (2026-08-06/07 + 2026-08-12):** Raw free-list + V1/V2 WriteData ([save-region.md](save-region.md) 3.3-3.4); location/timestamp packing (3.5); Raw **11-byte** header `7rr`+version:i32+paddingBytes:i32 from `New`/`Load`. 2026-08-12: the sector payload is now **byte-exact verified end-to-end** - V2 framing (len + 12-byte gap + data), `ttc\0` + Chunk.CurrentSaveVersion 47 preamble, raw Noemax deflate, and the whole `Chunk.save` body (layers, maps, channels, volumes) parse on 16 probe saves; the stock server boots the saves back (game-reader round-trip, gettime matches the parsed worldTime). `.7rr` is a dead path on stock dedicated (sector factory is unconditional). |
 | **Client-only UI / avatar / NGUI / camera** | Out of dedicated scope (non-goal) |
-| **Full NetPackage body catalog (193 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.23; per-flag framing for all 37 conditional-heavy packages verified from write IL in §6.23 (2026-08-10) |
+| **Full NetPackage body catalog (195 wire packages)** | **Closed:** metadata census for all 193; auto body sequences in [inventories/netpackage-bodies.md](inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](protocol-packages.md) sections 1-6.23; per-flag framing for all 37 conditional-heavy packages verified from write IL in §6.23 (2026-08-10) |
 | **Encryption cipher / KDF primitives** | **Managed session transform closed; native primitives permanent.** Closed: the handshake package bodies and the managed `AesEncryptAndMac` session transform (AES + HMAC, [network.md](network.md) §4.5). Not closable: RSA key wrap and platform RNG quality - anything below `System.Security.Cryptography` providers (OS/OpenSSL native crypto), which has no game sim logic |
 | **XML content semantics** | Blocks/items/biomes/prefabs are data, not loop IL |
 | **Discord GameSDK integration (`DiscordManager`, 140 methods)** | **Closed (2026-08-10, IL + runtime):** IL shows multiple `GameManager.get_IsDedicatedServer()` gates in `DiscordManager` (lines 874, 2007, 2469, 2605) - the Discord paths skip on dedicated. Runtime confirms: across 12 dedicated boots the log contains only static `libdiscord_partner_sdk.so` preload + 16 `GamePref.Discord*` defaults, **zero live activity** (no connection, presence, lobby, auth). The manager is instantiated but never activates on a headless server. A client social feature, not a dedicated codepath |
@@ -63,7 +63,7 @@ limit, or process).
 | Origin.FixedUpdate on dedicated | **No-op:** `IsDedicatedServer` → early `ret` ([loop.md](loop.md)) |
 | Land claims / PPL accessor | dedi-complete + product `realearth-surfaces.md` (product SoloSlide) |
 | ModEvents field inventory | managers.md |
-| NetPackage type census (194: 193 wire + NetPackageManager) | network.md + dedi-complete §3 |
+| NetPackage type census (196: 195 wire + NetPackageManager) | network.md + dedi-complete §3 |
 | Light/stability/mesh/water method map | light-mesh-water.md |
 | Manager Update IL table | managers.md |
 | ChunkBlockChannel Read/Write | dedi-complete §12 (IL=151/120) |

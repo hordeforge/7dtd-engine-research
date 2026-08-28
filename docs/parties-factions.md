@@ -173,7 +173,7 @@ other player - the pending-invite cleanup when a player leaves/disconnects.
 `Party` aggregates member state for shared mechanics:
 
 - **Shared kill XP.** Two server paths, both using the same base XP:
-  1. **Killer** `EntityPlayer.AddKillXP` (**IL=99**): `ExperienceValue` from
+  1. **Killer** `EntityPlayer.AddKillXP` (**IL=89**): `ExperienceValue` from
      victim class, scaled by `EffectManager.GetValue(PassiveEffects=193, victim
      holding item, …)`; if `xpModifier != 1`, `xp = (int)(xp * mod + 0.5)`; if
      in party, `Party.GetPartyXP` =

@@ -36,7 +36,7 @@ Count: **196** types with `NetPackage` name prefix in live dedi dump (195 wire-o
 | `NetPackageConfigFile` | NetPackage | 8 | 25 |
 | `NetPackageConsoleCmdClient` | NetPackage | 8 | 31 |
 | `NetPackageConsoleCmdServer` | NetPackage | 7 | 10 |
-| `NetPackageDamageEntity` | NetPackage | 6 | 176 |
+| `NetPackageDamageEntity` | NetPackage | 6 | 235 |
 | `NetPackageDebug` | NetPackage | 7 | 34 |
 | `NetPackageDecoResetWorldChunk` | NetPackage | 8 | 39 |
 | `NetPackageDecoResetWorldRect` | NetPackage | 8 | 58 |

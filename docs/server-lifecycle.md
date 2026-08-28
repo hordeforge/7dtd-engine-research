@@ -370,7 +370,7 @@ opens the `XUiC_SpawnSelectionWindow` (join-time spawn choice).
 `countdownSendPlayerDataFileToServer` timer that ships the local player
 data file to the server after the delay.
 
-**`RequestToSpawnEntityServer` (IL=101):** client →
+**`RequestToSpawnEntityServer` (IL=37):** client →
 `NetPackageRequestToSpawnEntity` to server. Server: if class is fallingTree,
 skip when an existing `EntityFallingTree` shares `blockPos`. Create entity;
 if `EntityBackpack`, match `RefPlayerId` to persistent player and
@@ -803,7 +803,7 @@ SaveId, OnlinePlayers, LocalMods, HasModifiedXML, character/game-stage stats).
 This is **telemetry**, not gameplay sim; transport is the platform analytics
 service (residual). See the EOS server-list filters section below.
 
-**Server-start analytics (`LogServerStartEventAnalytics`, IL=261):** the
+**Server-start analytics (`LogServerStartEventAnalytics`, IL=268):** the
 boot twin, skipped in edit/playtesting mode. It resolves the sandbox preset
 (GamePrefs 295, localized name, group), loads the code-based options
 (GamePrefs 296), and builds `ServerStartEventData` (server id, save guid,

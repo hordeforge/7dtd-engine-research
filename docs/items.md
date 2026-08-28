@@ -301,7 +301,7 @@ be equal. `ItemValue.CalcModSlotCount()` (IL=29) rolls the mod-slot budget from
 `Quality` as `FastMin(255, (int)EffectManager.GetValue(ModSlots, this,
 FastMax(0, Quality - 1), ...))`.
 
-`ItemValue.MergeBest(_iv)` (IL=115) merges a donor item into this one (the
+`ItemValue.MergeBest(_iv)` (IL=122) merges a donor item into this one (the
 repair/combine result). With `ItemAction.RepairType` `CombineOnly`/`Both` it
 sums both remaining durabilities against the larger `MaxUseTimes`:
 `UseTimes = FastMax(0, maxMax - (myRemaining + otherRemaining))`. Otherwise
@@ -536,7 +536,7 @@ flag. The game-stage stats: `FindGSStat(list, quality, gameStage, rand)`
 pipeline.
 ItemClass leaves (all IL-verified): `SetId(id)` (IL=12) stores `pId` and,
 when `Effects` is non-null, sets `Effects.ParentPointer = (object)id`
-(boxed). `SetActivated(ref value, bool)` (IL=10) folds the bool into
+(boxed). `SetActivated(ref value, bool)` (IL=5) folds the bool into
 `value.Activated = (byte)(activated ? 1 : 0)`. `CheckKeys` (IL=1) and the
 base `OnPlacedAsCatalyst` (IL=1) are no-ops; the `ItemClassHeldEntity`
 override (IL=19) sets the `CVarLastHeldEntitySlot` cvar to -1, removes the

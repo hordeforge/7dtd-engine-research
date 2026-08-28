@@ -263,7 +263,7 @@ present (overlap-safe placement window); it then:
 `ChunkManager.task_Lighting`, so late-arriving neighbors get their pending
 decoration on the lighting worker rather than only at generation time.
 
-`WorldDecoratorBlocksFromBiome.DecorateChunkOverlapping` (IL=245) is the
+`WorldDecoratorBlocksFromBiome.DecorateChunkOverlapping` (IL=242) is the
 biome-deco driver, guarded by its own `rwlock` write lock. It builds a
 per-chunk seeded `GameRandom` via `Utils.RandomFromSeedOnPos(chunk.X, chunk.Z,
 seed)`, lazily creates `resourceNoise = new PerlinNoise(seed)`, clears the
@@ -361,7 +361,7 @@ classification. Consequence for clones: emitting binary density + the byte
 heightmaps is exactly stock; "voxel stairs" on slopes are not caused by the
 server's density values.
 
-`WorldDecoratorPOIFromImage.DecorateChunkOverlapping` (IL=472) is the static
+`WorldDecoratorPOIFromImage.DecorateChunkOverlapping` (IL=469) is the static
 POI stamping from the `poi_processed` color map. It warns and returns when any
 neighbor chunk is missing, seeds a chunk-local `GameRandom` like the biome
 decorator, and per non-trader cell whose `m_Poi.GetData(wx, wz)` color is
