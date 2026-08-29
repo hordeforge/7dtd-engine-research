@@ -177,6 +177,7 @@ Product Streamed state machines (tiles, inject gate, SoloSlide): see product ``r
 | World tick / chunks | world-chunks.md |
 | Save / WorldState / region | save-region.md |
 | Terrain YDim / height APIs | terrain-height.md |
+| Runtime hot-patch of YDim expand (feasibility) | hot-patch-height.md |
 | Networking | network.md |
 | Light / stability / mesh / water | light-mesh-water.md |
 | Managers + ModEvents | managers.md |
