@@ -707,6 +707,27 @@ section 5.0.
 `NetPackageConfirmSpawnEntity` so the client can correlate via
 `EntityPlayerLocal.HandleRequestedEntitySpawn(key, entity)` (§5.1.2).
 
+**Client-side pending-request registry (`EntityPlayerLocal.SpawnRequest`,
+V3.2.0):** the client half of the correlation: `EntityPlayerLocal` holds a
+`Dictionary<Guid, SpawnRequest> spawnRequests` keyed by `requestKey`; each
+`SpawnRequest` record is `{ callback: Action<Entity>, blocksCollect: bool }`
+(`il/full-v3.2.0/_global/EntityPlayerLocal_SpawnRequest.il.txt`).
+
+1. `EntityPlayerLocal.RequestToSpawnEntityServer(ecd, callback, blocksCollect)`
+   (IL=28): generates a fresh `Guid` (retry until not present in the dict),
+   adds `SpawnRequest{callback, blocksCollect}` under it, stamps
+   `ecd.requestedBy = localPlayer.entityId` + `ecd.requestKey = guid`, then
+   calls `GameManager.RequestToSpawnEntityServer(ecd)` (the S2C round-trip
+   above).
+2. On `NetPackageConfirmSpawnEntity`: `HandleRequestedEntitySpawn(key, entity)`
+   (IL=16) does `TryGetValue` → `Remove` → `callback.Invoke(entity)` — the
+   pending request is consumed exactly once.
+3. `grabDisabled()` (IL=25, V3.2.0 new): true while any pending request has
+   `blocksCollect` set — the grab activation is suppressed until the requested
+   entity materializes. This is what lets held-entity placement (chicken
+   coop items, `ItemClassHeldEntity` family, [items.md](items.md) § Held
+   entities) wait for the server-confirmed spawn without a race.
+
 **`EntityFactory.SetupEntityCreationData` (ECD builder):** the rich overload
 (IL=31) fills `entityClass`, `id`, `itemStack = ItemStack(itemValue, count)`,
 `pos`/`rot`, `lifetime`, `belongsPlayerId`, `spawnById`, `spawnByName`. The

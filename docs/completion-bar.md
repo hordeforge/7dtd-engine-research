@@ -53,7 +53,7 @@ For each unaccounted type:
 | Check | How | Result |
 |---|---|---|
 | stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.2.0 b9) |
-| Unaccounted reached types | `Coverage.exe` | **100%** narrated (3692 game types; narrated 3692 / catalogued 0 / classified 0) |
+| Unaccounted reached types | `Coverage.exe` | **100%** accounted (3692 game types; narrated 3688 / catalogued 0 / classified 4) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
 | Tier A+B | this doc | **Met** for V3.2.0 b9 managed dedi bar |

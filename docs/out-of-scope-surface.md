@@ -89,11 +89,11 @@ Steam/EOS user-data, remote/title storage, app wrappers. Identity slice is in [p
 
 `ActionUserData`, `CensoredTextResult`, `EPlayGroupExtensions`, `EUserBlockStateExtensions`, `EUserPermsExtensions`, `IPlatformApplication`, `IPlatformUserBlockedDataExtensions`, `IRemotePlayerFileStorage`, `ListEntry`, `PlatformOptimizations`, `PlatformUserBlockedData`, `PlatformUserBlockedResults`, `PlatformUserData`, `PlatformUserDetailsResult`, `PlayerReportCategoryEos`, `ServerKey`, `TitleStorageOverridesManager`, `UserIdentifierFactory`, `UserIdentifierLocal`
 
-## Platform services / store / news (17)
+## Platform services / store / news (21)
 
 News, DLC/store, analytics DTOs, friends/lobby data.
 
-`BaseEventData`, `DLCTitleStorageManager`, `DlcListEntryController`, `FriendsServerList`, `GSRequestData`, `LanguageInfo`, `Lobby`, `LobbyInfo`, `NewsEntry`, `NewsSource`, `NewsSourceRfs`, `NewsSourceWww`, `PrefVersionStore`, `QualityInfo`, `ResolutionInfo`, `ServerDateTimeResult`, `ServiceProvider`
+`BaseEventData`, `ChallengeClaimedEventData`, `ChallengeCompletedEventData`, `CosmeticUsageEventData`, `DLCTitleStorageManager`, `DlcListEntryController`, `DlcOwnershipEventData`, `FriendsServerList`, `GSRequestData`, `LanguageInfo`, `Lobby`, `LobbyInfo`, `NewsEntry`, `NewsSource`, `NewsSourceRfs`, `NewsSourceWww`, `PrefVersionStore`, `QualityInfo`, `ResolutionInfo`, `ServerDateTimeResult`, `ServiceProvider`
 
 ## Editor / creative tools / dev automation (3)
 

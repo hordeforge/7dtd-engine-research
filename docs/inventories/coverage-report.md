@@ -1,6 +1,6 @@
 # RE coverage report (auto-generated)
 
-**Assembly studied:** Assembly-CSharp V3.2.0 (b9), file mtime 2026-08-28 09:53 UTC. The numbers below are for THIS build only: if the corpus pin
+**Assembly studied:** Assembly-CSharp V3.2.0 (b9), file mtime 2026-08-29 08:44 UTC. The numbers below are for THIS build only: if the corpus pin
 moved (`docs/coverage.md` header), regenerate before quoting any number here.
 
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
@@ -50,10 +50,10 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached, non-generated | 6199 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2366 (excluded from %) |
 | ...**game types** (the RE surface) | **3692** |
-| ...**narrated** (backticked in a narrative doc) | **3687 (99%)** |
+| ...**narrated** (backticked in a narrative doc) | **3688 (99%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 0 |
-| ...**classified** out-of-scope | 0 |
-| ...**unaccounted** (appears nowhere) | 5 |
+| ...**classified** out-of-scope | 4 |
+| ...**unaccounted** (appears nowhere) | 0 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 503 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 179 |
 
@@ -71,8 +71,8 @@ as an upper bound; this table is its actual depth.
 
 | Narrative mentions | Types | Share of base |
 |---|---:|---:|
-| 0 (catalogued, classified, or unaccounted) | 5 | 0% |
-| exactly 1 | 2401 | 65% |
+| 0 (catalogued, classified, or unaccounted) | 4 | 0% |
+| exactly 1 | 2402 | 65% |
 | 2-4 | 785 | 21% |
 | 5-19 | 420 | 11% |
 | 20+ | 81 | 2% |
@@ -2422,7 +2422,7 @@ Full unreached game-type list (2261):
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2898 | 2897 | 1 | 99% |
+| `<global>` | 2898 | 2898 | 0 | 100% |
 | `GameEvent` | 180 | 180 | 0 | 100% |
 | `Platform` | 147 | 147 | 0 | 100% |
 | `Twitch` | 110 | 110 | 0 | 100% |
@@ -2432,7 +2432,7 @@ Full unreached game-type list (2261):
 | `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100% |
 | `UAI` | 24 | 24 | 0 | 100% |
 | `PrefabVolumes` | 16 | 16 | 0 | 100% |
-| `Services` | 13 | 9 | 4 | 69% |
+| `Services` | 13 | 13 | 0 | 100% |
 | `GamePath` | 13 | 13 | 0 | 100% |
 | `SandboxOptions` | 13 | 13 | 0 | 100% |
 | `Audio` | 12 | 12 | 0 | 100% |
@@ -2467,11 +2467,6 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
-| `ChallengeClaimedEventData` | Services.Analytics.Events | 24 |
-| `ChallengeCompletedEventData` | Services.Analytics.Events | 22 |
-| `CosmeticUsageEventData` | Services.Analytics.Events | 14 |
-| `DlcOwnershipEventData` | Services.Analytics.Events | 6 |
-| `SpawnRequest` | <global> | 1 |
 
 ## Catalogued-only reached types (narrate these to reach 100% narration)
 
@@ -2490,4 +2485,8 @@ out-of-scope-surface.md. A backticked mention in a narrative doc moves them to
 
 | Type | Namespace | methods |
 |---|---|---:|
+| `ChallengeClaimedEventData` | Services.Analytics.Events | 24 |
+| `ChallengeCompletedEventData` | Services.Analytics.Events | 22 |
+| `CosmeticUsageEventData` | Services.Analytics.Events | 14 |
+| `DlcOwnershipEventData` | Services.Analytics.Events | 6 |
 
