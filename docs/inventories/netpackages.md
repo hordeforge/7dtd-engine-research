@@ -9,6 +9,19 @@
 
 Count: **196** types with `NetPackage` name prefix in live dedi dump (195 wire-oriented types + manager/helpers as named in the table).
 
+> **Census gap (2026-08-29, cross-pollinated from zdtd):** the type table below
+> omits four wire packages that DO have extracted bodies in
+> [netpackage-bodies.md](netpackage-bodies.md) and appear in the zdtd server's
+> negotiated map: `NetPackageLight`, `NetPackageTreeFade`,
+> `NetPackageDroneDataSync`, `NetPackageDroneParticleEffect`. The table's
+> Methods/IL columns are not filled here because the rows are absent from the
+> generator's source list; the census count above is the dump census, and the
+> four names are real registered classes (bodies + `dedicated-leaves.md` /
+> `vehicles-drones-turrets.md` references). The zdtd side also confirmed the
+> name `NetPackageEntityFlags` is NOT a stock class (no dump/census hit; the
+> stock package is `NetPackageEntityAliveFlags`) — it was removed from the
+> zdtd map as an invented name.
+
 | Type | Base | Methods | Max method IL |
 |---|---|---:|---:|
 | `NetPackage` | Object | 18 | 49 |
