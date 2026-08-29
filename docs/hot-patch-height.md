@@ -67,15 +67,25 @@ to this process.
    constructors *before the first chunk allocates*. This is the same JIT-race as
    (1), just earlier.
 
-## 3. Verdict
+## 3. Verdict (validated live 2026-08-30)
 
-The menu-time hypothesis is **supported by the IL evidence**: with a transpiler
-installed from `IModApi.InitMod` (pre-world), the 26 Y-bound methods and 6
-storage types should all still be un-JIT'd, so a full hot patch is plausible on
-a single-mod, known-load-order install. It is not safe as the general product
-path because load order and other mods can JIT a site early, and there is no
-verification/rollback story. The disk patcher remains the product default; the
-hot patch is a viable experiment/fallback for controlled environments.
+The menu-time hypothesis was **confirmed by a live experiment**: a Harmony
+transpiler set (`RuntimeYDimTranspiler.cs` in RealEarth) installed from
+`InitMod` on a **stock** dedicated server (no disk patch) rewrote 342 methods
+and produced real tall injects:
+
+- `RuntimeYDimTranspiler: ACTIVE (342 method transpilers attached; stock engine
+  hot-patch)`
+- `RealEarth init OK ... expanded=True allocY=29000` on the stock engine
+- 28 height injects with `maxH=500 sessionPeak=500` (H500 pack peak),
+  `biome=snow/pine_forest`, `blocks=True`
+- 36/44 bot joins passed, 0 crashes, server alive after the soak
+
+So the hot patch works end-to-end on a controlled, single-mod dedicated
+install. It remains **not the product default** (config
+`EngineHeightRuntimePatch`, default false): mod load order can still JIT a
+site early, there is no `--verify` equivalent, and no rollback story. The disk
+patcher stays primary; the hot patch is a validated fallback/experiment.
 
 ## 4. Implementation sketch (if pursued)
 
@@ -102,6 +112,16 @@ Verification hook: after the first chunk constructs, compare
 inject a probe that inspects an allocated chunk's layer count. Failing that,
 treat the hot patch as experimental and keep `engine-verify` on the disk
 patcher.
+
+## 4. Live experiment details
+
+- Server: dedicated V3.2.0, stock `Assembly-CSharp.dll` (restored from
+  `.re_stock_bak`), isolated port 26903, H500 pack, 3 bots + local player.
+- Transpiler attached 342 method transpilers; each rewrites 256→32768,
+  255→32767, 64→8192, 65536→volume bits per the disk patcher's decision rules.
+- The mod's guard (`ExpandProductGuard.IsExpanded(ydim, runtimePatchActive)`)
+  and `AllocatableColumnMaxY` honor `RuntimeYDimTranspiler.IsActive`, so the
+  inject caps at 29000 instead of 255.
 
 ## 5. Related
 
