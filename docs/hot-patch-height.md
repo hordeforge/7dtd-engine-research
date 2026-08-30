@@ -81,11 +81,14 @@ and produced real tall injects:
   `biome=snow/pine_forest`, `blocks=True`
 - 36/44 bot joins passed, 0 crashes, server alive after the soak
 
-So the hot patch works end-to-end on a controlled, single-mod dedicated
-install. It remains **not the product default** (config
-`EngineHeightRuntimePatch`, default false): mod load order can still JIT a
-site early, there is no `--verify` equivalent, and no rollback story. The disk
-patcher stays primary; the hot patch is a validated fallback/experiment.
+So the hot patch works end-to-end and is now the **product default**
+(`EngineHeightRuntimePatch=true`). The disk patcher stays in the repo
+(`Tools/EngineHeightPatcher.exe`, `make engine-expand`) as the fallback for
+load orders where a pre-boot patch is safer. Remaining risks: mod load order
+can still JIT a site early (half-patched engine), there is no `--verify`
+equivalent, and no rollback story - all acceptable for the default on the
+controlled installs this product targets, with the disk patcher as the escape
+hatch.
 
 ## 4. Implementation sketch (if pursued)
 
