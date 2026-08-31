@@ -4,7 +4,7 @@
 runtime (mod DLL + Harmony transpiler / MonoMod) instead of the shipped
 `EngineHeightPatcher.exe` disk tool. Product side:
 [`7dtd-realearth/docs/HEIGHT_LIMITS.md`](../../7dtd-realearth/docs/HEIGHT_LIMITS.md).
-Hub: [INDEX.md](INDEX.md).
+**Hub:** [`INDEX.md`](INDEX.md).
 
 ## 1. Why the disk patcher exists
 

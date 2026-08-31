@@ -135,6 +135,7 @@ should be re-checked against IL before you rely on it.
 | [INDEX.md](INDEX.md) V3.2.0 shipped delta map (replaces the retired V3.1.0 map + experimental-delta) | audited (pass 1; map refreshed 2026-08-28) |
 | [full-surface.md](full-surface.md) | audited (pass 1) |
 | [game-events.md](game-events.md) | audited (pass 1) |
+| [hot-patch-height.md](hot-patch-height.md) | audited (pass 1) |
 | [items.md](items.md) | audited (pass 1) |
 | [light-mesh-water.md](light-mesh-water.md) | audited (pass 1) |
 | [loop-gmupdate.md](loop-gmupdate.md) | audited (pass 1) |
