@@ -64,6 +64,54 @@ picked as the figure, and that child carries no `Animation`. The stock
 states. A generated entity therefore drives a mod-owned controller that finds
 the figure by name (the writer's `figure` node), not by active-child order.
 
+### The collision capsule does not follow animated bone translation
+
+The stock model has two independent transform branches. `Entity.PhysicsInit`
+selects the root's named `Physics` child, and `AddCharacterController`
+configures the motor once from that node's capsule. Separately,
+`GameObjectAnimalAnimation.Awake` selects the figure child and plays its legacy
+`Animation` clips. No instruction in either path recomputes capsule center or
+height from a posed `SkinnedMeshRenderer`, and `CharacterControllerKinematic`
+subsequently reads size from the motor capsule, not from renderer bounds.
+
+That separation has a concrete diagnostic consequence. A position curve on a
+pelvis or body bone changes the visible skin without moving the root-level
+collision capsule. Legacy position-curve values are local positions, so a
+curve must retain the bone's rest translation and add its bob, dip, or hop to
+that value. A zero-based curve on a bone whose rest local Y is `0.60` moves the
+whole visible body down about 0.60 m while the collision capsule remains where
+it was authored. The resulting entity can spawn, report an enabled renderer,
+and collide while its legs are buried in terrain.
+
+Evidence is the paired stock paths above (`Entity::AddCharacterController`,
+IL=257; `GameObjectAnimalAnimation::Awake`, IL=61). A 2026-08-31 live-client
+probe supplied the complementary rendered measurement: the source mesh AABB
+had minimum Y about `-0.02`, while `SkinnedMeshRenderer.BakeMesh` after the
+idle clip had minimum Y about `-0.60`. Restoring the clip's `0.60` pelvis
+translation is the asset-side correction; moving or enlarging the capsule
+would only hide the animation error and misalign collision in other poses.
+
+Ground placement must also use the loaded voxel column. `World.GetHeightAt`
+queries the terrain generator and can differ from edited or POI terrain;
+`World.GetHeight(int,int)` reads `Chunk.GetHeight`, and stock spawn samplers
+start entities at that block Y plus one. A live road-column probe measured
+60.05 from the generator but 61 for the loaded standing surface. Reassigning a
+spawned entity to the former every update buried it by almost one block even
+though its posed skin and capsule bottoms both sat at local Y about -0.02.
+See [`terrain-height.md`](terrain-height.md#height-api-inventory-harmony-targets).
+That loaded height is still a voxel ceiling. Slopes and partial blocks can have
+a lower collider surface inside the occupied cell, so a harness that forces Y
+each frame must raycast that surface or it will create invisible one-metre
+bumps. Normal engine motion leaves this job to the character motor; the issue
+arises when a visual harness teleports the entity to a synthesized Y.
+
+The 2026-08-31 corrected d3d11 run measured this on the same moving entity. At
+one road sample, `World.GetHeight + 1` returned 62 while the downward physics
+ray hit the surface at 61. Grounding against the hit kept the posed visual
+bottom at 61.032 and reported `groundReady=True`; the independent capsule ray
+reported `collisionReady=True`. The suite completed `pass=1 fail=0`, and the
+looked-at movement was signed off without the previous excessive rise.
+
 ### CharacterControllerKinematic (the kinematic motor wrapper)
 
 `CharacterControllerKinematic.ctor` (IL=60) replaces the Unity CC for
@@ -96,13 +144,10 @@ and ORs `CollisionFlags.Down` (4) into the flags when
 `enableOverlapRecovery` throws `NotImplementedException`; `Rotate` is empty;
 `SetSkinWidth` is a no-op (`GetSkinWidth` returns 0.08).
 
-This is the surface the generated-creature walk-instability analysis targets:
-an oversized capsule (radius/height derived from the model AABB) plus the
-`MoveEntityHeaded` ground-friction lerp interact to fling and climb the entity,
-so the correction is motor-configuration and capsule tuning, not a `moveSpeed`
-override. The engine reads this capsule off an **active** `Physics` node and
-the motor binds that same capsule in its Awake; see the asset-pipeline
-walk-entity case for the measured instability.
+An oversized capsule plus the `MoveEntityHeaded` ground-friction lerp can fling
+or climb an entity, so capsule dimensions and motor configuration remain a
+separate concern from animation pose. The engine reads the capsule off an
+**active** `Physics` node and the motor binds that same capsule in its Awake.
 
 ## Call chain (per tick, `OnUpdateLive`)
 

@@ -69,12 +69,20 @@ Interfaces **cannot** be patched directly (RealEarth already avoids that). Concr
 | Type | Method | Return | Notes for inject |
 |---|---|---|---|
 | `World` | `GetTerrainHeight(int,int)` | **byte** | Clamps tall heights if only this is used |
-| `World` | `GetHeightAt(float,float)` | float | Prefer for full 1:1 meters-as-blocks |
+| `World` | `GetHeight(int,int)` | **byte** | Loaded chunk's top non-air/water block; add 1 for its voxel ceiling, not an arbitrary shape's exact collider surface |
+| `World` | `GetHeightAt(float,float)` | float | Generator height, not the loaded voxel surface |
 | `Chunk` | `GetTerrainHeight` / `SetTerrainHeight` | **byte** | Chunk-local heightmap still byte |
 | `TerrainFromDTM` | `GetTerrainHeightByteAt` / `GetTerrainHeightAt` | byte / float | Baked DTM path |
 | `TerrainFromRaw` | same | byte / float | Raw heightmap path |
 
-**Bodies (V3.2.0 b9):** `World.GetHeightAt(x, z)` (IL=22) delegates to
+**Bodies (V3.2.0 b9):** `World.GetHeight(x, z)` resolves the loaded chunk with
+`GetChunkSync`, converts world to chunk-local X/Z, and returns
+`Chunk.GetHeight`, or 0 when the chunk is absent. Stock spawn-point code then
+uses `chunk.GetHeight(x,z) + 1` as its spawn-candidate Y. `ilspycmd -t World`
+on the installed V3.2.0 client shows that exact route in
+`FindRandomSpawnPointNearPosition` and the adjacent spawn samplers.
+
+`World.GetHeightAt(x, z)` (IL=22) delegates to
 `GetTerrainGenerator().GetTerrainHeightAt((int)x, (int)z)` (the generator
 oracle, no chunk load; **0** without a generator). `World.GetTerrainHeight(x,
 z)` (IL=19) reads the live chunk's byte heightmap via `GetChunkSync` +
@@ -86,6 +94,28 @@ returns the prefab height).
 `Chunk.RecalcHeightAt(x, yMaxStart, z)` (IL=55) rescans the column downward
 from `yMaxStart` and writes `m_HeightMap[offset] = y` at the first non-air (or
 water) cell, returning that y (0 for an all-air column).
+
+These methods are not interchangeable for live grounding. A 2026-08-31 client
+probe measured `GetHeightAt = 60.05` at a road column whose loaded top block
+gave standing surface `GetHeight + 1 = 61`. A harness that assigned an entity
+root to `GetHeightAt` forced a correctly posed one-metre creature almost one
+full block into the road. Use the generator query for terrain-generation
+height questions; use the loaded chunk height plus one for the current voxel
+surface candidate, then account for the model's authored capsule-bottom
+offset. For a visual harness that teleports an entity over slopes and partial
+blocks, even `GetHeight + 1` is too coarse: it is the top of the occupied
+one-metre cell, while the shape's collider can be lower inside that cell. A
+downward physics query on the traversable-surface mask measures the actual
+shape. Keep the height value as a fallback and diagnostic, not as the precise
+surface of every block shape.
+
+The corrected 2026-08-31 d3d11 harness run supplied a discriminating live
+sample: `voxelTop=62.000 surfaceRay=61.000 voxelMinusSurface=1.000`. Placing
+the authored capsule bottom on the ray hit left the posed skin at
+`groundClearance=0.032`, both collision and ground probes passed, and the
+looked-at movement no longer showed the oversized bump rise. That result is
+evidence for the API distinction, not a claim that every terrain block differs
+by one metre.
 `Chunk.AddWallVolumeId(id)` (IL=18) is the wall-volume link: dedupe into
 `wallVolumes` with the same **255** cap error
 (`Chunk AddWallVolume at max`); `GetWallVolumes` (IL=3) exposes the list. `Chunk.GetTerrainHeight(x, z)` (IL=9) reads the
