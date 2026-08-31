@@ -54,6 +54,16 @@ generated creature therefore carries an **active** `Physics` node, which is the
 real-animal standard (animalDeerStag has an active `Physics` child with a
 `CapsuleCollider` at the root).
 
+Because the `Physics` node is active, the stock `GameObjectAnimalAnimation`
+avatar controller cannot wrap this model. Its `Awake` (GameObjectAnimalAnimation.il.txt,
+IL=61) finds its figure by `GetChild(reverse-first-active)`: it iterates the
+model root's children from the last down to the first and takes the first active
+one, so an active `Physics` sibling that is the highest-index active child is
+picked as the figure, and that child carries no `Animation`. The stock
+`Awake` then calls `anim.Play("Idle1")` and caches the `Attack1`/`Attack2`
+states. A generated entity therefore drives a mod-owned controller that finds
+the figure by name (the writer's `figure` node), not by active-child order.
+
 ### CharacterControllerKinematic (the kinematic motor wrapper)
 
 `CharacterControllerKinematic.ctor` (IL=60) replaces the Unity CC for
