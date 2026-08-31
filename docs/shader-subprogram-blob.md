@@ -292,6 +292,23 @@ parameter entry kind 3, whose layout comes from the parser because no UAV
 entry appears in either sample. **Not decoded:** the quantity in header byte
 4, and the meaning of the three empty `m_PlayerSubPrograms` groups.
 
+### Skinned-mesh sub-programs need bone-matrix bindings
+
+A sub-program on a `SkinnedMeshRenderer` must transform each vertex by its
+bone matrices; a stock entity/character shader does this (the game's
+`Game/SDCS/Skin`, read off the player model's material in a live V 3.2.0
+client, skins and renders). A program whose vertex stage only does
+`mul(unity_ObjectToWorld, input.vertex)` (the `Shamway/Unlit` shape) renders a
+`MeshRenderer` but draws nothing on a `SkinnedMeshRenderer`. Authoring such a
+program needs (a) the per-vertex bone index/weight vertex-input slots
+(`BLENDINDICES`/`BLENDWEIGHT`) declared in the bind-channel block, and (b) the
+bone matrices bound in the parameter blob (Unity's `unity_SkinnedMeshBoneMatrix`
+or an equivalent per-mesh texture/cbuffer). This pins the asset-pipeline
+generated-entity shader gap; see
+[`7dtd-asset-pipeline` docs/status/improvements.md §4b][ap-improvements].
+
+[ap-improvements]: https://github.com/hordeforge/7dtd-asset-pipeline/blob/main/docs/status/improvements.md#4b-the-editorless-writers-shader-scope
+
 ## Changelog
 
 - **2026-08-24:** Initial reversal. Container, record table and code-blob
