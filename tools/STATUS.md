@@ -25,6 +25,24 @@ Status terms:
 
 ## Log
 
+### 2026-09-06
+
+- Added `asm_body_diff.py` (supported): pairwise Mono.Cecil method-body hash of
+  two managed assemblies; catches same-size IL rewrites FullSurface type-row
+  diffs miss. Wired into `test_python_cli_usage.py`. Fixed `dump_diff.py` usage
+  string (`vdiff.py` → `dump_diff.py`). Re-verified b10 claims against EOS.dll
+  `Result` enum (`ldc.i4.s 20` = `NoChange`, not `AlreadyPending`) and
+  `EFileDownloadResult.Other` for cancel completion.
+
+### 2026-09-05
+
+- Retargeted hub pins to V3.2.0 b10 after a Steam dedicated/client download
+  (app 294420 buildid 24994542). Census unchanged; managed delta confined to
+  `Platform.EOS.RemoteFileStorage` cancel path (see `docs/releases/changelog-3.2.0.md`
+  §8). Re-extracted `stock_facts.json` (xml pins byte-identical). Sibling
+  version pins bumped in `7dtd-loadgen` PackageCodec and `zdtd-server`
+  `src/version.zig`.
+
 ### 2026-08-28
 
 - Retargeted the whole corpus to the V3.2.0 b9 dedicated build: regenerated all

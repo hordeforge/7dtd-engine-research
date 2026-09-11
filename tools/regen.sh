@@ -115,5 +115,5 @@ step "consistency + gates"
 (cd "$root" && make test)
 
 echo
-echo "Regeneration done. Re-check docs/coverage.md census numbers and commit"
+echo "Regeneration done. Re-check docs/meta/coverage.md census numbers and commit"
 echo "the refreshed committed inventories (docs/inventories/*)."

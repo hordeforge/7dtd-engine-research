@@ -5,11 +5,11 @@
 **Raw IL:** [`../il/opt-scan-v3.2.0/`](../../il/opt-scan-v3.2.0/).
 **Hub:** [`INDEX.md`](../INDEX.md).  
 
-Generated: 2026-07-16 10:19:44Z
+Generated: 2026-08-28 03:34:23Z
 Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`
 
 
-## Largest methods (IL count): scan selected type name prefixes
+## Largest methods (IL count) - scan selected type name prefixes
 
 - **4090** `DistantChunkMap::SetChunkTrigger(Int32)`
 - **3604** `DynamicMeshConsoleCmd::Execute(List`1,CommandSenderInfo)`
@@ -51,20 +51,20 @@ Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/
 - **747** `MeshGeneratorMC2::ChooseTriangulation(Int32,Int32,Int32,Int32,Int32,UInt16[])`
 - **742** `ChunkProviderGenerateWorldFromRaw/<FillOccupiedMap>d__42::MoveNext IL=742`
 - **741** `DistantChunk::ActivateObject(Boolean)`
-- **738** `EntityVehicle::OnCollisionForward(Transform,Collision,Boolean)`
+- **730** `EntityVehicle::OnCollisionForward(Transform,Collision,Boolean)`
 - **726** `World/<LoadWorld>d__73::MoveNext IL=726`
 - **721** `DynamicMeshFile/<ReadMeshTerrainCoroutine>d__58::MoveNext IL=721`
 - **717** `DynamicMeshFile/<ReadMeshCoroutine>d__53::MoveNext IL=717`
 - **715** `Prefab::CopyBlocksIntoChunkNoEntities(World,Chunk,Vector3i,Boolean,FastTags`1)`
 - **705** `WorldBuilder::SmoothRoadTerrainTask$BurstManaged(Data&,NativeArray`1&,NativeArray`1&,Int32)`
 - **694** `WorldBiomes::parseBiome(Byte,Byte,String,XElement,Boolean)`
+- **693** `GameManager/<worldInfoCo>d__197::MoveNext IL=693`
 - **685** `EntityPlayerLocal::guiDrawCrosshair(NGuiWdwInGameHUD,Boolean)`
 - **680** `Prefab::CopyIntoLocal(ChunkCluster,Vector3i,Boolean,Boolean,FastTags`1)`
 - **675** `EntityPlayerLocal::Update()`
-- **670** `GameManager/<worldInfoCo>d__197::MoveNext IL=670`
 - **667** `DistantChunk::calculateMeshTangents(DChunkSquareMesh)`
 - **666** `BlockCollector::Init()`
-- **665** `Prefab::readBlockData(PooledBinaryReader,UInt32,Int32[],Boolean)`
+- **664** `Prefab::readBlockData(PooledBinaryReader,UInt32,Int32[],Boolean)`
 - **652** `WorldBuilder::generateTerrainFeature(String,GenerationSelections,Boolean)`
 - **647** `PrefabPreviewManager::UpdateDisplay()`
 - **639** `EntityFactory/CreateEntityOperation::CompleteEntity IL=639`
@@ -288,7 +288,6 @@ Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/
 - `EAIBreakBlock::AttackBlock`
 - `EAIDodge::CanExecute`
 - `EAIManager::FallHitGround`
-- `EAIRunawayFromEntity::FindEnemy`
 - `EAISetNearestEntityAsTarget::FindTarget`
 - `EntityFallingBlock::OnUpdateEntity`
 - `EntityFallingBlocks::OnUpdateEntity`
@@ -305,6 +304,7 @@ Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/
 - `PlayerMoveController::FindCameraSnapTarget`
 - `UAIBase::addEntityTargetsToConsider`
 - `RequirementNearbyEntities::CanPerform`
+- `HomerunGoalController::Update`
 
 ### Callers of `EntityAlive::FindPath`
 
@@ -395,7 +395,7 @@ Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/
 - `ChunkManager::SendChunksToClients` IL=216 newobj=0 box=0 calls=37
 - `GameManager::gmUpdate` IL=631 newobj=1 box=2 calls=182
 - `GameManager::UpdateTick` IL=150 newobj=0 box=0 calls=29
-- `ConnectionManager::Update` IL=228 newobj=2 box=0 calls=44
+- `ConnectionManager::Update` IL=231 newobj=2 box=0 calls=46
 - `DynamicMeshManager::Update` IL=404 newobj=1 box=0 calls=83
 - `ASPPathFinderThread::FindPath` IL=17 newobj=1 box=0 calls=2
 - `ASPPathFinderThread::FindPath` IL=22 newobj=1 box=0 calls=3

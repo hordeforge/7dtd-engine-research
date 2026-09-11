@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Decode Shader (class 48) sub-program blobs from a stock UnityFS bundle.
 
-Reproduces every measurement in docs/shader-subprogram-blob.md: the LZ4
+Reproduces every measurement in docs/world/shader-subprogram-blob.md: the LZ4
 per-platform blobs, the 12-byte record table, the sub-program header, and the
 DX11 program-data header whose three count bytes are cross-checked against the
 DXBC SHDR/SHEX declarations they describe.

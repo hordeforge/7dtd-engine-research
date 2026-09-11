@@ -13,7 +13,7 @@ Usage:
 Deps: dnfile, dncil; hash-pinned in requirements.txt next to this script
 (uv pip install -r requirements.txt).
 
-Evidence: docs/sandbox-options.md (this repo). The option ids and value sets
+Evidence: docs/admin/sandbox-options.md (this repo). The option ids and value sets
 are the wire-visible contract of the sandbox code (see sandbox-options.md §3);
 they must match the stock DLL exactly for zdtd's SandboxCode decode.
 """

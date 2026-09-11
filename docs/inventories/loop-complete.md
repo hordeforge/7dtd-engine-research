@@ -1,7 +1,7 @@
 # Loop-complete dump notes (V3.2.0)
 
 **Kind:** auto inventory from `DumpLoopComplete` (not the primary narrative).  
-**Prefer:** [`loop.md`](../loop.md), [`save-region.md`](../save-region.md), [`managers.md`](../managers.md).  
+**Prefer:** [`loop.md`](../loop/loop.md), [`save-region.md`](../world/save-region.md), [`managers.md`](../loop/managers.md).  
 **Raw IL:** [`../il/loop-complete-v3.2.0/`](../../il/loop-complete-v3.2.0/).
 **Hub:** [`INDEX.md`](../INDEX.md).  
 

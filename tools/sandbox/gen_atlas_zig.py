@@ -2,7 +2,7 @@
 """Generate src/assets/map_atlas.zig in zdtd from the extracted atlas XMLs.
 
 Reads tools/sandbox/atlas/ta_*.xml (extracted from the operator install's
-meshdescriptions_assets_all.bundle; see docs/texture-atlas.md) and emits a
+meshdescriptions_assets_all.bundle; see docs/world/texture-atlas.md) and emits a
 comptime table of per-texture minimap colors packed with the stock
 Utils.ToColor5 RGB555 formula. Regenerate when the game updates; do not
 hand-edit the output.
@@ -53,7 +53,9 @@ def main() -> None:
     lines.append("//! `../7dtd-engine-research/tools/sandbox/atlas/ta_*.xml` by")
     lines.append("//! `../7dtd-engine-research/tools/sandbox/gen_atlas_zig.py` (do not hand-edit).")
     lines.append("//! Source of truth: the `MeshDescription.MetaData` TextAssets in the")
-    lines.append("//! stock V3.1.0 b14 `meshdescriptions_assets_all.bundle` (docs/texture-atlas.md")
+    lines.append(
+        "//! stock V3.1.0 b14 `meshdescriptions_assets_all.bundle` (docs/world/texture-atlas.md"
+    )
     lines.append("//! in the 7dtd-engine-research repo). Colors are packed with the stock")
     lines.append("//! Utils.ToColor5 RGB555 formula: (r*31+0.5)<<10 | (g*31+0.5)<<5 | (b*31+0.5).")
     lines.append("")

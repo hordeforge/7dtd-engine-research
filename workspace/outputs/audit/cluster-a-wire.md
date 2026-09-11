@@ -14,7 +14,7 @@ from repo root with `ASM` = the stable dedicated-server DLL path. Raw dumps used
 
 ### [CRITICAL-1] WorldInfo `worldHashesData` wire layout is wrong (protocol-packages.md 4.2)
 
-**Doc claim** (`docs/protocol-packages.md` 4.2, "NetPackageWorldInfo write order"):
+**Doc claim** (`docs/network/protocol-packages.md` 4.2, "NetPackageWorldInfo write order"):
 ```
 worldHashesData : i32 len + byte[len]     // world file hashes blob
 worldDataSize   : i64
@@ -68,8 +68,8 @@ is why write uses `Write(byte[])` while read reconstructs the dictionary.
 
 ### [MINOR-1] "193 wire packages" overcounts by ~6 non-wire helper types (protocol.md 4; network.md 3; inventories/netpackages.md)
 
-**Doc claim.** `docs/protocol.md` 4: "**194** `NetPackage*` types = **193 wire
-packages + `NetPackageManager`**". Repeated verbatim in `docs/network.md` 3.
+**Doc claim.** `docs/network/protocol.md` 4: "**194** `NetPackage*` types = **193 wire
+packages + `NetPackageManager`**". Repeated verbatim in `docs/network/network.md` 3.
 
 **Ground truth.** The `194 = 193 + Manager` arithmetic is internally consistent
 (`comm` of census names vs the inventory table differs only by `NetPackageManager`),

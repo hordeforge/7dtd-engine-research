@@ -2,7 +2,7 @@
 """Save format round-trip verifier (stock 7DTD V3.1.0 dedicated).
 
 Validates a real, stock-written save directory against the codecs documented in
-docs/save-region.md:
+docs/world/save-region.md:
 
   main.ttw  : magic "ttw\\0", version u32, gameVersionString, VersionInformation,
               pad/activeGameMode/pad, waterLevel, chunk sizes (Y/Z swapped),
@@ -820,7 +820,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     reject it instead of running a bogus report against a file named --help.
     """
     ap = argparse.ArgumentParser(
-        description="Verify a real stock save against the codecs documented in docs/save-region.md.",
+        description="Verify a real stock save against the codecs documented in docs/world/save-region.md.",
         epilog="exit 0 = all checks passed; 1 = any check failed; 2 = usage error",
     )
     ap.add_argument(

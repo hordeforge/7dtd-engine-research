@@ -21,7 +21,7 @@ Objective (user): "audit all docs here. do more RE of all game systems and wire 
 - [ ] Annotate P0: NetPackageChunk, Entity spawn/create, WorldInfo/WorldTime.
 - [ ] Annotate P1: SetBlock(+Response), PlayerInventory/HoldingItem, ChunkRemove.
 - [ ] Other systems as time permits.
-- Output: new dumps in il/netpackages-v3.0.1/ ; narrative extends docs/protocol.md + protocol-frames.md; annotate workspace/notes/re-audit-extend-wire.md
+- Output: new dumps in il/netpackages-v3.0.1/ ; narrative extends docs/network/protocol.md + protocol-frames.md; annotate workspace/notes/re-audit-extend-wire.md
 
 ## Verification
 - Every new wire field traces to a specific IL instruction (ldfld/callvirt Write*).

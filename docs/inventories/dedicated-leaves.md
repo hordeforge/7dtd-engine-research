@@ -13,7 +13,7 @@ and fingerprint columns come from `tools/src/LeafInfo`, and the promoted section
 derived with `tools/src/RefScan`, but the roles and the owner grouping were written
 by hand. Regenerate the *columns* if the game updates; do not regenerate the file
 wholesale, or the referrer-verified promotions and the IL-verified roles are lost.  
-**Hub:** [`../INDEX.md`](../INDEX.md). **Method:** [`../re-methodology.md`](../re-methodology.md).
+**Hub:** [`../INDEX.md`](../INDEX.md). **Method:** [`../meta/re-methodology.md`](../meta/re-methodology.md).
 
 **88 leaf types** in the base catalog below, plus the promoted sections further down (the file's total row count is higher; see those sections for provenance).
 
@@ -426,7 +426,7 @@ Types that were in the Coverage unaccounted set, confirmed **server-dominant** (
 reflection/XML-reached) by `tools/src/RefScan`, and not already in the leaf catalog.
 Fingerprints from `tools/src/LeafInfo`. Roles are name-derived; verify against IL
 before treating a row as a behavioral claim. Infra collections are classified in
-[`out-of-scope-surface.md`](../out-of-scope-surface.md) instead.
+[`out-of-scope-surface.md`](../meta/out-of-scope-surface.md) instead.
 
 ### aidirector / spawning (5)
 
@@ -542,7 +542,6 @@ before treating a row as a behavioral claim. Infra collections are classified in
 | `ParsingMethodData` | Parsing Method Data | `Object` | TryGetDelegateForSourceType |
 | `TaskGroup` | Task Group | `Object` | (fields only) |
 | `TierSpec` | Tier Spec | `ValueType` | (fields only) |
-| `TraderComparer` | Trader Comparer (removed V3.2.0; replaced by `DesignatedAreaStore<TraderArea>`) | `Object` | Compare |
 | `Trajectory` | Trajectory | `Object` | Calculate, SuggestVelocity_CustomArc |
 | `UnlockData` | Unlock Data | `Object` | (fields only) |
 | `VoxeChunkInfo` | Voxe Chunk Info | `Object` | IsEmpty |

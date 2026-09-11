@@ -30,29 +30,37 @@ LINK_RE = re.compile(r"\]\(([^)]+\.md)")
 
 
 def collect(docs: str) -> tuple[dict[str, list[str]], set[str]]:
-    """Return ({doc_basename: [link basenames]}, {doc_basename} of docs/ root)."""
+    """Return ({doc_basename: [link basenames]}, {doc_basename} of narratives).
+
+    docs/ is grouped into subsystem folders (docs/network/protocol.md, ...) with
+    docs/inventories/ beside them; basenames are unique across the tree, so the
+    graph is keyed by basename and a link is resolved against its own folder.
+    """
     out: dict[str, list[str]] = {}
-    doc_root: set[str] = set()
-    for sub, is_root in (("", True), ("inventories", False)):
-        d = os.path.join(docs, sub)
-        if not os.path.isdir(d):
-            continue
-        for name in os.listdir(d):
+    narrative: set[str] = set()
+    root_abs = os.path.abspath(docs)
+    for sub, dirs, names in os.walk(docs):
+        dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+        for name in sorted(names):
             if not name.endswith(".md"):
                 continue
-            path = os.path.join(d, name)
-            with open(path, encoding="utf-8") as f:
+            with open(os.path.join(sub, name), encoding="utf-8") as f:
                 text = f.read()
             targets = []
             for m in LINK_RE.finditer(text):
                 tgt = m.group(1)
-                if tgt.startswith(("http", "../", "/")):
-                    continue  # external or cross-repo; not this check
-                targets.append(os.path.basename(tgt))
+                if tgt.startswith(("http", "/")):
+                    continue  # external; not this check
+                dest = os.path.abspath(os.path.join(sub, tgt))
+                if os.path.commonpath([root_abs, dest]) != root_abs:
+                    continue  # cross-repo; checked separately below
+                targets.append(os.path.basename(dest))
+            if name in out:
+                raise AssertionError(f"duplicate doc basename under docs/: {name}")
             out[name] = targets
-            if is_root:
-                doc_root.add(name)
-    return out, doc_root
+            if os.path.basename(sub) != "inventories":
+                narrative.add(name)
+    return out, narrative
 
 
 def reachable_from(
@@ -148,6 +156,10 @@ def main() -> None:
             text = open(path, encoding="utf-8").read()
             for m in re.finditer(r"\]\((\.\./[^)]+\.md)\)", text):
                 target = os.path.normpath(os.path.join(sub, m.group(1)))
+                if os.path.abspath(target).startswith(os.path.abspath(DOCS) + os.sep):
+                    if not os.path.isfile(target):
+                        dead_x.append(f"{os.path.relpath(path, DOCS)} -> {m.group(1)}")
+                    continue
                 # Sibling repo name = first non-".." path component (e.g. 7dtd-server-optimizer).
                 parts = [p for p in m.group(1).split("/") if p not in ("", ".")]
                 sibling = next((p for p in parts if p != ".."), None)
@@ -183,7 +195,8 @@ def main() -> None:
                 # check above (the delivery loop verifies them locally).
                 parts = [p for p in m.group(1).split("/") if p not in ("", ".")]
                 sibling = next((p for p in parts if p != ".."), None)
-                if sibling is not None:
+                in_docs = os.path.abspath(target).startswith(os.path.abspath(DOCS) + os.sep)
+                if sibling is not None and not in_docs:
                     correct_sibling = os.path.normpath(os.path.join(REPO, "..", sibling))
                     if not os.path.isdir(correct_sibling):
                         continue
@@ -201,11 +214,9 @@ def main() -> None:
     if bad_sec:
         raise AssertionError("broken section references:\n" + "\n".join(sorted(set(bad_sec))[:15]))
 
-    # 4. Every root doc carries the canonical hub backlink ("**Hub:** INDEX.md").
+    # 4. Every narrative carries the canonical hub backlink ("**Hub:** INDEX.md").
     no_hub = sorted(
-        d
-        for d in doc_root
-        if "**Hub:**" not in open(os.path.join(DOCS, d), encoding="utf-8").read()
+        d for d in doc_root if "**Hub:**" not in _common.doc(d).read_text(encoding="utf-8")
     )
     if no_hub:
         raise AssertionError(f"docs missing **Hub:** backlink: {no_hub}")

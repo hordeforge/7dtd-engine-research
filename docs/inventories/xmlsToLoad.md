@@ -5,8 +5,8 @@
 **Basis:** IL of the static constructor (`tools/src/DumpMethod`); flags and delegates
 read from the `XmlLoadInfo` ctor argument list. **Not** a runtime measurement of
 which files exist on disk.
-**Hub:** [`../INDEX.md`](../INDEX.md). **Narrative:** [`../mod-loading.md`](../mod-loading.md) §5.5.
-**Method:** [`../re-methodology.md`](../re-methodology.md).
+**Hub:** [`../INDEX.md`](../INDEX.md). **Narrative:** [`../admin/mod-loading.md`](../admin/mod-loading.md) §5.5.
+**Method:** [`../meta/re-methodology.md`](../meta/re-methodology.md).
 
 ## Flag meanings (`XmlLoadInfo` ctor)
 
@@ -62,7 +62,7 @@ server-side, not sent). Pure client UI rows (`XUi_*`, `loadingscreen`,
 | `vehicles` | S2C, reload | `VehiclesFromXml::Load(XmlFile)` | `Vehicle::Cleanup()` | `-` | `VehiclesFromXml::Reload(XmlFile)` | `-` |
 | `rwgmixer` | boot | `WorldGenerationEngineFinal.WorldGenerationFromXml::Load(XmlFile)` | `WorldGenerationEngineFinal.WorldGenerationFromXml::Cleanup()` | `-` | `-` | `-` |
 | `weathersurvival` | S2C | `WorldStaticData::LoadWeather(XmlFile)` | `-` | `-` | `-` | `-` |
-| `archetypes` | boot, S2C, clientFile | `WorldStaticData::LoadSDCSArchetypes(XmlFile)` ([schema](../sdcs-character-gear.md)) | `-` | `-` | `-` | `-` |
+| `archetypes` | boot, S2C, clientFile | `WorldStaticData::LoadSDCSArchetypes(XmlFile)` ([schema](../content/sdcs-character-gear.md)) | `-` | `-` | `-` | `-` |
 | `challenges` | S2C, reload | `ChallengesFromXml::CreateChallenges(XmlFile)` | `WorldStaticData::CleanupChallenges()` | `-` | `-` | `-` |
 | `quests` | S2C | `QuestsFromXml::CreateQuests(XmlFile)` | `-` | `-` | `-` | `-` |
 | `traders` | S2C, reload | `WorldStaticData::LoadTraders(XmlFile)` | `TraderInfo::Cleanup()` | `-` | `-` | `-` |
@@ -111,9 +111,9 @@ server-side, not sent). Pure client UI rows (`XUi_*`, `loadingscreen`,
 | `WorldStaticData.Reset(nameSubstring)` | cleanup + optional reload | partial reset (IL=52) |
 | `WorldStaticData.ReloadInGameXML` | per-entry reload delegates | in-game reload (IL=88) |
 
-Patching after stock load: [`../mod-loading.md`](../mod-loading.md) §5 (`XmlPatcher`).
+Patching after stock load: [`../admin/mod-loading.md`](../admin/mod-loading.md) §5 (`XmlPatcher`).
 
-**S2C shipping detail:** [`../mod-loading.md`](../mod-loading.md) §5.6
+**S2C shipping detail:** [`../admin/mod-loading.md`](../admin/mod-loading.md) §5.6
 (`RequestToEnterGame` → `SendXmlsToClient` → `NetPackageConfigFile`; Deflate cache).
 
 ## Changelog

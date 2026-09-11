@@ -2,10 +2,10 @@
 
 **Kind:** auto-extracted per-package wire-body reference (ordered `write()` field
 sequence). Not a hand-narrative; complements the annotated bodies in
-[`../protocol-packages.md`](../protocol-packages.md) and the census in
+[`../network/protocol-packages.md`](../network/protocol-packages.md) and the census in
 [`netpackages.md`](netpackages.md).  
 **Regenerate:** `mono tools/bin/WireBodies.exe "$ASM" docs/inventories/netpackage-bodies.md`.  
-**Method:** [`../re-methodology.md`](../re-methodology.md).  
+**Method:** [`../meta/re-methodology.md`](../meta/re-methodology.md).  
 **Hub:** [`INDEX.md`](../INDEX.md).
 
 Each row is one `BinaryWriter.Write(T)` or nested `.Write(writer)` in emit order.

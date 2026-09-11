@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Guard the hand-corrections that tools/data/promoted-types.txt pins.
 
-docs/out-of-scope-surface.md was machine-generated, then hand-corrected: 48+
+docs/meta/out-of-scope-surface.md was machine-generated, then hand-corrected: 48+
 types whose referrers are server-dominant were promoted out of it (list in
 tools/data/promoted-types.txt). A naive regeneration of the name-based
 classifier would silently pull them back in. This gate makes the promotion
@@ -19,10 +19,13 @@ import os
 import re
 import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = str(_common.TOOLS)
+REPO = str(_common.REPO)
 PROMOTED = os.path.join(TOOLS, "data", "promoted-types.txt")
-OOS = os.path.join(REPO, "docs", "out-of-scope-surface.md")
+OOS = str(_common.doc("out-of-scope-surface.md"))
 
 IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 

@@ -58,3 +58,7 @@ workspace/experiments/script-order-probe/
 # Scratch space (ephemeral venvs, probes); never tracked.
 /.scratch/
 *.lock
+
+# Obsidian vault: local config, community plugins, and embedding index.
+/.obsidian/
+/.smart-env/

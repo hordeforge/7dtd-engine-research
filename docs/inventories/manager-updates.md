@@ -1,7 +1,7 @@
 # Manager-like types with Update* methods
 
 **Kind:** inventory table (not primary narrative).  
-**Prefer:** [`managers.md`](../managers.md) (manager Update table).  
+**Prefer:** [`managers.md`](../loop/managers.md) (manager Update table).  
 **Hub:** [`INDEX.md`](../INDEX.md) · Inventories section.
 
 
@@ -27,7 +27,7 @@
 - `BlockLimitTracker::UpdateClientAmounts(List`1)` IL=20 MB=False
 - `ChunkPreviewManager::Update()` IL=47 MB=False
 - `ConnectionManager::UpdatePings()` IL=20 MB=True
-- `ConnectionManager::Update()` IL=228 MB=True
+- `ConnectionManager::Update()` IL=231 MB=True
 - `DayTimeTracker::Update()` IL=14 MB=False
 - `DayTimeTracker::UpdateDay()` IL=8 MB=False
 - `DayTimeTracker::UpdateDayPeriod()` IL=48 MB=False

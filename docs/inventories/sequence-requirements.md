@@ -1,11 +1,11 @@
 # Sequence requirement catalog (V3.2.0)
 
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name/base/code signals; no bodies).  
-**Framework:** [`../game-events.md`](../game-events.md) owns the contract; this describes each `BaseRequirement` leaf.  
+**Framework:** [`../content/game-events.md`](../content/game-events.md) owns the contract; this describes each `BaseRequirement` leaf.  
 **Regenerate:** hint extractor over transitive subclasses.
 **Hub:** [`INDEX.md`](../INDEX.md).  
 
-Every `GameEvent.SequenceRequirements.BaseRequirement` subclass (game-event gate: cvar, event-active, operation compare, ...). Contract: [game-events.md](../game-events.md).
+Every `GameEvent.SequenceRequirements.BaseRequirement` subclass (game-event gate: cvar, event-active, operation compare, ...). Contract: [game-events.md](../content/game-events.md).
 
 **37 concrete leaves** (38 requirement types transitively, including the abstract `BaseOperationRequirement` base of the 12 operation-compare leaves). Note: the same-named `Quests.Requirements.*` types (`RequirementBuff`/`Group`/`Holding`/`Level`/`Wearing`, contract `SetupRequirement`/`CheckRequirement`/`Clone`) are a **different** base and belong to the quest system, not here.
 

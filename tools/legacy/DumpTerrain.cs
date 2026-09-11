@@ -1,5 +1,5 @@
 // Regenerable RE: WorldConstants vertical dims + terrain height / generate surfaces.
-// Output: 7dtd-engine-research/il/terrain-VERSION/ (raw) + feeds 7dtd-engine-research/docs/terrain-height.md
+// Output: 7dtd-engine-research/il/terrain-VERSION/ (raw) + feeds 7dtd-engine-research/docs/world/terrain-height.md
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -154,7 +154,7 @@ class DumpTerrain
       + DateTime.UtcNow.ToString("u") + "\n");
     File.WriteAllText(Path.Combine(outDir, "README.md"),
       "# Raw IL dump set: `terrain`\n\n"
-      + "Human research notes: **[`../../docs/terrain-height.md`](../../docs/terrain-height.md)** "
+      + "Human research notes: **[`../../docs/world/terrain-height.md`](../../docs/world/terrain-height.md)** "
       + "and RealEarth product docs under `7dtd-realearth/docs/`.\n\n"
       + "Regenerable Cecil outputs only. Do not redistribute game assemblies.\n");
     Console.WriteLine("OK → " + outDir + " methods-ish hits height=" + n + " lit=" + hits);

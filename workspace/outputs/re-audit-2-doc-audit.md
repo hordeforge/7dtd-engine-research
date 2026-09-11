@@ -8,31 +8,31 @@
 
 | # | Sev | File:line | Finding |
 |---|-----|-----------|---------|
-| H1 | High | `docs/loop-gmupdate.md:9`, `:362` | Regen instructions point at nonexistent old tree AND a dumper tools/README declares broken. Line 9: "**Tool:** `7dtd-server-optimizer/tools/DumpGmUpdate.cs`"; line 362: "cd 7dtd-server-container-optimizer/tools / mcs -r:Mono.Cecil.dll -out:DumpGmUpdate.exe DumpGmUpdate.cs". `../7dtd-server-optimizer/tools/` does not exist (verified), and `tools/README.md:68-69` says "2 are pre-corrupted: `DumpGmUpdate`, `DumpExtra2`, use `DumpMethod`/`DumpType` instead". The doc's §10 regen recipe cannot work as written, twice over. |
+| H1 | High | `docs/loop/loop-gmupdate.md:9`, `:362` | Regen instructions point at nonexistent old tree AND a dumper tools/README declares broken. Line 9: "**Tool:** `7dtd-server-optimizer/tools/DumpGmUpdate.cs`"; line 362: "cd 7dtd-server-container-optimizer/tools / mcs -r:Mono.Cecil.dll -out:DumpGmUpdate.exe DumpGmUpdate.cs". `../7dtd-server-optimizer/tools/` does not exist (verified), and `tools/README.md:68-69` says "2 are pre-corrupted: `DumpGmUpdate`, `DumpExtra2`, use `DumpMethod`/`DumpType` instead". The doc's §10 regen recipe cannot work as written, twice over. |
 | H2 | High | `il/README.md:3` | The IL policy doc attributes all dumps to the old repo: "Regenerable Mono.Cecil output from `7dtd-server-optimizer/tools/Dump*.cs`". Dumpers now live in `tools/src/` + `tools/legacy/` of this repo (AGENTS.md layout, tools/README.md). Contradicts AGENTS.md rule 2 ("RE dumpers go in `tools/` (git)"). |
-| H3 | High | `docs/closed-gaps.md:177` | Internal contradiction: "§9 Remaining open (still) ... 4. **Region/WorldState** binary formats" vs `docs/residuals.md:49` ("WorldState.SaveLoad structure | save-region.md + dedi-complete §5" in the *closed* table), `docs/terrain-height.md:119` ("WorldState.SaveLoad managed structure | **CLOSED**, save-region (IL=884)"), and `docs/save-region.md` §1-3 which documents it. Only the sector-payload byte codec remains residual. Also conflicts with `docs/INDEX.md:130` declaring residuals.md "the only open-item list". |
-| M1 | Medium | `docs/terrain-height.md:20,25-29` | Stale regen path: "Tool: `7dtd-server-optimizer/tools/DumpTerrain.cs`" and "cd 7dtd-server-container-optimizer/tools ... mono DumpTerrain.exe \"$ASM\" ../../7dtd-engine-research/il/terrain-v3.0.1". Directory gone; dumper is now `tools/legacy/DumpTerrain.cs` (verified present), run via `tools/build.sh` + `bin/legacy/`. |
-| M2 | Medium | `docs/entity-ai.md:383-387,649` | Stale regen paths: "cd 7dtd-server-container-optimizer/tools / mcs ... DumpDeep.cs / mono DumpDeep.exe ... ../../7dtd-il/deep-VERSION" (neither `7dtd-server-optimizer/tools` nor a `7dtd-il` tree exists), and line 649 "Regenerate: `tools/DumpDeeper.cs`" (actual: `tools/legacy/DumpDeeper.cs`). |
+| H3 | High | `docs/entities/closed-gaps.md:177` | Internal contradiction: "§9 Remaining open (still) ... 4. **Region/WorldState** binary formats" vs `docs/meta/residuals.md:49` ("WorldState.SaveLoad structure | save-region.md + dedi-complete §5" in the *closed* table), `docs/world/terrain-height.md:119` ("WorldState.SaveLoad managed structure | **CLOSED**, save-region (IL=884)"), and `docs/world/save-region.md` §1-3 which documents it. Only the sector-payload byte codec remains residual. Also conflicts with `docs/INDEX.md:130` declaring residuals.md "the only open-item list". |
+| M1 | Medium | `docs/world/terrain-height.md:20,25-29` | Stale regen path: "Tool: `7dtd-server-optimizer/tools/DumpTerrain.cs`" and "cd 7dtd-server-container-optimizer/tools ... mono DumpTerrain.exe \"$ASM\" ../../7dtd-engine-research/il/terrain-v3.0.1". Directory gone; dumper is now `tools/legacy/DumpTerrain.cs` (verified present), run via `tools/build.sh` + `bin/legacy/`. |
+| M2 | Medium | `docs/entities/entity-ai.md:383-387,649` | Stale regen paths: "cd 7dtd-server-container-optimizer/tools / mcs ... DumpDeep.cs / mono DumpDeep.exe ... ../../7dtd-il/deep-VERSION" (neither `7dtd-server-optimizer/tools` nor a `7dtd-il` tree exists), and line 649 "Regenerate: `tools/DumpDeeper.cs`" (actual: `tools/legacy/DumpDeeper.cs`). |
 | M3 | Medium | `README.md:3-5,16-19,23-24` | Repo README scope not updated for the doc split. Line 4-5: "Everything here is written analysis: game-loop structure, per-system cost anatomy, scaling measurements..." (cost anatomy + scaling docs moved to 7dtd-server-optimizer). Line 17: highlight labeled "([`docs/bottlenecks.md`](../7dtd-server-optimizer/docs/bottlenecks.md))" - the visible label `docs/bottlenecks.md` implies a local doc that no longer exists here. Line 23: "Network, protocol, GC/runtime tuning, aggressive-optimization catalog" - the latter two catalogs are no longer in this repo. |
-| M4 | Medium | `docs/re-methodology.md:183-184` | Bare prose mention of a moved doc as if local: "look for `newobj`, `newarr`, boxing, and LINQ closures in hot methods (`allocation-reuse.md`)". It is in code-span (passes link checkers) but reads as a sibling doc; it lives at `../../7dtd-server-optimizer/docs/allocation-reuse.md`. |
-| M5 | Medium | `docs/network.md:136-147` | Unsupported quantitative claims (no artifact pointer in the section): "Where the ~15 MB/s at 128p actually comes from", "it is the **#4** allocator, not #1". The §4b correction block cites RE dates but no RESULTS/measured-scaling anchor for these two measured numbers, unlike loop.md §3 (cites RESULTS §3k) and entity-ai addendum (cites RESULTS §3m-3q). |
-| M6 | Medium | `docs/network.md:144-147` | Scope: optimization-lever narrative inside a stock RE doc: "the worthwhile network levers are the send-path scan (shipped, `FastSendPatch`) and a spatial index for the O(N^2) interest all-pairs" plus the deprioritization verdict ("modest reward, real risk - deprioritized"). Per AGENTS.md doc-scope, lever selection/status belongs in `7dtd-server-optimizer/docs/`; the RE fact (writer-thread serialization) belongs here. |
-| M7 | Medium | `docs/entity-ai.md:317-360,622-627,653-684` | Scope: §11 "Cost model (for optim / conductor)", §12 "EfficientServer / conductor hooks" (hook-to-lever table incl. "ES far skip"), §12(second) "Optim ideas derived here", and the addendum's lever/status content ("The animator-LOD lever (v1.15.0) helps only dispersed populations") are optimization-mod content in a stock doc. The measured numbers themselves are properly pointered (RESULTS §3m-3o/§3q), but lever grading/status is optimizer-owned per AGENTS.md. |
-| M8 | Medium | `docs/loop-gmupdate.md:236,286,313,343-356` | Scope: EfficientServer/conductor guidance embedded in the phase narrative: line 236 "EfficientServer already targets some presentation; spawn walk is a **candidate** to scope", §9 "Implications for EfficientServer / 'conductor'" (patch-strategy table). Also line 351 bare unlinked "(see SIM_PARALLELISM §5.6.1)". |
-| M9 | Medium | `docs/entity-ai.md` (structure) | Merge artifact: two complete numbered section sequences in one file - §1-§15 (lines 14-390), then "Deeper synthesis" restarting at §1-§14 (lines 399-649). Duplicate section numbers make references like "entity-ai §3" ambiguous; two see-also-style sections (§14 "See also" line 369, §14 "File map" line 642). |
-| M10 | Medium | `docs/network.md:149-164` | Duplicated closing sections: "## 5. See also" (loop.md, closed-gaps.md, measured-scaling.md, entity-ai.md) immediately followed by "## Related docs" (closed-gaps.md, measured-scaling.md, loop.md) - same links twice. |
-| M11 | Medium | `docs/terrain-height.md:93-105,150-171` | Duplicated closing sections ("Related research / product docs" + "See also" with overlapping rows), and a "Product inject lessons (from runtime work)" section that is RealEarth product content (self-declared "Not pure engine RE") in a generic engine doc - AGENTS.md routes product lessons to `7days-realworld/docs/`. |
+| M4 | Medium | `docs/meta/re-methodology.md:183-184` | Bare prose mention of a moved doc as if local: "look for `newobj`, `newarr`, boxing, and LINQ closures in hot methods (`allocation-reuse.md`)". It is in code-span (passes link checkers) but reads as a sibling doc; it lives at `../../7dtd-server-optimizer/docs/allocation-reuse.md`. |
+| M5 | Medium | `docs/network/network.md:136-147` | Unsupported quantitative claims (no artifact pointer in the section): "Where the ~15 MB/s at 128p actually comes from", "it is the **#4** allocator, not #1". The §4b correction block cites RE dates but no RESULTS/measured-scaling anchor for these two measured numbers, unlike loop.md §3 (cites RESULTS §3k) and entity-ai addendum (cites RESULTS §3m-3q). |
+| M6 | Medium | `docs/network/network.md:144-147` | Scope: optimization-lever narrative inside a stock RE doc: "the worthwhile network levers are the send-path scan (shipped, `FastSendPatch`) and a spatial index for the O(N^2) interest all-pairs" plus the deprioritization verdict ("modest reward, real risk - deprioritized"). Per AGENTS.md doc-scope, lever selection/status belongs in `7dtd-server-optimizer/docs/`; the RE fact (writer-thread serialization) belongs here. |
+| M7 | Medium | `docs/entities/entity-ai.md:317-360,622-627,653-684` | Scope: §11 "Cost model (for optim / conductor)", §12 "EfficientServer / conductor hooks" (hook-to-lever table incl. "ES far skip"), §12(second) "Optim ideas derived here", and the addendum's lever/status content ("The animator-LOD lever (v1.15.0) helps only dispersed populations") are optimization-mod content in a stock doc. The measured numbers themselves are properly pointered (RESULTS §3m-3o/§3q), but lever grading/status is optimizer-owned per AGENTS.md. |
+| M8 | Medium | `docs/loop/loop-gmupdate.md:236,286,313,343-356` | Scope: EfficientServer/conductor guidance embedded in the phase narrative: line 236 "EfficientServer already targets some presentation; spawn walk is a **candidate** to scope", §9 "Implications for EfficientServer / 'conductor'" (patch-strategy table). Also line 351 bare unlinked "(see SIM_PARALLELISM §5.6.1)". |
+| M9 | Medium | `docs/entities/entity-ai.md` (structure) | Merge artifact: two complete numbered section sequences in one file - §1-§15 (lines 14-390), then "Deeper synthesis" restarting at §1-§14 (lines 399-649). Duplicate section numbers make references like "entity-ai §3" ambiguous; two see-also-style sections (§14 "See also" line 369, §14 "File map" line 642). |
+| M10 | Medium | `docs/network/network.md:149-164` | Duplicated closing sections: "## 5. See also" (loop.md, closed-gaps.md, measured-scaling.md, entity-ai.md) immediately followed by "## Related docs" (closed-gaps.md, measured-scaling.md, loop.md) - same links twice. |
+| M11 | Medium | `docs/world/terrain-height.md:93-105,150-171` | Duplicated closing sections ("Related research / product docs" + "See also" with overlapping rows), and a "Product inject lessons (from runtime work)" section that is RealEarth product content (self-declared "Not pure engine RE") in a generic engine doc - AGENTS.md routes product lessons to `7days-realworld/docs/`. |
 | M12 | Medium | `oss-tools/naiwazi.md:118`, `oss-tools/servertools.md:4` | Stale old-structure paths: "Local copies under `research/naiwazi/`" and "**Local clone:** `research/7dtd-ServerTools`". No `research/` directory exists in or beside the repo (verified). NOTES.md:4 says clones are "not tracked here", which is the current truth; these two files still point at the pre-restructure location. |
-| M13 | Medium | `docs/coverage.md:41-42` | Scope tension: coverage families 12 ("Runtime APM scale ... live APM ... Closed (measured)") and 13 ("Runtime / GC / FPS knobs") are optimizer-owned docs listed as rows of this repo's "dedicated-relevant **managed** surfaces" coverage bar (line 7). Neither is a managed surface of the DLL; INDEX cluster F explicitly exiles those docs. |
-| M14 | Medium | `docs/engine-limitations.md:43,124` | Bare unlinked references to optimizer docs as evidence: line 43 evidence "loop.md, ARCHITECTURE"; line 124 evidence "runtime-tuning, FEATURES A7" ("FEATURES" is an optimizer doc never introduced here). Everywhere else this file links full `../../7dtd-server-optimizer/docs/` paths. |
+| M13 | Medium | `docs/meta/coverage.md:41-42` | Scope tension: coverage families 12 ("Runtime APM scale ... live APM ... Closed (measured)") and 13 ("Runtime / GC / FPS knobs") are optimizer-owned docs listed as rows of this repo's "dedicated-relevant **managed** surfaces" coverage bar (line 7). Neither is a managed surface of the DLL; INDEX cluster F explicitly exiles those docs. |
+| M14 | Medium | `docs/meta/engine-limitations.md:43,124` | Bare unlinked references to optimizer docs as evidence: line 43 evidence "loop.md, ARCHITECTURE"; line 124 evidence "runtime-tuning, FEATURES A7" ("FEATURES" is an optimizer doc never introduced here). Everywhere else this file links full `../../7dtd-server-optimizer/docs/` paths. |
 | L1 | Low | `tools/README.md:40` | One em dash character: "## 1. General dumpers (`src/`), prefer these". Violates AGENTS.md rule 5 ("No em dashes ... in any shipped text"). Only em dash in the audited corpus. |
 | L2 | Low | `oss-tools/naiwazi.md:30,174`, `oss-tools/NOTES.md:369,432` | Four en dashes (U+2013): "20–30+ players", "20–30p", "§5–7" (x2). Not literally banned by the em-dash rule but same style family. Counts: naiwazi.md 2, NOTES.md 2; all other files 0. |
-| L3 | Low | `docs/managers.md:28` | Redundant duplication in one cell: "`TwitchManager` | **1585** (IL=1585)". |
-| L4 | Low | `docs/aidirector.md:110-113` | Stray tail section "IsDedicatedServer references in Entity* Update methods" (2 bullets) unrelated to the doc's stated ownership ("AIDirector type inventory"); belongs with closed-gaps §5 / frame classification. Also no blank line between it and "## Related docs" (line 113/114). |
+| L3 | Low | `docs/loop/managers.md:28` | Redundant duplication in one cell: "`TwitchManager` | **1585** (IL=1585)". |
+| L4 | Low | `docs/entities/aidirector.md:110-113` | Stray tail section "IsDedicatedServer references in Entity* Update methods" (2 bullets) unrelated to the doc's stated ownership ("AIDirector type inventory"); belongs with closed-gaps §5 / frame classification. Also no blank line between it and "## Related docs" (line 113/114). |
 | L5 | Low | `docs/INDEX.md:194,222` | Inventories table row "inventories/opt-scan.md | optim OPTIMIZATION_CANDIDATES" is the only unlinked "Prefer" target (opt-scan.md itself links it). Line 222 calls all of `tools/legacy/` "39 per-family dumpers", while tools/README.md distinguishes ~12 canonical family dumpers from ad-hoc helpers/finders. |
 | L6 | Low | `docs/inventories/netpackages.md:8` vs table | Definitional imprecision, consistent corpus-wide: "193 wire + NetPackageManager" counts by name prefix, but the 194-row table itself shows 7 rows that are not wire packages (base `NetPackage`, enum `NetPackageDirection`, `NetPackageEntry`, `NetPackageInfo`, `NetPackageLogger`, `NetPackageMeasure`, `NetPackageMetrics` - Object/Enum-based). Matches the oracle phrasing, so no factual error, but "wire packages" overstates ~6 helper types. |
-| L7 | Low | `docs/protocol.md:377,410-413` | §11 status table updated "after the protocol-packages.md pass (2026-07-23)" but the Changelog's last entry is 2026-07-20; the 07-23 pass is only recorded in INDEX.md's changelog. |
-| L8 | Low | `docs/loop-gmupdate.md:377-380` | Changelog ends 2026-07-16; does not record that its dump tool moved (nor could it, see H1). Same for entity-ai.md changelog (ends 2026-07-16 despite 2026-07-21 addendum being added later; addendum is dated inline, so informational only). |
+| L7 | Low | `docs/network/protocol.md:377,410-413` | §11 status table updated "after the protocol-packages.md pass (2026-07-23)" but the Changelog's last entry is 2026-07-20; the 07-23 pass is only recorded in INDEX.md's changelog. |
+| L8 | Low | `docs/loop/loop-gmupdate.md:377-380` | Changelog ends 2026-07-16; does not record that its dump tool moved (nor could it, see H1). Same for entity-ai.md changelog (ends 2026-07-16 despite 2026-07-21 addendum being added later; addendum is dated inline, so informational only). |
 | L9 | Low | `il/terrain-*-v3.0.1/TERRAIN_auto.md:6` etc. | Regenerable dump artifacts still print old regen hints ("mono DumpTerrain.exe $ASM research/il/terrain-VERSION"). Out of audit scope (git-ignored), but the *tracked* legacy dumpers embed these strings and will reprint them on regen; fix at the dumper if touched. |
 | O1 | Observation | task premise | docs/ contains **19** .md files including INDEX, not 20 as stated in the audit request. No file appears missing: INDEX clusters A-E enumerate exactly the 18 non-INDEX docs present. |
 
@@ -81,58 +81,58 @@ Clean. Doc-scope rule is well-formed and is the yardstick used for M6-M8/M11/M13
 ### README.md
 Findings: M3. Also note the highlights quote measured results (0.4% residual, O(N^2.26), 54%/27% split) - each traceable (bottlenecks.md link, entity-ai addendum with RESULTS pointers), so not unsupported, but the framing sells the repo as containing the measurement program that now lives in 7dtd-server-optimizer. The Layout block (lines 28-36) is accurate post-restructure; only the prose above it lags.
 
-### docs/coverage.md
+### docs/meta/coverage.md
 Findings: M13. Census table matches oracle exactly. Family rows 1-11 correctly map to local narratives + dump sets. Changelog does not mention the 2026-07-23 restructure (INDEX carries it; acceptable for a leaf doc).
 
-### docs/residuals.md
+### docs/meta/residuals.md
 Clean, and it is the doc closed-gaps §9 contradicts (H3). Closed-items table verified against the owning docs (spot checks all resolve). The "encryption cipher/KDF" and "sector payload codec" residuals correctly survive the protocol-packages pass.
 
-### docs/re-methodology.md
+### docs/meta/re-methodology.md
 Findings: M4. Census baseline table matches oracle (plus "All types incl nested 7413", unverifiable against provided oracle but not conflicting). §5 enum method matches oracle direction values. §6 correctly draws the structure-vs-cost line and routes cost to optimizer docs with full paths, except the one bare `allocation-reuse.md`.
 
-### docs/loop.md
+### docs/loop/loop.md
 Clean on numbers; measured block §3 (19.9/59.7 calls/s, recv ~1,200/s, send ~1,600/s, 86-96% gaps <2 ms) carries an explicit artifact pointer ("Full evidence: `7dtd-server-optimizer/docs/RESULTS.md` §3k" - unlinked prose path, file exists). Mild scope residue: §4 "Optim: optional air-swap..." and §9 "Optim note" column ("dedi skip candidate") are one-line lever hints in a stock doc; §13 is correctly pointers-only. Not escalated beyond the M6-M8 class.
 
-### docs/loop-gmupdate.md
+### docs/loop/loop-gmupdate.md
 Findings: H1, M8 (+L8, L9-adjacent bare SIM_PARALLELISM ref at line 351). Phase content itself is consistent with loop.md §2 and gmupdate-calls.md (182 calls, same ordering).
 
-### docs/managers.md
+### docs/loop/managers.md
 Findings: L3. Manager IL table consistent with manager-updates.md and loop.md §10 (spot-checked all shared rows). ModEvents inventory consistent with residuals ("names closed, subscribers residual").
 
-### docs/entity-ai.md
+### docs/entities/entity-ai.md
 Findings: M2, M7, M9. Threshold constants (64/225/0.1/0.3/1.0, 36, 625/3025, 1225, ±45, 0.05, ≤8 drain, 20 Hz) all consistent with deeper.md §4 constants dump. §3.5 net-interest table honestly labeled "hypothesis". Addendum measured claims all carry RESULTS §3m-3o/§3q pointers (good provenance; scope note under M7). README's "54% world-collision physics, 27% AI" matches addendum's "MoveEntityHeaded 54%, updateTasks 27%".
 
-### docs/aidirector.md
+### docs/entities/aidirector.md
 Findings: L4. Component inventory and install order consistent with closed-gaps §2 and loop.md §5. Single H1 confirmed.
 
-### docs/closed-gaps.md
+### docs/entities/closed-gaps.md
 Findings: H3; also line 8 "Tool: `tools/DumpGaps.cs`" - actual location `tools/legacy/DumpGaps.cs` (minor stale, fold into the H1/M1/M2 fix batch). §4 threshold table consistent with network.md §2 and deeper.md constants (2/16/128/256/0.04/100/10, mask 192). §8 lever-map table is borderline scope but explicitly framed as "merged into the optimizer project" with a full link.
 
-### docs/world-chunks.md
+### docs/world/world-chunks.md
 Clean. IL numbers consistent with loop.md/opt-scan (828 SetBlock, 550 chunkPosNeedsRegeneration, 448 DetermineChunksToLoad, 216 SendChunks). "EntityFallingBlock OnUpdateEntity 300+" is a rounded version of 344/302 elsewhere - not a contradiction.
 
-### docs/terrain-height.md
+### docs/world/terrain-height.md
 Findings: M1, M11. Constant table (256/64/255/16384/4096/16383, ChunkAreaDim 256 never expand) internally consistent and consistent with save-region/light-mesh-water 255/256/64 sites.
 
-### docs/save-region.md
+### docs/world/save-region.md
 Clean. Write/Read 601/775, layer loop 64, ChunkBlockChannel Write=120/Read=151 (residuals' "IL=151/120" for "Read/Write" agrees), RegionFileRaw constants, `.ttc` ext. Honest "codec not hand-annotated" status matches residuals.
 
-### docs/light-mesh-water.md
+### docs/world/light-mesh-water.md
 Clean. 255/256 site inventory consistent with terrain-height and engine-limitations §5.
 
-### docs/network.md
+### docs/network/network.md
 Findings: M5, M6, M10. §2/§3/§3b consistent with closed-gaps §4, protocol.md, oracle census. The §4b CORRECTION block is exemplary honest-status practice (it names and reverses its own earlier wrong claim).
 
-### docs/protocol.md
+### docs/network/protocol.md
 Findings: L7. Everything numeric checks out (see oracle section). §8/§9 correctly defer census detail to protocol-packages. Family-counts table (line 133-141) is labeled "Approx" - fine.
 
-### docs/protocol-frames.md
+### docs/network/protocol-frames.md
 Clean. All offset tables re-computed and verified (challenge 17, envelope 9+ps, empty frame 15, PosAndRot 30/32, RelPos 20/22 and quat-variant 30, AliveFlags 6 + bit table matching protocol.md, LookAt 16, DamageEntity fixed head offsets 0-43, full RelPos frame 35). Anchors used by protocol.md §2/§3/§6 match its headings.
 
-### docs/protocol-packages.md
+### docs/network/protocol-packages.md
 Clean. The strongest doc in the corpus: every census number matches the oracle, direction tally sums, §8 "Still open" agrees with residuals.md and coverage.md row 6 residual tail.
 
-### docs/engine-limitations.md
+### docs/meta/engine-limitations.md
 Findings: M14. §2 measured walls all carry measured-scaling pointers. Scope is legitimate under AGENTS ("stock ceilings live here"); lever columns reference optimizer by name, mostly linked.
 
 ### docs/inventories/* (8 files)
@@ -153,32 +153,32 @@ Findings: M12, L2. Content is survey-grade with excellent claim hygiene (vendor 
 ## Corrections recommended
 
 High priority:
-- [ ] `docs/loop-gmupdate.md:9` - change tool reference to `tools/legacy/DumpGmUpdate.cs` and note it is broken; point §10 (lines 359-369) at the supported path: `cd tools && ./build.sh` then `mono bin/DumpMethod.exe "$ASM" GameManager gmUpdate` (per tools/README §2).
+- [ ] `docs/loop/loop-gmupdate.md:9` - change tool reference to `tools/legacy/DumpGmUpdate.cs` and note it is broken; point §10 (lines 359-369) at the supported path: `cd tools && ./build.sh` then `mono bin/DumpMethod.exe "$ASM" GameManager gmUpdate` (per tools/README §2).
 - [ ] `il/README.md:3` - replace "`7dtd-server-optimizer/tools/Dump*.cs`" with "`tools/src/` + `tools/legacy/` (see `../tools/README.md`)".
-- [ ] `docs/closed-gaps.md:172-179` - rewrite §9: drop item 4 or restate as "Region sector payload byte codec (residual; managed structure closed in save-region.md)"; ideally replace the whole §9 list with a one-line pointer to residuals.md to honor "only open-item list".
+- [ ] `docs/entities/closed-gaps.md:172-179` - rewrite §9: drop item 4 or restate as "Region sector payload byte codec (residual; managed structure closed in save-region.md)"; ideally replace the whole §9 list with a one-line pointer to residuals.md to honor "only open-item list".
 
 Medium priority:
-- [ ] `docs/terrain-height.md:20,22-30` - regen block: `tools/legacy/DumpTerrain.cs`, `cd tools && ./build.sh`, output `../il/terrain-v3.0.1`.
-- [ ] `docs/entity-ai.md:383-388,649` - regen block: `tools/legacy/DumpDeep.cs` / `DumpDeeper.cs` via build.sh; output `../il/deep-v3.0.1`; drop `7dtd-il`.
-- [ ] `docs/closed-gaps.md:8` - `tools/DumpGaps.cs` -> `tools/legacy/DumpGaps.cs`.
+- [ ] `docs/world/terrain-height.md:20,22-30` - regen block: `tools/legacy/DumpTerrain.cs`, `cd tools && ./build.sh`, output `../il/terrain-v3.0.1`.
+- [ ] `docs/entities/entity-ai.md:383-388,649` - regen block: `tools/legacy/DumpDeep.cs` / `DumpDeeper.cs` via build.sh; output `../il/deep-v3.0.1`; drop `7dtd-il`.
+- [ ] `docs/entities/closed-gaps.md:8` - `tools/DumpGaps.cs` -> `tools/legacy/DumpGaps.cs`.
 - [ ] `README.md:4-5,17,23` - reword highlights/scope: analysis produced *alongside* the optimization suite; label the bottlenecks link as external (`7dtd-server-optimizer/docs/bottlenecks.md`); drop or re-attribute "GC/runtime tuning, aggressive-optimization catalog".
-- [ ] `docs/re-methodology.md:184` - link `allocation-reuse.md` with its full optimizer path.
-- [ ] `docs/network.md:136-147` - add an artifact pointer (RESULTS/measured-scaling anchor) for the 15 MB/s and #4-allocator claims, and trim the lever verdict to a one-line pointer at the optimizer.
-- [ ] `docs/network.md:149-164` - merge "See also" and "Related docs" into one table.
-- [ ] `docs/terrain-height.md` - merge the two see-also tables; move "Product inject lessons" to `7days-realworld/docs/` leaving a pointer row.
-- [ ] `docs/entity-ai.md` - renumber the "Deeper synthesis" sections (e.g. D1-D14) or fold them into the main sequence; trim §12 lever tables to pointers; move the "v1.15.0 lever" status sentence to the optimizer doc.
-- [ ] `docs/loop-gmupdate.md:236,343-356` - compress EfficientServer/conductor guidance into a pointer at optimizer ARCHITECTURE/SIM_PARALLELISM; link SIM_PARALLELISM at line 351.
+- [ ] `docs/meta/re-methodology.md:184` - link `allocation-reuse.md` with its full optimizer path.
+- [ ] `docs/network/network.md:136-147` - add an artifact pointer (RESULTS/measured-scaling anchor) for the 15 MB/s and #4-allocator claims, and trim the lever verdict to a one-line pointer at the optimizer.
+- [ ] `docs/network/network.md:149-164` - merge "See also" and "Related docs" into one table.
+- [ ] `docs/world/terrain-height.md` - merge the two see-also tables; move "Product inject lessons" to `7days-realworld/docs/` leaving a pointer row.
+- [ ] `docs/entities/entity-ai.md` - renumber the "Deeper synthesis" sections (e.g. D1-D14) or fold them into the main sequence; trim §12 lever tables to pointers; move the "v1.15.0 lever" status sentence to the optimizer doc.
+- [ ] `docs/loop/loop-gmupdate.md:236,343-356` - compress EfficientServer/conductor guidance into a pointer at optimizer ARCHITECTURE/SIM_PARALLELISM; link SIM_PARALLELISM at line 351.
 - [ ] `oss-tools/naiwazi.md:118`, `oss-tools/servertools.md:4` - update local-clone locations (or state "clone location: external, not tracked" as NOTES.md does).
-- [ ] `docs/coverage.md:41-42` - either move rows 12-13 below the table as "companion (optimizer-owned)" or annotate that they are outside the managed-surface bar.
-- [ ] `docs/engine-limitations.md:43,124` - link ARCHITECTURE and FEATURES with full optimizer paths (or drop "FEATURES A7").
+- [ ] `docs/meta/coverage.md:41-42` - either move rows 12-13 below the table as "companion (optimizer-owned)" or annotate that they are outside the managed-surface bar.
+- [ ] `docs/meta/engine-limitations.md:43,124` - link ARCHITECTURE and FEATURES with full optimizer paths (or drop "FEATURES A7").
 
 Low priority:
 - [ ] `tools/README.md:40` - replace the em dash.
 - [ ] `oss-tools/naiwazi.md:30,174`, `NOTES.md:369,432` - replace en dashes with hyphens if the style rule is read strictly.
-- [ ] `docs/managers.md:28` - drop "(IL=1585)".
-- [ ] `docs/aidirector.md:110-114` - move the IsDedicatedServer bullets to closed-gaps/inventories; add blank line before Related docs.
+- [ ] `docs/loop/managers.md:28` - drop "(IL=1585)".
+- [ ] `docs/entities/aidirector.md:110-114` - move the IsDedicatedServer bullets to closed-gaps/inventories; add blank line before Related docs.
 - [ ] `docs/INDEX.md:194` - link the opt-scan Prefer target; `:222` - "39 dumpers (12 canonical per-family + ad-hoc helpers)".
-- [ ] `docs/protocol.md` changelog - add the 2026-07-23 backlog-status entry.
+- [ ] `docs/network/protocol.md` changelog - add the 2026-07-23 backlog-status entry.
 - [ ] Optional: qualify "193 wire" once (e.g. in netpackages.md) as "by name prefix; includes base/enum/helper types".
 - [ ] When next touching `tools/legacy/DumpTerrain.cs`/`DumpRealEarthSurfaces.cs`, update their embedded `research/il/...` regen hint strings.
 

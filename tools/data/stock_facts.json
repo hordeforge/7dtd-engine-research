@@ -2,14 +2,14 @@
   "schema": 1,
   "generated_by": "tools/src/StockFacts.cs",
   "asm": "Assembly-CSharp.dll",
-  "extracted_utc": "2026-08-28T03:33:13.9914060Z",
+  "extracted_utc": "2026-09-05T08:49:28.3213110Z",
   "version": {
     "release_type": 1,
     "major": 3,
     "minor": 20,
-    "build": 9,
+    "build": 10,
     "display": "V 3.2.0",
-    "stock_wire": "V3.2.0 b9",
+    "stock_wire": "V3.2.0 b10",
     "product": "7 Days To Die",
     "game_reset_revision": 13
   },
@@ -52,7 +52,7 @@
     "payload_len_likely_i32": true
   },
   "consumers": {
-    "research_docs": ["docs/coverage.md", "docs/protocol.md", "docs/closed-gaps.md", "docs/save-region.md"],
+    "research_docs": ["docs/meta/coverage.md", "docs/network/protocol.md", "docs/entities/closed-gaps.md", "docs/world/save-region.md"],
     "loadgen": ["src/LoadGen/PackageCodec.cs GameVersion", "tests golden-wire"],
     "zdtd": ["src/version.zig stock_wire", "src/protocol.zig challenge/ticks"]
   },
@@ -65,7 +65,7 @@
     "note": "After TFP patch: post-update.sh then re-Dump* into il/<set>-<dump_label_suffix>/"
   },
   "pins": {
-    "research": ["docs/coverage.md", "docs/protocol.md", "docs/closed-gaps.md", "docs/save-region.md", "README.md", "docs/tile-entities-power.md", "docs/protocol-packages.md"],
+    "research": ["docs/meta/coverage.md", "docs/network/protocol.md", "docs/entities/closed-gaps.md", "docs/world/save-region.md", "README.md", "docs/gameplay/tile-entities-power.md", "docs/network/protocol-packages.md"],
     "siblings": ["7dtd-loadgen/src/LoadGen/PackageCodec.cs", "zdtd-server/src/version.zig", "zdtd-server/src/protocol.zig", "zdtd-server/src/world/store.zig"]
   },
   "behaviour": {

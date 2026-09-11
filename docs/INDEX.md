@@ -2,12 +2,22 @@
 
 **Owns:** hub for **generic** dedicated engine RE narratives + dump index.  
 **Not:** RealEarth product status/lessons (`7dtd-realearth`, private companion project, not published).  
-**Game:** V3.2.0 (b9) dedicated `Assembly-CSharp.dll`.  
+**Game:** V3.2.0 (b10) dedicated `Assembly-CSharp.dll`.  
 **Policy:** research only. Do not redistribute game IL or managed DLLs.  
-**Coverage bar:** dedicated-relevant **managed** surfaces. Open leftovers: [`residuals.md`](residuals.md).
+**Coverage bar:** dedicated-relevant **managed** surfaces. Open leftovers: [`residuals.md`](meta/residuals.md).
 
 ```text
-docs/              generic engine narratives (this folder)
+docs/              this hub (INDEX.md)
+docs/meta/         what the corpus covers, how it was derived, what IL cannot close
+docs/releases/     per-release exact deltas
+docs/loop/         frame and simulation loop
+docs/entities/     entity tick, AI, pathing, survival stats
+docs/world/        world gen, chunks, terrain, persistence, asset formats
+docs/network/      wire protocol: framing, join, package bodies
+docs/admin/        lifecycle, auth, console, web admin, mods, sandbox options
+docs/gameplay/     the gameplay systems the server simulates
+docs/content/      scripted content: events, quests, dialog, character data
+docs/social/       chat, parties, third-party integration
 docs/inventories/  raw method/call inventories backing the narratives
 il/                regenerable Mono.Cecil dumps only (local; not in git)
 oss-tools/         survey notes on third-party server tools/mods
@@ -17,73 +27,18 @@ oss-tools/         survey notes on third-party server tools/mods
 ---
 
 
-## Version policy and IL citation convention
-
-**Policy: track the latest stock release only.** The corpus is regenerated
-against each new dedicated `Assembly-CSharp.dll` and the previous version's sets
-are deleted in the same change, so a citation can never quietly refer to an old
-build. Regenerate before deleting: an assembly that is no longer installed
-cannot be dumped again.
-
-**Current pin:** V **3.2.0 b9**. Every tracked set in [`../il/`](../il/) is
-V3.2.0; the V3.1.0 sets were retained for the 3.1.0→3.2.0 diff and the V3.0.1
-sets were removed on 2026-08-06.
-
-| Citation form | Means |
-|---|---|
-| `il/<set>-v3.2.0/...` | the tracked V3.2.0 dump sets |
-| `asm.il:NNNN` | a V3.2.0 single-file dump kept outside the repo, identified by MD5 in [`../il/README.md`](../il/README.md) |
-
-Mentions of V3.0.1 and V3.1.0 in these documents are deliberate history (what
-changed between releases, what a prior corpus measured), not stale pins. Line
-numbers written before 2026-08-06 may still be V3.0.1 numbers, which drift from
-the V3.2.0 dump by roughly 3500 lines in the NetPackage region.
-
-### V3.2.0 shipped delta map
-
-The 3.1.0→3.2.0 diff was RE'd from the tracked dumps (3.1.0 sets vs the
-regenerated 3.2.0 sets); the full evidence trail is the standalone
-[`changelog-3.2.0.md`](changelog-3.2.0.md). The per-fact homes in the topic
-docs:
-
-| Topic | Home |
-|---|---|
-| Machine pin (version, TPS, census, TE widths) | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json), [coverage.md](coverage.md), [re-methodology.md](re-methodology.md) §1 |
-| Wire: `NetPackageDamageEntity` packed `UInt32 flags` bitfield + `KillXPScale` (drops 10 bools, drops `bIsDamageTransfer`) | [protocol.md](protocol.md) §6.5, [protocol-packages.md](protocol-packages.md) §6.11 |
-| Wire: `NetPackagePOIAround` removed → `NetPackagePOIMetadataRequest/Response` + `PrefabInstance.POIMetadata` (server pushes POI metadata to clients) | [protocol-packages.md](protocol-packages.md) § POI metadata, [protocol.md](protocol.md) §6 |
-| Wire: `NetPackageConfirmSpawnEntity` (S2C) + `EntityCreationData.requestedBy`/`requestKey` (spawn request correlation) | [protocol-packages.md](protocol-packages.md) § ConfirmSpawnEntity, [spawning.md](spawning.md) |
-| Kill XP rework: `DamageSource.bTrapKillXP`/`KillXPScale`, `EntityAlive.AwardKillXPServer`/`PartyShareKillServer`, `EntityPlayer.AddKillXP` | [combat-damage.md](combat-damage.md), [entity-stats.md](entity-stats.md) |
-| Trader doors: `TEFeatureDoor.HonkOpenType`/`HonkOpenDistance`, `TraderDoorController` (new), `Vehicle.GetHornEventName` | [tile-entities-power.md](tile-entities-power.md), [vehicles-drones-turrets.md](vehicles-drones-turrets.md) |
-| Item combining: `ItemValue.Flags` + `cFlagsWasCombined`, `ItemActionEntryCombine` (new), `XUiC_CombineGrid` rework | [items.md](items.md) § Combining |
-| Decoration suppression: `DecoSuppressArea` (new), `DynamicPrefabDecorator` deco-suppress store, `AllowDecorations` prop, `AllowTopSoilDecorations` removed | [world-generation.md](world-generation.md), [spawning.md](spawning.md) |
-| AI: `EntityFlags.Timid = 32` (new), `EAIRunawayFromEntity` flag-based threat + `dangerDistance` | [entity-ai.md](entity-ai.md) |
-| Misc: `Challenge.CompleteChallenge(..., forceComplete)`, sandbox option display API (`GetDisplayAtIndex(index, languageName)`), analytics sandbox-delta events, `StockFileHashes` all regenerated | [quests-challenges.md](quests-challenges.md), [sandbox-options.md](sandbox-options.md) |
-
-Prior-release feature inventories (official changelogs mapped to RE homes):
-[`changelog-3.1.0.md`](changelog-3.1.0.md) (Henpocalypse) ·
-[`changelog-3.0.0.md`](changelog-3.0.0.md) (Dead Hot Summer).
-
-### V3.1.0 shipped delta map (history)
-
-The standalone `experimental-delta.md` doc was **retired** once Henpocalypse
-shipped as stable V3.1.0 (b14). Facts live in the topic docs (not a separate
-delta file):
-
-| Topic | Home |
-|---|---|
-| NetPackageTileEntity `teBlockId` + i32 length | [protocol-packages.md](protocol-packages.md) §6.12, [tile-entities-power.md](tile-entities-power.md) |
-| Held entities / wild chicken grab | [items.md](items.md) § Held entities, [entity-ai.md](entity-ai.md) |
-| WorldState.SaveLoad IL=926 / CurrentSaveVersion=23 | [save-region.md](save-region.md) §1 (full-file byte-exact round-trip; game-reader round-trip; shipped V4.0-tooled world skew) |
-| Save codecs verified byte-exact on real saves | `make save-roundtrip-all` ([tools/save_roundtrip_check.py](../tools/save_roundtrip_check.py)): main.ttw (all nested blobs), region files, chunk bodies, decoration/multiblocks, id mappings, plus the shipped Navezgane world - 16 probe saves + shipped, 2026-08-12 |
-| LiteNetLib wire pins: `ProtocolId` **13**, `MaxPacketSize` **1432**, `PossibleMtu` [1024..1432], PacketProperty ordinals 0-17 | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) `litenet.*` (machine-checked; zdtd `max_packet_size` 1327 divergence flagged) |
-| XML data pins: zombie HP ladder (healthSlim **125** ... infernal **1600**), trader economy (**3.0**/**0.2**), survival well-fed threshold **0.52** | [`../tools/data/xml_pins.json`](../tools/data/xml_pins.json) (machine-checked by `check_stock_facts`) |
-| Behaviour pins: WaterLevel **62.88**, item-drop lifetime **300 s**, per-frame load budget **50 ms** | [`../tools/data/stock_facts.json`](../tools/data/stock_facts.json) `behaviour.*` (machine-checked by `check_stock_facts`; WaterLevel 62.88 also observed live in a real `main.ttw` save header, save-region.md §1) |
-| Join analytics `PlayerJoinServerEventData` | [server-lifecycle.md](server-lifecycle.md) |
-| Sandbox day/night density+respawn, chicken coop knobs, six difficulty preset codes, infection/hunger/thirst/stack | [sandbox-options.md](sandbox-options.md) §2 + §3 |
-| EOS/browse filters, GSI sandbox fields | [server-browser-prefabs.md](server-browser-prefabs.md), [network.md](network.md) |
-| Official product notes (content, not IL) | https://7daystodie.com/v3-1-0-henpocalypse-release-notes/ |
-
 ## Start here
+
+| # | Doc | Use when |
+|---|---|---|
+| 0 | [`architecture-map.md`](meta/architecture-map.md) | **Start here.** Whole-system visual map: layers, boot, frame phases, sim core, wire, persistence |
+| 1 | [`coverage.md`](meta/coverage.md) | Is engine family X documented? Which dump? |
+| 2 | [`engine-limitations.md`](meta/engine-limitations.md) | What stock ceilings bind any dedicated server? (+ known stock defects) |
+| 3 | [`loop.md`](loop/loop.md) | How the dedicated frame/sim runs |
+| 4 | [`protocol.md`](network/protocol.md) | Wire framing, join, golden package bodies |
+| 5 | [`protocol-frames.md`](network/protocol-frames.md) | Visual RFC/Mermaid byte frames per package |
+| 6 | [`residuals.md`](meta/residuals.md) | What IL cannot close |
+| 6b | [`completion-bar.md`](meta/completion-bar.md) | What "100% documented" means (tiers A-D) |
 
 Campaign audit (V3.2.0 evidence + residual map): [`../workspace/outputs/docs-research-audit-20260803.md`](../workspace/outputs/docs-research-audit-20260803.md).
 
@@ -91,21 +46,7 @@ Live scheduled-event evidence (2026-08-11, stock V3.1.0 dedicated runs):
 [air drop](../workspace/notes/live-airdrop-verification-20260811.md),
 [wandering horde](../workspace/notes/live-horde-verification-20260811.md),
 [blood-moon start](../workspace/notes/live-bloodmoon-verification-20260811.md);
-the method (boot/settime/join/observe) is in [re-methodology.md](re-methodology.md) 5e.
-
-
-| # | Doc | Use when |
-|---|---|---|
-| 0 | [`architecture-map.md`](architecture-map.md) | **Start here.** Whole-system visual map: layers, boot, frame phases, sim core, wire, persistence |
-| 1 | [`coverage.md`](coverage.md) | Is engine family X documented? Which dump? |
-| 2 | [`engine-limitations.md`](engine-limitations.md) | What stock ceilings bind any dedicated server? (+ known stock defects) |
-| 3 | [`loop.md`](loop.md) | How the dedicated frame/sim runs |
-| 4 | [`protocol.md`](protocol.md) | Wire framing, join, golden package bodies |
-| 5 | [`protocol-frames.md`](protocol-frames.md) | Visual RFC/Mermaid byte frames per package |
-| 6 | [`ZIG_CLONE.md`](../../zdtd-server/docs/ZIG_CLONE.md) | Zig clone architecture from RE (companion `zdtd-server/docs/`) |
-| 6b | [`PROVENANCE.md`](../../zdtd-server/docs/PROVENANCE.md) | zdtd provenance ledger: every behavior/perk/value -> stock source (file map 187/187, constants, divergences; gated by zdtd `tools/provenance_scan.py`) |
-| 7 | [`residuals.md`](residuals.md) | What IL cannot close |
-| 7b | [`completion-bar.md`](completion-bar.md) | What "100% documented" means (tiers A-D) |
+the method (boot/settime/join/observe) is in [re-methodology.md](meta/re-methodology.md) 5e.
 
 ```mermaid
 flowchart LR
@@ -123,8 +64,8 @@ flowchart LR
 | Goal | Path |
 |---|---|
 | Whole engine map | coverage → loop → family docs → residuals |
-| **Stock ceilings (any dedi)** | [engine-limitations.md](engine-limitations.md) → loop (scaling laws: optimizer `measured-scaling.md`) |
-| **Zig / custom dedi clone** | [ZIG_CLONE.md](../../zdtd-server/docs/ZIG_CLONE.md) → [protocol.md](protocol.md) → loop → network → world-chunks → save-region |
+| **Stock ceilings (any dedi)** | [engine-limitations.md](meta/engine-limitations.md) → loop (scaling laws: optimizer `measured-scaling.md`) |
+| **Zig / custom dedi clone** | [ZIG_CLONE.md](../../zdtd-server/docs/ZIG_CLONE.md) → [protocol.md](network/protocol.md) → loop → network → world-chunks → save-region |
 | Wire / join / golden packages | protocol → **protocol-frames** → **protocol-packages** → network → loadgen PackageCodec |
 | How to reverse-engineer | **re-methodology** → [`../tools/`](../tools) → coverage |
 | Re-run the zdtd provenance review | `../../zdtd-server/docs/provenance-review.md` (copy-paste prompt; picked up by `~/review-prompts` as `*-review.md`) |
@@ -146,200 +87,163 @@ flowchart LR
 
 | Lifecycle | Doc |
 |---|---|
-| gmUpdate phases A-J | [loop.md](loop.md) §2 |
-| UpdateTick slice vs full | [loop.md](loop.md) §3 |
-| AI LOD + path request | [entity-ai.md](entity-ai.md) |
-| Chunk InProgress lifecycle | [world-chunks.md](world-chunks.md) §4 |
-| Net package bands | [network.md](network.md) §2 |
-| World save/load | [save-region.md](save-region.md) §1 |
-| Origin FixedUpdate (dedi no-op) | [loop.md](loop.md) §1 / §12 |
+| gmUpdate phases A-J | [loop.md](loop/loop.md) §2 |
+| UpdateTick slice vs full | [loop.md](loop/loop.md) §3 |
+| AI LOD + path request | [entity-ai.md](entities/entity-ai.md) |
+| Chunk InProgress lifecycle | [world-chunks.md](world/world-chunks.md) §4 |
+| Net package bands | [network.md](network/network.md) §2 |
+| World save/load | [save-region.md](world/save-region.md) §1 |
+| Origin FixedUpdate (dedi no-op) | [loop.md](loop/loop.md) §1 / §12 |
 
 Product Streamed state machines (tiles, inject gate, SoloSlide): see product ``realearth-runtime.md``.
 
 ---
 
-## One home per topic
+## Subsystem map
 
-| Topic | File (this folder) |
-|---|---|
-| Coverage checklist | coverage.md |
-| **Whole-assembly map + coverage ledger** | **full-surface.md** |
-| **Stock engine ceilings** | **engine-limitations.md** |
-| **Wire protocol (join + golden bodies)** | **protocol.md** |
-| **Wire package bodies + metadata census** | **protocol-packages.md** |
-| **Wire frames (visual)** | **protocol-frames.md** |
-| **How to reverse-engineer (method)** | **re-methodology.md** |
-| Non-IL residuals | residuals.md |
-| Frame / sim loop | loop.md |
-| gmUpdate phases | loop-gmupdate.md |
-| Entity / AI / path | entity-ai.md |
-| Closed IL gaps (timer, path, net bands) | closed-gaps.md |
-| World tick / chunks | world-chunks.md |
-| Save / WorldState / region | save-region.md |
-| Terrain YDim / height APIs | terrain-height.md |
-| Runtime hot-patch of YDim expand (feasibility) | hot-patch-height.md |
-| Networking | network.md |
-| Light / stability / mesh / water | light-mesh-water.md |
-| Managers + ModEvents | managers.md |
-| AIDirector types | aidirector.md |
-| SDCS character/armor authoring | sdcs-character-gear.md |
+One folder per subsystem; each doc is the single home for its topic. Raw
+method/call inventories back them and are listed under [Inventories](#inventories-not-primary-reading).
 
-Optimization-mod topics (bottlenecks, algorithm cost anatomy, APM scaling laws,
-GC/FPS tuning, allocation reuse, aggressive levers) live in the **companion
-`7dtd-server-optimizer/docs/`**, not this repo. See the table below. The **Zig clone
-architecture** (module map, M0-M6 milestones) is reimplementation design and lives
-in **`zdtd-server/docs/ZIG_CLONE.md`**, built from the wire/loop RE here.
+### Meta and method (`docs/meta/`)
 
-| Topic | File (product `7dtd-realearth/docs/`, private, not published) |
-|---|---|
-| Streamed runtime lessons | `realearth-runtime.md` |
-| Engine surfaces used by RealEarth | `realearth-surfaces.md` |
-| Adversarial review catalog | `realearth-review.md` |
-| Product status Done/Partial | `MODIFICATIONS.md` |
-| Lon/lat dual coords | `LON_LAT.md` |
-| Absolute → inject path | `ABSOLUTE_STREAMING.md` |
-| Product hub | `INDEX.md` |
-
----
-
-## Generic engine narratives
-
-Grouped by subsystem. Each doc is the single home for its topic; inventories
-(raw dumps) back them and are listed further down.
-
-### A. Meta and method
+What the corpus covers, how it was derived, and what managed IL cannot close.
 
 | Doc | Role |
 |---|---|
-| [architecture-map.md](architecture-map.md) | Whole-system visual map and subsystem ownership index |
-| [coverage.md](coverage.md) | Family → narrative → dump map; census numbers |
-| [full-surface.md](full-surface.md) | Whole-assembly map (all 89 namespaces) + coverage ledger toward 100% |
+| [architecture-map.md](meta/architecture-map.md) | Whole-system visual map and subsystem ownership index |
+| [coverage.md](meta/coverage.md) | Family → narrative → dump map; census numbers |
+| [full-surface.md](meta/full-surface.md) | Whole-assembly map (all 88 namespaces) + coverage ledger toward 100% |
+| [residuals.md](meta/residuals.md) | What managed IL cannot close (the only open-item list) |
+| [out-of-scope-surface.md](meta/out-of-scope-surface.md) | Reached-but-out-of-scope types classified by category (the boundary map) |
+| [client-side-surface.md](meta/client-side-surface.md) | Client-executed surface (XUi, client-only subsystems) narrated for the census; authoritative classification in out-of-scope-surface.md |
+| [engine-limitations.md](meta/engine-limitations.md) | Generic stock ceilings (sim, net, AI, height, GC, ops) |
+| [re-methodology.md](meta/re-methodology.md) | How to RE: toolchain, dumping, reading IL into wire layouts |
+| [completion-bar.md](meta/completion-bar.md) | What "100% documented" means (tiers A-D) |
+| [dedicated-misc-systems.md](meta/dedicated-misc-systems.md) | Grab-bag of small dedicated systems (gamestage groups, water apply, boss/companion, admin users, entitlements, AI tasks, ...) |
+| [dedicated-leftovers.md](meta/dedicated-leftovers.md) | Final leftovers batch (inventory manager, search paths, prefab volumes, physics bodies, infra types; AuthAndLoginManager verdict) |
 
-| [residuals.md](residuals.md) | What managed IL cannot close (the only open-item list) |
-| [out-of-scope-surface.md](out-of-scope-surface.md) | Reached-but-out-of-scope types classified by category (the boundary map) |
-| [client-side-surface.md](client-side-surface.md) | Client-executed surface (XUi, client-only subsystems) narrated for the census; authoritative classification in out-of-scope-surface.md |
-| [engine-limitations.md](engine-limitations.md) | Generic stock ceilings (sim, net, AI, height, GC, ops) |
-| [re-methodology.md](re-methodology.md) | How to RE: toolchain, dumping, reading IL into wire layouts |
+### Release deltas (`docs/releases/`)
 
-### B. Frame and simulation loop
-
-| Doc | Role |
-|---|---|
-| [loop.md](loop.md) | Peers, gmUpdate, UpdateTick, subsystem scale |
-| [loop-gmupdate.md](loop-gmupdate.md) | gmUpdate phase narrative (detail under loop.md §2) |
-| [managers.md](managers.md) | Manager Update ILs + ModEvents fields |
-| [sandbox-options.md](sandbox-options.md) | Sandbox/game-option type system + sandbox-code codec |
-| [npc-dialog.md](npc-dialog.md) | Trader/NPC dialog tree + requirement gating + quest-data records |
-| [signs.md](signs.md) | Writable signs (AuthoredText) + layered drawing model + moderation |
-| [map-objects.md](map-objects.md) | Map/compass markers: MapObject + NavObject registries (client-derived) |
-| [server-browser-prefabs.md](server-browser-prefabs.md) | GameServerInfo advertisement + prefab-instance persistence |
-
-### C. Entities, AI and pathing
+Per-release exact deltas, each mapping a shipped change to the doc that owns it.
 
 | Doc | Role |
 |---|---|
-| [entity-ai.md](entity-ai.md) | TickEntity → AI → path + thresholds |
-| [raycast-pathing.md](raycast-pathing.md) | Raycast path generator + steering (junk-drone travel; A* handoff) |
-| [dedicated-misc-systems.md](dedicated-misc-systems.md) | Grab-bag of small dedicated systems (gamestage groups, water apply, boss/companion, admin users, entitlements, AI tasks, ...) |
-| [dedicated-leftovers.md](dedicated-leftovers.md) | Final leftovers batch (inventory manager, search paths, prefab volumes, physics bodies, infra types; AuthAndLoginManager verdict) |
-| [aidirector.md](aidirector.md) | AIDirector type inventory |
-| [closed-gaps.md](closed-gaps.md) | Timer 20 Hz, AIDirector install, ASP→A*, net bands |
-| [uai.md](uai.md) | Utility AI (UseAIPackages branch): packages, considerations, tasks, decision cycle |
-| [entity-stats.md](entity-stats.md) | Entity + survival stats: health/food/water/stamina over-time, damage |
-| [stealth-smell.md](stealth-smell.md) | Stealth/noise/smell: server detection inputs driving zombie sensing |
-| [entity-movement.md](entity-movement.md) | Move chain + physics surface: MoveHelper → Entity::Move → CC collision, gravity, friction |
+| [changelog-3.0.0.md](releases/changelog-3.0.0.md) | V3.0.0 Dead Hot Summer feature inventory mapped to RE homes |
+| [changelog-3.1.0.md](releases/changelog-3.1.0.md) | V3.1.0 Henpocalypse feature inventory mapped to RE homes |
+| [changelog-3.2.0.md](releases/changelog-3.2.0.md) | V3.1.0 -> V3.2.0 exact IL-verified delta (+ per-fact homes, §9) |
 
-### D. World, terrain, save
+### Frame and simulation loop (`docs/loop/`)
+
+The dedicated frame and simulation loop, and the managers it drives.
 
 | Doc | Role |
 |---|---|
-| [world-chunks.md](world-chunks.md) | Gen, load/send, SetBlock, chunk flags |
-| [terrain-height.md](terrain-height.md) | WorldConstants, height APIs, expand pin |
-| [save-region.md](save-region.md) | WorldState, chunk write/read (incl. 64-layer loop), RegionFile* |
-| [save-persistence.md](save-persistence.md) | Save path/slot model + SaveInfoProvider (dedicated runs the System.IO placeholder) |
-| [chunk-providers.md](chunk-providers.md) | ChunkProvider* (dedicated = GenerateWorldFromRaw) + decoration layer |
-| [light-mesh-water.md](light-mesh-water.md) | Light, stability, mesh, water, deco |
-| [stability.md](stability.md) | Stability calculator / falling blocks: StabilityInitializer spread/clear, GetBlockStability BFS, EntityFallingBlock landing |
-| [world-generation.md](world-generation.md) | RWG world create pipeline: WorldBuilder stages, threading, outputs |
-| [blocks.md](blocks.md) | Block framework: BlockValue bitfield, virtual surface, damage/upgrade, block-change flow |
-| [block-shapes.md](block-shapes.md) | BlockShape rotation model + BlockTrigger firing chain |
-| [dynamic-mesh.md](dynamic-mesh.md) | Dynamic mesh: destroyed-geometry regen, threading, DynamicMeshes/ persistence, channel-1 streaming |
-| [texture-atlas.md](texture-atlas.md) | Block texture-atlas metadata + minimap color chain: uvmapping XML in meshdescriptions_assets_all.bundle, CalcChunkColors → GetMapColor → ToColor5 (map chunks) |
-| [texture-atlas-unityfs.md](texture-atlas-unityfs.md) | UnityFS container layout of meshdescriptions_assets_all.bundle (backs texture-atlas.md) |
-| [shader-subprogram-blob.md](shader-subprogram-blob.md) | Shader (class 48) sub-program blob: LZ4 per-platform blobs, 12-byte record table, code-blob record, and the 38-byte DX11 program-data header before the DXBC |
+| [loop.md](loop/loop.md) | Peers, gmUpdate, UpdateTick, subsystem scale |
+| [loop-gmupdate.md](loop/loop-gmupdate.md) | gmUpdate phase narrative (detail under loop.md §2) |
+| [managers.md](loop/managers.md) | Manager Update ILs + ModEvents fields |
 
-### E. Networking and wire protocol
+### Entities, AI and pathing (`docs/entities/`)
+
+The per-entity tick: AI, pathing, movement and survival stats.
 
 | Doc | Role |
 |---|---|
-| [network.md](network.md) | ConnectionManager, NetEntity, NetPackage census, interest bands |
-| [protocol.md](protocol.md) | LiteNet envelope, challenge, join, golden entity packages |
-| [protocol-frames.md](protocol-frames.md) | RFC-style + Mermaid byte frames per package |
-| [protocol-packages.md](protocol-packages.md) | Per-package body catalog, channel/compress/auth census, encryption handshake |
+| [entity-ai.md](entities/entity-ai.md) | TickEntity → AI → path + thresholds |
+| [entity-movement.md](entities/entity-movement.md) | Move chain + physics surface: MoveHelper → Entity::Move → CC collision, gravity, friction |
+| [entity-stats.md](entities/entity-stats.md) | Entity + survival stats: health/food/water/stamina over-time, damage |
+| [raycast-pathing.md](entities/raycast-pathing.md) | Raycast path generator + steering (junk-drone travel; A* handoff) |
+| [aidirector.md](entities/aidirector.md) | AIDirector type inventory |
+| [uai.md](entities/uai.md) | Utility AI (UseAIPackages branch): packages, considerations, tasks, decision cycle |
+| [stealth-smell.md](entities/stealth-smell.md) | Stealth/noise/smell: server detection inputs driving zombie sensing |
+| [closed-gaps.md](entities/closed-gaps.md) | Timer 20 Hz, AIDirector install, ASP→A*, net bands |
 
-### F. Server services and gameplay systems
+### World, terrain and persistence (`docs/world/`)
 
-The dedicated server surface beyond the hot path, grouped by role. Verified
-complete against a call-graph reachability pass ([re-methodology.md](re-methodology.md) discipline).
-
-**Admin and ops**
-
-| Doc | Role |
-|---|---|
-| [server-lifecycle.md](server-lifecycle.md) | Boot -> world load -> run -> save/shutdown; game state + game modes; player persistence + land claims |
-| [platform-auth.md](platform-auth.md) | Platform identity + server join auth (Steam/EOS), EAC/EOS managed wrappers |
-| [console-commands.md](console-commands.md) | Console/telnet command system: registry, dispatch + permissions, telnet auth |
-| [webserver.md](webserver.md) | Web admin server: HTTP pipeline, auth/session, permissions, REST, SSE |
-| [mod-loading.md](mod-loading.md) | Mod discovery + DLL load pipeline, EAC gate, ModEvents lifecycle |
-
-**Gameplay systems**
+World generation, chunk lifecycle, terrain, persistence and the asset formats behind them.
 
 | Doc | Role |
 |---|---|
-| [spawning.md](spawning.md) | Entity spawning: biome/dynamic/horde/scout sources, caps, spawn->despawn |
-| [combat-damage.md](combat-damage.md) | Damage pipeline: DamageSource, armor/health apply, death + kill award |
-| [buffs.md](buffs.md) | Buff system: EntityBuffs tick, BuffValue lifecycle, tag/death removal, net sync |
-| [items.md](items.md) | Item framework: ItemValue packing, ItemClass/Actions, use lifecycle, inventory, durability |
-| [crafting-recipes.md](crafting-recipes.md) | Recipe model, CanCraft validation, craft-queue lifecycle, unlock progression |
-| [tile-entities-power.md](tile-entities-power.md) | Tile entities + power graph: storage, PowerManager tick, workstations/forges, traps |
-| [loot-economy.md](loot-economy.md) | Loot generation + respawn, traders (restock/hours/pricing), vending rent |
-| [vehicles-drones-turrets.md](vehicles-drones-turrets.md) | Vehicles (client-authoritative motion), drones + turrets (server behavior), waypoints |
-| [weather-environment.md](weather-environment.md) | Server-authoritative weather sim, storm state machine, temperature survival |
-| [progression.md](progression.md) | Player XP/level, skill points, perk purchase, calculated level |
+| [world-chunks.md](world/world-chunks.md) | Gen, load/send, SetBlock, chunk flags |
+| [world-generation.md](world/world-generation.md) | RWG world create pipeline: WorldBuilder stages, threading, outputs |
+| [chunk-providers.md](world/chunk-providers.md) | ChunkProvider* (dedicated = GenerateWorldFromRaw) + decoration layer |
+| [terrain-height.md](world/terrain-height.md) | WorldConstants, height APIs, expand pin |
+| [hot-patch-height.md](world/hot-patch-height.md) | Whether the `ChunkBlockYDim` 256 -> 32768 expand can be hot-patched at runtime |
+| [save-region.md](world/save-region.md) | WorldState, chunk write/read (incl. 64-layer loop), RegionFile* |
+| [save-persistence.md](world/save-persistence.md) | Save path/slot model + SaveInfoProvider (dedicated runs the System.IO placeholder) |
+| [light-mesh-water.md](world/light-mesh-water.md) | Light, stability, mesh, water, deco |
+| [stability.md](world/stability.md) | Stability calculator / falling blocks: StabilityInitializer spread/clear, GetBlockStability BFS, EntityFallingBlock landing |
+| [dynamic-mesh.md](world/dynamic-mesh.md) | Dynamic mesh: destroyed-geometry regen, threading, DynamicMeshes/ persistence, channel-1 streaming |
+| [blocks.md](world/blocks.md) | Block framework: BlockValue bitfield, virtual surface, damage/upgrade, block-change flow |
+| [block-shapes.md](world/block-shapes.md) | BlockShape rotation model + BlockTrigger firing chain |
+| [texture-atlas.md](world/texture-atlas.md) | Block texture-atlas metadata + minimap color chain: uvmapping XML in meshdescriptions_assets_all.bundle, CalcChunkColors → GetMapColor → ToColor5 (map chunks) |
+| [texture-atlas-unityfs.md](world/texture-atlas-unityfs.md) | UnityFS container layout of meshdescriptions_assets_all.bundle (backs texture-atlas.md) |
+| [shader-subprogram-blob.md](world/shader-subprogram-blob.md) | Shader (class 48) sub-program blob: LZ4 per-platform blobs, 12-byte record table, code-blob record, and the 38-byte DX11 program-data header before the DXBC |
 
-**Content and scripting**
+### Networking and wire protocol (`docs/network/`)
 
-| Doc | Role |
-|---|---|
-| [game-events.md](game-events.md) | Scripted-event interpreter: sequences, actions, requirements, decisions, loops |
-| [minevents.md](minevents.md) | Triggered-effect framework: FireEvent dispatch, action/requirement/target model |
-| [quests-challenges.md](quests-challenges.md) | Quest + challenge template/instance lifecycles, objectives, rewards, QuestEventManager |
-| [sdcs-character-gear.md](sdcs-character-gear.md) | SDCS skinned character system: archetype/items.xml authoring contracts, asset-path grammar, rig-stitching pipeline (client-executed, server-loaded data) |
-
-**Social and integration**
+LiteNet framing, the join sequence and every package body.
 
 | Doc | Role |
 |---|---|
-| [chat.md](chat.md) | Chat: NetPackageChat wire, server channel routing, system messages |
-| [parties-factions.md](parties-factions.md) | Parties (session), faction standing matrix, ally handshake |
-| [twitch-integration.md](twitch-integration.md) | Twitch: server action/vote execution via game events (connection is client residual) |
+| [network.md](network/network.md) | ConnectionManager, NetEntity, NetPackage census, interest bands |
+| [protocol.md](network/protocol.md) | LiteNet envelope, challenge, join, golden entity packages |
+| [protocol-frames.md](network/protocol-frames.md) | RFC-style + Mermaid byte frames per package |
+| [protocol-packages.md](network/protocol-packages.md) | Per-package body catalog, channel/compress/auth census, encryption handshake |
 
-### G. Optimization-mod companion (`7dtd-server-optimizer/docs/`, not this repo)
+### Server lifecycle, auth and ops (`docs/admin/`)
 
-These consume the stock RE above and belong to the EfficientServer optimization
-mod, not stock-game research. Cost measurements, lever catalogs, and tuning knobs
-live with the mod that ships them.
+Boot to shutdown, platform auth, the console and web admin, mods and sandbox options.
 
 | Doc | Role |
 |---|---|
-| [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md) | Live APM scaling laws |
-| [bottlenecks.md](../../7dtd-server-optimizer/docs/bottlenecks.md) | Consolidated ranked bottleneck catalog (super-linear walls, bad data structures, serial stages) |
-| [algorithms.md](../../7dtd-server-optimizer/docs/algorithms.md) | Every hot-subsystem algorithm + data structure (path scan, net interest, chunk RLE, Boehm GC, spatial queries) |
-| [aggressive-optimizations.md](../../7dtd-server-optimizer/docs/aggressive-optimizations.md) | Unsafe/beyond-Harmony lever catalog: risk classes, per-cost targets, gain/risk hierarchy |
-| [runtime-tuning.md](../../7dtd-server-optimizer/docs/runtime-tuning.md) | Process knobs: Boehm GC env, GC.Collect gate, ModEvents lifecycle, settargetfps |
-| [allocation-reuse.md](../../7dtd-server-optimizer/docs/allocation-reuse.md) | Buffer reuse / preallocation to cut churn; what is pooled vs what still churns |
+| [server-lifecycle.md](admin/server-lifecycle.md) | Boot -> world load -> run -> save/shutdown; game state + game modes; player persistence + land claims |
+| [platform-auth.md](admin/platform-auth.md) | Platform identity + server join auth (Steam/EOS), EAC/EOS managed wrappers |
+| [console-commands.md](admin/console-commands.md) | Console/telnet command system: registry, dispatch + permissions, telnet auth |
+| [webserver.md](admin/webserver.md) | Web admin server: HTTP pipeline, auth/session, permissions, REST, SSE |
+| [mod-loading.md](admin/mod-loading.md) | Mod discovery + DLL load pipeline, EAC gate, ModEvents lifecycle |
+| [sandbox-options.md](admin/sandbox-options.md) | Sandbox/game-option type system + sandbox-code codec |
+| [server-browser-prefabs.md](admin/server-browser-prefabs.md) | GameServerInfo advertisement + prefab-instance persistence |
 
----
+### Gameplay systems (`docs/gameplay/`)
+
+The gameplay systems the dedicated server simulates.
+
+| Doc | Role |
+|---|---|
+| [spawning.md](gameplay/spawning.md) | Entity spawning: biome/dynamic/horde/scout sources, caps, spawn->despawn |
+| [combat-damage.md](gameplay/combat-damage.md) | Damage pipeline: DamageSource, armor/health apply, death + kill award |
+| [buffs.md](gameplay/buffs.md) | Buff system: EntityBuffs tick, BuffValue lifecycle, tag/death removal, net sync |
+| [items.md](gameplay/items.md) | Item framework: ItemValue packing, ItemClass/Actions, use lifecycle, inventory, durability |
+| [crafting-recipes.md](gameplay/crafting-recipes.md) | Recipe model, CanCraft validation, craft-queue lifecycle, unlock progression |
+| [tile-entities-power.md](gameplay/tile-entities-power.md) | Tile entities + power graph: storage, PowerManager tick, workstations/forges, traps |
+| [loot-economy.md](gameplay/loot-economy.md) | Loot generation + respawn, traders (restock/hours/pricing), vending rent |
+| [vehicles-drones-turrets.md](gameplay/vehicles-drones-turrets.md) | Vehicles (client-authoritative motion), drones + turrets (server behavior), waypoints |
+| [weather-environment.md](gameplay/weather-environment.md) | Server-authoritative weather sim, storm state machine, temperature survival |
+| [progression.md](gameplay/progression.md) | Player XP/level, skill points, perk purchase, calculated level |
+| [signs.md](gameplay/signs.md) | Writable signs (AuthoredText) + layered drawing model + moderation |
+| [map-objects.md](gameplay/map-objects.md) | Map/compass markers: MapObject + NavObject registries (client-derived) |
+
+### Content and scripting (`docs/content/`)
+
+Scripted content: events, quests, dialog and character data.
+
+| Doc | Role |
+|---|---|
+| [game-events.md](content/game-events.md) | Scripted-event interpreter: sequences, actions, requirements, decisions, loops |
+| [minevents.md](content/minevents.md) | Triggered-effect framework: FireEvent dispatch, action/requirement/target model |
+| [quests-challenges.md](content/quests-challenges.md) | Quest + challenge template/instance lifecycles, objectives, rewards, QuestEventManager |
+| [sdcs-character-gear.md](content/sdcs-character-gear.md) | SDCS skinned character system: archetype/items.xml authoring contracts, asset-path grammar, rig-stitching pipeline (client-executed, server-loaded data) |
+| [npc-dialog.md](content/npc-dialog.md) | Trader/NPC dialog tree + requirement gating + quest-data records |
+
+### Social and integrations (`docs/social/`)
+
+Chat, parties and factions, and third-party integration.
+
+| Doc | Role |
+|---|---|
+| [chat.md](social/chat.md) | Chat: NetPackageChat wire, server channel routing, system messages |
+| [parties-factions.md](social/parties-factions.md) | Parties (session), faction standing matrix, ally handshake |
+| [twitch-integration.md](social/twitch-integration.md) | Twitch: server action/vote execution via game events (connection is client residual) |
 
 ## Inventories (not primary reading)
 
@@ -394,7 +298,7 @@ Policy: [`../il/README.md`](../il/README.md).
 
 **All RE tooling lives in this repo:** [`../tools/`](../tools) (tracked). Full
 catalog: [`../tools/README.md`](../tools/README.md). How to RE:
-[`re-methodology.md`](re-methodology.md).
+[`re-methodology.md`](meta/re-methodology.md).
 
 | Group | What |
 |---|---|
@@ -421,20 +325,117 @@ Live scale laws: [measured-scaling.md](../../7dtd-server-optimizer/docs/measured
 
 ---
 
+## Version policy and IL citation convention
+
+**Policy: track the latest stock release only.** The corpus is regenerated
+against each new dedicated `Assembly-CSharp.dll` and the previous version's sets
+are deleted in the same change, so a citation can never quietly refer to an old
+build. Regenerate before deleting: an assembly that is no longer installed
+cannot be dumped again.
+
+**Current pin:** V **3.2.0 b10**. Every tracked set in [`../il/`](../il/) is
+V3.2.0; the V3.1.0 sets were retained for the 3.1.0→3.2.0 diff and the V3.0.1
+sets were removed on 2026-08-06.
+
+| Citation form | Means |
+|---|---|
+| `il/<set>-v3.2.0/...` | the tracked V3.2.0 dump sets |
+| `asm.il:NNNN` | a V3.2.0 single-file dump kept outside the repo, identified by MD5 in [`../il/README.md`](../il/README.md) |
+
+Mentions of V3.0.1 and V3.1.0 in these documents are deliberate history (what
+changed between releases, what a prior corpus measured), not stale pins. Line
+numbers written before 2026-08-06 may still be V3.0.1 numbers, which drift from
+the V3.2.0 dump by roughly 3500 lines in the NetPackage region.
+
+Per-release delta maps (which doc owns each shipped change) live with the release they describe: [`changelog-3.2.0.md`](releases/changelog-3.2.0.md) §9, [`changelog-3.1.0.md`](releases/changelog-3.1.0.md), [`changelog-3.0.0.md`](releases/changelog-3.0.0.md).
+
+---
+
+## Companion repos
+
+Reimplementation, optimization and product work consume the RE here and live in
+their own repos ([`../AGENTS.md`](../AGENTS.md) doc scope). Cost measurements,
+lever catalogs and tuning knobs belong to the mod that ships them.
+
+### Zig clone (`zdtd-server/docs/`)
+
+| Doc | Role |
+|---|---|
+| [ZIG_CLONE.md](../../zdtd-server/docs/ZIG_CLONE.md) | Clone architecture built from the wire/loop RE: module map, M0-M6 milestones |
+| [PROVENANCE.md](../../zdtd-server/docs/PROVENANCE.md) | Provenance ledger: every behavior/perk/value to its stock source (file map 187/187, constants, divergence register; gated by zdtd `tools/provenance_scan.py`) |
+
+### Optimization mod (`7dtd-server-optimizer/docs/`)
+
+Bottlenecks, algorithm cost anatomy, APM scaling laws, GC/FPS tuning, allocation
+reuse and aggressive levers.
+
+| Doc | Role |
+|---|---|
+| [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md) | Live APM scaling laws |
+| [bottlenecks.md](../../7dtd-server-optimizer/docs/bottlenecks.md) | Consolidated ranked bottleneck catalog (super-linear walls, bad data structures, serial stages) |
+| [algorithms.md](../../7dtd-server-optimizer/docs/algorithms.md) | Every hot-subsystem algorithm + data structure (path scan, net interest, chunk RLE, Boehm GC, spatial queries) |
+| [aggressive-optimizations.md](../../7dtd-server-optimizer/docs/aggressive-optimizations.md) | Unsafe/beyond-Harmony lever catalog: risk classes, per-cost targets, gain/risk hierarchy |
+| [runtime-tuning.md](../../7dtd-server-optimizer/docs/runtime-tuning.md) | Process knobs: Boehm GC env, GC.Collect gate, ModEvents lifecycle, settargetfps |
+| [allocation-reuse.md](../../7dtd-server-optimizer/docs/allocation-reuse.md) | Buffer reuse / preallocation to cut churn; what is pooled vs what still churns |
+
+---
+
+### RealEarth product (`7dtd-realearth/docs/`, private, not published)
+
+| Topic | File (product `7dtd-realearth/docs/`, private, not published) |
+|---|---|
+| Streamed runtime lessons | `realearth-runtime.md` |
+| Engine surfaces used by RealEarth | `realearth-surfaces.md` |
+| Adversarial review catalog | `realearth-review.md` |
+| Product status Done/Partial | `MODIFICATIONS.md` |
+| Lon/lat dual coords | `LON_LAT.md` |
+| Absolute → inject path | `ABSOLUTE_STREAMING.md` |
+| Product hub | `INDEX.md` |
+
+---
+
 ## Changelog
 
-- **2026-08-24:** [shader-subprogram-blob.md](shader-subprogram-blob.md) adds the `ParserBindChannels` block that closes every code-blob record, with the mesh-channel to shader-input mapping; a record without it is refused by the runtime.
-- **2026-08-24:** [shader-subprogram-blob.md](shader-subprogram-blob.md) adds the parameter blob (the binding table Unity keeps instead of the stripped DXBC `RDEF` chunk), round-tripped byte for byte over 3403 stock records, and the parallel index space between `m_ParameterBlobIndices` and `m_PlayerSubPrograms`.
-- **2026-08-24:** New page [shader-subprogram-blob.md](shader-subprogram-blob.md): Shader (class 48) compiled-code container, including the 38-byte DX11 program-data header decoded over 7366 sub-programs (`tools/shader_blob_dump.py`). Method added as [re-methodology.md](re-methodology.md) 7b.
+- **2026-09-11:** Corpus restructured into subsystem folders. `docs/` was 72 flat
+  files; it is now one folder per subsystem (`meta`, `releases`, `loop`, `entities`,
+  `world`, `network`, `admin`, `gameplay`, `content`, `social`) beside `inventories/`,
+  with every internal and cross-repo link repointed and the hub's subsystem map
+  rebuilt from the layout. Re-filed on the way: the release changelogs into
+  `releases/`, `sandbox-options`/`server-browser-prefabs` into `admin/`,
+  `npc-dialog` into `content/`, `signs`/`map-objects` into `gameplay/`, and the
+  two census grab-bags (`dedicated-misc-systems`, `dedicated-leftovers`) into
+  `meta/`. Gates now resolve a doc by basename (`_common.doc()`), the link gate
+  walks the whole tree and resolves every link against its own folder, and
+  `StateMachines` clusters by folder. Hub order also changed: map first (Start
+  here, reading paths, subsystem map), history last; the V3.2.0/V3.1.0 shipped-delta
+  maps moved to [changelog-3.2.0.md](releases/changelog-3.2.0.md) §9 and
+  [changelog-3.1.0.md](releases/changelog-3.1.0.md) § Per-fact homes; the "One home
+  per topic" table was dropped as a duplicate of the subsystem tables (its omissions
+  were audit finding F23); every cross-repo pointer folded into `## Companion repos`.
+- **2026-09-11:** Stale facts found by the full suite and refreshed against the live
+  V3.2.0 b10 assembly: whole-assembly IL total 1,740,737 -> **1,743,842**
+  ([full-surface.md](meta/full-surface.md)); registered wire packages 189 -> **191** and
+  the channel-1/compressed census (POIAround out, POIMetadataResponse in)
+  ([network.md](network/network.md) §3, [protocol-packages.md](network/protocol-packages.md));
+  six drifted IL citations (`ConnectionManager.Update` 228->231, `Entity.Detach` 79->92,
+  `ItemActionAttack.Hit` 1614->1564, `TraderArea.IsWithinProtectArea` 47->59,
+  `EAIRunawayFromEntity.FindEnemy` 166->136, `EntityAlive.updateCurrentBlockPosAndValue`
+  318->341); the dumper-generated inventories re-spliced from the current dumps; the
+  removed-in-V3.2.0 `TraderComparer` rows dropped from the leaf inventories. New:
+  `NetPackageDamageEntity`'s `flags:u32` bit layout is now documented where the package
+  body is defined, and its 11 `cFlags*` constants are pinned by `test_tuned_constants`.
+- **2026-08-24:** [shader-subprogram-blob.md](world/shader-subprogram-blob.md) adds the `ParserBindChannels` block that closes every code-blob record, with the mesh-channel to shader-input mapping; a record without it is refused by the runtime.
+- **2026-08-24:** [shader-subprogram-blob.md](world/shader-subprogram-blob.md) adds the parameter blob (the binding table Unity keeps instead of the stripped DXBC `RDEF` chunk), round-tripped byte for byte over 3403 stock records, and the parallel index space between `m_ParameterBlobIndices` and `m_PlayerSubPrograms`.
+- **2026-08-24:** New page [shader-subprogram-blob.md](world/shader-subprogram-blob.md): Shader (class 48) compiled-code container, including the 38-byte DX11 program-data header decoded over 7366 sub-programs (`tools/shader_blob_dump.py`). Method added as [re-methodology.md](meta/re-methodology.md) 7b.
 - **2026-08-22:** Wire the texture-atlas docs into the hub (section D rows; the docs shipped in 24c8199 without INDEX or audit-table entries).
 - **2026-08-11:** Tools section now names both gates (`make test` full suite, `make test-docs` CI variant); research CI added (`.github/workflows/ci.yml`); reading-path table links the zdtd provenance ledger (`zdtd-server/docs/PROVENANCE.md`).
 - **2026-08-10:** LiteNetLib join-churn race closed as a managed defect
-  ([network.md](network.md) §4.0: `UnsyncedEvents=true` + receive-thread
+  ([network.md](network/network.md) §4.0: `UnsyncedEvents=true` + receive-thread
   `Clients.List` enumeration; ramp workaround validated), `NetPackageMinEventFire`
   null-itemValue NRE documented + audited as the unique reachable instance-callvirt
-  write defect ([protocol-packages.md](protocol-packages.md) §6.23), stock-defects
-  section added to [engine-limitations.md](engine-limitations.md), ModEvents
-  subscriber baseline pinned in [managers.md](managers.md) §2, stale
+  write defect ([protocol-packages.md](network/protocol-packages.md) §6.23), stock-defects
+  section added to [engine-limitations.md](meta/engine-limitations.md), ModEvents
+  subscriber baseline pinned in [managers.md](loop/managers.md) §2, stale
   native-LiteNetLib labels purged corpus-wide, regression test wired into
   `make test`.
 - **2026-08-09:** Wiki cross-linking pass: added hub backlinks (`**Hub:**
@@ -465,10 +466,14 @@ Live scale laws: [measured-scaling.md](../../7dtd-server-optimizer/docs/measured
   format). Line numbers in those sections are from the 2026-08-05 dump and drift
   from the tracked `il/` V3.1.0 sets.
 
+- **2026-09-05:** Pin bumped to **V3.2.0 (b10)** after Steam dedicated/client
+  download (app 294420 buildid 24994542). Census unchanged; managed delta only
+  `Platform.EOS.RemoteFileStorage` cancel path ([changelog-3.2.0.md](releases/changelog-3.2.0.md)
+  §8). Sibling version pins bumped in `7dtd-loadgen` and `zdtd-server`.
 - **2026-08-28:** Retarget corpus to **V3.2.0 (b9)**: regenerated all dump
   sets + committed inventories + `stock_facts.json`/`xml_pins.json` from the
   live dedicated build; diffed every type against the retained V3.1.0 sets
-  (exact 3.1.0→3.2.0 delta: [`changelog-3.2.0.md`](changelog-3.2.0.md)); wire
+  (exact 3.1.0→3.2.0 delta: [`changelog-3.2.0.md`](releases/changelog-3.2.0.md)); wire
   facts updated for `NetPackageDamageEntity` (packed flags + KillXPScale),
   POI metadata packages (POIAround removed), `NetPackageConfirmSpawnEntity` +
   `EntityCreationData.requestedBy/requestKey`, `ItemValue.Flags`; feature docs

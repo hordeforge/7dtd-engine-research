@@ -39,6 +39,19 @@ def _repo_root() -> Path:
 REPO = _repo_root()
 TOOLS = REPO / "tools"
 BIN = TOOLS / "bin"
+DOCS = REPO / "docs"
+
+
+def doc(name: str) -> Path:
+    """Path of a narrative doc by basename, wherever its subsystem folder sits.
+
+    docs/ is grouped by subsystem (docs/network/protocol.md, ...); basenames stay
+    unique across the tree, so a gate cites a doc by name and never by folder.
+    """
+    hits = sorted(DOCS.rglob(name))
+    if len(hits) != 1:
+        raise FileNotFoundError(f"{name}: {len(hits)} matches under {DOCS}")
+    return hits[0]
 
 
 def scratch_dir() -> Path:

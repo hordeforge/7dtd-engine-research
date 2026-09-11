@@ -1,7 +1,7 @@
 # Types promoted OUT of the name-based out-of-scope classification after a
 # referrer sweep (tools/src/RefScan) showed server-dominant referrers.
 # This file is the tool INPUT that makes the hand-correction reproducible:
-# any regeneration of docs/out-of-scope-surface.md must exclude these names.
+# any regeneration of docs/meta/out-of-scope-surface.md must exclude these names.
 # Rule: promote when server referrers outnumber client referrers.
 AIFocus
 AttachedToEntitySlotInfo

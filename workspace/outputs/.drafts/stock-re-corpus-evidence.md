@@ -28,17 +28,17 @@
 
 | Claim | Evidence | Observation | Status |
 |---|---|---|---|
-| Hub pin V3.1.0 | `docs/INDEX.md` L5; `docs/coverage.md` L1-3; `AGENTS.md` | V3.1.0 (b14) | match |
+| Hub pin V3.1.0 | `docs/INDEX.md` L5; `docs/meta/coverage.md` L1-3; `AGENTS.md` | V3.1.0 (b14) | match |
 | README version | `README.md` L3 | still says dedicated server **(V3.0.1)** | **mismatch** |
-| re-methodology census table | `docs/re-methodology.md` L52-57 | Top-level 4401, methods 43901, SaveLoad **884** labeled “V3.0.1 baseline” in surrounding prose | ambiguous (historical OK if labeled; SaveLoad still 884 while live 926) |
-| coverage.md live census table | `docs/coverage.md` L66-71 | Still 4401 / 43901 / SaveLoad **884** under “Census (live dedi)” despite V3.1.0 banner | **mismatch** |
-| Families 1-11 Closed | `docs/coverage.md` table | Status Closed for 1-11 | match (doc claim; not re-proved per family) |
-| Coverage metric honesty | `docs/coverage.md` L7-8; `tools/src/Coverage.cs` L175+ | Explicitly “not a coverage metric”; mention-overlap tiers | match (prior Critical framing mitigated in tooling/docs) |
-| residuals non-IL only | `docs/residuals.md` §1-3 | Unaccounted 0; open = native/Unity/content/optional annotation | match (doc status) |
-| WorldInfo hash tail fixed | `docs/protocol-packages.md` §4.2 L222-231 | `i32 count + count × {string,u32}` + explicit NOT byte-length | match (prior C1 fixed) |
-| DynamicMesh dead WriteRegion | `docs/dynamic-mesh.md` L208-236 | Live SaveRegion path; WriteRegion documented dead | match (prior C2 fixed) |
-| TE wire in protocol-packages | `docs/protocol-packages.md` §6.12 | teBlockId i32 + payloadLen i32; write IL=27 | match |
-| TE wire in tile-entities-power | `docs/tile-entities-power.md` ~L129-132 | Still `payloadLen : u16`, **no teBlockId**; parenthetical claims V3.1 teBlockId+i32 | **mismatch (wire-breaking if followed)** |
+| re-methodology census table | `docs/meta/re-methodology.md` L52-57 | Top-level 4401, methods 43901, SaveLoad **884** labeled “V3.0.1 baseline” in surrounding prose | ambiguous (historical OK if labeled; SaveLoad still 884 while live 926) |
+| coverage.md live census table | `docs/meta/coverage.md` L66-71 | Still 4401 / 43901 / SaveLoad **884** under “Census (live dedi)” despite V3.1.0 banner | **mismatch** |
+| Families 1-11 Closed | `docs/meta/coverage.md` table | Status Closed for 1-11 | match (doc claim; not re-proved per family) |
+| Coverage metric honesty | `docs/meta/coverage.md` L7-8; `tools/src/Coverage.cs` L175+ | Explicitly “not a coverage metric”; mention-overlap tiers | match (prior Critical framing mitigated in tooling/docs) |
+| residuals non-IL only | `docs/meta/residuals.md` §1-3 | Unaccounted 0; open = native/Unity/content/optional annotation | match (doc status) |
+| WorldInfo hash tail fixed | `docs/network/protocol-packages.md` §4.2 L222-231 | `i32 count + count × {string,u32}` + explicit NOT byte-length | match (prior C1 fixed) |
+| DynamicMesh dead WriteRegion | `docs/world/dynamic-mesh.md` L208-236 | Live SaveRegion path; WriteRegion documented dead | match (prior C2 fixed) |
+| TE wire in protocol-packages | `docs/network/protocol-packages.md` §6.12 | teBlockId i32 + payloadLen i32; write IL=27 | match |
+| TE wire in tile-entities-power | `docs/gameplay/tile-entities-power.md` ~L129-132 | Still `payloadLen : u16`, **no teBlockId**; parenthetical claims V3.1 teBlockId+i32 | **mismatch (wire-breaking if followed)** |
 | TE live IL | `DumpMethod NetPackageTileEntity write` | IL=27: handle u8, Vector3i, **teBlockId Int32**, Length **conv.i4 Write(Int32)**, WriteTo stream | match experimental-delta + protocol-packages; contradicts tile-entities-power layout |
 | Title pins still 3.0.1 | `loop-gmupdate.md`, `protocol-packages.md`, `protocol-frames.md` heads | Titles say V3.0.1 | mismatch (cosmetic / framing) |
 | Challenge 0xCA in protocol | stock-check + protocol pin grep | present | match |
@@ -73,8 +73,8 @@
 | High first-draft error rate | Still relevant process lesson; stock-check does not catch all wire prose |
 
 ## Strongest mismatches
-1. **`docs/tile-entities-power.md` TE package layout still V3.0.1 (u16, no teBlockId)** while live IL and protocol-packages §6.12 are V3.1.0 i32+teBlockId.
-2. **`docs/coverage.md` “Census (live dedi)” table still 3.0.1 numbers** (4401/43901/884) under a 3.1.0 banner.
+1. **`docs/gameplay/tile-entities-power.md` TE package layout still V3.0.1 (u16, no teBlockId)** while live IL and protocol-packages §6.12 are V3.1.0 i32+teBlockId.
+2. **`docs/meta/coverage.md` “Census (live dedi)” table still 3.0.1 numbers** (4401/43901/884) under a 3.1.0 banner.
 3. **`README.md` still V3.0.1** while AGENTS/INDEX/coverage pin 3.1.0.
 4. Multiple package/loop doc **titles** still V3.0.1.
 

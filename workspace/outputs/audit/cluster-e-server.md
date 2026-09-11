@@ -1,6 +1,6 @@
 # Cluster E audit: server / loop / meta-systems (V3.0.1 dedicated)
 
-**Scope:** docs/server-lifecycle.md, loop.md, loop-gmupdate.md, managers.md,
+**Scope:** docs/admin/server-lifecycle.md, loop.md, loop-gmupdate.md, managers.md,
 mod-loading.md, webserver.md, console-commands.md, twitch-integration.md,
 parties-factions.md, verified against the stable DLL
 (`~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`).
@@ -360,4 +360,4 @@ Loop core (`mono tools/bin/DumpMethod.exe "$ASM" <Type> <Method>` unless noted):
 
 - Ground-truth DLL: `/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` (V3.0.1 stable, 2025-07-17 build)
 - Repo toolkit: `tools/bin/DumpMethod.exe`, `DumpType.exe`, `EnumList.exe`, `MethodList.exe` (+ ad-hoc Mono.Cecil scanners in session scratchpad: subclass census, ldstr locator, caller scan, method-body stats)
-- Audited docs: `docs/server-lifecycle.md`, `docs/loop.md`, `docs/loop-gmupdate.md`, `docs/managers.md`, `docs/mod-loading.md`, `docs/webserver.md`, `docs/console-commands.md`, `docs/twitch-integration.md`, `docs/parties-factions.md`, `docs/inventories/console-command-list.md`, `docs/inventories/gmupdate-calls.md`
+- Audited docs: `docs/admin/server-lifecycle.md`, `docs/loop/loop.md`, `docs/loop/loop-gmupdate.md`, `docs/loop/managers.md`, `docs/admin/mod-loading.md`, `docs/admin/webserver.md`, `docs/admin/console-commands.md`, `docs/social/twitch-integration.md`, `docs/social/parties-factions.md`, `docs/inventories/console-command-list.md`, `docs/inventories/gmupdate-calls.md`

@@ -5,7 +5,7 @@ inspects the shipped `Assembly-CSharp.dll` (dumpers, census, protocol extractors
 version-diff, dump-regen tests) lives here and is tracked in git. Reimplementation
 code and mods live in their own sibling repos; RE tooling does not.
 
-Method (how to use these to reverse a system): [`../docs/re-methodology.md`](../docs/re-methodology.md).
+Method (how to use these to reverse a system): [`../docs/meta/re-methodology.md`](../docs/meta/re-methodology.md).
 Maintainer status and audit log: [`STATUS.md`](STATUS.md).
 
 ```
@@ -28,8 +28,8 @@ Standalone entry points (no build step; make targets noted inline where wired):
 |---|---|
 | `facts.py` | Quick view of the machine-checked stock pins (`make facts`). |
 | `census-pct.py [asm] [docsDir] [--json] [--history FILE]` | Percentage view of the coverage census: narrated / catalogued / classified / unaccounted fractions of reached game types, plus the whole-assembly reached-type/method fractions. `--json` emits a machine-readable object; `--history FILE` appends a dated row to the census-history CSV. Runs `Coverage.exe` + `Census.exe` live (`make census`; Python 3, no build step). |
-| `mention_depth.py [docsDir]` | DLL-free mention-depth histogram over the narrative docs: how many times each type-shaped backticked identifier occurs (exactly-1 / 2-4 / 5-19 / 20+). The depth behind any "narrated" fraction; published in [`../docs/re-methodology.md`](../docs/re-methodology.md) §1. `Coverage.exe` emits the reached-type version into the generated report and stamps that report with the studied build's version consts. |
-| `shader_blob_dump.py <bundle> [--shader NAME] [--verbose]` | Decodes Shader (class 48) sub-program blobs from a stock UnityFS bundle and re-checks the documented layout: LZ4 per-platform blobs, the 12-byte record table, the code-blob record, and the 38-byte DX11 program-data header whose SRV/constant-buffer/sampler bytes are cross-checked against the DXBC `SHDR`/`SHEX` declaration opcodes. Exits non-zero on any disagreement; no assembly, no mono; exits 77 if UnityPy is absent. Backs [`../docs/shader-subprogram-blob.md`](../docs/shader-subprogram-blob.md). Needs UnityPy from the pinned sandbox requirements (`uv pip install -r sandbox/requirements.txt`). |
+| `mention_depth.py [docsDir]` | DLL-free mention-depth histogram over the narrative docs: how many times each type-shaped backticked identifier occurs (exactly-1 / 2-4 / 5-19 / 20+). The depth behind any "narrated" fraction; published in [`../docs/meta/re-methodology.md`](../docs/meta/re-methodology.md) §1. `Coverage.exe` emits the reached-type version into the generated report and stamps that report with the studied build's version consts. |
+| `shader_blob_dump.py <bundle> [--shader NAME] [--verbose]` | Decodes Shader (class 48) sub-program blobs from a stock UnityFS bundle and re-checks the documented layout: LZ4 per-platform blobs, the 12-byte record table, the code-blob record, and the 38-byte DX11 program-data header whose SRV/constant-buffer/sampler bytes are cross-checked against the DXBC `SHDR`/`SHEX` declaration opcodes. Exits non-zero on any disagreement; no assembly, no mono; exits 77 if UnityPy is absent. Backs [`../docs/world/shader-subprogram-blob.md`](../docs/world/shader-subprogram-blob.md). Needs UnityPy from the pinned sandbox requirements (`uv pip install -r sandbox/requirements.txt`). |
 | `save_roundtrip_check.py` | Verify real saves against the documented codecs (`make save-roundtrip[-all]`). |
 | `cross_repo_links.py` | Cross-repo markdown link sweep (`make cross-links`). |
 | `zdtd_cite_check.py` | Sibling-repo research citation check (`make sibling-cites`). |
@@ -82,7 +82,7 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 | Tool | Purpose |
 |---|---|
 | `StockFacts.exe <asm> [out.json]` | Small JSON of stock hardcodes (version, TPS, chunk dims, save version, NetPackage count, behaviour pins: WaterLevel 62.88, item-drop lifetime 300 s, per-frame load budget 50 ms). Feeds `data/stock_facts.json` + pin check. |
-| `Census.exe <asm>` | Whole-assembly ground-truth counts (types, methods-with-body, gmUpdate IL, WorldState.SaveLoad IL). Re-run after a game patch to re-check `docs/coverage.md`. |
+| `Census.exe <asm>` | Whole-assembly ground-truth counts (types, methods-with-body, gmUpdate IL, WorldState.SaveLoad IL). Re-run after a game patch to re-check `docs/meta/coverage.md`. |
 | `DumpMethod.exe <asm> <typeFilter> <methodFilter> [out]` | IL for any method by case-insensitive substring filters (nested types included). The workhorse; replaces most one-off legacy dumpers. |
 | `DumpType.exe <asm> <outDir> <Type>...` | Fields + `read/write/Read/Write` bodies for wire payload structs (`EntityCreationData`, `BlockChangeInfo`, `ItemValue`, ...). |
 | `DumpNetPackages.exe <asm> <outDir>` | Every `NetPackage*` wire surface (Setup/read/write/GetLength/ProcessPackage + trivial getters), one file per type + `INDEX.md`. |
@@ -93,7 +93,7 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 | `Coverage.exe <asm> <docsDir> <out.md>` | Programmatic RE-coverage report: call-graph reachability from dedicated entry points vs docs name-mentions, per-namespace + top undocumented-reached gap list. Reports narrated / catalogued / classified / unaccounted as separate tiers (never summed), plus a mention-depth histogram over reached game types, and stamps the header with the studied build's `Constants.cVersion*` so a report cannot masquerade as another build's. Committable. Backs [`../docs/inventories/coverage-report.md`](../docs/inventories/coverage-report.md). |
 | `Reach.exe <asm> <outFile>` | Reached types/methods from the same seed set as `Coverage.exe` (shared `src/Seeds.cs`), TSV output for cross-filtering against `surface-types.md`. `tests/test_reach_consistency.py` asserts Reach and Coverage report identical reached-method counts so the two lenses cannot drift. |
 | `WireBodies.exe <asm> <out.md>` | Auto-extracted per-package wire-body catalog: ordered `write()` field/type sequence for every `NetPackage*` with an extractable body (183) + the nested serializers they delegate to (60). Committable. Backs [`../docs/inventories/netpackage-bodies.md`](../docs/inventories/netpackage-bodies.md). |
-| `FullSurface.exe <asm> <outDir>` | Whole-assembly **metadata** map (all 7,432 types): namespace summary + per-type signatures/sizes, no IL bodies. Committable. Backs [`../docs/full-surface.md`](../docs/full-surface.md). |
+| `FullSurface.exe <asm> <outDir>` | Whole-assembly **metadata** map (all 7,432 types): namespace summary + per-type signatures/sizes, no IL bodies. Committable. Backs [`../docs/meta/full-surface.md`](../docs/meta/full-surface.md). |
 | `DumpAll.exe <asm> <outDir> [ns]` | **Full local reversal**: every method body of every type, one file per type. Output is git-ignored (never redistribute); optional namespace prefix filter. |
 | `RefScan.exe <asm> <typeNamesFile> [out.tsv]` | Batch reverse-reference scan: every site that references each listed type, attributed to its outermost owner type; bulk server-vs-client classification (see re-methodology §8b). Complements single-member `Xref`. |
 | `StateMachines.exe <docsDir> <out.md>` | Indexes every mermaid `stateDiagram` in the docs tree with owning section + state count. Docs in, assembly not involved; backs [`../docs/inventories/state-machines.md`](../docs/inventories/state-machines.md). |
@@ -129,11 +129,11 @@ python3 tests/check_stock_facts.py --require-live
 ```
 
 Commit `data/stock_facts.json` when the game pin changes. The checker fails if
-`docs/coverage.md`, loadgen `GameVersion`, or zdtd `stock_wire` / challenge /
+`docs/meta/coverage.md`, loadgen `GameVersion`, or zdtd `stock_wire` / challenge /
 ticks disagree with the JSON. Values that could not be extracted from IL and
 were published as hard-coded defaults are listed under `provenance.baked`; a
 non-empty list always fails the pin check (re-extract against the live game).
-See [`../docs/re-methodology.md`](../docs/re-methodology.md) §5c.
+See [`../docs/meta/re-methodology.md`](../docs/meta/re-methodology.md) §5c.
 
 ### After a TFP game update
 
@@ -206,6 +206,7 @@ Fun Pimps changed between game versions.
 | `parity/fetch_version.sh <branch\|manifest> [label]` | Download a specific dedicated build (app 294420) via operator-installed SteamCMD and atomically emit a validated `ParitySurface` snapshot. Set `STEAMCMD` when it is not on `PATH`. |
 | `parity/parity_diff.py old.json new.json` | Diff two stock snapshots (added/removed/wire-changed packages). |
 | `dump_diff.py old-full new-full [filter]` | Method-level diff of two `il/full-<version>/` dump trees: per-type added/removed/changed methods + field/base/interface drift. Used for the 3.1.0→3.2.0 diff; `filter` is a regex on the relative type path. |
+| `asm_body_diff.py old.dll new.dll` | Pairwise method-body hash of two managed assemblies (Mono.Cecil). Catches same-size IL rewrites that FullSurface type-row diffs miss. Used to close the V3.2.0 b9→b10 completeness check. |
 
 ## 4. One-off reversers (`re-scratch/`)
 
@@ -226,7 +227,7 @@ are explicit. See `re-scratch/README.md`.
 | `tests/test_dedi_coverage_docs.py` | Structural proof that the coverage docs, dump sets, and dumpers all exist and are IL-backed (no game constant is the pass condition). Detector self-tests prove the banned-phrase and IL-claim greps can fire. |
 | `tests/check_stock_facts.py --require-live` | `tools/data/stock_facts.json` matches the live dedicated DLL (`make stock-check`): re-extracts via `bin/StockFacts.exe` and diffs every field, so a Steam-side build update fails with a named diff instead of passing silently. The facts-vs-DLL diff skips (with a note) on machines without the game; the docs/siblings checks always run. |
 | `tests/test_reach_consistency.py` | Reach and Coverage report identical reached-method counts (shared `src/Seeds.cs`), so the two lenses cannot drift. Census bucket arithmetic sums. |
-| `tests/test_surface_wellformed.py` | `full-surface.md` type rows sum to the 1,740,737 IL-instruction pin (per-type vs per-namespace totals must agree). |
+| `tests/test_surface_wellformed.py` | `full-surface.md` type rows sum to the 1,743,842 IL-instruction pin (per-type vs per-namespace totals must agree). |
 | `tests/test_subclass_counts.py` | Per-leaf inventories (sequence-requirements 38, item-actions 38, quest-objectives 38, minevent-actions 71, block-behaviors 65, te-features 11, challenge-objectives 28+1, sequence-actions 123) match the DLL's concrete-subclass closures / namespace composition; six inventories' key-method fingerprints exist on the leaf or its base chain (args stripped; te-features' annotated prose excluded). |
 | `tests/test_console_cmd_inventory.py` | Console-command inventory primary rows equal `CmdMap.exe` output exactly; alias rows are real registered names (getCommands ldstrs + cctor string-field values); the committed `console-command-list.tsv` equals fresh output; the Does column equals each `getDescription` (whitespace-normalized); the Perm column equals each `get_DefaultPermissionLevel` (blank = inherited). |
 | `tests/test_gamestats_gameprefs_current.py` | `gamestats-gameprefs.md` EnumGameStats (82) + EnumGamePrefs (317) index tables equal the DLL's enum members by name, not just count. |
@@ -242,7 +243,7 @@ are explicit. See `re-scratch/README.md`.
 | `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (12 claims). |
 | `tests/test_readme_test_table.py` | Every test script run by `make test`/`test-docs`/`verify` is documented in this table, and every entry is a real file. |
 | `tests/test_transport_closure_claims.py` | No stale native-LiteNetLib / unknown-peer-order claims in the docs. Pattern liveness self-tested. |
-| `tests/test_coverage_consistency.py` | `docs/coverage.md` audit table lists every narrative doc; census rows match `stock_facts.json`. |
+| `tests/test_coverage_consistency.py` | `docs/meta/coverage.md` audit table lists every narrative doc; census rows match `stock_facts.json`. |
 | `tests/test_promoted_types.py` | Every name in `data/promoted-types.txt` stays absent from `out-of-scope-surface.md`, so an inventory regeneration cannot silently revert the referrer-verified hand-corrections; the OOS maintenance note must still cite the input file. DLL-free. |
 | `tests/test_doc_link_integrity.py` | Every doc reachable from `INDEX.md`; 0 dead internal links; every root doc carries the `**Hub:**` backlink; every `../` cross-repo link resolves to a real file (wrong-depth citations fail). Synthetic-tree self-tests prove orphan/dead detection. |
 | `tests/test_save_roundtrip_robustness.py` | `save_roundtrip_check.py` degrades malformed/truncated saves to `"parse error"` FAIL verdicts instead of escaping a traceback (which would abort the remaining files' checks), and `--shipped` usage-errors with exit 2 when its path argument is missing or absent. Fixture-driven, DLL-free. |

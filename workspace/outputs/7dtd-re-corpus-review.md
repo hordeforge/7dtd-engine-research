@@ -242,25 +242,25 @@ or move hand-maintained catalogs out of `inventories/`.
 
 - **`docs/inventories/coverage-report.md` → Totals table.** "accounted for … 100%"
   needs the depth histogram adjacent, or a rename. See M1.
-- **`docs/re-methodology.md` §8b.** Strongest section in the corpus. The two failure
+- **`docs/meta/re-methodology.md` §8b.** Strongest section in the corpus. The two failure
   modes (field access invisible to call sweeps; closure hits credited to the wrong
   owner) plus "a negative claim needs the stronger tool" are transferable beyond this
   game. Keep and lead with it.
-- **`docs/protocol-packages.md` §4.2 (WorldInfo).** Correctly distinguishes the
+- **`docs/network/protocol-packages.md` §4.2 (WorldInfo).** Correctly distinguishes the
   entry-count prefix from a byte length and explains the desync consequence. Good
   model for how a wire correction should be written.
-- **`docs/protocol-packages.md` §5.1 (EntityCreationData).** Now a three-section model
+- **`docs/network/protocol-packages.md` §5.1 (EntityCreationData).** Now a three-section model
   (header / `entityClass` switch / networkWrite tail) with two explicit traps
   (`isSleeperPassive` sleeper-gated; junk-drone extras outside the guard) and the
   shared-count note for `fallingBlocks`. This section previously contained a
   wire-breaking error; its current form is the corpus's best worked example.
-- **`docs/items.md` §2 (ItemValue packing).** Declares itself "authoritative for byte
+- **`docs/gameplay/items.md` §2 (ItemValue packing).** Declares itself "authoritative for byte
   order" (appropriate for a table that a clone parses), and it survived two audits
   after the stat-type byte was added.
-- **`docs/dedicated-misc-systems.md` → WorldStats.** Good example of a corrected
+- **`docs/meta/dedicated-misc-systems.md` → WorldStats.** Good example of a corrected
   classification: promoted out of "client-only" once a *field* read (`DensityScore`)
   was found feeding RWG placement. Cites the methodological cause.
-- **`docs/out-of-scope-surface.md` header.** The maintenance note is necessary; see M3
+- **`docs/meta/out-of-scope-surface.md` header.** The maintenance note is necessary; see M3
   for why the arrangement is still fragile.
 
 ---
@@ -307,10 +307,10 @@ All local; no external URLs were needed for this review.
 
 - Artifact root: `/home/maci/Desktop/7dtd/7dtd-engine-research`
 - Docs reviewed: `docs/*.md` (60), `docs/inventories/*.md` (20), including
-  `docs/re-methodology.md`, `docs/protocol-packages.md`, `docs/items.md`,
-  `docs/coverage.md`, `docs/inventories/coverage-report.md`,
-  `docs/out-of-scope-surface.md`, `docs/inventories/dedicated-leaves.md`,
-  `docs/dedicated-misc-systems.md`, `docs/crafting-recipes.md`, `docs/buffs.md`
+  `docs/meta/re-methodology.md`, `docs/network/protocol-packages.md`, `docs/gameplay/items.md`,
+  `docs/meta/coverage.md`, `docs/inventories/coverage-report.md`,
+  `docs/meta/out-of-scope-surface.md`, `docs/inventories/dedicated-leaves.md`,
+  `docs/meta/dedicated-misc-systems.md`, `docs/gameplay/crafting-recipes.md`, `docs/gameplay/buffs.md`
 - Tooling: `tools/src/{Census,Coverage,Xref,RefScan,LeafInfo,WireBodies,DumpMethod,EnumList}.cs`,
   `tools/tests/{test_dedi_coverage_docs,test_re_dump_regen}.py`
 - Lab notebook: `workspace/CHANGELOG.md` (31 dated entries)

@@ -12,7 +12,7 @@ netpackages / surface / full sets. Full table: docs INDEX.
 
 ## Version policy: latest release only
 
-These dumps track the **latest stock release**, currently **V3.2.0 b9**. When
+These dumps track the **latest stock release**, currently **V3.2.0 b10**. When
 the game updates, regenerate every set against the new dedicated
 `Assembly-CSharp.dll` and delete the previous version's sets in the same change,
 so there is only ever one corpus and a citation cannot silently refer to an old

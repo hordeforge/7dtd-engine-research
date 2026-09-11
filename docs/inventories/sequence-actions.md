@@ -1,7 +1,7 @@
 # Sequence action catalog (V3.2.0)
 
 **Kind:** per-action reference (name -> effect, derived from class name/base/fields/key-method IL; no bodies).
-**Framework:** [`../game-events.md`](../game-events.md) owns the contract; this describes each `BaseAction` leaf.
+**Framework:** [`../content/game-events.md`](../content/game-events.md) owns the contract; this describes each `BaseAction` leaf.
 **Regenerate:** hint extractor over transitive subclasses of `GameEvent.SequenceActions.BaseAction`.
 **Hub:** [`../INDEX.md`](../INDEX.md).
 

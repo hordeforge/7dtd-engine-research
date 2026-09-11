@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assert docs/coverage.md invariants: audit-table completeness + census pin match.
+"""Assert docs/meta/coverage.md invariants: audit-table completeness + census pin match.
 
 The audit table ("Audit status per doc") must list every narrative doc under
 docs/ (root level), so a new or renamed doc cannot silently skip an audit
@@ -12,11 +12,15 @@ Usage: python3 tools/tests/test_coverage_consistency.py
 import json
 import os
 import re
+import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
-DOCS = os.path.join(REPO, "docs")
-COVERAGE = os.path.join(DOCS, "coverage.md")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = str(_common.TOOLS)
+REPO = str(_common.REPO)
+DOCS = str(_common.DOCS)
+COVERAGE = _common.doc("coverage.md")
 FACTS = os.path.join(TOOLS, "data", "stock_facts.json")
 
 
@@ -32,7 +36,13 @@ def test_audit_table_lists_every_doc() -> None:
     # they do not put " |" immediately after the closing paren. Dots allowed so
     # versioned docs like changelog-3.2.0.md participate.
     audited = set(re.findall(r"\| \[([a-z0-9.\-]+\.md)\]\([^)]+\) \|", text))
-    root_docs = {n for n in os.listdir(DOCS) if n.endswith(".md") and n != "INDEX.md"}
+    root_docs = {
+        n
+        for sub, _dirs, names in os.walk(DOCS)
+        if os.path.basename(sub) != "inventories"
+        for n in names
+        if n.endswith(".md") and n != "INDEX.md"
+    }
     missing = sorted(root_docs - audited)
     assert not missing, f"docs missing from coverage.md audit table: {missing}"
 

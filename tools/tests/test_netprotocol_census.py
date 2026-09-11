@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Guard the NetProtocolCensus claims in protocol-packages.md against the live DLL.
 
-The doc claims "exactly 6 packages override to channel 1" and names them.
+The doc claims "exactly 5 packages override to channel 1" and names them.
 NetProtocolCensus.exe re-derives the per-package channel census; a package that
 moves channels, or a census the doc mis-states, fails here.
 
@@ -14,24 +14,24 @@ import sys
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
-DOC = os.path.join(REPO, "docs", "protocol-packages.md")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
+
+DOC = str(_common.doc("protocol-packages.md"))
 
 CHANNEL1 = [
     "NetPackageChunk",
     "NetPackageChunkRemove",
     "NetPackageMapChunks",
     "NetPackageDynamicMesh",
-    "NetPackagePOIAround",
     "NetPackageWorldFolder",
 ]
 COMPRESSED = [
     "NetPackageChunk",
     "NetPackageMapChunks",
     "NetPackageDynamicMesh",
-    "NetPackagePOIAround",
+    "NetPackagePOIMetadataResponse",
     "NetPackageConfigFile",
     "NetPackageDynamicClientArrive",
     "NetPackageIdMapping",
@@ -61,14 +61,14 @@ ALLOWED_BEFORE_AUTH = [
     "NetPackageAuthConfirmation",
 ]
 # the 4 top-level NetPackage* types that are NOT registered wire packages
-# (193 top-level - 4 = 189 in the live id-map; network.md §3)
+# (195 top-level - 4 = 191 in the live id-map; network.md §3)
 NON_MAP = [
     "NetPackage",  # abstract base
     "NetPackageDirection",  # enum
     "NetPackageEntityTargeted",  # abstract intermediate
     "NetPackageLogger",  # abstract helper
 ]
-EXPECTED_TOTAL = 193
+EXPECTED_TOTAL = 195
 
 
 def main() -> int:
@@ -148,16 +148,16 @@ class NpKind {
     if non_map != set(NON_MAP):
         bad.append(f"non-map packages {sorted(non_map)} != expected {NON_MAP}")
     # network.md §3 must state the 189-in-map / 4-helpers accounting
-    net = open(os.path.join(REPO, "docs", "network.md"), encoding="utf-8").read()
-    if "**189**" not in net:
-        bad.append("network.md: no '**189**' live id-map claim")
+    net = _common.doc("network.md").read_text(encoding="utf-8")
+    if "**191**" not in net:
+        bad.append("network.md: no '**191**' live id-map claim")
     if "remaining **4**" not in net:
         bad.append("network.md: no 'remaining **4**' helper claim")
     for p in NON_MAP:
         if not re.search(rf"`{p}`", net):
             bad.append(f"network.md: does not name helper `{p}`")
-    if not re.search(r"[Ee]xactly \*{0,2}6\*{0,2} override", doc):
-        bad.append("protocol-packages.md: no 'exactly 6 override to channel 1' claim")
+    if not re.search(r"[Ee]xactly \*{0,2}5\*{0,2} override", doc):
+        bad.append("protocol-packages.md: no 'exactly 5 override to channel 1' claim")
     if not re.search(r"\*\*8 packages set", doc):
         bad.append("protocol-packages.md: no '**8 packages set get_Compress = 1**' claim")
     for p in CHANNEL1 + COMPRESSED + ALLOWED_BEFORE_AUTH + UNRELIABLE:

@@ -15,8 +15,11 @@ import os
 import re
 import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = str(_common.TOOLS)
+REPO = str(_common.REPO)
 INV = os.path.join(REPO, "docs", "inventories")
 IDX = os.path.join(REPO, "docs", "INDEX.md")
 
@@ -41,7 +44,7 @@ def check_package_framing_counts(bad: list[str]) -> None:
     """protocol-packages.md §6.23 self-claims '37 rows (18 conditional + 19
     always-present)'. The 18 live in a table; the 19 are a prose name list.
     If either half drifts the stated total must too."""
-    text = open(os.path.join(REPO, "docs", "protocol-packages.md"), encoding="utf-8").read()
+    text = _common.doc("protocol-packages.md").read_text(encoding="utf-8")
     m = re.search(r"all 37 rows\s*\((\d+) conditional \+ (\d+) always-present\)", text, re.S)
     if not m:
         bad.append(

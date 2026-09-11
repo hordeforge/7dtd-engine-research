@@ -25,7 +25,7 @@ output is `.drafts/7dtd-re-corpus-independent-review.md`.
 ## 2. Metric reproducibility: PASS (6/6 exact)
 
 `mono tools/bin/Census.exe "$ASM"` vs the baseline table pinned in
-`docs/re-methodology.md` §1:
+`docs/meta/re-methodology.md` §1:
 
 | Metric | Tool | Doc | Match |
 |---|---:|---:|:--:|
