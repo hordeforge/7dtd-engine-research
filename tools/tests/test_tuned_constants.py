@@ -21,6 +21,22 @@ DOCS = os.path.join(REPO, "docs")
 
 # family -> (doc, { const name: expected value })  (values from the V3.1.0 DLL)
 CONSTS: dict[str, tuple[str, dict[str, int | float | str]]] = {
+    "NetPackageDamageEntity": (
+        "protocol-packages.md",
+        {
+            "cFlagsCanHitSpecialBodyParts": 1,
+            "cFlagsCrippleLegs": 2,
+            "cFlagsCritical": 4,
+            "cFlagsDismember": 8,
+            "cFlagsFatal": 16,
+            "cFlagsFromBuff": 32,
+            "cFlagsIgnoreConsecutiveDamages": 64,
+            "cFlagsIgnorePartyShare": 128,
+            "cFlagsPainHit": 256,
+            "cFlagsTurnIntoCrawler": 512,
+            "cFlagsTrapKillXP": 1024,
+        },
+    ),
     "AIDirectorBloodMoonParty": (
         "aidirector.md",
         {
@@ -1024,7 +1040,7 @@ def main() -> int:
     doc_text: dict[str, str] = {}
     for cls, (doc_name, consts) in CONSTS.items():
         if doc_name not in doc_text:
-            with open(os.path.join(DOCS, doc_name), encoding="utf-8") as f:
+            with open(_common.doc(doc_name), encoding="utf-8") as f:
                 doc_text[doc_name] = f.read()
         doc = doc_text[doc_name]
         for name, want in consts.items():

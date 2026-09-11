@@ -1,7 +1,7 @@
 # Challenge objective catalog (V3.2.0)
 
 **Kind:** per-objective behavioral catalog (name -> role, derived from class name/base/hook fingerprint; no full bodies).
-**Framework:** [`../quests-challenges.md`](../quests-challenges.md) owns the quest/challenge contract; this describes each `Challenges.BaseChallengeObjective` leaf.
+**Framework:** [`../content/quests-challenges.md`](../content/quests-challenges.md) owns the quest/challenge contract; this describes each `Challenges.BaseChallengeObjective` leaf.
 **Regenerate:** `MethodList` + `DumpType`/`DumpMethod` over the transitive `BaseChallengeObjective` subclass family in the stable server DLL.
 **Hub:** [`../INDEX.md`](../INDEX.md)
 
@@ -15,7 +15,7 @@
 > (b) executing the reward `GameEvent` sequence when a client redeems
 > (`Challenge.Redeem` -> `GameEventManager.HandleAction(ChallengeClass.RewardEvent, player)`,
 > which on a client ships `NetPackageGameEventRequest` to the server,
-> [`../game-events.md`](../game-events.md)).
+> [`../content/game-events.md`](../content/game-events.md)).
 
 ## Framework in brief
 

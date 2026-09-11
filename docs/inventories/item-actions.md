@@ -1,7 +1,7 @@
 # Item action catalog (V3.2.0)
 
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name, base, and code signals; no bodies).  
-**Framework:** [`../items.md`](../items.md) owns the contract; this describes each `ItemAction` leaf.  
+**Framework:** [`../gameplay/items.md`](../gameplay/items.md) owns the contract; this describes each `ItemAction` leaf.  
 **Regenerate:** `tools` hint extractor over transitive subclasses.
 **Hub:** [`INDEX.md`](../INDEX.md).  
 

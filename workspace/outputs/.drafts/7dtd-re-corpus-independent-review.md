@@ -27,7 +27,7 @@ Severity counts: 2 critical, 3 major, 5 minor. 1 item unverifiable.
 
 - **[S1] Wire-format accuracy is outstanding.** I dumped IL fresh and checked
   byte-for-byte:
-  - `docs/protocol-packages.md` §5.1 (`EntityCreationData.write`): the
+  - `docs/network/protocol-packages.md` §5.1 (`EntityCreationData.write`): the
     three-section structure, all five entityClass branches, the itemClass branch
     jumping straight to the tail, and both gating details are exact. The doc's
     cited offsets are real: `brfalse IL_03C5` at IL_033F (networkWrite guard),
@@ -45,7 +45,7 @@ Severity counts: 2 critical, 3 major, 5 minor. 1 item unverifiable.
   - §4.3 `NetPackageWorldInitInfo`: write IL=57 / read IL=58 exactly as stated;
     read ends after the two count-prefixed loops with no trailing length;
     `NetPackageWorldInitInfoRequest.read` IL=1 (empty body claim holds).
-  - `docs/items.md` §2 (`ItemValue.Write`): marker 0/9, flags bit0 =
+  - `docs/gameplay/items.md` §2 (`ItemValue.Write`): marker 0/9, flags bit0 =
     `type >= Block.ItemsStartHere` with the id written minus `ItemsStartHere`
     (IL_0027..IL_0037), Stats triplet (type byte, value-or-0, boosted-or-0), the
     `isinst ItemClassModifier -> brtrue IL_0262` guard skipping both mod
@@ -56,7 +56,7 @@ Severity counts: 2 critical, 3 major, 5 minor. 1 item unverifiable.
   `netpackage-bodies.md` byte-identically (diff clean). Both python gates pass.
   `Census.exe` reproduces the totals `full-surface.md` claims (7413 types,
   53011 method bodies, 193 top-level NetPackage*).
-- **[S3] Sampled negative claims hold.** `docs/chunk-providers.md` says
+- **[S3] Sampled negative claims hold.** `docs/world/chunk-providers.md` says
   `ChunkBlockLayerLegacy` `Read`/`Write` and `ChunkBlockChannel.Convert` have no
   callers while its static index helpers stay live: Xref returns 0 call sites for
   all three, and RefScan shows the remaining 26 refs are exactly the static-helper
@@ -139,11 +139,11 @@ Severity counts: 2 critical, 3 major, 5 minor. 1 item unverifiable.
 
 - **[M1] The out-of-scope classification is name-triage presented next to
   verified work, and contains at least one dedicated-relevant type.**
-  `docs/out-of-scope-surface.md` "Utility / collections / infra (230)" is a flat
+  `docs/meta/out-of-scope-surface.md` "Utility / collections / infra (230)" is a flat
   name list. `ClientPowerData` sits in it, but
   `mono tools/bin/Xref.exe "$ASM" ClientPowerData .ctor` shows it is constructed
   in `TileEntityPowerSource::.ctor` and `TileEntityPowerSource::read`, i.e. the
-  power tile-entity serialization path that `docs/tile-entities-power.md` owns
+  power tile-entity serialization path that `docs/gameplay/tile-entities-power.md` owns
   (and which never names it). The file itself admits the name classifier already
   misplaced 48 types (later promoted via RefScan). There is no evidence the
   remaining ~200 utility-bucket types received the referrer check the header
@@ -151,8 +151,8 @@ Severity counts: 2 critical, 3 major, 5 minor. 1 item unverifiable.
   classification" cuts both ways: the initial placements were never
   referrer-verified either).
 - **[M2] Stale cross-doc status and count drift.**
-  - `docs/coverage.md` family row 6 still lists "residual tail:
-    EntityCreationData per-class" while `docs/protocol-packages.md` §8 marks the
+  - `docs/meta/coverage.md` family row 6 still lists "residual tail:
+    EntityCreationData per-class" while `docs/network/protocol-packages.md` §8 marks the
     same item "fully extracted (56 fields, per-class branches)". One of these
     survived from an earlier draft (commit ca1ba42 closed it).
   - `docs/inventories/netpackages.md` line 5 says "183 packages + **60** nested
@@ -171,10 +171,10 @@ Severity counts: 2 critical, 3 major, 5 minor. 1 item unverifiable.
 
 ## Minor
 
-- **[m1]** `docs/out-of-scope-surface.md` says "Total out-of-scope reached types
+- **[m1]** `docs/meta/out-of-scope-surface.md` says "Total out-of-scope reached types
   classified: **915**"; `coverage-report.md` says classified = **904**. The delta
   (11 types both narrated and classified) is explained in neither file.
-- **[m2]** `docs/items.md` §2 ItemStack row: "itemValue ... only if count > 0".
+- **[m2]** `docs/gameplay/items.md` §2 ItemStack row: "itemValue ... only if count > 0".
   IL gates on `count != 0` (`brfalse.s IL_0031` on the raw field) and the u16 is
   the clamped value while the gate uses the unclamped field; a negative count
   would write a wrapped u16 and still emit the value. Cosmetic, but "write is
@@ -215,7 +215,7 @@ reproduce.
 
 ## Unverifiable / blocked
 
-- **EntityVBlimp "dead in stock config"** (`docs/dedicated-leftovers.md` §Out of
+- **EntityVBlimp "dead in stock config"** (`docs/meta/dedicated-leftovers.md` §Out of
   scope): the code-side half is consistent (RefScan: no code references), but the
   claim rests on `entityclasses.xml` having the entity commented out. XML content
   ships inside game data archives I did not extract in this pass: **inferred

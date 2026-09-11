@@ -8,7 +8,7 @@
 **Evidence:** [`.drafts/stock-re-corpus-evidence.md`](.drafts/stock-re-corpus-evidence.md)  
 **Verification:** [`.drafts/stock-re-corpus-verification.md`](.drafts/stock-re-corpus-verification.md)  
 
-**What was audited as the “paper”:** `docs/` narratives + `docs/re-methodology.md` + `tools/data/stock_facts.json` + prior audit trail.  
+**What was audited as the “paper”:** `docs/` narratives + `docs/meta/re-methodology.md` + `tools/data/stock_facts.json` + prior audit trail.  
 **What was audited as the “codebase”:** `tools/src/*` dumpers and pin gates; consumers `../zdtd-server-server` and `../7dtd-loadgen`; live local dedicated `Assembly-CSharp.dll` (not redistributed).
 
 ---
@@ -26,7 +26,7 @@
 
 **One-line judgment:** the *extractable* research (JSON pin, Census, stock-check, canonical package layouts, consumer hardcodes) is reproducible on this host and matches V3.1.0; a few *narrative* surfaces still carry V3.0.1 layouts or census numbers, including one **wire-breaking** TE layout in `tile-entities-power.md` that contradicts both IL and the canonical package catalog.
 
-**Recommendation:** treat `tools/data/stock_facts.json` + `docs/protocol-packages.md` (and live DumpMethod) as authoritative for pins/wire.
+**Recommendation:** treat `tools/data/stock_facts.json` + `docs/network/protocol-packages.md` (and live DumpMethod) as authoritative for pins/wire.
 
 ### Fix pass (2026-08-05, same session)
 
@@ -120,8 +120,8 @@ Live `NetPackageTileEntity.write` IL=27 sequence:
 
 `read` IL=24 mirrors: ReadByte, ReadVector3i, ReadInt32 → teBlockId, ReadInt32 → length, StreamCopy.
 
-**Matches:** `docs/protocol-packages.md` §6.12, `docs/experimental-delta.md` §2, `stock_facts.tile_entity_package`.  
-**Contradicts:** `docs/tile-entities-power.md` layout (`payloadLen : u16`, no teBlockId, write IL=23) even though a parenthetical already points at §6.12.
+**Matches:** `docs/network/protocol-packages.md` §6.12, `docs/experimental-delta.md` §2, `stock_facts.tile_entity_package`.  
+**Contradicts:** `docs/gameplay/tile-entities-power.md` layout (`payloadLen : u16`, no teBlockId, write IL=23) even though a parenthetical already points at §6.12.
 
 ### Consumers
 
@@ -145,7 +145,7 @@ Live `NetPackageTileEntity.write` IL=27 sequence:
 
 ### Critical (wire): fixed
 
-**Was:** `docs/tile-entities-power.md` TE package layout V3.0.1-shaped (u16, no teBlockId).  
+**Was:** `docs/gameplay/tile-entities-power.md` TE package layout V3.0.1-shaped (u16, no teBlockId).  
 **Now:** matches §6.12 / IL=27 (teBlockId i32, payloadLen i32). stock-check greps enforce this.
 
 ### High (quantitative drift): fixed
@@ -209,7 +209,7 @@ Tool and narrative both state this is **documentation-mention overlap on a stati
 
 - `tools/data/stock_facts.json` machine pin for V 3.1.0 (b14)  
 - Live Census / StockFacts agreement on this host  
-- TE wire from `docs/protocol-packages.md` §6.12 + DumpMethod  
+- TE wire from `docs/network/protocol-packages.md` §6.12 + DumpMethod  
 - WorldInfo count-not-length; DynamicMesh SaveRegion-live  
 - zdtd / loadgen version and challenge pins  
 - Policy: no redistributed ASM/IL dumps  
@@ -250,17 +250,17 @@ Tool and narrative both state this is **documentation-mention overlap on a stati
 |---|---|
 | Research hub | [`docs/INDEX.md`](../../docs/INDEX.md) |
 | README | [`README.md`](../../README.md) |
-| RE method | [`docs/re-methodology.md`](../../docs/re-methodology.md) |
-| Coverage map | [`docs/coverage.md`](../../docs/coverage.md) |
+| RE method | [`docs/meta/re-methodology.md`](../../docs/meta/re-methodology.md) |
+| Coverage map | [`docs/meta/coverage.md`](../../docs/meta/coverage.md) |
 | Coverage report (generated) | [`docs/inventories/coverage-report.md`](../../docs/inventories/coverage-report.md) |
-| Protocol packages | [`docs/protocol-packages.md`](../../docs/protocol-packages.md) |
-| Protocol | [`docs/protocol.md`](../../docs/protocol.md) |
-| TE / power | [`docs/tile-entities-power.md`](../../docs/tile-entities-power.md) |
+| Protocol packages | [`docs/network/protocol-packages.md`](../../docs/network/protocol-packages.md) |
+| Protocol | [`docs/network/protocol.md`](../../docs/network/protocol.md) |
+| TE / power | [`docs/gameplay/tile-entities-power.md`](../../docs/gameplay/tile-entities-power.md) |
 | Experimental / V3.1 delta | [`docs/experimental-delta.md`](../../docs/experimental-delta.md) |
-| Dynamic mesh | [`docs/dynamic-mesh.md`](../../docs/dynamic-mesh.md) |
-| Residuals | [`docs/residuals.md`](../../docs/residuals.md) |
-| Closed gaps | [`docs/closed-gaps.md`](../../docs/closed-gaps.md) |
-| Save / region | [`docs/save-region.md`](../../docs/save-region.md) |
+| Dynamic mesh | [`docs/world/dynamic-mesh.md`](../../docs/world/dynamic-mesh.md) |
+| Residuals | [`docs/meta/residuals.md`](../../docs/meta/residuals.md) |
+| Closed gaps | [`docs/entities/closed-gaps.md`](../../docs/entities/closed-gaps.md) |
+| Save / region | [`docs/world/save-region.md`](../../docs/world/save-region.md) |
 | Repo rules | [`AGENTS.md`](../../AGENTS.md) |
 
 ### Code / tooling / consumers

@@ -16,11 +16,12 @@ import sys
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
-DOC = os.path.join(REPO, "docs", "console-commands.md")
 XREF = os.path.join(TOOLS, "bin", "CmdMap.exe")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
+
+DOC = str(_common.doc("console-commands.md"))
 
 # The 10 dedicated-gated leaves, as documented (console-commands.md 6).
 GATED = [

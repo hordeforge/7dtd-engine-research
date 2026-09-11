@@ -72,7 +72,7 @@
 
 | Project | Residual hub |
 |---|---|
-| Research non-IL | `7dtd-engine-research/docs/residuals.md` §1 |
+| Research non-IL | `7dtd-engine-research/docs/meta/residuals.md` §1 |
 | Research product pointer | `residuals.md` §5 |
 | zdtd open + playtest 8 | `zdtd/TODO.md` Open now + Residual playtest fails |
 | zdtd gap inventory | `zdtd-server/docs/MISSING_FEATURES.md` |
@@ -107,8 +107,8 @@
 
 | Artifact | Path |
 |---|---|
-| Coverage | `7dtd-engine-research/docs/coverage.md` |
-| Residuals | `7dtd-engine-research/docs/residuals.md` |
+| Coverage | `7dtd-engine-research/docs/meta/coverage.md` |
+| Residuals | `7dtd-engine-research/docs/meta/residuals.md` |
 | Experimental delta | `7dtd-engine-research/docs/experimental-delta.md` |
 | V3.1 APM baseline | `7dtd-server-optimizer/docs/V310_APM_BASELINE.md` |
 | RESULTS | `7dtd-server-optimizer/docs/RESULTS.md` |

@@ -1,7 +1,7 @@
 # Gap-closing RE notes (V3.2.0)
 
 **Kind:** auto dump notes (not primary narrative).  
-**Prefer:** [`closed-gaps.md`](../closed-gaps.md).  
+**Prefer:** [`closed-gaps.md`](../entities/closed-gaps.md).  
 **Raw IL:** [`../il/gaps-v3.2.0/`](../../il/gaps-v3.2.0/).
 **Hub:** [`INDEX.md`](../INDEX.md).  
 
@@ -1005,7 +1005,7 @@ IL_0012: ret
   - 1x `ReadOnlyCollection`1::get_Item`
   - 1x `ClientInfo::UpdatePing`
   - 1x `ReadOnlyCollection`1::get_Count`
-- dump `ConnectionManager::Update` IL=228
+- dump `ConnectionManager::Update` IL=231
   - 4x `ConnectionManager::ProcessPackages`
   - 3x `INetConnection::IsDisconnected`
   - 3x `GameManager::get_World`

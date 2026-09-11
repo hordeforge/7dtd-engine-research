@@ -150,7 +150,7 @@ Scratch dumps live under `/tmp/nNNN_*` (not committed). Recent batches: `n189` s
 
 ### Batch A: document `/tmp/n191_*` (dumped, not all committed)
 
-- [x] `DropContentOfLootContainerServer` (IL=99) → `docs/loot-economy.md`
+- [x] `DropContentOfLootContainerServer` (IL=99) → `docs/gameplay/loot-economy.md`
   - server-only; lock reject; DroppedEntityClass override; LootContainerOpened if !bTouched; clone items into EntityLootContainer; SetEmpty
 - [x] `CheckDestroyTileEntity` (IL=37) → loot-economy / TE
   - ITileEntityLootable + ShouldDestroyOnClose → drop + DamageBlock MaxDamage
@@ -210,18 +210,18 @@ Scratch dumps live under `/tmp/nNNN_*` (not committed). Recent batches: `n189` s
 
 | Leaf family | Doc |
 |---|---|
-| Spawn position / bedroll / CanMobsSpawn | `docs/spawning.md` |
-| Join / save / disconnect / GM lifecycle | `docs/server-lifecycle.md` |
-| Entity AI / sleeper / ragdoll / attack timeouts | `docs/entity-ai.md` |
-| Damage / dismember / crawler | `docs/combat-damage.md` |
-| Loot drop containers / TE destroy | `docs/loot-economy.md` |
-| Interest / SendToPlayers / inventory packages | `docs/network.md` |
-| Package bodies | `docs/protocol-packages.md` |
-| Power / TE | `docs/tile-entities-power.md` |
-| Save files | `docs/save-region.md` |
-| Block damage / upgrade / downgrade / placeholder map | `docs/blocks.md` |
-| Tier-C progress rows | `docs/completion-bar.md` |
-| Honest permanent non-IL | `docs/residuals.md` |
+| Spawn position / bedroll / CanMobsSpawn | `docs/gameplay/spawning.md` |
+| Join / save / disconnect / GM lifecycle | `docs/admin/server-lifecycle.md` |
+| Entity AI / sleeper / ragdoll / attack timeouts | `docs/entities/entity-ai.md` |
+| Damage / dismember / crawler | `docs/gameplay/combat-damage.md` |
+| Loot drop containers / TE destroy | `docs/gameplay/loot-economy.md` |
+| Interest / SendToPlayers / inventory packages | `docs/network/network.md` |
+| Package bodies | `docs/network/protocol-packages.md` |
+| Power / TE | `docs/gameplay/tile-entities-power.md` |
+| Save files | `docs/world/save-region.md` |
+| Block damage / upgrade / downgrade / placeholder map | `docs/world/blocks.md` |
+| Tier-C progress rows | `docs/meta/completion-bar.md` |
+| Honest permanent non-IL | `docs/meta/residuals.md` |
 
 ## Commit message pattern
 

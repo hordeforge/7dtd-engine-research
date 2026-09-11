@@ -28,7 +28,7 @@ Scratchpad: the uncommitted session scratch dir.
 
 ### [F3] MINOR: cross-consistency: quests-challenges.md says "29 `ChallengeObjective*`", actual prefix count is 28
 
-- **Doc claim** (docs/quests-challenges.md lines 52, 315): "+ 29 `ChallengeObjective*`" / "The 29 `ChallengeObjective*` verbs".
+- **Doc claim** (docs/content/quests-challenges.md lines 52, 315): "+ 29 `ChallengeObjective*`" / "The 29 `ChallengeObjective*` verbs".
 - **Ground truth:** `closure.py typebases.tsv Challenges.BaseChallengeObjective` -> 29 subtypes, of which **28** are named `ChallengeObjective*`; the 29th is `ChallengeBaseTrackedItemObjective` (does not match the glob). The catalog and INDEX.md line 266 both correctly say 28 leaves.
 - **Fix:** in quests-challenges.md, change to "28 `ChallengeObjective*` leaves + `ChallengeBaseTrackedItemObjective`".
 
@@ -38,7 +38,7 @@ Scratchpad: the uncommitted session scratch dir.
 - **Ground truth:** `grep PrefabGameObject typebases.tsv` -> `PrefabLODManager/PrefabGameObject` AND `PrefabPreviewManager/PrefabGameObject`. `LeafInfo` is simple-name keyed ("first wins"), so the fingerprint verified only one of them; the stated role matches the LOD one (`FindCallers` shows `PrefabLODManager::GetInstance`/`UpdatePrefabsAround` and `ChunkPreviewManager::SetPrefab` as users). Client-only marking still holds for both.
 - **Fix:** qualify the row as `PrefabLODManager/PrefabGameObject`. (Same nesting nit applies to `BodyParts` = `BodyAnimator/BodyParts`, but that name is unique.)
 
-Also noted, not graded: docs/game-events.md line 305 "nine abstract bases", none of the 9 (`BaseAction` + 8) carries the IL abstract flag (`closure.py` reports 0 abstract in the family); they are bases by position only.
+Also noted, not graded: docs/content/game-events.md line 305 "nine abstract bases", none of the 9 (`BaseAction` + 8) carries the IL abstract flag (`closure.py` reports 0 abstract in the family); they are bases by position only.
 
 ## Spot-verified CONFIRMED
 

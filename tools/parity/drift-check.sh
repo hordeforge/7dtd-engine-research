@@ -136,5 +136,5 @@ fi
 echo
 if [[ "$drift" -eq 0 ]]; then echo "drift: NONE (build matches baseline)"; else
   echo "drift: DETECTED. Update baseline after review:  cp -r $cur/. $BASELINE_DIR/"
-  echo "Then re-verify affected narratives (see docs/re-methodology.md §5b for the workflow)."; fi
+  echo "Then re-verify affected narratives (see docs/meta/re-methodology.md §5b for the workflow)."; fi
 exit $drift

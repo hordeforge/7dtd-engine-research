@@ -12,9 +12,9 @@ There is no external academic paper. The publishable research surface is:
 | Layer | Path | Role |
 |---|---|---|
 | Hub / claims index | `docs/INDEX.md`, `README.md` | Scope, version pin, reading paths |
-| Method | `docs/re-methodology.md` | How IL is dumped and turned into wire layouts |
-| Coverage ledger | `docs/coverage.md`, `docs/full-surface.md` | What is mapped; residual honesty |
-| Load-bearing narratives | `docs/protocol*.md`, `docs/loop.md`, `docs/save-region.md`, `docs/entity-ai.md`, `docs/residuals.md` | Wire/sim/save claims |
+| Method | `docs/meta/re-methodology.md` | How IL is dumped and turned into wire layouts |
+| Coverage ledger | `docs/meta/coverage.md`, `docs/meta/full-surface.md` | What is mapped; residual honesty |
+| Load-bearing narratives | `docs/protocol*.md`, `docs/loop/loop.md`, `docs/world/save-region.md`, `docs/entities/entity-ai.md`, `docs/meta/residuals.md` | Wire/sim/save claims |
 | Pin artifact | `tools/data/stock_facts.json` | Machine-extractable constants consumers must match |
 | Prior audits | `workspace/outputs/*audit*`, `7dtd-re-corpus-review.md` | Known critical findings and metric critique |
 

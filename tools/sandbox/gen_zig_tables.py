@@ -3,7 +3,7 @@
 
 The value sets and per-option records come from the stock DLL
 (SandboxOptionManager.SetupOptions IL + <PrivateImplementationDetails> FieldRVA
-arrays); see docs/sandbox-options.md and extract_sandbox_tables.py in this
+arrays); see docs/admin/sandbox-options.md and extract_sandbox_tables.py in this
 repo. zdtd embeds them at comptime so the server can decode an operator's
 sandbox code without re-extraction; the JSON here is the source of truth.
 
@@ -49,7 +49,7 @@ def emit(json_path: str, out_path: str) -> None:
     out.append("//! `../7dtd-engine-research/tools/sandbox/sandbox_tables.json` by")
     out.append("//! `../7dtd-engine-research/tools/sandbox/gen_zig_tables.py` (do not hand-edit).")
     out.append("//! Source of truth: `SandboxOptionManager.SetupOptions` IL of the stock")
-    out.append("//! V3.1.0 b14 dedicated server (docs/sandbox-options.md §2.1/§3 in the")
+    out.append("//! V3.1.0 b14 dedicated server (docs/admin/sandbox-options.md §2.1/§3 in the")
     out.append("//! 7dtd-engine-research repo). Decode contract: code := 'A' + 3-letter groups")
     out.append("//! (2-letter base-26 option id + 1-letter value-set index).")
     out.append("")

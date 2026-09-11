@@ -39,5 +39,5 @@ with the client's hex-log window widened (temp patch, reverted after).
 [join#1] PASS joined entity=171
 ```
 
-Cross-refs: docs/protocol.md §3 (golden hex) + §8 (live-observed pre-auth order),
+Cross-refs: docs/network/protocol.md §3 (golden hex) + §8 (live-observed pre-auth order),
 workspace/CHANGELOG.md batch 8.

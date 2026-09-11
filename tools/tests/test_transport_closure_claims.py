@@ -3,8 +3,8 @@
 
 2026-08-10 closures that must not be re-broken by a future edit:
   - LiteNetLib.dll is a MANAGED .NET assembly, not a native plugin (the
-    join-churn flake root cause is a managed race, docs/network.md 4.0).
-  - Unity peer script order is observed, not unknown (docs/loop.md 1.1).
+    join-churn flake root cause is a managed race, docs/network/network.md 4.0).
+  - Unity peer script order is observed, not unknown (docs/loop/loop.md 1.1).
 Any doc that still calls the transport "native LiteNetLib" / "LiteNet native"
 or calls peer order "unknown" is stale relative to the residual table.
 
@@ -89,7 +89,7 @@ def main() -> None:
                     )
     if bad:
         raise AssertionError(
-            "Stale stock-transport claims found (see docs/network.md 4.0, docs/loop.md 1.1):\n"
+            "Stale stock-transport claims found (see docs/network/network.md 4.0, docs/loop/loop.md 1.1):\n"
             + "\n".join(bad)
         )
     print("OK: no stale native-LiteNetLib / unknown-peer-order claims in docs")

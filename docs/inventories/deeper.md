@@ -1,7 +1,7 @@
 # DumpDeeper auto notes
 
 **Kind:** auto dump notes (not primary narrative).
-**Prefer:** [`entity-ai.md`](../entity-ai.md).
+**Prefer:** [`entity-ai.md`](../entities/entity-ai.md).
 **Raw IL:** [`../il/deeper-v3.2.0/`](../../il/deeper-v3.2.0/) (`DEEPER.md` source).
 **Hub:** [`INDEX.md`](../INDEX.md).  
 
@@ -9,10 +9,11 @@
 
 ## Deeper RE notes (V3.2.0 dedicated)
 
-Generated UTC: 2026-08-08 14:49:21Z
+Generated UTC: 2026-08-28 03:34:15Z
 Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll`
 
 Documentation only. No game IL redistribution as product.
+
 
 ## 1. All EAI* / UAI* task methods by IL size
 
@@ -29,11 +30,11 @@ Documentation only. No game IL redistribution as product.
 - **172** `EAIApproachAndAttackTarget::GetMoveToLocation(Single)`
 - **171** `EAIDroneItemTask::DoMoveIntoAtkPos(EntityAlive,Single,Vector3,Single,Boolean,Single)`
 - **170** `EAISetAsTargetIfHurt::CanExecute()`
-- **166** `EAIRunawayFromEntity::FindEnemy()`
 - **163** `EAIDroneItemModStunWeapon::Continue()`
 - **151** `EAIDroneItemModHealWeapon::Continue()`
 - **137** `EAITaskList::OnUpdateTasks()`
 - **136** `EAILeap::CanExecute()`
+- **136** `EAIRunawayFromEntity::FindEnemy()`
 - **134** `EAISetNearestEntityAsTarget::Continue()`
 - **132** `EAIApproachAndAttackTarget::ToString()`
 - **124** `UAIPackage::DecideAction(Context,UAIAction&,Object&)`
@@ -159,7 +160,7 @@ Documentation only. No game IL redistribution as product.
 - dumped `AStarPathFinderThread::GetPath(Int32)` IL=35
 - dumped `EntityAlive::FindPath(Vector3,Single,Boolean,EAIBase)` IL=49
 - dumped `EntityAlive::CheckDespawn()` IL=198
-- dumped `EntityAlive::updateCurrentBlockPosAndValue()` IL=318
+- dumped `EntityAlive::updateCurrentBlockPosAndValue()` IL=341
 - dumped `EntityAlive::CanSee(Vector3)` IL=62
 - dumped `EntityAlive::CanSeeStealth(Single,Single)` IL=21
 - dumped `EntityAlive::CanSee(EntityAlive)` IL=5
@@ -327,7 +328,6 @@ _(6 caller types)_
 - `EAIBreakBlock::AttackBlock` → `World::GetEntitiesInBounds`
 - `EAIDodge::CanExecute` → `World::GetEntitiesInBounds`
 - `EAIManager::FallHitGround` → `World::GetEntitiesInBounds`
-- `EAIRunawayFromEntity::FindEnemy` → `World::GetEntitiesInBounds`
 - `EAISetNearestEntityAsTarget::FindTarget` → `World::GetEntitiesInBounds`
 - `EntityFallingBlock::OnUpdateEntity` → `World::GetEntitiesInBounds`
 - `EntityFallingBlocks::OnUpdateEntity` → `World::GetEntitiesInBounds`
@@ -360,7 +360,7 @@ _(6 caller types)_
 - `ThreatLevelUtility::GetThreatLevelOn` → `World::GetEntitiesInBounds`
 - `ThreatLevelTracker::TickTrackThreatLevel` → `World::GetEntitiesInBounds`
 
-_(45 caller types)_
+_(44 caller types)_
 
 ### `FindPath`
 

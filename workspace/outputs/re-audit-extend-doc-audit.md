@@ -58,25 +58,25 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 
 ## Per-file detail
 
-### docs/coverage.md
+### docs/meta/coverage.md
 - **F1 (High).** Line 58: `| NetPackage* types | ~196 |` in the "Census (live dedi)" table. Every other census row in this table matches the oracle exactly (4401, 43901, 631, 884, 20); this is the lone wrong value, and it sits in the file positioned as the authoritative census. Should be 194 (or "194 top-level / 199 incl. nested").
 - **F18 (Low).** Two `## Changelog` headings (lines 83 and 94) with the Related-docs table between them.
 - **F14 (Medium).** Line 69: "Open the cited `research/il/...` path", the published tree is `il/` (INDEX.md:12).
 - **F24 (Low).** Line 37: family 8 "Origin / claims" narrative is `realearth-surfaces.md` (private, unpublished); line 92 Related-docs row `` `INDEX.md` | Product RealEarth `` is ambiguous with the hub link two rows above.
 
-### docs/residuals.md
+### docs/meta/residuals.md
 - **F1 (High).** Internal contradiction: line 33 "Full NetPackage body catalog (**~194**)" vs line 53 "NetPackage type census (**~196**)". Same file, two values.
 - **F10 (Medium).** Lines 7-8 policy: "every residual here is **non-managed**, **native**, **Unity-settings**, **content-dependent**, or **third-party black box**." Line 33 (NetPackage bodies: "Names + maxIL closed; most write/read bodies not hand-annotated") and line 31 (sector codec: "Managed methods exist and are dumped") are managed-IL annotation backlogs, not non-IL residuals. Either the policy line or the rows need adjusting.
 - Positive: §3 (lines 62-71) is a model correction note for the Origin no-op.
 
-### docs/network.md
+### docs/network/network.md
 - **F1 (High).** Line 73: "Live census: **~196** types named `NetPackage*`". Conflicts with 194.
 - **F14 (Medium).** Line 90: "Full name list: `research/il/dedi-complete-v3.0.1/...`".
 - **F11 (Medium).** Line 137: "**Where the ~15 MB/s at 128p actually comes from**", the 15 MB/s @128p figure appears nowhere else with a session/artifact pointer (measured-scaling's alloc data is 64p + ~300z).
 - **F18 (Low).** Two `## Changelog` blocks (158, 170).
 - Positive: §4b CORRECTION (lines 126-135) is explicit and dated; zig-clone.md §4.1 agrees with it.
 
-### docs/engine-limitations.md
+### docs/meta/engine-limitations.md
 - **F1 (High).** Line 78: "**~196 NetPackage\* types** | dedi-complete census". The dedi-complete census says 194 (netpackages.md:8).
 - Scaling rows (lines 59-66) correctly point to measured-scaling.md; no provenance issue.
 
@@ -120,37 +120,37 @@ Other cross-checked claims that held up: loop.md:59 "242 MB methods" = 242 rows 
 - **F15 (Medium).** Line 6: "128 GB RAM" (vs 123 GB, runtime-tuning).
 - **F7 (Medium).** Line 15-16: "one forced collect of a **~7 GB** heap freezes the server **~479 ms**" (third variant of the heap size).
 
-### docs/protocol.md
+### docs/network/protocol.md
 - **F9 (Medium).** Line 45: `protocol-frames.md#1-challenge-pre-auth-raw-no-envelope`, actual heading is "1. Challenge (raw, before game envelope)" (protocol-frames.md:32); slug does not match. Line 58: `#2-channel-envelope-every-game-message-after-challenge`, actual: "2. Game channel envelope + package stream" (:61). Line 206: `#8-entity-packages-golden-fixed-bodies`, actual §8 is "EntityRelPosAndRot body (!bUseQ) · 20 bytes" (:355); there is no combined "entity packages" section, and §6.1 (PosAndRot, §7 in frames) links to the RelPos section. All three anchors predate the 2026-07-20 frames rewrite.
 - **F16 (Low).** Line 276: `damageType:u8 // 3 Bashing, 16 Suffocation, 26 Suicide` vs protocol-frames.md:520 "3 Bash, **16 Drown**, 26 Suicide". One enum, two names for value 16.
 - **F14 (Medium).** Lines 9, 90(via network), 142: `research/il/dedi-complete-v3.0.1/`.
 - Line 125 "DLL census: **~194**", the tilde is unnecessary (count is exact) but not wrong; note the family table (lines 129-138) sums to exactly 194.
 
-### docs/protocol-frames.md
+### docs/network/protocol-frames.md
 - Internally consistent (envelope invariant, §13 full-frame math, §4 hex decode: 0x12BC=4796, 0x12B8=4792, 0xBD=189).
 - F16 counterpart (line 520, "Drown").
 
-### docs/loop.md
+### docs/loop/loop.md
 - **F19 (Low).** Lines 428-435: "## Appendix: key Update caller edges" is followed by a bare ASCII tree (`GameManager.LateUpdate ├─ ...`) that is not opened as a code block but is closed with a stray ``` at line 433. Renders broken.
 - **F18 (Low).** Two `## Changelog` blocks (417, 448).
 - **F14 (Medium).** Line 379 "not under `research/il/`"; changelog line 421 references `research/docs/`.
 - All oracle numbers correct (631, 884, 20 Hz, 189-IL OnUpdateTick, Origin no-op).
 
-### docs/loop-gmupdate.md
+### docs/loop/loop-gmupdate.md
 - **F26 (Low).** Lines 283-285: "Else if dist² < 225 (~15 m): scale **0.3 or 0.1** (branch picks 0.1 vs 0.3)", entity-ai.md:155-159 and loop.md:218-222 give the clean bands (<225 → 0.3; else 0.1). The hedged phrasing here reads as a different decode.
 - **F17 (Low).** Line 297: "**ProcessPackages** (both channels)".
 - **F14 (Medium).** Line 366: example output path `research/il/gmUpdate-v3.0.1`.
 
-### docs/entity-ai.md
+### docs/entities/entity-ai.md
 - **F20 (Low).** Merge artifacts: §14 "See also" (line 369) plus a second "## See also" (line 392); "## Changelog" (line 396) plus "## Changelog (merged source 2)" (line 661); a second H1 "# Deeper synthesis" mid-file (line 402); line 654: "`SYNTHESIS.md`, this file", stale name from the pre-merge dump doc.
 - **F14 (Medium).** Line 385: regenerate output `../../research/il/deep-VERSION`.
 - Addendum measurements (lines 664-695) all cite RESULTS §3m-3q, good provenance; README's 54%/27% claim traces here.
 
-### docs/terrain-height.md
+### docs/world/terrain-height.md
 - **F8 (Medium).** Lines 15-17: `../il/terrain-v3.0.1/` = "Dedicated live | **Expanded** on this machine (RealEarth YDim)". coverage.md:10: "**Live pin (2026-07-18 dedi):** stock ... Expanded dumps in `terrain-v3.0.1` are historical." The table's "live/this machine" labels predate the revert to stock; the doc's own line 55 ("Always probe or dump") and changelog line 176 ("note live dedi stock again") acknowledge the issue without fixing the table.
 - **F14 (Medium).** Lines 27-29: regenerate paths `../../research/il/terrain-*`.
 
-### docs/closed-gaps.md, docs/world-chunks.md, docs/save-region.md, docs/light-mesh-water.md, docs/managers.md, docs/aidirector.md
+### docs/entities/closed-gaps.md, docs/world/world-chunks.md, docs/world/save-region.md, docs/world/light-mesh-water.md, docs/loop/managers.md, docs/entities/aidirector.md
 - Content numerically consistent with the rest of the corpus (20 Hz decode, AIDirector component order, 64-layer loop, `.ttc`, sector offsets, ModEvents list, manager ILs all cross-check against inventories).
 - **F18 (Low).** closed-gaps.md (183+194), world-chunks.md (143+154), light-mesh-water.md (105+115), managers.md (115+125): duplicate `## Changelog` blocks.
 

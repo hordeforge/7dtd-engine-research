@@ -1,4 +1,4 @@
-# Audit: docs/save-persistence.md + docs/chunk-providers.md vs Assembly-CSharp IL
+# Audit: docs/world/save-persistence.md + docs/world/chunk-providers.md vs Assembly-CSharp IL
 
 **Verdict: 4 issues (1 CRITICAL, 2 MAJOR, 1 MINOR).** Both docs are otherwise
 highly accurate; every dead-code, provider-selection, and caller claim I checked

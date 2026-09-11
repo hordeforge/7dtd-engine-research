@@ -1,0 +1,479 @@
+# Weather, sky, and environment (dedicated V3.2.0)
+
+**Owns:** the server-authoritative weather simulation, `WeatherManager` (the
+per-biome weather state machine, storm scheduling, temperature/precipitation
+model) and its net sync (`WeatherPackage` / `NetPackageWeather`), plus the
+server-relevant slice of `SkyManager` (time-of-day, dawn/dusk, blood-moon
+visibility).
+**Not:** the felt-temperature and survival buff math on the local player
+(client, largely stubbed on the dedicated build); sky/fog/cloud/lightning
+rendering (`SkyManager.Update` and friends, client visual); the biome/weather
+XML content (`weathersurvival.xml`, `biomes.xml`, data).
+**Evidence:** `WeatherManager` (+ nested `BiomeWeather`, `WeatherPackage`),
+`SkyManager`, `NetPackageWeather`, `PlayerEntityStats` IL (dump locally with
+`tools/src/DumpType` / `DumpMethod` / `DumpNetPackages`, git-ignored).
+**Hub:** [`INDEX.md`](../INDEX.md). **Method:** [`re-methodology.md`](../meta/re-methodology.md).
+
+Weather is driven off the world clock, so it belongs to the game-state tick that
+[server-lifecycle.md](../admin/server-lifecycle.md) and [loop.md](../loop/loop.md) describe: the
+server advances biome weather every frame and pushes packages to clients on the
+same throttle as the world-time broadcast.
+
+---
+
+## 1. Model
+
+`WeatherManager` is a `MonoBehaviour` singleton (`Instance`) created from the
+`Prefabs/WeatherManager` asset during `World.createWorld` and initialized via
+`Init(World)`. The simulation state is a list of per-biome machines with a
+parallel array of wire packages.
+
+| Type | Role |
+|---|---|
+| `WeatherManager` | Singleton driver: `List<BiomeWeather> biomeWeather`, parallel `WeatherPackage[] weatherPackages`, static `worldTime`, static admin overrides, grace period, custom-weather timer |
+| `WeatherManager.BiomeWeather` | Per-biome state machine: `stormState`/`stormWorldTime`/`stormDuration`, `nextRandWorldTime`, a 5-slot `Param[]` + `parameterFinals[5]`, plus `rainParam`/`snowFallParam` |
+| `WeatherManager.Param` | One animated scalar: `value` eased toward `target` at a per-step rate (`FrameUpdate`) |
+| `WeatherPackage` | Wire snapshot of one biome: `biomeId`, `groupIndex`, `remainingSeconds`, `float[5] param` |
+| `BiomeDefinition.WeatherGroup` | XML weather definition: `name`, `stormLevel`, `prob`, `duration`, `delay`, `buffName`, `spectrum`, probability table |
+| `SkyManager` | Time-of-day + celestial state; server uses only the clock/query surface, the rest is rendering |
+
+`InitBiomeWeather` builds one `BiomeWeather` per biome that declares
+
+**Weather-sim constants (IL):** `BaseTemperature` = **70**, `cForceTempDefault` =
+**-100** (the no-weather fallback temp), `cGracePeriodWorldTime` = **22000**
+(grace until this world-time), `cLightningDelayMin` = **30** / `cLightningDelayMax`
+= **60** s, `cStormWarningDuration` = **60** s, `cWeatherTransitionSeconds` =
+**10** s (param easing), `cVersion` = 4 (weather state version).`weatherGroups`, and one `WeatherPackage` per `BiomeWeather` (same index).
+
+### 1.1 The 5-slot parameter vector
+
+Each biome carries a fixed 5-element parameter vector (a `BiomeDefinition`
+`ProbType`). `BiomeWeather.FrameUpdate` fixes the slot meanings:
+
+| Slot | Meaning | Read by |
+|---:|---|---|
+| 0 | temperature (derived) | `GetTemperature` accessors, sent as `param[0]` |
+| 1 | precipitation intensity | drives `rainParam` / `snowFallParam` |
+| 2 | cloud thickness | `GetCloudThickness`, `CloudThickness()` |
+| 3 | wind | `Wind()` |
+| 4 | fog | `FogPercent()` |
+
+`rainParam` and `snowFallParam` are not independent inputs: their `target` is
+computed each frame from slot 1 and the temperature, split at freezing
+(`32` degrees F): above freezing the precipitation becomes rain, at or below it
+becomes snow. Visible precipitation is `max(0, (precip*0.01 - 0.3) / 0.7)`, so a
+biome only shows weather once precipitation clears roughly 30 percent.
+
+`CalcGlobalTemperature(precip, cloud, ref temp)` lowers the biome base
+temperature by precipitation (`temp += clamp01(precip*0.01) * -5`) and by the
+cloud-occluded loss of sun (`sun = SkyManager.GetSunPercent()`, reduced by cloud
+cover, then `temp += (1 - sun) * -7.5`). So overcast, rainy, night-side biomes
+run coldest.
+
+---
+
+## 2. Server weather simulation
+
+The whole simulation is server-only. `WorldEnvironment.Update` calls
+`WeatherManager.FrameUpdate`, which runs the authoritative step only when
+`IsDedicatedServer` or `ConnectionManager.IsServer`, then eases every biome's
+params toward their targets regardless (so a client still animates its last
+received snapshot).
+
+```mermaid
+flowchart TB
+  WE[WorldEnvironment.Update] --> FU[WeatherManager.FrameUpdate]
+  FU --> SRV{server?}
+  SRV -->|yes| GEN[GenerateWeatherServerFrameUpdate]
+  SRV -->|no| EASE
+  GEN --> GP{worldTime &lt; 22000?<br/>grace period}
+  GP -->|yes| RESET[GeneralReset, no weather] --> EASE
+  GP -->|no| CW{CustomWeatherTime &gt; 0?}
+  CW -->|yes| CDN[count down, revert to 'default' at 0]
+  CW -->|no| GLOB{CalcGlobalWeatherType}
+  GLOB -->|bloodMoon visible| ALL[SetAllWeather 'bloodMoon']
+  GLOB -->|null| STU[per-biome BiomeWeather.ServerTimeUpdate<br/>every ~5 worldTime units, scaled by World.StormFrequency]
+  STU --> EASE[each BiomeWeather.FrameUpdate: Param.value -&gt; target]
+```
+
+- **Grace period.** For `worldTime < 22000` (`cGracePeriodWorldTime`),
+  `inWeatherGracePeriod` is true and no weather runs; this same flag also
+  suppresses temperature survival (§4). It starts true (`.cctor`).
+- **Time rewind.** `SetWorldTime(worldTime)` (fed from `World.worldTime`)
+  detects a backward jump and calls `AdjustTimeRewind`, which zeroes every
+  biome's `stormWorldTime` / `stormDuration` / `nextRandWorldTime` so storms do
+  not fire against stale schedules.
+- **Custom weather.** `ForceWeather(name, duration)` sets `CustomWeatherName` /
+  `CustomWeatherTime`; the timer counts down by `Time.deltaTime` and reverts to
+  `SetAllWeather("default")` at zero. The `weather` console command
+  (`ConsoleCmdWeather`) instead sets the static overrides
+  `forceClouds` / `forceRain` / `forceSnowfall` / `forceTemperature`
+  (`-100` = off) / `forceWind` / `SetSimRandom`, which the accessors and
+  `BiomeWeather.FrameUpdate` honor.
+
+**Live-verified 2026-08-12 (stock V3.1.0 dedicated, `weather` telnet dump):**
+- `WeatherManager #5` (the `ToString` = `"#{biomeWeather.Count}"`, IL=32) then
+  5 Navezgane biomes each print the documented 5-slot vector
+  (`Temperature` / `Precipitation` / `CloudThickness` / `Wind` / `Fog`) plus
+  `rain` / `snow`, `storm WT / dur / state` - all 0 in the day-1 grace period,
+  weather group `default`, `nxtT0`. Biome temps spread correctly (desert
+  95.3 F, snow 28.4 F) with precipitation 0 so rain and snow are both 0.
+- Mutator: `weather clouds 100` logs `Cloud thickness set to 1.` and the dump
+  then reads `Clouds 1` (`forceClouds` = value/100 -> `GetCloudThickness`).
+  `weather clouds 0` resets. `debugweather` prints nothing on dedicated.
+  The grace-period claim (no weather before `cGracePeriodWorldTime` 22000)
+  matches: no storms fire while `worldTime` is day-1.
+- **Immediate storm.** `SetStorm(biomeName, duration)` (IL=32) walks every
+  `BiomeWeather` and, for the named biome (or **all** when `biomeName` is
+  null), stamps `stormWorldTime = worldTime` and `stormDuration = duration` -
+  the admin `stormsurvival`-style instant storm, reusing the same
+  stormWorldTime/stormDuration fields the scheduler drives.
+
+**Exposure query (`EntityHuman.IsStormEffected`, IL=22):** true only when
+the entity's `GetSpawnerSource()` is `Biome` (1), `biomeStandingOn` is set,
+the biome type is not 3 (`BiomeType.PineForest` in the `BiomeDefinition/
+BiomeType` order), and
+`WeatherManager.IsStorming(biomeStandingOn.m_BiomeType)` - the per-biome
+storm-exposure check the survival layers use to apply storm
+buffs/penalties to NPC-style humans standing in a storming biome.
+
+### 2.1 Storm state machine (per biome)
+
+`BiomeWeather.ServerTimeUpdate(worldTime, freq)` is the state machine. Storms are
+scheduled with `GameRandom` off the biome's XML `stormbuild` / `storm` durations,
+scaled to wall-clock by the day-length game pref. `stormState` is
+`0` clear, `1` building, `2` storming. When `World.StormFrequency` is `0`,
+`stormWorldTime` is pinned to `int.MaxValue` and storms never start.
+
+```mermaid
+stateDiagram-v2
+  [*] --> Clear: stormState = 0
+  Clear --> Scheduled: pick next stormWorldTime + stormDuration (GameRandom)
+  Scheduled --> Building: worldTime reaches stormWorldTime -> SetWeather('stormbuild'), stormState = 1
+  Building --> Building: remainingSeconds countdown (sent to clients)
+  Building --> Storming: build window elapsed -> SetWeather('storm'), stormState = 2
+  Storming --> Clear: worldTime past stormWorldTime + stormDuration -> stormState = 0, reschedule
+  Clear --> Clear: StormFrequency == 0 -> stormWorldTime = int.MaxValue (disabled)
+```
+
+Independent of storms, each biome also rerolls ordinary weather: when
+`worldTime >= nextRandWorldTime`, `SetWeather(worldTime, rand)` runs
+`BiomeDefinition.WeatherRandomize(rand)` (probability-weighted group pick), sets
+the 5 param targets from the chosen `WeatherGroup`, and schedules
+`nextRandWorldTime += currentWeatherGroup.duration`.
+
+### 1.2 The `BiomeDefinition` weather surface
+
+`AddWeatherGroup(name, prob, duration, delay, buffName)` (IL=57) builds a
+`WeatherGroup`: `stormLevel` is 2 for a `storm*` name that does **not** contain
+`build`, 1 for `storm*build*`, else 0; `duration` and both `delay` components
+convert seconds to milliseconds (`* 1000` then `conv.i4`, stored as
+`Int32`/`Vector2i`); `buffName` is kept only when non-empty. `SetupWeather()`
+(IL=53) normalizes the groups in two passes: accumulate all `prob`s, then divide
+each by `total + 1e-6` (so the weights sum to ~1) and call
+`Probabilities.Normalize()` per group.
+
+`WeatherRandomize(float rand)` (IL=32) walks the group list accumulating `prob`
+and calls `SelectWeatherGroup(i)` at the first group where `rand < acc`; the
+`string` overload (IL=14) is `FindWeatherGroupIndex(name) >= 0` →
+`SelectWeatherGroup(idx)`. `SelectWeatherGroup(index)` (IL=40) copies
+`name`/`spectrum` into `weatherName`/`weatherSpectrum`, stores
+`currentWeatherGroupIndex`/`currentWeatherGroup`, then fills all 5 slots
+`weatherValues[slot] = group.probabilities.GetRandomValue((ProbType)slot)`.
+`FindWeatherGroup` (IL=26) / `FindWeatherGroupIndex` (IL=24) are linear name
+matches returning the group / index, null / -1 on miss; `WeatherGetValue`
+(IL=5) and `WeatherSetValue` (IL=6) index `weatherValues[type]` directly;
+`WeatherGetDuration(name[, ref delay])` (IL=11/18) resolves the group and reads
+its millisecond `duration`, filling `delay` (or `Vector2i.zero`) when the ref is
+present. `InitWeather()` (IL=1) is an empty stub in this build.
+
+The `Probabilities` table inside each `WeatherGroup` is a `List<Vector3>[5]` (
+one list per `ProbType` slot, each entry a `Vector3(min, max, prob)`
+(`AddProbability`, IL=14; `WeatherGroup.AddProbability` is a 7-instruction
+pass-through). `Normalize()` (IL=62) divides every entry's `z` by the slot's
+`z`-sum, so the weights within a slot sum to 1. `GetRandomValue(type)` (IL=54)
+uses two `GameRandom.RandomFloat` draws from `World.GetGameRandom()`: the first
+walks the cumulative `z` weights to pick an entry, the second lerps the range
+`x + (y - x) * rand2`; no entry hit returns 0. `CalcMinMaxPossibleValue(type)`
+(IL=44) folds the per-slot entry ranges into a `Vector2(min, max)` (starting
+from `+floatMax`/`-floatMax`).
+
+Blood moon overrides all of
+**`CalcGlobalWeatherType` (IL=36):** if `SkyManager.IsBloodMoonVisible()`, for
+each biome with `stormWorldTime - worldTime < 5000`, push
+`stormWorldTime = worldTime + 5000` (defer near storms past BM window); return
+`"bloodMoon"` so `SetAllWeather("bloodMoon")` forces every biome to the
+blood-moon group. Else null (per-biome path).
+
+---
+
+## 3. Server to client net sync
+
+`GameManager.updateTimeOfDay()` is the sync point. On the same throttle
+(`Constants.cSendWorldTickTimeToClients`) that broadcasts `NetPackageWorldTime`,
+it calls `WeatherManager.SendPackages()`. That method runs `CalcPackages()` to
+copy each `BiomeWeather` into its `WeatherPackage` (biome id,
+`currentWeatherGroupIndex`, `remainingSeconds`, and `parameterFinals[0..4]`),
+wraps them in a `NetPackageWeather`, and broadcasts to all connected clients.
+`NetPackageWeather.PackageDirection` is `ToClient` (2).
+
+```mermaid
+sequenceDiagram
+  participant Tick as GameManager.updateTimeOfDay (server)
+  participant WM as WeatherManager (server)
+  participant Net as NetPackageWeather
+  participant CM as ConnectionManager
+  participant CL as Clients
+  Tick->>Tick: throttle on cSendWorldTickTimeToClients
+  Tick->>CM: send NetPackageWorldTime (world clock)
+  Tick->>WM: SendPackages()
+  WM->>WM: CalcPackages() -> fill WeatherPackage[] from parameterFinals
+  WM->>Net: Setup(weatherPackages)
+  WM->>CM: SendPackage(NetPackageWeather, broadcast)
+  CM->>CL: per-biome snapshot
+  Note over CL: client read() repopulates biomeWeather,<br/>WeatherPackage.CopyTo eases params to targets
+```
+
+**Wire body** (`NetPackageWeather.write`, authoritative for byte order; `read`
+mirrors it). No count prefix is sent: both sides size the array from
+`WeatherManager.Instance.biomeWeather.Count` (`InitPackages`), so the layouts
+must agree. Per biome, in order:
+
+| Field | Type | Source |
+|---|---|---|
+| `biomeId` | `byte` | `BiomeDefinition.m_Id` |
+| `groupIndex` | `byte` | `currentWeatherGroupIndex` |
+| `remainingSeconds` | `byte` | storm-build countdown |
+| `param[0..4]` | `5 x float32` | `parameterFinals` (temp, precip, cloud, wind, fog) |
+
+This is a **dedicated-server binary**, so the receive side is visibly a stub:
+`NetPackageWeather.ProcessPackage` is empty (`IL=1, ret`), the static
+`WeatherManager.currentWeather` pointer is **never assigned** anywhere in this
+DLL, and `WeatherPackage.CopyTo` has no caller here. Those are the client's
+apply path; the server only ever generates and sends.
+
+---
+
+## 4. Temperature and survival
+
+Temperature is where server authority and client computation split most sharply.
+The server owns the **inputs and the gates**; the local client owns the **felt
+temperature and the buffs**.
+
+- **Server-authoritative gates** (sandbox options, replicated as world state):
+  `World.TemperatureSurvival`, `World.StormFrequency`,
+  `EntityStats.WeatherSurvivalEnabled` / `NewWeatherSurvivalEnabled`, and
+  `WeatherManager.inWeatherGracePeriod`. The `weathersurvival` console command
+  (`ConsoleCmdWeatherSurvival`) toggles `WeatherSurvivalEnabled`.
+- **Server-authoritative inputs:** the per-biome params (including slot 0
+  temperature) shipped in `NetPackageWeather` (§3).
+- **Client-computed felt temperature:** `PlayerEntityStats.UpdateWeatherStats`
+  writes the survival custom vars on the local player's `EntityBuffs`
+  (`_wetnessrate`, `_outsidetemp`, `_sheltered`, `_degreesabsorbed`,
+  `_coretemp`, `_shaded`). Those cvars are what the `weathersurvival.xml`
+  MinEvents read to apply cold/hot buffs. See [buffs.md](../gameplay/buffs.md) for the cvar
+  and buff mechanism.
+
+**The `_sheltered` computation (`EntityPlayerLocal.ShelterFrameUpdate`,
+IL=184) is a sampled enclosure scan**, spread over frames with a
+`shelterIsUpdating` latch. It anchors `shelterStartPos` at the player
+(position - Origin, y+0.62) and walks: `ShelterCheckSkyUp()` (exposed when
+the sky check finds nothing above -> `shelterPercent = 0`), then a
+`shelterSideCount` phase from -10 that runs `ShelterCheckSkyDiagonal()`
+while stepping `shelterPos.y` by 0.1, then a side scan
+(`ShelterCheckSides()` at `shelterDir = 0` / `shelterRadius = 1`) that must
+block **4** sides to count as enclosed. When all 4 sides are blocked it
+steps the sampling offset upward (y += 0.65, or 0.54 while crouching; x
++= 0.011, z += 0.013) and rescans; when the offset reaches the player's
+height it finalizes `shelterIsUpdating = false` and `shelterPercent = 1` -
+fully sheltered. The resulting `shelterPercent` feeds the `_sheltered`
+cvar path above. `WeatherBuffUpdate` (IL=45) is the indoor/outdoor buff
+gate that consumes `isIndoorsCurrent`: with a `weatherBuff` set it removes
+the buff while indoors and re-adds it (`AddBuff(name, -1, true, false,
+-1)`) once outdoors - the outdoor-weather buff follows the shelter state.
+
+```mermaid
+flowchart LR
+  BW[BiomeWeather params<br/>temp, precip, cloud] -->|NetPackageWeather| CLI
+  FLAGS[World.TemperatureSurvival<br/>WeatherSurvivalEnabled<br/>inWeatherGracePeriod] --> GATE
+  subgraph CLI[Local client]
+    UW[PlayerEntityStats.UpdateWeatherStats] --> GATE{gates pass<br/>and not god-mode?}
+    GATE -->|yes| CV[SetCustomVar: _outsidetemp,<br/>_coretemp, _shaded, _wetnessrate]
+    GATE -->|no| SKIP[cvars reset to neutral]
+    CV --> BUFF[weathersurvival MinEvents -> cold/hot buffs]
+  end
+```
+
+On this dedicated build the felt-temperature helpers are stubbed to constants,
+consistent with the compute living on the client: `GetOutsideTemperature()`
+returns `70`, `WeatherManager.GetTemperature()` and `GetWindSpeed()` return `0`,
+and `AddTemperatureOffSetHeight` / `ClearTemperatureOffSetHeights` are empty. The
+server still saves and restores the real biome weather state (§6), and still
+ships the params that a client turns into a felt temperature. More
+stubs/delegates on the dedicated build: `SeaLevel()` (IL=2) is the constant
+**0**, `GetCurrentTemperatureValue()` (IL=2) forwards to `GetTemperature()`,
+`GetCurrentCloudThicknessPercent()` (IL=4) is `GetCloudThickness() * 0.01`,
+`EntityRemovedFromWorld` (IL=1) is empty, and `IsStorming(type)` (IL=15) is
+`FindBiomeWeather(type)` non-null with `stormState >= 2`.
+
+Two weather values do read straight off biome state even on the server, guarded
+so they return `0` when `currentWeather` is null (its normal server state):
+`GetCurrentRainfallPercent`, `GetCurrentSnowfallPercent`, and
+`GetCurrentWetPercent(EntityAlive)`, the last combining rain, snow, and a full
+wet flag while a level-2 storm is overhead. These exist for shared entity logic
+(`EntityAlive.GetWetnessRate`).
+
+---
+
+## 5. SkyManager: clock versus rendering
+
+`SkyManager` is mostly a client renderer, but a thin time-of-day surface is real
+game logic that the server and weather sim both call.
+
+**Server-relevant (clock and queries):**
+
+| Member | Role |
+|---|---|
+| `SetGameTime(worldTime)` | Set from `World.worldTime` each tick (`WorldEnvironment.WorldTimeChanged`): updates `dayCount` and `timeOfDay` |
+| `TimeOfDay` / `GetTimeOfDayAsMinutes` | Minutes-of-day from the clock |
+| `GetDawnTime` / `GetDuskTime` / `IsDark` | Day/night boundaries (drive spawns, AI, weather) |
+| `IsBloodMoonVisible` / `BloodMoonVisiblePercent` | Blood-moon window (drives `CalcGlobalWeatherType` and the game-state round) |
+| `GetSunPercent` / `GetSunLightDirection` | Sun geometry used by `CalcGlobalTemperature` |
+
+**Residual (client visual):** `Update`, `UpdateSunMoonAngles`,
+`UpdateShaderGlobals` / `UpdateFogShader`, the fog fields
+(`SetFogDensity` / `SetFogFade` / `SetFogColor`), clouds
+(`SetCloudTextures` / `SetCloudTransition`), `TriggerLightning`, sun/moon
+materials and lights. None of it changes authoritative state; it renders the sky
+from the same clock and the received weather snapshot.
+
+`WeatherManager.TriggerThunder` only forwards to `EnvironmentAudioManager`
+(audio, client), and `PushTransitions` / `ReloadSpectrums` / `Start` /
+`GeneralReset` are empty on this build.
+
+**Day/night boundary derivation (exact):** `World.IsDark()` (IL=31):
+`SkyManager.isAllTimeDay` -> false, `isAllTimeNight` -> true, else
+`hour = (worldTime % 24000) / 1000.0f` (game hours) and dark iff
+`hour < DawnHour || hour > DuskHour` (`hour == DuskHour` is still light).
+`World.IsDaytime()` (IL=5) is `!IsDark()`. The hours come from
+`World.DuskDawnInit` (IL=13): `(DuskHour, DawnHour) =
+GameUtils::CalcDuskDawnHours(GameStats.GetInt(42) DayLightLength)`
+(`GameStats.DayLightLength` is index 42; the index-42 row in the
+`EnumGamePrefs` table is the unrelated `PlayerSafeZoneHours`).
+`CalcDuskDawnHours(len)` (IL=45): `len == 0 || len == 24` -> dusk 22 / dawn 4
+(the default vanilla 18 h of light); else dusk starts 22, `len > 22` ->
+`dusk = clamp(len, 0, 23)`, `len < 18` -> `dusk = 12 + len / 2`, and always
+`dawn = clamp(dusk - len, 0, 23)` (IL_004b-IL_005d). `DuskDawnInit` runs at world init, so the boundary is
+fixed per world; no in-assembly `GameStats.Set(42, ...)` call exists (the
+stat's readers include `DuskDawnInit`, blood-moon dawn/dusk,
+`World.WorldEventUpdateTime`, SkyManager, Twitch, TraderInfo), so
+`DayLightLength` is set outside this DLL's direct Set calls (vanilla default
+18 -> 22:00-04:00 dark).
+
+---
+
+**Moon brightness term (pinned 2026-08-27, SkyManager cctor + Update):**
+the moon's ambient contribution is data-driven from two 7-element static
+tables: `sMoonPhases` = `{0.05, 0.35, 0.55, 0.70, 1.40, 1.63, 1.82}` and
+`sMoonBrights` = `{1.0, 0.65, 0.45, 0.25, 0.40, 0.60, 0.90}` (extracted
+from the PE static data via Mono.Cecil FieldRVA). `SkyManager.Update`
+computes the phase index as `((int)(dayCount + 5.5)) % 7` (a blood-moon
+window forces index 0, the full moon), then `moonBright =
+sMoonBrights[index]`. Cloud dimming: when `cloudThickness > 45` and
+`GamePrefs.GetFloat(195) < 0.49`, `moonBright *= FastLerp(1, 0.15,
+(cloudThickness - 45) / 55)`. `GetMoonBrightness()` =
+`moonLightColor.grayscale * moonBright`; `GetMoonAmbientScale(add, mpy)`
+= `FastLerp(1, moonBright * mpy + add, dayPercent * 3.030303)` is the
+ambient fold `AmbientSpectrumFrameUpdate` multiplies into the day/night
+brightness (then `LerpUnclamped(scale, 1, insideCurrent)` and
+`+ nightVisionBrightness`). The moon direction for the sprite: angle =
+`sMoonPhases[index] * pi`, dir = `(-sin(angle), 0, cos(angle))`.
+Server-side relevance: the stealth-light ambient leg and night-time AI
+sight can fold `moonBright` without any client channel.
+
+---
+
+## 6. Save/load and dedicated relevance
+
+- **Persistence.** Weather is part of the world header: `WorldState` calls
+  `WeatherManager.Save` / `Load`. `Load(RW, size)` (IL=19) only copies `size`
+  bytes into static `loadData` MemoryStream; `ApplyLoad` (IL=22) later runs
+  `ReadWriteData(reader, load=true)`. `Save` either re-emits buffered `loadData`
+  or live `ReadWriteData(writer, load=false)`.
+
+  **`ReadWriteData` (IL=193):** version u16 (**4**); on load abort if version &lt; 4.
+  Next byte must match `GamePrefs` int **60** (gate) or load returns. Then biome
+  count (u8) and per biome: biome id (u8, the `BiomeDefinition.m_Id`),
+  weather group (u8, `currentWeatherGroupIndex`), `stormWorldTime`
+  (i32), `stormDuration` (i16), `nextRandWorldTime` (i32), **5** param floats
+  (in §1.1 slot order: temperature, precipitation, cloud, wind, fog), rain
+  float, snow float. See [save-region.md](../world/save-region.md) for the surrounding
+  world header.
+
+  **Live-decoded 2026-08-12 (byte-exact, `tools/save_roundtrip_check.py`):**
+  `version 4, gate 60, 5 biomes` (ids 3/9/5/1/8 = the Navezgane biomes.xml
+  `m_Id`s), each record exactly 40 B (4 + 5x40 = 204 B payload). A day-4 save
+  shows the desert biome at `[102.95, 0.0, ...]` temperature, the snow biome
+  at `30.02`, all precipitation 0 (no active precip at save), scheduled storms
+  ahead of the saved worldTime; the shipped Navezgane world state is pristine
+  (`stormWorldTime/duration/nextRand = 0`).
+- **Core dedicated path:** the biome storm state machine, weather rerolls, grace
+  period, save/load, and the per-tick `NetPackageWeather` broadcast all run on
+  the headless server.
+- **Residual (client / content):** felt-temperature and survival buff math
+  (stubbed here, computed on the local client); all sky/fog/cloud/lightning
+  rendering; the biome and `weathersurvival.xml` content (data, not loop IL, see
+  [residuals.md](../meta/residuals.md)).
+
+---
+
+## Related docs
+
+| Doc | Role |
+|---|---|
+| [server-lifecycle.md](../admin/server-lifecycle.md) | Game-state tick and world clock that drive weather |
+| [loop.md](../loop/loop.md) | The frame/sim loop that calls `FrameUpdate` and `updateTimeOfDay` |
+| [buffs.md](../gameplay/buffs.md) | Cvar and buff mechanism the survival temperature feeds |
+| [protocol-packages.md](../network/protocol-packages.md) | Where `NetPackageWeather` sits among the packages |
+| [protocol.md](../network/protocol.md) | Wire framing conventions |
+| [save-region.md](../world/save-region.md) | World header that stores weather state |
+| [light-mesh-water.md](../world/light-mesh-water.md) | Adjacent environment/rendering surface |
+| [residuals.md](../meta/residuals.md) | Client-visual and content residuals |
+| [full-surface.md](../meta/full-surface.md) | Whole-assembly map |
+| [re-methodology.md](../meta/re-methodology.md) | How this was reversed |
+
+**Server-relevant classified leaves (re-narrated for the coverage census):**
+
+| Leaf | base | key methods |
+|---|---|---|
+| `BiomeAtmosphereEffects` | Object | Update, getColorFromSpectrum, Init |
+
+## Changelog
+
+- **2026-08-25:** verified against the zdtd clone: the dedicated server's
+  temperature input leg is the per-biome weather params (slot 0 temperature
+  from biomes.xml weather-group ranges) shipped in NetPackageWeather on join
+  and broadcast; the felt temperature, `_coretemp`/`_outsidetemp`/`_sheltered`
+  cvars and the weathersurvival.xml cold/hot buffs remain local-client
+  computed, so a server-side core-temp sim would diverge from stock.
+
+- **2026-08-11:** Weather IL re-verified: SetStorm IL=32, IsStormEffected IL=22, AddWeatherGroup IL=57, SetupWeather IL=53, WeatherRandomize IL=32/14, SelectWeatherGroup IL=40, FindWeatherGroup IL=26 / Index IL=24, WeatherGetValue IL=5, WeatherSetValue IL=6, WeatherGetDuration IL=11/18, InitWeather IL=1, Probabilities AddProbability IL=14, Normalize IL=62, GetRandomValue IL=54, CalcMinMaxPossibleValue IL=44, CalcGlobalWeatherType IL=36, NetPackageWeather.ProcessPackage IL=1, ShelterFrameUpdate IL=184, WeatherBuffUpdate IL=45, SeaLevel IL=2, GetCurrentTemperatureValue IL=2, GetCurrentCloudThicknessPercent IL=4, EntityRemovedFromWorld IL=1, IsStorming IL=15 (exact).
+- **2026-08-10:** Weather group IL re-verified: SelectWeatherGroup IL=40, FindWeatherGroup IL=26, FindWeatherGroupIndex IL=24, WeatherSetValue IL=6 (exact).
+- **2026-08-10:** Weather method IL sizes re-verified: SetStorm IL=32,
+  IsStormEffected IL=22, BiomeDefinition.AddWeatherGroup IL=57,
+  WeatherRandomize IL=32/14 (all exact).
+- **2026-08-08:** EntityPlayerLocal.WeatherBuffUpdate (IL=45): weatherBuff
+  removed indoors / re-added outdoors, driven by isIndoorsCurrent.
+
+- **2026-08-08:** EntityPlayerLocal.ShelterFrameUpdate (IL=184) sampled
+  enclosure scan: sky-up + diagonal checks, 4-side block gate, upward
+  sampling offset (0.65 / 0.54 crouch), shelterPercent 0/1 finalization.
+
+- **2026-08-08:** WeatherManager.SetStorm IL=32: per-biome stormWorldTime/
+  stormDuration stamp for the named biome or all (null name) - instant admin
+  storm.
+- **2026-08-07:** CalcGlobalWeatherType IL=36 bloodMoon + stormWorldTime+5000
+  defer for near storms.
+- **2026-07-28:** WeatherManager.ReadWriteData IL layout; Load buffer vs ApplyLoad.
+
+- **2026-07-23:** Initial weather/sky/environment reversal (WeatherManager biome state machine, storm scheduling, 5-slot param model, NetPackageWeather sync, temperature/survival client-server split, SkyManager clock vs rendering) with state machines.

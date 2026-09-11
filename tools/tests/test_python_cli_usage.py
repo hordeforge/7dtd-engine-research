@@ -14,6 +14,7 @@ SCRIPTS = (
     "save_roundtrip_check.py",
     "facts.py",
     "mention_depth.py",
+    "asm_body_diff.py",
     "sandbox/extract_mesh_atlas.py",
     "sandbox/extract_sandbox_tables.py",
     "sandbox/extract_preset_codes.py",

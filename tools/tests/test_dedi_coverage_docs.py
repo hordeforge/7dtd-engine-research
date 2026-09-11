@@ -180,7 +180,7 @@ def main() -> int:
     self_test_detectors(fails)
 
     for name in FAMILY_DOCS:
-        p = DOCS / name
+        p = _common.doc(name)
         if not p.is_file():
             fails.append(f"missing family doc: {p}")
             continue
@@ -235,7 +235,7 @@ def main() -> int:
             p = PRODUCT_DOCS / name
             if not p.is_file() or p.stat().st_size < 200:
                 fails.append(f"missing product RealEarth doc: {p}")
-            if (DOCS / name).exists():
+            if list(DOCS.rglob(name)):
                 fails.append(f"RealEarth doc still under 7dtd-engine-research/docs: {name}")
 
     # research INDEX should not own product RealEarth as primary

@@ -1,7 +1,7 @@
 # RE coverage report (auto-generated)
 
-**Assembly studied:** Assembly-CSharp V3.2.0 (b9), file mtime 2026-08-29 08:44 UTC. The numbers below are for THIS build only: if the corpus pin
-moved (`docs/coverage.md` header), regenerate before quoting any number here.
+**Assembly studied:** Assembly-CSharp V3.2.0 (b10), file mtime 2026-09-05 08:35 UTC. The numbers below are for THIS build only: if the corpus pin
+moved (`docs/meta/coverage.md` header), regenerate before quoting any number here.
 
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
 dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced
@@ -38,17 +38,17 @@ The tiers are reported separately and deliberately **not summed into a headline*
 |---|---|
 | **narrated** | backticked in a narrative subsystem doc (the closest thing to real documentation) |
 | **catalogued only** | backticked only in a generated `inventories/` catalog: enumerated, not explained |
-| **classified** | listed in [out-of-scope-surface.md](../out-of-scope-surface.md) as not dedicated work |
+| **classified** | listed in [out-of-scope-surface.md](../meta/out-of-scope-surface.md) as not dedicated work |
 | **unaccounted** | appears nowhere: the honest gap list |
 
 ## Totals
 
 | Metric | Value |
 |---|---:|
-| Reached methods (with body) | 46830 |
-| Reached types (incl. compiler-generated) | 7342 |
-| Reached, non-generated | 6199 |
-| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2366 (excluded from %) |
+| Reached methods (with body) | 46831 |
+| Reached types (incl. compiler-generated) | 7343 |
+| Reached, non-generated | 6200 |
+| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2367 (excluded from %) |
 | ...**game types** (the RE surface) | **3692** |
 | ...**narrated** (backticked in a narrative doc) | **3688 (99%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 0 |
@@ -72,10 +72,10 @@ as an upper bound; this table is its actual depth.
 | Narrative mentions | Types | Share of base |
 |---|---:|---:|
 | 0 (catalogued, classified, or unaccounted) | 4 | 0% |
-| exactly 1 | 2402 | 65% |
-| 2-4 | 785 | 21% |
-| 5-19 | 420 | 11% |
-| 20+ | 81 | 2% |
+| exactly 1 | 2392 | 64% |
+| 2-4 | 791 | 21% |
+| 5-19 | 423 | 11% |
+| 20+ | 82 | 2% |
 
 ## Whole-assembly accounting (all types and methods)
 

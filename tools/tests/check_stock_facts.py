@@ -218,12 +218,12 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
     npkg = facts["network"]["netpackage_top_level_count"]
     save_ver = facts["save"].get("current_save_version")
 
-    cov = read(ROOT / "docs" / "coverage.md")
+    cov = read(_common.doc("coverage.md"))
     # Pin banner: V X.Y.Z (bN) driven entirely by stock_facts (no fixed version soft path).
     pin_display = display.replace("V ", "")  # strip leading V from facts display
     pin_esc = re.escape(pin_display)
     must_match(
-        "docs/coverage.md pin",
+        "docs/meta/coverage.md pin",
         cov,
         rf"V\s*{pin_esc}\s*\(b{build}\)|"
         rf"V\s*\*\*{pin_esc}\s*\(b{build}\)\*\*",
@@ -238,7 +238,7 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
     ):
         if f"Major={major}" not in cov and f"Minor={minor}" not in cov:
             errors.append(
-                f"docs/coverage.md: expected version pin for {display} b{build} "
+                f"docs/meta/coverage.md: expected version pin for {display} b{build} "
                 f"(Major={major} Minor={minor} Build={build})"
             )
 
@@ -246,11 +246,11 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
     if str(ydim) not in cov and f"ChunkBlockYDim={ydim}" not in cov:
         # coverage mentions ChunkBlockYDim=256 historically
         must_match(
-            "docs/coverage.md YDim", cov, rf"ChunkBlockYDim\s*=\s*{ydim}|YDim.*{ydim}", errors
+            "docs/meta/coverage.md YDim", cov, rf"ChunkBlockYDim\s*=\s*{ydim}|YDim.*{ydim}", errors
         )
     if str(layers) not in cov and f"ChunkBlockLayers={layers}" not in cov:
         must_match(
-            "docs/coverage.md layers",
+            "docs/meta/coverage.md layers",
             cov,
             rf"ChunkBlockLayers\s*=\s*{layers}|Layers.*{layers}",
             errors,
@@ -281,11 +281,11 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
     # LiteNetLib pins: facts carry the library constants; network.md must
     # document them (protocol 13, MaxPacketSize 1432, PossibleMtu).
     lite = facts.get("litenet", {})
-    net = read(ROOT / "docs" / "network.md")
+    net = read(_common.doc("network.md"))
     if net and lite:
-        must_match("docs/network.md ProtocolId", net, r"ProtocolId", errors)
-        must_match("docs/network.md 1432", net, r"1432", errors)
-        must_match("docs/network.md 1024", net, r"1024", errors)
+        must_match("docs/network/network.md ProtocolId", net, r"ProtocolId", errors)
+        must_match("docs/network/network.md 1432", net, r"1432", errors)
+        must_match("docs/network/network.md 1024", net, r"1024", errors)
 
     # XML data pins: the committed hp ladder must carry the key zombie values,
     # and the zdtd divergence register must cite healthSlim 125.
@@ -327,8 +327,8 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
         errors.append(f"stock_facts world_water_level={water} != 62.88 (Block.cWaterLevel)")
     else:
         must_match(
-            "docs/save-region.md WaterLevel",
-            read(ROOT / "docs" / "save-region.md"),
+            "docs/world/save-region.md WaterLevel",
+            read(_common.doc("save-region.md")),
             r"62\.88",
             errors,
         )
@@ -338,11 +338,17 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
         (
             "item_dropped_on_death_lifetime_s",
             300.0,
-            "docs/combat-damage.md",
+            "docs/gameplay/combat-damage.md",
             r"300",
             "item lifetime",
         ),
-        ("max_load_time_per_frame_ms", 50.0, "docs/crafting-recipes.md", r"50", "load budget"),
+        (
+            "max_load_time_per_frame_ms",
+            50.0,
+            "docs/gameplay/crafting-recipes.md",
+            r"50",
+            "load budget",
+        ),
     ]
     for key, want, doc, pat, label in tuned:
         got = facts["behaviour"].get(key)
@@ -353,27 +359,27 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
         else:
             must_match(f"docs pin {label}", read(ROOT / doc), pat, errors)
 
-    closed = read(ROOT / "docs" / "closed-gaps.md")
+    closed = read(_common.doc("closed-gaps.md"))
     must_match(
-        "docs/closed-gaps.md GameTimer",
+        "docs/entities/closed-gaps.md GameTimer",
         closed,
         rf"ticksPerSecond\s*=\s*\*\*{tps}\*\*|GameTimer\({tps}|ticksPerSecond.*{tps}",
         errors,
     )
 
-    proto = read(ROOT / "docs" / "protocol.md")
-    must_contain("docs/protocol.md challenge", proto, "0xCA", errors)
+    proto = read(_common.doc("protocol.md"))
+    must_contain("docs/network/protocol.md challenge", proto, "0xCA", errors)
     must_match(
-        "docs/protocol.md version display",
+        "docs/network/protocol.md version display",
         proto,
         re.escape(display) + r"|" + re.escape("V " + pin_display),
         errors,
     )
 
     if save_ver is not None:
-        save = read(ROOT / "docs" / "save-region.md")
+        save = read(_common.doc("save-region.md"))
         must_match(
-            "docs/save-region.md CurrentSaveVersion",
+            "docs/world/save-region.md CurrentSaveVersion",
             save,
             rf"CurrentSaveVersion[`\s]*=?\s*\*\*{save_ver}\*\*|CurrentSaveVersion\s*=\s*{save_ver}",
             errors,
@@ -381,7 +387,7 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
 
     # NetPackage count in coverage/protocol family
     if str(npkg) not in cov and str(npkg) not in proto:
-        inv = read(ROOT / "docs" / "protocol-packages.md")
+        inv = read(_common.doc("protocol-packages.md"))
         if str(npkg) not in inv:
             errors.append(
                 f"research docs: NetPackage count {npkg} not mentioned in coverage/protocol/protocol-packages"
@@ -394,21 +400,21 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
     saveload = facts.get("save", {}).get("worldstate_saveload_stream_il")
     if top is not None:
         must_match(
-            "docs/coverage.md live top-level types",
+            "docs/meta/coverage.md live top-level types",
             cov,
             rf"Top-level types\s*\|\s*{top}\b",
             errors,
         )
     if methods is not None:
         must_match(
-            "docs/coverage.md live methods with body",
+            "docs/meta/coverage.md live methods with body",
             cov,
             rf"Methods with body\s*\|\s*{methods}\b",
             errors,
         )
     if saveload is not None:
         must_match(
-            "docs/coverage.md live SaveLoad IL",
+            "docs/meta/coverage.md live SaveLoad IL",
             cov,
             rf"WorldState\.SaveLoad\(Stream\)\s*IL\s*\|\s*{saveload}\b",
             errors,
@@ -428,16 +434,16 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
     # TE package layout: V3.1+ must document teBlockId + i32 payload length
     te = facts.get("tile_entity_package") or {}
     if te.get("payload_len_likely_i32") or te.get("present"):
-        te_doc = read(ROOT / "docs" / "tile-entities-power.md")
-        pkg_doc = read(ROOT / "docs" / "protocol-packages.md")
+        te_doc = read(_common.doc("tile-entities-power.md"))
+        pkg_doc = read(_common.doc("protocol-packages.md"))
         must_match(
-            "docs/tile-entities-power.md teBlockId",
+            "docs/gameplay/tile-entities-power.md teBlockId",
             te_doc,
             r"teBlockId\s*:\s*i32",
             errors,
         )
         must_match(
-            "docs/tile-entities-power.md payloadLen i32",
+            "docs/gameplay/tile-entities-power.md payloadLen i32",
             te_doc,
             r"payloadLen\s*:\s*i32",
             errors,
@@ -449,17 +455,17 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
             re.M,
         ):
             errors.append(
-                "docs/tile-entities-power.md: stale NetPackageTileEntity layout "
+                "docs/gameplay/tile-entities-power.md: stale NetPackageTileEntity layout "
                 "(payloadLen:u16 without V3.1 teBlockId/i32)"
             )
         must_match(
-            "docs/protocol-packages.md §6.12 teBlockId",
+            "docs/network/protocol-packages.md §6.12 teBlockId",
             pkg_doc,
             r"teBlockId\s*:\s*i32",
             errors,
         )
         must_match(
-            "docs/protocol-packages.md §6.12 payloadLen i32",
+            "docs/network/protocol-packages.md §6.12 payloadLen i32",
             pkg_doc,
             r"payloadLen\s*:\s*i32",
             errors,

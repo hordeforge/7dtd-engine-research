@@ -4,7 +4,7 @@
 FullSurface emits per-type and per-namespace markdown tables. Compiler-generated
 state-machine type names can embed a pipe (e.g. `...Privileges|1>d`), which used
 to break the table rows: 23 rows were malformed and the naive per-type IL sum
-read 1,738,381 instead of the true 1,740,737 (full-surface.md). Since the
+read a short per-type sum instead of the true total (full-surface.md). Since the
 2026-08-11 escape fix the two tables must agree and the total must match the
 documented pin.
 
@@ -20,7 +20,7 @@ import tempfile
 import _common
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-EXPECTED_IL_TOTAL = 1740737  # docs/full-surface.md: "1,740,737 IL instructions"
+EXPECTED_IL_TOTAL = 1743842  # docs/meta/full-surface.md: "1,743,842 IL instructions" (V3.2.0 b10)
 
 PIPE_AWARE = re.compile(r"(?<!\\)\|")  # split on | not preceded by backslash
 

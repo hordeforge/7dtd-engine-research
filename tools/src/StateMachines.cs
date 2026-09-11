@@ -14,14 +14,25 @@ using System.Text.RegularExpressions;
 static class StateMachines {
   class Entry { public string Doc, Section; public int States; public string Cluster; }
 
+  // Cluster = the subsystem folder the doc lives in (docs/<folder>/<doc>.md).
+  static readonly Dictionary<string, string> Clusters = new Dictionary<string, string> {
+    { "loop",      "Frame and lifecycle" },
+    { "entities",  "Entities, AI and pathing" },
+    { "world",     "World, chunks, persistence" },
+    { "network",   "Wire and session" },
+    { "gameplay",  "Gameplay systems" },
+    { "admin",     "Ops and admin" },
+    { "content",   "Content and scripting" },
+    { "social",    "Social and integration" },
+    { "meta",      "Meta and method" },
+    { "releases",  "Release deltas" },
+  };
+
   static string ClusterOf(string doc) {
-    string d = doc.Replace("inventories/", "");
-    if (Regex.IsMatch(d, "^(loop|managers|architecture)")) return "Frame and lifecycle";
-    if (Regex.IsMatch(d, "^(protocol|network|chat|platform-auth)")) return "Wire and session";
-    if (Regex.IsMatch(d, "^(world|chunk|terrain|save|light|dynamic-mesh|weather)")) return "World, chunks, persistence";
-    if (Regex.IsMatch(d, "^(entity|uai|aidirector|spawning|stealth|raycast|combat|buffs)")) return "Entities, AI, combat";
-    if (Regex.IsMatch(d, "^(block|item|craft|loot|quest|progression|minevent|game-events|tile-entities|vehicles|npc)")) return "Gameplay systems";
-    return "Ops, admin, integrations";
+    int slash = doc.IndexOf('/');
+    string folder = slash < 0 ? "" : doc.Substring(0, slash);
+    string cluster;
+    return Clusters.TryGetValue(folder, out cluster) ? cluster : "Unfiled";
   }
 
   static void Main(string[] a) {
@@ -55,7 +66,7 @@ static class StateMachines {
     sb.AppendLine("Each diagram's correctness is the owning doc's, and the state counts below are");
     sb.AppendLine("counted from the diagram source (nodes on the left of a transition), so a state");
     sb.AppendLine("that is only ever a target reads one lower.  ");
-    sb.AppendLine("**Hub:** [`../INDEX.md`](../INDEX.md). **Visual overview:** [`../architecture-map.md`](../architecture-map.md).");
+    sb.AppendLine("**Hub:** [`../INDEX.md`](../INDEX.md). **Visual overview:** [`../meta/architecture-map.md`](../meta/architecture-map.md).");
     sb.AppendLine();
     sb.AppendLine("**" + entries.Count + " state machines** across **" +
                   entries.Select(e => e.Doc).Distinct().Count() + " docs**.");

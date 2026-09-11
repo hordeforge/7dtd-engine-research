@@ -1,6 +1,6 @@
 # AGENTS.md - 7dtd-engine-research
 
-Stock-game RE for 7 Days to Die dedicated server (V3.1.0). All study of shipped `Assembly-CSharp.dll` lives here: RE narratives, dump tooling, wire/protocol analysis, engine cost/loop RE. Reimplementations/mods live in siblings, linking here for RE facts (see [`hordeforge/.github` AGENTS.md](https://github.com/hordeforge/.github/blob/main/AGENTS.md) boundaries).
+Stock-game RE for 7 Days to Die dedicated server (V3.2.0 b10). All study of shipped `Assembly-CSharp.dll` lives here: RE narratives, dump tooling, wire/protocol analysis, engine cost/loop RE. Reimplementations/mods live in siblings, linking here for RE facts (see [`hordeforge/.github` AGENTS.md](https://github.com/hordeforge/.github/blob/main/AGENTS.md) boundaries).
 
 Workspace root: [`hordeforge/.github` MODDING_BEST_PRACTICES.md](https://github.com/hordeforge/.github/blob/main/MODDING_BEST_PRACTICES.md).
 
@@ -30,7 +30,7 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 
 | Path | Role |
 |---|---|
-| [`docs/`](docs) | Engine RE narratives. Hub: [`docs/INDEX.md`](docs/INDEX.md) |
+| [`docs/`](docs) | Engine RE narratives, one folder per subsystem (`meta`, `releases`, `loop`, `entities`, `world`, `network`, `admin`, `gameplay`, `content`, `social`). Hub: [`docs/INDEX.md`](docs/INDEX.md). A new narrative goes in the folder whose subsystem owns it and gets a row in the hub's subsystem map (the link gate fails on an unlinked doc). Basenames are unique corpus-wide; gates resolve a doc by name (`_common.doc()`), never by folder |
 | [`docs/inventories/`](docs/inventories) | Raw method/call inventories for the narratives |
 | [`tools/`](tools) | **Tracked** Mono.Cecil dump tooling ([`tools/README.md`](tools/README.md)) |
 | [`tools/data/`](tools/data) | Committed pins (`stock_facts.json`) |
@@ -49,15 +49,15 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 
 1. **Do not redistribute** game assemblies or bulk IL. `il/` dumps are regenerable, git-ignored evidence. Quote at most a few disassembly lines for commentary.
 2. **Tooling is tracked, dumps are not.** RE dumpers in `tools/` (tracked); output in `il/` (git-ignored). Never commit `Assembly-CSharp.dll`.
-3. **Trace every wire/RE claim to an instruction.** Each field maps to a `ldfld`/`Write` pair. Method: [`docs/re-methodology.md`](docs/re-methodology.md).
+3. **Trace every wire/RE claim to an instruction.** Each field maps to a `ldfld`/`Write` pair. Method: [`docs/meta/re-methodology.md`](docs/meta/re-methodology.md).
 4. **Regenerate, do not hand-edit dumps.** After a game update run `make post-update` (stock facts + pins + drift), then `make census`; re-dump only changed families into `il/<label>/`. Commit `tools/data/stock_facts.json` and pin-site doc edits together.
 5. **No em dashes; no AI attribution** in shipped text (workspace rule).
 6. **Generic engine only.** RealEarth product status/lessons belong in `7dtd-realearth/docs/`, not here.
-7. Mark status honestly: `verified` / `unverified` / `inferred` / `blocked`. Residuals beyond IL go in [`docs/residuals.md`](docs/residuals.md).
+7. Mark status honestly: `verified` / `unverified` / `inferred` / `blocked`. Residuals beyond IL go in [`docs/meta/residuals.md`](docs/meta/residuals.md).
 
 ## Start here
 
-[`docs/INDEX.md`](docs/INDEX.md) -> [`docs/coverage.md`](docs/coverage.md) (what is mapped) -> family narrative -> `il/` dump. For new RE: [`docs/re-methodology.md`](docs/re-methodology.md) + [`tools/`](tools).
+[`docs/INDEX.md`](docs/INDEX.md) -> [`docs/meta/coverage.md`](docs/meta/coverage.md) (what is mapped) -> family narrative -> `il/` dump. For new RE: [`docs/meta/re-methodology.md`](docs/meta/re-methodology.md) + [`tools/`](tools).
 
 Gates: `make test-docs` (no DLL needed, same as CI), `make lint` (`ruff` check + format, `mypy --strict`, `shellcheck`); with the live game also `make test`, `make verify`.
 

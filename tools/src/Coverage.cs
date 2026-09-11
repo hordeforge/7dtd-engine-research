@@ -191,7 +191,7 @@ class Coverage {
     sb.AppendLine("**Assembly studied:** " + asm.Name.Name + " " + ver + ", file mtime "
                   + File.GetLastWriteTimeUtc(a[0]).ToString("yyyy-MM-dd HH:mm 'UTC'")
                   + ". The numbers below are for THIS build only: if the corpus pin");
-    sb.AppendLine("moved (`docs/coverage.md` header), regenerate before quoting any number here.");
+    sb.AppendLine("moved (`docs/meta/coverage.md` header), regenerate before quoting any number here.");
     sb.AppendLine();
     sb.AppendLine("**Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the");
     sb.AppendLine("dedicated boot + tick drivers (devirtualized `callvirt`), cross-referenced");
@@ -228,7 +228,7 @@ class Coverage {
     sb.AppendLine("|---|---|");
     sb.AppendLine("| **narrated** | backticked in a narrative subsystem doc (the closest thing to real documentation) |");
     sb.AppendLine("| **catalogued only** | backticked only in a generated `inventories/` catalog: enumerated, not explained |");
-    sb.AppendLine("| **classified** | listed in [out-of-scope-surface.md](../out-of-scope-surface.md) as not dedicated work |");
+    sb.AppendLine("| **classified** | listed in [out-of-scope-surface.md](../meta/out-of-scope-surface.md) as not dedicated work |");
     sb.AppendLine("| **unaccounted** | appears nowhere: the honest gap list |");
     sb.AppendLine();
     sb.AppendLine("## Totals");

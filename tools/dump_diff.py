@@ -132,7 +132,7 @@ def diff_type(name: str, old: TypeInfo, new: TypeInfo, full: bool = False) -> li
 
 def main() -> int:
     if len(sys.argv) not in (3, 4):
-        print("usage: vdiff.py <old-full-dir> <new-full-dir> [type-filter-regex]")
+        print("usage: dump_diff.py <old-full-dir> <new-full-dir> [type-filter-regex]")
         return 2
     old_dir = Path(sys.argv[1])
     new_dir = Path(sys.argv[2])

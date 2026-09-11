@@ -11,7 +11,7 @@ V3.0.1) and `~/.cache/zdtd-scratch/exp-Assembly-CSharp.dll` (experimental), usin
 `tools/bin/{DumpMethod,DumpType,EnumDump,Census,NetProtocolCensus,FullSurface,FindCallers}`.
 Raw dumps: the session scratchpad (not committed).
 Baseline census re-run: gmUpdate IL=631, WorldState.SaveLoad=884, 193 top-level
-NetPackage types, 4401 types / 43901 method bodies. All match `docs/coverage.md`-era
+NetPackage types, 4401 types / 43901 method bodies. All match `docs/meta/coverage.md`-era
 claims.
 
 Verdict scale: **WRONG** (contradicted by IL), **UNSUPPORTED** (asserted as fact, no

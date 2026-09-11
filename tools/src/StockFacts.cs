@@ -452,7 +452,7 @@ class StockFacts {
     }
     sb.AppendLine("  },");
     sb.AppendLine("  \"consumers\": {");
-    sb.AppendLine("    \"research_docs\": [\"docs/coverage.md\", \"docs/protocol.md\", \"docs/closed-gaps.md\", \"docs/save-region.md\"],");
+    sb.AppendLine("    \"research_docs\": [\"docs/meta/coverage.md\", \"docs/network/protocol.md\", \"docs/entities/closed-gaps.md\", \"docs/world/save-region.md\"],");
     sb.AppendLine("    \"loadgen\": [\"src/LoadGen/PackageCodec.cs GameVersion\", \"tests golden-wire\"],");
     sb.AppendLine("    \"zdtd\": [\"src/version.zig stock_wire\", \"src/protocol.zig challenge/ticks\"]");
     sb.AppendLine("  },");
@@ -469,7 +469,7 @@ class StockFacts {
     sb.AppendLine("  },");
     // Machine-checked pin sites (mirrors check_stock_facts.py consumers).
     sb.AppendLine("  \"pins\": {");
-    sb.AppendLine("    \"research\": [\"docs/coverage.md\", \"docs/protocol.md\", \"docs/closed-gaps.md\", \"docs/save-region.md\", \"README.md\", \"docs/tile-entities-power.md\", \"docs/protocol-packages.md\"],");
+    sb.AppendLine("    \"research\": [\"docs/meta/coverage.md\", \"docs/network/protocol.md\", \"docs/entities/closed-gaps.md\", \"docs/world/save-region.md\", \"README.md\", \"docs/gameplay/tile-entities-power.md\", \"docs/network/protocol-packages.md\"],");
     sb.AppendLine("    \"siblings\": [\"7dtd-loadgen/src/LoadGen/PackageCodec.cs\", \"zdtd-server/src/version.zig\", \"zdtd-server/src/protocol.zig\", \"zdtd-server/src/world/store.zig\"]");
     sb.AppendLine("  },");
     sb.AppendLine("  \"behaviour\": {");

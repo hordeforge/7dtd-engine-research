@@ -2,7 +2,7 @@
 
 **Verdict:** Every load-bearing census, surface, reachability, and experimental-delta number reproduces exactly against the DLLs; the only real issues are one overstated completeness sentence in full-surface.md, one broken documented command, and a handful of stale/unclassified minor items. No CRITICAL findings.
 
-Audited: docs/re-methodology.md, docs/full-surface.md, docs/coverage.md, docs/closed-gaps.md, docs/residuals.md, docs/engine-limitations.md, docs/experimental-delta.md, docs/INDEX.md, README.md, AGENTS.md.
+Audited: docs/meta/re-methodology.md, docs/meta/full-surface.md, docs/meta/coverage.md, docs/entities/closed-gaps.md, docs/meta/residuals.md, docs/meta/engine-limitations.md, docs/experimental-delta.md, docs/INDEX.md, README.md, AGENTS.md.
 
 Ground truth: `ASM="/home/maci/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"` (stable V3.0.1). Experimental artifact found locally: `/home/maci/.cache/zdtd-scratch/exp-Assembly-CSharp.dll` (provenance: `fetch_exp.log` in same dir; build id not independently verified, see W8).
 
@@ -64,7 +64,7 @@ Fix: prefix `../` and make the cwd convention consistent across §1-§5b.
 
 ### [W5] MINOR (wrong path): AGENTS.md rule 4
 
-Claim: "re-check `docs/coverage.md` census numbers with `tools/Census.exe`".
+Claim: "re-check `docs/meta/coverage.md` census numbers with `tools/Census.exe`".
 
 Ground truth: `ls tools/Census.exe` -> No such file or directory. The binary is `tools/bin/Census.exe` (verified working).
 

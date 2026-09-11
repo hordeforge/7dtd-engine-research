@@ -1,11 +1,11 @@
 # MinEvent action catalog (V3.2.0)
 
 **Kind:** per-leaf behavioral catalog (name -> function, derived from class name/base/code signals; no bodies).  
-**Framework:** [`../minevents.md`](../minevents.md) owns the contract; this describes each `MinEventActionBase` leaf.  
+**Framework:** [`../content/minevents.md`](../content/minevents.md) owns the contract; this describes each `MinEventActionBase` leaf.  
 **Regenerate:** hint extractor over transitive subclasses.
 **Hub:** [`INDEX.md`](../INDEX.md).  
 
-Every `MinEventActionBase` subclass (triggered effect: add buff, modify stat/cvar, spawn, sound, ...). Dispatch: [minevents.md](../minevents.md).
+Every `MinEventActionBase` subclass (triggered effect: add buff, modify stat/cvar, spawn, sound, ...). Dispatch: [minevents.md](../content/minevents.md).
 
 **71 leaves.**
 

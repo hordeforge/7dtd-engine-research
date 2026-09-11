@@ -14,8 +14,8 @@ Method: dumped every type + base via a Mono.Cecil script (`TypeBases.exe`, scrat
 - **Doc:** `docs/inventories/sequence-requirements.md`
 - **Claim:** "Every `BaseRequirement` subclass (game-event gate ...) ... **43 leaves.**" Contract owner given as `game-events.md`.
 - **Ground truth:** transitive closure of `GameEvent.SequenceRequirements.BaseRequirement` = **38** types (`python3 closure.py "GameEvent.SequenceRequirements.BaseRequirement" typebases.txt | wc -l` → 38). Diff against the doc's 43 rows shows exactly 5 doc-only rows: `RequirementBuff`, `RequirementGroup`, `RequirementHolding`, `RequirementLevel`, `RequirementWearing`. Those 5 exist only as `Quests.Requirements.*` deriving from `Quests.Requirements.BaseRequirement` (closure = exactly 5), a quest-offer-gate hierarchy that merely shares the short name `BaseRequirement`. Their listed key methods (`SetupRequirement,CheckRequirement,Clone`) are the quest API, not the sequence API (`OnInit/CanPerform/ParseProperties`) used by every genuine row, so the extractor keyed on simple name and merged two hierarchies.
-- **Corroboration:** `grep -n "SequenceRequirements" docs/game-events.md` line 35 itself says the `GameEvent.SequenceRequirements` namespace has 39 types (= abstract base + 38 subclasses), contradicting the "43" its own line 452 cites. `docs/quests-challenges.md` lines 55/141 already document the 5 quest requirements separately, so they are double-counted across catalogs.
-- **Fix:** drop the 5 `Quests.Requirements.*` rows, change count to **38**, and update `docs/game-events.md` line 452 ("all 43 requirement leaves" → 38). Optionally note the same-named quest hierarchy lives in quests-challenges.md.
+- **Corroboration:** `grep -n "SequenceRequirements" docs/content/game-events.md` line 35 itself says the `GameEvent.SequenceRequirements` namespace has 39 types (= abstract base + 38 subclasses), contradicting the "43" its own line 452 cites. `docs/content/quests-challenges.md` lines 55/141 already document the 5 quest requirements separately, so they are double-counted across catalogs.
+- **Fix:** drop the 5 `Quests.Requirements.*` rows, change count to **38**, and update `docs/content/game-events.md` line 452 ("all 43 requirement leaves" → 38). Optionally note the same-named quest hierarchy lives in quests-challenges.md.
 
 ### [F2] MAJOR: console-command-list.md missing `exportprefab` (186 vs 187 concrete commands)
 - **Doc:** `docs/inventories/console-command-list.md` ("**186 commands.**", 186 table rows).
@@ -23,7 +23,7 @@ Method: dumped every type + base via a Mono.Cecil script (`TypeBases.exe`, scrat
   - `mono tools/bin/DumpMethod.exe "$ASM" ConsoleCmdExportPrefab getCommands` → `ldsfld String ConsoleCmdExportPrefab::CommandName`
   - `mono tools/bin/DumpMethod.exe "$ASM" ConsoleCmdExportPrefab .cctor` → `ldstr exportprefab`
   So the ldstr-based extractor missed it. `grep -i exportprefab docs/` finds no mention anywhere.
-- **Propagation:** `docs/console-commands.md` cites "186" at lines 4, 7, 120, 148.
+- **Propagation:** `docs/admin/console-commands.md` cites "186" at lines 4, 7, 120, 148.
 - **Fix:** add a row for `exportprefab` (perm inherits default; description from its `getDescription`), bump count to **187**, update the four "186" citations, and make the extractor follow `ldsfld` → `.cctor` for command names.
 
 ### [F3] MAJOR (low impact): frame-entries.md misses 2 nested MonoBehaviour frame entries
@@ -32,7 +32,7 @@ Method: dumped every type + base via a Mono.Cecil script (`TypeBases.exe`, scrat
 - **Fix:** add the 2 nested entries (or state "top-level types only" in the header).
 
 ### [F4] MINOR: blocks.md "138 `Block*` types" not reproducible
-- **Doc:** `docs/blocks.md` line 16: "(138 `Block*` types, of which about 65 are concrete `Block` behavior subclasses)".
+- **Doc:** `docs/world/blocks.md` line 16: "(138 `Block*` types, of which about 65 are concrete `Block` behavior subclasses)".
 - **Ground truth:** the 65 is exact and correct (see C1). But no natural counting yields 138: top-level full-name prefix `Block*` = 131, simple-name `Block*` anywhere = 142, including nested = 180 (`awk` over typebases.txt). Likely a stale number from an earlier build.
 - **Fix:** change to "131 top-level `Block*` types" (or whatever counting rule is intended, stated explicitly).
 

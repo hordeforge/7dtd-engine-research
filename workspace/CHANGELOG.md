@@ -6,7 +6,7 @@ what changed / what was tried, verification state (`verified` / `unverified` /
 resuming substantial work. Do not log trivial one-shot tasks.
 
 ---
-## 2026-08-31 - animated skin, collision capsule and surface-query separation. `verified` from the paired stock setup paths (`Entity::AddCharacterController` IL=257 and `GameObjectAnimalAnimation::Awake` IL=61), `ilspycmd -t World` on the installed V3.2.0 client, and complementary live-client probes. The root-level `Physics` capsule is configured independently of the figure's animated bones; a local-position curve that writes zero instead of retaining a pelvis rest Y of 0.60 therefore shifts the rendered body down about 0.60 m without moving collision. The observed source AABB minimum was about -0.02 and the posed `SkinnedMeshRenderer.BakeMesh` minimum about -0.60. After correcting that curve, the posed and capsule bottoms both returned to about -0.02, but a harness still buried the creature: it assigned generator `World.GetHeightAt = 60.05` where the loaded voxel ceiling was `World.GetHeight + 1 = 61`. That corrected the burial, then exposed a third distinction: the loaded height is a whole-cell ceiling, not a slope or partial block's collider surface, so forced Y produced invisible one-metre bumps. `docs/entity-movement.md` and `docs/terrain-height.md` now record all three independent coordinate surfaces and why a teleporting visual harness must raycast actual ground. The fresh d3d11 rerun measured `voxelTop=62.000 surfaceRay=61.000`, maintained 0.032 m visual clearance, passed both ground and capsule probes, completed `pass=1 fail=0`, and was visually signed off without the excessive bump rise. Next: none for this finding.
+## 2026-08-31 - animated skin, collision capsule and surface-query separation. `verified` from the paired stock setup paths (`Entity::AddCharacterController` IL=257 and `GameObjectAnimalAnimation::Awake` IL=61), `ilspycmd -t World` on the installed V3.2.0 client, and complementary live-client probes. The root-level `Physics` capsule is configured independently of the figure's animated bones; a local-position curve that writes zero instead of retaining a pelvis rest Y of 0.60 therefore shifts the rendered body down about 0.60 m without moving collision. The observed source AABB minimum was about -0.02 and the posed `SkinnedMeshRenderer.BakeMesh` minimum about -0.60. After correcting that curve, the posed and capsule bottoms both returned to about -0.02, but a harness still buried the creature: it assigned generator `World.GetHeightAt = 60.05` where the loaded voxel ceiling was `World.GetHeight + 1 = 61`. That corrected the burial, then exposed a third distinction: the loaded height is a whole-cell ceiling, not a slope or partial block's collider surface, so forced Y produced invisible one-metre bumps. `docs/entities/entity-movement.md` and `docs/world/terrain-height.md` now record all three independent coordinate surfaces and why a teleporting visual harness must raycast actual ground. The fresh d3d11 rerun measured `voxelTop=62.000 surfaceRay=61.000`, maintained 0.032 m visual clearance, passed both ground and capsule probes, completed `pass=1 fail=0`, and was visually signed off without the excessive bump rise. Next: none for this finding.
 ## 2026-08-26 - repo-wide conformance pass against the workspace agent rules. Four classes of finding, all fixed. (1) **No static-type gate.** `mypy` was never wired in; the tree carried 507 `--strict` findings (129 unannotated defs plus ~60 real typing defects). Every Python file is now `mypy --strict` clean, `mypy.ini` pins the config, `make lint` and the ci.yml lint job run it on the CI-pinned version (mypy 2.3.1) beside ruff and shellcheck. Defects found on the way, not just annotations: `check_stock_facts` reused `val` as both `int` and `float` across two loops and `check_zdtd` fell off the end of a `str | None` signature; `test_dedi_coverage_docs` shadowed the ban-pattern loop's `label` with the nullable dump label; `bench_version_update_tooling` reused `s` as both the stripped line and the score; `test_subclass_counts` parsed heterogeneous probe rows into a `dict[str, str]` it then stuffed ints and lists into (now a frozen `Stats` dataclass). (2) **Temp files on tmpfs.** 21 gate/tool sites used the system temp dir, which is RAM-backed here (62 G tmpfs); all now stage under the gitignored `.scratch/tmp` via `_common.scratch_dir()` (Python) or an explicit `mktemp` base (drift-check.sh). (3) **Depth-counted repo roots.** 14 scripts resolved the root with `parents[N]` / nested `dirname`; `_common` now walks up for the `Makefile` + `AGENTS.md` marker pair and every script reads `_common.REPO` / `_common.TOOLS`. (4) **Prose and hygiene.** 353 em dashes removed across docs + workspace audits (headings take a colon, body prose a comma, evidence separators become `Evidence:`); banned weasel words cleared from `_common`, `Coverage.cs`, `world-generation.md`; AI-tool names stripped from four tracked artifacts (old scratchpad paths); empty Cecil `catch { }` blocks narrowed to `AssemblyResolutionException` with a stated reason; `extract_preset_codes`'s docstring dropped its embedded `python3 - <<EOF` heredoc for the `try_extract_presets.py --out` command that replaces it. Also fixed a real bug spotted in passing: `try_extract_presets` walked a **relative** `Data` directory, so its bundle scan depended on the caller's cwd. `verified` (make test-docs 22/22, make lint green incl. mypy; DLL-dependent `make test` not runnable on this host: local dedi is V3.1.0 b4 vs corpus pin b14, the pre-existing mismatch noted 2026-08-25). Next: none, this is a hygiene pass with no RE-surface change.
 ## 2026-08-25 - review-follow-up: mention-depth published + promoted-types enforced as tool input. M1: `tools/mention_depth.py` (DLL-free) measures the depth behind any narrated fraction over narrative docs: 9507 distinct type-shaped backtick-quoted identifiers; exactly-1 = 66% / 2-4 = 25% / 5-19 = 7% / 20+ = 1% - two thirds of named types rest on a single passing reference. Table published in re-methodology §1 ("Mention depth"); coverage.md programmatic-coverage note links it. Coverage.exe now emits the same histogram restricted to reached game types into the generated report, and stamps the report header with the studied build's `Constants.cVersion*` display version + file mtime (game images are 0.0.0.0; without a stamp a report regenerated against the wrong install passes for the pinned build - caught live here: local dedi is V3.0.1 b4 vs corpus pin V3.1.0 b14, so the committed coverage-report.md was deliberately NOT regenerated and stays pin-matched; test_committed_inventories_current fails on this host for any inventory until a b14 assembly is present, pre-existing environmental mismatch). M3 hardening: promoted-types.txt was a documented input nothing enforced - new `tools/tests/test_promoted_types.py` (DLL-free, CI-safe, negative-tested) fails if any of the 62 referrer-promoted names re-enter out-of-scope-surface.md or if the maintenance note stops citing the input; OOS maintenance note now points at tools/data/promoted-types.txt explicitly; wired into make test/test-docs + README tables (29 scripts). C1/M2 already stood from the V3.1 retarget (four-tier non-summed report with caveats; per-doc audit table guarded by test_coverage_consistency). `verified` (make test-docs green incl. new gate; reach-consistency green; fresh b4 regen inspected in .scratch then discarded).
 ## 2026-08-24 - SDCS validation: five full sweeps of sdcs-character-gear.md vs a fresh pinned-Cecil il/full-v3.1.0 regeneration (Cecil 0.11.5 fetched from NuGet, sha matches data/cecil.pin; tools rebuilt incl. legacy; all dump sets regenerated per il/README). Sweep 1: 123/123 IL= claims exact. Sweep 2: 33/33 quoted literals/paths present as ldstr operands (concat fragments verified individually). Sweep 3: archetypes.xml/sdcs.xml/items.xml-SDCS contracts re-derived attribute-for-attribute from parser IL (incl. HairMaskTypes Full/Hat/None order, xmlsToLoad entry 22 flags, lambda-hosted class=="SDCS" match). Sweep 4: behavioral claims in doc sections 1-13 re-checked against method bodies (cctor arrays + buffer capacities, setupRig female-only Hips capsule 0/0/-0.03 r0.15 h0.375, gaze/eyelid constants 35/30/25/75/7/5, useCosmetic decision chain, Stitch _Tint/_ClipFPV handling, CollectRequiredNamesForSlot allowlist, teardown chain, GearVariantMatrixSO, ConsoleCmdSDCS closed enums) - zero drift. Sweep 5: completeness - all 76 methods of the SDCS trio accounted for (3 helper mentions added: MapSourceByName IL=10, LoadRaceDataFromResources IL=7, LoadHairTypeFromResources IL=69); make verify + make test green. Collateral pre-existing staleness fixed on the way: quests-challenges.md GetPosition citations re-attributed (IL=339 ObjectiveRandomPOIGoto, IL=232 ObjectiveClosestPOIGoto, base IL=363), netpackage-bodies.md + coverage-report.md regenerated with the matching tools (were stale vs current tool output; test_committed_inventories_current now green). `verified` (IL + full gate suite). Next: none - SDCS gap closed and validated.
@@ -6581,10 +6581,10 @@ Objective: fix all problems surfaced by `workspace/outputs/stock-re-corpus-audit
 (paper/code audit of our RE corpus vs tools/consumers/live ASM).
 
 Done (verified):
-- **Critical wire:** `docs/tile-entities-power.md` NetPackageTileEntity layout
+- **Critical wire:** `docs/gameplay/tile-entities-power.md` NetPackageTileEntity layout
   now teBlockId:i32 + payloadLen:i32, write IL=27 / read IL=24 (matches
   protocol-packages §6.12 + live DumpMethod).
-- **High census drift:** `docs/coverage.md` live census table → 4414 / 44107 /
+- **High census drift:** `docs/meta/coverage.md` live census table → 4414 / 44107 /
   SaveLoad 926 / CurrentSaveVersion 23 (was stale 4401/43901/884 under 3.1 banner).
 - **Framing:** README, protocol-packages, protocol-frames, loop-gmupdate titles/pins
   to V3.1.0 (b14); re-methodology §1 shows live vs historical V3.0.1 columns.
@@ -6612,8 +6612,8 @@ Done (verified against live V3.0.1 Assembly-CSharp.dll):
   WorldInfo, EntitySpawn(+EntityCreationData header), EntitySpawnResponse,
   SetBlock(+BlockChangeInfo), SetBlockResponse, HoldingItem, PlayerInventory,
   and the full 4-package encryption handshake (closes residual). Findings:
-  6 channel-1 packages, 8 compressed, 10 pre-auth. -> `docs/protocol-packages.md`.
-- **Docs:** new `docs/re-methodology.md` (how to RE) + `docs/protocol-packages.md`;
+  6 channel-1 packages, 8 compressed, 10 pre-auth. -> `docs/network/protocol-packages.md`.
+- **Docs:** new `docs/meta/re-methodology.md` (how to RE) + `docs/network/protocol-packages.md`;
   updated protocol/coverage/residuals/network/engine-limitations/INDEX/README;
   new `AGENTS.md`. Verified: census 4401/43901/631/884 match; corrected NetPackage
   count fork (~196 -> 194 = 193 wire + NetPackageManager); fixed 3 broken
@@ -6727,7 +6727,7 @@ game copy or fabricate coverage); delivered the honest maximum:
   7,413 types: namespace/kind/base/signatures/IL sizes, no bodies).
 - `tools/src/DumpAll.cs` - full LOCAL IL reversal (every method body, one file per
   type) into git-ignored `il/full-v3.0.1/`; proven on GamePath (18 types/112 methods).
-- `docs/full-surface.md` - committed map of all 87 namespaces by functional cluster
+- `docs/meta/full-surface.md` - committed map of all 87 namespaces by functional cluster
   + honest coverage ledger (dedicated hot path deeply narrated = low-single-digit %
   of 7,413 types but the surfaces that run every tick) + roadmap + regen instructions.
 Measured scope: 7,413 types / 53,011 methods-with-body / 1,734,742 IL / 87 ns;
@@ -6747,7 +6747,7 @@ for every state machine (user requirement).
   world-generation, platform-auth. Each writes one docs/<slug>.md with state-machine
   diagrams; lead integrates (INDEX cluster F + full-surface ledger) + verifies.
 - New tools: FullSurface (committable whole-assembly metadata) + DumpAll (full local
-  IL); docs/full-surface.md holds the 87-namespace map + coverage ledger.
+  IL); docs/meta/full-surface.md holds the 87-namespace map + coverage ledger.
 Verified: 2 new docs 0 em dashes / 0 broken links / 9 mermaid; dumps git-ignored.
 Next: integrate the 4 subagent docs; then <global> subsystems (spawn, vehicles,
 buffs, weather, chat, persistence).
@@ -6828,7 +6828,7 @@ native residuals honestly enumerated. State: verified. DEDICATED CODEPATHS DONE.
 
 User challenge "did you fully reverse everything the server needs" -> ran a deeper
 "heavy unreferenced types" lens which found a real miss: PlayerStealth (server
-stealth/noise/smell detection, TickServer 430 IL). Wrote docs/stealth-smell.md.
+stealth/noise/smell detection, TickServer 430 IL). Wrote docs/entities/stealth-smell.md.
 Then built the definitive lens: tools/src/Reach.cs (call-graph reachability from
 GameManager.StartAsServer/gmUpdate/tick drivers, devirtualizing callvirt).
 Reached 28,374 methods / 4,516 types. Cross-filtered to Assembly-CSharp game types:
@@ -7454,7 +7454,7 @@ Verification: 0 broken links / dashes / odd fences, both gates pass, zdtd green.
 
 ## 2026-07-26 (cont.) - whole-system visual map
 
-Added `docs/architecture-map.md`: the top-level view the corpus lacked. It had 176
+Added `docs/meta/architecture-map.md`: the top-level view the corpus lacked. It had 176
 per-subsystem diagrams but no single picture of how the pieces connect, so a reader
 had to assemble the system mentally from 60 docs.
 
@@ -7563,7 +7563,7 @@ Effect on the honest tiers: narrated **1120 -> 1248 (33%)**, catalogued
 `tools/src/RefScan` (server vs client dominance) and split:
 
 - **494** client/platform/vendored/infra types appended as a *supplementary*
-  section in `docs/out-of-scope-surface.md` (base hand-curated lists left
+  section in `docs/meta/out-of-scope-surface.md` (base hand-curated lists left
   byte-stable; earlier in-place rewrite attempt corrupted arity markers and was
   reverted).
 - **216** server-dominant / reflection-XML types leaf-catalogued under
@@ -7610,7 +7610,7 @@ plus a short apply-stage note in `dedicated-misc-systems.md`).
   `networkMaxBytesPerSecond`; send path builds `NetPackageWaterSimChunkUpdate`
   for `clientsNearChunkBuffer`.
 
-Expanded `docs/light-mesh-water.md` §4 with diagrams + method map; cross-linked
+Expanded `docs/world/light-mesh-water.md` §4 with diagrams + method map; cross-linked
 from `dedicated-misc-systems.md`. Coverage still **unaccounted=0** after regen.
 
 **Verification:** dedi coverage gate OK; 0 em dashes; mermaid hazard scan clean
@@ -8331,7 +8331,7 @@ the empirical evidence.
 
 ## 2026-08-24 - Shader (class 48) sub-program blob decoded
 
-New docs/shader-subprogram-blob.md picks up where texture-atlas-unityfs.md
+New docs/world/shader-subprogram-blob.md picks up where texture-atlas-unityfs.md
 stopped (that page ends at TextAsset, class 49). Covers the LZ4 per-platform
 blobs, the 12-byte (offset, length, segment) record table, the code-blob
 record for version tag 202012090, and the DX11 program-data header.

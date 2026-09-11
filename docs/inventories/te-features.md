@@ -1,7 +1,7 @@
 # Tile-entity feature catalog (V3.2.0)
 
 **Kind:** per-feature reference (name -> code-derived role, base, serialized state and behavior fingerprint).
-**Framework:** [`../tile-entities-power.md`](../tile-entities-power.md) owns the TE model + power; this enumerates the `TEFeatureAbs` leaves.
+**Framework:** [`../gameplay/tile-entities-power.md`](../gameplay/tile-entities-power.md) owns the TE model + power; this enumerates the `TEFeatureAbs` leaves.
 **Regenerate:** `MethodList.exe` grep `TEFeature` + Cecil base-type walk + `DumpType.exe`/`DumpMethod.exe` on each leaf's `Read`/`Write`.
 **Hub:** [`../INDEX.md`](../INDEX.md).
 

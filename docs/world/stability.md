@@ -1,0 +1,282 @@
+# Block stability, structural support and falling blocks
+
+**Owns:** the stability calculator and falling blocks: `StabilityInitializer` spread/clear, `GetBlockStability` BFS, `EntityFallingBlock` landing.  
+**Hub:** [`INDEX.md`](../INDEX.md).  
+Status: **derived 2026-08-06** from the V3.1.0 b14 disassembly (dedi-complete
+dump). Raw IL in [`../../il/stability-v3.2.0/`](../../il/stability-v3.2.0/) (regenerable
+evidence, git-ignored). This is the server
+side of the stability model zdtd must match so that unsupported structures
+collapse the same way on the authoritative plane and on the stock client.
+
+Related: [world-chunks.md](../world/world-chunks.md) (Stability runs on clients too,
+falling-block pump runs off the IsServer guard), [save-region.md](../world/save-region.md)
+(`chnStability` optional channel in the chunk file).
+
+## Why the server needs this
+
+`ChunkStabilityEnabled` is a non-persistent GameStats bool defaulting true
+(asm.il 1919743), so every stock client runs its own `StabilityCalculator` plus
+`StabilityInitializer` (`ChunkCluster::Init` 1125631-1125637) and recomputes the
+whole plane locally (`ChunkCluster::CalcStability` 1127044, inside
+`LightChunk`). `bNetwork=true` skips the stability channel on the wire, which is
+only sound because the client rebuilds it. If the server never models stability,
+removing a support makes the client collapse blocks the server still reports as
+standing: a desync the client treats as authoritative. The server must run the
+same plane math, then convert the same positions to falling blocks.
+
+## The model
+
+The plane is a per-block byte (`Chunk.chnStability`, 0..15). `15` is full
+support. `0` is unsupported: the only value that makes a block fall. Non-support
+blocks are capped at `1` wherever they sit. A block falls when its byte is `0`
+after a support removal and the re-spread cannot lift it back.
+
+### Seed (Chunk::ResetStability, ResetStabilityToBottomMost)
+
+On chunk creation every non-air, non-liquid, non-`StabilityIgnore` block is set
+to `15` when `Block.StabilitySupport` is true, else `1`. Note this makes even a
+floating structure fully stable until a support change runs: stability is
+derived on change, not baked at gen.
+
+### Spread (StabilityInitializer)
+
+`DistributeStability(chunk)` scans y 0..maxHeight per column and calls
+`spreadHorizontal(x,y,z,stab)` for every block whose current stability is > 1.
+`set_StopStabilityCalculation(false)` at the end marks the chunk done.
+
+`spreadHorizontal(x,y,z,stab)`:
+- return if `stab <= 1`; else `stab -= 1`.
+- for each of the 4 HORIZONTAL_DIRECTIONS:
+  - nbr = (x+dx, y, z+dz); resolve neighbor chunk when crossing the border
+    (world coords via `GetBlockWorldPosX/Z`).
+  - skip air / `blockMaterial.IsLiquid` / `StabilityIgnore`.
+  - `v = stab`; if `v > 1` and the neighbor block is not `StabilitySupport`,
+    `v = 1`.
+  - if `v > chunk.GetStability(nbr)`: `SetStability(nbr, v)`; and if the
+    neighbor is `StabilitySupport`, recurse `spreadHorizontal(nbr, v)` and
+    `spreadVertical(nbr, v)`.
+
+`spreadVertical(x,y,z,stab)` has two phases:
+- upward from y+1 to 255 with the same `stab` value (`v = min(stab,15)`, capped
+  to 1 on non-support blocks); set + recurse horizontally when `StabilitySupport`.
+- downward from y-1 with `stab-1` decrementing each step (`v = min(v,15)`, cap 1
+  on non-support); same set + recurse.
+
+So: horizontal support decays 1 per block step; vertical support keeps its value
+going up and decays 1 per block going down; anything without `StabilitySupport`
+never carries more than 1.
+
+### Removal (StabilityCalculator::BlockRemovedAt -> ChannelCalculator)
+
+`StabilityCalculator::BlockRemovedAt(pos)` (126 IL) skips y >= 255, clears
+`stab0Positions`, delegates to `ChannelCalculator::BlockRemovedAt(pos, out)` and,
+when not remote, walks all 6 neighbors, zeroing the stability of neighbors that
+fail `IsBlockSupportedByNeighbor` and collecting them into `stab0Positions`
+(positions whose byte goes to 0). Neighbor re-queue into `queueStabilityAvail`
+is capped at **200** entries (same hard cap as placement).
+
+`ChannelCalculator::BlockRemovedAt` (81 IL) skips air/liquid/`StabilityIgnore`,
+then runs `CalcChangedPositionsFromRemove(pos, list2, stab0, null)`:
+
+`CalcChangedPositionsFromRemove` is a BFS from the removed position over all 6
+directions. For each reached non-air, non-liquid, non-`StabilityIgnore` block it
+computes the new stability via `ChangeStability`:
+- `v = getMaxStabilityAround(pos, out bFromDownwards)`; when not from a
+  downwards neighbor, `v -= 1`; cap `v` at 1 for non-`StabilitySupport` blocks.
+- if `v` differs from the current byte, set it.
+- when the new value is 0, add the position to `stab0Positions` (it will fall).
+- blocks whose computed value is below their old value propagate the BFS; equal
+  or higher stops that branch.
+
+`StabilityInitializer::BlockRemovedAt(worldX, worldY, worldZ)` (106 IL) is the
+plane recompute path: set the removed cell's byte to 0, then `unspreadHorizontal`
+(clear the affected region via `clearHorizontal`/`clearDown` with a stop value,
+then re-spread from the remaining supported anchors).
+
+### Placement (StabilityCalculator::BlockPlacedAt / ChannelCalculator::BlockPlacedAt)
+
+`StabilityCalculator::BlockPlacedAt` (**IL=19**): always
+`channelCalculator.BlockPlacedAt(pos, forceFull)`; if not remote and
+`queueStabilityAvail.Count < **200**`, enqueue pos for avail recompute.
+
+`ChannelCalculator::BlockPlacedAt(pos, isForceFullStab)` (154 IL) with
+`getMaxStabilityAround(pos, out bFromDownwards)`: the new block's stability is
+`maxStabilityAround - 1` (or `maxStabilityAround` when the max comes from below),
+capped 1 for non-support blocks, then propagated (`BlockPlacedAt` also has a
+force-full path used by MultiBlockManager).
+
+### The fall trigger (StabilityCalculator/UpdatePhysics + physicsIsolation)
+
+`UpdatePhysics::MoveNext` (126 IL) is a coroutine on `updatePeriod`: while
+`queueStabilityEmpty` is non-empty it dequeues a position, runs
+`physicsIsolation(pos)`, and for every position in `hashSetIsolation` calls
+`World::AddFallingBlock(pos, false)`.
+
+`physicsIsolation(pos)` (125 IL) is a 6-direction flood: skip air, liquid,
+`StabilityIgnore` and already-processed cells; a non-child cell whose chunk
+stability byte is `0` is added to `hashSetIsolation` (capped at 1000 positions),
+and every reached cell is enqueued for the flood regardless of its byte. The
+flood runs through the whole connected non-air region, so removing one support
+collects every now-unsupported block of the structure.
+
+### Falling blocks (World::AddFallingBlock / LetBlocksFall)
+
+`World::AddFallingBlock(pos, includeOversized)` (38 IL): skip if already queued,
+or the block is air / child / `StabilityIgnore`, or oversized without
+`includeOversized`; otherwise enqueue into `World.fallingBlocks` and add to
+`fallingBlockSet` (dedupe), plus `DynamicMeshManager::AddFallingBlockObserver`.
+
+**Batch surface:** `AddFallingBlocks(list)` (IL=18) fans each position into
+`AddFallingBlock(pos, false)`. `ClearFallingBlocksForChunks(chunks)` (IL=111)
+drains the `fallingBlocks` queue: a position whose chunk is in the given set is
+dropped from `fallingBlockSet` (its fall is cancelled), everything else is
+collected into `resetTempPositions` and the queue is rebuilt from them (the
+chunk unload / stream path).
+
+`World::LetBlocksFall` (220 IL, run from `GameManager::UpdateTick` outside the
+IsServer guard, so clients run it too): when `EntityFallingBlocks::Enabled` is
+set it first groups via `GroupFallingBlocks` (up to **2** groups per pump via
+`CreateFallingBlockGroup`), then dequeues individual positions, skipping
+processed/grouped ones, reads the block value, the texture array and any tile
+entity, and spawns the falling-block entity (`EntityFallingBlocks` for groups,
+`EntityFallingBlock` for singles) via
+`EntityFactory::CreateEntity(EntityClass::FromString("fallingBlock"))`.
+
+**`CreateFallingBlockGroup(list)` (IL=107):** snapshot block values + textures;
+for each pos `OnBlockStartsToFall` + `DynamicMeshManager.ChunkChanged` + remove
+from `groupedBlocks`; if first block `ShowModelOnFall`, spawn `fallingBlocks`
+entity at center with ±0.1 xz jitter.
+
+**`World.GetBlockValues(groupBlocks)` (IL=25)** is the snapshot helper behind
+the group snapshot: allocates a `BlockValue[count]` and fills index i with
+`GetBlock(groupBlocks[i])`. **`GetBlockTextureFullArrays(groupBlocks)`
+(IL=34)** is the texture twin: per position `GetTextureFullArray(x, y, z)`
+into a `TextureFullArray[]` (the mesh material arrays the falling-block
+entity needs).
+
+**`GroupFallingBlocks` (IL=292 high-level):** BFS over `fallingBlockSet`
+connected non-air non-terrain blocks; enforce `GroupBounds.IsWithinSize`;
+enqueue completed groups into `fallingGroups` and mark `groupedBlocks`.
+
+**`Block.OnBlockStartsToFall` (IL=6):** base path only
+`SetBlockRPC(pos, Air)` (remove solid before entity simulates). Overrides:
+`BlockModelTree` may `OnBlockDestroyedBy` then particle; composites forward to
+`TileEntityComposite.OnBlockStartsToFall` then base.
+
+## The stability viewer BFS (GetBlockStability)
+`GetBlockStability(pos, newBV)` (293 IL) is the debug/UI measure (StabilityViewer
+F9 overlay) and the `GetBlockStabilityIfPlaced` preview; it is not the fall
+decision. It runs a 25-iteration BFS from the position over
+`Vector3i.AllDirectionsShuffled`:
+
+- `mass` = sum of `blockMaterial.Mass` of every reached block.
+- `downTotal` = sum of `GetForceToOtherBlock` over reached blocks' neighbors
+  with stability > 0; `GetForceToOtherBlock(other)` =
+  `FastMin(StabilityGlue(block), StabilityGlue(other))` (10 IL). A neighbor
+  directly below with stability >= 1 sets `downTotal = 100000` (direct support
+  dominates; masses are small, so the structure is stable).
+- result `1 - mass / (downTotal * 1.01)` when `downTotal > 0`, `1` when no
+  support was reached, `0` when `mass > downTotal`.
+
+**`BuildStabilityBlocks` (StabilityViewer leaf, ctor IL=11 + `RegisterWhenDone`
+coroutine IL=1304):** the debug F9 overlay's per-chunk box builder. The ctor
+`StartCoroutine(RegisterWhenDone)`: after a 0.01 s delay it reads the chunk at
+`startPos`; a missing / not-yet-available / empty chunk just removes
+`startPos` from `StabilityViewer.buildingChunks` and clears the `boxes` entry
+(both under `Monitor`). Otherwise it scans the whole 16³ chunk volume, skipping
+terrain and air, collecting every solid position with
+`StabilityCalculator.GetBlockStability(pos)`, and builds one box mesh (8
+vertices per cell, vertex color = `white * stability`, 36 indices per cell)
+registered as `StabilityViewer.boxes[startPos]` under the `StabilityViewBoxes`
+root - so the overlay's per-cell shade maps stability 0..1 to black..white.
+
+### `getMaxStabilityAround` (IL=61) closed 2026-08-07
+
+1. `_bFromDownwards = false`; `maxStab = 0`; `downStab = 0`.
+2. For each of `Vector3i.AllDirections` (6):
+   - `s = world.GetStability(neighbor)`.
+   - If direction.y == **-1**: `downStab = s` (downward neighbor byte, even if 0).
+   - If `s > maxStab` **and** neighbor block has `StabilitySupport`: `maxStab = s`.
+3. `_bFromDownwards = (maxStab == downStab)`; return `maxStab`.
+
+So downward support wins the `bFromDownwards` flag only when the max support
+value equals the downward neighbor's stability (including when both are 0).
+Non-support blocks never contribute to the max even if they have high bytes.
+
+### `ChangeStability` (IL=111)
+
+Recursive: for each neighbor non-air/non-liquid/non-`StabilityIgnore`, candidate
+`stab-1`; if current stability already >= candidate, stop; non-support blocks
+cap candidate at 1; update stab0 set; `SetStability`; recurse.
+
+**`StabilityCalculator` constants (IL):** `cInfiniteSupport` = **100000**,
+`cSupportScale` = **1.01**, `isolatedBlockLimit` = **1000**, `maxIterations` =
+**20**, `stabilityQueueLimit` = **200**.
+
+## Remaining detail to pin down before implementing
+
+- **Closed 2026-08-08 (stability clear/unspread mechanics, IL-verified):**
+  the `StabilityInitializer` clear and unspread paths share one gate set.
+  Every neighbor test skips (leaves the block alone) when the block is air,
+  `!Block.StabilitySupport`, `MaterialBlock.IsLiquid`, `Block.StabilityIgnore`,
+  or `GetStability == 0`:
+  - `clearHorizontal(chunk, x, y, z, stabStop)` (IL=114) / `clearDown`
+    (IL=59): for each of the 4 `HORIZONTAL_DIRECTIONS` (clearHorizontal) or
+    the block below (clearDown, y-1, recursing down + horizontal at each
+    level), when the neighbor's `stab < stabStop` it `SetStability(..., 0)`
+    and recurses. Chunk-crossing neighbors are fetched via
+    `world.GetChunkFromWorldPos` and remapped with `World.toBlockXZ`.
+  - `unspreadHorizontal` (IL=136) / `unspreadVertical` (IL=154): propagate
+    the caller's `stab` value into the neighbor (`SetStability(..., stab)`),
+    add the affected position to the caller's `HashSet<Vector3i>`, and
+    recurse with the same `stab`.
+  - Entry points: `BlockRemovedAt` (IL=106) reads the removed block's old
+    stability, `SetStability(..., 0)` on the position, then
+    `unspreadHorizontal` + `unspreadVertical` with the old value and walks
+    the affected set (re-checking each position via `GetChunkFromWorldPos`);
+    `BlockPlacedAt` (IL=125) runs the `spreadHorizontal` / `spreadVertical`
+    (IL=127/152) counterpart; `DistributeStability` (IL=72) is the initial
+    distribution pass.
+- `Block.StabilitySupport`, `Block.StabilityIgnore`,
+  `MaterialBlock.StabilityGlue` and `MaterialBlock.Mass` data sources in
+  blocks.xml (properties on `<block>` and `<material>`), to be loaded into the
+  block/material tables.
+
+Landing of `EntityFallingBlock` is resolved in [entity-ai.md](../entities/entity-ai.md) §8: no re-placement;
+settled on a non-air, stability > 0 block below, it plays `<surface>destroy`
+audio and drops items (Fall event prob from the first drop entry, Destroy pass
+at 0.7 early), gated on GamePrefs 148, then `SetDead` (also on 300 ticks or
+world-y below 2).
+
+## Chunk file note
+
+`Chunk.write` writes the optional `chnStability` channel (save-region.md) but the
+wire skips it (`bNetwork=true`). zdtd's ZCH3 chunk format has no stability
+channel today; the plane can be recomputed on load with
+`ResetStability` + `DistributeStability` semantics instead of persisting it.
+
+## Changelog
+
+- **2026-08-11:** Stability IL re-verified: BlockPlacedAt IL=19, BuildStabilityBlocks ctor IL=11 + RegisterWhenDone MoveNext IL=1304, getMaxStabilityAround IL=61, ChangeStability IL=111, clearHorizontal IL=114, clearDown IL=59, GetBlockValues IL=25, GetBlockTextureFullArrays IL=34 (exact).
+- **2026-08-10:** Stability/failing-block IL sizes re-verified: BlockPlacedAt
+  IL=19, World.AddFallingBlocks IL=18, ClearFallingBlocksForChunks IL=111,
+  CreateFallingBlockGroup IL=107, GetBlockValues IL=25 (all exact).
+- **2026-08-08:** StabilityInitializer clear/unspread mechanics closed (shared gates: air / !StabilitySupport / liquid / StabilityIgnore / stab==0; clear sets 0 below stabStop, unspread propagates the caller stab via HashSet tracking; BlockRemovedAt/BlockPlacedAt entries).
+- **2026-08-08:** BuildStabilityBlocks (StabilityViewer F9 overlay) leaf:
+  ctor coroutine RegisterWhenDone IL=1304, 16^3 scan of solid non-terrain
+  blocks, per-cell box mesh colored white * stability, boxes dict under
+  Monitor, empty/unavailable chunk cleanup.
+- **2026-08-08:** EntityFallingBlock landing resolved (entity-ai §8): no
+  re-placement, drops + SetDead; residual closed.
+- **2026-08-07:** GroupFallingBlocks BFS GroupBounds size limit.
+- **2026-08-07:** CreateFallingBlockGroup OnBlockStartsToFall + fallingBlocks entity.
+- **2026-08-07:** OnBlockStartsToFall base SetBlockRPC Air; tree/composite
+  overrides.
+- **2026-08-07:** getMaxStabilityAround IL=61 (AllDirections, StabilitySupport
+  max, bFromDownwards = max==down); ChangeStability recurse stab-1.
+- **2026-08-07:** BlockPlacedAt / BlockRemovedAt `queueStabilityAvail` hard cap
+  **200**; placement always channels then optional enqueue when not remote.
+- 2026-08-06: derived plane seed/spread/removal/fall paths from
+  `StabilityCalculator`, `StabilityInitializer`, `ChannelCalculator`,
+  `World::AddFallingBlock/LetBlocksFall` and `EntityFallingBlock(s)`; dumps in
+  `il/stability-v3.2.0/`.

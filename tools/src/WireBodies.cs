@@ -145,10 +145,10 @@ static class WireBodies {
     sb.AppendLine();
     sb.AppendLine("**Kind:** auto-extracted per-package wire-body reference (ordered `write()` field");
     sb.AppendLine("sequence). Not a hand-narrative; complements the annotated bodies in");
-    sb.AppendLine("[`../protocol-packages.md`](../protocol-packages.md) and the census in");
+    sb.AppendLine("[`../network/protocol-packages.md`](../network/protocol-packages.md) and the census in");
     sb.AppendLine("[`netpackages.md`](netpackages.md).  ");
     sb.AppendLine("**Regenerate:** `mono tools/bin/WireBodies.exe \"$ASM\" docs/inventories/netpackage-bodies.md`.  ");
-    sb.AppendLine("**Method:** [`../re-methodology.md`](../re-methodology.md).  ");
+    sb.AppendLine("**Method:** [`../meta/re-methodology.md`](../meta/re-methodology.md).  ");
     sb.AppendLine("**Hub:** [`INDEX.md`](../INDEX.md).");
     sb.AppendLine();
     sb.AppendLine("Each row is one `BinaryWriter.Write(T)` or nested `.Write(writer)` in emit order.");
