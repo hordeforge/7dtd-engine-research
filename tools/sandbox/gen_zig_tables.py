@@ -106,8 +106,10 @@ def emit(json_path: str, out_path: str) -> None:
             df = "0.0"
             di = str(d if d is not None else 0)
         else:
+            # Boolean options: the census carries the IL default (1 for 25 of
+            # the 32 stock bools). Forcing 0 inverted every unset option.
             df = "0.0"
-            di = "0"
+            di = "1" if d else "0"
         kind = "float" if o["type"] == "float" else ("int" if o["type"] == "int" else "boolean")
         out.append(
             f"    .{{ .id = {o['id']}, .name = {zstr(o['name'])}, "
