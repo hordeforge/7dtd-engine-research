@@ -20,6 +20,7 @@ Usage: python3 tools/tests/test_xml_pins_gate.py
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -91,6 +92,17 @@ def main() -> int:
                 for k, v in want.items():
                     if data.get(sec, {}).get(k) != v:
                         bad.append(f"{sec}.{k}={data.get(sec, {}).get(k)!r} != {v!r}")
+            # Source identity: regeneration records a 64-hex sha256 + byte
+            # count for each pinned Config file.
+            ident = data.get("source_identity") or {}
+            for key in ("entityclasses.xml", "traders.xml", "buffs.xml"):
+                row = ident.get(key) or {}
+                digest = row.get("sha256")
+                size = row.get("bytes")
+                if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+                    bad.append(f"source_identity.{key} missing a 64-hex sha256")
+                if not isinstance(size, int) or size <= 0:
+                    bad.append(f"source_identity.{key} missing a positive byte count")
 
         # 2. Unchanged install passes --check.
         rc, out = run("--check", "--game-dir", game, "--pins", pins)
@@ -127,6 +139,17 @@ def main() -> int:
         rc, out = run("--check", "--game-dir", game, "--pins", pins)
         if rc != 1 or "entityclasses_health.healthSlim" not in out:
             bad.append(f"health drift not detected (rc={rc}):\n{out}")
+
+        # 5b. Same values, different bytes: a comment-only edit changes no
+        # pinned value but must still FAIL on source identity (the silent
+        # re-release case version pins cannot see).
+        write_config(game, "entityclasses.xml", ENTITYCLASSES)
+        with open(os.path.join(game, "Data", "Config", "buffs.xml"), "a", encoding="utf-8") as f:
+            f.write("<!-- re-release -->\n")
+        rc, out = run("--check", "--game-dir", game, "--pins", pins)
+        if rc != 1 or "source_identity.buffs.xml" not in out:
+            bad.append(f"byte-only drift not detected (rc={rc}):\n{out}")
+        write_config(game, "buffs.xml", BUFFS)
 
         # 6. Wrong game dir (no parseable health values) refuses to wipe pins.
         write_config(game, "entityclasses.xml", ENTITYCLASSES)

@@ -2,7 +2,12 @@
   "schema": 1,
   "generated_by": "tools/src/StockFacts.cs",
   "asm": "Assembly-CSharp.dll",
-  "extracted_utc": "2026-09-05T08:49:28.3213110Z",
+  "source_identity": {
+    "assembly_csharp_dll_sha256": "3737eedc9f143d428a69030317428c45d342be4f11006a46d72bcd7b1d0fc64d",
+    "assembly_csharp_dll_bytes": 11610624,
+    "note": "hash of the exact extracted bytes; version fields can repeat across a silent re-release, this hash cannot"
+  },
+  "extracted_utc": "2026-09-15T08:13:49.1587450Z",
   "version": {
     "release_type": 1,
     "major": 3,

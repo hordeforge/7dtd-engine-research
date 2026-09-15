@@ -15,6 +15,7 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -39,12 +40,37 @@ CFG_BUFFS = "Data/Config/buffs.xml"
 HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="(\d+)"')
 
 
+def sha256_file(path: str) -> tuple[int, str]:
+    """Byte count + hex sha256 of a file, streamed (no game bytes retained)."""
+    h = hashlib.sha256()
+    n = 0
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+            n += len(chunk)
+    return n, h.hexdigest()
+
+
 def extract(game_dir: str) -> dict[str, Any]:
     def read_if_present(path: str) -> str | None:
         if not os.path.isfile(path):
             return None
         with open(path, encoding="utf-8", errors="replace") as fh:
             return fh.read()
+
+    # Source identity: hash of the exact bytes each pinned section was read
+    # from. Version labels repeat across silent re-releases; these hashes do
+    # not, and --check fails closed when they drift.
+    source_paths = {
+        "entityclasses.xml": os.path.join(game_dir, CFG_ENTITIES),
+        "traders.xml": os.path.join(game_dir, CFG_TRADERS),
+        "buffs.xml": os.path.join(game_dir, CFG_BUFFS),
+    }
+    source_identity: dict[str, dict[str, Any]] = {}
+    for key, path in source_paths.items():
+        if os.path.isfile(path):
+            size, digest = sha256_file(path)
+            source_identity[key] = {"bytes": size, "sha256": digest}
 
     hp: dict[str, int] = {}
     epath = os.path.join(game_dir, CFG_ENTITIES)
@@ -78,6 +104,7 @@ def extract(game_dir: str) -> dict[str, Any]:
         buffs["thirst_buff"] = "buffStatusThirsty01"
     return {
         "sources": [CFG_ENTITIES, CFG_TRADERS, CFG_BUFFS],
+        "source_identity": source_identity,
         "entityclasses_health": hp,
         "traders_root": trader,
         "buffs_survival": buffs,
@@ -92,6 +119,38 @@ def section_diffs(live: dict[str, Any], committed: dict[str, Any]) -> list[str]:
         for k in sorted(set(lv) | set(cv)):
             if lv.get(k) != cv.get(k):
                 diffs.append(f"{sec}.{k}: install={lv.get(k)!r} pinned={cv.get(k)!r}")
+    return diffs
+
+
+SOURCE_FILES = {
+    "entityclasses.xml": CFG_ENTITIES,
+    "traders.xml": CFG_TRADERS,
+    "buffs.xml": CFG_BUFFS,
+}
+
+
+def identity_diffs(live: dict[str, Any], committed: dict[str, Any]) -> list[str]:
+    """Byte-identity diffs for the exact files the pins were read from.
+
+    A silent TFP re-release keeps every pinned value and still changes bytes;
+    the hash is what catches it.
+    """
+    diffs: list[str] = []
+    lv, cv = live.get("source_identity") or {}, committed.get("source_identity") or {}
+    if not cv:
+        return [
+            "source_identity: committed pins carry no source hashes (re-run xml_pins.py --game-dir <studied install>)"
+        ]
+    for key, rel in sorted(SOURCE_FILES.items()):
+        want = (cv.get(key) or {}).get("sha256")
+        got = (lv.get(key) or {}).get("sha256")
+        if not want or not isinstance(want, str) or len(want) != 64:
+            diffs.append(f"source_identity.{key}: committed pin has no usable sha256")
+        elif got != want:
+            diffs.append(
+                f"source_identity.{key}: install bytes differ from the studied file "
+                f"(install={got!r} pinned={want!r}; {rel})"
+            )
     return diffs
 
 
@@ -177,15 +236,21 @@ def main() -> int:
         print("  regenerate with: python3 tools/xml_pins.py --game-dir <dir>")
         return 1
     diffs = section_diffs(live, committed)
+    diffs.extend(identity_diffs(live, committed))
     if diffs:
         print(f"FAIL: xml pins drift from install ({len(diffs)} diffs):")
         for d in diffs:
             print(f"  - {d}")
         return 1
+    live_id = live.get("source_identity") or {}
+    got = sorted(
+        f"{k}={v.get('sha256', '')[:12]}" for k, v in live_id.items() if isinstance(v, dict)
+    )
     print(
         f"OK: xml pins match install ({len(committed.get('entityclasses_health', {}))} hp vars, "
         f"{len(committed.get('traders_root', {}))} trader attrs, "
-        f"{len(committed.get('buffs_survival', {}))} survival keys)"
+        f"{len(committed.get('buffs_survival', {}))} survival keys; "
+        f"sources {', '.join(got)})"
     )
     return 0
 

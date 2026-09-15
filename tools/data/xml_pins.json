@@ -59,6 +59,20 @@
   "healthWightInfernal": 3000,
   "healthWightRadiated": 2200
  },
+ "source_identity": {
+  "buffs.xml": {
+   "bytes": 1036835,
+   "sha256": "d6c714d7b4645f92d0c4c6a3adf1fa3b5f775f9bd3f22baaed4a8e72fdab5b1c"
+  },
+  "entityclasses.xml": {
+   "bytes": 414216,
+   "sha256": "0c95e7330e497a11308b94fb61f85c42d9213a172c8e287d1b6edc3e912db0b0"
+  },
+  "traders.xml": {
+   "bytes": 66301,
+   "sha256": "06202f165d4d516fcd771926cb28f61cd5e8b5bfea694a1c1833de31ca40dfcc"
+  }
+ },
  "sources": [
   "Data/Config/entityclasses.xml",
   "Data/Config/traders.xml",

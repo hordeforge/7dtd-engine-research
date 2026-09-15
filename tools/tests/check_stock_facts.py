@@ -42,8 +42,17 @@ DEFAULT_FACTS = TOOLS / "data" / "stock_facts.json"
 
 # Fields that legitimately differ between the committed artifact and a fresh
 # extraction without indicating game drift: timestamps, provenance bookkeeping,
-# schema metadata. Everything else must match byte-for-value.
-VOLATILE_FACT_KEYS = {"extracted_utc", "asm", "generated_by", "schema", "provenance"}
+# schema metadata. Everything else must match byte-for-value. source_identity
+# is compared separately below (fail closed on a hash change even when every
+# extracted value still matches, which is exactly the silent-re-release case).
+VOLATILE_FACT_KEYS = {
+    "extracted_utc",
+    "asm",
+    "generated_by",
+    "schema",
+    "provenance",
+    "source_identity",
+}
 
 _MISSING = object()
 
@@ -113,6 +122,37 @@ def check_live_against_dll(facts: dict[str, Any], errors: list[str]) -> None:
     def strip(d: dict[str, Any]) -> dict[str, Any]:
         return {k: v for k, v in d.items() if k not in VOLATILE_FACT_KEYS}
 
+    def check_source_identity() -> None:
+        """Fail closed when the live bytes differ from the studied bytes.
+
+        A TFP re-release can keep every extracted constant (version tuple,
+        census, IL counts) and still change behaviour; only the input hash
+        distinguishes it. Both sides must carry a 64-hex sha256 or the pin is
+        unusable.
+        """
+        want = ((facts.get("source_identity") or {}).get("assembly_csharp_dll_sha256")) or ""
+        got = ((live.get("source_identity") or {}).get("assembly_csharp_dll_sha256")) or ""
+        if not re.fullmatch(r"[0-9a-f]{64}", want):
+            errors.append(
+                "committed stock_facts.json has no usable source_identity.assembly_csharp_dll_sha256 "
+                "(re-run tools/stock-sync.sh against the studied build)"
+            )
+            return
+        if not re.fullmatch(r"[0-9a-f]{64}", got):
+            errors.append("live facts extraction produced no usable source_identity hash")
+            return
+        if got != want:
+            lv = live.get("version") or {}
+            cm = facts.get("version") or {}
+            errors.append(
+                "live DLL bytes differ from the studied build "
+                f"(local {lv.get('display')} b{lv.get('build')} sha256={got[:12]}... vs pinned "
+                f"{cm.get('display')} b{cm.get('build')} sha256={want[:12]}...): same version, "
+                "different file. After a TFP patch re-sync: ASM=<dll> tools/post-update.sh "
+                "(then re-pin docs/siblings); or point ASM at the studied build"
+            )
+
+    check_source_identity()
     diffs: list[str] = []
     _diff(strip(live), strip(facts), "", diffs)
     if diffs:
@@ -558,6 +598,13 @@ def check_zdtd(facts: dict[str, Any], errors: list[str]) -> str | None:
             r"62\.88",
             errors,
         )
+    # Cross-repo: zdtd's provenance ledger must cite the studied-build hashes
+    # so a reader can tell whether their install is the build the pins came
+    # from (version strings repeat across silent re-releases; hashes do not).
+    if prov:
+        want_hash = ((facts.get("source_identity") or {}).get("assembly_csharp_dll_sha256")) or ""
+        if want_hash and want_hash not in prov:
+            errors.append("zdtd PROVENANCE.md does not cite the studied Assembly-CSharp.dll sha256")
     return None
 
 

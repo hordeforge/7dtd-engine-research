@@ -61,8 +61,19 @@ and live outside this bar, in the companion docs:
 
 ## Census (live dedi V3.2.0)
 
-From `Census.exe` / `tools/data/stock_facts.json` on dedicated V **3.2.0 (b9)**.
+From `Census.exe` / `tools/data/stock_facts.json` on dedicated V **3.2.0 (b10)**.
 Prior V3.0.1 baseline was types 4401, methods 43901, SaveLoad IL 884 (see [re-methodology.md](../meta/re-methodology.md) §1).
+
+**Studied bytes (sha256; the version tuple repeats across a silent re-release, these hashes do not):**
+
+| File | sha256 | Bytes |
+|---|---|---:|
+| `7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` (V3.2.0 b10) | `3737eedc9f143d428a69030317428c45d342be4f11006a46d72bcd7b1d0fc64d` | 11610624 |
+| `Data/Config/entityclasses.xml` | `0c95e7330e497a11308b94fb61f85c42d9213a172c8e287d1b6edc3e912db0b0` | 414216 |
+| `Data/Config/traders.xml` | `06202f165d4d516fcd771926cb28f61cd5e8b5bfea694a1c1833de31ca40dfcc` | 66301 |
+| `Data/Config/buffs.xml` | `d6c714d7b4645f92d0c4c6a3adf1fa3b5f775f9bd3f22baaed4a8e72fdab5b1c` | 1036835 |
+
+Machine-readable copies live in `tools/data/stock_facts.json` (`source_identity`) and `tools/data/xml_pins.json` (`source_identity`); `check_stock_facts.py` and `xml_pins.py --check` fail closed when the live bytes differ.
 
 | Metric | Value |
 |---|---:|

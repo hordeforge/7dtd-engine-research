@@ -290,6 +290,19 @@ class StockFacts {
       Environment.Exit(2);
     }
     var asmPath = Path.GetFullPath(a[0]);
+    // Source identity: sha256 of the exact bytes read. Version numbers do not
+    // detect a TFP re-release without a version bump; the hash does, and the
+    // pin gate fails closed when the live bytes differ from the committed pin.
+    string asmSha256;
+    long asmBytes;
+    using (var sha = System.Security.Cryptography.SHA256.Create())
+    using (var fs = File.OpenRead(asmPath)) {
+      var hash = sha.ComputeHash(fs);
+      var sbHash = new StringBuilder(hash.Length * 2);
+      foreach (var b in hash) sbHash.Append(b.ToString("x2"));
+      asmSha256 = sbHash.ToString();
+      asmBytes = fs.Length;
+    }
     var r = new DefaultAssemblyResolver();
     r.AddSearchDirectory(Path.GetDirectoryName(asmPath));
     var asm = AssemblyDefinition.ReadAssembly(asmPath, new ReaderParameters { AssemblyResolver = r });
@@ -400,6 +413,11 @@ class StockFacts {
     sb.AppendLine("  \"schema\": 1,");
     sb.AppendLine("  \"generated_by\": \"tools/src/StockFacts.cs\",");
     sb.AppendLine("  \"asm\": " + JsonEsc(Path.GetFileName(asmPath)) + ",");
+    sb.AppendLine("  \"source_identity\": {");
+    sb.AppendLine("    \"assembly_csharp_dll_sha256\": " + JsonEsc(asmSha256) + ",");
+    sb.AppendLine("    \"assembly_csharp_dll_bytes\": " + asmBytes + ",");
+    sb.AppendLine("    \"note\": \"hash of the exact extracted bytes; version fields can repeat across a silent re-release, this hash cannot\"");
+    sb.AppendLine("  },");
     sb.AppendLine("  \"extracted_utc\": " + JsonEsc(DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture)) + ",");
     sb.AppendLine("  \"version\": {");
     sb.AppendLine("    \"release_type\": " + releaseType + ",");
