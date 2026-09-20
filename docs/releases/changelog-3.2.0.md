@@ -455,10 +455,12 @@ changes**, all the `Platform.EOS.RemoteFileStorage` rows above. Surface IL
 total +97 matches the six method deltas. No other managed game type drifted.
 
 Machine re-derivation of this section: `workspace/outputs/diffs/b9-to-b10-20260920.md`
-(`tools/research_diff.py` runs the facts, census, method-signature, enum-member
-and body-hash lenses in one pass). Its body lens lists the same six
-`Platform.EOS.RemoteFileStorage` changes and the Burst rename; the census,
-signature and enum lenses report zero drift, matching the claims above.
+(`tools/research_diff.py --pair b9:b10` runs the facts, census, type-metadata,
+method-signature, enum-member, body-hash, wire-parity and depot-manifest lenses
+in one pass). Its metadata lens is the one that checks the `RequestDetails`
+fields 4 to 6 claim above (`~ RequestDetails: ... | 4 | 4 | 66 -> ... | 6 | 4 | 66`),
+its body lens lists the same six `Platform.EOS.RemoteFileStorage` changes and
+the Burst rename, and the census, signature and enum lenses report zero drift.
 
 **Assets (non-managed):** ~1977 `Data/` files newer than the b9 install
 window, dominated by Prefabs (POIs/Parts/Test/RWGTiles), Addressables, and

@@ -27,6 +27,15 @@ Status terms:
 
 ### 2026-09-20
 
+- `research_diff.py` gained a per-type metadata lens (`FullSurface.exe`):
+  added/removed types plus changed kind/base/field-count/method-count/IL rows,
+  which no other lens covered. Over the real b9/b10 pair it reports exactly the
+  three documented changes (`RequestDetails` fields 4 to 6, and the Burst
+  job-reflection type rename as one added plus one removed), so the
+  changelog-3.2.0 section 8 metadata claim is now machine-checked by the report.
+  The two 0.5 s `FullSurface` runs overlap with the body walk, so the report p50
+  stays at 2567 ms (was 2585 ms).
+
 - `research_diff.py` runs its independent lenses concurrently (`--jobs`, default
   `min(4, CPUs)`): the report p50 over the real b9/b10 pair dropped 3352 ms to
   2585 ms with `--jobs 4` (per-lens: body diff 1.66 s, method lists 0.33 s,

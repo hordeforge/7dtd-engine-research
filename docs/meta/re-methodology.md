@@ -247,8 +247,9 @@ It reports source identity (bytes, sha256, version, Steam build id when the sha
 matches the pin, and the depot-provenance row: Steam's own SHA-1 for each DLL
 with a match/mismatch against the local file, so the artifact states that the
 bytes compared are the bytes Steam shipped) and runs facts (`StockFacts.exe`), census (`Census.exe`),
-method signatures (`MethodList.exe`), enum members (`EnumList.exe`) and
-per-method body hashes (`asm_body_diff.py`), plus wire parity when
+per-type metadata (`FullSurface.exe`, which is what catches a field-count change
+such as `RequestDetails` 4 to 6), method signatures (`MethodList.exe`), enum
+members (`EnumList.exe`) and per-method body hashes (`asm_body_diff.py`), plus wire parity when
 `--parity-old/--parity-new` snapshots are given, and the non-managed content lens
 when `--steam-manifest-old/--steam-manifest-new` are given (§5b-ii); the rendered
 report is the evidence artifact to attach to a delta narrative (see the b9 to b10

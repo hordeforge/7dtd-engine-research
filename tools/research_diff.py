@@ -8,6 +8,7 @@ per-lens detail. The lenses are the maintained tools, not reimplementations:
 
   facts    StockFacts.exe      version/sim/network/save/behaviour fields
   census   Census.exe          whole-assembly type/method/IL counts
+  metadata FullSurface.exe     per-type kind/base/field/method/IL rows
   methods  MethodList.exe      Type::Method(params) signature surface
   enums    EnumList.exe        Enum.Member=value surface
   bodies   asm_body_diff.py    per-method body hash (catches same-size rewrites)
@@ -119,7 +120,13 @@ def prereq() -> str | None:
     """Return a fix-instruction message when a lens prerequisite is missing."""
     missing = [
         name
-        for name in ("StockFacts.exe", "Census.exe", "MethodList.exe", "EnumList.exe")
+        for name in (
+            "StockFacts.exe",
+            "Census.exe",
+            "FullSurface.exe",
+            "MethodList.exe",
+            "EnumList.exe",
+        )
         if not (BIN / name).is_file()
     ]
     if missing:
@@ -295,6 +302,40 @@ def list_surface(tool: str, dll: Path, tmp: Path, name: str) -> str:
     if proc.returncode != 0 or not out.is_file():
         raise RuntimeError(f"{tool} failed on {dll}: {proc.stderr.strip() or proc.stdout}")
     return out.read_text(encoding="utf-8", errors="replace")
+
+
+def parse_surface_rows(text: str) -> dict[str, str]:
+    """FullSurface `surface-types.md` rows: type name -> the rest of the row."""
+    rows: dict[str, str] = {}
+    for line in text.splitlines():
+        if not line.startswith("| ") or line.startswith(("| Type", "|---")):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) < 7:
+            continue
+        rows[cells[0]] = " | ".join(cells[1:])
+    return rows
+
+
+def surface_rows(dll: Path, out_dir: Path) -> dict[str, str]:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    proc = run(["mono", str(BIN / "FullSurface.exe"), str(dll), str(out_dir)])
+    report = out_dir / "surface-types.md"
+    if proc.returncode != 0 or not report.is_file():
+        raise RuntimeError(f"FullSurface.exe failed on {dll}: {proc.stderr.strip() or proc.stdout}")
+    return parse_surface_rows(report.read_text(encoding="utf-8", errors="replace"))
+
+
+def lens_metadata(old: Source, new: Source, tmp: Path, limit: int) -> Section:
+    """Per-type metadata drift: added/removed types and changed kind/base/counts."""
+    title = "Type metadata (FullSurface.exe)"
+    try:
+        before = surface_rows(old.path, tmp / "surface_old")
+        after = surface_rows(new.path, tmp / "surface_new")
+    except RuntimeError as exc:
+        return Section(title, {}, "", note=str(exc))
+    counts, lines = diff_maps(before, after)
+    return Section(title, counts, cap(lines, limit))
 
 
 def lens_methods(old: Source, new: Source, tmp: Path, limit: int) -> Section:
@@ -762,6 +803,7 @@ def main(argv: list[str] | None = None) -> int:
             builders: list[Callable[[], Section]] = [
                 partial(lens_facts, old, new),
                 partial(lens_census, old, new),
+                partial(lens_metadata, old, new, tmp_path, limit),
                 partial(lens_methods, old, new, tmp_path, limit),
                 partial(lens_enums, old, new, tmp_path, limit),
                 partial(lens_bodies, old, new, limit),

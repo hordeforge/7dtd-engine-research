@@ -204,6 +204,20 @@ def main() -> None:
     pins = {"studied": {"dll_sha256": "b" * 64, "buildid": "42", "branch": "public"}}
     assert module.buildid_for("b" * 64, pins) == "42"
 
+    surface = module.parse_surface_rows(
+        "# Full type surface (metadata only)\n"
+        "// 7451 types (incl nested). Signatures/sizes only; no IL bodies (policy).\n"
+        "| Type | ns | kind | base | fields | methods | IL |\n"
+        "|---|---|---|---|--:|--:|--:|\n"
+        "| Foo | - | class | Object | 4 | 4 | 66 |\n"
+        "| Bar | Ns | class | Object | 0 | 1 | 2 |\n"
+    )
+    assert surface == {
+        "Foo": "- | class | Object | 4 | 4 | 66",
+        "Bar": "Ns | class | Object | 0 | 1 | 2",
+    }, surface
+    assert module.parse_surface_rows("no table here") == {}
+
     # --pair resolution helpers (pure): label matching and candidate filtering.
     facts_b9 = {"version": {"display": "V 3.2.0", "stock_wire": "V3.2.0 b9", "build": 9}}
     assert module.label_matches("b9", facts_b9), facts_b9
@@ -234,7 +248,10 @@ def main() -> None:
         assert pair_run.returncode == 0, (pair_run.stdout[-500:], pair_run.stderr)
         assert "pair: b9 ->" in pair_run.stdout, pair_run.stdout
         assert "pair: b10 ->" in pair_run.stdout, pair_run.stdout
-        assert "## 7. Depot manifest" in pair_run.stdout, pair_run.stdout
+        assert "## 6. Method bodies" in pair_run.stdout, pair_run.stdout
+        assert "## 8. Depot manifest" in pair_run.stdout, pair_run.stdout
+        assert "## 3. Type metadata (FullSurface.exe)" in pair_run.stdout, pair_run.stdout
+        assert "~ RequestDetails:" in pair_run.stdout, pair_run.stdout
         assert "matches the local file" in pair_run.stdout, pair_run.stdout
 
         sequential = run("--pair", "b9:b10", "--out", "-", "--jobs", "1")
