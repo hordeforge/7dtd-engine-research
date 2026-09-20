@@ -14,6 +14,7 @@ import importlib.util
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +38,16 @@ def run(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(TOOL), *args], text=True, capture_output=True, check=False
     )
+
+
+def load_sibling(name: str) -> Any:
+    spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(f"{name}.py"))
+    assert spec is not None, name
+    assert spec.loader is not None, name
+    sibling: Any = importlib.util.module_from_spec(spec)
+    sys.modules[name] = sibling
+    spec.loader.exec_module(sibling)
+    return sibling
 
 
 def source(module: Any, label: str, facts: dict[str, Any], buildid: str | None = None) -> Any:
@@ -110,6 +121,38 @@ def main() -> None:
         old, new, [module.Section("Stock facts (StockFacts.exe)", {}, "none")], "t", []
     )
     assert "drift: no" in quiet, quiet
+
+    # Depot-manifest lens: fixture manifests built with the sibling encoder.
+    encoder = load_sibling("test_steam_manifest")
+    with tempfile.TemporaryDirectory(prefix="research_diff_", dir=_common.scratch_dir()) as tmp:
+        root = Path(tmp)
+        old_manifest = root / "294422_1.manifest"
+        new_manifest = root / "294422_2.manifest"
+        other_depot = root / "294421_2.manifest"
+        old_manifest.write_bytes(encoder.manifest([encoder.entry("Data\\a.bin", b"old")]))
+        new_manifest.write_bytes(
+            encoder.manifest(
+                [encoder.entry("Data\\a.bin", b"new"), encoder.entry("Data\\b.bin", b"added")]
+            )
+        )
+        other_depot.write_bytes(new_manifest.read_bytes())
+        depot = module.lens_depot(old_manifest, new_manifest, 10)
+        assert depot.counts == {"added": 1, "removed": 0, "changed": 1}, depot.counts
+        assert "gid 1 -> 2" in depot.body, depot.body
+        assert "Data\\a.bin" in depot.body, depot.body
+
+        unmeasured = module.lens_depot(None, None, 10)
+        assert unmeasured.counts == {}, unmeasured
+        assert "not measured" in (unmeasured.note or ""), unmeasured.note
+        mismatched = module.lens_depot(old_manifest, other_depot, 10)
+        assert "depot 294422 != 294421" in (mismatched.note or ""), mismatched.note
+
+        sections.append(depot)
+        with_depot = module.report_markdown(
+            old, new, sections, "2026-01-01T00:00:00Z", ["--old", "a"]
+        )
+        assert "## 7. Depot manifest (steam_manifest.py)" in with_depot, with_depot
+        assert "depot manifest 2" in with_depot, with_depot
 
     pins = {"studied": {"dll_sha256": "b" * 64, "buildid": "42", "branch": "public"}}
     assert module.buildid_for("b" * 64, pins) == "42"

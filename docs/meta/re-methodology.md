@@ -237,9 +237,11 @@ It reports source identity (bytes, sha256, version, Steam build id when the sha
 matches the pin) and runs facts (`StockFacts.exe`), census (`Census.exe`),
 method signatures (`MethodList.exe`), enum members (`EnumList.exe`) and
 per-method body hashes (`asm_body_diff.py`), plus wire parity when
-`--parity-old/--parity-new` snapshots are given; the rendered report is the
-evidence artifact to attach to a delta narrative (see the b9 to b10 report cited
-by [changelog-3.2.0.md](../releases/changelog-3.2.0.md) §8).
+`--parity-old/--parity-new` snapshots are given, and the non-managed content lens
+when `--steam-manifest-old/--steam-manifest-new` are given (§5b-ii); the rendered
+report is the evidence artifact to attach to a delta narrative (see the b9 to b10
+report cited by [changelog-3.2.0.md](../releases/changelog-3.2.0.md) §8, which now
+carries both the managed delta and the 16-file content delta).
 
 The package parity diff only covers `NetPackage` wire and enums. For a **full**
 cross-version diff also run a per-method **signature** diff (emit

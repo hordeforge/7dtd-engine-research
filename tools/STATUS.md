@@ -27,6 +27,11 @@ Status terms:
 
 ### 2026-09-20
 
+- `research_diff.py` gained the depot-manifest lens (`--steam-manifest-old` /
+  `--steam-manifest-new`), so one report carries the managed delta and the
+  non-managed content delta; the committed b9 to b10 report was regenerated with
+  it. The fake-steamcmd test also covers `steam_builds.py --fetch` handing the
+  branch manifest through to `fetch_version.sh`.
 - Added `tests/test_fetch_version_fake_steamcmd.py`: `parity/fetch_version.sh` had no
   test because it needs SteamCMD and a multi-GB depot. A recording fake steamcmd
   (logs argv, materialises a DLL from the live install into the content or install

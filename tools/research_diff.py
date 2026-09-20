@@ -12,12 +12,16 @@ per-lens detail. The lenses are the maintained tools, not reimplementations:
   enums    EnumList.exe        Enum.Member=value surface
   bodies   asm_body_diff.py    per-method body hash (catches same-size rewrites)
   parity   parity_diff.py      NetPackage wire snapshots, when both are given
+  depot    steam_manifest.py   non-managed content delta (per-file SHA-1)
 
 Usage:
   research_diff.py --old backup.dll --new live.dll
   research_diff.py --old backup.dll --new live.dll --label-old b9 --label-new b10 \
       --buildid-old 24994542 --buildid-new 24994542 --check
   research_diff.py --old a.dll --new b.dll --parity-old old.json --parity-new new.json
+  research_diff.py --old a.dll --new b.dll \
+      --steam-manifest-old ~/.local/share/Steam/depotcache/294422_<old>.manifest \
+      --steam-manifest-new ~/.local/share/Steam/depotcache/294422_<new>.manifest
 
 Exit codes: 0 report written, 1 drift detected (--check), 2 unusable input.
 """
@@ -39,7 +43,9 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "tests"))
+sys.path.insert(0, str(Path(__file__).resolve().parent / "parity"))
 import _common
+from steam_manifest import ManifestError, diff_manifests, read_manifest
 
 TOOLS = _common.TOOLS
 REPO = _common.REPO
@@ -300,6 +306,29 @@ def lens_parity(old_json: Path | None, new_json: Path | None, limit: int) -> Sec
     return Section(title, counts, body, note=note)
 
 
+def lens_depot(old_path: Path | None, new_path: Path | None, limit: int) -> Section:
+    """Non-managed content delta from Steam's own depot manifests."""
+    title = "Depot manifest (steam_manifest.py)"
+    if old_path is None or new_path is None:
+        return Section(
+            title,
+            {},
+            "",
+            note="not measured: pass --steam-manifest-old and --steam-manifest-new",
+        )
+    old = read_manifest(old_path)
+    new = read_manifest(new_path)
+    if old.depot != new.depot:
+        return Section(
+            title,
+            {},
+            "",
+            note=f"not measured: depot {old.depot} != {new.depot}",
+        )
+    counts, lines = diff_manifests(old, new, None)
+    return Section(title, counts, cap([f"gid {old.gid} -> {new.gid}", *lines], limit))
+
+
 def section_markdown(index: int, section: Section) -> str:
     total = sum(section.counts.values())
     verdict = f"{total} change(s)" if total else "no change"
@@ -375,6 +404,16 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--parity-old", default=None, help="baseline ParitySurface JSON snapshot")
     ap.add_argument("--parity-new", default=None, help="candidate ParitySurface JSON snapshot")
     ap.add_argument(
+        "--steam-manifest-old",
+        default=None,
+        help="baseline cached depot manifest (<depot>_<gid>.manifest) for the content lens",
+    )
+    ap.add_argument(
+        "--steam-manifest-new",
+        default=None,
+        help="candidate cached depot manifest for the content lens",
+    )
+    ap.add_argument(
         "--max-list", type=int, default=40, help="max detail lines per lens (default 40)"
     )
     ap.add_argument(
@@ -417,8 +456,13 @@ def main(argv: list[str] | None = None) -> int:
                     Path(args.parity_new) if args.parity_new else None,
                     limit,
                 ),
+                lens_depot(
+                    Path(args.steam_manifest_old) if args.steam_manifest_old else None,
+                    Path(args.steam_manifest_new) if args.steam_manifest_new else None,
+                    limit,
+                ),
             ]
-    except (RuntimeError, subprocess.TimeoutExpired) as exc:
+    except (RuntimeError, ManifestError, subprocess.TimeoutExpired) as exc:
         print(f"research_diff: {exc}", file=sys.stderr)
         return 2
 

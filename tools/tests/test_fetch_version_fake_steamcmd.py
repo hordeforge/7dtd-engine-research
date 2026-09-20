@@ -10,8 +10,9 @@ argv and copies a known DLL covers all of it offline.
 Cases:
   1. manifest form   -> snapshot written, identical to a direct ParitySurface run
   2. branch form     -> snapshot written from the install dir
-  3. fake does nothing -> non-zero, no snapshot published
-  4. fake fails      -> non-zero, no snapshot published
+  3. steam_builds --fetch -> branch manifest reaches fetch_version.sh
+  4. fake does nothing -> non-zero, no snapshot published
+  5. fake fails      -> non-zero, no snapshot published
 
 SKIPs without mono/mcs, the pinned Cecil build, or the live dedicated DLL.
 
@@ -147,13 +148,76 @@ def main() -> None:
         assert (out_branch / "parity_fakebranch.json").is_file(), branch.stdout
         assert "mode=branch" in log.read_text(encoding="utf-8")
 
-        # 3. a steamcmd that silently does nothing must not publish a snapshot
+        # 3. steam_builds --fetch must hand the branch's manifest to fetch_version.sh
+        appinfo = root / "appinfo.json"
+        appinfo.write_text(
+            json.dumps(
+                {
+                    "status": "success",
+                    "data": {
+                        "294420": {
+                            "depots": {
+                                "branches": {"public": {"buildid": "100"}},
+                                "294422": {
+                                    "manifests": {
+                                        "public": {
+                                            "gid": "1633674551820196085",
+                                            "size": "1",
+                                            "download": "1",
+                                        }
+                                    }
+                                },
+                            }
+                        }
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        pins = root / "pins.json"
+        pins.write_text(
+            json.dumps({"schema": 1, "studied": {"branch": "public", "buildid": "100"}}),
+            encoding="utf-8",
+        )
+        builds_log = root / "calls-builds.log"
+        out_builds = root / "out-builds"
+        builds = subprocess.run(
+            [
+                sys.executable,
+                str(_common.TOOLS / "parity" / "steam_builds.py"),
+                "--from",
+                str(appinfo),
+                "--pins",
+                str(pins),
+                "--no-installed",
+                "--steam-root",
+                str(root / "empty-root"),
+                "--fetch",
+                "--label",
+                "fakebuilds",
+            ],
+            capture_output=True,
+            text=True,
+            env=dict(
+                base_env,
+                FAKE_LOG=str(builds_log),
+                FAKE_MODE="ok",
+                STEAM_CONTENT=str(root / "content-builds"),
+                SCRATCH=str(root / "scratch" / "builds"),
+                OUT=str(out_builds),
+            ),
+        )
+        assert builds.returncode == 0, (builds.stdout, builds.stderr)
+        assert (out_builds / "parity_fakebuilds.json").is_file(), builds.stdout
+        assert "manifest=1633674551820196085" in builds_log.read_text(encoding="utf-8")
+
+        # 4. a steamcmd that silently does nothing must not publish a snapshot
         out_silent = root / "out-silent"
         silent = fetch("1633674551820196085", "fakesilent", "nothing", out_silent, root / "c1")
         assert silent.returncode != 0, silent.stdout
         assert not list(out_silent.glob("parity_*.json")), list(out_silent.iterdir())
 
-        # 4. a failing steamcmd must abort before extraction
+        # 5. a failing steamcmd must abort before extraction
         out_fail = root / "out-fail"
         failed = fetch("v3.1.0", "fakefail", "fail", out_fail, root / "content-fail")
         assert failed.returncode != 0, failed.stdout
