@@ -656,12 +656,23 @@ def main(argv: list[str] | None = None) -> int:
 
     generated = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     date = generated[:10].replace("-", "")
-    argv_tail = [a for a in (argv if argv is not None else sys.argv[1:]) if a != "--json"]
+    # The reproduce line must be the command a reader should run: no output
+    # redirection and no summary flag.
+    argv_tail: list[str] = []
+    skip_value = False
+    for arg in argv if argv is not None else sys.argv[1:]:
+        if skip_value:
+            skip_value = False
+            continue
+        if arg in {"--json", "--out"} or arg.startswith("--out="):
+            skip_value = arg == "--out"
+            continue
+        argv_tail.append(arg)
     text = report_markdown(old, new, sections, generated, argv_tail)
 
     drift = any(sum(s.counts.values()) for s in sections)
     if args.out == "-":
-        print(text)
+        sys.stdout.write(text)
     else:
         out = (
             Path(args.out)

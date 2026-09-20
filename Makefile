@@ -124,6 +124,7 @@ test:
 	python3 "$(TOOLS)/tests/test_il_citations.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_xref_claims.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_fetch_version_fake_steamcmd.py"
+	python3 "$(TOOLS)/tests/test_committed_diff_artifacts.py"
 	python3 "$(TOOLS)/tests/test_netprotocol_census.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_tuned_constants.py" "$(ASM)"
 
