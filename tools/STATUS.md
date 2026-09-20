@@ -27,6 +27,17 @@ Status terms:
 
 ### 2026-09-20
 
+- Ran the first whole-install integrity check (`steam_manifest.py --verify <game
+  dir>`): 17,532 files, 17.6 GB, about 11 s, and exactly one difference,
+  `platform.cfg` (67 bytes locally against the manifest's 71). Both cached
+  manifests ship the same 71-byte file, so Steam's manifest-diff update never
+  noticed the local edit and never restored it.
+- `--ignore SUBSTR` (repeatable) on both `steam_manifest.py --verify` and
+  `steam_builds.py --verify-install` skips such runtime-written paths and
+  reports the ignored count rather than hiding it: the full install then reads
+  "17532 ok, 0 missing, 0 mismatch, 1 ignored". The filter applies after
+  `--only`, so `--only Managed --ignore platform.cfg` reports 0 ignored.
+
 - `research_diff.py` schedules its lenses longest-first (`bodies` 1.7 s, then
   `metadata` 1.1 s; the rest under 0.4 s) while keeping the fixed report order,
   so a cheap lens no longer holds a worker while the body walk waits. Report p50

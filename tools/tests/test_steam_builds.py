@@ -231,6 +231,18 @@ def main() -> None:
         assert payload["integrity"]["ok"] == 1, payload["integrity"]
         assert payload["integrity"]["manifest"] == "294422_111.manifest", payload["integrity"]
 
+        ignored = run(
+            *base,
+            "--pins",
+            str(good_pins),
+            "--verify-install",
+            "Data",
+            "--ignore",
+            "Good.dll",
+        )
+        assert ignored.returncode == 0, (ignored.stdout, ignored.stderr)
+        assert "integrity: 0 ok, 0 missing, 0 mismatch, 1 ignored" in ignored.stdout, ignored.stdout
+
         (install / "Data" / "Managed" / "Good.dll").write_bytes(b"tampered")
         broken = run(*base, "--pins", str(good_pins), "--check", "--verify-install", "Data")
         assert broken.returncode == 1, (broken.stdout, broken.stderr)

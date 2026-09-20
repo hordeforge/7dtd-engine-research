@@ -313,6 +313,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="install directory to verify (default: the appmanifest's Steam common/<installdir>)",
     )
     ap.add_argument(
+        "--ignore",
+        action="append",
+        default=[],
+        metavar="SUBSTR",
+        help="skip manifest paths containing SUBSTR when verifying (repeatable; "
+        "for files the server rewrites at runtime, e.g. platform.cfg)",
+    )
+    ap.add_argument(
         "--verify-install",
         nargs="?",
         const="",
@@ -378,7 +386,7 @@ def main(argv: list[str] | None = None) -> int:
     cached_buildids = steam_log_buildids(DEPOT, roots)
     diffable = sum(1 for b in snapshot.branches if b.manifest in cached)
 
-    integrity: tuple[str, int, int, int, list[str]] | None = None
+    integrity: tuple[str, int, int, int, int, list[str]] | None = None
     if args.verify_install is not None:
         gid = install_manifest or branch.manifest
         manifest_path = cached.get(gid or "")
@@ -398,13 +406,16 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         try:
-            ok, missing, bad, problems = verify(
-                read_manifest(manifest_path), root, args.verify_install or None
+            ok, missing, bad, problems, ignored = verify(
+                read_manifest(manifest_path),
+                root,
+                args.verify_install or None,
+                tuple(args.ignore),
             )
         except ManifestError as exc:
             print(f"steam_builds: {exc}", file=sys.stderr)
             return 2
-        integrity = (manifest_path.name, ok, missing, bad, problems)
+        integrity = (manifest_path.name, ok, missing, bad, ignored, problems)
 
     if args.json:
         payload = {
@@ -427,7 +438,8 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": integrity[1],
                     "missing": integrity[2],
                     "mismatch": integrity[3],
-                    "problems": integrity[4][:50],
+                    "ignored": integrity[4],
+                    "problems": integrity[5][:50],
                 }
                 if integrity
                 else None
@@ -466,12 +478,16 @@ def main(argv: list[str] | None = None) -> int:
             )
         print()
     if integrity:
-        name, ok, missing, bad, problems = integrity
+        name, ok, missing, bad, ignored, problems = integrity
         for line in problems[:20]:
             print(line, file=sys.stderr)
         if len(problems) > 20:
             print(f"... ({len(problems) - 20} more)", file=sys.stderr)
-        print(f"integrity: {ok} ok, {missing} missing, {bad} mismatch against {name}")
+        print(
+            f"integrity: {ok} ok, {missing} missing, {bad} mismatch"
+            + (f", {ignored} ignored" if ignored else "")
+            + f" against {name}"
+        )
     if not quiet and cached:
         print(
             f"offline-diffable: {diffable} of {len(snapshot.branches)} branch manifests cached "

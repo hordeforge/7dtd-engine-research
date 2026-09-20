@@ -137,6 +137,52 @@ def main() -> None:
         assert "SIZE Data\\Managed\\Short.dll" in verified.stderr, verified.stderr
         assert "MISSING Data\\Managed\\Absent.dll" in verified.stderr, verified.stderr
 
+        # --ignore excludes a known runtime-written file, explicitly and counted.
+        ignored = run(
+            "--manifest",
+            str(path),
+            "--verify",
+            str(install),
+            "--only",
+            "Data",
+            "--ignore",
+            "Corrupt.dll",
+        )
+        assert ignored.returncode == 1, ignored.stdout
+        assert "verify: 1 ok, 1 missing, 1 mismatch, 1 ignored" in ignored.stdout, ignored.stdout
+        ignored_json = run(
+            "--manifest",
+            str(path),
+            "--verify",
+            str(install),
+            "--only",
+            "Data",
+            "--ignore",
+            "Corrupt.dll",
+            "--json",
+        )
+        payload_ignored = json.loads(ignored_json.stdout)
+        assert payload_ignored["ignored"] == 1, payload_ignored
+
+        everything = run(
+            "--manifest",
+            str(path),
+            "--verify",
+            str(install),
+            "--only",
+            "Data",
+            "--ignore",
+            "Corrupt",
+            "--ignore",
+            "Short",
+            "--ignore",
+            "Absent.dll",
+        )
+        assert everything.returncode == 0, (everything.stdout, everything.stderr)
+        assert "verify: 1 ok, 0 missing, 0 mismatch, 3 ignored" in everything.stdout, (
+            everything.stdout
+        )
+
         (install / "Data" / "Managed" / "Corrupt.dll").write_bytes(b"original")
         (install / "Data" / "Managed" / "Short.dll").write_bytes(b"original-bytes")
         (install / "Data" / "Managed" / "Absent.dll").write_bytes(b"gone")

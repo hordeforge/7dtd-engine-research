@@ -273,13 +273,25 @@ def manifest_for_gid(depot: str, gid: str, roots: tuple[Path, ...] = STEAM_ROOTS
     )
 
 
-def verify(manifest: Manifest, root: Path, only: str | None) -> tuple[int, int, int, list[str]]:
-    ok = missing = bad = 0
+def verify(
+    manifest: Manifest, root: Path, only: str | None, ignore: tuple[str, ...] = ()
+) -> tuple[int, int, int, list[str], int]:
+    """Hash local files against Steam's manifest.
+
+    `ignore` skips paths containing any of its substrings and reports how many
+    were skipped: a file the running server rewrites (see platform.cfg in the
+    methodology) should be excluded explicitly, never silently.
+    """
+    ok = missing = bad = ignored = 0
     problems: list[str] = []
     for entry in manifest.entries:
         if not entry.sha1 or entry.size == 0:
             continue  # directory, empty file, or symlink: nothing to hash
-        if only and only.lower().replace("/", "\\") not in entry.name.lower():
+        lowered = entry.name.lower()
+        if only and only.lower().replace("/", "\\") not in lowered:
+            continue
+        if any(pattern.lower() in lowered for pattern in ignore):
+            ignored += 1
             continue
         local = root / entry.name.replace("\\", "/")
         if not local.is_file():
@@ -295,7 +307,7 @@ def verify(manifest: Manifest, root: Path, only: str | None) -> tuple[int, int, 
             problems.append(f"SHA1 {entry.name}: local file differs from the depot manifest")
             continue
         ok += 1
-    return ok, missing, bad, problems
+    return ok, missing, bad, problems, ignored
 
 
 def diff_manifests(
@@ -398,6 +410,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ap.add_argument("--pins", default=str(PINS), help=f"build-id pin file (default: {PINS})")
     ap.add_argument("--only", default=None, metavar="SUBSTR", help="limit --verify/--list/--diff")
+    ap.add_argument(
+        "--ignore",
+        action="append",
+        default=[],
+        metavar="SUBSTR",
+        help="skip manifest paths containing SUBSTR (repeatable; for files rewritten at runtime)",
+    )
     ap.add_argument("--json", action="store_true", help="emit JSON")
     return ap
 
@@ -455,8 +474,16 @@ def main(argv: list[str] | None = None) -> int:
                 "lines": lines,
             }
         elif args.verify:
-            ok, missing, bad, problems = verify(manifest, Path(args.verify), args.only)
-            payload |= {"ok": ok, "missing": missing, "mismatch": bad, "problems": problems[:200]}
+            ok, missing, bad, problems, ignored = verify(
+                manifest, Path(args.verify), args.only, tuple(args.ignore)
+            )
+            payload |= {
+                "ok": ok,
+                "missing": missing,
+                "mismatch": bad,
+                "ignored": ignored,
+                "problems": problems[:200],
+            }
         elif args.find or args.list:
             payload["entries"] = [
                 {
@@ -491,12 +518,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.verify:
-        ok, missing, bad, problems = verify(manifest, Path(args.verify), args.only)
+        ok, missing, bad, problems, ignored = verify(
+            manifest, Path(args.verify), args.only, tuple(args.ignore)
+        )
         for line in problems[:40]:
             print(line, file=sys.stderr)
         if len(problems) > 40:
             print(f"... ({len(problems) - 40} more)", file=sys.stderr)
-        print(f"verify: {ok} ok, {missing} missing, {bad} mismatch (root {args.verify})")
+        print(
+            f"verify: {ok} ok, {missing} missing, {bad} mismatch"
+            + (f", {ignored} ignored" if ignored else "")
+            + f" (root {args.verify})"
+        )
         return 1 if (missing or bad) else 0
 
     if args.find:

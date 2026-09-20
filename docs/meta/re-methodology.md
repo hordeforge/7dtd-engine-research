@@ -283,7 +283,14 @@ tools/parity/steam_manifest.py --diff ~/.local/share/Steam/depotcache/294422_<ol
 ```
 
 `--verify` is the install-integrity check (exit 1 on missing/short/mismatched
-files) and `--diff` is the asset-level patch delta. The same check is reachable
+files; `--ignore SUBSTR` excludes a file the server rewrites at runtime and
+reports how many were skipped) and `--diff` is the asset-level patch delta. A
+full-install verify reads 17.6 GB in about 11 s on this machine and is worth
+running once per build: it found exactly one local difference here,
+`platform.cfg` at 67 bytes against the manifest's 71. Both cached manifests ship
+the same 71-byte file, so Steam's update path (a manifest-to-manifest diff)
+never noticed the local edit and never restored it. Verify integrity explicitly
+after a patch; a manifest-diff update alone does not re-check unchanged files. The same check is reachable
 through the build tool, which picks the manifest for the *installed* build out of
 the appmanifest:
 
