@@ -27,6 +27,13 @@ Status terms:
 
 ### 2026-09-20
 
+- `parity/drift-check.sh` now compares the NetPackage wire axis against the
+  committed `workspace/outputs/parity/parity_b10.json` when its own baseline dir
+  has no `parity.json` (a fresh checkout), so the first `make drift` gives a
+  verdict instead of only creating a baseline; `PARITY_BASELINE` overrides it. The
+  update advice names the baseline actually in force. Gated by
+  `tests/test_drift_committed_baseline.py` (fresh baseline compared, perturbed
+  snapshot detected with exit 1, absent snapshot stays quiet).
 - Added `tests/test_committed_diff_artifacts.py`: the committed parity snapshots and
   the b9 to b10 report are re-derived and compared, so an artifact cited by the docs
   cannot silently go stale after a lens or format change (the report had to be

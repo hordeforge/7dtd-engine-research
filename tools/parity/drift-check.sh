@@ -6,8 +6,12 @@
 #
 #   drift-check.sh [ASM]           # ASM defaults to the local stable dedicated DLL
 #   BASELINE_DIR=... drift-check.sh
+#   PARITY_BASELINE=... drift-check.sh   # committed wire snapshot (default below)
 #
-# First run with no baseline snapshots writes them and reports "baseline created".
+# First run with no baseline snapshots writes them. The wire axis is still
+# compared on that first run, against the committed ParitySurface snapshot in
+# workspace/outputs/parity/ ($PARITY_BASELINE), so a fresh checkout gets a real
+# drift verdict instead of "baseline created".
 # Requires: mono (mcs), Mono.Cecil, the tools built (../build.sh).
 set -uo pipefail
 # sort/comm below compare baseline vs current listings byte-wise; both sides
@@ -24,6 +28,10 @@ TOOLS="$(cd "$here/.." && pwd)"
 BIN="$TOOLS/bin"
 ASM="${1:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll}"
 BASELINE_DIR="${BASELINE_DIR:-$HOME/.cache/zdtd-scratch/drift-baseline}"
+# Committed wire snapshot of the studied build. A fresh checkout has no
+# BASELINE_DIR, so this is what makes the wire axis comparable on first run
+# instead of silently creating a baseline and comparing nothing.
+PARITY_BASELINE="${PARITY_BASELINE:-$TOOLS/../workspace/outputs/parity/parity_b10.json}"
 CECIL="$BIN/Mono.Cecil.dll"
 
 [[ -f "$ASM" ]]   || { echo "drift: game DLL not found: $ASM" >&2; exit 2; }
@@ -100,13 +108,40 @@ if [[ "$axis_fail" -ne 0 ]]; then
   exit 2
 fi
 
+# Separate the baseline axes from the parity axis: the full baseline is machine
+# state, the parity snapshot is committed.
+base_parity="$BASELINE_DIR/parity.json"
+fresh_baseline=0
 if [[ ! -f "$BASELINE_DIR/surface/surface-types.md" ]]; then
   cp -r "$cur/." "$BASELINE_DIR/"
-  echo "drift: baseline created at $BASELINE_DIR (no comparison this run)"; exit 0
+  fresh_baseline=1
+  if [[ -f "$PARITY_BASELINE" ]]; then
+    base_parity="$PARITY_BASELINE"
+    echo "drift: baseline created at $BASELINE_DIR; comparing the wire axis against the committed snapshot"
+  else
+    echo "drift: baseline created at $BASELINE_DIR (no comparison this run)"; exit 0
+  fi
+elif [[ ! -f "$base_parity" && -f "$PARITY_BASELINE" ]]; then
+  base_parity="$PARITY_BASELINE"
+  echo "drift: parity baseline: committed $PARITY_BASELINE"
 fi
 
 drift=0
 sec() { echo; echo "== $1 =="; }
+if [[ "$fresh_baseline" -eq 1 ]]; then
+  sec "NetPackage wire (committed baseline)"
+  if [[ -f "$base_parity" && -f "$cur/parity.json" ]]; then
+    python3 "$here/parity_diff.py" "$base_parity" "$cur/parity.json" || drift=1
+  else
+    echo "drift: error: parity comparison unavailable" >&2; drift=2
+  fi
+  echo
+  if [[ "$drift" -eq 0 ]]; then echo "drift: NONE (build matches the committed wire baseline)"; else
+    echo "drift: DETECTED against the committed wire baseline. Update it after review:"
+    echo "  cp $cur/parity.json $PARITY_BASELINE"; fi
+  exit "$drift"
+fi
+
 sec "census"
 diff "$BASELINE_DIR/census.txt" "$cur/census.txt" && echo "  (unchanged)" || drift=1
 sec "types (added/removed)"
@@ -129,9 +164,9 @@ if [[ -f "$BASELINE_DIR/enums.txt" && -f "$cur/enums.txt" ]]; then
   [[ -n "$er" ]] && { echo "  REMOVED:"; echo "$er" | awk '{print "    -" $0}'; drift=1; }
   [[ -z "$ea" && -z "$er" ]] && echo "  (unchanged)"
 fi
-if [[ -f "$BASELINE_DIR/parity.json" && -f "$cur/parity.json" ]]; then
+if [[ -f "$base_parity" && -f "$cur/parity.json" ]]; then
   sec "NetPackage wire (added/removed/changed)"
-  python3 "$here/parity_diff.py" "$BASELINE_DIR/parity.json" "$cur/parity.json" || drift=1
+  python3 "$here/parity_diff.py" "$base_parity" "$cur/parity.json" || drift=1
 fi
 echo
 if [[ "$drift" -eq 0 ]]; then echo "drift: NONE (build matches baseline)"; else
