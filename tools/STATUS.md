@@ -27,6 +27,15 @@ Status terms:
 
 ### 2026-09-20
 
+- Replaced the hand-kept Python-CLI list in `tests/test_python_cli_usage.py` with
+  AST discovery (`_common.argparse_clis`), shared with `test_cli_args_wired.py`. The
+  old list had already drifted: `facts.py`, `census-pct.py`, `cross_repo_links.py`,
+  `xml_pins.py`, and `zdtd_cite_check.py` were unchecked. The gate now covers 18
+  discovered CLIs, each of which must print `--help` without its optional runtime
+  dependencies and be named in `tools/README.md`; the two undocumented sandbox
+  preset scripts were added to the table. Detector liveness is asserted (a known
+  tool is found, nothing under `tests/` is scanned) and proven by an undocumented
+  probe file, which fails the gate by name.
 - `research_diff.py --pair OLD:NEW` (e.g. `--pair b9:b10`) resolves a known build pair
   in one command: candidate DLLs are matched on the version each reports, the
   cached depot manifest is matched on the DLL's own SHA-1 (which also supplies the

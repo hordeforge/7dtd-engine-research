@@ -25,8 +25,6 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-SCAN_DIRS = ("", "parity", "sandbox")
-
 
 def declared_dests(tree: ast.AST) -> set[str]:
     dests: set[str] = set()
@@ -118,15 +116,10 @@ def main() -> None:
     self_test()
     bad: list[str] = []
     checked = skipped = 0
-    paths = sorted(_common.TOOLS.glob("*.py"))
-    for sub in SCAN_DIRS[1:]:
-        paths.extend(sorted((_common.TOOLS / sub).glob("*.py")))
-    for path in paths:
-        if path.name == "__init__.py":
-            continue
+    for path in _common.argparse_clis():
         tree = ast.parse(path.read_text(encoding="utf-8"))
         if not declared_dests(tree):
-            continue  # not a CLI
+            continue  # help-only CLI, nothing to wire
         checked += 1
         if rebinds_args(tree):
             skipped += 1

@@ -13,6 +13,7 @@ Convention (mirrors test_re_dump_regen.py):
 
 from __future__ import annotations
 
+import ast
 import atexit
 import os
 import shutil
@@ -155,6 +156,32 @@ def strip_mono_noise(text: str) -> str:
     return "".join(
         line for line in text.splitlines(keepends=True) if not line.startswith(MONO_NOISE_PREFIXES)
     )
+
+
+def argparse_clis() -> list[Path]:
+    """Maintained Python tools that parse arguments, discovered from the AST.
+
+    Discovery, not a hand-kept list: a new CLI is covered by the help and
+    argument-wiring gates the moment it exists. `ArgumentParser` is the marker
+    (a help-only script has no `add_argument`).
+    """
+    found: list[Path] = []
+    for path in sorted(TOOLS.rglob("*.py")):
+        if "tests" in path.parts or "__pycache__" in path.parts:
+            continue
+        source = path.read_text(encoding="utf-8", errors="replace")
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            if isinstance(func, ast.Attribute) and func.attr in {"ArgumentParser", "add_argument"}:
+                found.append(path)
+                break
+    return found
 
 
 def run_tool(exe: str, *args: str) -> tuple[int, str, str]:
