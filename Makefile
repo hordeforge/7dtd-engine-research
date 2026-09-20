@@ -3,7 +3,7 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check post-update census drift test test-docs lint verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all
+.PHONY: tools stock-sync stock-check post-update census drift test test-docs lint verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
@@ -12,6 +12,7 @@ help:
 	@echo "make sibling-cites - verify every sibling repo's research citations resolve against docs/"
 	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
 	@echo "make save-roundtrip-all - verify EVERY probe save + the shipped Navezgane world (full fleet round-trip)"
+	@echo "make latest       - newest dedicated-server build vs the studied pin (ARGS=--check / --fetch)"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
 	@echo "make stock-check  - pin check only (committed JSON; also diffs facts vs the live DLL when present)"
 	@echo "make facts        - view the machine-checked stock pins (census/save/behaviour)"
@@ -36,6 +37,11 @@ stock-check:
 # Quick view of the machine-checked stock pins (version, sim, behaviour).
 facts:
 	python3 "$(TOOLS)/facts.py"
+
+# Newest dedicated build from Steam PICS + the studied-build pin. ARGS=--check
+# exits 1 when a build newer than the pin exists (cron/CI); ARGS=--fetch pulls it.
+latest:
+	python3 "$(TOOLS)/parity/steam_builds.py" $(ARGS)
 
 post-update:
 	cd "$(TOOLS)" && ASM="$(ASM)" ./post-update.sh
@@ -136,6 +142,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_gate_unreadable_files.py"
 	python3 "$(TOOLS)/tests/test_parity_diff.py"
 	python3 "$(TOOLS)/tests/test_parity_drift_fail_closed.py"
+	python3 "$(TOOLS)/tests/test_steam_builds.py"
 	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 	python3 "$(TOOLS)/tests/test_inventory_counts.py"
 	python3 "$(TOOLS)/tests/test_readme_test_table.py"

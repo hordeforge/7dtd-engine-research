@@ -207,6 +207,23 @@ after every update, diff against the pinned baseline, and only re-annotate the
 packages the diff flags. Clone implementation coverage belongs in the clone
 repository, not this stock RE tool.
 
+Before pulling a build, ask Steam which builds exist. `parity/steam_builds.py`
+reads the same facts SteamDB shows (branch build ids + depot 294422 manifest ids)
+out of Steam's own PICS app info, prints the local install's build id from its
+`appmanifest`, and hands the manifest straight to `fetch_version.sh`:
+
+```bash
+tools/parity/steam_builds.py --check                    # exit 1 if a newer build exists
+tools/parity/steam_builds.py --fetch                    # pull + snapshot the newest public build
+tools/parity/steam_builds.py --print-fetch --branch latest_experimental
+```
+
+`--record` writes `tools/data/steam_builds.json`: branch, build id, depot
+manifest, studied version, and the sha256 of the studied `Assembly-CSharp.dll`.
+A delta narrative can then name the exact Steam build it compared instead of
+leaving that to the git-ignored local artifact (SteamDB has no public API and
+403s scripted clients, so the machine path is PICS).
+
 The package parity diff only covers `NetPackage` wire and enums. For a **full**
 cross-version diff also run a per-method **signature** diff (emit
 `Type::Method(params)` for every method-with-body in each build and `comm` them:

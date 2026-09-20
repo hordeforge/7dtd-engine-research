@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "app": "294420",
+  "depot": "294422",
+  "studied": {
+    "branch": "public",
+    "buildid": "24994542",
+    "manifest": "1633674551820196085",
+    "download_bytes": 14354376816,
+    "size_bytes": 17607545324,
+    "version": "V 3.2.0",
+    "dll_sha256": "3737eedc9f143d428a69030317428c45d342be4f11006a46d72bcd7b1d0fc64d",
+    "recorded_utc": "2026-09-20T03:16:40Z",
+    "source": "https://api.steamcmd.net/v1/info/294420"
+  }
+}

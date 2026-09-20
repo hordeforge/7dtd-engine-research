@@ -15,6 +15,7 @@ Requires mono + tools/bin/Mono.Cecil.dll (built by `make tools`).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import subprocess
 import sys
@@ -87,6 +88,14 @@ static class AsmBodyDiff {
 """
 
 
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Hash-diff every method body between two managed assemblies."
@@ -109,6 +118,12 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
+
+    # Stamp both inputs: a body-hash report is only meaningful next to the exact
+    # bytes it compared, and the sha256 is what tools/data/steam_builds.json maps
+    # back to a Steam build id.
+    for label, path in (("old", old), ("new", new)):
+        print(f"# {label} {path} bytes={path.stat().st_size} sha256={sha256(path)}")
 
     with tempfile.TemporaryDirectory(prefix="asm_body_diff_") as tmp:
         tmp_path = Path(tmp)

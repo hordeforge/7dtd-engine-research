@@ -34,6 +34,7 @@ Standalone entry points (no build step; make targets noted inline where wired):
 | `cross_repo_links.py` | Cross-repo markdown link sweep (`make cross-links`). |
 | `zdtd_cite_check.py` | Sibling-repo research citation check (`make sibling-cites`). |
 | `xml_pins.py` | XML data pins vs the game dir (`make verify`). |
+| `parity/steam_builds.py [--check] [--fetch]` | Newest dedicated-server build (app 294420) from Steam's PICS app info: every branch's build id + depot 294422 manifest id, the local install's build id (Steam `appmanifest`), and the studied-build pin in [`data/steam_builds.json`](data/steam_builds.json). `--check` exits 1 when a build newer than the pin exists or the local install differs; `--print-fetch`/`--fetch` hand the manifest to `parity/fetch_version.sh`; `--record` re-pins after a retarget; `--from FILE` parses a saved payload offline. SteamDB has no public API and 403s scripted clients, so the machine path is Steam's own PICS. `make latest`. |
 | `regen.sh` | One-shot full regeneration: builds the dumpers, then re-dumps every `il/` set and refreshes every committed inventory (`docs/inventories/*`), ending with `make test`. Needs `ASM=<dedicated Assembly-CSharp.dll>`. |
 
 ## Build
@@ -203,6 +204,7 @@ Fun Pimps changed between game versions.
 | File | Purpose |
 |---|---|
 | `parity/ParitySurface.cs` | Extract every `NetPackage` read/write call sequence + directions + selected enums into a stable JSON snapshot. |
+| `parity/steam_builds.py` | Which builds exist, and which one this corpus studied: branch build ids + depot manifest ids from Steam PICS, local-install build id, drift verdict, and the `data/steam_builds.json` pin (build id + manifest + studied DLL sha256). |
 | `parity/fetch_version.sh <branch\|manifest> [label]` | Download a specific dedicated build (app 294420) via operator-installed SteamCMD and atomically emit a validated `ParitySurface` snapshot. Set `STEAMCMD` when it is not on `PATH`. |
 | `parity/parity_diff.py old.json new.json` | Diff two stock snapshots (added/removed/wire-changed packages). |
 | `dump_diff.py old-full new-full [filter]` | Method-level diff of two `il/full-<version>/` dump trees: per-type added/removed/changed methods + field/base/interface drift. Used for the 3.1.0→3.2.0 diff; `filter` is a regex on the relative type path. |
@@ -257,6 +259,7 @@ are explicit. See `re-scratch/README.md`.
 | `tests/test_parity_diff.py` | Stock snapshot parity CLI: unchanged snapshots exit 0, wire drift exits 1, malformed/removed modes exit 2. DLL-free. |
 | `tests/test_parity_drift_fail_closed.py` | Drift orchestration rejects an unreadable assembly with exit 2 and never creates an incomplete baseline. Skips unless the C# tools, Mono, and mcs are available. |
 | `tests/test_re_dump_regen.py` | Compiles `legacy/DumpFrameEntries` and regenerates non-empty inventory dumps from the local dedicated DLL (needs install + mcs/mono). |
+| `tests/test_steam_builds.py` | `parity/steam_builds.py` parses a fixture PICS payload (`--from`) and a fixture `appmanifest`, and returns the right verdicts: exit 0 on a match, 1 on branch or install drift, 2 on an unusable payload, missing pin, or unknown branch; `--print-fetch` emits exactly the `fetch_version.sh <manifest> <label>` line; the committed pin names the build whose sha256 is pinned in `stock_facts.json`. Network-free, DLL-free. |
 | `tests/bench_version_update_tooling.py` | Version-update tooling benchmark (`make readiness`). Includes mutation checks of the Mono.Cecil pin gate. |
 
 Tests that need the local dedicated DLL or built binaries SKIP with a reason on
