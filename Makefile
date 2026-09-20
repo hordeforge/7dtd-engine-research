@@ -2,8 +2,10 @@
 ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
+# Managed -> 7DaysToDieServer_Data -> the install root the depot manifest describes.
+GAME_ROOT ?= $(patsubst %/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll,%,$(ASM))
 
-.PHONY: bench-bodydiff tools stock-sync stock-check post-update census drift test test-docs lint verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
+.PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift test test-docs lint verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
@@ -13,6 +15,7 @@ help:
 	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
 	@echo "make save-roundtrip-all - verify EVERY probe save + the shipped Navezgane world (full fleet round-trip)"
 	@echo "make latest       - newest build vs the studied pin (ARGS=--check / --fetch / --verify-install Managed)"
+	@echo "make install-check - every install file vs Steam's manifest (ARGS=\"--only Managed\" to keep it fast)"
 	@echo "make stock-sync   - extract stock_facts.json from live DLL + pin check"
 	@echo "make stock-check  - pin check only (committed JSON; also diffs facts vs the live DLL when present)"
 	@echo "make facts        - view the machine-checked stock pins (census/save/behaviour)"
@@ -38,6 +41,13 @@ stock-check:
 # Quick view of the machine-checked stock pins (version, sim, behaviour).
 facts:
 	python3 "$(TOOLS)/facts.py"
+
+# Every installed file against Steam's own manifest for the installed build.
+# Reads the whole install (17.6 GB, about 11 s here); ARGS="--only Managed"
+# narrows it to the research-critical managed payload, ARGS="--ignore platform.cfg"
+# skips a file the server rewrites at runtime.
+install-check:
+	python3 "$(TOOLS)/parity/steam_manifest.py" --verify "$(GAME_ROOT)" $(ARGS)
 
 # Newest dedicated build from Steam PICS + the studied-build pin. ARGS=--check
 # exits 1 when a build newer than the pin exists (cron/CI); ARGS=--fetch pulls it.

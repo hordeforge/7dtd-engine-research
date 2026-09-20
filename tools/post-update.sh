@@ -9,8 +9,9 @@
 #   ASM=/path/to/Assembly-CSharp.dll ./tools/post-update.sh
 #
 # --steam adds the Steam side (needs network for the PICS branch table): the
-# published/installed build vs the studied pin, and the local managed payload vs
-# Steam's cached manifest. It is opt-in so the default path stays offline, and
+# published/installed build vs the studied pin, and every installed file vs
+# Steam's cached manifest (the whole install, about 11 s; use
+# steam_builds.py --verify-install Managed for the fast subset). It is opt-in so the default path stays offline, and
 # its non-zero rc is reported, not fatal: right after an update the pin is
 # expected to be behind until it is re-recorded.
 #
@@ -72,13 +73,15 @@ fi
 if [[ "$DO_STEAM" -eq 1 ]]; then
   echo "post-update: step steam build + install integrity"
   set +e
-  python3 "$HERE/parity/steam_builds.py" --check --verify-install Managed
+  python3 "$HERE/parity/steam_builds.py" --check --verify-install
   steam_rc=$?
   set -e
   if [[ $steam_rc -ne 0 ]]; then
     echo "post-update: steam check rc=$steam_rc (expected when the pin is behind the" >&2
     echo "  published/installed build, or when a managed file differs from Steam's" >&2
-    echo "  manifest; review before re-pinning and before trusting a diff)" >&2
+    echo "  manifest; review before re-pinning and before trusting a diff." >&2
+    echo "  runtime-written files (platform.cfg) can be excluded with --ignore SUBSTR;" >&2
+    echo "  the full verify reads the whole install, ~11 s here)" >&2
   fi
   echo "post-update: step cached builds"
   python3 "$HERE/parity/steam_manifest.py" --history || true

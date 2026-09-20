@@ -27,6 +27,13 @@ Status terms:
 
 ### 2026-09-20
 
+- `make install-check` runs the whole-install integrity check with the game root
+  derived from `ASM`/`GAME_ROOT` (no triple-`dirname` to remember):
+  `ARGS="--only Managed"` is the fast subset, `ARGS="--ignore platform.cfg"`
+  skips runtime-written files. `post-update.sh --steam` now verifies the whole
+  install rather than just `Managed`, and its hint names `--ignore` and the
+  runtime cost; the step stays non-fatal and reports rc.
+
 - Ran the first whole-install integrity check (`steam_manifest.py --verify <game
   dir>`): 17,532 files, 17.6 GB, about 11 s, and exactly one difference,
   `platform.cfg` (67 bytes locally against the manifest's 71). Both cached

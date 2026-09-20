@@ -317,7 +317,7 @@ mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.2.0
 mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.2.0
 ```
 
-Gates: `make test` (full suite, needs the live DLL), `make test-docs` (DLL-free corpus invariants; runs in CI on every push), `make stock-check` (pins vs live DLL + siblings), `make regen-check` (dump-regeneration check), `make facts` (machine-checked stock pins), `make latest ARGS="--check --verify-install Managed"` (newest published build vs the pin, and the local managed payload against Steam's manifest), `make drift` (patch drift vs the studied baseline), `make bench-bodydiff` (perf gate for the body-diff lens).  
+Gates: `make test` (full suite, needs the live DLL), `make test-docs` (DLL-free corpus invariants; runs in CI on every push), `make stock-check` (pins vs live DLL + siblings), `make regen-check` (dump-regeneration check), `make facts` (machine-checked stock pins), `make latest ARGS="--check --verify-install Managed"` (newest published build vs the pin, and the local managed payload against Steam's manifest), `make install-check` (every installed file against that manifest), `make drift` (patch drift vs the studied baseline), `make bench-bodydiff` (perf gate for the body-diff lens).  
 IL policy: [`../il/README.md`](../il/README.md).
 
 Host topology (not IL): [`../../7dtd-server-optimizer/docs/HOST_TUNING.md`](../../7dtd-server-optimizer/docs/HOST_TUNING.md).  
