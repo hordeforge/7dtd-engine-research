@@ -51,9 +51,11 @@ import _common
 from steam_manifest import (
     DEFAULT_DEPOT,
     ManifestError,
+    assembly_entry,
+    assembly_sha1,
     cached_manifests,
     diff_manifests,
-    match_entries,
+    manifest_for_gid,
     pins_buildids,
     read_manifest,
     roots_from,
@@ -171,15 +173,7 @@ def depot_provenance(dll: Path, manifest_path: Path | None) -> tuple[str, str, b
     """
     if manifest_path is None:
         return None
-    manifest = read_manifest(manifest_path)
-    entry = next(
-        (
-            candidate
-            for candidate in match_entries(manifest, "managed/assembly-csharp.dll")
-            if candidate.sha1
-        ),
-        None,
-    )
+    entry = assembly_entry(read_manifest(manifest_path))
     if entry is None or entry.sha1 is None:
         return None
     return manifest_path.name, entry.sha1, entry.sha1 == sha1_file(dll)
@@ -538,20 +532,8 @@ def resolve_pair(
     gid_of_build = {build: gid for gid, build in buildids.items()}
 
     def depot_sha1(gid: str) -> str | None:
-        manifest_path = next((p for p in cached if f"_{gid}." in p.name), None)
-        if manifest_path is None:
-            return None
-        entry = next(
-            (
-                candidate
-                for candidate in match_entries(
-                    read_manifest(manifest_path), "managed/assembly-csharp.dll"
-                )
-                if candidate.sha1
-            ),
-            None,
-        )
-        return entry.sha1 if entry else None
+        manifest_path = manifest_for_gid(DEFAULT_DEPOT, gid, roots)
+        return assembly_sha1(read_manifest(manifest_path)) if manifest_path else None
 
     resolved: dict[str, Source] = {}
     for label in (old_label, new_label):
@@ -585,12 +567,7 @@ def resolve_pair(
             (
                 manifest_path
                 for manifest_path in cached
-                if any(
-                    entry.sha1 == local_sha1
-                    for entry in match_entries(
-                        read_manifest(manifest_path), "managed/assembly-csharp.dll"
-                    )
-                )
+                if assembly_sha1(read_manifest(manifest_path)) == local_sha1
             ),
             None,
         )

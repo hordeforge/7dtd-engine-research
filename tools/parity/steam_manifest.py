@@ -249,6 +249,30 @@ def match_entries(manifest: Manifest, needle: str) -> list[Entry]:
     return [e for e in manifest.entries if lowered in e.name.lower()]
 
 
+GAME_ASSEMBLY = "managed/assembly-csharp.dll"
+
+
+def assembly_entry(manifest: Manifest) -> Entry | None:
+    """The depot entry for the managed game assembly, when it has a SHA-1."""
+    return next(
+        (entry for entry in match_entries(manifest, GAME_ASSEMBLY) if entry.sha1),
+        None,
+    )
+
+
+def assembly_sha1(manifest: Manifest) -> str | None:
+    entry = assembly_entry(manifest)
+    return entry.sha1 if entry else None
+
+
+def manifest_for_gid(depot: str, gid: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> Path | None:
+    """The cached manifest file with this gid, or None."""
+    return next(
+        (path for path in cached_manifests(depot, roots).values() if f"_{gid}." in path.name),
+        None,
+    )
+
+
 def verify(manifest: Manifest, root: Path, only: str | None) -> tuple[int, int, int, list[str]]:
     ok = missing = bad = 0
     problems: list[str] = []
