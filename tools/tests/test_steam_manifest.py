@@ -278,6 +278,27 @@ def main() -> None:
             labelled.stdout
         ), labelled.stdout
 
+        # Manifest selection by gid or Steam build id, and diff by build id.
+        by_gid = run("--steam-root", str(steam_root), "--manifest", "1111111111111111111")
+        assert by_gid.returncode == 0, by_gid.stderr
+        assert "gid: 1111111111111111111" in by_gid.stdout, by_gid.stdout
+        by_build = run("--steam-root", str(steam_root), "--manifest", "24911252")
+        assert by_build.returncode == 0, by_build.stderr
+        assert "gid: 1111111111111111111" in by_build.stdout, by_build.stdout
+        unknown_label = run("--steam-root", str(steam_root), "--manifest", "999")
+        assert unknown_label.returncode == 2, unknown_label
+        assert "cached gids" in unknown_label.stderr, unknown_label.stderr
+        diff_by_id = run(
+            "--steam-root",
+            str(steam_root),
+            "--manifest",
+            "2222222222222222222",
+            "--diff",
+            "24911252",
+        )
+        assert diff_by_id.returncode == 0, diff_by_id.stderr
+        assert "(build 24911252 -> build 24994542)" in diff_by_id.stdout, diff_by_id.stdout
+
         empty_root = root / "empty-steam"
         empty_root.mkdir()
         no_history = run("--steam-root", str(empty_root), "--history")

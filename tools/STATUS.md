@@ -27,6 +27,16 @@ Status terms:
 
 ### 2026-09-20
 
+- `steam_manifest.py --manifest` and `--diff` accept a cached manifest gid or a
+  Steam build id as well as a path (resolved through the cache plus the pin
+  history and client log), so a build no longer has to be pasted as a full
+  depotcache path; an unknown label exits 2 listing the cached gids.
+- `make install-check` guards its derived root: if `ASM` points outside the
+  standard layout the target says so instead of verifying a nonsense path, and
+  `research_diff --pair` without a discoverable install says to pass
+  `--game-dir` instead of reporting an empty scan of `.`.
+### 2026-09-20
+
 - `research_diff.py --pair` accepts a path to an assembly outside the install dir
   (a steamcmd scratch download, for example): the side is loaded directly and its
   report label comes from the version it reports, while the depot manifest and

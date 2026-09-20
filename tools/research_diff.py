@@ -736,7 +736,17 @@ def main(argv: list[str] | None = None) -> int:
     resolved_old = resolved_new = None
     if args.pair:
         live = _common.find_asm()
-        game_dir = Path(args.game_dir) if args.game_dir else (live.parent if live else Path("."))
+        if args.game_dir:
+            game_dir = Path(args.game_dir)
+        elif live is not None:
+            game_dir = live.parent
+        else:
+            print(
+                "research_diff: no dedicated install found for --pair; pass --game-dir "
+                "with the directory holding the assemblies",
+                file=sys.stderr,
+            )
+            return 2
         try:
             with tempfile.TemporaryDirectory(
                 prefix="research_diff_pair_", dir=_common.scratch_dir()

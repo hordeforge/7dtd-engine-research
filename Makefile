@@ -47,6 +47,9 @@ facts:
 # narrows it to the research-critical managed payload, ARGS="--ignore platform.cfg"
 # skips a file the server rewrites at runtime.
 install-check:
+	@test -d "$(GAME_ROOT)/7DaysToDieServer_Data/Managed" || { \
+	  echo "install-check: GAME_ROOT not derivable from ASM ($(GAME_ROOT)); pass GAME_ROOT=<install root>" >&2; \
+	  exit 2; }
 	python3 "$(TOOLS)/parity/steam_manifest.py" --verify "$(GAME_ROOT)" $(ARGS)
 
 # Newest dedicated build from Steam PICS + the studied-build pin. ARGS=--check

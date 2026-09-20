@@ -236,6 +236,37 @@ def find_manifest(depot: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> Path | N
     return max(candidates.values(), key=lambda p: p.stat().st_mtime)
 
 
+def resolve_manifest_arg(
+    value: str,
+    depot: str,
+    roots: tuple[Path, ...],
+    pins: dict[str, str] | None = None,
+) -> Path:
+    """A manifest path, a manifest gid, or a Steam build id -> the cached file.
+
+    `--history` prints the gids and build ids, so accepting them here removes the
+    need to paste a `~/.local/share/Steam/depotcache/...` path for every diff.
+    """
+    direct = Path(value).expanduser()
+    if direct.is_file():
+        return direct
+    cached = cached_manifests(depot, roots)
+    wanted = value.strip()
+    if wanted in cached:
+        return cached[wanted]
+    buildids = (pins if pins is not None else pins_buildids(PINS)) | steam_log_buildids(
+        depot, roots
+    )
+    for gid, build in buildids.items():
+        if build == wanted and gid in cached:
+            return cached[gid]
+    known = ", ".join(sorted(cached)) or "none cached"
+    raise ManifestError(
+        f"{value!r} is neither a file nor a cached manifest gid/build id for depot {depot} "
+        f"(cached gids: {known})"
+    )
+
+
 def sha1_file(path: Path) -> str:
     digest = hashlib.sha1()
     with path.open("rb") as fh:
@@ -389,7 +420,11 @@ def build_parser() -> argparse.ArgumentParser:
         prog="steam_manifest.py",
         description="Read Steam's cached depot manifest (per-file SHA-1, offline).",
     )
-    ap.add_argument("--manifest", default=None, help="explicit <depot>_<gid>.manifest path")
+    ap.add_argument(
+        "--manifest",
+        default=None,
+        help="manifest file, or a cached manifest gid / Steam build id (default: newest cached)",
+    )
     ap.add_argument("--depot", default=DEFAULT_DEPOT, help=f"depot id (default {DEFAULT_DEPOT})")
     ap.add_argument("--list", action="store_true", help="list every entry")
     ap.add_argument("--find", default=None, metavar="SUBSTR", help="entries whose path matches")
@@ -397,8 +432,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument(
         "--diff",
         default=None,
-        metavar="OLD.manifest",
-        help="compare the selected manifest (new) against this older one",
+        metavar="OLD",
+        help="compare the selected manifest (new) against this older file, gid or build id",
     )
     ap.add_argument(
         "--history",
@@ -427,7 +462,15 @@ def main(argv: list[str] | None = None) -> int:
     pinned = pins_buildids(Path(args.pins))
     if args.history:
         return print_history(args.depot, roots, args.json, pinned)
-    path = Path(args.manifest) if args.manifest else find_manifest(args.depot, roots)
+    try:
+        path = (
+            resolve_manifest_arg(args.manifest, args.depot, roots)
+            if args.manifest
+            else find_manifest(args.depot, roots)
+        )
+    except ManifestError as exc:
+        print(f"steam_manifest: {exc}", file=sys.stderr)
+        return 2
     if path is None:
         print(f"steam_manifest: no cached manifest for depot {args.depot}", file=sys.stderr)
         return 2
@@ -442,7 +485,7 @@ def main(argv: list[str] | None = None) -> int:
     older: Manifest | None = None
     if args.diff:
         try:
-            older = read_manifest(Path(args.diff))
+            older = read_manifest(resolve_manifest_arg(args.diff, args.depot, roots, pinned))
         except ManifestError as exc:
             print(f"steam_manifest: {exc}", file=sys.stderr)
             return 2
