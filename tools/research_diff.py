@@ -716,10 +716,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    problem = prereq()
-    if problem:
-        print(f"research_diff: {problem}", file=sys.stderr)
-        return 2
     if not args.pair and not (args.old and args.new):
         print("research_diff: pass --old/--new or --pair OLD:NEW", file=sys.stderr)
         return 2
@@ -783,6 +779,10 @@ def main(argv: list[str] | None = None) -> int:
         if not path.is_file():
             print(f"research_diff: dll not found: {path}", file=sys.stderr)
             return 2
+    problem = prereq()
+    if problem:
+        print(f"research_diff: {problem}", file=sys.stderr)
+        return 2
     try:
         with tempfile.TemporaryDirectory(prefix="research_diff_", dir=_common.scratch_dir()) as tmp:
             tmp_path = Path(tmp)
