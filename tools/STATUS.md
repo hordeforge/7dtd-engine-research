@@ -27,6 +27,14 @@ Status terms:
 
 ### 2026-09-20
 
+- `post-update.sh --steam` folds the Steam side into the documented post-patch
+  path (opt-in, so the default run stays offline): published/installed build vs
+  the studied pin, local `Managed/` vs Steam's cached manifest, the cached-build
+  history, and the fetch/re-pin/delta-report commands as next steps. A non-zero
+  rc from that step is reported with the reason, not fatal, since the pin is
+  expected to be behind until re-recorded. The shell help gate now also asserts
+  the flag is documented and unknown options still exit 2.
+
 - `research_diff.py` gained a per-type metadata lens (`FullSurface.exe`):
   added/removed types plus changed kind/base/field-count/method-count/IL rows,
   which no other lens covered. Over the real b9/b10 pair it reports exactly the

@@ -30,6 +30,15 @@ def main() -> None:
     assert not bad, "\n".join(bad)
     assert subprocess.run([TOOLS / "build.sh", "--bad"], capture_output=True).returncode == 2
     assert subprocess.run([TOOLS / "regen.sh", "--bad"], capture_output=True).returncode == 2
+    assert subprocess.run([TOOLS / "post-update.sh", "--bad"], capture_output=True).returncode == 2
+
+    # The opt-in Steam side of the post-update path must stay documented: the
+    # default run is offline, so a reader only discovers --steam from the help.
+    help_text = subprocess.run(
+        [TOOLS / "post-update.sh", "--help"], text=True, capture_output=True
+    ).stdout
+    assert "--steam" in help_text, help_text
+    assert "offline" in help_text, help_text
     print(f"OK: {len(SCRIPTS)} shell CLIs provide side-effect-free help")
 
 
