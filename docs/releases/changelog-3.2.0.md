@@ -454,6 +454,12 @@ b10 hashed (`tools/asm_body_diff.py`): 56064 methods; 2 added / 2 removed
 changes**, all the `Platform.EOS.RemoteFileStorage` rows above. Surface IL
 total +97 matches the six method deltas. No other managed game type drifted.
 
+Machine re-derivation of this section: `workspace/outputs/diffs/b9-to-b10-20260920.md`
+(`tools/research_diff.py` runs the facts, census, method-signature, enum-member
+and body-hash lenses in one pass). Its body lens lists the same six
+`Platform.EOS.RemoteFileStorage` changes and the Burst rename; the census,
+signature and enum lenses report zero drift, matching the claims above.
+
 **Assets (non-managed):** ~1977 `Data/` files newer than the b9 install
 window, dominated by Prefabs (POIs/Parts/Test/RWGTiles), Addressables, and
 Bundles, plus touched Config XML (`blocks`, `items`, `buffs`, `quests`,

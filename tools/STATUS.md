@@ -27,6 +27,17 @@ Status terms:
 
 ### 2026-09-20
 
+- Added `research_diff.py` (supported): one-pass build-to-build report over the
+  maintained lenses (facts, census, method signatures, enum members, method
+  bodies, optional wire parity), stamped with both inputs' bytes, sha256,
+  version and Steam build id (mapped through the `steam_builds.json` pin).
+  Writes `workspace/outputs/diffs/<old>-to-<new>-<date>.md`, `--check` exits 1
+  on drift, `--json` prints the summary. Ran it on the retained b9 backup vs the
+  live b10 DLL: it independently reproduces the documented delta (version 9 to
+  10, six `Platform.EOS.RemoteFileStorage` body changes, the Burst job-reflection
+  rename, zero census/signature/enum drift). Report committed and linked from
+  `docs/releases/changelog-3.2.0.md` §8. Gated by `tests/test_research_diff.py`
+  (fixture parsers + renderer + CLI contract, DLL-free).
 - Added `parity/steam_builds.py` (supported): newest dedicated-server build from
   Steam's PICS app info (branch build ids + depot 294422 manifest ids), the local
   install's build id from its `appmanifest`, and the studied-build pin in

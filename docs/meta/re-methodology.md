@@ -224,6 +224,23 @@ A delta narrative can then name the exact Steam build it compared instead of
 leaving that to the git-ignored local artifact (SteamDB has no public API and
 403s scripted clients, so the machine path is PICS).
 
+`research_diff.py` folds the cheap lenses below into one stamped report, so a
+patch investigation starts from a single artifact instead of a hand-run list:
+
+```bash
+tools/research_diff.py --old Assembly-CSharp.dll.re_stock_bak --new Assembly-CSharp.dll \
+  --label-old b9 --label-new b10          # -> workspace/outputs/diffs/b9-to-b10-<date>.md
+tools/research_diff.py --old a.dll --new b.dll --check   # exit 1 when any lens drifts
+```
+
+It reports source identity (bytes, sha256, version, Steam build id when the sha
+matches the pin) and runs facts (`StockFacts.exe`), census (`Census.exe`),
+method signatures (`MethodList.exe`), enum members (`EnumList.exe`) and
+per-method body hashes (`asm_body_diff.py`), plus wire parity when
+`--parity-old/--parity-new` snapshots are given; the rendered report is the
+evidence artifact to attach to a delta narrative (see the b9 to b10 report cited
+by [changelog-3.2.0.md](../releases/changelog-3.2.0.md) §8).
+
 The package parity diff only covers `NetPackage` wire and enums. For a **full**
 cross-version diff also run a per-method **signature** diff (emit
 `Type::Method(params)` for every method-with-body in each build and `comm` them:
