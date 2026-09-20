@@ -251,6 +251,33 @@ held-entity feature ([items.md](../gameplay/items.md) § Held entities) and join
 shipped surface were only visible through those two lenses, not the package parity alone.
 Full delta map: [changelog-3.2.0.md](../releases/changelog-3.2.0.md) §9 (per-fact homes).
 
+### 5b-ii. Non-managed content delta (Steam depot manifest)
+
+All three lenses above read managed IL. The shipped `Data/` payload (bundles,
+Addressables, config XML, prefabs) is only visible through Steam's own depot
+manifest, which the client caches at
+`<steam>/depotcache/<depot>_<gid>.manifest` in plaintext. `parity/steam_manifest.py`
+reads it offline: Steam's per-file size, flags, whole-file SHA-1 and per-chunk
+SHA-1s for all 17,624 files of depot 294422.
+
+```bash
+tools/parity/steam_manifest.py --history                      # cached builds + Steam build ids
+tools/parity/steam_manifest.py --find Assembly-CSharp         # one entry's size + SHA-1
+tools/parity/steam_manifest.py --verify "$GAME_DIR" --only Managed   # hash local files against Steam
+tools/parity/steam_manifest.py --diff ~/.local/share/Steam/depotcache/294422_<old-gid>.manifest
+```
+
+`--verify` is the install-integrity check (exit 1 on missing/short/mismatched
+files) and `--diff` is the asset-level patch delta. For b9 to b10 it reports
+16 changed files and 0 added/removed, which matches the client's own content log
+and is the authoritative content delta: mtime-based windows over the install
+overstate a patch (the b9 to b10 narrative's "~1977 newer `Data/` files" was
+install activity, not depot content). Build ids come from the client's
+`logs/content_log.txt` and fall back to the `studied`/`history` entries of
+`tools/data/steam_builds.json`, so an old cached manifest stays labelled after
+the log rotates. SteamDB is not a route for this: it has no API and 403s
+scripted clients.
+
 ## 5c. Stock facts pin (hardcodes across docs + products)
 
 Hardcoded stock values (version triple, TPS, challenge `0xCA`, chunk YDim,

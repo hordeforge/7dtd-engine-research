@@ -27,6 +27,16 @@ Status terms:
 
 ### 2026-09-20
 
+- Added `tests/test_fetch_version_fake_steamcmd.py`: `parity/fetch_version.sh` had no
+  test because it needs SteamCMD and a multi-GB depot. A recording fake steamcmd
+  (logs argv, materialises a DLL from the live install into the content or install
+  dir) now exercises the manifest form (manifest id passed through, published
+  snapshot identical to a direct `ParitySurface.exe` run on the same bytes), the
+  branch form, and both fail-closed paths (a steamcmd that does nothing or exits
+  non-zero must not publish a partial snapshot). Offline; wired into `make test`.
+- Documented the non-managed content lens in `docs/meta/re-methodology.md` 5b-ii:
+  depot-manifest `--history`/`--find`/`--verify`/`--diff`, the b9 to b10 result
+  (16 changed files, matching the client log), and the mtime-window caveat.
 - Fixed the stale `args.url` left in `steam_builds.py` by dropping `--url` (the
   live PICS path crashed; the tests only exercised `--from`) and added
   `tests/test_cli_args_wired.py`: every `args.<name>` a maintained Python tool
