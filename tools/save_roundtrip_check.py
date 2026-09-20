@@ -745,29 +745,6 @@ def check_region_raw(path: str, checks: list[str]) -> None:
     checks.append("  header 11 bytes; location table 512 B @11; timestamp 256 B @523; payload @779")
 
 
-def discover_save_dir() -> str | None:
-    """Newest probe save containing main.ttw + Region/, or None.
-
-    Probe saves live under active loadgen sessions; a file that vanishes
-    between the glob and its stat degrades to "not newest" instead of
-    aborting discovery, keeping the documented None-on-no-save contract.
-    """
-    best = None
-    best_mtime = -1.0
-    for ttw in glob.glob(os.path.expanduser("~/.cache/7dtd-loadgen-*/Saves/*/*/main.ttw")):
-        d = os.path.dirname(ttw)
-        if not os.path.isdir(os.path.join(d, "Region")):
-            continue
-        try:
-            mtime = os.path.getmtime(ttw)
-        except OSError:
-            continue
-        if mtime > best_mtime:
-            best_mtime = mtime
-            best = ttw
-    return os.path.dirname(best) if best else None
-
-
 # Substrings that mark a check line as failed. Keep in sync with the failure
 # messages below: every violation text must contain at least one marker.
 FAILED_MARKERS = (

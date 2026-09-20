@@ -204,6 +204,35 @@ def main() -> None:
         assert written["buildid"] == "90", written
         assert written["manifest"] == "222", written
 
+        seeded = tmp_path / "seeded.json"
+        seeded.write_text(
+            json.dumps(
+                {
+                    "schema": 1,
+                    "studied": {
+                        "branch": "public",
+                        "buildid": "100",
+                        "manifest": "111",
+                        "version": "V 0.0.1",
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        first = run(*base, "--pins", str(seeded), "--record", "--branch", "v9.9.9")
+        assert first.returncode == 0, first.stderr
+        assert "history: 1 earlier build(s)" in first.stdout, first.stdout
+        seeded_doc = json.loads(seeded.read_text(encoding="utf-8"))
+        assert seeded_doc["studied"]["buildid"] == "90", seeded_doc
+        assert [e["buildid"] for e in seeded_doc["history"]] == ["100"], seeded_doc
+        assert seeded_doc["history"][0]["gid"] == "111", seeded_doc
+
+        again = run(*base, "--pins", str(seeded), "--record", "--branch", "v9.9.9")
+        assert again.returncode == 0, again.stderr
+        assert "earlier builds: 100 (111)" in again.stdout, again.stdout
+        repeat_doc = json.loads(seeded.read_text(encoding="utf-8"))
+        assert [e["buildid"] for e in repeat_doc["history"]] == ["100"], repeat_doc
+
     check_committed_pin()
     print("OK: steam_builds parse/drift/pin cases pass; committed pin matches stock_facts")
 

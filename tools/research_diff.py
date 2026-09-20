@@ -61,7 +61,6 @@ class Source:
     size: int
     facts: dict[str, Any]
     buildid: str | None
-    buildid_from: str | None
 
     @property
     def version(self) -> str:
@@ -123,10 +122,11 @@ def load_steam_pins() -> dict[str, Any]:
     return pins if isinstance(pins, dict) else {}
 
 
-def buildid_for(sha: str, pins: dict[str, Any]) -> tuple[str, str] | None:
+def buildid_for(sha: str, pins: dict[str, Any]) -> str | None:
+    """The Steam build id whose studied DLL sha256 matches, when the pin has one."""
     studied = pins.get("studied")
     if isinstance(studied, dict) and studied.get("dll_sha256") == sha and studied.get("buildid"):
-        return str(studied["buildid"]), f"studied pin ({studied.get('branch', '?')})"
+        return str(studied["buildid"])
     return None
 
 
@@ -147,10 +147,6 @@ def load_source(
 ) -> Source:
     facts = extract_facts(path, tmp, name)
     sha = sha256_file(path)
-    if buildid:
-        mapped: tuple[str, str] | None = (buildid, "given on the command line")
-    else:
-        mapped = buildid_for(sha, pins)
     wire = str(facts.get("version", {}).get("stock_wire", "unknown"))
     return Source(
         label=label or wire.replace(" ", "-"),
@@ -158,8 +154,7 @@ def load_source(
         sha256=sha,
         size=path.stat().st_size,
         facts=facts,
-        buildid=mapped[0] if mapped else None,
-        buildid_from=mapped[1] if mapped else None,
+        buildid=buildid or buildid_for(sha, pins),
     )
 
 

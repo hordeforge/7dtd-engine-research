@@ -34,8 +34,8 @@ Standalone entry points (no build step; make targets noted inline where wired):
 | `cross_repo_links.py` | Cross-repo markdown link sweep (`make cross-links`). |
 | `zdtd_cite_check.py` | Sibling-repo research citation check (`make sibling-cites`). |
 | `xml_pins.py` | XML data pins vs the game dir (`make verify`). |
-| `parity/steam_builds.py [--check] [--fetch]` | Newest dedicated-server build (app 294420) from Steam's PICS app info: every branch's build id + depot 294422 manifest id, the local install's build id (Steam `appmanifest`), and the studied-build pin in [`data/steam_builds.json`](data/steam_builds.json). `--check` exits 1 when a build newer than the pin exists or the local install differs; `--print-fetch`/`--fetch` hand the manifest to `parity/fetch_version.sh` (a branch PICS does not list, e.g. `latest_experimental`, falls back to the branch form so steamcmd can still install it by name); `--record` re-pins after a retarget; `--from FILE` parses a saved payload offline. SteamDB has no public API and 403s scripted clients, so the machine path is Steam's own PICS. The table also marks each branch whose depot manifest is already cached locally (`cached`), so you can see which builds are diffable offline before fetching anything. `make latest`. |
-| `parity/steam_manifest.py [--find SUBSTR] [--verify DIR]` | Steam's **own per-file checksums**, offline. The Steam client caches the depot manifest it installed from at `<steam>/depotcache/<depot>_<gid>.manifest`; the 7DTD dedicated depot (294422) one is plaintext protobuf (magic `0x71F617D0`), so every file's size, flags, whole-file SHA-1 and per-chunk SHA-1 are readable with no steamcmd, login, or network (SteamDB 403s scripted clients). `--find` prints the manifest row for a path, `--verify DIR [--only SUBSTR]` hashes local files against Steam's SHA-1s and exits 1 on missing/mismatched/short files, `--history` lists every cached build of the depot with the Steam build id paired from the client's `logs/content_log.txt`, `--list --json` emits the whole table, `--manifest FILE` reads an older cached build, and `--diff OLD.manifest` lists exactly which files changed between two cached builds with both SHA-1s and both build ids (the b10 vs b9 depot delta is 16 changed, 0 added, 0 removed). `--steam-root DIR` scans a non-default Steam tree. A full-install verify reads every byte, so use `--only` while iterating. |
+| `parity/steam_builds.py [--check] [--fetch]` | Newest dedicated-server build (app 294420) from Steam's PICS app info: every branch's build id + depot 294422 manifest id, the local install's build id (Steam `appmanifest`), and the studied-build pin in [`data/steam_builds.json`](data/steam_builds.json). `--check` exits 1 when a build newer than the pin exists or the local install differs; `--print-fetch`/`--fetch` hand the manifest to `parity/fetch_version.sh` (a branch PICS does not list, e.g. `latest_experimental`, falls back to the branch form so steamcmd can still install it by name); `--record` re-pins after a retarget and keeps the superseded pin in the file's `history` (capped, deduped by build id) so an older cached manifest can still be labelled after the Steam log rotates; `--from FILE` parses a saved payload offline. SteamDB has no public API and 403s scripted clients, so the machine path is Steam's own PICS. The table also marks each branch whose depot manifest is already cached locally (`cached`), so you can see which builds are diffable offline before fetching anything. `make latest`. |
+| `parity/steam_manifest.py [--find SUBSTR] [--verify DIR]` | Steam's **own per-file checksums**, offline. The Steam client caches the depot manifest it installed from at `<steam>/depotcache/<depot>_<gid>.manifest`; the 7DTD dedicated depot (294422) one is plaintext protobuf (magic `0x71F617D0`), so every file's size, flags, whole-file SHA-1 and per-chunk SHA-1 are readable with no steamcmd, login, or network (SteamDB 403s scripted clients). `--find` prints the manifest row for a path, `--verify DIR [--only SUBSTR]` hashes local files against Steam's SHA-1s and exits 1 on missing/mismatched/short files, `--history` lists every cached build of the depot with the Steam build id paired from the client's `logs/content_log.txt` (falling back to the `studied`/`history` entries of `--pins FILE`, default [`data/steam_builds.json`](data/steam_builds.json)), `--list --json` emits the whole table, `--manifest FILE` reads an older cached build, and `--diff OLD.manifest` lists exactly which files changed between two cached builds with both SHA-1s and both build ids (the b10 vs b9 depot delta is 16 changed, 0 added, 0 removed). `--steam-root DIR` scans a non-default Steam tree. A full-install verify reads every byte, so use `--only` while iterating. |
 | `research_diff.py --old <dll> --new <dll>` | One-pass build-to-build research report: source identity (bytes, sha256, version, Steam build when the sha matches the pin), a drift verdict, then the facts (`StockFacts.exe`), census (`Census.exe`), method-signature (`MethodList.exe`), enum-member (`EnumList.exe`) and per-method body-hash (`asm_body_diff.py`) lenses, plus optional wire parity (`parity_diff.py` via `--parity-old/--parity-new`). Writes a stamped Markdown report (default `workspace/outputs/diffs/<old>-to-<new>-<date>.md`, `--out -` for stdout), `--check` exits 1 on drift, `--json` prints the summary. The committed b9 to b10 report backs [`../docs/releases/changelog-3.2.0.md`](../docs/releases/changelog-3.2.0.md) §8. |
 | `regen.sh` | One-shot full regeneration: builds the dumpers, then re-dumps every `il/` set and refreshes every committed inventory (`docs/inventories/*`), ending with `make test`. Needs `ASM=<dedicated Assembly-CSharp.dll>`. |
 
@@ -102,7 +102,6 @@ Small, parameterized, maintained. They supersede most of `legacy/`.
 | `StateMachines.exe <docsDir> <out.md>` | Indexes every mermaid `stateDiagram` in the docs tree with owning section + state count. Docs in, assembly not involved; backs [`../docs/inventories/state-machines.md`](../docs/inventories/state-machines.md). |
 | `EnumList.exe <asm> <outFile>` | Emits `Enum.Member=value` for every enum member; feeds the drift-check enum diff. |
 | `MethodList.exe <asm> <outFile>` | Emits `Type::Method(params)` for every method-with-body; feeds the drift-check method-surface diff. |
-| `ListAllTypes.exe <asm> <outFile>` | One-off audit helper: every type FullName sorted to a file (used to audit DumpAll completeness). |
 
 The no-build-step Python helpers (`census-pct.py`, `mention_depth.py`,
 `shader_blob_dump.py`) are not `src/` tools; they are listed in the standalone
@@ -163,10 +162,10 @@ Session notes for the readiness experiment: [`../workspace/autoresearch/`](../wo
 
 ## 2. Legacy per-family dumpers (`legacy/`)
 
-38 archival dumpers that generated the historical `il/` dump sets. Each emits a
+12 archival dumpers that generated the historical `il/` dump sets. Each emits a
 whole family at once (many files + an auto-narrative). Kept for regenerating those
 specific sets; for anything new, prefer `src/DumpMethod`/`src/DumpType`. `build.sh`
-compiles them to `bin/legacy/` best-effort (**all 38 build**; a source that stops
+compiles them to `bin/legacy/` best-effort (all 12 build; a source that stops
 compiling is reported, not fatal).
 
 Canonical family dumpers (map to `il/` dump sets):
@@ -186,12 +185,11 @@ Canonical family dumpers (map to `il/` dump sets):
 | `DumpAIDirector` | (aidirector) | AIDirector component types |
 | `DumpSaveLight` | (save/light) | WorldState + light sites |
 
-The remaining `legacy/*.cs` (`DumpMethods`, `DumpMethodByName`, `DumpType(s)`,
-`DumpOne`, `DumpOneMethod(2)`,
-`DumpNamed`, `DumpNested`, `DumpNodes`, `DumpReg`, `DumpMgr`, `DumpScan`, `DumpIter`,
-`DumpFull`, `DumpAstar`, `DumpAuth`, `DumpVoxel`, `DumpTps`, `DumpTypeBases`,
-`DumpExtra*`, `Find{FieldWrite,Log,Sub,Type}`, `ListMethods`) are ad-hoc single-target
-helpers/finders, superseded by `src/DumpMethod` and `src/DumpType`.
+All 12 files in `legacy/` are canonical family dumpers (the table above). The 26
+ad-hoc single-target helpers/finders that used to sit beside them (multiple
+`DumpOne*`, `DumpNamed`, `Find*`, `ListMethods`, ...) were deleted after a
+reference sweep: they were superseded by `src/DumpMethod`/`src/DumpType` and no
+tool, test, or gate named them.
 
 ```bash
 mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.1.0

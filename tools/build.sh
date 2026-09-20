@@ -112,6 +112,13 @@ done
 # not fatal. Pass --skip-legacy to skip this stage.
 if [[ "$skip_legacy" -eq 0 && -d legacy ]]; then
   mkdir -p bin/legacy
+  # Drop exes whose source is gone: a stale bin/legacy/*.exe from a deleted
+  # dumper would otherwise stay runnable and look supported.
+  for exe in bin/legacy/*.exe; do
+    [[ -e "$exe" ]] || continue
+    name="$(basename "$exe" .exe)"
+    [[ -f "legacy/$name.cs" ]] || { rm -f "$exe"; echo "legacy: removed stale bin/legacy/$name.exe (no legacy/$name.cs)"; }
+  done
   ok=0; fail=0; failed=""
   for f in legacy/*.cs; do
     name="$(basename "$f" .cs)"

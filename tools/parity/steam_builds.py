@@ -175,23 +175,50 @@ def write_pins(path: Path, pins: dict[str, Any]) -> None:
     tmp.replace(path)
 
 
-def stock_version() -> str | None:
+def stock_facts() -> dict[str, Any]:
+    """The committed studied-build facts, or {} when absent/unreadable."""
     try:
         with STOCK_FACTS.open(encoding="utf-8") as fh:
             facts: Any = json.load(fh)
-        display = facts["version"]["display"]
-        return str(display)
-    except (OSError, json.JSONDecodeError, KeyError, TypeError):
-        return None
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return facts if isinstance(facts, dict) else {}
 
 
-def stock_dll_sha256() -> str | None:
-    try:
-        with STOCK_FACTS.open(encoding="utf-8") as fh:
-            facts: Any = json.load(fh)
-        return str(facts["source_identity"]["assembly_csharp_dll_sha256"])
-    except (OSError, json.JSONDecodeError, KeyError, TypeError):
-        return None
+def record_history(pins: dict[str, Any] | None, studied: dict[str, Any]) -> list[dict[str, Any]]:
+    """Previous studied pins, newest first, deduped by build id and capped.
+
+    Steam's content log pairs build ids to manifests, but the log rotates;
+    keeping the superseded pins here means an old cached manifest can still be
+    labelled with the build that shipped it.
+    """
+    history: list[dict[str, Any]] = [
+        entry for entry in ((pins or {}).get("history") or []) if isinstance(entry, dict)
+    ]
+    previous = (pins or {}).get("studied")
+    if (
+        isinstance(previous, dict)
+        and previous.get("buildid")
+        and previous.get("buildid") != studied.get("buildid")
+    ):
+        history.insert(
+            0,
+            {
+                "buildid": previous.get("buildid"),
+                "gid": previous.get("manifest"),
+                "version": previous.get("version"),
+                "recorded_utc": previous.get("recorded_utc"),
+                "note": "previous studied pin",
+            },
+        )
+    kept: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for entry in history:
+        key = str(entry.get("buildid") or "")
+        if key and key not in seen:
+            seen.add(key)
+            kept.append(entry)
+    return kept[:10]
 
 
 def select(snapshot: Snapshot, name: str) -> Branch | None:
@@ -224,9 +251,7 @@ def iso(epoch: int | None) -> str:
     return datetime.fromtimestamp(epoch, tz=timezone.utc).strftime("%Y-%m-%d %H:%MZ")
 
 
-def as_json(branch: Branch | None) -> dict[str, Any] | None:
-    if branch is None:
-        return None
+def as_json(branch: Branch) -> dict[str, Any]:
     return {
         "branch": branch.name,
         "buildid": branch.buildid,
@@ -244,7 +269,6 @@ def build_parser() -> argparse.ArgumentParser:
         description="Latest 7DTD dedicated-server build (PICS) + studied-build pin.",
     )
     ap.add_argument("--from", dest="from_path", metavar="FILE", help="read PICS JSON from a file")
-    ap.add_argument("--url", default=PICS_URL, help=f"app-info URL (default: {PICS_URL})")
     ap.add_argument("--branch", default=None, help="branch to select (default: the pinned one)")
     ap.add_argument("--label", default=None, help="fetch_version.sh label (default: branch name)")
     ap.add_argument("--pins", default=str(PINS), help=f"studied-build pin file (default: {PINS})")
@@ -335,9 +359,7 @@ def main(argv: list[str] | None = None) -> int:
                 gid: {"buildid": cached_buildids.get(gid), "path": str(path)}
                 for gid, path in sorted(cached.items())
             },
-            "branches": [
-                (as_json(b) or {}) | {"cached": b.manifest in cached} for b in snapshot.branches
-            ],
+            "branches": [as_json(b) | {"cached": b.manifest in cached} for b in snapshot.branches],
         }
         print(json.dumps(payload, indent=2))
         return 0
@@ -380,29 +402,44 @@ def main(argv: list[str] | None = None) -> int:
             )
         else:
             print(f"studied pin: none in {pins_path}")
+        history = [e for e in ((pins or {}).get("history") or []) if isinstance(e, dict)]
+        if history:
+            earlier = ", ".join(
+                f"{e.get('buildid')} ({e.get('gid') or 'gid unknown'})" for e in history[:3]
+            )
+            print(f"earlier builds: {earlier}" + (" ..." if len(history) > 3 else ""))
 
     stale = bool(studied) and branch.buildid != studied.get("buildid")
     install_stale = install_buildid is not None and install_buildid != branch.buildid
 
     if args.record:
-        recorded = {
+        facts = stock_facts()
+        studied_entry: dict[str, Any] = {
+            "branch": branch.name,
+            "buildid": branch.buildid,
+            "manifest": branch.manifest,
+            "download_bytes": branch.download,
+            "size_bytes": branch.size,
+            "version": str(facts.get("version", {}).get("display")) or None,
+            "dll_sha256": str(facts.get("source_identity", {}).get("assembly_csharp_dll_sha256"))
+            or None,
+            "recorded_utc": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "source": snapshot.source,
+        }
+        recorded: dict[str, Any] = {
             "schema": 1,
             "app": APP,
             "depot": DEPOT,
-            "studied": {
-                "branch": branch.name,
-                "buildid": branch.buildid,
-                "manifest": branch.manifest,
-                "download_bytes": branch.download,
-                "size_bytes": branch.size,
-                "version": stock_version(),
-                "dll_sha256": stock_dll_sha256(),
-                "recorded_utc": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "source": snapshot.source,
-            },
+            "studied": studied_entry,
         }
+        history = record_history(pins, studied_entry)
+        if history:
+            recorded["history"] = history
         write_pins(pins_path, recorded)
-        print(f"recorded: {pins_path} <- {branch.name} buildid {branch.buildid}")
+        print(
+            f"recorded: {pins_path} <- {branch.name} buildid {branch.buildid}"
+            + (f" (history: {len(history)} earlier build(s))" if history else "")
+        )
 
     label = args.label or branch.name
     if not LABEL_RE.match(label):

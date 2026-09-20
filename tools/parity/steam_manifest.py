@@ -38,6 +38,7 @@ from typing import Any, Iterator
 
 MAGIC = 0x71F617D0
 DEFAULT_DEPOT = "294422"  # dedicated-server content depot
+PINS = Path(__file__).resolve().parent.parent / "data" / "steam_builds.json"
 STEAM_ROOTS = (
     Path.home() / ".local/share/Steam",
     Path.home() / ".steam/steam",
@@ -204,6 +205,29 @@ def steam_log_buildids(depot: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> dic
     return mapping
 
 
+def pins_buildids(path: Path) -> dict[str, str]:
+    """gid -> build id from the committed pin file (studied build + history).
+
+    The client's content log rotates; the pin file keeps the build ids of
+    earlier studied builds so an old cached manifest stays labelled.
+    """
+    try:
+        data: Any = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    mapping: dict[str, str] = {}
+    studied = data.get("studied")
+    if isinstance(studied, dict) and studied.get("manifest") and studied.get("buildid"):
+        mapping[str(studied["manifest"])] = str(studied["buildid"])
+    history = data.get("history")
+    for entry in history if isinstance(history, list) else []:
+        if isinstance(entry, dict) and entry.get("gid") and entry.get("buildid"):
+            mapping[str(entry["gid"])] = str(entry["buildid"])
+    return mapping
+
+
 def find_manifest(depot: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> Path | None:
     """Newest cached manifest for a depot, or None."""
     candidates = cached_manifests(depot, roots)
@@ -276,13 +300,15 @@ def diff_manifests(
     return counts, lines
 
 
-def print_history(depot: str, roots: tuple[Path, ...], as_json: bool) -> int:
+def print_history(
+    depot: str, roots: tuple[Path, ...], as_json: bool, pinned: dict[str, str] | None = None
+) -> int:
     """Every cached manifest of the depot, newest first, with its build id."""
     cached = cached_manifests(depot, roots)
     if not cached:
         print(f"steam_manifest: no cached manifest for depot {depot}", file=sys.stderr)
         return 2
-    buildids = steam_log_buildids(depot, roots)
+    buildids = (pinned or {}) | steam_log_buildids(depot, roots)
     rows: list[dict[str, Any]] = []
     for gid, path in cached.items():
         try:
@@ -346,6 +372,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument(
         "--steam-root", default=None, help="Steam root to scan (default: standard locations)"
     )
+    ap.add_argument("--pins", default=str(PINS), help=f"build-id pin file (default: {PINS})")
     ap.add_argument("--only", default=None, metavar="SUBSTR", help="limit --verify/--list/--diff")
     ap.add_argument("--json", action="store_true", help="emit JSON")
     return ap
@@ -354,8 +381,9 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     roots = roots_from(args.steam_root)
+    pinned = pins_buildids(Path(args.pins))
     if args.history:
-        return print_history(args.depot, roots, args.json)
+        return print_history(args.depot, roots, args.json, pinned)
     path = Path(args.manifest) if args.manifest else find_manifest(args.depot, roots)
     if path is None:
         print(f"steam_manifest: no cached manifest for depot {args.depot}", file=sys.stderr)
@@ -393,7 +421,7 @@ def main(argv: list[str] | None = None) -> int:
         }
         if older is not None:
             counts, lines = diff_manifests(older, manifest, args.only)
-            buildids = steam_log_buildids(manifest.depot, roots)
+            buildids = pinned | steam_log_buildids(manifest.depot, roots)
             payload |= {
                 "old_manifest": str(older.path),
                 "old_gid": older.gid,
@@ -429,7 +457,7 @@ def main(argv: list[str] | None = None) -> int:
         counts, lines = diff_manifests(older, manifest, args.only)
         for line in lines:
             print(line)
-        buildids = steam_log_buildids(manifest.depot, roots)
+        buildids = pinned | steam_log_buildids(manifest.depot, roots)
         old_label = f"build {buildids[older.gid]}" if older.gid in buildids else older.gid
         new_label = f"build {buildids[manifest.gid]}" if manifest.gid in buildids else manifest.gid
         print(

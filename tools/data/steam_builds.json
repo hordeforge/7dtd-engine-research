@@ -12,5 +12,13 @@
     "dll_sha256": "3737eedc9f143d428a69030317428c45d342be4f11006a46d72bcd7b1d0fc64d",
     "recorded_utc": "2026-09-20T03:16:40Z",
     "source": "https://api.steamcmd.net/v1/info/294420"
-  }
+  },
+  "history": [
+    {
+      "buildid": "24911252",
+      "gid": "1712639873522480804",
+      "version": "V 3.2.0",
+      "note": "b9 pin, superseded by the b10 retarget; build id and gid paired from the Steam client content log (logs/content_log.txt) and confirmed by the cached depot manifest"
+    }
+  ]
 }

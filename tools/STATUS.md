@@ -21,11 +21,30 @@ Status terms:
 | `tests/` | supported | executable gate scripts, enumerated by Make; not unittest discovery tests |
 | `sandbox/` | experimental | lint plus focused safe-name, dependency-lock, and Zig-table gates |
 | `re-scratch/` | experimental | one-off format probes; compile/run manually when revisiting the format |
-| `legacy/` | archival | best-effort build; canonical family dumpers run from `regen.sh` |
+| `legacy/` | archival | 12 canonical family dumpers, best-effort build; run from `regen.sh` |
 
 ## Log
 
 ### 2026-09-20
+
+- Applied the ponytail-audit deletions after a fresh reference sweep: removed the
+  26 superseded ad-hoc legacy helpers (`DumpOne*`, `DumpNamed`, `DumpNested`,
+  `DumpNodes`, `DumpReg`, `DumpMgr`, `DumpScan`, `DumpIter`, `DumpFull`,
+  `DumpAstar`, `DumpAuth`, `DumpVoxel`, `DumpTps`, `DumpType(s)`,
+  `DumpTypeBases`, `DumpExtraSurfaces`, `Find{FieldWrite,Log,Sub,Type}`,
+  `ListMethods`, `DumpMethods`, `DumpMethodByName`), `src/ListAllTypes.cs`, and
+  the dead `save_roundtrip_check.discover_save_dir`. `legacy/` is now the 12
+  canonical family dumpers that `regen.sh` and the docs actually name, and
+  `build.sh` prunes `bin/legacy/*.exe` whose source is gone so a deleted dumper
+  cannot stay runnable. Also dropped `steam_builds --url` (nobody set it),
+  merged its two `stock_facts.json` loaders into one, and dropped
+  `research_diff.Source.buildid_from` (assigned, never read).
+- `steam_builds.py --record` now keeps superseded pins in the pin file's
+  `history` (capped at 10, deduped by build id), and the default report prints
+  an `earlier builds:` line. `steam_manifest.py` reads the same file via
+  `--pins` as a fallback for gid-to-build-id labelling when the client log has
+  rotated. `data/steam_builds.json` seeded with b9 (build id 24911252, gid
+  1712639873522480804).
 
 - Added `research_diff.py` (supported): one-pass build-to-build report over the
   maintained lenses (facts, census, method signatures, enum members, method
@@ -185,7 +204,8 @@ Status terms:
 - Kept the executable-script test model. Converting 33 purpose-built gates to
   unittest/pytest would add churn without improving the supported Make interface.
 - Confirmed the full static gate passes (`make lint`: Ruff check/format plus
-  ShellCheck) and all 38 archival dumpers build against the pinned Cecil.
+  ShellCheck) and all 12 archival dumpers build against the pinned Cecil (the 26
+  superseded ad-hoc helpers were deleted).
 - The live-DLL `make test` suite passed its first four gates, then correctly
   rejected the installed V3.1.0 b4 DLL because the corpus is pinned to b14 (13
   reported pin differences). A matching b14 DLL is not installed locally, so

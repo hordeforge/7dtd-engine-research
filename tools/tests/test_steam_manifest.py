@@ -237,6 +237,28 @@ def main() -> None:
         no_history = run("--steam-root", str(empty_root), "--history")
         assert no_history.returncode == 2, no_history
 
+        # Pins fallback: a cached manifest the client log no longer covers still
+        # gets its build id from the committed pin file's history.
+        pins = root / "steam_builds.json"
+        pins.write_text(
+            json.dumps(
+                {
+                    "schema": 1,
+                    "studied": {"manifest": "2222222222222222222", "buildid": "24994542"},
+                    "history": [{"gid": "1111111111111111111", "buildid": "24911252"}],
+                }
+            ),
+            encoding="utf-8",
+        )
+        logless = root / "logless-steam"
+        (logless / "depotcache").mkdir(parents=True)
+        (logless / "depotcache" / "294422_1111111111111111111.manifest").write_bytes(
+            manifest([entry("Data\\a.bin", b"x")])
+        )
+        fallback = run("--steam-root", str(logless), "--pins", str(pins), "--history")
+        assert fallback.returncode == 0, fallback.stderr
+        assert "24911252" in fallback.stdout, fallback.stdout
+
         missing = run("--manifest", str(root / "not-there.manifest"))
         assert missing.returncode == 2, missing
 

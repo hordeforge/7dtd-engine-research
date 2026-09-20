@@ -47,7 +47,6 @@ def source(module: Any, label: str, facts: dict[str, Any], buildid: str | None =
         size=100,
         facts=facts,
         buildid=buildid,
-        buildid_from="test",
     )
 
 
@@ -113,8 +112,7 @@ def main() -> None:
     assert "drift: no" in quiet, quiet
 
     pins = {"studied": {"dll_sha256": "b" * 64, "buildid": "42", "branch": "public"}}
-    mapped = module.buildid_for("b" * 64, pins)
-    assert mapped == ("42", "studied pin (public)"), mapped
+    assert module.buildid_for("b" * 64, pins) == "42"
     assert module.buildid_for("c" * 64, pins) is None
 
     print("OK: research_diff parsers, renderer, and CLI contract hold")
