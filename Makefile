@@ -126,6 +126,7 @@ test:
 	python3 "$(TOOLS)/tests/test_fetch_version_fake_steamcmd.py"
 	python3 "$(TOOLS)/tests/test_committed_diff_artifacts.py"
 	python3 "$(TOOLS)/tests/test_drift_committed_baseline.py"
+	python3 "$(TOOLS)/tests/test_install_integrity.py"
 	python3 "$(TOOLS)/tests/test_netprotocol_census.py" "$(ASM)"
 	python3 "$(TOOLS)/tests/test_tuned_constants.py" "$(ASM)"
 

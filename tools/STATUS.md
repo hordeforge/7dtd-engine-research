@@ -27,6 +27,15 @@ Status terms:
 
 ### 2026-09-20
 
+- Added `tests/test_install_integrity.py`: the live suite now asserts the whole
+  installed `Managed/` payload still matches Steam's cached depot manifest for the
+  installed build, not just the studied `Assembly-CSharp.dll` that `make
+  stock-check` re-extracts. It drives `steam_builds.py --check --verify-install
+  Managed --json` and requires 0 missing / 0 mismatch against the appmanifest's
+  own manifest gid; SKIPs when that manifest is not cached. Proved to fire by
+  pointing `--install-dir` at a one-file copy: `FAIL local install differs from
+  Steam's manifest (1 mismatch, 148 missing)`, exit 1.
+
 - `docs/INDEX.md` now carries a "Committed research artifacts" table (the parity
   snapshots, the b9 to b10 report, the Steam build pins) with what each proves
   and how to regenerate it, the `tools/parity/` row names the Steam build and
