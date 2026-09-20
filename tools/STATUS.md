@@ -38,6 +38,12 @@ Status terms:
   rename, zero census/signature/enum drift). Report committed and linked from
   `docs/releases/changelog-3.2.0.md` §8. Gated by `tests/test_research_diff.py`
   (fixture parsers + renderer + CLI contract, DLL-free).
+- Made the local `make test` suite runnable again on hosts where mono prints
+  `mono_thread_internal_set_priority: unknown policy 5` on stdout before any
+  tool output: `tests/test_ilfmt_safe.py` parsed those lines as tab-separated
+  probe rows. `tests/_common.strip_mono_noise` now drops the startup chatter
+  in `run_tool`/`run_probe`, and the probe gate filters its direct mono call.
+  Full 25-gate live `make test` green afterwards.
 - Added `parity/steam_builds.py` (supported): newest dedicated-server build from
   Steam's PICS app info (branch build ids + depot 294422 manifest ids), the local
   install's build id from its `appmanifest`, and the studied-build pin in

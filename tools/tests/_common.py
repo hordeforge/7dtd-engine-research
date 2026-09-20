@@ -139,6 +139,24 @@ def prereq(tool_names: list[str]) -> tuple[str, bool]:
     return "", False
 
 
+MONO_NOISE_PREFIXES = ("mono_thread_internal_set_priority:",)
+
+
+def strip_mono_noise(text: str) -> str:
+    """Drop mono's host startup chatter from captured stdout.
+
+    Some mono builds print a thread-priority warning on stdout before any tool
+    output ("mono_thread_internal_set_priority: unknown policy 5" on kernels
+    whose scheduling policy mono does not know). Gates that parse stdout line
+    by line must not read it as tool output.
+    """
+    if not text:
+        return text
+    return "".join(
+        line for line in text.splitlines(keepends=True) if not line.startswith(MONO_NOISE_PREFIXES)
+    )
+
+
 def run_tool(exe: str, *args: str) -> tuple[int, str, str]:
     """Run bin/<exe> under mono with MONO_PATH pointing at tools/bin."""
     env = dict(os.environ, MONO_PATH=str(BIN))
@@ -148,7 +166,7 @@ def run_tool(exe: str, *args: str) -> tuple[int, str, str]:
         text=True,
         env=env,
     )
-    return proc.returncode, proc.stdout, proc.stderr
+    return proc.returncode, strip_mono_noise(proc.stdout), proc.stderr
 
 
 def compile_probe(cs_text: str, stem: str) -> str:
@@ -175,4 +193,4 @@ def run_probe(exe: str, *args: str) -> str:
         env=dict(os.environ, MONO_PATH=str(BIN)),
         check=True,
     )
-    return proc.stdout
+    return strip_mono_noise(proc.stdout)

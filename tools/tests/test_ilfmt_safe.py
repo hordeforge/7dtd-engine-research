@@ -87,7 +87,7 @@ def main() -> int:
         return 1
 
     rows = {}
-    for line in run.stdout.splitlines():
+    for line in _common.strip_mono_noise(run.stdout).splitlines():
         name, frag, verdict = line.split("\t")
         rows[name] = (frag, verdict)
         if verdict != "OK":
