@@ -27,6 +27,13 @@ Status terms:
 
 ### 2026-09-20
 
+- `docs/INDEX.md` now carries a "Committed research artifacts" table (the parity
+  snapshots, the b9 to b10 report, the Steam build pins) with what each proves
+  and how to regenerate it, the `tools/parity/` row names the Steam build and
+  manifest tools, and the gates line lists `make latest ARGS="--check
+  --verify-install Managed"`, `make drift`, and `make bench-bodydiff`. The
+  `make latest` help line names the integrity flag too.
+
 - `research_diff.py --pair` also accepts raw Steam build ids
   (`--pair 24911252:24994542`): the id resolves through its cached depot
   manifest's SHA-1 to a local DLL, and the parity snapshots fall back to the

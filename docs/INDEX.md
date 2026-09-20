@@ -304,7 +304,7 @@ catalog: [`../tools/README.md`](../tools/README.md). How to RE:
 |---|---|
 | `tools/src/` | General maintained dumpers: `Census`, `DumpMethod`, `DumpType`, `DumpNetPackages`, `NetProtocolCensus`, `FullSurface` (whole-assembly metadata), `DumpAll` (full local IL) |
 | `tools/legacy/` | 12 canonical per-family dumpers that generated the `il/` dump sets (`DumpDediComplete`, `DumpGmUpdate`, `DumpTerrain`, ...) |
-| `tools/parity/` | Cross-version wire-surface snapshot + diff (steamcmd) |
+| `tools/parity/` | Cross-version wire snapshot + diff and the Steam build/manifest tools: `fetch_version.sh` (steamcmd pull), `steam_builds.py` (PICS branch + build ids, `--check`, `--fetch`, `--verify-install`), `steam_manifest.py` (depot per-file SHA-1: `--history`, `--find`, `--verify`, `--diff`), `parity_diff.py`, `drift-check.sh` |
 | `tools/re-scratch/` | One-off Zig reversers for on-disk formats |
 | `tools/tests/` | Dump-regen + coverage regression tests |
 
@@ -317,11 +317,27 @@ mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.2.0
 mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.2.0
 ```
 
-Gates: `make test` (full suite, needs the live DLL), `make test-docs` (DLL-free corpus invariants; runs in CI on every push), `make stock-check` (pins vs live DLL + siblings), `make regen-check` (dump-regeneration check), `make facts` (machine-checked stock pins).  
+Gates: `make test` (full suite, needs the live DLL), `make test-docs` (DLL-free corpus invariants; runs in CI on every push), `make stock-check` (pins vs live DLL + siblings), `make regen-check` (dump-regeneration check), `make facts` (machine-checked stock pins), `make latest ARGS="--check --verify-install Managed"` (newest published build vs the pin, and the local managed payload against Steam's manifest), `make drift` (patch drift vs the studied baseline), `make bench-bodydiff` (perf gate for the body-diff lens).  
 IL policy: [`../il/README.md`](../il/README.md).
 
 Host topology (not IL): [`../../7dtd-server-optimizer/docs/HOST_TUNING.md`](../../7dtd-server-optimizer/docs/HOST_TUNING.md).  
 Live scale laws: [measured-scaling.md](../../7dtd-server-optimizer/docs/measured-scaling.md).
+
+---
+
+## Committed research artifacts
+
+Evidence that the docs cite, regenerable with the tools above:
+
+| Artifact | What |
+|---|---|
+| [`../workspace/outputs/parity/parity_b9.json`](../workspace/outputs/parity/parity_b9.json), [`parity_b10.json`](../workspace/outputs/parity/parity_b10.json) | `ParitySurface` snapshots of the two builds on disk. `parity_diff.py` finds **0 added / 0 removed / 0 changed wire** between them (the b9 to b10 wire claim), and `drift-check.sh` uses the b10 snapshot as the wire baseline when a fresh checkout has none |
+| [`../workspace/outputs/diffs/b9-to-b10-20260920.md`](../workspace/outputs/diffs/b9-to-b10-20260920.md) | Eight-lens build report (facts, census, method signatures, enum members, body hashes, wire parity, depot manifest content delta) with both DLLs' sha256, Steam build ids, depot provenance and the 16 changed depot files. Regenerate: `tools/research_diff.py --pair b9:b10` |
+| [`../tools/data/steam_builds.json`](../tools/data/steam_builds.json) | Studied Steam build (branch, build id, depot manifest gid, studied DLL sha256) plus the superseded builds; `steam_builds.py --record` maintains it |
+
+`tests/test_committed_diff_artifacts.py` re-derives the parity snapshots and the
+report and fails when either goes stale; `tests/test_drift_committed_baseline.py`
+pins the fresh-checkout wire comparison.
 
 ---
 
