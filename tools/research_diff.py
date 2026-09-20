@@ -75,6 +75,22 @@ BODY_SUMMARY_RE = re.compile(
 )
 
 
+# Report order is the reading order; execution order puts the long poles first so
+# a cheap lens cannot hold a worker while the 1.7 s body walk waits (measured
+# weights: bodies 1.7 s, metadata 1.1 s, methods 0.3 s, census 0.2 s, depot 0.1 s).
+REPORT_LENS_ORDER = ("facts", "census", "metadata", "methods", "enums", "bodies", "parity", "depot")
+EXECUTION_LENS_ORDER = (
+    "bodies",
+    "metadata",
+    "methods",
+    "census",
+    "enums",
+    "depot",
+    "parity",
+    "facts",
+)
+
+
 class SourceError(Exception):
     """A requested artifact could not be resolved."""
 
@@ -777,27 +793,29 @@ def main(argv: list[str] | None = None) -> int:
                             file=sys.stderr,
                         )
 
-            builders: list[Callable[[], Section]] = [
-                partial(lens_facts, old, new),
-                partial(lens_census, old, new),
-                partial(lens_metadata, old, new, tmp_path, limit),
-                partial(lens_methods, old, new, tmp_path, limit),
-                partial(lens_enums, old, new, tmp_path, limit),
-                partial(lens_bodies, old, new, limit),
-                partial(
+            builders: dict[str, Callable[[], Section]] = {
+                "facts": partial(lens_facts, old, new),
+                "census": partial(lens_census, old, new),
+                "metadata": partial(lens_metadata, old, new, tmp_path, limit),
+                "methods": partial(lens_methods, old, new, tmp_path, limit),
+                "enums": partial(lens_enums, old, new, tmp_path, limit),
+                "bodies": partial(lens_bodies, old, new, limit),
+                "parity": partial(
                     lens_parity,
                     Path(parity_old) if parity_old else None,
                     Path(parity_new) if parity_new else None,
                     limit,
                 ),
-                partial(
+                "depot": partial(
                     lens_depot,
                     Path(manifest_old) if manifest_old else None,
                     Path(manifest_new) if manifest_new else None,
                     limit,
                 ),
-            ]
-            sections = run_lenses(max(1, args.jobs), builders)
+            }
+            done = run_lenses(max(1, args.jobs), [builders[name] for name in EXECUTION_LENS_ORDER])
+            by_name = dict(zip(EXECUTION_LENS_ORDER, done, strict=True))
+            sections = [by_name[name] for name in REPORT_LENS_ORDER]
     except (RuntimeError, ManifestError, subprocess.TimeoutExpired) as exc:
         print(f"research_diff: {exc}", file=sys.stderr)
         return 2

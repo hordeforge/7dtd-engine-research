@@ -27,6 +27,13 @@ Status terms:
 
 ### 2026-09-20
 
+- `research_diff.py` schedules its lenses longest-first (`bodies` 1.7 s, then
+  `metadata` 1.1 s; the rest under 0.4 s) while keeping the fixed report order,
+  so a cheap lens no longer holds a worker while the body walk waits. Report p50
+  over the real pair: 2567 ms to 2197 ms. Content is unchanged (the
+  committed-artifact gate re-derives the report, and `--jobs 1` still renders a
+  byte-identical section order).
+
 - `test_cli_args_wired.py` now checks the CLI surface in both directions: a read
   with no declaration (the stale-flag bug) and a declaration nothing reads (a
   dead flag, the other half of the same removal). `dest=` is honoured and the
