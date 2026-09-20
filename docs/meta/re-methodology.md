@@ -237,7 +237,8 @@ tools/research_diff.py --old a.dll --new b.dll --check   # exit 1 when any lens 
 
 `--pair` is the one-command path for a pair of retained builds: it matches each
 candidate DLL in the install dir on the version it reports (`b9`, `b10`,
-`V3.2.0 b9`), then matches that DLL's SHA-1 against Steam's cached depot
+`V3.2.0 b9`) or, for a raw Steam build id (`24911252`), through that build's
+cached depot manifest SHA-1, then matches the DLL's SHA-1 against those
 manifests, which also supplies the Steam build ids, and finally uses the
 committed parity snapshots. Explicit `--old/--new` plus the per-lens flags stay
 available when the artifacts are somewhere unusual.

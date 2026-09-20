@@ -27,6 +27,11 @@ Status terms:
 
 ### 2026-09-20
 
+- `research_diff.py --pair` also accepts raw Steam build ids
+  (`--pair 24911252:24994542`): the id resolves through its cached depot
+  manifest's SHA-1 to a local DLL, and the parity snapshots fall back to the
+  resolved build's version name (`parity_b9.json`), so a build-id pair measures
+  all eight lenses just like `b9:b10`.
 - `research_diff.py` reports depot provenance: the identity table gained `depot
   manifest` and `depot file SHA-1` rows, the latter Steam's own SHA-1 for that DLL
   with a match/mismatch against the local file, so the report itself states that the

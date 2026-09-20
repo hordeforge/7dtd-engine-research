@@ -464,8 +464,9 @@ def resolve_pair(
 ) -> tuple[Source, Source, Path | None, Path | None, Path | None, Path | None]:
     """Resolve a label pair to DLLs, cached depot manifests and committed parity snapshots.
 
-    DLLs come from the install dir (the live `Assembly-CSharp.dll` plus retained
-    backups), matched on the version facts each DLL reports. The cached depot
+    A label is either a version (`b9`, `V3.2.0 b9`), matched on the facts each DLL
+    reports, or a Steam build id (`24911252`), resolved through that build's cached
+    depot manifest SHA-1. The cached depot
     manifest is then matched by the DLL's own SHA-1 as recorded in Steam's
     manifest, so all three artifacts provably belong to the same build.
     """
@@ -475,20 +476,52 @@ def resolve_pair(
     candidates = candidate_dlls(game_dir)
     if not candidates:
         raise SourceError(f"no Assembly-CSharp.dll (or .dll.* backup) in {game_dir}")
+
+    roots = roots_from(steam_root)
+    cached = sorted(cached_manifests(DEFAULT_DEPOT, roots).values())
+    buildids = pins_buildids(STEAM_PINS) | steam_log_buildids(DEFAULT_DEPOT, roots)
+    gid_of_build = {build: gid for gid, build in buildids.items()}
+
+    def depot_sha1(gid: str) -> str | None:
+        manifest_path = next((p for p in cached if f"_{gid}." in p.name), None)
+        if manifest_path is None:
+            return None
+        entry = next(
+            (
+                candidate
+                for candidate in match_entries(
+                    read_manifest(manifest_path), "managed/assembly-csharp.dll"
+                )
+                if candidate.sha1
+            ),
+            None,
+        )
+        return entry.sha1 if entry else None
+
     resolved: dict[str, Source] = {}
     for label in (old_label, new_label):
+        # A version label (`b9`, `V3.2.0 b9`) matches on the facts a DLL reports.
         for path in candidates:
             source = load_source(path, label, None, tmp, f"probe_{path.name}", pins)
             if label_matches(label, source.facts):
                 resolved[label] = source
                 break
+        if label in resolved:
+            continue
+        # Otherwise a Steam build id resolves through its depot manifest's SHA-1.
+        wanted = gid_of_build.get(label)
+        expected = depot_sha1(wanted) if wanted else None
+        for path in candidates:
+            if expected is not None and sha1_file(path) == expected:
+                resolved[label] = load_source(path, label, wanted, tmp, f"probe_{path.name}", pins)
+                break
         if label not in resolved:
             found = ", ".join(p.name for p in candidates)
-            raise SourceError(f"no DLL in {game_dir} matches label {label!r} (candidates: {found})")
-
-    roots = roots_from(steam_root)
-    cached = sorted(cached_manifests(DEFAULT_DEPOT, roots).values())
-    buildids = pins_buildids(STEAM_PINS) | steam_log_buildids(DEFAULT_DEPOT, roots)
+            known = ", ".join(sorted(buildids.values())) or "none known"
+            raise SourceError(
+                f"no DLL in {game_dir} matches {label!r} (candidates: {found}; "
+                f"known build ids: {known})"
+            )
     manifests: list[Path | None] = []
     for label in (old_label, new_label):
         source = resolved[label]
@@ -521,8 +554,22 @@ def resolve_pair(
 
     parity: list[Path | None] = []
     for label in (old_label, new_label):
-        snapshot = DEFAULT_OUT_DIR.parent / "parity" / f"parity_{label}.json"
-        parity.append(snapshot if snapshot.is_file() else None)
+        # Snapshots are named by version label; a build-id pair falls back to the
+        # resolved DLL's own version (`parity_b9.json`).
+        names = [f"parity_{label}.json"]
+        version = resolved[label].facts.get("version")
+        if isinstance(version, dict) and version.get("build") is not None:
+            names.append(f"parity_b{version['build']}.json")
+        parity.append(
+            next(
+                (
+                    candidate
+                    for name in names
+                    if (candidate := DEFAULT_OUT_DIR.parent / "parity" / name).is_file()
+                ),
+                None,
+            )
+        )
     return (
         resolved[old_label],
         resolved[new_label],

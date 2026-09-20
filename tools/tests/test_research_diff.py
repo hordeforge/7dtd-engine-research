@@ -235,6 +235,24 @@ def main() -> None:
         assert "pair: b10 ->" in pair_run.stdout, pair_run.stdout
         assert "## 7. Depot manifest" in pair_run.stdout, pair_run.stdout
         assert "matches the local file" in pair_run.stdout, pair_run.stdout
+
+        cached_gid = "294422_1712639873522480804.manifest"
+        cached = any(
+            list((root / "depotcache").glob(cached_gid))
+            for root in (Path.home() / ".local/share/Steam", Path.home() / ".steam/steam")
+        )
+        if not cached:
+            print("note: build-id --pair check skipped (baseline manifest not cached)")
+        else:
+            by_buildid = run("--pair", "24911252:24994542", "--out", "-")
+            assert by_buildid.returncode == 0, (by_buildid.stdout[-500:], by_buildid.stderr)
+            assert "pair: 24911252 -> Assembly-CSharp.dll.re_stock_bak" in by_buildid.stdout
+            assert "pair: 24994542 -> Assembly-CSharp.dll" in by_buildid.stdout
+            assert "pair: parity snapshots parity_b9.json, parity_b10.json" in by_buildid.stdout, (
+                by_buildid.stdout
+            )
+            assert "depot file SHA-1" in by_buildid.stdout, by_buildid.stdout
+            assert "depot manifest 16" in by_buildid.stdout, by_buildid.stdout
         assert "no change\n\n```\n=== PACKAGE DIFF ===\nadded (0)" in pair_run.stdout, (
             pair_run.stdout
         )
