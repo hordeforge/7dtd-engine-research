@@ -134,6 +134,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_tool_cli_usage.py"
 	python3 "$(TOOLS)/tests/test_shell_cli_usage.py"
 	python3 "$(TOOLS)/tests/test_python_cli_usage.py"
+	python3 "$(TOOLS)/tests/test_cli_args_wired.py"
 	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"

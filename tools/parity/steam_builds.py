@@ -299,7 +299,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     pins_path = Path(args.pins)
     try:
-        snapshot = load_appinfo(Path(args.from_path)) if args.from_path else fetch_appinfo(args.url)
+        snapshot = load_appinfo(Path(args.from_path)) if args.from_path else fetch_appinfo()
         pins = load_pins(pins_path) if pins_path.exists() else None
     except SourceError as exc:
         print(f"steam_builds: {exc}", file=sys.stderr)

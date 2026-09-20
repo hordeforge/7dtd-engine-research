@@ -27,6 +27,12 @@ Status terms:
 
 ### 2026-09-20
 
+- Fixed the stale `args.url` left in `steam_builds.py` by dropping `--url` (the
+  live PICS path crashed; the tests only exercised `--from`) and added
+  `tests/test_cli_args_wired.py`: every `args.<name>` a maintained Python tool
+  reads must be declared by an `add_argument` in the same file. The detector is
+  self-tested and provably fires on the reintroduced bug; files that rebind the
+  name `args` are skipped and counted (3 today).
 - Applied the ponytail-audit deletions after a fresh reference sweep: removed the
   26 superseded ad-hoc legacy helpers (`DumpOne*`, `DumpNamed`, `DumpNested`,
   `DumpNodes`, `DumpReg`, `DumpMgr`, `DumpScan`, `DumpIter`, `DumpFull`,
