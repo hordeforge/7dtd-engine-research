@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The installed managed payload must still be the bytes Steam shipped.
+"""The installed managed payload must be Steam's bytes, and the installed build must be the studied one.
 
 `make stock-check` re-extracts the studied DLL's facts and would catch a patched
 `Assembly-CSharp.dll`, but nothing in the suite looked at the rest of the
@@ -7,6 +7,13 @@ managed payload: a hand-built `LiteNetLib.dll` or an experiment left in
 `Managed/` changes wire and runtime research without failing any gate. The
 cached depot manifest has SHA-1s for all of it, so this gate asks the build tool
 for the verdict (`--check --verify-install Managed`) and asserts a clean install.
+
+It also asserts the installed build *is* the studied one: the appmanifest's
+build id and depot manifest must equal `tools/data/steam_builds.json`. An
+asset-only TFP patch moves the installed build without changing the studied
+DLL's facts, so `make stock-check` would stay green while every doc still cites
+the previous build; this is the gate that notices, and the fix is to review and
+re-record the pin (`steam_builds.py --record`).
 
 SKIPs when the manifest for the installed build is not cached (steamcmd
 installs, or a machine that never ran the Steam client).
@@ -54,6 +61,18 @@ def main() -> None:
     installed = payload["installed"]["manifest"]
     assert installed, payload["installed"]
     assert installed in integrity["manifest"], (installed, integrity)
+
+    pins = json.loads((_common.TOOLS / "data" / "steam_builds.json").read_text(encoding="utf-8"))
+    studied = pins["studied"]
+    assert payload["installed"]["buildid"] == studied["buildid"], (
+        f"installed build {payload['installed']['buildid']} != studied pin "
+        f"{studied['buildid']}; review the new build, then re-record the pin with "
+        "steam_builds.py --record"
+    )
+    assert installed == studied["manifest"], (
+        f"installed manifest {installed} != studied pin {studied['manifest']}; "
+        "review the new build, then re-record the pin with steam_builds.py --record"
+    )
     print(
         f"OK: managed payload matches Steam's manifest "
         f"({integrity['ok']} files, build {payload['installed']['buildid']})"

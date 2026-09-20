@@ -27,6 +27,15 @@ Status terms:
 
 ### 2026-09-20
 
+- `test_install_integrity.py` also asserts the installed build *is* the studied
+  one: the appmanifest's build id and depot manifest must equal
+  `tools/data/steam_builds.json`. An asset-only patch moves the installed build
+  without changing the studied DLL's facts, so `make stock-check` would stay
+  green while the docs cite the previous build; this gate notices and names the
+  fix (`steam_builds.py --record` after review). Proved by temporarily setting
+  the pin to the previous build id: the gate fails naming both ids, and
+  restoring the pin returns it to green.
+
 - `make install-check` runs the whole-install integrity check with the game root
   derived from `ASM`/`GAME_ROOT` (no triple-`dirname` to remember):
   `ARGS="--only Managed"` is the fast subset, `ARGS="--ignore platform.cfg"`
