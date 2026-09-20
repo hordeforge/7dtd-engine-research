@@ -31,42 +31,78 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using Mono.Cecil;
 
-static class AsmBodyDiff {
-  static string Key(MethodDefinition m) => m.DeclaringType.FullName + "::" + m.FullName;
-  static string Hex16(byte[] b) {
-    var sb = new StringBuilder(32);
-    for (int i = 0; i < 8 && i < b.Length; i++) sb.Append(b[i].ToString("x2"));
-    return sb.ToString();
+// One BodyHasher per thread. The hasher owns its buffer, scratch array and
+// SHA256 instance, so the two assembly walks run concurrently without shared
+// mutable state (the earlier static form raced and corrupted the stream).
+//
+// Zero-allocation hashing on the hot path: one reusable buffer and one SHA256
+// instance per assembly for all ~56k methods, so the per-instruction
+// BitConverter/UTF8/ToArray allocations (millions of them, ~44e9 instructions
+// retired on the 3.2.0 pair) disappear. The byte stream per method is unchanged,
+// so hashes still match any pre-optimization report.
+class BodyHasher {
+  static readonly char[] HexDigits = "0123456789abcdef".ToCharArray();
+  readonly MemoryStream Buf = new MemoryStream(1 << 16);
+  readonly SHA256 Sha = SHA256.Create();
+  readonly Encoding Utf8 = new UTF8Encoding(false);
+  byte[] Scratch = new byte[256];
+
+  public static string Key(MethodDefinition m) => m.DeclaringType.FullName + "::" + m.FullName;
+
+  string Hex16(byte[] b) {
+    var c = new char[16];
+    for (int i = 0; i < 8; i++) {
+      c[i * 2] = HexDigits[b[i] >> 4];
+      c[i * 2 + 1] = HexDigits[b[i] & 15];
+    }
+    return new string(c);
   }
-  static string Hash(MethodDefinition m) {
+  void WInt(int v) {
+    Scratch[0] = (byte)v; Scratch[1] = (byte)(v >> 8);
+    Scratch[2] = (byte)(v >> 16); Scratch[3] = (byte)(v >> 24);
+    Buf.Write(Scratch, 0, 4);
+  }
+  void WLong(long v) {
+    for (int i = 0; i < 8; i++) Scratch[i] = (byte)(v >> (8 * i));
+    Buf.Write(Scratch, 0, 8);
+  }
+  void WStr(string s) {
+    int n = Utf8.GetByteCount(s);
+    if (n > Scratch.Length) Scratch = new byte[Math.Max(n, Scratch.Length * 2)];
+    Utf8.GetBytes(s, 0, s.Length, Scratch, 0);
+    Buf.Write(Scratch, 0, n);
+  }
+
+  string Hash(MethodDefinition m) {
     if (!m.HasBody) return "-";
-    var ms = new MemoryStream();
+    Buf.SetLength(0);
     foreach (var i in m.Body.Instructions) {
-      var op = BitConverter.GetBytes((int)i.OpCode.Code);
-      ms.Write(op, 0, op.Length);
+      WInt((int)i.OpCode.Code);
       if (i.Operand is MethodReference mr) {
-        var s = Encoding.UTF8.GetBytes(mr.FullName); ms.Write(s, 0, s.Length);
+        WStr(mr.FullName);
       } else if (i.Operand is FieldReference fr) {
-        var s = Encoding.UTF8.GetBytes(fr.FullName); ms.Write(s, 0, s.Length);
+        WStr(fr.FullName);
       } else if (i.Operand is string str) {
-        var s = Encoding.UTF8.GetBytes(str); ms.Write(s, 0, s.Length);
+        WStr(str);
       } else if (i.Operand is int iv) {
-        var b = BitConverter.GetBytes(iv); ms.Write(b, 0, b.Length);
+        WInt(iv);
       } else if (i.Operand is long lv) {
-        var b = BitConverter.GetBytes(lv); ms.Write(b, 0, b.Length);
+        WLong(lv);
       } else if (i.Operand is float fv) {
-        var b = BitConverter.GetBytes(fv); ms.Write(b, 0, b.Length);
+        Buf.Write(BitConverter.GetBytes(fv), 0, 4);
       } else if (i.Operand is double dv) {
-        var b = BitConverter.GetBytes(dv); ms.Write(b, 0, b.Length);
+        Buf.Write(BitConverter.GetBytes(dv), 0, 8);
       } else if (i.Operand is TypeReference tr) {
-        var s = Encoding.UTF8.GetBytes(tr.FullName); ms.Write(s, 0, s.Length);
+        WStr(tr.FullName);
       }
     }
-    return Hex16(SHA256.Create().ComputeHash(ms.ToArray()));
+    return Hex16(Sha.ComputeHash(Buf.GetBuffer(), 0, (int)Buf.Length));
   }
-  static Dictionary<string,string> Map(string path) {
+
+  public Dictionary<string,string> Map(string path) {
     var d = new Dictionary<string,string>();
     var asm = AssemblyDefinition.ReadAssembly(path);
     foreach (var t in asm.MainModule.GetTypes())
@@ -74,8 +110,14 @@ static class AsmBodyDiff {
         d[Key(m)] = Hash(m) + "\t" + (m.HasBody ? m.Body.Instructions.Count.ToString() : "0");
     return d;
   }
+}
+
+static class AsmBodyDiff {
   static void Main(string[] args) {
-    var a = Map(args[0]); var b = Map(args[1]);
+    Dictionary<string,string> a = null, b = null;
+    var t1 = new Thread(() => { a = new BodyHasher().Map(args[0]); });
+    var t2 = new Thread(() => { b = new BodyHasher().Map(args[1]); });
+    t1.Start(); t2.Start(); t1.Join(); t2.Join();
     var added = b.Keys.Except(a.Keys).OrderBy(x => x).ToList();
     var removed = a.Keys.Except(b.Keys).OrderBy(x => x).ToList();
     var changed = a.Keys.Intersect(b.Keys).Where(k => a[k] != b[k]).OrderBy(k => k).ToList();

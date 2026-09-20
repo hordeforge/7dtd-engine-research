@@ -38,6 +38,14 @@ Status terms:
   rename, zero census/signature/enum drift). Report committed and linked from
   `docs/releases/changelog-3.2.0.md` §8. Gated by `tests/test_research_diff.py`
   (fixture parsers + renderer + CLI contract, DLL-free).
+- Profiled the research diff loop and cut its dominant cost. `asm_body_diff.py`
+  now hashes method bodies zero-allocation (one buffer and one SHA256 per
+  assembly instead of per-instruction BitConverter/UTF8/ToArray) and walks the
+  two assemblies on two threads with a hasher instance each (no shared mutable
+  state). Measured on the b9 backup vs the live b10 DLL: retired instructions
+  44.2e9 -> 41.8e9, `asm_body_diff` wall p50 2370 -> 1565 ms, `research_diff`
+  p50 3182 -> 2364 ms, byte-identical report output. Gated by
+  `tests/bench_asm_body_diff.py` (`make bench-bodydiff`).
 - Made the local `make test` suite runnable again on hosts where mono prints
   `mono_thread_internal_set_priority: unknown policy 5` on stdout before any
   tool output: `tests/test_ilfmt_safe.py` parsed those lines as tab-separated

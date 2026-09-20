@@ -3,7 +3,7 @@ ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
 ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
 
-.PHONY: tools stock-sync stock-check post-update census drift test test-docs lint verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
+.PHONY: bench-bodydiff tools stock-sync stock-check post-update census drift test test-docs lint verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
 
 help:
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
@@ -20,6 +20,7 @@ help:
 	@echo "make census       - Census.exe against ASM"
 	@echo "make drift        - parity drift-check vs baseline"
 	@echo "make readiness    - version-update tooling readiness bench (0-100)"
+	@echo "make bench-bodydiff - deterministic perf gate for the body-diff lens (perf instructions:u)"
 	@echo "make test         - full suite (structural, stock-check, reach, inventories, surface, links)"
 	@echo "make test-docs    - DLL-free corpus invariants (runs in CI)"
 	@echo "make verify       - one-command gate: doc links, pins, readiness, facts, xml data"
@@ -58,6 +59,12 @@ drift:
 
 readiness:
 	python3 "$(TOOLS)/tests/bench_version_update_tooling.py"
+
+# Perf gate for the one slow research lens: pins retired instructions and CPU
+# time of asm_body_diff.py (wall is reported, not asserted). Needs perf
+# permission for user-space counters + the local game DLLs; SKIPs otherwise.
+bench-bodydiff:
+	python3 "$(TOOLS)/tests/bench_asm_body_diff.py"
 
 # Regenerate-inventory check: compiles legacy/DumpFrameEntries and re-derives
 # the frame-entries inventories from the live DLL (needs mcs + mono).
