@@ -212,6 +212,32 @@ def verify(manifest: Manifest, root: Path, only: str | None) -> tuple[int, int, 
     return ok, missing, bad, problems
 
 
+def diff_manifests(
+    old: Manifest, new: Manifest, only: str | None
+) -> tuple[dict[str, int], list[str]]:
+    """Per-file add/remove/change between two depot manifests (same depot)."""
+    before = {e.name: e for e in old.entries}
+    after = {e.name: e for e in new.entries}
+    counts = {"added": 0, "removed": 0, "changed": 0}
+    lines: list[str] = []
+    for name in sorted(set(before) | set(after)):
+        if only and only.lower().replace("/", "\\") not in name.lower():
+            continue
+        a, b = before.get(name), after.get(name)
+        if a is None and b is not None:
+            counts["added"] += 1
+            lines.append(f"+ {b.size:>12} {b.sha1 or '-':40} {name}")
+        elif b is None and a is not None:
+            counts["removed"] += 1
+            lines.append(f"- {a.size:>12} {a.sha1 or '-':40} {name}")
+        elif a is not None and b is not None and (a.size != b.size or a.sha1 != b.sha1):
+            counts["changed"] += 1
+            lines.append(
+                f"~ {name}: size {a.size} -> {b.size}; sha1 {a.sha1 or '-'} -> {b.sha1 or '-'}"
+            )
+    return counts, lines
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="steam_manifest.py",
@@ -222,7 +248,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--list", action="store_true", help="list every entry")
     ap.add_argument("--find", default=None, metavar="SUBSTR", help="entries whose path matches")
     ap.add_argument("--verify", default=None, metavar="DIR", help="hash DIR against the manifest")
-    ap.add_argument("--only", default=None, metavar="SUBSTR", help="limit --verify/--list")
+    ap.add_argument(
+        "--diff",
+        default=None,
+        metavar="OLD.manifest",
+        help="compare the selected manifest (new) against this older one",
+    )
+    ap.add_argument("--only", default=None, metavar="SUBSTR", help="limit --verify/--list/--diff")
     ap.add_argument("--json", action="store_true", help="emit JSON")
     return ap
 
@@ -241,6 +273,20 @@ def main(argv: list[str] | None = None) -> int:
 
     selected = match_entries(manifest, args.only) if args.only else manifest.entries
 
+    older: Manifest | None = None
+    if args.diff:
+        try:
+            older = read_manifest(Path(args.diff))
+        except ManifestError as exc:
+            print(f"steam_manifest: {exc}", file=sys.stderr)
+            return 2
+        if older.depot != manifest.depot:
+            print(
+                f"steam_manifest: refusing to diff depot {older.depot} against {manifest.depot}",
+                file=sys.stderr,
+            )
+            return 2
+
     if args.json:
         payload: dict[str, Any] = {
             "manifest": str(manifest.path),
@@ -250,7 +296,15 @@ def main(argv: list[str] | None = None) -> int:
             "selected": len(selected),
             "trailer_bytes": manifest.trailer,
         }
-        if args.verify:
+        if older is not None:
+            counts, lines = diff_manifests(older, manifest, args.only)
+            payload |= {
+                "old_manifest": str(older.path),
+                "old_gid": older.gid,
+                "changes": counts,
+                "lines": lines,
+            }
+        elif args.verify:
             ok, missing, bad, problems = verify(manifest, Path(args.verify), args.only)
             payload |= {"ok": ok, "missing": missing, "mismatch": bad, "problems": problems[:200]}
         elif args.find or args.list:
@@ -272,6 +326,16 @@ def main(argv: list[str] | None = None) -> int:
         f"files: {len(manifest.entries)}  chunks: {sum(e.chunks for e in manifest.entries)}  "
         f"trailer bytes: {manifest.trailer}"
     )
+
+    if older is not None:
+        counts, lines = diff_manifests(older, manifest, args.only)
+        for line in lines:
+            print(line)
+        print(
+            f"diff: {counts['added']} added, {counts['removed']} removed, "
+            f"{counts['changed']} changed ({older.gid} -> {manifest.gid})"
+        )
+        return 0
 
     if args.verify:
         ok, missing, bad, problems = verify(manifest, Path(args.verify), args.only)

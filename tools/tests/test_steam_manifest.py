@@ -152,6 +152,44 @@ def main() -> None:
         truncated.write_bytes(struct.pack("<II", MAGIC, 1 << 30) + b"junk")
         assert run("--manifest", str(truncated)).returncode == 2
 
+        older = root / "294422_1111111111111111111.manifest"
+        older.write_bytes(
+            manifest(
+                [
+                    entry("Data\\keep.bin", b"keep-old"),
+                    entry("Data\\drop.bin", b"drop-me"),
+                ]
+            )
+        )
+        newer = root / "294422_2222222222222222222.manifest"
+        newer.write_bytes(
+            manifest(
+                [
+                    entry("Data\\keep.bin", b"keep-new"),
+                    entry("Data\\fresh.bin", b"brand-new"),
+                ]
+            )
+        )
+        drift = run("--manifest", str(newer), "--diff", str(older))
+        assert drift.returncode == 0, drift.stderr
+        assert "diff: 1 added, 1 removed, 1 changed" in drift.stdout, drift.stdout
+        assert "~ Data\\keep.bin: size 8 -> 8" in drift.stdout, drift.stdout
+        assert "- " in drift.stdout, drift.stdout
+        assert "Data\\drop.bin" in drift.stdout, drift.stdout
+        assert "+ " in drift.stdout, drift.stdout
+        assert "Data\\fresh.bin" in drift.stdout, drift.stdout
+
+        drift_json = run("--manifest", str(newer), "--diff", str(older), "--json")
+        payload = json.loads(drift_json.stdout)
+        assert payload["changes"] == {"added": 1, "removed": 1, "changed": 1}, payload["changes"]
+        assert payload["old_gid"] == "1111111111111111111", payload
+
+        cross_depot = root / "294421_2222222222222222222.manifest"
+        cross_depot.write_bytes(newer.read_bytes())
+        refused = run("--manifest", str(newer), "--diff", str(cross_depot))
+        assert refused.returncode == 2, refused
+        assert "refusing to diff depot" in refused.stderr, refused.stderr
+
         missing = run("--manifest", str(root / "not-there.manifest"))
         assert missing.returncode == 2, missing
 

@@ -45,7 +45,10 @@ Status terms:
   4), so `--find` prints a path's size + SHA-1 and `--verify DIR [--only SUBSTR]`
   hashes local files against Steam's SHA-1s (exit 1 on missing/short/mismatch);
   `--list --json` emits the 17624-entry table and `--manifest FILE` reads an
-  older cached build. This is the checksum source SteamDB cannot provide (it
+  older cached build; `--diff OLD.manifest` lists the per-file delta between two
+  cached builds with both SHA-1s (b10 vs b9: 16 changed, 0 added, 0 removed,
+  matching the client's content_log line). This is the checksum source SteamDB
+  cannot provide (it
   403s scripted clients and has no API). Gated by `tests/test_steam_manifest.py`
   (fixture manifests + a real-cache integration check when present).
 - Profiled the research diff loop and cut its dominant cost. `asm_body_diff.py`

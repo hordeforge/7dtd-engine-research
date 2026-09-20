@@ -468,6 +468,18 @@ Bundles, plus touched Config XML (`blocks`, `items`, `buffs`, `quests`,
 (engine DLL; no bak retained; not game IL). Content/`xml_pins` re-extracted
 and matched.
 
+**Depot-level truth (Steam manifest, verified):** the Steam client keeps both
+builds' depot manifests, so the file set is machine-checkable with no
+credentials: b9 is buildid `24911252` / depot 294422 manifest
+`1712639873522480804` (the pairing comes from the client's own
+`logs/content_log.txt`), b10 is buildid `24994542` / manifest
+`1633674551820196085`. `tools/parity/steam_manifest.py --diff <old.manifest>`
+reports **16 changed files, 0 added, 0 removed** with both sides' SHA-1s,
+matching the client's "16 updated, 0 moved, 0 deleted files" log line. The
+mtime window above is local install activity (re-extraction and probe
+sessions), not depot content: the touched Config XML and the Prefabs listed
+there did not change between the two manifests.
+
 **Corpus action:** hub pin sites + `tools/data/stock_facts.json` retargeted
 to b10; RFS cancel path narrated in [`platform-auth.md`](../admin/platform-auth.md)
 §6 with flow diagram. Bulk `il/*-v3.2.0/` dumps not regenerated (only this
