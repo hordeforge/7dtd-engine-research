@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import struct
 import subprocess
 import sys
 import tempfile
@@ -113,12 +114,26 @@ def main() -> None:
         stale_acf.write_text(ACF.replace("__BUILDID__", "90"), encoding="utf-8")
         out_pins = tmp_path / "recorded.json"
 
-        base = ("--from", str(appinfo), "--appmanifest", str(acf))
+        # Steam root fixture: one cached manifest (gid 111), no others.
+        steam_root = tmp_path / "steam"
+        (steam_root / "depotcache").mkdir(parents=True)
+        (steam_root / "logs").mkdir()
+        (steam_root / "depotcache" / "294422_111.manifest").write_bytes(
+            struct.pack("<II", 0x71F617D0, 0)
+        )
+        (steam_root / "logs" / "content_log.txt").write_text(
+            "[2026-01-01 00:00:00] AppID 294420 finished update, 1 mounted depots "
+            "(BuildID 100) : 294422 (111),\n",
+            encoding="utf-8",
+        )
+        base = ("--from", str(appinfo), "--appmanifest", str(acf), "--steam-root", str(steam_root))
         table = run(*base, "--pins", str(good_pins))
         assert table.returncode == 0, table.stderr
         assert "installed: buildid 100" in table.stdout, table.stdout
         assert "public" in table.stdout, table.stdout
         assert "111" in table.stdout, table.stdout
+        assert "offline-diffable: 1 of 3 branch manifests cached" in table.stdout, table.stdout
+        assert "cached" in table.stdout, table.stdout
 
         js = run(*base, "--pins", str(good_pins), "--json", "--branch", "v9.9.9")
         assert js.returncode == 0, js.stderr
@@ -127,6 +142,9 @@ def main() -> None:
         assert payload["selected"]["manifest"] == "222", payload["selected"]
         assert payload["installed"]["buildid"] == "100", payload["installed"]
         assert len(payload["branches"]) == 3, payload["branches"]
+        assert payload["cached_manifests"]["111"]["buildid"] == "100", payload["cached_manifests"]
+        selected_branch = next(b for b in payload["branches"] if b["branch"] == "public")
+        assert selected_branch["cached"] is True, selected_branch
 
         ok = run(*base, "--pins", str(good_pins), "--check")
         assert ok.returncode == 0, (ok.returncode, ok.stdout, ok.stderr)

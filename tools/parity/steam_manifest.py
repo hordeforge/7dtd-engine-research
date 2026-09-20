@@ -28,9 +28,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import struct
 import sys
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -43,6 +45,7 @@ STEAM_ROOTS = (
     Path.home() / ".local/share/Steam/steamapps",
 )
 HASH_CHUNK = 1 << 20
+LOG_RE = re.compile(r"BuildID (\d+)\)[^:]*: (\d+) \((\d+)\)")
 
 
 class ManifestError(Exception):
@@ -163,15 +166,50 @@ def read_manifest(path: Path) -> Manifest:
     return Manifest(path=path, gid=gid, entries=entries, trailer=len(data) - table_end)
 
 
-def find_manifest(depot: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> Path | None:
-    """Newest cached manifest for a depot, or None."""
-    candidates: list[Path] = []
+def roots_from(value: str | None) -> tuple[Path, ...]:
+    """Explicit --steam-root wins; otherwise the standard Steam locations."""
+    return (Path(value).expanduser(),) if value else STEAM_ROOTS
+
+
+def cached_manifests(depot: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> dict[str, Path]:
+    """gid -> manifest path for every manifest of this depot on disk."""
+    found: dict[str, Path] = {}
     for root in roots:
         for sub in ("depotcache", "steamapps/depotcache"):
-            candidates.extend((root / sub).glob(f"{depot}_*.manifest"))
+            for path in (root / sub).glob(f"{depot}_*.manifest"):
+                gid = path.name.split("_", 1)[1].split(".")[0]
+                best = found.get(gid)
+                if best is None or path.stat().st_mtime > best.stat().st_mtime:
+                    found[gid] = path
+    return found
+
+
+def steam_log_buildids(depot: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> dict[str, str]:
+    """gid -> Steam build id, paired from the client's own content log.
+
+    Steam writes `finished update, N mounted depots (BuildID <id>) : <depot>
+    (<gid>)` on every install, which is the only local source that pairs a
+    manifest with the build id that shipped it.
+    """
+    mapping: dict[str, str] = {}
+    for root in roots:
+        log = root / "logs" / "content_log.txt"
+        try:
+            text = log.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for match in LOG_RE.finditer(text):
+            if match.group(2) == depot:
+                mapping[match.group(3)] = match.group(1)
+    return mapping
+
+
+def find_manifest(depot: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> Path | None:
+    """Newest cached manifest for a depot, or None."""
+    candidates = cached_manifests(depot, roots)
     if not candidates:
         return None
-    return max(candidates, key=lambda p: p.stat().st_mtime)
+    return max(candidates.values(), key=lambda p: p.stat().st_mtime)
 
 
 def sha1_file(path: Path) -> str:
@@ -238,6 +276,52 @@ def diff_manifests(
     return counts, lines
 
 
+def print_history(depot: str, roots: tuple[Path, ...], as_json: bool) -> int:
+    """Every cached manifest of the depot, newest first, with its build id."""
+    cached = cached_manifests(depot, roots)
+    if not cached:
+        print(f"steam_manifest: no cached manifest for depot {depot}", file=sys.stderr)
+        return 2
+    buildids = steam_log_buildids(depot, roots)
+    rows: list[dict[str, Any]] = []
+    for gid, path in cached.items():
+        try:
+            manifest = read_manifest(path)
+            files = len(manifest.entries)
+            size = sum(e.size for e in manifest.entries)
+        except ManifestError as exc:
+            print(f"steam_manifest: {exc}", file=sys.stderr)
+            return 2
+        rows.append(
+            {
+                "gid": gid,
+                "buildid": buildids.get(gid),
+                "files": files,
+                "bytes": size,
+                "cached_at": datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).strftime(
+                    "%Y-%m-%d %H:%MZ"
+                ),
+                "path": str(path),
+            }
+        )
+    rows.sort(key=lambda r: str(r["cached_at"]), reverse=True)
+    if as_json:
+        print(json.dumps({"depot": depot, "cached": rows}, indent=2))
+        return 0
+    print(f"depot: {depot}  cached manifests: {len(rows)}")
+    print(f"{'gid':<21} {'buildid':<11} {'files':>6} {'bytes':>13}  cached_at")
+    for row in rows:
+        print(
+            f"{row['gid']:<21} {row['buildid'] or '-':<11} {row['files']:>6} "
+            f"{row['bytes']:>13}  {row['cached_at']}"
+        )
+    if len(rows) > 1:
+        print(
+            "diff them: steam_manifest.py --manifest <new.gid>.manifest --diff <old.gid>.manifest"
+        )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="steam_manifest.py",
@@ -254,6 +338,14 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="OLD.manifest",
         help="compare the selected manifest (new) against this older one",
     )
+    ap.add_argument(
+        "--history",
+        action="store_true",
+        help="list every cached manifest of the depot with its build id",
+    )
+    ap.add_argument(
+        "--steam-root", default=None, help="Steam root to scan (default: standard locations)"
+    )
     ap.add_argument("--only", default=None, metavar="SUBSTR", help="limit --verify/--list/--diff")
     ap.add_argument("--json", action="store_true", help="emit JSON")
     return ap
@@ -261,7 +353,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    path = Path(args.manifest) if args.manifest else find_manifest(args.depot)
+    roots = roots_from(args.steam_root)
+    if args.history:
+        return print_history(args.depot, roots, args.json)
+    path = Path(args.manifest) if args.manifest else find_manifest(args.depot, roots)
     if path is None:
         print(f"steam_manifest: no cached manifest for depot {args.depot}", file=sys.stderr)
         return 2
@@ -298,9 +393,12 @@ def main(argv: list[str] | None = None) -> int:
         }
         if older is not None:
             counts, lines = diff_manifests(older, manifest, args.only)
+            buildids = steam_log_buildids(manifest.depot, roots)
             payload |= {
                 "old_manifest": str(older.path),
                 "old_gid": older.gid,
+                "old_buildid": buildids.get(older.gid),
+                "buildid": buildids.get(manifest.gid),
                 "changes": counts,
                 "lines": lines,
             }
@@ -331,9 +429,12 @@ def main(argv: list[str] | None = None) -> int:
         counts, lines = diff_manifests(older, manifest, args.only)
         for line in lines:
             print(line)
+        buildids = steam_log_buildids(manifest.depot, roots)
+        old_label = f"build {buildids[older.gid]}" if older.gid in buildids else older.gid
+        new_label = f"build {buildids[manifest.gid]}" if manifest.gid in buildids else manifest.gid
         print(
             f"diff: {counts['added']} added, {counts['removed']} removed, "
-            f"{counts['changed']} changed ({older.gid} -> {manifest.gid})"
+            f"{counts['changed']} changed ({old_label} -> {new_label})"
         )
         return 0
 

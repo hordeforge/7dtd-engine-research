@@ -190,6 +190,53 @@ def main() -> None:
         assert refused.returncode == 2, refused
         assert "refusing to diff depot" in refused.stderr, refused.stderr
 
+        # Cache history: two manifests plus the client log that pairs build ids.
+        steam_root = root / "steam"
+        (steam_root / "depotcache").mkdir(parents=True)
+        (steam_root / "logs").mkdir()
+        old_cached = steam_root / "depotcache" / "294422_1111111111111111111.manifest"
+        old_cached.write_bytes(manifest([entry("Data\\a.bin", b"old")]))
+        new_cached = steam_root / "depotcache" / "294422_2222222222222222222.manifest"
+        new_cached.write_bytes(manifest([entry("Data\\a.bin", b"new"), entry("Data\\b.bin", b"b")]))
+        os.utime(old_cached, (1_700_000_000, 1_700_000_000))
+        os.utime(new_cached, (1_800_000_000, 1_800_000_000))
+        (steam_root / "logs" / "content_log.txt").write_text(
+            "[2026-01-01 00:00:00] AppID 294420 finished update, 1 mounted depots "
+            "(BuildID 24911252) : 294422 (1111111111111111111),\n"
+            "[2026-02-01 00:00:00] AppID 294420 finished update, 1 mounted depots "
+            "(BuildID 24994542) : 294422 (2222222222222222222),\n",
+            encoding="utf-8",
+        )
+        history = run("--steam-root", str(steam_root), "--history")
+        assert history.returncode == 0, history.stderr
+        assert "cached manifests: 2" in history.stdout, history.stdout
+        rows = [line for line in history.stdout.splitlines() if line.startswith("2222")]
+        assert rows, history.stdout
+        assert "24994542" in rows[0], history.stdout
+        assert "1111111111111111111" in history.stdout, history.stdout
+
+        history_json = run("--steam-root", str(steam_root), "--history", "--json")
+        payload = json.loads(history_json.stdout)
+        assert [row["buildid"] for row in payload["cached"]] == ["24994542", "24911252"], payload
+
+        labelled = run(
+            "--steam-root",
+            str(steam_root),
+            "--manifest",
+            str(new_cached),
+            "--diff",
+            str(old_cached),
+        )
+        assert labelled.returncode == 0, labelled.stderr
+        assert "diff: 1 added, 0 removed, 1 changed (build 24911252 -> build 24994542)" in (
+            labelled.stdout
+        ), labelled.stdout
+
+        empty_root = root / "empty-steam"
+        empty_root.mkdir()
+        no_history = run("--steam-root", str(empty_root), "--history")
+        assert no_history.returncode == 2, no_history
+
         missing = run("--manifest", str(root / "not-there.manifest"))
         assert missing.returncode == 2, missing
 

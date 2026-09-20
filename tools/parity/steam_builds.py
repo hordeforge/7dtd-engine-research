@@ -37,6 +37,9 @@ from typing import Any
 
 PARITY = Path(__file__).resolve().parent
 TOOLS = PARITY.parent
+sys.path.insert(0, str(PARITY))
+from steam_manifest import cached_manifests, roots_from, steam_log_buildids  # noqa: E402
+
 PINS = TOOLS / "data" / "steam_builds.json"
 STOCK_FACTS = TOOLS / "data" / "stock_facts.json"
 FETCH = PARITY / "fetch_version.sh"
@@ -251,6 +254,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Steam appmanifest ACF of the local install",
     )
     ap.add_argument("--no-installed", action="store_true", help="skip the local install")
+    ap.add_argument(
+        "--steam-root",
+        default=None,
+        help="Steam root to scan for cached depot manifests (default: standard locations)",
+    )
     ap.add_argument("--json", action="store_true", help="emit the snapshot as JSON")
     ap.add_argument(
         "--check",
@@ -303,6 +311,11 @@ def main(argv: list[str] | None = None) -> int:
     install_buildid = installed[0] if installed else None
     install_manifest = installed[1].get(DEPOT) if installed else None
 
+    roots = roots_from(args.steam_root)
+    cached = cached_manifests(DEPOT, roots)
+    cached_buildids = steam_log_buildids(DEPOT, roots)
+    diffable = sum(1 for b in snapshot.branches if b.manifest in cached)
+
     if args.json:
         payload = {
             "source": snapshot.source,
@@ -318,7 +331,13 @@ def main(argv: list[str] | None = None) -> int:
                 else None
             ),
             "selected": as_json(branch),
-            "branches": [as_json(b) for b in snapshot.branches],
+            "cached_manifests": {
+                gid: {"buildid": cached_buildids.get(gid), "path": str(path)}
+                for gid, path in sorted(cached.items())
+            },
+            "branches": [
+                (as_json(b) or {}) | {"cached": b.manifest in cached} for b in snapshot.branches
+            ],
         }
         print(json.dumps(payload, indent=2))
         return 0
@@ -340,11 +359,18 @@ def main(argv: list[str] | None = None) -> int:
                 notes.append("studied")
             if b.buildid and install_buildid and b.buildid == install_buildid:
                 notes.append("installed")
+            if b.manifest and b.manifest in cached:
+                notes.append("cached")
             print(
                 f"{b.name:<22} {b.buildid or '-':<11} {b.manifest or '-':<21} "
                 f"{human_size(b.size):>10}  {iso(b.updated):<17} {' '.join(notes)}"
             )
         print()
+    if not quiet and cached:
+        print(
+            f"offline-diffable: {diffable} of {len(snapshot.branches)} branch manifests cached "
+            f"({len(cached)} manifest(s); steam_manifest.py --history)"
+        )
     if not quiet:
         if studied:
             print(
