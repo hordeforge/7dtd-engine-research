@@ -160,6 +160,20 @@ def main() -> None:
         missing = run("--from", str(appinfo), "--no-installed", "--branch", "latest_experimental")
         assert missing.returncode == 2, missing
 
+        # A branch PICS does not list can still be installed by name.
+        unlisted = run(
+            "--from",
+            str(appinfo),
+            "--no-installed",
+            "--branch",
+            "latest_experimental",
+            "--print-fetch",
+        )
+        assert unlisted.returncode == 0, unlisted.stderr
+        unlisted_lines = [line for line in unlisted.stdout.splitlines() if line.strip()]
+        assert len(unlisted_lines) == 1, unlisted_lines
+        assert unlisted_lines[0].endswith("latest_experimental latest_experimental"), unlisted_lines
+
         fetch = run(*base, "--pins", str(good_pins), "--print-fetch", "--branch", "v9.9.9")
         assert fetch.returncode == 0, fetch.stderr
         lines = [line for line in fetch.stdout.splitlines() if line.strip()]

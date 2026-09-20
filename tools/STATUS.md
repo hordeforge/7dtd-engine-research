@@ -49,7 +49,8 @@ Status terms:
   install's build id from its `appmanifest`, and the studied-build pin in
   `data/steam_builds.json` (branch, build id, manifest, version, DLL sha256).
   `--check` fails (1) on a newer build or a stale install, `--print-fetch`/`--fetch`
-  hand the manifest to `fetch_version.sh`, `--record` re-pins. SteamDB has no
+  hand the manifest to `fetch_version.sh` (an unlisted branch such as
+  `latest_experimental` falls back to the branch form), `--record` re-pins. SteamDB has no
   public API and 403s scripted clients, so the machine path is PICS; the human
   page stays linked in the docstring. Wired as `make latest` and gated by
   `tests/test_steam_builds.py` (fixture PICS + appmanifest, network-free).

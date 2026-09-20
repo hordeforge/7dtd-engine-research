@@ -9,7 +9,7 @@ build id and the depot 294422 manifest id. SteamDB pages stay useful by hand
   steam_builds.py                    # branch table + installed build + next step
   steam_builds.py --json             # machine-readable snapshot
   steam_builds.py --check            # exit 1 when a newer build than the pin exists
-  steam_builds.py --print-fetch      # exact fetch_version.sh command for the branch
+  steam_builds.py --print-fetch --branch latest_experimental  # fetch by name if unlisted
   steam_builds.py --fetch            # download + snapshot the selected branch
   steam_builds.py --record           # pin the selected branch as the studied build
 
@@ -198,6 +198,19 @@ def select(snapshot: Snapshot, name: str) -> Branch | None:
     return None
 
 
+def fetch_by_name(branch_name: str, label: str, do_fetch: bool) -> int:
+    """Hand a branch steamcmd can install even when PICS does not list it."""
+    if not LABEL_RE.match(label):
+        print(f"steam_builds: invalid label {label!r}", file=sys.stderr)
+        return 2
+    command = [str(FETCH), branch_name, label]
+    if not do_fetch:
+        print(" ".join(command))
+        return 0
+    print("fetch: " + " ".join(command))
+    return subprocess.run(command, check=False).returncode
+
+
 def human_size(value: int | None) -> str:
     return f"{value / 1_000_000_000:.2f} GB" if value else "-"
 
@@ -267,13 +280,19 @@ def main(argv: list[str] | None = None) -> int:
     wanted = args.branch or str(studied.get("branch") or "public")
     branch = select(snapshot, wanted)
     if branch is None:
+        # A password-gated or brand-new branch (latest_experimental) can be
+        # missing from the branch table while steamcmd can still install it by
+        # name, so --print-fetch/--fetch fall back to the branch form instead of
+        # refusing. There is no build id or manifest to compare in that case.
+        if args.print_fetch or args.fetch:
+            return fetch_by_name(wanted, args.label or wanted, args.fetch)
         known = ", ".join(b.name for b in snapshot.branches)
         print(
             f"steam_builds: branch {wanted!r} not in {snapshot.source}; known: {known}",
             file=sys.stderr,
         )
         print(
-            "steam_builds: a password-gated branch can be fetched by name, but not listed here",
+            "steam_builds: pass --print-fetch/--fetch to install it by branch name anyway",
             file=sys.stderr,
         )
         return 2
