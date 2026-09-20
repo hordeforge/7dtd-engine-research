@@ -122,6 +122,52 @@ def main() -> None:
     )
     assert "drift: no" in quiet, quiet
 
+    # Depot provenance: the DLL's own SHA-1 as Steam's manifest records it.
+    encoder = load_sibling("test_steam_manifest")
+    with tempfile.TemporaryDirectory(
+        prefix="research_diff_prov_", dir=_common.scratch_dir()
+    ) as tmp:
+        root = Path(tmp)
+        dll = root / "Assembly-CSharp.dll"
+        dll.write_bytes(b"stock bytes\n")
+        good = root / "294422_5.manifest"
+        good.write_bytes(
+            encoder.manifest(
+                [encoder.entry("Data\\Managed\\Assembly-CSharp.dll", dll.read_bytes())]
+            )
+        )
+        bad = root / "294422_6.manifest"
+        bad.write_bytes(
+            encoder.manifest([encoder.entry("Data\\Managed\\Assembly-CSharp.dll", b"other bytes")])
+        )
+        assert module.depot_provenance(dll, None) is None
+        matched = module.depot_provenance(dll, good)
+        assert matched is not None, matched
+        assert matched[0] == "294422_5.manifest", matched
+        assert matched[2] is True, matched
+        mismatched = module.depot_provenance(dll, bad)
+        assert mismatched is not None, mismatched
+        assert mismatched[2] is False, mismatched
+        unrelated = root / "294422_7.manifest"
+        unrelated.write_bytes(encoder.manifest([encoder.entry("Data\\other.bin", b"x")]))
+        assert module.depot_provenance(dll, unrelated) is None
+
+        unchecked = source(module, "b9", {"version": {"display": "V 3.2.0"}})
+        assert "not checked" in module.provenance_cell(unchecked), module.provenance_cell(unchecked)
+        checked = module.Source(
+            label="b9",
+            path=dll,
+            sha256="a" * 64,
+            size=12,
+            facts={"version": {"display": "V 3.2.0", "stock_wire": "V3.2.0 b9"}},
+            buildid="1",
+            depot=matched[0],
+            depot_sha1=matched[1],
+            depot_matches=matched[2],
+        )
+        cell = module.provenance_cell(checked)
+        assert "matches the local file" in cell, cell
+
     # Depot-manifest lens: fixture manifests built with the sibling encoder.
     encoder = load_sibling("test_steam_manifest")
     with tempfile.TemporaryDirectory(prefix="research_diff_", dir=_common.scratch_dir()) as tmp:
@@ -188,6 +234,7 @@ def main() -> None:
         assert "pair: b9 ->" in pair_run.stdout, pair_run.stdout
         assert "pair: b10 ->" in pair_run.stdout, pair_run.stdout
         assert "## 7. Depot manifest" in pair_run.stdout, pair_run.stdout
+        assert "matches the local file" in pair_run.stdout, pair_run.stdout
         assert "no change\n\n```\n=== PACKAGE DIFF ===\nadded (0)" in pair_run.stdout, (
             pair_run.stdout
         )

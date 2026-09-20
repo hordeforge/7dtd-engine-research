@@ -27,6 +27,12 @@ Status terms:
 
 ### 2026-09-20
 
+- `research_diff.py` reports depot provenance: the identity table gained `depot
+  manifest` and `depot file SHA-1` rows, the latter Steam's own SHA-1 for that DLL
+  with a match/mismatch against the local file, so the report itself states that the
+  bytes compared are the bytes Steam shipped for those builds. A mismatch prints a
+  WARNING and marks the cell; an absent manifest reads `not checked`. The committed
+  b9 to b10 report was regenerated with both cells matching.
 - `steam_builds.py --verify-install [SUBSTR]` hashes local files against Steam's
   manifest for the installed build (gid taken from the appmanifest, falling back to
   the selected branch), and `--check` now fails on any mismatch or missing file, so

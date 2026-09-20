@@ -82,6 +82,9 @@ class Source:
     size: int
     facts: dict[str, Any]
     buildid: str | None
+    depot: str | None = None
+    depot_sha1: str | None = None
+    depot_matches: bool | None = None
 
     @property
     def version(self) -> str:
@@ -149,6 +152,28 @@ def buildid_for(sha: str, pins: dict[str, Any]) -> str | None:
     if isinstance(studied, dict) and studied.get("dll_sha256") == sha and studied.get("buildid"):
         return str(studied["buildid"])
     return None
+
+
+def depot_provenance(dll: Path, manifest_path: Path | None) -> tuple[str, str, bool] | None:
+    """Steam's own SHA-1 for this DLL from a depot manifest, and whether it matches.
+
+    This is the check that says "the bytes I diffed are the bytes Steam shipped":
+    the manifest entry for Managed/Assembly-CSharp.dll against the local file.
+    """
+    if manifest_path is None:
+        return None
+    manifest = read_manifest(manifest_path)
+    entry = next(
+        (
+            candidate
+            for candidate in match_entries(manifest, "managed/assembly-csharp.dll")
+            if candidate.sha1
+        ),
+        None,
+    )
+    if entry is None or entry.sha1 is None:
+        return None
+    return manifest_path.name, entry.sha1, entry.sha1 == sha1_file(dll)
 
 
 def extract_facts(dll: Path, tmp: Path, name: str) -> dict[str, Any]:
@@ -360,6 +385,13 @@ def section_markdown(index: int, section: Section) -> str:
     return "\n".join(lines)
 
 
+def provenance_cell(source: Source) -> str:
+    if source.depot_sha1 is None:
+        return "not checked"
+    verdict = "matches the local file" if source.depot_matches else "MISMATCHES the local file"
+    return f"`{source.depot_sha1}` ({verdict})"
+
+
 def report_markdown(
     old: Source, new: Source, sections: list[Section], generated: str, argv: list[str]
 ) -> str:
@@ -383,6 +415,8 @@ def report_markdown(
         f"| version | {old.version} | {new.version} |",
         f"| stock wire | {old.wire} | {new.wire} |",
         f"| Steam build | {old.buildid or 'unknown'} | {new.buildid or 'unknown'} |",
+        f"| depot manifest | {old.depot or 'not given'} | {new.depot or 'not given'} |",
+        f"| depot file SHA-1 | {provenance_cell(old)} | {provenance_cell(new)} |",
         "",
         "## Verdict",
         "",
@@ -633,6 +667,31 @@ def main(argv: list[str] | None = None) -> int:
                 or load_source(new_path, label_new, args.buildid_new, tmp_path, "new", pins)
             )
             limit = max(0, args.max_list)
+            provenance = [
+                depot_provenance(source.path, Path(manifest) if manifest else None)
+                for source, manifest in ((old, manifest_old), (new, manifest_new))
+            ]
+            if provenance[0] or provenance[1]:
+                old = replace(
+                    old,
+                    depot=provenance[0][0] if provenance[0] else None,
+                    depot_sha1=provenance[0][1] if provenance[0] else None,
+                    depot_matches=provenance[0][2] if provenance[0] else None,
+                )
+                new = replace(
+                    new,
+                    depot=provenance[1][0] if provenance[1] else None,
+                    depot_sha1=provenance[1][1] if provenance[1] else None,
+                    depot_matches=provenance[1][2] if provenance[1] else None,
+                )
+                for side, source in (("old", old), ("new", new)):
+                    if source.depot_sha1 and not source.depot_matches:
+                        print(
+                            f"research_diff: WARNING {side} DLL {source.path.name} does not match "
+                            f"{source.depot} SHA-1 (not the bytes that manifest shipped)",
+                            file=sys.stderr,
+                        )
+
             sections = [
                 lens_facts(old, new),
                 lens_census(old, new),

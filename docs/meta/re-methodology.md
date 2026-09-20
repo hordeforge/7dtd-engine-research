@@ -243,7 +243,9 @@ committed parity snapshots. Explicit `--old/--new` plus the per-lens flags stay
 available when the artifacts are somewhere unusual.
 
 It reports source identity (bytes, sha256, version, Steam build id when the sha
-matches the pin) and runs facts (`StockFacts.exe`), census (`Census.exe`),
+matches the pin, and the depot-provenance row: Steam's own SHA-1 for each DLL
+with a match/mismatch against the local file, so the artifact states that the
+bytes compared are the bytes Steam shipped) and runs facts (`StockFacts.exe`), census (`Census.exe`),
 method signatures (`MethodList.exe`), enum members (`EnumList.exe`) and
 per-method body hashes (`asm_body_diff.py`), plus wire parity when
 `--parity-old/--parity-new` snapshots are given, and the non-managed content lens
