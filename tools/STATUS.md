@@ -38,6 +38,16 @@ Status terms:
   rename, zero census/signature/enum drift). Report committed and linked from
   `docs/releases/changelog-3.2.0.md` §8. Gated by `tests/test_research_diff.py`
   (fixture parsers + renderer + CLI contract, DLL-free).
+- Added `parity/steam_manifest.py` (supported): reads the Steam client's
+  cached depot manifest (`<steam>/depotcache/<depot>_<gid>.manifest`) and gives
+  Steam's own per-file checksums offline. For the dedicated depot 294422 the
+  file is plaintext protobuf (magic `0x71F617D0`, entry table length at offset
+  4), so `--find` prints a path's size + SHA-1 and `--verify DIR [--only SUBSTR]`
+  hashes local files against Steam's SHA-1s (exit 1 on missing/short/mismatch);
+  `--list --json` emits the 17624-entry table and `--manifest FILE` reads an
+  older cached build. This is the checksum source SteamDB cannot provide (it
+  403s scripted clients and has no API). Gated by `tests/test_steam_manifest.py`
+  (fixture manifests + a real-cache integration check when present).
 - Profiled the research diff loop and cut its dominant cost. `asm_body_diff.py`
   now hashes method bodies zero-allocation (one buffer and one SHA256 per
   assembly instead of per-instruction BitConverter/UTF8/ToArray) and walks the
