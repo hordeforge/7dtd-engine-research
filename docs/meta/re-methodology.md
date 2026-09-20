@@ -279,6 +279,13 @@ install activity, not depot content). Build ids come from the client's
 `tools/data/steam_builds.json`, so an old cached manifest stays labelled after
 the log rotates. SteamDB is not a route for this: it has no API and 403s
 scripted clients.
+Committed baselines make the first two lenses free on the next patch:
+`workspace/outputs/parity/parity_b9.json` / `parity_b10.json` are the
+`ParitySurface` snapshots for the two cached builds (`parity_diff.py` finds no
+wire drift between them, which is the b9 to b10 wire claim), and
+`workspace/outputs/diffs/b9-to-b10-20260920.md` is the full eight-lens report
+for the same pair. A new build only needs its own snapshot to diff against.
+
 
 ## 5c. Stock facts pin (hardcodes across docs + products)
 

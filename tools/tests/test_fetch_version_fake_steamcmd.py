@@ -9,10 +9,11 @@ argv and copies a known DLL covers all of it offline.
 
 Cases:
   1. manifest form   -> snapshot written, identical to a direct ParitySurface run
-  2. branch form     -> snapshot written from the install dir
-  3. steam_builds --fetch -> branch manifest reaches fetch_version.sh
-  4. fake does nothing -> non-zero, no snapshot published
-  5. fake fails      -> non-zero, no snapshot published
+  2. two builds      -> gid-mapped fetches reproduce both snapshots; wire parity is unchanged
+  3. branch form     -> snapshot written from the install dir
+  4. steam_builds --fetch -> branch manifest reaches fetch_version.sh
+  5. fake does nothing -> non-zero, no snapshot published
+  6. fake fails      -> non-zero, no snapshot published
 
 SKIPs without mono/mcs, the pinned Cecil build, or the live dedicated DLL.
 
@@ -66,7 +67,16 @@ while [[ $# -gt 0 ]]; do
 done
 [[ -n "$dir" ]] || exit 9
 mkdir -p "$dir"
-cp -f "${FAKE_DLL:?}" "$dir/Assembly-CSharp.dll"
+dll="${FAKE_DLL:?}"
+if [[ -n "${FAKE_DLL_MAP:-}" ]]; then
+  # <gid>=<path> pairs, ';' separated: lets one fake serve several builds.
+  saved="$IFS"; IFS=';'
+  for pair in $FAKE_DLL_MAP; do
+    [[ "${pair%%=*}" == "${manifest:-}" ]] && dll="${pair#*=}"
+  done
+  IFS="$saved"
+fi
+cp -f "$dll" "$dir/Assembly-CSharp.dll"
 printf 'mode=%s\\n' "$mode" >> "${FAKE_LOG}"
 """
 
@@ -147,6 +157,50 @@ def main() -> None:
         assert branch.returncode == 0, (branch.stdout, branch.stderr)
         assert (out_branch / "parity_fakebranch.json").is_file(), branch.stdout
         assert "mode=branch" in log.read_text(encoding="utf-8")
+
+        # 2. one fake, two builds: gid-mapped fetches must reproduce both snapshots,
+        # and the wire surface must come out unchanged (changelog-3.2.0 section 8).
+        backup = asm.with_name(asm.name + ".re_stock_bak")
+        if backup.is_file():
+            mapped = f"1633674551820196085={asm};1712639873522480804={backup}"
+            pairs = [
+                ("1633674551820196085", "map-b10", asm),
+                ("1712639873522480804", "map-b9", backup),
+            ]
+            for gid, label, dll in pairs:
+                out_map = root / f"out-{label}"
+                env_map = dict(
+                    base_env,
+                    FAKE_MODE="ok",
+                    FAKE_DLL_MAP=mapped,
+                    STEAM_CONTENT=str(root / f"content-{label}"),
+                    SCRATCH=str(root / "scratch" / label),
+                    OUT=str(out_map),
+                )
+                proc_map = subprocess.run(
+                    [str(FETCH), gid, label], capture_output=True, text=True, env=env_map
+                )
+                assert proc_map.returncode == 0, (proc_map.stdout, proc_map.stderr)
+                snapshot_map = out_map / f"parity_{label}.json"
+                assert snapshot_map.is_file(), proc_map.stdout
+                assert load_snapshot(snapshot_map.read_text(encoding="utf-8")) == direct_snapshot(
+                    dll
+                ), f"{label}: fetched snapshot != direct ParitySurface run"
+
+            wire = subprocess.run(
+                [
+                    sys.executable,
+                    str(_common.TOOLS / "parity" / "parity_diff.py"),
+                    str(root / "out-map-b9" / "parity_map-b9.json"),
+                    str(root / "out-map-b10" / "parity_map-b10.json"),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            assert wire.returncode == 0, wire.stdout
+            assert "changed wire (0)" in wire.stdout, wire.stdout
+        else:
+            print(f"note: {backup.name} absent; b9/b10 gid-map case skipped")
 
         # 3. steam_builds --fetch must hand the branch's manifest to fetch_version.sh
         appinfo = root / "appinfo.json"

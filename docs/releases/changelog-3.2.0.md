@@ -475,7 +475,11 @@ credentials: b9 is buildid `24911252` / depot 294422 manifest
 `logs/content_log.txt`), b10 is buildid `24994542` / manifest
 `1633674551820196085`. `tools/parity/steam_manifest.py --diff <old.manifest>`
 reports **16 changed files, 0 added, 0 removed** with both sides' SHA-1s,
-matching the client's "16 updated, 0 moved, 0 deleted files" log line. The
+matching the client's "16 updated, 0 moved, 0 deleted files" log line. The wire lens is machine-checked
+too: `workspace/outputs/parity/parity_b9.json` and `parity_b10.json` are the
+committed `ParitySurface` snapshots for the two builds, and
+`tools/parity/parity_diff.py` reports **0 added, 0 removed, 0 changed wire**
+between them, confirming the no-NetPackage-drift claim above. The
 mtime window above is local install activity (re-extraction and probe
 sessions), not depot content: the touched Config XML and the Prefabs listed
 there did not change between the two manifests.

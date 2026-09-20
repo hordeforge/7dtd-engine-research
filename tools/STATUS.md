@@ -27,6 +27,13 @@ Status terms:
 
 ### 2026-09-20
 
+- Committed `workspace/outputs/parity/parity_b9.json` and `parity_b10.json`
+  (ParitySurface snapshots for the two cached builds). `parity_diff.py` reports
+  0 added / 0 removed / 0 changed wire between them, so changelog-3.2.0 section 8's
+  no-NetPackage-drift claim is machine-checked and the next patch has a local
+  baseline. The b9 to b10 report was regenerated with all eight lenses measured
+  (wire parity now "no change" instead of "not measured"). The fake steamcmd
+  learned a gid-to-DLL map so one run reproduces both snapshots.
 - `research_diff.py` gained the depot-manifest lens (`--steam-manifest-old` /
   `--steam-manifest-new`), so one report carries the managed delta and the
   non-managed content delta; the committed b9 to b10 report was regenerated with
