@@ -27,6 +27,14 @@ Status terms:
 
 ### 2026-09-20
 
+- `research_diff.py` runs its independent lenses concurrently (`--jobs`, default
+  `min(4, CPUs)`): the report p50 over the real b9/b10 pair dropped 3352 ms to
+  2585 ms with `--jobs 4` (per-lens: body diff 1.66 s, method lists 0.33 s,
+  census 0.20 s, depot 0.14 s, rest under 0.1 s). `--jobs 1` is the reference and
+  renders a byte-identical report; the `--jobs` flag is stripped from the
+  reproduce line like `--out`/`--json`, so the report stays deterministic.
+  `tests/test_research_diff.py` asserts the jobs=1 versus default equality.
+
 - Added `tests/test_install_integrity.py`: the live suite now asserts the whole
   installed `Managed/` payload still matches Steam's cached depot manifest for the
   installed build, not just the studied `Assembly-CSharp.dll` that `make

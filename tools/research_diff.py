@@ -37,10 +37,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
+from functools import partial
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "tests"))
 sys.path.insert(0, str(Path(__file__).resolve().parent / "parity"))
@@ -369,6 +371,18 @@ def lens_depot(old_path: Path | None, new_path: Path | None, limit: int) -> Sect
     return Section(title, counts, cap([f"gid {old.gid} -> {new.gid}", *lines], limit))
 
 
+def run_lenses(jobs: int, builders: list[Callable[[], Section]]) -> list[Section]:
+    """Run the independent lenses, optionally concurrently (order is preserved).
+
+    Every lens only reads the two DLLs and its own outputs, so overlapping them
+    is safe; `jobs=1` is the reference path and must produce an identical report.
+    """
+    if jobs <= 1 or len(builders) < 2:
+        return [build() for build in builders]
+    with ThreadPoolExecutor(max_workers=jobs) as pool:
+        return list(pool.map(lambda build: build(), builders))
+
+
 def section_markdown(index: int, section: Section) -> str:
     total = sum(section.counts.values())
     verdict = f"{total} change(s)" if total else "no change"
@@ -632,6 +646,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help=f"report path, or - for stdout (default: {DEFAULT_OUT_DIR}/<old>-to-<new>-<date>.md)",
     )
+    ap.add_argument(
+        "--jobs",
+        type=int,
+        default=min(4, os.cpu_count() or 1),
+        help="concurrent lenses (default: min(4, CPUs); 1 is the sequential reference)",
+    )
     ap.add_argument("--json", action="store_true", help="emit the summary as JSON")
     ap.add_argument("--check", action="store_true", help="exit 1 when any lens reports drift")
     return ap
@@ -739,23 +759,26 @@ def main(argv: list[str] | None = None) -> int:
                             file=sys.stderr,
                         )
 
-            sections = [
-                lens_facts(old, new),
-                lens_census(old, new),
-                lens_methods(old, new, tmp_path, limit),
-                lens_enums(old, new, tmp_path, limit),
-                lens_bodies(old, new, limit),
-                lens_parity(
+            builders: list[Callable[[], Section]] = [
+                partial(lens_facts, old, new),
+                partial(lens_census, old, new),
+                partial(lens_methods, old, new, tmp_path, limit),
+                partial(lens_enums, old, new, tmp_path, limit),
+                partial(lens_bodies, old, new, limit),
+                partial(
+                    lens_parity,
                     Path(parity_old) if parity_old else None,
                     Path(parity_new) if parity_new else None,
                     limit,
                 ),
-                lens_depot(
+                partial(
+                    lens_depot,
                     Path(manifest_old) if manifest_old else None,
                     Path(manifest_new) if manifest_new else None,
                     limit,
                 ),
             ]
+            sections = run_lenses(max(1, args.jobs), builders)
     except (RuntimeError, ManifestError, subprocess.TimeoutExpired) as exc:
         print(f"research_diff: {exc}", file=sys.stderr)
         return 2
@@ -770,8 +793,8 @@ def main(argv: list[str] | None = None) -> int:
         if skip_value:
             skip_value = False
             continue
-        if arg in {"--json", "--out"} or arg.startswith("--out="):
-            skip_value = arg == "--out"
+        if arg in {"--json", "--out", "--jobs"} or arg.startswith(("--out=", "--jobs=")):
+            skip_value = arg in {"--out", "--jobs"}
             continue
         argv_tail.append(arg)
     text = report_markdown(old, new, sections, generated, argv_tail)

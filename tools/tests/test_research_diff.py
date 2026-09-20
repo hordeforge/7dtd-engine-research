@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -235,6 +236,13 @@ def main() -> None:
         assert "pair: b10 ->" in pair_run.stdout, pair_run.stdout
         assert "## 7. Depot manifest" in pair_run.stdout, pair_run.stdout
         assert "matches the local file" in pair_run.stdout, pair_run.stdout
+
+        sequential = run("--pair", "b9:b10", "--out", "-", "--jobs", "1")
+        assert sequential.returncode == 0, sequential.stderr
+        stamp = re.compile(r"^Generated .*$", re.M)
+        assert stamp.sub("Generated <stamp>", sequential.stdout) == stamp.sub(
+            "Generated <stamp>", pair_run.stdout
+        ), "jobs=1 report differs from the default"
 
         cached_gid = "294422_1712639873522480804.manifest"
         cached = any(
