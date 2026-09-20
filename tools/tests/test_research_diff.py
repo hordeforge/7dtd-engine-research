@@ -13,6 +13,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -117,6 +118,40 @@ def main() -> None:
     assert "not measured" in report, report
     assert "\n\n## 1. Stock facts" in report, report
     assert "python3 tools/research_diff.py --old a" in report, report
+
+    with tempfile.TemporaryDirectory(
+        prefix="research_diff_litenet_", dir=_common.scratch_dir()
+    ) as tmp:
+        lone = Path(tmp) / "lone" / "Assembly-CSharp.dll"
+        lone.parent.mkdir()
+        lone.write_bytes(b"x")
+        paired = Path(tmp) / "paired" / "Assembly-CSharp.dll"
+        paired.parent.mkdir()
+        paired.write_bytes(b"x")
+        (paired.parent / "LiteNetLib.dll").write_bytes(b"y")
+        lone_source = module.Source(
+            label="lone",
+            path=lone,
+            sha256="a" * 64,
+            size=1,
+            facts={"version": {"display": "V 3.2.0"}, "litenet": {"protocol_id": 13}},
+            buildid=None,
+        )
+        paired_source = module.Source(
+            label="paired",
+            path=paired,
+            sha256="a" * 64,
+            size=1,
+            facts={
+                "version": {"display": "V 3.2.0"},
+                "litenet": {"protocol_id": 13, "header_size": 1},
+            },
+            buildid=None,
+        )
+        noted = module.lens_facts(lone_source, paired_source)
+        assert noted.note is not None, noted
+        assert "LiteNetLib.dll" in noted.note, noted.note
+        assert module.lens_facts(paired_source, paired_source).note is None
 
     quiet = module.report_markdown(
         old, new, [module.Section("Stock facts (StockFacts.exe)", {}, "none")], "t", []
@@ -253,6 +288,19 @@ def main() -> None:
         assert "## 3. Type metadata (FullSurface.exe)" in pair_run.stdout, pair_run.stdout
         assert "~ RequestDetails:" in pair_run.stdout, pair_run.stdout
         assert "matches the local file" in pair_run.stdout, pair_run.stdout
+
+        with tempfile.TemporaryDirectory(
+            prefix="research_diff_path_", dir=_common.scratch_dir()
+        ) as tmp:
+            copied = Path(tmp) / "Assembly-CSharp.dll"
+            shutil.copy2(backup, copied)
+            by_path = run("--pair", f"{copied}:b10", "--out", "-")
+            assert by_path.returncode == 0, (by_path.stdout[-500:], by_path.stderr)
+            assert f"pair: {copied} -> Assembly-CSharp.dll" in by_path.stdout, by_path.stdout
+            assert "[label V3.2.0-b9]" in by_path.stdout, by_path.stdout
+            assert "| stock wire | V3.2.0 b9 | V3.2.0 b10 |" in by_path.stdout, by_path.stdout
+            assert "no LiteNetLib.dll beside" in by_path.stdout, by_path.stdout
+            assert "depot manifest 16" in by_path.stdout, by_path.stdout
 
         sequential = run("--pair", "b9:b10", "--out", "-", "--jobs", "1")
         assert sequential.returncode == 0, sequential.stderr

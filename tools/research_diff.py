@@ -289,8 +289,22 @@ def cap(lines: list[str], limit: int) -> str:
 
 
 def lens_facts(old: Source, new: Source) -> Section:
-    counts, lines = diff_maps(flatten(old.facts), flatten(new.facts))
-    return Section("Stock facts (StockFacts.exe)", counts, cap(lines, 10_000))
+    old_facts = flatten(old.facts)
+    new_facts = flatten(new.facts)
+    counts, lines = diff_maps(old_facts, new_facts)
+    note = None
+    # StockFacts reads the sibling LiteNetLib.dll for the litenet.* pins. A lone
+    # copy of the assembly has no sibling, so only protocol_id is pinned there and
+    # the rest of the section shows up as added rather than unchanged.
+    old_lite = (old.path.parent / "LiteNetLib.dll").is_file()
+    new_lite = (new.path.parent / "LiteNetLib.dll").is_file()
+    if old_lite != new_lite:
+        side = "old" if not old_lite else "new"
+        note = (
+            f"note: no LiteNetLib.dll beside the {side} assembly, so StockFacts pinned only "
+            "litenet.protocol_id there; the other litenet.* rows are missing rather than changed"
+        )
+    return Section("Stock facts (StockFacts.exe)", counts, cap(lines, 10_000), note=note)
 
 
 def lens_census(old: Source, new: Source) -> Section:
@@ -530,16 +544,23 @@ def resolve_pair(
     """Resolve a label pair to DLLs, cached depot manifests and committed parity snapshots.
 
     A label is either a version (`b9`, `V3.2.0 b9`), matched on the facts each DLL
-    reports, or a Steam build id (`24911252`), resolved through that build's cached
-    depot manifest SHA-1. The cached depot
-    manifest is then matched by the DLL's own SHA-1 as recorded in Steam's
-    manifest, so all three artifacts provably belong to the same build.
+    reports, a Steam build id (`24911252`), resolved through that build's cached
+    depot manifest SHA-1, or a path to an assembly that is not in the install dir
+    (a build downloaded into steamcmd's scratch tree, for example), whose label is
+    then taken from the version it reports. The cached depot manifest is matched by
+    the DLL's own SHA-1 as recorded in Steam's manifest, so the artifacts provably
+    belong to the same build.
     """
     if ":" not in pair:
         raise SourceError(f"--pair wants OLD:NEW, got {pair!r}")
     old_label, new_label = (part.strip() for part in pair.split(":", 1))
-    candidates = candidate_dlls(game_dir)
-    if not candidates:
+    resolved: dict[str, Source] = {}
+    for label in (old_label, new_label):
+        direct = Path(label).expanduser()
+        if direct.is_file():
+            resolved[label] = load_source(direct, None, None, tmp, f"probe_{direct.name}", pins)
+    candidates = candidate_dlls(game_dir) if len(resolved) < 2 else []
+    if len(resolved) < 2 and not candidates:
         raise SourceError(f"no Assembly-CSharp.dll (or .dll.* backup) in {game_dir}")
 
     roots = roots_from(steam_root)
@@ -551,8 +572,9 @@ def resolve_pair(
         manifest_path = manifest_for_gid(DEFAULT_DEPOT, gid, roots)
         return assembly_sha1(read_manifest(manifest_path)) if manifest_path else None
 
-    resolved: dict[str, Source] = {}
     for label in (old_label, new_label):
+        if label in resolved:
+            continue
         # A version label (`b9`, `V3.2.0 b9`) matches on the facts a DLL reports.
         for path in candidates:
             source = load_source(path, label, None, tmp, f"probe_{path.name}", pins)
@@ -597,6 +619,7 @@ def resolve_pair(
         print(
             f"pair: {label} -> {source.path.name} sha256 {source.sha256[:12]} "
             f"build {source.buildid or 'unknown'}; manifest {match.name if match else 'not cached'}"
+            + (f" [label {source.label}]" if source.label != label else "")
         )
         manifests.append(match)
 

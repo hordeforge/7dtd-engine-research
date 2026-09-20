@@ -27,6 +27,15 @@ Status terms:
 
 ### 2026-09-20
 
+- `research_diff.py --pair` accepts a path to an assembly outside the install dir
+  (a steamcmd scratch download, for example): the side is loaded directly and its
+  report label comes from the version it reports, while the depot manifest and
+  parity snapshot still resolve by SHA-1 and version name. `pair:` prints the
+  derived label next to the input when they differ.
+- The facts lens notes when a side has no sibling `LiteNetLib.dll` (that is how
+  StockFacts pins the `litenet.*` rows), so a lone copied assembly shows those
+  rows as missing rather than changed.
+
 - `test_install_integrity.py` also asserts the installed build *is* the studied
   one: the appmanifest's build id and depot manifest must equal
   `tools/data/steam_builds.json`. An asset-only patch moves the installed build
