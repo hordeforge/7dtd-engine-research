@@ -228,10 +228,16 @@ leaving that to the git-ignored local artifact (SteamDB has no public API and
 patch investigation starts from a single artifact instead of a hand-run list:
 
 ```bash
-tools/research_diff.py --old Assembly-CSharp.dll.re_stock_bak --new Assembly-CSharp.dll \
-  --label-old b9 --label-new b10          # -> workspace/outputs/diffs/b9-to-b10-<date>.md
+tools/research_diff.py --pair b9:b10      # resolves DLLs, depot manifests and parity snapshots
 tools/research_diff.py --old a.dll --new b.dll --check   # exit 1 when any lens drifts
 ```
+
+`--pair` is the one-command path for a pair of retained builds: it matches each
+candidate DLL in the install dir on the version it reports (`b9`, `b10`,
+`V3.2.0 b9`), then matches that DLL's SHA-1 against Steam's cached depot
+manifests, which also supplies the Steam build ids, and finally uses the
+committed parity snapshots. Explicit `--old/--new` plus the per-lens flags stay
+available when the artifacts are somewhere unusual.
 
 It reports source identity (bytes, sha256, version, Steam build id when the sha
 matches the pin) and runs facts (`StockFacts.exe`), census (`Census.exe`),

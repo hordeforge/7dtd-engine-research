@@ -27,6 +27,14 @@ Status terms:
 
 ### 2026-09-20
 
+- `research_diff.py --pair OLD:NEW` (e.g. `--pair b9:b10`) resolves a known build pair
+  in one command: candidate DLLs are matched on the version each reports, the
+  cached depot manifest is matched on the DLL's own SHA-1 (which also supplies the
+  Steam build id), and the committed parity snapshots are picked up by label.
+  Nothing is silent: a `pair:` line names each resolved file, manifest and build
+  id. The committed b9 to b10 report was regenerated through it, so its identity
+  table now shows Steam builds 24911252 and 24994542 and its reproduce line is
+  `python3 tools/research_diff.py --pair b9:b10`.
 - Committed `workspace/outputs/parity/parity_b9.json` and `parity_b10.json`
   (ParitySurface snapshots for the two cached builds). `parity_diff.py` reports
   0 added / 0 removed / 0 changed wire between them, so changelog-3.2.0 section 8's

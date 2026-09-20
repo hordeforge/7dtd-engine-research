@@ -156,6 +156,41 @@ def main() -> None:
 
     pins = {"studied": {"dll_sha256": "b" * 64, "buildid": "42", "branch": "public"}}
     assert module.buildid_for("b" * 64, pins) == "42"
+
+    # --pair resolution helpers (pure): label matching and candidate filtering.
+    facts_b9 = {"version": {"display": "V 3.2.0", "stock_wire": "V3.2.0 b9", "build": 9}}
+    assert module.label_matches("b9", facts_b9), facts_b9
+    assert module.label_matches("V3.2.0 b9", facts_b9), facts_b9
+    assert not module.label_matches("b10", facts_b9), facts_b9
+    assert not module.label_matches("", facts_b9), facts_b9
+    with tempfile.TemporaryDirectory(
+        prefix="research_diff_pair_", dir=_common.scratch_dir()
+    ) as tmp:
+        game = Path(tmp)
+        (game / "Assembly-CSharp.dll").write_bytes(b"x" * 1_100_000)
+        (game / "Assembly-CSharp.dll.re_stock_bak").write_bytes(b"y" * 1_100_000)
+        (game / "Assembly-CSharp.dll.re_height_expanded").write_bytes(b"tiny note")
+        names = [p.name for p in module.candidate_dlls(game)]
+        assert names == ["Assembly-CSharp.dll", "Assembly-CSharp.dll.re_stock_bak"], names
+
+    assert run("--pair", "nocolon").returncode == 2
+    assert run("--pair", "b9:b10", "--old", "x.dll").returncode == 2
+    assert run("--old", "a.dll").returncode == 2
+
+    # Live --pair run when this machine keeps the previous build beside the live one.
+    asm = _common.find_asm()
+    backup = asm.with_name(asm.name + ".re_stock_bak") if asm else None
+    if asm is None or backup is None or not backup.is_file():
+        print("note: live --pair check skipped (no retained stock backup)")
+    else:
+        pair_run = run("--pair", "b9:b10", "--out", "-")
+        assert pair_run.returncode == 0, (pair_run.stdout[-500:], pair_run.stderr)
+        assert "pair: b9 ->" in pair_run.stdout, pair_run.stdout
+        assert "pair: b10 ->" in pair_run.stdout, pair_run.stdout
+        assert "## 7. Depot manifest" in pair_run.stdout, pair_run.stdout
+        assert "no change\n\n```\n=== PACKAGE DIFF ===\nadded (0)" in pair_run.stdout, (
+            pair_run.stdout
+        )
     assert module.buildid_for("c" * 64, pins) is None
 
     print("OK: research_diff parsers, renderer, and CLI contract hold")

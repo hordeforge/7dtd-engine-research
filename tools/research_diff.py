@@ -37,7 +37,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -45,7 +45,18 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent / "tests"))
 sys.path.insert(0, str(Path(__file__).resolve().parent / "parity"))
 import _common
-from steam_manifest import ManifestError, diff_manifests, read_manifest
+from steam_manifest import (
+    DEFAULT_DEPOT,
+    ManifestError,
+    cached_manifests,
+    diff_manifests,
+    match_entries,
+    pins_buildids,
+    read_manifest,
+    roots_from,
+    sha1_file,
+    steam_log_buildids,
+)
 
 TOOLS = _common.TOOLS
 REPO = _common.REPO
@@ -57,6 +68,10 @@ FACTS_SKIP = {"asm", "extracted_utc"}
 BODY_SUMMARY_RE = re.compile(
     r"methods bak=(\d+) live=(\d+) added=(\d+) removed=(\d+) body-changed=(\d+)"
 )
+
+
+class SourceError(Exception):
+    """A requested artifact could not be resolved."""
 
 
 @dataclass(frozen=True)
@@ -386,13 +401,128 @@ def report_markdown(
     )
 
 
+def candidate_dlls(game_dir: Path) -> list[Path]:
+    """Assembly-CSharp.dll plus its retained backups (the tiny experiment files are not DLLs)."""
+    names = ["Assembly-CSharp.dll", *sorted(p.name for p in game_dir.glob("Assembly-CSharp.dll.*"))]
+    return [
+        path
+        for name in names
+        if (path := game_dir / name).is_file() and path.stat().st_size > 1_000_000
+    ]
+
+
+def label_matches(label: str, facts: dict[str, Any]) -> bool:
+    """Does a version label (`b9`, `V 3.2.0`, `V3.2.0 b9`) name this build?"""
+    version = facts.get("version", {}) if isinstance(facts.get("version"), dict) else {}
+    wanted = label.strip().lower()
+    if not wanted:
+        return False
+    candidates = {
+        f"b{version.get('build')}",
+        str(version.get("display", "")).lower().replace(" ", ""),
+        str(version.get("stock_wire", "")).lower().replace(" ", ""),
+    }
+    return wanted.replace(" ", "") in candidates
+
+
+def resolve_pair(
+    pair: str, game_dir: Path, steam_root: str | None, tmp: Path, pins: dict[str, Any]
+) -> tuple[Source, Source, Path | None, Path | None, Path | None, Path | None]:
+    """Resolve a label pair to DLLs, cached depot manifests and committed parity snapshots.
+
+    DLLs come from the install dir (the live `Assembly-CSharp.dll` plus retained
+    backups), matched on the version facts each DLL reports. The cached depot
+    manifest is then matched by the DLL's own SHA-1 as recorded in Steam's
+    manifest, so all three artifacts provably belong to the same build.
+    """
+    if ":" not in pair:
+        raise SourceError(f"--pair wants OLD:NEW, got {pair!r}")
+    old_label, new_label = (part.strip() for part in pair.split(":", 1))
+    candidates = candidate_dlls(game_dir)
+    if not candidates:
+        raise SourceError(f"no Assembly-CSharp.dll (or .dll.* backup) in {game_dir}")
+    resolved: dict[str, Source] = {}
+    for label in (old_label, new_label):
+        for path in candidates:
+            source = load_source(path, label, None, tmp, f"probe_{path.name}", pins)
+            if label_matches(label, source.facts):
+                resolved[label] = source
+                break
+        if label not in resolved:
+            found = ", ".join(p.name for p in candidates)
+            raise SourceError(f"no DLL in {game_dir} matches label {label!r} (candidates: {found})")
+
+    roots = roots_from(steam_root)
+    cached = sorted(cached_manifests(DEFAULT_DEPOT, roots).values())
+    buildids = pins_buildids(STEAM_PINS) | steam_log_buildids(DEFAULT_DEPOT, roots)
+    manifests: list[Path | None] = []
+    for label in (old_label, new_label):
+        source = resolved[label]
+        local_sha1 = sha1_file(source.path)
+        match = next(
+            (
+                manifest_path
+                for manifest_path in cached
+                if any(
+                    entry.sha1 == local_sha1
+                    for entry in match_entries(
+                        read_manifest(manifest_path), "managed/assembly-csharp.dll"
+                    )
+                )
+            ),
+            None,
+        )
+        if match is not None:
+            gid = match.name.split("_", 1)[1].split(".")[0]
+            if gid in buildids:
+                # The matched manifest names the build, so the report can label the
+                # DLL with its Steam build id even when nothing else knows it.
+                source = replace(source, buildid=buildids[gid])
+                resolved[label] = source
+        print(
+            f"pair: {label} -> {source.path.name} sha256 {source.sha256[:12]} "
+            f"build {source.buildid or 'unknown'}; manifest {match.name if match else 'not cached'}"
+        )
+        manifests.append(match)
+
+    parity: list[Path | None] = []
+    for label in (old_label, new_label):
+        snapshot = DEFAULT_OUT_DIR.parent / "parity" / f"parity_{label}.json"
+        parity.append(snapshot if snapshot.is_file() else None)
+    return (
+        resolved[old_label],
+        resolved[new_label],
+        manifests[0],
+        manifests[1],
+        parity[0],
+        parity[1],
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="research_diff.py",
         description="Build-to-build research diff report across the maintained lenses.",
     )
-    ap.add_argument("--old", required=True, help="baseline Assembly-CSharp.dll")
-    ap.add_argument("--new", required=True, help="candidate Assembly-CSharp.dll")
+    ap.add_argument("--old", default=None, help="baseline Assembly-CSharp.dll")
+    ap.add_argument("--new", default=None, help="candidate Assembly-CSharp.dll")
+    ap.add_argument(
+        "--pair",
+        default=None,
+        metavar="OLD:NEW",
+        help="resolve both DLLs, both cached depot manifests and both parity snapshots "
+        "from their labels (e.g. b9:b10) instead of passing paths",
+    )
+    ap.add_argument(
+        "--game-dir",
+        default=None,
+        help="Managed dir to scan for Assembly-CSharp.dll* candidates (default: the live install)",
+    )
+    ap.add_argument(
+        "--steam-root",
+        default=None,
+        help="Steam root to scan for cached depot manifests (default: standard locations)",
+    )
     ap.add_argument(
         "--label-old", default=None, help="baseline label (default: stock wire version)"
     )
@@ -432,18 +562,76 @@ def main(argv: list[str] | None = None) -> int:
     if problem:
         print(f"research_diff: {problem}", file=sys.stderr)
         return 2
-    old_path, new_path = Path(args.old), Path(args.new)
+    if not args.pair and not (args.old and args.new):
+        print("research_diff: pass --old/--new or --pair OLD:NEW", file=sys.stderr)
+        return 2
+    if args.pair and (args.old or args.new):
+        print("research_diff: --pair and --old/--new are mutually exclusive", file=sys.stderr)
+        return 2
+
+    pins = load_steam_pins()
+    parity_old = args.parity_old
+    parity_new = args.parity_new
+    manifest_old = args.steam_manifest_old
+    manifest_new = args.steam_manifest_new
+    label_old, label_new = args.label_old, args.label_new
+    resolved_old = resolved_new = None
+    if args.pair:
+        live = _common.find_asm()
+        game_dir = Path(args.game_dir) if args.game_dir else (live.parent if live else Path("."))
+        try:
+            with tempfile.TemporaryDirectory(
+                prefix="research_diff_pair_", dir=_common.scratch_dir()
+            ) as tmp_pair:
+                (
+                    resolved_old,
+                    resolved_new,
+                    manifest_old_path,
+                    manifest_new_path,
+                    parity_old_path,
+                    parity_new_path,
+                ) = resolve_pair(args.pair, game_dir, args.steam_root, Path(tmp_pair), pins)
+        except (SourceError, ManifestError, RuntimeError) as exc:
+            print(f"research_diff: {exc}", file=sys.stderr)
+            return 2
+        label_old = resolved_old.label
+        label_new = resolved_new.label
+        manifest_old = str(manifest_old_path) if manifest_old_path else None
+        manifest_new = str(manifest_new_path) if manifest_new_path else None
+        parity_old = str(parity_old_path) if parity_old_path else None
+        parity_new = str(parity_new_path) if parity_new_path else None
+        print(
+            "pair: parity snapshots "
+            + (
+                f"{parity_old_path.name}, {parity_new_path.name}"
+                if parity_old_path and parity_new_path
+                else "not available (content/managed lenses still measured)"
+            )
+        )
+
+    old_path = Path(args.old) if args.old else Path(resolved_old.path if resolved_old else "")
+    new_path = Path(args.new) if args.new else Path(resolved_new.path if resolved_new else "")
     for path in (old_path, new_path):
         if not path.is_file():
             print(f"research_diff: dll not found: {path}", file=sys.stderr)
             return 2
-
-    pins = load_steam_pins()
     try:
         with tempfile.TemporaryDirectory(prefix="research_diff_", dir=_common.scratch_dir()) as tmp:
             tmp_path = Path(tmp)
-            old = load_source(old_path, args.label_old, args.buildid_old, tmp_path, "old", pins)
-            new = load_source(new_path, args.label_new, args.buildid_new, tmp_path, "new", pins)
+            # --pair already resolved facts, labels and build ids; reloading would
+            # throw the manifest-derived build id away.
+            old = (
+                replace(resolved_old, buildid=args.buildid_old)
+                if resolved_old is not None and args.buildid_old
+                else resolved_old
+                or load_source(old_path, label_old, args.buildid_old, tmp_path, "old", pins)
+            )
+            new = (
+                replace(resolved_new, buildid=args.buildid_new)
+                if resolved_new is not None and args.buildid_new
+                else resolved_new
+                or load_source(new_path, label_new, args.buildid_new, tmp_path, "new", pins)
+            )
             limit = max(0, args.max_list)
             sections = [
                 lens_facts(old, new),
@@ -452,13 +640,13 @@ def main(argv: list[str] | None = None) -> int:
                 lens_enums(old, new, tmp_path, limit),
                 lens_bodies(old, new, limit),
                 lens_parity(
-                    Path(args.parity_old) if args.parity_old else None,
-                    Path(args.parity_new) if args.parity_new else None,
+                    Path(parity_old) if parity_old else None,
+                    Path(parity_new) if parity_new else None,
                     limit,
                 ),
                 lens_depot(
-                    Path(args.steam_manifest_old) if args.steam_manifest_old else None,
-                    Path(args.steam_manifest_new) if args.steam_manifest_new else None,
+                    Path(manifest_old) if manifest_old else None,
+                    Path(manifest_new) if manifest_new else None,
                     limit,
                 ),
             ]
