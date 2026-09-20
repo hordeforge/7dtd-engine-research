@@ -12,13 +12,14 @@ Usage: python3 tools/tests/test_steam_builds.py
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
-import struct
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -51,6 +52,7 @@ APPINFO = {
 ACF = """"AppState"
 {
 \t"appid"\t\t"294420"
+\t"installdir"\t\t"fake"
 \t"buildid"\t\t"__BUILDID__"
 \t"InstalledDepots"
 \t{
@@ -61,6 +63,16 @@ ACF = """"AppState"
 \t}
 }
 """
+
+
+def load_sibling(name: str) -> Any:
+    spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(f"{name}.py"))
+    assert spec is not None, name
+    assert spec.loader is not None, name
+    sibling: Any = importlib.util.module_from_spec(spec)
+    sys.modules[name] = sibling
+    spec.loader.exec_module(sibling)
+    return sibling
 
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
@@ -118,8 +130,13 @@ def main() -> None:
         steam_root = tmp_path / "steam"
         (steam_root / "depotcache").mkdir(parents=True)
         (steam_root / "logs").mkdir()
+        encoder = load_sibling("test_steam_manifest")
+        stock_bytes = b"stock managed bytes\n"
+        install = tmp_path / "common" / "fake"
+        (install / "Data" / "Managed").mkdir(parents=True)
+        (install / "Data" / "Managed" / "Good.dll").write_bytes(stock_bytes)
         (steam_root / "depotcache" / "294422_111.manifest").write_bytes(
-            struct.pack("<II", 0x71F617D0, 0)
+            encoder.manifest([encoder.entry("Data\\Managed\\Good.dll", stock_bytes)])
         )
         (steam_root / "logs" / "content_log.txt").write_text(
             "[2026-01-01 00:00:00] AppID 294420 finished update, 1 mounted depots "
@@ -203,6 +220,36 @@ def main() -> None:
         written = json.loads(out_pins.read_text(encoding="utf-8"))["studied"]
         assert written["buildid"] == "90", written
         assert written["manifest"] == "222", written
+
+        # Install integrity against Steam's manifest for the installed build.
+        clean = run(*base, "--pins", str(good_pins), "--verify-install", "Data")
+        assert clean.returncode == 0, (clean.stdout, clean.stderr)
+        assert "integrity: 1 ok, 0 missing, 0 mismatch" in clean.stdout, clean.stdout
+
+        integrity_json = run(*base, "--pins", str(good_pins), "--verify-install", "Data", "--json")
+        payload = json.loads(integrity_json.stdout)
+        assert payload["integrity"]["ok"] == 1, payload["integrity"]
+        assert payload["integrity"]["manifest"] == "294422_111.manifest", payload["integrity"]
+
+        (install / "Data" / "Managed" / "Good.dll").write_bytes(b"tampered")
+        broken = run(*base, "--pins", str(good_pins), "--check", "--verify-install", "Data")
+        assert broken.returncode == 1, (broken.stdout, broken.stderr)
+        assert "integrity: 0 ok, 0 missing, 1 mismatch" in broken.stdout, broken.stdout
+        assert "FAIL local install differs" in broken.stderr, broken.stderr
+
+        empty = tmp_path / "empty-install"
+        empty.mkdir()
+        gone = run(
+            *base,
+            "--pins",
+            str(good_pins),
+            "--check",
+            "--verify-install",
+            "--install-dir",
+            str(empty),
+        )
+        assert gone.returncode == 1, (gone.stdout, gone.stderr)
+        assert "1 missing" in gone.stdout, gone.stdout
 
         seeded = tmp_path / "seeded.json"
         seeded.write_text(

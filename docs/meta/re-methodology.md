@@ -279,7 +279,14 @@ tools/parity/steam_manifest.py --diff ~/.local/share/Steam/depotcache/294422_<ol
 ```
 
 `--verify` is the install-integrity check (exit 1 on missing/short/mismatched
-files) and `--diff` is the asset-level patch delta. For b9 to b10 it reports
+files) and `--diff` is the asset-level patch delta. The same check is reachable
+through the build tool, which picks the manifest for the *installed* build out of
+the appmanifest:
+
+```bash
+make latest ARGS="--check --verify-install Managed"   # studied build + stock managed bytes
+python3 tools/parity/steam_manifest.py --verify "$GAME_DIR" --only Managed
+``` For b9 to b10 it reports
 16 changed files and 0 added/removed, which matches the client's own content log
 and is the authoritative content delta: mtime-based windows over the install
 overstate a patch (the b9 to b10 narrative's "~1977 newer `Data/` files" was

@@ -38,7 +38,14 @@ from typing import Any
 PARITY = Path(__file__).resolve().parent
 TOOLS = PARITY.parent
 sys.path.insert(0, str(PARITY))
-from steam_manifest import cached_manifests, roots_from, steam_log_buildids  # noqa: E402
+from steam_manifest import (  # noqa: E402
+    ManifestError,
+    cached_manifests,
+    read_manifest,
+    roots_from,
+    steam_log_buildids,
+    verify,
+)
 
 PINS = TOOLS / "data" / "steam_builds.json"
 STOCK_FACTS = TOOLS / "data" / "stock_facts.json"
@@ -132,9 +139,8 @@ def fetch_appinfo(url: str = PICS_URL, timeout: float = 30.0) -> Snapshot:
 
 def read_appmanifest(path: Path) -> tuple[str, dict[str, str]] | None:
     """Installed build id + per-depot manifest ids from Steam's appmanifest ACF."""
-    try:
-        text = path.read_text(encoding="utf-8", errors="replace")
-    except OSError:
+    text = _read_text(path)
+    if not text:
         return None
     buildid: str | None = None
     manifests: dict[str, str] = {}
@@ -155,6 +161,24 @@ def read_appmanifest(path: Path) -> tuple[str, dict[str, str]] | None:
     if not buildid:
         return None
     return buildid, manifests
+
+
+def install_dir_for(appmanifest: Path, override: str | None = None) -> Path | None:
+    """The install directory this appmanifest describes (Steam common/<installdir>)."""
+    if override:
+        return Path(override)
+    for line in _read_text(appmanifest).splitlines():
+        match = _KV_RE.match(line)
+        if match and match.group(1) == "installdir":
+            return appmanifest.parent / "common" / match.group(2)
+    return None
+
+
+def _read_text(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
 
 
 def load_pins(path: Path) -> dict[str, Any] | None:
@@ -283,6 +307,20 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Steam root to scan for cached depot manifests (default: standard locations)",
     )
+    ap.add_argument(
+        "--install-dir",
+        default=None,
+        help="install directory to verify (default: the appmanifest's Steam common/<installdir>)",
+    )
+    ap.add_argument(
+        "--verify-install",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="SUBSTR",
+        help="hash local files against Steam's manifest for the installed build "
+        "(optionally limited to paths containing SUBSTR; without a filter this reads the whole install)",
+    )
     ap.add_argument("--json", action="store_true", help="emit the snapshot as JSON")
     ap.add_argument(
         "--check",
@@ -340,6 +378,34 @@ def main(argv: list[str] | None = None) -> int:
     cached_buildids = steam_log_buildids(DEPOT, roots)
     diffable = sum(1 for b in snapshot.branches if b.manifest in cached)
 
+    integrity: tuple[str, int, int, int, list[str]] | None = None
+    if args.verify_install is not None:
+        gid = install_manifest or branch.manifest
+        manifest_path = cached.get(gid or "")
+        if manifest_path is None:
+            print(
+                f"steam_builds: no cached manifest for the installed build "
+                f"({gid or 'unknown gid'}); fetch it or point --steam-root at the right tree",
+                file=sys.stderr,
+            )
+            return 2
+        root = install_dir_for(Path(args.appmanifest), args.install_dir)
+        if root is None or not root.is_dir():
+            print(
+                f"steam_builds: cannot locate the install directory "
+                f"({root or args.appmanifest}); pass --install-dir",
+                file=sys.stderr,
+            )
+            return 2
+        try:
+            ok, missing, bad, problems = verify(
+                read_manifest(manifest_path), root, args.verify_install or None
+            )
+        except ManifestError as exc:
+            print(f"steam_builds: {exc}", file=sys.stderr)
+            return 2
+        integrity = (manifest_path.name, ok, missing, bad, problems)
+
     if args.json:
         payload = {
             "source": snapshot.source,
@@ -355,6 +421,17 @@ def main(argv: list[str] | None = None) -> int:
                 else None
             ),
             "selected": as_json(branch),
+            "integrity": (
+                {
+                    "manifest": integrity[0],
+                    "ok": integrity[1],
+                    "missing": integrity[2],
+                    "mismatch": integrity[3],
+                    "problems": integrity[4][:50],
+                }
+                if integrity
+                else None
+            ),
             "cached_manifests": {
                 gid: {"buildid": cached_buildids.get(gid), "path": str(path)}
                 for gid, path in sorted(cached.items())
@@ -388,6 +465,13 @@ def main(argv: list[str] | None = None) -> int:
                 f"{human_size(b.size):>10}  {iso(b.updated):<17} {' '.join(notes)}"
             )
         print()
+    if integrity:
+        name, ok, missing, bad, problems = integrity
+        for line in problems[:20]:
+            print(line, file=sys.stderr)
+        if len(problems) > 20:
+            print(f"... ({len(problems) - 20} more)", file=sys.stderr)
+        print(f"integrity: {ok} ok, {missing} missing, {bad} mismatch against {name}")
     if not quiet and cached:
         print(
             f"offline-diffable: {diffable} of {len(snapshot.branches)} branch manifests cached "
@@ -457,6 +541,13 @@ def main(argv: list[str] | None = None) -> int:
         return subprocess.run(command, check=False).returncode
 
     if args.check:
+        if integrity and (integrity[2] or integrity[3]):
+            print(
+                f"steam_builds: FAIL local install differs from Steam's manifest "
+                f"({integrity[3]} mismatch, {integrity[2]} missing)",
+                file=sys.stderr,
+            )
+            return 1
         if not studied:
             print(
                 f"steam_builds: FAIL no studied pin in {pins_path} (run --record)", file=sys.stderr

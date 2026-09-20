@@ -27,6 +27,13 @@ Status terms:
 
 ### 2026-09-20
 
+- `steam_builds.py --verify-install [SUBSTR]` hashes local files against Steam's
+  manifest for the installed build (gid taken from the appmanifest, falling back to
+  the selected branch), and `--check` now fails on any mismatch or missing file, so
+  `make latest ARGS="--check --verify-install Managed"` answers "studied build and
+  stock managed bytes" in one command. A filter keeps it fast (149 files for
+  `Managed`); without one it reads the whole install. The install directory comes
+  from the appmanifest's `installdir` or `--install-dir`.
 - `parity/drift-check.sh` now compares the NetPackage wire axis against the
   committed `workspace/outputs/parity/parity_b10.json` when its own baseline dir
   has no `parity.json` (a fresh checkout), so the first `make drift` gives a
