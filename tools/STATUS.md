@@ -27,6 +27,20 @@ Status terms:
 
 ### 2026-09-20
 
+- Restructured the tool tree and the shared code. `tools/steam/` now holds build
+  acquisition and verification (`steam_builds.py`, `steam_manifest.py`,
+  `fetch_version.sh`), while `tools/parity/` holds the comparison tools
+  (`ParitySurface.cs`, `parity_diff.py`, `drift-check.sh`); the two domains no
+  longer sit in one folder. `tools/tooling.py` is the single home of the
+  repo-root marker walk, the scratch dir, file digests and assembly discovery,
+  and `tools/tests/_common.py` re-exports those for the gates, so no tool
+  imports the test package any more (`research_diff.py` used to). A new
+  `tests/test_tools_layout.py` enforces both rules: no maintained module outside
+  `tests/` imports the test package, and every `tools/*.py` is named in
+  `tools/README.md` (proved by a probe module that imports `_common` and is
+  undocumented). `assignids_dump.py` was the one maintained tool missing from
+  the README table and now has a row.
+
 - Installed Valve's SteamCMD at the operator path the docs use
   (`~/.cache/zdtd-scratch/steamcmd/steamcmd.sh`) and cross-checked its
   `app_info_print 294420` against this repo's PICS tool: public build id

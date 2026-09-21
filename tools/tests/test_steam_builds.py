@@ -24,7 +24,7 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-SCRIPT = _common.TOOLS / "parity" / "steam_builds.py"
+SCRIPT = _common.TOOLS / "steam" / "steam_builds.py"
 PINS = _common.TOOLS / "data" / "steam_builds.json"
 STOCK_FACTS = _common.TOOLS / "data" / "stock_facts.json"
 

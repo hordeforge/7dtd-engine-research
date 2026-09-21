@@ -32,7 +32,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-TOOL = _common.TOOLS / "parity" / "steam_builds.py"
+TOOL = _common.TOOLS / "steam" / "steam_builds.py"
 
 
 def main() -> None:

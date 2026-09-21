@@ -16,7 +16,7 @@ SCRIPTS = (
     "regen.sh",
     "stock-sync.sh",
     "parity/drift-check.sh",
-    "parity/fetch_version.sh",
+    "steam/fetch_version.sh",
 )
 
 

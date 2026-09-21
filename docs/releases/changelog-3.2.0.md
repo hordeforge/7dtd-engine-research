@@ -475,7 +475,7 @@ builds' depot manifests, so the file set is machine-checkable with no
 credentials: b9 is buildid `24911252` / depot 294422 manifest
 `1712639873522480804` (the pairing comes from the client's own
 `logs/content_log.txt`), b10 is buildid `24994542` / manifest
-`1633674551820196085`. `tools/parity/steam_manifest.py --diff <old.manifest>`
+`1633674551820196085`. `tools/steam/steam_manifest.py --diff <old.manifest>`
 reports **16 changed files, 0 added, 0 removed** with both sides' SHA-1s,
 matching the client's "16 updated, 0 moved, 0 deleted files" log line. The wire lens is machine-checked
 too: `workspace/outputs/parity/parity_b9.json` and `parity_b10.json` are the

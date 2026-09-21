@@ -38,7 +38,7 @@ def main() -> None:
     stock_sync = (ROOT / "tools" / "stock-sync.sh").read_text(encoding="utf-8")
     assert 'mktemp -d "$DATA/.stock-sync.' in stock_sync
     assert '--pins "$tmpdir/xml_pins.json"' in stock_sync
-    fetch = ROOT / "tools" / "parity" / "fetch_version.sh"
+    fetch = ROOT / "tools" / "steam" / "fetch_version.sh"
     fetch_text = fetch.read_text(encoding="utf-8")
     assert "curl " not in fetch_text
     assert 'python3 -m json.tool "$tmp"' in fetch_text

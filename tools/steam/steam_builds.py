@@ -35,9 +35,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-PARITY = Path(__file__).resolve().parent
-TOOLS = PARITY.parent
-sys.path.insert(0, str(PARITY))
+STEAM = Path(__file__).resolve().parent
+sys.path.insert(0, str(STEAM))
 from steam_manifest import (  # noqa: E402
     ManifestError,
     cached_manifests,
@@ -47,9 +46,11 @@ from steam_manifest import (  # noqa: E402
     verify,
 )
 
+TOOLS = STEAM.parent
+
 PINS = TOOLS / "data" / "steam_builds.json"
 STOCK_FACTS = TOOLS / "data" / "stock_facts.json"
-FETCH = PARITY / "fetch_version.sh"
+FETCH = STEAM / "fetch_version.sh"
 
 APP = "294420"
 DEPOT = "294422"  # dedicated-server content depot (linux/windows payload)

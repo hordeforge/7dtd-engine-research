@@ -73,7 +73,7 @@ fi
 if [[ "$DO_STEAM" -eq 1 ]]; then
   echo "post-update: step steam build + install integrity"
   set +e
-  python3 "$HERE/parity/steam_builds.py" --check --verify-install
+  python3 "$HERE/steam/steam_builds.py" --check --verify-install
   steam_rc=$?
   set -e
   if [[ $steam_rc -ne 0 ]]; then
@@ -84,7 +84,7 @@ if [[ "$DO_STEAM" -eq 1 ]]; then
     echo "  the full verify reads the whole install, ~11 s here)" >&2
   fi
   echo "post-update: step cached builds"
-  python3 "$HERE/parity/steam_manifest.py" --history || true
+  python3 "$HERE/steam/steam_manifest.py" --history || true
 fi
 
 echo "post-update: done (stock facts + pins$([ "$DO_DRIFT" -eq 1 ] && echo ' + drift' || true)$([ "$DO_STEAM" -eq 1 ] && echo ' + steam' || true))"
@@ -92,7 +92,7 @@ echo "post-update: next manual steps:"
 echo "  - make census   # refresh live counts if needed"
 echo "  - re-run Dump* into il/<label>/ only for changed families"
 echo "  - commit tools/data/stock_facts.json + pin site edits together"
-echo "  - new build?  python3 tools/parity/steam_builds.py --fetch          # pull it"
-echo "                python3 tools/parity/steam_builds.py --record         # re-pin"
+echo "  - new build?  python3 tools/steam/steam_builds.py --fetch          # pull it"
+echo "                python3 tools/steam/steam_builds.py --record         # re-pin"
 echo "                python3 tools/research_diff.py --pair <old>:<new>     # delta report"
-echo "                python3 tools/parity/steam_manifest.py --diff <old.manifest>  # content delta"
+echo "                python3 tools/steam/steam_manifest.py --diff <old.manifest>  # content delta"

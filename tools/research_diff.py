@@ -45,9 +45,8 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Callable
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "tests"))
-sys.path.insert(0, str(Path(__file__).resolve().parent / "parity"))
-import _common
+sys.path.insert(0, str(Path(__file__).resolve().parent / "steam"))
+import tooling
 from steam_manifest import (
     DEFAULT_DEPOT,
     ManifestError,
@@ -63,9 +62,9 @@ from steam_manifest import (
     steam_log_buildids,
 )
 
-TOOLS = _common.TOOLS
-REPO = _common.REPO
-BIN = _common.BIN
+TOOLS = tooling.TOOLS
+REPO = tooling.REPO
+BIN = tooling.BIN
 DEFAULT_OUT_DIR = REPO / "workspace" / "outputs" / "diffs"
 STEAM_PINS = TOOLS / "data" / "steam_builds.json"
 
@@ -731,7 +730,7 @@ def main(argv: list[str] | None = None) -> int:
     label_old, label_new = args.label_old, args.label_new
     resolved_old = resolved_new = None
     if args.pair:
-        live = _common.find_asm()
+        live = tooling.find_asm()
         if args.game_dir:
             game_dir = Path(args.game_dir)
         elif live is not None:
@@ -745,7 +744,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         try:
             with tempfile.TemporaryDirectory(
-                prefix="research_diff_pair_", dir=_common.scratch_dir()
+                prefix="research_diff_pair_", dir=tooling.scratch_dir()
             ) as tmp_pair:
                 (
                     resolved_old,
@@ -784,7 +783,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"research_diff: {problem}", file=sys.stderr)
         return 2
     try:
-        with tempfile.TemporaryDirectory(prefix="research_diff_", dir=_common.scratch_dir()) as tmp:
+        with tempfile.TemporaryDirectory(prefix="research_diff_", dir=tooling.scratch_dir()) as tmp:
             tmp_path = Path(tmp)
             # --pair already resolved facts, labels and build ids; reloading would
             # throw the manifest-derived build id away.

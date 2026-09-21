@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""End-to-end check of parity/fetch_version.sh with a recording fake steamcmd.
+"""End-to-end check of steam/fetch_version.sh with a recording fake steamcmd.
 
 The download path was the one documented entry point with no test: it needs
 SteamCMD and a multi-GB depot, so nothing exercised manifest pass-through, the
@@ -33,7 +33,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-FETCH = _common.TOOLS / "parity" / "fetch_version.sh"
+FETCH = _common.TOOLS / "steam" / "fetch_version.sh"
 PARITY_EXE = _common.BIN / "ParitySurface.exe"
 
 FAKE = """#!/usr/bin/env bash
@@ -238,7 +238,7 @@ def main() -> None:
         builds = subprocess.run(
             [
                 sys.executable,
-                str(_common.TOOLS / "parity" / "steam_builds.py"),
+                str(_common.TOOLS / "steam" / "steam_builds.py"),
                 "--from",
                 str(appinfo),
                 "--pins",

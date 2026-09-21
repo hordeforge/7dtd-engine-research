@@ -304,7 +304,9 @@ catalog: [`../tools/README.md`](../tools/README.md). How to RE:
 |---|---|
 | `tools/src/` | General maintained dumpers: `Census`, `DumpMethod`, `DumpType`, `DumpNetPackages`, `NetProtocolCensus`, `FullSurface` (whole-assembly metadata), `DumpAll` (full local IL) |
 | `tools/legacy/` | 12 canonical per-family dumpers that generated the `il/` dump sets (`DumpDediComplete`, `DumpGmUpdate`, `DumpTerrain`, ...) |
-| `tools/parity/` | Cross-version wire snapshot + diff and the Steam build/manifest tools: `fetch_version.sh` (steamcmd pull), `steam_builds.py` (PICS branch + build ids, `--check`, `--fetch`, `--verify-install`), `steam_manifest.py` (depot per-file SHA-1: `--history`, `--find`, `--verify`, `--diff`), `parity_diff.py`, `drift-check.sh` |
+| `tools/steam/` | Acquire and verify stock builds: `steam_builds.py` (PICS branch + build ids, `--check`, `--fetch`, `--verify-install`), `steam_manifest.py` (depot per-file SHA-1: `--history`, `--find`, `--verify`, `--diff`), `fetch_version.sh` (steamcmd pull) |
+| `tools/parity/` | Compare builds: `ParitySurface.cs` + `parity_diff.py` (wire-surface snapshot and diff), `drift-check.sh` (patch drift vs the committed/local baselines) |
+| `tools/tooling.py` | Shared paths (repo-root marker walk), scratch dir, file digests and assembly discovery, imported by tools and gates |
 | `tools/re-scratch/` | One-off Zig reversers for on-disk formats |
 | `tools/tests/` | Dump-regen + coverage regression tests |
 

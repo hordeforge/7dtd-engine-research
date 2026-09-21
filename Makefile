@@ -50,12 +50,12 @@ install-check:
 	@test -d "$(GAME_ROOT)/7DaysToDieServer_Data/Managed" || { \
 	  echo "install-check: GAME_ROOT not derivable from ASM ($(GAME_ROOT)); pass GAME_ROOT=<install root>" >&2; \
 	  exit 2; }
-	python3 "$(TOOLS)/parity/steam_manifest.py" --verify "$(GAME_ROOT)" $(ARGS)
+	python3 "$(TOOLS)/steam/steam_manifest.py" --verify "$(GAME_ROOT)" $(ARGS)
 
 # Newest dedicated build from Steam PICS + the studied-build pin. ARGS=--check
 # exits 1 when a build newer than the pin exists (cron/CI); ARGS=--fetch pulls it.
 latest:
-	python3 "$(TOOLS)/parity/steam_builds.py" $(ARGS)
+	python3 "$(TOOLS)/steam/steam_builds.py" $(ARGS)
 
 post-update:
 	cd "$(TOOLS)" && ASM="$(ASM)" ./post-update.sh
@@ -152,6 +152,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_shell_cli_usage.py"
 	python3 "$(TOOLS)/tests/test_python_cli_usage.py"
 	python3 "$(TOOLS)/tests/test_cli_args_wired.py"
+	python3 "$(TOOLS)/tests/test_tools_layout.py"
 	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"

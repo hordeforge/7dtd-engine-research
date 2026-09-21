@@ -18,29 +18,28 @@ import atexit
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
+# Paths and file digests live in tools/tooling.py so the tools themselves can
+# import them without depending on this test package.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import tooling
+
+# Re-exported so the gates keep one import surface (`_common.TOOLS`, ...); the
+# shared definitions live in tools/tooling.py.
+REPO = tooling.REPO
+TOOLS = tooling.TOOLS
+BIN = tooling.BIN
+DOCS = tooling.DOCS
+repo_root = tooling.repo_root
+scratch_dir = tooling.scratch_dir
+sha256_file = tooling.sha256_file
+find_asm = tooling.find_asm
+resolve_asm = tooling.resolve_asm
+
 ROOT_MARKERS = ("Makefile", "AGENTS.md")
-
-
-def _repo_root() -> Path:
-    """Nearest ancestor holding every root marker.
-
-    Walking for markers instead of counting parent hops keeps a moved script
-    pointing at the same repo instead of silently resolving one level off.
-    """
-    here = Path(__file__).resolve()
-    for d in here.parents:
-        if all((d / m).is_file() for m in ROOT_MARKERS):
-            return d
-    raise RuntimeError(f"repo root ({', '.join(ROOT_MARKERS)}) not found above {here}")
-
-
-REPO = _repo_root()
-TOOLS = REPO / "tools"
-BIN = TOOLS / "bin"
-DOCS = REPO / "docs"
 
 
 def doc(name: str) -> Path:
@@ -49,21 +48,10 @@ def doc(name: str) -> Path:
     docs/ is grouped by subsystem (docs/network/protocol.md, ...); basenames stay
     unique across the tree, so a gate cites a doc by name and never by folder.
     """
-    hits = sorted(DOCS.rglob(name))
+    hits: list[Path] = sorted(DOCS.rglob(name))
     if len(hits) != 1:
         raise FileNotFoundError(f"{name}: {len(hits)} matches under {DOCS}")
     return hits[0]
-
-
-def scratch_dir() -> Path:
-    """Disk-backed base for temp trees, under the gitignored .scratch/.
-
-    The system temp dir is tmpfs on the dev machines, so probe binaries,
-    fixture trees and regenerated inventories would be charged to RAM.
-    """
-    d = REPO / ".scratch" / "tmp"
-    d.mkdir(parents=True, exist_ok=True)
-    return d
 
 
 # Private scratch dir for ad-hoc probe sources/binaries. A fixed name under a
@@ -78,41 +66,6 @@ def probe_dir() -> Path:
         _PROBE_DIR = tempfile.mkdtemp(prefix="probe-", dir=scratch_dir())
         atexit.register(shutil.rmtree, _PROBE_DIR, True)
     return Path(_PROBE_DIR)
-
-
-def find_asm() -> Path | None:
-    """Return the local dedicated Assembly-CSharp.dll, or None when absent."""
-    candidates: list[Path] = []
-    for env in ("ASM", "SEVENDTD_ASM", "SEVENDTD_DS_DIR"):
-        value = os.environ.get(env)
-        if not value:
-            continue
-        p = Path(value)
-        if p.is_file() and p.name.endswith(".dll"):
-            candidates.append(p)
-        else:
-            candidates.append(p / "7DaysToDieServer_Data/Managed/Assembly-CSharp.dll")
-    home = Path.home()
-    candidates.extend(
-        [
-            home / ".local/share/Steam/steamapps/common/"
-            "7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
-            home / ".steam/steam/steamapps/common/"
-            "7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
-        ]
-    )
-    return next((c for c in candidates if c.is_file()), None)
-
-
-def resolve_asm(explicit: str | None) -> tuple[Path | None, str]:
-    """Resolve the assembly from an explicit CLI arg, else discovery."""
-    if explicit:
-        p = Path(explicit)
-        if p.is_file():
-            return p, str(p)
-        return None, str(p)
-    found = find_asm()
-    return found, (str(found) if found else "auto-discovery")
 
 
 def prereq(tool_names: list[str]) -> tuple[str, bool]:

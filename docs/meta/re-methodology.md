@@ -195,8 +195,8 @@ The dumpers above annotate one build. To see what a game update changed, snapsho
 the whole wire surface to JSON and diff:
 
 ```bash
-tools/parity/fetch_version.sh public v3.0.1     # steamcmd pull + ParitySurface snapshot
-tools/parity/fetch_version.sh latest_experimental exp
+tools/steam/fetch_version.sh public v3.0.1     # steamcmd pull + ParitySurface snapshot
+tools/steam/fetch_version.sh latest_experimental exp
 tools/parity/parity_diff.py parity_v3.0.1.json parity_exp.json   # added/removed/changed packages
 ```
 
@@ -212,15 +212,15 @@ after every update, diff against the pinned baseline, and only re-annotate the
 packages the diff flags. Clone implementation coverage belongs in the clone
 repository, not this stock RE tool.
 
-Before pulling a build, ask Steam which builds exist. `parity/steam_builds.py`
+Before pulling a build, ask Steam which builds exist. `steam/steam_builds.py`
 reads the same facts SteamDB shows (branch build ids + depot 294422 manifest ids)
 out of Steam's own PICS app info, prints the local install's build id from its
 `appmanifest`, and hands the manifest straight to `fetch_version.sh`:
 
 ```bash
-tools/parity/steam_builds.py --check                    # exit 1 if a newer build exists
-tools/parity/steam_builds.py --fetch                    # pull + snapshot the newest public build
-tools/parity/steam_builds.py --print-fetch --branch latest_experimental
+tools/steam/steam_builds.py --check                    # exit 1 if a newer build exists
+tools/steam/steam_builds.py --fetch                    # pull + snapshot the newest public build
+tools/steam/steam_builds.py --print-fetch --branch latest_experimental
 ```
 
 `--record` writes `tools/data/steam_builds.json`: branch, build id, depot
@@ -274,15 +274,15 @@ Full delta map: [changelog-3.2.0.md](../releases/changelog-3.2.0.md) §9 (per-fa
 All three lenses above read managed IL. The shipped `Data/` payload (bundles,
 Addressables, config XML, prefabs) is only visible through Steam's own depot
 manifest, which the client caches at
-`<steam>/depotcache/<depot>_<gid>.manifest` in plaintext. `parity/steam_manifest.py`
+`<steam>/depotcache/<depot>_<gid>.manifest` in plaintext. `steam/steam_manifest.py`
 reads it offline: Steam's per-file size, flags, whole-file SHA-1 and per-chunk
 SHA-1s for all 17,624 files of depot 294422.
 
 ```bash
-tools/parity/steam_manifest.py --history                      # cached builds + Steam build ids
-tools/parity/steam_manifest.py --find Assembly-CSharp         # one entry's size + SHA-1
-tools/parity/steam_manifest.py --verify "$GAME_DIR" --only Managed   # hash local files against Steam
-tools/parity/steam_manifest.py --diff ~/.local/share/Steam/depotcache/294422_<old-gid>.manifest
+tools/steam/steam_manifest.py --history                      # cached builds + Steam build ids
+tools/steam/steam_manifest.py --find Assembly-CSharp         # one entry's size + SHA-1
+tools/steam/steam_manifest.py --verify "$GAME_DIR" --only Managed   # hash local files against Steam
+tools/steam/steam_manifest.py --diff ~/.local/share/Steam/depotcache/294422_<old-gid>.manifest
 ```
 
 `--verify` is the install-integrity check (exit 1 on missing/short/mismatched
@@ -299,7 +299,7 @@ the appmanifest:
 
 ```bash
 make latest ARGS="--check --verify-install Managed"   # studied build + stock managed bytes
-python3 tools/parity/steam_manifest.py --verify "$GAME_DIR" --only Managed
+python3 tools/steam/steam_manifest.py --verify "$GAME_DIR" --only Managed
 ``` For b9 to b10 it reports
 16 changed files and 0 added/removed, which matches the client's own content log
 and is the authoritative content delta: mtime-based windows over the install

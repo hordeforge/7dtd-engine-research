@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Download a specific 7DTD Dedicated Server build via steamcmd and extract its
 # parity surface, for diffing against another version. App 294420 (dedicated).
+# Lives in tools/steam/ with the other build-acquisition tools; the wire-surface
+# extractor it runs (parity/ParitySurface.cs) stays in tools/parity/ with the
+# comparison tools.
 #
 # Usage:
 #   fetch_version.sh <branch|manifestid> [label]
@@ -33,6 +36,7 @@ SCRIPTDIR="$(cd "$(dirname "$0")" && pwd)"
 TOOLS="$(cd "$SCRIPTDIR/.." && pwd)"
 BIN="$TOOLS/bin"
 CECIL="$BIN/Mono.Cecil.dll"
+PARITY_SRC="$TOOLS/parity/ParitySurface.cs"
 PARITY_EXE="$BIN/ParitySurface.exe"
 
 # 1) Resolve an operator-installed SteamCMD. Do not download and execute tools
@@ -60,7 +64,7 @@ if [[ "$BRANCH" =~ ^[0-9]{6,}$ ]]; then
       +download_depot "$APP" "$DEPOT" "$BRANCH" +quit; then
     echo "[parity] steamcmd could not download depot manifest $BRANCH (app $APP depot $DEPOT):" >&2
     echo "  an unpublished or other-app manifest id fails here, and a retired build may be gone." >&2
-    echo "  list published ids with tools/parity/steam_builds.py --json." >&2
+    echo "  list published ids with tools/steam/steam_builds.py --json." >&2
     exit 1
   fi
   # steamcmd drops it under steamapps/content; copy DLL out
@@ -80,7 +84,7 @@ else
       +app_update "$APP" -beta "$BRANCH" validate +quit; then
     echo "[parity] steamcmd could not install branch $BRANCH (app $APP):" >&2
     echo "  a password-gated or misspelled beta branch fails here; check the branch name" >&2
-    echo "  against tools/parity/steam_builds.py output." >&2
+    echo "  against tools/steam/steam_builds.py output." >&2
     exit 1
   fi
 fi
@@ -91,8 +95,8 @@ if [[ -z "$DLL" ]]; then echo "[parity] DLL not found in $INSTALL"; exit 1; fi
 if [[ ! -f "$CECIL" ]]; then
   "$TOOLS/build.sh" --skip-legacy
 fi
-if [[ ! -f "$PARITY_EXE" || "$SCRIPTDIR/ParitySurface.cs" -nt "$PARITY_EXE" ]]; then
-  mcs -nologo -warn:4 -warnaserror -r:"$CECIL" "$SCRIPTDIR/ParitySurface.cs" -out:"$PARITY_EXE"
+if [[ ! -f "$PARITY_EXE" || "$PARITY_SRC" -nt "$PARITY_EXE" ]]; then
+  mcs -nologo -warn:4 -warnaserror -r:"$CECIL" "$PARITY_SRC" -out:"$PARITY_EXE"
 fi
 mkdir -p "$OUT"
 target="$OUT/parity_$LABEL.json"
@@ -103,4 +107,4 @@ python3 -m json.tool "$tmp" >/dev/null
 mv "$tmp" "$target"
 trap - EXIT
 echo "[parity] wrote $target ($(wc -l < "$target") lines)"
-echo "[parity] diff:  python3 $SCRIPTDIR/parity_diff.py <old.json> $OUT/parity_$LABEL.json"
+echo "[parity] diff:  python3 $TOOLS/parity/parity_diff.py <old.json> $OUT/parity_$LABEL.json"

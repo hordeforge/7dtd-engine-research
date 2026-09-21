@@ -24,7 +24,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-TOOL = _common.TOOLS / "parity" / "steam_manifest.py"
+TOOL = _common.TOOLS / "steam" / "steam_manifest.py"
 MAGIC = 0x71F617D0
 
 
