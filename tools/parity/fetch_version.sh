@@ -53,8 +53,16 @@ fi
 mkdir -p "$INSTALL"
 if [[ "$BRANCH" =~ ^[0-9]{6,}$ ]]; then
   # pinned manifest: needs download_depot form
-  "$STEAMCMD_BIN" +login anonymous \
-    +download_depot "$APP" "$DEPOT" "$BRANCH" +quit
+  # An unpublished manifest, or one from another app, makes steamcmd exit
+  # non-zero; without this the script died with steamcmd's raw code (14) instead
+  # of saying what failed. The message names the ids and the likely causes.
+  if ! "$STEAMCMD_BIN" +login anonymous \
+      +download_depot "$APP" "$DEPOT" "$BRANCH" +quit; then
+    echo "[parity] steamcmd could not download depot manifest $BRANCH (app $APP depot $DEPOT):" >&2
+    echo "  an unpublished or other-app manifest id fails here, and a retired build may be gone." >&2
+    echo "  list published ids with tools/parity/steam_builds.py --json." >&2
+    exit 1
+  fi
   # steamcmd drops it under steamapps/content; copy DLL out
   # -print -quit: stop at the first hit; piping a full depot walk into head
   # would SIGPIPE find and pipefail+set -e would abort before the error check.
@@ -68,8 +76,13 @@ if [[ "$BRANCH" =~ ^[0-9]{6,}$ ]]; then
   fi
   cp -f "$SRC" "$INSTALL/Assembly-CSharp.dll"
 else
-  "$STEAMCMD_BIN" +force_install_dir "$INSTALL" +login anonymous \
-    +app_update "$APP" -beta "$BRANCH" validate +quit
+  if ! "$STEAMCMD_BIN" +force_install_dir "$INSTALL" +login anonymous \
+      +app_update "$APP" -beta "$BRANCH" validate +quit; then
+    echo "[parity] steamcmd could not install branch $BRANCH (app $APP):" >&2
+    echo "  a password-gated or misspelled beta branch fails here; check the branch name" >&2
+    echo "  against tools/parity/steam_builds.py output." >&2
+    exit 1
+  fi
 fi
 
 # 3) locate the DLL + extract the parity surface

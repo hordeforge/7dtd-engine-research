@@ -27,6 +27,16 @@ Status terms:
 
 ### 2026-09-20
 
+- Installed Valve's SteamCMD at the operator path the docs use
+  (`~/.cache/zdtd-scratch/steamcmd/steamcmd.sh`) and cross-checked its
+  `app_info_print 294420` against this repo's PICS tool: public build id
+  `24994542` and depot 294422 manifest `1633674551820196085` agree, as does
+  `v3.1.0` = `24436799`. `fetch_version.sh` now resolves that install, and both
+  of its failure modes report instead of leaking steamcmd's code: an unpublished
+  manifest id and a misspelled beta branch each exit 1 with the app/depot ids and
+  where to list published ids. A real depot download was deliberately not run
+  (14 GB); the plumbing is proven up to the point where it would start.
+
 - Committed the drift baselines for the studied build under
   `workspace/outputs/baseline/` (census, `surface/surface-types.md`, methods,
   enums; the wire snapshot stays in `workspace/outputs/parity/`). `drift-check.sh`

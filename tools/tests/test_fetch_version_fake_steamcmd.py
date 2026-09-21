@@ -274,8 +274,19 @@ def main() -> None:
         # 5. a failing steamcmd must abort before extraction
         out_fail = root / "out-fail"
         failed = fetch("v3.1.0", "fakefail", "fail", out_fail, root / "content-fail")
-        assert failed.returncode != 0, failed.stdout
+        assert failed.returncode == 1, (failed.returncode, failed.stdout[-300:])
+        assert "could not install branch v3.1.0" in failed.stderr, failed.stderr
         assert not out_fail.exists() or not list(out_fail.glob("parity_*.json"))
+
+        # The manifest form reports the ids and where to list published ones.
+        failed_manifest = fetch(
+            "999999999", "fakefailmanifest", "fail", root / "out-fail-manifest", root / "c-fail2"
+        )
+        assert failed_manifest.returncode == 1, failed_manifest.returncode
+        assert "could not download depot manifest 999999999" in failed_manifest.stderr, (
+            failed_manifest.stderr
+        )
+        assert "app 294420 depot 294422" in failed_manifest.stderr, failed_manifest.stderr
 
     print(
         "OK: fetch_version.sh manifest + branch downloads, snapshot equality, and "
