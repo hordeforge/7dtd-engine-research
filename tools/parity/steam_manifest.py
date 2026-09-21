@@ -46,6 +46,12 @@ STEAM_ROOTS = (
     Path.home() / ".local/share/Steam/steamapps",
 )
 HASH_CHUNK = 1 << 20
+# Files the running game rewrites from its own settings. A mismatch here is
+# expected on an install that has been launched; the hint explains it rather than
+# hiding it, and `--ignore` excludes it explicitly when the rest matters.
+RUNTIME_WRITTEN = {
+    "platform.cfg": "the dedicated server rewrites this from its platform settings",
+}
 LOG_RE = re.compile(r"BuildID (\d+)\)[^:]*: (\d+) \((\d+)\)")
 
 
@@ -304,6 +310,14 @@ def manifest_for_gid(depot: str, gid: str, roots: tuple[Path, ...] = STEAM_ROOTS
     )
 
 
+def _runtime_hint(name: str) -> str:
+    """A one-line explanation for a file the game is known to rewrite."""
+    for path, why in RUNTIME_WRITTEN.items():
+        if name.endswith(path):
+            return f" (runtime-written: {why}; --ignore {path} to skip it)"
+    return ""
+
+
 def verify(
     manifest: Manifest, root: Path, only: str | None, ignore: tuple[str, ...] = ()
 ) -> tuple[int, int, int, list[str], int]:
@@ -331,11 +345,17 @@ def verify(
             continue
         if local.stat().st_size != entry.size:
             bad += 1
-            problems.append(f"SIZE {entry.name}: {local.stat().st_size} != {entry.size}")
+            problems.append(
+                f"SIZE {entry.name}: {local.stat().st_size} != {entry.size}"
+                + _runtime_hint(entry.name)
+            )
             continue
         if sha1_file(local) != entry.sha1:
             bad += 1
-            problems.append(f"SHA1 {entry.name}: local file differs from the depot manifest")
+            problems.append(
+                f"SHA1 {entry.name}: local file differs from the depot manifest"
+                + _runtime_hint(entry.name)
+            )
             continue
         ok += 1
     return ok, missing, bad, problems, ignored

@@ -8,10 +8,10 @@
 #   BASELINE_DIR=... drift-check.sh
 #   PARITY_BASELINE=... drift-check.sh   # committed wire snapshot (default below)
 #
-# First run with no baseline snapshots writes them. The wire axis is still
-# compared on that first run, against the committed ParitySurface snapshot in
-# workspace/outputs/parity/ ($PARITY_BASELINE), so a fresh checkout gets a real
-# drift verdict instead of "baseline created".
+# Every axis has a committed baseline in workspace/outputs/baseline/ (and the
+# wire axis one in workspace/outputs/parity/), so a fresh checkout gets a real
+# drift verdict on the first run instead of "baseline created". The machine-local
+# BASELINE_DIR takes precedence once it exists.
 # Requires: mono (mcs), Mono.Cecil, the tools built (../build.sh).
 set -uo pipefail
 # sort/comm below compare baseline vs current listings byte-wise; both sides
@@ -28,6 +28,10 @@ TOOLS="$(cd "$here/.." && pwd)"
 BIN="$TOOLS/bin"
 ASM="${1:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll}"
 BASELINE_DIR="${BASELINE_DIR:-$HOME/.cache/zdtd-scratch/drift-baseline}"
+# Committed baselines for the studied build. A fresh checkout has no
+# BASELINE_DIR, so every axis compares against these; the local dir wins as soon
+# as it exists, and is seeded from the current build on the first run.
+COMMITTED_BASELINE="${COMMITTED_BASELINE:-$TOOLS/../workspace/outputs/baseline}"
 # Committed wire snapshot of the studied build. A fresh checkout has no
 # BASELINE_DIR, so this is what makes the wire axis comparable on first run
 # instead of silently creating a baseline and comparing nothing.
@@ -108,68 +112,101 @@ if [[ "$axis_fail" -ne 0 ]]; then
   exit 2
 fi
 
-# Separate the baseline axes from the parity axis: the full baseline is machine
-# state, the parity snapshot is committed.
-base_parity="$BASELINE_DIR/parity.json"
-fresh_baseline=0
-if [[ ! -f "$BASELINE_DIR/surface/surface-types.md" ]]; then
-  cp -r "$cur/." "$BASELINE_DIR/"
-  fresh_baseline=1
-  if [[ -f "$PARITY_BASELINE" ]]; then
-    base_parity="$PARITY_BASELINE"
-    echo "drift: baseline created at $BASELINE_DIR; comparing the wire axis against the committed snapshot"
-  else
-    echo "drift: baseline created at $BASELINE_DIR (no comparison this run)"; exit 0
-  fi
-elif [[ ! -f "$base_parity" && -f "$PARITY_BASELINE" ]]; then
-  base_parity="$PARITY_BASELINE"
-  echo "drift: parity baseline: committed $PARITY_BASELINE"
-fi
+# Per-axis baseline: the machine-local dir wins, then the committed one. An axis
+# with neither is reported as unmeasured instead of silently passing.
+pick_base() { # <relative path> -> path to use, or nothing
+  if [[ -f "$BASELINE_DIR/$1" ]]; then printf '%s\n' "$BASELINE_DIR/$1"
+  elif [[ -f "$COMMITTED_BASELINE/$1" ]]; then printf '%s\n' "$COMMITTED_BASELINE/$1"; fi
+}
+base_census="$(pick_base census.txt)"
+base_types="$(pick_base surface/surface-types.md)"
+base_methods="$(pick_base methods.txt)"
+base_enums="$(pick_base enums.txt)"
+base_parity="$(pick_base parity.json)"
+[[ -n "$base_parity" ]] || base_parity="$PARITY_BASELINE"
+
+echo "drift: baseline local=$BASELINE_DIR"
+[[ -n "$base_census" && "$base_census" == "$COMMITTED_BASELINE"/* ]] && \
+  echo "drift: using the committed baselines in $COMMITTED_BASELINE (no local one yet)"
 
 drift=0
+missing=""
 sec() { echo; echo "== $1 =="; }
-if [[ "$fresh_baseline" -eq 1 ]]; then
-  sec "NetPackage wire (committed baseline)"
-  if [[ -f "$base_parity" && -f "$cur/parity.json" ]]; then
-    python3 "$here/parity_diff.py" "$base_parity" "$cur/parity.json" || drift=1
-  else
-    echo "drift: error: parity comparison unavailable" >&2; drift=2
-  fi
-  echo
-  if [[ "$drift" -eq 0 ]]; then echo "drift: NONE (build matches the committed wire baseline)"; else
-    echo "drift: DETECTED against the committed wire baseline. Update it after review:"
-    echo "  cp $cur/parity.json $PARITY_BASELINE"; fi
-  exit "$drift"
+# Both the axis baselines and the committed wire snapshot count as committed.
+note_committed() {
+  case "$1" in
+    "$COMMITTED_BASELINE"/*|"$PARITY_BASELINE") echo "  (committed baseline)" ;;
+  esac
+  return 0
+}
+
+if [[ -n "$base_census" ]]; then
+  sec "census"
+  note_committed "$base_census"
+  diff "$base_census" "$cur/census.txt" && echo "  (unchanged)" || drift=1
+else
+  missing="$missing census"
 fi
 
-sec "census"
-diff "$BASELINE_DIR/census.txt" "$cur/census.txt" && echo "  (unchanged)" || drift=1
-sec "types (added/removed)"
-tlist() { awk -F'|' 'NR>3{gsub(/ /,"",$2);print $2}' "$1/surface/surface-types.md" | grep -vE '\$|<>|__' | sort -u; }
-added=$(comm -13 <(tlist "$BASELINE_DIR") <(tlist "$cur"))
-removed=$(comm -23 <(tlist "$BASELINE_DIR") <(tlist "$cur"))
-[[ -n "$added" ]]   && { echo "  ADDED:";   echo "$added"   | awk '{print "    +" $0}'; drift=1; } || echo "  no new types"
-[[ -n "$removed" ]] && { echo "  REMOVED:"; echo "$removed" | awk '{print "    -" $0}'; drift=1; }
-if [[ -f "$BASELINE_DIR/methods.txt" && -f "$cur/methods.txt" ]]; then
-  sec "methods (added/removed on existing+new types)"
-  ma=$(comm -13 <(sort -u "$BASELINE_DIR/methods.txt") <(sort -u "$cur/methods.txt") | grep -cvE '\$|<>|__|b__|g__' || true)
-  mr=$(comm -23 <(sort -u "$BASELINE_DIR/methods.txt") <(sort -u "$cur/methods.txt") | grep -cvE '\$|<>|__|b__|g__' || true)
-  echo "  +$ma methods / -$mr methods"; [[ "$ma" -gt 0 || "$mr" -gt 0 ]] && drift=1
+if [[ -n "$base_types" ]]; then
+  sec "types (added/removed)"
+  note_committed "$base_types"
+  tlist() { awk -F'|' 'NR>3{gsub(/ /,"",$2);print $2}' "$1" | grep -vE '\$|<>|__' | sort -u; }
+  added=$(comm -13 <(tlist "$base_types") <(tlist "$cur/surface/surface-types.md"))
+  removed=$(comm -23 <(tlist "$base_types") <(tlist "$cur/surface/surface-types.md"))
+  [[ -n "$added" ]]   && { echo "  ADDED:";   echo "$added"   | awk '{print "    +" $0}'; drift=1; } || echo "  no new types"
+  [[ -n "$removed" ]] && { echo "  REMOVED:"; echo "$removed" | awk '{print "    -" $0}'; drift=1; }
+else
+  missing="$missing types"
 fi
-if [[ -f "$BASELINE_DIR/enums.txt" && -f "$cur/enums.txt" ]]; then
+
+if [[ -n "$base_methods" ]]; then
+  sec "methods (added/removed on existing+new types)"
+  note_committed "$base_methods"
+  ma=$(comm -13 <(sort -u "$base_methods") <(sort -u "$cur/methods.txt") | grep -cvE '\$|<>|__|b__|g__' || true)
+  mr=$(comm -23 <(sort -u "$base_methods") <(sort -u "$cur/methods.txt") | grep -cvE '\$|<>|__|b__|g__' || true)
+  echo "  +$ma methods / -$mr methods"; [[ "$ma" -gt 0 || "$mr" -gt 0 ]] && drift=1
+else
+  missing="$missing methods"
+fi
+
+if [[ -n "$base_enums" ]]; then
   sec "enum members (added/removed)"
-  ea=$(comm -13 <(sort -u "$BASELINE_DIR/enums.txt") <(sort -u "$cur/enums.txt") | grep -vE '_0000')
-  er=$(comm -23 <(sort -u "$BASELINE_DIR/enums.txt") <(sort -u "$cur/enums.txt") | grep -vE '_0000')
+  note_committed "$base_enums"
+  ea=$(comm -13 <(sort -u "$base_enums") <(sort -u "$cur/enums.txt") | grep -vE '_0000')
+  er=$(comm -23 <(sort -u "$base_enums") <(sort -u "$cur/enums.txt") | grep -vE '_0000')
   [[ -n "$ea" ]] && { echo "  ADDED:";   echo "$ea" | awk '{print "    +" $0}'; drift=1; }
   [[ -n "$er" ]] && { echo "  REMOVED:"; echo "$er" | awk '{print "    -" $0}'; drift=1; }
   [[ -z "$ea" && -z "$er" ]] && echo "  (unchanged)"
+else
+  missing="$missing enums"
 fi
+
 if [[ -f "$base_parity" && -f "$cur/parity.json" ]]; then
   sec "NetPackage wire (added/removed/changed)"
+  note_committed "$base_parity"
   python3 "$here/parity_diff.py" "$base_parity" "$cur/parity.json" || drift=1
+else
+  missing="$missing wire"
 fi
+
+if [[ -n "$missing" ]]; then
+  echo
+  echo "drift: no baseline for:$missing (neither $BASELINE_DIR nor $COMMITTED_BASELINE)" >&2
+  if [[ ! -f "$BASELINE_DIR/surface/surface-types.md" ]]; then
+    cp -r "$cur/." "$BASELINE_DIR/"
+    echo "drift: seeded the local baseline at $BASELINE_DIR; those axes compare from the next run" >&2
+  fi
+  [[ "$drift" -eq 0 ]] && drift=2
+fi
+
 echo
-if [[ "$drift" -eq 0 ]]; then echo "drift: NONE (build matches baseline)"; else
-  echo "drift: DETECTED. Update baseline after review:  cp -r $cur/. $BASELINE_DIR/"
-  echo "Then re-verify affected narratives (see docs/meta/re-methodology.md §5b for the workflow)."; fi
+if [[ "$drift" -eq 0 ]]; then
+  echo "drift: NONE (build matches baseline)"
+else
+  echo "drift: DETECTED. After review, refresh the baseline that flagged it:"
+  echo "  local:     cp -r $cur/. $BASELINE_DIR/"
+  echo "  committed: cp <the current file> $COMMITTED_BASELINE/<axis>   # commit with the pin edits"
+  echo "Then re-verify affected narratives (see docs/meta/re-methodology.md §5b)."
+fi
 exit $drift

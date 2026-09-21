@@ -27,6 +27,18 @@ Status terms:
 
 ### 2026-09-20
 
+- Committed the drift baselines for the studied build under
+  `workspace/outputs/baseline/` (census, `surface/surface-types.md`, methods,
+  enums; the wire snapshot stays in `workspace/outputs/parity/`). `drift-check.sh`
+  now picks a baseline per axis, machine-local first then committed, so a fresh
+  checkout reports all five axes instead of "baseline created"; an axis with
+  neither is reported and seeds the local dir rather than passing. `make drift`
+  on a fresh dir reports NONE for every axis here, which also proves the
+  committed baselines are not stale.
+- A known runtime-written file now explains its own mismatch:
+  `SIZE platform.cfg: 67 != 71 (runtime-written: the dedicated server rewrites
+  this from its platform settings; --ignore platform.cfg to skip it)`.
+
 - `steam_manifest.py --manifest` and `--diff` accept a cached manifest gid or a
   Steam build id as well as a path (resolved through the cache plus the pin
   history and client log), so a build no longer has to be pasted as a full

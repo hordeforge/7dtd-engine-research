@@ -202,10 +202,12 @@ tools/parity/parity_diff.py parity_v3.0.1.json parity_exp.json   # added/removed
 
 `ParitySurface.cs` records each package's read/write `BinaryReader`/`BinaryWriter`
 call sequence, so a changed wire layout shows up as a changed call string even
-when the field names are stable. On a fresh checkout `drift-check.sh` compares
-that axis against the committed `workspace/outputs/parity/parity_b10.json`
-instead of only writing a baseline, so the first `make drift` reports a real
-verdict; the other axes still need their machine-local baseline. This is the fastest drift check: re-snapshot
+when the field names are stable. On a fresh checkout `drift-check.sh` compares every
+axis against committed baselines (`workspace/outputs/baseline/` for census,
+types, methods and enums; `workspace/outputs/parity/parity_b10.json` for wire),
+so the first `make drift` reports a real verdict; the machine-local
+`BASELINE_DIR` wins once it exists. Refresh the committed baselines with the
+pins after a reviewed update, and commit them together. This is the fastest drift check: re-snapshot
 after every update, diff against the pinned baseline, and only re-annotate the
 packages the diff flags. Clone implementation coverage belongs in the clone
 repository, not this stock RE tool.

@@ -1,0 +1,9 @@
+mono_thread_internal_set_priority: unknown policy 5
+TopLevelTypes                = 4426
+MethodsWithBody (top-level)  = 44277
+AllTypes (incl nested)       = 7451
+AllMethodsWithBody           = 53418
+NetPackage* (top-level)      = 195
+NetPackage* (incl nested)    = 200
+WorldState.SaveLoad(Stream)  = 926
+GameManager.gmUpdate IL      = 631

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""drift-check.sh must compare the wire axis against the committed snapshot.
+"""drift-check.sh must compare every axis against the committed baselines.
 
 A fresh checkout has no `BASELINE_DIR`, and the old behaviour was to write one
 and compare nothing, so the first `make drift` after cloning said "baseline
-created" and stopped. The wire axis is now compared against the committed
-`workspace/outputs/parity/parity_b10.json`, and this test pins all three
-behaviours: fresh baseline + committed snapshot (compared), a perturbed
-snapshot (drift, exit 1), and no snapshot at all (baseline created, exit 0).
+created" and stopped. Every axis (census, types, methods, enums, wire) now
+compares against `workspace/outputs/baseline/` plus the committed wire snapshot,
+and this test pins the behaviours: a fresh baseline dir still reports every axis
+against the committed files (NONE for the studied build, which also proves the
+committed baselines are not stale), a perturbed snapshot is detected with exit
+1, and an axis with no baseline anywhere is reported rather than passed.
 
 Needs mono/mcs, the built tools, the live DLL. SKIPs otherwise.
 
@@ -59,12 +61,18 @@ def main() -> None:
 
         fresh = run(asm, root / "cb1", COMMITTED)
         assert fresh.returncode == 0, (fresh.stdout[-400:], fresh.stderr[-400:])
-        assert "comparing the wire axis against the committed snapshot" in fresh.stdout, (
-            fresh.stdout
-        )
-        assert "drift: NONE (build matches the committed wire baseline)" in fresh.stdout, (
-            fresh.stdout
-        )
+        assert "using the committed baseline" in fresh.stdout, fresh.stdout
+        for axis in (
+            "census",
+            "types (added/removed)",
+            "methods (added/removed",
+            "enum members",
+            "NetPackage wire",
+        ):
+            assert axis in fresh.stdout, (axis, fresh.stdout)
+        assert fresh.stdout.count("(committed baseline)") == 5, fresh.stdout
+        assert "drift: NONE (build matches baseline)" in fresh.stdout, fresh.stdout
+        assert not (root / "cb1" / "surface").exists(), "clean comparison seeded a local baseline"
 
         perturbed = json.loads(COMMITTED.read_text(encoding="utf-8"))
         package = sorted(perturbed["packages"])[0]
@@ -73,20 +81,30 @@ def main() -> None:
         perturbed_path.write_text(json.dumps(perturbed), encoding="utf-8")
         drifted = run(asm, root / "cb2", perturbed_path)
         assert drifted.returncode == 1, (drifted.stdout[-400:], drifted.stderr[-400:])
-        assert "drift: DETECTED against the committed wire baseline" in drifted.stdout, (
-            drifted.stdout
-        )
+        assert "drift: DETECTED" in drifted.stdout, drifted.stdout
         assert package in drifted.stdout, drifted.stdout
-        # The update advice names the baseline actually in force.
-        assert str(perturbed_path) in drifted.stdout, drifted.stdout
+        assert "refresh the baseline that flagged it" in drifted.stdout, drifted.stdout
 
-        absent = run(asm, root / "cb3", root / "absent.json")
-        assert absent.returncode == 0, (absent.stdout[-400:], absent.stderr[-400:])
-        assert "no comparison this run" in absent.stdout, absent.stdout
+        # An axis with no baseline anywhere is reported, not passed.
+        empty_committed = root / "empty-committed"
+        empty_committed.mkdir()
+        env = os.environ | {
+            "BASELINE_DIR": str(root / "cb3"),
+            "PARITY_BASELINE": str(root / "absent.json"),
+            "COMMITTED_BASELINE": str(empty_committed),
+        }
+        unmeasured = subprocess.run(
+            [str(DRIFT), str(asm)], env=env, text=True, capture_output=True, check=False
+        )
+        assert unmeasured.returncode == 2, (unmeasured.stdout[-400:], unmeasured.stderr[-400:])
+        assert "no baseline for:" in unmeasured.stderr, unmeasured.stderr
+        assert (root / "cb3" / "surface" / "surface-types.md").is_file(), (
+            "local baseline not seeded"
+        )
 
     print(
-        "OK: drift-check compares the committed wire baseline on a fresh checkout, "
-        "flags a perturbed one, and stays quiet with none"
+        "OK: drift-check compares every axis against the committed baselines on a fresh "
+        "checkout, flags a perturbed one, and reports an axis with no baseline"
     )
 
 
