@@ -4000,8 +4000,61 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 | `BuffEntityUINotification` | Object | get_Units, get_DisplayMode, get_CurrentValue |
 | `EntityMeshCache` | MonoBehaviour | TryGetMeshData, EqualsCollection, InitData |
 
+## Addendum (2026-09-22): AI task-to-class census, installed V3.2.0 data
+
+Measured against the installed `Data/Config/entityclasses.xml`
+(sha256 `0c95e733…912db0b0`, the same bytes already pinned in
+[PROVENANCE](../PROVENANCE.md) for zdtd). Census of every `AITask` and
+numbered `AITask-N` list in the file, resolved per class (a class counts a
+name once, union over both forms). 23 classes carry an AITask list; 149
+task-name occurrences across 12 distinct names:
+
+| Task | Classes | zdtd |
+|---|---|---|
+| `ApproachAndAttackTarget` | 21 | mapped (approach_attack) |
+| `Look` | 21 | mapped (look) |
+| `Wander` | 21 | mapped (wander) |
+| `ApproachSpot` | 20 | mapped (approach_spot) |
+| `BreakBlock` | 20 | mapped (break_block) |
+| `Territorial` | 12 | mapped (territorial) |
+| `ApproachDistraction` | 10 | mapped (approach_distraction) |
+| `DestroyArea` | 10 | mapped (destroy_area) |
+| `RunawayWhenHurt` | 5 | mapped (runaway) |
+| `RangedAttackTarget` | 5 | **unmapped** |
+| `RunawayFromEntity` | 2 | mapped (runaway) |
+| `Leap` | 2 | **unmapped** |
+
+The two unmapped tasks are real, referenced entries, not dead names. Full
+`RangedAttackTarget` parameter blocks (the acid-spitter zombies):
+
+- `zombieRancher`: `itemType=1;cooldown=6;duration=7;minRange=4;maxRange=27`
+- `zombieChuck`: `startAnimType=2;itemType=1;cooldown=4;duration=5;minRange=5;maxRange=43;releaseDelay=.41;sndStart=chuckwarning;sndRelease=chuckrelease`
+- `zombieFatCop`: `itemType=1;cooldown=4;duration=5` (minRange/maxRange at defaults)
+- `zombieMutated`: `itemType=1;cooldown=4;duration=3;minRange=1;maxRange=6;unreachableRange=18`
+- `zombieMutatedRadiated`: `itemType=1;cooldown=4;duration=3;minRange=1;maxRange=14;unreachableRange=20`
+
+`Leap` sits first in `zombieSpider`'s pipe `AITask` (the pounce) and as
+`AITask-1` on `animalMountainLion` with `data="legs=4"` (the lion pounce).
+
+Field contract matches `il/full-v3.2.0/_global/EAIRangedAttackTarget.il.txt`:
+`SetData` IL=64 reads `itemType`, `startAnimType`, `releaseDelay`, `cooldown`,
+`duration`, `minRange`, `maxRange`, `unreachableRange`, plus `sndStart` /
+`sndRelease`; `Update` IL=107 ends in `UseHoldingItem(itemActionType, false)`.
+The cop-style spit is `ItemActionVomit`, base `ItemActionLauncher`
+(`il/full-v3.2.0/_global/ItemActionVomit.il.txt`): `GetActionEffectsValues`
+IL=99 resolves the held ammo's `ItemActionProjectile` and fires a
+`ProjectileMoveScript` **GameObject** exactly like the player launcher
+([items.md §4](../gameplay/items.md) — projectile, not an entity), so the
+spit is a client GameObject and **how a dedicated server delivers the ranged
+attack's damage is the open RE slice** before zdtd can implement these tasks
+without fake FX. `EAILeap.CanExecute` IL=136 / `Start` IL=19 behavior is
+documented above; zdtd's `src/assets/entities.zig` `taskNameToId` drops
+`Leap` and `RangedAttackTarget`, so all seven classes currently play as
+pure melee.
+
 ## Changelog
 
+- **2026-09-22:** AI task-to-class census from installed V3.2.0 `entityclasses.xml` (sha256 `0c95e733…912db0b0`): 12 distinct task names over 23 classes; `RangedAttackTarget` on five acid-spitter zombies and `Leap` on `zombieSpider` / `animalMountainLion` are the two zdtd-unmapped entries. `ItemActionVomit` (base `ItemActionLauncher`) fires a `ProjectileMoveScript` GameObject, so dedi damage delivery is the recorded open slice.
 - **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `EAIRunawayFromEntity.FindEnemy` 166 -> 136 (exact). Prior values were the V3.1.0 b14 measurement.
 - **2026-08-28:** V3.2.0: EntityFlags.Timid=32 added; EAIRunawayFromEntity reworked to flag-based threat (flags/safeFlags, dangerDistance, entityList; class-list + minSneakDistance removed; FindEnemy IL=136).
 - **2026-08-11:** Vulture/flying tail IL re-verified: FindTarget IL=69, IsCourseTraversable IL=102, StartHome IL=10, AdjustWaypoint IL=46, EntityFlying.MoveEntityHeaded IL=135 / IsAirBorne IL=2, EAISetNearestCorpseAsTarget.CanExecute IL=110, EntityAlive.AddOwnedEntity(OwnedEntityData) IL=35, AddPart/AddParticle IL=17 (exact).
