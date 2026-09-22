@@ -4027,9 +4027,9 @@ task-name occurrences across 12 distinct names:
 | `RunawayWhenHurt` | 5 | mapped (runaway) |
 | `RangedAttackTarget` | 5 | **unmapped** |
 | `RunawayFromEntity` | 2 | mapped (runaway) |
-| `Leap` | 2 | **unmapped** |
+| `Leap` | 2 | mapped (leap, 2026-09-22) |
 
-The two unmapped tasks are real, referenced entries, not dead names. Full
+The one unmapped task is a real, referenced entry, not a dead name. Full
 `RangedAttackTarget` parameter blocks (the acid-spitter zombies):
 
 - `zombieRancher`: `itemType=1;cooldown=6;duration=7;minRange=4;maxRange=27`
@@ -4084,15 +4084,17 @@ damage itself, in five IL-pinned steps:
 So zdtd's implementation path is server-side projectile flight plus its
 existing AI damage choke and items.xml triggered-effect runner; no client
 damage claim is involved (`isEntityRemote` blocks the client leg).
-`EAILeap.CanExecute` IL=136 / `Start` IL=19 behavior is
-documented above; zdtd's `src/assets/entities.zig` `taskNameToId` drops
-`Leap` and `RangedAttackTarget`, so all seven classes currently play as
-pure melee.
+`EAILeap.CanExecute` IL=136 / `Start` IL=19 / `Continue` IL=47 behavior is
+documented above; zdtd ships `Leap` (2026-09-22, `taskNameToId` maps it and
+the task runs behind the parsed-list, window, `leapV.y` and corridor-ray
+gates), and only `RangedAttackTarget` remains unmapped, so the five
+acid-spitter classes still play as pure melee.
 
 ## Changelog
 
+- **2026-09-22:** zdtd ships `EAILeap`: the census table's `Leap` row moves to mapped. The task runs behind the stock gates (parsed-list bit, `[2.8, JumpMaxDistance]` window, `leapV.y` bound, corridor physics ray) with flight tunables as Rules fields; `RangedAttackTarget` is the one unmapped row left.
 - **2026-09-22:** Ranged-attack delivery contract closed: `ProjectileMoveScript::checkCollision` gates damage on `!firingEntity.isEntityRemote`, so the dedicated server applies the vomit hit itself (`ItemActionAttack::Hit`, events 96/97, ammo triggered rows) and clients only play the replicated anim action (`NetPackageEntityAnimationData`) plus their local visual projectile. No client damage claim exists for the spit.
-- **2026-09-22:** AI task-to-class census from installed V3.2.0 `entityclasses.xml` (sha256 `0c95e733…912db0b0`): 12 distinct task names over 23 classes; `RangedAttackTarget` on five acid-spitter zombies and `Leap` on `zombieSpider` / `animalMountainLion` are the two zdtd-unmapped entries. `ItemActionVomit` (base `ItemActionLauncher`) fires a `ProjectileMoveScript` GameObject.
+- **2026-09-22:** AI task-to-class census from installed V3.2.0 `entityclasses.xml` (sha256 `0c95e733…912db0b0`): 12 distinct task names over 23 classes; `RangedAttackTarget` on five acid-spitter zombies and `Leap` on `zombieSpider` / `animalMountainLion` were the two zdtd-unmapped entries (Leap shipped the same day). `ItemActionVomit` (base `ItemActionLauncher`) fires a `ProjectileMoveScript` GameObject.
 - **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `EAIRunawayFromEntity.FindEnemy` 166 -> 136 (exact). Prior values were the V3.1.0 b14 measurement.
 - **2026-08-28:** V3.2.0: EntityFlags.Timid=32 added; EAIRunawayFromEntity reworked to flag-based threat (flags/safeFlags, dangerDistance, entityList; class-list + minSneakDistance removed; FindEnemy IL=136).
 - **2026-08-11:** Vulture/flying tail IL re-verified: FindTarget IL=69, IsCourseTraversable IL=102, StartHome IL=10, AdjustWaypoint IL=46, EntityFlying.MoveEntityHeaded IL=135 / IsAirBorne IL=2, EAISetNearestCorpseAsTarget.CanExecute IL=110, EntityAlive.AddOwnedEntity(OwnedEntityData) IL=35, AddPart/AddParticle IL=17 (exact).
