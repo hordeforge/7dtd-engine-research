@@ -64,6 +64,26 @@ def main() -> None:
             assert step in dry.stdout, (step, dry.stdout)
         assert not tag_exists("v9.9.9"), "a dry run created a tag"
 
+        # A dry run must not consult gh at all: CI has gh installed but
+        # unauthenticated, and a failing stub earlier on PATH proves the plan is
+        # printed without asking it anything.
+        stub_dir = Path(tmp) / "bin"
+        stub_dir.mkdir()
+        stub = stub_dir / "gh"
+        stub.write_text("#!/usr/bin/env bash\nexit 1\n", encoding="utf-8")
+        stub.chmod(0o755)
+        env = os.environ | {"PATH": f"{stub_dir}:{os.environ['PATH']}"}
+        stubbed = subprocess.run(
+            [str(RELEASE), "v9.9.8", "--notes", str(notes), "--dry-run"],
+            text=True,
+            capture_output=True,
+            check=False,
+            env=env,
+        )
+        assert stubbed.returncode == 0, (stubbed.stdout, stubbed.stderr)
+        assert "gh release create v9.9.8" in stubbed.stdout, stubbed.stdout
+        assert not tag_exists("v9.9.8"), "a dry run with a stub gh created a tag"
+
     print("OK: release.sh refuses bad input and existing tags, and its dry run writes nothing")
 
 

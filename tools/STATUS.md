@@ -32,8 +32,9 @@ Status terms:
   locally or on origin, a branch behind `origin/main`, an unauthenticated `gh`,
   and a missing notes file; runs `make lint` and `make test-docs` before tagging;
   then pushes `main`, creates the annotated tag, pushes it and creates the GitHub
-  release. `--dry-run` prints the plan and writes nothing, and the notes file is
-  required (reviewed, not generated). Gated by `tests/test_release_script.py`.
+  release. `--dry-run` prints the plan and writes nothing, and does not consult
+  `gh` at all (CI has it installed but unauthenticated), so the plan is printable
+  anywhere; the notes file is required (reviewed, not generated). Gated by `tests/test_release_script.py`.
 
 - Restructured the tool tree and the shared code. `tools/steam/` now holds build
   acquisition and verification (`steam_builds.py`, `steam_manifest.py`,

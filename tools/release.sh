@@ -47,8 +47,14 @@ git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null && die "tag $VERSION a
 if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
   die "tag $VERSION already exists on origin"
 fi
-command -v gh >/dev/null 2>&1 || die "gh not on PATH (needed for the GitHub release)"
-gh auth status >/dev/null 2>&1 || die "gh is not authenticated"
+# gh is only needed to publish, so a dry run must not consult it: CI has gh
+# installed but unauthenticated, and the plan is still worth printing there.
+if [[ "$DRY" -eq 0 ]]; then
+  command -v gh >/dev/null 2>&1 || die "gh not on PATH (needed for the GitHub release)"
+  gh auth status >/dev/null 2>&1 || die "gh is not authenticated"
+else
+  command -v gh >/dev/null 2>&1 || echo "release: note: gh not on PATH (needed for the real run)"
+fi
 
 echo "release: $VERSION from $(git rev-parse --short HEAD), notes $NOTES"
 if [[ "$DRY" -eq 0 ]]; then
