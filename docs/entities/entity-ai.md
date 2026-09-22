@@ -4090,7 +4090,62 @@ the task runs behind the parsed-list, window, `leapV.y` and corridor-ray
 gates), and only `RangedAttackTarget` remains unmapped, so the five
 acid-spitter classes still play as pure melee.
 
+## Addendum (2026-09-22): Animator.StringToHash is CRC-32, and the server anim flush
+
+**The parameter hash (pinned live).** `AnimParamData.hash` carries
+`UnityEngine.Animator::StringToHash(name)` (`AssignAnimatorHash`,
+AvatarController StaticInit: `attackHash = StringToHash("Attack")`,
+`attackTriggerHash = StringToHash("AttackTrigger")`,
+`attackBlendHash = StringToHash("AttackBlend")`). The managed side is an
+internalcall (`UnityEngine.AnimationModule.dll`:
+`.method public hidebysig static int32 StringToHash(string) cil managed
+internalcall`), so the algorithm lives in the engine binary. RE chain on the
+installed stock dedi (`UnityPlayer.so`, read-only):
+
+1. The icall name string `UnityEngine.Animator::StringToHash` sits in
+   `.rodata`; a `gdb` run of `7DaysToDieServer.x86_64` with a conditional
+   breakpoint on `mono_add_internal_call` captured the registered function
+   (runtime base `+0x74faa0` from the ASLR run).
+2. Disassembly: the wrapper (`+0x74faa0`) marshals the mono string, calls the
+   core at `+0xed94f0`, which seeds `-1`, calls the byte/UTF-16 leaf loops at
+   `+0xc26c90` / `+0xc26c60`, and complements the result (`not %ebx`).
+   Per byte: `h = (h >> 8) ^ table[(h ^ byte) & 0xFF]` with table base
+   `+0x1dedaf0` (BSS, built at load by the SIMD generator at `+0xc268b0`).
+3. A second gdb run dumped the built table: rows 0-7 match the standard
+   reflected CRC-32 (IEEE, poly `0xEDB88320`) table exactly, and evaluating
+   the captured leaf over the UTF-16 bytes of `"Attack"` returned
+   **`0x406c280d`**, which equals `zlib.crc32("Attack")`.
+
+So `StringToHash(name) == zlib.crc32(name bytes)` for ASCII names, and a
+wrong hash is a silent client no-op (animator parameter lookup by hash), so
+zdtd pins the constants through that function (`animatorStringHash`).
+
+**The flush chain.** `AvatarZombieController::StartAction(animType)` (IL=22):
+`animType < 3000` calls `StartAnimationAttack()`; `>= 3000` writes
+`_setInt(attackHash, animType)` + `_setTrigger(attackTriggerHash)`.
+`StartAnimationAttack` (IL=110) writes `_setInt(attackHash, variant)` (limb /
+walk-type / door-pick derived), `_setFloat(attackBlendHash, rand)`, and
+`_setTrigger(attackTriggerHash)`; the melee task reaches it through
+`EntityAlive::StartAnimAction` (only local, `!isEntityRemote` entities
+qualify). `AvatarController::FixedUpdate` (IL=84 call at IL_00FA) calls
+`updateNetworkAnimData` (IL=83): for a server-local entity every changed
+parameter list becomes `NetPackageEntityAnimationData::Setup(entityId,
+list)` and is sent with `ConnectionManager::SendPackage(..., entityId,
+entityId, ..., 192)`, i.e. routed to the players tracking that entity;
+remote entities instead drain queued lists into their local animator.
+`NetPackageEntityAnimationData` has no `get_ReliableDelivery` override
+(default Reliable) and its client `ProcessPackage` (IL=64) applies
+`AvatarController::SetAnimParameters` (the C2S direction is the same package,
+which zdtd already relays).
+
+Zdtd ships the landed-strike flush with base variant 0 and blend 0.5 (the
+limb-derived variant and random blend are cosmetic client choices; a dedi
+zombie carries no per-limb body damage) and only for zombie avatars (the
+`AvatarAnimalController` attack params are not RE'd).
+
 ## Changelog
+
+- **2026-09-22:** `Animator.StringToHash` pinned as reflected CRC-32 by a live stock-dedi gdb capture (registered icall function + built table + `"Attack" = 0x406c280d = zlib.crc32`), and the server anim-flush chain recorded end to end: `StartAnimAction` / `StartAction` param writes, the `FixedUpdate` -> `updateNetworkAnimData` -> `NetPackageEntityAnimationData` routing, and the default-Reliable delivery with the C2S relay as the same package.
 
 - **2026-09-22:** zdtd ships `EAILeap`: the census table's `Leap` row moves to mapped. The task runs behind the stock gates (parsed-list bit, `[2.8, JumpMaxDistance]` window, `leapV.y` bound, corridor physics ray) with flight tunables as Rules fields; `RangedAttackTarget` is the one unmapped row left.
 - **2026-09-22:** Ranged-attack delivery contract closed: `ProjectileMoveScript::checkCollision` gates damage on `!firingEntity.isEntityRemote`, so the dedicated server applies the vomit hit itself (`ItemActionAttack::Hit`, events 96/97, ammo triggered rows) and clients only play the replicated anim action (`NetPackageEntityAnimationData`) plus their local visual projectile. No client damage claim exists for the spit.
