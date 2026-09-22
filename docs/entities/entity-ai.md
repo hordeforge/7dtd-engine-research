@@ -1895,7 +1895,12 @@ Horizontal `leapDist` must be in **[2.8, jumpMaxDistance]**. Physics ray from
 pos **y+1.5** along leap for `leapDist-0.5` (layer mask) must be clear.
 
 **`EAILeap.Start` (IL=19):** `abortTime = 5`; `moveHelper.Stop()`; `leapYaw` from
-Atan2 xz * rad2deg. **`Update`:** `abortTime -= 0.05`.
+Atan2 xz * rad2deg. **`Continue` (IL=47):** false while stunned or `abortTime`
+runs out; `SeekYaw(leapYaw, 0, 10)` until `|DeltaAngle(rotation.y, leapYaw)| < 1`,
+then `EntityMoveHelper.StartJump(false, leapDist, leapV.y)` - the leap drives
+the shared jump motion with the path gap's horizontal distance and vertical
+component, so zdtd needs one jump primitive, not a bespoke flight.
+**`Update`:** `abortTime -= 0.05`.
 
 **`EntityMoveHelper.Stop` (IL=7):** `StopMove` + `navigator.clearPath`.
 `StopMove`: clear active; if not (jumping and not swimming) zero forward and
@@ -4041,20 +4046,53 @@ Field contract matches `il/full-v3.2.0/_global/EAIRangedAttackTarget.il.txt`:
 `duration`, `minRange`, `maxRange`, `unreachableRange`, plus `sndStart` /
 `sndRelease`; `Update` IL=107 ends in `UseHoldingItem(itemActionType, false)`.
 The cop-style spit is `ItemActionVomit`, base `ItemActionLauncher`
-(`il/full-v3.2.0/_global/ItemActionVomit.il.txt`): `GetActionEffectsValues`
-IL=99 resolves the held ammo's `ItemActionProjectile` and fires a
-`ProjectileMoveScript` **GameObject** exactly like the player launcher
-([items.md §4](../gameplay/items.md) — projectile, not an entity), so the
-spit is a client GameObject and **how a dedicated server delivers the ranged
-attack's damage is the open RE slice** before zdtd can implement these tasks
-without fake FX. `EAILeap.CanExecute` IL=136 / `Start` IL=19 behavior is
+(`il/full-v3.2.0/_global/ItemActionVomit.il.txt`).
+
+**Delivery contract (closed 2026-09-22):** a dedicated server delivers the
+damage itself, in five IL-pinned steps:
+
+1. `ItemActionVomit.ExecuteAction` IL=129 telegraphs (`warningTime` gate,
+   warning sound, `set_Raging(true)`, `StartAnimAction(animType + 3000)`),
+   then defers to `ItemActionRanged::ExecuteAction` per burst.
+2. `ItemActionVomit::ItemActionEffects` IL=84 resolves the ammo's
+   `ItemActionProjectile` and calls `instantiateProjectile` +
+   `ProjectileMoveScript::Fire` (a GameObject, not an entity; see
+   [items.md §4](../gameplay/items.md)), aimed at
+   `EntityAlive.getChestPosition(target)` when the target is in front
+   (`GetActionEffectsValues` IL=99).
+3. `ProjectileMoveScript::checkCollision` gates the whole hit path on
+   `firingEntity != null && !firingEntity.isEntityRemote`
+   (`il/full-v3.2.0/_global/ProjectileMoveScript.il.txt` IL_0175-0190): an AI
+   entity is local on the server, so the server processes the hit; the same
+   script running on a client for a remote zombie computes no damage. The
+   server also fires `ItemClass::FireEvent(96)` (onProjectilePreImpact) first.
+4. On hit the server computes damage (`GetDamageEntity` lerped with
+   `strainPercent`, then `EntityPlayerDamagePercent` /
+   `RangedDamagePercent` scale) and applies it through
+   `ItemActionAttack::Hit` (same file, IL_0316-03A6) with the ammo item,
+   crit chance and dismember inputs, then `EntityAlive::FireEvent(97)` plus
+   `ItemClass::FireEvent(97)` (onProjectileImpact) on the ammo, and the
+   optional explosion particle (`ExplosionData.ParticleIndex > 0`).
+5. Replication rides the existing surfaces: the HP result reaches clients as
+   `NetPackageEntityStatChanged`, and the anim action replicates through
+   `NetPackageEntityAnimationData` queued by the local `AvatarController`
+   (`AvatarController.il.txt` IL_0087-00EE Setup calls; `StartAnimAction`
+   sets `bPlayerStatsChanged |= !isEntityRemote`,
+   `EntityAlive.il.txt` IL_0051-0062), so a stock client plays the spit
+   action from the package and spawns its own local visual projectile.
+
+So zdtd's implementation path is server-side projectile flight plus its
+existing AI damage choke and items.xml triggered-effect runner; no client
+damage claim is involved (`isEntityRemote` blocks the client leg).
+`EAILeap.CanExecute` IL=136 / `Start` IL=19 behavior is
 documented above; zdtd's `src/assets/entities.zig` `taskNameToId` drops
 `Leap` and `RangedAttackTarget`, so all seven classes currently play as
 pure melee.
 
 ## Changelog
 
-- **2026-09-22:** AI task-to-class census from installed V3.2.0 `entityclasses.xml` (sha256 `0c95e733…912db0b0`): 12 distinct task names over 23 classes; `RangedAttackTarget` on five acid-spitter zombies and `Leap` on `zombieSpider` / `animalMountainLion` are the two zdtd-unmapped entries. `ItemActionVomit` (base `ItemActionLauncher`) fires a `ProjectileMoveScript` GameObject, so dedi damage delivery is the recorded open slice.
+- **2026-09-22:** Ranged-attack delivery contract closed: `ProjectileMoveScript::checkCollision` gates damage on `!firingEntity.isEntityRemote`, so the dedicated server applies the vomit hit itself (`ItemActionAttack::Hit`, events 96/97, ammo triggered rows) and clients only play the replicated anim action (`NetPackageEntityAnimationData`) plus their local visual projectile. No client damage claim exists for the spit.
+- **2026-09-22:** AI task-to-class census from installed V3.2.0 `entityclasses.xml` (sha256 `0c95e733…912db0b0`): 12 distinct task names over 23 classes; `RangedAttackTarget` on five acid-spitter zombies and `Leap` on `zombieSpider` / `animalMountainLion` are the two zdtd-unmapped entries. `ItemActionVomit` (base `ItemActionLauncher`) fires a `ProjectileMoveScript` GameObject.
 - **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `EAIRunawayFromEntity.FindEnemy` 166 -> 136 (exact). Prior values were the V3.1.0 b14 measurement.
 - **2026-08-28:** V3.2.0: EntityFlags.Timid=32 added; EAIRunawayFromEntity reworked to flag-based threat (flags/safeFlags, dangerDistance, entityList; class-list + minSneakDistance removed; FindEnemy IL=136).
 - **2026-08-11:** Vulture/flying tail IL re-verified: FindTarget IL=69, IsCourseTraversable IL=102, StartHome IL=10, AdjustWaypoint IL=46, EntityFlying.MoveEntityHeaded IL=135 / IsAirBorne IL=2, EAISetNearestCorpseAsTarget.CanExecute IL=110, EntityAlive.AddOwnedEntity(OwnedEntityData) IL=35, AddPart/AddParticle IL=17 (exact).
