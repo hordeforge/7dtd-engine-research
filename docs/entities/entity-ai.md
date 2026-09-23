@@ -4025,12 +4025,13 @@ task-name occurrences across 12 distinct names:
 | `ApproachDistraction` | 10 | mapped (approach_distraction) |
 | `DestroyArea` | 10 | mapped (destroy_area) |
 | `RunawayWhenHurt` | 5 | mapped (runaway) |
-| `RangedAttackTarget` | 5 | **unmapped** |
+| `RangedAttackTarget` | 5 | mapped (ranged_attack_target, 2026-09-22) |
 | `RunawayFromEntity` | 2 | mapped (runaway) |
 | `Leap` | 2 | mapped (leap, 2026-09-22) |
 
-The one unmapped task is a real, referenced entry, not a dead name. Full
-`RangedAttackTarget` parameter blocks (the acid-spitter zombies):
+Every referenced task name now maps; zero stock-class references stay
+unmapped. Full `RangedAttackTarget` parameter blocks (the acid-spitter
+zombies):
 
 - `zombieRancher`: `itemType=1;cooldown=6;duration=7;minRange=4;maxRange=27`
 - `zombieChuck`: `startAnimType=2;itemType=1;cooldown=4;duration=5;minRange=5;maxRange=43;releaseDelay=.41;sndStart=chuckwarning;sndRelease=chuckrelease`
@@ -4087,8 +4088,11 @@ damage claim is involved (`isEntityRemote` blocks the client leg).
 `EAILeap.CanExecute` IL=136 / `Start` IL=19 / `Continue` IL=47 behavior is
 documented above; zdtd ships `Leap` (2026-09-22, `taskNameToId` maps it and
 the task runs behind the parsed-list, window, `leapV.y` and corridor-ray
-gates), and only `RangedAttackTarget` remains unmapped, so the five
-acid-spitter classes still play as pure melee.
+gates), and it ships `RangedAttackTarget` too (2026-09-22: the task's
+SetData window/cooldown/anim plus the held item's `Class=Vomit` action and
+its ammo's `Class=Projectile` flight config drive an aim, telegraph and
+server-simulated shot for the five acid-spitter classes), so every stock
+class task reference now has a native task.
 
 ## Addendum (2026-09-22): Animator.StringToHash is CRC-32, and the server anim flush
 
@@ -4145,6 +4149,7 @@ zombie carries no per-limb body damage) and only for zombie avatars (the
 
 ## Changelog
 
+- **2026-09-22:** zdtd ships `RangedAttackTarget`: the census table's last unmapped row moves to mapped. The task parses its SetData block from the class AITask entry (ctor defaults for the fields a class omits), resolves the held item's `Class=Vomit` action and its ammo's `Class=Projectile` config from items.xml through Extends, and runs the stock sequence shape (aim half, `StartAnimAction(3000 + X)` telegraph, releaseDelay plus the ItemActionVomit warning window, then the burst anim and the shot). The projectile is server-simulated per shooter (never a replicated entity, per the delivery contract above) and lands through zdtd's deferred damage choke; the client sees only the replicated anim action plus its local visual, exactly as stock.
 - **2026-09-22:** `Animator.StringToHash` pinned as reflected CRC-32 by a live stock-dedi gdb capture (registered icall function + built table + `"Attack" = 0x406c280d = zlib.crc32`), and the server anim-flush chain recorded end to end: `StartAnimAction` / `StartAction` param writes, the `FixedUpdate` -> `updateNetworkAnimData` -> `NetPackageEntityAnimationData` routing, and the default-Reliable delivery with the C2S relay as the same package.
 
 - **2026-09-22:** zdtd ships `EAILeap`: the census table's `Leap` row moves to mapped. The task runs behind the stock gates (parsed-list bit, `[2.8, JumpMaxDistance]` window, `leapV.y` bound, corridor physics ray) with flight tunables as Rules fields; `RangedAttackTarget` is the one unmapped row left.
