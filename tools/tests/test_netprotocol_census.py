@@ -11,6 +11,7 @@ Usage: python3 tools/tests/test_netprotocol_census.py [<asm>] (defaults to ASM e
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -87,7 +88,7 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
-    meta = open(meta_path, encoding="utf-8").read() if os.path.exists(meta_path) else ""
+    meta = Path(meta_path).read_text(encoding="utf-8") if os.path.exists(meta_path) else ""
     if not meta:
         print("FAIL: NetProtocolCensus produced no output", file=sys.stderr)
         return 1
@@ -131,7 +132,7 @@ class NpKind {
     for line in kout.splitlines():
         name, _, _kind = line.partition("\t")
         non_map.add(name)
-    doc = open(DOC, encoding="utf-8").read()
+    doc = Path(DOC).read_text(encoding="utf-8")
     bad = []
     if total != EXPECTED_TOTAL:
         bad.append(f"census rows = {total}, expected {EXPECTED_TOTAL}")

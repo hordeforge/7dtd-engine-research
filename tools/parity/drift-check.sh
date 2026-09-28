@@ -52,6 +52,10 @@ COMMITTED_BASELINE="${COMMITTED_BASELINE:-$ROOT/workspace/outputs/baseline}"
 # instead of silently creating a baseline and comparing nothing.
 PARITY_BASELINE="${PARITY_BASELINE:-$ROOT/workspace/outputs/parity/parity_b10.json}"
 CECIL="$BIN/Mono.Cecil.dll"
+# Wall-clock bound on the helper builds and the snapshot runs below
+# (tools/bounded-run.sh).
+# shellcheck source=tools/bounded-run.sh
+. "$TOOLS/bounded-run.sh"
 # Digest of the DLL the local baseline was taken from. It is the cache key for
 # that baseline: a snapshot of another build answers a different question.
 BASELINE_STAMP="$BASELINE_DIR/source.sha256"
@@ -92,7 +96,7 @@ build_helper() { # <name> <src>
   staged="$BIN/.staging/$1.exe"
   mkdir -p "$BIN/.staging"
   rm -f "$staged"
-  if ! mcs -nologo -pathmap:"$TOOLS=." -r:"$CECIL" "$2" -out:"$staged"; then
+  if ! run_bounded mcs -nologo -pathmap:"$TOOLS=." -r:"$CECIL" "$2" -out:"$staged"; then
     rm -f "$staged"
     echo "drift: error: failed to compile $1.exe; refusing to compare an incomplete surface" >&2
     return 1
@@ -104,7 +108,9 @@ build_helper MethodList "$TOOLS/src/MethodList.cs" || axis_fail=1
 # ParitySurface feeds the NetPackage wire diff below; build it like the other
 # helpers so a fresh checkout gets the full drift report (not a silent skip).
 build_helper ParitySurface "$here/ParitySurface.cs" || axis_fail=1
-run() { MONO_PATH="$BIN" mono "$@"; }
+# Wall-clock bound on every snapshot tool below (tools/bounded-run.sh); a
+# wedged Cecil walk must fail the axis, not hang the whole drift check.
+run() { MONO_PATH="$BIN" run_bounded mono "$@"; }
 
 mkdir -p "$BASELINE_DIR"
 # Snapshot dirs hold whole-assembly surface dumps; the system temp dir is tmpfs

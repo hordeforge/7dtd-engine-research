@@ -20,6 +20,10 @@ for arg in "$@"; do
   esac
 done
 cd "$here"
+# Every compiler and monodis run below is wall-clock bound and dies with its
+# process group on expiry; a wedged mcs must fail the build, not hang it.
+# shellcheck source=tools/bounded-run.sh
+. "$here/bounded-run.sh"
 # Every compile goes through bin/.staging/<final-name> and is renamed into
 # place. The staging path must keep the FINAL basename: mcs derives the
 # assembly name and the module MVID from the -out path, so a mktemp name
@@ -104,7 +108,7 @@ if command -v monodis >/dev/null 2>&1; then
   # No early `exit` in the awk: monodis keeps writing after the Version line, and
   # an awk that exits there SIGPIPEs it, which pipefail turns into a spurious
   # build failure.
-  cecil_ver="$(monodis --assembly bin/Mono.Cecil.dll 2>/dev/null | awk '/^Version:/ && !seen {v=$2; seen=1} END {print v}')"
+  cecil_ver="$(run_bounded monodis --assembly bin/Mono.Cecil.dll 2>/dev/null | awk '/^Version:/ && !seen {v=$2; seen=1} END {print v}')"
   [[ -n "$cecil_ver" ]] || cecil_ver="unknown"
   echo "using Mono.Cecil $cecil_ver: $cecil"
 else
@@ -115,13 +119,13 @@ fi
 # host package), so stamp what produced bin/ and force a full rebuild whenever
 # the compiler or the pinned Cecil changes. Without this a toolchain upgrade
 # silently leaves every exe from the previous compiler in place.
-mcs_ver="$(mcs --version 2>/dev/null | sed -n '1s/.*version \([0-9][0-9.]*\).*/\1/p')"
+mcs_ver="$(run_bounded mcs --version 2>/dev/null | sed -n '1s/.*version \([0-9][0-9.]*\).*/\1/p')"
 [[ -n "$mcs_ver" ]] || mcs_ver="unknown"
 mono_ver="unknown"
 if command -v mono >/dev/null 2>&1; then
   # "Mono JIT compiler version 6.12.0.123 (2024-02)": take the dotted version,
   # not the trailing date field.
-  mono_ver="$(mono --version 2>/dev/null | sed -n '1s/.*version \([0-9][0-9.]*\).*/\1/p')"
+  mono_ver="$(run_bounded mono --version 2>/dev/null | sed -n '1s/.*version \([0-9][0-9.]*\).*/\1/p')"
   [[ -n "$mono_ver" ]] || mono_ver="unknown"
 fi
 stamp_file="bin/.toolchain-stamp"
@@ -177,7 +181,7 @@ for f in src/*.cs; do
   # MVID identical across rebuilds.
   staged="bin/.staging/$name.exe"
   rm -f "$staged"
-  if ! out="$(mcs -nologo -warn:4 -warnaserror -pathmap:"$here=." -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"$staged" 2>&1)"; then
+  if ! out="$(run_bounded mcs -nologo -warn:4 -warnaserror -pathmap:"$here=." -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"$staged" 2>&1)"; then
     [[ -n "$out" ]] && printf '%s\n' "$out" >&2
     rm -f "$staged"
     echo "build: FAILED bin/$name.exe (compiler output above)" >&2
@@ -209,7 +213,7 @@ if [[ "$skip_legacy" -eq 0 && -d legacy ]]; then
       continue
     fi
     if staged="bin/.staging/$name.exe" && rm -f "$staged" &&
-      mcs -nologo -pathmap:"$here=." -r:bin/Mono.Cecil.dll "$f" -out:"$staged" >/dev/null 2>&1; then
+      run_bounded mcs -nologo -pathmap:"$here=." -r:bin/Mono.Cecil.dll "$f" -out:"$staged" >/dev/null 2>&1; then
       mv -f "$staged" "bin/legacy/$name.exe"
       ok=$((ok+1))
     else

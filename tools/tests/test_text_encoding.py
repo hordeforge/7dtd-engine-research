@@ -12,6 +12,12 @@ Two failure modes this pins, both real on a UTF-8 host:
   to a file read, so a save dump or an inventory written as UTF-8 is decoded as
   whatever the shell's locale happens to be.
 
+The same scan owns the handle lifecycle of those calls: an `open()` must be the
+context manager of a `with`, or the one-shot read it feeds must go through
+`Path.read_text()`. A bare `open(...).read()` closes only when the reference
+drops, which leaves the descriptor's lifetime to the interpreter rather than to
+the code that opened it.
+
 The static half scans the tree (AST, so a string in a comment never matches and
 a keyword can never hide); the runtime half runs the shared runner under a C
 locale and a child that writes raw UTF-8 bytes, which is the exact input that
@@ -54,8 +60,36 @@ def _is_const_true(node: ast.expr) -> bool:
     return isinstance(node, ast.Constant) and node.value is True
 
 
+def _unmanaged_opens(tree: ast.AST) -> set[int]:
+    """Line numbers of `open()` calls that no `with` statement owns."""
+    managed: set[int] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.With, ast.AsyncWith)):
+            continue
+        for item in node.items:
+            expr = item.context_expr
+            if isinstance(expr, ast.Call) and _is_open_call(expr):
+                managed.add(expr.lineno)
+    owned: set[int] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and _is_open_call(node):
+            owned.add(node.lineno)
+    return owned - managed
+
+
+def _is_open_call(node: ast.Call) -> bool:
+    func = node.func
+    return (isinstance(func, ast.Name) and func.id == "open") or (
+        isinstance(func, ast.Attribute) and func.attr == "open"
+    )
+
+
 def _encoding_missing(path: str, tree: ast.AST) -> list[str]:
     bad: list[str] = []
+    for line in sorted(_unmanaged_opens(tree)):
+        bad.append(
+            f"{path}:{line}: open() outside a with block; use Path.read_text() for a one-shot read"
+        )
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue

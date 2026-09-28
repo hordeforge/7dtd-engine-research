@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -51,8 +52,8 @@ def main() -> int:
         if proc.returncode != 0:
             print(f"FAIL: StateMachines.exe: {proc.stderr}")
             return 1
-        fresh = open(out, encoding="utf-8").read()
-        committed = open(COMMITTED, encoding="utf-8").read()
+        fresh = Path(out).read_text(encoding="utf-8")
+        committed = Path(COMMITTED).read_text(encoding="utf-8")
     if fresh != committed:
         print(
             "FAIL: docs/inventories/state-machines.md is STALE (regenerate with StateMachines.exe)"

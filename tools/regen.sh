@@ -27,6 +27,11 @@ label="${label%%$'\n'*}"
   echo "regen: update.dump_label_suffix missing from $here/data/stock_facts.json" >&2
   exit 2
 }
+# Every mono child below runs under a wall-clock bound and dies with its group
+# on expiry (RE_MONO_TIMEOUT): a dumper that wedges on a bad assembly must fail
+# the regen, not hold it open with no way out.
+# shellcheck source=tools/bounded-run.sh
+. "$here/bounded-run.sh"
 
 step() { printf '\n== %s ==\n' "$*"; }
 
@@ -37,7 +42,7 @@ step "Census (ground-truth counts)"
 # Capture before truncating: `mono ... | head -10` SIGPIPEs the dumper once it
 # has written the tenth line, and pipefail would abort the regen on it. A
 # census crash must stop the regen, not scroll past.
-if ! census_out="$(MONO_PATH="$here/bin" mono "$here/bin/Census.exe" "$asm" 2>&1)"; then
+if ! census_out="$(MONO_PATH="$here/bin" run_bounded mono "$here/bin/Census.exe" "$asm" 2>&1)"; then
   printf '%s\n' "$census_out" >&2
   echo "regen: error: Census.exe failed" >&2
   exit 2
@@ -48,32 +53,32 @@ step "stock facts (live pin)"
 (cd "$root" && ASM="$asm" ./tools/stock-sync.sh)
 
 step "NetPackage wire surface + companion types"
-MONO_PATH="$here/bin" mono "$here/bin/DumpNetPackages.exe" "$asm" "$root/il/netpackages-$label"
-MONO_PATH="$here/bin" mono "$here/bin/DumpType.exe" "$asm" "$root/il/netpackages-$label" \
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/DumpNetPackages.exe" "$asm" "$root/il/netpackages-$label"
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/DumpType.exe" "$asm" "$root/il/netpackages-$label" \
      EntityCreationData ItemValue ItemStack BlockChangeInfo
 
 step "full surface metadata (committable)"
-MONO_PATH="$here/bin" mono "$here/bin/FullSurface.exe" "$asm" "$root/il/surface-$label"
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/FullSurface.exe" "$asm" "$root/il/surface-$label"
 
 step "full local IL reversal (git-ignored)"
-MONO_PATH="$here/bin" mono "$here/bin/DumpAll.exe" "$asm" "$root/il/full-$label"
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/DumpAll.exe" "$asm" "$root/il/full-$label"
 
 step "wire-body catalog (committed)"
-MONO_PATH="$here/bin" mono "$here/bin/WireBodies.exe" "$asm" "$root/docs/inventories/netpackage-bodies.md"
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/WireBodies.exe" "$asm" "$root/docs/inventories/netpackage-bodies.md"
 
 step "console-command registry"
 # Committed inventory like WireBodies/StateMachines/Coverage below: a failed
 # run must abort the regen, not leave a stale tsv looking freshly regenerated.
-MONO_PATH="$here/bin" mono "$here/bin/CmdMap.exe" "$asm" "$root/docs/inventories/console-command-list.tsv"
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/CmdMap.exe" "$asm" "$root/docs/inventories/console-command-list.tsv"
 
 step "NetPackage channel/compress census (META)"
-MONO_PATH="$here/bin" mono "$here/bin/NetProtocolCensus.exe" "$asm" "$root/il/netpackages-$label/META.md"
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/NetProtocolCensus.exe" "$asm" "$root/il/netpackages-$label/META.md"
 
 step "state-machine index (committed)"
-MONO_PATH="$here/bin" mono "$here/bin/StateMachines.exe" "$root/docs" "$root/docs/inventories/state-machines.md"
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/StateMachines.exe" "$root/docs" "$root/docs/inventories/state-machines.md"
 
 step "RE coverage report (committed)"
-MONO_PATH="$here/bin" mono "$here/bin/Coverage.exe" "$asm" "$root/docs" "$root/docs/inventories/coverage-report.md"
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/Coverage.exe" "$asm" "$root/docs" "$root/docs/inventories/coverage-report.md"
 
 step "legacy per-family dumpers"
 # explicit tool -> output-dir mapping (dirs are lowercase in il/). Parallel
@@ -113,7 +118,7 @@ for i in "${!legacy_tools[@]}"; do
     legacy_fail=1
     continue
   fi
-  if ! out="$(MONO_PATH="$here/bin" mono "$exe" "$asm" "$root/il/${legacy_outdirs[i]}" 2>&1)"; then
+  if ! out="$(MONO_PATH="$here/bin" run_bounded mono "$exe" "$asm" "$root/il/${legacy_outdirs[i]}" 2>&1)"; then
     printf 'regen: warning: %s dump FAILED:\n%s\n' "$t" "$out" >&2
     legacy_fail=1
   fi

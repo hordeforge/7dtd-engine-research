@@ -15,12 +15,24 @@ spawned running with no parent. Pinned here, DLL-free and network-free:
   4. `RE_MONO_TIMEOUT` is read, and a value that is not a positive number of
      seconds fails loud instead of silently meaning "no bound".
 
+The shell entry points (regen.sh, build.sh, stock-sync.sh, drift-check.sh,
+fetch_version.sh) spawn the same tools, so they carry the same bound through
+tools/bounded-run.sh. Pinned here too:
+
+  5. the shell wrapper kills a grandchild on expiry, like the Python one;
+  6. an invalid `RE_MONO_TIMEOUT` fails the sourcing script instead of running
+     unbounded;
+  7. every mono/mcs/monodis child in tools/*.sh goes through `run_bounded`, so
+     a new dump call cannot come back unbounded.
+
 Usage: python3 tools/tests/test_bounded_runs.py
 """
 
 from __future__ import annotations
 
 import os
+import re
+import subprocess
 import sys
 import tempfile
 import time
@@ -37,6 +49,10 @@ SNIPPET = (
     "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(600)'])\n"
     "open(sys.argv[1], 'w').write(str(child.pid))\n"
     "time.sleep(600)\n"
+)
+# A mono/mcs/monodis child, at the start of a command or behind a var assignment.
+SHELL_CHILD_RE = re.compile(
+    r"(?:^|[;&|(]\s*|\bthen\s+|\bdo\s+|\$\(\s*)((?:[\w./]*=\S*\s+)?)(mono|mcs|monodis)\s"
 )
 
 
@@ -109,11 +125,77 @@ def check_timeout_env() -> None:
             os.environ[tooling.MONO_TIMEOUT_ENV] = saved
 
 
+def _bash(script: str) -> subprocess.CompletedProcess[str]:
+    # The shell default is 1800 s, sized for a whole-assembly dump; the probe
+    # needs the same short bound the Python checks use or it waits it out.
+    return subprocess.run(
+        ["bash", "-c", f'. "{_common.TOOLS}/bounded-run.sh"\n{script}'],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env={**os.environ, tooling.MONO_TIMEOUT_ENV: str(int(TIMEOUT_S))},
+        timeout=GRANDCHILD_WAIT_S + 30.0,
+    )
+
+
+def check_shell_wrapper_kills_group(tmp: Path) -> None:
+    """The shell bound kills the group too, and names the expired command."""
+    marker = tmp / "shell-grandchild.pid"
+    result = _bash(f'run_bounded {sys.executable} -c "{SNIPPET}" {marker}')
+    assert result.returncode == 124, (
+        f"shell run_bounded returned {result.returncode}, not 124: {result.stderr}"
+    )
+    assert "exceeded" in result.stderr, f"shell timeout names nothing: {result.stderr!r}"
+    assert marker.is_file(), "the shell-run child never wrote its grandchild pid"
+    pid = int(marker.read_text(encoding="utf-8").strip())
+    assert wait_gone(pid), f"grandchild {pid} survived the shell timeout: only the child was killed"
+
+
+def check_shell_timeout_env_fails_loud() -> None:
+    for bad in ("nope", "0"):
+        result = subprocess.run(
+            ["bash", "-c", f'. "{_common.TOOLS}/bounded-run.sh"; echo REACHED'],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env={**os.environ, tooling.MONO_TIMEOUT_ENV: bad},
+            timeout=GRANDCHILD_WAIT_S,
+        )
+        assert result.returncode == 2, (
+            f"RE_MONO_TIMEOUT={bad!r} returned {result.returncode}, not 2"
+        )
+        assert "REACHED" not in result.stdout, (
+            f"RE_MONO_TIMEOUT={bad!r} did not stop the sourcing script"
+        )
+
+
+def check_shell_scripts_are_bounded() -> None:
+    """No mono/mcs/monodis child in a shell entry point comes back unbounded."""
+    for path in sorted(_common.TOOLS.rglob("*.sh")):
+        if path.name == "bounded-run.sh":
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            match = SHELL_CHILD_RE.search(line)
+            if match is None:
+                continue
+            assert "run_bounded" in line, (
+                f"{path.name}:{number} spawns {match.group(2)} with no wall-clock bound: {stripped}"
+            )
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="bounded-runs-", dir=_common.scratch_dir()) as td:
         check_timeout_kills_group(Path(td))
+        check_shell_wrapper_kills_group(Path(td))
     check_passthrough()
     check_timeout_env()
+    check_shell_timeout_env_fails_loud()
+    check_shell_scripts_are_bounded()
     print("OK: a timed-out tool run is killed with its process group and reports the timeout")
 
 

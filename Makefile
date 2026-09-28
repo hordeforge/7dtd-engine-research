@@ -131,7 +131,9 @@ lint:
 	ruff check .
 	ruff format --check .
 	mypy $$(git ls-files '*.py')
-	for f in $$(git ls-files '*.sh'); do shellcheck --severity=style "$$f"; done
+	# -x: bounded-run.sh is sourced by the entry points, and shellcheck only
+	# follows a source directive when told to resolve it.
+	for f in $$(git ls-files '*.sh'); do shellcheck -x --severity=style "$$f"; done
 
 test:
 	python3 "$(TOOLS)/tests/test_tool_bootstrap.py"

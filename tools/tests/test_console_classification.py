@@ -13,6 +13,7 @@ Usage: python3 tools/tests/test_console_classification.py [<asm>] (defaults to A
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -97,7 +98,7 @@ def main() -> int:
     leaves, on_client, dedi, either = (int(m.group(i)) for i in range(1, 5))
     gated = sorted(ln.split(" ", 1)[1] for ln in out.splitlines() if ln.startswith("GATED "))
 
-    doc = open(DOC, encoding="utf-8").read()
+    doc = Path(DOC).read_text(encoding="utf-8")
     bad = []
     if leaves != 188:
         bad.append(f"console population {leaves} != 188 (CmdMap rows)")

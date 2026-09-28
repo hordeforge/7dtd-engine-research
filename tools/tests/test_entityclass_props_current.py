@@ -11,6 +11,7 @@ Usage: python3 tools/tests/test_entityclass_props_current.py [<asm>] (defaults t
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -63,7 +64,7 @@ def main() -> int:
     npairs = int(next(ln for ln in lines if ln.startswith("PAIRS=")).split("=")[1])
     dll = {ln for ln in lines if "=" in ln and not ln.startswith(("IL=", "PAIRS="))}
 
-    doc = open(DOC, encoding="utf-8").read()
+    doc = Path(DOC).read_text(encoding="utf-8")
     doc_rows = {
         m.group(1) + "=" + m.group(2)
         for m in re.finditer(r"^\| `(Prop[A-Za-z0-9_]+)` \| `([^`]+)` \|", doc, re.M)

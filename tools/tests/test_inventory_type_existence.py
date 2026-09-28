@@ -13,6 +13,7 @@ Usage: python3 tools/tests/test_inventory_type_existence.py [<asm>] (defaults to
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -67,7 +68,7 @@ def main() -> int:
     total = 0
 
     # dedicated-leaves.md: type existence (normalized), tolerate "(not found)" rows
-    text = open(os.path.join(INV, "dedicated-leaves.md"), encoding="utf-8").read()
+    text = Path(os.path.join(INV, "dedicated-leaves.md")).read_text(encoding="utf-8")
     for row in text.splitlines():
         m = re.match(r"^\| `([^`]+)` \|", row)
         if not m:
@@ -87,7 +88,7 @@ def main() -> int:
     # IL + completeness (the table must list every top-level NetPackage* type,
     # excluding NetPackageManager; nested types like DroneWeapons/
     # NetPackageDroneParticleEffect live in dedicated-leaves.md instead)
-    text = open(os.path.join(INV, "netpackages.md"), encoding="utf-8").read()
+    text = Path(os.path.join(INV, "netpackages.md")).read_text(encoding="utf-8")
     doc_np_rows = {
         norm(m.group(1)) for m in re.finditer(r"^\| `(NetPackage[A-Za-z0-9]*)` \|", text, re.M)
     }

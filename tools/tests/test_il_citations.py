@@ -16,6 +16,7 @@ Usage: python3 tools/tests/test_il_citations.py [<asm>] (defaults to ASM env / s
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -90,7 +91,7 @@ def main() -> int:
             if not fn.endswith(".md"):
                 continue
             p = os.path.join(root, fn)
-            text = open(p, encoding="utf-8", errors="replace").read()
+            text = Path(p).read_text(encoding="utf-8", errors="replace")
             lines = text.splitlines()
             for no, ls in enumerate(lines):
                 if DATE_PAT.search(ls):

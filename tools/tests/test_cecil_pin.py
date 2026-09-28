@@ -15,6 +15,7 @@ Usage: python3 tools/tests/test_cecil_pin.py
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -42,7 +43,9 @@ def load_pin() -> tuple[str, str]:
     if not os.path.isfile(PIN):
         raise AssertionError(f"missing pin file: {PIN}")
     fields: dict[str, str] = {}
-    for line in open(PIN, encoding="utf-8"):
+    with open(PIN, encoding="utf-8") as fh:
+        lines = fh.readlines()
+    for line in lines:
         line = line.strip()
         if not line or line.startswith("#"):
             continue
@@ -57,7 +60,7 @@ def load_pin() -> tuple[str, str]:
 
 
 def check_build_gate() -> None:
-    text = open(BUILD, encoding="utf-8").read()
+    text = Path(BUILD).read_text(encoding="utf-8")
     for marker in GATE_MARKERS:
         if not re.search(marker, text):
             raise AssertionError(f"{BUILD}: pin gate lost marker {marker!r}")

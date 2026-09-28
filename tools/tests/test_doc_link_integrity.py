@@ -20,6 +20,7 @@ import sys
 import tempfile
 import unicodedata
 from collections import deque
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -198,7 +199,7 @@ def main() -> None:
             if not name.endswith(".md"):
                 continue
             path = os.path.join(sub, name)
-            text = open(path, encoding="utf-8").read()
+            text = Path(path).read_text(encoding="utf-8")
             for m in re.finditer(r"\]\((\.\./[^)]+\.md)\)", text):
                 target = os.path.normpath(os.path.join(sub, m.group(1)))
                 if os.path.abspath(target).startswith(os.path.abspath(DOCS) + os.sep):
@@ -229,7 +230,7 @@ def main() -> None:
             if not name.endswith(".md"):
                 continue
             path = os.path.join(sub, name)
-            text = open(path, encoding="utf-8").read()
+            text = Path(path).read_text(encoding="utf-8")
             for m in SECT_LINK_RE.finditer(text):
                 target = os.path.normpath(os.path.join(sub, m.group(2)))
                 sec = m.group(3)
@@ -251,7 +252,9 @@ def main() -> None:
                     )
                     continue
                 hdr = re.compile(rf"^#{{1,4}} {re.escape(sec)}(?:[ .:]|$)")
-                tlines = open(found, encoding="utf-8").read().splitlines()
+                # `found` is the NFC-resolved real path; `target` may be the NFD
+                # spelling the filesystem does not hold.
+                tlines = Path(found).read_text(encoding="utf-8").splitlines()
                 if not any(hdr.match(ln) for ln in tlines):
                     bad_sec.append(
                         f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(2)} (no header)"
@@ -273,7 +276,7 @@ def main() -> None:
         n
         for n in os.listdir(inv_dir)
         if n.endswith(".md")
-        and "**Hub:**" not in open(os.path.join(inv_dir, n), encoding="utf-8").read()
+        and "**Hub:**" not in Path(os.path.join(inv_dir, n)).read_text(encoding="utf-8")
     )
     if no_hub_inv:
         raise AssertionError(f"inventories missing **Hub:** backlink: {no_hub_inv}")

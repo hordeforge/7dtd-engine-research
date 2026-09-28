@@ -16,6 +16,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 import _common
 
@@ -65,8 +66,8 @@ def main() -> int:
             env=env,
         )
         assert proc.returncode == 0, f"FullSurface failed: {proc.stderr}"
-        types = open(os.path.join(tmp, "surface-types.md"), encoding="utf-8").read()
-        namespaces = open(os.path.join(tmp, "surface-namespaces.md"), encoding="utf-8").read()
+        types = Path(os.path.join(tmp, "surface-types.md")).read_text(encoding="utf-8")
+        namespaces = Path(os.path.join(tmp, "surface-namespaces.md")).read_text(encoding="utf-8")
 
     rows, type_total, malformed = parse_types_table(types)
     assert not malformed, f"{len(malformed)} malformed surface-types rows:\n" + "\n".join(

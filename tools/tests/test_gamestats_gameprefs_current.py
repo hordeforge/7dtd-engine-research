@@ -12,6 +12,7 @@ Usage: python3 tools/tests/test_gamestats_gameprefs_current.py [<asm>] (defaults
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -59,7 +60,7 @@ def main() -> int:
         name, _, members = line.partition(":")
         dll[name] = members.split(",") if members else []
 
-    doc = open(DOC, encoding="utf-8").read()
+    doc = Path(DOC).read_text(encoding="utf-8")
     bad = []
     # the hand-annotated EnumGameState values in the doc's note must match the DLL
     want_state = ["Off=-1", "Loading=0", "Running=1", "Over=2"]
@@ -94,7 +95,7 @@ def main() -> int:
         for fn in files:
             if not fn.endswith(".md"):
                 continue
-            txt = open(os.path.join(root, fn), encoding="utf-8", errors="replace").read()
+            txt = Path(os.path.join(root, fn)).read_text(encoding="utf-8", errors="replace")
             for m in re.finditer(r"GameStats\[(\d+)\]", txt):
                 if int(m.group(1)) >= n_state:
                     bad.append(f"{fn}: GameStats[{m.group(1)}] out of range (< {n_state})")

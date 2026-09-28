@@ -14,6 +14,7 @@ Usage: python3 tools/tests/test_inventory_counts.py
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -75,11 +76,11 @@ def check_package_framing_counts(bad: list[str]) -> None:
 
 
 def main() -> int:
-    idx = open(IDX, encoding="utf-8").read()
+    idx = Path(IDX).read_text(encoding="utf-8")
     bad: list[str] = []
     check_package_framing_counts(bad)
     for name, (pat, expected) in CLAIMS.items():
-        text = open(os.path.join(INV, name), encoding="utf-8", errors="replace").read()
+        text = Path(os.path.join(INV, name)).read_text(encoding="utf-8", errors="replace")
         m = re.search(pat, idx)
         if not m:
             bad.append(f"{name}: no INDEX claim matching /{pat}/")

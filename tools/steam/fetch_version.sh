@@ -60,6 +60,11 @@ BIN="$TOOLS/bin"
 CECIL="$BIN/Mono.Cecil.dll"
 PARITY_SRC="$TOOLS/parity/ParitySurface.cs"
 PARITY_EXE="$BIN/ParitySurface.exe"
+# Wall-clock bound on the compile and the parity extract below
+# (tools/bounded-run.sh). The steamcmd download above is operator-paced and
+# stays unbounded.
+# shellcheck source=tools/bounded-run.sh
+. "$TOOLS/bounded-run.sh"
 
 # 1) Resolve an operator-installed SteamCMD. Do not download and execute tools
 # inside a research script; package installation and provenance are external.
@@ -120,7 +125,7 @@ fi
 if [[ ! -f "$PARITY_EXE" || "$PARITY_SRC" -nt "$PARITY_EXE" ]]; then
   # Stage and rename so a concurrent drift-check never loads a half-written exe.
   parity_staged="$(mktemp "$BIN/.ParitySurface.exe.XXXXXX")"
-  if mcs -nologo -warn:4 -warnaserror -r:"$CECIL" "$PARITY_SRC" -out:"$parity_staged"; then
+  if run_bounded mcs -nologo -warn:4 -warnaserror -r:"$CECIL" "$PARITY_SRC" -out:"$parity_staged"; then
     mv -f "$parity_staged" "$PARITY_EXE"
   else
     rm -f "$parity_staged"
@@ -131,7 +136,7 @@ mkdir -p "$OUT"
 target="$OUT/parity_$LABEL.json"
 tmp="$(mktemp "$OUT/.parity_$LABEL.XXXXXX")"
 trap 'rm -f "$tmp"' EXIT
-mono "$PARITY_EXE" "$DLL" 2>/dev/null | sed -n '/^{/,$p' > "$tmp"
+run_bounded mono "$PARITY_EXE" "$DLL" 2>/dev/null | sed -n '/^{/,$p' > "$tmp"
 python3 -m json.tool "$tmp" >/dev/null
 mv "$tmp" "$target"
 trap - EXIT

@@ -13,6 +13,9 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
 fi
 [[ $# -eq 1 ]] || { echo "usage: cecil-pin.sh /path/to/Mono.Cecil.dll" >&2; exit 2; }
 dll="${1:?usage: cecil-pin.sh /path/to/Mono.Cecil.dll}"
+# Wall-clock bound on the monodis probe (tools/bounded-run.sh).
+# shellcheck source=tools/bounded-run.sh
+. "$here/bounded-run.sh"
 [[ -f "$dll" ]] || { echo "cecil-pin: not found: $dll" >&2; exit 2; }
 if command -v sha256sum >/dev/null 2>&1; then
   hash="$(sha256sum "$dll" | cut -d' ' -f1)"
@@ -23,7 +26,7 @@ ver="unknown"
 if command -v monodis >/dev/null 2>&1; then
   # Read the whole stream: an awk that `exit`s at the Version line SIGPIPEs
   # monodis, and pipefail turns that into a failed re-pin.
-  ver="$(monodis --assembly "$dll" 2>/dev/null | awk '/^Version:/ && !seen {v=$2; seen=1} END {print v}')"
+  ver="$(run_bounded monodis --assembly "$dll" 2>/dev/null | awk '/^Version:/ && !seen {v=$2; seen=1} END {print v}')"
 fi
 
 tmp="$(mktemp "$here/data/.cecil.pin.XXXXXX")"

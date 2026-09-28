@@ -30,6 +30,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -195,7 +196,7 @@ class LeafMeth {
         "challenge-objectives.md",
         "dedicated-leaves.md",
     ):
-        text = open(os.path.join(INV, inv), encoding="utf-8").read()
+        text = Path(os.path.join(INV, inv)).read_text(encoding="utf-8")
         for m in re.finditer(r"^\| `([^`]+)` \| [^|]+ \| [^|]+ \| ([^|]+) \|", text, re.M):
             typ, kms = m.group(1), m.group(2)
             # dedicated-leaves mixes formats: skip rows whose fingerprint column
@@ -265,7 +266,7 @@ class LeafMeth {
                     f"{inventory}: leaf-parents used as bases = {leaf_parents}, expected all of {SEQ_LEAF_PARENTS}"
                 )
         # the inventory must self-state the count (leaves for challenge-objectives)
-        text = open(os.path.join(INV, inventory), encoding="utf-8").read()
+        text = Path(os.path.join(INV, inventory)).read_text(encoding="utf-8")
         stated = self_state if self_state is not None else expected
         if not re.search(rf"\b{stated}\b", text):
             bad.append(f"{inventory}: does not self-state {stated}")

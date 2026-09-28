@@ -27,6 +27,10 @@ FACTS="$DATA/stock_facts.json"
 # macOS install is found without handing over a path. Empty when nothing is
 # found; extract() and the drift hook below report it.
 ASM="${ASM:-$(python3 "$HERE/asm_path.py")}"
+# Wall-clock bound on the compiler and the extractor (tools/bounded-run.sh):
+# either one wedged must fail the sync, not hold it open.
+# shellcheck source=tools/bounded-run.sh
+. "$HERE/bounded-run.sh"
 
 MODE="all"
 for arg in "$@"; do
@@ -73,7 +77,7 @@ extract() {
     staged="$BIN/.staging/StockFacts.exe"
     mkdir -p "$BIN/.staging"
     rm -f "$staged"
-    if mcs -nologo -pathmap:"$HERE=." -r:"$BIN/Mono.Cecil.dll" "$HERE/src/StockFacts.cs" -out:"$staged"; then
+    if run_bounded mcs -nologo -pathmap:"$HERE=." -r:"$BIN/Mono.Cecil.dll" "$HERE/src/StockFacts.cs" -out:"$staged"; then
       mv -f "$staged" "$BIN/StockFacts.exe"
     else
       rm -f "$staged"
@@ -84,7 +88,7 @@ extract() {
   tmpdir="$(mktemp -d "$DATA/.stock-sync.XXXXXX")"
   trap 'rm -rf "$tmpdir"' EXIT
   echo "stock-sync: extracting from $ASM"
-  MONO_PATH="$BIN" mono "$BIN/StockFacts.exe" "$ASM" "$tmpdir/stock_facts.json"
+  MONO_PATH="$BIN" run_bounded mono "$BIN/StockFacts.exe" "$ASM" "$tmpdir/stock_facts.json"
   # XML data pins (zombie HP ladder etc.) from the same install's Data/Config.
   if ! GAME_ROOT="$(python3 "$HERE/asm_path.py" --game-dir)"; then
     echo "stock-sync: $ASM is not inside a dedicated-server install, so the Data/Config pins cannot be read" >&2

@@ -13,6 +13,7 @@ Usage: python3 tools/tests/test_readme_test_table.py
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -27,11 +28,11 @@ HELPERS = {"_common.py"}
 
 
 def main() -> int:
-    mk = open(MAKEFILE, encoding="utf-8").read()
+    mk = Path(MAKEFILE).read_text(encoding="utf-8")
     run = set()
     for m in re.finditer(r"python3 \"\$\(TOOLS\)/tests/([A-Za-z0-9_.-]+\.py)\"", mk):
         run.add(m.group(1))
-    readme = open(README, encoding="utf-8").read()
+    readme = Path(README).read_text(encoding="utf-8")
     table = set(re.findall(r"tests/([A-Za-z0-9_.-]+\.py)", readme))
     bad = []
     # make help parity: every non-help target has a help line and vice versa

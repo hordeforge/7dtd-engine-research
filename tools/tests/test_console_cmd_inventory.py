@@ -17,6 +17,7 @@ Usage: python3 tools/tests/test_console_cmd_inventory.py [<asm>] (defaults to AS
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -145,9 +146,8 @@ def main() -> int:
         descriptions[typ] = desc
         permissions[typ] = perm
 
-    text_inv = open(
-        INV, encoding="utf-8"
-    ).read()  # read once; parse_inventory + self-state check reuse it
+    # read once; parse_inventory + self-state check reuse it
+    text_inv = Path(INV).read_text(encoding="utf-8")
     primaries, aliases = parse_inventory(text_inv)
     bad = []
     # the committed CmdMap tsv (regen.sh artifact) must equal fresh output. A
@@ -155,7 +155,7 @@ def main() -> int:
     # fails here instead of silently disarming the staleness check.
     if not os.path.exists(TSV):
         bad.append(f"missing committed inventory artifact: {TSV}")
-    elif open(TSV, encoding="utf-8").read() != cmdmap:
+    elif Path(TSV).read_text(encoding="utf-8") != cmdmap:
         bad.append("docs/inventories/console-command-list.tsv stale vs CmdMap.exe (rerun regen.sh)")
     if len(dll_primary) != EXPECTED_PRIMARY:
         bad.append(f"DLL primary commands = {len(dll_primary)} != expected {EXPECTED_PRIMARY}")
