@@ -99,9 +99,15 @@ def main() -> int:
                 if approx.search(ls):
                     bad.append(f"{p}:{no + 1}: IL approximation `IL=~` (must be exact)")
             for pat in (CLAIM_PAT, TABLE_PAT):
+                # Matches arrive in source order, so the line number advances by
+                # the newlines in the gap since the last match. Recomputing it as
+                # `text[:m.start()].count("\n")` copies the document prefix once
+                # per claim, which is 127 MB of copying over this corpus.
+                prev_at, line_no = 0, 0
                 for m in pat.finditer(text):
+                    line_no += text.count("\n", prev_at, m.start())
+                    prev_at = m.start()
                     typ, meth, claimed = m.group(1), norm(m.group(2)), int(m.group(3))
-                    line_no = text[: m.start()].count("\n")
                     linestr = lines[line_no] if line_no < len(lines) else ""
                     if DATE_PAT.search(linestr) and "(exact)" not in linestr:
                         n_skipped += 1

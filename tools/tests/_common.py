@@ -92,6 +92,25 @@ def find_asm() -> Path | None:
         return None
 
 
+_DOC_INDEX: dict[str, list[Path]] | None = None
+
+
+def doc_index() -> dict[str, list[Path]]:
+    """NFC doc basename -> the paths under docs/ that carry it, built once per process.
+
+    `doc()` is called once per narrative doc by several gates, and a bare
+    `rglob` per call turns a few hundred lookups into a few hundred full walks
+    of docs/. No gate writes into docs/, so the index cannot go stale mid-run.
+    """
+    global _DOC_INDEX
+    if _DOC_INDEX is None:
+        index: dict[str, list[Path]] = {}
+        for path in sorted(DOCS.rglob("*.md")):
+            index.setdefault(tooling.nfc(path.name), []).append(path)
+        _DOC_INDEX = index
+    return _DOC_INDEX
+
+
 def doc(name: str) -> Path:
     """Path of a narrative doc by basename, wherever its subsystem folder sits.
 
@@ -102,8 +121,7 @@ def doc(name: str) -> Path:
     NFD filename, and a gate asking for the NFC spelling it was written with
     would otherwise find nothing and report a missing doc.
     """
-    want = tooling.nfc(name)
-    hits: list[Path] = sorted(p for p in DOCS.rglob("*.md") if tooling.nfc(p.name) == want)
+    hits = doc_index().get(tooling.nfc(name), [])
     if len(hits) != 1:
         raise FileNotFoundError(f"{name}: {len(hits)} matches under {DOCS}")
     return hits[0]

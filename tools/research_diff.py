@@ -58,7 +58,6 @@ from steam_manifest import (
     cached_manifests,
     diff_manifests,
     gid_of,
-    manifest_for_gid,
     pins_buildids,
     read_manifest,
     roots_from,
@@ -231,20 +230,39 @@ def extract_facts(dll: Path, tmp: Path, name: str) -> dict[str, Any]:
     return facts
 
 
-def load_source(
-    path: Path, label: str | None, buildid: str | None, tmp: Path, name: str, pins: dict[str, Any]
-) -> Source:
-    facts = extract_facts(path, tmp, name)
-    sha = tooling.sha256_file(path)
-    wire = str(facts.get("version", {}).get("stock_wire", "unknown"))
-    return Source(
-        label=label or wire.replace(" ", "-"),
-        path=path,
-        sha256=sha,
-        size=path.stat().st_size,
-        facts=facts,
-        buildid=buildid or buildid_for(sha, pins),
-    )
+class SourceLoader:
+    """Path-keyed memo over the per-DLL work: a mono StockFacts run plus two 11 MB hashes.
+
+    A `--pair` resolution probes the same candidate assemblies once per label, so
+    without the memo every install DLL is loaded, parsed and hashed twice per run.
+    """
+
+    def __init__(self, tmp: Path, pins: dict[str, Any]) -> None:
+        self._tmp = tmp
+        self._pins = pins
+        self._facts: dict[Path, dict[str, Any]] = {}
+        self._sha256: dict[Path, str] = {}
+        self._sha1: dict[Path, str] = {}
+
+    def sha1(self, path: Path) -> str:
+        if (sha := self._sha1.get(path)) is None:
+            sha = self._sha1[path] = sha1_file(path)
+        return sha
+
+    def load(self, path: Path, label: str | None, buildid: str | None, name: str) -> Source:
+        if (facts := self._facts.get(path)) is None:
+            facts = self._facts[path] = extract_facts(path, self._tmp, name)
+        if (sha := self._sha256.get(path)) is None:
+            sha = self._sha256[path] = tooling.sha256_file(path)
+        wire = str(facts.get("version", {}).get("stock_wire", "unknown"))
+        return Source(
+            label=label or wire.replace(" ", "-"),
+            path=path,
+            sha256=sha,
+            size=path.stat().st_size,
+            facts=facts,
+            buildid=buildid or buildid_for(sha, self._pins),
+        )
 
 
 def flatten(value: Any, prefix: str = "") -> dict[str, Any]:
@@ -616,30 +634,37 @@ def resolve_pair(
     if ":" not in pair:
         raise SourceError(f"--pair wants OLD:NEW, got {pair!r}")
     old_label, new_label = (part.strip() for part in pair.split(":", 1))
+    loader = SourceLoader(tmp, pins)
     resolved: dict[str, Source] = {}
     for label in (old_label, new_label):
         direct = Path(label).expanduser()
         if direct.is_file():
-            resolved[label] = load_source(direct, None, None, tmp, f"probe_{direct.name}", pins)
+            resolved[label] = loader.load(direct, None, None, f"probe_{direct.name}")
     candidates = candidate_dlls(game_dir) if len(resolved) < 2 else []
     if len(resolved) < 2 and not candidates:
         raise SourceError(f"no Assembly-CSharp.dll (or .dll.* backup) in {game_dir}")
 
     roots = roots_from(steam_root)
-    cached = sorted(cached_manifests(DEFAULT_DEPOT, roots).values())
+    cached_by_gid = cached_manifests(DEFAULT_DEPOT, roots)
+    cached = sorted(cached_by_gid.values())
     buildids = pins_buildids(STEAM_PINS) | steam_log_buildids(DEFAULT_DEPOT, roots)
     gid_of_build = {build: gid for gid, build in buildids.items()}
+    # Every cached manifest is 17 MB / 70k entries to parse, and the two labels
+    # below plus a build-id lookup all ask the same question of the same file, so
+    # each one is parsed at most once per run.
+    assembly_sha1_of: dict[Path, str | None] = {}
 
-    def depot_sha1(gid: str) -> str | None:
-        manifest_path = manifest_for_gid(DEFAULT_DEPOT, gid, roots)
-        return assembly_sha1(read_manifest(manifest_path)) if manifest_path else None
+    def cached_sha1(manifest_path: Path) -> str | None:
+        if manifest_path not in assembly_sha1_of:
+            assembly_sha1_of[manifest_path] = assembly_sha1(read_manifest(manifest_path))
+        return assembly_sha1_of[manifest_path]
 
     for label in (old_label, new_label):
         if label in resolved:
             continue
         # A version label (`b9`, `V3.2.0 b9`) matches on the facts a DLL reports.
         for path in candidates:
-            source = load_source(path, label, None, tmp, f"probe_{path.name}", pins)
+            source = loader.load(path, label, None, f"probe_{path.name}")
             if label_matches(label, source.facts):
                 resolved[label] = source
                 break
@@ -647,10 +672,12 @@ def resolve_pair(
             continue
         # Otherwise a Steam build id resolves through its depot manifest's SHA-1.
         wanted = gid_of_build.get(label)
-        expected = depot_sha1(wanted) if wanted else None
+        expected = (
+            cached_sha1(cached_by_gid[wanted]) if wanted and wanted in cached_by_gid else None
+        )
         for path in candidates:
-            if expected is not None and sha1_file(path) == expected:
-                resolved[label] = load_source(path, label, wanted, tmp, f"probe_{path.name}", pins)
+            if expected is not None and loader.sha1(path) == expected:
+                resolved[label] = loader.load(path, label, wanted, f"probe_{path.name}")
                 break
         if label not in resolved:
             found = ", ".join(p.name for p in candidates)
@@ -662,13 +689,9 @@ def resolve_pair(
     manifests: list[Path | None] = []
     for label in (old_label, new_label):
         source = resolved[label]
-        local_sha1 = sha1_file(source.path)
+        local_sha1 = loader.sha1(source.path)
         match = next(
-            (
-                manifest_path
-                for manifest_path in cached
-                if assembly_sha1(read_manifest(manifest_path)) == local_sha1
-            ),
+            (manifest_path for manifest_path in cached if cached_sha1(manifest_path) == local_sha1),
             None,
         )
         if match is not None:
@@ -851,19 +874,18 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with tempfile.TemporaryDirectory(prefix="research_diff_", dir=tooling.scratch_dir()) as tmp:
             tmp_path = Path(tmp)
+            loader = SourceLoader(tmp_path, pins)
             # --pair already resolved facts, labels and build ids; reloading would
             # throw the manifest-derived build id away.
             old = (
                 replace(resolved_old, buildid=args.buildid_old)
                 if resolved_old is not None and args.buildid_old
-                else resolved_old
-                or load_source(old_path, label_old, args.buildid_old, tmp_path, "old", pins)
+                else resolved_old or loader.load(old_path, label_old, args.buildid_old, "old")
             )
             new = (
                 replace(resolved_new, buildid=args.buildid_new)
                 if resolved_new is not None and args.buildid_new
-                else resolved_new
-                or load_source(new_path, label_new, args.buildid_new, tmp_path, "new", pins)
+                else resolved_new or loader.load(new_path, label_new, args.buildid_new, "new")
             )
             limit = max(0, args.max_list)
             provenance = [
