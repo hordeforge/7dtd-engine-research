@@ -49,14 +49,22 @@ fi
 export RE_MONO_TIMEOUT
 
 # macOS ships no GNU timeout (coreutils installs it as gtimeout), and these
-# scripts run there. A host without it says so once and runs unbounded, rather
+# scripts run there. A host with neither says so once and runs unbounded, rather
 # than failing every regen over a missing optional tool; every other host gets
-# the bound.
+# the bound. The command is held in BOUNDED_TIMEOUT_CMD so run_bounded does not
+# depend on the name being on PATH at call time.
+BOUNDED_TIMEOUT_CMD=""
+for candidate in timeout gtimeout; do
+  if command -v "$candidate" >/dev/null 2>&1; then
+    BOUNDED_TIMEOUT_CMD="$candidate"
+    break
+  fi
+done
 BOUNDED_HAS_TIMEOUT=0
-if command -v timeout >/dev/null 2>&1; then
+if [[ -n "$BOUNDED_TIMEOUT_CMD" ]]; then
   BOUNDED_HAS_TIMEOUT=1
 else
-  echo "warning: no 'timeout' on PATH; RE_MONO_TIMEOUT is not enforced for this run" >&2
+  echo "warning: no 'timeout' or 'gtimeout' on PATH; RE_MONO_TIMEOUT is not enforced for this run" >&2
   echo "  install coreutils (brew install coreutils) to bound every tool run" >&2
 fi
 
@@ -68,7 +76,7 @@ run_bounded() {
     return $?
   fi
   local status=0
-  timeout --kill-after="$BOUNDED_KILL_GRACE_S" "$RE_MONO_TIMEOUT" "$@" || status=$?
+  "$BOUNDED_TIMEOUT_CMD" --kill-after="$BOUNDED_KILL_GRACE_S" "$RE_MONO_TIMEOUT" "$@" || status=$?
   if [[ "$status" == "$BOUNDED_TIMEOUT_RC" ]]; then
     printf '%s: %s exceeded %ss and its process group was killed\n' \
       "${0##*/}" "${1##*/}" "$RE_MONO_TIMEOUT" >&2

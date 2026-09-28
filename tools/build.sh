@@ -62,13 +62,22 @@ sha256_of() { # GNU coreutils, falling back to macOS shasum
 }
 pin_sha="$(sed -n 's/^sha256=//p' "$here/data/cecil.pin")"
 
-# The GAC moved with every host: /usr/lib/mono/gac on a Linux package, a
-# %WINDIR%\\assembly path on a Windows mono. Ask the runtime where its own GAC
-# is instead of listing one platform's layout; gacutil ships with mono, and a
-# host without it just falls through to the well-known Linux paths.
+# The GAC moved with every host: /usr/lib/mono/gac on a Linux package,
+# /Library/Frameworks/Mono.framework/... on macOS, a %WINDIR%\assembly path on
+# a Windows mono. Ask the runtime where its own GAC is instead of listing one
+# platform's layout; gacutil ships with mono, and a host without it just falls
+# through to the well-known Linux paths.
+#
+# Only a `Path:` line is an answer. `gacutil -l` otherwise lists identity lines
+# ("Mono.Cecil, Version=..., PublicKeyToken=...") and nothing else, so taking
+# their last field produced a "PublicKeyToken=..." token that was never a file
+# and the probe silently found nothing on every host. The whole `Path:` line is
+# kept, not a whitespace field, so a GAC path with spaces survives; a gacutil
+# that prints no such line yields nothing and the Linux paths below answer.
 gac_cecil() {
   command -v gacutil >/dev/null 2>&1 || return 0
-  run_bounded gacutil -l Mono.Cecil 2>/dev/null | awk '/^Mono\.Cecil/ {print $NF}' | head -1
+  run_bounded gacutil -l Mono.Cecil 2>/dev/null |
+    sed -n 's/^Path: //p' | head -1
 }
 
 # Candidates: env override, then vendored, then a previously verified copy in

@@ -38,6 +38,7 @@ import ast
 import contextlib
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -49,7 +50,11 @@ import _common
 import tooling
 
 GRANDCHILD_WAIT_S = 20.0
-TIMEOUT_S = 2.0
+# Long enough for the child to start a grandchild and write its pid before the
+# bound expires: on a loaded host a bare interpreter start alone can take longer
+# than 2 s, and the marker read then fails for want of a race the test means to
+# win, not for want of a kill.
+TIMEOUT_S = 10.0
 # The subprocess callables that start a child.
 SUBPROCESS_CALLS = {"run", "Popen", "call", "check_call", "check_output"}
 SNIPPET = (
@@ -330,10 +335,48 @@ def check_gate_children_are_bounded() -> None:
     assert not offenders, "\n".join(offenders)
 
 
+def check_shell_gtimeout_fallback(tmp: Path) -> None:
+    """macOS has no `timeout`; coreutils installs it as `gtimeout`.
+
+    The Platforms section of tools/README.md promises that fallback, so a
+    source that only probes `timeout` leaves every regen on macOS unbounded
+    while the docs say it is bounded. Driven with a PATH holding only the
+    `gtimeout` stub, so the probe has to find that name to pass.
+    """
+    stub_dir = tmp / "fakebin"
+    stub_dir.mkdir()
+    stub = stub_dir / "gtimeout"
+    stub.write_text('#!/bin/bash\necho "GTIMEOUT $*"\nshift 2\n"$@"\n', encoding="utf-8")
+    os.chmod(stub, 0o755)
+    bash = shutil.which("bash")
+    assert bash is not None, "no bash on PATH to source the wrapper with"
+    result = subprocess.run(
+        [
+            bash,
+            "-c",
+            (
+                f'. "{_common.TOOLS}/bounded-run.sh"\n'
+                '[[ "$BOUNDED_HAS_TIMEOUT" == 1 ]] || { echo "gtimeout not found"; exit 1; }\n'
+                "run_bounded echo child-ran"
+            ),
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env={"PATH": str(stub_dir), "RE_MONO_TIMEOUT": "30"},
+        timeout=GRANDCHILD_WAIT_S,
+    )
+    assert result.returncode == 0, f"the shell bound did not fall back to gtimeout: {result.stderr}"
+    assert "GTIMEOUT" in result.stdout, f"gtimeout was not the bound used: {result.stdout!r}"
+    assert "child-ran" in result.stdout, f"the child never ran: {result.stdout!r}"
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="bounded-runs-", dir=_common.scratch_dir()) as td:
         check_timeout_kills_group(Path(td))
         check_shell_wrapper_kills_group(Path(td))
+        check_shell_gtimeout_fallback(Path(td))
     check_passthrough()
     check_kill_group_fallback()
     check_timeout_env()
