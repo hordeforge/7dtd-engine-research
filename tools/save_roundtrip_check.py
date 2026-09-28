@@ -901,6 +901,13 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
+    if not os.path.isdir(save_dir):
+        # A path that is not a save directory reports every file MISSING and
+        # exits 1, which reads as a save that failed the round trip rather than
+        # a path the caller got wrong. Refuse it before the report starts, so
+        # stdout never carries a report for a directory that was never read.
+        print(f"error: save_dir is not a directory: {save_dir}", file=sys.stderr)
+        return 2
     print(f"Round-trip checking save: {save_dir}\n")
 
     ttw = os.path.join(save_dir, "main.ttw")

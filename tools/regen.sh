@@ -12,7 +12,11 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   sed -n '2,/^[^#]/ { /^#/ { s/^#[[:space:]]\{0,1\}//; p; } }' "$0"
   exit 0
 fi
-[[ $# -eq 0 ]] || { echo "regen: unknown argument: $1" >&2; exit 2; }
+if [[ $# -ne 0 ]]; then
+  echo "regen: unknown argument: $1" >&2
+  echo "regen: try 'regen.sh --help' for the supported arguments" >&2
+  exit 2
+fi
 asm="${ASM:?set ASM to the dedicated Assembly-CSharp.dll path}"
 
 # Dump-set label from the machine pin (update.dump_label_suffix), not a

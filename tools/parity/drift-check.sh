@@ -30,11 +30,15 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
 fi
 accept=0
 asm_arg=""
+usage() { echo "usage: drift-check.sh [Assembly-CSharp.dll] [--accept-baseline]"; }
 for arg in "$@"; do
   case "$arg" in
     --accept-baseline) accept=1 ;;
-    -*) echo "usage: drift-check.sh [Assembly-CSharp.dll] [--accept-baseline]" >&2; exit 2 ;;
-    *) [[ -z "$asm_arg" ]] || { echo "usage: drift-check.sh [Assembly-CSharp.dll] [--accept-baseline]" >&2; exit 2; }
+    -*) echo "drift: unknown argument: $arg" >&2
+       usage >&2
+       echo "drift: try 'drift-check.sh --help' for the supported arguments" >&2
+       exit 2 ;;
+    *) [[ -z "$asm_arg" ]] || { echo "drift: one assembly at a time: $arg" >&2; usage >&2; exit 2; }
        asm_arg="$arg" ;;
   esac
 done

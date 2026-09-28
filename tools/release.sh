@@ -41,7 +41,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY=1; shift ;;
     --skip-gates) GATES=0; shift ;;
     --resume) RESUME=1; shift ;;
-    -*) die "unknown option: $1" ;;
+    -*) die "unknown option: $1; try 'release.sh --help' for the supported arguments" ;;
     *) [[ -z "$VERSION" ]] || die "one version at a time"; VERSION="$1"; shift ;;
   esac
 done

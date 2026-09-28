@@ -47,7 +47,9 @@ for arg in "$@"; do
       sed -n '2,/^[^#]/ { /^#/ { s/^#[[:space:]]\{0,1\}//; p; } }' "$0"
       exit 0
       ;;
-    *) echo "stock-sync: unknown argument: $arg" >&2; exit 2 ;;
+    *) echo "stock-sync: unknown argument: $arg" >&2
+       echo "stock-sync: try 'stock-sync.sh --help' for the supported arguments" >&2
+       exit 2 ;;
   esac
 done
 

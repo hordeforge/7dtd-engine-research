@@ -6,8 +6,14 @@ Usage:
   parity_diff.py old.json new.json  # what TFP changed between versions
 
 Exit codes: 0 no wire drift (or `--help`), 1 wire/enum drift, 2 unusable input.
+The report is the tool's output, so it goes to stdout; only the refusals and
+the usage errors go to stderr, and `drift-check.sh` reads the report from
+stdout with the exit code as the verdict.
 """
 
+from __future__ import annotations
+
+import argparse
 import sys
 from pathlib import Path
 from typing import Any
@@ -71,18 +77,27 @@ def diff(old: dict[str, Any], new: dict[str, Any]) -> int:
     return len(added) + len(removed) + len(changed) + enum_changed
 
 
-if __name__ == "__main__":
-    if len(sys.argv) == 2 and sys.argv[1] in ("-h", "--help"):
-        print(__doc__.strip())
-        sys.exit(0)
-    if len(sys.argv) != 3:
-        print(__doc__.strip(), file=sys.stderr)
-        sys.exit(2)
+def build_parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(
+        description="Diff two stock ParitySurface snapshots (NetPackage wire + enums).",
+        epilog="exit 0 = no drift, 1 = wire/enum drift, 2 = unusable input",
+    )
+    ap.add_argument("old", help="older ParitySurface snapshot (JSON)")
+    ap.add_argument("new", help="newer ParitySurface snapshot (JSON)")
+    return ap
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
     try:
-        n = diff(load(sys.argv[1]), load(sys.argv[2]))
+        n = diff(load(args.old), load(args.new))
     except (OSError, ValueError, KeyError, TypeError) as exc:
         # A snapshot that cannot be read is not a wire change: exit 2, so a
         # caller that reads 1 as drift (research_diff.py) does not report one.
         print(f"parity_diff: {exc}", file=sys.stderr)
-        sys.exit(2)
-    sys.exit(1 if n else 0)
+        return 2
+    return 1 if n else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
