@@ -30,6 +30,7 @@ import os
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -78,6 +79,10 @@ LABEL_RE = re.compile(r"[A-Za-z0-9._-]+")
 GID_RE = re.compile(r"[0-9]+")
 FETCH_TIMEOUT_ENV = "RE_STEAM_FETCH_TIMEOUT"
 DEFAULT_FETCH_TIMEOUT = 6 * 3600.0
+# Ceiling on the PICS app-info body. The real payload for one app is a few
+# hundred KB; 8 MiB leaves room for the endpoint to grow without turning the
+# response length, which the server picks, into an unbounded allocation.
+MAX_APPINFO_BYTES = 8 << 20
 
 
 def usable_label(value: str) -> bool:
@@ -178,11 +183,35 @@ def load_appinfo(path: Path) -> Snapshot:
     return parse_snapshot(appinfo, f"file:{path}")
 
 
+def read_bounded(response: Any, url: str, limit: int = MAX_APPINFO_BYTES) -> bytes:
+    """The response body, read one byte past `limit` so an oversize body fails.
+
+    `response.read()` with no argument is the whole body in one allocation, and
+    the length here is the server's to choose: a timeout bounds the wait, not
+    the bytes that arrive inside it. Reading `limit + 1` and refusing anything
+    longer turns an unbounded body into a SourceError instead of a memory
+    spike on the operator machine.
+    """
+    body = response.read(limit + 1)
+    if len(body) > limit:
+        raise SourceError(f"{url}: response body exceeds the {limit}-byte cap")
+    return body
+
+
 def fetch_appinfo(url: str = PICS_URL, timeout: float = 30.0) -> Snapshot:
+    if urllib.parse.urlsplit(url).scheme != "https":
+        # This is the repo's only inbound network call and it carries no
+        # credentials, but a plaintext body is still an attacker-chosen
+        # payload parsed into the pin pipeline, and urllib follows a redirect
+        # to whatever scheme the response names. Refuse before the request.
+        raise SourceError(f"refusing a non-https app-info URL: {url}")
     request = urllib.request.Request(url, headers={"User-Agent": "7dtd-engine-research"})
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            appinfo: Any = tooling.loads_json(response.read().decode("utf-8"))
+            final = getattr(response, "url", "") or url
+            if urllib.parse.urlsplit(final).scheme != "https":
+                raise SourceError(f"refusing a non-https app-info response from {final}")
+            appinfo: Any = tooling.loads_json(read_bounded(response, url).decode("utf-8"))
     except (
         urllib.error.URLError,
         TimeoutError,

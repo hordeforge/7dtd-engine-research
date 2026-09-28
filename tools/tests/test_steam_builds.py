@@ -13,6 +13,7 @@ Usage: python3 tools/tests/test_steam_builds.py
 from __future__ import annotations
 
 import functools
+import io
 import json
 import os
 import sys
@@ -67,6 +68,90 @@ ACF = """"AppState"
 \t}
 }
 """
+
+
+class _FakeResponse(io.BytesIO):
+    """A urlopen result: the body, read under the cap the caller asks for."""
+
+    def __init__(self, body: bytes, url: str = "https://example.invalid") -> None:
+        super().__init__(body)
+        self.url = url
+
+    def __enter__(self) -> "_FakeResponse":
+        return self
+
+    def __exit__(self, *_exc: object) -> None:
+        self.close()
+
+
+def check_fetch_bounds() -> None:
+    """The only inbound network call must be size- and scheme-bounded.
+
+    A timeout bounds how long the fetch waits, not how many bytes arrive
+    inside it, and urllib follows a redirect to whatever scheme the response
+    names, so an oversize body and a plaintext one both reach the pin parser
+    unless the read and the URL are checked here.
+    """
+    cap = steam_builds.MAX_APPINFO_BYTES
+    body = json.dumps(APPINFO).encode("utf-8")
+    assert len(body) < cap, f"the APPINFO fixture no longer fits the {cap}-byte cap"
+
+    # Pair side: a body under the cap is returned whole.
+    read = steam_builds.read_bounded(_FakeResponse(body), "https://example.invalid")
+    assert read == body, read[:80]
+
+    # One byte over the cap fails closed rather than allocating without bound.
+    # Exactly at the cap is still a body the cap allows, so it is read whole.
+    at_cap = steam_builds.read_bounded(_FakeResponse(b"x" * cap), "https://example.invalid")
+    assert len(at_cap) == cap, len(at_cap)
+    try:
+        steam_builds.read_bounded(_FakeResponse(b"x" * (cap + 1)), "https://example.invalid")
+    except steam_builds.SourceError as exc:
+        assert "cap" in str(exc), exc
+    else:
+        raise AssertionError(f"read_bounded accepted a body over the {cap} cap")
+
+    # A plaintext URL is refused before any request is made.
+    for url in ("http://api.steamcmd.net/v1/info/294420", "file:///etc/passwd", "steam_builds.json"):
+        try:
+            steam_builds.fetch_appinfo(url)
+        except steam_builds.SourceError as exc:
+            assert "non-https" in str(exc), exc
+        else:
+            raise AssertionError(f"fetch_appinfo accepted a non-https URL: {url}")
+
+    # A redirect that lands off https is refused too, and the redirect is
+    # urllib's own: urlopen follows it, so the request the operator asked for
+    # is not the response that would otherwise be parsed.
+    real_urlopen = steam_builds.urllib.request.urlopen
+    for response_url, expect in (
+        ("http://example.invalid/info", "non-https app-info response"),
+        ("https://example.invalid/info", "cap"),
+    ):
+        steam_builds.urllib.request.urlopen = (
+            lambda *_a, **_k: _FakeResponse(
+                b"x" * (cap + 1) if "cap" in expect else json.dumps(APPINFO).encode("utf-8"),
+                url=response_url,
+            )
+        )
+        try:
+            steam_builds.fetch_appinfo()
+        except steam_builds.SourceError as exc:
+            assert expect in str(exc), exc
+        else:
+            raise AssertionError(f"fetch_appinfo accepted a response from {response_url}")
+        finally:
+            steam_builds.urllib.request.urlopen = real_urlopen
+
+    # Pair side: a well-formed https response still parses through the same path.
+    steam_builds.urllib.request.urlopen = lambda *_a, **_k: _FakeResponse(
+        json.dumps(APPINFO).encode("utf-8")
+    )
+    try:
+        snapshot = steam_builds.fetch_appinfo()
+    finally:
+        steam_builds.urllib.request.urlopen = real_urlopen
+    assert snapshot.branches[0].name == "public", snapshot.branches
 
 
 def check_error_paths(tmp_path: Path, appinfo: Path) -> None:
@@ -424,6 +509,7 @@ def main() -> None:
 
         check_error_paths(tmp_path, appinfo)
 
+    check_fetch_bounds()
     check_committed_pin()
     print("OK: steam_builds parse/drift/pin cases pass; committed pin matches stock_facts")
 
