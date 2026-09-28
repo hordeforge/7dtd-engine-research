@@ -5,10 +5,15 @@ StateMachines.exe scans the docs for mermaid state diagrams and regenerates
 docs/inventories/state-machines.md. A doc edit that adds/removes a diagram
 without regenerating the inventory fails here.
 
+SKIPs (rather than fails) when mono or the built dumper is absent: the check
+cannot run without them, and a stock build carries no bin/ (see tools/README.md
+for `make tools`). Same shape as tests/test_cecil_pin.py.
+
 Usage: python3 tools/tests/test_state_machines_current.py
 """
 
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -19,25 +24,22 @@ import _common
 TOOLS = str(_common.TOOLS)
 REPO = str(_common.REPO)
 COMMITTED = os.path.join(REPO, "docs", "inventories", "state-machines.md")
+EXE = os.path.join(TOOLS, "bin", "StateMachines.exe")
 
 
 def main() -> int:
-    import shutil
-
     if shutil.which("mono") is None:
         print("SKIP: mono not installed (state-machines regen is a local gate)")
+        return 0
+    if not os.path.isfile(EXE):
+        print(f"SKIP: {EXE} not built (run make tools)")
         return 0
     env = dict(os.environ)
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
     with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         out = os.path.join(td, "state-machines.md")
         proc = subprocess.run(
-            [
-                "mono",
-                os.path.join(TOOLS, "bin", "StateMachines.exe"),
-                os.path.join(REPO, "docs"),
-                out,
-            ],
+            ["mono", EXE, os.path.join(REPO, "docs"), out],
             capture_output=True,
             text=True,
             env=env,

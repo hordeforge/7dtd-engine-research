@@ -12,9 +12,12 @@ Checked here:
   - every pin carries at least one --hash=sha256 (no hash-stripped hand edits)
   - no ranged/wildcard/url specifiers sneak into the lock
   - every entry the lock marks as coming from requirements.in is declared there
+  - every non-stdlib import in the sandbox tools and shader_blob_dump.py is
+    declared in requirements.in, so no tool rides in on an undeclared
+    transitive (a version bump of the parent can then move it under them)
 
-The checker is itself mutation-tested below against crafted bad locks so a
-future refactor cannot turn it into a no-op.
+The checker is itself mutation-tested below against crafted bad locks and
+sources so a future refactor cannot turn it into a no-op.
 """
 
 from __future__ import annotations
@@ -22,6 +25,8 @@ from __future__ import annotations
 import os
 import re
 import sys
+import tempfile
+from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -30,10 +35,12 @@ import _common
 TOOLS = _common.TOOLS
 IN_FILE = TOOLS / "sandbox" / "requirements.in"
 LOCK = TOOLS / "sandbox" / "requirements.txt"
+IMPORTERS = [*sorted((TOOLS / "sandbox").glob("*.py")), TOOLS / "shader_blob_dump.py"]
 
 PIN_RE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9._-]*)==([^\s\\]+)\s*(?:\\\s*)?$")
 NON_EXACT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*\s*(@|~=|!=|<|>|[*]|\[)")
 DIRECT_VIA_RE = re.compile(r"#\s+(?:via\s+)?-r requirements\.in$")
+IMPORT_RE = re.compile(r"^[ \t]*(?:from\s+([A-Za-z_][\w.]*)|import\s+([A-Za-z_][\w.]*))", re.M)
 
 
 def canon(name: str) -> str:
@@ -95,6 +102,28 @@ def check(in_set: set[str], lock_text: str) -> list[str]:
     return bad
 
 
+def third_party_imports(path: Path, local: set[str]) -> set[str]:
+    """Top-level modules a file imports that are neither stdlib nor a sibling module."""
+    out = set()
+    for m in IMPORT_RE.finditer(path.read_text(encoding="utf-8")):
+        top = (m.group(1) or m.group(2)).split(".")[0]
+        if top in sys.stdlib_module_names or top in local or top == path.stem:
+            continue
+        out.add(top)
+    return out
+
+
+def undeclared_imports(in_set: set[str], sources: list[Path]) -> list[str]:
+    """Imports a tool relies on that requirements.in does not declare."""
+    bad = []
+    for path in sources:
+        local = {p.stem for p in path.parent.glob("*.py")}
+        for mod in sorted(third_party_imports(path, local)):
+            if canon(mod) not in in_set:
+                bad.append(f"{mod}: imported by {path.name} but not declared in requirements.in")
+    return bad
+
+
 def self_test() -> tuple[list[str], int]:
     """Mutation checks: each crafted defect must be caught, the clean lock must pass."""
 
@@ -141,6 +170,43 @@ def self_test() -> tuple[list[str], int]:
                 bad.append(f"{label}: clean case rejected: {got}")
         elif not any(w in line for w in want for line in got):
             bad.append(f"{label}: defect not caught (got {got!r})")
+
+    # Import-side mutations: a tool must not reach a package requirements.in
+    # never declared, and stdlib/sibling imports must not be flagged.
+    with tempfile.TemporaryDirectory(prefix="reqsync-selftest-", dir=_common.scratch_dir()) as td:
+        tmp = Path(td)
+        (tmp / "safe_name.py").write_text("def safe_name(x):\n    return x\n", encoding="utf-8")
+        src_cases = [
+            (
+                "imports declared",
+                {"unitypy"},
+                "import json\n\nfrom UnityPy import load\nfrom safe_name import safe_name\n",
+                [],
+            ),
+            (
+                "transitive import undeclared",
+                {"unitypy"},
+                "import json\n\n    import lz4.block\n",
+                ["lz4"],
+            ),
+            (
+                "dotted stdlib ignored",
+                {"unitypy"},
+                "import xml.etree.ElementTree as ET\n",
+                [],
+            ),
+        ]
+        for label, in_set, body, want in src_cases:
+            target = tmp / "tool_under_test.py"
+            target.write_text(body, encoding="utf-8")
+            got = undeclared_imports(in_set, [target])
+            if not want:
+                if got:
+                    bad.append(f"{label}: clean case rejected: {got}")
+            elif not any(w in line for w in want for line in got):
+                bad.append(f"{label}: defect not caught (got {got!r})")
+            cases.append((label, in_set, body, want))
+
     return bad, len(cases)
 
 
@@ -152,7 +218,11 @@ def main() -> int:
     real = check(parse_in(IN_FILE.read_text(encoding="utf-8")), LOCK.read_text(encoding="utf-8"))
     for f in real:
         print("FAIL:", f, file=sys.stderr)
-    if failures or real:
+    declared = parse_in(IN_FILE.read_text(encoding="utf-8"))
+    undeclared = undeclared_imports(declared, IMPORTERS)
+    for f in undeclared:
+        print("FAIL:", f, file=sys.stderr)
+    if failures or real or undeclared:
         return 1
 
     pins = parse_lock(LOCK.read_text(encoding="utf-8"))
@@ -160,7 +230,8 @@ def main() -> int:
     directs = ", ".join(sorted(n for n, m in pins.items() if m["direct"]))
     print(
         f"OK: sandbox lock matches requirements.in ({directs}); all {len(pins)} pins exact, "
-        f"{hashed}/{len(pins)} sha256-hashed; {n_cases} mutations caught"
+        f"{hashed}/{len(pins)} sha256-hashed, {len(IMPORTERS)} tools import only declared "
+        f"packages; {n_cases} mutations caught"
     )
     return 0
 
