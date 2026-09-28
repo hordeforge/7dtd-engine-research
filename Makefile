@@ -231,6 +231,8 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_xml_pins_fuzz.py"
 	python3 "$(TOOLS)/tests/test_gate_unreadable_files.py"
 	python3 "$(TOOLS)/tests/test_parity_diff.py"
+	python3 "$(TOOLS)/tests/test_dump_diff.py"
+	python3 "$(TOOLS)/tests/test_assignids_dump.py"
 	python3 "$(TOOLS)/tests/test_parity_drift_fail_closed.py"
 	python3 "$(TOOLS)/tests/test_steam_builds.py"
 	python3 "$(TOOLS)/tests/test_steam_manifest.py"

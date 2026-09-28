@@ -119,8 +119,14 @@ def diff_type(old: TypeInfo, new: TypeInfo, full: bool = False) -> list[str]:
         if old.methods[sig] == new.methods[sig]:
             continue
         changed_body, lines = method_diff(old.methods[sig], new.methods[sig])
-        if not changed_body and old.method_sigs.get(sig) != new.method_sigs.get(sig):
-            continue  # same body, different IL byte count marker only
+        if not changed_body:
+            # Same body once the IL offsets are stripped, so the only
+            # difference is where the dumper numbered the instructions.
+            # The extra "and the IL marker differs" clause this used to carry
+            # defeated strip_offsets: a recompile renumbers the offsets and
+            # keeps the marker, so every method in the tree was reported as
+            # changed and the real drift was buried.
+            continue
         out.append(
             f"  ~method {sig} (IL {old.method_sigs.get(sig, '?')}->{new.method_sigs.get(sig, '?')})"
         )
