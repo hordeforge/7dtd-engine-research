@@ -51,7 +51,23 @@ def sha256_file(path: str) -> tuple[int, str]:
     return n, h.hexdigest()
 
 
+def parse_float(text: str, where: str, unparsed: list[str]) -> float | None:
+    """A value that is not a plain number is a finding, not a crash.
+
+    An install whose markup or threshold carries a locale comma or a stray unit
+    must degrade to a named skip that fails the gate closed; float() alone
+    raised ValueError and left a traceback with no verdict.
+    """
+    try:
+        return float(text)
+    except ValueError:
+        unparsed.append(f"{where}: {text!r} is not a number")
+        return None
+
+
 def extract(game_dir: str) -> dict[str, Any]:
+    unparsed: list[str] = []
+
     def read_if_present(path: str) -> str | None:
         if not os.path.isfile(path):
             return None
@@ -88,7 +104,9 @@ def extract(game_dir: str) -> dict[str, Any]:
             for attr in ("buy_markup", "sell_markdown"):
                 am = re.search(rf'\b{attr}="([^"]+)"', m.group(0))
                 if am:
-                    trader[attr] = float(am.group(1))
+                    value = parse_float(am.group(1), f"{CFG_TRADERS}:{attr}", unparsed)
+                    if value is not None:
+                        trader[attr] = value
     buffs: dict[str, float | str] = {}
     btext = read_if_present(os.path.join(game_dir, CFG_BUFFS))
     if btext is not None:
@@ -99,12 +117,16 @@ def extract(game_dir: str) -> dict[str, Any]:
                 btext,
             )
             if m:
-                buffs[f"{stat.lower()}_wellfed_threshold"] = float(m.group(1))
+                key = f"{stat.lower()}_wellfed_threshold"
+                value = parse_float(m.group(1), f"{CFG_BUFFS}:{key}", unparsed)
+                if value is not None:
+                    buffs[key] = value
         buffs["hunger_buff"] = "buffStatusHungry01"
         buffs["thirst_buff"] = "buffStatusThirsty01"
     return {
         "sources": [CFG_ENTITIES, CFG_TRADERS, CFG_BUFFS],
         "source_identity": source_identity,
+        "unparsed": unparsed,
         "entityclasses_health": hp,
         "traders_root": trader,
         "buffs_survival": buffs,
@@ -182,7 +204,7 @@ def main() -> int:
         # A wrong --game-dir (or a renamed config section) must not wipe the
         # committed pins with empty values while reporting success. Same rule
         # for every section whose source file exists but parses to nothing.
-        refusals = []
+        refusals = list(data["unparsed"])
         if not data["entityclasses_health"]:
             refusals.append(f"no health* values parsed from {epath}")
         tpath = os.path.join(args.game_dir, CFG_TRADERS)
@@ -223,6 +245,13 @@ def main() -> int:
         print(f"error: game dir not found: {args.game_dir} (--game-dir)", file=sys.stderr)
         return 2
     live = extract(args.game_dir)
+    if live["unparsed"]:
+        # A pinned value the install carries in a shape the gate cannot read is
+        # drift the operator has to see, not a value the gate may skip.
+        print("FAIL: xml pins: values the gate could not read from the install")
+        for u in live["unparsed"]:
+            print(f"  - {u}")
+        return 1
     if not os.path.isfile(pins_path):
         print(f"FAIL: {pins_path} missing (run xml_pins.py --game-dir first)")
         return 1

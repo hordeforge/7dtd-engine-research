@@ -83,10 +83,13 @@ class Manifest:
         return self.path.name.split("_", 1)[0]
 
 
+MAX_VARINT_BYTES = 10  # uint64 ceiling; a longer run is corrupt, not a big number
+
+
 def _varint(data: bytes, offset: int) -> tuple[int, int]:
     value = 0
     shift = 0
-    while True:
+    for _ in range(MAX_VARINT_BYTES):
         if offset >= len(data):
             raise ManifestError("truncated varint")
         byte = data[offset]
@@ -95,6 +98,7 @@ def _varint(data: bytes, offset: int) -> tuple[int, int]:
         shift += 7
         if not byte & 0x80:
             return value, offset
+    raise ManifestError(f"varint longer than {MAX_VARINT_BYTES} bytes")
 
 
 def _fields(block: bytes) -> Iterator[tuple[int, int, Any]]:
@@ -112,9 +116,13 @@ def _fields(block: bytes) -> Iterator[tuple[int, int, Any]]:
             value = block[offset : offset + length]
             offset += length
         elif wire == 5:
+            if offset + 4 > len(block):
+                raise ManifestError("truncated 32-bit field")
             value = struct.unpack_from("<I", block, offset)[0]
             offset += 4
         elif wire == 1:
+            if offset + 8 > len(block):
+                raise ManifestError("truncated 64-bit field")
             value = struct.unpack_from("<Q", block, offset)[0]
             offset += 8
         else:

@@ -172,6 +172,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_parity_drift_fail_closed.py"
 	python3 "$(TOOLS)/tests/test_steam_builds.py"
 	python3 "$(TOOLS)/tests/test_steam_manifest.py"
+	python3 "$(TOOLS)/tests/test_steam_manifest_fuzz.py"
 	python3 "$(TOOLS)/tests/test_research_diff.py"
 	python3 "$(TOOLS)/tests/test_generation_stamp.py"
 	python3 "$(TOOLS)/tests/test_state_machines_current.py"

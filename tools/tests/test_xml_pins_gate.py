@@ -12,6 +12,8 @@ pin the full-section contract with synthetic Data/Config XML:
   - drift in ANY section fails --check (traders, buffs, health)
   - regeneration refuses to overwrite populated sections when a source file
     parses to nothing (wrong --game-dir or renamed config section)
+  - a pinned value the install spells in an unreadable shape fails closed with
+    a named reason instead of raising out of float()
 
 Runs entirely in a temp dir via --pins/--game-dir; never touches tools/data.
 
@@ -187,6 +189,35 @@ def main() -> int:
             bad.append(f"corrupt pins not a clean FAIL (rc={rc}):\n{out}")
         if "regenerate" not in out:
             bad.append(f"corrupt pins FAIL lacks repair hint:\n{out}")
+
+    # 9. A pinned value the install spells in a shape the gate cannot read
+    #    (locale comma, trailing unit) must fail closed with a named reason in
+    #    both modes, not raise ValueError out of float() as a traceback.
+    with tempfile.TemporaryDirectory(prefix="xml-pins-gate-", dir=_common.scratch_dir()) as tmp:
+        game = os.path.join(tmp, "game")
+        pins = os.path.join(tmp, "pins.json")
+        build_install(game)
+        rc, out = run("--game-dir", game, "--pins", pins)
+        if rc != 0:
+            bad.append(f"setup regenerate failed (rc={rc}):\n{out}")
+        write_config(game, "traders.xml", TRADERS.replace('buy_markup="3.0"', 'buy_markup="3,0"'))
+        rc, out = run("--check", "--game-dir", game, "--pins", pins)
+        if rc != 1 or "could not read" not in out or "Traceback" in out:
+            bad.append(f"unreadable trader value not a clean FAIL (rc={rc}):\n{out}")
+        if "traders.xml" not in out:
+            bad.append(f"unreadable trader FAIL does not name the file:\n{out}")
+        with open(pins, encoding="utf-8") as f:
+            before = f.read()
+        rc, out = run("--game-dir", game, "--pins", pins)
+        if rc != 2 or "is not a number" not in out:
+            bad.append(f"unreadable trader value not refused on regenerate (rc={rc}):\n{out}")
+        with open(pins, encoding="utf-8") as f:
+            if f.read() != before:
+                bad.append("committed pins were modified by a refused malformed regenerate")
+        write_config(game, "buffs.xml", BUFFS.replace('value="0.52"', 'value="52%"', 1))
+        rc, out = run("--check", "--game-dir", game, "--pins", pins)
+        if rc != 1 or "buffs.xml" not in out or "Traceback" in out:
+            bad.append(f"unreadable buff threshold not a clean FAIL (rc={rc}):\n{out}")
 
     if bad:
         print("FAIL: xml_pins gate")
