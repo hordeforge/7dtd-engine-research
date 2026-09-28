@@ -1,8 +1,16 @@
 name: ci
 on: [push, pull_request]
+# One run per ref: a force-push or a follow-up commit supersedes the previous
+# run instead of burning a second runner on results nobody reads.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   docs:
     runs-on: ubuntu-latest
+    # A wedged fuzz/parse step must fail the job, not hold a runner for the
+    # six-hour default.
+    timeout-minutes: 20
     steps:
       # Actions are pinned to immutable commit SHAs (dependabot's github-actions
       # ecosystem bumps both the SHA and the version comment weekly); a retagged
@@ -12,6 +20,7 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2

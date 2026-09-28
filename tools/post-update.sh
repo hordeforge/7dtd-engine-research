@@ -41,7 +41,7 @@ for arg in "$@"; do
       DO_DRIFT=0
       ;;
     -h|--help)
-      sed -n '2,18p' "$0"
+      sed -n '2,/^[^#]/ { /^#/ { s/^#[[:space:]]\{0,1\}//; p; } }' "$0"
       exit 0
       ;;
     *) echo "post-update: unknown argument: $arg" >&2; exit 2 ;;

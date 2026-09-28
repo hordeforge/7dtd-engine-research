@@ -17,7 +17,7 @@
 set -euo pipefail
 
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-  sed -n '2,11p' "$0"
+  sed -n '2,/^[^#]/ { /^#/ { s/^#[[:space:]]\{0,1\}//; p; } }' "$0"
   exit 0
 fi
 [[ $# -le 2 ]] || { echo "usage: fetch_version.sh <branch|manifestid> [label]" >&2; exit 2; }

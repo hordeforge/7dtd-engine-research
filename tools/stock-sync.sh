@@ -29,7 +29,7 @@ for arg in "$@"; do
       MODE="extract"
       ;;
     -h|--help)
-      sed -n '2,14p' "$0"
+      sed -n '2,/^[^#]/ { /^#/ { s/^#[[:space:]]\{0,1\}//; p; } }' "$0"
       exit 0
       ;;
     *) echo "stock-sync: unknown argument: $arg" >&2; exit 2 ;;

@@ -20,7 +20,7 @@ set -uo pipefail
 export LC_ALL=C
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-  sed -n '2,10p' "$0"
+  sed -n '2,/^[^#]/ { /^#/ { s/^#[[:space:]]\{0,1\}//; p; } }' "$0"
   exit 0
 fi
 [[ $# -le 1 ]] || { echo "usage: drift-check.sh [Assembly-CSharp.dll]" >&2; exit 2; }

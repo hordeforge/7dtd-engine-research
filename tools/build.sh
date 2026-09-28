@@ -7,7 +7,7 @@ skip_legacy=0
 for arg in "$@"; do
   case "$arg" in
     --skip-legacy) skip_legacy=1 ;;
-    -h|--help) sed -n '2,3p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,/^[^#]/ { /^#/ { s/^#[[:space:]]\{0,1\}//; p; } }' "$0"; exit 0 ;;
     *) echo "build: unknown argument: $arg" >&2; exit 2 ;;
   esac
 done

@@ -14,10 +14,24 @@ SCRIPTS = (
     "cecil-pin.sh",
     "post-update.sh",
     "regen.sh",
+    "release.sh",
     "stock-sync.sh",
     "parity/drift-check.sh",
     "steam/fetch_version.sh",
 )
+
+
+def header_comment(path: str) -> list[str]:
+    """The script's leading comment block, as `--help` must print it."""
+    lines: list[str] = []
+    with open(path, encoding="utf-8") as handle:
+        for index, line in enumerate(handle):
+            if index == 0:
+                continue
+            if not line.startswith("#"):
+                break
+            lines.append(line[1:].removeprefix(" ").rstrip())
+    return lines
 
 
 def main() -> None:
@@ -27,6 +41,13 @@ def main() -> None:
         result = subprocess.run([path, "--help"], text=True, capture_output=True)
         if result.returncode != 0 or not result.stdout.strip():
             bad.append(f"{relative}: rc={result.returncode}, stderr={result.stderr.strip()!r}")
+            continue
+        # A stale line range used to spill the source below the comment block
+        # into the help text; the whole block must still be printed, and nothing
+        # past its end.
+        printed = result.stdout.splitlines()
+        if printed != header_comment(str(path)):
+            bad.append(f"{relative}: help is not the header comment block:\n" + "\n".join(printed))
     assert not bad, "\n".join(bad)
     assert subprocess.run([TOOLS / "build.sh", "--bad"], capture_output=True).returncode == 2
     assert subprocess.run([TOOLS / "regen.sh", "--bad"], capture_output=True).returncode == 2

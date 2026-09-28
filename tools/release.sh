@@ -17,7 +17,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-usage() { sed -n '2,13p' "$0"; }
+usage() { sed -n '2,/^[^#]/ { /^#/ { s/^#[[:space:]]\{0,1\}//; p; } }' "$0"; }
 die() { echo "release: $*" >&2; exit 2; }
 
 VERSION=""; NOTES=""; DRY=0; GATES=1
