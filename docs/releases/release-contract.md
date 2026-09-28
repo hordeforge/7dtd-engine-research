@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**76 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**83 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -153,6 +153,12 @@ falls behind the commits actually below the last tag.
 - `steam_manifest.py` orders manifest history by mtime instead of a truncated
   clock string, and the steam install-integrity verdict was restored after a
   drift.
+- **A resume tags the commit it is releasing.** A run that died between the tag
+  and the release used to leave the local tree untagged while origin carried the
+  tag, so the retry tagged nothing and the release named a commit the published
+  tag did not. The tag is now cut before the push, and a tag that exists on
+  origin only is left alone. The shell bound also refuses an unusable kill-grace
+  value rather than passing a malformed one to the killer.
 - **A CLI that cannot answer exits 2 instead of a clean-looking pass.**
   `cross_repo_links.py`, `mention_depth.py`, `zdtd_cite_check.py` and
   `steam_builds.py` took a range or a threshold that could name nothing, and

@@ -33,6 +33,7 @@ import os
 import re
 import struct
 import sys
+import unicodedata
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -342,9 +343,23 @@ def sha1_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def fold_path(s: str) -> str:
+    """The form a depot path is matched in: NFC, case folded, backslash separators.
+
+    Depot entry names are the identity --only/--ignore/--find match on, and the
+    needle comes from the command line, so the two spellings need not agree.
+    NFC because a macOS checkout hands back NFD and byte equality then misses
+    a live file (same rule as tooling.nfc). casefold, not lower: lower leaves
+    "SS" distinct from the sharp s it is, so a folded needle missed a name an
+    operator typed as the character it case folds to. It is the locale-free
+    fold, which is what a path wants; it is not a locale collation.
+    """
+    return unicodedata.normalize("NFC", s).casefold().replace("/", "\\")
+
+
 def match_entries(manifest: Manifest, needle: str) -> list[Entry]:
-    lowered = needle.lower().replace("/", "\\")
-    return [e for e in manifest.entries if lowered in e.name.lower()]
+    folded = fold_path(needle)
+    return [e for e in manifest.entries if folded in fold_path(e.name)]
 
 
 def safe_join(root: Path, name: str) -> Path | None:
@@ -426,10 +441,10 @@ def verify(
     for entry in manifest.entries:
         if not entry.sha1 or entry.size == 0:
             continue  # directory, empty file, or symlink: nothing to hash
-        lowered = entry.name.lower()
-        if only and only.lower().replace("/", "\\") not in lowered:
+        lowered = fold_path(entry.name)
+        if only and fold_path(only) not in lowered:
             continue
-        if any(pattern.lower().replace("/", "\\") in lowered for pattern in ignore):
+        if any(fold_path(pattern) in lowered for pattern in ignore):
             ignored += 1
             continue
         local = safe_join(root, entry.name)
@@ -468,7 +483,7 @@ def diff_manifests(
     counts = {"added": 0, "removed": 0, "changed": 0}
     lines: list[str] = []
     for name in sorted(set(before) | set(after)):
-        if only and only.lower().replace("/", "\\") not in name.lower():
+        if only and fold_path(only) not in fold_path(name):
             continue
         a, b = before.get(name), after.get(name)
         if a is None and b is not None:

@@ -22,6 +22,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 RELEASE = _common.TOOLS / "release.sh"
+# Every child a gate starts is bounded (tools/tests/test_bounded_runs.py): a
+# wedged git must fail the gate, not hang it.
+GIT_TIMEOUT = 60.0
 
 # A stub gh: `auth status` passes, `release view` reports a release only once
 # `release create` has recorded one, and every call is logged so the test can
@@ -54,6 +57,7 @@ def git_out(*args: str, cwd: Path) -> str:
         text=True,
         encoding="utf-8",
         errors="replace",
+        timeout=GIT_TIMEOUT,
     )
     return run.stdout.strip()
 

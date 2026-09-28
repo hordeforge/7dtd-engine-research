@@ -61,6 +61,29 @@ SKIP_DIRS = {
 }
 
 
+def _resolves(path: str) -> bool:
+    """True when `path` names a file or directory that exists.
+
+    A miss falls back to the NFC-equal name in the same directory: a link
+    typed on macOS is written NFD (a decomposed "é" is "e" plus a combining
+    acute) and the file it points at is committed NFC, so the exact path does
+    not exist and a live document reads as BROKEN. Both spellings are the same
+    document, which is the rule tooling.nfc exists for; the fallback only runs
+    when the exact path is already absent, so it can never mask a real break.
+    """
+    if os.path.exists(path):
+        return True
+    parent, _, name = path.rpartition(os.sep)
+    if not parent or not name:
+        return False
+    try:
+        entries = os.listdir(parent)
+    except OSError:
+        return False
+    want = tooling.nfc(name)
+    return any(tooling.nfc(entry) == want for entry in entries)
+
+
 def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str]]:
     """(external-link count, broken count, unreadable-file count, report lines)."""
     if not os.path.isdir(repo):
@@ -82,7 +105,13 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str
                 continue
             f = os.path.join(dirpath, name)
             try:
-                with open(f, encoding="utf-8") as fh:
+                # errors="replace", the same as zdtd_cite_check.py: a file that
+                # is not valid UTF-8 raises UnicodeDecodeError, which is a
+                # ValueError, not an OSError, so the handler below never saw it
+                # and the gate died on a traceback instead of reporting the
+                # file. Link targets are ASCII paths, so the mangled tail costs
+                # nothing.
+                with open(f, encoding="utf-8", errors="replace") as fh:
                     txt = fh.read()
             except OSError as exc:
                 # A gate must not pass a file it could not read: its links were
@@ -93,7 +122,7 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str
                 p = os.path.normpath(os.path.join(dirpath, m.group(1).split("#", 1)[0]))
                 if not p.startswith(root_prefix):
                     total += 1
-                    if not os.path.exists(p):
+                    if not _resolves(p):
                         broken.append(f"  BROKEN {f}: {m.group(1)}")
     return total, len(broken), len(unreadable), broken + unreadable
 

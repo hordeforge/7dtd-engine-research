@@ -19,6 +19,7 @@ import os
 import struct
 import sys
 import tempfile
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -124,6 +125,39 @@ def main() -> None:
         found = run("--manifest", str(path), "--find", "good.dll")
         assert found.returncode == 0, found.stderr
         assert hashlib.sha1(good).hexdigest() in found.stdout, found.stdout
+
+        # Depot paths are matched in the fold form: an operator on macOS types
+        # the NFD spelling of an accented name, and the manifest carries NFC
+        # (or the reverse), and byte equality misses a file that is right
+        # there. Case folding, not lower(), so a sharp s matches the ss it
+        # folds to.
+        (install / "Data" / "Ünïcode").mkdir(parents=True, exist_ok=True)
+        folded_bytes = b"depot payload\n"
+        (install / "Data" / "Ünïcode" / "straße.dll").write_bytes(folded_bytes)
+        folded_path = root / "294422_42.manifest"
+        folded_path.write_bytes(
+            manifest(
+                [
+                    entry("Data\\Ünïcode\\straße.dll", folded_bytes),
+                ]
+            )
+        )
+        nfd_needle = unicodedata.normalize("NFD", "Data\\Ünïcode")
+        for needle in (nfd_needle, "data\\ünïcode", "STRASSE.DLL"):
+            matched = run("--manifest", str(folded_path), "--find", needle)
+            assert matched.returncode == 0, (needle, matched.stderr)
+            assert "straße.dll" in matched.stdout, (needle, matched.stdout)
+            filtered = _common.run_cli(
+                TOOL,
+                "--manifest",
+                str(folded_path),
+                "--verify",
+                str(install),
+                "--only",
+                needle,
+            )
+            assert filtered.returncode == 0, (needle, filtered.stdout, filtered.stderr)
+            assert "verify: 1 ok, 0 missing, 0 mismatch" in filtered.stdout, filtered.stdout
 
         verified = _common.run_cli(
             TOOL, "--manifest", str(path), "--verify", str(install), "--only", "Data"

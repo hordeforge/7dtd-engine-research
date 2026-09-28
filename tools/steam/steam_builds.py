@@ -188,6 +188,10 @@ def fetch_appinfo(url: str = PICS_URL, timeout: float = 30.0) -> Snapshot:
         TimeoutError,
         OSError,
         json.JSONDecodeError,
+        # A body that is not UTF-8 raises UnicodeDecodeError, a ValueError and
+        # not an OSError, so the source failure escaped as a traceback instead
+        # of the SourceError every caller of this function reports.
+        UnicodeDecodeError,
         tooling.NonFiniteNumberError,
     ) as exc:
         raise SourceError(f"cannot read {url}: {exc}") from exc
