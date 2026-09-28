@@ -8,7 +8,7 @@
 
 ```text
 docs/              this hub (INDEX.md)
-docs/meta/         what the corpus covers, how it was derived, what IL cannot close
+docs/meta/         what the corpus covers, how it was derived, what IL cannot close, this repo's own threat model
 docs/releases/     per-release exact deltas
 docs/loop/         frame and simulation loop
 docs/entities/     entity tick, AI, pathing, survival stats
@@ -38,6 +38,7 @@ oss-tools/         survey notes on third-party server tools/mods
 | 4 | [`protocol.md`](network/protocol.md) | Wire framing, join, golden package bodies |
 | 5 | [`protocol-frames.md`](network/protocol-frames.md) | Visual RFC/Mermaid byte frames per package |
 | 6 | [`residuals.md`](meta/residuals.md) | What IL cannot close |
+| 6a | [`threat-model.md`](meta/threat-model.md) | What can be attacked in this repo's own tooling: entry points, boundaries, ranked risks |
 | 6b | [`completion-bar.md`](meta/completion-bar.md) | What "100% documented" means (tiers A-D) |
 
 Campaign audit (V3.2.0 evidence + residual map): [`../workspace/outputs/docs-research-audit-20260803.md`](../workspace/outputs/docs-research-audit-20260803.md).

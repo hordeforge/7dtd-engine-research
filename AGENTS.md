@@ -32,6 +32,7 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 |---|---|
 | [`docs/`](docs) | Engine RE narratives, one folder per subsystem (`meta`, `releases`, `loop`, `entities`, `world`, `network`, `admin`, `gameplay`, `content`, `social`). Hub: [`docs/INDEX.md`](docs/INDEX.md). A new narrative goes in the folder whose subsystem owns it and gets a row in the hub's subsystem map (the link gate fails on an unlinked doc). Basenames are unique corpus-wide; gates resolve a doc by name (`_common.doc()`), never by folder |
 | [`docs/inventories/`](docs/inventories) | Raw method/call inventories for the narratives |
+| [`docs/meta/threat-model.md`](docs/meta/threat-model.md) | The one doc here that is not stock RE: the attack surface, trust boundaries, and ranked risks of this repo's own tooling. Update it when a tool gains, loses, or moves an entry point |
 | [`tools/`](tools) | **Tracked** Mono.Cecil dump tooling ([`tools/README.md`](tools/README.md)) |
 | [`tools/data/`](tools/data) | Committed pins (`stock_facts.json`) |
 | [`tools/tests/`](tools/tests) | Pin gate, dump-set structural tests, readiness bench |

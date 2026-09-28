@@ -180,6 +180,7 @@ should be re-checked against IL before you rely on it.
 | [stability.md](../world/stability.md) | IL re-verified 2026-08-11 sweep (not in audit passes) |
 | [stealth-smell.md](../entities/stealth-smell.md) | audited (pass 1) |
 | [terrain-height.md](../world/terrain-height.md) | audited (pass 1) |
+| [threat-model.md](../meta/threat-model.md) | tooling threat model (not stock RE; no IL claims) |
 | [texture-atlas.md](../world/texture-atlas.md) | not-independently-audited |
 | [texture-atlas-unityfs.md](../world/texture-atlas-unityfs.md) | not-independently-audited |
 | [shader-subprogram-blob.md](../world/shader-subprogram-blob.md) | not-independently-audited |
