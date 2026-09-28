@@ -157,7 +157,6 @@ Closed in recent sessions (still optional, not required for A+B):
 | FireEvent fan-out order | minevents §3 |
 | SetAttackTarget / SeeCache | entity-ai §5.1b |
 | ExplosionServer/Client | protocol-packages §6.14-6.15 |
-| explode AttackBlocks/Entities | protocol-packages §6.14 |
 | LetBlocksFall create path | entity-ai §8 |
 | BuffValue.DurationTick | buffs §2 |
 | PlayerId / PlayerSpawnedInWorld packages | server-lifecycle join |

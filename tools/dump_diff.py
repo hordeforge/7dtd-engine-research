@@ -100,7 +100,7 @@ def method_diff(old: list[str], new: list[str]) -> tuple[bool, list[str]]:
     return True, out
 
 
-def diff_type(name: str, old: TypeInfo, new: TypeInfo, full: bool = False) -> list[str]:
+def diff_type(old: TypeInfo, new: TypeInfo, full: bool = False) -> list[str]:
     out: list[str] = []
     if old.kind_line != new.kind_line:
         out.append(f"  base/kind: {old.kind_line} -> {new.kind_line}")
@@ -114,11 +114,9 @@ def diff_type(name: str, old: TypeInfo, new: TypeInfo, full: bool = False) -> li
         out.append(f"  +methods ({len(added)}): " + ", ".join(added))
     if removed:
         out.append(f"  -methods ({len(removed)}): " + ", ".join(removed))
-    changed = 0
     for sig in sorted(set(old.methods) & set(new.methods)):
         if old.methods[sig] == new.methods[sig]:
             continue
-        changed += 1
         changed_body, lines = method_diff(old.methods[sig], new.methods[sig])
         if not changed_body and old.method_sigs.get(sig) != new.method_sigs.get(sig):
             continue  # same body, different IL byte count marker only
@@ -141,17 +139,14 @@ def main() -> int:
     old_files = {p.relative_to(old_dir): p for p in old_dir.rglob("*.il.txt")}
     new_files = {p.relative_to(new_dir): p for p in new_dir.rglob("*.il.txt")}
 
-    total_changed = 0
     # common files
     for rel in sorted(set(old_files) & set(new_files)):
-        name = rel.name
         if not flt.search(str(rel)):
             continue
         o = parse_type(old_files[rel])
         n = parse_type(new_files[rel])
-        d = diff_type(name, o, n, full=False)
+        d = diff_type(o, n, full=False)
         if d:
-            total_changed += 1
             print(f"== {rel}")
             for x in d:
                 print(x)

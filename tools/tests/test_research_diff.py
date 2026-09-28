@@ -42,16 +42,6 @@ def run(*args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def load_sibling(name: str) -> Any:
-    spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(f"{name}.py"))
-    assert spec is not None, name
-    assert spec.loader is not None, name
-    sibling: Any = importlib.util.module_from_spec(spec)
-    sys.modules[name] = sibling
-    spec.loader.exec_module(sibling)
-    return sibling
-
-
 def source(module: Any, label: str, facts: dict[str, Any], buildid: str | None = None) -> Any:
     return module.Source(
         label=label,
@@ -159,7 +149,7 @@ def main() -> None:
     assert "drift: no" in quiet, quiet
 
     # Depot provenance: the DLL's own SHA-1 as Steam's manifest records it.
-    encoder = load_sibling("test_steam_manifest")
+    encoder = _common.load_sibling("test_steam_manifest")
     with tempfile.TemporaryDirectory(
         prefix="research_diff_prov_", dir=_common.scratch_dir()
     ) as tmp:
@@ -205,7 +195,7 @@ def main() -> None:
         assert "matches the local file" in cell, cell
 
     # Depot-manifest lens: fixture manifests built with the sibling encoder.
-    encoder = load_sibling("test_steam_manifest")
+    encoder = _common.load_sibling("test_steam_manifest")
     with tempfile.TemporaryDirectory(prefix="research_diff_", dir=_common.scratch_dir()) as tmp:
         root = Path(tmp)
         old_manifest = root / "294422_1.manifest"

@@ -12,14 +12,12 @@ Usage: python3 tools/tests/test_steam_builds.py
 
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -63,16 +61,6 @@ ACF = """"AppState"
 \t}
 }
 """
-
-
-def load_sibling(name: str) -> Any:
-    spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(f"{name}.py"))
-    assert spec is not None, name
-    assert spec.loader is not None, name
-    sibling: Any = importlib.util.module_from_spec(spec)
-    sys.modules[name] = sibling
-    spec.loader.exec_module(sibling)
-    return sibling
 
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
@@ -130,7 +118,7 @@ def main() -> None:
         steam_root = tmp_path / "steam"
         (steam_root / "depotcache").mkdir(parents=True)
         (steam_root / "logs").mkdir()
-        encoder = load_sibling("test_steam_manifest")
+        encoder = _common.load_sibling("test_steam_manifest")
         stock_bytes = b"stock managed bytes\n"
         install = tmp_path / "common" / "fake"
         (install / "Data" / "Managed").mkdir(parents=True)

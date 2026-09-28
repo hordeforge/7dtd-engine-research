@@ -118,8 +118,7 @@ lifecycle/boot/persistence + game modes, platform auth, console/telnet, web admi
 chat, spawning, buffs, entity/survival stats, combat/damage, blocks, items,
 crafting, loot/traders, tile-entities + power, vehicles/drones/turrets, weather,
 progression, game events, quests/challenges, MinEvent effects, utility AI, world
-generation, and the server slice of Twitch. See the ledger table above (23 new
-narratives this pass, 158 diagrams corpus-wide).
+generation, and the server slice of Twitch. See the ledger table above.
 
 **Caveat (not "every method"), with the honest numbers.** The reachability pass
 reaches ~45k methods / 3,681 game types in the RE surface, far more than any per-method narration could
@@ -155,16 +154,11 @@ its event machinery and the join-churn flake root cause are closed in
 
 ## Coverage roadmap (dedicated subsystems: done)
 
-All dedicated-server **subsystems** are narrated and their leaves enumerated (see
-the ledger). The remaining surface is out-of-scope by policy (client render, audio,
-editor), native residual (EAC/anticheat protocol, OS crypto), or server-side
-support/utility code captured at the enumeration level (see the caveat above);
-those are enumerated, not hand-narrated, by design. The three managed
-third-party libraries the dedicated server actually drives (LiteNetLib transport,
-Granberg A* search, SpaceWizards.HttpListener) were closed 2026-08-12 (network.md
-§4.6, raycast-pathing.md §5.1, webserver.md §1.1). Future work is
-maintenance: after a game update, regenerate `Census` + `FullSurface`, diff the
-per-namespace counts, and re-verify the affected narratives.
+The three managed third-party libraries the dedicated server actually drives
+(LiteNetLib transport, Granberg A* search, SpaceWizards.HttpListener) were closed
+2026-08-12 (network.md §4.6, raycast-pathing.md §5.1, webserver.md §1.1). Future
+work is maintenance: after a game update, regenerate `Census` + `FullSurface`,
+diff the per-namespace counts, and re-verify the affected narratives.
 
 ## Related docs
 

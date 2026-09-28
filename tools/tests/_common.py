@@ -15,11 +15,13 @@ from __future__ import annotations
 
 import ast
 import atexit
+import importlib.util
 import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 # Paths and file digests live in tools/tooling.py so the tools themselves can
 # import them without depending on this test package.
@@ -48,6 +50,21 @@ def doc(name: str) -> Path:
     if len(hits) != 1:
         raise FileNotFoundError(f"{name}: {len(hits)} matches under {DOCS}")
     return hits[0]
+
+
+def load_sibling(name: str) -> Any:
+    """Import another tools/tests script as a module, by its script name.
+
+    The tests are standalone scripts, not an importable package, so a test that
+    borrows another's encoder imports it by file path.
+    """
+    spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(f"{name}.py"))
+    assert spec is not None, name
+    assert spec.loader is not None, name
+    sibling: Any = importlib.util.module_from_spec(spec)
+    sys.modules[name] = sibling
+    spec.loader.exec_module(sibling)
+    return sibling
 
 
 # Private scratch dir for ad-hoc probe sources/binaries. A fixed name under a

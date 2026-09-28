@@ -352,23 +352,25 @@ def lens_metadata(old: Source, new: Source, tmp: Path, limit: int) -> Section:
 
 
 def lens_methods(old: Source, new: Source, tmp: Path, limit: int) -> Section:
+    title = "Method signatures (MethodList.exe)"
     try:
         before = parse_methods(list_surface("MethodList.exe", old.path, tmp, "methods_old"))
         after = parse_methods(list_surface("MethodList.exe", new.path, tmp, "methods_new"))
     except RuntimeError as exc:
-        return Section("Method signatures (MethodList.exe)", {}, "", note=str(exc))
+        return Section(title, {}, "", note=str(exc))
     counts, lines = diff_maps(before, after)
-    return Section("Method signatures (MethodList.exe)", counts, cap(lines, limit))
+    return Section(title, counts, cap(lines, limit))
 
 
 def lens_enums(old: Source, new: Source, tmp: Path, limit: int) -> Section:
+    title = "Enum members (EnumList.exe)"
     try:
         before = parse_pairs(list_surface("EnumList.exe", old.path, tmp, "enums_old"))
         after = parse_pairs(list_surface("EnumList.exe", new.path, tmp, "enums_new"))
     except RuntimeError as exc:
-        return Section("Enum members (EnumList.exe)", {}, "", note=str(exc))
+        return Section(title, {}, "", note=str(exc))
     counts, lines = diff_maps(before, after)
-    return Section("Enum members (EnumList.exe)", counts, cap(lines, limit))
+    return Section(title, counts, cap(lines, limit))
 
 
 def lens_bodies(old: Source, new: Source, limit: int) -> Section:

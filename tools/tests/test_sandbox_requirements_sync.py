@@ -205,7 +205,6 @@ def self_test() -> tuple[list[str], int]:
                     bad.append(f"{label}: clean case rejected: {got}")
             elif not any(w in line for w in want for line in got):
                 bad.append(f"{label}: defect not caught (got {got!r})")
-            cases.append((label, in_set, body, want))
 
     return bad, len(cases)
 
@@ -215,10 +214,10 @@ def main() -> int:
     for f in failures:
         print("FAIL:", f, file=sys.stderr)
 
-    real = check(parse_in(IN_FILE.read_text(encoding="utf-8")), LOCK.read_text(encoding="utf-8"))
+    declared = parse_in(IN_FILE.read_text(encoding="utf-8"))
+    real = check(declared, LOCK.read_text(encoding="utf-8"))
     for f in real:
         print("FAIL:", f, file=sys.stderr)
-    declared = parse_in(IN_FILE.read_text(encoding="utf-8"))
     undeclared = undeclared_imports(declared, IMPORTERS)
     for f in undeclared:
         print("FAIL:", f, file=sys.stderr)
