@@ -2,6 +2,7 @@
 """Ensure the RE tool bootstrap discovers a normal system Mono.Cecil install."""
 
 import os
+import re
 import subprocess
 import sys
 
@@ -17,6 +18,19 @@ def main() -> None:
     assert "/usr/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll" in build
     assert "/usr/local/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll" in build
     assert "$HOME/Desktop/" not in build
+    # Every file build.sh compiles or copies into before renaming it into bin/
+    # must live under this run's staging directory. A fixed
+    # bin/.staging/<final-name> is one shared path, and two builds at once then
+    # rm each other's staged file mid-compile and rename what is left into
+    # bin/: measured with six concurrent rm/mcs/mv runs over one staged path,
+    # four of the six landed no exe at all ("Cannot open assembly").
+    assert 'staging_run="bin/.staging/run.$$"' in build, "build.sh stages no per-run directory"
+    shared_stage = [
+        line.strip()
+        for line in build.splitlines()
+        if re.search(r'\bstaged(_cecil)?="', line) and "staging_run" not in line
+    ]
+    assert not shared_stage, f"build.sh stages into a path shared between runs: {shared_stage}"
     assert 'mktemp "$here/data/.cecil.pin.' in (ROOT / "tools" / "cecil-pin.sh").read_text(
         encoding="utf-8"
     )

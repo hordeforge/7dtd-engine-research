@@ -24,13 +24,25 @@ cd "$here"
 # process group on expiry; a wedged mcs must fail the build, not hang it.
 # shellcheck source=tools/bounded-run.sh
 . "$here/bounded-run.sh"
-# Every compile goes through bin/.staging/<final-name> and is renamed into
-# place. The staging path must keep the FINAL basename: mcs derives the
-# assembly name and the module MVID from the -out path, so a mktemp name
+# Every compile goes through a staging file and is renamed into place. The
+# staging file must keep the FINAL basename: mcs derives the assembly name and
+# the module MVID from the -out file name, so a mktemp name
 # (bin/.Xref.exe.AB12cd) leaks into the shipped exe and makes two builds of
-# identical sources differ. bin/.staging is inside bin/, so the rename stays a
+# identical sources differ. Only the file name matters, not the directory: the
+# same basename under two different directories compiles byte-identically, and
+# the directories below are all inside bin/, so every rename stays a
 # same-filesystem atomic move.
 mkdir -p bin/.staging
+# One staging DIRECTORY per run. bin/.staging/<final-name> is a single shared
+# path, so two builds at once (a retried `make census` beside a `make drift`, a
+# local build while CI runs the same target) would rm each other's staged file
+# mid-compile and rename whatever was left into bin/: a half-written exe that
+# mono then refuses to load. The per-run directory removes the shared name; the
+# PID keeps two runs from taking the same one. A SIGKILL leaves the directory
+# behind, inert like the staged files it replaced.
+staging_run="bin/.staging/run.$$"
+mkdir -p "$staging_run"
+trap 'rm -rf "$staging_run"' EXIT
 
 # Compiler prerequisite: mcs ships with the mono development packages; a bare
 # mono runtime can run the dumpers but not compile them. Fail once, by name,
@@ -105,7 +117,7 @@ if [[ ! -s bin/Mono.Cecil.dll ]] || ! cmp -s "$cecil" bin/Mono.Cecil.dll; then
   # Stage and rename: a concurrent `make census` or drift-check must not load a
   # half-copied assembly, which reads as "cannot open assembly" rather than as
   # the build race it is.
-  staged_cecil="bin/.staging/Mono.Cecil.dll"
+  staged_cecil="$staging_run/Mono.Cecil.dll"
   if cp -f "$cecil" "$staged_cecil"; then
     mv -f "$staged_cecil" bin/Mono.Cecil.dll
   else
@@ -179,10 +191,10 @@ up_to_date() { # <exe> <input>...
 # otherwise tests keep running against a stale exe that predates the breakage.
 # -warn:4 -warnaserror: the tree compiles warning-clean at max severity; keep
 # it that way (new warnings fail the build instead of scrolling past).
-# Compiling under the final basename in bin/.staging and renaming into place
-# keeps a concurrent build or gate from loading a half-written exe, leaves the
-# previous one intact when the compile fails, and keeps the assembly name and
-# MVID identical across rebuilds.
+# Compiling under the final basename in this run's staging directory and
+# renaming into place keeps a concurrent build or gate from loading a
+# half-written exe, leaves the previous one intact when the compile fails, and
+# keeps the assembly name and MVID identical across rebuilds.
 #
 # build_target <name> <src> <shared:yes|no> [extra input]...
 build_target() { # <name> <src> <shared:yes|no> [extra input]...
@@ -198,7 +210,7 @@ build_target() { # <name> <src> <shared:yes|no> [extra input]...
   local args=(-nologo -warn:4 -warnaserror -pathmap:"$here=." "-r:bin/Mono.Cecil.dll" "$src")
   [[ "$use_shared" == "yes" ]] && args+=("${shared[@]}")
   local staged out
-  staged="bin/.staging/$name.exe"
+  staged="$staging_run/$name.exe"
   rm -f "$staged"
   if ! out="$(run_bounded mcs "${args[@]}" -out:"$staged" 2>&1)"; then
     [[ -n "$out" ]] && printf '%s\n' "$out" >&2
@@ -252,7 +264,7 @@ if [[ "$skip_legacy" -eq 0 && -d legacy ]]; then
       ok=$((ok+1))
       continue
     fi
-    if staged="bin/.staging/$name.exe" && rm -f "$staged" &&
+    if staged="$staging_run/$name.exe" && rm -f "$staged" &&
       run_bounded mcs -nologo -pathmap:"$here=." -r:bin/Mono.Cecil.dll "$f" -out:"$staged" >/dev/null 2>&1; then
       mv -f "$staged" "bin/legacy/$name.exe"
       ok=$((ok+1))
@@ -268,8 +280,13 @@ fi
 
 # Recorded last, and only because every stage above succeeded: a failed build
 # must leave the old stamp in place so the next run rebuilds rather than
-# trusting exes from the previous toolchain.
-printf '%s\n' "$stamp_now" > "$stamp_file"
+# trusting exes from the previous toolchain. Both records are staged and
+# renamed, so a build running beside this one reads the whole previous stamp
+# rather than a half-written one: the stamp decides whether that build rebuilds
+# or trusts these exes, and an empty read of it would send every target through
+# mcs for nothing.
+printf '%s\n' "$stamp_now" > "$staging_run/toolchain-stamp"
+mv -f "$staging_run/toolchain-stamp" "$stamp_file"
 {
   echo "# toolchain that produced tools/bin (regenerable: rerun tools/build.sh)"
   echo "mcs=$mcs_ver"
@@ -281,5 +298,6 @@ printf '%s\n' "$stamp_now" > "$stamp_file"
   echo "# name, and the source paths are mapped out (-pathmap); the compiler has no"
   echo "# -deterministic, so do not reintroduce a random -out basename."
   echo "deterministic=yes"
-} > bin/buildinfo.txt
+} > "$staging_run/buildinfo.txt"
+mv -f "$staging_run/buildinfo.txt" bin/buildinfo.txt
 echo "done. run e.g.:  mono bin/Census.exe \"\$ASM\""

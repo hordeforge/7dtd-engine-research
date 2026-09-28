@@ -97,13 +97,16 @@ in place. The compile and log order is pinned to `LC_ALL=C`, so it does not
 follow the invoker's collation.
 
 Two builds of one tree are byte-identical. `mcs` has no `-deterministic`, but
-it takes the assembly name and the module MVID from the `-out` path, so every
-compile targets `bin/.staging/<final-name>` and is renamed into place: a
-`mktemp` `-out` name would land in the shipped assembly and make each rebuild
-differ. Source paths are mapped out with `-pathmap`. `bin/buildinfo.txt` records
-the digest of the Cecil actually linked in (`monocecil_sha256`) next to the pin
-it was checked against (`monocecil_pinned_sha256`); the two differ only under
-`MONO_CECIL_UNVERIFIED=1`.
+it takes the assembly name and the module MVID from the `-out` file name, so
+every compile targets `bin/.staging/run.<pid>/<final-name>` and is renamed into
+place: a `mktemp` `-out` name would land in the shipped assembly and make each
+rebuild differ. Only the file name is load-bearing, not the directory (the same
+basename under two directories compiles byte-identically), so the directory
+carries the run's PID: one shared staged path let concurrent builds delete each
+other's output mid-compile. Source paths are mapped out with `-pathmap`.
+`bin/buildinfo.txt` records the digest of the Cecil actually linked in
+(`monocecil_sha256`) next to the pin it was checked against
+(`monocecil_pinned_sha256`); the two differ only under `MONO_CECIL_UNVERIFIED=1`.
 
 ```bash
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
@@ -306,7 +309,7 @@ are explicit. See `re-scratch/README.md`.
 
 | Test | Checks |
 |---|---|
-| `tests/test_tool_bootstrap.py` | The tool builder discovers distribution-provided Mono.Cecil assemblies in the standard `/usr/lib` and `/usr/local/lib` Mono GAC paths. |
+| `tests/test_tool_bootstrap.py` | The tool builder discovers distribution-provided Mono.Cecil assemblies in the standard `/usr/lib` and `/usr/local/lib` Mono GAC paths, and every file `build.sh` stages before renaming it into `bin/` sits under the run's own `bin/.staging/run.<pid>/` directory, so two builds cannot delete each other's staged exe mid-compile. |
 | `tests/test_asm_discovery.py` | `tooling.asm_candidates` resolves the dedicated `Assembly-CSharp.dll` from every Steam library layout a supported host has (`%ProgramFiles(x86)%`, `%ProgramFiles%`, `%ProgramW6432%`, `~/.local/share/Steam`, `~/.steam/steam`, `~/.steam/root`, `~/Library/Application Support/Steam`), with `ASM`/`SEVENDTD_ASM`/`SEVENDTD_DS_DIR` outranking the probed roots. Fixtures per layout, so the whole matrix is checked on any host; stdlib-only, DLL-free. Each override variable set to a path holding no assembly raises `ConfigError` from `tooling.find_asm` (a probed install is planted alongside, so a silent fall-through would be caught), the gate-facing `_common` wrappers report that reason instead of tracing back, and an empty or unset variable still discovers normally. |
 | `tests/test_tool_cli_usage.py` | Every maintained C# executable reports usage and exits 2 when required arguments are missing. Skips until the tools are built or Mono is available. |
 | `tests/test_shell_cli_usage.py` | Supported shell entry points provide side-effect-free `--help`; strict no-positional commands reject unknown options. DLL-free. |
