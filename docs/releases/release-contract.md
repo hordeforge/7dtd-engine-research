@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**76 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**78 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -176,9 +176,29 @@ falls behind the commits actually below the last tag.
 - **The sandbox installs a bounded, reviewed requirement series**, the
   static-analysis gate is pinned to rule sets strict enough to fail on the
   defects it exists to catch, and the CI token is read-only for `contents`.
+- **A census that measured nothing fails instead of reporting 0 %.**
+  `census-pct.py` read a missing or empty report as a 0 % completion, so a
+  dump that never ran looked like a finished inventory.
+- **A hash is a hash, wherever it is taken.** The stock facts, the xml pins,
+  the shader blob and the sandbox table extraction computed a content digest
+  through a helper that was not pinned to an algorithm, so a different digest
+  could be pinned under the same field name; `steam_builds.py` now also
+  refuses a fetch whose download root resolves outside the depot it asked for.
+- **A rerun of `research_diff.py` and `stock-sync.sh` lands cleanly.** The diff
+  report is written by rename and the pin refresh rebuilds its inputs before
+  comparing, so running either twice in a row no longer trips over its own
+  previous output or skips a file it just changed.
+- **Every gate-spawned child is bounded and a failed `zig fmt` is a failure.**
+  `gen_atlas_zig.py` bounded its `zig` calls through the shared runner instead
+  of a bare `subprocess.run`, and a non-zero `zig fmt` now stops the run rather
+  than writing a file that was never formatted.
 
 ### Tools and docs
 
+- **Each build run gets its own staging directory.** `tools/build.sh` compiles
+  into a per-run `mktemp` tree and moves the finished exes into `bin/`, so two
+  concurrent builds cannot hand each other a half-written executable, and the
+  Mono GAC probe and the macOS timeout bound work on a Linux host.
 - **Hot paths stopped paying for the same work twice.** The shader dumper
   copies only the sub-program slice it decompresses instead of the whole
   shared compressed blob per shader, and parses each DXBC container once
