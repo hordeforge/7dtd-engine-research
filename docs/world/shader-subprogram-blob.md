@@ -332,3 +332,10 @@ generated-entity shader gap; see
   `m_ParameterBlobIndices` runs parallel to the platform-mixed
   `m_PlayerSubPrograms` list, which is the index space that makes the format
   look broken when read flat.
+- **2026-09-28:** The reproduction tool's decoders fail closed on a malformed
+  blob: every length, count, and offset above is file-controlled, so a
+  truncated record, a count the remaining bytes cannot hold, or a negative
+  string length now raises `ShaderBlobError` (or lands in the tool's
+  `skipped` list) instead of reaching `struct.unpack_from` or an unbounded
+  record walk. Gated by `tools/tests/test_shader_blob_fuzz.py`; the documented
+  layout and the 3403-of-3403 exact re-emit are unchanged.

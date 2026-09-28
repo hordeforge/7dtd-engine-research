@@ -16,6 +16,12 @@ Usage:
 
 Prints one summary table per bundle and exits non-zero if any decoded
 sub-program disagrees with the documented header layout.
+
+Every length, count, and offset in these blobs is file-controlled, so the
+decoders fail closed: a blob that is truncated, out of range, or not the
+documented shape raises ShaderBlobError (or lands in the skipped list) rather
+than reaching struct.unpack_from or a Python range. Gate:
+`python3 tools/tests/test_shader_blob_fuzz.py`.
 """
 
 from __future__ import annotations
@@ -30,6 +36,17 @@ from typing import Any
 # strings, nested record lists), and the field names ARE the on-disk schema, so
 # the payloads stay plain dicts rather than growing a class per record kind.
 Fields = dict[str, Any]
+
+
+class ShaderBlobError(ValueError):
+    """A blob is not decodable: truncated, out of range, or not the expected shape.
+
+    Every length, count, and offset in these blobs is file-controlled, so a
+    decoder that lets one reach struct.unpack_from or a Python range reports a
+    crash instead of a verdict. Everything that reads untrusted bytes raises
+    this instead.
+    """
+
 
 BLOB_VERSION = 202012090  # Unity 2021.2+ LoadGpuProgramFromData tag
 DX11_TYPES = set(range(13, 23))  # kShaderGpuProgramDX10Level9Vertex .. DX11DomainSM50
@@ -49,7 +66,17 @@ GEOMETRY_TYPES = {19, 20}  # kShaderGpuProgramDX11GeometrySM40 / SM50
 VERTEX_TYPES = {13, 15, 16}  # DX10Level9Vertex, DX11VertexSM40/SM50
 
 
+def _count(buf: bytes, off: int, limit: int, what: str) -> int:
+    """A file-controlled element count, bounded by what the remaining bytes can hold."""
+    value = u32(buf, off)
+    if value > limit:
+        raise ShaderBlobError(f"{what} count {value} exceeds the {limit} the blob can hold")
+    return value
+
+
 def u32(buf: bytes, off: int) -> int:
+    if off < 0 or off + 4 > len(buf):
+        raise ShaderBlobError(f"u32 at {off} runs past the {len(buf)}-byte blob")
     value: int = struct.unpack_from("<I", buf, off)[0]
     return value
 
@@ -70,8 +97,10 @@ def parse_subprogram(buf: bytes, pos: int) -> tuple[Fields, int]:
     tex = r.u32()
     flow = r.u32()
     temp = r.u32()
-    keywords = [r.string() for _ in range(r.u32())]
+    keywords = [r.string() for _ in range(r.count(4))]
     size = r.u32()
+    if size > len(buf) - r.pos:
+        raise ShaderBlobError(f"sub-program data {size} exceeds the {len(buf) - r.pos} bytes left")
     return {
         "version": version,
         "program_type": program_type,
@@ -92,17 +121,35 @@ class _Reader:
         self.buf, self.pos = buf, 0
 
     def i32(self) -> int:
+        if self.pos + 4 > len(self.buf):
+            raise ShaderBlobError(f"i32 at {self.pos} runs past the {len(self.buf)}-byte blob")
         value: int = struct.unpack_from("<i", self.buf, self.pos)[0]
         self.pos += 4
         return value
 
     def u32(self) -> int:
+        if self.pos + 4 > len(self.buf):
+            raise ShaderBlobError(f"u32 at {self.pos} runs past the {len(self.buf)}-byte blob")
         value: int = struct.unpack_from("<I", self.buf, self.pos)[0]
         self.pos += 4
         return value
 
+    def count(self, stride: int) -> int:
+        """A record count, bounded by the bytes left: each record costs `stride`.
+
+        Without the bound a file-controlled count is a minutes-long walk over
+        garbage, or a negative position once a string length runs backwards.
+        """
+        value = self.u32()
+        left = len(self.buf) - self.pos
+        if value > left // stride:
+            raise ShaderBlobError(f"count {value} exceeds the {left} bytes left at {self.pos}")
+        return value
+
     def string(self) -> bytes:
         n = self.i32()
+        if n < 0 or self.pos + n > len(self.buf):
+            raise ShaderBlobError(f"string length {n} at {self.pos - 4} exceeds the blob")
         value = bytes(self.buf[self.pos : self.pos + n])
         self.pos += n
         self.pos = (self.pos + 3) & ~3
@@ -146,7 +193,7 @@ def _write_cb_param(w: _Writer, p: Fields) -> None:
 
 def _read_struct_param(r: _Reader) -> Fields:
     s: Fields = {"name": r.string(), "index": r.i32(), "array_size": r.i32(), "size": r.i32()}
-    s["params"] = [_read_cb_param(r) for _ in range(r.i32())]
+    s["params"] = [_read_cb_param(r) for _ in range(r.count(28))]
     return s
 
 
@@ -161,8 +208,8 @@ def _write_struct_param(w: _Writer, s: Fields) -> None:
 
 def _read_constant_buffer(r: _Reader) -> Fields:
     cb: Fields = {"name": r.string(), "used_size": r.i32()}
-    cb["params"] = [_read_cb_param(r) for _ in range(r.i32())]
-    cb["structs"] = [_read_struct_param(r) for _ in range(r.i32())]
+    cb["params"] = [_read_cb_param(r) for _ in range(r.count(28))]
+    cb["structs"] = [_read_struct_param(r) for _ in range(r.count(20))]
     return cb
 
 
@@ -190,7 +237,11 @@ BIND_CHANNEL_SOURCES = {
 
 def parse_bind_channels(raw: bytes) -> tuple[Fields, int]:
     """Decode the `ParserBindChannels` block that closes a code-blob record."""
+    if len(raw) < 8:
+        raise ShaderBlobError(f"bind-channel block is {len(raw)} bytes, needs 8")
     source_map, count = struct.unpack_from("<ii", raw, 0)
+    if count < 0 or count > (len(raw) - 8) // 8:
+        raise ShaderBlobError(f"bind-channel count {count} exceeds the {len(raw) - 8} bytes left")
     channels = [struct.unpack_from("<ii", raw, 8 + i * 8) for i in range(count)]
     return {"source_map": source_map, "channels": channels}, 8 + count * 8
 
@@ -201,9 +252,18 @@ def input_semantics(dxbc: bytes) -> list[tuple[str, int]]:
     if isgn is None:
         return []
     out = []
-    for i in range(u32(isgn, 0)):
+    for i in range(_count(isgn, 0, (len(isgn) - 8) // 24, "ISGN element")):
         name_offset, index = struct.unpack_from("<II", isgn, 8 + i * 24)
-        out.append((isgn[name_offset : isgn.index(b"\x00", name_offset)].decode("ascii"), index))
+        if name_offset >= len(isgn):
+            raise ShaderBlobError(f"ISGN semantic {i} points at {name_offset}, past the chunk")
+        end = isgn.find(b"\x00", name_offset)
+        if end < 0:
+            raise ShaderBlobError(f"ISGN semantic {i} is not NUL-terminated")
+        try:
+            name = isgn[name_offset:end].decode("ascii")
+        except UnicodeDecodeError as exc:
+            raise ShaderBlobError(f"ISGN semantic {i} is not ASCII") from exc
+        out.append((name, index))
     return out
 
 
@@ -225,9 +285,9 @@ def parse_parameter_blob(raw: bytes) -> tuple[Fields, int]:
     """
     r = _Reader(raw)
     version = r.i32()
-    buffers = [_read_constant_buffer(r) for _ in range(r.i32())]
+    buffers = [_read_constant_buffer(r) for _ in range(r.count(20))]
     entries = []
-    for _ in range(r.i32()):
+    for _ in range(r.count(12)):
         name = r.string()
         kind = r.i32()
         e: Fields
@@ -246,7 +306,7 @@ def parse_parameter_blob(raw: bytes) -> tuple[Fields, int]:
         elif kind == 4:  # sampler
             e = {"kind": 4, "name": name, "bind_point": r.i32(), "sampler": r.u32()}
         else:
-            raise ValueError(f"unknown parameter kind {kind}")
+            raise ShaderBlobError(f"unknown parameter kind {kind}")
         entries.append(e)
     return {"version": version, "buffers": buffers, "entries": entries}, r.pos
 
@@ -280,9 +340,11 @@ def build_parameter_blob(fields: Fields) -> bytes:
 
 def dxbc_chunks(data: bytes) -> dict[str, bytes]:
     """{fourcc: payload} for a DXBC container."""
-    count = u32(data, 0x1C)
+    count = _count(data, 0x1C, max(0, (len(data) - 0x20) // 4), "DXBC chunk")
     out = {}
     for off in struct.unpack_from(f"<{count}I", data, 0x20):
+        if off + 8 > len(data):
+            raise ShaderBlobError(f"DXBC chunk header at {off} runs past the {len(data)}-byte blob")
         size = u32(data, off + 4)
         out[data[off : off + 4].decode("ascii", "replace")] = data[off + 8 : off + 8 + size]
     return out
@@ -300,7 +362,7 @@ def shdr_declaration_counts(chunk: bytes) -> collections.Counter[int]:
         if opcode == OP_CUSTOMDATA:  # length lives in the next dword
             length = words[i + 1] if i + 1 < len(words) else 2
         if length == 0:
-            raise ValueError(f"zero-length token {token:#x} (opcode {opcode}) at dword {i}")
+            raise ShaderBlobError(f"zero-length token {token:#x} (opcode {opcode}) at dword {i}")
         counts[opcode] += 1
         i += length
     return counts
@@ -341,7 +403,7 @@ def decode_bundle(
         data = CompressionHelper.decompress_lz4(
             blob[offsets[0] : offsets[0] + compressed], decompressed
         )
-        count = u32(data, 0)
+        count = _count(data, 0, max(0, (len(data) - 4) // 12), "sub-program record")
         records = [struct.unpack_from("<III", data, 4 + i * 12) for i in range(count)]
 
         wanted: dict[int, int] = {}
@@ -378,23 +440,26 @@ def decode_bundle(
                 continue
             if u32(data, offset) != BLOB_VERSION or u32(data, offset + 4) != gpu_type:
                 continue
-            sub, data_offset = parse_subprogram(data, offset)
-            code = sub["data"]
-            if code[38:42] != b"DXBC":
-                skipped.append((name, f"blob {blob_index}: DXBC not at offset 38"))
+            try:
+                sub, data_offset = parse_subprogram(data, offset)
+                code = sub["data"]
+                if code[38:42] != b"DXBC":
+                    raise ShaderBlobError("DXBC not at offset 38")
+                chunks = dxbc_chunks(code[38:])
+                # SHDR is shader model 4, SHEX shader model 5; identical token stream.
+                code_chunk = chunks.get("SHDR") or chunks.get("SHEX")
+                if code_chunk is None:
+                    raise ShaderBlobError("no SHDR/SHEX chunk")
+                counts = shdr_declaration_counts(code_chunk)
+                data_end = (data_offset + sub["size"] + 3) & ~3
+                trailing = bytes(data[data_end : offset + length])
+                channels = None
+                if len(trailing) >= 8:
+                    channels, _consumed = parse_bind_channels(trailing)
+                expected = expected_channels(code[38:])
+            except ShaderBlobError as exc:
+                skipped.append((name, f"blob {blob_index}: {exc}"))
                 continue
-            chunks = dxbc_chunks(code[38:])
-            # SHDR is shader model 4, SHEX shader model 5; identical token stream.
-            code_chunk = chunks.get("SHDR") or chunks.get("SHEX")
-            if code_chunk is None:
-                skipped.append((name, f"blob {blob_index}: no SHDR/SHEX chunk"))
-                continue
-            counts = shdr_declaration_counts(code_chunk)
-            data_end = (data_offset + sub["size"] + 3) & ~3
-            trailing = bytes(data[data_end : offset + length])
-            channels = None
-            if len(trailing) >= 8:
-                channels, _consumed = parse_bind_channels(trailing)
             rows.append(
                 {
                     "shader": name,
@@ -410,7 +475,7 @@ def decode_bundle(
                     "gs_primitive": code[5],
                     "trailing": len(trailing),
                     "channels": channels,
-                    "expected_channels": expected_channels(code[38:]),
+                    "expected_channels": expected,
                     "uav": sum(counts[op] for op in UAV_OPCODES),
                 }
             )
