@@ -57,11 +57,20 @@ def declared_dests(tree: ast.AST) -> set[str]:
 
 
 def _from_parse_args(value: ast.AST | None) -> bool:
-    return (
-        isinstance(value, ast.Call)
-        and isinstance(value.func, ast.Attribute)
-        and value.func.attr == "parse_args"
-    )
+    """True when a value comes from calling parse_args.
+
+    Both call shapes count: `argparse.ArgumentParser().parse_args(argv)` and a
+    module that binds `parse_args = argparse.ArgumentParser().parse_args` (or
+    does `from argparse import ArgumentParser` and calls `p.parse_args`).
+    Matching only the attribute form silently dropped tools that wrap argparse
+    in a local helper, reporting them as "rebinds args" and never checking them.
+    """
+    if not isinstance(value, ast.Call):
+        return False
+    func = value.func
+    if isinstance(func, ast.Attribute):
+        return func.attr == "parse_args"
+    return isinstance(func, ast.Name) and func.id == "parse_args"
 
 
 def rebinds_args(tree: ast.AST) -> bool:
@@ -146,18 +155,21 @@ def main() -> None:
     bad: list[str] = []
     checked = skipped = 0
     for path in _common.argparse_clis():
-        tree = ast.parse(path.read_text(encoding="utf-8"))
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source)
         if not declared_dests(tree):
             continue  # help-only CLI, nothing to wire
         checked += 1
         if rebinds_args(tree):
             skipped += 1
             continue
+        # The same helpers self_test() exercises, not a second copy of the
+        # rule: a copy drifts from the fixtures it is supposed to be pinned by.
         relative = path.relative_to(_common.TOOLS)
-        missing = sorted(read_dests(tree) - declared_dests(tree))
+        missing = undeclared(source)
         if missing:
             bad.append(f"{relative}: undeclared {', '.join(missing)}")
-        unused = sorted(dest for dest in declared_dests(tree) if dest not in read_dests(tree))
+        unused = unread(source)
         if unused:
             bad.append(f"{relative}: declared but never read {', '.join(unused)}")
     if bad:

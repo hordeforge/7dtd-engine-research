@@ -51,7 +51,10 @@ def wait_gone(pid: int) -> bool:
         except ProcessLookupError:
             return True
         except PermissionError:
-            return True
+            # EPERM means the pid exists and belongs to another user, so it is
+            # still running: reporting it gone here would turn a surviving
+            # grandchild into a passing group-kill assertion.
+            return False
         try:
             os.waitpid(pid, os.WNOHANG)
         except ChildProcessError:

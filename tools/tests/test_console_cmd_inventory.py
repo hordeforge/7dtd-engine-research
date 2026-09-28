@@ -150,8 +150,12 @@ def main() -> int:
     ).read()  # read once; parse_inventory + self-state check reuse it
     primaries, aliases = parse_inventory(text_inv)
     bad = []
-    # the committed CmdMap tsv (regen.sh artifact) must equal fresh output
-    if os.path.exists(TSV) and open(TSV, encoding="utf-8").read() != cmdmap:
+    # the committed CmdMap tsv (regen.sh artifact) must equal fresh output. A
+    # missing artifact is a deleted inventory, not an absent prerequisite, so it
+    # fails here instead of silently disarming the staleness check.
+    if not os.path.exists(TSV):
+        bad.append(f"missing committed inventory artifact: {TSV}")
+    elif open(TSV, encoding="utf-8").read() != cmdmap:
         bad.append("docs/inventories/console-command-list.tsv stale vs CmdMap.exe (rerun regen.sh)")
     if len(dll_primary) != EXPECTED_PRIMARY:
         bad.append(f"DLL primary commands = {len(dll_primary)} != expected {EXPECTED_PRIMARY}")

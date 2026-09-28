@@ -40,20 +40,31 @@ def _touch(path: Path) -> Path:
     return path
 
 
-def check_roots(home: Path) -> None:
+def check_roots(home: Path) -> bool:
     """Every OS layout probed at once, all from one fake environment."""
+    # Keys are the literal env / home-layout names asm_candidates resolves, so
+    # a name duplicated across the two constant lists collapses here and the
+    # count check below is what catches it.
     roots: dict[str, str] = {
         name: str(home.parent / "steam" / name) for name in tooling.STEAM_ROOT_ENV
     }
     roots.update({layout: str(home / layout) for layout in tooling.STEAM_ROOTS_HOME})
     planted = [_install(Path(root)) for root in roots.values()]
 
+    ok = True
     candidates = tooling.asm_candidates(roots, home)
     missing = [str(dll) for dll in planted if dll not in candidates]
     if missing:
         print(f"FAIL: no candidate for Steam roots: {missing}", file=sys.stderr)
-    if len(roots) != len(tooling.STEAM_ROOT_ENV) + len(tooling.STEAM_ROOTS_HOME):
-        print("FAIL: a declared Steam root was not exercised", file=sys.stderr)
+        ok = False
+    declared = len(tooling.STEAM_ROOT_ENV) + len(tooling.STEAM_ROOTS_HOME)
+    if len(roots) != declared:
+        print(
+            f"FAIL: a declared Steam root was not exercised: {len(roots)} probed, {declared} declared",
+            file=sys.stderr,
+        )
+        ok = False
+    return ok
 
 
 def check_overrides(home: Path) -> bool:
@@ -167,7 +178,8 @@ def main() -> int:
         base = Path(td)
         home = base / "home"
         home.mkdir()
-        check_roots(home)
+        if not check_roots(home):
+            bad = True
         if not check_overrides(home):
             bad = True
     if not check_shared_roots():
