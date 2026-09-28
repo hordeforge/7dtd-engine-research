@@ -60,6 +60,15 @@ falls behind the commits actually below the last tag.
 
 ### Breaking for a consumer
 
+- **Two sandbox CLIs changed exit codes and streams.**
+  `sandbox/gen_zig_tables.py` and `sandbox/extract_preset_codes.py` answered a
+  path they cannot open with a `FileNotFoundError` traceback on stderr and exit
+  1, the same code a failed run used, so a script could not tell a bad path
+  from a bad run. They now print one plain line naming the path and exit 2, the
+  usage-error code every other tool uses. `extract_preset_codes.py` also moved
+  its column header below the input checks, so a failed run no longer leaves a
+  bare header on stdout, and `gen_zig_tables.py` grew the `main() -> int` entry
+  point its sibling tools already had.
 - **Four CLIs changed exit codes and streams.** `asm_body_diff.py` with no
   arguments printed its help to stdout and exited 0; it now exits 2 as a usage
   error, like every other tool. `assignids_dump.py` with the wrong argument

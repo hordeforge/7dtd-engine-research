@@ -8,6 +8,9 @@ repo. zdtd embeds them at comptime so the server can decode an operator's
 sandbox code without re-extraction; the JSON here is the source of truth.
 
 Usage: python3 gen_zig_tables.py sandbox_tables.json ../zdtd-server/src/assets/sandbox_data.zig
+
+Exit 0 = the table was written; 1 = the JSON is not a sandbox table; 2 = usage
+error, including a path the tool cannot open.
 """
 
 import argparse
@@ -129,7 +132,7 @@ def emit(json_path: str, out_path: str) -> None:
     print(f"wrote {out_path}: {len(vs)} value sets, {len(opts)} options")
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(
         description="Generate src/assets/sandbox_data.zig in zdtd from sandbox_tables.json."
     )
@@ -138,5 +141,22 @@ if __name__ == "__main__":
         "out",
         help="path of the .zig table to write (e.g. ../zdtd-server/src/assets/sandbox_data.zig)",
     )
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
+    # A path the tool cannot open is a usage error (exit 2), not the 1 an
+    # unhandled FileNotFoundError would give: 1 already means the generator ran
+    # and failed, so a script reading it cannot tell a bad path from a bad emit.
+    if not Path(args.tables).is_file():
+        print(f"gen_zig_tables: tables is not a file: {args.tables}", file=sys.stderr)
+        return 2
+    if not Path(args.out).parent.is_dir():
+        print(
+            f"gen_zig_tables: out directory does not exist: {Path(args.out).parent}",
+            file=sys.stderr,
+        )
+        return 2
     emit(args.tables, args.out)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

@@ -62,7 +62,7 @@ def main(argv: list[str]) -> int:
         "docs_dir",
         nargs="?",
         default=DEFAULT_DOCS,
-        help=f"docs directory to scan (default: this repo's {DEFAULT_DOCS})",
+        help="docs directory to scan (default: this repo's docs/)",
     )
     args = ap.parse_args(argv)
     # A path that is not a directory makes os.walk yield nothing, so the table

@@ -40,6 +40,8 @@ BAD_VALUES = (
     ("zdtd_cite_check.py", ("--repo", "not-a-sibling-repo")),
     ("mention_depth.py", ("/nonexistent-docs-dir",)),
     ("steam/steam_builds.py", ("--pins", "/nonexistent-pins.json")),
+    ("sandbox/gen_zig_tables.py", ("/nonexistent-tables.json", "/nonexistent-dir/out.zig")),
+    ("sandbox/extract_preset_codes.py", ("/nonexistent-presets.xml",)),
 )
 
 
@@ -87,6 +89,8 @@ def main() -> None:
         result = run(script, *argv)
         if result.returncode != 2 or not result.stderr.strip():
             unusable.append(f"{name} {' '.join(argv)}: rc={result.returncode}")
+        elif "Traceback" in result.stderr:
+            unusable.append(f"{name} {' '.join(argv)}: answered with a traceback")
     assert not unusable, "unusable flag value not refused with exit 2: " + ", ".join(unusable)
     print(
         f"OK: {len(scripts)} discovered Python CLIs provide help, refuse unknown flags "

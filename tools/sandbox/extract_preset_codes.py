@@ -19,6 +19,9 @@ EntityIncomingDamage).
 
 Usage:
   python3 extract_preset_codes.py [sandbox_presets.xml] [sandbox_tables.json]
+
+Exit 0 = the six presets decoded; 1 = a preset code is malformed; 2 = usage
+error, including a path that is not a readable file.
 """
 
 import argparse
@@ -80,7 +83,17 @@ def decode(
     return out
 
 
-def main() -> int:
+def fail(message: str) -> int:
+    """Refuse an input the tool cannot act on: plain stderr, exit 2.
+
+    The parser is already built, so this cannot use ap.error(); a usage error
+    still exits 2 either way, which is what callers and the gate check for.
+    """
+    print(f"extract_preset_codes: {message}", file=sys.stderr)
+    return 2
+
+
+def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -98,16 +111,24 @@ def main() -> int:
         default=HERE / "sandbox_tables.json",
         help="option/value-set tables (default: sandbox/sandbox_tables.json next to this script)",
     )
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
+    for label, path in (("xml", args.xml), ("tables", args.tables)):
+        if not path.is_file():
+            return fail(f"{label} is not a file: {path}")
     tables = tooling.load_json(args.tables)
     opts = {o["id"]: o for o in tables["options"]}
     sets = tables["valuesets"]
 
-    root = ET.parse(args.xml).getroot()
-    print("preset | code | IncomingDamage | EntityIncomingDamage | RangedDamage | MeleeDamage")
+    try:
+        root = ET.parse(args.xml).getroot()
+    except ET.ParseError as exc:
+        return fail(f"xml is not well-formed: {args.xml}: {exc}")
     presets = [p for p in root.findall("preset") if p.get("category") == "Difficulty"]
     if not presets:
-        raise ValueError(f"no Difficulty presets found in {args.xml}")
+        return fail(f"no Difficulty presets found in {args.xml}")
+    # Header last: a run that fails must leave stdout empty, so a redirected
+    # report is never a bare column header with no rows under it.
+    print("preset | code | IncomingDamage | EntityIncomingDamage | RangedDamage | MeleeDamage")
     for preset in presets:
         name, code = preset.get("name", ""), preset.get("code", "")
         dec = decode(code, opts, sets)
@@ -123,4 +144,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
