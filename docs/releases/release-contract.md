@@ -63,8 +63,9 @@ extended, not re-pinned.
 - **Tooling:** `tools/release.sh` cuts a release with its checks built in
   (clean tree, free tag, not behind `origin/main`, authenticated `gh`, required
   notes, `make lint` + `make test-docs` green); `--dry-run` prints the plan and
-  changes nothing. `steam_manifest.py` orders manifest history by mtime instead
-  of a truncated clock string.
+  changes nothing, and `--resume` finishes a run that stopped between steps
+  without repeating the ones that landed. `steam_manifest.py` orders manifest
+  history by mtime instead of a truncated clock string.
 - **Docs:** this repo's own attack surface and ranked tooling risks are recorded
   in [`../meta/threat-model.md`](../meta/threat-model.md).
 
@@ -73,12 +74,20 @@ build first, which would be `v3.3.0`.
 
 ## Cutting a release
 
-`tools/release.sh <vX.Y.Z> [--notes FILE] [--dry-run]`. It refuses a dirty
+`tools/release.sh <vX.Y.Z> [--notes FILE] [--dry-run] [--resume]`. It refuses a dirty
 worktree, a tag that exists locally or on origin, a branch behind
 `origin/main`, an unauthenticated `gh` and a missing notes file; it runs the
 DLL-free gates (`make lint`, `make test-docs`) before tagging, then pushes
 `main`, tags annotated, pushes the tag and creates the GitHub release. CI runs
 the DLL-dependent half on the push.
+
+A run that dies between those steps leaves a half-published version, and the
+refusal on an existing tag would leave it that way for good. `--resume` is the
+way out: the tag must exist (locally or on origin) and name `HEAD`, the tag and
+its push are skipped when they already landed, and the release is created only
+when `gh release view` does not find it. Two resumes leave the same state as
+one, and a tag on any other commit is refused rather than published under a live
+version.
 
 Notes are required and reviewed, not generated: the default path is
 `docs/releases/release-<version>.md`, which is a different thing from the
