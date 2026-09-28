@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
-"""Assert docs/meta/coverage.md invariants: audit-table completeness + census pin match.
+"""Assert the corpus pin invariants: audit table, census rows, pin banners.
 
 The audit table ("Audit status per doc") must list every narrative doc under
 docs/ (root level), so a new or renamed doc cannot silently skip an audit
 tier. The census table must match tools/data/stock_facts.json, so the
 coverage map's headline numbers cannot drift from the pinned tool output.
+Every "**Current pin:**" banner must name the pinned build, so a doc cannot
+quietly keep advertising a superseded one (this is how docs/network/network.md
+came to claim a 3.1.0 pin after the corpus moved to 3.2.0).
 
 Usage: python3 tools/tests/test_coverage_consistency.py
 """
 
+import importlib.util
 import json
 import os
 import re
 import sys
+import tempfile
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -79,7 +85,68 @@ def test_census_table_matches_stock_facts() -> None:
     )
 
 
+def test_pin_banners_match_stock_facts() -> None:
+    """No doc's current-pin banner may name a build other than the machine pin.
+
+    Runs the check_stock_facts banner check over the real corpus, then over a
+    synthetic tree with one stale banner, so the check cannot rot into a
+    pass-because-it-does-nothing gate. The banner check is a pure function of
+    stock_facts.json, so this is DLL-free even though its owner is not.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "check_stock_facts", os.path.join(TOOLS, "tests", "check_stock_facts.py")
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    with open(FACTS, encoding="utf-8") as f:
+        facts = json.load(f)
+
+    errors: list[str] = []
+    module.check_pin_banners(facts, errors)
+    assert not errors, "current-pin banners disagree with stock_facts.json:\n" + "\n".join(errors)
+
+    with tempfile.TemporaryDirectory(prefix="pin_banner_", dir=_common.scratch_dir()) as tmp:
+        tree = Path(tmp)
+        (tree / "good.md").write_text(
+            f"**Current pin:** V **{facts['version']['display']} "
+            f"(b{facts['version']['build']})**.\n",
+            encoding="utf-8",
+        )
+        stale: list[str] = []
+        module.check_pin_banners(facts, stale, root=tree)
+        assert not stale, stale
+
+        # A superseded build, and the right version with the wrong build, both fail.
+        for banner, why in (
+            ("**Current pin:** V **3.1.0 (b14)**.", "superseded build"),
+            (
+                f"**Current game pin:** V **{facts['version']['display']} (b1)**.",
+                "wrong build for the right version",
+            ),
+        ):
+            (tree / "good.md").write_text(banner + "\n", encoding="utf-8")
+            stale = []
+            module.check_pin_banners(facts, stale, root=tree)
+            assert stale, f"stale banner accepted ({why}): {banner}"
+
+        # History prose and section headings are not banners and must pass through.
+        (tree / "good.md").write_text(
+            "## 3. Current pin status\n\n"
+            "the last live capture was V 3.1.0 b14; see changelog-3.1.0.md\n",
+            encoding="utf-8",
+        )
+        stale = []
+        module.check_pin_banners(facts, stale, root=tree)
+        assert not stale, stale
+
+
 if __name__ == "__main__":
     test_audit_table_lists_every_doc()
     test_census_table_matches_stock_facts()
-    print("OK: coverage.md audit table complete; census rows match stock_facts.json")
+    test_pin_banners_match_stock_facts()
+    print(
+        "OK: coverage.md audit table complete; census rows and current-pin "
+        "banners match stock_facts.json"
+    )

@@ -31,6 +31,8 @@ def main() -> int:
     if shutil.which("mono") is None:
         print("SKIP: mono not installed (state-machines regen is a local gate)")
         return 0
+    # mono alone is not enough: the regen needs the built tool, and a
+    # checkout without `make tools` must not fail this DLL-free gate.
     if not os.path.isfile(EXE):
         print(f"SKIP: {EXE} not built (run make tools)")
         return 0

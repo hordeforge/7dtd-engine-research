@@ -9,7 +9,7 @@
 ```text
 docs/              this hub (INDEX.md)
 docs/meta/         what the corpus covers, how it was derived, what IL cannot close, this repo's own threat model
-docs/releases/     per-release exact deltas
+docs/releases/     per-release exact deltas + this repo's own release contract
 docs/loop/         frame and simulation loop
 docs/entities/     entity tick, AI, pathing, survival stats
 docs/world/        world gen, chunks, terrain, persistence, asset formats
@@ -129,6 +129,7 @@ Per-release exact deltas, each mapping a shipped change to the doc that owns it.
 
 | Doc | Role |
 |---|---|
+| [release-contract.md](releases/release-contract.md) | This repo's own release contract: the `v3.Y.0` corpus / `v0.Y.Z` tooling tag series, tag history, unreleased delta, how to cut one |
 | [changelog-3.0.0.md](releases/changelog-3.0.0.md) | V3.0.0 Dead Hot Summer feature inventory mapped to RE homes |
 | [changelog-3.1.0.md](releases/changelog-3.1.0.md) | V3.1.0 Henpocalypse feature inventory mapped to RE homes |
 | [changelog-3.2.0.md](releases/changelog-3.2.0.md) | V3.1.0 -> V3.2.0 exact IL-verified delta (+ per-fact homes, §9) |

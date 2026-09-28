@@ -195,6 +195,41 @@ def must_match(label: str, text: str, pattern: str, errors: list[str]) -> None:
         errors.append(f"{label}: no match for /{pattern}/")
 
 
+def check_pin_banners(facts: dict[str, Any], errors: list[str], root: Path | None = None) -> None:
+    """Every "**Current pin:**" banner in the corpus must state the machine pin.
+
+    The banner convention ("**Current pin:** V **X.Y.Z (bN)**", also spelled
+    "**Current game pin:**" where the pin is qualified) is the corpus's one
+    place a reader learns which build a doc was written against, so a banner
+    that names a superseded build is a wrong version claim, not a history note.
+    Only bold banners are checked: prose mentions and section headings carry
+    history ("the 3.1.0 b14 capture") and must not be forced onto the pin.
+    """
+    v = facts["version"]
+    pin = v["display"].removeprefix("V ").strip()  # "3.2.0"
+    build = v["build"]
+    base = _common.DOCS if root is None else root
+    banner = re.compile(r"\*\*Current (?:game )?pin:\*\*", re.I)
+    for path in sorted(base.rglob("*.md")):
+        for line in read(path).splitlines():
+            if not banner.search(line):
+                continue
+            try:
+                where = str(path.relative_to(_common.REPO))
+            except ValueError:  # a synthetic tree (the gate's own test fixture)
+                where = str(path)
+            if not re.search(rf"(?<![0-9.]){re.escape(pin)}(?![0-9])", line):
+                errors.append(
+                    f"{where}: current-pin banner does not name the pinned build "
+                    f"{v['display']} (from stock_facts.json)"
+                )
+            if not re.search(rf"\bb{build}\b|Build\s*=\s*{build}\b", line):
+                errors.append(
+                    f"{where}: current-pin banner does not name build b{build} "
+                    f"(from stock_facts.json)"
+                )
+
+
 def check_xmls_to_load_inventory(errors: list[str]) -> None:
     """xmlsToLoad list: the WorldStaticData cctor's load names (non-XUi core)
     must match the inventory's XmlName rows exactly."""
@@ -648,6 +683,7 @@ def main() -> int:
         )
 
     check_research(facts, errors)
+    check_pin_banners(facts, errors)
     if not args.skip_siblings:
         for check in (check_loadgen, check_zdtd):
             note = check(facts, errors)

@@ -1,6 +1,6 @@
 # Dedicated wire protocol (V3.2.0 pin; V3.1.0/V3.0.1-era goldens still cited)
 
-**Current game pin:** V **3.2.0 (b9)**. Framing/join and most package bodies are stable from the V3.0.1 corpus; the TE outer wire and PackageIds VersionInformation (minor=20 build=9) are in [protocol-packages.md](../network/protocol-packages.md). Loadgen dual fixtures cover both heads.
+**Current game pin:** V **3.2.0 (b10)**. Framing/join and most package bodies are stable from the V3.0.1 corpus; the TE outer wire and PackageIds VersionInformation (the last hex capture is the b9 one: minor=20 build=9, § "Live capture head" below) are in [protocol-packages.md](../network/protocol-packages.md). Loadgen dual fixtures cover both heads.
 
 
 **Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, `NetPackageRequestToSpawnPlayer` / RequestToSpawnPlayer/PlayerId/PlayerSpawnedInWorld, golden package body layouts.  

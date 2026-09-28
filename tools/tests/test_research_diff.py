@@ -274,6 +274,14 @@ def main() -> None:
     assert run("--old", "a.dll").returncode == 2
 
     # Live --pair run when this machine keeps the previous build beside the live one.
+    # A research artifact, not an assertion (see the docstring), so it needs the
+    # built lenses; without them it is skipped with the build command named.
+    msg, _is_skip = _common.prereq(
+        ["StockFacts.exe", "Census.exe", "FullSurface.exe", "MethodList.exe", "EnumList.exe"]
+    )
+    if msg:
+        print(f"note: live --pair checks skipped: {msg}")
+        return
     asm = _common.find_asm()
     backup = asm.with_name(asm.name + ".re_stock_bak") if asm else None
     if asm is None or backup is None or not backup.is_file():

@@ -10,8 +10,10 @@
 # gate suite; CI runs the rest on the push) unless --skip-gates is given.
 #
 # Version scheme follows the history: v3.x.0 for a game-version corpus release,
-# v0.x.0 for the tooling series. The notes file is required: release prose is not
-# generated, it is reviewed.
+# v0.x.0 for the tooling series (next tooling release: v0.4.0; v0.3.0 was tagged
+# and deleted without a release). Full policy and tag history:
+# docs/releases/release-contract.md. The notes file is required: release prose
+# is not generated, it is reviewed.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

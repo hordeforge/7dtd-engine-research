@@ -125,6 +125,7 @@ should be re-checked against IL before you rely on it.
 | [changelog-3.0.0.md](../releases/changelog-3.0.0.md) | V3.0 Dead Hot Summer feature inventory + RE map (digest; RE homes verified 2026-08-28) |
 | [changelog-3.1.0.md](../releases/changelog-3.1.0.md) | V3.1.0 Henpocalypse feature inventory + RE map (digest; RE homes verified 2026-08-28) |
 | [changelog-3.2.0.md](../releases/changelog-3.2.0.md) | exact 3.1.0→3.2.0 delta, IL-verified (2026-08-28; regenerated dumps vs retained 3.1.0 sets) |
+| [release-contract.md](../releases/release-contract.md) | this repo's release contract (tag series, tag history, unreleased delta; no game claims) |
 | [block-shapes.md](../world/block-shapes.md) | audited (pass 2) |
 | [blocks.md](../world/blocks.md) | audited (pass 1) |
 | [buffs.md](../gameplay/buffs.md) | audited (pass 1) |
