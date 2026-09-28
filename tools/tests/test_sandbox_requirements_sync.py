@@ -10,6 +10,8 @@ recompiling installs from a lock without it; a recompile that drops
 Checked here:
   - every requirements.in dep appears in the lock as an exact name==version pin
   - every pin carries at least one --hash=sha256 (no hash-stripped hand edits)
+  - the locked version satisfies the bound requirements.in declares for it, so
+    the floors/ceilings there and the reviewed lock cannot drift apart
   - no ranged/wildcard/url specifiers sneak into the lock
   - every entry the lock marks as coming from requirements.in is declared there
   - every non-stdlib import in the sandbox tools and shader_blob_dump.py is
@@ -41,18 +43,60 @@ PIN_RE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9._-]*)==([^\s\\]+)\s*(?:\\\s*)?$")
 NON_EXACT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*\s*(@|~=|!=|<|>|[*]|\[)")
 DIRECT_VIA_RE = re.compile(r"#\s+(?:via\s+)?-r requirements\.in$")
 IMPORT_RE = re.compile(r"^[ \t]*(?:from\s+([A-Za-z_][\w.]*)|import\s+([A-Za-z_][\w.]*))", re.M)
+REQ_RE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9._-]*)(.*)$")
+# The only bound forms requirements.in may use. Anything else (extras, env
+# markers, URLs, wildcards) resolves in ways this gate cannot check, so it is a
+# hard error rather than a silently unverified declaration.
+SPEC_RE = re.compile(r"^(~=|>=|<=|==|>|<)\s*([0-9][0-9A-Za-z.]*)$")
 
 
 def canon(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
-def parse_in(text: str) -> set[str]:
-    return {
-        canon(line.strip())
-        for line in text.splitlines()
-        if line.strip() and not line.lstrip().startswith("#")
-    }
+def release(version: str) -> tuple[int, ...]:
+    """Dotted numeric version as a tuple; '1.0' and '1.0.0' compare equal."""
+    return tuple(int(part) for part in version.split("."))
+
+
+def bounded(version: str, spec: str) -> tuple[bool, str]:
+    """Does a locked version satisfy a requirements.in bound? (ok, reason)."""
+    if not spec:
+        return True, ""
+    m = SPEC_RE.match(spec)
+    if m is None:
+        return False, f"unsupported specifier {spec!r}"
+    op, want = m.group(1), m.group(2)
+    try:
+        got, need = release(version), release(want)
+    except ValueError:
+        return False, f"is not a plain dotted version ({version!r}, {want!r})"
+    if op == "~=":
+        upper = (*need[:-1], need[-1] + 1) if len(need) > 1 else (need[0] + 1,)
+        return (need <= got < upper), f"is outside the {spec} series"
+    cmp = (got > need) - (got < need)
+    ok = {
+        ">=": cmp >= 0,
+        ">": cmp > 0,
+        "<=": cmp <= 0,
+        "<": cmp < 0,
+        "==": cmp == 0,
+    }[op]
+    return ok, f"does not satisfy {spec}"
+
+
+def parse_in(text: str) -> dict[str, str]:
+    """Map canonical dep name -> its full requirement line in requirements.in."""
+    out: dict[str, str] = {}
+    for raw in text.splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        m = REQ_RE.match(line)
+        if m is None:
+            raise ValueError(f"unparseable requirements.in line: {raw!r}")
+        out[canon(m.group(1))] = line[len(m.group(1)) :].strip()
+    return out
 
 
 def parse_lock(text: str) -> dict[str, dict[str, Any]]:
@@ -80,22 +124,30 @@ def parse_lock(text: str) -> dict[str, dict[str, Any]]:
     return pins
 
 
-def check(in_set: set[str], lock_text: str) -> list[str]:
+def check(declared: dict[str, str], lock_text: str) -> list[str]:
     bad: list[str] = []
     try:
         pins = parse_lock(lock_text)
     except ValueError as exc:
         return [str(exc)]
-    for dep in sorted(in_set):
+    for dep in sorted(declared):
         if dep not in pins:
             bad.append(
                 f"{dep}: declared in requirements.in but absent from the lock "
                 "(recompile: uv pip compile --generate-hashes)"
             )
-        elif pins[dep]["hashes"] == 0:
+            continue
+        if pins[dep]["hashes"] == 0:
             bad.append(f"{dep}: pinned without any --hash=sha256 (integrity check lost)")
+            continue
+        ok, reason = bounded(str(pins[dep]["version"]), declared[dep])
+        if not ok:
+            bad.append(
+                f"{dep}: locked {pins[dep]['version']} {reason} "
+                "(requirements.in and the lock disagree: recompile)"
+            )
     for name, meta in sorted(pins.items()):
-        if meta["direct"] and name not in in_set:
+        if meta["direct"] and name not in declared:
             bad.append(
                 f"{name}: locked as a direct requirement but not declared in requirements.in"
             )
@@ -113,13 +165,13 @@ def third_party_imports(path: Path, local: set[str]) -> set[str]:
     return out
 
 
-def undeclared_imports(in_set: set[str], sources: list[Path]) -> list[str]:
+def undeclared_imports(declared: dict[str, str], sources: list[Path]) -> list[str]:
     """Imports a tool relies on that requirements.in does not declare."""
     bad = []
     for path in sources:
         local = {p.stem for p in path.parent.glob("*.py")}
         for mod in sorted(third_party_imports(path, local)):
-            if canon(mod) not in in_set:
+            if canon(mod) not in declared:
                 bad.append(f"{mod}: imported by {path.name} but not declared in requirements.in")
     return bad
 
@@ -136,24 +188,47 @@ def self_test() -> tuple[list[str], int]:
         "    # via alpha\n"
     )
     cases = [
-        ("clean lock", {"alpha"}, clean, []),
-        ("dep missing from lock", {"alpha", "gamma"}, clean, ["gamma"]),
-        ("hash stripped", {"alpha"}, "alpha==1.0.0\n    # via -r requirements.in\n", ["alpha"]),
+        ("clean lock", {"alpha": ""}, clean, []),
+        ("clean lock with bounds", {"alpha": "~=1.0", "beta": ">=2.0"}, clean, []),
+        (
+            "bound above the locked version",
+            {"alpha": "~=1.1"},
+            clean,
+            ["outside the ~=1.1 series"],
+        ),
+        (
+            "bound unsupported form",
+            {"alpha": ">=1.0; python_version>'3.12'"},
+            clean,
+            ["unsupported specifier"],
+        ),
+        (
+            "dep missing from lock",
+            {"alpha": "", "gamma": ""},
+            clean,
+            ["gamma"],
+        ),
+        (
+            "hash stripped",
+            {"alpha": ""},
+            "alpha==1.0.0\n    # via -r requirements.in\n",
+            ["alpha"],
+        ),
         (
             "ghost direct",
-            set(),
+            {},
             f"alpha==1.0.0 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
             ["not declared"],
         ),
         (
             "range sneaks in",
-            {"alpha"},
+            {"alpha": ""},
             f"alpha>=1.0 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
             ["non-exact specifier"],
         ),
         (
             "multi-via direct",
-            {"alpha"},
+            {"alpha": ""},
             (
                 f"alpha==1.0 \\\n    --hash=sha256:{h64('a')}\n    # via\n    #   beta\n"
                 "    #   -r requirements.in\n"
@@ -163,8 +238,8 @@ def self_test() -> tuple[list[str], int]:
         ),
     ]
     bad: list[str] = []
-    for label, in_set, lock, want in cases:
-        got = check(in_set, lock)
+    for label, declared, lock, want in cases:
+        got = check(declared, lock)
         if not want:
             if got:
                 bad.append(f"{label}: clean case rejected: {got}")
@@ -179,27 +254,27 @@ def self_test() -> tuple[list[str], int]:
         src_cases = [
             (
                 "imports declared",
-                {"unitypy"},
+                {"unitypy": "~=1.25"},
                 "import json\n\nfrom UnityPy import load\nfrom safe_name import safe_name\n",
                 [],
             ),
             (
                 "transitive import undeclared",
-                {"unitypy"},
+                {"unitypy": "~=1.25"},
                 "import json\n\n    import lz4.block\n",
                 ["lz4"],
             ),
             (
                 "dotted stdlib ignored",
-                {"unitypy"},
+                {"unitypy": "~=1.25"},
                 "import xml.etree.ElementTree as ET\n",
                 [],
             ),
         ]
-        for label, in_set, body, want in src_cases:
+        for label, declared, body, want in src_cases:
             target = tmp / "tool_under_test.py"
             target.write_text(body, encoding="utf-8")
-            got = undeclared_imports(in_set, [target])
+            got = undeclared_imports(declared, [target])
             if not want:
                 if got:
                     bad.append(f"{label}: clean case rejected: {got}")
@@ -214,7 +289,11 @@ def main() -> int:
     for f in failures:
         print("FAIL:", f, file=sys.stderr)
 
-    declared = parse_in(IN_FILE.read_text(encoding="utf-8"))
+    try:
+        declared = parse_in(IN_FILE.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        print("FAIL:", exc, file=sys.stderr)
+        return 1
     real = check(declared, LOCK.read_text(encoding="utf-8"))
     for f in real:
         print("FAIL:", f, file=sys.stderr)
