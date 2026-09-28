@@ -70,6 +70,9 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str
     total = 0
     broken = []
     unreadable = []
+    # Hoisted out of the per-link loop below: the prefix every resolved link is
+    # tested against is the same for every link in every file of the repo.
+    root_prefix = os.path.normpath(repo) + os.sep
     for dirpath, dirnames, filenames in os.walk(repo):
         # Only VCS and vendored trees are skipped: dot-directories carry docs
         # (a sibling's .github/), and glob's recursive walk never matched them.
@@ -88,7 +91,7 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str
                 continue
             for m in LINK.finditer(txt):
                 p = os.path.normpath(os.path.join(dirpath, m.group(1).split("#", 1)[0]))
-                if not p.startswith(os.path.normpath(repo) + os.sep):
+                if not p.startswith(root_prefix):
                     total += 1
                     if not os.path.exists(p):
                         broken.append(f"  BROKEN {f}: {m.group(1)}")

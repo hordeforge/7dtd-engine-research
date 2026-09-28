@@ -19,6 +19,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
+import io
 import json
 import math
 import os
@@ -180,6 +182,23 @@ SECTIONS = tuple(spec.name for spec in SECTION_SPECS)
 SOURCE_FILES = {os.path.basename(spec.config): spec.config for spec in SECTION_SPECS}
 
 
+def read_source(path: str) -> tuple[bytes, str] | None:
+    """(raw bytes, decoded text) for one Data/Config file, or None if absent.
+
+    One read serves both consumers. The hash must cover the exact bytes on
+    disk, and the parse must see what `open(..., encoding="utf-8",
+    errors="replace")` produces, universal-newline translation included, so
+    the bytes are hashed directly and the text goes through a wrapper with the
+    same settings rather than a second pass over the file.
+    """
+    if not os.path.isfile(path):
+        return None
+    with open(path, "rb") as fh:
+        raw = fh.read()
+    text = io.TextIOWrapper(io.BytesIO(raw), encoding="utf-8", errors="replace").read()
+    return raw, text
+
+
 def extract(game_dir: str) -> dict[str, Any]:
     unparsed: list[str] = []
     values: dict[str, dict[str, Any]] = {}
@@ -187,21 +206,23 @@ def extract(game_dir: str) -> dict[str, Any]:
     # Source identity: hash of the exact bytes each pinned section was read
     # from. Version labels repeat across silent re-releases; these hashes do
     # not, and --check fails closed when they drift.
+    sources: dict[str, tuple[bytes, str] | None] = {}
     source_identity: dict[str, dict[str, Any]] = {}
     for key, rel in SOURCE_FILES.items():
-        path = os.path.join(game_dir, rel)
-        if os.path.isfile(path):
+        source = read_source(os.path.join(game_dir, rel))
+        sources[key] = source
+        if source is not None:
+            raw, _text = source
             source_identity[key] = {
-                "bytes": os.stat(path).st_size,
-                "sha256": tooling.sha256_file(Path(path)),
+                "bytes": len(raw),
+                "sha256": hashlib.sha256(raw).hexdigest(),
             }
 
     for spec in SECTION_SPECS:
-        path = os.path.join(game_dir, spec.config)
+        source = sources[os.path.basename(spec.config)]
         parsed: dict[str, Any] = {}
-        if os.path.isfile(path):
-            with open(path, encoding="utf-8", errors="replace") as fh:
-                parsed = spec.parse(fh.read(), unparsed)
+        if source is not None:
+            parsed = spec.parse(source[1], unparsed)
         values[spec.name] = {**parsed, **spec.constants}
 
     return {

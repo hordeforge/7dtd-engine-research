@@ -27,6 +27,7 @@ Usage: python3 tools/save_roundtrip_check.py [save_dir]
 import argparse
 import glob
 import os
+import re
 import struct
 import sys
 import zlib
@@ -806,8 +807,14 @@ FAILED_MARKERS = (
 )
 
 
+# One scan per line instead of eleven: `checks` grows a line per region slot
+# and per biome, and the marker set is fixed, so the alternation is compiled
+# once from the tuple above.
+FAILED_RE = re.compile("|".join(re.escape(marker) for marker in FAILED_MARKERS))
+
+
 def any_failed(checks: list[str]) -> bool:
-    return any(marker in c for c in checks for marker in FAILED_MARKERS)
+    return any(FAILED_RE.search(c) for c in checks)
 
 
 def report(checks: list[str]) -> int:

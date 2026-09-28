@@ -246,9 +246,14 @@ def parse_bind_channels(raw: bytes) -> tuple[Fields, int]:
     return {"source_map": source_map, "channels": channels}, 8 + count * 8
 
 
-def input_semantics(dxbc: bytes) -> list[tuple[str, int]]:
-    """`(semantic, index)` per element of a DXBC input signature."""
-    isgn = dxbc_chunks(dxbc).get("ISGN")
+def input_semantics(dxbc: bytes, chunks: dict[str, bytes] | None = None) -> list[tuple[str, int]]:
+    """`(semantic, index)` per element of a DXBC input signature.
+
+    `chunks` is the caller's own `dxbc_chunks` result for the same container, so
+    a caller that already holds it does not pay a second table walk and a second
+    copy of every chunk payload.
+    """
+    isgn = (dxbc_chunks(dxbc) if chunks is None else chunks).get("ISGN")
     if isgn is None:
         return []
     out = []
@@ -267,10 +272,10 @@ def input_semantics(dxbc: bytes) -> list[tuple[str, int]]:
     return out
 
 
-def expected_channels(dxbc: bytes) -> list[tuple[int, int]]:
+def expected_channels(dxbc: bytes, chunks: dict[str, bytes] | None = None) -> list[tuple[int, int]]:
     """The channel list a vertex program's input signature implies."""
     channels = []
-    for semantic, index in input_semantics(dxbc):
+    for semantic, index in input_semantics(dxbc, chunks):
         if semantic == "TEXCOORD":
             channels.append((4 + index, 5 + index))
         elif (semantic, index) in BIND_CHANNEL_SOURCES:
@@ -425,9 +430,11 @@ def decode_bundle(
             continue
         compressed = shader.compressedLengths[index][0]
         decompressed = shader.decompressedLengths[index][0]
-        blob = bytes(shader.compressedBlob)
+        # Only this shader's own slice of the shared compressed blob is copied.
+        # bytes(blob) for the whole blob, once per shader, made allocation
+        # O(shaders x blob) on a bundle that keeps one blob for all of them.
         data = CompressionHelper.decompress_lz4(
-            blob[offsets[0] : offsets[0] + compressed], decompressed
+            bytes(shader.compressedBlob[offsets[0] : offsets[0] + compressed]), decompressed
         )
         count = _count(data, 0, max(0, (len(data) - 4) // 12), "sub-program record")
         records = [struct.unpack_from("<III", data, 4 + i * 12) for i in range(count)]
@@ -496,7 +503,7 @@ def decode_bundle(
                 channels = None
                 if len(trailing) >= 8:
                     channels, _consumed = parse_bind_channels(trailing)
-                expected = expected_channels(code[38:])
+                expected = expected_channels(code[38:], chunks)
             except ShaderBlobError as exc:
                 skipped.append((name, f"blob {blob_index}: {exc}"))
                 continue

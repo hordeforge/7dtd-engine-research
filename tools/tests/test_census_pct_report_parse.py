@@ -47,7 +47,7 @@ def main() -> None:
 
     report = tmp / "coverage.md"
     report.write_text(f"# Coverage\n\n{REPORT_ROW}", encoding="utf-8")
-    assert module.parse_report_reached_types(str(report)) == 4211
+    assert module.parse_coverage_report(str(report))[0] == 4211
 
     # A report with no such row and an unreadable report are both "not
     # measured". Neither may answer with a number.
@@ -56,8 +56,9 @@ def main() -> None:
     for label, path in (("no such row", str(empty)), ("unreadable", str(tmp / "absent.md"))):
         err = io.StringIO()
         with contextlib.redirect_stderr(err):
-            got = module.parse_report_reached_types(path)
+            got, accounted = module.parse_coverage_report(path)
         assert got is None, f"{label}: returned {got!r} instead of None"
+        assert accounted == {"acct_types": None, "acct_methods": None}, label
         if label == "unreadable":
             assert path in err.getvalue(), (
                 f"unreadable report not named on stderr: {err.getvalue()!r}"

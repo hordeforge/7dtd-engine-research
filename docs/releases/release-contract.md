@@ -153,6 +153,18 @@ falls behind the commits actually below the last tag.
 
 ### Tools and docs
 
+- **Hot paths stopped paying for the same work twice.** The shader dumper
+  copies only the sub-program slice it decompresses instead of the whole
+  shared compressed blob per shader, and parses each DXBC container once
+  rather than walking and copying every chunk twice; the coverage report is
+  opened and scanned once instead of twice; `xml_pins.py` reads each
+  `Data/Config` file once for both its byte hash and its parse instead of
+  streaming it for the hash and slurping it again; `blocks.xml` is read once
+  rather than twice in the block dumper; the save round-trip verdict is one
+  compiled scan per line instead of eleven substring searches; the
+  cross-repo link sweep hoists its loop-invariant prefix and the citation gate
+  resolves a nested path from the set of known `docs/` files instead of one
+  `isfile` syscall per citation.
 - **Gates share one argument surface.** The tests that need the game assembly
   or a mono tool call the same helpers from `tools/tests/_common.py` instead of
   each resolving them, and `tools/sandbox/requirements.in` carries a floor and

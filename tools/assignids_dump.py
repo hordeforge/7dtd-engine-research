@@ -39,10 +39,13 @@ def parse_shapes(path: str) -> tuple[list[str], set[str]]:
     return all_names, bulletproof
 
 
-def parse_blocks(path: str, shapes: list[str], bulletproof: set[str]) -> list[str]:
-    """Return the emitted block names in document order (shape groups expanded)."""
-    with open(path, encoding="utf-8-sig") as f:
-        xml = f.read()
+def parse_blocks(xml: str, shapes: list[str], bulletproof: set[str]) -> list[str]:
+    """Return the emitted block names in document order (shape groups expanded).
+
+    Takes the document text, not a path: the caller already holds it for
+    `terrain_by_name`, and this file is megabytes that a second read and a
+    second full scan would duplicate for nothing.
+    """
     out: list[str] = []
     for m in re.finditer(r"<block\s+name=\"([^\"]+)\"([^>]*)/?>", xml):
         name, attrs = m.group(1), m.group(2)
@@ -121,7 +124,7 @@ def main() -> None:
     shapes, bulletproof = parse_shapes(f"{cfg_dir}/shapes.xml")
     with open(f"{cfg_dir}/blocks.xml", encoding="utf-8-sig") as f:
         blocks_xml = f.read()
-    names = parse_blocks(f"{cfg_dir}/blocks.xml", shapes, bulletproof)
+    names = parse_blocks(blocks_xml, shapes, bulletproof)
 
     fixed = {"air": 0, "water": 240, "terrWaterPOI": 241, "waterdata": 242}
     used = set(fixed.values())

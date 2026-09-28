@@ -90,6 +90,22 @@ def known_doc_names() -> set[str]:
     return names
 
 
+def known_doc_paths() -> set[str]:
+    """Every file under docs/ as a docs-relative POSIX path, resolved once.
+
+    A citation carrying a directory (`meta/coverage.md`) is looked up here
+    rather than stat'ed: one isfile per such citation made the walk pay a
+    syscall per match over whole sibling repos, and this is the same answer.
+    """
+    paths: set[str] = set()
+    for dirpath, dirnames, filenames in os.walk(tooling.DOCS):
+        dirnames[:] = [d for d in dirnames if not d.startswith(".")]
+        for n in filenames:
+            rel = os.path.relpath(os.path.join(dirpath, n), tooling.DOCS)
+            paths.add(tooling.nfc(rel.replace(os.sep, "/")))
+    return paths
+
+
 def collect_local(root: str, into: set[str]) -> None:
     """Every repo-local doc name across the fleet (roots, the full docs/ tree
     incl. nested dirs like docs/reviews/, and docs/adr names prefix-stripped),
@@ -111,17 +127,17 @@ def collect_local(root: str, into: set[str]) -> None:
                     into.add(tooling.nfc(re.sub(r"^\d+-", "", d)))
 
 
-def resolves(name: str, docs: set[str]) -> bool:
+def resolves(name: str, docs: set[str], paths: set[str]) -> bool:
     """A citation resolves when its path exists under docs/, or its basename
     does. `7dtd-engine-research/docs/meta/x.md` is a research citation too,
     and the nested form has to reach the same verdict as the flat one."""
     name = tooling.nfc(name)
     if "/" not in name:
         return name in docs
-    return (tooling.DOCS / name).is_file() or os.path.basename(name) in docs
+    return name in paths or os.path.basename(name) in docs
 
 
-def scan(root: str, local: set[str], docs: set[str]) -> tuple[int, list[str], int]:
+def scan(root: str, local: set[str], docs: set[str], paths: set[str]) -> tuple[int, list[str], int]:
     """(citation count, broken-citation lines, unreadable-file count)."""
     total = 0
     broken: list[str] = []
@@ -144,7 +160,7 @@ def scan(root: str, local: set[str], docs: set[str]) -> tuple[int, list[str], in
             for pat in (RES_PATH, BARE_AFTER_RE):
                 for m in pat.finditer(txt):
                     total += 1
-                    if not resolves(m.group(1), docs):
+                    if not resolves(m.group(1), docs, paths):
                         broken.append(f"{p}: cites {m.group(1)}")
             # src files: a bare `X.md` name must be a research doc or a
             # repo-local doc (incl. zdtd docs/adr stripped).
@@ -184,6 +200,7 @@ def main() -> int:
     bad_total = 0
     local: set[str] = set()
     docs = known_doc_names()
+    doc_paths = known_doc_paths()
     for name in REPOS:
         if args.repo and name != args.repo:
             continue
@@ -201,7 +218,7 @@ def main() -> int:
         repo_dir = os.path.join(args.root, name)
         if not os.path.isdir(repo_dir):
             continue
-        total, broken, unreadable = scan(repo_dir, local, docs)
+        total, broken, unreadable = scan(repo_dir, local, docs, doc_paths)
         grand += total
         bad_total += len(broken)
         for b in broken:

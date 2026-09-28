@@ -97,51 +97,54 @@ def whole_assembly_counts(cen: dict[str, int]) -> tuple[int, int]:
     return cen["AllTypes (incl nested)"], cen["AllMethodsWithBody"]
 
 
-def parse_report_reached_types(report_path: str) -> int | None:
-    """Grab 'Reached types (incl. compiler-generated)' from the Coverage report.
+REACHED_RE = re.compile(r"\|\s*Reached types \(incl\. compiler-generated\)\s*\|\s*(\d+)\s*\|")
+ACCT_TYPES_RE = re.compile(
+    r"\|\s*Accounted game types \(reached documented \+ unreached classified\)"
+    r"\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|"
+)
+ACCT_METHODS_RE = re.compile(
+    r"\|\s*Methods in accounted game types\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|"
+)
 
-    None, not 0, when the report is unreadable or has no such row. A 0 here
-    would be indistinguishable from a real measurement and would drop the
-    "reached in the server call graph" line from a report whose other rows
-    look complete; the caller says which report it could not read.
+
+def parse_coverage_report(report_path: str) -> tuple[int | None, dict[str, int | None]]:
+    """The reached-type count and the whole-assembly 100% rows, in one pass.
+
+    The report is the largest artifact this tool reads, so it is opened and
+    scanned once: three per-line matchers share the single read.
+
+    None, not 0, for every value when the report is unreadable or has no such
+    row. A 0 here would be indistinguishable from a real measurement and would
+    drop the "reached in the server call graph" line from a report whose other
+    rows look complete; the caller says which report it could not read.
     """
-    try:
-        with open(report_path, encoding="utf-8") as fh:
-            for line in fh:
-                m = re.match(
-                    r"\|\s*Reached types \(incl\. compiler-generated\)\s*\|\s*(\d+)\s*\|", line
-                )
-                if m:
-                    return int(m.group(1))
-    except OSError as exc:
-        print(f"census-pct: cannot read coverage report {report_path}: {exc}", file=sys.stderr)
-    return None
-
-
-def parse_report_accounted(report_path: str) -> dict[str, int | None]:
-    """Grab the whole-assembly 100% rows: accounted types and methods in them."""
+    reached: int | None = None
     out: dict[str, int | None] = {"acct_types": None, "acct_methods": None}
     try:
         with open(report_path, encoding="utf-8") as fh:
             for line in fh:
-                m = re.match(
-                    r"\|\s*Accounted game types \(reached documented \+ unreached classified\)\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|",
-                    line,
-                )
+                m = REACHED_RE.match(line)
+                if m:
+                    reached = int(m.group(1))
+                m = ACCT_TYPES_RE.match(line)
                 if m:
                     out["acct_types"] = int(m.group(1))
-                m = re.match(
-                    r"\|\s*Methods in accounted game types\s*\|\s*\*\*(\d+) / \d+ \(100%\)\*\*\s*\|",
-                    line,
-                )
+                m = ACCT_METHODS_RE.match(line)
                 if m:
                     out["acct_methods"] = int(m.group(1))
-    except OSError:
-        # Unreadable report: the None entries stay, and main() prints the
+                if (
+                    reached is not None
+                    and out["acct_types"] is not None
+                    and out["acct_methods"] is not None
+                ):
+                    break
+    except OSError as exc:
+        # Unreadable report: every value stays None, main() prints the
         # "could not parse the whole-assembly accounting rows" warning rather
         # than claiming a 100% partition it never read.
-        pass
-    return out
+        reached = None
+        print(f"census-pct: cannot read coverage report {report_path}: {exc}", file=sys.stderr)
+    return reached, out
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -294,8 +297,7 @@ def main() -> int:
             print(stderr, file=sys.stderr)
             return rc
         cov = parse_coverage(stderr)
-        reached_types = parse_report_reached_types(tmp_report)
-        accounted = parse_report_accounted(tmp_report)
+        reached_types, accounted = parse_coverage_report(tmp_report)
     except ValueError as exc:
         # A reformatted or absent summary line is unreadable input, not a
         # traceback: every other failure in this main() returns an rc.
