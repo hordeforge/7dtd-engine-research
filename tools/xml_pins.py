@@ -5,50 +5,40 @@ StockFacts.exe pins DLL constants; this pins selected XML data values that
 the corpus and zdtd's provenance register cite (the zombie HP ladder from
 entityclasses.xml replace_passive_effect, etc.). Values are pinned against the
 installed game so a data change (or wrong claim) fails the gate. Every section
-written to the pins file is verified by --check: a section that is extracted
-and committed but never diffed against the install would let silent drift pass
-as a green gate.
+declared in SECTION_SPECS is extracted, committed and diffed by --check: a
+section that is extracted and committed but never diffed against the install
+would let silent drift pass as a green gate, so the section table is the single
+place a new pin site is registered (source file, parser, minimum parsed
+values, and the constant keys that section always carries).
 
 Usage:
   python3 tools/xml_pins.py [--pins FILE] --game-dir DIR  # regenerate pins from DIR
   python3 tools/xml_pins.py --check [--pins FILE]         # check committed pins vs the pinned install path
 """
 
+from __future__ import annotations
+
 import argparse
-import hashlib
 import json
 import os
 import re
 import sys
 import tempfile
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
-TOOLS = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_PINS = os.path.join(TOOLS, "data", "xml_pins.json")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tooling
 
-# Every extracted section is part of the gate contract: --check diffs each one,
-# and regeneration refuses to overwrite a populated section with an empty parse.
-SECTIONS = ("entityclasses_health", "traders_root", "buffs_survival")
+DEFAULT_PINS = str(tooling.TOOLS / "data" / "xml_pins.json")
 
 DEFAULT_GAME = os.path.expanduser(
     "~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
 )
-CFG_ENTITIES = "Data/Config/entityclasses.xml"
-CFG_TRADERS = "Data/Config/traders.xml"
-CFG_BUFFS = "Data/Config/buffs.xml"
 
 HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="(\d+)"')
-
-
-def sha256_file(path: str) -> tuple[int, str]:
-    """Byte count + hex sha256 of a file, streamed (no game bytes retained)."""
-    h = hashlib.sha256()
-    n = 0
-    with open(path, "rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 20), b""):
-            h.update(chunk)
-            n += len(chunk)
-    return n, h.hexdigest()
 
 
 def parse_float(text: str, where: str, unparsed: list[str]) -> float | None:
@@ -65,72 +55,138 @@ def parse_float(text: str, where: str, unparsed: list[str]) -> float | None:
         return None
 
 
+def entityclasses_health(text: str, unparsed: list[str]) -> dict[str, int]:
+    """health* values inside the replace_passive_effect block."""
+    m = re.search(r"<replace_passive_effect>.*?</replace_passive_effect>", text, re.S)
+    block = m.group(0) if m else ""
+    return {name: int(val) for name, val in HEALTH_RE.findall(block)}
+
+
+def traders_root(text: str, unparsed: list[str]) -> dict[str, float]:
+    """buy_markup / sell_markdown off the <traders> root element."""
+    m = re.search(r"<traders\b[^>]*>", text)
+    if not m:
+        return {}
+    found: dict[str, float] = {}
+    for attr in ("buy_markup", "sell_markdown"):
+        am = re.search(rf'\b{attr}="([^"]+)"', m.group(0))
+        if am:
+            value = parse_float(am.group(1), f"Data/Config/traders.xml:{attr}", unparsed)
+            if value is not None:
+                found[attr] = value
+    return found
+
+
+def buffs_survival(text: str, unparsed: list[str]) -> dict[str, float]:
+    """Survival thresholds: StatComparePercCurrentToMax on Food/Water."""
+    found: dict[str, float] = {}
+    for stat in ("Food", "Water"):
+        m = re.search(
+            rf'StatComparePercCurrentToMax"[^>]*stat="{stat}"[^>]*operation="GT"[^>]*value="([^"]+)"',
+            text,
+        )
+        if m:
+            key = f"{stat.lower()}_wellfed_threshold"
+            value = parse_float(m.group(1), f"Data/Config/buffs.xml:{key}", unparsed)
+            if value is not None:
+                found[key] = value
+    return found
+
+
+@dataclass(frozen=True)
+class Section:
+    """One pinned data section and everything the gate needs to police it.
+
+    `parse` returns the values read out of the install's config file;
+    `constants` are the section's stable identity keys, pinned without being
+    parsed; `min_parsed` is how many file-derived values must appear before
+    regeneration will overwrite the committed section (a renamed config block
+    or a wrong --game-dir must fail, not wipe the pins).
+    """
+
+    name: str
+    config: str
+    parse: Callable[[str, list[str]], dict[str, Any]]
+    min_parsed: int
+    constants: dict[str, Any] = field(default_factory=dict)
+
+
+# Every pin site, in one table: extraction, --check diffing, the "sources"
+# record and the regeneration refusal all read from this list.
+SECTION_SPECS: tuple[Section, ...] = (
+    Section(
+        name="entityclasses_health",
+        config="Data/Config/entityclasses.xml",
+        parse=entityclasses_health,
+        min_parsed=1,
+    ),
+    Section(
+        name="traders_root",
+        config="Data/Config/traders.xml",
+        parse=traders_root,
+        min_parsed=1,
+    ),
+    Section(
+        name="buffs_survival",
+        config="Data/Config/buffs.xml",
+        parse=buffs_survival,
+        min_parsed=1,
+        constants={"hunger_buff": "buffStatusHungry01", "thirst_buff": "buffStatusThirsty01"},
+    ),
+)
+
+SECTIONS = tuple(spec.name for spec in SECTION_SPECS)
+SOURCE_FILES = {os.path.basename(spec.config): spec.config for spec in SECTION_SPECS}
+
+
 def extract(game_dir: str) -> dict[str, Any]:
     unparsed: list[str] = []
-
-    def read_if_present(path: str) -> str | None:
-        if not os.path.isfile(path):
-            return None
-        with open(path, encoding="utf-8", errors="replace") as fh:
-            return fh.read()
+    values: dict[str, dict[str, Any]] = {}
 
     # Source identity: hash of the exact bytes each pinned section was read
     # from. Version labels repeat across silent re-releases; these hashes do
     # not, and --check fails closed when they drift.
-    source_paths = {
-        "entityclasses.xml": os.path.join(game_dir, CFG_ENTITIES),
-        "traders.xml": os.path.join(game_dir, CFG_TRADERS),
-        "buffs.xml": os.path.join(game_dir, CFG_BUFFS),
-    }
     source_identity: dict[str, dict[str, Any]] = {}
-    for key, path in source_paths.items():
+    for key, rel in SOURCE_FILES.items():
+        path = os.path.join(game_dir, rel)
         if os.path.isfile(path):
-            size, digest = sha256_file(path)
-            source_identity[key] = {"bytes": size, "sha256": digest}
+            source_identity[key] = {
+                "bytes": os.stat(path).st_size,
+                "sha256": tooling.sha256_file(Path(path)),
+            }
 
-    hp: dict[str, int] = {}
-    epath = os.path.join(game_dir, CFG_ENTITIES)
-    text = read_if_present(epath)
-    if text is not None:
-        m = re.search(r"<replace_passive_effect>.*?</replace_passive_effect>", text, re.S)
-        block = m.group(0) if m else ""
-        for name, val in HEALTH_RE.findall(block):
-            hp[name] = int(val)
-    trader: dict[str, float] = {}
-    ttext = read_if_present(os.path.join(game_dir, CFG_TRADERS))
-    if ttext is not None:
-        m = re.search(r"<traders\b[^>]*>", ttext)
-        if m:
-            for attr in ("buy_markup", "sell_markdown"):
-                am = re.search(rf'\b{attr}="([^"]+)"', m.group(0))
-                if am:
-                    value = parse_float(am.group(1), f"{CFG_TRADERS}:{attr}", unparsed)
-                    if value is not None:
-                        trader[attr] = value
-    buffs: dict[str, float | str] = {}
-    btext = read_if_present(os.path.join(game_dir, CFG_BUFFS))
-    if btext is not None:
-        # survival thresholds: StatComparePercCurrentToMax on Food/Water
-        for stat in ("Food", "Water"):
-            m = re.search(
-                rf'StatComparePercCurrentToMax"[^>]*stat="{stat}"[^>]*operation="GT"[^>]*value="([^"]+)"',
-                btext,
-            )
-            if m:
-                key = f"{stat.lower()}_wellfed_threshold"
-                value = parse_float(m.group(1), f"{CFG_BUFFS}:{key}", unparsed)
-                if value is not None:
-                    buffs[key] = value
-        buffs["hunger_buff"] = "buffStatusHungry01"
-        buffs["thirst_buff"] = "buffStatusThirsty01"
+    for spec in SECTION_SPECS:
+        path = os.path.join(game_dir, spec.config)
+        parsed: dict[str, Any] = {}
+        if os.path.isfile(path):
+            with open(path, encoding="utf-8", errors="replace") as fh:
+                parsed = spec.parse(fh.read(), unparsed)
+        values[spec.name] = {**parsed, **spec.constants}
+
     return {
-        "sources": [CFG_ENTITIES, CFG_TRADERS, CFG_BUFFS],
+        "sources": [spec.config for spec in SECTION_SPECS],
         "source_identity": source_identity,
         "unparsed": unparsed,
-        "entityclasses_health": hp,
-        "traders_root": trader,
-        "buffs_survival": buffs,
+        **values,
     }
+
+
+def refusals(data: dict[str, Any], game_dir: str) -> list[str]:
+    """Reasons regeneration must not overwrite the committed pins.
+
+    A wrong --game-dir, a renamed config block, or a source file that parses
+    to nothing must leave the pins alone rather than replace them with empty
+    sections and report success.
+    """
+    out = list(data["unparsed"])
+    for spec in SECTION_SPECS:
+        path = os.path.join(game_dir, spec.config)
+        if os.path.isfile(path) and len(data[spec.name]) - len(spec.constants) < spec.min_parsed:
+            out.append(
+                f"{path} present but no {spec.name} value parsed "
+                f"(need {spec.min_parsed}; config section renamed?)"
+            )
+    return out
 
 
 def section_diffs(live: dict[str, Any], committed: dict[str, Any]) -> list[str]:
@@ -142,13 +198,6 @@ def section_diffs(live: dict[str, Any], committed: dict[str, Any]) -> list[str]:
             if lv.get(k) != cv.get(k):
                 diffs.append(f"{sec}.{k}: install={lv.get(k)!r} pinned={cv.get(k)!r}")
     return diffs
-
-
-SOURCE_FILES = {
-    "entityclasses.xml": CFG_ENTITIES,
-    "traders.xml": CFG_TRADERS,
-    "buffs.xml": CFG_BUFFS,
-}
 
 
 def identity_diffs(live: dict[str, Any], committed: dict[str, Any]) -> list[str]:
@@ -193,7 +242,7 @@ def main() -> int:
     pins_path = args.pins
 
     if not args.check:
-        epath = os.path.join(args.game_dir, CFG_ENTITIES)
+        epath = os.path.join(args.game_dir, SECTION_SPECS[0].config)
         if not os.path.isfile(epath):
             print(
                 f"error: {epath} not found; pass the dedicated-server root via --game-dir",
@@ -204,17 +253,9 @@ def main() -> int:
         # A wrong --game-dir (or a renamed config section) must not wipe the
         # committed pins with empty values while reporting success. Same rule
         # for every section whose source file exists but parses to nothing.
-        refusals = list(data["unparsed"])
-        if not data["entityclasses_health"]:
-            refusals.append(f"no health* values parsed from {epath}")
-        tpath = os.path.join(args.game_dir, CFG_TRADERS)
-        if os.path.isfile(tpath) and not data["traders_root"]:
-            refusals.append(
-                f"{tpath} present but no buy_markup/sell_markdown parsed "
-                "(traders <traders> header changed?)"
-            )
-        if refusals:
-            for r in refusals:
+        reasons = refusals(data, args.game_dir)
+        if reasons:
+            for r in reasons:
                 print(
                     f"error: {r}; refusing to overwrite {pins_path} with empty pins",
                     file=sys.stderr,
@@ -234,11 +275,8 @@ def main() -> int:
         finally:
             if tmp and os.path.exists(tmp):
                 os.unlink(tmp)
-        print(
-            f"wrote {pins_path} ({len(data['entityclasses_health'])} hp vars, "
-            f"{len(data['traders_root'])} trader attrs, "
-            f"{len(data['buffs_survival'])} survival keys)"
-        )
+        counts = ", ".join(f"{len(data[spec.name])} {spec.name}" for spec in SECTION_SPECS)
+        print(f"wrote {pins_path} ({counts})")
         return 0
 
     if not os.path.isdir(args.game_dir):
@@ -275,12 +313,8 @@ def main() -> int:
     got = sorted(
         f"{k}={v.get('sha256', '')[:12]}" for k, v in live_id.items() if isinstance(v, dict)
     )
-    print(
-        f"OK: xml pins match install ({len(committed.get('entityclasses_health', {}))} hp vars, "
-        f"{len(committed.get('traders_root', {}))} trader attrs, "
-        f"{len(committed.get('buffs_survival', {}))} survival keys; "
-        f"sources {', '.join(got)})"
-    )
+    counts = ", ".join(f"{len(committed.get(spec.name, {}))} {spec.name}" for spec in SECTION_SPECS)
+    print(f"OK: xml pins match install ({counts}; sources {', '.join(got)})")
     return 0
 
 

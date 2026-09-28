@@ -54,13 +54,36 @@ def score_current_pin_green() -> tuple[float, str]:
     return 0.0, f"stock-check failed rc={code}"
 
 
+def code_lines(text: str) -> list[tuple[int, str]]:
+    """Non-comment, non-docstring source lines, as (line number, line).
+
+    Handles the tree's two comment markers (Python `#`, C# `//`), so prose
+    about a build is never scored as an accept path or as pin debt.
+    """
+    kept: list[tuple[int, str]] = []
+    in_docstring = False
+    for i, line in enumerate(text.splitlines(), 1):
+        quotes = line.count('"""') + line.count("'''")
+        if quotes % 2 == 1:
+            in_docstring = not in_docstring
+            continue
+        if in_docstring:
+            continue
+        code = re.split(r"\s+#|\s+//", line, maxsplit=1)[0]
+        if code.strip() and not code.strip().startswith(("#", "//")):
+            kept.append((i, code))
+    return kept
+
+
 def score_no_soft_literals() -> tuple[float, str]:
     text = CHECKER.read_text(encoding="utf-8", errors="replace")
-    # Count only non-comment code lines that accept a fixed version without using display/build vars.
+    # Count only non-comment code lines that accept a fixed version without
+    # using display/build vars. Prose (comments, docstrings) is documentation,
+    # not an accept path, and scoring it would reward deleting the history note
+    # that tells a reader which build a doc was written against.
     soft_hits = []
-    for i, line in enumerate(text.splitlines(), 1):
-        stripped = line.strip()
-        if stripped.startswith("#"):
+    for i, line in code_lines(text):
+        if not re.search(r"V?\d+\.\d+(?:\.\d+)?", line):
             continue
         # Acceptable: comments about V3.0.1 stale layouts
         if "3.1.0" in line or r"3\.1\.0" in line:
@@ -204,7 +227,18 @@ def score_update_entrypoint() -> tuple[float, str]:
 
 def score_tooling_hardcode_debt() -> tuple[float, str]:
     """Lower debt in .py/.sh/.cs (exclude dump path tables and stock_facts)."""
-    pats = [re.compile(r"3\.1\.0"), re.compile(r"V3\.0\.1"), re.compile(r"\bb14\b")]
+    # The studied pin's own labels, read from stock_facts.json, so the detector
+    # follows the pin instead of naming the builds that were current when it
+    # was written; a frozen pair of superseded labels only measures the past.
+    # Superseded pins stay listed: a stale version hardcoded in tooling is the
+    # same debt as the current one.
+    version = json.loads(FACTS.read_text(encoding="utf-8"))["version"] if FACTS.is_file() else {}
+    labels = {
+        version.get("display", "").removeprefix("V ").strip(),
+        f"b{version.get('build')}" if version.get("build") is not None else "",
+    }
+    pats = [re.compile(rf"\b{re.escape(label)}\b") for label in sorted(labels) if label]
+    pats += [re.compile(r"3\.1\.0"), re.compile(r"V3\.0\.1"), re.compile(r"\bb14\b")]
     hits = 0
     files = 0
     skip_names = {
@@ -220,12 +254,7 @@ def score_tooling_hardcode_debt() -> tuple[float, str]:
             continue
         text = p.read_text(encoding="utf-8", errors="replace")
         files += 1
-        for line in text.splitlines():
-            s = line.strip()
-            if s.startswith("//") or s.startswith("#"):
-                continue
-            # Inline comments on code lines: strip trailing comment before match.
-            code = re.split(r"\s+#|\s+//", line, maxsplit=1)[0]
+        for _i, code in code_lines(text):
             # Fallback labels / format templates are not pin debt.
             if re.search(r"v0\.0\.0|v\{disp\}|dump_label_suffix|V\{0\}", code):
                 continue
@@ -233,8 +262,10 @@ def score_tooling_hardcode_debt() -> tuple[float, str]:
                 if pat.search(code):
                     hits += 1
                     break
-    # 0 hits => 1.0; each hit costs 0.08
-    score = max(0.0, 1.0 - 0.08 * hits)
+    # Saturating linear decay pinned this component at 0.0 once the corpus
+    # passed a dozen hits, so it could no longer report progress. Decay
+    # asymptotically instead: every removal still moves the score.
+    score = 1.0 / (1.0 + hits / 4.0)
     return score, f"code_version_literal_hits={hits} files_scanned={files}"
 
 

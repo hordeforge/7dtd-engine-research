@@ -159,7 +159,7 @@ def main() -> int:
     for label, path in (("old", old), ("new", new)):
         print(f"# {label} {path} bytes={path.stat().st_size} sha256={tooling.sha256_file(path)}")
 
-    with tempfile.TemporaryDirectory(prefix="asm_body_diff_") as tmp:
+    with tempfile.TemporaryDirectory(prefix="asm_body_diff_", dir=tooling.scratch_dir()) as tmp:
         tmp_path = Path(tmp)
         cs = tmp_path / "AsmBodyDiff.cs"
         exe = tmp_path / "AsmBodyDiff.exe"
