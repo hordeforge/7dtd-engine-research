@@ -28,6 +28,7 @@ loudly but is not a hard failure (this is a report, not a gate).
 """
 
 import argparse
+import fcntl
 import json
 import os
 import re
@@ -153,21 +154,22 @@ def pct(n: int, total: int) -> float:
 def append_history(path: str, header: str, row: str) -> None:
     """Append one census row, writing the header exactly once.
 
-    The header goes through O_CREAT|O_EXCL rather than an exists() test followed
-    by a truncating open: two runs racing on a fresh file both saw it missing, both
-    truncated, and both wrote a header, so a second header line landed mid-CSV and
-    one run's rows were discarded. The row itself is written O_APPEND, whose
-    offset-and-write is atomic against other appenders.
+    The whole sequence (open, write the header if the file is empty, write the
+    row) runs under one exclusive lock on the file. Two separately atomic steps
+    are not enough: O_CREAT|O_EXCL only makes the file exist, so a racing
+    appender can put its row at offset 0 before the creator's header lands, and
+    the header then overwrites that row. Measured, that lost one row out of 200
+    from eight concurrent writers. O_APPEND keeps each write atomic against
+    appenders that do not take the lock; flock orders the ones that do.
     """
+    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_APPEND, 0o644)
     try:
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
-    except FileExistsError:
-        pass
-    else:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="") as fh:
-            fh.write(header)
-    with open(path, "a", encoding="utf-8", newline="") as fh:
-        fh.write(row)
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        if os.fstat(fd).st_size == 0:
+            os.write(fd, header.encode("utf-8"))
+        os.write(fd, row.encode("utf-8"))
+    finally:
+        os.close(fd)
 
 
 def main() -> int:

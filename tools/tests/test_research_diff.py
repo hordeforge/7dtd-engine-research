@@ -263,8 +263,10 @@ def main() -> None:
     assert run("--pair", "b9:b10", "--old", "x.dll").returncode == 2
     assert run("--old", "a.dll").returncode == 2
 
-    # Live --pair run when this machine keeps the previous build beside the live one.
-    # A research artifact, not an assertion (see the docstring), so it needs the
+    # Live --pair run when this machine keeps the previous build beside the live
+    # one AND the mono lens tools are built. A machine with the game but no
+    # tools/bin (a fresh clone) must skip, not fail this DLL-free gate. It is a
+    # research artifact, not an assertion (see the docstring), so it needs the
     # built lenses; without them it is skipped with the build command named.
     msg, _is_skip = _common.prereq(
         ["StockFacts.exe", "Census.exe", "FullSurface.exe", "MethodList.exe", "EnumList.exe"]
@@ -276,6 +278,8 @@ def main() -> None:
     backup = asm.with_name(asm.name + ".re_stock_bak") if asm else None
     if asm is None or backup is None or not backup.is_file():
         print("note: live --pair check skipped (no retained stock backup)")
+    elif module.prereq() is not None:
+        print(f"note: live --pair check skipped ({module.prereq()})")
     else:
         pair_run = run("--pair", "b9:b10", "--out", "-")
         assert pair_run.returncode == 0, (pair_run.stdout[-500:], pair_run.stderr)

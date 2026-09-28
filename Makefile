@@ -5,9 +5,17 @@ ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Serve
 # Managed -> 7DaysToDieServer_Data -> the install root the depot manifest describes.
 GAME_ROOT ?= $(patsubst %/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll,%,$(ASM))
 
-.PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift test test-docs lint verify facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
+.PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift test test-docs lint verify verify-live facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
 
 help:
+	@echo "Fresh clone, no game install? These need nothing but python3:"
+	@echo "  make test-docs  - the CI gate (docs, links, pins, layout); DLL-free"
+	@echo "  make lint       - static analysis (see its own version pins below)"
+	@echo "  make tools      - build Mono.Cecil dumpers (tools/bin); needs mono + mcs"
+	@echo "With a game install (ASM=.../Assembly-CSharp.dll): make test, make verify."
+	@echo "One gate at a time: python3 tools/tests/<gate>.py (all of them are listed"
+	@echo "in tools/README.md); ASM=/path/to/Assembly-CSharp.dll selects the DLL."
+	@echo ""
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
 	@echo "make lint         - static analysis: ruff check+format + mypy (Python) + shellcheck (shell)"
 	@echo "make cross-links  - resolve every cross-repo .md link in the sibling workspace"
@@ -26,7 +34,8 @@ help:
 	@echo "make bench-bodydiff - deterministic perf gate for the body-diff lens (perf instructions:u)"
 	@echo "make test         - full suite (structural, stock-check, reach, inventories, surface, links)"
 	@echo "make test-docs    - DLL-free corpus invariants (runs in CI)"
-	@echo "make verify       - one-command gate: doc links, pins, readiness, facts, xml data"
+	@echo "make verify       - one-command gate: doc links, pins, readiness, facts, xml data (needs the live game)"
+	@echo "make verify-live  - the body of verify, after its ASM preflight; run verify, not this"
 	@echo "make regen-check  - regenerate-inventory check (needs mcs/mono + live DLL)"
 
 tools:
@@ -181,8 +190,20 @@ test-docs:
 
 # Everything in one command: doc gates (no DLL), pins, readiness, facts view.
 # make test (the DLL-dependent suite) is separate: it needs the live game.
-verify: test-docs stock-check readiness facts
-	@test -f "$(ASM)" || (echo "ASM not found: $(ASM) (make verify needs the live game)"; exit 2)
+# The prerequisites re-derive the committed pins from the live DLL, so a clone
+# without one has to be turned away before they run, not after a minute of
+# gates have failed with unrelated pin-mismatch noise. `make test-docs` is the
+# no-DLL path; the error says so.
+verify:
+	@test -f "$(ASM)" || { \
+	  echo "verify: no Assembly-CSharp.dll at $(ASM)" >&2; \
+	  echo "verify: this gate re-checks committed pins against a live game install." >&2; \
+	  echo "verify: point ASM at yours (ASM=/path/to/Assembly-CSharp.dll), or run" >&2; \
+	  echo "verify: 'make test-docs' for the DLL-free gate CI runs." >&2; \
+	  exit 2; }
+	@$(MAKE) --no-print-directory verify-live
+
+verify-live: test-docs stock-check readiness facts
 	python3 "$(TOOLS)/xml_pins.py" --check --game-dir "$$(dirname "$$(dirname "$$(dirname "$(ASM)")")")"
 	@echo "verify: ALL GATES GREEN (doc links, pins, readiness, facts, xml data)"
 

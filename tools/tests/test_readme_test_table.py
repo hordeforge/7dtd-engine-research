@@ -2,9 +2,10 @@
 """Guard the tools/README.md test table against the Makefile's actual test runs.
 
 Every test script invoked by the `make test` / `make test-docs` / `make verify`
-targets must be listed in the tools/README.md "Tests" table, and every table
-entry must be a real file. Adding a gate without documenting it (or removing a
-script without cleaning the table) fails here.
+targets must be listed in the tools/README.md "Tests" table, every table entry
+must be a real file, and every script in tools/tests/ must be invoked by a make
+target (_common.py is the shared helper, not a gate). A gate that is written
+but never wired in would otherwise sit green forever without ever running.
 
 Usage: python3 tools/tests/test_readme_test_table.py
 """
@@ -18,6 +19,8 @@ REPO = os.path.dirname(TOOLS)
 MAKEFILE = os.path.join(REPO, "Makefile")
 README = os.path.join(TOOLS, "README.md")
 TESTDIR = os.path.join(TOOLS, "tests")
+# Shared helper module, not a gate: it is imported by the gates, never run.
+HELPERS = {"_common.py"}
 
 
 def main() -> int:
@@ -42,7 +45,8 @@ def main() -> int:
             bad.append(f"{f}: in README Tests table but file does not exist")
     # A gate wired into neither the Makefile nor the table was invisible to both
     # checks above: nothing ran it and nothing claimed it ran.
-    for f in sorted({f for f in os.listdir(TESTDIR) if f.endswith(".py")} - run - {"_common.py"}):
+    present = {f for f in os.listdir(TESTDIR) if f.endswith(".py")} - HELPERS
+    for f in sorted(present - run):
         bad.append(f"{f}: exists in tools/tests but no make target runs it")
     if bad:
         for b in bad:
