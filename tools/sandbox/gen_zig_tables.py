@@ -40,7 +40,8 @@ def val_literal(v: object) -> str:
 
 
 def emit(json_path: str, out_path: str) -> None:
-    t = json.load(open(json_path, encoding="utf-8"))
+    with open(json_path, encoding="utf-8") as fh:
+        t = json.load(fh)
     vs = t["valuesets"]
     opts = t["options"]
 

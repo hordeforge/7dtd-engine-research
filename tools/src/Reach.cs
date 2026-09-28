@@ -20,9 +20,11 @@ class Reach {
     Seeds.WalkCallGraph(all, visited, work, Seeds.BuildOverrideMap(all), Seeds.ReflTargets(all));
     var reached=new HashSet<TypeDefinition>(visited.Select(m=>m.DeclaringType));
     Console.Error.WriteLine("reached methods="+visited.Count+" reached types="+reached.Count);
-    var w=new StreamWriter(a[1]);
+    // using, not a trailing Close: a Cecil read error mid-write would otherwise
+    // leave the output half-written at the caller's path instead of no file.
+    using(var w=new StreamWriter(a[1])){
     foreach(var t in reached.Where(t=>!t.Name.Contains("<")&&!t.Name.Contains("$")&&!t.Name.StartsWith("__")).OrderByDescending(t=>t.Methods.Count(x=>x.HasBody)))
       w.WriteLine(t.Methods.Count(x=>x.HasBody)+"\t"+t.Name);
-    w.Close();
+    }
   }
 }

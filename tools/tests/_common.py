@@ -167,17 +167,22 @@ def compile_probe(cs_text: str, stem: str) -> str:
     src = str(d / f"{stem}.cs")
     with open(src, "w") as f:
         f.write(cs_text)
-    subprocess.run(["mcs", "-r:%s" % (BIN / "Mono.Cecil.dll"), src, "-out:" + exe], check=True)
+    subprocess.run(
+        ["mcs", "-r:%s" % (BIN / "Mono.Cecil.dll"), src, "-out:" + exe],
+        check=True,
+        timeout=tooling.mono_timeout(),
+    )
     return exe
 
 
 def run_probe(exe: str, *args: str) -> str:
-    """Run a compiled probe under mono with MONO_PATH wired; returns stdout."""
-    proc = subprocess.run(
-        ["mono", exe, *args],
-        capture_output=True,
-        text=True,
-        env=tooling.mono_env(),
-        check=True,
-    )
-    return strip_mono_noise(proc.stdout)
+    """Run a compiled probe under mono with MONO_PATH wired; returns stdout.
+
+    A wedged probe fails the gate through the shared bound rather than hanging
+    it: a nonzero rc (including the timeout rc) raises here, which is what
+    `check=True` used to do for the ordinary failure cases.
+    """
+    rc, out, err = tooling.run_bounded(["mono", exe, *args], env=tooling.mono_env())
+    if rc != 0:
+        raise subprocess.CalledProcessError(rc, ["mono", exe, *args], out, err)
+    return strip_mono_noise(out)

@@ -6,7 +6,9 @@ class EnumList{static void Main(string[]a){
   if(a.Length<2){Console.Error.WriteLine("usage: EnumList <asm> <outFile>");Environment.Exit(2);}
   var r=new DefaultAssemblyResolver();r.AddSearchDirectory(Path.GetDirectoryName(Path.GetFullPath(a[0])));
   var asm=AssemblyDefinition.ReadAssembly(a[0],new ReaderParameters{AssemblyResolver=r});
-  var w=new StreamWriter(a[1]);
+  // using, not a trailing Close: a Cecil read error mid-enum would otherwise
+  // leave the output half-written at the caller's path instead of no file.
+  using(var w=new StreamWriter(a[1])){
   foreach(var t in asm.MainModule.GetTypes().Where(t=>t.IsEnum&&!t.Name.Contains("<")))
     foreach(var f in t.Fields.Where(f=>f.HasConstant))w.WriteLine(t.Name+"."+f.Name+"="+f.Constant);
-  w.Close();}}
+  }}}

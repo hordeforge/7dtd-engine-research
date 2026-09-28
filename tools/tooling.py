@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import signal
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -25,6 +26,9 @@ ROOT_MARKERS = ("Makefile", "AGENTS.md")
 _HASH_CHUNK = 1 << 20
 STAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 STAMP_ENV = "SOURCE_DATE_EPOCH"
+MONO_TIMEOUT_ENV = "RE_MONO_TIMEOUT"
+DEFAULT_MONO_TIMEOUT = 900.0
+TIMEOUT_RC = 124
 
 
 class StampError(RuntimeError):
@@ -137,13 +141,64 @@ def mono_env() -> dict[str, str]:
     return env
 
 
+def mono_timeout() -> float:
+    """Seconds a spawned tool may run before it is killed, from the env.
+
+    A wedged mono (a malformed assembly driving Cecil into a long walk, a
+    runtime prompt) otherwise blocks the gate that spawned it forever, so the
+    bound lives here and every runner shares it. `RE_MONO_TIMEOUT` raises it
+    for a slow host; a non-numeric or non-positive value fails loud rather than
+    silently meaning "no bound".
+    """
+    raw = os.environ.get(MONO_TIMEOUT_ENV)
+    if raw is None:
+        return DEFAULT_MONO_TIMEOUT
+    try:
+        seconds = float(raw.strip())
+    except ValueError as exc:
+        raise ValueError(f"{MONO_TIMEOUT_ENV}={raw!r} is not a number of seconds") from exc
+    if seconds <= 0:
+        raise ValueError(f"{MONO_TIMEOUT_ENV}={raw!r} must be positive")
+    return seconds
+
+
+def run_bounded(
+    command: list[str], *, env: dict[str, str], timeout: float | None = None
+) -> tuple[int, str, str]:
+    """Run a tool to completion under a wall-clock bound -> (rc, stdout, stderr).
+
+    The child gets its own process group and a timeout, and the whole group is
+    killed on expiry: killing only the direct child would orphan whatever it
+    spawned. A timeout reports TIMEOUT_RC rather than raising, so a caller that
+    already handles a nonzero rc reports the failure instead of unwinding.
+    """
+    limit = mono_timeout() if timeout is None else timeout
+    proc = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        env=env,
+        start_new_session=True,
+    )
+    try:
+        out, err = proc.communicate(timeout=limit)
+    except subprocess.TimeoutExpired:
+        _kill_group(proc)
+        out, err = proc.communicate()
+        return TIMEOUT_RC, out, f"{command[0]} exceeded {limit:g}s and was killed\n{err}"
+    return proc.returncode, out, err
+
+
+def _kill_group(proc: "subprocess.Popen[str]") -> None:
+    """SIGKILL the child's process group, so grandchildren die with it."""
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+
+
 def run_mono(exe: str | Path, *args: str) -> tuple[int, str, str]:
     """Run a mono exe (path or a name inside tools/bin) -> (rc, stdout, stderr)."""
     target = exe if os.sep in str(exe) else BIN / str(exe)
-    proc = subprocess.run(
-        ["mono", str(target), *args],
-        capture_output=True,
-        text=True,
-        env=mono_env(),
-    )
-    return proc.returncode, proc.stdout, proc.stderr
+    return run_bounded(["mono", str(target), *args], env=mono_env())

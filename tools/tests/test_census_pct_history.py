@@ -112,9 +112,17 @@ def main() -> None:
         procs = [ctx.Process(target=writer, args=(concurrent, i)) for i in range(WRITERS)]
         for proc in procs:
             proc.start()
-        for proc in procs:
-            proc.join(120)
-            assert proc.exitcode == 0, f"recorder exited {proc.exitcode}"
+        try:
+            for proc in procs:
+                proc.join(120)
+                assert proc.exitcode == 0, f"recorder exited {proc.exitcode}"
+        finally:
+            # A writer that wedges on the flock, or an assert that fires first,
+            # must not leave eight live children holding the scratch tree.
+            for proc in procs:
+                if proc.is_alive():
+                    proc.kill()
+                proc.join()
         lines = Path(concurrent).read_text(encoding="utf-8").splitlines()
         assert lines[0] == HEADER.rstrip("\n"), "header is not the first line"
         assert lines.count(HEADER.rstrip("\n")) == 1, f"{len(lines)} lines, header appears twice"

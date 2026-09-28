@@ -40,7 +40,8 @@ def main() -> None:
     atlases = []
     for xml in sorted(glob.glob(os.path.join(here, "atlas", "ta_*.xml"))):
         name = os.path.basename(xml)[3:-4]  # strip ta_ and .xml
-        text = open(xml, encoding="utf-8-sig").read()
+        with open(xml, encoding="utf-8-sig") as fh:
+            text = fh.read()
         entries = []
         for m in COLOR_RE.finditer(text):
             tid = int(m.group(1))

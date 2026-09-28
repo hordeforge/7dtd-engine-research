@@ -28,7 +28,6 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -68,6 +67,8 @@ LABEL_RE = re.compile(r"[A-Za-z0-9._-]+")
 # non-numeric (in particular a leading `-`, which steamcmd would read as an
 # option) is refused rather than forwarded.
 GID_RE = re.compile(r"[0-9]+")
+FETCH_TIMEOUT_ENV = "RE_STEAM_FETCH_TIMEOUT"
+DEFAULT_FETCH_TIMEOUT = 6 * 3600.0
 
 
 def usable_label(value: str) -> bool:
@@ -278,6 +279,40 @@ def select(snapshot: Snapshot, name: str) -> Branch | None:
     return None
 
 
+def fetch_timeout() -> float:
+    """Wall-clock bound for a fetch, in seconds.
+
+    A full depot is gigabytes, so this is deliberately far above the mono
+    bound; it exists because steamcmd can wait forever on a login prompt or a
+    stalled CDN, and nothing else in this tool can end that. `RE_STEAM_FETCH_TIMEOUT`
+    raises it for a slow line; a non-numeric or non-positive value fails loud
+    rather than meaning "no bound".
+    """
+    raw = os.environ.get(FETCH_TIMEOUT_ENV)
+    if raw is None:
+        return DEFAULT_FETCH_TIMEOUT
+    try:
+        seconds = float(raw.strip())
+    except ValueError as exc:
+        raise ValueError(f"{FETCH_TIMEOUT_ENV}={raw!r} is not a number of seconds") from exc
+    if seconds <= 0:
+        raise ValueError(f"{FETCH_TIMEOUT_ENV}={raw!r} must be positive")
+    return seconds
+
+
+def run_fetch(command: list[str]) -> int:
+    """Run fetch_version.sh under that bound, killing steamcmd's group with it.
+
+    fetch_version.sh spawns steamcmd and then a `find` over the depot tree, so
+    the process group is what has to die: killing only the script would leave
+    a download running with no parent.
+    """
+    rc, _, err = tooling.run_bounded(command, env=dict(os.environ), timeout=fetch_timeout())
+    if rc != 0 and err.strip():
+        print(err.strip(), file=sys.stderr)
+    return rc
+
+
 def fetch_by_name(branch_name: str, label: str, do_fetch: bool) -> int:
     """Hand a branch steamcmd can install even when PICS does not list it."""
     if not usable_label(label):
@@ -294,7 +329,7 @@ def fetch_by_name(branch_name: str, label: str, do_fetch: bool) -> int:
         print(" ".join(command))
         return 0
     print("fetch: " + " ".join(command))
-    return subprocess.run(command, check=False).returncode
+    return run_fetch(command)
 
 
 def human_size(value: int | None) -> str:
@@ -640,7 +675,7 @@ def main(argv: list[str] | None = None) -> int:
             print(" ".join(command))
             return 0
         print("fetch: " + " ".join(command))
-        return subprocess.run(command, check=False).returncode
+        return run_fetch(command)
 
     if args.check:
         verdict = drift_verdict(branch, studied, install_buildid, integrity, pins_path)
