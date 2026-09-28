@@ -50,7 +50,7 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached, non-generated | 6200 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2367 (excluded from %) |
 | ...**game types** (the RE surface) | **3692** |
-| ...**narrated** (backticked in a narrative doc) | **3688 (99%)** |
+| ...**narrated** (backticked in a narrative doc) | **3688 (99.9)** |
 | ...**catalogued only** (generated inventory, not narrated) | 0 |
 | ...**classified** out-of-scope | 4 |
 | ...**unaccounted** (appears nowhere) | 0 |
@@ -71,11 +71,11 @@ as an upper bound; this table is its actual depth.
 
 | Narrative mentions | Types | Share of base |
 |---|---:|---:|
-| 0 (catalogued, classified, or unaccounted) | 4 | 0% |
-| exactly 1 | 2392 | 64% |
-| 2-4 | 791 | 21% |
-| 5-19 | 423 | 11% |
-| 20+ | 82 | 2% |
+| 0 (catalogued, classified, or unaccounted) | 4 | 0.1% |
+| exactly 1 | 2392 | 64.8% |
+| 2-4 | 791 | 21.4% |
+| 5-19 | 423 | 11.5% |
+| 20+ | 82 | 2.2% |
 
 ## Whole-assembly accounting (all types and methods)
 
@@ -86,14 +86,14 @@ reached-and-documented plus unreached-and-classified (client / editor / dead).
 | Metric | Value |
 |---|---:|
 | All types (incl. nested) | 7451 |
-| Reached (Assembly-CSharp own types) | 4779 (64%) |
-| Unreached | 2672 (35%) |
+| Reached (Assembly-CSharp own types) | 4779 (64.1) |
+| Unreached | 2672 (35.9) |
 | ...compiler-generated / obfuscated | 354 (excluded) |
 | ...third-party / BCL | 57 (excluded) |
 | ...**unreached game types** (need classification) | **2261** |
 | All methods with body | 53418 |
-| Reached methods (Assembly-CSharp own) | 31544 (59%) |
-| Unreached methods | 21874 (40%) |
+| Reached methods (Assembly-CSharp own) | 31544 (59.1) |
+| Unreached methods | 21874 (40.9) |
 | ...in reached game types (uncalled members) | 13103 |
 | ...in unreached game types | 4469 |
 
@@ -2422,33 +2422,33 @@ Full unreached game-type list (2261):
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2898 | 2898 | 0 | 100% |
-| `GameEvent` | 180 | 180 | 0 | 100% |
-| `Platform` | 147 | 147 | 0 | 100% |
-| `Twitch` | 110 | 110 | 0 | 100% |
-| `Webserver` | 73 | 73 | 0 | 100% |
-| `DynamicMusic` | 47 | 47 | 0 | 100% |
-| `Challenges` | 47 | 47 | 0 | 100% |
-| `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100% |
-| `UAI` | 24 | 24 | 0 | 100% |
-| `PrefabVolumes` | 16 | 16 | 0 | 100% |
-| `Services` | 13 | 13 | 0 | 100% |
-| `GamePath` | 13 | 13 | 0 | 100% |
-| `SandboxOptions` | 13 | 13 | 0 | 100% |
-| `Audio` | 12 | 12 | 0 | 100% |
-| `SDF` | 11 | 11 | 0 | 100% |
-| `RaycastPathing` | 10 | 10 | 0 | 100% |
-| `XMLData` | 7 | 7 | 0 | 100% |
-| `Quests` | 7 | 7 | 0 | 100% |
-| `MapRendering` | 7 | 7 | 0 | 100% |
-| `MusicUtils` | 5 | 5 | 0 | 100% |
-| `GearVariants` | 4 | 4 | 0 | 100% |
-| `ConcurrentCollections` | 3 | 3 | 0 | 100% |
-| `mumblelib` | 2 | 2 | 0 | 100% |
-| `WaterClippingTool` | 1 | 1 | 0 | 100% |
-| `XMLEditing` | 1 | 1 | 0 | 100% |
-| `TriggerEffects` | 1 | 1 | 0 | 100% |
-| `GUI_2` | 1 | 1 | 0 | 100% |
+| `<global>` | 2898 | 2898 | 0 | 100.0% |
+| `GameEvent` | 180 | 180 | 0 | 100.0% |
+| `Platform` | 147 | 147 | 0 | 100.0% |
+| `Twitch` | 110 | 110 | 0 | 100.0% |
+| `Webserver` | 73 | 73 | 0 | 100.0% |
+| `DynamicMusic` | 47 | 47 | 0 | 100.0% |
+| `Challenges` | 47 | 47 | 0 | 100.0% |
+| `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100.0% |
+| `UAI` | 24 | 24 | 0 | 100.0% |
+| `PrefabVolumes` | 16 | 16 | 0 | 100.0% |
+| `Services` | 13 | 13 | 0 | 100.0% |
+| `GamePath` | 13 | 13 | 0 | 100.0% |
+| `SandboxOptions` | 13 | 13 | 0 | 100.0% |
+| `Audio` | 12 | 12 | 0 | 100.0% |
+| `SDF` | 11 | 11 | 0 | 100.0% |
+| `RaycastPathing` | 10 | 10 | 0 | 100.0% |
+| `XMLData` | 7 | 7 | 0 | 100.0% |
+| `Quests` | 7 | 7 | 0 | 100.0% |
+| `MapRendering` | 7 | 7 | 0 | 100.0% |
+| `MusicUtils` | 5 | 5 | 0 | 100.0% |
+| `GearVariants` | 4 | 4 | 0 | 100.0% |
+| `ConcurrentCollections` | 3 | 3 | 0 | 100.0% |
+| `mumblelib` | 2 | 2 | 0 | 100.0% |
+| `WaterClippingTool` | 1 | 1 | 0 | 100.0% |
+| `XMLEditing` | 1 | 1 | 0 | 100.0% |
+| `TriggerEffects` | 1 | 1 | 0 | 100.0% |
+| `GUI_2` | 1 | 1 | 0 | 100.0% |
 
 ## Triage of the unaccounted set
 

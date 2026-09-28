@@ -10,6 +10,7 @@
 // as the honest gap list.
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -62,6 +63,14 @@ class Coverage {
     return string.IsNullOrEmpty(ns) ? "<global>" : ns;
   }
 
+  // A share of a whole, one decimal, invariant culture. Integer division
+  // truncated every ratio: 3688 of 3692 game types narrated printed as "99%"
+  // (it is 99.9%), and the reached/unreached rows read 64% + 35%, so the
+  // report understated a tier and its rows no longer summed to the whole.
+  // One decimal is the precision tools/census-pct.py prints for the same
+  // counts, and .NET's "0.0" rounds a midpoint away from zero.
+  static string Pct(int n, int d) =>
+    (100.0 * n / Math.Max(1, d)).ToString("0.0", CultureInfo.InvariantCulture) + "%";
   // Mention-depth bucket index: 0 / exactly-1 / 2-4 / 5-19 / 20+.
   static int DepthBucket(int mentions) =>
     mentions == 0 ? 0 : mentions == 1 ? 1 : mentions <= 4 ? 2 : mentions <= 19 ? 3 : 4;
@@ -257,7 +266,7 @@ class Coverage {
     sb.AppendLine("| Reached, non-generated | " + nonGen.Count + " |");
     sb.AppendLine("| ...third-party / BCL (System, Unity, Newtonsoft, ...) | " + libReached.Count + " (excluded from %) |");
     sb.AppendLine("| ...**game types** (the RE surface) | **" + gameReached.Count + "** |");
-    sb.AppendLine("| ...**narrated** (backticked in a narrative doc) | **" + docd + " (" + (100 * docd / Math.Max(1, gameReached.Count)) + "%)** |");
+    sb.AppendLine("| ...**narrated** (backticked in a narrative doc) | **" + docd + " (" + Pct(docd, gameReached.Count) + ")** |");
     sb.AppendLine("| ...**catalogued only** (generated inventory, not narrated) | " + catd + " |");
     sb.AppendLine("| ...**classified** out-of-scope | " + classd + " |");
     sb.AppendLine("| ...**unaccounted** (appears nowhere) | " + undoc + " |");
@@ -280,7 +289,7 @@ class Coverage {
     sb.AppendLine("|---|---:|---:|");
     for (int i = 0; i < depth.Length; i++)
       sb.AppendLine("| " + DepthLabel[i] + " | " + depth[i] + " | "
-                    + (100 * depth[i] / Math.Max(1, gameReached.Count)) + "% |");
+                    + Pct(depth[i], gameReached.Count) + " |");
     sb.AppendLine();
 
     // Whole-assembly accounting: every type and every method body is either reached
@@ -325,14 +334,14 @@ class Coverage {
     sb.AppendLine("| Metric | Value |");
     sb.AppendLine("|---|---:|");
     sb.AppendLine("| All types (incl. nested) | " + all.Count + " |");
-    sb.AppendLine("| Reached (Assembly-CSharp own types) | " + reachedAc.Count + " (" + (100 * reachedAc.Count / Math.Max(1, all.Count)) + "%) |");
-    sb.AppendLine("| Unreached | " + unreached.Count + " (" + (100 * unreached.Count / Math.Max(1, all.Count)) + "%) |");
+    sb.AppendLine("| Reached (Assembly-CSharp own types) | " + reachedAc.Count + " (" + Pct(reachedAc.Count, all.Count) + ") |");
+    sb.AppendLine("| Unreached | " + unreached.Count + " (" + Pct(unreached.Count, all.Count) + ") |");
     sb.AppendLine("| ...compiler-generated / obfuscated | " + unGen.Count + " (excluded) |");
     sb.AppendLine("| ...third-party / BCL | " + unLib.Count + " (excluded) |");
     sb.AppendLine("| ...**unreached game types** (need classification) | **" + unGame.Count + "** |");
     sb.AppendLine("| All methods with body | " + totalMethods + " |");
-    sb.AppendLine("| Reached methods (Assembly-CSharp own) | " + visitedAc.Count + " (" + (100 * visitedAc.Count / Math.Max(1, totalMethods)) + "%) |");
-    sb.AppendLine("| Unreached methods | " + (totalMethods - visitedAc.Count) + " (" + (100 * (totalMethods - visitedAc.Count) / Math.Max(1, totalMethods)) + "%) |");
+    sb.AppendLine("| Reached methods (Assembly-CSharp own) | " + visitedAc.Count + " (" + Pct(visitedAc.Count, totalMethods) + ") |");
+    sb.AppendLine("| Unreached methods | " + (totalMethods - visitedAc.Count) + " (" + Pct(totalMethods - visitedAc.Count, totalMethods) + ") |");
     sb.AppendLine("| ...in reached game types (uncalled members) | " + uncalledInReachedGame + " |");
     sb.AppendLine("| ...in unreached game types | " + unGameMethods + " |");
     sb.AppendLine();
@@ -380,7 +389,7 @@ class Coverage {
     foreach (var kv in byNs.OrderByDescending(x => x.Value.Count)) {
       int d = kv.Value.Count(t => !unaccounted(t));
       int u = kv.Value.Count - d;
-      sb.AppendLine("| `" + kv.Key + "` | " + kv.Value.Count + " | " + d + " | " + u + " | " + (100 * d / kv.Value.Count) + "% |");
+      sb.AppendLine("| `" + kv.Key + "` | " + kv.Value.Count + " | " + d + " | " + u + " | " + Pct(d, kv.Value.Count) + " |");
     }
     sb.AppendLine();
 

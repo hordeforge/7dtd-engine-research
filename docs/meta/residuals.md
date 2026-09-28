@@ -86,7 +86,7 @@ For **dedicated managed** surfaces under the coverage bar (families 1-11 in
 | Tier | Count |
 |---|---:|
 | Game types in reach base | 3692 |
-| Narrated | 3688 (99%) |
+| Narrated | 3688 (99.9%) |
 | Catalogued only | 0 |
 | (refresh after each Coverage run) | |
 | Classified OOS | 4 |
