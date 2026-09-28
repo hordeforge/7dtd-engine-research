@@ -171,20 +171,50 @@ def check_shell_timeout_env_fails_loud() -> None:
         )
 
 
+class _ShellScanner:
+    """Splits shell source into code and quoted text, line by line.
+
+    A `#` inside quotes is text, not a comment: `echo "# mcs has no
+    -deterministic"` writes a comment to buildinfo.txt and spawns nothing, and
+    reading it as a spawn is a false positive that sends the next maintainer
+    looking for a bound that is not missing. Quote state carries across lines,
+    because a multi-line `echo` leaves the next line inside the string.
+    """
+
+    def __init__(self) -> None:
+        self.quote: str | None = None
+
+    def code(self, line: str) -> str:
+        """The part of the line outside quotes and before any comment."""
+        end: int | None = None
+        for index, char in enumerate(line):
+            if self.quote is not None:
+                if char == self.quote:
+                    self.quote = None
+            elif char in "'\"":
+                self.quote = char
+                end = index if end is None else end
+            elif char == "#" and (index == 0 or line[index - 1].isspace()):
+                end = index
+                break
+        return line if end is None else line[:end]
+
+
 def check_shell_scripts_are_bounded() -> None:
     """No mono/mcs/monodis child in a shell entry point comes back unbounded."""
     for path in sorted(_common.TOOLS.rglob("*.sh")):
         if path.name == "bounded-run.sh":
             continue
+        scanner = _ShellScanner()
         for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            stripped = line.strip()
-            if stripped.startswith("#"):
+            code = scanner.code(line)
+            if not code.strip():
                 continue
-            match = SHELL_CHILD_RE.search(line)
+            match = SHELL_CHILD_RE.search(code)
             if match is None:
                 continue
-            assert "run_bounded" in line, (
-                f"{path.name}:{number} spawns {match.group(2)} with no wall-clock bound: {stripped}"
+            assert "run_bounded" in code, (
+                f"{path.name}:{number} spawns {match.group(2)} with no wall-clock bound: {line.strip()}"
             )
 
 

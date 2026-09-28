@@ -52,22 +52,75 @@ new number.
 
 ## Unreleased
 
-Everything below `v3.2.0` (2026-09-21) as of 2026-09-28. Breaking for a
-consumer: none. Pins are unchanged at V3.2.0 b10; the corpus delta docs were
-extended, not re-pinned.
+**49 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
+carries breaking changes without a major bump, so the consumer-visible ones are
+listed first; `tests/test_release_contract.py` fails if this section's count
+falls behind the commits actually below the last tag.
 
-- **Docs:** the ranged-attack delivery contract is closed (`RangedAttackTarget`
+### Breaking for a consumer
+
+- **Four CLIs changed exit codes and streams.** `asm_body_diff.py` with no
+  arguments printed its help to stdout and exited 0; it now exits 2 as a usage
+  error, like every other tool. `assignids_dump.py` with the wrong argument
+  count exited 1 with the docstring on stdout; it now exits 2 with the docstring
+  on stderr (`--help` is the stdout, exit-0 path). `dump_diff.py` and
+  `parity/parity_diff.py` moved their usage line from stdout to stderr, so
+  `dump_diff.py a b > report` no longer writes the usage text into the report.
+  Both now exit 2 on a path that is not a directory/snapshot instead of
+  reporting "no drift" and exiting 0.
+- **An assembly override that names no install is refused.** `ASM`,
+  `SEVENDTD_ASM` and `SEVENDTD_DS_DIR` used to fall through to a probed Steam
+  root when the named path held no `Assembly-CSharp.dll`, so a typo silently
+  answered with a different install. They now exit 2 naming the variable. A
+  working override is unchanged.
+- **New environment variables**, all with defaults, so nothing has to be set:
+  `RE_MONO_TIMEOUT` (900 s) bounds every spawned mono/mcs/`fetch_version.sh`
+  child, `RE_STEAM_FETCH_TIMEOUT` (21600 s) bounds a `steam_builds.py --fetch`
+  depot download, and `SEVENDTD_SERVER_DIR` names the install that
+  `make save-roundtrip-all` reads. A non-numeric or non-positive timeout aborts
+  rather than meaning "no bound".
+
+### Fixes
+
+- **No tool runs unbounded and no tool child is orphaned.** `tooling.run_bounded`
+  is the single spawn point and `tools/bounded-run.sh` does the same for the
+  shell entry points; a child that outlives its bound reports the rc and names
+  itself instead of hanging a gate, and its grandchildren die with it.
+- **Gates no longer pass on input they never read.** Several link, citation and
+  inventory gates skipped a file they could not open, and three reported OK
+  while proving nothing; a drifted or unreadable input now fails with the reason.
+- **Pins stop being lost silently.** Non-finite and over-uint64 values are kept
+  out of pinned data, xml pin sections come from one source, the drift baseline
+  is keyed to the build it came from (an unstamped or foreign local baseline no
+  longer outranks the committed pin), and the census history append is
+  race-safe.
+- **Reproducible output.** Artifact stamps derive from `SOURCE_DATE_EPOCH`, the
+  dumper build is incremental and locale-pinned, and output names are stable, so
+  a repeated build is byte-identical.
+- **Install discovery works from every Steam root** a supported host has
+  (Windows program files, the three Linux homes, the macOS path) through
+  `tools/asm_path.py`, which is now the one resolution behind `make`'s `ASM`,
+  the shell entry points and the Python tools.
+- **Fuzzing and bounds.** The shader sub-program and parameter blob decoders and
+  the depot-manifest parser are fuzzed; the manifest parser is bounded.
+- `steam_manifest.py` orders manifest history by mtime instead of a truncated
+  clock string, and the steam install-integrity verdict was restored after a
+  drift.
+
+### Tools and docs
+
+- `tools/release.sh` cuts a release with its checks built in (clean tree, free
+  tag, not behind `origin/main`, authenticated `gh`, required notes, `make lint`
+  + `make test-docs` green); `--dry-run` prints the plan and changes nothing, and
+  `--resume` finishes a run that stopped between steps without repeating the
+  ones that landed.
+- Docs: the ranged-attack delivery contract is closed (`RangedAttackTarget`
   mapped, `EAILeap` motion pinned, `Animator.StringToHash` identified as
-  CRC-32 with its flush chain), the `Leap` census row is marked mapped, and a
-  census of stock AI task-to-class usage in the V3.2.0 data was added.
-- **Tooling:** `tools/release.sh` cuts a release with its checks built in
-  (clean tree, free tag, not behind `origin/main`, authenticated `gh`, required
-  notes, `make lint` + `make test-docs` green); `--dry-run` prints the plan and
-  changes nothing, and `--resume` finishes a run that stopped between steps
-  without repeating the ones that landed. `steam_manifest.py` orders manifest
-  history by mtime instead of a truncated clock string.
-- **Docs:** this repo's own attack surface and ranked tooling risks are recorded
-  in [`../meta/threat-model.md`](../meta/threat-model.md).
+  CRC-32 with its flush chain), the `Leap` census row is marked mapped, a
+  census of stock AI task-to-class usage in the V3.2.0 data was added, coverage
+  counts were re-pinned to V3.2.0, and this repo's own attack surface is
+  recorded in [`../meta/threat-model.md`](../meta/threat-model.md).
 
 The next cut is `v0.4.0` (tooling) unless the corpus is re-pinned to a new game
 build first, which would be `v3.3.0`.
@@ -93,5 +146,12 @@ Notes are required and reviewed, not generated: the default path is
 `docs/releases/release-<version>.md`, which is a different thing from the
 `changelog-<game-version>.md` game digests that sit beside it. A release with
 nothing to say still gets notes; the tag has to be explainable from the tree.
+
+`make test-docs` runs before the tag, and it includes
+`tests/test_release_contract.py`, so a cut is refused while this file
+disagrees with the repository: a tag with no history row, a row for a tag that
+no longer exists, an Unreleased section that does not count the commits below
+the last tag, or a "next cut" naming a version already published. That gate is
+the reason the Unreleased section above states a count instead of a date.
 
 **Hub:** [`INDEX.md`](../INDEX.md).

@@ -179,6 +179,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_cli_args_wired.py"
 	python3 "$(TOOLS)/tests/test_tools_layout.py"
 	python3 "$(TOOLS)/tests/test_release_script.py"
+	python3 "$(TOOLS)/tests/test_release_contract.py"
 	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_census_pct_history.py"
 	python3 "$(TOOLS)/tests/test_json_pins_finite.py"
