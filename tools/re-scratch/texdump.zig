@@ -1,8 +1,13 @@
 const std = @import("std");
 const linux = std.os.linux;
 
+// A path longer than this does not fit the stack buffer `open` is handed, and
+// argv lets it run to ARG_MAX, so it is refused rather than copied past the end.
+const PATH_CAP = 1024;
+
 fn readAll(a: std.mem.Allocator, path: []const u8) ![]u8 {
-    var z: [1024]u8 = undefined;
+    var z: [PATH_CAP]u8 = undefined;
+    if (path.len >= z.len) return error.PathTooLong;
     @memcpy(z[0..path.len], path);
     z[path.len] = 0;
     const rc = linux.open(z[0..path.len :0].ptr, .{ .ACCMODE = .RDONLY }, 0);
@@ -33,11 +38,15 @@ pub fn main(init: std.process.Init.Minimal) !void {
         return error.Usage;
     };
     const data = try readAll(a, path);
+    if (data.len < 14) return error.Truncated;
     const version = std.mem.readInt(u32, data[4..8], .little);
     const sx: i32 = std.mem.readInt(i16, data[8..10], .little);
     const sy: i32 = std.mem.readInt(i16, data[10..12], .little);
     const sz: i32 = std.mem.readInt(i16, data[12..14], .little);
-    const count: usize = @intCast(@as(i64, sx) * @as(i64, sy) * @as(i64, sz));
+    if (sx < 0 or sy < 0 or sz < 0) return error.BadDimensions;
+    const count: usize = @as(usize, @as(u32, @intCast(sx))) *
+        @as(usize, @as(u32, @intCast(sy))) *
+        @as(usize, @as(u32, @intCast(sz)));
     std.debug.print("version {d}  size {d}x{d}x{d} = {d}\n", .{ version, sx, sy, sz, count });
 
     var pos: usize = 14 + count * 4; // after blocks u32 plane
@@ -49,9 +58,13 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     // texture sparse: bitstream then i64 per set bit
     if (version >= 10 and pos + 4 <= data.len) {
-        const n = std.mem.readInt(i32, data[pos..][0..4], .little);
+        const n: usize = @as(usize, std.mem.readInt(u32, data[pos..][0..4], .little));
+        if (n > data.len - pos - 4) {
+            std.debug.print("bitstream length {d} overruns the file ({d} bytes left)\n", .{ n, data.len - pos - 4 });
+            return;
+        }
         std.debug.print("bitstream bytes: {d}\n", .{n});
-        const bits = data[pos + 4 ..][0..@intCast(n)];
+        const bits = data[pos + 4 ..][0..n];
         var texpos = pos + 4 + @as(usize, @intCast(n));
         var set: usize = 0;
         var shown: usize = 0;

@@ -1,8 +1,13 @@
 const std = @import("std");
 const linux = std.os.linux;
 
+// A path longer than this does not fit the stack buffer `open` is handed, and
+// argv lets it run to ARG_MAX, so it is refused rather than copied past the end.
+const PATH_CAP = 1024;
+
 fn readAll(a: std.mem.Allocator, path: []const u8) ![]u8 {
-    var z: [1024]u8 = undefined;
+    var z: [PATH_CAP]u8 = undefined;
+    if (path.len >= z.len) return error.PathTooLong;
     @memcpy(z[0..path.len], path);
     z[path.len] = 0;
     const rc = linux.open(z[0..path.len :0].ptr, .{ .ACCMODE = .RDONLY }, 0);
@@ -37,15 +42,23 @@ pub fn main(init: std.process.Init.Minimal) !void {
         return error.Usage;
     };
     const data = try readAll(a, tts_path);
+    if (data.len < 14) return error.Truncated;
     const sx: i32 = std.mem.readInt(i16, data[8..10], .little);
     const sy: i32 = std.mem.readInt(i16, data[10..12], .little);
     const sz: i32 = std.mem.readInt(i16, data[12..14], .little);
-    const count: usize = @intCast(@as(i64, sx) * @as(i64, sy) * @as(i64, sz));
+    if (sx < 0 or sy < 0 or sz < 0) return error.BadDimensions;
+    const count: usize = @as(usize, @as(u32, @intCast(sx))) *
+        @as(usize, @as(u32, @intCast(sy))) *
+        @as(usize, @as(u32, @intCast(sz)));
     std.debug.print("size {d}x{d}x{d} = {d}\n", .{ sx, sy, sz, count });
 
+    // The block plane is what the loop below reads, so a header claiming more
+    // cells than the file holds is clamped to the cells that are there rather
+    // than indexing past the end of the buffer.
+    const cells = @min(count, (data.len - 14) / 4);
     var counts = std.AutoHashMap(u16, u32).init(a);
     var i: usize = 0;
-    while (i < count) : (i += 1) {
+    while (i < cells) : (i += 1) {
         const raw = std.mem.readInt(u32, data[14 + i * 4 ..][0..4], .little);
         if (raw & 0x40000000 != 0) continue;
         const id: u16 = @truncate(raw & 0xFFFF);

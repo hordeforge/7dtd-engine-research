@@ -55,14 +55,7 @@ SNIPPET = (
 SHELL_CHILD_RE = re.compile(
     r"(?:^|[;&|(]\s*|\bthen\s+|\bdo\s+|\$\(\s*)((?:[\w./]*=\S*\s+)?)(mono|mcs|monodis)\s"
 )
-# A quoted literal: the build stamp is written with echo "# ... mcs has no
-# -deterministic ...", which names the tool inside a string and spawns nothing.
-QUOTED_RE = re.compile(r"\"[^\"]*\"|'[^']*'")
 
-
-def _unquoted(line: str) -> str:
-    """The line with its quoted literals blanked, so prose is not read as a spawn."""
-    return QUOTED_RE.sub('""', line)
 
 
 def wait_gone(pid: int) -> bool:
