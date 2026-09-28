@@ -5,20 +5,26 @@ TOOLS := $(ROOT)/tools
 # ASM / SEVENDTD_ASM / SEVENDTD_DS_DIR first, then every Steam library root of
 # the host OS. tools/asm_path.py is that one resolution, so make, the shell
 # entry points and the tools cannot answer with three different installs.
-# stderr is dropped here because `make help` runs on a checkout with no game:
-# the targets that need the DLL say so themselves.
-# ifndef + `:=`, not `?=`: a conditional (`?=`) assignment is recursively
-# expanded, so the $(shell ...) probe above ran again at every $(ASM) reference.
-# `make test` names the DLL in 15 recipe lines, so discovery walked the Steam
-# roots 15 times before the first gate ran. An override (command line or
-# environment) still wins, and skips the probe entirely.
+# stderr is dropped on the first call because `make help` runs on a checkout
+# with no game: it exits 0 with a "not found" note, and the targets that need
+# the DLL say so themselves. An override that names an install is the opposite
+# case (exit 2), and dropping that message left the target reporting an empty
+# path for a variable the operator did set. So the failure re-runs with stderr
+# live, and the reason reaches the operator.
+ASM_RESOLVE = python3 "$(TOOLS)/asm_path.py" 2>/dev/null || python3 "$(TOOLS)/asm_path.py" 1>/dev/null
+# ifndef + `:=`, not `?=` or `=`: a recursive assignment re-runs the $(shell ...)
+# probe at every $(ASM) reference. `make test` names the DLL in 15 recipe
+# lines, so discovery walked the Steam roots 15 times before the first gate ran.
+# An override (command line or environment) still wins, and skips the probe
+# entirely.
 ifndef ASM
-ASM := $(shell python3 "$(TOOLS)/asm_path.py" 2>/dev/null)
+ASM := $(shell $(ASM_RESOLVE))
 endif
 # The install root holding Data/Config (the directory the depot manifest
 # describes), the same install as the assembly above. Resolved once, same rule.
+GAME_ROOT_RESOLVE = python3 "$(TOOLS)/asm_path.py" --game-dir 2>/dev/null || python3 "$(TOOLS)/asm_path.py" --game-dir 1>/dev/null
 ifndef GAME_ROOT
-GAME_ROOT := $(shell python3 "$(TOOLS)/asm_path.py" --game-dir 2>/dev/null)
+GAME_ROOT := $(shell $(GAME_ROOT_RESOLVE))
 endif
 ASM_VARS := ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR
 

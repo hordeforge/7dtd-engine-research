@@ -24,8 +24,18 @@
 # runtime is a depot download the operator paced, not a process that can wedge
 # on a library walk.
 
-# Seconds SIGTERM gets before the group is SIGKILLed.
+# Seconds SIGTERM gets before the group is SIGKILLed. Same rule as
+# RE_MONO_TIMEOUT below, and held to it for the same reason: the value reaches
+# `timeout --kill-after=`, so a mistyped one is not a bound at all but a
+# per-run failure of every command, named by timeout rather than here. Zero is
+# a real setting (no grace, kill on expiry); negative is not a duration.
 BOUNDED_KILL_GRACE_S="${BOUNDED_KILL_GRACE_S:-10}"
+case "$BOUNDED_KILL_GRACE_S" in
+  '' | *[!0-9]*)
+    echo "BOUNDED_KILL_GRACE_S=$BOUNDED_KILL_GRACE_S: not a whole number of seconds" >&2
+    exit 2
+    ;;
+esac
 # Exit status `timeout` reports for an expired run.
 BOUNDED_TIMEOUT_RC=124
 

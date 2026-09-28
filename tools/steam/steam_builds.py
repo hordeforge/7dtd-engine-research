@@ -354,9 +354,6 @@ def fetch_timeout() -> float:
     raises it for a slow line; a non-numeric or non-positive value fails loud
     rather than meaning "no bound", by the shared rule in `tooling`.
     """
-    raw = os.environ.get(FETCH_TIMEOUT_ENV)
-    if raw is None:
-        return DEFAULT_FETCH_TIMEOUT
     return tooling.positive_seconds(FETCH_TIMEOUT_ENV, DEFAULT_FETCH_TIMEOUT)
 
 

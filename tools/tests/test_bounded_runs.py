@@ -16,17 +16,18 @@ spawned running with no parent. Pinned here, DLL-free and network-free:
      seconds fails loud instead of silently meaning "no bound";
   5. a host with no process group (Windows) still kills the child on expiry
      instead of raising out of the timeout path;
-  6. a gate that spawns a child bounds it, so a wedged tool fails a gate
+  6. `BOUNDED_KILL_GRACE_S` follows the same rule, with zero a real setting;
+  7. a gate that spawns a child bounds it, so a wedged tool fails a gate
      instead of hanging it.
 
 The shell entry points (regen.sh, build.sh, stock-sync.sh, drift-check.sh,
 fetch_version.sh) spawn the same tools, so they carry the same bound through
 tools/bounded-run.sh. Pinned here too:
 
-  7. the shell wrapper kills a grandchild on expiry, like the Python one;
-  8. an invalid `RE_MONO_TIMEOUT` fails the sourcing script instead of running
+  8. the shell wrapper kills a grandchild on expiry, like the Python one;
+  9. an invalid `RE_MONO_TIMEOUT` fails the sourcing script instead of running
      unbounded;
-  9. every mono/mcs/monodis child in tools/*.sh goes through `run_bounded`, so
+ 10. every mono/mcs/monodis child in tools/*.sh goes through `run_bounded`, so
      a new dump call cannot come back unbounded.
 
 Usage: python3 tools/tests/test_bounded_runs.py
@@ -233,6 +234,47 @@ def check_shell_timeout_env_fails_loud() -> None:
         )
 
 
+def check_kill_grace_env_fails_loud() -> None:
+    """The SIGKILL grace takes the same rule, and 0 is a real setting.
+
+    The value reaches `timeout --kill-after=`, so a mistyped one is not a bound
+    at all but a failure of every command the wrapper runs, named by `timeout`
+    rather than by the script that took the value.
+    """
+    for bad in ("nope", "-1", "1.5"):
+        result = subprocess.run(
+            ["bash", "-c", f'. "{_common.TOOLS}/bounded-run.sh"; echo REACHED'],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env={**os.environ, "BOUNDED_KILL_GRACE_S": bad},
+            timeout=GRANDCHILD_WAIT_S,
+        )
+        assert result.returncode == 2, (
+            f"BOUNDED_KILL_GRACE_S={bad!r} returned {result.returncode}, not 2"
+        )
+        assert "REACHED" not in result.stdout, (
+            f"BOUNDED_KILL_GRACE_S={bad!r} did not stop the sourcing script"
+        )
+    # Zero is a duration with no grace, and an empty value is an unset one:
+    # both take the `:-` default the whole script is written in.
+    for value, want in (("0", "0"), ("", "10")):
+        result = subprocess.run(
+            ["bash", "-c", f'. "{_common.TOOLS}/bounded-run.sh"; echo $BOUNDED_KILL_GRACE_S'],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env={**os.environ, "BOUNDED_KILL_GRACE_S": value, tooling.MONO_TIMEOUT_ENV: "2"},
+            timeout=GRANDCHILD_WAIT_S,
+        )
+        assert result.returncode == 0, f"BOUNDED_KILL_GRACE_S={value!r}: {result.stderr!r}"
+        assert result.stdout.strip() == want, (
+            f"BOUNDED_KILL_GRACE_S={value!r} resolved to {result.stdout!r}, want {want!r}"
+        )
+
+
 class _ShellScanner:
     """Splits shell source into code and quoted text, line by line.
 
@@ -400,6 +442,7 @@ def main() -> None:
     check_kill_group_fallback()
     check_timeout_env()
     check_shell_timeout_env_fails_loud()
+    check_kill_grace_env_fails_loud()
     check_spawn_detector()
     check_shell_scripts_are_bounded()
     check_gate_children_are_bounded()
