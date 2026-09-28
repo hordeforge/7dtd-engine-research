@@ -184,6 +184,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_json_pins_finite.py"
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
+	python3 "$(TOOLS)/tests/test_stock_facts_baseline.py"
 	python3 "$(TOOLS)/tests/test_promoted_types.py"
 	python3 "$(TOOLS)/tests/test_doc_link_integrity.py"
 	python3 "$(TOOLS)/tests/test_save_roundtrip_robustness.py"

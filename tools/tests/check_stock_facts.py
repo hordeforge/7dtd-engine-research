@@ -4,6 +4,16 @@
 StockFacts.cs regenerates that JSON from the live Assembly-CSharp.dll. This script
 only reads the committed (or just-regenerated) JSON and greps known pin sites.
 
+Two kinds of check run here, and they have different jobs:
+
+  - Pin-site checks read a value out of the pin file and require the doc or
+    sibling file that cites it to carry the same one. The pin file is the single
+    source of truth; a value that moves here is a value the corpus re-pins.
+  - Baseline checks (PIN_BASELINE, XML_PIN_BASELINE) require the pin file to
+    still hold the build this corpus was written against. They are the tripwire
+    for a TFP patch, and they live in one table per pin file so a deliberate
+    re-pin is a table edit rather than a hunt through nested comparisons.
+
 Usage:
   python3 tools/tests/check_stock_facts.py
   python3 tools/tests/check_stock_facts.py --facts path/to/stock_facts.json
@@ -52,6 +62,59 @@ VOLATILE_FACT_KEYS = {
     "schema",
     "provenance",
     "source_identity",
+}
+
+# The pin files declare this and every consumer must honour it: a schema bump
+# that renames or retires a field reads as a missing pin here, which points an
+# operator at their install instead of at the tool that cannot parse the file.
+STOCK_FACTS_SCHEMA = 1
+
+# The values this corpus was written against, in one table per pin file.
+#
+# Every field below is machine-extracted from the live assembly (or, for the
+# XML table, from the install's Data/Config) and `check_live_against_dll`
+# already proves the committed file against that source, so this table is the
+# pin file's *baseline*, not a second extractor: its job is to make a value
+# change a named, deliberate edit here plus a doc re-pin, rather than a
+# constant buried in a nested comparison that silently encodes the studied
+# build. Float entries compare within FLOAT_TOLERANCE, the precision the
+# IL-sourced values are written at.
+FLOAT_TOLERANCE = 1e-6
+
+PIN_BASELINE: tuple[tuple[str, object], ...] = (
+    ("enums.game_stats_members", 82),
+    ("enums.game_prefs_members", 317),
+    ("litenet.protocol_id", 13),
+    ("litenet.max_packet_size", 1432),
+    ("behaviour.world_water_level", 62.88),
+    ("behaviour.item_dropped_on_death_lifetime_s", 300.0),
+    ("behaviour.max_load_time_per_frame_ms", 50.0),
+)
+
+# tools/data/xml_pins.json, regenerated from the same install by stock-sync.sh
+# and diffed against it by `xml_pins.py --check`. The three keys the corpus and
+# the sibling provenance register cite.
+XML_PIN_BASELINE: tuple[tuple[str, object], ...] = (
+    ("entityclasses_health.healthSlim", 125),
+    ("entityclasses_health.healthSlimFeral", 500),
+    ("entityclasses_health.healthSlimInfernal", 1600),
+    ("traders_root.buy_markup", 3.0),
+    ("traders_root.sell_markdown", 0.2),
+    ("buffs_survival.food_wellfed_threshold", 0.52),
+)
+
+REPIN_HINT = (
+    "regenerate the pins with 'make stock-sync', then re-pin the doc sites the "
+    "value is cited in and update this table in the same change"
+)
+
+PIN_BASELINE_VALUES = dict(PIN_BASELINE)
+
+# Dotted pin paths whose value the corpus cites in a sibling provenance file.
+XML_PIN_CITATIONS: dict[str, str] = {
+    "entityclasses_health.healthSlim": "125",
+    "traders_root.sell_markdown": r"sell_markdown|SellMarkdown",
+    "buffs_survival.food_wellfed_threshold": "buffStatusHungry",
 }
 
 _MISSING = object()
@@ -199,6 +262,58 @@ def must_match(label: str, text: str, pattern: str, errors: list[str]) -> None:
         errors.append(f"{label}: no match for /{pattern}/")
 
 
+def pin_value(data: dict[str, Any], dotted: str) -> Any:
+    """The value at a dotted pin path, None when any step along it is absent.
+
+    A renamed section in a future pin schema has to read as "no value" here so
+    the caller reports the missing pin by name, rather than as an AttributeError
+    from dict lookups down a path that no longer exists.
+    """
+    node: Any = data
+    for part in dotted.split("."):
+        if not isinstance(node, dict):
+            return None
+        node = node.get(part)
+    return node
+
+
+def _close(got: object, want: float) -> bool:
+    """Whether an extracted float pin equals its baseline within written precision."""
+    if not isinstance(got, (int, float, str)):
+        return False
+    try:
+        return abs(float(got) - want) <= FLOAT_TOLERANCE
+    except ValueError:
+        return False
+
+
+def pin_matches(data: dict[str, Any], dotted: str, want: object) -> bool:
+    """Whether a pin path carries its baseline value."""
+    got = pin_value(data, dotted)
+    if isinstance(want, float):
+        return _close(got, want)
+    return bool(got == want)
+
+
+def check_baseline(
+    label: str, data: dict[str, Any], table: tuple[tuple[str, object], ...], errors: list[str]
+) -> None:
+    """Assert every baseline value in a pin file, naming the path on failure.
+
+    Reported as a drift from the studied build rather than a malformed file,
+    because that is what it is: a TFP patch that moves one of these values
+    arrives here as a gate that cannot go green until the pin, this table and
+    the docs citing it move together.
+    """
+    for dotted, want in table:
+        got = pin_value(data, dotted)
+        if not pin_matches(data, dotted, want):
+            errors.append(
+                f"{label} {dotted}={got!r} does not match the pin this corpus was written "
+                f"against ({want!r}); {REPIN_HINT}"
+            )
+
+
 def check_pin_banners(facts: dict[str, Any], errors: list[str], root: Path | None = None) -> None:
     """Every "**Current pin:**" banner in the corpus must state the machine pin.
 
@@ -340,14 +455,18 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
     # Enum index sizes: EnumGameStats/EnumGamePrefs member counts pin the
     # gamestats-gameprefs inventory; each of its tables must carry exactly that
     # many rows, indexed 0..count-1.
-    en = facts.get("enums", {})
-    if en.get("game_stats_members") != 82:
-        errors.append(f"stock_facts enums.game_stats_members={en.get('game_stats_members')} != 82")
-    if en.get("game_prefs_members") != 317:
-        errors.append(f"stock_facts enums.game_prefs_members={en.get('game_prefs_members')} != 317")
-    if en.get("game_stats_members") == 82 and en.get("game_prefs_members") == 317:
+    check_baseline("stock_facts", facts, PIN_BASELINE, errors)
+    if all(
+        pin_matches(facts, dotted, want)
+        for dotted, want in PIN_BASELINE
+        if dotted.startswith("enums.")
+    ):
         gg = read(ROOT / "docs" / "inventories" / "gamestats-gameprefs.md")
-        for enum_name, count in (("EnumGameStats", 82), ("EnumGamePrefs", 317)):
+        for enum_name, path in (
+            ("EnumGameStats", "enums.game_stats_members"),
+            ("EnumGamePrefs", "enums.game_prefs_members"),
+        ):
+            count = int(pin_value(facts, path))
             m = re.search(rf"^## {enum_name}\s*$(.*?)(?=^## |\Z)", gg, re.M | re.S)
             rows = re.findall(r"^\|\s*(\d+)\s*\|\s*`\w+`\s*\|\s*$", m.group(1), re.M) if m else []
             if [int(i) for i in rows] != list(range(count)):
@@ -373,44 +492,19 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
         must_match("docs/network/network.md 1024", net, r"1024", errors)
 
     # XML data pins: the committed hp ladder must carry the key zombie values,
-    # and the zdtd divergence register must cite healthSlim 125.
+    # and the zdtd divergence register must cite the ones it diverges on.
     pins_path = ROOT / "tools" / "data" / "xml_pins.json"
     if pins_path.is_file():
         pins = _common.load_json(pins_path)
-        hp = pins.get("entityclasses_health", {})
-        for key, val in [
-            ("healthSlim", 125),
-            ("healthSlimFeral", 500),
-            ("healthSlimInfernal", 1600),
-        ]:
-            if hp.get(key) != val:
-                errors.append(f"xml_pins entityclasses_health.{key}={hp.get(key)} != {val}")
+        check_baseline("xml_pins", pins, XML_PIN_BASELINE, errors)
         prov = read(WS / "zdtd-server" / "docs" / "PROVENANCE.md")
-        if prov:
-            must_match("zdtd PROVENANCE healthSlim", prov, r"125", errors)
-        tr = pins.get("traders_root", {})
-        if abs(tr.get("buy_markup", 0) - 3.0) > 1e-9:
-            errors.append(f"xml_pins traders_root.buy_markup={tr.get('buy_markup')} != 3.0")
-        if abs(tr.get("sell_markdown", 0) - 0.2) > 1e-9:
-            errors.append(f"xml_pins traders_root.sell_markdown={tr.get('sell_markdown')} != 0.2")
-        if prov and tr.get("sell_markdown"):
-            must_match("zdtd PROVENANCE sell_markdown", prov, r"sell_markdown|SellMarkdown", errors)
-        bs = pins.get("buffs_survival", {})
-        if abs(bs.get("food_wellfed_threshold", 0) - 0.52) > 1e-9:
-            errors.append(
-                f"xml_pins buffs food_wellfed_threshold={bs.get('food_wellfed_threshold')} != 0.52"
-            )
-        if prov and bs.get("hunger_buff"):
-            must_match("zdtd PROVENANCE buffStatusHungry", prov, r"buffStatusHungry", errors)
+        for dotted, needle in sorted(XML_PIN_CITATIONS.items()):
+            if prov and pin_value(pins, dotted) is not None:
+                must_match("zdtd PROVENANCE " + dotted, prov, needle, errors)
 
     # WaterLevel pin: facts must carry the IL-verified value and save-region.md
     # must document it (the zdtd divergence register consumes the same number).
-    water = facts["behaviour"].get("world_water_level")
-    if water is None:
-        errors.append("stock_facts behaviour.world_water_level missing")
-    elif abs(float(water) - 62.88) > 1e-6:
-        errors.append(f"stock_facts world_water_level={water} != 62.88 (Block.cWaterLevel)")
-    else:
+    if pin_matches(facts, "behaviour.world_water_level", 62.88):
         must_match(
             "docs/world/save-region.md WaterLevel",
             read(_common.doc("save-region.md")),
@@ -419,29 +513,25 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
         )
 
     # Death-loot lifetime + per-frame load budget (cctor-pinned IL values).
-    tuned: list[tuple[str, float, str, str, str]] = [
+    # The value assertion is the baseline table's; the doc check runs only when
+    # the pin still holds, so a drifted pin is reported once as a pin failure
+    # rather than again as a doc failure.
+    tuned: tuple[tuple[str, str, str, str], ...] = (
         (
-            "item_dropped_on_death_lifetime_s",
-            300.0,
+            "behaviour.item_dropped_on_death_lifetime_s",
             "docs/gameplay/combat-damage.md",
             r"300",
             "item lifetime",
         ),
         (
-            "max_load_time_per_frame_ms",
-            50.0,
+            "behaviour.max_load_time_per_frame_ms",
             "docs/gameplay/crafting-recipes.md",
             r"50",
             "load budget",
         ),
-    ]
-    for key, want, doc, pat, label in tuned:
-        got = facts["behaviour"].get(key)
-        if got is None:
-            errors.append(f"stock_facts behaviour.{key} missing")
-        elif abs(float(got) - want) > 1e-6:
-            errors.append(f"stock_facts {key}={got} != {want}")
-        else:
+    )
+    for path, doc, pat, label in tuned:
+        if pin_matches(facts, path, PIN_BASELINE_VALUES[path]):
             must_match(f"docs pin {label}", read(ROOT / doc), pat, errors)
 
     closed = read(_common.doc("closed-gaps.md"))
@@ -617,15 +707,12 @@ def check_zdtd(facts: dict[str, Any], errors: list[str]) -> str | None:
     store = read(WS / "zdtd-server" / "src" / "world" / "store.zig")
     if store:
         must_match("zdtd y_dim", store, rf"pub const y_dim: i32 = {ydim};", errors)
-    # LiteNetLib wire pins: facts carry the library constants; zdtd's packet.zig
-    # must acknowledge the max_packet_size divergence (1327 vs stock 1432).
-    lite = facts.get("litenet", {})
-    if lite.get("max_packet_size") != 1432:
-        errors.append(f"stock_facts litenet.max_packet_size={lite.get('max_packet_size')} != 1432")
-    if lite.get("protocol_id") != 13:
-        errors.append(f"stock_facts litenet.protocol_id={lite.get('protocol_id')} != 13")
+    # LiteNetLib wire pins: the baseline table already asserts the stock
+    # constants, so here zdtd's packet.zig only has to acknowledge the
+    # max_packet_size divergence (1327 vs stock 1432).
+    max_packet = pin_value(facts, "litenet.max_packet_size")
     pkt = read(WS / "zdtd-server" / "src" / "litenet" / "packet.zig")
-    if pkt and lite.get("max_packet_size"):
+    if pkt and max_packet:
         must_match(
             "zdtd packet.zig max_packet_size divergence",
             pkt,
@@ -634,7 +721,7 @@ def check_zdtd(facts: dict[str, Any], errors: list[str]) -> str | None:
         )
     # Cross-repo: the divergence register must carry the machine-checked
     # WaterLevel so zdtd's sea_level=64 divergence stays tied to the pin.
-    water = facts["behaviour"].get("world_water_level")
+    water = pin_value(facts, "behaviour.world_water_level")
     prov = read(WS / "zdtd-server" / "docs" / "PROVENANCE.md")
     if water is not None and prov:
         must_match(
@@ -683,6 +770,20 @@ def main() -> int:
         return 1
     errors: list[str] = []
     skips: list[str] = []
+
+    # The pin file declares the schema its fields are written for. Reading a
+    # file whose schema moved would turn every renamed field into a "missing
+    # pin" naming the operator's install, so the version is checked before any
+    # field is read and names the tool that writes it.
+    schema = facts.get("schema")
+    if schema != STOCK_FACTS_SCHEMA:
+        print(
+            f"FAIL: {args.facts} declares schema {schema!r}, this gate reads schema "
+            f"{STOCK_FACTS_SCHEMA} (written by tools/src/StockFacts.cs); regenerate "
+            f"the pins and update the gate together",
+            file=sys.stderr,
+        )
+        return 1
 
     # The documented contract for --require-live: the facts under test match the
     # live dedicated DLL (skipped with a note where there is no local game).

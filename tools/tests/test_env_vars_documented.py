@@ -62,20 +62,20 @@ def env_reads(path: Path) -> set[str]:
     """
     tree = ast.parse(path.read_text(encoding="utf-8", errors="replace"))
     consts: dict[str, str | tuple[str, ...]] = {}
-    for node in tree.body:
-        if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+    for stmt in tree.body:
+        if not isinstance(stmt, (ast.Assign, ast.AnnAssign)):
             continue
-        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-        value = node.value
+        targets = stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
+        init = stmt.value
         for target in targets:
-            if not isinstance(target, ast.Name) or value is None:
+            if not isinstance(target, ast.Name) or init is None:
                 continue
-            if isinstance(value, ast.Constant) and isinstance(value.value, str):
-                consts[target.id] = value.value
-            elif isinstance(value, (ast.Tuple, ast.List)):
+            if isinstance(init, ast.Constant) and isinstance(init.value, str):
+                consts[target.id] = init.value
+            elif isinstance(init, (ast.Tuple, ast.List)):
                 parts = tuple(
                     item.value
-                    for item in value.elts
+                    for item in init.elts
                     if isinstance(item, ast.Constant) and isinstance(item.value, str)
                 )
                 if parts:
@@ -85,14 +85,14 @@ def env_reads(path: Path) -> set[str]:
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
             if node.func.attr == "getenv" and _is_os(node.func.value):
-                found.update(_string_args(node))
+                found.update(_call_arg_name(node))
             if node.func.attr == "get" and _is_environ(node.func.value):
-                found.update(_string_args(node))
+                found.update(_call_arg_name(node))
         if isinstance(node, ast.Subscript) and _is_environ(node.value):
-            found.update(_string_args(node))
+            found.update(_subscript_name(node))
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
             if node.func.id == "getenv":
-                found.update(_string_args(node))
+                found.update(_call_arg_name(node))
     # Constants: a bare string (a timeout's variable) or a tuple of them (the
     # override names in one list), read from the `_ENV` / `_VARS` constants the
     # tools already use. Other uppercase tuples are path parts and verdict
@@ -115,14 +115,30 @@ def _is_environ(node: ast.expr) -> bool:
     return isinstance(node, ast.Attribute) and node.attr == "environ" and _is_os(node.value)
 
 
-def _string_args(node: ast.Call) -> set[str]:
+def _constant_str(node: ast.expr) -> str | None:
+    """A plain string literal expression, or None for anything computed."""
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    return None
+
+
+def _call_arg_name(node: ast.Call) -> set[str]:
     """The name a call reads, its first argument; a default is not a variable."""
     if not node.args:
         return set()
-    first = node.args[0]
-    if isinstance(first, ast.Constant) and isinstance(first.value, str):
-        return {first.value}
-    return set()
+    name = _constant_str(node.args[0])
+    return {name} if name is not None else set()
+
+
+def _subscript_name(node: ast.Subscript) -> set[str]:
+    """The name `os.environ["X"]` reads.
+
+    A subscript carries its key in `slice`, not in `args`: routing it through
+    the call reader raised AttributeError on the first tool that used the
+    subscript form, which is why the scan documented a form it could not read.
+    """
+    name = _constant_str(node.slice)
+    return {name} if name is not None else set()
 
 
 def make_vars() -> set[str]:
