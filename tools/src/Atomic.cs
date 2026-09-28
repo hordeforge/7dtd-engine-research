@@ -5,7 +5,6 @@
 // leaves a truncated file with no rollback. Staging beside the target and
 // renaming over it means a reader sees the previous file or the new one, never a
 // half-written one, and a failed dump leaves the old bytes untouched.
-using System;
 using System.IO;
 
 static class Atomic {
@@ -22,17 +21,6 @@ static class Atomic {
     string tmp = Staged(path);
     try {
       File.WriteAllText(tmp, text);
-      Land(tmp, path);
-    } catch {
-      Discard(tmp);
-      throw;
-    }
-  }
-
-  public static void WriteLines(string path, Action<StreamWriter> body) {
-    string tmp = Staged(path);
-    try {
-      using (var w = new StreamWriter(tmp)) body(w);
       Land(tmp, path);
     } catch {
       Discard(tmp);

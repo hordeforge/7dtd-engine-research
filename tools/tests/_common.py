@@ -177,19 +177,31 @@ def doc(name: str) -> Path:
     return hits[0]
 
 
+def load_module(path: str | Path, name: str) -> Any:
+    """Execute a standalone script as a module named `name`.
+
+    The tools are scripts, not a package, and some carry names Python cannot
+    import (`census-pct.py`), so a gate that calls their functions imports
+    them by path. Registering in `sys.modules` is what makes a dataclass
+    defined there resolve its own annotations, which the paths that define
+    one need.
+    """
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None, path
+    assert spec.loader is not None, path
+    module: Any = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 def load_sibling(name: str) -> Any:
     """Import another tools/tests script as a module, by its script name.
 
     The tests are standalone scripts, not an importable package, so a test that
     borrows another's encoder imports it by file path.
     """
-    spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(f"{name}.py"))
-    assert spec is not None, name
-    assert spec.loader is not None, name
-    sibling: Any = importlib.util.module_from_spec(spec)
-    sys.modules[name] = sibling
-    spec.loader.exec_module(sibling)
-    return sibling
+    return load_module(Path(__file__).with_name(f"{name}.py"), name)
 
 
 # Private scratch dir for ad-hoc probe sources/binaries. A fixed name under a

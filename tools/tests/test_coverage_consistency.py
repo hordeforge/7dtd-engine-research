@@ -12,7 +12,6 @@ came to claim a 3.1.0 pin after the corpus moved to 3.2.0).
 Usage: python3 tools/tests/test_coverage_consistency.py
 """
 
-import importlib.util
 import json
 import os
 import re
@@ -23,11 +22,11 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
-TOOLS = str(_common.TOOLS)
+TOOLS = _common.TOOLS
 REPO = str(_common.REPO)
 DOCS = str(_common.DOCS)
 COVERAGE = _common.doc("coverage.md")
-FACTS = os.path.join(TOOLS, "data", "stock_facts.json")
+FACTS = TOOLS / "data" / "stock_facts.json"
 
 
 def _coverage_text() -> str:
@@ -93,13 +92,7 @@ def test_pin_banners_match_stock_facts() -> None:
     pass-because-it-does-nothing gate. The banner check is a pure function of
     stock_facts.json, so this is DLL-free even though its owner is not.
     """
-    spec = importlib.util.spec_from_file_location(
-        "check_stock_facts", os.path.join(TOOLS, "tests", "check_stock_facts.py")
-    )
-    assert spec is not None
-    assert spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    module = _common.load_module(TOOLS / "tests" / "check_stock_facts.py", "check_stock_facts")
     with open(FACTS, encoding="utf-8") as f:
         facts = json.load(f)
 

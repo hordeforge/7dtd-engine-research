@@ -383,15 +383,6 @@ def assembly_sha1(manifest: Manifest) -> str | None:
     return entry.sha1 if entry else None
 
 
-def manifest_for_gid(depot: str, gid: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> Path | None:
-    """The cached manifest file with this gid, or None.
-
-    Matched on the gid key `cached_manifests` already parsed out of the file
-    name, not on a `_gid.` substring of the name.
-    """
-    return cached_manifests(depot, roots).get(gid)
-
-
 def _runtime_hint(name: str) -> str:
     """A one-line explanation for a file the game is known to rewrite."""
     for path, why in RUNTIME_WRITTEN.items():

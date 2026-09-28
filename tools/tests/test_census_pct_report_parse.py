@@ -18,7 +18,6 @@ Usage: python3 tools/tests/test_census_pct_report_parse.py
 from __future__ import annotations
 
 import contextlib
-import importlib.util
 import io
 import os
 import sys
@@ -32,12 +31,7 @@ REPORT_ROW = "| Reached types (incl. compiler-generated) | 4211 |\n"
 
 
 def load_module() -> Any:
-    spec = importlib.util.spec_from_file_location("census_pct_parse", TOOL)
-    assert spec is not None, TOOL
-    assert spec.loader is not None, TOOL
-    module: Any = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return _common.load_module(TOOL, "census_pct_parse")
 
 
 def main() -> None:

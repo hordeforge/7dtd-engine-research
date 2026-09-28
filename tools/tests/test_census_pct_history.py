@@ -13,7 +13,6 @@ Usage: python3 tools/tests/test_census_pct_history.py
 
 from __future__ import annotations
 
-import importlib.util
 import multiprocessing
 import os
 import sys
@@ -34,12 +33,7 @@ ROWS_PER_WRITER = 25
 
 
 def load_module() -> Any:
-    spec = importlib.util.spec_from_file_location("census_pct", TOOL)
-    assert spec is not None, TOOL
-    assert spec.loader is not None, TOOL
-    module: Any = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return _common.load_module(TOOL, "census_pct")
 
 
 def writer(path: str, index: int) -> None:

@@ -17,7 +17,6 @@ Usage: python3 tools/tests/test_sandbox_zig_tables.py
 
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
 import struct
@@ -28,23 +27,11 @@ import _common
 
 TOOLS = _common.TOOLS
 
-_spec = importlib.util.spec_from_file_location(
-    "gen_zig_tables", TOOLS / "sandbox" / "gen_zig_tables.py"
-)
-assert _spec is not None
-assert _spec.loader is not None
-_mod = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_mod)
+_mod = _common.load_module(TOOLS / "sandbox" / "gen_zig_tables.py", "gen_zig_tables")
 f32 = _mod.f32
 val_literal = _mod.val_literal
 
-_atlas_spec = importlib.util.spec_from_file_location(
-    "gen_atlas_zig", TOOLS / "sandbox" / "gen_atlas_zig.py"
-)
-assert _atlas_spec is not None
-assert _atlas_spec.loader is not None
-_atlas = importlib.util.module_from_spec(_atlas_spec)
-_atlas_spec.loader.exec_module(_atlas)
+_atlas = _common.load_module(TOOLS / "sandbox" / "gen_atlas_zig.py", "gen_atlas_zig")
 to_color5 = _atlas.to_color5
 
 

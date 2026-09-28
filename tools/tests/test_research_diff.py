@@ -11,7 +11,6 @@ Usage: python3 tools/tests/test_research_diff.py
 from __future__ import annotations
 
 import functools
-import importlib.util
 import os
 import re
 import shutil
@@ -29,13 +28,7 @@ run = functools.partial(_common.run_cli, TOOL)
 
 
 def load_module() -> Any:
-    spec = importlib.util.spec_from_file_location("research_diff", TOOL)
-    assert spec is not None, TOOL
-    assert spec.loader is not None, TOOL
-    module: Any = importlib.util.module_from_spec(spec)
-    sys.modules["research_diff"] = module  # dataclasses resolve cls.__module__ there
-    spec.loader.exec_module(module)
-    return module
+    return _common.load_module(TOOL, "research_diff")
 
 
 def source(module: Any, label: str, facts: dict[str, Any], buildid: str | None = None) -> Any:

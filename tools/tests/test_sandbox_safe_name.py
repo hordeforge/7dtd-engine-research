@@ -11,7 +11,6 @@ can never produce a parent-directory component. Stdlib only, DLL-free.
 
 from __future__ import annotations
 
-import importlib.util
 import os
 import sys
 
@@ -20,11 +19,7 @@ import _common
 
 TOOLS = _common.TOOLS
 
-_spec = importlib.util.spec_from_file_location("safe_name", TOOLS / "sandbox" / "safe_name.py")
-assert _spec is not None
-assert _spec.loader is not None
-_mod = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_mod)
+_mod = _common.load_module(TOOLS / "sandbox" / "safe_name.py", "safe_name")
 safe_name = _mod.safe_name
 
 # (hostile name, expected sanitized fragment) -- mirrors the IlFmt cases.
