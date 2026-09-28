@@ -36,7 +36,7 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 | [`tools/`](tools) | **Tracked** Mono.Cecil dump tooling ([`tools/README.md`](tools/README.md)) |
 | [`tools/data/`](tools/data) | Committed pins (`stock_facts.json`) |
 | [`tools/tests/`](tools/tests) | Pin gate, dump-set structural tests, readiness bench |
-| [`Makefile`](Makefile) | Gate entry points: `verify`, `test`, `test-docs`, `lint`, `post-update`, `census` |
+| [`Makefile`](Makefile) | Gate entry points; `make help` is the index of every target and whether it needs the game |
 | [`ruff.toml`](ruff.toml), [`mypy.ini`](mypy.ini) | Static-analysis config for `make lint`; versions pinned in [`ci.yml`](.github/workflows/ci.yml) |
 | `il/` | Regenerable Cecil dumps. **git-ignored** (may contain game IL); never redistribute |
 | `.scratch/` | Ephemeral probes and gate temp trees (`.scratch/tmp`). **git-ignored**; never the system temp dir, which is tmpfs here |
@@ -54,12 +54,13 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 4. **Regenerate, do not hand-edit dumps.** After a game update run `make post-update` (stock facts + pins + drift), then `make census`; re-dump only changed families into `il/<label>/`. Commit `tools/data/stock_facts.json` and pin-site doc edits together.
 5. **No em dashes; no AI attribution** in shipped text (workspace rule).
 6. **Generic engine only.** RealEarth product status/lessons belong in `7dtd-realearth/docs/`, not here.
-7. Mark status honestly: `verified` / `unverified` / `inferred` / `blocked`. Residuals beyond IL go in [`docs/meta/residuals.md`](docs/meta/residuals.md).
+7. Mark status honestly, with the vocabulary the corpus already uses: `verified` / `inferred` / **not decoded** for IL-derived fields ([`re-methodology.md`](docs/meta/re-methodology.md) §7), `Closed` / `Partially closed` / `Permanent` for coverage rows ([`coverage.md`](docs/meta/coverage.md)). Residuals beyond IL go in [`docs/meta/residuals.md`](docs/meta/residuals.md), the only table for permanent open items.
+8. **A new gate is wired in two places.** A script under `tools/tests/` must be invoked by a Makefile target *and* listed in the `tools/README.md` test table, or `test_readme_test_table.py` fails; a target without a `make help` line fails the same gate. Sibling-repo links and citations have their own targets, which no-op when the siblings are not checked out: `make cross-links` (`../*.md` links) and `make sibling-cites` (bare `doc.md` citations).
 
 ## Start here
 
 [`docs/INDEX.md`](docs/INDEX.md) -> [`docs/meta/coverage.md`](docs/meta/coverage.md) (what is mapped) -> family narrative -> `il/` dump. For new RE: [`docs/meta/re-methodology.md`](docs/meta/re-methodology.md) + [`tools/`](tools).
 
-Gates: `make test-docs` (no DLL needed, same as CI), `make lint` (`ruff` check + format, `mypy --strict`, `shellcheck`); with the live game also `make test`, `make verify`.
+Gates: the two CI jobs are `make test-docs` (no DLL needed) and `make lint` (`ruff` check + format, `mypy --strict`, `shellcheck`, both on the versions pinned in [`ci.yml`](.github/workflows/ci.yml)); with the live game also `make test` and `make verify`. Single gates run standalone: `python3 tools/tests/<gate>.py`.
 
-Python tooling rules: every parameter and return annotated (`mypy --strict` is a gate, not advice); scripts take the repo root from `_common.REPO` (a marker walk) rather than counting parent directories; temp trees go under `_common.scratch_dir()`.
+Python tooling rules: every parameter and return annotated (`mypy --strict` is a gate, not advice); a tool takes the repo root from `tools/tooling.py` (`tooling.REPO`, a `Makefile` + `AGENTS.md` marker walk) and never counts parent directories. Gates under `tools/tests/` import `_common`, which only re-exports that module; tools never import from `tests/`. Temp trees go under `tooling.scratch_dir()` (`.scratch/tmp`).

@@ -23,10 +23,12 @@ import os
 import re
 import sys
 from collections.abc import Callable, Iterator
+from pathlib import Path
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
-DEFAULT_DOCS = os.path.join(REPO, "docs")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tooling
+
+DEFAULT_DOCS = str(tooling.DOCS)
 
 # Same token rule as tools/src/Coverage.cs: credit the leading identifier of
 # a backticked token (`Type`, `Type.Member`, `Type::Member`).
