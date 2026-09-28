@@ -85,12 +85,14 @@ git-ignored and regenerable. Nothing here ships game bytes; point `ASM` at your
 own copy:
 
 Rebuilds are incremental: a target is recompiled only when a source (or the
-staged Cecil) is newer than its exe, and the whole tree rebuilds when the
-compiler or the pinned Cecil changes. build.sh is the only writer of `bin/`:
+staged Cecil, or `build.sh` itself, which carries the compiler flags) is newer
+than its exe, and the whole tree rebuilds when the compiler or the pinned Cecil
+changes. build.sh is the only writer of `bin/`:
 `drift-check.sh`, `stock-sync.sh` and `fetch_version.sh` run it instead of
 compiling an exe themselves, so no script can leave an exe in place under a
 weaker key than the toolchain stamp records. The `mcs`/`mono` versions, the Cecil
-version, and Cecil's SHA-256 are written to `bin/buildinfo.txt` after a
+version, Cecil's SHA-256 and the SHA-256 of `build.sh` are written to
+`bin/buildinfo.txt` after a
 successful build, and to `bin/.toolchain-stamp`, so a rebuild can be reproduced
 and a toolchain swap cannot silently leave binaries from the previous compiler
 in place. The compile and log order is pinned to `LC_ALL=C`, so it does not

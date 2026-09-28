@@ -12,7 +12,11 @@ permissions:
   contents: read
 jobs:
   docs:
-    runs-on: ubuntu-latest
+    # A versioned image, not `latest`: a floating tag moves the Python, the
+    # coreutils and every apt package under the gates without a commit, so one
+    # green run is not the next one, and a new base image can break a gate on
+    # its own. Bump it deliberately, in its own commit.
+    runs-on: ubuntu-24.04
     # A wedged fuzz/parse step must fail the job, not hold a runner for the
     # six-hour default.
     timeout-minutes: 20
@@ -28,7 +32,7 @@ jobs:
       - run: make test-docs
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -41,7 +45,7 @@ jobs:
           uv tool install mypy==2.3.1
           uv tool install yamllint==1.38.0
           # Pinned so local `make lint` and CI agree (same policy as ruff);
-          # ubuntu-latest's apt shellcheck trails the current release.
+          # the runner image's apt shellcheck trails the current release.
           # Checksum-gated like the Mono.Cecil pin: a swapped release artifact
           # must fail the download, not run in the lint job.
           sc_ver=0.11.0

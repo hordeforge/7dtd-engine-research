@@ -7,10 +7,19 @@ TOOLS := $(ROOT)/tools
 # entry points and the tools cannot answer with three different installs.
 # stderr is dropped here because `make help` runs on a checkout with no game:
 # the targets that need the DLL say so themselves.
-ASM ?= $(shell python3 "$(TOOLS)/asm_path.py" 2>/dev/null)
+# ifndef + `:=`, not `?=`: a conditional (`?=`) assignment is recursively
+# expanded, so the $(shell ...) probe above ran again at every $(ASM) reference.
+# `make test` names the DLL in 15 recipe lines, so discovery walked the Steam
+# roots 15 times before the first gate ran. An override (command line or
+# environment) still wins, and skips the probe entirely.
+ifndef ASM
+ASM := $(shell python3 "$(TOOLS)/asm_path.py" 2>/dev/null)
+endif
 # The install root holding Data/Config (the directory the depot manifest
-# describes), the same install as the assembly above.
-GAME_ROOT ?= $(shell python3 "$(TOOLS)/asm_path.py" --game-dir 2>/dev/null)
+# describes), the same install as the assembly above. Resolved once, same rule.
+ifndef GAME_ROOT
+GAME_ROOT := $(shell python3 "$(TOOLS)/asm_path.py" --game-dir 2>/dev/null)
+endif
 ASM_VARS := ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR
 
 .PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift gate test test-docs lint verify verify-live facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
@@ -127,7 +136,7 @@ regen-check:
 # .github/workflows/ci.yml), because their rules drift between releases.
 lint:
 	@for tool in ruff mypy yamllint; do \
-	  expected=$$(sed -n "s/^ *uv tool install $$tool==\([0-9][0-9.]*\)/\1/p" .github/workflows/ci.yml | head -1); \
+	  expected=$$(sed -n "s/^ *uv tool install $$tool==\([0-9][0-9.]*\)/\1/p" "$(ROOT)/.github/workflows/ci.yml" | head -1); \
 	  if [ -z "$$expected" ]; then \
 	    echo "lint: cannot read the $$tool pin from .github/workflows/ci.yml" >&2; exit 2; \
 	  fi; \
@@ -140,7 +149,7 @@ lint:
 	  fi; \
 	done; \
 	command -v shellcheck >/dev/null 2>&1 || { \
-	  echo "lint: shellcheck not on PATH; CI pins $(shell sed -n 's/^ *sc_ver=\([0-9][0-9.]*\)/\1/p' .github/workflows/ci.yml | head -1) (.github/workflows/ci.yml); any recent distro package is fine locally, e.g.: sudo apt install shellcheck" >&2; exit 2; \
+	  echo "lint: shellcheck not on PATH; CI pins $(shell sed -n 's/^ *sc_ver=\([0-9][0-9.]*\)/\1/p' "$(ROOT)/.github/workflows/ci.yml" | head -1) (.github/workflows/ci.yml); any recent distro package is fine locally, e.g.: sudo apt install shellcheck" >&2; exit 2; \
 	}
 	ruff check .
 	ruff format --check .

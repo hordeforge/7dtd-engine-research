@@ -209,7 +209,11 @@ up_to_date() { # <exe> <input>...
 build_target() { # <name> <src> <shared:yes|no> [extra input]...
   local name="$1" src="$2" use_shared="$3"
   shift 3
-  local inputs=("$src")
+  # build.sh itself is an input: it carries the compiler flags (-warnaserror,
+  # -pathmap, and anything a later change adds), and those change the bytes an
+  # exe has. The toolchain stamp covers the compiler, not the flag list, so
+  # editing a flag here left every exe built with the old one in place.
+  local inputs=("$src" "$here/build.sh")
   [[ "$use_shared" == "yes" ]] && inputs+=("${shared[@]}")
   inputs+=(bin/Mono.Cecil.dll "$@")
   if up_to_date "bin/$name.exe" "${inputs[@]}"; then
@@ -269,7 +273,7 @@ if [[ "$skip_legacy" -eq 0 && -d legacy ]]; then
   ok=0; fail=0; failed=""
   for f in legacy/*.cs; do
     name="$(basename "$f" .cs)"
-    if up_to_date "bin/legacy/$name.exe" "$f" bin/Mono.Cecil.dll; then
+    if up_to_date "bin/legacy/$name.exe" "$f" "$here/build.sh" bin/Mono.Cecil.dll; then
       ok=$((ok+1))
       continue
     fi
@@ -303,6 +307,10 @@ mv -f "$staging_run/toolchain-stamp" "$stamp_file"
   echo "monocecil_version=$cecil_ver"
   echo "monocecil_sha256=$cecil_actual_sha"
   echo "monocecil_pinned_sha256=$pin_sha"
+  # The flag list lives in this script, so its digest is part of the record of
+  # what produced bin/: without it two builds from the same compiler and the
+  # same Cecil but different mcs flags are indistinguishable here.
+  echo "build_sh_sha256=$(sha256_of "$here/build.sh")"
   echo "# byte-identical across rebuilds: the output basename, not the mktemp"
   echo "# name, and the source paths are mapped out (-pathmap); the compiler has no"
   echo "# -deterministic, so do not reintroduce a random -out basename."
