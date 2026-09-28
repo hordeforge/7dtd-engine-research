@@ -87,6 +87,16 @@ def usable_label(value: str) -> bool:
     return bool(LABEL_RE.fullmatch(value)) and value not in (".", "..")
 
 
+def usable_branch(value: str) -> bool:
+    """A branch fetch_version.sh will accept.
+
+    The label shape, plus the one rule the label does not carry: a branch is
+    forwarded to `steamcmd -beta <name>`, where a leading `-` is one of
+    steamcmd's own options, so it is refused here too.
+    """
+    return usable_label(value) and not value.startswith("-")
+
+
 _KV_RE = re.compile(r'^\s*"([^"]+)"\s+"([^"]*)"\s*$')
 _DEPOT_RE = re.compile(r'^\s*"(\d+)"\s*$')
 
@@ -133,7 +143,10 @@ def parse_snapshot(appinfo: Any, source: str, app: str = APP, depot: str = DEPOT
         depots = appinfo["data"][app]["depots"]
         raw_branches = depots["branches"]
         raw_manifests = depots[depot].get("manifests", {})
-    except (KeyError, TypeError) as exc:
+    except (AttributeError, KeyError, TypeError) as exc:
+        # AttributeError: `depots[depot]` is present but not a mapping, which
+        # the same handler turns into the documented SourceError -> exit 2
+        # instead of a traceback out of a payload the tool typed as Any.
         raise SourceError(f"app info has no data.{app}.depots.{depot} branches: {exc!r}") from exc
     if not isinstance(raw_branches, dict) or not raw_branches:
         raise SourceError(f"app info has an empty branch table for app {app}")
@@ -349,10 +362,39 @@ def run_fetch(command: list[str]) -> int:
     the process group is what has to die: killing only the script would leave
     a download running with no parent.
     """
-    rc, _, err = tooling.run_bounded(command, env=dict(os.environ), timeout=fetch_timeout())
+    try:
+        timeout = fetch_timeout()
+    except tooling.ConfigError as exc:
+        # An unusable RE_STEAM_FETCH_TIMEOUT is this tool's "unusable input"
+        # exit 2, not a traceback: the module header promises that code.
+        print(f"steam_builds: {exc}", file=sys.stderr)
+        return 2
+    rc, _, err = tooling.run_bounded(command, env=dict(os.environ), timeout=timeout)
     if rc != 0 and err.strip():
         print(err.strip(), file=sys.stderr)
     return rc
+
+
+def fetch_argv(branch: Branch, source: str, label: str) -> tuple[list[str] | None, int]:
+    """The `fetch_version.sh` argv for a branch, or `(None, rc)` when refused.
+
+    Both output paths need the same two refusals, and a branch that changes
+    between them must not be fetched under one rule and refused under the
+    other: a branch with no depot manifest, and a manifest gid that is not
+    numeric (it reaches steamcmd as an argument, where a leading `-` reads as
+    an option).
+    """
+    if not branch.manifest:
+        print(f"steam_builds: branch {branch.name} has no depot {DEPOT} manifest")
+        return None, 2
+    if not GID_RE.fullmatch(branch.manifest):
+        print(
+            f"steam_builds: refusing to fetch with a non-numeric depot manifest "
+            f"gid {branch.manifest!r} from {source}",
+            file=sys.stderr,
+        )
+        return None, 2
+    return [str(FETCH), branch.manifest, label], 0
 
 
 def fetch_by_name(branch_name: str, label: str, do_fetch: bool) -> int:
@@ -360,10 +402,7 @@ def fetch_by_name(branch_name: str, label: str, do_fetch: bool) -> int:
     if not usable_label(label):
         print(f"steam_builds: invalid label {label!r}", file=sys.stderr)
         return 2
-    # fetch_version.sh forwards this to `steamcmd -beta <name>`; a leading `-`
-    # would be read by steamcmd as an option, so the name is held to the label
-    # shape. A leading hyphen still passes here; fetch_version.sh refuses it.
-    if not usable_label(branch_name):
+    if not usable_branch(branch_name):
         print(f"steam_builds: invalid branch name {branch_name!r}", file=sys.stderr)
         return 2
     command = [str(FETCH), branch_name, label]
@@ -635,17 +674,9 @@ def main(argv: list[str] | None = None) -> int:
         # both options no-ops in a scripted run.
         fetch_command: list[str] | None = None
         if args.print_fetch or args.fetch:
-            if not branch.manifest:
-                print(f"steam_builds: branch {branch.name} has no depot {DEPOT} manifest")
-                return 2
-            if not GID_RE.fullmatch(branch.manifest):
-                print(
-                    f"steam_builds: refusing to fetch with a non-numeric depot manifest "
-                    f"gid {branch.manifest!r} from {snapshot.source}",
-                    file=sys.stderr,
-                )
-                return 2
-            fetch_command = [str(FETCH), branch.manifest, label]
+            fetch_command, rc = fetch_argv(branch, snapshot.source, label)
+            if fetch_command is None:
+                return rc
         payload = {
             "source": snapshot.source,
             "app": APP,
@@ -755,17 +786,9 @@ def main(argv: list[str] | None = None) -> int:
     install_stale = install_buildid is not None and install_buildid != branch.buildid
 
     if args.print_fetch or args.fetch:
-        if not branch.manifest:
-            print(f"steam_builds: branch {branch.name} has no depot {DEPOT} manifest")
-            return 2
-        if not GID_RE.fullmatch(branch.manifest):
-            print(
-                f"steam_builds: refusing to fetch with a non-numeric depot manifest "
-                f"gid {branch.manifest!r} from {snapshot.source}",
-                file=sys.stderr,
-            )
-            return 2
-        command = [str(FETCH), branch.manifest, label]
+        command, rc = fetch_argv(branch, snapshot.source, label)
+        if command is None:
+            return rc
         if args.print_fetch and not args.fetch:
             print(" ".join(command))
             return 0

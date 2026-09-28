@@ -36,7 +36,7 @@ import tooling
 DEFAULT_PINS = str(tooling.TOOLS / "data" / "xml_pins.json")
 
 DEFAULT_GAME = ""  # discovered per run, see default_game_dir()
-NO_GAME = "no dedicated server found; pass --game-dir or set ASM/SEVENDTD_ASM/SEVENDTD_DS_DIR"
+NO_GAME = "no dedicated server found; pass --game-dir or set " + "/".join(tooling.ASM_VARS)
 
 
 def default_game_dir() -> str:
@@ -56,6 +56,12 @@ def default_game_dir() -> str:
 
 
 HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="([^"]*)"')
+# A pinned hash is only usable if every one of its 64 characters is a hex digit.
+# A length check alone lets a corrupt pin fall through to the byte-diff branch
+# and blames the operator's install for a damaged pin file. Case is not part of
+# the value: committed pins carry upper-case hex while `hexdigest()` is lower,
+# so both sides are compared folded.
+SHA256_RE = re.compile(r"[0-9a-fA-F]{64}")
 
 
 def parse_float(text: str, where: str, unparsed: list[str]) -> float | None:
@@ -254,9 +260,9 @@ def identity_diffs(live: dict[str, Any], committed: dict[str, Any]) -> list[str]
     for key, rel in sorted(SOURCE_FILES.items()):
         want = (cv.get(key) or {}).get("sha256")
         got = (lv.get(key) or {}).get("sha256")
-        if not want or not isinstance(want, str) or len(want) != 64:
+        if not isinstance(want, str) or not SHA256_RE.fullmatch(want):
             diffs.append(f"source_identity.{key}: committed pin has no usable sha256")
-        elif got != want:
+        elif str(got).lower() != want.lower():
             diffs.append(
                 f"source_identity.{key}: install bytes differ from the studied file "
                 f"(install={got!r} pinned={want!r}; {rel})"

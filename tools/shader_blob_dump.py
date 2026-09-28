@@ -285,7 +285,10 @@ def parse_parameter_blob(raw: bytes) -> tuple[Fields, int]:
     """
     r = _Reader(raw)
     version = r.i32()
-    buffers = [_read_constant_buffer(r) for _ in range(r.count(20))]
+    # A constant buffer encodes its shortest as an empty name plus three ints,
+    # so 16 is the stride `count` has to assume, not the 20 the record looks
+    # like on paper; a 20 bound accepts a count the remaining bytes cannot hold.
+    buffers = [_read_constant_buffer(r) for _ in range(r.count(16))]
     entries = []
     for _ in range(r.count(12)):
         name = r.string()

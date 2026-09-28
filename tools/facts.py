@@ -7,14 +7,12 @@ StockFacts.exe extracts from the live DLL and check_stock_facts asserts.
 """
 
 import argparse
-import os
 import pathlib
 import sys
+from typing import Any
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import tooling
-
-TOOLS = os.path.dirname(os.path.abspath(__file__))
 
 
 def main() -> int:
@@ -24,18 +22,26 @@ def main() -> int:
     ap.parse_args()
     try:
         return show()
-    except (OSError, ValueError, KeyError) as exc:
+    except (OSError, ValueError, KeyError, TypeError) as exc:
         # ValueError covers both JSONDecodeError and tooling's
         # NonFiniteNumberError; KeyError is a pin file missing a section the
-        # display below reads unconditionally. All three mean the same thing to
-        # a reader: the committed pins are unreadable, not absent.
+        # display below reads unconditionally, and TypeError is one whose top
+        # level is not an object. All four mean the same thing to a reader: the
+        # committed pins are unreadable, not absent.
         print(f"facts: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 2
 
 
+def load_pins(name: str) -> dict[str, Any]:
+    """One committed pin file as an object, or the error main() reports."""
+    doc = tooling.load_json(tooling.TOOLS / "data" / name)
+    if not isinstance(doc, dict):
+        raise TypeError(f"{name}: top level is {type(doc).__name__}, not an object")
+    return doc
+
+
 def show() -> int:
-    facts_path = os.path.join(TOOLS, "data", "stock_facts.json")
-    d = tooling.load_json(pathlib.Path(facts_path))
+    d = load_pins("stock_facts.json")
     v = d["version"]
     print(f"pin: {v['display']} (b{v['build']}) tps={d['sim']['constants_ticks_per_second']}")
     c = d.get("census", {})
@@ -46,9 +52,9 @@ def show() -> int:
     print(
         f"  save: current_save_version={s.get('current_save_version')} saveload_il={s.get('worldstate_saveload_stream_il')}"
     )
-    xp = os.path.join(TOOLS, "data", "xml_pins.json")
-    if os.path.isfile(xp):
-        xd = tooling.load_json(pathlib.Path(xp))
+    xp = tooling.TOOLS / "data" / "xml_pins.json"
+    if xp.is_file():
+        xd = load_pins("xml_pins.json")
         hp = xd.get("entityclasses_health", {})
         if hp:
             print(

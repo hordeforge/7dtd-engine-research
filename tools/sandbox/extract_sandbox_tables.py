@@ -133,11 +133,14 @@ def extract(pe: Any) -> dict[str, Any]:
     def find_newarr_len(j: int) -> int | None:
         # First ldc.i4 constant walking back from the newarr (its element
         # count); stops at the nearest call/newobj/stfld boundary.
+        # A negative constant (ldc.i4.m1) is not a length: every caller feeds
+        # the result straight to a count, where it would build a negative
+        # struct format or an empty value set reported as "no values".
         m = j - 1
         while m >= 0 and insns[m].opcode.name not in ("newobj", "call", "callvirt", "stfld"):
             v = ldc4_val(insns[m])
             if v is not None:
-                return v
+                return v if v >= 0 else None
             m -= 1
         return None
 

@@ -41,6 +41,10 @@ STAMP_ENV = "SOURCE_DATE_EPOCH"
 MONO_TIMEOUT_ENV = "RE_MONO_TIMEOUT"
 DEFAULT_MONO_TIMEOUT = 900.0
 TIMEOUT_RC = 124
+# How long the post-kill read of a timed-out child may block. A group kill takes
+# the grandchildren with it and the pipes close at once; a grandchild that
+# survives the kill is given this long to exit before the read is abandoned.
+POST_KILL_TIMEOUT = 5.0
 
 # The dedicated server is a Steam app, and Steam installs to a different tree
 # per OS, so discovery probes every known root rather than assuming the Linux
@@ -267,7 +271,12 @@ def game_dir(asm: Path) -> Path | None:
     count = len(tail.parts)
     if asm.parts[-count:] != tail.parts:
         return None
-    return Path(*asm.parts[: len(asm.parts) - count])
+    root = asm.parts[: len(asm.parts) - count]
+    # An override may be relative, in which case the tail is the whole path and
+    # the root would be `Path()`, which stringifies to the process cwd. Callers
+    # test the result for truthiness, and `.` is truthy, so the empty prefix has
+    # to be refused here rather than handed on as a root.
+    return Path(*root) if root else None
 
 
 def resolve_asm(explicit: str | None) -> tuple[Path | None, str]:
@@ -364,7 +373,14 @@ def run_bounded(
         out, err = proc.communicate(timeout=limit)
     except subprocess.TimeoutExpired:
         kill_child_group(proc)
-        out, err = proc.communicate()
+        # Windows kills only the direct child, so a grandchild can still hold
+        # the pipes open. The second read is bounded for that case; without it
+        # the timeout turns back into the hang the bound exists to prevent.
+        try:
+            out, err = proc.communicate(timeout=POST_KILL_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            out, err = proc.communicate()
         return TIMEOUT_RC, out, f"{command[0]} exceeded {limit:g}s and was killed\n{err}"
     return proc.returncode, out, err
 
