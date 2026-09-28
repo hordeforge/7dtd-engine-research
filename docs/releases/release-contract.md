@@ -172,7 +172,22 @@ falls behind the commits actually below the last tag.
   temporary name and `rename` into place, so an interrupted run cannot leave a
   half-written artifact where a gate expects a complete one. `build.sh` is the
   only writer of `bin/`, keyed on its source, so a stale executable cannot
-  shadow a rebuilt one.
+  shadow a rebuilt one, and each build run stages under
+  `bin/.staging/run.$$` rather than one shared path, so two builds running at
+  once cannot `rm` each other's staged file and rename a half-written exe into
+  `bin/`.
+- **A rerun answers the same as the first run.** `research_diff.py` names its
+  report after the build pair and republishes over the one already in
+  `workspace/outputs/diffs/`, so a repeated command leaves one report per pair
+  instead of a dated sibling per run; `stock-sync.sh` publishes `stock_facts.json`
+  and `xml_pins.json` as one step and restores the previous pair if the publish
+  fails, so a half-finished refresh cannot leave the two pins describing
+  different installs.
+- **An unmeasured census is a failure, not a zero.** `Census.exe` exiting 0
+  without its `AllTypes` / `AllMethodsWithBody` rows means the dumper's output
+  format changed; `census-pct.py` refuses the run instead of reporting a whole
+  assembly of zero types, and an unreadable coverage report yields no
+  "reached in the server call graph" row rather than a fabricated one.
 - **The sandbox installs a bounded, reviewed requirement series**, the
   static-analysis gate is pinned to rule sets strict enough to fail on the
   defects it exists to catch, and the CI token is read-only for `contents`.
@@ -268,5 +283,14 @@ disagrees with the repository: a tag with no history row, a row for a tag that
 no longer exists, an Unreleased section that does not count the commits below
 the last tag, or a "next cut" naming a version already published. That gate is
 the reason the Unreleased section above states a count instead of a date.
+
+The count is checked only while commits are unreleased. The tag push is the
+moment `git rev-list --count <last-tag>..HEAD` returns 0, and the section still
+describes the cut that has just happened until the next edit resets it; failing
+there would turn every release's own CI run red over prose nobody reads in
+between, which is how `v0.3.0` ended up tagged, unreleased and deleted. The
+gate takes `--contract` and `--repo`, and
+`tests/test_release_contract_gate.py` runs every one of its detectors, this
+case included, in a throwaway repository.
 
 **Hub:** [`INDEX.md`](../INDEX.md).
