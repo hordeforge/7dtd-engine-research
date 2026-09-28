@@ -17,6 +17,8 @@ any other way re-derives those rules, which is how they drift apart.
 
 `generation_stamp()` is the one clock the tools that stamp a committed artifact
 read, so `SOURCE_DATE_EPOCH` makes their output replayable byte-for-byte.
+`fuzz_rng()` is the one RNG a randomized gate draws from, so `RE_FUZZ_SEED`
+names the seed a failure replays from.
 """
 
 from __future__ import annotations
@@ -26,8 +28,10 @@ import hashlib
 import json
 import math
 import os
+import random
 import signal
 import subprocess
+import sys
 import unicodedata
 from collections.abc import Mapping
 from datetime import datetime, timezone
@@ -38,6 +42,7 @@ ROOT_MARKERS = ("Makefile", "AGENTS.md")
 _HASH_CHUNK = 1 << 20
 STAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 STAMP_ENV = "SOURCE_DATE_EPOCH"
+FUZZ_SEED_ENV = "RE_FUZZ_SEED"
 MONO_TIMEOUT_ENV = "RE_MONO_TIMEOUT"
 DEFAULT_MONO_TIMEOUT = 900.0
 TIMEOUT_RC = 124
@@ -319,6 +324,67 @@ def generation_stamp() -> str:
         raise StampError(
             f"{STAMP_ENV}={raw!r} is outside the representable UTC range (year 1 to 9999): {exc}"
         ) from exc
+
+
+def fuzz_seed(default_seed: int) -> int:
+    """The seed a randomized gate runs on: `RE_FUZZ_SEED`, else its own default.
+
+    A seeded fuzzer is replayable only if the seed that produced a failure can
+    be named, and a seed baked into a module constant cannot be re-run: the
+    caller would have to edit the file to get back to the same mutation stream.
+    Every randomized gate resolves its seed here and prints the resolved value,
+    so a FAIL line carries the seed and the command that replays it.
+
+    Hex is accepted because the defaults are written that way, and a decimal
+    seed past `sys.hash_info` width is refused: `random.Random` seeds from the
+    value's bit pattern, and a silently truncated 40-digit paste would replay
+    a different run than the one printed.
+    """
+    raw = os.environ.get(FUZZ_SEED_ENV)
+    if raw is None:
+        return default_seed
+    text = raw.strip()
+    try:
+        seed = int(text, 0) if text.lower().startswith(("0x", "-0x")) else int(text, 10)
+    except ValueError as exc:
+        raise ConfigError(
+            f"{FUZZ_SEED_ENV}={raw!r} is not an integer seed (decimal, or 0x-prefixed hex)"
+        ) from exc
+    limit = sys.maxsize
+    if not -limit - 1 <= seed <= limit:
+        raise ConfigError(f"{FUZZ_SEED_ENV}={raw!r} is outside the range of an int seed")
+    return seed
+
+
+def fuzz_rng(default_seed: int) -> random.Random:
+    """The one `random.Random` a randomized gate draws from, seeded by `fuzz_seed`."""
+    return random.Random(fuzz_seed(default_seed))
+
+
+class CorpusDigest:
+    """Rolling digest of every input a randomized gate fed to its subject.
+
+    A seed is only worth printing if it is what decides the run, and the
+    cheapest proof is two runs of the same seed agreeing on this value. A gate
+    that hashes its generated corpus reports it on both the OK and the FAIL
+    line, so a divergence between two replays points at the seed rather than
+    at whatever the gate happened to print about the failure. Each input is
+    length-prefixed, so two corpora that concatenate differently cannot hash
+    alike.
+    """
+
+    def __init__(self) -> None:
+        self._digest = hashlib.sha256()
+        self.count = 0
+
+    def add(self, data: bytes) -> None:
+        self._digest.update(len(data).to_bytes(8, "little"))
+        self._digest.update(data)
+        self.count += 1
+
+    def hexdigest(self) -> str:
+        """First 16 hex chars: enough to separate two runs, short enough to read."""
+        return self._digest.hexdigest()[:16]
 
 
 def sha256_file(path: Path) -> str:

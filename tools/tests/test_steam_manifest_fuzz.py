@@ -23,6 +23,9 @@ whole-file and per-chunk SHA-1 rows, empty and multi-chunk entries), so the
 mutations explore around true shapes rather than random noise. Deterministic,
 stdlib-only, DLL-free, network-free, seconds to run.
 
+`RE_FUZZ_SEED` replaces SEED, so a failing round replays from the seed the
+FAIL line prints.
+
 Usage: python3 tools/tests/test_steam_manifest_fuzz.py
 """
 
@@ -42,7 +45,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 sys.path.insert(0, str(_common.TOOLS / "steam"))
+sys.path.insert(0, str(_common.TOOLS))
+
 import steam_manifest as src
+import tooling
 
 # The wire-format encoder is one implementation: test_steam_manifest.py owns it,
 # and both gates must build the same shapes or a decoder fix passes one and
@@ -53,6 +59,7 @@ SEED = 0x71F617D0
 ROUNDS = 240  # mutation rounds per seed family
 TIME_BUDGET_S = 5.0  # hard ceiling for ONE parse (hang-class guard)
 HEX = frozenset("0123456789abcdef")
+SCRIPT = "tools/tests/test_steam_manifest_fuzz.py"
 
 
 def seed_manifests() -> list[bytes]:
@@ -140,9 +147,16 @@ def check_invariants(data: bytes, parsed: src.Manifest, label: str, bad: list[st
             bad.append(f"{label}: sha1 is not 40 lowercase hex chars: {e.sha1!r}")
 
 
-def fuzz(seeds: list[bytes], path: Path, rng: random.Random, bad: list[str]) -> None:
+def fuzz(
+    seeds: list[bytes],
+    path: Path,
+    rng: random.Random,
+    bad: list[str],
+    corpus: tooling.CorpusDigest,
+) -> None:
     for k in range(ROUNDS):
         data = mutate(rng, rng.choice(seeds)) if rng.random() < 0.85 else seeds[k % len(seeds)]
+        corpus.add(data)
         label = f"round {k}"
         try:
             parsed = parse(data, path)
@@ -268,24 +282,32 @@ def _write(path: Path, data: bytes) -> Path:
 
 
 def main() -> int:
-    rng = random.Random(SEED)
+    try:
+        seed = tooling.fuzz_seed(SEED)
+    except tooling.ConfigError as exc:
+        print(f"FAIL: steam_manifest fuzz: {exc}")
+        return 2
+    rng = random.Random(seed)
     bad: list[str] = []
+    corpus = tooling.CorpusDigest()
     seeds = seed_manifests()
     with tempfile.TemporaryDirectory(
         prefix="steam-manifest-fuzz-", dir=_common.scratch_dir()
     ) as tmp:
         path = Path(tmp) / "294422_1234567890123456789.manifest"
-        fuzz(seeds, path, rng, bad)
+        fuzz(seeds, path, rng, bad, corpus)
         if not bad:
             regression_pins(path, bad)
     if bad:
-        print("FAIL: steam_manifest fuzz")
+        print(f"FAIL: steam_manifest fuzz (seed 0x{seed:X}, corpus {corpus.hexdigest()})")
         for b in bad:
             print("  - " + b)
+        print(f"  replay: RE_FUZZ_SEED=0x{seed:X} python3 {SCRIPT}")
         return 1
     print(
         f"OK: {ROUNDS} mutation rounds over {len(seeds)} structure-aware manifest seeds; "
-        "no escapes, hangs, invariant breaks, or nondeterminism"
+        f"no escapes, hangs, invariant breaks, or nondeterminism "
+        f"(seed 0x{seed:X}, corpus {corpus.hexdigest()})"
     )
     return 0
 

@@ -46,16 +46,7 @@ def git(*args: str, cwd: Path) -> None:
 
 
 def git_out(*args: str, cwd: Path) -> str:
-    run = subprocess.run(
-        ["git", *args],
-        cwd=cwd,
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    return run.stdout.strip()
+    return _common.run_cmd(["git", *args], cwd=cwd, check=True).stdout.strip()
 
 
 def make_sandbox(tmp: Path) -> tuple[Path, Path, Path]:

@@ -22,6 +22,9 @@ a compressed valid chunk body, chunk bodies, and the small record formats;
 seeded mutations (bit flips, truncation, splices, count-field inflation) then
 explore around realistic shapes. Deterministic, stdlib-only, seconds to run.
 
+`RE_FUZZ_SEED` replaces SEED, so a failing round replays from the seed the
+FAIL line prints.
+
 Usage: python3 tools/tests/test_save_roundtrip_fuzz.py
 """
 
@@ -43,10 +46,12 @@ TOOLS = str(_common.TOOLS)
 sys.path.insert(0, TOOLS)
 
 import save_roundtrip_check as src
+import tooling
 
 SEED = 0x7D7D1EA
 ROUNDS = 240  # mutation rounds per target family
 TIME_BUDGET_S = 5.0  # hard ceiling for ONE parser call (hang-class guard)
+SCRIPT = "tools/tests/test_save_roundtrip_fuzz.py"
 
 
 def netstr(s: str) -> bytes:
@@ -237,6 +242,7 @@ def fuzz_family(
     rng: random.Random,
     rounds: int,
     bad: list[str],
+    corpus: tooling.CorpusDigest,
 ) -> None:
     seeds = [seed_builder(i) for i in range(3)]
     # parse_chunk_body documents ValueError/struct.error as its caller-caught
@@ -244,6 +250,7 @@ def fuzz_family(
     allowed = ALLOWED_CHUNK_BODY if name == "chunk-body" else ()
     for k in range(rounds):
         data = mutate(rng, rng.choice(seeds)) if rng.random() < 0.85 else seeds[k % 3]
+        corpus.add(data)
         try:
             checks = invoker(data)
         except BudgetError as exc:
@@ -272,8 +279,14 @@ def fuzz_family(
 
 
 def main() -> int:
-    rng = random.Random(SEED)
+    try:
+        seed = tooling.fuzz_seed(SEED)
+    except tooling.ConfigError as exc:
+        print(f"FAIL: save_roundtrip fuzz: {exc}")
+        return 2
+    rng = random.Random(seed)
     bad: list[str] = []
+    corpus = tooling.CorpusDigest()
     with tempfile.TemporaryDirectory(prefix="srt-fuzz-", dir=_common.scratch_dir()) as tmp:
         families = [
             (
@@ -333,7 +346,7 @@ def main() -> int:
             ),
         ]
         for name, seed_builder, invoker in families:
-            fuzz_family(name, seed_builder, invoker, rng, ROUNDS, bad)
+            fuzz_family(name, seed_builder, invoker, rng, ROUNDS, bad, corpus)
             if bad:
                 break
 
@@ -424,13 +437,15 @@ def main() -> int:
         bad.append(f"inflate: raised {type(exc).__name__}: {exc}")
 
     if bad:
-        print("FAIL: save_roundtrip fuzz")
+        print(f"FAIL: save_roundtrip fuzz (seed 0x{seed:X}, corpus {corpus.hexdigest()})")
         for b in bad:
             print("  - " + b)
+        print(f"  replay: RE_FUZZ_SEED=0x{seed:X} python3 {SCRIPT}")
         return 1
     print(
         f"OK: {ROUNDS * len(families)} mutation rounds across "
-        f"{len(families)} parser surfaces; no escapes, hangs, or verdict drift"
+        f"{len(families)} parser surfaces; no escapes, hangs, or verdict drift "
+        f"(seed 0x{seed:X}, corpus {corpus.hexdigest()})"
     )
     return 0
 

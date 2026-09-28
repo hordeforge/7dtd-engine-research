@@ -26,6 +26,9 @@ ParserBindChannels block. Mutations are bit flips, truncation, count/length
 inflation, and sign flips on the length fields. Deterministic, stdlib-only,
 DLL-free, seconds to run.
 
+`RE_FUZZ_SEED` replaces SEED, so a failing round replays from the seed the
+FAIL line prints.
+
 Usage: python3 tools/tests/test_shader_blob_fuzz.py
 """
 
@@ -45,11 +48,13 @@ import _common
 sys.path.insert(0, str(_common.TOOLS))
 
 import shader_blob_dump as src
+import tooling
 
 Fields = dict[str, Any]
 SEED = 0x5BADE7B0
 ROUNDS = 300  # mutation rounds per target family
 TIME_BUDGET_S = 5.0  # hard ceiling for ONE decoder call (hang-class guard)
+SCRIPT = "tools/tests/test_shader_blob_fuzz.py"
 
 Decoder = Callable[[bytes], object]
 
@@ -306,10 +311,11 @@ def check_roundtrip(name: str, data: bytes, parsed: Any, bad: list[str]) -> None
         bad.append("parameter: re-emitting a decoded blob is not a fixed point")
 
 
-def fuzz(rng: random.Random, bad: list[str]) -> None:
+def fuzz(rng: random.Random, bad: list[str], corpus: tooling.CorpusDigest) -> None:
     for name, (decode, seeds) in sorted(TARGETS.items()):
         for k in range(ROUNDS):
             data = mutate(rng, rng.choice(seeds)) if rng.random() < 0.85 else seeds[k % len(seeds)]
+            corpus.add(data)
             label = f"{name} round {k}"
             try:
                 parsed = timed(decode, data)
@@ -432,21 +438,29 @@ def regression_pins(bad: list[str]) -> None:
 
 
 def main() -> int:
-    rng = random.Random(SEED)
+    try:
+        seed = tooling.fuzz_seed(SEED)
+    except tooling.ConfigError as exc:
+        print(f"FAIL: shader_blob_dump fuzz: {exc}")
+        return 2
+    rng = random.Random(seed)
     bad: list[str] = []
+    corpus = tooling.CorpusDigest()
     valid_seeds(bad)
     if not bad:
-        fuzz(rng, bad)
+        fuzz(rng, bad, corpus)
     if not bad:
         regression_pins(bad)
     if bad:
-        print("FAIL: shader_blob_dump fuzz")
+        print(f"FAIL: shader_blob_dump fuzz (seed 0x{seed:X}, corpus {corpus.hexdigest()})")
         for b in bad:
             print("  - " + b)
+        print(f"  replay: RE_FUZZ_SEED=0x{seed:X} python3 {SCRIPT}")
         return 1
     print(
         f"OK: {ROUNDS} mutation rounds over {len(TARGETS)} decoder families; "
-        "no escapes, hangs, amplification, or round-trip drift"
+        f"no escapes, hangs, amplification, or round-trip drift "
+        f"(seed 0x{seed:X}, corpus {corpus.hexdigest()})"
     )
     return 0
 
