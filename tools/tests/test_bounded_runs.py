@@ -55,6 +55,8 @@ SNIPPET = (
 SHELL_CHILD_RE = re.compile(
     r"(?:^|[;&|(]\s*|\bthen\s+|\bdo\s+|\$\(\s*)((?:[\w./]*=\S*\s+)?)(mono|mcs|monodis)\s"
 )
+# A quoted span is one argument, so a tool named inside it is text, not a spawn.
+QUOTED_RE = re.compile(r"""'[^']*'|"[^"]*\"""")
 
 
 def wait_gone(pid: int) -> bool:
@@ -229,8 +231,12 @@ def check_shell_scripts_are_bounded() -> None:
             if not code.strip():
                 continue
             # A tool named inside a quoted substitution runs, and the scanner
-            # reads that as text, so the raw line is the fallback source.
+            # reads quoted text as text, so the quote-stripped line and then
+            # the raw line are the fallback sources.
             source, match = code, SHELL_CHILD_RE.search(code)
+            if match is None:
+                unquoted = QUOTED_RE.sub("", line)
+                source, match = unquoted, SHELL_CHILD_RE.search(unquoted)
             if match is None and spawns_a_tool(line.strip()):
                 source, match = line, SHELL_CHILD_RE.search(line)
             if match is None:

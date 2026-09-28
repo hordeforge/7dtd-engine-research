@@ -44,47 +44,15 @@ import _common
 sys.path.insert(0, str(_common.TOOLS / "steam"))
 import steam_manifest as src
 
+# The wire-format encoder is one implementation: test_steam_manifest.py owns it,
+# and both gates must build the same shapes or a decoder fix passes one and
+# fails the other for unrelated bytes.
+from test_steam_manifest import entry, field_bytes, field_varint, manifest, varint
+
 SEED = 0x71F617D0
 ROUNDS = 240  # mutation rounds per seed family
 TIME_BUDGET_S = 5.0  # hard ceiling for ONE parse (hang-class guard)
 HEX = frozenset("0123456789abcdef")
-
-
-def varint(value: int) -> bytes:
-    out = bytearray()
-    while True:
-        byte = value & 0x7F
-        value >>= 7
-        out.append(byte | (0x80 if value else 0))
-        if not value:
-            return bytes(out)
-
-
-def field_bytes(number: int, payload: bytes) -> bytes:
-    return varint((number << 3) | 2) + varint(len(payload)) + payload
-
-
-def field_varint(number: int, value: int) -> bytes:
-    return varint(number << 3) + varint(value)
-
-
-def entry(name: str, data: bytes, flags: int = 0, chunks: int = 1) -> bytes:
-    blob = field_bytes(1, name.encode())
-    blob += field_varint(2, len(data))
-    blob += field_varint(3, flags)
-    if data or chunks:
-        blob += field_bytes(5, hashlib.sha1(data).digest())
-    for _ in range(chunks):
-        chunk = field_bytes(1, hashlib.sha1(data).digest())
-        chunk += struct.pack("<BI", (2 << 3) | 5, len(data))
-        chunk += field_varint(3, 0) + field_varint(4, len(data)) + field_varint(5, len(data))
-        blob += field_bytes(6, chunk)
-    return field_bytes(1, blob)
-
-
-def manifest(entries: list[bytes], trailer: bytes = b"\x00" * 70) -> bytes:
-    table = b"".join(entries)
-    return struct.pack("<II", src.MAGIC, len(table)) + table + trailer
 
 
 def seed_manifests() -> list[bytes]:
