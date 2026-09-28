@@ -14,6 +14,9 @@ reached game types) into docs/inventories/coverage-report.md; this script
 is the DLL-free corpus-level view and needs no assembly.
 
 Usage: python3 tools/mention_depth.py [docsDir]
+  docsDir defaults to this repo's docs/. A path that is not a directory is a
+  usage error (exit 2): os.walk would yield nothing and the all-zero table
+  would read as a corpus with no mentions.
 """
 
 from __future__ import annotations
@@ -59,6 +62,15 @@ def main(argv: list[str]) -> int:
         help="docs directory to scan (default: docs)",
     )
     args = ap.parse_args(argv)
+    # A path that is not a directory makes os.walk yield nothing, so the table
+    # comes out all zeroes and reads as a corpus with no mentions. Refuse the
+    # argument instead, the way dump_diff.py refuses a bad dump dir.
+    if not os.path.isdir(args.docs_dir):
+        print(
+            f"mention_depth: docs_dir is not a directory: {args.docs_dir}",
+            file=sys.stderr,
+        )
+        return 2
     counts: dict[str, int] = {}
     files = 0
     for path in narrative_docs(args.docs_dir):

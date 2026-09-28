@@ -13,8 +13,9 @@ needs `../7dtd-engine-research/...`, a docs/ file needs `../../7dtd-engine-resea
 
 Usage: python3 tools/cross_repo_links.py [--root <workspace>] [--repo NAME]
   --root defaults to the parent of this repo (the sibling layout root).
-  --repo limits the scan to one repo name.
-Exit 0 = all links resolve; 1 = at least one broken link.
+  --repo limits the scan to one repo name; any other name is a usage error
+  (exit 2), never an empty sweep reported as OK.
+Exit 0 = all links resolve; 1 = at least one broken link; 2 = bad invocation.
 """
 
 import argparse
@@ -84,7 +85,11 @@ def main() -> int:
         default=str(tooling.REPO.parent),
         help="workspace root holding the sibling repos (default: the parent of this repo)",
     )
-    ap.add_argument("--repo", help="limit the scan to one repo name")
+    # A name outside REPOS matches no repo, so the sweep prints a per-repo
+    # zero line and reports "OK: 0 cross-repo .md links all resolve": a typo
+    # reads as a green gate. choices= makes argparse refuse it with the
+    # candidate names and exit 2.
+    ap.add_argument("--repo", choices=REPOS, help="limit the scan to one repo name")
     args = ap.parse_args()
     root = args.root
     grand = 0

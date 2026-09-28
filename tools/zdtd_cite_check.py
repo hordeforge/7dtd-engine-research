@@ -11,7 +11,8 @@ against that repo's docs/ + root + its docs/adr, number prefix stripped).
 
 Usage: python3 tools/zdtd_cite_check.py [--root <workspace>] [--repo NAME]
   --root defaults to the parent of this repo (the sibling layout root).
-  --repo limits the scan to one sibling repo.
+  --repo limits the scan to one sibling repo; any other name is a usage error
+  (exit 2), never an empty scan reported as OK.
 Exit 0 when every research citation resolves; 1 with the broken list otherwise.
 """
 
@@ -154,23 +155,32 @@ def main() -> int:
         default=str(tooling.REPO.parent),
         help="workspace root holding the sibling repos (default: the parent of this repo)",
     )
-    ap.add_argument("--repo", help="limit the scan to one repo name")
+    # A name outside REPOS selects nothing, and the run then prints
+    # "OK: 0 explicit sibling research citations all resolve": a typo reads as
+    # a green gate. choices= makes argparse refuse it with the candidate names
+    # and exit 2.
+    ap.add_argument("--repo", choices=REPOS, help="limit the scan to one repo name")
     args = ap.parse_args()
     grand = 0
     bad_total = 0
     local: set[str] = set()
     docs = known_doc_names()
     for name in REPOS:
+        if args.repo and name != args.repo:
+            continue
         repo_dir = os.path.join(args.root, name)
         if not os.path.isdir(repo_dir):
+            # Only the repos this run was asked about: the per-repo absence
+            # note is a status line, and naming the repos a --repo run
+            # filtered out buries the one it did scan.
             print(f"{name}: sibling repo directory absent, skipped")
             continue
         collect_local(repo_dir, local)
     for name in REPOS:
+        if args.repo and name != args.repo:
+            continue
         repo_dir = os.path.join(args.root, name)
         if not os.path.isdir(repo_dir):
-            continue
-        if args.repo and name != args.repo:
             continue
         total, broken, unreadable = scan(repo_dir, local, docs)
         grand += total

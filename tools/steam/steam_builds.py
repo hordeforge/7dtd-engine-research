@@ -439,7 +439,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--from", dest="from_path", metavar="FILE", help="read PICS JSON from a file")
     ap.add_argument("--branch", default=None, help="branch to select (default: the pinned one)")
     ap.add_argument("--label", default=None, help="fetch_version.sh label (default: branch name)")
-    ap.add_argument("--pins", default=str(PINS), help=f"studied-build pin file (default: {PINS})")
+    ap.add_argument(
+        "--pins",
+        default=None,
+        metavar="FILE",
+        help=f"studied-build pin file (default: {PINS}, which may be absent until --record)",
+    )
     ap.add_argument(
         "--appmanifest",
         default=str(DEFAULT_APPMANIFEST),
@@ -487,7 +492,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    pins_path = Path(args.pins)
+    # The default pin file, and any --pins file this run will write, is allowed
+    # to be absent (--record creates it). A named file nothing writes is not: a
+    # typo there reads as "studied pin: none" and exits 0, quietly dropping the
+    # drift comparison the run exists for.
+    pins_path = Path(args.pins) if args.pins else PINS
+    if args.pins and not args.record and not pins_path.exists():
+        print(f"steam_builds: --pins file not found: {pins_path}", file=sys.stderr)
+        return 2
     try:
         snapshot = load_appinfo(Path(args.from_path)) if args.from_path else fetch_appinfo()
         pins = load_pins(pins_path) if pins_path.exists() else None
