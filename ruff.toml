@@ -24,6 +24,9 @@ select = [
     "TID", # tidy imports
     "ISC", # implicit string concat (accidental literal joining)
     "G",   # logging format-string correctness
+    "LOG", # logging misuse (f-strings in the message, f-string in exc_info)
+    "ASYNC", # blocking calls inside async functions
+    "RET", # return-path consistency (superfluous else/finally, unreachable code)
     "PGH", # blanket noqa/fixme suppression hygiene
     "PLE", # pylint errors (real-defect subset)
     "RSE", # unnecessary parens on raised exceptions

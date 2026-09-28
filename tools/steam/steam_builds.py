@@ -400,7 +400,7 @@ def drift_verdict(
     branch: Branch,
     studied: dict[str, Any] | None,
     install_buildid: str | None,
-    integrity: tuple[str, int, int, int, int, list[str]] | None,
+    integrity: Integrity | None,
     pins_path: Path,
 ) -> tuple[int, str] | None:
     """The --check verdict as (exit code, FAIL reason), or None when clean.
@@ -408,10 +408,10 @@ def drift_verdict(
     Shared by the human table and the --json snapshot, so `--check --json`
     cannot report success on a drifted build.
     """
-    if integrity and (integrity[2] or integrity[3]):
+    if integrity and (integrity.files.missing or integrity.files.bad):
         return 1, (
             f"local install differs from Steam's manifest "
-            f"({integrity[3]} mismatch, {integrity[2]} missing)"
+            f"({integrity.files.bad} mismatch, {integrity.files.missing} missing)"
         )
     if not studied:
         return 2, f"no studied pin in {pins_path} (run --record)"
