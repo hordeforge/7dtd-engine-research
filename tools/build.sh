@@ -158,40 +158,69 @@ up_to_date() { # <exe> <input>...
   return 0
 }
 
-# Primary tools (src/): general, maintained. IlFmt.cs (IL formatting),
-# Seeds.cs (reachability seeds shared by Coverage/Reach), AsmWalk.cs
-# (assembly-walk helpers shared by the scanners) and Atomic.cs (landed-by-rename
-# output writes) are compiled into every src/ dumper. StockFacts/MethodList/
-# ParitySurface are ALSO compiled standalone by stock-sync.sh / drift-check.sh,
-# so those three must stay free of the shared files.
-shared=("src/IlFmt.cs" "src/Seeds.cs" "src/AsmWalk.cs" "src/Atomic.cs")
-for f in src/*.cs; do
-  [[ " ${shared[*]} " == *" $f "* ]] && continue
-  name="$(basename "$f" .cs)"
-  if up_to_date "bin/$name.exe" "$f" "${shared[@]}" bin/Mono.Cecil.dll; then
+# Every maintained exe is built here, by this one rule. drift-check.sh and
+# fetch_version.sh used to compile ParitySurface themselves and stock-sync.sh
+# StockFacts, each on a weaker key (source mtime only) that ignored the
+# compiler; the exe a weaker writer produced then satisfied up_to_date here, so
+# bin/.toolchain-stamp recorded a toolchain that never built it. A caller that
+# needs an exe now runs this script and uses the result.
+#
+# src/ is the maintained surface: a compile failure here must stop the build,
+# otherwise tests keep running against a stale exe that predates the breakage.
+# -warn:4 -warnaserror: the tree compiles warning-clean at max severity; keep
+# it that way (new warnings fail the build instead of scrolling past).
+# Compiling under the final basename in bin/.staging and renaming into place
+# keeps a concurrent build or gate from loading a half-written exe, leaves the
+# previous one intact when the compile fails, and keeps the assembly name and
+# MVID identical across rebuilds.
+#
+# build_target <name> <src> <shared:yes|no> [extra input]...
+build_target() { # <name> <src> <shared:yes|no> [extra input]...
+  local name="$1" src="$2" use_shared="$3"
+  shift 3
+  local inputs=("$src")
+  [[ "$use_shared" == "yes" ]] && inputs+=("${shared[@]}")
+  inputs+=(bin/Mono.Cecil.dll "$@")
+  if up_to_date "bin/$name.exe" "${inputs[@]}"; then
     echo "up to date bin/$name.exe"
-    continue
+    return 0
   fi
-  # src/ is the maintained surface: a compile failure here must stop the build,
-  # otherwise tests keep running against a stale exe that predates the breakage.
-  # -warn:4 -warnaserror: the tree compiles warning-clean at max severity; keep
-  # it that way (new warnings fail the build instead of scrolling past).
-  # Compiling under the final basename in bin/.staging and renaming into place
-  # keeps a concurrent build or gate from loading a half-written exe, leaves the
-  # previous one intact when the compile fails, and keeps the assembly name and
-  # MVID identical across rebuilds.
+  local args=(-nologo -warn:4 -warnaserror -pathmap:"$here=." "-r:bin/Mono.Cecil.dll" "$src")
+  [[ "$use_shared" == "yes" ]] && args+=("${shared[@]}")
+  local staged out
   staged="bin/.staging/$name.exe"
   rm -f "$staged"
-  if ! out="$(run_bounded mcs -nologo -warn:4 -warnaserror -pathmap:"$here=." -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"$staged" 2>&1)"; then
+  if ! out="$(run_bounded mcs "${args[@]}" -out:"$staged" 2>&1)"; then
     [[ -n "$out" ]] && printf '%s\n' "$out" >&2
     rm -f "$staged"
     echo "build: FAILED bin/$name.exe (compiler output above)" >&2
-    exit 1
+    return 1
   fi
   mv -f "$staged" "bin/$name.exe"
   [[ -n "$out" ]] && printf '%s\n' "$out"
   echo "built bin/$name.exe"
+}
+
+# Primary tools (src/): general, maintained. IlFmt.cs (IL formatting),
+# Seeds.cs (reachability seeds shared by Coverage/Reach), AsmWalk.cs
+# (assembly-walk helpers shared by the scanners) and Atomic.cs (landed-by-rename
+# output writes) are compiled into every src/ dumper. StockFacts/MethodList/
+# ParitySurface are ALSO compiled standalone (fetch_version.sh runs
+# ParitySurface.exe directly), so those three must stay free of the shared
+# files.
+shared=("src/IlFmt.cs" "src/Seeds.cs" "src/AsmWalk.cs" "src/Atomic.cs")
+for f in src/*.cs; do
+  [[ " ${shared[*]} " == *" $f "* ]] && continue
+  name="$(basename "$f" .cs)"
+  build_target "$name" "$f" yes || exit 1
 done
+
+# The NetPackage wire extractor lives in parity/ because it ships with the wire
+# axis, not with the general dumpers. It links the same pinned Cecil, so it is
+# cached by the same rule rather than by a per-script shortcut.
+if [[ -f parity/ParitySurface.cs ]]; then
+  build_target ParitySurface parity/ParitySurface.cs no || exit 1
+fi
 
 # Legacy per-family dumpers (legacy/): archival, superseded by src/. Each compiles
 # to its own exe (class names collide across files, so never combined). Best-effort:

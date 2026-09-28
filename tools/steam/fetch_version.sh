@@ -57,8 +57,6 @@ OUT="${OUT:-$SCRATCH}"
 SCRIPTDIR="$(cd "$(dirname "$0")" && pwd)"
 TOOLS="$(cd "$SCRIPTDIR/.." && pwd)"
 BIN="$TOOLS/bin"
-CECIL="$BIN/Mono.Cecil.dll"
-PARITY_SRC="$TOOLS/parity/ParitySurface.cs"
 PARITY_EXE="$BIN/ParitySurface.exe"
 # Wall-clock bound on the compile and the parity extract below
 # (tools/bounded-run.sh). The steamcmd download above is operator-paced and
@@ -119,18 +117,14 @@ fi
 # 3) locate the DLL + extract the parity surface
 DLL="$(find "$INSTALL" -name Assembly-CSharp.dll -print -quit || true)"
 if [[ -z "$DLL" ]]; then echo "[parity] DLL not found in $INSTALL"; exit 1; fi
-if [[ ! -f "$CECIL" ]]; then
-  "$TOOLS/build.sh" --skip-legacy
-fi
-if [[ ! -f "$PARITY_EXE" || "$PARITY_SRC" -nt "$PARITY_EXE" ]]; then
-  # Stage and rename so a concurrent drift-check never loads a half-written exe.
-  parity_staged="$(mktemp "$BIN/.ParitySurface.exe.XXXXXX")"
-  if run_bounded mcs -nologo -warn:4 -warnaserror -r:"$CECIL" "$PARITY_SRC" -out:"$parity_staged"; then
-    mv -f "$parity_staged" "$PARITY_EXE"
-  else
-    rm -f "$parity_staged"
-    exit 1
-  fi
+# build.sh owns bin/ and builds ParitySurface.exe with the same freshness rule
+# every other exe gets (source, pinned Mono.Cecil, bin/.toolchain-stamp). A
+# source-mtime check here was a second, weaker key for the same artifact, and
+# left the exe in place across a compiler or Cecil change.
+"$TOOLS/build.sh" --skip-legacy
+if [[ ! -f "$PARITY_EXE" ]]; then
+  echo "[parity] build.sh did not produce $PARITY_EXE" >&2
+  exit 1
 fi
 mkdir -p "$OUT"
 target="$OUT/parity_$LABEL.json"

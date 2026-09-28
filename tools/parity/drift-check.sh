@@ -16,7 +16,8 @@
 # drift verdict on the first run instead of "baseline created". The machine-local
 # BASELINE_DIR takes precedence once it exists, and only while it carries the
 # digest of the DLL it was taken from (see "local baseline provenance" below).
-# Requires: mono (mcs), Mono.Cecil, the tools built (../build.sh).
+# Requires: mono (mcs) and a Mono.Cecil matching data/cecil.pin; the dumpers are
+# built by ../build.sh, which this script runs before the snapshot.
 set -uo pipefail
 # sort/comm below compare baseline vs current listings byte-wise; both sides
 # must collate identically, so pin the locale instead of inheriting the
@@ -65,7 +66,6 @@ if [[ -z "$ASM" ]]; then
   exit 2
 fi
 [[ -f "$ASM" ]]   || { echo "drift: game DLL not found: $ASM" >&2; exit 2; }
-[[ -f "$CECIL" ]] || { echo "drift: tools not built; run $TOOLS/build.sh" >&2; exit 2; }
 
 # sha256 of a file, or nothing when the host has neither digest tool.
 file_digest() { # <path> -> hex digest on stdout, empty when uncomputable
@@ -77,37 +77,22 @@ file_digest() { # <path> -> hex digest on stdout, empty when uncomputable
 }
 ASM_DIGEST="$(file_digest "$ASM")"
 
-# helper builders (compiled on demand into bin/)
-build_helper() { # <name> <src>
-  local exe="$BIN/$1.exe"
-  # Freshness is the cache key: the helper is reused only while it is newer than
-  # BOTH its source and the Mono.Cecil it was compiled against. Keying on the
-  # source alone kept a helper built against an older cecil.dll in place, and it
-  # then ran against an assembly it was not compiled for.
-  [[ -f "$exe" && "$exe" -nt "$2" && "$exe" -nt "$CECIL" ]] && return 0
-  # A failed helper build must not look like "no drift" on that axis; the run
-  # fails closed below instead of comparing a partial surface. The compile lands
-  # on a private staging copy and is renamed into place, so a concurrent
-  # drift-check or `make census` never loads a half-written assembly. The
-  # staging name is the FINAL one: mcs takes the assembly name and module MVID
-  # from the -out path, so a mktemp name leaks into the exe and breaks
-  # byte-identical rebuilds.
-  local staged
-  staged="$BIN/.staging/$1.exe"
-  mkdir -p "$BIN/.staging"
-  rm -f "$staged"
-  if ! run_bounded mcs -nologo -pathmap:"$TOOLS=." -r:"$CECIL" "$2" -out:"$staged"; then
-    rm -f "$staged"
-    echo "drift: error: failed to compile $1.exe; refusing to compare an incomplete surface" >&2
-    return 1
-  fi
-  mv -f "$staged" "$exe"
-}
+# Every tool this script runs is built by build.sh, under one freshness rule
+# (source, the pinned Mono.Cecil, and bin/.toolchain-stamp). This script used to
+# compile MethodList and ParitySurface itself on a weaker key that ignored the
+# compiler, and the exe it wrote then satisfied build.sh's own up-to-date check,
+# so the toolchain stamp recorded a toolchain that never built it. A build that
+# fails here must not look like "no drift" on any axis: the run fails closed
+# below instead of comparing a partial surface.
 axis_fail=0
-build_helper MethodList "$TOOLS/src/MethodList.cs" || axis_fail=1
-# ParitySurface feeds the NetPackage wire diff below; build it like the other
-# helpers so a fresh checkout gets the full drift report (not a silent skip).
-build_helper ParitySurface "$here/ParitySurface.cs" || axis_fail=1
+if ! "$TOOLS/build.sh" --skip-legacy; then
+  echo "drift: error: build.sh failed; refusing to compare an incomplete surface" >&2
+  axis_fail=1
+fi
+[[ -f "$CECIL" ]] || {
+  echo "drift: error: no Mono.Cecil.dll in $BIN; tools not built" >&2
+  axis_fail=1
+}
 # Wall-clock bound on every snapshot tool below (tools/bounded-run.sh); a
 # wedged Cecil walk must fail the axis, not hang the whole drift check.
 run() { MONO_PATH="$BIN" run_bounded mono "$@"; }

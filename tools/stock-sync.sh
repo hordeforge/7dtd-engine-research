@@ -60,29 +60,15 @@ extract() {
     echo "stock-sync: game DLL not found: $ASM" >&2
     exit 2
   fi
-  if [[ ! -f "$BIN/Mono.Cecil.dll" ]]; then
-    echo "stock-sync: building tools (need Mono.Cecil)..."
-    (cd "$HERE" && ./build.sh --skip-legacy)
-  fi
-  # Stale on the source or on the Cecil it was linked against: a re-pinned
-  # Mono.Cecil must not leave an exe built against the old one in place.
-  if [[ ! -f "$BIN/StockFacts.exe" ]] ||
-    [[ "$HERE/src/StockFacts.cs" -nt "$BIN/StockFacts.exe" ]] ||
-    [[ "$BIN/Mono.Cecil.dll" -nt "$BIN/StockFacts.exe" ]]; then
-    echo "stock-sync: compiling StockFacts.exe"
-    # Stage and rename so a concurrent research_diff / census never loads a
-    # half-written assembly. The staging name is the FINAL one: mcs takes the
-    # assembly name and module MVID from the -out path, so a mktemp name would
-    # leak into the exe and make two builds of one source differ.
-    staged="$BIN/.staging/StockFacts.exe"
-    mkdir -p "$BIN/.staging"
-    rm -f "$staged"
-    if run_bounded mcs -nologo -pathmap:"$HERE=." -r:"$BIN/Mono.Cecil.dll" "$HERE/src/StockFacts.cs" -out:"$staged"; then
-      mv -f "$staged" "$BIN/StockFacts.exe"
-    else
-      rm -f "$staged"
-      exit 1
-    fi
+  # build.sh owns bin/: it applies one freshness rule (source, the pinned
+  # Mono.Cecil, and bin/.toolchain-stamp) to every exe. This script used to
+  # compile StockFacts.exe itself on a weaker key that ignored the compiler, and
+  # the exe it wrote then satisfied build.sh's own up-to-date check.
+  echo "stock-sync: building tools..."
+  (cd "$HERE" && ./build.sh --skip-legacy)
+  if [[ ! -f "$BIN/StockFacts.exe" ]]; then
+    echo "stock-sync: build.sh did not produce bin/StockFacts.exe" >&2
+    exit 2
   fi
   mkdir -p "$DATA"
   tmpdir="$(mktemp -d "$DATA/.stock-sync.XXXXXX")"

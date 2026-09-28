@@ -24,7 +24,7 @@ tools/
                extract_sandbox_tables.py -> sandbox_tables.json -> gen_zig_tables.py)
   data/       committed pins: cecil.pin, stock_facts.json, xml_pins.json, promoted-types.txt
   tests/      gate scripts (one executable per rule) + _common.py helpers
-  build.sh    compiles src/ (and best-effort legacy/) into bin/
+  build.sh    compiles src/ + parity/ParitySurface.cs (and best-effort legacy/) into bin/
   bounded-run.sh  sourced, not run: the wall-clock bound on every mono/mcs/
                   monodis child the shell entry points spawn
 ```
@@ -85,7 +85,10 @@ own copy:
 
 Rebuilds are incremental: a target is recompiled only when a source (or the
 staged Cecil) is newer than its exe, and the whole tree rebuilds when the
-compiler or the pinned Cecil changes. The `mcs`/`mono` versions, the Cecil
+compiler or the pinned Cecil changes. build.sh is the only writer of `bin/`:
+`drift-check.sh`, `stock-sync.sh` and `fetch_version.sh` run it instead of
+compiling an exe themselves, so no script can leave an exe in place under a
+weaker key than the toolchain stamp records. The `mcs`/`mono` versions, the Cecil
 version, and Cecil's SHA-256 are written to `bin/buildinfo.txt` after a
 successful build, and to `bin/.toolchain-stamp`, so a rebuild can be reproduced
 and a toolchain swap cannot silently leave binaries from the previous compiler
@@ -177,8 +180,9 @@ entry-points table at the top of this file.
 fully-qualified operands, `IL_offset` branch targets: the corpus dump format).
 `src/Seeds.cs` (shared reachability graph) and `src/AsmWalk.cs` (nested-type walk,
 outermost-owner attribution, generic-arity strip) compile into each src/ tool the
-same way; `StockFacts`/`MethodList`/`ParitySurface` are also compiled standalone by
-stock-sync.sh/drift-check.sh and must stay free of them.
+same way; `StockFacts`/`MethodList`/`ParitySurface` are also compiled standalone
+(`fetch_version.sh` runs `bin/ParitySurface.exe` directly) and must stay free of
+them.
 
 ```bash
 mono bin/Census.exe "$ASM"
