@@ -3,7 +3,6 @@
 
 import os
 import shutil
-import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +24,7 @@ def main() -> None:
         return
     bad = []
     for name in sorted(names):
-        result = subprocess.run(
+        result = _common.run_cmd(
             ["mono", str(TOOLS / "bin" / f"{name}.exe")],
             text=True,
             encoding="utf-8",

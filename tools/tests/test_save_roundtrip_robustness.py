@@ -13,7 +13,6 @@ Usage: python3 tools/tests/test_save_roundtrip_robustness.py
 
 import os
 import struct
-import subprocess
 import sys
 import tempfile
 
@@ -25,7 +24,7 @@ SCRIPT = os.path.join(TOOLS, "save_roundtrip_check.py")
 
 
 def run(*argv: str) -> tuple[int, str]:
-    proc = subprocess.run(
+    proc = _common.run_cmd(
         [sys.executable, SCRIPT, *argv],
         capture_output=True,
         text=True,

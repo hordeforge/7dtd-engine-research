@@ -49,6 +49,10 @@ ROOT = _common.REPO
 WS = ROOT.parent  # 7dtd workspace
 TOOLS = _common.TOOLS
 DEFAULT_FACTS = TOOLS / "data" / "stock_facts.json"
+# Wall-clock bound on the single-method DumpMethod run: long enough for a slow
+# host, short enough that a wedged extractor fails the check rather than the run.
+XMLS_EXTRACT_TIMEOUT_S = 60.0
+LIVE_FACTS_TIMEOUT_S = 120.0
 
 # Fields that legitimately differ between the committed artifact and a fresh
 # extraction without indicating game drift: timestamps, provenance bookkeeping,
@@ -170,10 +174,10 @@ def check_live_against_dll(facts: dict[str, Any], errors: list[str]) -> None:
                 encoding="utf-8",
                 errors="replace",
                 env=env,
-                timeout=120,
+                timeout=LIVE_FACTS_TIMEOUT_S,
             )
         except subprocess.TimeoutExpired:
-            errors.append("live facts extraction timed out after 120s")
+            errors.append(f"live facts extraction timed out after {LIVE_FACTS_TIMEOUT_S:g}s")
             return
         if proc.returncode != 0 or not out.is_file():
             errors.append("live facts extraction failed: " + (proc.stderr or "").strip()[:400])
@@ -358,15 +362,22 @@ def check_xmls_to_load_inventory(errors: list[str]) -> None:
         return
     env = dict(os.environ)
     env["MONO_PATH"] = str(TOOLS / "bin")
-    proc = subprocess.run(
-        ["mono", str(TOOLS / "bin" / "DumpMethod.exe"), str(asm), "WorldStaticData", ".cctor"],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        env=env,
-        timeout=60,
-    )
+    # A 60 s expiry is a named failure, not a raw TimeoutExpired traceback out
+    # of the gate, and it is the same kind of extractor failure as a nonzero rc
+    # below: no cctor dump, no inventory comparison.
+    try:
+        proc = subprocess.run(
+            ["mono", str(TOOLS / "bin" / "DumpMethod.exe"), str(asm), "WorldStaticData", ".cctor"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+            timeout=XMLS_EXTRACT_TIMEOUT_S,
+        )
+    except subprocess.TimeoutExpired:
+        errors.append(f"xmlsToLoad: DumpMethod.exe timed out after {XMLS_EXTRACT_TIMEOUT_S:g}s")
+        return
     # An extractor failure must not masquerade as an inventory drift: an empty
     # cctor dump would otherwise report "core (0) != inventory core (N)" and
     # send the operator hunting through docs instead of at the tool failure.

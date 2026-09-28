@@ -44,7 +44,7 @@ BAD_VALUES = (
 
 
 def run(script: Path, *argv: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
+    return _common.run_cmd(
         [sys.executable, str(script), *argv],
         text=True,
         encoding="utf-8",

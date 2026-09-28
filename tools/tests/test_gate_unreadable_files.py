@@ -18,7 +18,6 @@ Usage: python3 tools/tests/test_gate_unreadable_files.py
 """
 
 import os
-import subprocess
 import sys
 import tempfile
 
@@ -33,7 +32,7 @@ REAL_DOC = "network.md"
 
 
 def run(script: str, *argv: str) -> tuple[int, str]:
-    proc = subprocess.run(
+    proc = _common.run_cmd(
         [sys.executable, script, *argv],
         capture_output=True,
         text=True,

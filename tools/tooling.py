@@ -335,7 +335,11 @@ def mono_timeout() -> float:
 
 
 def run_bounded(
-    command: list[str], *, env: dict[str, str], timeout: float | None = None
+    command: list[str],
+    *,
+    env: dict[str, str],
+    timeout: float | None = None,
+    cwd: Path | None = None,
 ) -> tuple[int, str, str]:
     """Run a tool to completion under a wall-clock bound -> (rc, stdout, stderr).
 
@@ -353,6 +357,7 @@ def run_bounded(
         encoding="utf-8",
         errors="replace",
         env=env,
+        cwd=None if cwd is None else str(cwd),
         start_new_session=True,
     )
     try:

@@ -2,7 +2,6 @@
 """Require side-effect-free help from supported shell entry points."""
 
 import os
-import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -38,7 +37,7 @@ def main() -> None:
     bad = []
     for relative in SCRIPTS:
         path = TOOLS / relative
-        result = subprocess.run(
+        result = _common.run_cmd(
             [path, "--help"], text=True, encoding="utf-8", errors="replace", capture_output=True
         )
         if result.returncode != 0 or not result.stdout.strip():
@@ -51,13 +50,13 @@ def main() -> None:
         if printed != header_comment(str(path)):
             bad.append(f"{relative}: help is not the header comment block:\n" + "\n".join(printed))
     assert not bad, "\n".join(bad)
-    assert subprocess.run([TOOLS / "build.sh", "--bad"], capture_output=True).returncode == 2
-    assert subprocess.run([TOOLS / "regen.sh", "--bad"], capture_output=True).returncode == 2
-    assert subprocess.run([TOOLS / "post-update.sh", "--bad"], capture_output=True).returncode == 2
+    assert _common.run_cmd([TOOLS / "build.sh", "--bad"], capture_output=True).returncode == 2
+    assert _common.run_cmd([TOOLS / "regen.sh", "--bad"], capture_output=True).returncode == 2
+    assert _common.run_cmd([TOOLS / "post-update.sh", "--bad"], capture_output=True).returncode == 2
 
     # The opt-in Steam side of the post-update path must stay documented: the
     # default run is offline, so a reader only discovers --steam from the help.
-    help_text = subprocess.run(
+    help_text = _common.run_cmd(
         [TOOLS / "post-update.sh", "--help"],
         text=True,
         encoding="utf-8",

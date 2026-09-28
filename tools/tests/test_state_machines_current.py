@@ -14,7 +14,6 @@ Usage: python3 tools/tests/test_state_machines_current.py
 
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -41,7 +40,7 @@ def main() -> int:
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
     with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         out = os.path.join(td, "state-machines.md")
-        proc = subprocess.run(
+        proc = _common.run_cmd(
             ["mono", EXE, os.path.join(REPO, "docs"), out],
             capture_output=True,
             text=True,

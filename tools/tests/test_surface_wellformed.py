@@ -13,7 +13,6 @@ Usage: python3 tools/tests/test_surface_wellformed.py [<asm>] (defaults to ASM e
 
 import os
 import re
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -57,7 +56,7 @@ def main() -> int:
     env = dict(os.environ)
     env["MONO_PATH"] = os.path.join(TOOLS, "bin")
     with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as tmp:
-        proc = subprocess.run(
+        proc = _common.run_cmd(
             ["mono", os.path.join(TOOLS, "bin", "FullSurface.exe"), asm, tmp],
             capture_output=True,
             text=True,

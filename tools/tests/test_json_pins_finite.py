@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 import tempfile
 
@@ -67,7 +66,7 @@ def checker_rejects(bad: list[str]) -> None:
             fh.write(probe)
             path = fh.name
         try:
-            proc = subprocess.run(
+            proc = _common.run_cmd(
                 [sys.executable, str(CHECKER), "--facts", path, "--skip-siblings"],
                 capture_output=True,
                 text=True,

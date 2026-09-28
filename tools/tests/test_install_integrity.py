@@ -26,7 +26,6 @@ from __future__ import annotations
 import json
 import os
 import shutil
-import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -42,7 +41,7 @@ def main() -> None:
     if shutil.which("mono") is None or not (_common.BIN / "Mono.Cecil.dll").is_file():
         print("SKIP: steam_builds needs mono and the built tools")
         return
-    result = subprocess.run(
+    result = _common.run_cmd(
         [sys.executable, str(TOOL), "--check", "--verify-install", "Managed", "--json"],
         text=True,
         encoding="utf-8",

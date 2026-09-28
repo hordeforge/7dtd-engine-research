@@ -89,7 +89,7 @@ def load_snapshot(text: str) -> dict[str, object]:
 
 def direct_snapshot(dll: Path) -> dict[str, object]:
     env = dict(os.environ, MONO_PATH=str(_common.BIN))
-    proc = subprocess.run(
+    proc = _common.run_cmd(
         ["mono", str(PARITY_EXE), str(dll)],
         capture_output=True,
         text=True,
@@ -115,7 +115,7 @@ def arg_shape_cases() -> str:
     # path component, so the refusals are the shapes steamcmd would misread.
     bad_targets = ["-injected", "-force_install_dir", "a b", "v3.1.0;id", "pub/../x", "a\tb"]
     for target in bad_targets:
-        proc = subprocess.run(
+        proc = _common.run_cmd(
             [str(FETCH), target, "shapecheck"],
             capture_output=True,
             text=True,
@@ -128,7 +128,7 @@ def arg_shape_cases() -> str:
     # A label is a filename stem (parity_<label>.json), so the refusals are the
     # shapes that escape the output directory or break the stem.
     for target, label in [("public", "a b"), ("public", ".."), ("public", "."), ("public", "a/b")]:
-        proc = subprocess.run(
+        proc = _common.run_cmd(
             [str(FETCH), target, label],
             capture_output=True,
             text=True,
@@ -140,7 +140,7 @@ def arg_shape_cases() -> str:
         assert "invalid" in proc.stderr, (label, proc.stderr)
     # A trailing newline passes bash's `=~ ...$`, so it is rejected explicitly.
     for target in ["public\n", "1234567890123\n"]:
-        proc = subprocess.run(
+        proc = _common.run_cmd(
             [str(FETCH), target, "shapecheck"],
             capture_output=True,
             text=True,
@@ -194,7 +194,7 @@ def main() -> None:
                 SCRATCH=str(root / "scratch" / label),
                 OUT=str(out),
             )
-            return subprocess.run(
+            return _common.run_cmd(
                 [str(FETCH), target, label],
                 capture_output=True,
                 text=True,
@@ -240,7 +240,7 @@ def main() -> None:
                     SCRATCH=str(root / "scratch" / label),
                     OUT=str(out_map),
                 )
-                proc_map = subprocess.run(
+                proc_map = _common.run_cmd(
                     [str(FETCH), gid, label],
                     capture_output=True,
                     text=True,
@@ -255,7 +255,7 @@ def main() -> None:
                     dll
                 ), f"{label}: fetched snapshot != direct ParitySurface run"
 
-            wire = subprocess.run(
+            wire = _common.run_cmd(
                 [
                     sys.executable,
                     str(_common.TOOLS / "parity" / "parity_diff.py"),
@@ -305,7 +305,7 @@ def main() -> None:
         )
         builds_log = root / "calls-builds.log"
         out_builds = root / "out-builds"
-        builds = subprocess.run(
+        builds = _common.run_cmd(
             [
                 sys.executable,
                 str(_common.TOOLS / "steam" / "steam_builds.py"),

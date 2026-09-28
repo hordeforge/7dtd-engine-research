@@ -2,7 +2,6 @@
 """Verify the sandbox preset decoder and its path-independent CLI."""
 
 import os
-import subprocess
 import sys
 import tempfile
 
@@ -14,7 +13,7 @@ TOOL = _common.TOOLS / "sandbox" / "extract_preset_codes.py"
 
 def main() -> None:
     with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
-        result = subprocess.run(
+        result = _common.run_cmd(
             [sys.executable, str(TOOL)],
             cwd=td,
             text=True,
@@ -34,7 +33,7 @@ def main() -> None:
         f"import sys; sys.path.insert(0, {str(TOOL.parent)!r}); "
         "from extract_preset_codes import decode; decode('bad', {}, {})"
     )
-    bad = subprocess.run(
+    bad = _common.run_cmd(
         [sys.executable, "-c", probe],
         text=True,
         encoding="utf-8",

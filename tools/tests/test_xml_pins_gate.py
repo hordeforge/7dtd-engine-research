@@ -25,7 +25,6 @@ Usage: python3 tools/tests/test_xml_pins_gate.py
 import json
 import os
 import re
-import subprocess
 import sys
 import tempfile
 
@@ -56,7 +55,7 @@ BUFFS = """<buffs>
 
 
 def run(*argv: str) -> tuple[int, str]:
-    proc = subprocess.run(
+    proc = _common.run_cmd(
         [sys.executable, SCRIPT, *argv],
         capture_output=True,
         text=True,

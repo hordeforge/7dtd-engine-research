@@ -42,7 +42,7 @@ exit 0
 
 
 def git(*args: str, cwd: Path) -> None:
-    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True)
+    _common.run_cmd(["git", *args], cwd=cwd, check=True, capture_output=True)
 
 
 def make_sandbox(tmp: Path) -> tuple[Path, Path, Path]:
@@ -84,7 +84,7 @@ def run_in(repo: Path, stub_dir: Path, tmp: Path, *args: str) -> subprocess.Comp
         "GH_LOG": str(tmp / "gh.log"),
         "GH_MARKER": str(tmp / "gh.marker"),
     }
-    return subprocess.run(
+    return _common.run_cmd(
         [str(repo / "tools" / "release.sh"), *args],
         cwd=repo,
         text=True,
@@ -102,7 +102,7 @@ def gh_calls(tmp: Path) -> list[str]:
 
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
+    return _common.run_cmd(
         [str(RELEASE), *args],
         text=True,
         encoding="utf-8",
@@ -114,7 +114,7 @@ def run(*args: str) -> subprocess.CompletedProcess[str]:
 
 def tag_exists(name: str) -> bool:
     return (
-        subprocess.run(
+        _common.run_cmd(
             ["git", "rev-parse", "-q", "--verify", f"refs/tags/{name}"],
             cwd=_common.REPO,
             capture_output=True,
@@ -159,7 +159,7 @@ def main() -> None:
         stub.write_text("#!/usr/bin/env bash\nexit 1\n", encoding="utf-8")
         stub.chmod(0o755)
         env = os.environ | {"PATH": f"{stub_dir}:{os.environ['PATH']}"}
-        stubbed = subprocess.run(
+        stubbed = _common.run_cmd(
             [str(RELEASE), "v9.9.8", "--notes", str(notes), "--dry-run"],
             text=True,
             encoding="utf-8",
@@ -177,7 +177,7 @@ def main() -> None:
     ) as resume_tmp:
         tmp = Path(resume_tmp)
         repo, stub_dir, notes = make_sandbox(tmp)
-        head = subprocess.run(
+        head = _common.run_cmd(
             ["git", "rev-parse", "HEAD"],
             cwd=repo,
             check=True,
@@ -208,7 +208,7 @@ def main() -> None:
         )
         assert resumed.returncode == 0, (resumed.stdout, resumed.stderr)
         assert any("release create v0.0.1" in call for call in gh_calls(tmp)), gh_calls(tmp)
-        after = subprocess.run(
+        after = _common.run_cmd(
             ["git", "rev-parse", "v0.0.1^{commit}"],
             cwd=repo,
             check=True,

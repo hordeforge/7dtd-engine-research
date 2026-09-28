@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import contextlib
 import os
-import subprocess
 import sys
 import tempfile
 from collections.abc import Iterator
@@ -123,7 +122,7 @@ def check_game_dir() -> bool:
 
 def run_resolver(env: dict[str, str], *args: str) -> tuple[int, str]:
     """Run tools/asm_path.py with `env` as the whole environment but PATH."""
-    result = subprocess.run(
+    result = _common.run_cmd(
         [sys.executable, str(_common.TOOLS / "asm_path.py"), *args],
         env={"PATH": os.environ.get("PATH", "")} | env,
         text=True,

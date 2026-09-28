@@ -3,7 +3,6 @@
 
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -27,7 +26,7 @@ def main() -> None:
         bad_asm = root / "not-an-assembly.dll"
         bad_asm.touch()
         env = os.environ | {"BASELINE_DIR": str(root / "baseline")}
-        result = subprocess.run(
+        result = _common.run_cmd(
             [str(TOOLS / "parity" / "drift-check.sh"), str(bad_asm)],
             env=env,
             text=True,

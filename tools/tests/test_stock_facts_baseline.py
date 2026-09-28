@@ -22,7 +22,6 @@ from __future__ import annotations
 import copy
 import json
 import os
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -47,7 +46,7 @@ def failures(data: dict[str, Any], table: tuple[tuple[str, object], ...]) -> lis
 
 
 def run_gate(facts_path: Path) -> tuple[int, str]:
-    proc = subprocess.run(
+    proc = _common.run_cmd(
         [sys.executable, str(SCRIPT), "--facts", str(facts_path), "--skip-siblings"],
         capture_output=True,
         text=True,

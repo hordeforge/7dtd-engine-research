@@ -37,7 +37,7 @@ NEXT_CUT = re.compile(r"[Tt]he next cut is `(?P<version>v[0-9]+\.[0-9]+\.[0-9]+)
 
 
 def git(*args: str) -> str:
-    return subprocess.run(
+    return _common.run_cmd(
         ["git", *args],
         cwd=_common.REPO,
         capture_output=True,

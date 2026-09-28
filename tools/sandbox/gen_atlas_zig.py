@@ -14,6 +14,8 @@ import argparse
 import glob
 import os
 import re
+import subprocess
+import sys
 
 COLOR_RE = re.compile(r'<uv\s+id="(\d+)"[^>]*color="([0-9.eE+-]+),([0-9.eE+-]+),([0-9.eE+-]+)"')
 
@@ -34,7 +36,7 @@ def to_color5(r: float, g: float, b: float) -> int:
     return (channel(r) << 10) | (channel(g) << 5) | channel(b)
 
 
-def main() -> None:
+def main() -> int:
     ap = argparse.ArgumentParser(
         description="Generate src/assets/map_atlas.zig in zdtd from the extracted atlas XMLs "
         "(tools/sandbox/atlas/ta_*.xml)."
@@ -168,14 +170,30 @@ def main() -> None:
     print(f"wrote {out_path}")
     # Best-effort: keep the output zig fmt clean (regeneration is manual).
     # Only the expected "zig not installed" case is tolerated silently; any
-    # other failure (e.g. malformed generated output) must surface.
+    # other failure (e.g. malformed generated output) must surface. `zig fmt`
+    # is bounded and its status is checked, so a run that wrote the file and
+    # then failed to format it says so and exits nonzero instead of leaving
+    # unformatted output behind a success.
+    rc = 0
     try:
-        import subprocess
-
-        subprocess.run(["zig", "fmt", out_path], check=False)
-    except OSError:
-        pass
+        proc = subprocess.run(
+            ["zig", "fmt", out_path],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=60,
+        )
+        rc = proc.returncode
+        if rc != 0:
+            print(f"zig fmt failed ({rc}) on {out_path}:\n{proc.stderr}", file=sys.stderr)
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f"zig fmt did not run ({exc}); wrote unformatted {out_path}", file=sys.stderr)
+    if rc != 0:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

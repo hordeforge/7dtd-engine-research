@@ -3,7 +3,6 @@
 
 import os
 import re
-import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -42,9 +41,11 @@ def main() -> None:
         text = path.read_text(encoding="utf-8")
         assert "unknown argument" in text
         assert "choose one mode" in text
-        assert subprocess.run([path, "--bad-option"], capture_output=True).returncode == 2
+        assert _common.run_cmd([path, "--bad-option"], capture_output=True).returncode == 2
         assert (
-            subprocess.run([path, "--check-only", "--extract-only"], capture_output=True).returncode
+            _common.run_cmd(
+                [path, "--check-only", "--extract-only"], capture_output=True
+            ).returncode
             == 2
         )
     post_update = (ROOT / "tools" / "post-update.sh").read_text(encoding="utf-8")
@@ -56,7 +57,7 @@ def main() -> None:
     fetch_text = fetch.read_text(encoding="utf-8")
     assert "curl " not in fetch_text
     assert 'python3 -m json.tool "$tmp"' in fetch_text
-    assert subprocess.run([fetch, "public", "../escape"], capture_output=True).returncode == 2
+    assert _common.run_cmd([fetch, "public", "../escape"], capture_output=True).returncode == 2
     assert "standard Mono GAC" in docs
     print("OK: tool bootstrap searches the system Mono.Cecil GAC")
 

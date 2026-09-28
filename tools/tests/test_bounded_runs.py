@@ -15,16 +15,18 @@ spawned running with no parent. Pinned here, DLL-free and network-free:
   4. `RE_MONO_TIMEOUT` is read, and a value that is not a positive number of
      seconds fails loud instead of silently meaning "no bound";
   5. a host with no process group (Windows) still kills the child on expiry
-     instead of raising out of the timeout path.
+     instead of raising out of the timeout path;
+  6. a gate that spawns a child bounds it, so a wedged tool fails a gate
+     instead of hanging it.
 
 The shell entry points (regen.sh, build.sh, stock-sync.sh, drift-check.sh,
 fetch_version.sh) spawn the same tools, so they carry the same bound through
 tools/bounded-run.sh. Pinned here too:
 
-  5. the shell wrapper kills a grandchild on expiry, like the Python one;
-  6. an invalid `RE_MONO_TIMEOUT` fails the sourcing script instead of running
+  7. the shell wrapper kills a grandchild on expiry, like the Python one;
+  8. an invalid `RE_MONO_TIMEOUT` fails the sourcing script instead of running
      unbounded;
-  7. every mono/mcs/monodis child in tools/*.sh goes through `run_bounded`, so
+  9. every mono/mcs/monodis child in tools/*.sh goes through `run_bounded`, so
      a new dump call cannot come back unbounded.
 
 Usage: python3 tools/tests/test_bounded_runs.py
@@ -32,6 +34,7 @@ Usage: python3 tools/tests/test_bounded_runs.py
 
 from __future__ import annotations
 
+import ast
 import contextlib
 import os
 import re
@@ -47,6 +50,8 @@ import tooling
 
 GRANDCHILD_WAIT_S = 20.0
 TIMEOUT_S = 2.0
+# The subprocess callables that start a child.
+SUBPROCESS_CALLS = {"run", "Popen", "call", "check_call", "check_output"}
 SNIPPET = (
     "import subprocess, sys, time\n"
     "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(600)'])\n"
@@ -294,6 +299,37 @@ def check_spawn_detector() -> None:
         assert got == want, f"spawns_a_tool({line!r}) is {got}, want {want}"
 
 
+def check_gate_children_are_bounded() -> None:
+    """No child a gate spawns comes back unbounded.
+
+    A gate is a tool: `tooling.run_bounded` and `tools/bounded-run.sh` bound
+    every child the tools start, and a gate that called `subprocess.run` with
+    no `timeout=` had no bound at all, so a wedged tool hung the gate instead
+    of failing it. A call that passes its own `timeout=` is bounded, so the
+    check is on the call rather than the module.
+
+    The two perf benches are exempt: their whole job is a run long enough to
+    measure, so a bound would be the thing under test rather than its guard.
+    """
+    exempt = {"test_bounded_runs.py", "bench_asm_body_diff.py", "bench_version_update_tooling.py"}
+    offenders: list[str] = []
+    for path in sorted(_common.TOOLS.rglob("tests/*.py")):
+        if path.name in exempt or path.name == "_common.py":
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            if not (isinstance(func, ast.Attribute) and func.attr in SUBPROCESS_CALLS):
+                continue
+            if any(kw.arg == "timeout" for kw in node.keywords):
+                continue
+            if isinstance(func.value, ast.Name) and func.value.id == "subprocess":
+                offenders.append(f"{path.name}:{node.lineno} subprocess.{func.attr}() is unbounded")
+    assert not offenders, "\n".join(offenders)
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="bounded-runs-", dir=_common.scratch_dir()) as td:
         check_timeout_kills_group(Path(td))
@@ -304,6 +340,7 @@ def main() -> None:
     check_shell_timeout_env_fails_loud()
     check_spawn_detector()
     check_shell_scripts_are_bounded()
+    check_gate_children_are_bounded()
     print("OK: a timed-out tool run is killed with its process group and reports the timeout")
 
 

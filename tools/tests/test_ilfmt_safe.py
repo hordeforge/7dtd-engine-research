@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import os
 import shutil
-import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -77,14 +76,14 @@ def main() -> int:
     probe_cs.write_text(PROBE_CS, encoding="utf-8")
 
     compile_cmd = ["mcs", "-nologo", f"-r:{CECIL}", str(ILFMT), str(probe_cs), f"-out:{probe_exe}"]
-    r = subprocess.run(
+    r = _common.run_cmd(
         compile_cmd, capture_output=True, text=True, encoding="utf-8", errors="replace"
     )
     if r.returncode != 0:
         print("FAIL: probe compile failed:", r.stderr.strip(), file=sys.stderr)
         return 1
 
-    run = subprocess.run(
+    run = _common.run_cmd(
         ["mono", str(probe_exe), str(base)] + [c for c, _ in CASES],
         capture_output=True,
         text=True,

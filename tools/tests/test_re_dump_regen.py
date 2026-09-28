@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import atexit
 import os
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -62,13 +61,13 @@ def main() -> int:
     exe = Path(build.name) / DUMPER.stem
     compile_cmd = ["mcs", f"-r:{CECIL}", f"-out:{exe}", str(DUMPER)]
     print("RUN:", " ".join(compile_cmd))
-    subprocess.check_call(compile_cmd, cwd=str(TOOLS))
+    _common.run_cmd(compile_cmd, cwd=TOOLS, check=True)
 
     # Mono.Cecil.dll lives in bin/; make it resolvable at runtime.
     env = dict(os.environ, MONO_PATH=str(CECIL.parent))
-    run_cmd = ["mono", str(exe), str(asm), str(out)]
-    print("RUN:", " ".join(run_cmd))
-    subprocess.check_call(run_cmd, cwd=str(TOOLS), env=env)
+    run = ["mono", str(exe), str(asm), str(out)]
+    print("RUN:", " ".join(run))
+    _common.run_cmd(run, cwd=TOOLS, env=env, check=True)
 
     required = [
         out / "inventory-frame-entries.md",

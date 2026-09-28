@@ -16,10 +16,12 @@ from __future__ import annotations
 import ast
 import atexit
 import importlib.util
+import os
 import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -60,20 +62,68 @@ def asm_from_argv() -> tuple[Path | None, str]:
     return resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
 
 
-def run_cli(tool: Path | str, *args: str) -> "subprocess.CompletedProcess[str]":
+def run_cmd(
+    command: Sequence[object],
+    *,
+    env: dict[str, str] | None = None,
+    cwd: str | Path | None = None,
+    check: bool = False,
+    timeout: float | None = None,
+    capture_output: bool = True,
+    text: bool = True,
+    encoding: str = "utf-8",
+    errors: str = "replace",
+) -> "subprocess.CompletedProcess[str]":
+    """`subprocess.run` under the shared bound, for a gate that spawns a child.
+
+    `tooling.run_bounded` is the one launcher the tools use, and a gate is a
+    tool: a child left unbounded hangs the gate instead of failing it, and a
+    hung gate reads as a slow run rather than a broken one. This wraps it in
+    the `CompletedProcess` shape the gates already assert on, so the change
+    is the call name and nothing else.
+
+    An expired run comes back as `tooling.TIMEOUT_RC` with the bound in
+    stderr, which is an ordinary nonzero rc for the caller's own check; with
+    `check=True` it raises `CalledProcessError`, as `subprocess.run` does.
+
+    The capture and decoding options are accepted so a call site can keep
+    reading the way it was written, but only the one this module uses is
+    supported: a caller asking for inherited streams or another decoder gets
+    a loud error rather than output the gate cannot parse.
+    """
+    if not (capture_output and text and encoding == "utf-8" and errors == "replace"):
+        raise ValueError(
+            "run_cmd captures utf-8 with errors='replace'; "
+            f"got capture_output={capture_output}, text={text}, "
+            f"encoding={encoding!r}, errors={errors!r}"
+        )
+    argv = [str(part) for part in command]
+    rc, out, err = tooling.run_bounded(
+        argv,
+        env=dict(os.environ) if env is None else env,
+        timeout=tooling.mono_timeout() if timeout is None else timeout,
+        cwd=None if cwd is None else Path(cwd),
+    )
+    if check and rc != 0:
+        raise subprocess.CalledProcessError(rc, argv, out, err)
+    return subprocess.CompletedProcess(argv, rc, out, err)
+
+
+def run_cli(
+    tool: Path | str, *args: str, timeout: float | None = None
+) -> "subprocess.CompletedProcess[str]":
     """Run a repo Python CLI in a subprocess with its output captured.
 
     Gates that drive a tool as a program (not an import) all want the same
     decoding, so it is decided once here rather than per gate.
+
+    Bounded like every other child the tools spawn: a tool that wedges or
+    waits on stdin hangs the gate that ran it instead of failing it, and a
+    hung gate reads as a slow run rather than a broken one. An expired run
+    comes back as `tooling.TIMEOUT_RC` with the bound in stderr, which is an
+    ordinary nonzero rc for the caller to assert on.
     """
-    return subprocess.run(
-        [sys.executable, str(tool), *args],
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        capture_output=True,
-        check=False,
-    )
+    return run_cmd([sys.executable, str(tool), *args], timeout=timeout)
 
 
 def find_asm() -> Path | None:

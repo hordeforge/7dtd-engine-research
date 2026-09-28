@@ -35,7 +35,7 @@ COMMITTED = _common.REPO / "workspace" / "outputs" / "parity" / "parity_b10.json
 
 def run(asm: Path, baseline: Path, parity: Path, *extra: str) -> subprocess.CompletedProcess[str]:
     env = os.environ | {"BASELINE_DIR": str(baseline), "PARITY_BASELINE": str(parity)}
-    return subprocess.run(
+    return _common.run_cmd(
         [str(DRIFT), str(asm), *extra],
         env=env,
         text=True,
@@ -100,7 +100,7 @@ def main() -> None:
             "PARITY_BASELINE": str(root / "absent.json"),
             "COMMITTED_BASELINE": str(empty_committed),
         }
-        unmeasured = subprocess.run(
+        unmeasured = _common.run_cmd(
             [str(DRIFT), str(asm)],
             env=env,
             text=True,

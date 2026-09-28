@@ -76,7 +76,7 @@ def stamp_epoch(text: str) -> int:
 
 def parity_snapshot(dll: Path) -> dict[str, object]:
     env = dict(os.environ, MONO_PATH=str(_common.BIN))
-    proc = subprocess.run(
+    proc = _common.run_cmd(
         ["mono", str(_common.BIN / "ParitySurface.exe"), str(dll)],
         capture_output=True,
         text=True,
@@ -144,7 +144,7 @@ def main() -> int:
     env = dict(os.environ, MONO_PATH=str(_common.BIN), SOURCE_DATE_EPOCH=str(epoch))
 
     def run_report(out: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
+        return _common.run_cmd(
             [
                 sys.executable,
                 str(_common.TOOLS / "research_diff.py"),
