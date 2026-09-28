@@ -25,17 +25,18 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
 fi
 [[ $# -le 1 ]] || { echo "usage: drift-check.sh [Assembly-CSharp.dll]" >&2; exit 2; }
 TOOLS="$(cd "$here/.." && pwd)"
+ROOT="$(cd "$TOOLS/.." && pwd)"
 BIN="$TOOLS/bin"
 ASM="${1:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll}"
 BASELINE_DIR="${BASELINE_DIR:-$HOME/.cache/zdtd-scratch/drift-baseline}"
 # Committed baselines for the studied build. A fresh checkout has no
 # BASELINE_DIR, so every axis compares against these; the local dir wins as soon
 # as it exists, and is seeded from the current build on the first run.
-COMMITTED_BASELINE="${COMMITTED_BASELINE:-$TOOLS/../workspace/outputs/baseline}"
+COMMITTED_BASELINE="${COMMITTED_BASELINE:-$ROOT/workspace/outputs/baseline}"
 # Committed wire snapshot of the studied build. A fresh checkout has no
 # BASELINE_DIR, so this is what makes the wire axis comparable on first run
 # instead of silently creating a baseline and comparing nothing.
-PARITY_BASELINE="${PARITY_BASELINE:-$TOOLS/../workspace/outputs/parity/parity_b10.json}"
+PARITY_BASELINE="${PARITY_BASELINE:-$ROOT/workspace/outputs/parity/parity_b10.json}"
 CECIL="$BIN/Mono.Cecil.dll"
 
 [[ -f "$ASM" ]]   || { echo "drift: game DLL not found: $ASM" >&2; exit 2; }

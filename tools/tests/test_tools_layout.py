@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""Tools live in documented folders, and the tools do not reach into tests.
+"""Tools live in documented folders, and repo paths come from one module.
 
-Two structural rules that a move or a new script can silently break:
+Three structural rules that a move or a new script can silently break:
 
   1. No maintained module under `tools/` (outside `tools/tests/`) imports the
      test package (`tests/_common`) or any `tests.*` module. Tools importing
      test helpers was the state before `tools/tooling.py` existed: it made the
      tools depend on the gate suite's package and hid the shared helpers in the
      wrong place.
-  2. Every `.py` under `tools/` is named in `tools/README.md`, so moving or
+  2. No maintained module locates a repo path by counting parent directories
+     out of its own folder. `tools/tooling.py` finds the repo by marker walk
+     and exports REPO/TOOLS/DOCS, so a subfolder module imports it instead of
+     climbing `parent.parent`, which couples it to the tree's current shape.
+  3. Every `.py` under `tools/` is named in `tools/README.md`, so moving or
      splitting a file without documenting it fails here rather than drifting.
 
 Usage: python3 tools/tests/test_tools_layout.py
@@ -44,6 +48,18 @@ def imports_test_package(tree: ast.AST) -> list[str]:
     return offenders
 
 
+def counts_parents(text: str) -> list[str]:
+    """Lines that locate a repo path by climbing out of their own folder.
+
+    `tools/tooling.py` is the one place that finds the repo (marker walk), so a
+    module under `tools/steam/` or `tools/tests/` resolves it by import instead
+    of `parent.parent` / `"..", ".."`. A `sys.path.insert` bootstrap is the
+    exception: putting the tools dir on the path is how that import is made.
+    """
+    climb = re.compile(r"parent\.parent|\"\.\.\"(?:\s*,\s*\"\.\.\")+")
+    return [line for line in text.splitlines() if climb.search(line) and "sys.path" not in line]
+
+
 def main() -> None:
     readme = README.read_text(encoding="utf-8")
     bad: list[str] = []
@@ -54,9 +70,15 @@ def main() -> None:
         relative = path.relative_to(_common.TOOLS)
         if "tests" not in relative.parts:
             checked += 1
-            offenders = imports_test_package(ast.parse(path.read_text(encoding="utf-8")))
+            text = path.read_text(encoding="utf-8")
+            offenders = imports_test_package(ast.parse(text))
             for offender in offenders:
                 bad.append(f"{relative}: {offender} (tools must import tools/tooling.py)")
+            for number, line in enumerate(counts_parents(text), start=1):
+                bad.append(
+                    f"{relative}:{number}: reaches out of its folder by counting parents "
+                    f"({line.strip()}) (use tools/tooling.py: REPO, TOOLS, DOCS)"
+                )
         # Whole-token match on the basename: a path prefix (`tests/`, `sandbox/`)
         # is fine, but "tooling.py" must not pass merely because
         # `bench_version_update_tooling.py` contains it.
@@ -67,8 +89,8 @@ def main() -> None:
             print(f"FAIL: {line}", file=sys.stderr)
         raise SystemExit(1)
     print(
-        f"OK: {checked} maintained modules import no test helpers, and every tools/*.py "
-        "is documented"
+        f"OK: {checked} maintained modules import no test helpers, locate the repo through "
+        "tools/tooling.py, and every tools/*.py is documented"
     )
 
 

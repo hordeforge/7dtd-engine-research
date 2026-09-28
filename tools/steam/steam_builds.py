@@ -37,6 +37,8 @@ from typing import Any
 
 STEAM = Path(__file__).resolve().parent
 sys.path.insert(0, str(STEAM))
+sys.path.insert(0, str(STEAM.parent))
+import tooling  # noqa: E402
 from steam_manifest import (  # noqa: E402
     ManifestError,
     cached_manifests,
@@ -46,7 +48,7 @@ from steam_manifest import (  # noqa: E402
     verify,
 )
 
-TOOLS = STEAM.parent
+TOOLS = tooling.TOOLS
 
 PINS = TOOLS / "data" / "steam_builds.json"
 STOCK_FACTS = TOOLS / "data" / "stock_facts.json"

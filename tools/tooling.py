@@ -1,4 +1,4 @@
-"""Shared, import-free helpers for the RE tools and their gates.
+"""Shared helpers for the RE tools and their gates, importing no other tool.
 
 The repo root is found by walking up for the marker pair (`Makefile` +
 `AGENTS.md`) instead of counting parent directories, so a script or module that

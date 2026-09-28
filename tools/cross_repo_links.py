@@ -22,6 +22,13 @@ import glob
 import os
 import re
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tooling
+
+# Sibling layout: every scan target is a directory next to this repo.
+WORKSPACE = tooling.REPO.parent
 
 # The optional #fragment suffix must be matched (and stripped before the
 # existence check): a link like ../repo/docs/x.md#section crosses the repo
@@ -77,9 +84,7 @@ def main() -> int:
     )
     ap.add_argument(
         "--root",
-        default=os.path.normpath(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-        ),
+        default=str(WORKSPACE),
         help="workspace root holding the sibling repos (default: the parent of this repo)",
     )
     ap.add_argument("--repo", help="limit the scan to one repo name")

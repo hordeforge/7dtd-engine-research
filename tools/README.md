@@ -27,10 +27,12 @@ tools/
   build.sh    compiles src/ (and best-effort legacy/) into bin/
 ```
 
-Two rules keep that shape honest, enforced by
+Three rules keep that shape honest, enforced by
 [`tests/test_tools_layout.py`](tests/test_tools_layout.py): no maintained
 module outside `tests/` imports the test package (shared helpers live in
-`tooling.py`), and every `tools/*.py` is named here.
+`tooling.py`) or finds the repo by counting parent directories (a subfolder
+module imports `tooling.REPO`/`TOOLS`/`DOCS`), and every `tools/*.py` is
+named here.
 
 Standalone entry points (no build step; make targets noted inline where wired):
 

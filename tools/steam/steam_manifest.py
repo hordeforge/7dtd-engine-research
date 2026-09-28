@@ -36,9 +36,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import tooling
+
 MAGIC = 0x71F617D0
 DEFAULT_DEPOT = "294422"  # dedicated-server content depot
-PINS = Path(__file__).resolve().parent.parent / "data" / "steam_builds.json"
+PINS = tooling.TOOLS / "data" / "steam_builds.json"
 STEAM_ROOTS = (
     Path.home() / ".local/share/Steam",
     Path.home() / ".steam/steam",
