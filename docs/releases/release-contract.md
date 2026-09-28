@@ -105,8 +105,10 @@ falls behind the commits actually below the last tag.
 - **No tool runs unbounded and no tool child is orphaned.** `tooling.run_bounded`
   is the single spawn point and `tools/bounded-run.sh` does the same for the
   shell entry points; a child that outlives its bound reports the rc and names
-  itself instead of hanging a gate, and its grandchildren die with it (a host
-  with no process group, Windows, kills the child itself).
+  itself instead of hanging a gate, its grandchildren die with it (a host with
+  no process group, Windows, kills the child itself), and the post-kill read of
+  a timed-out child is bounded, so a grandchild that survives the kill cannot
+  turn the timeout back into the hang the bound exists to prevent.
 - **A rerun republishes instead of piling up.** `research_diff.py` names its
   report after the build pair, not the date, so a repeated run of the same pair
   overwrites the report already in `workspace/outputs/diffs/` rather than adding
@@ -123,38 +125,15 @@ falls behind the commits actually below the last tag.
   beside a `make drift`, or a local build while CI runs the same target, cannot
   delete the other run's staged exe and rename a half-written one into `bin/`.
 - **The shell bound and the Mono lookup work on the hosts that run them.**
+  itself instead of hanging a gate, its grandchildren die with it (a host with
+  no process group, Windows, kills the child itself), and the post-kill read of
+  a timed-out child is bounded, so a grandchild that survives the kill cannot
+  turn the timeout back into the hang the bound exists to prevent.
+- **The bound and the Mono lookup work on the hosts that run them.**
   `build.sh` asks the runtime for its own GAC (`gacutil`) instead of listing one
   platform's layout, and `tools/bounded-run.sh` looks for `timeout` or `gtimeout`
   and keeps the command it needs. A host with neither says so once and runs
   unbounded, rather than dropping the bound silently.
-- **Gates no longer pass on input they never read.** Several link, citation and
-  inventory gates skipped a file they could not open, and three reported OK
-  while proving nothing; a drifted or unreadable input now fails with the reason.
-- **Pins stop being lost silently.** Non-finite and over-uint64 values are kept
-  out of pinned data, xml pin sections come from one source, the drift baseline
-  is keyed to the build it came from (an unstamped or foreign local baseline no
-  longer outranks the committed pin), and the census history append is
-  race-safe. A committed pin that cannot be read, or whose top level is not an
-  object, is reported as the error it is rather than degrading to "no pin".
-- **Reproducible output.** Artifact stamps derive from `SOURCE_DATE_EPOCH`, the
-  dumper build is incremental and locale-pinned, and output names are stable, so
-  a repeated build is byte-identical.
-- **`build.sh` is the only writer of `bin/`.** The shell entry points call it
-  instead of compiling their own exes, and it keys each exe on the tool sources
-  so a rebuilt tool is the one that runs.
-- **Static analysis is tighter.** `mypy` enables the error codes strict mode
-  leaves off (`ignore-without-code`, `possibly-undefined`, `redundant-expr`, and
-  the rest), and `ruff` adds `ARG` and `SIM`; every code in the set is green on
-  the tree, so a raise lands with the fixes that keep it green.
-- **The stock pin gate is baselined.** `test_stock_facts_baseline.py` runs
-  `check_stock_facts.py` against a recorded copy of the pin, so a pin that
-  stops matching itself is caught without the game installed.
-- **Install discovery works from every Steam root** a supported host has
-  (Windows program files, the three Linux homes, the macOS path) through
-  `tools/asm_path.py`, which is now the one resolution behind `make`'s `ASM`,
-  the shell entry points and the Python tools.
-- **Fuzzing and bounds.** The shader sub-program and parameter blob decoders and
-  the depot-manifest parser are fuzzed; the manifest parser is bounded.
 - **The Python tooling runs where it is claimed to.** The census history lock
   and the bounded-run timeout both had POSIX-only code paths on a host that
   documents Windows and macOS support: `census-pct.py` imported `fcntl` at
@@ -163,13 +142,61 @@ falls behind the commits actually below the last tag.
   now degrade to the temp-and-rename and the direct-child kill they already had
   underneath, and the census lock is documented as advisory rather than
   portable.
-- `steam_manifest.py` orders manifest history by mtime instead of a truncated
-  clock string, and the steam install-integrity verdict was restored after a
-  drift.
-- **A CLI that cannot answer exits 2 instead of a clean-looking pass.**
-  `cross_repo_links.py`, `mention_depth.py`, `zdtd_cite_check.py` and
-  `steam_builds.py` took a range or a threshold that could name nothing, and
-  reported OK over an empty input set. They now refuse the value.
+- **A rerun republishes instead of piling up.** `research_diff.py` treats the
+  build pair as the report's identity and writes over the report already in
+  `workspace/outputs/diffs/`, so a repeated run of the same pair converges to
+  one report per pair rather than adding a dated sibling; `--out PATH` still
+  writes exactly where it is told, which is how a second dated copy is made on
+  purpose, and the report is written by rename, so running it twice in a row
+  never trips over its own previous output. `stock-sync.sh` rebuilds its inputs
+  before comparing, publishes `stock_facts.json` and `xml_pins.json` as one
+  step, and puts the previous pair back when a move fails, so a half-finished
+  refresh cannot leave the two pins describing different installs.
+- **`build.sh` is the only writer of `bin/`, and each run gets its own staging
+  directory.** The shell entry points call it instead of compiling their own
+  exes, and it keys each exe on the tool sources, so a stale executable cannot
+  shadow a rebuilt one. Every run stages under `bin/.staging/run.$$` and keeps
+  the final basename, which is what `mcs` derives the assembly name and MVID
+  from, so a retried `make census` beside a `make drift`, or a local build while
+  CI runs the same target, cannot `rm` each other's staged file and rename a
+  half-written exe into `bin/`. Dumper and drift-baseline writes land by
+  rename, so a run cut short cannot leave a half-written pin or baseline.
+- **An unmeasured census answers with a failure, not a zero.** `Census.exe`
+  exiting 0 without its `AllTypes (incl nested)` / `AllMethodsWithBody` rows
+  means the dumper's output format changed, so `census-pct.py` refuses the run
+  instead of reporting a whole assembly of zero types or a 0 % completion; an
+  unreadable coverage report drops its "reached in the server call graph" row
+  rather than printing `0`, which a reader cannot tell from a real measurement;
+  and `steam_manifest.py` names an unreadable `content_log.txt` on stderr,
+  because the silent skip printed a bare gid that reads as "never pinned".
+- **Gates no longer pass on input they never read.** Several link, citation and
+  inventory gates skipped a file they could not open, and three reported OK
+  while proving nothing; a drifted or unreadable input now fails with the reason.
+- **Pins stop being lost silently.** Non-finite and over-uint64 values are kept
+  out of pinned data, a negative save-format count and a negative pin number are
+  rejected rather than pinned, xml pin sections come from one source, the drift
+  baseline is keyed to the build it came from (an unstamped or foreign local
+  baseline no longer outranks the committed pin), and the census history append
+  is race-safe. A committed pin that cannot be read, or whose top level is not
+  an object, is reported as the error it is rather than degrading to "no pin",
+  and `test_stock_facts_baseline.py` runs `check_stock_facts.py` against a
+  recorded copy of the pin, so a pin that stops matching itself is caught
+  without the game installed.
+- **A hash is a hash, wherever it is taken.** The stock facts, the xml pins,
+  the shader blob and the sandbox table extraction computed a content digest
+  through a helper that was not pinned to an algorithm, so a different digest
+  could be pinned under the same field name, and a pinned SHA-256 that is not 64
+  hex digits now fails instead of falling through to the byte-diff branch and
+  blaming the operator's install for a damaged file. A relative `ASM` that
+  resolves to the process cwd is refused rather than handed on as an install
+  root, and `steam_builds.py` refuses a branch or depot gid that reaches
+  `steamcmd` as one of its own options, from the cache and the live query
+  alike, as well as a fetch whose download root resolves outside the depot it
+  asked for.
+- **The app-info fetch is bounded by bytes and by scheme.** A timeout bounds
+  how long the PICS request waits, not how many bytes arrive inside it, so the
+  body is read one byte past an 8 MiB cap and refused past it, and a URL or
+  redirect that leaves `https` is refused before the body is parsed.
 - **A UTC stamp is stamped in UTC, on any host.** A `SOURCE_DATE_EPOCH` past
   year 9999 raised a bare `ValueError` from `datetime` past the `StampError`
   every caller catches, and `DumpGmUpdate.cs` rendered its `Time (UTC)` line
@@ -177,60 +204,56 @@ falls behind the commits actually below the last tag.
   Umm al-Qura wrote a year decades off into a line claiming to be UTC. Both are
   pinned by `tests/test_generation_stamp.py`, which now also rejects any C#
   `DateTime` format that goes through the ambient culture.
-- **Pinned counts are validated at the boundary.** A negative save-format count
-  and a negative pin number are rejected rather than pinned, and the stock-pin
-  gate compares against a committed baseline instead of whatever the checkout
-  happens to hold.
-- **Writes land by rename.** The dumper build and the drift baseline write to a
-  temporary name and `rename` into place, so an interrupted run cannot leave a
-  half-written artifact where a gate expects a complete one.
-- **The sandbox installs a bounded, reviewed requirement series**, the
-  static-analysis gate is pinned to rule sets strict enough to fail on the
-  defects it exists to catch, and the CI token is read-only for `contents`.
-- **An unmeasured census answers with a failure, not a zero.**
-  `census-pct.py` refuses `Census.exe` output that carries no
-  `AllTypes (incl nested)` or `AllMethodsWithBody` row instead of reporting
-  the whole assembly as empty, and an unreadable coverage report drops its
-  "reached in the server call graph" row rather than printing `0`, which a
-  reader cannot tell from a real measurement. `steam_manifest.py` names an
-  unreadable `content_log.txt` on stderr, because the silent skip printed a
-  bare gid that reads as "never pinned".
-- **A hash is a hash, wherever it is taken.** The stock facts, the xml pins,
-  the shader blob and the sandbox table extraction computed a content digest
-  through a helper that was not pinned to an algorithm, so a different digest
-  could be pinned under the same field name; `steam_builds.py` now also
-  refuses a fetch whose download root resolves outside the depot it asked for.
-- **Hash, install-root and fetch-guard boundaries.** A pinned SHA-256 has to be
-  64 hex digits, so a corrupt pin fails instead of falling through to the
-  byte-diff branch and blaming the operator's install for a damaged file; a
-  relative `ASM` that resolves to the process cwd is refused rather than
-  handed on as an install root; `steam_builds.py` refuses a branch or depot gid
-  that reaches `steamcmd` as one of its own options, from the cache and the
-  live query alike; and the post-kill read of a timed-out child is bounded, so
-  a grandchild that survives the kill cannot turn the timeout back into the
-  hang the bound exists to prevent.
-- **Every gate-spawned child is bounded and a failed `zig fmt` is a failure.**
-  `gen_atlas_zig.py` bounded its `zig` calls through the shared runner instead
-  of a bare `subprocess.run`, and a non-zero `zig fmt` now stops the run rather
-  than writing a file that was never formatted.
-- **The app-info fetch is bounded by bytes and by scheme.** A timeout bounds
-  how long the PICS request waits, not how many bytes arrive inside it, so the
-  body is read one byte past an 8 MiB cap and refused past it, and a URL or
-  redirect that leaves `https` is refused before the body is parsed.
+- **A committed artifact is a function of the studied bytes.** Artifact stamps
+  derive from `SOURCE_DATE_EPOCH`, the dumper build is incremental and
+  locale-pinned, and output names are stable, so a repeated build is
+  byte-identical. The coverage report identifies its build by the assembly's
+  sha256 rather than a file mtime, which changes when the same bytes are
+  re-downloaded and made every regeneration read as stale; the .NET stamp is
+  the same `yyyy-MM-ddTHH:mm:ssZ` string `tools/tooling.py` formats, because
+  the .NET round-trip `"o"` carried sub-second digits an integer
+  `SOURCE_DATE_EPOCH` cannot reproduce; and `StockFacts.exe` emits a complete
+  `litenet` section of documented defaults (every field marked baked, so the pin
+  gate refuses to pin it) when the sibling assembly is missing or unreadable, so
+  a failed extraction has the same object shape as a successful one and cannot
+  read as an absent protocol.
+- **`zig fmt` is bounded and its status is checked.** `gen_atlas_zig.py` ran it
+  with `check=False` and swallowed the `OSError`, so a run that wrote the file
+  and then failed to format it exited 0 over unformatted output; it now runs
+  through the shared bounded runner and a non-zero `zig fmt` stops the run.
+- **A CLI that cannot answer exits 2 instead of a clean-looking pass.**
+  `cross_repo_links.py`, `mention_depth.py`, `zdtd_cite_check.py` and
+  `steam_builds.py` took a range or a threshold that could name nothing, and
+  reported OK over an empty input set. They now refuse the value.
 - **A failing fuzz round names the seed it replays from.** Every seeded gate
   resolves its seed through `tooling.fuzz_seed` (`RE_FUZZ_SEED` overrides the
   per-gate default) and reports that seed with a digest of the corpus it
   produced, on both the OK and the FAIL line, so two runs of one seed can be
-  compared by more than the seed they claim to share.
+  compared by more than the seed they claim to share. The shader sub-program
+  and parameter blob decoders and the depot-manifest parser are fuzzed; the
+  manifest parser is bounded.
+- `steam_manifest.py` orders manifest history by mtime instead of a truncated
+  clock string, and the steam install-integrity verdict was restored after a
+  drift.
+- **Static analysis is tighter, and green.** `mypy` enables the error codes
+  strict mode leaves off (`ignore-without-code`, `possibly-undefined`,
+  `redundant-expr`, and the rest), and `ruff` adds `ARG` and `SIM`. The
+  fetch-bound work then left `make lint` red on eight findings (assertions on a
+  caught exception, a response factory closing over its loop variables, a
+  `bytes` read that returned `Any`, a re-exported `urllib` reaching through the
+  tool module), all fixed in the same change, so a raise lands with the fixes
+  that keep the gate green.
+- **The sandbox installs a bounded, reviewed requirement series.** Each package
+  in `tools/sandbox/requirements.in` carries a floor and a ceiling, checked
+  against the lock, so a recompile cannot jump a series under a tool that reads
+  package internals.
+- **Install discovery works from every Steam root** a supported host has
+  (Windows program files, the three Linux homes, the macOS path) through
+  `tools/asm_path.py`, which is now the one resolution behind `make`'s `ASM`,
+  the shell entry points and the Python tools.
 - **Superseded research moved to `workspace/outputs/archive/`.** The pre-V3.1.0
   wire snapshots, diff report and census history are kept as history, out of the
   path the drift gate reads.
-- **The static-analysis gate is green again.** The fetch-bound work left
-  `make lint` red on eight findings: assertions on a caught exception, a
-  response factory closing over its loop variables, a `bytes` read that
-  returned `Any`, and a re-exported `urllib` reaching through the tool module.
-  The refusals now assert through one helper, the factory binds its loop
-  values, and the gate patches `urllib.request` itself.
 
 ### Tools and docs
 
@@ -248,9 +271,7 @@ falls behind the commits actually below the last tag.
   `isfile` syscall per citation.
 - **Gates share one argument surface.** The tests that need the game assembly
   or a mono tool call the same helpers from `tools/tests/_common.py` instead of
-  each resolving them, and `tools/sandbox/requirements.in` carries a floor and
-  a ceiling per package, checked against the lock, so a recompile cannot jump a
-  series under a tool that reads package internals.
+  each resolving them.
 - **CI runs untrusted pull-request code read-only.** Both jobs declare
   `permissions: contents: read` and check out with `persist-credentials: false`,
   so a gate running fork code cannot push with the token; the shellcheck
@@ -264,17 +285,6 @@ falls behind the commits actually below the last tag.
 - `make lint` now also runs `yamllint` over the tracked YAML, on the version
   pinned in `.github/workflows/ci.yml`, and refuses a local `yamllint` that is
   not that pin. Config lives in [`.yamllint`](../../.yamllint).
-- **A committed artifact is a function of the studied bytes.** The coverage
-  report identifies its build by the assembly's sha256 rather than a file
-  mtime, which changes when the same bytes are re-downloaded and made every
-  regeneration read as stale; the .NET stamp is now the same
-  `yyyy-MM-ddTHH:mm:ssZ` string `tools/tooling.py` formats, because the .NET
-  round-trip `"o"` carried sub-second digits an integer `SOURCE_DATE_EPOCH`
-  cannot reproduce; and `StockFacts.exe` emits a complete `litenet` section of
-  documented defaults (every field marked baked, so the pin gate refuses to
-  pin it) when the sibling assembly is missing or unreadable, so a failed
-  extraction has the same object shape as a successful one and cannot read as
-  an absent protocol.
 - Docs: the ranged-attack delivery contract is closed (`RangedAttackTarget`
   mapped, `EAILeap` motion pinned, `Animator.StringToHash` identified as
   CRC-32 with its flush chain), the `Leap` census row is marked mapped, a
