@@ -28,6 +28,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import ntpath
+import os
 import re
 import struct
 import sys
@@ -297,6 +299,26 @@ def match_entries(manifest: Manifest, needle: str) -> list[Entry]:
     return [e for e in manifest.entries if lowered in e.name.lower()]
 
 
+def safe_join(root: Path, name: str) -> Path | None:
+    """`root / name` for a depot entry name, or None when it escapes `root`.
+
+    Entry names come from the manifest file, which is untrusted input (any
+    `--manifest` path parses it), so `..` segments and absolute names must not
+    steer --verify at files outside the install root the operator named. The
+    check is lexical: a symlink already inside the install is the operator's
+    own tree and stays readable.
+    """
+    relative = name.replace("\\", "/")
+    if relative.startswith("/") or ntpath.isabs(relative) or ntpath.splitdrive(relative)[0]:
+        return None
+    joined = Path(os.path.normpath(root / relative))
+    base = Path(os.path.abspath(root))
+    target = Path(os.path.abspath(joined))
+    if target != base and base not in target.parents:
+        return None
+    return joined
+
+
 GAME_ASSEMBLY = "managed/assembly-csharp.dll"
 
 
@@ -349,7 +371,11 @@ def verify(
         if any(pattern.lower() in lowered for pattern in ignore):
             ignored += 1
             continue
-        local = root / entry.name.replace("\\", "/")
+        local = safe_join(root, entry.name)
+        if local is None:
+            bad += 1
+            problems.append(f"UNSAFE {entry.name}: path escapes the verify root")
+            continue
         if not local.is_file():
             missing += 1
             problems.append(f"MISSING {entry.name}")

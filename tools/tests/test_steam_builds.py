@@ -35,11 +35,13 @@ APPINFO = {
                     "public": {"buildid": "100", "timebuildupdated": "1700000000"},
                     "v9.9.9": {"buildid": "90", "timebuildupdated": "1600000000"},
                     "alpha9.3": {"buildid": "5", "timebuildupdated": "1400000000"},
+                    "rogue": {"buildid": "7", "timebuildupdated": "1500000000"},
                 },
                 "294422": {
                     "manifests": {
                         "public": {"gid": "111", "size": "1000", "download": "500"},
                         "v9.9.9": {"gid": "222", "size": "900", "download": "400"},
+                        "rogue": {"gid": "-injected", "size": "900", "download": "400"},
                     }
                 },
             }
@@ -137,7 +139,7 @@ def main() -> None:
         assert "installed: buildid 100" in table.stdout, table.stdout
         assert "public" in table.stdout, table.stdout
         assert "111" in table.stdout, table.stdout
-        assert "offline-diffable: 1 of 3 branch manifests cached" in table.stdout, table.stdout
+        assert "offline-diffable: 1 of 4 branch manifests cached" in table.stdout, table.stdout
         assert "cached" in table.stdout, table.stdout
 
         js = run(*base, "--pins", str(good_pins), "--json", "--branch", "v9.9.9")
@@ -146,7 +148,7 @@ def main() -> None:
         assert payload["selected"]["buildid"] == "90", payload["selected"]
         assert payload["selected"]["manifest"] == "222", payload["selected"]
         assert payload["installed"]["buildid"] == "100", payload["installed"]
-        assert len(payload["branches"]) == 3, payload["branches"]
+        assert len(payload["branches"]) == 4, payload["branches"]
         assert payload["cached_manifests"]["111"]["buildid"] == "100", payload["cached_manifests"]
         selected_branch = next(b for b in payload["branches"] if b["branch"] == "public")
         assert selected_branch["cached"] is True, selected_branch
@@ -203,6 +205,21 @@ def main() -> None:
         assert len(lines) == 1, lines
         assert lines[0].endswith("222 v9.9.9"), lines
 
+        # A PICS gid reaches fetch_version.sh as a steamcmd argument, so a
+        # non-numeric one (a leading `-` reads as an option) is refused.
+        rogue_gid = run(*base, "--pins", str(good_pins), "--print-fetch", "--branch", "rogue")
+        assert rogue_gid.returncode == 2, (rogue_gid.stdout, rogue_gid.stderr)
+        assert "non-numeric depot manifest" in rogue_gid.stderr, rogue_gid.stderr
+
+        # A label becomes a filename and a steamcmd argument, so anything
+        # outside [A-Za-z0-9._-] is refused, trailing newline included.
+        for bad_label in ("../escape", "a b", "a\n"):
+            refused_label = run(
+                *base, "--pins", str(good_pins), "--print-fetch", "--label", bad_label
+            )
+            assert refused_label.returncode == 2, (bad_label, refused_label.stdout)
+            assert "invalid label" in refused_label.stderr, (bad_label, refused_label.stderr)
+
         recorded = run(*base, "--pins", str(out_pins), "--record", "--branch", "v9.9.9")
         assert recorded.returncode == 0, recorded.stderr
         written = json.loads(out_pins.read_text(encoding="utf-8"))["studied"]
@@ -250,6 +267,30 @@ def main() -> None:
         )
         assert gone.returncode == 1, (gone.stdout, gone.stderr)
         assert "1 missing" in gone.stdout, gone.stdout
+
+        # An ACF is a file, not a trusted authority: an installdir naming a
+        # parent tree must not make --verify-install hash outside the install.
+        escape_acf = tmp_path / "escape.acf"
+        escape_acf.write_text(
+            ACF.replace("__BUILDID__", "100").replace(
+                '"installdir"\t\t"fake"', '"installdir"\t\t"../../.."'
+            ),
+            encoding="utf-8",
+        )
+        escaped = run(
+            "--from",
+            str(appinfo),
+            "--pins",
+            str(good_pins),
+            "--appmanifest",
+            str(escape_acf),
+            "--steam-root",
+            str(steam_root),
+            "--verify-install",
+            "Data",
+        )
+        assert escaped.returncode == 2, (escaped.stdout, escaped.stderr)
+        assert "cannot locate the install directory" in escaped.stderr, escaped.stderr
 
         seeded = tmp_path / "seeded.json"
         seeded.write_text(

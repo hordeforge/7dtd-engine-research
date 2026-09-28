@@ -60,7 +60,23 @@ APP = "294420"
 DEPOT = "294422"  # dedicated-server content depot (linux/windows payload)
 PICS_URL = f"https://api.steamcmd.net/v1/info/{APP}"
 DEFAULT_APPMANIFEST = Path.home() / ".local/share/Steam/steamapps" / f"appmanifest_{APP}.acf"
-LABEL_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+# fullmatch, not match with `$`: Python's `$` also matches before a trailing
+# newline, so "ok\n" would pass here and only be caught by the shell.
+LABEL_RE = re.compile(r"[A-Za-z0-9._-]+")
+# A depot manifest gid is numeric. The value reaches steam_builds from the
+# PICS response and is handed to fetch_version.sh as an argument, so anything
+# non-numeric (in particular a leading `-`, which steamcmd would read as an
+# option) is refused rather than forwarded.
+GID_RE = re.compile(r"[0-9]+")
+
+
+def usable_label(value: str) -> bool:
+    """A label fetch_version.sh will accept: fetch_version.sh is the enforcing
+    copy (same shape, no bare dot, no leading hyphen); this keeps the two in
+    step so the refusal happens before a download is announced."""
+    return bool(LABEL_RE.fullmatch(value)) and value not in (".", "..")
+
+
 _KV_RE = re.compile(r'^\s*"([^"]+)"\s+"([^"]*)"\s*$')
 _DEPOT_RE = re.compile(r'^\s*"(\d+)"\s*$')
 
@@ -175,7 +191,12 @@ def install_dir_for(appmanifest: Path, override: str | None = None) -> Path | No
     for line in _read_text(appmanifest).splitlines():
         match = _KV_RE.match(line)
         if match and match.group(1) == "installdir":
-            return appmanifest.parent / "common" / match.group(2)
+            # The ACF is a file, not a trusted authority: an installdir of
+            # "../../etc" would point --verify-install at another tree.
+            name = match.group(2)
+            if not name or "/" in name or "\\" in name or name in (".", ".."):
+                return None
+            return appmanifest.parent / "common" / name
     return None
 
 
@@ -259,8 +280,14 @@ def select(snapshot: Snapshot, name: str) -> Branch | None:
 
 def fetch_by_name(branch_name: str, label: str, do_fetch: bool) -> int:
     """Hand a branch steamcmd can install even when PICS does not list it."""
-    if not LABEL_RE.match(label):
+    if not usable_label(label):
         print(f"steam_builds: invalid label {label!r}", file=sys.stderr)
+        return 2
+    # fetch_version.sh forwards this to `steamcmd -beta <name>`; a leading `-`
+    # would be read by steamcmd as an option, so the name is held to the same
+    # shape as a label.
+    if not usable_label(branch_name):
+        print(f"steam_builds: invalid branch name {branch_name!r}", file=sys.stderr)
         return 2
     command = [str(FETCH), branch_name, label]
     if not do_fetch:
@@ -552,12 +579,19 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     label = args.label or branch.name
-    if not LABEL_RE.match(label):
+    if not usable_label(label):
         print(f"steam_builds: invalid label {label!r}", file=sys.stderr)
         return 2
     if args.print_fetch or args.fetch:
         if not branch.manifest:
             print(f"steam_builds: branch {branch.name} has no depot {DEPOT} manifest")
+            return 2
+        if not GID_RE.fullmatch(branch.manifest):
+            print(
+                f"steam_builds: refusing to fetch with a non-numeric depot manifest "
+                f"gid {branch.manifest!r} from {snapshot.source}",
+                file=sys.stderr,
+            )
             return 2
         command = [str(FETCH), branch.manifest, label]
         if args.print_fetch and not args.fetch:

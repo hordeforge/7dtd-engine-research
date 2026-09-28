@@ -12,6 +12,10 @@
 #   fetch_version.sh latest_experimental # exp branch
 #   fetch_version.sh 1234567890123 v3.0  # a pinned depot manifest
 #
+# A branch is letters/digits/dot/underscore/hyphen with no leading hyphen (a
+# leading `-` is one of steamcmd's own options); a manifest id is all digits;
+# a label is the same shape as a branch and becomes parity_<label>.json.
+#
 # Produces: <OUT>/parity_<label>.json  (ParitySurface snapshot)
 # Requires SteamCMD installed by the operator (`STEAMCMD=/path/to/steamcmd.sh`).
 set -euo pipefail
@@ -23,10 +27,27 @@ fi
 [[ $# -le 2 ]] || { echo "usage: fetch_version.sh <branch|manifestid> [label]" >&2; exit 2; }
 BRANCH="${1:?usage: fetch_version.sh <branch|manifestid> [label]}"
 LABEL="${2:-$BRANCH}"
-[[ "$LABEL" =~ ^[A-Za-z0-9._-]+$ ]] || {
-  echo "[parity] invalid label (allowed: letters, digits, dot, underscore, hyphen): $LABEL" >&2
+# Both values reach steamcmd as arguments (a `-beta` name and a depot gid) and
+# LABEL also names the output file, so both are held to a fixed shape. bash's
+# `=~` `$` also matches before a trailing newline, hence the explicit reject.
+for v in "$BRANCH" "$LABEL"; do
+  if [[ "$v" == *$'\n'* ]]; then
+    echo "[parity] invalid argument (embedded newline)" >&2
+    exit 2
+  fi
+done
+if [[ ! "$LABEL" =~ ^[A-Za-z0-9._-]+$ || "$LABEL" == "." || "$LABEL" == ".." ]]; then
+  echo "[parity] invalid label (allowed: letters, digits, dot, underscore, hyphen; no bare dot): $LABEL" >&2
   exit 2
-}
+fi
+# Not numeric means a branch name. A leading `-` is refused: steamcmd would
+# read it as one of its own options rather than as a beta name.
+if [[ ! "$BRANCH" =~ ^[0-9]+$ ]]; then
+  if [[ "$BRANCH" == -* || ! "$BRANCH" =~ ^[A-Za-z0-9._-]+$ ]]; then
+    echo "[parity] invalid branch name (allowed: letters, digits, dot, underscore, hyphen; no leading hyphen): $BRANCH" >&2
+    exit 2
+  fi
+fi
 APP=294420
 DEPOT=294422 # dedicated server content depot
 SCRATCH="${SCRATCH:-$HOME/.cache/zdtd-scratch}"

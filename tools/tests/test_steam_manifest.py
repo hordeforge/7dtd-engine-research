@@ -190,6 +190,29 @@ def main() -> None:
         assert clean.returncode == 0, (clean.stdout, clean.stderr)
         assert "verify: 4 ok, 0 missing, 0 mismatch" in clean.stdout, clean.stdout
 
+        # Entry names come from the manifest file, so a `..` name must not
+        # steer --verify at a file outside the root the operator named.
+        outside = root / "outside.bin"
+        outside.write_bytes(b"secret-adjacent bytes")
+        escape = root / "294422_7.manifest"
+        escape.write_bytes(
+            manifest(
+                [
+                    entry("Data\\..\\..\\outside.bin", outside.read_bytes()),
+                    entry("..\\outside.bin", outside.read_bytes()),
+                    entry("/etc/hostname", b"host"),
+                ]
+            )
+        )
+        escaped = run("--manifest", str(escape), "--verify", str(install), "--json")
+        unsafe = json.loads(escaped.stdout)
+        assert unsafe["ok"] == 0, unsafe
+        assert unsafe["mismatch"] == 3, unsafe
+        assert all(p.startswith("UNSAFE ") for p in unsafe["problems"]), unsafe["problems"]
+        unsafe_rc = run("--manifest", str(escape), "--verify", str(install))
+        assert unsafe_rc.returncode == 1, unsafe_rc.stdout
+        assert "3 mismatch" in unsafe_rc.stdout, unsafe_rc.stdout
+
         bad_magic = root / "294422_9.manifest"
         bad_magic.write_bytes(struct.pack("<II", 0xDEADBEEF, 0) + b"junk")
         assert run("--manifest", str(bad_magic)).returncode == 2

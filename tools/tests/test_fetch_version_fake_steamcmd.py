@@ -96,16 +96,52 @@ def direct_snapshot(dll: Path) -> dict[str, object]:
     return load_snapshot(proc.stdout)
 
 
+def arg_shape_cases() -> str:
+    """Reject a target/label that would reach steamcmd as an option or a path.
+
+    Pure argument validation, so it needs neither mono nor the live DLL and runs
+    before the SKIP gates.
+    """
+    # STEAMCMD points at a path that does not exist: a shape that reached the
+    # download step would exit 2 on the missing binary, so an accepted shape
+    # can never start a real download here.
+    env = dict(os.environ, STEAMCMD=str(Path(os.sep) / "nonexistent-steamcmd"))
+    # A target is only ever a steamcmd `-beta` name or a depot gid, never a
+    # path component, so the refusals are the shapes steamcmd would misread.
+    bad_targets = ["-injected", "-force_install_dir", "a b", "v3.1.0;id", "pub/../x", "a\tb"]
+    for target in bad_targets:
+        proc = subprocess.run(
+            [str(FETCH), target, "shapecheck"], capture_output=True, text=True, env=env
+        )
+        assert proc.returncode == 2, (target, proc.returncode, proc.stdout, proc.stderr)
+        assert "invalid" in proc.stderr, (target, proc.stderr)
+    # A label is a filename stem (parity_<label>.json), so the refusals are the
+    # shapes that escape the output directory or break the stem.
+    for target, label in [("public", "a b"), ("public", ".."), ("public", "."), ("public", "a/b")]:
+        proc = subprocess.run([str(FETCH), target, label], capture_output=True, text=True, env=env)
+        assert proc.returncode == 2, (label, proc.returncode, proc.stdout, proc.stderr)
+        assert "invalid" in proc.stderr, (label, proc.stderr)
+    # A trailing newline passes bash's `=~ ...$`, so it is rejected explicitly.
+    for target in ["public\n", "1234567890123\n"]:
+        proc = subprocess.run(
+            [str(FETCH), target, "shapecheck"], capture_output=True, text=True, env=env
+        )
+        assert proc.returncode == 2, (repr(target), proc.returncode, proc.stdout, proc.stderr)
+        assert "newline" in proc.stderr, (repr(target), proc.stderr)
+    return f"{len(bad_targets) + 4 + 2} malformed target/label shapes refused"
+
+
 def main() -> None:
+    shape_note = arg_shape_cases()
     asm = _common.find_asm()
     if asm is None:
-        print("SKIP: dedicated Assembly-CSharp.dll not found")
+        print(f"SKIP: dedicated Assembly-CSharp.dll not found ({shape_note})")
         return
     if shutil.which("mono") is None or shutil.which("mcs") is None:
-        print("SKIP: mono/mcs not on PATH")
+        print(f"SKIP: mono/mcs not on PATH ({shape_note})")
         return
     if not (_common.BIN / "Mono.Cecil.dll").is_file() or not PARITY_EXE.is_file():
-        print("SKIP: parity tools not built (cd tools && ./build.sh --skip-legacy)")
+        print(f"SKIP: parity tools not built (cd tools && ./build.sh --skip-legacy) ({shape_note})")
         return
 
     with tempfile.TemporaryDirectory(prefix="fetch_version_", dir=_common.scratch_dir()) as tmp:
@@ -289,8 +325,8 @@ def main() -> None:
         assert "app 294420 depot 294422" in failed_manifest.stderr, failed_manifest.stderr
 
     print(
-        "OK: fetch_version.sh manifest + branch downloads, snapshot equality, and "
-        "fail-closed paths hold with a fake steamcmd"
+        f"OK: fetch_version.sh manifest + branch downloads, snapshot equality, and "
+        f"fail-closed paths hold with a fake steamcmd ({shape_note})"
     )
 
 
