@@ -22,8 +22,9 @@ on its own (`make gate NAME=test_doc_link_integrity.py`, or
 `python3 tools/tests/test_doc_link_integrity.py`;
 DLL-dependent scripts auto-discover your game install). `make help` lists the
 targets and which ones need the game. `make lint` is the
-static-analysis gate: `ruff` check + format, `mypy --strict`, and `shellcheck`,
-all on the versions pinned in the CI workflow. Machine-checked stock
+static-analysis gate: `ruff` check + format, `mypy --strict`, `shellcheck`,
+and `yamllint` over the repo's own YAML, all on the versions pinned in the CI
+workflow. Machine-checked stock
 facts (constants + LiteNetLib wire + XML data) live in
 [`tools/data/stock_facts.json`](tools/data/stock_facts.json) and
 [`tools/data/xml_pins.json`](tools/data/xml_pins.json); `make facts` shows them.

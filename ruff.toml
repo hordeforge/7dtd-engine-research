@@ -38,6 +38,14 @@ select = [
     "FLY", # literal joins
     "EXE", # shebang/executable-bit consistency for script-style gates
     "RUF", # ruff-specific rules
+    "FA",  # `from __future__ import annotations`: without it, PEP 585/604
+           # annotations in signatures are evaluated at def time, so a module
+           # that imports a name only under TYPE_CHECKING crashes on import
+    "Q",   # quote style, so hand-written strings match the double-quote
+           # formatter instead of drifting back to single quotes
+    "PD",  # pylint deprecations (badly deprecated cgi/imp/etc. imports)
+    "NPY", # numpy legacy np.* aliases (np.float, np.bool) removed in 2.0
+    "SLOT", # __slots__ shape errors (typos, non-str members)
 ]
 
 [lint.per-file-ignores]

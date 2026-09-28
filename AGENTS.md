@@ -37,7 +37,7 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 | [`tools/data/`](tools/data) | Committed pins (`stock_facts.json`) |
 | [`tools/tests/`](tools/tests) | Pin gate, dump-set structural tests, readiness bench |
 | [`Makefile`](Makefile) | Gate entry points; `make help` is the index of every target and whether it needs the game |
-| [`ruff.toml`](ruff.toml), [`mypy.ini`](mypy.ini) | Static-analysis config for `make lint`; versions pinned in [`ci.yml`](.github/workflows/ci.yml) |
+| [`ruff.toml`](ruff.toml), [`mypy.ini`](mypy.ini), [`.yamllint`](.yamllint) | Static-analysis config for `make lint`; versions pinned in [`ci.yml`](.github/workflows/ci.yml) |
 | `il/` | Regenerable Cecil dumps. **git-ignored** (may contain game IL); never redistribute |
 | `.scratch/` | Ephemeral probes and gate temp trees (`.scratch/tmp`). **git-ignored**; never the system temp dir, which is tmpfs here |
 | [`oss-tools/`](oss-tools) | Third-party server-tool/mod survey notes |
@@ -60,7 +60,7 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 
 [`docs/INDEX.md`](docs/INDEX.md) -> [`docs/meta/coverage.md`](docs/meta/coverage.md) (what is mapped) -> family narrative -> `il/` dump. For new RE, the method is in rule 3 and the dumpers in [`tools/`](tools).
 
-Gates: the two CI jobs are `make test-docs` (no DLL needed) and `make lint` (`ruff` check + format, `mypy --strict`, `shellcheck`); with the live game also `make test` and `make verify`. One gate while iterating: `make gate NAME=<gate>.py` (or `python3 tools/tests/<gate>.py`), which takes the script's own flags as `ARGS=`.
+Gates: the two CI jobs are `make test-docs` (no DLL needed) and `make lint` (`ruff` check + format, `mypy --strict`, `shellcheck`, `yamllint` over the tracked YAML); with the live game also `make test` and `make verify`. One gate while iterating: `make gate NAME=<gate>.py` (or `python3 tools/tests/<gate>.py`), which takes the script's own flags as `ARGS=`.
 
 `make lint` compares the local `ruff` and `mypy` against the pins in [`ci.yml`](.github/workflows/ci.yml) and exits 2 on a mismatch, before running either. Match the pin first (`uv tool install ruff==<pin>`, `mypy==<pin>`); never edit the local version to make the gate pass.
 

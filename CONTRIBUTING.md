@@ -16,11 +16,11 @@ CI runs.
 | For | You need | How to get it |
 |---|---|---|
 | `make test-docs` | python3 | the interpreter on `PATH` |
-| `make lint` | `ruff`, `mypy`, `shellcheck` | `uv tool install ruff==0.16.4`, `uv tool install mypy==2.3.1`; any recent `shellcheck` package |
+| `make lint` | `ruff`, `mypy`, `shellcheck`, `yamllint` | `uv tool install ruff==0.16.4`, `uv tool install mypy==2.3.1`, `uv tool install yamllint==1.38.0`; any recent `shellcheck` package |
 | `make tools`, `make census`, `make test`, `make verify` | mono with `mcs`, a pinned `Mono.Cecil.dll`, the game | see below |
 
-`make lint` refuses a `ruff` or `mypy` whose version is not the CI pin, and
-prints the pin to install. Keep the local version and the pin in
+`make lint` refuses a `ruff`, `mypy`, or `yamllint` whose version is not the CI
+pin, and prints the pin to install. Keep the local version and the pin in
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) in step: the rules drift
 between releases, so an unpinned local run is not a preview of CI.
 
@@ -41,7 +41,7 @@ The third-party Python imports are confined to `tools/sandbox/` and
 make help                                  # every target, and which need the game
 make gate NAME=test_doc_link_integrity.py  # one gate, while iterating on it
 make test-docs                             # the full DLL-free suite (what CI runs)
-make lint                                  # ruff + mypy --strict + shellcheck
+make lint                                  # ruff + mypy --strict + shellcheck + yamllint
 ```
 
 `make gate` takes the filename exactly as [`tools/README.md`](tools/README.md)

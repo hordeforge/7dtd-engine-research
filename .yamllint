@@ -1,0 +1,25 @@
+# yamllint config for the repo's own YAML (CI workflows, dependabot).
+# Enforced by `make lint` and the ci.yml lint job on the same pinned version
+# as ruff/mypy (see the workflow), so local and CI agree.
+#
+# The defaults are kept except for the three the repo's own files fail, each
+# for a stated reason. Anything else yamllint reports is a real defect to fix,
+# not a rule to switch off.
+extends: default
+
+rules:
+  # 100 columns, the same cap `make lint` applies to Python (ruff line-length),
+  # so a line budget means one thing across the tree. Longer than yamllint's
+  # 80 default because the SHA pins in the workflow do not fit in 80.
+  line-length:
+    max: 100
+
+  # `on:` is the GitHub workflow key, not a boolean. PyYAML reads the bare
+  # `on` key as True; yamllint's truthy check flags every workflow that uses
+  # the correct spelling, so the workflow vocabulary is allowed here.
+  truthy:
+    allowed-values: ["true", "false", "on"]
+
+  # A leading `---` buys nothing in a two-step file: GitHub parses the whole
+  # document either way.
+  document-start: disable

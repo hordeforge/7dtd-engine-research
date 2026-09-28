@@ -18,7 +18,7 @@ ASM_VARS := ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR
 help:
 	@echo "Fresh clone, no game install? These need no game:"
 	@echo "  make test-docs  - the CI gate (docs, links, pins, layout); needs only python3"
-	@echo "  make lint       - static analysis; also needs ruff, mypy, shellcheck (pins below)"
+	@echo "  make lint       - static analysis; also needs ruff, mypy, yamllint, shellcheck (pins below)"
 	@echo "  make tools      - build Mono.Cecil dumpers (tools/bin); needs mono + mcs"
 	@echo "With a game install: make test, make verify. The DLL is discovered"
 	@echo "(ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR, then this OS's Steam roots);"
@@ -27,7 +27,7 @@ help:
 	@echo "in tools/README.md)."
 	@echo ""
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
-	@echo "make lint         - static analysis: ruff check+format + mypy (Python) + shellcheck (shell)"
+	@echo "make lint         - static analysis: ruff check+format + mypy (Python) + shellcheck (shell) + yamllint (YAML)"
 	@echo "make cross-links  - resolve every cross-repo .md link in the sibling workspace"
 	@echo "make sibling-cites - verify every sibling repo's research citations resolve against docs/"
 	@echo "make save-roundtrip - verify a real stock save against the documented codecs (main.ttw + region files)"
@@ -126,7 +126,7 @@ regen-check:
 # mypy binaries must match the CI pins (single source of truth:
 # .github/workflows/ci.yml), because their rules drift between releases.
 lint:
-	@for tool in ruff mypy; do \
+	@for tool in ruff mypy yamllint; do \
 	  expected=$$(sed -n "s/^ *uv tool install $$tool==\([0-9][0-9.]*\)/\1/p" .github/workflows/ci.yml | head -1); \
 	  if [ -z "$$expected" ]; then \
 	    echo "lint: cannot read the $$tool pin from .github/workflows/ci.yml" >&2; exit 2; \
@@ -148,6 +148,7 @@ lint:
 	# -x: bounded-run.sh is sourced by the entry points, and shellcheck only
 	# follows a source directive when told to resolve it.
 	for f in $$(git ls-files '*.sh'); do shellcheck -x --severity=style "$$f"; done
+	yamllint -c .yamllint $$(git ls-files '*.yml' '*.yaml')
 
 test:
 	python3 "$(TOOLS)/tests/test_tool_bootstrap.py"

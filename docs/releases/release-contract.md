@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**60 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**70 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -161,6 +161,9 @@ falls behind the commits actually below the last tag.
   + `make test-docs` green); `--dry-run` prints the plan and changes nothing, and
   `--resume` finishes a run that stopped between steps without repeating the
   ones that landed.
+- `make lint` now also runs `yamllint` over the tracked YAML, on the version
+  pinned in `.github/workflows/ci.yml`, and refuses a local `yamllint` that is
+  not that pin. Config lives in [`.yamllint`](../../.yamllint).
 - Docs: the ranged-attack delivery contract is closed (`RangedAttackTarget`
   mapped, `EAILeap` motion pinned, `Animator.StringToHash` identified as
   CRC-32 with its flush chain), the `Leap` census row is marked mapped, a

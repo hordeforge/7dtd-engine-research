@@ -22,7 +22,7 @@ jobs:
       # mutable ref must not be able to swap what CI executes.
       # persist-credentials: false keeps the token out of .git/config, so a
       # gate running untrusted pull-request code cannot push with it.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
       - run: make test-docs
@@ -31,14 +31,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5.4.2
       - name: install pinned analyzers
         run: |
           uv tool install ruff==0.16.4
           uv tool install mypy==2.3.1
+          uv tool install yamllint==1.38.0
           # Pinned so local `make lint` and CI agree (same policy as ruff);
           # ubuntu-latest's apt shellcheck trails the current release.
           # Checksum-gated like the Mono.Cecil pin: a swapped release artifact
@@ -50,7 +51,10 @@ jobs:
           # else shares the runner's temp directory pre-aim the download.
           sc_dir="$(mktemp -d)"
           trap 'rm -rf "$sc_dir"' EXIT
-          curl -sSfL "https://github.com/koalaman/shellcheck/releases/download/v${sc_ver}/shellcheck-v${sc_ver}.linux.x86_64.tar.xz" -o "$sc_dir/sc.tar.xz"
+          sc_base="https://github.com/koalaman/shellcheck/releases/download"
+          curl -sSfL \
+            "${sc_base}/v${sc_ver}/shellcheck-v${sc_ver}.linux.x86_64.tar.xz" \
+            -o "$sc_dir/sc.tar.xz"
           echo "${sc_sha}  $sc_dir/sc.tar.xz" | sha256sum -c -
           tar -xJ -C "$sc_dir" -f "$sc_dir/sc.tar.xz"
           sudo install "$sc_dir/shellcheck-v${sc_ver}/shellcheck" /usr/local/bin/shellcheck
