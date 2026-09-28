@@ -22,6 +22,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import tooling
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(
@@ -93,7 +96,7 @@ def main() -> int:
             with tempfile.NamedTemporaryFile(dir=args.out.parent, delete=False) as fh:
                 fh.write(text)
                 tmp = Path(fh.name)
-            os.replace(tmp, args.out)
+            tooling.publish(tmp, args.out)
         finally:
             if tmp is not None and tmp.exists():
                 tmp.unlink()

@@ -15,11 +15,14 @@ Deps: UnityPy, hash-pinned in requirements.txt next to this script
 """
 
 import argparse
-import os
+import sys
 import tempfile
 from pathlib import Path
 
 from safe_name import safe_name
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import tooling
 
 IMPORT_ERROR: ModuleNotFoundError | None = None
 try:
@@ -81,7 +84,7 @@ def main() -> None:
         # previous set whole rather than a directory with files missing from it.
         for source in staged.iterdir():
             target = out_dir / source.name
-            os.replace(source, target)
+            tooling.publish(source, target)
             print(f"wrote {target} ({target.stat().st_size} bytes)")
         for old in out_dir.glob("*.xml"):
             if old.name not in expected:

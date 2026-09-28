@@ -180,6 +180,7 @@ lint:
 test:
 	python3 "$(TOOLS)/tests/test_tool_bootstrap.py"
 	python3 "$(TOOLS)/tests/test_ilfmt_safe.py"
+	python3 "$(TOOLS)/tests/test_asm_body_diff_threads.py"
 	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_dedi_coverage_docs.py"
 	python3 "$(TOOLS)/tests/check_stock_facts.py" --require-live
@@ -225,6 +226,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_release_contract_gate.py"
 	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_census_pct_history.py"
+	python3 "$(TOOLS)/tests/test_durable_publish.py"
 	python3 "$(TOOLS)/tests/test_census_pct_report_parse.py"
 	python3 "$(TOOLS)/tests/test_json_pins_finite.py"
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"

@@ -24,7 +24,11 @@ import os
 import struct
 import sys
 import tempfile
+from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import tooling
 
 IMPORT_ERROR: ModuleNotFoundError | None = None
 try:
@@ -321,7 +325,7 @@ def main() -> None:
                 tmp = f.name
                 json.dump(out, f, indent=1)
                 f.write("\n")
-            os.replace(tmp, args.out)
+            tooling.publish(Path(tmp), Path(args.out))
         finally:
             if tmp and os.path.exists(tmp):
                 os.unlink(tmp)

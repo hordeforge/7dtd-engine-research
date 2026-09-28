@@ -212,6 +212,53 @@ def load_json(path: Path) -> Any:
     return loads_json(path.read_text(encoding="utf-8"))
 
 
+def fsync_path(path: Path) -> None:
+    """Flush a staged file's bytes to disk, or the directory entry that names it.
+
+    Opening read-only is enough: fsync needs no write permission, and the
+    staged file is already closed by the time a publish calls this.
+    """
+    fd = os.open(path, os.O_RDONLY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def fsync_dir(path: Path) -> None:
+    """Flush a directory's entries, so a rename into it survives a crash.
+
+    A platform that cannot open a directory (Windows) or cannot fsync one
+    keeps the data flush: the rename is still atomic against a reader there,
+    only the directory entry can be lost by a power cut.
+    """
+    try:
+        fd = os.open(path, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+    except OSError:
+        return
+    try:
+        os.fsync(fd)
+    except OSError:
+        pass
+    finally:
+        os.close(fd)
+
+
+def publish(tmp: Path, dest: Path) -> None:
+    """Move a staged file into place, flushed to disk first.
+
+    `os.replace` alone is atomic against a concurrent reader, so a half-written
+    file is never visible, but it does not flush: a crash after the rename can
+    leave the destination empty or short, with no earlier copy to roll back to.
+    The pins and the history CSV are committed artifacts a gate reads, so the
+    staged bytes are fsynced before the rename and the parent directory after
+    it. A failure anywhere leaves the previous contents in place.
+    """
+    fsync_path(tmp)
+    os.replace(tmp, dest)
+    fsync_dir(dest.parent)
+
+
 def scratch_dir() -> Path:
     """Disk-backed base for temp trees, under the gitignored `.scratch/`.
 
