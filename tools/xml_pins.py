@@ -34,9 +34,21 @@ import tooling
 
 DEFAULT_PINS = str(tooling.TOOLS / "data" / "xml_pins.json")
 
-DEFAULT_GAME = os.path.expanduser(
-    "~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server"
-)
+DEFAULT_GAME = ""  # discovered per run, see default_game_dir()
+NO_GAME = "no dedicated server found; pass --game-dir or set ASM/SEVENDTD_ASM/SEVENDTD_DS_DIR"
+
+
+def default_game_dir() -> str:
+    """Install root of the discovered dedicated server, "" when there is none.
+
+    The Linux Steam path used to be baked in here, so a Windows or macOS
+    operator had to pass --game-dir on every run while the rest of the tooling
+    found the same install by itself.
+    """
+    asm = tooling.find_asm()
+    root = tooling.game_dir(asm) if asm else None
+    return str(root) if root else ""
+
 
 HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="(\d+)"')
 
@@ -232,7 +244,7 @@ def main() -> int:
     ap.add_argument(
         "--game-dir",
         default=DEFAULT_GAME,
-        help="dedicated-server install root (default: the Steam path)",
+        help="dedicated-server install root (default: the discovered install)",
     )
     ap.add_argument("--check", action="store_true", help="verify committed pins vs the install")
     ap.add_argument(
@@ -240,20 +252,24 @@ def main() -> int:
     )
     args = ap.parse_args()
     pins_path = args.pins
+    game_dir = args.game_dir or default_game_dir()
+    if not game_dir:
+        print(f"error: {NO_GAME}", file=sys.stderr)
+        return 2
 
     if not args.check:
-        epath = os.path.join(args.game_dir, SECTION_SPECS[0].config)
+        epath = os.path.join(game_dir, SECTION_SPECS[0].config)
         if not os.path.isfile(epath):
             print(
                 f"error: {epath} not found; pass the dedicated-server root via --game-dir",
                 file=sys.stderr,
             )
             return 2
-        data = extract(args.game_dir)
+        data = extract(game_dir)
         # A wrong --game-dir (or a renamed config section) must not wipe the
         # committed pins with empty values while reporting success. Same rule
         # for every section whose source file exists but parses to nothing.
-        reasons = refusals(data, args.game_dir)
+        reasons = refusals(data, game_dir)
         if reasons:
             for r in reasons:
                 print(
@@ -279,10 +295,10 @@ def main() -> int:
         print(f"wrote {pins_path} ({counts})")
         return 0
 
-    if not os.path.isdir(args.game_dir):
-        print(f"error: game dir not found: {args.game_dir} (--game-dir)", file=sys.stderr)
+    if not os.path.isdir(game_dir):
+        print(f"error: game dir not found: {game_dir} (--game-dir)", file=sys.stderr)
         return 2
-    live = extract(args.game_dir)
+    live = extract(game_dir)
     if live["unparsed"]:
         # A pinned value the install carries in a shape the gate cannot read is
         # drift the operator has to see, not a value the gate may skip.

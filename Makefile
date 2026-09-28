@@ -1,9 +1,17 @@
 # 7dtd-engine-research: stock RE tooling + pin gates.
 ROOT := $(CURDIR)
 TOOLS := $(ROOT)/tools
-ASM ?= $(HOME)/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll
-# Managed -> 7DaysToDieServer_Data -> the install root the depot manifest describes.
-GAME_ROOT ?= $(patsubst %/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll,%,$(ASM))
+# The live dedicated build, resolved the way the Python tools resolve it:
+# ASM / SEVENDTD_ASM / SEVENDTD_DS_DIR first, then every Steam library root of
+# the host OS. tools/asm_path.py is that one resolution, so make, the shell
+# entry points and the tools cannot answer with three different installs.
+# stderr is dropped here because `make help` runs on a checkout with no game:
+# the targets that need the DLL say so themselves.
+ASM ?= $(shell python3 "$(TOOLS)/asm_path.py" 2>/dev/null)
+# The install root holding Data/Config (the directory the depot manifest
+# describes), the same install as the assembly above.
+GAME_ROOT ?= $(shell python3 "$(TOOLS)/asm_path.py" --game-dir 2>/dev/null)
+ASM_VARS := ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR
 
 .PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift test test-docs lint verify verify-live facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
 
@@ -12,9 +20,11 @@ help:
 	@echo "  make test-docs  - the CI gate (docs, links, pins, layout); DLL-free"
 	@echo "  make lint       - static analysis (see its own version pins below)"
 	@echo "  make tools      - build Mono.Cecil dumpers (tools/bin); needs mono + mcs"
-	@echo "With a game install (ASM=.../Assembly-CSharp.dll): make test, make verify."
+	@echo "With a game install: make test, make verify. The DLL is discovered"
+	@echo "(ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR, then this OS's Steam roots);"
+	@echo "ASM=/path/to/Assembly-CSharp.dll selects it explicitly."
 	@echo "One gate at a time: python3 tools/tests/<gate>.py (all of them are listed"
-	@echo "in tools/README.md); ASM=/path/to/Assembly-CSharp.dll selects the DLL."
+	@echo "in tools/README.md)."
 	@echo ""
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
 	@echo "make lint         - static analysis: ruff check+format + mypy (Python) + shellcheck (shell)"
@@ -57,7 +67,8 @@ facts:
 # skips a file the server rewrites at runtime.
 install-check:
 	@test -d "$(GAME_ROOT)/7DaysToDieServer_Data/Managed" || { \
-	  echo "install-check: GAME_ROOT not derivable from ASM ($(GAME_ROOT)); pass GAME_ROOT=<install root>" >&2; \
+	  echo "install-check: no dedicated-server install root resolved (got '$(GAME_ROOT)' from ASM='$(ASM)');" >&2; \
+	  echo "  set $(ASM_VARS), or pass GAME_ROOT=<install root>" >&2; \
 	  exit 2; }
 	python3 "$(TOOLS)/steam/steam_manifest.py" --verify "$(GAME_ROOT)" $(ARGS)
 
@@ -70,7 +81,9 @@ post-update:
 	cd "$(TOOLS)" && ASM="$(ASM)" ./post-update.sh
 
 census: tools
-	@test -f "$(ASM)" || (echo "ASM not found: $(ASM)"; exit 2)
+	@test -f "$(ASM)" || { \
+	  echo "census: no Assembly-CSharp.dll resolved (got '$(ASM)'); set $(ASM_VARS) or ASM=<path>" >&2; \
+	  exit 2; }
 	MONO_PATH="$(TOOLS)/bin" mono "$(TOOLS)/bin/Census.exe" "$(ASM)"
 	python3 "$(TOOLS)/census-pct.py" "$(ASM)" --history "$(ROOT)/workspace/outputs/census-history.csv"
 	@echo "--- machine-checked stock pins ---"
@@ -198,15 +211,19 @@ test-docs:
 # no-DLL path; the error says so.
 verify:
 	@test -f "$(ASM)" || { \
-	  echo "verify: no Assembly-CSharp.dll at $(ASM)" >&2; \
+	  echo "verify: no Assembly-CSharp.dll resolved (got '$(ASM)')" >&2; \
 	  echo "verify: this gate re-checks committed pins against a live game install." >&2; \
-	  echo "verify: point ASM at yours (ASM=/path/to/Assembly-CSharp.dll), or run" >&2; \
-	  echo "verify: 'make test-docs' for the DLL-free gate CI runs." >&2; \
+	  echo "verify: point it at yours ($(ASM_VARS), or ASM=/path/to/Assembly-CSharp.dll)," >&2; \
+	  echo "verify: or run 'make test-docs' for the DLL-free gate CI runs." >&2; \
 	  exit 2; }
 	@$(MAKE) --no-print-directory verify-live
 
 verify-live: test-docs stock-check readiness facts
-	python3 "$(TOOLS)/xml_pins.py" --check --game-dir "$$(dirname "$$(dirname "$$(dirname "$(ASM)")")")"
+	@test -n "$(GAME_ROOT)" || { \
+	  echo "verify: ASM='$(ASM)' is not under a dedicated-server install root;" >&2; \
+	  echo "verify: pass GAME_ROOT=<install root> for the Data/Config pins." >&2; \
+	  exit 2; }
+	python3 "$(TOOLS)/xml_pins.py" --check --game-dir "$(GAME_ROOT)"
 	@echo "verify: ALL GATES GREEN (doc links, pins, readiness, facts, xml data)"
 
 cross-links:
@@ -230,6 +247,10 @@ save-roundtrip-all:
 	  python3 "$(TOOLS)/save_roundtrip_check.py" "$$d" >/dev/null || fail=1; \
 	done; \
 	[ "$$found" = 1 ] || echo "no probe saves found (run a live session first)"; \
+	server="$${SEVENDTD_SERVER_DIR:-$(GAME_ROOT)}"; \
+	[ -n "$$server" ] || { \
+	  echo "save-roundtrip-all: no dedicated-server install root; set $(ASM_VARS) or SEVENDTD_SERVER_DIR" >&2; \
+	  exit 2; }; \
 	echo "== shipped Navezgane"; \
-	python3 "$(TOOLS)/save_roundtrip_check.py" --shipped "$${SEVENDTD_SERVER_DIR:-$$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server}/Data/Worlds/Navezgane" >/dev/null || fail=1; \
+	python3 "$(TOOLS)/save_roundtrip_check.py" --shipped "$$server/Data/Worlds/Navezgane" >/dev/null || fail=1; \
 	exit $$fail

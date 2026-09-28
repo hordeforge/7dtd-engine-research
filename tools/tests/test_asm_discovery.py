@@ -5,7 +5,10 @@ The dedicated server ships as a Steam app, and Steam's library root differs per
 OS (Program Files on Windows, ~/Library/Application Support on macOS, ~/.local
 or ~/.steam on Linux). Discovery probes all of them, so the cases below build a
 tree per layout and assert the assembly resolves without the operator handing
-over ASM. Stdlib only, no DLL, no game install.
+over ASM. `tools/asm_path.py` prints that resolution for the Makefile and the
+shell entry points, and the cases cover it: the assembly, the install root with
+`--game-dir`, and an override that points at nothing failing rather than falling
+through to a probed root. Stdlib only, no DLL, no game install.
 
 Usage: python3 tools/tests/test_asm_discovery.py
 """
@@ -13,6 +16,7 @@ Usage: python3 tools/tests/test_asm_discovery.py
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -88,6 +92,73 @@ def check_shared_roots() -> bool:
     return ok
 
 
+def check_game_dir() -> bool:
+    """`tooling.game_dir` maps an install assembly to its root, and refuses a loose one."""
+    root = Path("/srv/7 Days to Die Dedicated Server")
+    managed = root.joinpath(*tooling.MANAGED, tooling.ASM_NAME)
+    loose = Path("/scratch/Assembly-CSharp.dll")
+    ok: bool = tooling.game_dir(managed) == root
+    if not ok:
+        print(
+            f"FAIL: game_dir of an install assembly: {tooling.game_dir(managed)}", file=sys.stderr
+        )
+    if tooling.game_dir(loose) is not None:
+        print(f"FAIL: game_dir invented a root for {loose}", file=sys.stderr)
+        ok = False
+    return ok
+
+
+def run_resolver(env: dict[str, str], *args: str) -> tuple[int, str]:
+    """Run tools/asm_path.py with `env` as the whole environment but PATH."""
+    result = subprocess.run(
+        [sys.executable, str(_common.TOOLS / "asm_path.py"), *args],
+        env={"PATH": os.environ.get("PATH", "")} | env,
+        text=True,
+        capture_output=True,
+    )
+    return result.returncode, result.stdout.strip()
+
+
+def check_resolver() -> bool:
+    """The printable resolution the Makefile and the shell entry points call.
+
+    Three shapes matter: the discovered install prints its assembly, the same
+    run with --game-dir prints the root holding Data/Config, and an override
+    that points at nothing exits 2 instead of falling through to whatever the
+    host happens to have installed.
+    """
+    ok = True
+    with tempfile.TemporaryDirectory(prefix="asm-resolver-", dir=_common.scratch_dir()) as td:
+        base = Path(td)
+        dll = _install(base / "steam")
+        env = {
+            "SEVENDTD_DS_DIR": str(
+                base
+                / "steam"
+                / tooling.STEAM_COMMON[0]
+                / tooling.STEAM_COMMON[1]
+                / tooling.GAME_DIR
+            )
+        }
+        rc, out = run_resolver(env)
+        if (rc, out) != (0, str(dll)):
+            print(f"FAIL: resolver assembly: rc={rc} out={out!r}, want {dll}", file=sys.stderr)
+            ok = False
+        rc, out = run_resolver(env, "--game-dir")
+        want = base / "steam" / tooling.STEAM_COMMON[0] / tooling.STEAM_COMMON[1] / tooling.GAME_DIR
+        if (rc, out) != (0, str(want)):
+            print(f"FAIL: resolver game dir: rc={rc} out={out!r}, want {want}", file=sys.stderr)
+            ok = False
+        rc, out = run_resolver({"ASM": str(base / "absent" / "Assembly-CSharp.dll")})
+        if rc != 2 or out:
+            print(
+                f"FAIL: a missing ASM override must fail, not fall through: rc={rc} {out!r}",
+                file=sys.stderr,
+            )
+            ok = False
+    return ok
+
+
 def main() -> int:
     bad = False
     with tempfile.TemporaryDirectory(prefix="asm-discovery-", dir=_common.scratch_dir()) as td:
@@ -98,6 +169,10 @@ def main() -> int:
         if not check_overrides(home):
             bad = True
     if not check_shared_roots():
+        bad = True
+    if not check_game_dir():
+        bad = True
+    if not check_resolver():
         bad = True
     if bad:
         return 1

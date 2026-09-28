@@ -4,7 +4,8 @@
 # game update; exits 1 if drift is detected (for cron/CI alerting), and fails
 # closed with exit 2 if any axis cannot be measured (no partial comparison).
 #
-#   drift-check.sh [ASM]           # ASM defaults to the local stable dedicated DLL
+#   drift-check.sh [ASM]           # ASM defaults to the discovered dedicated DLL
+#                                  # (SEVENDTD_ASM/SEVENDTD_DS_DIR, Steam roots)
 #   BASELINE_DIR=... drift-check.sh
 #   PARITY_BASELINE=... drift-check.sh   # committed wire snapshot (default below)
 #   drift-check.sh --accept-baseline      # make the current build the local baseline
@@ -38,7 +39,7 @@ done
 TOOLS="$(cd "$here/.." && pwd)"
 ROOT="$(cd "$TOOLS/.." && pwd)"
 BIN="$TOOLS/bin"
-ASM="${asm_arg:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll}"
+ASM="${asm_arg:-$(python3 "$TOOLS/asm_path.py")}"
 BASELINE_DIR="${BASELINE_DIR:-$HOME/.cache/zdtd-scratch/drift-baseline}"
 # Committed baselines for the studied build. A fresh checkout has no
 # BASELINE_DIR, so every axis compares against these; the local dir wins as soon
@@ -54,6 +55,10 @@ CECIL="$BIN/Mono.Cecil.dll"
 # that baseline: a snapshot of another build answers a different question.
 BASELINE_STAMP="$BASELINE_DIR/source.sha256"
 
+if [[ -z "$ASM" ]]; then
+  echo "drift: no dedicated server found; install it, pass the DLL, or set ASM/SEVENDTD_ASM/SEVENDTD_DS_DIR" >&2
+  exit 2
+fi
 [[ -f "$ASM" ]]   || { echo "drift: game DLL not found: $ASM" >&2; exit 2; }
 [[ -f "$CECIL" ]] || { echo "drift: tools not built; run $TOOLS/build.sh" >&2; exit 2; }
 

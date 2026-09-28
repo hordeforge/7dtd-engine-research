@@ -7,6 +7,10 @@
 #   ./stock-sync.sh --extract-only
 #   ASM=/path/to/Assembly-CSharp.dll ./stock-sync.sh
 #
+# ASM is optional: without it the dedicated assembly is discovered from
+# SEVENDTD_ASM / SEVENDTD_DS_DIR and the Steam install roots of this OS
+# (tools/asm_path.py, the resolution the Python tools use).
+#
 # After a TFP patch: run this, fix any FAIL sites, commit stock_facts.json + pin edits.
 # SOURCE_DATE_EPOCH=<epoch> pins the extracted_utc stamp, so re-running the
 # extraction over an unchanged DLL reproduces stock_facts.json byte for byte
@@ -18,7 +22,11 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN="$HERE/bin"
 DATA="$HERE/data"
 FACTS="$DATA/stock_facts.json"
-ASM="${ASM:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll}"
+# ASM unset: the same resolution the Python tools use (ASM/SEVENDTD_ASM/
+# SEVENDTD_DS_DIR first, then every Steam root of this OS), so a Windows or
+# macOS install is found without handing over a path. Empty when nothing is
+# found; extract() and the drift hook below report it.
+ASM="${ASM:-$(python3 "$HERE/asm_path.py")}"
 
 MODE="all"
 for arg in "$@"; do
@@ -40,9 +48,12 @@ for arg in "$@"; do
 done
 
 extract() {
+  if [[ -z "$ASM" ]]; then
+    echo "stock-sync: no dedicated server found; install it or set ASM=..., SEVENDTD_ASM=... or SEVENDTD_DS_DIR=..." >&2
+    exit 2
+  fi
   if [[ ! -f "$ASM" ]]; then
     echo "stock-sync: game DLL not found: $ASM" >&2
-    echo "  set ASM=... or install the dedicated server." >&2
     exit 2
   fi
   if [[ ! -f "$BIN/Mono.Cecil.dll" ]]; then
@@ -71,7 +82,10 @@ extract() {
   echo "stock-sync: extracting from $ASM"
   MONO_PATH="$BIN" mono "$BIN/StockFacts.exe" "$ASM" "$tmpdir/stock_facts.json"
   # XML data pins (zombie HP ladder etc.) from the same install's Data/Config.
-  GAME_ROOT="$(dirname "$(dirname "$(dirname "$ASM")")")"  # Managed -> 7DaysToDieServer_Data -> server root
+  if ! GAME_ROOT="$(python3 "$HERE/asm_path.py" --game-dir)"; then
+    echo "stock-sync: $ASM is not inside a dedicated-server install, so the Data/Config pins cannot be read" >&2
+    exit 2
+  fi
   python3 "$HERE/xml_pins.py" --game-dir "$GAME_ROOT" --pins "$tmpdir/xml_pins.json" >/dev/null
   mv "$tmpdir/stock_facts.json" "$FACTS"
   mv "$tmpdir/xml_pins.json" "$DATA/xml_pins.json"

@@ -87,22 +87,34 @@ def steam_roots(env: Mapping[str, str], home: Path) -> list[Path]:
     return roots
 
 
-def asm_candidates(env: Mapping[str, str], home: Path) -> list[Path]:
-    """Every path `find_asm` may resolve to, explicit overrides first.
+def env_candidates(env: Mapping[str, str]) -> list[tuple[str, Path]]:
+    """`(variable, path)` for every ASM_VARS override, in the documented order.
 
-    Split out from `find_asm` so the per-OS layout is testable on a host that
-    only has one of them.
+    An override is either the assembly itself or the install root holding
+    `7DaysToDieServer_Data/Managed/`. The pair is kept so a caller can report
+    which variable resolved to what, and can tell an override apart from a root
+    that discovery probed.
     """
-    candidates: list[Path] = []
+    overrides: list[tuple[str, Path]] = []
     for name in ASM_VARS:
         value = env.get(name)
         if not value:
             continue
         path = Path(value)
         if path.is_file() and path.suffix.lower() == ".dll":
-            candidates.append(path)
+            overrides.append((name, path))
         else:
-            candidates.append(path.joinpath(*MANAGED, ASM_NAME))
+            overrides.append((name, path.joinpath(*MANAGED, ASM_NAME)))
+    return overrides
+
+
+def asm_candidates(env: Mapping[str, str], home: Path) -> list[Path]:
+    """Every path `find_asm` may resolve to, explicit overrides first.
+
+    Split out from `find_asm` so the per-OS layout is testable on a host that
+    only has one of them.
+    """
+    candidates = [path for _, path in env_candidates(env)]
     candidates.extend(
         root.joinpath(*STEAM_COMMON, GAME_DIR, *MANAGED, ASM_NAME)
         for root in steam_roots(env, home)
@@ -118,6 +130,21 @@ def find_asm() -> Path | None:
     """
     candidates = asm_candidates(os.environ, Path.home())
     return next((candidate for candidate in candidates if candidate.is_file()), None)
+
+
+def game_dir(asm: Path) -> Path | None:
+    """The dedicated-server install root a resolved assembly sits in.
+
+    `<root>/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` -> `<root>`, the
+    directory that holds `Data/Config`, so every XML pin reads one install.
+    None for an assembly that is not under that layout (a copied DLL, a fixture),
+    because the caller then has to be told rather than handed a wrong root.
+    """
+    tail = Path(*MANAGED, ASM_NAME)
+    count = len(tail.parts)
+    if asm.parts[-count:] != tail.parts:
+        return None
+    return Path(*asm.parts[: len(asm.parts) - count])
 
 
 def resolve_asm(explicit: str | None) -> tuple[Path | None, str]:

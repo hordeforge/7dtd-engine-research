@@ -39,6 +39,7 @@ Standalone entry points (no build step; make targets noted inline where wired):
 | Script | Purpose |
 |---|---|
 | `facts.py` | Quick view of the machine-checked stock pins (`make facts`). |
+| `asm_path.py [--game-dir]` | Prints the dedicated-server `Assembly-CSharp.dll` in use, or with `--game-dir` the install root holding `Data/Config`. The one resolution behind `make`'s `ASM`/`GAME_ROOT`, `stock-sync.sh`, `post-update.sh` and `parity/drift-check.sh`, so the Makefile, the shell entry points and the Python tools cannot pick three different installs. Nothing found prints nothing and exits 0 (the caller's own guard reports it); an `ASM`/`SEVENDTD_ASM`/`SEVENDTD_DS_DIR` that points at no file exits 2 instead of falling through to a probed root. |
 | `census-pct.py [asm] [docsDir] [--json] [--history FILE]` | Percentage view of the coverage census: narrated / catalogued / classified / unaccounted fractions of reached game types, plus the whole-assembly reached-type/method fractions. `--json` emits a machine-readable object; `--history FILE` records a dated row in the census-history CSV, one row per date, so a rerun replaces its own row. Runs `Coverage.exe` + `Census.exe` live (`make census`; Python 3, no build step). |
 | `mention_depth.py [docsDir]` | DLL-free mention-depth histogram over the narrative docs: how many times each type-shaped backticked identifier occurs (exactly-1 / 2-4 / 5-19 / 20+). The depth behind any "narrated" fraction; published in [`../docs/meta/re-methodology.md`](../docs/meta/re-methodology.md) §1. `Coverage.exe` emits the reached-type version into the generated report and stamps that report with the studied build's version consts. |
 | `shader_blob_dump.py <bundle> [--shader NAME] [--verbose]` | Decodes Shader (class 48) sub-program blobs from a stock UnityFS bundle and re-checks the documented layout: LZ4 per-platform blobs, the 12-byte record table, the code-blob record, and the 38-byte DX11 program-data header whose SRV/constant-buffer/sampler bytes are cross-checked against the DXBC `SHDR`/`SHEX` declaration opcodes. Exits non-zero on any disagreement; no assembly, no mono; exits 77 if UnityPy is absent. Backs [`../docs/world/shader-subprogram-blob.md`](../docs/world/shader-subprogram-blob.md). Needs UnityPy from the pinned sandbox requirements (`uv pip install -r sandbox/requirements.txt`). |
@@ -325,6 +326,14 @@ vars or the standard Steam dedicated-server install paths: `%ProgramFiles(x86)%`
 `~/.steam/steam`, `~/.steam/root` on Linux, `~/Library/Application Support/Steam`
 on macOS (`tools/tests/_common.py::find_asm`); with none found they print
 `SKIP: assembly not found: ...` rather than silently passing.
+
+The same resolution is what the Makefile's `ASM` and `GAME_ROOT`, and the
+`ASM`-less runs of `stock-sync.sh`, `post-update.sh` and `parity/drift-check.sh`,
+use: `python3 tools/asm_path.py [--game-dir]` prints it. An explicit variable
+wins over the probed roots, and one that points at no file is refused (exit 2)
+instead of falling through to whatever install the host happens to carry, so a
+typo cannot quietly redirect a pin run to another build. `SEVENDTD_SERVER_DIR`
+overrides the install root for `make save-roundtrip-all` only.
 
 ```bash
 make test        # the full gate suite above

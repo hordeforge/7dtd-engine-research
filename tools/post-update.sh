@@ -8,6 +8,10 @@
 #   ./tools/post-update.sh --steam      # also Steam build id + install integrity
 #   ASM=/path/to/Assembly-CSharp.dll ./tools/post-update.sh
 #
+# ASM is optional: without it the dedicated assembly is discovered from
+# SEVENDTD_ASM / SEVENDTD_DS_DIR and the Steam install roots of this OS
+# (tools/asm_path.py, the resolution the Python tools use).
+#
 # --steam adds the Steam side (needs network for the PICS branch table): the
 # published/installed build vs the studied pin, and every installed file vs
 # Steam's cached manifest (the whole install, about 11 s; use
@@ -21,7 +25,10 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ASM="${ASM:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll}"
+# ASM unset: the same resolution the Python tools use (SEVENDTD_ASM /
+# SEVENDTD_DS_DIR first, then every Steam root of this OS). Empty when nothing
+# is found; stock-sync.sh reports it in the modes that read the install.
+ASM="${ASM:-$(python3 "$HERE/asm_path.py")}"
 
 DO_DRIFT=1
 DO_STEAM=0
@@ -48,7 +55,7 @@ for arg in "$@"; do
   esac
 done
 
-echo "post-update: ASM=$ASM"
+echo "post-update: ASM=${ASM:-<none found>}"
 echo "post-update: step stock-sync ($MODE)"
 case "$MODE" in
   check)   "$HERE/stock-sync.sh" --check-only ;;
