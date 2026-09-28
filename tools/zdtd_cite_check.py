@@ -23,10 +23,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import tooling
 
-# Sibling layout: every scan target is a directory next to this repo.
-WORKSPACE = tooling.REPO.parent
-DOCS = tooling.DOCS
-
 REPOS = [
     "zdtd-server",
     "7dtd-server-optimizer",
@@ -62,10 +58,6 @@ SKIP_DIRS = {
 SRC_EXTS = {".zig", ".cs", ".rs", ".py", ".ts", ".js", ".go"}
 
 
-def docs_dir() -> str:
-    return str(DOCS)
-
-
 def known_doc_names() -> set[str]:
     """Every docs/ filename in this repo (top level + nested inventories),
     resolved once.
@@ -75,11 +67,11 @@ def known_doc_names() -> set[str]:
     trees count: docs/inventories/netpackage-bodies.md is a research doc, so
     an `RE netpackage-bodies.md` marker must resolve against its basename.
     """
-    ddir = docs_dir()
+    ddir = tooling.DOCS
     # The docs set is the gate's reference side: a missing/unreadable docs
     # tree would flag every sibling citation as broken (a misleading "docs
     # missing" verdict instead of the real tooling problem), so refuse loudly.
-    if not os.path.isdir(ddir):
+    if not ddir.is_dir():
         raise SystemExit(f"zdtd_cite_check: docs tree not found: {ddir}")
     names: set[str] = set()
     for _dirpath, dirnames, filenames in os.walk(ddir):
@@ -155,7 +147,7 @@ def main() -> int:
     )
     ap.add_argument(
         "--root",
-        default=str(WORKSPACE),
+        default=str(tooling.REPO.parent),
         help="workspace root holding the sibling repos (default: the parent of this repo)",
     )
     ap.add_argument("--repo", help="limit the scan to one repo name")

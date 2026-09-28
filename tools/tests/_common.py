@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import ast
 import atexit
-import os
 import shutil
 import subprocess
 import sys
@@ -33,13 +32,10 @@ REPO = tooling.REPO
 TOOLS = tooling.TOOLS
 BIN = tooling.BIN
 DOCS = tooling.DOCS
-repo_root = tooling.repo_root
 scratch_dir = tooling.scratch_dir
 sha256_file = tooling.sha256_file
 find_asm = tooling.find_asm
 resolve_asm = tooling.resolve_asm
-
-ROOT_MARKERS = ("Makefile", "AGENTS.md")
 
 
 def doc(name: str) -> Path:
@@ -139,14 +135,8 @@ def argparse_clis() -> list[Path]:
 
 def run_tool(exe: str, *args: str) -> tuple[int, str, str]:
     """Run bin/<exe> under mono with MONO_PATH pointing at tools/bin."""
-    env = dict(os.environ, MONO_PATH=str(BIN))
-    proc = subprocess.run(
-        ["mono", str(BIN / exe), *args],
-        capture_output=True,
-        text=True,
-        env=env,
-    )
-    return proc.returncode, strip_mono_noise(proc.stdout), proc.stderr
+    rc, out, err = tooling.run_mono(exe, *args)
+    return rc, strip_mono_noise(out), err
 
 
 def compile_probe(cs_text: str, stem: str) -> str:
@@ -170,7 +160,7 @@ def run_probe(exe: str, *args: str) -> str:
         ["mono", exe, *args],
         capture_output=True,
         text=True,
-        env=dict(os.environ, MONO_PATH=str(BIN)),
+        env=tooling.mono_env(),
         check=True,
     )
     return strip_mono_noise(proc.stdout)

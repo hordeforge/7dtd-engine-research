@@ -31,39 +31,14 @@ import datetime
 import json
 import os
 import re
-import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tooling
 
-
-def default_asm() -> str:
-    env = os.environ.get("ASM")
-    if env:
-        return env
-    home = os.path.expanduser("~")
-    cand = os.path.join(
-        home,
-        ".local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/"
-        "7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
-    )
-    return cand
-
-
-def run_mono(exe: str, *args: str) -> tuple[int, str, str]:
-    """Run a tools/bin exe under mono with MONO_PATH set, return stdout+stderr."""
-    bin_dir = os.path.join(REPO, "tools", "bin")
-    env = dict(os.environ)
-    env["MONO_PATH"] = bin_dir
-    proc = subprocess.run(
-        ["mono", os.path.join(bin_dir, exe), *args],
-        capture_output=True,
-        text=True,
-        env=env,
-    )
-    return proc.returncode, proc.stdout, proc.stderr
+DOCS = tooling.DOCS
 
 
 def parse_coverage(stderr: str) -> dict[str, int]:
@@ -149,8 +124,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "asm",
         nargs="?",
         default=None,
-        help="path to Assembly-CSharp.dll (default: $ASM or the Steam path, "
-        "same resolution as tools/stock-sync.sh)",
+        help="path to Assembly-CSharp.dll (default: $ASM or the Steam path "
+        "under ~/.local/share/Steam, the same resolution every tool uses)",
     )
     ap.add_argument("docs", nargs="?", default=None, help="docs directory to scan (default: docs)")
     ap.add_argument(
@@ -199,23 +174,26 @@ def main() -> int:
     args = parse_args(sys.argv[1:])
     history = args.history
     as_json = args.json
-    asm = args.asm if args.asm else default_asm()
-    docs = args.docs if args.docs else os.path.join(REPO, "docs")
+    asm = args.asm or tooling.find_asm()
+    docs = args.docs if args.docs else str(DOCS)
 
-    if not os.path.isfile(asm):
-        print(f"error: assembly not found at {asm}", file=sys.stderr)
+    if asm is None or not Path(asm).is_file():
+        print(
+            f"error: assembly not found at {asm or '(no $ASM, no local install)'}", file=sys.stderr
+        )
         print("pass the path as argv[1] or set $ASM", file=sys.stderr)
         return 2
+    asm = str(asm)
 
     # 1. Live coverage census over the docs tree (report to a private temp
     #    file so the scan never sees a stale extra file inside docs/). The
     #    scratch base is disk-backed: the system temp dir is tmpfs here.
-    scratch = os.path.join(REPO, ".scratch", "tmp")
-    os.makedirs(scratch, exist_ok=True)
-    fd, tmp_report = tempfile.mkstemp(prefix="census-pct-coverage-", suffix=".md", dir=scratch)
+    fd, tmp_report = tempfile.mkstemp(
+        prefix="census-pct-coverage-", suffix=".md", dir=tooling.scratch_dir()
+    )
     os.close(fd)
     try:
-        rc, _, stderr = run_mono("Coverage.exe", asm, docs, tmp_report)
+        rc, _, stderr = tooling.run_mono("Coverage.exe", asm, docs, tmp_report)
         if rc != 0:
             print("error: Coverage.exe failed:", file=sys.stderr)
             print(stderr, file=sys.stderr)
@@ -228,7 +206,7 @@ def main() -> int:
             os.unlink(tmp_report)
 
     # 2. Whole-assembly census (for the unreached remainder).
-    rc, stdout, census_stderr = run_mono("Census.exe", asm)
+    rc, stdout, census_stderr = tooling.run_mono("Census.exe", asm)
     if rc != 0:
         print("error: Census.exe failed:", file=sys.stderr)
         print(census_stderr, file=sys.stderr)

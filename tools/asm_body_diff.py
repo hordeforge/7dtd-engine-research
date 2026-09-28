@@ -15,7 +15,6 @@ Requires mono + tools/bin/Mono.Cecil.dll (built by `make tools`).
 from __future__ import annotations
 
 import argparse
-import os
 import subprocess
 import sys
 import tempfile
@@ -24,8 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import tooling
 
-TOOLS = Path(__file__).resolve().parent
-CECIL = TOOLS / "bin" / "Mono.Cecil.dll"
+CECIL = tooling.BIN / "Mono.Cecil.dll"
 HASH_CS = r"""
 using System;
 using System.Collections.Generic;
@@ -171,8 +169,7 @@ def main() -> int:
         if comp.returncode != 0:
             print(comp.stderr or comp.stdout, file=sys.stderr)
             return 1
-        env = os.environ.copy()
-        env["MONO_PATH"] = str(TOOLS / "bin")
+        env = tooling.mono_env()
         run = subprocess.run(
             ["mono", str(exe), str(old), str(new)],
             text=True,

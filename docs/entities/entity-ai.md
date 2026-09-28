@@ -4009,7 +4009,8 @@ base class (moved up from rabbit-only, which is where V3.0.1 had it). Full held-
 
 Measured against the installed `Data/Config/entityclasses.xml`
 (sha256 `0c95e733…912db0b0`, the same bytes already pinned in
-[PROVENANCE](../../../zdtd-server/docs/PROVENANCE.md) for zdtd). Census of every `AITask` and
+[PROVENANCE](../../../zdtd-server/docs/PROVENANCE.md) for zdtd). Census of every
+`AITask` and
 numbered `AITask-N` list in the file, resolved per class (a class counts a
 name once, union over both forms). 23 classes carry an AITask list; 149
 task-name occurrences across 12 distinct names:

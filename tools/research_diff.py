@@ -30,7 +30,6 @@ Exit codes: 0 report written, 1 drift detected (--check), 2 unusable input.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -123,14 +122,10 @@ class Section:
     note: str | None = None
 
 
-def mono_env() -> dict[str, str]:
-    env = dict(os.environ)
-    env["MONO_PATH"] = str(BIN)
-    return env
-
-
 def run(cmd: list[str], timeout: float = 900.0) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, text=True, capture_output=True, env=mono_env(), timeout=timeout)
+    return subprocess.run(
+        cmd, text=True, capture_output=True, env=tooling.mono_env(), timeout=timeout
+    )
 
 
 def prereq() -> str | None:
@@ -153,14 +148,6 @@ def prereq() -> str | None:
     if shutil.which("mono") is None:
         return "mono not on PATH (the C# lenses need Mono)"
     return None
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def load_steam_pins() -> dict[str, Any]:
@@ -210,7 +197,7 @@ def load_source(
     path: Path, label: str | None, buildid: str | None, tmp: Path, name: str, pins: dict[str, Any]
 ) -> Source:
     facts = extract_facts(path, tmp, name)
-    sha = sha256_file(path)
+    sha = tooling.sha256_file(path)
     wire = str(facts.get("version", {}).get("stock_wire", "unknown"))
     return Source(
         label=label or wire.replace(" ", "-"),

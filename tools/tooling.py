@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import subprocess
 from pathlib import Path
 
 ROOT_MARKERS = ("Makefile", "AGENTS.md")
@@ -92,3 +93,25 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(_HASH_CHUNK), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def mono_env() -> dict[str, str]:
+    """Process environment with MONO_PATH wired at tools/bin.
+
+    Every dumper links Mono.Cecil from there, so mono needs the hint to load it.
+    """
+    env = dict(os.environ)
+    env["MONO_PATH"] = str(BIN)
+    return env
+
+
+def run_mono(exe: str | Path, *args: str) -> tuple[int, str, str]:
+    """Run a mono exe (path or a name inside tools/bin) -> (rc, stdout, stderr)."""
+    target = exe if os.sep in str(exe) else BIN / str(exe)
+    proc = subprocess.run(
+        ["mono", str(target), *args],
+        capture_output=True,
+        text=True,
+        env=mono_env(),
+    )
+    return proc.returncode, proc.stdout, proc.stderr
