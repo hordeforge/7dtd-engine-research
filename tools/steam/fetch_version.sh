@@ -13,8 +13,9 @@
 #   fetch_version.sh 1234567890123 v3.0  # a pinned depot manifest
 #
 # A branch is letters/digits/dot/underscore/hyphen with no leading hyphen (a
-# leading `-` is one of steamcmd's own options); a manifest id is all digits;
-# a label is the same shape as a branch and becomes parity_<label>.json.
+# leading `-` is one of steamcmd's own options); a manifest id is 6 or more
+# digits, anything else numeric is taken as a branch; a label is the same shape
+# as a branch and becomes parity_<label>.json.
 #
 # Produces: <OUT>/parity_<label>.json  (ParitySurface snapshot)
 # Requires SteamCMD installed by the operator (`STEAMCMD=/path/to/steamcmd.sh`).

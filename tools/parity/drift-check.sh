@@ -7,6 +7,7 @@
 #   drift-check.sh [ASM]           # ASM defaults to the discovered dedicated DLL
 #                                  # (SEVENDTD_ASM/SEVENDTD_DS_DIR, Steam roots)
 #   BASELINE_DIR=... drift-check.sh
+#   COMMITTED_BASELINE=... drift-check.sh  # where the shipped baseline lives
 #   PARITY_BASELINE=... drift-check.sh   # committed wire snapshot (default below)
 #   drift-check.sh --accept-baseline      # make the current build the local baseline
 #

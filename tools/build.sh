@@ -4,6 +4,7 @@
 # Rebuilds are incremental: a target is recompiled only when a source is newer
 # than its exe or bin/.toolchain-stamp no longer matches the compiler/Cecil in
 # use. The toolchain that produced bin/ is recorded in bin/buildinfo.txt.
+# Pass --skip-legacy to compile src/*.cs alone (legacy/ is a best-effort stage).
 set -euo pipefail
 # Compile and report in a fixed order regardless of the invoker's locale:
 # the src/*.cs and legacy/*.cs globs below iterate in collation order, so a

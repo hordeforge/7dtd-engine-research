@@ -7,10 +7,11 @@ dedicated server through the research docs. This gate extracts every EXPLICIT re
 citation - an `RE:` marker or a `7dtd-engine-research/docs/` path prefix - from each
 sibling and checks the cited file exists in this repo's docs/. Bare names of a
 sibling's OWN docs are not research citations and are ignored (resolved
-against that repo's docs/ + root + zdtd-server docs/adr).
+against that repo's docs/ + root + its docs/adr, number prefix stripped).
 
-Usage: python3 tools/zdtd_cite_check.py [--root <workspace>]
+Usage: python3 tools/zdtd_cite_check.py [--root <workspace>] [--repo NAME]
   --root defaults to the parent of this repo (the sibling layout root).
+  --repo limits the scan to one sibling repo.
 Exit 0 when every research citation resolves; 1 with the broken list otherwise.
 """
 

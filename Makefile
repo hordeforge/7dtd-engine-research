@@ -16,9 +16,9 @@ ASM_VARS := ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR
 .PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift test test-docs lint verify verify-live facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
 
 help:
-	@echo "Fresh clone, no game install? These need nothing but python3:"
-	@echo "  make test-docs  - the CI gate (docs, links, pins, layout); DLL-free"
-	@echo "  make lint       - static analysis (see its own version pins below)"
+	@echo "Fresh clone, no game install? These need no game:"
+	@echo "  make test-docs  - the CI gate (docs, links, pins, layout); needs only python3"
+	@echo "  make lint       - static analysis; also needs ruff, mypy, shellcheck (pins below)"
 	@echo "  make tools      - build Mono.Cecil dumpers (tools/bin); needs mono + mcs"
 	@echo "With a game install: make test, make verify. The DLL is discovered"
 	@echo "(ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR, then this OS's Steam roots);"

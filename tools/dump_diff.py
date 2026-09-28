@@ -2,8 +2,9 @@
 """Method-level diff of two il/full-<version> dump sets.
 
 Each type file (.il.txt) has:
-  // ==== TypeName ====
-  // kind base=... interfaces=... fields: ...
+  // ==== TypeName.FullName ====
+  // kind base=... interfaces=...
+  // fields: ...
   then per method:
   // TypeName::Method(param list) IL=N
   IL_xxxx: instruction

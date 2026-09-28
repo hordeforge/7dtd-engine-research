@@ -2,7 +2,8 @@
 // Seeds GameManager.StartAsServer/gmUpdate/UpdateTick/... + peer Updates + entity
 // tick, walks call/callvirt/newobj (devirtualizing callvirt via an override map), and
 // emits reached types (method-with-body count, tab-separated). Cross-filter against
-// il/surface-v3.1.0/surface-types.md (Assembly-CSharp) to find reachable game types no
+// il/surface-<update.dump_label_suffix>/surface-types.md (v3.2.0 at the stock pin,
+// Assembly-CSharp) to find reachable game types no
 // doc references: the definitive coverage lens.
 //   mono Reach.exe <asm> <outFile>
 using System;using System.Collections.Generic;using System.IO;using System.Linq;

@@ -5,6 +5,7 @@
 #   ./tools/post-update.sh              # extract stock_facts + pin check + drift
 #   ./tools/post-update.sh --no-drift   # extract + pin only
 #   ./tools/post-update.sh --check-only # pin check only (no extract)
+#   ./tools/post-update.sh --extract-only # extract stock_facts only (no pin check, no drift)
 #   ./tools/post-update.sh --steam      # also Steam build id + install integrity
 #   ASM=/path/to/Assembly-CSharp.dll ./tools/post-update.sh
 #

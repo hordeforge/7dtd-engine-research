@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# One-shot regeneration of every committed inventory + git-ignored dump set.
+# One-shot regeneration of the canonical il/ dump sets + the four generated
+# committed inventories.
 # Run after a game update or after changing tools/src, then re-check docs:
 #   ASM=".../Assembly-CSharp.dll" ./tools/regen.sh
-# Leaves the working tree with fresh dumps (il/, git-ignored) and refreshed
-# committed inventories (docs/inventories/*). Follow up with `make test`.
+# Leaves the working tree with fresh dumps (il/, git-ignored) and the generated
+# inventories in docs/inventories/ refreshed. Follow up with `make test`.
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(dirname "$here")"

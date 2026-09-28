@@ -4,8 +4,10 @@
 // markdown report: reachability totals, per-namespace documented/undocumented split,
 // and the top undocumented reached types (the gaps left to close).
 //   mono Coverage.exe <asm> <docsDir> <out.md>
-// The "documented" signal is a name mention in any docs/*.md (an upper bound: a type
-// named in passing counts). Treat undocumented-reached as the honest gap list.
+// The "documented" signal is a backtick-quoted name mention in a narrative doc
+// (narrated), in a non-narrative one (catalogued), or a classified-list entry.
+// It is an upper bound: a type named in passing counts. Treat undocumented-reached
+// as the honest gap list.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -287,7 +289,7 @@ class Coverage {
     int reachedGameMethods = visitedAc.Count(m => !Generated(m.DeclaringType) && !IsLibrary(m.DeclaringType));
     int uncalledInReachedGame = methodsInReachedGameTypes - reachedGameMethods;
     // Whole-assembly accounting: every non-generated non-library AC type is either a
-    // reached game type (all 3,699 accounted: narrated/catalogued/classified) or an
+    // reached game type (all accounted: narrated/catalogued/classified) or an
     // unreached game type (classified in out-of-scope-surface.md). Methods follow from
     // their declaring type, so the whole assembly reaches 100% accounted.
     int acNonGenNonLib = all.Count(t => !Generated(t) && !IsLibrary(t));

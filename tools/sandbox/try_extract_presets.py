@@ -1,7 +1,7 @@
 """Scan the shipped Unity bundles for the sandbox_presets TextAsset (the six
 difficulty presets, LoadInternalPresets IL=43 Resources.Load("Data/Sandbox/
 sandbox_presets")). Walks every .bundle/.unity3d/.resource under the game dir
-(dedicated layout 7DaysToDieServer_Data, client fallback 7DaysToDie_Data) and
+(client layout 7DaysToDie_Data, dedicated fallback 7DaysToDieServer_Data) and
 prints any TextAsset whose name mentions sandbox/preset.
 
 Historical note 2026-08-25: the dedicated install held no such TextAsset

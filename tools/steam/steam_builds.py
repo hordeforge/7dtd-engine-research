@@ -82,8 +82,8 @@ DEFAULT_FETCH_TIMEOUT = 6 * 3600.0
 
 def usable_label(value: str) -> bool:
     """A label fetch_version.sh will accept: fetch_version.sh is the enforcing
-    copy (same shape, no bare dot, no leading hyphen); this keeps the two in
-    step so the refusal happens before a download is announced."""
+    copy (same shape, no bare dot); this keeps the two in step so the refusal
+    happens before a download is announced."""
     return bool(LABEL_RE.fullmatch(value)) and value not in (".", "..")
 
 
@@ -369,8 +369,8 @@ def fetch_by_name(branch_name: str, label: str, do_fetch: bool) -> int:
         print(f"steam_builds: invalid label {label!r}", file=sys.stderr)
         return 2
     # fetch_version.sh forwards this to `steamcmd -beta <name>`; a leading `-`
-    # would be read by steamcmd as an option, so the name is held to the same
-    # shape as a label.
+    # would be read by steamcmd as an option, so the name is held to the label
+    # shape. A leading hyphen still passes here; fetch_version.sh refuses it.
     if not usable_label(branch_name):
         print(f"steam_builds: invalid branch name {branch_name!r}", file=sys.stderr)
         return 2

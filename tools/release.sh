@@ -7,8 +7,11 @@
 #
 # Refuses on a dirty worktree, a tag that already exists locally or on origin, a
 # branch behind origin/main, an unauthenticated gh, and a missing notes file.
+# Under --dry-run the worktree, behind-main and gh checks are notes, not
+# refusals, since a dry run changes nothing.
 # Runs `make lint` and `make test-docs` before tagging (the DLL-free half of the
-# gate suite; CI runs the rest on the push) unless --skip-gates is given.
+# gate suite; CI runs the rest on the push) unless --skip-gates is given. A
+# --dry-run skips them too, for the same reason.
 #
 # A release is several irreversible steps, and a run that dies between them
 # (a push that lands and a gh that does not, a laptop lid closed on the tag

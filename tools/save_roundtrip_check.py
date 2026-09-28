@@ -848,10 +848,11 @@ def main() -> int:
         return report(checks)
     if not save_dir:
         print(
-            "error: no save dir given and none found under ~/.cache/7dtd-loadgen-*/Saves/*/*/",
+            "error: no save dir given and there is no discovery; pass one "
+            "explicitly (e.g. ~/.cache/7dtd-loadgen-*/Saves/*/*/) or use --shipped",
             file=sys.stderr,
         )
-        return 1
+        return 2
     print(f"Round-trip checking save: {save_dir}\n")
 
     ttw = os.path.join(save_dir, "main.ttw")

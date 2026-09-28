@@ -173,7 +173,8 @@ class StockFacts {
   }
 
   // NetPackageTileEntity write: detect teBlockId (i32 after pos) + payload length width.
-  // Heuristic from BinaryWriter.Write calls in write(): count Write(Int32) near end.
+  // Heuristic from BinaryWriter.Write calls in write(): total the single-argument
+  // primitive Write overloads in the body, by parameter type.
   static Dictionary<string, object> TileEntityWire(ModuleDefinition mod) {
     var t = mod.Types.FirstOrDefault(x => x.Name == "NetPackageTileEntity");
     var d = new Dictionary<string, object>();
