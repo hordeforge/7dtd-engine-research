@@ -20,7 +20,13 @@ for arg in "$@"; do
   esac
 done
 cd "$here"
-mkdir -p bin
+# Every compile goes through bin/.staging/<final-name> and is renamed into
+# place. The staging path must keep the FINAL basename: mcs derives the
+# assembly name and the module MVID from the -out path, so a mktemp name
+# (bin/.Xref.exe.AB12cd) leaks into the shipped exe and makes two builds of
+# identical sources differ. bin/.staging is inside bin/, so the rename stays a
+# same-filesystem atomic move.
+mkdir -p bin/.staging
 
 # Compiler prerequisite: mcs ships with the mono development packages; a bare
 # mono runtime can run the dumpers but not compile them. Fail once, by name,
@@ -85,7 +91,7 @@ if [[ ! -s bin/Mono.Cecil.dll ]] || ! cmp -s "$cecil" bin/Mono.Cecil.dll; then
   # Stage and rename: a concurrent `make census` or drift-check must not load a
   # half-copied assembly, which reads as "cannot open assembly" rather than as
   # the build race it is.
-  staged_cecil="$(mktemp "bin/.Mono.Cecil.dll.XXXXXX")"
+  staged_cecil="bin/.staging/Mono.Cecil.dll"
   if cp -f "$cecil" "$staged_cecil"; then
     mv -f "$staged_cecil" bin/Mono.Cecil.dll
   else
@@ -119,7 +125,12 @@ if command -v mono >/dev/null 2>&1; then
   [[ -n "$mono_ver" ]] || mono_ver="unknown"
 fi
 stamp_file="bin/.toolchain-stamp"
-stamp_now="mcs=$mcs_ver mono=$mono_ver cecil=$cecil_ver cecil_sha256=$pin_sha"
+# The digest of the assembly actually linked in, not the pin: an
+# MONO_CECIL_UNVERIFIED=1 build links something the pin does not name, and a
+# stamp that claims otherwise both hides the swap and lets the next run treat
+# exes built against the other dll as current.
+cecil_actual_sha="$(sha256_of bin/Mono.Cecil.dll)"
+stamp_now="mcs=$mcs_ver mono=$mono_ver cecil=$cecil_ver cecil_sha256=$cecil_actual_sha"
 # Compared by content, not mtime: the stamp is rewritten at the end of every
 # successful run, and a run that rebuilt one target must not mark the exes it
 # did not touch as stale. A mismatch (new compiler, re-pinned Cecil, missing
@@ -160,11 +171,13 @@ for f in src/*.cs; do
   # otherwise tests keep running against a stale exe that predates the breakage.
   # -warn:4 -warnaserror: the tree compiles warning-clean at max severity; keep
   # it that way (new warnings fail the build instead of scrolling past).
-  # Compiling to a private temp and renaming into place keeps a concurrent build
-  # or gate from loading a half-written exe, and leaves the previous one intact
-  # when the compile fails.
-  staged="$(mktemp "bin/.$name.exe.XXXXXX")"
-  if ! out="$(mcs -nologo -warn:4 -warnaserror -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"$staged" 2>&1)"; then
+  # Compiling under the final basename in bin/.staging and renaming into place
+  # keeps a concurrent build or gate from loading a half-written exe, leaves the
+  # previous one intact when the compile fails, and keeps the assembly name and
+  # MVID identical across rebuilds.
+  staged="bin/.staging/$name.exe"
+  rm -f "$staged"
+  if ! out="$(mcs -nologo -warn:4 -warnaserror -pathmap:"$here=." -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"$staged" 2>&1)"; then
     [[ -n "$out" ]] && printf '%s\n' "$out" >&2
     rm -f "$staged"
     echo "build: FAILED bin/$name.exe (compiler output above)" >&2
@@ -195,8 +208,8 @@ if [[ "$skip_legacy" -eq 0 && -d legacy ]]; then
       ok=$((ok+1))
       continue
     fi
-    if staged="$(mktemp "bin/legacy/.$name.exe.XXXXXX")" &&
-      mcs -nologo -r:bin/Mono.Cecil.dll "$f" -out:"$staged" >/dev/null 2>&1; then
+    if staged="bin/.staging/$name.exe" && rm -f "$staged" &&
+      mcs -nologo -pathmap:"$here=." -r:bin/Mono.Cecil.dll "$f" -out:"$staged" >/dev/null 2>&1; then
       mv -f "$staged" "bin/legacy/$name.exe"
       ok=$((ok+1))
     else
@@ -218,6 +231,11 @@ printf '%s\n' "$stamp_now" > "$stamp_file"
   echo "mcs=$mcs_ver"
   echo "mono=$mono_ver"
   echo "monocecil_version=$cecil_ver"
-  echo "monocecil_sha256=$pin_sha"
+  echo "monocecil_sha256=$cecil_actual_sha"
+  echo "monocecil_pinned_sha256=$pin_sha"
+  echo "# byte-identical across rebuilds: the output basename, not the mktemp"
+  echo "# name, and the source paths are mapped out (-pathmap); mcs has no"
+  echo "# -deterministic, so do not reintroduce a random -out basename."
+  echo "deterministic=yes"
 } > bin/buildinfo.txt
 echo "done. run e.g.:  mono bin/Census.exe \"\$ASM\""

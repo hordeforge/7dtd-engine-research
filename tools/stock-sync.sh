@@ -67,9 +67,13 @@ extract() {
     [[ "$BIN/Mono.Cecil.dll" -nt "$BIN/StockFacts.exe" ]]; then
     echo "stock-sync: compiling StockFacts.exe"
     # Stage and rename so a concurrent research_diff / census never loads a
-    # half-written assembly.
-    staged="$(mktemp "$BIN/.StockFacts.exe.XXXXXX")"
-    if mcs -nologo -r:"$BIN/Mono.Cecil.dll" "$HERE/src/StockFacts.cs" -out:"$staged"; then
+    # half-written assembly. The staging name is the FINAL one: mcs takes the
+    # assembly name and module MVID from the -out path, so a mktemp name would
+    # leak into the exe and make two builds of one source differ.
+    staged="$BIN/.staging/StockFacts.exe"
+    mkdir -p "$BIN/.staging"
+    rm -f "$staged"
+    if mcs -nologo -pathmap:"$HERE=." -r:"$BIN/Mono.Cecil.dll" "$HERE/src/StockFacts.cs" -out:"$staged"; then
       mv -f "$staged" "$BIN/StockFacts.exe"
     else
       rm -f "$staged"

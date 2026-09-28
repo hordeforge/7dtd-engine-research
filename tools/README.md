@@ -90,6 +90,15 @@ and a toolchain swap cannot silently leave binaries from the previous compiler
 in place. The compile and log order is pinned to `LC_ALL=C`, so it does not
 follow the invoker's collation.
 
+Two builds of one tree are byte-identical. `mcs` has no `-deterministic`, but
+it takes the assembly name and the module MVID from the `-out` path, so every
+compile targets `bin/.staging/<final-name>` and is renamed into place: a
+`mktemp` `-out` name would land in the shipped assembly and make each rebuild
+differ. Source paths are mapped out with `-pathmap`. `bin/buildinfo.txt` records
+the digest of the Cecil actually linked in (`monocecil_sha256`) next to the pin
+it was checked against (`monocecil_pinned_sha256`); the two differ only under
+`MONO_CECIL_UNVERIFIED=1`.
+
 ```bash
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 ```

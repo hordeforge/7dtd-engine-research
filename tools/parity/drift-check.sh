@@ -83,11 +83,16 @@ build_helper() { # <name> <src>
   [[ -f "$exe" && "$exe" -nt "$2" && "$exe" -nt "$CECIL" ]] && return 0
   # A failed helper build must not look like "no drift" on that axis; the run
   # fails closed below instead of comparing a partial surface. The compile lands
-  # on a private temp and is renamed into place, so a concurrent drift-check or
-  # `make census` never loads a half-written assembly.
+  # on a private staging copy and is renamed into place, so a concurrent
+  # drift-check or `make census` never loads a half-written assembly. The
+  # staging name is the FINAL one: mcs takes the assembly name and module MVID
+  # from the -out path, so a mktemp name leaks into the exe and breaks
+  # byte-identical rebuilds.
   local staged
-  staged="$(mktemp "$BIN/.$1.exe.XXXXXX")"
-  if ! mcs -nologo -r:"$CECIL" "$2" -out:"$staged"; then
+  staged="$BIN/.staging/$1.exe"
+  mkdir -p "$BIN/.staging"
+  rm -f "$staged"
+  if ! mcs -nologo -pathmap:"$TOOLS=." -r:"$CECIL" "$2" -out:"$staged"; then
     rm -f "$staged"
     echo "drift: error: failed to compile $1.exe; refusing to compare an incomplete surface" >&2
     return 1
