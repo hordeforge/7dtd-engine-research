@@ -10,14 +10,16 @@
 
 Reverse-engineering research on the **7 Days to Die dedicated server** (V **3.2.0 (b10)**): how the stock, unmodified server is built and behaves, and its wire/file formats, derived from the shipped `Assembly-CSharp.dll`. Produced alongside a server performance-optimization suite; the cost/scaling **measurement** program and optimization levers live in the companion `7dtd-server-optimizer/docs/`, not here.
 
-Start at [`docs/INDEX.md`](docs/INDEX.md).
+Start at [`docs/INDEX.md`](docs/INDEX.md). Contributing (setup, the
+edit-test loop, what CI runs) is in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 Gates, from a clean clone with only Python: `make test-docs` is the CI gate and
 needs no game install; `make lint` adds static analysis. With a game install
 (`ASM=/path/to/Assembly-CSharp.dll`), `make test` adds the DLL-dependent suite
 (reach, inventories, surface) and `make verify` runs the doc-link, pin,
 readiness, facts and XML-data checks in one command. Any single gate also runs
-standalone (`python3 tools/tests/test_doc_link_integrity.py`;
+on its own (`make gate NAME=test_doc_link_integrity.py`, or
+`python3 tools/tests/test_doc_link_integrity.py`;
 DLL-dependent scripts auto-discover your game install). `make help` lists the
 targets and which ones need the game. `make lint` is the
 static-analysis gate: `ruff` check + format, `mypy --strict`, and `shellcheck`,

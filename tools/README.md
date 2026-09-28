@@ -389,7 +389,14 @@ overrides the install root for `make save-roundtrip-all` only.
 ```bash
 make test        # the full gate suite above
 make stock-check # stock_facts pins vs live DLL + sibling pins
+make gate NAME=test_bounded_runs.py   # one gate, while iterating on it
 ```
+
+`make gate` takes the filename exactly as the table above spells it and
+`ARGS=` passes that script's own flags. A name that is not a file in
+`tests/` (including an empty one) prints the gate list and exits 2, so a typo
+cannot read as a run that passed. `python3 tests/<gate>.py` is the same thing
+without make.
 
 ## Policy
 

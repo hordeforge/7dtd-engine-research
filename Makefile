@@ -13,7 +13,7 @@ ASM ?= $(shell python3 "$(TOOLS)/asm_path.py" 2>/dev/null)
 GAME_ROOT ?= $(shell python3 "$(TOOLS)/asm_path.py" --game-dir 2>/dev/null)
 ASM_VARS := ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR
 
-.PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift test test-docs lint verify verify-live facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
+.PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift gate test test-docs lint verify verify-live facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
 
 help:
 	@echo "Fresh clone, no game install? These need no game:"
@@ -23,7 +23,7 @@ help:
 	@echo "With a game install: make test, make verify. The DLL is discovered"
 	@echo "(ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR, then this OS's Steam roots);"
 	@echo "ASM=/path/to/Assembly-CSharp.dll selects it explicitly."
-	@echo "One gate at a time: python3 tools/tests/<gate>.py (all of them are listed"
+	@echo "One gate at a time: make gate NAME=<gate>.py (all of them are listed"
 	@echo "in tools/README.md)."
 	@echo ""
 	@echo "make tools        - build Mono.Cecil dumpers (tools/bin)"
@@ -43,6 +43,7 @@ help:
 	@echo "make readiness    - version-update tooling readiness bench (0-100)"
 	@echo "make bench-bodydiff - deterministic perf gate for the body-diff lens (perf instructions:u)"
 	@echo "make test         - full suite (structural, stock-check, reach, inventories, surface, links)"
+	@echo "make gate         - one gate while iterating: NAME=<gate>.py, ARGS=<flags>"
 	@echo "make test-docs    - DLL-free corpus invariants (runs in CI)"
 	@echo "make verify       - one-command gate: doc links, pins, readiness, facts, xml data (needs the live game)"
 	@echo "make verify-live  - the body of verify, after its ASM preflight; run verify, not this"
@@ -50,6 +51,19 @@ help:
 
 tools:
 	cd "$(TOOLS)" && ./build.sh --skip-legacy
+
+# One gate, for the edit-test loop: `make gate NAME=test_bounded_runs.py`, and
+# ARGS passes the script's own flags. The name must be a real file in
+# tools/tests; a typo or an empty NAME prints the gate list and exits 2 rather
+# than exiting 0, so neither can read as a passing run.
+gate:
+	@if [ -z "$(NAME)" ] || [ ! -f "$(TOOLS)/tests/$(NAME)" ]; then \
+	  echo "gate: NAME=<gate>.py selects one script in $(TOOLS)/tests; got '$(NAME)'." >&2; \
+	  echo "gate: the gates are:" >&2; \
+	  for f in "$(TOOLS)/tests"/*.py; do basename "$$f"; done >&2; \
+	  exit 2; \
+	fi; \
+	python3 "$(TOOLS)/tests/$(NAME)" $(ARGS)
 
 stock-sync:
 	cd "$(TOOLS)" && ASM="$(ASM)" ./stock-sync.sh

@@ -57,7 +57,6 @@ SHELL_CHILD_RE = re.compile(
 )
 
 
-
 def wait_gone(pid: int) -> bool:
     """Poll briefly for a pid to disappear. A zombie answers kill(0), so reap
     it opportunistically; this process is not its parent, so the check is a
@@ -202,6 +201,23 @@ class _ShellScanner:
         return line if end is None else line[:end]
 
 
+def spawns_a_tool(stripped: str) -> bool:
+    """True when a source line launches mono/mcs/monodis as a command.
+
+    Two things only ever name a tool in a shell entry point without running
+    one: a comment, and a string being written out. `build.sh` records
+    `mcs=$mcs_ver` and a comment mentioning mcs in `bin/buildinfo.txt`; reading
+    either as a spawn fails the gate on a line that spawns nothing. Command
+    substitution in the argument is the exception, because there the tool runs.
+    """
+    if stripped.startswith("#"):
+        return False
+    word = stripped.split(None, 1)[0] if stripped else ""
+    if word in ("echo", "printf") and "$(" not in stripped and "`" not in stripped:
+        return False
+    return SHELL_CHILD_RE.search(stripped) is not None
+
+
 def check_shell_scripts_are_bounded() -> None:
     """No mono/mcs/monodis child in a shell entry point comes back unbounded."""
     for path in sorted(_common.TOOLS.rglob("*.sh")):
@@ -212,12 +228,34 @@ def check_shell_scripts_are_bounded() -> None:
             code = scanner.code(line)
             if not code.strip():
                 continue
-            match = SHELL_CHILD_RE.search(code)
+            # A tool named inside a quoted substitution runs, and the scanner
+            # reads that as text, so the raw line is the fallback source.
+            source, match = code, SHELL_CHILD_RE.search(code)
+            if match is None and spawns_a_tool(line.strip()):
+                source, match = line, SHELL_CHILD_RE.search(line)
             if match is None:
                 continue
-            assert "run_bounded" in code, (
+            assert "run_bounded" in source, (
                 f"{path.name}:{number} spawns {match.group(2)} with no wall-clock bound: {line.strip()}"
             )
+
+
+# A write naming a tool, a comment naming a tool, and the real spawn forms.
+DETECTOR_CASES = (
+    ('echo "mcs=$mcs_ver"', False),
+    ('echo "# name, and the source paths are mapped out; mcs has no"', False),
+    ('echo "installed: $(mcs --version)"', True),
+    ("# mcs is only needed for the legacy dumpers", False),
+    ('mcs_ver="$(run_bounded mcs --version 2>/dev/null)"', True),
+    ("mcs -nologo -out:bin/Census.exe src/Census.cs", True),
+)
+
+
+def check_spawn_detector() -> None:
+    """The text-write exemption must not hide a real spawn."""
+    for line, want in DETECTOR_CASES:
+        got = spawns_a_tool(line)
+        assert got == want, f"spawns_a_tool({line!r}) is {got}, want {want}"
 
 
 def main() -> None:
@@ -227,6 +265,7 @@ def main() -> None:
     check_passthrough()
     check_timeout_env()
     check_shell_timeout_env_fails_loud()
+    check_spawn_detector()
     check_shell_scripts_are_bounded()
     print("OK: a timed-out tool run is killed with its process group and reports the timeout")
 
