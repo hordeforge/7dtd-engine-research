@@ -86,7 +86,7 @@ edits together.
 ## House rules
 
 - **No em dashes, and no AI attribution**, in any text that lands here
-  ([`AGENTS.md`](AGENTS.md) rules 5 and 8). Match the surrounding voice.
+  ([`AGENTS.md`](AGENTS.md) rule 5). Match the surrounding voice.
 - **No game assemblies or IL.** `il/` is git-ignored evidence; quote at most a
   few disassembly lines for commentary.
 - **Every wire or RE claim traces to an instruction.** The method, the status

@@ -123,7 +123,8 @@ otherwise, and each one has a default that runs on a checkout with no game and
 no setup. `tools/tests/test_env_vars_documented.py` fails if a variable the code
 reads is missing from this table, or a row here names nothing the code reads.
 It scans the Python tools, the Makefile, and the defaulting expansions in the
-shell entry points, so a knob added to `tools/*.sh` lands here too.
+shell entry points at any depth, so a knob added to a script under `tools/`
+lands here too.
 
 | Variable | Read by | Default | Effect |
 |---|---|---|---|
@@ -352,7 +353,7 @@ are explicit. See `re-scratch/README.md`.
 | `tests/test_state_machines_current.py` | `state-machines.md` lifecycle tables are current against the live DLL (skips without mono or without the built `bin/StateMachines.exe`, so a stock CI checkout is CI-safe). |
 | `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (12 claims). |
 | `tests/test_readme_test_table.py` | Every test script run by `make test`/`test-docs`/`verify` is documented in this table, and every entry is a real file. |
-| `tests/test_env_vars_documented.py` | Every environment variable the Python tools, the Makefile or the shell entry points read is a row in the "Environment variables" table above, and every row is a variable something reads. The names come from an AST scan of the tools (`os.environ` reads plus the `_ENV`/`_VARS` constants they indirect through), the Makefile's own variables, and the defaulting expansions (`${VAR:-...}` and friends) in `tools/*.sh`, with comments and single-quoted text cut, so a knob added to a shell script cannot ship with a default nobody outside the diff knows. Names that are not configuration (make's own variables, `$HOME`) are a reviewed `NOT_CONFIG` list. The shell scan is self-tested against source whose answer is known. DLL-free, network-free. |
+| `tests/test_env_vars_documented.py` | Every environment variable the Python tools, the Makefile or the shell entry points read is a row in the "Environment variables" table above, and every row is a variable something reads. The names come from an AST scan of the tools (`os.environ` reads plus the `_ENV`/`_VARS` constants they indirect through), the Makefile's own variables, and the defaulting expansions (`${VAR:-...}` and friends) in every `.sh` file under `tools/`, with comments and single-quoted text cut, so a knob added to a shell script cannot ship with a default nobody outside the diff knows. Names that are not configuration (make's own variables, `$HOME`) are a reviewed `NOT_CONFIG` list. The shell scan is self-tested against source whose answer is known. DLL-free, network-free. |
 | `tests/test_transport_closure_claims.py` | No stale native-LiteNetLib / unknown-peer-order claims in the docs. Pattern liveness self-tested. |
 | `tests/test_coverage_consistency.py` | `docs/meta/coverage.md` audit table lists every narrative doc; census rows match `stock_facts.json`; every `**Current pin:**` banner in `docs/` names the pinned build (a stale banner is caught, a history mention is not). |
 | `tests/test_promoted_types.py` | Every name in `data/promoted-types.txt` stays absent from `out-of-scope-surface.md`, so an inventory regeneration cannot silently revert the referrer-verified hand-corrections; the OOS maintenance note must still cite the input file. DLL-free. |

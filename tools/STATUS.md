@@ -131,9 +131,9 @@ Status terms:
   detector is self-tested both ways; proven by dropping a probe tool with an
   unread `--dead` flag, which fails by name, and removing it restores green.
 - `steam_manifest.py` owns the depot-entry lookups (`assembly_entry`,
-  `assembly_sha1`); `research_diff.py` had three copies of
-  the `Managed/Assembly-CSharp.dll` entry search across its provenance and
-  `--pair` resolution paths.
+  `assembly_sha1`); `research_diff.py` had three copies of the
+  `Managed/Assembly-CSharp.dll` entry search across its provenance and
+  `--pair` resolution paths and now calls the shared two from both.
 
 - `post-update.sh --steam` folds the Steam side into the documented post-patch
   path (opt-in, so the default run stays offline): published/installed build vs

@@ -60,8 +60,9 @@ to this process.
    as the patcher (9 constant-table + 76 IL). Any miss = inconsistent columns.
    The disk patcher has a `--verify` sha256 marker; a transpiler has no
    equivalent post-hoc verification that every site was caught.
-3. **Rollback.** Disk patch: `make engine-restore` + Steam-Verify recovery. Hot
-   patch: no clean undo once a method has run.
+3. **Rollback.** Disk patch: `make engine-restore` in the `7dtd-realearth`
+   sibling + Steam-Verify recovery. Hot patch: no clean undo once a method has
+   run.
 4. **Layer-storage allocation.** `ChunkBlockLayer`/`UnsafeChunkData` allocate
    `[YDim/LayerHeight]` arrays at construction; the transpiler must hit the
    constructors *before the first chunk allocates*. This is the same JIT-race as
@@ -83,7 +84,8 @@ and produced real tall injects:
 
 So the hot patch works end-to-end and is now the **product default**
 (`EngineHeightRuntimePatch=true`). The disk patcher stays in the repo
-(`Tools/EngineHeightPatcher.exe`, `make engine-expand`) as the fallback for
+(`Tools/EngineHeightPatcher.exe`, `make engine-expand` in the `7dtd-realearth`
+sibling) as the fallback for
 load orders where a pre-boot patch is safer. Remaining risks: mod load order
 can still JIT a site early (half-patched engine), there is no `--verify`
 equivalent, and no rollback story - all acceptable for the default on the
