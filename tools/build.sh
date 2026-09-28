@@ -50,6 +50,15 @@ sha256_of() { # GNU coreutils, falling back to macOS shasum
 }
 pin_sha="$(sed -n 's/^sha256=//p' "$here/data/cecil.pin")"
 
+# The GAC moved with every host: /usr/lib/mono/gac on a Linux package, a
+# %WINDIR%\\assembly path on a Windows mono. Ask the runtime where its own GAC
+# is instead of listing one platform's layout; gacutil ships with mono, and a
+# host without it just falls through to the well-known Linux paths.
+gac_cecil() {
+  command -v gacutil >/dev/null 2>&1 || return 0
+  run_bounded gacutil -l Mono.Cecil 2>/dev/null | awk '/^Mono\.Cecil/ {print $NF}' | head -1
+}
+
 # Candidates: env override, then vendored, then a previously verified copy in
 # bin/, then known local copies, then the distribution's Mono GAC.
 candidates=()
@@ -60,6 +69,7 @@ else
     "$here/Mono.Cecil.dll" \
     "$here/bin/Mono.Cecil.dll" \
     "$HOME/.cache/zdtd/Mono.Cecil.dll" \
+    "$(gac_cecil)" \
     /usr/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll \
     /usr/local/lib/mono/gac/Mono.Cecil/*/Mono.Cecil.dll; do
     [[ -f "$c" ]] && candidates+=("$c")

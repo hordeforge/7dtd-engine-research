@@ -29,7 +29,6 @@ loudly but is not a hard failure (this is a report, not a gate).
 """
 
 import argparse
-import fcntl
 import hashlib
 import json
 import os
@@ -37,6 +36,11 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+
+try:
+    import fcntl
+except ImportError:  # Windows: no flock, so no advisory lock on the history CSV
+    fcntl = None  # type: ignore[assignment]
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import tooling
@@ -215,8 +219,15 @@ def record_history(path: str, header: str, row: str) -> str:
     file byte-for-byte identical. The exclusive lock covers the whole
     read-modify-write, and the file lands through a temp-and-rename, so
     concurrent runs neither lose a row nor leave a truncated CSV.
+
+    The lock is advisory and POSIX-only: Windows has no fcntl, so there the
+    temp-and-rename is the whole mechanism and two simultaneous `make census`
+    runs can race to the same row. The rename keeps the CSV from being read
+    half-written either way, which is the failure the lock exists to prevent.
     """
     with open(history_lock(path), "a", encoding="utf-8") as lock:
+        if fcntl is None:
+            return _write_history_row(path, header, row)
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
         try:
             return _write_history_row(path, header, row)

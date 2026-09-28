@@ -13,7 +13,9 @@ spawned running with no parent. Pinned here, DLL-free and network-free:
   3. a command that finishes in time still passes through its real rc, stdout
      and stderr untouched;
   4. `RE_MONO_TIMEOUT` is read, and a value that is not a positive number of
-     seconds fails loud instead of silently meaning "no bound".
+     seconds fails loud instead of silently meaning "no bound";
+  5. a host with no process group (Windows) still kills the child on expiry
+     instead of raising out of the timeout path.
 
 The shell entry points (regen.sh, build.sh, stock-sync.sh, drift-check.sh,
 fetch_version.sh) spawn the same tools, so they carry the same bound through
@@ -94,6 +96,34 @@ def check_timeout_kills_group(tmp: Path) -> None:
     assert marker.is_file(), "the child never wrote its grandchild pid, nothing to check"
     pid = int(marker.read_text(encoding="utf-8").strip())
     assert wait_gone(pid), f"grandchild {pid} survived the timeout: only the child was killed"
+
+
+def check_kill_group_fallback() -> None:
+    """Without a process group (Windows), the bound still kills the child.
+
+    A host with no `os.killpg` used to reach `os.killpg` and raise
+    AttributeError out of the timeout path, so a wedged tool turned a reported
+    timeout into a crashed gate. The fallback is pinned here by removing the
+    attribute for the duration of the call, which is what the Windows host
+    looks like to this code.
+    """
+    calls: list[int] = []
+
+    class _Child:
+        pid = 4242
+
+        def kill(self) -> None:
+            calls.append(self.pid)
+
+    killpg = getattr(os, "killpg", None)
+    if killpg is not None:
+        del os.killpg
+    try:
+        tooling.kill_child_group(_Child())  # type: ignore[arg-type]
+    finally:
+        if killpg is not None:
+            os.killpg = killpg
+    assert calls == [4242], f"the no-process-group path killed {calls}, not the child"
 
 
 def check_passthrough() -> None:
@@ -269,6 +299,7 @@ def main() -> None:
         check_timeout_kills_group(Path(td))
         check_shell_wrapper_kills_group(Path(td))
     check_passthrough()
+    check_kill_group_fallback()
     check_timeout_env()
     check_shell_timeout_env_fails_loud()
     check_spawn_detector()

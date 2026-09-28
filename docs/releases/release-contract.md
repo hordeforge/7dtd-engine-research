@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**49 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**58 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -86,7 +86,8 @@ falls behind the commits actually below the last tag.
 - **No tool runs unbounded and no tool child is orphaned.** `tooling.run_bounded`
   is the single spawn point and `tools/bounded-run.sh` does the same for the
   shell entry points; a child that outlives its bound reports the rc and names
-  itself instead of hanging a gate, and its grandchildren die with it.
+  itself instead of hanging a gate, and its grandchildren die with it (a host
+  with no process group, Windows, kills the child itself).
 - **Gates no longer pass on input they never read.** Several link, citation and
   inventory gates skipped a file they could not open, and three reported OK
   while proving nothing; a drifted or unreadable input now fails with the reason.
@@ -104,6 +105,14 @@ falls behind the commits actually below the last tag.
   the shell entry points and the Python tools.
 - **Fuzzing and bounds.** The shader sub-program and parameter blob decoders and
   the depot-manifest parser are fuzzed; the manifest parser is bounded.
+- **The Python tooling runs where it is claimed to.** The census history lock
+  and the bounded-run timeout both had POSIX-only code paths on a host that
+  documents Windows and macOS support: `census-pct.py` imported `fcntl` at
+  module scope (so every gate loading it failed to import on Windows), and a
+  timed-out tool reached `os.killpg` on a host that has no process groups. Both
+  now degrade to the temp-and-rename and the direct-child kill they already had
+  underneath, and the census lock is documented as advisory rather than
+  portable.
 - `steam_manifest.py` orders manifest history by mtime instead of a truncated
   clock string, and the steam install-integrity verdict was restored after a
   drift.

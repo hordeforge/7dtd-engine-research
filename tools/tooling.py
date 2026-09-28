@@ -353,14 +353,23 @@ def run_bounded(
     try:
         out, err = proc.communicate(timeout=limit)
     except subprocess.TimeoutExpired:
-        _kill_group(proc)
+        kill_child_group(proc)
         out, err = proc.communicate()
         return TIMEOUT_RC, out, f"{command[0]} exceeded {limit:g}s and was killed\n{err}"
     return proc.returncode, out, err
 
 
-def _kill_group(proc: "subprocess.Popen[str]") -> None:
-    """SIGKILL the child's process group, so grandchildren die with it."""
+def kill_child_group(proc: "subprocess.Popen[str]") -> None:
+    """SIGKILL the child's process group, so grandchildren die with it.
+
+    POSIX has the group; Windows has neither killpg nor SIGKILL, so there the
+    direct child is killed and whatever it spawned is left to exit on its own.
+    A timeout still reports TIMEOUT_RC there instead of raising, which is the
+    part callers depend on.
+    """
+    if not hasattr(os, "killpg"):  # Windows
+        proc.kill()
+        return
     # ProcessLookupError: the group is already gone, which is the state asked for.
     with contextlib.suppress(ProcessLookupError):
         os.killpg(os.getpgid(proc.pid), signal.SIGKILL)

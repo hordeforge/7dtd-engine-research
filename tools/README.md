@@ -71,7 +71,8 @@ cd tools
 ```
 
 Requires `mono` (`mcs`) and a `Mono.Cecil.dll` (build.sh searches known local
-copies and the standard Mono GAC under `/usr/lib` or `/usr/local/lib`; override
+copies, asks `gacutil -l` where the host's own GAC put the assembly, and falls
+back to the standard Mono GAC paths under `/usr/lib` and `/usr/local/lib`; override
 with `MONO_CECIL=/path/to/Mono.Cecil.dll`, or restore via `dotnet add package
 Mono.Cecil`). Mono.Cecil is the only third-party dependency of the C# tooling,
 and it is **pinned**: build.sh checks the candidate's SHA-256 against
@@ -349,7 +350,7 @@ are explicit. See `re-scratch/README.md`.
 | `tests/test_shader_blob_fuzz.py` | Seeded mutation fuzzer over the byte-level decoders in `shader_blob_dump.py` (`parse_subprogram`, `parse_parameter_blob`/`build_parameter_blob`, `dxbc_chunks`, `input_semantics`, `expected_channels`, `shdr_declaration_counts`, `parse_bind_channels`): structure-aware seeds built from the documented record layouts (a sub-program header, a DXBC container with an ISGN input signature and an SHDR token stream, parameter blobs with constant buffers, nested structs, and all five entry kinds, a bind-channel block), then bit flips, truncation, count and pointer inflation, and sign flips on length fields. Asserts only `ShaderBlobError` escapes, a per-call time budget, that no record list outgrows the bytes that could hold it, determinism, and that a decoded parameter blob re-emits byte for byte and re-emitting is a fixed point. Deterministic seed, stdlib-only, DLL-free, UnityPy-free, seconds to run. |
 | `tests/test_research_diff.py` | `research_diff.py` lens parsers and report renderer hold on fixtures: facts flatten skips the volatile stamp and input filename, method keys collapse `Type::Method(params)` to a signature diff, `cap` truncates with a counted tail, the rendered report carries identity/verdict/reproduce sections, a missing sha maps to no Steam build id, and the CLI exits 2 on missing or absent DLL arguments. DLL-free: the live b9→b10 `--pair` run at the end is a research artifact, so it is skipped (with the build command named) unless the built lenses and the retained stock backup are both present. |
 | `tests/test_generation_stamp.py` | Every artifact stamp goes through `tooling.generation_stamp()`: `SOURCE_DATE_EPOCH` pins it (padded values accepted, non-integers raise rather than falling back to a stamp that would look recorded), an unset variable still yields a wall-clock UTC stamp, and an AST scan fails any tool that reads the clock for a stamp itself. The scan is self-tested against the seam, and the same rule covers `tools/src/*.cs`: a Mono clock read outside a method that consults `StampEnv` fails, so `extracted_utc` in `stock_facts.json` replays byte for byte. DLL-free, network-free. |
-| `tests/test_bounded_runs.py` | `tooling.run_bounded()`, the single place the tools spawn mono, mcs, and `fetch_version.sh`, holds a wall-clock bound: a command that outlives `RE_MONO_TIMEOUT` (default 900 s) reports the timeout rc and names itself in stderr instead of hanging the gate, its grandchild dies with it (the process group is killed, not just the child), a command that finishes passes its own rc/stdout/stderr through untouched, and a non-numeric or non-positive `RE_MONO_TIMEOUT` fails loud rather than meaning "no bound". The shell entry points carry the same bound through `bounded-run.sh` (default 1800 s, whole seconds; a host with no GNU `timeout` warns and runs unbounded), and are pinned here too: the shell wrapper kills its own grandchild and rejects a bad `RE_MONO_TIMEOUT`, and a line scan of `tools/**/*.sh` fails any mono/mcs/monodis child that does not go through `run_bounded`, so a new dump call cannot come back unbounded. The scan reads code, not text: quoted strings and comments are excluded (a `#` inside quotes carries quote state across lines, so a multi-line `echo` does not leak a phantom spawn). DLL-free, network-free. |
+| `tests/test_bounded_runs.py` | `tooling.run_bounded()`, the single place the tools spawn mono, mcs, and `fetch_version.sh`, holds a wall-clock bound: a command that outlives `RE_MONO_TIMEOUT` (default 900 s) reports the timeout rc and names itself in stderr instead of hanging the gate, its grandchild dies with it on a POSIX host (the process group is killed, not just the child; a host with no process group, Windows, kills the child itself rather than raising out of the timeout path), a command that finishes passes its own rc/stdout/stderr through untouched, and a non-numeric or non-positive `RE_MONO_TIMEOUT` fails loud rather than meaning "no bound". The shell entry points carry the same bound through `bounded-run.sh` (default 1800 s, whole seconds; a host with no GNU `timeout` warns and runs unbounded), and are pinned here too: the shell wrapper kills its own grandchild and rejects a bad `RE_MONO_TIMEOUT`, and a line scan of `tools/**/*.sh` fails any mono/mcs/monodis child that does not go through `run_bounded`, so a new dump call cannot come back unbounded. The scan reads code, not text: quoted strings and comments are excluded (a `#` inside quotes carries quote state across lines, so a multi-line `echo` does not leak a phantom spawn). DLL-free, network-free. |
 | `tests/test_text_encoding.py` | Every text boundary in the Python tooling names its encoding: an AST scan rejects `subprocess.run`/`Popen` in text mode without `encoding=`, and `open()`/`read_text()`/`write_text()` in text mode without one. A runtime half runs `tooling.run_bounded` under `LC_ALL=C` with PEP 538/540 coercion disabled against a child writing raw UTF-8, so the decode is the shared runner's and not the interpreter's locale default. DLL-free, network-free. |
 | `tests/bench_version_update_tooling.py` | Version-update tooling benchmark (`make readiness`). Includes mutation checks of the Mono.Cecil pin gate. |
 | `tests/bench_asm_body_diff.py` | Deterministic perf gate for the body-diff lens (`make bench-bodydiff`): median retired user-space instructions (`perf stat -e instructions:u`) and child CPU time of `asm_body_diff.py` over the retained stock backup vs the live DLL, asserted in a band against the recorded mono 6.12.0 baseline, plus a wall/CPU overlap check that fails if the two assembly walks stop running concurrently. SKIPs without the two assemblies, perf permission, or the recorded mono version. Instructions are load-independent; wall clock is reported, never asserted. |
@@ -358,6 +359,29 @@ Tests that need the local dedicated DLL or built binaries SKIP with a reason on
 machines without them, and FAIL with the fix command when the DLL is present but
 the prerequisite is missing (`make tools`). Nothing here asserts game constants
 as pass conditions.
+
+## Platforms
+
+CI runs `make test-docs` and `make lint` on **Linux only**, so Linux is the
+tested platform. Everything else here is written to the portable API
+(`pathlib`, `os.path`, `os.replace`, explicit `encoding=`/`newline=` on every
+text boundary) and is expected to run elsewhere, with these boundaries:
+
+- **macOS**: supported. `build.sh` and the other shell entry points use
+  `shasum` when `sha256sum` is absent and `gtimeout` when GNU `timeout` is not;
+  `test_census_pct_history.py` NFC-normalizes the history lock key
+  (`census-pct.py::history_lock`) so a decomposed checkout spelling does not
+  fork it. Not covered by CI.
+- **Windows**: the Python tools and the DLL-free gates are expected to run
+  under a POSIX-ish shell or plain `python`, and assembly discovery knows the
+  `%ProgramFiles*%` Steam roots. POSIX-only pieces are named, not silently
+  assumed: `tools/*.sh` need bash, `mono`/`mcs` GAC probing in `build.sh` asks
+  `gacutil` where the assembly lives (a `gacutil` that prints no `Path=` field
+  falls back to the Linux GAC paths), and the shell-side
+  grandchild-kill checks in `tests/test_bounded_runs.py` use POSIX pid
+  semantics. Not covered by CI.
+- `resource` (per-process CPU accounting) in `tests/bench_asm_body_diff.py` and
+  `perf stat` in the same file are Linux-only; that bench is not a gate.
 
 Every script in this table is runnable directly, so the edit-check loop during a
 doc change can be a single gate instead of the whole suite:
