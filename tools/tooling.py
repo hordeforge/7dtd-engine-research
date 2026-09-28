@@ -17,8 +17,8 @@ any other way re-derives those rules, which is how they drift apart.
 
 `generation_stamp()` is the one clock the tools that stamp a committed artifact
 read, so `SOURCE_DATE_EPOCH` makes their output replayable byte-for-byte.
-`fuzz_rng()` is the one RNG a randomized gate draws from, so `RE_FUZZ_SEED`
-names the seed a failure replays from.
+`fuzz_seed()` is the one place a randomized gate resolves its seed, so
+`RE_FUZZ_SEED` names the seed a failure replays from.
 """
 
 from __future__ import annotations
@@ -28,7 +28,6 @@ import hashlib
 import json
 import math
 import os
-import random
 import signal
 import subprocess
 import sys
@@ -336,16 +335,16 @@ def fuzz_seed(default_seed: int) -> int:
     so a FAIL line carries the seed and the command that replays it.
 
     Hex is accepted because the defaults are written that way, and a decimal
-    seed past `sys.hash_info` width is refused: `random.Random` seeds from the
-    value's bit pattern, and a silently truncated 40-digit paste would replay
-    a different run than the one printed.
+    seed past `sys.maxsize` is refused: `random.Random` seeds from the value's
+    bit pattern, and a silently truncated 40-digit paste would replay a
+    different run than the one printed.
     """
     raw = os.environ.get(FUZZ_SEED_ENV)
     if raw is None:
         return default_seed
     text = raw.strip()
     try:
-        seed = int(text, 0) if text.lower().startswith(("0x", "-0x")) else int(text, 10)
+        seed = int(text, 16) if text.lstrip("+-").lower().startswith("0x") else int(text, 10)
     except ValueError as exc:
         raise ConfigError(
             f"{FUZZ_SEED_ENV}={raw!r} is not an integer seed (decimal, or 0x-prefixed hex)"
@@ -354,11 +353,6 @@ def fuzz_seed(default_seed: int) -> int:
     if not -limit - 1 <= seed <= limit:
         raise ConfigError(f"{FUZZ_SEED_ENV}={raw!r} is outside the range of an int seed")
     return seed
-
-
-def fuzz_rng(default_seed: int) -> random.Random:
-    """The one `random.Random` a randomized gate draws from, seeded by `fuzz_seed`."""
-    return random.Random(fuzz_seed(default_seed))
 
 
 class CorpusDigest:

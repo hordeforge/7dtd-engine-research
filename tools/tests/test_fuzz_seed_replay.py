@@ -48,9 +48,11 @@ TESTS = _common.TOOLS / "tests"
 # one whose corpus is built entirely in-process.
 REPLAYED = TESTS / "test_steam_manifest_fuzz.py"
 SEEDED_GATES = (
+    "test_sandbox_preset_code_fuzz.py",
     "test_save_roundtrip_fuzz.py",
     "test_shader_blob_fuzz.py",
     "test_steam_manifest_fuzz.py",
+    "test_xml_pins_fuzz.py",
 )
 # The f-string a gate formats its verdict with, matched in source so the check
 # is a property of the code rather than of one run's output.

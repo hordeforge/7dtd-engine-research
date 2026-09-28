@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**90 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**95 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -86,7 +86,8 @@ falls behind the commits actually below the last tag.
 - **New environment variables**, all with defaults, so nothing has to be set:
   `RE_MONO_TIMEOUT` (900 s) bounds every spawned mono/mcs/`fetch_version.sh`
   child, `RE_STEAM_FETCH_TIMEOUT` (21600 s) bounds a `steam_builds.py --fetch`
-  depot download, and `SEVENDTD_SERVER_DIR` names the install that
+  depot download, `RE_FUZZ_SEED` names the seed a randomized gate replays
+  from, and `SEVENDTD_SERVER_DIR` names the install that
   `make save-roundtrip-all` reads. A non-numeric or non-positive timeout aborts
   rather than meaning "no bound".
 - **A branch that cannot be fetched is refused rather than attempted.**
@@ -240,14 +241,15 @@ falls behind the commits actually below the last tag.
   `gen_atlas_zig.py` bounded its `zig` calls through the shared runner instead
   of a bare `subprocess.run`, and a non-zero `zig fmt` now stops the run rather
   than writing a file that was never formatted.
-- **The Steam app-info fetch is bounded too.** `steam_builds.py` reads it
-  through the same bound as every other spawned child and stops a response
-  larger than the cap or on a scheme that is not http/https, so a hostile or
-  runaway endpoint cannot hold the gate open.
-- **A fuzz run is reproducible from its seed.** The corpus digest and seed are
-  printed by every fuzz gate and replayed by `test_fuzz_seed_replay.py`, so a
-  failure names the run that produced it instead of asking for a rerun to
-  reproduce.
+- **The app-info fetch is bounded by bytes and by scheme.** A timeout bounds
+  how long the PICS request waits, not how many bytes arrive inside it, so the
+  body is read one byte past an 8 MiB cap and refused past it, and a URL or
+  redirect that leaves `https` is refused before the body is parsed.
+- **A failing fuzz round names the seed it replays from.** Every seeded gate
+  resolves its seed through `tooling.fuzz_seed` (`RE_FUZZ_SEED` overrides the
+  per-gate default) and reports that seed with a digest of the corpus it
+  produced, on both the OK and the FAIL line, so two runs of one seed can be
+  compared by more than the seed they claim to share.
 - **Superseded research moved to `workspace/outputs/archive/`.** The pre-V3.1.0
   wire snapshots, diff report and census history are kept as history, out of the
   path the drift gate reads.

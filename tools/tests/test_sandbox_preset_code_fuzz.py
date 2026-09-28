@@ -26,6 +26,9 @@ Seeds are structure-aware: the real codes read out of the committed
 sandbox_presets.xml, plus the option/value-set table those codes index into,
 so mutations explore around true shapes. Deterministic, stdlib-only, DLL-free.
 
+`RE_FUZZ_SEED` replaces SEED, so a failing round replays from the seed the
+FAIL line prints.
+
 Usage: python3 tools/tests/test_sandbox_preset_code_fuzz.py
 """
 
@@ -45,6 +48,9 @@ from typing import Any, TypeVar
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
+sys.path.insert(0, str(_common.TOOLS))
+import tooling
+
 SANDBOX = _common.TOOLS / "sandbox"
 # The decoder is a script with no package, so it is loaded the way
 # test_sandbox_safe_name.py loads safe_name.py, and its entry point is
@@ -61,6 +67,7 @@ decode: Callable[[str, "Opts", "Sets"], dict[str, Any]] = _mod.decode
 SEED = 0x5A4B0DE
 ROUNDS = 240  # mutation rounds per family
 TIME_BUDGET_S = 5.0  # hard ceiling for ONE decode (hang-class guard)
+SCRIPT = "tools/tests/test_sandbox_preset_code_fuzz.py"
 T = TypeVar("T")
 # The value table is JSON: an option id, a name, a value-set name, and a value
 # of whatever type the set carries (float, bool, int).
@@ -144,10 +151,16 @@ def check_invariants(
 
 
 def fuzz_codes(
-    rng: random.Random, opts: Opts, sets: Sets, codes: list[str], bad: list[str]
+    rng: random.Random,
+    opts: Opts,
+    sets: Sets,
+    codes: list[str],
+    bad: list[str],
+    corpus: tooling.CorpusDigest,
 ) -> None:
     for k in range(ROUNDS):
         code = mutate(rng, rng.choice(codes)) if rng.random() < 0.85 else codes[k % len(codes)]
+        corpus.add(code.encode("utf-8"))
         label = f"round {k} {code!r}"
         try:
             out = timed(partial(decode, code, opts, sets))
@@ -165,7 +178,12 @@ def fuzz_codes(
 
 
 def fuzz_tables(
-    rng: random.Random, opts: Opts, sets: Sets, codes: list[str], bad: list[str]
+    rng: random.Random,
+    opts: Opts,
+    sets: Sets,
+    codes: list[str],
+    bad: list[str],
+    corpus: tooling.CorpusDigest,
 ) -> None:
     """A malformed value-set table must be refused, never indexed into."""
     for k in range(ROUNDS):
@@ -173,6 +191,7 @@ def fuzz_tables(
         name = rng.choice(sorted(broken_sets))
         entry = broken_sets[name]
         shape = rng.choice(("dict", "string", "number", "null", "empty", "drop"))
+        corpus.add(f"{name}={shape}".encode("utf-8"))
         if shape == "dict":
             entry["values"] = {"0": 1.0, "1": 2.0}
         elif shape == "string":
@@ -188,6 +207,7 @@ def fuzz_tables(
         if entry.get("type") == "bool" and shape in ("drop", "null"):
             continue  # a bool set with no table is the documented codec
         code = rng.choice(codes)
+        corpus.add(code.encode("utf-8"))
         label = f"tables round {k} {name}={shape} {code!r}"
         try:
             timed(partial(decode, code, opts, broken_sets))
@@ -201,11 +221,14 @@ def fuzz_tables(
             return
 
 
-def fuzz_xml(rng: random.Random, opts: Opts, sets: Sets, bad: list[str]) -> None:
+def fuzz_xml(
+    rng: random.Random, opts: Opts, sets: Sets, bad: list[str], corpus: tooling.CorpusDigest
+) -> None:
     """The TextAsset itself: a mutated preset document decodes or is refused."""
     original = (SANDBOX / "sandbox_presets.xml").read_text(encoding="utf-8")
     for k in range(ROUNDS):
         text = mutate(rng, original) if rng.random() < 0.85 else original
+        corpus.add(text.encode("utf-8"))
         label = f"xml round {k}"
         try:
             timed(partial(ET.fromstring, text))
@@ -262,22 +285,33 @@ class BudgetError(Exception):
 
 
 def main() -> int:
-    rng = random.Random(SEED)
+    try:
+        seed = tooling.fuzz_seed(SEED)
+    except tooling.ConfigError as exc:
+        print(f"FAIL: sandbox preset-code fuzz: {exc}")
+        return 2
+    rng = random.Random(seed)
     opts, sets = tables()
     codes = seed_codes()
     bad: list[str] = []
-    fuzz_codes(rng, opts, sets, codes, bad)
+    corpus = tooling.CorpusDigest()
+    fuzz_codes(rng, opts, sets, codes, bad, corpus)
     if not bad:
-        fuzz_tables(rng, opts, sets, codes, bad)
+        fuzz_tables(rng, opts, sets, codes, bad, corpus)
     if not bad:
-        fuzz_xml(rng, opts, sets, bad)
+        fuzz_xml(rng, opts, sets, bad, corpus)
     if not bad:
         regression_pins(opts, sets, bad)
     if bad:
+        print(f"FAIL: sandbox preset-code fuzz (seed 0x{seed:X}, corpus {corpus.hexdigest()})")
         for b in bad:
-            print("FAIL:", b)
+            print("  - " + b)
+        print(f"  replay: RE_FUZZ_SEED=0x{seed:X} python3 {SCRIPT}")
         return 1
-    print(f"OK: {ROUNDS} rounds x 3 families over {len(codes)} seed codes, seeds {SEED:#x}")
+    print(
+        f"OK: {ROUNDS} rounds x 3 families over {len(codes)} seed codes; no escapes, "
+        f"hangs, or invariant breaks (seed 0x{seed:X}, corpus {corpus.hexdigest()})"
+    )
     return 0
 
 

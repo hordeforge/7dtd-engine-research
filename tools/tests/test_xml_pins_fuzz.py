@@ -26,6 +26,9 @@ with the blocks the parsers look for, then mutations that hit the parsers'
 boundaries (tag and attribute mangling, numeric-value mangling, nesting,
 truncation, adversarial Unicode). Deterministic, stdlib-only, DLL-free.
 
+`RE_FUZZ_SEED` replaces SEED, so a failing round replays from the seed the
+FAIL line prints.
+
 Usage: python3 tools/tests/test_xml_pins_fuzz.py
 """
 
@@ -47,11 +50,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 sys.path.insert(0, str(_common.TOOLS))
+import tooling
 import xml_pins as src
 
 SEED = 0x58B1A25
 ROUNDS = 200  # mutation rounds per seed family
 TIME_BUDGET_S = 5.0  # hard ceiling for ONE parse (hang-class guard)
+SCRIPT = "tools/tests/test_xml_pins_fuzz.py"
 T = TypeVar("T")
 # The characters a config file can be attacked with, and the ones that decide
 # where each regex cuts its input.
@@ -195,12 +200,13 @@ def check_invariants(
             return
 
 
-def fuzz(rng: random.Random, bad: list[str]) -> None:
+def fuzz(rng: random.Random, bad: list[str], corpus: tooling.CorpusDigest) -> None:
     families = seeds()
     for spec in src.SECTION_SPECS:
         base = families[os.path.basename(spec.config)]
         for k in range(ROUNDS):
             text = mutate(rng, rng.choice(base)) if rng.random() < 0.85 else base[k % len(base)]
+            corpus.add(text.encode("utf-8"))
             label = f"{spec.name} round {k}"
             try:
                 parsed, unparsed = timed(partial(parse, spec, text))
@@ -277,17 +283,28 @@ class BudgetError(Exception):
 
 
 def main() -> int:
-    rng = random.Random(SEED)
+    try:
+        seed = tooling.fuzz_seed(SEED)
+    except tooling.ConfigError as exc:
+        print(f"FAIL: xml_pins fuzz: {exc}")
+        return 2
+    rng = random.Random(seed)
     bad: list[str] = []
-    fuzz(rng, bad)
+    corpus = tooling.CorpusDigest()
+    fuzz(rng, bad, corpus)
     if not bad:
         with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
             regression_pins(Path(td), bad)
     if bad:
+        print(f"FAIL: xml_pins fuzz (seed 0x{seed:X}, corpus {corpus.hexdigest()})")
         for b in bad:
-            print("FAIL:", b)
+            print("  - " + b)
+        print(f"  replay: RE_FUZZ_SEED=0x{seed:X} python3 {SCRIPT}")
         return 1
-    print(f"OK: {ROUNDS} rounds x {len(src.SECTION_SPECS)} xml_pins sections, seeds {SEED:#x}")
+    print(
+        f"OK: {ROUNDS} rounds x {len(src.SECTION_SPECS)} xml_pins sections; no escapes, "
+        f"hangs, or invariant breaks (seed 0x{seed:X}, corpus {corpus.hexdigest()})"
+    )
     return 0
 
 

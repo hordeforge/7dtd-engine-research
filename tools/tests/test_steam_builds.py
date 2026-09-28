@@ -84,13 +84,18 @@ class _FakeResponse(io.BytesIO):
         self.url = url
 
 
-def refusal(call: Callable[[], object], expected: str) -> str:
-    """The message of the SourceError a call that must refuse raises."""
+def refusal(call: Callable[[], object]) -> str | None:
+    """The message a refusing call answers with, or None if it accepted."""
     try:
         call()
     except steam_builds.SourceError as exc:
         return str(exc)
-    raise AssertionError(f"expected a refusal naming {expected!r}, but the call succeeded")
+    return None
+
+
+def respond(response: _FakeResponse, *_args: object, **_kwargs: object) -> object:
+    """A `urlopen` stand-in: it ignores the request and yields the response."""
+    return response
 
 
 def check_fetch_bounds() -> None:
@@ -113,13 +118,12 @@ def check_fetch_bounds() -> None:
     # Exactly at the cap is still a body the cap allows, so it is read whole.
     at_cap = steam_builds.read_bounded(_FakeResponse(b"x" * cap), "https://example.invalid")
     assert len(at_cap) == cap, len(at_cap)
-    over_cap = refusal(
-        lambda: steam_builds.read_bounded(
-            _FakeResponse(b"x" * (cap + 1)), "https://example.invalid"
-        ),
-        "cap",
+    over_cap = _FakeResponse(b"x" * (cap + 1))
+    over = refusal(
+        functools.partial(steam_builds.read_bounded, over_cap, "https://example.invalid")
     )
-    assert "cap" in over_cap, over_cap
+    assert over is not None, f"read_bounded accepted a body over the {cap} cap"
+    assert "cap" in over, over
 
     # A plaintext URL is refused before any request is made.
     for url in (
@@ -127,29 +131,30 @@ def check_fetch_bounds() -> None:
         "file:///etc/passwd",
         "steam_builds.json",
     ):
-        refused = refusal(functools.partial(steam_builds.fetch_appinfo, url), "non-https")
+        refused = refusal(functools.partial(steam_builds.fetch_appinfo, url))
+        assert refused is not None, f"fetch_appinfo accepted a non-https URL: {url}"
         assert "non-https" in refused, refused
 
     # A redirect that lands off https is refused too, and the redirect is
     # urllib's own: urlopen follows it, so the request the operator asked for
     # is not the response that would otherwise be parsed.
     real_urlopen = urllib.request.urlopen
-    for response_url, expect in (
-        ("http://example.invalid/info", "non-https app-info response"),
-        ("https://example.invalid/info", "cap"),
+    for response_url, expect, payload in (
+        ("http://example.invalid/info", "non-https app-info response", body),
+        ("https://example.invalid/info", "cap", b"x" * (cap + 1)),
     ):
-        urllib.request.urlopen = lambda *_a, _url=response_url, _expect=expect, **_k: _FakeResponse(
-            b"x" * (cap + 1) if "cap" in _expect else json.dumps(APPINFO).encode("utf-8"),
-            url=_url,
+        urllib.request.urlopen = functools.partial(
+            respond, _FakeResponse(payload, url=response_url)
         )
         try:
-            refused = refusal(steam_builds.fetch_appinfo, expect)
+            refused = refusal(steam_builds.fetch_appinfo)
         finally:
             urllib.request.urlopen = real_urlopen
+        assert refused is not None, f"fetch_appinfo accepted a response from {response_url}"
         assert expect in refused, refused
 
     # Pair side: a well-formed https response still parses through the same path.
-    urllib.request.urlopen = lambda *_a, **_k: _FakeResponse(json.dumps(APPINFO).encode("utf-8"))
+    urllib.request.urlopen = functools.partial(respond, _FakeResponse(body))
     try:
         snapshot = steam_builds.fetch_appinfo()
     finally:
