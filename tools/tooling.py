@@ -9,6 +9,12 @@ not reach into `tests/`, and gates import the same module the tools do.
 `tools/tests/_common.py` re-exports these and adds the test-only helpers
 (assembly discovery, mono runners, probe compilation).
 
+Every environment variable the tools read is resolved here, with one rule for
+each: an override that names an install is honoured or refused, never traded
+for a discovered one, and a bound that is not a positive number raises
+ConfigError rather than meaning "no bound". A tool that reads configuration
+any other way re-derives those rules, which is how they drift apart.
+
 `generation_stamp()` is the one clock the tools that stamp a committed artifact
 read, so `SOURCE_DATE_EPOCH` makes their output replayable byte-for-byte.
 """
@@ -51,8 +57,39 @@ ASM_NAME = "Assembly-CSharp.dll"
 ASM_VARS = ("ASM", "SEVENDTD_ASM", "SEVENDTD_DS_DIR")
 
 
+class ConfigError(RuntimeError):
+    """An environment variable names something that is not there.
+
+    A caller that reads configuration through this module gets the failure
+    here rather than a value it cannot use: the alternative is a fallback that
+    answers with a different install, a default that looks like an operator's
+    choice, or a downstream error naming the wrong thing.
+    """
+
+
 class StampError(RuntimeError):
     """A pinned generation stamp is set to something that is not an epoch."""
+
+
+def positive_seconds(name: str, default: float) -> float:
+    """A wall-clock bound in seconds from the environment.
+
+    Unset means the documented default; a value that is not a positive number
+    raises ConfigError rather than being read as "no bound" or "no timeout",
+    because a mistyped bound silently turns a hung child into a hung gate.
+    Shared by every timeout the tools take, so the rule and the message are the
+    same whichever variable was set.
+    """
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        seconds = float(raw.strip())
+    except ValueError as exc:
+        raise ConfigError(f"{name}={raw!r} is not a number of seconds") from exc
+    if seconds <= 0:
+        raise ConfigError(f"{name}={raw!r} must be positive")
+    return seconds
 
 
 def repo_root() -> Path:
@@ -103,6 +140,19 @@ def steam_roots(env: Mapping[str, str], home: Path) -> list[Path]:
     return roots
 
 
+def override_path(value: str) -> Path:
+    """The assembly an override names: the file itself, or under an install root.
+
+    A value that is not an existing `.dll` is read as the install root holding
+    `7DaysToDieServer_Data/Managed/`, so one variable covers both forms the
+    README documents.
+    """
+    path = Path(value)
+    if path.is_file() and path.suffix.lower() == ".dll":
+        return path
+    return path.joinpath(*MANAGED, ASM_NAME)
+
+
 def env_candidates(env: Mapping[str, str]) -> list[tuple[str, Path]]:
     """`(variable, path)` for every ASM_VARS override, in the documented order.
 
@@ -116,11 +166,7 @@ def env_candidates(env: Mapping[str, str]) -> list[tuple[str, Path]]:
         value = env.get(name)
         if not value:
             continue
-        path = Path(value)
-        if path.is_file() and path.suffix.lower() == ".dll":
-            overrides.append((name, path))
-        else:
-            overrides.append((name, path.joinpath(*MANAGED, ASM_NAME)))
+        overrides.append((name, override_path(value)))
     return overrides
 
 
@@ -143,7 +189,24 @@ def find_asm() -> Path | None:
 
     Shared by the tools (a diff needs the live install) and the gates (a missing
     DLL means SKIP, not FAIL), so both agree on what "the local install" means.
+
+    A variable that names an install is honoured or refused: with `ASM` (or
+    `SEVENDTD_ASM` / `SEVENDTD_DS_DIR`) set to a path that holds no assembly,
+    this raises ConfigError instead of probing on and answering with whatever
+    Steam root the host happens to carry. A pin run pointed at a build that is
+    not there has to stop; silently verifying a different build reads exactly
+    like a green one.
     """
+    for name in ASM_VARS:
+        value = os.environ.get(name)
+        if not value:
+            continue
+        path = override_path(value)
+        if not path.is_file():
+            raise ConfigError(
+                f"{name}={value} holds no assembly (looked for {path}); unset it to "
+                f"use the Steam install roots probed on this host"
+            )
     candidates = asm_candidates(os.environ, Path.home())
     return next((candidate for candidate in candidates if candidate.is_file()), None)
 
@@ -224,16 +287,7 @@ def mono_timeout() -> float:
     for a slow host; a non-numeric or non-positive value fails loud rather than
     silently meaning "no bound".
     """
-    raw = os.environ.get(MONO_TIMEOUT_ENV)
-    if raw is None:
-        return DEFAULT_MONO_TIMEOUT
-    try:
-        seconds = float(raw.strip())
-    except ValueError as exc:
-        raise ValueError(f"{MONO_TIMEOUT_ENV}={raw!r} is not a number of seconds") from exc
-    if seconds <= 0:
-        raise ValueError(f"{MONO_TIMEOUT_ENV}={raw!r} must be positive")
-    return seconds
+    return positive_seconds(MONO_TIMEOUT_ENV, DEFAULT_MONO_TIMEOUT)
 
 
 def run_bounded(

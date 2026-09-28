@@ -37,8 +37,35 @@ DOCS = tooling.DOCS
 scratch_dir = tooling.scratch_dir
 sha256_file = tooling.sha256_file
 nfc = tooling.nfc
-find_asm = tooling.find_asm
-resolve_asm = tooling.resolve_asm
+ConfigError = tooling.ConfigError
+
+
+def resolve_asm(explicit: str | None) -> tuple[Path | None, str]:
+    """`(path, label)`, with a broken override reported as the label.
+
+    A gate prints the label when it skips, so a variable naming no assembly
+    travels with the SKIP line instead of stopping the run in a traceback.
+    """
+    try:
+        return tooling.resolve_asm(explicit)
+    except tooling.ConfigError as exc:
+        return None, str(exc)
+
+
+def find_asm() -> Path | None:
+    """The discovered dedicated assembly, or None; a broken override says why.
+
+    `tooling.find_asm` raises on a variable that names an install which is not
+    there, because falling back to a probed root would verify a different build
+    and call it a pass. A gate prints that reason on stderr and reports the
+    verdict its own conventions ask for, so the operator sees the bad variable
+    next to the SKIP or FAIL rather than in a traceback.
+    """
+    try:
+        return tooling.find_asm()
+    except tooling.ConfigError as exc:
+        print(f"config: {exc}", file=sys.stderr)
+        return None
 
 
 def doc(name: str) -> Path:
@@ -91,10 +118,15 @@ def prereq(tool_names: list[str]) -> tuple[str, bool]:
     """Check run prerequisites for the named bin tools.
 
     Returns (message, is_skip): a missing dedicated DLL is a SKIP (nothing
-    regenerable locally to assert); a missing built binary while the DLL is
-    present is a FAIL carrying the build command.
+    regenerable locally to assert); an override that names no assembly is a
+    FAIL, because the run was pointed at an install and got none; a missing
+    built binary while the DLL is present is a FAIL carrying the build command.
     """
-    if find_asm() is None:
+    try:
+        asm = tooling.find_asm()
+    except tooling.ConfigError as exc:
+        return (str(exc), False)
+    if asm is None:
         return (
             ("dedicated Assembly-CSharp.dll not found (set ASM=<path to Assembly-CSharp.dll>)"),
             True,

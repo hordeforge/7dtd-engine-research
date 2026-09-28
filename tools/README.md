@@ -105,6 +105,30 @@ ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7D
 
 Run: `MONO_PATH=bin mono bin/<Tool>.exe ...` (Cecil resolves from `bin/`).
 
+## Environment variables
+
+The tools take no config file. Everything below is optional unless a row says
+otherwise, and each one has a default that runs on a checkout with no game and
+no setup. `tools/tests/test_env_vars_documented.py` fails if a variable the code
+reads is missing from this table, or a row here names nothing the code reads.
+
+| Variable | Read by | Default | Effect |
+|---|---|---|---|
+| `ASM` | every tool and gate that needs the live assembly (first of the three below) | probed Steam roots | The dedicated `Assembly-CSharp.dll` itself, or the install root holding `7DaysToDieServer_Data/Managed/`. Set to a path that holds no assembly the run stops with that message rather than probing on, so a pin run cannot verify a different build and pass. |
+| `SEVENDTD_ASM` | same, after `ASM` | probed Steam roots | Alternative name for the same override. |
+| `SEVENDTD_DS_DIR` | same, after `SEVENDTD_ASM` | probed Steam roots | Alternative name for the same override. |
+| `GAME_ROOT` | `make` only (`install-check`, `save-roundtrip-all`) | `asm_path.py --game-dir` | The install root holding `Data/Config`, for a run that pins XML data. |
+| `SEVENDTD_SERVER_DIR` | `make save-roundtrip-all` only | `$(GAME_ROOT)` | Install root used to find the shipped `worlds` for the full-fleet round trip. |
+| `SOURCE_DATE_EPOCH` | every tool that stamps a committed artifact | wall clock (UTC) | Integer UTC epoch fixing that stamp, so re-running a tool over unchanged input rewrites the same bytes. A non-integer aborts. |
+| `RE_MONO_TIMEOUT` | `tooling.run_bounded` (every mono, mcs and `fetch_version.sh` child) | 900 s | Wall-clock bound on a spawned tool. Non-numeric or non-positive aborts rather than meaning no bound. |
+| `RE_STEAM_FETCH_TIMEOUT` | `steam_builds.py --fetch` | 21600 s (6 h) | Bound on a steamcmd download, far above the mono bound because a depot is gigabytes. Same validation as `RE_MONO_TIMEOUT`. |
+
+Two more are read by the shell entry points only, and are named in each script's
+own header: `MONO_CECIL` and `MONO_CECIL_UNVERIFIED` (`build.sh`, above),
+`SCRATCH`, `OUT`, `STEAMCMD` and `STEAM_CONTENT` (`steam/fetch_version.sh`), and
+`BASELINE_DIR`, `PARITY_BASELINE` and `COMMITTED_BASELINE`
+(`parity/drift-check.sh`).
+
 ## Python dependencies
 
 Everything under `tools/` runs on the stdlib except the `sandbox/` asset
@@ -260,7 +284,7 @@ are explicit. See `re-scratch/README.md`.
 | Test | Checks |
 |---|---|
 | `tests/test_tool_bootstrap.py` | The tool builder discovers distribution-provided Mono.Cecil assemblies in the standard `/usr/lib` and `/usr/local/lib` Mono GAC paths. |
-| `tests/test_asm_discovery.py` | `tooling.asm_candidates` resolves the dedicated `Assembly-CSharp.dll` from every Steam library layout a supported host has (`%ProgramFiles(x86)%`, `%ProgramFiles%`, `%ProgramW6432%`, `~/.local/share/Steam`, `~/.steam/steam`, `~/.steam/root`, `~/Library/Application Support/Steam`), with `ASM`/`SEVENDTD_ASM`/`SEVENDTD_DS_DIR` outranking the probed roots. Fixtures per layout, so the whole matrix is checked on any host; stdlib-only, DLL-free. |
+| `tests/test_asm_discovery.py` | `tooling.asm_candidates` resolves the dedicated `Assembly-CSharp.dll` from every Steam library layout a supported host has (`%ProgramFiles(x86)%`, `%ProgramFiles%`, `%ProgramW6432%`, `~/.local/share/Steam`, `~/.steam/steam`, `~/.steam/root`, `~/Library/Application Support/Steam`), with `ASM`/`SEVENDTD_ASM`/`SEVENDTD_DS_DIR` outranking the probed roots. Fixtures per layout, so the whole matrix is checked on any host; stdlib-only, DLL-free. Each override variable set to a path holding no assembly raises `ConfigError` from `tooling.find_asm` (a probed install is planted alongside, so a silent fall-through would be caught), the gate-facing `_common` wrappers report that reason instead of tracing back, and an empty or unset variable still discovers normally. |
 | `tests/test_tool_cli_usage.py` | Every maintained C# executable reports usage and exits 2 when required arguments are missing. Skips until the tools are built or Mono is available. |
 | `tests/test_shell_cli_usage.py` | Supported shell entry points provide side-effect-free `--help`; strict no-positional commands reject unknown options. DLL-free. |
 | `tests/test_release_script.py` | `release.sh` refuses a bad version, a missing notes file, unknown options and an existing tag, and its `--dry-run` prints the planned `git tag` / `gh release` steps while creating no tag. `--resume` is pinned in a throwaway git repository under the scratch tree (origin remote, stub `gh`): nothing tagged is refused, a run that pushed the tag and died before the release finishes on the first resume, a second resume creates nothing, and a tag pointing away from `HEAD` is refused. The real checkout is never written. DLL-free. |
@@ -288,6 +312,7 @@ are explicit. See `re-scratch/README.md`.
 | `tests/test_state_machines_current.py` | `state-machines.md` lifecycle tables are current against the live DLL (skips without mono or without the built `bin/StateMachines.exe`, so a stock CI checkout is CI-safe). |
 | `tests/test_inventory_counts.py` | `docs/INDEX.md` inventory-count claims match each inventory's own self-stated count (12 claims). |
 | `tests/test_readme_test_table.py` | Every test script run by `make test`/`test-docs`/`verify` is documented in this table, and every entry is a real file. |
+| `tests/test_env_vars_documented.py` | Every environment variable the Python tools or the Makefile read is a row in the "Environment variables" table above, and every row is a variable something reads. The names come from an AST scan of the tools (`os.environ` reads plus the `_ENV`/`_VARS` constants they indirect through) and the Makefile's own variables, so a new knob cannot ship with a default nobody outside the diff knows. Names that are not configuration (make's own variables, `$HOME`) are a reviewed `NOT_CONFIG` list. DLL-free, network-free. |
 | `tests/test_transport_closure_claims.py` | No stale native-LiteNetLib / unknown-peer-order claims in the docs. Pattern liveness self-tested. |
 | `tests/test_coverage_consistency.py` | `docs/meta/coverage.md` audit table lists every narrative doc; census rows match `stock_facts.json`; every `**Current pin:**` banner in `docs/` names the pinned build (a stale banner is caught, a history mention is not). |
 | `tests/test_promoted_types.py` | Every name in `data/promoted-types.txt` stays absent from `out-of-scope-surface.md`, so an inventory regeneration cannot silently revert the referrer-verified hand-corrections; the OOS maintenance note must still cite the input file. DLL-free. |
@@ -342,9 +367,12 @@ on macOS (`tools/tests/_common.py::find_asm`); with none found they print
 The same resolution is what the Makefile's `ASM` and `GAME_ROOT`, and the
 `ASM`-less runs of `stock-sync.sh`, `post-update.sh` and `parity/drift-check.sh`,
 use: `python3 tools/asm_path.py [--game-dir]` prints it. An explicit variable
-wins over the probed roots, and one that points at no file is refused (exit 2)
-instead of falling through to whatever install the host happens to carry, so a
-typo cannot quietly redirect a pin run to another build. `SEVENDTD_SERVER_DIR`
+wins over the probed roots, and one that points at no file is refused, not traded
+for a probed root: `tooling.find_asm` raises `ConfigError` naming the variable,
+so a pin run pointed at a build that is not there stops instead of verifying
+whatever Steam root the host happens to carry and printing a pass. The gates
+turn that into their own verdict (`prereq` FAILs, a gate that skips says why),
+and `asm_path.py` keeps its exit 2. `SEVENDTD_SERVER_DIR`
 overrides the install root for `make save-roundtrip-all` only.
 
 ```bash

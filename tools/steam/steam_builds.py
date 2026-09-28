@@ -336,18 +336,12 @@ def fetch_timeout() -> float:
     bound; it exists because steamcmd can wait forever on a login prompt or a
     stalled CDN, and nothing else in this tool can end that. `RE_STEAM_FETCH_TIMEOUT`
     raises it for a slow line; a non-numeric or non-positive value fails loud
-    rather than meaning "no bound".
+    rather than meaning "no bound", by the shared rule in `tooling`.
     """
     raw = os.environ.get(FETCH_TIMEOUT_ENV)
     if raw is None:
         return DEFAULT_FETCH_TIMEOUT
-    try:
-        seconds = float(raw.strip())
-    except ValueError as exc:
-        raise ValueError(f"{FETCH_TIMEOUT_ENV}={raw!r} is not a number of seconds") from exc
-    if seconds <= 0:
-        raise ValueError(f"{FETCH_TIMEOUT_ENV}={raw!r} must be positive")
-    return seconds
+    return tooling.positive_seconds(FETCH_TIMEOUT_ENV, DEFAULT_FETCH_TIMEOUT)
 
 
 def run_fetch(command: list[str]) -> int:

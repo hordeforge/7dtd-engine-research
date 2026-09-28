@@ -15,10 +15,12 @@ Usage: python3 tools/tests/test_asm_discovery.py
 
 from __future__ import annotations
 
+import contextlib
 import os
 import subprocess
 import sys
 import tempfile
+from collections.abc import Iterator
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -172,6 +174,85 @@ def check_resolver() -> bool:
     return ok
 
 
+def check_broken_override() -> bool:
+    """`tooling.find_asm` raises rather than answering with another install.
+
+    The gates are the reason: a pin run pointed at a build that is not there
+    would otherwise discover whatever Steam root the host carries, verify that
+    build's pins, and print a pass. Every override variable is checked, with
+    and without a probed install present, and the gate-facing wrappers must
+    turn the raise into a message instead of a traceback.
+    """
+    ok = True
+    with tempfile.TemporaryDirectory(prefix="asm-override-", dir=_common.scratch_dir()) as td:
+        base = Path(td)
+        home = base / "home"
+        home.mkdir()
+        # A probed install is present, so a silent fall-through would find it.
+        _install(home / tooling.STEAM_ROOTS_HOME[-1])
+        for name in tooling.ASM_VARS:
+            for value in (base / "absent", base / "absent" / tooling.ASM_NAME):
+                with env_var(name, str(value)):
+                    try:
+                        tooling.find_asm()
+                    except tooling.ConfigError as exc:
+                        if name not in str(exc) or str(value) not in str(exc):
+                            print(
+                                f"FAIL: {exc} names neither the variable nor the path",
+                                file=sys.stderr,
+                            )
+                            ok = False
+                        continue
+                    print(f"FAIL: {name}={value} fell through to another install", file=sys.stderr)
+                    ok = False
+                # The gate wrappers answer with the reason, not a traceback.
+                with env_var(name, str(value)):
+                    if _common.find_asm() is not None:
+                        print(
+                            f"FAIL: _common.find_asm used another install for {name}",
+                            file=sys.stderr,
+                        )
+                        ok = False
+                    path, label = _common.resolve_asm(None)
+                    if path is not None or name not in label:
+                        print(
+                            f"FAIL: _common.resolve_asm label for {name}: {label!r}",
+                            file=sys.stderr,
+                        )
+                        ok = False
+        # No override at all: discovery answers without raising, whatever this
+        # host has installed, and an empty value is not read as an override.
+        for unset in ("", None):
+            with env_var("ASM", unset):
+                try:
+                    asm = tooling.find_asm()
+                except tooling.ConfigError as exc:
+                    print(f"FAIL: ASM={unset!r} raised {exc}", file=sys.stderr)
+                    ok = False
+                    continue
+                if asm is not None and base in asm.parents:
+                    print(f"FAIL: ASM={unset!r} resolved to a fixture path: {asm}", file=sys.stderr)
+                    ok = False
+    return ok
+
+
+@contextlib.contextmanager
+def env_var(name: str, value: str | None) -> "Iterator[None]":
+    """Set (or clear, for None) one environment variable for the block."""
+    saved = os.environ.get(name)
+    if value is None:
+        os.environ.pop(name, None)
+    else:
+        os.environ[name] = value
+    try:
+        yield
+    finally:
+        if saved is None:
+            os.environ.pop(name, None)
+        else:
+            os.environ[name] = saved
+
+
 def main() -> int:
     bad = False
     with tempfile.TemporaryDirectory(prefix="asm-discovery-", dir=_common.scratch_dir()) as td:
@@ -187,6 +268,8 @@ def main() -> int:
     if not check_game_dir():
         bad = True
     if not check_resolver():
+        bad = True
+    if not check_broken_override():
         bad = True
     if bad:
         return 1

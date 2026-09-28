@@ -228,7 +228,11 @@ def main() -> int:
     args = parse_args(sys.argv[1:])
     history = args.history
     as_json = args.json
-    asm = args.asm or tooling.find_asm()
+    try:
+        asm = args.asm or tooling.find_asm()
+    except tooling.ConfigError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     docs = args.docs if args.docs else str(DOCS)
     try:
         today = tooling.generation_stamp()[:10]

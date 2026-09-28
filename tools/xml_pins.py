@@ -45,6 +45,10 @@ def default_game_dir() -> str:
     The Linux Steam path used to be baked in here, so a Windows or macOS
     operator had to pass --game-dir on every run while the rest of the tooling
     found the same install by itself.
+
+    A variable naming an install that is not there is a configuration error,
+    not an absent install: the caller reports it rather than scanning a
+    different one.
     """
     asm = tooling.find_asm()
     root = tooling.game_dir(asm) if asm else None
@@ -260,7 +264,11 @@ def main() -> int:
     )
     args = ap.parse_args()
     pins_path = args.pins
-    game_dir = args.game_dir or default_game_dir()
+    try:
+        game_dir = args.game_dir or default_game_dir()
+    except tooling.ConfigError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     if not game_dir:
         print(f"error: {NO_GAME}", file=sys.stderr)
         return 2

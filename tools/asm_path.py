@@ -26,7 +26,6 @@ named.
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
@@ -39,11 +38,11 @@ MISSING = 2
 
 def resolve(game_dir: bool) -> tuple[str, int]:
     """`(path, rc)`. The path is "" with the reason on stderr when it is unusable."""
-    for name, path in tooling.env_candidates(os.environ):
-        if not path.is_file():
-            print(f"asm_path: {name}={path} is not a file", file=sys.stderr)
-            return "", MISSING
-    asm = tooling.find_asm()
+    try:
+        asm = tooling.find_asm()
+    except tooling.ConfigError as exc:
+        print(f"asm_path: {exc}", file=sys.stderr)
+        return "", MISSING
     if asm is None:
         print(f"asm_path: no dedicated server found; set {VARS}", file=sys.stderr)
         return "", 0

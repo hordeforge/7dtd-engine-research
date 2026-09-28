@@ -97,7 +97,7 @@ def check_timeout_env() -> None:
             os.environ[tooling.MONO_TIMEOUT_ENV] = bad
             try:
                 tooling.mono_timeout()
-            except ValueError:
+            except tooling.ConfigError:
                 continue
             raise AssertionError(f"{tooling.MONO_TIMEOUT_ENV}={bad!r} did not fail loud")
         del os.environ[tooling.MONO_TIMEOUT_ENV]

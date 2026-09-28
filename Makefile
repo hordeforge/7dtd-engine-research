@@ -203,6 +203,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_text_encoding.py"
 	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 	python3 "$(TOOLS)/tests/test_inventory_counts.py"
+	python3 "$(TOOLS)/tests/test_env_vars_documented.py"
 	python3 "$(TOOLS)/tests/test_readme_test_table.py"
 
 # Everything in one command: doc gates (no DLL), pins, readiness, facts view.

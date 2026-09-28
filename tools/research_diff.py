@@ -791,7 +791,11 @@ def main(argv: list[str] | None = None) -> int:
     label_old, label_new = args.label_old, args.label_new
     resolved_old = resolved_new = None
     if args.pair:
-        live = tooling.find_asm()
+        try:
+            live = tooling.find_asm()
+        except tooling.ConfigError as exc:
+            print(f"research_diff: {exc}", file=sys.stderr)
+            return 2
         if args.game_dir:
             game_dir = Path(args.game_dir)
         elif live is not None:
