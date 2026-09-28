@@ -8,6 +8,9 @@ not reach into `tests/`, and gates import the same module the tools do.
 
 `tools/tests/_common.py` re-exports these and adds the test-only helpers
 (assembly discovery, mono runners, probe compilation).
+
+`generation_stamp()` is the one clock the tools that stamp a committed artifact
+read, so `SOURCE_DATE_EPOCH` makes their output replayable byte-for-byte.
 """
 
 from __future__ import annotations
@@ -15,10 +18,17 @@ from __future__ import annotations
 import hashlib
 import os
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT_MARKERS = ("Makefile", "AGENTS.md")
 _HASH_CHUNK = 1 << 20
+STAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+STAMP_ENV = "SOURCE_DATE_EPOCH"
+
+
+class StampError(RuntimeError):
+    """A pinned generation stamp is set to something that is not an epoch."""
 
 
 def repo_root() -> Path:
@@ -84,6 +94,28 @@ def resolve_asm(explicit: str | None) -> tuple[Path | None, str]:
         return None, str(path)
     found = find_asm()
     return found, (str(found) if found else "auto-discovery")
+
+
+def generation_stamp() -> str:
+    """UTC stamp (`2026-09-20T04:46:00Z`) for a generated artifact.
+
+    Every tool that stamps a committed artifact (the build-diff report, the
+    census history row, the studied-build pin) reads the clock here, so a run
+    can be replayed byte-for-byte: set `SOURCE_DATE_EPOCH` to the integer UTC
+    epoch the artifact should carry and the output becomes a pure function of
+    its inputs, down to the date in a default output filename. Unset, the wall
+    clock is used, which is what an interactive run wants. A value that is not
+    an integer raises rather than silently falling back, because a mistyped
+    stamp would otherwise be written into a committed file and look recorded.
+    """
+    raw = os.environ.get(STAMP_ENV)
+    if raw is None:
+        return datetime.now(timezone.utc).strftime(STAMP_FORMAT)
+    try:
+        seconds = int(raw.strip())
+    except ValueError as exc:
+        raise StampError(f"{STAMP_ENV}={raw!r} is not an integer UTC epoch") from exc
+    return datetime.fromtimestamp(seconds, tz=timezone.utc).strftime(STAMP_FORMAT)
 
 
 def sha256_file(path: Path) -> str:

@@ -16,6 +16,8 @@ build id and the depot 294422 manifest id. SteamDB pages stay useful by hand
 `tools/data/steam_builds.json` records which Steam build the studied
 `Assembly-CSharp.dll` came from (build id + depot manifest + DLL sha256), so a
 diff narrative can name its source build instead of "the local artifact".
+`SOURCE_DATE_EPOCH` (integer UTC epoch) pins that file's `recorded_utc` field,
+so re-recording the same build rewrites the same bytes.
 
 Exit codes: 0 ok, 1 drift detected by --check, 2 unusable input/source.
 """
@@ -517,6 +519,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.record:
         facts = stock_facts()
+        try:
+            recorded_utc = tooling.generation_stamp()
+        except tooling.StampError as exc:
+            print(f"steam_builds: {exc}", file=sys.stderr)
+            return 2
         studied_entry: dict[str, Any] = {
             "branch": branch.name,
             "buildid": branch.buildid,
@@ -526,7 +533,7 @@ def main(argv: list[str] | None = None) -> int:
             "version": str(facts.get("version", {}).get("display")) or None,
             "dll_sha256": str(facts.get("source_identity", {}).get("assembly_csharp_dll_sha256"))
             or None,
-            "recorded_utc": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "recorded_utc": recorded_utc,
             "source": snapshot.source,
         }
         recorded: dict[str, Any] = {

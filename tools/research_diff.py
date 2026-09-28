@@ -24,6 +24,10 @@ Usage:
       --steam-manifest-old ~/.local/share/Steam/depotcache/294422_<old>.manifest \
       --steam-manifest-new ~/.local/share/Steam/depotcache/294422_<new>.manifest
 
+`SOURCE_DATE_EPOCH` (integer UTC epoch) pins the `Generated <stamp>` line and
+the date in the default output filename, so re-running the same pair overwrites
+the same file with the same bytes instead of a fresh copy per day.
+
 Exit codes: 0 report written, 1 drift detected (--check), 2 unusable input.
 """
 
@@ -39,7 +43,6 @@ import sys
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, replace
-from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
 from typing import Any, Callable
@@ -839,7 +842,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"research_diff: {exc}", file=sys.stderr)
         return 2
 
-    generated = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        generated = tooling.generation_stamp()
+    except tooling.StampError as exc:
+        print(f"research_diff: {exc}", file=sys.stderr)
+        return 2
     date = generated[:10].replace("-", "")
     # The reproduce line must be the command a reader should run: no output
     # redirection and no summary flag.

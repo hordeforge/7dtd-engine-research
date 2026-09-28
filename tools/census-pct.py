@@ -20,14 +20,14 @@ Usage:
     --json  emit a machine-readable JSON object instead of the human report
     --history FILE  append the percentages to a CSV (default name:
             census-history.csv) so census numbers can be tracked over time
-            (date column is UTC so rows from different hosts stay comparable)
+            (date column is UTC so rows from different hosts stay comparable;
+            set SOURCE_DATE_EPOCH to pin it for a reproducible append)
 
 Exit code is 0 unless the census itself fails; unaccounted > 0 is reported
 loudly but is not a hard failure (this is a report, not a gate).
 """
 
 import argparse
-import datetime
 import json
 import os
 import re
@@ -176,6 +176,11 @@ def main() -> int:
     as_json = args.json
     asm = args.asm or tooling.find_asm()
     docs = args.docs if args.docs else str(DOCS)
+    try:
+        today = tooling.generation_stamp()[:10]
+    except tooling.StampError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
     if asm is None or not Path(asm).is_file():
         print(
@@ -287,7 +292,7 @@ def main() -> int:
     }
     if history:
         row = "%s,%d,%d,%d,%d,%d,%.1f%%\n" % (
-            datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
+            today,
             cov["game_types"],
             cov["narrated"],
             cov["catalogued"],

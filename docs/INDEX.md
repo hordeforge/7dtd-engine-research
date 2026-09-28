@@ -335,13 +335,15 @@ Evidence that the docs cite, regenerable with the tools above:
 | Artifact | What |
 |---|---|
 | [`../workspace/outputs/parity/parity_b9.json`](../workspace/outputs/parity/parity_b9.json), [`parity_b10.json`](../workspace/outputs/parity/parity_b10.json) | `ParitySurface` snapshots of the two builds on disk. `parity_diff.py` finds **0 added / 0 removed / 0 changed wire** between them (the b9 to b10 wire claim), and `drift-check.sh` uses the b10 snapshot as the wire baseline when a fresh checkout has none |
-| [`../workspace/outputs/diffs/b9-to-b10-20260920.md`](../workspace/outputs/diffs/b9-to-b10-20260920.md) | Eight-lens build report (facts, census, method signatures, enum members, body hashes, wire parity, depot manifest content delta) with both DLLs' sha256, Steam build ids, depot provenance and the 16 changed depot files. Regenerate: `tools/research_diff.py --pair b9:b10` |
+| [`../workspace/outputs/diffs/b9-to-b10-20260920.md`](../workspace/outputs/diffs/b9-to-b10-20260920.md) | Eight-lens build report (facts, census, method signatures, enum members, body hashes, wire parity, depot manifest content delta) with both DLLs' sha256, Steam build ids, depot provenance and the 16 changed depot files. Regenerate: `SOURCE_DATE_EPOCH=<epoch of the stamp to keep> tools/research_diff.py --pair b9:b10`, which rewrites the same file byte for byte |
 | [`../workspace/outputs/baseline/`](../workspace/outputs/baseline) | Committed drift baselines for the studied build (`census.txt`, `surface/surface-types.md`, `methods.txt`, `enums.txt`), compared axis by axis by `make drift` on a fresh checkout; the machine-local `BASELINE_DIR` wins once it exists |
 | [`../tools/data/steam_builds.json`](../tools/data/steam_builds.json) | Studied Steam build (branch, build id, depot manifest gid, studied DLL sha256) plus the superseded builds; `steam_builds.py --record` maintains it |
 
 `tests/test_committed_diff_artifacts.py` re-derives the parity snapshots and the
-report and fails when either goes stale; `tests/test_drift_committed_baseline.py`
-pins the fresh-checkout wire comparison.
+report, the latter replayed with `SOURCE_DATE_EPOCH` pinned to its own stamp so
+the comparison is byte-for-byte, and fails when either goes stale;
+`tests/test_generation_stamp.py` keeps every artifact stamp on that seam;
+`tests/test_drift_committed_baseline.py` pins the fresh-checkout wire comparison.
 
 ---
 
