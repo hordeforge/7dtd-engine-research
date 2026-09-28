@@ -148,6 +148,20 @@ the hashes gate every download. Each `requirements.in` line carries a
 compatible-release bound, so a recompile resolves inside the series the lock
 was reviewed against instead of jumping to whatever is newest.
 
+The lock is 16 packages: the three direct deps plus UnityPy's transitives.
+`tests/test_sandbox_requirements_sync.py` fails if any tool under `tools/`
+imports a package that is not one of the three, so the closure cannot grow
+without naming it in `requirements.in`.
+
+Repository [`LICENSE`](../LICENSE) (CC BY 4.0) covers the docs and the code in
+this tree, not the installed packages. Nothing from the lock is committed or
+vendored here, so the grant travels with the install, not with the repo. Two
+entries in the closure are licensed rather than open source and arrive
+transitively: `fmod-toolkit` and, through it, `pyfmodex`, both via `unitypy`
+(per the lock's `# via` lines). Their upstream terms are not recorded in this
+repo, so anyone who redistributes an environment rather than installing it
+locally has to resolve those terms upstream first.
+
 ## 1. General dumpers (`src/`): prefer these
 
 Small, parameterized, maintained. They supersede most of `legacy/`.
@@ -333,7 +347,7 @@ are explicit. See `re-scratch/README.md`.
 | `tests/test_save_roundtrip_robustness.py` | `save_roundtrip_check.py` degrades malformed/truncated saves to `"parse error"` FAIL verdicts instead of escaping a traceback (which would abort the remaining files' checks), and `--shipped` usage-errors with exit 2 when its path argument is missing or absent. Fixture-driven, DLL-free. |
 | `tests/test_save_roundtrip_fuzz.py` | Seeded mutation fuzzer over every `save_roundtrip_check.py` parser surface (ttw, region V2/raw, chunk bodies, worldstate blobs, record files, nim): structure-aware valid seeds, then bit flips, truncations, splices, and count-field inflation. Asserts no exception escapes, per-call time budget (pins the spawnList-count hang fix), byte-exact lines never carry FAIL markers, deterministic re-parses, and the capped inflate round-trip/bomb contract. Deterministic seed, stdlib-only, DLL-free. |
 | `tests/test_sandbox_safe_name.py` | `sandbox/safe_name.py` (the filename sanitizer for bundle-supplied TextAsset names in extract_mesh_atlas) never yields a fragment that escapes the atlas out-dir: crafted names of `.`, `..`, separators, or absolute paths are defused while namespace dots survive. Python twin of the `IlFmt.Safe` pin over the same ASCII alphabet; stdlib-only, DLL-free. |
-| `tests/test_sandbox_requirements_sync.py` | `sandbox/requirements.txt` (the uv-compiled, sha256-hashed dependency lock for dnfile/dncil/UnityPy) stays in sync with `sandbox/requirements.in`: every declared dep is an exact pin in the lock with at least one hash, the locked version satisfies the bound `requirements.in` declares for it, no ranged/wildcard specifiers, and every entry the lock marks direct is declared. Also fails any non-stdlib import in `sandbox/*.py` or `shader_blob_dump.py` that `requirements.in` does not declare, so no tool rides in on an undeclared transitive. Mutation-tested against missing deps, stripped hashes, ghost directs, range specifiers, and undeclared imports; stdlib-only, DLL-free, network-free. |
+| `tests/test_sandbox_requirements_sync.py` | `sandbox/requirements.txt` (the uv-compiled, sha256-hashed dependency lock for dnfile/dncil/UnityPy) stays in sync with `sandbox/requirements.in`: every declared dep is an exact pin in the lock with at least one hash, the locked version satisfies the bound `requirements.in` declares for it (a `~=` bound is a series: `~=1.25.0` admits `1.25.x`, rejects `1.26`), no ranged/wildcard specifiers, and every entry the lock marks direct is declared. Also fails any non-stdlib import anywhere under `tools/` that `requirements.in` does not declare, so no tool rides in on an undeclared transitive. Mutation-tested against missing deps, stripped hashes, ghost directs, range specifiers, out-of-series locks, and undeclared, guarded, and prose-shaped imports; stdlib-only, DLL-free, network-free. |
 | `tests/test_sandbox_preset_codes.py` | The built-in difficulty preset decoder resolves its committed inputs independently of the working directory, emits all six tiers, and rejects malformed codes. Stdlib-only, DLL-free. |
 | `tests/test_sandbox_zig_tables.py` | Every float in `sandbox/sandbox_tables.json` emits from `gen_zig_tables.py` as the shortest Zig literal that re-parses to the identical binary32 value, so a fixed-precision round can never silently shift a stock sandbox default (binary32 successors of 0.5/1.0/2.0 are pinned as collapse probes), and `gen_atlas_zig.to_color5` packs the stock `(r*31+0.5)<<10 | (g*31+0.5)<<5 | (b*31+0.5)` RGB555 correctly at the boundaries (black, white, the `Color32(0,105,148)` water colour, the `Color.get_gray()` fallback at 16912, and out-of-range components clamped rather than wrapped by the 5-bit mask), so the two hand-typed minimap constants the generator emits are derived from the formula rather than typed beside it; stdlib-only, DLL-free. |
 | `tests/test_xml_pins_gate.py` | `xml_pins.py --check` diffs every committed section (`entityclasses_health`, `traders_root`, `buffs_survival`) against the install, so drift in any pinned value fails; regeneration refuses to overwrite populated sections when a source file parses to nothing (wrong `--game-dir`, renamed config header). Synthetic Data/Config fixtures in a temp dir via `--pins`; DLL-free, never touches `tools/data`. |

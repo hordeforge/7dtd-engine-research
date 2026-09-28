@@ -11,12 +11,13 @@ Checked here:
   - every requirements.in dep appears in the lock as an exact name==version pin
   - every pin carries at least one --hash=sha256 (no hash-stripped hand edits)
   - the locked version satisfies the bound requirements.in declares for it, so
-    the floors/ceilings there and the reviewed lock cannot drift apart
+    the floors/ceilings there and the reviewed lock cannot drift apart. The
+    bound is a series, not a floor: ~=1.25.0 admits 1.25.x and rejects 1.26
   - no ranged/wildcard/url specifiers sneak into the lock
   - every entry the lock marks as coming from requirements.in is declared there
-  - every non-stdlib import in the sandbox tools and shader_blob_dump.py is
-    declared in requirements.in, so no tool rides in on an undeclared
-    transitive (a version bump of the parent can then move it under them)
+  - every non-stdlib import under tools/ is declared in requirements.in, so no
+    tool rides in on an undeclared transitive (a version bump of the parent can
+    then move it under them)
 
 The checker is itself mutation-tested below against crafted bad locks and
 sources so a future refactor cannot turn it into a no-op.
@@ -24,6 +25,7 @@ sources so a future refactor cannot turn it into a no-op.
 
 from __future__ import annotations
 
+import ast
 import os
 import re
 import sys
@@ -37,12 +39,17 @@ import _common
 TOOLS = _common.TOOLS
 IN_FILE = TOOLS / "sandbox" / "requirements.in"
 LOCK = TOOLS / "sandbox" / "requirements.txt"
-IMPORTERS = [*sorted((TOOLS / "sandbox").glob("*.py")), TOOLS / "shader_blob_dump.py"]
+# Every tool source in the tree, not just the sandbox: a tool anywhere under
+# tools/ that reaches for a package requirements.in never declared rides in on
+# an undeclared transitive. LOCAL is the sibling-module set, taken tree-wide
+# because tools/ root modules are imported from subdirectories (tests/ imports
+# tooling and shader_blob_dump; research_diff imports steam/steam_manifest).
+IMPORTERS = sorted(TOOLS.rglob("*.py"))
+LOCAL = {p.stem for p in IMPORTERS}
 
 PIN_RE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9._-]*)==([^\s\\]+)\s*(?:\\\s*)?$")
 NON_EXACT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*\s*(@|~=|!=|<|>|[*]|\[)")
 DIRECT_VIA_RE = re.compile(r"#\s+(?:via\s+)?-r requirements\.in$")
-IMPORT_RE = re.compile(r"^[ \t]*(?:from\s+([A-Za-z_][\w.]*)|import\s+([A-Za-z_][\w.]*))", re.M)
 REQ_RE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9._-]*)(.*)$")
 # The only bound forms requirements.in may use. Anything else (extras, env
 # markers, URLs, wildcards) resolves in ways this gate cannot check, so it is a
@@ -72,7 +79,13 @@ def bounded(version: str, spec: str) -> tuple[bool, str]:
     except ValueError:
         return False, f"is not a plain dotted version ({version!r}, {want!r})"
     if op == "~=":
-        upper = (*need[:-1], need[-1] + 1) if len(need) > 1 else (need[0] + 1,)
+        # The series is the bound minus its patch component when it has one
+        # (~=1.25.0 and ~=1.25 both mean the reviewed 1.25 series), matching
+        # what requirements.in promises: a recompile cannot jump a series under
+        # a tool that reads the package's internals. The next release past the
+        # series is the ceiling.
+        series = need[:-1] if len(need) > 2 else need
+        upper = (*series[:-1], series[-1] + 1)
         return (need <= got < upper), f"is outside the {spec} series"
     cmp = (got > need) - (got < need)
     ok = {
@@ -155,21 +168,32 @@ def check(declared: dict[str, str], lock_text: str) -> list[str]:
 
 
 def third_party_imports(path: Path, local: set[str]) -> set[str]:
-    """Top-level modules a file imports that are neither stdlib nor a sibling module."""
+    """Top-level modules a file imports that are neither stdlib nor a sibling module.
+
+    Imports come from the parse tree, not a line regex: prose in a docstring
+    ("from dict lookups down a path") must not read as an import, and a
+    conditional or function-local import is as binding as a top-level one.
+    """
     out = set()
-    for m in IMPORT_RE.finditer(path.read_text(encoding="utf-8")):
-        top = (m.group(1) or m.group(2)).split(".")[0]
-        if top in sys.stdlib_module_names or top in local or top == path.stem:
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"), filename=str(path))):
+        if isinstance(node, ast.Import):
+            names = [alias.name for alias in node.names]
+        elif isinstance(node, ast.ImportFrom):
+            names = [node.module or ""]
+        else:
             continue
-        out.add(top)
+        for name in names:
+            top = name.split(".")[0]
+            if not top or top in sys.stdlib_module_names or top in local:
+                continue
+            out.add(top)
     return out
 
 
-def undeclared_imports(declared: dict[str, str], sources: list[Path]) -> list[str]:
+def undeclared_imports(declared: dict[str, str], sources: list[Path], local: set[str]) -> list[str]:
     """Imports a tool relies on that requirements.in does not declare."""
     bad = []
     for path in sources:
-        local = {p.stem for p in path.parent.glob("*.py")}
         for mod in sorted(third_party_imports(path, local)):
             if canon(mod) not in declared:
                 bad.append(f"{mod}: imported by {path.name} but not declared in requirements.in")
@@ -190,6 +214,24 @@ def self_test() -> tuple[list[str], int]:
     cases = [
         ("clean lock", {"alpha": ""}, clean, []),
         ("clean lock with bounds", {"alpha": "~=1.0", "beta": ">=2.0"}, clean, []),
+        (
+            "patch release inside the bound series",
+            {"alpha": "~=1.0.2"},
+            f"alpha==1.0.9 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
+            [],
+        ),
+        (
+            "minor jump outside the bound series",
+            {"alpha": "~=1.0.2"},
+            f"alpha==1.1.0 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
+            ["outside the ~=1.0.2 series"],
+        ),
+        (
+            "below the bound floor",
+            {"alpha": "~=1.0.2"},
+            f"alpha==1.0.1 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
+            ["outside the ~=1.0.2 series"],
+        ),
         (
             "bound above the locked version",
             {"alpha": "~=1.1"},
@@ -261,7 +303,7 @@ def self_test() -> tuple[list[str], int]:
             (
                 "transitive import undeclared",
                 {"unitypy": "~=1.25"},
-                "import json\n\n    import lz4.block\n",
+                "import json\n\n\ndef load():\n    import lz4.block\n",
                 ["lz4"],
             ),
             (
@@ -270,11 +312,23 @@ def self_test() -> tuple[list[str], int]:
                 "import xml.etree.ElementTree as ET\n",
                 [],
             ),
+            (
+                "prose in a docstring is not an import",
+                {"unitypy": "~=1.25"},
+                '"""Walks from dict lookups down a path."""\nimport json\n',
+                [],
+            ),
+            (
+                "guarded import still binds",
+                {"unitypy": "~=1.25"},
+                "try:\n    import astc_etcpak\nexcept ImportError:\n    astc_etcpak = None\n",
+                ["astc_etcpak"],
+            ),
         ]
         for label, declared, body, want in src_cases:
             target = tmp / "tool_under_test.py"
             target.write_text(body, encoding="utf-8")
-            got = undeclared_imports(declared, [target])
+            got = undeclared_imports(declared, [target], {"safe_name", "tool_under_test"})
             if not want:
                 if got:
                     bad.append(f"{label}: clean case rejected: {got}")
@@ -297,7 +351,7 @@ def main() -> int:
     real = check(declared, LOCK.read_text(encoding="utf-8"))
     for f in real:
         print("FAIL:", f, file=sys.stderr)
-    undeclared = undeclared_imports(declared, IMPORTERS)
+    undeclared = undeclared_imports(declared, IMPORTERS, LOCAL)
     for f in undeclared:
         print("FAIL:", f, file=sys.stderr)
     if failures or real or undeclared:
