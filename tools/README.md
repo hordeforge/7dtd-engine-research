@@ -249,6 +249,7 @@ are explicit. See `re-scratch/README.md`.
 | Test | Checks |
 |---|---|
 | `tests/test_tool_bootstrap.py` | The tool builder discovers distribution-provided Mono.Cecil assemblies in the standard `/usr/lib` and `/usr/local/lib` Mono GAC paths. |
+| `tests/test_asm_discovery.py` | `tooling.asm_candidates` resolves the dedicated `Assembly-CSharp.dll` from every Steam library layout a supported host has (`%ProgramFiles(x86)%`, `%ProgramFiles%`, `%ProgramW6432%`, `~/.local/share/Steam`, `~/.steam/steam`, `~/.steam/root`, `~/Library/Application Support/Steam`), with `ASM`/`SEVENDTD_ASM`/`SEVENDTD_DS_DIR` outranking the probed roots. Fixtures per layout, so the whole matrix is checked on any host; stdlib-only, DLL-free. |
 | `tests/test_tool_cli_usage.py` | Every maintained C# executable reports usage and exits 2 when required arguments are missing. Skips until the tools are built or Mono is available. |
 | `tests/test_shell_cli_usage.py` | Supported shell entry points provide side-effect-free `--help`; strict no-positional commands reject unknown options. DLL-free. |
 | `tests/test_release_script.py` | `release.sh` refuses a bad version, a missing notes file, unknown options and an existing tag, and its `--dry-run` prints the planned `git tag` / `gh release` steps while creating no tag. Every case avoids writes, so the test does not depend on the checkout being clean. DLL-free. |
@@ -287,7 +288,7 @@ are explicit. See `re-scratch/README.md`.
 | `tests/test_sandbox_preset_codes.py` | The built-in difficulty preset decoder resolves its committed inputs independently of the working directory, emits all six tiers, and rejects malformed codes. Stdlib-only, DLL-free. |
 | `tests/test_sandbox_zig_tables.py` | Every float in `sandbox/sandbox_tables.json` emits from `gen_zig_tables.py` as the shortest Zig literal that re-parses to the identical binary32 value, so a fixed-precision round can never silently shift a stock sandbox default (binary32 successors of 0.5/1.0/2.0 are pinned as collapse probes); stdlib-only, DLL-free. |
 | `tests/test_xml_pins_gate.py` | `xml_pins.py --check` diffs every committed section (`entityclasses_health`, `traders_root`, `buffs_survival`) against the install, so drift in any pinned value fails; regeneration refuses to overwrite populated sections when a source file parses to nothing (wrong `--game-dir`, renamed config header). Synthetic Data/Config fixtures in a temp dir via `--pins`; DLL-free, never touches `tools/data`. |
-| `tests/test_gate_unreadable_files.py` | The link/citation gates (`cross_repo_links.py`, `zdtd_cite_check.py`) FAIL with an explicit UNREADABLE line when a scanned file cannot be read, instead of silently skipping it (which would pass the gate while that file's links/citations were never checked). Dangling-symlink fixtures in a temp root; clean-tree positive controls; DLL-free. |
+| `tests/test_gate_unreadable_files.py` | The link/citation gates (`cross_repo_links.py`, `zdtd_cite_check.py`) FAIL with an explicit UNREADABLE line when a scanned file cannot be read, instead of silently skipping it (which would pass the gate while that file's links/citations were never checked). Dangling-symlink fixtures in a temp root (reported as not exercised where the host denies symlink creation, e.g. Windows without Developer Mode); clean-tree positive controls; DLL-free. |
 | `tests/test_parity_diff.py` | Stock snapshot parity CLI: unchanged snapshots exit 0, wire drift exits 1, malformed/removed modes exit 2. DLL-free. |
 | `tests/test_committed_diff_artifacts.py` | The committed evidence artifacts still equal what the tools emit: `parity_b9.json`/`parity_b10.json` are re-derived with `ParitySurface.exe` and compared field for field, and the `b9-to-b10-*.md` report is re-rendered through `research_diff.py --pair b9:b10` with `SOURCE_DATE_EPOCH` pinned to the stamp the committed report already carries, so the comparison is byte-for-byte. A second committed report FAILs rather than SKIPs. SKIPs unless the live DLL is the studied build, the retained backup is the report's baseline, and the cached manifests are present. Machine-local, needs mono. |
 | `tests/test_fetch_version_fake_steamcmd.py` | `steam/fetch_version.sh` end to end with a recording fake steamcmd: the manifest form passes the manifest id through and publishes a snapshot identical to a direct `ParitySurface.exe` run on the same DLL, the branch form materialises the install per `-beta`, and a steamcmd that does nothing or fails exits non-zero without publishing a partial snapshot, and `steam_builds.py --fetch` hands the branch manifest through to the same script. A gid-to-DLL map in the fake (`<gid>=<path>;...`) fetches two builds in one run and asserts their snapshots equal the direct `ParitySurface` runs and that `parity_diff.py` reports no wire drift for the b9 to b10 pair. Malformed target/label shapes (a leading `-`, a space, a tab, a `..` segment, a bare-dot label, a trailing newline) are refused before any download is attempted, which runs DLL-free. Offline; SKIPs without mono/mcs, the pinned Cecil build, or the live DLL. |
@@ -319,8 +320,10 @@ python3 tests/test_il_citations.py          # DLL-dependent scripts auto-discove
 
 DLL-dependent scripts take an optional `<asm>` argument and otherwise resolve
 the dedicated assembly from the `ASM` / `SEVENDTD_ASM` / `SEVENDTD_DS_DIR` env
-vars or the standard Steam dedicated-server install paths
-(`tools/tests/_common.py::find_asm`); with none found they print
+vars or the standard Steam dedicated-server install paths: `%ProgramFiles(x86)%`,
+`%ProgramFiles%` and `%ProgramW6432%` on Windows, `~/.local/share/Steam`,
+`~/.steam/steam`, `~/.steam/root` on Linux, `~/Library/Application Support/Steam`
+on macOS (`tools/tests/_common.py::find_asm`); with none found they print
 `SKIP: assembly not found: ...` rather than silently passing.
 
 ```bash

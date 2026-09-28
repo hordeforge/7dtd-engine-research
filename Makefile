@@ -157,6 +157,7 @@ test:
 # local `make test` (it needs the git-ignored il/ dump sets).
 test-docs:
 	python3 "$(TOOLS)/tests/test_tool_bootstrap.py"
+	python3 "$(TOOLS)/tests/test_asm_discovery.py"
 	python3 "$(TOOLS)/tests/test_tool_cli_usage.py"
 	python3 "$(TOOLS)/tests/test_shell_cli_usage.py"
 	python3 "$(TOOLS)/tests/test_python_cli_usage.py"

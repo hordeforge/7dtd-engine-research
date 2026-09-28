@@ -58,7 +58,15 @@ FETCH = STEAM / "fetch_version.sh"
 APP = "294420"
 DEPOT = "294422"  # dedicated-server content depot (linux/windows payload)
 PICS_URL = f"https://api.steamcmd.net/v1/info/{APP}"
-DEFAULT_APPMANIFEST = Path.home() / ".local/share/Steam/steamapps" / f"appmanifest_{APP}.acf"
+DEFAULT_APPMANIFEST = next(
+    (
+        root / "steamapps" / f"appmanifest_{APP}.acf"
+        for root in tooling.steam_roots(os.environ, Path.home())
+        if (root / "steamapps" / f"appmanifest_{APP}.acf").is_file()
+    ),
+    # Nothing installed: name the Linux default so the error points somewhere.
+    Path.home() / ".local/share/Steam/steamapps" / f"appmanifest_{APP}.acf",
+)
 # fullmatch, not match with `$`: Python's `$` also matches before a trailing
 # newline, so "ok\n" would pass here and only be caught by the shell.
 LABEL_RE = re.compile(r"[A-Za-z0-9._-]+")

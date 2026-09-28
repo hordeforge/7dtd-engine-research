@@ -19,6 +19,7 @@ import hashlib
 import os
 import signal
 import subprocess
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -29,6 +30,24 @@ STAMP_ENV = "SOURCE_DATE_EPOCH"
 MONO_TIMEOUT_ENV = "RE_MONO_TIMEOUT"
 DEFAULT_MONO_TIMEOUT = 900.0
 TIMEOUT_RC = 124
+
+# The dedicated server is a Steam app, and Steam installs to a different tree
+# per OS, so discovery probes every known root rather than assuming the Linux
+# one. Windows names its roots through the environment; on Linux/macOS those
+# variables are absent, and on Windows the lookup is case-insensitive, so one
+# list covers every host.
+STEAM_ROOT_ENV = ("ProgramFiles(x86)", "ProgramFiles", "ProgramW6432")
+STEAM_ROOTS_HOME = (
+    ".local/share/Steam",  # Linux default
+    ".steam/steam",  # Linux, older default
+    ".steam/root",  # Linux, ~/.steam symlink to the real root
+    "Library/Application Support/Steam",  # macOS
+)
+STEAM_COMMON = ("steamapps", "common")
+GAME_DIR = "7 Days to Die Dedicated Server"
+MANAGED = ("7DaysToDieServer_Data", "Managed")
+ASM_NAME = "Assembly-CSharp.dll"
+ASM_VARS = ("ASM", "SEVENDTD_ASM", "SEVENDTD_DS_DIR")
 
 
 class StampError(RuntimeError):
@@ -61,31 +80,43 @@ def scratch_dir() -> Path:
     return path
 
 
+def steam_roots(env: Mapping[str, str], home: Path) -> list[Path]:
+    """Steam library roots to probe, in the order the host is most likely to use."""
+    roots = [Path(env[name]) for name in STEAM_ROOT_ENV if env.get(name)]
+    roots.extend(home / relative for relative in STEAM_ROOTS_HOME)
+    return roots
+
+
+def asm_candidates(env: Mapping[str, str], home: Path) -> list[Path]:
+    """Every path `find_asm` may resolve to, explicit overrides first.
+
+    Split out from `find_asm` so the per-OS layout is testable on a host that
+    only has one of them.
+    """
+    candidates: list[Path] = []
+    for name in ASM_VARS:
+        value = env.get(name)
+        if not value:
+            continue
+        path = Path(value)
+        if path.is_file() and path.suffix.lower() == ".dll":
+            candidates.append(path)
+        else:
+            candidates.append(path.joinpath(*MANAGED, ASM_NAME))
+    candidates.extend(
+        root.joinpath(*STEAM_COMMON, GAME_DIR, *MANAGED, ASM_NAME)
+        for root in steam_roots(env, home)
+    )
+    return candidates
+
+
 def find_asm() -> Path | None:
     """The local dedicated `Assembly-CSharp.dll`, or None when absent.
 
     Shared by the tools (a diff needs the live install) and the gates (a missing
     DLL means SKIP, not FAIL), so both agree on what "the local install" means.
     """
-    candidates: list[Path] = []
-    for env in ("ASM", "SEVENDTD_ASM", "SEVENDTD_DS_DIR"):
-        value = os.environ.get(env)
-        if not value:
-            continue
-        path = Path(value)
-        if path.is_file() and path.name.endswith(".dll"):
-            candidates.append(path)
-        else:
-            candidates.append(path / "7DaysToDieServer_Data/Managed/Assembly-CSharp.dll")
-    home = Path.home()
-    candidates.extend(
-        [
-            home / ".local/share/Steam/steamapps/common/"
-            "7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
-            home / ".steam/steam/steamapps/common/"
-            "7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll",
-        ]
-    )
+    candidates = asm_candidates(os.environ, Path.home())
     return next((candidate for candidate in candidates if candidate.is_file()), None)
 
 

@@ -28,6 +28,9 @@ Full tool catalog (general `src/`, per-family `legacy/`, `parity/`, `re-scratch/
 Nothing in this repo ships game bytes. Point `ASM` at your own install:
 
 ```bash
+# Linux (the layout the tools probe first); on macOS and Windows the same
+# relative path lives under ~/Library/Application Support/Steam and
+# %ProgramFiles(x86)%\Steam, both probed too, so leaving ASM unset usually works.
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 cd tools && ./build.sh
 ```

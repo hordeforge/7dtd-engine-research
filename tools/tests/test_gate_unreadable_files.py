@@ -53,8 +53,23 @@ def write(path: str, text: str) -> None:
         f.write(text)
 
 
+def dangling(path: str) -> bool:
+    """A symlink to a missing target; False when the host refuses symlinks.
+
+    Windows only lets an unprivileged process create a symlink with Developer
+    Mode on, so the case is reported as not exercised rather than crashing the
+    gate; the rest of the fixtures still run.
+    """
+    try:
+        os.symlink("gone-target", path)
+    except OSError:
+        return False
+    return True
+
+
 def main() -> int:
     bad: list[str] = []
+    skipped: list[str] = []
     with tempfile.TemporaryDirectory(prefix="gate-unreadable-", dir=_common.scratch_dir()) as tmp:
         repo = build_repo(tmp)
 
@@ -104,21 +119,27 @@ def main() -> int:
             bad.append(f"zdtd_cite_check failed on a resolved citation (rc={rc}):\n{out}")
 
         # Unreadable markdown: the link gate must fail and name the file.
-        os.symlink("gone-target", os.path.join(repo, "locked.md"))
-        rc, out = run(CROSS, "--root", tmp)
-        if rc != 1 or "UNREADABLE" not in out or "locked.md" not in out:
-            bad.append(f"cross_repo_links passed despite unreadable md (rc={rc}):\n{out}")
-        if "Traceback" in out:
-            bad.append(f"cross_repo_links crashed instead of reporting:\n{out}")
-        os.unlink(os.path.join(repo, "locked.md"))
+        locked_md = os.path.join(repo, "locked.md")
+        if dangling(locked_md):
+            rc, out = run(CROSS, "--root", tmp)
+            if rc != 1 or "UNREADABLE" not in out or "locked.md" not in out:
+                bad.append(f"cross_repo_links passed despite unreadable md (rc={rc}):\n{out}")
+            if "Traceback" in out:
+                bad.append(f"cross_repo_links crashed instead of reporting:\n{out}")
+            os.unlink(locked_md)
+        else:
+            skipped.append("unreadable markdown")
 
         # Unreadable source: the citation gate must fail the same way.
-        os.symlink("gone-target", os.path.join(repo, "locked.py"))
-        rc, out = run(CITES, "--root", tmp)
-        if rc != 1 or "UNREADABLE" not in out or "locked.py" not in out:
-            bad.append(f"zdtd_cite_check passed despite unreadable src (rc={rc}):\n{out}")
-        if "Traceback" in out:
-            bad.append(f"zdtd_cite_check crashed instead of reporting:\n{out}")
+        locked_py = os.path.join(repo, "locked.py")
+        if dangling(locked_py):
+            rc, out = run(CITES, "--root", tmp)
+            if rc != 1 or "UNREADABLE" not in out or "locked.py" not in out:
+                bad.append(f"zdtd_cite_check passed despite unreadable src (rc={rc}):\n{out}")
+            if "Traceback" in out:
+                bad.append(f"zdtd_cite_check crashed instead of reporting:\n{out}")
+        else:
+            skipped.append("unreadable source")
 
     if bad:
         print("FAIL: gate unreadable-file handling")
@@ -129,6 +150,8 @@ def main() -> int:
         "OK: link/citation gates FAIL on unreadable files (UNREADABLE line) and "
         "on broken links/citations; resolved ones pass"
     )
+    if skipped:
+        print(f"note: no symlink permission here, cases not exercised: {', '.join(skipped)}")
     return 0
 
 

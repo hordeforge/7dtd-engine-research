@@ -44,12 +44,11 @@ import tooling
 MAGIC = 0x71F617D0
 DEFAULT_DEPOT = "294422"  # dedicated-server content depot
 PINS = tooling.TOOLS / "data" / "steam_builds.json"
-STEAM_ROOTS = (
-    Path.home() / ".local/share/Steam",
-    Path.home() / ".steam/steam",
-    Path.home() / ".steam/root",
-    Path.home() / ".local/share/Steam/steamapps",
-)
+# The Steam client lives under a different root per OS, so the depot cache,
+# content log and appmanifest are looked for under every layout the host can
+# have (see tooling.steam_roots), not only the Linux one.
+_STEAM_ROOTS = tuple(tooling.steam_roots(os.environ, Path.home()))
+STEAM_ROOTS = _STEAM_ROOTS + tuple(root / "steamapps" for root in _STEAM_ROOTS)
 HASH_CHUNK = 1 << 20
 # Files the running game rewrites from its own settings. A mismatch here is
 # expected on an install that has been launched; the hint explains it rather than
