@@ -445,13 +445,39 @@ def run_bounded(
         # Windows kills only the direct child, so a grandchild can still hold
         # the pipes open. The second read is bounded for that case; without it
         # the timeout turns back into the hang the bound exists to prevent.
-        try:
-            out, err = proc.communicate(timeout=POST_KILL_TIMEOUT)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            out, err = proc.communicate()
+        out, err = drain_killed(proc)
         return TIMEOUT_RC, out, f"{command[0]} exceeded {limit:g}s and was killed\n{err}"
+    except BaseException:
+        # Ctrl-C and every other unwind: the child is in its own session, so the
+        # signal never reached it, and without this it outlives the run that
+        # started it with both pipe ends still open.
+        kill_child_group(proc)
+        drain_killed(proc)
+        raise
     return proc.returncode, out, err
+
+
+def drain_killed(proc: "subprocess.Popen[str]") -> tuple[str, str]:
+    """Take what a killed child produced, under a bound, and let go of its pipes.
+
+    A grandchild that inherited the write ends can hold a read open past the
+    kill, so the read is bounded and, when the bound expires, abandoned: the
+    last thing this does is close both pipes, which releases the parent's file
+    descriptors whether or not the output ever arrives. The child's own status
+    is reaped under the same bound, so a child left unreaped cannot become a
+    zombie of this process either.
+    """
+    try:
+        out, err = proc.communicate(timeout=POST_KILL_TIMEOUT)
+        return out or "", err or ""
+    except (subprocess.TimeoutExpired, OSError, ValueError):
+        for stream in (proc.stdout, proc.stderr):
+            if stream is not None:
+                with contextlib.suppress(OSError, ValueError):
+                    stream.close()
+        with contextlib.suppress(OSError, ValueError, subprocess.TimeoutExpired):
+            proc.wait(timeout=POST_KILL_TIMEOUT)
+        return "", ""
 
 
 def kill_child_group(proc: "subprocess.Popen[str]") -> None:
