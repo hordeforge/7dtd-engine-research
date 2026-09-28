@@ -14,8 +14,10 @@ import argparse
 import glob
 import os
 import re
-import subprocess
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import tooling
 
 COLOR_RE = re.compile(r'<uv\s+id="(\d+)"[^>]*color="([0-9.eE+-]+),([0-9.eE+-]+),([0-9.eE+-]+)"')
 
@@ -170,27 +172,22 @@ def main() -> int:
     print(f"wrote {out_path}")
     # Best-effort: keep the output zig fmt clean (regeneration is manual).
     # Only the expected "zig not installed" case is tolerated silently; any
-    # other failure (e.g. malformed generated output) must surface. `zig fmt`
-    # is bounded and its status is checked, so a run that wrote the file and
-    # then failed to format it says so and exits nonzero instead of leaving
-    # unformatted output behind a success.
-    rc = 0
+    # other failure (e.g. malformed generated output) must surface. The child
+    # runs through tooling.run_bounded so a wedged zig fmt cannot hang the
+    # generator forever, and its status is checked, so a run that wrote the
+    # file and then failed to format it says so and exits nonzero instead of
+    # leaving unformatted output behind a success.
     try:
-        proc = subprocess.run(
+        rc, _, err = tooling.run_bounded(
             ["zig", "fmt", out_path],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=60,
+            env=dict(os.environ),
+            timeout=tooling.mono_timeout(),
         )
-        rc = proc.returncode
-        if rc != 0:
-            print(f"zig fmt failed ({rc}) on {out_path}:\n{proc.stderr}", file=sys.stderr)
-    except (OSError, subprocess.SubprocessError) as exc:
+    except OSError as exc:
         print(f"zig fmt did not run ({exc}); wrote unformatted {out_path}", file=sys.stderr)
+        return 0
     if rc != 0:
+        print(f"zig fmt failed ({rc}) on {out_path}: {err.strip()}", file=sys.stderr)
         return 1
     return 0
 

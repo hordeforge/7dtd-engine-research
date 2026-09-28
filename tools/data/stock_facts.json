@@ -7,7 +7,7 @@
     "assembly_csharp_dll_bytes": 11610624,
     "note": "hash of the exact extracted bytes; version fields can repeat across a silent re-release, this hash cannot"
   },
-  "extracted_utc": "2026-09-15T08:13:49.1587450Z",
+  "extracted_utc": "2026-09-15T08:13:49Z",
   "version": {
     "release_type": 1,
     "major": 3,

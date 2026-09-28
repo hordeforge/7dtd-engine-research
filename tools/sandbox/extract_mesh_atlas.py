@@ -76,13 +76,16 @@ def main() -> None:
         if not n:
             raise ValueError(f"no TextAssets found in {args.bundle}")
         expected = {p.name for p in staged.iterdir()}
-        for old in out_dir.glob("*.xml"):
-            if old.name not in expected:
-                old.unlink()
+        # Replace first, prune second: every asset in the new set is in place
+        # before a stale one is removed, so a failure mid-replace leaves the
+        # previous set whole rather than a directory with files missing from it.
         for source in staged.iterdir():
             target = out_dir / source.name
             os.replace(source, target)
             print(f"wrote {target} ({target.stat().st_size} bytes)")
+        for old in out_dir.glob("*.xml"):
+            if old.name not in expected:
+                old.unlink()
     print(f"total TextAssets: {n}")
 
 

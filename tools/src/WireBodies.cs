@@ -201,7 +201,10 @@ static class WireBodies {
       if (wm == null) continue;
       var more = new HashSet<string>();
       Emit(sb, td.Name, wm.Name, wm, more);
-      foreach (var x in more) if (!done.Contains(x)) queue.Add(x);
+      // Sorted, not HashSet order: this queue decides the section order of a
+      // committed inventory, and hash order differs run to run, so the file
+      // would differ from itself for identical bytes.
+      foreach (var x in more.OrderBy(y => y, StringComparer.Ordinal)) if (!done.Contains(x)) queue.Add(x);
     }
 
     Atomic.WriteText(a[1], sb.ToString());

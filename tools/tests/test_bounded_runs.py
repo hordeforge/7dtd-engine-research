@@ -71,6 +71,25 @@ SHELL_CHILD_RE = re.compile(
 QUOTED_RE = re.compile(r"""'[^']*'|"[^"]*\"""")
 
 
+def child_start_s() -> float:
+    """Wall time for one bare child start on this host."""
+    start = time.monotonic()
+    subprocess.run([sys.executable, "-c", "pass"], check=True, timeout=60)
+    return time.monotonic() - start
+
+
+def probe_bound_s() -> float:
+    """The bound the group-kill probes run under.
+
+    It has to clear the child's own cold start several times over. A fixed
+    2 s bound expires on a loaded or slow host before the probe has written
+    the grandchild pid, and the gate then reports a missing marker for what is
+    really a slow interpreter start: the probe measures the host, not the
+    wrapper it is there to check.
+    """
+    return max(TIMEOUT_S, child_start_s() * 3.0 + 1.0)
+
+
 def wait_gone(pid: int) -> bool:
     """Poll briefly for a pid to disappear. A zombie answers kill(0), so reap
     it opportunistically; this process is not its parent, so the check is a
@@ -99,7 +118,7 @@ def check_timeout_kills_group(tmp: Path) -> None:
     rc, _out, err = tooling.run_bounded(
         [sys.executable, "-c", SNIPPET, str(marker)],
         env=dict(os.environ),
-        timeout=TIMEOUT_S,
+        timeout=probe_bound_s(),
     )
     assert rc == tooling.TIMEOUT_RC, f"timed-out command reported rc {rc}, not the timeout rc"
     assert sys.executable in err, f"timeout stderr does not name the command: {err!r}"
@@ -168,16 +187,16 @@ def check_timeout_env() -> None:
             os.environ[tooling.MONO_TIMEOUT_ENV] = saved
 
 
-def _bash(script: str) -> subprocess.CompletedProcess[str]:
+def _bash(script: str, bound: float) -> subprocess.CompletedProcess[str]:
     # The shell default is 1800 s, sized for a whole-assembly dump; the probe
-    # needs the same short bound the Python checks use or it waits it out.
+    # needs a short bound or it waits it out. The variable is whole seconds.
     return subprocess.run(
         ["bash", "-c", f'. "{_common.TOOLS}/bounded-run.sh"\n{script}'],
         capture_output=True,
         text=True,
         encoding="utf-8",
         errors="replace",
-        env={**os.environ, tooling.MONO_TIMEOUT_ENV: str(int(TIMEOUT_S))},
+        env={**os.environ, tooling.MONO_TIMEOUT_ENV: str(max(1, round(bound)))},
         timeout=GRANDCHILD_WAIT_S + 30.0,
     )
 
@@ -185,7 +204,7 @@ def _bash(script: str) -> subprocess.CompletedProcess[str]:
 def check_shell_wrapper_kills_group(tmp: Path) -> None:
     """The shell bound kills the group too, and names the expired command."""
     marker = tmp / "shell-grandchild.pid"
-    result = _bash(f'run_bounded {sys.executable} -c "{SNIPPET}" {marker}')
+    result = _bash(f'run_bounded {sys.executable} -c "{SNIPPET}" {marker}', probe_bound_s())
     assert result.returncode == 124, (
         f"shell run_bounded returned {result.returncode}, not 124: {result.stderr}"
     )

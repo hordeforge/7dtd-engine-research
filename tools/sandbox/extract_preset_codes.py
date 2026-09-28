@@ -22,11 +22,13 @@ Usage:
 """
 
 import argparse
-import json
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import tooling
 
 HERE = Path(__file__).resolve().parent
 
@@ -86,8 +88,7 @@ def main() -> int:
         help="option/value-set tables (default: sandbox/sandbox_tables.json next to this script)",
     )
     args = ap.parse_args()
-    with args.tables.open(encoding="utf-8") as fh:
-        tables = json.load(fh)
+    tables = tooling.load_json(args.tables)
     opts = {o["id"]: o for o in tables["options"]}
     sets = tables["valuesets"]
 

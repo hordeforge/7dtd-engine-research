@@ -17,6 +17,21 @@ using System.Text.RegularExpressions;
 using Mono.Cecil;
 
 class Coverage {
+  // The first 16 hex digits of the assembly's SHA-256: the report header's
+  // identity for the studied build. A file mtime is a property of the host
+  // filesystem, so the same bytes re-downloaded stamp a different header and
+  // every regeneration of this committed report reads as stale; the hash is
+  // the value tools/data/stock_facts.json already pins the same build by.
+  static string Sha256Prefix(string path) {
+    using (var sha = System.Security.Cryptography.SHA256.Create())
+    using (var fs = File.OpenRead(path)) {
+      var hash = sha.ComputeHash(fs);
+      var hex = new StringBuilder(16);
+      for (int i = 0; i < 8; i++) hex.Append(hash[i].ToString("x2"));
+      return hex.ToString();
+    }
+  }
+
   static bool Generated(TypeDefinition t) {
     string n = t.Name;
     // '#'-named types are obfuscated/mangled compiler artifacts (no stable identity).
@@ -190,8 +205,8 @@ class Coverage {
     sb.AppendLine("# RE coverage report (auto-generated)");
     sb.AppendLine();
     string ver = ConstVersion(mod) ?? ("image V" + asm.Name.Version);
-    sb.AppendLine("**Assembly studied:** " + asm.Name.Name + " " + ver + ", file mtime "
-                  + File.GetLastWriteTimeUtc(a[0]).ToString("yyyy-MM-dd HH:mm 'UTC'")
+    sb.AppendLine("**Assembly studied:** " + asm.Name.Name + " " + ver + ", sha256 "
+                  + Sha256Prefix(a[0])
                   + ". The numbers below are for THIS build only: if the corpus pin");
     sb.AppendLine("moved (`docs/meta/coverage.md` header), regenerate before quoting any number here.");
     sb.AppendLine();

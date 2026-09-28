@@ -11,9 +11,14 @@ Usage: python3 gen_zig_tables.py sandbox_tables.json ../zdtd-server/src/assets/s
 """
 
 import argparse
-import json
+import os
 import struct
+import sys
 from json import dumps as zstr
+from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import tooling
 
 
 def f32(x: float) -> float:
@@ -40,8 +45,7 @@ def val_literal(v: object) -> str:
 
 
 def emit(json_path: str, out_path: str) -> None:
-    with open(json_path, encoding="utf-8") as fh:
-        t = json.load(fh)
+    t = tooling.load_json(Path(json_path))
     vs = t["valuesets"]
     opts = t["options"]
 

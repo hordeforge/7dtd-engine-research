@@ -172,9 +172,8 @@ def parse_snapshot(appinfo: Any, source: str, app: str = APP, depot: str = DEPOT
 
 def load_appinfo(path: Path) -> Snapshot:
     try:
-        with path.open(encoding="utf-8") as fh:
-            appinfo: Any = json.load(fh)
-    except (OSError, json.JSONDecodeError) as exc:
+        appinfo: Any = tooling.load_json(path)
+    except (OSError, json.JSONDecodeError, tooling.NonFiniteNumberError) as exc:
         raise SourceError(f"unreadable app info {path}: {exc}") from exc
     return parse_snapshot(appinfo, f"file:{path}")
 
@@ -183,8 +182,14 @@ def fetch_appinfo(url: str = PICS_URL, timeout: float = 30.0) -> Snapshot:
     request = urllib.request.Request(url, headers={"User-Agent": "7dtd-engine-research"})
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            appinfo: Any = json.load(response)
-    except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+            appinfo: Any = tooling.loads_json(response.read().decode("utf-8"))
+    except (
+        urllib.error.URLError,
+        TimeoutError,
+        OSError,
+        json.JSONDecodeError,
+        tooling.NonFiniteNumberError,
+    ) as exc:
         raise SourceError(f"cannot read {url}: {exc}") from exc
     return parse_snapshot(appinfo, url)
 

@@ -47,6 +47,10 @@ CLOCK_CALLS = ("now", "utcnow", "today")
 # the seam there is the SOURCE_DATE_EPOCH variable, and Mono's DateTimeOffset
 # is the only clock source the sources may read.
 CS_CLOCK_RE = re.compile(r"DateTime(?:Offset)?\.(?:UtcNow|Now|Today)\b")
+# The C# emitter has to spell the stamp the same way tooling.STAMP_FORMAT does,
+# or the two spellings drift and a consumer cannot parse both.
+CS_STAMP_FORMAT = "yyyy-MM-ddTHH:mm:ssZ"
+STOCK_FACTS = "data/stock_facts.json"
 CS_SEAM = "StampEnv"
 CS_STAMP_METHOD = "ExtractedStamp"
 CS_METHOD_RE = re.compile(r"^  (?:static|public|private|internal)?[^;{]*\([^;]*\)[ ]*\{")
@@ -180,6 +184,36 @@ CS_LIVENESS_SNIPPET = """class T {
 """
 
 
+def check_cs_stamp_format() -> list[str]:
+    """The C# emitter and the committed pin carry the shared stamp shape.
+
+    `SOURCE_DATE_EPOCH` is an integer number of seconds, so a stamp with
+    sub-second digits in it cannot be reproduced from the variable that is
+    supposed to pin it: the committed artifact then differs on every rerun.
+    """
+    failures: list[str] = []
+    helpers = [
+        path
+        for path in sorted(_common.TOOLS.rglob("src/*.cs"))
+        if CS_STAMP_METHOD in path.read_text(encoding="utf-8")
+    ]
+    for path in helpers:
+        text = path.read_text(encoding="utf-8")
+        if CS_STAMP_FORMAT not in text:
+            failures.append(
+                f"{path.relative_to(_common.TOOLS)}: no {CS_STAMP_FORMAT} stamp format; a stamp "
+                f"the pinned epoch cannot spell is a stamp that cannot be replayed"
+            )
+    facts = _common.TOOLS / STOCK_FACTS
+    if facts.is_file():
+        stamp = tooling.load_json(facts).get("extracted_utc", "")
+        if not STAMP_RE.match(str(stamp)):
+            failures.append(
+                f"{STOCK_FACTS}: extracted_utc={stamp!r} is not a {tooling.STAMP_FORMAT} stamp"
+            )
+    return failures
+
+
 def cs_detector_alive() -> bool:
     """The C# detector must flag a bare wall-clock read, or it reads as a pass."""
     lines = CS_LIVENESS_SNIPPET.splitlines()
@@ -273,6 +307,7 @@ def main() -> int:
             "on a known-bad sample"
         )
     failures.extend(check_cs_culture())
+    failures.extend(check_cs_stamp_format())
 
     if failures:
         for failure in failures:

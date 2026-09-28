@@ -1,6 +1,6 @@
 # RE coverage report (auto-generated)
 
-**Assembly studied:** Assembly-CSharp V3.2.0 (b10), file mtime 2026-09-05 08:35 UTC. The numbers below are for THIS build only: if the corpus pin
+**Assembly studied:** Assembly-CSharp V3.2.0 (b10), sha256 3737eedc9f143d42. The numbers below are for THIS build only: if the corpus pin
 moved (`docs/meta/coverage.md` header), regenerate before quoting any number here.
 
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
