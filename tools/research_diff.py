@@ -37,6 +37,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -70,6 +71,9 @@ REPO = tooling.REPO
 BIN = tooling.BIN
 DEFAULT_OUT_DIR = REPO / "workspace" / "outputs" / "diffs"
 STEAM_PINS = TOOLS / "data" / "steam_builds.json"
+# --max-list bounds every lens, so a facts diff over a LiteNetLib-less side
+# cannot print hundreds of rows behind the reader's back.
+DEFAULT_MAX_LIST = 40
 
 FACTS_SKIP = {"asm", "extracted_utc"}
 BODY_SUMMARY_RE = re.compile(
@@ -308,7 +312,7 @@ def cap(lines: list[str], limit: int) -> str:
     return "\n".join(shown)
 
 
-def lens_facts(old: Source, new: Source) -> Section:
+def lens_facts(old: Source, new: Source, limit: int = DEFAULT_MAX_LIST) -> Section:
     old_facts = flatten(old.facts)
     new_facts = flatten(new.facts)
     counts, lines = diff_maps(old_facts, new_facts)
@@ -324,10 +328,10 @@ def lens_facts(old: Source, new: Source) -> Section:
             f"note: no LiteNetLib.dll beside the {side} assembly, so StockFacts pinned only "
             "litenet.protocol_id there; the other litenet.* rows are missing rather than changed"
         )
-    return Section("Stock facts (StockFacts.exe)", counts, cap(lines, 10_000), note=note)
+    return Section("Stock facts (StockFacts.exe)", counts, cap(lines, limit), note=note)
 
 
-def lens_census(old: Source, new: Source) -> Section:
+def lens_census(old: Source, new: Source, limit: int = DEFAULT_MAX_LIST) -> Section:
     texts = []
     for src in (old, new):
         proc = run(["mono", str(BIN / "Census.exe"), str(src.path)])
@@ -337,7 +341,7 @@ def lens_census(old: Source, new: Source) -> Section:
             )
         texts.append(proc.stdout)
     counts, lines = diff_maps(parse_pairs(texts[0]), parse_pairs(texts[1]))
-    return Section("Census (Census.exe)", counts, cap(lines, 10_000))
+    return Section("Census (Census.exe)", counts, cap(lines, limit))
 
 
 def list_surface(tool: str, dll: Path, tmp: Path, name: str) -> str:
@@ -546,7 +550,7 @@ def report_markdown(
         "## Reproduce",
         "",
         "```bash",
-        " ".join(["python3", "tools/research_diff.py", *argv]),
+        " ".join(["python3", "tools/research_diff.py", *(shlex.quote(a) for a in argv)]),
         "```",
         "",
         "",
@@ -754,7 +758,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="candidate cached depot manifest for the content lens",
     )
     ap.add_argument(
-        "--max-list", type=int, default=40, help="max detail lines per lens (default 40)"
+        "--max-list",
+        type=int,
+        default=DEFAULT_MAX_LIST,
+        help="max detail lines per lens (default 40)",
     )
     ap.add_argument(
         "--out",
@@ -885,8 +892,8 @@ def main(argv: list[str] | None = None) -> int:
                         )
 
             builders: dict[str, Callable[[], Section]] = {
-                "facts": partial(lens_facts, old, new),
-                "census": partial(lens_census, old, new),
+                "facts": partial(lens_facts, old, new, limit),
+                "census": partial(lens_census, old, new, limit),
                 "metadata": partial(lens_metadata, old, new, tmp_path, limit),
                 "methods": partial(lens_methods, old, new, tmp_path, limit),
                 "enums": partial(lens_enums, old, new, tmp_path, limit),

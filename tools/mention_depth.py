@@ -39,9 +39,12 @@ TOKEN = re.compile(r"`([A-Za-z_][A-Za-z0-9_]*)(?:[./:][^`]*)?`")
 
 
 def narrative_docs(docs_dir: str) -> Iterator[str]:
-    for root, _dirs, files in os.walk(docs_dir):
+    for root, dirs, files in os.walk(docs_dir):
         norm = root.replace(os.sep, "/")
         if norm.endswith("/inventories"):
+            # Prune, not just skip: a subdirectory of inventories/ is as
+            # generated as the directory itself.
+            dirs[:] = []
             continue
         for fn in files:
             if not fn.endswith(".md"):
@@ -59,7 +62,7 @@ def main(argv: list[str]) -> int:
         "docs_dir",
         nargs="?",
         default=DEFAULT_DOCS,
-        help="docs directory to scan (default: docs)",
+        help=f"docs directory to scan (default: this repo's {DEFAULT_DOCS})",
     )
     args = ap.parse_args(argv)
     # A path that is not a directory makes os.walk yield nothing, so the table

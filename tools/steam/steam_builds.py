@@ -617,6 +617,11 @@ def main(argv: list[str] | None = None) -> int:
         if history:
             recorded["history"] = history
         write_pins(pins_path, recorded)
+        # The pin now IS the recorded entry: every later verdict, the printed
+        # pin line and the JSON payload must read the pin the file carries,
+        # not the one this process loaded before --record rewrote it.
+        pins = recorded
+        studied = studied_entry
         # --json owns stdout, so the human confirmation goes beside the JSON.
         print(
             f"recorded: {pins_path} <- {branch.name} buildid {branch.buildid}"
@@ -625,6 +630,22 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.json:
+        # --fetch/--print-fetch act on the selection, and --json only changes
+        # how the snapshot is printed. Silently dropping the fetch here made
+        # both options no-ops in a scripted run.
+        fetch_command: list[str] | None = None
+        if args.print_fetch or args.fetch:
+            if not branch.manifest:
+                print(f"steam_builds: branch {branch.name} has no depot {DEPOT} manifest")
+                return 2
+            if not GID_RE.fullmatch(branch.manifest):
+                print(
+                    f"steam_builds: refusing to fetch with a non-numeric depot manifest "
+                    f"gid {branch.manifest!r} from {snapshot.source}",
+                    file=sys.stderr,
+                )
+                return 2
+            fetch_command = [str(FETCH), branch.manifest, label]
         payload = {
             "source": snapshot.source,
             "app": APP,
@@ -658,13 +679,21 @@ def main(argv: list[str] | None = None) -> int:
             "branches": [as_json(b) | {"cached": b.manifest in cached} for b in snapshot.branches],
         }
         print(json.dumps(payload, indent=2))
+        fetch_rc = 0
+        if fetch_command is not None:
+            if args.print_fetch and not args.fetch:
+                # stdout is the JSON document, so the command goes to stderr.
+                print(" ".join(fetch_command), file=sys.stderr)
+            else:
+                print("fetch: " + " ".join(fetch_command), file=sys.stderr)
+                fetch_rc = run_fetch(fetch_command)
         if args.check:
             verdict = drift_verdict(branch, studied, install_buildid, integrity, pins_path)
             if verdict is not None:
                 code, message = verdict
                 print(f"steam_builds: FAIL {message}", file=sys.stderr)
                 return code
-        return 0
+        return fetch_rc
 
     quiet = args.print_fetch and not args.fetch
     if not quiet:

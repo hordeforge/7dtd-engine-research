@@ -62,11 +62,15 @@ def parse_blocks(path: str, shapes: list[str], bulletproof: set[str]) -> list[st
 
 def terrain_shape(block_name: str, xml: str) -> bool:
     """True when the block's Shape property resolves to BlockShapeTerrain."""
-    # Find the block element and read its Shape property value.
-    m = re.search(re.escape(block_name) + r'"([^>]*)>(.*?)</block>', xml, re.S)
-    if not m:
+    # Read the block's OWN body. A self-closing `<block ... />` (a block with no
+    # properties) has no body at all, and a body-matched-to-the-next-`</block>`
+    # regex would hand it the following block's Shape, putting a Cube block
+    # into the terrain band.
+    m = re.search(r'<block\b[^>]*name="' + re.escape(block_name) + r'"[^>]*>', xml, re.S)
+    if not m or m.group(0).rstrip().endswith("/>"):
         return False
-    body = m.group(2)
+    end = xml.find("</block>", m.end())
+    body = xml[m.end() : end if end != -1 else len(xml)]
     pm = re.search(r'<property\s+name="Shape"\s+value="([^"]+)"', body)
     return pm is not None and pm.group(1) == "Terrain"
 

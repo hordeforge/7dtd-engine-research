@@ -610,6 +610,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
 
     if args.json:
+        verify_result: VerifyResult | None = None
         payload: dict[str, Any] = {
             "manifest": str(manifest.path),
             "depot": manifest.depot,
@@ -631,6 +632,7 @@ def main(argv: list[str] | None = None) -> int:
             }
         elif args.verify:
             result = verify(manifest, Path(args.verify), args.only, tuple(args.ignore))
+            verify_result = result
             payload |= {
                 "ok": result.ok,
                 "missing": result.missing,
@@ -650,6 +652,11 @@ def main(argv: list[str] | None = None) -> int:
                 for e in (match_entries(manifest, args.find) if args.find else selected)
             ]
         print(json.dumps(payload, indent=2))
+        # The documented exit contract is a property of --verify, not of the
+        # output format: a caller reading the JSON gets the same verdict a
+        # caller reading the text gets.
+        if verify_result is not None and (verify_result.missing or verify_result.bad):
+            return 1
         return 0
 
     print(

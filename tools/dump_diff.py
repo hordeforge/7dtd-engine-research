@@ -143,7 +143,11 @@ def main() -> int:
         return 2
     old_dir = Path(sys.argv[1])
     new_dir = Path(sys.argv[2])
-    flt = re.compile(sys.argv[3]) if len(sys.argv) == 4 else re.compile(".*")
+    try:
+        flt = re.compile(sys.argv[3]) if len(sys.argv) == 4 else re.compile(".*")
+    except re.error as exc:
+        print(f"dump_diff: type-filter-regex is not a valid regex: {exc}", file=sys.stderr)
+        return 2
 
     for label, directory in (("old-full-dir", old_dir), ("new-full-dir", new_dir)):
         if not directory.is_dir():
@@ -153,6 +157,17 @@ def main() -> int:
             return 2
     old_files = {p.relative_to(old_dir): p for p in old_dir.rglob("*.il.txt")}
     new_files = {p.relative_to(new_dir): p for p in new_dir.rglob("*.il.txt")}
+
+    for label, files in (("old-full-dir", old_files), ("new-full-dir", new_files)):
+        if not files:
+            # Same silence as a wrong path, reached by a dump run that
+            # aborted or wrote elsewhere.
+            print(
+                f"dump_diff: {label} holds no *.il.txt dumps: "
+                f"{old_dir if label == 'old-full-dir' else new_dir}",
+                file=sys.stderr,
+            )
+            return 2
 
     # common files
     for rel in sorted(set(old_files) & set(new_files)):
@@ -165,6 +180,15 @@ def main() -> int:
             print(f"== {rel}")
             for x in d:
                 print(x)
+
+    # A type present on one side only is the largest single drift category,
+    # and the intersection-only walk above could not report it.
+    for rel in sorted(set(new_files) - set(old_files)):
+        if flt.search(str(rel)):
+            print(f"++ {rel}")
+    for rel in sorted(set(old_files) - set(new_files)):
+        if flt.search(str(rel)):
+            print(f"-- {rel}")
     return 0
 
 

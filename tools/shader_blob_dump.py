@@ -346,6 +346,13 @@ def dxbc_chunks(data: bytes) -> dict[str, bytes]:
         if off + 8 > len(data):
             raise ShaderBlobError(f"DXBC chunk header at {off} runs past the {len(data)}-byte blob")
         size = u32(data, off + 4)
+        # A slice past the end would silently hand back a short chunk, and the
+        # declaration count read from it would be a truncated shader's, not the
+        # shader's.
+        if off + 8 + size > len(data):
+            raise ShaderBlobError(
+                f"DXBC chunk at {off} claims {size} bytes, past the {len(data)}-byte blob"
+            )
         out[data[off : off + 4].decode("ascii", "replace")] = data[off + 8 : off + 8 + size]
     return out
 
@@ -433,12 +440,26 @@ def decode_bundle(
                                 parameter_indices.add(int(idx))
 
         for blob_index, gpu_type in sorted(wanted.items()):
+            # A wanted sub-program that is not decoded is a finding: dropping
+            # it silently would report a clean bundle for a truncated blob and
+            # under-count the sub-program census.
             if blob_index >= len(records):
+                skipped.append((name, f"blob {blob_index}: no record (of {len(records)})"))
                 continue
             offset, length, segment = records[blob_index]
             if offset + 32 > len(data):
+                skipped.append((name, f"blob {blob_index}: record runs past the blob"))
                 continue
             if u32(data, offset) != BLOB_VERSION or u32(data, offset + 4) != gpu_type:
+                skipped.append(
+                    (
+                        name,
+                        (
+                            f"blob {blob_index}: record is not a version {BLOB_VERSION} "
+                            f"gpu type {gpu_type} sub-program"
+                        ),
+                    )
+                )
                 continue
             try:
                 sub, data_offset = parse_subprogram(data, offset)
@@ -482,15 +503,19 @@ def decode_bundle(
             if verbose:
                 print(
                     f"  {name} blob={blob_index} type={gpu_type} "
-                    f"header={code[:6].hex(' ')} srv={counts[OP_DCL_RESOURCE]} "
+                    f"header={code[:6].hex(' ')} srv={sum(counts[op] for op in SRV_OPCODES)} "
                     f"cb={counts[OP_DCL_CONSTANT_BUFFER]} smp={counts[OP_DCL_SAMPLER]}"
                 )
         for blob_index in sorted(parameter_indices):
             if blob_index >= len(records):
+                skipped.append((name, f"parameter blob {blob_index}: no record"))
                 continue
             offset, length, _segment = records[blob_index]
             raw = bytes(data[offset : offset + length])
             if len(raw) < 8 or u32(raw, 0) != BLOB_VERSION:
+                skipped.append(
+                    (name, f"parameter blob {blob_index}: not a version {BLOB_VERSION} blob")
+                )
                 continue
             try:
                 fields, consumed = parse_parameter_blob(raw)

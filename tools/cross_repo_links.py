@@ -19,7 +19,6 @@ Exit 0 = all links resolve; 1 = at least one broken link; 2 = bad invocation.
 """
 
 import argparse
-import glob
 import os
 import re
 import sys
@@ -32,7 +31,7 @@ import tooling
 # existence check): a link like ../repo/docs/x.md#section crosses the repo
 # boundary just the same, and leaving it unmatched would print "OK: all links
 # resolve" while that link was never checked.
-LINK = re.compile(r"\]\(((?:\.\./)+[^) ]+\.md(?:#[^) ]*)?)\)")
+LINK = re.compile(r"\]\(((?:\.\./)+[^) ]+\.md(?:#[^) ]*)?)(?:\s+[^)]*)?\)")
 REPOS = [
     "7dtd-server-apm",
     "7dtd-fastconnect",
@@ -44,6 +43,21 @@ REPOS = [
     "7dtd-server-guard",
     "zdtd-server",
 ]
+# VCS metadata and vendored trees: they hold no authored links, and walking a
+# sibling's node_modules is pure cost. Dot-directories other than these are
+# swept, because a sibling's .github/ is documentation.
+SKIP_DIRS = {
+    ".git",
+    ".zig-cache",
+    "node_modules",
+    ".venv",
+    "bin",
+    "obj",
+    "__pycache__",
+    "target",
+    "dist",
+    "build",
+}
 
 
 def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str]]:
@@ -55,24 +69,28 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str
     total = 0
     broken = []
     unreadable = []
-    for f in glob.glob(os.path.join(repo, "**", "*.md"), recursive=True):
-        if ".git" in f:
-            continue
-        base = os.path.dirname(f)
-        try:
-            with open(f, encoding="utf-8") as fh:
-                txt = fh.read()
-        except OSError as exc:
-            # A gate must not pass a file it could not read: its links were
-            # never checked. Report and fail rather than silently skipping.
-            unreadable.append(f"  UNREADABLE {f}: {exc}")
-            continue
-        for m in LINK.finditer(txt):
-            p = os.path.normpath(os.path.join(base, m.group(1).split("#", 1)[0]))
-            if not p.startswith(os.path.normpath(repo) + os.sep):
-                total += 1
-                if not os.path.exists(p):
-                    broken.append(f"  BROKEN {f}: {m.group(1)}")
+    for dirpath, dirnames, filenames in os.walk(repo):
+        # Only VCS and vendored trees are skipped: dot-directories carry docs
+        # (a sibling's .github/), and glob's recursive walk never matched them.
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+        for name in filenames:
+            if not name.endswith(".md"):
+                continue
+            f = os.path.join(dirpath, name)
+            try:
+                with open(f, encoding="utf-8") as fh:
+                    txt = fh.read()
+            except OSError as exc:
+                # A gate must not pass a file it could not read: its links were
+                # never checked. Report and fail rather than silently skipping.
+                unreadable.append(f"  UNREADABLE {f}: {exc}")
+                continue
+            for m in LINK.finditer(txt):
+                p = os.path.normpath(os.path.join(dirpath, m.group(1).split("#", 1)[0]))
+                if not p.startswith(os.path.normpath(repo) + os.sep):
+                    total += 1
+                    if not os.path.exists(p):
+                        broken.append(f"  BROKEN {f}: {m.group(1)}")
     return total, len(broken), len(unreadable), broken + unreadable
 
 
@@ -91,6 +109,12 @@ def main() -> int:
     # candidate names and exit 2.
     ap.add_argument("--repo", choices=REPOS, help="limit the scan to one repo name")
     args = ap.parse_args()
+    if args.repo and args.repo not in REPOS:
+        print(
+            f"cross_repo_links: unknown repo {args.repo!r}; known repos: " + ", ".join(REPOS),
+            file=sys.stderr,
+        )
+        return 2
     root = args.root
     grand = 0
     bad_total = 0

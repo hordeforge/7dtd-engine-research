@@ -50,7 +50,17 @@ def decode(
         o = opts.get(oid)
         if not o:
             raise ValueError(f"sandbox code references unknown option {oid}")
-        vs = sets.get(o["valueset"], {}).get("values", [])
+        entry = sets.get(o["valueset"]) or {}
+        vs = entry.get("values")
+        if vs is None:
+            # A bool value set carries no table: the index is the bool
+            # (sandbox-options.md 2.1 renders YesNo as "false/true").
+            if entry.get("type") != "bool":
+                raise ValueError(
+                    f"sandbox option {oid} value set {o['valueset']!r} has no values "
+                    f"and is not a bool set"
+                )
+            vs = [False, True]
         if idx >= len(vs):
             raise ValueError(f"sandbox option {oid} value index {idx} is out of range")
         out[o["name"]] = vs[idx]

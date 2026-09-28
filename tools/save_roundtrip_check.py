@@ -448,7 +448,7 @@ def check_main_ttw(path: str, checks: list[str]) -> None:
     checks.append(
         f"  chunkSizeX/Y/Z: {csx}/{csy}/{csz} == 16/16/16 (Y/Z swapped on store)"
         if (csx, csy, csz) == (16, 16, 16)
-        else f"  chunkSize: {csx}/{csy}/{csz}"
+        else f"  chunkSize: {csx}/{csy}/{csz} MISMATCH the 16/16/16 pin"
     )
     chunk_count = struct.unpack_from("<i", buf, off)[0]
     off += 4
@@ -657,7 +657,8 @@ def check_nim_mapping(path: str, checks: list[str]) -> None:
         # offset here would print "consumed -1/N", which names neither the entry
         # that failed to parse nor the truncation that caused it.
         checks.append(
-            f"{name}: id-name walk stopped after {len(ids)}/{cnt} entries at offset {p}: {exc}"
+            f"{name}: parse error: id-name walk stopped after {len(ids)}/{cnt} "
+            f"entries at offset {p}: {exc}"
         )
         return
     ok = p == len(data)
@@ -895,7 +896,9 @@ def main() -> int:
     if rr and len(rr) > 2:
         checks.append(f"  ({len(rr) - 2} further .7rr files not expanded)")
     if not rg and not rr:
-        checks.append("Region/: no region files")
+        # Same verdict as a missing main.ttw: a save with a header and no
+        # region files has not round-tripped.
+        checks.append("Region/: no region files (MISSING)")
 
     deco = os.path.join(save_dir, "decoration.7dt")
     if os.path.exists(deco):

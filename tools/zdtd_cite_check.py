@@ -32,7 +32,10 @@ REPOS = [
     "7dtd-realearth",
     "7dtd-server-apm",
 ]
-RES_PATH = re.compile(r"(?:(?:\.\./)*7dtd-engine-research/docs/)([A-Za-z0-9][A-Za-z0-9_-]+\.md)")
+RES_PATH = re.compile(
+    r"(?:(?:\.\./)*7dtd-engine-research/docs/)"
+    r"((?:[A-Za-z0-9_-]+/)*[A-Za-z0-9][A-Za-z0-9_-]*\.md)"
+)
 BARE_AFTER_RE = re.compile(
     r"RE(?::|\s+)(?:../7dtd-engine-research/docs/)?([A-Za-z0-9][A-Za-z0-9_-]+\.md)"
 )
@@ -108,6 +111,16 @@ def collect_local(root: str, into: set[str]) -> None:
                     into.add(tooling.nfc(re.sub(r"^\d+-", "", d)))
 
 
+def resolves(name: str, docs: set[str]) -> bool:
+    """A citation resolves when its path exists under docs/, or its basename
+    does. `7dtd-engine-research/docs/meta/x.md` is a research citation too,
+    and the nested form has to reach the same verdict as the flat one."""
+    name = tooling.nfc(name)
+    if "/" not in name:
+        return name in docs
+    return (tooling.DOCS / name).is_file() or os.path.basename(name) in docs
+
+
 def scan(root: str, local: set[str], docs: set[str]) -> tuple[int, list[str], int]:
     """(citation count, broken-citation lines, unreadable-file count)."""
     total = 0
@@ -131,7 +144,7 @@ def scan(root: str, local: set[str], docs: set[str]) -> tuple[int, list[str], in
             for pat in (RES_PATH, BARE_AFTER_RE):
                 for m in pat.finditer(txt):
                     total += 1
-                    if tooling.nfc(m.group(1)) not in docs:
+                    if not resolves(m.group(1), docs):
                         broken.append(f"{p}: cites {m.group(1)}")
             # src files: a bare `X.md` name must be a research doc or a
             # repo-local doc (incl. zdtd docs/adr stripped).
@@ -161,6 +174,12 @@ def main() -> int:
     # and exit 2.
     ap.add_argument("--repo", choices=REPOS, help="limit the scan to one repo name")
     args = ap.parse_args()
+    if args.repo and args.repo not in REPOS:
+        print(
+            f"zdtd_cite_check: unknown repo {args.repo!r}; known repos: " + ", ".join(REPOS),
+            file=sys.stderr,
+        )
+        return 2
     grand = 0
     bad_total = 0
     local: set[str] = set()

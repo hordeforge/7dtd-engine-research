@@ -55,7 +55,7 @@ def default_game_dir() -> str:
     return str(root) if root else ""
 
 
-HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="(\d+)"')
+HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="([^"]*)"')
 
 
 def parse_float(text: str, where: str, unparsed: list[str]) -> float | None:
@@ -80,10 +80,21 @@ def parse_float(text: str, where: str, unparsed: list[str]) -> float | None:
 
 
 def entityclasses_health(text: str, unparsed: list[str]) -> dict[str, int]:
-    """health* values inside the replace_passive_effect block."""
+    """health* values inside the replace_passive_effect block.
+
+    A value the gate cannot read is a named skip, not a silently dropped key:
+    dropping it would remove a pinned value from the corpus and leave --check
+    green against an install that no longer carries it.
+    """
     m = re.search(r"<replace_passive_effect>.*?</replace_passive_effect>", text, re.S)
     block = m.group(0) if m else ""
-    return {name: int(val) for name, val in HEALTH_RE.findall(block)}
+    out: dict[str, int] = {}
+    for name, val in HEALTH_RE.findall(block):
+        try:
+            out[name] = int(val)
+        except ValueError:
+            unparsed.append(f"entityclasses.xml {name}: {val!r} is not an integer")
+    return out
 
 
 def traders_root(text: str, unparsed: list[str]) -> dict[str, float]:
@@ -200,12 +211,16 @@ def refusals(data: dict[str, Any], game_dir: str) -> list[str]:
 
     A wrong --game-dir, a renamed config block, or a source file that parses
     to nothing must leave the pins alone rather than replace them with empty
-    sections and report success.
+    sections and report success. A source file that is missing entirely is
+    the same failure: an incomplete --game-dir would otherwise drop a whole
+    section from the pins and still report success.
     """
     out = list(data["unparsed"])
     for spec in SECTION_SPECS:
         path = os.path.join(game_dir, spec.config)
-        if os.path.isfile(path) and len(data[spec.name]) - len(spec.constants) < spec.min_parsed:
+        if not os.path.isfile(path):
+            out.append(f"{path} not found; --game-dir is not a dedicated-server install root")
+        elif len(data[spec.name]) - len(spec.constants) < spec.min_parsed:
             out.append(
                 f"{path} present but no {spec.name} value parsed "
                 f"(need {spec.min_parsed}; config section renamed?)"

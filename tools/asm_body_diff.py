@@ -15,6 +15,7 @@ Requires mono + tools/bin/Mono.Cecil.dll (built by `make tools`).
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -154,6 +155,16 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
+    # The docstring's precondition is mono + mcs; checked here so a host
+    # without them gets the documented usage-exit instead of a traceback out
+    # of Popen.
+    for launcher in ("mcs", "mono"):
+        if shutil.which(launcher) is None:
+            print(
+                f"asm_body_diff: {launcher} not on PATH; install the mono toolchain",
+                file=sys.stderr,
+            )
+            return 2
 
     # Stamp both inputs: a body-hash report is only meaningful next to the exact
     # bytes it compared, and the sha256 is what tools/data/steam_builds.json maps
