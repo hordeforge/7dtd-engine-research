@@ -63,7 +63,7 @@ def main() -> None:
     assert installed, payload["installed"]
     assert installed in integrity["manifest"], (installed, integrity)
 
-    pins = json.loads((_common.TOOLS / "data" / "steam_builds.json").read_text(encoding="utf-8"))
+    pins = _common.load_json(_common.TOOLS / "data" / "steam_builds.json")
     studied = pins["studied"]
     assert payload["installed"]["buildid"] == studied["buildid"], (
         f"installed build {payload['installed']['buildid']} != studied pin "

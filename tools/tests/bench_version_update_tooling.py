@@ -109,7 +109,7 @@ def score_no_soft_literals() -> tuple[float, str]:
 def score_mutation_facts_fail() -> tuple[float, str]:
     if not FACTS.is_file():
         return 0.0, "no facts"
-    facts = json.loads(FACTS.read_text(encoding="utf-8"))
+    facts = _common.load_json(FACTS)
     # Mutate version so pins should fail if checker is facts-driven
     facts["version"]["major"] = 99
     facts["version"]["minor"] = 0
@@ -129,7 +129,7 @@ def score_mutation_doc_fail() -> tuple[float, str]:
     """Copy docs to temp is hard; instead mutate facts census numbers and require fail."""
     if not FACTS.is_file():
         return 0.0, "no facts"
-    facts = json.loads(FACTS.read_text(encoding="utf-8"))
+    facts = _common.load_json(FACTS)
     facts.setdefault("census", {})
     facts["census"]["top_level_types"] = 1
     facts["census"]["methods_with_body_top_level"] = 1
@@ -162,7 +162,7 @@ def _path_present(facts: dict[str, Any], path: tuple[str, ...]) -> bool:
 def score_schema_breadth() -> tuple[float, str]:
     if not FACTS.is_file():
         return 0.0, "no facts"
-    facts = json.loads(FACTS.read_text(encoding="utf-8"))
+    facts = _common.load_json(FACTS)
     required_paths = [
         ("version", "major"),
         ("version", "minor"),
@@ -236,7 +236,7 @@ def score_tooling_hardcode_debt() -> tuple[float, str]:
     # was written; a frozen pair of superseded labels only measures the past.
     # Superseded pins stay listed: a stale version hardcoded in tooling is the
     # same debt as the current one.
-    version = json.loads(FACTS.read_text(encoding="utf-8"))["version"] if FACTS.is_file() else {}
+    version = _common.load_json(FACTS)["version"] if FACTS.is_file() else {}
     labels = {
         version.get("display", "").removeprefix("V ").strip(),
         f"b{version.get('build')}" if version.get("build") is not None else "",

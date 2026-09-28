@@ -63,8 +63,8 @@ def main() -> int:
         if not condition:
             failures_found.append(label)
 
-    facts = json.loads(FACTS.read_text(encoding="utf-8"))
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    facts = _common.load_json(FACTS)
+    pins = _common.load_json(PINS)
 
     # The committed pins still hold the build the corpus was written against.
     expect(
@@ -113,6 +113,19 @@ def main() -> int:
         any("litenet.protocol_id" in e for e in failures(renamed, checker.PIN_BASELINE)),
         "a removed section is not reported as a missing pin",
     )
+
+    # A float pin written as a string is a pin of the wrong type, and passes no
+    # numeric comparison: the gate that exists to catch a bad pin must not
+    # coerce one into agreement.
+    for wrong in ("62.88", True):
+        mistyped = copy.deepcopy(facts)
+        mistyped["behaviour"]["world_water_level"] = wrong
+        expect(
+            any(
+                "behaviour.world_water_level" in e for e in failures(mistyped, checker.PIN_BASELINE)
+            ),
+            f"a {type(wrong).__name__} pin passed a float baseline: {wrong!r}",
+        )
 
     # Both tables name the same values the docs cite.
     for dotted, _ in checker.XML_PIN_BASELINE:

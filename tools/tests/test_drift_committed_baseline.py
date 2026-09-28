@@ -81,7 +81,7 @@ def main() -> None:
         assert "drift: NONE (build matches baseline)" in fresh.stdout, fresh.stdout
         assert not (root / "cb1" / "surface").exists(), "clean comparison seeded a local baseline"
 
-        perturbed = json.loads(COMMITTED.read_text(encoding="utf-8"))
+        perturbed = _common.load_json(COMMITTED)
         package = sorted(perturbed["packages"])[0]
         perturbed["packages"][package]["write"] += "WriteSingle;"
         perturbed_path = root / "perturbed.json"

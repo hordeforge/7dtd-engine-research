@@ -102,6 +102,25 @@ def main() -> None:
         assert lines.count(HEADER.rstrip("\n")) == 1, lines
         assert len(lines) == 3, lines
 
+        # A file whose first line is a different width is not a lost header: it
+        # is another schema's CSV, and writing a row would carry that line as
+        # data under columns it does not have.
+        foreign = os.path.join(td, "foreign.csv")
+        Path(foreign).write_text("date,game_types,narrated\n2026-01-01,1,1\n", encoding="utf-8")
+        refused = "a foreign-width history file was written to"
+        try:
+            module.record_history(foreign, HEADER, "2026-01-04,1,1,0,0,0,100.0%\n")
+        except ValueError as exc:
+            refused = (
+                "the refusal does not name the column mismatch"
+                if ("different column set" not in str(exc))
+                else ""
+            )
+        assert not refused, refused
+        assert Path(foreign).read_text(encoding="utf-8") == (
+            "date,game_types,narrated\n2026-01-01,1,1\n"
+        ), "the refused run still modified the file"
+
         # A history file whose name is not valid UTF-8 is legal on the host the
         # tool runs on (Linux stores raw bytes), and --history takes the name
         # from the command line. Hashing it strictly raised UnicodeEncodeError

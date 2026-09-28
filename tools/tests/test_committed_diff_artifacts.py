@@ -131,7 +131,7 @@ def main() -> int:
             print(f"SKIP: {snapshot.name} missing")
             return 0
         fresh = parity_snapshot(dll)
-        if json.loads(snapshot.read_text(encoding="utf-8")) != fresh:
+        if _common.load_json(snapshot) != fresh:
             problems.append(
                 f"{snapshot.relative_to(REPO)} is STALE (regenerate from {dll.name} with ParitySurface)"
             )

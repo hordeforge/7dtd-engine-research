@@ -22,11 +22,11 @@ Runs entirely in a temp dir via --pins/--game-dir; never touches tools/data.
 Usage: python3 tools/tests/test_xml_pins_gate.py
 """
 
-import json
 import os
 import re
 import sys
 import tempfile
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -90,8 +90,7 @@ def main() -> int:
         if rc != 0:
             bad.append(f"regenerate failed on well-formed install (rc={rc}):\n{out}")
         else:
-            with open(pins, encoding="utf-8") as f:
-                data = json.load(f)
+            data = _common.load_json(Path(pins))
             expected: list[tuple[str, dict[str, float]]] = [
                 ("entityclasses_health", {"healthSlim": 125}),
                 ("traders_root", {"buy_markup": 3.0, "sell_markdown": 0.2}),

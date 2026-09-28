@@ -12,7 +12,6 @@ came to claim a 3.1.0 pin after the corpus moved to 3.2.0).
 Usage: python3 tools/tests/test_coverage_consistency.py
 """
 
-import json
 import os
 import re
 import sys
@@ -54,8 +53,7 @@ def test_audit_table_lists_every_doc() -> None:
 
 def test_census_table_matches_stock_facts() -> None:
     text = _coverage_text()
-    with open(FACTS, encoding="utf-8") as f:
-        facts = json.load(f)
+    facts = _common.load_json(FACTS)
     c = facts["census"]
     s = facts["save"]
     sim = facts["sim"]
@@ -93,8 +91,7 @@ def test_pin_banners_match_stock_facts() -> None:
     stock_facts.json, so this is DLL-free even though its owner is not.
     """
     module = _common.load_module(TOOLS / "tests" / "check_stock_facts.py", "check_stock_facts")
-    with open(FACTS, encoding="utf-8") as f:
-        facts = json.load(f)
+    facts = _common.load_json(FACTS)
 
     errors: list[str] = []
     module.check_pin_banners(facts, errors)
