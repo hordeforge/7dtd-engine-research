@@ -61,6 +61,7 @@ SKIP_DIRS = {
 }
 
 
+
 def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str]]:
     """(external-link count, broken count, unreadable-file count, report lines)."""
     if not os.path.isdir(repo):
@@ -82,7 +83,13 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str
                 continue
             f = os.path.join(dirpath, name)
             try:
-                with open(f, encoding="utf-8") as fh:
+                # errors="replace", the same as zdtd_cite_check.py: a file that
+                # is not valid UTF-8 raises UnicodeDecodeError, which is a
+                # ValueError, not an OSError, so the handler below never saw it
+                # and the gate died on a traceback instead of reporting the
+                # file. Link targets are ASCII paths, so the mangled tail costs
+                # nothing.
+                with open(f, encoding="utf-8", errors="replace") as fh:
                     txt = fh.read()
             except OSError as exc:
                 # A gate must not pass a file it could not read: its links were

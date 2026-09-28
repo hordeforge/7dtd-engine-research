@@ -78,7 +78,11 @@ def main(argv: list[str]) -> int:
     files = 0
     for path in narrative_docs(args.docs_dir):
         files += 1
-        with open(path, encoding="utf-8") as fh:
+        # errors="replace": a doc carrying a byte that is not valid UTF-8 (a
+        # latin-1 quote pasted on Windows) raised UnicodeDecodeError, which is
+        # not an OSError, and the whole table was lost to a traceback. The
+        # token pattern is ASCII, so the replacement costs no identifier.
+        with open(path, encoding="utf-8", errors="replace") as fh:
             for m in TOKEN.finditer(fh.read()):
                 name = m.group(1)
                 if name[0].isupper():  # type-shaped; lowercase words are prose/IL ops

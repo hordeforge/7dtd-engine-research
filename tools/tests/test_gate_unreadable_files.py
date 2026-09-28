@@ -13,6 +13,12 @@ files were never checked. Fixtures pin the fixed contracts:
     document passes. Without the broken-vs-real pair a regression in the
     detector (regex, existence check) could never fire and every clean tree
     would keep passing vacuously.
+  - a file holding bytes that are not valid UTF-8 is read, not fatal: the
+    decode error is a ValueError the OSError handlers never saw, and the gate
+    died on a traceback.
+  - a link spelled NFD to a document committed NFC resolves: a macOS checkout
+    writes the decomposed form, and byte equality reported a live document as
+    broken.
 
 Usage: python3 tools/tests/test_gate_unreadable_files.py
 """
@@ -20,6 +26,7 @@ Usage: python3 tools/tests/test_gate_unreadable_files.py
 import os
 import sys
 import tempfile
+import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -109,6 +116,24 @@ def main() -> int:
         if rc != 0 or "BROKEN" in out:
             bad.append(f"cross_repo_links failed on a resolved link (rc={rc}):\n{out}")
 
+        # A link spelled NFD (what a macOS checkout writes) to a document
+        # committed NFC: same document, two spellings, and byte equality called
+        # it BROKEN.
+        accented = "café-notes.md"
+        nfd = unicodedata.normalize("NFD", accented)
+        assert nfd != accented, "fixture must be a decomposed spelling"
+        write(os.path.join(research_docs, accented), "accented link target\n")
+        write(linked, f"[a](../7dtd-engine-research/docs/{nfd})\n")
+        rc, out = run(CROSS, "--root", tmp)
+        if rc != 0 or "BROKEN" in out:
+            bad.append(f"cross_repo_links failed on an NFD-spelled link to NFC (rc={rc}):\n{out}")
+        write(linked, f"[a](../7dtd-engine-research/docs/{nfd}-ghost.md)\n")
+        rc, out = run(CROSS, "--root", tmp)
+        if rc != 1 or "BROKEN" not in out:
+            bad.append(f"cross_repo_links passed despite a broken NFD link (rc={rc}):\n{out}")
+        os.unlink(os.path.join(research_docs, accented))
+        write(linked, f"[good](../7dtd-engine-research/docs/{REAL_DOC})\n")
+
         # Same liveness pair for citations: a missing research doc must FAIL,
         # a citation of a real docs/ file must resolve.
         citer = os.path.join(repo, "cites.py")
@@ -145,6 +170,24 @@ def main() -> int:
                 bad.append(f"zdtd_cite_check crashed instead of reporting:\n{out}")
         else:
             skipped.append("unreadable source")
+        if os.path.islink(locked_py):
+            os.unlink(locked_py)
+
+        # A markdown file holding a byte that is not valid UTF-8 (a latin-1
+        # quote from a Windows editor). Read strictly it raises
+        # UnicodeDecodeError, a ValueError the OSError handlers never see, so
+        # the gate died on a traceback; both gates decode with errors="replace"
+        # and keep checking the rest of the tree.
+        latin1 = os.path.join(repo, "latin1.md")
+        with open(latin1, "wb") as f:
+            f.write(b"caf\xe9 notes\n")
+        for script, label in ((CROSS, "cross_repo_links"), (CITES, "zdtd_cite_check")):
+            rc, out = run(script, "--root", tmp)
+            if "Traceback" in out:
+                bad.append(f"{label} crashed on a non-UTF-8 markdown file:\n{out}")
+            elif rc != 0:
+                bad.append(f"{label} failed on a non-UTF-8 markdown file (rc={rc}):\n{out}")
+        os.unlink(latin1)
 
     if bad:
         print("FAIL: gate unreadable-file handling")
