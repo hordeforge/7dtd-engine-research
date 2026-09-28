@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**78 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**86 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -192,6 +192,48 @@ falls behind the commits actually below the last tag.
   `gen_atlas_zig.py` bounded its `zig` calls through the shared runner instead
   of a bare `subprocess.run`, and a non-zero `zig fmt` now stops the run rather
   than writing a file that was never formatted.
+- **A killed release run still ends with a pushed tag.** `release.sh` read a tag
+  that existed on origin but not locally as "already tagged" and never created
+  the local ref, so a run cut between `git tag` and `git push` resumed into a
+  release with no tag on the remote. It now tags whenever neither side carries
+  the tag, and says which step it is on.
+- **A committed artifact is a function of the studied bytes.** `StockFacts.cs`,
+  `Coverage.cs` and `WireBodies.cs` stamped through .NET's round-trip `"o"`
+  format, which carries sub-second digits an integer `SOURCE_DATE_EPOCH` cannot
+  reproduce, so a regenerated pin could never match the committed one byte for
+  byte; every committed stamp now uses the one `yyyy-MM-ddTHH:mm:ssZ` shape
+  `tools/tooling.py` formats and `test_generation_stamp.py` pins. An unreadable
+  `LiteNetLib.dll` next to the assembly also wrote half a `litenet` block with
+  no closing values; it now emits every field at its documented default and
+  records all of them as baked, so a consumer cannot read a missing field as an
+  absent protocol and the pin gate refuses to pin them.
+  `extract_mesh_atlas.py` now replaces before it prunes, so a run cut midway
+  leaves the previous asset set whole instead of a directory missing files.
+- **The assembly is resolved once per make run, and an override that names no
+  install says so.** The `ASM` and `GAME_ROOT` probes were recursively expanded,
+  so `make test` walked the Steam roots once per `$(ASM)` reference; an
+  `ifndef` + `:=` resolves each once. `make` also dropped the probe's stderr
+  unconditionally, which swallowed the exit-2 reason an operator needs when a
+  variable names an install that is not there, so a failed probe re-runs with
+  stderr live. `build.sh` takes `build.sh` itself as an input, so touching the
+  build script rebuilds what it produces, and records its own digest in the
+  toolchain stamp, so two builds from the same compiler and the same Cecil but
+  different `mcs` flags are no longer indistinguishable.
+- **The shell entry points police their own environment.**
+  `BOUNDED_KILL_GRACE_S` reaches `timeout --kill-after=`, so a mistyped value
+  was not a bound but a per-run failure of every command; it is now held to a
+  whole number of seconds (zero is a real setting, no grace) and named when it
+  is not, and `test_env_vars_documented.py` checks the shell variables against
+  `tools/README.md` the way it already did for the Python ones.
+- **The parsers that read shipped data are fuzzed.** `xml_pins.py` and
+  `sandbox/extract_preset_codes.py` are driven by randomized inputs in
+  `test_xml_pins_fuzz.py` and `test_sandbox_preset_code_fuzz.py`, both in
+  `make test-docs`, so a malformed `Data/Config` file or preset code fails a
+  gate rather than a run.
+- **The gates share one module loader.** `_common.load_module` is the single
+  path a test uses to import another script by file (the tools are standalone
+  scripts, some with names Python cannot import), and the uncalled helpers the
+  duplicate loaders carried are gone.
 
 ### Tools and docs
 
