@@ -22,15 +22,15 @@ control exists or does not.
 
 | # | Risk | Boundary | Where | Control today |
 |---|---|---|---|---|
-| 1 | A downloaded or swapped build payload is executed on the operator machine | tool → third-party binary | [`tools/steam/fetch_version.sh`](../../tools/steam/fetch_version.sh), [`tools/build.sh`](../../tools/build.sh) | Mono.Cecil is sha256-pinned ([`tools/data/cecil.pin`](../../tools/data/cecil.pin), checked in [`tools/build.sh:33`](../../tools/build.sh)); the game DLL is never verified before `mcs`/`mono` run over it |
+| 1 | A downloaded or swapped build payload is executed on the operator machine | tool → third-party binary | [`tools/steam/fetch_version.sh`](../../tools/steam/fetch_version.sh), [`tools/build.sh`](../../tools/build.sh) | Mono.Cecil is sha256-pinned ([`tools/data/cecil.pin`](../../tools/data/cecil.pin), checked in [`tools/build.sh:63`](../../tools/build.sh)); the game DLL is never verified before `mcs`/`mono` run over it |
 | 2 | Crafted save/region bytes drive the parsers in `save_roundtrip_check.py` | file on disk → parser | [`tools/save_roundtrip_check.py`](../../tools/save_roundtrip_check.py) | capped inflate, bounds-checked records, fuzz + robustness gates ([`tools/tests/test_save_roundtrip_fuzz.py`](../../tools/tests/test_save_roundtrip_fuzz.py)) |
-| 3 | The pin file (`tools/data/*.json`) is rewritten by a network fetch or a hostile local file | network/disk → repo state | [`tools/steam/steam_builds.py:249`](../../tools/steam/steam_builds.py), [`tools/xml_pins.py`](../../tools/xml_pins.py) | atomic tmp+rename, digest-pinned source identity; no signature over the pin files themselves |
-| 4 | CI executes a shellcheck tarball fetched at run time | CI → external host | [`.github/workflows/ci.yml:37`](../../.github/workflows/ci.yml) | sha256 check before extract into a private temp dir; GitHub Actions pinned to commit SHAs; `permissions: contents: read` and `persist-credentials: false` |
+| 3 | The pin file (`tools/data/*.json`) is rewritten by a network fetch or a hostile local file | network/disk → repo state | [`tools/steam/steam_builds.py:270`](../../tools/steam/steam_builds.py), [`tools/xml_pins.py`](../../tools/xml_pins.py) | atomic tmp+rename, digest-pinned source identity; no signature over the pin files themselves |
+| 4 | CI executes a shellcheck tarball fetched at run time | CI → external host | [`.github/workflows/ci.yml:58`](../../.github/workflows/ci.yml) | sha256 check before extract into a private temp dir; GitHub Actions pinned to commit SHAs; `permissions: contents: read` and `persist-credentials: false` |
 | 5 | Untrusted game-supplied names become filesystem paths under the output dir | game data → filesystem | [`tools/sandbox/safe_name.py`](../../tools/sandbox/safe_name.py), [`tools/src/IlFmt.cs`](../../tools/src/IlFmt.cs) | `safe_name` strips separators and refuses `.`/`..`; enforced by [`tools/tests/test_sandbox_safe_name.py`](../../tools/tests/test_sandbox_safe_name.py) |
-| 6 | A hostile Steam depot manifest or appinfo JSON exhausts memory or CPU | network/disk → tool | [`tools/steam/steam_manifest.py`](../../tools/steam/steam_manifest.py), [`tools/steam/steam_builds.py`](../../tools/steam/steam_builds.py) | size-bounded protobuf reads (fixed-width fields and varints checked against the block), fuzz + per-call time ceiling ([`tools/tests/test_steam_manifest_fuzz.py`](../../tools/tests/test_steam_manifest_fuzz.py)); 30 s on the appinfo GET ([`steam_builds.py:169`](../../tools/steam/steam_builds.py)); no global quota on a `--verify` over a full 17 GB install |
-| 7 | A hostile depot manifest steers `--verify-install` at files outside the install root, or a network-supplied gid reaches the shell as an argument | network/disk → filesystem, network → argv | [`tools/steam/steam_manifest.py:338`](../../tools/steam/steam_manifest.py), [`tools/steam/steam_builds.py:78`](../../tools/steam/steam_builds.py) | `safe_join` refuses absolute or escaping entry names and `--verify` reports them as `UNSAFE`; `GID_RE` refuses a non-numeric gid before it becomes a `fetch_version.sh` argument |
+| 6 | A hostile Steam depot manifest or appinfo JSON exhausts memory or CPU | network/disk → tool | [`tools/steam/steam_manifest.py`](../../tools/steam/steam_manifest.py), [`tools/steam/steam_builds.py`](../../tools/steam/steam_builds.py) | size-bounded protobuf reads (fixed-width fields and varints checked against the block), fuzz + per-call time ceiling ([`tools/tests/test_steam_manifest_fuzz.py`](../../tools/tests/test_steam_manifest_fuzz.py)); 30 s on the appinfo GET ([`steam_builds.py:182`](../../tools/steam/steam_builds.py)); no global quota on a `--verify` over a full 17 GB install |
+| 7 | A hostile depot manifest steers `--verify-install` at files outside the install root, or a network-supplied gid reaches the shell as an argument | network/disk → filesystem, network → argv | [`tools/steam/steam_manifest.py:350`](../../tools/steam/steam_manifest.py), [`tools/steam/steam_builds.py:78`](../../tools/steam/steam_builds.py) | `safe_join` refuses absolute or escaping entry names and `--verify` reports them as `UNSAFE`; `GID_RE` refuses a non-numeric gid before it becomes a `fetch_version.sh` argument |
 | 8 | Third-party parsers (UnityPy, dncil, dnfile, Mono.Cecil) run over game-controlled bytes with no size or depth bound | game file → dependency | [`tools/sandbox/extract_mesh_atlas.py`](../../tools/sandbox/extract_mesh_atlas.py), [`tools/sandbox/extract_sandbox_tables.py`](../../tools/sandbox/extract_sandbox_tables.py) | the requirements are hash-pinned ([`tools/sandbox/requirements.txt`](../../tools/sandbox/requirements.txt)); the in-repo parser bounds do not extend into these dependencies, and CI never runs them |
-| 9 | Shell injection through operator-supplied values | operator → shell | [`tools/steam/fetch_version.sh:39`](../../tools/steam/fetch_version.sh), [`Makefile`](../../Makefile) | label allowlist regex, quoted expansions, `set -euo pipefail`, shellcheck at style severity (every level) over every tracked `.sh` |
+| 9 | Shell injection through operator-supplied values | operator → shell | [`tools/steam/fetch_version.sh:40`](../../tools/steam/fetch_version.sh), [`Makefile`](../../Makefile) | label allowlist regex, quoted expansions, `set -euo pipefail`, shellcheck at style severity (every level) over every tracked `.sh` |
 
 Nothing here is internet-facing. The inbound network paths are an HTTPS GET to
 `https://api.steamcmd.net/v1/info/294420` in
@@ -43,18 +43,18 @@ the tooling is local, operator-invoked.
 
 | Entry point | Kind | Input trust | Reference |
 |---|---|---|---|
-| `python3 tools/*.py`, `tools/tests/*.py` CLIs | CLI argv | operator | 87 `add_argument` sites across `tools/`; usage contract gated by [`tools/tests/test_python_cli_usage.py`](../../tools/tests/test_python_cli_usage.py) and [`test_cli_args_wired.py`](../../tools/tests/test_cli_args_wired.py) |
+| `python3 tools/*.py`, `tools/tests/*.py` CLIs | CLI argv | operator | 88 `add_argument` sites across `tools/`; usage contract gated by [`tools/tests/test_python_cli_usage.py`](../../tools/tests/test_python_cli_usage.py) and [`test_cli_args_wired.py`](../../tools/tests/test_cli_args_wired.py) |
 | `tools/*.sh` | CLI argv, env | operator | [`tools/steam/fetch_version.sh`](../../tools/steam/fetch_version.sh), [`tools/build.sh`](../../tools/build.sh), [`tools/post-update.sh`](../../tools/post-update.sh) |
 | Environment variables | config | operator | `ASM`, `SEVENDTD_ASM`, `SEVENDTD_DS_DIR`, `GAME_ROOT`, `SOURCE_DATE_EPOCH`, `RE_MONO_TIMEOUT`, `RE_STEAM_FETCH_TIMEOUT`, `SCRATCH`, `OUT`, `STEAMCMD`, `STEAM_CONTENT`, `SEVENDTD_SERVER_DIR`, `MONO_PATH`; inventoried in [`tools/README.md`](../../tools/README.md#environment-variables), read in [`tools/tooling.py`](../../tools/tooling.py), [`Makefile:3`](../../Makefile) |
-| `save_roundtrip_check.py` region glob | filesystem glob | game-written | [`tools/save_roundtrip_check.py:864`](../../tools/save_roundtrip_check.py) globs `*.7rg` / `*.7rr` inside the save dir the operator passes; there is no save-dir auto-discovery |
-| Game install files (`Assembly-CSharp.dll`, `Data/Config/*.xml`) | file parse | third-party binary/data | [`tools/xml_pins.py:38`](../../tools/xml_pins.py), Mono.Cecil dumpers in [`tools/src/`](../../tools/src) |
+| `save_roundtrip_check.py` region glob | filesystem glob | game-written | [`tools/save_roundtrip_check.py:896`](../../tools/save_roundtrip_check.py) globs `*.7rg` / `*.7rr` inside the save dir the operator passes; there is no save-dir auto-discovery |
+| Game install files (`Assembly-CSharp.dll`, `Data/Config/*.xml`) | file parse | third-party binary/data | [`tools/xml_pins.py:42`](../../tools/xml_pins.py), Mono.Cecil dumpers in [`tools/src/`](../../tools/src) |
 | Save files (`main.ttw`, `.7rg`, `.7rr`) | binary parse | untrusted (may be corrupt or crafted) | [`tools/save_roundtrip_check.py`](../../tools/save_roundtrip_check.py) |
 | Steam depot manifest cache, appinfo JSON | binary/JSON parse | Steam, or a local file passed with `--manifest` / `--appinfo` | [`tools/steam/steam_manifest.py`](../../tools/steam/steam_manifest.py), [`tools/steam/steam_builds.py`](../../tools/steam/steam_builds.py) |
 | `api.steamcmd.net` appinfo | HTTPS GET | remote | [`tools/steam/steam_builds.py:61`](../../tools/steam/steam_builds.py) |
-| steamcmd depot download | outbound HTTPS to a Steam CDN | remote, operator-invoked | [`tools/steam/fetch_version.sh`](../../tools/steam/fetch_version.sh), bounded by [`steam_builds.py:332`](../../tools/steam/steam_builds.py) |
+| steamcmd depot download | outbound HTTPS to a Steam CDN | remote, operator-invoked | [`tools/steam/fetch_version.sh`](../../tools/steam/fetch_version.sh), bounded by [`steam_builds.py:80`](../../tools/steam/steam_builds.py) |
 | Unity bundles (`.bundle`, `.unity3d`, `.resource`) and `Assembly-CSharp.dll` | third-party binary parse | game-controlled bytes through a third-party library | [`tools/sandbox/try_extract_presets.py`](../../tools/sandbox/try_extract_presets.py), [`tools/sandbox/extract_mesh_atlas.py`](../../tools/sandbox/extract_mesh_atlas.py) |
 | Zig scratch dumpers | binary parse of game assets | game-controlled bytes | [`tools/re-scratch/texdump.zig`](../../tools/re-scratch/texdump.zig), [`tools/re-scratch/ttsdump.zig`](../../tools/re-scratch/ttsdump.zig); no gate runs them |
-| Operator-supplied `STEAMCMD` binary | exec | operator | [`tools/steam/fetch_version.sh:84`](../../tools/steam/fetch_version.sh) |
+| Operator-supplied `STEAMCMD` binary | exec | operator | [`tools/steam/fetch_version.sh:88`](../../tools/steam/fetch_version.sh) |
 | CI job | build → runtime | GitHub Actions, external download | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) |
 | `mono` executing the repo's own compiled dumpers | build → runtime | locally built C# | [`tools/build.sh`](../../tools/build.sh) |
 
@@ -68,8 +68,8 @@ the tooling is local, operator-invoked.
    load it through Mono.Cecil, and `mcs`/`mono` consume it. This is the widest
    gap in the model: the game payload is not digest-checked before execution,
    only recorded afterwards in `stock_facts.json`
-   (`source_identity`, see [`tools/xml_pins.py:169`](../../tools/xml_pins.py) and
-   [`tools/steam/steam_builds.py:601`](../../tools/steam/steam_builds.py)).
+   (`source_identity`, see [`tools/xml_pins.py:190`](../../tools/xml_pins.py) and
+   [`tools/steam/steam_builds.py:644`](../../tools/steam/steam_builds.py)).
 3. **Tool to local untrusted files.** Saves, region files, depot manifests, and
    appinfo JSON are parsed defensively. This boundary has the most explicit
    hardening in the repo, described under mitigations below.
@@ -114,7 +114,7 @@ the tooling is local, operator-invoked.
 - Denial of service: `--verify-install` with no `--only` reads 17 GB; a disk-bound
   run is a plausible accidental hang. Unbounded by quota today, though every
   child process sits under a wall-clock bound that kills the process group
-  ([`tools/tooling.py:31`](../../tools/tooling.py)).
+  ([`tools/tooling.py:346`](../../tools/tooling.py)).
 
 **Third-party libraries over game bytes**
 - Denial of service: a crafted `.bundle` or a hostile PE drives UnityPy or
@@ -145,14 +145,14 @@ the tooling is local, operator-invoked.
 - Tampering / information disclosure: a depot manifest names the files it
   describes, so a crafted `--manifest` can try to walk `--verify-install` out of
   the install root. `safe_join` is the named control at
-  [`tools/steam/steam_manifest.py:338`](../../tools/steam/steam_manifest.py), and
+  [`tools/steam/steam_manifest.py:350`](../../tools/steam/steam_manifest.py), and
   an escaping name is reported as `UNSAFE` rather than silently skipped. The
   check is lexical: a symlink already inside the install is the operator's own
   tree and stays readable, which is the residual.
 - Tampering: an `installdir` in a hostile `appmanifest_294420.acf` would point
   `--verify-install` at an arbitrary tree. A name with a separator, a drive, or
   a bare `.`/`..` is refused outright at
-  [`tools/steam/steam_builds.py:205`](../../tools/steam/steam_builds.py).
+  [`tools/steam/steam_builds.py:228`](../../tools/steam/steam_builds.py).
 
 **Tool to network**
 - Spoofing / tampering: the response is TLS-protected but unauthenticated at the
@@ -165,9 +165,9 @@ the tooling is local, operator-invoked.
   anything non-numeric, which is what keeps a leading `-` from reading as an
   option to steamcmd.
 - Denial of service: the appinfo GET is bounded by 30 s at
-  [`steam_builds.py:169`](../../tools/steam/steam_builds.py). The depot fetch
+  [`steam_builds.py:182`](../../tools/steam/steam_builds.py). The depot fetch
   that follows it is a different bound, 6 h by default and raised only by
-  `RE_STEAM_FETCH_TIMEOUT` ([`steam_builds.py:332`](../../tools/steam/steam_builds.py));
+  `RE_STEAM_FETCH_TIMEOUT` ([`steam_builds.py:80`](../../tools/steam/steam_builds.py));
   it is deliberately loose because a depot is gigabytes, so a stalled CDN holds
   the run for hours rather than minutes.
 
@@ -186,21 +186,21 @@ the tooling is local, operator-invoked.
 
 | Control | Covers | Reference |
 |---|---|---|
-| sha256 pin on Mono.Cecil before use | build → runtime supply chain | [`tools/build.sh:33`](../../tools/build.sh), [`tools/cecil-pin.sh`](../../tools/cecil-pin.sh), gate [`tools/tests/test_cecil_pin.py`](../../tools/tests/test_cecil_pin.py) |
+| sha256 pin on Mono.Cecil before use | build → runtime supply chain | [`tools/build.sh:63`](../../tools/build.sh), [`tools/cecil-pin.sh`](../../tools/cecil-pin.sh), gate [`tools/tests/test_cecil_pin.py`](../../tools/tests/test_cecil_pin.py) |
 | Capped raw inflate, bounded record walks | save-parser DoS | [`tools/save_roundtrip_check.py:41`](../../tools/save_roundtrip_check.py) |
 | Seeded mutation fuzzer and per-call time ceiling | parser robustness | [`tools/tests/test_save_roundtrip_fuzz.py`](../../tools/tests/test_save_roundtrip_fuzz.py) |
 | Bounded varint and fixed-width protobuf reads, fail-closed on a truncated manifest | depot-manifest parser DoS and crashes | [`tools/steam/steam_manifest.py`](../../tools/steam/steam_manifest.py), gate [`tools/tests/test_steam_manifest_fuzz.py`](../../tools/tests/test_steam_manifest_fuzz.py) |
 | Filename sanitisation for game/assembly-supplied names | path traversal from game data | [`tools/sandbox/safe_name.py`](../../tools/sandbox/safe_name.py), [`tools/src/IlFmt.cs`](../../tools/src/IlFmt.cs) |
-| `safe_join` rejects depot entry names that are absolute or escape the verify root | `--verify-install` steered outside the install by a crafted manifest | [`tools/steam/steam_manifest.py:338`](../../tools/steam/steam_manifest.py), reported as `UNSAFE` at [`steam_manifest.py:423`](../../tools/steam/steam_manifest.py) |
-| `installdir` from a Steam ACF is refused if it holds a separator, a drive, or a bare `.`/`..` | crafted `appmanifest_294420.acf` redirecting the verify root | [`tools/steam/steam_builds.py:205`](../../tools/steam/steam_builds.py) |
-| `GID_RE.fullmatch` on the manifest gid before it becomes a script argument | option injection into `fetch_version.sh`/steamcmd from a network response | [`tools/steam/steam_builds.py:78`](../../tools/steam/steam_builds.py), checked at [`steam_builds.py:728`](../../tools/steam/steam_builds.py) |
-| Every spawned child runs in its own process group under a wall-clock bound that kills the group | a wedged mono, mcs, or steamcmd hanging the gate that started it | [`tools/tooling.py:31`](../../tools/tooling.py), [`tools/tooling.py:223`](../../tools/tooling.py), gate [`tools/tests/test_bounded_runs.py`](../../tools/tests/test_bounded_runs.py) |
+| `safe_join` rejects depot entry names that are absolute or escape the verify root | `--verify-install` steered outside the install by a crafted manifest | [`tools/steam/steam_manifest.py:350`](../../tools/steam/steam_manifest.py), reported as `UNSAFE` at [`steam_manifest.py:438`](../../tools/steam/steam_manifest.py) |
+| `installdir` from a Steam ACF is refused if it holds a separator, a drive, or a bare `.`/`..` | crafted `appmanifest_294420.acf` redirecting the verify root | [`tools/steam/steam_builds.py:228`](../../tools/steam/steam_builds.py) |
+| `GID_RE.fullmatch` on the manifest gid before it becomes a script argument | option injection into `fetch_version.sh`/steamcmd from a network response | [`tools/steam/steam_builds.py:78`](../../tools/steam/steam_builds.py), checked at [`steam_builds.py:390`](../../tools/steam/steam_builds.py) |
+| Every spawned child runs in its own process group under a wall-clock bound that kills the group | a wedged mono, mcs, or steamcmd hanging the gate that started it | [`tools/tooling.py:346`](../../tools/tooling.py), [`tools/tooling.py:389`](../../tools/tooling.py), gate [`tools/tests/test_bounded_runs.py`](../../tools/tests/test_bounded_runs.py) |
 | Hash-pinned third-party wheels for the sandbox extractors | dependency substitution in the extract path | [`tools/sandbox/requirements.txt`](../../tools/sandbox/requirements.txt) |
-| Regex extraction instead of an XML parser for the pin files | XXE / entity expansion | [`tools/xml_pins.py:39`](../../tools/xml_pins.py) |
-| Atomic pin writes (tmp file + `replace`) | partial/corrupt pin files | [`tools/steam/steam_builds.py:249`](../../tools/steam/steam_builds.py) |
-| Digest-pinned source identity for every committed pin | silent pin drift | `source_identity` in [`tools/xml_pins.py:169`](../../tools/xml_pins.py) |
+| Regex extraction instead of an XML parser for the pin files | XXE / entity expansion | [`tools/xml_pins.py:58`](../../tools/xml_pins.py) |
+| Atomic pin writes (tmp file + `replace`) | partial/corrupt pin files | [`tools/steam/steam_builds.py:270`](../../tools/steam/steam_builds.py) |
+| Digest-pinned source identity for every committed pin | silent pin drift | `source_identity` in [`tools/xml_pins.py:190`](../../tools/xml_pins.py) |
 | SHA-1 verify of a local install against Steam's own manifest | swapped install files | [`tools/steam/steam_manifest.py`](../../tools/steam/steam_manifest.py), [`tools/tests/test_install_integrity.py`](../../tools/tests/test_install_integrity.py) |
-| Quoted expansions, `set -euo pipefail`, label allowlist, shellcheck at style severity | shell injection in operator scripts | [`tools/steam/fetch_version.sh:39`](../../tools/steam/fetch_version.sh), `make lint` |
+| Quoted expansions, `set -euo pipefail`, label allowlist, shellcheck at style severity | shell injection in operator scripts | [`tools/steam/fetch_version.sh:40`](../../tools/steam/fetch_version.sh), `make lint` |
 | Read-only CI token scope, `persist-credentials: false` | token misuse from a step running untrusted PR code | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) |
 | Git-ignored `il/` dumps, no DLL committed | redistribution of game assets | repo `AGENTS.md` rule 2, [`.gitignore`](../../.gitignore) |
 
@@ -243,17 +243,17 @@ was executed against a hostile target.
   into a check line. Without the cap the same input would allocate
   attacker-chosen memory, which is the reason the cap exists.
 - **Crafted count drives a long walk.** A spawn list with a large count is read
-  at [`tools/save_roundtrip_check.py:301`](../../tools/save_roundtrip_check.py),
+  at [`tools/save_roundtrip_check.py:86`](../../tools/save_roundtrip_check.py),
   where a count larger than the remaining buffer raises rather than looping;
   the fuzzer pins the bound so a crafted count cannot stall the gate.
 - **Crafted manifest steers the verify root.** A depot manifest whose entry name
   is `../../etc/passwd` reaches the join in
-  [`tools/steam/steam_manifest.py:423`](../../tools/steam/steam_manifest.py).
+  [`tools/steam/steam_manifest.py:438`](../../tools/steam/steam_manifest.py).
   `safe_join` returns `None`, the entry is counted as `UNSAFE`, and the run
   reports it, so the file is not read and not silently skipped.
 - **Crafted gid reaches the shell as an option.** A `gid` of `-someflag` in a
   spoofed appinfo response travels to `fetch_version.sh` as argv. `GID_RE`
-  at [`tools/steam/steam_builds.py:728`](../../tools/steam/steam_builds.py)
+  at [`tools/steam/steam_builds.py:390`](../../tools/steam/steam_builds.py)
   refuses it before the fetch is built, which is the difference between a
   non-numeric build id and an option steamcmd would act on.
 - **Path escape via a game-supplied name.** A name containing `..` or a

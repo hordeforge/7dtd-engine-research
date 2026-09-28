@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**70 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**76 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -80,6 +80,15 @@ falls behind the commits actually below the last tag.
   depot download, and `SEVENDTD_SERVER_DIR` names the install that
   `make save-roundtrip-all` reads. A non-numeric or non-positive timeout aborts
   rather than meaning "no bound".
+- **A branch that cannot be fetched is refused rather than attempted.**
+  `steam_builds.py` forwards a branch to `steamcmd -beta <name>`, where a
+  leading `-` is one of steamcmd's own options, so a branch is now held to the
+  label shape and additionally to no leading `-`. A branch whose PICS entry
+  carries no depot manifest gid is refused too, rather than handed to
+  `fetch_version.sh` with nothing to fetch. The same two refusals apply on both
+  output paths, so a branch that changes between them cannot be fetched under
+  one rule and refused under the other. An unusable `RE_STEAM_FETCH_TIMEOUT`
+  exits 2 with the reason, not a traceback.
 
 ### Fixes
 
@@ -88,6 +97,22 @@ falls behind the commits actually below the last tag.
   shell entry points; a child that outlives its bound reports the rc and names
   itself instead of hanging a gate, and its grandchildren die with it (a host
   with no process group, Windows, kills the child itself).
+- **A rerun republishes instead of piling up.** `research_diff.py` names its
+  report after the build pair, not the date, so a repeated run of the same pair
+  overwrites the report already in `workspace/outputs/diffs/` rather than adding
+  a dated sibling, and the committed tree converges to one report per pair.
+  `--out PATH` still writes exactly where it is told, which is how a second
+  dated copy is made on purpose. `stock-sync.sh` puts the previous pin pair back
+  if a publish stops halfway.
+- **Two builds at once no longer race for the same staging path.** Every
+  `build.sh` run stages under `bin/.staging/run.$$`, so a retried `make census`
+  beside a `make drift`, or a local build while CI runs the same target, cannot
+  delete the other run's staged exe and rename a half-written one into `bin/`.
+- **The shell bound and the Mono lookup work on the hosts that run them.**
+  `build.sh` asks the runtime for its own GAC (`gacutil`) instead of listing one
+  platform's layout, and `tools/bounded-run.sh` looks for `timeout` or `gtimeout`
+  and keeps the command it needs. A host with neither says so once and runs
+  unbounded, rather than dropping the bound silently.
 - **Gates no longer pass on input they never read.** Several link, citation and
   inventory gates skipped a file they could not open, and three reported OK
   while proving nothing; a drifted or unreadable input now fails with the reason.
@@ -95,7 +120,8 @@ falls behind the commits actually below the last tag.
   out of pinned data, xml pin sections come from one source, the drift baseline
   is keyed to the build it came from (an unstamped or foreign local baseline no
   longer outranks the committed pin), and the census history append is
-  race-safe.
+  race-safe. A committed pin that cannot be read, or whose top level is not an
+  object, is reported as the error it is rather than degrading to "no pin".
 - **Reproducible output.** Artifact stamps derive from `SOURCE_DATE_EPOCH`, the
   dumper build is incremental and locale-pinned, and output names are stable, so
   a repeated build is byte-identical. Dumper and drift-baseline writes land by
