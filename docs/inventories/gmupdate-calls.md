@@ -1,7 +1,7 @@
 # GameManager.gmUpdate ordered calls (full, V3.2.0)
 
 **Kind:** inventory table (not primary narrative).  
-**Pin:** V **3.2.0 (b9)**; gmUpdate IL size still **631** (unchanged from V3.1.0/V3.0.1).  
+**Pin:** V **3.2.0 (b10)**; gmUpdate IL size still **631** (unchanged from V3.1.0/V3.0.1).  
 **Prefer:** [`loop-gmupdate.md`](../loop/loop-gmupdate.md) (gmUpdate call chain).  
 **Raw:** [`../../il/loop-complete-v3.2.0/`](../../il/loop-complete-v3.2.0/) or [`../../il/frame-entries-v3.2.0/`](../../il/frame-entries-v3.2.0/).  
 **Hub:** [`INDEX.md`](../INDEX.md) · Inventories section.

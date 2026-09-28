@@ -846,9 +846,11 @@ then `WriteCustomData` when `inclCustomData` is set. `GetToStreamLength` mirrors
 `VersionInformation.SerializableString` is
 `String.Format("{0}.{1}.{2}.{3}", ReleaseType, Major, Minor, Build)`
 (2009306-2009320), and `GameServerInfo` sets `GameInfoString.ServerVersion` (key 9)
-to exactly that (795818-795822). For V3.2.0 b9 the correct GSI value is
-**`V.3.10.14`** (Constants `cReleaseType=1`/'V', `cVersionMajor=3`,
-`cVersionMinor=0xA`, `cVersionBuild=0xE`, 1865686-1865690).
+to exactly that (795818-795822). For V3.2.0 b10 the correct GSI value is
+**`V.3.20.10`** (Constants `cReleaseType=1`/'V', `cVersionMajor=3`,
+`cVersionMinor=20`, `cVersionBuild=10`). The V3.1.0 b14 pair is the lower
+`V.3.10.14` (`cVersionMinor=0xA`, `cVersionBuild=0xE`); the minor is the
+unsplit value, not the displayed one.
 
 `VersionInformation.TryParseSerializedString` (2009539-2009625) requires
 `Split('.')` to yield exactly 4 fields: an `EGameReleaseType` enum name, then three
@@ -856,7 +858,7 @@ ints. `EGameReleaseType` has only `Alpha=0` and `V=1` (2008981-2008982).
 
 The **displayed** minor is an encoding, not the wire minor: for `ReleaseType == V`
 and `Major >= 3` the ctor splits `Minor` into `Minor/10` and `Minor%10`
-(2009148-2009157), so "V 3.2.0 (b9)" is Major=3, Minor=20, Build=9 (and the
+(2009148-2009157), so "V 3.2.0 (b10)" is Major=3, Minor=20, Build=10 (and the
 V3.1.0 pair "V 3.1.0 (b14)" was Minor=10, Build=14).
 
 A malformed version string is not fatal: `GameServerInfo`'s ctor seeds
@@ -1047,7 +1049,7 @@ discovery loop from 1024 up to 1432 minus the layer overhead.
   LiteNetLibAuthWrapperServer rate-limit/auth-timeout/challenge constants and
   InitConfig; Connect uses port + 2; NetPackagePlayerLogin field order and
   PlatformUserIdentifier ToStream layout; GameServerInfo ServerVersion must be the
-  four-field SerializableString (`V.3.10.14`) and how the displayed minor is
+  four-field SerializableString (`V.3.20.10`) and how the displayed minor is
   encoded; GameInfoString SandboxPreset/SandboxCode; console permission constants
   and the 191/283 command census.
 

@@ -11,7 +11,7 @@
 
 **Scope:** headless dedicated tick under `-dedicated -batchmode -nographics`.  
 **Not in scope:** client-only UI/camera/rendering (unless proven on dedi); RealEarth product status.  
-**Pin:** Steam dedicated `Assembly-CSharp.dll` V3.2.0 (b9).
+**Pin:** Steam dedicated `Assembly-CSharp.dll` V3.2.0 (b10).
 
 **Optim product (not this folder):**  
 [`../../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md`](../../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md) · [`../../../7dtd-server-optimizer/docs/ARCHITECTURE.md`](../../../7dtd-server-optimizer/docs/ARCHITECTURE.md)
@@ -46,7 +46,7 @@ Confirmed **server-relevant** peers (have `Update`/`LateUpdate`/`FixedUpdate` an
 | GameManager | UpdateTick | 150 | Sim core (called from gmUpdate) |
 | GameManager | LateUpdate | 18 | ThreadManager late, MeshDataManager, multiplayer services |
 | GameManager | FixedUpdate | 5 | `fixedUpdateCount++` only |
-| **ConnectionManager** | Update | **215** | LiteNetLib / packages / flush / pings (**not** called from gmUpdate) |
+| **ConnectionManager** | Update | **231** | LiteNetLib / packages / flush / pings (**not** called from gmUpdate) |
 | ConnectionManager | LateUpdate | 4 | `ProtocolManager.LateUpdate` |
 | **DynamicMeshManager** | Update | **404** | Mesh region/item pipeline; server calls DynamicMeshServer |
 | **SdtdConsole** | Update | 60 | Console command pump |
@@ -377,7 +377,7 @@ Deep detail: [`entity-ai.md`](../entities/entity-ai.md), path/net gaps: [`closed
 
 ## 6. Networking
 
-### 6.1 ConnectionManager.Update (215 IL): peer
+### 6.1 ConnectionManager.Update (231 IL): peer
 
 ProtocolManager.Update → server: ProcessPackages (× clients × channels), FlushClientSendQueues, periodic UpdatePings + NetPackageClientInfo.
 

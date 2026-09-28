@@ -64,7 +64,7 @@ def parse_coverage(stderr: str) -> dict[str, int]:
 
 
 def parse_census(stdout: str) -> dict[str, int]:
-    """Parse Census.exe key/value lines: 'AllTypes (incl nested)       = 7432'."""
+    """Parse Census.exe key/value lines: 'AllTypes (incl nested)       = 7451'."""
     out: dict[str, int] = {}
     for line in stdout.splitlines():
         m = re.match(r"([A-Za-z0-9 ().*]+?)\s*=\s*(\d+)", line)

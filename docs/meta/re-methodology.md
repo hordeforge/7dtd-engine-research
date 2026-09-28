@@ -45,7 +45,7 @@ visible:
 mono bin/Census.exe "$ASM"
 ```
 
-**Live pin (V3.2.0 b9)** from `tools/data/stock_facts.json` / `Census.exe`
+**Live pin (V3.2.0 b10)** from `tools/data/stock_facts.json` / `Census.exe`
 (regenerate after any game update with `make stock-sync`):
 
 | Metric | V3.2.0 live | V3.1.0 (historical) | V3.0.1 baseline (historical) |
@@ -158,7 +158,7 @@ then `dataLen:i32`, then the serialized chunk blob. That is the entire terrain
 push body, read straight from the two methods. See
 [`protocol.md`](../network/protocol.md) for the annotated packages.
 
-**Automated first pass (`tools/src/WireBodies`).** Doing step 2 by hand for all 183
+**Automated first pass (`tools/src/WireBodies`).** Doing step 2 by hand for all 195
 packages is slow, so `WireBodies` walks every `NetPackage*` `write()` (and the
 nested serializers they delegate to) and emits the ordered field/type sequence to
 [`../inventories/netpackage-bodies.md`](../inventories/netpackage-bodies.md). It captures
@@ -172,7 +172,7 @@ body against `write`/`read` IL before cloning. Regenerate:
 
 ## 5. Protocol-wide sweeps
 
-Per-package behaviour lives in trivial overrides. Rather than open 193 files,
+Per-package behaviour lives in trivial overrides. Rather than open 195 files,
 census the constants:
 
 ```bash
@@ -355,15 +355,15 @@ patch or a careless edit cannot silently drift the docs:
 
 | Gate | What it verifies |
 |---|---|
-| `make test` (25 checks) | the full local suite: reach/coverage consistency, committed-inventory currency (`WireBodies`/`Coverage`/`StateMachines` regeneration), surface well-formedness, doc-link + section-ref integrity, inventory count claims, and the DLL-side guards below |
+| `make test` (30 checks) | the full local suite: reach/coverage consistency, committed-inventory currency (`WireBodies`/`Coverage`/`StateMachines` regeneration), surface well-formedness, doc-link + section-ref integrity, inventory count claims, and the DLL-side guards below |
 | `tests/test_subclass_counts.py` | per-leaf inventory counts (sequence-requirements 38, item-actions 38, quest-objectives 38, minevent-actions 71, block-behaviors 65, te-features 11, challenge-objectives 28+1, sequence-actions 123) match the concrete-subclass closures / namespace composition |
 | `tests/test_console_cmd_inventory.py` | console catalog primary rows == `CmdMap.exe` output, alias rows are real names, the committed `.tsv` is current, and every Does-column description equals `getDescription` |
 | `tests/test_console_classification.py` | the console client-executable / dedicated-gate split (188 leaves; 83 `get_IsExecuteOnClient`, 84 either, 10 `IsDedicatedServer`-gated classes listed in console-commands.md 6) matches a Cecil prologue probe over the `CmdMap` population |
 | `tests/test_il_citations.py` | **every** parseable `Type::Method` + `IL=N` claim in the docs (2367 claims, incl. dated "(exact)" re-verification notes) matches some overload of the method in the live DLL; approximate IL claims (a tilde form) are banned |
 | `tests/test_xref_claims.py` | every `Xref=N` call-site claim in the docs (5, tight ``Type.Method (Xref=N)`` form, backtick-gapped) matches `Xref.exe` against the live DLL |
-| `tests/test_inventory_type_existence.py` | every type row in `dedicated-leaves.md` (371) and `netpackages.md` (194, incl. base/method-count/max-IL columns and top-level completeness) resolves in the DLL |
+| `tests/test_inventory_type_existence.py` | every type row in `dedicated-leaves.md` (370) and `netpackages.md` (196, incl. base/method-count/max-IL columns and top-level completeness) resolves in the DLL |
 | `tests/test_entityclass_props_current.py`, `test_gamestats_gameprefs_current.py` | EntityClass `.cctor` prop pairs (167) and the EnumGameStats/EnumGamePrefs member-name tables (82/317) equal the DLL |
-| `tests/test_tuned_constants.py` | **524 tuned game constants** (AI director horde/placement/cooldown + airdrop schedule, water sim, block masks + `BlockValue` bit layouts, entity/walk-type ids, spawn rings, stealth/smell, vehicle/drone/turret, region/chunk/world, RWG, threat levels) pinned against the DLL and stated in the owning doc; a **completeness scan** fails on any const-rich class (>= 4 numeric consts) that is neither pinned nor allowlisted |
+| `tests/test_tuned_constants.py` | **535 tuned game constants** (AI director horde/placement/cooldown + airdrop schedule, water sim, block masks + `BlockValue` bit layouts, entity/walk-type ids, spawn rings, stealth/smell, vehicle/drone/turret, region/chunk/world, RWG, threat levels) pinned against the DLL and stated in the owning doc; a **completeness scan** fails on any const-rich class (>= 4 numeric consts) that is neither pinned nor allowlisted |
 | dump-mirror guards in `test_dedi_coverage_docs.py` | `deeper.md`/`gaps.md`/`opt-scan.md`/`loop-complete.md` bodies equal their regenerated dump masters (gaps with the >4-line raw-IL elision policy); every `il/` reference resolves; `tools/bin` exes are not older than `tools/src` |
 | `test_re_dump_regen.py` | `frame-entries`/`gmupdate-calls`/`manager-updates` committed bodies equal the regenerated dumper output |
 

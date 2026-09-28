@@ -4,7 +4,7 @@
 hand-annotated `read`/`write` byte layouts beyond the join-critical set in
 [`protocol.md`](../network/protocol.md).
 **Hub:** [`INDEX.md`](../INDEX.md).  
-**Pin:** dedicated V **3.2.0 (b9)**; dump set dir name `il/netpackages-v3.2.0/`
+**Pin:** dedicated V **3.2.0 (b10)**; dump set dir name `il/netpackages-v3.2.0/`
 is historical (regenerate against live ASM).
 **Not:** framing/join/challenge (that is [`protocol.md`](../network/protocol.md)); visual
 frames ([`protocol-frames.md`](../network/protocol-frames.md)).
@@ -25,7 +25,7 @@ Full table: `il/netpackages-v3.2.0/META.md` (195 packages). Regenerate with
 `mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.2.0/META.md`.
 
 **Per-package wire bodies:** this doc hand-annotates the load-bearing packages; the
-**complete** ordered `write()` field sequence for every package (183 bodies + 61
+**complete** ordered `write()` field sequence for every package (185 bodies + 61
 nested serializers) is auto-extracted in
 [`../inventories/netpackage-bodies.md`](../inventories/netpackage-bodies.md)
 (`tools/src/WireBodies`).

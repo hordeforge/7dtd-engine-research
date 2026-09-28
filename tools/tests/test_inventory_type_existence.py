@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Guard hand-maintained type tables against the DLL (types exist; bases match where the format is uniform).
 
-dedicated-leaves.md (371 rows; heterogeneous section tables, generic names
+dedicated-leaves.md (370 rows; heterogeneous section tables, generic names
 listed without arity, honest "(not found)" markers) -> type-existence only.
-netpackages.md (194 rows; uniform Type|Base table) -> existence + direct base.
+netpackages.md (196 rows; uniform Type|Base table) -> existence + direct base.
 A typo, a removed/renamed type, or a base change after a game patch fails here,
 even though these inventories are hand-maintained.
 

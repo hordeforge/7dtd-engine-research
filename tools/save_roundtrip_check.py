@@ -18,8 +18,8 @@ docs/world/save-region.md:
 
 Usage: python3 tools/save_roundtrip_check.py [save_dir]
   or: python3 tools/save_roundtrip_check.py --shipped <worlddir-or-main.ttw>
-  With no argument, auto-discovers the most recent probe save under
-  ~/.cache/7dtd-loadgen-*/Saves/*/*/ that contains main.ttw + Region/.
+  save_dir is required unless --shipped is given; there is no discovery, so
+  pass the probe save under ~/.cache/7dtd-loadgen-*/Saves/*/*/ explicitly.
   --shipped checks just a main.ttw (e.g. the TFP-shipped Navezgane world).
   Exit code 0 = all checks passed; 1 = any check failed; 2 = usage error.
 """
@@ -803,8 +803,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "save_dir",
         nargs="?",
         default=None,
-        help="save directory to check (default: newest probe save under "
-        "~/.cache/7dtd-loadgen-*/Saves/*/*/ containing main.ttw + Region/)",
+        help="save directory to check (required; no discovery, e.g. the probe "
+        "save under ~/.cache/7dtd-loadgen-*/Saves/*/*/ with main.ttw + Region/)",
     )
     ap.add_argument(
         "--shipped",

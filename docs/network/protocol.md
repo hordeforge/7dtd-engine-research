@@ -131,10 +131,12 @@ hasHostUserAndToken:bool (+ optional platform user blobs)
 
 Client must use **server-advertised** ids for all later packages. Do not hard-code ids across game versions.
 
-DLL census (V3.0.1, `tools/bin/Census.exe`): **194** `NetPackage*`-prefixed types =
-**193 + `NetPackageManager`** (the registry). The **189** in the live id-map are the
-actual registered wire packages; the remaining ~4-6 of the 193 are name-prefixed
-helpers (`NetPackageDirection` [enum], `Logger`, `Metrics`, ...), not wire packages.
+Current DLL census (`tools/bin/Census.exe`, `netpackage_top_level_count` in
+`tools/data/stock_facts.json`): **195** `NetPackage*` types (+ `NetPackageManager`
+→ 196 name-prefixed). The **191** in the live id-map are the actual registered wire
+packages; the remaining **4** are name-prefixed helpers (`NetPackageDirection`
+[enum], `Logger`, `Metrics`, ...), not wire packages. The V3.0.1-era figures were
+194 / 193 / 189.
 
 ### Family counts (census)
 

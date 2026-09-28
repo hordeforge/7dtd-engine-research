@@ -5,7 +5,7 @@
 **Dump set:** [`../il/loop-complete-v3.2.0/`](../../il/loop-complete-v3.2.0) (IL size still 631 on V3.2.0, unchanged from V3.1.0/V3.0.1).  
 **Hub:** [`INDEX.md`](../INDEX.md).
 
-**Assembly:** dedicated `Assembly-CSharp.dll` V **3.2.0 (b9)** (gmUpdate IL=631 unchanged from V3.1.0/V3.0.1)  
+**Assembly:** dedicated `Assembly-CSharp.dll` V **3.2.0 (b10)** (gmUpdate IL=631 unchanged from V3.1.0/V3.0.1)  
 **Tool:** `tools/legacy/DumpGmUpdate.cs` (or the general `tools/src/DumpMethod`, see §10)  
 **Optim summary:** [`../../../7dtd-server-optimizer/docs/ARCHITECTURE.md`](../../../7dtd-server-optimizer/docs/ARCHITECTURE.md)
 
@@ -326,7 +326,7 @@ When any players online:
 
 ## 6. Net and mesh (outside `gmUpdate`)
 
-### 6.1 `ConnectionManager.Update` (215 IL)
+### 6.1 `ConnectionManager.Update` (231 IL)
 
 Own MonoBehaviour update:
 

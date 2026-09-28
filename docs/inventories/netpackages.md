@@ -1,7 +1,7 @@
 # NetPackage type inventory (V3.2.0 dedicated)
 
 **Kind:** inventory table (not primary narrative).  
-**Pin:** V **3.2.0 (b9)**; static top-level `NetPackage*` census **195** (+ `NetPackageManager` → 196 name-prefixed; see [coverage.md](../meta/coverage.md)).  
+**Pin:** V **3.2.0 (b10)**; static top-level `NetPackage*` census **195** (+ `NetPackageManager` → 196 name-prefixed; see [coverage.md](../meta/coverage.md)).  
 **Prefer:** [`protocol.md`](../network/protocol.md), [`protocol-packages.md`](../network/protocol-packages.md), [`protocol-frames.md`](../network/protocol-frames.md) (visual), [`network.md`](../network/network.md).  
 **Wire bodies:** ordered `write()` field sequence per package in [`netpackage-bodies.md`](netpackage-bodies.md) (auto-extracted).  
 **Raw:** [`../../il/netpackages-v3.2.0/`](../../il/netpackages-v3.2.0/), [`../../il/dedi-complete-v3.2.0/`](../../il/dedi-complete-v3.2.0/).  

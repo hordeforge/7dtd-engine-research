@@ -200,7 +200,8 @@ Status terms:
   verdict instead of only creating a baseline; `PARITY_BASELINE` overrides it. The
   update advice names the baseline actually in force. Gated by
   `tests/test_drift_committed_baseline.py` (fresh baseline compared, perturbed
-  snapshot detected with exit 1, absent snapshot stays quiet).
+  snapshot detected with exit 1, absent snapshot fails closed with exit 2 naming
+  the unbaselined axis).
 - Added `tests/test_committed_diff_artifacts.py`: the committed parity snapshots and
   the b9 to b10 report are re-derived and compared, so an artifact cited by the docs
   cannot silently go stale after a lens or format change (the report had to be

@@ -76,7 +76,7 @@ flowchart LR
 | World / chunks / save | world-chunks → save-region → terrain-height |
 | Net | network → closed-gaps |
 | Light / mesh / water | light-mesh-water |
-| **Tuned game constants (exact numbers)** | the owning topic doc (constants pinned by `tools/tests/test_tuned_constants.py`, 524 pins: horde geometry + airdrop schedule, block masks, entity ids, spawn rings, stealth, caps) |
+| **Tuned game constants (exact numbers)** | the owning topic doc (constants pinned by `tools/tests/test_tuned_constants.py`, 535 pins: horde geometry + airdrop schedule, block masks, entity ids, spawn rings, stealth, caps) |
 | Managers / ModEvents | managers |
 | **Live APM scale / bottlenecks / tuning** | optimization mod: `../../7dtd-server-optimizer/docs/` (measured-scaling, bottlenecks, runtime-tuning) |
 | **RealEarth product limits** | `../../7dtd-realearth/docs/ENGINE_LIMITATIONS.md` |
