@@ -48,11 +48,11 @@ For each unaccounted type:
 
 ---
 
-## 3. Current pin status (2026-08-08, regenerate to refresh)
+## 3. Current pin status (V3.2.0 b10, regenerate to refresh)
 
 | Check | How | Result |
 |---|---|---|
-| stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.2.0 b9) |
+| stock_facts vs live ASM | `make stock-check` | exit 0 (V 3.2.0 b10) |
 | Unaccounted reached types | `Coverage.exe` | **100%** accounted (3692 game types; narrated 3688 / catalogued 0 / classified 4) |
 | Families 1-11 | coverage.md Status column | Closed |
 | Non-IL residuals | residuals.md §1 | Honest permanent list only |
@@ -86,7 +86,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | Twitch server slice (vote queue, manager update, player gates) | twitch-integration §2 |
 | EntityAlive/Player leaf hooks + TaskManager + infra records | entity-ai §5.1b / parties-factions / items / dedicated-misc-systems |
 | ModEvents payload structs (S- carriers) + SNetPackageInfo | dedicated-misc-systems |
-| Requirement framework + all 26 leaves | minevents §7.0a |
+| Requirement framework + the sequence leaves (37 in the catalog) | minevents §7.0a / [sequence-requirements.md](../inventories/sequence-requirements.md) |
 | Power block wrappers (block to TE identity) | tile-entities-power §3.7 |
 | Block behavior leaves (cactus/hay AABB, sibling remove, forge/sign) | blocks §8 |
 | ItemAction leaves (Melee/Cancel/ExchangeItem/DisconnectPower/UseOther/TextureBlock) | items §4.2 |
@@ -365,5 +365,8 @@ work, not more narrative RE.
 
 ## Changelog
 
+- **2026-09-28:** Section 3 re-pinned to V3.2.0 b10 (3692 game types, narrated 3688,
+  classified 4, unaccounted 0), matching `inventories/coverage-report.md` and
+  `tools/data/stock_facts.json`. The 2026-08-08 counts below are superseded.
 - **2026-08-08:** Census pin refreshed to 1841 narrated / 0 unaccounted (corrected AC-only game base 3574).
 - **2026-08-07:** Initial completion-bar definition after Coverage unaccounted=4 cleanup drive.

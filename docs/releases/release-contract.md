@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**58 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**60 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -98,7 +98,18 @@ falls behind the commits actually below the last tag.
   race-safe.
 - **Reproducible output.** Artifact stamps derive from `SOURCE_DATE_EPOCH`, the
   dumper build is incremental and locale-pinned, and output names are stable, so
-  a repeated build is byte-identical.
+  a repeated build is byte-identical. Dumper and drift-baseline writes land by
+  rename, so a run cut short cannot leave a half-written pin or baseline.
+- **`build.sh` is the only writer of `bin/`.** The shell entry points call it
+  instead of compiling their own exes, and it keys each exe on the tool sources
+  so a rebuilt tool is the one that runs.
+- **Static analysis is tighter.** `mypy` enables the error codes strict mode
+  leaves off (`ignore-without-code`, `possibly-undefined`, `redundant-expr`, and
+  the rest), and `ruff` adds `ARG` and `SIM`; every code in the set is green on
+  the tree, so a raise lands with the fixes that keep it green.
+- **The stock pin gate is baselined.** `test_stock_facts_baseline.py` runs
+  `check_stock_facts.py` against a recorded copy of the pin, so a pin that
+  stops matching itself is caught without the game installed.
 - **Install discovery works from every Steam root** a supported host has
   (Windows program files, the three Linux homes, the macOS path) through
   `tools/asm_path.py`, which is now the one resolution behind `make`'s `ASM`,
@@ -135,6 +146,16 @@ falls behind the commits actually below the last tag.
 
 ### Tools and docs
 
+- **Gates share one argument surface.** The tests that need the game assembly
+  or a mono tool call the same helpers from `tools/tests/_common.py` instead of
+  each resolving them, and `tools/sandbox/requirements.in` carries a floor and
+  a ceiling per package, checked against the lock, so a recompile cannot jump a
+  series under a tool that reads package internals.
+- **CI runs untrusted pull-request code read-only.** Both jobs declare
+  `permissions: contents: read` and check out with `persist-credentials: false`,
+  so a gate running fork code cannot push with the token; the shellcheck
+  download goes to a private `mktemp` dir. Recorded in
+  [`../meta/threat-model.md`](../meta/threat-model.md).
 - `tools/release.sh` cuts a release with its checks built in (clean tree, free
   tag, not behind `origin/main`, authenticated `gh`, required notes, `make lint`
   + `make test-docs` green); `--dry-run` prints the plan and changes nothing, and
@@ -152,10 +173,11 @@ build first, which would be `v3.3.0`.
 
 ## Cutting a release
 
-`tools/release.sh <vX.Y.Z> [--notes FILE] [--dry-run] [--resume]`. It refuses a dirty
-worktree, a tag that exists locally or on origin, a branch behind
+`tools/release.sh <vX.Y.Z> [--notes FILE] [--dry-run] [--skip-gates] [--resume]`. It
+refuses a dirty worktree, a tag that exists locally or on origin, a branch behind
 `origin/main`, an unauthenticated `gh` and a missing notes file; it runs the
-DLL-free gates (`make lint`, `make test-docs`) before tagging, then pushes
+DLL-free gates (`make lint`, `make test-docs`) before tagging (`--skip-gates`
+skips both, and a dry run skips them too, since it changes nothing), then pushes
 `main`, tags annotated, pushes the tag and creates the GitHub release. CI runs
 the DLL-dependent half on the push.
 
