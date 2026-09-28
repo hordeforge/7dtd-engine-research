@@ -1,0 +1,4 @@
+# The interpreter the gates are written against and the one CI runs
+# (ubuntu-24.04, python_version in mypy.ini). Read by uv and pyenv. The
+# floor is 3.10 (PEP 604 in runtime annotations); see CONTRIBUTING.md.
+3.12

@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**87 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**90 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -231,6 +231,23 @@ falls behind the commits actually below the last tag.
   `gen_atlas_zig.py` bounded its `zig` calls through the shared runner instead
   of a bare `subprocess.run`, and a non-zero `zig fmt` now stops the run rather
   than writing a file that was never formatted.
+- **The Steam app-info fetch is bounded too.** `steam_builds.py` reads it
+  through the same bound as every other spawned child and stops a response
+  larger than the cap or on a scheme that is not http/https, so a hostile or
+  runaway endpoint cannot hold the gate open.
+- **A fuzz run is reproducible from its seed.** The corpus digest and seed are
+  printed by every fuzz gate and replayed by `test_fuzz_seed_replay.py`, so a
+  failure names the run that produced it instead of asking for a rerun to
+  reproduce.
+- **Superseded research moved to `workspace/outputs/archive/`.** The pre-V3.1.0
+  wire snapshots, diff report and census history are kept as history, out of the
+  path the drift gate reads.
+- **The static-analysis gate is green again.** The fetch-bound work left
+  `make lint` red on eight findings: assertions on a caught exception, a
+  response factory closing over its loop variables, a `bytes` read that
+  returned `Any`, and a re-exported `urllib` reaching through the tool module.
+  The refusals now assert through one helper, the factory binds its loop
+  values, and the gate patches `urllib.request` itself.
 
 ### Tools and docs
 
@@ -336,6 +353,8 @@ there would turn every release's own CI run red over prose nobody reads in
 between, which is how `v0.3.0` ended up tagged, unreleased and deleted. The
 gate takes `--contract` and `--repo`, and
 `tests/test_release_contract_gate.py` runs every one of its detectors, this
-case included, in a throwaway repository.
+case included, in a throwaway repository. `make release-count` prints the
+number the section must carry, so the count is written before CI reads it
+rather than after.
 
 **Hub:** [`INDEX.md`](../INDEX.md).

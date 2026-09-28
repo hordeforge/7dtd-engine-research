@@ -9,9 +9,10 @@ itself starts at [`docs/INDEX.md`](docs/INDEX.md); the method is
 ## What you need
 
 A clone, a Python 3 interpreter, and `make`. The gates use PEP 604 unions in
-runtime annotations, so 3.10 is the floor; CI runs `ubuntu-latest`, whose
-`python3` is 3.12. Nothing else is needed for the DLL-free gates, which is all
-CI runs.
+runtime annotations, so 3.10 is the floor; the interpreter they are written
+against is pinned in [`.python-version`](.python-version) (3.12, the one the
+`mypy` config and the CI runner use). Nothing else is needed for the DLL-free
+gates, which is all CI runs.
 
 | For | You need | How to get it |
 |---|---|---|
@@ -107,6 +108,10 @@ edits together.
    table.
 4. A user-visible change to the corpus has a bullet under **Unreleased** in
    [`docs/releases/release-contract.md`](docs/releases/release-contract.md),
-   which is what the next release notes are cut from.
+   which is what the next release notes are cut from. That section also states
+   how many commits sit below the last tag, and
+   `test_release_contract.py` fails when that number is behind `HEAD`; every
+   commit updates it, so `make release-count` prints the number to write
+   before you push rather than after CI tells you.
 
 Cut the change on a branch, not on `main`.

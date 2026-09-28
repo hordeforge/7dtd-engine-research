@@ -192,7 +192,7 @@ def read_bounded(response: Any, url: str, limit: int = MAX_APPINFO_BYTES) -> byt
     longer turns an unbounded body into a SourceError instead of a memory
     spike on the operator machine.
     """
-    body = response.read(limit + 1)
+    body: bytes = response.read(limit + 1)
     if len(body) > limit:
         raise SourceError(f"{url}: response body exceeds the {limit}-byte cap")
     return body

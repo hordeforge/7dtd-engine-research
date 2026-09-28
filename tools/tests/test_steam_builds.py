@@ -18,6 +18,8 @@ import json
 import os
 import sys
 import tempfile
+import urllib.request
+from collections.abc import Callable
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -71,17 +73,24 @@ ACF = """"AppState"
 
 
 class _FakeResponse(io.BytesIO):
-    """A urlopen result: the body, read under the cap the caller asks for."""
+    """A urlopen result: the body, read under the cap the caller asks for.
+
+    BytesIO is its own context manager, so `with urlopen(...)` needs no
+    hand-written dunders here.
+    """
 
     def __init__(self, body: bytes, url: str = "https://example.invalid") -> None:
         super().__init__(body)
         self.url = url
 
-    def __enter__(self) -> "_FakeResponse":
-        return self
 
-    def __exit__(self, *_exc: object) -> None:
-        self.close()
+def refusal(call: Callable[[], object], expected: str) -> str:
+    """The message of the SourceError a call that must refuse raises."""
+    try:
+        call()
+    except steam_builds.SourceError as exc:
+        return str(exc)
+    raise AssertionError(f"expected a refusal naming {expected!r}, but the call succeeded")
 
 
 def check_fetch_bounds() -> None:
@@ -104,53 +113,47 @@ def check_fetch_bounds() -> None:
     # Exactly at the cap is still a body the cap allows, so it is read whole.
     at_cap = steam_builds.read_bounded(_FakeResponse(b"x" * cap), "https://example.invalid")
     assert len(at_cap) == cap, len(at_cap)
-    try:
-        steam_builds.read_bounded(_FakeResponse(b"x" * (cap + 1)), "https://example.invalid")
-    except steam_builds.SourceError as exc:
-        assert "cap" in str(exc), exc
-    else:
-        raise AssertionError(f"read_bounded accepted a body over the {cap} cap")
+    over_cap = refusal(
+        lambda: steam_builds.read_bounded(
+            _FakeResponse(b"x" * (cap + 1)), "https://example.invalid"
+        ),
+        "cap",
+    )
+    assert "cap" in over_cap, over_cap
 
     # A plaintext URL is refused before any request is made.
-    for url in ("http://api.steamcmd.net/v1/info/294420", "file:///etc/passwd", "steam_builds.json"):
-        try:
-            steam_builds.fetch_appinfo(url)
-        except steam_builds.SourceError as exc:
-            assert "non-https" in str(exc), exc
-        else:
-            raise AssertionError(f"fetch_appinfo accepted a non-https URL: {url}")
+    for url in (
+        "http://api.steamcmd.net/v1/info/294420",
+        "file:///etc/passwd",
+        "steam_builds.json",
+    ):
+        refused = refusal(functools.partial(steam_builds.fetch_appinfo, url), "non-https")
+        assert "non-https" in refused, refused
 
     # A redirect that lands off https is refused too, and the redirect is
     # urllib's own: urlopen follows it, so the request the operator asked for
     # is not the response that would otherwise be parsed.
-    real_urlopen = steam_builds.urllib.request.urlopen
+    real_urlopen = urllib.request.urlopen
     for response_url, expect in (
         ("http://example.invalid/info", "non-https app-info response"),
         ("https://example.invalid/info", "cap"),
     ):
-        steam_builds.urllib.request.urlopen = (
-            lambda *_a, **_k: _FakeResponse(
-                b"x" * (cap + 1) if "cap" in expect else json.dumps(APPINFO).encode("utf-8"),
-                url=response_url,
-            )
+        urllib.request.urlopen = lambda *_a, _url=response_url, _expect=expect, **_k: _FakeResponse(
+            b"x" * (cap + 1) if "cap" in _expect else json.dumps(APPINFO).encode("utf-8"),
+            url=_url,
         )
         try:
-            steam_builds.fetch_appinfo()
-        except steam_builds.SourceError as exc:
-            assert expect in str(exc), exc
-        else:
-            raise AssertionError(f"fetch_appinfo accepted a response from {response_url}")
+            refused = refusal(steam_builds.fetch_appinfo, expect)
         finally:
-            steam_builds.urllib.request.urlopen = real_urlopen
+            urllib.request.urlopen = real_urlopen
+        assert expect in refused, refused
 
     # Pair side: a well-formed https response still parses through the same path.
-    steam_builds.urllib.request.urlopen = lambda *_a, **_k: _FakeResponse(
-        json.dumps(APPINFO).encode("utf-8")
-    )
+    urllib.request.urlopen = lambda *_a, **_k: _FakeResponse(json.dumps(APPINFO).encode("utf-8"))
     try:
         snapshot = steam_builds.fetch_appinfo()
     finally:
-        steam_builds.urllib.request.urlopen = real_urlopen
+        urllib.request.urlopen = real_urlopen
     assert snapshot.branches[0].name == "public", snapshot.branches
 
 

@@ -28,7 +28,7 @@ GAME_ROOT := $(shell $(GAME_ROOT_RESOLVE))
 endif
 ASM_VARS := ASM, SEVENDTD_ASM, SEVENDTD_DS_DIR
 
-.PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift gate test test-docs lint verify verify-live facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest
+.PHONY: install-check bench-bodydiff tools stock-sync stock-check post-update census drift gate test test-docs lint verify verify-live facts regen-check readiness help cross-links sibling-cites save-roundtrip save-roundtrip-all latest release-count
 
 help:
 	@echo "Fresh clone, no game install? These need no game:"
@@ -63,6 +63,7 @@ help:
 	@echo "make verify       - one-command gate: doc links, pins, readiness, facts, xml data (needs the live game)"
 	@echo "make verify-live  - the body of verify, after its ASM preflight; run verify, not this"
 	@echo "make regen-check  - regenerate-inventory check (needs mcs/mono + live DLL)"
+	@echo "make release-count - the commit count docs/releases/release-contract.md must state"
 
 tools:
 	cd "$(TOOLS)" && ./build.sh --skip-legacy
@@ -89,6 +90,17 @@ stock-check:
 # Quick view of the machine-checked stock pins (version, sim, behaviour).
 facts:
 	python3 "$(TOOLS)/facts.py"
+
+# The commit count the release contract's Unreleased section has to state.
+# tests/test_release_contract.py fails every commit that lands without it, so
+# this prints the number instead of leaving the contributor to count by hand.
+release-count:
+	@base=$$(sed -n 's/^\*\*[0-9][0-9]* commits\? after `\(v[0-9][0-9.]*\)`.*/\1/p' "$(ROOT)/docs/releases/release-contract.md" | head -1); \
+	if [ -z "$$base" ]; then \
+	  echo "release-count: the Unreleased section states no 'N commits after \`vX.Y.Z\`' count" >&2; \
+	  exit 2; \
+	fi; \
+	echo "release-count: $$base..HEAD is $$(git rev-list --count "$$base..HEAD") commits"
 
 # Every installed file against Steam's own manifest for the installed build.
 # Reads the whole install (17.6 GB, about 11 s here); ARGS="--only Managed"
