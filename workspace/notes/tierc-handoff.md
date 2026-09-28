@@ -257,5 +257,5 @@ Document **Batch A** from `/tmp/n191_*` into loot-economy + server-lifecycle + n
 ## Session continuity notes
 
 - Autoresearch version-update tooling already at readiness **100**; parked under `workspace/autoresearch/`
-- Post-update dry-run report: `workspace/outputs/post-update-dry-run-20260807.md`
+- Post-update dry-run report: `workspace/outputs/archive/post-update-dry-run-20260807.md`
 - Do not invent optim patches; RE only unless user asks product lane

@@ -42,7 +42,7 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 | `.scratch/` | Ephemeral probes and gate temp trees (`.scratch/tmp`). **git-ignored**; never the system temp dir, which is tmpfs here |
 | [`oss-tools/`](oss-tools) | Third-party server-tool/mod survey notes |
 | [`workspace/`](workspace) | Research artifacts only (no product code) |
-| [`workspace/outputs/`](workspace/outputs) | Audits, plans, review drafts |
+| [`workspace/outputs/`](workspace/outputs) | Research artifacts. The gate-read drift baselines, wire snapshots, diff report and census history are **pins, not outputs**: see its [`README.md`](workspace/outputs/README.md). `archive/` is the superseded pre-V3.1.0 set |
 | [`workspace/autoresearch/`](workspace/autoresearch) | Metric session logs (readiness bench notes) |
 | [`workspace/CHANGELOG.md`](workspace/CHANGELOG.md) | Lab notebook |
 

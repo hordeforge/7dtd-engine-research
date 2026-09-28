@@ -9,7 +9,7 @@ Mono.Cecil tools, 2 Python gates, consumed by the sibling `../zdtd-server-server
 `Assembly-CSharp.dll` (read locally; never redistributed).
 **Review date:** 2026-07-24.
 **Evidence:** `.drafts/7dtd-re-corpus-review-evidence.md`.
-**Plan:** `.plans/7dtd-re-corpus-review-plan.md`.
+**Plan:** `../.plans/7dtd-re-corpus-review-plan.md`.
 
 > **Conflict of interest, stated up front.** I authored this artifact in the same
 > session in which I am reviewing it. That is not a neutral position. Two mitigations

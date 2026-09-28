@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**78 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**87 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
@@ -194,15 +194,39 @@ falls behind the commits actually below the last tag.
 - **A census that measured nothing fails instead of reporting 0 %.**
   `census-pct.py` read a missing or empty report as a 0 % completion, so a
   dump that never ran looked like a finished inventory.
+- **An unmeasured census answers with a failure, not a zero.**
+  `census-pct.py` refuses `Census.exe` output that carries no
+  `AllTypes (incl nested)` or `AllMethodsWithBody` row instead of reporting
+  the whole assembly as empty, and an unreadable coverage report drops its
+  "reached in the server call graph" row rather than printing `0`, which a
+  reader cannot tell from a real measurement. `steam_manifest.py` names an
+  unreadable `content_log.txt` on stderr, because the silent skip printed a
+  bare gid that reads as "never pinned".
 - **A hash is a hash, wherever it is taken.** The stock facts, the xml pins,
   the shader blob and the sandbox table extraction computed a content digest
   through a helper that was not pinned to an algorithm, so a different digest
   could be pinned under the same field name; `steam_builds.py` now also
   refuses a fetch whose download root resolves outside the depot it asked for.
+- **Hash, install-root and fetch-guard boundaries.** A pinned SHA-256 has to be
+  64 hex digits, so a corrupt pin fails instead of falling through to the
+  byte-diff branch and blaming the operator's install for a damaged file; a
+  relative `ASM` that resolves to the process cwd is refused rather than
+  handed on as an install root; `steam_builds.py` refuses a branch or depot gid
+  that reaches `steamcmd` as one of its own options, from the cache and the
+  live query alike; and the post-kill read of a timed-out child is bounded, so
+  a grandchild that survives the kill cannot turn the timeout back into the
+  hang the bound exists to prevent.
 - **A rerun of `research_diff.py` and `stock-sync.sh` lands cleanly.** The diff
   report is written by rename and the pin refresh rebuilds its inputs before
   comparing, so running either twice in a row no longer trips over its own
   previous output or skips a file it just changed.
+- **A rerun republishes, it does not accumulate.** `research_diff.py` treats
+  the build pair as the report's identity and writes over the report already in
+  `workspace/outputs/diffs/`, so the tree converges to one report per pair
+  however often the command runs, and `stock-sync.sh` publishes
+  `stock_facts.json` and `xml_pins.json` as one step that restores the previous
+  pair when a move fails, instead of leaving this build's facts beside the
+  previous build's XML pins.
 - **Every gate-spawned child is bounded and a failed `zig fmt` is a failure.**
   `gen_atlas_zig.py` bounded its `zig` calls through the shared runner instead
   of a bare `subprocess.run`, and a non-zero `zig fmt` now stops the run rather
@@ -244,6 +268,27 @@ falls behind the commits actually below the last tag.
 - `make lint` now also runs `yamllint` over the tracked YAML, on the version
   pinned in `.github/workflows/ci.yml`, and refuses a local `yamllint` that is
   not that pin. Config lives in [`.yamllint`](../../.yamllint).
+- **A committed artifact is a function of the studied bytes.** The coverage
+  report identifies its build by the assembly's sha256 rather than a file
+  mtime, which changes when the same bytes are re-downloaded and made every
+  regeneration read as stale; the .NET stamp is now the same
+  `yyyy-MM-ddTHH:mm:ssZ` string `tools/tooling.py` formats, because the .NET
+  round-trip `"o"` carried sub-second digits an integer `SOURCE_DATE_EPOCH`
+  cannot reproduce; and `StockFacts.exe` emits a complete `litenet` section of
+  documented defaults (every field marked baked, so the pin gate refuses to
+  pin it) when the sibling assembly is missing or unreadable, so a failed
+  extraction has the same object shape as a successful one and cannot read as
+  an absent protocol.
+- **Two builds no longer share a staging path.** `build.sh` staged every
+  compile under one `bin/.staging/<final-name>`, so two runs at once (a
+  retried `make census` beside a `make drift`, a local build while CI runs the
+  same target) removed each other's staged file mid-compile and renamed
+  whatever was left into `bin/`. Each run now stages in its own directory
+  under `bin/`, which keeps the rename inside `bin/` and the final basename
+  that `mcs` derives the assembly name and MVID from.
+- **`zig fmt` is bounded and its status is checked.** `gen_atlas_zig.py` ran it
+  with `check=False` and swallowed the `OSError`, so a run that wrote the file
+  and then failed to format it exited 0 over unformatted output.
 - Docs: the ranged-attack delivery contract is closed (`RangedAttackTarget`
   mapped, `EAILeap` motion pinned, `Animator.StringToHash` identified as
   CRC-32 with its flush chain), the `Leap` census row is marked mapped, a
