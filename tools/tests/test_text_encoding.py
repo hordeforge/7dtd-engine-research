@@ -24,8 +24,11 @@ import ast
 import os
 import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = _common.TOOLS
+REPO = _common.REPO
 SKIP_DIRS = {".git", "il", "__pycache__", ".scratch", ".mypy_cache", ".ruff_cache"}
 # Callables that decode a child's bytes, and Path methods that decode a file's.
 SUBPROCESS_CALLS = {"run", "Popen", "call", "check_call", "check_output"}
@@ -36,8 +39,8 @@ CHILD = "import sys; sys.stdout.buffer.write('caf\\u00e9\\n'.encode('utf-8'))"
 
 
 def _python_files() -> list[str]:
-    out = []
-    for sub, dirs, names in os.walk(TOOLS):
+    out: list[str] = []
+    for sub, dirs, names in os.walk(str(TOOLS)):
         dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS)
         out.extend(os.path.join(sub, n) for n in sorted(names) if n.endswith(".py"))
     return out
@@ -93,13 +96,15 @@ def static_scan() -> list[str]:
     bad: list[str] = []
     for path in _python_files():
         with open(path, encoding="utf-8") as fh:
-            bad.extend(_encoding_missing(os.path.relpath(path, REPO), ast.parse(fh.read(), path)))
+            bad.extend(
+                _encoding_missing(os.path.relpath(path, str(REPO)), ast.parse(fh.read(), path))
+            )
     return bad
 
 
 def c_locale_child() -> tuple[int, str, str]:
     """Run the shared runner under a C locale against a child emitting UTF-8."""
-    sys.path.insert(0, TOOLS)
+    sys.path.insert(0, str(TOOLS))
     import tooling
 
     env = dict(os.environ) | {"LC_ALL": "C", "LANG": "C"}

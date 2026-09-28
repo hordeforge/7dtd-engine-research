@@ -19,7 +19,7 @@ import tempfile
 
 import _common
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TOOLS = _common.TOOLS
 EXPECTED_IL_TOTAL = 1743842  # docs/meta/full-surface.md: "1,743,842 IL instructions" (V3.2.0 b10)
 
 PIPE_AWARE = re.compile(r"(?<!\\)\|")  # split on | not preceded by backslash

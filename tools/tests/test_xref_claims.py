@@ -34,9 +34,9 @@ from pathlib import Path
 
 import _common
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
-DOCS = os.path.join(REPO, "docs")
+TOOLS = _common.TOOLS
+REPO = _common.REPO
+DOCS = _common.DOCS
 XREF = os.path.join(TOOLS, "bin", "Xref.exe")
 
 CLAIM = re.compile(r"`?([A-Za-z_]\w*)(?:\.|::)([A-Za-z_]\w*)`?\s*[^(`\n]*?\(Xref=(\d+)")

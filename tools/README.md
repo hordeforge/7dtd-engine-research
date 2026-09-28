@@ -30,8 +30,9 @@ tools/
 Three rules keep that shape honest, enforced by
 [`tests/test_tools_layout.py`](tests/test_tools_layout.py): no maintained
 module outside `tests/` imports the test package (shared helpers live in
-`tooling.py`) or finds the repo by counting parent directories (a subfolder
-module imports `tooling.REPO`/`TOOLS`/`DOCS`), and every `tools/*.py` is
+`tooling.py`), and no `tools/*.py` at any depth, gate included, finds the repo
+by counting parent directories (a module imports `tooling.REPO`/`TOOLS`/`DOCS`,
+or `_common.REPO`/`TOOLS`/`DOCS` under `tests/`), and every `tools/*.py` is
 named here.
 
 Standalone entry points (no build step; make targets noted inline where wired):
@@ -254,7 +255,7 @@ are explicit. See `re-scratch/README.md`.
 | `tests/test_tool_cli_usage.py` | Every maintained C# executable reports usage and exits 2 when required arguments are missing. Skips until the tools are built or Mono is available. |
 | `tests/test_shell_cli_usage.py` | Supported shell entry points provide side-effect-free `--help`; strict no-positional commands reject unknown options. DLL-free. |
 | `tests/test_release_script.py` | `release.sh` refuses a bad version, a missing notes file, unknown options and an existing tag, and its `--dry-run` prints the planned `git tag` / `gh release` steps while creating no tag. Every case avoids writes, so the test does not depend on the checkout being clean. DLL-free. |
-| `tests/test_tools_layout.py` | The tool tree's two structural rules: no maintained module outside `tools/tests/` imports the test package (shared paths, scratch and digests live in `tools/tooling.py`), and every `tools/*.py` is named in this README. Static, DLL-free. |
+| `tests/test_tools_layout.py` | The tool tree's structural rules: no maintained module outside `tools/tests/` imports the test package (shared paths, scratch and digests live in `tools/tooling.py`), no `tools/*.py` at any depth, gate included, locates the repo by counting parent directories, and every `tools/*.py` is named in this README. Static, DLL-free. |
 | `tests/test_cli_args_wired.py` | Both directions of the CLI surface: every `args.<name>` a maintained Python tool reads is declared by an `add_argument` (removing a flag must not leave a stale `args.oldflag` on a branch the tests never reach, found after `steam_builds --url` was dropped and the live PICS path kept reading it), and every declared destination is read somewhere (no dead flag left behind by the same removal). `dest=` is honoured, `--help` is exempt, self-tested detector, files that rebind `args` are skipped and counted. Static, DLL-free. |
 | `tests/test_python_cli_usage.py` | Every Python CLI discovered by AST under `tools/` (18 today) prints `--help` with exit 0 without importing its optional runtime packages, and is named in `tools/README.md`. Discovery replaced the hand-kept list, which had already drifted: `facts.py`, `census-pct.py`, `cross_repo_links.py`, `xml_pins.py`, and `zdtd_cite_check.py` were unchecked. DLL-free. |
 | `tests/test_ilfmt_safe.py` | `IlFmt.Safe` (the filename sanitizer for assembly-supplied namespace/type names in DumpAll/DumpType/DumpNetPackages) never yields a fragment that escapes the dump out-dir: a crafted name of `.` or `..` is defused while namespace dots survive. Compiles a probe against `src/IlFmt.cs`; skips without mcs/mono. |

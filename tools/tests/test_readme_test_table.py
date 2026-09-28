@@ -14,8 +14,11 @@ import os
 import re
 import sys
 
-TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(TOOLS)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+TOOLS = _common.TOOLS
+REPO = _common.REPO
 MAKEFILE = os.path.join(REPO, "Makefile")
 README = os.path.join(TOOLS, "README.md")
 TESTDIR = os.path.join(TOOLS, "tests")

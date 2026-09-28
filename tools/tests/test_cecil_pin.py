@@ -16,8 +16,11 @@ import os
 import re
 import sys
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TOOLS = os.path.join(REPO, "tools")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
+
+REPO = _common.REPO
+TOOLS = _common.TOOLS
 PIN = os.path.join(TOOLS, "data", "cecil.pin")
 BUILD = os.path.join(TOOLS, "build.sh")
 

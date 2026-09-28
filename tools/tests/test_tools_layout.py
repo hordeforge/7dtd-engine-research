@@ -8,10 +8,11 @@ Three structural rules that a move or a new script can silently break:
      test helpers was the state before `tools/tooling.py` existed: it made the
      tools depend on the gate suite's package and hid the shared helpers in the
      wrong place.
-  2. No maintained module locates a repo path by counting parent directories
-     out of its own folder. `tools/tooling.py` finds the repo by marker walk
-     and exports REPO/TOOLS/DOCS, so a subfolder module imports it instead of
-     climbing `parent.parent`, which couples it to the tree's current shape.
+  2. No module locates a repo path by counting parent directories out of its
+     own folder, gates included. `tools/tooling.py` finds the repo by marker
+     walk and exports REPO/TOOLS/DOCS (re-exported by `tests/_common.py`), so
+     a module imports it instead of climbing parent directories, which couples
+     it to the tree's current shape.
   3. Every `.py` under `tools/` is named in `tools/README.md`, so moving or
      splitting a file without documenting it fails here rather than drifting.
 
@@ -68,17 +69,19 @@ def main() -> None:
         if "__pycache__" in path.parts:
             continue
         relative = path.relative_to(_common.TOOLS)
+        text = path.read_text(encoding="utf-8")
         if "tests" not in relative.parts:
             checked += 1
-            text = path.read_text(encoding="utf-8")
-            offenders = imports_test_package(ast.parse(text))
-            for offender in offenders:
+            for offender in imports_test_package(ast.parse(text)):
                 bad.append(f"{relative}: {offender} (tools must import tools/tooling.py)")
-            for number, line in enumerate(counts_parents(text), start=1):
-                bad.append(
-                    f"{relative}:{number}: reaches out of its folder by counting parents "
-                    f"({line.strip()}) (use tools/tooling.py: REPO, TOOLS, DOCS)"
-                )
+        # Every module, gates included: a gate that counts parents couples
+        # itself to the tree's current shape, and the gates are the modules
+        # that outlive any single move.
+        for number, line in enumerate(counts_parents(text), start=1):
+            bad.append(
+                f"{relative}:{number}: reaches out of its folder by counting parents "
+                f"({line.strip()}) (use tools/tooling.py: REPO, TOOLS, DOCS)"
+            )
         # Whole-token match on the basename: a path prefix (`tests/`, `sandbox/`)
         # is fine, but "tooling.py" must not pass merely because
         # `bench_version_update_tooling.py` contains it.
@@ -89,8 +92,8 @@ def main() -> None:
             print(f"FAIL: {line}", file=sys.stderr)
         raise SystemExit(1)
     print(
-        f"OK: {checked} maintained modules import no test helpers, locate the repo through "
-        "tools/tooling.py, and every tools/*.py is documented"
+        f"OK: {checked} maintained modules import no test helpers, every tools/*.py locates "
+        "the repo through tools/tooling.py, and every one is documented"
     )
 
 
