@@ -345,7 +345,10 @@ def main() -> int:
                 tmp = f.name
                 json.dump(data, f, indent=1, sort_keys=True)
                 f.write("\n")
-            os.replace(tmp, pins_path)
+            # Flushed before the rename: a crash after it would otherwise leave
+            # the committed pins empty, and the gate that reads them has no
+            # earlier copy to fall back on.
+            tooling.publish(Path(tmp), Path(pins_path))
         finally:
             if tmp and os.path.exists(tmp):
                 os.unlink(tmp)

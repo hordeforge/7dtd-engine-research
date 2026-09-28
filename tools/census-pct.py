@@ -226,7 +226,9 @@ def _write_history_row(path: str, header: str, row: str) -> str:
         with os.fdopen(fd, "w", encoding="utf-8", newline="") as fh:
             fh.write(header)
             fh.writelines(lines)
-        os.replace(tmp, path)
+        # Flushed before the rename: the rename is atomic against a reader, but
+        # only the fsync keeps a crash from leaving the committed CSV empty.
+        tooling.publish(Path(tmp), Path(path))
     except BaseException:
         os.unlink(tmp)
         raise
@@ -241,8 +243,9 @@ def record_history(path: str, header: str, row: str) -> str:
     Keyed on the date column, the repeat replaces its own row instead of
     adding a duplicate: a run that only re-measures the same day leaves the
     file byte-for-byte identical. The exclusive lock covers the whole
-    read-modify-write, and the file lands through a temp-and-rename, so
-    concurrent runs neither lose a row nor leave a truncated CSV.
+    read-modify-write, and the file lands through a flushed temp-and-rename
+    (`tooling.publish`), so concurrent runs neither lose a row nor leave a
+    truncated CSV.
 
     The lock is advisory and POSIX-only: Windows has no fcntl, so there the
     temp-and-rename is the whole mechanism and two simultaneous `make census`

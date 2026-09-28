@@ -113,11 +113,40 @@ class BodyHasher {
 }
 
 static class AsmBodyDiff {
-  static void Main(string[] args) {
-    Dictionary<string,string> a = null, b = null;
-    var t1 = new Thread(() => { a = new BodyHasher().Map(args[0]); });
-    var t2 = new Thread(() => { b = new BodyHasher().Map(args[1]); });
+  // A walk that throws (an unreadable path, a file that is not an assembly)
+  // took the whole process down with an unhandled-exception abort that named
+  // neither side and threw away the other walk's hours. Each thread owns its
+  // own result slot, so the main thread only reads a map its walk finished.
+  static Dictionary<string,string> a, b;
+  static Exception failure = null;
+  static string failureSide = null;
+
+  static Dictionary<string,string> Walk(string side, string path) {
+    try {
+      return new BodyHasher().Map(path);
+    } catch (Exception exc) {
+      Interlocked.CompareExchange(ref failure, exc, null);
+      Interlocked.CompareExchange(ref failureSide, side, null);
+      return null;
+    }
+  }
+
+  static int Main(string[] args) {
+    if (args.Length != 2) {
+      Console.Error.WriteLine("usage: AsmBodyDiff <old.dll> <new.dll>");
+      return 2;
+    }
+    var t1 = new Thread(() => a = Walk("old", args[0]));
+    var t2 = new Thread(() => b = Walk("new", args[1]));
     t1.Start(); t2.Start(); t1.Join(); t2.Join();
+    if (failure != null) {
+      Console.Error.WriteLine($"{failureSide} assembly walk failed: {failure.GetType().Name}: {failure.Message}");
+      return 1;
+    }
+    if (a == null || b == null) {
+      Console.Error.WriteLine("an assembly walk produced no map; refusing to diff a missing side");
+      return 1;
+    }
     var added = b.Keys.Except(a.Keys).OrderBy(x => x).ToList();
     var removed = a.Keys.Except(b.Keys).OrderBy(x => x).ToList();
     var changed = a.Keys.Intersect(b.Keys).Where(k => a[k] != b[k]).OrderBy(k => k).ToList();
@@ -125,6 +154,7 @@ static class AsmBodyDiff {
     foreach (var x in added) Console.WriteLine(" + " + x + " " + b[x]);
     foreach (var x in removed) Console.WriteLine(" - " + x + " " + a[x]);
     foreach (var k in changed) Console.WriteLine(" ~ " + k + " " + a[k] + " -> " + b[k]);
+    return 0;
   }
 }
 """
