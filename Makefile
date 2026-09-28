@@ -181,6 +181,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_release_script.py"
 	python3 "$(TOOLS)/tests/test_cecil_pin.py"
 	python3 "$(TOOLS)/tests/test_census_pct_history.py"
+	python3 "$(TOOLS)/tests/test_json_pins_finite.py"
 	python3 "$(TOOLS)/tests/test_transport_closure_claims.py"
 	python3 "$(TOOLS)/tests/test_coverage_consistency.py"
 	python3 "$(TOOLS)/tests/test_promoted_types.py"

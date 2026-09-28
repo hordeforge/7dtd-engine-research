@@ -174,13 +174,12 @@ def load_steam_pins() -> dict[str, Any]:
     silently reporting an unlabelled build as if no pin existed hides it.
     """
     try:
-        with STEAM_PINS.open(encoding="utf-8") as fh:
-            pins: Any = json.load(fh)
+        pins: Any = tooling.load_json(STEAM_PINS)
     except FileNotFoundError:
         return {}
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, json.JSONDecodeError, tooling.NonFiniteNumberError) as exc:
         print(
-            f"research_diff: cannot read {STEAM_PINS}: {exc}; "
+            f"research_diff: cannot use {STEAM_PINS}: {exc}; "
             "no assembly will be labelled with a Steam build id",
             file=sys.stderr,
         )
@@ -222,8 +221,7 @@ def extract_facts(dll: Path, tmp: Path, name: str) -> dict[str, Any]:
     proc = run(["mono", str(BIN / "StockFacts.exe"), str(dll), str(out)])
     if proc.returncode != 0 or not out.is_file():
         raise RuntimeError(f"StockFacts.exe failed on {dll}: {proc.stderr.strip() or proc.stdout}")
-    with out.open(encoding="utf-8") as fh:
-        facts: Any = json.load(fh)
+    facts: Any = tooling.load_json(out)
     if not isinstance(facts, dict):
         raise RuntimeError(f"StockFacts.exe wrote a non-object to {out}")
     return facts

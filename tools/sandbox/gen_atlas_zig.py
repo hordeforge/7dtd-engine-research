@@ -17,13 +17,21 @@ import re
 
 COLOR_RE = re.compile(r'<uv\s+id="(\d+)"[^>]*color="([0-9.eE+-]+),([0-9.eE+-]+),([0-9.eE+-]+)"')
 
+# Unity colour components are normalized; the stock packer scales by 31 and
+# keeps 5 bits. A component above 1.0 would scale past 31, and the 5-bit mask
+# then folds it back to 0 (a value the stock expression never produces), so
+# clamp before scaling rather than masking a bad component into a neighbour.
+MAX_COMPONENT = 1.0
+MAX_CHANNEL_5 = 31
+
 
 def to_color5(r: float, g: float, b: float) -> int:
-    return (
-        ((int(r * 31 + 0.5) & 0x1F) << 10)
-        | ((int(g * 31 + 0.5) & 0x1F) << 5)
-        | (int(b * 31 + 0.5) & 0x1F)
-    )
+    def channel(v: float) -> int:
+        return min(
+            MAX_CHANNEL_5, max(0, int(min(MAX_COMPONENT, max(0.0, v)) * MAX_CHANNEL_5 + 0.5))
+        )
+
+    return (channel(r) << 10) | (channel(g) << 5) | channel(b)
 
 
 def main() -> None:
@@ -83,10 +91,10 @@ def main() -> None:
     lines.append("")
     lines.append("/// Minimap water color (BlockLiquidv2.Color = Color32(0,105,148))")
     lines.append("/// packed RGB555 (RE texture-atlas.md CalcChunkColors).")
-    lines.append("pub const water_color5: u16 = 434;")
+    lines.append(f"pub const water_color5: u16 = {to_color5(0.0, 105.0 / 255.0, 148.0 / 255.0)};")
     lines.append("/// Fallback when a block has no atlas color nor MapColor: stock")
     lines.append("/// Color.get_gray() = (0.5,0.5,0.5) -> RGB555 16,16,16.")
-    lines.append("pub const gray_color5: u16 = 16816;")
+    lines.append(f"pub const gray_color5: u16 = {to_color5(0.5, 0.5, 0.5)};")
     lines.append("")
     lines.append("/// blocks.xml Mesh property name -> atlas table name. Empty (no")
     lines.append('/// Mesh property) = default mesh 0 = "opaque" (RE texture-atlas.md).')

@@ -116,9 +116,12 @@ def check_live_against_dll(facts: dict[str, Any], errors: list[str]) -> None:
             errors.append("live facts extraction failed: " + (proc.stderr or "").strip()[:400])
             return
         try:
-            live = json.loads(out.read_text(encoding="utf-8"))
+            live = _common.loads_json(out.read_text(encoding="utf-8"))
         except json.JSONDecodeError as exc:
             errors.append(f"live facts extraction produced invalid JSON: {exc}")
+            return
+        except _common.NonFiniteNumberError as exc:
+            errors.append(f"live facts extraction produced a non-finite pin: {exc}")
             return
 
     def strip(d: dict[str, Any]) -> dict[str, Any]:
@@ -175,8 +178,7 @@ def check_live_against_dll(facts: dict[str, Any], errors: list[str]) -> None:
 
 
 def load_facts(path: Path) -> dict[str, Any]:
-    with path.open(encoding="utf-8") as f:
-        data: dict[str, Any] = json.load(f)
+    data: dict[str, Any] = _common.load_json(path)
     return data
 
 
@@ -374,7 +376,7 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
     # and the zdtd divergence register must cite healthSlim 125.
     pins_path = ROOT / "tools" / "data" / "xml_pins.json"
     if pins_path.is_file():
-        pins = json.loads(pins_path.read_text(encoding="utf-8"))
+        pins = _common.load_json(pins_path)
         hp = pins.get("entityclasses_health", {})
         for key, val in [
             ("healthSlim", 125),
@@ -671,7 +673,14 @@ def main() -> int:
         print(f"SKIP: {msg} (run tools/stock-sync.sh to enable pin gate)")
         return 0
 
-    facts = load_facts(args.facts)
+    try:
+        facts = load_facts(args.facts)
+    except _common.NonFiniteNumberError as exc:
+        print(f"FAIL: {args.facts}: {exc}", file=sys.stderr)
+        return 1
+    except json.JSONDecodeError as exc:
+        print(f"FAIL: {args.facts} is not valid JSON: {exc}", file=sys.stderr)
+        return 1
     errors: list[str] = []
     skips: list[str] = []
 

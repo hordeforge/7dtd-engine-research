@@ -77,6 +77,24 @@ def inflate_raw_capped(data: bytes, cap: int = MAX_INFLATED) -> bytes:
     return bytes(out)
 
 
+def read_count(blob: bytes, off: int, what: str) -> tuple[int, int]:
+    """A file-controlled i32 element count or byte length, never negative.
+
+    Every one of these fields is a signed int32 written by the game but read
+    back from a file that may be corrupt or crafted. A negative value is not a
+    small or empty list: `off += ln` walks the cursor backwards, so the fields
+    after it re-read bytes already consumed and the walk can still land on
+    len(buf), printing "byte-exact" for a blob that is malformed. `range(n)`
+    over a negative count is empty, which reads as "zero entries" and hides a
+    corrupt count. Both degrade to struct.error, the parse-error line the
+    callers already print.
+    """
+    value = struct.unpack_from("<i", blob, off)[0]
+    if value < 0:
+        raise struct.error(f"{what} {value} at {off} is negative")
+    return value, off + 4
+
+
 def read_net_string(buf: bytes, off: int) -> tuple[str, int]:
     """.NET BinaryReader.ReadString: 7-bit encoded length prefix + UTF-8.
 
@@ -105,8 +123,7 @@ def check_sleeper_volumes(blob: bytes, checks: list[str]) -> None:
         return
     try:
         p = 0
-        count = struct.unpack_from("<i", blob, p)[0]
-        p += 4
+        count, p = read_count(blob, p, "sleeperVolumes count")
         seen = []
         for _ in range(count):
             vol_id = struct.unpack_from("<i", blob, p)[0]
@@ -212,8 +229,7 @@ def check_ai_director_blob(blob: bytes, checks: list[str]) -> None:
         last_freq = struct.unpack_from("<Q", blob, p)[0]
         p += 8
         freq = [(last_freq >> (16 * i)) & 0xFFFF for i in range(4)]
-        crates = struct.unpack_from("<i", blob, p)[0]
-        p += 4
+        crates, p = read_count(blob, p, "airdrop crate count")
         crate_d = []
         for _ in range(crates):
             eid = struct.unpack_from("<i", blob, p)[0]
@@ -292,10 +308,11 @@ def check_worldstate_tail(buf: bytes, off: int, checks: list[str]) -> None:
     try:
         sp_ver = buf[off]
         off += 1
-        sp_cnt = struct.unpack_from("<i", buf, off)[0]
-        off += 4
         # sp_cnt is file-controlled: bound the walk by the buffer so a crafted
-        # count cannot spin this loop for minutes before the next unpack fails.
+        # count cannot spin this loop for minutes before the next unpack fails,
+        # and reject a negative one, which range() would swallow as "no
+        # spawns" and report as byte-exact.
+        sp_cnt, off = read_count(buf, off, "spawnList count")
         step = (2 if sp_ver == 2 else 0) + 12 + 4 + 8
         if sp_cnt * step > len(buf):
             raise struct.error(f"spawnList count {sp_cnt} exceeds buffer")
@@ -314,18 +331,16 @@ def check_worldstate_tail(buf: bytes, off: int, checks: list[str]) -> None:
         blob_sizes = []
         blob_bodies = []
         for _ in ("dynamicSpawnerState", "aiDirectorState"):
-            ln = struct.unpack_from("<i", buf, off)[0]
-            off += 4
+            ln, off = read_count(buf, off, "state blob length")
             blob_sizes.append(ln)
             blob_bodies.append(buf[off : off + ln])
             off += ln
         vol_sizes = []
         vol_bodies = []
-        for _name in ("sleeperVolumes", "triggerVolumes", "wallVolumes"):
+        for name in ("sleeperVolumes", "triggerVolumes", "wallVolumes"):
             sv = struct.unpack_from("<i", buf, off)[0]
             off += 4
-            ln = struct.unpack_from("<i", buf, off)[0]
-            off += 4
+            ln, off = read_count(buf, off, f"{name} length")
             vol_sizes.append((sv, ln))
             vol_bodies.append(buf[off : off + ln])
             off += ln
@@ -351,12 +366,18 @@ def check_worldstate_tail(buf: bytes, off: int, checks: list[str]) -> None:
                 f"{'byte-exact' if len(dyn) == 2 else f'({len(dyn)} B)'}"
             )
         check_ai_director_blob(blob_bodies[1], checks)
-        w_sz = struct.unpack_from("<i", buf, off)[0]
-        off += 4
+        # The weather prefix counts itself, so a valid one is 4 + at least the
+        # 4-byte header (version u16 + gate byte + biome count). Anything below
+        # that is a corrupt length; reading it as an empty blob and carrying on
+        # hid the corruption from the byte-exact verdict.
+        w_sz, off = read_count(buf, off, "weather size prefix")
+        if w_sz < 4:
+            raise struct.error(
+                f"weather size prefix {w_sz} at {off - 4} cannot cover its own 4 bytes"
+            )
         checks.append(f"  weather size prefix {w_sz} (includes itself: {w_sz - 4} B payload)")
-        w_body = buf[off : off + w_sz - 4] if w_sz > 4 else b""
-        if w_sz > 4:
-            off += w_sz - 4
+        w_body = bytes(buf[off : off + w_sz - 4])
+        off += w_sz - 4
         check_weather_blob(w_body, checks)
         guid, off = read_net_string(buf, off)
         checks.append(f"  guid: {guid[:8]}... len {len(guid)} chars")

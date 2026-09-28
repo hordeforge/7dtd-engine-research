@@ -8,10 +8,12 @@ Usage:
 Exit codes: 0 no wire drift (or `--help`), 1 wire/enum drift, 2 unusable input.
 """
 
-import json
 import sys
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import tooling
 
 
 def load(p: str) -> dict[str, Any]:
@@ -21,8 +23,11 @@ def load(p: str) -> dict[str, Any]:
         # got wrong; a missing snapshot is a usage error.
         print(f"parity_diff: snapshot not found: {path}", file=sys.stderr)
         raise SystemExit(2)
-    with open(p, encoding="utf-8") as fh:
-        data: dict[str, Any] = json.load(fh)
+    try:
+        data: dict[str, Any] = tooling.load_json(path)
+    except (ValueError, OSError) as exc:
+        print(f"parity_diff: unreadable snapshot {path}: {exc}", file=sys.stderr)
+        raise SystemExit(2) from exc
     return data
 
 

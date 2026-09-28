@@ -22,6 +22,7 @@ read, so `SOURCE_DATE_EPOCH` makes their output replayable byte-for-byte.
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import signal
 import subprocess
@@ -29,6 +30,7 @@ import unicodedata
 from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 ROOT_MARKERS = ("Makefile", "AGENTS.md")
 _HASH_CHUNK = 1 << 20
@@ -120,6 +122,42 @@ def nfc(s: str) -> str:
     author which form their filesystem handed them.
     """
     return unicodedata.normalize("NFC", s)
+
+
+class NonFiniteNumberError(ValueError):
+    """A JSON document carried NaN or Infinity, which JSON cannot represent."""
+
+
+def _reject_non_finite(literal: str) -> float:
+    raise NonFiniteNumberError(
+        f"JSON contains the non-finite literal {literal}; JSON has no spelling for it, "
+        "and a pin that carries one compares false against every tolerance check "
+        "(NaN - 62.88 is NaN, and NaN > 1e-6 is False)"
+    )
+
+
+def _finite_float(literal: str) -> float:
+    """`parse_float` hook: a decimal literal that overflows binary64 is also a
+    value JSON cannot round-trip, and it becomes inf silently otherwise."""
+    value = float(literal)
+    if value in (float("inf"), float("-inf")):
+        raise NonFiniteNumberError(f"JSON number {literal} overflows to infinity")
+    return value
+
+
+def loads_json(text: str) -> Any:
+    """`json.loads` that refuses NaN, +/-Infinity, and literals that overflow.
+
+    Python accepts those by default, and the C# extractor writes NaN for a
+    float constant that is not finite. Every numeric pin in the corpus is
+    checked as `abs(got - want) > tol`, which a NaN passes silently, so the
+    artifact has to be rejected at the load instead of at each comparison.
+    """
+    return json.loads(text, parse_constant=_reject_non_finite, parse_float=_finite_float)
+
+
+def load_json(path: Path) -> Any:
+    return loads_json(path.read_text(encoding="utf-8"))
 
 
 def scratch_dir() -> Path:

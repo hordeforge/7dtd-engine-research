@@ -326,9 +326,8 @@ def main() -> int:
         print(f"FAIL: {pins_path} missing (run xml_pins.py --game-dir first)")
         return 1
     try:
-        with open(pins_path, encoding="utf-8") as fh:
-            committed = json.load(fh)
-    except (json.JSONDecodeError, OSError) as exc:
+        committed = tooling.load_json(Path(pins_path))
+    except (json.JSONDecodeError, OSError, tooling.NonFiniteNumberError) as exc:
         # A corrupt pins file must read as a failed gate (with the repair
         # hint), not as a traceback with no verdict.
         print(f"FAIL: {pins_path}: {exc}")

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Pin sandbox gen_zig_tables float literals: every emitted f32 round-trips.
+"""Pin the sandbox Zig generators: every emitted f32 round-trips, and the
+atlas RGB555 packing matches the stock formula it documents.
 
 gen_zig_tables.py turns the stock sandbox_tables.json floats (binary32 values
 read out of Assembly-CSharp RVA data) into Zig `f32` comptime literals that
@@ -37,6 +38,15 @@ _spec.loader.exec_module(_mod)
 f32 = _mod.f32
 val_literal = _mod.val_literal
 
+_atlas_spec = importlib.util.spec_from_file_location(
+    "gen_atlas_zig", TOOLS / "sandbox" / "gen_atlas_zig.py"
+)
+assert _atlas_spec is not None
+assert _atlas_spec.loader is not None
+_atlas = importlib.util.module_from_spec(_atlas_spec)
+_atlas_spec.loader.exec_module(_atlas)
+to_color5 = _atlas.to_color5
+
 
 def next_f32_up(x: float) -> float:
     """Smallest binary32 value greater than `x` (`x` must be positive)."""
@@ -55,6 +65,31 @@ def dataset_floats() -> list[float]:
         if o["type"] == "float" and o["default"] is not None:
             vals.append(float(o["default"]))
     return vals
+
+
+def atlas_color_bad() -> list[str]:
+    """The stock `(r*31+0.5)<<10 | (g*31+0.5)<<5 | (b*31+0.5)` RGB555 packing.
+
+    gen_atlas_zig emits two hand-typed constants beside that formula
+    (water, and the Color.get_gray() fallback). Both are now derived from the
+    same function, so a constant cannot contradict the derivation its own
+    comment states: 0.5 scales to 16 per channel, which is 16912, not the
+    16816 the file carried (that is 16,13,16, a green channel the formula
+    cannot produce). Out-of-range components are clamped instead of masked, so
+    a component above 1.0 does not wrap past 31 and back to 0.
+    """
+    out: list[str] = []
+    for label, got, want in (
+        ("water Color32(0,105,148)", to_color5(0.0, 105 / 255, 148 / 255), 434),
+        ("Color.get_gray() 0.5", to_color5(0.5, 0.5, 0.5), 16912),
+        ("black", to_color5(0.0, 0.0, 0.0), 0),
+        ("white", to_color5(1.0, 1.0, 1.0), 32767),
+        ("component above 1.0 clamps, not wraps", to_color5(1.5, 0.0, 0.0), 31744),
+        ("component below 0.0 clamps", to_color5(-0.5, 0.0, 0.0), 0),
+    ):
+        if got != want:
+            out.append(f"{label}: packed {got}, want {want}")
+    return out
 
 
 def main() -> int:
@@ -84,12 +119,17 @@ def main() -> int:
     if val_literal(7) != "7":
         bad.append(f"int literal changed: {val_literal(7)!r}")
 
+    bad.extend(atlas_color_bad())
+
     if bad:
-        print("FAIL: gen_zig_tables float round-trip")
+        print("FAIL: sandbox Zig generator")
         for b in bad:
             print("  - " + b)
         return 1
-    print(f"OK: {n} sandbox table floats + hostile probes emit f32-exact Zig literals")
+    print(
+        f"OK: {n} sandbox table floats + hostile probes emit f32-exact Zig literals; "
+        "atlas RGB555 constants match the stock packing"
+    )
     return 0
 
 

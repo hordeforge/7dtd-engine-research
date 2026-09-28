@@ -237,9 +237,8 @@ def _read_text(path: Path) -> str:
 
 def load_pins(path: Path) -> dict[str, Any] | None:
     try:
-        with path.open(encoding="utf-8") as fh:
-            pins: Any = json.load(fh)
-    except (OSError, json.JSONDecodeError) as exc:
+        pins: Any = tooling.load_json(path)
+    except (OSError, json.JSONDecodeError, tooling.NonFiniteNumberError) as exc:
         raise SourceError(f"unreadable pins {path}: {exc}") from exc
     if not isinstance(pins, dict) or not isinstance(pins.get("studied"), dict):
         raise SourceError(f"{path}: missing studied block (run --record)")
@@ -274,9 +273,8 @@ def stock_facts() -> dict[str, Any]:
     with version and dll_sha256 null, which no build-id lookup can ever match.
     """
     try:
-        with STOCK_FACTS.open(encoding="utf-8") as fh:
-            facts: Any = json.load(fh)
-    except (OSError, json.JSONDecodeError) as exc:
+        facts: Any = tooling.load_json(STOCK_FACTS)
+    except (OSError, json.JSONDecodeError, tooling.NonFiniteNumberError) as exc:
         raise SourceError(
             f"unreadable stock facts {STOCK_FACTS}: {exc} (regenerate with: make stock-sync)"
         ) from exc

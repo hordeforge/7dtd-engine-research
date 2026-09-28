@@ -255,10 +255,10 @@ def pins_buildids(path: Path) -> dict[str, str]:
     bare gid with no build id and read as "never pinned".
     """
     try:
-        data: Any = json.loads(path.read_text(encoding="utf-8"))
+        data: Any = tooling.load_json(path)
     except FileNotFoundError:
         return {}
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, json.JSONDecodeError, tooling.NonFiniteNumberError) as exc:
         print(
             f"steam_manifest: cannot read {path}: {exc}; "
             "cached manifests will carry no pinned build id",

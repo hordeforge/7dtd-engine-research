@@ -7,9 +7,12 @@ StockFacts.exe extracts from the live DLL and check_stock_facts asserts.
 """
 
 import argparse
-import json
 import os
+import pathlib
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import tooling
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,10 +22,16 @@ def main() -> int:
         description="Print the machine-checked stock pins (census/save/xml/behaviour)."
     )
     ap.parse_args()
+    try:
+        return show()
+    except tooling.NonFiniteNumberError as exc:
+        print(f"facts: {exc}", file=sys.stderr)
+        return 2
 
+
+def show() -> int:
     facts_path = os.path.join(TOOLS, "data", "stock_facts.json")
-    with open(facts_path, encoding="utf-8") as fh:
-        d = json.load(fh)
+    d = tooling.load_json(pathlib.Path(facts_path))
     v = d["version"]
     print(f"pin: {v['display']} (b{v['build']}) tps={d['sim']['constants_ticks_per_second']}")
     c = d.get("census", {})
@@ -35,8 +44,7 @@ def main() -> int:
     )
     xp = os.path.join(TOOLS, "data", "xml_pins.json")
     if os.path.isfile(xp):
-        with open(xp, encoding="utf-8") as fh:
-            xd = json.load(fh)
+        xd = tooling.load_json(pathlib.Path(xp))
         hp = xd.get("entityclasses_health", {})
         if hp:
             print(

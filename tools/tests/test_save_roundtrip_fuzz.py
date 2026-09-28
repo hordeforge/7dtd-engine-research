@@ -33,6 +33,7 @@ import tempfile
 import time
 import zlib
 from collections.abc import Callable
+from functools import partial
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -348,6 +349,34 @@ def main() -> int:
             bad.append("spawnList regression: crafted count still walks unbounded")
         if not any("parse error" in c for c in checks) or not src.any_failed(checks):
             bad.append(f"spawnList regression: no FAIL degradation: {checks}")
+
+        # Regression pins: a negative file-controlled count or length is corrupt,
+        # not "empty". range(n) swallows a negative count as zero entries, and
+        # `off += ln` with a negative length walks the cursor backwards, so the
+        # walk can still land on len(buf) and claim a malformed blob byte-exact.
+        # Offsets are the build_worldstate_tail field offsets above it.
+        tail = build_worldstate_tail()
+        for label, at in (
+            ("spawnList count", 1),
+            ("dynamicSpawner length", 17),
+            ("aiDirectorState length", 23),
+            ("sleeperVolumes length", 91),
+        ):
+            for bad_value in (-1, -0x7FFFFFFF):
+                crafted = tail[:at] + struct.pack("<i", bad_value) + tail[at + 4 :]
+                neg_checks: list[str] = []
+                timed(partial(src.check_worldstate_tail, crafted, 0, neg_checks))
+                if not any("parse error" in c and "negative" in c for c in neg_checks):
+                    bad.append(f"negative {label} {bad_value} not rejected: {neg_checks}")
+                if any("byte-exact" in c for c in neg_checks):
+                    bad.append(f"negative {label} {bad_value} still claimed byte-exact")
+        # A weather size prefix below its own 4 bytes cannot cover itself.
+        for bad_value in (0, -1, 3):
+            crafted = tail[:135] + struct.pack("<i", bad_value) + tail[139:]
+            w_checks: list[str] = []
+            timed(partial(src.check_worldstate_tail, crafted, 0, w_checks))
+            if not any("weather size prefix" in c and "parse error" in c for c in w_checks):
+                bad.append(f"weather size prefix {bad_value} not rejected: {w_checks}")
 
         # Happy-path pin: a fully valid ttw + region must come back byte-exact
         # with a green verdict, so the seeds above start from a true shape.

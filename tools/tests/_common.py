@@ -38,6 +38,9 @@ scratch_dir = tooling.scratch_dir
 sha256_file = tooling.sha256_file
 nfc = tooling.nfc
 ConfigError = tooling.ConfigError
+load_json = tooling.load_json
+loads_json = tooling.loads_json
+NonFiniteNumberError = tooling.NonFiniteNumberError
 
 
 def resolve_asm(explicit: str | None) -> tuple[Path | None, str]:
