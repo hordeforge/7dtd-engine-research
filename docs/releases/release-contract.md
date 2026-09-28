@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**95 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
+**96 commits after `v3.2.0` (2026-09-21) as of 2026-09-28.** The corpus pin is
 unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
 carries breaking changes without a major bump, so the consumer-visible ones are
 listed first; `tests/test_release_contract.py` fails if this section's count
