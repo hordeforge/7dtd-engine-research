@@ -112,8 +112,12 @@ falls behind the commits actually below the last tag.
   overwrites the report already in `workspace/outputs/diffs/` rather than adding
   a dated sibling, and the committed tree converges to one report per pair.
   `--out PATH` still writes exactly where it is told, which is how a second
-  dated copy is made on purpose. `stock-sync.sh` puts the previous pin pair back
-  if a publish stops halfway.
+  dated copy is made on purpose. `stock-sync.sh` rebuilds its inputs before
+  comparing and publishes `stock_facts.json` and `xml_pins.json` as one step that
+  puts the previous pair back if a move fails, so running either twice in a row
+  no longer trips over its own previous output, leaves this build's facts beside
+  the previous build's XML pins, or writes a half-written report over the one
+  already there.
 - **Two builds at once no longer race for the same staging path.** Every
   `build.sh` run stages under `bin/.staging/run.$$`, so a retried `make census`
   beside a `make drift`, or a local build while CI runs the same target, cannot
@@ -134,8 +138,7 @@ falls behind the commits actually below the last tag.
   object, is reported as the error it is rather than degrading to "no pin".
 - **Reproducible output.** Artifact stamps derive from `SOURCE_DATE_EPOCH`, the
   dumper build is incremental and locale-pinned, and output names are stable, so
-  a repeated build is byte-identical. Dumper and drift-baseline writes land by
-  rename, so a run cut short cannot leave a half-written pin or baseline.
+  a repeated build is byte-identical.
 - **`build.sh` is the only writer of `bin/`.** The shell entry points call it
   instead of compiling their own exes, and it keys each exe on the tool sources
   so a rebuilt tool is the one that runs.
@@ -180,30 +183,10 @@ falls behind the commits actually below the last tag.
   happens to hold.
 - **Writes land by rename.** The dumper build and the drift baseline write to a
   temporary name and `rename` into place, so an interrupted run cannot leave a
-  half-written artifact where a gate expects a complete one. `build.sh` is the
-  only writer of `bin/`, keyed on its source, so a stale executable cannot
-  shadow a rebuilt one, and each build run stages under
-  `bin/.staging/run.$$` rather than one shared path, so two builds running at
-  once cannot `rm` each other's staged file and rename a half-written exe into
-  `bin/`.
-- **A rerun answers the same as the first run.** `research_diff.py` names its
-  report after the build pair and republishes over the one already in
-  `workspace/outputs/diffs/`, so a repeated command leaves one report per pair
-  instead of a dated sibling per run; `stock-sync.sh` publishes `stock_facts.json`
-  and `xml_pins.json` as one step and restores the previous pair if the publish
-  fails, so a half-finished refresh cannot leave the two pins describing
-  different installs.
-- **An unmeasured census is a failure, not a zero.** `Census.exe` exiting 0
-  without its `AllTypes` / `AllMethodsWithBody` rows means the dumper's output
-  format changed; `census-pct.py` refuses the run instead of reporting a whole
-  assembly of zero types, and an unreadable coverage report yields no
-  "reached in the server call graph" row rather than a fabricated one.
+  half-written artifact where a gate expects a complete one.
 - **The sandbox installs a bounded, reviewed requirement series**, the
   static-analysis gate is pinned to rule sets strict enough to fail on the
   defects it exists to catch, and the CI token is read-only for `contents`.
-- **A census that measured nothing fails instead of reporting 0 %.**
-  `census-pct.py` read a missing or empty report as a 0 % completion, so a
-  dump that never ran looked like a finished inventory.
 - **An unmeasured census answers with a failure, not a zero.**
   `census-pct.py` refuses `Census.exe` output that carries no
   `AllTypes (incl nested)` or `AllMethodsWithBody` row instead of reporting
@@ -226,17 +209,6 @@ falls behind the commits actually below the last tag.
   live query alike; and the post-kill read of a timed-out child is bounded, so
   a grandchild that survives the kill cannot turn the timeout back into the
   hang the bound exists to prevent.
-- **A rerun of `research_diff.py` and `stock-sync.sh` lands cleanly.** The diff
-  report is written by rename and the pin refresh rebuilds its inputs before
-  comparing, so running either twice in a row no longer trips over its own
-  previous output or skips a file it just changed.
-- **A rerun republishes, it does not accumulate.** `research_diff.py` treats
-  the build pair as the report's identity and writes over the report already in
-  `workspace/outputs/diffs/`, so the tree converges to one report per pair
-  however often the command runs, and `stock-sync.sh` publishes
-  `stock_facts.json` and `xml_pins.json` as one step that restores the previous
-  pair when a move fails, instead of leaving this build's facts beside the
-  previous build's XML pins.
 - **Every gate-spawned child is bounded and a failed `zig fmt` is a failure.**
   `gen_atlas_zig.py` bounded its `zig` calls through the shared runner instead
   of a bare `subprocess.run`, and a non-zero `zig fmt` now stops the run rather
@@ -262,10 +234,6 @@ falls behind the commits actually below the last tag.
 
 ### Tools and docs
 
-- **Each build run gets its own staging directory.** `tools/build.sh` compiles
-  into a per-run `mktemp` tree and moves the finished exes into `bin/`, so two
-  concurrent builds cannot hand each other a half-written executable, and the
-  Mono GAC probe and the macOS timeout bound work on a Linux host.
 - **Hot paths stopped paying for the same work twice.** The shader dumper
   copies only the sub-program slice it decompresses instead of the whole
   shared compressed blob per shader, and parses each DXBC container once
@@ -307,16 +275,6 @@ falls behind the commits actually below the last tag.
   pin it) when the sibling assembly is missing or unreadable, so a failed
   extraction has the same object shape as a successful one and cannot read as
   an absent protocol.
-- **Two builds no longer share a staging path.** `build.sh` staged every
-  compile under one `bin/.staging/<final-name>`, so two runs at once (a
-  retried `make census` beside a `make drift`, a local build while CI runs the
-  same target) removed each other's staged file mid-compile and renamed
-  whatever was left into `bin/`. Each run now stages in its own directory
-  under `bin/`, which keeps the rename inside `bin/` and the final basename
-  that `mcs` derives the assembly name and MVID from.
-- **`zig fmt` is bounded and its status is checked.** `gen_atlas_zig.py` ran it
-  with `check=False` and swallowed the `OSError`, so a run that wrote the file
-  and then failed to format it exited 0 over unformatted output.
 - Docs: the ranged-attack delivery contract is closed (`RangedAttackTarget`
   mapped, `EAILeap` motion pinned, `Animator.StringToHash` identified as
   CRC-32 with its flush chain), the `Leap` census row is marked mapped, a
