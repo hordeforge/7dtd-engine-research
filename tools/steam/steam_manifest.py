@@ -396,7 +396,10 @@ def print_history(
         print(f"steam_manifest: no cached manifest for depot {depot}", file=sys.stderr)
         return 2
     buildids = (pinned or {}) | steam_log_buildids(depot, roots)
-    rows: list[dict[str, Any]] = []
+    # Order on the mtime instant, not the rendered column: cached_at drops to the
+    # minute, so manifests cached in the same minute would tie and fall back to
+    # glob order, which can list the older one first.
+    rows: list[tuple[float, dict[str, Any]]] = []
     for gid, path in cached.items():
         try:
             manifest = read_manifest(path)
@@ -406,29 +409,33 @@ def print_history(
             print(f"steam_manifest: {exc}", file=sys.stderr)
             return 2
         rows.append(
-            {
-                "gid": gid,
-                "buildid": buildids.get(gid),
-                "files": files,
-                "bytes": size,
-                "cached_at": datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).strftime(
-                    "%Y-%m-%d %H:%MZ"
-                ),
-                "path": str(path),
-            }
+            (
+                path.stat().st_mtime,
+                {
+                    "gid": gid,
+                    "buildid": buildids.get(gid),
+                    "files": files,
+                    "bytes": size,
+                    "cached_at": datetime.fromtimestamp(
+                        path.stat().st_mtime, tz=timezone.utc
+                    ).strftime("%Y-%m-%d %H:%MZ"),
+                    "path": str(path),
+                },
+            )
         )
-    rows.sort(key=lambda r: str(r["cached_at"]), reverse=True)
+    rows.sort(key=lambda row: row[0], reverse=True)
+    ordered = [row for _, row in rows]
     if as_json:
-        print(json.dumps({"depot": depot, "cached": rows}, indent=2))
+        print(json.dumps({"depot": depot, "cached": ordered}, indent=2))
         return 0
-    print(f"depot: {depot}  cached manifests: {len(rows)}")
+    print(f"depot: {depot}  cached manifests: {len(ordered)}")
     print(f"{'gid':<21} {'buildid':<11} {'files':>6} {'bytes':>13}  cached_at")
-    for row in rows:
+    for row in ordered:
         print(
             f"{row['gid']:<21} {row['buildid'] or '-':<11} {row['files']:>6} "
             f"{row['bytes']:>13}  {row['cached_at']}"
         )
-    if len(rows) > 1:
+    if len(ordered) > 1:
         print(
             "diff them: steam_manifest.py --manifest <new.gid>.manifest --diff <old.gid>.manifest"
         )

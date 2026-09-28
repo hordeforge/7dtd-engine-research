@@ -265,6 +265,20 @@ def main() -> None:
         payload = json.loads(history_json.stdout)
         assert [row["buildid"] for row in payload["cached"]] == ["24994542", "24911252"], payload
 
+        # Same rendered minute, so cached_at ties: newest-first must still hold
+        # on the mtime instant, not on glob order.
+        os.utime(old_cached, (1_700_000_000, 1_700_000_000))
+        os.utime(new_cached, (1_700_000_030, 1_700_000_030))
+        same_minute = run("--steam-root", str(steam_root), "--history", "--json")
+        assert same_minute.returncode == 0, same_minute.stderr
+        rows_json = json.loads(same_minute.stdout)["cached"]
+        assert [row["gid"] for row in rows_json] == [
+            "2222222222222222222",
+            "1111111111111111111",
+        ], rows_json
+        assert len({row["cached_at"] for row in rows_json}) == 1, rows_json
+        os.utime(new_cached, (1_800_000_000, 1_800_000_000))
+
         labelled = run(
             "--steam-root",
             str(steam_root),
