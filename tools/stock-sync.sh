@@ -48,7 +48,15 @@ extract() {
   fi
   if [[ ! -f "$BIN/StockFacts.exe" ]] || [[ "$HERE/src/StockFacts.cs" -nt "$BIN/StockFacts.exe" ]]; then
     echo "stock-sync: compiling StockFacts.exe"
-    mcs -nologo -r:"$BIN/Mono.Cecil.dll" "$HERE/src/StockFacts.cs" -out:"$BIN/StockFacts.exe"
+    # Stage and rename so a concurrent research_diff / census never loads a
+    # half-written assembly.
+    staged="$(mktemp "$BIN/.StockFacts.exe.XXXXXX")"
+    if mcs -nologo -r:"$BIN/Mono.Cecil.dll" "$HERE/src/StockFacts.cs" -out:"$staged"; then
+      mv -f "$staged" "$BIN/StockFacts.exe"
+    else
+      rm -f "$staged"
+      exit 1
+    fi
   fi
   mkdir -p "$DATA"
   tmpdir="$(mktemp -d "$DATA/.stock-sync.XXXXXX")"

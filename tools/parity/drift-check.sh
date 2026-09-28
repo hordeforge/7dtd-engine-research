@@ -47,11 +47,17 @@ build_helper() { # <name> <src>
   local exe="$BIN/$1.exe"
   [[ -f "$exe" && "$exe" -nt "$2" ]] && return 0
   # A failed helper build must not look like "no drift" on that axis; the run
-  # fails closed below instead of comparing a partial surface.
-  if ! mcs -nologo -r:"$CECIL" "$2" -out:"$exe"; then
+  # fails closed below instead of comparing a partial surface. The compile lands
+  # on a private temp and is renamed into place, so a concurrent drift-check or
+  # `make census` never loads a half-written assembly.
+  local staged
+  staged="$(mktemp "$BIN/.$1.exe.XXXXXX")"
+  if ! mcs -nologo -r:"$CECIL" "$2" -out:"$staged"; then
+    rm -f "$staged"
     echo "drift: error: failed to compile $1.exe; refusing to compare an incomplete surface" >&2
     return 1
   fi
+  mv -f "$staged" "$exe"
 }
 axis_fail=0
 build_helper MethodList "$TOOLS/src/MethodList.cs" || axis_fail=1

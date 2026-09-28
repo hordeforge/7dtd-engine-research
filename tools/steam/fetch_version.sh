@@ -96,7 +96,14 @@ if [[ ! -f "$CECIL" ]]; then
   "$TOOLS/build.sh" --skip-legacy
 fi
 if [[ ! -f "$PARITY_EXE" || "$PARITY_SRC" -nt "$PARITY_EXE" ]]; then
-  mcs -nologo -warn:4 -warnaserror -r:"$CECIL" "$PARITY_SRC" -out:"$PARITY_EXE"
+  # Stage and rename so a concurrent drift-check never loads a half-written exe.
+  parity_staged="$(mktemp "$BIN/.ParitySurface.exe.XXXXXX")"
+  if mcs -nologo -warn:4 -warnaserror -r:"$CECIL" "$PARITY_SRC" -out:"$parity_staged"; then
+    mv -f "$parity_staged" "$PARITY_EXE"
+  else
+    rm -f "$parity_staged"
+    exit 1
+  fi
 fi
 mkdir -p "$OUT"
 target="$OUT/parity_$LABEL.json"

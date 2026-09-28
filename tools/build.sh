@@ -74,7 +74,16 @@ if [[ -z "$cecil" ]]; then
   fi
 fi
 if [[ ! -s bin/Mono.Cecil.dll ]] || ! cmp -s "$cecil" bin/Mono.Cecil.dll; then
-  cp -f "$cecil" bin/Mono.Cecil.dll
+  # Stage and rename: a concurrent `make census` or drift-check must not load a
+  # half-copied assembly, which reads as "cannot open assembly" rather than as
+  # the build race it is.
+  staged_cecil="$(mktemp "bin/.Mono.Cecil.dll.XXXXXX")"
+  if cp -f "$cecil" "$staged_cecil"; then
+    mv -f "$staged_cecil" bin/Mono.Cecil.dll
+  else
+    rm -f "$staged_cecil"
+    exit 1
+  fi
 fi
 if command -v monodis >/dev/null 2>&1; then
   ver="$(monodis --assembly bin/Mono.Cecil.dll 2>/dev/null | awk '/^Version:/{print $2; exit}')"
@@ -96,12 +105,17 @@ for f in src/*.cs; do
   # otherwise tests keep running against a stale exe that predates the breakage.
   # -warn:4 -warnaserror: the tree compiles warning-clean at max severity; keep
   # it that way (new warnings fail the build instead of scrolling past).
-  if ! out="$(mcs -nologo -warn:4 -warnaserror -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"bin/$name.exe" 2>&1)"; then
+  # Compiling to a private temp and renaming into place keeps a concurrent build
+  # or gate from loading a half-written exe, and leaves the previous one intact
+  # when the compile fails.
+  staged="$(mktemp "bin/.$name.exe.XXXXXX")"
+  if ! out="$(mcs -nologo -warn:4 -warnaserror -r:bin/Mono.Cecil.dll "$f" "${shared[@]}" -out:"$staged" 2>&1)"; then
     [[ -n "$out" ]] && printf '%s\n' "$out" >&2
-    rm -f "bin/$name.exe"
+    rm -f "$staged"
     echo "build: FAILED bin/$name.exe (compiler output above)" >&2
     exit 1
   fi
+  mv -f "$staged" "bin/$name.exe"
   [[ -n "$out" ]] && printf '%s\n' "$out"
   echo "built bin/$name.exe"
 done
@@ -122,9 +136,12 @@ if [[ "$skip_legacy" -eq 0 && -d legacy ]]; then
   ok=0; fail=0; failed=""
   for f in legacy/*.cs; do
     name="$(basename "$f" .cs)"
-    if mcs -nologo -r:bin/Mono.Cecil.dll "$f" -out:"bin/legacy/$name.exe" >/dev/null 2>&1; then
+    if staged="$(mktemp "bin/legacy/.$name.exe.XXXXXX")" &&
+      mcs -nologo -r:bin/Mono.Cecil.dll "$f" -out:"$staged" >/dev/null 2>&1; then
+      mv -f "$staged" "bin/legacy/$name.exe"
       ok=$((ok+1))
     else
+      rm -f "$staged"
       fail=$((fail+1)); failed="$failed $name"
     fi
   done

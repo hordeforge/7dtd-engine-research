@@ -175,6 +175,26 @@ def pct(n: int, total: int) -> float:
     return 100.0 * n / total if total else 0.0
 
 
+def append_history(path: str, header: str, row: str) -> None:
+    """Append one census row, writing the header exactly once.
+
+    The header goes through O_CREAT|O_EXCL rather than an exists() test followed
+    by a truncating open: two runs racing on a fresh file both saw it missing, both
+    truncated, and both wrote a header, so a second header line landed mid-CSV and
+    one run's rows were discarded. The row itself is written O_APPEND, whose
+    offset-and-write is atomic against other appenders.
+    """
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    except FileExistsError:
+        pass
+    else:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as fh:
+            fh.write(header)
+    with open(path, "a", encoding="utf-8", newline="") as fh:
+        fh.write(row)
+
+
 def main() -> int:
     args = parse_args(sys.argv[1:])
     history = args.history
@@ -298,11 +318,7 @@ def main() -> int:
             narrated_pct,
         )
         header = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
-        if not os.path.exists(history):
-            with open(history, "w", encoding="utf-8", newline="") as fh:
-                fh.write(header)
-        with open(history, "a", encoding="utf-8", newline="") as fh:
-            fh.write(row)
+        append_history(history, header, row)
         # Keep stdout pure JSON under --json: consumers pipe the report
         # straight into a parser.
         print("history appended to", history, file=sys.stderr if as_json else sys.stdout)
