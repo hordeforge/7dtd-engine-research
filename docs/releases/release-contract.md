@@ -116,6 +116,22 @@ falls behind the commits actually below the last tag.
 - `steam_manifest.py` orders manifest history by mtime instead of a truncated
   clock string, and the steam install-integrity verdict was restored after a
   drift.
+- **A CLI that cannot answer exits 2 instead of a clean-looking pass.**
+  `cross_repo_links.py`, `mention_depth.py`, `zdtd_cite_check.py` and
+  `steam_builds.py` took a range or a threshold that could name nothing, and
+  reported OK over an empty input set. They now refuse the value.
+- **Pinned counts are validated at the boundary.** A negative save-format count
+  and a negative pin number are rejected rather than pinned, and the stock-pin
+  gate compares against a committed baseline instead of whatever the checkout
+  happens to hold.
+- **Writes land by rename.** The dumper build and the drift baseline write to a
+  temporary name and `rename` into place, so an interrupted run cannot leave a
+  half-written artifact where a gate expects a complete one. `build.sh` is the
+  only writer of `bin/`, keyed on its source, so a stale executable cannot
+  shadow a rebuilt one.
+- **The sandbox installs a bounded, reviewed requirement series**, the
+  static-analysis gate is pinned to rule sets strict enough to fail on the
+  defects it exists to catch, and the CI token is read-only for `contents`.
 
 ### Tools and docs
 

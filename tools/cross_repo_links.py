@@ -27,11 +27,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import tooling
 
-# The optional #fragment suffix must be matched (and stripped before the
-# existence check): a link like ../repo/docs/x.md#section crosses the repo
-# boundary just the same, and leaving it unmatched would print "OK: all links
-# resolve" while that link was never checked.
-LINK = re.compile(r"\]\(((?:\.\./)+[^) ]+\.md(?:#[^) ]*)?)(?:\s+[^)]*)?\)")
+# The optional #fragment suffix and the optional `"Title"` must both be
+# matched (and stripped before the existence check): a link like
+# ../repo/docs/x.md#section, or ../repo/docs/x.md "Surface", crosses the repo
+# boundary just the same, and leaving either unmatched would print "OK: all
+# links resolve" while that link was never checked.
+LINK = re.compile(r"\]\(((?:\.\./)+[^)\s]+\.md(?:#[^)\s]*)?)(?:\s+[^)]*)?\)")
 REPOS = [
     "7dtd-server-apm",
     "7dtd-fastconnect",

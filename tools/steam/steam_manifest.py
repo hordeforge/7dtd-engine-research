@@ -619,6 +619,10 @@ def main(argv: list[str] | None = None) -> int:
             "selected": len(selected),
             "trailer_bytes": manifest.trailer,
         }
+        # --json carries the same verdict as the text path below, so a gate that
+        # reads the JSON does not get exit 0 for a tampered install the text
+        # form rejects.
+        rc = 0
         if older is not None:
             counts, lines = diff_manifests(older, manifest, args.only)
             buildids = pinned | steam_log_buildids(manifest.depot, roots)
@@ -640,6 +644,7 @@ def main(argv: list[str] | None = None) -> int:
                 "ignored": result.ignored,
                 "problems": result.problems[:200],
             }
+            rc = 1 if (result.missing or result.bad) else 0
         elif args.find or args.list:
             payload["entries"] = [
                 {
@@ -657,7 +662,7 @@ def main(argv: list[str] | None = None) -> int:
         # caller reading the text gets.
         if verify_result is not None and (verify_result.missing or verify_result.bad):
             return 1
-        return 0
+        return rc
 
     print(
         f"manifest: {manifest.path}\ndepot: {manifest.depot}  gid: {manifest.gid}  "

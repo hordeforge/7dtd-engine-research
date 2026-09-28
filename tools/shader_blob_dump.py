@@ -346,10 +346,12 @@ def dxbc_chunks(data: bytes) -> dict[str, bytes]:
         if off + 8 > len(data):
             raise ShaderBlobError(f"DXBC chunk header at {off} runs past the {len(data)}-byte blob")
         size = u32(data, off + 4)
-        # A slice past the end would silently hand back a short chunk, and the
-        # declaration count read from it would be a truncated shader's, not the
-        # shader's.
         if off + 8 + size > len(data):
+            # A size that runs past the blob used to slice short, and the
+            # truncated chunk then parsed as a complete one, so the declaration
+            # count read from it would be a truncated shader's, not the
+            # shader's, and the header-vs-declaration comparison below reported
+            # a layout violation for what is really a corrupt container.
             raise ShaderBlobError(
                 f"DXBC chunk at {off} claims {size} bytes, past the {len(data)}-byte blob"
             )
@@ -360,7 +362,14 @@ def dxbc_chunks(data: bytes) -> dict[str, bytes]:
 def shdr_declaration_counts(chunk: bytes) -> collections.Counter[int]:
     """Count dcl_resource / dcl_constantbuffer / dcl_sampler in an SHDR/SHEX chunk."""
     declared = u32(chunk, 4)
-    words = struct.unpack_from(f"<{min(declared, len(chunk) // 4)}I", chunk, 0)
+    if declared > len(chunk) // 4:
+        # Clamping to what fits used to hand back a short word list, which the
+        # walk below reads as "this shader declares nothing" and the header
+        # comparison then reports as a layout violation on every entry.
+        raise ShaderBlobError(
+            f"SHDR header declares {declared} words but the chunk holds {len(chunk) // 4}"
+        )
+    words = struct.unpack_from(f"<{declared}I", chunk, 0)
     i, counts = 2, collections.Counter[int]()
     while i < len(words):
         token = words[i]
@@ -403,6 +412,13 @@ def decode_bundle(
             # Blob indices are per-tier; a multi-tier shader cannot be resolved
             # from the parsed form alone, so it is reported rather than guessed.
             skipped.append((name, f"{len(offsets)} hardware tiers"))
+            continue
+        if not shader.compressedLengths[index] or not shader.decompressedLengths[index]:
+            # A d3d11 entry with no length table is a bundle this parser cannot
+            # resolve; every other unresolvable shape below is reported and
+            # skipped, so this one must be too rather than raising IndexError
+            # out of a decoder whose other failures are all verdicts.
+            skipped.append((name, "no compressed/decompressed length table"))
             continue
         compressed = shader.compressedLengths[index][0]
         decompressed = shader.decompressedLengths[index][0]

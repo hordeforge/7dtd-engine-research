@@ -275,6 +275,11 @@ def main() -> int:
         cov = parse_coverage(stderr)
         reached_types = parse_report_reached_types(tmp_report)
         accounted = parse_report_accounted(tmp_report)
+    except ValueError as exc:
+        # A reformatted or absent summary line is unreadable input, not a
+        # traceback: every other failure in this main() returns an rc.
+        print(f"error: Coverage.exe output: {exc}", file=sys.stderr)
+        return 2
     finally:
         if os.path.exists(tmp_report):
             os.unlink(tmp_report)
@@ -285,7 +290,11 @@ def main() -> int:
         print("error: Census.exe failed:", file=sys.stderr)
         print(census_stderr, file=sys.stderr)
         return rc
-    cen = parse_census(stdout)
+    try:
+        cen = parse_census(stdout)
+    except ValueError as exc:
+        print(f"error: Census.exe output: {exc}", file=sys.stderr)
+        return 2
     all_types = cen.get("AllTypes (incl nested)", 0)
     all_methods = cen.get("AllMethodsWithBody", 0)
 

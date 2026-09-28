@@ -601,8 +601,8 @@ def main(argv: list[str] | None = None) -> int:
             "manifest": branch.manifest,
             "download_bytes": branch.download,
             "size_bytes": branch.size,
-            "version": str(facts.get("version", {}).get("display")) or None,
-            "dll_sha256": str(facts.get("source_identity", {}).get("assembly_csharp_dll_sha256"))
+            "version": facts.get("version", {}).get("display") or None,
+            "dll_sha256": facts.get("source_identity", {}).get("assembly_csharp_dll_sha256")
             or None,
             "recorded_utc": recorded_utc,
             "source": snapshot.source,

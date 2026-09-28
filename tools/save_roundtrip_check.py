@@ -42,6 +42,12 @@ MAX_INFLATED = 64 * 1024 * 1024
 
 REGION_WIDTH = 32  # CHUNK_TO_REGION_SHIFT 5: chunks per region edge
 
+# A full run deep-parses a sample, not every region: .7rg costs a deflate and a
+# chunk-body walk per allocated slot, .7rr only a header. The remainder is
+# reported by count so a truncated expansion never reads as a complete one.
+MAX_7RG_EXPANDED = 6
+MAX_7RR_EXPANDED = 2
+
 
 def slot_mod(coord: int) -> int:
     """`GetOffsetFromXz`'s per-axis slot index for a chunk coordinate.
@@ -884,17 +890,20 @@ def main() -> int:
         checks.append("main.ttw: MISSING")
 
     region = os.path.join(save_dir, "Region")
-    rg = sorted(glob.glob(os.path.join(region, "*.7rg"))) if os.path.isdir(region) else []
-    rr = sorted(glob.glob(os.path.join(region, "*.7rr"))) if os.path.isdir(region) else []
+    rg: list[str] = []
+    rr: list[str] = []
+    if os.path.isdir(region):
+        rg = sorted(glob.glob(os.path.join(region, "*.7rg")))
+        rr = sorted(glob.glob(os.path.join(region, "*.7rr")))
     print(f"Region files: {len(rg)} .7rg (sector V2), {len(rr)} .7rr (raw)\n")
-    for p in rg[:6]:
+    for p in rg[:MAX_7RG_EXPANDED]:
         run_file_check(check_region_v2, p, checks)
-    if len(rg) > 6:
-        checks.append(f"  ({len(rg) - 6} further .7rg files not expanded)")
-    for p in rr[:2]:
+    if len(rg) > MAX_7RG_EXPANDED:
+        checks.append(f"  ({len(rg) - MAX_7RG_EXPANDED} further .7rg files not expanded)")
+    for p in rr[:MAX_7RR_EXPANDED]:
         run_file_check(check_region_raw, p, checks)
-    if rr and len(rr) > 2:
-        checks.append(f"  ({len(rr) - 2} further .7rr files not expanded)")
+    if rr and len(rr) > MAX_7RR_EXPANDED:
+        checks.append(f"  ({len(rr) - MAX_7RR_EXPANDED} further .7rr files not expanded)")
     if not rg and not rr:
         # Same verdict as a missing main.ttw: a save with a header and no
         # region files has not round-tripped.

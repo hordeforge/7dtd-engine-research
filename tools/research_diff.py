@@ -471,10 +471,19 @@ def lens_parity(old_json: Path | None, new_json: Path | None, limit: int) -> Sec
         return Section(title, {}, "", note="not measured: pass --parity-old and --parity-new")
     script = TOOLS / "parity" / "parity_diff.py"
     proc = run([sys.executable, str(script), str(old_json), str(new_json)])
+    if proc.returncode not in (0, 1):
+        # parity_diff.py exits 2 when a snapshot cannot be read. Treating that
+        # as "no changes" reported a deleted or corrupt snapshot as a clean
+        # wire-parity section and let --check exit 0.
+        return Section(
+            title,
+            {"unreadable": 1},
+            cap(proc.stdout.splitlines(), limit),
+            note=f"parity_diff.py rc={proc.returncode}: "
+            + (proc.stderr.strip() or "no diagnostics"),
+        )
     counts = {"changed": 1} if proc.returncode == 1 else {}
-    body = cap(proc.stdout.splitlines(), limit)
-    note = None if proc.returncode in (0, 1) else proc.stderr.strip() or f"rc={proc.returncode}"
-    return Section(title, counts, body, note=note)
+    return Section(title, counts, cap(proc.stdout.splitlines(), limit))
 
 
 def lens_depot(old_path: Path | None, new_path: Path | None, limit: int) -> Section:

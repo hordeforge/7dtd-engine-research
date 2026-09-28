@@ -24,8 +24,12 @@ def main() -> int:
     ap.parse_args()
     try:
         return show()
-    except tooling.NonFiniteNumberError as exc:
-        print(f"facts: {exc}", file=sys.stderr)
+    except (OSError, ValueError, KeyError) as exc:
+        # ValueError covers both JSONDecodeError and tooling's
+        # NonFiniteNumberError; KeyError is a pin file missing a section the
+        # display below reads unconditionally. All three mean the same thing to
+        # a reader: the committed pins are unreadable, not absent.
+        print(f"facts: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 2
 
 

@@ -24,6 +24,7 @@ from __future__ import annotations
 import contextlib
 import hashlib
 import json
+import math
 import os
 import signal
 import subprocess
@@ -90,8 +91,12 @@ def positive_seconds(name: str, default: float) -> float:
         seconds = float(raw.strip())
     except ValueError as exc:
         raise ConfigError(f"{name}={raw!r} is not a number of seconds") from exc
-    if seconds <= 0:
-        raise ConfigError(f"{name}={raw!r} must be positive")
+    # `inf` and `nan` both survive `seconds <= 0` (the comparison is False for
+    # both), and each is worse than an oversized bound: `inf` removes the bound
+    # the caller is relying on, and `nan` makes every deadline comparison
+    # False, so the child is never killed at all.
+    if not math.isfinite(seconds) or seconds <= 0:
+        raise ConfigError(f"{name}={raw!r} must be a positive, finite number of seconds")
     return seconds
 
 
