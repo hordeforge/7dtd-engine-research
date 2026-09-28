@@ -20,6 +20,7 @@ capture had (air 0, terrStone 1, treeDeadTree02, cntWoodenChestClosed,
 treeOakSml01) unless a 3.2.0 blocks.xml edit shifted them.
 """
 
+import os
 import re
 import sys
 
@@ -71,9 +72,22 @@ def terrain_shape(block_name: str, xml: str) -> bool:
 
 
 def main() -> None:
+    if len(sys.argv) == 2 and sys.argv[1] in ("-h", "--help"):
+        print((__doc__ or "").strip())
+        raise SystemExit(0)
     if len(sys.argv) != 3:
-        raise SystemExit(__doc__)
+        # Usage is an error here, so it goes to stderr with exit 2; `--help`
+        # above is the only path that writes the docstring to stdout.
+        print((__doc__ or "").strip(), file=sys.stderr)
+        raise SystemExit(2)
     cfg_dir, out_path = sys.argv[1], sys.argv[2]
+    for name in ("blocks.xml", "shapes.xml"):
+        if not os.path.isfile(os.path.join(cfg_dir, name)):
+            print(
+                f"assignids_dump: not a stock Data/Config dir: {cfg_dir} (no {name})",
+                file=sys.stderr,
+            )
+            raise SystemExit(2)
     shapes, bulletproof = parse_shapes(f"{cfg_dir}/shapes.xml")
     with open(f"{cfg_dir}/blocks.xml", encoding="utf-8-sig") as f:
         blocks_xml = f.read()

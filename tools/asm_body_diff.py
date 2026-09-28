@@ -132,14 +132,17 @@ static class AsmBodyDiff {
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Hash-diff every method body between two managed assemblies."
+        description="Hash-diff every method body between two managed assemblies.",
+        epilog=(
+            "Example: python3 tools/asm_body_diff.py b9/Assembly-CSharp.dll "
+            "b10/Assembly-CSharp.dll\n"
+            "\n"
+            "exit 0 = diff written; 1 = the dumper failed; 2 = usage error"
+        ),
     )
-    ap.add_argument("old_dll", nargs="?", help="baseline Assembly-CSharp.dll")
-    ap.add_argument("new_dll", nargs="?", help="candidate Assembly-CSharp.dll")
+    ap.add_argument("old_dll", help="baseline Assembly-CSharp.dll")
+    ap.add_argument("new_dll", help="candidate Assembly-CSharp.dll")
     args = ap.parse_args()
-    if not args.old_dll or not args.new_dll:
-        ap.print_help()
-        return 2 if args.old_dll or args.new_dll else 0
 
     old = Path(args.old_dll)
     new = Path(args.new_dll)

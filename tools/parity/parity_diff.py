@@ -2,17 +2,25 @@
 """Diff two stock ParitySurface snapshots.
 
 Usage:
+  parity_diff.py --help
   parity_diff.py old.json new.json  # what TFP changed between versions
 
-Exit codes: 0 no wire drift, 1 wire/enum drift, 2 unusable input.
+Exit codes: 0 no wire drift (or `--help`), 1 wire/enum drift, 2 unusable input.
 """
 
 import json
 import sys
+from pathlib import Path
 from typing import Any
 
 
 def load(p: str) -> dict[str, Any]:
+    path = Path(p)
+    if not path.is_file():
+        # A traceback here names a JSON decoder, not the argument the caller
+        # got wrong; a missing snapshot is a usage error.
+        print(f"parity_diff: snapshot not found: {path}", file=sys.stderr)
+        raise SystemExit(2)
     with open(p, encoding="utf-8") as fh:
         data: dict[str, Any] = json.load(fh)
     return data
@@ -57,6 +65,9 @@ def diff(old: dict[str, Any], new: dict[str, Any]) -> int:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__.strip())
+        sys.exit(0)
     if len(sys.argv) != 3:
         print(__doc__.strip(), file=sys.stderr)
         sys.exit(2)

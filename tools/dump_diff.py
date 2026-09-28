@@ -128,14 +128,28 @@ def diff_type(old: TypeInfo, new: TypeInfo, full: bool = False) -> list[str]:
     return out
 
 
+USAGE = "usage: dump_diff.py <old-full-dir> <new-full-dir> [type-filter-regex]"
+
+
 def main() -> int:
+    if len(sys.argv) == 2 and sys.argv[1] in ("-h", "--help"):
+        print(USAGE)
+        return 0
     if len(sys.argv) not in (3, 4):
-        print("usage: dump_diff.py <old-full-dir> <new-full-dir> [type-filter-regex]")
+        # stderr, so `dump_diff.py a b > report` never lands the usage line in
+        # the report; stdout stays the diff and nothing else.
+        print(USAGE, file=sys.stderr)
         return 2
     old_dir = Path(sys.argv[1])
     new_dir = Path(sys.argv[2])
     flt = re.compile(sys.argv[3]) if len(sys.argv) == 4 else re.compile(".*")
 
+    for label, directory in (("old-full-dir", old_dir), ("new-full-dir", new_dir)):
+        if not directory.is_dir():
+            # A wrong path makes rglob() yield nothing, which reads as "no
+            # drift" and exits 0. Name the argument instead.
+            print(f"dump_diff: {label} is not a directory: {directory}", file=sys.stderr)
+            return 2
     old_files = {p.relative_to(old_dir): p for p in old_dir.rglob("*.il.txt")}
     new_files = {p.relative_to(new_dir): p for p in new_dir.rglob("*.il.txt")}
 
