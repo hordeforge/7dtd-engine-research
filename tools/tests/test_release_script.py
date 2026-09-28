@@ -45,6 +45,19 @@ def git(*args: str, cwd: Path) -> None:
     _common.run_cmd(["git", *args], cwd=cwd, check=True, capture_output=True)
 
 
+def git_out(*args: str, cwd: Path) -> str:
+    run = subprocess.run(
+        ["git", *args],
+        cwd=cwd,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return run.stdout.strip()
+
+
 def make_sandbox(tmp: Path) -> tuple[Path, Path, Path]:
     """A throwaway repo with an origin remote, release.sh in it, and a gh stub.
 
@@ -172,19 +185,31 @@ def main() -> None:
         assert "gh release create v9.9.8" in stubbed.stdout, stubbed.stdout
         assert not tag_exists("v9.9.8"), "a dry run with a stub gh created a tag"
 
+    with tempfile.TemporaryDirectory(prefix="release_cut_", dir=_common.scratch_dir()) as cut_tmp:
+        tmp = Path(cut_tmp)
+        repo, stub_dir, notes = make_sandbox(tmp)
+        first = run_in(repo, stub_dir, tmp, "v0.0.1", "--notes", str(notes), "--skip-gates")
+        assert first.returncode == 0, (first.stdout, first.stderr)
+        # The cut has to leave an annotated tag at HEAD, pushed to origin, and a
+        # GitHub release: a run that only pushed main publishes nothing, and
+        # `git push origin <version>` dies on a tag it never created.
+        head = git_out("rev-parse", "HEAD", cwd=repo)
+        named = git_out("rev-parse", "v0.0.1^{commit}", cwd=repo)
+        assert named == head, "the local tag does not name HEAD"
+        # A pushed tag has no remote-tracking ref, so origin is asked directly.
+        published = git_out("ls-remote", "origin", "refs/tags/v0.0.1^{}", cwd=repo).split()
+        assert published, "origin has no v0.0.1"
+        assert published[0] == head, f"origin v0.0.1 names {published[0]}"
+        kind = git_out("cat-file", "-t", "v0.0.1", cwd=repo)
+        assert kind == "tag", f"v0.0.1 is a {kind}, not an annotated tag"
+        assert any("release create v0.0.1" in call for call in gh_calls(tmp)), gh_calls(tmp)
+
     with tempfile.TemporaryDirectory(
         prefix="release_resume_", dir=_common.scratch_dir()
     ) as resume_tmp:
         tmp = Path(resume_tmp)
         repo, stub_dir, notes = make_sandbox(tmp)
-        head = _common.run_cmd(
-            ["git", "rev-parse", "HEAD"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        ).stdout.strip()
+        head = git_out("rev-parse", "HEAD", cwd=repo)
 
         # Nothing tagged: --resume has nothing to continue, and a plain run
         # would be the first cut, not a resume.
@@ -208,14 +233,7 @@ def main() -> None:
         )
         assert resumed.returncode == 0, (resumed.stdout, resumed.stderr)
         assert any("release create v0.0.1" in call for call in gh_calls(tmp)), gh_calls(tmp)
-        after = _common.run_cmd(
-            ["git", "rev-parse", "v0.0.1^{commit}"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        ).stdout.strip()
+        after = git_out("rev-parse", "v0.0.1^{commit}", cwd=repo)
         assert after == head, "the resume re-tagged"
 
         # Second resume: the release exists, so gh is not asked to create it

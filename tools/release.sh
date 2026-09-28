@@ -120,12 +120,16 @@ fi
 # Each step below is one that a killed run may already have completed, so each
 # asks first. Tag and push are the recorded version; the release is what a
 # half-finished run left out, and gh refuses to create it twice.
-if [[ -z "$tag_local_commit" ]]; then
+if [[ -z "$tag_local_commit" && -z "$tag_remote_commit" ]]; then
+  echo "release: tagging $VERSION at HEAD"
+  git tag -a "$VERSION" -m "$TITLE"
+elif [[ -z "$tag_local_commit" ]]; then
   echo "release: tag $VERSION exists on origin only; leaving the local ref alone"
 else
   echo "release: tag $VERSION already at HEAD (resume)"
 fi
 if [[ -z "$tag_remote_commit" ]]; then
+  echo "release: pushing $VERSION to origin"
   git push origin "$VERSION"
 fi
 if gh release view "$VERSION" >/dev/null 2>&1; then
