@@ -363,7 +363,17 @@ def dxbc_chunks(data: bytes) -> dict[str, bytes]:
             raise ShaderBlobError(
                 f"DXBC chunk at {off} claims {size} bytes, past the {len(data)}-byte blob"
             )
-        out[data[off : off + 4].decode("ascii", "replace")] = data[off + 8 : off + 8 + size]
+        # The fourcc is the chunk's identity: every lookup is
+        # chunks.get("ISGN") / "SHDR" / "SHEX", and errors="replace" turned a
+        # corrupt tag into U+FFFD, so a corrupt container then read as a
+        # shader that declares no signature inputs. The ISGN semantic decode
+        # above refuses the same bytes; refuse them here too.
+        tag = data[off : off + 4]
+        try:
+            name = tag.decode("ascii")
+        except UnicodeDecodeError as exc:
+            raise ShaderBlobError(f"DXBC chunk at {off} has a non-ASCII fourcc {tag!r}") from exc
+        out[name] = data[off + 8 : off + 8 + size]
     return out
 
 

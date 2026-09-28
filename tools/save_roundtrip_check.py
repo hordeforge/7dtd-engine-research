@@ -108,6 +108,15 @@ def read_net_string(buf: bytes, off: int) -> tuple[str, int]:
     Raises struct.error (not IndexError) on a prefix that runs past the end:
     every blob walker catches struct.error to degrade one entry/file to a FAIL
     line, and parse_chunk_body's caller catches exactly that pair.
+
+    The decode is strict, for the same reason and the same reason the exception
+    is struct.error. BinaryReader hands the bytes to a UTF8Encoding that throws
+    on an ill-formed sequence, so a blob carrying one is a blob the engine
+    would not have read either; errors="replace" decoded it to U+FFFD, the byte
+    offsets stayed correct, and the walk went on to report a "byte-exact" parse
+    of a string that is not the one the save holds. The report's byte-exactness
+    is the tool's central claim, so it cannot be asserted over a decoded value
+    the tool repaired.
     """
     length = 0
     shift = 0
@@ -120,7 +129,11 @@ def read_net_string(buf: bytes, off: int) -> tuple[str, int]:
         if not (b & 0x80):
             break
         shift += 7
-    return buf[off : off + length].decode("utf-8", "replace"), off + length
+    raw = buf[off : off + length]
+    try:
+        return raw.decode("utf-8"), off + length
+    except UnicodeDecodeError as exc:
+        raise struct.error(f"string at {off} is not valid UTF-8: {raw[:32]!r}") from exc
 
 
 def check_sleeper_volumes(blob: bytes, checks: list[str]) -> None:
@@ -387,7 +400,7 @@ def check_worldstate_tail(buf: bytes, off: int, checks: list[str]) -> None:
         off += w_sz - 4
         check_weather_blob(w_body, checks)
         guid, off = read_net_string(buf, off)
-        checks.append(f"  guid: {guid[:8]}... len {len(guid)} chars")
+        checks.append(f"  guid: {guid[:8]}... len {len(guid.encode('utf-8'))} B")
         exact = off == len(buf)
         checks.append(
             f"  full WorldState parse {'byte-exact' if exact else 'MISMATCH'} ({off}/{len(buf)})"

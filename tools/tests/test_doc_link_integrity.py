@@ -39,21 +39,11 @@ SECT_LINK_RE = re.compile(r"\[([\w.-]+\.md)\]\(([^)]*\.md)\)\s*§\s*([0-9]+(?:\.
 def resolve(target: str) -> str | None:
     """The real path for a link target, or None when nothing is there.
 
-    os.path.isfile compares the link's bytes against the directory entry, so an
-    NFC link misses a doc committed from macOS under its NFD name. The NFC
-    comparison of the two names is what decides identity, and the path handed
-    back is the one the filesystem actually holds.
+    `tooling.resolve_link` so this gate and cross_repo_links.py answer "does
+    this doc exist?" the same way: raw target first, percent-decoded second,
+    each matched against the directory by NFC name.
     """
-    if os.path.isfile(target):
-        return target
-    parent, leaf = os.path.split(os.path.normpath(target))
-    if not os.path.isdir(parent):
-        return None
-    want = _common.nfc(leaf)
-    for entry in os.listdir(parent):
-        if _common.nfc(entry) == want and os.path.isfile(os.path.join(parent, entry)):
-            return os.path.join(parent, entry)
-    return None
+    return _common.resolve_link(target)
 
 
 def collect(docs: str) -> tuple[dict[str, list[str]], set[str]]:
@@ -169,6 +159,19 @@ def self_test(tmp_parent: str) -> None:
     assert root == {"INDEX.md", _common.nfc(nfd_name)}, root
     assert reachable_from(graph, root) == root, graph
     assert dead_links(graph) == [], dead_links(graph)
+
+    # Percent-encoded target: a link to a doc whose name carries a space or a
+    # non-ASCII character is written percent-encoded, and the raw target names
+    # a file that was never on disk, so byte equality called it a dead link.
+    tree = os.path.join(tmp_parent, "pct")
+    _write(os.path.join(tree, "réseau social.md"), "# net\nleaf\n")
+    got = resolve(os.path.join(tree, "r%C3%A9seau%20social.md"))
+    assert got == os.path.join(tree, "réseau social.md"), got
+    # The raw spelling still resolves, so a filename that literally contains a
+    # percent escape is not decoded out from under the author.
+    _write(os.path.join(tree, "100%25.md"), "# pct\nleaf\n")
+    assert resolve(os.path.join(tree, "100%25.md")) == os.path.join(tree, "100%25.md")
+    assert resolve(os.path.join(tree, "ghost%20link.md")) is None
 
 
 def main() -> None:

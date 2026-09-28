@@ -39,6 +39,7 @@ DOCS = tooling.DOCS
 scratch_dir = tooling.scratch_dir
 sha256_file = tooling.sha256_file
 nfc = tooling.nfc
+resolve_link = tooling.resolve_link
 ConfigError = tooling.ConfigError
 load_json = tooling.load_json
 loads_json = tooling.loads_json
