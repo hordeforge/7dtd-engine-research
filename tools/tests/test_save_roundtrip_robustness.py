@@ -22,6 +22,41 @@ import _common
 TOOLS = str(_common.TOOLS)
 SCRIPT = os.path.join(TOOLS, "save_roundtrip_check.py")
 
+sys.path.insert(0, TOOLS)
+
+import save_roundtrip_check as src
+
+
+def ill_formed_net_string() -> None:
+    """A .NET string that is not valid UTF-8 must be refused, not repaired.
+
+    BinaryReader hands the bytes to a UTF8Encoding that throws, so errors="replace"
+    decoded an ill-formed sequence to U+FFFD, left every byte offset correct, and
+    let the walk report a "byte-exact" parse of a string the engine would not have
+    read. The refusal has to be struct.error, the type every blob walker's caller
+    catches, or a corrupt save escapes as a traceback.
+    """
+    bad: list[str] = []
+    prefix = bytes([len(b"\xff\xfe")])
+    try:
+        src.read_net_string(prefix + b"\xff\xfe", 0)
+    except struct.error:
+        pass
+    except Exception as exc:
+        bad.append(f"ill-formed UTF-8 string: raised {type(exc).__name__}, not struct.error")
+    else:
+        bad.append("ill-formed UTF-8 string: decoded instead of refused")
+    # A well-formed string still round-trips, non-ASCII included, so the strict
+    # decode did not narrow what the tool accepts.
+    payload = "génération-9".encode("utf-8")
+    got, off = src.read_net_string(bytes([len(payload)]) + payload, 0)
+    if got != "génération-9" or off != len(payload) + 1:
+        bad.append(f"well-formed non-ASCII string: got {got!r} off {off}")
+    for line in bad:
+        print("FAIL:", line)
+    if bad:
+        raise AssertionError(f"{len(bad)} ill-formed string finding(s)")
+
 
 def run(*argv: str) -> tuple[int, str]:
     proc = _common.run_cmd(
@@ -94,6 +129,7 @@ def unreadable_region_entry(dirpath: str) -> None:
 
 def main() -> int:
     bad: list[str] = []
+    ill_formed_net_string()
     with tempfile.TemporaryDirectory(prefix="srt-robustness-", dir=_common.scratch_dir()) as tmp:
         ttw = os.path.join(tmp, "trunc.ttw")
         truncated_ttw(ttw)

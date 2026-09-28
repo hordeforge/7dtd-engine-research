@@ -36,6 +36,7 @@ from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote
 
 ROOT_MARKERS = ("Makefile", "AGENTS.md")
 _HASH_CHUNK = 1 << 20
@@ -136,6 +137,43 @@ def nfc(s: str) -> str:
     author which form their filesystem handed them.
     """
     return unicodedata.normalize("NFC", s)
+
+
+def resolve_link(target: str) -> str | None:
+    """The real path a markdown link target names, or None when nothing is there.
+
+    Both link gates resolve a target the same way, because both answer the same
+    question ("does this doc exist?") and a difference between them is a gate
+    that reports a live link dead, or passes a dead one, on spelling alone.
+
+    Two spellings reach the filesystem that are the same identity:
+
+    - percent-encoding. A link to a doc whose name carries a space or a
+      non-ASCII character is written percent-encoded (`r%C3%A9seau.md`), and
+      the raw target names a file that was never on disk.
+    - normalization. macOS hands back NFD where the link is written in NFC
+      (see `nfc`), and byte equality calls a live doc a dead link.
+
+    The raw target is tried first and the decoded one second, so a filename
+    that literally contains `%20` still resolves through the first attempt.
+    The path returned is the one the filesystem holds, never the spelling the
+    link used.
+    """
+    seen: set[str] = set()
+    for spelling in (target, unquote(target)):
+        if spelling in seen:
+            continue
+        seen.add(spelling)
+        if os.path.isfile(spelling):
+            return spelling
+        parent, leaf = os.path.split(os.path.normpath(spelling))
+        if not os.path.isdir(parent):
+            continue
+        want = nfc(leaf)
+        for entry in os.listdir(parent):
+            if nfc(entry) == want and os.path.isfile(os.path.join(parent, entry)):
+                return os.path.join(parent, entry)
+    return None
 
 
 class NonFiniteNumberError(ValueError):

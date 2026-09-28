@@ -93,7 +93,12 @@ def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str
                 p = os.path.normpath(os.path.join(dirpath, m.group(1).split("#", 1)[0]))
                 if not p.startswith(root_prefix):
                     total += 1
-                    if not os.path.exists(p):
+                    # tooling.resolve_link, not os.path.exists: a link to a doc
+                    # carrying a space or a non-ASCII name is written
+                    # percent-encoded, and a sibling checked out on macOS holds
+                    # NFD where the link is written in NFC. Byte equality calls
+                    # both a dead link.
+                    if tooling.resolve_link(p) is None:
                         broken.append(f"  BROKEN {f}: {m.group(1)}")
     return total, len(broken), len(unreadable), broken + unreadable
 
