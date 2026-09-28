@@ -219,10 +219,20 @@ def install_dir_for(appmanifest: Path, override: str | None = None) -> Path | No
 
 
 def _read_text(path: Path) -> str:
+    """Read a Steam config file; absent reads as empty, unreadable as an error.
+
+    A missing appmanifest ACF just means this is not an install Steam tracks, and
+    every caller reports that as "not found". A file that exists and cannot be
+    read (permissions, an I/O error) is a different failure: returning "" for it
+    would report an unreadable config as an absent one and send the operator
+    looking for a Steam install that is right there.
+    """
     try:
         return path.read_text(encoding="utf-8", errors="replace")
-    except OSError:
+    except FileNotFoundError:
         return ""
+    except OSError as exc:
+        raise SourceError(f"unreadable {path}: {exc}") from exc
 
 
 def load_pins(path: Path) -> dict[str, Any] | None:
@@ -237,20 +247,42 @@ def load_pins(path: Path) -> dict[str, Any] | None:
 
 
 def write_pins(path: Path, pins: dict[str, Any]) -> None:
+    """Replace the pin file atomically, leaving no temp file behind on failure.
+
+    The temp name is pid-scoped so two runs cannot collide, and it is removed
+    when the write or the rename fails: a half-written `.json.tmp<pid>` left in
+    tools/data/ is the residue of a failed --record, and the next run would
+    not clean it up.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(f".{path.name}.tmp{os.getpid()}")
-    tmp.write_text(json.dumps(pins, indent=2, sort_keys=False) + "\n", encoding="utf-8")
-    tmp.replace(path)
+    try:
+        tmp.write_text(json.dumps(pins, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+        tmp.replace(path)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
 
 
 def stock_facts() -> dict[str, Any]:
-    """The committed studied-build facts, or {} when absent/unreadable."""
+    """The committed studied-build facts.
+
+    A missing or corrupt tools/data/stock_facts.json raises: the only caller
+    builds the studied entry of the pin file, and the two facts it takes from
+    here (the version string and the Assembly-CSharp.dll sha256) are what
+    identify that pin later. Reading them as {} would record a committed pin
+    with version and dll_sha256 null, which no build-id lookup can ever match.
+    """
     try:
         with STOCK_FACTS.open(encoding="utf-8") as fh:
             facts: Any = json.load(fh)
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return facts if isinstance(facts, dict) else {}
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SourceError(
+            f"unreadable stock facts {STOCK_FACTS}: {exc} (regenerate with: make stock-sync)"
+        ) from exc
+    if not isinstance(facts, dict):
+        raise SourceError(f"{STOCK_FACTS}: not a JSON object")
+    return facts
 
 
 def record_history(pins: dict[str, Any] | None, studied: dict[str, Any]) -> list[dict[str, Any]]:
@@ -275,6 +307,7 @@ def record_history(pins: dict[str, Any] | None, studied: dict[str, Any]) -> list
                 "buildid": previous.get("buildid"),
                 "gid": previous.get("manifest"),
                 "version": previous.get("version"),
+                "dll_sha256": previous.get("dll_sha256"),
                 "recorded_utc": previous.get("recorded_utc"),
                 "note": "previous studied pin",
             },
@@ -494,7 +527,11 @@ def main(argv: list[str] | None = None) -> int:
 
     installed: tuple[str, dict[str, str]] | None = None
     if not args.no_installed:
-        installed = read_appmanifest(Path(args.appmanifest))
+        try:
+            installed = read_appmanifest(Path(args.appmanifest))
+        except SourceError as exc:
+            print(f"steam_builds: {exc}", file=sys.stderr)
+            return 2
     install_buildid = installed[0] if installed else None
     install_manifest = installed[1].get(DEPOT) if installed else None
 
@@ -514,7 +551,11 @@ def main(argv: list[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return 2
-        root = install_dir_for(Path(args.appmanifest), args.install_dir)
+        try:
+            root = install_dir_for(Path(args.appmanifest), args.install_dir)
+        except SourceError as exc:
+            print(f"steam_builds: {exc}", file=sys.stderr)
+            return 2
         if root is None or not root.is_dir():
             print(
                 f"steam_builds: cannot locate the install directory "
@@ -540,7 +581,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     if args.record:
-        facts = stock_facts()
+        try:
+            facts = stock_facts()
+        except SourceError as exc:
+            print(f"steam_builds: {exc}", file=sys.stderr)
+            return 2
         try:
             recorded_utc = tooling.generation_stamp()
         except tooling.StampError as exc:

@@ -15,7 +15,6 @@ Requires mono + tools/bin/Mono.Cecil.dll (built by `make tools`).
 from __future__ import annotations
 
 import argparse
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -167,22 +166,21 @@ def main() -> int:
         cs = tmp_path / "AsmBodyDiff.cs"
         exe = tmp_path / "AsmBodyDiff.exe"
         cs.write_text(HASH_CS, encoding="utf-8")
-        compile_cmd = ["mcs", f"-r:{CECIL}", f"-out:{exe}", str(cs)]
-        comp = subprocess.run(compile_cmd, text=True, capture_output=True)
-        if comp.returncode != 0:
-            print(comp.stderr or comp.stdout, file=sys.stderr)
-            return 1
-        env = tooling.mono_env()
-        run = subprocess.run(
-            ["mono", str(exe), str(old), str(new)],
-            text=True,
-            capture_output=True,
-            env=env,
+        # Both children go through tooling.run_bounded, the one launcher that
+        # bounds a tool and kills its process group: an unbounded mcs or mono
+        # (a malformed assembly driving Cecil into a long walk, a runtime
+        # prompt) would hang the gate that ran this instead of failing it.
+        comp_rc, comp_out, comp_err = tooling.run_bounded(
+            ["mcs", f"-r:{CECIL}", f"-out:{exe}", str(cs)], env=tooling.mono_env()
         )
-        if run.returncode != 0:
-            print(run.stderr or run.stdout, file=sys.stderr)
+        if comp_rc != 0:
+            print(comp_err or comp_out, file=sys.stderr)
             return 1
-        sys.stdout.write(run.stdout)
+        rc, out, err = tooling.run_mono(exe, str(old), str(new))
+        if rc != 0:
+            print(err or out, file=sys.stderr)
+            return 1
+        sys.stdout.write(out)
     return 0
 
 

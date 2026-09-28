@@ -126,10 +126,20 @@ class Section:
     note: str | None = None
 
 
-def run(cmd: list[str], timeout: float = 900.0) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        cmd, text=True, capture_output=True, env=tooling.mono_env(), timeout=timeout
-    )
+def run(cmd: list[str], timeout: float | None = None) -> subprocess.CompletedProcess[str]:
+    """Run one lens tool under the shared bound -> (rc, stdout, stderr).
+
+    The bound is `tooling.mono_timeout()` rather than a literal here, so
+    `RE_MONO_TIMEOUT` reaches every runner, and the child gets its own process
+    group so a timeout kills whatever it spawned instead of orphaning it. A
+    timeout is a lens that never finished, not a lens result: it raises with
+    the command and the bound named, and main reports it like any other
+    tool failure.
+    """
+    rc, out, err = tooling.run_bounded(cmd, env=tooling.mono_env(), timeout=timeout)
+    if rc == tooling.TIMEOUT_RC:
+        raise RuntimeError(err.strip() or f"{cmd[0]} exceeded its time bound and was killed")
+    return subprocess.CompletedProcess(cmd, rc, out, err)
 
 
 def prereq() -> str | None:
@@ -155,12 +165,33 @@ def prereq() -> str | None:
 
 
 def load_steam_pins() -> dict[str, Any]:
+    """The committed Steam pins, used only to label an assembly with a build id.
+
+    Absent or unreadable, the report still runs (a diff against two loose DLLs
+    is the normal case) but every build id reads "unknown". That is said on
+    stderr: a pin file that exists and cannot be read is a repo problem, and
+    silently reporting an unlabelled build as if no pin existed hides it.
+    """
     try:
         with STEAM_PINS.open(encoding="utf-8") as fh:
             pins: Any = json.load(fh)
-    except (OSError, json.JSONDecodeError):
+    except FileNotFoundError:
         return {}
-    return pins if isinstance(pins, dict) else {}
+    except (OSError, json.JSONDecodeError) as exc:
+        print(
+            f"research_diff: cannot read {STEAM_PINS}: {exc}; "
+            "no assembly will be labelled with a Steam build id",
+            file=sys.stderr,
+        )
+        return {}
+    if not isinstance(pins, dict):
+        print(
+            f"research_diff: {STEAM_PINS} is not a JSON object; "
+            "no assembly will be labelled with a Steam build id",
+            file=sys.stderr,
+        )
+        return {}
+    return pins
 
 
 def buildid_for(sha: str, pins: dict[str, Any]) -> str | None:
@@ -873,7 +904,7 @@ def main(argv: list[str] | None = None) -> int:
             done = run_lenses(max(1, args.jobs), [builders[name] for name in EXECUTION_LENS_ORDER])
             by_name = dict(zip(EXECUTION_LENS_ORDER, done, strict=True))
             sections = [by_name[name] for name in REPORT_LENS_ORDER]
-    except (RuntimeError, ManifestError, subprocess.TimeoutExpired) as exc:
+    except (RuntimeError, ManifestError) as exc:
         print(f"research_diff: {exc}", file=sys.stderr)
         return 2
 

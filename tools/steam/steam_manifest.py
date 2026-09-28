@@ -235,13 +235,28 @@ def pins_buildids(path: Path) -> dict[str, str]:
     """gid -> build id from the committed pin file (studied build + history).
 
     The client's content log rotates; the pin file keeps the build ids of
-    earlier studied builds so an old cached manifest stays labelled.
+    earlier studied builds so an old cached manifest stays labelled. A pin file
+    that exists but cannot be read is a repo problem, not an absent pin, and it
+    is reported: the manifests it would have labelled would otherwise print a
+    bare gid with no build id and read as "never pinned".
     """
     try:
         data: Any = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except FileNotFoundError:
+        return {}
+    except (OSError, json.JSONDecodeError) as exc:
+        print(
+            f"steam_manifest: cannot read {path}: {exc}; "
+            "cached manifests will carry no pinned build id",
+            file=sys.stderr,
+        )
         return {}
     if not isinstance(data, dict):
+        print(
+            f"steam_manifest: {path} is not a JSON object; "
+            "cached manifests will carry no pinned build id",
+            file=sys.stderr,
+        )
         return {}
     mapping: dict[str, str] = {}
     studied = data.get("studied")

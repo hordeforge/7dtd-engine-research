@@ -621,8 +621,14 @@ def check_nim_mapping(path: str, checks: list[str]) -> None:
             ids.add(bid)
             nl = data[p + 4]
             p += 5 + nl
-    except (struct.error, IndexError):
-        p = -1
+    except (struct.error, IndexError) as exc:
+        # The walk stopped at entry {len(ids)}: report where and why. A sentinel
+        # offset here would print "consumed -1/N", which names neither the entry
+        # that failed to parse nor the truncation that caused it.
+        checks.append(
+            f"{name}: id-name walk stopped after {len(ids)}/{cnt} entries at offset {p}: {exc}"
+        )
+        return
     ok = p == len(data)
     checks.append(
         f"{name}: version {ver} count {cnt} unique_ids {len(ids)} "

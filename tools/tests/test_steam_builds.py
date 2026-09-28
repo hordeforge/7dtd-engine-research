@@ -22,6 +22,9 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
+sys.path.insert(0, str(_common.TOOLS / "steam"))
+import steam_builds
+
 SCRIPT = _common.TOOLS / "steam" / "steam_builds.py"
 PINS = _common.TOOLS / "data" / "steam_builds.json"
 STOCK_FACTS = _common.TOOLS / "data" / "stock_facts.json"
@@ -68,6 +71,80 @@ ACF = """"AppState"
 def run(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPT), *args], text=True, capture_output=True, check=False
+    )
+
+
+def check_error_paths(tmp_path: Path, appinfo: Path) -> None:
+    """A read that fails must not read as a read that found nothing.
+
+    An appmanifest ACF that exists but cannot be read is an operator error, not
+    an install Steam does not track: the tool says so and exits 2 rather than
+    printing "installed: not found". --record must refuse to write a pin whose
+    version and dll_sha256 it could not read, and a failed pin write must leave
+    no temp file behind.
+    """
+    unreadable_acf = tmp_path / "appmanifest.d"
+    unreadable_acf.mkdir()
+    denied = run("--from", str(appinfo), "--appmanifest", str(unreadable_acf), "--no-installed")
+    assert denied.returncode == 0, denied  # --no-installed never reads the ACF
+
+    denied = run("--from", str(appinfo), "--appmanifest", str(unreadable_acf))
+    assert denied.returncode == 2, denied
+    assert "unreadable" in denied.stderr, denied.stderr
+    assert str(unreadable_acf) in denied.stderr, denied.stderr
+
+    missing_acf = run("--from", str(appinfo), "--appmanifest", str(tmp_path / "nope.acf"))
+    assert missing_acf.returncode == 0, missing_acf
+    assert "installed: not found" in missing_acf.stdout, missing_acf.stdout
+
+    corrupt = tmp_path / "stock_facts.json"
+    corrupt.write_text('{"not json', encoding="utf-8")
+    saved = steam_builds.STOCK_FACTS
+    try:
+        for bad in (corrupt, tmp_path / "absent.json"):
+            steam_builds.STOCK_FACTS = bad
+            try:
+                steam_builds.stock_facts()
+            except steam_builds.SourceError as exc:
+                message = str(exc)
+            else:
+                raise AssertionError(f"stock_facts() accepted an unreadable {bad}")
+            assert str(bad) in message, message
+            assert "stock-sync" in message, message
+
+        not_object = tmp_path / "facts_list.json"
+        not_object.write_text("[1, 2]", encoding="utf-8")
+        steam_builds.STOCK_FACTS = not_object
+        try:
+            steam_builds.stock_facts()
+        except steam_builds.SourceError as exc:
+            message = str(exc)
+        else:
+            raise AssertionError("stock_facts() accepted a non-object payload")
+        assert "not a JSON object" in message, message
+    finally:
+        steam_builds.STOCK_FACTS = saved
+
+    # A pin write that fails at the rename must not leave its temp file: the
+    # target here is a directory, so replace() fails after the temp file exists.
+    pinned_dir = tmp_path / "pins_as_dir"
+    pinned_dir.mkdir()
+    try:
+        steam_builds.write_pins(pinned_dir, {"studied": {}})
+    except OSError:
+        pass
+    else:
+        raise AssertionError("write_pins() replaced a directory with a file")
+    residue = [p.name for p in tmp_path.iterdir() if p.name.startswith(".pins_as_dir.tmp")]
+    assert not residue, f"write_pins left temp files behind: {residue}"
+
+    steam_builds.write_pins(tmp_path / "clean.json", {"studied": {"buildid": "1"}})
+    assert (
+        json.loads((tmp_path / "clean.json").read_text(encoding="utf-8"))["studied"]["buildid"]
+        == "1"
+    )
+    assert not [p for p in tmp_path.iterdir() if p.name.startswith(".clean.json.tmp")], (
+        "write_pins left a temp file behind on the success path"
     )
 
 
@@ -320,6 +397,8 @@ def main() -> None:
         assert "earlier builds: 100 (111)" in again.stdout, again.stdout
         repeat_doc = json.loads(seeded.read_text(encoding="utf-8"))
         assert [e["buildid"] for e in repeat_doc["history"]] == ["100"], repeat_doc
+
+        check_error_paths(tmp_path, appinfo)
 
     check_committed_pin()
     print("OK: steam_builds parse/drift/pin cases pass; committed pin matches stock_facts")
