@@ -38,6 +38,15 @@ CASES = [
     ("ta_grassxml", "ta_grassxml"),
     ("a:b<c>", "a_b_c_"),
     ("", "_"),
+    # Not ASCII: the fragment is a fixed alphabet, so the same bundle name
+    # yields the same file on every host instead of a decomposed spelling on
+    # macOS that a normalizing filesystem folds onto the composed one.
+    ("café", "caf_"),
+    ("naïve.mesh", "na_ve.mesh"),
+    # Astral: C# reads a name as UTF-16 code units, so a surrogate pair is two
+    # characters there and two '_' here. Matching that is what makes the
+    # fragments identical instead of merely both safe.
+    ("\U0001d400", "__"),
 ]
 
 

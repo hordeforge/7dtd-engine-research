@@ -19,6 +19,7 @@ import hashlib
 import os
 import signal
 import subprocess
+import unicodedata
 from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
@@ -67,6 +68,21 @@ REPO = repo_root()
 TOOLS = REPO / "tools"
 BIN = TOOLS / "bin"
 DOCS = REPO / "docs"
+
+
+def nfc(s: str) -> str:
+    """A name as every gate keys it: Unicode NFC.
+
+    A doc basename is an identity the corpus resolves against from three
+    sources that need not agree on spelling: the filename the author created,
+    the link text typed into another doc, and a citation pasted from a
+    sibling repo. macOS filesystems store and hand back NFD, so the same word
+    arrives in two spellings, and byte equality then reports a live doc as a
+    dead link (or the reverse). NFC is the form docs are written in, so both
+    sides are normalized before they are compared rather than asking the
+    author which form their filesystem handed them.
+    """
+    return unicodedata.normalize("NFC", s)
 
 
 def scratch_dir() -> Path:

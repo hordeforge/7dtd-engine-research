@@ -31,6 +31,12 @@ CASES = [
     ("System.Collections", "System.Collections"),  # namespaces keep their dots
     ("Foo/Bar\\Baz", "Foo_Bar_Baz"),
     ("", ""),
+    # ASCII alphanumerics only: the fragment must not depend on how the host
+    # spells a Unicode name, and must match tools/sandbox/safe_name.py.
+    ("café", "caf_"),
+    # An astral character is a surrogate pair, so it is two '_' here and two
+    # in the Python twin.
+    ("\U0001d400", "__"),
 ]
 
 

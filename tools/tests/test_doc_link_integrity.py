@@ -18,6 +18,7 @@ import os
 import re
 import sys
 import tempfile
+import unicodedata
 from collections import deque
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -27,6 +28,31 @@ TOOLS = str(_common.TOOLS)
 REPO = str(_common.REPO)
 DOCS = os.path.join(REPO, "docs")
 LINK_RE = re.compile(r"\]\(([^)]+\.md)")
+# The link text of a section reference. `\w` is the Unicode-aware set, so a
+# doc whose name is not ASCII still has its section refs counted; the previous
+# [A-Za-z0-9_.-] class matched nothing there and the ref was skipped in silence
+# rather than checked.
+SECT_LINK_RE = re.compile(r"\[([\w.-]+\.md)\]\(([^)]*\.md)\)\s*§\s*([0-9]+(?:\.[0-9]+)?)")
+
+
+def resolve(target: str) -> str | None:
+    """The real path for a link target, or None when nothing is there.
+
+    os.path.isfile compares the link's bytes against the directory entry, so an
+    NFC link misses a doc committed from macOS under its NFD name. The NFC
+    comparison of the two names is what decides identity, and the path handed
+    back is the one the filesystem actually holds.
+    """
+    if os.path.isfile(target):
+        return target
+    parent, leaf = os.path.split(os.path.normpath(target))
+    if not os.path.isdir(parent):
+        return None
+    want = _common.nfc(leaf)
+    for entry in os.listdir(parent):
+        if _common.nfc(entry) == want and os.path.isfile(os.path.join(parent, entry)):
+            return os.path.join(parent, entry)
+    return None
 
 
 def collect(docs: str) -> tuple[dict[str, list[str]], set[str]]:
@@ -35,6 +61,11 @@ def collect(docs: str) -> tuple[dict[str, list[str]], set[str]]:
     docs/ is grouped into subsystem folders (docs/network/protocol.md, ...) with
     docs/inventories/ beside them; basenames are unique across the tree, so the
     graph is keyed by basename and a link is resolved against its own folder.
+
+    Keys and link targets are both NFC: a doc committed from macOS carries an
+    NFD filename, and the link to it is written in NFC. Keyed on raw bytes the
+    two are different nodes, so a live doc reads as a dead link and the hub
+    loses it from the reachable set.
     """
     out: dict[str, list[str]] = {}
     narrative: set[str] = set()
@@ -54,12 +85,13 @@ def collect(docs: str) -> tuple[dict[str, list[str]], set[str]]:
                 dest = os.path.abspath(os.path.join(sub, tgt))
                 if os.path.commonpath([root_abs, dest]) != root_abs:
                     continue  # cross-repo; checked separately below
-                targets.append(os.path.basename(dest))
-            if name in out:
-                raise AssertionError(f"duplicate doc basename under docs/: {name}")
-            out[name] = targets
+                targets.append(_common.nfc(os.path.basename(dest)))
+            key = _common.nfc(name)
+            if key in out:
+                raise AssertionError(f"duplicate doc basename under docs/: {key}")
+            out[key] = targets
             if os.path.basename(sub) != "inventories":
-                narrative.add(name)
+                narrative.add(key)
     return out, narrative
 
 
@@ -124,6 +156,19 @@ def self_test(tmp_parent: str) -> None:
     assert reachable_from(graph, root) == {"INDEX.md"}
     assert dead_links(graph) == ["INDEX.md -> ghost.md"], dead_links(graph)
 
+    # Decomposed name: the file is committed from a macOS filesystem under NFD,
+    # the link is written in NFC. Byte equality calls it a dead link and drops
+    # the doc out of the hub's reachable set; NFC is the same identity.
+    tree = os.path.join(tmp_parent, "nfd")
+    nfd_name = unicodedata.normalize("NFD", "ré-network.md")
+    assert nfd_name != _common.nfc(nfd_name), "fixture must be a decomposed spelling"
+    _write(os.path.join(tree, "INDEX.md"), f"# hub\n[net]({_common.nfc(nfd_name)})\n")
+    _write(os.path.join(tree, nfd_name), "# net\nleaf\n")
+    graph, root = collect(tree)
+    assert root == {"INDEX.md", _common.nfc(nfd_name)}, root
+    assert reachable_from(graph, root) == root, graph
+    assert dead_links(graph) == [], dead_links(graph)
+
 
 def main() -> None:
     with tempfile.TemporaryDirectory(
@@ -157,7 +202,7 @@ def main() -> None:
             for m in re.finditer(r"\]\((\.\./[^)]+\.md)\)", text):
                 target = os.path.normpath(os.path.join(sub, m.group(1)))
                 if os.path.abspath(target).startswith(os.path.abspath(DOCS) + os.sep):
-                    if not os.path.isfile(target):
+                    if resolve(target) is None:
                         dead_x.append(f"{os.path.relpath(path, DOCS)} -> {m.group(1)}")
                     continue
                 # Sibling repo name = first non-".." path component (e.g. 7dtd-server-optimizer).
@@ -170,14 +215,13 @@ def main() -> None:
                 correct_sibling = os.path.normpath(os.path.join(REPO, "..", sibling))
                 if not os.path.isdir(correct_sibling):
                     continue
-                if not os.path.isfile(target):
+                if resolve(target) is None:
                     dead_x.append(f"{os.path.relpath(path, DOCS)} -> {m.group(1)}")
     if dead_x:
         raise AssertionError("broken cross-repo links:\n" + "\n".join(sorted(set(dead_x))[:15]))
 
     # 3b. Section references ([doc](path) §N[.M]) must resolve to a header in
     # the target doc (anchors drift when sections are renumbered).
-    sect_pat = re.compile(r"\[[A-Za-z0-9_.-]+\.md\]\(([^)]*\.md)\)\s*§\s*([0-9]+(?:\.[0-9]+)?)")
     bad_sec = []
     n_sec = 0
     for sub, _dirs, names in os.walk(DOCS):
@@ -186,30 +230,31 @@ def main() -> None:
                 continue
             path = os.path.join(sub, name)
             text = open(path, encoding="utf-8").read()
-            for m in sect_pat.finditer(text):
-                target = os.path.normpath(os.path.join(sub, m.group(1)))
-                sec = m.group(2)
+            for m in SECT_LINK_RE.finditer(text):
+                target = os.path.normpath(os.path.join(sub, m.group(2)))
+                sec = m.group(3)
                 n_sec += 1
                 # Single-repo CI checkout: skip cross-repo section refs whose
                 # sibling repo is absent, exactly like the cross-repo link
                 # check above (the delivery loop verifies them locally).
-                parts = [p for p in m.group(1).split("/") if p not in ("", ".")]
+                parts = [p for p in m.group(2).split("/") if p not in ("", ".")]
                 sibling = next((p for p in parts if p != ".."), None)
                 in_docs = os.path.abspath(target).startswith(os.path.abspath(DOCS) + os.sep)
                 if sibling is not None and not in_docs:
                     correct_sibling = os.path.normpath(os.path.join(REPO, "..", sibling))
                     if not os.path.isdir(correct_sibling):
                         continue
-                if not os.path.isfile(target):
+                found = resolve(target)
+                if found is None:
                     bad_sec.append(
-                        f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no file)"
+                        f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(2)} (no file)"
                     )
                     continue
                 hdr = re.compile(rf"^#{{1,4}} {re.escape(sec)}(?:[ .:]|$)")
-                tlines = open(target, encoding="utf-8").read().splitlines()
+                tlines = open(found, encoding="utf-8").read().splitlines()
                 if not any(hdr.match(ln) for ln in tlines):
                     bad_sec.append(
-                        f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(1)} (no header)"
+                        f"{os.path.relpath(path, DOCS)}: §{sec} -> {m.group(2)} (no header)"
                     )
     if bad_sec:
         raise AssertionError("broken section references:\n" + "\n".join(sorted(set(bad_sec))[:15]))

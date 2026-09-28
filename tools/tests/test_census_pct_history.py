@@ -18,6 +18,7 @@ import multiprocessing
 import os
 import sys
 import tempfile
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -106,6 +107,24 @@ def main() -> None:
         lines = Path(fresh).read_text(encoding="utf-8").splitlines()
         assert lines.count(HEADER.rstrip("\n")) == 1, lines
         assert len(lines) == 3, lines
+
+        # A history file whose name is not valid UTF-8 is legal on the host the
+        # tool runs on (Linux stores raw bytes), and --history takes the name
+        # from the command line. Hashing it strictly raised UnicodeEncodeError
+        # before the row was written; the lock must be derivable either way, and
+        # the same bytes must keep mapping to the same lock.
+        raw = os.path.join(os.fsencode(td), b"census-\xff.csv")
+        weird = os.fsdecode(raw)
+        assert "\udcff" in weird, "fixture path must carry an undecodable byte"
+        assert module.history_lock(weird) == module.history_lock(weird)
+        assert module.history_lock(weird) != module.history_lock(fresh)
+
+        # A decomposed and a composed spelling of the same name are the same
+        # file, so the lock must not be a second writer's lock.
+        composed = os.path.join(td, "café-history.csv")
+        decomposed = os.path.join(td, unicodedata.normalize("NFD", "café-history.csv"))
+        assert composed != decomposed
+        assert module.history_lock(composed) == module.history_lock(decomposed)
 
         concurrent = os.path.join(td, "concurrent.csv")
         ctx = multiprocessing.get_context("fork")

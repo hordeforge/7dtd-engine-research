@@ -66,6 +66,9 @@ def known_doc_names() -> set[str]:
     the walk pay one syscall per citation over whole sibling repos. Nested
     trees count: docs/inventories/netpackage-bodies.md is a research doc, so
     an `RE netpackage-bodies.md` marker must resolve against its basename.
+
+    Names are stored NFC: a doc committed from macOS carries an NFD filename
+    and the citation naming it is written in NFC, and the two are one identity.
     """
     ddir = tooling.DOCS
     # The docs set is the gate's reference side: a missing/unreadable docs
@@ -78,7 +81,7 @@ def known_doc_names() -> set[str]:
         dirnames[:] = [d for d in dirnames if not d.startswith(".")]
         for n in filenames:
             if n.endswith(".md"):
-                names.add(n)
+                names.add(tooling.nfc(n))
     return names
 
 
@@ -88,19 +91,19 @@ def collect_local(root: str, into: set[str]) -> None:
     so cross-repo-local references resolve."""
     for d in os.listdir(root):
         if d.endswith(".md"):
-            into.add(d)
+            into.add(tooling.nfc(d))
     ddir = os.path.join(root, "docs")
     if os.path.isdir(ddir):
         for _dirpath, dirnames, filenames in os.walk(ddir):
             dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
             for fn in filenames:
                 if fn.endswith(".md"):
-                    into.add(fn)
+                    into.add(tooling.nfc(fn))
         adr = os.path.join(ddir, "adr")
         if os.path.isdir(adr):
             for d in os.listdir(adr):
                 if d.endswith(".md"):
-                    into.add(re.sub(r"^\d+-", "", d))
+                    into.add(tooling.nfc(re.sub(r"^\d+-", "", d)))
 
 
 def scan(root: str, local: set[str], docs: set[str]) -> tuple[int, list[str], int]:
@@ -126,13 +129,13 @@ def scan(root: str, local: set[str], docs: set[str]) -> tuple[int, list[str], in
             for pat in (RES_PATH, BARE_AFTER_RE):
                 for m in pat.finditer(txt):
                     total += 1
-                    if m.group(1) not in docs:
+                    if tooling.nfc(m.group(1)) not in docs:
                         broken.append(f"{p}: cites {m.group(1)}")
             # src files: a bare `X.md` name must be a research doc or a
             # repo-local doc (incl. zdtd docs/adr stripped).
             if any(fn.endswith(e) for e in SRC_EXTS):
                 for m in BARE.finditer(txt):
-                    name = m.group(1)
+                    name = tooling.nfc(m.group(1))
                     if name in local or name in ALLOW_BARE:
                         continue
                     total += 1

@@ -153,10 +153,22 @@ def pct(n: int, total: int) -> float:
     return 100.0 * n / total if total else 0.0
 
 
-def _history_lock(path: str) -> Path:
-    """Stable lock file for one history CSV, under the gitignored scratch tree."""
-    digest = hashlib.sha256(os.path.abspath(path).encode("utf-8")).hexdigest()[:16]
-    return tooling.scratch_dir() / f"census-history-{digest}.lock"
+def history_lock(path: str) -> Path:
+    """Stable lock file for one history CSV, under the gitignored scratch tree.
+
+    surrogateescape: the path comes from the command line and the filesystem
+    holds bytes, not characters, so a name that is not valid UTF-8 reaches
+    here as lone surrogates. Encoding it strictly raised UnicodeEncodeError
+    before a single row was written; the escaped form round-trips the original
+    bytes, so two spellings of the same file still hash to one lock.
+
+    NFC first, because a decomposed name (what a macOS checkout hands back) and
+    the composed one an operator types are the same file, and two spellings of
+    it must not become two locks and two racing writers.
+    """
+    key = tooling.nfc(os.path.abspath(path))
+    digest = hashlib.sha256(key.encode("utf-8", "surrogateescape")).hexdigest()
+    return tooling.scratch_dir() / f"census-history-{digest[:16]}.lock"
 
 
 def _write_history_row(path: str, header: str, row: str) -> str:
@@ -204,7 +216,7 @@ def record_history(path: str, header: str, row: str) -> str:
     read-modify-write, and the file lands through a temp-and-rename, so
     concurrent runs neither lose a row nor leave a truncated CSV.
     """
-    with open(_history_lock(path), "a", encoding="utf-8") as lock:
+    with open(history_lock(path), "a", encoding="utf-8") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
         try:
             return _write_history_row(path, header, row)

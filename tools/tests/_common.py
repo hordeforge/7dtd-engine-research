@@ -36,6 +36,7 @@ BIN = tooling.BIN
 DOCS = tooling.DOCS
 scratch_dir = tooling.scratch_dir
 sha256_file = tooling.sha256_file
+nfc = tooling.nfc
 find_asm = tooling.find_asm
 resolve_asm = tooling.resolve_asm
 
@@ -45,8 +46,13 @@ def doc(name: str) -> Path:
 
     docs/ is grouped by subsystem (docs/network/protocol.md, ...); basenames stay
     unique across the tree, so a gate cites a doc by name and never by folder.
+
+    Both sides go through tooling.nfc: a doc committed from macOS carries an
+    NFD filename, and a gate asking for the NFC spelling it was written with
+    would otherwise find nothing and report a missing doc.
     """
-    hits: list[Path] = sorted(DOCS.rglob(name))
+    want = tooling.nfc(name)
+    hits: list[Path] = sorted(p for p in DOCS.rglob("*.md") if tooling.nfc(p.name) == want)
     if len(hits) != 1:
         raise FileNotFoundError(f"{name}: {len(hits)} matches under {DOCS}")
     return hits[0]

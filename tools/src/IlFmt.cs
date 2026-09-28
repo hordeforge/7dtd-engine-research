@@ -26,8 +26,17 @@ static class IlFmt {
   // Dots survive (namespaces carry them), so a whole fragment of "." or ".."
   // would combine into a parent directory; prefix it to pin every fragment
   // strictly below the output root.
+  //
+  // ASCII alphanumerics only, not char.IsLetterOrDigit: that predicate accepts
+  // Unicode letters and reads a name as UTF-16 code units, so the fragment
+  // depended on the spelling of the name and on how the host's filesystem
+  // normalizes it. Tools/sandbox/safe_name.py is the twin and holds the same
+  // alphabet.
+  static bool IsAsciiAlnum(char c) =>
+    (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+
   public static string Safe(string s) {
-    var t = string.Concat(s.Select(c => char.IsLetterOrDigit(c) || c == '_' || c == '.' ? c : '_'));
+    var t = string.Concat(s.Select(c => IsAsciiAlnum(c) || c == '_' || c == '.' ? c : '_'));
     return t == "." || t == ".." ? "_" + t : t;
   }
 }
