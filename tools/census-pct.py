@@ -18,10 +18,11 @@ Usage:
             under ~/.local/share/Steam; same resolution as tools/stock-sync.sh)
     docsDir docs directory to scan (default: docs)
     --json  emit a machine-readable JSON object instead of the human report
-    --history FILE  append the percentages to a CSV (default name:
-            census-history.csv) so census numbers can be tracked over time
-            (date column is UTC so rows from different hosts stay comparable;
-            set SOURCE_DATE_EPOCH to pin it for a reproducible append)
+    --history FILE  record the percentages in a CSV (default name:
+            census-history.csv), one row per date, so census numbers can be
+            tracked over time (date column is UTC so rows from different hosts
+            stay comparable; a rerun on the same date replaces its own row; set
+            SOURCE_DATE_EPOCH to pin the date for a reproducible run)
 
 Exit code is 0 unless the census itself fails; unaccounted > 0 is reported
 loudly but is not a hard failure (this is a report, not a gate).
@@ -29,6 +30,7 @@ loudly but is not a hard failure (this is a report, not a gate).
 
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 import re
@@ -140,9 +142,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         const="census-history.csv",
         default=None,
         metavar="FILE",
-        help="append the percentages to a CSV so census numbers can be "
-        "tracked over time (default name: census-history.csv; "
-        "date column is UTC)",
+        help="record the percentages in a CSV, one row per date, so census "
+        "numbers can be tracked over time (default name: "
+        "census-history.csv; date column is UTC)",
     )
     return ap.parse_args(argv)
 
@@ -151,25 +153,63 @@ def pct(n: int, total: int) -> float:
     return 100.0 * n / total if total else 0.0
 
 
-def append_history(path: str, header: str, row: str) -> None:
-    """Append one census row, writing the header exactly once.
+def _history_lock(path: str) -> Path:
+    """Stable lock file for one history CSV, under the gitignored scratch tree."""
+    digest = hashlib.sha256(os.path.abspath(path).encode("utf-8")).hexdigest()[:16]
+    return tooling.scratch_dir() / f"census-history-{digest}.lock"
 
-    The whole sequence (open, write the header if the file is empty, write the
-    row) runs under one exclusive lock on the file. Two separately atomic steps
-    are not enough: O_CREAT|O_EXCL only makes the file exist, so a racing
-    appender can put its row at offset 0 before the creator's header lands, and
-    the header then overwrites that row. Measured, that lost one row out of 200
-    from eight concurrent writers. O_APPEND keeps each write atomic against
-    appenders that do not take the lock; flock orders the ones that do.
-    """
-    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_APPEND, 0o644)
+
+def _write_history_row(path: str, header: str, row: str) -> str:
+    """Write `row` into the history CSV keyed on its date column."""
+    date = row.split(",", 1)[0]
+    lines: list[str] = []
+    if os.path.exists(path):
+        with open(path, encoding="utf-8", newline="") as fh:
+            lines = fh.read().splitlines(keepends=True)
+        if lines and lines[0] == header:
+            lines.pop(0)
+    outcome = "appended"
+    for index, line in enumerate(lines):
+        if line.split(",", 1)[0] == date:
+            if line == row:
+                outcome = "unchanged"
+            else:
+                lines[index] = row
+                outcome = "replaced"
+            break
+    else:
+        lines.append(row)
+    fd, tmp = tempfile.mkstemp(
+        prefix=os.path.basename(path) + ".", dir=os.path.dirname(os.path.abspath(path))
+    )
     try:
-        fcntl.flock(fd, fcntl.LOCK_EX)
-        if os.fstat(fd).st_size == 0:
-            os.write(fd, header.encode("utf-8"))
-        os.write(fd, row.encode("utf-8"))
-    finally:
-        os.close(fd)
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as fh:
+            fh.write(header)
+            fh.writelines(lines)
+        os.replace(tmp, path)
+    except BaseException:
+        os.unlink(tmp)
+        raise
+    return outcome
+
+
+def record_history(path: str, header: str, row: str) -> str:
+    """Record one census row, one row per date, last write wins.
+
+    `make census` appends to a committed CSV, and a second run over the same
+    build is the normal case (a retried CI step, a re-run after a docs edit).
+    Keyed on the date column, the repeat replaces its own row instead of
+    adding a duplicate: a run that only re-measures the same day leaves the
+    file byte-for-byte identical. The exclusive lock covers the whole
+    read-modify-write, and the file lands through a temp-and-rename, so
+    concurrent runs neither lose a row nor leave a truncated CSV.
+    """
+    with open(_history_lock(path), "a", encoding="utf-8") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        try:
+            return _write_history_row(path, header, row)
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
 
 
 def main() -> int:
@@ -303,10 +343,10 @@ def main() -> int:
             narrated_pct,
         )
         header = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
-        append_history(history, header, row)
+        outcome = record_history(history, header, row)
         # Keep stdout pure JSON under --json: consumers pipe the report
         # straight into a parser.
-        print("history appended to", history, file=sys.stderr if as_json else sys.stdout)
+        print("history %s in" % outcome, history, file=sys.stderr if as_json else sys.stdout)
     if as_json:
         print(json.dumps(result, indent=2))
         return 0

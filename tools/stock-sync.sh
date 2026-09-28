@@ -8,6 +8,9 @@
 #   ASM=/path/to/Assembly-CSharp.dll ./stock-sync.sh
 #
 # After a TFP patch: run this, fix any FAIL sites, commit stock_facts.json + pin edits.
+# SOURCE_DATE_EPOCH=<epoch> pins the extracted_utc stamp, so re-running the
+# extraction over an unchanged DLL reproduces stock_facts.json byte for byte
+# instead of dirtying the tree with a new wall-clock second.
 # Full post-update path (facts + pins + optional drift): tools/post-update.sh
 set -euo pipefail
 

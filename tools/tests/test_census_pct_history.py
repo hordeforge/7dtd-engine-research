@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""census-pct.py: the census history CSV must survive concurrent runs.
+"""census-pct.py: recording a census row twice must equal recording it once.
 
 The history file is a committed artifact under workspace/outputs/, and `make
-census` can run more than once at a time. Concurrent appenders must produce one
-header line and one row per append; a second header mid-file, or a lost row, is
-corruption of a tracked file that no gate would otherwise notice.
+census` can run more than once: a retried CI step, a re-measure of the same
+build, or two runs at the same time. The file is keyed on the date column, so a
+repeat replaces its own row rather than adding a duplicate, the header is
+written exactly once, and concurrent runs neither lose a row nor leave a
+truncated CSV behind.
 
 Usage: python3 tools/tests/test_census_pct_history.py
 """
@@ -25,6 +27,7 @@ import _common
 TOOL = _common.TOOLS / "census-pct.py"
 HISTORY = _common.REPO / "workspace" / "outputs" / "census-history.csv"
 HEADER = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
+ROW = "2026-01-01,3681,3681,0,0,0,100.0%\n"
 WRITERS = 8
 ROWS_PER_WRITER = 25
 
@@ -39,10 +42,16 @@ def load_module() -> Any:
 
 
 def writer(path: str, index: int) -> None:
-    """Child-process body: the exact call main() makes on --history."""
+    """Child-process body: the exact call main() makes on --history.
+
+    The row key is the first column (a UTC date in real use); the synthetic
+    values here give every concurrent row a distinct key, so each run must
+    survive rather than replace a sibling.
+    """
     module = load_module()
     for row in range(ROWS_PER_WRITER):
-        module.append_history(path, HEADER, f"2026-01-01,run{index},{row},0,0,0,0.0%\n")
+        key = "2026-01-01-run%d-%02d" % (index, row)
+        module.record_history(path, HEADER, f"{key},{index},{row},0,0,0,0.0%\n")
 
 
 def main() -> None:
@@ -51,23 +60,68 @@ def main() -> None:
     assert rows[0] == HEADER, f"{HISTORY}: first line is not the header"
     dupes = sum(1 for line in rows if line == HEADER)
     assert dupes == 1, f"{HISTORY}: {dupes} header lines (a racing run truncated it)"
+    dates = [line.split(",", 1)[0] for line in rows[1:]]
+    repeated = sorted({date for date in dates if dates.count(date) > 1})
+    assert not repeated, (
+        f"{HISTORY}: repeated dates {repeated} (a rerun appended instead of replacing)"
+    )
 
     with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         fresh = os.path.join(td, "census-history.csv")
+        module = load_module()
+
+        assert module.record_history(fresh, HEADER, ROW) == "appended"
+        once = Path(fresh).read_text(encoding="utf-8")
+        assert once == HEADER + ROW, "a fresh history file is not header + one row"
+
+        # The property under test: the same run again changes nothing.
+        assert module.record_history(fresh, HEADER, ROW) == "unchanged"
+        assert Path(fresh).read_text(encoding="utf-8") == once, "a rerun rewrote an identical row"
+        module.record_history(fresh, HEADER, ROW)
+        module.record_history(fresh, HEADER, ROW)
+        assert Path(fresh).read_text(encoding="utf-8") == once, "repeated runs grew the file"
+
+        # A same-date re-measure with different numbers replaces, never appends.
+        assert (
+            module.record_history(fresh, HEADER, "2026-01-01,3700,3690,0,0,10,99.7%\n")
+            == "replaced"
+        )
+        lines = Path(fresh).read_text(encoding="utf-8").splitlines()
+        assert lines == [HEADER.rstrip("\n"), "2026-01-01,3700,3690,0,0,10,99.7%"], lines
+
+        # A different date accumulates, and re-recording an earlier date leaves
+        # the later rows in place.
+        module.record_history(fresh, HEADER, "2026-01-02,3700,3690,0,0,10,99.7%\n")
+        module.record_history(fresh, HEADER, "2026-01-01,3681,3681,0,0,0,100.0%\n")
+        lines = Path(fresh).read_text(encoding="utf-8").splitlines()
+        assert lines == [
+            HEADER.rstrip("\n"),
+            ROW.rstrip("\n"),
+            "2026-01-02,3700,3690,0,0,10,99.7%",
+        ], lines
+
+        # A missing header is restored, not duplicated.
+        Path(fresh).write_text(ROW, encoding="utf-8")
+        module.record_history(fresh, HEADER, "2026-01-03,1,1,0,0,0,100.0%\n")
+        lines = Path(fresh).read_text(encoding="utf-8").splitlines()
+        assert lines.count(HEADER.rstrip("\n")) == 1, lines
+        assert len(lines) == 3, lines
+
+        concurrent = os.path.join(td, "concurrent.csv")
         ctx = multiprocessing.get_context("fork")
-        procs = [ctx.Process(target=writer, args=(fresh, i)) for i in range(WRITERS)]
+        procs = [ctx.Process(target=writer, args=(concurrent, i)) for i in range(WRITERS)]
         for proc in procs:
             proc.start()
         for proc in procs:
             proc.join(120)
-            assert proc.exitcode == 0, f"appender exited {proc.exitcode}"
-        lines = Path(fresh).read_text(encoding="utf-8").splitlines()
+            assert proc.exitcode == 0, f"recorder exited {proc.exitcode}"
+        lines = Path(concurrent).read_text(encoding="utf-8").splitlines()
         assert lines[0] == HEADER.rstrip("\n"), "header is not the first line"
         assert lines.count(HEADER.rstrip("\n")) == 1, f"{len(lines)} lines, header appears twice"
         expected = WRITERS * ROWS_PER_WRITER
-        assert len(lines) - 1 == expected, f"{len(lines) - 1} rows appended, expected {expected}"
-        assert len(set(lines[1:])) == expected, "a concurrent append lost a row"
-    print(f"OK: {WRITERS} concurrent census runs keep one header and every row")
+        assert len(lines) - 1 == expected, f"{len(lines) - 1} rows recorded, expected {expected}"
+        assert len(set(lines[1:])) == expected, "a concurrent run lost a row"
+    print(f"OK: a repeated census run rewrites nothing; {WRITERS} concurrent runs keep every row")
 
 
 if __name__ == "__main__":

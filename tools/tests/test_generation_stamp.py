@@ -16,7 +16,10 @@ Two things are pinned here, DLL-free and network-free:
      would be written into a committed file and look recorded).
   2. That no tool reads the clock for a stamp itself. A new artifact that
      calls `datetime.now()` directly is a run that cannot be replayed, and the
-     detector is self-tested so a silent no-match cannot read as a pass.
+     detector is self-tested so a silent no-match cannot read as a pass. The
+     same rule covers `tools/src/*.cs`, whose `extracted_utc` line lands in the
+     committed `tools/data/stock_facts.json`: the Mono extractor must read the
+     clock only inside a method that honors `SOURCE_DATE_EPOCH`.
 
 Usage: python3 tools/tests/test_generation_stamp.py
 """
@@ -40,6 +43,13 @@ PINNED_STAMP = "2026-09-12T09:46:00Z"
 WALL_CLOCK_SKEW_S = 120
 SEAM = "tooling.py"
 CLOCK_CALLS = ("now", "utcnow", "today")
+# tools/src/*.cs stamps a committed artifact (stock_facts.json) the same way;
+# the seam there is the SOURCE_DATE_EPOCH variable, and Mono's DateTimeOffset
+# is the only clock source the sources may read.
+CS_CLOCK_RE = re.compile(r"DateTime(?:Offset)?\.(?:UtcNow|Now|Today)\b")
+CS_SEAM = "StampEnv"
+CS_STAMP_METHOD = "ExtractedStamp"
+CS_METHOD_RE = re.compile(r"^  (?:static|public|private|internal)?[^;{]*\([^;]*\)[ ]*\{")
 
 
 def direct_clock_reads(path: Path) -> list[tuple[str, int]]:
@@ -81,6 +91,71 @@ def stamp_with(value: str | None) -> str:
             os.environ[tooling.STAMP_ENV] = previous
 
 
+def cs_method_at(lines: list[str], index: int) -> str:
+    """The C# method body containing `lines[index]`.
+
+    The sources indent members two spaces and close them at that indent, so a
+    method runs from its `  ...(...) {` header to the next line that is exactly
+    `  }`.
+    """
+    start = index
+    while start >= 0 and not CS_METHOD_RE.match(lines[start]):
+        start -= 1
+    if start < 0:
+        return ""
+    end = start
+    while end < len(lines) and lines[end] != "  }":
+        end += 1
+    return "\n".join(lines[start:end])
+
+
+def cs_stamp_helpers() -> list[str]:
+    """Paths of the C# stamp helpers, used as the detector's liveness proof."""
+    return [
+        str(path.relative_to(_common.TOOLS))
+        for path in sorted(_common.TOOLS.rglob("src/*.cs"))
+        if CS_STAMP_METHOD in path.read_text(encoding="utf-8")
+    ]
+
+
+def check_cs_sources() -> list[str]:
+    """Every C# clock read must sit in a method that honors the pinned epoch."""
+    failures: list[str] = []
+    for path in sorted(_common.TOOLS.rglob("src/*.cs")):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        for index, line in enumerate(lines):
+            if not CS_CLOCK_RE.search(line):
+                continue
+            body = cs_method_at(lines, index)
+            if CS_SEAM not in body:
+                failures.append(
+                    f"{path.relative_to(_common.TOOLS)}:{index + 1} reads the wall clock "
+                    f"outside a {CS_SEAM} check: {line.strip()}"
+                )
+    return failures
+
+
+CS_LIVENESS_SNIPPET = """class T {
+  static string Stamp() {
+    return DateTime.UtcNow.ToString("o");
+  }
+  static void Other() {
+    var t = DateTime.Now;
+  }
+}
+"""
+
+
+def cs_detector_alive() -> bool:
+    """The C# detector must flag a bare wall-clock read, or it reads as a pass."""
+    lines = CS_LIVENESS_SNIPPET.splitlines()
+    flagged = 0
+    for index, line in enumerate(lines):
+        if CS_CLOCK_RE.search(line) and CS_SEAM not in cs_method_at(lines, index):
+            flagged += 1
+    return flagged == 2
+
+
 def main() -> int:
     failures: list[str] = []
 
@@ -117,6 +192,15 @@ def main() -> int:
                 f"{path.relative_to(_common.TOOLS)}:{line} reads the clock directly "
                 f"({callee}); stamp artifacts through tooling.generation_stamp()"
             )
+
+    helpers = cs_stamp_helpers()
+    if not helpers:
+        failures.append(f"detector is dead: no tools/src/*.cs defines {CS_STAMP_METHOD}")
+    if not cs_detector_alive():
+        failures.append(
+            "detector is dead: the C# wall-clock read is not flagged on a known-bad sample"
+        )
+    failures.extend(check_cs_sources())
 
     if failures:
         for failure in failures:

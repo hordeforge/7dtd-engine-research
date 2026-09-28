@@ -18,6 +18,23 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 class StockFacts {
+  const string StampEnv = "SOURCE_DATE_EPOCH";
+
+  // The stamp every tool writing a committed artifact reads, so an extraction
+  // is a pure function of the assembly: a rerun over an unchanged DLL
+  // reproduces tools/data/stock_facts.json byte-for-byte instead of dirtying the
+  // tree with a new wall-clock second. A value that is not an integer epoch
+  // aborts rather than silently stamping the clock, because a mistyped stamp
+  // would otherwise be written into a committed file and look recorded.
+  static string ExtractedStamp() {
+    var raw = Environment.GetEnvironmentVariable(StampEnv);
+    if (string.IsNullOrEmpty(raw)) return DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
+    long seconds;
+    if (!long.TryParse(raw.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out seconds))
+      throw new Exception(StampEnv + "=" + raw + " is not an integer UTC epoch");
+    return DateTimeOffset.FromUnixTimeSeconds(seconds).UtcDateTime.ToString("o", CultureInfo.InvariantCulture);
+  }
+
   static TypeDefinition Exact(ModuleDefinition mod, string name) {
     return mod.Types.FirstOrDefault(t => t.Name == name && (t.Namespace == "" || t.Namespace == null))
         ?? mod.Types.FirstOrDefault(t => t.Name == name)
@@ -418,7 +435,7 @@ class StockFacts {
     sb.AppendLine("    \"assembly_csharp_dll_bytes\": " + asmBytes + ",");
     sb.AppendLine("    \"note\": \"hash of the exact extracted bytes; version fields can repeat across a silent re-release, this hash cannot\"");
     sb.AppendLine("  },");
-    sb.AppendLine("  \"extracted_utc\": " + JsonEsc(DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture)) + ",");
+    sb.AppendLine("  \"extracted_utc\": " + JsonEsc(ExtractedStamp()) + ",");
     sb.AppendLine("  \"version\": {");
     sb.AppendLine("    \"release_type\": " + releaseType + ",");
     sb.AppendLine("    \"major\": " + major + ",");
