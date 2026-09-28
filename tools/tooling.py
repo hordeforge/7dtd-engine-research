@@ -21,6 +21,7 @@ read, so `SOURCE_DATE_EPOCH` makes their output replayable byte-for-byte.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
@@ -360,10 +361,9 @@ def run_bounded(
 
 def _kill_group(proc: "subprocess.Popen[str]") -> None:
     """SIGKILL the child's process group, so grandchildren die with it."""
-    try:
+    # ProcessLookupError: the group is already gone, which is the state asked for.
+    with contextlib.suppress(ProcessLookupError):
         os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-    except ProcessLookupError:
-        pass
 
 
 def run_mono(exe: str | Path, *args: str) -> tuple[int, str, str]:

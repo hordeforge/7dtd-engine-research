@@ -91,9 +91,12 @@ def env_reads(path: Path) -> set[str]:
                 found.update(_call_arg_name(node))
         if isinstance(node, ast.Subscript) and _is_environ(node.value):
             found.update(_subscript_name(node))
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-            if node.func.id == "getenv":
-                found.update(_call_arg_name(node))
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "getenv"
+        ):
+            found.update(_call_arg_name(node))
     # Constants: a bare string (a timeout's variable) or a tuple of them (the
     # override names in one list), read from the `_ENV` / `_VARS` constants the
     # tools already use. Other uppercase tuples are path parts and verdict

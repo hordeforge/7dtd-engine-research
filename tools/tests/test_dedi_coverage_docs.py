@@ -188,9 +188,12 @@ def main() -> int:
         doc_texts[name] = txt
         if len(txt) < 300:
             fails.append(f"family doc too short (<300 bytes): {name}")
-        if name not in EVIDENCE_EXEMPT_DOCS:
-            if not has_il_backed_claim(txt) and not is_dump_marker(txt):
-                fails.append(f"family doc lacks IL or dump evidence reference: {name}")
+        if (
+            name not in EVIDENCE_EXEMPT_DOCS
+            and not has_il_backed_claim(txt)
+            and not is_dump_marker(txt)
+        ):
+            fails.append(f"family doc lacks IL or dump evidence reference: {name}")
 
         for pat, label in ban_pattern_specs():
             if re.search(pat, txt):

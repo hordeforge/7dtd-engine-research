@@ -149,7 +149,9 @@ def score_mutation_doc_fail() -> tuple[float, str]:
 
 
 def _path_present(facts: dict[str, Any], path: tuple[str, ...]) -> bool:
-    cur = facts
+    # A JSON document nests dicts, lists and scalars; the walk below checks each
+    # step, so the value in hand is not a dict until the isinstance says so.
+    cur: Any = facts
     for k in path:
         if not isinstance(cur, dict) or k not in cur:
             return False

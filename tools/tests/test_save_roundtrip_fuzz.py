@@ -278,7 +278,7 @@ def main() -> int:
         families = [
             (
                 "main.ttw",
-                lambda i: build_ttw(),
+                lambda _i: build_ttw(),
                 lambda d: run_path_parser(src.check_main_ttw, d, tmp),
             ),
             (
@@ -313,7 +313,7 @@ def main() -> int:
             ),
             (
                 "worldstate-tail",
-                lambda i: build_worldstate_tail(),
+                lambda _i: build_worldstate_tail(),
                 lambda d: run_blob_parser(src.check_worldstate_tail, d, 0),
             ),
             (
@@ -323,12 +323,12 @@ def main() -> int:
             ),
             (
                 "ai-director",
-                lambda i: build_ai_blob(),
+                lambda _i: build_ai_blob(),
                 lambda d: run_blob_parser(src.check_ai_director_blob, d),
             ),
             (
                 "weather",
-                lambda i: struct.pack("<HBB", 4, 60, 1) + bytes(40),
+                lambda _i: struct.pack("<HBB", 4, 60, 1) + bytes(40),
                 lambda d: run_blob_parser(src.check_weather_blob, d),
             ),
         ]

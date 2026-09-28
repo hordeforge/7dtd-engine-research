@@ -426,17 +426,20 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
         errors,
     )
     # Fallback: Major/Minor/Build triple or display+build without hard-coded line version.
-    if not re.search(
-        rf"{pin_esc}.*b{build}|b{build}.*{pin_esc}|"
-        rf"Major\s*=\s*{major}.*Minor\s*=\s*{minor}.*Build\s*=\s*{build}",
-        cov,
-        re.I | re.S,
+    if (
+        not re.search(
+            rf"{pin_esc}.*b{build}|b{build}.*{pin_esc}|"
+            rf"Major\s*=\s*{major}.*Minor\s*=\s*{minor}.*Build\s*=\s*{build}",
+            cov,
+            re.I | re.S,
+        )
+        and f"Major={major}" not in cov
+        and f"Minor={minor}" not in cov
     ):
-        if f"Major={major}" not in cov and f"Minor={minor}" not in cov:
-            errors.append(
-                f"docs/meta/coverage.md: expected version pin for {display} b{build} "
-                f"(Major={major} Minor={minor} Build={build})"
-            )
+        errors.append(
+            f"docs/meta/coverage.md: expected version pin for {display} b{build} "
+            f"(Major={major} Minor={minor} Build={build})"
+        )
 
     # Chunk dims
     if str(ydim) not in cov and f"ChunkBlockYDim={ydim}" not in cov:

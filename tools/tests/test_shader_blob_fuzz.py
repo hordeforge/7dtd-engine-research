@@ -297,7 +297,10 @@ def check_roundtrip(name: str, data: bytes, parsed: Any, bad: list[str]) -> None
     fields, consumed = parsed
     rebuilt = src.build_parameter_blob(fields)
     if len(rebuilt) != consumed:
-        bad.append(f"parameter: re-emit is {len(rebuilt)} bytes, parse consumed {consumed}")
+        bad.append(
+            f"parameter: {len(data)}-byte blob re-emits as {len(rebuilt)} bytes, "
+            f"parse consumed {consumed}"
+        )
     again, consumed_again = src.parse_parameter_blob(rebuilt)
     if consumed_again != len(rebuilt) or src.build_parameter_blob(again) != rebuilt:
         bad.append("parameter: re-emitting a decoded blob is not a fixed point")

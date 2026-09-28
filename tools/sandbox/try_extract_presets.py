@@ -95,7 +95,7 @@ def main() -> int:
                 tmp = Path(fh.name)
             os.replace(tmp, args.out)
         finally:
-            if tmp and tmp.exists():
+            if tmp is not None and tmp.exists():
                 tmp.unlink()
         print(f"wrote {args.out} ({len(text)} bytes) from {source}")
     else:

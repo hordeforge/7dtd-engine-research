@@ -30,6 +30,7 @@ Usage: python3 tools/tests/test_bounded_runs.py
 
 from __future__ import annotations
 
+import contextlib
 import os
 import re
 import subprocess
@@ -54,6 +55,14 @@ SNIPPET = (
 SHELL_CHILD_RE = re.compile(
     r"(?:^|[;&|(]\s*|\bthen\s+|\bdo\s+|\$\(\s*)((?:[\w./]*=\S*\s+)?)(mono|mcs|monodis)\s"
 )
+# A quoted literal: the build stamp is written with echo "# ... mcs has no
+# -deterministic ...", which names the tool inside a string and spawns nothing.
+QUOTED_RE = re.compile(r"\"[^\"]*\"|'[^']*'")
+
+
+def _unquoted(line: str) -> str:
+    """The line with its quoted literals blanked, so prose is not read as a spawn."""
+    return QUOTED_RE.sub('""', line)
 
 
 def wait_gone(pid: int) -> bool:
@@ -71,10 +80,10 @@ def wait_gone(pid: int) -> bool:
             # still running: reporting it gone here would turn a surviving
             # grandchild into a passing group-kill assertion.
             return False
-        try:
+        # ChildProcessError: the pid was already reaped, so there is no child to
+        # wait for and the loop keeps probing.
+        with contextlib.suppress(ChildProcessError):
             os.waitpid(pid, os.WNOHANG)
-        except ChildProcessError:
-            pass
         time.sleep(0.05)
     return False
 

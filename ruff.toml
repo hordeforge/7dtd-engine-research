@@ -27,6 +27,8 @@ select = [
     "LOG", # logging misuse (f-strings in the message, f-string in exc_info)
     "ASYNC", # blocking calls inside async functions
     "RET", # return-path consistency (superfluous else/finally, unreachable code)
+    "ARG", # unused arguments: a dropped parameter is a silently dead contract
+    "SIM", # simplifications that hide a branch or an exception path
     "PGH", # blanket noqa/fixme suppression hygiene
     "PLE", # pylint errors (real-defect subset)
     "RSE", # unnecessary parens on raised exceptions
@@ -43,6 +45,11 @@ select = [
 # importing the shared _common helper, so module-level imports legitimately
 # follow executable setup statements there.
 "tools/tests/**" = ["E402"]
+# Every parser in the SECTION_SPECS table takes (text, unparsed) so the driver
+# calls them uniformly, and HEALTH_RE only matches \d+, so some parsers have
+# nothing to record. Renaming the parameter would break the table's symmetry
+# without changing what the gate checks.
+"tools/xml_pins.py" = ["ARG001"]
 
 [format]
 # De-facto Python formatter, same pinned ruff binary as the lint gate
