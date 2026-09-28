@@ -25,7 +25,7 @@ control exists or does not.
 | 1 | A downloaded or swapped build payload is executed on the operator machine | tool → third-party binary | [`tools/steam/fetch_version.sh`](../../tools/steam/fetch_version.sh), [`tools/build.sh`](../../tools/build.sh) | Mono.Cecil is sha256-pinned ([`tools/data/cecil.pin`](../../tools/data/cecil.pin), checked in [`tools/build.sh:33`](../../tools/build.sh)); the game DLL is never verified before `mcs`/`mono` run over it |
 | 2 | Crafted save/region bytes drive the parsers in `save_roundtrip_check.py` | file on disk → parser | [`tools/save_roundtrip_check.py`](../../tools/save_roundtrip_check.py) | capped inflate, bounds-checked records, fuzz + robustness gates ([`tools/tests/test_save_roundtrip_fuzz.py`](../../tools/tests/test_save_roundtrip_fuzz.py)) |
 | 3 | The pin file (`tools/data/*.json`) is rewritten by a network fetch or a hostile local file | network/disk → repo state | [`tools/steam/steam_builds.py:249`](../../tools/steam/steam_builds.py), [`tools/xml_pins.py`](../../tools/xml_pins.py) | atomic tmp+rename, digest-pinned source identity; no signature over the pin files themselves |
-| 4 | CI executes a shellcheck tarball fetched at run time | CI → external host | [`.github/workflows/ci.yml:37`](../../.github/workflows/ci.yml) | sha256 check before extract; GitHub Actions pinned to commit SHAs |
+| 4 | CI executes a shellcheck tarball fetched at run time | CI → external host | [`.github/workflows/ci.yml:37`](../../.github/workflows/ci.yml) | sha256 check before extract into a private temp dir; GitHub Actions pinned to commit SHAs; `permissions: contents: read` and `persist-credentials: false` |
 | 5 | Untrusted game-supplied names become filesystem paths under the output dir | game data → filesystem | [`tools/sandbox/safe_name.py`](../../tools/sandbox/safe_name.py), [`tools/src/IlFmt.cs`](../../tools/src/IlFmt.cs) | `safe_name` strips separators and refuses `.`/`..`; enforced by [`tools/tests/test_sandbox_safe_name.py`](../../tools/tests/test_sandbox_safe_name.py) |
 | 6 | A hostile Steam depot manifest or appinfo JSON exhausts memory or CPU | network/disk → tool | [`tools/steam/steam_manifest.py`](../../tools/steam/steam_manifest.py), [`tools/steam/steam_builds.py`](../../tools/steam/steam_builds.py) | size-bounded protobuf reads (fixed-width fields and varints checked against the block), fuzz + per-call time ceiling ([`tools/tests/test_steam_manifest_fuzz.py`](../../tools/tests/test_steam_manifest_fuzz.py)); 30 s on the appinfo GET ([`steam_builds.py:169`](../../tools/steam/steam_builds.py)); no global quota on a `--verify` over a full 17 GB install |
 | 7 | A hostile depot manifest steers `--verify-install` at files outside the install root, or a network-supplied gid reaches the shell as an argument | network/disk → filesystem, network → argv | [`tools/steam/steam_manifest.py:338`](../../tools/steam/steam_manifest.py), [`tools/steam/steam_builds.py:78`](../../tools/steam/steam_builds.py) | `safe_join` refuses absolute or escaping entry names and `--verify` reports them as `UNSAFE`; `GID_RE` refuses a non-numeric gid before it becomes a `fetch_version.sh` argument |
@@ -174,10 +174,13 @@ the tooling is local, operator-invoked.
 **CI**
 - Tampering: a compromised release host, mitigated by the sha256 gate on the
   shellcheck tarball; the Actions themselves are SHA-pinned.
-- Elevation: CI runs with the default token and no secrets on `push` and
-  `pull_request`. Untrusted PR code does reach `make test-docs` on
-  `pull_request`; it is repo-adjacent test code, not a fork-publishable secret
-  path.
+- Elevation: CI runs on `push` and `pull_request` with `GITHUB_TOKEN`
+  restricted to `contents: read`
+  ([`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)) and
+  `persist-credentials: false`, so the token is neither write-capable nor left
+  in `.git/config` for a step to use. No secrets are configured. Untrusted PR
+  code does reach `make test-docs` on `pull_request`; it is repo-adjacent test
+  code, and it runs with a read-only, unpersisted token.
 
 ## Mitigations that exist
 
@@ -198,6 +201,7 @@ the tooling is local, operator-invoked.
 | Digest-pinned source identity for every committed pin | silent pin drift | `source_identity` in [`tools/xml_pins.py:169`](../../tools/xml_pins.py) |
 | SHA-1 verify of a local install against Steam's own manifest | swapped install files | [`tools/steam/steam_manifest.py`](../../tools/steam/steam_manifest.py), [`tools/tests/test_install_integrity.py`](../../tools/tests/test_install_integrity.py) |
 | Quoted expansions, `set -euo pipefail`, label allowlist, shellcheck error-severity | shell injection in operator scripts | [`tools/steam/fetch_version.sh:39`](../../tools/steam/fetch_version.sh), `make lint` |
+| Read-only CI token scope, `persist-credentials: false` | token misuse from a step running untrusted PR code | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) |
 | Git-ignored `il/` dumps, no DLL committed | redistribution of game assets | repo `AGENTS.md` rule 2, [`.gitignore`](../../.gitignore) |
 
 ## Gaps, ranked
