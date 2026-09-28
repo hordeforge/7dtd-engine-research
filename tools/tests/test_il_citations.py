@@ -50,6 +50,8 @@ TABLE_PAT = re.compile(
 DATE_PAT = re.compile(r"\d{4}-\d{2}-\d{2}")
 # corpus shorthand: docs cite NetPackage*/AIDirector*/etc. types by suffix.
 PREFIXES = ("NetPackage", "AIDirector", "ConsoleCmd", "TileEntity", "TEFeature")
+# Vacuity floor: the gate must resolve at least this many claims to report OK.
+MIN_LIVE_CLAIMS = 250
 
 
 def norm(s: str) -> str:
@@ -73,6 +75,9 @@ def main() -> int:
         short = norm(full.rsplit("/", 1)[-1].rsplit(".", 1)[-1])
         for key in (norm(full), short):
             methods.setdefault(key, {}).setdefault(norm(name), set()).add(il)
+    if not methods:
+        print("FAIL: the Cecil probe reported no method bodies; every claim would skip")
+        return 1
 
     bad = []
     n_claims = 0
@@ -121,6 +126,13 @@ def main() -> int:
         if len(bad) > 40:
             print(f"...and {len(bad) - 40} more")
         print(f"({len(bad)} mismatches of {n_claims} live claims, {n_skipped} skipped)")
+        return 1
+    # A renamed or moved type makes every claim citing it unresolvable, and an
+    # unresolvable claim is a skip, not a failure: without a floor the gate goes
+    # green having verified nothing. The corpus carries thousands of claims;
+    # MIN_LIVE_CLAIMS is far under the real count and far over vacuity.
+    if n_claims < MIN_LIVE_CLAIMS:
+        print(f"FAIL: only {n_claims} live IL claims resolved, expected at least {MIN_LIVE_CLAIMS}")
         return 1
     print(
         f"OK: {n_claims} IL citations verified against the DLL ({n_skipped} changelog/shorthand skipped)"

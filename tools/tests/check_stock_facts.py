@@ -332,19 +332,23 @@ def check_research(facts: dict[str, Any], errors: list[str]) -> None:
         )
 
     # Enum index sizes: EnumGameStats/EnumGamePrefs member counts pin the
-    # gamestats-gameprefs inventory; the docs must cite 82 + 317.
+    # gamestats-gameprefs inventory; each of its tables must carry exactly that
+    # many rows, indexed 0..count-1.
     en = facts.get("enums", {})
     if en.get("game_stats_members") != 82:
         errors.append(f"stock_facts enums.game_stats_members={en.get('game_stats_members')} != 82")
     if en.get("game_prefs_members") != 317:
         errors.append(f"stock_facts enums.game_prefs_members={en.get('game_prefs_members')} != 317")
-    else:
-        must_match(
-            "docs/inventories/gamestats-gameprefs.md 82+317",
-            read(ROOT / "docs" / "inventories" / "gamestats-gameprefs.md"),
-            r"82|317",
-            errors,
-        )
+    if en.get("game_stats_members") == 82 and en.get("game_prefs_members") == 317:
+        gg = read(ROOT / "docs" / "inventories" / "gamestats-gameprefs.md")
+        for enum_name, count in (("EnumGameStats", 82), ("EnumGamePrefs", 317)):
+            m = re.search(rf"^## {enum_name}\s*$(.*?)(?=^## |\Z)", gg, re.M | re.S)
+            rows = re.findall(r"^\|\s*(\d+)\s*\|\s*`\w+`\s*\|\s*$", m.group(1), re.M) if m else []
+            if [int(i) for i in rows] != list(range(count)):
+                errors.append(
+                    f"docs/inventories/gamestats-gameprefs.md: {enum_name} table indexes "
+                    f"{len(rows)} rows, expected {count} contiguous 0..{count - 1}"
+                )
 
     # xmlsToLoad list: the WorldStaticData cctor's load names (non-XUi core)
     # must match the inventory's XmlName rows exactly.

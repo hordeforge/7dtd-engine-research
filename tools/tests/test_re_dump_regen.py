@@ -6,15 +6,17 @@ Requires:
   - mcs + mono on PATH
   - Mono.Cecil.dll next to tools/
 
-Does not redistribute game IL; writes only under a caller-supplied out dir or
-tools/tests/_out (gitignored).
+Does not redistribute game IL; writes into a fresh scratch directory (or the
+out dir RE_DUMP_OUT names), removed when the run ends.
 """
 
 from __future__ import annotations
 
+import atexit
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -40,8 +42,17 @@ def main() -> int:
         print("FAIL: missing", DUMPER, file=sys.stderr)
         return 1
 
-    out = Path(os.environ.get("RE_DUMP_OUT", TOOLS / "tests" / "_out" / "frame-entries"))
-    out.mkdir(parents=True, exist_ok=True)
+    # A fresh directory per run: a fixed _out/ path lets artifacts from an
+    # earlier run satisfy the existence, size, and content checks below.
+    override = os.environ.get("RE_DUMP_OUT")
+    tmp = None
+    if override:
+        out = Path(override)
+        out.mkdir(parents=True, exist_ok=True)
+    else:
+        tmp = tempfile.TemporaryDirectory(prefix="re-dump-regen-", dir=_common.scratch_dir())
+        atexit.register(tmp.cleanup)
+        out = Path(tmp.name)
 
     EXE.parent.mkdir(parents=True, exist_ok=True)
     compile_cmd = ["mcs", f"-r:{CECIL}", f"-out:{EXE}", str(DUMPER)]
@@ -71,6 +82,14 @@ def main() -> int:
                     return 1
         if f.name == "inventory-gmupdate-calls.md":
             for needle in ("UpdateTick", "gmUpdate", "ThreadManager"):
+                if needle not in text:
+                    print("FAIL:", f, "missing", needle, file=sys.stderr)
+                    return 1
+        if f.name == "inventory-manager-updates.md":
+            for needle in (
+                "AchievementManager::UpdateAchievement",
+                "AIDirector::UpdatePlayerInventory",
+            ):
                 if needle not in text:
                     print("FAIL:", f, "missing", needle, file=sys.stderr)
                     return 1

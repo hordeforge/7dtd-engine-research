@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Guard `Xref=N` call-site claims in narrative docs against the Xref tool.
 
-docs/*.md (hand-written, excluding docs/inventories/) state call-site counts
+docs/**/*.md (hand-written, excluding docs/inventories/) state call-site counts
 in the tight form ``Type.Method (Xref=N)`` / ``Type::Method (Xref=N)``. The
 Xref tool (tools/src/Xref.cs, builds to tools/bin/Xref.exe) reports every
 call/callvirt/newobj/ldftn site attributed to its enclosing method. A doc
@@ -30,6 +30,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 import _common
 
@@ -81,17 +82,26 @@ def main() -> int:
         print(f"SKIP: assembly not found: {asm_label}")
         return 0
     asm = str(asm_path)
+
+    found = []
+    # Every subsystem subfolder, not just docs/*.md: the narratives moved into
+    # per-folder files, and a top-level-only walk found zero claims while still
+    # printing OK.
+    for path in sorted(Path(DOCS).rglob("*.md")):
+        rel = str(path.relative_to(DOCS))
+        if rel.startswith("inventories" + os.sep):
+            continue
+        for typ, member, want in claims_in(str(path)):
+            found.append((rel, typ, member, want))
+    # Collected before the tool check: an empty corpus is a broken walk or a
+    # broken claim regex, not a missing prerequisite.
+    if not found:
+        print("FAIL: no Xref=N claims found under docs/; the claim regex or the walk is broken")
+        return 1
+
     if not os.path.exists(XREF):
         print("SKIP: Xref.exe not built (run make tools)")
         return 0
-
-    found = []
-    for name in sorted(os.listdir(DOCS)):
-        path = os.path.join(DOCS, name)
-        if not name.endswith(".md") or os.path.isdir(path):
-            continue
-        for typ, member, want in claims_in(path):
-            found.append((name, typ, member, want))
 
     # One assembly pass for all unique claims.
     pairs: list[tuple[str, str]] = []

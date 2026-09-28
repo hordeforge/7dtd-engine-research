@@ -40,6 +40,10 @@ def main() -> int:
     for f in sorted(table - run):
         if not os.path.exists(os.path.join(TESTDIR, f)):
             bad.append(f"{f}: in README Tests table but file does not exist")
+    # A gate wired into neither the Makefile nor the table was invisible to both
+    # checks above: nothing ran it and nothing claimed it ran.
+    for f in sorted({f for f in os.listdir(TESTDIR) if f.endswith(".py")} - run - {"_common.py"}):
+        bad.append(f"{f}: exists in tools/tests but no make target runs it")
     if bad:
         for b in bad:
             print("FAIL:", b)

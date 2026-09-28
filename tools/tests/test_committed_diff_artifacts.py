@@ -110,8 +110,10 @@ def main() -> int:
     text = report.read_text(encoding="utf-8")
     row = SHA_ROW_RE.search(text)
     if row is None:
-        print("SKIP: committed report has no sha256 identity row")
-        return 0
+        # A format change here would silently disarm every check below, so it
+        # is a broken gate, not a missing prerequisite.
+        print(f"FAIL: {report} has no sha256 identity row (report format changed?)")
+        return 1
     old_sha, new_sha = row.group(1), row.group(2)
     if sha256_file(backup) != old_sha:
         print(f"SKIP: {backup.name} is not the report's baseline build")
