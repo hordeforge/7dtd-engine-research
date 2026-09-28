@@ -27,7 +27,6 @@ DOCS = TOOLS.parent / "docs"
 # Mono.Cecil is copied into bin/ by build.sh; legacy dumpers live in legacy/.
 CECIL = TOOLS / "bin" / "Mono.Cecil.dll"
 DUMPER = TOOLS / "legacy" / "DumpFrameEntries.cs"
-EXE = TOOLS / "bin" / "legacy" / "DumpFrameEntries.exe"
 
 
 def main() -> int:
@@ -54,14 +53,20 @@ def main() -> int:
         atexit.register(tmp.cleanup)
         out = Path(tmp.name)
 
-    EXE.parent.mkdir(parents=True, exist_ok=True)
-    compile_cmd = ["mcs", f"-r:{CECIL}", f"-out:{EXE}", str(DUMPER)]
+    # The gate compiles its own copy of the dumper into a private dir: writing it
+    # over bin/legacy/ would clobber the build's artifact mid-write, so a
+    # concurrent `make tools` or a second run could load a half-written exe (and
+    # the run would leave an exe no build.sh knows it produced).
+    build = tempfile.TemporaryDirectory(prefix="re-dump-regen-bin-", dir=_common.scratch_dir())
+    atexit.register(build.cleanup)
+    exe = Path(build.name) / DUMPER.stem
+    compile_cmd = ["mcs", f"-r:{CECIL}", f"-out:{exe}", str(DUMPER)]
     print("RUN:", " ".join(compile_cmd))
     subprocess.check_call(compile_cmd, cwd=str(TOOLS))
 
     # Mono.Cecil.dll lives in bin/; make it resolvable at runtime.
     env = dict(os.environ, MONO_PATH=str(CECIL.parent))
-    run_cmd = ["mono", str(EXE), str(asm), str(out)]
+    run_cmd = ["mono", str(exe), str(asm), str(out)]
     print("RUN:", " ".join(run_cmd))
     subprocess.check_call(run_cmd, cwd=str(TOOLS), env=env)
 

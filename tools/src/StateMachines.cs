@@ -83,7 +83,7 @@ static class StateMachines {
     sb.AppendLine("## Changelog");
     sb.AppendLine();
     sb.AppendLine("- **2026-07-26:** Initial generated index of all modelled lifecycles.");
-    File.WriteAllText(a[1], sb.ToString());
+    Atomic.WriteText(a[1], sb.ToString());
     Console.Error.WriteLine("indexed " + entries.Count + " state machines");
     Console.WriteLine("wrote " + a[1]);
   }

@@ -52,7 +52,7 @@ static class RefScan {
     }
 
     string outp = a.Length > 2 ? a[2] : null;
-    if (outp != null) { File.WriteAllText(outp, sb.ToString()); Console.Error.WriteLine("wrote " + outp); }
+    if (outp != null) { Atomic.WriteText(outp, sb.ToString()); Console.Error.WriteLine("wrote " + outp); }
     else Console.Write(sb.ToString());
     foreach (var kv in counts.OrderBy(k => k.Value))
       Console.Error.WriteLine(string.Format("{0,-40} external refs: {1}", kv.Key, kv.Value));

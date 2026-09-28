@@ -420,7 +420,7 @@ class Coverage {
     }
     sb.AppendLine();
 
-    File.WriteAllText(a[2], sb.ToString());
+    Atomic.WriteText(a[2], sb.ToString());
 
     Console.Error.WriteLine("reached methods=" + visited.Count + " game types=" + gameReached.Count + " narrated=" + docd + " catalogued=" + catd + " classified=" + classd + " unaccounted=" + undoc);
     Console.WriteLine("wrote " + a[2] + " (" + undoc + " undocumented)");

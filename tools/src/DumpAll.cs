@@ -49,7 +49,7 @@ class DumpAll {
       string ns = root.Namespace;
       string dir = Path.Combine(a[1], IlFmt.Safe(ns == "" ? "_global" : ns));
       Directory.CreateDirectory(dir);
-      File.WriteAllText(Path.Combine(dir, scope + IlFmt.Safe(t.Name) + ".il.txt"), sb.ToString());
+      Atomic.WriteText(Path.Combine(dir, scope + IlFmt.Safe(t.Name) + ".il.txt"), sb.ToString());
       nt++;
     }
     Console.Error.WriteLine("dumped " + nt + " types / " + nm + " method bodies to " + a[1]);

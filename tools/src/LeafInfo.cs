@@ -45,7 +45,7 @@ static class LeafInfo {
                         .Take(4).Select(m => m.Name).ToList();
       sb.AppendLine(name + "\t" + bt + "\t" + bodies + "\t" + string.Join(", ", fp));
     }
-    File.WriteAllText(a[2], sb.ToString());
+    Atomic.WriteText(a[2], sb.ToString());
     Console.WriteLine("wrote " + a[2]);
   }
 }

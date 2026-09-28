@@ -204,7 +204,7 @@ static class WireBodies {
       foreach (var x in more) if (!done.Contains(x)) queue.Add(x);
     }
 
-    File.WriteAllText(a[1], sb.ToString());
+    Atomic.WriteText(a[1], sb.ToString());
     Console.WriteLine("wrote " + a[1] + " (" + types.Count + " packages, " + done.Count + " nested serializers)");
   }
 

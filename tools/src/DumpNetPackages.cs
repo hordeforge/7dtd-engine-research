@@ -48,11 +48,11 @@ class DumpNetPackages {
       sb.AppendLine("// fields: " + string.Join(", ", t.Fields.Select(f => f.FieldType.Name + " " + f.Name)));
       sb.AppendLine();
       foreach (var mn in Methods) Dump(sb, t, mn);
-      File.WriteAllText(Path.Combine(a[1], IlFmt.Safe(t.Name) + "_il.txt"), sb.ToString());
+      Atomic.WriteText(Path.Combine(a[1], IlFmt.Safe(t.Name) + "_il.txt"), sb.ToString());
       idx.AppendLine("| " + Esc(t.Name) + " | " + t.Fields.Count + " | " + IL(t, "read") + " | " + IL(t, "write") +
         " | " + IL(t, "Setup") + " | " + IL(t, "GetLength") + " | " + IL(t, "ProcessPackage") + " |");
     }
-    File.WriteAllText(Path.Combine(a[1], "INDEX.md"), idx.ToString());
+    Atomic.WriteText(Path.Combine(a[1], "INDEX.md"), idx.ToString());
     Console.Error.WriteLine("Dumped " + pkgs.Count + " NetPackage types to " + a[1]);
   }
 }

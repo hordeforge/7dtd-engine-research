@@ -35,7 +35,7 @@ class DumpMethod {
         hits++;
       }
     }
-    if (a.Length >= 4) { File.WriteAllText(a[3], sb.ToString()); Console.Error.WriteLine("wrote " + hits + " method(s) to " + a[3]); }
+    if (a.Length >= 4) { Atomic.WriteText(a[3], sb.ToString()); Console.Error.WriteLine("wrote " + hits + " method(s) to " + a[3]); }
     else Console.Write(sb.ToString());
   }
 }

@@ -41,7 +41,7 @@ class FullSurface {
         " | " + (t.BaseType == null ? "-" : t.BaseType.Name) + " | " + t.Fields.Count + " | " +
         t.Methods.Count(m => m.HasBody) + " | " + il + " |");
     }
-    File.WriteAllText(Path.Combine(a[1], "surface-types.md"), types.ToString());
+    Atomic.WriteText(Path.Combine(a[1], "surface-types.md"), types.ToString());
 
     // Per-namespace summary.
     var ns = new StringBuilder();
@@ -55,7 +55,7 @@ class FullSurface {
       int f = g.Sum(t => t.Fields.Count);
       ns.AppendLine("| " + Esc(g.Key) + " | " + g.Count() + " | " + m + " | " + il + " | " + f + " |");
     }
-    File.WriteAllText(Path.Combine(a[1], "surface-namespaces.md"), ns.ToString());
+    Atomic.WriteText(Path.Combine(a[1], "surface-namespaces.md"), ns.ToString());
     Console.Error.WriteLine("wrote surface-types.md (" + all.Count + " types) + surface-namespaces.md to " + a[1]);
   }
 }

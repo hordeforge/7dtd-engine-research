@@ -159,11 +159,12 @@ up_to_date() { # <exe> <input>...
 }
 
 # Primary tools (src/): general, maintained. IlFmt.cs (IL formatting),
-# Seeds.cs (reachability seeds shared by Coverage/Reach) and AsmWalk.cs
-# (assembly-walk helpers shared by the scanners) are compiled into every src/
-# dumper. StockFacts/MethodList/ParitySurface are ALSO compiled standalone by
-# stock-sync.sh / drift-check.sh, so those three must stay free of the shared files.
-shared=("src/IlFmt.cs" "src/Seeds.cs" "src/AsmWalk.cs")
+# Seeds.cs (reachability seeds shared by Coverage/Reach), AsmWalk.cs
+# (assembly-walk helpers shared by the scanners) and Atomic.cs (landed-by-rename
+# output writes) are compiled into every src/ dumper. StockFacts/MethodList/
+# ParitySurface are ALSO compiled standalone by stock-sync.sh / drift-check.sh,
+# so those three must stay free of the shared files.
+shared=("src/IlFmt.cs" "src/Seeds.cs" "src/AsmWalk.cs" "src/Atomic.cs")
 for f in src/*.cs; do
   [[ " ${shared[*]} " == *" $f "* ]] && continue
   name="$(basename "$f" .cs)"

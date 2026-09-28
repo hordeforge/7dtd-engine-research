@@ -49,7 +49,7 @@ class NetProtocolCensus {
       sb.AppendLine("| " + Esc(t.Name) + " | " + S(ConstOf(t, "get_Channel")) + " | " + S(ConstOf(t, "get_Compress")) +
         " | " + S(ConstOf(t, "get_PackageDirection")) + " | " + S(ConstOf(t, "get_ReliableDelivery")) +
         " | " + S(ConstOf(t, "get_AllowedBeforeAuth")) + " |");
-    File.WriteAllText(a[1], sb.ToString());
+    Atomic.WriteText(a[1], sb.ToString());
     Console.WriteLine("channel != 0 (non-default band):");
     foreach (var t in pkgs) { var c = ConstOf(t, "get_Channel"); if (c != null && c != 0 && c != -999) Console.WriteLine("  chan " + c + "  " + t.Name); }
     Console.WriteLine("compress == 1:");

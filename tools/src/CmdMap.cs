@@ -55,7 +55,7 @@ static class CmdMap {
       if (name == null) continue;
       sb.AppendLine(name + "\t" + t.Name); n++;
     }
-    if (a.Length > 1) { File.WriteAllText(a[1], sb.ToString()); Console.Error.WriteLine("wrote " + a[1]); }
+    if (a.Length > 1) { Atomic.WriteText(a[1], sb.ToString()); Console.Error.WriteLine("wrote " + a[1]); }
     else Console.Write(sb.ToString());
     Console.Error.WriteLine("commands mapped: " + n);
   }

@@ -193,21 +193,39 @@ elif [[ "$local_present" -eq 1 ]]; then
 fi
 
 # Replace the local baseline with the current snapshot, re-stamped with the
-# source digest. The old dir is emptied first: a merge would leave files from a
-# different build sitting in the dir the next run treats as this build's.
+# source digest. The copy is staged beside the dir and the two are swapped by
+# rename, so the dir only ever holds a complete snapshot of one build. Merging
+# into the old dir would leave files from a different build sitting in the dir
+# the next run treats as this build's; emptying it in place would instead leave
+# a window where a concurrent run (cron vs `make post-update`) sees a half-copied
+# baseline under a stamp that still names this build, and reports its verdict
+# against it. The swap leaves one window where the dir is absent, and an absent
+# baseline is the case every reader already falls back to the committed one for.
 reset_baseline() {
-  find "$BASELINE_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-  cp -r "$cur/." "$BASELINE_DIR/"
-  [[ -n "$ASM_DIGEST" ]] && printf '%s\n' "$ASM_DIGEST" > "$BASELINE_STAMP"
+  local staged="$BASELINE_DIR.staged.$$" retired="$BASELINE_DIR.retired.$$"
+  rm -rf "$staged" "$retired"
+  mkdir -p "$staged"
+  cp -R "$cur/." "$staged/"
+  [[ -n "$ASM_DIGEST" ]] && printf '%s\n' "$ASM_DIGEST" > "$staged/source.sha256"
+  if [[ -d "$BASELINE_DIR" ]]; then mv "$BASELINE_DIR" "$retired"; fi
+  if ! mv "$staged" "$BASELINE_DIR"; then
+    # The old snapshot goes back rather than leaving no baseline at all.
+    [[ -d "$retired" ]] && mv "$retired" "$BASELINE_DIR"
+    return 1
+  fi
+  rm -rf "$retired"
 }
 
 if [[ "$accept" -eq 1 ]]; then
-  # --accept-baseline empties the dir it is pointed at; a root or empty
+  # --accept-baseline replaces the dir it is pointed at; a root or empty
   # BASELINE_DIR would take the whole filesystem with it.
   case "$BASELINE_DIR" in
     /|"") echo "drift: refusing to --accept-baseline into BASELINE_DIR='$BASELINE_DIR'" >&2; exit 2 ;;
   esac
-  reset_baseline
+  if ! reset_baseline; then
+    echo "drift: error: could not replace the local baseline at $BASELINE_DIR" >&2
+    exit 2
+  fi
   echo "drift: local baseline at $BASELINE_DIR is now the current build"
   exit 0
 fi
