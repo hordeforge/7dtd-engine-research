@@ -50,6 +50,15 @@ CS_CLOCK_RE = re.compile(r"DateTime(?:Offset)?\.(?:UtcNow|Now|Today)\b")
 CS_SEAM = "StampEnv"
 CS_STAMP_METHOD = "ExtractedStamp"
 CS_METHOD_RE = re.compile(r"^  (?:static|public|private|internal)?[^;{]*\([^;]*\)[ ]*\{")
+# A UTC instant rendered through the ambient culture: `$"{dt:fmt}"` or a
+# ToString whose format is not one of the culture-independent standard
+# specifiers. "o" (round-trip) and "u"/"r"/"R" (RFC 1123) are defined on the
+# invariant culture, so a dump line carrying one of those needs no explicit
+# provider; every other format string takes the host's calendar, and a
+# Buddhist or Umm al-Qura default renders a year decades off in a UTC stamp.
+CS_CULTURE_FORMATTED_RE = re.compile(r"\{(?:[A-Za-z0-9_.]*\.)?DateTime(?:Offset)?\.\w+:[^}]+\}")
+CS_TO_STRING_RE = re.compile(r"DateTime(?:Offset)?\.\w+\.ToString\(\s*\"(?P<fmt>[^\"]*)\"")
+CS_CULTURE_INDEPENDENT_FMTS = frozenset({"o", "O", "u", "r", "R", "s", "Sortable", "Roundtrip"})
 
 
 def direct_clock_reads(path: Path) -> list[tuple[str, int]]:
@@ -118,6 +127,31 @@ def cs_stamp_helpers() -> list[str]:
     ]
 
 
+def check_cs_culture() -> list[str]:
+    """Every C# date format must be culture-independent, or name a provider."""
+    failures: list[str] = []
+    for path in sorted(_common.TOOLS.rglob("*.cs")):
+        text = path.read_text(encoding="utf-8")
+        for match in CS_CULTURE_FORMATTED_RE.finditer(text):
+            line = text.count("\n", 0, match.start()) + 1
+            failures.append(
+                f"{path.relative_to(_common.TOOLS)}:{line} formats a DateTime through "
+                f"the ambient culture: {match.group(0)}"
+            )
+        for match in CS_TO_STRING_RE.finditer(text):
+            if match.group("fmt") in CS_CULTURE_INDEPENDENT_FMTS:
+                continue
+            line = text.count("\n", 0, match.start()) + 1
+            rest = text[match.end() : text.find(")", match.end()) + 1]
+            if "CultureInfo" in rest:
+                continue
+            failures.append(
+                f"{path.relative_to(_common.TOOLS)}:{line} formats a DateTime through "
+                f"the ambient culture: {match.group(0)}"
+            )
+    return failures
+
+
 def check_cs_sources() -> list[str]:
     """Every C# clock read must sit in a method that honors the pinned epoch."""
     failures: list[str] = []
@@ -156,6 +190,35 @@ def cs_detector_alive() -> bool:
     return flagged == 2
 
 
+CS_CULTURE_SNIPPET = """class T {
+  static void Bad() {
+    var a = $"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}Z";
+    var b = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+  }
+  static void Good() {
+    var c = DateTime.UtcNow.ToString("u");
+    var d = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
+    var e = DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+  }
+}
+"""
+
+
+def cs_culture_detector_alive() -> bool:
+    """The culture detector must flag both ambient-format spellings and no others."""
+    text = CS_CULTURE_SNIPPET
+    flagged = 0
+    for _ in CS_CULTURE_FORMATTED_RE.finditer(text):
+        flagged += 1
+    for match in CS_TO_STRING_RE.finditer(text):
+        if match.group("fmt") in CS_CULTURE_INDEPENDENT_FMTS:
+            continue
+        if "CultureInfo" in text[match.end() : text.find(")", match.end()) + 1]:
+            continue
+        flagged += 1
+    return flagged == 2
+
+
 def main() -> int:
     failures: list[str] = []
 
@@ -174,7 +237,10 @@ def main() -> int:
         if skew > WALL_CLOCK_SKEW_S:
             failures.append(f"the fallback stamp is {skew:.0f}s away from the wall clock")
 
-    for bad in ("bogus", "", "17.5", "1789206360x"):
+    # Integers the datetime range cannot represent (past year 9999, before year
+    # 1) raise the same StampError as unparseable text: every caller catches
+    # that one, and a raw ValueError would escape them as a traceback.
+    for bad in ("bogus", "", "17.5", "1789206360x", "253402300800", "99999999999999999999"):
         try:
             yielded = stamp_with(bad)
         except tooling.StampError:
@@ -201,6 +267,12 @@ def main() -> int:
             "detector is dead: the C# wall-clock read is not flagged on a known-bad sample"
         )
     failures.extend(check_cs_sources())
+    if not cs_culture_detector_alive():
+        failures.append(
+            "detector is dead: the C# ambient-culture date format is not flagged "
+            "on a known-bad sample"
+        )
+    failures.extend(check_cs_culture())
 
     if failures:
         for failure in failures:

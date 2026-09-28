@@ -42,7 +42,12 @@ static class DumpGmUpdate
         sbIndex.AppendLine("# GameManager update-path dump");
         sbIndex.AppendLine();
         sbIndex.AppendLine($"Assembly: `{asmPath}`");
-        sbIndex.AppendLine($"Time (UTC): {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}Z");
+        // InvariantCulture: a host whose default calendar is not Gregorian
+        // (th-TH Buddhist, ar-SA Umm al-Qura) would otherwise render a year
+        // decades off in a line that claims to be UTC.
+        sbIndex.AppendLine(
+          "Time (UTC): "
+          + DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss'Z'", System.Globalization.CultureInfo.InvariantCulture));
         sbIndex.AppendLine();
 
         foreach (var name in targets)

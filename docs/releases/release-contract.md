@@ -131,6 +131,13 @@ falls behind the commits actually below the last tag.
   `cross_repo_links.py`, `mention_depth.py`, `zdtd_cite_check.py` and
   `steam_builds.py` took a range or a threshold that could name nothing, and
   reported OK over an empty input set. They now refuse the value.
+- **A UTC stamp is stamped in UTC, on any host.** A `SOURCE_DATE_EPOCH` past
+  year 9999 raised a bare `ValueError` from `datetime` past the `StampError`
+  every caller catches, and `DumpGmUpdate.cs` rendered its `Time (UTC)` line
+  through the ambient culture, so a host whose default calendar is Buddhist or
+  Umm al-Qura wrote a year decades off into a line claiming to be UTC. Both are
+  pinned by `tests/test_generation_stamp.py`, which now also rejects any C#
+  `DateTime` format that goes through the ambient culture.
 - **Pinned counts are validated at the boundary.** A negative save-format count
   and a negative pin number are rejected rather than pinned, and the stock-pin
   gate compares against a committed baseline instead of whatever the checkout

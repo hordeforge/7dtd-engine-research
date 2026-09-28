@@ -299,8 +299,12 @@ def generation_stamp() -> str:
     epoch the artifact should carry and the output becomes a pure function of
     its inputs, down to the date in a default output filename. Unset, the wall
     clock is used, which is what an interactive run wants. A value that is not
-    an integer raises rather than silently falling back, because a mistyped
-    stamp would otherwise be written into a committed file and look recorded.
+    an integer, or is an integer outside the range `datetime` can represent
+    (an epoch past year 9999, or a 20-digit paste), raises rather than silently
+    falling back, because a mistyped stamp would otherwise be written into a
+    committed file and look recorded. Every caller catches StampError, so the
+    out-of-range case raises the same error as the unparseable one instead of
+    letting a raw ValueError escape past them.
     """
     raw = os.environ.get(STAMP_ENV)
     if raw is None:
@@ -309,7 +313,12 @@ def generation_stamp() -> str:
         seconds = int(raw.strip())
     except ValueError as exc:
         raise StampError(f"{STAMP_ENV}={raw!r} is not an integer UTC epoch") from exc
-    return datetime.fromtimestamp(seconds, tz=timezone.utc).strftime(STAMP_FORMAT)
+    try:
+        return datetime.fromtimestamp(seconds, tz=timezone.utc).strftime(STAMP_FORMAT)
+    except (OSError, OverflowError, ValueError) as exc:
+        raise StampError(
+            f"{STAMP_ENV}={raw!r} is outside the representable UTC range (year 1 to 9999): {exc}"
+        ) from exc
 
 
 def sha256_file(path: Path) -> str:
