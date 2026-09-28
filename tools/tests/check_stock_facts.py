@@ -282,13 +282,16 @@ def pin_value(data: dict[str, Any], dotted: str) -> Any:
 
 
 def _close(got: object, want: float) -> bool:
-    """Whether an extracted float pin equals its baseline within written precision."""
-    if not isinstance(got, (int, float, str)):
+    """Whether an extracted float pin equals its baseline within written precision.
+
+    Numbers only. A pin written as a JSON string ("50") or a bool is a
+    different pin type from the one the baseline describes, and accepting it
+    here would let a stringly-typed pin pass a numeric comparison, which is
+    the one error this gate exists to catch.
+    """
+    if isinstance(got, bool) or not isinstance(got, (int, float)):
         return False
-    try:
-        return abs(float(got) - want) <= FLOAT_TOLERANCE
-    except ValueError:
-        return False
+    return abs(float(got) - want) <= FLOAT_TOLERANCE
 
 
 def pin_matches(data: dict[str, Any], dotted: str, want: object) -> bool:

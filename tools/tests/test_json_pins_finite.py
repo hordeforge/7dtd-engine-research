@@ -17,6 +17,7 @@ import json
 import os
 import sys
 import tempfile
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -87,17 +88,72 @@ def checker_rejects(bad: list[str]) -> None:
             )
 
 
+def pin_readers_use_the_loader() -> list[str]:
+    """Every module that reads a committed JSON data file goes through the loader.
+
+    The rejection above is a property of `tooling.load_json`, so a reader that
+    calls `json.load` on a pin file has none of it, and nothing else in the
+    corpus would notice: that reader is where a NaN pin comes back as a silent
+    pass. The rule is stated on the reader, not on a list of readers, so a new
+    pin reader is covered the day it is written.
+    """
+    import ast
+
+    bad: list[str] = []
+    data_files = {
+        path.name
+        for directory in (_common.TOOLS / "data", _common.TOOLS / "sandbox")
+        for path in directory.glob("*.json")
+    }
+    for path in sorted(_common.TOOLS.rglob("*.py")):
+        if "__pycache__" in path.parts or path.name == Path(__file__).name:
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8", errors="replace"))
+        names = {
+            n.value
+            for n in ast.walk(tree)
+            if isinstance(n, ast.Constant) and isinstance(n.value, str)
+        }
+        if not (names & data_files):
+            continue
+        # A file read: json.load on an open handle, or json.loads over text
+        # read off disk. json.loads over a subprocess's stdout is a tool
+        # report, not a committed artifact, and is not this rule's business.
+        raw_file_read = False
+        loader_used = False
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call) or not isinstance(node.func, (ast.Name, ast.Attribute)):
+                continue
+            name = node.func.id if isinstance(node.func, ast.Name) else node.func.attr
+            source = ast.unparse(node)
+            if name == "load":
+                raw_file_read = True
+            elif name == "loads" and ("read_text" in source or ".read()" in source):
+                raw_file_read = True
+            elif name in {"load_json", "loads_json"}:
+                loader_used = True
+        if raw_file_read and not loader_used:
+            bad.append(
+                f"{path.relative_to(_common.REPO)}: reads a committed data file with raw "
+                f"json.load/json.loads; a NaN pin would pass that reader"
+            )
+    return bad
+
+
 def main() -> int:
     import tooling
 
     bad = loads_rejects(tooling)
     checker_rejects(bad)
+    bad.extend(pin_readers_use_the_loader())
     if bad:
         print("FAIL: non-finite pin values")
         for b in bad:
             print(f"  - {b}")
         return 1
-    print(f"OK: {len(NON_FINITE)} non-finite pin spellings rejected at the load and by the gate")
+    print(
+        f"OK: {len(NON_FINITE)} non-finite pin spellings rejected at the load and by the gate"
+    )
     return 0
 
 

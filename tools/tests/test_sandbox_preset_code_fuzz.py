@@ -35,7 +35,6 @@ Usage: python3 tools/tests/test_sandbox_preset_code_fuzz.py
 from __future__ import annotations
 
 import importlib.util
-import json
 import os
 import random
 import sys
@@ -77,7 +76,7 @@ ALPHABET = "ABCZaz0 \t-_/\u00e9\ufffd\U0001f600"
 
 
 def tables() -> tuple[Opts, Sets]:
-    data: Any = json.loads((SANDBOX / "sandbox_tables.json").read_text(encoding="utf-8"))
+    data: Any = _common.load_json(SANDBOX / "sandbox_tables.json")
     opts: Opts = {o["id"]: o for o in data["options"]}
     sets: Sets = dict(data["valuesets"])
     return opts, sets

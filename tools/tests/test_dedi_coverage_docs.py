@@ -15,7 +15,6 @@ Usage: python3 tools/tests/test_dedi_coverage_docs.py
 
 from __future__ import annotations
 
-import json
 import os
 import re
 import sys
@@ -89,7 +88,7 @@ DEFAULT_DUMP_MIN_BYTES = 1000
 def dump_label() -> str | None:
     """The studied build's il/ label from the facts pin (None when unreadable)."""
     try:
-        suffix = json.loads(FACTS.read_text(encoding="utf-8"))["update"]["dump_label_suffix"]
+        suffix = _common.load_json(FACTS)["update"]["dump_label_suffix"]
     except (OSError, ValueError, KeyError, TypeError):
         return None
     return suffix if isinstance(suffix, str) and re.fullmatch(r"v[0-9.]+", suffix) else None

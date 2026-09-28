@@ -46,13 +46,15 @@ def live_build_matches_pin(asm_path: Path) -> tuple[bool, str]:
         rc, _, err = _common.run_tool("StockFacts.exe", str(asm_path), out)
         if rc != 0:
             return True, f"StockFacts.exe failed ({err.strip()[:120]}); cannot version-check"
+        # The committed pin decides what this gate compares, so it is read the
+        # way every other pin reader reads it (no NaN, no blind json.load) and
+        # it fails the gate when unreadable: a pin this gate cannot read is not
+        # a reason to skip the staleness check it exists to perform.
+        pin = _common.load_json(Path(FACTS))["version"]
         try:
-            with open(out, encoding="utf-8") as f:
-                live = json.load(f)["version"]
-            with open(FACTS, encoding="utf-8") as f:
-                pin = json.load(f)["version"]
-        except (json.JSONDecodeError, KeyError, OSError) as exc:
-            return True, f"facts unreadable ({exc}); cannot version-check"
+            live = _common.load_json(Path(out))["version"]
+        except (ValueError, KeyError, OSError) as exc:
+            return True, f"live facts unreadable ({exc}); cannot version-check"
         triple = ("major", "minor", "build")
         if all(live.get(k) == pin.get(k) for k in triple):
             return True, ""

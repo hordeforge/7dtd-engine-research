@@ -17,7 +17,6 @@ Usage: python3 tools/tests/test_sandbox_zig_tables.py
 
 from __future__ import annotations
 
-import json
 import os
 import struct
 import sys
@@ -43,7 +42,7 @@ def next_f32_up(x: float) -> float:
 
 
 def dataset_floats() -> list[float]:
-    t = json.loads((TOOLS / "sandbox" / "sandbox_tables.json").read_text(encoding="utf-8"))
+    t = _common.load_json(TOOLS / "sandbox" / "sandbox_tables.json")
     vals: list[float] = []
     for v in t["valuesets"].values():
         if v["type"] == "float":

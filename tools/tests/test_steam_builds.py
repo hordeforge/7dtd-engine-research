@@ -241,13 +241,13 @@ def check_error_paths(tmp_path: Path, appinfo: Path) -> None:
 
 
 def check_committed_pin() -> None:
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    pins = _common.load_json(PINS)
     studied = pins["studied"]
     assert pins["app"] == "294420", pins
     assert pins["depot"] == "294422", pins
     for key in ("branch", "buildid", "manifest"):
         assert studied.get(key), f"studied.{key} missing: {studied}"
-    facts = json.loads(STOCK_FACTS.read_text(encoding="utf-8"))
+    facts = _common.load_json(STOCK_FACTS)
     assert studied["version"] == facts["version"]["display"], (
         f"pin version {studied['version']!r} != stock_facts {facts['version']['display']!r}"
     )
@@ -405,7 +405,7 @@ def main() -> None:
             SCRIPT, *base, "--pins", str(out_pins), "--record", "--branch", "v9.9.9"
         )
         assert recorded.returncode == 0, recorded.stderr
-        written = json.loads(out_pins.read_text(encoding="utf-8"))["studied"]
+        written = _common.load_json(out_pins)["studied"]
         assert written["buildid"] == "90", written
         assert written["manifest"] == "222", written
 

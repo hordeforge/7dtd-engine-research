@@ -200,14 +200,32 @@ def history_lock(path: str) -> Path:
 
 
 def _write_history_row(path: str, header: str, row: str) -> str:
-    """Write `row` into the history CSV keyed on its date column."""
+    """Write `row` into the history CSV keyed on its date column.
+
+    A committed history file's first line is either the header or a data row
+    of the same width (a header lost to a half-finished write, which this
+    restores). A first line of any other width is a file written by a
+    different schema than the one writing this row, so the run stops: the old
+    line would otherwise be carried as data under a header whose columns it
+    does not have, and every later reader parses the columns by position.
+    """
     date = row.split(",", 1)[0]
     lines: list[str] = []
     if os.path.exists(path):
         with open(path, encoding="utf-8", newline="") as fh:
             lines = fh.read().splitlines(keepends=True)
-        if lines and lines[0] == header:
-            lines.pop(0)
+        if lines:
+            if lines[0] != header:
+                width = len(header.rstrip("\n").split(","))
+                first = lines[0].rstrip("\n").split(",")
+                if len(first) != width:
+                    raise ValueError(
+                        "%s: first line has %d fields, not the %d of the history header %r; "
+                        "refusing to write a row into a file with a different column set"
+                        % (path, len(first), width, header.rstrip("\n"))
+                    )
+            else:
+                lines.pop(0)
     outcome = "appended"
     for index, line in enumerate(lines):
         if line.split(",", 1)[0] == date:
@@ -402,7 +420,11 @@ def main() -> int:
             narrated_pct,
         )
         header = "date,game_types,narrated,catalogued,classified,unaccounted,narrated_pct\n"
-        outcome = record_history(history, header, row)
+        try:
+            outcome = record_history(history, header, row)
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
         # Keep stdout pure JSON under --json: consumers pipe the report
         # straight into a parser.
         print("history %s in" % outcome, history, file=sys.stderr if as_json else sys.stdout)
