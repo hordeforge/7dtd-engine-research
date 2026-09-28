@@ -42,6 +42,7 @@ sys.path.insert(0, str(STEAM.parent))
 import tooling  # noqa: E402
 from steam_manifest import (  # noqa: E402
     ManifestError,
+    VerifyResult,
     cached_manifests,
     read_manifest,
     roots_from,
@@ -109,6 +110,14 @@ class Branch:
 class Snapshot:
     source: str
     branches: list[Branch]
+
+
+@dataclass(frozen=True)
+class Integrity:
+    """The manifest an install was checked against, and the per-file verdict."""
+
+    manifest: str
+    files: VerifyResult
 
 
 def _int(value: Any) -> int | None:
@@ -494,7 +503,7 @@ def main(argv: list[str] | None = None) -> int:
     cached_buildids = steam_log_buildids(DEPOT, roots)
     diffable = sum(1 for b in snapshot.branches if b.manifest in cached)
 
-    integrity: tuple[str, int, int, int, int, list[str]] | None = None
+    integrity: Integrity | None = None
     if args.verify_install is not None:
         gid = install_manifest or branch.manifest
         manifest_path = cached.get(gid or "")
@@ -514,7 +523,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         try:
-            ok, missing, bad, problems, ignored = verify(
+            files = verify(
                 read_manifest(manifest_path),
                 root,
                 args.verify_install or None,
@@ -523,7 +532,7 @@ def main(argv: list[str] | None = None) -> int:
         except ManifestError as exc:
             print(f"steam_builds: {exc}", file=sys.stderr)
             return 2
-        integrity = (manifest_path.name, ok, missing, bad, ignored, problems)
+        integrity = Integrity(manifest_path.name, files)
 
     label = args.label or branch.name
     if not usable_label(label):
@@ -583,12 +592,12 @@ def main(argv: list[str] | None = None) -> int:
             "selected": as_json(branch),
             "integrity": (
                 {
-                    "manifest": integrity[0],
-                    "ok": integrity[1],
-                    "missing": integrity[2],
-                    "mismatch": integrity[3],
-                    "ignored": integrity[4],
-                    "problems": integrity[5][:50],
+                    "manifest": integrity.manifest,
+                    "ok": integrity.files.ok,
+                    "missing": integrity.files.missing,
+                    "mismatch": integrity.files.bad,
+                    "ignored": integrity.files.ignored,
+                    "problems": integrity.files.problems[:50],
                 }
                 if integrity
                 else None
@@ -633,15 +642,15 @@ def main(argv: list[str] | None = None) -> int:
             )
         print()
     if integrity:
-        name, ok, missing, bad, ignored, problems = integrity
-        for line in problems[:20]:
+        files = integrity.files
+        for line in files.problems[:20]:
             print(line, file=sys.stderr)
-        if len(problems) > 20:
-            print(f"... ({len(problems) - 20} more)", file=sys.stderr)
+        if len(files.problems) > 20:
+            print(f"... ({len(files.problems) - 20} more)", file=sys.stderr)
         print(
-            f"integrity: {ok} ok, {missing} missing, {bad} mismatch"
-            + (f", {ignored} ignored" if ignored else "")
-            + f" against {name}"
+            f"integrity: {files.ok} ok, {files.missing} missing, {files.bad} mismatch"
+            + (f", {files.ignored} ignored" if files.ignored else "")
+            + f" against {integrity.manifest}"
         )
     if not quiet and cached:
         print(

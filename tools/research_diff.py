@@ -45,7 +45,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, replace
 from functools import partial
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "steam"))
 import tooling
@@ -56,6 +56,7 @@ from steam_manifest import (
     assembly_sha1,
     cached_manifests,
     diff_manifests,
+    gid_of,
     manifest_for_gid,
     pins_buildids,
     read_manifest,
@@ -374,22 +375,42 @@ def lens_enums(old: Source, new: Source, tmp: Path, limit: int) -> Section:
 
 
 def lens_bodies(old: Source, new: Source, limit: int) -> Section:
+    title = "Method bodies (asm_body_diff.py)"
     script = TOOLS / "asm_body_diff.py"
     proc = run([sys.executable, str(script), str(old.path), str(new.path)])
     if proc.returncode != 0:
-        return Section("Method bodies (asm_body_diff.py)", {}, "", note=proc.stderr.strip())
+        return Section(
+            title,
+            {},
+            "",
+            note=f"not measured: asm_body_diff.py rc={proc.returncode}: "
+            + (proc.stderr.strip() or "no stderr"),
+        )
     added = removed = changed = 0
+    summarised = False
     lines: list[str] = []
     for line in proc.stdout.splitlines():
         match = BODY_SUMMARY_RE.search(line)
         if match:
             _, _, added, removed, changed = (int(g) for g in match.groups())
+            summarised = True
             lines.append(line)
             continue
         if line.startswith((" + ", " - ", " ~ ")):
             lines.append(line)
+    if not summarised:
+        # A changed summary format would otherwise read as three zero counts:
+        # the report would say "no change" and --check would pass on a lens
+        # that never parsed. Count the detail lines so the verdict stays honest.
+        return Section(
+            title,
+            {"unread": len(lines)},
+            cap(lines, limit),
+            note=f"note: no line matching {BODY_SUMMARY_RE.pattern!r} in the "
+            "asm_body_diff.py output; added/removed/changed are unknown",
+        )
     counts = {"added": added, "removed": removed, "changed": changed}
-    return Section("Method bodies (asm_body_diff.py)", counts, cap(lines, limit))
+    return Section(title, counts, cap(lines, limit))
 
 
 def lens_parity(old_json: Path | None, new_json: Path | None, limit: int) -> Section:
@@ -529,9 +550,25 @@ def label_matches(label: str, facts: dict[str, Any]) -> bool:
     return wanted.replace(" ", "") in candidates
 
 
+class ResolvedPair(NamedTuple):
+    """A `--pair OLD:NEW` resolution.
+
+    The four optional paths are the same type, so they are named: unpacked
+    positionally, a swapped manifest/parity pair is invisible to the type
+    checker and silently lenses the wrong artifact.
+    """
+
+    old: Source
+    new: Source
+    old_manifest: Path | None
+    new_manifest: Path | None
+    old_parity: Path | None
+    new_parity: Path | None
+
+
 def resolve_pair(
     pair: str, game_dir: Path, steam_root: str | None, tmp: Path, pins: dict[str, Any]
-) -> tuple[Source, Source, Path | None, Path | None, Path | None, Path | None]:
+) -> ResolvedPair:
     """Resolve a label pair to DLLs, cached depot manifests and committed parity snapshots.
 
     A label is either a version (`b9`, `V3.2.0 b9`), matched on the facts each DLL
@@ -601,7 +638,7 @@ def resolve_pair(
             None,
         )
         if match is not None:
-            gid = match.name.split("_", 1)[1].split(".")[0]
+            gid = gid_of(match)
             if gid in buildids:
                 # The matched manifest names the build, so the report can label the
                 # DLL with its Steam build id even when nothing else knows it.
@@ -632,7 +669,7 @@ def resolve_pair(
                 None,
             )
         )
-    return (
+    return ResolvedPair(
         resolved[old_label],
         resolved[new_label],
         manifests[0],
@@ -738,28 +775,24 @@ def main(argv: list[str] | None = None) -> int:
             with tempfile.TemporaryDirectory(
                 prefix="research_diff_pair_", dir=tooling.scratch_dir()
             ) as tmp_pair:
-                (
-                    resolved_old,
-                    resolved_new,
-                    manifest_old_path,
-                    manifest_new_path,
-                    parity_old_path,
-                    parity_new_path,
-                ) = resolve_pair(args.pair, game_dir, args.steam_root, Path(tmp_pair), pins)
+                pair_paths = resolve_pair(
+                    args.pair, game_dir, args.steam_root, Path(tmp_pair), pins
+                )
         except (SourceError, ManifestError, RuntimeError) as exc:
             print(f"research_diff: {exc}", file=sys.stderr)
             return 2
+        resolved_old, resolved_new = pair_paths.old, pair_paths.new
         label_old = resolved_old.label
         label_new = resolved_new.label
-        manifest_old = str(manifest_old_path) if manifest_old_path else None
-        manifest_new = str(manifest_new_path) if manifest_new_path else None
-        parity_old = str(parity_old_path) if parity_old_path else None
-        parity_new = str(parity_new_path) if parity_new_path else None
+        manifest_old = str(pair_paths.old_manifest) if pair_paths.old_manifest else None
+        manifest_new = str(pair_paths.new_manifest) if pair_paths.new_manifest else None
+        parity_old = str(pair_paths.old_parity) if pair_paths.old_parity else None
+        parity_new = str(pair_paths.new_parity) if pair_paths.new_parity else None
         print(
             "pair: parity snapshots "
             + (
-                f"{parity_old_path.name}, {parity_new_path.name}"
-                if parity_old_path and parity_new_path
+                f"{pair_paths.old_parity.name}, {pair_paths.new_parity.name}"
+                if pair_paths.old_parity and pair_paths.new_parity
                 else "not available (content/managed lenses still measured)"
             )
         )

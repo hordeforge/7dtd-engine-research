@@ -54,10 +54,12 @@ def diff(old: dict[str, Any], new: dict[str, Any]) -> int:
             print(f"    write NEW {n[k]['write']}")
     # enum drift
     print("=== ENUM DIFF ===")
+    old_enums = old.get("enums", {})
+    new_enums = new.get("enums", {})
     enum_changed = 0
-    for e in sorted(set(new["enums"]) | set(old.get("enums", {}))):
-        ov = old.get("enums", {}).get(e)
-        nv = new["enums"].get(e)
+    for e in sorted(set(old_enums) | set(new_enums)):
+        ov = old_enums.get(e)
+        nv = new_enums.get(e)
         if ov != nv:
             enum_changed += 1
             print(f"  {e}: {ov} -> {nv}")

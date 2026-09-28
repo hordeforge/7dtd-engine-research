@@ -226,6 +226,30 @@ def main() -> None:
         assert "## 7. Depot manifest (steam_manifest.py)" in with_depot, with_depot
         assert "depot manifest 2" in with_depot, with_depot
 
+    # Body lens: the summary line carries the counts, and output without one
+    # must not read as "no change" (that would let --check pass on an unparsed
+    # lens).
+    real_run = module.run
+
+    def bodies_run(stdout: str, rc: int = 0) -> Any:
+        module.run = lambda *_a, **_k: subprocess.CompletedProcess([], rc, stdout, "")
+        try:
+            return module.lens_bodies(old, new, 10)
+        finally:
+            module.run = real_run
+
+    parsed = bodies_run("methods bak=1 live=2 added=1 removed=0 body-changed=1\n + Type::New\n")
+    assert parsed.counts == {"added": 1, "removed": 0, "changed": 1}, parsed.counts
+    assert parsed.note is None, parsed.note
+    assert "+ Type::New" in parsed.body, parsed.body
+
+    unsummarised = bodies_run(" + Type::New\n ~ Type::Same\n")
+    assert unsummarised.counts == {"unread": 2}, unsummarised.counts
+    assert "are unknown" in (unsummarised.note or ""), unsummarised.note
+    failed = bodies_run("", rc=2)
+    assert failed.counts == {}, failed
+    assert "rc=2" in (failed.note or ""), failed
+
     pins = {"studied": {"dll_sha256": "b" * 64, "buildid": "42", "branch": "public"}}
     assert module.buildid_for("b" * 64, pins) == "42"
 

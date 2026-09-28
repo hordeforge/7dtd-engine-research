@@ -36,7 +36,7 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import tooling
@@ -151,6 +151,14 @@ def _entry(block: bytes) -> Entry:
     return Entry(name=name, size=size, flags=flags, sha1=sha1, chunks=chunks)
 
 
+def gid_of(path: Path) -> str:
+    """The manifest gid from Steam's `<depot>_<gid>.manifest` file name."""
+    name = path.name
+    if "_" not in name:
+        return "unknown"
+    return name.split("_", 1)[1].split(".")[0]
+
+
 def read_manifest(path: Path) -> Manifest:
     """Parse the entry table: magic(4) + entry-table byte length(4) + entries, then a trailer.
 
@@ -164,7 +172,7 @@ def read_manifest(path: Path) -> Manifest:
         raise ManifestError(f"unreadable manifest {path}: {exc}") from exc
     if len(data) < 8 or struct.unpack_from("<I", data, 0)[0] != MAGIC:
         raise ManifestError(f"{path}: not a Steam depot manifest (bad magic)")
-    gid = path.name.split("_", 1)[1].split(".")[0] if "_" in path.name else "unknown"
+    gid = gid_of(path)
     entries: list[Entry] = []
     table_end = 8 + struct.unpack_from("<I", data, 4)[0]
     if table_end > len(data):
@@ -196,7 +204,7 @@ def cached_manifests(depot: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> dict[
     for root in roots:
         for sub in ("depotcache", "steamapps/depotcache"):
             for path in (root / sub).glob(f"{depot}_*.manifest"):
-                gid = path.name.split("_", 1)[1].split(".")[0]
+                gid = gid_of(path)
                 best = found.get(gid)
                 if best is None or path.stat().st_mtime > best.stat().st_mtime:
                     found[gid] = path
@@ -335,11 +343,12 @@ def assembly_sha1(manifest: Manifest) -> str | None:
 
 
 def manifest_for_gid(depot: str, gid: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> Path | None:
-    """The cached manifest file with this gid, or None."""
-    return next(
-        (path for path in cached_manifests(depot, roots).values() if f"_{gid}." in path.name),
-        None,
-    )
+    """The cached manifest file with this gid, or None.
+
+    Matched on the gid key `cached_manifests` already parsed out of the file
+    name, not on a `_gid.` substring of the name.
+    """
+    return cached_manifests(depot, roots).get(gid)
 
 
 def _runtime_hint(name: str) -> str:
@@ -350,9 +359,21 @@ def _runtime_hint(name: str) -> str:
     return ""
 
 
+class VerifyResult(NamedTuple):
+    """Per-file verdict counts. Named because the three counts are the same
+    type: unpacked positionally they can be transposed at a call site without
+    any type or name to catch it."""
+
+    ok: int
+    missing: int
+    bad: int
+    problems: list[str]
+    ignored: int
+
+
 def verify(
     manifest: Manifest, root: Path, only: str | None, ignore: tuple[str, ...] = ()
-) -> tuple[int, int, int, list[str], int]:
+) -> VerifyResult:
     """Hash local files against Steam's manifest.
 
     `ignore` skips paths containing any of its substrings and reports how many
@@ -394,7 +415,7 @@ def verify(
             )
             continue
         ok += 1
-    return ok, missing, bad, problems, ignored
+    return VerifyResult(ok, missing, bad, problems, ignored)
 
 
 def diff_manifests(
@@ -580,15 +601,13 @@ def main(argv: list[str] | None = None) -> int:
                 "lines": lines,
             }
         elif args.verify:
-            ok, missing, bad, problems, ignored = verify(
-                manifest, Path(args.verify), args.only, tuple(args.ignore)
-            )
+            result = verify(manifest, Path(args.verify), args.only, tuple(args.ignore))
             payload |= {
-                "ok": ok,
-                "missing": missing,
-                "mismatch": bad,
-                "ignored": ignored,
-                "problems": problems[:200],
+                "ok": result.ok,
+                "missing": result.missing,
+                "mismatch": result.bad,
+                "ignored": result.ignored,
+                "problems": result.problems[:200],
             }
         elif args.find or args.list:
             payload["entries"] = [
@@ -624,19 +643,17 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.verify:
-        ok, missing, bad, problems, ignored = verify(
-            manifest, Path(args.verify), args.only, tuple(args.ignore)
-        )
-        for line in problems[:40]:
+        result = verify(manifest, Path(args.verify), args.only, tuple(args.ignore))
+        for line in result.problems[:40]:
             print(line, file=sys.stderr)
-        if len(problems) > 40:
-            print(f"... ({len(problems) - 40} more)", file=sys.stderr)
+        if len(result.problems) > 40:
+            print(f"... ({len(result.problems) - 40} more)", file=sys.stderr)
         print(
-            f"verify: {ok} ok, {missing} missing, {bad} mismatch"
-            + (f", {ignored} ignored" if ignored else "")
+            f"verify: {result.ok} ok, {result.missing} missing, {result.bad} mismatch"
+            + (f", {result.ignored} ignored" if result.ignored else "")
             + f" (root {args.verify})"
         )
-        return 1 if (missing or bad) else 0
+        return 1 if (result.missing or result.bad) else 0
 
     if args.find:
         for entry in match_entries(manifest, args.find):
