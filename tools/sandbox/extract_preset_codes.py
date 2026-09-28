@@ -52,6 +52,13 @@ def decode(
         o = opts.get(oid)
         if not o:
             raise ValueError(f"sandbox code references unknown option {oid}")
+        # The tables are a committed JSON artifact, but a hand-edited or
+        # partially regenerated one reaches here as arbitrary data, so every
+        # field the codec indexes into is checked before it is indexed: a
+        # missing key or a `values` that is not a list is a named refusal,
+        # not a KeyError or a TypeError out of the tool.
+        if "valueset" not in o or "name" not in o:
+            raise ValueError(f"sandbox option {oid} has no valueset/name entry: {o!r}")
         entry = sets.get(o["valueset"]) or {}
         vs = entry.get("values")
         if vs is None:
@@ -63,6 +70,10 @@ def decode(
                     f"and is not a bool set"
                 )
             vs = [False, True]
+        if not isinstance(vs, list):
+            raise ValueError(
+                f"sandbox option {oid} value set {o['valueset']!r} values is not a list: {vs!r}"
+            )
         if idx >= len(vs):
             raise ValueError(f"sandbox option {oid} value index {idx} is out of range")
         out[o["name"]] = vs[idx]
