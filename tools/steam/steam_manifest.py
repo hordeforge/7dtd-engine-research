@@ -368,7 +368,7 @@ def verify(
         lowered = entry.name.lower()
         if only and only.lower().replace("/", "\\") not in lowered:
             continue
-        if any(pattern.lower() in lowered for pattern in ignore):
+        if any(pattern.lower().replace("/", "\\") in lowered for pattern in ignore):
             ignored += 1
             continue
         local = safe_join(root, entry.name)
@@ -528,7 +528,7 @@ def main(argv: list[str] | None = None) -> int:
         return print_history(args.depot, roots, args.json, pinned)
     try:
         path = (
-            resolve_manifest_arg(args.manifest, args.depot, roots)
+            resolve_manifest_arg(args.manifest, args.depot, roots, pinned)
             if args.manifest
             else find_manifest(args.depot, roots)
         )

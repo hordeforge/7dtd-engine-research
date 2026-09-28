@@ -468,7 +468,8 @@ def parse_chunk_body(body: bytes, idx: int, checks: list[str]) -> tuple[bool, bo
     if x_mod + z_mod * 32 != idx:
         coords_ok = False
         checks.append(
-            f"  slot {idx}: stored chunk ({x},{z}) maps to slot {x_mod + z_mod * 32}, not {idx}"
+            f"  slot {idx}: coord mismatch: stored chunk ({x},{z}) maps to "
+            f"slot {x_mod + z_mod * 32}, not {idx}"
         )
 
     layers = 0

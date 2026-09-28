@@ -3,6 +3,8 @@
 
 Usage:
   parity_diff.py old.json new.json  # what TFP changed between versions
+
+Exit codes: 0 no wire drift, 1 wire/enum drift, 2 unusable input.
 """
 
 import json
@@ -55,9 +57,14 @@ def diff(old: dict[str, Any], new: dict[str, Any]) -> int:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 3:
-        n = diff(load(sys.argv[1]), load(sys.argv[2]))
-        sys.exit(1 if n else 0)
-    else:
+    if len(sys.argv) != 3:
         print(__doc__.strip(), file=sys.stderr)
         sys.exit(2)
+    try:
+        n = diff(load(sys.argv[1]), load(sys.argv[2]))
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        # A snapshot that cannot be read is not a wire change: exit 2, so a
+        # caller that reads 1 as drift (research_diff.py) does not report one.
+        print(f"parity_diff: {exc}", file=sys.stderr)
+        sys.exit(2)
+    sys.exit(1 if n else 0)

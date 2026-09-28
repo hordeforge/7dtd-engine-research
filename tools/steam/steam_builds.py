@@ -304,7 +304,40 @@ def human_size(value: int | None) -> str:
 def iso(epoch: int | None) -> str:
     if not epoch:
         return "-"
-    return datetime.fromtimestamp(epoch, tz=timezone.utc).strftime("%Y-%m-%d %H:%MZ")
+    try:
+        stamp = datetime.fromtimestamp(epoch, tz=timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        return "-"
+    return stamp.strftime("%Y-%m-%d %H:%MZ")
+
+
+def drift_verdict(
+    branch: Branch,
+    studied: dict[str, Any] | None,
+    install_buildid: str | None,
+    integrity: tuple[str, int, int, int, int, list[str]] | None,
+    pins_path: Path,
+) -> tuple[int, str] | None:
+    """The --check verdict as (exit code, FAIL reason), or None when clean.
+
+    Shared by the human table and the --json snapshot, so `--check --json`
+    cannot report success on a drifted build.
+    """
+    if integrity and (integrity[2] or integrity[3]):
+        return 1, (
+            f"local install differs from Steam's manifest "
+            f"({integrity[3]} mismatch, {integrity[2]} missing)"
+        )
+    if not studied:
+        return 2, f"no studied pin in {pins_path} (run --record)"
+    if branch.buildid != studied.get("buildid"):
+        return 1, (
+            f"{branch.name} buildid {branch.buildid} != studied "
+            f"{studied.get('buildid')} (newer binary available)"
+        )
+    if install_buildid is not None and install_buildid != branch.buildid:
+        return 1, f"local install buildid {install_buildid} != {branch.name} {branch.buildid}"
+    return None
 
 
 def as_json(branch: Branch) -> dict[str, Any]:
@@ -449,6 +482,47 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         integrity = (manifest_path.name, ok, missing, bad, ignored, problems)
 
+    label = args.label or branch.name
+    if not usable_label(label):
+        print(f"steam_builds: invalid label {label!r}", file=sys.stderr)
+        return 2
+
+    if args.record:
+        facts = stock_facts()
+        try:
+            recorded_utc = tooling.generation_stamp()
+        except tooling.StampError as exc:
+            print(f"steam_builds: {exc}", file=sys.stderr)
+            return 2
+        studied_entry: dict[str, Any] = {
+            "branch": branch.name,
+            "buildid": branch.buildid,
+            "manifest": branch.manifest,
+            "download_bytes": branch.download,
+            "size_bytes": branch.size,
+            "version": str(facts.get("version", {}).get("display")) or None,
+            "dll_sha256": str(facts.get("source_identity", {}).get("assembly_csharp_dll_sha256"))
+            or None,
+            "recorded_utc": recorded_utc,
+            "source": snapshot.source,
+        }
+        recorded: dict[str, Any] = {
+            "schema": 1,
+            "app": APP,
+            "depot": DEPOT,
+            "studied": studied_entry,
+        }
+        history = record_history(pins, studied_entry)
+        if history:
+            recorded["history"] = history
+        write_pins(pins_path, recorded)
+        # --json owns stdout, so the human confirmation goes beside the JSON.
+        print(
+            f"recorded: {pins_path} <- {branch.name} buildid {branch.buildid}"
+            + (f" (history: {len(history)} earlier build(s))" if history else ""),
+            file=sys.stderr if args.json else sys.stdout,
+        )
+
     if args.json:
         payload = {
             "source": snapshot.source,
@@ -483,6 +557,12 @@ def main(argv: list[str] | None = None) -> int:
             "branches": [as_json(b) | {"cached": b.manifest in cached} for b in snapshot.branches],
         }
         print(json.dumps(payload, indent=2))
+        if args.check:
+            verdict = drift_verdict(branch, studied, install_buildid, integrity, pins_path)
+            if verdict is not None:
+                code, message = verdict
+                print(f"steam_builds: FAIL {message}", file=sys.stderr)
+                return code
         return 0
 
     quiet = args.print_fetch and not args.fetch
@@ -544,44 +624,6 @@ def main(argv: list[str] | None = None) -> int:
     stale = bool(studied) and branch.buildid != studied.get("buildid")
     install_stale = install_buildid is not None and install_buildid != branch.buildid
 
-    if args.record:
-        facts = stock_facts()
-        try:
-            recorded_utc = tooling.generation_stamp()
-        except tooling.StampError as exc:
-            print(f"steam_builds: {exc}", file=sys.stderr)
-            return 2
-        studied_entry: dict[str, Any] = {
-            "branch": branch.name,
-            "buildid": branch.buildid,
-            "manifest": branch.manifest,
-            "download_bytes": branch.download,
-            "size_bytes": branch.size,
-            "version": str(facts.get("version", {}).get("display")) or None,
-            "dll_sha256": str(facts.get("source_identity", {}).get("assembly_csharp_dll_sha256"))
-            or None,
-            "recorded_utc": recorded_utc,
-            "source": snapshot.source,
-        }
-        recorded: dict[str, Any] = {
-            "schema": 1,
-            "app": APP,
-            "depot": DEPOT,
-            "studied": studied_entry,
-        }
-        history = record_history(pins, studied_entry)
-        if history:
-            recorded["history"] = history
-        write_pins(pins_path, recorded)
-        print(
-            f"recorded: {pins_path} <- {branch.name} buildid {branch.buildid}"
-            + (f" (history: {len(history)} earlier build(s))" if history else "")
-        )
-
-    label = args.label or branch.name
-    if not usable_label(label):
-        print(f"steam_builds: invalid label {label!r}", file=sys.stderr)
-        return 2
     if args.print_fetch or args.fetch:
         if not branch.manifest:
             print(f"steam_builds: branch {branch.name} has no depot {DEPOT} manifest")
@@ -601,32 +643,11 @@ def main(argv: list[str] | None = None) -> int:
         return subprocess.run(command, check=False).returncode
 
     if args.check:
-        if integrity and (integrity[2] or integrity[3]):
-            print(
-                f"steam_builds: FAIL local install differs from Steam's manifest "
-                f"({integrity[3]} mismatch, {integrity[2]} missing)",
-                file=sys.stderr,
-            )
-            return 1
-        if not studied:
-            print(
-                f"steam_builds: FAIL no studied pin in {pins_path} (run --record)", file=sys.stderr
-            )
-            return 2
-        if stale:
-            print(
-                f"steam_builds: FAIL {branch.name} buildid {branch.buildid} != studied "
-                f"{studied.get('buildid')} (newer binary available)",
-                file=sys.stderr,
-            )
-            return 1
-        if install_stale:
-            print(
-                f"steam_builds: FAIL local install buildid {install_buildid} != "
-                f"{branch.name} {branch.buildid}",
-                file=sys.stderr,
-            )
-            return 1
+        verdict = drift_verdict(branch, studied, install_buildid, integrity, pins_path)
+        if verdict is not None:
+            code, message = verdict
+            print(f"steam_builds: FAIL {message}", file=sys.stderr)
+            return code
         print(f"steam_builds: OK {branch.name} buildid {branch.buildid} matches the studied pin")
         return 0
 
