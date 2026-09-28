@@ -35,9 +35,9 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 | [`docs/meta/threat-model.md`](docs/meta/threat-model.md) | The one doc here that is not stock RE: the attack surface, trust boundaries, and ranked risks of this repo's own tooling. Update it when a tool gains, loses, or moves an entry point |
 | [`tools/`](tools) | **Tracked** Mono.Cecil dump tooling ([`tools/README.md`](tools/README.md)) |
 | [`tools/data/`](tools/data) | Committed pins (`stock_facts.json`) |
-| [`tools/tests/`](tools/tests) | Pin gate, dump-set structural tests, readiness bench |
+| [`tools/tests/`](tools/tests) | The corpus gates, every one wired into a Makefile target and the [`tools/README.md`](tools/README.md) table (rule 7) |
 | [`Makefile`](Makefile) | Gate entry points; `make help` is the index of every target and whether it needs the game |
-| [`ruff.toml`](ruff.toml), [`mypy.ini`](mypy.ini), [`.yamllint`](.yamllint) | Static-analysis config for `make lint`; versions pinned in [`ci.yml`](.github/workflows/ci.yml) |
+| [`ruff.toml`](ruff.toml), [`mypy.ini`](mypy.ini), `.yamllint` | Static-analysis config for `make lint`; versions pinned in [`ci.yml`](.github/workflows/ci.yml) |
 | `il/` | Regenerable Cecil dumps. **git-ignored** (may contain game IL); never redistribute |
 | `.scratch/` | Ephemeral probes and gate temp trees (`.scratch/tmp`). **git-ignored**; never the system temp dir, which is tmpfs here |
 | [`oss-tools/`](oss-tools) | Third-party server-tool/mod survey notes |
@@ -62,6 +62,8 @@ Measuring/optimizing the game is not stock RE: work *about a change to* the game
 
 Gates: the two CI jobs are `make test-docs` (no DLL needed) and `make lint` (`ruff` check + format, `mypy --strict`, `shellcheck`, `yamllint` over the tracked YAML); with the live game also `make test` and `make verify`. One gate while iterating: `make gate NAME=<gate>.py` (or `python3 tools/tests/<gate>.py`), which takes the script's own flags as `ARGS=`.
 
-`make lint` compares the local `ruff` and `mypy` against the pins in [`ci.yml`](.github/workflows/ci.yml) and exits 2 on a mismatch, before running either. Match the pin first (`uv tool install ruff==<pin>`, `mypy==<pin>`); never edit the local version to make the gate pass.
+`make lint` compares the local `ruff`, `mypy` and `yamllint` against the pins in [`ci.yml`](.github/workflows/ci.yml) and exits 2 on a mismatch or a missing tool, before running any of them; `shellcheck` is required on `PATH` but unpinned. Match the pins first (`uv tool install ruff==<pin>`, `mypy==<pin>`, `yamllint==<pin>`; any recent distro shellcheck is fine); never edit the local version to make the gate pass.
+
+The DLL-bearing gates resolve the assembly in the order `ASM`, `SEVENDTD_ASM`, `SEVENDTD_DS_DIR`, then this OS's Steam roots; a variable naming an install with no assembly there is a FAIL, never a fallback to a probed root. Every child the tools spawn is bounded by `RE_MONO_TIMEOUT` seconds, so a wedged mono run fails the gate instead of hanging it. The full variable list is in [`tools/README.md`](tools/README.md), which the env-var gate keeps current.
 
 Python tooling rules: every parameter and return annotated (`mypy --strict` is a gate, not advice); a tool takes the repo root from `tools/tooling.py` (`tooling.REPO`, a `Makefile` + `AGENTS.md` marker walk) and never counts parent directories. Gates under `tools/tests/` import `_common`, which only re-exports that module; tools never import from `tests/`. Temp trees go under `tooling.scratch_dir()` (`.scratch/tmp`).
