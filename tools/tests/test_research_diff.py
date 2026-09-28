@@ -263,6 +263,22 @@ def main() -> None:
     }, surface
     assert module.parse_surface_rows("no table here") == {}
 
+    # Default report path: one report per build pair, republished in place. A
+    # rerun of the same pair on a later date must not add a second committed
+    # report, which is what test_committed_diff_artifacts.py fails on.
+    with tempfile.TemporaryDirectory(prefix="research_diff_out_", dir=_common.scratch_dir()) as tmp:
+        out_dir = Path(tmp)
+        first = module.default_out_path(out_dir, "b9", "b10", "20260101")
+        assert first == out_dir / "b9-to-b10-20260101.md", first
+        first.write_text("report\n", encoding="utf-8")
+        again = module.default_out_path(out_dir, "b9", "b10", "20260202")
+        assert again == first, again
+        other = module.default_out_path(out_dir, "b9", "b11", "20260202")
+        assert other == out_dir / "b9-to-b11-20260202.md", other
+        (out_dir / "b9-to-b10-20251231.md").write_text("older\n", encoding="utf-8")
+        latest = module.default_out_path(out_dir, "b9", "b10", "20260303")
+        assert latest == out_dir / "b9-to-b10-20260101.md", latest
+
     # --pair resolution helpers (pure): label matching and candidate filtering.
     facts_b9 = {"version": {"display": "V 3.2.0", "stock_wire": "V3.2.0 b9", "build": 9}}
     assert module.label_matches("b9", facts_b9), facts_b9

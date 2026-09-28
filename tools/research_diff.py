@@ -25,8 +25,13 @@ Usage:
       --steam-manifest-new ~/.local/share/Steam/depotcache/294422_<new>.manifest
 
 `SOURCE_DATE_EPOCH` (integer UTC epoch) pins the `Generated <stamp>` line and
-the date in the default output filename, so re-running the same pair overwrites
-the same file with the same bytes instead of a fresh copy per day.
+the date in the default output filename, so re-running the same pair reproduces
+the same file byte for byte instead of a fresh copy per day. The build pair is
+the report's identity: a rerun republishes over the report already in
+`workspace/outputs/diffs/` rather than adding a dated sibling, so the committed
+tree holds one report per pair however often the command is repeated. `--out
+PATH` writes exactly where it is told, which is how a second dated copy is made
+on purpose.
 
 Exit codes: 0 report written, 1 drift detected (--check), 2 unusable input.
 """
@@ -798,7 +803,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument(
         "--out",
         default=None,
-        help=f"report path, or - for stdout (default: {DEFAULT_OUT_DIR}/<old>-to-<new>-<date>.md)",
+        help=f"report path, or - for stdout (default: one report per build pair in "
+        f"{DEFAULT_OUT_DIR}, named <old>-to-<new>-<date>.md on the first run and "
+        f"republished in place on later ones)",
     )
     ap.add_argument(
         "--jobs",
@@ -809,6 +816,24 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--json", action="store_true", help="emit the summary as JSON")
     ap.add_argument("--check", action="store_true", help="exit 1 when any lens reports drift")
     return ap
+
+
+def default_out_path(out_dir: Path, old_label: str, new_label: str, date: str) -> Path:
+    """Where a default run publishes its report, one report per build pair.
+
+    The pair is the operation; the date in the name records when a report was
+    first written for it. A second run of the same pair (a retried CI step, the
+    regenerate command in test_committed_diff_artifacts.py, a rerun after a
+    lens changed) republishes over the report already there instead of adding a
+    second dated sibling, so the committed tree converges to one report per
+    pair. `--out PATH` still writes exactly where it is told, which is how a
+    dated copy alongside an existing one is made on purpose.
+    """
+    stem = f"{old_label}-to-{new_label}"
+    existing = sorted(out_dir.glob(f"{stem}-*.md"))
+    if existing:
+        return existing[-1]
+    return out_dir / f"{stem}-{date}.md"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -976,7 +1001,7 @@ def main(argv: list[str] | None = None) -> int:
         out = (
             Path(args.out)
             if args.out
-            else DEFAULT_OUT_DIR / f"{old.label}-to-{new.label}-{date}.md"
+            else default_out_path(DEFAULT_OUT_DIR, old.label, new.label, date)
         )
         out.parent.mkdir(parents=True, exist_ok=True)
         staging = out.with_name(f".{out.name}.tmp{os.getpid()}")

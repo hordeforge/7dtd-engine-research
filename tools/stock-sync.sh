@@ -52,6 +52,22 @@ for arg in "$@"; do
 done
 
 extract() {
+  # Put the previous pin pair back after a half-finished publish. A pin file
+  # that did not exist before the run is removed, so the tree lands where it
+  # started rather than half-refreshed.
+  restore_pins() {
+    local pair target backup
+    for pair in "$FACTS:prev_stock_facts.json" "$DATA/xml_pins.json:prev_xml_pins.json"; do
+      target="${pair%%:*}"
+      backup="$tmpdir/${pair##*:}"
+      if [[ -f "$backup" ]]; then
+        cp -p "$backup" "$target"
+      else
+        rm -f "$target"
+      fi
+    done
+    echo "stock-sync: publish failed; the previous pin pair was restored" >&2
+  }
   if [[ -z "$ASM" ]]; then
     echo "stock-sync: no dedicated server found; install it or set ASM=..., SEVENDTD_ASM=... or SEVENDTD_DS_DIR=..." >&2
     exit 2
@@ -81,8 +97,23 @@ extract() {
     exit 2
   fi
   python3 "$HERE/xml_pins.py" --game-dir "$GAME_ROOT" --pins "$tmpdir/xml_pins.json" >/dev/null
-  mv "$tmpdir/stock_facts.json" "$FACTS"
-  mv "$tmpdir/xml_pins.json" "$DATA/xml_pins.json"
+  # Both pins are committed together and must describe the same install, so the
+  # publish is one step: the staged pair is put aside, the new pair is moved in,
+  # and a move that fails puts the previous pair back. Two plain `mv`s left a
+  # window where a killed run left this build's stock_facts.json beside the
+  # previous build's xml_pins.json, a pair no gate can tell from a deliberate
+  # one until the next full sync.
+  local staged
+  for staged in "$tmpdir/stock_facts.json" "$tmpdir/xml_pins.json"; do
+    if [[ ! -f "$staged" ]]; then
+      echo "stock-sync: $staged was not written; nothing published" >&2
+      exit 2
+    fi
+  done
+  if [[ -f "$FACTS" ]]; then cp -p "$FACTS" "$tmpdir/prev_stock_facts.json"; fi
+  if [[ -f "$DATA/xml_pins.json" ]]; then cp -p "$DATA/xml_pins.json" "$tmpdir/prev_xml_pins.json"; fi
+  mv "$tmpdir/stock_facts.json" "$FACTS" || { restore_pins; exit 2; }
+  mv "$tmpdir/xml_pins.json" "$DATA/xml_pins.json" || { restore_pins; exit 2; }
   rmdir "$tmpdir"
   trap - EXIT
   echo "stock-sync: wrote $FACTS"
