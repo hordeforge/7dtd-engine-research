@@ -14,6 +14,8 @@ pin the full-section contract with synthetic Data/Config XML:
     parses to nothing (wrong --game-dir or renamed config section)
   - a pinned value the install spells in an unreadable shape fails closed with
     a named reason instead of raising out of float()
+  - a non-finite value float() accepts ("nan"/"inf") is refused the same way, so
+    it cannot reach the pins file as a JSON NaN that never compares equal
 
 Runs entirely in a temp dir via --pins/--game-dir; never touches tools/data.
 
@@ -218,6 +220,29 @@ def main() -> int:
         rc, out = run("--check", "--game-dir", game, "--pins", pins)
         if rc != 1 or "buffs.xml" not in out or "Traceback" in out:
             bad.append(f"unreadable buff threshold not a clean FAIL (rc={rc}):\n{out}")
+
+    # 10. A non-finite value float() accepts but no price or threshold is:
+    #     "nan" would land in the pins file as the non-standard JSON literal
+    #     NaN and never compare equal, so --check would report drift forever.
+    with tempfile.TemporaryDirectory(prefix="xml-pins-gate-", dir=_common.scratch_dir()) as tmp:
+        game = os.path.join(tmp, "game")
+        pins = os.path.join(tmp, "pins.json")
+        build_install(game)
+        write_config(game, "traders.xml", TRADERS.replace('buy_markup="3.0"', 'buy_markup="nan"'))
+        rc, out = run("--check", "--game-dir", game, "--pins", pins)
+        if rc != 1 or "not a finite number" not in out or "Traceback" in out:
+            bad.append(f"non-finite trader value not a clean FAIL (rc={rc}):\n{out}")
+        rc, out = run("--game-dir", game, "--pins", pins)
+        if rc != 2 or "not a finite number" not in out:
+            bad.append(f"non-finite trader value not refused on regenerate (rc={rc}):\n{out}")
+        if os.path.exists(pins):
+            bad.append("a refused non-finite regenerate still wrote a pins file")
+        write_config(
+            game, "traders.xml", TRADERS.replace('sell_markdown="0.2"', 'sell_markdown="inf"')
+        )
+        rc, out = run("--check", "--game-dir", game, "--pins", pins)
+        if rc != 1 or "not a finite number" not in out or "Traceback" in out:
+            bad.append(f"infinite trader value not a clean FAIL (rc={rc}):\n{out}")
 
     if bad:
         print("FAIL: xml_pins gate")

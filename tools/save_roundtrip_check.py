@@ -40,6 +40,21 @@ RAW_DEFLATE = -15  # no zlib/gzip wrapper (Noemax.GZip.DeflateOutputStream, no h
 # chunk bodies are well under 1 MiB, so 64 MiB leaves generous headroom.
 MAX_INFLATED = 64 * 1024 * 1024
 
+REGION_WIDTH = 32  # CHUNK_TO_REGION_SHIFT 5: chunks per region edge
+
+
+def slot_mod(coord: int) -> int:
+    """`GetOffsetFromXz`'s per-axis slot index for a chunk coordinate.
+
+    The stock formula is the C# remainder (truncated division, so the result
+    keeps the sign of `coord`; Python's % floors instead) plus the +31 adjust
+    the engine applies on the negative side. The quotient is integer
+    arithmetic: a float division rounds before the truncation cast, and the
+    stored coordinate is an i32 the file controls.
+    """
+    rem = -((-coord) % REGION_WIDTH)
+    return rem + REGION_WIDTH - 1 if coord < 0 else rem
+
 
 def inflate_raw_capped(data: bytes, cap: int = MAX_INFLATED) -> bytes:
     """RAW_DEFLATE-inflate `data` with a hard cap on decompressed size.
@@ -458,18 +473,13 @@ def parse_chunk_body(body: bytes, idx: int, checks: list[str]) -> tuple[bool, bo
     x, _, z = rd("<iii", 12)
     ticks = rd("<Q", 8)[0]
     coords_ok = True
-    # C# remainder semantics (Python % differs for negatives): r = a - trunc(a/b)*b
-    x_mod = x - int(x / 32) * 32
-    if x < 0:
-        x_mod += 31
-    z_mod = z - int(z / 32) * 32
-    if z < 0:
-        z_mod += 31
-    if x_mod + z_mod * 32 != idx:
+    x_mod = slot_mod(x)
+    z_mod = slot_mod(z)
+    if x_mod + z_mod * REGION_WIDTH != idx:
         coords_ok = False
         checks.append(
             f"  slot {idx}: coord mismatch: stored chunk ({x},{z}) maps to "
-            f"slot {x_mod + z_mod * 32}, not {idx}"
+            f"slot {x_mod + z_mod * REGION_WIDTH}, not {idx}"
         )
 
     layers = 0

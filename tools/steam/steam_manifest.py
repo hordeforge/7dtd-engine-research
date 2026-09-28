@@ -90,11 +90,16 @@ MAX_VARINT_BYTES = 10  # uint64 ceiling; a longer run is corrupt, not a big numb
 def _varint(data: bytes, offset: int) -> tuple[int, int]:
     value = 0
     shift = 0
-    for _ in range(MAX_VARINT_BYTES):
+    for i in range(MAX_VARINT_BYTES):
         if offset >= len(data):
             raise ManifestError("truncated varint")
         byte = data[offset]
         offset += 1
+        if i == MAX_VARINT_BYTES - 1 and byte > 0x01:
+            # The tenth byte carries only bit 63; anything more is a value
+            # past uint64, and reading it as the low bits would silently wrap
+            # a corrupt length into a plausible one.
+            raise ManifestError(f"varint exceeds uint64 (tenth byte {byte:#04x})")
         value |= (byte & 0x7F) << shift
         shift += 7
         if not byte & 0x80:

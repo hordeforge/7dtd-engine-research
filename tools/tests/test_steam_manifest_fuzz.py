@@ -235,6 +235,19 @@ def regression_pins(path: Path, bad: list[str]) -> None:
     except Exception as exc:
         bad.append(f"varint: 10-byte size raised {type(exc).__name__}: {exc}")
 
+    # A tenth byte above bit 63 is a value past uint64: reading it as the low
+    # bits would wrap a corrupt length into a plausible one.
+    overflow = struct.pack("<II", src.MAGIC, 12) + b"\x08" + b"\x80" * 9 + b"\x02"
+    try:
+        src.read_manifest(_write(path, overflow))
+        bad.append("varint: over-uint64 tenth byte parsed instead of failing closed")
+    except src.ManifestError:
+        pass
+    except Exception as exc:
+        bad.append(
+            f"varint: over-uint64 raised {type(exc).__name__} instead of ManifestError: {exc}"
+        )
+
     # Pair assertion: a valid manifest must carry the fields the encoder wrote.
     payload = b"steady stock bytes\n"
     good = manifest([entry("Data\\Managed\\Good.dll", payload, flags=1024, chunks=2)])

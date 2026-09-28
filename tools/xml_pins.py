@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
 import sys
@@ -54,17 +55,24 @@ HEALTH_RE = re.compile(r'name="(health[A-Za-z0-9_]*)"\s*value="(\d+)"')
 
 
 def parse_float(text: str, where: str, unparsed: list[str]) -> float | None:
-    """A value that is not a plain number is a finding, not a crash.
+    """A value that is not a plain finite number is a finding, not a crash.
 
     An install whose markup or threshold carries a locale comma or a stray unit
     must degrade to a named skip that fails the gate closed; float() alone
-    raised ValueError and left a traceback with no verdict.
+    raised ValueError and left a traceback with no verdict. float() also accepts
+    "nan"/"inf", which no price or threshold ever is: those reach the pins file
+    as the non-standard JSON literals NaN/Infinity and never compare equal, so
+    --check would report drift on an unchanged install forever.
     """
     try:
-        return float(text)
+        value = float(text)
     except ValueError:
         unparsed.append(f"{where}: {text!r} is not a number")
         return None
+    if not math.isfinite(value):
+        unparsed.append(f"{where}: {text!r} is not a finite number")
+        return None
+    return value
 
 
 def entityclasses_health(text: str, unparsed: list[str]) -> dict[str, int]:
