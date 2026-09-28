@@ -10,6 +10,7 @@ Usage: python3 tools/tests/test_research_diff.py
 
 from __future__ import annotations
 
+import functools
 import importlib.util
 import os
 import re
@@ -24,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 TOOL = _common.TOOLS / "research_diff.py"
+run = functools.partial(_common.run_cli, TOOL)
 
 
 def load_module() -> Any:
@@ -34,17 +36,6 @@ def load_module() -> Any:
     sys.modules["research_diff"] = module  # dataclasses resolve cls.__module__ there
     spec.loader.exec_module(module)
     return module
-
-
-def run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, str(TOOL), *args],
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        capture_output=True,
-        check=False,
-    )
 
 
 def source(module: Any, label: str, facts: dict[str, Any], buildid: str | None = None) -> Any:

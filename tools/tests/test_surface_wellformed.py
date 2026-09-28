@@ -49,7 +49,7 @@ def parse_types_table(text: str) -> tuple[int, int, list[str]]:
 
 
 def main() -> int:
-    asm_path, asm_label = _common.resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+    asm_path, asm_label = _common.asm_from_argv()
     if asm_path is None:
         print(f"SKIP: assembly not found: {asm_label}")
         return 0

@@ -50,6 +50,7 @@ NOT_CONFIG = {
 CELL_RE = re.compile(r"^\|\s*`([A-Z][A-Z0-9_]*)`", re.M)
 MAKE_ASSIGN_RE = re.compile(r"^([A-Z][A-Z0-9_]*)\s*[:?+]?=", re.M)
 MAKE_USE_RE = re.compile(r"\$\{?\$\{?([A-Z][A-Z0-9_]*)\b")
+ENV_NAME_RE = re.compile(r"[A-Z][A-Z0-9_]*")
 
 
 def env_reads(path: Path) -> set[str]:
@@ -97,13 +98,13 @@ def env_reads(path: Path) -> set[str]:
     # override names in one list), read from the `_ENV` / `_VARS` constants the
     # tools already use. Other uppercase tuples are path parts and verdict
     # words, not variables.
-    for name, value in consts.items():
+    for name, constant in consts.items():
         if not name.isupper() or not name.endswith(("_ENV", "_VARS")):
             continue
-        if isinstance(value, str) and re.fullmatch(r"[A-Z][A-Z0-9_]*", value):
-            found.add(value)
-        elif isinstance(value, tuple):
-            found.update(v for v in value if re.fullmatch(r"[A-Z][A-Z0-9_]*", v))
+        if isinstance(constant, str) and ENV_NAME_RE.fullmatch(constant):
+            found.add(constant)
+        elif isinstance(constant, tuple):
+            found.update(v for v in constant if ENV_NAME_RE.fullmatch(v))
     return found
 
 

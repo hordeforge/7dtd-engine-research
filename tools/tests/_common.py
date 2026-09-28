@@ -55,6 +55,27 @@ def resolve_asm(explicit: str | None) -> tuple[Path | None, str]:
         return None, str(exc)
 
 
+def asm_from_argv() -> tuple[Path | None, str]:
+    """`(path, label)` from the gate's optional first argument, else discovery."""
+    return resolve_asm(sys.argv[1] if len(sys.argv) > 1 else None)
+
+
+def run_cli(tool: Path | str, *args: str) -> "subprocess.CompletedProcess[str]":
+    """Run a repo Python CLI in a subprocess with its output captured.
+
+    Gates that drive a tool as a program (not an import) all want the same
+    decoding, so it is decided once here rather than per gate.
+    """
+    return subprocess.run(
+        [sys.executable, str(tool), *args],
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=False,
+    )
+
+
 def find_asm() -> Path | None:
     """The discovered dedicated assembly, or None; a broken override says why.
 

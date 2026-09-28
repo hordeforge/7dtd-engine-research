@@ -12,9 +12,9 @@ Usage: python3 tools/tests/test_steam_builds.py
 
 from __future__ import annotations
 
+import functools
 import json
 import os
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -26,6 +26,7 @@ sys.path.insert(0, str(_common.TOOLS / "steam"))
 import steam_builds
 
 SCRIPT = _common.TOOLS / "steam" / "steam_builds.py"
+run = functools.partial(_common.run_cli, SCRIPT)
 PINS = _common.TOOLS / "data" / "steam_builds.json"
 STOCK_FACTS = _common.TOOLS / "data" / "stock_facts.json"
 
@@ -68,17 +69,6 @@ ACF = """"AppState"
 """
 
 
-def run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, str(SCRIPT), *args],
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        capture_output=True,
-        check=False,
-    )
-
-
 def check_error_paths(tmp_path: Path, appinfo: Path) -> None:
     """A read that fails must not read as a read that found nothing.
 
@@ -90,7 +80,9 @@ def check_error_paths(tmp_path: Path, appinfo: Path) -> None:
     """
     unreadable_acf = tmp_path / "appmanifest.d"
     unreadable_acf.mkdir()
-    denied = run("--from", str(appinfo), "--appmanifest", str(unreadable_acf), "--no-installed")
+    denied = _common.run_cli(
+        SCRIPT, "--from", str(appinfo), "--appmanifest", str(unreadable_acf), "--no-installed"
+    )
     assert denied.returncode == 0, denied  # --no-installed never reads the ACF
 
     denied = run("--from", str(appinfo), "--appmanifest", str(unreadable_acf))
@@ -98,7 +90,9 @@ def check_error_paths(tmp_path: Path, appinfo: Path) -> None:
     assert "unreadable" in denied.stderr, denied.stderr
     assert str(unreadable_acf) in denied.stderr, denied.stderr
 
-    missing_acf = run("--from", str(appinfo), "--appmanifest", str(tmp_path / "nope.acf"))
+    missing_acf = _common.run_cli(
+        SCRIPT, "--from", str(appinfo), "--appmanifest", str(tmp_path / "nope.acf")
+    )
     assert missing_acf.returncode == 0, missing_acf
     assert "installed: not found" in missing_acf.stdout, missing_acf.stdout
 
@@ -224,7 +218,9 @@ def main() -> None:
         assert "offline-diffable: 1 of 4 branch manifests cached" in table.stdout, table.stdout
         assert "cached" in table.stdout, table.stdout
 
-        js = run(*base, "--pins", str(good_pins), "--json", "--branch", "v9.9.9")
+        js = _common.run_cli(
+            SCRIPT, *base, "--pins", str(good_pins), "--json", "--branch", "v9.9.9"
+        )
         assert js.returncode == 0, js.stderr
         payload = json.loads(js.stdout)
         assert payload["selected"]["buildid"] == "90", payload["selected"]
@@ -243,7 +239,8 @@ def main() -> None:
         assert drifted.returncode == 1, drifted
         assert "FAIL" in drifted.stderr, drifted.stderr
 
-        install_drift = run(
+        install_drift = _common.run_cli(
+            SCRIPT,
             "--from",
             str(appinfo),
             "--appmanifest",
@@ -260,15 +257,20 @@ def main() -> None:
 
         assert run(*base, "--pins", str(no_pins), "--check").returncode == 2
 
-        source_error = run("--from", str(bad), "--no-installed", "--pins", str(good_pins), "--json")
+        source_error = _common.run_cli(
+            SCRIPT, "--from", str(bad), "--no-installed", "--pins", str(good_pins), "--json"
+        )
         assert source_error.returncode == 2, source_error
         assert "app info" in source_error.stderr, source_error.stderr
 
-        missing = run("--from", str(appinfo), "--no-installed", "--branch", "latest_experimental")
+        missing = _common.run_cli(
+            SCRIPT, "--from", str(appinfo), "--no-installed", "--branch", "latest_experimental"
+        )
         assert missing.returncode == 2, missing
 
         # A branch PICS does not list can still be installed by name.
-        unlisted = run(
+        unlisted = _common.run_cli(
+            SCRIPT,
             "--from",
             str(appinfo),
             "--no-installed",
@@ -281,7 +283,9 @@ def main() -> None:
         assert len(unlisted_lines) == 1, unlisted_lines
         assert unlisted_lines[0].endswith("latest_experimental latest_experimental"), unlisted_lines
 
-        fetch = run(*base, "--pins", str(good_pins), "--print-fetch", "--branch", "v9.9.9")
+        fetch = _common.run_cli(
+            SCRIPT, *base, "--pins", str(good_pins), "--print-fetch", "--branch", "v9.9.9"
+        )
         assert fetch.returncode == 0, fetch.stderr
         lines = [line for line in fetch.stdout.splitlines() if line.strip()]
         assert len(lines) == 1, lines
@@ -289,20 +293,24 @@ def main() -> None:
 
         # A PICS gid reaches fetch_version.sh as a steamcmd argument, so a
         # non-numeric one (a leading `-` reads as an option) is refused.
-        rogue_gid = run(*base, "--pins", str(good_pins), "--print-fetch", "--branch", "rogue")
+        rogue_gid = _common.run_cli(
+            SCRIPT, *base, "--pins", str(good_pins), "--print-fetch", "--branch", "rogue"
+        )
         assert rogue_gid.returncode == 2, (rogue_gid.stdout, rogue_gid.stderr)
         assert "non-numeric depot manifest" in rogue_gid.stderr, rogue_gid.stderr
 
         # A label becomes a filename and a steamcmd argument, so anything
         # outside [A-Za-z0-9._-] is refused, trailing newline included.
         for bad_label in ("../escape", "a b", "a\n"):
-            refused_label = run(
-                *base, "--pins", str(good_pins), "--print-fetch", "--label", bad_label
+            refused_label = _common.run_cli(
+                SCRIPT, *base, "--pins", str(good_pins), "--print-fetch", "--label", bad_label
             )
             assert refused_label.returncode == 2, (bad_label, refused_label.stdout)
             assert "invalid label" in refused_label.stderr, (bad_label, refused_label.stderr)
 
-        recorded = run(*base, "--pins", str(out_pins), "--record", "--branch", "v9.9.9")
+        recorded = _common.run_cli(
+            SCRIPT, *base, "--pins", str(out_pins), "--record", "--branch", "v9.9.9"
+        )
         assert recorded.returncode == 0, recorded.stderr
         written = json.loads(out_pins.read_text(encoding="utf-8"))["studied"]
         assert written["buildid"] == "90", written
@@ -313,12 +321,15 @@ def main() -> None:
         assert clean.returncode == 0, (clean.stdout, clean.stderr)
         assert "integrity: 1 ok, 0 missing, 0 mismatch" in clean.stdout, clean.stdout
 
-        integrity_json = run(*base, "--pins", str(good_pins), "--verify-install", "Data", "--json")
+        integrity_json = _common.run_cli(
+            SCRIPT, *base, "--pins", str(good_pins), "--verify-install", "Data", "--json"
+        )
         payload = json.loads(integrity_json.stdout)
         assert payload["integrity"]["ok"] == 1, payload["integrity"]
         assert payload["integrity"]["manifest"] == "294422_111.manifest", payload["integrity"]
 
-        ignored = run(
+        ignored = _common.run_cli(
+            SCRIPT,
             *base,
             "--pins",
             str(good_pins),
@@ -331,14 +342,17 @@ def main() -> None:
         assert "integrity: 0 ok, 0 missing, 0 mismatch, 1 ignored" in ignored.stdout, ignored.stdout
 
         (install / "Data" / "Managed" / "Good.dll").write_bytes(b"tampered")
-        broken = run(*base, "--pins", str(good_pins), "--check", "--verify-install", "Data")
+        broken = _common.run_cli(
+            SCRIPT, *base, "--pins", str(good_pins), "--check", "--verify-install", "Data"
+        )
         assert broken.returncode == 1, (broken.stdout, broken.stderr)
         assert "integrity: 0 ok, 0 missing, 1 mismatch" in broken.stdout, broken.stdout
         assert "FAIL local install differs" in broken.stderr, broken.stderr
 
         empty = tmp_path / "empty-install"
         empty.mkdir()
-        gone = run(
+        gone = _common.run_cli(
+            SCRIPT,
             *base,
             "--pins",
             str(good_pins),
@@ -359,7 +373,8 @@ def main() -> None:
             ),
             encoding="utf-8",
         )
-        escaped = run(
+        escaped = _common.run_cli(
+            SCRIPT,
             "--from",
             str(appinfo),
             "--pins",
@@ -389,7 +404,9 @@ def main() -> None:
             ),
             encoding="utf-8",
         )
-        first = run(*base, "--pins", str(seeded), "--record", "--branch", "v9.9.9")
+        first = _common.run_cli(
+            SCRIPT, *base, "--pins", str(seeded), "--record", "--branch", "v9.9.9"
+        )
         assert first.returncode == 0, first.stderr
         assert "history: 1 earlier build(s)" in first.stdout, first.stdout
         seeded_doc = json.loads(seeded.read_text(encoding="utf-8"))
@@ -397,7 +414,9 @@ def main() -> None:
         assert [e["buildid"] for e in seeded_doc["history"]] == ["100"], seeded_doc
         assert seeded_doc["history"][0]["gid"] == "111", seeded_doc
 
-        again = run(*base, "--pins", str(seeded), "--record", "--branch", "v9.9.9")
+        again = _common.run_cli(
+            SCRIPT, *base, "--pins", str(seeded), "--record", "--branch", "v9.9.9"
+        )
         assert again.returncode == 0, again.stderr
         assert "earlier builds: 100 (111)" in again.stdout, again.stdout
         repeat_doc = json.loads(seeded.read_text(encoding="utf-8"))

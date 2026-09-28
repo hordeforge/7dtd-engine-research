@@ -268,7 +268,7 @@ printf '%s\n' "$stamp_now" > "$stamp_file"
   echo "monocecil_sha256=$cecil_actual_sha"
   echo "monocecil_pinned_sha256=$pin_sha"
   echo "# byte-identical across rebuilds: the output basename, not the mktemp"
-  echo "# name, and the source paths are mapped out (-pathmap); mcs has no"
+  echo "# name, and the source paths are mapped out (-pathmap); the compiler has no"
   echo "# -deterministic, so do not reintroduce a random -out basename."
   echo "deterministic=yes"
 } > bin/buildinfo.txt

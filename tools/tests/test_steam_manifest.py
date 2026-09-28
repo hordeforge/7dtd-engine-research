@@ -12,11 +12,11 @@ Usage: python3 tools/tests/test_steam_manifest.py
 
 from __future__ import annotations
 
+import functools
 import hashlib
 import json
 import os
 import struct
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 TOOL = _common.TOOLS / "steam" / "steam_manifest.py"
+run = functools.partial(_common.run_cli, TOOL)
 MAGIC = 0x71F617D0
 
 
@@ -63,17 +64,6 @@ def entry(name: str, data: bytes, flags: int = 0, chunks: int = 1) -> bytes:
 def manifest(entries: list[bytes], trailer: bytes = b"\x00" * 70) -> bytes:
     table = b"".join(entries)
     return struct.pack("<II", MAGIC, len(table)) + table + trailer
-
-
-def run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, str(TOOL), *args],
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        capture_output=True,
-        check=False,
-    )
 
 
 def real_manifest_check() -> str:
@@ -135,7 +125,9 @@ def main() -> None:
         assert found.returncode == 0, found.stderr
         assert hashlib.sha1(good).hexdigest() in found.stdout, found.stdout
 
-        verified = run("--manifest", str(path), "--verify", str(install), "--only", "Data")
+        verified = _common.run_cli(
+            TOOL, "--manifest", str(path), "--verify", str(install), "--only", "Data"
+        )
         assert verified.returncode == 1, verified.stdout
         assert "verify: 1 ok, 1 missing, 2 mismatch" in verified.stdout, verified.stdout
         assert "SHA1 Data\\Managed\\Corrupt.dll" in verified.stderr, verified.stderr
@@ -143,7 +135,8 @@ def main() -> None:
         assert "MISSING Data\\Managed\\Absent.dll" in verified.stderr, verified.stderr
 
         # --ignore excludes a known runtime-written file, explicitly and counted.
-        ignored = run(
+        ignored = _common.run_cli(
+            TOOL,
             "--manifest",
             str(path),
             "--verify",
@@ -155,7 +148,8 @@ def main() -> None:
         )
         assert ignored.returncode == 1, ignored.stdout
         assert "verify: 1 ok, 1 missing, 1 mismatch, 1 ignored" in ignored.stdout, ignored.stdout
-        ignored_json = run(
+        ignored_json = _common.run_cli(
+            TOOL,
             "--manifest",
             str(path),
             "--verify",
@@ -169,7 +163,8 @@ def main() -> None:
         payload_ignored = json.loads(ignored_json.stdout)
         assert payload_ignored["ignored"] == 1, payload_ignored
 
-        everything = run(
+        everything = _common.run_cli(
+            TOOL,
             "--manifest",
             str(path),
             "--verify",
@@ -191,7 +186,9 @@ def main() -> None:
         (install / "Data" / "Managed" / "Corrupt.dll").write_bytes(b"original")
         (install / "Data" / "Managed" / "Short.dll").write_bytes(b"original-bytes")
         (install / "Data" / "Managed" / "Absent.dll").write_bytes(b"gone")
-        clean = run("--manifest", str(path), "--verify", str(install), "--only", "Data")
+        clean = _common.run_cli(
+            TOOL, "--manifest", str(path), "--verify", str(install), "--only", "Data"
+        )
         assert clean.returncode == 0, (clean.stdout, clean.stderr)
         assert "verify: 4 ok, 0 missing, 0 mismatch" in clean.stdout, clean.stdout
 
@@ -209,7 +206,9 @@ def main() -> None:
                 ]
             )
         )
-        escaped = run("--manifest", str(escape), "--verify", str(install), "--json")
+        escaped = _common.run_cli(
+            TOOL, "--manifest", str(escape), "--verify", str(install), "--json"
+        )
         unsafe = json.loads(escaped.stdout)
         assert unsafe["ok"] == 0, unsafe
         assert unsafe["mismatch"] == 3, unsafe
@@ -307,7 +306,8 @@ def main() -> None:
         assert len({row["cached_at"] for row in rows_json}) == 1, rows_json
         os.utime(new_cached, (1_800_000_000, 1_800_000_000))
 
-        labelled = run(
+        labelled = _common.run_cli(
+            TOOL,
             "--steam-root",
             str(steam_root),
             "--manifest",
@@ -321,7 +321,9 @@ def main() -> None:
         ), labelled.stdout
 
         # Manifest selection by gid or Steam build id, and diff by build id.
-        by_gid = run("--steam-root", str(steam_root), "--manifest", "1111111111111111111")
+        by_gid = _common.run_cli(
+            TOOL, "--steam-root", str(steam_root), "--manifest", "1111111111111111111"
+        )
         assert by_gid.returncode == 0, by_gid.stderr
         assert "gid: 1111111111111111111" in by_gid.stdout, by_gid.stdout
         by_build = run("--steam-root", str(steam_root), "--manifest", "24911252")
@@ -330,7 +332,8 @@ def main() -> None:
         unknown_label = run("--steam-root", str(steam_root), "--manifest", "999")
         assert unknown_label.returncode == 2, unknown_label
         assert "cached gids" in unknown_label.stderr, unknown_label.stderr
-        diff_by_id = run(
+        diff_by_id = _common.run_cli(
+            TOOL,
             "--steam-root",
             str(steam_root),
             "--manifest",
@@ -364,7 +367,9 @@ def main() -> None:
         (logless / "depotcache" / "294422_1111111111111111111.manifest").write_bytes(
             manifest([entry("Data\\a.bin", b"x")])
         )
-        fallback = run("--steam-root", str(logless), "--pins", str(pins), "--history")
+        fallback = _common.run_cli(
+            TOOL, "--steam-root", str(logless), "--pins", str(pins), "--history"
+        )
         assert fallback.returncode == 0, fallback.stderr
         assert "24911252" in fallback.stdout, fallback.stdout
 

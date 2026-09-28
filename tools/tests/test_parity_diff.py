@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Exercise the supported stock-snapshot parity CLI."""
 
+import functools
 import json
 import os
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -12,16 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 TOOL = _common.TOOLS / "parity" / "parity_diff.py"
-
-
-def run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, str(TOOL), *args],
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        capture_output=True,
-    )
+run = functools.partial(_common.run_cli, TOOL)
 
 
 def main() -> None:
@@ -75,7 +66,12 @@ def main() -> None:
         assert "  EnumChunkMode: byte,short,int -> byte,short,int,int" in lines, lines
 
         assert run("--coverage", str(new), td).returncode == 2
-        assert run().returncode == 2
+        assert (
+            _common.run_cli(
+                TOOL,
+            ).returncode
+            == 2
+        )
     print("OK: parity diff reports stock drift and rejects unsupported modes")
 
 
