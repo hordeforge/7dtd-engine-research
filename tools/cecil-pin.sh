@@ -21,7 +21,9 @@ else
 fi
 ver="unknown"
 if command -v monodis >/dev/null 2>&1; then
-  ver="$(monodis --assembly "$dll" 2>/dev/null | awk '/^Version:/{print $2; exit}')"
+  # Read the whole stream: an awk that `exit`s at the Version line SIGPIPEs
+  # monodis, and pipefail turns that into a failed re-pin.
+  ver="$(monodis --assembly "$dll" 2>/dev/null | awk '/^Version:/ && !seen {v=$2; seen=1} END {print v}')"
 fi
 
 tmp="$(mktemp "$here/data/.cecil.pin.XXXXXX")"

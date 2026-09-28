@@ -46,7 +46,11 @@ extract() {
     echo "stock-sync: building tools (need Mono.Cecil)..."
     (cd "$HERE" && ./build.sh --skip-legacy)
   fi
-  if [[ ! -f "$BIN/StockFacts.exe" ]] || [[ "$HERE/src/StockFacts.cs" -nt "$BIN/StockFacts.exe" ]]; then
+  # Stale on the source or on the Cecil it was linked against: a re-pinned
+  # Mono.Cecil must not leave an exe built against the old one in place.
+  if [[ ! -f "$BIN/StockFacts.exe" ]] ||
+    [[ "$HERE/src/StockFacts.cs" -nt "$BIN/StockFacts.exe" ]] ||
+    [[ "$BIN/Mono.Cecil.dll" -nt "$BIN/StockFacts.exe" ]]; then
     echo "stock-sync: compiling StockFacts.exe"
     # Stage and rename so a concurrent research_diff / census never loads a
     # half-written assembly.

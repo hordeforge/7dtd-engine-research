@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 # Build the RE dumpers in src/*.cs against Mono.Cecil.
 # Output: tools/bin/*.exe (run with mono). Requires: mono (mcs), Mono.Cecil.dll.
+# Rebuilds are incremental: a target is recompiled only when a source is newer
+# than its exe or bin/.toolchain-stamp no longer matches the compiler/Cecil in
+# use. The toolchain that produced bin/ is recorded in bin/buildinfo.txt.
 set -euo pipefail
+# Compile and report in a fixed order regardless of the invoker's locale:
+# the src/*.cs and legacy/*.cs globs below iterate in collation order, so a
+# different LC_COLLATE would build (and log) in a different order.
+export LC_ALL=C
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 skip_legacy=0
 for arg in "$@"; do
@@ -85,12 +92,55 @@ if [[ ! -s bin/Mono.Cecil.dll ]] || ! cmp -s "$cecil" bin/Mono.Cecil.dll; then
     exit 1
   fi
 fi
+cecil_ver="unknown"
 if command -v monodis >/dev/null 2>&1; then
-  ver="$(monodis --assembly bin/Mono.Cecil.dll 2>/dev/null | awk '/^Version:/{print $2; exit}')"
-  echo "using Mono.Cecil $ver: $cecil"
+  # No early `exit` in the awk: monodis keeps writing after the Version line, and
+  # an awk that exits there SIGPIPEs it, which pipefail turns into a spurious
+  # build failure.
+  cecil_ver="$(monodis --assembly bin/Mono.Cecil.dll 2>/dev/null | awk '/^Version:/ && !seen {v=$2; seen=1} END {print v}')"
+  [[ -n "$cecil_ver" ]] || cecil_ver="unknown"
+  echo "using Mono.Cecil $cecil_ver: $cecil"
 else
   echo "using Mono.Cecil: $cecil"
 fi
+
+# Toolchain record. Mono.Cecil is pinned by digest; the compiler is not (it is a
+# host package), so stamp what produced bin/ and force a full rebuild whenever
+# the compiler or the pinned Cecil changes. Without this a toolchain upgrade
+# silently leaves every exe from the previous compiler in place.
+mcs_ver="$(mcs --version 2>/dev/null | sed -n '1s/.*version \([0-9][0-9.]*\).*/\1/p')"
+[[ -n "$mcs_ver" ]] || mcs_ver="unknown"
+mono_ver="unknown"
+if command -v mono >/dev/null 2>&1; then
+  # "Mono JIT compiler version 6.12.0.123 (2024-02)": take the dotted version,
+  # not the trailing date field.
+  mono_ver="$(mono --version 2>/dev/null | sed -n '1s/.*version \([0-9][0-9.]*\).*/\1/p')"
+  [[ -n "$mono_ver" ]] || mono_ver="unknown"
+fi
+stamp_file="bin/.toolchain-stamp"
+stamp_now="mcs=$mcs_ver mono=$mono_ver cecil=$cecil_ver cecil_sha256=$pin_sha"
+# Compared by content, not mtime: the stamp is rewritten at the end of every
+# successful run, and a run that rebuilt one target must not mark the exes it
+# did not touch as stale. A mismatch (new compiler, re-pinned Cecil, missing
+# stamp after a failed run) rebuilds everything.
+force_rebuild=0
+if [[ "$(cat "$stamp_file" 2>/dev/null || true)" != "$stamp_now" ]]; then
+  force_rebuild=1
+fi
+
+# A target is stale unless its exe exists and is newer than every input. The
+# toolchain dimension is covered by force_rebuild, not here.
+up_to_date() { # <exe> <input>...
+  [[ "$force_rebuild" -eq 0 ]] || return 1
+  local exe="$1"
+  [[ -f "$exe" ]] || return 1
+  shift
+  local input
+  for input in "$@"; do
+    [[ "$exe" -nt "$input" ]] || return 1
+  done
+  return 0
+}
 
 # Primary tools (src/): general, maintained. IlFmt.cs (IL formatting),
 # Seeds.cs (reachability seeds shared by Coverage/Reach) and AsmWalk.cs
@@ -101,6 +151,10 @@ shared=("src/IlFmt.cs" "src/Seeds.cs" "src/AsmWalk.cs")
 for f in src/*.cs; do
   [[ " ${shared[*]} " == *" $f "* ]] && continue
   name="$(basename "$f" .cs)"
+  if up_to_date "bin/$name.exe" "$f" "${shared[@]}" bin/Mono.Cecil.dll; then
+    echo "up to date bin/$name.exe"
+    continue
+  fi
   # src/ is the maintained surface: a compile failure here must stop the build,
   # otherwise tests keep running against a stale exe that predates the breakage.
   # -warn:4 -warnaserror: the tree compiles warning-clean at max severity; keep
@@ -136,6 +190,10 @@ if [[ "$skip_legacy" -eq 0 && -d legacy ]]; then
   ok=0; fail=0; failed=""
   for f in legacy/*.cs; do
     name="$(basename "$f" .cs)"
+    if up_to_date "bin/legacy/$name.exe" "$f" bin/Mono.Cecil.dll; then
+      ok=$((ok+1))
+      continue
+    fi
     if staged="$(mktemp "bin/legacy/.$name.exe.XXXXXX")" &&
       mcs -nologo -r:bin/Mono.Cecil.dll "$f" -out:"$staged" >/dev/null 2>&1; then
       mv -f "$staged" "bin/legacy/$name.exe"
@@ -145,6 +203,20 @@ if [[ "$skip_legacy" -eq 0 && -d legacy ]]; then
       fail=$((fail+1)); failed="$failed $name"
     fi
   done
-  echo "legacy: $ok built, $fail need repair:${failed:- none}"
+  # ok counts up-to-date targets as well as freshly compiled ones, so the line
+  # reads "current", not "built".
+  echo "legacy: $ok current, $fail need repair:${failed:- none}"
 fi
+
+# Recorded last, and only because every stage above succeeded: a failed build
+# must leave the old stamp in place so the next run rebuilds rather than
+# trusting exes from the previous toolchain.
+printf '%s\n' "$stamp_now" > "$stamp_file"
+{
+  echo "# toolchain that produced tools/bin (regenerable: rerun tools/build.sh)"
+  echo "mcs=$mcs_ver"
+  echo "mono=$mono_ver"
+  echo "monocecil_version=$cecil_ver"
+  echo "monocecil_sha256=$pin_sha"
+} > bin/buildinfo.txt
 echo "done. run e.g.:  mono bin/Census.exe \"\$ASM\""

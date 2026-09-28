@@ -79,6 +79,15 @@ check for one build. `bin/`, the Cecil binary, and `*.exe` are
 git-ignored and regenerable. Nothing here ships game bytes; point `ASM` at your
 own copy:
 
+Rebuilds are incremental: a target is recompiled only when a source (or the
+staged Cecil) is newer than its exe, and the whole tree rebuilds when the
+compiler or the pinned Cecil changes. The `mcs`/`mono` versions, the Cecil
+version, and Cecil's SHA-256 are written to `bin/buildinfo.txt` after a
+successful build, and to `bin/.toolchain-stamp`, so a rebuild can be reproduced
+and a toolchain swap cannot silently leave binaries from the previous compiler
+in place. The compile and log order is pinned to `LC_ALL=C`, so it does not
+follow the invoker's collation.
+
 ```bash
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 ```

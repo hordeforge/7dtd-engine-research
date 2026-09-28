@@ -18,7 +18,10 @@ asm="${ASM:?set ASM to the dedicated Assembly-CSharp.dll path}"
 # hand-bumped literal: after a TFP update stock-sync refreshes the suffix and
 # this script re-targets every il/<set>-<label>/ dir without edits. Same field
 # test_dedi_coverage_docs.py derives its dump paths from.
-label="$(sed -n 's/^ *"dump_label_suffix": *"\([^"]*\)",*/\1/p' "$here/data/stock_facts.json" | head -1)"
+label="$(sed -n 's/^ *"dump_label_suffix": *"\([^"]*\)",*/\1/p' "$here/data/stock_facts.json")"
+# Keep the first match without `| head -1`: head exiting first SIGPIPEs sed, and
+# this script runs under pipefail.
+label="${label%%$'\n'*}"
 [[ -n "$label" ]] || {
   echo "regen: update.dump_label_suffix missing from $here/data/stock_facts.json" >&2
   exit 2
@@ -30,7 +33,15 @@ step "build tools"
 (cd "$here" && ./build.sh)
 
 step "Census (ground-truth counts)"
-MONO_PATH="$here/bin" mono "$here/bin/Census.exe" "$asm" 2>&1 | head -10
+# Capture before truncating: `mono ... | head -10` SIGPIPEs the dumper once it
+# has written the tenth line, and pipefail would abort the regen on it. A
+# census crash must stop the regen, not scroll past.
+if ! census_out="$(MONO_PATH="$here/bin" mono "$here/bin/Census.exe" "$asm" 2>&1)"; then
+  printf '%s\n' "$census_out" >&2
+  echo "regen: error: Census.exe failed" >&2
+  exit 2
+fi
+printf '%s\n' "$census_out" | head -10
 
 step "stock facts (live pin)"
 (cd "$root" && ASM="$asm" ./tools/stock-sync.sh)
