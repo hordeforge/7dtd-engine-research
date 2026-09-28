@@ -79,8 +79,32 @@ def parse_census(stdout: str) -> dict[str, int]:
     return out
 
 
-def parse_report_reached_types(report_path: str) -> int:
-    """Grab 'Reached types (incl. compiler-generated)' from the Coverage report."""
+# The two Census.exe rows the whole-assembly view is built from. Census.exe
+# exiting 0 without them means its output format changed, not that the
+# assembly holds zero types.
+CENSUS_KEYS = ("AllTypes (incl nested)", "AllMethodsWithBody")
+
+
+def whole_assembly_counts(cen: dict[str, int]) -> tuple[int, int]:
+    """(all types, all methods) or ValueError naming the rows that were absent."""
+    missing = [k for k in CENSUS_KEYS if k not in cen]
+    if missing:
+        raise ValueError(
+            "Census.exe output has no "
+            + ", ".join(repr(k) for k in missing)
+            + f" row (parsed {sorted(cen)}); the dumper's output format changed"
+        )
+    return cen["AllTypes (incl nested)"], cen["AllMethodsWithBody"]
+
+
+def parse_report_reached_types(report_path: str) -> int | None:
+    """Grab 'Reached types (incl. compiler-generated)' from the Coverage report.
+
+    None, not 0, when the report is unreadable or has no such row. A 0 here
+    would be indistinguishable from a real measurement and would drop the
+    "reached in the server call graph" line from a report whose other rows
+    look complete; the caller says which report it could not read.
+    """
     try:
         with open(report_path, encoding="utf-8") as fh:
             for line in fh:
@@ -89,12 +113,9 @@ def parse_report_reached_types(report_path: str) -> int:
                 )
                 if m:
                     return int(m.group(1))
-    except OSError:
-        # Unreadable report: the caller prints "reached in the server call
-        # graph" only for a non-zero count, so 0 suppresses the row instead of
-        # reporting a made-up one.
-        pass
-    return 0
+    except OSError as exc:
+        print(f"census-pct: cannot read coverage report {report_path}: {exc}", file=sys.stderr)
+    return None
 
 
 def parse_report_accounted(report_path: str) -> dict[str, int | None]:
@@ -290,13 +311,12 @@ def main() -> int:
         print("error: Census.exe failed:", file=sys.stderr)
         print(census_stderr, file=sys.stderr)
         return rc
+    cen = parse_census(stdout)
     try:
-        cen = parse_census(stdout)
+        all_types, all_methods = whole_assembly_counts(cen)
     except ValueError as exc:
         print(f"error: Census.exe output: {exc}", file=sys.stderr)
         return 2
-    all_types = cen.get("AllTypes (incl nested)", 0)
-    all_methods = cen.get("AllMethodsWithBody", 0)
 
     if not as_json:
         g = cov["game_types"]
@@ -341,7 +361,7 @@ def main() -> int:
                     "  types   %6d total; %d accounted (100%%) - reached documented + unreached classified"
                     % (all_types, accounted["acct_types"])
                 )
-            if reached_types:
+            if reached_types is not None:
                 print(
                     "  reached in the server call graph: %d types / %d methods"
                     % (reached_types, cov["reached_methods"])
@@ -365,6 +385,7 @@ def main() -> int:
         "accounted_types": accounted.get("acct_types"),
         "all_methods": all_methods,
         "accounted_methods": accounted.get("acct_methods"),
+        "reached_types": reached_types,
         "reached_methods": cov["reached_methods"],
         "narrated_pct": narrated_pct,
     }

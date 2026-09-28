@@ -231,13 +231,25 @@ def steam_log_buildids(depot: str, roots: tuple[Path, ...] = STEAM_ROOTS) -> dic
     Steam writes `finished update, N mounted depots (BuildID <id>) : <depot>
     (<gid>)` on every install, which is the only local source that pairs a
     manifest with the build id that shipped it.
+
+    An absent log is the normal case for a root that is not a Steam install.
+    A log that exists and cannot be read is not: the manifests it would have
+    labelled print a bare gid with no build id, which reads as "never
+    pinned", so the path and the error go to stderr.
     """
     mapping: dict[str, str] = {}
     for root in roots:
         log = root / "logs" / "content_log.txt"
         try:
             text = log.read_text(encoding="utf-8", errors="replace")
-        except OSError:
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            print(
+                f"steam_manifest: cannot read {log}: {exc}; "
+                "manifests only this log can label will print a bare gid",
+                file=sys.stderr,
+            )
             continue
         for match in LOG_RE.finditer(text):
             if match.group(2) == depot:
