@@ -16,18 +16,22 @@ spawned running with no parent. Pinned here, DLL-free and network-free:
      seconds fails loud instead of silently meaning "no bound";
   5. a host with no process group (Windows) still kills the child on expiry
      instead of raising out of the timeout path;
-  6. `BOUNDED_KILL_GRACE_S` follows the same rule, with zero a real setting;
-  7. a gate that spawns a child bounds it, so a wedged tool fails a gate
+  6. a grandchild that survives that kill and holds the pipes open cannot turn
+     the bound back into a hang, and the parent's descriptors are released;
+  7. an interrupt out of the wait kills the group too, since the child is in
+     its own session and the signal never reached it;
+  8. `BOUNDED_KILL_GRACE_S` follows the same rule, with zero a real setting;
+  9. a gate that spawns a child bounds it, so a wedged tool fails a gate
      instead of hanging it.
 
 The shell entry points (regen.sh, build.sh, stock-sync.sh, drift-check.sh,
 fetch_version.sh) spawn the same tools, so they carry the same bound through
 tools/bounded-run.sh. Pinned here too:
 
-  8. the shell wrapper kills a grandchild on expiry, like the Python one;
-  9. an invalid `RE_MONO_TIMEOUT` fails the sourcing script instead of running
+ 10. the shell wrapper kills a grandchild on expiry, like the Python one;
+ 11. an invalid `RE_MONO_TIMEOUT` fails the sourcing script instead of running
      unbounded;
- 10. every mono/mcs/monodis child in tools/*.sh goes through `run_bounded`, so
+ 12. every mono/mcs/monodis child in tools/*.sh goes through `run_bounded`, so
      a new dump call cannot come back unbounded.
 
 Usage: python3 tools/tests/test_bounded_runs.py
@@ -40,11 +44,13 @@ import contextlib
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -126,6 +132,96 @@ def check_timeout_kills_group(tmp: Path) -> None:
     assert marker.is_file(), "the child never wrote its grandchild pid, nothing to check"
     pid = int(marker.read_text(encoding="utf-8").strip())
     assert wait_gone(pid), f"grandchild {pid} survived the timeout: only the child was killed"
+
+
+def open_fd_count() -> int:
+    """Descriptors this process holds, or -1 where /proc does not exist."""
+    if not os.path.isdir("/proc/self/fd"):
+        return -1
+    return len(os.listdir("/proc/self/fd"))
+
+
+def check_pipes_are_released_without_a_group(tmp: Path) -> None:
+    """A survivor holding the pipes cannot turn the bound back into a hang.
+
+    On a host with no process group the kill reaches the direct child alone, and
+    the grandchild it spawned keeps the inherited write ends open. The read of a
+    killed child is bounded for exactly that case, and when the bound expires it
+    is abandoned with both pipes closed: the parent's descriptors come back and
+    the call returns the timeout rc instead of blocking forever.
+    """
+    if getattr(os, "killpg", None) is None:
+        return
+    marker = tmp / "pipe-holder.pid"
+    before = open_fd_count()
+    killpg = os.killpg
+    del os.killpg
+    started = time.monotonic()
+    try:
+        rc, _out, err = tooling.run_bounded(
+            [sys.executable, "-c", SNIPPET, str(marker)],
+            env=dict(os.environ),
+            timeout=probe_bound_s(),
+        )
+    finally:
+        os.killpg = killpg
+    elapsed = time.monotonic() - started
+    # The grandchild outlived the kill on purpose, so it is this run's to reap.
+    assert marker.is_file(), "the child never wrote its grandchild pid"
+    with contextlib.suppress(OSError):
+        os.kill(int(marker.read_text(encoding="utf-8").strip()), signal.SIGKILL)
+    assert rc == tooling.TIMEOUT_RC, f"the unkillable-pipe case reported rc {rc}: {err}"
+    budget = probe_bound_s() + 2 * tooling.POST_KILL_TIMEOUT + GRANDCHILD_WAIT_S
+    assert elapsed < budget, f"the kill path blocked {elapsed:.1f}s, past its {budget:.0f}s budget"
+    after = open_fd_count()
+    assert before == -1 or after <= before, (
+        f"the abandoned read left {after - before} more descriptors open ({before} -> {after})"
+    )
+
+
+def check_interrupt_kills_group(tmp: Path) -> None:
+    """An interrupt out of the wait kills the group, like the timeout does.
+
+    The child runs in its own session, so a Ctrl-C at the gate never reaches it:
+    without a kill on the unwind the tool outlives the run that started it, and
+    the two pipe descriptors stay open with it.
+    """
+    marker = tmp / "interrupt-grandchild.pid"
+    real = subprocess.Popen.communicate
+    calls: list[int] = []
+
+    def interrupt_the_first_read(
+        self: subprocess.Popen[str], *args: Any, **kwargs: Any
+    ) -> tuple[str, str]:
+        # Raised out of the wait rather than delivered by a signal: a real
+        # Ctrl-C is not reproducible here (the child is in its own session, and
+        # 3.14's Popen wait defers the signal past the wait), and what is under
+        # test is what the unwind does, not how the exception arrived.
+        calls.append(1)
+        if len(calls) == 1:
+            deadline = time.monotonic() + GRANDCHILD_WAIT_S
+            while not marker.is_file() and time.monotonic() < deadline:
+                time.sleep(0.05)
+            raise KeyboardInterrupt
+        return real(self, *args, **kwargs)
+
+    subprocess.Popen.communicate = interrupt_the_first_read  # type: ignore[method-assign]
+    try:
+        tooling.run_bounded(
+            [sys.executable, "-c", SNIPPET, str(marker)],
+            env=dict(os.environ),
+            timeout=probe_bound_s() * 4,
+        )
+    except KeyboardInterrupt:
+        pass
+    else:
+        raise AssertionError("the interrupt never landed inside the wait")
+    finally:
+        subprocess.Popen.communicate = real  # type: ignore[method-assign]
+    assert len(calls) == 2, f"the unwind drained the pipes {len(calls) - 1} times, not once"
+    assert marker.is_file(), "the child never started, nothing was interrupted"
+    pid = int(marker.read_text(encoding="utf-8").strip())
+    assert wait_gone(pid), f"grandchild {pid} survived the interrupt: the child was left running"
 
 
 def check_kill_group_fallback() -> None:
@@ -438,6 +534,8 @@ def main() -> None:
         check_timeout_kills_group(Path(td))
         check_shell_wrapper_kills_group(Path(td))
         check_shell_gtimeout_fallback(Path(td))
+        check_pipes_are_released_without_a_group(Path(td))
+        check_interrupt_kills_group(Path(td))
     check_passthrough()
     check_kill_group_fallback()
     check_timeout_env()
