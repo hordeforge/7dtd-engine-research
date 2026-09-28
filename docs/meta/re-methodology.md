@@ -209,7 +209,12 @@ when the field names are stable. On a fresh checkout `drift-check.sh` compares e
 axis against committed baselines (`workspace/outputs/baseline/` for census,
 types, methods and enums; `workspace/outputs/parity/parity_b10.json` for wire),
 so the first `make drift` reports a real verdict; the machine-local
-`BASELINE_DIR` wins once it exists. Refresh the committed baselines with the
+`BASELINE_DIR` wins while it holds a snapshot of the DLL in hand. It records
+that DLL's sha256 in `source.sha256` beside the snapshot, and a baseline stamped
+with another build (the state every post-patch run finds) is ignored in favour
+of the committed pin, so a run answers "does this build match the pin" instead
+of "what changed since the last patch". `drift-check.sh --accept-baseline`
+replaces the local baseline and re-stamps it. Refresh the committed baselines with the
 pins after a reviewed update, and commit them together. This is the fastest drift check: re-snapshot
 after every update, diff against the pinned baseline, and only re-annotate the
 packages the diff flags. Clone implementation coverage belongs in the clone

@@ -7,11 +7,13 @@
 #   drift-check.sh [ASM]           # ASM defaults to the local stable dedicated DLL
 #   BASELINE_DIR=... drift-check.sh
 #   PARITY_BASELINE=... drift-check.sh   # committed wire snapshot (default below)
+#   drift-check.sh --accept-baseline      # make the current build the local baseline
 #
 # Every axis has a committed baseline in workspace/outputs/baseline/ (and the
 # wire axis one in workspace/outputs/parity/), so a fresh checkout gets a real
 # drift verdict on the first run instead of "baseline created". The machine-local
-# BASELINE_DIR takes precedence once it exists.
+# BASELINE_DIR takes precedence once it exists, and only while it carries the
+# digest of the DLL it was taken from (see "local baseline provenance" below).
 # Requires: mono (mcs), Mono.Cecil, the tools built (../build.sh).
 set -uo pipefail
 # sort/comm below compare baseline vs current listings byte-wise; both sides
@@ -23,29 +25,56 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   sed -n '2,/^[^#]/ { /^#/ { s/^#[[:space:]]\{0,1\}//; p; } }' "$0"
   exit 0
 fi
-[[ $# -le 1 ]] || { echo "usage: drift-check.sh [Assembly-CSharp.dll]" >&2; exit 2; }
+accept=0
+asm_arg=""
+for arg in "$@"; do
+  case "$arg" in
+    --accept-baseline) accept=1 ;;
+    -*) echo "usage: drift-check.sh [Assembly-CSharp.dll] [--accept-baseline]" >&2; exit 2 ;;
+    *) [[ -z "$asm_arg" ]] || { echo "usage: drift-check.sh [Assembly-CSharp.dll] [--accept-baseline]" >&2; exit 2; }
+       asm_arg="$arg" ;;
+  esac
+done
 TOOLS="$(cd "$here/.." && pwd)"
 ROOT="$(cd "$TOOLS/.." && pwd)"
 BIN="$TOOLS/bin"
-ASM="${1:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll}"
+ASM="${asm_arg:-$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll}"
 BASELINE_DIR="${BASELINE_DIR:-$HOME/.cache/zdtd-scratch/drift-baseline}"
 # Committed baselines for the studied build. A fresh checkout has no
 # BASELINE_DIR, so every axis compares against these; the local dir wins as soon
-# as it exists, and is seeded from the current build on the first run.
+# as it holds a snapshot of THIS build, and is seeded from the current build on
+# the first run.
 COMMITTED_BASELINE="${COMMITTED_BASELINE:-$ROOT/workspace/outputs/baseline}"
 # Committed wire snapshot of the studied build. A fresh checkout has no
 # BASELINE_DIR, so this is what makes the wire axis comparable on first run
 # instead of silently creating a baseline and comparing nothing.
 PARITY_BASELINE="${PARITY_BASELINE:-$ROOT/workspace/outputs/parity/parity_b10.json}"
 CECIL="$BIN/Mono.Cecil.dll"
+# Digest of the DLL the local baseline was taken from. It is the cache key for
+# that baseline: a snapshot of another build answers a different question.
+BASELINE_STAMP="$BASELINE_DIR/source.sha256"
 
 [[ -f "$ASM" ]]   || { echo "drift: game DLL not found: $ASM" >&2; exit 2; }
 [[ -f "$CECIL" ]] || { echo "drift: tools not built; run $TOOLS/build.sh" >&2; exit 2; }
 
+# sha256 of a file, or nothing when the host has neither digest tool.
+file_digest() { # <path> -> hex digest on stdout, empty when uncomputable
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | cut -d' ' -f1
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | cut -d' ' -f1
+  fi
+}
+ASM_DIGEST="$(file_digest "$ASM")"
+
 # helper builders (compiled on demand into bin/)
 build_helper() { # <name> <src>
   local exe="$BIN/$1.exe"
-  [[ -f "$exe" && "$exe" -nt "$2" ]] && return 0
+  # Freshness is the cache key: the helper is reused only while it is newer than
+  # BOTH its source and the Mono.Cecil it was compiled against. Keying on the
+  # source alone kept a helper built against an older cecil.dll in place, and it
+  # then ran against an assembly it was not compiled for.
+  [[ -f "$exe" && "$exe" -nt "$2" && "$exe" -nt "$CECIL" ]] && return 0
   # A failed helper build must not look like "no drift" on that axis; the run
   # fails closed below instead of comparing a partial surface. The compile lands
   # on a private temp and is renamed into place, so a concurrent drift-check or
@@ -119,10 +148,57 @@ if [[ "$axis_fail" -ne 0 ]]; then
   exit 2
 fi
 
+# local baseline provenance
+# The local baseline is a cache of the last reviewed snapshot and it outranks the
+# committed one, so it is only a valid comparison target while it was taken from
+# the DLL in hand. Nothing recorded that: after a patch the local snapshot
+# silently won, and every axis reported patch-to-patch changes instead of drift
+# from the studied pin the corpus cites. The digest of the source DLL is the
+# cache key; a baseline whose stamp names another build (or names no build at
+# all) is not used, and the committed baseline answers until it is re-accepted.
+local_usable=0
+local_present=0
+[[ -n "$(ls -A "$BASELINE_DIR" 2>/dev/null)" ]] && local_present=1
+if [[ -z "$ASM_DIGEST" ]]; then
+  echo "drift: warning: no sha256 tool (sha256sum/shasum); the local baseline at $BASELINE_DIR cannot be provenance-checked" >&2
+  local_usable=1
+elif [[ -f "$BASELINE_STAMP" ]]; then
+  stamp_digest="$(tr -d '[:space:]' < "$BASELINE_STAMP")"
+  if [[ "$stamp_digest" == "$ASM_DIGEST" ]]; then
+    local_usable=1
+  else
+    echo "drift: ignoring the local baseline at $BASELINE_DIR: it was taken from another build (${stamp_digest:0:12} != ${ASM_DIGEST:0:12})" >&2
+    echo "drift: comparing against the committed baselines instead; re-accept this build with: drift-check.sh --accept-baseline" >&2
+  fi
+elif [[ "$local_present" -eq 1 ]]; then
+  echo "drift: ignoring the unstamped local baseline at $BASELINE_DIR: which build it was taken from is unknown" >&2
+  echo "drift: comparing against the committed baselines instead; re-accept this build with: drift-check.sh --accept-baseline" >&2
+fi
+
+# Replace the local baseline with the current snapshot, re-stamped with the
+# source digest. The old dir is emptied first: a merge would leave files from a
+# different build sitting in the dir the next run treats as this build's.
+reset_baseline() {
+  find "$BASELINE_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+  cp -r "$cur/." "$BASELINE_DIR/"
+  [[ -n "$ASM_DIGEST" ]] && printf '%s\n' "$ASM_DIGEST" > "$BASELINE_STAMP"
+}
+
+if [[ "$accept" -eq 1 ]]; then
+  # --accept-baseline empties the dir it is pointed at; a root or empty
+  # BASELINE_DIR would take the whole filesystem with it.
+  case "$BASELINE_DIR" in
+    /|"") echo "drift: refusing to --accept-baseline into BASELINE_DIR='$BASELINE_DIR'" >&2; exit 2 ;;
+  esac
+  reset_baseline
+  echo "drift: local baseline at $BASELINE_DIR is now the current build"
+  exit 0
+fi
+
 # Per-axis baseline: the machine-local dir wins, then the committed one. An axis
 # with neither is reported as unmeasured instead of silently passing.
 pick_base() { # <relative path> -> path to use, or nothing
-  if [[ -f "$BASELINE_DIR/$1" ]]; then printf '%s\n' "$BASELINE_DIR/$1"
+  if [[ "$local_usable" -eq 1 && -f "$BASELINE_DIR/$1" ]]; then printf '%s\n' "$BASELINE_DIR/$1"
   elif [[ -f "$COMMITTED_BASELINE/$1" ]]; then printf '%s\n' "$COMMITTED_BASELINE/$1"; fi
 }
 base_census="$(pick_base census.txt)"
@@ -133,8 +209,11 @@ base_parity="$(pick_base parity.json)"
 [[ -n "$base_parity" ]] || base_parity="$PARITY_BASELINE"
 
 echo "drift: baseline local=$BASELINE_DIR"
-[[ -n "$base_census" && "$base_census" == "$COMMITTED_BASELINE"/* ]] && \
+if [[ "$local_usable" -eq 0 && "$local_present" -eq 1 && -n "$base_census" && "$base_census" == "$COMMITTED_BASELINE"/* ]]; then
+  echo "drift: using the committed baselines in $COMMITTED_BASELINE (the local one is not this build's)"
+elif [[ -n "$base_census" && "$base_census" == "$COMMITTED_BASELINE"/* ]]; then
   echo "drift: using the committed baselines in $COMMITTED_BASELINE (no local one yet)"
+fi
 
 drift=0
 missing=""
@@ -200,8 +279,8 @@ fi
 if [[ -n "$missing" ]]; then
   echo
   echo "drift: no baseline for:$missing (neither $BASELINE_DIR nor $COMMITTED_BASELINE)" >&2
-  if [[ ! -f "$BASELINE_DIR/surface/surface-types.md" ]]; then
-    cp -r "$cur/." "$BASELINE_DIR/"
+  if [[ "$local_usable" -eq 0 || ! -f "$BASELINE_DIR/surface/surface-types.md" ]]; then
+    reset_baseline
     echo "drift: seeded the local baseline at $BASELINE_DIR; those axes compare from the next run" >&2
   fi
   [[ "$drift" -eq 0 ]] && drift=2
@@ -212,7 +291,7 @@ if [[ "$drift" -eq 0 ]]; then
   echo "drift: NONE (build matches baseline)"
 else
   echo "drift: DETECTED. After review, refresh the baseline that flagged it:"
-  echo "  local:     cp -r $cur/. $BASELINE_DIR/"
+  echo "  local:     drift-check.sh --accept-baseline   # re-stamps $BASELINE_DIR with this build"
   echo "  committed: cp <the current file> $COMMITTED_BASELINE/<axis>   # commit with the pin edits"
   echo "Then re-verify affected narratives (see docs/meta/re-methodology.md §5b)."
 fi

@@ -8,7 +8,8 @@ compares against `workspace/outputs/baseline/` plus the committed wire snapshot,
 and this test pins the behaviours: a fresh baseline dir still reports every axis
 against the committed files (NONE for the studied build, which also proves the
 committed baselines are not stale), a perturbed snapshot is detected with exit
-1, and an axis with no baseline anywhere is reported rather than passed.
+1, an axis with no baseline anywhere is reported rather than passed, and the
+machine-local baseline is used only for the build it was taken from.
 
 Needs mono/mcs, the built tools, the live DLL. SKIPs otherwise.
 
@@ -32,10 +33,10 @@ DRIFT = _common.TOOLS / "parity" / "drift-check.sh"
 COMMITTED = _common.REPO / "workspace" / "outputs" / "parity" / "parity_b10.json"
 
 
-def run(asm: Path, baseline: Path, parity: Path) -> subprocess.CompletedProcess[str]:
+def run(asm: Path, baseline: Path, parity: Path, *extra: str) -> subprocess.CompletedProcess[str]:
     env = os.environ | {"BASELINE_DIR": str(baseline), "PARITY_BASELINE": str(parity)}
     return subprocess.run(
-        [str(DRIFT), str(asm)], env=env, text=True, capture_output=True, check=False
+        [str(DRIFT), str(asm), *extra], env=env, text=True, capture_output=True, check=False
     )
 
 
@@ -102,9 +103,37 @@ def main() -> None:
             "local baseline not seeded"
         )
 
+        # The local baseline is a cache of the last reviewed snapshot: it is used
+        # only while it carries the digest of the DLL it was taken from. Stamped
+        # with this build it answers the comparison; stamped with any other (the
+        # state a post-patch run finds) it must not, or the run reports
+        # patch-to-patch changes where the corpus asks for drift from the pin.
+        accepted = root / "cb4"
+        take = run(asm, accepted, COMMITTED, "--accept-baseline")
+        assert take.returncode == 0, (take.stdout[-400:], take.stderr[-400:])
+        assert (accepted / "source.sha256").is_file(), "accepted baseline records no source digest"
+
+        reused = run(asm, accepted, COMMITTED)
+        assert reused.returncode == 0, (reused.stdout[-400:], reused.stderr[-400:])
+        assert "(committed baseline)" not in reused.stdout, reused.stdout
+        assert "ignoring the local baseline" not in reused.stderr, reused.stderr
+
+        (accepted / "source.sha256").write_text("0" * 64 + "\n", encoding="utf-8")
+        foreign = run(asm, accepted, COMMITTED)
+        assert foreign.returncode == 0, (foreign.stdout[-400:], foreign.stderr[-400:])
+        assert "ignoring the local baseline" in foreign.stderr, foreign.stderr
+        assert foreign.stdout.count("(committed baseline)") == 5, foreign.stdout
+
+        # A baseline whose provenance is unknown is not trusted either.
+        (accepted / "source.sha256").unlink()
+        unstamped = run(asm, accepted, COMMITTED)
+        assert "ignoring the unstamped local baseline" in unstamped.stderr, unstamped.stderr
+        assert unstamped.stdout.count("(committed baseline)") == 5, unstamped.stdout
+
     print(
         "OK: drift-check compares every axis against the committed baselines on a fresh "
-        "checkout, flags a perturbed one, and reports an axis with no baseline"
+        "checkout, flags a perturbed one, reports an axis with no baseline, and uses a "
+        "local baseline only for the build it was taken from"
     )
 
 
