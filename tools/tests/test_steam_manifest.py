@@ -134,6 +134,17 @@ def main() -> None:
         assert "SIZE Data\\Managed\\Short.dll" in verified.stderr, verified.stderr
         assert "MISSING Data\\Managed\\Absent.dll" in verified.stderr, verified.stderr
 
+        # A --verify root that is not a directory reports every entry MISSING,
+        # which reads as a tampered install rather than a typo. It is a usage
+        # error, on both output paths.
+        for extra in ([], ["--json"]):
+            bad_root = _common.run_cli(
+                TOOL, "--manifest", str(path), "--verify", str(install / "nope"), *extra
+            )
+            assert bad_root.returncode == 2, bad_root
+            assert "no install root" in bad_root.stderr, bad_root.stderr
+            assert bad_root.stdout == "", bad_root.stdout
+
         # --ignore excludes a known runtime-written file, explicitly and counted.
         ignored = _common.run_cli(
             TOOL,

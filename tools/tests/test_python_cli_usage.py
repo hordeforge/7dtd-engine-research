@@ -39,6 +39,7 @@ BAD_VALUES = (
     ("cross_repo_links.py", ("--repo", "not-a-sibling-repo")),
     ("zdtd_cite_check.py", ("--repo", "not-a-sibling-repo")),
     ("mention_depth.py", ("/nonexistent-docs-dir",)),
+    ("save_roundtrip_check.py", ("/nonexistent-save-dir",)),
     ("steam/steam_builds.py", ("--pins", "/nonexistent-pins.json")),
     ("sandbox/gen_zig_tables.py", ("/nonexistent-tables.json", "/nonexistent-dir/out.zig")),
     ("sandbox/extract_preset_codes.py", ("/nonexistent-presets.xml",)),

@@ -16,10 +16,14 @@ Compare old vs new per type:
   - field list changes
   - added / removed / changed methods
   - per-method IL: normalized instruction diff
+
+Usage: python3 tools/dump_diff.py <old-full-dir> <new-full-dir> [type-filter-regex]
+Exit codes: 0 the pair was compared, 2 unusable input.
 """
 
 from __future__ import annotations
 
+import argparse
 import difflib
 import re
 import sys
@@ -135,27 +139,43 @@ def diff_type(old: TypeInfo, new: TypeInfo, full: bool = False) -> list[str]:
     return out
 
 
-USAGE = "usage: dump_diff.py <old-full-dir> <new-full-dir> [type-filter-regex]"
+OLD_METAVAR = "old-full-dir"
+NEW_METAVAR = "new-full-dir"
 
 
-def main() -> int:
-    if len(sys.argv) == 2 and sys.argv[1] in ("-h", "--help"):
-        print(USAGE)
-        return 0
-    if len(sys.argv) not in (3, 4):
-        # stderr, so `dump_diff.py a b > report` never lands the usage line in
-        # the report; stdout stays the diff and nothing else.
-        print(USAGE, file=sys.stderr)
-        return 2
-    old_dir = Path(sys.argv[1])
-    new_dir = Path(sys.argv[2])
+def build_parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(
+        description="Method-level diff of two il/full-<version> dump trees.",
+        epilog="exit 0 = the pair was compared, 2 = unusable input",
+    )
+    ap.add_argument(
+        "old_dir", metavar=OLD_METAVAR, help="older dump tree (the il/full-<version> directory)"
+    )
+    ap.add_argument("new_dir", metavar=NEW_METAVAR, help="newer dump tree to compare against")
+    ap.add_argument(
+        "type_filter",
+        nargs="?",
+        default=None,
+        metavar="type-filter-regex",
+        help="regex on the relative type path, e.g. '^Sub/A' (default: every type)",
+    )
+    return ap
+
+
+def main(argv: list[str] | None = None) -> int:
+    # argparse answers --help on stdout (exit 0) and a bad invocation on stderr
+    # (exit 2), so `dump_diff.py a b > report` never lands usage text in the
+    # report; stdout stays the diff and nothing else.
+    args = build_parser().parse_args(argv)
+    old_dir = Path(args.old_dir)
+    new_dir = Path(args.new_dir)
     try:
-        flt = re.compile(sys.argv[3]) if len(sys.argv) == 4 else re.compile(".*")
+        flt = re.compile(args.type_filter if args.type_filter is not None else ".*")
     except re.error as exc:
         print(f"dump_diff: type-filter-regex is not a valid regex: {exc}", file=sys.stderr)
         return 2
 
-    for label, directory in (("old-full-dir", old_dir), ("new-full-dir", new_dir)):
+    for label, directory in ((OLD_METAVAR, old_dir), (NEW_METAVAR, new_dir)):
         if not directory.is_dir():
             # A wrong path makes rglob() yield nothing, which reads as "no
             # drift" and exits 0. Name the argument instead.

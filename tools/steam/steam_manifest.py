@@ -578,6 +578,12 @@ def main(argv: list[str] | None = None) -> int:
     pinned = pins_buildids(Path(args.pins))
     if args.history:
         return print_history(args.depot, roots, args.json, pinned)
+    if args.verify and not os.path.isdir(args.verify):
+        # A root that is not there makes every manifest entry report MISSING,
+        # so a typo'd path reads as an install Steam tampered with (exit 1, a
+        # full report on stderr) instead of a path the caller got wrong.
+        print(f"steam_manifest: no install root: {args.verify} (--verify)", file=sys.stderr)
+        return 2
     try:
         path = (
             resolve_manifest_arg(args.manifest, args.depot, roots, pinned)

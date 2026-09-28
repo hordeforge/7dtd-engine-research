@@ -3,11 +3,13 @@
 
 import os
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 TOOLS = _common.TOOLS
+UNKNOWN_FLAG = "--zzz-not-a-flag"
 SCRIPTS = (
     "build.sh",
     "cecil-pin.sh",
@@ -53,6 +55,32 @@ def main() -> None:
     assert _common.run_cmd([TOOLS / "build.sh", "--bad"], capture_output=True).returncode == 2
     assert _common.run_cmd([TOOLS / "regen.sh", "--bad"], capture_output=True).returncode == 2
     assert _common.run_cmd([TOOLS / "post-update.sh", "--bad"], capture_output=True).returncode == 2
+
+    # A flag no script takes is the one invocation they share, so the answer is
+    # one shape: exit 2, the refusal on stderr naming the argument, and the
+    # same pointer at --help. stdout stays empty, so a redirected report never
+    # carries a usage line.
+    for relative in SCRIPTS:
+        name = Path(relative).name
+        result = _common.run_cmd(
+            [TOOLS / relative, UNKNOWN_FLAG],
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+        )
+        if name in ("cecil-pin.sh", "fetch_version.sh"):
+            # These two take paths/targets, not flags; an unknown flag is an
+            # argument they cannot use, which they already refuse by name with
+            # exit 2 and nothing on stdout.
+            assert result.returncode == 2, result
+            assert UNKNOWN_FLAG in result.stderr, result.stderr
+            assert result.stdout == "", result.stdout
+            continue
+        assert result.returncode == 2, f"{relative}: {result.stderr}"
+        assert result.stdout == "", f"{relative}: {result.stdout}"
+        assert UNKNOWN_FLAG in result.stderr, f"{relative}: {result.stderr}"
+        assert f"{name} --help" in result.stderr, f"{relative}: {result.stderr}"
 
     # The opt-in Steam side of the post-update path must stay documented: the
     # default run is offline, so a reader only discovers --steam from the help.
