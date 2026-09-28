@@ -25,7 +25,13 @@ SCRIPT = os.path.join(TOOLS, "save_roundtrip_check.py")
 
 
 def run(*argv: str) -> tuple[int, str]:
-    proc = subprocess.run([sys.executable, SCRIPT, *argv], capture_output=True, text=True)
+    proc = subprocess.run(
+        [sys.executable, SCRIPT, *argv],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
     return proc.returncode, proc.stdout + proc.stderr
 
 

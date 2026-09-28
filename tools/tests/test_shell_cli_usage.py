@@ -38,7 +38,9 @@ def main() -> None:
     bad = []
     for relative in SCRIPTS:
         path = TOOLS / relative
-        result = subprocess.run([path, "--help"], text=True, capture_output=True)
+        result = subprocess.run(
+            [path, "--help"], text=True, encoding="utf-8", errors="replace", capture_output=True
+        )
         if result.returncode != 0 or not result.stdout.strip():
             bad.append(f"{relative}: rc={result.returncode}, stderr={result.stderr.strip()!r}")
             continue
@@ -56,7 +58,11 @@ def main() -> None:
     # The opt-in Steam side of the post-update path must stay documented: the
     # default run is offline, so a reader only discovers --steam from the help.
     help_text = subprocess.run(
-        [TOOLS / "post-update.sh", "--help"], text=True, capture_output=True
+        [TOOLS / "post-update.sh", "--help"],
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
     ).stdout
     assert "--steam" in help_text, help_text
     assert "offline" in help_text, help_text

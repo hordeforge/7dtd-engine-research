@@ -45,6 +45,8 @@ def main() -> None:
     result = subprocess.run(
         [sys.executable, str(TOOL), "--check", "--verify-install", "Managed", "--json"],
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
         check=False,
     )

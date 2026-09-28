@@ -36,7 +36,13 @@ COMMITTED = _common.REPO / "workspace" / "outputs" / "parity" / "parity_b10.json
 def run(asm: Path, baseline: Path, parity: Path, *extra: str) -> subprocess.CompletedProcess[str]:
     env = os.environ | {"BASELINE_DIR": str(baseline), "PARITY_BASELINE": str(parity)}
     return subprocess.run(
-        [str(DRIFT), str(asm), *extra], env=env, text=True, capture_output=True, check=False
+        [str(DRIFT), str(asm), *extra],
+        env=env,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=False,
     )
 
 
@@ -95,7 +101,13 @@ def main() -> None:
             "COMMITTED_BASELINE": str(empty_committed),
         }
         unmeasured = subprocess.run(
-            [str(DRIFT), str(asm)], env=env, text=True, capture_output=True, check=False
+            [str(DRIFT), str(asm)],
+            env=env,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            check=False,
         )
         assert unmeasured.returncode == 2, (unmeasured.stdout[-400:], unmeasured.stderr[-400:])
         assert "no baseline for:" in unmeasured.stderr, unmeasured.stderr

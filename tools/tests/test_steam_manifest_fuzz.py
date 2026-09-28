@@ -248,6 +248,31 @@ def regression_pins(path: Path, bad: list[str]) -> None:
             f"varint: over-uint64 raised {type(exc).__name__} instead of ManifestError: {exc}"
         )
 
+    # An entry name that is not UTF-8: the name is the identity --verify matches
+    # a local file by, and errors="replace" folded every invalid sequence to
+    # U+FFFD, so two different entries could claim the same install path.
+    undecodable = field_varint(2, 1) + field_bytes(5, hashlib.sha1(b"x").digest())
+    table = field_bytes(1, b"Data\xff\xfe") + undecodable
+    table = field_bytes(1, table)
+    body = struct.pack("<II", src.MAGIC, len(table)) + table
+    try:
+        parsed = src.read_manifest(_write(path, body))
+        bad.append(f"name: invalid UTF-8 entry name parsed as {parsed.entries}")
+    except src.ManifestError:
+        pass
+    except Exception as exc:
+        bad.append(f"name: raised {type(exc).__name__} instead of ManifestError: {exc}")
+
+    # Pair side: a real non-ASCII depot name still decodes.
+    good_name = "Data\\Managed\\café.dll"
+    body = manifest([entry(good_name, b"x")])
+    try:
+        parsed = src.read_manifest(_write(path, body))
+        if parsed.entries[0].name != good_name:
+            bad.append(f"name: non-ASCII name round-tripped as {parsed.entries[0].name!r}")
+    except src.ManifestError as exc:
+        bad.append(f"name: valid non-ASCII depot name was rejected: {exc}")
+
     # Pair assertion: a valid manifest must carry the fields the encoder wrote.
     payload = b"steady stock bytes\n"
     good = manifest([entry("Data\\Managed\\Good.dll", payload, flags=1024, chunks=2)])

@@ -165,7 +165,7 @@ def compile_probe(cs_text: str, stem: str) -> str:
     d = probe_dir()
     exe = str(d / f"{stem}.exe")
     src = str(d / f"{stem}.cs")
-    with open(src, "w") as f:
+    with open(src, "w", encoding="utf-8") as f:
         f.write(cs_text)
     subprocess.run(
         ["mcs", "-r:%s" % (BIN / "Mono.Cecil.dll"), src, "-out:" + exe],

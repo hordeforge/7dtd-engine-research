@@ -55,13 +55,19 @@ def perf_works() -> bool:
     if shutil.which("perf") is None:
         return False
     probe = subprocess.run(
-        ["perf", "stat", "-e", "instructions:u", "true"], capture_output=True, text=True
+        ["perf", "stat", "-e", "instructions:u", "true"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     return probe.returncode == 0 and "instructions:u" in probe.stderr
 
 
 def mono_version() -> str:
-    probe = subprocess.run(["mono", "--version"], capture_output=True, text=True)
+    probe = subprocess.run(
+        ["mono", "--version"], capture_output=True, text=True, encoding="utf-8", errors="replace"
+    )
     match = re.search(r"version (\S+)", probe.stdout or "")
     return match.group(1) if match else "unknown"
 
@@ -81,6 +87,8 @@ def run_instructions(old: Path, new: Path) -> float:
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         env=dict(os.environ, MONO_PATH=str(_common.BIN)),
     )
     match = INSTRUCTIONS_RE.search(proc.stderr)
@@ -97,6 +105,8 @@ def run_cpu_wall(old: Path, new: Path) -> tuple[float, float, str]:
         [sys.executable, str(TOOL), str(old), str(new)],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         env=dict(os.environ, MONO_PATH=str(_common.BIN)),
     )
     wall = (time.perf_counter() - start) * 1000.0

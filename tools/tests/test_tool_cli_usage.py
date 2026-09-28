@@ -26,7 +26,11 @@ def main() -> None:
     bad = []
     for name in sorted(names):
         result = subprocess.run(
-            ["mono", str(TOOLS / "bin" / f"{name}.exe")], text=True, capture_output=True
+            ["mono", str(TOOLS / "bin" / f"{name}.exe")],
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
         )
         if result.returncode != 2 or "usage:" not in result.stderr.lower():
             bad.append(f"{name}: rc={result.returncode}, stderr={result.stderr.strip()!r}")

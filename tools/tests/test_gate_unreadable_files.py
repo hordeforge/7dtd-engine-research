@@ -33,7 +33,13 @@ REAL_DOC = "network.md"
 
 
 def run(script: str, *argv: str) -> tuple[int, str]:
-    proc = subprocess.run([sys.executable, script, *argv], capture_output=True, text=True)
+    proc = subprocess.run(
+        [sys.executable, script, *argv],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
     return proc.returncode, proc.stdout + proc.stderr
 
 

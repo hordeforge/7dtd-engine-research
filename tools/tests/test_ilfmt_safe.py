@@ -71,7 +71,9 @@ def main() -> int:
     probe_cs.write_text(PROBE_CS, encoding="utf-8")
 
     compile_cmd = ["mcs", "-nologo", f"-r:{CECIL}", str(ILFMT), str(probe_cs), f"-out:{probe_exe}"]
-    r = subprocess.run(compile_cmd, capture_output=True, text=True)
+    r = subprocess.run(
+        compile_cmd, capture_output=True, text=True, encoding="utf-8", errors="replace"
+    )
     if r.returncode != 0:
         print("FAIL: probe compile failed:", r.stderr.strip(), file=sys.stderr)
         return 1
@@ -80,6 +82,8 @@ def main() -> int:
         ["mono", str(probe_exe), str(base)] + [c for c, _ in CASES],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         env=dict(os.environ, MONO_PATH=str(CECIL.parent)),
     )
     if run.returncode != 0:

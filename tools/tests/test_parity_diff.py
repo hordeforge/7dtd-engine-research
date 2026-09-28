@@ -15,7 +15,13 @@ TOOL = _common.TOOLS / "parity" / "parity_diff.py"
 
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([sys.executable, str(TOOL), *args], text=True, capture_output=True)
+    return subprocess.run(
+        [sys.executable, str(TOOL), *args],
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+    )
 
 
 def main() -> None:

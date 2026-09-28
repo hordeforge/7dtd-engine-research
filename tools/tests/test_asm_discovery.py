@@ -114,6 +114,8 @@ def run_resolver(env: dict[str, str], *args: str) -> tuple[int, str]:
         [sys.executable, str(_common.TOOLS / "asm_path.py"), *args],
         env={"PATH": os.environ.get("PATH", "")} | env,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
     )
     return result.returncode, result.stdout.strip()

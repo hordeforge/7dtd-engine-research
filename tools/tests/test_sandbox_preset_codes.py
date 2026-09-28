@@ -14,7 +14,14 @@ TOOL = _common.TOOLS / "sandbox" / "extract_preset_codes.py"
 
 def main() -> None:
     with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
-        result = subprocess.run([sys.executable, str(TOOL)], cwd=td, text=True, capture_output=True)
+        result = subprocess.run(
+            [sys.executable, str(TOOL)],
+            cwd=td,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+        )
     assert result.returncode == 0, result.stderr
     rows = result.stdout.splitlines()
     assert len(rows) == 7
@@ -30,6 +37,8 @@ def main() -> None:
     bad = subprocess.run(
         [sys.executable, "-c", probe],
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
     )
     assert bad.returncode != 0

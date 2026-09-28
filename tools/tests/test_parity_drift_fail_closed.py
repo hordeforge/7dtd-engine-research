@@ -31,6 +31,8 @@ def main() -> None:
             [str(TOOLS / "parity" / "drift-check.sh"), str(bad_asm)],
             env=env,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             capture_output=True,
         )
         assert result.returncode == 2

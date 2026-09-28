@@ -359,7 +359,7 @@ def check_worldstate_tail(buf: bytes, off: int, checks: list[str]) -> None:
             off += w_sz - 4
         check_weather_blob(w_body, checks)
         guid, off = read_net_string(buf, off)
-        checks.append(f"  guid: {guid[:8]}... len {len(guid)}")
+        checks.append(f"  guid: {guid[:8]}... len {len(guid)} chars")
         exact = off == len(buf)
         checks.append(
             f"  full WorldState parse {'byte-exact' if exact else 'MISMATCH'} ({off}/{len(buf)})"

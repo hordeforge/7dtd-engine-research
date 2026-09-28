@@ -144,7 +144,16 @@ def _entry(block: bytes) -> Entry:
     chunks = 0
     for field, wire, value in _fields(block):
         if field == 1 and wire == 2:
-            name = bytes(value).decode("utf-8", "replace")
+            # Steam depot names are UTF-8 and are the identity --verify matches a
+            # local file by, so an undecodable one is a bad manifest, not a name
+            # to repair: errors="replace" collapses every invalid sequence to
+            # U+FFFD and two different entries then claim the same path.
+            try:
+                name = bytes(value).decode("utf-8")
+            except UnicodeDecodeError as exc:
+                raise ManifestError(
+                    f"entry name is not valid UTF-8: {bytes(value)[:64]!r}"
+                ) from exc
         elif field == 2 and wire == 0:
             size = int(value)
         elif field == 3 and wire == 0:

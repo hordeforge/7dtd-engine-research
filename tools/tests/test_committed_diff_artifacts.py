@@ -80,6 +80,8 @@ def parity_snapshot(dll: Path) -> dict[str, object]:
         ["mono", str(_common.BIN / "ParitySurface.exe"), str(dll)],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         env=env,
     )
     assert proc.returncode == 0, proc.stderr
@@ -153,6 +155,8 @@ def main() -> int:
             ],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             env=env,
         )
 

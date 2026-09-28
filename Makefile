@@ -199,6 +199,7 @@ test-docs:
 	python3 "$(TOOLS)/tests/test_research_diff.py"
 	python3 "$(TOOLS)/tests/test_generation_stamp.py"
 	python3 "$(TOOLS)/tests/test_bounded_runs.py"
+	python3 "$(TOOLS)/tests/test_text_encoding.py"
 	python3 "$(TOOLS)/tests/test_state_machines_current.py"
 	python3 "$(TOOLS)/tests/test_inventory_counts.py"
 	python3 "$(TOOLS)/tests/test_readme_test_table.py"

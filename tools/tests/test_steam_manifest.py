@@ -67,7 +67,12 @@ def manifest(entries: list[bytes], trailer: bytes = b"\x00" * 70) -> bytes:
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(TOOL), *args], text=True, capture_output=True, check=False
+        [sys.executable, str(TOOL), *args],
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=False,
     )
 
 

@@ -44,6 +44,8 @@ def main() -> int:
             ["mono", EXE, os.path.join(REPO, "docs"), out],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             env=env,
         )
         if proc.returncode != 0:

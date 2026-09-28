@@ -34,7 +34,11 @@ def main() -> None:
     for path in scripts:
         relative = str(path.relative_to(_common.TOOLS))
         result = subprocess.run(
-            [sys.executable, str(path), "--help"], text=True, capture_output=True
+            [sys.executable, str(path), "--help"],
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
         )
         if result.returncode != 0 or "usage:" not in result.stdout.lower():
             broken.append(

@@ -64,7 +64,11 @@ def xref_counts(asm: str, pairs: list[tuple[str, str]]) -> dict[tuple[str, str],
             for typ, member in pairs:
                 f.write(f"{typ}\t{member}\n")
         r = subprocess.run(
-            ["mono", XREF, asm, "--batch", claims_path], capture_output=True, text=True
+            ["mono", XREF, asm, "--batch", claims_path],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     if r.returncode != 0:
         return {}

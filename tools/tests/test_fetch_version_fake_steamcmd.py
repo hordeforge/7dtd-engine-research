@@ -90,7 +90,12 @@ def load_snapshot(text: str) -> dict[str, object]:
 def direct_snapshot(dll: Path) -> dict[str, object]:
     env = dict(os.environ, MONO_PATH=str(_common.BIN))
     proc = subprocess.run(
-        ["mono", str(PARITY_EXE), str(dll)], capture_output=True, text=True, env=env
+        ["mono", str(PARITY_EXE), str(dll)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=env,
     )
     assert proc.returncode == 0, proc.stderr
     return load_snapshot(proc.stdout)
@@ -111,20 +116,37 @@ def arg_shape_cases() -> str:
     bad_targets = ["-injected", "-force_install_dir", "a b", "v3.1.0;id", "pub/../x", "a\tb"]
     for target in bad_targets:
         proc = subprocess.run(
-            [str(FETCH), target, "shapecheck"], capture_output=True, text=True, env=env
+            [str(FETCH), target, "shapecheck"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
         )
         assert proc.returncode == 2, (target, proc.returncode, proc.stdout, proc.stderr)
         assert "invalid" in proc.stderr, (target, proc.stderr)
     # A label is a filename stem (parity_<label>.json), so the refusals are the
     # shapes that escape the output directory or break the stem.
     for target, label in [("public", "a b"), ("public", ".."), ("public", "."), ("public", "a/b")]:
-        proc = subprocess.run([str(FETCH), target, label], capture_output=True, text=True, env=env)
+        proc = subprocess.run(
+            [str(FETCH), target, label],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+        )
         assert proc.returncode == 2, (label, proc.returncode, proc.stdout, proc.stderr)
         assert "invalid" in proc.stderr, (label, proc.stderr)
     # A trailing newline passes bash's `=~ ...$`, so it is rejected explicitly.
     for target in ["public\n", "1234567890123\n"]:
         proc = subprocess.run(
-            [str(FETCH), target, "shapecheck"], capture_output=True, text=True, env=env
+            [str(FETCH), target, "shapecheck"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
         )
         assert proc.returncode == 2, (repr(target), proc.returncode, proc.stdout, proc.stderr)
         assert "newline" in proc.stderr, (repr(target), proc.stderr)
@@ -173,7 +195,12 @@ def main() -> None:
                 OUT=str(out),
             )
             return subprocess.run(
-                [str(FETCH), target, label], capture_output=True, text=True, env=env
+                [str(FETCH), target, label],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                env=env,
             )
 
         # 1. manifest form: pass-through, atomic publish, snapshot equality
@@ -214,7 +241,12 @@ def main() -> None:
                     OUT=str(out_map),
                 )
                 proc_map = subprocess.run(
-                    [str(FETCH), gid, label], capture_output=True, text=True, env=env_map
+                    [str(FETCH), gid, label],
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    env=env_map,
                 )
                 assert proc_map.returncode == 0, (proc_map.stdout, proc_map.stderr)
                 snapshot_map = out_map / f"parity_{label}.json"
@@ -232,6 +264,8 @@ def main() -> None:
                 ],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
             )
             assert wire.returncode == 0, wire.stdout
             assert "changed wire (0)" in wire.stdout, wire.stdout
@@ -288,6 +322,8 @@ def main() -> None:
             ],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             env=dict(
                 base_env,
                 FAKE_LOG=str(builds_log),

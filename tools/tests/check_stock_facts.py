@@ -104,6 +104,8 @@ def check_live_against_dll(facts: dict[str, Any], errors: list[str]) -> None:
                 [mono, str(exe), str(asm), str(out)],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 env=env,
                 timeout=120,
             )
@@ -243,6 +245,8 @@ def check_xmls_to_load_inventory(errors: list[str]) -> None:
         ["mono", str(TOOLS / "bin" / "DumpMethod.exe"), str(asm), "WorldStaticData", ".cctor"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         env=env,
         timeout=60,
     )

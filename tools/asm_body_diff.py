@@ -170,6 +170,7 @@ def main() -> int:
         # bounds a tool and kills its process group: an unbounded mcs or mono
         # (a malformed assembly driving Cecil into a long walk, a runtime
         # prompt) would hang the gate that ran this instead of failing it.
+        # It also decodes the children as utf-8 with errors="replace".
         comp_rc, comp_out, comp_err = tooling.run_bounded(
             ["mcs", f"-r:{CECIL}", f"-out:{exe}", str(cs)], env=tooling.mono_env()
         )

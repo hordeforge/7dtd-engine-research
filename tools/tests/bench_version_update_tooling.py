@@ -40,7 +40,9 @@ def run_checker(facts: Path, *, skip_siblings: bool = True) -> tuple[int, str]:
     cmd = [sys.executable, str(CHECKER), "--facts", str(facts), "--require-live"]
     if skip_siblings:
         cmd.append("--skip-siblings")
-    p = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
+    p = subprocess.run(
+        cmd, cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace"
+    )
     out = (p.stdout or "") + (p.stderr or "")
     return p.returncode, out
 

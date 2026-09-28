@@ -129,12 +129,13 @@ class Section:
 def run(cmd: list[str], timeout: float | None = None) -> subprocess.CompletedProcess[str]:
     """Run one lens tool under the shared bound -> (rc, stdout, stderr).
 
-    The bound is `tooling.mono_timeout()` rather than a literal here, so
-    `RE_MONO_TIMEOUT` reaches every runner, and the child gets its own process
-    group so a timeout kills whatever it spawned instead of orphaning it. A
-    timeout is a lens that never finished, not a lens result: it raises with
-    the command and the bound named, and main reports it like any other
-    tool failure.
+    The bound is `tooling.mono_timeout()` (900 s unless `RE_MONO_TIMEOUT` says
+    otherwise) rather than a literal here, so one env var reaches every
+    runner, and the child gets its own process group so a timeout kills
+    whatever it spawned instead of orphaning it. Output is decoded as utf-8
+    with errors="replace". A timeout is a lens that never finished, not a lens
+    result: it raises with the command and the bound named, and main reports
+    it like any other tool failure.
     """
     rc, out, err = tooling.run_bounded(cmd, env=tooling.mono_env(), timeout=timeout)
     if rc == tooling.TIMEOUT_RC:

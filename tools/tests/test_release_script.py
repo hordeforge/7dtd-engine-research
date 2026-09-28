@@ -23,7 +23,14 @@ RELEASE = _common.TOOLS / "release.sh"
 
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([str(RELEASE), *args], text=True, capture_output=True, check=False)
+    return subprocess.run(
+        [str(RELEASE), *args],
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=False,
+    )
 
 
 def tag_exists(name: str) -> bool:
@@ -76,6 +83,8 @@ def main() -> None:
         stubbed = subprocess.run(
             [str(RELEASE), "v9.9.8", "--notes", str(notes), "--dry-run"],
             text=True,
+            encoding="utf-8",
+            errors="replace",
             capture_output=True,
             check=False,
             env=env,
