@@ -1,4 +1,4 @@
-# 📜 Schematics (7DTD Engine Research)
+# 📜 Schematics (Engine Research)
 
 > **Part of [HordeForge](https://github.com/hordeforge)**: High-Performance Systems Engineering for 7 Days to Die.
 
