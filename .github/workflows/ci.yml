@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      # enable-cache keys the uv download cache on tools/sandbox/requirements.txt,
+      # enable-cache keys the uv download cache on uv.lock,
       # so the two pinned analyzers below resolve from a warm cache instead of
       # being re-downloaded on every run. The installed versions are still the
       # pins, never whatever the cache holds: uv re-resolves and re-installs.

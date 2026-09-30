@@ -244,7 +244,7 @@ falls behind the commits actually below the last tag.
   tool module), all fixed in the same change, so a raise lands with the fixes
   that keep the gate green.
 - **The sandbox installs a bounded, reviewed requirement series.** Each package
-  in `tools/sandbox/requirements.in` carries a floor and a ceiling, checked
+  in `pyproject.toml` carries a floor and a ceiling, checked
   against the lock, so a recompile cannot jump a series under a tool that reads
   package internals.
 - **Install discovery works from every Steam root** a supported host has

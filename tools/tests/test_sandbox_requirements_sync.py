@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
-"""Pin sandbox/requirements.txt to sandbox/requirements.in (hash-pinned lock).
+"""Pin uv.lock to the dependencies pyproject.toml declares.
 
-The uv-compiled lock is the repo's dependency inventory and supply-chain gate
-(exact versions + sha256 for dnfile/dncil/UnityPy and their transitives). That
-only holds while the two files agree: a dep added to requirements.in without
-recompiling installs from a lock without it; a recompile that drops
---generate-hashes silently loses integrity checking. DLL-free, network-free.
+The uv lock is the repo's dependency inventory and supply-chain gate (exact
+versions + sha256 for dnfile/dncil/UnityPy and their transitives). That only
+holds while the two files agree: a dep added to pyproject.toml without
+re-locking installs from a lock without it; a lock entry stripped of its hashes
+silently loses integrity checking. DLL-free, network-free.
 
 Checked here:
-  - every requirements.in dep appears in the lock as an exact name==version pin
-  - every pin carries at least one --hash=sha256 (no hash-stripped hand edits)
-  - the locked version satisfies the bound requirements.in declares for it, so
+  - every declared dep appears in the lock with an exact version
+  - every locked registry package carries at least one sha256 (no hash-stripped
+    hand edits)
+  - the locked version satisfies the bound pyproject.toml declares for it, so
     the floors/ceilings there and the reviewed lock cannot drift apart. The
     bound is a series, not a floor: ~=1.25.0 admits 1.25.x and rejects 1.26
-  - no ranged/wildcard/url specifiers sneak into the lock
-  - every entry the lock marks as coming from requirements.in is declared there
-  - every non-stdlib import under tools/ is declared in requirements.in, so no
+  - every locked package comes from the registry (no git/url/path sources)
+  - every dep the lock records for the sandbox project is declared
+  - every non-stdlib import under tools/ is declared in pyproject.toml, so no
     tool rides in on an undeclared transitive (a version bump of the parent can
     then move it under them)
 
@@ -30,6 +31,7 @@ import os
 import re
 import sys
 import tempfile
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -37,21 +39,19 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 TOOLS = _common.TOOLS
-IN_FILE = TOOLS / "sandbox" / "requirements.in"
-LOCK = TOOLS / "sandbox" / "requirements.txt"
+PYPROJECT = TOOLS.parent / "pyproject.toml"
+LOCK = TOOLS.parent / "uv.lock"
 # Every tool source in the tree, not just the sandbox: a tool anywhere under
-# tools/ that reaches for a package requirements.in never declared rides in on
+# tools/ that reaches for a package pyproject.toml never declared rides in on
 # an undeclared transitive. LOCAL is the sibling-module set, taken tree-wide
 # because tools/ root modules are imported from subdirectories (tests/ imports
 # tooling and shader_blob_dump; research_diff imports steam/steam_manifest).
-IMPORTERS = sorted(TOOLS.rglob("*.py"))
+# The sandbox's own .venv is excluded: it holds the installed packages.
+IMPORTERS = sorted(p for p in TOOLS.rglob("*.py") if ".venv" not in p.parts)
 LOCAL = {p.stem for p in IMPORTERS}
 
-PIN_RE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9._-]*)==([^\s\\]+)\s*(?:\\\s*)?$")
-NON_EXACT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*\s*(@|~=|!=|<|>|[*]|\[)")
-DIRECT_VIA_RE = re.compile(r"#\s+(?:via\s+)?-r requirements\.in$")
 REQ_RE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9._-]*)(.*)$")
-# The only bound forms requirements.in may use. Anything else (extras, env
+# The only bound forms pyproject.toml may use. Anything else (extras, env
 # markers, URLs, wildcards) resolves in ways this gate cannot check, so it is a
 # hard error rather than a silently unverified declaration.
 SPEC_RE = re.compile(r"^(~=|>=|<=|==|>|<)\s*([0-9][0-9A-Za-z.]*)$")
@@ -67,7 +67,7 @@ def release(version: str) -> tuple[int, ...]:
 
 
 def bounded(version: str, spec: str) -> tuple[bool, str]:
-    """Does a locked version satisfy a requirements.in bound? (ok, reason)."""
+    """Does a locked version satisfy a declared bound? (ok, reason)."""
     if not spec:
         return True, ""
     m = SPEC_RE.match(spec)
@@ -81,7 +81,7 @@ def bounded(version: str, spec: str) -> tuple[bool, str]:
     if op == "~=":
         # The series is the bound minus its patch component when it has one
         # (~=1.25.0 and ~=1.25 both mean the reviewed 1.25 series), matching
-        # what requirements.in promises: a recompile cannot jump a series under
+        # what pyproject.toml promises: a re-lock cannot jump a series under
         # a tool that reads the package's internals. The next release past the
         # series is the ceiling.
         series = need[:-1] if len(need) > 2 else need
@@ -98,72 +98,66 @@ def bounded(version: str, spec: str) -> tuple[bool, str]:
     return ok, f"does not satisfy {spec}"
 
 
-def parse_in(text: str) -> dict[str, str]:
-    """Map canonical dep name -> its full requirement line in requirements.in."""
+def parse_declared(text: str) -> dict[str, str]:
+    """Map canonical dep name -> its bound from pyproject.toml's dependencies."""
     out: dict[str, str] = {}
-    for raw in text.splitlines():
-        line = raw.split("#", 1)[0].strip()
-        if not line:
-            continue
-        m = REQ_RE.match(line)
+    for line in tomllib.loads(text)["project"]["dependencies"]:
+        m = REQ_RE.match(line.strip())
         if m is None:
-            raise ValueError(f"unparseable requirements.in line: {raw!r}")
-        out[canon(m.group(1))] = line[len(m.group(1)) :].strip()
+            raise ValueError(f"unparseable dependency: {line!r}")
+        out[canon(m.group(1))] = m.group(2).strip()
     return out
 
 
-def parse_lock(text: str) -> dict[str, dict[str, Any]]:
-    """Map canonical name -> {version, hashes, direct} from uv compile output."""
+def parse_lock(text: str) -> tuple[dict[str, dict[str, Any]], set[str]]:
+    """(canonical name -> {version, hashes, registry}, the project's direct deps)."""
     pins: dict[str, dict[str, Any]] = {}
-    current: dict[str, Any] | None = None
-    for raw in text.splitlines():
-        line = raw.strip()
-        if not line:
+    direct: set[str] | None = None
+    for pkg in tomllib.loads(text).get("package", []):
+        source = pkg.get("source", {})
+        if "virtual" in source:
+            if direct is not None:
+                raise ValueError("more than one project entry in the lock")
+            direct = {canon(dep["name"]) for dep in pkg.get("dependencies", [])}
             continue
-        if line.startswith("#"):
-            if current is not None and DIRECT_VIA_RE.fullmatch(line):
-                current["direct"] = True
-            continue
-        if line.startswith("--"):
-            if current is not None and line.startswith("--hash=sha256:"):
-                current["hashes"] += 1
-            continue
-        m = PIN_RE.match(line)
-        if m is None:
-            hint = "non-exact specifier" if NON_EXACT_RE.match(line) else "unparseable"
-            raise ValueError(f"{hint} pin line: {raw!r}")
-        current = {"version": m.group(2), "hashes": 0, "direct": False}
-        pins[canon(m.group(1))] = current
-    return pins
+        artifacts = [pkg["sdist"]] if "sdist" in pkg else []
+        artifacts += pkg.get("wheels", [])
+        hashes = sum(1 for a in artifacts if str(a.get("hash", "")).startswith("sha256:"))
+        pins[canon(pkg["name"])] = {
+            "version": str(pkg.get("version", "")),
+            "hashes": hashes,
+            "registry": "registry" in source,
+        }
+    if direct is None:
+        raise ValueError("no project entry in the lock")
+    return pins, direct
 
 
 def check(declared: dict[str, str], lock_text: str) -> list[str]:
     bad: list[str] = []
     try:
-        pins = parse_lock(lock_text)
-    except ValueError as exc:
-        return [str(exc)]
+        pins, direct = parse_lock(lock_text)
+    except (ValueError, KeyError, tomllib.TOMLDecodeError) as exc:
+        return [f"unparseable lock: {exc}"]
     for dep in sorted(declared):
         if dep not in pins:
             bad.append(
-                f"{dep}: declared in requirements.in but absent from the lock "
-                "(recompile: uv pip compile --generate-hashes)"
+                f"{dep}: declared in pyproject.toml but absent from the lock (re-run uv lock)"
             )
-            continue
-        if pins[dep]["hashes"] == 0:
-            bad.append(f"{dep}: pinned without any --hash=sha256 (integrity check lost)")
             continue
         ok, reason = bounded(str(pins[dep]["version"]), declared[dep])
         if not ok:
             bad.append(
                 f"{dep}: locked {pins[dep]['version']} {reason} "
-                "(requirements.in and the lock disagree: recompile)"
+                "(pyproject.toml and the lock disagree: re-run uv lock)"
             )
     for name, meta in sorted(pins.items()):
-        if meta["direct"] and name not in declared:
-            bad.append(
-                f"{name}: locked as a direct requirement but not declared in requirements.in"
-            )
+        if not meta["registry"]:
+            bad.append(f"{name}: locked from a non-registry source")
+        elif meta["hashes"] == 0:
+            bad.append(f"{name}: locked without any sha256 (integrity check lost)")
+    for name in sorted(direct - declared.keys()):
+        bad.append(f"{name}: locked as a direct dependency but not declared in pyproject.toml")
     return bad
 
 
@@ -191,12 +185,12 @@ def third_party_imports(path: Path, local: set[str]) -> set[str]:
 
 
 def undeclared_imports(declared: dict[str, str], sources: list[Path], local: set[str]) -> list[str]:
-    """Imports a tool relies on that requirements.in does not declare."""
+    """Imports a tool relies on that pyproject.toml does not declare."""
     bad = []
     for path in sources:
         for mod in sorted(third_party_imports(path, local)):
             if canon(mod) not in declared:
-                bad.append(f"{mod}: imported by {path.name} but not declared in requirements.in")
+                bad.append(f"{mod}: imported by {path.name} but not declared in pyproject.toml")
     return bad
 
 
@@ -206,30 +200,43 @@ def self_test() -> tuple[list[str], int]:
     def h64(c: str) -> str:
         return c * 64
 
-    clean = (
-        f"alpha==1.0.0 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n"
-        f"beta==2.0 \\\n    --hash=sha256:{h64('b')} \\\n    --hash=sha256:{h64('c')}\n"
-        "    # via alpha\n"
-    )
+    def pkg(name: str, version: str, hashes: str, source: str = 'registry = "x"') -> str:
+        return (
+            f'[[package]]\nname = "{name}"\nversion = "{version}"\n'
+            f"source = {{ {source} }}\n{hashes}\n"
+        )
+
+    def project(*deps: str) -> str:
+        listed = ", ".join(f'{{ name = "{d}" }}' for d in deps)
+        return (
+            f'[[package]]\nname = "sandbox"\nversion = "0"\n'
+            f'source = {{ virtual = "." }}\ndependencies = [{listed}]\n'
+        )
+
+    def sdist(c: str) -> str:
+        return f'sdist = {{ url = "u", hash = "sha256:{h64(c)}" }}'
+
+    wheels_bc = f'wheels = [{{ url = "u", hash = "sha256:{h64("b")}" }}, {{ url = "v", hash = "sha256:{h64("c")}" }}]'
+    clean = project("alpha") + pkg("alpha", "1.0.0", sdist("a")) + pkg("beta", "2.0", wheels_bc)
     cases = [
         ("clean lock", {"alpha": ""}, clean, []),
         ("clean lock with bounds", {"alpha": "~=1.0", "beta": ">=2.0"}, clean, []),
         (
             "patch release inside the bound series",
             {"alpha": "~=1.0.2"},
-            f"alpha==1.0.9 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
+            project("alpha") + pkg("alpha", "1.0.9", sdist("a")),
             [],
         ),
         (
             "minor jump outside the bound series",
             {"alpha": "~=1.0.2"},
-            f"alpha==1.1.0 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
+            project("alpha") + pkg("alpha", "1.1.0", sdist("a")),
             ["outside the ~=1.0.2 series"],
         ),
         (
             "below the bound floor",
             {"alpha": "~=1.0.2"},
-            f"alpha==1.0.1 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
+            project("alpha") + pkg("alpha", "1.0.1", sdist("a")),
             ["outside the ~=1.0.2 series"],
         ),
         (
@@ -253,30 +260,32 @@ def self_test() -> tuple[list[str], int]:
         (
             "hash stripped",
             {"alpha": ""},
-            "alpha==1.0.0\n    # via -r requirements.in\n",
+            project("alpha") + pkg("alpha", "1.0.0", 'sdist = { url = "u" }'),
             ["alpha"],
+        ),
+        (
+            "transitive hash stripped",
+            {"alpha": ""},
+            project("alpha") + pkg("alpha", "1.0.0", sdist("a")) + pkg("beta", "2.0", ""),
+            ["beta"],
         ),
         (
             "ghost direct",
             {},
-            f"alpha==1.0.0 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
+            project("alpha") + pkg("alpha", "1.0.0", sdist("a")),
             ["not declared"],
         ),
         (
-            "range sneaks in",
+            "git source sneaks in",
             {"alpha": ""},
-            f"alpha>=1.0 \\\n    --hash=sha256:{h64('a')}\n    # via -r requirements.in\n",
-            ["non-exact specifier"],
+            project("alpha") + pkg("alpha", "1.0.0", "", 'git = "https://x/alpha"'),
+            ["non-registry source"],
         ),
         (
-            "multi-via direct",
+            "no project entry",
             {"alpha": ""},
-            (
-                f"alpha==1.0 \\\n    --hash=sha256:{h64('a')}\n    # via\n    #   beta\n"
-                "    #   -r requirements.in\n"
-                f"beta==2.0 \\\n    --hash=sha256:{h64('b')}\n    # via alpha\n"
-            ),
-            [],
+            pkg("alpha", "1.0.0", sdist("a")),
+            ["no project entry"],
         ),
     ]
     bad: list[str] = []
@@ -288,7 +297,7 @@ def self_test() -> tuple[list[str], int]:
         elif not any(w in line for w in want for line in got):
             bad.append(f"{label}: defect not caught (got {got!r})")
 
-    # Import-side mutations: a tool must not reach a package requirements.in
+    # Import-side mutations: a tool must not reach a package pyproject.toml
     # never declared, and stdlib/sibling imports must not be flagged.
     with tempfile.TemporaryDirectory(prefix="reqsync-selftest-", dir=_common.scratch_dir()) as td:
         tmp = Path(td)
@@ -344,11 +353,12 @@ def main() -> int:
         print("FAIL:", f, file=sys.stderr)
 
     try:
-        declared = parse_in(IN_FILE.read_text(encoding="utf-8"))
-    except ValueError as exc:
+        declared = parse_declared(PYPROJECT.read_text(encoding="utf-8"))
+    except (ValueError, KeyError, tomllib.TOMLDecodeError) as exc:
         print("FAIL:", exc, file=sys.stderr)
         return 1
-    real = check(declared, LOCK.read_text(encoding="utf-8"))
+    lock_text = LOCK.read_text(encoding="utf-8")
+    real = check(declared, lock_text)
     for f in real:
         print("FAIL:", f, file=sys.stderr)
     undeclared = undeclared_imports(declared, IMPORTERS, LOCAL)
@@ -357,13 +367,12 @@ def main() -> int:
     if failures or real or undeclared:
         return 1
 
-    pins = parse_lock(LOCK.read_text(encoding="utf-8"))
+    pins, direct = parse_lock(lock_text)
     hashed = sum(1 for m in pins.values() if m["hashes"] > 0)
-    directs = ", ".join(sorted(n for n, m in pins.items() if m["direct"]))
     print(
-        f"OK: sandbox lock matches requirements.in ({directs}); all {len(pins)} pins exact, "
-        f"{hashed}/{len(pins)} sha256-hashed, {len(IMPORTERS)} tools import only declared "
-        f"packages; {n_cases} mutations caught"
+        f"OK: sandbox uv.lock matches pyproject.toml ({', '.join(sorted(direct))}); "
+        f"{hashed}/{len(pins)} pins sha256-hashed, {len(IMPORTERS)} tools import only "
+        f"declared packages; {n_cases} mutations caught"
     )
     return 0
 

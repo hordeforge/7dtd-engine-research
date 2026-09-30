@@ -11,9 +11,8 @@ data.unity3d and is committed as sandbox/sandbox_presets.xml; decode it with
 extract_preset_codes.py. This probe stays as a re-scan helper for future game
 updates.
 
-Run with the repo's hash-pinned UnityPy (uv pip install -r
-tools/sandbox/requirements.txt):
-    python3 tools/sandbox/try_extract_presets.py [game_dir]
+Run with the repo's hash-pinned UnityPy (uv sync --locked):
+    uv run python tools/sandbox/try_extract_presets.py [game_dir]
 """
 
 import argparse
@@ -42,7 +41,7 @@ def main() -> int:
     try:
         import UnityPy
     except ModuleNotFoundError:
-        ap.error("missing UnityPy; install tools/sandbox/requirements.txt")
+        ap.error("missing UnityPy; run uv sync --locked")
 
     root = (
         args.game_dir

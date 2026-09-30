@@ -33,7 +33,7 @@ setup problem: do not re-pin to make a build go through, read
 
 The third-party Python imports are confined to `tools/sandbox/` and
 `shader_blob_dump.py`; install them hash-pinned into a venv
-(`uv pip install -r tools/sandbox/requirements.txt`). Everything else under
+(`uv sync --locked`, then `uv run python <tool>`). Everything else under
 `tools/` is stdlib only.
 
 ## The loop

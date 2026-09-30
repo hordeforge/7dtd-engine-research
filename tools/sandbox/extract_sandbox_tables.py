@@ -8,10 +8,10 @@ names, value-set name, default value, and the full numeric value set (from
 inline stelem fills). Output: JSON written to stdout or --out.
 
 Usage:
-  python3 extract_sandbox_tables.py /path/to/Assembly-CSharp.dll --out out.json
+  uv run python extract_sandbox_tables.py /path/to/Assembly-CSharp.dll --out out.json
 
-Deps: dnfile, dncil; hash-pinned in requirements.txt next to this script
-(uv pip install -r requirements.txt).
+Deps: dnfile, dncil; hash-pinned in the repository's uv.lock
+(uv sync --locked).
 
 Evidence: docs/admin/sandbox-options.md (this repo). The option ids and value sets
 are the wire-visible contract of the sandbox code (see sandbox-options.md §3);
@@ -313,7 +313,7 @@ def main() -> None:
     ap.add_argument("--out", help="write the JSON here instead of stdout (atomic replace)")
     args = ap.parse_args()
     if IMPORT_ERROR:
-        ap.error(f"missing dependency {IMPORT_ERROR.name!r}; install sandbox/requirements.txt")
+        ap.error(f"missing dependency {IMPORT_ERROR.name!r}; run uv sync --locked")
     pe = dnfile.dnPE(args.dll)
     out = extract(pe)
     if args.out:

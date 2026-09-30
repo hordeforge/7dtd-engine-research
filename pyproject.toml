@@ -1,0 +1,27 @@
+# Third-party deps of tools/sandbox/*.py and tools/shader_blob_dump.py
+# (stdlib otherwise). The gate reads every third-party import under tools/, so a
+# new tool cannot add a fourth package here without naming it.
+# Each dependency carries a floor and a ceiling: a re-lock resolves inside the
+# series the lock was reviewed against, so it cannot silently jump a series
+# under a tool that reaches into the package's internals. The series is the
+# last component that is not a patch number: ~=1.25.0 and ~=1.25 both mean 1.25.
+# tests/test_sandbox_requirements_sync.py checks every bound against the
+# version in uv.lock, so a bound and a lock that disagree fail the gate.
+# Install with `uv sync --locked`; uv.lock carries a
+# sha256 for every artifact.
+[project]
+name = "7dtd-engine-research"
+version = "0"
+requires-python = ">=3.12"
+dependencies = [
+    "dnfile~=0.18.0",
+    # Stale upstream (last release Dec 2022) but stable and complete as a CIL
+    # disassembler; Mandiant-maintained and still the standard Python option.
+    "dncil~=1.0.2",
+    # 1.25.x only: shader_blob_dump.py calls UnityPy.helpers.CompressionHelper,
+    # which is not a stable API, so a 1.26+ refactor must not land on a re-lock.
+    "UnityPy~=1.25.0",
+]
+
+[tool.uv]
+package = false

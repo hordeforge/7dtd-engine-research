@@ -8,10 +8,10 @@ Data/Addressables/Standalone/meshdescriptions_assets_all.bundle into
 tools/sandbox/atlas/*.xml for provenance + regeneration of the zdtd comptime
 atlas table. Uses UnityPy (a reference UnityFS/SerializedFile parser).
 
-Usage: python3 extract_mesh_atlas.py <meshdescriptions_assets_all.bundle>
+Usage: uv run python extract_mesh_atlas.py <meshdescriptions_assets_all.bundle>
 
-Deps: UnityPy, hash-pinned in requirements.txt next to this script
-(uv pip install -r requirements.txt).
+Deps: UnityPy, hash-pinned in the repository's uv.lock
+(uv sync --locked).
 """
 
 import argparse
@@ -50,7 +50,7 @@ def main() -> None:
     )
     args = ap.parse_args()
     if IMPORT_ERROR:
-        ap.error(f"missing dependency {IMPORT_ERROR.name!r}; install sandbox/requirements.txt")
+        ap.error(f"missing dependency {IMPORT_ERROR.name!r}; run uv sync --locked")
 
     out_dir = args.out_dir.resolve()
     out_dir.mkdir(parents=True, exist_ok=True)

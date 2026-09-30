@@ -9,10 +9,10 @@ DXBC SHDR/SHEX declarations they describe.
 Needs UnityPy; use the repo's hash-pinned set (this is a reproduction tool,
 not a gate):
 
-    uv pip install -r tools/sandbox/requirements.txt
+    uv sync --locked
 
 Usage:
-    python3 tools/shader_blob_dump.py <bundle> [--shader NAME] [--verbose]
+    uv run python tools/shader_blob_dump.py <bundle> [--shader NAME] [--verbose]
 
 Prints one summary table per bundle and exits non-zero if any decoded
 sub-program disagrees with the documented header layout.
@@ -661,8 +661,7 @@ def main(argv: list[str] | None = None) -> int:
         rows, skipped, parameters = decode_bundle(args.bundle, args.shader, args.verbose)
     except ImportError:
         print(
-            "UnityPy is not installed; this reproduction tool needs it "
-            "(uv pip install -r tools/sandbox/requirements.txt).",
+            "UnityPy is not installed; this reproduction tool needs it (uv sync --locked).",
             file=sys.stderr,
         )
         return 77

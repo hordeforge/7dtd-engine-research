@@ -1,18 +1,17 @@
 # Dependency surface:
 #   - the SHA-pinned CI actions in .github/workflows/ci.yml
-#   - the Python RE-tooling lock: tools/sandbox/requirements.in compiled to the
-#     sha256-hashed tools/sandbox/requirements.txt via `uv pip compile
-#     --generate-hashes` (see tools/tests/test_sandbox_requirements_sync.py).
-# Dependabot's pip updater detects the --hash pins in the lock and regenerates
-# them on update; the sync gate in make test-docs fails any PR that drops or
-# desyncs them.
+#   - the Python RE-tooling lock: pyproject.toml locked to the
+#     sha256-hashed uv.lock by `uv lock`
+#     (see tools/tests/test_sandbox_requirements_sync.py).
+# Dependabot's uv updater re-locks on update; the sync gate in make test-docs
+# fails any PR that drops the hashes or desyncs the lock from its bounds.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
-  - package-ecosystem: pip
-    directory: /tools/sandbox
+  - package-ecosystem: uv
+    directory: /
     schedule:
       interval: weekly
