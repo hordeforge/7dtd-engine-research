@@ -19,7 +19,6 @@ Usage: python3 tools/tests/test_committed_inventories_current.py [asm]
 
 from __future__ import annotations
 
-import json
 import os
 import sys
 import tempfile

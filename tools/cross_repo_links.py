@@ -61,7 +61,6 @@ SKIP_DIRS = {
 }
 
 
-
 def scan_repo(repo: str, only_name: str | None) -> tuple[int, int, int, list[str]]:
     """(external-link count, broken count, unreadable-file count, report lines)."""
     if not os.path.isdir(repo):

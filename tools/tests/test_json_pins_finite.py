@@ -122,13 +122,15 @@ def pin_readers_use_the_loader() -> list[str]:
         raw_file_read = False
         loader_used = False
         for node in ast.walk(tree):
-            if not isinstance(node, ast.Call) or not isinstance(node.func, (ast.Name, ast.Attribute)):
+            if not isinstance(node, ast.Call) or not isinstance(
+                node.func, (ast.Name, ast.Attribute)
+            ):
                 continue
             name = node.func.id if isinstance(node.func, ast.Name) else node.func.attr
             source = ast.unparse(node)
-            if name == "load":
-                raw_file_read = True
-            elif name == "loads" and ("read_text" in source or ".read()" in source):
+            if name == "load" or (
+                name == "loads" and ("read_text" in source or ".read()" in source)
+            ):
                 raw_file_read = True
             elif name in {"load_json", "loads_json"}:
                 loader_used = True
@@ -151,9 +153,7 @@ def main() -> int:
         for b in bad:
             print(f"  - {b}")
         return 1
-    print(
-        f"OK: {len(NON_FINITE)} non-finite pin spellings rejected at the load and by the gate"
-    )
+    print(f"OK: {len(NON_FINITE)} non-finite pin spellings rejected at the load and by the gate")
     return 0
 
 

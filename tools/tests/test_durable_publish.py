@@ -23,6 +23,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
+import tooling
 
 TOOLS = _common.TOOLS
 # The helper is the one place allowed to rename a staged file.
@@ -42,7 +43,7 @@ def test_publish_lands_bytes() -> None:
         dest = Path(td) / "pins.json"
         dest.write_text("old\n", encoding="utf-8")
         tmp = stage(Path(td), "new\n")
-        _common.tooling.publish(tmp, dest)
+        tooling.publish(tmp, dest)
         assert not tmp.exists(), "the staged file survived the rename"
         assert dest.read_text(encoding="utf-8") == "new\n"
 
@@ -58,7 +59,7 @@ def test_flush_precedes_rename() -> None:
         order.append("fsync")
         real_fsync(fd)
 
-    def spy_replace(src: object, dst: object) -> None:
+    def spy_replace(src: Path, dst: Path) -> None:
         order.append("replace")
         real_replace(src, dst)
 
@@ -70,7 +71,7 @@ def test_flush_precedes_rename() -> None:
             mock.patch.object(os, "fsync", spy_fsync),
             mock.patch.object(os, "replace", spy_replace),
         ):
-            _common.tooling.publish(tmp, dest)
+            tooling.publish(tmp, dest)
     assert order[0] == "fsync", f"the rename ran before the flush: {order}"
     assert order[-1] == "fsync", f"the directory entry was never flushed: {order}"
     assert "replace" in order, f"the staged file was never renamed: {order}"
@@ -86,7 +87,7 @@ def test_failed_flush_keeps_previous_file() -> None:
         tmp = stage(Path(td), "new\n")
         with mock.patch.object(os, "fsync", boom):
             try:
-                _common.tooling.publish(tmp, dest)
+                tooling.publish(tmp, dest)
             except OSError:
                 pass
             else:
@@ -102,8 +103,8 @@ def test_fsync_dir_tolerates_a_non_directory() -> None:
     with tempfile.TemporaryDirectory(dir=_common.scratch_dir()) as td:
         plain = Path(td) / "not-a-dir"
         plain.write_text("x", encoding="utf-8")
-        _common.tooling.fsync_dir(plain)
-        _common.tooling.fsync_dir(Path(td) / "missing")
+        tooling.fsync_dir(plain)
+        tooling.fsync_dir(Path(td) / "missing")
 
 
 def test_no_tool_renames_its_own_staged_file() -> None:
