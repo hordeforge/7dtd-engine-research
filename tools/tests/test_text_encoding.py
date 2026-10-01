@@ -78,10 +78,18 @@ def _unmanaged_opens(tree: ast.AST) -> set[int]:
 
 
 def _is_open_call(node: ast.Call) -> bool:
+    """A call that returns a file object: `open()` or `<path>.open()`.
+
+    `os.open` returns a bare descriptor, which has no context manager and no
+    `read_text` equivalent; its lifetime is a `try`/`finally` around
+    `os.close`, so it is not an unmanaged handle.
+    """
     func = node.func
-    return (isinstance(func, ast.Name) and func.id == "open") or (
-        isinstance(func, ast.Attribute) and func.attr == "open"
-    )
+    if isinstance(func, ast.Name):
+        return func.id == "open"
+    if not isinstance(func, ast.Attribute) or func.attr != "open":
+        return False
+    return not (isinstance(func.value, ast.Name) and func.value.id == "os")
 
 
 def _encoding_missing(path: str, tree: ast.AST) -> list[str]:
@@ -149,8 +157,26 @@ def c_locale_child() -> tuple[int, str, str]:
     return tooling.run_bounded([sys.executable, "-c", CHILD], env=env, timeout=60.0)
 
 
+# Lines 1-2 hold file objects no `with` owns, line 3 one a `with` owns, and
+# line 4 a descriptor, which is closed by os.close rather than a `with`.
+SCAN_SELF_CHECK = (
+    "data = open('a', encoding='utf-8').read()\n"
+    "fh = path.open(encoding='utf-8')\n"
+    "with open('b', encoding='utf-8') as fh: pass\n"
+    "fd = os.open(path, os.O_RDONLY)\n"
+)
+
+
+def scan_self_check() -> list[str]:
+    """The handle scan flags unmanaged file objects and nothing else."""
+    found = sorted(_unmanaged_opens(ast.parse(SCAN_SELF_CHECK)))
+    if found != [1, 2]:
+        return [f"handle scan self-check flagged lines {found}, expected [1, 2]"]
+    return []
+
+
 def main() -> int:
-    bad = static_scan()
+    bad = scan_self_check() + static_scan()
     rc, out, err = c_locale_child()
     if rc != 0 or out != "café\n":
         bad.append(f"C-locale child: rc={rc} stdout={out!r} stderr={err.strip()!r}")
