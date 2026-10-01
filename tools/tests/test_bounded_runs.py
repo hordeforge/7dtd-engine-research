@@ -50,7 +50,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
@@ -187,11 +187,14 @@ def check_interrupt_kills_group(tmp: Path) -> None:
     the two pipe descriptors stay open with it.
     """
     marker = tmp / "interrupt-grandchild.pid"
+    # Measured before the patch: probe_bound_s spawns a child through
+    # subprocess.run, whose communicate would take the stub's interrupt.
+    bound = probe_bound_s() * 4
     real = subprocess.Popen.communicate
     calls: list[int] = []
 
     def interrupt_the_first_read(
-        self: subprocess.Popen[str], *args: Any, **kwargs: Any
+        self: subprocess.Popen[str], input_: str | None = None, timeout: float | None = None
     ) -> tuple[str, str]:
         # Raised out of the wait rather than delivered by a signal: a real
         # Ctrl-C is not reproducible here (the child is in its own session, and
@@ -203,21 +206,19 @@ def check_interrupt_kills_group(tmp: Path) -> None:
             while not marker.is_file() and time.monotonic() < deadline:
                 time.sleep(0.05)
             raise KeyboardInterrupt
-        return real(self, *args, **kwargs)
+        return real(self, input_, timeout)
 
-    subprocess.Popen.communicate = interrupt_the_first_read  # type: ignore[method-assign]
     try:
-        tooling.run_bounded(
-            [sys.executable, "-c", SNIPPET, str(marker)],
-            env=dict(os.environ),
-            timeout=probe_bound_s() * 4,
-        )
+        with mock.patch.object(subprocess.Popen, "communicate", interrupt_the_first_read):
+            tooling.run_bounded(
+                [sys.executable, "-c", SNIPPET, str(marker)],
+                env=dict(os.environ),
+                timeout=bound,
+            )
     except KeyboardInterrupt:
         pass
     else:
         raise AssertionError("the interrupt never landed inside the wait")
-    finally:
-        subprocess.Popen.communicate = real  # type: ignore[method-assign]
     assert len(calls) == 2, f"the unwind drained the pipes {len(calls) - 1} times, not once"
     assert marker.is_file(), "the child never started, nothing was interrupted"
     pid = int(marker.read_text(encoding="utf-8").strip())
