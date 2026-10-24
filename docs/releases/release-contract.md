@@ -1,6 +1,6 @@
 # Releasing 7dtd-engine-research (tag series, what each version means)
 
-**Hub:** [`INDEX.md`](../INDEX.md). **Corpus pin:** V **3.2.0 (b10)**
+**Hub:** [`INDEX.md`](../INDEX.md). **Corpus pin:** V **3.3.0 (b18)**
 ([`tools/data/stock_facts.json`](../../tools/data/stock_facts.json)).
 **Not:** a game release. Nothing here describes a 7 Days to Die build; those
 live in [`changelog-3.2.0.md`](changelog-3.2.0.md) and its two predecessors.
@@ -15,7 +15,7 @@ belongs to. Read the series before choosing the next number.
 
 | Series | Form | What the number tracks | When it moves |
 |---|---|---|---|
-| Corpus | `v3.Y.0` | The studied game build. `v3.1.0` is the corpus for game V3.1.0 b14, `v3.2.0` for V3.2.0 b10. | A TFP update that the corpus is re-pinned to (`make post-update`, then a new `changelog-<game-version>.md`) |
+| Corpus | `v3.Y.0` | The studied game build. `v3.1.0` is the corpus for game V3.1.0 b14, `v3.2.0` for V3.2.0 b10, `v3.3.0` for V3.3.0 b18. | A TFP update that the corpus is re-pinned to (`make post-update`, then a new `changelog-<game-version>.md`) |
 | Tooling | `v0.Y.Z` | This repo's own tooling and docs, independent of any game build. | A tooling or corpus change that does not re-pin the corpus |
 
 A corpus release may carry tooling changes (the `v3.2.0` cut shipped
@@ -30,6 +30,7 @@ Annotated tags, newest first, with the subject of the tagged commit:
 
 | Tag | Date | Tagged commit |
 |---|---|---|
+| `v3.3.0` | 2026-10-25 | `docs: add the v3.3.0 release notes` (corpus V3.3.0 b18) |
 | `v3.2.0` | 2026-09-21 | `tools: split by domain and share one helper module` (corpus V3.2.0 b10) |
 | `v0.2.0` | 2026-09-11 | `Merge pull request #21 from hordeforge/docs/subsystem-folders` (tooling) |
 | `v0.1.2` | 2026-08-26 | `Merge pull request #16 from hordeforge/chore/agent-rules-conformance` (tooling) |
@@ -52,293 +53,16 @@ new number.
 
 ## Unreleased
 
-**134 commits after `v3.2.0` (2026-09-21) as of 2026-10-25.** The corpus pin moved
-to V3.3.0 b18, so the next cut is a `v3.3.0` corpus release, not a tooling
-version: the game shipped V3.3.0 b18 (Steam build 25661908, depot manifest
-3031329678505041777) and the whole corpus was re-derived from it. The
-consumer-visible changes of that retarget are listed first, then the tooling
-changes that accumulated since `v3.2.0`;
-`tests/test_release_contract.py` fails if this section's count falls behind the
-commits actually below the last tag.
+**1 commit after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
+section used to describe is published under the tag and in
+[`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
-### The retarget: corpus pinned to V3.3.0 b18
-
-- **Every save record version moved.** `PlayerDataFile` 59 -> 62,
-  `EntityCreationData` 37 -> 38, `TEFeatureStorage` 18 -> 20, `Bag` 1 -> 2,
-  `Equipment` 4 -> 6, `Quest.FileVersion` 8 -> 9, each with `i32`-length blobs
-  where the old record was inline; `WorldState` 23 and the chunk preamble 47 did
-  not move. A b18 server reads a b10 world, a b10 server cannot read a b18 one,
-  so a downgrade must be refused.
-- **The wire registry lost three packages net** (187 -> 184 ids): six removed
-  (the two inventory-data and two inventory-transaction packages, the lock
-  request and the lock response) and three added (`NetPackageLockTarget`,
-  `NetPackageSingleSignData`, `NetPackageSignDelete`). The shift is piecewise:
-  ids 0..85 unchanged, then -2, -4, -5 and -3 across the ranges the removals and
-  additions interleave with. `NetPackagePlayerInventory` and `NetPackagePlayerEquipment`
-  now carry client-serialized save blobs, so the b10 per-operation inventory
-  transaction gate is gone; a mod that patched it has nothing to patch.
-- **The client owns its container serialization.** `TransactionalInventory`,
-  `InventoryTransaction`, `InventoryManager`, `ILockContext` and `LockTargetType`
-  were removed; locks are server-authoritative through `NetPackageLockTarget`,
-  `LockChannel` and `WorldObjectType`.
-- **Equipment is a 13-slot list with a backpack** (`EquipmentSlots.Backpack = 12`,
-  `EquipmentSlotType`), the held item moved into `Hand`
-  (`HoldingMode` replaces `HeldItemState`), `ItemStackGrid` became the storage
-  and serialization core, and the toolbelt count comes from the new
-  `Data/Config/toolbelt.xml` instead of compiled constants.
-- **Signs are a new subsystem.** Player libraries persist to
-  `<save>/Player/<id>.signs` and deletions to `deletedSigns.dat`; sign upload has
-  no sender check and the join download ships every player library, private ones
-  included. Both are documented as findings, not fixed behavior.
-- **The dedicated server emits analytics over HTTPS** (`player_death` with
-  inventory/position/biome/POI, plus the quest events) with no managed opt-out.
-- **Two console commands were added** (`give`, `listitems`), both at permission
-  level 0, and the registry is 190 commands.
-- **`zdtd-server` was not retargeted in this pass.** Its `stock_wire` and
-  PROVENANCE pins still name the old build, which is why the sibling half of
-  `make test` fails; the corpus half
-  (`check_stock_facts.py --require-live --skip-siblings`) is green.
-
-### Breaking for a consumer
-
-- **Two sandbox CLIs changed exit codes and streams.**
-  `sandbox/gen_zig_tables.py` and `sandbox/extract_preset_codes.py` answered a
-  path they cannot open with a `FileNotFoundError` traceback on stderr and exit
-  1, the same code a failed run used, so a script could not tell a bad path
-  from a bad run. They now print one plain line naming the path and exit 2, the
-  usage-error code every other tool uses. `extract_preset_codes.py` also moved
-  its column header below the input checks, so a failed run no longer leaves a
-  bare header on stdout, and `gen_zig_tables.py` grew the `main() -> int` entry
-  point its sibling tools already had.
-- **Four CLIs changed exit codes and streams.** `asm_body_diff.py` with no
-  arguments printed its help to stdout and exited 0; it now exits 2 as a usage
-  error, like every other tool. `assignids_dump.py` with the wrong argument
-  count exited 1 with the docstring on stdout; it now exits 2 with the docstring
-  on stderr (`--help` is the stdout, exit-0 path). `dump_diff.py` and
-  `parity/parity_diff.py` moved their usage line from stdout to stderr, so
-  `dump_diff.py a b > report` no longer writes the usage text into the report.
-  Both now exit 2 on a path that is not a directory/snapshot instead of
-  reporting "no drift" and exiting 0.
-- **An assembly override that names no install is refused.** `ASM`,
-  `SEVENDTD_ASM` and `SEVENDTD_DS_DIR` used to fall through to a probed Steam
-  root when the named path held no `Assembly-CSharp.dll`, so a typo silently
-  answered with a different install. They now exit 2 naming the variable. A
-  working override is unchanged.
-- **New environment variables**, all with defaults, so nothing has to be set:
-  `RE_MONO_TIMEOUT` (900 s) bounds every spawned mono/mcs/`fetch_version.sh`
-  child, `RE_STEAM_FETCH_TIMEOUT` (21600 s) bounds a `steam_builds.py --fetch`
-  depot download, `RE_FUZZ_SEED` names the seed a randomized gate replays
-  from, and `SEVENDTD_SERVER_DIR` names the install that
-  `make save-roundtrip-all` reads. A non-numeric or non-positive timeout aborts
-  rather than meaning "no bound".
-- **A branch that cannot be fetched is refused rather than attempted.**
-  `steam_builds.py` forwards a branch to `steamcmd -beta <name>`, where a
-  leading `-` is one of steamcmd's own options, so a branch is now held to the
-  label shape and additionally to no leading `-`. A branch whose PICS entry
-  carries no depot manifest gid is refused too, rather than handed to
-  `fetch_version.sh` with nothing to fetch. The same two refusals apply on both
-  output paths, so a branch that changes between them cannot be fetched under
-  one rule and refused under the other. An unusable `RE_STEAM_FETCH_TIMEOUT`
-  exits 2 with the reason, not a traceback.
-
-### Fixes
-
-- **No tool runs unbounded and no tool child is orphaned.** `tooling.run_bounded`
-  is the single spawn point and `tools/bounded-run.sh` does the same for the
-  shell entry points; a child that outlives its bound reports the rc and names
-  itself instead of hanging a gate, its grandchildren die with it (a host with
-  no process group, Windows, kills the child itself), and the post-kill read of
-  a timed-out child is bounded, so a grandchild that survives the kill cannot
-  turn the timeout back into the hang the bound exists to prevent.
-- **A rerun republishes instead of piling up.** `research_diff.py` names its
-  report after the build pair, not the date, so a repeated run of the same pair
-  overwrites the report already in `workspace/outputs/diffs/` rather than adding
-  a dated sibling, and the committed tree converges to one report per pair.
-  `--out PATH` still writes exactly where it is told, which is how a second
-  dated copy is made on purpose. `stock-sync.sh` rebuilds its inputs before
-  comparing and publishes `stock_facts.json` and `xml_pins.json` as one step that
-  puts the previous pair back if a move fails, so running either twice in a row
-  no longer trips over its own previous output, leaves this build's facts beside
-  the previous build's XML pins, or writes a half-written report over the one
-  already there.
-- **Two builds at once no longer race for the same staging path.** Every
-  `build.sh` run stages under `bin/.staging/run.$$`, so a retried `make census`
-  beside a `make drift`, or a local build while CI runs the same target, cannot
-  delete the other run's staged exe and rename a half-written one into `bin/`.
-- **The shell bound and the Mono lookup work on the hosts that run them.**
-  itself instead of hanging a gate, its grandchildren die with it (a host with
-  no process group, Windows, kills the child itself), and the post-kill read of
-  a timed-out child is bounded, so a grandchild that survives the kill cannot
-  turn the timeout back into the hang the bound exists to prevent.
-- **The bound and the Mono lookup work on the hosts that run them.**
-  `build.sh` asks the runtime for its own GAC (`gacutil`) instead of listing one
-  platform's layout, and `tools/bounded-run.sh` looks for `timeout` or `gtimeout`
-  and keeps the command it needs. A host with neither says so once and runs
-  unbounded, rather than dropping the bound silently.
-- **The Python tooling runs where it is claimed to.** The census history lock
-  and the bounded-run timeout both had POSIX-only code paths on a host that
-  documents Windows and macOS support: `census-pct.py` imported `fcntl` at
-  module scope (so every gate loading it failed to import on Windows), and a
-  timed-out tool reached `os.killpg` on a host that has no process groups. Both
-  now degrade to the temp-and-rename and the direct-child kill they already had
-  underneath, and the census lock is documented as advisory rather than
-  portable.
-- **A rerun republishes instead of piling up.** `research_diff.py` treats the
-  build pair as the report's identity and writes over the report already in
-  `workspace/outputs/diffs/`, so a repeated run of the same pair converges to
-  one report per pair rather than adding a dated sibling; `--out PATH` still
-  writes exactly where it is told, which is how a second dated copy is made on
-  purpose, and the report is written by rename, so running it twice in a row
-  never trips over its own previous output. `stock-sync.sh` rebuilds its inputs
-  before comparing, publishes `stock_facts.json` and `xml_pins.json` as one
-  step, and puts the previous pair back when a move fails, so a half-finished
-  refresh cannot leave the two pins describing different installs.
-- **`build.sh` is the only writer of `bin/`, and each run gets its own staging
-  directory.** The shell entry points call it instead of compiling their own
-  exes, and it keys each exe on the tool sources, so a stale executable cannot
-  shadow a rebuilt one. Every run stages under `bin/.staging/run.$$` and keeps
-  the final basename, which is what `mcs` derives the assembly name and MVID
-  from, so a retried `make census` beside a `make drift`, or a local build while
-  CI runs the same target, cannot `rm` each other's staged file and rename a
-  half-written exe into `bin/`. Dumper and drift-baseline writes land by
-  rename, so a run cut short cannot leave a half-written pin or baseline.
-- **An unmeasured census answers with a failure, not a zero.** `Census.exe`
-  exiting 0 without its `AllTypes (incl nested)` / `AllMethodsWithBody` rows
-  means the dumper's output format changed, so `census-pct.py` refuses the run
-  instead of reporting a whole assembly of zero types or a 0 % completion; an
-  unreadable coverage report drops its "reached in the server call graph" row
-  rather than printing `0`, which a reader cannot tell from a real measurement;
-  and `steam_manifest.py` names an unreadable `content_log.txt` on stderr,
-  because the silent skip printed a bare gid that reads as "never pinned".
-- **Gates no longer pass on input they never read.** Several link, citation and
-  inventory gates skipped a file they could not open, and three reported OK
-  while proving nothing; a drifted or unreadable input now fails with the reason.
-- **Pins stop being lost silently.** Non-finite and over-uint64 values are kept
-  out of pinned data, a negative save-format count and a negative pin number are
-  rejected rather than pinned, xml pin sections come from one source, the drift
-  baseline is keyed to the build it came from (an unstamped or foreign local
-  baseline no longer outranks the committed pin), and the census history append
-  is race-safe. A committed pin that cannot be read, or whose top level is not
-  an object, is reported as the error it is rather than degrading to "no pin",
-  and `test_stock_facts_baseline.py` runs `check_stock_facts.py` against a
-  recorded copy of the pin, so a pin that stops matching itself is caught
-  without the game installed.
-- **A hash is a hash, wherever it is taken.** The stock facts, the xml pins,
-  the shader blob and the sandbox table extraction computed a content digest
-  through a helper that was not pinned to an algorithm, so a different digest
-  could be pinned under the same field name, and a pinned SHA-256 that is not 64
-  hex digits now fails instead of falling through to the byte-diff branch and
-  blaming the operator's install for a damaged file. A relative `ASM` that
-  resolves to the process cwd is refused rather than handed on as an install
-  root, and `steam_builds.py` refuses a branch or depot gid that reaches
-  `steamcmd` as one of its own options, from the cache and the live query
-  alike, as well as a fetch whose download root resolves outside the depot it
-  asked for.
-- **The app-info fetch is bounded by bytes and by scheme.** A timeout bounds
-  how long the PICS request waits, not how many bytes arrive inside it, so the
-  body is read one byte past an 8 MiB cap and refused past it, and a URL or
-  redirect that leaves `https` is refused before the body is parsed.
-- **A UTC stamp is stamped in UTC, on any host.** A `SOURCE_DATE_EPOCH` past
-  year 9999 raised a bare `ValueError` from `datetime` past the `StampError`
-  every caller catches, and `DumpGmUpdate.cs` rendered its `Time (UTC)` line
-  through the ambient culture, so a host whose default calendar is Buddhist or
-  Umm al-Qura wrote a year decades off into a line claiming to be UTC. Both are
-  pinned by `tests/test_generation_stamp.py`, which now also rejects any C#
-  `DateTime` format that goes through the ambient culture.
-- **A committed artifact is a function of the studied bytes.** Artifact stamps
-  derive from `SOURCE_DATE_EPOCH`, the dumper build is incremental and
-  locale-pinned, and output names are stable, so a repeated build is
-  byte-identical. The coverage report identifies its build by the assembly's
-  sha256 rather than a file mtime, which changes when the same bytes are
-  re-downloaded and made every regeneration read as stale; the .NET stamp is
-  the same `yyyy-MM-ddTHH:mm:ssZ` string `tools/tooling.py` formats, because
-  the .NET round-trip `"o"` carried sub-second digits an integer
-  `SOURCE_DATE_EPOCH` cannot reproduce; and `StockFacts.exe` emits a complete
-  `litenet` section of documented defaults (every field marked baked, so the pin
-  gate refuses to pin it) when the sibling assembly is missing or unreadable, so
-  a failed extraction has the same object shape as a successful one and cannot
-  read as an absent protocol.
-- **`zig fmt` is bounded and its status is checked.** `gen_atlas_zig.py` ran it
-  with `check=False` and swallowed the `OSError`, so a run that wrote the file
-  and then failed to format it exited 0 over unformatted output; it now runs
-  through the shared bounded runner and a non-zero `zig fmt` stops the run.
-- **A CLI that cannot answer exits 2 instead of a clean-looking pass.**
-  `cross_repo_links.py`, `mention_depth.py`, `zdtd_cite_check.py` and
-  `steam_builds.py` took a range or a threshold that could name nothing, and
-  reported OK over an empty input set. They now refuse the value.
-- **A failing fuzz round names the seed it replays from.** Every seeded gate
-  resolves its seed through `tooling.fuzz_seed` (`RE_FUZZ_SEED` overrides the
-  per-gate default) and reports that seed with a digest of the corpus it
-  produced, on both the OK and the FAIL line, so two runs of one seed can be
-  compared by more than the seed they claim to share. The shader sub-program
-  and parameter blob decoders and the depot-manifest parser are fuzzed; the
-  manifest parser is bounded.
-- `steam_manifest.py` orders manifest history by mtime instead of a truncated
-  clock string, and the steam install-integrity verdict was restored after a
-  drift.
-- **Static analysis is tighter, and green.** `mypy` enables the error codes
-  strict mode leaves off (`ignore-without-code`, `possibly-undefined`,
-  `redundant-expr`, and the rest), and `ruff` adds `ARG` and `SIM`. The
-  fetch-bound work then left `make lint` red on eight findings (assertions on a
-  caught exception, a response factory closing over its loop variables, a
-  `bytes` read that returned `Any`, a re-exported `urllib` reaching through the
-  tool module), all fixed in the same change, so a raise lands with the fixes
-  that keep the gate green.
-- **The sandbox installs a bounded, reviewed requirement series.** Each package
-  in `pyproject.toml` carries a floor and a ceiling, checked
-  against the lock, so a recompile cannot jump a series under a tool that reads
-  package internals.
-- **Install discovery works from every Steam root** a supported host has
-  (Windows program files, the three Linux homes, the macOS path) through
-  `tools/asm_path.py`, which is now the one resolution behind `make`'s `ASM`,
-  the shell entry points and the Python tools.
-- **Superseded research moved to `workspace/outputs/archive/`.** The pre-V3.1.0
-  wire snapshots, diff report and census history are kept as history, out of the
-  path the drift gate reads.
-
-### Tools and docs
-
-- **Hot paths stopped paying for the same work twice.** The shader dumper
-  copies only the sub-program slice it decompresses instead of the whole
-  shared compressed blob per shader, and parses each DXBC container once
-  rather than walking and copying every chunk twice; the coverage report is
-  opened and scanned once instead of twice; `xml_pins.py` reads each
-  `Data/Config` file once for both its byte hash and its parse instead of
-  streaming it for the hash and slurping it again; `blocks.xml` is read once
-  rather than twice in the block dumper; the save round-trip verdict is one
-  compiled scan per line instead of eleven substring searches; the
-  cross-repo link sweep hoists its loop-invariant prefix and the citation gate
-  resolves a nested path from the set of known `docs/` files instead of one
-  `isfile` syscall per citation.
-- **Gates share one argument surface.** The tests that need the game assembly
-  or a mono tool call the same helpers from `tools/tests/_common.py` instead of
-  each resolving them.
-- **CI runs untrusted pull-request code read-only.** Both jobs declare
-  `permissions: contents: read` and check out with `persist-credentials: false`,
-  so a gate running fork code cannot push with the token; the shellcheck
-  download goes to a private `mktemp` dir. Recorded in
-  [`../meta/threat-model.md`](../meta/threat-model.md).
-- `tools/release.sh` cuts a release with its checks built in (clean tree, free
-  tag, not behind `origin/main`, authenticated `gh`, required notes, `make lint`
-  + `make test-docs` green); `--dry-run` prints the plan and changes nothing, and
-  `--resume` finishes a run that stopped between steps without repeating the
-  ones that landed.
-- **The sandbox environment is a uv project.** `tools/sandbox/requirements.in`
-  and its hash-pinned `requirements.txt` became the root `pyproject.toml` and
-  `uv.lock` at the same 16 versions: install with `uv sync --locked` and run a
-  sandbox tool with `uv run python`.
-- `make lint` now also runs `yamllint` over the tracked YAML, on the version
-  pinned in `.github/workflows/ci.yml`, and refuses a local `yamllint` that is
-  not that pin. Config lives in [`.yamllint`](../../.yamllint).
-- Docs: the ranged-attack delivery contract is closed (`RangedAttackTarget`
-  mapped, `EAILeap` motion pinned, `Animator.StringToHash` identified as
-  CRC-32 with its flush chain), the `Leap` census row is marked mapped, a
-  census of stock AI task-to-class usage in the V3.2.0 data was added, coverage
-  counts were re-pinned to V3.2.0, and this repo's own attack surface is
-  recorded in [`../meta/threat-model.md`](../meta/threat-model.md).
+- The tag history row for `v3.3.0`, the corpus pin in this file's header, and
+  the reset of this section land after the cut, so the release notes stay the
+  record of what shipped and this file stays the contract for what comes next.
 
 The next cut is `v0.4.0` (tooling) unless the corpus is re-pinned to a new game
-build first, which would be `v3.3.0`.
+build first, which would be `v3.4.0`.
 
 ## Cutting a release
 
