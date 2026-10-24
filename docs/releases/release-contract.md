@@ -72,8 +72,9 @@ commits actually below the last tag.
 - **The wire registry lost three packages net** (187 -> 184 ids): six removed
   (the two inventory-data and two inventory-transaction packages, the lock
   request and the lock response) and three added (`NetPackageLockTarget`,
-  `NetPackageSingleSignData`, `NetPackageSignDelete`). Every id from 86 up
-  shifted by -3. `NetPackagePlayerInventory` and `NetPackagePlayerEquipment`
+  `NetPackageSingleSignData`, `NetPackageSignDelete`). The shift is piecewise:
+  ids 0..85 unchanged, then -2, -4, -5 and -3 across the ranges the removals and
+  additions interleave with. `NetPackagePlayerInventory` and `NetPackagePlayerEquipment`
   now carry client-serialized save blobs, so the b10 per-operation inventory
   transaction gate is gone; a mod that patched it has nothing to patch.
 - **The client owns its container serialization.** `TransactionalInventory`,

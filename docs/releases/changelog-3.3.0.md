@@ -187,7 +187,15 @@ a removal also renumbers everything after it.
 | `NetPackagePlayerInventory` | 116 | 111 |
 | `NetPackageSignDataResponse` | 148 | 143 |
 
-Every package from id 86 up moves by -3. Removed: `NetPackageInventoryDataRequest`,
+The shift is piecewise, not uniform, because the six removals and three
+additions interleave with the metadata order: ids 0..85 are unchanged,
+b10 88 moves by -2 (`NetPackageInventoryKeepOpen`), b10 91..96 by -4, then
+`NetPackageLockTarget` takes 93, b10 99..148 move by -5, `NetPackageSingleSignData`
+and `NetPackageSignDelete` take 144 and 145, and b10 149..186 move by -3.
+For example `NetPackagePlayerLogin` is 119 -> 114 and `NetPackageSimpleChat`
+is 149 -> 146.
+
+Removed: `NetPackageInventoryDataRequest`,
 `NetPackageInventoryDataResponse`, `NetPackageInventoryTransactionRequest`,
 `NetPackageInventoryTransactionResponse`, `NetPackageLockRequest`,
 `NetPackageLockResponse`. The ids are derived, not stored, and no live V3.3.0

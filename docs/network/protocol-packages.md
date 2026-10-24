@@ -381,9 +381,13 @@ packages in this section, with their V3.2.0 values, are: `ItemActionEffects`
 87 (was 91), `LockTarget` 93 (new; the old `LockRequest` 97 / `LockResponse` 98
 slots shifted out), `PlayerEquipment` 109 (was 114), `PlayerInventory` 111 (was
 116), `SignDataRequest` 142 (was 147), `SignDataResponse` 143 (was 148),
-`SingleSignData` 144 (new), `SignDelete` 145 (new). Every id from the first
-removed slot (86) upward shifts by -3; anything that hardcodes ids across builds
-is wrong by construction.
+`SingleSignData` 144 (new), `SignDelete` 145 (new). The shift is piecewise, not
+uniform: the first removed slot is 86 (`InventoryDataRequest`), and the rest
+of the mapping measures as ids 0..85 unchanged, b10 88 -> -2
+(`InventoryKeepOpen`), b10 91..96 -> -4, `LockTarget` taking 93, b10 99..148
+-> -5, `SingleSignData`/`SignDelete` taking 144/145, and b10 149..186 -> -3
+(`PlayerLogin` 119 -> 114, `SimpleChat` 149 -> 146). Anything that hardcodes
+ids across builds is wrong by construction.
 
 
 ---
