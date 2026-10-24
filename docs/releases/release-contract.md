@@ -52,7 +52,7 @@ new number.
 
 ## Unreleased
 
-**127 commits after `v3.2.0` (2026-09-21) as of 2026-10-24.** The corpus pin moved
+**129 commits after `v3.2.0` (2026-09-21) as of 2026-10-24.** The corpus pin moved
 to V3.3.0 b18, so the next cut is a `v3.3.0` corpus release, not a tooling
 version: the game shipped V3.3.0 b18 (Steam build 25661908, depot manifest
 3031329678505041777) and the whole corpus was re-derived from it. The
