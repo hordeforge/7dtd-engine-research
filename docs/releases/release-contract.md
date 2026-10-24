@@ -53,7 +53,7 @@ new number.
 
 ## Unreleased
 
-**1 commit after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
+**2 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
