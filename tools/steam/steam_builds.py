@@ -60,15 +60,48 @@ FETCH = STEAM / "fetch_version.sh"
 APP = "294420"
 DEPOT = "294422"  # dedicated-server content depot (linux/windows payload)
 PICS_URL = f"https://api.steamcmd.net/v1/info/{APP}"
-DEFAULT_APPMANIFEST = next(
-    (
-        root / "steamapps" / f"appmanifest_{APP}.acf"
-        for root in tooling.steam_roots(os.environ, Path.home())
-        if (root / "steamapps" / f"appmanifest_{APP}.acf").is_file()
-    ),
+
+
+def _steamcmd_ancestors(ancestors: int = 4) -> list[Path]:
+    """Install roots above the assembly in ASM, for a steamcmd download tree.
+
+    steamcmd writes its own `steamapps/appmanifest_<app>.acf` inside the
+    `+force_install_dir` tree rather than into a Steam library, so an assembly
+    fetched by `fetch_version.sh` has an install and a manifest that the Steam
+    root scan never sees. Walking a bounded number of ancestors keeps this
+    honest: no `/` sweep, no guessing outside the tree the caller named.
+    """
+    asm = tooling.find_asm()
+    if asm is None:
+        return []
+    roots: list[Path] = []
+    current = asm.parent
+    for _ in range(ancestors):
+        roots.append(current)
+        current = current.parent
+    return roots
+
+
+def _discover_appmanifest() -> tuple[Path, Path | None]:
+    """The appmanifest in hand, plus its install tree when steamcmd wrote it.
+
+    A Steam library needs no tree: the payload lives at `common/<installdir>`.
+    A steamcmd `+force_install_dir` tree keeps the payload at the tree root, so
+    the tree itself is the install directory and it is returned alongside.
+    """
+    for root in tooling.steam_roots(os.environ, Path.home()):
+        manifest = root / "steamapps" / f"appmanifest_{APP}.acf"
+        if manifest.is_file():
+            return manifest, None
+    for root in _steamcmd_ancestors():
+        manifest = root / "steamapps" / f"appmanifest_{APP}.acf"
+        if manifest.is_file():
+            return manifest, root
     # Nothing installed: name the Linux default so the error points somewhere.
-    Path.home() / ".local/share/Steam/steamapps" / f"appmanifest_{APP}.acf",
-)
+    return Path.home() / ".local/share/Steam/steamapps" / f"appmanifest_{APP}.acf", None
+
+
+DEFAULT_APPMANIFEST, DEFAULT_INSTALL_TREE = _discover_appmanifest()
 # fullmatch, not match with `$`: Python's `$` also matches before a trailing
 # newline, so "ok\n" would pass here and only be caught by the shell.
 LABEL_RE = re.compile(r"[A-Za-z0-9._-]+")
@@ -253,10 +286,18 @@ def read_appmanifest(path: Path) -> tuple[str, dict[str, str]] | None:
     return buildid, manifests
 
 
-def install_dir_for(appmanifest: Path, override: str | None = None) -> Path | None:
-    """The install directory this appmanifest describes (Steam common/<installdir>)."""
+def install_dir_for(
+    appmanifest: Path, override: str | None = None, tree: Path | None = None
+) -> Path | None:
+    """The install directory this appmanifest describes.
+
+    `tree` names a steamcmd install tree, whose payload is at the tree root; a
+    Steam library instead uses `common/<installdir>`.
+    """
     if override:
         return Path(override)
+    if tree is not None and (tree / "steamapps" / f"appmanifest_{APP}.acf") == appmanifest:
+        return tree
     for line in _read_text(appmanifest).splitlines():
         match = _KV_RE.match(line)
         if match and match.group(1) == "installdir":
@@ -630,7 +671,9 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         try:
-            root = install_dir_for(Path(args.appmanifest), args.install_dir)
+            manifest = Path(args.appmanifest)
+            tree = DEFAULT_INSTALL_TREE if manifest == DEFAULT_APPMANIFEST else None
+            root = install_dir_for(manifest, args.install_dir, tree)
         except SourceError as exc:
             print(f"steam_builds: {exc}", file=sys.stderr)
             return 2

@@ -41,18 +41,7 @@ def main() -> None:
     if shutil.which("mono") is None or not (_common.BIN / "Mono.Cecil.dll").is_file():
         print("SKIP: steam_builds needs mono and the built tools")
         return
-    # steamcmd leaves its install tree beside the game directory instead of in a
-    # Steam library, so the appmanifest is not where --verify-install looks by
-    # default. Name the install dir explicitly when the assembly in hand sits in
-    # such a tree; otherwise the tool cannot locate one and the gate has nothing
-    # to measure (a checkout with no install), which is a SKIP, not a failure.
-    asm = _common.find_asm()
-    assert asm is not None
     commands = [sys.executable, str(TOOL), "--check", "--verify-install", "Managed", "--json"]
-    install_dir = asm.parent.parent.parent
-    appmanifest = install_dir / "steamapps" / "appmanifest_294420.acf"
-    if appmanifest.is_file():
-        commands += ["--install-dir", str(install_dir), "--appmanifest", str(appmanifest)]
     result = _common.run_cmd(
         commands,
         text=True,
