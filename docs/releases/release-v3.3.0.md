@@ -5,6 +5,7 @@ depot manifest `3031329678505041777`, `Assembly-CSharp.dll` sha256
 `e16ff9d539b8fbf64904c0bc090d502286a62464742a9396f0455936ad0beb87`
 (11697152 bytes). The previous pin was V3.2.0 b10, which stays in the pin's
 history so a build-id pair still resolves.
+**Hub:** [`INDEX.md`](../INDEX.md).
 
 ## The delta, reversed and documented
 

@@ -127,6 +127,7 @@ should be re-checked against IL before you rely on it.
 | [changelog-3.2.0.md](../releases/changelog-3.2.0.md) | exact 3.1.0→3.2.0 delta, IL-verified (2026-08-28; regenerated dumps vs retained 3.1.0 sets) |
 | [changelog-3.3.0.md](../releases/changelog-3.3.0.md) | exact 3.2.0→3.3.0 delta, IL-verified (2026-10-24; regenerated dumps vs retained 3.2.0 sets) |
 | [release-contract.md](../releases/release-contract.md) | this repo's release contract (tag series, tag history, unreleased delta; no game claims) |
+| [release-v3.3.0.md](../releases/release-v3.3.0.md) | release notes for the V3.3.0 corpus cut (summary of the delta; claims live in changelog-3.3.0.md) |
 | [block-shapes.md](../world/block-shapes.md) | audited (pass 2) |
 | [blocks.md](../world/blocks.md) | audited (pass 1) |
 | [buffs.md](../gameplay/buffs.md) | audited (pass 1) |
