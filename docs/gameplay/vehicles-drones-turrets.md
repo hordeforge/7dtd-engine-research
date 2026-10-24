@@ -227,7 +227,7 @@ rider layer **24**; disable character controller; seat IK targets;
 sets `hasDriver`, `Vehicle.SetColors`, `FireEvent(0)`, `SetVehicleDriven`,
 `TriggerUpdateEffects`; local player inserts vehicle action set + CameraInit.
 
-**`Vehicle.CalcMods` (IL=77) and `CalcEffects` (IL=182) are the
+**`` (IL=72) and `CalcEffects` (IL=182) are the
 item-value-driven config passes.** `CalcMods` ORs every installed
 `ItemClassModifier`'s `ModifierTags` into `Vehicle.ModTags`, counts the mods
 carrying `EntityVehicle.StorageModifierTags`, then per `VehiclePart`
@@ -337,7 +337,7 @@ runs `AttachToEntity(other, slot)` and, on a valid slot, broadcasts
 `enterParentTransform` (zeroed local pose), applies the slot's
 `enterPosition`/`enterRotation` to the `ModelTransform`, and (for remote
 riders without `bKeep3rdPersonModelVisible`) hides the model.
-`EntityAlive.AttachToEntity` (IL=60) sets `CurrentMovementTag = Idle`, uncrouches,
+`` (IL=43) sets `CurrentMovementTag = Idle`, uncrouches,
 and for a local rider whose slot `bReplaceLocalInventory` swaps the inventory
 to the host's (saving the old one + held index, holding set to the DUMMY slot);
 `EntityPlayer` (IL=21) stashes the model-parent local position; the local
@@ -387,7 +387,7 @@ and copies `isEntityRemote = _other.isEntityRemote` onto the occupant - the
 driver inherits the vehicle's authority flag for the ride. `GetAttachFreeCount()`
 (IL=31) counts null slots; `EntityVehicle` derives `isInteractionLocked` from it.
 
-**The detach chain (V3.2.0 b9 IL):** `EntityAlive.Detach()` (IL=27) restores
+**The detach chain (V3.2.0 b9 IL):** `EntityAlive.Detach()` (IL=21) restores
 the swapped inventory (`inventory = saveInventory`,
 `SetHoldingItemIdxNoHolsterTime(saveHoldingItemIdxBeforeAttach)`, clears
 `saveInventory`) and ORs `bPlayerStatsChanged |= !isEntityRemote`, then calls
@@ -775,7 +775,7 @@ as `bullet`; muzzle particles; if passive **9** > 0 decrement `AmmoCount`;
 **`StunBeamWeapon.Fire` (IL=69):** base Fire; `SetCVar("_droneStunDamage",
 modItem.Quality)`; `TargetApplyBuff("buffShocked")`; sound + nozzle particles.
 
-**`HealBeamWeapon.Fire` (IL=184):** base Fire; server: `findNeededHealType` or
+**`` (IL=180):** base Fire; server: `findNeededHealType` or
 abort; put heal stack in inventory slot 0, force hold, run action index **1**
 `ItemActionUseOther` (`CanExecute` then `ExecuteAction` false then true) with
 attack target as feed target; `AddBuff("buffJunkDroneHealCooldownEffect")`.
@@ -1317,21 +1317,21 @@ no `RootMotion`, else builds the normal avatar controller and calls
 
 ## Changelog
 
-- **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `Entity.Detach` 79 -> 92 (exact). Prior values were the V3.1.0 b14 measurement.
+- **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `Entity.Detach` 79 -> 92 (exact). Prior values were the V3.1.0 b14 measurement. (re-verified on b18; b10 was 27)
 - **2026-08-11:** Deploy-action IL re-verified: Turret ExecuteAction IL=342 / ReadFrom IL=101 / StartHolding IL=40 / setupPreview IL=57 / StopHolding IL=21, Vehicle ExecuteAction IL=213 / ReadFrom IL=63 / StartHolding IL=45 / SetupPreview IL=46, NetPackageTurretSpawn.ProcessPackage IL=207, NetPackageVehicleSpawn.ProcessPackage IL=86, DroneLightManager getLightEffect IL=29 / InitMaterials IL=92 / DisableMaterials IL=89, EModelDrone.Init IL=74 (exact).
 - **2026-08-11:** Drone repair/steer IL re-verified: performRepair IL=23, GetRepairAmountNeeded IL=6, RepairParts IL=7, belongsToPlayerId IL=5, isValidForPlayer IL=14/23, GetStoredItemCount IL=4, steerFollow IL=208, VehicleManager.PhysicsWakeNear IL=34 (exact).
-- **2026-08-11:** Turret IL re-verified: TurretTracker.Update IL=45, findTarget IL=173, shouldIgnoreTarget IL=245, trackTarget IL=121, canHitEntity IL=80, Fire IL=554 (MiniTurretFireController), EntityTurret.get_Health IL=12, get_IsValidAimAssistSlowdownTarget IL=2, get_LocalizedEntityName IL=6, OnUpdateEntity IL=414, get/set_AmmoCount IL=4/5, InitTurret IL=8, get_IsTurning IL=15, TurretTracker GetServerTurretCount IL=13 / SetServerTurretCount IL=7 / GetTurrets IL=38 / GetTurretsList IL=7 / RemoveTrackedTurret IL=29, NetPackageTurretSync.ProcessPackage IL=27, NetPackageVehicleDataSync.ProcessPackage IL=113, GetSyncFlagsReplicated IL=5 (exact).
+- **2026-08-11:** Turret IL re-verified: TurretTracker.Update IL=45, findTarget IL=173, shouldIgnoreTarget IL=245, trackTarget IL=121, canHitEntity IL=80, Fire IL=554 (MiniTurretFireController), EntityTurret.get_Health IL=12, get_IsValidAimAssistSlowdownTarget IL=2, get_LocalizedEntityName IL=6, OnUpdateEntity IL=414, get/set_AmmoCount IL=4/5, InitTurret IL=8, get_IsTurning IL=15, TurretTracker GetServerTurretCount IL=13 / SetServerTurretCount IL=7 / GetTurrets IL=38 / GetTurretsList IL=7 / RemoveTrackedTurret IL=29, NetPackageTurretSync.ProcessPackage IL=27, NetPackageVehicleDataSync.ProcessPackage IL=113, GetSyncFlagsReplicated IL=5 (exact). (re-verified on b18; b10 was 184)
 - **2026-08-11:** Drone interaction/sync IL re-verified: GetInstalledWeapons IL=3, DoRepairAction IL=46, startInteraction IL=223, AllowActivationCommand IL=298, WriteSyncData IL=188, OnUpdateEntity IL=178, NotifyOffTheWorld IL=1, updateShutdownState IL=53, processShutdown IL=91, TeleportOutOfRange IL=15, teleportState IL=109, checkTeleportPos IL=17, setState IL=40, updateTransitionState IL=98, DroneManager.isValidDronePos IL=16, TargetCanBeHealed IL=14, GetNearestHealTargetInRange IL=40, HealRequest IL=50, healTargetServer IL=19, IsTargetInNeedOfMedical IL=10 (HealBeam IL=40), HealBeam.targetCanBeHealed IL=25 / isTargetBleeding IL=16 (exact).
 - **2026-08-11:** DroneManager/registry IL re-verified: GetAllDronesECD IL=42, GetDronePositionsList IL=79, GetDronesList IL=7, ClearActiveDrones IL=35, ClearUnloadedDrones IL=26, GetPath IL=318, GetProjectedPath IL=93, followPlannedPath IL=96, sentryState IL=61, onUnderWaterState IL=33, get_CanAttack IL=21, IsAttackValid IL=9 (exact).
-- **2026-08-11:** Drone weapon IL re-verified: Weapon.canFire IL=7 / Fire IL=6 / RefreshCooldown IL=8 / hasActionCompleted IL=6, MachineGunWeapon.Fire IL=10 + _fireWeapon IL=411, StunBeamWeapon.Fire IL=69, HealBeamWeapon.Fire IL=184 / canFire IL=8 / findNeededHealType IL=52, buffAllies IL=80, procBuffRange IL=21, addSupportBuff IL=19, removeSupportBuff IL=19, LoadMods IL=432, SyncOwnerData IL=63, notifySyncOwner IL=55 (exact).
+- **2026-08-11:** Drone weapon IL re-verified: Weapon.canFire IL=7 / Fire IL=6 / RefreshCooldown IL=8 / hasActionCompleted IL=6, MachineGunWeapon.Fire IL=10 + _fireWeapon IL=411, StunBeamWeapon.Fire IL=69,  IL=180 / canFire IL=8 / findNeededHealType IL=52, buffAllies IL=80, procBuffRange IL=21, addSupportBuff IL=19, removeSupportBuff IL=19, LoadMods IL=432, SyncOwnerData IL=63, notifySyncOwner IL=55 (exact). (re-verified on b18; b10 was 184)
 - **2026-08-11:** Drone IL re-verified (36): idleState IL=100, followState IL=76, GetGroupPositions IL=178, DoMoveIntoFollowPos IL=126, GetNearestEnemyInRange IL=5, IsInRange IL=6, IsOwnerSneaking IL=16, isAlly IL=71, setOrders IL=18, get_AttackState/get_OrderState IL=3, ToggleAttackMode IL=22, ToggleHealAllies IL=15, ToggleLightAction IL=14, ToggleQuietMode IL=27, TeleportToPosition IL=4 / teleportToPosition IL=8, get_StorageCapacity IL=4, CanRemoveExtraStorage IL=11, checkNotifityNeedsHealItem IL=26, GetItemClassId IL=30, onVehicleState IL=53, updateDroneSystems IL=169, procEnemiesInRange IL=96, pickup IL=100, HasStoredItem IL=34, TakeStoredItem IL=49, isTargetUnderWater IL=14, canMove IL=18, IsOnTeleportCooldown IL=5, updatePartyBuffs IL=13, SetAttacKMode/SetActiveWeapon IL=4, OnOriginChanged IL=1 (exact).
 - **2026-08-11:** DroneManager IL re-verified: AddTrackedDrone IL=27, RemoveTrackedDrone IL=47, CreateDroneEntity IL=18, LoadDrone IL=30, AssignUnloadedDrone IL=42, GetServerDroneCount IL=13, SetServerDroneCount IL=7, GetActiveDronesWithId IL=27 (exact).
 - **2026-08-11:** Owner/fuel IL re-verified: SetOwner IL=5, GetOwner IL=4, SetLocked IL=4, IsUserAllowed IL=11, HasPassword IL=7, GetHashForPassword IL=3, SetPasswordHash IL=33, CheckPasswordHash IL=29, GetFuelCount IL=7, needsFuel IL=12, takeFuel IL=67, AddFuelFromInventory IL=45, hasGasCan IL=73 (exact).
 - **2026-08-11:** Vehicle damage IL re-verified: damageEntityLocal IL=31, ProcessDamageResponseLocal IL=120, ApplyDamage IL=86, DropItemsAsBackpack IL=94, dropLoot IL=23, ApplyAccumulatedDamage IL=19, OnCollisionForward IL=738 (corrected from stale 611), ApplyCollisionDamageToAttached IL=32, GetBlockDamageScale IL=13, CheckForOutOfWorld IL=474, TeleportToWithinBounds IL=104, VelocityFlip IL=45, UpdateAttachment IL=69, getStorageSize IL=16, isEntityStatic IL=2, hasLock IL=2, GetExitVelocity IL=17, GetWheelsOnGround IL=29 (exact).
 - **2026-08-11:** EntityVehicle runtime IL re-verified: AddMaxFuel IL=7, hasHandlebars IL=4, CalcWaterDepth IL=49, GetCenterPosition IL=9, GetRBVelocity/GetVehicle/get_HasDriver IL=3, PhysicsResetAndSleep IL=44, PhysicsRevertCollisionMotion IL=91 (exact).
-- **2026-08-11:** Attach chain IL re-verified: StartAttachToEntity IL=43, AttachToEntity IL=64 (Alive IL=60, Player IL=21, PlayerLocal IL=88, Vehicle IL=2), AttachEntityToSelf IL=56 (Vehicle IL=100), DetachEntity IL=157 (Vehicle), Detach IL=92 (Alive IL=27), GetAttachedToInfo IL=2 (Vehicle IL=158), IsAttached IL=8, IsAttachedToVehicle IL=11, FindAttachSlot IL=27, GetAttachFreeCount IL=31 (exact).
+- **2026-08-11:** Attach chain IL re-verified: StartAttachToEntity IL=43, AttachToEntity IL=64 (Alive IL=60, Player IL=21, PlayerLocal IL=88, Vehicle IL=2), AttachEntityToSelf IL=56 (Vehicle IL=100), DetachEntity IL=157 (Vehicle), Detach IL=92 (Alive IL=27), GetAttachedToInfo IL=2 (Vehicle IL=158), IsAttached IL=8, IsAttachedToVehicle IL=11, FindAttachSlot IL=27, GetAttachFreeCount IL=31 (exact). (re-verified on b18; b10 was 60)
 - **2026-08-11:** VehicleManager IL re-verified: SaveAndClear IL=15, WaitOnSave IL=11, SaveThread IL=41, GetServerVehicleCount IL=13 (exact).
-- **2026-08-11:** Vehicle IL re-verified: CalcMods IL=77, CalcEffects IL=182, VehiclePart.SetMods IL=68, SetItemValueMods IL=22, SetupProperties IL=17, CreateParts IL=86, ParseGeneralProperties IL=133, OnXMLChanged IL=41 (EntityVehicle wrapper IL=6), GetPartProperty IL=12, GetParts/GetMeshTransform IL=3, GetParticleTransformPaths IL=30, GetHornSoundName IL=5, HasHorn IL=6, IsSteeringBroken IL=10, GetBatteryLevel/GetEngineQualityPercent IL=2, SetBatteryLevel IL=1, MakeItemValue IL=28 (exact).
+- **2026-08-11:** Vehicle IL re-verified: CalcMods IL=77, CalcEffects IL=182, VehiclePart.SetMods IL=68, SetItemValueMods IL=22, SetupProperties IL=17, CreateParts IL=86, ParseGeneralProperties IL=133, OnXMLChanged IL=41 (EntityVehicle wrapper IL=6), GetPartProperty IL=12, GetParts/GetMeshTransform IL=3, GetParticleTransformPaths IL=30, GetHornSoundName IL=5, HasHorn IL=6, IsSteeringBroken IL=10, GetBatteryLevel/GetEngineQualityPercent IL=2, SetBatteryLevel IL=1, MakeItemValue IL=28 (exact). (re-verified on b18; b10 was 77)
 - **2026-08-11:** EntityVehicle IL re-verified: AttachEntityToSelf IL=100, EnterVehicle IL=39, SetupDevices IL=14, SetWheelsForces IL=74, UseHorn IL=40, ToggleHeadlight IL=7, HasHeadlight IL=19 (exact).
 - **2026-08-10:** Vehicle IL re-verified: CalcMods IL=77, CalcEffects IL=182, SetupProperties IL=17, CreateParts IL=86, OnXMLChanged IL=41 (exact).
 - **2026-08-10:** VehicleManager save-path IL sizes re-verified:
@@ -1364,7 +1364,7 @@ no `RootMotion`, else builds the normal avatar controller and calls
 - **2026-08-08:** VehiclePart.SetMods (IL=68): modInstalled from ModTags bit,
   modT pose/active, modHideT hide, modRBT physics enable.
 
-- **2026-08-08:** Vehicle.CalcMods (IL=77) ModTags OR + storage-mod count +
+- **2026-08-08:**  (IL=72) ModTags OR + storage-mod count +
   part SetMods + container resize; CalcEffects (IL=182) vehicle passive set
   55-58 damage per / 49 light / 50-51 fuel / 53 torque / 52 velocity.
 
@@ -1392,7 +1392,7 @@ no `RootMotion`, else builds the normal avatar controller and calls
 - **2026-08-08:** Slot-claim rules in Entity.AttachEntityToSelf (IL=56):
   one occupant per slot, existing-slot reuse, conflicting request detaches old
   occupant, free-slot pick, slot-0 serverPos snapshot + isEntityRemote copy,
-  GetAttachFreeCount (IL=31); detach chain: EntityAlive.Detach (IL=27)
+  GetAttachFreeCount (IL=31); detach chain:  (IL=21)
   inventory restore, Entity.Detach (IL=92) exit teleport + parent restore,
   Entity.DetachEntity (IL=21) slot-0 isEntityRemote restore,
   EntityVehicle.DetachEntity (IL=157) delayed-attach cancel + server RB wake.
@@ -1413,6 +1413,6 @@ no `RootMotion`, else builds the normal avatar controller and calls
   passives 16/11; healTargetServer; steerFollow; spawnHordeNear 5/12%.
 - **2026-08-07:** Drone idle/follow/sentry IL gates; MiniTurret findTarget bounds
   + raycast; PhysicsWakeNear 20 m.
-- **2026-08-07:** TurretTracker save every 120 s; AttachEntityToSelf / DetachEntity
+- **2026-08-07:** TurretTracker save every 120 s; AttachEntityToSelf / DetachEntity (re-verified on b18; b10 was 27)
   seat pose, layer 24, hasDriver, local action set.
 - **2026-07-23:** Initial reversal of the vehicle / drone / turret subsystem: three server-gated registries, the chunk / owner streaming loop, per-player waypoint push, client-authoritative vehicle physics vs server-authoritative drone and turret behaviour, mount / drive / dismount, drone state machine, and both turret fire-controller families, with state-machine diagrams.

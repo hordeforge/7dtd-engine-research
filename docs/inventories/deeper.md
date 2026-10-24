@@ -85,7 +85,7 @@ Documentation only. No game IL redistribution as product.
 - `Entity::Update` IL=105 base=MonoBehaviour
 - `EntityAlive::updateTasks` IL=125 base=Entity
 - `EntityAlive::OnUpdateLive` IL=363 base=Entity
-- `EntityAlive::OnUpdateEntity` IL=457 base=Entity
+- `` IL=454 base=Entity
 - `EntityAlive::OnUpdatePosition` IL=107 base=Entity
 - `EntityAlive::Update` IL=171 base=Entity
 - `EntityAnimal::OnUpdateLive` IL=57 base=EntityAlive
@@ -105,9 +105,9 @@ Documentation only. No game IL redistribution as product.
 - `EntityFallingTree::OnUpdateEntity` IL=91 base=Entity
 - `EntityHomerunGoal::Update` IL=247 base=Entity
 - `EntityHuman::OnUpdateLive` IL=157 base=EntityEnemy
-- `EntityItem::OnUpdateEntity` IL=114 base=Entity
+- `` IL=121 base=Entity
 - `EntityLootContainer::OnUpdateEntity` IL=46 base=EntityItem
-- `EntityPlayer::OnUpdateEntity` IL=179 base=EntityAlive
+- `` IL=184 base=EntityAlive
 - `EntityPlayer::Update` IL=179 base=EntityAlive
 - `EntityPlayerLocal::OnUpdateLive` IL=880 base=EntityPlayer
 - `EntityPlayerLocal::OnUpdateEntity` IL=153 base=EntityPlayer
@@ -197,7 +197,7 @@ Documentation only. No game IL redistribution as product.
 - dumped `SleeperVolume::CheckTouching(World,EntityPlayer)` IL=165
 - dumped `DecoManager::UpdateTick(World)` IL=330
 - dumped `WaterSplashCubes::Update()` IL=185
-- dumped `ChunkManager::DetermineChunksToLoad()` IL=448
+- dumped `()` IL=456
 - dumped `ChunkManager::SendChunksToClients()` IL=216
 - dumped `ChunkManager::ResendChunksToClients(HashSetLong)` IL=55
 - dumped `ChunkManager::doCopyChunksToUnity()` IL=252
@@ -790,7 +790,7 @@ _(1 caller types)_
 
 ## 15. ChunkManager.DetermineChunksToLoad call breakdown
 
-### `ChunkManager::DetermineChunksToLoad` IL=448
+### `` IL=456
 - 5x `List`1::get_Item`
 - 5x `BucketHashSetList::Clear`
 - 5x `BucketHashSetList::RecalcHashSetList`

@@ -1,4 +1,4 @@
-# Dedicated leaf types (V3.2.0)
+# Dedicated leaf types (V3.3.0)
 
 **Kind:** per-leaf reference for small dedicated-relevant types that execute on a
 headless server but are each too minor for their own doc. Each row is a reachable
@@ -15,7 +15,7 @@ by hand. Regenerate the *columns* if the game updates; do not regenerate the fil
 wholesale, or the referrer-verified promotions and the IL-verified roles are lost.  
 **Hub:** [`../INDEX.md`](../INDEX.md). **Method:** [`../meta/re-methodology.md`](../meta/re-methodology.md).
 
-**88 leaf types** in the base catalog below, plus the promoted sections further down (the file's total row count is higher; see those sections for provenance).
+**84 leaf types** in the base catalog below, plus the promoted sections further down (the file's total row count is higher; see those sections for provenance).
 
 ## blocks / block-shapes (11)
 
@@ -454,18 +454,15 @@ before treating a row as a behavioral claim. Infra collections are classified in
 | `BlockData` | Block Data | `Object` | (fields only) |
 | `BlockData` | Block Data | `Object` | (fields only) |
 
-### entities (11)
+### entities (8)
 
 | Leaf | Role | Base | Key methods |
 |---|---|---|---|
-| `EntityLockContext` | Entity Lock Context | `Object` | Write, Read |
 | `EntityInstanceAssets` | Entity Instance Assets | `Object` | Load, WaitForComplete, Release, OnPrefabLoaded |
 | `EntityCreateHandle` | Entity Create Handle | `Object` | TryComplete, WaitForComplete |
 | `AutoMove` | Auto Move | `Object` | Update, StartOrbit, StartLine, StartRelative |
-| `EntityTraderLockContext` | Entity Trader Lock Context | `Object` | Read, Write |
 | `PhysicsBodyColliderConfiguration` | Physics Body Collider Configuration | `Object` | Read, Write, vecFromString, vecToString |
 | `PhysicsBodyInstance` | Physics Body Instance | `Object` | bindCollider, GetTransformForColliderTag, SetColliderMode, BindColliders |
-| `VendingMachineLockContext` | Vending Machine Lock Context | `Object` | Read, Write |
 | `EntityFlying` | Entity Flying | `EntityEnemy` | MoveEntityHeaded, IsAirBorne |
 | `EntityZombie` | Entity Zombie | `EntityHuman` | (fields only) |
 | `EAITaskEntry` | EAITask Entry | `Object` | (fields only) |
@@ -678,7 +675,6 @@ before treating a row as a behavioral claim. Infra collections are classified in
 | `Force` | Force | `Object` | (fields only) |
 | `LoadingStats` | Loading Stats | `Object` | (fields only) |
 | `Noise` | Noise | `ValueType` | (fields only) |
-| `OperationData` | Operation Data | `Object` | (fields only) |
 | `POIWeightData` | POIWeight Data | `Object` | (fields only) |
 | `PoiMapBlock` | Poi Map Block | `Object` | (fields only) |
 | `PoiMapDecal` | Poi Map Decal | `Object` | (fields only) |

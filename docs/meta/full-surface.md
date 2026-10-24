@@ -1,4 +1,4 @@
-# Whole-assembly surface map and coverage ledger (V3.2.0)
+# Whole-assembly surface map and coverage ledger (V3.3.0)
 
 **Owns:** the 100%-of-the-assembly structural map (every namespace, with type /
 method / IL counts) and the honest ledger of how much has a hand-written narrative.
@@ -8,8 +8,8 @@ method / IL counts) and the honest ledger of how much has a hand-written narrati
 
 ## Scope and the two hard limits on "document 100% in minute detail"
 
-The shipped `Assembly-CSharp.dll` is **7,451 types (incl. nested), 53,418 methods with bodies,
-1,743,842 IL instructions**, across 88 namespaces (regenerate with
+The shipped `Assembly-CSharp.dll` is **7,501 types (incl. nested), 53,796 methods with bodies,
+1,749,641 IL instructions**, across 89 namespaces (regenerate with
 `tools/src/Census` and `FullSurface`). Two constraints shape what this repo can
 honestly hold:
 
@@ -30,12 +30,12 @@ honestly hold:
 ```bash
 cd tools && ./build.sh
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
-mono bin/FullSurface.exe "$ASM" ../il/surface-v3.2.0          # committable metadata
-mono bin/DumpAll.exe    "$ASM" ../il/full-v3.2.0              # full IL, git-ignored (all 7451 types)
-mono bin/DumpAll.exe    "$ASM" ../il/full-v3.2.0 GamePath     # or one namespace
+mono bin/FullSurface.exe "$ASM" ../il/surface-v3.3.0          # committable metadata
+mono bin/DumpAll.exe    "$ASM" ../il/full-v3.3.0              # full IL, git-ignored (all 7501 types)
+mono bin/DumpAll.exe    "$ASM" ../il/full-v3.3.0 GamePath     # or one namespace
 ```
 
-`il/full-v3.2.0/` after a full run is the 100% reversal: one `<Type>.il.txt` per
+`il/full-v3.3.0/` after a full run is the 100% reversal: one `<Type>.il.txt` per
 type, every method body. It is git-ignored on purpose.
 
 ## The assembly by functional cluster
@@ -64,13 +64,13 @@ narrated docs below, not by namespace.
 | **Bundled third-party libraries** | `UniLinq`, `ICSharpCode.WpfDesign.XamlDom`, `ConcurrentCollections`, `Microsoft.CodeAnalysis`, `SandboxOptions`, `System.*` | Vendored libs; `UniLinq` (LINQ impl) and `ConcurrentCollections.ConcurrentHashSet` are **live helpers** called by server code (RWG/Twitch/chunk queues, [dedicated-leftovers.md](../meta/dedicated-leftovers.md)); the rest are unreferenced or non-game |
 
 Per-namespace counts: `il/surface-v3.2.0/surface-namespaces.md` (regenerate).
-Per-type inventory (all 7,451, names + sizes, no bodies): `surface-types.md` (local).
+Per-type inventory (all 7,501, names + sizes, no bodies): `surface-types.md` (local).
 
 ## Coverage ledger (hand-written narrative)
 
 The narrated corpus targets **the dedicated-relevant managed surface** (the
 project's stated bar, [`coverage.md`](../meta/coverage.md)), which is the dedicated sim
-core + wire protocol, a small but load-bearing slice of the 7,451 types.
+core + wire protocol, a small but load-bearing slice of the 7,501 types.
 
 | Subsystem | Narrative | Depth |
 |---|---|---|
@@ -121,12 +121,12 @@ progression, game events, quests/challenges, MinEvent effects, utility AI, world
 generation, and the server slice of Twitch. See the ledger table above.
 
 **Caveat (not "every method"), with the honest numbers.** The reachability pass
-reaches ~45k methods / 3,681 game types in the RE surface, far more than any per-method narration could
+reaches ~47k methods / 3,713 game types in the RE surface, far more than any per-method narration could
 cover. As of the current [coverage report](../inventories/coverage-report.md):
-**3,681 (100% of the 3,681-type RE surface) are narrated** in a narrative doc,
-**0 are catalogued only, 0 classified out of scope, and 0 are unaccounted**.
-(A larger whole-assembly base of 7,451 types incl. nested/third-party is
-partitioned separately; narrated there is ~49.5%.) Server-side support and
+**3,695 of the 3,713 reached types (99.5%) are narrated** in a narrative doc,
+**1 is catalogued only, 5 are classified out of scope, and 12 are unaccounted**.
+(A larger whole-assembly base of 7,501 types incl. nested/third-party is
+partitioned separately.) Server-side support and
 utility code that the reachable set includes but no narrative singles out
 (e.g. `Configuration.*` parsing, `StringParsers`, `TEFeatureAbs` helpers) is
 captured at the framework level, not with a dedicated section each.

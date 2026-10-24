@@ -318,7 +318,7 @@ the `EntityBuffs` runtime these actions drive.
 
 **Items** are sources through `ItemClass.Effects` and, for equipped or held
 items, are fired by `Inventory` / `Equipment` inside the entity fan-out.
-`ItemValue.FireEvent` (**IL=107**) order:
+`ItemValue.FireEvent` (**IL=99**) order:
 
 1. If `ItemClass` is not an `ItemClassModifier` and has `Effects`: fire controller.
 2. Walk `ItemClass.Actions`; for `ItemActionAttack` with magazine names, fire
@@ -614,7 +614,7 @@ them for the coverage census with their base and key methods.
 | `RequirementVarInt` |  |  |
 | `RequirementVarString` |  |  |
 
-### 7.0 `EffectManager.GetValue` (IL=372) passive stack
+### 7.0 `EffectManager.GetValue` (IL=368) passive stack
 
 Signature (bool flags control which layers run):
 `GetValue(PassiveEffects, ItemValue original, float originalValue, EntityAlive,
@@ -755,7 +755,7 @@ changed for local entities.
 `QuestAwardCredited(stat, count)`. No-op on pure dedicated targets (no local
 player).
 
-#### `MinEventActionSetItemInSlot.Execute` (IL=39)
+#### `MinEventActionSetItemInSlot.Execute` (IL=38)
 
 `ItemClass.GetItem(itemName)`; requires `ItemClassArmor` whose `EquipSlot`
 matches action `slot`; then `Equipment.SetSlotItem(slot, item, true)` per target.
@@ -872,13 +872,13 @@ side that raises the item and reload triggers.
 
 ## Changelog
 
-- **2026-08-11:** Action Execute IL re-verified (14): AddProgressionLevel IL=143, ModifyStat IL=117, GiveExp IL=63, GiveSkillExp IL=112, SetProgressionLevel IL=104, AwardChallenge/AwardQuestStat IL=41, SetItemInSlot IL=39, ResetHeldItem IL=13, SetHeldItemJammed IL=13, Rage IL=38, SetOverrideLoot IL=56, ShowToolbeltMessage IL=53, SetNavObject Execute IL=53 / ParseXmlAttribute IL=67, Entity.AddNavObject IL=24 / RemoveNavObject IL=15 (exact).
+- **2026-08-11:** Action Execute IL re-verified (14): AddProgressionLevel IL=143, ModifyStat IL=117, GiveExp IL=63, GiveSkillExp IL=112, SetProgressionLevel IL=104, AwardChallenge/AwardQuestStat IL=41, SetItemInSlot IL=38, ResetHeldItem IL=13, SetHeldItemJammed IL=13, Rage IL=38, SetOverrideLoot IL=56, ShowToolbeltMessage IL=53, SetNavObject Execute IL=53 / ParseXmlAttribute IL=67, Entity.AddNavObject IL=24 / RemoveNavObject IL=15 (exact).
 - **2026-08-11:** Requirement leaves IL re-verified (28, approximations upgraded to exact): IsItemActive IL=30, HoldingItemBroken IL=32, IsPrimaryAttack/IsSecondaryAttack IL=65, RoundsInMagazine IL=45, CatapultStrainAmount IL=79, CompareLightLevel IL=36, TargetRange IL=59, HasTrackedEntity IL=93, IsSDCS IL=27, IsMale IL=19, IsCorpse IL=16, IsLocalPlayer IL=23, IsSleeping IL=27, WasAlive IL=26, IsBloodMoon IL=11, IsIndoors IL=25, InSafeZone IL=25, IsAlly IL=36, InBiome IL=30, GameStatFloat IL=29 / GameStatInt IL=31, SandboxOptionFloat IL=29 / SandboxOptionInt IL=31, TimeOfDay IL=60, RandomRoll IL=71, HasParticle IL=23, BurstRoundCount IL=61 (exact).
-- **2026-08-11:** EffectManager/action IL re-verified: GetValue IL=372, GetValuesAndSources IL=208, GetDisplayValues IL=216, MinEventActionAddBuff.Execute IL=211, RemoveBuff IL=4, ModifyCVar IL=154, Explode IL=83, CallGameEvent IL=46, AddHealth IL=55, Ragdoll IL=130 (exact).
+- **2026-08-11:** EffectManager/action IL re-verified: GetValue IL=368, GetValuesAndSources IL=208, GetDisplayValues IL=216, MinEventActionAddBuff.Execute IL=211, RemoveBuff IL=4, ModifyCVar IL=154, Explode IL=83, CallGameEvent IL=46, AddHealth IL=55, Ragdoll IL=130 (exact).
 - **2026-08-11:** Requirement leaves IL re-verified (31): PlayerItemCount IL=67, PlayerItemCountByTags IL=49, ArmorGroupCount/ArmorGroupLowestQuality IL=34, WornItems IL=54, WornItemMods IL=80, RecipeUnlocked IL=48, ProgressionLevel IL=50, RequirementItemModTier IL=84, ItemHasTags IL=43, HoldingItemHasTags IL=37, BlockHasTags IL=45, TriggerHasTags IL=33, ProjectileHasTags IL=45, EntityHasMovementTag/EntityHasStanceTag IL=47, EntityTagCompare IL=43, HasAttachedPrefab IL=53, HitLocation IL=27 + ParseXAttribute IL=48, CompareItemMetaFloat IL=44 + ParseXAttribute IL=20, IsDay/IsNight IL=19, IsDayNumber IL=32, PlayerLevel IL=38, IsFPV IL=34, IsSheltered IL=24, IsInstigator IL=17, IsAttachedToEntity IL=23 (corrected from stale 19), IsOnLadder IL=19, NPCIsAlert IL=25, IsHeldItem IL=24, IsEquipped IL=97 (exact).
 - **2026-08-11:** Requirement IL re-verified: RequirementBase.IsValid IL=13, ParseXAttribute IL=64, ParseRequirement IL=76, ParseRequirementGroup IL=148, compareValues IL=37, TargetedCompareRequirementBase.IsValid IL=51 / ParseXAttribute IL=22, CVarCompare IL=23/20, IsStatAtMax IL=100, StatCompareAbs IL=10, Current IL=52, Max/ModMax IL=46, PercCurrentToMax IL=120, PercCurrentToModMax IL=66, PercModMaxToMax IL=42, NotHasBuff IL=25, RequirementItemTier IL=36, BlockStandingOn IL=37, IsLookingAtBlock.IsValid IL=8 / raycast IL=1, IsLookingAtBlock/Entity ParseXAttribute IL=38, PerksUnlocked IL=68 (exact).
 - **2026-08-11:** Requirement IL re-verified: CVarCompare.IsValid IL=23 / ParseXAttribute IL=20, IsStatAtMax.IsValid IL=100 (exact).
-- **2026-08-10:** MinEvent IL sizes re-verified: EntityAlive.FireEvent IL=57, ItemValue.FireEvent IL=107, RequirementBase.IsValid IL=13, ParseXAttribute IL=64, ParseRequirement IL=76 (exact).
+- **2026-08-10:** MinEvent IL sizes re-verified: EntityAlive.FireEvent IL=57, ItemValue.FireEvent IL=99, RequirementBase.IsValid IL=13, ParseXAttribute IL=64, ParseRequirement IL=76 (exact).
 - **2026-08-08:** Catalogued MinEventAction/Requirement leaf index (7.0b) - 83 leaves
   narrated for the coverage census.
 
@@ -898,8 +898,8 @@ side that raises the item and reload triggers.
   add=false; nav_object/sprite/text/cvar_to_text/add attributes.
 - **2026-08-07:** GiveExp/GiveSkillExp/SetProgressionLevel; AwardChallenge/QuestStat
   local-only; SetItemInSlot armor gate; jam/reset held; Rage; SetOverrideLoot.
-- **2026-08-07:** EffectManager.GetValue IL=372 stack order; ItemValue.FireEvent
-  IL=107 ammo/mod recursion; MinEffectController/Group FireEvent IL sizes.
+- **2026-08-07:** EffectManager.GetValue IL=368 stack order; ItemValue.FireEvent (re-verified on b18; b10 was 372)
+  IL=99 ammo/mod recursion; MinEffectController/Group FireEvent IL sizes.
 
 - **2026-08-07:** FireEvent IL=57 fan-out includes equipment + buffs; §7.1 action
   leaves (CallGameEvent/AddHealth/Ragdoll/progression/ModifyStat/etc).

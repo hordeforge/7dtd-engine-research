@@ -691,7 +691,7 @@ resolves `Origin` on both sides, picks up the `AuxBoneTracker` from the catalog'
   the catalog.
 - Recurse into that child.
 
-`SDCSUtils::setupEquipmentCommon(GameObject,TransformCatalog,List<Transform>)` (IL=91)
+`SDCSUtils::setupEquipmentCommon(GameObject,TransformCatalog,List<Transform>)` (IL=94)
 then finishes the rig, once, after all slots:
 
 1. `GetOrAddComponent<RigBuilder>` and **disable** it.

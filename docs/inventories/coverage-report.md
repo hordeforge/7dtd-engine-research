@@ -50,10 +50,10 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached, non-generated | 6222 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2368 (excluded from %) |
 | ...**game types** (the RE surface) | **3713** |
-| ...**narrated** (backticked in a narrative doc) | **3671 (98.9%)** |
-| ...**catalogued only** (generated inventory, not narrated) | 0 |
-| ...**classified** out-of-scope | 4 |
-| ...**unaccounted** (appears nowhere) | 38 |
+| ...**narrated** (backticked in a narrative doc) | **3695 (99.5%)** |
+| ...**catalogued only** (generated inventory, not narrated) | 1 |
+| ...**classified** out-of-scope | 5 |
+| ...**unaccounted** (appears nowhere) | 12 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 504 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 181 |
 
@@ -71,11 +71,11 @@ as an upper bound; this table is its actual depth.
 
 | Narrative mentions | Types | Share of base |
 |---|---:|---:|
-| 0 (catalogued, classified, or unaccounted) | 42 | 1.1% |
-| exactly 1 | 2379 | 64.1% |
-| 2-4 | 789 | 21.2% |
-| 5-19 | 421 | 11.3% |
-| 20+ | 82 | 2.2% |
+| 0 (catalogued, classified, or unaccounted) | 18 | 0.5% |
+| exactly 1 | 2365 | 63.7% |
+| 2-4 | 799 | 21.5% |
+| 5-19 | 440 | 11.9% |
+| 20+ | 91 | 2.5% |
 
 ## Whole-assembly accounting (all types and methods)
 
@@ -144,22 +144,15 @@ Unreached game types (2266), grouped by top namespace:
 | `UAI` | 1 |
 | `AssetManagement` | 1 |
 
-Unreached game types already mentioned in docs: **2250** (accounted).
-Unreached game types with **no mention anywhere**: **16** (the whole-assembly gap).
+Unreached game types already mentioned in docs: **2257** (accounted).
+Unreached game types with **no mention anywhere**: **9** (the whole-assembly gap).
 
 Gap list (no mention in any doc):
 
-- `Address` (<global>)
-- `EquipmentSlotType` (<global>)
-- `HoldingMode` (<global>)
 - `HonkOpenTypes` (<global>)
-- `IHasWorldAddress` (<global>)
 - `IItemStackController` (<global>)
-- `IItemStackGridHolder` (<global>)
 - `QuestEvent_ContainerOpened` (<global>)
 - `QuestSource` (<global>)
-- `SignSharing` (<global>)
-- `WorldObjectType` (<global>)
 - `XuiBindingBoxWriterDelegate` (<global>)
 - `IAssetManager` (AssetManagement)
 - `OpenDoorStates` (GameEvent.SequenceActions)
@@ -2441,7 +2434,7 @@ Full unreached game-type list (2266):
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2903 | 2880 | 23 | 99.2% |
+| `<global>` | 2903 | 2898 | 5 | 99.8% |
 | `GameEvent` | 180 | 180 | 0 | 100.0% |
 | `Platform` | 147 | 147 | 0 | 100.0% |
 | `Twitch` | 110 | 110 | 0 | 100.0% |
@@ -2449,7 +2442,7 @@ Full unreached game-type list (2266):
 | `DynamicMusic` | 47 | 47 | 0 | 100.0% |
 | `Challenges` | 47 | 47 | 0 | 100.0% |
 | `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100.0% |
-| `Services` | 24 | 13 | 11 | 54.2% |
+| `Services` | 24 | 18 | 6 | 75.0% |
 | `UAI` | 24 | 24 | 0 | 100.0% |
 | `PrefabVolumes` | 16 | 16 | 0 | 100.0% |
 | `GamePath` | 13 | 13 | 0 | 100.0% |
@@ -2460,7 +2453,7 @@ Full unreached game-type list (2266):
 | `XMLData` | 7 | 7 | 0 | 100.0% |
 | `Quests` | 7 | 7 | 0 | 100.0% |
 | `MapRendering` | 7 | 7 | 0 | 100.0% |
-| `AssetManagement` | 5 | 1 | 4 | 20.0% |
+| `AssetManagement` | 5 | 4 | 1 | 80.0% |
 | `MusicUtils` | 5 | 5 | 0 | 100.0% |
 | `GearVariants` | 4 | 4 | 0 | 100.0% |
 | `ConcurrentCollections` | 3 | 3 | 0 | 100.0% |
@@ -2487,44 +2480,18 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
-| `QuestAddedEventData` | Services.Analytics.Events | 47 |
-| `Hand` | <global> | 38 |
-| `PlayerDeathEventData` | Services.Analytics.Events | 38 |
-| `QuestProgressionEventData` | Services.Analytics.Events | 29 |
-| `QuestRemovedEventData` | Services.Analytics.Events | 24 |
+| `XUiC_SignEditorWindow` | <global> | 77 |
 | `PlayerStateData` | Services.Analytics.Events | 18 |
-| `DeletedSignStore` | <global> | 17 |
-| `ToolbeltConfig` | <global> | 15 |
-| `PlayerSignStore` | <global> | 13 |
-| `XUiC_SignSharingPrompt` | <global> | 13 |
-| `EntityContainerAbs` | <global> | 12 |
 | `ActiveConditionData` | Services.Analytics.Events | 12 |
 | `InventoryItemData` | Services.Analytics.Events | 10 |
-| `WorldAddress` | <global> | 8 |
-| `CellPool` | <global> | 7 |
-| `AssetManagerLifetimed` | AssetManagement | 7 |
-| `NetPackageLockTarget` | <global> | 7 |
 | `AssetHandle`1` | AssetManagement | 7 |
 | `PlayerInventoryData` | Services.Analytics.Events | 6 |
-| `RespawnConditionTimer` | <global> | 6 |
-| `AssetLoaderManager` | <global> | 5 |
-| `NetPackageSingleSignData` | <global> | 5 |
-| `NetPackageSignDelete` | <global> | 5 |
-| `InstanceHandle`1` | AssetManagement | 5 |
-| `SignStoreIO` | <global> | 5 |
-| `ConsoleCmdGive` | <global> | 5 |
-| `ConsoleCmdListItems` | <global> | 5 |
 | `EngagedEnemyData` | Services.Analytics.Events | 4 |
-| `AssetManager` | AssetManagement | 3 |
 | `EnumBoxCache`1` | <global> | 3 |
-| `ToolbeltFromXml` | <global> | 2 |
 | `ItemValueExtensions` | <global> | 2 |
-| `EquipmentUsageEventData` | Services.Analytics.Events | 2 |
-| `AssetManagers` | <global> | 1 |
 | `PlayerSignWriteRequest` | <global> | 1 |
 | `PlayerSignLibraryState` | <global> | 1 |
 | `ModificationData` | Services.Analytics.Events | 1 |
-| `EquipmentSlotExtensions` | <global> | 1 |
 
 ## Catalogued-only reached types (narrate these to reach 100% narration)
 
@@ -2534,6 +2501,7 @@ narrative doc moves it to **narrated**.
 
 | Type | Namespace | methods |
 |---|---|---:|
+| `ConsoleCmdSignEditorDebug` | <global> | 7 |
 
 ## Classified reached types (narrate these to reach 100% narration)
 
@@ -2543,6 +2511,7 @@ out-of-scope-surface.md. A backticked mention in a narrative doc moves them to
 
 | Type | Namespace | methods |
 |---|---|---:|
+| `ItemActionEntryUse` | <global> | 6 |
 | `ChallengeClaimedEventData` | Services.Analytics.Events | 24 |
 | `ChallengeCompletedEventData` | Services.Analytics.Events | 22 |
 | `CosmeticUsageEventData` | Services.Analytics.Events | 14 |

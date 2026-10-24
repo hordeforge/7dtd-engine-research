@@ -1475,7 +1475,10 @@ hand only when the mode or the slot says so.
 (IL=110) into `GameConfig` and `EditorConfig`; the shipped file only sets
 `editorconfig` (10 slots/bar, 2 bars/page, 20 total) and states
 `gameconfig is currently unsupported`. `EntityPlayer.InitInventory` (IL=10)
-sizes the `Inventory` from `ToolbeltConfig.CurrentConfig.TotalSlots`. The b10
+sizes the `Inventory` from `ToolbeltConfig.CurrentConfig.TotalSlots`.
+`ToolbeltFromXml` bounds what the file may ask for: `MinSlotsPerBar` 1,
+`MaxSlotsPerBar` 10, `MinBarPerPage` 1, `MaxBarPerPage` 2, `MinPages` 1 and
+`MaxPages` 10, so a config cannot exceed 200 slots. The b10
 constants `PUBLIC_SLOTS`, `INVENTORY_SLOTS`, `DUMMY_SLOT_IDX` and
 `SHIFT_KEY_SLOT_OFFSET` are gone; `SlotCount` is a plain field now. The b10
 hidden dummy-slot stow (vehicle attach) has no equivalent constant in b18; the

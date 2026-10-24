@@ -83,9 +83,9 @@ removed hooks.
 **`NetPackageEntityRemove.ProcessPackage` (IL=24):** log if missing; always
 `RemoveEntity(entityId, reason)` (reason is u8 enum).
 
-### 2.0 Parent chain: `OnUpdateEntity` (IL=457) then `OnUpdateLive` (IL=363)
+### 2.0 Parent chain: `OnUpdateEntity` (IL=454) then `OnUpdateLive` (IL=363)
 
-**`OnUpdateEntity` high-level (IL=457):** base `Entity.OnUpdateEntity`;
+**`OnUpdateEntity` high-level (IL=454):** base `Entity.OnUpdateEntity`;
 `Buffs.SetCustomVar` / `Buffs.Tick`; optional class `PickupStressBuff` add;
 **`OnUpdateLive()`**; `inventory.OnUpdate()` when present; death / hurt sound;
 radiation-sensitive path can `DamageEntity` (e.g. **20** under biome flags);
@@ -3301,7 +3301,7 @@ range &lt; 0 → `max(3, sightRangeBase * 0.2)`; store `sleeperViewAngle` /
 `1/percent` into local then
 `sleeperNoiseToSense/Wake *= percent` (hearing scale).
 
-### D8.6 Entity config init: `EntityAlive.CopyPropertiesFromEntityClass` (IL=1128)
+### D8.6 Entity config init: `EntityAlive.CopyPropertiesFromEntityClass` (IL=1125)
 
 One-time copy from the resolved `EntityClass` (via `EntityClass.list[entityClass]`,
 after base `Entity::CopyPropertiesFromEntityClass`). `entityClass` ids are
@@ -3404,7 +3404,7 @@ Consumers: `fallBehaviors` feeds `ChooseFallBehavior` (above); the sound fields
 drive `internalPlayStepSound` / alert loops; `itemsOnEnterGame` is granted on
 spawn.
 
-### D8.6a Base `Entity::CopyPropertiesFromEntityClass` (IL=238)
+### D8.6a Base `` (IL=244)
 
 Runs first (D8.6 calls it). Copies from the resolved `EntityClass`:
 
@@ -4160,7 +4160,7 @@ zombie carries no per-limb body damage) and only for zombie avatars (the
 - **2026-08-28:** V3.2.0: EntityFlags.Timid=32 added; EAIRunawayFromEntity reworked to flag-based threat (flags/safeFlags, dangerDistance, entityList; class-list + minSneakDistance removed; FindEnemy IL=136).
 - **2026-08-11:** Vulture/flying tail IL re-verified: FindTarget IL=69, IsCourseTraversable IL=102, StartHome IL=10, AdjustWaypoint IL=46, EntityFlying.MoveEntityHeaded IL=135 / IsAirBorne IL=2, EAISetNearestCorpseAsTarget.CanExecute IL=110, EntityAlive.AddOwnedEntity(OwnedEntityData) IL=35, AddPart/AddParticle IL=17 (exact).
 - **2026-08-11:** Sleeper config IL re-verified: GetAliveCount IL=34, MinScript.Tick IL=261, cctor IL=48, DespawnAndReset IL=6, Write/Read IL=332/350, SpawnPoint.Write/Read IL=25/70, EntityAlive.SetSleeper IL=11, SetSleeperSight IL=23, SetSleeperHearing IL=22 (exact).
-- **2026-08-11:** Config-init IL re-verified: EntityAlive.CopyPropertiesFromEntityClass IL=1128 / Init IL=13 / InitStats IL=9 / switchModelView IL=11 / InitPostCommon IL=97 / PostInit IL=34 (EntityEnemy IL=13), Entity.CopyPropertiesFromEntityClass IL=238 (EntityPlayer IL=3, EntityPlayerLocal IL=21), EntityClass.FromString IL=3 / Init IL=1465 / ParseEntityFlags IL=49, ItemClass.GetItem IL=13, Inventory.SetBareHandItem IL=23, EntityPlayerLocal.SetupStartingItems IL=39, StartStopLivingSound IL=55, ItemStack.FromString IL=38 (exact).
+- **2026-08-11:** Config-init IL re-verified: EntityAlive.CopyPropertiesFromEntityClass IL=1125 / Init IL=13 / InitStats IL=9 / switchModelView IL=11 / InitPostCommon IL=97 / PostInit IL=34 (EntityEnemy IL=13), Entity.CopyPropertiesFromEntityClass IL=244 (EntityPlayer IL=3, EntityPlayerLocal IL=21), EntityClass.FromString IL=3 / Init IL=1465 / ParseEntityFlags IL=49, ItemClass.GetItem IL=13, Inventory.SetBareHandItem IL=23, EntityPlayerLocal.SetupStartingItems IL=39, StartStopLivingSound IL=55, ItemStack.FromString IL=38 (exact).
 - **2026-08-11:** Activation-command IL re-verified: Entity.GetActivationCommands IL=51, InitLocalActivationCommands IL=14 (EntityAlive) / IL=1 (Entity), ReorderActivationCommands IL=9 (EntityDrone) / IL=1 (Entity), MoveActivationCommandBefore IL=64, MoveActivationCommandAfter IL=64 (exact).
 - **2026-08-11:** FastTags/task-config IL re-verified: FastTags.Parse IL=90, GetBit IL=56, GetTag IL=4, GetTagNames IL=78, Test_Bit IL=46, Test_AnySet IL=68, Entity.HasAnyTags IL=5, EAIManager.CopyPropertiesFromEntityClass IL=213 / ParseTasks IL=111, DynamicProperties.ParseData IL=82 / ParseKeyData IL=29 (exact).
 - **2026-08-11:** Vulture/turn IL re-verified: EntityVulture.updateTasks IL=1344, ClearTarget IL=11, StartAttackReposition IL=104, AttackAndAdjust IL=53, ItemActionRanged.GetRange IL=23, Entity.SeekYaw IL=136 / animateYaw IL=54 / IsSeekYaw IL=5 / SeekYawToPos IL=36 (exact).
@@ -4222,7 +4222,7 @@ zombie carries no per-limb body damage) and only for zombie avatars (the
 - **2026-08-10:** EntityAlive task IL re-verified: ForceBigHead IL=22, ForceResetHead IL=28, snake aim IL=13, isRadiationSensitive IL=2, onNewBiomeEntered IL=4 (exact).
 - **2026-08-10:** EntityPlayer IL re-verified: OnUpdateLive IL=13, SetAlive IL=31/38, TurnOffLightFlares IL=4 (exact).
 - **2026-08-10:** ASP->AstarPath handoff re-verified: ASPPathFinder calls AstarPath.StartPath(Pathfinding.Path, bool) (IL_03FD), matching the closed-gaps/residual claim.
-- **2026-08-10:** Entity-unload IL sizes re-verified: World.RemoveEntity IL=16, unloadEntity IL=216, Entity.MarkToUnload IL=4, EntityAlive.OnUpdateEntity IL=457 (exact).
+- **2026-08-10:** Entity-unload IL sizes re-verified: World.RemoveEntity IL=16, unloadEntity IL=216, Entity.MarkToUnload IL=4, EntityAlive.OnUpdateEntity IL=454 (exact).
 - **2026-08-08:** Catalogued-leaf index added (narrates the family's remaining
   catalogued leaves for the coverage census).
 
@@ -4412,7 +4412,7 @@ zombie carries no per-limb body damage) and only for zombie avatars (the
   CheckSpawnPos / FindSpawnIndex; Tick phase entity-gone restart correction.
 - **2026-08-07:** GameTimer.updateTimer formula; EnemyAnimal electrocute gate;
   canDespawn/unload; CheckDespawn; player OnUpdateLive; EAI leaves.
-- **2026-08-07:** OnUpdateEntity IL=457 / OnUpdateLive IL=363 ordered phases;
+- **2026-08-07:** OnUpdateEntity IL=454 / OnUpdateLive IL=363 ordered phases; (re-verified on b18; b10 was 457)
   UAI task leaves MoveToTarget/Wander/AttackTargetEntity; UAIBase package path.
 - **2026-08-07:** SleeperVolume UpdateSpawn/Despawn/UpdatePlayerTouched IL phases;
   Tick phase order (MinScript / UpdateSpawn / player touch / despawn timer).

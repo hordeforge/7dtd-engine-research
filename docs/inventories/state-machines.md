@@ -30,7 +30,7 @@ that is only ever a target reads one lower.
 | Lifecycle | Doc | States |
 |---|---|---:|
 | 4. Net interest package selection (decoded) | [entities/closed-gaps.md](../entities/closed-gaps.md) | 7 |
-| 2.0 Parent chain: `OnUpdateEntity` (IL=457) then `OnUpdateLive` (IL=363) | [entities/entity-ai.md](../entities/entity-ai.md) | 7 |
+| 2.0 Parent chain: `OnUpdateEntity` (IL=454) then `OnUpdateLive` (IL=363) | [entities/entity-ai.md](../entities/entity-ai.md) | 7 |
 | Path request lifecycle | [entities/entity-ai.md](../entities/entity-ai.md) | 6 |
 | 2. Survival over-time loop (state machine) | [entities/entity-stats.md](../entities/entity-stats.md) | 7 |
 | 6b. The drone state machine | [entities/raycast-pathing.md](../entities/raycast-pathing.md) | 8 |

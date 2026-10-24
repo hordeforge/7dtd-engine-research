@@ -35,8 +35,8 @@ CLAIMS = {
     "quest-objectives.md": (r"(\d+)\s+objectives", 38),
     "console-command-list.md": (r"(\d+)\s+commands", 190),
     "xmlsToLoad.md": (r"(\d+)\s+WorldStaticData XmlLoadInfo rows", 50),
-    "entityclass-props.md": (r"(\d+)\s+EntityClass prop-name constants", 187),
-    "dedicated-leaves.md": (r"\((\d+)\)", 88),
+    "entityclass-props.md": (r"(\d+)\s+EntityClass prop-name constants", 188),
+    "dedicated-leaves.md": (r"\((\d+)\)", 84),
     "state-machines.md": (r"all (\d+) modelled lifecycles", 74),
 }
 

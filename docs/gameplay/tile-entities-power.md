@@ -602,7 +602,7 @@ matching power item: `PowerTimerRelay` (2), `PowerTripWireRelay` (4),
   `PlayOpen` / `PlayClose` / `PlayWarning` (trader-door ambience, no power
   graph).
   `BlockSpotlight` (PowerItemType 2) is the richest consumer wrapper:
-  `OnBlockActivated` (IL=127) handles the `light` (toggles meta bit 1 and
+  `OnBlockActivated` (IL=126) handles the `light` (toggles meta bit 1 and
   the TE's `IsToggled`), `aim` (sets `AimingGun` and
   `LockManager.LockRequestLocal` on the TE) and `take` (block
   `takeItemWithTimer` with `BlockPowered.TakeDelay`) commands, resolving
@@ -799,7 +799,7 @@ count byte, reallocates the queue on a length change, and per entry runs
 `bWaitingForServerResponse` it consumes the entries into a scratch item
 instead (the client keeps its pending queue untouched).
 
-### 4.4 `TileEntityForge.UpdateTick` (IL=340)
+### 4.4 `TileEntityForge.UpdateTick` (IL=344)
 
 Separate type (not a workstation subclass). Fuel is **tick-integer** based:
 `fuelInStorageInTicks`, `fuelInForgeInTicks`, `burningItemValue`.
@@ -1047,7 +1047,7 @@ outer trader doors (`TraderOuter`) react, interior doors use the new
 Land-claim repair package drives `TEFeatureAreaRepair.RepairAll` (protocol
 §6.19). Storage/lock features are the composite replacement for classic
 `TileEntitySecureLootContainer` in V3.2.0 where the composite TE type is used.
-`TEFeatureStorage.CountItem(class)` (IL=33) sums `count` over matching
+`TEFeatureStorage.CountItem(class)` (IL=32) sums `count` over matching
 `ItemClass` slots; `AddItem(stack)` (IL=29) writes the first empty slot via
 `UpdateSlot` + `SetModified` (false when full).
 
@@ -1195,9 +1195,9 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
-- **2026-08-11:** Trap/feature IL re-verified: get/set_ItemSlots IL=12/16, set_IsLocked IL=16, get_AmmoItems IL=40, target flags IL=7, get_OwnerEntityID IL=9 / SetOwnerEntityID IL=27 / set IL=4, get_PowerUsed IL=8, set_IsToggled IL=24, MeleeTrap.write IL=15, Workstation.write IL=246, PoweredTrigger.write IL=138, TryGetSelfOrFeature IL=53 / GetSelfOrFeature IL=6, PrecomputeCapabilities IL=43, SplitFullCommandName IL=28, UpdateBlockActivationCommands IL=124, Door.CanOpen IL=29, Storage.CountItem IL=33 / AddItem IL=29, Lockable.InitBlockActivationCommands IL=37 / AllowBlockActivationCommand IL=93 / get_TriggerRole IL=2 / OnBlockTriggered IL=10 (exact).
-- **2026-08-11:** Forge/collector IL re-verified: get_IsCrafting IL=15, get_BurnTimeLeft IL=3, readRecipeStackArray IL=79, TileEntityForge.UpdateTick IL=340, GetFuelLeft IL=30, GetMetalForgedSoFar IL=45, GetInputWeight/GetOutputWeight/GetBurningItemValue IL=3, Collector.write IL=278, handleUpdateForOutputType IL=233, getCurrentConvertCount IL=52, getCurrentConvertSpeed IL=9, getCatalystCount IL=57, getFuelCount IL=30, getFuelSlotFuelCount IL=35, getMaxProductionCount IL=29, getAdditionalFuelCost IL=3, newItem IL=36, removeFuel IL=67, dropItems IL=22, isDisabled IL=16, anyEnabled IL=39, resetTimeValues IL=9, GetSlotOutputType IL=9, GetSlotFillData IL=28, IsCurrentStack IL=26, BlockCollector addTileEntity IL=13 / removeTileEntity IL=7 / OnBlockEntityTransformBeforeActivated IL=11 / GetSandboxModifiedFuelNeeded IL=28 / modifyTime IL=16, TileEntityLight.write IL=48, TileEntityPoweredRangedTrap.write IL=74 / get_TargetType IL=12 / set_TargetType IL=14 (exact).
-- **2026-08-11:** Power-block IL re-verified: PowerItem.write IL=55, NetPackageWireActions write IL=45 / read IL=38 / ProcessPackage IL=163, CreatePowerItem IL=95, BlockSolarPanel.CanPlaceBlockAt IL=28, BlockSpeaker.Init IL=16 / ActivateBlock IL=53, BlockSpeakerTrader.Init IL=42, BlockSpotlight.OnBlockActivated IL=127 / updateState IL=249, BlockLauncher.InstantiateProjectile IL=188, BlockElectricWire.Init IL=25, BlockRallyMarker.OnBlockActivated IL=29 (exact).
+- **2026-08-11:** Trap/feature IL re-verified: get/set_ItemSlots IL=12/16, set_IsLocked IL=16, get_AmmoItems IL=40, target flags IL=7, get_OwnerEntityID IL=9 / SetOwnerEntityID IL=27 / set IL=4, get_PowerUsed IL=8, set_IsToggled IL=24, MeleeTrap.write IL=15, Workstation.write IL=246, PoweredTrigger.write IL=138, TryGetSelfOrFeature IL=53 / GetSelfOrFeature IL=6, PrecomputeCapabilities IL=43, SplitFullCommandName IL=28, UpdateBlockActivationCommands IL=124, Door.CanOpen IL=29, Storage.CountItem IL=32 / AddItem IL=29, Lockable.InitBlockActivationCommands IL=37 / AllowBlockActivationCommand IL=93 / get_TriggerRole IL=2 / OnBlockTriggered IL=10 (exact).
+- **2026-08-11:** Forge/collector IL re-verified: get_IsCrafting IL=15, get_BurnTimeLeft IL=3, readRecipeStackArray IL=79, TileEntityForge.UpdateTick IL=344, GetFuelLeft IL=30, GetMetalForgedSoFar IL=45, GetInputWeight/GetOutputWeight/GetBurningItemValue IL=3, Collector.write IL=278, handleUpdateForOutputType IL=233, getCurrentConvertCount IL=52, getCurrentConvertSpeed IL=9, getCatalystCount IL=57, getFuelCount IL=30, getFuelSlotFuelCount IL=35, getMaxProductionCount IL=29, getAdditionalFuelCost IL=3, newItem IL=36, removeFuel IL=67, dropItems IL=22, isDisabled IL=16, anyEnabled IL=39, resetTimeValues IL=9, GetSlotOutputType IL=9, GetSlotFillData IL=28, IsCurrentStack IL=26, BlockCollector addTileEntity IL=13 / removeTileEntity IL=7 / OnBlockEntityTransformBeforeActivated IL=11 / GetSandboxModifiedFuelNeeded IL=28 / modifyTime IL=16, TileEntityLight.write IL=48, TileEntityPoweredRangedTrap.write IL=74 / get_TargetType IL=12 / set_TargetType IL=14 (exact).
+- **2026-08-11:** Power-block IL re-verified: PowerItem.write IL=55, NetPackageWireActions write IL=45 / read IL=38 / ProcessPackage IL=163, CreatePowerItem IL=95, BlockSolarPanel.CanPlaceBlockAt IL=28, BlockSpeaker.Init IL=16 / ActivateBlock IL=53, BlockSpeakerTrader.Init IL=42, BlockSpotlight.OnBlockActivated IL=126 / updateState IL=249,  IL=189, BlockElectricWire.Init IL=25, BlockRallyMarker.OnBlockActivated IL=29 (exact).
 - **2026-08-11:** Workstation IL re-verified: UpdateTick IL=134, CanOperate IL=3, AcceptsMaterial IL=31, getFuelTime IL=46, GetFuelTime IL=11, getTotalFuelSeconds IL=41, hasRecipeInQueue IL=31, InputIsEmpty IL=57, readItemStackArray IL=59/54, SetDataFromNet IL=20, emitHeatMapEvent IL=48, HandleFuel IL=105, CheckForCraftComplete IL=55, ResetCraftingQueue IL=42, ResetTickTime IL=5, ClearSlotTimersForInputs IL=19, GetTimerForSlot IL=13, IsToolsSame IL=37, OutputEmpty IL=23, get_IsEmpty IL=31, FuelType ctor IL=41, CatalystConvert.Convert IL=23 (exact).
 - **2026-08-11:** Power-wire IL re-verified: TileEntityPowerSource.write IL=98 / read IL=158, TileEntityComposite write IL=74 / read(3-arg) IL=479, PowerManager FindPowerItems IL=25, GetPowerItemByWorldPos IL=12, SetTileEntityUpdate IL=14, LogChildren IL=65, RemovePowerNode IL=61, RemoveChild IL=14, savePowerDataThreaded IL=31, OnSetLocalChunkPosition IL=37, HasSlottedItems IL=24, TryAddItemToSlot IL=50 (exact).
 - **2026-08-11:** Power item IL re-verified: PowerChildren IL=2, PowerSource.Update IL=28 / HandleSendPower IL=86 / TickPowerGeneration IL=1 / ShouldAutoTurnOff IL=2, Generator.TickPowerGeneration IL=30, SolarPanel.HandleSendPower IL=111 / TickPowerGeneration IL=8, BatteryBank.Update IL=22 / TickPowerGeneration IL=76 / HandlePowerReceived IL=89, Consumer.HandlePowerUpdate IL=51, Toggle IL=53, Single IL=41, Trigger.CachedUpdateCall IL=77 / HandlePowerUpdate IL=72, TimerRelay.CachedUpdateCall IL=12, PowerManager.Update IL=106 / SavePowerManager IL=41 / LoadPowerManager IL=70 / Write IL=35 / Read IL=34 (exact).

@@ -266,13 +266,13 @@ Chat, parties and factions, and third-party integration.
 | [inventories/te-features.md](inventories/te-features.md) | tile-entities-power.md (11 TEFeatureAbs leaves) |
 | [inventories/challenge-objectives.md](inventories/challenge-objectives.md) | challenges (28 objective leaves; client-tracked) |
 | [inventories/sequence-actions.md](inventories/sequence-actions.md) | game-events.md (123 SequenceAction leaves) |
-| [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) | small dedicated leaf types attributed to their owning subsystem (88) |
+| [inventories/dedicated-leaves.md](inventories/dedicated-leaves.md) | small dedicated leaf types attributed to their owning subsystem (84) |
 | [inventories/block-behaviors.md](inventories/block-behaviors.md) | blocks.md (65 Block leaves) |
 | [inventories/item-actions.md](inventories/item-actions.md) | items.md (38 ItemAction leaves) |
 | [inventories/minevent-actions.md](inventories/minevent-actions.md) | minevents.md (71 triggered-effect leaves) |
 | [inventories/console-command-list.md](inventories/console-command-list.md) | console-commands.md (190 commands, with descriptions) |
 | [inventories/xmlsToLoad.md](inventories/xmlsToLoad.md) | mod-loading.md (50 WorldStaticData XmlLoadInfo rows) |
-| [inventories/entityclass-props.md](inventories/entityclass-props.md) | entity-ai.md D8.6-D8.7 (187 EntityClass prop-name constants from the cctor) |
+| [inventories/entityclass-props.md](inventories/entityclass-props.md) | entity-ai.md D8.6-D8.7 (188 EntityClass prop-name constants from the cctor) |
 | [inventories/gamestats-gameprefs.md](inventories/gamestats-gameprefs.md) | every doc that cites `GameStats[i]` / `GamePrefs.Get*(i)` (82 + 317 index rows) |
 | [inventories/quest-objectives.md](inventories/quest-objectives.md) | quests-challenges.md (38 objectives) |
 | [inventories/sequence-requirements.md](inventories/sequence-requirements.md) | game-events.md (37 concrete requirements) |

@@ -1005,7 +1005,7 @@ IL_0012: ret
   - 1x `ReadOnlyCollection`1::get_Item`
   - 1x `ClientInfo::UpdatePing`
   - 1x `ReadOnlyCollection`1::get_Count`
-- dump `ConnectionManager::Update` IL=231
+- dump `` IL=213
   - 4x `ConnectionManager::ProcessPackages`
   - 3x `INetConnection::IsDisconnected`
   - 3x `GameManager::get_World`
@@ -1476,7 +1476,7 @@ IL_0012: ret
 
 - dump `GameManager::StartAsServer` IL=9
   - 1x `new <StartAsServer>d__166::.ctor`
-- dump `GameManager::StartGame` IL=21
+- dump `` IL=24
   - 2x `GameSparksManager::Instance`
   - 1x `Time::set_timeScale`
   - 1x `GamePrefs::Set`

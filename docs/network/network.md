@@ -18,7 +18,7 @@
 
 ```mermaid
 flowchart TD
-  CU[ConnectionManager.Update IL=231]
+  CU[ IL=213]
   CU --> PU[ProtocolManager.Update]
   PU --> PP[ProcessPackages × clients × channels]
   PP --> FL[FlushClientSendQueues]
@@ -27,14 +27,14 @@ flowchart TD
   CL --> PL[ProtocolManager.LateUpdate]
 ```
 
-These run as **peer MonoBehaviours** relative to `GameManager.Update`. **Observed order (2026-08-09, runtime probe):** `ConnectionManager.Update` runs **before** `GameManager.Update` every frame (and `ConnectionManager.LateUpdate` before `GameManager.LateUpdate`); see [loop.md](../loop/loop.md) §1.1.
+These run as **peer MonoBehaviours** relative to `GameManager.Update`. **Observed order (2026-08-09, runtime probe):** `ConnectionManager.Update` runs **before** `GameManager.Update` every frame (and `ConnectionManager.LateUpdate` before `GameManager.LateUpdate`); see [loop.md](../loop/loop.md) §1.1. (re-verified on b18; b10 was 231)
 
 `ProtocolManager.Update` / `LateUpdate` (IL=35 each) only walk
 `List` of `INetworkServer` and `INetworkClient` calling `Update` /
 `LateUpdate` on each transport backend (LiteNet/Steam/etc.). Package
 decode/dispatch stays in `ConnectionManager` (section 1.1).
 
-### 1.1 `ConnectionManager.Update` (IL=231, server path)
+### 1.1 `` (IL=213, server path)
 
 Verified body order when `IsServer`:
 
@@ -592,7 +592,7 @@ SendData(cInfo, channel, buf, reliable)`) or client-side
 (`netClient.SendData(channel, buf)`), and re-queues the buffer at the
 front when the send errors - the retry loop.
 
-`ConnectionManager.Update` (IL=231, peer MB) drains each connection via `GetPackages` → `ProcessPackages` (IL=116) and flushes send queues. Xref: `ProcessPackages` is only called from that Update path (4 sites).
+`` (IL=213, peer MB) drains each connection via `GetPackages` → `ProcessPackages` (IL=116) and flushes send queues. Xref: `ProcessPackages` is only called from that Update path (4 sites).
 
 **Server bring-up (`ProtocolManager`):** `SetupProtocols` (IL=128) builds the
 `servers` / `clients` lists once: it parses `GamePrefs` 144
@@ -1018,11 +1018,11 @@ discovery loop from 1024 up to 1432 minus the layer overhead.
 
 ## Changelog
 
-- **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `ConnectionManager.Update` 228 -> 231 (exact). Prior values were the V3.1.0 b14 measurement.
+- **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `ConnectionManager.Update` 228 -> 231 (exact). Prior values were the V3.1.0 b14 measurement. (re-verified on b18; b10 was 231)
 - **2026-08-11:** NetConstants.ProtocolId pinned 13 (Cecil-verified on the game's Managed LiteNetLib.dll).
 - **2026-08-11:** Added canonical `**Hub:** INDEX.md` backlink (was prose "Hub map:" only).
 - **2026-08-11:** Transport IL re-verified: InitConfig IL=22, InitStreams Steam IL=131 / Simple IL=190, NetConnectionAbs.FlushSendQueue IL=1 / IsDisconnected IL=4, NetConnectionSimple.FlushSendQueue IL=19 / SendBuffers IL=22 / sendBuffersFromQueue IL=63, SetupProtocols IL=128, StartServers IL=106, StopServersOnly IL=22, MakeServerOffline IL=11, SendQueueHandled IL=7, Task_CommWriter IL=251 / Task_CommReader IL=213, taskSerialize IL=392 / taskDeserialize IL=437, WriteToStream IL=435, StreamToBuffer IL=194 (exact).
-- **2026-08-11:** Distribution IL re-verified: OnUpdateEntities IL=322, NetEntityDistribution ctor IL=141, Add(entity) IL=66, Remove(entity,reason) IL=48, SendToPlayers IL=42, getSpawnPacket IL=7, updatePlayerEntity IL=222, SendChunksToClients IL=216, ChunkManager.AddChunkObserver IL=15 (exact).
+- **2026-08-11:** Distribution IL re-verified: OnUpdateEntities IL=322, NetEntityDistribution ctor IL=141, Add(entity) IL=66, Remove(entity,reason) IL=48, SendToPlayers IL=42, getSpawnPacket IL=7, updatePlayerEntity IL=222, SendChunksToClients IL=216, ChunkManager.AddChunkObserver IL=15 (exact). (re-verified on b18; b10 was 231)
 - **2026-08-11:** Validation/package-manager IL re-verified: ValidEntityIdForSender IL=49, ValidUserIdForSender IL=29, AddPackageMapping IL=29, GetPackageName IL=5, ResetMappings IL=7, getPackageInfoByType IL=16, LogStats IL=70 (exact).
 - **2026-08-11:** LiteNetLib wrapper IL re-verified: GetServerPorts IL=9, SetServerPassword IL=8, DropClient IL=17, OnPlayerDisconnected IL=11, OnPeerConnectedEvent IL=35, OnDisconnectedFromServer IL=100, ConnectionRequestCheck IL=86, OnNetworkReceiveEvent IL=134 (server) / IL=36 (client wrapper), wrapper disconnect event IL=6, CreateRejectMessage IL=27 (exact).
 - **2026-08-11:** ConnectionManager IL re-verified: Update IL=231, LateUpdate IL=4, ProcessPackages IL=116, DisconnectClient IL=184, SavePlayerData IL=91 (GameManager), SendPackage(list) IL=168, AddClient IL=32, ServerReady IL=10, SendToClientsOrServer IL=21, Enable/Disable/PrintNetworkStatistics IL=4, SetLatencySimulation IL=7, SetPacketLossSimulation IL=6, get_CurrentMode/get_IsClient/GetRequiredPortsString IL=4, Net_DataReceivedServer IL=14, Net_PlayerConnected IL=12, SendLogin IL=60, Net_InvalidPassword IL=16, Net_ConnectionFailed IL=30, Net_DisconnectedFromServer IL=22 (exact).

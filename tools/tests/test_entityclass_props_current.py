@@ -2,7 +2,7 @@
 """Guard entityclass-props.md against the EntityClass..cctor.
 
 The doc tables every `ldstr` + `stsfld EntityClass::PropX` pair in the cctor
-(167 rows) plus the non-string statics (20) and pins IL=394. A game patch that
+(168 rows) plus the non-string statics (20) and pins IL=396. A game patch that
 adds/renames/removes a prop name constant without updating the doc fails here.
 
 Usage: python3 tools/tests/test_entityclass_props_current.py [<asm>] (defaults to ASM env / standard install discovery)
@@ -18,9 +18,9 @@ import _common
 
 REPO = str(_common.REPO)
 DOC = os.path.join(REPO, "docs", "inventories", "entityclass-props.md")
-EXPECTED_IL = 394
-EXPECTED_PAIRS = 167
-EXPECTED_TOTAL = 187
+EXPECTED_IL = 396
+EXPECTED_PAIRS = 168
+EXPECTED_TOTAL = 188
 
 SRC = r"""
 using System;

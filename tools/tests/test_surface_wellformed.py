@@ -20,7 +20,7 @@ from pathlib import Path
 import _common
 
 TOOLS = _common.TOOLS
-EXPECTED_IL_TOTAL = 1743842  # docs/meta/full-surface.md: "1,743,842 IL instructions" (V3.2.0 b10)
+EXPECTED_IL_TOTAL = 1749641  # docs/meta/full-surface.md: "1,749,641 IL instructions" (V3.3.0 b18)
 
 PIPE_AWARE = re.compile(r"(?<!\\)\|")  # split on | not preceded by backslash
 

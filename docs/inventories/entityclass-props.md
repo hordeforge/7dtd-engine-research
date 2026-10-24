@@ -1,13 +1,13 @@
-# EntityClass prop-name constants (V3.2.0 b9)
+# EntityClass prop-name constants (V3.3.0 b18)
 
 **Kind:** raw reference table (not primary narrative).
-**Source:** `EntityClass::.cctor` (IL=394) - each row is a
+**Source:** `EntityClass::.cctor` (IL=396) - each row is a
 **Hub:** [`INDEX.md`](../INDEX.md).  
 `ldstr <value>` + `stsfld String EntityClass::PropX` pair; non-string
 statics (class ids, `FastTags`) listed at the end. Regenerate with
 `tools/bin/DumpMethod.exe <asm> EntityClass .cctor`.
 
-**187 rows: 167 `ldstr`+`stsfld` string pairs + 20 non-string statics.**
+**188 rows: 168 `ldstr`+`stsfld` string pairs + 20 non-string statics.**
 
 These are the **XML property names** read by `Entity.*CopyProperties
 FromEntityClass` ([entity-ai.md](../entities/entity-ai.md) D8.6-D8.7) and the
@@ -94,6 +94,7 @@ concatenated with the index).
 | `PropMapIcon` | `MapIcon` |
 | `PropMass` | `Mass` |
 | `PropMatColor` | `MatColor` |
+| `PropMaxBagSize` | `MaxBagSize` |
 | `PropMaxHealth` | `MaxHealth` |
 | `PropMaxStamina` | `MaxStamina` |
 | `PropMaxTurnSpeed` | `MaxTurnSpeed` |

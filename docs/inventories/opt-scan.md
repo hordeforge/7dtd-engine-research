@@ -136,7 +136,7 @@ Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/
 - `DecoManager::UpdateDecorationsCo` IL=6 → DecoManager_UpdateDecorationsCo_calls.md
 - `ChunkManager::SendChunksToClients` IL=216 → ChunkManager_SendChunksToClients_calls.md
 - `ChunkManager::ResendChunksToClients` IL=55 → ChunkManager_ResendChunksToClients_HashSetLong_calls.md
-- `ChunkManager::DetermineChunksToLoad` IL=448 → ChunkManager_DetermineChunksToLoad_calls.md
+- `` IL=456 → ChunkManager_DetermineChunksToLoad_calls.md
 - `ChunkManager::CopyChunksToUnity` IL=13 → ChunkManager_CopyChunksToUnity_calls.md
 - `ChunkManager::doCopyChunksToUnity` IL=252 → ChunkManager_doCopyChunksToUnity_calls.md
 - `ChunkManager::GroundAlignFrameUpdate` IL=42 → ChunkManager_GroundAlignFrameUpdate_calls.md
@@ -154,7 +154,7 @@ Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/
 - `EntityAlive::OnUpdateLive` IL=363 → EntityAlive_OnUpdateLive_calls.md
 - `EntityAlive::GetSpeedModifier` IL=3 → EntityAlive_GetSpeedModifier_calls.md
 - `EntityPlayer::OnUpdateLive` IL=13 → EntityPlayer_OnUpdateLive_calls.md
-- `EntityPlayer::OnUpdateEntity` IL=179 → EntityPlayer_OnUpdateEntity_calls.md
+- `` IL=184 → EntityPlayer_OnUpdateEntity_calls.md
 - `PathNavigate::UpdateNavigation` IL=1 → PathNavigate_UpdateNavigation_calls.md
 - `PathNavigate::SetPath` IL=2 → PathNavigate_SetPath_PathInfo_Single_calls.md
 - `PathNavigate::GetPathTo` IL=1 → PathNavigate_GetPathTo_PathInfo_calls.md
@@ -383,7 +383,7 @@ Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/
 
 - `EntityAlive::updateTasks` IL=125 newobj=0 box=0 calls=20
 - `EntityAlive::OnUpdateLive` IL=363 newobj=0 box=0 calls=40
-- `EntityAlive::OnUpdateEntity` IL=457 newobj=0 box=0 calls=47
+- `` IL=454 newobj=0 box=0 calls=47
 - `World::TickEntities` IL=117 newobj=0 box=0 calls=13
 - `World::TickEntity` IL=148 newobj=0 box=0 calls=23
 - `World::EntityActivityUpdate` IL=229 newobj=1 box=0 calls=32
@@ -393,9 +393,9 @@ Assembly: `~/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/
 - `NetEntityDistribution::OnUpdateEntities` IL=322 newobj=0 box=0 calls=47
 - `DecoManager::UpdateTick` IL=330 newobj=1 box=0 calls=49
 - `ChunkManager::SendChunksToClients` IL=216 newobj=0 box=0 calls=37
-- `GameManager::gmUpdate` IL=631 newobj=1 box=2 calls=182
+- `` IL=638 newobj=1 box=2 calls=182
 - `GameManager::UpdateTick` IL=150 newobj=0 box=0 calls=29
-- `ConnectionManager::Update` IL=231 newobj=2 box=0 calls=46
+- `` IL=213 newobj=2 box=0 calls=46
 - `DynamicMeshManager::Update` IL=404 newobj=1 box=0 calls=83
 - `ASPPathFinderThread::FindPath` IL=17 newobj=1 box=0 calls=2
 - `ASPPathFinderThread::FindPath` IL=22 newobj=1 box=0 calls=3

@@ -38,13 +38,13 @@ UTC: 2026-07-16 10:27:14Z
 - `AIWanderingHordeSpawner::UpdateHorde(Single)` IL=189
 - `AIWanderingHordeSpawner::UpdateSpawn(World,Single)` IL=158
 - `AIWanderingHordeSpawner::UpdateHorde(Single)` IL=189
-- `GameManager::SaveLocalPlayerData()` IL=45
+- `()` IL=46
 - `GameManager::SaveWorld()` IL=7
 - `GameManager::ExplodeGroupFrameUpdate()` IL=220
 - `GameManager::updateTimeOfDay()` IL=156
 - `GameManager::updateBlockParticles()` IL=65
 - `GameManager::ReportUnusedAssets(Boolean)` IL=159
-- `GameManager::SaveAndCleanupWorld()` IL=499
+- `()` IL=502
 - `GameManager::Cleanup()` IL=32
 - `World::SaveWorldState()` IL=16
 - `World::SaveDecorations()` IL=3
@@ -193,7 +193,7 @@ UTC: 2026-07-16 10:27:14Z
 - `TokenManager::Update()` IL=121
 - `InviteManager::Update()` IL=67
 - `InviteManager::<Update>b__12_0()` IL=7
-- `LockManager::Update()` IL=128
+- `()` IL=100
 - `RaycastPathManager::Update()` IL=5
 - `DismembermentManager::Update()` IL=60
 - `TrajectorySimulation::UpdateSimulationQueue()` IL=15
@@ -274,10 +274,10 @@ UTC: 2026-07-16 10:27:14Z
 - `WorldState::SaveLoad` IL=76
 - `WorldState::SaveLoad` IL=926
 - `WorldState::Save` IL=21
-- `GameManager::SaveAndCleanupWorld` IL=499
-- `GameManager::SaveLocalPlayerData` IL=45
+- `` IL=502
+- `` IL=46
 - `GameManager::SavePlayerData` IL=91
-- `PlayerDataFile::Save` IL=129
+- `` IL=130
 - `WorldStaticData::SaveXmlsToFolder` IL=80
 - `WorldBuilder::SaveData` IL=18
 

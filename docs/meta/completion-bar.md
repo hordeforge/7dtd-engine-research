@@ -315,7 +315,7 @@ Closed in recent sessions (still optional, not required for A+B):
 | GetSpawnWalkType IL=9 + GameUtils.GetViewDistance IL=10 | entity-ai.md D8.6 / server-lifecycle |
 | SetupEntityCreationData ECD builder + CreateEntity wrapper | [spawning.md](../gameplay/spawning.md) §7 |
 | ChunkManager.AddChunkObserver IL=15 + GetPlayerDataFromEntityID IL=10 | world-chunks §4.0 / spawning §6.1 |
-| Entity.CopyPropertiesFromEntityClass IL=238 custom commands + EntityPlayerLocal | entity-ai.md D8.6a |
+|  IL=244 custom commands + EntityPlayerLocal | entity-ai.md D8.6a |
 | PlayerSpawnedInWorld IL=127 full body (Died SetAlive, JoinedGame msg, waypoints) | [server-lifecycle.md](../admin/server-lifecycle.md) §3 |
 | EntityClass cctor prop-name table + GetActivationCommands IL=51 | inventories/entityclass-props.md / entity-ai D8.6a |
 | DynamicProperties.ParseData IL=82 + ParseKeyData IL=29 (k=v; pairs) | entity-ai.md D8.7 |

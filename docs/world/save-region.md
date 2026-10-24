@@ -1189,7 +1189,7 @@ the sections above. The platform cloud-save backend is native (residual).
   parses every decompressed `Chunk.save` body byte-exactly: layers, maps, all 6
   channels, volumes, insideDevices). New pins in §2: `PooledBinaryWriter.Write(Byte[])`
   (IL=14) writes maps **raw with no length prefix**; exact map sizes 256/256/32/256/1536
-  (topsoil 32 for version > 41, biome intensities 1536) from `Chunk.read` IL=775;
+  (topsoil 32 for version > 41, biome intensities 1536) from `Chunk.read` IL=779;
   `ChunkBlockLayer.Write` IL=36 and `ChunkBlockChannel.Write` IL=120 serialization
   shapes (1 flag byte per band, bpv table light/density/stability 1, damage/water 2,
   textures 6); `SavedInWorldTicks` set *after* write (first save carries 0). ~1390

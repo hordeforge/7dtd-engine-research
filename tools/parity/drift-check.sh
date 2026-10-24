@@ -108,8 +108,11 @@ SCRATCH="$(cd "$TOOLS/.." && pwd)/.scratch/tmp"
 mkdir -p "$SCRATCH"
 cur="$(mktemp -d "$SCRATCH/drift.XXXXXX")"
 trap 'rm -rf "$cur"' EXIT
-# snapshot the current build: census, per-type surface, methods, enums, parity
-run "$BIN/Census.exe" "$ASM" > "$cur/census.txt" || {
+# snapshot the current build: census, per-type surface, methods, enums, parity.
+# Some mono builds print a thread-priority warning on stdout before any tool
+# output; it is host chatter, not a census row, and diffed as one it reads as
+# drift (same line tools/tests/_common.py strips for the Python gates).
+run "$BIN/Census.exe" "$ASM" | grep -v "^mono_thread_internal_set_priority:" > "$cur/census.txt" || {
   echo "drift: error: Census.exe failed; census not compared" >&2
   axis_fail=1
 }

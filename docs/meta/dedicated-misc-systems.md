@@ -1490,7 +1490,7 @@ the dump-derived base + key methods; each family doc owns the substantive groups
   128-byte scratch buffers only, same little-endian / 7-bit-length / UTF-8 wire
   form as the framework classes, no flush of the base stream on dispose, and the
   `MemoryPools` reader/writer pools are `MemoryPooledObject<T>(100)`. The
-  2026-08-27 Bag pin below is the **b10** layout; on b18 `Bag::Write` is version
+  2026-08-27 Bag pin below is the **b10** layout; on b18 `Bag::Write` is version (re-verified on b18; b10 was 71)
   byte **2** and delegates to `ItemStackGrid::Write` (grid version 2, container
   size `Vector2i`, `i16` item count, slot locks, preferences, `u64`
   worldTimeTouched, playerOwned), with b18 still reading the v1 inline layout.
@@ -1536,10 +1536,10 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 - **2026-08-27 (vehicle storage pin v2, DumpMethod/DumpType from the client
   assembly):** the 2026-08-26 pin's open question is answered. The basket
   contents live in **`Entity.bag`**, not the VehicleInventory:
-  `EntityVehicle.UpdateContainerSize` (IL=143) builds the storage from
+  `` (IL=45) builds the storage from
   `getStorageSize()` and `Bag.SetSlots` on `Entity.bag`. The sync carrier is
   **`NetPackageBag`**: wire (write IL=19 / read IL=16) = entityId i32 +
-  blobLen u16 + `Bag.Write` blob. `Bag.Write` (IL=71) = version byte 1 +
+  blobLen u16 + `Bag.Write` blob. `` (IL=9) = version byte 1 +
   u16 slot count + N x ItemStack.Write + hasLocked bool + PackedBoolArray +
   Touched bool + hasPreferences bool + PreferenceTracker (PooledBinaryWriter
   only). [b10 pin; V3.3.0 b18 writes version byte 2 with an

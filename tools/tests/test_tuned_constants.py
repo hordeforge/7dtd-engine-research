@@ -816,6 +816,17 @@ CONSTS: dict[str, tuple[str, dict[str, int | float | str]]] = {
             "cMaxSpawnDistanceFromTrader": 750,
         },
     ),
+    "ToolbeltFromXml": (
+        "items.md",
+        {
+            "MinSlotsPerBar": 1,
+            "MaxSlotsPerBar": 10,
+            "MinBarPerPage": 1,
+            "MaxBarPerPage": 2,
+            "MinPages": 1,
+            "MaxPages": 10,
+        },
+    ),
     "SignDataManager": (
         "signs.md",
         {

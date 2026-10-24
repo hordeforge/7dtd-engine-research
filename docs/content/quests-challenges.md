@@ -277,7 +277,7 @@ quest id in `id`; the turn-in grants it to the player's journal.
 
 **Reward leaves (all IL-verified):** `BaseReward.GetRewardText()` (IL=2)
 returns "" and `SetupGlobalRewardSettings()` (IL=1) is a no-op (the subclass
-hooks); `RewardItem.GetRewardText()` (IL=12) is
+hooks); `RewardItem.GetRewardText()` (IL=14) is
 `"{count} x {itemClass.GetLocalizedItemName()}"`;
 `RewardSkillPoints.GetRewardText()` (IL=7) is
 `"{Description} {ValueText}"`. The `ID` / `Description` / `Icon` /
@@ -699,7 +699,7 @@ touches in passing:
   `QuestJournal.AddSharedQuestEntry`, and the server's `Party.ServerHandle*`
   leave/kick/disconnect paths purge them via `RemoveSharedQuestEntryByOwner`.
 
-**`NetPackageSharedQuest` wire (`SharedQuestData.write` IL=63, per-flag framing):**
+**`NetPackageSharedQuest` wire (`SharedQuestData.write` IL=67, per-flag framing):**
 the package body is `sharedByEntityID:i32` + `questEvent:u8`, then a
 `SharedQuestEvents` switch (`0 ShareQuest`, `1 RemoveQuest`,
 `2 AddSharedMember`, `3 RemoveSharedMember`):
@@ -710,7 +710,7 @@ the package body is `sharedByEntityID:i32` + `questEvent:u8`, then a
 | 1 RemoveQuest | `questCode:i32` only |
 | 2 / 3 Add/RemoveSharedMember | `questCode:i32`, `sharedWithEntityID:i32` |
 
-`ProcessPackage` (IL=371) switches on the same enum: `ShareQuest` on the server
+`ProcessPackage` (IL=380) switches on the same enum: `ShareQuest` on the server
 calls `GameManager.QuestShareServer(data)` (client `SendToServer`); the member
 add/remove cases touch the journal's shared-quest entries; `RemoveQuest` clears
 the recipient's entry (channel **192** fan-out per member).
@@ -835,7 +835,7 @@ uses. Each hop is grounded in `ProcessPackage` IL from the V3.2.0
    questCode + questID + poiName/position/size + returnPos + questGiverID +
    sharedWithEntityID, and sends it to the server (`SendToServer`), also
    running the local `QuestShareClient` copy.
-2. Server `ProcessPackage` (IL=371) dispatches to
+2. Server `ProcessPackage` (IL=380) dispatches to
    `GameManager.QuestShareServer(data)`; the recipient's `QuestJournal`
    installs a `SharedQuestEntry` (the offer) via `AddSharedQuestEntry`.
 3. Accepting the offer sends `questEvent = AddSharedMember` (2) with the
@@ -1277,15 +1277,15 @@ usedPOILocations, player.entityId)` runs; on failure
   `GetClosestPOIToWorldPos`); the base `ObjectiveGoto::GetPosition` is IL=363.
   Numbers were real, class prefixes were not (caught by `test_il_citations`).
 - **2026-08-21:** New "Quest POI selection" section: Quest.SetupPosition IL=26, ObjectiveRandomPOIGoto.SetupPosition IL=9 / GetPosition IL=339, ObjectiveGoto.FinalizePoint IL=74, GetRandomPOINearWorldPos IL=193 / GetRandomPOINearTrader IL=65, ValidPrefabForQuest IL=156, GetClosestPOIToWorldPos IL=230, QuestEventManager GetPrefabsByDifficultyTier IL=63 / GetPrefabsForTrader IL=35 / SetupTraderPrefabList IL=80, PrefabListData ShuffleDifficulty IL=10, PrefabVolumeListAbs`2.get_AnyUsedEntry IL=24 (Use per parsed volume), Prefab.GetQuestTag IL=5 (Test_AllSet), objective SetupQuestTag tag map, EntityTrader offer-loop SetupPosition flow (exact).
-- **2026-08-11:** Shared/rally IL re-verified: ObjectiveRallyPoint.Current_BlockActivate IL=182, SharedQuestData.write IL=63, NetPackageSharedQuest.ProcessPackage IL=371, FailAllSharedQuests IL=46, FailAllActivatedQuests IL=45, QuestIsActive IL=36, FindQuest/FindCompletedQuest IL=37, FindActiveQuest IL=33/40, AddTraderPOI IL=33, HasTraderPOI IL=5, GetTraderList IL=12, TriggerQuest*Event IL=9, TriggerSharedQuestAddedEvent IL=13, QuestShareServer IL=37, NetPackagePartyQuestChange.ProcessPackage IL=83, NetPackageQuestGotoPoint.ProcessPackage IL=312, NetPackageQuestObjectiveUpdate.write IL=21, QuestClass.CreateQuest IL=147, CanActivate IL=26, GetCurrentHint IL=52, CheckCriteriaQuestGiver/CheckCriteriaOffer IL=29, ResetObjectives IL=18 (exact).
+- **2026-08-11:** Shared/rally IL re-verified: ObjectiveRallyPoint.Current_BlockActivate IL=182, SharedQuestData.write IL=67, NetPackageSharedQuest.ProcessPackage IL=380, FailAllSharedQuests IL=46, FailAllActivatedQuests IL=45, QuestIsActive IL=36, FindQuest/FindCompletedQuest IL=37, FindActiveQuest IL=33/40, AddTraderPOI IL=33, HasTraderPOI IL=5, GetTraderList IL=12, TriggerQuest*Event IL=9, TriggerSharedQuestAddedEvent IL=13, QuestShareServer IL=37, NetPackagePartyQuestChange.ProcessPackage IL=83, NetPackageQuestGotoPoint.ProcessPackage IL=312, NetPackageQuestObjectiveUpdate.write IL=21, QuestClass.CreateQuest IL=147, CanActivate IL=26, GetCurrentHint IL=52, CheckCriteriaQuestGiver/CheckCriteriaOffer IL=29, ResetObjectives IL=18 (exact).
 - **2026-08-11:** QuestJournal lifecycle IL re-verified: StartQuests IL=87, RefreshTracked IL=26, SetActivePositionData IL=32, HandlePartyRemoveQuest IL=77, RemoveAllSharedQuests IL=125, RemoveSharedQuestForOwner IL=53, AddQuestFactionPoint IL=34, GetQuestFactionMax IL=20, HasCraftingQuest IL=29, HasActiveQuestByQuestCode IL=30, GetObjectiveForQuest IL=43, GetCurrentFactionTier IL=46, GetTraderData IL=27, CheckRallyMarkerActivation IL=56, HandleRallyMarkerActivation IL=36 (exact).
 - **2026-08-11:** Objective/challenge IL re-verified: BaseObjective HandleCompleted/SetupObjective/SetupDisplay/SetupQuestTag IL=1, SetupActivationList IL=2, HandleVariables IL=15, AddModifier IL=14, DisableModifiers IL=21, CopyValues IL=55, ChallengeJournal StartChallenges IL=160 / ModifyValue IL=88 / HandleChallengeRedeemed IL=12 / GetNextChallenge IL=52 / EndChallenges IL=19 / ResetChallenges IL=30 / RemoveChallengesForGroup IL=38 / Write IL=103 / Read IL=176 / Clone IL=56, Challenge StartChallenge IL=55 / get_ReadyToComplete IL=17 / Write IL=43 / Read IL=60 (exact).
 - **2026-08-11:** Quest shared/event IL re-verified: GetSharedWithCount IL=9, GetSharedWithCountNotInRange IL=64, GetPositionData IL=18, GetLocationRect IL=44, ParseBindingVariables IL=106, GetVariableText IL=250, CheckIsQuestGiver IL=27, GiveRewardsLater IL=9, SetupSharedQuest IL=116, HandleQuestEvent IL=30, AddSharedKill IL=46, AddSharedLocation IL=30, HandleActivateListReceived IL=24, SetObjectivePosition IL=48, ResetToRallyPointObjective IL=75, AddQuestTag IL=7, AddReward IL=8, ParseVariable IL=39 (exact).
 - **2026-08-11:** QuestJournal IL re-verified: FindNonSharedQuest IL=34/33, FindSharedQuest IL=26, GetSharedQuest IL=33, FindLatestNonSharedQuest IL=52, FindActiveOrCompleteQuest IL=44, FindReadyForTurnInQuestByGiver IL=46, GetNextCompletedQuest IL=48, FailedQuest IL=22, ForceRemoveQuest IL=21/47, ForceRemoveAllQuests IL=21, GetQuestRecipes IL=73, GetRewardedSkillPoints IL=56, HandleQuestCompleteToday IL=60, ResetAddToProgression IL=42 (exact).
 - **2026-08-11:** Quest registry IL re-verified: NewClass IL=16, AddCriteria IL=8, BlockDestroyed IL=49, BlockChanged IL=10, ItemAdded IL=8, HarvestedItem IL=10, OpenedContainer IL=9, CheckResetQuestTrader IL=24, GetTraderPoiCount IL=30, AddQuestTierReward IL=11, ClearTraderResetQuestsForPlayer IL=11, NetPackageQuestTreasurePoint.ProcessPackage IL=176 (exact).
-- **2026-08-11:** Quest leaves IL re-verified: SetupQuestCode IL=48, SetupTags IL=41, get_HasPosition IL=10, GetActionIndex/GetObjectiveIndex IL=23, get_IsShareable IL=18, AddSharedWith IL=16, HasSharedWith IL=28, RemoveSharedWith IL=44, BaseReward.GetRewardText IL=2 / SetupGlobalRewardSettings IL=1, RewardItem.GetRewardText IL=12, RewardSkillPoints.GetRewardText IL=7 (exact).
+- **2026-08-11:** Quest leaves IL re-verified: SetupQuestCode IL=48, SetupTags IL=41, get_HasPosition IL=10, GetActionIndex/GetObjectiveIndex IL=23, get_IsShareable IL=18, AddSharedWith IL=16, HasSharedWith IL=28, RemoveSharedWith IL=44, BaseReward.GetRewardText IL=2 / SetupGlobalRewardSettings IL=1, RewardItem.GetRewardText IL=14, RewardSkillPoints.GetRewardText IL=7 (exact).
 - **2026-08-10:** Quest shared IL re-verified: Quest.AddSharedWith IL=16, HasSharedWith IL=28, QuestEventManager.AddQuestTierReward IL=11 (exact).
-- **2026-08-10:** Quest/reward IL sizes re-verified: get_HasPosition IL=10, get_IsShareable IL=18, BaseReward.GetRewardText IL=2, RewardItem IL=12, RewardSkillPoints IL=7 (exact).
+- **2026-08-10:** Quest/reward IL sizes re-verified: get_HasPosition IL=10, get_IsShareable IL=18, BaseReward.GetRewardText IL=2, RewardItem IL=14, RewardSkillPoints IL=7 (exact).
 - **2026-08-10:** QuestClass IL sizes re-verified: NewClass IL=16, AddCriteria IL=8 (exact).
 - **2026-08-09:** End-to-end wire flow section (§11): offer/accept, share
   (NetPackageSharedQuest ShareQuest/AddSharedMember/RemoveSharedMember/
