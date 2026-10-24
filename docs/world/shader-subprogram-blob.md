@@ -1,7 +1,10 @@
 # Shader (class 48) sub-program blob layout
 
 Reference for the compiled-shader container inside a stock UnityFS bundle, as
-validated on the stock V3.2.0 b9 install (Unity 2022.3.62f2). Picks up where
+validated on the stock V3.2.0 b9 install (Unity 2022.3.62f2). The V3.3.0 b18
+`data.unity3d` keeps the same UnityFS header fields (version 8, engine string
+`2022.3.62f2`, flags `0x243`); the sub-program sample counts below were not
+re-measured on b18. Picks up where
 [texture-atlas-unityfs.md](../world/texture-atlas-unityfs.md) stops: that page decodes
 the container, the SerializedFile header/type/object tables and TextAsset
 (class 49); this one decodes Shader (class 48) down to the driver bytecode.
@@ -311,6 +314,12 @@ generated-entity shader gap; see
 [ap-improvements]: https://github.com/hordeforge/7dtd-asset-pipeline/blob/main/docs/status/improvements.md#4b-the-editorless-writers-shader-scope
 
 ## Changelog
+
+- **2026-10-24:** Container re-checked on V3.3.0 (b18): `data.unity3d` still
+  reports UnityFS v8 / `5.x.x` / `2022.3.62f2` / flags `0x243`, so the container
+  layout holds. The 7366-sub-program sample counts are **not** re-measured on
+  b18; they remain the b9 measurement. The managed side never touches this
+  format, so no `Assembly-CSharp` claim in this doc can drift with a patch.
 
 - **2026-08-24:** Initial reversal. Container, record table and code-blob
   record cross-read against USCSandbox and UnityPy; the 38-byte DX11 header

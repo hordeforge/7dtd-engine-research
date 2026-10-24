@@ -1,4 +1,4 @@
-# Raycast pathing and drone steering (dedicated V3.2.0)
+# Raycast pathing and drone steering (dedicated V3.3.0)
 
 **Owns:** the `RaycastPathing` namespace (`RaycastPath`, `FloodFillPath`,
 `RaycastNode`, `RaycastNodeHierarcy` (sic), `FloodFillNode`, `RaycastPathUtils`,
@@ -544,6 +544,23 @@ the whole reason this system works headless at all.
   and only leave via `Destruct()`; the drone's `cleanupPath` honors this, so
   the registry stays bounded at one live path per generator.
 
+### 8.1 Burst direct-call shims are not a V3.3.0 change
+
+`WorldGenerationEngineFinal` carries `*_BurstDirectCall` + `*_PostfixBurstDelegate`
+pairs for its Burst-compiled bodies, including `CalcPathBounds`,
+`FindDetailedPath` and `FindClosestPathPoint` (RWG path-tile work, not the runtime
+A*). Every one of those pairs exists in **both** builds with identical IL sizes;
+V3.3.0 only renumbers the type suffix (`CalcPathBounds_0000B724` ->
+`CalcPathBounds_0000B87B`, `AdjustHeights_0000B874` -> `_0000B9CB`,
+`ClearWaterUnderTerrain_0000B857` -> `_0000B9AE`) because the Burst method hash
+changed with the assembly. No shim was added or removed, so nothing about which
+path runs where, or what a dedicated server executes, changed.
+
+The cost reasoning in section 8 therefore stands unchanged. Re-measure it if a
+number is ever needed: nothing here re-derives a raycast-per-node cost, and the
+`RaycastPathing` and `AstarVoxelGrid` type bodies are unchanged in b18 (no
+signature or body delta in the b10 -> b18 report).
+
 ## Related docs
 
 | Doc | Role |
@@ -558,6 +575,13 @@ the whole reason this system works headless at all.
 
 ## Changelog
 
+- **2026-10-24:** Retargeted to V3.3.0 (b18). No change in this subsystem's
+  types or bodies: `RaycastPathing.*`, `AstarVoxelGrid`, `AstarManager`,
+  `GamePath.*` and the drone steering methods are absent from the b10 -> b18
+  report, and the Burst direct-call type renames are suffix-only (8.1). Drone
+  lock and inventory APIs did change (`ILockContext` -> pooled readers,
+  `DroneInventory` removed); those belong to
+  [vehicles-drones-turrets.md](../gameplay/vehicles-drones-turrets.md).
 - **2026-08-11:** A* grid IL re-verified: ScanInternal IL=6, UpdateArea IL=102, CalcBlockingFlags IL=99, AddConnection IL=85, RemoveConnection IL=84, AllocConnection IL=33, ClearConnections IL=38, AddArea IL=64, AddAreaBlock IL=26, FindLocation IL=47, OnBlockChanged IL=209, IsBlockOrTerrain IL=22, GetDirByNormal IL=11/22, GetClosestDirection IL=74, OneVoxelStep IL=264, GetCellsOnRay IL=242 (corrected from stale 244), Raycast IL=8/20/8, raycastNew IL=525, GetNextBlockHit IL=549 (exact).
 - **2026-08-10:** AstarVoxelGrid IL sizes re-verified: ScanInternal IL=6, CalcBlockingFlags IL=99, AddConnection IL=85 (exact).
 - **2026-08-08:** Voxel.raycastNew (IL=525) physics-march core: 10-iteration

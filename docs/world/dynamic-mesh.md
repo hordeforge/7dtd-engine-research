@@ -1,4 +1,4 @@
-# Dynamic mesh subsystem (dedicated V3.2.0)
+# Dynamic mesh subsystem (dedicated V3.3.0)
 
 **Owns:** the server-authoritative regeneration, persistence, and streaming of
 deformed and destroyed block geometry, the geometry that diverges from the base
@@ -440,6 +440,11 @@ stateDiagram-v2
 
 ## Changelog
 
+- **2026-10-24:** Retargeted to V3.3.0 (b18). No `DynamicMesh*` type, signature or
+  body changed. The only delta in this subsystem is that
+  `NetPackageDynamicMesh` and `NetPackageDynamicClientArrive` lost their
+  `GetLength()` helper (a length estimate, not serialized), so both wire bodies
+  read and write exactly as documented.
 - **2026-08-11:** Dynamic-mesh IL re-verified: Update IL=404, CreateMeshSync IL=52, CopyTerrain IL=209, SaveRegion IL=69, SaveRegionToFile IL=7, ChunkData.Write IL=201, LoadRegion IL=167, TryGetData IL=15, GetLock IL=73, ReleaseLock/ThreadHasLock IL=4, IsReadyForRelease IL=49, Path/RawPath IL=13, Exists IL=4, Reset IL=4, IsUpdating/MarkAsUpdating/MarkAsUpdated/MarkAsGenerating IL=11-15, ClearQueues IL=15, IsReadyThreaded IL=13, TryLoadItem IL=192, DynamicMeshFile.WriteRegion IL=159 / WriteRegionHeaderData IL=133, AddChunkUpdateFromServer IL=15, DynamicMeshServer.Update IL=452 (exact).
 - **2026-08-10:** Dynamic-mesh IL re-verified: DynamicMeshManager.Update IL=404, DynamicMeshRegionDataStorage.SaveRegion IL=69, SaveRegionToFile IL=7, DynamicMeshChunkData.Write IL=201 (exact).
 - **2026-08-10:** `MaxActiveSyncs` default verified = **10** (`ldc.i4.s 10` +

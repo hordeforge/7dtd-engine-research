@@ -1,4 +1,4 @@
-# Dedicated leftovers (V3.2.0)
+# Dedicated leftovers (V3.3.0)
 
 **Owns:** the final batch of reached-but-undocumented server types: the
 transactional-inventory orchestrator (`InventoryManager` + `LockEntry`), the
@@ -11,7 +11,9 @@ entity/trader/vending `*LockContext` wire bags, `Prefab/PrefabChunk`,
 `ShapesFromXml/ShapeCategory`, `DynamicPropertiesCache`, the `PhysicsBody*`
 collider layout family, and the infra types `SdFileSystemInfo`,
 `TrackedDataMap/SubsetAccessor`, `UpdateListenerMap`, `DynamicObserver`,
-`PooledExpandableMemoryStream`. Also settles `DiscordManager/AuthAndLoginManager`.
+`PooledExpandableMemoryStream`. Also settles `DiscordManager/AuthAndLoginManager`,
+and records the two type families b18 added: the `AssetManagement` handle layer
+(§22) and `Prefab.CellPool` (§23).
 **Not:** the owning systems (each section cross-links its family doc); anything
 whose entire caller set is UI, editor, avatar, or client render code (listed at
 the end); dead config (`EntityVBlimp`).
@@ -24,7 +26,8 @@ on config. **Hub:** [`INDEX.md`](../INDEX.md).
 **Method:** [`re-methodology.md`](../meta/re-methodology.md).
 
 Every type below was confirmed dedicated-relevant by walking its callers back
-to server-side code, not just by existing in the assembly. Several types the
+to server-side code, not just by existing in the assembly. The two V3.3.0
+sections state separately where dedicated reachability is only partial. Several types the
 tasking expected to be client-only turned out to be dedicated (`PhysicsBody*`,
 `SdFileSystemInfo`, `SubsetAccessor`, `UpdateListenerMap`, `DynamicObserver`,
 `PooledExpandableMemoryStream`), and several expected-dedicated types turned out
@@ -512,6 +515,71 @@ this type is **template addressing**, not region persistence.
 
 ---
 
+## 22. AssetManagement: the handle layer over LoadManager (V3.3.0)
+
+New namespace in b18, five types plus two statics:
+
+| Type | Kind | Role |
+|---|---|---|
+| `AssetManagement.IAssetManager` | interface | `AcquireAsset<T>`, `AcquireAssetAsync<T>`, `TrackAsset`, `TrackInstance`, `Release`, `Cleanup`, `ActiveAssetCount` |
+| `AssetManagement.AssetManager` | class | base implementation, no state of its own (`AcquireAsset` calls `LoadManager.LoadAsset<T>(uri, null, null, false, sync, ignoreDlcEntitlements)` and wraps the task) |
+| `AssetManagement.AssetManagerLifetimed` | subclass | ref-counted with a release timer: `softMax` / `timeout` / `hardMax`, `LinkedList<Entry>` + `Dictionary<string, LinkedListNode<Entry>>` |
+| `AssetManagement.AssetHandle<T>` | class | a `LoadManager/AssetRequestTask<T>` plus the owning manager; `Asset`, `IsValid`, `IsComplete`, `WaitForComplete`, `CreateInstance` (Unity `Object.Instantiate` + `TrackInstance`), `Release` |
+| `AssetManagement.InstanceHandle<T>` | struct | one spawned instance of a loaded asset, `Destroy` releases it |
+| `AssetLoaderManager` | class (global) | holds `managersToUpdate` / `managersToCleanup`; `Update` ticks the lifetimed managers, `Cleanup` disposes every registered manager |
+| `AssetManagers` | static (global) | `Items` manager, created by `Initialize(AssetLoaderManager)` |
+
+**What did not change:** `LoadManager` and `DataLoader` are byte-identical to b10
+(same method bodies; the b10 and b18 type dumps are line-for-line equal). The Addressables
+`LoadAsset<T>` / `LoadAssetBundle` / `Resources.Load` paths, and therefore the
+`xmlsToLoad` static-data load table in
+[mod-loading.md](../admin/mod-loading.md), are untouched. `AssetManagement` is a
+ref-counting convenience layer above `LoadManager`, not a new loader.
+
+**Wiring:** `GameManager.StartGame` calls `AssetManagers.Initialize` (IL_0045),
+which creates one `AssetManagerLifetimed(softMax: 0, timeout: 5.0 s,
+hardMax: int.MaxValue)` for items and registers it with `GameManager.assetLoaders`.
+`GameManager.gmUpdate` (IL=638) calls `AssetLoaderManager.Update` right after
+`LoadManager.Update`, and `SaveAndCleanupWorld` calls `Cleanup`.
+
+**Only consumer:** `ItemClass.GetModelHandle(MeshPurpose, ItemValue)` (IL=30)
+resolves `GetMeshfilePath` and acquires `AssetManagers.Items`'s `GameObject`
+handle, falling back to `@:Other/Items/Crafting/leather.fbx`. It is reached from
+`ItemClass.CloneModel` (IL=35), which instantiates, then `Release`s the handle
+(the caller owns the `InstanceHandle`). In b10 the same path cached a permanent
+`ItemClass.renderGameObject` through `DataLoader.LoadAsset` and never released it;
+b18 replaces that pinned cache with an acquire/instantiate/release cycle.
+
+**Dedicated classification:** the per-frame driver is real dedicated work
+(`gmUpdate` is unconditional), but the tracked-asset list is empty unless an item
+mesh is acquired, so the loop is O(0) on a server that renders nothing. Two of the
+four `CloneModel` call sites are render-only (`EntityItem.createMesh`,
+`ItemInventoryData.BuildModel`); the launcher/projectile sites
+(`BlockLauncher.InstantiateProjectile`, `ItemActionLauncher.instantiateProjectile`)
+carry no `IsDedicatedServer` guard in their IL, so whether a dedicated server ever
+acquires an item mesh is **not proven either way** here. Either answer is cheap:
+one `AssetManagerLifetimed.Update` over an empty list per frame.
+
+## 23. Prefab/CellPool: prefab cell storage moves to native memory (V3.3.0)
+
+`Prefab.Cells<T>.Cell` no longer owns a managed `T[]`; the field is now a
+single packed `Int32 offset` (`poolIndex << 16 | byteOffset`) into a
+`Prefab.CellPool`. The pool allocates
+`NativeArray<byte>` blocks of **2048** bytes (`Allocator.Persistent`) and packs
+the block index and byte offset into one `int` (`index << 16 | offset`), with
+`Alloc(16 * sizeof(T))` per cell and an 8-byte header per block. Accessors are
+`PtrFromOffset` / `CellFromOffset`; `Cell.Load` / `Cell.Save` / `Set` / `Get` now
+take the pool as a parameter, and `Cell.Clone` is gone (replaced by the pool-aware
+`HasData`/`GetPtr` set).
+
+Dedicated relevance: prefab cell data is read and written on the server during POI
+placement and `prefabs.xml` load/save, so this moves a large managed allocation
+into native memory (no Boehm GC pressure) instead of changing behaviour. It does
+not touch the wire or the region format; prefab serialization versions are owned
+by [dedicated-misc-systems.md](../meta/dedicated-misc-systems.md).
+
+---
+
 ## Out of scope (verified client-only)
 
 - **DiscordManager/AuthAndLoginManager**: Discord Social SDK sign-in for the
@@ -741,6 +809,10 @@ Small dedicated-relevant types that extend an already-owned subsystem:
 
 ## Changelog
 
+- **2026-10-24:** Retargeted to V3.3.0 (b18). New sections: the `AssetManagement`
+  handle layer over the unchanged `LoadManager` (§22, with the ref-counted item
+  mesh path and its dedicated classification) and `Prefab.CellPool` (§23, prefab
+  cells moved to native memory).
 - **2026-08-11:** Lock IL re-verified: NetPackageLockRequest write IL=62 / ProcessPackage IL=24, LockRequestServer IL=239, ForceUnlockLockTarget IL=124, NetPackageLockResponse write IL=74 / ProcessPackage IL=27, ForceUnlockByPlayer IL=11 (exact).
 - **2026-08-11:** Volume/util IL re-verified: AddVolumeServer IL=115, CloneVolumeServer IL=76, GetPrefabIdAndVolumeId IL=76, TryGetSelectedVolume IL=50, getBoxVolumeType IL=27, TraderArea Write IL=111 / Read IL=91 / GetReadWriteSize IL=10 / SetClosed IL=222 / Overlaps IL=38 / IsWithinTeleportArea IL=93, World.IsMaterialInBounds IL=79, Utils WrapFloat IL=21 / WrapInt IL=22 / WrapIndex IL=18 / FastAbsInt IL=13 / FastLerpUnclamped IL=8 / Saturate IL=44 / FastRoundToIntAndMod IL=25 / ToCelsius IL=6 / ToRelativeCelsius IL=4 (exact).
 - **2026-08-10:** LockManager IL re-verified: LockRequestServer IL=239, ForceUnlockLockTarget IL=124 (exact).

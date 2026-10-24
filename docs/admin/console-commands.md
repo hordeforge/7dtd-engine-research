@@ -1,10 +1,10 @@
-# Console and telnet command system (dedicated V3.2.0)
+# Console and telnet command system (dedicated V3.3.0)
 
 **Owns:** the server admin command surface: `SdtdConsole` (command registry +
-dispatch), `ConsoleCmdAbstract` (the 187-command contract), the connection sources
+dispatch), `ConsoleCmdAbstract` (the 190-command contract), the connection sources
 (`TelnetConnection`, in-game console, and `WebConnection` from the web server), and
 the permission gate.
-**Not:** each command's own effect (187 leaf commands, content/feature specific);
+**Not:** each command's own effect (190 leaf commands, content/feature specific);
 the telnet TCP socket internals (native).
 **Evidence:** `SdtdConsole`, `ConsoleCmdAbstract`, `ConsoleConnectionAbstract`,
 `TelnetConnection` IL (dump locally with `tools/src/DumpMethod`, git-ignored).
@@ -53,13 +53,20 @@ frames on the main thread.
 
 ## 2. Command dispatch (state machine)
 
-**Live registry verified 2026-08-12:** a stock V3.1.0 dedicated `help` dump
-lists every command in the catalog
-([../inventories/console-command-list.md](../inventories/console-command-list.md),
-188 rows) plus the standard mod set (`apm`/`apmbridge` from 7dtd-server-apm-bridge,
+**Live registry verified 2026-08-12 (V3.1.0):** a stock V3.1.0 dedicated `help`
+dump lists every command in the catalog
+([../inventories/console-command-list.md](../inventories/console-command-list.md))
+plus the standard mod set (`apm`/`apmbridge` from 7dtd-server-apm-bridge,
 `efficientserver`, `dynamic mesh`/`dynamic mesh debug` with aliases `zz`/`zd`).
 No documented command is absent from the live registry; no undocumented command
 appears on a clean server. The registry matches the IL-derived catalog exactly.
+
+The V3.3.0 catalog is **190** primary rows (`CmdMap.exe` over b18):
+`give` (`ConsoleCmdGive`) and `listitems`/`li` (`ConsoleCmdListItems`) join;
+nothing is removed or renamed. The client-executable / dedicated-gated split is
+unchanged (83 `get_IsExecuteOnClient`, 84 either, the same 10 dedicated-gated
+classes); neither new command is client-exec or dedicated-gated. The live `help`
+dump was not repeated for b18.
 
 `ExecuteAsync`/`ExecuteSync` funnel into `executeCommand(line, senderInfo)`, which
 tokenizes the line (quote-aware, `tokenizeCommand`), looks up the command by its
@@ -142,6 +149,7 @@ Selected dedi-critical Execute bodies:
 | `ConsoleCmdShutdown` | 5 | Output `Shutting server down...` then `Application.Quit()` |
 | `ConsoleCmdMem` | 480 | Subcommands: `gc` (GC stats / incremental collector), editor/mem dump branches (large). Live 2026-08-12: `mem gc` -> `gc Enabled, mem 1353512k, count 101, isInc True, inc time 3ms` (Mono incremental GC, ~1.35 GB, 101 collections) |
 | `ConsoleCmdWeather` | 465 | Dumps biome weather / WeatherManager state; mutator subcommands for weather params |
+| `ConsoleCmdGive` | 144 | 3 or 4 args (`give <player> <item name> <amount> [quality]`); player via `ConsoleHelper.ParseParamIdOrName`, item via `ItemClass.GetItem`; amount must parse and be > 0; quality parses as `u16`, must be <= **6**, default **6**; sets quality on every modification when `HasSubItems`, else only on `HasQuality` items; then `GameManager.ItemDropServer(stack, playerPos, zero, -1, 60f, false)` drops one stack at the player's feet |
 | `ConsoleCmdGetGamePrefs` | 73 | Optional filter string; lists allowed prefs `GamePref.X = value` via `prefAccessAllowed`. Live 2026-08-12: `getgamepref MaxSpawnedZombies` -> `GamePref.MaxSpawnedZombies = 16`; full dump lists **307** allowed prefs (the `prefAccessAllowed` subset of the 317 enum) |
 | `ConsoleCmdGetGameStats` | 73 | Optional filter; lists all `EnumGameStats` as `GameStat.X = value` (live-tested 2026-08-11: `getgamestat AirDropFrequency` -> `GameStat.AirDropFrequency = 3`; full-dump 2026-08-12: 81 stats in the server log, `UNUSED_GameDifficultyBonus` / `UNUSED_ShowZombieCounter` print empty; SUT harness live 2026-08-12: no-arg prints all 81 to the console too, `TimeOfDayIncPerSec` = 6 at DayLightLength 18, `AirDropFrequency` = 3 (preset default over the 0-pref), `LandClaimOnlineDurabilityModifier`/`Offline` = 4, `PlayerKillingMode` = 0, `BloodMoonWarning` = 1, `LandClaimExpiryTime` = 7, `GameDifficulty` = 1) |
 | `ConsoleCmdSetGamePref` | 58 | `GamePrefs.Parse` + `SetObject`; errors on bad pref/value. Live 2026-08-12: `setgamepref MaxSpawnedZombies 32` -> `MaxSpawnedZombies set to 32`, read-back 32 (round-trip verified) |
@@ -250,7 +258,7 @@ Every command subclasses `ConsoleCmdAbstract` and provides:
 | `GetDescription()` / `GetHelp()` | `help` output |
 | `IsExecuteOnClient` / `AllowedInMainMenu` / `AllowedDeviceTypes` | run-context gates |
 
-There are **188** concrete commands in the V3.2.0 catalog (e.g. `admin`, `whitelist`,
+There are **190** concrete commands in the V3.3.0 catalog (e.g. `admin`, `whitelist`,
 `help`, `cvar`, `logenv`, `prefab`, `loot`, `visitmap`, `profiler`). This count includes
 the web-dashboard commands (`webtokens`, `webpermission`, `invalidatecaches`,
 `createwebuser`, `openiddebug`), which ship in the **base `Assembly-CSharp`**, not as a
@@ -267,11 +275,11 @@ this doc owns the framework, not each leaf command's full prose.
 - **Shared with the web server:** `WebConnection` (`Webserver`) is a console
   connection, so the web dashboard's Command endpoint is this system with an HTTP
   front (see [webserver.md](../admin/webserver.md) §3).
-- **Client-executable set:** 84 of the 188 leaves carry
+- **Client-executable set:** 84 of the 190 leaves carry
   `get_IsExecuteOnClient = true` (83 of them) and/or an
   explicit `GameManager.IsDedicatedServer` gate at the top of `Execute` (10,
   overlap 9). Machine-swept 2026-08-11 (CmdMap population + Cecil prologue
-  probe): the 10 dedicated-gated ones are `Challenges`, `GiveQualityItem`,
+  probe), unchanged at 190 leaves on 2026-10-24: the 10 dedicated-gated ones are `Challenges`, `GiveQualityItem`,
   `GiveQuest`, `Occlusion`, `PathTest`, `RemoveQuest`, `ResetAchievementStats`,
   `SelfExp`, `SpectatorMode`, `Spectrum` - `pathtest` is a pure dedicated no-op
   (see above), the rest branch to client behavior on the gate.
@@ -332,6 +340,7 @@ is in the framework sections above; per-command effects are the catalog's role.
 | `ConsoleCmdGetLogfilePath` | `getlogpath` | Get the path of the logfile the game currently writes to |
 | `ConsoleCmdGetOptions` | `getoptions` | Gets game options |
 | `ConsoleCmdGetTime` | `gettime` | Get the current game time |
+| `ConsoleCmdGive` | `give` | give an item to a player (entity id or name) |
 | `ConsoleCmdGiveQualityItem` | `giveself` | usage: giveself itemName [qualityLevel= |
 | `ConsoleCmdGiveQuest` | `givequest` | Gives a quest to the player or add to quest tier |
 | `ConsoleCmdGiveXp` | `givexp` | Give XP to a player |
@@ -344,6 +353,7 @@ is in the framework sections above; per-command effects are the catalog's role.
 | `ConsoleCmdListDLC` | `listdlc` | List the available DLC and their current entitlement status. |
 | `ConsoleCmdListEntities` | `listents` | lists all entities |
 | `ConsoleCmdListGameObjects` | `lgo` | List all active game objects |
+| `ConsoleCmdListItems` | `listitems` | lists all items that contain the given substring (alias `li`; `*` lists every name) |
 | `ConsoleCmdListPlayerIds` | `listplayerids` | Lists all players with their IDs for ingame commands |
 | `ConsoleCmdListPlayers` | `listplayers` | lists all players. Live 2026-08-12: `0. id=298, EntityPlayer, pos=(269.3, 72.0, 258.3), rot=(0.0, -42.2, 0.0), remote=True, health=100, deaths=0, zombies=0, players=0, score=0, level=1, pltfmid=Local_REFake1, crossid=Local_REFake1, ip=127.0.0.19, ping=0` (index, id, type, pos, rot, remote flag, stats, platform ids, source ip, ping) |
 | `ConsoleCmdListThreads` | `listthreads` | lists all threads |
@@ -469,6 +479,15 @@ is irrelevant to the server surface despite its stock description. Client-side
 it toggles path-test flags (`canBreakBlocks`, `climbladders`, ...) with
 `+`/`-`-prefixed arguments.
 
+**`ConsoleCmdListItems` (`listitems`, alias `li`) is new in V3.3.0** and has no
+permission override: `DefaultPermissionLevel` stays 0 from the base class and no
+stock `serveradmin.xml` ships, so an admin file is the only way to raise it. It
+walks `ItemClass.ItemNames`: with `*` it prints every name, otherwise each name
+whose `IndexOf(search, OrdinalIgnoreCase) >= 0`, one per line, then
+`Listed {0} matching items.`. A missing, empty, or extra argument prints
+`Usage: listitems <searchString>`. This is the listing `give` points at in its
+own help text.
+
 ---
 
 ## Related docs
@@ -480,10 +499,11 @@ it toggles path-test flags (`canBreakBlocks`, `climbladders`, ...) with
 | [full-surface.md](../meta/full-surface.md) | Where this sits in the whole-assembly map |
 | [re-methodology.md](../meta/re-methodology.md) | How this was reversed |
 
-**Leaf catalog:** every instance is enumerated in [`../inventories/console-command-list.md`](../inventories/console-command-list.md) (all 187 commands with descriptions).
+**Leaf catalog:** every instance is enumerated in [`../inventories/console-command-list.md`](../inventories/console-command-list.md) (all 190 commands with descriptions).
 
 ## Changelog
 
+- **2026-10-24:** Retargeted to V3.3.0 (b18). Two commands added, none removed or renamed: `ConsoleCmdGive` (`give`, Execute IL=144) and `ConsoleCmdListItems` (`listitems` + `li`, Execute IL=65). Catalog 188 -> 190 primaries; the client-executable / dedicated-gated split is unchanged (83 on-client, 84 either, same 10 gated classes). Both new commands inherit `DefaultPermissionLevel` 0.
 - **2026-08-11:** `ConsoleCmdPIRS` (`pirs`) decoded from `Execute` IL=274: the Player Input Recording System (reset/play/record/stop/save/load + bare `pirs <saveName>` perftest-copy flow; stock getDescription is literally `tbd`).
 - **2026-08-11:** Console IL re-verified: SdtdConsole.Update IL=60, executeCommand IL=149, ConnectionManager.ServerConsoleCommand IL=125, NetPackageConsoleCmdClient write IL=31 / ProcessPackage IL=19, NetPackageConsoleCmdServer write IL=8, CommandAllowedFor IL=12, TelnetConnection HandlerThread IL=66 / handleReading IL=60, LoginAttempts.LogAttempt IL=14 / IsBanned IL=20 (exact).
 - **2026-08-10:** Console IL sizes re-verified: SdtdConsole.Update IL=60, executeCommand IL=149, ConnectionManager.ServerConsoleCommand IL=125, NetPackageConsoleCmdClient.ProcessPackage IL=19 (exact).

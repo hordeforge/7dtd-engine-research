@@ -1,7 +1,7 @@
-# WorldStaticData xmlsToLoad table (V3.2.0)
+# WorldStaticData xmlsToLoad table (V3.3.0)
 
 **Kind:** inventory of the stock config load table built in `WorldStaticData..cctor`
-(IL=871). Each row is one `WorldStaticData/XmlLoadInfo` entry in `xmlsToLoad[]`.
+(IL=887). Each row is one `WorldStaticData/XmlLoadInfo` entry in `xmlsToLoad[]`.
 **Basis:** IL of the static constructor (`tools/src/DumpMethod`); flags and delegates
 read from the `XmlLoadInfo` ctor argument list. **Not** a runtime measurement of
 which files exist on disk.
@@ -27,7 +27,7 @@ Delegates:
 | Reload | `ReloadDuringGameMethod` (`Action<XmlFile>`) |
 | Loc | `LoadStepLocalizationKey` (progress UI string key) |
 
-**Entry count:** **49** (array length from cctor; stored in `xmlsToLoad`).
+**Entry count:** **50** (array length from cctor; stored in `xmlsToLoad`).
 
 **Dedi-relevant reading:** rows with **S2C** are the bulk of the config surface a
 dedicated server loads and may ship to clients. Rows with neither **boot** nor
@@ -49,6 +49,7 @@ server-side, not sent). Pure client UI rows (`XUi_*`, `loadingscreen`,
 | `progression` | S2C, reload | `ProgressionFromXml::Load(XmlFile)` | `Progression::Cleanup()` | `-` | `-` | `-` |
 | `buffs` | S2C, reload | `BuffsFromXml::CreateBuffs(XmlFile)` | `BuffManager::Cleanup()` | `-` | `BuffsFromXml::Reload(XmlFile)` | `-` |
 | `misc` | S2C, reload | `WorldStaticData::LoadMisc(XmlFile)` | `AnimationDelayData::Cleanup()` | `-` | `WorldStaticData::ReloadMisc(XmlFile)` | `-` |
+| `toolbelt` | S2C | `ToolbeltFromXml::Load(XmlFile)` | `-` | `-` | `-` | `-` |
 | `items` | S2C, reload | `WorldStaticData::LoadItems(XmlFile)` | `ItemClass::Cleanup()` | `-` | `WorldStaticData::ReloadItems(XmlFile)` | `loadActionItems` |
 | `item_modifiers` | S2C, reload | `WorldStaticData::LoadItemModifiers(XmlFile)` | `-` | `WorldStaticData::LateInitItems()` | `WorldStaticData::ReloadItemModifiers(XmlFile)` | `-` |
 | `entityclasses` | S2C | `EntityClassesFromXml::LoadMain(XmlFile)` | `EntityClass::Cleanup()` | `-` | `-` | `-` |
@@ -94,7 +95,7 @@ server-side, not sent). Pure client UI rows (`XUi_*`, `loadingscreen`,
 
 | Set | Count |
 |---|---:|
-| Total entries | 49 |
+| Total entries | 50 |
 | boot | 7 |
 | S2C | 42 |
 | reload | 19 |

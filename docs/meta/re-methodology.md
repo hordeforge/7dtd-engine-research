@@ -207,7 +207,7 @@ tools/parity/parity_diff.py parity_v3.0.1.json parity_exp.json   # added/removed
 call sequence, so a changed wire layout shows up as a changed call string even
 when the field names are stable. On a fresh checkout `drift-check.sh` compares every
 axis against committed baselines (`workspace/outputs/baseline/` for census,
-types, methods and enums; `workspace/outputs/parity/parity_b10.json` for wire),
+types, methods and enums; `workspace/outputs/parity/parity_b18.json` for wire),
 so the first `make drift` reports a real verdict; the machine-local
 `BASELINE_DIR` wins while it holds a snapshot of the DLL in hand. It records
 that DLL's sha256 in `source.sha256` beside the snapshot, and a baseline stamped
@@ -318,11 +318,12 @@ install activity, not depot content). Build ids come from the client's
 the log rotates. SteamDB is not a route for this: it has no API and 403s
 scripted clients.
 Committed baselines make the first two lenses free on the next patch:
-`workspace/outputs/parity/parity_b9.json` / `parity_b10.json` are the
-`ParitySurface` snapshots for the two cached builds (`parity_diff.py` finds no
-wire drift between them, which is the b9 to b10 wire claim), and
-`workspace/outputs/diffs/b9-to-b10-20260920.md` is the full eight-lens report
-for the same pair. A new build only needs its own snapshot to diff against.
+`workspace/outputs/parity/parity_b10.json` / `parity_b18.json` are the
+`ParitySurface` snapshots for the two builds on disk (`parity_diff.py` finds 3
+packages added, 6 removed and 4 changed wire, which is the b10 to b18 wire
+claim), and `workspace/outputs/diffs/b10-to-v3.3.0-20261024.md` is the full
+eight-lens report for the same pair. `parity_b9.json` and the b9 to b10 report
+are kept beside them as history.
 
 
 ## 5c. Stock facts pin (hardcodes across docs + products)

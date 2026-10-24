@@ -1,6 +1,6 @@
-# Dedicated wire protocol (V3.2.0 pin; V3.1.0/V3.0.1-era goldens still cited)
+# Dedicated wire protocol (V3.3.0 pin; V3.1.0/V3.0.1-era goldens still cited)
 
-**Current game pin:** V **3.2.0 (b10)**. Framing/join and most package bodies are stable from the V3.0.1 corpus; the TE outer wire and PackageIds VersionInformation (the last hex capture is the b9 one: minor=20 build=9, § "Live capture head" below) are in [protocol-packages.md](../network/protocol-packages.md). Loadgen dual fixtures cover both heads.
+**Current game pin:** V **3.3.0 (b18)**. Framing/join and most package bodies are stable from the V3.0.1 corpus; the TE outer wire and PackageIds VersionInformation (the last hex capture is the b9 one: minor=20 build=9, § "Live capture head" below; the b18 triple is minor=30 build=18) are in [protocol-packages.md](../network/protocol-packages.md), and the package-set delta is its §1.5. Loadgen dual fixtures cover both heads.
 
 
 **Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, `NetPackageRequestToSpawnPlayer` / RequestToSpawnPlayer/PlayerId/PlayerSpawnedInWorld, golden package body layouts.  
@@ -98,9 +98,11 @@ Constants:
 ### Live capture head (PackageIds, channel 0)
 
 Hex prefix validated in loadgen golden (V3.0.1-era capture; V3.1.0 re-captured
-in-session 2026-08-11 - only the version triple differs). The 3.2.0 b9
-PackageIds head was not re-captured live this cycle; by the same packing the
-version triple is minor=20 (0x14) build=9 (0x09), everything else identical:
+in-session 2026-08-11 - only the version triple and the map count differ). The
+V3.3.0 b18 PackageIds head has not been captured live; its triple is
+release=1 major=3 minor=30 (0x1E) build=18 (0x12) and its map count is **184**
+(`il/netpackages-v3.3.0/`, see [protocol-packages.md](../network/protocol-packages.md)
+§1.5), by the same packing:
 
 ```text
 V3.1.0 live:  00 BC 12 00 00  00 00  01 00  B8 12 00 00  00 00  01 03 00 00 00  0A 00 00 00  0E 00 00 00  BD 00 00 00  14 ...
@@ -111,7 +113,8 @@ version (V3.0.1): release=1 major=3 minor=1 build=4
 map count: 0xBD = 189   first name: len 0x14 "NetPackagePackageIds"
 ```
 
-Display version packing: `VersionLongString` → **`V 3.2.0`** for Minor=20 Build=9 (see loadgen; Constants.cVersion*).
+Display version packing: `VersionLongString` → **`V 3.3.0`** for Minor=30 Build=18
+(the V3.2.0 pin was Minor=20 Build=9 → "V 3.2.0"; see loadgen; `Constants.cVersion*`).
 
 ---
 
@@ -132,11 +135,14 @@ hasHostUserAndToken:bool (+ optional platform user blobs)
 Client must use **server-advertised** ids for all later packages. Do not hard-code ids across game versions.
 
 Current DLL census (`tools/bin/Census.exe`, `netpackage_top_level_count` in
-`tools/data/stock_facts.json`): **195** `NetPackage*` types (+ `NetPackageManager`
-→ 196 name-prefixed). The **191** in the live id-map are the actual registered wire
-packages; the remaining **4** are name-prefixed helpers (`NetPackageDirection`
-[enum], `Logger`, `Metrics`, ...), not wire packages. The V3.0.1-era figures were
-194 / 193 / 189.
+`tools/data/stock_facts.json`): **192** `NetPackage*` types (the census excludes
+`NetPackageManager`). The **184** in the live id-map are the actual registered wire
+packages; the remaining **8** are name-prefixed entries that are not registered:
+the abstract base `NetPackage`, the abstract intermediate
+`NetPackageEntityTargeted`, the abstract helper `NetPackageLogger`, the
+`NetPackageDirection` enum, and the plain helpers `NetPackageEntry`,
+`NetPackageInfo`, `NetPackageMeasure`, `NetPackageMetrics`. V3.2.0 was 195 / 187
+and V3.0.1 194 / 189; the V3.3.0 delta is [protocol-packages.md](../network/protocol-packages.md) §1.5.
 
 ### Family counts (census)
 
@@ -148,12 +154,14 @@ packages; the remaining **4** are name-prefixed helpers (`NetPackageDirection`
 | Chunk* | 8 |
 | World/Tile* | 9 |
 | Auth/Crypto* | 6 |
-| Inventory* | 5 |
+| Inventory* | 3 |
 | Other | ~106 |
 
 Largest maxIL (complexity signal, not wire size; V3.2.0): Metrics (501), SharedQuest (371), QuestEvent (368), QuestGotoPoint (312), WireToolActions (254), PartyData (243), DamageEntity (235 — grew from 176 in V3.1.0), RangeCheckDamageEntity (216), GameEventRequest (211), TurretSpawn (207), Audio (206), DynamicMesh (192), …
 
-Full name list: `il/dedi-complete-v3.2.0/DEDI_COMPLETE_auto.md` §3.
+Full name list: `il/dedi-complete-v3.3.0/DEDI_COMPLETE_auto.md` §3 (the
+`il/netpackages-v3.3.0/META.md` table carries the per-package channel/compress
+flags).
 
 ---
 
@@ -560,7 +568,8 @@ match the documented agreement flow. `DiscordIdMappings` arrives right after
 Loadgen uses **channel 0** for game packages. Challenge is **outside** the envelope (raw 0xCA).
 
 Most packages inherit **channel 0**, but exactly **5 override to channel 1**
-(V3.2.0; was 6 before `NetPackagePOIAround` was removed): `NetPackageChunk`,
+(V3.3.0, unchanged since V3.2.0; was 6 before `NetPackagePOIAround` was
+removed): `NetPackageChunk`,
 `NetPackageChunkRemove`, `NetPackageMapChunks`, `NetPackageDynamicMesh`,
 `NetPackageWorldFolder`. These carry the heaviest bodies and several are
 compressed (`get_Compress = 1`). A clone must route both channels. Full census

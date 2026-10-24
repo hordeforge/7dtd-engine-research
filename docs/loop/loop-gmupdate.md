@@ -1,11 +1,11 @@
-# `gmUpdate` structure (V3.2.0 dedicated RE)
+# `gmUpdate` structure (V3.3.0 dedicated RE)
 
 **Owns:** gmUpdate phase narrative (detail under [`loop.md`](../loop/loop.md) §2).  
 **Call list:** [`../inventories/gmupdate-calls.md`](../inventories/gmupdate-calls.md).  
-**Dump set:** [`../il/loop-complete-v3.2.0/`](../../il/loop-complete-v3.2.0) (IL size still 631 on V3.2.0, unchanged from V3.1.0/V3.0.1).  
+**Dump set:** [`../../il/deep-v3.3.0/GameManager_gmUpdate_il.txt`](../../il/deep-v3.3.0/GameManager_gmUpdate_il.txt) (638 IL on V3.3.0; 631 on V3.2.0, unchanged from V3.1.0/V3.0.1).  
 **Hub:** [`INDEX.md`](../INDEX.md).
 
-**Assembly:** dedicated `Assembly-CSharp.dll` V **3.2.0 (b10)** (gmUpdate IL=631 unchanged from V3.1.0/V3.0.1)  
+**Assembly:** dedicated `Assembly-CSharp.dll` V **3.3.0 (b18)** (gmUpdate IL=638; 631 on V3.2.0 and V3.1.0)  
 **Tool:** `tools/legacy/DumpGmUpdate.cs` (or the general `tools/src/DumpMethod`, see §10)  
 **Optim summary:** [`../../../7dtd-server-optimizer/docs/ARCHITECTURE.md`](../../../7dtd-server-optimizer/docs/ARCHITECTURE.md)
 
@@ -18,7 +18,7 @@ Stock does **not** put all work in one method. Multiple `MonoBehaviour.Update` /
 | Component | Base | Method | IL | Role |
 |---|---|---|---:|---|
 | **GameManager** | `MonoBehaviour` | `Update` | 3 | **Only** calls `gmUpdate()` |
-| **GameManager** | | `gmUpdate` | **631** | Main orchestration (managers, timer, `UpdateTick`, GC/save side paths) |
+| **GameManager** | | `gmUpdate` | **638** | Main orchestration (managers, timer, `UpdateTick`, GC/save side paths) |
 | **GameManager** | | `UpdateTick` | 150 | **Sim core:** world tick, entities, fall, server net distribute/chunks |
 | **GameManager** | | `FixedUpdate` | 5 | Increments `fixedUpdateCount` only |
 | **GameManager** | | `LateUpdate` | 18 | `ThreadManager.LateUpdate`, platform late, AIDirector debug, multiplayer services, **`MeshDataManager.LateUpdate`** |
@@ -29,7 +29,7 @@ Stock does **not** put all work in one method. Multiple `MonoBehaviour.Update` /
 flowchart TB
   subgraph peers["Same Unity Update phase peers"]
     GM[GameManager.Update]
-    GM --> GMu[gmUpdate IL=631]
+    GM --> GMu[gmUpdate IL=638]
     GMu --> UT[UpdateTick IL=150]
     CM[ConnectionManager.Update<br/>NOT under gmUpdate]
     DM[DynamicMeshManager.Update<br/>NOT under gmUpdate]
@@ -44,7 +44,7 @@ flowchart TB
 
 ## 2. `GameManager.gmUpdate` phases (ordered)
 
-IL count **631**, **14** locals, **1** exception handler (destroy queue lock).  
+IL count **638**, **14** locals, **1** exception handler (destroy queue lock).  
 `get_IsDedicatedServer()` appears **6** times.
 
 ### Phase A: Frame prologue
@@ -59,10 +59,12 @@ IL count **631**, **14** locals, **1** exception handler (destroy queue lock).
 | 6 | `ReportUnusedAssets` | May early-`ret` on some path |
 | 7 | If `timeScale <= 0`: `Physics.SyncTransforms` | Paused physics sync |
 | 8 | `LoadManager.Update` | Async loads |
-| 9 | `PlatformManager.Update` | Platform |
-| 10 | `InviteManager` / `LockManager` Update | Optional singletons |
-| 11 | FPS stopwatch restart + `FPS.Update` | FPS counter |
-| 12 | `BlockLiquidv2.UpdateTime` | Liquid time |
+| 9 | `AssetLoaderManager.Update` | Asset-handle expiry (new in V3.3.0) |
+| 10 | `PlatformManager.Update` | Platform |
+| 11 | `InviteManager` / `LockManager` Update | Optional singletons |
+| 12 | `SignDataManager.Update` | Debounced per-player sign-store writes (new in V3.3.0) |
+| 13 | FPS stopwatch restart + `FPS.Update` | FPS counter |
+| 14 | `BlockLiquidv2.UpdateTime` | Liquid time |
 
 #### Phase A2: `updatePauseState` (IL=94)
 

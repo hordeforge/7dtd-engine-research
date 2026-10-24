@@ -22,7 +22,7 @@ source; nested `.Write` rows name the serializer type, whose own layout is in it
 own doc/dump. Verify a load-bearing body against its `write`/`read` IL before
 cloning.
 
-Total packages with an extractable `write()` body: **185**.
+Total packages with an extractable `write()` body: **182**.
 Not listed (no own `write()` body - inherited serialization, abstract bases, enums, or helpers): `NetPackageDirection`, `NetPackageEncryptionRequest`, `NetPackageEntityAddExpServer`, `NetPackageEntityAddScoreServer`, `NetPackageEntitySetSkillLevelServer`, `NetPackageEntityTeleport`, `NetPackageEntry`, `NetPackageInfo`, `NetPackageInventoryKeepOpen`, `NetPackageLogger`, `NetPackageMeasure`, `NetPackageMetrics`, `NetPackagePlayerDisconnect`, `NetPackageSleeperPassiveChange`.
 
 ## NetPackage
@@ -944,45 +944,6 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 2 | `data` | i32 |
 | 3 | `data` | bytes[] |
 
-## NetPackageInventoryDataRequest
-`write` IL=12, 2 wire field(s).
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `keyHash` | `KeyHashPair.Write` |
-| 2 | `managerToken` | `StreamUtils.Write` |
-
-## NetPackageInventoryDataResponse
-`write` IL=24, 4 wire field(s).
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `success` | bool |
-| 2 | `errorMsg` | string |
-| 3 | `inventoryKey` | `StreamUtils.Write` |
-| 4 | `managerToken` | `StreamUtils.Write` |
-
-## NetPackageInventoryTransactionRequest
-`write` IL=8, 1 wire field(s).
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `tx` | `InventoryTransaction.Write` |
-
-## NetPackageInventoryTransactionResponse
-`write` IL=66, 6 wire field(s).
-
-> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `inventories` | bool |
-| 2 | `-` | i32 |
-| 3 | `success` | bool |
-| 4 | `keys` | i32 (list/array count) |
-| 5 | `Item` | `StreamUtils.Write` |
-| 6 | `Item` | bool |
-
 ## NetPackageItemActionEffects
 `write` IL=52, 8 wire field(s).
 
@@ -991,7 +952,7 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
 | 1 | `entityId` | i32 |
-| 2 | `slotIdx` | u8 |
+| 2 | `slotIdx` | i8 |
 | 3 | `actionIdx` | u8 |
 | 4 | `firingState` | u8 |
 | 5 | `zero` | bool |
@@ -1072,36 +1033,12 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 3 | `data` | i32 |
 | 4 | `data` | bytes[] |
 
-## NetPackageLockRequest
-`write` IL=62, 6 wire field(s).
-
-> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
+## NetPackageLockTarget
+`write` IL=15, 1 wire field(s).
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
-| 1 | `locking` | bool |
-| 2 | `channel` | u16 |
-| 3 | `targets` | i32 |
-| 4 | `context` | string |
-| 5 | `FullName` | string |
-| 6 | `context` | `ILockContext.Write` |
-
-## NetPackageLockResponse
-`write` IL=74, 9 wire field(s).
-
-> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `locking` | bool |
-| 2 | `success` | bool |
-| 3 | `errorMsg` | string |
-| 4 | `isForceUnlocked` | bool |
-| 5 | `channel` | u16 |
-| 6 | `targets` | i32 |
-| 7 | `context` | string |
-| 8 | `FullName` | string |
-| 9 | `context` | `ILockContext.Write` |
+| 1 | `payload` | i32 (list/array count) |
 
 ## NetPackageMapChunks
 `write` IL=109, 5 wire field(s).
@@ -1301,7 +1238,7 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 4 | `persistentPlayerId` | `PlatformUserIdentifierExtensions.ToStream` |
 
 ## NetPackagePlayerData
-`write` IL=8, 1 wire field(s).
+`write` IL=9, 1 wire field(s).
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
@@ -1318,14 +1255,12 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 4 | `customReason` | string |
 
 ## NetPackagePlayerEquipment
-`write` IL=8, 1 wire field(s).
+`write` IL=8, 0 wire field(s).
 
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `equipment` | `Equipment.Write` |
+_No BinaryWriter/nested Write calls detected (empty body: only the base handle, or fully helper-delegated)._
 
 ## NetPackagePlayerId
-`write` IL=21, 4 wire field(s).
+`write` IL=22, 4 wire field(s).
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
@@ -1335,20 +1270,16 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 4 | `chunkViewDim` | i32 |
 
 ## NetPackagePlayerInventory
-`write` IL=107, 8 wire field(s).
+`write` IL=61, 4 wire field(s).
 
-> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
+> Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
-| 1 | `toolbelt` | bool |
-| 2 | `bag` | bool |
-| 3 | `bag` | `Bag.Write` |
-| 4 | `equipment` | bool |
-| 5 | `equipment` | i32 |
-| 6 | `m_unlockedCosmetics` | i32 (list/array count) |
-| 7 | `Item` | i32 |
-| 8 | `dragAndDropItem` | bool (list/array count) |
+| 1 | `inventoryData` | bool |
+| 2 | `bagData` | bool |
+| 3 | `equipmentData` | bool |
+| 4 | `dragAndDropItem` | bool |
 
 ## NetPackagePlayerInventoryForAI
 `write` IL=18, 1 wire field(s).
@@ -1742,6 +1673,13 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 2 | `data` | i32 |
 | 3 | `data` | bytes[] |
 
+## NetPackageSignDelete
+`write` IL=8, 1 wire field(s).
+
+| # | Source (field/getter) | Wire |
+|---:|---|---|
+| 1 | `signId` | `GlobalSignId.ToStream` |
+
 ## NetPackageSimpleChat
 `write` IL=44, 3 wire field(s).
 
@@ -1760,6 +1698,17 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 |---:|---|---|
 | 1 | `entityId` | i32 |
 | 2 | `type` | u8 |
+
+## NetPackageSingleSignData
+`write` IL=28, 3 wire field(s).
+
+> Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
+
+| # | Source (field/getter) | Wire |
+|---:|---|---|
+| 1 | `libraryId` | string |
+| 2 | `signBlob` | i32 |
+| 3 | `signBlob` | bytes[] |
 
 ## NetPackageSleeperPose
 `write` IL=12, 2 wire field(s).
@@ -2084,22 +2033,6 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 4 | `FloatValue` | f32 |
 | 5 | `IntValue` | i32 |
 
-## Bag
-`Write` IL=71, 8 wire field(s).
-
-> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `-` | u8 |
-| 2 | `-` | u16 |
-| 3 | `-` | `ItemStack.Write` |
-| 4 | `LockedSlots` | bool |
-| 5 | `LockedSlots` | `PackedBoolArray.Write` |
-| 6 | `Touched` | bool |
-| 7 | `preferences` | bool |
-| 8 | `preferences` | `PreferenceTracker.Write` |
-
 ## BiomeIntensity
 `Write` IL=45, 8 wire field(s).
 
@@ -2159,7 +2092,7 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 22 | `progressionsData` | bytes[] |
 
 ## EntityCreationData
-`write` IL=372, 59 wire field(s).
+`write` IL=372, 58 wire field(s).
 
 > Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
 
@@ -2180,79 +2113,57 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 13 | `stats` | bool |
 | 14 | `stats` | `EntityStats.Write` |
 | 15 | `deathTime` | i16 |
-| 16 | `bag` | bool |
-| 17 | `bag` | `Bag.Write` |
-| 18 | `x` | i32 |
-| 19 | `y` | i32 |
-| 20 | `z` | i32 |
-| 21 | `homeRange` | i16 |
-| 22 | `spawnerSource` | u8 |
-| 23 | `belongsPlayerId` | i32 |
-| 24 | `clientEntityId` | i32 |
-| 25 | `itemStack` | `ItemStack.Write` |
-| 26 | `-` | i8 |
-| 27 | `rawData` | u32 |
-| 28 | `textureFullArrays` | `TextureFullArray.Write` |
-| 29 | `blockValues` | i32 |
-| 30 | `rawData` | u32 |
-| 31 | `blockPositions` | `StreamUtils.Write` |
-| 32 | `textureFullArrays` | `TextureFullArray.Write` |
-| 33 | `blockPos` | `StreamUtils.Write` |
-| 34 | `fallTreeDir` | `StreamUtils.Write` |
-| 35 | `holdingItem` | `ItemValue.Write` |
-| 36 | `teamNumber` | u8 |
-| 37 | `entityName` | string |
-| 38 | `skinTexture` | string |
-| 39 | `playerProfile` | bool |
-| 40 | `playerProfile` | `PlayerProfile.Write` |
-| 41 | `entityData` | u16 (list/array count) |
-| 42 | `entityData` | bytes[] |
-| 43 | `traderData` | bool |
-| 44 | `traderData` | `TraderData.Write` |
-| 45 | `sleeperPose` | u8 |
-| 46 | `isSleeper` | bool |
-| 47 | `spawnById` | i32 |
-| 48 | `spawnByName` | string |
-| 49 | `spawnByAllowShare` | bool |
-| 50 | `headState` | u8 |
-| 51 | `overrideSize` | f32 |
-| 52 | `overrideHeadSize` | f32 |
-| 53 | `isDancing` | bool |
-| 54 | `isSleeperPassive` | bool |
-| 55 | `belongsPlayerId` | i32 |
-| 56 | `orderState` | i32 |
-| 57 | `stressAmount` | f32 |
-| 58 | `requestedBy` | i64 |
-| 59 | `requestKey` | bytes[] |
+| 16 | `bagData` | bool |
+| 17 | `x` | i32 |
+| 18 | `y` | i32 |
+| 19 | `z` | i32 |
+| 20 | `homeRange` | i16 |
+| 21 | `spawnerSource` | u8 |
+| 22 | `belongsPlayerId` | i32 |
+| 23 | `clientEntityId` | i32 |
+| 24 | `itemStack` | `ItemStack.Write` |
+| 25 | `-` | i8 |
+| 26 | `rawData` | u32 |
+| 27 | `textureFullArrays` | `TextureFullArray.Write` |
+| 28 | `blockValues` | i32 |
+| 29 | `rawData` | u32 |
+| 30 | `blockPositions` | `StreamUtils.Write` |
+| 31 | `textureFullArrays` | `TextureFullArray.Write` |
+| 32 | `blockPos` | `StreamUtils.Write` |
+| 33 | `fallTreeDir` | `StreamUtils.Write` |
+| 34 | `holdingItem` | `ItemValue.Write` |
+| 35 | `teamNumber` | u8 |
+| 36 | `entityName` | string |
+| 37 | `skinTexture` | string |
+| 38 | `playerProfile` | bool |
+| 39 | `playerProfile` | `PlayerProfile.Write` |
+| 40 | `entityData` | u16 (list/array count) |
+| 41 | `entityData` | bytes[] |
+| 42 | `traderData` | bool |
+| 43 | `traderData` | `TraderData.Write` |
+| 44 | `sleeperPose` | u8 |
+| 45 | `isSleeper` | bool |
+| 46 | `spawnById` | i32 |
+| 47 | `spawnByName` | string |
+| 48 | `spawnByAllowShare` | bool |
+| 49 | `headState` | u8 |
+| 50 | `overrideSize` | f32 |
+| 51 | `overrideHeadSize` | f32 |
+| 52 | `isDancing` | bool |
+| 53 | `isSleeperPassive` | bool |
+| 54 | `belongsPlayerId` | i32 |
+| 55 | `orderState` | i32 |
+| 56 | `stressAmount` | f32 |
+| 57 | `requestedBy` | i64 |
+| 58 | `requestKey` | bytes[] |
 
-## Equipment
-`Write` IL=77, 6 wire field(s).
-
-> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
+## GlobalSignId
+`ToStream` IL=22, 2 wire field(s).
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
-| 1 | `-` | u8 |
-| 2 | `m_slots` | `ItemValue.Write` |
-| 3 | `m_cosmeticSlots` | i32 |
-| 4 | `Item` | i32 |
-| 5 | `m_unlockedCosmetics` | i32 (list/array count) |
-| 6 | `Item` | i32 |
-
-## InventoryTransaction
-`Write` IL=75, 7 wire field(s).
-
-> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `InventoryOps` | i32 (list/array count) |
-| 2 | `InventoryOps` | i32 (list/array count) |
-| 3 | `Key` | `StreamUtils.Write` |
-| 4 | `InitialHash` | i32 |
-| 5 | `FinalHash` | i32 |
-| 6 | `Ops` | i32 (list/array count) |
-| 7 | `Current` | `InventoryOperation.Write` |
+| 1 | `libraryId` | string |
+| 2 | `signGuid` | ReadOnlySpan`1 |
 
 ## ItemStack
 `Write` IL=20, 2 wire field(s).
@@ -2286,7 +2197,7 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 5 | `TraderPos` | `StreamUtils.Write` |
 
 ## SharedQuestData
-`write` IL=63, 13 wire field(s).
+`write` IL=67, 14 wire field(s).
 
 > Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
 
@@ -2294,17 +2205,18 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 |---:|---|---|
 | 1 | `sharedByEntityID` | i32 |
 | 2 | `questEvent` | u8 |
-| 3 | `questCode` | i32 |
-| 4 | `questID` | string |
-| 5 | `poiName` | string |
-| 6 | `position` | `StreamUtils.Write` |
-| 7 | `size` | `StreamUtils.Write` |
-| 8 | `returnPos` | `StreamUtils.Write` |
-| 9 | `questGiverID` | i32 |
-| 10 | `sharedWithEntityID` | i32 |
-| 11 | `questCode` | i32 |
+| 3 | `questUniqueId` | string |
+| 4 | `questCode` | i32 |
+| 5 | `questID` | string |
+| 6 | `poiName` | string |
+| 7 | `position` | `StreamUtils.Write` |
+| 8 | `size` | `StreamUtils.Write` |
+| 9 | `returnPos` | `StreamUtils.Write` |
+| 10 | `questGiverID` | i32 |
+| 11 | `sharedWithEntityID` | i32 |
 | 12 | `questCode` | i32 |
-| 13 | `sharedWithEntityID` | i32 |
+| 13 | `questCode` | i32 |
+| 14 | `sharedWithEntityID` | i32 |
 
 ## WaterSetInfo
 `Write` IL=9, 2 wire field(s).
@@ -2402,65 +2314,59 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 1 | `-` | `PlatformUserIdentifierExtensions.ToStream` |
 
 ## PlayerDataFile
-`Write` IL=372, 53 wire field(s).
+`Write` IL=325, 47 wire field(s).
 
 > Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
 | 1 | `ecd` | `EntityCreationData.write` |
-| 2 | `selectedInventorySlot` | u8 |
-| 3 | `bag` | `Bag.Write` |
-| 4 | `alreadyCraftedList` | u16 (list/array count) |
-| 5 | `Current` | string |
-| 6 | `-` | u8 |
-| 7 | `selectedSpawnPointKey` | i64 |
-| 8 | `-` | bool |
-| 9 | `-` | i16 |
-| 10 | `bLoaded` | bool |
-| 11 | `x` | i32 |
-| 12 | `y` | i32 |
-| 13 | `z` | i32 |
-| 14 | `heading` | f32 |
-| 15 | `id` | i32 |
-| 16 | `playerKills` | i32 |
-| 17 | `zombieKills` | i32 |
-| 18 | `deaths` | i32 |
-| 19 | `score` | i32 |
-| 20 | `equipment` | `Equipment.Write` |
-| 21 | `unlockedRecipeList` | u16 (list/array count) |
-| 22 | `Current` | string |
-| 23 | `-` | u16 |
-| 24 | `markerPosition` | `StreamUtils.Write` |
-| 25 | `markerHidden` | bool |
-| 26 | `bCrouchedLocked` | bool |
-| 27 | `craftingData` | `CraftingData.Write` |
-| 28 | `favoriteRecipeList` | u16 (list/array count) |
-| 29 | `Current` | string |
-| 30 | `totalItemsCrafted` | u32 |
-| 31 | `distanceWalked` | f32 |
-| 32 | `longestLife` | f32 |
-| 33 | `gameStageBornAtWorldTime` | u64 |
-| 34 | `waypoints` | `WaypointCollection.Write` |
-| 35 | `questJournal` | `QuestJournal.Write` |
-| 36 | `deathUpdateTime` | i32 |
-| 37 | `currentLife` | f32 |
-| 38 | `bDead` | bool |
-| 39 | `-` | u8 |
-| 40 | `bModdedSaveGame` | bool |
-| 41 | `challengeJournal` | `ChallengeJournal.Write` |
-| 42 | `rentedVMPosition` | `StreamUtils.Write` |
-| 43 | `rentalEndDay` | i32 |
-| 44 | `progressionData` | i32 (list/array count) |
-| 45 | `buffData` | i32 (list/array count) |
-| 46 | `stealthData` | i32 (list/array count) |
-| 47 | `favoriteCreativeStacks` | u16 (list/array count) |
-| 48 | `Item` | u16 |
-| 49 | `favoriteShapes` | u16 (list/array count) |
-| 50 | `Item` | string |
-| 51 | `ownedEntities` | u16 (list/array count) |
-| 52 | `Item` | `OwnedEntityData.Write` |
-| 53 | `totalTimePlayed` | f32 (list/array count) |
+| 2 | `alreadyCraftedList` | u16 (list/array count) |
+| 3 | `Current` | string |
+| 4 | `-` | u8 |
+| 5 | `selectedSpawnPointKey` | i64 |
+| 6 | `-` | bool |
+| 7 | `-` | i16 |
+| 8 | `bLoaded` | bool |
+| 9 | `x` | i32 |
+| 10 | `y` | i32 |
+| 11 | `z` | i32 |
+| 12 | `heading` | f32 |
+| 13 | `id` | i32 |
+| 14 | `playerKills` | i32 |
+| 15 | `zombieKills` | i32 |
+| 16 | `deaths` | i32 |
+| 17 | `score` | i32 |
+| 18 | `unlockedRecipeList` | u16 (list/array count) |
+| 19 | `Current` | string |
+| 20 | `-` | u16 |
+| 21 | `markerPosition` | `StreamUtils.Write` |
+| 22 | `markerHidden` | bool |
+| 23 | `bCrouchedLocked` | bool |
+| 24 | `craftingData` | `CraftingData.Write` |
+| 25 | `favoriteRecipeList` | u16 (list/array count) |
+| 26 | `Current` | string |
+| 27 | `totalItemsCrafted` | u32 |
+| 28 | `distanceWalked` | f32 |
+| 29 | `longestLife` | f32 |
+| 30 | `gameStageBornAtWorldTime` | u64 |
+| 31 | `waypoints` | `WaypointCollection.Write` |
+| 32 | `questJournal` | `QuestJournal.Write` |
+| 33 | `deathUpdateTime` | i32 |
+| 34 | `currentLife` | f32 |
+| 35 | `bDead` | bool |
+| 36 | `-` | u8 |
+| 37 | `bModdedSaveGame` | bool |
+| 38 | `challengeJournal` | `ChallengeJournal.Write` |
+| 39 | `rentedVMPosition` | `StreamUtils.Write` |
+| 40 | `rentalEndDay` | i32 |
+| 41 | `favoriteCreativeStacks` | u16 (list/array count) |
+| 42 | `Item` | u16 |
+| 43 | `favoriteShapes` | u16 (list/array count) |
+| 44 | `Item` | string |
+| 45 | `ownedEntities` | u16 (list/array count) |
+| 46 | `Item` | `OwnedEntityData.Write` |
+| 47 | `totalTimePlayed` | f32 (list/array count) |
 
 ## PlayerProfile
 `Write` IL=69, 11 wire field(s).
@@ -2589,14 +2495,6 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 2 | `lastInventoryUpdate` | u64 |
 | 3 | `-` | u8 |
 
-## KeyHashPair
-`Write` IL=9, 2 wire field(s).
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `Key` | `StreamUtils.Write` |
-| 2 | `Hash` | i32 |
-
 ## VersionInformation
 `Write` IL=18, 4 wire field(s).
 
@@ -2652,25 +2550,6 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 2 | `BlockPosition` | `StreamUtils.Write` |
 | 3 | `PropReference` | `PropRef.Write` |
 
-## PackedBoolArray
-`Write` IL=16, 0 wire field(s).
-
-> Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
-
-_No BinaryWriter/nested Write calls detected (empty body: only the base handle, or fully helper-delegated)._
-
-## PreferenceTracker
-`Write` IL=65, 4 wire field(s).
-
-> Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `PlayerID` | i32 |
-| 2 | `toolbelt` | bool |
-| 3 | `equipment` | bool |
-| 4 | `bag` | bool |
-
 ## BlockValue
 `Write` IL=10, 2 wire field(s).
 
@@ -2705,15 +2584,6 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 1 | `-` | i32 |
 | 2 | `Health` | `Stat.Write` |
 
-## InventoryOperation
-`Write` IL=29, 3 wire field(s).
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `Operation` | i16 |
-| 2 | `Stack` | `ItemStack.Write` |
-| 3 | `Index` | i32 |
-
 ## WaterValue
 `Write` IL=5, 1 wire field(s).
 
@@ -2745,6 +2615,21 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 3 | `Key` | `PlatformUserIdentifierExtensions.ToStream` |
 | 4 | `Value` | u8 |
 
+## ChallengeJournal
+`Write` IL=103, 7 wire field(s).
+
+> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
+
+| # | Source (field/getter) | Wire |
+|---:|---|---|
+| 1 | `-` | u8 |
+| 2 | `Challenges` | i32 (list/array count) |
+| 3 | `Item` | `Challenge.Write` |
+| 4 | `ChallengeGroups` | i32 (list/array count) |
+| 5 | `Name` | string |
+| 6 | `LastUpdateDay` | i32 |
+| 7 | `ChallengeGroups` | string (list/array count) |
+
 ## CraftingData
 `Write` IL=39, 3 wire field(s).
 
@@ -2756,16 +2641,19 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 2 | `RecipeQueueItems` | u8 |
 | 3 | `RecipeQueueItems` | `RecipeQueueItem.Write` |
 
-## WaypointCollection
-`Write` IL=61, 3 wire field(s).
+## OwnedEntityData
+`Write` IL=37, 6 wire field(s).
 
-> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
+> Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
-| 1 | `-` | u8 |
-| 2 | `list` | u16 (list/array count) |
-| 3 | `Item` | `Waypoint.Write` |
+| 1 | `Id` | i32 |
+| 2 | `ClassId` | i32 |
+| 3 | `saveFlags` | u16 |
+| 4 | `x` | i32 |
+| 5 | `y` | i32 |
+| 6 | `z` | i32 |
 
 ## QuestJournal
 `Write` IL=138, 11 wire field(s).
@@ -2786,34 +2674,16 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 10 | `TraderData` | u8 (list/array count) |
 | 11 | `Item` | `QuestTraderData.Write` |
 
-## ChallengeJournal
-`Write` IL=103, 7 wire field(s).
+## WaypointCollection
+`Write` IL=61, 3 wire field(s).
 
 > Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
 
 | # | Source (field/getter) | Wire |
 |---:|---|---|
 | 1 | `-` | u8 |
-| 2 | `Challenges` | i32 (list/array count) |
-| 3 | `Item` | `Challenge.Write` |
-| 4 | `ChallengeGroups` | i32 (list/array count) |
-| 5 | `Name` | string |
-| 6 | `LastUpdateDay` | i32 |
-| 7 | `ChallengeGroups` | string (list/array count) |
-
-## OwnedEntityData
-`Write` IL=37, 6 wire field(s).
-
-> Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `Id` | i32 |
-| 2 | `ClassId` | i32 |
-| 3 | `saveFlags` | u16 |
-| 4 | `x` | i32 |
-| 5 | `y` | i32 |
-| 6 | `z` | i32 |
+| 2 | `list` | u16 (list/array count) |
+| 3 | `Item` | `Waypoint.Write` |
 
 ## SpawnPoint
 `Write` IL=13, 3 wire field(s).
@@ -2844,6 +2714,20 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 5 | `m_originalBaseMax` | f32 |
 | 6 | `m_originalValue` | f32 |
 
+## Challenge
+`Write` IL=43, 6 wire field(s).
+
+> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
+
+| # | Source (field/getter) | Wire |
+|---:|---|---|
+| 1 | `-` | u8 |
+| 2 | `Name` | string |
+| 3 | `ChallengeState` | u8 |
+| 4 | `AutoCompleted` | bool |
+| 5 | `-` | u8 |
+| 6 | `ObjectiveList` | i32 (list/array count) |
+
 ## RecipeQueueItem
 `Write` IL=82, 12 wire field(s).
 
@@ -2865,7 +2749,7 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 12 | `Recipe` | `Recipe.Write` |
 
 ## Quest
-`Write` IL=186, 22 wire field(s).
+`Write` IL=190, 23 wire field(s).
 
 > Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
 
@@ -2880,19 +2764,20 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 7 | `Tracked` | bool |
 | 8 | `CurrentPhase` | u8 |
 | 9 | `QuestCode` | i32 |
-| 10 | `Item` | `BaseObjective.Write` |
-| 11 | `DataVariables` | u8 (list/array count) |
-| 12 | `Key` | string |
-| 13 | `Value` | string |
-| 14 | `PositionData` | u8 (list/array count) |
-| 15 | `Key` | u8 |
-| 16 | `Value` | `StreamUtils.Write` |
-| 17 | `RallyMarkerActivated` | bool |
-| 18 | `FinishTime` | u64 |
-| 19 | `Rewards` | i32 (list/array count) |
-| 20 | `Item` | `BaseReward.Write` |
-| 21 | `QuestFaction` | u8 (list/array count) |
-| 22 | `QuestProgressDay` | i32 |
+| 10 | `QuestUniqueId` | string |
+| 11 | `Item` | `BaseObjective.Write` |
+| 12 | `DataVariables` | u8 (list/array count) |
+| 13 | `Key` | string |
+| 14 | `Value` | string |
+| 15 | `PositionData` | u8 (list/array count) |
+| 16 | `Key` | u8 |
+| 17 | `Value` | `StreamUtils.Write` |
+| 18 | `RallyMarkerActivated` | bool |
+| 19 | `FinishTime` | u64 |
+| 20 | `Rewards` | i32 (list/array count) |
+| 21 | `Item` | `BaseReward.Write` |
+| 22 | `QuestFaction` | u8 (list/array count) |
+| 23 | `QuestProgressDay` | i32 |
 
 ## QuestTraderData
 `Write` IL=85, 8 wire field(s).
@@ -2909,20 +2794,6 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 6 | `TradersSentTo` | u8 (list/array count) |
 | 7 | `Item` | `StreamUtils.Write` |
 | 8 | `resetDay` | i32 (list/array count) |
-
-## Challenge
-`Write` IL=43, 6 wire field(s).
-
-> Control-flow: loop(s) present (count-prefixed list/array); conditional branch(es) present. Flat sequence below is the backbone.
-
-| # | Source (field/getter) | Wire |
-|---:|---|---|
-| 1 | `-` | u8 |
-| 2 | `Name` | string |
-| 3 | `ChallengeState` | u8 |
-| 4 | `AutoCompleted` | bool |
-| 5 | `-` | u8 |
-| 6 | `ObjectiveList` | i32 (list/array count) |
 
 ## SpawnPosition
 `Write` IL=23, 5 wire field(s).

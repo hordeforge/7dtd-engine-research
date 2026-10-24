@@ -1,4 +1,4 @@
-# Entity spawning subsystem (dedicated V3.2.0)
+# Entity spawning subsystem (dedicated V3.3.0)
 
 **Owns:** how entities are placed INTO the world: the spawn-manager family
 (`SpawnManagerBiomes`, `SpawnManagerDynamic`, `SpawnManagerAbstract`), the
@@ -720,10 +720,10 @@ V3.2.0):** the client half of the correlation: `EntityPlayerLocal` holds a
    calls `GameManager.RequestToSpawnEntityServer(ecd)` (the S2C round-trip
    above).
 2. On `NetPackageConfirmSpawnEntity`: `HandleRequestedEntitySpawn(key, entity)`
-   (IL=16) does `TryGetValue` → `Remove` → `callback.Invoke(entity)` — the
-   pending request is consumed exactly once.
+   (IL=16) does `TryGetValue`, then `Remove`, then `callback.Invoke(entity)`, so
+   the pending request is consumed exactly once.
 3. `grabDisabled()` (IL=25, V3.2.0 new): true while any pending request has
-   `blocksCollect` set — the grab activation is suppressed until the requested
+   `blocksCollect` set, and the grab activation is suppressed until the requested
    entity materializes. This is what lets held-entity placement (chicken
    coop items, `ItemClassHeldEntity` family, [items.md](../gameplay/items.md) § Held
    entities) wait for the server-confirmed spawn without a race.
@@ -1217,7 +1217,8 @@ spawner '...' contains invalid group`). The rest: `StartSound`,
 ## Biome spawn manager, director constants and the gamestage indirection (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the tracked `il/` sets are the V3.2.0 corpus).
+numbers are from that dump; the tracked `il/` sets were the V3.2.0 corpus when
+this section was written and now hold the V3.3.0 set).
 
 ### AIDirectorConstants: the whole horde/scout tuning block
 
@@ -1386,6 +1387,12 @@ above.
 
 ## Changelog
 
+- **2026-10-24:** Retargeted to V3.3.0 (b18). No change in this subsystem: the
+  spawn-manager family, `EntitySpawner`, `ChunkAreaBiomeSpawnData`,
+  `AIHordeSpawner`, `SpawnPointList` and `DynamicPrefabDecorator` carry no type,
+  signature or body delta in the b10 -> b18 report, so every claim here stands as
+  written. Player respawn / spawn-selection changes are client-side and recorded
+  in [server-lifecycle.md](../admin/server-lifecycle.md) 3.3.
 - **2026-08-11:** Decorator query IL re-verified: GetPrefabsFromWorldPosInside IL=83, GetPrefabsIntersecting IL=114, GetRandomPOINearTrader IL=65, ValidPrefabForQuest IL=156, GetRandomPOINearWorldPos IL=193, GetClosestPOIToWorldPos IL=230, chooseBestTrader IL=58, copyPrefabsIntoHeightMap IL=318 (exact).
 - **2026-08-11:** Decorator lifecycle IL re-verified: CleanAllPrefabsFromWorld IL=34, ClearAllPrefabs IL=46, CreateBoundingBoxes IL=33, CallPrefabChangedEvent IL=25, CallPrefabRemovedEvent IL=8, CreateNewPrefabAndActivate IL=46, RemoveWorldPrefab IL=39, RemoveEventPrefab IL=25, IsActivePrefab IL=13, CalculateStats IL=133 (exact).
 - **2026-08-11:** PrefabInstance IL re-verified: GetPositionRelativeToPoi IL=81, GetWorldPositionOfPoiOffset IL=81, MoveBoundingBox IL=10, RotateAroundY IL=24, ResizeBoundingBox IL=33, UpdateBoundingBoxPosAndScale IL=82, SetBoundingBoxPosition/SetBoundingBoxSize IL=7, GetBox IL=9, GetSerializable IL=3; Prefab.IsPosInSleeperVolume IL=47, FindSleeperVolumeFreeGroupId IL=31, HasAnyQuestTag IL=5, IsAllowedZone IL=5 (exact).

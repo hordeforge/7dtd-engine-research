@@ -1,4 +1,4 @@
-# Stock dedicated engine limitations (V3.2.0)
+# Stock dedicated engine limitations (V3.3.0)
 
 **Owns:** generic stock engine ceilings and structural limits for dedicated multiplayer (sim, net, world, memory, process).  
 **Not:** RealEarth product attack plan (`product ENGINE_LIMITATIONS`), optim backlog ([OPTIMIZATION_CANDIDATES](../../../7dtd-server-optimizer/docs/OPTIMIZATION_CANDIDATES.md)), permanent non-IL residuals only ([residuals.md](../meta/residuals.md)).  
@@ -6,7 +6,7 @@
 **Live scale numbers:** [measured-scaling.md](../../../7dtd-server-optimizer/docs/measured-scaling.md).  
 **Loop map:** [loop.md](../loop/loop.md).
 
-This is a **limitation map** for anyone running or modding dedicated V3.2.0. It does not re-list every IL detail; each row points at the narrative that owns the evidence.
+This is a **limitation map** for anyone running or modding dedicated V3.3.0. It does not re-list every IL detail; each row points at the narrative that owns the evidence.
 
 **Severity**
 
@@ -76,10 +76,11 @@ Live APM + loadgen ladders (2026-07-17/18). Detail: [measured-scaling.md](../../
 | **LiteNetLib + managed wrappers** | [network.md](../network/network.md) | Protocol pump on main peer Update | **Hard** | Measure package cost; do not reimplement combat net |
 | **LiteNetLib event dispatch (managed)** | **Closed 2026-08-10** | `UnsyncedEvents=true`; receive-thread `ConnectionRequestCheck` races `Clients.List` under join churn ([network.md](../network/network.md) §4.0) | **Closed** | Ramp bot joins (`--ramp-ms`); fix direction documented |
 | **Entity interest + package bands** | distSq interest **16**; teleport ±**256**; pos/rot ±**128**; age **100** | Wrong assumptions break optim or custom entities | **Soft** | Document thresholds; measure under loadgen |
-| **196 NetPackage* types** (195 wire + manager) | dedi-complete census | Large surface; many client-only | **Soft** | Touch only hot packages |
+| **193 NetPackage* types** (192 wire + manager; 189 registered) | b18 census + `NetPackageManager` registry | Large surface; many client-only | **Soft** | Touch only hot packages |
 | **Chunk transfer bandwidth** | SendChunksToClients; kernel UDP | Join burst + tall columns + dense urban | **Hard** | View distance, density caps; RealEarth small host |
 | **EAC / anti-cheat** | NetPackageEAC, EOS types | C# mods and loadgen bots require EAC off | **Ops** | Document; never claim EAC-on for DLL mods |
 | **SteamNetworking optional** | serverconfig disable list | Extra path complexity | **Soft** | Dedicated usually LiteNet only |
+| **Outbound analytics is not wired into the game protocol** | [server-lifecycle.md](../admin/server-lifecycle.md) 7 | The dedicated process creates and starts the Kraken analytics service and calls it from server-side paths (player death, quest, server start/join). Transport is HTTPS JSON to a configured endpoint, not NetPackage traffic, so a UDP-only firewall rule does not block it and game-wire capture does not see it. Actual transmission was not observed in this session | **Ops** | Firewall the host at the TLS layer or run offline; no managed opt-out exists |
 
 Combat across chunks **already works** if coordinates are shared. Per-player private origins break hits/claims (product design rule).
 
@@ -231,4 +232,8 @@ them (the Zig clone's clean-room stack avoids the first by construction, ADR
 - **2026-08-11:** DynamicMeshManager.Update IL=404 re-verified (exact).
 - **2026-08-10:** Stock-defects section added (join-churn race + MinEventFire
   null-itemValue NRE, both IL + runtime evidenced).
+- **2026-10-24:** Retargeted to V3.3.0 (b18): NetPackage population row
+  re-measured (192 wire types, 189 registered); added the outbound-analytics row
+  because the dedicated server now emits player-death and quest events off-host
+  as HTTPS JSON, outside the game wire.
 - **2026-07-19:** Initial generic dedicated limitation map (sim, scale, net, AI, height, GC, content, modding).

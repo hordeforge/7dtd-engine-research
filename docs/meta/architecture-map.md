@@ -1,4 +1,4 @@
-# Architecture map: the dedicated server at a glance (V3.2.0)
+# Architecture map: the dedicated server at a glance (V3.3.0)
 
 **Owns:** the visual, whole-system view of what a headless 7 Days to Die server is
 and how its parts connect: process lifecycle, the frame, the simulation core, the
@@ -26,6 +26,7 @@ flowchart TB
     CL[Stock game clients]
     ADM[Admin: telnet / web dashboard]
     PLAT[Steam / EOS platform services]
+    TEL[Kraken analytics<br/>HTTPS JSON, outbound]
   end
 
   subgraph TRANSPORT[Transport and session]
@@ -35,12 +36,12 @@ flowchart TB
   end
 
   subgraph WIRE[Wire protocol]
-    PKG[NetPackage registry<br/>193 types, channel 0 bulk-band 1]
+    PKG[NetPackage registry<br/>189 registered packages, channel 0 bulk-band 1]
     ENC[Encryption handshake<br/>4 pre-auth packages]
   end
 
   subgraph SIM[Simulation core - the authority]
-    GM[GameManager.gmUpdate<br/>631 IL, phases A-J]
+    GM[GameManager.gmUpdate<br/>638 IL, phases A-J]
     TICK[UpdateTick<br/>GameTimer 20 Hz]
     WORLD[World + ChunkCluster]
     ENT[Entities / AI / pathing]
@@ -61,6 +62,7 @@ flowchart TB
   ENC -.before auth.-> PKG
   PKG --> GM
   GM --> PKG
+  GM -.player death / quest / server events.-> TEL
   ADM --> CONS[SdtdConsole + Webserver]
   CONS --> GM
   GM --> TICK
@@ -84,7 +86,7 @@ the wire and flushed to region files.
 
 ```mermaid
 stateDiagram-v2
-  [*] --> Boot: GameManager.StartGame(offline)
+  [*] --> Boot: GameManager.StartGame(offline) then AssetManagers.Initialize
   Boot --> EacAdvisory: startGameCo reads GameServerInfo.EACEnabled (advisory log only)
   EacAdvisory --> StartAsServer
   StartAsServer --> Config: load XML config, mods (ModManager two-pass), sandbox options
@@ -127,7 +129,9 @@ Manager tick chain in phase B (each null-checked, so a disabled feature costs
 nothing): `TwitchManager`, `DroneManager`, `VehicleManager`, `TriggerEffectManager`,
 `QuestEventManager`, `TokenManager`, `PowerManager`, `DismembermentManager`,
 `FactionManager`, `NavObjectManager`, `GameEventManager`, `TriggerManager`,
-`RaycastPathManager`. `EntityAsyncManager` is **phase F**, not B
+`SignDataManager` (new in V3.3.0), `RaycastPathManager`. `EntityAsyncManager` is
+**phase F**, not B. `AssetLoaderManager.Update` (also new in V3.3.0) is
+unconditional in the prologue, right after `LoadManager.Update`
 ([`managers.md`](../loop/managers.md)).
 
 ---
@@ -308,4 +312,10 @@ The boundary is enumerated in
 
 ## Changelog
 
+- **2026-10-24:** Retargeted to V3.3.0 (b18): gmUpdate 631 -> 638 IL (adds
+  `AssetLoaderManager.Update` and a `SignDataManager.Update` block), registered
+  wire packages 192 -> 189, `AssetManagers.Initialize` added to the boot path,
+  and the outbound Kraken analytics edge made explicit (player-death, quest and
+  server-start events leave the host as HTTPS JSON; see
+  [server-lifecycle.md](../admin/server-lifecycle.md) 7).
 - **2026-07-26:** Initial whole-system visual map (layers, boot, frame phases, sim core, wire conversation, persistence, ownership index), drawn from the existing IL-derived narratives.

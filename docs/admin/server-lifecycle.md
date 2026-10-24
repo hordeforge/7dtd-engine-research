@@ -1,4 +1,4 @@
-# Server lifecycle, game state, and player persistence (dedicated V3.2.0)
+# Server lifecycle, game state, and player persistence (dedicated V3.3.0)
 
 **Owns:** the dedicated process lifecycle (boot -> world create/load -> run ->
 save + shutdown), the `GameStateManager` game-mode/round tick, and player
@@ -34,8 +34,11 @@ Application.GetCurrentRefreshRate().value`. Then the `GameStartupHelper`
 boot/config chain ([dedicated-misc-systems.md](../meta/dedicated-misc-systems.md))
 and `GameManager.StartGame(offline)` below.
 
-`GameManager.StartGame(offline)` kicks a coroutine `startGameCo` (the boot state
-machine `startGameCo>d__138`, IL=378), which on a dedicated server reads
+`GameManager.StartGame(offline)` first calls `AssetManagers.Initialize(assetLoaders)`
+(IL_0045; it registers the single `AssetManagerLifetimed` behind
+`AssetManagers.Items` with the loader, see [managers.md](../loop/managers.md)), then kicks a coroutine
+`startGameCo` (the boot state machine `startGameCo>d__139`, IL=378), which on a
+dedicated server reads
 `GameServerInfo.EACEnabled` (logging an `eacWarning` advisory), then routes through
 `StartAsServer` to create or load the world and mark the game started; from there
 the frame loop ([loop.md](../loop/loop.md)) drives everything.
@@ -237,7 +240,7 @@ also `AutoParty = false`. `SurvivalSP` additionally forces
 
 A joining client (after the wire handshake and enter-game batch,
 [protocol.md](../network/protocol.md) section 5) is created by
-`GameManager.RequestToSpawnPlayer` (IL=496) and only later marked fully present
+`GameManager.RequestToSpawnPlayer` (IL=501) and only later marked fully present
 via `GameManager.PlayerSpawnedInWorld` when `NetPackagePlayerSpawnedInWorld`
 arrives. Player state lives in a per-player `PlayerDataFile` on disk;
 `PersistentPlayerList` is the cross-session registry (identity, allies, land claims).
@@ -329,10 +332,13 @@ platform/crossplatform tickets into `ClientInfo`; `tryAuthorizer` walks sorted
 `NetPackageAuthState`, then `Authorize(client)` -> Accepted / Denied
 (`KickPlayerData`) / continue. When no more authorizers, `playerAllowed`.
 
-**`RequestToSpawnPlayer` (IL=496):** clamp `_chunkViewDim` to game-pref range;
-`PlayerDataFile.Load` by platform id; resolve spawn (near friend / random near
-player / spawn-point list / biome-aware); build ECD from PDF; create entity +
-`ToPlayer`; send player id / spawn packages (detail in join sequence above).
+**`RequestToSpawnPlayer` (IL=501, was 496):** clamp `_chunkViewDim` to game-pref
+range; `PlayerDataFile.Load` by platform id; resolve spawn (near friend / random
+near player / spawn-point list / biome-aware); build ECD from PDF; create entity +
+`ToPlayer(EntityPlayer, StreamModeRead)` (the b18 signature; a
+`PlayerDataFile.SetInventoryFrom(EntityPlayer, StreamModeWrite)` call follows, part
+of the inventory-grid rework); send player id / spawn packages (detail in join
+sequence above).
 
 **`PlayerSpawnedInWorld(cInfo, respawnReason, pos, entityId)` (IL=127):**
 
@@ -357,14 +363,16 @@ player / spawn-point list / biome-aware); build ECD from PDF; create entity +
 
 **`GameManager.SaveWorld` (IL=7):** if world non-null `World.Save()`.
 
-**`GameManager.SaveLocalPlayerData` (IL=45):** require world + primary local
+**`GameManager.SaveLocalPlayerData` (IL=46):** require world + primary local
 player + `bSavingActive`; `PlayerDataFile.FromPlayer` → `Save(playerDataDir,
 combinedId)`; if `ChunkObserver.mapDatabase` present, `SaveAsync` via
 `ThreadManager.AddSingleTask`.
 
-**`GameManager.DoSpawn` (IL=14):** with GamePrefs **262** (spawn-point
-selection disabled) it calls `RequestToSpawn(-1)` directly; otherwise it
-opens the `XUiC_SpawnSelectionWindow` (join-time spawn choice).
+**`GameManager.DoSpawn` (IL=24, was 14):** with GamePrefs **262** (spawn-point
+selection disabled) it now first opens an `XUiC_ProgressWindow`
+(`uiLoadCreatingPlayer`) and then calls `RequestToSpawn(-1)`; otherwise it opens
+the `XUiC_SpawnSelectionWindow` (join-time spawn choice). Both branches are local
+player UI, so a dedicated server never executes this method.
 `GetPersistentPlayerList` (IL=3) is the `persistentPlayers` accessor;
 `TriggerSendOfLocalPlayerDataFile(seconds)` (IL=5) arms the
 `countdownSendPlayerDataFileToServer` timer that ships the local player
@@ -559,6 +567,34 @@ jumps), so on a dedicated host it ends at `ConnectionManager.StopServers()`
 `NetPackagePlayerDisconnect` and starts the `disconnectLater` coroutine instead.
 
 ---
+
+### 3.3 Client respawn gate (V3.3.0; the server only sees its result)
+
+`RespawnProgress` (client enum, referenced only by `PlayerMoveController`) grew
+from 10 to 12 members: `WaitingForUI = 9` and `WaitingForWorld = 10` are new, and
+member 6 was renamed `ClampingToValidWorldPos` -> `WaitingForSpawnChunk`. The
+client respawn coroutine keeps the clamp (`World.ClampToValidWorldPos`, IL_057A,
+with the `Trying to respawn at invalid world position {0} adjusting to {1}` log)
+and then holds the respawn on three timers built in the `PlayerMoveController`
+constructor:
+
+| Timer | Timeout | Holds while | Progress text / log |
+|---|---|---|---|
+| `respawnChunkWaitTimer` ("Waiting for respawn chunk") | 10 s | `World.IsPositionAvailable(spawnPosition.position)` is false | `msgBuildingEnvironment` |
+| `respawnUIWaitTimer` ("Waiting for player xui") | 10 s | `LocalPlayerUI.GetUIForPrimaryPlayer().xui.IsReady` is false | `msgLoadingUI` |
+| `respawnWorldWaitTimer` ("Waiting for world") | 15 s | `CheckWorldReadyForSpawn` (IL=67) finds `ChunkManager.GetDisplayedChunkGameObjectsCount()` below `viewDistance^2 - 10` (0 for a fixed-size chunk cache) | `Respawn stuck waiting for world. Displayed ChunkGameObjects: {0}, waiting for: {1}. Distant terrain: {2}` |
+
+Each timer logs once on timeout (`RespawnConditionTimer.HasReachedTimeout` +
+`LogTimeoutReached` + `HasLogged`) and then lets the respawn continue, so none of
+them can wedge it. `ESpawnWindowMode` is gone; `XUiC_SpawnSelectionWindow` keeps
+its own progress/selection split internally (855 -> 621 IL, `get/set_WindowMode`
+and `updateLoadState` removed).
+
+**Server-side consequence:** none in the wire or the server state machine. All of
+this runs in the local player's controller, so the only effect on a dedicated
+server is that the respawn request arrives later (after the client's chunk/UI/world
+waits) and the position is already clamped client-side. The dedicated server never
+executes `PlayerMoveController`, `XUiC_SpawnSelectionWindow` or `RespawnProgress`.
 
 ## 4. Shutdown and save
 
@@ -794,56 +830,114 @@ inside the player element) become `Allies.SetStatus(primaryId, newId, 1)`.
 A top-level `allies` element (version >= 1) loads via `AllyStore.ReadXml`.
 
 
-## 7. Join analytics (V3.2.0)
+## 7. Analytics: what leaves the host
 
-On player join the dedicated server may emit platform analytics via
-`GameManager.LogPlayerJoinServerEventAnalyticsCoroutine` into
-`Services.Analytics.Events.PlayerJoinServerEventData` (fields include ServerId,
-SaveId, OnlinePlayers, LocalMods, HasModifiedXML, character/game-stage stats).
-This is **telemetry**, not gameplay sim; transport is the platform analytics
-service (residual). See the EOS server-list filters section below.
+The service is `BhvrAnalyticsServices.Interfaces.IAnalyticsService`, implemented
+in `BhvrAnalytics.dll` (shipped beside `Assembly-CSharp.dll` on a dedicated
+install) with the generated HTTP client in `BhvrAnalyticsMS.dll`. Call sites and
+DTOs live in `Assembly-CSharp`: `Services.Analytics.Events.*` are the payload
+types, `Services.Analytics.EventTypes.VersionDictionary` maps event name to
+payload schema version (14 entries), `Services.Analytics.Helper` supplies
+ServerId/SaveId and the edit/playtest gate, and
+`Services.Analytics.TruncateStringSerializerConverter` truncates every string
+field at **50** characters.
 
-**Server-start analytics (`LogServerStartEventAnalytics`, IL=268):** the
-boot twin, skipped in edit/playtesting mode. It resolves the sandbox preset
-(GamePrefs 295, localized name, group), loads the code-based options
-(GamePrefs 296), and builds `ServerStartEventData` (server id, save guid,
-UTC timestamp, `ServerType` = Dedicated / Listen / Offline, sandbox seed
-from GameStats 71, sandbox-settings delta, world name GamePrefs 33, a
-`GeneralSettings` dict of ~25 server prefs: region 217, visibility 169,
-EAC 28, crossplay 27, max players 26, chunk-reset 221/312, creative 58,
-persistent profiles 110, camera restriction 280, player killing 52, and
-the full land-claim set 91-96 plus bedroll 160/192 and party range 100,
-and the truncated mod list) before `_analyticsService.LogEvent`; a
-non-dedicated host also starts the player-join coroutine.
-`GameManager.loadStaticData` (IL=6) is the boot static-data coroutine
-wrapper whose progress callback stores `CurrentLoadAction`.
+### 7.1 Transport, outside the game wire
 
-### Analytics heartbeat (client path; dead on dedicated)
+`KrakenAnalyticsMicroservice` queues events, batches them and retries through the
+generated `BhvrAnalyticsMS` client: `POST /analytics/v1/batch`,
+`POST /analytics/v1/one`, `GET /analytics/v1/healthcheck` (plus `/full` and
+management paths for event-type config and the DLQ). The base endpoint comes from
+the Unity asset `Assets/Resources/Analytics/BhvrAnalyticsSettings`, which holds a
+`ReleaseConfiguration` and a `DevelopmentConfiguration`.
+
+`Services.Analytics.Helper.IsDevConfig()` returns false on a dedicated server
+(its first test is `IsDedicatedServer`), so the **release** configuration is
+selected. The install's `data.unity3d` carries the literal
+`https://analytics.dev.bhvr7dtd.com` next to `DevelopmentServiceConfiguration`;
+the release endpoint string is not present as plaintext in that file, so the
+production host is **not decoded**.
+
+No opt-out exists in managed code: no `EnumGamePrefs` member, no `LaunchPref`,
+and no `serverconfig.xml` key disables the service. `analyticsLogLevel` (a launch
+argument parsed in `GameEntrypoint.FirstFrameInit`) only sets SDK verbosity.
+`Helper.IsEditingOrPlaytesting()` is the only global skip. When the settings asset
+cannot be loaded, `AnalyticsServiceFactory` returns `EmptyAnalyticsService`, whose
+every method is a no-op.
+
+### 7.2 Events the dedicated server emits
+
+Send sites are unfiltered by `IsDedicatedServer` unless the row says otherwise.
+Every DTO derives from `BaseEventData`, so each payload also carries
+`ProviderUserId`, `EasyAntiCheatEnabled`, `Platform`, `Provider`, `SessionBuild`,
+`GameVersion` and `SteamBranchName`.
+
+| Event (schema version) | DTO | Send site | On dedicated | Notable payload |
+|---|---|---|---|---|
+| `server_start` (3) | `ServerStartEventData` | `GameManager::LogServerStartEventAnalytics` IL=265, called from boot | yes | server id/save, timestamp, `ServerType` (Dedicated/Listen/Offline), sandbox seed, sandbox-settings delta, world name, ~25-pref `GeneralSettings` dict, truncated mod list |
+| `player_join_server` (3, was 2) | `PlayerJoinServerEventData` | `<LogPlayerJoinServerEventAnalyticsCoroutine>d__168`, started from `GameManager::PlayerId` IL=162 (no dedicated gate, so this is the dedicated send site). `LogServerStartEventAnalytics` also starts it, but only inside `if (!IsDedicatedServer)` (IL_037B) | yes, once per player | server/save id, join timestamp, online players, join source, local mods, `HasModifiedXML`, elapsed player time, in-game days, character level, deaths, personal game stage (modified and unmodified), `GameStagesJson`, total mods. The b18 DTO drops `ElapsedWorldSaveTime` |
+| `player_death` (2) | `PlayerDeathEventData` | `EntityPlayer::Kill` IL=378, `LogEvent` at IL_04E9, guarded only by `IsEditingOrPlaytesting` | yes, per player death | position, biome id/name, POI id/name, cause of death + provider id, damage taken, engaged foes, active (debuff) conditions, health/food/water/stamina/temperature, and **the player's inventory**: toolbelt, bag and equipment as item name, quantity, slot, durability, encumbered flag |
+| `quest_added` (3) | `QuestAddedEventData` | `Quest::StartQuest` IL=601, `LogEvent` at IL_071D | yes | quest id/name/group/category/tier/tags, instance id, add source, giver entity id, owner provider id, assignable POI, objective and completed counts |
+| `quest_progression` (4) | `QuestProgressionEventData` | `Quest::refreshQuestCompletion` IL=228, `LogEvent` at IL_0160 | yes | quest identity, progress type, objective type and parameters |
+| `quest_removed` (2) | `QuestRemovedEventData` | `Quest::CloseQuest` IL=522, two sites (IL_0080 and IL_0644) | yes | quest identity, owner provider id, remove reason |
+| `equipment_usage` (0) | `EquipmentUsageEventData` | `Equipment::LogEquipmentUsageEvent` IL=311, `LogEvent` at IL_0342 | **no** | returns immediately unless `m_entity is EntityPlayerLocal`, and a dedicated server has no local player |
+| `heartbeat` (5) | `HeartbeatEventData` | `ConnectionManager::Update` IL=213 | **no** | `IsDedicatedServer` early-out, see 7.4 |
+
+`login`, `hardware_info`, `challenge_claimed`, `challenge_completed`,
+`cosmetic_usage` and `dlc_ownership` exist in the same table; their b18 send sites
+were not re-walked here (b10 evidence put them on the login coroutine and client
+UI paths).
+
+### 7.3 Server-start payload detail
+
+`LogServerStartEventAnalytics(Boolean isOffline)` (IL=**265**, was 268 in b10) is
+skipped in edit/playtesting mode. It resolves the sandbox preset (GamePrefs 295,
+localized name, group), loads the code-based options (GamePrefs 296), and builds
+`ServerStartEventData` (server id, save guid, UTC timestamp, `ServerType`, sandbox
+seed from GameStats 71, sandbox-settings delta, world name GamePrefs 33, a
+`GeneralSettings` dict of ~25 server prefs: region 217, visibility 169, EAC 28,
+crossplay 27, max players 26, chunk-reset 221/312, creative 58, persistent
+profiles 110, camera restriction 280, player killing 52, the full land-claim set
+91-96 plus bedroll 160/192 and party range 100, and the truncated mod list) before
+`_analyticsService.LogEvent`. After that send, `if (!IsDedicatedServer)`
+(IL_037B) sets `ConnectionManager.LastJoinSource = "Server Start"` and starts the
+player-join coroutine, so a dedicated host sends `player_join_server` only from
+`PlayerId`.
+
+### 7.4 Analytics heartbeat (client path; dead on dedicated)
 
 `ConnectionManager` holds `countdownAnalyticsHeartbeat` constructed as
 `new CountdownTimer(300f, false)` (**300 s**). `BeginHeartbeat(seconds)` only
 `SetTimeout` + `ResetAndRestart`.
 
-Each `ConnectionManager.Update`, after flush work:
+`ConnectionManager.Update` (IL=**213**, was 231 in b10) still carries the block:
 
 ```text
-if GameManager.IsDedicatedServer: ret          // IL_01D9 brtrue → skip entire block
+if GameManager.IsDedicatedServer: ret          // skip entire block
 if !countdownAnalyticsHeartbeat.HasPassed: ret
 ResetAndRestart()
-ev = new HeartbeatEventData()                  // Services.Analytics.Events
+ev = new HeartbeatEventData()
 ev.HeartbeatTimestamp = DateTime.UtcNow.ToString("O")
-ev.ServerId = Helper.GetServerId()             // Services.Analytics.Helper
+ev.ServerId = Helper.GetServerId()
 ev.SaveId = IsClient ? GamePrefs.GetString(159) : World.Guid  // null-safe
 ServiceProvider.Get<IAnalyticsService>().LogEvent(ev)
 ```
 
 **Dedicated implication:** the heartbeat **never fires** on pure dedicated
-(`IsDedicatedServer` early-out). Types still appear in the reachability set
-because `ConnectionManager.Update` is shared. Classify as telemetry residual;
-do not model as a dedi sim cost. Types: `HeartbeatEventData`, `Helper`
-(Services.Analytics), `TruncateStringSerializerConverter` (JSON string length
-cap for analytics payloads). OOS list: [out-of-scope-surface.md](../meta/out-of-scope-surface.md)
-third-party/analytics.
+(`IsDedicatedServer` early-out), so the b18 body shrink does not add server cost.
+The new server-side sends are the ones in 7.2.
+
+### 7.5 Residuals
+
+- Actual transmission was not observed in this session: no packet capture and no
+  host firewall log was taken. IL proves the service is created, started and
+  called; the SDK's queueing, health-check and retry behaviour is a separate
+  assembly.
+- The release endpoint host is not decoded (7.1).
+- The b18 send sites for `login`, `hardware_info`, `challenge_*`, `cosmetic_usage`
+  and `dlc_ownership` were not re-walked.
+- `GameStats`/config-modification detection (`HasModifiedXML`) semantics are in
+  [`mod-loading.md`](../admin/mod-loading.md), not here.
 
 ## Related docs
 
@@ -857,13 +951,27 @@ third-party/analytics.
 
 ## Changelog
 
+- **2026-10-24:** Retargeted to V3.3.0 (b18). Section 7 rewritten: the analytics
+  service, transport (`/analytics/v1/batch` over HTTPS, not the game wire), the
+  b18 event set with schema versions and send sites, and which events reach a
+  dedicated server (`player_death`, `quest_*`, `server_start`,
+  `player_join_server` yes; `equipment_usage` and `heartbeat` no). `player_death`
+  carries the player's inventory, location, biome and POI. Server-start IL
+  268 -> 265; `player_join_server` payload drops `ElapsedWorldSaveTime` and moves
+  to schema 3. Boot now calls `AssetManagers.Initialize` before `startGameCo`
+  (`d__138` -> `d__139`); `RequestToSpawnPlayer` 496 -> 501 IL with
+  `ToPlayer(StreamModeRead)` + `SetInventoryFrom`; `DoSpawn` 14 -> 24 IL with a
+  progress window. Section 3.3 records the new client respawn gate
+  (`RespawnProgress` +2 members, member 6 renamed) and why it has no server-side
+  effect. Analytics heartbeat section re-read (still dedicated-dead;
+  `ConnectionManager.Update` 231 -> 213 IL).
 - **2026-08-11:** PPD wire IL re-verified: Write(BinaryWriter) IL=205, Write(XmlElement) IL=313, Read IL=167, ReadXML IL=587, AddQuestPosition IL=52, RemovePositionsForQuest IL=49, UpdatePositionFromEntity IL=21, ShowBedrollOnMap IL=35, IsAlly IL=8/13, GetLandProtectionBlock IL=21 / Blocks IL=9, RemoveLandProtectionBlock IL=6, Update IL=13, get_MostRecentBackpackPosition IL=18, PPL Write IL=73 / Read IL=72 / ReadXML IL=153 / Write(path) IL=44, LogServerStartEventAnalytics IL=261, loadStaticData IL=6 (exact).
 - **2026-08-11:** Land-claim IL re-verified: VisiblityCheck IL=48, GetLandClaimOwner IL=119/88, IsEmptyPosition IL=117, IsMyLandClaimInChunk IL=116, IsMyLandProtectedBlock IL=8/119, GetPrimaryPlayerId IL=11, IsRandomWorld IL=19, get_OfflineHours/get_OfflineMinutes IL=14, get_HasBedrollPos IL=8, ClearBedroll IL=37, AddLandProtectionBlock IL=11, ProcessBackpacks IL=21, TryUpdateBackpackPosition IL=19 (exact).
 - **2026-08-11:** Shutdown IL re-verified: PlayerDisconnected IL=76, NetPackagePlayerDisconnect.ProcessPackage IL=9, HandlePersistentPlayerDisconnected IL=19, Disconnect IL=129, SaveAndCleanupWorld IL=499, GameStateManager.EndGame IL=13, ShutdownMultiplayerServicesNow IL=33, AuthorizationManager.ServerStop IL=22, World.UnloadWorld IL=62, World.Cleanup IL=162, NetPackageLandClaimRepair.ProcessPackage IL=33 (exact).
 - **2026-08-11:** Name/land-claim IL re-verified: AutoFixNameCollisions IL=58, FixNameCollisions IL=197, GetLandProtectionBlockOwner IL=8, PlaceLandProtectionBlock IL=47, RemoveExtraLandClaims IL=50, RemoveLandProtectionBlock IL=45, CleanupPlayers IL=113, NetworkCloneRelevantForPlayer IL=80, SavePersistentPlayerData IL=12, AuthorizationManager.Authorize IL=47 (exact).
-- **2026-08-11:** GameManager save IL re-verified: PlayerSpawnedInWorld IL=127, SaveWorld IL=7, SaveLocalPlayerData IL=45, DoSpawn IL=14, GetPersistentPlayerList IL=3, TriggerSendOfLocalPlayerDataFile IL=5, doSendLocalPlayerData IL=25, doSendLocalInventory IL=40, IsSafeToDisconnect IL=27, CalculatePersistentPlayerCount IL=64, EntityPlayer.Respawn IL=10, InitBreadcrumbs IL=6, GetBreadcrumbPos IL=27, SetPrefabsAroundNear IL=26, NetPackagePlayerId.Process IL=11, NetPackagePlayerSpawnedInWorld.Process IL=47, GameUtils.GetViewDistance IL=10 (exact).
+- **2026-08-11:** GameManager save IL re-verified: PlayerSpawnedInWorld IL=127, SaveWorld IL=7, SaveLocalPlayerData IL=46, DoSpawn IL=24, GetPersistentPlayerList IL=3, TriggerSendOfLocalPlayerDataFile IL=5, doSendLocalPlayerData IL=25, doSendLocalInventory IL=40, IsSafeToDisconnect IL=27, CalculatePersistentPlayerCount IL=64, EntityPlayer.Respawn IL=10, InitBreadcrumbs IL=6, GetBreadcrumbPos IL=27, SetPrefabsAroundNear IL=26, NetPackagePlayerId.Process IL=11, NetPackagePlayerSpawnedInWorld.Process IL=47, GameUtils.GetViewDistance IL=10 (exact).
 - **2026-08-11:** Boot IL re-verified: FirstFrameInit IL=65, HasPrefCollisions IL=53, InitCommandLine IL=85, <startGameCo>d__138.MoveNext IL=378, GameStateManager.OnUpdateTick IL=198, nextRound IL=29, SetBloodMoonDay IL=13, InitGame IL=50, ModeGamePref ctor IL=22, GameMode.StartRound IL=4 (Survival/Creative/EditWorld), Deathmatch IL=62, ZombieHorde IL=53, GameModeAbstract.Init IL=205, Survival Init IL=41 / MP IL=38 / SP IL=50 / PvP IL=34 (exact).
-- **2026-08-11:** Player-registry IL re-verified: GetLandProtectionHardnessModifierForPlayer IL=97, RequestToSpawnPlayer IL=496, GetEntityPlayerFromUserId IL=18, SetPlayerData IL=43, SpawnPointRemoved IL=28, HandlePlayerDetailsUpdate IL=14, MapPlayer IL=18, UnmapPlayer IL=25, CreatePlayerData IL=21 (exact).
+- **2026-08-11:** Player-registry IL re-verified: GetLandProtectionHardnessModifierForPlayer IL=97, RequestToSpawnPlayer IL=501, GetEntityPlayerFromUserId IL=18, SetPlayerData IL=43, SpawnPointRemoved IL=28, HandlePlayerDetailsUpdate IL=14, MapPlayer IL=18, UnmapPlayer IL=25, CreatePlayerData IL=21 (exact).
 - **2026-08-10:** GameStateManager IL re-verified: OnUpdateTick IL=198, nextRound IL=29, SetBloodMoonDay IL=13, InitGame IL=50 (exact).
 - **2026-08-10:** Boot IL sizes re-verified: FirstFrameInit IL=65, InitCommandLine IL=85 (exact).
 - **2026-08-08:** ObservableDictionary<K,V> backing collection for PersistentPlayerList.Players (event funnel + EChangeType).

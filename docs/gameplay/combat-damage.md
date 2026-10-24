@@ -1,4 +1,4 @@
-# Combat and damage application (dedicated V3.2.0)
+# Combat and damage application (dedicated V3.3.0)
 
 **Owns:** the server-authoritative damage pipeline: `DamageSource` (the damage
 descriptor), `EntityAlive.DamageEntity` (armor mitigation, modifiers, health,
@@ -11,6 +11,8 @@ damage ([blocks.md](../world/blocks.md)); the ragdoll/hit VFX (client).
 **Evidence:** `DamageSource`, `EntityAlive.DamageEntity` /
 `ProcessDamageResponse` IL (dump locally with `tools/src/DumpMethod`, git-ignored).
 **Hub:** [`INDEX.md`](../INDEX.md). **Method:** [`re-methodology.md`](../meta/re-methodology.md).
+**Build:** V3.3.0 b18. The damage pipeline bodies the b18 diff did not touch keep
+their b10 widths; the equipment-slot attribution below was re-read.
 
 All damage is resolved on the authoritative server entity, so this is a core
 dedicated codepath shared by melee, ranged, traps, explosions, and environment.
@@ -236,6 +238,10 @@ High-signal gates from live IL:
 - Attacker `SetDamagedTarget`; sleeper noise wake + `ConditionalTriggerSleeperWakeUp`.
 - Armor wear: split `ArmorDamage` across `Equipment.GetArmor()` pieces
   (`UseTimes += EffectManager.GetValue(PassiveEffects=7, ...) * ItemDegradationModifier`).
+  `Equipment` is 13 slots in b18: `Equipment.GetArmor` (IL=46) and
+  `GetTotalPhysicalArmorRating` (IL=47) loop the shared `ItemStackGrid`, so the
+  new `Backpack` slot (12, `EquipmentSlotType.Armor`) is included in the armor
+  pass; stock backpacks carry no armor stats.
 - `ApplyLocalBodyDamage`; store `lastDamageResponse`.
 - **`FireAttackedEvents` (IL=61):** base entity fire; if no `BuffClass` on source
   (or progression present): set `MinEventContext.DamageResponse`; mark
@@ -315,7 +321,7 @@ lootDropProb, killer)`. Then `lootDropProb *= LootContainer.LootBagChance`.
 If not `LootContainer.NoLoot` and `lootDropProb > RandomFloat`,
 **`Entity.DropBagServer()`**.
 
-**`Entity.DropBagServer` (IL=99, server only):** no-op if already
+**`Entity.DropBagServer` (IL=109, server only):** no-op if already
 `EntityLootContainer`. Spawn pos = entity pos with **y+0.9**.
 
 1. If `lootDropProb != 0` and class has `lootDrops`: `LootDropPick(rand)` →
@@ -330,7 +336,7 @@ If not `LootContainer.NoLoot` and `lootDropProb > RandomFloat`,
 `r = RandomFloat`; walk entries adding `weight` until `r <= sum`; return that
 `LootDrop.entityClass`.
 
-**`Entity.InitializeBagFromLootList` (IL=39):** when the entity has no `bag`
+**`Entity.InitializeBagFromLootList` (IL=37):** when the entity has no `bag`
 yet and `GetLootList()` names a `LootContainer`, it allocates
 `bag = new Bag(size.x * size.y)` from the container's size - the entity's
 drop bag is sized by its loot container (the bag `DropBagServer` carries on
@@ -402,7 +408,7 @@ exception), and the party share is funneled through `PartyShareKillServer` →
 2. Killer must be a distinct `EntityPlayer` (`isinst EntityPlayer`, `!= self`).
 3. `EntityClass.list` must contain the victim class → else ret.
 4. `scale = source.KillXPScale` (V3.2.0 new field on `DamageSource`).
-5. If `source.bTrapKillXP` (V3.2.0 new): `scale *= EffectManager.GetValue(PassiveEffects.ElectricalTrapXP = 169, killer.holdingItem, ...)` — the killer's held item's electrical-trap XP passive scales the trap kill.
+5. If `source.bTrapKillXP` (V3.2.0 new): `scale *= EffectManager.GetValue(PassiveEffects.ElectricalTrapXP = 169, killer.holdingItem, ...); the killer's held item's electrical-trap XP passive scales the trap kill.
 6. `scale <= 0` → ret; else `killer.AddKillXP(this, source.AttackingItem, scale)`.
    `EntityPlayer.AddKillXP` (IL=89, was 99) is the XP application entry.
 
@@ -411,7 +417,7 @@ exception), and the party share is funneled through `PartyShareKillServer` →
 2. `source.bIgnorePartyShare` or `source.bTrapKillXP` → **ret** (trap kills do not share XP).
 3. `(int)source.KillXPScale != 1` → **ret** (only scale 1.0 shares).
 4. If `source.BuffClass != null` **and** `Buffs.GetCustomVar("ETrapHit") == 1` → **ret** (buff-tag trap hits already credited elsewhere).
-5. `GameManager.SharedKillServer(victimId, killerId, 1.0)` — the party XP share.
+5. `GameManager.SharedKillServer(victimId, killerId, 1.0)`, the party XP share.
 
 Both ride the new `NetPackageDamageEntity` wire fields `bTrapKillXP` (flags bit
 10) and `KillXPScale` (f32), so the client sends the trap/XPScale metadata with
@@ -654,6 +660,9 @@ Leaf types on the edges of the damage flow above:
 - **2026-08-07:** EntityHuman.TurnIntoCrawler collider 0.8 cube; AvatarHuman
   isCrawler + walkType 21 trigger; base TurnIntoCrawler stubs.
 - **2026-08-07:** KillLootContainer snaps deathUpdateTime near linger end.
+- **2026-10-24:** V3.3.0 b18: `Equipment` armor passes now cover 13 slots
+  including `Backpack`; `GetArmor` IL=45 -> 46. The damage pipeline bodies and
+  the `DamageResponse`/`NetPackageDamageEntity` fields are unchanged.
 - **2026-08-07:** DamageEntity IL=236 gate order (consecutive timeout, FF, god,
   dead, EffectManager mult, damageEntityLocal, S2C package).
 - **2026-08-07:** NetPackageDamageEntity Process IL=172 local-player early outs

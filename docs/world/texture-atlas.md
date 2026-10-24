@@ -1,4 +1,4 @@
-# Texture atlas and minimap colors (V3.2.0 b9)
+# Texture atlas and minimap colors (V3.2.0 b9 data pin; container re-checked on V3.3.0 b18)
 
 **Owns:** the block texture atlas metadata that feeds the minimap colors:
 where the `uvmapping` XML lives (`MeshDescription.MetaData` TextAssets inside
@@ -105,6 +105,15 @@ The 256 u16 colors per chunk are what `MapChunkDatabase` stores and
 
 ## Changelog
 
+- **2026-10-24:** Container and parse path re-checked on V3.3.0 (b18): the bundle
+  path exists, its UnityFS header and file/block tables match
+  [texture-atlas-unityfs.md](../world/texture-atlas-unityfs.md), and every type and
+  method in the parse chain (`TextureAtlasBlocks`,
+  `MeshDescription.ReloadTextureArrays`, `Chunk.CalcChunkColors`,
+  `Block.GetMapColor`, `Block.GetColorForSide`, `Utils.ToColor5`) is absent from
+  the b10 -> b18 delta report, so the chain is unchanged. The six `ta_*` XMLs were
+  **not** re-extracted on b18, so the atlas entry counts and per-texture colors
+  stay pinned to the b9 extraction in `tools/sandbox/atlas/`.
 - **2026-08-21:** Initial reversal: atlas TextAssets located in
   `meshdescriptions_assets_all.bundle` (UnityFS v8), uvmapping XML format,
   `TextureAtlasBlocks.LoadTextureAtlasFromMetadata` / `UVRectTiling.FromXML`

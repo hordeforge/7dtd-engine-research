@@ -1,6 +1,6 @@
 # RE coverage report (auto-generated)
 
-**Assembly studied:** Assembly-CSharp V3.2.0 (b10), sha256 3737eedc9f143d42. The numbers below are for THIS build only: if the corpus pin
+**Assembly studied:** Assembly-CSharp V3.3.0 (b18), sha256 e16ff9d539b8fbf6. The numbers below are for THIS build only: if the corpus pin
 moved (`docs/meta/coverage.md` header), regenerate before quoting any number here.
 
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
@@ -19,11 +19,11 @@ quoting any number here.
 
 - *Over-approximation:* `callvirt` is devirtualized to every override regardless of
   whether the receiver is ever instantiated on a server, so client-only trees get
-  pulled in. This run has **503 XUi/XUiC_ client-UI types** inside the base even
+  pulled in. This run has **504 XUi/XUiC_ client-UI types** inside the base even
   though a headless server renders nothing.
 - *Under-approximation:* code reached only by **reflection** (XML-instantiated
   classes) is invisible. Interface dispatch IS devirtualized as of this version
-  (that fix brought the console-command family in: **179 `ConsoleCmd*` types**
+  (that fix brought the console-command family in: **181 `ConsoleCmd*` types**
   are now in the base, against 1 before).
 
 **The signal (numerator) is a mention, not an explanation.** A type counts as
@@ -45,17 +45,17 @@ The tiers are reported separately and deliberately **not summed into a headline*
 
 | Metric | Value |
 |---|---:|
-| Reached methods (with body) | 46831 |
-| Reached types (incl. compiler-generated) | 7343 |
-| Reached, non-generated | 6200 |
-| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2367 (excluded from %) |
-| ...**game types** (the RE surface) | **3692** |
-| ...**narrated** (backticked in a narrative doc) | **3688 (99.9)** |
+| Reached methods (with body) | 47096 |
+| Reached types (incl. compiler-generated) | 7390 |
+| Reached, non-generated | 6222 |
+| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2368 (excluded from %) |
+| ...**game types** (the RE surface) | **3713** |
+| ...**narrated** (backticked in a narrative doc) | **3671 (98.9%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 0 |
 | ...**classified** out-of-scope | 4 |
-| ...**unaccounted** (appears nowhere) | 0 |
-| of the base: XUi/XUiC_ client-UI types (over-approximation) | 503 |
-| of the base: `ConsoleCmd*` (recovered by interface devirt) | 179 |
+| ...**unaccounted** (appears nowhere) | 38 |
+| of the base: XUi/XUiC_ client-UI types (over-approximation) | 504 |
+| of the base: `ConsoleCmd*` (recovered by interface devirt) | 181 |
 
 Third-party/BCL and obfuscated `#`-named types are excluded from the base.
 **Do not add these rows together and present the sum as coverage.** "Narrated"
@@ -71,10 +71,10 @@ as an upper bound; this table is its actual depth.
 
 | Narrative mentions | Types | Share of base |
 |---|---:|---:|
-| 0 (catalogued, classified, or unaccounted) | 4 | 0.1% |
-| exactly 1 | 2392 | 64.8% |
-| 2-4 | 791 | 21.4% |
-| 5-19 | 423 | 11.5% |
+| 0 (catalogued, classified, or unaccounted) | 42 | 1.1% |
+| exactly 1 | 2379 | 64.1% |
+| 2-4 | 789 | 21.2% |
+| 5-19 | 421 | 11.3% |
 | 20+ | 82 | 2.2% |
 
 ## Whole-assembly accounting (all types and methods)
@@ -85,31 +85,31 @@ reached-and-documented plus unreached-and-classified (client / editor / dead).
 
 | Metric | Value |
 |---|---:|
-| All types (incl. nested) | 7451 |
-| Reached (Assembly-CSharp own types) | 4779 (64.1) |
-| Unreached | 2672 (35.9) |
+| All types (incl. nested) | 7501 |
+| Reached (Assembly-CSharp own types) | 4824 (64.3%) |
+| Unreached | 2677 (35.7%) |
 | ...compiler-generated / obfuscated | 354 (excluded) |
 | ...third-party / BCL | 57 (excluded) |
-| ...**unreached game types** (need classification) | **2261** |
-| All methods with body | 53418 |
-| Reached methods (Assembly-CSharp own) | 31544 (59.1) |
-| Unreached methods | 21874 (40.9) |
-| ...in reached game types (uncalled members) | 13103 |
-| ...in unreached game types | 4469 |
+| ...**unreached game types** (need classification) | **2266** |
+| All methods with body | 53796 |
+| Reached methods (Assembly-CSharp own) | 31791 (59.1%) |
+| Unreached methods | 22005 (40.9%) |
+| ...in reached game types (uncalled members) | 13251 |
+| ...in unreached game types | 4448 |
 
 **Whole-assembly accounting (the 100% view):**
 
 | Metric | Value |
 |---|---:|
-| Accounted game types (reached documented + unreached classified) | **5953 / 5953 (100%)** |
-| Methods in accounted game types | **46504 / 46504 (100%)** |
-| (excluded by design: 1361 compiler-generated, 99 third-party/BCL, 38 both; sums to 7451 of 7451) | |
+| Accounted game types (reached documented + unreached classified) | **5979 / 5979 (100%)** |
+| Methods in accounted game types | **46807 / 46807 (100%)** |
+| (excluded by design: 1385 compiler-generated, 99 third-party/BCL, 38 both; sums to 7501 of 7501) | |
 
-Unreached game types (2261), grouped by top namespace:
+Unreached game types (2266), grouped by top namespace:
 
 | Namespace | count |
 |---|---:|
-| `<global>` | 1778 |
+| `<global>` | 1781 |
 | `Platform` | 155 |
 | `Twitch` | 57 |
 | `DynamicMusic` | 45 |
@@ -129,8 +129,8 @@ Unreached game types (2261), grouped by top namespace:
 | `SandboxOptions` | 4 |
 | `Assets` | 4 |
 | `ModInfo` | 3 |
+| `Services` | 3 |
 | `PrefabVolumes` | 3 |
-| `Services` | 2 |
 | `GearVariants` | 2 |
 | `Quests` | 2 |
 | `RaycastPathing` | 2 |
@@ -142,17 +142,31 @@ Unreached game types (2261), grouped by top namespace:
 | `SDF` | 1 |
 | `GUI_2` | 1 |
 | `UAI` | 1 |
+| `AssetManagement` | 1 |
 
-Unreached game types already mentioned in docs: **2258** (accounted).
-Unreached game types with **no mention anywhere**: **3** (the whole-assembly gap).
+Unreached game types already mentioned in docs: **2250** (accounted).
+Unreached game types with **no mention anywhere**: **16** (the whole-assembly gap).
 
 Gap list (no mention in any doc):
 
+- `Address` (<global>)
+- `EquipmentSlotType` (<global>)
+- `HoldingMode` (<global>)
 - `HonkOpenTypes` (<global>)
+- `IHasWorldAddress` (<global>)
+- `IItemStackController` (<global>)
+- `IItemStackGridHolder` (<global>)
+- `QuestEvent_ContainerOpened` (<global>)
+- `QuestSource` (<global>)
+- `SignSharing` (<global>)
+- `WorldObjectType` (<global>)
+- `XuiBindingBoxWriterDelegate` (<global>)
+- `IAssetManager` (AssetManagement)
 - `OpenDoorStates` (GameEvent.SequenceActions)
 - `EntitlementData` (Services.Analytics.Events)
+- `OfferedQuest` (Services.Analytics.Events)
 
-Full unreached game-type list (2261):
+Full unreached game-type list (2266):
 
 | Type | Namespace | methods |
 |---|---|---:|
@@ -164,9 +178,9 @@ Full unreached game-type list (2261):
 | `ActionTargetType` | <global> | 0 |
 | `ActionTypes` | <global> | 0 |
 | `ActionTypes` | <global> | 0 |
-| `ActiveIndex` | <global> | 0 |
 | `ActivityInviteReceivedCallback` | <global> | 0 |
 | `ActivityJoiningCallback` | <global> | 0 |
+| `Address` | <global> | 4 |
 | `AddressableFolders` | <global> | 1 |
 | `AddSnowToGlass` | <global> | 2 |
 | `AdminSectionAbs` | <global> | 2 |
@@ -461,7 +475,6 @@ Full unreached game-type list (2261):
 | `DownloadTexture` | <global> | 3 |
 | `DragInfo` | <global> | 0 |
 | `DrawSideParams` | <global> | 0 |
-| `DroneInventory` | <global> | 2 |
 | `DroneRunningLight` | <global> | 7 |
 | `DroneRunningLightMan` | <global> | 3 |
 | `DroneWeapons` | <global> | 1 |
@@ -655,7 +668,6 @@ Full unreached game-type list (2261):
 | `EnumMirrorAlong` | <global> | 0 |
 | `EnumMode` | <global> | 0 |
 | `EnumNGUIWindow` | <global> | 0 |
-| `EnumOperation` | <global> | 0 |
 | `EnumPaintMode` | <global> | 0 |
 | `EnumParsers`1` | <global> | 1 |
 | `EnumPartyStatus` | <global> | 0 |
@@ -697,6 +709,7 @@ Full unreached game-type list (2261):
 | `Equipment_CosmeticUnlocked` | <global> | 0 |
 | `EquipmentSlotGroups` | <global> | 0 |
 | `EquipmentSlots` | <global> | 0 |
+| `EquipmentSlotType` | <global> | 0 |
 | `EquippedPart` | <global> | 1 |
 | `EquipRandomItem` | <global> | 2 |
 | `ERagdollState` | <global> | 0 |
@@ -711,7 +724,6 @@ Full unreached game-type list (2261):
 | `ESelectedAction` | <global> | 0 |
 | `EServerRelationType` | <global> | 0 |
 | `eSetBlockResponse` | <global> | 0 |
-| `ESpawnWindowMode` | <global> | 0 |
 | `ESpecIdx` | <global> | 0 |
 | `EStackPanelPos` | <global> | 0 |
 | `eState` | <global> | 0 |
@@ -834,13 +846,13 @@ Full unreached game-type list (2261):
 | `HeadShotOnlyModes` | <global> | 0 |
 | `HeadStates` | <global> | 0 |
 | `HealItemType` | <global> | 0 |
-| `HeldItemState` | <global> | 0 |
 | `HelpTopic` | <global> | 1 |
 | `HierarchyElement` | <global> | 1 |
 | `HitData` | <global> | 0 |
 | `HitDataFlags` | <global> | 0 |
 | `HitDelegate` | <global> | 0 |
 | `HoldingItemBroken` | <global> | 2 |
+| `HoldingMode` | <global> | 0 |
 | `HolsterState` | <global> | 0 |
 | `HonkOpenTypes` | <global> | 0 |
 | `HordeArrivedDelegate` | <global> | 0 |
@@ -887,15 +899,16 @@ Full unreached game-type list (2261):
 | `IGamePrefsChangedListener` | <global> | 0 |
 | `IGameStatsChangedListener` | <global> | 0 |
 | `IGroup` | <global> | 0 |
+| `IHasWorldAddress` | <global> | 0 |
 | `IHorde` | <global> | 0 |
 | `IIntermediateDataWrapper` | <global> | 0 |
 | `IInventory` | <global> | 0 |
-| `IInventoryChangedListener` | <global> | 0 |
 | `IItemDataDragSource` | <global> | 0 |
+| `IItemStackController` | <global> | 0 |
+| `IItemStackGridHolder` | <global> | 0 |
 | `ILaunchPref` | <global> | 0 |
 | `ILaunchPref`1` | <global> | 0 |
 | `ILightProcessor` | <global> | 0 |
-| `ILockContext` | <global> | 0 |
 | `ImageEffect_TurretView` | <global> | 2 |
 | `ImageEffectManager` | <global> | 16 |
 | `IMarchingCubes` | <global> | 0 |
@@ -977,7 +990,6 @@ Full unreached game-type list (2261):
 | `ITileEntity` | <global> | 0 |
 | `ITileEntityChangedListener` | <global> | 0 |
 | `ITileEntityFeature` | <global> | 0 |
-| `ITileEntityLootable` | <global> | 0 |
 | `ITileEntitySignable` | <global> | 0 |
 | `ITrader` | <global> | 0 |
 | `IWireNode` | <global> | 0 |
@@ -1032,7 +1044,7 @@ Full unreached game-type list (2261):
 | `LocalUserChangedCallback` | <global> | 0 |
 | `LocationTypes` | <global> | 0 |
 | `LockChannel` | <global> | 0 |
-| `LockTargetType` | <global> | 0 |
+| `LockChannel` | <global> | 0 |
 | `LockTypes` | <global> | 0 |
 | `LoggingTypes` | <global> | 0 |
 | `LoginAttempts` | <global> | 3 |
@@ -1301,6 +1313,7 @@ Full unreached game-type list (2261):
 | `QuestEvent_BlockEvent` | <global> | 0 |
 | `QuestEvent_ChallengeAwardCredit` | <global> | 0 |
 | `QuestEvent_ChallengeCompleteEvent` | <global> | 0 |
+| `QuestEvent_ContainerOpened` | <global> | 0 |
 | `QuestEvent_EntityKillEvent` | <global> | 0 |
 | `QuestEvent_Event` | <global> | 0 |
 | `QuestEvent_Explosion` | <global> | 0 |
@@ -1327,6 +1340,7 @@ Full unreached game-type list (2261):
 | `QuestObjectiveEventTypes` | <global> | 0 |
 | `QuestPlaceholderEntry` | <global> | 0 |
 | `QuestPointActions` | <global> | 0 |
+| `QuestSource` | <global> | 0 |
 | `QuestState` | <global> | 0 |
 | `QuestStatuses` | <global> | 0 |
 | `RadialContextAbs` | <global> | 1 |
@@ -1386,6 +1400,7 @@ Full unreached game-type list (2261):
 | `ResponseTypes` | <global> | 0 |
 | `ResponseTypes` | <global> | 0 |
 | `RestAngleFunc` | <global> | 0 |
+| `Result` | <global> | 0 |
 | `Result` | <global> | 0 |
 | `Result` | <global> | 0 |
 | `RewardTypes` | <global> | 0 |
@@ -1462,6 +1477,7 @@ Full unreached game-type list (2261):
 | `SignBlendMode` | <global> | 0 |
 | `SignFontConfiguration` | <global> | 1 |
 | `SignShaderIDs` | <global> | 1 |
+| `SignSharing` | <global> | 0 |
 | `SignTextureQuality` | <global> | 0 |
 | `SignUIStyle` | <global> | 0 |
 | `SimpleGraph` | <global> | 4 |
@@ -1750,7 +1766,6 @@ Full unreached game-type list (2261):
 | `vp_GlobalEventReturn`1` | <global> | 5 |
 | `vp_GlobalEventReturn`2` | <global> | 5 |
 | `vp_GlobalEventReturn`3` | <global> | 5 |
-| `vp_Grab` | <global> | 23 |
 | `vp_Grenade` | <global> | 6 |
 | `vp_HealthPickup` | <global> | 2 |
 | `vp_HitscanBullet` | <global> | 8 |
@@ -1850,6 +1865,7 @@ Full unreached game-type list (2261):
 | `WorldEvent` | <global> | 0 |
 | `WorldGlobalFromXml` | <global> | 3 |
 | `WorldListEntry` | <global> | 3 |
+| `WorldObjectType` | <global> | 0 |
 | `WorldRefMono` | <global> | 1 |
 | `WrapMode` | <global> | 0 |
 | `XmlPatchMethodAttribute` | <global> | 2 |
@@ -1860,6 +1876,7 @@ Full unreached game-type list (2261):
 | `XPTypes` | <global> | 0 |
 | `XuiBindComponentAttribute` | <global> | 2 |
 | `XuiBindEventAttribute` | <global> | 1 |
+| `XuiBindingBoxWriterDelegate` | <global> | 0 |
 | `XuiBindingDelegate` | <global> | 0 |
 | `XuiBindingNcalcFunctionAttribute` | <global> | 2 |
 | `XuiBindParentAttribute` | <global> | 1 |
@@ -1934,6 +1951,7 @@ Full unreached game-type list (2261):
 | `XuiXmlAttributeConvertersClassAttribute` | <global> | 1 |
 | `XuiXmlBindingAttribute` | <global> | 1 |
 | `ZoomStates` | <global> | 0 |
+| `IAssetManager` | AssetManagement | 0 |
 | `Extensions` | Assets.DuckType.Jiggle | 7 |
 | `Jiggle` | Assets.DuckType.Jiggle | 14 |
 | `JiggleScheduler` | Assets.DuckType.Jiggle | 7 |
@@ -2279,6 +2297,7 @@ Full unreached game-type list (2261):
 | `SdfTagType` | SDF | 0 |
 | `EventTypes` | Services.Analytics | 1 |
 | `EntitlementData` | Services.Analytics.Events | 0 |
+| `OfferedQuest` | Services.Analytics.Events | 0 |
 | `Rotate` | ShinyScreenSpaceRaytracedReflections | 2 |
 | `TriggerEffectDualsense` | TriggerEffects | 14 |
 | `BaseTwitchVoteOperationRequirement` | Twitch | 7 |
@@ -2422,7 +2441,7 @@ Full unreached game-type list (2261):
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2898 | 2898 | 0 | 100.0% |
+| `<global>` | 2903 | 2880 | 23 | 99.2% |
 | `GameEvent` | 180 | 180 | 0 | 100.0% |
 | `Platform` | 147 | 147 | 0 | 100.0% |
 | `Twitch` | 110 | 110 | 0 | 100.0% |
@@ -2430,9 +2449,9 @@ Full unreached game-type list (2261):
 | `DynamicMusic` | 47 | 47 | 0 | 100.0% |
 | `Challenges` | 47 | 47 | 0 | 100.0% |
 | `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100.0% |
+| `Services` | 24 | 13 | 11 | 54.2% |
 | `UAI` | 24 | 24 | 0 | 100.0% |
 | `PrefabVolumes` | 16 | 16 | 0 | 100.0% |
-| `Services` | 13 | 13 | 0 | 100.0% |
 | `GamePath` | 13 | 13 | 0 | 100.0% |
 | `SandboxOptions` | 13 | 13 | 0 | 100.0% |
 | `Audio` | 12 | 12 | 0 | 100.0% |
@@ -2441,6 +2460,7 @@ Full unreached game-type list (2261):
 | `XMLData` | 7 | 7 | 0 | 100.0% |
 | `Quests` | 7 | 7 | 0 | 100.0% |
 | `MapRendering` | 7 | 7 | 0 | 100.0% |
+| `AssetManagement` | 5 | 1 | 4 | 20.0% |
 | `MusicUtils` | 5 | 5 | 0 | 100.0% |
 | `GearVariants` | 4 | 4 | 0 | 100.0% |
 | `ConcurrentCollections` | 3 | 3 | 0 | 100.0% |
@@ -2467,6 +2487,44 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
+| `QuestAddedEventData` | Services.Analytics.Events | 47 |
+| `Hand` | <global> | 38 |
+| `PlayerDeathEventData` | Services.Analytics.Events | 38 |
+| `QuestProgressionEventData` | Services.Analytics.Events | 29 |
+| `QuestRemovedEventData` | Services.Analytics.Events | 24 |
+| `PlayerStateData` | Services.Analytics.Events | 18 |
+| `DeletedSignStore` | <global> | 17 |
+| `ToolbeltConfig` | <global> | 15 |
+| `PlayerSignStore` | <global> | 13 |
+| `XUiC_SignSharingPrompt` | <global> | 13 |
+| `EntityContainerAbs` | <global> | 12 |
+| `ActiveConditionData` | Services.Analytics.Events | 12 |
+| `InventoryItemData` | Services.Analytics.Events | 10 |
+| `WorldAddress` | <global> | 8 |
+| `CellPool` | <global> | 7 |
+| `AssetManagerLifetimed` | AssetManagement | 7 |
+| `NetPackageLockTarget` | <global> | 7 |
+| `AssetHandle`1` | AssetManagement | 7 |
+| `PlayerInventoryData` | Services.Analytics.Events | 6 |
+| `RespawnConditionTimer` | <global> | 6 |
+| `AssetLoaderManager` | <global> | 5 |
+| `NetPackageSingleSignData` | <global> | 5 |
+| `NetPackageSignDelete` | <global> | 5 |
+| `InstanceHandle`1` | AssetManagement | 5 |
+| `SignStoreIO` | <global> | 5 |
+| `ConsoleCmdGive` | <global> | 5 |
+| `ConsoleCmdListItems` | <global> | 5 |
+| `EngagedEnemyData` | Services.Analytics.Events | 4 |
+| `AssetManager` | AssetManagement | 3 |
+| `EnumBoxCache`1` | <global> | 3 |
+| `ToolbeltFromXml` | <global> | 2 |
+| `ItemValueExtensions` | <global> | 2 |
+| `EquipmentUsageEventData` | Services.Analytics.Events | 2 |
+| `AssetManagers` | <global> | 1 |
+| `PlayerSignWriteRequest` | <global> | 1 |
+| `PlayerSignLibraryState` | <global> | 1 |
+| `ModificationData` | Services.Analytics.Events | 1 |
+| `EquipmentSlotExtensions` | <global> | 1 |
 
 ## Catalogued-only reached types (narrate these to reach 100% narration)
 

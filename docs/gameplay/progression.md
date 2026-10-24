@@ -1,4 +1,4 @@
-# Progression: levels, skills, perks (dedicated V3.2.0)
+# Progression: levels, skills, perks (dedicated V3.3.0)
 
 **Owns:** the server-authoritative player progression: `Progression` (per-player
 level + XP + skill points + owned skills/perks), `ProgressionValue` (a skill /
@@ -8,6 +8,9 @@ math applied by perks ([buffs.md](../gameplay/buffs.md)).
 **Evidence:** `Progression`, `ProgressionValue`, `ProgressionClass` IL (dump
 locally with `tools/src/DumpMethod`, git-ignored). **Hub:** [`INDEX.md`](../INDEX.md).
 **Method:** [`re-methodology.md`](../meta/re-methodology.md).
+**Build:** V3.3.0 b18. The death/backpack and capacity sections were re-read
+against b18; the XP/level/perk method bodies the b18 diff did not touch keep
+their b10 widths.
 
 XP, leveling, and perk unlocks are validated and stored on the server (they gate
 crafting, stats, and abilities), so progression is a dedicated codepath even
@@ -198,27 +201,38 @@ EffectManager.GetValue(PassiveEffects.ExpDeficitMaxPercentage = 0x60, default
 is the apply side and early-returns unless `ExpDeficitGained`.
 
 The stock death **backpack** is client-requested, not server-generated:
-`EntityPlayerLocal::dropItemOnDeath` (523092) is `removeItemsOnDeath` plus
-`degradeItemsOnDeath` plus `dropBackpack(true)` plus `Inventory.SetFlashlight(false)`,
-and `dropBackpack` (523893) ends at
-`GameManager::RequestToSpawnEntityServer(EntityCreationData)` (524453), which
-becomes `NetPackageRequestToSpawnEntity`. `dropBackpack` also reads the static
-`EntityPlayerLocal::DropOnDeathOption` to decide which slots to move.
+`EntityAlive::dropItemOnDeath` (IL=99) and the local
+`EntityPlayerLocal::dropItemOnDeath` (IL=8) run `removeItemsOnDeath` plus
+`degradeItemsOnDeath` plus `dropBackpack(true)`. The b10
+`Inventory.SetFlashlight(false)` call is gone (that method was removed).
+`EntityPlayerLocal::dropBackpack` (IL=336) ends at
+`GameManager::RequestToSpawnEntityServer(EntityCreationData)`, which becomes
+`NetPackageRequestToSpawnEntity`. `dropBackpack` reads the static
+`DropOnDeathOption` to decide which slots move, computes the keep size with
+`EntityPlayer.CalcCurrentBackpackSize(false)` (new, b18) so the bag shrinks to
+the equipment-included capacity before packing, records sort preferences in a
+`PreferenceTracker` (new) and copies them into the spawned container's bag,
+then fills the new `EntityBackpack` (now an `EntityContainerAbs`) with the
+moved stacks.
 
 **`EntityPlayerLocal` death / quit slot handling:**
 - `dropItemOnQuit` (IL=4) is `dropBackpack(false)`.
-- `HandleRemoveRandomItems` (IL=33/34/35, one overload per container type)
-  walks `DestroyLocationSlotList` backwards and clears the recorded slots:
-  `LocationTypes` 0 clears the item-stack array element (`ItemStack.Clear`),
-  1 clears the `Inventory` slot (`SetItem(slot, Empty)`), 2 clears the
-  `Equipment` slot (`SetSlotItem(slot, null, true)`); each entry is removed
-  after clearing.
-- `ShouldRemoveEquipmentOnDeath` (IL=9) is true when the configured
-  `DropOption` is 1 or 6 (equipment is stripped on death for those modes).
-- `EmptyBackpack` (IL=25) sets every bag slot to `ItemStack.Empty` and
-  writes them back; `EmptyToolbelt(start, end)` (IL=21) clears the inventory
-  slot range (skipping `DUMMY_SLOT_IDX`); `EmptyBackpackAndToolbelt`
-  (IL=47) is the combination.
+- `HandleRemoveRandomItems` is now three typed overloads
+  (`HandleRemoveRandomItems(Bag)` / `(Inventory)` / `(Equipment)`, IL=34
+  each). Each walks `DestroyLocationSlotList` backwards and clears only the
+  entries whose `LocationTypes` value matches its container (bag 0 via
+  `Bag.ItemGrid.GetItem(slot).Clear()`, inventory 1 via
+  `Inventory.SetItem(slot, ItemStack.Empty)`, equipment 2 via
+  `Equipment.SetSlotItem(slot, ItemValue.None)`), removing each entry after
+  clearing. The b10 single pass with a `LocationTypes` switch is gone.
+- `ShouldRemoveEquipmentOnDeath` (IL=12) is true when the configured
+  `DropOption` is 1, **4** or 6 (b10 was 1 or 6; option 4 now strips
+  equipment too).
+- `EmptyBackpack` (IL=4) is `Bag.Clear()` (grid `ClearItems`);
+  `EmptyToolbelt(start, end)` (IL=28) writes `ItemStack.Empty` over the slot
+  range (no `DUMMY_SLOT_IDX` skip is needed, that constant is gone);
+  `EmptyBackpackAndToolbelt` (IL=7) is the two calls. New
+  `EmptyEquipment(keepOnDeathItems)` (IL=30) clears the worn slots.
 - `RemoveSpawnPoints(showTooltip)` (IL=19) clears
   `EntityAlive.SpawnPoints` (the `EntityBedrollPositionList`), shows the
   `ttBedrollGone` tooltip when asked, and resets
@@ -231,6 +245,32 @@ becomes `NetPackageRequestToSpawnEntity`. `dropBackpack` also reads the static
 - `AdjustItemsForSandboxOptions` (IL=40) runs the per-slot sandbox filter
   (`ItemStack.AdjustForSandboxOptions`) over the drag-and-drop item, every
   equipment slot, every inventory slot and every bag slot.
+
+### Backpack capacity and `craftingBackpack` (V3.3.0)
+
+Bag capacity is a `PassiveEffects.BagSize` (99) value, not a hardcoded 45.
+`EntityPlayer.Awake` (IL=39) reads `BagSize` with base 45 into `CarryCapacity`
+and sizes the bag from it; the player class in `entityclasses.xml` sets
+`BagSize base_set 48` (b10: 45), so a naked b18 bag is **48** slots.
+`Entity.MaxBagSize` is new: `Entity..ctor` defaults it to 45 and the player
+class overrides it to **96**. `EntityPlayer.CalcCurrentBackpackSize(bool
+includeEquipment)` (IL=30) re-reads `BagSize` clamped to `[1, MaxBagSize]`;
+`UpdateBagpackSize()` (IL=52) resizes the carried bag, and
+`shrinkBackpackMoveItems(int)` (IL=90) spills what no longer fits.
+
+`progression.xml` adds a `crafting_skill` named `craftingBackpack` (max level
+100, parent `attCrafting`) with `display_entry` unlocks at 5..100, and the
+`PackMule` perk's `CarryCapacity` values moved from 3,6,10,14,18 to
+4,12,24,40,56. The perk also gains two `LootProb` effects on the
+`backpackCSM` tag: +2..10% magazine drop chance until `craftingBackpack`
+reaches 100, then a `base_set` back to 1.
+
+The gear items are `backpackSmall|Medium|Large` (`EquipSlot="Backpack"`,
+counted as `EquipmentSlotType.Armor`). Each adds `BagSize` by CraftingTier
+level: small 2..16, medium 18..32, large 34..48, so the carried grid ladder is
+50..64, 66..80 and 82..96 slots. `items.xml` also adds
+`backpackSkillMagazine` (the `craftingBackpack` magazine) and
+`recipes.xml` adds the three workbench recipes (10/30/60 s).
 
 ### The two progression packages a server must handle
 
@@ -369,6 +409,12 @@ player's own `get_gameStage`.
 
 - **2026-08-11:** Progression/store IL re-verified: GetDict IL=4, CalcId IL=4, ToBytes IL=28, FromBytes IL=31, ClearProgressionClassLinks IL=27, Update IL=32, UpdateForSandbox IL=22/52, get_gameStage IL=124, get_unModifiedGameStage IL=45, GetTraderStage IL=46, get_HighestPartyGameStage IL=10, Party.get_HighestGameStage IL=26, dropItemOnQuit IL=4, HandleRemoveRandomItems IL=33/34/35, ShouldRemoveEquipmentOnDeath IL=9, EmptyBackpack IL=25, EmptyToolbelt IL=21, EmptyBackpackAndToolbelt IL=47, RemoveSpawnPoints IL=19, TryAddRecoveryPosition IL=73, AdjustItemsForSandboxOptions IL=40 (exact).
 - **2026-08-10:** Progression IL re-verified: addProgressionCurrency IL=85, ToBytes IL=28, FromBytes IL=31, Update IL=32, UpdateForSandbox IL=22 (exact).
+- **2026-10-24:** V3.3.0 b18: death backpack path (`dropItemOnDeath` IL=8,
+  `dropBackpack` IL=336, `PreferenceTracker`, `CalcCurrentBackpackSize`),
+  typed `HandleRemoveRandomItems` overloads, `ShouldRemoveEquipmentOnDeath`
+  now 1/4/6, `Empty*` bodies, new `EmptyEquipment`; backpack capacity is
+  `BagSize` 48 base up to `MaxBagSize` 96 with `craftingBackpack`; PackMule
+  `CarryCapacity` values changed.
 - **2026-08-10:** Progression IL sizes re-verified: AddLevelExp IL=161, CalcId IL=4 (exact).
 - **2026-08-07:** Progression.Update (IL=32) 1-s cadence MinEvent(5) fire +
   per-frame _expdeficit cvar; UpdateForSandbox fan-out + ProgressionClass

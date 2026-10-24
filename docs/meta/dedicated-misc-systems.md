@@ -488,6 +488,13 @@ footprint is saved-and-dormant
 (IL=65) deregisters entries with no synced / save-dir overlapped chunk then
 runs the cleanup; `CullChunklessDataOnClient(removedChunks)` (IL=69) is the
 client (mode 5) twin.
+**V3.3.0 b18 caller:** `RegionFileManager` no longer runs this inline from the
+save thread. `RemoveChunks` sets a volatile `cullChunklessDataPending`; the next
+`DoSaveChunks` clears it and calls
+`AssertSafeToCallMultiBlockManager("DoSaveChunks")` ->
+`MultiBlockManager.Instance.CullChunklessData()`. The assert logs a thread-safety
+violation when `Monitor.IsEntered(chunksInSaveDir)` (the documented lock
+ordering: never call MultiBlockManager while holding `chunksInSaveDir`).
 `SetOversizedStabilityDirty(pos)` (IL=100) marks every oversized block whose
 local stability bounds contain the position (error on chunk-bin / data
 mismatch); `SetTerrainAlignmentDirty(pos)` (IL=46, plus the `BlockValueRef`
@@ -1088,6 +1095,52 @@ within a per-frame byte budget; `AdminTools` and `StockFileHashes` use it
 for the world-file integrity checks. `WaveReader` (a WAV stream reader,
 `Read(float[])` IL=54) loads audio assets, client-side.
 
+**Blob helpers (new on V3.3.0 b18; type 41 -> 46 methods, IL 1056 -> 1163):**
+`ReadBlob(PooledBinaryReader)` (IL=21) = `i32 length` + `length` bytes
+(`length <= 0` -> empty `MemoryStream`); `WriteBlob(PooledBinaryWriter,
+MemoryStream)` (IL=16) = `i32 count` + the buffer bytes;
+`ToBlob(Action<PooledBinaryWriter>)` (IL=20) and
+`FromBlob(MemoryStream, Action<PooledBinaryReader>)` (IL=40) run a write/read
+callback against a pooled writer/reader bound to a fresh memory stream;
+`GetBlobData(MemoryStream)` (IL=10) is `TryGetBuffer` else `ToArray`. These are
+the containers behind the b18 entity/bag/equipment/inventory record bumps
+([save-region.md](../world/save-region.md) §0).
+
+## Pooled binary reader / writer
+
+`PooledBinaryReader` / `PooledBinaryWriter` are the pooled counterparts of
+`System.IO.BinaryReader`/`BinaryWriter`. Both existed in b10; the V3.3.0 b18
+migration moved every save/wire `Read`/`Write` signature onto them
+(342 changed signatures, 5296 method-body changes). They are **pooling only**:
+
+- Fields: `buffer: Byte[128]`, `charBuffer: Char[128]`, an `encoding` and a
+  cached `Encoder`/`Decoder` (reader also has a `StringBuilder(128)`), plus the
+  base stream held in the inherited `baseStream`/`OutStream` slot. Every
+  primitive write assembles bytes into `buffer` and calls `Stream.Write` once;
+  the reader's `FillBuffer(int)` override fills its own `buffer` from
+  `baseStream`.
+- Encoding: identical to the framework classes. Little-endian integers
+  (`Write(Int32)` shifts 0/8/16/24), `bool` = one byte (`0/1`, reader `!= 0`),
+  strings = `Write7BitEncodedInt(byteCount)` + UTF-8 (`new UTF8Encoding(false,
+  false)`; the framework's default decoder throws on invalid UTF-8, this one
+  replaces, so bytes for valid strings are unchanged), `decimal` 16 bytes,
+  float/double via `BitConverterLE`. No compression, no string table, no BOM.
+- Pool: static `MemoryPools.poolBinaryReader` / `poolBinaryWriter`, each a
+  `MemoryPooledObject<T>(100)` created in `MemoryPools.InitStatic`. Save paths
+  `AllocSync(false)` (no reset) in a try/finally and `Dispose()` in the finally;
+  dispose returns the instance to the pool, `Free` calls `Reset()` (base stream
+  null) and retains up to `maxCapacity`, else `Cleanup()`. `Close()` and
+  `Dispose(bool)` are no-ops.
+- Flush: the writer keeps **no pending user bytes** (the 128-byte array is a
+  per-call scratch). It never flushes the base stream on dispose; durability is
+  the owner's job. Checked owners do it (`WorldState.SaveLoad(String)` disposes
+  its `BufferedStream` in the outer finally, `PlayerDataFile.Save` disposes the
+  `SdFile` stream, chunk snapshots close through `ChunkMemoryStreamWriter`).
+  No pooled-writer data-loss window was found in the save paths.
+
+The migration is therefore a performance change, not a format change; the
+record-version bumps it shipped with are separate source changes.
+
 ## Threading-semantics and collider config leaves
 
 - **`IMapChunkDatabase/DirectoryPlayerId`** (fields `file`, `dir`): the
@@ -1431,6 +1484,19 @@ the dump-derived base + key methods; each family doc owns the substantive groups
 
 ## Changelog
 
+- **2026-10-24 (V3.3.0 b18 serialization re-check):** added the StreamUtils blob
+  helpers (`ReadBlob`/`WriteBlob`/`ToBlob`/`FromBlob`/`GetBlobData`; type now 46
+  methods / 1163 IL) and the "Pooled binary reader / writer" section: pooling and
+  128-byte scratch buffers only, same little-endian / 7-bit-length / UTF-8 wire
+  form as the framework classes, no flush of the base stream on dispose, and the
+  `MemoryPools` reader/writer pools are `MemoryPooledObject<T>(100)`. The
+  2026-08-27 Bag pin below is the **b10** layout; on b18 `Bag::Write` is version
+  byte **2** and delegates to `ItemStackGrid::Write` (grid version 2, container
+  size `Vector2i`, `i16` item count, slot locks, preferences, `u64`
+  worldTimeTouched, playerOwned), with b18 still reading the v1 inline layout.
+  Added the b18 `MultiBlockManager.CullChunklessData` caller (deferred from
+  `RegionFileManager.RemoveChunks` with the `chunksInSaveDir` lock-order assert).
+  Other claims in this doc were not re-run against b18.
 - **2026-08-21:** PlayerSlotsAuthorizer.Authorize pinned: the tiered
   player-cap gate (normal under max; reserved-tier under max with
   occupied < max - reserved; admin tier under max + adminSlots with the
@@ -1476,7 +1542,9 @@ the dump-derived base + key methods; each family doc owns the substantive groups
   blobLen u16 + `Bag.Write` blob. `Bag.Write` (IL=71) = version byte 1 +
   u16 slot count + N x ItemStack.Write + hasLocked bool + PackedBoolArray +
   Touched bool + hasPreferences bool + PreferenceTracker (PooledBinaryWriter
-  only). The only named caller of `NetPackageBag.Setup` in the dump set is
+  only). [b10 pin; V3.3.0 b18 writes version byte 2 with an
+  `ItemStackGrid` v2 payload - see the 2026-10-24 changelog entry.] The only
+  named caller of `NetPackageBag.Setup` in the dump set is
   the client-side `Entity.OnBagModified` (IL=15: `!IsServer` ->
   `SendToServer(NetPackageBag(entityId, bag))`); the server's ProcessPackage
   (IL=61) does `GetEntity(entityId).bag.ReadInto(reader)` with no sender

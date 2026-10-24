@@ -57,6 +57,7 @@ getoptions	ConsoleCmdGetOptions
 getsandboxoptions	ConsoleCmdGetSandboxOptions
 gettime	ConsoleCmdGetTime
 gfx	ConsoleCmdGfx
+give	ConsoleCmdGive
 giveself	ConsoleCmdGiveQualityItem
 givequest	ConsoleCmdGiveQuest
 givexp	ConsoleCmdGiveXp
@@ -71,6 +72,7 @@ lights	ConsoleCmdLights
 listdlc	ConsoleCmdListDLC
 listents	ConsoleCmdListEntities
 lgo	ConsoleCmdListGameObjects
+listitems	ConsoleCmdListItems
 listplayerids	ConsoleCmdListPlayerIds
 listplayers	ConsoleCmdListPlayers
 listthreads	ConsoleCmdListThreads

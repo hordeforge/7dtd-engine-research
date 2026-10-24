@@ -1,4 +1,4 @@
-# Item framework (dedicated V3.2.0)
+# Item framework (dedicated V3.3.0)
 
 **Owns:** the item system core that runs on the server: `ItemValue` (the packed
 item instance), `ItemStack` (value plus count), `ItemClass` (the definition and
@@ -21,6 +21,10 @@ rendering); the `MinEvent` action framework internals (see
 git-ignored). Type census from `il/surface-v3.2.0/surface-types.md` (103 `Item*`
 types; 38 concrete `ItemAction` leaves, see catalog). **Hub:** [`INDEX.md`](../INDEX.md).
 **Method:** [`re-methodology.md`](../meta/re-methodology.md).
+**Build:** V3.3.0 b18. The container, equipment, holding, save and wire
+sections (§2 framing, §5, §6, the held-entity and transaction notes) were
+re-read against b18. Item-framework method bodies that the b18 diff did not
+touch keep their b9 IL widths and are labelled as such.
 
 Items are a core server codepath: the authority owns every held item's runtime
 state, decides damage and consumption, mutates the packed `ItemValue`, and
@@ -97,7 +101,7 @@ item->block conversion every held/placed block item goes through - with
 meta byte selects the alternate block variant, e.g. paint/frame variants),
 otherwise `iv.ToBlockValue(false)`.
 
-**`ItemActionPlaceAsBlock.ExecuteAction` (IL=353)** is the placement action
+**`ItemActionPlaceAsBlock.ExecuteAction` (IL=351)** is the placement action
 (the place half of the bridge): release-only, rate-gated by `Delay` and
 `Constants.cBuildIntervall`, with the same passive-177 `twitch_no_attack`
 gate. It reads the local player's `HitInfo` (valid hit, non-zero
@@ -229,10 +233,15 @@ reference by emitting a single `0` byte, which is why a null and an empty
 | 2 | itemValue | `ItemValue.Write` | gated on the **raw `count` field being non-zero** (`brfalse` on the field, not on the clamped u16 written above), so a zero-count stack writes no value and reads back `ItemValue.None` |
 
 This packing is shared by the save path and the wire: `ItemStack` and `ItemValue`
-appear inside `NetPackageHoldingItem`, `NetPackagePlayerInventory`,
-`EntityCreationData`, and the chunk/tile-entity blobs (see
+appear inside `NetPackageHoldingItem`, `EntityCreationData`, the item grids
+(§6), and the chunk/tile-entity blobs (see
 [`protocol-packages.md`](../network/protocol-packages.md) and
-[`tile-entities-power.md`](../gameplay/tile-entities-power.md)).
+[`tile-entities-power.md`](../gameplay/tile-entities-power.md)). The b18 diff
+does not change this pair: `ItemStack.Write` (IL=20) and `ItemValue.Write`
+(IL=311, version byte 9) have the same layout as b10. What changed is the
+container around it, `ItemStackGrid` (§6), and the wire framing
+(`NetPackagePlayerInventory` carries three serialized grids as blobs since
+b18, not per-field arrays).
 
 `ItemStack.FromString(s)` (IL=38) parses the `name=count` text form: an `=`
 splits the item name (before) from an `int.TryParse` count (after, defaulting
@@ -301,7 +310,7 @@ be equal. `ItemValue.CalcModSlotCount()` (IL=29) rolls the mod-slot budget from
 `Quality` as `FastMin(255, (int)EffectManager.GetValue(ModSlots, this,
 FastMax(0, Quality - 1), ...))`.
 
-`ItemValue.MergeBest(_iv)` (IL=122) merges a donor item into this one (the
+`ItemValue.MergeBest(_iv)` (IL=132) merges a donor item into this one (the
 repair/combine result). With `ItemAction.RepairType` `CombineOnly`/`Both` it
 sums both remaining durabilities against the larger `MaxUseTimes`:
 `UseTimes = FastMax(0, maxMax - (myRemaining + otherRemaining))`. Otherwise
@@ -610,7 +619,7 @@ true in the base and `ItemActionRanged` (IL=4) restricts it to
   `ActivationEmissive`, and `FuseTime` (default 2) converted to
   `explodeAfterTicks = FuseTime * 20` - the 20-TPS tick conversion.
 
-**`ItemClassTimeBomb.OnDroppedUpdate(data)` (IL=188) is the dropped-bomb
+**`ItemClassTimeBomb.OnDroppedUpdate(data)` (IL=190) is the dropped-bomb
 fuse machine** (driven from `EntityItem.OnUpdateEntity` -> `ItemClass.OnDroppedUpdate`):
 a remote client marks a ticking bomb by `Meta = 65535 -> -1`; the server
 tracks `pos = entity.PhysicsMasterGetFinalPosition()` (the physics-master
@@ -626,7 +635,7 @@ Each server tick then decrements `Meta` (playing `SoundTick` on the
 `SetDead()` + `gameManager.ExplosionServer(pos, worldToBlockPos(pos),
 identity, explosion, belongsEntityId, 0, false, itemValue.Clone())` - the
 detonation itself. The held-side priming is
-`ItemClassTimeBomb.OnHoldingItemActivated` (IL=82): with `Meta == 0` it
+`ItemClassTimeBomb.OnHoldingItemActivated` (IL=72): with `Meta == 0` it
 cancels the `WeaponPreFireCancel` avatar event, activates the model's
 activation transforms, sets `RightArmAnimationUse`, and primes
 `Meta = explodeAfterTicks` (or **-1** when `FusePrimeOnActivate`, matching
@@ -1104,7 +1113,7 @@ ranged twin: same charge/release but with `WeaponPreFire`/`WeaponFire`
 avatar events and `HandleJamSound` on an empty release.
 
 **Catapult (bow) family (V3.2.0 b9):** `ItemActionCatapult.ExecuteAction`
-(IL=163) is the draw-and-release state machine over the ranged base. While
+(IL=161) is the draw-and-release state machine over the ranged base. While
 reloading it only stamps `m_LastShotTime` (no fire); the rate gate is the
 inherited `Delay`. An empty weapon (`!InfiniteAmmo && Meta == 0`) with
 `AutoReload && CanReload` runs `ItemReloadServer(entityId)` and sets
@@ -1296,7 +1305,7 @@ the per-target damage math itself lives in
 empty container refund.
 
 **`ItemActionEat.ExecuteInstantAction(ent, stack, isHeldItem, stackCtrl)`
-(IL=179)** is the inventory right-click eat (the §4.1 one-shot variant): it
+(IL=183)** is the inventory right-click eat (the §4.1 one-shot variant): it
 stamps `MinEventContext.ItemValue` and fires MinEvent **24** on the item and
 the entity (use start) with `soundStart`. With the `Consume` flag and a
 partially-used stack (`UseTimes + passive 7 degradation < MaxUseTimes`) it
@@ -1308,7 +1317,7 @@ the `UseJarRefund` sandbox roll (option 12), added via
 `PlayerInventory.AddItem` or dropped with `ItemDropServer(stack, pos, zero,
 -1, 60, false)` when the inventory is full.
 
-**`ItemActionOpenBundle.ExecuteInstantAction` (IL=493)** is the bundle-open
+**`ItemActionOpenBundle.ExecuteInstantAction` (IL=495)** is the bundle-open
 twin (same MinEvent 24/29 + consume skeleton): it iterates the `CreateItem`
 name array and, per entry, takes the matching `CreateItemCount[i]` (default
 `1`), which may be a `min-max` range rolled with the holder's `rand`
@@ -1317,7 +1326,7 @@ name array and, per entry, takes the matching `CreateItemCount[i]` (default
 `PlayerInventory.AddItem`, dropping with `ItemDropServer(stack, pos, zero,
 -1, 60, false)` when the inventory is full.
 
-**`ItemActionOpenLootBundle.ExecuteInstantAction` (IL=183)** is the loot
+**`ItemActionOpenLootBundle.ExecuteInstantAction` (IL=185)** is the loot
 variant: it resolves `LootContainer.GetLootContainer(lootListName, true)`
 (missing -> false), consumes the bundle, and for a player holder rolls
 `LootContainer.Spawn(rand, 100, 0, 0, player.GetHighestPartyLootStage(0, 0),
@@ -1347,436 +1356,258 @@ or count) and applying effects; that mutation is the server's authority.
 
 ## 5. Holding and using an item (server flow)
 
-An `EntityAlive` holds one item at a time. The toolbelt is an `Inventory`; its
-`m_HoldingItemIdx` / `currActiveItemIndex` name the active slot, and each slot is
-an `ItemInventoryData` binding (`item` = `ItemClass`, `itemStack` = `ItemStack`,
-`createItemInventoryData(stack, gm, holder, slotIdx)` (IL=7) is the
-per-holder factory `new ItemInventoryData(...)` (`ItemClassBlock` returns
-its `ItemBlockInventoryData` subclass); `CanPlaceInContainer` (IL=2) is
-true (quest items override to false); `HandleSandboxTechType` (IL=21)
-walks `GetPreviousTechItem` until the tech type is within `MaxTechType`
-(the sandbox tech clamp).
-`actionData` = the per-action runtime states, `holdingEntity` = the wielder).
+An `EntityAlive` holds one item at a time. The held-item state lives in `Hand`
+(new in V3.3.0), not in `Inventory`. `Hand` owns the per-toolbelt-slot
+`ItemInventoryData[] slotDatas`, the bare-hand and transient instances, the
+`equipped`/`holstering` instances, and the `HoldingMode`. The toolbelt
+`Inventory` keeps the storage grid and the selection index (`SelectedSlot`) and
+forwards every holding call to `Hand`. `EntityAlive` carries both (`inventory`
+and `Hand`); the b10 `Inventory` fields (`slots`, `m_HoldingItemIdx`,
+`currActiveItemIndex`, `HoldState`, `createHeldItem`, `listeners`) and
+`EntityAlive.saveInventory` are gone.
 
-Drawing an item runs `SetHoldingItemIdx -> updateHoldingItem ->
-ItemClass.StartHolding`, which calls `StartHolding` on each of the first three
-`Actions`. The change is broadcast to observers as `NetPackageHoldingItem`
-(`entityId`, `holdingItemStack`, `holdingItemIndex`; see
-[`protocol-packages.md`](../network/protocol-packages.md) §5.3), so every client renders the
-right model in the entity's hands.
+`ItemInventoryData` is the per-slot held instance: `stack` (`ItemStack`),
+`physicalItemValue`, `entity`, `toolbeltSlotIdx`, a built `heldModel`
+(`InstanceHandle`), and the per-action `actionData` list. It is created by the
+static `ItemInventoryData.Create(entity, stack, slotIdx)` (IL=5), not by
+`ItemClass.createItemInventoryData`; `Build`/`BuildModel`/`SeatModel`/
+`UnseatModel`/`Teardown` (IL=104/57/82/21/29) run the model lifecycle. The
+`ItemClass` no longer keeps the `World`/`IGameManager` references the old
+binding carried.
 
-**`Inventory.updateHoldingItem()` (IL=172)** - the redraw on a held-slot
-change: with the same item value *and* index as last drawn, it just calls
-`holdingItem.OnHoldingReset(holdingItemData)` and returns. Otherwise it marks
-`entity.bPlayerStatsChanged = !isEntityRemote`, then tears down the old item:
-`lastdrawnHoldingItem.StopHolding(lastDrawnHoldingItemData,
-lastdrawnHoldingItemTransform)`, fires
-`lastDrawnHoldingItemValue.FireEvent(onSelfEquipStop, MinEventContext)` (when
-the old item's tags are not in the `ignoreWhenHeld` set), and hides the old
-model (`SetParent(inactiveItems, false)` + `SetActive(false)`). The new item:
-`QuestEventManager.Current.HeldItem(holdingItemData.itemValue)`,
-`holdingItem.StartHolding(holdingItemData, models[holdingItemIdx])`,
-MinEventContext gets `ItemValue = value` (with the context seed overwritten by
-`value.Seed`) and `Transform = models[idx]`,
-`setHoldingItemTransform(models[idx])`, `ShowRightHand(true)`, then fires
-`value.FireEvent(onSelfHoldingItemCreated, context)` and (tags not ignored)
-`value.FireEvent(onSelfEquipStart, context)`; finally
-`entity.OnHoldingItemChanged()` and the `lastDrawn*`/`lastdrawn*` cache fields
-are refreshed. `Inventory.ShowHeldItem(waitTime, hideFirst)` (IL=19) is the
-delayed re-show helper: it stops any pending `delayedShowHideHeldItemRoutine`
-coroutine and starts `delayedShowHideHeldItem(hideFirst, waitTime)` on the
-GameManager instance (used by `SetItem` step 1 after a held-slot rewrite).
-**`Inventory.HoldingItemHasChanged()` (IL=51)** cancels in-flight action
-animations when the held item changes: with entity/emodel/avatar present it
-fires `AvatarController.CancelEvent` for `WeaponFire`, `PowerAttack`,
-`UseItem`, and `ItemUse`, plus `UpdateBool("Reload", false, true)` - so a slot
-switch mid-swing/mid-reload drops the pending action pose.
+`HoldingMode {Current=0, Bare=1, Transient=2}` replaces `HeldItemState` as the
+selector of which instance the hand uses, not as an animation phase.
+`Hand.get_Held()` (IL=37) returns `bareHandData` unless one of these holds:
+`mode == Transient` and `transientData.HasItem()`, or `mode == Current` with a
+bound toolbelt whose `slotDatas[SelectedSlot]` has an `ItemClass`. It calls
+`EnsureActionData()` on the result.
 
-**`Inventory.SimulateActionExecution(actionIdx, itemStack, onComplete)`**
-(IL=15, coroutine `<SimulateActionExecution>d__138` MoveNext IL=277) is the
-context-menu "Use Item" flow (the only caller is
-`ItemActionEntryUse`'s use-with-animation coroutine): it waits for the
-`DUMMY_SLOT_IDX` slot to free up, clones `itemStack` into it, records the
-previous holding/focused indices, `SetHoldingItemIdx(DUMMY_SLOT_IDX)` and
-`CallOnToolbeltChangedInternal()` (0.1 s waits through the holster delay),
-then runs `Execute(actionIdx, false, null)` followed by
-`Execute(actionIdx, true, null)`, pumping `OnHoldingUpdate(GetItemActionDataInSlot(
-DUMMY_SLOT_IDX, actionIdx))` while `IsHoldingItemActionRunning()` and the
-holster delay settle (0.1 s polls). The `HandleComplete` helper (IL=43)
-returns the dummy slot's stack (or the original `_itemStack` when it still
-matches), restores the previous holding/focused indices when the focus was
-the dummy slot, clears the dummy slot, and invokes `onComplete(stack)`.
-
-**`Inventory.setHeldItemByIndex(idx, applyHolsterTime)` (IL=132)** - the slot
-switch behind `SetHoldingItemIdx` (IL=5, `applyHolsterTime=true`) and
-`SetHoldingItemIdxNoHolsterTime` (IL=5, `false`): after
-`BeginSwapHoldingItem()`, the index wraps around `slots.Length` (negative adds,
-oversized subtracts). It captures `flashlightWasOn = flashlightOn &&
-IsHoldingFlashlight()`, runs `HoldingItemHasChanged()`, triggers the avatar
-`itemHasChangedTriggerHash` when the entity/emodel/avatar exist, and stops
-every `ItemActionAttack` sound in the *current* holding item's `Actions`
-(`Audio.Manager.BroadcastStop(entityId, GetSoundStart())`). Sets
-`m_HoldingItemIdx = m_FocusedItemIdx = idx`; a remote entity then goes straight
-to `updateHoldingItem()` (no holster choreography), while a local entity calls
-`ShowHeldItem(applyHolsterTime ? 0.2 : 0, true)`. Finally, when the flashlight
-was on it re-toggles: `SetFlashlight(false)`, `currActiveItemIndex = -1`, and
-on success plays the `flashlight_toggle` one-shot.
-
-```mermaid
-sequenceDiagram
-  participant CL as Wielder client
-  participant SV as Server (authority)
-  participant OBS as Observing clients
-  CL->>SV: input: use primary (button down)
-  SV->>SV: ItemClass.ExecuteAction(0, invData, bReleased=false, actions)
-  SV->>SV: Actions[0].ExecuteAction -> Hit / fireShot / consume
-  Note over SV: apply damage / consume ammo / decrement count<br/>mutate ItemValue (UseTimes, Meta), roll degradation
-  SV->>SV: ExecuteBuffActions -> target.Buffs.AddBuff(netSync=true)
-  SV->>SV: ItemValue.FireEvent -> ItemClass.Effects (MinEvents)
-  SV->>OBS: NetPackageHoldingItem / entity anim / buff-add packages
-  SV->>CL: authoritative inventory + entity state
-  Note over CL: client also predicted the swing locally (feel),<br/>server result reconciles
-```
-
-The primary-action lifecycle for one use, driven by `ExecuteAction` (press then
-release) and `OnHoldingUpdate` (per-frame advance):
+The primary-action lifecycle for one use, driven by `Hand.Execute` (press then
+release) and `Hand.OnUpdate` (per server tick), keeps the b10 shape:
 
 ```mermaid
 stateDiagram-v2
   [*] --> Holstered
-  Holstered --> Drawn: SetHoldingItemIdx -> StartHolding(actionData)
-  Drawn --> Ready: OnHoldingUpdate (idle)
-  Ready --> Executing: ExecuteAction(idx, bReleased=false)
-  Executing --> Executing: OnHoldingUpdate (charge / auto-fire / reload advance)
-  Executing --> Released: ExecuteAction(idx, bReleased=true)
+  Holstered --> Drawn: SelectSlot -> SelectHoldingMode(Current) -> Equip
+  Drawn --> Ready: OnUpdate (idle)
+  Ready --> Executing: Execute(idx, bReleased=false)
+  Executing --> Executing: OnUpdate (charge / auto-fire / reload advance)
+  Executing --> Released: Execute(idx, bReleased=true)
   Released --> Resolve: HasExecuted -> Hit / fireShot / consume, mutate ItemValue
   Resolve --> Cooldown: apply degradation, effects, buffs
   Cooldown --> Ready: attack interval / Delay elapsed
   Executing --> Canceled: CancelAction / CancelReload
   Canceled --> Ready
-  Ready --> Holstered: switch item -> StopHolding + Cleanup
+  Ready --> Holstered: switch item -> Unequip + TransitionRoutine
 ```
 
-The equip/hold/unequip state of the toolbelt slot itself (distinct from a single
-use) tracks which item is in hand and how switching and depletion move it:
+The equip/switch state of the hand itself:
 
 ```mermaid
 stateDiagram-v2
-  [*] --> NoActiveItem
-  NoActiveItem --> Switching: SetHoldingItemIdx(newIdx) -> isSwitchingHeldItem = true (holster time)
-  Switching --> Holding: updateHoldingItem -> StartHolding, broadcast NetPackageHoldingItem
-  Holding --> Holding: OnHoldingUpdate per frame
-  Holding --> Switching: SetHoldingItemIdx(other) -> StopHolding old, holster
-  Holding --> Depleted: DecHoldingItem -> count reaches 0
-  Depleted --> ClearSlot: clearSlotByIndex + notifyListeners
-  ClearSlot --> Switching: GetBestQuickSwapSlot -> auto-draw replacement
-  ClearSlot --> NoActiveItem: no replacement (bare hands)
+  [*] --> NoSlot
+  NoSlot --> Current: SelectSlot(idx) -> SelectHoldingMode(Current, holster)
+  Current --> Current: same slot and item -> OnHoldingReset
+  Current --> Bare: SelectHoldingMode(Bare) (empty slot, holstered)
+  Current --> Transient: SelectHoldingMode(Transient) (external held item)
+  Bare --> Current: SelectHoldingMode(Current)
+  Transient --> Current: SelectHoldingMode(Current)
+  Current --> Switching: SelectHoldingMode(other) -> Unequip + TransitionRoutine
+  Switching --> Current: CompleteTransition -> Reconcile -> Equip
 ```
 
-Wire mirror struct: `EntityNetworkHoldingData` carries `m_HoldingItemStack` +
-`m_HoldingItemIndex` for the S2C `NetPackageHoldingItem` body (same fields as
-[protocol-packages.md](../network/protocol-packages.md) §5.3).
+**Switch entries.** `Inventory.SetHoldingItemIdx(idx)` (IL=6) is
+`Hand.SelectSlot(idx, true)`; `SetHoldingItemIdxNoHolsterTime` (IL=6) passes
+false. `Hand.SelectSlot(slot, applyHolsterTime)` (IL=80) fires the avatar
+item-changed trigger, stops `ItemActionAttack` start sounds, calls
+`ItemClass.OnHoldingReset` when reselecting the equipped item, writes
+`Inventory.SelectedSlot`, then `SelectHoldingMode(Current, 0.2f or 0f)`.
+`Hand.SelectHoldingMode(mode, holsterTime)` (IL=89) cancels animator actions,
+stores `mode`, resolves the new `Held`, unequips when it differs from
+`equipped` or needs a rebuild, rebuilds the instances, and either calls
+`CompleteTransition()` directly (remote entity) or starts `TransitionRoutine`
+(local entity). `Reconcile()` (IL=60) is the idempotent settle: unequip +
+rebuild + equip when the held instance changed, else re-seat the model when it
+is not parented to the right-hand transform. `TransitionRoutine` (IL=12) is the
+holster/unholster coroutine; `CompleteTransition()` (IL=29) clears
+`isSwitching`, unseats the holstering model, reconciles, stamps
+`MinEventContext`, and cancels avatar actions.
 
-**`updateHoldingItem()` (IL=172)** is the switch body: with the same value and
-index as last drawn it runs `holdingItem.OnHoldingReset(data)` and returns
-(the re-arm path); otherwise it marks `bPlayerStatsChanged = !isEntityRemote`,
-points `MinEventContext` at the old value/transform, runs
-`lastdrawnHoldingItem.StopHolding(data, transform)`, then starts the new item
-and updates the last-drawn value/index.
+**Equip/unequip effects.** `Equip` (IL=63) runs `OnEquipped`,
+`ItemClass.StartHolding`, MinEvent **54** (and **83** when the item is not in
+`IgnoreWhenHeld`), sets `bPlayerStatsChanged` for a local entity, and calls
+`EntityAlive.OnHoldingItemChanged`. `Unequip` (IL=60) fires MinEvent **57**
+under the same tag gate, then `StopHolding`; it parks the model in `holstering`
+while switching and unseats it otherwise.
 
-**Switch entries:** `SetHoldingItemIdx(idx)` (IL=5) is
-`setHeldItemByIndex(idx, true)` (with holster time); the `NoHolsterTime`
-variant (IL=5) passes false.
+**Dispatch and busy state.** `IsBusy` (IL=20) is true while switching or in
+`Transient`, else `ItemClass.IsActionRunning(Held)`; `IsHolstered` is
+`mode == Bare`. `OnUpdate` (IL=53) runs `ItemClass.OnHoldingUpdate(Held)` per
+tick, fires MinEvent **56**, and cancels the local avatar item-changed event.
+`Execute` (IL=26) gates on `isSwitching` and `WaitForSecondaryRelease`, then
+calls `ItemClass.ExecuteAction(actionIdx, Held, released, actions)`.
+`ReleaseAll` (IL=22) releases every action slot.
 
-**`DecHoldingItem(count)` (IL=45)** consumes from the held slot (stackable
-only): on emptying it runs `HandleTurningOffHoldingFlashlight()` +
-`clearSlotByIndex`, then `updateHoldingItem()` + `notifyListeners()`.
-**`GetBestQuickSwapSlot()` (IL=50)** prefers the remembered
-`quickSwapSlotIdx` when it still holds the same item id, else scans for the
-first slot with that id (**-1** when absent or never armed).
+**Quick-swap and depletion.** `Hand.GetBestQuickSwapSlot()` (IL=57) prefers the
+remembered `quickSwapSlotIdx` when that slot still holds the same class, else
+scans for the first slot with that class (returning -1 when absent or never
+armed). `Inventory.DecHoldingItem(count)` (IL=50, returns `bool`) returns
+immediately for a bare hand, consumes `min(count, stack.count)`, clears the cell
+at zero, calls `ItemClass.OnHoldingReset(Held)` when the cell still holds the
+item, then `Hand.Reconcile()`. There is no explicit quick-swap call in
+`DecHoldingItem` any more; the replacement is drawn by `Reconcile` or the next
+`SelectHoldingMode(Current)`.
 
-**Held-slot accessors (V3.2.0 b9):** `get_holdingItemIdx()` (IL=3) is the raw
-`m_HoldingItemIdx`. `get_holdingItem()` (IL=20),
-`get_holdingItemItemValue()` (IL=16), `get_holdingItemStack()` (IL=17), and
-`get_holdingItemData()` (IL=23) all read `slots[m_HoldingItemIdx]` and fall
-back to the bare-hand twin when the held slot is empty: `bareHandItem`,
-`bareHandItemValue`, `new ItemStack(bareHandItemValue, 0)`, and
-`bareHandItemInventoryData` (with `slotIdx = holdingItemIdx` stamped in),
-respectively - an empty toolbelt slot reads as the bare hand everywhere.
-`IsHoldingGun()` (IL=9) is `holdingItem != null && holdingItem.IsGun()`
-(the guard behind the magnum kill-score flag in
-[`combat-damage.md`](../gameplay/combat-damage.md)). Slot-count constants:
-`get_INVENTORY_SLOTS()` (IL=5) = `PUBLIC_SLOTS + 1`;
-`get_PUBLIC_SLOTS()` (IL=11) = 10 in play, 20 while
-`PrefabEditModeManager.IsActive()` (`PREFABEDITOR = 2 * PLAYMODE`);
-`get_DUMMY_SLOT_IDX()` (IL=5) = `INVENTORY_SLOTS - 1`, the hidden last slot
-used to stow the held item during a vehicle attach
-(`SetHoldingItemIdxNoHolsterTime(DUMMY_SLOT_IDX)`, see
-[`vehicles-drones-turrets.md`](../gameplay/vehicles-drones-turrets.md) §4.2).
+**Held-slot accessors** are one-line delegates to `Hand`:
+`get_holdingItemIdx` = `SelectedSlot` (IL=3); `get_holdingItem`,
+`get_holdingItemItemValue`, `get_holdingItemStack`, `get_holdingItemData`,
+`get_holdingCount`, `get_holdingItemDataSlotNoBarehandFallback`,
+`GetHoldingItemTransform`, `IsHoldingItemActionRunning`, `IsHandBusy`,
+`IsHandSwitching`, `ReconcileHeldItem`, `Execute`, `ReleaseAll`,
+`GetBestQuickSwapSlot` (Inventory IL=3..9 each). The bare-hand fallback now
+exists only in `Hand.get_Held`, so an empty toolbelt slot reads as the bare
+hand only when the mode or the slot says so.
 
-**`ForceHoldingItemUpdate()` (IL=91)** is the forced full rebuild of the held
-item: it destroys the current held model, re-creates the model only when the
-class `CanHold()` (`createHeldItem`), re-creates the slot's
-`ItemInventoryData` when a block-data slot no longer holds a block class,
-restores the cloned value + count into the slot, sets
-`m_LastDrawnHoldingItemIndex = -1`, and runs `updateHoldingItem()`. Xref
-callers (6): `DroneWeapons.HealBeamWeapon.Fire` (the drone heal beam rebuilds
-the patient's held item), `EntityAlive.EntityNetworkStats.ToEntity` (stats
-restore on entity materialization), `EModelBase.SwitchModelAndView` (x2,
-client model swap), the client
-`PlayerMoveController.<initializeHoldingItemLater>d__92` coroutine, and the
-server-relevant `WorldStaticData.ReloadItemModifiers` (an item-modifier
-reload forces every held item to re-resolve).
-
-`DecHoldingItem` is the server-authoritative depletion: it lowers the held
-`ItemStack.count`, and when the stack hits zero it clears the slot and quick-swaps
-to the best remaining slot (`GetBestQuickSwapSlot`) so a used-up stack of thrown
-weapons or blocks auto-replaces from the toolbelt.
+**Toolbelt slot count is data-driven.** `ToolbeltConfig` (new) holds
+`SlotsPerBar`, `BarsPerPage` and `PageCount`, with
+`TotalSlots = SlotsPerBar * BarsPerPage * PageCount` (IL=9); the defaults are
+10/1/1. `Data/Config/toolbelt.xml` is parsed by `ToolbeltFromXml.ParseConfig`
+(IL=110) into `GameConfig` and `EditorConfig`; the shipped file only sets
+`editorconfig` (10 slots/bar, 2 bars/page, 20 total) and states
+`gameconfig is currently unsupported`. `EntityPlayer.InitInventory` (IL=10)
+sizes the `Inventory` from `ToolbeltConfig.CurrentConfig.TotalSlots`. The b10
+constants `PUBLIC_SLOTS`, `INVENTORY_SLOTS`, `DUMMY_SLOT_IDX` and
+`SHIFT_KEY_SLOT_OFFSET` are gone; `SlotCount` is a plain field now. The b10
+hidden dummy-slot stow (vehicle attach) has no equivalent constant in b18; the
+vehicle handoff itself was not traced (`vehicles-drones-turrets.md` needs its
+own re-read).
 
 ---
 
 ## 6. Inventory containers
 
-An `EntityAlive` carries three distinct containers, each a different type:
+An `EntityAlive` carries three containers, plus the world-addressed grids of
+tile entities and dropped containers:
 
-| Container | Type (base) | Role |
+| Container | Type | Role |
 |---|---|---|
-| Toolbelt | `Inventory` | the held-item bar: `slots` (`ItemInventoryData[]`), `m_HoldingItemIdx`, holding dispatch, quick-swap |
-| Backpack | `Bag` (`: InventoryBase`) | main storage grid of `ItemStack`s; not held, just carried |
-| Worn gear | `Equipment` | armor and cosmetic slots (`ArmorGroupEquipped`, `m_cosmeticSlots`), keyed by armor group |
+| Toolbelt | `Inventory` (`: InventoryBase`) | 10 slots (config-driven), `SelectedSlot`, `ItemGrid`; holding delegates to `Hand` |
+| Backpack | `Bag` (`: InventoryBase`) | carried storage grid; 48 slot base, up to `Entity.MaxBagSize` 96 through backpacks (§ equipment below) |
+| Worn gear | `Equipment` | 13 slots (`EquipmentSlots`) plus 3 cosmetic slots; `ItemGrid` |
+| World storage | `TEFeatureStorage`, `Entity` bag | `ItemStackGrid` addressed by `ItemStackGrid/Address` (`WorldAddress` + byte key) |
 
-`Inventory` is the only one that participates in holding: it resolves the active
-`ItemInventoryData`, runs `StartHolding`/`OnHoldingUpdate`, and exposes typed
-accessors (`GetHoldingGun`, `GetHoldingBlock`, `GetHoldingDynamicMelee`,
-`IsHoldingItemActionRunning`). `Bag` is pure storage. `Equipment` applies worn-gear
-stats through its armor groups and tracks cosmetic unlocks; it changes stats but
-is never "held".
+**`ItemStackGrid` is the storage core.** It existed in b10 as the client-side
+2D stack class and is rewritten in b18 into the shared storage and
+serialization type behind all four rows above. Fields: `ItemStack[] items` (one
+`ItemStack` cell per slot, each `BindGridSlot`-ed to the grid), `PackedBoolArray
+slotLocks`, `PreferenceTracker preferences`, `Vector2i ContainerSize`,
+`StackLocationTypes StackLocation`, `UInt64 worldTimeTouched`, `bool
+playerOwned`, `bool suppressChanged`, `Action<int> SlotChanged`.
+`Create(size, location, hasLocks, hasPreferences, holder)` (IL=7) sizes `x*y`
+cells; the parameterless ctor is the read path. Leaves: `Read`/`ReadInto`
+(IL=114), `Write` (IL=70), `Resize` (IL=99), `SetItems` (IL=86), `SetItem`
+(IL=23), `AddItem` (IL=81), `ChangeCount` (IL=56), `CopyFrom` (IL=103),
+`CopyItemsFrom` (IL=60), `CloneItems` (IL=29), `Compact`/`CompactSlots`
+(IL=11/140), `Sort` (IL=74), `SetSlotLocks` (IL=43), `SetPreferences` (IL=53),
+`Touch` (IL=6). `ItemStack` keeps the value+count record and gains
+`BindGridSlot`, `SwapWith`, `Set`, `NotifyChanged`; the b10 `ItemStack[]` array
+helpers are replaced by grid methods.
 
-**Container accessors (all IL-verified):** `Inventory.GetSlotCount` (IL=5)
-is the `slots` array length; `GetSlotsWithBlock(block)` (IL=60) returns the
-slot indices holding that block - for a `CanPickup` block the item name
-must equal `block.PickedUpItemValue`, otherwise the slot's
-`ItemClassBlock.GetBlock()` must equal it; `IsHoldingBlock` (IL=9) is
-`holdingItem?.IsBlock()`; `PerformActionOnSlots(action)` (IL=21) invokes
-the action on every slot's `ItemStack` (the sandbox-adjust fan-out).
-`Equipment.GetSlotCount` (IL=5) is the `m_slots` length; `GetSlotItem(i)`
-(IL=13) returns null past the end; `GetSlotItemOrNone(i)` (IL=19) returns
-`ItemValue.None` for out-of-range or empty slots;
-`Equipment.PerformActionOnSlots(action)` (IL=24) invokes the action on
-every non-null worn `ItemValue`.
+**Grid persistence** (`ItemStackGrid.ReadInto` IL=114 / `Write` IL=70): `u16`
+version (written 2), `Vector2i` container size, `i16` slot count (must equal
+`x*y`, else `InvalidOperationException`), one `ItemStack` per slot, a `bool`
+locks flag (+`PackedBoolArray`), a `bool` preferences flag
+(+`PreferenceTracker`), then at version >= 2 `u64 worldTimeTouched` and `bool
+playerOwned`. `Resize` returns the stacks that no longer fit so the caller can
+spill them.
 
-**`Bag` leaves:** `TryStackItem(startIndex, stack)` (IL=75) is the stack-merge:
-it requires `CanMoveTo(Backpack, -1)`, then scans slots from `startIndex`,
-merging same-type slots via `CanStackPartly(ref count)` (each merge fires
-`onBackpackChanged()`), and returns `(fullyPlaced, changed)`.
-`ReadInto(br)` (IL=93) is the bag wire format: version byte, `u16` slot count
-(resizing `items` when it differs), per-slot `ItemStack.Read`, a
-`LockedSlots` `PackedBoolArray` when flagged (else null), and at version >= 1
-`Touched` plus an optional `PreferenceTracker` (a non-`PooledBinaryReader`
-here throws `InvalidOperationException`). `get_SlotCount` (IL=10) is
-`items?.Length`; the change notification `onBackpackChanged` (IL=8) is a
-null-guarded invoke.
+**Container accessors.** `Inventory.Length` (IL=4) and `SlotCount` (IL=3) are
+the grid length; `GetStackAt` (IL=5), `ChangeSlotCount` (IL=6), `SetStackAt`
+(IL=32), `GetItem` (IL=4), `SetItem` (IL=41/8), `SetSlots` (IL=28),
+`PerformActionOnSlots` (IL=17). `Equipment.GetSlotCount` (IL=4) is the grid
+length (13); `GetSlotItem(i)` (IL=13) returns `ItemValue.None` past the end;
+`PerformActionOnSlots` (IL=25) visits every worn value. `Bag.SlotCount` is the
+grid length; `Resize` (IL=16), `SetSlots` (IL=19), `SetSlot` (IL=11).
 
-**`Bag` storage leaves:** `DecItem(value, count, ignoreModdedItems,
-removedItems)` (IL=120) is the consume path: over matching-type slots
-(skipping modded when asked) it takes `min(slot.count, remaining)` from
-stackable classes (recording the taken `ItemStack(value.Clone(), take)` in
-`removedItems`), and for non-stackable classes removes the whole slot (recording
-a clone) decrementing one per slot; returns the amount actually removed.
-`CanStack(stack)` (IL=31) is true when any slot is empty or `CanStackWith`;
-`CanStackNoEmpty` (IL=26) and `CanTakeItem` (IL=33) use `CanStackPartlyWith`
-(empty-slot allowance for the latter); `GetUsedSlotCount` (IL=28) counts
-non-empty slots; `IsEmpty` (IL=24) is all-empty; `AddItem(stack)` (IL=21) gates
-on `CanMoveTo(Backpack, -1)` then `AddToItemStackArray` (fires
-`onBackpackChanged` on success); `Clear()` (IL=24) empties every slot + notifies.
-`GetItemCount(ItemValue / FastTags, seed, meta, ignoreModded)` (IL=68 / 75)
-match the `Inventory` variants (type/tag, seed/meta filters, modded skip).
-`Clone()` (IL=31) deep-copies items, locked slots, `Touched`, and preferences.
+**`Bag` format changed.** `Bag.Write` (IL=9) emits a `Byte version` (2) then
+the `ItemStackGrid`; `Bag.readInto` (IL=96) delegates to the grid at version >=
+2 and reads the legacy layout below it (`u16` slot count, `ItemStack` per
+slot, `bool` locks, `Touched` plus optional `PreferenceTracker`), migrating
+into the grid. The b10 description of the bag reader as owning the whole format no longer
+applies; `Bag.readInto` is now a wrapper over the grid.
 
-**`Inventory` layer leaves:** `ModifyValue(original, effect, ref base, ref
-perc, tags)` (IL=29) applies the holding item's chain (`ItemValue.ModifyValue`,
-useMods true) unless it equals the original or its class matches the
-`ignoreWhenHeld` tags - the holding-item layer of `EffectManager.GetValue`.
-`DecItem(value, count, ignoreModded, removedItems)` (IL=132) is the toolbelt
-consume, the same take-min/record/clear walk as `Bag.DecItem` over the
-`ItemInventoryData[]` slots (holding-index updates included).
+**`Bag` leaves:** `TryStackItem(startIndex, stack)` (IL=74) requires
+`CanMoveTo(Backpack, -1)`, scans from `startIndex`, merges via
+`CanStackPartly(ref count)`, and returns `(fullyPlaced, changed)`.
+`DecItem(value, count, ignoreModdedItems, removedItems)` (IL=96) is the consume
+walk; `CanStack` (IL=30) / `CanStackNoEmpty` (IL=24) / `CanTakeItem` (IL=32),
+`GetUsedSlotCount` (IL=26), `IsEmpty` (IL=22), `AddItem` (IL=18), `Clear`
+(IL=4, `ItemGrid.ClearItems()`), `GetItemCount` (IL=58/63). The b10 `Clone()`
+is gone; `ItemStackGrid.CopyFrom`/`CloneItems` replace it.
+`onBackpackChanged` (IL=8) remains the change notify.
 
-**`Equipment` leaves:** `ApplyTempCosmeticSlot` (IL=24) writes the pending
-`tempCosmeticSlot` into `m_cosmeticSlots[tempCosmeticSlotIndex]` and, for a
-non-remote entity, sets `bPlayerEquipmentChanged = true` (the equip-sync
-flag); `ClearTempCosmeticSlot` (IL=7) resets the index and class.
-`FireEventsForChangedSlots` (IL=137) is the equip-change dispatch: it
-latches `IsEquipping`, and per changed slot (the `slotsChangedFlags`
-bitmask) fires MinEvent **55** on the item, then **91** (equip) or **92**
-(unequip) on the item class and every installed mod depending on
-`Activated`, clearing the flags and `IsEquipping` at the end.
+**`Inventory` layer leaves.** `ModifyValue(original, effect, ref base, ref
+perc, tags)` (IL=28) applies the held item's chain unless the value equals the
+original or its class matches `Hand.IgnoreWhenHeld`. `DecItem(value, count,
+ignoreModded, removedItems)` (IL=97) walks the grid with the same
+take-min/record/clear rule; `AddItem` overloads (IL=5/8/107) gate on
+`CanMoveTo(ToolBelt, slot)`; `CanStack` (IL=32), `TryStackItem` (IL=70),
+`HasItem` (IL=10). `OnSlotChanged` (IL=7) is the grid `SlotChanged` receiver:
+it no-ops while `isReading`, else `CallOnToolbeltChangedInternal()`. The b10
+`listeners`/`notifyListeners` fan-out and `SetItem(idx, ItemValue, count,
+notifyListeners)` (IL=166) are gone.
 
-**More `Equipment` leaves:** `ModifyValue(original, effect, ref base, ref perc,
-tags, useDurability)` (IL=39) runs `ItemValue.ModifyValue` (useMods true) over
-every non-null, non-original slot with a class - the worn-gear layer of
-`EffectManager.GetValue`. `updateInsulation` (IL=32) recomputes `waterProof`
-as the sum of the worn classes' `WaterProof` (the `insulation` field is the
-cached total). `DropItems` (IL=31) drops every slot via
-`ItemDropServer(ItemStack(iv, 1), position + (0.5, 0, 0.5), belongsPlayerId,
-60, false)` and clears the slot, then re-runs `updateInsulation`;
-`GetTotalInsulation` / `GetTotalWaterproof` (IL=3 each) are field getters.
+**`Equipment` leaves.** `SetSlotItem(index, value)` (IL=91; the `isLocal`
+argument is gone) runs the equip change: no-op for null to null, treats empty
+as null, latches `IsEquipping`, tears the old item down (MinEvent 92 then 57),
+stores the preferred type and the new value, flags the changed slot, resets
+armor groups and fires `OnChanged` for a local entity, then clears
+`IsEquipping`. `BuildSlot(i)` (IL=31) / `TeardownSlot(i)` (IL=87) build and
+destroy the slot's `ItemInventoryData`; `OnEquipmentChanged` (IL=22) is the
+rebuild fan-out. `GetSlotItem` (IL=13), `HasAnyItems` (IL=22), `DropItems`
+(IL=31), `updateInsulation` (IL=33), `GetTotalInsulation`/`GetTotalWaterproof`
+(IL=3), `CalcDamage` (IL=83), `GetTotalPhysicalArmorRating` (IL=47) and
+`GetArmor` (IL=46) loop the grid, so slot 12 (Backpack) joins every armor pass.
+`SetCosmeticSlot` (IL=51) still accepts only the first 4 cosmetic slots and
+gates on `HasCosmeticUnlocked`; the (slotID, id) variant (IL=73) resolves
+through `CosmeticMappingIDString`. `ApplyTempCosmeticSlot` /
+`ClearTempCosmeticSlot` (IL=24/7) keep their shape.
 
-All three ride the inventory net packages rather than a per-item packet:
-`NetPackagePlayerInventory` carries `toolbelt` (`ItemStack[]`), `bag`
-(`Bag.Write`), `equipment`, and the drag-and-drop item; the request/response and
-transaction packages (`NetPackageInventoryDataRequest/Response`,
-`NetPackageInventoryTransactionRequest/Response`) move container contents and
-validate moves on the server. `NetPackagePlayerInventoryForAI` sends a reduced
-view for AI. Server validates every transaction; the client requests, the server
-approves and echoes the authoritative result.
+**Equipment slots.** `EquipmentSlots` has 15 names in b18 over 13 distinct
+values: Head 0, Chest 1, Hands 2, Feet 3, BiomeBadge 4..7, ClothingHead 8..11,
+Backpack 12, and both `Count` and `None` at 13. `EquipmentSlotExtensions.SlotType(slot)` (IL=53)
+maps Head/Chest/Hands/Feet and Backpack to `EquipmentSlotType.Armor`, the four
+BiomeBadges to `BiomeGear`, the four Clothing slots to `Clothing`, `Count` to
+`None`, and throws for anything else. `items.xml` `EquipSlot="Backpack"` is
+the new slot name for `backpackSmall|Medium|Large`; their `BagSize` effects
+raise the carried grid from 48 slots ([progression.md](../gameplay/progression.md)
+"Backpack capacity and `craftingBackpack`").
 
-**`Inventory.SetItem(idx, itemValue, count, notifyListeners)` (IL=166)** (the
-server-authoritative slot write; `SetItem(idx, ItemStack)` IL=9 wraps it with
-`notifyListeners=true`):
+**Unchanged leaf behavior (b18 sizes).** `Inventory.ModifyValue` (IL=28),
+`Inventory.GetItemCount` (IL=65 both overloads), `Inventory.GetItemInSlot`
+(IL=6, now just `GetStackAt(i).itemValue.ItemClass`) and
+`Inventory.GetItemDataInSlot` (IL=5, `Hand.GetSlotData(i)`; null for an empty
+slot, no bare-hand fallback) keep their jobs over the grid/`Hand`.
+`Equipment.ModifyValue` (IL=40), `DropItems` (IL=31), `updateInsulation`
+(IL=33), `GetTotalInsulation`/`GetTotalWaterproof` (IL=3) and
+`FireEventsForChangedSlots` (IL=135, MinEvent **55** per changed item then
+**91**/**92** equip/unequip on the class and its mods, gated by `Activated`)
+are unchanged in shape. `Bag.GetItemCount` (IL=58/63) still filters
+type-or-tags, seed, meta and modded items over the grid.
 
-1. **Held re-show:** when writing the held slot and the new item value differs
-   from the current one (`EqualsExceptUseTimesAndAmmo`), `ShowHeldItem(0.2,
-   true)` re-displays the held item model.
-2. **Bounds:** `idx >= slots.Length` returns without touching anything.
-3. **Missing-class guard:** a non-zero `ItemValue.type` whose `ItemClass` is
-   null logs `Inventory slot {0} {1} missing item class` and clears the value.
-4. **Preferred-slot memory:** with `idx < preferredItemSlots.Length`, a
-   non-zero new type records `preferredItemSlots[idx] = type` (when notifying);
-   otherwise the *old* slot type is remembered before it is overwritten.
-5. **Class-change rebuild:** when the incoming class differs from the slot's
-   (or the slot is empty), `clearSlotByIndex(idx)` first, then rebuild
-   `models[idx]` (`createHeldItem` only when the class `CanHold()`, else null)
-   and `slots[idx] = createInventoryData(idx, itemValue)`; `changed` is set.
-6. **Store:** `slots[idx].itemStack.itemValue = itemValue.Clone()` and
-   `.count = count` (the value is cloned, never aliased).
-7. When `changed` and the written slot is the held slot:
-   `updateHoldingItem()`; when `notifyListeners`: `notifyListeners()` (the
-   network/buff/listener fan-out).
-
-**`Inventory.notifyListeners()` (IL=24):** calls the internal
-`onInventoryChanged()` hook, then iterates the `listeners`
-(`HashSet<IInventoryChangedListener>`) calling `OnInventoryChanged(this)` on
-each - the single fan-out point behind every slot write.
-
-**Read accessors (V3.2.0 b9):** `GetItem(idx)` (IL=6) / `GetItemStack(idx)`
-(IL=6) read `slots[idx].itemStack`; `GetItemInSlot` (IL=15) and
-`GetItemDataInSlot` (IL=14) fall back to `bareHandItem` /
-`bareHandItemInventoryData` when the slot's item class is null (empty slots
-read as the bare hand). `GetItemCount()` (IL=5) is just `slots.Length`.
-`GetItemCount(ItemValue, bConsiderTexture, seed, meta, ignoreModdedItems)`
-(IL=92) sums counts over slots matching: same `type`, texture
-(`TextureFullArray` equality) when requested, `seed` when not -1, `meta` when
-not -1; with `ignoreModdedItems`, slots whose value `HasModSlots && HasMods`
-are skipped. `GetItemCount(FastTags itemTags, seed, meta, ignoreModded)`
-(IL=86) is the tag variant: non-empty values whose
-`ItemClass.ItemTags.Test_AnySet(itemTags)` match, same seed/meta/mod filters.
-The `XUiM_PlayerInventory.GetItemCount` wrappers (IL=19) sum the same query
-over backpack + toolbelt (UI-side). `Bag.GetItemCount` mirrors both Inventory
-overloads (IL=68 / IL=75) over the backpack's `GetSlots()` array with the same
-type-or-tags, seed, meta, and `ignoreModdedItems` filters.
-
-**`Equipment.SetSlotItem(index, value, isLocal)` (IL=191)** (the armor-slot
-equip path): with `isLocal` an empty value is treated as null; a no-op when
-both old and new are null; wraps the work in `m_entity.IsEquipping = true`.
-The **same-value path** stores and fires `onSelfEquipStart` (54) only. The
-**changed path** first tears down the old item: for the item and each mod with
-an `onSelfItemActivate` (91) trigger and `Activated != 0`, fire
-`onSelfItemDeactivate` (92) and clear `Activated`; then fire
-`onSelfEquipStop` (57) on the old value. It stores
-`preferredItemSlots[index] = value?.type ?? 0`, `m_slots[index] = value`, and
-sets the `slotsSetFlags` / `slotsChangedFlags` bit for the index; on a real
-change a local entity gets `bPlayerEquipmentChanged = true` plus
-`ResetArmorGroups()` and `OnChanged?.Invoke()`; finally
-`IsEquipping = false`. `SetSlotItemRaw` (IL=13) is the silent raw store.
-**`SetCosmeticSlot`** (IL=50, class variant): only `EquipSlot < 4` cosmetic
-slots, gated on `HasCosmeticUnlocked`; skips when the slot already wears the
-same `ArmorGroup[0]`; stores and flags `bPlayerEquipmentChanged` for local
-entities. The (slotID, id) variant (IL=72) resolves the id through
-`CosmeticMappingIDString` into an `ItemClassArmor` (id 0 clears the slot) and
-stores into the mapped or generic slot.
-
-**Equipment leaves:** `updateInsulation()` (IL=32) recomputes `waterProof` as
-the sum of every equipped slot's `ItemClass.WaterProof`;
-`GetTotalInsulation` / `GetTotalWaterproof` (IL=3) read the accumulated
-fields. `DropItemOnGround(item)` (IL=21) spawns a 1-count stack via
-`IGameManager.ItemDropServer(stack, entity position, velocity (0.5, 0, 0.5),
-belongsPlayerId, 60 s lifetime, false)` (the armor drop on death/swap path).
-`GetArmorGroupLowestQuality(group)` (IL=13) is
-`ArmorGroupEquipped[group].LowestQuality` (0 when not equipped);
-`HasAnyItems` (IL=22) is a non-null slot scan.
-
-**Armor-group bookkeeping:** `Equipment.ResetArmorGroups()` (IL=51) clears the
-`ArmorGroupEquipped` dictionary and rebuilds it from `m_slots`: every equipped
-`ItemClassArmor` registers each of its `ArmorGroup` names via
-`AddArmorGroup(name, itemValue.Quality)`. `AddArmorGroup` (IL=36) bumps the
-group's `Count` and keeps the running `LowestQuality` (min), or seeds a new
-`ArmorGroupInfo { Count = 1, LowestQuality = quality }` - so set bonuses can
-scale off the worst piece worn.
-
-**`Inventory.AddItem(stack, out slot)` (IL=121)** (wrapper IL=5): the give-item
-path (loot, crafting output, admin `give`). First gate:
-`stack.CanMoveTo(StackLocationTypes.Toolbelt, -1)` (the item must be movable
-into the toolbelt); a rejection writes `slot = -1` and returns false. Then a
-**stack-merge pass** over `slots`: the first slot with the same `type` and
-`CanStackWith(stack, false)` gets `count += stack.count`; failing that, an
-**empty-slot pass** writes the stack into the first `IsEmpty()` slot via
-`SetItem(i, value, count, true)`. Both paths call `notifyListeners()`, set
-`entity.bPlayerStatsChanged = !isEntityRemote`, and report the slot index.
-`AddItemAtSlot(stack, slot)` (IL=84) targets one slot: it requires
-`0 <= slot < PUBLIC_SLOTS`, merges counts when stackable, else writes when the
-slot is empty and `CanMoveToSlot(stack, slot)` passes; on any change it
-notifies, marks stats changed, and runs `HoldingItemHasChanged()` when the
-written slot is the held slot.
-
-**Take / return / lookup leaves:**
-
-- `TryTakeItem(stack)` (IL=83) deposits a stack by scanning `PUBLIC_SLOTS`: an
-  empty slot takes the whole clone (notify + `bPlayerStatsChanged =
-  !isEntityRemote`, true); a same-type slot takes `CanStackPartly(ref count)`
-  and returns true once the request is consumed; false only when nothing fits.
-- `CanTakeItem(stack)` (IL=37) is the affordance probe: true when any slot
-  (the full `slots` array) `CanStackPartlyWith` it or is empty.
-  `CanStackNoEmpty(stack)` (IL=24) is the same scan restricted to partial-stack
-  fits over `PUBLIC_SLOTS` (no empty slots).
-- `ReturnItem(stack)` (IL=36) walks `PreferredItemSlot(type, slot)` from 0: it
-  tries `AddItemAtSlot` into the first slot whose `preferredItemSlots[slot] ==
-  type`, scanning forward on failure.
-- `PreferredItemSlot(type, start)` (IL=23) is the first index at or after
-  `start` with `preferredItemSlots[i] == type`, else **-1**.
-- `GetSlotWithItemValue(iv)` (IL=25) is the first slot whose `itemValue`
-  `Equals(iv)`, else **-1**. `UsingBareHand` (IL=6) is
-  `bareHandItem == holdingItem`; `GetBareHandItemValue` (IL=3) reads the
-  `bareHandItemValue` field.
-
-**`Inventory.DecItem(itemValue, count, ignoreModdedItems, removedItems)`
-(IL=132)** is the consume/remove path (fuel, ammo, crafting inputs): it scans
-slots of the matching `type` (skipping modded values when `ignoreModdedItems`
-is set), taking `min(slotCount, remaining)` from stackable slots (recording a
-cloned removed stack into `removedItems` when provided, clearing the slot when
-empty) and one whole slot at a time for non-stackables; it ends with
-`notifyListeners()` and returns the total removed count
-(`originalCount - remaining`).
-
-**`clearSlotByIndex(idx)` (IL=41)** empties one slot: a non-empty value is
-replaced with `ItemStack.Empty`, and a present model game object triggers
-`HoldingItemHasChanged()`, is unparented, deactivated, `Destroy`ed, and the
-model slot nulled.
-
-**`SetItem(idx, itemValue, count, notifyListeners)` (IL=166)** is the core
-slot write: a held-slot item change redraws via `ShowHeldItem(0.2, true)`;
-an out-of-range index returns; a type with no `ItemClass` logs and
-`Clear()`s the value; the `preferredItemSlots` array follows the write
-(writing a type, or preserving the old type on an empty write). A class change
-or empty value runs `clearSlotByIndex` then rebuilds the model
-(`createHeldItem` when `CanHold`) and `createInventoryData`; the stack stores
-`itemValue.Clone()` plus the count; a changed held slot calls
-`updateHoldingItem()` and `notifyListeners()` fires when requested.
-
-**`notifyListeners()` (IL=24)** runs the `onInventoryChanged()` virtual hook
-then fans `IInventoryChangedListener.OnInventoryChanged(this)` to every
-listener in the `listeners` hash set (a null set skips the fan-out).
-
----
+**All three player containers ride two packages**
+([protocol-packages.md](../network/protocol-packages.md)):
+`NetPackagePlayerInventory` carries three optional blobs (`inventoryData` =
+`Inventory.Write`, `bagData` = `Bag.Write`, `equipmentData` =
+`Equipment.Write`) plus the optional drag-and-drop `ItemStack`;
+`NetPackagePlayerEquipment` carries one `equipmentData` blob. Each blob is an
+`i32` byte count then raw bytes (`StreamUtils.WriteBlob`/`ReadBlob`), so the
+record layout inside is exactly the save layout above. The
+`NetPackageInventoryDataRequest/Response` and
+`NetPackageInventoryTransactionRequest/Response` system is gone; the server
+stores the received blobs into `ClientInfo.latestPlayerData` and applies them
+through `PlayerDataFile.ToPlayer` (see below). `NetPackagePlayerInventoryForAI`
+still sends a reduced view.
 
 ## 7. Durability and degradation
 
@@ -1876,7 +1707,7 @@ is exactly the `EntityBuffs.AddBuff` entry point in
 so observers see the buff. Consumables (`ItemActionEat`) apply their buffs the
 same way on completion.
 
-**MinEvents.** `ItemValue.FireEvent` (**IL=107**): base `ItemClass.Effects` (unless
+**MinEvents.** `ItemValue.FireEvent` (**IL=99**): base `ItemClass.Effects` (unless
 the class is an `ItemClassModifier`), then magazine ammo `FireEvent` for the
 selected ammo type on attack actions, then quality `Modifications[]` and
 `CosmeticMods[]` recursion. Eat/attack paths populate
@@ -1900,8 +1731,10 @@ flowchart LR
 
 - **Server-authoritative:** the packed `ItemValue` and its mutations (durability,
   ammo, quality, mods), damage resolution (`Hit`/`fireShot` behind `IsServer`),
-  consumption (`ItemActionEat.consume`, `DecHoldingItem`), inventory transactions,
-  and buff/MinEvent application all run on the authority. The held `ItemValue`,
+  consumption (`ItemActionEat.consume`, `DecHoldingItem`), and buff/MinEvent
+  application run on the authority. Container contents are client-serialized
+  pushes since b18 (see "Inventory transactions"); the authority stores and
+  applies them but no longer validates moves op by op. The held `ItemValue`,
   toolbelt, bag, and equipment serialize into the player profile
   ([`server-lifecycle.md`](../admin/server-lifecycle.md)) and replicate through the
   inventory and holding-item packages.
@@ -1919,26 +1752,25 @@ flowchart LR
 
 ---
 
-## Inventory transactions (server-authoritative)
+## Inventory transactions (removed in V3.3.0)
 
-Item moves between containers go through `TransactionalInventory`: the server
-validates each transaction (source/destination slots, counts) before applying it,
-which is the anti-dupe / anti-cheat gate for inventory. Requests arrive as
-`NetPackageInventoryTransactionRequest` whose body is
-`InventoryTransaction.Write` (per-inventory Guid + initial/final hash + ops).
-Server `TransactionRequestServer` (**IL=46**): must be server (else throw);
-`tx.Apply(secretToken)` then on success `ValidateFinalHashes`; on failure log +
-`LockManager.ForceUnlockByPlayer` (**IL=11** -> `UnlockRequestServer`); on
-success for non-primary player send `NetPackageInventoryTransactionResponse`
-flags **192** (minimal ack).
+The b10 server-authoritative transaction gate is gone. `TransactionalInventory`,
+`InventoryTransaction`, `InventoryManager`,
+`NetPackageInventoryTransactionRequest`, `NetPackageInventoryTransactionResponse`
+and the `NetPackageInventoryData*` pair do not exist in b18 (verified: the types
+are absent from `il/full-v3.3.0/`, and the `NetPackage` top-level count drops
+195 -> 192 while 3 unrelated packages are added).
 
-**`InventoryTransaction.Apply` (IL=126):** for each inventory op data: require
-`TransactionalInventory.Hash == InitialHash` else warn/fail; `StartTransaction`;
-`ProcessOperation` each op; `FinalizeTransaction`; store `FinalHash`.
-
-Force-unlocks the player on failure, and acks remote
-clients via `NetPackageInventoryTransactionResponse` (see
-[protocol-packages.md](../network/protocol-packages.md) section 6.13).
+The replacement path is a client-serialized state push.
+`NetPackagePlayerInventory.ProcessPackage` (IL=36, direction ToServer) copies
+`inventoryData`, `bagData`, `equipmentData` and the drag item straight into
+`ClientInfo.latestPlayerData` and sets `bModifiedSinceLastSave`; it does not
+decode, hash, or compare them. `PlayerDataFile.ToPlayer` later applies the
+blobs through `FromBlob` and `Inventory.ReadInto` / `Bag.ReadInto` /
+`Equipment.ReadInto`, spilling anything that no longer fits on the ground.
+`NetPackagePlayerEquipment.ProcessPackage` decodes its blob onto the targeted
+entity. There is no per-operation source/destination validation left on this
+path; a server that needs anti-dupe checks has to add them outside stock.
 
 ## Item net packages (extras)
 
@@ -1947,16 +1779,21 @@ clients via `NetPackageInventoryTransactionResponse` (see
 
 ## Held entities (V3.1.0 Henpocalypse feature; unchanged on V3.2.0)
 
-New item classes: `ItemClassHeldEntity` (base), `ItemClassWildChicken`, plus
-`ItemStackGrid` for 2D stacks. Grab activation lives on `EntityAlive`
-(`InitLocalActivationCommands` / `OnEntityActivated("grab")`). Full feature
-state machine: [items.md](../gameplay/items.md) (held-entity item types).
+New item classes: `ItemClassHeldEntity` (base), `ItemClassWildChicken`. The
+`ItemStackGrid` mentioned in this feature became the storage core in b18 (§6).
+Grab activation lives on `EntityAlive` (`InitLocalActivationCommands` /
+`OnEntityActivated("grab")`). Full feature state machine: [items.md](../gameplay/items.md)
+(held-entity item types).
 
 ## ItemStack.Clone call-site triage (V3.2.0 b9)
 
 **Owns:** stock IL census of who calls `ItemStack.Clone` (instance + array overloads),
 so alloc work is attributed to real owners. Not an EfficientServer lever list
 (that lives in optimizer docs).
+
+**Status:** b9 census. `TransactionalInventory`, `InventoryOperation` and the
+inventory transaction packages do not exist in b18, so those rows are
+historical; the clone call count was not re-measured.
 
 **Method:** `ItemStack.Clone()` IL=15 always allocates a new `ItemStack` and, when
 `itemValue != null`, also `ItemValue.Clone()`. Array overload IL=35 allocates a new
@@ -2117,6 +1954,9 @@ count)`. That is what fills a `RecipeQueueItem`'s `RepairItem` slot.
 
 ### NetPackageInventoryTransactionRequest has no body of its own
 
+Removed in b18 with the rest of the transaction system (see "Inventory
+transactions" above); the b10 layout is kept here as history.
+
 `NetPackageInventoryTransactionRequest` (823005-823102): `read()` is
 `InventoryTransaction::Read(BinaryReader)` and `write()` is
 `InventoryTransaction::Write`. `PackageDirection` = 1 (ToServer). `ProcessPackage`
@@ -2243,6 +2083,15 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-10-24:** V3.3.0 b18 re-read of the item container model. `ItemStackGrid`
+  rewritten into the storage and save/wire core (§6; version-2 grid, locks,
+  preferences, worldTimeTouched, playerOwned); `Hand` + `HoldingMode` replace
+  the `Inventory` held-item fields and `HeldItemState` (§5); `Inventory`,
+  `Bag` and `Equipment` are grid wrappers, `Equipment` is 13 slots with
+  `Backpack=12` and `EquipmentSlotType` (§6); toolbelt slots come from `toolbelt.xml`
+  (§5); containers move over three blobs and the b10 transaction system is
+  removed ("Inventory transactions"); `items.xml` gains the backpack and
+  DLC cosmetic items, `progression.xml` gains `craftingBackpack`.
 - **2026-08-28:** V3.2.0: ItemValue.Activated byte -> Flags bitfield (bit0 activated, bit1 WasCombined; wire-compatible); §7.1 combine-station section added (ItemActionEntryCombine, XUiC_CombineGrid rework, TEFeatureCombine).
 - **2026-08-25:** passive value curves pinned (PassiveEffect.il.txt): ModValue
   (IL=796) walks the curve segments from the top and piecewise-linearly
@@ -2270,8 +2119,8 @@ The non-action leaves:
   constants, stone axe 250,500, chainsaw 2000,5000); get_PercentUsesLeft
   (IL=17) short-circuits to 1 when MaxUseTimes <= 0 (non-durable items price
   full; worn items sell for less via GetSellPrice).
-- **2026-08-11:** Transaction/repair IL re-verified: ItemValue.FireEvent IL=107, ForceUnlockByPlayer IL=11, InventoryTransaction.Apply IL=126, ItemStack.Clone IL=15/35, ItemActionRepair.ExecuteAction IL=631, CanRemoveRequiredResource IL=106, GetRepairAmount IL=3, ExchangeBlock.ExecuteAction IL=82, MakeFertile.hitTheTarget IL=175, CollectWater.ExecuteAction IL=89, DumpWater.ExecuteAction IL=118, OnConvertToBlockValue IL=2 (Torch IL=20), Activate.ExecuteAction IL=79, Zoom.ExecuteAction IL=103, SpawnEntity.Spawn IL=61, TerrainTool.ExecuteAction IL=46 / GetRange IL=2 (exact).
-- **2026-08-11:** Armor/AddItem IL re-verified: GetArmorGroupLowestQuality IL=13, HasAnyItems IL=22, ResetArmorGroups IL=51, AddArmorGroup IL=36, Inventory.AddItem IL=121/5, AddItemAtSlot IL=84, TryTakeItem IL=83, CanTakeItem IL=37, CanStackNoEmpty IL=24, ReturnItem IL=36, PreferredItemSlot IL=23, GetSlotWithItemValue IL=25, UsingBareHand IL=6, GetBareHandItemValue IL=3, DecItem IL=132, clearSlotByIndex IL=41, CheckBreakUseItems IL=85 (exact).
+- **2026-08-11:** Transaction/repair IL re-verified: ItemValue.FireEvent IL=107, ForceUnlockByPlayer IL=11, InventoryTransaction.Apply IL=126, ItemStack.Clone IL=15/35, ItemActionRepair.ExecuteAction IL=631, CanRemoveRequiredResource IL=106, GetRepairAmount IL=3, ExchangeBlock.ExecuteAction IL=82, MakeFertile.hitTheTarget IL=175, CollectWater.ExecuteAction IL=89, DumpWater.ExecuteAction IL=118, OnConvertToBlockValue IL=2 (Torch IL=20), Activate.ExecuteAction IL=79, Zoom.ExecuteAction IL=103, SpawnEntity.Spawn IL=61, TerrainTool.ExecuteAction IL=46 / GetRange IL=2.
+- **2026-08-11:** Armor/AddItem IL re-verified: GetArmorGroupLowestQuality IL=13, HasAnyItems IL=22, ResetArmorGroups IL=51, AddArmorGroup IL=36, Inventory.AddItem IL=121/5, AddItemAtSlot IL=84, TryTakeItem IL=83, CanTakeItem IL=37, CanStackNoEmpty IL=24, ReturnItem IL=36, PreferredItemSlot IL=23, GetSlotWithItemValue IL=25, UsingBareHand IL=6, GetBareHandItemValue IL=3, DecItem IL=132, clearSlotByIndex IL=41, CheckBreakUseItems IL=85.
 - **2026-08-11:** Durability chain IL re-verified: get_MaxUseTimesBase IL=25, get_MaxUseTimes IL=5, ModMaxUseTimes IL=24, get/set_MaxDurabilityModifier IL=9/13, AdjustForSandboxOptions IL=7 (ItemValue) / IL=8 (ItemStack), get_PermaDegrationOn IL=12 (exact).
 - **2026-08-11:** Equipment IL re-verified: ApplyTempCosmeticSlot IL=24, ClearTempCosmeticSlot IL=7, FireEventsForChangedSlots IL=137, ModifyValue IL=39, updateInsulation IL=32, DropItems IL=31, GetTotalInsulation/GetTotalWaterproof IL=3, SetSlotItem IL=191, SetSlotItemRaw IL=13, SetCosmeticSlot IL=50/72, DropItemOnGround IL=21 (exact).
 - **2026-08-11:** Inventory slot IL re-verified: SetItem IL=166/9, notifyListeners IL=24, GetItem IL=6, GetItemStack IL=6, GetItemInSlot IL=15, GetItemDataInSlot IL=14, GetItemCount IL=5/92/86, XUiM_PlayerInventory.GetItemCount IL=19 (exact).
@@ -2279,7 +2128,7 @@ The non-action leaves:
 - **2026-08-11:** Container IL re-verified: Inventory GetSlotCount IL=5, GetSlotsWithBlock IL=60, IsHoldingBlock IL=9, PerformActionOnSlots IL=21, ModifyValue IL=29, DecItem IL=132; Equipment GetSlotCount IL=5, GetSlotItem IL=13, GetSlotItemOrNone IL=19, PerformActionOnSlots IL=24; Bag TryStackItem IL=75, ReadInto IL=93, get_SlotCount IL=10, onBackpackChanged IL=8, DecItem IL=120, CanStack IL=31, CanStackNoEmpty IL=26, CanTakeItem IL=33, GetUsedSlotCount IL=28, IsEmpty IL=24, AddItem IL=21, Clear IL=24, GetItemCount IL=68/75, Clone IL=31 (exact).
 - **2026-08-11:** Dynamic-melee IL re-verified: Raycast IL=203, hitTarget IL=454, Eat.consume IL=154, ExecuteInstantAction: Eat IL=179, OpenBundle IL=493, OpenLootBundle IL=183, Quest IL=87, GetDamageEntity IL=52 / GetDamageBlock IL=70 (ItemActionAttack), createItemInventoryData IL=7, CanPlaceInContainer IL=2, HandleSandboxTechType IL=21 (exact).
 - **2026-08-11:** Inventory IL re-verified: updateHoldingItem IL=172, ShowHeldItem IL=19, HoldingItemHasChanged IL=51, SimulateActionExecution IL=15 + MoveNext IL=277 + HandleComplete IL=43, setHeldItemByIndex IL=132, SetHoldingItemIdx IL=5 / NoHolsterTime IL=5, DecHoldingItem IL=45, GetBestQuickSwapSlot IL=50 (exact).
-- **2026-08-11:** Catapult/launcher IL re-verified: ItemActionCatapult.ExecuteAction IL=163, GetStrainPercent IL=10, CanReload IL=15, ItemActionLauncher.fireShot IL=5, instantiateProjectile IL=136, ItemActionEffects IL=72, ProjectileMoveScript.Fire IL=236, FixedUpdate IL=196, SetState IL=33, checkCollision IL=616, TryCollect IL=40, ItemActionProjectile.ReadFrom IL=51 (exact).
+- **2026-08-11:** Catapult/launcher IL re-verified: ItemActionCatapult.ExecuteAction IL=163, GetStrainPercent IL=10, CanReload IL=15, ItemActionLauncher.fireShot IL=5, instantiateProjectile IL=136, ItemActionEffects IL=72, ProjectileMoveScript.Fire IL=236, FixedUpdate IL=196, SetState IL=33, checkCollision IL=616, TryCollect IL=40, ItemActionProjectile.ReadFrom IL=51.
 - **2026-08-11:** Ammo/dynamic-melee IL re-verified: GetMaxAmmoCount IL=25, checkAmmo IL=12, HasInfiniteAmmo IL=24, GetBurstCount IL=23, IsAmmoUsableUnderwater IL=19, requestReload IL=12, isJammed IL=5, ThrownWeapon.ExecuteAction IL=117 / instantiateProjectile IL=122 / throwAway IL=96, DynamicMelee.ExecuteAction IL=210, canStartAttack IL=198, canContinueAttack IL=5, SetAttackFinished IL=53, GameUtils.HarvestOnAttack IL=623, collectHarvestedItem IL=138 (exact).
 - **2026-08-11:** Config-tail IL re-verified: Quest.ReadFrom IL=49, Repair IL=43, UseOther IL=57, MakeFertile IL=66, ExchangeBlock IL=55, SpawnEntity IL=34 (exact).
 - **2026-08-11:** Reload/accuracy IL re-verified: ConsumeAmmo IL=9, loadNewAmmunition IL=20, CompleteReload IL=176 (corrected from stale 178), CanReload IL=93, CancelReload IL=57, EntityPlayer.IsReloadCancelled IL=36, InvokeTeleportDelegates IL=8, IsSavedToNetwork IL=2, updateAccuracy IL=175, AccuracyExpDecay IL=29, getDirectionRandomOffset IL=86, ItemActionEat.NeedPrompt IL=13 / IsValidConditions IL=94 / PercentDone IL=24 (exact).
@@ -2291,12 +2140,12 @@ The non-action leaves:
 - **2026-08-11:** Subclass Init IL re-verified: ItemClassBlock IL=56, ItemClassArmor IL=61, ItemClassTimeBomb IL=62, ItemClassWaterContainer IL=32, ItemClassHeldEntity IL=99, ItemClassWildChicken IL=21, TimeBomb.OnDroppedUpdate IL=188 / OnHoldingItemActivated IL=82, ItemActionAttack difficultyModifier IL=44 / DegradationModifier IL=14 / calculateHarvestToolDamageBonus IL=43, EntityPlayer.GetBlockDamageScale IL=6 (exact).
 - **2026-08-11:** Ranged IL re-verified: CreateModifierData IL=4, GetItemActionInSlot IL=32, GetItemActionDataInSlot IL=18, fireShot IL=482, TryExecuteAction IL=562, triggerReleased IL=33, GetIdealRangeForAI IL=23, getDamageBlock IL=12, getDamageEntity IL=11, GetReloadFlags IL=147, CycleAmmoType IL=85, SwapSelectedAmmo IL=41, SwapAmmoType IL=149, removeCurrentlyLoadedAmmunition IL=137 (exact).
 - **2026-08-11:** ItemClass/loader IL re-verified: ctor IL=181, GetHoldingPrimary/Secondary IL=6, parseItem IL=772 (classes) / IL=725 (mods), ParseModifier IL=63, InitStatic IL=24, AutoCalcWeight IL=195, AutoCalcEcoVal IL=148, CalculateTechType IL=50, SetCanDrop IL=4, FindGSStat IL=90, AddGSStats IL=100, SetId IL=12, SetActivated IL=10, CheckKeys IL=1, OnPlacedAsCatalyst IL=1 (HeldEntity IL=19), CleanupHoldingActions IL=27, GetItemsAndBlocks IL=184, CanRepair IL=37, CanCancel IL=2, IsAimingGunPossible IL=2 (Ranged IL=4) (exact).
-- **2026-08-11:** Effect-chain IL re-verified: ItemValue.ModifyValue IL=304, GetModifiedValueData IL=142, HasAnyBoostedStats IL=26, HasStats IL=5, ClearStats IL=4, RemoveUnusedStats IL=77, MinEffectController.ModifyValue IL=54, GetModifiedValueData IL=38, FireEvent IL=25, HasEvents IL=23, HasTrigger IL=24, IsOwnerTiered IL=23, MinEffectGroup.ModifyValue IL=41, canRun IL=10, FireEvent IL=44, GetTriggeredEffects IL=10, AddTriggeredEffect IL=20, HasEvents IL=6, HasTrigger IL=7, PassiveEffect.ModifyValue IL=61, RequirementsMet IL=17, hasMatchingTag IL=53, CreateEmptyPassiveEffect IL=14, AddColoredInfoStrings IL=52 (exact).
+- **2026-08-11:** Effect-chain IL re-verified: ItemValue.ModifyValue IL=304, GetModifiedValueData IL=142, HasAnyBoostedStats IL=26, HasStats IL=5, ClearStats IL=4, RemoveUnusedStats IL=77, MinEffectController.ModifyValue IL=54, GetModifiedValueData IL=38, FireEvent IL=25, HasEvents IL=23, HasTrigger IL=24, IsOwnerTiered IL=23, MinEffectGroup.ModifyValue IL=41, canRun IL=10, FireEvent IL=44, GetTriggeredEffects IL=10, AddTriggeredEffect IL=20, HasEvents IL=6, HasTrigger IL=7, PassiveEffect.ModifyValue IL=61, RequirementsMet IL=17, hasMatchingTag IL=53, CreateEmptyPassiveEffect IL=14, AddColoredInfoStrings IL=52.
 - **2026-08-11:** Stacking/mod IL re-verified: CanStackPartlyWith IL=15, get_MaxCount IL=23, CanStack IL=6 (Quest IL=2), CanMoveToLocation IL=41, StackTransferCount IL=21, EqualsForMerging IL=47, CalcModSlotCount IL=29, MergeBest IL=115, MergeBestStats IL=109, CloneModsTo/CloneCosmeticModsTo IL=34, get_HasModSlots IL=6, HasMods/HasCosmetics IL=30, createDefaultModItems IL=187, UnlockCosmeticItem IL=31, GetItemModWithAnyTags IL=53, GetDesiredItemModWithAnyTags IL=67, GetPropertyOverride IL=50, HasAllTags/HasAnyTags IL=5 (corrected from stale 5/7), GetStatPercent IL=12, StatModifyValue IL=47, IsStatLowerBetter IL=9 (exact).
 - **2026-08-11:** Id/wire IL re-verified: GetItemOrBlockId IL=12, GetItemId IL=5, assignIdsFromXml IL=29, assignIdsLinear IL=14, assignLeftOverItems IL=87, createFullMappingForClients IL=31, ItemStack.ReadDelta IL=15 / WriteDelta IL=23, ItemValue.ReadOrNull IL=13 / ReadOld IL=1, ItemStack.ReadOld IL=10, Block.PlaceBlock IL=67 (exact).
 - **2026-08-11:** Metadata/stacking IL re-verified: HasMetadata IL=25, TryGetMetadata IL=17 (x3) / core IL=36, GetMetadata IL=17, RemoveMetaData IL=12, SetMetadata core IL=86, CanStackWith IL=46, CanMoveTo IL=15, CanStack IL=19, CanStackPartly IL=24 (exact).
 - **2026-08-11:** ItemClass IL re-verified: GetItemClass IL=15, GetItem IL=13, GetItemWithTag IL=30, GetItemsWithTag IL=33, CreateItemValue IL=17, GetForId IL=15, CanCollect IL=2 (TimeBomb IL=5), IsGun/IsDynamicMelee IL=8, IsLightSource IL=5, ItemValue get_ItemClassOrMissing IL=9 / get_HasQuality IL=17 / get_IsMod IL=12 / get_IsShapeHelperBlock IL=12, ItemClassBlock.GetBlock IL=5 / GetBlockValueFromItemValue IL=15 (exact).
-- **2026-08-11:** Item-action IL re-verified: ItemActionPlaceAsBlock.ExecuteAction IL=353, ItemActionGainSkill.ExecuteAction IL=24 / OnHoldingUpdate IL=143, ItemActionLearnRecipe.ExecuteAction IL=24, BlockPlacement.OnPlaceBlock IL=235 (exact).
+- **2026-08-11:** Item-action IL re-verified: ItemActionPlaceAsBlock.ExecuteAction IL=353, ItemActionGainSkill.ExecuteAction IL=24 / OnHoldingUpdate IL=143, ItemActionLearnRecipe.ExecuteAction IL=24, BlockPlacement.OnPlaceBlock IL=235.
 - **2026-08-10:** Item metadata IL re-verified (7): ReadOrNull 13, ReadOld 1, ItemStack.ReadOld 10, HasMetadata 25, RemoveMetaData 12, SetMetadata(String,Object,TypeTag) 86 core, Int32/Single/String overloads 6-7 (exact).
 - **2026-08-10:** Item id-assign pipeline re-verified: assignIdsFromXml IL=29, assignIdsLinear IL=14, assignLeftOverItems IL=87, createFullMappingForClients IL=31 (exact).
 - **2026-08-10:** Item IL sizes re-verified (10): GetItemClass 15, GetItem 13, GetItemsWithTag 33, GetForId 15, IsGun 8, GetItemOrBlockId 12, GetItemId 5, ItemStack.FromString 38, ReadDelta 15, WriteDelta 23 (all exact).

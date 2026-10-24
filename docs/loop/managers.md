@@ -1,9 +1,9 @@
-# Managers and ModEvents (dedicated V3.2.0)
+# Managers and ModEvents (dedicated V3.3.0)
 
 **Owns:** gmUpdate-relevant manager Update ILs + full `ModEvents` field list.  
 **Hub:** [`INDEX.md`](../INDEX.md).  
 **Raw inventory (all Update* names):** [`../inventories/manager-updates.md`](../inventories/manager-updates.md).  
-**Dumps:** [`../il/dedi-complete-v3.2.0/`](../../il/dedi-complete-v3.2.0) §2, §11; [`../il/loop-complete-v3.2.0/`](../../il/loop-complete-v3.2.0).  
+**Dumps:** [`../il/dedi-complete-v3.3.0/`](../../il/dedi-complete-v3.3.0) §2, §11; [`../il/loop-complete-v3.3.0/`](../../il/loop-complete-v3.3.0).  
 **Loop context:** [`loop.md`](../loop/loop.md) §10.
 
 ---
@@ -46,6 +46,8 @@ manager's `Update`/`UpdateTick` method instruction count from the dump (e.g.
 | `RaycastPathManager` | 5 | |
 | `PartyManager` | 4 | |
 | `ThreadManager.UpdateMainThreadTasks` | 64 | Main queue drain (name may not be bare `Update`) |
+| `AssetLoaderManager` | 17 | New in V3.3.0. Called unconditionally right after `LoadManager.Update` in the gmUpdate prologue: iterates `managersToUpdate` (`AssetManagerLifetimed.Update`, which releases time-expired handles) and, from `SaveAndCleanupWorld`, `Cleanup` disposes every registered manager. On a dedicated server the registered set is the single `AssetManagers.Items` manager and its tracked-asset list is empty unless item meshes were acquired |
+| `SignDataManager` | 87 | New in V3.3.0. Null-checked block after `LockManager.Update`: signs have their own manager now (`HasInstance` gate, then `Update`) |
 
 ### 1.1 Related non-gmUpdate sim managers (re-pin 2026-08-07)
 
@@ -154,6 +156,7 @@ Core types include `GameEventManager` and `GameEventAction` sequences (content-d
 
 ## Changelog
 
+- **2026-10-24:** Retargeted to V3.3.0 (b18). gmUpdate IL 631 -> 638: two new prologue calls, `AssetLoaderManager.Update` (IL=17, right after `LoadManager.Update`) and a null-checked `SignDataManager.Update` block (IL=87, after `LockManager.Update`). No pre-existing manager Update body in this table changed.
 - **2026-08-11:** Manager IL re-verified: DecoManager.UpdateTick IL=330, TwitchManager IL=1585 (exact).
 - **2026-08-10:** Manager Update IL sizes re-verified (8): DroneManager 305, VehicleManager 297, TriggerEffectManager 216, PowerManager 106, FactionManager 43, GameEventManager 25, TurretTracker 45 (all exact).
 - **2026-08-10:** ModEvents subscriber sets refined: pure-stock baseline pinned

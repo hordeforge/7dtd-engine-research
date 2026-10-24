@@ -447,6 +447,19 @@ allyEventTarget : u8   // AllyEvent
 (int count of pairs, then each `a`, `b` platform id plus a status byte). Only `Allies`
 and pending `OutgoingInvite` states are persisted; declined / removed pairs are dropped.
 
+### 5.4 Ally-gated surfaces: sign copying (V3.3.0)
+
+The ally map is also the gate for player sign sharing. A sign drawing carries
+`SignData.SignSharing` (Private / Selectable / Copyable); the gallery lists
+another player's signs only for allies, and the Copy action is allowed only when
+the drawing is `Copyable` and the sign's owner, read out of the library id as a
+`PlatformUserIdentifierAbs`, is an ally:
+`SignDataManager.IsLocalPlayerAlliedWith` (IL=16) calls
+`GameManager.persistentLocalPlayer.IsAlly(id)`, which is the
+`PersistentPlayerList.Allies.IsAlly` pair lookup above. Party membership alone
+does not qualify. The enforcement is client-side (the server stores the sharing
+byte without checking it); see [signs.md](../gameplay/signs.md) §5.
+
 ---
 
 ## 6. Dedicated relevance and residuals

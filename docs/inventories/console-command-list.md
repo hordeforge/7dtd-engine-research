@@ -1,4 +1,4 @@
-# Console command catalog (V3.2.0)
+# Console command catalog (V3.3.0)
 
 **Kind:** per-command behavioral reference (name, permission, function) for every
 `ConsoleCmdAbstract` subclass; function text is each command's own `getDescription`.  
@@ -8,7 +8,7 @@
 
 Permission: blank = inherits default (0 = highest admin; higher number = less privileged).
 
-**188 commands** (primary name per command class; short aliases like `as`/`zd`/`zz` are listed as extra `(alias)` rows).
+**190 commands** (primary name per command class; short aliases like `as`/`zd`/`zz` are listed as extra `(alias)` rows).
 
 | Command | Type | Perm | Does |
 |---|---|---|---|
@@ -70,6 +70,7 @@ Permission: blank = inherits default (0 = highest admin; higher number = less pr
 | `getsandboxoptions` | `ConsoleCmdGetSandboxOptions` | 1000 | Gets the current game's Sandbox Options |
 | `gettime` | `ConsoleCmdGetTime` | 1000 | Get the current game time |
 | `gfx` | `ConsoleCmdGfx` | 1000 | Graphics commands |
+| `give` | `ConsoleCmdGive` |  | give an item to a player (entity id or name) |
 | `givequest` | `ConsoleCmdGiveQuest` |  | Gives a quest to the player or add to quest tier |
 | `giveself` | `ConsoleCmdGiveQualityItem` |  | usage: giveself itemName [qualityLevel= |
 | `giveselfxp` | `ConsoleCmdSelfExp` |  | usage: giveselfxp 10000 |
@@ -86,7 +87,9 @@ Permission: blank = inherits default (0 = highest admin; higher number = less pr
 | `lgo` | `ConsoleCmdListGameObjects` |  | List all active game objects |
 | `lights` | `ConsoleCmdLights` |  | Light debugging |
 | `listdlc` | `ConsoleCmdListDLC` |  | List the available DLC and their current entitlement status. |
+| `li` | `ConsoleCmdListItems` (alias) |  | lists all items that contain the given substring |
 | `listents` | `ConsoleCmdListEntities` |  | lists all entities |
+| `listitems` | `ConsoleCmdListItems` |  | lists all items that contain the given substring |
 | `listplayerids` | `ConsoleCmdListPlayerIds` | 1000 | Lists all players with their IDs for ingame commands |
 | `listplayers` | `ConsoleCmdListPlayers` |  | lists all players |
 | `listthreads` | `ConsoleCmdListThreads` | 1000 | lists all threads |

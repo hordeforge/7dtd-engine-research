@@ -1,4 +1,4 @@
-# World and chunk pipeline (dedicated V3.2.0)
+# World and chunk pipeline (dedicated V3.2.0; chunk serialization re-pinned on V3.3.0 b18)
 
 **Owns:** world tick, generateTerrain trampoline, load/send (observer streaming), SetBlock path (generic engine).  
 **Index math:** §2 below + [`terrain-height.md`](../world/terrain-height.md).  
@@ -320,7 +320,7 @@ busy chunk makes the position unavailable.
 (Regeneration/Saving/Copying/Decorating/Lighting/Unloading) and the collision
 mesh flags; clear `entityStubs`; for each of the 16 `entityLists`: move every
 `IsSavedToFile()` entity into `entityStubs` as `EntityCreationData(entity,
-true)` and clear the list (the stubs are re-spawned on next `OnLoad`).
+StreamModeWrite.ToClient)` and clear the list (the stubs are re-spawned on next `OnLoad`).
 
 **Coordinate helpers (`World.toChunk*`):** `toChunkXYZ(v)` (IL=14) is
 `(x >> 4, y >> 8, z >> 4)` (16/256-block chunk units); `toChunkXYZCube(v)`
@@ -880,14 +880,15 @@ commit+replicate wrapper: `ChangeBlocks(persistentPlayerId, changes)`, then
 myPlayerId)`; on the server `SetBlocksOnClients(-1, package)`, else
 `SendToServer`.
 
-## 5.2 Network-mode `Chunk.write` body layout (V3.2.0)
+## 5.2 Network-mode `Chunk.write` body layout (V3.3.0 b18)
 
 The `serializedData` payload inside `NetPackageChunk` is the **network-mode
-`Chunk.write(PooledBinaryWriter, Boolean)`** (IL=601, dump
-[`../../il/realearth-surfaces-v3.2.0/Chunk_write_PooledBinaryWriter_Boolean_il.txt`](../../il/realearth-surfaces-v3.2.0/Chunk_write_PooledBinaryWriter_Boolean_il.txt)).
-This differs from the save format (save-region.md §2): the network body is
-the map+channel plane order below, the save file additionally carries
-stability and raw map arrays. Field order (IL-cited at each step):
+`Chunk.write(PooledBinaryWriter, Boolean)`** (IL=605 on V3.3.0 b18, was 601;
+dump `../../il/full-v3.3.0/Chunk.il.txt`).
+This differs from the save format (save-region.md §2) only in the
+`_bNetworkWrite` gates: the network body skips stability, keeps only
+network-flagged custom-data entries and the network entity/TE tail, while the
+map/channel plane order below is shared. Field order (IL-cited at each step):
 
 ```text
 m_X:i32 | m_Y:i32 | m_Z:i32 | SavedInWorldTicks:u64
@@ -922,6 +923,17 @@ Notes pinned by the same dump:
 - The header Y is `m_Y` (chunk Y index); stock worlds are single-column
   (Y=0), the expanded RealEarth snapshot keeps the same writer with the
   same 256-byte maps.
+- **b18 nested-record change:** everything down to `NeedsLightCalculation` is
+  unchanged from b10, but the entity and TE records in the last line moved to
+  `EntityCreationData` file version **38** (bag as a length-prefixed blob,
+  mode-gated network tail) and TE storage feature version **20**
+  (`ItemStackGrid` v2 record). The save format uses the same nested records, so
+  this section is now shared with [save-region.md](../world/save-region.md) §0/§2
+  for the version table. What still separates the two modes is the
+  `_bNetworkWrite` gating: network skips `chnStability` (IL_007B `brtrue` over
+  it), keeps only `ChunkCustomData` entries with `isSavedToNetwork`, and skips
+  the save-only volume/TE tails. The height/biome/normal maps are written in
+  both modes (the older "save additionally carries raw maps" note was wrong).
 
 `SetBlocksOnClients(exceptEntityId, package)` (IL=13):
 `ConnectionManager.SendPackage(package, false, -1, exceptEntityId, -1, null,
@@ -1154,6 +1166,16 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-10-24 (V3.3.0 b18 serialization re-check):** `Chunk.write` IL 601 -> 605;
+  the entity/TE records nested in both the network and save chunk bodies moved to
+  `EntityCreationData` 38 (bag blob) and TE storage 20 (`ItemStackGrid` v2), so
+  §5.2 is now shared with save-region §0/§2 for record versions. Corrected the
+  §5.2 mode split: maps/biomes/normals are written in **both** modes; network
+  skips `chnStability`, filters `ChunkCustomData` to `isSavedToNetwork`, and skips
+  the save-only tails. `OnLoadedFromCache`'s stub ctor now takes
+  `EntityCreationData(entity, StreamModeWrite.ToClient)`. Other IL pins in this
+  doc were not re-run against b18 (their owning types are IL-identical unless the
+  file says otherwise).
 - **2026-08-23:** §5.2 added: the network-mode `Chunk.write(PooledBinaryWriter,
   Boolean)` body layout (IL=601, realearth-surfaces-v3.2.0 dump) - header
   X/Y/Z + SavedInWorldTicks, 64 block layers, then the maps region in order

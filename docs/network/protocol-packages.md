@@ -1,11 +1,11 @@
-# Wire package body catalog (V3.2.0 pin; IL-derived)
+# Wire package body catalog (V3.3.0 pin; IL-derived)
 
 **Owns:** per-`NetPackage` wire metadata (channel/compress/direction/auth) and
 hand-annotated `read`/`write` byte layouts beyond the join-critical set in
 [`protocol.md`](../network/protocol.md).
 **Hub:** [`INDEX.md`](../INDEX.md).  
-**Pin:** dedicated V **3.2.0 (b10)**; dump set dir name `il/netpackages-v3.2.0/`
-is historical (regenerate against live ASM).
+**Pin:** dedicated V **3.3.0 (b18)**; re-checked against `il/netpackages-v3.3.0/`
+(the earlier `il/netpackages-v3.2.0/` set stays as the previous build).
 **Not:** framing/join/challenge (that is [`protocol.md`](../network/protocol.md)); visual
 frames ([`protocol-frames.md`](../network/protocol-frames.md)).
 **Evidence:** dumped from the live `Assembly-CSharp.dll` with
@@ -21,12 +21,12 @@ All widths little-endian. `string` = .NET 7-bit length prefix + UTF-8. `bool` =
 
 ## 1. Protocol-wide metadata census
 
-Full table: `il/netpackages-v3.2.0/META.md` (195 packages). Regenerate with
-`mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.2.0/META.md`.
+Full table: `il/netpackages-v3.3.0/META.md` (192 packages). Regenerate with
+`mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.3.0/META.md`.
 
 **Per-package wire bodies:** this doc hand-annotates the load-bearing packages; the
-**complete** ordered `write()` field sequence for every package (185 bodies + 61
-nested serializers) is auto-extracted in
+**complete** ordered `write()` field sequence for every package (182 packages
+with an extractable body in V3.3.0) is auto-extracted in
 [`../inventories/netpackage-bodies.md`](../inventories/netpackage-bodies.md)
 (`tools/src/WireBodies`).
 
@@ -133,10 +133,10 @@ join set, false for these bulk packages.
 ### 1.3 Direction tally
 
 `NetPackageDirection`: `0 = Both`, `1 = ToServer`, `2 = ToClient`.
-Of 195 packages: **68 ToClient, 34 ToServer, 7 Both (explicit), 86 inherit**
-(base default = Both). (V3.1.0 was 66/33/7/87 — the removed `POIAround` was
-inherit; the three added packages are explicit: Request=ToServer,
-Response/ConfirmSpawn=ToClient.)
+Of 192 packages: **65 ToClient, 31 ToServer, 7 Both (explicit), 89 inherit**
+(base default = Both). The V3.2.0 set was 195 with 68/34/7/86: the six removed
+packages were three ToClient + three ToServer pairs, and the three added ones
+inherit `Both`.
 
 ### 1.4 Pre-auth surface (`AllowedBeforeAuth = 1`)
 
@@ -147,6 +147,244 @@ complete attack/handshake surface a server must accept pre-auth:
 `NetPackageAuthConfirmation`, `NetPackageAuthState`, `NetPackageEAC`,
 `NetPackageEncryptionRequest`, `NetPackageEncryptionPublicKey`,
 `NetPackageEncryptionSharedKey`, `NetPackageKeyExchangeComplete`.
+
+---
+
+## 1.5 V3.2.0 (b10) -> V3.3.0 (b18) wire delta
+
+Registered package ids dropped **187 -> 184** (id 0 is always
+`NetPackagePackageIds`, the rest are assigned at startup; see
+[`network.md`](../network/network.md) section 3). Three packages added, six
+removed, four bodies changed. Evidence: `il/netpackages-v3.2.0/` vs
+`il/netpackages-v3.3.0/`, the parity snapshots, and the dossiers below.
+
+### 1.5.1 `NetPackageLockTarget` (id 93, added, direction `Both`)
+
+One package carries both the lock request and the lock response. The body is an
+opaque length-prefixed payload; `LockManager` owns the layout:
+
+```text
+payloadLen : i32              // write: (i32)payload.Length, then payload bytes
+payload    : payloadLen bytes // LockManager request or response, below
+```
+
+`read` (IL=17): alloc a pooled stream, `ReadInt32`, then
+`StreamUtils.StreamCopy(reader.BaseStream, payload, len, null, true)`.
+`write` (IL=15): `Int32 payload.Length` then `MemoryStream.WriteTo`.
+`ProcessPackage` (IL=46): on the server `LockManager.ProcessRequest(payloadReader,
+Sender.entityId)`, otherwise `LockManager.ProcessResponse(payloadReader)`.
+
+Request payload (`LockManager.LockRequestLocal` IL=117, client -> server):
+
+```text
+isLock      : bool (1)
+channel     : u16                 // LockChannel
+targetCount : i32                 // server enforces 1..5, else logs and drops
+targetCount x WorldAddress
+targetCount x ILockTarget.OnLockRequestLocal(pbw, channel)   // per-target context
+```
+
+An unlock request is `isLock = false` and nothing else (`UnlockRequestLocal`
+IL=38). Response payload (`LockManager.LockRequestServer` IL=297):
+
+```text
+isLock      : bool (1)
+success     : bool
+error       : string              // String.Empty when null
+channel     : u16
+targetCount : i32
+targetCount x WorldAddress
+targetCount x ILockTarget.OnLockResponseServer(pbw, channel) // per-target context
+```
+
+The unlock response (`UnlockResponseLocal` IL=43) is `isLock=false`, `success:
+bool`, `error: string`, `closeWindows: bool`.
+
+`WorldAddress.Write` (IL=35) / `Read` (IL=44):
+
+```text
+type : u8                       // WorldAddress/WorldObjectType
+// None=0     : nothing
+// TileEntity=1 : pos Vector3i (3 x i32)
+// TEFeature=2  : pos Vector3i, featureName string (null-coalesced to "")
+// Entity=3     : entityId i32
+```
+
+`LockTargetType` (TileEntity/TEFeature/Entity/TransactionalInventory) is gone;
+`WorldObjectType` under `WorldAddress` replaces it, and the tag is now the first
+byte of every target.
+
+**Server-authoritative lock.** `LockManager.ProcessRequest` (IL=19) rejects the
+client role outright (`[LockManager] Clients must only request a lock by using
+LockRequestLocal`). State lives on the server in `singleLocks` /
+`sharedLocks` keyed by player id; a grant is refused with
+`[LockManager] Failed to lock {target} on channel {channel}. It is already
+locked by another player.`, the target can also refuse
+(`ILockTarget.OnLockRequestServer` -> false), and only then is the response
+dispatched (`DispatchResponse`, `SendPackage` targeted by `_attachedToEntityId`, `_range` 192). Clients
+apply nothing until the response arrives.
+
+`LockChannel` is a per-owner nested enum: `EntityTrader/LockChannel {Interaction
+= 0, Trade = 1}` (unchanged) and the new `EntityVehicle/LockChannel {Interaction
+= 0, Collect = 1}`. `ILockTarget.IsSharedLock(channel)` decides the map: trader
+`Interaction` is a shared lock, trader `Trade` is exclusive, everything else
+(`TileEntity`, default `Entity`) is exclusive. The `Collect` channel is the
+vehicle pickup/collect gate: `EntityVehicle.OnLockRequestServer` (IL=35) refuses
+`Collect` while the bag is non-empty or a driver is aboard, and its
+`OnLockResponseServer` streams the bag grid (`ItemStackGrid.Write(pbw,
+ToClient)`) to the locker.
+
+### 1.5.2 `NetPackageSingleSignData` (id 144, added, direction `Both`)
+
+```text
+libraryId   : string
+signBlobLen : i32
+signBlob    : signBlobLen bytes   // SignData.Write payload, no compression
+```
+
+`read` (IL=24): negative/zero length -> null blob. `ProcessPackage` (IL=34):
+null blob logs `[NetPackageSingleSignData] Received an empty sign blob for
+library '{0}'; ignoring.`, otherwise
+`SignDataManager.ProcessSignReceived(libraryId, signBlob)`; the server then
+rebroadcasts to every client except the sender
+(`SendPackage(pkg, false, -1, Sender.entityId, -1, null, _range: 192, false)`).
+Sent by `SignDataManager.SyncSignData` (IL=37) from
+`MarkSignDirty` when the sign's library is not a local library. There is no
+sender validation on this path: `ProcessPackage` runs no
+`ValidUserIdForSender` / `ValidEntityIdForSender` check and
+`ProcessSignReceived` never reads `Sender`; the blob names only the target
+library.
+
+### 1.5.3 `NetPackageSignDelete` (id 145, added, direction `Both`)
+
+```text
+signId : GlobalSignId     // string libraryId, then 16 raw Guid bytes
+```
+
+`GlobalSignId.ToStream` (IL=22) / `FromStream` (IL=24) are unchanged from the
+previous build apart from the pooled reader/writer types. `ProcessPackage`
+(IL=122) validates and then calls
+`SignDataManager.ProcessSignDeleteReceived(signId)`, then (server only)
+rebroadcasting to every client except the sender with the same argument shape
+as `SingleSignData`. Server-side refusals, all logged and dropped:
+
+- invalid id (`GlobalSignId.IsValid` false);
+- `libraryId == "[D]"` (default library);
+- `libraryId` in `SignDataManager.localLibraryIds`;
+- a player library where `libraryId != Sender.InternalId.CombinedString`
+  (ownership check);
+- a prefab library while `PrefabEditModeManager.IsActive()` is false.
+
+Sent by `SignDataManager.SyncSignDelete` (IL=25) from `TryDeleteSign` when the
+library is not a local library.
+
+### 1.5.4 `NetPackagePlayerInventory` (id 111, body changed)
+
+Previous body (per-field): `toolbelt:bool + ItemStack[]`, `bag:bool + Bag.Read`,
+`equipment:bool + ItemValue[] + cosmetic i32 list + unlocked list`,
+`dragAndDropItem:bool + ItemStack[]`. New body (IL=38 read / IL=61 write):
+
+```text
+inventoryPresent : bool  + blob   // Inventory.Write(pbw, Persistency=0)
+bagPresent       : bool  + blob   // Bag.Write(pbw, Persistency=0)
+equipmentPresent : bool  + blob   // Equipment.Write(pbw, Persistency=0)
+dragPresent      : bool  + GameUtils.WriteItemStack(1 x dragAndDropItem)
+```
+
+Blob framing is `StreamUtils.WriteBlob` (IL=16): `i32 length` then the raw
+bytes; `ReadBlob` (IL=21) returns an empty stream for `length <= 0`. No
+compression at this layer. Blob contents:
+
+- `Inventory.Write(pbw, mode)` (IL=14): `u8 version = 1`,
+  `ItemStackGrid.Write(pbw, mode)`, `u8 selectedSlot`.
+- `Bag.Write(pbw, mode)` (IL=9): `u8 version = 2`,
+  `ItemStackGrid.Write(pbw, mode)`.
+- `Equipment.Write(pbw, mode)` (IL=63): `u8 version = 6`,
+  `ItemStackGrid.Write(pbw, mode)`, then per cosmetic slot `i32` (0 when the
+  slot is empty, else the cosmetic mapping id), then `i32` unlocked-cosmetic
+  count and that many `i32`.
+- `ItemStackGrid.Write` (IL=70): `u16 version = 2`, container size
+  `Vector2i` (2 x i32), `i16` slot count, that many `ItemStack.Write`
+  (`u16` count capped 65535, then `ItemValue.Write` only when count != 0),
+  `bool` slot-lock array present (+`PackedBoolArray.Write`),
+  `bool` preferences present (+`PreferenceTracker.Write`),
+  `u64 worldTimeTouched`, `bool playerOwned`.
+
+`ProcessPackage` stores the blobs straight into
+`Sender.latestPlayerData` (`PlayerDataFile.inventoryData` / `bagData` /
+`equipmentData`, plus `dragAndDropItem`) and sets `bModifiedSinceLastSave`.
+The previous build wrote the fields themselves; the b10 and b18 bodies are not
+mutually readable. The payloads now use the same versioned serializers as the
+save file (`StreamModeWrite` 0), so the packet is save-shaped, not a bespoke
+enumeration.
+
+### 1.5.5 `NetPackagePlayerEquipment` (id 109, body changed)
+
+```text
+entityId : i32                    // NetPackageEntityTargeted
+blobLen  : i32                    // StreamUtils.WriteBlob, unconditional
+blob     : Equipment.Write(pbw, mode)
+```
+
+`mode` is `StreamModeWrite.ToClient` (2) on the server and `ToServer` (1) on a
+client (`NetPackagePlayerEquipment/<>c__DisplayClass1_0::<Setup>b__0`). The
+client applies it with `Equipment.ReadInto(pbr, mode)` inside
+`StreamUtils.FromBlob`, then the server rebroadcasts its own copy. The
+previous body was `Equipment.Write(BinaryWriter)` with no length prefix.
+
+### 1.5.6 `NetPackageItemActionEffects` (id 87, field width changed)
+
+`slotIdx` changed from `Byte` to `SByte`. Same one byte on the wire in both
+directions (`ReadSByte` at read IL_000E, `Write(SByte)` at write IL_0015); a
+negative slot index is now representable. `Setup` converts with `conv.i1`
+instead of `conv.u1`. No layout change.
+
+### 1.5.7 `NetPackageSignDataResponse` (id 143, reader changed, wire unchanged)
+
+The byte layout is identical: `isLastBatch:bool`, `dataLen:i32`, then
+`dataLen` bytes. Only the reader changed from `ReadBytes(len)` to
+`newarr` + `PooledBinaryReader.ReadExact(Span<byte>)`, and `GetLength()` was
+dropped. The batch payload is `[i32 size marker][ (string libraryId,
+SignData.Read) x N ]`; `SignDataManager.SendSignDataToClient` (IL=144) fills it
+in 1 MiB batches from `EnumeratePublicSignLibraries`.
+
+`SignData.Write` (IL=70) now carries its own version head and sharing byte:
+`i32 version = 3`, `Guid` (16 raw bytes), `string name`, `i64 UTC ticks`,
+`i32 nextPolyId`, `i32 nextTextId`, `i32 nextNoiseId`, `i32 nextGroupId`,
+`u8 sharing` (`SignData/SignSharing`: Private=0, Selectable=1, Copyable=2),
+`i32 layerCount`, layers. The previous build had neither the version head nor
+the sharing byte.
+
+`SignSharing` gates the gallery/info UI through
+`SignDataManager.GetEffectiveSharing` (IL=10, returns `SignData.sharing`, or
+Private when the sign is unknown) in `XUiC_SignGalleryWindow` /
+`XUiC_SignInfoWindow`. Delete authorization on the server is library ownership,
+not the sharing value (see 1.5.3).
+
+### 1.5.8 Removed packages (6)
+
+| Removed (b10 id) | What replaced the path |
+|---|---|
+| `NetPackageInventoryDataRequest` (86) / `NetPackageInventoryDataResponse` (87) | gone with the transactional-inventory subsystem; container contents now travel as `ItemStackGrid`/`Inventory` blobs (§1.5.4) |
+| `NetPackageInventoryTransactionRequest` (89) / `...Response` (90) | same; `InventoryTransaction`, `TransactionalInventory` and `InventoryManager` are also removed |
+| `NetPackageLockRequest` (97) / `NetPackageLockResponse` (98) | `NetPackageLockTarget` (§1.5.1); `ILockContext` and `LockTargetType` are removed, the per-target payload is now `ILockTarget.OnLockRequestLocal` / `OnLockResponseServer` |
+
+The old lock pair wrote `locking:bool`, `channel:u16`, `targets` count +
+`ILockTarget.WriteIdentifyingInfo` each, then `context` (type-name string +
+`ILockContext.Write`); the response added `success:bool` and `error:string`
+before the same target set. Both are unreadable by V3.3.0 and vice versa.
+
+**Ids.** Ids are assigned at startup, never stored, so they are not a stable
+contract: `NetPackagePackageIds` is always 0, and the rest follow metadata order
+(see [`network.md`](../network/network.md) §3). The derived values for the
+packages in this section, with their V3.2.0 values, are: `ItemActionEffects`
+87 (was 91), `LockTarget` 93 (new; the old `LockRequest` 97 / `LockResponse` 98
+slots shifted out), `PlayerEquipment` 109 (was 114), `PlayerInventory` 111 (was
+116), `SignDataRequest` 142 (was 147), `SignDataResponse` 143 (was 148),
+`SingleSignData` 144 (new), `SignDelete` 145 (new). Every id from the first
+removed slot (86) upward shifts by -3; anything that hardcodes ids across builds
+is wrong by construction.
+
 
 ---
 
@@ -624,16 +862,20 @@ entity before `NetPackageHoldingItem.Setup` fans them to observers.
 
 ### 5.4 NetPackagePlayerInventory
 ```text
-toolbelt present : bool  (+ ItemStack[] count-prefixed if present)
-bag present      : bool  (+ Bag.Write if present)
-equipment present: bool  (+ Equipment: slot count i32 + unlockedCosmetics list ...)
-dragAndDropItem  : ItemStack.Write
+inventoryPresent : bool (+ Inventory blob)
+bagPresent       : bool (+ Bag blob)
+equipmentPresent : bool (+ Equipment blob)
+dragPresent      : bool (+ ItemStack.Write)
 ```
 
-**ProcessPackage (IL=36):** writes optional toolbelt/bag/equipment/drag fields
-into `Sender.latestPlayerData` (`PlayerDataFile`) and sets
-`bModifiedSinceLastSave = true` (server-side inventory snapshot for save, not
-live entity mutate).
+Blob framing and per-blob contents: §1.5.4. Each present flag guards one
+length-prefixed blob; the drag-and-drop item is still a single
+`GameUtils.WriteItemStack` element.
+
+**ProcessPackage (IL=36):** stores the blobs into `Sender.latestPlayerData`
+(`PlayerDataFile.inventoryData` / `bagData` / `equipmentData` and
+`dragAndDropItem`) and sets `bModifiedSinceLastSave = true` (server-side
+inventory snapshot for save, not live entity mutate).
 
 Also related: `NetPackagePlayerInventoryForAI` Process IL=23 ->
 `AIDirector.UpdatePlayerInventory(entityId, bag/belt lists)` for smell/threat.
@@ -759,7 +1001,7 @@ Bit packing from `Setup` (IL=91), OR into flags:
 | 64 | `bReplicatedAlertFlag` **only if** `isEntityRemote` |
 | 128 | `Inventory.SetFlashlight` |
 
-On **server**, rebroadcast `Setup(entity)` with flags **192** excluding sender.
+On **server**, rebroadcast `Setup(entity)` (`_range` **192**, sender excluded).
 
 ### 5.6 `NetPackagePlayerData` (ToServer)
 
@@ -1229,90 +1471,26 @@ stream via `TileEntity.write(writer, streamMode)`.
    **2** if not remote world else **1**.
 4. `NotifyListeners()`.
 5. If server: `SetChunkModified()`; rebroadcast `NetPackageTileEntity.Setup(te,
-   StreamModeWrite=2, handle)` with bulk flags **192** and optional world-center
+   StreamModeWrite=2, handle)` with `_range` **192** and optional world-center
    position for interest.
 
 Base TE network write omits disk-only heat-map time; see
 [tile-entities-power.md](../gameplay/tile-entities-power.md) section 2.
 
-### 6.13 Inventory transaction packages
+### 6.13 Inventory transaction packages (removed in V3.3.0)
 
-Server-authoritative container moves ([items.md](../gameplay/items.md)).
+The whole server-authoritative container-transaction wire is gone in V3.3.0.
+Removed together with the four packages: the `InventoryManager`,
+`InventoryTransaction` and `TransactionalInventory` types, plus the
+`ILockContext` / `LockTargetType` lock-context pair (§1.5.8). The previous
+build's layout is preserved in `il/netpackages-v3.2.0/` and in the earlier
+revision of this doc, not in the shipped V3.3.0 assembly.
 
-#### Request (ToServer)
-
-```text
-// body:
-InventoryTransaction.Write(tx)
-```
-
-`ProcessPackage` (IL=8): `InventoryManager.TransactionRequestServer(tx, Sender.entityId)`.
-
-**`InventoryTransaction.Write` (IL=75):**
-
-```text
-inventoryCount : i32
-// per inventory:
-  inventoryKey : Guid
-  initialHash : i32
-  finalHash : i32
-  opCount : i32
-  // opCount x InventoryOperation.Write
-```
-
-**`TransactionRequestServer` (IL=46):** must be server; `tx.Apply(secretToken)`;
-on success `ValidateFinalHashes`; on failure log + `LockManager.ForceUnlockByPlayer`;
-on success for non-primary player send `NetPackageInventoryTransactionResponse`
-(flags 192) with success=true and null inventory lists (minimal ack).
-
-#### Response (ToClient)
-
-```text
-// empty keys/inventories fast path:
-success=false implied path: bool false, count 0
-// full:
-success : bool
-count : i32
-// count times:
-  key : Guid
-  hasStacks : bool
-  if hasStacks: ItemStack.WriteArray
-```
-
-`ItemStack.WriteArray` / `ReadArray` (ItemStack.il.txt): `i16 count`, `-1` = null
-(array), else count x `ItemStack.Write` (u16 stack count + ItemValue).
-
-`InventoryTransaction.Read` (InventoryTransaction.il.txt IL=74): per entry Guid +
-initialHash + finalHash + opCount + ops, then `TryGetTransactionalInventory(Guid)`;
-**unknown key logs `[InventoryTransaction] Could not find inventory with key
-{...}` and clears the whole op map** - the transaction then fails `Apply` (empty
-map returns false) and `TransactionRequestServer` runs the failure path
-(ForceUnlockByPlayer). Open RE gap: `InventoryManager.CreateInventoryServer`
-(Guid.NewGuid) has **no callers in the corpus**, so the server-side registry
-population path (who creates a TransactionalInventory for a container, and how
-the client learns the container's Guid key) is unpinned; candidate capture: the
-container-open sequence (NetPackageInventoryDataRequest + TE stream) against a
-stock dedi.
-
-Client `ProcessPackage` is currently a no-op (`ret` IL=1) on this build; server
-still emits the ack for remote players.
-
-#### Data request / response (related)
-
-`NetPackageInventoryDataRequest`: `KeyHashPair` + `managerToken` Guid.
-`NetPackageInventoryDataResponse`: success, errorMsg, inventoryKey Guid,
-`ItemStack[]`, managerToken; client updates `TransactionalInventory` on success.
-
-**Request Process (IL=92, server):**
-
-1. `InventoryManager.TryGetTransactionalInventory(key)`.
-2. Missing key -> Response success=false + error string, flags **192** to sender.
-3. If `inventory.Hash == request.Hash` -> Response success=true with **null** items
-   (client already current; bandwidth short-circuit).
-4. Else -> Response success=true with `GetItemsReadonly()` + managerToken.
-
-**Response Process (IL=30, client):** failure logs warning; success calls
-`TransactionalInventory.UpdateInventory(items, managerToken)` when key found.
+What carries container contents now: the versioned `ItemStackGrid` serializer,
+either inside a `NetPackagePlayerInventory` blob (§1.5.4) or in a tile-entity
+stream. The old open question (who populated the `TransactionalInventory`
+registry, and how the client learned a container's Guid key) is closed by
+removal rather than by a decoded replacement path.
 
 ### 6.14 NetPackageExplosionInitiate (ToServer)
 
@@ -1478,7 +1656,7 @@ data : dataLen bytes     // EntityBuffs.Write / Read blob
 ```
 
 `Setup` can serialize live buffs if data null. `ProcessPackage` (**IL=76**):
-pooled stream -> `EntityBuffs.Read`; on **server** rebroadcast Setup flags **192**.
+pooled stream -> `EntityBuffs.Read`; on **server** rebroadcast Setup (`_range` **192**).
 
 #### `NetPackagePlayerStats` (extends EntityTargeted)
 
@@ -1490,7 +1668,7 @@ EntityNetworkStats.write(...)
 `Setup` fills `EntityNetworkStats` from entity. `ProcessPackage` (**IL=70**):
 `ValidEntityIdForSender`; if not `EntityAlive` log discard; on server may stamp
 sender name into network stats; `ToEntity` + `EnqueueNetworkStats`; server
-rebroadcast Setup flags **192**.
+rebroadcast Setup (`_range` **192**).
 
 ### 6.17 Social / admin / lock / quest spawn packages
 
@@ -1516,10 +1694,12 @@ Routing is recipient-list based ([chat.md](../social/chat.md)).
 See [console-commands.md](../admin/console-commands.md) section 3: server carries a single
 `cmd` string; client carries `lineCount` strings + `bExecute`.
 
-#### `NetPackageLockRequest` / `Response`
+#### `NetPackageLockTarget` (V3.3.0, replaces `NetPackageLockRequest` / `Response`)
 
-See [dedicated-leftovers.md](../meta/dedicated-leftovers.md) section 2.2: locking bool,
-channel u16, target identifying infos, context type name + body.
+One package for both directions, opaque length-prefixed `LockManager` payload;
+full layout in §1.5.1. `ILockContext` and `LockTargetType` are removed: each
+target is `WorldAddress` (u8 tag + type-specific fields) plus a per-target
+context written by `ILockTarget.OnLockRequestLocal` / `OnLockResponseServer`.
 
 #### `NetPackagePartyActions` / `PartyData`
 
@@ -1531,7 +1711,7 @@ member array). Data write includes member id array.
 
 - `PartyActions` Process **IL=176**: switch on action enum (invite/accept/kick/
   leave/...); server uses `Party.ServerHandleAcceptInvite`, `AddPartyInvite`,
-  client may `SendToServer` follow-ups; rebroadcast patterns use flags **192**.
+  client may `SendToServer` follow-ups; rebroadcast patterns that exclude the sender use `_allButAttachedToEntityId` and `_range` **192**.
 - `PartyData` Process **IL=243**: server `PartyManager.GetParty`; client
   `CreateClientParty` / `UpdateMemberList`; join/leave audio + localization.
 
@@ -1575,7 +1755,7 @@ blockPos : Vector3i
 
 | eventType | Server | Client / local |
 |---|---|---|
-| 0 | Fan to each party member (HandlePlayer if local, else rebroadcast Setup flags **192**) | `HandlePlayer` for primary |
+| 0 | Fan to each party member (HandlePlayer if local, else rebroadcast Setup with `_range` **192**) | `HandlePlayer` for primary |
 | 1 | `QuestEventManager.FinishTreasureQuest(questCode, sender)` | (server-only path) |
 | 2 | Fan party members with Setup that includes `blockPos` | `HandlePlayer` |
 
@@ -1632,7 +1812,7 @@ Detail: [quests-challenges.md](../content/quests-challenges.md) section 8,
   value:string)` tuples.
 - **Request** Process **IL=211**: resolve target/requester entities; party
   membership check; `GameEventManager.HandleAction(...)`; reply
-  `NetPackageGameEventResponse` flags **192**.
+  `NetPackageGameEventResponse` (`_range` **192**).
 - **Response** Process **IL=135**: switch on `ResponseTypes` ->
   `HandleGameEventDenied/Approved`, twitch party/refund, entity spawn/despawn/kill,
   blocks added, etc.
@@ -1773,7 +1953,7 @@ entityId : i32
 // op 2: (none)
 ```
 
-#### `NetPackageSignDataRequest` / `Response`
+#### `NetPackageSignDataRequest` / `Response` (bulk download, V3.3.0 unchanged bytes)
 
 Request body empty (write IL=4). Request Process **IL=5**:
 `SignDataManager.SendSignDataToClient(Sender)`. Response:
@@ -1781,11 +1961,23 @@ Request body empty (write IL=4). Request Process **IL=5**:
 ```text
 isLastBatch : bool
 dataLen : i32
-data : dataLen bytes     // compressed library batch
+data : dataLen bytes     // [i32 size marker][ (string libraryId, SignData.Read) x N ]
 ```
 
 `ProcessPackage` → `SignDataManager.ProcessSignDataBatchReceived`
-([signs.md](../gameplay/signs.md) section 4). Response is compressed.
+([signs.md](../gameplay/signs.md) section 4). Response is compressed
+(`get_Compress` = 1). The byte layout is the same as V3.2.0; the V3.3.0 reader
+uses `ReadExact(Span<byte>)`, and each `SignData` entry gained the version head
+and sharing byte (§1.5.7).
+
+#### `NetPackageSingleSignData` / `NetPackageSignDelete` (V3.3.0, single-sign edits)
+
+Both are `Both`-direction and answer one sign at a time:
+`SingleSignData` carries `libraryId:string` + `signBlobLen:i32` + the
+`SignData.Write` blob, `SignDelete` carries `GlobalSignId` (libraryId string +
+16 raw Guid bytes). Full layouts, server-side authorization gates and the
+`SignSharing` field are in §1.5.2, §1.5.3 and §1.5.7. Bulk sync still uses the
+`SignDataResponse` batch above.
 
 #### `NetPackageDecoUpdate` (ToClient, write IL=19)
 
@@ -1816,7 +2008,7 @@ Process path already in [protocol.md](../network/protocol.md) section 5 / Reques
 | Package | IL write | Wire (after base) | Process / notes |
 |---|---:|---|---|
 | `NetPackageEntityRemove` | 8 | `reason` (EnumRemoveEntityReason) | Process IL=24: log if missing; `World.RemoveEntity(id, reason)` |
-| `NetPackageEntityCollect` | 12 | `entityId`, `playerId` | Process IL=51: `ValidEntityIdForSender(playerId)`; server rebroadcast flags **192** then `Entity.OnCollectServer(playerId)`; client `OnCollectLocal` |
+| `NetPackageEntityCollect` | 12 | `entityId`, `playerId` | Process IL=51: `ValidEntityIdForSender(playerId)`; server rebroadcast (`_range` **192**) then `Entity.OnCollectServer(playerId)`; client `OnCollectLocal` |
 | `NetPackageEntityPhysics` | 77 | flags + entityId + pos f32x3 + quat f32x4 + vel f32x3 + angVel f32x3 | Physics master broadcast |
 | `NetPackageTeleportPlayer` | 56 | pos f32x3, rot f32x3, `onlyIfNotFlying` | Local player `TeleportToPosition` |
 | `NetPackageEntityAttach` | 21 | `attachType:u8`, `riderId:i32`, `vehicleId:i32`, `slot:i16` | Process IL=104; `AttachType`: 0 AttachServer, 1 AttachClient, 2 DetachServer, 3 DetachClient (see §6.21.1) |
@@ -1834,7 +2026,7 @@ Process path already in [protocol.md](../network/protocol.md) section 5 / Reques
 
 | Package | IL write | Wire | Notes |
 |---|---:|---|---|
-| `NetPackagePlayerEquipment` | 8 | `Equipment` blob | Process IL=56: `Equipment.Apply` + server rebroadcast |
+| `NetPackagePlayerEquipment` | 8 | `i32` blobLen + `Equipment` blob (`StreamModeWrite` 2 server / 1 client, §1.5.5) | Process IL=61: `Equipment.ReadInto` in `FromBlob` + server rebroadcast |
 | `NetPackagePlayerSetBackpackPosition` | 39 | playerId, positions list | `SetDroppedBackpackPositions` |
 | `NetPackagePlayerQuestPositions` | 30 | entityId, questPositions | C2S Process IL=24: sender-gated `QuestPositions.Clear() + AddRange` into the PPD cache; S2C via `Setup(entityId, ppd)` re-broadcast |
 | `NetPackagePlayerTwitchStats` | 26 | twitchEnabled, twitchSafe, twitchVoteLock, twitchVisionDisabled, twitchActionsEnabled | Twitch integration flags |
@@ -1842,7 +2034,7 @@ Process path already in [protocol.md](../network/protocol.md) section 5 / Reques
 | `NetPackagePlayerLaserSight` | 19 | entityId, laserSightActive, laserSightPosition | Cosmetic aim |
 | `NetPackageItemDrop` | 37 | itemStack, dropPos, initialMotion, randomPosAdd, lifetime, entityId, clientInstanceId, bDropPosIsRelativeToHead | Process IL=23: always `IGameManager.ItemDropServer(...)` (server apply path) |
 | `NetPackageDropItemsContainer` | 42 | droppedByID, containerEntity, worldPos, items | Process IL=19: `DropContentInLootContainerServer` |
-| `NetPackageItemActionEffects` | 52 | entityId, slotIdx, actionIdx, firingState, startPos, direction, userData | Process IL=42: server/client `ItemActionEffectsServer/Client` |
+| `NetPackageItemActionEffects` | 52 | entityId, slotIdx (`SByte` in V3.3.0, was `Byte`), actionIdx, firingState, startPos, direction, userData | Process IL=42: server/client `ItemActionEffectsServer/Client` |
 | `NetPackageItemReload` | 8 | entityId | Process IL=18: `ItemReloadServer` / `ItemReloadClient` |
 | `NetPackageModifyCVar` | 21 | m_entityId, cvarName, value, operation | Process IL=26: server `EntityBuffs.SetCustomVar` |
 | `NetPackageEntityAddExpClient` | 30 | entityId, xp, xpType, usedItem | Process IL=36: `Progression.AddLevelExp` with `_xpFromKill` / `_xpOther` tags |
@@ -1857,7 +2049,7 @@ Process path already in [protocol.md](../network/protocol.md) section 5 / Reques
 
 | Package | IL write | Wire | Notes |
 |---|---:|---|---|
-| `NetPackageSetBlockTexture` | 24 | blockPos, blockFace, idx, playerIdThatChanged, channel | Process IL=46: always `SetBlockTextureClient`; server also rebroadcast Setup excluding sender flags **192** |
+| `NetPackageSetBlockTexture` | 24 | blockPos, blockFace, idx, playerIdThatChanged, channel | Process IL=46: always `SetBlockTextureClient`; server also rebroadcast Setup excluding sender (`_range` **192**) |
 | `NetPackageAnimateBlock` | 24 | blockPosition, animParamater, animType, animationInteger, animationBool | Process IL=33 (client block animator) |
 | `NetPackagePickupBlock` | 22 | blockPos, rawData, playerId, persistentPlayerId | Process IL=41: `ValidEntityIdForSender` + `ValidUserIdForSender`; server `PickupBlockServer`, remote `PickupBlockClient` |
 | `NetPackageWallVolume` | 12 | id, wallVolume | Process IL=16: client `World.AddWallVolumeAt` / remove |
@@ -1920,7 +2112,7 @@ conditional still lives in [../inventories/netpackage-bodies.md](../inventories/
 
 | Op | Behaviour |
 |---|---|
-| AttachServer (0) | Resolve rider + vehicle; if vehicle missing return; `FindAttachSlot` or `AttachToEntity(vehicle, slot)`; on success rebroadcast **AttachClient** (type 1) with resolved slot, flags **192** |
+| AttachServer (0) | Resolve rider + vehicle; if vehicle missing return; `FindAttachSlot` or `AttachToEntity(vehicle, slot)`; on success rebroadcast **AttachClient** (type 1) with resolved slot, `_range` **192** |
 | AttachClient (1) | `rider.AttachToEntity(vehicle, slot)` local apply |
 | DetachServer (2) | `rider.Detach()`; rebroadcast **DetachClient** (type 3) with vehicleId/slot = -1, exclude rider from fanout |
 | DetachClient (3) | `rider.Detach()` |
@@ -2093,9 +2285,16 @@ is what the placement/repair/dump-water gates then consult.
 
 All conditional-heavy packages from the census, with the exact branch framing
 of their `write(PooledBinaryWriter)` body (IL offsets from
-`il/full-v3.1.0/_global/`). **Verification status (2026-08-10): all 37 rows
-(18 conditional + 19 always-present) re-checked against write IL across five
-rounds - every claim below is exact.** Two prior confusions resolved: a `dup; brtrue;
+`il/full-v3.3.0/_global/`). **Verification status: all 35 rows
+(16 conditional + 19 always-present).** The 2026-08-10 audit covered 37 rows
+(18 conditional + 19 always-present); V3.3.0 removed three conditional rows
+(`InventoryTransactionResponse`, `LockRequest`, `LockResponse`, all deleted
+packages, §1.5.8) and added `NetPackagePlayerInventory` as a conditional row
+(§1.5.4). The three added V3.3.0 packages and `NetPackagePlayerEquipment` are
+not in either list: each writes one length-prefixed body with no branch
+(§1.5.1, §1.5.2, §1.5.3, §1.5.5). Two
+prior
+confusions resolved: a `dup; brtrue;
 pop; ldstr ""` pattern is **null-coalescing** (field always on the wire), not a
 condition; and a conditional in `ProcessPackage` does not change the write
 layout. Null-coalesced strings below are always-present.
@@ -2111,16 +2310,14 @@ layout. Null-coalesced strings below are always-present.
 | `NetPackageEntityPosAndRot` | 76 | `bUseQRotation==false`: `rot:Vector3`; `==true`: `qrot:Quaternion` (mutually exclusive); `pos`, `bUseQRotation`, `onGround` always |
 | `NetPackageEntityRotation` | 54 | same `bUseQRotation` split: `rot:Vector3i` (3x i16) vs `qrot:Quaternion` (mutually exclusive) |
 | `NetPackageGameEventResponse` | 102 | `responseType==12 ClientSequenceAction`: `actionKey`; `==8 BlocksAdded`: `index`, `blockList` count + Vector3i list; `==9 BlocksRemoved`: `index`, `isDespawn`; `==11 BlockDamaged` (guard `==9\|\|==11`): `blockPos`; all other types: no tail fields |
-| `NetPackageInventoryTransactionResponse` | 66 | per entry: `guid`, `hasInventory:bool`; `inventory:ItemStack[]` only when `hasInventory` true |
 | `NetPackageLocalization` | 30 | `seqNr`, `totalParts`; `dataLen:i32` (-1 when null); `data` bytes only when `data != null` |
-| `NetPackageLockRequest` | 62 | `targets` count + per-target info only when `targets != null`; `context` type-name always (empty when null), `context` payload only when `context != null` |
-| `NetPackageLockResponse` | 74 | same two null-guards as LockRequest |
 | `NetPackageMinEventFire` | 35 | `eventPackageType==0 ItemEvent`: `itemValue`; `==1 BlockEvent`: `blockValue.rawData:u32` (mutually exclusive). **Stock defect (2026-08-10, unique among the 17 instance-callvirt writers):** the ItemEvent branch callvirt-dereferences the instance `ItemValue::Write(BinaryWriter)` (IL_0048) with no null guard - the static null-safe `Write(ItemValue,BinaryWriter)` (ItemValue IL=10, writes byte 0 for null) is bypassed - and entity explosions queue null: `EntityZombieCop` death -> `GameManager.ExplosionServer(..., itemValue=null)` (ldnull, EntityZombieCop IL_0156) -> `Explosion.AttackEntites` -> `NetPackageMinEventFire.Setup(remoteEntityId, ..., MinEventTypes=19, null)` -> serialize-thread NRE under churn (108 observed in one 28-bot run). **Audit (2026-08-10):** 16 other packages instance-callvirt-write reference fields (HoldingItem/ItemDrop ItemStack, VehicleSpawn ItemValue, PlayerData PlayerDataFile, RequestToSpawnPlayer PlayerProfile, Waypoint, etc.) but are safe by construction - their `Setup` callers pass non-null (e.g. `ItemActionSpawnVehicle` passes `inventory.get_holdingItemItemValue()`, always the held item) or their Write methods null-guard internally; MinEventFire is the only reachable null path. Failure is **graceful**: `NetConnectionSimple.WriteToStream` catches it, warns `Failed writing first package: ... remaining packages in queue`, calls `SendQueueHandled()` (NetPackage IL=7: decrement + free) and continues - the lost MinEvent is dropped, the connection survives (client drops came from the LiteNetLib receive-thread race, [network.md](../network/network.md) §4.0) |
 | `NetPackageNPCQuestList` | 99 | `eventType==0 FetchList`: `tierLevel`, entries count + `QuestPacketEntry` list; `==1 RemoveQuest`: `tierLevel`, `removeIndex:u8`; `==3 AddUsedPOI`: `tierLevel`, `questGiverPos`, `prefabPos`; `==4 ClearUsedPOI`: `tierLevel`, `questGiverPos`; `==2 ResetQuests`: no tail fields |
+| `NetPackagePlayerInventory` | 61 | four present-flags: `inventoryData`, `bagData`, `equipmentData` each `bool` + `i32 blobLen` + blob bytes only when true (`StreamUtils.WriteBlob`); `dragAndDropItem` `bool` + one `ItemStack.Write` only when true (blob contents §1.5.4) |
 | `NetPackagePackageIds` | 62 | `compatVersion` (from `Constants::cVersionInformation`), mapping count + type names, `serverUseEAC`; `hasHostUserAndToken:bool`; when true: `hostUserAndToken` (ToStream + token string, null-coalesced) |
 | `NetPackageQuestEvent` | 205 | 5 always: `entityID`, `prefabPos`, `eventType:u8`, `questTags`, `questCode`. Tail by `eventType`: `==3`: `extraData:u64`; `==7`: `questID`, `SharedWithList` count+ids; `==9`: `SubscribeTo:bool`; `==12`: `FetchModeType:u8`, `SharedWithList` count+ids; `==13`: `blockIndex`, `eventName`, `SharedWithList` count+ids, `activateList` count+Vector3i; `==16`: `factionPointOverride:i32`; 8/10/11/other: no tail |
 | `NetPackageRangeCheckDamageEntity` | 216 | 38 scalar fields always; `buffActions` count:u8 always (0 when empty), string elements only when count > 0 |
-| `NetPackageSignDataResponse` | 28 | `isLastBatch`; `dataLen:i32` (0 when null); `data` bytes only when length > 0 |
+| `NetPackageSignDataResponse` | 28 | `isLastBatch`; `dataLen:i32` (0 when null); `data` bytes only when length > 0. V3.3.0 bytes are unchanged; the reader switched to `ReadExact(Span<byte>)` (§1.5.7) |
 | `NetPackageTraderData` | 38 | flag `entityId != -1`: when true `entityId:i32`; when false `tePosition:Vector3i` (mutually exclusive); then `traderData != null` flag + `traderData` payload only when non-null |
 
 **Always-present framing (count-prefixed lists / fixed scalars only, no wire

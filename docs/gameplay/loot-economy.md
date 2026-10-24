@@ -1,4 +1,4 @@
-# Loot, traders and economy (dedicated V3.2.0)
+# Loot, traders and economy (dedicated V3.3.0)
 
 **Owns:** the server-authoritative loot and trade subsystem: how a placed container
 rolls its contents on first open (`LootContainer` definitions + `TEFeatureStorage`
@@ -14,6 +14,9 @@ math primitives (`ItemValue`, `Block.EconomicValue`).
 `TraderData`, `TraderManager`, `EntityTrader`, `TraderArea`,
 `TileEntityVendingMachine`, `XUiM_Trader` IL (dump locally with `tools/src/DumpMethod`,
 git-ignored). **Hub:** [`INDEX.md`](../INDEX.md). **Method:** [`re-methodology.md`](../meta/re-methodology.md).
+**Build:** V3.3.0 b18. The storage and dropped-container sections were re-read
+against b18; loot/trader method bodies the b18 diff did not touch keep their
+b10 widths.
 
 Loot generation and trader restock/hours are gated behind `ConnectionManager.IsServer`
 and run inside the `TraderManager` / `LootManager` singletons, so both are dedicated
@@ -32,9 +35,11 @@ folded into the composite tile-entity feature system. A lootable block is a
 | Type | Role |
 |---|---|
 | `LootContainer` | A named loot-list **definition** (registry `lootContainers`, keyed by name), plus the nested `LootGroup` / `LootItem` / `LootEntry` / `LootQualityTemplate` / `LootProbabilityTemplate`. Loaded from `loot.xml` by `LootFromXml` (the `<LoadLootContainers>` coroutine). Owns the roll: `Spawn`, `SpawnLootItemsFromList`, `getProbability`, `RandomSpawnCount` |
-| `TEFeatureStorage` | The placed **runtime container** (a feature on `TileEntityComposite`). Holds `items[]`, the loot-list name (`lootListName`), the touched flags (`internalTouched`/`bTouched`, `bWasTouched`, `worldTimeTouched`), `LootStageMod`/`LootStageBonus`, `bPlayerStorage`, and the quest `AlternateLootList` |
+| `TEFeatureStorage` | The placed **runtime container** (a feature on `TileEntityComposite`). Holds a V3.3.0 `ItemStackGrid` (`itemGrid` with locks, preferences, `worldTimeTouched`, `playerOwned`), the loot-list name (`lootListName`), `LootStageMod`/`LootStageBonus`, and the quest `AlternateLootList` |
 | `LootManager` | World singleton. `LootContainerOpened(ITileEntityLootable, playerId, tags)` is the server generation entry point; `LootBagOpened(Bag, owner, playerId)` handles dropped bags |
-| `EntityLootContainer` | A **dropped** loot bag/backpack (an `EntityItem`), separate from block storage |
+| `EntityContainerAbs` | New V3.3.0 base (`: EntityItem`) for dropped containers. Owns the despawn timer (`deathUpdateTime`, `timeStayAfterDeath`, `bRemoved`), `removeBackpack(reason)`/`onBackpackRemoved`, `OnUpdateEntity`, `updatePosition`/`updateMarkers`, `AllowActivationCommand`, `OnUnlockedServer`, `IsMarkedForUnload` |
+| `EntityLootContainer` | A **dropped** loot bag/backpack (`: EntityContainerAbs`), separate from block storage |
+| `EntityBackpack` | The player death/quit drop (`: EntityContainerAbs`). Same despawn and unlock path as `EntityLootContainer`; adds `RefPlayerId`, dropped-backpack markers, and the remove log |
 | `TraderInfo` | A trader **definition** from `traders.xml` (`TradersFromXml`); `traderInfoList[]` indexed by `TraderID`. Markups, quality mods, currency item, reset interval, open/close/warning times, hour preset, rent config, tier item groups |
 | `TraderData` | Per-trader **runtime** state: `PrimaryInventory` (`List<Entry>`), `TierItemGroups`, and `lastInventoryUpdate` (world time of last restock). An `Entry` is `{ ItemStack Item, sbyte Markup, bool addedByPlayer }` |
 | `TraderManager` | World singleton. `TraderInventoryRequested` decides whether to restock; `HandleFullReset` rebuilds the inventory |
@@ -57,7 +62,7 @@ generates its loot exactly once until it is re-armed by the respawn timer.
 stateDiagram-v2
   [*] --> Unlooted: block placed / prefab spawned<br/>bTouched=false, items empty
   Unlooted --> Generating: LootContainerOpened (server only)<br/>set bTouched=true, worldTimeTouched=now
-  Generating --> Filled: container empty, LootContainer.Spawn<br/>roll count, items, quality, clone into items[]
+  Generating --> Filled: container empty, LootContainer.Spawn<br/>roll count, items, quality, clone into ItemStackGrid
   Generating --> Filled: container already had items -> skip roll
   Filled --> Looted: player removes items -> IsEmpty()
   Looted --> Cooldown: UpdateTick, LootRespawnDays>0, not player-placed
@@ -95,7 +100,7 @@ entries, applying:
 - **Loot buffs:** any buffs the loot list attaches are applied to the opening player
   via `EntityBuffs.AddBuff` (see [buffs.md](../gameplay/buffs.md)).
 
-Rolled stacks are cloned into the tile entity `items[]` and synced to the opening
+Rolled stacks are cloned into the tile entity's `ItemStackGrid` and synced to the opening
 client. Server authority is total: the client never decides what spawns.
 
 ```mermaid
@@ -110,7 +115,7 @@ sequenceDiagram
   LM->>LM: set bTouched and worldTimeTouched, fire MinEvent 101
   LM->>LC: Spawn(random, slots, lootStage, tags, ...)
   LC-->>LM: List<ItemStack>
-  LM->>TE: clone stacks into items[], fire MinEvent 100
+  LM->>TE: clone stacks into the ItemStackGrid, fire MinEvent 100
   TE-->>P: synced container contents
 ```
 
@@ -430,20 +435,25 @@ Default entity class `DroppedLootContainer`; override via block prop
 If not empty: `CreateEntity` as `EntityLootContainer`, `SetContent(Clone items)`,
 `SpawnEntityInWorld`. Always `SetEmpty()` on the TE.
 
-**`EntityLootContainer.OnUnlockedServer(playerId, channel)` (IL=7):** an empty
-`bag` dies on unlock: `IsEmpty()` → `KillLootContainer()`, so a loot bag that
-was picked clean despawns the moment a player opens it.
+**`EntityContainerAbs.OnUnlockedServer(playerId, channel)` (IL=7, shared by
+`EntityLootContainer` and `EntityBackpack`):** an empty `bag` dies on unlock:
+`IsEmpty()` → `KillLootContainer()`, so a loot bag that was picked clean
+despawns the moment a player opens it.
 
-**`EntityLootContainer.OnUpdateEntity` (IL=46)** is the unattended despawn:
-after the base `EntityItem` update it skips while the bag is locked (channel
-0, local or server), and otherwise removes the bag when
+**`EntityContainerAbs.OnUpdateEntity` (IL=59)** is the unattended despawn for
+both dropped-container types. After the base `EntityItem` update it skips
+while the bag is locked (channel 0, `IsLockedByLocalPlayer` on a client or
+`IsLockedServer` on the server), and otherwise removes the bag when
 `bag.Touched && bag.IsEmpty()` (emptied by someone who touched it) or when
 `deathUpdateTime >= timeStayAfterDeath - 1` (the timed expiry), else
-increments `deathUpdateTime`. `removeBackpack` (IL=10) sets
-`deathUpdateTime = timeStayAfterDeath`, `bRemoved = true` and
-`MarkToUnload()`; `IsMarkedForUnload` (IL=8) is the base flag OR `bRemoved`;
-`GetLootList` (IL=11) prefers `OverrideLootList` when set, else the base
-`lootList`.
+increments `deathUpdateTime` and runs `updatePosition()` / `updateMarkers()`.
+`removeBackpack(reason)` (IL=13) sets `deathUpdateTime =
+timeStayAfterDeath`, calls the overridable `onBackpackRemoved(reason)` (the
+`EntityBackpack` override logs `RemoveBackpack empty {0}, reason {1}` and
+updates its marker), sets `bRemoved = true` and `MarkToUnload()`.
+`IsMarkedForUnload` (IL=8) is the base flag OR `bRemoved`;
+`EntityLootContainer.GetLootList` (IL=11) prefers `OverrideLootList` when set,
+else the base `lootList`.
 
 **`EntityClass.AddDroppedId(event, name, minCount, maxCount, prob,
 stickChance, toolCategory, tag)` (IL=33)** registers a corpse/entity drop: it
@@ -512,7 +522,7 @@ when the bait is weaker than the entity's resistance), otherwise always. A
 successful candidate stores `pendingDistraction` + `pendingDistractionDistanceSq`
 on the entity, and the lifetime counter decrements each pass.
 
-**`EntityItem.OnUpdateEntity` (IL=114):** base update; create mesh if needed;
+**`EntityItem.OnUpdateEntity` (IL=121):** base update; create mesh if needed;
 `ItemClass.OnDroppedUpdate`; if |dy| &lt; 0.1 for **10** ticks set `onGround`;
 physics-master client odd ticks `PhysicsMasterSendToServer`;
 `checkGravitySetting`; non-remote: if no transform force `lifetime=0`; else
@@ -717,31 +727,60 @@ quest_list="trader_jen_quests"/>`. `EntityTrader::PostInit` (531098-531180) read
 
 ### TEFeatureStorage surface
 
-`TEFeatureStorage` (156979) declares `Version = 0x12` (18) and the property names
-`PropLootList`, `PropAlternateLootList`, `PropLootStageMod`, `PropLootStageBonus`,
-`PropIsJammed`, `PropIsQuestLoot`, plus `lockFeature` / `lockpickFeature`
-sub-features, an `AlternateLootList` of `(FastTags tag, string lootEntry)` and a
-`Vector2i containerSize`. Its `Write` (158970+) order is: base
-`TEFeatureAbs::Write`, `u16 version` (skipped in network mode),
-`bool lootListName-present` plus optional string, `u16 containerSize.x`,
-`u16 containerSize.y`, `bool bTouched`, `u32 worldTimeTouched`,
-`bool bPlayerStorage`, `i16 items.Length`, `ItemStack*`, then a preferences bool
-and the locked-slot bit array.
+`TEFeatureStorage` still declares `PropLootList`, `PropAlternateLootList`,
+`PropLootStageMod`, `PropLootStageBonus`, `PropIsJammed`, `PropIsQuestLoot`,
+the `lockFeature` / `lockpickFeature` sub-features, and the `AlternateLootList`
+of `(FastTags tag, string lootEntry)`. The b10 storage fields (`containerSize`,
+`itemsArr`, `playerStorage`, `internalTouched`, `bWasTouched`, `SlotLocks`,
+`preferences`, `worldTimeTouched`) are replaced by one `ItemStackGrid
+itemGrid`; the feature now implements `IItemStackGridHolder` and
+`IHasWorldAddress`, and `GetItemStackGridKey` returns 0.
+
+Its `Write` (IL=30) order is: base `TEFeatureAbs::Write`, `u16` local version
+**20** (skipped in network mode), `bool lootListName-present` plus optional
+string, then `ItemStackGrid.Write`. `readInternal` (IL=186) mirrors it: the
+version comes from the wire in network mode, else from the parent tile
+entity's local version; at version >= 20 it reads the grid, at version 19 it
+reads the b10 record (`u16 containerSize.x`, `u16 containerSize.y`, a
+discarded bool, `u32 worldTimeTouched`, `bool playerStorage`, `i16` item
+count clamped to `x*y`, `ItemStack*`, an optional `PreferenceTracker`, and at
+version >= 12 the `PackedBoolArray` locks) and migrates that into the grid.
+Older versions fall through to the same legacy item path.
 
 **`migrateItemsFromOtherContainer(other)` (IL=94)** is the storage-upgrade
 handoff: it clones the other container's items clamped to this size, and when
 the source held more than fits, drops the overflow as a `DroppedLootContainer`
 at `ToWorldCenterPos() + (0, 0.9, 0)` through
-`GameManager.DropContentInLootContainerServer`. Slot locks follow the source:
-cloned and resized to this size when the source supports them, else a fresh
-all-empty `PackedBoolArray`.
+`GameManager.DropContentInLootContainerServer`. Slot locks and preferences
+follow the source into the grid.
 
-**Storage leaves:** `SetContainerSize(size, clearItems)` (IL=48) writes the
-size and, when clearing, either rebuilds `items` at the new capacity or empties
-the existing array. `HasItem(item)` (IL=26) scans for a matching `type`;
-`UpdateSlot(idx, item)` (IL=10) stores a clone and `NotifyListeners()`;
-`GetContainerSize` (IL=3) and the `LootStageMod`/`LootStageBonus` accessors
-are field reads.
+**Storage leaves:** `SetEmpty` (IL=12) / `IsEmpty` (IL=22) /
+`ShouldDestroyOnClose` (IL=19) wrap the grid; `HasItem(item)` (IL=25) scans for
+a matching `type`; `UpdateSlot(idx, item)` (IL=9) stores a clone via
+`ItemGrid.SetItem`; `AddItem` (IL=28) / `TryStackItem` (IL=73) /
+`RemoveItem(s)` (IL=26/85) use the grid; `GetItemStackGrid(byte key)` (IL=3)
+returns the grid and `get_LootStageMod` / `get_LootStageBonus` are field
+reads. The b10 `SetContainerSize(size, clearItems)` / `GetContainerSize` pair
+is gone; the grid's `Vector2i ContainerSize` + `Resize` replace it.
+
+---
+
+## 7a. V3.3.0 backpack loot data
+
+`loot.xml` gains `<lootgroup name="groupPlayerBackpacks">` (`backpackSmall`
+ProbT1, `backpackMedium` ProbT2, `backpackLarge` ProbT3, quality template
+`armorQualityTemplate`, `abundance_type="Armor"`) and adds
+`backpackSkillMagazine` to the magazine loot groups
+(`groupSavageCountryMagazines`, the Savage Country crates, the two
+magazine crates). `groupSavageCountryCrate02` now also rolls
+`groupPlayerBackpacks` on the armor-skill tags and reorders its cloth/sewing
+kit entries.
+
+Two dropped-container definitions grew: `playerBackpack` (the player death
+drop) is **8x15 = 120** slots (b10 7x10 = 70), and `cntDropBag` (the bag
+spilled when a loot container is destroyed) is **8x15** (b10 9x10 = 90).
+`EntityContainerAbs.OnUpdateEntity` still destroys both when empty or after
+`timeStayAfterDeath - 1` ticks.
 
 ---
 
@@ -969,7 +1008,7 @@ or `ItemStack.Empty` when nothing rolled.
 |---|---|
 | [full-surface.md](../meta/full-surface.md) | Where loot/trader types sit in the whole-assembly map |
 | [buffs.md](../gameplay/buffs.md) | The buff system loot lists add to the opening player |
-| [server-lifecycle.md](../admin/server-lifecycle.md) | World save/load that persists container `items[]` and `TraderData` |
+| [server-lifecycle.md](../admin/server-lifecycle.md) | World save/load that persists container `ItemStackGrid` blobs and `TraderData` |
 | [protocol-packages.md](../network/protocol-packages.md) | `NetPackageTraderData` and the container/lock packages on the wire |
 | [managers.md](../loop/managers.md) | The world singletons (`LootManager`, `TraderManager`) alongside the others |
 | [re-methodology.md](../meta/re-methodology.md) | How this was reversed |
@@ -979,6 +1018,11 @@ or `ItemStack.Empty` when nothing rolled.
 
 - **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `TraderArea.IsWithinProtectArea` 47 -> 59 (exact). Prior values were the V3.1.0 b14 measurement.
 - **2026-08-11:** Loot-entity IL re-verified: EntityLootContainer OnUnlockedServer IL=7, OnUpdateEntity IL=46, removeBackpack IL=10, IsMarkedForUnload IL=8, GetLootList IL=11, EntityClass.AddDroppedId IL=33, CheckDestroyTileEntity IL=37, EntityItem.OnCollectServer IL=8, Init IL=10, PostInit IL=37, InitLocalActivationCommands IL=15, CheckStick IL=93, get_IsDistractionActive IL=5, PhysicsMasterBecome IL=6, SetItemStack IL=115, CanCollect IL=12, tickDistraction IL=147, OnUpdateEntity IL=114 (exact).
+- **2026-10-24:** V3.3.0 b18 re-read: `EntityContainerAbs` base for
+  `EntityLootContainer`/`EntityBackpack` (despawn, unlock, removeBackpack
+  IL=13, OnUpdateEntity IL=59); `TEFeatureStorage` local version 20 with the
+  `ItemStackGrid` record and a version-19 legacy branch; dropped-container
+  sizes 8x15; new backpack loot group and magazine entries.
 - **2026-08-11:** Trader/storage/loader IL re-verified: ParseTraderInfo IL=320, EntityTrader.OnUpdateLive IL=315, TEFeatureStorage migrateItemsFromOtherContainer IL=94, SetContainerSize IL=48, HasItem IL=26, UpdateSlot IL=10, GetContainerSize IL=3, LootFromXml LoadLootContainers IL=6, LoadLootContainer IL=275, ParseItemList IL=334, LoadLootGroup IL=197, LoadLootQualityTemplate IL=231, LoadLootSetting IL=142, ExecuteBuffActions IL=28, GetLootContainer IL=21, IsLoaded IL=5, LootLog IL=11 (exact).
 - **2026-08-11:** Trader-area IL re-verified: get_TraderAreas IL=12, GetTraderAreaAt IL=14, IsWithinTraderPlacingProtection IL=20/29, TraderComparer.Compare IL=8, IsWithinTraderArea IL=6/19, GetTraderAtPosition IL=68, TraderArea.IsWithinProtectArea IL=59, GetProtectPadding IL=22, checkForTeleportOutOfTraderArea IL=241 (exact).
 - **2026-08-11:** Vending/drop IL re-verified: SetAutoBuyTime IL=21, get_IsRentable IL=5, get_RentTimeRemaining IL=9, get_RentalEndDay IL=3, GetUsers IL=3, GetPasswordHash IL=3, TryAutoBuy IL=227, UpdateTick IL=25, ItemDropServer(8-arg) IL=268, DropContentInLootContainerServer IL=104, DropContentOfLootContainerServer IL=99, EntityItem OnLoadedFromEntityCache IL=73 / createMesh IL=249 / GetModelTransform IL=3 / playThrowSound IL=15, NetPackageTraderData.write IL=38 (exact).

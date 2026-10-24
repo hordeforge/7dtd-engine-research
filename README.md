@@ -8,7 +8,7 @@
 ![languages](https://img.shields.io/github/languages/count/hordeforge/7dtd-engine-research)
 ![top language](https://img.shields.io/github/languages/top/hordeforge/7dtd-engine-research)
 
-Reverse-engineering research on the **7 Days to Die dedicated server** (V **3.2.0 (b10)**): how the stock, unmodified server is built and behaves, and its wire/file formats, derived from the shipped `Assembly-CSharp.dll`. Produced alongside a server performance-optimization suite; the cost/scaling **measurement** program and optimization levers live in the companion `7dtd-server-optimizer/docs/`, not here.
+Reverse-engineering research on the **7 Days to Die dedicated server** (V **3.3.0 (b18)**): how the stock, unmodified server is built and behaves, and its wire/file formats, derived from the shipped `Assembly-CSharp.dll`. Produced alongside a server performance-optimization suite; the cost/scaling **measurement** program and optimization levers live in the companion `7dtd-server-optimizer/docs/`, not here.
 
 Start at [`docs/INDEX.md`](docs/INDEX.md). Contributing (setup, the
 edit-test loop, what CI runs) is in [`CONTRIBUTING.md`](CONTRIBUTING.md).

@@ -128,7 +128,7 @@ that is only ever a target reads one lower.
 | 3. `SaveDataUtils` lifecycle: manager and prefs selection | [world/save-persistence.md](../world/save-persistence.md) | 10 |
 | 1.1 World save state machine (managed) | [world/save-region.md](../world/save-region.md) | 7 |
 | 4.1 Chunk progress flags (stock `InProgress*` volatiles) | [world/world-chunks.md](../world/world-chunks.md) | 11 |
-| 5.2 Network-mode `Chunk.write` body layout (V3.2.0) | [world/world-chunks.md](../world/world-chunks.md) | 5 |
+| 5.2 Network-mode `Chunk.write` body layout (V3.3.0 b18) | [world/world-chunks.md](../world/world-chunks.md) | 5 |
 | 4.1 Coroutine driver and worker task | [world/world-generation.md](../world/world-generation.md) | 8 |
 
 ## Changelog

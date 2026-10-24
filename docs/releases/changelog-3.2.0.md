@@ -5,7 +5,7 @@
 **Scope:** stock dedicated `Assembly-CSharp.dll`, 7 Days to Die.
 **From:** V3.1.0 b14 (Major=3 Minor=10 Build=14, "Henpocalypse").
 **To (sections 1–7):** V3.2.0 b9 (Major=3 Minor=20 Build=9), dated 2026-08-28.
-**Current pin:** V3.2.0 b10 (Major=3 Minor=20 Build=10). The b9→b10 patch is §8.
+**Pin at release:** V3.2.0 b10 (Major=3 Minor=20 Build=10). The b9→b10 patch is §8.
 **Method:** pairwise IL diff of the tracked V3.1.0 dump sets (`il/*-v3.1.0/`)
 against freshly regenerated V3.2.0 sets (`il/*-v3.2.0/`), plus the machine
 pins in [`tools/data/stock_facts.json`](../../tools/data/stock_facts.json) and
@@ -497,9 +497,10 @@ family changed; method dumps under `.scratch/b10-il/` for review).
 
 The 3.1.0→3.2.0 diff was RE'd from the tracked dumps (3.1.0 sets vs the
 regenerated 3.2.0 sets); the full evidence trail is the standalone
-[`changelog-3.2.0.md`](../releases/changelog-3.2.0.md). The current pin is **b10**; the
+[`changelog-3.2.0.md`](../releases/changelog-3.2.0.md). The pin at release was **b10**; the
 b9→b10 patch (EOS Title Storage cancel path only) is §8 of that changelog and
-[`platform-auth.md`](../admin/platform-auth.md) §6. The per-fact homes for the major
+[`platform-auth.md`](../admin/platform-auth.md) §6. The 3.2.0→3.3.0 delta has its own
+map in [`changelog-3.3.0.md`](../releases/changelog-3.3.0.md). The per-fact homes for the major
 3.1.0→3.2.0 delta:
 
 | Topic | Home |

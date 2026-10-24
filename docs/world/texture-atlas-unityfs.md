@@ -1,7 +1,9 @@
 # UnityFS bundle layout (meshdescriptions_assets_all.bundle)
 
 Reference for the `meshdescriptions_assets_all.bundle` container format, as
-validated on the stock V3.2.0 b9 operator install (Unity 2022.3.62f2).
+validated on the stock V3.3.0 b18 dedicated install (Unity 2022.3.62f2),
+bundle sha256 `30c13a3c97e7d7f0d8c8618395476b3904b9699291ad340739ec1d08fb23f0c`
+(36,172,424 bytes).
 Backs [texture-atlas.md](../world/texture-atlas.md); the atlas TextAssets live inside
 this bundle.
 **Owns:** the UnityFS container layout of `meshdescriptions_assets_all.bundle` (backs [texture-atlas.md](../world/texture-atlas.md)).  
@@ -75,5 +77,12 @@ per object    : path_id i64 LE (4-aligned), byte_start i64 LE (absolute),
 
 ## Changelog
 
+- **2026-10-24:** Re-verified on V3.3.0 (b18): the header constants (version 8,
+  `version_player` `5.x.x`, `version_engine` `2022.3.62f2`, `size` 36172424,
+  compressed blocks-info 5828 / uncompressed 14593, flags `0x243`), the blocks
+  table (1445 blocks, all LZ4HC flag 3) and the file table (2 files: `CAB-<guid>`
+  92,489,448 bytes at offset 0 and `CAB-<guid>.resS` 96,819,040 bytes at
+  92,489,448), plus CAB serialized-file version 22. Identity is the bundle sha256
+  above; the b18 patch changed no container field.
 - **2026-08-21:** Initial reversal from the stock operator install; validated
   end-to-end by extracting the six `ta_*` atlas XMLs.

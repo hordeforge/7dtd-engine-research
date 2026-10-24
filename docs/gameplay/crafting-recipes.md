@@ -1,4 +1,4 @@
-# Crafting and recipes (dedicated V3.2.0)
+# Crafting and recipes (dedicated V3.3.0)
 
 **Owns:** the recipe model: `Recipe` (ingredients, output, crafting tier, unlock),
 `CanCraft` validation, the `RecipeQueueItem` craft queue, and recipe unlock
@@ -9,16 +9,21 @@ recipe content.
 **Evidence:** `Recipe`, `RecipeQueueItem`, `CraftingManager`, `RecipesFromXml`,
 `RecipeUnlockData` IL (dump locally with `tools/src/DumpMethod`, git-ignored).
 **Hub:** [`INDEX.md`](../INDEX.md). **Method:** [`re-methodology.md`](../meta/re-methodology.md).
+**Build:** V3.3.0 b18. The recipe loader and unlock/tier method bodies the
+b18 diff did not touch keep their b10 widths; the shipped `recipes.xml`
+and `progression.xml` backpack content was re-read.
 
 **Authority (corrected):** crafting is **not** fully server-authoritative.
 `Recipe.CanCraft` is invoked from the **client** crafting UI (`XUiC_ItemActionList`),
-and **backpack** crafting runs its `RecipeQueueItem` queue client-side; the server's
-authority is (1) the **inventory transaction** the craft produces, validated by
-`TransactionalInventory` (the anti-dupe gate, [items.md](../gameplay/items.md)), and (2)
-**workstation** crafting, whose queue ticks inside the server-owned
-`TileEntityWorkstation` ([tile-entities-power.md](../gameplay/tile-entities-power.md)). So the
-recipe model is the same everywhere, but the *tick* is client (backpack) or server
-(workstation), and the server gates the resulting item movement.
+and **backpack** crafting runs its `RecipeQueueItem` queue client-side. In b18 the
+server no longer validates the resulting inventory transaction: the
+`TransactionalInventory` anti-dupe gate was removed and the owning client pushes its
+containers as serialized blobs ([items.md](../gameplay/items.md) "Inventory
+transactions"). The server-side authority that remains is **workstation** crafting,
+whose queue ticks inside the server-owned `TileEntityWorkstation`
+([tile-entities-power.md](../gameplay/tile-entities-power.md)). So the recipe model
+is the same everywhere, but the *tick* is client (backpack) or server (workstation),
+and b18 has no server-side item-movement gate behind the client craft.
 
 ---
 
@@ -56,7 +61,7 @@ block for recipe-level effects. Child elements are `<ingredient name count>`
 `<wildcard_forge_category>` (sets `wildcardForgeCategory`). Each recipe ends
 with `Recipe.Init()` then `CraftingManager.AddRecipe(recipe)`; the whole load
 finishes with `CraftingManager.PostInit()`. The editor export twin
-`RecipesFromXml.SaveRecipes` (IL=123) writes `CraftingManager.GetAllRecipes()`
+`RecipesFromXml.SaveRecipes` (IL=125) writes `CraftingManager.GetAllRecipes()`
 back to `<recipes>` XML and has no production callers on b9.
 
 **`Recipe.Init` (IL=79)** derives the defaults left at -1 from the
@@ -272,6 +277,35 @@ the parallel `lockedRecipeNames` / `lockedRecipeTypes` list entry (case-
 insensitive name match), and `GetLockedRecipeCount` / `GetUnlockedRecipeCount`
 report the sizes for the UI.
 
+**V3.3.0 backpack recipes.** `recipes.xml` adds three learnable workbench
+recipes, all `count=1` with `tags="learnable,workbenchCrafting"` and
+`CraftingIngredientCount` effects that raise the ingredient cost per
+crafting tier:
+
+| recipe | craft_time | base ingredients | tier cost scaling |
+|---|---:|---|---|
+| `backpackSmall` | 10 s | sewingKit 1, cloth 5, forgedIron 0 | sewingKit +1..5, cloth +5..20, iron +1..5 at tier 4..6 |
+| `backpackMedium` | 30 s | sewingKit 7, leather 25, forgedIron 5 | sewingKit +1..5, leather +5..25, iron +5..25 |
+| `backpackLarge` | 60 s | sewingKit 13, leather 50, scrapPolymers 20, forgedSteel 5, legendaryParts 0 | all four scale, legendaryParts +1 at tier 6 |
+
+They are the first craftable `EquipSlot="Backpack"` items; equipping one
+raises the carried grid through the `BagSize` effect
+([progression.md](../gameplay/progression.md) "Backpack capacity and
+`craftingBackpack`"), so the craft tier both gates and improves the output
+like any other tiered recipe.
+
+**The `craftingBackpack` skill drives their unlock.** `progression.xml` adds a
+`crafting_skill` named `craftingBackpack` (max level 100, parent
+`attCrafting`) with `display_entry` rows at levels 5,10,15,20,25,30
+(small), 40,45,50,55,60,65 (medium) and 75,80,85,90,95,100 (large). Its
+effect group is the same two-pass pattern other crafting skills use:
+`RecipeTagUnlocked` seeds passive 73 for the three recipe tags from the
+first matching level, and `CraftingTier` (91) adds 1..5 for each tag at the
+listed levels, so `IsUnlocked` and `GetCraftingTier` above read it with no
+loader change. `items.xml` adds `backpackSkillMagazine`
+(`Unlocks craftingBackpack`, tag `backpackCSM`), and the `PackMule` perk
+raises the `LootProb` of that magazine until the skill reaches 100.
+
 ---
 
 ## 4. Dedicated relevance and residuals
@@ -302,7 +336,7 @@ report the sizes for the UI.
 - **2026-08-11:** Recipe IL re-verified: <LoadRecipies>d__1.MoveNext IL=436, SaveRecipes IL=123, Recipe.Init IL=79, RecipeUnlockData.Init IL=56, CraftingManager AddRecipe IL=6, PostInit IL=6, GetScrapableRecipe IL=77, GetRecipe IL=24, GetRecipes IL=3/27, ClearAllRecipes IL=3, ClearAllGeneralRecipes IL=30, ClearCraftAreaRecipes IL=36, ClearRecipe IL=5, InitForNewGame IL=10, RecipeIsFavorite IL=5, ToggleFavoriteRecipe IL=17, GetFavoriteRecipesFromList IL=31, ClearLockedData IL=5, AddWorkstationData IL=17, GetWorkstationData IL=12 (exact).
 - **2026-08-11:** Progression IL re-verified: GiveExp(CraftCompleteData) IL=54, AddLevelExp IL=161, AddLevelExpRecursive IL=179, getExpForLevel IL=10, getLevelFloat IL=14, AddXPDeficit IL=65 (exact).
 - **2026-08-10:** CraftingManager IL re-verified: AddRecipe IL=6, PostInit IL=6, GetRecipe IL=24, GetRecipes IL=3 (exact).
-- **2026-08-10:** RecipesFromXml.SaveRecipes IL=123, Recipe.Init IL=79 re-verified (exact).
+- **2026-08-10:** RecipesFromXml.SaveRecipes IL=123, Recipe.Init IL=79 re-verified.
 - **2026-08-08:** EntityPlayerLocal.GiveExp (IL=54): _craftCount_ recipe var
   accumulation, AddLevelExp(CraftExpGain / total, _xpFromCrafting), quest
   CraftedItem hook.
@@ -326,6 +360,10 @@ report the sizes for the UI.
   cacheNonScrapable + backpack refresh, GetScrapableRecipe (IL=77) forge
   category + weight gate, UnlockRecipe (IL=21) sets the IsUnlocked cvar
   (passive 73 seed), LockRecipe OR-flag, count getters.
+- **2026-10-24:** V3.3.0 b18: `recipes.xml` backpack recipes (10/30/60 s,
+  `CraftingIngredientCount` tier scaling), `craftingBackpack` skill
+  (`RecipeTagUnlocked` + `CraftingTier` effects), `backpackSkillMagazine`
+  unlock. Loader and `IsUnlocked`/`GetCraftingTier` bodies unchanged.
 - **2026-08-08:** recipes.xml loader (LoadRecipies MoveNext IL=436):
   frame-budgeted coroutine, full attribute parse, craft_tool bCraftingTool
   side effect, wildcard_forge_category, PostInit; Recipe.Init (IL=79)

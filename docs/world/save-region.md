@@ -1,9 +1,55 @@
-# Save, WorldState, and region files (dedicated V3.2.0)
+# Save, WorldState, and region files (dedicated V3.3.0)
 
-**Owns:** WorldState, Chunk write/read, `RegionFile`* managed layout, snapshot/Deflate path, WorldBlockTicker schedule wire (generic engine).  
+**Owns:** WorldState, Chunk write/read, `RegionFile`* managed layout, snapshot/Deflate path, the per-record save version registry, WorldBlockTicker schedule wire (generic engine).  
 **Product expand/inject notes:** `7dtd-realearth/docs/realearth-surfaces.md`.  
-**Dumps:** `../il/loop-complete-v3.2.0/`, `../il/realearth-surfaces-v3.2.0/`, `../il/dedi-complete-v3.2.0/`.  
+**Dumps:** `../il/loop-complete-v3.3.0/`, `../il/realearth-surfaces-v3.3.0/`, `../il/dedi-complete-v3.3.0/`, `../il/full-v3.3.0/`.  
 **Hub:** [`INDEX.md`](../INDEX.md).
+
+---
+
+## 0. Save-format versions (V3.3.0 b18 vs V3.2.0 b10)
+
+The b10 -> b18 diff migrated every `Read`/`Write` from `BinaryReader`/`BinaryWriter`
+to `PooledBinaryReader`/`PooledBinaryWriter` (342 changed signatures; 5296
+method-body changes across the assembly).
+That migration is **byte-neutral**: a normalized IL diff of all 7297 dump files
+(method bodies compared after mapping the pooled types back to the framework types)
+leaves 108 changed serialization methods, and those changes are the explicit record
+version bumps below, not the reader swap. `PooledBinaryWriter` IL is identical in
+both builds; `PooledBinaryReader` only gained `ReadExact(Span<byte>)`. The pooled
+types are buffers and pool membership, not an encoding, compression or string table
+(details: [dedicated-misc-systems.md](../meta/dedicated-misc-systems.md)).
+
+| Surface | Version field | b10 | b18 | Changed? |
+|---|---|---:|---:|---|
+| `main.ttw` world header | `WorldState.CurrentSaveVersion` (u32 in file) | 23 | **23** | no |
+| Region container | `.7rg` magic + file version byte (V1 0 / V2 >=1) | 0 / 1 | **0 / 1** | no |
+| Per-chunk payload preamble | `"ttc\0"` + `Chunk.CurrentSaveVersion` u32 | 47 | **47** | no |
+| Chunk record floor | `Chunk.SupportedSaveVersion` (read throws below) | 32 | **32** | no |
+| Entity record (chunk + `.ttp`) | `EntityCreationData` file version byte | 37 | **38** | **yes** |
+| Tile-entity storage feature | `TEFeatureStorage` local u16 | 18 | **20** | **yes** |
+| Item grid (inside TE/bag/equip) | `ItemStackGrid` u16 | n/a (new type) | **2** | **new** |
+| Backpack bag | `Bag` version byte | 1 | **2** | **yes** |
+| Player equipment | `Equipment` version byte | 4 | **6** | **yes** |
+| Quest record (journal blob) | `Quest.FileVersion` | 8 | **9** | **yes** |
+| Player data file | `.ttp` header version byte | 59 | **62** | **yes** |
+| Decorations / block mappings / multi-blocks | `decoration.7dt` 6, `.nim` 1, `multiblocks.7dt` 6 | 6/1/6 | **6/1/6** | no |
+
+Direction of compatibility: **b18 reads b10, b10 does not read b18** for any record
+that bumped (its reader takes the new length-prefixed blob as the old inline layout).
+The `.7rg` container, `main.ttw` header and chunk geometry/map/channel sections are
+byte-compatible in both directions. Live check: a b10 `main.ttw` loaded on the b18
+dedicated server with only `Loaded world file from different version: 'V 3.2.0 (b10)'`
+(`.scratch` evidence, see changelog).
+
+The new records all use one helper pair added to `StreamUtils`:
+`WriteBlob(PooledBinaryWriter, MemoryStream)` = `i32 length` + bytes;
+`ReadBlob(PooledBinaryReader)` = `i32 length` + bytes (`length <= 0` -> empty stream);
+`ToBlob(Action<PooledBinaryWriter>)` / `FromBlob(MemoryStream, Action<PooledBinaryReader>)`
+wrap an in-memory pooled writer/reader around the same framing. The blobs are
+uncompressed; the only compressed save path is still the chunk snapshot through
+`Noemax.GZip.DeflateOutputStream` (unchanged). `RegionFileManager` did not gain a
+new compression or layout mode.
 
 ---
 
@@ -68,7 +114,7 @@ stateDiagram-v2
 `SetFrom(World, EnumChunkProviderId)` (IL=203) snapshots water level (`WorldConstants.WaterLevel` = `Block.cWaterLevel` = **62.88**, Block cctor `ldc.r4 62.88`), seed, time, entity id, writes sleeper/trigger/wall volumes, dynamic spawner, **`new AIDirector()` path via Save**, chunk sizes (includes literal **256** for area-related sizes on stock). Blobs are held as `MemoryStream` fields until `SaveLoad` writes them length-prefixed.
 `World.get_Guid()` (IL=9) is the world-identity accessor: `worldState?.get_Guid()` (null world state -> null).
 
-### 1.1b `main.ttw` header codec (`SaveLoad(Stream)`, IL=926 on V3.2.0)
+### 1.1b `main.ttw` header codec (`SaveLoad(Stream)`, IL=926; unchanged on V3.3.0 b18)
 
 Symmetric reader/writer via `IBinaryReaderOrWriter` under a lock on `this`.
 
@@ -81,7 +127,7 @@ Symmetric reader/writer via `IBinaryReaderOrWriter` under a lock on `this`.
 On save, those four values are written first. On load, four reads are compared to
 `116,116,119,0`; mismatch logs `Invalid magic bytes in world header` and fails.
 
-**Then (high level, version-gated; verified V3.2.0 IL=926):**
+**Then (high level, version-gated; verified on V3.2.0 and V3.3.0 b18, both IL=926):**
 
 `WorldState.CurrentSaveVersion` = **23** (`0x17`, cctor). File `version:u32` is
 compared to that on load (reject newer).
@@ -97,6 +143,26 @@ compared to that on load (reject newer).
 `VersionInformation (1, 3, 10, 14)` - every field matches the layout above. The
 `waterLevel` float (after the active-game-mode + mode pad) reads **62.88**,
 confirming the `behaviour` water-level pin in a real save.
+
+**Live-verified 2026-10-24 (V3.3.0 b18, both directions):** a fresh stock b18
+dedicated save (Empty world, `saveworld`, clean shutdown) writes a 470 B
+`main.ttw` that `tools/save_roundtrip_check.py` parses **byte-exactly 470/470**:
+`ttw\0`, `version = 23`, `gameVersionString = "V 3.3.0 (b18)"`,
+`VersionInformation (1, 3, 30, 18)`, pads 0, `activeGameMode 1`,
+waterLevel 62.88, chunk sizes 16/16/16, chunkCount 0,
+`providerId 7 = FlatWorld` for the Empty world (`EnumChunkProviderId` order:
+None 0, Disc 1, GenerateFromDtm 2, NetworkClient 3, ChunkDataDriven 4, Random 5,
+Random2 6, FlatWorld 7), seed, worldTime 7000, SpawnPointList, nextEntityID 171,
+saveDataLimit -1, the four blobs, weather prefix 208, 32-char Guid. A b10 save
+(same Empty-world recipe: 470 B, version 23, `"V 3.2.0 (b10)"`,
+`VersionInformation (1, 3, 20, 10)`) was then copied into the b18 user data and
+the b18 server booted on it: the only line about it is
+`WRN Loaded world file from different version: 'V 3.2.0 (b10)'`, then
+`StartGame done`. No header or blob field differs between the builds.
+The two `ReadWrite` literal changes in the b18 read branch (`20 -> 30`,
+`9 -> 18`) are arguments to `PooledBinaryReader.ReadWrite(int)`, which ignores
+the argument (`ldarg.0; callvirt BinaryReader::ReadInt32; ret`), so they do not
+move bytes.
 
 **Full-file round-trip 2026-08-12 (4 real saves, `tools/save_roundtrip_check.py`):**
 the complete WorldState parses byte-exactly to EOF on every probe save. Tail
@@ -132,10 +198,11 @@ the documented codec agree end-to-end.
 `ttw\0`, version 23, waterLevel 62.88, chunkSize 16, providerId 4
 (ChunkDataDriven), seed -1634985719 - but its `gameVersionString` is
 **"V 4.0 (b8)"** (`VersionInformation (1, 4, 0, 8)`), i.e. the world data was
-tooled with a V4.0 build while the dedicated server is V3.2.0 (b9), and its
+tooled with a V4.0 build while the dedicated server was V3.2.0 (b9), and its
 `activeGameMode` is **8 = `EditWorld`** (`EnumGameMode`; probe saves carry
 1 = `Survival`) - the file was exported from the world-editor tooling. Every
-V3.2.0 boot of the shipped world logs
+3.x boot of the shipped world (re-checked on V3.3.0 b18: same string, version 23,
+providerId 4, seed -1634985719, waterLevel 62.88) logs
 `Loaded world file from different version: 'V 4.0 (b8)'` and proceeds -
 the mismatch is a warning only, and the **save-version 23 codec is shared**
 across the two builds (the version gate reads the string, not the other way
@@ -222,15 +289,19 @@ earlier), the cleanest rotation evidence.
 ### 1.3 PlayerDataFile (per-player `*.ttp`)
 
 Path: `{playerDir}/{playerId}.{EXT}` with atomic `*.tmp` write and `*.bak` backup
-(Save IL=129). Separate `*.meta` via `PlayerMetaInfo.Write`.
+(Save IL=130 on V3.3.0 b18; was 129). Separate `*.meta` via `PlayerMetaInfo.Write`.
 
 **On-disk header (verified, IL):**
 
 ```text
 't' 't' 'p' 0x00     // magic ttp\0
-version : u8         // written as literal 59 on current Save
+version : u8         // 62 on V3.3.0 b18 (was 59 on b10)
 // then PlayerDataFile.Write body
 ```
+
+The header version is the only top-level version; the blobs below carry their own
+(`EntityCreationData` 38, `Bag` 2 / `ItemStackGrid` 2, `Equipment` 6,
+`Quest.FileVersion` 9).
 
 **Dedicated observation (2026-08-12):** 8 live stock V3.1.0 sessions with
 Local-platform test clients (join, wander, `saveworld`, clean disconnect)
@@ -239,45 +310,53 @@ produced **zero** `Player/*.ttp` files - the live player surface on dedicated is
 codec above stays IL-pinned (not yet live-observed). No `Player/` directory is
 ever created in these sessions.
 
-Load (IL=223) checks magic; on failure rolls to `*.bak`. Network form used by
-`NetPackagePlayerData` / join `PlayerId`:
+Load (IL=225 on V3.3.0 b18; was 223) checks magic; on failure rolls to `*.bak`.
+Network form used by `NetPackagePlayerData` / join `PlayerId`:
 
 ```text
-PlayerDataFile.Write  +  PlayerMetaInfo.Write     // WriteNetwork IL=8
-ReadNetwork: Read(version=-1) + PlayerMetaInfo.FromStream
+PlayerDataFile.Write  +  PlayerMetaInfo.Write     // WriteNetwork IL=9 (was 8)
+ReadNetwork: Read(version=-1, mode) + PlayerMetaInfo.FromStream   // IL=10
 ```
 
-**`Write` body (IL=372) major sections** (order; nested codecs own details):
+**`Write` body (IL=325 on V3.3.0 b18; was 372) major sections** (order; nested
+codecs own details):
 
-1. `EntityCreationData.write(networkWrite=false)` (disk ECD)
-2. inventory `ItemStack[]`, selected slot, `Bag`, drag-and-drop stack
-3. already-crafted name set (u16 count + strings)
-4. spawn selection key / last spawn / loaded flag
-5. entity id, kills, deaths, score
-6. `Equipment.Write`
-7. unlocked + favorite recipe lists
-8. map marker, crouched lock, `CraftingData`
-9. craft totals, distance walked, lives, game-stage birth time
-10. `WaypointCollection`, `QuestJournal`, `ChallengeJournal`
-11. death/life flags, rented VM position, further progression fields
+1. `EntityCreationData.write(StreamModeWrite.Persistency)` (disk ECD, file version 38)
+2. `StreamUtils::WriteBlob(inventoryData)` - the inventory blob
+3. `StreamUtils::WriteBlob(bagData)` - the backpack blob (`Bag` v2 +
+   `ItemStackGrid` v2 inside)
+4. drag-and-drop stack (`ItemStack.Write`)
+5. already-crafted name set (u16 count + strings)
+6. spawn selection key / last spawn / loaded flag
+7. entity id, kills, deaths, score
+8. `StreamUtils::WriteBlob(equipmentData)` - the equipment blob (`Equipment` v6
+   + `ItemStackGrid` v2 + cosmetics inside)
+9. unlocked + favorite recipe lists
+10. map marker, crouched lock, `CraftingData`
+11. craft totals, distance walked, lives, game-stage birth time
+12. `WaypointCollection`, `QuestJournal`, `ChallengeJournal`
+13. death/life flags, rented VM position, further progression fields
 
-`FromPlayer` / `ToPlayer` (IL=300 / 463) bridge live `EntityPlayer` and this blob
+`FromPlayer` / `ToPlayer` (IL=277 / 463 on V3.3.0 b18; FromPlayer was 300 and
+now calls the extracted `SetInventoryFrom` IL=27) bridge live `EntityPlayer` and
+this blob
 (join path in [protocol.md](../network/protocol.md) section 5).
 
-**`Read` body (IL=564)** mirrors `Write` with version gates: whole body requires
-`version > 37`; legacy inventory via `ReadItemStackOld` (v < 10); `Bag` is
-`Bag.Read` (v >= 58) or built from `ReadItemStack` + version-gated locked-slots
-(v >= 57 bool + `PackedBoolArray`, v >= 55 u16 count, v >= 53 all-true count);
-v >= 52 takes the first of a drag-and-drop stack; v < 49 pops three legacy ints;
-v < 54 pops a legacy `Equipment`; `craftingData` reads `Read` (v >= 59) else
-`ReadLegacy`; v <= 38 reads `rentalEndTime` (u64) else `rentalEndDay` (i32);
-v <= 55 pops a legacy u16 count of ints; `progressionData` / `buffData` /
-`stealthData` are length-prefixed byte blobs (0 length = empty stream); v > 50
-reads `favoriteShapes`; v > 44 reads `ownedEntities` (`OwnedEntityData.Read` at
-v > 47, else legacy id + optional extra id); v > 45 reads `totalTimePlayed`.
-A `bModdedSaveGame` flag logs `Modded save game` on load.
+**`Read` body (IL=657 on V3.3.0 b18; was 564)** mirrors `Write` with version gates.
+b18 gates: whole body requires `version > 37` (unchanged); inventory is
+`StreamUtils::ReadBlob` at v >= 62, a blob-fed `ItemStackGrid` at v >= 61,
+inline `ItemStackGrid::ReadInto` at v >= 60, else `GameUtils::ReadItemStack` and
+`ReadItemStackOld` (v < 10) (unchanged); `Bag` is `Bag.Read` (v >= 61), or an
+inline `Bag.Read` converted with `StreamUtils::ToBlob` (v >= 58); the v >= 57/55/53
+locked-slot paths, v >= 52 drag-and-drop first stack, v < 49 three legacy ints,
+v < 54 legacy `Equipment`, `craftingData` `Read` (v >= 59) else `ReadLegacy`,
+`rentalEndTime` u64 at v <= 38 else `rentalEndDay` i32, v <= 55 legacy u16 count,
+the `progressionData` / `buffData` / `stealthData` length-prefixed blobs,
+`favoriteShapes` v > 50, `ownedEntities` v > 44 (`OwnedEntityData.Read` at
+v > 47), `totalTimePlayed` v > 45 all stand. A `bModdedSaveGame` flag logs
+`Modded save game` on load.
 
-**`FromPlayer(player)` (IL=300)** is the extraction mirror: clones the bag,
+**`FromPlayer(player)` (IL=277 on V3.3.0 b18)** is the extraction mirror: clones the bag,
 equipment, waypoints, quest/challenge journals, and inventory slots, writes the
 `progressionData` / `buffData` / `stealthData` blobs via pooled writers, copies
 kills/deaths/score, marker position, rented-VM position, and the drag-and-drop
@@ -297,8 +376,8 @@ The length-prefixed blobs become `Progression.Read`, `EntityBuffs.Read`, and
 `PlayerStealth.Read` via pooled readers; owned entities are re-added;
 `gameStageBornAtWorldTime` clamps to the current `worldTime`.
 
-**`Save(dir, playerId)` (IL=129)** makes the directory, backs the existing file
-to `.bak` (overwrite), writes `'t' 't' 'p' 0x00` + version **59** + the `Write`
+**`Save(dir, playerId)` (IL=130)** makes the directory, backs the existing file
+to `.bak` (overwrite), writes `'t' 't' 'p' 0x00` + version **62** + the `Write`
 body to a fresh `.tmp` (`FileMode.Create`, `FileShare.Read`), clears
 `bModifiedSinceLastSave`, promotes `.tmp` over the target, and writes the
 `.meta` sidecar via `PlayerMetaInfo.Write`. `Exists(dir, playerName)` (IL=25)
@@ -320,32 +399,43 @@ name with presence bools before the i32 level and f32 distance - used by
 
 | Method | IL | Bound |
 |---|---:|---|
-| `Chunk.write(PooledBinaryWriter, bool)` | 601 | **layer loop `i < 64` hardcoded** |
-| `Chunk.read(PooledBinaryReader, uint, bool)` | 775 | **same `i < 64`** |
+| `Chunk.write(PooledBinaryWriter, bool)` | 605 (was 601 on b10) | **layer loop `i < 64` hardcoded** |
+| `Chunk.read(PooledBinaryReader, uint, bool)` | 779 (was 775 on b10) | **same `i < 64`** |
 | `Chunk.save` / `load` | 14 / 9 | wrappers |
-| `CurrentSaveVersion` | 47 | |
-| `SupportedSaveVersion` | 32 | read throws if version &lt; 32 |
+| `CurrentSaveVersion` | 47 | unchanged on b18 |
+| `SupportedSaveVersion` | 32 | read throws if version &lt; 32 (IL_0065 `ldc.i4.s 32`) |
 
-Write order (measured, byte-exact round-trip verified 2026-08-12 on live saves):
+The V3.3.0 growth (4 IL each) is only the `EntityCreationData` `bool ->
+StreamModeRead/Write` conversion and the nested `TileEntity/StreamMode*` enum
+moving to top level; the field order below is unchanged. The **records nested in
+section 7 did change** (entity file version 38 with a bag blob, TE storage
+version 20 with an `ItemStackGrid` blob), so a b18 chunk body is not byte-identical
+to a b10 body even though the envelope is.
+
+Write order (measured; bytes up to section 6 identical in b10/b18):
 
 1. `m_X`, `m_Y`, `m_Z`, `SavedInWorldTicks`  
 2. For `i in 0..63`: bool present + optional `ChunkBlockLayer.Write`  
 3. Optional `chnStability.Write`  
 4. Maps (raw, no length prefix): `m_HeightMap` 256, `m_TerrainHeight` 256,
    `m_bTopSoilBroken` **32**, `m_Biomes` 256, `m_BiomeIntensities` **1536**
-   (sizes from `Chunk.read` IL=775: version > 41 reads 32 topsoil bytes; the
+   (sizes from `Chunk.read` IL=779: version > 41 reads 32 topsoil bytes; the
    1536 biome-intensity bytes = 3 bytes per cell)
 5. `DominantBiome`, `AreaMasterDominantBiome` bytes, custom-data count u16 + entries, `m_NormalX/Y/Z` 256 raw each  
 6. Channels: `chnDensity` (bpv 1), `chnLight` (bpv 1), `chnDamage` (bpv 2),
    `chnTextures[0]` (bpv 6), `chnWater` (bpv 2)  
-7. `NeedsLightCalculation` bool, entity count i32 + `EntityCreationData.write`,
-   TE count i32 + per-TE (type i32 + `TileEntity.write`), bool false,
-   sleeper/trigger/wall volume counts, `insideDevices` runs, `IsInternalBlocksCulled`, triggerData  
+7. `NeedsLightCalculation` bool, entity count i32 + `EntityCreationData.write`
+   (file version 38: after `id/lifetime/pos/rot/onGround/bodyDamage/stats/deathTime`
+   a `hasBagData:bool` + `i32 length` + blob, where b10 v37 had `hasBag:bool` +
+   inline `Bag`), TE count i32 + per-TE (type i32 + `TileEntity.write`; the
+   storage feature writes its local version 20 then an `ItemStackGrid` v2 record),
+   bool false, sleeper/trigger/wall volume counts, `insideDevices` runs,
+   `IsInternalBlocksCulled`, triggerData
 
 **Raw-map pin:** maps and normal arrays are written by
 `PooledBinaryWriter.Write(Byte[])` (IL=14), which writes the bytes **raw with
 no length prefix** (the base `BinaryWriter.Write(byte[])` length-prefix is
-overridden away). The reader (`Chunk.read` IL=775) uses raw `Read(buf, 0, N)`.
+overridden away). The reader (`Chunk.read` IL=779) uses raw `Read(buf, 0, N)`.
 A reader that assumes length-prefixed maps will desync immediately.
 
 **`SavedInWorldTicks` first-save quirk:** `Chunk.save` (IL=14) calls
@@ -432,7 +522,12 @@ AIDirector.GetActivityWorldTimeDelay()` (the delay is subtracted at load so
 the TE counts as recently active); older versions leave the time zero.
 Each subclass appends its own `u16` version + fields after the base preamble
 (e.g. `TileEntityCollector.write` IL=278 writes its own version **21** after
-calling the base).
+calling the base; unchanged on V3.3.0 b18). These per-subclass versions did not
+all stay put in b18: the storage feature composite module
+(`TEFeatureStorage`, the crate/forge/workstation/collector storage) moved from
+local version **18** to **20** and replaced its inline container layout with an
+`ItemStackGrid` v2 record, so a v20 container TE record is not byte-compatible
+with b10 (details in §0 and §2; the read side keeps the <=18 legacy layout).
 
 **`TileEntity.InstantiateFromRead(br, mode, type, chunk, blockIdMapping,
 getBlock)` (IL=88)** is the type registry: in Save mode it first asks
@@ -461,6 +556,16 @@ modules, see [`tile-entities-power.md`](../gameplay/tile-entities-power.md)).
 ---
 
 ## 3. Region file system
+
+**The container is unchanged between V3.2.0 b10 and V3.3.0 b18.** Whole-file IL
+comparison of `RegionFile`, `RegionFileV1`, `RegionFileV2`,
+`RegionFileSectorBased`, `RegionFileRaw`, `RegionFileAccessAbstract`,
+`RegionFileAccessMultipleChunks`, `RegionFileAccessSectorBased`, `RegionFileAccessRaw`,
+`RegionFileChunkReader`, `RegionFileChunkWriter`, `RegionFileChunkSnapshot`,
+`IRegionFileChunkSnapshotUtil` and both factories is empty, so every constant,
+header offset, sector allocation rule and the Deflate framing below still holds.
+Only `RegionFileManager` (the cache/cull orchestration above the container)
+changed; see §3.1.
 
 ### Type hierarchy
 
@@ -530,17 +635,28 @@ Protection margins (cull): land claim / bedroll / offline / backpack / vehicle /
 |---|---:|---|
 | `cacheChunk` | 114 | insert into live cache; if `NeedsSaving`, queue into pending dict and `startSavingTask` |
 | `GetChunkSync(Int64)` | 178 | live cache → pending snapshot → pending chunk → load from save dir → load from load dir → `cacheChunk` |
-| `DoSaveChunks` | **292** | free locked unload list, `CullExpiredChunks`, `OptimizeLayouts`, drain snapshot dict + dirty chunk dict via `IRegionFileChunkSnapshotUtil.TakeSnapshot` / write |
+| `DoSaveChunks` | **308** (was 292 on b10) | free locked unload list, `CullExpiredChunks`, then the deferred chunkless-data cull (below), `OptimizeLayouts`, drain snapshot dict + dirty chunk dict via `IRegionFileChunkSnapshotUtil.TakeSnapshot` / write |
 | `CullExpiredChunks` | 179 | refresh protection levels + group timestamps; remove unprotected expired keys (`RemoveChunks`) |
-| `MakeRoom` / `MakeRoomForChunk` | 297 / 322 | the save-size-limit eviction core: sort `chunksInSaveDir` culling candidates (timestamp comparer), `RemoveChunks` the oldest until the target bytes are free; `Requested space ({0} bytes) exceeds maximum available space ({1} bytes).` when the request exceeds `maxBytes`; `Failed to clear as much space as requested.` on a shortfall; `MakeRoom` warns `RegionFileManager has been requested to clear more space than is currently occupied by region data...` when the target exceeds the occupied bytes |
+| `MakeRoom` / `MakeRoomForChunk` | 297 / 322 (same sizes; `MakeRoomForChunk` body rewritten) | the save-size-limit eviction core: sort `chunksInSaveDir` culling candidates (timestamp comparer), `RemoveChunks` the oldest until the target bytes are free; `Requested space ({0} bytes) exceeds maximum available space ({1} bytes).` when the request exceeds `maxBytes`; `Failed to clear as much space as requested.` on a shortfall; `MakeRoom` warns `RegionFileManager has been requested to clear more space than is currently occupied by region data...` when the target exceeds the occupied bytes |
+| `AssertSafeToCallMultiBlockManager(String)` | 9 (new on b18) | logs `... : thread safety violation. MultiBlockManager must not be called while the lock on "chunksInSaveDir" is held; see the lock ordering note on saveLock.` when `Monitor.IsEntered(chunksInSaveDir)` |
 | `IsChunkSavedAndDormant` | 62 | in `chunksInSaveDir`, not in the live cache, not in `chunksToSave`, and not the chunk currently saving |
 | `GetUniqueChunkKeys` | 78 | unions `chunksInLoadDir` + `chunksInSaveDir` keys, skipping chunks whose protection level intersects the excluded set |
 | `GetChunkTimestamp` / `SetChunkTimestamp` | 29 / 30 | the group / per-chunk save timestamps (`No timestamp available for chunk with key: {0}` on a miss; `Set` keeps the earlier group timestamp unless `groupTimestampsDirty`) |
 | `GetChunkProtectionLevelWithGrouping` | 24 | the chunk group's protection level, else the per-chunk level (0 default) |
 | `LoadResetRequests` | 44 | reads `{saveDir}/PendingResets.7pr` (`i32` count + `i64` keys) into `resetRequestedChunks` |
-| `resetVolumeDataForChunks` | 26 | per chunk `World.ResetTriggerVolumes` + `ResetSleeperVolumes` |
 | `isChunkInLoadDir` / `isChunkInSaveDir` | 5 / 21 | the load-dir hashset / locked save-dir dict membership |
 | `SetCacheSize` / `get_MaxBytes` / `get_SaveDataSlot` / `get_ChunkGroups` | 4 / 3 / 3 / 3 | the cache-size, byte budget, slot and chunk-group accessors |
+
+**b18 chunkless-data cull:** `RegionFileManager` gained a volatile
+`cullChunklessDataPending` flag (fields 65 -> 66; methods 73 -> 72; type IL
+5250 -> 5290). `RemoveChunks` sets it (and schedules
+`NetPackageDeleteChunkData`); the next `DoSaveChunks` clears it, calls
+`AssertSafeToCallMultiBlockManager("DoSaveChunks")`, then
+`MultiBlockManager.Instance.CullChunklessData()`. Multi-block data registers and
+deregisters on the main thread, so the save thread defers the call and the assert
+documents the lock ordering. `resetVolumeDataForChunks` (b10 IL=26) is gone:
+`RemoveChunks`' local `RemoveChunk` function now calls `WorldBase.ResetTriggerVolumes`
+/ `ResetSleeperVolumes` directly (`RegionFileManager` IL_039E / IL_03AF).
 
 There is **no** `RegionFileManager.Update` call site in the assembly (Xref=0).
 Save work is task-driven from `cacheChunk` / world save, not a per-frame MB.
@@ -565,6 +681,10 @@ flowchart TD
   Dirty -->|yes| Queue[pending dict + startSavingTask]
   Queue --> Save[DoSaveChunks on worker]
   Save --> Cull[CullExpiredChunks]
+  Save --> CullChunkless{"cullChunklessDataPending?"}
+  CullChunkless -->|yes| MBM[MultiBlockManager.CullChunklessData]
+  CullChunkless -->|no| SnapTake
+  MBM --> SnapTake
   Save --> SnapTake[TakeSnapshot]
   SnapTake --> Write[RegionFileChunkWriter.WriteStreamCompressed]
 ```
@@ -941,6 +1061,8 @@ Read reconstructs world XZ as `local + chunk*16`.
 | Exact sector free-list algorithm? | **Closed:** best-fit with exact-fit short-circuit over `usedSectors` (above) |
 | Location table bit packing? | **Closed:** Raw i32 pairs; sector LE u16 + pad + u8 (§3.5) |
 | Random tick interval? | 1200 game ticks between per-chunk random passes |
+| b10 save readable by b18? | **TTW/header yes (live-proven, §1.1b); chunks inferred** from the version-gated record readers (§0). Region container byte-identical |
+| b18 save readable by b10? | **No** for records at ECD 38 / TE storage 20 / Bag 2 / Equipment 6 / Quest 9 / `.ttp` 62; container and maps still parse |
 
 ---
 
@@ -948,15 +1070,18 @@ Read reconstructs world XZ as `local + chunk*16`.
 
 | Surface | IL / note |
 |---|---|
-| `PersistentPlayerList.Write` | 73; claims + players |
+| `PersistentPlayerList.Write` | 73 (unchanged on b18; pooled-writer signature only) |
 | `PersistentPlayerList.SavePersistentPlayerData` | 12 |
-| `GameManager.SaveLocalPlayerData` | 45 |
-| `GameManager.SaveAndCleanupWorld` | 499 |
+| `GameManager.SaveLocalPlayerData` | 46 (was 45 on b10) |
+| `GameManager.SaveAndCleanupWorld` | 502 (was 499 on b10; adds the shutdown `SignDataManager.Cleanup()` call, which flushes pending player sign writes and the deleted-sign store) |
 | `ChunkProviderGenerateWorld.SaveRandomChunks` | 99 |
 | `World.SaveDecorations` | 3 |
 | `blockmappings.nim` / `itemmappings.nim` | id-name mapping files (observed real save, byte-exact): `version:u32` (1) + `count:u32` + entries of `id:u32` + `nameLen:u8` + name. E.g. air=0, terrStone=1, terrBedrock=4, terrDirt=5 (the terrain id band) |
-| `decoration.7dt` | distant-deco records: **version byte 6** + `count:i32` + per record `packedPos:u64` + `realYPos:f32` + `bv.rawData:u32` + `state:u8` (17 B); live-verified byte-exact on 7 saves (75-76k records) |
-| `multiblocks.7dt` | MultiBlockManager tracked data (`SaveIfDirty` IL=107): **version byte 6** + `count:i32` + per record `pos:Vector3i` (3xi32) + `rawData:u32` + `trackingTypeFlags:u8` (17 B); live-verified byte-exact on 7 saves (92-1240 records) |
+| `decoration.7dt` | distant-deco records: **version byte 6** + `count:i32` + per record `packedPos:u64` + `realYPos:f32` + `bv.rawData:u32` + `state:u8` (17 B); live-verified byte-exact on 7 saves (75-76k records). Unchanged on b18 (`DecoManager` IL identical) |
+| `multiblocks.7dt` | MultiBlockManager tracked data (`SaveIfDirty` IL=107): **version byte 6** + `count:i32` + per record `pos:Vector3i` (3xi32) + `rawData:u32` + `trackingTypeFlags:u8` (17 B); live-verified byte-exact on 7 saves (92-1240 records). Unchanged on b18 (`MultiBlockManager` IL identical) |
+| `{saveDir}/deletedSigns.dat` | **new in V3.3.0 b18, not decoded.** `DeletedSignStore` ctor literal; `SignStoreIO` reads/writes a versioned, backed-up store (`magic:u32`, `version`, `recordCount`, `flags` header validated before payload). `SignDataManager.Cleanup` calls `Flush()` on it during shutdown. Contents/layout not read back from the dump in this pass |
+| `{playerDir}/{player}.signs` (+ `.signs.bak`) | **new in V3.3.0 b18, not decoded.** `PlayerSignStore` owns the per-player sign library; `SignData`/`SignLayer` gained rewrite/versioned serialization; `SignDataManager` flushes pending player sign writes on save |
+| `main.ttw` sign section | none found in the b18 `WorldState.SaveLoad` body (IL=926, unchanged); sign state lives in the `.signs`/`deletedSigns.dat` stores above |
 
 **Chunk save callback:** `WorldChunkCache.NotifyOnChunkBeforeSave(chunk)`
 (IL=19) is the fan-out the save path drives before a chunk writes: it calls
@@ -1035,6 +1160,30 @@ the sections above. The platform cloud-save backend is native (residual).
 
 ## Changelog
 
+- **2026-10-24 (V3.3.0 b18 retarget):** §0 format-version registry added. The
+  `PooledBinaryReader`/`PooledBinaryWriter` migration is byte-neutral: normalized
+  IL diff over 7297 dump files leaves 108 changed serialization methods, and the
+  `PooledBinaryWriter` IL is identical between builds (`PooledBinaryReader` only
+  gained `ReadExact(Span<byte>)`). Real record bumps: `EntityCreationData` 37 -> 38
+  (bag as a length-prefixed blob via new `StreamUtils.ReadBlob`/`WriteBlob`),
+  `TEFeatureStorage` 18 -> 20 (`ItemStackGrid` v2 record), `Bag` 1 -> 2,
+  `Equipment` 4 -> 6, `Quest.FileVersion` 8 -> 9 (`QuestUniqueId`), `.ttp` header
+  59 -> 62 (inventory/bag/equipment moved into three blobs). Unchanged: WorldState
+  23, chunk 47, `SupportedSaveVersion` 32, `.7rg` container (all `RegionFile*` IL
+  identical). IL re-pins: `Chunk.write` 605, `Chunk.read` 779,
+  `PlayerDataFile` Save 130 / Load 225 / Read 657 / Write 325,
+  `GameManager.SaveAndCleanupWorld` 502 / `SaveLocalPlayerData` 46,
+  `RegionFileManager` 66 fields / 72 methods / 5290 IL with `DoSaveChunks` 308,
+  new `AssertSafeToCallMultiBlockManager` and the deferred
+  `MultiBlockManager.CullChunklessData()` cull (b18); `resetVolumeDataForChunks`
+  removed (inlined). Live: a fresh b18 save's whole WorldState parses 470/470
+  (version 23, `V 3.3.0 (b18)`, VI (1,3,30,18), providerId 7 FlatWorld for Empty);
+  a b10 save loads on b18 with only the version-skew warning. New b18 sign save
+  stores (`deletedSigns.dat`, `*.signs`) recorded as `not decoded`. Corpus tool
+  note: `make save-roundtrip` has no save discovery, so it exits 2 on a machine
+  without probe saves; run `tools/save_roundtrip_check.py <save-dir>` with an
+  explicit directory (a fresh region-less save reports only
+  `Region/: no region files (MISSING)` as FAIL, with the whole WorldState passing).
 - **2026-08-12:** main.ttw full-file round-trip: the tool now parses the entire WorldState to EOF byte-exactly on 4 probe saves. Tail pins: SpawnPointList.Read starts with a version byte + i32 count (per-point Vector3+heading+team+mode, +u16 only when list version 2); weather size prefix counts itself (N = 4 + payload); volume blobs carry version-23 save-version i32 + len; dynamicSpawner 2 B, aiDirector 77 B, weather 208 B consistent across saves; nextEntityID 243-494; saveDataLimit -1; trailing 32-char Guid.
 - **2026-08-12:** Full chunk-body round-trip added (`tools/save_roundtrip_check.py`
   parses every decompressed `Chunk.save` body byte-exactly: layers, maps, all 6
