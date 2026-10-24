@@ -12,8 +12,8 @@ without the matching install changes what the gates assert:
 | Path | Read by | Holds |
 |---|---|---|
 | `baseline/` | `tools/parity/drift-check.sh` (`make drift`) | The studied build's census, type surface, method and enum dumps, one file per axis. |
-| `parity/parity_b9.json`, `parity_b10.json` | `parity_diff.py`, `research_diff.py --pair`, `drift-check.sh` | `ParitySurface` wire snapshots of the two cached builds. |
-| `diffs/b9-to-b10-20260920.md` | `tests/test_committed_diff_artifacts.py`, `docs/releases/changelog-3.2.0.md` | The eight-lens build-to-build report. One report per build pair; a rerun republishes over it. |
+| `parity/parity_b10.json`, `parity_b18.json` | `parity_diff.py`, `research_diff.py --pair`, `drift-check.sh` | `ParitySurface` wire snapshots of the two builds on disk; `parity_b9.json` is kept for the b9 to b10 claim. |
+| `diffs/b9-to-b10-20260920.md`, `diffs/b10-to-v3.3.0-20261024.md` | `tests/test_committed_diff_artifacts.py`, `docs/releases/changelog-3.2.0.md`, `docs/releases/changelog-3.3.0.md` | The eight-lens build-to-build reports. One report per build pair; a rerun republishes over it. |
 | `census-history.csv` | `make census` (`census-pct.py --history`), `tests/test_census_pct_history.py` | One dated row per census run, replaced in place on a same-date rerun. |
 
 Regenerate them through the command the owning tool documents, never by hand
