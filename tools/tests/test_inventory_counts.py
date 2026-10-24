@@ -33,8 +33,8 @@ CLAIMS = {
     "te-features.md": (r"(\d+)\s+TEFeatureAbs leaves", 11),
     "challenge-objectives.md": (r"(\d+)\s+objective leaves", 28),
     "quest-objectives.md": (r"(\d+)\s+objectives", 38),
-    "console-command-list.md": (r"(\d+)\s+commands", 188),
-    "xmlsToLoad.md": (r"(\d+)\s+WorldStaticData XmlLoadInfo rows", 49),
+    "console-command-list.md": (r"(\d+)\s+commands", 190),
+    "xmlsToLoad.md": (r"(\d+)\s+WorldStaticData XmlLoadInfo rows", 50),
     "entityclass-props.md": (r"(\d+)\s+EntityClass prop-name constants", 187),
     "dedicated-leaves.md": (r"\((\d+)\)", 88),
     "state-machines.md": (r"all (\d+) modelled lifecycles", 74),
@@ -42,14 +42,16 @@ CLAIMS = {
 
 
 def check_package_framing_counts(bad: list[str]) -> None:
-    """protocol-packages.md §6.23 self-claims '37 rows (18 conditional + 19
-    always-present)'. The 18 live in a table; the 19 are a prose name list.
+    """protocol-packages.md §6.23 self-claims 'V3.3.0: 35 rows (16 conditional
+    + 19 always-present)'. The 16 live in a table; the 19 are a prose name list.
+    (The V3.2.0 set was 37 = 18 + 19: three conditional rows were deleted
+    packages and NetPackagePlayerInventory was added as a conditional row.)
     If either half drifts the stated total must too."""
     text = _common.doc("protocol-packages.md").read_text(encoding="utf-8")
-    m = re.search(r"all 37 rows\s*\((\d+) conditional \+ (\d+) always-present\)", text, re.S)
+    m = re.search(r"all 35 rows\s*\((\d+) conditional \+ (\d+) always-present\)", text, re.S)
     if not m:
         bad.append(
-            "protocol-packages.md: §6.23 no 'all 37 rows (N conditional + M always-present)' claim"
+            "protocol-packages.md: §6.23 no 'all 35 rows (N conditional + M always-present)' claim"
         )
         return
     want_cond, want_always = int(m.group(1)), int(m.group(2))

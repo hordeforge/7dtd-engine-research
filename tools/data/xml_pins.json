@@ -61,16 +61,16 @@
  },
  "source_identity": {
   "buffs.xml": {
-   "bytes": 1036835,
-   "sha256": "d6c714d7b4645f92d0c4c6a3adf1fa3b5f775f9bd3f22baaed4a8e72fdab5b1c"
+   "bytes": 1036875,
+   "sha256": "08345e0d43aa76f542fc55e3055855e51bfccd0e59d698ddf54f6d3d6886824a"
   },
   "entityclasses.xml": {
-   "bytes": 414216,
-   "sha256": "0c95e7330e497a11308b94fb61f85c42d9213a172c8e287d1b6edc3e912db0b0"
+   "bytes": 415836,
+   "sha256": "5f930212bd315039a641841a571938f5f5aa855178e1859b3e6f5f1d05e79061"
   },
   "traders.xml": {
-   "bytes": 66301,
-   "sha256": "06202f165d4d516fcd771926cb28f61cd5e8b5bfea694a1c1833de31ca40dfcc"
+   "bytes": 67126,
+   "sha256": "b7d1860484d9de625b2ec3e01714ce785ca947b4008dd19d5ebfffd10765caf4"
   }
  },
  "sources": [
@@ -81,5 +81,6 @@
  "traders_root": {
   "buy_markup": 3.0,
   "sell_markdown": 0.2
- }
+ },
+ "unparsed": []
 }

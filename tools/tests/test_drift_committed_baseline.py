@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common
 
 DRIFT = _common.TOOLS / "parity" / "drift-check.sh"
-COMMITTED = _common.REPO / "workspace" / "outputs" / "parity" / "parity_b10.json"
+COMMITTED = _common.REPO / "workspace" / "outputs" / "parity" / "parity_b18.json"
 
 
 def run(asm: Path, baseline: Path, parity: Path, *extra: str) -> subprocess.CompletedProcess[str]:

@@ -116,7 +116,7 @@ extract() {
   if [[ -f "$DATA/xml_pins.json" ]]; then cp -p "$DATA/xml_pins.json" "$tmpdir/prev_xml_pins.json"; fi
   mv "$tmpdir/stock_facts.json" "$FACTS" || { restore_pins; exit 2; }
   mv "$tmpdir/xml_pins.json" "$DATA/xml_pins.json" || { restore_pins; exit 2; }
-  rmdir "$tmpdir"
+  rm -rf "$tmpdir"
   trap - EXIT
   echo "stock-sync: wrote $FACTS"
   echo "stock-sync: wrote $DATA/xml_pins.json"

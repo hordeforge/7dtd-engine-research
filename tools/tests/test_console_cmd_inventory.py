@@ -27,7 +27,7 @@ INV = os.path.join(REPO, "docs", "inventories", "console-command-list.md")
 TSV = os.path.join(REPO, "docs", "inventories", "console-command-list.tsv")
 
 # Number of primary commands (one per concrete ConsoleCmdAbstract subclass).
-EXPECTED_PRIMARY = 188
+EXPECTED_PRIMARY = 190
 
 SRC = r"""
 using System;

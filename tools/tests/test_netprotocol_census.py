@@ -61,15 +61,17 @@ ALLOWED_BEFORE_AUTH = [
     "NetPackageAuthState",
     "NetPackageAuthConfirmation",
 ]
-# the 4 top-level NetPackage* types that are NOT registered wire packages
-# (195 top-level - 4 = 191 in the live id-map; network.md §3)
+# the abstract/enum top-level NetPackage* types the reflection sweep skips.
+# The registry also skips the plain helper classes NetPackageEntry,
+# NetPackageInfo, NetPackageMeasure and NetPackageMetrics, so the V3.3.0
+# accounting is 192 top-level - 8 helpers = 184 registered (network.md §3).
 NON_MAP = [
     "NetPackage",  # abstract base
     "NetPackageDirection",  # enum
     "NetPackageEntityTargeted",  # abstract intermediate
     "NetPackageLogger",  # abstract helper
 ]
-EXPECTED_TOTAL = 195
+EXPECTED_TOTAL = 192
 
 
 def main() -> int:
@@ -110,8 +112,9 @@ def main() -> int:
             unreliable.add(parts[1])
         if parts[6] == "1":
             allowed_before_auth.add(parts[1])
-    # kind (abstract/enum) of the top-level NetPackage* types - the 4 non-map
-    # helpers (the META has no kind column)
+    # kind (abstract/enum) of the top-level NetPackage* types: the registry
+    # sweep skips these 4 plus the plain helper classes named in NON_MAP's
+    # comment (the META has no kind column)
     kind_src = r"""
 using System;
 using System.Linq;
@@ -148,12 +151,12 @@ class NpKind {
         bad.append(f"unreliable packages {sorted(unreliable)} != documented {UNRELIABLE}")
     if non_map != set(NON_MAP):
         bad.append(f"non-map packages {sorted(non_map)} != expected {NON_MAP}")
-    # network.md §3 must state the 189-in-map / 4-helpers accounting
+    # network.md §3 must state the 184-in-map / 8-helpers accounting
     net = _common.doc("network.md").read_text(encoding="utf-8")
-    if "**191**" not in net:
-        bad.append("network.md: no '**191**' live id-map claim")
-    if "remaining **4**" not in net:
-        bad.append("network.md: no 'remaining **4**' helper claim")
+    if "**184**" not in net:
+        bad.append("network.md: no '**184**' live id-map claim")
+    if "remaining **8**" not in net:
+        bad.append("network.md: no 'remaining **8**' helper claim")
     for p in NON_MAP:
         if not re.search(rf"`{p}`", net):
             bad.append(f"network.md: does not name helper `{p}`")

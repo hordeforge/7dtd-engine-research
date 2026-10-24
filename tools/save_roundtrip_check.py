@@ -432,12 +432,17 @@ def check_main_ttw(path: str, checks: list[str]) -> None:
     checks.append(f"  gameVersionString: {gvs!r}")
     vi = struct.unpack_from("<4i", buf, off)
     off += 16
-    known = {(1, 3, 10, 14): "V3.1.0 (b14)", (1, 4, 0, 8): "V4.0 (b8) shipped world data"}
+    known = {
+        (1, 3, 10, 14): "V3.1.0 (b14)",
+        (1, 3, 20, 10): "V3.2.0 (b10)",
+        (1, 3, 30, 18): "V3.3.0 (b18)",
+        (1, 4, 0, 8): "V4.0 (b8) shipped world data",
+    }
     vi_note = known.get(vi, "unknown build")
     checks.append(
         f"  VersionInformation (ReleaseType,Major,Minor,Build): {vi} [{vi_note}]"
         if vi in known
-        else f"  VersionInformation: {vi} not in {{(1,3,10,14),(1,4,0,8)}}"
+        else f"  VersionInformation: {vi} not in {sorted(known)}"
     )
     pad0 = struct.unpack_from("<I", buf, off)[0]
     off += 4

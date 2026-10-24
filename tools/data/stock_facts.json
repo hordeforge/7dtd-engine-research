@@ -3,18 +3,18 @@
   "generated_by": "tools/src/StockFacts.cs",
   "asm": "Assembly-CSharp.dll",
   "source_identity": {
-    "assembly_csharp_dll_sha256": "3737eedc9f143d428a69030317428c45d342be4f11006a46d72bcd7b1d0fc64d",
-    "assembly_csharp_dll_bytes": 11610624,
+    "assembly_csharp_dll_sha256": "e16ff9d539b8fbf64904c0bc090d502286a62464742a9396f0455936ad0beb87",
+    "assembly_csharp_dll_bytes": 11697152,
     "note": "hash of the exact extracted bytes; version fields can repeat across a silent re-release, this hash cannot"
   },
-  "extracted_utc": "2026-09-15T08:13:49Z",
+  "extracted_utc": "2026-10-24T15:12:31Z",
   "version": {
     "release_type": 1,
     "major": 3,
-    "minor": 20,
-    "build": 10,
-    "display": "V 3.2.0",
-    "stock_wire": "V3.2.0 b10",
+    "minor": 30,
+    "build": 18,
+    "display": "V 3.3.0",
+    "stock_wire": "V3.3.0 b18",
     "product": "7 Days To Die",
     "game_reset_revision": 13
   },
@@ -26,7 +26,7 @@
   "network": {
     "default_port": 26900,
     "max_mp_players_constant": 8,
-    "netpackage_top_level_count": 195,
+    "netpackage_top_level_count": 192,
     "challenge_marker": 202,
     "challenge_size": 17,
     "challenge_marker_hex": "0xCA",
@@ -44,9 +44,9 @@
     "worldstate_saveload_stream_il": 926
   },
   "census": {
-    "top_level_types": 4426,
-    "methods_with_body_top_level": 44277,
-    "gmupdate_il": 631
+    "top_level_types": 4447,
+    "methods_with_body_top_level": 44534,
+    "gmupdate_il": 638
   },
   "tile_entity_package": {
     "present": true,
@@ -65,7 +65,7 @@
     "entrypoint": "tools/post-update.sh",
     "stock_sync": "tools/stock-sync.sh",
     "drift_check": "tools/parity/drift-check.sh",
-    "dump_label_suffix": "v3.2.0",
+    "dump_label_suffix": "v3.3.0",
     "dump_sets": ["deep", "deeper", "gaps", "loop-complete", "terrain", "realearth-surfaces", "dedi-complete"],
     "note": "After TFP patch: post-update.sh then re-Dump* into il/<set>-<dump_label_suffix>/"
   },

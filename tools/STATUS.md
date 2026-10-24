@@ -25,6 +25,33 @@ Status terms:
 
 ## Log
 
+### 2026-10-24
+
+- Retargeted the pinned build to V3.3.0 b18 (Steam build `25661908`, depot
+  manifest `3031329678505041777`, DLL sha256 `e16ff9d5...`, 11697152 bytes).
+  `steam_builds.py --record` moved b10 and b9 into the pin's `history`, so
+  `--pair` still resolves either by build id while its depot manifest is cached.
+  `parity_b18.json` is committed beside `parity_b10.json` and is now the wire
+  baseline `drift-check.sh` uses on a fresh checkout; the committed per-axis
+  baselines under `workspace/outputs/baseline/` were re-accepted from the b18
+  assembly, and `docs/inventories/` was regenerated with `tools/regen.sh`.
+
+- Two fixes surfaced by the retarget. `stock-sync.sh` ended its publish with
+  `rmdir` on a temp dir that still holds the previous pin pair, so every
+  retarget over an install with both pins present aborted after publishing the
+  new facts (and, under `set -e`, took `regen.sh` with it). It now clears the
+  dir with `rm -rf`. `regen.sh` also called `stock-sync.sh` in its default mode,
+  which runs the pin-site check and therefore aborted before the dumps that the
+  pin sites are fixed from existed; it now extracts only, and the final
+  `make test` in the same script still reports the sites.
+
+- The b10 to b18 lens results: 4447 top-level types (+21), 44534 methods with
+  body (+257), 192 NetPackage* types with 184 registered wire packages (3
+  added, 6 removed), 1925 method-signature changes (the `BinaryReader` ->
+  `PooledBinaryReader` migration across the save and wire paths dominates),
+  81 enum-member changes, 5296 body changes, and a depot content delta of 15
+  added plus 59 changed files including a new `Data/Config/toolbelt.xml`.
+
 ### 2026-09-21
 
 - Added `release.sh`: the release cut for v3.2.0 was done by hand, so the checks

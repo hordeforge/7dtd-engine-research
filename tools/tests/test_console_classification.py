@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Guard the console client-executable / dedicated-gate classification.
 
-console-commands.md 6 states the machine-swept split of the 188-command
+console-commands.md 6 states the machine-swept split of the 190-command
 population (CmdMap.exe rows): how many leaves carry get_IsExecuteOnClient=true,
 how many start Execute with a GameManager.IsDedicatedServer gate, and the exact
 10 dedicated-gated class names. A game patch that adds or removes a client
@@ -100,10 +100,10 @@ def main() -> int:
 
     doc = Path(DOC).read_text(encoding="utf-8")
     bad = []
-    if leaves != 188:
-        bad.append(f"console population {leaves} != 188 (CmdMap rows)")
-    if "84 of the 188 leaves" not in doc:
-        bad.append("doc no longer states '84 of the 188 leaves'")
+    if leaves != 190:
+        bad.append(f"console population {leaves} != 190 (CmdMap rows)")
+    if "84 of the 190 leaves" not in doc:
+        bad.append("doc no longer states '84 of the 190 leaves'")
     if on_client != 83:
         bad.append(f"onClient {on_client} != 83 (doc 83)")
     if either != 84:
@@ -115,7 +115,7 @@ def main() -> int:
             print("FAIL: " + b)
         return 1
     print(
-        f"OK: console classification (188 leaves; 83 client-exec, {either} either, {dedi} gated) matches the doc"
+        f"OK: console classification (190 leaves; 83 client-exec, {either} either, {dedi} gated) matches the doc"
     )
     return 0
 

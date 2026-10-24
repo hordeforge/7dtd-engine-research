@@ -54,7 +54,10 @@ fi
 printf '%s\n' "$census_out" | head -10
 
 step "stock facts (live pin)"
-(cd "$root" && ASM="$asm" ./tools/stock-sync.sh)
+# Extract only: the pin-site check belongs to the final `make test` below, and
+# running it here aborted the regen before it produced the dumps needed to fix
+# those sites.
+(cd "$root" && ASM="$asm" ./tools/stock-sync.sh --extract-only)
 
 step "NetPackage wire surface + companion types"
 MONO_PATH="$here/bin" run_bounded mono "$here/bin/DumpNetPackages.exe" "$asm" "$root/il/netpackages-$label"
@@ -131,6 +134,12 @@ if [[ "${legacy_fail:-0}" == "1" ]]; then
   echo "regen: FAILED (one or more canonical legacy dump sets are stale or absent)" >&2
   exit 2
 fi
+
+step "whole-type dumps cited by the coverage docs"
+# DumpDeep emits one file per method; the coverage docs also cite three
+# whole-type dumps in the deep set (test_dedi_coverage_docs requires them).
+MONO_PATH="$here/bin" run_bounded mono "$here/bin/DumpType.exe" "$asm" "$root/il/deep-$label" \
+     GameManager NetPackage World
 
 step "consistency + gates"
 (cd "$root" && make test)

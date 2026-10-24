@@ -55,7 +55,7 @@ COMMITTED_BASELINE="${COMMITTED_BASELINE:-$ROOT/workspace/outputs/baseline}"
 # Committed wire snapshot of the studied build. A fresh checkout has no
 # BASELINE_DIR, so this is what makes the wire axis comparable on first run
 # instead of silently creating a baseline and comparing nothing.
-PARITY_BASELINE="${PARITY_BASELINE:-$ROOT/workspace/outputs/parity/parity_b10.json}"
+PARITY_BASELINE="${PARITY_BASELINE:-$ROOT/workspace/outputs/parity/parity_b18.json}"
 CECIL="$BIN/Mono.Cecil.dll"
 # Wall-clock bound on the helper builds and the snapshot runs below
 # (tools/bounded-run.sh).
