@@ -52,11 +52,51 @@ new number.
 
 ## Unreleased
 
-**123 commits after `v3.2.0` (2026-09-21) as of 2026-10-01.** The corpus pin is
-unchanged at V3.2.0 b10, so this is a tooling-series release. A 0.x series
-carries breaking changes without a major bump, so the consumer-visible ones are
-listed first; `tests/test_release_contract.py` fails if this section's count
-falls behind the commits actually below the last tag.
+**127 commits after `v3.2.0` (2026-09-21) as of 2026-10-24.** The corpus pin moved
+to V3.3.0 b18, so the next cut is a `v3.3.0` corpus release, not a tooling
+version: the game shipped V3.3.0 b18 (Steam build 25661908, depot manifest
+3031329678505041777) and the whole corpus was re-derived from it. The
+consumer-visible changes of that retarget are listed first, then the tooling
+changes that accumulated since `v3.2.0`;
+`tests/test_release_contract.py` fails if this section's count falls behind the
+commits actually below the last tag.
+
+### The retarget: corpus pinned to V3.3.0 b18
+
+- **Every save record version moved.** `PlayerDataFile` 59 -> 62,
+  `EntityCreationData` 37 -> 38, `TEFeatureStorage` 18 -> 20, `Bag` 1 -> 2,
+  `Equipment` 4 -> 6, `Quest.FileVersion` 8 -> 9, each with `i32`-length blobs
+  where the old record was inline; `WorldState` 23 and the chunk preamble 47 did
+  not move. A b18 server reads a b10 world, a b10 server cannot read a b18 one,
+  so a downgrade must be refused.
+- **The wire registry lost three packages net** (187 -> 184 ids): six removed
+  (the two inventory-data and two inventory-transaction packages, the lock
+  request and the lock response) and three added (`NetPackageLockTarget`,
+  `NetPackageSingleSignData`, `NetPackageSignDelete`). Every id from 86 up
+  shifted by -3. `NetPackagePlayerInventory` and `NetPackagePlayerEquipment`
+  now carry client-serialized save blobs, so the b10 per-operation inventory
+  transaction gate is gone; a mod that patched it has nothing to patch.
+- **The client owns its container serialization.** `TransactionalInventory`,
+  `InventoryTransaction`, `InventoryManager`, `ILockContext` and `LockTargetType`
+  were removed; locks are server-authoritative through `NetPackageLockTarget`,
+  `LockChannel` and `WorldObjectType`.
+- **Equipment is a 13-slot list with a backpack** (`EquipmentSlots.Backpack = 12`,
+  `EquipmentSlotType`), the held item moved into `Hand`
+  (`HoldingMode` replaces `HeldItemState`), `ItemStackGrid` became the storage
+  and serialization core, and the toolbelt count comes from the new
+  `Data/Config/toolbelt.xml` instead of compiled constants.
+- **Signs are a new subsystem.** Player libraries persist to
+  `<save>/Player/<id>.signs` and deletions to `deletedSigns.dat`; sign upload has
+  no sender check and the join download ships every player library, private ones
+  included. Both are documented as findings, not fixed behavior.
+- **The dedicated server emits analytics over HTTPS** (`player_death` with
+  inventory/position/biome/POI, plus the quest events) with no managed opt-out.
+- **Two console commands were added** (`give`, `listitems`), both at permission
+  level 0, and the registry is 190 commands.
+- **`zdtd-server` was not retargeted in this pass.** Its `stock_wire` and
+  PROVENANCE pins still name the old build, which is why the sibling half of
+  `make test` fails; the corpus half
+  (`check_stock_facts.py --require-live --skip-siblings`) is green.
 
 ### Breaking for a consumer
 
