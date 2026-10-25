@@ -95,6 +95,35 @@ missing key and `Block with name '{0}' not found!` on an unknown block;
 `BlockIdsByName()` (IL=26) folds `nameToBlock` into a name -> id dictionary;
 `get_UnlockedBy()` (IL=55) lazily comma-splits `PropUnlockedBy` into cached
 `RecipeUnlockData[]` (empty array when the prop is absent).
+
+### The face order of a multi-value `Texture`
+
+A block's `Texture` property may hold one id or a comma list. The list is
+parsed in file order into `sideTextureIds`, and the face picks one through
+`BlockShape::MapSideAndRotationToTextureIdx`, which `BlockShapeCube` (IL=18)
+overrides:
+
+```text
+side 0        -> 0
+side 1        -> 1
+side 2..5     -> ((side - 2 + rotation) & 3) + 2
+past the end  -> 0        (GetSideTextureId falls back, IL=20..IL_0038)
+```
+
+`BlockFace` declares `Top, Bottom, North, West, South, East, Middle, None`, and
+that `0` is Top is settled in use: `GetSideTextureId(blockValue, 0, 0)` feeds
+`topTextures`, and `GetColorForSide` passes `BlockFace.Top=0` for an upward
+normal. So a six-value `Texture` is **(top, bottom, north, west, south, east)**,
+with the block's rotation permuting the four sides and nothing else.
+
+Two consequences: a seven-value list leaves its seventh id unreferenced by the
+cube path, and a shorter list repeats index 0 for the faces it does not cover,
+which is why a three-value block still renders on all six faces.
+
+Grade: the order rests on the enum declaration plus the `Top=0` usage. The values
+2..5 are only ever read through the rotated expression, so which of them is North
+and which is West is not separately exercised by the cube path.
+
 Query leaves: `GetShownMaxDamage()` (IL=15) returns `MaxDamagePlusDowngrades`
 for a composite door (`TEFeatureDoor`) else `MaxDamage`;
 `GetActivationDistanceSq()` (IL=14) squares `activationDistance`, falling

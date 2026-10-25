@@ -53,13 +53,17 @@ new number.
 
 ## Unreleased
 
-**8 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
+**9 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
 - The tag history row for `v3.3.0`, the corpus pin in this file's header, and
   the reset of this section land after the cut, so the release notes stay the
   record of what shipped and this file stays the contract for what comes next.
+- [`../world/blocks.md`](../world/blocks.md) records the face order of a
+  multi-value `Texture` property: top, bottom, north, west, south, east, with
+  rotation permuting the four sides and an out-of-range index falling back to
+  the first id.
 - [`../world/texture-atlas.md`](../world/texture-atlas.md) gained §4: the block
   atlas images (nine 407-layer `Texture2DArray` objects, the five families that
   are single 2D atlases instead), the opaque tile space, and the per-file rect
