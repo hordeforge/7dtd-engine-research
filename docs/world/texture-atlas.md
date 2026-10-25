@@ -146,10 +146,35 @@ The same check on `id` 7 (`brick.tga`, `index` 0, 2x2) gives 8.9 and 8.3 for
 the horizontal joins and 11.3 and 12.4 for the vertical ones, against 21.0 at
 the boundary to `id` 8.
 
-Grade for the *sampling*: **inferred**. Which slice a face of a 2xN texture
-reads, and how `globaluv` and `blockw/blockh` turn a block's world position into
-that choice, is not decoded. The packing above says what the slices mean, not
-what a face asks for.
+Grade for the *sampling*: **verified** from IL. The layer a face reads is
+`uvTexRect.index + BlockShapeNew::ComputeTaIndexOffsFor(...)`, added at every
+call site in `BlockShapeNew::renderFace` (IL=2291, the additions at
+IL_0846..IL_0A3F). That helper (IL=67) is the whole rule:
+
+```text
+baseW = max(1, (int)uv.width)          baseH = max(1, (int)uv.height)
+plane 0 (X face): u = pos.z, v = pos.y
+plane 1 (Y face): u = pos.x, v = pos.z
+plane 2 (Z face): u = pos.x, v = pos.y
+uIdx  = FloorModFloat(u, baseW)
+vIdx  = FloorModFloat(v, baseH)
+if (flipU) uIdx = baseW - 1 - uIdx
+vIdx  = baseH - 1 - vIdx               // unconditional
+offset = uIdx + vIdx * baseW
+```
+
+So the packing is row-major with a stride of `baseW`, which is what the pixel
+measurement found independently: one rule read from IL and one measured from the
+shipped layers, agreeing. `pos` arrives as the block centre (a `+0.5` is added
+before the call), so a block-aligned coordinate floors to its own sub-tile
+rather than the one before it. `FlipU` is the per-direction argument the four
+`tri*` lists pass in, negative-facing directions flipping it.
+
+Two consequences worth stating. The `(int)` cast means a normalised `w` such as
+`0.125` reads as 0 and then `max(1, ...)` as 1, which is why only the opaque
+family can be an array source: its rects are already in tile counts. And the
+unconditional V flip is not a detail of one face: the bottom row of a texture is
+slice `index + baseW - 1`, not `index`.
 
 The other families do not share this shape: `ta_terrainxml` gives pixel rects
 (239, 247, 495) with `blockw/blockh` of 4 or 8, `ta_grassxml`,
@@ -177,7 +202,7 @@ belong to that legacy single-image path, not to the arrays.
   the six XMLs do not share units. The opaque tile space is recorded too:
   `index` as a packing cursor over 407 slots (`w*h` per entry, the last entry
   ending exactly at the array depth), **verified** by pixel continuity to pack
-  row-major, with which slice a face reads left **inferred**.
+  row-major, and the face-to-slice rule decoded from `ComputeTaIndexOffsFor`.
 - **2026-10-24:** Container and parse path re-checked on V3.3.0 (b18): the bundle
   path exists, its UnityFS header and file/block tables match
   [texture-atlas-unityfs.md](../world/texture-atlas-unityfs.md), and every type and
