@@ -94,6 +94,56 @@ The 256 u16 colors per chunk are what `MapChunkDatabase` stores and
 `NetPackageMapChunks` ships (17x17 window, 256 colors per piece;
 [protocol-packages.md §3.3](../network/protocol-packages.md)).
 
+## 4. The atlas images
+
+The metadata above is only half of the block atlas. The images live in a second
+bundle, and they are not one texture:
+
+`Data/Addressables/Standalone/blocktextureatlases_assets_all.bundle` holds nine
+`Texture2DArray` objects (class 187), all **407 layers** deep, in three
+resolutions and three roles:
+
+| Objects | Resolution | Role |
+|---|---|---|
+| `ta_opaque_0`, `ta_opaque_n_0`, `ta_opaque_s_0` | 512x512 | diffuse, normal, specular |
+| `ta_opaque_1`, `ta_opaque_n_1`, `ta_opaque_s_1` | 256x256 | the same three, half size |
+| `ta_opaque_2`, `ta_opaque_n_2`, `ta_opaque_s_2` | 128x128 | the same three, quarter size |
+
+**Verified** on the b18 install: object table from the bundle's `index.json`,
+layer counts and pixel sizes from the exports produced by `unityz` (sibling
+`hordeforge/unityz`, class-187 support since 0.1.11). The serialized `m_Format`
+is a `GraphicsFormat`, not the `TextureFormat` a `Texture2D` carries.
+
+The other five `ta_*` families are **not** arrays. Their images are single
+`Texture2D` objects (class 28): `ta_grass`, `ta_transparent`, `ta_decals`,
+`ta_water`, `ta_cracks` and `ta_ingredients01`, each with `_n` and `_s` or
+`_Packed_*` companions. No object named `ta_terrain` exists anywhere in the
+extraction, so the image the eighteen `ta_terrainxml` entries address is still
+unidentified; the terrain splat textures in
+`terraintextures_assets_all.bundle` (`terrain_filler`, `sidewalk_terrain`) are
+not an atlas of that shape.
+
+### The opaque tile space (inferred)
+
+The opaque `uv` entries carry `index` alongside `id`, and `index` is not a
+second name for `id`. Sorted by `index`, the 160 opaque entries cover `0..406`
+in `w*h` strides (82 entries are 2x2, 78 are 1x1), and the last entry
+(`id` 607, `metal_roof.tga`) starts at 403 and ends at **407**, which is exactly
+the layer count of every `ta_opaque_*` array. So `index` reads as a packing
+cursor into a 407-slot space where each texture owns `w*h` consecutive slots.
+
+Grade: **inferred**. The arithmetic is consistent across all 160 entries and
+lands on the array depth, but the sampling path is not decoded: which slot a
+face of a 2xN texture reads, and how `globaluv` and `blockw/blockh` turn a UV
+into that offset, are open. A shader or mesh-path reading
+(`MeshDescription.ReloadTextureArrays` is the named next target) would settle it.
+
+The other families do not share this shape: `ta_terrainxml` gives pixel rects
+(239, 247, 495) with `blockw/blockh` of 4 or 8, `ta_grassxml`,
+`ta_transparentxml` and `ta_decalsxml` give normalised sizes (0.125, 0.25) with
+`index` 0 on every entry, and `ta_waterxml` has no `w` or `h` at all. The rect
+attributes should be read per file, not with one shared interpretation.
+
 ## Related docs
 
 | Doc | Role |
@@ -105,6 +155,13 @@ The 256 u16 colors per chunk are what `MapChunkDatabase` stores and
 
 ## Changelog
 
+- **2026-10-25:** Added §4 on the atlas **images**: the nine `ta_opaque_*`
+  `Texture2DArray` objects (512, 256, 128 px, 407 layers each, measured with
+  `unityz` on b18), the five families that are single `Texture2D` atlases
+  instead, the absent `ta_terrain` image, and the **inferred** opaque tile space
+  (`index` as a packing cursor over 407 slots, `w*h` per entry, the last entry
+  ending exactly at the array depth). The per-file rect shapes are recorded with
+  it: the six XMLs do not share units.
 - **2026-10-24:** Container and parse path re-checked on V3.3.0 (b18): the bundle
   path exists, its UnityFS header and file/block tables match
   [texture-atlas-unityfs.md](../world/texture-atlas-unityfs.md), and every type and
