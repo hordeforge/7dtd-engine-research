@@ -53,7 +53,7 @@ new number.
 
 ## Unreleased
 
-**5 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
+**7 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
@@ -62,8 +62,12 @@ section used to describe is published under the tag and in
   record of what shipped and this file stays the contract for what comes next.
 - [`../world/texture-atlas.md`](../world/texture-atlas.md) gained §4: the block
   atlas images (nine 407-layer `Texture2DArray` objects, the five families that
-  are single 2D atlases instead), the opaque tile space verified to pack
-  row-major by pixel continuity, and the per-file rect shapes.
+  are single 2D atlases instead), the opaque tile space, and the per-file rect
+  shapes.
+- The tile packing in that section is now verified rather than inferred: the
+  four slices of a 2x2 entry join with a mean difference of 6 to 8 against 62
+  at the next texture, and the order is row-major. The count in this section is
+  corrected with it, since the previous change left it one behind.
 
 The next cut is `v0.4.0` (tooling) unless the corpus is re-pinned to a new game
 build first, which would be `v3.4.0`.
