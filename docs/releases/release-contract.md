@@ -53,13 +53,17 @@ new number.
 
 ## Unreleased
 
-**4 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
+**5 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
 - The tag history row for `v3.3.0`, the corpus pin in this file's header, and
   the reset of this section land after the cut, so the release notes stay the
   record of what shipped and this file stays the contract for what comes next.
+- [`../world/texture-atlas.md`](../world/texture-atlas.md) gained §4: the block
+  atlas images (nine 407-layer `Texture2DArray` objects, the five families that
+  are single 2D atlases instead), the opaque tile space verified to pack
+  row-major by pixel continuity, and the per-file rect shapes.
 
 The next cut is `v0.4.0` (tooling) unless the corpus is re-pinned to a new game
 build first, which would be `v3.4.0`.
