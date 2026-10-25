@@ -101,6 +101,12 @@ item->block conversion every held/placed block item goes through - with
 meta byte selects the alternate block variant, e.g. paint/frame variants),
 otherwise `iv.ToBlockValue(false)`.
 
+**No block item is authored.** `items.xml` in the installed build contains no
+`ItemClassBlock` entry: a block item is constructed from `Block.list`, which is
+why the bridge above can index it by item id. So a placeable block is not content
+that `items.xml` can be searched for, and a name appearing in both files is not
+the rule that links them - the id is.
+
 **`ItemActionPlaceAsBlock.ExecuteAction` (IL=351)** is the placement action
 (the place half of the bridge): release-only, rate-gated by `Delay` and
 `Constants.cBuildIntervall`, with the same passive-177 `twitch_no_attack`

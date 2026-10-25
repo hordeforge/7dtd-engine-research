@@ -53,13 +53,16 @@ new number.
 
 ## Unreleased
 
-**9 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
+**10 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
 - The tag history row for `v3.3.0`, the corpus pin in this file's header, and
   the reset of this section land after the cut, so the release notes stay the
   record of what shipped and this file stays the contract for what comes next.
+- [`../gameplay/items.md`](../gameplay/items.md) records that no block item is
+  authored in `items.xml`: a block item is constructed from `Block.list`, so the
+  id links them, not a shared name.
 - [`../world/blocks.md`](../world/blocks.md) records the face order of a
   multi-value `Texture` property: top, bottom, north, west, south, east, with
   rotation permuting the four sides and an out-of-range index falling back to
