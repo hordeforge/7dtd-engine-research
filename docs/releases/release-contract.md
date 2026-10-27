@@ -53,7 +53,7 @@ new number.
 
 ## Unreleased
 
-**12 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**13 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
@@ -85,6 +85,12 @@ section used to describe is published under the tag and in
   wins unless a containing volume is marked priority, which returns at once.
   The count above is brought up to date here too, since two commits landed
   without a bump.
+- [`../world/block-shapes.md`](../world/block-shapes.md) §7.1 records the two
+  layouts a consumer needs for block triggers: the `.tts` trigger section
+  (`i16 count`, then `i16 length` + `Vector3i` + body) and `BlockTrigger.Read`'s
+  versioned body, plus the `AllowBlockTriggers` filter that drops wiring on a
+  block that cannot use it. It also states that nothing between the block payload
+  and the triggers is length-prefixed, and how `SimpleBitStream` packs its flags.
 
 The next cut is `v0.4.0` (tooling) unless the corpus is re-pinned to a new game
 build first, which would be `v3.4.0`.
