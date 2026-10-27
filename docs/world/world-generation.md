@@ -538,6 +538,39 @@ payload until chunk decoration instantiates the prefab at runtime
 (`world-chunks.md` chunk lifecycle) or the server syncs them
 (`SendAllVolumesToClient`).
 
+**Sleeper volume properties, and the priority flag.** `PrefabSleeperVolumeList.ReadFromProperties`
+reads `SleeperVolumeStart`, `SleeperVolumeSize`, `SleeperVolumeGroup` or
+`SleeperVolumeGroupId`, `SleeperIsLootVolume`, `SleeperIsQuestExclude`,
+`SleeperVolumeFlags`, `SleeperVolumeTriggeredBy`, and the per-volume `SVS<n>`
+script properties (`PrefabVolumes/PrefabSleeperVolumeList.il.txt`). Two of those
+names mislead:
+
+- `SleeperIsLootVolume` does **not** mark a loot container. The parsed boolean
+  is stored into `PrefabSleeperVolume.isPriority` (`ReadFromProperties` IL_00D6
+  `ldstr SleeperIsLootVolume` through IL_0319 `stfld PrefabSleeperVolume::isPriority`),
+  and `SleeperVolume` copies it to `isPriority` and the `cFlagsPriority` runtime
+  flag (`SleeperVolume.il.txt` IL_0027-002C, field list `cFlagsPriority`).
+- `SleeperIsQuestExclude` does the same for `isQuestExclude` and
+  `cFlagsQuestExclude`.
+
+The flag resolves **overlap**: one cell can sit inside several sleeper volumes,
+and the priority volume owns it.
+
+- `Prefab.FindSleeperVolume(pos)` (IL=34) walks the list in order, skips unused
+  volumes and volumes that do not contain the point (`IsPosInSleeperVolume`, a
+  half-open box test `start <= pos < start + size`), keeps the last containing
+  volume, and returns at once on a containing priority volume (IL_0027-002D
+  `ldfld isPriority` / `brtrue`). A non-priority overlap therefore resolves to
+  the later volume; a priority overlap resolves to the priority one wherever it
+  sits in the list.
+- `Prefab.IsPosInSleeperPriorityVolume(pos, skipIndex)` (IL=35) answers whether
+  any other used priority volume contains the point (IL_001E), which is how a
+  caller tells that a cell belongs to a higher-priority volume than the one it
+  is placing for.
+
+So the property is a placement tie-break, not a container marker. Loot in a POI
+is the block tile entities inside it, not a sleeper-volume property.
+
 ---
 
 ## 7. `SDF.*`: the settings file format
