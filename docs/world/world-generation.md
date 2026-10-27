@@ -472,6 +472,19 @@ world folder (`SdDirectory.CreateDirectory`) and writes each buffer to its file
 | `main.ttw` | `serializeRWGTTW` | a fresh `WorldState` from an empty `World` (`SetFrom(world, EnumChunkProviderId=4)` + `ResetDynamicData`), saved via `WorldState.Save`; layout owned by [`save-region.md`](../world/save-region.md) |
 | `map_info.xml` | `serializeDynamicProperties` | `SchemaVersion`, `Scale=1`, `HeightMapSize`, `Modes`, `FixedWaterLevel=false`, `RandomGeneratedWorld=true`, `GameVersion`, `Seed`, plus a `Generation` block (Seed, Towns, Wilderness, Lakes, Rivers, **Cracks** (= Canyons), Craters, Plains, Hills, Mountains, biome weights) |
 
+**Texture orientation (measured, 2026-10-27).** `splat3.png` is written bottom-up
+relative to the block coordinates `dtm.raw` uses: texture row 0 is block
+`y = height - 1`, so a block column `(x, y)` is pixel `(x, height - 1 - y)`. Measured
+on the shipped Navezgane world (6144): the 128 block square at `(2768, 4336)` holds a
+desert town whose four `street_*` marker columns have a road or gravel pixel within
+6 blocks in 676 of 676 samples under the flip and in 0 of 676 without it, and 783 of
+4096 sampled pixels in the square are set under the flip against 0 without. Reading
+the red channel as asphalt, green as gravel, and blue as a water crossing matches the
+writer above. `biomes.png` is top-down instead: the unflipped town square reads desert
+`(255, 228, 119)` and the flipped one reads snow `(255, 255, 255)`. The two files do
+not share an orientation, so a reader that samples both from the same pixel formula
+gets one of them wrong wherever the world is not symmetric.
+
 ```mermaid
 flowchart LR
   HM[Data.HeightMap] --> DTM[dtm.raw uint16 LE]
