@@ -295,6 +295,53 @@ saved with the chunk (`Chunk.read` / `Chunk.write` call `BlockTrigger.Read` /
 example `BlockActivateSwitch` sets meta bit 0 to "on" only when the trigger has
 no `TriggeredBy` wiring, then `World.SetBlock`s the result).
 
+**`.tts` layout (pinned from IL).** `Prefab.readTriggerData(PooledBinaryReader)`
+(IL=102, `Prefab.il.txt`) reads the section after the block payload:
+
+```
+i16 count
+repeat count times:
+  i16 length
+  Vector3i pos                       StreamUtils.ReadVector3i
+  byte[length] body                  copied to a sub-reader, then BlockTrigger.Read
+```
+
+A trigger whose cell is loaded and whose block does **not**
+`AllowBlockTriggers` is dropped (IL_00A3-IL_00D2): the file may carry wiring on a
+block class that cannot use it, and the reader filters rather than trusts. Each
+accepted trigger joins `Prefab.triggerData` keyed by `LocalChunkPos` and goes
+through `HandleAddingTriggerLayers`.
+
+**`BlockTrigger.Read` (IL=100, `BlockTrigger.il.txt`)** is the body, versioned
+by its own `u16` header (`Write` IL=93 always emits version 5):
+
+| Bytes | Field | Present |
+|---|---|---|
+| `u16` | `currentVersion` | always |
+| `u8` | `NeedsTriggered` (`TriggeredStates`) | version >= 2 |
+| `u8 n`, `n x u8` | `TriggersIndices` | always |
+| `u8 n`, `n x u8` | `TriggeredByIndices` | always |
+| `u8 n`, `n x u8` | `TriggeredValues` | always |
+| `bool` | `ExcludeIcon` | version >= 3 |
+| `bool` | `UseOrForMultipleTriggers` | version >= 4 |
+| `bool` | `Unlock` | version >= 5 |
+
+Channel indices and counts are one byte each, so a cell fires or listens on at
+most 255 layers. The world chunk save writes the same record, which is why the
+chunk format carries a `TriggerVolumeWorldStateSaveVersion` of its own.
+
+**Reaching the section.** `Prefab.loadBlockData` (IL=111) is the whole payload:
+four magic chars, `u32 version`, `readBlockData` (IL=665), `readTileEntities`
+(IL=108), `readTriggerData` (IL=102), then the separate `.ins` file. There are no
+length prefixes between the three, so a consumer that wants the triggers has to
+walk the block payload to the byte. `readBlockData` reads the size, the cell
+array, the density cells, the damage values and then two `SimpleBitStream`s with
+their bodies; `SimpleBitStream.Write/Read` (IL=33/24) are `i32 byteCount` and that
+many bytes, with the flags packed least-significant bit first, and each set bit
+means one `TextureFullArray.Read` or `WaterValue` body follows. The version gates
+in `readBlockData` change which of those streams exist, so the walk is
+version-specific and the method is the reference.
+
 ### 7.2 Runtime registration
 
 `World.triggerManager` (a `TriggerManager`) keys everything by POI:
