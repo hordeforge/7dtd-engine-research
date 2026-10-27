@@ -97,7 +97,7 @@ server-side, not sent). Pure client UI rows (`XUi_*`, `loadingscreen`,
 |---|---:|
 | Total entries | 50 |
 | boot | 7 |
-| S2C | 42 |
+| S2C | 43 |
 | reload | 19 |
 | clientFile | 1 |
 | no S2C (server-only or shared-local) | 7 |
@@ -121,3 +121,9 @@ Patching after stock load: [`../admin/mod-loading.md`](../admin/mod-loading.md) 
 
 - **2026-07-28:** Initial table from `WorldStaticData..cctor` (49 `XmlLoadInfo` entries).
 - **2026-07-28:** Link §5.6 S2C send path.
+- **2026-10-26:** Counts corrected against the table: S2C is 43, not 42. The
+  `toolbelt` row (`Data/Config/toolbelt.xml` is a new config file in 3.3.0,
+  `docs/releases/changelog-3.3.0.md`) took the table from the initial 49 to 50
+  entries; the S2C count was never updated with it. A dedi sending the old
+  42-name set leaves a V3.3.0 client waiting on `toolbelt` forever, before the
+  sign-data and world-folder steps of `worldInfoCo`.
