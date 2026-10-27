@@ -53,7 +53,7 @@ new number.
 
 ## Unreleased
 
-**10 commits after `v3.3.0` (2026-10-25) as of 2026-10-25.** The retarget this
+**12 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
@@ -77,6 +77,14 @@ section used to describe is published under the tag and in
   decoded too (`ComputeTaIndexOffsFor`: `index + uIdx + vIdx * baseW`, V flipped
   unconditionally), which agrees with the measured layout. The count in this
   section is corrected with it, since the previous change left it one behind.
+- [`../world/world-generation.md`](../world/world-generation.md) §6 records what
+  the sleeper-volume properties do. `SleeperIsLootVolume` sets
+  `PrefabSleeperVolume.isPriority`, a placement tie-break for overlapping
+  volumes, not a loot marker; `SleeperIsQuestExclude` sets `isQuestExclude`. The
+  precedence rule is `Prefab.FindSleeperVolume`'s: the last containing volume
+  wins unless a containing volume is marked priority, which returns at once.
+  The count above is brought up to date here too, since two commits landed
+  without a bump.
 
 The next cut is `v0.4.0` (tooling) unless the corpus is re-pinned to a new game
 build first, which would be `v3.4.0`.
