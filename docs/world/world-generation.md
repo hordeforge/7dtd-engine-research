@@ -280,6 +280,31 @@ each `StreetTile` caches biome/terrain type, position height, and validity flags
 `<district>` XML), wire tile exits, and `CleanupStreets`. Results accumulate in
 `Townships`; the log line is `TownPlanner Plan {0} in {1}`.
 
+**Township spawn counts (`getTownshipCounts`, IL=83).** The planner iterates
+`WorldBuilderStatic.idToTownshipData` and skips a township whose
+`TownshipData.Category` is `Wilderness` (3). The `TownshipData` ctor sets the
+category by name suffix: `roadside` -> `Roadside` (1), `rural` -> `Rural` (2),
+`wilderness` -> `Wilderness` (3), everything else `Normal` (0), so
+`wasteland_city` plans as a normal town. Per remaining township it parses
+`tiles` with `DynamicProperties.ParseVec` (two floats, defaults **1, 1**), takes
+`count` from `WorldBuilder.GetCount(name, WorldBuilder.Towns, rand)`, parses
+`distance` with `ParseInt` (default **5**), and records
+`TownshipSpawnInfo(minTiles, maxTiles, count, distance)` only when `count >= 1`
+and both tile bounds are `>= 1`. Its return value is the sum of the counts.
+
+**`WorldBuilder.GetCount` (IL=50) and the `count` property.** `count` is a float
+vector whose first value defaults to **-1**; a negative first value means the
+township states no count and is skipped. `GenerationSelections` is
+`None = 0, Few = 1, Default = 2, Many = 3`, and the selection picks the first,
+second or third value (`None` and `Few` both read the first). The picked value
+truncates to an int, and its fractional part is the chance of one more
+(`RandomFloat() < frac`). `WorldBuilder.Towns` is `Default` (`WorldBuilder`
+ctor), so a township plans the **second** value of its `count`: `"2, 4, 6"` is
+four townships, and `"2.3, 4.4, 6"` is four with a 40 percent chance of five.
+
+Grade: verified from the IL dumps (`TownPlanner.il.txt`, `WorldBuilder.il.txt`,
+`TownshipData.il.txt`, and the `GenerationSelections` / `eCategory` enum dumps).
+
 ### 3.4 Terrain features and stamp rasterization (`GenerateTerrainLast`)
 
 `generateTerrainFeature(name, selection, isWater)` runs for `lake` and `river`
