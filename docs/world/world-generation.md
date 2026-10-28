@@ -502,9 +502,70 @@ After both complete, `ClearWaterUnderTerrain` iterates `waterRects` and clears
 ### 3.5 POI placement: wilderness, highways, prefabs
 
 - `POISmoother.SmoothStreetTiles` flattens terrain under town street tiles.
-- `WildernessPlanner.Plan` picks unused valid wilderness tiles per biome and
-  spawns wilderness POIs (`StreetTile.spawnWildernessPrefab`, IL=623) with
-  low-biased random sizing; `SmoothWildernessTerrain` then smooths their pads.
+- `WildernessPlanner.Plan` (IL=180) places wilderness POIs before highways and
+  towns are spawned: per biome, a count from the world preset, candidate tiles
+  that are unused, dry, in that biome and outside the border and radiation ring,
+  and a farthest-from-township, low-biased tile pick with 20 attempts per POI.
+  `StreetTile.spawnWildernessPrefab` (IL=623) then places one
+  `GetWildernessPrefab` pick per tile, up to six times, and
+  `SmoothWildernessTerrain` smooths their pads. The full rules are below.
+
+**Wilderness placement (decoded).** `WildernessPlanner.Plan` runs after
+`POISmoother.SmoothStreetTiles` and before `HighwayPlanner.Plan`,
+`TownPlanner.SpawnPrefabs` and `WildernessPathPlanner.Plan`, and only when the
+world's `Wilderness` selection is not `None`. Its RNG is seeded with
+`worldSeed + 409651`. For each of the five biome types it reads
+`{Biome}_wilderness`, falls back to `wilderness`, and then to a default of 200
+with a warning. Only `forest_wilderness` and `wasteland_wilderness` exist in
+`rwgmixer.xml`, so the other three biomes share the generic count. In the 3.3
+file the generic and forest counts are `12,24,36` (tiny), `27,54,81` (small),
+`45,90,135` (medium) and `75,150,225` (large), and wasteland is `16,32,48`,
+`36,72,108`, `60,120,180` and `100,200,300`; the selection picks `a`, `b` or `c`
+and the value is truncated, not rounded.
+
+A candidate tile is one that is not `Used`, is not inside the radiation or map
+border ring, is not mostly water, has no district or the `wilderness` district,
+and matches the biome being filled. A POI is attempted up to 20 times: each
+attempt re-filters the unused candidates, orders them by distance from the
+nearest township's centre, farthest first, and takes index `(int)(f * f *
+count)` of a fresh `RandomFloat` `f`, so the pick strongly favours tiles far
+from towns without any distance threshold. A success marks the tile used; 20
+failures consume the POI anyway; an exhausted list abandons the rest of that
+biome.
+
+`StreetTile.spawnWildernessPrefab` seeds a per-tile RNG with
+`worldSeed + 4096953 + GridPosition.x + GridPosition.y * 200`, draws one
+prefab, and tries up to six placements. The rotation is
+`(rotationToFaceNorth + RandomRange(0, 4)) & 3`. The position is inset 20 blocks
+inside the 150 block tile unless a footprint side is 110 or more, which centres
+it instead, and a side above 150 logs `RWG spawnWildernessPrefab {0}, overflows
+TileSize {1}` and proceeds. A footprint that leaves the world, touches any water
+cell, crosses a biome boundary, or varies by more than 11 blocks in height is
+refused; otherwise the placed height is the **median** of the footprint's
+heights plus the prefab's `YOffset`, and a height below 2 is refused. One
+`RoadExit` marker is picked at random for the wilderness path record
+(`AddPathInfo` at the marker's centre with half the footprint's longer side as
+its radius), the prefab's markers are resolved by
+`SpawnMarkerPartsAndPrefabsWilderness`, and every 150 block grid tile the
+footprint overlaps is marked used, so one large prefab can consume several
+tiles.
+
+The pick is `PrefabManager.GetWildernessPrefab` (IL=109): the prefab must carry
+`wilderness` or `trader` and must not be a street tile or part; theme spacing
+and the duplicate-name check apply unless this is the retry, and the same score
+formula as the district pick decides, with one retry that drops both spacing
+checks. The top-level call passes no size bounds (zero bounds always fit) and
+the `withoutTags` argument it passes for traders is never read, so trader
+prefabs stay eligible. The tile-level `HasSteepSlope` flag is not consulted;
+slope is enforced only by the 11 block footprint test. Logged as
+`WildernessPlanner Plan {0} prefabs spawned, in {1}, retries {2}, r={3:x}`.
+
+Grade: verified from the IL dump (`WildernessPlanner.il.txt`,
+`StreetTile.il.txt`, `PrefabManager.il.txt`). Not decoded: the path tile blocked
+codes (1, 2 and 5) and the smoothing pass, the `prefab_weights` values, and why
+a 110 block prefab is centred with no overlap test beyond marking tiles used.
+There is no low-biased *sizing*: the low-biased pick is the tile index and
+prefab sizes are authored.
 - `CalcTownshipsHeightMask` locks township terrain, `HighwayPlanner.Plan`
   connects township gateways (`ConnectClosest` / `ConnectSelf`, A* paths from
   `PathingUtils` over the WorldSize/10 `PathTileGrid`, Burst
