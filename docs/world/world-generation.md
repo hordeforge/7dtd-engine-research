@@ -550,6 +550,35 @@ its radius), the prefab's markers are resolved by
 footprint overlaps is marked used, so one large prefab can consume several
 tiles.
 
+**A wilderness POI's own markers (`SpawnMarkerPartsAndPrefabsWilderness`).** The
+method seeds a `GameRandom` from the parent position's string hash, rotates the
+prefab's markers by the parent rotation, and walks them:
+
+- `POISpawn` markers pick a child with
+  `GetWildernessPrefab(traderTag, marker.Tags, size, size, parent + centre,
+  false)` and place it with the same alignment arithmetic as the town path: the
+  corner is the parent plus the marker start, then a rotation-dependent offset
+  driven by the marker's own `Rotations` (centred across one axis, flush to the
+  other edge), with the final rotation's swapped footprint and the child's
+  `YOffset` added to the height. The child recurses on its own markers.
+- `PartSpawn` markers are grouped by `GroupName`. Each group normalises its
+  chances by their total (a single member uses its own chance as absolute),
+  accumulates them, and takes the first marker whose accumulated share reaches a
+  fresh roll, so at most one part per group is placed. A non-empty tag list must
+  test `wilderness`, the part comes from `GetPrefabByName`, its rotation mirrors
+  1 and 3 before adding the parent rotation and the part's
+  `RotationToFaceNorth`, and its position is the parent plus the marker start
+  with **no** `YOffset`. The part recurses with that same position.
+- `None` and `RoadExit` markers are skipped. There is no depth limit, no
+  placement cap, and no bounds or overlap test anywhere in the method. The only
+  log string is `Part to spawn {0} not found!`. The `RotatePOIMarkers` call on a
+  spawned child discards its result, so it does nothing.
+
+Grade: verified from the IL dump (`StreetTile.il.txt`, method IL=537). A port
+needs a substitute for the position-string seed (the hash is runtime dependent)
+and a depth cap, because a self-referential part would otherwise recurse
+forever.
+
 The pick is `PrefabManager.GetWildernessPrefab` (IL=109): the prefab must carry
 `wilderness` or `trader` and must not be a street tile or part; theme spacing
 and the duplicate-name check apply unless this is the retry, and the same score
