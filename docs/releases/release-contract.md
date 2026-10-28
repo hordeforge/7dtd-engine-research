@@ -53,9 +53,15 @@ new number.
 
 ## Unreleased
 
-**15 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**16 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 pins how a
+  street tile earns its validity: nine slope and radiation samples at ±75 blocks,
+  a 3-block stride over the tile for biome and water, the 20-block slope and 90
+  percent water thresholds, and the same three checks in
+  `IsValidForStreetTile` plus the mountain terrain type.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 pins the
   town planner's inputs and placement: how a township's `count`, `tiles` and

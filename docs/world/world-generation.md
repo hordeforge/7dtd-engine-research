@@ -347,6 +347,24 @@ passes one. Those tiles become the township's outskirt district.
 
 Grade: verified from the IL dumps.
 
+**Street-tile validity (`StreetTile.UpdateValidity`, IL=139;
+`IsValidForStreetTile`, IL=24).** The grid is `StreetTileMapWidth = WorldSize /
+150`, so a tile is 150 blocks a side and its centre is `position + 75`. Nine
+samples decide the slope: the centre and the eight points at ±75 on both axes,
+each compared with the centre's height, and a difference of more than **20**
+sets `HasSteepSlope`; a radiation value above zero at any of the nine sets
+`OverlapsRadiation`. The tile's 150x150 area is then walked with a stride of
+**3** for biome and water: a sample whose biome differs from the centre
+column's sets `OverlapsBiomes`, any water cell sets `OverlapsWater`, and more
+than **90 percent** water samples set `AllIsWater`.
+
+`IsValidForStreetTile` is the conjunction: no water overlap, no biome overlap,
+no radiation, no steep slope, and a terrain type other than mountains.
+`TerrainType` is `plains = 0, hills = 1, mountains = 2, none = 3`, read at the
+tile centre.
+
+Grade: verified from the IL dumps.
+
 ### 3.4 Terrain features and stamp rasterization (`GenerateTerrainLast`)
 
 `generateTerrainFeature(name, selection, isWater)` runs for `lake` and `river`
