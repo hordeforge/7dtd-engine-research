@@ -374,7 +374,13 @@ Grade: verified from the IL dumps.
 order from its name suffix: `commercial` type 1 spawn order 1, `downtown` type 2
 spawn order 99, `gateway` type 3, `industrial` type 4, `residential` type 5
 spawn order -1, `rural` type 6, and everything else type 0 spawn order 0 (the
-default weight is 0.5, which the XML overrides).
+default weight is 0.5, which the XML overrides). The XML loader
+(`WorldGenerationFromXml.Load`) starts a district's `tag` as its own lower-cased
+name and its `prefab_name` the same way, then overrides either when the record
+states the property. A district's tag is therefore never empty, which is what
+makes the prefab pick's district gate apply to every district: a
+`countryresidential` tile asks for prefabs tagged `countryresidential`, and
+`forest_rural` asks for `rural`.
 
 The candidates are the districts whose `required_township` tag set matches the
 township's name, lower-cased, and whose `spawn_weight` is above zero; `gateway`,
