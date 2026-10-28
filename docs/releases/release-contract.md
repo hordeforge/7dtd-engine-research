@@ -53,9 +53,14 @@ new number.
 
 ## Unreleased
 
-**18 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**19 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 pins the
+  prefab pick: the prefab metadata `PrefabData.Init` builds, the loader's tag
+  filters, every gate `GetPrefabWithDistrict` applies, the theme and duplicate
+  spacing checks, and the score formula with the `prefab_spawn_adjust` defaults.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 pins the
   district fill: the name-derived type and spawn order, the candidates whose
