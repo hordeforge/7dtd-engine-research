@@ -53,9 +53,14 @@ new number.
 
 ## Unreleased
 
-**20 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**21 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 records how a
+  township's RWG biome tag finds its `biomes.xml` row: through `biomemapcolor`
+  against the biome colours, so `forest` is `pine_forest` and `burntforest` is
+  `burnt_forest`.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 records that
   a district's `tag` and `prefab_name` default to its own name, so the prefab
