@@ -53,9 +53,17 @@ new number.
 
 ## Unreleased
 
-**24 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**25 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 records the
+  per-tile prefab density budget: the 62 default, `TileMaxDensityScore` filled from
+  `rwgmixer`'s `<streettile maxdensity>` (which the shipped file never states), the
+  integer `DensityScore` formula, the budget gate and the caller's charge, the three
+  retry attempts, what `_distanceScale` really switches, the parts that charge without
+  being gated, and the depth-0 neighbour penalty with its 190-unit radius and 1.3
+  multiplier.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 records the
   placement arithmetic of `StreetTile.SpawnMarkerPartsAndPrefabs`: the `POISpawn`
