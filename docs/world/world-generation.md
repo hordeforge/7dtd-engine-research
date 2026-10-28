@@ -586,9 +586,49 @@ depth cap **20**, a per-group weighted pick over `partChanceToSpawn`, no `yOffse
 the part's position taken as `parent + startPos - HalfWorldSize` (it adds the world
 offset itself). Its rotation mirrors 1 and 3 before adding, which the POI path does not;
 the asymmetry is in the IL. A part whose bounds intersect an earlier part's is refused
-(`StreetTile.partBounds`). The gateway block (`IL_0D31` and on) spawns `PartToSpawn`
-markers named `highway_transition` regardless of marker type, but only when the neighbour
-tile in that direction has an exit to this tile and belongs to the same township.
+(`StreetTile.partBounds`).
+
+The gateway block (`IL_0CEC` to `IL_0FD0`) runs only when the tile's district is
+`gateway`, and it takes every marker whose `PartToSpawn` contains `highway_transition`
+regardless of marker type, tags, group or chance:
+
+```
+dx = marker.startPos.x - size.x / 2 ; dz = marker.startPos.z - size.z / 2   // IL_0D5C-0D97
+dir = |dx| > |dz| ? (dx > 0 ? right : left) : (dz > 0 ? up : down)          // IL_0D99-0E6B
+if not this.HasExitTo(neighbour(dir)): next marker                          // IL_0DD0-0E9C
+if neighbour(dir).Township != this.Township: next marker                    // IL_0DE2-0E8C
+pd = GetPrefabByName(marker.PartToSpawn); if null: next                    // IL_0EA7
+pos = parent + startPos - HalfWorldSize, y = parent.y + startPos.y          // IL_0EBC-0F13
+if pos.y <= 0: next marker                                                  // IL_0F18
+rot = (parentRotations + pd.rotationToFaceNorth + mirror(marker.Rotations)) % 4
+```
+
+`size` there is the **parent prefab's** extent, swapped when the tile is turned
+(`IL_0039-006D`), and the direction comes from the marker's minimum corner rather than
+its centre, so a marker straddling the middle takes the vertical branch. `HasExitTo`
+is this tile's own road exit toward that side (`RoadShape >= 0` and the rotated
+`RoadShapeExits` mask has the bit), never the neighbour's, and the township check is a
+reference comparison. There is no density debit, no part-bounds test, no logging and no
+recursion guard, so the block runs at any depth that reaches it. The position and
+rotation are the parts formula; unlike the POI path, no `yOffset` is added.
+
+Nine of the shipped `RWGTiles` prefabs carry `highway_transition` markers, and every
+one of them is a `PartSpawn` marker in a group named `highwayN`, `highwayE`, `highwayS`
+or `highwayW` with size `18,2,8` or `8,2,18`, starting on the tile edge (coordinate 0
+or 142 of 150) at y 0 to 12: `intersection` (four, chances 0.03/0/0/0), `intersection2`
+(four, 0.09/0/0.03/0), `straight` (two, 0.02/0.04), `straight2` (0.01/1), `straight3`,
+`straight3a`, `straight3b` (0.01/1 each), `straight4` (1/0.01) and `t` (three,
+0.05/0.04/0.03). The prefab they spawn is `Parts/part_highway_transition` (18x2x8,
+`RotationToFaceNorth` 2, `YOffset` -1). Because these markers are also `PartSpawn`, the
+parts loop above can add the same marker once through its chance and the gateway block
+can add it again unconditionally; the IL marks no marker used, so whether the author
+intended both is not recoverable, and the port must pick one. Gateway tiles themselves
+come from `DistrictPlanner.GenerateGatewayDir` (`IL_0055` to `IL_0129`): an out-of-town
+neighbour of a
+township street tile that passes `IsValidForGateway` (no water, biome or radiation
+overlap, no steep slope, no prefabs) when the township has at least two such neighbours
+and exactly one of them already carries a Township; that neighbour joins the township
+and is registered in `Township.Streets` and `Township.Gateways`.
 
 Grade: verified from the IL dump (`il/full-v3.1.0/WorldGenerationEngineFinal/StreetTile.il.txt`,
 `StreetTile___c.il.txt`, `StreetTile___c__DisplayClass135_*`). Not decoded: what

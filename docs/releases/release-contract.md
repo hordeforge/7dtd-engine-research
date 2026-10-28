@@ -53,9 +53,19 @@ new number.
 
 ## Unreleased
 
-**22 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**24 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 records the
+  placement arithmetic of `StreetTile.SpawnMarkerPartsAndPrefabs`: the `POISpawn`
+  filter and its size-descending sort, one child per group, the shuffle seed that uses
+  the parent's height rather than z, the rotation composed from the parent, the prefab's
+  `RotationToFaceNorth` and the marker, the flush-to-edge offsets of a turned marker,
+  the parts block with its mirrored rotations and bounds refusal, and the gateway block
+  that needs this tile's own exit toward a same-township neighbour. It also records the
+  nine shipped gateway tiles that carry `highway_transition` markers and that the parts
+  loop can add the same marker a second time, since the IL marks none used.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 records the five
   road-shape prefabs, the `RoadShapeExits` static array (**5, 7, 15, 4, 6**, read from
