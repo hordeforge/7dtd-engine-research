@@ -533,6 +533,70 @@ heights `cRoadHighwayMaxStepH` = **11** / `cRoadCountryMaxStepH` = **12**.
 `/Prefabs/` locations, skipping `navonly,devonly,testonly,biomeonly` tagged and
 `/test` prefabs, and `ShufflePrefabData(Seed)` fixed a deterministic order.
 
+**Placing a district prefab inside a street tile (`StreetTile.SpawnMarkerPartsAndPrefabs`,
+IL=1410; `spawnStreetTile`, IL=149 in the same dump).** The tile prefab is stamped once at
+its grid position; every building, part and road transition a tile carries is a marker
+inside that prefab, so the placement arithmetic below is what decides where a house,
+a fence run or a highway transition lands. The parent is the tile's **min corner**:
+`spawnStreetTile` passes `(WorldPosition.x, height, WorldPosition.y)` with
+`WorldPosition = GridPosition * 150`, `height = Township.Height + prefab.yOffset`, and
+appends `PrefabWorldOffset = (-HalfWorldSize, 0, -HalfWorldSize)` only when it records
+the tile instance, not when it recurses.
+
+```
+markers = parentPrefab.RotatePOIMarkers(left: true, turns: parentRotations)   // IL_0000-0007
+P = markers of type POISpawn (1)                                             // IL_008E
+if depth >= 5 or P is empty: go to the parts block                           // IL_0096
+P sorted by (size.x + size.y + size.z) descending                            // b__135_3
+groups = distinct GroupName in that order
+rand.SetSeed(Township.ID + parent.x^2 + parent.y^2)                          // height, not z
+for each group (at most one child lands per group):
+    candidate = that group's markers, shuffled by one RandomFloat draw each    // b__135_5
+    for each marker:
+        centre.xz = parent.xz + marker.startPos.xz + marker.size.xz / 2        // IL_01AF-01F0
+        prefab = GetPrefabWithDistrict(district, marker.Tags, minSize, size,
+                                       centre, densityLeft, 1)                 // IL_03AA
+        if none: retry with densityLeft + 8 and 0.3, then 18 and 0             // IL_03E3, IL_0419
+        else next marker
+        px = parent.x + marker.startPos.x                                      // IL_04D8-04EB
+        pz = parent.z + marker.startPos.z                                      // IL_04ED-0500
+        y  = parent.y + marker.startPos.y + prefab.yOffset                     // IL_0502-051C
+        if y < 3: warn "y low!" and next marker                                // IL_051D-0520
+        rot = (parentRotations + prefab.rotationToFaceNorth + marker.Rotations) & 3
+                                                                               // IL_0636-064E
+        (fw, fd) = (prefab.size.x, prefab.size.z), swapped when rot is 1 or 3  // IL_0650-0680
+        marker.Rotations 2: px += size.x/2 - fw/2                              // IL_0682-069A
+                         3: pz += size.z/2 - fd/2; px += size.x - fw           // IL_069C-06C7
+                         0: px += size.x/2 - fw/2; pz += size.z - fd           // IL_06C9-070B
+                         1: pz += size.z/2 - fd/2
+        position = (px, y, pz) + PrefabWorldOffset                             // IL_0717-0741
+        AddPrefab(id, position, rot, prefab)                                   // IL_0743-0866
+        recurse(prefab, (px, y, pz), rot, depth + 1, densityLeft)              // IL_0878
+```
+
+The marker-relative offset for a non-zero `Marker.Rotations` is a **flush-to-edge** rule,
+not a centring: a prefab rotated 0 sits centred across x and flush to the marker's +z
+edge, rotated 1 centred across z and flush to the +x edge, and so on. Divisions are
+integer, so odd sizes truncate. The marker size used in the offsets is the one
+`RotatePOIMarkers` produced when the tile itself is turned, while the prefab footprint is
+the prefab's own, swapped by the final rotation.
+
+The parts block (`IL_08F1` and on) is the same shape with `PartSpawn` markers (type 3),
+depth cap **20**, a per-group weighted pick over `partChanceToSpawn`, no `yOffset`, and
+the part's position taken as `parent + startPos - HalfWorldSize` (it adds the world
+offset itself). Its rotation mirrors 1 and 3 before adding, which the POI path does not;
+the asymmetry is in the IL. A part whose bounds intersect an earlier part's is refused
+(`StreetTile.partBounds`). The gateway block (`IL_0D31` and on) spawns `PartToSpawn`
+markers named `highway_transition` regardless of marker type, but only when the neighbour
+tile in that direction has an exit to this tile and belongs to the same township.
+
+Grade: verified from the IL dump (`il/full-v3.1.0/WorldGenerationEngineFinal/StreetTile.il.txt`,
+`StreetTile___c.il.txt`, `StreetTile___c__DisplayClass135_*`). Not decoded: what
+`GetPrefabWithDistrict`'s distance scale does, whether `marker.startPos.y` is the marker
+floor or its centre, and the intent of the `spawnCustomSizePrefabs` minimum-size table.
+The shuffle seed uses the parent's y (height) rather than z, so every tile in a column
+draws the same permutation; recorded as a quirk, not a feature.
+
 **POI map records:** `PoiMapElement` (colorId, modelName, blockValue,
 blockBelow, yPos, yPosFill, plus `decals` / `blocksOnTop` lists with
 `GetRandomDecal` / `GetRandomBlockOnTop` IL=26 each) is the "pixel color ->
