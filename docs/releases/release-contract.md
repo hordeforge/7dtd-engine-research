@@ -53,9 +53,15 @@ new number.
 
 ## Unreleased
 
-**17 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**18 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 pins the
+  district fill: the name-derived type and spawn order, the candidates whose
+  required township matches and whose weight is above zero, normalised weights and
+  reversed avoid links, the quota per district, the neighbour-first pick, and the
+  roadside all-gateway case.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 pins how the
   planner chooses a biome while placing: the per-biome candidate list, the

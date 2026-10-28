@@ -368,6 +368,35 @@ resets the counters.
 
 Grade: verified from the IL dumps.
 
+**District fill (`DistrictPlanner.GenerateDistricts`, IL=314;
+`FindFreeWithNeighbor`, IL=112; `HasAvoidNeighbor`, IL=38;
+`District.Init`, IL=66).** `District.Init` sets a district's type and spawn
+order from its name suffix: `commercial` type 1 spawn order 1, `downtown` type 2
+spawn order 99, `gateway` type 3, `industrial` type 4, `residential` type 5
+spawn order -1, `rural` type 6, and everything else type 0 spawn order 0 (the
+default weight is 0.5, which the XML overrides).
+
+The candidates are the districts whose `required_township` tag set matches the
+township's name, lower-cased, and whose `spawn_weight` is above zero; `gateway`,
+`rural` and `forest_rural` state 0, so they never fill a town. The weights are
+normalized to the candidate total, and every avoid list gets its reverse: when
+A avoids B and both are candidates, A is appended to B's list as well. The
+candidates are ordered by spawn order descending, equal orders in file order.
+
+The town's free tiles are sorted by distance to a centre: the tile nearest the
+integer mean of the town's grid positions, its world centre shifted 5 units on
+x. Each candidate in turn takes `round(free tiles * weight)` tiles, and the last
+one takes everything that remains. For each free tile the planner first looks
+for a free tile that already neighbours the district (`FindFreeWithNeighbor`:
+the district's own tiles, 4-way first then diagonals, a neighbour that is free,
+in the town and without an avoided neighbour of the district) and otherwise
+takes the tile itself, unless it has an avoided neighbour. `HasAvoidNeighbor`
+is a district name match against the tile's four neighbours. Tiles left without
+a district are removed from the township. A roadside township skips the fill:
+every tile becomes `gateway`.
+
+Grade: verified from the IL dumps.
+
 **Street-tile validity (`StreetTile.UpdateValidity`, IL=139;
 `IsValidForStreetTile`, IL=24).** The grid is `StreetTileMapWidth = WorldSize /
 150`, so a tile is 150 blocks a side and its centre is `position + 75`. Nine
