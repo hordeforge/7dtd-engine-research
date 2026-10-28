@@ -53,9 +53,16 @@ new number.
 
 ## Unreleased
 
-**27 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**29 commits after `v3.3.0` (2026-10-25) as of 2026-10-29.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/blocks.md`](../world/blocks.md) §1 records a block's `Model`
+  reference: the two shipped forms (`#Bundle?objectPath`, `@:path`), inheritance
+  through `Extends`, `ModelOffset`, `MultiBlockDim`, the 6,529-block /
+  2,420-reference count, the prefab-to-mesh graph, and the address resolution by
+  family segment (`@:Other/Items/...` is `automatic_assets_other/items.bundle`)
+  with the sole catalog at `7DaysToDie_Data/StreamingAssets/aa/catalog.json`.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.5 records
   `SpawnMarkerPartsAndPrefabsWilderness` (IL=537): the position-string RNG seed,
