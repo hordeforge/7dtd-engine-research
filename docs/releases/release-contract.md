@@ -53,9 +53,17 @@ new number.
 
 ## Unreleased
 
-**25 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**26 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.5 records
+  wilderness POI placement in full: the per-biome counts and their `rwgmixer`
+  values, the candidate tile tests, the farthest-from-township low-biased tile
+  pick with 20 attempts, the per-tile rotation and 20-block inset, the footprint
+  tests (water, biome, 11-block height spread), the median placed height, the
+  `RoadExit` path anchor, the wilderness pick's tags and retry, and the
+  correction that the low-biased draw is the tile index, not a prefab size.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 records the
   per-tile prefab density budget: the 62 default, `TileMaxDensityScore` filled from
