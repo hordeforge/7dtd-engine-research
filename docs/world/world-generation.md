@@ -347,6 +347,27 @@ passes one. Those tiles become the township's outskirt district.
 
 Grade: verified from the IL dumps.
 
+**Biome choice while placing (`nextBiomeType`, IL=36;
+`getBiomeWithMostAvailableSpace`, IL=46; `getStreetTilesForBiome`, IL=40).**
+`getStreetTilesForBiome` gathers the tiles of one biome that are valid,
+unclaimed and not used by a wilderness POI, and `Plan` builds that list for all
+five biome indices once, before the first township. `getBiomeWithMostAvailableSpace`
+then picks the biome with the most such tiles (strictly more, so a tie keeps the
+lowest index) and returns 255 when none has any. `nextBiomeType` advances the
+current index through the five in `(current + 1) % 5` order, up to four steps,
+and returns the first biome the township's `biomes` list allows; an empty list
+allows all of them, and a township that allows none yields 255.
+
+A placement attempt first looks for a non-empty candidate list that clears the
+margin and `IsTooClose`, trying up to five biome switches. A successful
+placement advances the biome once; a failed one advances the biome while the
+80 biome tries last, then, once those are spent and the township allows 4 or
+more tiles, switches to the small retry (target 1..4, distance 1, lenient
+outskirt growth) for 30 more tries, and finally counts the spawn as spent and
+resets the counters.
+
+Grade: verified from the IL dumps.
+
 **Street-tile validity (`StreetTile.UpdateValidity`, IL=139;
 `IsValidForStreetTile`, IL=24).** The grid is `StreetTileMapWidth = WorldSize /
 150`, so a tile is 150 blocks a side and its centre is `position + 75`. Nine
