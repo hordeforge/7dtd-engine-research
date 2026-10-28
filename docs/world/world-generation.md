@@ -302,8 +302,16 @@ truncates to an int, and its fractional part is the chance of one more
 ctor), so a township plans the **second** value of its `count`: `"2, 4, 6"` is
 four townships, and `"2.3, 4.4, 6"` is four with a 40 percent chance of five.
 
+A township's `biomes` list holds the RWG `BiomeType` names (`forest`,
+`burntforest`, `desert`, `snow`, `wasteland`), which are not `biomes.xml`'s row
+names. The two line up through `biomemapcolor` and the biome colours stock
+writes into `biomes.png`: forest `#004000` is `pine_forest`, burntforest
+`#ba00ff` is `burnt_forest`, and desert `#FFE477`, snow `#FFFFFF` and wasteland
+`#ffa800` carry their own names.
+
 Grade: verified from the IL dumps (`TownPlanner.il.txt`, `WorldBuilder.il.txt`,
-`TownshipData.il.txt`, and the `GenerationSelections` / `eCategory` enum dumps).
+`TownshipData.il.txt`, and the `GenerationSelections` / `eCategory` enum dumps),
+and from `biomes.xml`'s `biomemapcolor` against the colours recorded below.
 
 **Start tiles, layout, growth (`Plan`, IL=817; `GetStreetLayout`, IL=262;
 `Grow`, IL=139; `IsTooClose`, IL=87).** The township kinds are visited by their
