@@ -53,9 +53,16 @@ new number.
 
 ## Unreleased
 
-**13 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**15 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 pins the
+  town planner's inputs and placement: how a township's `count`, `tiles` and
+  `distance` are read (`Towns` is `Default`, tiles default to 1, 1, distance to
+  5), the square `IsTooClose` box with its fixed 5 tiles between roadside
+  towns, and how `GetStreetLayout` seeds and grows a tile layout while `Grow`
+  thins the outskirt ring.
 
 - The tag history row for `v3.3.0`, the corpus pin in this file's header, and
   the reset of this section land after the cut, so the release notes stay the
