@@ -175,6 +175,15 @@ property:
 | `#Bundle?path` | `#Entities/Trees?StudioGimbal/Hollywood_Juniper_15m/Hollywood_Juniper15mGimbalPrefab.prefab` | a Unity container name plus the object path inside it; this one resolves to `Data/Bundles/Standalone/Entities/trees` |
 | `@:path` | `@:Shapes/water_full.fbx`, `@:Entities/Minerals/resourceRock02Prefab.prefab` | an Addressables address, relative to the catalog root |
 
+An `@:Family/...` address resolves by its family segment, which names the container:
+`@:Entities/Minerals/...` is `Data/Addressables/Standalone/automatic_assets_entities/minerals.bundle`
+and `@:Other/Items/...` is `automatic_assets_other/items.bundle`, so the root differs
+per address group and the family, not the root, is the reliable part. There is no
+readable address-to-bundle catalog under `Data`: the file lives at
+`<install>/7DaysToDie_Data/StreamingAssets/aa/catalog.json`, whose key and bucket
+tables are base64 rather than plain entries, so a resolver confirms an address by
+finding its object in the guessed container instead of trusting the mapping.
+
 Measured over the shipped `blocks.xml`: **6,529 of 6,643 block records name a `Model`,
 2,420 of them distinct**; the remainder draw from `Texture` ids. The inheritance is
 load-bearing, since `treeMaster` itself names the large mountain pine's model and a
@@ -1053,6 +1062,10 @@ not (the parent/child split of the vertical sign).
 
 ## Changelog
 
+- **2026-10-29:** Addressable `Model` addresses resolve by family, not by root:
+  `@:Entities/Minerals/...` is `automatic_assets_entities/minerals.bundle` and
+  `@:Other/Items/...` is `automatic_assets_other/items.bundle`; the only catalog is
+  `7DaysToDie_Data/StreamingAssets/aa/catalog.json` with base64 key and bucket tables.
 - **2026-10-29:** Block `Model` references documented: the two shipped forms
   (`#Bundle?path` and `@:path`), inheritance through `Extends`, `ModelOffset`,
   `MultiBlockDim` (`1,4,1` on the juniper, `1,12,1` on `treeMountainPine12m`), the
