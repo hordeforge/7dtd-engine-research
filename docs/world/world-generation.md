@@ -630,12 +630,44 @@ overlap, no steep slope, no prefabs) when the township has at least two such nei
 and exactly one of them already carries a Township; that neighbour joins the township
 and is registered in `Township.Streets` and `Township.Gateways`.
 
+**Tile density budget.** A street tile's prefab picks share one budget, and the budget
+is per tile, not per township. `spawnStreetTile` starts at **62** (`IL_0115`) and reads
+`PrefabManagerStatic.TileMaxDensityScore`, a `Dictionary<string,float>` keyed by the
+resolved street-tile prefab's name (for example `rwg_tile_straight`,
+`rwg_tile_gateway_straight3`), overriding the default when the name is present
+(`IL_011C-0132`, passed at `IL_0182`). The dictionary is filled from `rwgmixer.xml`:
+`WorldGenerationFromXml`'s loader takes each `<streettile>`'s `name` and its
+`<property name="maxdensity">` and stores it only when the property is present
+(`IL_0185-0296`), and the shipped file states none, so 62 is what always runs.
+
+`PrefabData.DensityScore` is a float holding an integer: `(TotalVertices + 50000) /
+100000` with integer division (`PrefabData.Init`, `IL_0144-015B`), zero for a prefab
+with no `Stats` class, which then passes every budget gate.
+`GetPrefabWithDistrict` tests it first in the scan, `DensityScore > densityPointsLeft`
+(`IL_004B-0054`), and charges nothing itself. The caller charges:
+`totalDensityLeft -= picked.DensityScore` after the pick succeeds and after the `y < 3`
+rejection (`IL_0553-055D`), so a failed pick and the two retries cost nothing. The three
+attempts are `(totalDensityLeft, 1.0)`, `(totalDensityLeft + 8, 0.3)` and `(18, 0)`
+(`IL_03A3`, `IL_03D6-03DE`, `IL_040F-0414`), and `_distanceScale` only switches the
+duplicate-name gate on and scales its distance (`IL_010B-012A`; `DuplicateRepeatDistance`
+defaults to 1000, `PrefabData..ctor` `IL_000C-0011`), so 0.3 checks 300 units and 0
+skips the check. Parts resolve by name and are not admitted against the budget but are
+still charged after they are added (`IL_0C7C-0C86`); the gateway block charges nothing.
+Before each depth-0 marker's pick the budget is reduced by the township's neighbours:
+every already-placed prefab within **190** units of the marker's centre whose
+`DensityScore` is above 6 costs `score * 1.3` when the score is 20 or more and
+`score - 6` otherwise, and the result is floored at 6 (`IL_0305-0383`). Recursion passes
+the already-charged value by value, so a nested prefab's spend does not return to its
+parent.
+
 Grade: verified from the IL dump (`il/full-v3.1.0/WorldGenerationEngineFinal/StreetTile.il.txt`,
-`StreetTile___c.il.txt`, `StreetTile___c__DisplayClass135_*`). Not decoded: what
-`GetPrefabWithDistrict`'s distance scale does, whether `marker.startPos.y` is the marker
-floor or its centre, and the intent of the `spawnCustomSizePrefabs` minimum-size table.
-The shuffle seed uses the parent's y (height) rather than z, so every tile in a column
-draws the same permutation; recorded as a quirk, not a feature.
+`PrefabManager.il.txt`, `PrefabManagerStatic.il.txt`, `PrefabData.il.txt`); the constants
+and offsets were re-checked against the V3.2.0 b10 assembly with `monodis`, since the
+local dump set for this family is V3.1.0. Not decoded: whether
+`marker.startPos.y` is the marker floor or its centre, and the intent of the
+`spawnCustomSizePrefabs` minimum-size table. The shuffle seed uses the parent's y
+(height) rather than z, so every tile in a column draws the same permutation; recorded
+as a quirk, not a feature.
 
 **POI map records:** `PoiMapElement` (colorId, modelName, blockValue,
 blockBelow, yPos, yPosFill, plus `decals` / `blocksOnTop` lists with
