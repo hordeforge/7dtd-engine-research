@@ -397,6 +397,43 @@ every tile becomes `gateway`.
 
 Grade: verified from the IL dumps.
 
+**The prefab pick (`PrefabManager.GetPrefabWithDistrict`, IL=129;
+`getScoreForPrefab`, IL=159; `isSizeValid`, IL=69; `isThemeValid`, IL=73;
+`isNameValid`, IL=62; `PrefabData.Init`, IL=121).** The manager holds one
+`PrefabData` per prefab: its `PrefabSize` footprint, `Tags` and `ThemeTags`
+(spaces stripped), `ThemeRepeatDistance` and `DuplicateRepeatDistance`,
+`DifficultyTier`, and a `DensityScore` of `(TotalVertices + 50000) / 100000`
+from the prefab's `Stats` class. `LoadPrefabs` skips the `/test` folder and any
+prefab tagged `navonly`, `devonly`, `testonly` or `biomeonly`, and it also skips
+a prefab whose `Tags` are empty. The static tag sets are `streettile,part`
+(parts and tiles), `wilderness`, `trader` and `has`.
+
+`GetPrefabWithDistrict` walks the list and keeps the highest-scoring prefab that
+passes every gate: its `DensityScore` must not exceed the tile's remaining
+density points; it must not be a part or a street tile; when the district states
+a tag the prefab must carry **all** of it; when the tile carries marker tags the
+prefab must share one, and otherwise it must not be tagged `has`; the footprint
+must fit the tile in either orientation (`isSizeValid` accepts a rotated fit);
+the theme spacing must hold; and, when the caller passes a distance scale, the
+duplicate spacing must hold. `isThemeValid` skips a prefab with no theme tags and
+otherwise refuses one whose theme tags intersect an already placed prefab's
+within `ThemeRepeatDistance` (a trader-tagged prefab's distance is divided by
+`WorldSizeDistDiv`). `isNameValid` refuses a repeat of the same prefab name
+within `DuplicateRepeatDistance * distanceScale`. Both distance checks shift the
+probe position by half the world size in the IL before comparing it with the
+placed instances' centres.
+
+The score is `((1 + bias + min-shortfall) + difficultyTier / 5) / (used + 1) *
+weight`, where `bias`, `weight`, `min_count` and `max_count` come from the
+`<prefab_spawn_adjust>` record whose `partial_name` the prefab's name contains
+(case-insensitively), with defaults weight 1, bias 0, `min_count` 1 and
+`max_count` `int.MaxValue`. A record whose `biomeTags` do not include the tile's
+biome bars the prefab from that biome outright. The shortfall is
+`min_count - used` while `used` is below it, and `weight` drops to zero once
+`used` reaches `max_count`.
+
+Grade: verified from the IL dumps.
+
 **Street-tile validity (`StreetTile.UpdateValidity`, IL=139;
 `IsValidForStreetTile`, IL=24).** The grid is `StreetTileMapWidth = WorldSize /
 150`, so a tile is 150 blocks a side and its centre is `position + 75`. Nine
