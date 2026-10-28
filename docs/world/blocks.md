@@ -152,6 +152,51 @@ same concatenation through `ContainsAlternateBlock`;
 `GetShapeCategories(altBlocks, target)` (IL=47) unions the alt blocks'
 `ShapeCategories` lists (deduped) and sorts the result.
 
+### A block's `Model` reference and its volume
+
+The model classes (`BlockModel`, `BlockModelTree`, `BlockModelEntity` and their
+descendants) draw from a Unity asset rather than from the atlas, and `blocks.xml`
+names it in `Model`:
+
+```xml
+<block name="treeJuniper4m">
+	<property name="Extends" value="treeMaster" />
+	<property name="Model" value="#Entities/Trees?StudioGimbal/Hollywood_Juniper_15m/Hollywood_Juniper15mGimbalPrefab.prefab" />
+	<property name="ModelOffset" value="0,-0.3,0" />
+	<property name="MultiBlockDim" value="1,4,1" />
+</block>
+```
+
+Two reference forms ship, and `Model` is inherited through `Extends` like every other
+property:
+
+| Form | Example | Meaning |
+|---|---|---|
+| `#Bundle?path` | `#Entities/Trees?StudioGimbal/Hollywood_Juniper_15m/Hollywood_Juniper15mGimbalPrefab.prefab` | a Unity container name plus the object path inside it; this one resolves to `Data/Bundles/Standalone/Entities/trees` |
+| `@:path` | `@:Shapes/water_full.fbx`, `@:Entities/Minerals/resourceRock02Prefab.prefab` | an Addressables address, relative to the catalog root |
+
+Measured over the shipped `blocks.xml`: **6,529 of 6,643 block records name a `Model`,
+2,420 of them distinct**; the remainder draw from `Texture` ids. The inheritance is
+load-bearing, since `treeMaster` itself names the large mountain pine's model and a
+child that states no `Model` keeps it.
+
+`ModelOffset` is the model's local offset in blocks (`0,-0.3,0` on the juniper), and
+`MultiBlockDim` is the volume stock fills with the block: `1,4,1` on the juniper,
+`1,12,1` on `treeMountainPine12m`, `1,20,1` on `treeOakMed01`. That multi-block fill is
+how a tree is taller than the cell that holds the block.
+
+The reference names a Unity prefab, not a mesh. In the trees container the prefab graph
+is `GameObject -> Transform + LODGroup -> MeshRenderer -> MeshFilter -> Mesh`; each LOD
+points at its own mesh (`Hollywood_Juniper_15m_LOD0` through `LOD3`), and the renderer
+and filter objects carry no name, so a resolver has to walk the graph from the named
+prefab. Evidence: `unityz show <bundle> 568569099654338598` on the GameObject
+`Hollywood_Juniper15mGimbalPrefab`, then on the three path ids in its `m_Component`
+list (a Transform with children, a LODGroup whose `m_LODs[].renderers` name
+MeshRenderers, and a MonoBehaviour).
+
+Grade: the property names, the two forms and the counts are read from shipped data;
+the graph shape is verified on the `Entities/trees` container only.
+
 Block ids are partitioned into fixed bands (static literals on `Block`):
 
 | Band | Id range | Constant(s) |
@@ -1008,6 +1053,12 @@ not (the parent/child split of the vertical sign).
 
 ## Changelog
 
+- **2026-10-29:** Block `Model` references documented: the two shipped forms
+  (`#Bundle?path` and `@:path`), inheritance through `Extends`, `ModelOffset`,
+  `MultiBlockDim` (`1,4,1` on the juniper, `1,12,1` on `treeMountainPine12m`), the
+  6,529-block / 2,420-reference count, and the prefab-to-mesh graph
+  (`GameObject -> LODGroup -> MeshRenderer -> MeshFilter -> Mesh`) probed in the
+  `Entities/trees` container with `unityz show`.
 - **2026-08-11:** Placement IL re-verified: Plate/Spotlight/TowardsPlacer90/TowardsPlacerInverted.OnPlaceBlock IL=91, PineLeaves IL=26, Torch IL=53, DrawBridge.LimitRotation IL=35, SleepingBag rotationToAddVector IL=25, CanPlaceBlockAt IL=80, PlaceBlock IL=52, GetOwningPlayer IL=43, OnBlockActivated IL=16, TakeItemWithTimerDone IL=106 (exact).
 - **2026-08-11:** Tick/behavior IL re-verified: BlockPlantGrowing.UpdateTick IL=239 / addScheduledTick IL=63, TorchHeatMap.UpdateTick IL=35, OnEntityWalking IL=1 (JumpPad IL=5, Mine IL=113), Cactus.GetCollisionAABB IL=60, Hay IL=34 / OnEntityCollidedWithBlock IL=10, Ladder.IsElevator IL=2/6, Stairs.IsMovementBlocked IL=7, Deadgrass.Init IL=6 / OnBlockPlaceBefore IL=8, TrunkTip.RotateVerticesOnCollisionCheck IL=2, SiblingRemove.Init IL=20 / OnBlockRemoved IL=177, Music OnBlockAdded/OnBlockRemoved IL=1, Ranged.Init IL=16, Forge checkParticles IL=15 / MaterialUpdate IL=64 / GetActivationText IL=29, Sign.Init IL=27 / OnBlockAdded IL=50 (exact).
 - **2026-08-11:** Damage IL re-verified: OnBlockDamaged IL=497, OnBlockDestroyedByExplosion IL=15 (Mine IL=14, ModelTree IL=10, TNT IL=22, TrapDoor IL=23, Composite IL=54), explode IL=18, TNT.OnBlockDamaged IL=31, Mine.TriggerMine IL=99 / UpdateTick IL=8 / IsMovementBlocked IL=2 / OnBlockDamaged IL=44, BlockDamage.OnEntityCollidedWithBlock IL=126 (Spikes IL=38, Barbed IL=51) (exact).
