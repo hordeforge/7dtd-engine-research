@@ -353,7 +353,20 @@ claimed township, then thins it to `OutskirtDistrictPercent` by walking it
 backwards and removing one tile each time an accumulator of `1 - percent`
 passes one. Those tiles become the township's outskirt district.
 
-Grade: verified from the IL dumps.
+**Road shapes (`StreetTileShared` ctor, `StreetTile.GetStamp`).** A street tile
+stamps one of five road-shape prefabs. The shape names, in the order the
+`RoadShapeExits` blob indexes, are `straight`, `t`, `intersection`, `cap` and
+`corner`; the district form is `rwg_tile_{district}{shape}` and the plain form
+`rwg_tile_{shape}`. The static `RoadShapeExits` array is **5, 7, 15, 4, 6**
+(read from the `<PrivateImplementationDetails>` blob the ctor's
+`InitializeArray` names, field `DD7CB0B7...` at RVA 5660249), and the exit
+counts the ctor builds beside it are **2, 3, 4, 1, 2**, which are the popcounts
+of those masks. With the tile's four directions numbered as `dir4way` lists
+them (up = 1, right = 2, down = 4, left = 8) the masks read as straight
+north/south, t north/east/south, intersection all four, cap south and corner
+east/south; the other orientations are quarter turns of these.
+
+Grade: verified from the IL dump and the assembly's static array.
 
 **Biome choice while placing (`nextBiomeType`, IL=36;
 `getBiomeWithMostAvailableSpace`, IL=46; `getStreetTilesForBiome`, IL=40).**

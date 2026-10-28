@@ -53,9 +53,14 @@ new number.
 
 ## Unreleased
 
-**21 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**22 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 records the five
+  road-shape prefabs, the `RoadShapeExits` static array (**5, 7, 15, 4, 6**, read from
+  the assembly's `<PrivateImplementationDetails>` blob) and the direction order that
+  makes each mask a shape.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 records how a
   township's RWG biome tag finds its `biomes.xml` row: through `biomemapcolor`
