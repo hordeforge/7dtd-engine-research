@@ -305,6 +305,48 @@ four townships, and `"2.3, 4.4, 6"` is four with a 40 percent chance of five.
 Grade: verified from the IL dumps (`TownPlanner.il.txt`, `WorldBuilder.il.txt`,
 `TownshipData.il.txt`, and the `GenerationSelections` / `eCategory` enum dumps).
 
+**Start tiles, layout, growth (`Plan`, IL=817; `GetStreetLayout`, IL=262;
+`Grow`, IL=139; `IsTooClose`, IL=87).** The township kinds are visited by their
+spawn info's `max` descending (`<Plan>b__0` compares `max`), and the loop seeds
+its `GameRandom` with `worldSeed + 1982 + kindIndex` before placing a kind.
+Candidate start tiles have both coordinates strictly inside a margin of the
+grid: `StreetTileMapWidth / 10`, or `/ 8` for a roadside township. The first
+test pass uses the spawn info's `distance` (`3` for roadside), later passes
+use `1`.
+
+`IsTooClose(position, isRoadsideTownship, distance)` is true when any existing
+township has a tile inside a square box: both `|dx| < distance` and
+`|dy| < distance`. When both townships are roadside the box is fixed at **5**
+and tested first, so two roadside towns keep five tiles between them whatever
+their `distance` says.
+
+The tile target is `RandomRange(min, max + 1)`, so `[min, max]`; a `max` of 10
+or more lifts the floor to `(min + max) / 2`, and a small retry (only when
+`min >= 4`) drops the range to `1..4`. Each candidate gets 12 layouts; the
+first one that reaches the target wins, and a township that states an outskirt
+also has to survive `Grow`. A failed candidate moves to the next one on a
+rotating start index; a full pass lowers the target by one until it reaches the
+floor. A township gets 80 biome switches and 30 small retries before its spawn
+count is spent.
+
+`GetStreetLayout` rejects a start tile that is out of the two-tile border,
+invalid, already claimed, has a claimed 8-way neighbour, or whose area overlaps
+an existing township's `BufferArea`. `Township.Area` is the world-space
+bounding box of the township's street tiles and `BufferArea` grows it by **150**
+units on every side, so a new town keeps one street tile clear of an old one.
+A target of 1 is the single tile; 2 to 16 seed the layout with the start tile;
+a larger target first fills a square of side `(int)sqrt(target)` around the
+start tile (corners included), then grows from that square's ring by picking a
+random frontier tile and trying the four directions in a rotated order until
+the target is reached. Any invalid tile in the seed square discards the layout.
+
+`Grow` collects the ring of free, valid tiles around the layout that touch no
+claimed township, then thins it to `OutskirtDistrictPercent` by walking it
+backwards and removing one tile each time an accumulator of `1 - percent`
+passes one. Those tiles become the township's outskirt district.
+
+Grade: verified from the IL dumps.
+
 ### 3.4 Terrain features and stamp rasterization (`GenerateTerrainLast`)
 
 `generateTerrainFeature(name, selection, isWater)` runs for `lake` and `river`
