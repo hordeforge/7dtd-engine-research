@@ -53,9 +53,18 @@ new number.
 
 ## Unreleased
 
-**26 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
+**27 commits after `v3.3.0` (2026-10-25) as of 2026-10-28.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.5 records
+  `SpawnMarkerPartsAndPrefabsWilderness` (IL=537): the position-string RNG seed,
+  the rotated marker list, the `POISpawn` placement alignment and `YOffset`, the
+  `PartSpawn` grouping with normalised cumulative chances and one part per group,
+  the mirrored rotation and the missing `YOffset`, the absence of any depth,
+  bounds or overlap test, and the two corrections it brings: a wilderness
+  `POISpawn` does not simply sit at the parent plus the marker start, and the
+  parts block is not a flat roll.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.5 records
   wilderness POI placement in full: the per-biome counts and their `rwgmixer`
