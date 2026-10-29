@@ -198,7 +198,20 @@ The reference names a Unity prefab, not a mesh. In the trees container the prefa
 is `GameObject -> Transform + LODGroup -> MeshRenderer -> MeshFilter -> Mesh`; each LOD
 points at its own mesh (`Hollywood_Juniper_15m_LOD0` through `LOD3`), and the renderer
 and filter objects carry no name, so a resolver has to walk the graph from the named
-prefab. Evidence: `unityz show <bundle> 568569099654338598` on the GameObject
+prefab.
+
+A model's texture travels the same way, one hop further: the renderer's
+`m_Materials[0]` names a `Material` (class 21) whose
+`m_SavedProperties.m_TexEnvs["_MainTex"].m_Texture` names the `Texture2D`. The material
+is per model and the texture per atlas, so several models share one image:
+`Hollywood_Juniper_15m` binds `Hollywood_Juniper_Atlas`, a 2048x2048 atlas that is
+also the `_ExtraTex` of its siblings. The renderer's own material is not one of the
+`M_*` assets in the container's material list by name alone (`Hollywood_Juniper_Atlas`
+exists both as a material with every slot unbound and as the shared texture), so a
+resolver has to follow the renderer's PPtr rather than guess from names. Evidence:
+`unityz show` on `Hollywood_Juniper_15m_LOD0`'s MeshRenderer, then on its
+`m_Materials[0]` (path id 7866078565253265000) and on that material's `_MainTex`
+texture. Evidence: `unityz show <bundle> 568569099654338598` on the GameObject
 `Hollywood_Juniper15mGimbalPrefab`, then on the three path ids in its `m_Component`
 list (a Transform with children, a LODGroup whose `m_LODs[].renderers` name
 MeshRenderers, and a MonoBehaviour).
