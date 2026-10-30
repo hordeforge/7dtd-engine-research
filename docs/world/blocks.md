@@ -194,6 +194,53 @@ child that states no `Model` keeps it.
 `1,12,1` on `treeMountainPine12m`, `1,20,1` on `treeOakMed01`. That multi-block fill is
 how a tree is taller than the cell that holds the block.
 
+#### Where a model block's prefab is placed
+
+`Chunk::OnDisplayBlockEntities` is what spawns the prefab for a model block, and the
+arithmetic is three steps. `BlockShapeModelEntity::Init` defaults its `modelOffset` to
+`(0, 0.5, 0)` and lets the block's `ModelOffset` property override it.
+`BlockShapeModelEntity::GetRotatedOffset(block, rot)` then builds
+
+```text
+base   = (0, -0.5, 0)      base.x = -0.5 when MultiBlockDim.x is even
+                           base.z = -0.5 when MultiBlockDim.z is even
+offset = rot * modelOffset + rot * base
+offset.y += 0.5
+```
+
+and the chunk adds the block's own half-cell shift and the decoration lift:
+
+```text
+offset.x += 0.5
+offset.z += 0.5
+offset.y += GetDecorationOffsetY(pos)      // 0 unless a terrain decoration on terrain
+transform.localPosition = pos + offset - chunkOrigin
+transform.localRotation = rot
+transform.localScale    = 1
+```
+
+So the prefab root lands at the block's **centre**. With the default `ModelOffset` on a
+1x1x1 block the offset reduces to exactly `(0.5, 0.5, 0.5)`; the juniper's `0,-0.3,0`
+gives `(0.5, 0.2, 0.5)`, which is why its base sits a fifth of a block above the cell's
+floor. `rot` is `BlockShapeModelEntity.GetRotation`, the same 24+4 quaternion vocabulary
+as `BlockShapeNew`, and the `+0.5` in Y is applied after the rotations, in world axes.
+
+The prefab's own child nodes then carry their authoring transforms, which the placement
+above does not touch: `tire02Prefab`'s `LOD0` node is a quarter turn about X and half a
+block down, which is what lays the wheel flat on the ground once the root is at the cell
+centre.
+
+Evidence: `BlockShapeModelEntity::Init` IL=157 (`IL_00EA`..`IL_0115` the default and the
+`ModelOffset` parse), `BlockShapeModelEntity::GetRotatedOffset` IL=50,
+`BlockShapeModelEntity::GetOffsetForMultiblock` IL=36, and
+`Chunk::OnDisplayBlockEntities` IL=616 (`IL_018B`..`IL_01AA` the half-cell adds,
+`IL_01B8`..`IL_0239` the transform write). The tyre node is read from
+`Data/Addressables/Standalone/automatic_assets_entities/outdoordecor.bundle` with
+`unityz`.
+
+Grade: read from IL and shipped assets; the offsets are arithmetic on them, not a
+rendered measurement.
+
 The reference names a Unity prefab, not a mesh. In the trees container the prefab graph
 is `GameObject -> Transform + LODGroup -> MeshRenderer -> MeshFilter -> Mesh`; each LOD
 points at its own mesh (`Hollywood_Juniper_15m_LOD0` through `LOD3`), and the renderer
