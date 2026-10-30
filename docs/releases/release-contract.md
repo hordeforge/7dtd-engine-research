@@ -59,9 +59,17 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**38 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**40 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 records where
+  traders come from: the five shipped `trader_*` prefabs are `gateway`-tagged, one
+  street tile (`rwg_tile_gateway_straight4`) carries a 60x60 `POISpawn` marker tagged
+  `gateway`, and each trader's `prefab_spawn_adjust` names its biome with `bias="20"`,
+  `min_count="2"` and `max_count="4"`. `TownshipData.SpawnTrader` is parsed and never
+  read, and `createTraderSpawnIfAble` places player spawns, so the marker is the whole
+  path.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.6 records how the
   builder picks the twelve player spawns: street tiles with no township, no radiation, no
