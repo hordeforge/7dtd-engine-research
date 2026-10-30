@@ -712,13 +712,82 @@ or 142 of 150) at y 0 to 12: `intersection` (four, chances 0.03/0/0/0), `interse
 `RotationToFaceNorth` 2, `YOffset` -1). Because these markers are also `PartSpawn`, the
 parts loop above can add the same marker once through its chance and the gateway block
 can add it again unconditionally; the IL marks no marker used, so whether the author
-intended both is not recoverable, and the port must pick one. Gateway tiles themselves
-come from `DistrictPlanner.GenerateGatewayDir` (`IL_0055` to `IL_0129`): an out-of-town
-neighbour of a
-township street tile that passes `IsValidForGateway` (no water, biome or radiation
-overlap, no steep slope, no prefabs) when the township has at least two such neighbours
-and exactly one of them already carries a Township; that neighbour joins the township
-and is registered in `Township.Streets` and `Township.Gateways`.
+intended both is not recoverable, and the port must pick one.
+
+**Gateway tiles (`DistrictPlanner.PlanTownship`, `GenerateGateway`, `GenerateGatewayDir`).**
+A township's gateways are tiles added after its districts are filled, not a district the
+fill could pick: `District/Type` is `None` 0, `Commercial` 1, `Downtown` 2, `Gateway` 3,
+`Industrial` 4, `Residential` 5, `Rural` 6, and `GenerateGatewayDir` writes the `gateway`
+district onto the tile it accepts.
+
+`PlanTownship` (`IL_0000`..`IL_005E`) branches on the category:
+
+```text
+if IsRoadside():                       // TownshipData.Category == 1
+    if Data.SpawnGateway: GenerateGateway(township)
+    return
+GenerateDistricts(township)
+if not Data.SpawnGateway: return
+passes = IsBig() ? 2 : 1
+for pass in 0..<passes:
+    for dir in 0..3:                   // dir4way order: +y, +x, -y, -x
+        GenerateGatewayDir(township, dir)
+```
+
+`IsBig()` is exactly `TownshipData.Name == "citybig"` (`IL_0000`..`IL_0015`), so one
+kind in the shipped file gets a second pass. `GenerateGateway(township)` is the roadside
+form (`IL_0000`..`IL_0063`): every one of its streets gets the `gateway` district and is
+appended to `Township.Gateways` and `SetTownship`ed, which is why a roadside township's
+tile is all gateway.
+
+`GenerateGatewayDir(township, baseDir)` (`IL_0000`..`IL_0147`) adds **at most one** tile
+per call and stops at the first acceptance:
+
+```text
+for street in township.Streets.Values:                    // insertion order
+    if street.District != null and street.District.type == Gateway: continue
+    tile = street.GetNeighbor(baseDir)
+    if township.Streets has tile.GridPosition: continue
+    if not tile.IsValidForGateway: continue
+    withTownship = 0 ; valid = 0 ; mask = 0
+    for dir in 0..3:
+        n = tile.GetNeighbor(dir)
+        if n == null or not n.IsValidForGateway: continue
+        mask |= 1 << (dir & 31) ; valid += 1
+        if n.Township != null:
+            withTownship += 1
+            if withTownship > 1: break out of the loop   // early exit
+    if withTownship != 1: continue
+    if valid < 2: continue
+    tile.SetTownship(township)
+    tile.District = Districts["gateway"]
+    tile.Used = true
+    tile.SetPathingConstraintsForTile(true)
+    foreach n in tile.GetNeighbors(): n.SetPathingConstraintsForTile(false)
+    township.Streets.Add(tile.GridPosition, tile)
+    township.Gateways.Add(tile)
+    break                                                  // one per call
+```
+
+Two counts decide acceptance, and both are about the *candidate's* four neighbours (not
+the township's): exactly one of them must already carry a Township, and at least two must
+pass `IsValidForGateway`. `IsValidForGateway` (`StreetTile.get_IsValidForGateway`,
+`IL_0000`..`IL_003B`) is `IsValidForStreetTile` plus `!HasPrefabs`: no water, no biome
+overlap, no radiation overlap, no steep slope, `TerrainType != 2` (mountain), and no
+street-tile prefabs. `HasPrefabs` is `StreetTilePrefabDatas` being non-empty, which the
+prefab spawn pass fills later, so during planning it is false. The street skip is on
+`District.type == Gateway`, so a pass never starts from a tile an earlier pass made a
+gateway. The candidate test does not exclude tiles another township claims: the
+`withTownship == 1` count is what keeps a gateway off a second township in practice.
+There is no `GenerateGatewayDir` side effect on the candidate's own neighbours' tiles:
+only the pathing constraints are cleared.
+
+Grade: read from IL (`PlanTownship` `IL_0000`..`IL_005E`, `GenerateGateway`
+`IL_0000`..`IL_0063`, `GenerateGatewayDir` `IL_0000`..`IL_0147`, `Township.IsBig`
+`IL_0000`..`IL_0015`, `StreetTile.get_IsValidForGateway` `IL_0000`..`IL_003B`, the
+`dir4way` array in `StreetTileShared..ctor` at `IL_00D9`..`IL_0117` = `(0,1)`, `(1,0)`,
+`(0,-1)`, `(-1,0)`, and the `District/Type` enum's field order); the acceptance counts
+are transcribed, not measured against a generated world.
 
 **Which gateways a highway joins (`HighwayPlanner.ConnectClosest`).** The planner walks a
 township's `Gateways` in list order and skips a gateway whose `UsedExitList` already holds
