@@ -1041,7 +1041,55 @@ which is not decoded here. Measured against a generated world: not done.
 ### 3.6 Spawns, roads, water finalization
 
 - Player spawns: `CreatePlayerSpawn` over `CalcPlayerSpawnTiles` until **12**
-  spawns exist.
+  spawns exist. Decoded below.
+
+**Player spawns (decoded).** After `WildernessPathPlanner.Plan` the builder fills
+`playerSpawns` to **12**. `CalcPlayerSpawnTiles` (`IL=14`) filters the street-tile map and
+sorts what survives, and `CreatePlayerSpawn` (`IL=129`) turns each into a record:
+
+```text
+candidates = StreetTileMap.Cast<StreetTile>()
+    .Where(st => !st.OverlapsRadiation
+              && !st.AllIsWater
+              && st.Township == null
+              && (st.District == null || st.District.name == "wilderness")
+              && (ForestBiomeWeight == 0 || st.BiomeType == forest)
+              && !st.Used)
+    .ToList()
+candidates.Sort(by CalcClosestTraderDistance ascending)     // nearest trader first
+
+for tile in candidates:
+    if CreatePlayerSpawn(tile.WorldPositionCenter, isFallback: true): count++
+    if count == 12: break
+```
+
+`CalcClosestTraderDistance` is the smallest `Distance` from the tile's centre to each entry
+of `TraderCenterPositions`, or infinity with no trader.
+
+`CreatePlayerSpawn(pos, _isFallback)` builds `Position = (pos.x, GetHeight(pos), pos.y)` and
+then, **only when `_isFallback` is false**, applies four tests before it accepts:
+
+```text
+foreach existing spawn: if IsTooClose(position) return false      // within 60 blocks
+tile = GetStreetTileWorld(pos)
+if tile != null && tile.HasPrefabs():
+    if ForestBiomeWeight > 0 && tile.BiomeType != forest: return false
+    foreach instance: if instance.prefab.DifficultyTier >= 2: return false
+traders = ForestBiomeWeight > 0 ? TraderForestCenterPositions : TraderCenterPositions
+if no trader within 900 blocks (squared 810000): return false
+```
+
+The boot loop passes `isFallback: true`, so the twelve are the twelve street tiles nearest
+a trader with nothing else checked; the tests exist for the other caller,
+`WildernessPathPlanner.createTraderSpawnIfAble`, which passes `false` and is how a road to
+a wilderness POI can produce a spawn near a trader. `PlayerSpawn.IsTooClose` is
+`(dx*dx + dz*dz) < 3600`, a 60 block radius, and the y rotation is `Rand.Range(0, 360)`
+degrees drawn per accepted spawn.
+
+Grade: read from IL (`CalcPlayerSpawnTiles`, its predicate `b__127_0` and comparison
+`b__127_1`, `CalcClosestTraderDistance`, `CreatePlayerSpawn`, `PlayerSpawn..ctor` and
+`IsTooClose`). `GetHeight` and `StreetTile.GetStreetTileWorld` are not decoded here, and
+nothing is measured against a generated world.
 - `DrawRoads`: each `Path` rasterizes into a byte id map
   (`DrawPathToRoadIds`, catmull-rom smoothed centerlines), then
   `PathShared.ConvertIdsToColors` maps id -> pixel: country/dirt road = green

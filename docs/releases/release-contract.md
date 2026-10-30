@@ -59,9 +59,17 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**37 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**38 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.6 records how the
+  builder picks the twelve player spawns: street tiles with no township, no radiation, no
+  water, an empty or `wilderness` district, forest when the world weights forest and never
+  `Used`, sorted by the distance to the nearest trader and taken with `isFallback: true` so
+  nothing else is checked; the full tests (60 block spacing, prefabs at
+  `DifficultyTier < 2`, a trader within 900 blocks) apply to the wilderness-road caller
+  instead.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.5 records how a
   township that spawns no gateway still gets a road out: `RunTownshipDirtRoads` walks only
