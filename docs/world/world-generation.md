@@ -461,6 +461,32 @@ biome bars the prefab from that biome outright. The shortfall is
 
 Grade: verified from the IL dumps.
 
+**Where traders come from.** The five shipped `trader_*` prefabs carry no
+`trader` tag: their `Tags` are `gateway, nocheckpoint`, their `PrefabSize` is
+60, 28, 60 and their `TraderArea` is true. They belong to the gateway family,
+which one shipped street tile actually gives a slot: `rwg_tile_gateway_straight4`
+declares eleven markers and the eleventh is `POISpawn`, 60, 0, 60 with
+`POIMarkerTags="gateway"`. The district pick at that marker is therefore offered
+only prefabs tagged `gateway`, and the five traders answer. `rwgmixer.xml` then
+points each trader at one biome and at a count:
+`<prefab_spawn_adjust partial_name="trader_rekt" biomeTags="forest" bias="20"
+min_count="2" max_count="4"/>`, one line each for `trader_jen` (`burntforest`),
+`trader_bob` (`desert`), `trader_hugh` (`snow`) and `trader_joel` (`wasteland`).
+A `bias` of 20 against the other gateway prefabs' 0, plus a shortfall of up to 2
+while the world holds fewer than `min_count`, makes a trader the pick; `max_count`
+4 then takes it out of the running. `TownshipData.SpawnTrader` (`spawn_trader`) is
+parsed and read nowhere in the dumped world-generation families, and
+`createTraderSpawnIfAble` is the player-spawn walk decoded below, so the gateway
+marker is the whole placement path. That is also why
+`StreetTile.SpawnMarkerPartsAndPrefabs` records a trader centre by tag **or** by
+name: the shipped prefabs need the name check because their tags say `gateway`.
+
+Grade: verified from the IL dumps and the shipped data (`PrefabManager.il.txt`,
+`PrefabManagerData.il.txt`, `StreetTile.il.txt`, `WorldGenerationFromXml.il.txt`,
+`Prefabs/POIs/trader_*.xml`, `Prefabs/RWGTiles/rwg_tile_gateway_straight4.xml`,
+`Config/rwgmixer.xml`). Not observed: a generated stock world's own trader list,
+which no run here has read.
+
 **Street-tile validity (`StreetTile.UpdateValidity`, IL=139;
 `IsValidForStreetTile`, IL=24).** The grid is `StreetTileMapWidth = WorldSize /
 150`, so a tile is 150 blocks a side and its centre is `position + 75`. Nine
