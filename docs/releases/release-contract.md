@@ -59,9 +59,29 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**34 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**35 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.3 records how a
+  township gains its gateway tiles: `DistrictPlanner.PlanTownship` fills the districts
+  first, then walks each `dir4way` direction once (twice for a township named `citybig`,
+  not at all for a kind that states `spawn_gateway="false"`), and `GenerateGatewayDir`
+  accepts at most one out-of-town neighbour per call, exactly one of whose own neighbours
+  carries a township while at least two are valid ground. The accepted tile joins
+  `Township.Streets` and `Township.Gateways` with district type `Gateway` (3), a pass
+  never starts from a gateway an earlier one made, and a roadside township takes
+  `GenerateGateway`, which marks every street. `IsValidForGateway` is
+  `IsValidForStreetTile` plus `!HasPrefabs`.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.5 records how a
+  wilderness POI gets a road: `WildernessPathPlanner.Plan` connects one record per
+  spawned-prefab `POIMarkers` volume of marker type 2 (centre and half its larger
+  horizontal side), picks the cheapest A* endpoint along a highway within a 250-block
+  window sampled every fifth node, sorts records by radius bucket then highway distance,
+  and otherwise chains to an already-pathed, wider POI's road within 700 blocks. A road
+  of five or more points then tries a trader spawn on a tile whose prefabs are all
+  `DifficultyTier <= 1`.
 
 - [`../world/blocks.md`](../world/blocks.md) §1 records where a model block's
   prefab is placed: `BlockShapeModelEntity::Init`'s default `modelOffset` of

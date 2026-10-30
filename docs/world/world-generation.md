@@ -617,7 +617,8 @@ heights `cRoadHighwayMaxStepH` = **11** / `cRoadCountryMaxStepH` = **12**.
   markers feed street/exit wiring. Every placement becomes a
   `PrefabDataInstance` in `PrefabManager.UsedPrefabsWorld`.
 - `WildernessPathPlanner.Plan` paths wilderness POIs to the nearest road and
-  creates trader spawn points where able (`createTraderSpawnIfAble`).
+  creates trader spawn points where able (`createTraderSpawnIfAble`; decoded below,
+  "Wilderness roads").
 
 `PrefabManager.LoadPrefabs` (via `PrefabManagerData`) had earlier enumerated all
 `/Prefabs/` locations, skipping `navonly,devonly,testonly,biomeonly` tagged and
@@ -895,6 +896,97 @@ per-township config, `Name`-keyed), `TownshipSpawnInfo` in
 `BiomeTypeData` (`WorldBuilder` nested, ctor `(BiomeType, float, int)`)
 in the biome-ratio lists. `IBiomeProvider` is the lookup interface
 (`GetBiomeOrSubAt(x, z)` + `Cleanup`).
+
+**Wilderness roads (decoded).** `WildernessPathPlanner.Plan` (`IL_0000`..`IL_0496`) runs
+after `HighwayPlanner.Plan` and gives wilderness POIs a road: one connection per record
+in `WildernessPlanner.WildernessPathInfos`, which `StreetTile.SpawnMarkerPartsAndPrefabs`
+fills when it spawns a prefab. A record is `(Position, PathRadius)`: `Position` is the
+centre of one of the spawned prefab's `POIMarkers` volumes whose marker type is **2**, and
+`PathRadius` is half that volume's larger horizontal side (`max(size.x, size.z) * 0.5`).
+One marker of that type is picked at random per prefab instance (`RandomRange(0, count)`),
+so a prefab with three trader volumes contributes one road, not three. The record's
+`highwayDistance` and `highwayPoint` are filled by the first pass:
+
+```text
+hasHighway = highwayPaths.Count > 0
+for info in infos:
+    pos = info.Position
+    best = float.MaxValue ; bestPoint = (0,0)
+    for path in highwayPaths:
+        dist = FindClosestPathPoint(path.FinalPathPoints, pos, out closest, 5)
+        if dist >= 1e6: continue
+        step = FastMin(5, path.FinalPathPoints.Length - 1)
+        for j from 0 by step while j < path.FinalPathPoints.Length:
+            p = path.FinalPathPoints[j]
+            if (closest - p).sqrMagnitude > 62500: continue        // 250 blocks
+            cost = GetPath(info.Position, p, true, false).Length    // A* over the 10-block grid
+            if cost < 2: continue
+            if cost >= best: continue
+            best = cost ; bestPoint = p
+    info.highwayDistance = best
+    info.highwayPoint = bestPoint
+infos.Sort(bucketThenDistance)
+```
+
+The sample step of 5 is why the endpoint is a point every fifth node along the highway,
+not the nearest one: the closest point is only used as a 250-block window. `cost` is the
+node count of the A* path, not a geometric distance, and `best` starts at
+`float.MaxValue`, so a POI with no highway within reach keeps `1e6`-scale values.
+
+The sort is descending by `bucket = PathRadius >= 2.4 ? 3 : PathRadius`, then ascending by
+`highwayDistance`, so the widest roads are drawn first and the planner can chain them: the
+second pass, in that order, skips a record that already has a `Path` and otherwise takes
+the cheapest of three endpoint kinds.
+
+```text
+for info in infos:
+    if info.Path != null: continue
+    dest = (0,0) ; best = float.MaxValue ; toHighway = false
+    if 2 <= info.highwayDistance < 999999:
+        best = info.highwayDistance
+        dest = (int)info.highwayPoint.x, (int)info.highwayPoint.y
+        toHighway = true
+    for other in infos:
+        if other == info: continue
+        if other.Path == null:
+            if hasHighway: continue
+            d = Distance(info.Position, other.Position)
+            if d < best: best = d ; dest = other.Position
+        else if other.Path.connectsToHighway and other.PathRadius >= info.PathRadius:
+            if FindShortestPathPointToPathTo(other.Path.FinalPathPoints, info.Position,
+                                             out dp, out cost):
+                if cost < best: best = cost ; dest = dp
+    if best > 999999: continue
+    path = new Path(worldBuilder, info.Position, dest, info.PathRadius, true)
+    if path.IsValid:
+        path.connectsToHighway = toHighway
+        info.Path = path
+        wildernessPaths.Add(path)
+        createTraderSpawnIfAble(path.FinalPathPoints)
+    else:
+        path.Cleanup()  and a warning with the index and the two endpoints
+```
+
+`FindShortestPathPointToPathTo` (`IL_0000`..`IL_0068`) is `FindClosestPathPoint(points,
+start, out closest, 1)`; a closest point at `sqrMagnitude >= 490000` (700 blocks) gives up,
+otherwise `GetPathPoint(start, points, true, false, out cost)` returns the point on that
+path the A* reaches, and a `cost` of zero gives up.
+
+`createTraderSpawnIfAble` (`IL_0000`..`IL_0152`) only runs for a road of at least five
+points. When `ForestBiomeWeight > 0` it first walks the points from index 2 to
+`Length - 3` and stops at the first one whose biome is not `None`; if it found one, no
+trader is placed. It then walks the same span and, for each point that passes the same
+biome test when the weight is set, takes the street tile at that point, requires it to
+have prefabs, requires every instance's `DifficultyTier <= 1`, and calls
+`CreatePlayerSpawn(point, false)`.
+
+Grade: read from IL (`WildernessPathPlanner.Plan`, `FindShortestPathPointToPathTo`,
+`createTraderSpawnIfAble`, `WildernessPlanner.AddPathInfo` at `IL_0000`..`IL_001C`,
+`WildernessPathInfo..ctor`, the `<Plan>b__2_0` comparison, and the `AddPathInfo` call in
+`StreetTile.SpawnMarkerPartsAndPrefabs` at `IL_02D1`..`IL_03FF`). The marker type of 2 is
+the enum constant, not named in the IL; the trader rule's biome test is transcribed
+(`GetBiome(...) != 0`), and `Path`'s own validity and radius handling belong to
+`PathingUtils` and are not part of this decode.
 
 ### 3.6 Spawns, roads, water finalization
 
