@@ -720,6 +720,41 @@ overlap, no steep slope, no prefabs) when the township has at least two such nei
 and exactly one of them already carries a Township; that neighbour joins the township
 and is registered in `Township.Streets` and `Township.Gateways`.
 
+**Which gateways a highway joins (`HighwayPlanner.ConnectClosest`).** The planner walks a
+township's `Gateways` in list order and skips a gateway whose `UsedExitList` already holds
+two or more exits. For the rest it builds a candidate list and tries **at most three** of
+them:
+
+```text
+candidates = highwayTownships.Where(t =>
+    !(township.TownshipConnectionCounts.TryGet(t, out n) && n > 1)
+    && t.ID != township.ID
+    && t.Data.SpawnGateway)
+  .OrderBy(t => DistanceSqr(gateway.GridPosition, t.GridCenter))   // nearest first
+```
+
+The ordering key is the squared distance from the **gateway tile's** `GridPosition` to the
+candidate township's `GridCenter`, not town-centre to town-centre, so a gateway on one side
+of a town prefers the neighbour it actually faces. Each candidate is resolved with
+`GetPathToTownship(gateway, township)`; when both townships have more than one street tile
+and this pair already has a connection (`TownshipConnectionCounts[t] > 0`), the candidate's
+path cost is multiplied by **1.6** before the comparison, so a second highway between the
+same two townships loses to a first highway to a different one. The loop keeps the cheapest
+path, cleans up the rest, and stops after three candidates whether or not one won. A winner
+increments both townships' `TownshipConnectionCounts`, is appended to
+`worldBuilder.highwayPaths`, gets `SetTileExits` and `CommitPathingMapData`.
+
+`ConnectSelf(township)` is the other half: it sorts the township's gateways clockwise
+(`SortGatewaysClockwise`), needs at least two, skips the first two whose `UsedExitList` holds
+four or more exits, and pairs the highway exits each of them still has
+(`GetHighwayExits(true)`), which is how a town with a single useful neighbour still gets a
+road between its own gates.
+
+Evidence: `HighwayPlanner.ConnectClosest` (`IL_0000`..`IL_0207`), its display classes'
+`<ConnectClosest>b__0` (the predicate) and `b__1` (the ordering), and
+`HighwayPlanner.ConnectSelf` (`IL_0000`..). Grade: read from IL; the cost scale and the
+three-candidate bound are transcribed, not measured against a generated world.
+
 **Tile density budget.** A street tile's prefab picks share one budget, and the budget
 is per tile, not per township. `spawnStreetTile` starts at **62** (`IL_0115`) and reads
 `PrefabManagerStatic.TileMaxDensityScore`, a `Dictionary<string,float>` keyed by the
