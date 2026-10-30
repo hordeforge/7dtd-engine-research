@@ -221,8 +221,10 @@ transform.localScale    = 1
 
 So the prefab root lands at the block's **centre**. With the default `ModelOffset` on a
 1x1x1 block the offset reduces to exactly `(0.5, 0.5, 0.5)`; the juniper's `0,-0.3,0`
-gives `(0.5, 0.2, 0.5)`, which is why its base sits a fifth of a block above the cell's
-floor. `rot` is `BlockShapeModelEntity.GetRotation`, the same 24+4 quaternion vocabulary
+gives `(0.5, -0.3, 0.5)`, because its own offset and the `-0.5` centring add to `-0.8`
+and the `+0.5` in Y brings that back to `-0.3`: the prefab root sits a third of a block
+below the cell's floor and the trunk rises out of it. `rot` is
+`BlockShapeModelEntity.GetRotation`, the same 24+4 quaternion vocabulary
 as `BlockShapeNew`, and the `+0.5` in Y is applied after the rotations, in world axes.
 
 The prefab's own child nodes then carry their authoring transforms, which the placement

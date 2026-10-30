@@ -59,7 +59,7 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**31 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**32 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
@@ -69,7 +69,7 @@ section used to describe is published under the tag and in
   multi-block centring of `base`, and `Chunk::OnDisplayBlockEntities`'s half-cell
   shift and decoration lift, which together put the prefab root at the block's
   centre rather than its corner. The juniper's `0,-0.3,0` therefore lands at
-  `(0.5, 0.2, 0.5)`, and the prefab's own child transforms (the tyre's quarter
+  `(0.5, -0.3, 0.5)`, and the prefab's own child transforms (the tyre's quarter
   turn) are the block's to apply.
 
 - [`../world/blocks.md`](../world/blocks.md) §1 records a block's `Model`
