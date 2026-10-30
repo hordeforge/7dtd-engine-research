@@ -59,9 +59,15 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**40 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**41 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.5 corrects the
+  wilderness-road spawn walk (`createTraderSpawnIfAble`): it creates player spawns, not
+  traders, and the zero its biome test compares against is `forest` (the RWG enum runs
+  `forest` 0 to `wasteland` 4, `none` 255), so the walk requires a forest column and
+  spawns on forest columns whose tile carries only `DifficultyTier <= 1` prefabs.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 records where
   traders come from: the five shipped `trader_*` prefabs are `gateway`-tagged, one
