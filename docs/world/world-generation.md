@@ -999,10 +999,15 @@ otherwise `GetPathPoint(start, points, true, false, out cost)` returns the point
 path the A* reaches, and a `cost` of zero gives up.
 
 `createTraderSpawnIfAble` (`IL_0000`..`IL_0152`) only runs for a road of at least five
-points. When `ForestBiomeWeight > 0` it first walks the points from index 2 to
-`Length - 3` and stops at the first one whose biome is not `None`; if it found one, no
-trader is placed. It then walks the same span and, for each point that passes the same
-biome test when the weight is set, takes the street tile at that point, requires it to
+points. Its name is a misnomer: every spawn it makes is a player spawn
+(`CreatePlayerSpawn(point, false)`), and no trader is created. The RWG enum
+`WorldGenerationEngineFinal.BiomeType` numbers its members `forest` 0,
+`burntForest` 1, `desert` 2, `snow` 3, `wasteland` 4, `count` 5, `waterDebug` 6
+and `none` 255, so the zero the IL compares against is **forest**, not an absent
+biome. When `ForestBiomeWeight > 0` it first walks the points from index 2 to
+`Length - 3` until the first forest column, and gives up when the span has none.
+It then walks the same span and, for each point that is still a forest column
+when the weight is set, takes the street tile at that point, requires the tile to
 have prefabs, requires every instance's `DifficultyTier <= 1`, and calls
 `CreatePlayerSpawn(point, false)`.
 
@@ -1011,8 +1016,8 @@ Grade: read from IL (`WildernessPathPlanner.Plan`, `FindShortestPathPointToPathT
 `WildernessPathInfo..ctor`, the `<Plan>b__2_0` comparison, and the `AddPathInfo` call in
 `StreetTile.SpawnMarkerPartsAndPrefabs` at `IL_02D1`..`IL_03FF`). The marker type of 2 is
 the enum constant, not named in the IL; the trader rule's biome test is transcribed
-(`GetBiome(...) != 0`), and `Path`'s own validity and radius handling belong to
-`PathingUtils` and are not part of this decode.
+(`GetBiome(...) != 0`, where the enum's own constants make `0` forest), and `Path`'s own
+validity and radius handling belong to `PathingUtils` and are not part of this decode.
 
 **Township dirt roads (decoded).** `HighwayPlanner.RunTownshipDirtRoads` (`IL_0000`..`IL_02D9`)
 runs after `ConnectClosest`/`ConnectSelf` and gives a township a country road out when its
