@@ -988,6 +988,56 @@ the enum constant, not named in the IL; the trader rule's biome test is transcri
 (`GetBiome(...) != 0`), and `Path`'s own validity and radius handling belong to
 `PathingUtils` and are not part of this decode.
 
+**Township dirt roads (decoded).** `HighwayPlanner.RunTownshipDirtRoads` (`IL_0000`..`IL_02D9`)
+runs after `ConnectClosest`/`ConnectSelf` and gives a township a country road out when its
+kind forbids gateways. The list it walks is
+`Townships.FindAll(t => !t.Data.SpawnGateway)` (`<RunTownshipDirtRoads>b__6_0`), so a
+township that spawns gateways is skipped entirely: its roads come from the highway
+connections, and these are the towns that would otherwise have no road at all.
+
+```text
+for township in [t : not t.Data.SpawnGateway]:
+    for exit in township.GetUnusedTownExits(4):
+        dest = (0,0) ; best = float.MaxValue ; seen = 0
+        for path in highwayPaths:
+            if path.isCountryRoad: continue                 // a highway is the target
+            foreach p in path.FinalPathPoints:
+                p = floor(p)
+                dist = DistanceSqr(exit, p)
+                if dist >= best: continue
+                if GetPathCost(exit, p, isCountryRoad: true) > 0:
+                    best = dist ; dest = p
+                if ++seen % 10 == 0: SetTaskMessage(...)
+        path = new Path(worldBuilder, exit, dest, 2, isCountryRoad: true)
+        if not path.IsValid: continue
+        foreach tile in township.Streets.Values:
+            for dir in 0..3:
+                if Distance(tile.GetHighwayExitPos(dir), exit) < 10:
+                    tile.SetExitUsed(dir)
+        highwayPaths.Add(path)
+```
+
+Three details matter for a port. The target search skips country paths, so a dirt road
+joins a highway and never another dirt road, and it keeps the point with the smallest
+squared distance among those the country A* can reach (`GetPathCost(..., true)` is the
+country-road variant, `cRoadCountryMaxStepH` 12 rather than the highway's 11). The road is
+two blocks of radius, narrower than a highway or a wilderness road. And the exit that
+produced it is booked used on every street tile within ten blocks of it, which is how a
+later township's search does not resolve to the same exit.
+
+`GetUnusedTownExits(4)` (`Township.il.txt`, `IL_0000`..`IL_0102`) branches on the same
+flag: with `SpawnGateway` it walks the township's `Gateways` whose `UsedExitList.Count` is
+at most the argument and collects their `GetHighwayExits(true)`; without it, which is the
+only case this method reaches, it collects `GetHighwayExits(false)` from every street.
+`GetHighwayExits` filters on `UsedExitList` (`IL_0000`..`IL_004C`), and
+`GetHighwayExitPos(dir)` is a cached per-tile `highwayExitPositions[dir]` (`IL=5`).
+
+Grade: read from IL (`HighwayPlanner.RunTownshipDirtRoads` `IL_0000`..`IL_02D9`, its
+predicate `b__6_0`, `Township.GetUnusedTownExits`, `StreetTile.GetHighwayExits` /
+`GetHighwayExitPos` / `SetExitUsed`, and the `Path` constructor's `(radius, isCountryRoad)`
+arguments). `highwayExitPositions` is filled by `SetTileExits`/`SetPathingConstraintsForTile`,
+which is not decoded here. Measured against a generated world: not done.
+
 ### 3.6 Spawns, roads, water finalization
 
 - Player spawns: `CreatePlayerSpawn` over `CalcPlayerSpawnTiles` until **12**

@@ -59,9 +59,16 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**36 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**37 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.5 records how a
+  township that spawns no gateway still gets a road out: `RunTownshipDirtRoads` walks only
+  the townships whose kind states `spawn_gateway="false"`, takes each unused town exit,
+  finds the nearest point on a highway that a country-road A* can reach, draws a
+  two-block-radius country path to it, books every tile exit within ten blocks used, and
+  appends it to `highwayPaths`.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.6 records how
   `SmoothRoadTerrainTask$BurstManaged` bends terrain under a road: an influence mask
