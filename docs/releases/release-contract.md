@@ -59,7 +59,7 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**33 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**34 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
@@ -71,6 +71,13 @@ section used to describe is published under the tag and in
   centre rather than its corner. The juniper's `0,-0.3,0` therefore lands at
   `(0.5, -0.3, 0.5)`, and the prefab's own child transforms (the tyre's quarter
   turn) are the block's to apply.
+
+- [`../world/world-generation.md`](../world/world-generation.md) records how a highway picks
+  the townships it joins: `HighwayPlanner.ConnectClosest` walks a township's gateways,
+  skips one that already carries two exits, orders candidates by the distance from the
+  *gateway tile* to each township's centre, tries at most three, penalises a pair that is
+  already connected by 1.6x, and books a winner into `highwayPaths` with both connection
+  counts incremented. `ConnectSelf` pairs a town's own gateways clockwise.
 
 - [`../world/world-generation.md`](../world/world-generation.md) records what
   `checkresource` on a `biomes.xml` decoration is: an integer Y offset for the ore-noise
