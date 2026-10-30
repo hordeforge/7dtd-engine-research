@@ -1083,6 +1083,46 @@ three are client render/UI and out of scope here.
   reports **0 external references**; live RWG prefab placement happens entirely
   in `WorldGenerationEngineFinal` (this doc §2-§5), so nothing touches this grid.
 
+### What `checkresource` is: the ore-noise probe's Y offset
+
+`checkresource` on a `biomes.xml` decoration is not a resource test by name or type.
+`WorldBiomes.parseBiome` parses it as an integer and hands it to
+`BiomeBlockDecoration`/`BiomePrefabDecoration` as `checkResourceOffsetY`, whose absence
+defaults differ by decoration type: prefab decorations default to **10000**, block
+decorations to `int.MaxValue`.
+
+`WorldDecoratorBlocksFromBiome` reads it while placing a prefab decoration:
+
+```text
+surfaceY = chunk.GetTerrainHeight(x, z) + 1
+if (deco.checkResourceOffsetY < int.MaxValue)
+    reject unless surfaceY + prefab.yOffset >= 0                      // pre-check
+    reject unless CheckOreNoiseAt(resourceNoise, x,
+                                  surfaceY + deco.checkResourceOffsetY, z)
+reject unless 0 < surfaceY < 255
+```
+
+`GameUtils.CheckOreNoiseAt` is `GetOreNoiseAt(...) > 0`, and
+`GetOreNoiseAt(noise, x, y, z) = noise.Noise(x * 0.05, y * 0.05, z * 0.05) * 3 - 0.333`,
+so the gate admits a column where the 3D noise clears `0.111`. `resourceNoise` is
+`new PerlinNoise(World.Seed)`, built on first use in the decorator and again in
+`DecoManager.OnWorldLoaded` for its own distant-decoration pass.
+
+Two consequences worth stating. An absent attribute is **not** "no check": a prefab
+decoration with no `checkresource` probes 10000 blocks above the surface, which is still a
+genuine roughly-half-the-columns gate rather than a pass. And the shipped ore veins state
+`checkresource="-7"`, so they probe seven blocks **below** the surface height, where the ore
+field is evaluated, which is what makes them follow the ore noise rather than the surface.
+`onslopes` is a separate flag (`isDecorateOnSlopes`), not part of this rule.
+
+Evidence: `WorldBiomes.parseBiome` (`IL_05AE`..`IL_05DE` for prefabs, `IL_056D`..`IL_05ED`
+for blocks), `WorldDecoratorBlocksFromBiome` (`IL_019E`..`IL_01D3` the offset and the probe),
+`GameUtils.GetOreNoiseAt`/`CheckOreNoiseAt`, and `BiomePrefabDecoration..ctor`
+(`_checkResource` -> `checkResourceOffsetY`).
+
+Grade: read from IL; the noise arithmetic is transcribed, not measured against a running
+world.
+
 ---
 
 ## Prefab rotation, id mapping and YOffset placement (2026-08-06)

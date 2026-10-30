@@ -59,7 +59,7 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**32 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**33 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
@@ -71,6 +71,14 @@ section used to describe is published under the tag and in
   centre rather than its corner. The juniper's `0,-0.3,0` therefore lands at
   `(0.5, -0.3, 0.5)`, and the prefab's own child transforms (the tyre's quarter
   turn) are the block's to apply.
+
+- [`../world/world-generation.md`](../world/world-generation.md) records what
+  `checkresource` on a `biomes.xml` decoration is: an integer Y offset for the ore-noise
+  probe (`checkResourceOffsetY`), defaulting to 10000 for a prefab decoration and to
+  `int.MaxValue` (no probe) for a block one, read at placement as
+  `CheckOreNoiseAt(resourceNoise, x, surfaceY + offset, z)` against
+  `PerlinNoise(World.Seed)` cleared at `0.111`. The shipped ore veins' `-7` probes seven
+  blocks below the surface, and an absent attribute is still a probe, not a pass.
 
 - [`../world/blocks.md`](../world/blocks.md) §1 records a block's `Model`
   reference: the two shipped forms (`#Bundle?objectPath`, `@:path`), inheritance
