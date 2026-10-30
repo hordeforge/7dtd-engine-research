@@ -999,7 +999,96 @@ the enum constant, not named in the IL; the trader rule's biome test is transcri
   `splat3.png` channel semantics.
 - `SmoothRoadTerrain`: copies the road mask into a `NativeArray` and runs the
   Burst `SmoothRoadTerrainTask` (705 IL managed fallback) on a task to bend
-  terrain under roads; `CalcWindernessPOIsHeightMask` protects POI pads.
+  terrain under roads; `CalcWindernessPOIsHeightMask` protects POI pads. The
+  task's three phases are decoded below.
+
+**Road terrain smoothing (decoded).** `SmoothRoadTerrainTask$BurstManaged`
+(`WorldBuilder.il.txt`, IL=705) runs on the `roadDest` colour array (splat3
+semantics: red is a highway, green a country road), the float `HeightMap` and
+`WorldSize`; `poiHeightMask` comes from `Data`. Its first phase builds a
+`uint16` influence mask and its next two smooth against it.
+
+```text
+for y, x:
+    i = x + y*W
+    if poiHeightMask[i] > 0: mask[i] = 1000 ; continue      // POI pad, never smoothed
+    r = road[i].r ; g = road[i].g
+    if r + g <= 0: continue                                  // no road
+    height[i] += 0.0008                                      // a hair up, so a road is above its ground
+    mask[i] = 200 ; reach = 80 ; steps = 3 ; drop = 30       // country road
+    if r > 0: mask[i] = 255 ; reach = 60 ; steps = 6 ; drop = 8   // highway
+    for step in 1..steps:
+        for dir in 0..7:
+            nx = x + directions8way[dir].x * step ; ny = y + directions8way[dir].y * step
+            if nx or ny out of bounds: continue
+            n = nx + ny*W
+            if reach > mask[n]: mask[n] = reach               // max, so a highway beats a country ring
+        reach -= drop
+```
+
+So a highway cell stamps `255` at its centre and `60, 52, 44, 36, 28, 20`
+along the eight rays of its six steps; a country road stamps `200` and
+`80, 50, 20` over three steps of 30. The mask is a maximum, so overlapping
+roads keep the wider value. The `+0.0008` is what lets a road sit marginally
+above the ground it crosses before the smoothing runs.
+
+Phase two smooths the **highway core** (`mask == 255`) only, over six passes,
+each reading the previous pass's heights from a scratch copy:
+
+```text
+for pass in 0..<6:
+    scratch = height.copy()
+    for y in 1..<H-1, x in 1..<W-1:
+        i = x + y*W
+        if road[i].r == 0: continue                          // country roads are not touched here
+        if mask[i] >= 1000: continue
+        h = scratch[i]
+        sum = h
+        for (dir, w) in [(top-left, 0.25), (top, 0.5), (top-right, 0.25), (left, 0.5),
+                         (right, 0.5), (bottom-left, 0.25), (bottom, 0.5), (bottom-right, 0.25)]:
+            n = neighbour
+            sum += (mask[n] >= 255 ? scratch[n] : h) * w
+        height[i] = sum / 4
+```
+
+The weights are the usual 4-neighbour 0.5 and diagonal 0.25 and they total 3,
+so a point whose neighbours are all core cells moves to their weighted mean with
+its own height counted once; a neighbour outside the core contributes the centre's
+own height, which is a clamp rather than a taper.
+
+Phase three smooths the **blend band** (`0 < mask <= 200`) over thirty passes
+with the mask as the weight:
+
+```text
+for pass in 0..<30:
+    scratch = height.copy()
+    for y in 1..<H-1, x in 1..<W-1:
+        i = x + y*W ; m = mask[i]
+        if m == 0 or m > 200: continue
+        sumW = 0 ; sum = 0
+        foreach (n, diagonal) in neighbours:
+            w = diagonal ? mask[n] / 2 : mask[n]        // integer division
+            sum += scratch[n] * w ; sumW += w
+        if sumW <= 0: continue
+        if m < 200:
+            alpha = m * 0.005
+            height[i] = height[i] * (1 - alpha) + (sum / sumW) * alpha
+        else:
+            height[i] = sum / sumW                       // only the country core, m == 200
+```
+
+The band therefore converges towards a mask-weighted neighbour average, harder
+near the road (`alpha` is 1.0 at `m == 200`) and barely at `m == 1`. The
+country road's own centre (`200`) is replaced outright and the highway core
+(`255`) is skipped because phase two already ran there.
+
+Grade: read from IL (`SmoothRoadTerrainTask$BurstManaged`, `IL_0000`..`IL_05E5`;
+`SmoothRoadTerrain` allocates the copy and starts the task at
+`IL_0022`..`IL_0088`). The `0.0008`, `0.005`, step counts, reach and drop values
+are transcribed literals. `directions8way` is the same eight directions the
+rest of the builder uses. Not decoded: why the country road's core is replaced
+in the last phase while its rings only blend, and whether `poiHeightMask`
+carries anything other than `1`.
 - `FinalizeWater` (Burst): per cell, if `height - 0.5` is above the water value
   the water is cleared, otherwise it is set to the global `WaterHeight` (**30**),
   producing the final flat sea-level water map.

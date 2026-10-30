@@ -59,9 +59,17 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**35 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**36 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../world/world-generation.md`](../world/world-generation.md) §3.6 records how
+  `SmoothRoadTerrainTask$BurstManaged` bends terrain under a road: an influence mask
+  built from splat3's red (highway, `255` core, rings `60, 52, 44, 36, 28, 20`) and green
+  (country, `200` core, rings `80, 50, 20`), a height lift of `0.0008` on every road cell,
+  six clamped-neighbour passes over the highway core with weights 0.5 orthogonal and 0.25
+  diagonal normalised by 4, and thirty mask-weighted passes over the blend band with
+  `alpha = mask * 0.005` and an outright replace on the country core.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.3 records how a
   township gains its gateway tiles: `DistrictPlanner.PlanTownship` fills the districts
