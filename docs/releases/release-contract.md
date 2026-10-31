@@ -59,14 +59,15 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**52 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
+**53 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
 - [`../world/blocks.md`](../world/blocks.md) records the shape-group helper's own
   properties and the `SortOrder2` assignment: each shape numbered from a counter that
   starts at 1, the helper at `"0000"`, plus `SelectAlternates` and the comma-joined
-  `PlaceAltBlockValue` list.
+  `PlaceAltBlockValue` list; also the shapes' `ShapeCategories` and the `<categories>`
+  order that structure the picker.
 
 - [`../content/quests-challenges.md`](../content/quests-challenges.md) §9 records the
   tier statics' defaults (`MaxQuestTier = 5`, `QuestsPerTier = 10`), the file's override
