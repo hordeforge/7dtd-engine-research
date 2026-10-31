@@ -62,6 +62,18 @@ not in `nameToBlock`). Verified 2026-08-28 against the 3.1.0 client
 capture (`woodShapes:cube` is the first woodShapes id, no bare
 `woodShapes` row) and replicated by
 [`tools/assignids_dump.py`](../../tools/assignids_dump.py).
+`ShapesFromXml.LoadShapes` (the `<LoadShapes>d__11` iterator) numbers the
+shapes as it walks the file: a counter initialised to 1 (`ldc.i4.1` at
+IL_0053) is written to each `<shape>` element's `SortOrder2` property as
+`ToString("0000")`, and incremented after each. That is the creative sort
+order the shape picker lists, so it is the file's declaration order rather
+than alphabetical, and the helper block itself is given `SortOrder2 =
+"0000"` so it sorts before every variant. The same pass seeds the helper's
+other properties: `Extends` from the group, `CreativeMode` `"5"` when the
+group asks for it and `"0"` otherwise (`EnumCreativeMode`), `DescriptionKey
+= blockVariantHelperGroupDesc`, `ItemTypeIcon = all_blocks`,
+`SelectAlternates = true` (the picker), and `PlaceAltBlockValue` as every
+`{group}:{shape}` name joined by commas (IL_008F-IL_00BD).
 `AlternateBlockCount` (IL=5) /
 `ContainsAlternateBlock(name)` (IL=24) read the `placeAltBlockNames` list;
 `GetPathOffset(rotation)` (IL=11) returns `shape.GetPathOffset` when
@@ -1124,6 +1136,12 @@ not (the parent/child split of the vertical sign).
 
 ## Changelog
 
+- **2026-11-01:** Shape-group expansion's sort order pinned: `ShapesFromXml`
+  `LoadShapes` numbers each `<shape>` from a counter that starts at 1 and writes
+  `SortOrder2` as `"0000"`, and gives the helper block `"0000"` itself; the same
+  pass seeds the helper's `Extends`, `CreativeMode` (`"5"` or `"0"`),
+  `DescriptionKey`, `ItemTypeIcon = all_blocks`, `SelectAlternates = true` and
+  the comma-joined `PlaceAltBlockValue` list.
 - **2026-10-29:** Addressable `Model` addresses resolve by family, not by root:
   `@:Entities/Minerals/...` is `automatic_assets_entities/minerals.bundle` and
   `@:Other/Items/...` is `automatic_assets_other/items.bundle`; the only catalog is
