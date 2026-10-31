@@ -773,6 +773,42 @@ before the division. The consequence for a port: the time between two shots is
 `60 / rounds-per-minute` seconds, not a constant, and an item that states no
 `RoundsPerMinute` starts from `60 / Delay`.
 
+**`ItemActionRanged` reload is animation-driven (V3.3.0 re-read).** No item
+field states a reload time. `requestReload` (IL=12) only sets
+`isReloadRequested`; the work runs in a Unity Animator state.
+`AnimatorRangedReloadState` is a `StateMachineBehaviour` on the weapon's reload
+state. `OnStateEnter` (IL=298) takes the held item's action slot 0 as
+`ItemActionDataRanged`, stops the idle sound, drops a zoom action when the
+player was aiming, plays `SoundReload` when the reload clip carries no
+animation events, evaluates passive **9** (`MagazineSize`) over
+`BulletsPerMagazine` to size the round count, sets `isReloading = true` and
+fires `MinEventTypes.onReloadStart` (58). `OnStateUpdate` (IL=47) fires
+`onReloadUpdate` (59) each tick and replays the state on a cancel. `OnStateExit`
+(IL=104) resets `Animator.speed` to 1, then clears `isReloading` and
+`isWeaponReloading`, fires `onReloadStop` (60), `EntityAlive.OnReloadEnd` and
+`Inventory.CallOnToolbeltChangedInternal`. `ItemActionRanged.CompleteReload`
+has exactly one call site (Xref=1), that state exit, and it is skipped when the
+reload was cancelled. So the server-side reload lasts exactly as long as the
+reload animation state, and its length lives in the animator controller asset,
+not in the assembly. `AnimatorWeaponRangedReloadState` is the weapon-layer
+sibling: it only tracks the `isWeaponReloading` / `isWeaponReloadCancelled`
+flags and cancels the state when a reload is cancelled.
+
+**`ReloadSpeedMultiplier` (passive 102) scales that animation (V3.3.0
+re-read).** `EntityAlive.OnReloadStart` (IL=11) forwards to
+`avatarController.StartAnimationReloading()`, and both controllers evaluate the
+passive there: `LegacyAvatarController.StartAnimationReloading` (IL=47) and
+`AvatarMultiBodyController.StartAnimationReloading` (IL=59) call
+`EffectManager.GetValue(ReloadSpeedMultiplier = 102, holdingItemItemValue, 1,
+entity, null, FastTags default, ...)`, set the `Reload` animator bool and write
+the result to the animator's `reloadSpeed` float parameter (net-synced). The
+base is 1, so a perk's `perc_add` rows make the reload clip play faster. The
+inference that the controller reads `reloadSpeed` as the state's speed
+multiplier is not decoded: the binding is serialized in the animator controller
+asset, not in the assembly, and no clip length or reload duration is stated in
+`items.xml` or `progression.xml`. `AnimatorSpeedSetter` is unrelated: it sets a
+constant `Animator.speed` per state from its serialized `animatorSpeed` field.
+
 **`ItemActionRanged.fireShot` (IL=482) re-pin:** look ray + direction offset ->
 `Voxel.Raycast` -> clone `voxelRayHitInfo`; entity hits via
 `ItemActionAttack.FindHitEntityNoTagCheck` (drone ally skip); block hits via
@@ -2103,6 +2139,14 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-11-01:** Reload re-read on V3.3.0: there is no reload timer in the
+  item data. `AnimatorRangedReloadState` fires `onReloadStart` / `onReloadUpdate`
+  / `onReloadStop` (58/59/60) and its state exit is the only
+  `ItemActionRanged.CompleteReload` call site; passive 102
+  (`ReloadSpeedMultiplier`) is evaluated with base 1 by both avatar controllers
+  and written to the animator's `reloadSpeed` parameter, so it scales the reload
+  clip (§4.2). The clip length and the parameter binding are in the asset
+  bundles, not the assembly.
 - **2026-11-01:** `ItemActionRanged.OnHoldingUpdate` re-read on V3.3.0: the shot
   delay is `60 / GetValue(RoundsPerMinute = 17, itemValue, 60 / Delay)`, so the
   item's `RoundsPerMinute` is the rate and the default comes from the action's
