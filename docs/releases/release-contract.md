@@ -59,7 +59,7 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**50 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
+**51 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
@@ -67,7 +67,9 @@ section used to describe is published under the tag and in
   tier statics' defaults (`MaxQuestTier = 5`, `QuestsPerTier = 10`), the file's override
   (6), and what `CompleteQuest` credits (`AddsToTierComplete` default true,
   `AddsProgression` = `QuestProgressDay > 0`, points = `DifficultyTier`, no-op on zero).
-  `QuestJournal.Write` stores no faction points; a load re-derives them.
+  `QuestJournal.Write` stores no faction points; a load re-derives them. The daily cap's
+  stat default is pinned at 4 (`QuestProgressionDailyLimit`), and the stamp's only
+  caller is `ObjectiveReturnToNPC.OnStart`.
 
 - [`../content/npc-dialog.md`](../content/npc-dialog.md) §8 records the `quest_faction`
   parse: written only when the attribute exists, so an absent one is 0.
