@@ -676,7 +676,11 @@ touches in passing:
   at 100), then `min(tier, Quest.MaxQuestTier + (allowExtraTierOverMax ? 1 :
   0))`; a zero `QuestsPerTier` short-circuits to `MaxQuestTier +
   (allowExtraTierOverMax ? 1 : 0)` (the tier-up cap the trader pipeline reads
-  in [npc-dialog.md](../content/npc-dialog.md) §5).
+  in [npc-dialog.md](../content/npc-dialog.md) §5). The cctor's defaults are
+  `MaxQuestTier = 5` and `QuestsPerTier = 10`, and `QuestsFromXml` then writes
+  `MaxQuestTier` from the root's `max_quest_tier` (6 in the installed file),
+  which is why the static is 5 before the file loads and 6 after; the file
+  states no `quests_per_tier`, so 10 stands.
   `GetTraderData(giver)` (IL=27) linear-scans the journal's `TraderData`
   list for the `QuestTraderData` whose `TraderPOI` Vector2 matches the giver,
   returning null when absent.

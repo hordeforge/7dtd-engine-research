@@ -59,9 +59,12 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**47 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
+**48 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../content/quests-challenges.md`](../content/quests-challenges.md) §9 records the tier
+  statics' defaults (`MaxQuestTier = 5`, `QuestsPerTier = 10`) and the file's override (6).
 
 - [`../gameplay/items.md`](../gameplay/items.md) §4.2 records the exact accuracy decay
   (`9.1 * Clamp01(passive 13, base 0.1)`) and the per-shot bloom
