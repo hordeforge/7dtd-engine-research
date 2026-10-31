@@ -162,7 +162,13 @@ same concatenation through `ContainsAlternateBlock`;
 `GetLocalizedAutoShapeShapeName()` (IL=8) is
 `Localization.Get("shape" + autoShapeShapeName)`;
 `GetShapeCategories(altBlocks, target)` (IL=47) unions the alt blocks'
-`ShapeCategories` lists (deduped) and sorts the result.
+`ShapeCategories` lists (deduped) and sorts the result. Each block's list comes
+from its shape: a `<shape>` in `shapes.xml` names its categories in a
+`ShapeCategories` property (`cube` is `Basic,Square`), and the file declares
+the categories themselves under `<categories>`, each with an `order` and an
+`icon` (`Basic` 1, `Square` 2, `Round` 3, `Wedge` 4, and so on to `Letters`
+14). That is the page structure of the shape picker: a category list, then the
+shapes of the chosen category.
 
 ### A block's `Model` reference and its volume
 
@@ -1136,6 +1142,10 @@ not (the parent/child split of the vertical sign).
 
 ## Changelog
 
+- **2026-11-01:** Shape categories pinned: a `<shape>`'s `ShapeCategories`
+  property names its categories (`cube` is `Basic,Square`), `<categories>`
+  declares them with an `order` and an `icon`, and `GetShapeCategories` unions
+  the alt blocks' lists for the picker's page structure.
 - **2026-11-01:** Shape-group expansion's sort order pinned: `ShapesFromXml`
   `LoadShapes` numbers each `<shape>` from a counter that starts at 1 and writes
   `SortOrder2` as `"0000"`, and gives the helper block `"0000"` itself; the same
