@@ -773,6 +773,22 @@ before the division. The consequence for a port: the time between two shots is
 `60 / rounds-per-minute` seconds, not a constant, and an item that states no
 `RoundsPerMinute` starts from `60 / Delay`.
 
+**`ItemActionDynamicMelee` attack rate (V3.3.0 re-read).** A swing is gated like
+a shot, on passive **18**. `canStartAttack` (IL=198) returns false while the
+action is `Attacking`; otherwise it builds the tag set from `primary` (or
+`secondary` when the action index is not 0) OR'd with the item's own
+`ItemTags`, evaluates `EffectManager.GetValue(AttacksPerMinute = 18, itemValue,
+60, holder, null, tags, ...)`, clamps a zero rate to `0.0001`, and computes
+`attackTime = 60 / rate`. The swing is refused while `Time.time - lastUseTime <
+attackTime + 0.1`, so the gap between two swings is `60 / attacks-per-minute`
+plus a fixed tenth of a second. The item's `AttacksPerMinute base_set` states
+the rate (the stone shovel states 50, which is 1.3 s per swing, and the iron
+shovel inherits it through `Extends`), and a perk's `perc_add` rows matching the
+item's tags raise it (`perkFlurryOfPerception` adds up to 25 percent).
+`OnHoldingUpdate` (IL=144) computes the same window while `Attacking`, stores it
+on the action data's `attackTime`, and calls `SetAttackFinished` once
+`Time.time - lastUseTime > attackTime + 0.1`.
+
 **`ItemActionRanged` reload is animation-driven (V3.3.0 re-read).** No item
 field states a reload time. `requestReload` (IL=12) only sets
 `isReloadRequested`; the work runs in a Unity Animator state.
@@ -2139,6 +2155,11 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-11-01:** Melee attack rate re-read on V3.3.0: `canStartAttack`
+  (IL=198) and `OnHoldingUpdate` (IL=144) both use
+  `60 / GetValue(AttacksPerMinute = 18, itemValue, 60, ..., primary|ItemTags)`
+  plus a fixed `0.1` s before the next swing, and the stone shovel's `base_set`
+  is 50 (§4.2).
 - **2026-11-01:** Reload re-read on V3.3.0: there is no reload timer in the
   item data. `AnimatorRangedReloadState` fires `onReloadStart` / `onReloadUpdate`
   / `onReloadStop` (58/59/60) and its state exit is the only
