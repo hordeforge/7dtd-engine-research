@@ -1156,11 +1156,16 @@ a product of passive-effect multipliers - base passive **26** x 0.1 while
 aiming (or **25** x 1 hip); movement: standing still x passive **30** x 0.1,
 walking x **28**, running x **27**; crouching x **29** - then multiplies by
 passive **13** (Clamp01). `lastAccuracy` eases toward that target through
-`AccuracyExpDecay` (IL=29): `target + (last - target) * exp(-decay * dt)`,
-snapping to the target once the delta is below 1e-5 (the
-`AccuracyUpdateDecayConstant` rate). The result feeds the spread cone in
-`getDirectionRandomOffset` above, so aim steadies while aiming/crouching/
-still and blooms while moving or right after firing.
+`AccuracyExpDecay` (IL=29): with `dt = Clamp01(deltaTickTime)`,
+`decay = 9.1 * Clamp01(GetValue(passive 13, itemValue, 0.1))` (`9.1` is
+`AccuracyUpdateDecayConstant` from the cctor and `0.1` is the passive's own
+base) and the value snaps to the target once its distance from it is below
+1e-5. The per-shot bloom is `onHoldingEntityFired` (IL=74):
+`lastAccuracy = min(lastAccuracy * GetValue(IncrementalSpreadMultiplier = 14,
+itemValue, 1), 5)`, so firing multiplies the cone by the passive (a
+`perc_add -.15` row is x0.85) and the factor never exceeds 5. The result
+feeds the spread cone in `getDirectionRandomOffset` above, so aim steadies
+while aiming/crouching/still and blooms while moving or right after firing.
 
 **Throw family (V3.2.0 b9):** `ItemActionThrowAway.ExecuteAction`
 (IL=137) is the charge/release state machine: press latches
@@ -2155,6 +2160,9 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-11-01:** Gun spread re-read on V3.3.0: `updateAccuracy` eases with
+  `exp(-9.1 * Clamp01(passive 13, base 0.1) * Clamp01(dt))`, and `onHoldingEntityFired`
+  (IL=74) blooms `lastAccuracy` by `IncrementalSpreadMultiplier` (14) and caps it at 5 (§4.2).
 - **2026-11-01:** Melee attack rate re-read on V3.3.0: `canStartAttack`
   (IL=198) and `OnHoldingUpdate` (IL=144) both use
   `60 / GetValue(AttacksPerMinute = 18, itemValue, 60, ..., primary|ItemTags)`
