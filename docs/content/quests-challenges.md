@@ -671,12 +671,20 @@ touches in passing:
   active quest's objective whose `Phase` matches the current quest phase and is
   the requested type, else the default value.
   `GetCurrentFactionTier(id, offset, allowExtraTierOverMax)` (IL=46) is the
-  tier formula: `points = GetQuestFactionPoints(id) + offset`, starting at
-  tier 1 and incrementing while `points >= tier * Quest.QuestsPerTier` (capped
-  at 100), then `min(tier, Quest.MaxQuestTier + (allowExtraTierOverMax ? 1 :
-  0))`; a zero `QuestsPerTier` short-circuits to `MaxQuestTier +
-  (allowExtraTierOverMax ? 1 : 0)` (the tier-up cap the trader pipeline reads
-  in [npc-dialog.md](../content/npc-dialog.md) §5). The cctor's defaults are
+  tier formula: `points = GetQuestFactionPoints(id) + offset`, tier starts at 1,
+  and the loop **subtracts** rather than comparing: while the tier is below 100
+  it does `points -= tier * Quest.QuestsPerTier`, returns
+  `min(tier, Quest.MaxQuestTier + (allowExtraTierOverMax ? 1 : 0))` as soon as
+  the remainder goes negative, and otherwise increments the tier. The
+  thresholds are therefore triangular, `tier N` at `QuestsPerTier * (N-1) * N /
+  2` points (10, 30, 60, 100, 150, 210 with the installed numbers), not one
+  tier per fixed block, which is exactly what `GetQuestFactionMax` sums in the
+  paragraph above. A loop that runs out at tier 100 returns 1 (IL_004C), a
+  branch stock's economy cannot reach: 99 quests at the 5-point maximum is 495
+  points, and tier 100 starts at 49,500. A zero `QuestsPerTier` short-circuits
+  to `MaxQuestTier + (allowExtraTierOverMax ? 1 : 0)` (the tier-up cap the
+  trader pipeline reads in [npc-dialog.md](../content/npc-dialog.md) §5). The
+  cctor's defaults are
   `MaxQuestTier = 5` and `QuestsPerTier = 10`, and `QuestsFromXml` then writes
   `MaxQuestTier` from the root's `max_quest_tier` (6 in the installed file),
   which is why the static is 5 before the file loads and 6 after; the file
@@ -1275,6 +1283,14 @@ usedPOILocations, player.entityId)` runs; on failure
 
 ## Changelog
 
+- **2026-11-01:** `GetCurrentFactionTier` IL=46 corrected to the subtractive loop
+  it actually is: the body decrements `points` by `tier * QuestsPerTier` each
+  pass and returns when the remainder goes negative, so the tier thresholds are
+  the triangular numbers `10, 30, 60, 100, 150, 210` and not one tier per fixed
+  block; the tier-100 exit returns 1 (IL_004C). The earlier "incrementing while
+  points >= tier * QuestsPerTier" wording described a linear ladder and is
+  replaced. `GetQuestFactionMax` IL=20 re-read: the same triangular sum over
+  `1..tier`.
 - **2026-08-24:** Objective-side `GetPosition` citations re-attributed to the
   correct classes: IL=339 is `ObjectiveRandomPOIGoto::GetPosition` and IL=232 is
   `ObjectiveClosestPOIGoto::GetPosition` (its own override calling
