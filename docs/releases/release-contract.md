@@ -59,9 +59,14 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**43 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
+**44 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../gameplay/items.md`](../gameplay/items.md) §4.2 records the melee attack rate:
+  `ItemActionDynamicMelee.canStartAttack` and `OnHoldingUpdate` read passive 18 with the
+  item's own tags plus `primary`/`secondary`, and a swing waits `60 / rate + 0.1` s; the
+  stone shovel's `base_set` is 50.
 
 - [`../gameplay/items.md`](../gameplay/items.md) §4.2 records that the ranged reload has
   no timer in the item data: `AnimatorRangedReloadState` fires `onReloadStart`,
