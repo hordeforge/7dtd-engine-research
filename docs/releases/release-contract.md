@@ -59,9 +59,13 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**45 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
+**46 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../gameplay/crafting-recipes.md`](../gameplay/crafting-recipes.md) §2 records that
+  `GetRecipeCraftTime` scales `recipe.craftingTime` with passive 90 at the recipe's own
+  tags and clamps at zero.
 
 - [`../gameplay/loot-economy.md`](../gameplay/loot-economy.md) §8.5 records that
   `LootContainer.SpawnItem` scales a spawned count by passive 81 with the spawned item's
