@@ -665,9 +665,15 @@ touches in passing:
   `q.QuestFaction`, which `EntityTrader` stamped from its giver's
   `NPCInfo.QuestFaction` when the offer was rolled. `QuestProgressDay` starts at
   `int.MinValue` (`Quest..ctor`), so a quest only counts once
-  `HandleQuestCompleteToday` has stamped the day, which it does while today's
+  `HandleQuestCompleteToday` has stamped the day. That method has one caller:
+  `ObjectiveReturnToNPC.OnStart` (IL=14), which calls it only when the quest
+  class adds to tier completion. A quest therefore credits faction points only
+  if it reaches a `ReturnToNPC` objective, which is every trader POI job's
+  final phase; a quest that completes in the field or on an `InteractWithNPC`
+  alone keeps `QuestProgressDay` at its sentinel and credits nothing. The stamp
+  is applied while today's
   completed count is below the `QuestProgressionDailyLimit` game stat
-  (`Quest.QuestsPerDay`, `GameStats.GetInt`), else stamps -1 and shows
+  (`Quest.QuestsPerDay`, `GameStats.GetInt`), else -1 and
   `buffShowQuestLimitReached`. That stat's `PropertyDecl` in
   `GameStats.initPropertyDecl` (IL=702) carries `EnumType` 0 (int) and a
   `defaultValue` of **4**, and `sandbox_overrides.xml` states no override, so
@@ -1315,6 +1321,9 @@ usedPOILocations, player.entityId)` runs; on failure
 - **2026-11-01:** `QuestProgressionDailyLimit`'s default pinned: `PropertyDecl`
   enum 65, `EnumType` 0, `defaultValue` 4, with no `sandbox_overrides.xml`
   override, so four completions a day credit faction points (-1 is unlimited).
+  Its stamp's only caller is `ObjectiveReturnToNPC.OnStart` IL=14, gated on
+  `AddsToTierComplete`, so a quest with no `ReturnToNPC` objective never
+  credits.
 - **2026-11-01:** `GetCurrentFactionTier` IL=46 corrected to the subtractive loop
   it actually is: the body decrements `points` by `tier * QuestsPerTier` each
   pass and returns when the remainder goes negative, so the tier thresholds are

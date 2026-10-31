@@ -68,7 +68,8 @@ section used to describe is published under the tag and in
   (6), and what `CompleteQuest` credits (`AddsToTierComplete` default true,
   `AddsProgression` = `QuestProgressDay > 0`, points = `DifficultyTier`, no-op on zero).
   `QuestJournal.Write` stores no faction points; a load re-derives them. The daily cap's
-  stat default is pinned at 4 (`QuestProgressionDailyLimit`).
+  stat default is pinned at 4 (`QuestProgressionDailyLimit`), and the stamp's only
+  caller is `ObjectiveReturnToNPC.OnStart`.
 
 - [`../content/npc-dialog.md`](../content/npc-dialog.md) §8 records the `quest_faction`
   parse: written only when the attribute exists, so an absent one is 0.
