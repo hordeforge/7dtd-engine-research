@@ -59,9 +59,17 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**41 commits after `v3.3.0` (2026-10-25) as of 2026-10-30.** The retarget this
+**43 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../gameplay/items.md`](../gameplay/items.md) §4.2 records that the ranged reload has
+  no timer in the item data: `AnimatorRangedReloadState` fires `onReloadStart`,
+  `onReloadUpdate` and `onReloadStop` (58/59/60), its state exit is the only
+  `ItemActionRanged.CompleteReload` call site, and passive 102
+  (`ReloadSpeedMultiplier`) is evaluated with base 1 by both avatar controllers into the
+  animator's `reloadSpeed` parameter, so it scales the reload clip whose length lives in
+  the asset bundles.
 
 - [`../world/world-generation.md`](../world/world-generation.md) §3.5 corrects the
   wilderness-road spawn walk (`createTraderSpawnIfAble`): it creates player spawns, not
