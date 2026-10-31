@@ -668,7 +668,11 @@ touches in passing:
   `HandleQuestCompleteToday` has stamped the day, which it does while today's
   completed count is below the `QuestProgressionDailyLimit` game stat
   (`Quest.QuestsPerDay`, `GameStats.GetInt`), else stamps -1 and shows
-  `buffShowQuestLimitReached`; the stat's default value is not pinned yet.
+  `buffShowQuestLimitReached`. That stat's `PropertyDecl` in
+  `GameStats.initPropertyDecl` (IL=702) carries `EnumType` 0 (int) and a
+  `defaultValue` of **4**, and `sandbox_overrides.xml` states no override, so
+  a stock world credits at most four completions a day; -1 means unlimited
+  (the `QuestsPerDay == -1` branch in `HandleQuestCompleteToday`).
 - **`QuestJournal.Write`** (IL=138) does not write `GlobalFactionPoints` or
   `QuestFactionPoints`: the load path re-adds them for every quest still in
   `Completed` state that adds to tier completion and progression, so the
@@ -1307,8 +1311,10 @@ usedPOILocations, player.entityId)` runs; on failure
   false on seven quests, `AddsProgression` = `QuestProgressDay >
   0`, points = `QuestClass.DifficultyTier`, no-op on zero), `Quest..ctor`
   `QuestProgressDay = int.MinValue`, and `QuestJournal.Write` IL=138 confirmed
-  to store no faction points (the load path re-adds them). The
-  `QuestProgressionDailyLimit` default is recorded as unpinned.
+  to store no faction points (the load path re-adds them).
+- **2026-11-01:** `QuestProgressionDailyLimit`'s default pinned: `PropertyDecl`
+  enum 65, `EnumType` 0, `defaultValue` 4, with no `sandbox_overrides.xml`
+  override, so four completions a day credit faction points (-1 is unlimited).
 - **2026-11-01:** `GetCurrentFactionTier` IL=46 corrected to the subtractive loop
   it actually is: the body decrements `points` by `tier * QuestsPerTier` each
   pass and returns when the remainder goes negative, so the tier thresholds are
