@@ -654,6 +654,23 @@ touches in passing:
   criteria; its `CheckForQuestGiver` override merely `TryParse`s
   `Value` and then returns a hardcoded false, so any quest definition using
   this criteria is never offered (dead in this build).
+- **`QuestJournal.CompleteQuest(q)`** (IL=91) credits a completion to faction
+  points only under three conditions: the quest class's `AddsToTierComplete`
+  (a cctor default of true; `quests.xml` never sets it), `q.AddsProgression`
+  (IL=5, `QuestProgressDay > 0`), and a non-zero `DifficultyTier` inside
+  `AddQuestFactionPoint`. The points added are `QuestClass.DifficultyTier`,
+  the quest's `difficulty_tier` property (0 when the file states none), under
+  `q.QuestFaction`, which `EntityTrader` stamped from its giver's
+  `NPCInfo.QuestFaction` when the offer was rolled. `QuestProgressDay` starts at
+  `int.MinValue` (`Quest..ctor`), so a quest only counts once
+  `HandleQuestCompleteToday` has stamped the day, which it does while today's
+  completed count is below the `QuestProgressionDailyLimit` game stat
+  (`Quest.QuestsPerDay`, `GameStats.GetInt`), else stamps -1 and shows
+  `buffShowQuestLimitReached`; the stat's default value is not pinned yet.
+- **`QuestJournal.Write`** (IL=138) does not write `GlobalFactionPoints` or
+  `QuestFactionPoints`: the load path re-adds them for every quest still in
+  `Completed` state that adds to tier completion and progression, so the
+  totals are derived from the journal's completed quests rather than stored.
 - **`QuestTierReward`**: a `Tier` int plus a `List<BaseReward>` parsed by
   `QuestsFromXml.ParseQuestTierRewards`; `QuestEventManager.HandleNewCompletedQuest`
   compares the player's faction quest tier before/after a completion and calls
@@ -1283,6 +1300,12 @@ usedPOILocations, player.entityId)` runs; on failure
 
 ## Changelog
 
+- **2026-11-01:** `QuestJournal.CompleteQuest` IL=91 credit rule pinned
+  (`AddsToTierComplete` default true, `AddsProgression` = `QuestProgressDay >
+  0`, points = `QuestClass.DifficultyTier`, no-op on zero), `Quest..ctor`
+  `QuestProgressDay = int.MinValue`, and `QuestJournal.Write` IL=138 confirmed
+  to store no faction points (the load path re-adds them). The
+  `QuestProgressionDailyLimit` default is recorded as unpinned.
 - **2026-11-01:** `GetCurrentFactionTier` IL=46 corrected to the subtractive loop
   it actually is: the body decrements `points` by `tier * QuestsPerTier` each
   pass and returns when the remainder goes negative, so the tier thresholds are

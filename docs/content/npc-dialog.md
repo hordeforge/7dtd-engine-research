@@ -276,7 +276,14 @@ ids) built by `QuestsFromXml.ParseQuestList` from `<quest_list>` elements. Its
 requirement) that section 5 samples. `NPCInfo.Quests` resolves
 `NPCInfo.QuestListName` through it; `NPCInfo` also carries `QuestFaction`,
 `TraderID` and `DialogID`, the glue between an NPC, its dialog tree, and its
-offer pool.
+offer pool. `NPCsFromXml.ParseNPCInfo` (IL=153) writes `QuestFaction` only when
+the `npc_info` element has a `quest_faction` attribute (the `HasAttribute`
+guard at IL_0190, `Convert.ToByte` at IL_01B2), so a record that states none
+keeps the CLR default of 0; the installed file states `quest_faction="1"` on
+the five traders that offer jobs and omits it on `traderTest`. The field is
+what `EntityTrader` stamps onto each rolled offer (`Quest.QuestFaction`) and
+what `AddQuestFactionPoint` credits on completion
+([`quests-challenges.md`](../content/quests-challenges.md) section 9).
 
 ## 9. BaseObjectiveModifier
 
@@ -325,6 +332,10 @@ objective's lifetime:
 
 ## Changelog
 
+- **2026-11-01:** `NPCsFromXml.ParseNPCInfo` IL=153: `quest_faction` is written
+  only when the attribute exists (HasAttribute IL=0190, `Convert.ToByte`
+  IL_01B2), so an absent one is 0. The installed file states it on the five
+  job traders and not on `traderTest`.
 - **2026-08-11:** Trader/dialog IL re-verified: NetPackageNPCQuestList.write IL=99, GetQuestFactionPoints IL=4, CanDamageEntity IL=2, get_IsValidAimAssistSnapTarget IL=2 (exact).
 - **2026-08-10:** EntityTrader leaf constants re-verified: GetQuestFactionPoints IL=4, CanDamageEntity IL=2 (exact).
 - **2026-08-08:** EntityTrader.PlayVoiceSetEntry (IL=98): TraderDialog gate,
