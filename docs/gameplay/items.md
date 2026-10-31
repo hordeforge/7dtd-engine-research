@@ -762,6 +762,17 @@ the runtime `actionData` list (the held path reads
 | Consume | `ItemActionEat` | `consume`: reduces `UseTimes` via `EffectManager`, sets stealth smell, creates a refund item (`CreateItem`, e.g. empty jar), fires quest events, applies buffs |
 | Dynamic | `ItemActionDynamicMelee` | the newer melee model: `GrazeCast` for near-misses, `hitTarget`, `harvestOnCompletion`, per-swing crit chance |
 
+**`ItemActionRanged` rate of fire (V3.3.0 re-read).** `OnHoldingUpdate` (IL=146)
+sets the shot delay from passive **17**: it evaluates
+`EffectManager.GetValue(RoundsPerMinute = 17, itemValue, 60 / OriginalDelay,
+holder, null, FastTags default, ...)` and stores `Delay = 60 / value`. The value's
+default is therefore the item's rounds per minute, `OriginalDelay` comes from the
+action's own `Delay` property (`OnModificationsChanged` IL=334 parses
+`Properties.Delay`), and a perk's `RoundsPerMinute perc_add` rows change the rate
+before the division. The consequence for a port: the time between two shots is
+`60 / rounds-per-minute` seconds, not a constant, and an item that states no
+`RoundsPerMinute` starts from `60 / Delay`.
+
 **`ItemActionRanged.fireShot` (IL=482) re-pin:** look ray + direction offset ->
 `Voxel.Raycast` -> clone `voxelRayHitInfo`; entity hits via
 `ItemActionAttack.FindHitEntityNoTagCheck` (drone ally skip); block hits via
@@ -2092,6 +2103,10 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-11-01:** `ItemActionRanged.OnHoldingUpdate` re-read on V3.3.0: the shot
+  delay is `60 / GetValue(RoundsPerMinute = 17, itemValue, 60 / Delay)`, so the
+  item's `RoundsPerMinute` is the rate and the default comes from the action's
+  `Delay` property (§4.2).
 - **2026-10-24:** V3.3.0 b18 re-read of the item container model. `ItemStackGrid`
   rewritten into the storage and save/wire core (§6; version-2 grid, locks,
   preferences, worldTimeTouched, playerOwned); `Hand` + `HoldingMode` replace
