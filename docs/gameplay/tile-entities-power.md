@@ -1066,6 +1066,36 @@ matching hash adds the user to `allowedUserIds` (SetModified) and returns
 true; `IsLocked` (IL=3) is the `locked` field, `HasPassword` (IL=6) is
 `!IsNullOrEmpty(passwordHash)`.
 
+**`TEFeatureLockPickable.ShowUI` (IL=171) makes a pick a rolled number of
+lockpicks inside one timed attempt.** Starting a pick sets
+`nthPercentile = rand.RandomRange(0, 0.999999)`, `lockPicksUsed = 0` and
+`unlockCompletion = 0`, then:
+
+- `lockTime = GetValue(LockPickTime = 77, holdingItem, lockPickTime)` and
+  `duration = lockTime * (1 - unlockCompletion)`.
+- `breakChance = GetValue(LockPickBreakChance = 78, holdingItem,
+  lockPickBreakChance)`, so a perk or a book can move it like any passive.
+- `picksNeeded = CalculateLockpicksNeeded(1 - breakChance, nthPercentile, 15)`,
+  the closure at IL=31: it returns 1 unless the success chance is in `(0, 1]`
+  and the cap is positive, otherwise
+  `min(Fastfloor(log(1 - nthPercentile) / log(breakChance)) + 1, 15)`. The
+  closure reads the captured `nthPercentile` field instead of its parameter, so
+  passing the same value is what makes the two agree.
+- With more than one pick left, the timer's alternate (break) instant is
+  `(lockTime - duration) + RandomizeNextBreak(picksRemaining - 1) * duration`.
+  `RandomizeNextBreak(k)` is the smallest of `k` `RandomRange(0, 1)` draws
+  clamped to `[0.05, 0.95]`, so the breaks are spread through the attempt's one
+  `lockTime` rather than adding time: the shortest of k uniforms is the first
+  break and the last draws approach the end.
+
+`EventData_BreakEvent` (IL=80) removes one `lockPickItem` from the player, plays
+`Misc/locked` and shows `ttLockpickBroken`. `EventData_Event` (IL=50) sets
+`unlockCompletion = 1`, increments `lockPicksUsed`, plays `Misc/unlocking`,
+downgrades the block (`DowngradeToUnlockedVariant`) and fires the configured
+success event. `ShowUI` assembles the pick `TimerEventData`
+(`FullTimeFinishEvent`, `AlternateEvent`, `CloseEvent`) and opens `XUiC_Timer`
+for `lockTime`.
+
 ---
 
 ## 5. Triggers and powered traps
@@ -1195,6 +1225,14 @@ the matching `PowerItem` by world position and links the two.
 
 ## Changelog
 
+- **2026-11-01:** `TEFeatureLockPickable.ShowUI` (IL=171) pinned: the pick
+  rolls `nthPercentile` once, `picksNeeded` is
+  `min(floor(log(1 - nthPercentile) / log(breakChance)) + 1, 15)` (closure
+  IL=31), the break instant is
+  `(lockTime - duration) + RandomizeNextBreak(remaining - 1) * duration`, and
+  `RandomizeNextBreak(k)` is the smallest of k uniforms clamped to [0.05,
+  0.95]. Each break removes one lockpick (`EventData_BreakEvent` IL=80); the
+  success downgrades the block (`EventData_Event` IL=50).
 - **2026-08-11:** Trap/feature IL re-verified: get/set_ItemSlots IL=12/16, set_IsLocked IL=16, get_AmmoItems IL=40, target flags IL=7, get_OwnerEntityID IL=9 / SetOwnerEntityID IL=27 / set IL=4, get_PowerUsed IL=8, set_IsToggled IL=24, MeleeTrap.write IL=15, Workstation.write IL=246, PoweredTrigger.write IL=138, TryGetSelfOrFeature IL=53 / GetSelfOrFeature IL=6, PrecomputeCapabilities IL=43, SplitFullCommandName IL=28, UpdateBlockActivationCommands IL=124, Door.CanOpen IL=29, Storage.CountItem IL=32 / AddItem IL=29, Lockable.InitBlockActivationCommands IL=37 / AllowBlockActivationCommand IL=93 / get_TriggerRole IL=2 / OnBlockTriggered IL=10 (exact).
 - **2026-08-11:** Forge/collector IL re-verified: get_IsCrafting IL=15, get_BurnTimeLeft IL=3, readRecipeStackArray IL=79, TileEntityForge.UpdateTick IL=344, GetFuelLeft IL=30, GetMetalForgedSoFar IL=45, GetInputWeight/GetOutputWeight/GetBurningItemValue IL=3, Collector.write IL=278, handleUpdateForOutputType IL=233, getCurrentConvertCount IL=52, getCurrentConvertSpeed IL=9, getCatalystCount IL=57, getFuelCount IL=30, getFuelSlotFuelCount IL=35, getMaxProductionCount IL=29, getAdditionalFuelCost IL=3, newItem IL=36, removeFuel IL=67, dropItems IL=22, isDisabled IL=16, anyEnabled IL=39, resetTimeValues IL=9, GetSlotOutputType IL=9, GetSlotFillData IL=28, IsCurrentStack IL=26, BlockCollector addTileEntity IL=13 / removeTileEntity IL=7 / OnBlockEntityTransformBeforeActivated IL=11 / GetSandboxModifiedFuelNeeded IL=28 / modifyTime IL=16, TileEntityLight.write IL=48, TileEntityPoweredRangedTrap.write IL=74 / get_TargetType IL=12 / set_TargetType IL=14 (exact).
 - **2026-08-11:** Power-block IL re-verified: PowerItem.write IL=55, NetPackageWireActions write IL=45 / read IL=38 / ProcessPackage IL=163, CreatePowerItem IL=95, BlockSolarPanel.CanPlaceBlockAt IL=28, BlockSpeaker.Init IL=16 / ActivateBlock IL=53, BlockSpeakerTrader.Init IL=42, BlockSpotlight.OnBlockActivated IL=126 / updateState IL=249,  IL=189, BlockElectricWire.Init IL=25, BlockRallyMarker.OnBlockActivated IL=29 (exact).
