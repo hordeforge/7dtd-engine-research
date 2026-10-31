@@ -656,7 +656,9 @@ touches in passing:
   this criteria is never offered (dead in this build).
 - **`QuestJournal.CompleteQuest(q)`** (IL=91) credits a completion to faction
   points only under three conditions: the quest class's `AddsToTierComplete`
-  (a cctor default of true; `quests.xml` never sets it), `q.AddsProgression`
+  (`add_to_tier_complete`; a cctor default of true, and `quests.xml` states
+  false on seven quests, among them `tier2_nexttrader` and the tier-complete
+  chain), `q.AddsProgression`
   (IL=5, `QuestProgressDay > 0`), and a non-zero `DifficultyTier` inside
   `AddQuestFactionPoint`. The points added are `QuestClass.DifficultyTier`,
   the quest's `difficulty_tier` property (0 when the file states none), under
@@ -1301,7 +1303,8 @@ usedPOILocations, player.entityId)` runs; on failure
 ## Changelog
 
 - **2026-11-01:** `QuestJournal.CompleteQuest` IL=91 credit rule pinned
-  (`AddsToTierComplete` default true, `AddsProgression` = `QuestProgressDay >
+  (`AddsToTierComplete`, the `add_to_tier_complete` property, default true and
+  false on seven quests, `AddsProgression` = `QuestProgressDay >
   0`, points = `QuestClass.DifficultyTier`, no-op on zero), `Quest..ctor`
   `QuestProgressDay = int.MinValue`, and `QuestJournal.Write` IL=138 confirmed
   to store no faction points (the load path re-adds them). The
