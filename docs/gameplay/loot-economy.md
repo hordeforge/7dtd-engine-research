@@ -1002,6 +1002,30 @@ the group's own `lootQualityTemplate`, no player, `FastTags.none`, with
 `_sandboxModifierUsed` all on, and one slot. Returns the first spawned stack,
 or `ItemStack.Empty` when nothing rolled.
 
+### 8.5 `LootQuantity` (passive 81) scales a spawned count
+
+`LootContainer.SpawnItem` (IL=394) opens by replacing the count it was handed
+when a player is present: it evaluates
+`EffectManager.GetValue(LootQuantity = 81, player.inventory.holdingItemItemValue,
+countToSpawn, player, null, lootItemValue.ItemClass.ItemTags | containerTags,
+...)`, casts the float to int (`conv.i4` truncates) and clamps the result to
+`ItemClass.MaxCount`. Three things follow from that call:
+
+- The tag context is the **spawned item's** own tags OR the **container's** tags,
+  not the loot entry's; the held item's value supplies any item-specific rows.
+- `base_add` rows add to the count and `perc_add` rows multiply it, in the order
+  the effect chain yields them; the final float is truncated once, after the
+  chain, and the per-stack cap applies after that.
+- The passive is evaluated per spawned item, so a container roll that names the
+  same item twice scales each stack separately.
+
+`progression.xml` states 13 rows: `perkTreasureHunter` raises
+`buriedTreasure` by 10 to 30 percent over its ranks, `perkLockPicking` adds
+`+1`/`+2` to `lockPickSkill` at ranks 2 and 3, the Lucky Looter volumes add 20
+percent to `dukes`, `ammo`, `brass`, `lead`, `junk`, `food` and `medical`,
+`perkFiremansAlmanacHeat` doubles `riverWater`, and the Great Heist volumes add
+10 percent to `gems` and `dukes` plus 20 percent to `resourceLockPick`.
+
 ## Related docs
 
 | Doc | Role |
@@ -1016,6 +1040,9 @@ or `ItemStack.Empty` when nothing rolled.
 
 ## Changelog
 
+- **2026-11-01:** `LootQuantity` (passive 81) pinned: `SpawnItem`
+  (IL=394) scales the passed count with the spawned item's tags plus the
+  container's, truncates once and clamps to `MaxCount` (§8.5).
 - **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `TraderArea.IsWithinProtectArea` 47 -> 59 (exact). Prior values were the V3.1.0 b14 measurement.
 - **2026-08-11:** Loot-entity IL re-verified: EntityLootContainer OnUnlockedServer IL=7, OnUpdateEntity IL=46, removeBackpack IL=10, IsMarkedForUnload IL=8, GetLootList IL=11, EntityClass.AddDroppedId IL=33, CheckDestroyTileEntity IL=37, EntityItem.OnCollectServer IL=8, Init IL=10, PostInit IL=37, InitLocalActivationCommands IL=15, CheckStick IL=93, get_IsDistractionActive IL=5, PhysicsMasterBecome IL=6, SetItemStack IL=115, CanCollect IL=12, tickDistraction IL=147, OnUpdateEntity IL=114 (exact).
 - **2026-10-24:** V3.3.0 b18 re-read: `EntityContainerAbs` base for
