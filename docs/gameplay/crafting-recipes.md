@@ -115,6 +115,20 @@ queued as a `RecipeQueueItem` with a craft time, and completed when the time
 elapses: the server consumes the ingredients, produces the output at the tier
 quality, and grants crafting XP (`AddCraftComplete`).
 
+**Craft time and the `CraftingTime` passive (V3.3.0 re-read).** The clock a
+recipe carries is `XUiM_Recipes.GetRecipeCraftTime` (IL=29): it evaluates
+`EffectManager.GetValue(CraftingTime = 90, null, recipe.craftingTime, player,
+recipe, recipe.tags, ...)`, multiplies the result by the static
+`XUiM_Recipes.CraftingTimeModifier` (1 in the cctor; written from sandbox
+option 97, `CraftingTime`, by `UpdateInGameValuesWithSandboxOptions`), and
+clamps a negative value to 0. The tag context is the **recipe's own `tags`**
+and the recipe rides along as the effect context, so a perk's `perc_add` row
+matches by recipe tag rather than by item: `perkPackMule`'s `-.1..-.5` on
+`packMuleCrafting` halves the 152 recipes carrying that tag at rank 5, and
+`perkSalvageOperations` speeds the 33 `salvageScrap` ones. `Recipe.craftingTime`
+is the file's `craft_time`, and the fetched value is what the queue stores in
+`RecipeQueueItem.OneItemCraftTime`.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Requested
@@ -330,6 +344,8 @@ raises the `LootProb` of that magazine until the skill reaches 100.
 
 ## Changelog
 
+- **2026-11-01:** `CraftingTime` (passive 90) pinned: `GetRecipeCraftTime`
+  (IL=29) scales `recipe.craftingTime` at the recipe's own tags and clamps at zero (§2).
 - **2026-08-11:** cMaxLoadTimePerFrameMillis pinned 50 ms (Constants cctor IL).
 - **2026-08-11:** ProgressionValue IL re-verified: SpendSkillPoints IL=16, addProgressionCurrency IL=85, GetPerkList IL=40, Write IL=51, Read IL=100, SetupData IL=144, set_Level IL=24, GetCalculatedLevel IL=79, get_PercToNextLevel IL=15, CanPurchase IL=9, IsLocked IL=6, Write IL=17, Read IL=16, ProgressionClass ModifyValue IL=17, CalculatedCostForLevel IL=31, GetCalculatedMaxLevel IL=78, canRun IL=8, AddLevelRequirement IL=7, GetRequirementsForLevel IL=20, PostInit IL=14, FireEvent/HasEvents IL=9 (exact).
 - **2026-08-11:** Craft/wire IL re-verified: CanCraft IL=128, CanCraftAny IL=134, ContainsIngredients IL=39, Recipe.Write IL=56, RecipeQueueItem.Write IL=82 / Read IL=116 / ReadLegacy IL=101 / Clear IL=32, IsUnlocked IL=31, GetCraftingTier IL=22, ModifyValue IL=15, UnlockRecipe IL=21/18, LockRecipe IL=40 (exact).
