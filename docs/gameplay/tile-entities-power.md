@@ -804,7 +804,50 @@ The timer is a delay rather than a budget: it is positive while waiting and
 driven negative while converting, which is why the inner loop converts every
 item it can before returning.
 
-**Open questions.** `V_8 = 3` is a hard-coded shadow index, while the ctor
+### 4.2b `TileEntityForge.UpdateTick` (IL=340): metal into the mold
+
+The forge is its own tile entity, not a `TileEntityWorkstation`, so the block
+players actually smelt in has a separate loop. Verified against
+`il/full-v3.1.0/_global/TileEntityForge.il.txt`.
+
+Order: base tick, `recalcStats()`, `timePassed` in ticks from `GameTimer`,
+`updateLightState`, then **`fuelInStorageInTicks + fuelInForgeInTicks == 0`
+returns** - an unfuelled forge melts nothing - and `emitHeatMapEvent(world, 1)`
+fires for as long as it holds any fuel, which is why a lit forge is a heat
+source whether or not a craft is queued. `timePassed` is then clamped to the
+fuel ticks left (`FastMin`), and the fuel loop from 4.2 runs.
+
+**The melt** (`IL_019B` onwards), after `moveDown(fuel)` compacts the array:
+
+```text
+budget = (int)(timePassed * 0.1)          // metal units this tick
+while budget > 0 and the input slot holds an item:
+    metalInForge    += item.GetWeight()
+    input[slot].count -= 1
+budget    = min(metalInForge, budget)     // cannot melt more than is in the forge
+metalInForge -= budget
+moldedMetalSoFar += budget
+```
+
+So `metalInForge` is a pool of **weight units**: each consumed input item
+contributes its own weight, and the forge can convert `timePassed * 0.1` units
+per tick (20 TPS, so two units a second), no faster than the metal it holds and
+no longer than its fuel lasts. Input moves down the array (`moveDown`) so the
+last non-empty slot is the one being melted.
+
+**The mold** (`IL_02B0`-`IL_02F9`): while
+`moldedMetalSoFar >= outputWeight`, it subtracts `outputWeight` and rebuilds
+`output = ItemStack(outputItem, output.count + 1)`. `outputWeight` and
+`outputItem` come from `recalcStats()` and the mold slot, so the item produced
+is whatever the mold names and the cost is that item's weight in metal units.
+
+**Open questions.** `recalcStats()` is the setter of `outputWeight` /
+`outputItem` and was not read here; the tick also carries the `outputWeight > 0`
+guard and the `metalInForge` cap, so the exact per-mold cost still wants a
+targeted read. The heat emission takes no `HeatMapStrength` argument - it is the
+`TileEntity` helper with its own block-derived strength.
+
+**Open questions (workstation).** `V_8 = 3` is a hard-coded shadow index, while the ctor
 allocates `input` with three slots; either the array is resized at load or the
 shadow slot only exists for a station whose `materialNames` length is below
 three, which the forge (six materials) is not. And this function is the

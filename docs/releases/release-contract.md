@@ -59,9 +59,17 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**54 commits after `v3.3.0` (2026-10-25) as of 2026-11-01.** The retarget this
+**55 commits after `v3.3.0` (2026-10-25) as of 2026-11-02.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../gameplay/tile-entities-power.md`](../gameplay/tile-entities-power.md) §4.2a-4.2b
+  pin the two smelting loops: the workstation's `HandleMaterialInput` (melt time from
+  the item's weight times `MeltTimePerUnit`, tools scaling it through `ModifyValue` tag
+  95, one item's weight in `unit_<category>` per conversion) and the forge's own
+  `UpdateTick` (`metalInForge` accumulating item weights, `0.1` units a tick converted
+  no faster than the metal and no longer than the fuel, and a mold named by
+  `recalcStats()` consuming `outputWeight` per item).
 
 - [`../world/blocks.md`](../world/blocks.md) records the shape-group helper's own
   properties and the `SortOrder2` assignment: each shape numbered from a counter that
