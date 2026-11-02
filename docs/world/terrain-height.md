@@ -127,6 +127,50 @@ from the prefab height for the first terrain-shape block); `SetTerrainHeight`
 | `MeshGeneratorMC2` / `Prefab` | `GetTerrainHeight` | **int** | Meshing |
 | `ITerrainGenerator` / `IChunk` | * | * | Abstract; patch implementors only |
 
+**The meshed surface is `m_TerrainHeight`, and a block edit does not move it
+(2026-11-03, verified from IL).** `m_TerrainHeight` and `m_HeightMap` are two
+different surfaces. `Chunk.GetTerrainHeight` reads the former; `Chunk.GetHeight`
+reads the latter, and the block-edit path refreshes only the latter:
+`Chunk.SetBlockRaw` (IL=386) runs `RecalcHeightAt` (IL=55) when a column
+changes between air and solid, and `RecalcHeightAt` writes `m_HeightMap`.
+`Chunk.SetTerrainHeight` (IL=10) is written by exactly five managed sites in the
+V3.1.0 dump: `TerrainGeneratorWithBiomeResource.GenerateTerrain` (the generator's
+own column height), `Chunk.ToTerrain(Chunk, Chunk)` (IL=92, which copies a whole
+column's `GetHeight` into both maps when a prefab chunk becomes terrain),
+`Prefab`'s copy path for a cell whose block `IsTerrain()`,
+`DynamicMeshChunkData`, and `ConsoleCmdSmoothWorldAll` (`smoothworldall`, below).
+A painted, mined or placed block is not one of them.
+
+The client's smooth deck is interpolated from that map: `MeshGeneratorMC2.build`
+(IL=1662) fills `terrainHeightsCache` through `GetTerrainHeight` and
+`topSoilCache` through `isTopSoil`/`calcTopSoil`, then decks the surface from
+those caches and uses `getDensity` only for the cell classification (see
+[`chunk-providers.md`](../world/chunk-providers.md) section 3, "Surface density
+is binary; the client height-smooths"). Consequence for a clone: a placed or
+removed block does **not** move the surface it stands on or is missing from. It is
+a full-block step against the terrain height and is drawn as block geometry with a
+vertical face. Only the terrain height itself, interpolated across columns, is
+smooth. Turning such a step into a slope is the deliberate block tool
+`BlockToolTerrainSmoothing` (`SmoothTerrain`, `SnapTerrain45`, `SnapTerrain22`;
+[`blocks.md`](../world/blocks.md)), whose `HasValidNeighbor` gates a brush write,
+and `ChunkCluster.snapTerrainToPosition` (IL=113) normalises the density at the
+border of a placed block instead of blending the block into the deck.
+
+**Why an integer height is flat and a fractional one slopes.** The same
+`ConsoleCmdSmoothWorldAll.Execute` (IL=212) is the clearest write-up of the
+density encoding. For a column it writes the terrain block and
+`MarchingCubes.DensityTerrain` (-128) for every cell up to the top solid cell,
+then splits the top two cells: `DensityTerrain * f` on the top solid cell and
+`DensityAir * (1 - f)` on the cell above, where `f` is the sub-block part of the
+column's height. The marching-cubes isosurface therefore sits at the surface's
+fraction, not at the cell's top face. A height that lands on a block boundary
+splits evenly (the two cells meet at the boundary) and the surface is drawn flat
+there; only a height between two boundaries bends the isosurface into a slope.
+A clone that keeps integer column heights can approximate the slope by
+interpolating those heights across the shared corner, but it must anchor the
+interpolation to the terrain height, not to the column's topmost block, or an
+edit's full-block step is bevelled into the same ramp as a hillside.
+
 **`HeightMapUtils` conversion leaves (all IL-verified):**
 `ConvertDTMToHeightData` (three overloads: `Color[] + size + flip` IL=81,
 `Texture2D + flip` IL=96, `Color32[] + w + h + flip` IL=155) turns a DTM
@@ -259,6 +303,7 @@ see `7dtd-realearth/docs/realearth-review.md`.
 
 ## Changelog
 
+- **2026-11-03:** Terrain-height writers closed: the edit path (`SetBlockRaw` -> `RecalcHeightAt`) moves only `m_HeightMap`, and five managed sites write `m_TerrainHeight`; the smooth deck is interpolated from it, so a placed or removed block is a full-block step against the terrain surface. Added with the density split of `ConsoleCmdSmoothWorldAll.Execute` (IL=212) that makes an integer height flat and a fractional one a slope.
 - **2026-08-28:** zdtd ADR 0036 note (WireProfile dialects mirror this table as data).
 - **2026-08-11:** Terrain IL re-verified: GetHeightAt IL=22, GetMaxHeight IL=29, GetHeight IL=9/5, RecalcHeightAt IL=55, AddWallVolumeId IL=18, GetWallVolumes IL=3, GetTerrainHeight IL=9, SetTerrainHeight IL=10, ConvertDTMToHeightData IL=81/96/155, ConvertDTMToTerrainStampData IL=46, LoadRAWToHeightData IL=60, LoadHeightMapRAW IL=132, LoadHeightMapRAWAsUnityHeightMap IL=90, LoadHeightMapRAWAsStampData IL=101, MarchingCubes.cctor IL=9, Chunk.SetTerrainNormal IL=43 / GetTerrainNormalY IL=15, IsOpenSkyAbove IL=9, GetTopMostTerrainHeight IL=28 (exact).
 - **2026-08-10:** Chunk height IL re-verified: AddWallVolumeId IL=18, GetWallVolumes IL=3, GetTerrainHeight IL=9, SetTerrainHeight IL=10 (exact).
