@@ -91,6 +91,19 @@ Live IL order (V3.2.0 b9):
    reduced by that. Non-physical: entity damage scaled by
    `1 - passive **43**/100` (min 0); armor damage = max(0, original - new).
 
+   **`GetTotalPhysicalArmorRating` composition (decompiled source, V3.3.0):**
+   `tags = coreDamageResist | attackingItem.ItemTags`, then
+   `rating = GetValue(PhysicalDamageResist = 41, null, 0, wearer, tags,
+   calcEquipment, calcHoldingItem, calcProgression, calcBuffs,
+   calcChallenges, useMods, durability)` and
+   `return GetValue(TargetArmor = 163, attackingItem, rating, attacker)`.
+   So `TargetArmor` is a **weapon-side rebase of the target's rating**, read
+   with the attacker as the holder, and it is one of the two stats
+   `ItemValue.IsStatLowerBetter` names (`StaminaLoss`, `TargetArmor`); a
+   `perc_add -.3` row on a spear therefore leaves 70 percent of the target's
+   rating. Grade: verified, decompiled member of the shipped assembly
+   (ILSpy 10.1.1.8388).
+
 4. `GetDamageFraction(_damage)` (IL=6) = `_damage / GetMaxHealth()`; Fatal when
    Strength >= Health.
 5. Head-part (`HitBodyPart & 2`) and damage-fraction thresholds feed
@@ -108,6 +121,15 @@ Live IL order (V3.2.0 b9):
      `sourceChance * damagePer * mult`; local player debug can force 1.
    - if chance > 0 and rand ≤ chance: set `Dismember`; leg also
      `TurnIntoCrawler`.
+   - **The source chance (decompiled source, V3.3.0):**
+     `ItemAction.GetDismemberChance(data, hitInfo)` reads
+     `GetValue(DismemberChance, holdingItemItemValue, 0, holder,
+     actionTags | item tags)`, where `actionTags` gains `head` when the hit
+     tag is `E_BP_Head`, `arm` when the tag contains `arm`, and `leg` when it
+     contains `leg` (case-insensitive). A row's `tags="head,arm,leg"`
+     therefore gates it per hit part, and a `tags="perkX"` row folds only when
+     the attacker's progression supplies that perk. Grade: verified, decompiled
+     member of the shipped assembly (ILSpy 10.1.1.8388).
    - Else if leg: if `LegCrawlerThreshold > 0` and damage fraction ≥ threshold
      set `TurnIntoCrawler`. If not already crawler path and
      `LegCrippleScale > 0`: `p = fraction * LegCrippleScale`; if p ≥ 0.05 and
@@ -573,6 +595,12 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-11-02:** Two damage consumers named from the decompiled source
+  (ILSpy 10.1.1.8388, shipped V3.3.0 assembly): `ItemAction.GetDismemberChance`
+  builds its source chance from the held item with the hit part as a tag
+  (`head`/`arm`/`leg`), and `Equipment.GetTotalPhysicalArmorRating` composes
+  `PhysicalDamageResist` (wearer and attacking-item tags) with a weapon-side
+  `TargetArmor` rebase read with the attacker as holder.
 - **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `ItemActionAttack.Hit` 1614 -> 1564 (exact). Prior values were the V3.1.0 b14 measurement.
 - **2026-08-28:** V3.2.0: kill-XP rework documented (§3.1a): DamageSource.bTrapKillXP/KillXPScale, EntityAlive.AwardKillXPServer (IL=62, ElectricalTrapXP=169 scaling) + PartyShareKillServer (IL=47), AddKillXP callers consolidated to EntityAlive/EntityBuffs.
 - **2026-08-25:** melee per-attack stamina cost pinned (ItemActionMelee.il.txt
