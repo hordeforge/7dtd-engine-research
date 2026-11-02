@@ -866,11 +866,29 @@ example `resourceScrapIron` (forge, `craft_time="1"`, `use_smelter`) with the on
 ingredient `unit_iron` 1, and `resourceRockSmall` from `unit_stone`.
 
 So the units are consumed by material-based forge recipes, and the wildcard
-element is the scrap target the manager resolves. What is *not* pinned is the
-producer side: which function turns a forge's material input into the units those
-recipes spend, given that the mold is the only writer the two reads above show.
-The queue's own material handling (`RecipeUseStatus` / the `material_based` read
-in `HandleRecipeQueue`'s neighbourhood) is the next thing to read.
+element is the scrap target the manager resolves.
+
+**The producer side is now pinned to nothing in this build.** Read on,
+`GetScrapableRecipe` has exactly two callers in the dumps,
+`ItemActionEntryScrap` (`IL_0040`) and `XUiC_ItemActionList` (`IL_070A`), which
+is the inventory's *scrap* action; and the direction is item to scrap, not scrap
+to unit: the wildcard recipes state no ingredients and produce
+`resourceScrapPolymers`, `resourceElectricParts`, `resourceMechanicalParts` and
+their siblings, so scrapping a plastic item yields polymers. `HandleRecipeQueue`
+(IL=179) does not pay anything either - it checks `bUserAccessing`, the fuel and
+burning gates, the queue's `CraftingTimeLeft`, builds the output stack from
+`Recipe.itemValueType` and adds it to `output` - because the ingredients were
+taken when the queue entry was made, and a `RecipeQueueItem` carries the
+`Recipe`, not a payment source.
+
+The only code that writes `unit_<category>` in the reads above is the
+workstation's shadow input slot (`V_8`, 4.2a) and the forge's mold cast (4.2b),
+and the cast needs a mold item that no `Data/Config` file states. So in V3.3 the
+`unit_*` chain has no producer: the 34 `material_based` forge recipes that name
+those units are leftovers of the removed mold mechanic, and the forge path players
+actually use is the ordinary recipe list (`resourceCement` from
+`resourceRockSmall`, and the rest). A reimplementation should treat that chain as
+dead stock code, in the same way it treats the mold slot.
 
 **Open questions (workstation).** `V_8 = 3` is a hard-coded shadow index, while the ctor
 allocates `input` with three slots; either the array is resized at load or the
