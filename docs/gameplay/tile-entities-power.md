@@ -739,6 +739,79 @@ count)` - the collector's catalyst-to-output conversion, used by
 (ctor from name + `DynamicProperties`) that `CraftingManager` and the
 workstation UI read, and `ConsoleCmdWorkstationMaterials` prints.
 
+### 4.2a `HandleMaterialInput` (IL=531): the smelt loop
+
+`TileEntityWorkstation::HandleMaterialInput(Single timePassed)` is the fourth
+step of the tick, after `HandleRecipeQueue`. Verified against
+`il/full-v3.1.0/_global/TileEntityWorkstation.il.txt` (offsets below are that
+dump's `IL_` values).
+
+**Gates.** `XUiM_Recipes.DisableSmelter` returns immediately (`IL_0000`). The
+fuel module (`isModuleUsed[4]`, the `output` index) must be on (`IL_000E`), and
+a fuelled workstation that is **not** `isBurning` returns (`IL_0015`: when
+`!isBurning` and `isModuleUsed[3]` is on, jump to the end). So smelting needs a
+lit station, which is the same `isBurning` the recipe queue requires.
+
+**Per input slot `i`**, over every entry of `input`:
+
+* An empty slot is cleared and its `currentMeltTimesLeft[i]` set to the sentinel
+  `float.MinValue` (-2.147484E9), firing `InputChanged` (`IL_0031`-`IL_0070`).
+* An item that does not resolve to an `ItemClass` is skipped (`IL_008D`).
+* **Countdown**: if `currentMeltTimesLeft[i] >= 0` and `input[i].count > 0` and
+  `lastInput[i].itemValue.type == input[i].itemValue.type`, the timer is
+  decremented by `timePassed` (`IL_00E7`-`IL_00F7`). A slot whose item type
+  changed resets to the sentinel instead (`IL_00D8`), so swapping the input
+  restarts the melt.
+* **Start**: when the timer is the sentinel, the slot's item is matched against
+  the material channels: for each `j < materialNames.length`, an item whose
+  `MadeOfMaterial.ForgeCategory` equals `materialNames[j]` (case-insensitive)
+  and for which `unit_<materialNames[j]>` resolves and itself carries a
+  `ForgeCategory` starts or extends the timer (`IL_010A`-`IL_0231`):
+
+  ```text
+  add = item.GetWeight() * (item.MeltTimePerUnit > 0 ? item.MeltTimePerUnit : 1)
+  for each tool in tools, when isModuleUsed[0] (the tools module) is on:
+      ItemValue.ModifyValue(null, null, tag 95, ref add, ref multiplier,
+                            FastTags.Parse(item.Name), true, false)
+      add *= multiplier
+  currentMeltTimesLeft[i] = (timer == sentinel) ? add : timer + add
+  lastInput[i] = input[i].Clone()
+  ```
+
+  `MeltTimePerUnit` is the item's own property (11 rows of the installed
+  `items.xml` state it, e.g. `.4`), and the fallback is one second per weight
+  unit when it is absent or zero.
+
+**Conversion**, when the timer is not the sentinel (`IL_026A` onwards). The
+same channel match runs again, and the unit's stack lives in a **shadow input
+slot at index 3** (`V_8`, `IL_026D`): an empty one becomes
+`ItemStack(unit_<name>, input[3].count)` (`IL_02EB`-`IL_0313`). Then, while the
+timer is negative:
+
+* `input[3].count` grows by the **item's weight** per converted item, capped at
+  `unit_<name>.MaxCount()` (`IL_0364`-`IL_03A0`); a conversion that would pass
+  the cap leaves the timer at the sentinel (`IL_04AD`).
+* `input[i].count` drops by one, and the melt time is recomputed exactly as
+  above (item weight x the property, scaled by the tools' `ModifyValue` with tag
+  95 and the **unit's** name as the tag argument this time,
+  `IL_03B5`-`IL_042D`) and **added** to the timer (`IL_0441`).
+* A slot whose count reaches zero is cleared, its timer set to the sentinel and
+  `InputChanged` fired (`IL_0453`-`IL_0493`).
+
+So the rate is one item per `weight * MeltTimePerUnit` seconds, tools scaling
+that interval, and the yield is `weight` units of `unit_<category>` per item.
+The timer is a delay rather than a budget: it is positive while waiting and
+driven negative while converting, which is why the inner loop converts every
+item it can before returning.
+
+**Open questions.** `V_8 = 3` is a hard-coded shadow index, while the ctor
+allocates `input` with three slots; either the array is resized at load or the
+shadow slot only exists for a station whose `materialNames` length is below
+three, which the forge (six materials) is not. And this function is the
+*workstation* path: `TileEntityForge` is its own tile entity whose melt logic
+lives in `TileEntityForge.UpdateTick` (IL=344), so the forge needs its own read
+before the port models smelting for it.
+
 ### 4.3 `HandleRecipeQueue` / `cycleRecipeQueue`
 
 `HandleRecipeQueue`: no-op while `bUserAccessing`. Active slot is last non-empty
