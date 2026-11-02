@@ -854,14 +854,23 @@ block-derived strength.
 **The mold path is inert in the installed V3.3.0 data.** No file under
 `Data/Config` states `MoldTarget` (grep of every XML), so `recalcStats` always
 leaves `outputItem` at `None` and `outputWeight` at 0, and the cast loop never
-runs: the pool accumulates and nothing is produced. `unit_<category>` items are
-only ever *consumed* by `recipes.xml` (37 references, none an output) and no
-recipe carries `wildcardForgeCategory`, which is the tag
-`CraftingManager.GetScrapableRecipe` looks for. So the forge's usable path in
-this version is somewhere the two reads above do not show - either the queue
-synthesises scrap recipes at runtime or the units come from a source outside
-`recipes.xml` - and that is the next thing to pin before a port models smelting
-as a mechanic players can complete.
+runs: the pool accumulates and nothing is produced.
+
+The scrap/unit loop behind `GetScrapableRecipe` does have data, and an earlier
+note here was wrong about it: the tag is an **element**, `<wildcard_forge_category />`,
+not the camel-case attribute a grep for `wildcardForgeCategory` misses. The
+installed `recipes.xml` carries 33 of them (`resourceScrapPolymers`,
+`resourceElectricParts`, `resourceMechanicalParts` and their siblings, tags
+`salvageScrap`), and 34 recipes are `material_based="true"` at a forge - for
+example `resourceScrapIron` (forge, `craft_time="1"`, `use_smelter`) with the one
+ingredient `unit_iron` 1, and `resourceRockSmall` from `unit_stone`.
+
+So the units are consumed by material-based forge recipes, and the wildcard
+element is the scrap target the manager resolves. What is *not* pinned is the
+producer side: which function turns a forge's material input into the units those
+recipes spend, given that the mold is the only writer the two reads above show.
+The queue's own material handling (`RecipeUseStatus` / the `material_based` read
+in `HandleRecipeQueue`'s neighbourhood) is the next thing to read.
 
 **Open questions (workstation).** `V_8 = 3` is a hard-coded shadow index, while the ctor
 allocates `input` with three slots; either the array is resized at load or the

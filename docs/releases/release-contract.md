@@ -59,9 +59,15 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**56 commits after `v3.3.0` (2026-10-25) as of 2026-11-02.** The retarget this
+**57 commits after `v3.3.0` (2026-10-25) as of 2026-11-02.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../gameplay/tile-entities-power.md`](../gameplay/tile-entities-power.md) §4.2b corrects
+  its own scrap/unit note: `<wildcard_forge_category />` is an element (33 in
+  `recipes.xml`), not an attribute, and 34 `material_based="true"` forge recipes
+  consume `unit_*` (e.g. `resourceScrapIron` from one `unit_iron`). The producer side
+  is named as the remaining read.
 
 - [`../gameplay/tile-entities-power.md`](../gameplay/tile-entities-power.md) §4.2b records
   `recalcStats()` (the mold's `MoldTarget` names the cast item and its weight is the
