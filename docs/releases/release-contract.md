@@ -59,9 +59,15 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**55 commits after `v3.3.0` (2026-10-25) as of 2026-11-02.** The retarget this
+**56 commits after `v3.3.0` (2026-10-25) as of 2026-11-02.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
+
+- [`../gameplay/tile-entities-power.md`](../gameplay/tile-entities-power.md) §4.2b records
+  `recalcStats()` (the mold's `MoldTarget` names the cast item and its weight is the
+  cost; fuel ticks are `FuelValue * count * 20`) and that the mold path is inert in the
+  installed data: no file states `MoldTarget`, `unit_*` has no XML producer and no recipe
+  carries `wildcardForgeCategory`.
 
 - [`../gameplay/tile-entities-power.md`](../gameplay/tile-entities-power.md) §4.2a-4.2b
   pin the two smelting loops: the workstation's `HandleMaterialInput` (melt time from

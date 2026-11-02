@@ -841,11 +841,27 @@ last non-empty slot is the one being melted.
 `outputItem` come from `recalcStats()` and the mold slot, so the item produced
 is whatever the mold names and the cost is that item's weight in metal units.
 
-**Open questions.** `recalcStats()` is the setter of `outputWeight` /
-`outputItem` and was not read here; the tick also carries the `outputWeight > 0`
-guard and the `metalInForge` cap, so the exact per-mold cost still wants a
-targeted read. The heat emission takes no `HeatMapStrength` argument - it is the
-`TileEntity` helper with its own block-derived strength.
+**`recalcStats()` (IL=109)**, read afterwards: `outputWeight = 0` and
+`outputItem = None`, then when the mold slot is non-empty
+`outputItem = ItemValue(moldItem.MoldTarget)` and `outputWeight =
+GetForId(outputItem.type).GetWeight()`. It also sums the fuel:
+`fuelInStorageInTicks += GetFuelValue(stack) * stack.count * 20` over the fuel
+slots. So the mold's `MoldTarget` names the item cast and that item's weight is
+its cost, both from the installed data. The heat emission takes no
+`HeatMapStrength` argument - it is the `TileEntity` helper with its own
+block-derived strength.
+
+**The mold path is inert in the installed V3.3.0 data.** No file under
+`Data/Config` states `MoldTarget` (grep of every XML), so `recalcStats` always
+leaves `outputItem` at `None` and `outputWeight` at 0, and the cast loop never
+runs: the pool accumulates and nothing is produced. `unit_<category>` items are
+only ever *consumed* by `recipes.xml` (37 references, none an output) and no
+recipe carries `wildcardForgeCategory`, which is the tag
+`CraftingManager.GetScrapableRecipe` looks for. So the forge's usable path in
+this version is somewhere the two reads above do not show - either the queue
+synthesises scrap recipes at runtime or the units come from a source outside
+`recipes.xml` - and that is the next thing to pin before a port models smelting
+as a mechanic players can complete.
 
 **Open questions (workstation).** `V_8 = 3` is a hard-coded shadow index, while the ctor
 allocates `input` with three slots; either the array is resized at load or the
