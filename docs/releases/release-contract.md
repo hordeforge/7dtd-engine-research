@@ -53,13 +53,22 @@ new number.
 
 ## Unreleased
 
+- [`../gameplay/combat-damage.md`](../gameplay/combat-damage.md) §"Damage application" names the
+  two damage consumers that had only a summary: `ItemAction.GetDismemberChance` builds its source
+  chance from the held item with the hit part as a tag (`head` when the tag is `E_BP_Head`, `arm`
+  and `leg` when the tag contains them, case-insensitive), so a row's `tags="head,arm,leg"` gates
+  it per part; and `Equipment.GetTotalPhysicalArmorRating` composes `PhysicalDamageResist` over
+  the wearer with the attacking item's tags, then rebases the result through `TargetArmor` read
+  with the attacker as holder. Both are graded from the decompiled shipped assembly (ILSpy
+  10.1.1.8388).
+
 - [`../world/blocks.md`](../world/blocks.md) §1 records how a model's texture travels:
   the renderer's `m_Materials[0]` names a Material whose `_MainTex` names the Texture2D,
   the material is per model and the texture per atlas (`Hollywood_Juniper_15m` binds the
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**58 commits after `v3.3.0` (2026-10-25) as of 2026-11-02.** The retarget this
+**60 commits after `v3.3.0` (2026-10-25) as of 2026-11-02.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
