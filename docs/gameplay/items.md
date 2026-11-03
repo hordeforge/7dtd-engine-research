@@ -948,6 +948,37 @@ otherwise, and a fallback pass with `-538488845` when the first pass found no
 `EntityAlive`; each uses `SphereRadius`.
 `GetCrosshairType` (IL=9) is crosshair **4** when `isShowOverlay`, else **1**.
 
+**Melee reach: `DynamicMelee` reads the `MaxRange` passive, `Melee` does not
+(IL-verified).** `ItemActionDynamic.GetExecuteActionTarget` (IL=254) computes
+the swing's two distances on every attack. `Range` is
+`EffectManager.GetValue(PassiveEffects.MaxRange, itemValue, RangeDefault,
+holder, null, actionTags | itemTags)` (`ldc.i4.s 11`, the `MaxRange` enum
+value), and `BlockRange` is `GetValue(PassiveEffects.BlockRange, itemValue,
+Range, ...)` (`ldc.i4.s 12`, so an unstated `BlockRange` stays at `Range`).
+The scan length is `FastMax(Range, BlockRange) + 0.15`, and
+`ItemActionDynamicMelee.hitTarget` drops an entity hit when `distanceSq >
+Range * Range`, so `Range` is the entity reach and `BlockRange` only lengthens
+the block scan. `RangeDefault` is the action's own `Range` property, whose
+default is **2**: `ItemActionDynamic.ReadFrom` (IL=495) executes `ldc.r4 2` /
+`stfld RangeDefault` and then `DynamicProperties.ParseFloat("Range",
+RangeDefault)`. A `passive_effect name="MaxRange" operation="base_set"` is
+therefore applied over the action's `Range`, and when an item states both,
+`MaxRange` wins. `ItemActionMelee` (class `Melee`, the entity hand items)
+reads the plain `ItemAction.Range` field, set by `ItemActionAttack.ReadFrom`
+from the same `Range` property, and never calls `EffectManager.GetValue` for
+it, so a `MaxRange` passive on a hand item does not change its swing.
+
+Measured in the installed `items.xml` (V3.3.0 b18): **34** `DynamicMelee` items
+state only `MaxRange` (baseball bat and the other clubs 2.4 m, hunting knife
+2.0 m, fireaxe and shovel 2.6 m, iron pickaxe 2.4 m, sledgehammers 2.6 m,
+knuckles 2.0 m, claw hammer 2.2 m, the player's fists 2.0 m); the **3** spears
+state only `Action0.Range` 2.6 m, while their `Action1` power attack states
+3.6 m, which the primary swing does not read; and **13** `Melee` hand items
+state both a 1.65 to 1.75 m `Range` and a 10 to 100 m `MaxRange` that belongs
+to their `Vomit` secondary action, and their melee reach stays at the action's
+number. The block scan uses `BlockRange` (3.0 to 3.5 m on the player weapons),
+which is why a swing can break a block further out than it can hit a body.
+
 **`ItemActionCancel.ExecuteAction` (IL=26):** on release only, cancels the
 action one slot earlier: `item.Actions[indexInEntityOfAction - 1].
 CancelAction(actionData[indexInEntityOfAction - 1])` when that slot's data
