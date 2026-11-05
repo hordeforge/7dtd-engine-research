@@ -145,8 +145,8 @@ transcription.
 | Skew | `q = R(-r) uv`; `q = (q.x - amount.y q.y, q.y - amount.x q.x)`; `uv' = R(r) q` |
 | Bulge | `p = uv.yx - offset.yx`; `r = abs(p)`; `ang = atan2(p.y, p.x)`; `uv' = (cos ang, sin ang) (r^amount amount) + offset` |
 | Twirl | `p = uv - offset`; `r = abs(p)`; `a = (sin(frequency r) - 1) / (25.12 r + 1) amount`; `uv' = R(a) p + offset` (25.12 is `8 pi` to two places) |
-| Kaleido | `p = uv - offset`; `ang = atan2(p.y, p.x)`; `t = fract((ang + pi) / sides) sides - sides / 2`; `uv' = R(rotation + abs(t)) p + offset` |
-| Perspective | the layer UV is a point on the `z = 1` plane, rotated by the record's Euler angles, divided by its own `z` clamped to at most `-0.001`, scaled by `strength / 2`, and projected back through the same matrix; the branch builds the 3x3 from `cos`/`sin` of the three angles inline |
+| Kaleido | `p = uv - offset`; `ang = atan2(p.y, p.x)`; `t = fract(abs((ang + pi) / k)) k - k / 2` (sign kept); `uv' = (cos(rotation + abs(t)), sin(rotation + abs(t))) abs(p) + offset`. The record's third float is the XML's `sides`, but the branch **divides** the angle by it instead of forming that many sectors, so at the shipped values it is a fold about the offset rather than a kaleidoscope; what the field means on this path is open |
+| Perspective | the layer UV is lifted onto a rotated plane and divided by its own clamped distance: the branch builds a 3x3 from `cos`/`sin` of the record's three angles inline, normalizes, takes `min(dot(a, b), -0.001)` as the divisor, and scales the result by 2. An 80-instruction branch; the closed form is not transcribed yet |
 | Arc | `q = R(-rotation) uv`; `s = sign(radius)`; `u = s q.x`, `v = s q.y + abs(radius)`; `ang = s atan2(v, u) / width`; `uv' = R(rotation) (abs(u, v) - abs(radius) + 0.28125, ang)` |
 | Stretch | `p = uv.yx - offset.yx`; `q = R(-rotation) p`; `t = abs(q.x) / (distance + width)`; displacement `m = abs(q.x) - distance` when `t > 1`, else `width t^exponent`; `m = max(m, 1e-4) sign(q.x)`; `uv' = offset + R(rotation) (q.x, m)` |
 | Grid | `p = R(-rotation) (uv.yx - offset.yx) / scale`; mode 2 snaps to a hex lattice, mode 1 shifts alternate rows by `shift` and snaps `x` to `aspect`, mode 0 snaps nothing; `uv' = offset + R(rotation) scale (p.y, p.x)` |
@@ -698,8 +698,10 @@ composite tile entity. Everything visual is client territory.
 - **2026-11-06:** The eight warp transforms decoded from the shipped client
   shader (`Game/SignTech/Decal`, Vulkan sub-program) rather than inferred: no
   managed method applies a warp, `PushWarps` fills one record per warp, the
-  shader's dispatch id is `TypeId + 11`, and every branch's math is transcribed
-  in §1. `KaleidoWarp.offsetScale` is not in the shader's record.
+  shader's dispatch id is `TypeId + 11`, and each branch's math is transcribed
+  in §1 - all but `Perspective`, whose 3x3 homography is summarised, and
+  `Kaleido`, whose third field divides the angle rather than counting sectors.
+  `KaleidoWarp.offsetScale` is not in the shader's record.
 - **2026-08-11:** Sign wire IL re-verified: SignDataRequest.write IL=4, SignDataResponse.write IL=28 (exact).
 - **2026-08-10:** Sign wire IL re-verified: NetPackageSignDataRequest write IL=4 (empty), NetPackageSignDataResponse write IL=28 (exact).
 - **2026-08-08:** Bake leaves: SignBakeRequest {GroupIndex, Tier,

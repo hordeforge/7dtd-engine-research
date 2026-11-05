@@ -54,7 +54,7 @@ new number.
 
 ## Unreleased
 
-**2 commits after `v3.4.0` (2026-11-05) as of 2026-11-06.** The build retarget this
+**4 commits after `v3.4.0` (2026-11-05) as of 2026-11-06.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -63,6 +63,9 @@ section described is published under the tag and in
   of what shipped and this file stays the contract for what comes next.
 - `physicsbodies.xml` is documented: the ragdoll layout's record set and the
   226 collider bindings a body's `DT_PhysicsBodies` row carries.
+- The eight sign warp transforms are decoded from the shipped client shader,
+  and the two branches the first reading got wrong (`Kaleido`'s third field,
+  `Perspective`'s closed form) are marked open rather than described.
 
 The next cut is `v0.4.0` (tooling) unless the corpus is re-pinned to a new game
 build first, which would be `v3.5.0`.
