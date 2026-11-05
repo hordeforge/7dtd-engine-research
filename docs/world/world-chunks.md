@@ -159,6 +159,35 @@ one face slot: it reads the channel word, clears the face's 8 bits
 `isModified`. The read twin `Chunk.GetBlockFaceTexture` (IL=19) is
 `(word >> (face*8 & 63)) & 0xFF`; the `PrefabChunk` variant (IL=29) uses
 6-bit face slots (`face*6`, mask 63) against the prefab's stored texture.
+The 6-bit accessor is a prefab-chunk query, not the copy path: a prefab's
+paint travels through the texture channel described next, and a stamp
+reads the whole word.
+
+### The prefab texture channel
+
+A prefab stores a painted cell as one `TextureFullArray`, which is a single
+`Int64` holding **eight 8-bit face slots** (`TextureFullArray::get_Item`
+IL=24 indexes `values[index]` and the fixed buffer is one `Int64`). The
+file's per-cell payload is that word:
+
+- `Prefab::Load` (IL, the version-10 branch) resets a
+  `SimpleBitStream` over the flag bytes and asks it for the next set-cell
+  offset. For a body version `>= 19` it calls
+  `TextureFullArray::Read(reader, 1)`, which reads one `Int64`; older
+  bodies read a raw `Int64` and store it with `set_Item(0, word)`
+  (`TextureFullArray::Read` IL=48, `Prefab::Load` IL, `set_Item` IL=25).
+- `Chunk.Value64FullToIndex(word, face)` (IL=12) extracts one face as
+  `(word >> (face * 8 & 63)) & 0xFF`; `Chunk.TextureIdxToTextureFullValue64`
+  (IL=43) is the inverse write, replicating a byte across all eight slots.
+- `Prefab.RotateY` (IL=324) rotates block shapes and volumes and does not
+  touch `textureCells`: the word travels with the cell, so a stamp applies
+  the authored faces without permuting the slots for the prefab's turn.
+
+What the byte then means is **not decoded** here: `painting.xml` states a
+paint `ID` in 0..255 and a separate `TextureId`, and the renderer's
+resolution from a face byte to a texture is the open end. The port must
+not infer it from a visual pattern; the paint-id versus texture-id
+question is a residual until the renderer path is read.
 `ChunkCluster.SetBlockFaceTexture(pos, face, textureIdx, channel)` (IL=61) is
 the painted-texture write: chunk lookup (no-op on miss),
 `Chunk.SetBlockFaceTexture(lx, ly, lz, face, textureIdx, channel)`, then
