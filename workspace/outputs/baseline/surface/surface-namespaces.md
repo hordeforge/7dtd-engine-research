@@ -1,15 +1,15 @@
 # Namespace surface summary
 | Namespace | types | methods(body) | IL total | fields |
 |---|--:|--:|--:|--:|
-| <global> | 6346 | 45701 | 1530395 | 38095 |
+| <global> | 6381 | 45819 | 1533806 | 38213 |
 | Twitch | 108 | 883 | 29685 | 867 |
-| GameEvent.SequenceActions | 132 | 749 | 22560 | 744 |
-| Challenges | 48 | 509 | 11434 | 249 |
+| GameEvent.SequenceActions | 132 | 749 | 22640 | 744 |
+| Challenges | 48 | 509 | 11454 | 249 |
 | WorldGenerationEngineFinal | 64 | 489 | 26690 | 394 |
 | Platform.EOS | 32 | 455 | 16317 | 219 |
+| Services.Analytics.Events | 22 | 408 | 1803 | 242 |
 | Platform | 137 | 377 | 8401 | 424 |
-| Platform.Steam | 28 | 302 | 6741 | 126 |
-| Services.Analytics.Events | 15 | 301 | 1288 | 153 |
+| Platform.Steam | 28 | 302 | 6765 | 126 |
 | XMLData.Item | 11 | 293 | 1152 | 186 |
 | DynamicMusic | 74 | 287 | 4700 | 138 |
 | UniLinq | 13 | 260 | 6152 | 20 |
@@ -30,6 +30,7 @@
 | Webserver.WebAPI.APIs.Permissions | 9 | 73 | 2128 | 62 |
 | ICSharpCode.WpfDesign.XamlDom | 14 | 71 | 506 | 38 |
 | Platform.XBL | 11 | 68 | 1443 | 41 |
+| GearVariants | 9 | 63 | 2292 | 39 |
 | Platform.Local | 7 | 62 | 335 | 9 |
 | Webserver.WebAPI | 6 | 51 | 1253 | 52 |
 | SDF | 12 | 49 | 800 | 17 |
@@ -42,7 +43,7 @@
 | Platform.LAN | 7 | 39 | 620 | 33 |
 | mumblelib | 5 | 37 | 409 | 19 |
 | SharpEXR.AttributeTypes | 14 | 36 | 537 | 46 |
-| Webserver.Permissions | 4 | 35 | 798 | 14 |
+| Webserver.Permissions | 4 | 35 | 808 | 14 |
 | ConcurrentCollections | 1 | 33 | 1160 | 7 |
 | Assets.DuckType.Jiggle | 4 | 32 | 1193 | 46 |
 | Webserver.WebAPI.APIs.ServerState | 6 | 32 | 863 | 21 |
@@ -51,14 +52,13 @@
 | SharpEXR.ColorSpace | 5 | 25 | 935 | 14 |
 | CoverClippingTool | 11 | 23 | 1041 | 52 |
 | DynamicMusic.Legacy.ObjectModel | 7 | 23 | 282 | 25 |
-| GearVariants | 3 | 23 | 1101 | 15 |
 | AssetManagement | 5 | 22 | 517 | 11 |
 | Webserver.Commands | 3 | 21 | 653 | 1 |
 | XMLData.Parsers | 10 | 21 | 238 | 1 |
 | GameEvent.SequenceLoops | 3 | 20 | 556 | 10 |
 | MusicUtils | 10 | 20 | 373 | 37 |
+| Services.Analytics | 3 | 19 | 327 | 7 |
 | GameEvent.GameEventHelpers | 3 | 16 | 1186 | 24 |
-| Services.Analytics | 3 | 16 | 273 | 5 |
 | GameEvent.SequenceDecisions | 2 | 14 | 459 | 6 |
 | PostEffects | 2 | 14 | 443 | 14 |
 | Webserver.FileCache | 4 | 14 | 214 | 2 |

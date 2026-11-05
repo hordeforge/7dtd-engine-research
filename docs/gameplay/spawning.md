@@ -1,4 +1,4 @@
-# Entity spawning subsystem (dedicated V3.3.0)
+# Entity spawning subsystem (dedicated V3.4.0)
 
 **Owns:** how entities are placed INTO the world: the spawn-manager family
 (`SpawnManagerBiomes`, `SpawnManagerDynamic`, `SpawnManagerAbstract`), the

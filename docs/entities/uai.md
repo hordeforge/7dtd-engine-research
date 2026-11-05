@@ -1,4 +1,4 @@
-# Utility AI packages (`UAI.*`) (dedicated V3.2.0)
+# Utility AI packages (`UAI.*`) (dedicated V3.4.0)
 
 **Owns:** the managed `UAI.*` namespace, the data-driven utility AI that runs when
 an entity class declares `AIPackages`: the package/action/consideration/task data

@@ -1,4 +1,4 @@
-# Console command catalog (V3.3.0)
+# Console command catalog (V3.4.0)
 
 **Kind:** per-command behavioral reference (name, permission, function) for every
 `ConsoleCmdAbstract` subclass; function text is each command's own `getDescription`.  

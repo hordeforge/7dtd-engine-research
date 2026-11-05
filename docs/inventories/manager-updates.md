@@ -2,8 +2,8 @@
 
 **Kind:** inventory table (not primary narrative).  
 **Prefer:** [`managers.md`](../loop/managers.md) (manager Update table).  
+**Raw:** [`../il/frame-entries-v3.4.0/`](../../il/frame-entries-v3.4.0/).  
 **Hub:** [`INDEX.md`](../INDEX.md) · Inventories section.
-
 
 - `AchievementManager::UpdateAchievement(EnumAchievementDataStat,Single)` IL=34 MB=False
 - `AchievementManager::UpdateAchievement(EnumAchievementDataStat,Int32)` IL=34 MB=False
@@ -19,15 +19,18 @@
 - `AIWanderingHordeSpawner::UpdateSpawn(World,Single)` IL=158 MB=False
 - `AIWanderingHordeSpawner::UpdateHorde(Single)` IL=189 MB=False
 - `AntiCheatServer::Update()` IL=1 MB=False
+- `AssetLoaderManager::Update()` IL=17 MB=False
+- `AssetManagerLifetimed::Update()` IL=68 MB=False
 - `AstarManager::UpdateGraphs(Single)` IL=185 MB=True
 - `AstarManager::UpdateGraphPos(AstarVoxelGrid,Vector2)` IL=60 MB=True
 - `AstarManager::UpdateMoveGraph()` IL=31 MB=True
 - `AstarManager::UpdateBlock(Vector3i,Boolean)` IL=97 MB=True
 - `AudioMixerManager::Update()` IL=85 MB=True
 - `BlockLimitTracker::UpdateClientAmounts(List`1)` IL=20 MB=False
+- `ChunkManager::UpdateChunkKeysToUnloadSnapshot()` IL=36 MB=False
 - `ChunkPreviewManager::Update()` IL=47 MB=False
 - `ConnectionManager::UpdatePings()` IL=20 MB=True
-- `()` IL=213 MB=True
+- `ConnectionManager::Update()` IL=213 MB=True
 - `DayTimeTracker::Update()` IL=14 MB=False
 - `DayTimeTracker::UpdateDay()` IL=8 MB=False
 - `DayTimeTracker::UpdateDayPeriod()` IL=48 MB=False
@@ -84,7 +87,7 @@
 - `LightManager::UpdateUI()` IL=1 MB=False
 - `LoadManager::Update()` IL=56 MB=False
 - `LoadManager::UpdateRequest(LoadTask)` IL=15 MB=False
-- `()` IL=100 MB=False
+- `LockManager::Update()` IL=100 MB=False
 - `MultiBlockManager::UpdateTrackedBlockData(Vector3i,BlockValue,Boolean)` IL=126 MB=False
 - `MultiBlockManager::UpdateAlignment()` IL=60 MB=False
 - `MultiBlockManager::UpdateOversizedStability()` IL=65 MB=False
@@ -136,6 +139,7 @@
 - `SelectionBoxManager::UpdateAllColors()` IL=60 MB=True
 - `SelectionBoxManager::Update()` IL=352 MB=True
 - `SignDataManager::UpdateRenderingData(SignData,GlobalSignId)` IL=115 MB=False
+- `SignDataManager::Update()` IL=87 MB=False
 - `SkyManager::UpdateSunMoonAngles()` IL=348 MB=True
 - `SkyManager::UpdateSunShaftSettings()` IL=49 MB=True
 - `SkyManager::UpdateFogShader()` IL=19 MB=True

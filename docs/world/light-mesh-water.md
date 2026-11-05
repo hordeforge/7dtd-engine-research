@@ -1,4 +1,4 @@
-# Light, stability, mesh, water, deco (dedicated V3.2.0)
+# Light, stability, mesh, water, deco (dedicated V3.4.0)
 
 **Owns:** light/stability/mesh/water/deco method maps + stock 255 ceilings (generic engine); water section includes the jobified sim pipeline.  
 **Product expand checklist:** `7dtd-realearth/docs/realearth-surfaces.md` §7.1.  

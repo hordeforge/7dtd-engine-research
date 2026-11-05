@@ -1,4 +1,4 @@
-# Combat and damage application (dedicated V3.3.0)
+# Combat and damage application (dedicated V3.4.0)
 
 **Owns:** the server-authoritative damage pipeline: `DamageSource` (the damage
 descriptor), `EntityAlive.DamageEntity` (armor mitigation, modifiers, health,
@@ -11,7 +11,7 @@ damage ([blocks.md](../world/blocks.md)); the ragdoll/hit VFX (client).
 **Evidence:** `DamageSource`, `EntityAlive.DamageEntity` /
 `ProcessDamageResponse` IL (dump locally with `tools/src/DumpMethod`, git-ignored).
 **Hub:** [`INDEX.md`](../INDEX.md). **Method:** [`re-methodology.md`](../meta/re-methodology.md).
-**Build:** V3.3.0 b18. The damage pipeline bodies the b18 diff did not touch keep
+**Build:** V3.4.0 b10. The damage pipeline bodies the b18 diff did not touch keep
 their b10 widths; the equipment-slot attribution below was re-read.
 
 All damage is resolved on the authoritative server entity, so this is a core

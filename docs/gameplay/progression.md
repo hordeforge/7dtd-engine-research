@@ -1,4 +1,4 @@
-# Progression: levels, skills, perks (dedicated V3.3.0)
+# Progression: levels, skills, perks (dedicated V3.4.0)
 
 **Owns:** the server-authoritative player progression: `Progression` (per-player
 level + XP + skill points + owned skills/perks), `ProgressionValue` (a skill /
@@ -8,7 +8,7 @@ math applied by perks ([buffs.md](../gameplay/buffs.md)).
 **Evidence:** `Progression`, `ProgressionValue`, `ProgressionClass` IL (dump
 locally with `tools/src/DumpMethod`, git-ignored). **Hub:** [`INDEX.md`](../INDEX.md).
 **Method:** [`re-methodology.md`](../meta/re-methodology.md).
-**Build:** V3.3.0 b18. The death/backpack and capacity sections were re-read
+**Build:** V3.4.0 b10. The death/backpack and capacity sections were re-read
 against b18; the XP/level/perk method bodies the b18 diff did not touch keep
 their b10 widths.
 

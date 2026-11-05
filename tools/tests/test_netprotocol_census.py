@@ -64,16 +64,17 @@ ALLOWED_BEFORE_AUTH = [
 # the abstract/enum top-level NetPackage* types this probe can classify. The
 # registry also skips the plain helper classes NetPackageEntry, NetPackageInfo,
 # NetPackageMeasure and NetPackageMetrics, and it registers four nested
-# subclasses this top-level census misses, so the V3.3.0 accounting is
-# 192 top-level - 8 non-registered + 4 nested = 188 registered (network.md §3,
-# measured live in protocol-packages.md §1.6).
+# subclasses this top-level census misses, so the V3.4.0 accounting is
+# 194 top-level - 8 non-registered + 4 nested = 190 registered. The b18 live join
+# measured 188 for its 192 top-level rows (network.md §3, protocol-packages.md
+# §1.6); the two packages added since are both registered.
 NON_MAP = [
     "NetPackage",  # abstract base
     "NetPackageDirection",  # enum
     "NetPackageEntityTargeted",  # abstract intermediate
     "NetPackageLogger",  # abstract helper
 ]
-EXPECTED_TOTAL = 192
+EXPECTED_TOTAL = 194
 
 
 def main() -> int:

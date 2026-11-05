@@ -1,4 +1,4 @@
-# Save, WorldState, and region files (dedicated V3.3.0)
+# Save, WorldState, and region files (dedicated V3.4.0)
 
 **Owns:** WorldState, Chunk write/read, `RegionFile`* managed layout, snapshot/Deflate path, the per-record save version registry, WorldBlockTicker schedule wire (generic engine).  
 **Product expand/inject notes:** `7dtd-realearth/docs/realearth-surfaces.md`.  

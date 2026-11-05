@@ -4,16 +4,24 @@
   "depot": "294422",
   "studied": {
     "branch": "public",
-    "buildid": "25661908",
-    "manifest": "3031329678505041777",
-    "download_bytes": 14445864032,
-    "size_bytes": 17701153808,
-    "version": "V 3.3.0",
-    "dll_sha256": "e16ff9d539b8fbf64904c0bc090d502286a62464742a9396f0455936ad0beb87",
-    "recorded_utc": "2026-10-24T15:13:40Z",
+    "buildid": "26310339",
+    "manifest": "5022117301453546978",
+    "download_bytes": 14545017680,
+    "size_bytes": 17803449012,
+    "version": "V 3.4.0",
+    "dll_sha256": "00a962dbbb5ef1bb454368322221f9eb4148dc2d548ed2b77244f9bda5ecc167",
+    "recorded_utc": "2026-11-05T08:53:01Z",
     "source": "https://api.steamcmd.net/v1/info/294420"
   },
   "history": [
+    {
+      "buildid": "25661908",
+      "gid": "3031329678505041777",
+      "version": "V 3.3.0",
+      "dll_sha256": "e16ff9d539b8fbf64904c0bc090d502286a62464742a9396f0455936ad0beb87",
+      "recorded_utc": "2026-10-24T15:13:40Z",
+      "note": "previous studied pin"
+    },
     {
       "buildid": "24994542",
       "gid": "1633674551820196085",

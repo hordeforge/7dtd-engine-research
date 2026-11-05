@@ -1,4 +1,4 @@
-# WorldStaticData xmlsToLoad table (V3.3.0)
+# WorldStaticData xmlsToLoad table (V3.4.0)
 
 **Kind:** inventory of the stock config load table built in `WorldStaticData..cctor`
 (IL=887). Each row is one `WorldStaticData/XmlLoadInfo` entry in `xmlsToLoad[]`.

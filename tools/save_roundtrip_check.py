@@ -436,6 +436,7 @@ def check_main_ttw(path: str, checks: list[str]) -> None:
         (1, 3, 10, 14): "V3.1.0 (b14)",
         (1, 3, 20, 10): "V3.2.0 (b10)",
         (1, 3, 30, 18): "V3.3.0 (b18)",
+        (1, 3, 40, 10): "V3.4.0 (b10)",
         (1, 4, 0, 8): "V4.0 (b8) shipped world data",
     }
     vi_note = known.get(vi, "unknown build")

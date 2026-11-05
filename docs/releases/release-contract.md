@@ -1,6 +1,6 @@
 # Releasing 7dtd-engine-research (tag series, what each version means)
 
-**Hub:** [`INDEX.md`](../INDEX.md). **Corpus pin:** V **3.3.0 (b18)**
+**Hub:** [`INDEX.md`](../INDEX.md). **Corpus pin:** V **3.4.0 (b10)**
 ([`tools/data/stock_facts.json`](../../tools/data/stock_facts.json)).
 **Not:** a game release. Nothing here describes a 7 Days to Die build; those
 live in [`changelog-3.2.0.md`](changelog-3.2.0.md) and its two predecessors.
@@ -15,7 +15,7 @@ belongs to. Read the series before choosing the next number.
 
 | Series | Form | What the number tracks | When it moves |
 |---|---|---|---|
-| Corpus | `v3.Y.0` | The studied game build. `v3.1.0` is the corpus for game V3.1.0 b14, `v3.2.0` for V3.2.0 b10, `v3.3.0` for V3.3.0 b18. | A TFP update that the corpus is re-pinned to (`make post-update`, then a new `changelog-<game-version>.md`) |
+| Corpus | `v3.Y.0` | The studied game build. `v3.1.0` is the corpus for game V3.1.0 b14, `v3.2.0` for V3.2.0 b10, `v3.3.0` for V3.3.0 b18, `v3.4.0` for V3.4.0 b10. | A TFP update that the corpus is re-pinned to (`make post-update`, then a new `changelog-<game-version>.md`) |
 | Tooling | `v0.Y.Z` | This repo's own tooling and docs, independent of any game build. | A tooling or corpus change that does not re-pin the corpus |
 
 A corpus release may carry tooling changes (the `v3.2.0` cut shipped
@@ -68,7 +68,7 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**65 commits after `v3.3.0` (2026-10-25) as of 2026-11-05.** The retarget this
+**66 commits after `v3.3.0` (2026-10-25) as of 2026-11-05.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 

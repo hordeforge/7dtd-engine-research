@@ -1,13 +1,13 @@
-# NetPackage type inventory (V3.3.0 dedicated)
+# NetPackage type inventory (V3.4.0 dedicated)
 
 **Kind:** inventory table (not primary narrative).  
-**Pin:** V **3.3.0 (b18)**; static top-level `NetPackage*` census **192** (+ `NetPackageManager` → 193 name-prefixed; see [coverage.md](../meta/coverage.md)).  
+**Pin:** V **3.4.0 (b10)**; static top-level `NetPackage*` census **194** (+ `NetPackageManager` → 195 name-prefixed; see [coverage.md](../meta/coverage.md)).  
 **Prefer:** [`protocol.md`](../network/protocol.md), [`protocol-packages.md`](../network/protocol-packages.md), [`protocol-frames.md`](../network/protocol-frames.md) (visual), [`network.md`](../network/network.md).  
 **Wire bodies:** ordered `write()` field sequence per package in [`netpackage-bodies.md`](netpackage-bodies.md) (auto-extracted).  
-**Raw:** [`../../il/netpackages-v3.3.0/`](../../il/netpackages-v3.3.0/), [`../../il/dedi-complete-v3.3.0/`](../../il/dedi-complete-v3.3.0/).  
+**Raw:** [`../../il/netpackages-v3.4.0/`](../../il/netpackages-v3.4.0/), [`../../il/dedi-complete-v3.4.0/`](../../il/dedi-complete-v3.4.0/).  
 **Hub:** [`INDEX.md`](../INDEX.md).
 
-Count: **193** types with `NetPackage` name prefix in live dedi dump (192 wire-oriented types + manager/helpers as named in the table).
+Count: **195** types with `NetPackage` name prefix in live dedi dump (194 wire-oriented types + manager/helpers as named in the table).
 
 > **Census gap (2026-08-29, cross-pollinated from zdtd):** the type table below
 > omits four wire packages that DO have extracted bodies in
@@ -59,6 +59,8 @@ Count: **193** types with `NetPackage` name prefix in live dedi dump (192 wire-o
 | `NetPackageDirection` | Enum | 0 | 0 |
 | `NetPackageDiscordIdMappings` | NetPackage | 6 | 78 |
 | `NetPackageDiscordLobbySecret` | NetPackage | 6 | 12 |
+| `NetPackageDroneRecoveryRequest` | NetPackage | 3 | 12 |
+| `NetPackageDroneRecoveryResponse` | NetPackage | 3 | 12 |
 | `NetPackageDropItemsContainer` | NetPackage | 6 | 42 |
 | `NetPackageDynamicClientArrive` | NetPackage | 9 | 42 |
 | `NetPackageDynamicMesh` | DynamicMeshServerData | 13 | 192 |
@@ -230,4 +232,5 @@ Count: **193** types with `NetPackage` name prefix in live dedi dump (192 wire-o
 
 - **2026-07-20:** Generated from dedi-complete auto dump for zig-clone RE.
 
+- **2026-11-05:** Retargeted to V3.4.0 (b10): census 194 (+ manager = 195). Two packages added, both drone recovery: `NetPackageDroneRecoveryRequest` (read/write + ctor, max IL 12) and `NetPackageDroneRecoveryResponse` (same shape); none removed. Wire delta: [b18-to-v3.4.0-20261105.md](../../workspace/outputs/diffs/b18-to-v3.4.0-20261105.md) §7.
 - **2026-10-24:** Table regenerated from the V3.3.0 (b18) assembly: 193 rows (was 196). Three packages added (`NetPackageLockTarget`, `NetPackageSingleSignData`, `NetPackageSignDelete`) and six removed (the two inventory-data, two inventory-transaction and the lock request/response packages), all under the same names and bases the wire delta uses ([changelog-3.3.0.md](../releases/changelog-3.3.0.md) §4).

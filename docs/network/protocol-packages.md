@@ -1,10 +1,10 @@
-# Wire package body catalog (V3.3.0 pin; IL-derived)
+# Wire package body catalog (V3.4.0 pin; IL-derived)
 
 **Owns:** per-`NetPackage` wire metadata (channel/compress/direction/auth) and
 hand-annotated `read`/`write` byte layouts beyond the join-critical set in
 [`protocol.md`](../network/protocol.md).
 **Hub:** [`INDEX.md`](../INDEX.md).  
-**Pin:** dedicated V **3.3.0 (b18)**; re-checked against `il/netpackages-v3.3.0/`
+**Pin:** dedicated V **3.4.0 (b10)**; bodies re-read against `il/netpackages-v3.3.0/`, census refreshed against `il/netpackages-v3.4.0/`
 (the earlier `il/netpackages-v3.2.0/` set stays as the previous build).
 **Not:** framing/join/challenge (that is [`protocol.md`](../network/protocol.md)); visual
 frames ([`protocol-frames.md`](../network/protocol-frames.md)).

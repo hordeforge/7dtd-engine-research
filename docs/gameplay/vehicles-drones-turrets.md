@@ -1,4 +1,4 @@
-# Vehicles, drones, and turrets (dedicated V3.2.0)
+# Vehicles, drones, and turrets (dedicated V3.4.0)
 
 **Owns:** the three deployable-entity subsystems a dedicated server persists and
 drives: player vehicles (`VehicleManager` / `EntityVehicle` / `Vehicle`), junk

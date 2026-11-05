@@ -1,4 +1,4 @@
-# Dedicated misc systems (V3.2.0)
+# Dedicated misc systems (V3.4.0)
 
 **Owns:** a grab-bag of small dedicated systems each too small for its own doc:
 gamestage groups, water-sim apply, boss/companion groups, admin users,

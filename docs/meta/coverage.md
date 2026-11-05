@@ -1,6 +1,6 @@
-# Dedicated-server engine coverage map (V3.3.0)
+# Dedicated-server engine coverage map (V3.4.0)
 
-**Current pin:** V **3.3.0 (b18)** (Major=3 Minor=30 Build=18). Prior pin was V3.2.0 (b10), before that V3.1.0 (b14) Henpocalypse and V3.0.1 (b4). Shipped-delta maps: [changelog-3.3.0.md](../releases/changelog-3.3.0.md) §1 (current), [changelog-3.2.0.md](../releases/changelog-3.2.0.md) §9 (history), [changelog-3.1.0.md](../releases/changelog-3.1.0.md) § Per-fact homes (history).
+**Current pin:** V **3.4.0 (b10)** (Major=3 Minor=40 Build=10). Prior pin was V3.3.0 (b18), before that V3.2.0 (b10), V3.1.0 (b14) Henpocalypse and V3.0.1 (b4). Delta map: [`../../workspace/outputs/diffs/b18-to-v3.4.0-20261105.md`](../../workspace/outputs/diffs/b18-to-v3.4.0-20261105.md) (current); shipped-delta maps for earlier cuts: [changelog-3.3.0.md](../releases/changelog-3.3.0.md) §1, [changelog-3.2.0.md](../releases/changelog-3.2.0.md) §9, [changelog-3.1.0.md](../releases/changelog-3.1.0.md) § Per-fact homes (history).
 
 **Owns:** family → narrative → dump checklist.  
 **Hub:** [`INDEX.md`](../INDEX.md).  
@@ -59,27 +59,27 @@ and live outside this bar, in the companion docs:
 
 ---
 
-## Census (live dedi V3.2.0)
+## Census (live dedi V3.4.0)
 
-From `Census.exe` / `tools/data/stock_facts.json` on dedicated V **3.2.0 (b10)**.
-Prior V3.0.1 baseline was types 4401, methods 43901, SaveLoad IL 884 (see [re-methodology.md](../meta/re-methodology.md) §1).
+From `Census.exe` / `tools/data/stock_facts.json` on dedicated V **3.4.0 (b10)**.
+Prior pins: V3.3.0 (b18) was types 4447, methods 44534, SaveLoad IL 926; the V3.0.1 baseline was types 4401, methods 43901, SaveLoad IL 884 (see [re-methodology.md](../meta/re-methodology.md) §1).
 
 **Studied bytes (sha256; the version tuple repeats across a silent re-release, these hashes do not):**
 
 | File | sha256 | Bytes |
 |---|---|---:|
-| `7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` (V3.3.0 b18) | `e16ff9d539b8fbf64904c0bc090d502286a62464742a9396f0455936ad0beb87` | 11697152 |
+| `7DaysToDieServer_Data/Managed/Assembly-CSharp.dll` (V3.4.0 b10) | `00a962dbbb5ef1bb454368322221f9eb4148dc2d548ed2b77244f9bda5ecc167` | 11752960 |
 | `Data/Config/entityclasses.xml` | `5f930212bd315039a641841a571938f5f5aa855178e1859b3e6f5f1d05e79061` | 415836 |
 | `Data/Config/traders.xml` | `b7d1860484d9de625b2ec3e01714ce785ca947b4008dd19d5ebfffd10765caf4` | 67126 |
-| `Data/Config/buffs.xml` | `08345e0d43aa76f542fc55e3055855e51bfccd0e59d698ddf54f6d3d6886824a` | 1036875 |
+| `Data/Config/buffs.xml` | `5fa4b264fa55d86a23c1228880feb79dc39fa39dc564489745b6d953b51e1929` | 1036875 |
 
 Machine-readable copies live in `tools/data/stock_facts.json` (`source_identity`) and `tools/data/xml_pins.json` (`source_identity`); `check_stock_facts.py` and `xml_pins.py --check` fail closed when the live bytes differ.
 
 | Metric | Value |
 |---|---:|
-| Top-level types | 4447 |
-| Methods with body | 44534 |
-| NetPackage* types | 193 name-prefixed (192 counted by the census plus `NetPackageManager`), from `Census.exe`. A live b18 join measured 188 registered wire packages, ids 0-187: the 192 census rows minus the abstract/enum/helper types that never register, plus four nested packages the top-level census misses ([network.md](../network/network.md) §3, [protocol-packages.md](../network/protocol-packages.md) §1.6). `workspace/outputs/parity/parity_b18.json` holds 189 package entries; the extra entries are types that carry a read/write pair without a registered id. |
+| Top-level types | 4468 |
+| Methods with body | 44747 |
+| NetPackage* types | 195 name-prefixed (194 counted by the census plus `NetPackageManager`), from `Census.exe`. A live V3.3.0 b18 join measured 188 registered wire packages, ids 0-187: its 192 census rows minus the abstract/enum/helper types that never register, plus four nested packages the top-level census misses ([network.md](../network/network.md) §3, [protocol-packages.md](../network/protocol-packages.md) §1.6). `workspace/outputs/parity/parity_v3.4.0.json` holds 191 package entries; the extra entries are types that carry a read/write pair without a registered id. The b18 snapshot is `parity_b18.json` (189 entries). |
 | GameTimer Hz | 20 |
 | gmUpdate IL | 638 |
 | WorldState.SaveLoad(Stream) IL | 926 |
@@ -212,6 +212,7 @@ their correctness is the tool's, not prose. `inventories/dedicated-leaves.md` an
 
 ## Changelog
 
+- **2026-11-05:** Retargeted to V3.4.0 (b10): census 4468 top-level types / 44747 methods with body / 194 name-prefixed `NetPackage*`; whole-assembly IL total 1754946; pinned DLL sha256 moves to `00a962db...` (11752960 bytes, Steam build `26310339`, depot manifest `5022117301453546978`). `buffs.xml` moves to its b10 bytes; `entityclasses.xml` and `traders.xml` are unchanged. `gmUpdate` 638 IL, `WorldState.SaveLoad` 926 IL and `CurrentSaveVersion` 23 are unchanged. Delta map: [`b18-to-v3.4.0-20261105.md`](../../workspace/outputs/diffs/b18-to-v3.4.0-20261105.md).
 - **2026-11-05:** Live V3.3.0 b18 join captured with the stock client and dedicated server; the `PackageIds` body measures 188 registered ids 0-187, correcting the 184 inferred from metadata order. Table and provenance: [protocol-packages.md](../network/protocol-packages.md) §1.6.
 - **2026-10-24:** Retargeted to V3.3.0 (b18): census 4447 types / 44534 methods / 192 name-prefixed NetPackage* (184 registered) / gmUpdate 638 IL; pinned DLL sha256 moves to `e16ff9d5...` (11697152 bytes) and the three XML pins to their b18 bytes; `WorldState.SaveLoad` 926 IL and `CurrentSaveVersion` 23 are unchanged. Delta map: [changelog-3.3.0.md](../releases/changelog-3.3.0.md).
 - **2026-09-05:** Pin bumped to V3.2.0 (b10): census unchanged; managed delta only `Platform.EOS.RemoteFileStorage` cancel path ([changelog-3.2.0.md](../releases/changelog-3.2.0.md) §8).

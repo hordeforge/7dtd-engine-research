@@ -2,7 +2,7 @@
 
 **Owns:** hub for **generic** dedicated engine RE narratives + dump index.  
 **Not:** RealEarth product status/lessons (`7dtd-realearth`, private companion project, not published).  
-**Game:** V3.3.0 (b18) dedicated `Assembly-CSharp.dll`.  
+**Game:** V3.4.0 (b10) dedicated `Assembly-CSharp.dll`.  
 **Policy:** research only. Do not redistribute game IL or managed DLLs.  
 **Coverage bar:** dedicated-relevant **managed** surfaces. Open leftovers: [`residuals.md`](meta/residuals.md).
 
@@ -286,12 +286,11 @@ Generic engine dumps plus surfaces dump consumed by RealEarth product docs.
 | Directory | Focus | Used by |
 |---|---|---|
 | gmUpdate / frame-entries / deep / deeper / gaps / loop-complete / opt-scan / dedi-complete | Generic loop RE | research narratives |
-| full-v3.3.0 | **Canonical whole-assembly IL dump** (7501 types; DumpAll, pipe-safe) | the IL-citation sweep, every `docs/*.md` claim |
-| surface-v3.3.0 | FullSurface metadata (surface-types + surface-namespaces; whole-assembly IL totals) | full-surface.md, test_surface_wellformed |
-| netpackages-v3.3.0 | NetPackage body dumps + protocol META | protocol-packages.md, RE_GAP_CLOSURE |
-| stability-v3.3.0 | Stability calculator / falling blocks | stability.md |
-| terrain-v3.3.0 | Stock vs expanded height | research + product |
-| realearth-surfaces-v3.3.0 | Chunk, Origin, PPL, region | product realearth-surfaces.md |
+| full-v3.4.0 | **Canonical whole-assembly IL dump** (7549 types; DumpAll, pipe-safe) | the IL-citation sweep, every `docs/*.md` claim |
+| surface-v3.4.0 | FullSurface metadata (surface-types + surface-namespaces; whole-assembly IL totals) | full-surface.md, test_surface_wellformed |
+| netpackages-v3.4.0 | NetPackage body dumps + protocol META | protocol-packages.md, RE_GAP_CLOSURE |
+| terrain-v3.4.0 | Stock vs expanded height | research + product |
+| realearth-surfaces-v3.4.0 | Chunk, Origin, PPL, region | product realearth-surfaces.md |
 
 Policy: [`../il/README.md`](../il/README.md).
 
@@ -318,8 +317,8 @@ catalog: [`../tools/README.md`](../tools/README.md). How to RE:
 cd tools && ./build.sh
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
 mono bin/Census.exe "$ASM"
-mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.3.0
-mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.3.0
+mono bin/DumpNetPackages.exe "$ASM" ../il/netpackages-v3.4.0
+mono bin/legacy/DumpDediComplete.exe "$ASM" ../il/dedi-complete-v3.4.0
 ```
 
 Gates: `make test` (full suite, needs the live DLL), `make test-docs` (DLL-free corpus invariants; runs in CI on every push), `make stock-check` (pins vs live DLL + siblings), `make regen-check` (dump-regeneration check), `make facts` (machine-checked stock pins), `make latest ARGS="--check --verify-install Managed"` (newest published build vs the pin, and the local managed payload against Steam's manifest), `make install-check` (every installed file against that manifest), `make drift` (patch drift vs the studied baseline), `make bench-bodydiff` (perf gate for the body-diff lens).  
@@ -336,9 +335,10 @@ Evidence that the docs cite, regenerable with the tools above:
 
 | Artifact | What |
 |---|---|
-| [`../workspace/outputs/parity/parity_b10.json`](../workspace/outputs/parity/parity_b10.json), [`parity_b18.json`](../workspace/outputs/parity/parity_b18.json) | `ParitySurface` snapshots of the two builds on disk. `parity_diff.py` finds 3 packages added, 6 removed and 4 with changed wire between them (the b10 to b18 wire claim: 192 package entries down to 189, and 187 inferred ids against 188 measured live), and `drift-check.sh` uses the b18 snapshot as the wire baseline when a fresh checkout has none. The b9 snapshot is kept beside them for the b9 to b10 claim |
+| [`../workspace/outputs/parity/parity_b10.json`](../workspace/outputs/parity/parity_b10.json), [`parity_b18.json`](../workspace/outputs/parity/parity_b18.json), [`parity_v3.4.0.json`](../workspace/outputs/parity/parity_v3.4.0.json) | `ParitySurface` snapshots of the three builds on disk. `parity_diff.py` finds 3 packages added, 6 removed and 4 with changed wire from b10 to b18 (192 package entries down to 189, and 187 inferred ids against 188 measured live), and 2 packages added, none removed or changed from b18 to V3.4.0 (189 entries to 191). `drift-check.sh` uses the V3.4.0 snapshot as the wire baseline when a fresh checkout has none. The b9 snapshot is kept beside them for the b9 to b10 claim |
 | [`../workspace/outputs/diffs/b9-to-b10-20260920.md`](../workspace/outputs/diffs/b9-to-b10-20260920.md) | Eight-lens build report (facts, census, method signatures, enum members, body hashes, wire parity, depot manifest content delta) with both DLLs' sha256, Steam build ids, depot provenance and the 16 changed depot files. Regenerate: `SOURCE_DATE_EPOCH=<epoch of the stamp to keep> tools/research_diff.py --pair b9:b10`, which rewrites the same file byte for byte |
 | [`../workspace/outputs/diffs/b10-to-v3.3.0-20261024.md`](../workspace/outputs/diffs/b10-to-v3.3.0-20261024.md) | Same eight lenses for b10 to V3.3.0 b18: 4447 types, 192 NetPackage* types, 1925 method-signature changes, 81 enum-member changes, 5296 body changes, the wire package add/remove/change set, and 15 added plus 59 changed depot files. Regenerate with the two DLL paths and both depot manifests named in the report's own Reproduce block |
+| [`../workspace/outputs/diffs/b18-to-v3.4.0-20261105.md`](../workspace/outputs/diffs/b18-to-v3.4.0-20261105.md) | Same eight lenses for V3.3.0 b18 to V3.4.0 b10: 4468 types, 194 NetPackage* types, 309 method-signature changes, 26 enum-member changes, 927 body changes, two wire packages added, and 76 added plus 1547 changed plus 2 removed depot files. Regenerate with the two DLL paths and both depot manifests named in the report's own Reproduce block |
 | [`../workspace/outputs/baseline/`](../workspace/outputs/baseline) | Committed drift baselines for the studied build (`census.txt`, `surface/surface-types.md`, `methods.txt`, `enums.txt`), compared axis by axis by `make drift` on a fresh checkout; the machine-local `BASELINE_DIR` wins while it holds a snapshot of the DLL in hand |
 | [`../tools/data/steam_builds.json`](../tools/data/steam_builds.json) | Studied Steam build (branch, build id, depot manifest gid, studied DLL sha256) plus the superseded builds; `steam_builds.py --record` maintains it |
 
@@ -358,19 +358,20 @@ are deleted in the same change, so a citation can never quietly refer to an old
 build. Regenerate before deleting: an assembly that is no longer installed
 cannot be dumped again.
 
-**Current pin:** V **3.3.0 b18**. Every tracked set in [`../il/`](../il/) is
-V3.3.0; the V3.2.0 sets were retained for the 3.2.0→3.3.0 diff, the V3.1.0 sets
-were removed on 2026-10-24 and the V3.0.1 sets on 2026-08-06.
+**Current pin:** V **3.4.0 b10**. Every set in [`../il/`](../il/) has a V3.4.0
+regeneration; the V3.3.0 and V3.2.0 sets were retained for the b18→b10 and
+3.2.0→3.3.0 diffs, the V3.1.0 sets were removed on 2026-10-24 and the V3.0.1 sets
+on 2026-08-06.
 
 | Citation form | Means |
 |---|---|
-| `il/<set>-v3.3.0/...` | the tracked V3.3.0 dump sets |
-| `asm.il:NNNN` | a V3.3.0 single-file dump kept outside the repo, identified by MD5 in [`../il/README.md`](../il/README.md) |
+| `il/<set>-v3.4.0/...` | the tracked V3.4.0 dump sets |
+| `asm.il:NNNN` | a V3.4.0 single-file dump kept outside the repo, identified by MD5 in [`../il/README.md`](../il/README.md) |
 
-Mentions of V3.0.1, V3.1.0 and V3.2.0 in these documents are deliberate history
-(what changed between releases, what a prior corpus measured), not stale pins.
-Line numbers written before 2026-10-24 may still be V3.2.0 numbers, which drift
-from the V3.3.0 dump by roughly 3500 lines in the NetPackage region.
+Mentions of V3.0.1, V3.1.0, V3.2.0 and V3.3.0 in these documents are deliberate
+history (what changed between releases, what a prior corpus measured), not stale
+pins. Line numbers written before 2026-11-05 are V3.3.0 numbers and can drift
+from the V3.4.0 dump; cite the type dump file, not a line.
 
 Per-release delta maps (which doc owns each shipped change) live with the release they describe: [`changelog-3.3.0.md`](releases/changelog-3.3.0.md) §1, [`changelog-3.2.0.md`](releases/changelog-3.2.0.md) §9, [`changelog-3.1.0.md`](releases/changelog-3.1.0.md), [`changelog-3.0.0.md`](releases/changelog-3.0.0.md).
 

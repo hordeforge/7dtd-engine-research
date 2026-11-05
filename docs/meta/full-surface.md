@@ -1,4 +1,4 @@
-# Whole-assembly surface map and coverage ledger (V3.3.0)
+# Whole-assembly surface map and coverage ledger (V3.4.0)
 
 **Owns:** the 100%-of-the-assembly structural map (every namespace, with type /
 method / IL counts) and the honest ledger of how much has a hand-written narrative.
@@ -8,20 +8,20 @@ method / IL counts) and the honest ledger of how much has a hand-written narrati
 
 ## Scope and the two hard limits on "document 100% in minute detail"
 
-The shipped `Assembly-CSharp.dll` is **7,501 types (incl. nested), 53,796 methods with bodies,
-1,749,641 IL instructions**, across 89 namespaces (regenerate with
+The shipped `Assembly-CSharp.dll` is **7,549 types (incl. nested), 54,064 methods with bodies,
+1,754,946 IL instructions**, across 89 namespaces (regenerate with
 `tools/src/Census` and `FullSurface`). Two constraints shape what this repo can
 honestly hold:
 
 1. **Redistribution / copyright.** A complete minute-detail transcription of
-   1.73M IL instructions is a full copy of The Fun Pimps' proprietary game. This
+   1.75M IL instructions is a full copy of The Fun Pimps' proprietary game. This
    repo's standing policy (README, [`../../il/README.md`](../../il/README.md),
    [`../../AGENTS.md`](../../AGENTS.md)) is: **no game code or bulk IL is distributed;
    docs quote at most a few disassembly lines for commentary.** So the full IL is
    dumped **locally and git-ignored** (`il/`, regenerable from your own game copy),
    never committed. What is committed is *metadata about* the code (this map,
    signatures, sizes, call graphs) and *transformative analysis* (the narratives).
-2. **Effort.** Hand-written minute detail for 53k methods is a multi-person-year
+2. **Effort.** Hand-written minute detail for 54k methods is a multi-person-year
    effort, not a single pass. This ledger makes coverage a tracked, incremental
    goal rather than a false "done" claim.
 
@@ -30,24 +30,24 @@ honestly hold:
 ```bash
 cd tools && ./build.sh
 ASM="$HOME/.local/share/Steam/steamapps/common/7 Days to Die Dedicated Server/7DaysToDieServer_Data/Managed/Assembly-CSharp.dll"
-mono bin/FullSurface.exe "$ASM" ../il/surface-v3.3.0          # committable metadata
-mono bin/DumpAll.exe    "$ASM" ../il/full-v3.3.0              # full IL, git-ignored (all 7501 types)
-mono bin/DumpAll.exe    "$ASM" ../il/full-v3.3.0 GamePath     # or one namespace
+mono bin/FullSurface.exe "$ASM" ../il/surface-v3.4.0          # committable metadata
+mono bin/DumpAll.exe    "$ASM" ../il/full-v3.4.0              # full IL, git-ignored (all 7549 types)
+mono bin/DumpAll.exe    "$ASM" ../il/full-v3.4.0 GamePath     # or one namespace
 ```
 
-`il/full-v3.3.0/` after a full run is the 100% reversal: one `<Type>.il.txt` per
+`il/full-v3.4.0/` after a full run is the 100% reversal: one `<Type>.il.txt` per
 type, every method body. It is git-ignored on purpose.
 
 ## The assembly by functional cluster
 
-All 88 namespaces grouped by role. Counts are methods-with-body / IL from
-`surface-namespaces.md` (regenerate to refresh). `<global>` (6,306 types /
-45,486 methods / 1.53M IL) is 85% of the code and is split by subsystem in the
+All 89 namespaces grouped by role. Counts are methods-with-body / IL from
+`surface-namespaces.md` (regenerate to refresh). `<global>` (6,381 types /
+45,819 methods / 1.53M IL) is 85% of the code and is split by subsystem in the
 narrated docs below, not by namespace.
 
 | Cluster | Namespaces | Coverage status |
 |---|---|---|
-| **Dedicated sim core** | `<global>` (GameManager, World, Chunk*, Entity*, EntityAlive, Tick*, managers, save) | **Narrated** for the dedicated hot path (see ledger); rest of `<global>` enumerated in `il/surface-v3.2.0/surface-types.md` (local) |
+| **Dedicated sim core** | `<global>` (GameManager, World, Chunk*, Entity*, EntityAlive, Tick*, managers, save) | **Narrated** for the dedicated hot path (see ledger); rest of `<global>` enumerated in `il/surface-v3.4.0/surface-types.md` (local) |
 | **Networking / wire** | `<global>` NetPackage*/ConnectionManager/NetEntity* | **Narrated** (protocol, protocol-frames, protocol-packages, network): 195 packages + framing + encryption |
 | **Pathfinding** | `GamePath`, `RaycastPathing` | **Narrated** ([entity-ai.md](../entities/entity-ai.md) §6 ASP wrapper, [closed-gaps.md](../entities/closed-gaps.md) ASP->A*); Aron Granberg A* search internals **closed 2026-08-12** (raycast-pathing.md §5.1) |
 | **Utility AI** | `UAI` | **Narrated** ([uai.md](../entities/uai.md)): packages, considerations, tasks, decision/selection cycle |
@@ -63,14 +63,14 @@ narrated docs below, not by namespace.
 | **Analytics / services / modinfo** | `Services*`, `Services.Analytics.Events`, `ModInfo` | Not narrated (telemetry / metadata) |
 | **Bundled third-party libraries** | `UniLinq`, `ICSharpCode.WpfDesign.XamlDom`, `ConcurrentCollections`, `Microsoft.CodeAnalysis`, `SandboxOptions`, `System.*` | Vendored libs; `UniLinq` (LINQ impl) and `ConcurrentCollections.ConcurrentHashSet` are **live helpers** called by server code (RWG/Twitch/chunk queues, [dedicated-leftovers.md](../meta/dedicated-leftovers.md)); the rest are unreferenced or non-game |
 
-Per-namespace counts: `il/surface-v3.2.0/surface-namespaces.md` (regenerate).
-Per-type inventory (all 7,501, names + sizes, no bodies): `surface-types.md` (local).
+Per-namespace counts: `il/surface-v3.4.0/surface-namespaces.md` (regenerate).
+Per-type inventory (all 7,549, names + sizes, no bodies): `surface-types.md` (local).
 
 ## Coverage ledger (hand-written narrative)
 
 The narrated corpus targets **the dedicated-relevant managed surface** (the
 project's stated bar, [`coverage.md`](../meta/coverage.md)), which is the dedicated sim
-core + wire protocol, a small but load-bearing slice of the 7,501 types.
+core + wire protocol, a small but load-bearing slice of the 7,549 types.
 
 | Subsystem | Narrative | Depth |
 |---|---|---|
@@ -121,11 +121,11 @@ progression, game events, quests/challenges, MinEvent effects, utility AI, world
 generation, and the server slice of Twitch. See the ledger table above.
 
 **Caveat (not "every method"), with the honest numbers.** The reachability pass
-reaches ~47k methods / 3,713 game types in the RE surface, far more than any per-method narration could
+reaches ~47k methods / 3,725 game types in the RE surface, far more than any per-method narration could
 cover. As of the current [coverage report](../inventories/coverage-report.md):
-**3,695 of the 3,713 reached types (99.5%) are narrated** in a narrative doc,
-**1 is catalogued only, 5 are classified out of scope, and 12 are unaccounted**.
-(A larger whole-assembly base of 7,501 types incl. nested/third-party is
+**3,691 of the 3,725 reached types (99.1%) are narrated** in a narrative doc,
+**1 is catalogued only, 5 are classified out of scope, and 28 are unaccounted**.
+(A larger whole-assembly base of 7,549 types incl. nested/third-party is
 partitioned separately.) Server-side support and
 utility code that the reachable set includes but no narrative singles out
 (e.g. `Configuration.*` parsing, `StringParsers`, `TEFeatureAbs` helpers) is

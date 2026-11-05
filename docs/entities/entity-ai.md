@@ -1,4 +1,4 @@
-# Entity, AI, and path (dedicated V3.2.0)
+# Entity, AI, and path (dedicated V3.4.0)
 
 **Owns:** authority entity tick chain, AI/path onion, thresholds (merged deep + deeper synthesis).  
 **Loop context:** [`loop.md`](../loop/loop.md), [`loop-gmupdate.md`](../loop/loop-gmupdate.md).  

@@ -25,6 +25,27 @@ Status terms:
 
 ## Log
 
+### 2026-11-05
+
+- Retargeted the pinned build to V3.4.0 b10 (Steam build `26310339`, depot
+  manifest `5022117301453546978`, DLL sha256 `00a962db...`, 11752960 bytes).
+  `steam_builds.py --record` moved b18 into the pin's `history`.
+  `parity_v3.4.0.json` is committed beside `parity_b10.json` and `parity_b18.json`
+  and is now the wire baseline `drift-check.sh` uses on a fresh checkout; the
+  committed per-axis baselines under `workspace/outputs/baseline/` were
+  re-accepted from the b10 assembly.
+
+- The b18 to b10 lens results: 4468 top-level types (+21), 44747 methods with
+  body (+213), 194 NetPackage* types (2 added, none removed or changed wire:
+  `NetPackageDroneRecoveryRequest`/`Response`), 309 method-signature changes,
+  26 enum-member changes, 927 body changes, and a depot content delta of 76
+  added plus 1547 changed plus 2 removed files. Whole-assembly IL total
+  1749641 -> 1754946 (`FullSurface`, per-type and per-namespace sums agree).
+  `gmUpdate` 638 IL and `WorldState.SaveLoad` 926 IL are unchanged.
+
+- XML pins: `entityclasses.xml` and `traders.xml` are byte-identical to b18;
+  `buffs.xml` moves to `5fa4b264...` (same 1036875 bytes).
+
 ### 2026-10-24
 
 - Retargeted the pinned build to V3.3.0 b18 (Steam build `25661908`, depot

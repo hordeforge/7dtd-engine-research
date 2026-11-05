@@ -1,9 +1,9 @@
-# All MonoBehaviour-like Update/LateUpdate/FixedUpdate (V3.2.0)
+# All MonoBehaviour-like Update/LateUpdate/FixedUpdate (V3.4.0)
 
 **Kind:** inventory table (not primary narrative).  
 **Prefer:** [`loop.md`](../loop/loop.md) §1.  
-**Raw:** [`../il/frame-entries-v3.2.0/`](../../il/frame-entries-v3.2.0/).  
-**Count:** 244 zero-arg `Update`/`LateUpdate`/`FixedUpdate` bodies over the transitive `MonoBehaviour` closure (including 2 nested types, marked). Almost all are client/render/UI; the loop doc owns the dedicated-relevant ones.
+**Raw:** [`../il/frame-entries-v3.4.0/`](../../il/frame-entries-v3.4.0/).  
+**Count:** 242 zero-arg `Update`/`LateUpdate`/`FixedUpdate` bodies over the transitive `MonoBehaviour` closure (including 2 nested types, marked). Almost all are client/render/UI; the loop doc owns the dedicated-relevant ones.
 **Hub:** [`INDEX.md`](../INDEX.md).  
 
 | Type | Base | Method | IL |
@@ -46,7 +46,7 @@
 | `CharacterGazeController` | MonoBehaviour | `LateUpdate` | 23 |
 | `CharacterShaderLODControl` | MonoBehaviour | `Update` | 39 |
 | `CloneToTransform` | MonoBehaviour | `LateUpdate` | 192 |
-| `ConnectionManager` | SingletonMonoBehaviour`1 | `Update` | 231 |
+| `ConnectionManager` | SingletonMonoBehaviour`1 | `Update` | 213 |
 | `ConnectionManager` | SingletonMonoBehaviour`1 | `LateUpdate` | 4 |
 | `ContactShadows` | MonoBehaviour | `Update` | 8 |
 | `ControllerCamera` | MonoBehaviour | `LateUpdate` | 179 |
@@ -72,7 +72,7 @@
 | `Entity` | MonoBehaviour | `FixedUpdate` | 71 |
 | `EntityAlive` | Entity | `Update` | 171 |
 | `EntityAlive` | Entity | `LateUpdate` | 6 |
-| `EntityBackpack` | EntityItem | `Update` | 38 |
+| `EntityBackpack` | EntityContainerAbs | `Update` | 38 |
 | `EntityCar` | EntityAlive | `Update` | 66 |
 | `EntityDrone` | EntityNPC | `LateUpdate` | 88 |
 | `EntityFallingBlock` | Entity | `Update` | 147 |
@@ -139,7 +139,7 @@
 | `Origin` | MonoBehaviour | `FixedUpdate` | 256 |
 | `PanWithMouse` | MonoBehaviour | `Update` | 81 |
 | `ParticleLifetimeSwitch` | MonoBehaviour | `Update` | 88 |
-| `PlayerMoveController` | MonoBehaviour | `Update` | 2735 |
+| `PlayerMoveController` | MonoBehaviour | `Update` | 2788 |
 | `PlayerReflectionProbe` | MonoBehaviour | `Update` | 181 |
 | `PlayIdleAnimations` | MonoBehaviour | `Update` | 77 |
 | `POIBoundsHelper` | MonoBehaviour | `Update` | 92 |
@@ -220,8 +220,6 @@
 | `vp_FPWeapon` | vp_Weapon | `FixedUpdate` | 23 |
 | `vp_FPWeapon` | vp_Weapon | `LateUpdate` | 1 |
 | `vp_FPWeaponMeleeAttack` | vp_Component | `Update` | 5 |
-| `vp_Grab` | vp_Interactable | `FixedUpdate` | 21 |
-| `vp_Grab` | vp_Interactable | `Update` | 13 |
 | `vp_ItemPickup` | MonoBehaviour | `Update` | 34 |
 | `vp_MovingPlatform` | MonoBehaviour | `FixedUpdate` | 9 |
 | `vp_MuzzleFlash` | MonoBehaviour | `Update` | 70 |

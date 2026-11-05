@@ -1,4 +1,4 @@
-# Challenge objective catalog (V3.2.0)
+# Challenge objective catalog (V3.4.0)
 
 **Kind:** per-objective behavioral catalog (name -> role, derived from class name/base/hook fingerprint; no full bodies).
 **Framework:** [`../content/quests-challenges.md`](../content/quests-challenges.md) owns the quest/challenge contract; this describes each `Challenges.BaseChallengeObjective` leaf.

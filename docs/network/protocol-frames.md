@@ -2,7 +2,7 @@
 
 **Owns:** left-to-right byte/field strips for envelope + golden packages (classic protocol style).  
 **Hub:** [`INDEX.md`](../INDEX.md).  
-**Pin:** V **3.2.0 (b9)** (golden live capture is V3.1.0-era: major=3, minor=10, build=14; the 3.2.0 triple is major=3, minor=20, build=9). The current build is V3.3.0 (b18): the version triple is major=3, minor=30, build=18 and the id map has 184 entries (was 189 in the captured budget); the frames below are captured bytes, not regenerated from b18.  
+**Pin:** V **3.2.0 (b9)** (golden live capture is V3.1.0-era: major=3, minor=10, build=14; the 3.2.0 triple is major=3, minor=20, build=9). The current build is V3.4.0 (b10): the version triple is major=3, minor=40, build=10; the id map was measured at 188 entries on V3.3.0 b18 (189 in the captured V3.1.0 budget), and the frames below are captured bytes, not regenerated from either of them.  
 **Companion:** narrative join/policy in [protocol.md](../network/protocol.md).  
 **Evidence:** loadgen `PackageCodec` · dedi-complete census.  
 **Clone:** [`../../zdtd-server/`](../../../zdtd-server).

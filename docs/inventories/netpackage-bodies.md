@@ -22,7 +22,7 @@ source; nested `.Write` rows name the serializer type, whose own layout is in it
 own doc/dump. Verify a load-bearing body against its `write`/`read` IL before
 cloning.
 
-Total packages with an extractable `write()` body: **182**.
+Total packages with an extractable `write()` body: **184**.
 Not listed (no own `write()` body - inherited serialization, abstract bases, enums, or helpers): `NetPackageDirection`, `NetPackageEncryptionRequest`, `NetPackageEntityAddExpServer`, `NetPackageEntityAddScoreServer`, `NetPackageEntitySetSkillLevelServer`, `NetPackageEntityTeleport`, `NetPackageEntry`, `NetPackageInfo`, `NetPackageInventoryKeepOpen`, `NetPackageLogger`, `NetPackageMeasure`, `NetPackageMetrics`, `NetPackagePlayerDisconnect`, `NetPackageSleeperPassiveChange`.
 
 ## NetPackage
@@ -400,6 +400,22 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 |---:|---|---|
 | 1 | `pe` | `ParticleEffect.Write` |
 | 2 | `entityThatCausedIt` | i32 |
+
+## NetPackageDroneRecoveryRequest
+`write` IL=12, 2 wire field(s).
+
+| # | Source (field/getter) | Wire |
+|---:|---|---|
+| 1 | `playerId` | i32 |
+| 2 | `actionId` | string |
+
+## NetPackageDroneRecoveryResponse
+`write` IL=12, 2 wire field(s).
+
+| # | Source (field/getter) | Wire |
+|---:|---|---|
+| 1 | `playerId` | i32 |
+| 2 | `droneId` | i32 |
 
 ## NetPackageDropItemsContainer
 `write` IL=42, 5 wire field(s).
@@ -2197,7 +2213,7 @@ _No BinaryWriter/nested Write calls detected (empty body: only the base handle, 
 | 5 | `TraderPos` | `StreamUtils.Write` |
 
 ## SharedQuestData
-`write` IL=67, 14 wire field(s).
+`write` IL=79, 14 wire field(s).
 
 > Control-flow: conditional branch(es) present. Flat sequence below is the backbone.
 

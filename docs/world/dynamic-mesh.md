@@ -1,4 +1,4 @@
-# Dynamic mesh subsystem (dedicated V3.3.0)
+# Dynamic mesh subsystem (dedicated V3.4.0)
 
 **Owns:** the server-authoritative regeneration, persistence, and streaming of
 deformed and destroyed block geometry, the geometry that diverges from the base

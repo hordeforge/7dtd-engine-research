@@ -1,4 +1,4 @@
-# Crafting and recipes (dedicated V3.3.0)
+# Crafting and recipes (dedicated V3.4.0)
 
 **Owns:** the recipe model: `Recipe` (ingredients, output, crafting tier, unlock),
 `CanCraft` validation, the `RecipeQueueItem` craft queue, and recipe unlock
@@ -9,7 +9,7 @@ recipe content.
 **Evidence:** `Recipe`, `RecipeQueueItem`, `CraftingManager`, `RecipesFromXml`,
 `RecipeUnlockData` IL (dump locally with `tools/src/DumpMethod`, git-ignored).
 **Hub:** [`INDEX.md`](../INDEX.md). **Method:** [`re-methodology.md`](../meta/re-methodology.md).
-**Build:** V3.3.0 b18. The recipe loader and unlock/tier method bodies the
+**Build:** V3.4.0 b10. The recipe loader and unlock/tier method bodies the
 b18 diff did not touch keep their b10 widths; the shipped `recipes.xml`
 and `progression.xml` backpack content was re-read.
 

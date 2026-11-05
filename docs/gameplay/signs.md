@@ -1,4 +1,4 @@
-# Signs, authored text, and player sign libraries (dedicated V3.3.0)
+# Signs, authored text, and player sign libraries (dedicated V3.4.0)
 
 **Owns:** the layered vector-sign ("drawing") content system: `SignData` and its
 layer tree (`SignLayer`, `TextSignLayer`, `PolygonSignLayer`, `NoiseSignLayer`,

@@ -1,8 +1,8 @@
-TopLevelTypes                = 4447
-MethodsWithBody (top-level)  = 44534
-AllTypes (incl nested)       = 7501
-AllMethodsWithBody           = 53796
-NetPackage* (top-level)      = 192
-NetPackage* (incl nested)    = 197
+TopLevelTypes                = 4468
+MethodsWithBody (top-level)  = 44747
+AllTypes (incl nested)       = 7549
+AllMethodsWithBody           = 54064
+NetPackage* (top-level)      = 194
+NetPackage* (incl nested)    = 199
 WorldState.SaveLoad(Stream)  = 926
 GameManager.gmUpdate IL      = 638

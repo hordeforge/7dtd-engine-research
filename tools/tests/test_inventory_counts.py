@@ -43,7 +43,7 @@ CLAIMS = {
 
 def check_package_framing_counts(bad: list[str]) -> None:
     """protocol-packages.md §6.23 self-claims 'V3.3.0: 35 rows (16 conditional
-    + 19 always-present)'. The 16 live in a table; the 19 are a prose name list.
+    + 19 always-present)' for the V3.3.0 pin; the number is unchanged at V3.4.0. The 16 live in a table; the 19 are a prose name list.
     (The V3.2.0 set was 37 = 18 + 19: three conditional rows were deleted
     packages and NetPackagePlayerInventory was added as a conditional row.)
     If either half drifts the stated total must too."""

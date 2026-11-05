@@ -1,6 +1,6 @@
 # RE coverage report (auto-generated)
 
-**Assembly studied:** Assembly-CSharp V3.3.0 (b18), sha256 e16ff9d539b8fbf6. The numbers below are for THIS build only: if the corpus pin
+**Assembly studied:** Assembly-CSharp V3.4.0 (b10), sha256 00a962dbbb5ef1bb. The numbers below are for THIS build only: if the corpus pin
 moved (`docs/meta/coverage.md` header), regenerate before quoting any number here.
 
 **Tool:** `tools/src/Coverage`. **Lens:** call-graph reachability from the
@@ -45,15 +45,15 @@ The tiers are reported separately and deliberately **not summed into a headline*
 
 | Metric | Value |
 |---|---:|
-| Reached methods (with body) | 47096 |
-| Reached types (incl. compiler-generated) | 7390 |
-| Reached, non-generated | 6222 |
-| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2368 (excluded from %) |
-| ...**game types** (the RE surface) | **3713** |
-| ...**narrated** (backticked in a narrative doc) | **3695 (99.5%)** |
+| Reached methods (with body) | 47189 |
+| Reached types (incl. compiler-generated) | 7416 |
+| Reached, non-generated | 6241 |
+| ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2372 (excluded from %) |
+| ...**game types** (the RE surface) | **3725** |
+| ...**narrated** (backticked in a narrative doc) | **3691 (99.1%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 1 |
 | ...**classified** out-of-scope | 5 |
-| ...**unaccounted** (appears nowhere) | 12 |
+| ...**unaccounted** (appears nowhere) | 28 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 504 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 181 |
 
@@ -71,11 +71,11 @@ as an upper bound; this table is its actual depth.
 
 | Narrative mentions | Types | Share of base |
 |---|---:|---:|
-| 0 (catalogued, classified, or unaccounted) | 18 | 0.5% |
-| exactly 1 | 2365 | 63.7% |
-| 2-4 | 799 | 21.5% |
-| 5-19 | 440 | 11.9% |
-| 20+ | 91 | 2.5% |
+| 0 (catalogued, classified, or unaccounted) | 34 | 0.9% |
+| exactly 1 | 2317 | 62.2% |
+| 2-4 | 795 | 21.3% |
+| 5-19 | 485 | 13.0% |
+| 20+ | 94 | 2.5% |
 
 ## Whole-assembly accounting (all types and methods)
 
@@ -85,31 +85,31 @@ reached-and-documented plus unreached-and-classified (client / editor / dead).
 
 | Metric | Value |
 |---|---:|
-| All types (incl. nested) | 7501 |
-| Reached (Assembly-CSharp own types) | 4824 (64.3%) |
-| Unreached | 2677 (35.7%) |
-| ...compiler-generated / obfuscated | 354 (excluded) |
+| All types (incl. nested) | 7549 |
+| Reached (Assembly-CSharp own types) | 4843 (64.2%) |
+| Unreached | 2706 (35.8%) |
+| ...compiler-generated / obfuscated | 360 (excluded) |
 | ...third-party / BCL | 57 (excluded) |
-| ...**unreached game types** (need classification) | **2266** |
-| All methods with body | 53796 |
-| Reached methods (Assembly-CSharp own) | 31791 (59.1%) |
-| Unreached methods | 22005 (40.9%) |
-| ...in reached game types (uncalled members) | 13251 |
-| ...in unreached game types | 4448 |
+| ...**unreached game types** (need classification) | **2289** |
+| All methods with body | 54064 |
+| Reached methods (Assembly-CSharp own) | 31860 (58.9%) |
+| Unreached methods | 22204 (41.1%) |
+| ...in reached game types (uncalled members) | 13380 |
+| ...in unreached game types | 4493 |
 
 **Whole-assembly accounting (the 100% view):**
 
 | Metric | Value |
 |---|---:|
-| Accounted game types (reached documented + unreached classified) | **5979 / 5979 (100%)** |
-| Methods in accounted game types | **46807 / 46807 (100%)** |
-| (excluded by design: 1385 compiler-generated, 99 third-party/BCL, 38 both; sums to 7501 of 7501) | |
+| Accounted game types (reached documented + unreached classified) | **6014 / 6014 (100%)** |
+| Methods in accounted game types | **47036 / 47036 (100%)** |
+| (excluded by design: 1398 compiler-generated, 99 third-party/BCL, 38 both; sums to 7549 of 7549) | |
 
-Unreached game types (2266), grouped by top namespace:
+Unreached game types (2289), grouped by top namespace:
 
 | Namespace | count |
 |---|---:|
-| `<global>` | 1781 |
+| `<global>` | 1790 |
 | `Platform` | 155 |
 | `Twitch` | 57 |
 | `DynamicMusic` | 45 |
@@ -118,10 +118,12 @@ Unreached game types (2266), grouped by top namespace:
 | `WorldGenerationEngineFinal` | 20 |
 | `JBooth` | 20 |
 | `MusicUtils` | 13 |
+| `GearVariants` | 12 |
 | `CoverClippingTool` | 11 |
 | `Webserver` | 9 |
 | `Audio` | 9 |
 | `XMLEditing` | 8 |
+| `Services` | 7 |
 | `Challenges` | 7 |
 | `GamePath` | 6 |
 | `mumblelib` | 5 |
@@ -129,9 +131,7 @@ Unreached game types (2266), grouped by top namespace:
 | `SandboxOptions` | 4 |
 | `Assets` | 4 |
 | `ModInfo` | 3 |
-| `Services` | 3 |
 | `PrefabVolumes` | 3 |
-| `GearVariants` | 2 |
 | `Quests` | 2 |
 | `RaycastPathing` | 2 |
 | `MapRendering` | 2 |
@@ -144,22 +144,39 @@ Unreached game types (2266), grouped by top namespace:
 | `UAI` | 1 |
 | `AssetManagement` | 1 |
 
-Unreached game types already mentioned in docs: **2257** (accounted).
-Unreached game types with **no mention anywhere**: **9** (the whole-assembly gap).
+Unreached game types already mentioned in docs: **2263** (accounted).
+Unreached game types with **no mention anywhere**: **26** (the whole-assembly gap).
 
 Gap list (no mention in any doc):
 
+- `CosmeticSet` (<global>)
+- `CosmeticSets` (<global>)
+- `HideIfAttribute` (<global>)
 - `HonkOpenTypes` (<global>)
 - `IItemStackController` (<global>)
+- `InspectorReadOnlyAttribute` (<global>)
+- `MatchesFiltersDelegate` (<global>)
 - `QuestEvent_ContainerOpened` (<global>)
 - `QuestSource` (<global>)
+- `SearchFiltersChangedDelegate` (<global>)
+- `ShowIfAttribute` (<global>)
+- `SkillTransactionType` (<global>)
 - `XuiBindingBoxWriterDelegate` (<global>)
 - `IAssetManager` (AssetManagement)
 - `OpenDoorStates` (GameEvent.SequenceActions)
+- `BodyFit` (GearVariants)
+- `CopyMode` (GearVariants)
+- `CopyResult` (GearVariants)
+- `GearFitEntry` (GearVariants)
+- `Gender` (GearVariants)
+- `CameraToggleEventData` (Services.Analytics.Events)
+- `changeTypes` (Services.Analytics.Events)
 - `EntitlementData` (Services.Analytics.Events)
 - `OfferedQuest` (Services.Analytics.Events)
+- `RewardData` (Services.Analytics.Events)
+- `triggerReasons` (Services.Analytics.Events)
 
-Full unreached game-type list (2266):
+Full unreached game-type list (2289):
 
 | Type | Namespace | methods |
 |---|---|---:|
@@ -385,6 +402,8 @@ Full unreached game-type list (2266):
 | `ControllerGUI` | <global> | 5 |
 | `ControllerMouseSimulation` | <global> | 1 |
 | `ControllerTriggerEffect` | <global> | 0 |
+| `CosmeticSet` | <global> | 1 |
+| `CosmeticSets` | <global> | 1 |
 | `CoverEngageType` | <global> | 0 |
 | `CoverMode` | <global> | 0 |
 | `CoverType` | <global> | 0 |
@@ -840,6 +859,7 @@ Full unreached game-type list (2266):
 | `HeadStates` | <global> | 0 |
 | `HealItemType` | <global> | 0 |
 | `HelpTopic` | <global> | 1 |
+| `HideIfAttribute` | <global> | 1 |
 | `HierarchyElement` | <global> | 1 |
 | `HitData` | <global> | 0 |
 | `HitDataFlags` | <global> | 0 |
@@ -926,6 +946,7 @@ Full unreached game-type list (2266):
 | `InitializedRenderer` | <global> | 0 |
 | `InputAxisHelper` | <global> | 1 |
 | `InputType` | <global> | 0 |
+| `InspectorReadOnlyAttribute` | <global> | 1 |
 | `InternalEdgeData` | <global> | 1 |
 | `Interval` | <global> | 1 |
 | `IntRect` | <global> | 2 |
@@ -971,6 +992,7 @@ Full unreached game-type list (2266):
 | `IsSecondaryAttack` | <global> | 2 |
 | `IsValidTarget` | <global> | 0 |
 | `IsVisibleDelegate` | <global> | 0 |
+| `Item` | <global> | 0 |
 | `ItemActionFiringState` | <global> | 0 |
 | `ItemActionListTypes` | <global> | 0 |
 | `ItemCap` | <global> | 1 |
@@ -1056,6 +1078,7 @@ Full unreached game-type list (2266):
 | `MapObjectVendingMachine` | <global> | 7 |
 | `Mask` | <global> | 0 |
 | `MaskModifier` | <global> | 0 |
+| `MatchesFiltersDelegate` | <global> | 0 |
 | `MaterialSync` | <global> | 0 |
 | `MaterialSyncAll` | <global> | 0 |
 | `MaxIntensityEvent` | <global> | 0 |
@@ -1431,6 +1454,7 @@ Full unreached game-type list (2266):
 | `SdEncoding` | <global> | 2 |
 | `SdXDocumentExtensions` | <global> | 1 |
 | `SearchDir` | <global> | 0 |
+| `SearchFiltersChangedDelegate` | <global> | 0 |
 | `SearchTypes` | <global> | 0 |
 | `SearchTypes` | <global> | 0 |
 | `SeedType` | <global> | 0 |
@@ -1461,6 +1485,7 @@ Full unreached game-type list (2266):
 | `ShapeMode` | <global> | 0 |
 | `SharedQuestEvents` | <global> | 0 |
 | `ShockSpot` | <global> | 0 |
+| `ShowIfAttribute` | <global> | 1 |
 | `ShowLocationInfoTypes` | <global> | 0 |
 | `ShowTextTypes` | <global> | 0 |
 | `ShowXPTypes` | <global> | 0 |
@@ -1481,6 +1506,7 @@ Full unreached game-type list (2266):
 | `SItemNameCount` | <global> | 0 |
 | `SizeTextMeshDefinition` | <global> | 1 |
 | `SkewWarp` | <global> | 0 |
+| `SkillTransactionType` | <global> | 0 |
 | `SkinnedCollisionHelper` | <global> | 4 |
 | `SkinnedMeshCombiner` | <global> | 3 |
 | `SkinningTestSceneTools` | <global> | 3 |
@@ -2068,8 +2094,18 @@ Full unreached game-type list (2266):
 | `PathInfoMultiSource` | GamePath | 1 |
 | `PathInfoMultiTarget` | GamePath | 1 |
 | `State` | GamePath | 0 |
+| `BodyFit` | GearVariants | 1 |
+| `CopyMode` | GearVariants | 0 |
+| `CopyResult` | GearVariants | 2 |
+| `GearFitEntry` | GearVariants | 1 |
 | `GearPart` | GearVariants | 0 |
+| `GearPart` | GearVariants | 0 |
+| `GearVariantMatrixSO` | GearVariants | 13 |
+| `Gender` | GearVariants | 0 |
+| `Row` | GearVariants | 1 |
 | `Sex` | GearVariants | 0 |
+| `SexGearTables` | GearVariants | 4 |
+| `StringTable2D` | GearVariants | 6 |
 | `ButtonIcon` | GUI_2 | 0 |
 | `AllTextureChannel` | JBooth.MicroSplat | 0 |
 | `ClusterMode` | JBooth.MicroSplat | 0 |
@@ -2289,8 +2325,12 @@ Full unreached game-type list (2266):
 | `SandboxOptions` | SandboxOptions | 0 |
 | `SdfTagType` | SDF | 0 |
 | `EventTypes` | Services.Analytics | 1 |
+| `CameraToggleEventData` | Services.Analytics.Events | 12 |
+| `changeTypes` | Services.Analytics.Events | 0 |
 | `EntitlementData` | Services.Analytics.Events | 0 |
 | `OfferedQuest` | Services.Analytics.Events | 0 |
+| `RewardData` | Services.Analytics.Events | 0 |
+| `triggerReasons` | Services.Analytics.Events | 0 |
 | `Rotate` | ShinyScreenSpaceRaytracedReflections | 2 |
 | `TriggerEffectDualsense` | TriggerEffects | 14 |
 | `BaseTwitchVoteOperationRequirement` | Twitch | 7 |
@@ -2434,7 +2474,7 @@ Full unreached game-type list (2266):
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2903 | 2898 | 5 | 99.8% |
+| `<global>` | 2906 | 2898 | 8 | 99.7% |
 | `GameEvent` | 180 | 180 | 0 | 100.0% |
 | `Platform` | 147 | 147 | 0 | 100.0% |
 | `Twitch` | 110 | 110 | 0 | 100.0% |
@@ -2442,7 +2482,7 @@ Full unreached game-type list (2266):
 | `DynamicMusic` | 47 | 47 | 0 | 100.0% |
 | `Challenges` | 47 | 47 | 0 | 100.0% |
 | `WorldGenerationEngineFinal` | 39 | 39 | 0 | 100.0% |
-| `Services` | 24 | 18 | 6 | 75.0% |
+| `Services` | 33 | 18 | 15 | 54.5% |
 | `UAI` | 24 | 24 | 0 | 100.0% |
 | `PrefabVolumes` | 16 | 16 | 0 | 100.0% |
 | `GamePath` | 13 | 13 | 0 | 100.0% |
@@ -2455,7 +2495,7 @@ Full unreached game-type list (2266):
 | `MapRendering` | 7 | 7 | 0 | 100.0% |
 | `AssetManagement` | 5 | 4 | 1 | 80.0% |
 | `MusicUtils` | 5 | 5 | 0 | 100.0% |
-| `GearVariants` | 4 | 4 | 0 | 100.0% |
+| `GearVariants` | 4 | 0 | 4 | 0.0% |
 | `ConcurrentCollections` | 3 | 3 | 0 | 100.0% |
 | `mumblelib` | 2 | 2 | 0 | 100.0% |
 | `WaterClippingTool` | 1 | 1 | 0 | 100.0% |
@@ -2481,16 +2521,32 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 | Type | Namespace | methods (reached-set) |
 |---|---|---:|
 | `XUiC_SignEditorWindow` | <global> | 77 |
+| `PlayerSkillPointEventData` | Services.Analytics.Events | 30 |
+| `GearFitMatrixSO` | GearVariants | 26 |
+| `PlayerPerkProgressionEventData` | Services.Analytics.Events | 24 |
+| `PlayerCraftingSkillEventData` | Services.Analytics.Events | 22 |
 | `PlayerStateData` | Services.Analytics.Events | 18 |
+| `ActiveConditionData` | Services.Analytics.Events | 12 |
 | `ActiveConditionData` | Services.Analytics.Events | 12 |
 | `InventoryItemData` | Services.Analytics.Events | 10 |
 | `AssetHandle`1` | AssetManagement | 7 |
+| `NetPackageDroneRecoveryRequest` | <global> | 6 |
+| `NetPackageDroneRecoveryResponse` | <global> | 6 |
+| `PlayerStateEventData` | Services.Analytics.Events | 6 |
 | `PlayerInventoryData` | Services.Analytics.Events | 6 |
+| `ToolBeltUsageEventData` | Services.Analytics.Events | 6 |
+| `GenderFitTables` | GearVariants | 5 |
+| `PartFitTable` | GearVariants | 5 |
 | `EngagedEnemyData` | Services.Analytics.Events | 4 |
+| `QuestRewardEventData` | Services.Analytics.Events | 3 |
 | `EnumBoxCache`1` | <global> | 3 |
+| `CosmeticSetRegistrar` | <global> | 2 |
 | `ItemValueExtensions` | <global> | 2 |
+| `GearFitNaming` | GearVariants | 2 |
 | `PlayerSignWriteRequest` | <global> | 1 |
 | `PlayerSignLibraryState` | <global> | 1 |
+| `ModificationData` | Services.Analytics.Events | 1 |
+| `StatsData` | Services.Analytics.Events | 1 |
 | `ModificationData` | Services.Analytics.Events | 1 |
 
 ## Catalogued-only reached types (narrate these to reach 100% narration)
@@ -2512,8 +2568,8 @@ out-of-scope-surface.md. A backticked mention in a narrative doc moves them to
 | Type | Namespace | methods |
 |---|---|---:|
 | `ItemActionEntryUse` | <global> | 6 |
-| `ChallengeClaimedEventData` | Services.Analytics.Events | 24 |
-| `ChallengeCompletedEventData` | Services.Analytics.Events | 22 |
+| `ChallengeClaimedEventData` | Services.Analytics.Events | 26 |
+| `ChallengeCompletedEventData` | Services.Analytics.Events | 24 |
 | `CosmeticUsageEventData` | Services.Analytics.Events | 14 |
 | `DlcOwnershipEventData` | Services.Analytics.Events | 6 |
 

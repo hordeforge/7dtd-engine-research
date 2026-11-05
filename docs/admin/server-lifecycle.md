@@ -1,4 +1,4 @@
-# Server lifecycle, game state, and player persistence (dedicated V3.3.0)
+# Server lifecycle, game state, and player persistence (dedicated V3.4.0)
 
 **Owns:** the dedicated process lifecycle (boot -> world create/load -> run ->
 save + shutdown), the `GameStateManager` game-mode/round tick, and player

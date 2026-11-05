@@ -1,4 +1,4 @@
-# Console and telnet command system (dedicated V3.3.0)
+# Console and telnet command system (dedicated V3.4.0)
 
 **Owns:** the server admin command surface: `SdtdConsole` (command registry +
 dispatch), `ConsoleCmdAbstract` (the 190-command contract), the connection sources
@@ -61,12 +61,12 @@ plus the standard mod set (`apm`/`apmbridge` from 7dtd-server-apm-bridge,
 No documented command is absent from the live registry; no undocumented command
 appears on a clean server. The registry matches the IL-derived catalog exactly.
 
-The V3.3.0 catalog is **190** primary rows (`CmdMap.exe` over b18):
-`give` (`ConsoleCmdGive`) and `listitems`/`li` (`ConsoleCmdListItems`) join;
-nothing is removed or renamed. The client-executable / dedicated-gated split is
-unchanged (83 `get_IsExecuteOnClient`, 84 either, the same 10 dedicated-gated
-classes); neither new command is client-exec or dedicated-gated. The live `help`
-dump was not repeated for b18.
+The V3.4.0 catalog is **190** primary rows (`CmdMap.exe` over b10), the same count
+as V3.3.0 b18, which added `give` (`ConsoleCmdGive`) and `listitems`/`li`
+(`ConsoleCmdListItems`) and removed or renamed nothing. The client-executable /
+dedicated-gated split is unchanged (83 `get_IsExecuteOnClient`, 84 either, the
+same 10 dedicated-gated classes); neither of those two commands is client-exec or
+dedicated-gated. The live `help` dump was not repeated for b18.
 
 `ExecuteAsync`/`ExecuteSync` funnel into `executeCommand(line, senderInfo)`, which
 tokenizes the line (quote-aware, `tokenizeCommand`), looks up the command by its
@@ -258,7 +258,7 @@ Every command subclasses `ConsoleCmdAbstract` and provides:
 | `GetDescription()` / `GetHelp()` | `help` output |
 | `IsExecuteOnClient` / `AllowedInMainMenu` / `AllowedDeviceTypes` | run-context gates |
 
-There are **190** concrete commands in the V3.3.0 catalog (e.g. `admin`, `whitelist`,
+There are **190** concrete commands in the V3.4.0 catalog (e.g. `admin`, `whitelist`,
 `help`, `cvar`, `logenv`, `prefab`, `loot`, `visitmap`, `profiler`). This count includes
 the web-dashboard commands (`webtokens`, `webpermission`, `invalidatecaches`,
 `createwebuser`, `openiddebug`), which ship in the **base `Assembly-CSharp`**, not as a
@@ -503,6 +503,7 @@ own help text.
 
 ## Changelog
 
+- **2026-11-05:** Retargeted to V3.4.0 (b10): `CmdMap.exe` still maps **190** commands, the same set as b18, so the catalog and the client-exec / dedicated-gated split are unchanged.
 - **2026-10-24:** Retargeted to V3.3.0 (b18). Two commands added, none removed or renamed: `ConsoleCmdGive` (`give`, Execute IL=144) and `ConsoleCmdListItems` (`listitems` + `li`, Execute IL=65). Catalog 188 -> 190 primaries; the client-executable / dedicated-gated split is unchanged (83 on-client, 84 either, same 10 gated classes). Both new commands inherit `DefaultPermissionLevel` 0.
 - **2026-08-11:** `ConsoleCmdPIRS` (`pirs`) decoded from `Execute` IL=274: the Player Input Recording System (reset/play/record/stop/save/load + bare `pirs <saveName>` perftest-copy flow; stock getDescription is literally `tbd`).
 - **2026-08-11:** Console IL re-verified: SdtdConsole.Update IL=60, executeCommand IL=149, ConnectionManager.ServerConsoleCommand IL=125, NetPackageConsoleCmdClient write IL=31 / ProcessPackage IL=19, NetPackageConsoleCmdServer write IL=8, CommandAllowedFor IL=12, TelnetConnection HandlerThread IL=66 / handleReading IL=60, LoginAttempts.LogAttempt IL=14 / IsBanned IL=20 (exact).

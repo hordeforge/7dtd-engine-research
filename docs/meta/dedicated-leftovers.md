@@ -1,4 +1,4 @@
-# Dedicated leftovers (V3.3.0)
+# Dedicated leftovers (V3.4.0)
 
 **Owns:** the final batch of reached-but-undocumented server types: the
 transactional-inventory orchestrator (`InventoryManager` + `LockEntry`), the

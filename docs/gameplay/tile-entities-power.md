@@ -1,4 +1,4 @@
-# Tile entities and the power system (dedicated V3.2.0)
+# Tile entities and the power system (dedicated V3.4.0)
 
 **Owns:** the `TileEntity` model (the per-block state objects a chunk carries),
 the `TileEntityType` registry and `InstantiateFromRead` factory, per-tick update

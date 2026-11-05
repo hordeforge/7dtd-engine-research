@@ -7,7 +7,7 @@
 manifest `1633674551820196085`, DLL sha256 `3737eedc...`, 11610624 bytes.
 **To:** V3.3.0 b18 (Major=3 Minor=30 Build=18), Steam build `25661908`, depot
 manifest `3031329678505041777`, DLL sha256 `e16ff9d5...`, 11697152 bytes.
-**Current pin:** V3.3.0 b18.
+**Pin at release:** V3.3.0 b18.
 **Method:** pairwise IL diff of the tracked V3.2.0 dump sets (`il/*-v3.2.0/`)
 against freshly regenerated V3.3.0 sets (`il/*-v3.3.0/`), the eight-lens report
 [`../../workspace/outputs/diffs/b10-to-v3.3.0-20261024.md`](../../workspace/outputs/diffs/b10-to-v3.3.0-20261024.md),

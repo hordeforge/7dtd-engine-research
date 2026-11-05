@@ -1,4 +1,4 @@
-# Loot, traders and economy (dedicated V3.3.0)
+# Loot, traders and economy (dedicated V3.4.0)
 
 **Owns:** the server-authoritative loot and trade subsystem: how a placed container
 rolls its contents on first open (`LootContainer` definitions + `TEFeatureStorage`
@@ -14,7 +14,7 @@ math primitives (`ItemValue`, `Block.EconomicValue`).
 `TraderData`, `TraderManager`, `EntityTrader`, `TraderArea`,
 `TileEntityVendingMachine`, `XUiM_Trader` IL (dump locally with `tools/src/DumpMethod`,
 git-ignored). **Hub:** [`INDEX.md`](../INDEX.md). **Method:** [`re-methodology.md`](../meta/re-methodology.md).
-**Build:** V3.3.0 b18. The storage and dropped-container sections were re-read
+**Build:** V3.4.0 b10. The storage and dropped-container sections were re-read
 against b18; loot/trader method bodies the b18 diff did not touch keep their
 b10 widths.
 

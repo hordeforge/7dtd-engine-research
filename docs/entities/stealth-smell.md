@@ -1,4 +1,4 @@
-# Stealth, noise, and smell (dedicated V3.2.0)
+# Stealth, noise, and smell (dedicated V3.4.0)
 
 **Owns:** the server-authoritative detection-input system: `PlayerStealth`
 (light-based stealth, accumulated noise, and the item/blood/food smell that attracts

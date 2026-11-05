@@ -1,4 +1,4 @@
-# EntityClass prop-name constants (V3.3.0 b18)
+# EntityClass prop-name constants (V3.4.0 b10)
 
 **Kind:** raw reference table (not primary narrative).
 **Source:** `EntityClass::.cctor` (IL=396) - each row is a
