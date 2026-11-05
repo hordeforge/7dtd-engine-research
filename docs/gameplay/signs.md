@@ -155,6 +155,18 @@ The `Perspective` and `Grid` branches are 50 to 100 instructions each; the
 per-instruction detail is reproducible with the recipe below rather than quoted
 here.
 
+**These expressions are the branch bodies, not yet a working warp.** Applied
+literally to a layer's own unit coordinates, they are not usable: over the
+shipped library's 75 `Skew`/`Bulge`/`Twirl`/`Arc`/`Stretch` records, 40 move
+`(0.5, 0.5)` further than the 2.5-unit canvas, and one `BulgeWarp` with
+`amount 3.66` multiplies a radius of 1.2 by 7. A bulge is a mild lens in a sign
+editor, so at least one of the pieces around the branch bodies is still wrong:
+which coordinate the chain runs in (the layer's UV versus the sign's units), or
+the field each branch reads out of its record (a `width` of 0.02 dividing an
+angle is a bend of tens of radians). Nothing on the GPU path should be
+implemented from this table until that is settled; the branch bodies themselves
+are exact transcriptions and are the starting point for settling it.
+
 **How this was recovered.** The shader is baked (no source string), so the path
 is bytecode: `unityz` reads the Shader object, its `compressedBlob` holds
 LZ4-compressed per-platform sub-program tables (`platforms` 4, 15 and 18 here;
