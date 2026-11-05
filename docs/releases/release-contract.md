@@ -54,13 +54,15 @@ new number.
 
 ## Unreleased
 
-**1 commit after `v3.4.0` (2026-11-05) as of 2026-11-05.** The build retarget this
+**2 commits after `v3.4.0` (2026-11-05) as of 2026-11-06.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
 - The tag history row for `v3.4.0`, the corpus pin in this file's header and the
   reset of this section land after the cut, so the release notes stay the record
   of what shipped and this file stays the contract for what comes next.
+- `physicsbodies.xml` is documented: the ragdoll layout's record set and the
+  226 collider bindings a body's `DT_PhysicsBodies` row carries.
 
 The next cut is `v0.4.0` (tooling) unless the corpus is re-pinned to a new game
 build first, which would be `v3.5.0`.
