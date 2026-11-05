@@ -1,6 +1,6 @@
 # Dedicated networking (V3.4.0 pin)
 
-**Current pin:** V **3.4.0 (b10)** (Major=3 Minor=40 Build=10, from [`tools/data/stock_facts.json`](../../tools/data/stock_facts.json)). Managed net architecture was first RE'd on V3.0.1, re-checked on the V3.1.0 b14 assembly, re-pinned to V3.2.0, and re-checked for V3.3.0 (wire delta in [protocol-packages.md](../network/protocol-packages.md) §1.5); the live join captures are the V3.1.0 b14 one (189 ids) and the V3.3.0 b18 one (188 ids; table in [protocol-packages.md](../network/protocol-packages.md) §1.6 and §3 below). Topic docs: TE outer wire in [protocol-packages.md](../network/protocol-packages.md) §6.12; PackageIds version triple in [protocol.md](../network/protocol.md) / loadgen fixtures (live triples: b18 minor=30 build=18, b14 minor=10 build=14); GSI / sandbox browser fields in [server-browser-prefabs.md](../admin/server-browser-prefabs.md). Prior-pinned delta map: [changelog-3.1.0.md](../releases/changelog-3.1.0.md) § Per-fact homes. **Hub:** [`INDEX.md`](../INDEX.md).
+**Current pin:** V **3.4.0 (b10)** (Major=3 Minor=40 Build=10, from [`tools/data/stock_facts.json`](../../tools/data/stock_facts.json)). Managed net architecture was first RE'd on V3.0.1, re-checked on the V3.1.0 b14 assembly, re-pinned to V3.2.0, re-checked for V3.3.0, and re-pinned to V3.4.0 (wire deltas in [protocol-packages.md](../network/protocol-packages.md) §1.5); the live join captures are the V3.1.0 b14 one (189 ids), the V3.3.0 b18 one (188 ids), and the current V3.4.0 b10 one (190 ids; table in [protocol-packages.md](../network/protocol-packages.md) §1.6.1 and §3 below). Topic docs: TE outer wire in [protocol-packages.md](../network/protocol-packages.md) §6.12; PackageIds version triple in [protocol.md](../network/protocol.md) / loadgen fixtures (live triples: V3.4.0 minor=40 build=10, b18 minor=30 build=18, b14 minor=10 build=14); GSI / sandbox browser fields in [server-browser-prefabs.md](../admin/server-browser-prefabs.md). Prior-pinned delta map: [changelog-3.1.0.md](../releases/changelog-3.1.0.md) § Per-fact homes. **Hub:** [`INDEX.md`](../INDEX.md).
 
 
 **Owns:** ConnectionManager peer pump, per-connection reader/writer threads, encrypt/compress framing, NetEntity package bands, NetPackage census.  
@@ -364,7 +364,7 @@ would play the wrong client teardown.
 
 ## 3. NetPackage type inventory
 
-Live census (tools/bin/Census.exe): **192** top-level types with the `NetPackage*` name prefix (the census excludes `NetPackageManager` and does not descend into nested types). The live V3.3.0 b18 join advertised **188** ids, 0..187: `NetPackagePackageIds` is fixed at id 0 by `SetupBaseMapping`, and `StartServer` assigns 1.. in the order `knownPackageTypes` was filled, which is `Assembly.GetTypes()` order over the concrete classes assignable to `NetPackage`. That order is not the metadata/alphabetical order the earlier table was inferred from: three nested subclasses enter it before most top-level packages, so the first inference was wrong by 3 across the range it published. The remaining **8** prefix types never register: the abstract base `NetPackage`, the abstract intermediate `NetPackageEntityTargeted`, the abstract helper `NetPackageLogger`, the `NetPackageDirection` enum, and the plain helper classes `NetPackageEntry`, `NetPackageInfo`, `NetPackageMeasure`, `NetPackageMetrics`. Four further registered packages are nested (`NetPackageDroneParticleEffect`, `NetPackageDroneDataSync`, `NetPackageTreeFade`, `NetPackageLight`), which is why the census count alone understates the map: 192 - 8 + 4 = 188. The numeric table is derived at runtime, not stored: the id is `NetPackageManager.GetPackageId(GetType())` over the dictionary filled at `StartServer`. Captured ids and provenance: [protocol-packages.md](../network/protocol-packages.md) §1.6; the other live capture is V3.1.0 b14 at 189 ids. The V3.2.0 187 and the pre-capture V3.3.0 184 figures were inferred, not captured ([protocol-packages.md](../network/protocol-packages.md) §1.5).
+Live census (tools/bin/Census.exe): **194** top-level types with the `NetPackage*` name prefix (the census excludes `NetPackageManager` and does not descend into nested types). The live V3.4.0 b10 join advertised **190** ids, 0..189; the live V3.3.0 b18 join advertised **188** ids, 0..187. `NetPackagePackageIds` is fixed at id 0 by `SetupBaseMapping`, and `StartServer` assigns 1.. in the order `knownPackageTypes` was filled, which is `Assembly.GetTypes()` order over the concrete classes assignable to `NetPackage`. That order is not the metadata/alphabetical order the earlier table was inferred from: three nested subclasses enter it before most top-level packages, so the first inference was wrong by 3 across the range it published. The remaining **8** prefix types never register: the abstract base `NetPackage`, the abstract intermediate `NetPackageEntityTargeted`, the abstract helper `NetPackageLogger`, the `NetPackageDirection` enum, and the plain helper classes `NetPackageEntry`, `NetPackageInfo`, `NetPackageMeasure`, `NetPackageMetrics`. Four further registered packages are nested (`NetPackageDroneParticleEffect` at 10, `NetPackageDroneDataSync` at 11, `NetPackageTreeFade` at 12, `NetPackageLight` at 187), which is why the census count alone understates the map: 194 - 8 + 4 = 190 at V3.4.0 (b18: 192 - 8 + 4 = 188; `NetPackageLight` was 185 before the two V3.4.0 insertions). The numeric table is derived at runtime, not stored: the id is `NetPackageManager.GetPackageId(GetType())` over the dictionary filled at `StartServer`. Captured ids and provenance: [protocol-packages.md](../network/protocol-packages.md) §1.6.1; the other live captures are V3.3.0 b18 at 188 and V3.1.0 b14 at 189. The V3.2.0 187 and the pre-capture V3.3.0 184 figures were inferred, not captured ([protocol-packages.md](../network/protocol-packages.md) §1.5).
 
 Representative dedi-relevant packages (from inventory dump):
 
@@ -725,7 +725,7 @@ any of this is worth a lever are optimizer-owned measurements/decisions:
 ## 4c. Package registry, direction gate, per-package channel/compress/reliability (2026-08-06)
 
 Status: **verified** against a full V3.1.0 b14 disassembly (2026-08-05 dump; line
-numbers are from that dump; the re-checked `il/` sets are the V3.3.0 corpus). Note LiteNetLib itself is a
+numbers are from that dump; the re-checked `il/` sets are the V3.4.0 corpus). Note LiteNetLib itself is a
 separate assembly and is **not** in the dump (only `.assembly extern LiteNetLib`),
 so nothing below covers LiteNet's own framing.
 
@@ -736,13 +736,13 @@ by reflection over every **concrete** subclass of `NetPackage`, keyed on
 `MemberInfo.Name` (805088-805100, 805117-805140). Abstract types are excluded
 because `ReflectionHelpers.FindTypesImplementingBase` defaults `_allowAbstract` to
 false (2133289-2133345, `.param [3] = bool(false)`). The concrete count on V3.1.0
-b14 was exactly **189** (live join capture) and on V3.3.0 b18 exactly **188**
-(live join capture 2026-11-05; §3 and
-[protocol-packages.md](../network/protocol-packages.md) §1.6). V3.2.0's 187 was
+b14 was exactly **189**, on V3.3.0 b18 exactly **188**, and on V3.4.0 b10
+exactly **190** (all live join captures; §3 and
+[protocol-packages.md](../network/protocol-packages.md) §1.6.1). V3.2.0's 187 was
 never captured. Nested packages register under their **short** name, so
 `Audio.NetPackageAudio` and `DroneWeapons/NetPackageDroneParticleEffect` are
 valid map entries; the census counts top-level types only, which is why four
-nested registrations are absent from its 192 rows.
+nested registrations are absent from its 194 rows.
 
 `SetupBaseMapping` (805194-805270) always pins `packageIdsType` to id 0 and
 `StartServer` numbers the rest from 1. `IdMappingsReceived` (805272-805340): any
@@ -849,12 +849,12 @@ then `WriteCustomData` when `inclCustomData` is set. `GetToStreamLength` mirrors
 `VersionInformation.SerializableString` is
 `String.Format("{0}.{1}.{2}.{3}", ReleaseType, Major, Minor, Build)`
 (2009306-2009320), and `GameServerInfo` sets `GameInfoString.ServerVersion` (key 9)
-to exactly that (795818-795822). For V3.3.0 b18 the correct GSI value is
-**`V.3.30.18`** (Constants `cReleaseType=1`/'V', `cVersionMajor=3`,
-`cVersionMinor=30`, `cVersionBuild=18`; `Constants..cctor` builds
-`VersionInformation(1, 3, 30, 18)` at IL_0013-IL_001E). The V3.2.0 b10 pair is the
-lower `V.3.20.10` and the V3.1.0 b14 pair `V.3.10.14` (`cVersionMinor=0xA`,
-`cVersionBuild=0xE`); the minor is the
+to exactly that (795818-795822). For V3.4.0 b10 the correct GSI value is
+**`V.3.40.10`** (Constants `cReleaseType=1`/'V', `cVersionMajor=3`,
+`cVersionMinor=40`, `cVersionBuild=10`; `Constants..cctor` builds
+`VersionInformation(1, 3, 40, 10)` at IL_0013-IL_001E). The b18 pair was
+`V.3.30.18`, the V3.2.0 b10 pair `V.3.20.10` and the V3.1.0 b14 pair
+`V.3.10.14` (`cVersionMinor=0xA`, `cVersionBuild=0xE`); the minor is the
 unsplit value, not the displayed one.
 
 `VersionInformation.TryParseSerializedString` (2009539-2009625) requires
@@ -863,9 +863,9 @@ ints. `EGameReleaseType` has only `Alpha=0` and `V=1` (2008981-2008982).
 
 The **displayed** minor is an encoding, not the wire minor: for `ReleaseType == V`
 and `Major >= 3` the ctor splits `Minor` into `Minor/10` and `Minor%10`
-(2009148-2009157), so "V 3.3.0 (b18)" is Major=3, Minor=30, Build=18 (the
-V3.2.0 pair "V 3.2.0 (b10)" was Minor=20, Build=10, and the
-V3.1.0 pair "V 3.1.0 (b14)" was Minor=10, Build=14).
+(2009148-2009157), so "V 3.4.0 (b10)" is Major=3, Minor=40, Build=10 (b18 was
+"V 3.3.0" at Minor=30, Build=18; the V3.2.0 pair "V 3.2.0 (b10)" was Minor=20,
+Build=10, and the V3.1.0 pair "V 3.1.0 (b14)" was Minor=10, Build=14).
 
 A malformed version string is not fatal: `GameServerInfo`'s ctor seeds
 `version = new VersionInformation(Alpha, -1, -1, -1)` (793967-793971), and
@@ -916,14 +916,22 @@ zdtd (PackageIds numeric Minor=20 -> the client echoes "V 3.2.0" -> the gate
 accepts; the previous Minor=10 advertising was rejected with
 VersionMismatch=4) **re-probed and confirmed the gate** end to end.
 
-V3.3.0 pin (b18): the same gate now takes the display form **"V 3.3.0"**
-(Minor=30; the raw-Minor form would be "V 3.30", and a V3.2.0 client echoing
-"V 3.2.0" is kicked with VersionMismatch=4). The wire triple in `PackageIds`
-is `release=1, major=3, minor=30, build=18` (`Constants..cctor`
-IL_0013-IL_001E). Every hardcoded version string in a clone, load generator or
+V3.4.0 b10 (current): the gate takes the display form **"V 3.4.0"** (Minor=40;
+the raw-Minor form would be "V 3.40"). The wire triple in `PackageIds` is
+`release=1, major=3, minor=40, build=10` (`Constants..cctor` IL_0013-IL_001E),
+and the captured V3.4.0 join passed the server's `VersionCheck authorization`.
+That capture does not show the exact `compVersion` string the client sent, so
+the display-string form itself is inferred from the b14/b18 behaviour rather
+than re-probed here. Every hardcoded version string in a clone, load generator or
 fixture has to move with it: `zdtd-server` `version.zig` (`stock_wire`,
 `stock_wire_announce`, `stock_wire_comp`, `stock_wire_gsi_version`) and
 `7dtd-loadgen` `PackageCodec.GameVersion` + its golden-login fixtures.
+
+V3.3.0 b18 (history): the same gate took the display form **"V 3.3.0"**
+(Minor=30; the raw-Minor form would be "V 3.30", and a V3.2.0 client echoing
+"V 3.2.0" is kicked with VersionMismatch=4). The wire triple in `PackageIds`
+is `release=1, major=3, minor=30, build=18` (`Constants..cctor`
+IL_0013-IL_001E).
 
 `GameInfoString` has 20 members (796457-796476), including `SandboxPreset = 0x12`
 and `SandboxCode = 0x13`, which is where V3.2.0 keeps the difficulty/loot/XP
@@ -1018,6 +1026,7 @@ discovery loop from 1024 up to 1432 minus the layer overhead.
 
 ## Changelog
 
+- **2026-11-05:** V3.4.0 b10 retarget: top-level `NetPackage*` census 192 -> 194, live id map 188 -> **190** (adds `NetPackageDroneRecoveryRequest` 45, `NetPackageDroneRecoveryResponse` 46; every later id +2; `NetPackageLight` 185 -> 187). Registry arithmetic now 194 - 8 + 4 = 190 (b18 192 - 8 + 4 = 188 kept as history). GSI version `V.3.40.10`; display form "V 3.4.0".
 - **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `ConnectionManager.Update` 228 -> 231 (exact). Prior values were the V3.1.0 b14 measurement. (re-verified on b18; b10 was 231)
 - **2026-08-11:** NetConstants.ProtocolId pinned 13 (Cecil-verified on the game's Managed LiteNetLib.dll).
 - **2026-08-11:** Added canonical `**Hub:** INDEX.md` backlink (was prose "Hub map:" only).

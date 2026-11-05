@@ -236,7 +236,7 @@ Scripted content: events, quests, dialog and character data.
 | [game-events.md](content/game-events.md) | Scripted-event interpreter: sequences, actions, requirements, decisions, loops |
 | [minevents.md](content/minevents.md) | Triggered-effect framework: FireEvent dispatch, action/requirement/target model |
 | [quests-challenges.md](content/quests-challenges.md) | Quest + challenge template/instance lifecycles, objectives, rewards, QuestEventManager |
-| [sdcs-character-gear.md](content/sdcs-character-gear.md) | SDCS skinned character system: archetype/items.xml authoring contracts, asset-path grammar, rig-stitching pipeline (client-executed, server-loaded data) |
+| [sdcs-character-gear.md](content/sdcs-character-gear.md) | SDCS skinned character system: archetype/items.xml authoring contracts, asset-path grammar, rig-stitching pipeline (render-only; a server runs the spawn-time build and drops it), gear-fit matrix + cosmetic-set id map |
 | [npc-dialog.md](content/npc-dialog.md) | Trader/NPC dialog tree + requirement gating + quest-data records |
 
 ### Social and integrations (`docs/social/`)

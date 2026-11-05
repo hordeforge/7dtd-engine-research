@@ -50,10 +50,10 @@ The tiers are reported separately and deliberately **not summed into a headline*
 | Reached, non-generated | 6241 |
 | ...third-party / BCL (System, Unity, Newtonsoft, ...) | 2372 (excluded from %) |
 | ...**game types** (the RE surface) | **3725** |
-| ...**narrated** (backticked in a narrative doc) | **3691 (99.1%)** |
+| ...**narrated** (backticked in a narrative doc) | **3698 (99.3%)** |
 | ...**catalogued only** (generated inventory, not narrated) | 1 |
 | ...**classified** out-of-scope | 5 |
-| ...**unaccounted** (appears nowhere) | 28 |
+| ...**unaccounted** (appears nowhere) | 21 |
 | of the base: XUi/XUiC_ client-UI types (over-approximation) | 504 |
 | of the base: `ConsoleCmd*` (recovered by interface devirt) | 181 |
 
@@ -71,11 +71,11 @@ as an upper bound; this table is its actual depth.
 
 | Narrative mentions | Types | Share of base |
 |---|---:|---:|
-| 0 (catalogued, classified, or unaccounted) | 34 | 0.9% |
-| exactly 1 | 2317 | 62.2% |
-| 2-4 | 795 | 21.3% |
-| 5-19 | 485 | 13.0% |
-| 20+ | 94 | 2.5% |
+| 0 (catalogued, classified, or unaccounted) | 27 | 0.7% |
+| exactly 1 | 2313 | 62.1% |
+| 2-4 | 760 | 20.4% |
+| 5-19 | 525 | 14.1% |
+| 20+ | 100 | 2.7% |
 
 ## Whole-assembly accounting (all types and methods)
 
@@ -144,13 +144,11 @@ Unreached game types (2289), grouped by top namespace:
 | `UAI` | 1 |
 | `AssetManagement` | 1 |
 
-Unreached game types already mentioned in docs: **2263** (accounted).
-Unreached game types with **no mention anywhere**: **26** (the whole-assembly gap).
+Unreached game types already mentioned in docs: **2271** (accounted).
+Unreached game types with **no mention anywhere**: **18** (the whole-assembly gap).
 
 Gap list (no mention in any doc):
 
-- `CosmeticSet` (<global>)
-- `CosmeticSets` (<global>)
 - `HideIfAttribute` (<global>)
 - `HonkOpenTypes` (<global>)
 - `IItemStackController` (<global>)
@@ -164,12 +162,6 @@ Gap list (no mention in any doc):
 - `XuiBindingBoxWriterDelegate` (<global>)
 - `IAssetManager` (AssetManagement)
 - `OpenDoorStates` (GameEvent.SequenceActions)
-- `BodyFit` (GearVariants)
-- `CopyMode` (GearVariants)
-- `CopyResult` (GearVariants)
-- `GearFitEntry` (GearVariants)
-- `Gender` (GearVariants)
-- `CameraToggleEventData` (Services.Analytics.Events)
 - `changeTypes` (Services.Analytics.Events)
 - `EntitlementData` (Services.Analytics.Events)
 - `OfferedQuest` (Services.Analytics.Events)
@@ -2474,7 +2466,7 @@ Full unreached game-type list (2289):
 
 | Namespace | reached | narrated+catalogued+classified | remaining | % |
 |---|---:|---:|---:|---:|
-| `<global>` | 2906 | 2898 | 8 | 99.7% |
+| `<global>` | 2906 | 2901 | 5 | 99.8% |
 | `GameEvent` | 180 | 180 | 0 | 100.0% |
 | `Platform` | 147 | 147 | 0 | 100.0% |
 | `Twitch` | 110 | 110 | 0 | 100.0% |
@@ -2495,7 +2487,7 @@ Full unreached game-type list (2289):
 | `MapRendering` | 7 | 7 | 0 | 100.0% |
 | `AssetManagement` | 5 | 4 | 1 | 80.0% |
 | `MusicUtils` | 5 | 5 | 0 | 100.0% |
-| `GearVariants` | 4 | 0 | 4 | 0.0% |
+| `GearVariants` | 4 | 4 | 0 | 100.0% |
 | `ConcurrentCollections` | 3 | 3 | 0 | 100.0% |
 | `mumblelib` | 2 | 2 | 0 | 100.0% |
 | `WaterClippingTool` | 1 | 1 | 0 | 100.0% |
@@ -2522,7 +2514,6 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 |---|---|---:|
 | `XUiC_SignEditorWindow` | <global> | 77 |
 | `PlayerSkillPointEventData` | Services.Analytics.Events | 30 |
-| `GearFitMatrixSO` | GearVariants | 26 |
 | `PlayerPerkProgressionEventData` | Services.Analytics.Events | 24 |
 | `PlayerCraftingSkillEventData` | Services.Analytics.Events | 22 |
 | `PlayerStateData` | Services.Analytics.Events | 18 |
@@ -2530,19 +2521,13 @@ code, client-shared helpers. Cross-check against `residuals.md` before acting.)
 | `ActiveConditionData` | Services.Analytics.Events | 12 |
 | `InventoryItemData` | Services.Analytics.Events | 10 |
 | `AssetHandle`1` | AssetManagement | 7 |
-| `NetPackageDroneRecoveryRequest` | <global> | 6 |
-| `NetPackageDroneRecoveryResponse` | <global> | 6 |
 | `PlayerStateEventData` | Services.Analytics.Events | 6 |
 | `PlayerInventoryData` | Services.Analytics.Events | 6 |
 | `ToolBeltUsageEventData` | Services.Analytics.Events | 6 |
-| `GenderFitTables` | GearVariants | 5 |
-| `PartFitTable` | GearVariants | 5 |
 | `EngagedEnemyData` | Services.Analytics.Events | 4 |
 | `QuestRewardEventData` | Services.Analytics.Events | 3 |
 | `EnumBoxCache`1` | <global> | 3 |
-| `CosmeticSetRegistrar` | <global> | 2 |
 | `ItemValueExtensions` | <global> | 2 |
-| `GearFitNaming` | GearVariants | 2 |
 | `PlayerSignWriteRequest` | <global> | 1 |
 | `PlayerSignLibraryState` | <global> | 1 |
 | `ModificationData` | Services.Analytics.Events | 1 |

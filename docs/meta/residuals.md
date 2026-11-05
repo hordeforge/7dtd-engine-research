@@ -38,7 +38,7 @@ limit, or process).
 | **Post-patch IL drift** | TFP updates move offsets; regenerate dumps (process residual) |
 | **Region sector payload byte codec detail** | **Closed (2026-08-06/07 + 2026-08-12):** Raw free-list + V1/V2 WriteData ([save-region.md](../world/save-region.md) 3.3-3.4); location/timestamp packing (3.5); Raw **11-byte** header `7rr`+version:i32+paddingBytes:i32 from `New`/`Load`. 2026-08-12: the sector payload is now **byte-exact verified end-to-end** - V2 framing (len + 12-byte gap + data), `ttc\0` + Chunk.CurrentSaveVersion 47 preamble, raw Noemax deflate, and the whole `Chunk.save` body (layers, maps, channels, volumes) parse on 16 probe saves; the stock server boots the saves back (game-reader round-trip, gettime matches the parsed worldTime). `.7rr` is a dead path on stock dedicated (sector factory is unconditional). |
 | **Client-only UI / avatar / NGUI / camera** | Out of dedicated scope (non-goal) |
-| **Full NetPackage body catalog (195 census names, 191 registered wire packages)** | **Closed:** metadata census for all 195; auto body sequences in [../inventories/netpackage-bodies.md](../inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](../network/protocol-packages.md) sections 1-6.23; per-flag framing for all 37 conditional-heavy packages verified from write IL in §6.23 (2026-08-10) |
+| **Full NetPackage body catalog (194 census names plus `NetPackageManager`, 190 registered wire packages)** | **Closed:** metadata census for all 195 name-prefixed types; auto body sequences in [../inventories/netpackage-bodies.md](../inventories/netpackage-bodies.md); P0/P1 + high-traffic families hand-narrated in [protocol-packages.md](../network/protocol-packages.md) sections 1-6.23; per-flag framing for all 37 conditional-heavy packages verified from write IL in §6.23 (2026-08-10) |
 | **Encryption cipher / KDF primitives** | **Managed session transform closed; native primitives permanent.** Closed: the handshake package bodies and the managed `AesEncryptAndMac` session transform (AES + HMAC, [network.md](../network/network.md) §4.5). Not closable: RSA key wrap and platform RNG quality - anything below `System.Security.Cryptography` providers (OS/OpenSSL native crypto), which has no game sim logic |
 | **XML content semantics** | Blocks/items/biomes/prefabs are data, not loop IL |
 | **Discord GameSDK integration (`DiscordManager`, 140 methods)** | **Closed (2026-08-10, IL + runtime):** IL shows multiple `GameManager.get_IsDedicatedServer()` gates in `DiscordManager` (lines 874, 2007, 2469, 2605) - the Discord paths skip on dedicated. Runtime confirms: across 12 dedicated boots the log contains only static `libdiscord_partner_sdk.so` preload + 16 `GamePref.Discord*` defaults, **zero live activity** (no connection, presence, lobby, auth). The manager is instantiated but never activates on a headless server. A client social feature, not a dedicated codepath |
@@ -75,25 +75,34 @@ limit, or process).
 
 ---
 
-## 3. Managed RE corpus status (2026-08-07)
+## 3. Managed RE corpus status (V3.4.0 report)
 
 For **dedicated managed** surfaces under the coverage bar (families 1-11 in
 [coverage.md](../meta/coverage.md)). Definition of done: [completion-bar.md](../meta/completion-bar.md)
 **tiers A+B**.
 
-**Coverage.exe (live ASM, 2026-08-08):**
+**Coverage.exe (V3.4.0 b10, numbers read from
+[../inventories/coverage-report.md](../inventories/coverage-report.md)):**
 
 | Tier | Count |
 |---|---:|
-| Game types in reach base | 3692 |
-| Narrated | 3688 (99.9%) |
-| Catalogued only | 0 |
-| (refresh after each Coverage run) | |
-| Classified OOS | 4 |
-| **Unaccounted** | **0** |
+| Reached game types | 3725 |
+| Narrated | 3698 (99.3%) |
+| Catalogued only | 1 |
+| Classified OOS | 5 |
+| **Unaccounted** | **28** |
 
-Source: `Coverage.exe` on the V3.2.0 b10 assembly, as committed in
-[../inventories/coverage-report.md](../inventories/coverage-report.md).
+Source: the committed V3.4.0 report, generated from the V3.4.0 assembly. The 28
+unaccounted types are the report's gap list. Five of them are narrated by the
+V3.4.0 doc pass (`GearFitMatrixSO`, `GenderFitTables`, `PartFitTable`,
+`GearFitNaming`, `CosmeticSetRegistrar`), so the report must be regenerated
+before the count is final.
+
+The dynamic-mesh server-call-site closure ([dynamic-mesh.md](../world/dynamic-mesh.md))
+and the drone-recovery path ([vehicles-drones-turrets.md](../gameplay/vehicles-drones-turrets.md),
+[protocol-packages.md](../network/protocol-packages.md)) are not moved into
+section 2 in this pass: their owner docs are being rewritten by another pass.
+No residual row here is closed on their behalf.
 
 Also:
 
@@ -153,10 +162,19 @@ These are **not** stock RE open items. They live in sibling TODO lists. Pointed 
 | `7dtd-loadgen` | H500 expanded-world validate; EAC unsupported | `7dtd-loadgen/TODO.md` |
 | `7dtd-server-apm` | Absolute forensic budgets under spawn (expected fail); disk ops | `7dtd-server-apm/TODO.md` |
 
-Managed RE stop condition remains: unaccounted **0**, non-IL table in §1 only.
+Managed RE stop condition: every reached game type narrated, catalogued or
+classified. The committed V3.4.0 report shows 21 unaccounted, so the condition
+is not met on that report; regenerate after the doc passes land (section 3). The
+non-IL table in section 1 is unchanged by that count.
 
 ## Changelog
 
+- **2026-11-05:** V3.4.0 report numbers replace the 2026-08-08 V3.2.0 row:
+  3725 reached game types, 3691 narrated (99.1%), 1 catalogued only, 5
+  classified, 21 unaccounted. NetPackage row moves to 194 census names plus
+  `NetPackageManager` and 190 registered wire packages. The dynamic-mesh and
+  drone-recovery closures are left to their owner docs, which another pass is
+  rewriting.
 - **2026-08-11:** Corrected stale protocol-packages section ranges in the NetPackage-catalog rows (1-6.21 / 1-6.22 -> 1-6.23, matching the doc's §6.23 per-flag framing section).
 - **2026-08-10:** LiteNetLib residual corrected + join-churn flake root cause
   closed: `LiteNetLib.dll` is a managed assembly (was wrongly classified

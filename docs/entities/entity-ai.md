@@ -1353,21 +1353,22 @@ holds an entity.
 | `ASPPathNavigate.SetPath` | 46 | Destruct old path; install new; empty path fails; else `ImprovePath()`, store speed/canBreak |
 | `EntityMoveHelper.UpdateMoveHelper` | **1236** | Largest common walker cost: stuck checks, jump/elevator, root-motion gates, blocked clear, moveToPos pursuit (full line-level residual) |
 | `EntityAlive.GetSpeedModifier` | 3 | returns field `speedModifier` (set by AI/tasks elsewhere) |
-| `EntityAlive.MoveEntityHeaded` | 292 | apply headed motion from AI/player direction |
+| `EntityAlive.MoveEntityHeaded` | 229 | dispatch on `IsFlyMode`: `MoveEntityHeadedFlying` or `DefaultMoveEntity` |
+| `EntityAlive.MoveEntityHeadedFlying` | 53 | airborne motion tail, extracted in V3.4.0 |
 
 ---
 
-## 8. `World.LetBlocksFall` (220 IL)
+## 8. `World.LetBlocksFall` (215 IL in V3.4.0; 220 in b18)
 
 Called once per full `UpdateTick` after entities.
 
 ```text
 if fallingBlocks queue empty: ret
 if EntityFallingBlocks.Enabled: GroupFallingBlocks()  // IL=292
-// process fallingGroups: CreateFallingBlockGroup (IL=107), clear hashset entries
+// process fallingGroups: CreateFallingBlockGroup (IL=107 b18, 102 b10), clear hashset entries
 // process fallingBlocks queue: skip if still in hashset pending group
 GetBlock / TE canvas clone for signs / OnBlockStartsToFall
-DynamicMeshManager.ChunkChanged
+// b18: DynamicMeshManager.ChunkChanged (removed in V3.4.0)
 if ShowModelOnFall: EntityFactory "fallingBlock" + random motion → spawn
 ```
 
@@ -1384,15 +1385,19 @@ false).
 expand while neighbor is falling and not terrain; group size clamped by
 `GroupBounds.IsWithinSize`; enqueue finished groups.
 
-**`CreateFallingBlockGroup` (IL=107):** snapshot block values + texture full arrays;
-per pos `OnBlockStartsToFall` + `ChunkChanged(-1)`; remove from `groupedBlocks`;
-if first block `ShowModelOnFall`: spawn entity class `"fallingBlocks"` at pos +
-(0.5, random Y -0.1..0.1, 0.5) with arrays; `SetBlockGroupData`.
+**`CreateFallingBlockGroup` (IL=107 in b18, 102 in V3.4.0):** snapshot block
+values + texture full arrays; per pos `OnBlockStartsToFall` + (b18 only)
+`ChunkChanged(-1)`; remove from `groupedBlocks`; if first block `ShowModelOnFall`:
+spawn entity class `"fallingBlocks"` at pos + (0.5, random Y -0.1..0.1, 0.5) with
+arrays; `SetBlockGroupData`. The V3.4.0 body drops the notification
+(`il/full-v3.3.0/_global/World.il.txt:7967`;
+`il/full-v3.4.0/_global/World.il.txt:7922`).
 
-**`AddFallingBlock(pos, includeOversized)` (IL=38):** skip if already in
-`fallingBlockSet`; skip child / `StabilityIgnore` / air / oversized (unless
-includeOversized); `DynamicMeshManager.AddFallingBlockObserver`; enqueue +
-hashset add.
+**`AddFallingBlock(pos, includeOversized)` (IL=38 in b18, 36 in V3.4.0):** skip
+if already in `fallingBlockSet`; skip child / `StabilityIgnore` / air / oversized
+(unless includeOversized); enqueue + hashset add. b18 also called
+`DynamicMeshManager.AddFallingBlockObserver` (`il/full-v3.3.0/_global/World.il.txt:7401`);
+the V3.4.0 body drops it (`il/full-v3.4.0/_global/World.il.txt:7373`).
 
 **`OnBlockStartsToFall` (IL=6):** `SetBlockRPC(pos, Air)` (tree/composite
 overrides may destroy/particles first).
@@ -2607,11 +2612,29 @@ or default step at volume.
 when not in first-person view - third-person footsteps play through this
 path, first-person through the FP controller.
 
-**`MoveEntityHeaded(dir, absolute)` (IL=292 high-level):** if jumping
-`JumpMove`. Root-motion path: hit/ragdoll gates; apply
+**`MoveEntityHeaded(dir, absolute)` (IL=292 in b18, 229 in V3.4.0):** if jumping
+`JumpMove`. The airborne branch is now the separate `MoveEntityHeadedFlying`
+(IL=53), reached when `IsFlyMode` is set, else `DefaultMoveEntity`
+(`il/full-v3.4.0/_global/EntityAlive.il.txt:6570`, dispatch at `:6686`, helper
+at `:6801`). Root-motion path: hit/ragdoll gates; apply
 `accumulatedRootMotion` via `Move` with passive speed modifiers (run scale
 0.12/0.35 residual); collision; friction 0.546; may
 `DefaultMoveEntity`. Non-root falls into DefaultMoveEntity.
+
+**`MoveEntityHeadedFlying` (IL=53):** instruction-for-instruction the old inline
+tail. Speed scale 0.12, or 0.35 while `MovementRunning`; `Entity.Move` unless
+`RootMotion`; on the colliding path `entityCollision(motion)` then
+`motion *= ConditionalScalePhysicsMulConstant(0.546)`; on the no-collision path
+`SetPosition(position + motion, true)` and zero `motion`
+(`il/full-v3.4.0/_global/EntityAlive.il.txt:6801`). `EntityDrone` overrides it
+(IL=29, `il/full-v3.4.0/_global/EntityDrone.il.txt:6394`), ignores both
+arguments, skips the `Entity.Move` phase and keeps the collision / 0.546 /
+`SetPosition` tail. Drone motion does not change: `EntityDrone` never assigns
+`moveDirection`, so the b18 `Entity.Move(Vector3.zero, ...)` call normalized a
+zero vector and added nothing, and the drone keeps the `motion` its steering
+phase accumulated. `EntityAlive.OnUpdateLive` (IL=363,
+`il/full-v3.4.0/_global/EntityAlive.il.txt:4863`) still calls
+`MoveEntityHeaded` on every entity tick (`:5029`).
 
 **`DefaultMoveEntity` (IL=290 high-level):** ground friction **0.91** / air
 **0.546**; dead residual; underfoot block checks; jumpTicks uses
@@ -4150,6 +4173,14 @@ zombie carries no per-limb body damage) and only for zombie avatars (the
 
 ## Changelog
 
+- **2026-11-05 (V3.4.0 b10 retarget):** `EntityAlive.MoveEntityHeaded` shrank
+  IL 292 -> 229 because its airborne tail became
+  `EntityAlive.MoveEntityHeadedFlying` (IL=53). The dispatch is `IsFlyMode` at
+  `il/full-v3.4.0/_global/EntityAlive.il.txt:6686`; `EntityDrone` overrides the
+  new method (IL=29, `il/full-v3.4.0/_global/EntityDrone.il.txt:6394`) with no
+  motion change. `World.LetBlocksFall` 220 -> 215, `AddFallingBlock` 38 -> 36 and
+  `CreateFallingBlockGroup` 107 -> 102 because their dynamic-mesh notifications
+  were removed; the falling-block mechanics themselves are unchanged.
 - **2026-09-22:** zdtd ships `RangedAttackTarget`: the census table's last unmapped row moves to mapped. The task parses its SetData block from the class AITask entry (ctor defaults for the fields a class omits), resolves the held item's `Class=Vomit` action and its ammo's `Class=Projectile` config from items.xml through Extends, and runs the stock sequence shape (aim half, `StartAnimAction(3000 + X)` telegraph, releaseDelay plus the ItemActionVomit warning window, then the burst anim and the shot). The projectile is server-simulated per shooter (never a replicated entity, per the delivery contract above) and lands through zdtd's deferred damage choke; the client sees only the replicated anim action plus its local visual, exactly as stock.
 - **2026-09-22:** `Animator.StringToHash` pinned as reflected CRC-32 by a live stock-dedi gdb capture (registered icall function + built table + `"Attack" = 0x406c280d = zlib.crc32`), and the server anim-flush chain recorded end to end: `StartAnimAction` / `StartAction` param writes, the `FixedUpdate` -> `updateNetworkAnimData` -> `NetPackageEntityAnimationData` routing, and the default-Reliable delivery with the C2S relay as the same package.
 

@@ -5,7 +5,8 @@ drives: player vehicles (`VehicleManager` / `EntityVehicle` / `Vehicle`), junk
 drones (`DroneManager` / `EntityDrone`), and turrets (`TurretTracker` /
 `EntityTurret` plus the powered turret block on `TileEntityPoweredRangedTrap`).
 Covers the per-frame manager loop, the per-player map-waypoint push, mount and
-movement authority, drone follow behaviour, and turret targeting and fire.
+movement authority, drone follow behaviour and recovery, and turret targeting
+and fire.
 **Not:** the Unity Rigidbody / WheelCollider integration itself (native
 residual); the XML that defines each vehicle, drone, and turret (content); the
 in-vehicle UI and camera (client-only).
@@ -126,7 +127,8 @@ Differences that matter:
   and no owner is parked in `dronesWithoutOwner`. After streaming, a second loop
   yanks any active drone more than `32 m` (`1024` sq) from its owner's chest back
   with `TeleportOutOfRange`, unless the drone is in `Shutdown` state or its order
-  is `Sentry` (a parked sentry is allowed to be far from its owner).
+  is `Sentry` (a parked sentry is allowed to be far from its owner). This loop is
+  unchanged in V3.4.0; the client-triggered recovery in §5.1 is a separate path.
 - **Turrets do not stream here.** `TurretTracker.Update` only runs the save
   timer. A deployed turret is a normal world entity: it comes back through the
   standard entity-load path, registers via `AddTrackedTurret`, and does its own
@@ -728,6 +730,102 @@ client mirrors `serverDroneCount` via `SetServerDroneCount` IL=7);
 backward and `World.RemoveEntity(id, 2)`s it; `ClearUnloadedDrones(entityId)`
 (IL=26) drops the matching unloaded ECDs.
 
+### 5.1 Drone recovery (new in V3.4.0)
+
+V3.4.0 adds a client-triggered path that finds a player's drone (active,
+unloaded, or ownerless), teleports it to the owner, marks the registry dirty and
+pushes the drone count. It extends the registry leaves above; `DroneManager`'s
+stream/save loop did not change.
+
+**Trigger.** The root is a dialog action, id `drone_commands_unstuck`.
+`DialogActionTrader.PerformAction(EntityPlayer)` (IL=160,
+`il/full-v3.4.0/_global/DialogActionTrader.il.txt:9`) compares the action id
+(`:66`); when `ConnectionManager.get_IsServer()` (`:70`) it calls
+`DroneManager.RecoverDroneForPlayer(player)` directly (`:74`), otherwise it
+builds `NetPackageDroneRecoveryRequest.Setup(player.entityId, get_ID())` (`:83`)
+and sends it to the server (`:85`). `Dialog.SelectResponse` is called only from
+the dialog window (`il/full-v3.4.0/_global/XUiC_DialogResponseList.il.txt:240`),
+so the action runs in the client's dialog window; its `IsServer` branch only
+applies on a host, and on a dedicated server the server-side entry is the
+package handler. The action id is content: `dialogs.xml` has to define the
+option for it to appear (inferred, the dialog data is not in the assembly).
+
+**Wire.** Both packages are added in this build; direction and payload verified:
+
+| Package | Direction | Payload | Evidence |
+|---|---|---|---|
+| `NetPackageDroneRecoveryRequest` | `ToServer` (1) | `playerId:i32`, `actionId:string` | `il/full-v3.4.0/_global/NetPackageDroneRecoveryRequest.il.txt:5`, `:15`, `:26`, `:84` |
+| `NetPackageDroneRecoveryResponse` | `ToClient` (2) | `playerId:i32`, `droneId:i32` | `il/full-v3.4.0/_global/NetPackageDroneRecoveryResponse.il.txt:5`, `:15`, `:26`, `:71` |
+
+Neither type overrides `get_Channel` or `get_Compress`, so both take the base
+defaults. The request's `actionId` is carried and read but never consulted:
+`ProcessPackage` reads only `playerId` (`:48`) and the field has no server
+decision attached.
+
+**Server.** `NetPackageDroneRecoveryRequest.ProcessPackage` (IL=42,
+`il/full-v3.4.0/_global/NetPackageDroneRecoveryRequest.il.txt:40`) resolves the
+`EntityPlayer` by `playerId` (`:48`), calls `RecoverDroneForPlayer` (`:58`),
+builds the response with `droneId = recovered == null ? -1 : recovered.entityId`
+(`:61`-`:71`), then sends it with `SendPackage(response, false, -1, -1, -1, null, 192, false)`
+(`:81`). All client selectors are `-1` and the position is null, the same
+broadcast shape `VehicleManager` uses for `NetPackageVehicleCount`; the only
+per-client filter is the `playerId` field.
+
+`DroneManager.RecoverDroneForPlayer(EntityPlayer)` (IL=157,
+`il/full-v3.4.0/_global/DroneManager.il.txt:814`) scans three lists in order,
+first hit wins:
+
+1. **Active** (`dronesActive`): first drone whose `belongsPlayerId` equals
+   `player.entityId`; `DebugTeleportTo(player.GetHeadPosition() - player.GetForwardVector())`
+   (`:846`). Nothing else is touched; owner, storage and state stay.
+2. **Unloaded** (`dronesUnloaded`): an `EntityCreationData` with matching
+   `belongsPlayerId`; `CreateDroneEntity(ecd, world)`, teleport, `RemoveAt`
+   (`:864`-`:891`).
+3. **Ownerless** (`dronesWithoutOwner`): an ECD whose `clientEntityId` equals an
+   `Id` in `player.ownedEntities`; same create, teleport and remove sequence
+   (`:901`-`:944`). This is the branch that can resurrect a drone whose save lost
+   its owner pointer but whose player still lists it.
+
+On success it calls `TriggerSave()` (`:954`), which arms the normal 120 s
+`DroneManager.Save`, and broadcasts `NetPackageVehicleCount.Setup()` with the
+same `(…, null, 192, false)` shape (`:956`-`:967`), a UI count refresh. On failure
+it returns null and the response carries `-1`. There is no automatic sweep: the
+only call sites of `RecoverDroneForPlayer` are `DialogActionTrader` (`:74`) and
+the package handler (`:58`); no timer, logout hook, or `DroneManager.Update` pass
+reaches it.
+
+**Client.** `NetPackageDroneRecoveryResponse.ProcessPackage` (IL=29,
+`il/full-v3.4.0/_global/NetPackageDroneRecoveryResponse.il.txt:40`) drops the
+packet when `droneId == -1` (`:46`), resolves the player (`:51`) and drone
+(`:60`) in the local world, then calls `player.AddOwnedEntity(drone)` (`:68`).
+It does not compare `playerId` to the local player and does not check whether the
+drone is already in the list. So with the broadcast send shape, every nearby
+client that can resolve both entity ids runs `AddOwnedEntity` for a remote
+player's drone; whether the transport really fans out to all clients is not
+decoded (residual, see §8).
+
+**Dedicated consequence.** A drone left behind keeps existing on the server with
+its `belongsPlayerId`, owner, storage and `NetPackageDroneStateSync`
+replication; the active branch mutates only its position. Recovery happens only
+when the owning client selects the dialog option (or the host runs the direct
+branch), and the teleport persists at the next `DroneManager.Save`. Server
+ownership bookkeeping changes only through the two create branches, where
+`CreateDroneEntity` (`IL=18`, `:430`) runs `SyncOwnerData` (`:446`) and
+`Owner.AddOwnedEntity`. The client's `AddOwnedEntity` mirrors server state.
+
+**Renamed / adjusted members.** `EntityDrone.Move(Vector3, Single)` is renamed
+`MoveTo` with an identical body (IL=15; b18
+`il/full-v3.3.0/_global/EntityDrone.il.txt:6256`, b10
+`il/full-v3.4.0/_global/EntityDrone.il.txt:6256`). `EntityDrone.GetPath` grew
+318 -> 334 IL only because the `GetProjectedPath` call now passes a literal
+`false` for `debugDraw` instead of the incoming argument
+(`il/full-v3.4.0/_global/EntityDrone.il.txt:6525`; b18
+`il/full-v3.3.0/_global/EntityDrone.il.txt:6494`), which is a no-op headless.
+`MoveEntityHeadedFlying` extraction and the `EntityDrone` override are covered in
+[`entity-ai.md`](../entities/entity-ai.md) §D4; the override does not change
+drone motion because `EntityDrone` never assigns `moveDirection`, so the b18
+`Entity.Move(Vector3.zero, ...)` call was already a no-op.
+
 **Drone pathing (`GetPath` IL=318 / `GetProjectedPath` IL=93 /
 `followPlannedPath` IL=96):** `GetProjectedPath` clears the output and pulls
 the drone's `PathFinderThread.Instance` path (`GetPath(entityId).path`),
@@ -1172,6 +1270,8 @@ server echoes to the other peers.
 | `NetPackageDroneDataSync` | server -> client | drone owner / order / state / storage sync fields |
 | `NetPackageEntityWaypointList` | server -> client | per-player vehicle (`eWayPointListType 0`) or drone (`1`) marker list |
 | `NetPackageVehicleCount` | server -> client | pushes the server vehicle/drone/turret count for client caps |
+| `NetPackageDroneRecoveryRequest` | client -> server | `playerId:i32`, `actionId:string`; server runs `RecoverDroneForPlayer` (§5.1) |
+| `NetPackageDroneRecoveryResponse` | server -> client | `playerId:i32`, `droneId:i32`; client re-owns the resolved drone (§5.1) |
 
 Spawn and count packages ride the reliable admin channel `192`. `entityThatPlaced`
 is sender-validated (`ValidEntityIdForSender`) so a client cannot spawn on
@@ -1288,6 +1388,15 @@ no `RootMotion`, else builds the normal avatar controller and calls
 - **Vehicles are client-authoritative for motion:** a remote vehicle is kinematic
   and interpolated on the server; the driving client simulates the Rigidbody.
   The server never runs vehicle physics for a player-driven vehicle.
+- **Residual (drone recovery delivery):** the response is sent with every client
+  selector `-1` and range 192
+  (`il/full-v3.4.0/_global/NetPackageDroneRecoveryRequest.il.txt:81`), and the
+  client handler does not compare `playerId` to the local player
+  (`il/full-v3.4.0/_global/NetPackageDroneRecoveryResponse.il.txt:40`-`:68`), so
+  every nearby client that resolves both ids could run `AddOwnedEntity` for a
+  remote player's drone. Whether `ConnectionManager.SendPackage` really fans a
+  `-1` selector out to all clients is not decoded; settle with two clients or by
+  decoding that overload.
 - **Residual (native / content):** the Unity Rigidbody, `WheelCollider`, and
   `FixedUpdate` physics step (native, not managed IL); `AutoTurretYawLerp` /
   `AutoTurretPitchLerp` transform interpolation is thin managed glue over Unity
@@ -1317,6 +1426,15 @@ no `RootMotion`, else builds the normal avatar controller and calls
 
 ## Changelog
 
+- **2026-11-05 (V3.4.0 b10 retarget):** new client-triggered drone recovery
+  (§5.1): dialog action `drone_commands_unstuck` -> `NetPackageDroneRecoveryRequest`
+  -> `DroneManager.RecoverDroneForPlayer` (active / unloaded / ownerless scan,
+  teleport, `TriggerSave`, `NetPackageVehicleCount` broadcast) ->
+  `NetPackageDroneRecoveryResponse` -> client `AddOwnedEntity`. The request's
+  `actionId` is unread server-side; the response has no client selector.
+  `EntityDrone.Move` renamed `MoveTo` (same body); `GetPath` passes a literal
+  `false` for its debug-draw argument. No stream, save or waypoint behaviour
+  changed.
 - **2026-09-11:** IL citations refreshed against the V3.2.0 b10 assembly: `Entity.Detach` 79 -> 92 (exact). Prior values were the V3.1.0 b14 measurement. (re-verified on b18; b10 was 27)
 - **2026-08-11:** Deploy-action IL re-verified: Turret ExecuteAction IL=342 / ReadFrom IL=101 / StartHolding IL=40 / setupPreview IL=57 / StopHolding IL=21, Vehicle ExecuteAction IL=213 / ReadFrom IL=63 / StartHolding IL=45 / SetupPreview IL=46, NetPackageTurretSpawn.ProcessPackage IL=207, NetPackageVehicleSpawn.ProcessPackage IL=86, DroneLightManager getLightEffect IL=29 / InitMaterials IL=92 / DisableMaterials IL=89, EModelDrone.Init IL=74 (exact).
 - **2026-08-11:** Drone repair/steer IL re-verified: performRepair IL=23, GetRepairAmountNeeded IL=6, RepairParts IL=7, belongsToPlayerId IL=5, isValidForPlayer IL=14/23, GetStoredItemCount IL=4, steerFollow IL=208, VehicleManager.PhysicsWakeNear IL=34 (exact).

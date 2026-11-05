@@ -1,4 +1,4 @@
-# World and chunk pipeline (dedicated V3.2.0; chunk serialization re-pinned on V3.3.0 b18)
+# World and chunk pipeline (dedicated V3.4.0; chunk serialization re-pinned on V3.3.0 b18)
 
 **Owns:** world tick, generateTerrain trampoline, load/send (observer streaming), SetBlock path (generic engine).  
 **Index math:** §2 below + [`terrain-height.md`](../world/terrain-height.md).  
@@ -597,9 +597,15 @@ Under `lockObject`:
 5. **Server:** rebuild `m_CollisionChunkPositions` =
    `m_All - m_Viewing` (per-bucket union then except), recalc.
 6. **Server, non-fixed-size cluster:** under `chunksToUnload` lock, for every
-   live cache key not in `m_AllChunkPositions` and not in DynamicMesh process/load
-   queues: mark `InProgressUnloading`, queue into `chunksToUnload`, then
-   `ChunkCluster.RemoveChunk` for each queued chunk.
+   live cache key not in `m_AllChunkPositions`: mark `InProgressUnloading`, queue
+   into `chunksToUnload`, then `ChunkCluster.RemoveChunk` for each queued chunk.
+   V3.4.0 b10 removed the DynamicMesh-thread test that b18 applied here, so a
+   chunk still queued for generation can be released on the main thread. The b18
+   guard tested `DynamicMeshThread.ChunksToProcess` and
+   `DynamicMeshThread.ChunksToLoad` (`il/full-v3.3.0/_global/ChunkManager.il.txt:2720`,
+   `:2724`; see [`dynamic-mesh.md`](../world/dynamic-mesh.md) §7.2). The b10 body
+   keeps one membership test (IL 456 -> 448,
+   `il/full-v3.4.0/_global/ChunkManager.il.txt:2345`).
 7. If unload budget remaining (`8 - drained`),
    `recalcFreeChunkGameObjects(remaining, false)`.
 
@@ -1053,8 +1059,8 @@ executes overdue ones immediately with the elapsed delay.
 `OnChunkBeforeRemove(chunk)` (IL=31) drops the key from
 `newlyLoadedChunksThisUpdate`, calls `worldBlockTicker.OnChunkRemoved(chunk)`,
 and `GameManager.Instance.prefabLODManager.TriggerUpdate()`.
-| `AddFallingBlock` / `LetBlocksFall` | 38 / 220 | Collapse storms |
-| `AddFallingBlock` detail | 38 | HashSet dedupe; skip child/air/`StabilityIgnore`/oversized (unless include); `DynamicMeshManager.AddFallingBlockObserver`; enqueue `fallingBlocks` |
+| `AddFallingBlock` / `LetBlocksFall` | 36 / 215 (b18: 38 / 220) | Collapse storms |
+| `AddFallingBlock` detail | 36 (b18: 38) | HashSet dedupe; skip child/air/`StabilityIgnore`/oversized (unless include); enqueue `fallingBlocks`. b18 also called `DynamicMeshManager.AddFallingBlockObserver` (`il/full-v3.3.0/_global/World.il.txt:7401`); the V3.4.0 body drops that call (`il/full-v3.4.0/_global/World.il.txt:7373`) |
 | `EntityFallingBlock` OnUpdateEntity | 300+ | Entity cost |
 
 ## Stability, falling blocks, DamageBlock and deco subbiomes (2026-08-06)
@@ -1195,6 +1201,15 @@ if two weather packages arrive in the same `Time.frameCount`.
 
 ## Changelog
 
+- **2026-11-05 (V3.4.0 b10 retarget):** the chunk unload candidate sweep no
+  longer skips chunks held by the dynamic-mesh thread (`DetermineChunksToLoad`
+  IL 456 -> 448; b18 guard at
+  `il/full-v3.3.0/_global/ChunkManager.il.txt:2720`, `:2724`;
+  `FreeChunkGameObject(ChunkCluster, Int64)` IL 44 -> 42 drops
+  `DynamicMeshThread.RemoveChunkGameObject`). `World.AddFallingBlock` IL 38 -> 36
+  and `World.LetBlocksFall` 220 -> 215 because their dynamic-mesh calls were
+  removed (`il/full-v3.4.0/_global/World.il.txt:7373`, `:7411`). No frame,
+  streaming or serialization claim moves.
 - **2026-10-24 (V3.3.0 b18 serialization re-check):** `Chunk.write` IL 601 -> 605;
   the entity/TE records nested in both the network and save chunk bodies moved to
   `EntityCreationData` 38 (bag blob) and TE storage 20 (`ItemStackGrid` v2), so

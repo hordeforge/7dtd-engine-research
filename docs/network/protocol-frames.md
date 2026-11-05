@@ -2,7 +2,7 @@
 
 **Owns:** left-to-right byte/field strips for envelope + golden packages (classic protocol style).  
 **Hub:** [`INDEX.md`](../INDEX.md).  
-**Pin:** V **3.2.0 (b9)** (golden live capture is V3.1.0-era: major=3, minor=10, build=14; the 3.2.0 triple is major=3, minor=20, build=9). The current build is V3.4.0 (b10): the version triple is major=3, minor=40, build=10; the id map was measured at 188 entries on V3.3.0 b18 (189 in the captured V3.1.0 budget), and the frames below are captured bytes, not regenerated from either of them.  
+**Pin:** V **3.2.0 (b9)** (golden live capture is V3.1.0-era: major=3, minor=10, build=14; the 3.2.0 triple is major=3, minor=20, build=9). The current build is V3.4.0 (b10): the version triple is major=3, minor=40, build=10, and the id map was measured at 190 entries on a live V3.4.0 join (188 on V3.3.0 b18, 189 in the captured V3.1.0 budget). The frames below are captured bytes, not regenerated from any of those maps.  
 **Companion:** narrative join/policy in [protocol.md](../network/protocol.md).  
 **Evidence:** loadgen `PackageCodec` · dedi-complete census.  
 **Clone:** [`../../zdtd-server/`](../../../zdtd-server).
@@ -174,7 +174,7 @@ block-beta
      1         4              4              4
 ```
 
-Golden live (V3.1.0): `major=3, minor=10, build=14` → display **`V 3.1.0 (b14)`**. Prior V3.0.1 golden used minor=1 build=4.
+Golden live (V3.1.0): `major=3, minor=10, build=14` → display **`V 3.1.0 (b14)`**. Prior V3.0.1 golden used minor=1 build=4. Current V3.4.0 b10: `major=3, minor=40, build=10` → display **`V 3.4.0 (b10)`** (b18 was minor=30 build=18).
 
 ```mermaid
 block-beta
@@ -232,6 +232,10 @@ Live head (hex, channel 0, one package, pkgId 0):
 00 | BC120000 | 00 | 00 | 0100 | B8120000 | 0000 | 01 03000000 01000000 04000000 | BD000000 | …
 ch   ps=4796    c    e    n=1    contentLen  ID=0   version 1/3/1/4                    count=189
 ```
+
+The current V3.4.0 b10 head has the same shape with count **190** (`0xBE`); the
+V3.3.0 b18 head has **188** (`0xBC`). The live heads and their evidence are in
+[protocol-packages.md](../network/protocol-packages.md) §1.6.
 
 ---
 
@@ -668,6 +672,7 @@ Details: [network.md](../network/network.md) §2.
 
 ## Changelog
 
+- **2026-11-05:** Retarget note: current build V3.4.0 b10 (release=1, major=3, minor=40, build=10), measured id map 190 (b18 188). The strips below stay the captured V3.1.0/V3.0.1 golden bytes.
 - **2026-08-08:** Live wire verification: loadgen full join against the running stock dedi server; challenge frame (0xCA + 16-byte guid) and join package sequence confirmed against observed traffic.
 - **2026-07-20:** Rewrite as left-to-right protocol strips (RFC bars + flat Mermaid); drop nested box diagrams.
 - **2026-07-20:** Initial visual catalog.

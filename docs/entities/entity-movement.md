@@ -156,7 +156,8 @@ separate concern from animation pose. The engine reads the capsule off an
 OnUpdateLive
  └─ MoveHelper.UpdateMoveHelper()          IL=1236  (behavior: stuck/jump/dig/swim)
      └─ SetMoveForwardWithModifiers()      AI move input (per-class speeds, scaling)
-EntityAlive.MoveEntityHeaded(dir, abs)     IL=292   (motion integration + gates)
+EntityAlive.MoveEntityHeaded(dir, abs)     IL=229   (motion integration + gates)
+EntityAlive.MoveEntityHeadedFlying(dir, abs) IL=53  (extracted in V3.4.0, used by drones)
  ├─ Entity.Move(dir, abs, velocity, max)   IL=138   (direction -> motion)
  └─ EntityAlive.DefaultMoveEntity()        IL=290   (friction, ground material)
 Entity.ccMove(vel)                         (motion * dt -> hitMove)
@@ -211,7 +212,7 @@ output is the entity position per tick, which the client interpolates.
 
 ### MoveEntityHeaded motion-lerp (landMovementFactor)
 
-`MoveEntityHeaded` (`EntityAlive::MoveEntityHeaded`, IL=292) is the
+`MoveEntityHeaded` (`EntityAlive::MoveEntityHeaded`, IL=229) is the
 ground-motion filter on top of `Entity.Move`, and it is where the
 generated-creature walk becomes erratic.
 The relevant constants, ordered as they apply:

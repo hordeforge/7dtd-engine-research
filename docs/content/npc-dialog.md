@@ -1,4 +1,4 @@
-# NPC dialog trees and quest-data records (dedicated V3.2.0)
+# NPC dialog trees and quest-data records (dedicated V3.4.0)
 
 **Owns:** the trader/NPC dialog tree model (`Dialog`, `DialogPhase`,
 `BaseDialogItem` / `BaseStatement` / `DialogStatement`, `DialogResponse` +
@@ -32,9 +32,12 @@ The headline finding: **the whole dialog tree, including requirement
 evaluation, runs on the client that owns the dialog window.** Several
 requirement and action bodies resolve their context through
 `WorldBase.GetPrimaryPlayer()` and `LocalPlayerUI` / `XUi.Dialog.Respondent`,
-which only exist where a local player renders UI. The server's authoritative
-share is everything in sections 5 to 9: which quests a trader can offer, the
-per-player offer cache, POI locks, and the shared quest-data records.
+which only exist where a local player renders UI. The one exception in V3.4.0
+is the `drone_commands_unstuck` action, whose effect reaches the server either
+through the listen-host branch or through a request packet (section 4.1). The
+server's authoritative share is everything in sections 5 to 9: which quests a
+trader can offer, the per-player offer cache, POI locks, and the shared
+quest-data records.
 
 ---
 
@@ -156,10 +159,41 @@ strongest IL evidence that requirement evaluation is client-side.
 |---|---|
 | `DialogActionAddQuest` | opens `XUiC_QuestOfferWindow` for `Quest` unless a non-repeatable copy already exists (then a `questunavailable` tooltip) |
 | `DialogActionCompleteQuest` | finds active quest `ID` for the giver faction, fires `QuestEventManager.NPCInteracted` and `Quest.RefreshQuestCompletion(TurnIn)`; this is the turn-in button |
-| `DialogActionTrader` | dispatch on `ID`: `restock` (zero `TraderData.lastInventoryUpdate`), `trade` (`SetNextTraderWindow(Trade)` + close modals), `reset_quests` (`EntityTrader.ClearActiveQuests`), plus the whole `drone_*` command set (`drone_storage`, follow/stay, heal toggles, attack mode, light, `drone_command_heal`) |
+| `DialogActionTrader` | dispatch on `ID`: `restock` (zero `TraderData.lastInventoryUpdate`), `trade` (`SetNextTraderWindow(Trade)` + close modals), `reset_quests` (`EntityTrader.ClearActiveQuests`), the drone submenu's `drone_commands_unstuck` (section 4.1), plus the whole `drone_*` command set (`drone_storage`, follow/stay, heal toggles, attack mode, light, `drone_command_heal`) |
 | `DialogActionAddBuff` | `AddBuff(ID)` on the primary player, failures printed to the console (debug-flavored) |
 | `DialogActionAddItem` | parses `Value` as count or `min,max`/quality and adds to `XUiM_PlayerInventory` (debug-flavored) |
 | `DialogActionVoice` | `EntityNPC.PlayVoiceSetEntry(ID)` on the respondent |
+
+### 4.1 Trader drone submenu (V3.4.0)
+
+The trader `start` statement gains a `dronecommands` entry (`dialogs.xml:18`)
+and a two-choice submenu:
+
+```text
+statement dronecommands  text=dialog_trader_statement_drone   dialogs.xml:157
+  response_entry droneunstuck                                  :158
+  response_entry nevermind
+response  dronecommands  text=dialog_trader_response_drone_commands            :273
+response  droneunstuck   text=dialog_trader_response_drone_commands_unstuck    :276
+  action type="Trader" id="drone_commands_unstuck"                             :277
+```
+
+`DialogActionTrader` handles `drone_commands_unstuck` in its `EntityTrader`
+respondent branch (`il/full-v3.4.0/_global/DialogActionTrader.il.txt`). When
+`ConnectionManager.IsServer` it calls
+`DroneManager.RecoverDroneForPlayer(player)` directly; on a client it sends
+`NetPackageDroneRecoveryRequest` with the player entity id. The action itself
+still runs where a local player opens the dialog: a dedicated server never runs
+it, it only handles the request packet. The server path (drone selection,
+teleport, save, vehicle-count broadcast, response) is owned by
+[vehicles-drones-turrets.md](../gameplay/vehicles-drones-turrets.md); this doc
+owns only the dialog wiring. This is the one trader action whose effect reaches
+the server.
+
+**Localization defect:** the statement key `dialog_trader_statement_drone` has
+no row in `Localization.csv` in either build, so a stock client shows the raw
+key as the submenu heading. Both response keys resolve
+(`Localization.csv:25883`, `:25884`).
 
 **`EntityTrader.PlayVoiceSetEntry(name, player, ignoreTime, showReactionAnim)`
 (IL=98)** is the voice playback (gated on `TraderInfo.TraderDialog`): a
@@ -309,6 +343,7 @@ objective's lifetime:
 | Concern | Where it runs |
 |---|---|
 | Dialog window, statement/response traversal, requirement checks, actions | client (`XUiC_Dialog*`, `LocalPlayerUI`, `GetPrimaryPlayer`); the dedicated server ships the types but never opens a dialog |
+| `DialogActionTrader` `drone_commands_unstuck` | client action; a listen host calls `DroneManager.RecoverDroneForPlayer`, otherwise the client sends `NetPackageDroneRecoveryRequest`; the dedicated server only handles the request |
 | `dialogs.xml` parse (`DialogFromXml`) | both sides (WorldStaticData) |
 | Offer generation (`PopulateActiveQuests`), `QuestEntry.CheckRequirement` | server |
 | Offer cache (`NPCQuestData`) and daily invalidation | server |
@@ -332,6 +367,13 @@ objective's lifetime:
 
 ## Changelog
 
+- **2026-11-05:** V3.4.0 b10: the trader drone submenu. `dialogs.xml` adds the
+  `dronecommands` start entry (:18), a two-choice statement (:157-159) and two
+  responses (:273-277) whose `drone_commands_unstuck` action branches on
+  `IsServer` between `DroneManager.RecoverDroneForPlayer` and
+  `NetPackageDroneRecoveryRequest`. The statement localization key
+  `dialog_trader_statement_drone` has no `Localization.csv` row in either
+  build; both response keys exist (:25883, :25884).
 - **2026-11-01:** `NPCsFromXml.ParseNPCInfo` IL=153: `quest_faction` is written
   only when the attribute exists (HasAttribute IL=0190, `Convert.ToByte`
   IL_01B2), so an absent one is 0. The installed file states it on the five

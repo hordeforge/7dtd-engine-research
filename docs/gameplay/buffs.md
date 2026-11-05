@@ -43,6 +43,26 @@ Static `BuffManager.Buffs` is a `CaseInsensitiveStringDictionary<BuffClass>`.
 XML load (`BuffsFromXml`) fills this table; entity code resolves names through
 `GetBuff` before constructing `BuffValue`s. Not per-entity; not per-tick.
 
+### 1.2 Carry-capacity buffs (V3.4.0 data note)
+
+`CarryCapacity` is passive **98** (the number of inventory slots "unlocked"
+before encumbrance; `buffs.xml:17040`). The player class supplies the 32-point
+baseline, and `EntityPlayer.OnUpdateEntity` recomputes the encumbrance cvars from
+the passive each tick. The arithmetic is in
+[progression.md](../gameplay/progression.md) "Carry capacity: four sources
+flattened to 96". Three buff rows matter to it in this build:
+
+| Buff | Element | V3.4.0 | b18 |
+|---|---|---:|---:|
+| `buffChickenNuggets` | `buffs.xml:9623`, `CarryCapacity base_add` | 96 | 48 |
+| `twitch_buffPackMule` | `buffs.xml:16033`, `base_set` | 96 | 50 |
+| `buffDrugSteroids` | `buffs.xml:9681`, `base_set` | 96 | 96 (unchanged) |
+
+`buffChickenNuggets` now agrees with its item's `dCarryCapacity` display row
+(`items.xml:20843`); `twitch_buffPackMule` has no item row. The `god` buff also
+sets 96 (`buffs.xml:62`), unchanged and debug/creative only. The matching book
+rows are in `progression.xml` (`:3681`, `:3687`, `:3725`).
+
 ---
 
 ## 2. Buff instance lifecycle (state machine)
@@ -285,6 +305,12 @@ see [protocol-packages.md](../network/protocol-packages.md) section 6.16 and
 
 ## Changelog
 
+- **2026-11-05:** V3.4.0 b10: the carry-capacity buff rows flatten to 96.
+  `buffChickenNuggets` `base_add` 96 (buffs.xml:9623, b18: 48),
+  `twitch_buffPackMule` `base_set` 96 (:16033, b18: 50), `buffDrugSteroids`
+  `base_set` 96 (:9681, unchanged). The player-class baseline (`32`) and the
+  `PackMule` and armor ladders are unchanged; see progression.md for the
+  derived encumbrance arithmetic.
 - **2026-08-11:** Buff IL re-verified: FriendlyFireCheck IL=2 (EntityAlive) / IL=77 (EntityPlayer), EntityBuffs.Tick IL=179, FireEvent IL=30, BuffClass.FireEvent IL=15, canRun IL=10, MinEventActionBase.CanExecute IL=10, removeBuff IL=4, get_DurationMax/get_InitialDurationMax IL=3, set_DurationMax IL=14, RemoveBuff IL=56, ModifyValue IL=35/39, SetCustomVar IL=130, GetCustomVar IL=10, AddCustomVar IL=8, SetCustomVarNetwork IL=33, IncrementCustomVar IL=8, HasCustomVar IL=5, CountCustomVars IL=4, EnumerateCustomVars IL=12, RemoveCustomVar IL=21, TrackCustomVar IL=39, SetBuff IL=17, UnPauseAll IL=19, ClearBuffClassLinks IL=21 (all exact).
 - **2026-08-10:** Buff IL re-verified: BuffValue.DurationTick IL=27, Tick IL=13, BuffClass.Tick IL=15, get_DurationInSeconds IL=7, AddBuffNetwork IL=34 (exact).
 - **2026-08-10:** EntityBuffs.HasImmunity IL=63 re-verified (exact).

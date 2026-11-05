@@ -30,6 +30,23 @@ The b18 `PooledBinary*` migration does not reach this layer, and no file-format
 claim in this doc moves (the byte formats it sits under are in
 [save-region.md](../world/save-region.md), which does record b18 bumps).
 
+**V3.4.0 b10 re-check (save path):** no record version moved. `WorldState` still
+sets `CurrentSaveVersion` to 23 (`ldc.i4.s 23; stsfld`,
+`il/full-v3.4.0/_global/WorldState.il.txt:1401`-`:1403`), the `.ttp` writer still
+emits the `t`,`t`,`p`,0,62 header (`PlayerDataFile.Save`,
+`il/full-v3.4.0/_global/PlayerDataFile.il.txt:1755`-`:1767`) and the reader still
+gates on 62 (`:1044`). Every nested record version the b18 corpus pinned is unchanged
+(`EntityCreationData`, `Bag`, `Equipment`, `TEFeatureStorage`, chunk preamble);
+do not re-derive field lists here, the format owner is
+[save-region.md](../world/save-region.md) §0. The b18 downgrade rule still
+applies: b18 cannot read a newer record, which is why the versions have not
+moved. A V3.4.0 reader accepts a b18 record; a b18 reader throws on the new
+1000-range `Equipment` cosmetic ids, because b18 indexes `CosmeticMappingIDString`
+directly (`il/full-v3.3.0/_global/Equipment.il.txt:2129`-`:2136`) where V3.4.0
+guards with `TryGetValue` and clears the slot
+(`il/full-v3.4.0/_global/Equipment.il.txt:2124`-`:2175`). A cross-build equipment
+record is therefore not merely lossy in the newer-to-older direction.
+
 ---
 
 ## 1. Layer overview
@@ -417,6 +434,12 @@ of the dedicated shutdown chain.
 
 ## Changelog
 
+- **2026-11-05 (V3.4.0 b10 retarget):** save-path layer untouched again; no
+  record version moved (`WorldState.CurrentSaveVersion` still 23,
+  `il/full-v3.4.0/_global/WorldState.il.txt:1401`; `.ttp` header still 62,
+  `il/full-v3.4.0/_global/PlayerDataFile.il.txt:1755`). The b18 downgrade rule
+  still applies; the only cross-build hazard is the V3.4.0 `Equipment` cosmetic-id
+  range, which b18's reader does not guard.
 - **2026-10-24 (V3.3.0 b18 retarget):** every type this doc owns is IL-identical
   between b10 and b18, so the managed-path/slot/manager/prefs claims carry over
   unchanged. The b18 record-version bumps (`EntityCreationData` 38, `Bag` 2,

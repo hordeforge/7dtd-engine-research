@@ -1,6 +1,6 @@
 # Dedicated wire protocol (V3.4.0 pin; V3.1.0/V3.0.1-era goldens still cited)
 
-**Current game pin:** V **3.4.0 (b10)**. Framing/join and most package bodies are stable from the V3.0.1 corpus; the TE outer wire and PackageIds VersionInformation (the last hex capture is the b9 one: minor=20 build=9, § "Live capture head" below; the b18 triple is minor=30 build=18) are in [protocol-packages.md](../network/protocol-packages.md), and the package-set delta is its §1.5. Loadgen dual fixtures cover both heads.
+**Current game pin:** V **3.4.0 (b10)**. Framing/join and most package bodies are stable from the V3.0.1 corpus. The TE outer wire and the PackageIds VersionInformation are in [protocol-packages.md](../network/protocol-packages.md); the current live PackageIds head is the V3.4.0 one (minor=40 build=10, map count 190, §3 below), the b18 head (minor=30 build=18, 188) is kept as history, and the last hex capture is the b9 one (minor=20 build=9). The package-set delta is [protocol-packages.md](../network/protocol-packages.md) §1.5.0. Loadgen dual fixtures cover both heads.
 
 
 **Owns:** LiteNet framing, pre-auth challenge, PackageIds, join sequence, post-login enter-game package batch, `NetPackageRequestToSpawnPlayer` / RequestToSpawnPlayer/PlayerId/PlayerSpawnedInWorld, golden package body layouts.  
@@ -97,11 +97,18 @@ Constants:
 
 ### Live capture head (PackageIds, channel 0)
 
-V3.3.0 b18 was captured live on 2026-11-05 from a real stock client joining a
+V3.4.0 b10 was captured live on 2026-11-05 from a real stock client joining a
 stock dedicated server (evidence and hashes:
-[protocol-packages.md](../network/protocol-packages.md) §1.6). Its triple is
+[protocol-packages.md](../network/protocol-packages.md) §1.6.1). Its triple is
+release=1 major=3 minor=40 (0x28) build=10 (0x0A) and its map count is **190**
+(0xBE). The payload is the same packing as the older heads below, which are kept
+as captured history; the v340 head is not reprinted as hex because that block is
+the bytes of those older captures.
+
+V3.3.0 b18 was captured live on 2026-11-05 the same way (evidence
+[protocol-packages.md](../network/protocol-packages.md) §1.6.2). Its triple is
 release=1 major=3 minor=30 (0x1E) build=18 (0x12) and its map count is **188**
-(0xBC). Same packing as the older heads:
+(0xBC):
 
 ```text
 V3.3.0 live:  00 8A 12 00 00  00 00  01 00  86 12 00 00  00 00  01 03 00 00 00  1E 00 00 00  12 00 00 00  BC 00 00 00  14 ...
@@ -114,8 +121,10 @@ version (V3.0.1): release=1 major=3 minor=1 build=4
 map count: 0xBC = 188   first name: len 0x14 "NetPackagePackageIds"
 ```
 
-Display version packing: `VersionLongString` → **`V 3.3.0`** for Minor=30 Build=18
-(the V3.2.0 pin was Minor=20 Build=9 → "V 3.2.0"; see loadgen; `Constants.cVersion*`).
+Display version packing: `VersionLongString` → **`V 3.4.0`** for Minor=40 Build=10,
+which splits as Minor/10 and Minor%10 (the V3.3.0 pin was Minor=30 Build=18 →
+"V 3.3.0"; the V3.2.0 pin was Minor=20 Build=9 → "V 3.2.0"; see loadgen;
+`Constants.cVersion*`).
 
 ---
 
@@ -136,10 +145,11 @@ hasHostUserAndToken:bool (+ optional platform user blobs)
 Client must use **server-advertised** ids for all later packages. Do not hard-code ids across game versions.
 
 Current DLL census (`tools/bin/Census.exe`, `netpackage_top_level_count` in
-`tools/data/stock_facts.json`): **192** `NetPackage*` top-level types (the census
-excludes `NetPackageManager`). A live b18 join advertised **188** ids, 0..187
-(§3; table in [protocol-packages.md](../network/protocol-packages.md) §1.6). The
-count reconciles as 192 top-level minus the **8** prefix types that never
+`tools/data/stock_facts.json`): **194** `NetPackage*` top-level types (the census
+excludes `NetPackageManager`). The live V3.4.0 b10 join advertised **190** ids,
+0..189; the b18 join advertised **188**, 0..187 (both measured, §3 and
+[protocol-packages.md](../network/protocol-packages.md) §1.6). The
+count reconciles as 194 top-level minus the **8** prefix types that never
 register (the abstract base `NetPackage`, the abstract intermediate
 `NetPackageEntityTargeted`, the abstract helper `NetPackageLogger`, the
 `NetPackageDirection` enum, and the plain helpers `NetPackageEntry`,
@@ -147,9 +157,12 @@ register (the abstract base `NetPackage`, the abstract intermediate
 packages the census misses because it walks top-level types only:
 `NetPackageDroneParticleEffect`, `NetPackageDroneDataSync`,
 `NetPackageTreeFade` and `NetPackageLight`, which register under their short
-names. The V3.2.0 195 / 187 and V3.0.1 194 / 189 pairs are census/inference
-counts; the only other live map is the V3.1.0 b14 one at 189 (§3). The b18 wire
-delta is [protocol-packages.md](../network/protocol-packages.md) §1.5.
+names: 194 - 8 + 4 = 190 (b18: 192 - 8 + 4 = 188). The census count 194 includes
+`Audio.NetPackageAudio`, non-nested but in the `Audio` namespace; it registers
+and is id 189. The V3.2.0 195 / 187 and V3.0.1 194 / 189 pairs are
+census/inference counts; the other live maps are V3.3.0 b18 at 188 and V3.1.0
+b14 at 189 (§3). The current wire delta is
+[protocol-packages.md](../network/protocol-packages.md) §1.5.0.
 
 ### Family counts (census)
 
@@ -256,10 +269,36 @@ After this batch the client proceeds to `RequestToSpawnPlayer` / in-world
 streaming (state machine above). Auth terminal steps that precede this request
 are in [platform-auth.md](../admin/platform-auth.md) section 3 (`playerAllowed`).
 
-**Measured order (b18 live, 2026-11-05):** ids are the live map
-([protocol-packages.md](../network/protocol-packages.md) §1.6), not the inferred
-ones. One client, loopback, captured from connect to 69 s after connect
-(34 s of it in-world):
+**Measured order (V3.4.0 b10 live, 2026-11-05):** ids are the live map
+([protocol-packages.md](../network/protocol-packages.md) §1.6.1), not the
+inferred ones. One client, loopback, captured from connect to spawn and about a
+minute of in-world traffic:
+
+```text
+S2C 0 PackageIds -> C2S 119 PlayerLogin -> S2C 21 AuthState (x2), 20
+AuthConfirmation -> C2S 20 AuthConfirmation -> S2C 21 AuthState, 120
+PlayerLoginAnswer (compressed) -> C2S 136 RequestToEnterGame -> S2C 5
+DiscordIdMappings, 90 IdMapping (x2), 97 Localization, 35 ConfigFile (x43),
+178 WorldInfo, 43 DecoUpdate (x3), 30 ChunkClusterInfo, 181 WorldSpawnPoints,
+176 WorldAreas, 87 GameStats -> S2C 185 PersistentPlayerPositions, repeating
+-> C2S 147 SignDataRequest -> S2C 148 SignDataResponse (x3) -> C2S 127
+POIMetadataRequest, 180 WorldInitInfoRequest -> S2C 128 POIMetadataResponse,
+179 WorldInitInfo -> C2S 138 RequestToSpawnPlayer -> S2C 115 PlayerId, 186
+PersistentPlayerState, 6 DiscordLobbySecret, 26 BloodmoonMusic, 29 Chunk
+(channel 1, compressed), then the in-world stream -> C2S 123
+PlayerSpawnedInWorld -> live entity/stat traffic (1, 2, 3, 4, 5, 27, 33, 60,
+61, 64, 74, 76, 80, 84, 85, 111, 114, 124, 182, 188, 189, with 29 Chunk and
+43 DecoUpdate interleaved)
+```
+
+The full 50-id observed set, with per-id counts and directions, is in
+[`netpackage-ids-v3.4.0.json`](../../workspace/outputs/wire/netpackage-ids-v3.4.0.json)
+(`observed_on_wire`); the other 140 registered ids were not exercised by this
+join, which is not a claim that they are absent from a V3.4.0 server.
+
+**Measured order (b18 live, 2026-11-05, history):** the same join method against
+b18, with the b18 ids from
+[protocol-packages.md](../network/protocol-packages.md) §1.6.2:
 
 ```text
 S2C 0 PackageIds -> C2S 117 PlayerLogin -> S2C 21 AuthState (x3), 20
@@ -277,9 +316,8 @@ SetBlock, 29 Chunk (channel 1, compressed) -> C2S 121 PlayerSpawnedInWorld
 187, 4, 78, 82, 83, 27, 68, 72, 8, 7)
 ```
 
-The full 54-id observed set, with per-id counts and directions, is in
-[`netpackage-ids-b18.json`](../../workspace/outputs/wire/netpackage-ids-b18.json);
-the other 134 registered ids were not exercised by this join.
+The full 54-id observed set for that capture is in
+[`netpackage-ids-b18.json`](../../workspace/outputs/wire/netpackage-ids-b18.json).
 
 ```mermaid
 flowchart TD
@@ -593,7 +631,17 @@ match the documented agreement flow. `DiscordIdMappings` arrives right after
 `PlayerLoginAnswer` (body 5 bytes = `entityId:u32` + `remove:bool` shape when
 `entityId > 0`).
 
-**V3.3.0 b18 (2026-11-05, real client, EAC off):** the same stage order
+**V3.4.0 b10 (2026-11-05, real client, EAC off):** the same stage order
+(`PackageIds` -> `PlayerLogin` 119 -> `AuthState` 21 three times with
+`authstate_nativeplatform`, `authstate_encryption`, `authstate_authenticated`
+-> `AuthConfirmation` 20 both ways -> `PlayerLoginAnswer` 120). No
+`NetPackageEncryptionRequest` (14), `EncryptionPublicKey` (15),
+`EncryptionSharedKey` (16) or `KeyExchangeComplete` (17) appeared, and every
+one of the 158 captured game envelopes carried `encrypted=0`. The server's
+`VersionCheck authorization` passed for the `V 3.4.0` client, so the login gate
+is unchanged in form.
+
+**V3.3.0 b18 (2026-11-05, real client, EAC off, history):** the same stage order
 (`PackageIds` -> `PlayerLogin` 117 -> `AuthState` 21 x3 with
 `authstate_nativeplatform`, `authstate_encryption`, `authstate_authenticated`
 -> `AuthConfirmation` 20 both ways -> `PlayerLoginAnswer` 118). No
@@ -610,7 +658,7 @@ stock pair did not; the stage string alone does not imply encrypted traffic.
 Loadgen uses **channel 0** for game packages. Challenge is **outside** the envelope (raw 0xCA).
 
 Most packages inherit **channel 0**, but exactly **5 override to channel 1**
-(V3.3.0, unchanged since V3.2.0; was 6 before `NetPackagePOIAround` was
+(V3.4.0, unchanged since V3.2.0; was 6 before `NetPackagePOIAround` was
 removed): `NetPackageChunk`,
 `NetPackageChunkRemove`, `NetPackageMapChunks`, `NetPackageDynamicMesh`,
 `NetPackageWorldFolder`. These carry the heaviest bodies and several are
@@ -684,6 +732,7 @@ Status refreshed 2026-08-10 (rows re-verified against the current
 
 ## Changelog
 
+- **2026-11-05:** V3.4.0 b10 retarget. Live V3.4.0 PackageIds head measured: triple `1 3.40.10`, map count **190**; join order re-recorded with the shifted ids (PlayerLogin 119, RequestToEnterGame 136, SignDataRequest 147, RequestToSpawnPlayer 138, PlayerId 115, PersistentPlayerState 186). b18 head and join order kept as history. Channel-1 set unchanged.
 - **2026-08-28:** V3.2.0 pin: version display V 3.2.0; §6.5 NetPackageDamageEntity rewritten (packed flags table + KillXPScale; V3.1.0 bool layout retained as compat note).
 - **2026-08-11:** Join IL re-verified: RequestToEnterGame IL=9 + <RequestToEnterGame>d__195.MoveNext IL=248, ChunkClusterInfo.ProcessPackage IL=13, NetPackagePlayerLoginAnswer.write IL=46,  IL=22, NetPackagePlayerSpawnedInWorld.write IL=16, PlayerSpawnedInWorld IL=127 (exact). (re-verified on b18; b10 was 21)
 - **2026-08-10:** RE-backlog table refreshed: TileEntity/vehicles + Quest/Party

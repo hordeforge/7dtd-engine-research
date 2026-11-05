@@ -4,8 +4,11 @@
 hand-annotated `read`/`write` byte layouts beyond the join-critical set in
 [`protocol.md`](../network/protocol.md).
 **Hub:** [`INDEX.md`](../INDEX.md).  
-**Pin:** dedicated V **3.4.0 (b10)**; bodies re-read against `il/netpackages-v3.3.0/`, census refreshed against `il/netpackages-v3.4.0/`
-(the earlier `il/netpackages-v3.2.0/` set stays as the previous build).
+**Pin:** dedicated V **3.4.0 (b10)**; bodies re-read against `il/netpackages-v3.4.0/`
+(byte-identical to `il/netpackages-v3.3.0/` for every shared package), census
+refreshed against the same v3.4.0 set, and the id map measured from a live
+V3.4.0 join (§1.6.1). The earlier `il/netpackages-v3.2.0/` set stays as the
+previous build.
 **Not:** framing/join/challenge (that is [`protocol.md`](../network/protocol.md)); visual
 frames ([`protocol-frames.md`](../network/protocol-frames.md)).
 **Evidence:** dumped from the live `Assembly-CSharp.dll` with
@@ -25,8 +28,8 @@ Full table: `il/netpackages-v3.4.0/META.md` (194 packages). Regenerate with
 `mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.4.0/META.md`.
 
 **Per-package wire bodies:** this doc hand-annotates the load-bearing packages; the
-**complete** ordered `write()` field sequence for every package (182 packages
-with an extractable body in V3.3.0) is auto-extracted in
+**complete** ordered `write()` field sequence for every package (184 packages
+with an extractable body, regenerated from the V3.4.0 assembly) is auto-extracted in
 [`../inventories/netpackage-bodies.md`](../inventories/netpackage-bodies.md)
 (`tools/src/WireBodies`).
 
@@ -128,20 +131,24 @@ the envelope bot path): `NetPackageChunk`, `NetPackageMapChunks`,
 `NetPackageSignDataResponse`. So bulk terrain/map/config is compressed on the
 wire even though the join handshake packets are not. This nuances
 [`protocol.md`](../network/protocol.md) §8 ("bots use uncompressed path"): true for the
-join set, false for these bulk packages.
+join set, false for these bulk packages. The set is unchanged at V3.4.0.
 
 ### 1.3 Direction tally
 
 `NetPackageDirection`: `0 = Both`, `1 = ToServer`, `2 = ToClient`.
-Of 192 packages: **65 ToClient, 31 ToServer, 7 Both (explicit), 89 inherit**
-(base default = Both). The V3.2.0 set was 195 with 68/34/7/86: the six removed
+Of 194 packages: **66 ToClient, 32 ToServer, 7 Both (explicit), 89 inherit**
+(base default = Both). The two V3.4.0 additions are one `ToServer` and one
+`ToClient`, and both inherit channel 0, compression off, reliable delivery and
+post-auth gating, so the V3.3.0 b18 tally of 192 with 65/31/7/89 moves by one
+in each direction. The V3.2.0 set was 195 with 68/34/7/86: the six removed
 packages were three ToClient + three ToServer pairs, and the three added ones
 inherit `Both`.
 
 ### 1.4 Pre-auth surface (`AllowedBeforeAuth = 1`)
 
-Exactly **10 packages** may cross the wire before authentication. This is the
-complete attack/handshake surface a server must accept pre-auth:
+Exactly **10 packages** may cross the wire before authentication, unchanged at
+V3.4.0. This is the complete attack/handshake surface a server must accept
+pre-auth:
 
 `NetPackagePackageIds`, `NetPackagePlayerLogin`, `NetPackagePlayerDenied`,
 `NetPackageAuthConfirmation`, `NetPackageAuthState`, `NetPackageEAC`,
@@ -150,13 +157,99 @@ complete attack/handshake surface a server must accept pre-auth:
 
 ---
 
-## 1.5 V3.2.0 (b10) -> V3.3.0 (b18) wire delta
+## 1.5 Per-build wire deltas
 
-The b18 registry holds **188** ids (0..187), measured from a live join (§1.6).
-The b10 count of 187 is inferred from metadata order and has not been captured.
+Two transitions are measured end to end. §1.5.0 is the current one, V3.3.0
+(b18) to V3.4.0 (b10). §1.5.1 to §1.5.8 record the earlier b10 to b18
+transition and stay as history.
+
+### 1.5.0 V3.3.0 (b18) -> V3.4.0 (b10) wire delta
+
+The V3.4.0 registry holds **190** ids (0..189), measured from a live join
+(§1.6.1). Two packages were added, none removed, and no package's `read` or
+`write` byte layout changed: the parity tool reports `added (2)`,
+`removed (0)`, `changed wire (0)`
+([`b18-to-v3.4.0-20261105.md`](../../workspace/outputs/diffs/b18-to-v3.4.0-20261105.md) §7).
+Two shared bodies change outside that comparison without changing the bytes on
+the wire. `NetPackageSetBlock::ProcessPackage` (IL=34) no longer runs the
+`DynamicMeshManager.CONTENT_ENABLED` loop that called
+`DynamicMeshManager.ChunkChanged` per change. The `ItemValue` payload helper
+calls `ResetFields()` before `Read` and `NotifyChanged()` after it, while
+`ItemValue::Write` stays byte-identical.
+
+| Change | ids | wire metadata |
+|---|---|---|
+| `NetPackageDroneRecoveryRequest` added | **45** | `ToServer` (1), channel 0, uncompressed, reliable, post-auth; body `playerId:i32`, `actionId:string` |
+| `NetPackageDroneRecoveryResponse` added | **46** | `ToClient` (2), channel 0, uncompressed, reliable, post-auth; body `playerId:i32`, `droneId:i32` |
+| `NetPackageDropItemsContainer` and every later package shifted | 47..189 (b18 45..187) | wire metadata and bodies unchanged |
+| `NetPackageLight` moved | 185 -> **187** | nested registration, unchanged metadata |
+
+Both new classes are non-nested, derive from `NetPackage`, and are absent from
+the b18 assembly. Neither has an explicit registration call. The registry is
+still filled by reflection: `NetPackageManager..cctor` calls
+`ReflectionHelpers.FindTypesImplementingBase(NetPackage, callback, false)`
+(`il/full-v3.4.0/_global/NetPackageManager.il.txt:5`), the callback keys each
+`type.Name` (`il/full-v3.4.0/_global/NetPackageManager___c.il.txt:17`), and
+`StartServer` numbers that dictionary from 1 after pinning
+`NetPackagePackageIds` at 0
+(`il/full-v3.4.0/_global/NetPackageManager.il.txt:76`). Their ids are read from
+the id-0 payload, not inferred; the metadata order agrees, with the two classes
+sitting between `NetPackageDeleteChunkData` and `NetPackageDropItemsContainer`.
+Every other wire attribute is inherited from the base getters: channel 0
+(`il/full-v3.4.0/_global/NetPackage.il.txt:5`), compress 0 (`:9`), reliable 1
+(`:42`), allowed before auth 0 (`:21`).
+
+Direction is enforced when packages are drained: `ProcessPackages` rejects a
+package whose `get_PackageDirection()` equals the disallowed direction
+(`il/full-v3.4.0/_global/ConnectionManager.il.txt:1484`), so a Request is only
+processed server-side and a Response only client-side.
+
+#### `NetPackageDroneRecoveryRequest` (id 45, added, `ToServer`)
+
+Body after the `u16` package id: `playerId:i32`, then `actionId:string`.
+`read` (IL=9) is `ReadInt32` then `ReadString`; `write` (IL=12) calls the base
+`NetPackage::write` then writes the two fields
+([`../inventories/netpackage-bodies.md`](../inventories/netpackage-bodies.md)).
+
+The sender is client-side `DialogActionTrader.PerformAction` for the
+`drone_commands_unstuck` dialog action: it takes
+`GetPackage<NetPackageDroneRecoveryRequest>()`, calls
+`Setup(player.entityId, action.ID)`, and sends it with `SendToServer`
+(`il/full-v3.4.0/_global/DialogActionTrader.il.txt:78`). On the server,
+`ProcessPackage` (IL=42) resolves `playerId` in `World` to an `EntityPlayer`,
+calls `DroneManager.RecoverDroneForPlayer`, and answers with a Response carrying
+`droneId` or `-1` (IL_0035-0056). `actionId` is read and never used, and
+`ProcessPackage` never reads `Sender`, so the target `playerId` is not checked
+against the sending client.
+
+Two behaviors are readings of that IL, not live observation. The handler sends
+the Response through `SendPackage(response, false, -1, -1, -1, null, 192,
+false)`; with no entity selector and no position, `range=192` is inert and the
+selection reduces to "every logged-in client"
+(`il/full-v3.4.0/_global/ConnectionManager.il.txt:1080`), so the Response is a
+broadcast, not a reply to the requester. With one captured client this cannot be
+distinguished from a unicast by observation.
+
+#### `NetPackageDroneRecoveryResponse` (id 46, added, `ToClient`)
+
+Body after the `u16` package id: `playerId:i32`, `droneId:i32`. `read` (IL=9)
+is two `ReadInt32`; `write` (IL=12) calls the base write then writes both
+fields. `ProcessPackage` (IL=29) returns when `droneId == -1`; otherwise it
+resolves `playerId` to an `EntityPlayer` and `droneId` to an `EntityDrone`, then
+calls `EntityAlive.AddOwnedEntity(drone)` on the player
+(`il/full-v3.4.0/_global/NetPackageDroneRecoveryResponse.il.txt:40`).
+
+Neither package was ever sent as envelope traffic in the captured join (§1.6.1):
+a join does not run the dialog action. Their ids and names are measured from the
+id-0 payload, which is the server's authoritative list; their bodies, direction
+and process paths are IL-derived only.
+
+The subsections from §1.5.1 record the b10 to b18 transition as history. The b18
+registry holds **188** ids (0..187), measured from a live join (§1.6.2);
+the b10 count of 187 is inferred from metadata order and has not been captured.
 Three packages added, six removed, four bodies changed. Evidence:
 `il/netpackages-v3.2.0/` vs `il/netpackages-v3.3.0/`, the parity snapshots, the
-live capture (§1.6), and the dossiers below.
+live capture (§1.6.2), and the dossiers below.
 
 ### 1.5.1 `NetPackageLockTarget` (id 96, added, direction `Both`)
 
@@ -382,24 +475,304 @@ V3.2.0 values, are: `ItemActionEffects` 90 (was 91), `LockTarget` 96 (new; the
 old `LockRequest` 97 / `LockResponse` 98 slots shifted out), `PlayerEquipment`
 112 (was 114), `PlayerInventory` 114 (was 116), `SignDataRequest` 145 (was
 147), `SignDataResponse` 146 (was 148), `SingleSignData` 147 (new),
-`SignDelete` 148 (new). The live value is 3 higher than the inferred one for
+`SignDelete` 148 (new). The b18 live value is 3 higher than the inferred one for
 every package in this section, because three nested subclasses enter the fill
-order before the alphabetically inferred slots (§1.6). The earlier piecewise
+order before the alphabetically inferred slots (§1.6.2). At V3.4.0 every one of
+these ids moves +2 from b18 (§1.5.0, §1.6.1): `ItemActionEffects` 92,
+`LockTarget` 98, `PlayerEquipment` 114, `PlayerInventory` 116,
+`SignDataRequest` 147, `SignDataResponse` 148, `SingleSignData` 149,
+`SignDelete` 150. The earlier piecewise
 b10 -> b18 arithmetic (ids 0..85 unchanged, b10 88 -> -2, b10 91..96 -> -4,
 b10 99..148 -> -5, b10 149..186 -> -3) is superseded: it was derived from the
-same wrong order. The b18 column is what
-the wire carries (§1.6); the b10 column remains inferred because no b10 join
-was captured. Anything that hardcodes ids across builds is wrong by
+same wrong order. The b18 column was what the b18 wire carried (§1.6.2); at
+V3.4.0 it is +2. The b10 column remains inferred because no b10 join was
+captured. Anything that hardcodes ids across builds is wrong by
 construction.
 
 
-### 1.6 Measured id map (live V3.3.0 b18 join, 2026-11-05)
+## 1.6 Measured id maps (live joins)
+
+Package ids are assigned at startup and never stored, so each build's map has to
+be measured. §1.6.1 is the current map, taken from the id-0 payload of a real
+V3.4.0 join; §1.6.2 keeps the b18 map as history. Registration order and
+observed traffic are marked separately in both tables: every name in a table is
+one the server advertised and the client adopted, while the `wire` column marks
+only the ids that join actually carried.
+
+### 1.6.1 V3.4.0 b10 measured id map (190 ids, 2026-11-05)
+
+A stock V3.4.0 b10 client (Windows build under Proton, EAC off, `Local`
+platform) joined a stock V3.4.0 b10 dedicated server over loopback once. The
+client was the Steam Windows build auto-updated to V3.4.0 b10; server and client
+share the version tuple while their build ids differ (`26310339` server,
+`26309840` client). The server's `NetPackagePackageIds` body (id 0) listed
+**190** names in id order; that list, not metadata order, is the V3.4.0 wire
+table, and the client adopts it. Machine-readable copy with `observed_on_wire`
+per id: [`netpackage-ids-v3.4.0.json`](../../workspace/outputs/wire/netpackage-ids-v3.4.0.json).
+
+The capture is 4,069 packets, 158 game envelopes (127 S2C, 31 C2S), 79
+compressed, 0 encrypted and 0 unparsed. It rides **server port + 2**, the same
+port pair the b18 capture shows.
+
+Evidence (git-ignored under `.scratch/livejoin-v340/`):
+
+| File | Bytes | SHA-256 |
+|---|---:|---|
+| `join-v340.pcap` (loopback, 4069 packets) | 3634039 | `12e621c2918582d63d0808b6f0ae9797c05f473a165d958b67cfc6d97355c6e2` |
+| `server_stdout.log` | 112631 | `b45563e35856774d5b6a5c67bcd839b160d846dc5aa7b58bc97b81c3d239c5ce` |
+| `client_output.log` | 48013 | `ab0793c2205978742b20bf11fd0fac9f19d1f539b986f152397085a8c42f8988` |
+| `parse_join.json` (decoded envelopes + id-0 payload) | 50211 | `78ed09347f7ca24064cce0da80d2778afcb94e815dbbe096f4d211e9b28821b6` |
+
+The payload layout is the b18 one: package id `0`, `VersionInformation` (`u8`
+release, `i32` major, `i32` minor, `i32` build), `i32` count, `count` .NET
+strings in id order, then the two trailing booleans (`serverUseEAC`,
+`hasHostUserAndToken`). Decoded here: `ver=1 3.40.10 count=190 trailing=2B`
+(`il/full-v3.4.0/_global/NetPackagePackageIds.il.txt:125`, read at `:75`).
+
+The count reconciles as **194 - 8 + 4 = 190**. The 194 is the top-level
+`NetPackage*` census, and it includes `Audio.NetPackageAudio`, which is
+non-nested but lives in the `Audio` namespace and still registers through the
+reflection walk (it is id 189). The eight prefix types that never register are
+unchanged: the abstract base `NetPackage`, the abstract intermediate
+`NetPackageEntityTargeted`, the abstract logger `NetPackageLogger`, the
+`NetPackageDirection` enum, and the plain helpers `NetPackageEntry`,
+`NetPackageInfo`, `NetPackageMeasure`, `NetPackageMetrics`. The four nested
+registrations are `NetPackageDroneParticleEffect` (10),
+`NetPackageDroneDataSync` (11), `NetPackageTreeFade` (12) and
+`NetPackageLight` (187).
+
+Measured offset against the naive inference (top-level names minus the eight
+non-registered ones, `PackageIds` pinned at 0), from the offset run in
+`.scratch/livejoin-v340/`:
+
+| measured ids | V3.4.0 offset | V3.3.0 offset |
+|---|---|---|
+| 0..9 | +0 | +0 |
+| 13..186 | +3 | +3 (13..184) |
+| 188..189 | +4 | +4 (186..187) |
+
+Delta from the b18 table (§1.6.2):
+
+| V3.4.0 id | b18 id | change |
+|---|---|---|
+| 0..44 | 0..44 | unchanged |
+| 45 | n/a | `NetPackageDroneRecoveryRequest` added |
+| 46 | n/a | `NetPackageDroneRecoveryResponse` added |
+| 47..189 | 45..187 | every id shifted +2 |
+
+The `wire` column marks ids this join saw as envelope traffic. Registration
+order is not traffic: every name below was advertised by the server (and
+adopted by the client), while 50 of the 190 ids were carried by this join. The
+other 140 were not exercised, which is not a claim that they are absent from a
+V3.4.0 server. Ids 45 and 46 are registered but were never sent, because a join
+does not run the `drone_commands_unstuck` dialog action; their ids and names
+rest on the id-0 payload and their bodies on IL (§1.5.0).
+
+| id | package | wire |
+|---:|---|---|
+| 0 | `NetPackagePackageIds` | yes |
+| 1 | `NetPackageEntityStatChanged` | yes |
+| 2 | `NetPackageEntityStatsBuff` | yes |
+| 3 | `NetPackageAddRemoveBuff` | yes |
+| 4 | `NetPackageModifyCVar` | yes |
+| 5 | `NetPackageDiscordIdMappings` | yes |
+| 6 | `NetPackageDiscordLobbySecret` | yes |
+| 7 | `NetPackageRegionMetaData` |  |
+| 8 | `NetPackageDynamicClientArrive` |  |
+| 9 | `NetPackageDynamicMesh` |  |
+| 10 | `NetPackageDroneParticleEffect` |  |
+| 11 | `NetPackageDroneDataSync` |  |
+| 12 | `NetPackageTreeFade` |  |
+| 13 | `NetPackageAnimateBlock` |  |
+| 14 | `NetPackageEncryptionRequest` |  |
+| 15 | `NetPackageEncryptionPublicKey` |  |
+| 16 | `NetPackageEncryptionSharedKey` |  |
+| 17 | `NetPackageKeyExchangeComplete` |  |
+| 18 | `NetPackageLandClaimRepair` |  |
+| 19 | `NetPackageAudioPlayInHead` |  |
+| 20 | `NetPackageAuthConfirmation` | yes |
+| 21 | `NetPackageAuthState` | yes |
+| 22 | `NetPackageBag` |  |
+| 23 | `NetPackageBiomeIntensity` |  |
+| 24 | `NetPackageBlockLimitTracking` |  |
+| 25 | `NetPackageBlockTrigger` |  |
+| 26 | `NetPackageBloodmoonMusic` | yes |
+| 27 | `NetPackageBossEvent` | yes |
+| 28 | `NetPackageChat` |  |
+| 29 | `NetPackageChunk` | yes |
+| 30 | `NetPackageChunkClusterInfo` | yes |
+| 31 | `NetPackageChunkRemove` |  |
+| 32 | `NetPackageChunkRemoveAll` |  |
+| 33 | `NetPackageClientInfo` | yes |
+| 34 | `NetPackageCloseAllWindows` |  |
+| 35 | `NetPackageConfigFile` | yes |
+| 36 | `NetPackageConfirmSpawnEntity` |  |
+| 37 | `NetPackageConsoleCmdClient` |  |
+| 38 | `NetPackageConsoleCmdServer` |  |
+| 39 | `NetPackageDamageEntity` |  |
+| 40 | `NetPackageDebug` |  |
+| 41 | `NetPackageDecoResetWorldChunk` |  |
+| 42 | `NetPackageDecoResetWorldRect` |  |
+| 43 | `NetPackageDecoUpdate` | yes |
+| 44 | `NetPackageDeleteChunkData` |  |
+| 45 | `NetPackageDroneRecoveryRequest` |  |
+| 46 | `NetPackageDroneRecoveryResponse` |  |
+| 47 | `NetPackageDropItemsContainer` |  |
+| 48 | `NetPackageEAC` |  |
+| 49 | `NetPackageEditorAddVolumeFromClient` |  |
+| 50 | `NetPackageEditorPrefabInstance` |  |
+| 51 | `NetPackageEditorUpdateVolume` |  |
+| 52 | `NetPackageEmitSmell` |  |
+| 53 | `NetPackageEntityAddExpClient` |  |
+| 54 | `NetPackageEntitySetSkillLevelClient` |  |
+| 55 | `NetPackageEntityAddExpServer` |  |
+| 56 | `NetPackageEntitySetSkillLevelServer` |  |
+| 57 | `NetPackageEntityAddScoreClient` |  |
+| 58 | `NetPackageEntityAddScoreServer` |  |
+| 59 | `NetPackageEntityAddVelocity` |  |
+| 60 | `NetPackageEntityAliveFlags` | yes |
+| 61 | `NetPackageEntityAnimationData` | yes |
+| 62 | `NetPackageEntityAwardKillServer` |  |
+| 63 | `NetPackageEntityCollect` |  |
+| 64 | `NetPackageEntityLookAt` | yes |
+| 65 | `NetPackageEntityMapMarkerRemove` |  |
+| 66 | `NetPackageEntityPhysics` |  |
+| 67 | `NetPackageEntityPosAndRot` |  |
+| 68 | `NetPackageEntityPrimeDetonator` |  |
+| 69 | `NetPackageEntityRagdoll` |  |
+| 70 | `NetPackageEntityRelPosAndRot` |  |
+| 71 | `NetPackageEntityRemove` |  |
+| 72 | `NetPackageEntityRotation` |  |
+| 73 | `NetPackageEntitySetPartActive` |  |
+| 74 | `NetPackageEntitySpawn` | yes |
+| 75 | `NetPackageEntitySpawnResponse` |  |
+| 76 | `NetPackageEntitySpeeds` | yes |
+| 77 | `NetPackageEntityStealth` |  |
+| 78 | `NetPackageEntityTeleport` |  |
+| 79 | `NetPackageEntityVelocity` |  |
+| 80 | `NetPackageEntityWaypointList` | yes |
+| 81 | `NetPackageEventPrefab` |  |
+| 82 | `NetPackageExplosionClient` |  |
+| 83 | `NetPackageExplosionInitiate` |  |
+| 84 | `NetPackageGameEventRequest` | yes |
+| 85 | `NetPackageGameEventResponse` | yes |
+| 86 | `NetPackageGameMessage` |  |
+| 87 | `NetPackageGameStats` | yes |
+| 88 | `NetPackageHoldingItem` |  |
+| 89 | `NetPackageHordeEvent` |  |
+| 90 | `NetPackageIdMapping` | yes |
+| 91 | `NetPackageInventoryKeepOpen` |  |
+| 92 | `NetPackageItemActionEffects` |  |
+| 93 | `NetPackageItemDrop` |  |
+| 94 | `NetPackageItemReload` |  |
+| 95 | `NetPackageLobbyJoin` |  |
+| 96 | `NetPackageLobbyRegisterClient` |  |
+| 97 | `NetPackageLocalization` | yes |
+| 98 | `NetPackageLockTarget` |  |
+| 99 | `NetPackageMapChunks` |  |
+| 100 | `NetPackageMapPosition` |  |
+| 101 | `NetPackageMinEventFire` |  |
+| 102 | `NetPackageNavObject` |  |
+| 103 | `NetPackageNetMetrics` |  |
+| 104 | `NetPackageNPCQuestList` |  |
+| 105 | `NetPackageOwnedEntitySync` |  |
+| 106 | `NetPackageParticleEffect` |  |
+| 107 | `NetPackagePartyActions` |  |
+| 108 | `NetPackagePartyData` |  |
+| 109 | `NetPackagePartyQuestChange` |  |
+| 110 | `NetPackagePickupBlock` |  |
+| 111 | `NetPackagePlayerData` | yes |
+| 112 | `NetPackagePlayerDenied` |  |
+| 113 | `NetPackagePlayerDisconnect` |  |
+| 114 | `NetPackagePlayerEquipment` | yes |
+| 115 | `NetPackagePlayerId` | yes |
+| 116 | `NetPackagePlayerInventory` |  |
+| 117 | `NetPackagePlayerInventoryForAI` |  |
+| 118 | `NetPackagePlayerLaserSight` |  |
+| 119 | `NetPackagePlayerLogin` | yes |
+| 120 | `NetPackagePlayerLoginAnswer` | yes |
+| 121 | `NetPackagePlayerQuestPositions` |  |
+| 122 | `NetPackagePlayerSetBackpackPosition` |  |
+| 123 | `NetPackagePlayerSpawnedInWorld` | yes |
+| 124 | `NetPackagePlayerStats` | yes |
+| 125 | `NetPackagePlayerTwitchStats` |  |
+| 126 | `NetPackagePlayerVendingMachine` |  |
+| 127 | `NetPackagePOIMetadataRequest` | yes |
+| 128 | `NetPackagePOIMetadataResponse` | yes |
+| 129 | `NetPackagePOIWaypoint` |  |
+| 130 | `NetPackageQuestEntitySpawn` |  |
+| 131 | `NetPackageQuestEvent` |  |
+| 132 | `NetPackageQuestGotoPoint` |  |
+| 133 | `NetPackageQuestObjectiveUpdate` |  |
+| 134 | `NetPackageQuestTreasurePoint` |  |
+| 135 | `NetPackageRangeCheckDamageEntity` |  |
+| 136 | `NetPackageRequestToEnterGame` | yes |
+| 137 | `NetPackageRequestToSpawnEntity` |  |
+| 138 | `NetPackageRequestToSpawnPlayer` | yes |
+| 139 | `NetPackageSetAttackTarget` |  |
+| 140 | `NetPackageSetBlock` |  |
+| 141 | `NetPackageSetBlockResponse` |  |
+| 142 | `NetPackageSetBlockTexture` |  |
+| 143 | `NetPackageSetProp` |  |
+| 144 | `NetPackageSharedPartyKill` |  |
+| 145 | `NetPackageSharedQuest` |  |
+| 146 | `NetPackageShowToolbeltMessage` |  |
+| 147 | `NetPackageSignDataRequest` | yes |
+| 148 | `NetPackageSignDataResponse` | yes |
+| 149 | `NetPackageSingleSignData` |  |
+| 150 | `NetPackageSignDelete` |  |
+| 151 | `NetPackageSimpleChat` |  |
+| 152 | `NetPackageSimpleRPC` |  |
+| 153 | `NetPackageSleeperPassiveChange` |  |
+| 154 | `NetPackageSleeperPose` |  |
+| 155 | `NetPackageSleeperWakeup` |  |
+| 156 | `NetPackageSoundAtPosition` |  |
+| 157 | `NetPackageTeleportPlayer` |  |
+| 158 | `NetPackageTileEntity` |  |
+| 159 | `NetPackageTraderData` |  |
+| 160 | `NetPackageTurretSpawn` |  |
+| 161 | `NetPackageTurretSync` |  |
+| 162 | `NetPackageTwitchAccess` |  |
+| 163 | `NetPackageTwitchVoteScheduling` |  |
+| 164 | `NetPackageVehicleCount` |  |
+| 165 | `NetPackageVehicleDataSync` |  |
+| 166 | `NetPackageEntityAttach` |  |
+| 167 | `NetPackageVehiclePositions` |  |
+| 168 | `NetPackageVehicleSpawn` |  |
+| 169 | `NetPackageWallVolume` |  |
+| 170 | `NetPackageWallVolumeRemove` |  |
+| 171 | `NetPackageWaterSet` |  |
+| 172 | `NetPackageWaterSimChunkUpdate` |  |
+| 173 | `NetPackageWaypoint` |  |
+| 174 | `NetPackageWireActions` |  |
+| 175 | `NetPackageWireToolActions` |  |
+| 176 | `NetPackageWorldAreas` | yes |
+| 177 | `NetPackageWorldFolder` |  |
+| 178 | `NetPackageWorldInfo` | yes |
+| 179 | `NetPackageWorldInitInfo` | yes |
+| 180 | `NetPackageWorldInitInfoRequest` | yes |
+| 181 | `NetPackageWorldSpawnPoints` | yes |
+| 182 | `NetPackageWorldTime` | yes |
+| 183 | `NetPackageAllyRequest` |  |
+| 184 | `NetPackageAllyResponse` |  |
+| 185 | `NetPackagePersistentPlayerPositions` | yes |
+| 186 | `NetPackagePersistentPlayerState` | yes |
+| 187 | `NetPackageLight` |  |
+| 188 | `NetPackageWeather` | yes |
+| 189 | `NetPackageAudio` | yes |
+
+Instances in this join: each name is registered whether or not the join used
+it. 50 of the 190 ids appear in the capture; the other 140 were not exercised
+and are recorded as unobserved, not as absent from a V3.4.0 server.
+
+### 1.6.2 V3.3.0 b18 measured id map (history, 2026-11-05)
 
 A stock b18 client (Windows build under Proton, EAC off, `Local` platform)
 joined a stock b18 dedicated server over loopback once. The server's
 `NetPackagePackageIds` body (id 0) listed **188** names in id order; that list,
 not metadata order, is the b18 wire table. Machine-readable copy and the
 observed join subset: [`netpackage-ids-b18.json`](../../workspace/outputs/wire/netpackage-ids-b18.json).
+This table is kept as the previous measured build; the current map is §1.6.1.
 
 Evidence (git-ignored under `.scratch/livejoin/`):
 
@@ -2680,6 +3053,7 @@ customReason    : string
 | Encryption cipher/KDF | handshake bodies decoded; crypto primitives native (residual) |
 | Quest/Party process | re-pinned 2026-08-07 (§6.17-6.18); Twitch still low priority |
 | `NetPackageDynamicMesh` | Process re-pinned (mesh ack IL=24). `NetPackagePOIAround` (removed V3.2.0; its Process IL=156 prefab dict fill is replaced by `NetPackagePOIMetadataRequest/Response`) |
+| `NetPackageDroneRecovery` pair (45, 46) | ids and names measured from the id-0 payload, bodies and process paths IL-derived (§1.5.0); neither was observed as envelope traffic in the V3.4.0 join. Whether the Response is a broadcast or is addressed to the requester is unresolved: one captured client cannot distinguish them |
 | Per-flag conditional framing on every package | **closed 2026-08-10** in §6.23 (all 37 conditional-heavy write bodies verified from IL; always-present vs conditional distinguished) |
 
 ---
@@ -2749,6 +3123,7 @@ cannot wedge or visibly alter the b9 client.
 
 ## Changelog
 
+- **2026-11-05:** V3.4.0 b10 retarget. Id map re-measured from a live join: **190** ids, `NetPackageDroneRecoveryRequest` 45 and `NetPackageDroneRecoveryResponse` 46 added, every id above 46 shifted +2, `NetPackageLight` 185 -> 187. No `read`/`write` byte layout changed; `NetPackageSetBlock::ProcessPackage` and the `ItemValue` helper changed body only. Direction tally 66/32/7/89 of 194; pre-auth set, channel-1 set and compressed set unchanged. b18 table kept as §1.6.2.
 - **2026-08-28:** V3.2.0 wire diff: NetPackageDamageEntity packed `flags:u32` bitfield (10 bools folded, bit 10 TrapKillXP new, `bIsDamageTransfer` dropped) + `KillXPScale:f32` (write IL=144); NetPackagePOIAround removed -> NetPackagePOIMetadataRequest/Response (+ PrefabInstance.POIMetadata record); NetPackageConfirmSpawnEntity added (i64 + Guid, S2C); EntityCreationData requestedBy/requestKey tail (read gated >= 37); compress set POIAround -> POIMetadataResponse (still 8).
 - **2026-08-22:** NetPackageQuestObjectiveUpdate mirror semantics pinned:
   the client reports its own objective events; the server applies them and

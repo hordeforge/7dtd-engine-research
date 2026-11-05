@@ -1,4 +1,4 @@
-# SDCS: skinned character system, archetypes and armor authoring (V3.2.0)
+# SDCS: skinned character system, archetypes and armor authoring (V3.4.0)
 
 **Owns:** the **S**kinned **D**ynamic **C**haracter **S**ystem: the archetype data
 model, the three XML/asset contracts a modder authors against (`items.xml` `SDCS`
@@ -8,15 +8,23 @@ skinned geometry on the player rig.
 **Not:** how armor *behaves* (`ItemClassArmor` stats, damage mitigation); that is
 [`items.md`](../gameplay/items.md) and [`combat-damage.md`](../gameplay/combat-damage.md). Not equipment
 slot bookkeeping (`Equipment`): [`items.md`](../gameplay/items.md).  
-**Server relevance, read this first:** a dedicated server **never executes** the
-rig pipeline. `SDCSUtils`, `SDCSDataUtils` and `SDCSArchetypesFromXml` stay
-classified client-render in [`out-of-scope-surface.md`](../meta/out-of-scope-surface.md);
-this doc narrates them. What *is* server-side is the **data**: `archetypes.xml` is
-entry 22 of `WorldStaticData::xmlsToLoad` with `LoadAtStartup` + `SendToClients` +
+**Server relevance, read this first:** the rig pipeline is render-only, but a
+dedicated server does execute it once per player spawn. `Entity.InitEModel`
+adds the component named by the player class's `ModelType=SDCS` property
+(`entityclasses.xml:191`), and `EModelSDCS.Init` has no dedicated guard, so the
+spawn-time model build runs the asset loads, the stitching and the gear-fit
+lookup; `EntityAlive.InitPostCommon` then disables every renderer through
+`ServerHelper.SetupForServer` and the result is discarded. `SDCSUtils`,
+`SDCSDataUtils` and `SDCSArchetypesFromXml` stay classified client-render in
+[`out-of-scope-surface.md`](../meta/out-of-scope-surface.md); the spawn-time run
+is the one server-side reach. The data and the cosmetic-set id map are what
+matter on a server: `archetypes.xml` is entry 22
+of `WorldStaticData::xmlsToLoad` with `LoadAtStartup` + `SendToClients` +
 `LoadClientFile` all true (see [`../inventories/xmlsToLoad.md`](../inventories/xmlsToLoad.md)),
-and the `SDCS` property class is parsed by `ItemClass::Init` on **every** peer,
-server included. A server operator shipping a custom-armor mod edits files the
-server loads and pushes; this doc is the contract those files must satisfy.  
+the `SDCS` property class is parsed by `ItemClass::Init` on **every** peer, and
+`Equipment.SetupCosmeticMapping` builds the cosmetic id map at startup (§9.2).
+A server operator shipping a custom-armor mod edits files the server loads and
+pushes; this doc is the contract those files must satisfy.  
 **Method:** [`re-methodology.md`](../meta/re-methodology.md). **Hub:** [`INDEX.md`](../INDEX.md).
 
 ---
@@ -527,9 +535,11 @@ Finally `setupEquipmentCommon` (§7).
 4. Find the *body* gear path: scan `tmpArchetype.Equipment` for the entry whose
    `PartName == "body"` and resolve its path (mask off). This becomes
    `targetBodyPath` for variant selection.
-5. `getPartNameWithVariant(PartName, sourceGearPath, targetBodyPath)` (IL=34) →
-   `getClothingPartWithName(prefab, name)` (IL=35, case-insensitive **exact** match
-   over direct children only, not recursive).
+5. `SDCSUtils::getPartNameWithVariant(PartName, sourceGearPath, targetBodyPath)`
+   (IL=28) resolves the fit through `GearFitMatrixSO::GetVariantOrEmpty` and
+   returns either `part` or `<part>_<variant>`; `getClothingPartWithName(prefab, name)`
+   (IL=35, case-insensitive **exact** match over direct children only, not
+   recursive) finds it.
 6. `CollectRequiredNamesForSlot(prefab.transform, slotSubRoot)` → the allowed-bone
    set; cached under the slot transform via `SlotAllowedBonesCache::Set`.
 7. Append the slot transform to `allGears`.
@@ -748,51 +758,178 @@ GameObject under every non-`Origin` child, used by `EModelSDCS::SetVisible` (IL=
 
 ---
 
-## 9. Gear variants: `GearVariantMatrixSO`
+## 9. Gear variants and cosmetic sets (V3.4.0)
 
-A gear mesh often needs a different cut depending on which *body* mesh it sits over
-(e.g. a jacket over a bulky torso vs a bare one). That mapping is a serialised
-matrix, not code.
+A gear mesh often needs a different cut depending on which *body* mesh it sits
+over (e.g. a jacket over a bulky torso vs a bare one). V3.4.0 replaces the b18
+dense string matrix with a sparse fit table in the `GearVariants` namespace.
+The other half of the feature is a cosmetic-set id map that `Equipment` builds
+on the server. The fit lookup is render-only; the id map is server state.
 
-`GearVariants.GearVariantMatrixSO::get_Instance()` (IL=13) loads
-`@:Entities/Player/Common/GearVariantMatrix.asset` (calling `LoadManager::InitSync()`
-first when not playing).
+### 9.1 The fit matrix: `GearFitMatrixSO`
 
-Structure:
+`GearVariants.GearFitMatrixSO::get_Instance()` (IL=15) loads
+`@:Entities/Player/Common/GearFitMatrix.asset` (calling `LoadManager::InitSync()`
+first when not playing). The addressable bundle is
+`Data/Addressables/Standalone/automatic_assets_entities/player/common/gearfitmatrix.asset.bundle`
+in the dedicated-server data tree.
 
-```text
-GearVariantMatrixSO
-  male, female : SexGearTables
-      gearPaths  : List<string>     // both the row and the column key space
-      gearGuids  : List<string>
-      head, hands, feet : StringTable2D
-          rowKeys, columnKeys : List<string>
-          rows : List<Row>          // Row { rowKey, rowGuid, cellValues : List<string> }
-```
+| Type | Fields | Role |
+|---|---|---|
+| `GearFitMatrixSO` | `male`/`female` `GenderFitTables`; `AssetAddress`; `_instance` | ScriptableObject and the lazy singleton |
+| `GenderFitTables` | `gearPaths`, `gearGuids`; `head`/`hands`/`feet` `PartFitTable`; `_known` | one per sex; the known-gear registry and the three part tables |
+| `PartFitTable` | `entries`; `_byWornKey`; stamp fields | one per part; `EnsureIndex` (IL=51) builds the worn-prefab index, `InvalidateIndex` (IL=10) drops it |
+| `GearFitEntry` | `wornKey`, `wornGuid`, `fits` | the worn gear prefab that owns this part |
+| `BodyFit` | `bodyKey`, `bodyGuid`, `variant` | one target body prefab and its mesh suffix |
+| `GearFitNaming` | `BodyChild`, `HeadChild`, `HandsChild`, `FeetChild` | `MeshName` (IL=10) returns `part + "_" + variant`; `VariantOf` (IL=46) is the inverse |
+| nested `Gender` | `Male = 0`, `Female = 1` | |
+| nested `GearPart` | `Head = 0`, `Hands = 1`, `Feet = 2` | |
+| nested `CopyMode` / `CopyResult` | `Replace`, `Merge` / `Copied`, `Skipped`, `BaseMeshOnly` | copy-mode results |
 
-`SDCSUtils::getPartNameWithVariant(String partName,String sourceGearPath,String targetBodyPath)`
-(IL=34) asks for the cell, and returns `partName` unchanged when the lookup is
-empty; otherwise it returns **`partName + "_" + variant`**. That is the string
-handed to `getClothingPartWithName`, so the gear prefab must contain a child named
-`<part>_<variant>` for every variant the matrix can produce. A missing
-`GearVariantMatrixSO` logs
-`"SDCSUtils::getPartNameWithVariant: No GearVariantMatrixSO instance found!"` and
-falls back to the plain part name.
+The asset holds, per sex and per part, a sparse list keyed by the *worn* gear
+prefab; each entry maps body prefabs to a short suffix. The part space has no
+`body` table: the body gear is the key space of `fits`.
 
-| Member | IL | Behaviour |
+**Lookup.** `GearFitMatrixSO::GetVariantOrEmpty(gender, part, sourceGearPath,
+targetBodyPath)` (IL=50) returns `""` when either path is empty, when
+`ParseGender` (IL=27) or `ParsePart` (IL=39) fails, or when either path is not in
+that sex's `IsKnownGear` set (IL=19). Otherwise it forwards to
+`PartFitTable::GetVariantOrEmpty(wornKey, bodyKey)` (IL=60), which returns the
+first matching `BodyFit.variant` or `""`. `GetVariant` (IL=9) is the typed form
+without the known-gear precheck; `GenderFitTables::GetTable` (IL=20) defaults an
+unknown `GearPart` to `hands`.
+
+| Member | IL | Role |
 |---|---:|---|
-| `GearVariantMatrixSO::TryParseSex(String,Sex&)` | 27 | lowercased `male`/`female`; `Sex` is `Male=0, Female=1` |
-| `GearVariantMatrixSO::TryParsePart(String,GearPart&)` | 69 | `head`/`hands`/`feet`, exact then trimmed-lowercase; `GearPart` is `Head=0, Hands=1, Feet=2` |
-| `GearVariantMatrixSO::EnsureIndex(Sex)` | 95 | build/refresh `gearPaths[i] -> i` (ordinal), invalidated by row-count change |
-| `GearVariantMatrixSO::TryGetIndices(Sex,String,String,Int32&,Int32&)` | 43 | both row and column resolve through the **same** `gearPaths` index |
-| `GearVariantMatrixSO::GetTable(Sex,GearPart)` | 11 | `SexGearTables::GetTable(GearPart)` (IL=15), switch, defaulting to `hands` |
-| `GearVariantMatrixSO::GetVariantOrEmpty(Sex,GearPart,String,String)` | 61 | bounds-checked cell fetch, `""` on any miss |
-| `GearVariantMatrixSO::GetVariantOrEmpty(String,String,String,String)` | 19 | string-keyed wrapper used by `SDCSUtils` |
-| `GearVariantMatrixSO::TryGetVariant(Sex,GearPart,String,String,String&)` | 64 | bool-returning form |
-| `StringTable2D::Get(Int32,Int32)` | 8 | `rows[row].cellValues[col]` |
+| `GetFits` / `FitCount` / `TotalFitCount` | 20 / 15 / 17 | read one fit list / its count / the table total |
+| `SetFit` / `SetFitMany` / `SetFitInline` | 39 / 78 / 58 | write one fit / many body keys / one entry with merge rules |
+| `CopyFits` | 92 | copy fits between worn keys, optional replace and variant filter |
+| `ClampToValidOptions` / `PruneOrphans` / `PruneKey` / `ClearFits` | 59 / 87 / 82 / 33 | maintenance; each prunes empty entries |
+| `AddEntry` / `EnumerateFits` / `HasNonBaseVariant` | 20 / 26 / 16 | table building and iteration |
+| `EnsureRegistry` / `InvalidateIndexes` | 15 / 15 | forward to both `GenderFitTables` |
 
-Note the part space here is only `head`/`hands`/`feet`: there is no `body` table,
-because the body *is* the column key.
+`GetFits` mixes a `List<BodyFit>` return with `Array.Empty<BodyFit>` on a miss;
+the exact declared return interface is not decoded.
+
+**Call sites and execution.** The only two call sites of `GetVariantOrEmpty` are
+the string-keyed `getPartNameWithVariant` helpers:
+`SDCSUtils::getPartNameWithVariant` (IL=28,
+`il/full-v3.4.0/_global/SDCSUtils.il.txt`) and
+`CharacterConstructUtils::getPartNameWithVariant` (IL=34). Both append `"_" +
+variant` themselves (or use `GearFitNaming::MeshName`) and log the stale
+`"No GearVariantMatrixSO instance found!"` warning on a null singleton. Every
+mutating and query method outside `get_Instance`/`GetVariantOrEmpty` has no
+caller outside the type in the shipped dedicated assembly (`tools/bin/Xref.exe`),
+and most of the mutator surface has no caller anywhere. The lookup therefore
+resolves on the client's gear-visual path: `setupEquipmentSlot` asks for the
+mesh child name, and nothing in the spawn, save, equipment, loot or network
+paths reads the result.
+
+A dedicated server does execute the same code during the spawn-time model
+build. The chain is `EntityPlayer.Init` -> `EntityAlive.Init` ->
+`Entity.Init` -> `InitEModel` -> `EModelSDCS.Init` (IL=58) ->
+`createModel` -> `GenerateMeshes` -> `CreateVizTP` -> `setupEquipment` ->
+`setupEquipmentSlot` (IL=196) -> `getPartNameWithVariant`.
+`EModelSDCS.Init` has no `IsDedicatedServer` branch; `EntityAlive.InitPostCommon`
+(IL=97) then takes its dedicated branch and calls `ServerHelper.SetupForServer`
+(IL=24), which disables every child `Renderer`. So the server pays for the
+lookup and discards the mesh name; the result is not stored, replicated or read
+by `PlayerDataFile`, `Equipment`, `EntityCreationData`, `Bag`, `ItemStackGrid`
+or any `NetPackage*`.
+
+**Shipped matrix data** (decoded from the bundle, asset name `GearFitMatrix`):
+
+| | male | female |
+|---|---:|---:|
+| `gearPaths` / `gearGuids` | 44 | 45 |
+| `head` entries / fits | 10 / 180 | 10 / 184 |
+| `hands` entries / fits | 14 / 233 | 16 / 227 |
+| `feet` entries / fits | 19 / 448 | 22 / 409 |
+
+`fits[].variant` uses `A`, `B` and `C` (male head 151/7/22, male hands
+224/9/0, male feet 373/75/0; female head 155/11/18, female hands 210/17/0,
+female feet 335/71/3). The male path list includes the two newest sets,
+`gearMaleScarletScoundrelPrefab` and `gearMaleRedRidingRoguePrefab`.
+
+The b18 type family is still compiled and its asset still ships:
+`GearVariantMatrixSO` / `SexGearTables` / `StringTable2D` (dense per-part
+matrices whose empty cells mean "no suffix") plus
+`gearvariantmatrix.asset.bundle`. No IL call site reaches it now; only the stale
+warning string in `CharacterConstructUtils` still names it, and the asset
+predates the two newest sets. This is a code-and-data migration from the dense
+matrix to the sparse table, with the old type left dead.
+
+### 9.2 Cosmetic sets: the `Equipment` id map (server state)
+
+`CosmeticSet` is a fourth `ScriptableObject`: `EntitlementSetName`,
+`AddressablePathPrefix`, `ExcludeFromGame`, `Item[] Items`, with nested
+`Item { string ItemName, int CosmeticId }`
+(`il/full-v3.4.0/_global/CosmeticSet.il.txt`, `CosmeticSet_Item.il.txt`).
+`CosmeticSetRegistrar` has two entry points:
+`RegisterAddressablePrefixes` (IL=53) merges the set prefixes into
+`EntitlementAddressablesMaps.AddressablesStringMap`, and
+`RegisterCosmeticMappings` (IL=94) calls `Equipment.AddCosmeticMapping(id,
+itemName)` for each generated pair.
+
+`CosmeticSets` is a static table (cctor IL=184) of nine
+tuples: entitlement set, addressable prefix, and `(item name, cosmetic id)`.
+The shipped map:
+
+| Set | `EntitlementSetEnum` | Cosmetic ids |
+|---|---:|---|
+| Scarlet Scoundrel | 39 | 1000-1003 |
+| Wraith Wood Witch | 40 | 1004-1007 |
+| Red Riding Rogue | 41 | 1008-1011 |
+| Working Stiffs Store | 42 | 1012 (hat), 1013 (outfit) |
+| Pop N Pills Store | 44 | 1015 (hat), 1016 (outfit) |
+| Shotgun Messiah Store | 45 | 1014 (hat), 1017 (outfit) |
+
+The server side is `Equipment.SetupCosmeticMapping` (IL=465,
+`il/full-v3.4.0/_global/Equipment.il.txt`). It clears
+`CosmeticMappingIDString` / `CosmeticMappingStringID`, writes the hardcoded
+small-id table, and ends with `CosmeticSetRegistrar::RegisterCosmeticMappings()`
+(`:2892`). Its only caller is the `items.xml` loader
+`WorldStaticData/<LoadItems>d__22` (`WorldStaticData__LoadItems_d__22.il.txt:28`),
+reached from `GameManager.<StartAsServer>` through
+`WorldStaticData.LoadAllXmlsCo`. The loop has no `IsDedicatedServer` exclusion,
+so a dedicated server builds the map at startup: the 18 generated ids are live
+`Equipment` state, not a client table.
+
+Against b18 the map moved in place of the record format: ten item names leave
+the hardcoded small-id table (six store/twitch items at ids 97, 98, 103, 104,
+105 and 106, and the four Wraith items at 159-162) and come back from
+`CosmeticSets` in the 1000 range. The hardcoded table shrinks from 163 to 153
+entries; with the 18 generated entries the runtime map grows from 163 to 171
+(eight of the 1000-range ids are new). `Equipment.Write` (IL=63) still writes
+version 6 with the same layout, so the ids travel inside the equipment blob in
+`PlayerDataFile` and `NetPackagePlayerEquipment` without a record change.
+
+Both readers were hardened in this build. `Equipment.ReadInto` (IL=217, b18
+199) and `SetCosmeticSlot(int,int)` (IL=89, b18 73) resolve through the map;
+an unknown id now clears the slot and logs
+`[Equipment] Unknown cosmetic id {0} in slot {1}; slot cleared. The save or
+packet was written by a build with different cosmetic ids.`, where b18 indexed
+the dictionary directly. A b18 server therefore throws inside `ReadInto` on a
+1000-range id and `PlayerDataFile.Load` rolls the player load back; V3.4.0
+reads b18 records, and b18 does not read the new ids.
+
+The addressable half is not wired. `RegisterAddressablePrefixes` has zero call
+sites and no custom attribute, and `EntitlementAddressablesMaps` hardcodes 31
+prefix entries that do not include the nine set prefixes. Inferred: prefix-based
+entitlement lookup for these sets has no entry in this build.
+
+**Data rows.** The eight new SDCS cosmetic armor items are
+`armorScarletScoundrel{Helmet,Outfit,Gloves,Boots}` and
+`armorRedRidingRogue{Helmet,Outfit,Gloves,Boots}` at `items.xml:17903`-`:18042`
+(`Extends="armorDLCMaster"`, `CreativeMode="None"`, `ArmorGroup`
+`groupScarletScoundrel` / `groupRedRidingRogue`, prefabs under
+`DLC/HalloweenCosmetic/...`). Their names are the `CosmeticSets` `ItemName`
+values. `recipes.xml`, `loot.xml` and `traders.xml` are byte-identical, so the
+items enter play by cosmetic entitlement only. No cosmetic-set asset was found
+in the shipped Addressables tree (`find` for `*cosmetic*set*` is empty), which
+matches `CosmeticSet` being authoring input for the generated table. The server
+does not validate entitlement ownership when it applies an equipment blob; it
+only resolves ids. Cosmetic slots are cosmetic-only state.
 
 ---
 
@@ -902,8 +1039,8 @@ bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`
    rig exactly; unmatched names become `null` bones in `TranslateTransforms` with no
    error (§6).
 2. **Prefab layout:** one root, one child per part named exactly `head`, `body`,
-   `hands`, `feet` (or `<part>_<variant>` when the piece participates in the gear
-   variant matrix, §9). `getClothingPartWithName` matches direct children only,
+   `hands`, `feet` (or `<part>_<variant>` when the piece participates in the
+   gear-fit matrix, §9.1). `getClothingPartWithName` matches direct children only,
    case-insensitively, exactly.
 3. **An `Origin` above the bone chain.** `MatchRigs` (§7) resolves `Origin` on
    both the source and the target before it walks, and the base rig parents
@@ -975,7 +1112,14 @@ bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`
 | `SDCSArchetypesFromXml::Save(String,List)` | 69 |
 | `SDCSGearXmlCatalog::BuildFromXml(String)` | 124 |
 | `GearBoneMap::Bake()` | 208 |
-| `GearVariantMatrixSO::EnsureIndex(Sex)` | 95 |
+| `GearFitMatrixSO::get_Instance()` | 15 |
+| `GearFitMatrixSO::GetVariantOrEmpty(String,String,String,String)` | 50 |
+| `PartFitTable::GetVariantOrEmpty(String,String)` | 60 |
+| `GearFitNaming::MeshName(String,String)` | 10 |
+| `GearVariantMatrixSO::EnsureIndex(Sex)` (dead type) | 95 |
+| `CosmeticSetRegistrar::RegisterCosmeticMappings()` | 94 |
+| `Equipment::SetupCosmeticMapping()` | 465 |
+| `Equipment::ReadInto(PooledBinaryReader,StreamModeRead)` | 217 |
 | `EModelSDCS::GenerateMeshes()` | 34 |
 | `AvatarSDCSController::assignParts(Boolean)` | 167 |
 | `ConsoleCmdSDCS::Execute(List,CommandSenderInfo)` | 166 |
@@ -984,6 +1128,14 @@ bound `1..4` is likewise a literal range check, not derived from `SDCSDataUtils`
 
 ## Changelog
 
+- **2026-11-05:** V3.4.0 b10: §9 rewritten. The live gear-fit family is
+  `GearFitMatrixSO` / `GenderFitTables` / `PartFitTable` / `GearFitEntry` /
+  `BodyFit` / `GearFitNaming`, asset `GearFitMatrix.asset`; `GearVariantMatrixSO`
+  and its dense `StringTable2D` matrices are dead but still shipped. Added the
+  server execution caveat (the fit lookup runs on spawn, then renderers are
+  disabled) and §9.2, the cosmetic-set map: `CosmeticSets` ids 1000-1017,
+  `Equipment.SetupCosmeticMapping` -> `CosmeticSetRegistrar`, the
+  unknown-cosmetic-id read guard, and the eight new SDCS cosmetic armor rows.
 - **2026-08-24 (validation):** Five full validation sweeps against a fresh
   pinned-Cecil `il/full-v3.2.0` regeneration: (1) all 123 `IL=` claims exact;
   (2) all 33 quoted literals/paths ground out in `ldstr` operands; (3) the three

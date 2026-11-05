@@ -471,12 +471,17 @@ runtime state into the original slot** (`meta = (meta & ~1) | (runtime ? 1 :
 
 **Server authority.** Every mutating helper the block calls (`SetBlockRPC`,
 `GameManager.SetBlockTextureServer`, `IGameManager.PickupBlockServer`,
-`DynamicMeshManager.ChunkChanged`, `QuestEventManager.BlockDestroyed`,
-`GameEventManager.HandleAction`) runs on the authority. The
+`QuestEventManager.BlockDestroyed`, `GameEventManager.HandleAction`) runs on the
+authority. The
 `OnBlockActivated(...,EntityPlayerLocal _player)` overload is the client-side
 entry point: it validates locally (land protection, repair state, inventory
 room) then issues a server RPC (`PickupBlockServer`). The result is replicated,
 not simulated on the client.
+
+In b18 the damage and placement callbacks also notified the dynamic mesh
+(`DynamicMeshManager.ChunkChanged`, twice in `OnBlockDamaged`, once in
+`OnBlockPlaceBefore`). V3.4.0 removed those calls; the block-change lifecycle
+itself is unchanged (see [`dynamic-mesh.md`](../world/dynamic-mesh.md) §7).
 
 ---
 
@@ -621,7 +626,8 @@ batch commit machine (the destination of `PrefabTriggerData.UpdateBlocks`,
 ## 5. Damage, upgrade, and downgrade lifecycle
 
 `DamageBlock` is a one-line forward to `OnBlockDamaged(..., _recDepth: 0)`, which
-is the entire engine (IL=497). It runs on the authority.
+is the entire engine (IL=497 in b18; IL=487 in V3.4.0, the difference being the
+two removed dynamic-mesh notifications). It runs on the authority.
 
 **Multiblock redirect.** If the hit cell is a child (`ischild`), the method
 resolves the parent position (`MultiBlockArray.GetParentPos`), reads the parent
@@ -776,7 +782,8 @@ stateDiagram-v2
 **Placement.** `OnBlockPlaceBefore` first mutates the `Result`: if
 `SelectAlternates`, it picks the alt block for the held item's meta; if
 `PlaceRandomRotation`, it rolls a rotation compatible with the block's
-`AllowedRotations` class. `CanPlaceBlockAt` is then the gate. Its checks (in
+`AllowedRotations` class. (IL=108 in b18, IL=96 in V3.4.0: the removed
+dynamic-mesh call.) `CanPlaceBlockAt` is then the gate. Its checks (in
 order, mostly skipped in edit mode):
 
 - `pos.y > 253` -> reject (world height ceiling).
@@ -1142,6 +1149,15 @@ not (the parent/child split of the vertical sign).
 
 ## Changelog
 
+- **2026-11-05 (V3.4.0 b10 retarget):** `OnBlockDamaged` IL 497 -> 487 and
+  `OnBlockPlaceBefore` IL 108 -> 96 because the dynamic-mesh `ChunkChanged`
+  notifications were removed (`il/full-v3.3.0/_global/Block.il.txt:4612`,
+  `:4661`, `:5682`; b10 bodies at
+  `il/full-v3.4.0/_global/Block.il.txt:4460`, `:5660`). No signature, damage
+  arithmetic, upgrade/downgrade or placement rule changed. `BlockShapeNew.renderFace`
+  shrank 2291 -> 2283 IL with the same signature
+  (`il/full-v3.4.0/_global/BlockShapeNew.il.txt:2416`), a geometry loop whose only
+  delta is register allocation.
 - **2026-11-01:** Shape categories pinned: a `<shape>`'s `ShapeCategories`
   property names its categories (`cube` is `Basic,Square`), `<categories>`
   declares them with an `order` and an `icon`, and `GetShapeCategories` unions

@@ -1,4 +1,4 @@
-# Item framework (dedicated V3.3.0)
+# Item framework (dedicated V3.4.0)
 
 **Owns:** the item system core that runs on the server: `ItemValue` (the packed
 item instance), `ItemStack` (value plus count), `ItemClass` (the definition and
@@ -18,13 +18,15 @@ rendering); the `MinEvent` action framework internals (see
 **Evidence:** `ItemValue`, `ItemStack`, `ItemClass`, `ItemAction`,
 `ItemActionAttack`, `ItemActionRanged`, `ItemActionEat`, `ItemActionDynamic`,
 `Inventory`, `Equipment` IL (dump locally with `tools/src/DumpMethod`,
-git-ignored). Type census from `il/surface-v3.2.0/surface-types.md` (103 `Item*`
-types; 38 concrete `ItemAction` leaves, see catalog). **Hub:** [`INDEX.md`](../INDEX.md).
+git-ignored). Type census from `il/surface-v3.4.0/surface-types.md`; 38
+concrete `ItemAction` leaves, see catalog. **Hub:** [`INDEX.md`](../INDEX.md).
 **Method:** [`re-methodology.md`](../meta/re-methodology.md).
-**Build:** V3.3.0 b18. The container, equipment, holding, save and wire
+**Build:** V3.4.0 b10. The container, equipment, holding, save and wire
 sections (§2 framing, §5, §6, the held-entity and transaction notes) were
-re-read against b18. Item-framework method bodies that the b18 diff did not
-touch keep their b9 IL widths and are labelled as such.
+re-read against b18. V3.4.0 changes `ItemValue.Read` (body, no layout) and the
+`Equipment` cosmetic readers (unknown-id guard) and adds
+`ItemStackGrid.IsSlotLocked`; the framework bodies below keep their b18 widths
+unless a section says otherwise.
 
 Items are a core server codepath: the authority owns every held item's runtime
 state, decides damage and consumption, mutates the packed `ItemValue`, and
@@ -1717,6 +1719,31 @@ stores the received blobs into `ClientInfo.latestPlayerData` and applies them
 through `PlayerDataFile.ToPlayer` (see below). `NetPackagePlayerInventoryForAI`
 still sends a reduced view.
 
+### V3.4.0 item data rows
+
+Three `items.xml` deltas touch the container and display layer. None changes a
+method body.
+
+- **Carry-capacity displays.** `drugSteroids` (`items.xml:19710`) and
+  `foodChickenNuggets` (`:20843`) print `dCarryCapacity` **96** (b18: 50 and
+  27), matching their buff rows. The capacity mechanic and the other two flat
+  sources are in [progression.md](../gameplay/progression.md) "Carry capacity:
+  four sources flattened to 96"; the 48-slot `BagSize` base and the 96
+  `MaxBagSize` above are unchanged.
+- **Eight SDCS cosmetic armors.** `armorScarletScoundrel*` and
+  `armorRedRidingRogue*` (helmet, outfit, gloves, boots each) sit at
+  `items.xml:17903`-`:18042` with `Extends="armorDLCMaster"`,
+  `CreativeMode="None"`, `ArmorGroup` `groupScarletScoundrel` /
+  `groupRedRidingRogue`, and prefabs under `DLC/HalloweenCosmetic/...`. No
+  `recipes.xml`, `loot.xml` or `traders.xml` row references them, so they enter
+  play by cosmetic entitlement only. Authoring contract and the equipment id
+  mapping: [sdcs-character-gear.md](../content/sdcs-character-gear.md) §9.
+- **Left-knuckle view parts.** The three knuckles items gain an
+  `onSelfChangedView` `RemovePart`/`AddPart` pair for `LeftKnuckles`
+  (`items.xml:5171-5172`, `:5321-5322`, `:5444-5445`), on top of the b18
+  `onSelfEquipStart`/`onSelfEquipStop` pair. Client view model only, no
+  server-side effect.
+
 ## 7. Durability and degradation
 
 Durability lives on `ItemValue.UseTimes` (a float counting uses **consumed**),
@@ -2191,6 +2218,13 @@ The non-action leaves:
 
 ## Changelog
 
+- **2026-11-05:** V3.4.0 b10 data rows: `drugSteroids` and `foodChickenNuggets`
+  print `dCarryCapacity` 96 (items.xml:19710, :20843); eight SDCS cosmetic
+  armors added at items.xml:17903-18042, entitlement-only; the three knuckles
+  items add `onSelfChangedView` left-knuckle parts (items.xml:5171-5172,
+  :5321-5322, :5444-5445); `ItemValue.Read` and the `Equipment` cosmetic
+  readers changed body without a layout change, and `ItemStackGrid` gains
+  `IsSlotLocked`.
 - **2026-11-01:** Gun spread re-read on V3.3.0: `updateAccuracy` eases with
   `exp(-9.1 * Clamp01(passive 13, base 0.1) * Clamp01(dt))`, and `onHoldingEntityFired`
   (IL=74) blooms `lastAccuracy` by `IncrementalSpreadMultiplier` (14) and caps it at 5 (§4.2).

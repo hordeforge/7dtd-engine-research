@@ -8,9 +8,10 @@ math applied by perks ([buffs.md](../gameplay/buffs.md)).
 **Evidence:** `Progression`, `ProgressionValue`, `ProgressionClass` IL (dump
 locally with `tools/src/DumpMethod`, git-ignored). **Hub:** [`INDEX.md`](../INDEX.md).
 **Method:** [`re-methodology.md`](../meta/re-methodology.md).
-**Build:** V3.4.0 b10. The death/backpack and capacity sections were re-read
-against b18; the XP/level/perk method bodies the b18 diff did not touch keep
-their b10 widths.
+**Build:** V3.4.0 b10. The death/backpack and capacity IL sections were re-read
+against b18; the capacity numbers below were re-derived from the V3.4.0 data
+files. The XP/level/perk method bodies the b18 diff did not touch keep their
+b10 widths.
 
 XP, leveling, and perk unlocks are validated and stored on the server (they gate
 crafting, stats, and abilities), so progression is a dedicated codepath even
@@ -246,24 +247,25 @@ moved stacks.
   (`ItemStack.AdjustForSandboxOptions`) over the drag-and-drop item, every
   equipment slot, every inventory slot and every bag slot.
 
-### Backpack capacity and `craftingBackpack` (V3.3.0)
+### Backpack capacity and `craftingBackpack` (V3.4.0)
 
 Bag capacity is a `PassiveEffects.BagSize` (99) value, not a hardcoded 45.
 `EntityPlayer.Awake` (IL=39) reads `BagSize` with base 45 into `CarryCapacity`
-and sizes the bag from it; the player class in `entityclasses.xml` sets
-`BagSize base_set 48` (b10: 45), so a naked b18 bag is **48** slots.
-`Entity.MaxBagSize` is new: `Entity..ctor` defaults it to 45 and the player
-class overrides it to **96**. `EntityPlayer.CalcCurrentBackpackSize(bool
+and sizes the bag from it; the player class in `entityclasses.xml:413` sets
+`BagSize base_set 48` (b10: 45), so a naked bag is **48** slots.
+`Entity.MaxBagSize` is **96** (`entityclasses.xml:243`; `Entity..ctor` defaults
+it to 45 and the player class overrides it). `EntityPlayer.CalcCurrentBackpackSize(bool
 includeEquipment)` (IL=30) re-reads `BagSize` clamped to `[1, MaxBagSize]`;
 `UpdateBagpackSize()` (IL=52) resizes the carried bag, and
 `shrinkBackpackMoveItems(int)` (IL=90) spills what no longer fits.
 
 `progression.xml` adds a `crafting_skill` named `craftingBackpack` (max level
 100, parent `attCrafting`) with `display_entry` unlocks at 5..100, and the
-`PackMule` perk's `CarryCapacity` values moved from 3,6,10,14,18 to
-4,12,24,40,56. The perk also gains two `LootProb` effects on the
-`backpackCSM` tag: +2..10% magazine drop chance until `craftingBackpack`
-reaches 100, then a `base_set` back to 1.
+`PackMule` perk's `CarryCapacity` ladder is `4,12,24,40,56`
+(`progression.xml:1764`; the b18 change from 3,6,10,14,18 holds in this
+build). The perk also gains two `LootProb` effects on the `backpackCSM` tag:
++2..10% magazine drop chance until `craftingBackpack` reaches 100, then a
+`base_set` back to 1.
 
 The gear items are `backpackSmall|Medium|Large` (`EquipSlot="Backpack"`,
 counted as `EquipmentSlotType.Armor`). Each adds `BagSize` by CraftingTier
@@ -271,6 +273,42 @@ level: small 2..16, medium 18..32, large 34..48, so the carried grid ladder is
 50..64, 66..80 and 82..96 slots. `items.xml` also adds
 `backpackSkillMagazine` (the `craftingBackpack` magazine) and
 `recipes.xml` adds the three workbench recipes (10/30/60 s).
+
+### Carry capacity: four sources flattened to 96 (V3.4.0)
+
+`CarryCapacity` (passive **98**) is the number of inventory slots "unlocked"
+before encumbrance (`buffs.xml:17040`, the stat-name comment). The player class
+seeds it from `.carryCapacityBase`, **32** by default (`entityclasses.xml:372`,
+applied at `:398`). `EntityPlayer.OnUpdateEntity` (IL=184) re-reads passive 98
+with base 0 every tick when the bag exists, then derives the encumbrance cvars:
+`_carrycapacity` is the passive value, `_encumberedslots` is
+`max(bag slots used - capacity, 0)`, and `_encumbrance` is that overflow over
+`bag SlotCount - capacity` (0 when the bag is not larger than the capacity).
+`MaxBagSize` 96 caps the bag, not this passive.
+
+In V3.4.0 four flat sources that b18 set to 27, 45, 48 and 50 all carry
+**96**:
+
+| Source | Element | b18 | V3.4.0 |
+|---|---|---:|---:|
+| `buffChickenNuggets` | `buffs.xml:9623`, `CarryCapacity base_add` | 48 | 96 |
+| `twitch_buffPackMule` | `buffs.xml:16033`, `base_set` | 50 | 96 |
+| `perkFiremansAlmanacComplete`, biomes 8 and 9 | `progression.xml:3681`, `:3687`, `base_add` | 45 | 96 |
+| `perkNightStalkerThiefAdrenaline`, night, no `twitch_buffEncumbered` | `progression.xml:3725`, `base_add` | 27 | 96 |
+| `buffDrugSteroids` | `buffs.xml:9681`, `base_set` | 96 | 96 (unchanged) |
+| `drugSteroids` item display | `items.xml:19710`, `display_value dCarryCapacity` | 50 | 96 |
+| `foodChickenNuggets` item display | `items.xml:20843` | 27 | 96 |
+
+The two `base_add` book rows and the chicken buff add 96 over the 32 base; the
+two `base_set` rows pin the value at 96. The composition order of `base_set`
+and `base_add` across sources is not decoded, but every result is at or above
+the 96-slot bag cap, so a full 96-slot bag is no longer encumbered under those
+sources. b18 left less than 96 slots of capacity there (80, 77 and 59 for the
+adds, 50 for `twitch_buffPackMule`). The `PackMule` ladder, the three armor
+items that add `CarryCapacity` 1..10 by tier (`items.xml:13829`, `:15065`,
+`:16052`) and the `BagSize` columns are unchanged, so the total still varies
+with perks, armor and backpack tier. What the 96 becomes in the UI after effect
+composition and sandbox modifiers is not decoded beyond the values above.
 
 ### The two progression packages a server must handle
 
@@ -407,6 +445,14 @@ player's own `get_gameStage`.
 
 ## Changelog
 
+- **2026-11-05:** V3.4.0 b10: the four flat carry-capacity sources move to 96.
+  `buffChickenNuggets` `base_add` 96 (buffs.xml:9623), `twitch_buffPackMule`
+  `base_set` 96 (:16033), Fireman's Almanac complete `base_add` 96 in biomes
+  8 and 9 (progression.xml:3681, :3687), Night Stalker adrenaline `base_add`
+  96 at night (:3725), replacing 48/50/45/27. The `drugSteroids` and
+  `foodChickenNuggets` displays now print 96 (items.xml:19710, :20843).
+  `PackMule` 4,12,24,40,56, `BagSize` 48, `MaxBagSize` 96 and the armor
+  CarryCapacity rows are unchanged.
 - **2026-08-11:** Progression/store IL re-verified: GetDict IL=4, CalcId IL=4, ToBytes IL=28, FromBytes IL=31, ClearProgressionClassLinks IL=27, Update IL=32, UpdateForSandbox IL=22/52, get_gameStage IL=124, get_unModifiedGameStage IL=45, GetTraderStage IL=46, get_HighestPartyGameStage IL=10, Party.get_HighestGameStage IL=26, dropItemOnQuit IL=4, HandleRemoveRandomItems IL=33/34/35, ShouldRemoveEquipmentOnDeath IL=9, EmptyBackpack IL=25, EmptyToolbelt IL=21, EmptyBackpackAndToolbelt IL=47, RemoveSpawnPoints IL=19, TryAddRecoveryPosition IL=73, AdjustItemsForSandboxOptions IL=40 (exact).
 - **2026-08-10:** Progression IL re-verified: addProgressionCurrency IL=85, ToBytes IL=28, FromBytes IL=31, Update IL=32, UpdateForSandbox IL=22 (exact).
 - **2026-10-24:** V3.3.0 b18: death backpack path (`dropItemOnDeath` IL=8,
