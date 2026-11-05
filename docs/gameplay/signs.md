@@ -171,6 +171,19 @@ Nothing on the GPU path should be implemented from this table until that is
 settled; the branch bodies themselves are exact transcriptions and are the
 starting point for settling it.
 
+**The decal a canvas draws on is authored in its prefab, not computed.** A
+`SignCanvas` component serialises `canvasDimensions` (`{x, y}` in blocks) and a
+`SignRenderers` list, and each entry is a `SignRenderer` whose `Renderer` owns the
+quad: the shipped canvas prefabs carry `1x1`, `6x1` and `7x9` among others, and a
+canvas block whose model holds the quad has it as a four-vertex mesh on the face
+(`SM_canvas_invisible_1x3` is `x` in `[-1.5, 1.5]`, `y` in `[-0.5, 0.5]`,
+`z = -0.499`). `SignCanvas.CacheBoundsMetrics` only aggregates those renderers'
+world bounds afterwards, into `_localCenter` (the bounds centre in the canvas's own
+frame) and `_sizeSquared` (the square of the largest bounds axis, clamped to 1), so
+it is a consumer of the authored geometry rather than its source. A
+reimplementation therefore reads the quad and its placement from the prefab's
+`SignRenderer`, and needs no runtime measurement.
+
 **How this was recovered.** The shader is baked (no source string), so the path
 is bytecode: `unityz` reads the Shader object, its `compressedBlob` holds
 LZ4-compressed per-platform sub-program tables (`platforms` 4, 15 and 18 here;
