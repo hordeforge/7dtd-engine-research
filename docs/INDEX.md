@@ -155,6 +155,7 @@ The per-entity tick: AI, pathing, movement and survival stats.
 | [entity-ai.md](entities/entity-ai.md) | TickEntity → AI → path + thresholds |
 | [entity-movement.md](entities/entity-movement.md) | Move chain + physics surface: MoveHelper → Entity::Move → CC collision, gravity, friction |
 | [entity-stats.md](entities/entity-stats.md) | Entity + survival stats: health/food/water/stamina over-time, damage |
+| [physics-bodies.md](entities/physics-bodies.md) | `physicsbodies.xml`: per-bone ragdoll collider layout, 21 bodies, class bindings |
 | [raycast-pathing.md](entities/raycast-pathing.md) | Raycast path generator + steering (junk-drone travel; A* handoff) |
 | [aidirector.md](entities/aidirector.md) | AIDirector type inventory |
 | [uai.md](entities/uai.md) | Utility AI (UseAIPackages branch): packages, considerations, tasks, decision cycle |

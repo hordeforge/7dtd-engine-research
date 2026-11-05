@@ -147,6 +147,7 @@ should be re-checked against IL before you rely on it.
 | [entity-ai.md](../entities/entity-ai.md) | audited (pass 1) |
 | [entity-movement.md](../entities/entity-movement.md) | audited (2026-08-20, movement chain + physics surface) |
 | [entity-stats.md](../entities/entity-stats.md) | audited (pass 1) |
+| [physics-bodies.md](../entities/physics-bodies.md) | audited (2026-11-06, `physicsbodies.xml` records and class bindings; the `Detail` fit is not decoded) |
 | [full-surface.md](../meta/full-surface.md) | audited (pass 1) |
 | [game-events.md](../content/game-events.md) | audited (pass 1) |
 | [hot-patch-height.md](../world/hot-patch-height.md) | audited (pass 1) |
