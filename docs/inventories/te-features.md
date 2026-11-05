@@ -37,6 +37,20 @@ IL_0021: call System.Void Log::Warning(System.String)
 
 Cross-feature composition is explicit in the fields: `TEFeatureAreaRepair`, `TEFeatureCanvas`, `TEFeatureDoor`, `TEFeatureLandClaim`, `TEFeatureSignable` and `TEFeatureStorage` each cache sibling `TEFeatureLockable` / `TEFeatureLockPickable` references resolved from the same composite.
 
+### What a canvas persists, byte by byte
+
+`TEFeatureCanvas` is the one feature whose payload a reimplementation cannot store as an opaque blob: the sign a canvas draws lives inside it. Its `Write` (IL=23) is the base version then `SignCanvas.CanvasState.Write`, and that body (IL=18) is:
+
+| Order | Field | Encoding |
+|---|---|---|
+| 1 | `SignId` | `GlobalSignId.ToStream`: `BinaryWriter.Write(string)` for `libraryId` (7-bit length prefix, UTF-8), then the `signGuid`'s 16 bytes from `Guid.TryWriteBytes`, which is .NET's mixed-endian layout, not the textual GUID order |
+| 2 | `BlendMode` | one byte (`SignBlendMode`) |
+| 3 | `CanvasRotation` | one byte (`CanvasRotationMode`) |
+| 4 | `ShowOnImposter` | one byte, a `BinaryWriter.Write(bool)` |
+
+`Read` (IL=88) mirrors it with two gates. The version comes from the parent's `UInt16` when `UseLocalVersioning()`, else from `GetLegacyForkVersion()`, and **no version is written on the network stream** (`_eStreamMode != 0`), where the payload is unconditionally the current shape. A version below **21** takes the pre-fork path: `GlobalSignId.FromStream`, then a byte read and discarded when the version is below **18**, `BlendMode` from **19**, `CanvasRotation` from **20**. On the server stream after parsing, a `SignId` whose `SignData` is gone and which `IsKnownDeleted` is replaced by `SignData.defaultSignDataID`, which is why a deleted sign's canvas draws the default sign rather than nothing. The parsed state goes to the `SignCanvas` component when one exists, else into `pendingCanvasState` until the component appears.
+
 ## Changelog
 
+- 2026-11-06: `TEFeatureCanvas`'s payload pinned byte by byte (version 21 gate, `GlobalSignId` = prefixed string + 16 mixed-endian GUID bytes, blend, rotation, `ShowOnImposter`), with the pre-fork read path and the deleted-sign substitution.
 - 2026-07-24: initial catalog from stable V3.0.1 server DLL (11 leaves, flat hierarchy verified).
