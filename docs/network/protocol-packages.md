@@ -406,7 +406,7 @@ Evidence (git-ignored under `.scratch/livejoin/`):
 | File | Bytes | SHA-256 |
 |---|---:|---|
 | `join-live3.pcap` (loopback, 4114 packets) | 3583041 | `31f2407fab49eb380c0c7a74d7c7b6adefe039d5a167f862952277138fb08bcc` |
-| `server_output.log` | 98024 | `36cb7a30d1763d1173cbf8e1cf009705126de6e9af15929b0ad4aac46e4c4a4c` |
+| `server_output.log` | 115729 | `df879eb8f0839326c9d444cd701233e523149acb55fe5e1f54c360be50a3e720` |
 | `client_output.log` | 49127 | `9f739792a4170d9b0eb3182db60178fa085f306e509394683d3961ae9012375c` |
 
 Both assemblies are the pinned stock bytes (`Assembly-CSharp.dll` sha256
