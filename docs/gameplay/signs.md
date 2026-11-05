@@ -101,6 +101,75 @@ Warps are a second polymorphic family under `SignData`, dispatched by their own
 `TypeId` byte: `SkewWarp` (0), `BulgeWarp` (1), `TwirlWarp` (2), `KaleidoWarp`
 (3), `PerspectiveWarp` (4), `ArcWarp` (5), `StretchWarp` (6), `GridWarp` (7).
 
+### The warp transforms themselves (client shader)
+
+No managed method applies a warp. The eight warp classes are (de)serialization
+only: `DumpMethod` over the type filter `Warp` returns 161 methods and every one
+is a constructor, `Clone`, `Read`/`Write`, `(Read|Write)Xml`, `TypeId` or an
+`XUiC_*WarpSettings` setter. The math is the fragment shader's.
+
+The CPU side is `SignDataManager.<UpdateRenderingData>g__PushWarps|106_5`: per
+layer it appends one record to the structured buffer of that warp's type and a
+`LayerDescriptor { int type, int index }` to the layer's descriptor list. The
+buffers are the `SignShaderIDs` names: `_TransformWarps` (the shared
+`SignTransform`, 5 floats: position, rotation, scale) and `_SkewWarps`,
+`_BulgeWarps`, `_TwirlWarps`, `_KaleidoWarps`, `_PerspectiveWarps`,
+`_ArcWarps`, `_StretchWarps`, `_GridWarps`.
+
+The shader dispatch id is **`TypeId + 11`**, which orders the branch bodies in
+the shader's own order rather than the XML type order:
+
+| Shader id | Warp | Record fields, in buffer order |
+|---|---|---|
+| 11 | `SkewWarp` | `rotation`, `amount.x`, `amount.y` |
+| 12 | `BulgeWarp` | `offset.x`, `offset.y`, `amount` |
+| 13 | `TwirlWarp` | `offset.x`, `offset.y`, `amount`, `frequency` |
+| 14 | `KaleidoWarp` | `offset.x`, `offset.y`, `sides`, `rotation` |
+| 15 | `PerspectiveWarp` | `rotation.x/y/z`, `strength` |
+| 16 | `ArcWarp` | `rotation`, `radius`, `width` |
+| 17 | `StretchWarp` | `offset.x`, `offset.y`, `rotation`, `distance`, `distance`, `width`, `exponent` |
+| 18 | `GridWarp` | `offset.x`, `offset.y`, `rotation`, `scale`, `mode`, `aspect`, `shift` |
+
+`KaleidoWarp.offsetScale` has no slot in the shader's record, and the type-14
+branch never reads a fifth float; on the render path it is dropped. (The
+intermediate struct keeps the field, so the buffer writer's packing of a
+five-field source into a four-float record is the one detail still open.)
+
+Per-warp math, in the shader's own terms: `R(a)` is `(x cos a - y sin a,
+x sin a + y cos a)`; several branches read the layer UV **transposed**
+(`uv.yx`), which is how the inputs were authored, not an error in the
+transcription.
+
+| Warp | Transform of the layer's `uv` |
+|---|---|
+| Skew | `q = R(-r) uv`; `q = (q.x - amount.y q.y, q.y - amount.x q.x)`; `uv' = R(r) q` |
+| Bulge | `p = uv.yx - offset.yx`; `r = abs(p)`; `ang = atan2(p.y, p.x)`; `uv' = (cos ang, sin ang) (r^amount amount) + offset` |
+| Twirl | `p = uv - offset`; `r = abs(p)`; `a = (sin(frequency r) - 1) / (25.12 r + 1) amount`; `uv' = R(a) p + offset` (25.12 is `8 pi` to two places) |
+| Kaleido | `p = uv - offset`; `ang = atan2(p.y, p.x)`; `t = fract((ang + pi) / sides) sides - sides / 2`; `uv' = R(rotation + abs(t)) p + offset` |
+| Perspective | the layer UV is a point on the `z = 1` plane, rotated by the record's Euler angles, divided by its own `z` clamped to at most `-0.001`, scaled by `strength / 2`, and projected back through the same matrix; the branch builds the 3x3 from `cos`/`sin` of the three angles inline |
+| Arc | `q = R(-rotation) uv`; `s = sign(radius)`; `u = s q.x`, `v = s q.y + abs(radius)`; `ang = s atan2(v, u) / width`; `uv' = R(rotation) (abs(u, v) - abs(radius) + 0.28125, ang)` |
+| Stretch | `p = uv.yx - offset.yx`; `q = R(-rotation) p`; `t = abs(q.x) / (distance + width)`; displacement `m = abs(q.x) - distance` when `t > 1`, else `width t^exponent`; `m = max(m, 1e-4) sign(q.x)`; `uv' = offset + R(rotation) (q.x, m)` |
+| Grid | `p = R(-rotation) (uv.yx - offset.yx) / scale`; mode 2 snaps to a hex lattice, mode 1 shifts alternate rows by `shift` and snaps `x` to `aspect`, mode 0 snaps nothing; `uv' = offset + R(rotation) scale (p.y, p.x)` |
+
+The `Perspective` and `Grid` branches are 50 to 100 instructions each; the
+per-instruction detail is reproducible with the recipe below rather than quoted
+here.
+
+**How this was recovered.** The shader is baked (no source string), so the path
+is bytecode: `unityz` reads the Shader object, its `compressedBlob` holds
+LZ4-compressed per-platform sub-program tables (`platforms` 4, 15 and 18 here;
+18 is Vulkan), the platform-18 payload holds SMOL-V modules (magic `LOMS`,
+`smolv::Decode` from `aras-p/smol-v` decodes them), and `spirv-cross
+--version 450` prints GLSL. The warp dispatch is a chain of
+`if (floatBitsToInt(descriptor.x) == 11..18)` blocks reading
+`_NN._m0[floatBitsToInt(descriptor.y)]`, which is how the ids and the record
+widths above were read. `Game/SignTech/Decal` is the canvas draw shader;
+`Game/SignTech/UI` is the same family for the editor and bake preview, and
+`Game/SignTech/Standard`/`Cutout` carry the same buffers for signs drawn on a
+model. The `atan` in `Bulge`, `Kaleido` and `Arc` is the polynomial
+approximation inlined by the compiler; the twirl's angle is the damped sine
+above, not a `1/r` falloff.
+
 ```mermaid
 graph TD
     SD[SignData<br/>guid, name, sharing, layer stack] --> L1[TextSignLayer<br/>font + string]
@@ -626,6 +695,11 @@ composite tile entity. Everything visual is client territory.
   attribute" (false now), `MoveSignToLibrary` (renamed `CopySignToLibrary`), and
   `EnumeratePublicSignLibraries` described as "exactly the set a server
   replicates" (true, but that set now includes every player library).
+- **2026-11-06:** The eight warp transforms decoded from the shipped client
+  shader (`Game/SignTech/Decal`, Vulkan sub-program) rather than inferred: no
+  managed method applies a warp, `PushWarps` fills one record per warp, the
+  shader's dispatch id is `TypeId + 11`, and every branch's math is transcribed
+  in §1. `KaleidoWarp.offsetScale` is not in the shader's record.
 - **2026-08-11:** Sign wire IL re-verified: SignDataRequest.write IL=4, SignDataResponse.write IL=28 (exact).
 - **2026-08-10:** Sign wire IL re-verified: NetPackageSignDataRequest write IL=4 (empty), NetPackageSignDataResponse write IL=28 (exact).
 - **2026-08-08:** Bake leaves: SignBakeRequest {GroupIndex, Tier,
