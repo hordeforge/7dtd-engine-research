@@ -1,6 +1,6 @@
 # Dedicated networking (V3.3.0 pin)
 
-**Current pin:** V **3.3.0 (b18)** (Major=3 Minor=30 Build=18, from [`tools/data/stock_facts.json`](../../tools/data/stock_facts.json)). Managed net architecture was first RE'd on V3.0.1, re-checked on the V3.1.0 b14 assembly, re-pinned to V3.2.0, and re-checked for V3.3.0 (wire delta in [protocol-packages.md](../network/protocol-packages.md) §1.5); the last live join capture is still the V3.1.0 b14 one (189 ids; the V3.3.0 registry has 184, see §3). Topic docs: TE outer wire in [protocol-packages.md](../network/protocol-packages.md) §6.12; PackageIds version triple in [protocol.md](../network/protocol.md) / loadgen fixtures (the last live capture is the 3.1.0 one: minor=10 build=14); GSI / sandbox browser fields in [server-browser-prefabs.md](../admin/server-browser-prefabs.md). Prior-pinned delta map: [changelog-3.1.0.md](../releases/changelog-3.1.0.md) § Per-fact homes. **Hub:** [`INDEX.md`](../INDEX.md).
+**Current pin:** V **3.3.0 (b18)** (Major=3 Minor=30 Build=18, from [`tools/data/stock_facts.json`](../../tools/data/stock_facts.json)). Managed net architecture was first RE'd on V3.0.1, re-checked on the V3.1.0 b14 assembly, re-pinned to V3.2.0, and re-checked for V3.3.0 (wire delta in [protocol-packages.md](../network/protocol-packages.md) §1.5); the live join captures are the V3.1.0 b14 one (189 ids) and the V3.3.0 b18 one (188 ids; table in [protocol-packages.md](../network/protocol-packages.md) §1.6 and §3 below). Topic docs: TE outer wire in [protocol-packages.md](../network/protocol-packages.md) §6.12; PackageIds version triple in [protocol.md](../network/protocol.md) / loadgen fixtures (live triples: b18 minor=30 build=18, b14 minor=10 build=14); GSI / sandbox browser fields in [server-browser-prefabs.md](../admin/server-browser-prefabs.md). Prior-pinned delta map: [changelog-3.1.0.md](../releases/changelog-3.1.0.md) § Per-fact homes. **Hub:** [`INDEX.md`](../INDEX.md).
 
 
 **Owns:** ConnectionManager peer pump, per-connection reader/writer threads, encrypt/compress framing, NetEntity package bands, NetPackage census.  
@@ -364,7 +364,7 @@ would play the wrong client teardown.
 
 ## 3. NetPackage type inventory
 
-Live census (tools/bin/Census.exe): **192** types with the `NetPackage*` name prefix (the census excludes `NetPackageManager`). Of those, **184** are the registered wire packages, ids 0-183: `NetPackagePackageIds` is fixed at id 0 by `SetupBaseMapping`, and `StartServer` assigns 1.. in the order `knownPackageTypes` was filled, which is `Assembly.GetTypes()` order (metadata order) over the concrete classes assignable to `NetPackage`. The remaining **8** are not registered: the abstract base `NetPackage`, the abstract intermediate `NetPackageEntityTargeted`, the abstract helper `NetPackageLogger`, the `NetPackageDirection` enum, and the plain helper classes `NetPackageEntry`, `NetPackageInfo`, `NetPackageMeasure`, `NetPackageMetrics` (192 - 8 = 184). The numeric table is derived from that order, not stored: the id is `NetPackageManager.GetPackageId(GetType())` over the dictionary filled at `StartServer`. The last live join capture was 189 ids on V3.1.0 b14 (see §5); V3.2.0 had 187, V3.3.0 has 184 (-6 removed, +3 added, [protocol-packages.md](../network/protocol-packages.md) §1.5).
+Live census (tools/bin/Census.exe): **192** top-level types with the `NetPackage*` name prefix (the census excludes `NetPackageManager` and does not descend into nested types). The live V3.3.0 b18 join advertised **188** ids, 0..187: `NetPackagePackageIds` is fixed at id 0 by `SetupBaseMapping`, and `StartServer` assigns 1.. in the order `knownPackageTypes` was filled, which is `Assembly.GetTypes()` order over the concrete classes assignable to `NetPackage`. That order is not the metadata/alphabetical order the earlier table was inferred from: three nested subclasses enter it before most top-level packages, so the first inference was wrong by 3 across the range it published. The remaining **8** prefix types never register: the abstract base `NetPackage`, the abstract intermediate `NetPackageEntityTargeted`, the abstract helper `NetPackageLogger`, the `NetPackageDirection` enum, and the plain helper classes `NetPackageEntry`, `NetPackageInfo`, `NetPackageMeasure`, `NetPackageMetrics`. Four further registered packages are nested (`NetPackageDroneParticleEffect`, `NetPackageDroneDataSync`, `NetPackageTreeFade`, `NetPackageLight`), which is why the census count alone understates the map: 192 - 8 + 4 = 188. The numeric table is derived at runtime, not stored: the id is `NetPackageManager.GetPackageId(GetType())` over the dictionary filled at `StartServer`. Captured ids and provenance: [protocol-packages.md](../network/protocol-packages.md) §1.6; the other live capture is V3.1.0 b14 at 189 ids. The V3.2.0 187 and the pre-capture V3.3.0 184 figures were inferred, not captured ([protocol-packages.md](../network/protocol-packages.md) §1.5).
 
 Representative dedi-relevant packages (from inventory dump):
 
@@ -736,13 +736,13 @@ by reflection over every **concrete** subclass of `NetPackage`, keyed on
 `MemberInfo.Name` (805088-805100, 805117-805140). Abstract types are excluded
 because `ReflectionHelpers.FindTypesImplementingBase` defaults `_allowAbstract` to
 false (2133289-2133345, `.param [3] = bool(false)`). The concrete count on V3.1.0
-b14 was exactly **189** (live join capture); V3.2.0 had 187 and V3.3.0 has 184
-(derived from the type census and the metadata order, see §3; the live join
-id-map has not been re-captured since b14). The three abstract ones are
-`NetPackage`,
-`NetPackageEntityTargeted` and `DynamicMeshServerData`. Nested packages register
-under their **short** name, so `Audio.NetPackageAudio` and
-`DroneWeapons/NetPackageDroneParticleEffect` are valid map entries.
+b14 was exactly **189** (live join capture) and on V3.3.0 b18 exactly **188**
+(live join capture 2026-11-05; §3 and
+[protocol-packages.md](../network/protocol-packages.md) §1.6). V3.2.0's 187 was
+never captured. Nested packages register under their **short** name, so
+`Audio.NetPackageAudio` and `DroneWeapons/NetPackageDroneParticleEffect` are
+valid map entries; the census counts top-level types only, which is why four
+nested registrations are absent from its 192 rows.
 
 `SetupBaseMapping` (805194-805270) always pins `packageIdsType` to id 0 and
 `StartServer` numbers the rest from 1. `IdMappingsReceived` (805272-805340): any

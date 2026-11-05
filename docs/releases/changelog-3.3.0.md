@@ -38,7 +38,7 @@ in the save and network paths moved from `BinaryReader`/`BinaryWriter` to
 | Enum members | | | 31 added, 16 removed, 34 renumbered |
 | Method bodies (hash) | | | 2079 added, 1703 removed, 1514 changed |
 | `NetPackage*` top-level types | 195 | 192 | -3 |
-| Registered wire packages (ids 0..N-1) | 187 | 184 | 3 added, 6 removed, 4 rewired |
+| Registered wire packages (ids 0..N-1) | 187 (inferred) | 188 (measured live) | 3 added, 6 removed, 4 rewired |
 | `ParitySurface` package entries | 192 | 189 | as above; the extra entries carry a read/write pair without a registered id |
 | gmUpdate IL instructions | 631 | 638 | +7 |
 | `WorldState.SaveLoad(Stream)` IL | 926 | 926 | unchanged |
@@ -171,44 +171,53 @@ build-local rather than content-derivable.
 
 ### 4.1 Package registry
 
-Registered wire packages are 187 (ids 0..186) in b10 and **184 (ids 0..183)** in
-b18: three added, six removed, nothing renamed. `NetPackagePackageIds` stays
-pinned at id 0 and the rest of the numbering is the order in which
-`knownPackageTypes` is filled, which is `Assembly.GetTypes()` metadata order, so
-a removal also renumbers everything after it.
+A live V3.3.0 b18 join (2026-11-05, stock client and dedicated server, capture
+and hashes in [protocol-packages.md](../network/protocol-packages.md) §1.6)
+measured **188 registered wire packages, ids 0..187**: three added, six removed,
+nothing renamed. `NetPackagePackageIds` stays pinned at id 0 and the rest of the
+numbering is the order in which `knownPackageTypes` is filled. That order is
+`Assembly.GetTypes()` order, but it is not metadata order: three nested
+registrations (`NetPackageDroneParticleEffect`, `NetPackageDroneDataSync`,
+`NetPackageTreeFade`) enter it early, and `NetPackageLight` enters at 185, so
+the metadata-order inference published earlier in this release was 3 low on
+every id it named and gave 184 registered packages where the wire carries 188.
 
-| Package | b10 id | b18 id |
+| Package | b10 id (inferred) | b18 id (measured) |
 |---|---:|---:|
-| `NetPackageLockTarget` | absent | **93** |
-| `NetPackageSingleSignData` | absent | **144** |
-| `NetPackageSignDelete` | absent | **145** |
-| `NetPackageItemActionEffects` | 91 | 87 |
-| `NetPackagePlayerEquipment` | 114 | 109 |
-| `NetPackagePlayerInventory` | 116 | 111 |
-| `NetPackageSignDataResponse` | 148 | 143 |
+| `NetPackageLockTarget` | absent | **96** |
+| `NetPackageSingleSignData` | absent | **147** |
+| `NetPackageSignDelete` | absent | **148** |
+| `NetPackageItemActionEffects` | 91 | **90** |
+| `NetPackagePlayerEquipment` | 114 | **112** |
+| `NetPackagePlayerInventory` | 116 | **114** |
+| `NetPackageSignDataRequest` | 147 | **145** |
+| `NetPackageSignDataResponse` | 148 | **146** |
+| `NetPackagePlayerLogin` | 119 | **117** |
+| `NetPackageSimpleChat` | 149 | **149** |
 
-The shift is piecewise, not uniform, because the six removals and three
-additions interleave with the metadata order: ids 0..85 are unchanged,
-b10 88 moves by -2 (`NetPackageInventoryKeepOpen`), b10 91..96 by -4, then
-`NetPackageLockTarget` takes 93, b10 99..148 move by -5, `NetPackageSingleSignData`
-and `NetPackageSignDelete` take 144 and 145, and b10 149..186 move by -3.
-For example `NetPackagePlayerLogin` is 119 -> 114 and `NetPackageSimpleChat`
-is 149 -> 146.
+The earlier piecewise shift arithmetic (ids 0..85 unchanged, b10 88 -> -2,
+b10 91..96 -> -4, `NetPackageLockTarget` 93, b10 99..148 -> -5,
+`NetPackageSingleSignData`/`SignDelete` 144/145, b10 149..186 -> -3) came from
+the same wrong order and is withdrawn. No b10 join was captured either, so every
+b10 id in this table is still inferred; the deltas are not a measured b10 -> b18
+shift. Full measured map: [protocol-packages.md](../network/protocol-packages.md)
+§1.6.
 
 Removed: `NetPackageInventoryDataRequest`,
 `NetPackageInventoryDataResponse`, `NetPackageInventoryTransactionRequest`,
 `NetPackageInventoryTransactionResponse`, `NetPackageLockRequest`,
-`NetPackageLockResponse`. The ids are derived, not stored, and no live V3.3.0
-join capture was taken, so the re-derived table is `inferred` from metadata
-order even though the set membership is `verified`.
+`NetPackageLockResponse`. Set membership is `verified` (census); ids are
+`verified` for b18 (live capture) and `inferred` for b10.
 
 The census counts 192 top-level `NetPackage*` types (195 in b10). Eight of those
-are not registered: the abstract base, the abstract `NetPackageEntityTargeted`,
-the `NetPackageDirection` enum, `NetPackageLogger`, and the helper classes
+never register: the abstract base, the abstract `NetPackageEntityTargeted`, the
+`NetPackageDirection` enum, `NetPackageLogger`, and the helper classes
 `NetPackageEntry`, `NetPackageInfo`, `NetPackageMeasure`, `NetPackageMetrics`.
-The framing census is unchanged: 5 packages override to channel 1, 8 set
-`get_Compress`, 5 are allowed before auth, 5 are marked unreliable, and the
-direction split is 65 any / 31 ToServer / 7 ToClient / 89 ToClient-with-broadcast.
+Four more registrations are nested and therefore absent from the top-level
+census, which is why 192 - 8 + 4 = 188. The framing census is unchanged: 5
+packages override to channel 1, 8 set `get_Compress`, 5 are allowed before auth,
+5 are marked unreliable, and the direction split is 65 any / 31 ToServer / 7
+ToClient / 89 ToClient-with-broadcast.
 
 ### 4.2 Version handshake
 
@@ -546,7 +555,13 @@ invalidated.
 - The release analytics host, and whether a dedicated host transmits at all.
 - Whether a dedicated host ever acquires an item mesh, and the per-prefab
   `CellPool` native-memory budget.
-- A live V3.3.0 join capture, so the registered-id table remains inferred from
-  metadata order.
+- The b10 side of the id table: b18 is now measured from a live join
+  ([protocol-packages.md](../network/protocol-packages.md) §1.6), but no b10
+  join was captured, so b10 ids and every b10 -> b18 shift in §4.1 remain
+  inferred from metadata order.
+- 134 of the 188 registered b18 ids were not exercised by the one captured
+  join; the 54 observed ids are listed with counts and directions in
+  [`netpackage-ids-b18.json`](../../workspace/outputs/wire/netpackage-ids-b18.json).
+  Absence from that set is not absence from the build.
 - Chunk-level b10-save read on a materialised world: the legacy gates are read,
   not exercised against a real b10 chunk file.

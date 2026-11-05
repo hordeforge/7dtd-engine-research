@@ -79,7 +79,7 @@ Machine-readable copies live in `tools/data/stock_facts.json` (`source_identity`
 |---|---:|
 | Top-level types | 4447 |
 | Methods with body | 44534 |
-| NetPackage* types | 193 name-prefixed (192 counted by the census plus `NetPackageManager`), from `Census.exe`. 184 are registered wire packages, ids 0-183; the other eight are the abstract base, the abstract intermediate, the enum and four plain helpers ([network.md](../network/network.md) §3). `workspace/outputs/parity/parity_b18.json` holds 189 package entries, the eight more than the registry being types that carry a read/write pair without an id. |
+| NetPackage* types | 193 name-prefixed (192 counted by the census plus `NetPackageManager`), from `Census.exe`. A live b18 join measured 188 registered wire packages, ids 0-187: the 192 census rows minus the abstract/enum/helper types that never register, plus four nested packages the top-level census misses ([network.md](../network/network.md) §3, [protocol-packages.md](../network/protocol-packages.md) §1.6). `workspace/outputs/parity/parity_b18.json` holds 189 package entries; the extra entries are types that carry a read/write pair without a registered id. |
 | GameTimer Hz | 20 |
 | gmUpdate IL | 638 |
 | WorldState.SaveLoad(Stream) IL | 926 |
@@ -212,6 +212,7 @@ their correctness is the tool's, not prose. `inventories/dedicated-leaves.md` an
 
 ## Changelog
 
+- **2026-11-05:** Live V3.3.0 b18 join captured with the stock client and dedicated server; the `PackageIds` body measures 188 registered ids 0-187, correcting the 184 inferred from metadata order. Table and provenance: [protocol-packages.md](../network/protocol-packages.md) §1.6.
 - **2026-10-24:** Retargeted to V3.3.0 (b18): census 4447 types / 44534 methods / 192 name-prefixed NetPackage* (184 registered) / gmUpdate 638 IL; pinned DLL sha256 moves to `e16ff9d5...` (11697152 bytes) and the three XML pins to their b18 bytes; `WorldState.SaveLoad` 926 IL and `CurrentSaveVersion` 23 are unchanged. Delta map: [changelog-3.3.0.md](../releases/changelog-3.3.0.md).
 - **2026-09-05:** Pin bumped to V3.2.0 (b10): census unchanged; managed delta only `Platform.EOS.RemoteFileStorage` cancel path ([changelog-3.2.0.md](../releases/changelog-3.2.0.md) §8).
 - **2026-08-28:** Retargeted to V3.2.0 (b9): census 4426 types / 44277 methods / 195 NetPackage; pin V 3.2.0 (b9); V3.2.0 delta map lives in changelog-3.2.0.md §9.

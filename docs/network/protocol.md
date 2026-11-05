@@ -97,20 +97,21 @@ Constants:
 
 ### Live capture head (PackageIds, channel 0)
 
-Hex prefix validated in loadgen golden (V3.0.1-era capture; V3.1.0 re-captured
-in-session 2026-08-11 - only the version triple and the map count differ). The
-V3.3.0 b18 PackageIds head has not been captured live; its triple is
-release=1 major=3 minor=30 (0x1E) build=18 (0x12) and its map count is **184**
-(`il/netpackages-v3.3.0/`, see [protocol-packages.md](../network/protocol-packages.md)
-§1.5), by the same packing:
+V3.3.0 b18 was captured live on 2026-11-05 from a real stock client joining a
+stock dedicated server (evidence and hashes:
+[protocol-packages.md](../network/protocol-packages.md) §1.6). Its triple is
+release=1 major=3 minor=30 (0x1E) build=18 (0x12) and its map count is **188**
+(0xBC). Same packing as the older heads:
 
 ```text
+V3.3.0 live:  00 8A 12 00 00  00 00  01 00  86 12 00 00  00 00  01 03 00 00 00  1E 00 00 00  12 00 00 00  BC 00 00 00  14 ...
 V3.1.0 live:  00 BC 12 00 00  00 00  01 00  B8 12 00 00  00 00  01 03 00 00 00  0A 00 00 00  0E 00 00 00  BD 00 00 00  14 ...
 V3.0.1 era:  00 BC 12 00 00  00 00  01 00  B8 12 00 00  00 00  01 03 00 00 00  01 00 00 00  04 00 00 00  BD 00 00 00  ...
-ch payload=0x12BC  c e  cnt=1  content=0x12B8  pkgId=0
+ch payload=0x128A  c e  cnt=1  content=0x1286  pkgId=0
+version (V3.3.0): release=1 major=3 minor=30 build=18
 version (V3.1.0): release=1 major=3 minor=10 build=14
 version (V3.0.1): release=1 major=3 minor=1 build=4
-map count: 0xBD = 189   first name: len 0x14 "NetPackagePackageIds"
+map count: 0xBC = 188   first name: len 0x14 "NetPackagePackageIds"
 ```
 
 Display version packing: `VersionLongString` → **`V 3.3.0`** for Minor=30 Build=18
@@ -135,14 +136,20 @@ hasHostUserAndToken:bool (+ optional platform user blobs)
 Client must use **server-advertised** ids for all later packages. Do not hard-code ids across game versions.
 
 Current DLL census (`tools/bin/Census.exe`, `netpackage_top_level_count` in
-`tools/data/stock_facts.json`): **192** `NetPackage*` types (the census excludes
-`NetPackageManager`). The **184** in the live id-map are the actual registered wire
-packages; the remaining **8** are name-prefixed entries that are not registered:
-the abstract base `NetPackage`, the abstract intermediate
+`tools/data/stock_facts.json`): **192** `NetPackage*` top-level types (the census
+excludes `NetPackageManager`). A live b18 join advertised **188** ids, 0..187
+(§3; table in [protocol-packages.md](../network/protocol-packages.md) §1.6). The
+count reconciles as 192 top-level minus the **8** prefix types that never
+register (the abstract base `NetPackage`, the abstract intermediate
 `NetPackageEntityTargeted`, the abstract helper `NetPackageLogger`, the
 `NetPackageDirection` enum, and the plain helpers `NetPackageEntry`,
-`NetPackageInfo`, `NetPackageMeasure`, `NetPackageMetrics`. V3.2.0 was 195 / 187
-and V3.0.1 194 / 189; the V3.3.0 delta is [protocol-packages.md](../network/protocol-packages.md) §1.5.
+`NetPackageInfo`, `NetPackageMeasure`, `NetPackageMetrics`) plus **4** nested
+packages the census misses because it walks top-level types only:
+`NetPackageDroneParticleEffect`, `NetPackageDroneDataSync`,
+`NetPackageTreeFade` and `NetPackageLight`, which register under their short
+names. The V3.2.0 195 / 187 and V3.0.1 194 / 189 pairs are census/inference
+counts; the only other live map is the V3.1.0 b14 one at 189 (§3). The b18 wire
+delta is [protocol-packages.md](../network/protocol-packages.md) §1.5.
 
 ### Family counts (census)
 
@@ -248,6 +255,31 @@ Client sends empty `NetPackageRequestToEnterGame` after accepting
 After this batch the client proceeds to `RequestToSpawnPlayer` / in-world
 streaming (state machine above). Auth terminal steps that precede this request
 are in [platform-auth.md](../admin/platform-auth.md) section 3 (`playerAllowed`).
+
+**Measured order (b18 live, 2026-11-05):** ids are the live map
+([protocol-packages.md](../network/protocol-packages.md) §1.6), not the inferred
+ones. One client, loopback, captured from connect to 69 s after connect
+(34 s of it in-world):
+
+```text
+S2C 0 PackageIds -> C2S 117 PlayerLogin -> S2C 21 AuthState (x3), 20
+AuthConfirmation -> C2S 20 AuthConfirmation -> S2C 118 PlayerLoginAnswer ->
+C2S 134 RequestToEnterGame -> S2C 5 DiscordIdMappings, 88 IdMapping (x2),
+95 Localization, 35 ConfigFile (x43), 176 WorldInfo, 43 DecoUpdate (x3),
+30 ChunkClusterInfo, 179 WorldSpawnPoints, 174 WorldAreas, 85 GameStats
+-> S2C 183 PersistentPlayerPositions, repeating -> C2S 145 SignDataRequest
+-> S2C 146 SignDataResponse -> C2S 125 POIMetadataRequest, 178
+WorldInitInfoRequest -> S2C 126 POIMetadataResponse, 177 WorldInitInfo ->
+C2S 136 RequestToSpawnPlayer -> S2C 113 PlayerId, 184 PersistentPlayerState,
+6 DiscordLobbySecret, 26 BloodmoonMusic, 180 WorldTime, 186 Weather, 138
+SetBlock, 29 Chunk (channel 1, compressed) -> C2S 121 PlayerSpawnedInWorld
+-> live entity/stat traffic (1, 2, 3, 33, 58, 59, 74, 109, 112, 114, 122,
+187, 4, 78, 82, 83, 27, 68, 72, 8, 7)
+```
+
+The full 54-id observed set, with per-id counts and directions, is in
+[`netpackage-ids-b18.json`](../../workspace/outputs/wire/netpackage-ids-b18.json);
+the other 134 registered ids were not exercised by this join.
 
 ```mermaid
 flowchart TD
@@ -551,7 +583,7 @@ path (they set `get_Compress` themselves). The encryption handshake
 KeyExchangeComplete`) is now mapped; the cipher/KDF primitives remain native
 (residual).
 
-**Live-observed pre-auth order (2026-08-11 in-session capture):**
+**Live-observed pre-auth order (2026-08-11 in-session capture, bot):**
 `PackageIds` → client `PlayerLogin` → `AuthState` `authstate_nativeplatform`
 → `AuthState` `authstate_encryption` → `AuthConfirmation` (empty body) →
 `AuthState` `authstate_authenticated` → traffic switches to encrypted
@@ -560,6 +592,16 @@ The `AuthState.stateKey` values are stage strings; all three observed values
 match the documented agreement flow. `DiscordIdMappings` arrives right after
 `PlayerLoginAnswer` (body 5 bytes = `entityId:u32` + `remove:bool` shape when
 `entityId > 0`).
+
+**V3.3.0 b18 (2026-11-05, real client, EAC off):** the same stage order
+(`PackageIds` -> `PlayerLogin` 117 -> `AuthState` 21 x3 with
+`authstate_nativeplatform`, `authstate_encryption`, `authstate_authenticated`
+-> `AuthConfirmation` 20 both ways -> `PlayerLoginAnswer` 118). No
+`NetPackageEncryptionRequest` (14), `EncryptionPublicKey` (15),
+`EncryptionSharedKey` (16) or `KeyExchangeComplete` (17) appeared, and every
+one of the 260 captured game envelopes carried `encrypted=0`. The bot capture
+that logged `enc=1` (2026-08-11) therefore exercised a key exchange the EAC-off
+stock pair did not; the stage string alone does not imply encrypted traffic.
 
 ---
 

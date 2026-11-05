@@ -61,10 +61,12 @@ ALLOWED_BEFORE_AUTH = [
     "NetPackageAuthState",
     "NetPackageAuthConfirmation",
 ]
-# the abstract/enum top-level NetPackage* types the reflection sweep skips.
-# The registry also skips the plain helper classes NetPackageEntry,
-# NetPackageInfo, NetPackageMeasure and NetPackageMetrics, so the V3.3.0
-# accounting is 192 top-level - 8 helpers = 184 registered (network.md §3).
+# the abstract/enum top-level NetPackage* types this probe can classify. The
+# registry also skips the plain helper classes NetPackageEntry, NetPackageInfo,
+# NetPackageMeasure and NetPackageMetrics, and it registers four nested
+# subclasses this top-level census misses, so the V3.3.0 accounting is
+# 192 top-level - 8 non-registered + 4 nested = 188 registered (network.md §3,
+# measured live in protocol-packages.md §1.6).
 NON_MAP = [
     "NetPackage",  # abstract base
     "NetPackageDirection",  # enum
@@ -151,10 +153,10 @@ class NpKind {
         bad.append(f"unreliable packages {sorted(unreliable)} != documented {UNRELIABLE}")
     if non_map != set(NON_MAP):
         bad.append(f"non-map packages {sorted(non_map)} != expected {NON_MAP}")
-    # network.md §3 must state the 184-in-map / 8-helpers accounting
+    # network.md §3 must state the measured 188-in-map / 8-helper accounting
     net = _common.doc("network.md").read_text(encoding="utf-8")
-    if "**184**" not in net:
-        bad.append("network.md: no '**184**' live id-map claim")
+    if "**188**" not in net:
+        bad.append("network.md: no '**188**' live id-map claim")
     if "remaining **8**" not in net:
         bad.append("network.md: no 'remaining **8**' helper claim")
     for p in NON_MAP:

@@ -17,10 +17,12 @@ instruction evidence. The short version:
   `Quest.FileVersion` 8 -> 9, with `i32`-length blobs where the old record was
   inline. `WorldState` 23 and the chunk preamble 47 did not move. A b18 server
   reads a b10 world, a b10 server cannot read a b18 one.
-- The wire registry lost three packages net (187 -> 184 ids): six removed (the
-  inventory-data and inventory-transaction pairs, the lock request and the lock
-  response) and three added (`NetPackageLockTarget`, `NetPackageSingleSignData`,
-  `NetPackageSignDelete`). `NetPackagePlayerInventory` and
+- The wire registry: six removed (the inventory-data and inventory-transaction
+  pairs, the lock request and the lock response) and three added
+  (`NetPackageLockTarget`, `NetPackageSingleSignData`, `NetPackageSignDelete`).
+  A later live join measured 188 registered ids; the 187 -> 184 count that
+  shipped with these notes was inferred from metadata order
+  ([protocol-packages.md](../network/protocol-packages.md) §1.6). `NetPackagePlayerInventory` and
   `NetPackagePlayerEquipment` now carry client-serialized save blobs, so the b10
   per-operation inventory transaction gate is gone.
 - The inventory model was rebuilt: 13 equipment slots with a backpack, the held

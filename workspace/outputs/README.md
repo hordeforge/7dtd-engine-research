@@ -38,3 +38,11 @@ and are superseded by the current corpus; nothing reads them.
   tool that owns it, and a change to it ships with the build it describes.
 - The corpus itself lives in [`../../docs/`](../../docs/); this directory is
   where a claim is recorded, not where it is published.
+
+## Measured runtime evidence
+
+`wire/` holds observations of the running game, not regenerable IL artifacts and
+not gate inputs. `netpackage-ids-b18.json` records the 188 registered package
+ids read out of a live V3.3.0 b18 join (client and server, loopback), with the
+capture and log paths, sizes and sha256. It is published in
+[`protocol-packages.md`](../../docs/network/protocol-packages.md) §1.6.
