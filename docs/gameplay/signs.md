@@ -155,17 +155,21 @@ The `Perspective` and `Grid` branches are 50 to 100 instructions each; the
 per-instruction detail is reproducible with the recipe below rather than quoted
 here.
 
-**These expressions are the branch bodies, not yet a working warp.** Applied
-literally to a layer's own unit coordinates, they are not usable: over the
-shipped library's 75 `Skew`/`Bulge`/`Twirl`/`Arc`/`Stretch` records, 40 move
-`(0.5, 0.5)` further than the 2.5-unit canvas, and one `BulgeWarp` with
-`amount 3.66` multiplies a radius of 1.2 by 7. A bulge is a mild lens in a sign
-editor, so at least one of the pieces around the branch bodies is still wrong:
-which coordinate the chain runs in (the layer's UV versus the sign's units), or
-the field each branch reads out of its record (a `width` of 0.02 dividing an
-angle is a bend of tens of radians). Nothing on the GPU path should be
-implemented from this table until that is settled; the branch bodies themselves
-are exact transcriptions and are the starting point for settling it.
+**The chain runs in `[-1, 1]`, and one of the branch readings is still wrong.**
+The coordinate space is settled: `BakeScheduler.TickOnce` bakes a sign into tiles
+and sets `_MinUV`/`_MaxUV` per tile as `(-1 + step * tileX, -1 + step * tileY)`
+with `step = 2 / tiles`, so the shader's UV covers a `[-1, 1]` square across the
+whole canvas, one layer's own quad included. Applied in that space, the branch
+bodies are still not usable: over the shipped library's 75
+`Skew`/`Bulge`/`Twirl`/`Arc`/`Stretch` records, 40 move a layer's centre further
+than the whole canvas, and one `BulgeWarp` with `amount 3.66` multiplies a radius
+of 1.2 by 7. A bulge is a lens, not a teleport, so at least one branch is reading
+its record wrongly: the field order is exact from `PushWarps`' constructor calls,
+which leaves which record slot each branch's arithmetic actually belongs to. A
+`width` of 0.02 dividing an angle into tens of radians points the same way.
+Nothing on the GPU path should be implemented from this table until that is
+settled; the branch bodies themselves are exact transcriptions and are the
+starting point for settling it.
 
 **How this was recovered.** The shader is baked (no source string), so the path
 is bytecode: `unityz` reads the Shader object, its `compressedBlob` holds
