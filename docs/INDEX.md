@@ -134,6 +134,7 @@ Per-release exact deltas, each mapping a shipped change to the doc that owns it.
 | [changelog-3.1.0.md](releases/changelog-3.1.0.md) | V3.1.0 Henpocalypse feature inventory mapped to RE homes |
 | [changelog-3.2.0.md](releases/changelog-3.2.0.md) | V3.1.0 -> V3.2.0 exact IL-verified delta (+ per-fact homes, §9) |
 | [changelog-3.3.0.md](releases/changelog-3.3.0.md) | V3.2.0 -> V3.3.0 exact delta: wire, signs, inventory/equipment, save path, new subsystems (§1) |
+| [changelog-3.4.0.md](releases/changelog-3.4.0.md) | V3.3.0 -> V3.4.0 exact delta: drone recovery wire, dynamic-mesh server call sites, carry capacity, gear variants, DLC armor rows |
 
 ### Frame and simulation loop (`docs/loop/`)
 
