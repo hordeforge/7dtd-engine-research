@@ -1,0 +1,770 @@
+{
+  "schema": 1,
+  "buildid": "26310339",
+  "version": "V 3.4.0 b10",
+  "dll_sha256": "00a962dbbb5ef1bb454368322221f9eb4148dc2d548ed2b77244f9bda5ecc167",
+  "source": "measured from a live join, .scratch/livejoin-v340/join-v340.pcap",
+  "count": 190,
+  "packages": {
+    "0": {
+      "package": "NetPackagePackageIds",
+      "observed_on_wire": true
+    },
+    "1": {
+      "package": "NetPackageEntityStatChanged",
+      "observed_on_wire": true
+    },
+    "2": {
+      "package": "NetPackageEntityStatsBuff",
+      "observed_on_wire": true
+    },
+    "3": {
+      "package": "NetPackageAddRemoveBuff",
+      "observed_on_wire": true
+    },
+    "4": {
+      "package": "NetPackageModifyCVar",
+      "observed_on_wire": true
+    },
+    "5": {
+      "package": "NetPackageDiscordIdMappings",
+      "observed_on_wire": true
+    },
+    "6": {
+      "package": "NetPackageDiscordLobbySecret",
+      "observed_on_wire": true
+    },
+    "7": {
+      "package": "NetPackageRegionMetaData",
+      "observed_on_wire": false
+    },
+    "8": {
+      "package": "NetPackageDynamicClientArrive",
+      "observed_on_wire": false
+    },
+    "9": {
+      "package": "NetPackageDynamicMesh",
+      "observed_on_wire": false
+    },
+    "10": {
+      "package": "NetPackageDroneParticleEffect",
+      "observed_on_wire": false
+    },
+    "11": {
+      "package": "NetPackageDroneDataSync",
+      "observed_on_wire": false
+    },
+    "12": {
+      "package": "NetPackageTreeFade",
+      "observed_on_wire": false
+    },
+    "13": {
+      "package": "NetPackageAnimateBlock",
+      "observed_on_wire": false
+    },
+    "14": {
+      "package": "NetPackageEncryptionRequest",
+      "observed_on_wire": false
+    },
+    "15": {
+      "package": "NetPackageEncryptionPublicKey",
+      "observed_on_wire": false
+    },
+    "16": {
+      "package": "NetPackageEncryptionSharedKey",
+      "observed_on_wire": false
+    },
+    "17": {
+      "package": "NetPackageKeyExchangeComplete",
+      "observed_on_wire": false
+    },
+    "18": {
+      "package": "NetPackageLandClaimRepair",
+      "observed_on_wire": false
+    },
+    "19": {
+      "package": "NetPackageAudioPlayInHead",
+      "observed_on_wire": false
+    },
+    "20": {
+      "package": "NetPackageAuthConfirmation",
+      "observed_on_wire": true
+    },
+    "21": {
+      "package": "NetPackageAuthState",
+      "observed_on_wire": true
+    },
+    "22": {
+      "package": "NetPackageBag",
+      "observed_on_wire": false
+    },
+    "23": {
+      "package": "NetPackageBiomeIntensity",
+      "observed_on_wire": false
+    },
+    "24": {
+      "package": "NetPackageBlockLimitTracking",
+      "observed_on_wire": false
+    },
+    "25": {
+      "package": "NetPackageBlockTrigger",
+      "observed_on_wire": false
+    },
+    "26": {
+      "package": "NetPackageBloodmoonMusic",
+      "observed_on_wire": true
+    },
+    "27": {
+      "package": "NetPackageBossEvent",
+      "observed_on_wire": true
+    },
+    "28": {
+      "package": "NetPackageChat",
+      "observed_on_wire": false
+    },
+    "29": {
+      "package": "NetPackageChunk",
+      "observed_on_wire": true
+    },
+    "30": {
+      "package": "NetPackageChunkClusterInfo",
+      "observed_on_wire": true
+    },
+    "31": {
+      "package": "NetPackageChunkRemove",
+      "observed_on_wire": false
+    },
+    "32": {
+      "package": "NetPackageChunkRemoveAll",
+      "observed_on_wire": false
+    },
+    "33": {
+      "package": "NetPackageClientInfo",
+      "observed_on_wire": true
+    },
+    "34": {
+      "package": "NetPackageCloseAllWindows",
+      "observed_on_wire": false
+    },
+    "35": {
+      "package": "NetPackageConfigFile",
+      "observed_on_wire": true
+    },
+    "36": {
+      "package": "NetPackageConfirmSpawnEntity",
+      "observed_on_wire": false
+    },
+    "37": {
+      "package": "NetPackageConsoleCmdClient",
+      "observed_on_wire": false
+    },
+    "38": {
+      "package": "NetPackageConsoleCmdServer",
+      "observed_on_wire": false
+    },
+    "39": {
+      "package": "NetPackageDamageEntity",
+      "observed_on_wire": false
+    },
+    "40": {
+      "package": "NetPackageDebug",
+      "observed_on_wire": false
+    },
+    "41": {
+      "package": "NetPackageDecoResetWorldChunk",
+      "observed_on_wire": false
+    },
+    "42": {
+      "package": "NetPackageDecoResetWorldRect",
+      "observed_on_wire": false
+    },
+    "43": {
+      "package": "NetPackageDecoUpdate",
+      "observed_on_wire": true
+    },
+    "44": {
+      "package": "NetPackageDeleteChunkData",
+      "observed_on_wire": false
+    },
+    "45": {
+      "package": "NetPackageDroneRecoveryRequest",
+      "observed_on_wire": false
+    },
+    "46": {
+      "package": "NetPackageDroneRecoveryResponse",
+      "observed_on_wire": false
+    },
+    "47": {
+      "package": "NetPackageDropItemsContainer",
+      "observed_on_wire": false
+    },
+    "48": {
+      "package": "NetPackageEAC",
+      "observed_on_wire": false
+    },
+    "49": {
+      "package": "NetPackageEditorAddVolumeFromClient",
+      "observed_on_wire": false
+    },
+    "50": {
+      "package": "NetPackageEditorPrefabInstance",
+      "observed_on_wire": false
+    },
+    "51": {
+      "package": "NetPackageEditorUpdateVolume",
+      "observed_on_wire": false
+    },
+    "52": {
+      "package": "NetPackageEmitSmell",
+      "observed_on_wire": false
+    },
+    "53": {
+      "package": "NetPackageEntityAddExpClient",
+      "observed_on_wire": false
+    },
+    "54": {
+      "package": "NetPackageEntitySetSkillLevelClient",
+      "observed_on_wire": false
+    },
+    "55": {
+      "package": "NetPackageEntityAddExpServer",
+      "observed_on_wire": false
+    },
+    "56": {
+      "package": "NetPackageEntitySetSkillLevelServer",
+      "observed_on_wire": false
+    },
+    "57": {
+      "package": "NetPackageEntityAddScoreClient",
+      "observed_on_wire": false
+    },
+    "58": {
+      "package": "NetPackageEntityAddScoreServer",
+      "observed_on_wire": false
+    },
+    "59": {
+      "package": "NetPackageEntityAddVelocity",
+      "observed_on_wire": false
+    },
+    "60": {
+      "package": "NetPackageEntityAliveFlags",
+      "observed_on_wire": true
+    },
+    "61": {
+      "package": "NetPackageEntityAnimationData",
+      "observed_on_wire": true
+    },
+    "62": {
+      "package": "NetPackageEntityAwardKillServer",
+      "observed_on_wire": false
+    },
+    "63": {
+      "package": "NetPackageEntityCollect",
+      "observed_on_wire": false
+    },
+    "64": {
+      "package": "NetPackageEntityLookAt",
+      "observed_on_wire": true
+    },
+    "65": {
+      "package": "NetPackageEntityMapMarkerRemove",
+      "observed_on_wire": false
+    },
+    "66": {
+      "package": "NetPackageEntityPhysics",
+      "observed_on_wire": false
+    },
+    "67": {
+      "package": "NetPackageEntityPosAndRot",
+      "observed_on_wire": false
+    },
+    "68": {
+      "package": "NetPackageEntityPrimeDetonator",
+      "observed_on_wire": false
+    },
+    "69": {
+      "package": "NetPackageEntityRagdoll",
+      "observed_on_wire": false
+    },
+    "70": {
+      "package": "NetPackageEntityRelPosAndRot",
+      "observed_on_wire": false
+    },
+    "71": {
+      "package": "NetPackageEntityRemove",
+      "observed_on_wire": false
+    },
+    "72": {
+      "package": "NetPackageEntityRotation",
+      "observed_on_wire": false
+    },
+    "73": {
+      "package": "NetPackageEntitySetPartActive",
+      "observed_on_wire": false
+    },
+    "74": {
+      "package": "NetPackageEntitySpawn",
+      "observed_on_wire": true
+    },
+    "75": {
+      "package": "NetPackageEntitySpawnResponse",
+      "observed_on_wire": false
+    },
+    "76": {
+      "package": "NetPackageEntitySpeeds",
+      "observed_on_wire": true
+    },
+    "77": {
+      "package": "NetPackageEntityStealth",
+      "observed_on_wire": false
+    },
+    "78": {
+      "package": "NetPackageEntityTeleport",
+      "observed_on_wire": false
+    },
+    "79": {
+      "package": "NetPackageEntityVelocity",
+      "observed_on_wire": false
+    },
+    "80": {
+      "package": "NetPackageEntityWaypointList",
+      "observed_on_wire": true
+    },
+    "81": {
+      "package": "NetPackageEventPrefab",
+      "observed_on_wire": false
+    },
+    "82": {
+      "package": "NetPackageExplosionClient",
+      "observed_on_wire": false
+    },
+    "83": {
+      "package": "NetPackageExplosionInitiate",
+      "observed_on_wire": false
+    },
+    "84": {
+      "package": "NetPackageGameEventRequest",
+      "observed_on_wire": true
+    },
+    "85": {
+      "package": "NetPackageGameEventResponse",
+      "observed_on_wire": true
+    },
+    "86": {
+      "package": "NetPackageGameMessage",
+      "observed_on_wire": false
+    },
+    "87": {
+      "package": "NetPackageGameStats",
+      "observed_on_wire": true
+    },
+    "88": {
+      "package": "NetPackageHoldingItem",
+      "observed_on_wire": false
+    },
+    "89": {
+      "package": "NetPackageHordeEvent",
+      "observed_on_wire": false
+    },
+    "90": {
+      "package": "NetPackageIdMapping",
+      "observed_on_wire": true
+    },
+    "91": {
+      "package": "NetPackageInventoryKeepOpen",
+      "observed_on_wire": false
+    },
+    "92": {
+      "package": "NetPackageItemActionEffects",
+      "observed_on_wire": false
+    },
+    "93": {
+      "package": "NetPackageItemDrop",
+      "observed_on_wire": false
+    },
+    "94": {
+      "package": "NetPackageItemReload",
+      "observed_on_wire": false
+    },
+    "95": {
+      "package": "NetPackageLobbyJoin",
+      "observed_on_wire": false
+    },
+    "96": {
+      "package": "NetPackageLobbyRegisterClient",
+      "observed_on_wire": false
+    },
+    "97": {
+      "package": "NetPackageLocalization",
+      "observed_on_wire": true
+    },
+    "98": {
+      "package": "NetPackageLockTarget",
+      "observed_on_wire": false
+    },
+    "99": {
+      "package": "NetPackageMapChunks",
+      "observed_on_wire": false
+    },
+    "100": {
+      "package": "NetPackageMapPosition",
+      "observed_on_wire": false
+    },
+    "101": {
+      "package": "NetPackageMinEventFire",
+      "observed_on_wire": false
+    },
+    "102": {
+      "package": "NetPackageNavObject",
+      "observed_on_wire": false
+    },
+    "103": {
+      "package": "NetPackageNetMetrics",
+      "observed_on_wire": false
+    },
+    "104": {
+      "package": "NetPackageNPCQuestList",
+      "observed_on_wire": false
+    },
+    "105": {
+      "package": "NetPackageOwnedEntitySync",
+      "observed_on_wire": false
+    },
+    "106": {
+      "package": "NetPackageParticleEffect",
+      "observed_on_wire": false
+    },
+    "107": {
+      "package": "NetPackagePartyActions",
+      "observed_on_wire": false
+    },
+    "108": {
+      "package": "NetPackagePartyData",
+      "observed_on_wire": false
+    },
+    "109": {
+      "package": "NetPackagePartyQuestChange",
+      "observed_on_wire": false
+    },
+    "110": {
+      "package": "NetPackagePickupBlock",
+      "observed_on_wire": false
+    },
+    "111": {
+      "package": "NetPackagePlayerData",
+      "observed_on_wire": true
+    },
+    "112": {
+      "package": "NetPackagePlayerDenied",
+      "observed_on_wire": false
+    },
+    "113": {
+      "package": "NetPackagePlayerDisconnect",
+      "observed_on_wire": false
+    },
+    "114": {
+      "package": "NetPackagePlayerEquipment",
+      "observed_on_wire": true
+    },
+    "115": {
+      "package": "NetPackagePlayerId",
+      "observed_on_wire": true
+    },
+    "116": {
+      "package": "NetPackagePlayerInventory",
+      "observed_on_wire": false
+    },
+    "117": {
+      "package": "NetPackagePlayerInventoryForAI",
+      "observed_on_wire": false
+    },
+    "118": {
+      "package": "NetPackagePlayerLaserSight",
+      "observed_on_wire": false
+    },
+    "119": {
+      "package": "NetPackagePlayerLogin",
+      "observed_on_wire": true
+    },
+    "120": {
+      "package": "NetPackagePlayerLoginAnswer",
+      "observed_on_wire": true
+    },
+    "121": {
+      "package": "NetPackagePlayerQuestPositions",
+      "observed_on_wire": false
+    },
+    "122": {
+      "package": "NetPackagePlayerSetBackpackPosition",
+      "observed_on_wire": false
+    },
+    "123": {
+      "package": "NetPackagePlayerSpawnedInWorld",
+      "observed_on_wire": true
+    },
+    "124": {
+      "package": "NetPackagePlayerStats",
+      "observed_on_wire": true
+    },
+    "125": {
+      "package": "NetPackagePlayerTwitchStats",
+      "observed_on_wire": false
+    },
+    "126": {
+      "package": "NetPackagePlayerVendingMachine",
+      "observed_on_wire": false
+    },
+    "127": {
+      "package": "NetPackagePOIMetadataRequest",
+      "observed_on_wire": true
+    },
+    "128": {
+      "package": "NetPackagePOIMetadataResponse",
+      "observed_on_wire": true
+    },
+    "129": {
+      "package": "NetPackagePOIWaypoint",
+      "observed_on_wire": false
+    },
+    "130": {
+      "package": "NetPackageQuestEntitySpawn",
+      "observed_on_wire": false
+    },
+    "131": {
+      "package": "NetPackageQuestEvent",
+      "observed_on_wire": false
+    },
+    "132": {
+      "package": "NetPackageQuestGotoPoint",
+      "observed_on_wire": false
+    },
+    "133": {
+      "package": "NetPackageQuestObjectiveUpdate",
+      "observed_on_wire": false
+    },
+    "134": {
+      "package": "NetPackageQuestTreasurePoint",
+      "observed_on_wire": false
+    },
+    "135": {
+      "package": "NetPackageRangeCheckDamageEntity",
+      "observed_on_wire": false
+    },
+    "136": {
+      "package": "NetPackageRequestToEnterGame",
+      "observed_on_wire": true
+    },
+    "137": {
+      "package": "NetPackageRequestToSpawnEntity",
+      "observed_on_wire": false
+    },
+    "138": {
+      "package": "NetPackageRequestToSpawnPlayer",
+      "observed_on_wire": true
+    },
+    "139": {
+      "package": "NetPackageSetAttackTarget",
+      "observed_on_wire": false
+    },
+    "140": {
+      "package": "NetPackageSetBlock",
+      "observed_on_wire": false
+    },
+    "141": {
+      "package": "NetPackageSetBlockResponse",
+      "observed_on_wire": false
+    },
+    "142": {
+      "package": "NetPackageSetBlockTexture",
+      "observed_on_wire": false
+    },
+    "143": {
+      "package": "NetPackageSetProp",
+      "observed_on_wire": false
+    },
+    "144": {
+      "package": "NetPackageSharedPartyKill",
+      "observed_on_wire": false
+    },
+    "145": {
+      "package": "NetPackageSharedQuest",
+      "observed_on_wire": false
+    },
+    "146": {
+      "package": "NetPackageShowToolbeltMessage",
+      "observed_on_wire": false
+    },
+    "147": {
+      "package": "NetPackageSignDataRequest",
+      "observed_on_wire": true
+    },
+    "148": {
+      "package": "NetPackageSignDataResponse",
+      "observed_on_wire": true
+    },
+    "149": {
+      "package": "NetPackageSingleSignData",
+      "observed_on_wire": false
+    },
+    "150": {
+      "package": "NetPackageSignDelete",
+      "observed_on_wire": false
+    },
+    "151": {
+      "package": "NetPackageSimpleChat",
+      "observed_on_wire": false
+    },
+    "152": {
+      "package": "NetPackageSimpleRPC",
+      "observed_on_wire": false
+    },
+    "153": {
+      "package": "NetPackageSleeperPassiveChange",
+      "observed_on_wire": false
+    },
+    "154": {
+      "package": "NetPackageSleeperPose",
+      "observed_on_wire": false
+    },
+    "155": {
+      "package": "NetPackageSleeperWakeup",
+      "observed_on_wire": false
+    },
+    "156": {
+      "package": "NetPackageSoundAtPosition",
+      "observed_on_wire": false
+    },
+    "157": {
+      "package": "NetPackageTeleportPlayer",
+      "observed_on_wire": false
+    },
+    "158": {
+      "package": "NetPackageTileEntity",
+      "observed_on_wire": false
+    },
+    "159": {
+      "package": "NetPackageTraderData",
+      "observed_on_wire": false
+    },
+    "160": {
+      "package": "NetPackageTurretSpawn",
+      "observed_on_wire": false
+    },
+    "161": {
+      "package": "NetPackageTurretSync",
+      "observed_on_wire": false
+    },
+    "162": {
+      "package": "NetPackageTwitchAccess",
+      "observed_on_wire": false
+    },
+    "163": {
+      "package": "NetPackageTwitchVoteScheduling",
+      "observed_on_wire": false
+    },
+    "164": {
+      "package": "NetPackageVehicleCount",
+      "observed_on_wire": false
+    },
+    "165": {
+      "package": "NetPackageVehicleDataSync",
+      "observed_on_wire": false
+    },
+    "166": {
+      "package": "NetPackageEntityAttach",
+      "observed_on_wire": false
+    },
+    "167": {
+      "package": "NetPackageVehiclePositions",
+      "observed_on_wire": false
+    },
+    "168": {
+      "package": "NetPackageVehicleSpawn",
+      "observed_on_wire": false
+    },
+    "169": {
+      "package": "NetPackageWallVolume",
+      "observed_on_wire": false
+    },
+    "170": {
+      "package": "NetPackageWallVolumeRemove",
+      "observed_on_wire": false
+    },
+    "171": {
+      "package": "NetPackageWaterSet",
+      "observed_on_wire": false
+    },
+    "172": {
+      "package": "NetPackageWaterSimChunkUpdate",
+      "observed_on_wire": false
+    },
+    "173": {
+      "package": "NetPackageWaypoint",
+      "observed_on_wire": false
+    },
+    "174": {
+      "package": "NetPackageWireActions",
+      "observed_on_wire": false
+    },
+    "175": {
+      "package": "NetPackageWireToolActions",
+      "observed_on_wire": false
+    },
+    "176": {
+      "package": "NetPackageWorldAreas",
+      "observed_on_wire": true
+    },
+    "177": {
+      "package": "NetPackageWorldFolder",
+      "observed_on_wire": false
+    },
+    "178": {
+      "package": "NetPackageWorldInfo",
+      "observed_on_wire": true
+    },
+    "179": {
+      "package": "NetPackageWorldInitInfo",
+      "observed_on_wire": true
+    },
+    "180": {
+      "package": "NetPackageWorldInitInfoRequest",
+      "observed_on_wire": true
+    },
+    "181": {
+      "package": "NetPackageWorldSpawnPoints",
+      "observed_on_wire": true
+    },
+    "182": {
+      "package": "NetPackageWorldTime",
+      "observed_on_wire": true
+    },
+    "183": {
+      "package": "NetPackageAllyRequest",
+      "observed_on_wire": false
+    },
+    "184": {
+      "package": "NetPackageAllyResponse",
+      "observed_on_wire": false
+    },
+    "185": {
+      "package": "NetPackagePersistentPlayerPositions",
+      "observed_on_wire": true
+    },
+    "186": {
+      "package": "NetPackagePersistentPlayerState",
+      "observed_on_wire": true
+    },
+    "187": {
+      "package": "NetPackageLight",
+      "observed_on_wire": false
+    },
+    "188": {
+      "package": "NetPackageWeather",
+      "observed_on_wire": true
+    },
+    "189": {
+      "package": "NetPackageAudio",
+      "observed_on_wire": true
+    }
+  }
+}

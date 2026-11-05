@@ -21,8 +21,8 @@ All widths little-endian. `string` = .NET 7-bit length prefix + UTF-8. `bool` =
 
 ## 1. Protocol-wide metadata census
 
-Full table: `il/netpackages-v3.3.0/META.md` (192 packages). Regenerate with
-`mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.3.0/META.md`.
+Full table: `il/netpackages-v3.4.0/META.md` (194 packages). Regenerate with
+`mono bin/NetProtocolCensus.exe "$ASM" ../il/netpackages-v3.4.0/META.md`.
 
 **Per-package wire bodies:** this doc hand-annotates the load-bearing packages; the
 **complete** ordered `write()` field sequence for every package (182 packages
