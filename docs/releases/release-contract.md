@@ -53,6 +53,7 @@ new number.
 
 ## Unreleased
 
+- An external pull request documenting the prefab texture channel (the Int64 face-slot layout, `TextureFullArray::Read` IL=48, the 6-bit chunk accessor and the 16-bit map indices it feeds) merged on top of the retarget, so the section's commit count includes it.
 - [`../world/terrain-height.md`](../world/terrain-height.md) records which writers move a column's
   height and why an integer height is flat: the height map stores one integer per cell, so a
   sub-block step cannot exist and a visible step is a writer's decision rather than a rounding
@@ -85,7 +86,7 @@ new number.
   2048x2048 `Hollywood_Juniper_Atlas`), and the renderer's PPtr is the only reliable
   link because a material and a texture of the same name exist side by side.
 
-**69 commits after `v3.3.0` (2026-10-25) as of 2026-11-05.** The retarget this
+**71 commits after `v3.3.0` (2026-10-25) as of 2026-11-05.** The retarget this
 section used to describe is published under the tag and in
 [`release-v3.3.0.md`](release-v3.3.0.md); what follows is post-cut bookkeeping.
 
