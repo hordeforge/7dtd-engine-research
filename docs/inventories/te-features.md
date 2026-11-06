@@ -103,6 +103,28 @@ The values a tile-entity reader needs, as the `i32` the stream carries:
 
 `Read` (IL=88) mirrors it with two gates. The version comes from the parent's `UInt16` when `UseLocalVersioning()`, else from `GetLegacyForkVersion()`, and **no version is written on the network stream** (`_eStreamMode != 0`), where the payload is unconditionally the current shape. A version below **21** takes the pre-fork path: `GlobalSignId.FromStream`, then a byte read and discarded when the version is below **18**, `BlendMode` from **19**, `CanvasRotation` from **20**. On the server stream after parsing, a `SignId` whose `SignData` is gone and which `IsKnownDeleted` is replaced by `SignData.defaultSignDataID`, which is why a deleted sign's canvas draws the default sign rather than nothing. The parsed state goes to the `SignCanvas` component when one exists, else into `pendingCanvasState` until the component appears.
 
+### A measured canvas, from a shipped prefab
+
+`Data/Prefabs/POIs/canyon_gift_shop_sign.tts` carries **three** tile entities, two of them
+composites, and the first is a canvas. Its bytes, walked from the file's cell array through the
+texture and water streams to the length-framed list:
+
+```text
+record 0: type 25, length 85
+  base      version 19, pos (1, 5, 5), heapMapUpdateTime 0
+  composite version 18, marker 61, blockID 23836
+  owner     0 (null)
+  features  1: NameHash -931925875 (3363041421, TEFeatureCanvas), marker 47
+    payload version 21, library id "canyon_gift_shop_sign", guid
+    11f303b9cc458044897e3439181a21e9, then blend, rotation and ShowOnImposter
+```
+
+Two things this settles. A shipped POI **does** carry an authored canvas, so a reimplementation
+can read a placed sign out of the stock prefabs rather than needing a session to make one. And the
+library id is the **prefab's own name**, which means stock ships per-POI sign libraries: a POI's
+signs are its own, not entries in `signs.xml`, and wherever those libraries are stored is the next
+document to find.
+
 ### What a writable sign persists
 
 `TEFeatureSignable.write` (IL=25) is the base, then `u16` version **18** on the
@@ -116,6 +138,7 @@ moderation filters on (see [signs.md](../gameplay/signs.md) §8); the four text 
 
 ## Changelog
 
+- 2026-11-06: a canvas measured in a shipped prefab (`canyon_gift_shop_sign`): composite block 23836, canvas feature version 21, library id the prefab's own name.
 - 2026-11-06: `TEFeatureSignable`'s payload pinned (version 18, a `hasText` byte, the text string and the author), which is the writable sign's whole state.
 - 2026-11-06: `NameHash` pinned as Unity's stable string hash over the feature's type name, with the values for the four features a reader meets first.
 - 2026-11-06: `TileEntityComposite.write`'s framing pinned, including that each feature's payload carries its own length, so a reader can skip features it does not implement and find one by `NameHash`.
