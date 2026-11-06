@@ -37,6 +37,29 @@ IL_0021: call System.Void Log::Warning(System.String)
 
 Cross-feature composition is explicit in the fields: `TEFeatureAreaRepair`, `TEFeatureCanvas`, `TEFeatureDoor`, `TEFeatureLandClaim`, `TEFeatureSignable` and `TEFeatureStorage` each cache sibling `TEFeatureLockable` / `TEFeatureLockPickable` references resolved from the same composite.
 
+### A feature's payload is length-prefixed, so a reader may skip it
+
+`TileEntityComposite.write` (IL=74) frames the module list, and both levels carry a
+size marker written by `PooledBinaryWriter.ReserveSizeMarker(4)` and backfilled by
+`FinalizeSizeMarker`, which is the four-byte length of what was written after it:
+
+| Order | Field | Encoding |
+|---|---|---|
+| 1 | base | `TileEntity.write` |
+| 2 | version | `u16`, **18** on this build |
+| 3 | module list | `u32` marker, backfilled over everything below it |
+| 4 | `Block.blockID` | `i32` |
+| 5 | owner | `PlatformUserIdentifierAbs.ToStream(owner, bw, false)`, and **null** when `GameManager.IsEditMode()`, so an editor save writes no owner |
+| 6 | feature count | `u8` |
+| 7 | per feature | `i32` `TileEntityFeatureData.NameHash`, `u32` size marker, then `ITileEntityFeature.Write` |
+
+The per-feature marker is what makes a reader tractable: a reimplementation that wants
+one feature's payload (a canvas's sign, a door's state) reads the name hash and the size,
+then **seeks past** every feature it does not implement instead of decoding all eleven in
+order. The name hash is `TileEntityFeatureData.NameHash`, so a reader matches the
+feature by that value rather than by position, which the block's own property list does
+not fix.
+
 ### What a canvas persists, byte by byte
 
 `TEFeatureCanvas` is the one feature whose payload a reimplementation cannot store as an opaque blob: the sign a canvas draws lives inside it. Its `Write` (IL=23) is the base version then `SignCanvas.CanvasState.Write`, and that body (IL=18) is:
@@ -52,5 +75,6 @@ Cross-feature composition is explicit in the fields: `TEFeatureAreaRepair`, `TEF
 
 ## Changelog
 
+- 2026-11-06: `TileEntityComposite.write`'s framing pinned, including that each feature's payload carries its own length, so a reader can skip features it does not implement and find one by `NameHash`.
 - 2026-11-06: `TEFeatureCanvas`'s payload pinned byte by byte (version 21 gate, `GlobalSignId` = prefixed string + 16 mixed-endian GUID bytes, blend, rotation, `ShowOnImposter`), with the pre-fork read path and the deleted-sign substitution.
 - 2026-07-24: initial catalog from stable V3.0.1 server DLL (11 leaves, flat hierarchy verified).
