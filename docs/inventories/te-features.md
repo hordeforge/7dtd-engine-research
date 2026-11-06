@@ -98,8 +98,20 @@ The values a tile-entity reader needs, as the `i32` the stream carries:
 
 `Read` (IL=88) mirrors it with two gates. The version comes from the parent's `UInt16` when `UseLocalVersioning()`, else from `GetLegacyForkVersion()`, and **no version is written on the network stream** (`_eStreamMode != 0`), where the payload is unconditionally the current shape. A version below **21** takes the pre-fork path: `GlobalSignId.FromStream`, then a byte read and discarded when the version is below **18**, `BlendMode` from **19**, `CanvasRotation` from **20**. On the server stream after parsing, a `SignId` whose `SignData` is gone and which `IsKnownDeleted` is replaced by `SignData.defaultSignDataID`, which is why a deleted sign's canvas draws the default sign rather than nothing. The parsed state goes to the `SignCanvas` component when one exists, else into `pendingCanvasState` until the component appears.
 
+### What a writable sign persists
+
+`TEFeatureSignable.write` (IL=25) is the base, then `u16` version **18** on the
+persistent stream only, then `AuthoredText.ToStream` over `signText`. That call (IL=22)
+writes `u8 0` for a null text and otherwise `u8 1`, `Write(string)` for the text, then
+`PlatformUserIdentifierAbs.ToStream(author, bw, false)`. In edit mode the feature builds a
+fresh `AuthoredText(text, null)` first, so an editor save writes the text and no author,
+which is the same shape as the canvas's owner field. The author is what stock's per-viewer
+moderation filters on (see [signs.md](../gameplay/signs.md) §8); the four text numbers
+(`fontSize`, `lineCount`, `lineWidth`, `lineSpacing`) are block properties, not payload.
+
 ## Changelog
 
+- 2026-11-06: `TEFeatureSignable`'s payload pinned (version 18, a `hasText` byte, the text string and the author), which is the writable sign's whole state.
 - 2026-11-06: `NameHash` pinned as Unity's stable string hash over the feature's type name, with the values for the four features a reader meets first.
 - 2026-11-06: `TileEntityComposite.write`'s framing pinned, including that each feature's payload carries its own length, so a reader can skip features it does not implement and find one by `NameHash`.
 - 2026-11-06: `TEFeatureCanvas`'s payload pinned byte by byte (version 21 gate, `GlobalSignId` = prefixed string + 16 mixed-endian GUID bytes, blend, rotation, `ShowOnImposter`), with the pre-fork read path and the deleted-sign substitution.

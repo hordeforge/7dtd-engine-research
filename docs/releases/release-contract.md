@@ -54,7 +54,7 @@ new number.
 
 ## Unreleased
 
-**10 commits after `v3.4.0` (2026-11-05) as of 2026-11-06.** The build retarget this
+**11 commits after `v3.4.0` (2026-11-05) as of 2026-11-06.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -72,7 +72,8 @@ section described is published under the tag and in
   reimplementation cannot keep as an opaque blob, the canvas decal is shown to
   be authored in its prefab rather than measured at run time, and a composite's
   feature payloads are shown to carry their own length, and the name hash a
-  reader matches on is pinned with the values it needs.
+  reader matches on is pinned with the values it needs, and a writable sign's
+  payload is pinned beside the canvas's.
 
 The next cut is `v0.4.0` (tooling) unless the corpus is re-pinned to a new game
 build first, which would be `v3.5.0`.
