@@ -60,6 +60,31 @@ order. The name hash is `TileEntityFeatureData.NameHash`, so a reader matches th
 feature by that value rather than by position, which the block's own property list does
 not fix.
 
+**The name hash is Unity's stable string hash.** `TileEntityFeatureData`'s constructor
+(IL=23) sets `NameHash = Extensions.GetStableHashCode(Name)`, and `Name` is the key of the
+block's `CompositeFeatures` property, which is the feature type's own name:
+`<property class="TEFeatureCanvas"/>` yields `Name = "TEFeatureCanvas"`. The hash
+(IL=63) is the classic two-accumulator form, with `*` meaning wrap to 32 bits and an
+early exit on a zero char:
+
+```
+h1 = 5381; h2 = h1
+for i in steps of 2:
+    h1 = (h1 << 5) + h1 ^ char[i]
+    if i is the last index or char[i + 1] == 0: break
+    h2 = (h2 << 5) + h2 ^ char[i + 1]
+return h1 + h2 * 1566083941
+```
+
+The values a tile-entity reader needs, as the `i32` the stream carries:
+
+| Feature | `NameHash` |
+|---|---|
+| `TEFeatureCanvas` | **3363041421** (-931925875 as `i32`) |
+| `TEFeatureSignable` | 924617576 |
+| `TEFeatureDoor` | 1390289507 |
+| `TEFeatureStorage` | 731446478 |
+
 ### What a canvas persists, byte by byte
 
 `TEFeatureCanvas` is the one feature whose payload a reimplementation cannot store as an opaque blob: the sign a canvas draws lives inside it. Its `Write` (IL=23) is the base version then `SignCanvas.CanvasState.Write`, and that body (IL=18) is:
@@ -75,6 +100,7 @@ not fix.
 
 ## Changelog
 
+- 2026-11-06: `NameHash` pinned as Unity's stable string hash over the feature's type name, with the values for the four features a reader meets first.
 - 2026-11-06: `TileEntityComposite.write`'s framing pinned, including that each feature's payload carries its own length, so a reader can skip features it does not implement and find one by `NameHash`.
 - 2026-11-06: `TEFeatureCanvas`'s payload pinned byte by byte (version 21 gate, `GlobalSignId` = prefixed string + 16 mixed-endian GUID bytes, blend, rotation, `ShowOnImposter`), with the pre-fork read path and the deleted-sign substitution.
 - 2026-07-24: initial catalog from stable V3.0.1 server DLL (11 leaves, flat hierarchy verified).
