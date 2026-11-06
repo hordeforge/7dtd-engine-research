@@ -299,11 +299,11 @@ size-marked envelope (`write` IL=74 / `read` IL=479 with the save-id
 |---|---|---|
 | base `TileEntity` preamble | - | version u16 + chunkPos (+ heapMapUpdateTime on disk) |
 | version | u16 | **18** on disk (Save mode); `UseLocalVersioning` reads/writes a local u16 on net; legacy path uses `GetLegacyForkVersion` |
-| outer size marker | i32 | `ReserveSizeMarker(4)` / `FinalizeSizeMarker` |
+| outer size marker | i32 | `ReserveSizeMarker(4)` / `FinalizeSizeMarker`; the value **counts its own four bytes** |
 | `blockId` | i32 | `teData.Block.blockID`; on read remapped through `blockIdMapping[blockId]` when provided; the resolved `Block.list` entry must be a `BlockCompositeTileEntity` (else `Log.Error` + skip) |
 | owner | `PlatformUserIdentifier` | null in edit mode (`GameManager.IsEditMode`) |
 | `featureCount` | u8 | `modulesInternalOrder.Length` |
-| per feature | | `i32 NameHash` (`TileEntityFeatureData.NameHash`), per-feature i32 size marker, `ITileEntityFeature.Write/Read` payload |
+| per feature | | `i32 NameHash` (`TileEntityFeatureData.NameHash`), per-feature i32 size marker (also counting itself), `ITileEntityFeature.Write/Read` payload |
 
 **Read resilience (IL=479):** modules are initialized from the block first
 when absent (`InitModulesFromBlock`). The **legacy path** (version < 17)

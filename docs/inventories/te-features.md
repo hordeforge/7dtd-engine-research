@@ -41,7 +41,12 @@ Cross-feature composition is explicit in the fields: `TEFeatureAreaRepair`, `TEF
 
 `TileEntityComposite.write` (IL=74) frames the module list, and both levels carry a
 size marker written by `PooledBinaryWriter.ReserveSizeMarker(4)` and backfilled by
-`FinalizeSizeMarker`, which is the four-byte length of what was written after it:
+`FinalizeSizeMarker`. The value **includes its own four bytes**, which
+[`tile-entities-power.md`](../gameplay/tile-entities-power.md) §2.2 states and which a reader
+that treats the marker as the payload length gets wrong: it overruns the frame by four bytes
+per feature and desyncs on the next field. Measured on this host's save, where that reading
+walks 148 of 148 chunks to their exact body end and the payload-length reading stops at the
+thirteenth:
 
 | Order | Field | Encoding |
 |---|---|---|
