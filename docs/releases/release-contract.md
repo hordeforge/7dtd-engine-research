@@ -54,7 +54,17 @@ new number.
 
 ## Unreleased
 
-**20 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
+- `BlockShapeNew`'s 32-entry `rotationsToQuats` is written down from its own `cctor`
+  (`docs/world/block-shapes.md` 2.1): yaw 0..3, pitch about right 4..11 and 16..19, pitch about
+  forward 12..15 and 20..23, the 45-degree yaw band 24..27, and identity 28..31. Three traits are
+  named because each fails silently in a consumer: 28..31 are not orientations, the free band has
+  no tipped entry, and `rotations[3,28]` is a cache of `CalcRotation` rather than a second source.
+- Symmetry is a rotation table, not mirrored geometry: `MirrorStatic` returns a rotation index in
+  all five arms, `symType` 0 returns it unchanged, `getVisualMesh` is a plain array index, and
+  `Prefab` applies the conversion to a cell's rotation while stamping. A shape whose
+  `SymmetryType` is 0 does not mirror at all, so a prefab pairing one shape at two rotations
+  across a mirror axis is not a mirrored pair.
+**22 commits after `v3.4.0` (2026-11-05) as of 2026-11-08.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
