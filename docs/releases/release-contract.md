@@ -54,7 +54,7 @@ new number.
 
 ## Unreleased
 
-**13 commits after `v3.4.0` (2026-11-05) as of 2026-11-06.** The build retarget this
+**15 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -63,6 +63,13 @@ section described is published under the tag and in
   of what shipped and this file stays the contract for what comes next.
 - `physicsbodies.xml` is documented: the ragdoll layout's record set and the
   226 collider bindings a body's `DT_PhysicsBodies` row carries.
+- A sign group's two down-tree effects are written down: the softness and dilate
+  offsets add per layer kind with softness clamped at zero, and the colour modes
+  multiply, blend or override innermost first, with the no-op case named.
+- The warp chain's packing is narrowed: a layer's warps are pushed in reverse file
+  order, rotations reach the shader in radians, and shader ids 11 and 12 read the
+  record fields `PushWarps` writes, so the open item is the space or the chain
+  order rather than a swapped pair.
 - The eight sign warp transforms are decoded from the shipped client shader,
   and the two branches the first reading got wrong (`Kaleido`'s third field,
   `Perspective`'s closed form) are marked open rather than described, the

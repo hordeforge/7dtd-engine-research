@@ -209,6 +209,23 @@ Nothing on the GPU path should be implemented from this table until that is
 settled; the branch bodies themselves are exact transcriptions and are the
 starting point for settling it.
 
+**What the packing does settle, and the two facts it adds.** `PushWarps` walks a
+layer's `warps` list from its last entry to its first (`warps.Count - 1` down to 0,
+IL_010C to IL_077F), so one descriptor's chain is the file's order reversed: the last
+warp an artist added is the first the shader applies. Both it and `SkewWarp`'s own
+record convert the authored degrees to radians on the CPU (`ldc.r4 0.01745329; mul`,
+IL_00BE for the layer transform and IL_01F9 for the skew), so a branch that expects
+degrees is wrong for every rotation.
+
+Re-reading shader ids 11 and 12 against the packed records narrows the open item
+above rather than widening it: `SkewWarp`'s branch takes `_m0[0]` as the angle and
+`_m0[1..2]` as the two amounts, which is the field order `PushWarps` writes, and
+`BulgeWarp`'s takes `_m0[0..1]` as the offset and `_m0[2]` as the amount, likewise.
+The records are therefore packed and read consistently for those two, so the
+implausible displacements come from the space the arithmetic runs in or from the
+branch order within a chain, not from a swapped pair of fields. Ids 13 to 18 have
+not been re-read this way.
+
 **The decal a canvas draws on is authored in its prefab, not computed.** A
 `SignCanvas` component serialises `canvasDimensions` (`{x, y}` in blocks) and a
 `SignRenderers` list, and each entry is a `SignRenderer` whose `Renderer` owns the
