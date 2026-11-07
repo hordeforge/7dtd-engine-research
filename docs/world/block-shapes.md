@@ -154,9 +154,11 @@ child GameObjects named `SymType_0`, `SymType_2`, `SymType_3` and `SymType_4`; l
 
 Two consequences matter more than the arms themselves.
 
-- **`getVisualMesh(i)` is `visualMeshes[i]`, a plain array index.** `MirrorStatic` never selects a
-  mesh, so a shape's symmetry is carried entirely by the rotation index it returns; the extra
-  `SymType_*` children are meshes at other indices, reached through that rotation.
+- **`getVisualMesh(i)` is `visualMeshes[i]`, a plain array index, and `visualMeshes` holds the
+  `LOD*` parts.** `MirrorStatic` never selects a mesh: a shape's symmetry is carried entirely by the
+  rotation index it returns. The `SymType_*` children are **empty marker GameObjects** (39 bytes
+  each in the shape bundle), not meshes at other indices, which is why `shape_meshes` skips them
+  when it collects the drawn faces.
 - **The mirror is applied at prefab-stamp time.** `Prefab` computes
   `rotation = (byte)MirrorStatic(axis, blockValue.rotation, block.shape.SymmetryType)` while
   walking a prefab's cells and writes that rotation into the cell (IL `0x0095`..`0x00B3` in
