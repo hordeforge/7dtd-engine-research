@@ -54,7 +54,7 @@ new number.
 
 ## Unreleased
 
-**15 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
+**16 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -69,7 +69,11 @@ section described is published under the tag and in
 - The warp chain's packing is narrowed: a layer's warps are pushed in reverse file
   order, rotations reach the shader in radians, and shader ids 11 and 12 read the
   record fields `PushWarps` writes, so the open item is the space or the chain
-  order rather than a swapped pair.
+  order rather than a swapped pair. The shipped records then settle the space: over
+  6,529 records in the `[-1, 1]` canvas frame, `Skew`, `Twirl`, `Stretch` and
+  `Bulge` displace a layer's corner by a fraction of the canvas (medians 0.27,
+  0.005, 0.25 and 0.59 units), while `Arc`'s output is a radius and an angle rather
+  than a planar position, which is what the earlier reading mistook for a teleport.
 - The eight sign warp transforms are decoded from the shipped client shader,
   and the two branches the first reading got wrong (`Kaleido`'s third field,
   `Perspective`'s closed form) are marked open rather than described, the

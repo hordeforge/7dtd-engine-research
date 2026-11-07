@@ -226,6 +226,27 @@ implausible displacements come from the space the arithmetic runs in or from the
 branch order within a chain, not from a swapped pair of fields. Ids 13 to 18 have
 not been re-read this way.
 
+**The authored values say which branches are planar displacements.** Applying the
+corpus's closed forms to all 6,529 shipped `Skew`/`Bulge`/`Twirl`/`Arc`/`Stretch`
+records, in the `[-1, 1]` canvas frame the shader uses, at the corner of the layer's
+own footprint (`pos + scale`), gives a median displacement of 0.273 units for
+`Skew` (1,148 records), 0.005 for `Twirl` (660), 0.249 for `Stretch` (1,337) and
+0.587 for `Bulge` (795): a fifth of a canvas, which is what a warp on a two-unit
+canvas should cost. The same records read in layer-local space move by one to two
+hundred times the layer's own size, so the canvas frame is the right one.
+
+`Arc` is the exception and it is not the same kind of transform: over its 2,589
+records the radius runs 0 to 15 (median 3.92) and the width 0.0045 to 1 (median
+0.1), and the branch's output is `(radius from the offset, angle / width)`, so its
+second coordinate is an angle in texture units rather than a canvas position. Read
+as a planar displacement it moves a layer's corner by a median of 14.7 units, which
+is the "teleport" the earlier paragraph objected to; it is a coordinate change, not
+a displacement, and a renderer that samples a planar UV with it is the thing that is
+wrong. `Bulge` still has outliers worth naming rather than hiding: 244 of 795 records
+move past two units, and `amount` above 1 grows a radius by its own power, so a
+record with `amount 3.66` is either authored for a different reading or a value the
+shader clamps somewhere this reading does not reach.
+
 **The decal a canvas draws on is authored in its prefab, not computed.** A
 `SignCanvas` component serialises `canvasDimensions` (`{x, y}` in blocks) and a
 `SignRenderers` list, and each entry is a `SignRenderer` whose `Renderer` owns the
