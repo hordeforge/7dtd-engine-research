@@ -54,6 +54,9 @@ new number.
 
 ## Unreleased
 
+- The `SymType_*` children a shape model carries are corrected: they are empty 39-byte marker
+  GameObjects that declare `SymmetryType`, not meshes at other rotation indices, and
+  `getVisualMesh` indexes the `LOD*` parts rather than anything symmetry-derived.
 - `BlockShapeNew`'s 32-entry `rotationsToQuats` is written down from its own `cctor`
   (`docs/world/block-shapes.md` 2.1): yaw 0..3, pitch about right 4..11 and 16..19, pitch about
   forward 12..15 and 20..23, the 45-degree yaw band 24..27, and identity 28..31. Three traits are
@@ -64,7 +67,7 @@ new number.
   `Prefab` applies the conversion to a cell's rotation while stamping. A shape whose
   `SymmetryType` is 0 does not mirror at all, so a prefab pairing one shape at two rotations
   across a mirror axis is not a mirrored pair.
-**22 commits after `v3.4.0` (2026-11-05) as of 2026-11-08.** The build retarget this
+**23 commits after `v3.4.0` (2026-11-05) as of 2026-11-08.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
