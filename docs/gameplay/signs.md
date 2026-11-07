@@ -97,6 +97,44 @@ multiplying the parent `SignTransform` into each child, and
 `GroupSignLayer` applies group-wide softness/dilate/color offsets to its
 children (`SignDataManager.GroupOffsets.WithOffsets`).
 
+### What a group passes down: additive offsets and colour operations
+
+**Softness and dilate add, per layer kind, and softness clamps at zero.** A group's
+`offsetTarget` (0 all kinds, 1 shape, 2 text, 3 noise, from the `switch` at
+`WithOffsets` IL_0008) decides which of the six accumulators the group's two numbers reach;
+`WithOffsets` copies the parent's struct and adds, so nested groups accumulate. A leaf then
+reads its own kind's pair and adds its own numbers, with `Mathf.Max(0, ...)` on softness only:
+
+```
+IL_0005: ldarg.1 ; ldfld Single PolygonSignLayer::softness
+IL_000C: ldfld Single GroupOffsets::shapeSoftnessOffset
+IL_0011: add
+IL_0012: call System.Single UnityEngine.Mathf::Max(System.Single,System.Single)
+```
+
+`dilate` is added with no clamp (IL_0018 to IL_0025). `ProcessTextLayer` and
+`ProcessNoiseLayer` do the same with `textSoftnessOffset`/`textDilateOffset` and
+`noiseSoftnessOffset`/`noiseDilateOffset`. A group's numbers therefore never replace a
+child's, and a leaf's own values are what a group's are measured against.
+
+**Colour modes multiply, blend or replace, innermost first.** `ColorMode` is 0 multiply,
+1 blend, 2 replace, and `SignDataManager.ColorOperation` is `{color, mode}`. Traversal pushes
+one op per group but skips a no-op group: the push is conditional on
+`!(colorMode == 0 && color == white)` and `!(colorMode == 1 && color.a == 0)`
+(`ProcessLayers` IL_01AA to IL_01DF). `EvaluateColor(leafColor, ops)` walks the list from its
+last entry to its first, so the innermost group acts on the leaf and each outer group acts on
+the result:
+
+* multiply: `c = c * op.color`, all four channels;
+* blend: `a = op.color.a`, then `c.rgb = lerp(c.rgb, op.color.rgb, a)` and `c.a` survives;
+* replace: `c = op.color`.
+
+The leaf colour the shader receives is `NGUITools.GammaToLinearSpace(EvaluateColor(...),
+true)` (`ProcessPolygonLayer` IL_002C to IL_003D), so the operations run on the authored
+gamma values and linearisation happens last. A group whose mode is 0 and whose colour is
+white, or whose mode is 1 and whose alpha is 0, is the identity and is not pushed, so a
+renderer can treat a missing op as an identity without measuring the colour.
+
 Warps are a second polymorphic family under `SignData`, dispatched by their own
 `TypeId` byte: `SkewWarp` (0), `BulgeWarp` (1), `TwirlWarp` (2), `KaleidoWarp`
 (3), `PerspectiveWarp` (4), `ArcWarp` (5), `StretchWarp` (6), `GridWarp` (7).
