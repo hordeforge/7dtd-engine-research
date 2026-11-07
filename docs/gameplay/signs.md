@@ -247,6 +247,53 @@ move past two units, and `amount` above 1 grows a radius by its own power, so a
 record with `amount 3.66` is either authored for a different reading or a value the
 shader clamps somewhere this reading does not reach.
 
+### The noise fill (client shader, descriptor type 103)
+
+A `NoiseSignLayer` is a fill, not a texture: `ProcessNoiseLayer` writes one `NoiseLayer`
+record (`color: Vector4`, then `offset`, `detail`, `softness`, `dilate`, `fade`) and pushes
+a descriptor of type **103**, and the shader synthesises the pattern. Nine floats, in that
+order, are what the branch reads: `_m0[0..3]` the colour, `_m0[4]` the offset, `_m0[5]` the
+detail, `_m0[6]` the softness, `_m0[7]` the dilate, `_m0[8]` the fade. The offset is
+`seed * 10` (`ldarg.1; ldfld Int32 NoiseSignLayer::seed; ldc.i4.s 10; mul`), which is how a
+seed reaches the pattern at all.
+
+The pattern is two-dimensional gradient noise with fractal octaves:
+
+* the sample point is `2 * (uv + (offset, 0))`, so the seed shifts the lattice in `x` and the
+  whole pattern lives at twice the canvas scale;
+* the octave count is `detail - 1` iterations plus a final sample, each iteration halving the
+  amplitude (which starts at 0.5) and rotating the point by the fixed matrix
+  `[[1.6, 1.2], [-1.2, 1.6]]`, so the octaves are not axis-aligned with each other;
+* each octave is gradient noise: the integer lattice cell is hashed with
+  `u = uint(x * 374761393 + y * 668265263)`, `u = (u ^ (u >> 13)) * 1274126177`,
+  `u = u ^ (u >> 16)`, the low three bits select one of eight fixed directions
+  (`(1, 0)`, `(0.70710678, 0.70710678)`, `(0, 1)`, `(-0.70710678, 0.70710678)`, `(-1, 0)`,
+  `(-0.70710678, -0.70710678)`, `(0, -1)`, `(0.70710678, -0.70710678)`, given in the shader's
+  constant array as the bit patterns `1065353216`, `1060439283`, `3212836864`, `3207922931`),
+  and the four corner dots are blended with the quintic `t*t*(3 - 2t)`.
+
+The sum `n` is then turned into a coverage with a screen-space derivative band:
+
+```
+len      = |dFdxCoarse(n), dFdyCoarse(n)|
+coverage = smoothstep(clamp((len + n - dilate) / (2 * len + softness), 0, 1))
+alpha    = color.a * (1 - 2 * fade * (0.5 * n + 0.5)) * coverage
+```
+
+`dilate` therefore moves the threshold the field is cut at, `softness` widens the band in field
+units, and `fade` scales the result by the noise itself: a `fade` of 0 leaves the coverage
+alone and a `fade` of 0.5 drives it to zero where the field is at its maximum. The layer is
+composited premultiplied (`rgb * alpha` over `1 - alpha`), so it can darken and lighten what is
+under it.
+
+This is `inferred` at one point and open at two: the derivative term is a screen-space
+anti-aliasing band, so a CPU renderer has to choose its own (an analytic gradient of the same
+field is the natural one, and it is not what the shader computes); the integer hash runs on
+GLSL `int`, so cells at negative coordinates wrap in two's complement rather than round toward
+zero, which a port must reproduce rather than approximate; and the final sample after the loop
+uses the amplitude the last iteration left, which is what the instruction order says but not
+something the shipped art distinguishes.
+
 **The decal a canvas draws on is authored in its prefab, not computed.** A
 `SignCanvas` component serialises `canvasDimensions` (`{x, y}` in blocks) and a
 `SignRenderers` list, and each entry is a `SignRenderer` whose `Renderer` owns the
