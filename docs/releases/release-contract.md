@@ -54,7 +54,7 @@ new number.
 
 ## Unreleased
 
-**16 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
+**17 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -74,6 +74,9 @@ section described is published under the tag and in
   `Bulge` displace a layer's corner by a fraction of the canvas (medians 0.27,
   0.005, 0.25 and 0.59 units), while `Arc`'s output is a radius and an angle rather
   than a planar position, which is what the earlier reading mistook for a teleport.
+- The sign noise fill is decoded: its nine-float record, the seed as `offset = seed * 10`, the
+  fractal gradient noise with its hash constants and eight-direction table, and the coverage and
+  alpha the branch builds from `softness`, `dilate` and `fade`.
 - The eight sign warp transforms are decoded from the shipped client shader,
   and the two branches the first reading got wrong (`Kaleido`'s third field,
   `Perspective`'s closed form) are marked open rather than described, the
