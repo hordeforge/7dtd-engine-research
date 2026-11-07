@@ -74,6 +74,10 @@ section described is published under the tag and in
   `Bulge` displace a layer's corner by a fraction of the canvas (medians 0.27,
   0.005, 0.25 and 0.59 units), while `Arc`'s output is a radius and an angle rather
   than a planar position, which is what the earlier reading mistook for a teleport.
+- `PerspectiveWarp`'s branch is located and its shape stated: the dispatch is
+  `uint(descriptor.x) < 16u` with `== 16` beside it, not an `== 15` comparison, and the
+  body is an inlined Euler matrix, a normalise, a divide by a clamped dot and a doubling.
+  The exact expression stays unnamed for a register the dump does not name.
 - The sign noise fill is decoded: its nine-float record, the seed as `offset = seed * 10`, the
   fractal gradient noise with its hash constants and eight-direction table, and the coverage and
   alpha the branch builds from `softness`, `dilate` and `fade`. A shipped prefab thumbnail then
