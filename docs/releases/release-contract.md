@@ -54,7 +54,7 @@ new number.
 
 ## Unreleased
 
-**18 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
+**20 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -78,6 +78,9 @@ section described is published under the tag and in
   `uint(descriptor.x) < 16u` with `== 16` beside it, not an `== 15` comparison, and the
   body is an inlined Euler matrix, a normalise, a divide by a clamped dot and a doubling.
   The exact expression stays unnamed for a register the dump does not name.
+- `KaleidoWarp`'s third field is settled: the branch divides the angle by it and folds the
+  fraction onto `[0, k/2]`, so on this path the field is a fan half-width in radians rather
+  than a sector count.
 - The sign noise fill is decoded: its nine-float record, the seed as `offset = seed * 10`, the
   fractal gradient noise with its hash constants and eight-direction table, and the coverage and
   alpha the branch builds from `softness`, `dilate` and `fade`. A shipped prefab thumbnail then
