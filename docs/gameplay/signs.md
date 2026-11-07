@@ -286,6 +286,24 @@ alone and a `fade` of 0.5 drives it to zero where the field is at its maximum. T
 composited premultiplied (`rgb * alpha` over `1 - alpha`), so it can darken and lighten what is
 under it.
 
+**A shipped thumbnail constrains the model, and it does not agree with the closed form at
+the shipped weights.** `Data/Prefabs/POIs/<prefab>.jpg` is the prefab's own preview, and
+`canyon_gift_shop_sign.jpg` shows the sign this section's record came from: a brown panel
+mottled darker, with `DEADMAN'S` and `Gulch Tour` legible in cream over it. The eleven noise
+layers of that sign all state `seed="0"`, so `offset = 0` and their covered sets coincide
+rather than spreading; their alphas stack (0.25, 0.22, 0.62, 0.55, 0.77, 0.75, 1.0, 1.0, 0.77,
+0.53, plus one `PunchOut`). Read through the coverage formula above with the shipped
+`softness` 0.02 to 0.32 and `dilate` -0.54 to 0.05, a share of the canvas near 30 percent is
+covered per layer, and the coincident sets stack to nearly opaque there, which would bury the
+lettering the thumbnail shows legible. So one of the field's scale, the coverage mapping or a
+mode's meaning is still wrong, and the thumbnail is the frame to calibrate against rather than
+a rendered guess.
+
+The same thumbnail settles the paint order the closed forms do not reach: the file's first
+layer is painted last, because the panel is the sign's first layer and the lettering sits
+above it in the preview; painting the file's order reversed would put the panel over the
+letters.
+
 This is `inferred` at one point and open at two: the derivative term is a screen-space
 anti-aliasing band, so a CPU renderer has to choose its own (an analytic gradient of the same
 field is the natural one, and it is not what the shader computes); the integer hash runs on
