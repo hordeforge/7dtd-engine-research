@@ -137,16 +137,35 @@ Three facts fall out of the table and matter to any consumer:
   `CalcRotation(i, i, rotation)` for every pair, so the cache is the table of that arithmetic and
   not a second source.
 
-**Symmetry (`SymType_*`).** A shape prefab may carry child GameObjects named `SymType_0`,
-`SymType_2`, `SymType_3` and `SymType_4`; loading them sets `MeshData::symTypeOverride` to that
-number, and a non-`-1` override is copied into `BlockShape::SymmetryType` (`BlockShapeNew` IL
-`0x0131`..`0x0140`). `BlockShapeNew::MirrorStatic(EnumMirrorAlong, Int32 rotation, Int32 _symType)`
-(`IL=289`) switches on that value with five arms. The arm for `symType` 1 is
-`GetRotationStatic(rotation) * AngleAxis(angle, up or forward)` followed by
-`ConvertRotationFree(rotation, quaternion, false, false)`, i.e. the mirror is expressed as a
-**rotation converted into the free band**, not as mirrored geometry. The other four arms route
-through `RotToBlockFace` and their own per-face switches; they are inventoried but not yet read in
-detail, so the per-symType mapping is the open part of this section rather than a settled fact.
+**Symmetry (`SymType_*`) is a rotation table, not mirrored geometry.** A shape prefab may carry
+child GameObjects named `SymType_0`, `SymType_2`, `SymType_3` and `SymType_4`; loading them sets
+`MeshData::symTypeOverride` to that number, and a non-`-1` override is copied into
+`BlockShape::SymmetryType` (`BlockShapeNew` IL `0x0131`..`0x0140`).
+
+`BlockShapeNew::MirrorStatic(EnumMirrorAlong axis, Int32 rotation, Int32 symType)` (`IL=289`)
+**returns a rotation index** in every arm. Its five arms, decoded:
+
+| symType | arm |
+|---|---|
+| 0 | `return rotation`: a shape with no symmetry treats a mirror as a no-op |
+| 1 | `q = GetRotationStatic(rotation)`; negate `q`'s component on the mirror axis **and its `w`**, post-multiply `AngleAxis(180, forward)` for the forward axis or `AngleAxis(180, up)` for the up axis (the right axis takes neither), then `return ConvertRotationFree(0, q, false)` |
+| 2 | face permutation: `face = RotToBlockFace(rotation)`, then swap 2 with 4 (up axis), 0 with 1 or 3 with 5 (right axis), or set a mirror flag for faces 2 and 4 (forward axis), and convert the local rotation with that flag |
+| 3, 4 | the same `ConvertRotationFree(rotation, AngleAxis(180, up or forward), flag)` composition with their own per-axis switches |
+
+Two consequences matter more than the arms themselves.
+
+- **`getVisualMesh(i)` is `visualMeshes[i]`, a plain array index.** `MirrorStatic` never selects a
+  mesh, so a shape's symmetry is carried entirely by the rotation index it returns; the extra
+  `SymType_*` children are meshes at other indices, reached through that rotation.
+- **The mirror is applied at prefab-stamp time.** `Prefab` computes
+  `rotation = (byte)MirrorStatic(axis, blockValue.rotation, block.shape.SymmetryType)` while
+  walking a prefab's cells and writes that rotation into the cell (IL `0x0095`..`0x00B3` in
+  `Prefab.il.txt`), so a prefab mirrored across an axis gets a converted rotation per cell rather
+  than a mirrored mesh or a flipped prefab.
+
+A shape whose `SymmetryType` is 0 therefore does **not** mirror at all: a prefab pairing the same
+shape at two rotations across a mirror axis is not a mirrored pair, and any reader that expects
+one is reading the data wrong.
 
 ## 3. Collision and movement (the server-relevant contract)
 
