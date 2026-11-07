@@ -54,7 +54,7 @@ new number.
 
 ## Unreleased
 
-**17 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
+**18 commits after `v3.4.0` (2026-11-05) as of 2026-11-07.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -76,7 +76,10 @@ section described is published under the tag and in
   than a planar position, which is what the earlier reading mistook for a teleport.
 - The sign noise fill is decoded: its nine-float record, the seed as `offset = seed * 10`, the
   fractal gradient noise with its hash constants and eight-direction table, and the coverage and
-  alpha the branch builds from `softness`, `dilate` and `fade`.
+  alpha the branch builds from `softness`, `dilate` and `fade`. A shipped prefab thumbnail then
+  constrains it: the sign's eleven fills share `seed="0"`, and the closed form at their shipped
+  weights would bury lettering the preview shows legible, so the model is decoded and not
+  calibrated, and the thumbnail is the frame to calibrate against.
 - The eight sign warp transforms are decoded from the shipped client shader,
   and the two branches the first reading got wrong (`Kaleido`'s third field,
   `Perspective`'s closed form) are marked open rather than described, the
