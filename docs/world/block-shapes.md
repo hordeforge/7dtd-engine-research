@@ -107,6 +107,47 @@ Observed per-family behavior (all from IL):
 multiblock child layout, `BlockShapeModelEntity.GetRotatedOffset`, and the
 face-flag rotation below.
 
+### 2.1 The 32-entry `rotationsToQuats` table, from IL
+
+The table is not data: `BlockShapeNew..cctor` (`IL=309`) builds all 32 entries with
+`Quaternion.AngleAxis`, so the values can be written down exactly. `up`, `right` and `forward` are
+`UnityEngine.Vector3`'s own axes, and every two-factor entry is
+`AngleAxis(first, axis) * AngleAxis(second, up)` in that operand order, which in Unity applies the
+second rotation first.
+
+| index | construction |
+|---|---|
+| 0..3 | `AngleAxis(0, 90, 180, 270, up)` |
+| 4..7 | `AngleAxis(180, right) * AngleAxis(180, 270, 360, 450, up)` |
+| 8..11 | `AngleAxis(90, right) * AngleAxis(180, 270, 360, 450, up)` |
+| 12..15 | `AngleAxis(90, forward) * AngleAxis(0, 90, 180, 270, up)` |
+| 16..19 | `AngleAxis(270, right) * AngleAxis(0, 90, 180, 270, up)` |
+| 20..23 | `AngleAxis(270, forward) * AngleAxis(0, 90, 180, 270, up)` |
+| 24..27 | `AngleAxis(45, 135, 225, 315, up)` |
+| 28..31 | `Quaternion.identity` |
+
+Three facts fall out of the table and matter to any consumer:
+
+- **28..31 are the identity**, not four more orientations. The 24-orientation model is indices 0..23;
+  28..31 exist so a lookup never has to range-check. A consumer that treats 28..31 as rotations
+  turns a cell by nothing and reports a plausible-looking zero.
+- **The 45-degree band is the yaw only** (24..27); there is no tipped entry in it, which is why
+  `CalcRotation` treats rotation >= 24 as the free band rather than extending the 24-cycle.
+- The same cctor sets `centerOffsetV = (-0.5, -0.5, -0.5)` and builds `rotations[3, 28]` by calling
+  `CalcRotation(i, i, rotation)` for every pair, so the cache is the table of that arithmetic and
+  not a second source.
+
+**Symmetry (`SymType_*`).** A shape prefab may carry child GameObjects named `SymType_0`,
+`SymType_2`, `SymType_3` and `SymType_4`; loading them sets `MeshData::symTypeOverride` to that
+number, and a non-`-1` override is copied into `BlockShape::SymmetryType` (`BlockShapeNew` IL
+`0x0131`..`0x0140`). `BlockShapeNew::MirrorStatic(EnumMirrorAlong, Int32 rotation, Int32 _symType)`
+(`IL=289`) switches on that value with five arms. The arm for `symType` 1 is
+`GetRotationStatic(rotation) * AngleAxis(angle, up or forward)` followed by
+`ConvertRotationFree(rotation, quaternion, false, false)`, i.e. the mirror is expressed as a
+**rotation converted into the free band**, not as mirrored geometry. The other four arms route
+through `RotToBlockFace` and their own per-face switches; they are inventoried but not yet read in
+detail, so the per-symType mapping is the open part of this section rather than a settled fact.
+
 ## 3. Collision and movement (the server-relevant contract)
 
 The dedicated server's AI consumes shapes through `Block.IsMovementBlocked` /
