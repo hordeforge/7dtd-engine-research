@@ -189,6 +189,18 @@ transcription.
 | Stretch | `p = uv.yx - offset.yx`; `q = R(-rotation) p`; `t = abs(q.x) / (distance + width)`; displacement `m = abs(q.x) - distance` when `t > 1`, else `width t^exponent`; `m = max(m, 1e-4) sign(q.x)`; `uv' = offset + R(rotation) (q.x, m)` |
 | Grid | `p = R(-rotation) (uv.yx - offset.yx) / scale`; mode 2 snaps to a hex lattice, mode 1 shifts alternate rows by `shift` and snaps `x` to `aspect`, mode 0 snaps nothing; `uv' = offset + R(rotation) scale (p.y, p.x)` |
 
+`Perspective`'s dispatch is the reason its body read as missing: there is no
+`== 15` comparison anywhere. The chain compares `floatBitsToUint(descriptor.x) < 16u`
+after the `== 14` arm, so that block **is** branch 15, and the `== 16` test beside it is
+its sibling. The body builds the rotation matrix from `cos`/`sin` of the record's three
+angles inline (the XXYZX/YYYZX/ZYZX product pattern an inlined Euler XYZ matrix
+compiles to), normalises it, lifts the layer's uv to a 3-vector with the record's fourth
+float, divides by `min(dot(axis, lifted), -0.001)`, projects the result back onto the
+matrix's rows and doubles it. That is a closed form in four numbers; it is not written
+out here because the intermediate `_69` vector's x and y are set outside the branch in
+a register the dump names only by index, and an expression assembled from a guessed
+pair is worse than a named gap.
+
 The `Perspective` and `Grid` branches are 50 to 100 instructions each; the
 per-instruction detail is reproducible with the recipe below rather than quoted
 here.
