@@ -107,7 +107,11 @@ new number.
   water finalize at 30, and the `(height - 1) * 257` saved `u16` height map.
 - `biomeLayout`'s single writer is pinned: the client's new-world screen, so a dedicated server
   generates `CenterForest` and the other four layouts are client choices.
-**36 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+- `generateTerrainFeature` (IL=652) is pinned for lakes and dry features: the plural group's scale
+  times 1.4, a random rotation, the shuffled street-tile candidates (wilderness or unclaimed, not
+  mountains, feature-free, more than three neighbours), the water feature's lower-layer plus water
+  stamp, and the dry feature's reserving stamp. The river path is still unread.
+**37 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
