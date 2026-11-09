@@ -80,13 +80,14 @@ new number.
   left column and right column, and the first unset cell with a same-type cardinal neighbour is
   set.
 - `GenerateTerrain` (IL=128) sets `BiomeSize = WorldSize / 8` and takes the border water
-  mask from `Rand.Instance.Int() & 15`.
+  mask from `Rand.Instance.Int() & 15`; the mask gates the terrain-border stamps, a clear bit
+  placing a stamp at that edge and `15` skipping the border task.
 - The RWG biome seed and growth rules are pinned: the ring layouts put five entries on a
   40 percent ring around a moving centre (forest or wasteland at the centre, `Circle2`'s
   middle entry jittered and pulled in), growth runs quota passes of
   `1 + int(fraction * 4)` steps per entry, then fill passes for every non-forest biome, and
   every remaining tile becomes forest.
-**29 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+**30 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 

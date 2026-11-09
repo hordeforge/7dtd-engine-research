@@ -168,6 +168,10 @@ regions are grown with edge preference and neighbor checks
 `biomeMap` `DataMap`. `GenerateTerrain` (IL=128) sets `BiomeSize = WorldSize / 8`
 before the tile pass and `BorderWaterMask = Rand.Instance.Int() & 15`: the low four bits
 of one random int are the only entropy behind which world edges become water border.
+The mask is consumed by the terrain-border stamp task (`GenerateBaseStamps`'s
+`b__0`): for each of the four edges in order, a **clear** bit (1, 2, 4, 8) places that
+edge's border stamp just outside the world, and `15` skips the border task entirely.
+The mask does not write water itself; it selects which edges get a border stamp.
 `BiomeType`: forest=0, burntForest=1, desert=2, snow=3, wasteland=4, waterDebug=6.
 
 `CalcBiomeTileBiomeData(int totalTiles, int multiple)` (IL=162) is pinned and
