@@ -185,6 +185,14 @@ sum equals `totalTiles`; entries whose `fraction` is below the smallest get no
 tile. The list is what the region-growing pass consumes, so the later a biome
 sits in a pass, the more tiles it starts with.
 
+The neighbour rules the region grower reads are pinned too. `HasBiomeNeighbor(x, y,
+type)` (IL=71) is true when any of the four cardinal neighbours inside the tile grid
+holds `type`. `GetBiomeFromNeighbors(x, y)` (IL=91) reads the same four in a fixed
+order, left, right, up, down, and returns the first neighbour that is neither 255
+(unset) nor wasteland (4); if all four are unset or wasteland it returns 255.
+Wasteland is therefore never inherited from a neighbour, which keeps a wasteland
+region from growing across its edge.
+
 **RE gap:** the runtime humidity/temperature grids feeding `GetHumidityAt` /
 `GetTemperatureAt` (IL sizes pinned, 808) - the 6-axis climate
 generation that maps (temp, moisture) to a biome per the biomes.xml
