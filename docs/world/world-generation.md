@@ -165,9 +165,10 @@ flowchart TB
 `CalcBiomeTileBiomeData` converts the five biome weights into tile counts, then
 regions are grown with edge preference and neighbor checks
 (`FindBiomeEmptyAndSet`, `HasBiomeNeighbor`, `GetBiomeFromNeighbors`) into the
-`biomeMap` `DataMap`. `BorderWaterMask` (randomized from `Rand`) selects which
-world edges become water border. `BiomeType`: forest=0, burntForest=1, desert=2,
-snow=3, wasteland=4, waterDebug=6.
+`biomeMap` `DataMap`. `GenerateTerrain` (IL=128) sets `BiomeSize = WorldSize / 8`
+before the tile pass and `BorderWaterMask = Rand.Instance.Int() & 15`: the low four bits
+of one random int are the only entropy behind which world edges become water border.
+`BiomeType`: forest=0, burntForest=1, desert=2, snow=3, wasteland=4, waterDebug=6.
 
 `CalcBiomeTileBiomeData(int totalTiles, int multiple)` (IL=162) is pinned and
 plain arithmetic. It sums the five integer weights

@@ -79,7 +79,9 @@ new number.
   by -2..2 on each axis, then a square perimeter walk by increasing radius, top row, bottom row,
   left column and right column, and the first unset cell with a same-type cardinal neighbour is
   set.
-**26 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+- `GenerateTerrain` (IL=128) sets `BiomeSize = WorldSize / 8` and takes the border water
+  mask from `Rand.Instance.Int() & 15`.
+**27 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
