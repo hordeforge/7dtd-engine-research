@@ -92,8 +92,9 @@ new number.
   probability 0.8, and plains as single cells. The budget arithmetic behind it is pinned too:
   the zero-sum substitution, the weight-gated top-up fall-through, a plains count that is
   never decremented, the unconditional four-hill charge, and the chain's unset-cell test
-  along `directions4way`.
-**32 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+  along `directions4way`. A hill budget that lands on one leaves its tile at 255, so the map is
+  not guaranteed full and no terrain stamp pass claims that tile.
+**33 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
