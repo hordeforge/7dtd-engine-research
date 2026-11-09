@@ -176,6 +176,7 @@ should be re-checked against IL before you rely on it.
 | [raycast-pathing.md](../entities/raycast-pathing.md) | audited (pass 2) |
 | [re-methodology.md](../meta/re-methodology.md) | audited (pass 1) |
 | [residuals.md](../meta/residuals.md) | audited (pass 1) |
+| [rwg-stamps.md](../world/rwg-stamps.md) | audited (2026-11-09, stamp format and rasterizers read from the V3.3.0 b18 client; the V3.4.0 b10 confirmation is pending) |
 | [sandbox-options.md](../admin/sandbox-options.md) | audited (pass 2) |
 | [save-persistence.md](../world/save-persistence.md) | audited (pass 2) |
 | [save-region.md](../world/save-region.md) | audited (pass 1) |
