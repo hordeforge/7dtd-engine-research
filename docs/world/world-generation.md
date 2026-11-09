@@ -352,8 +352,9 @@ x-major), then for each group:
 - With neither left it writes a plain.
 - The map is not guaranteed full: a group whose hill budget lands on exactly one spends that
   position while the unconditional charge takes the count to -3, and the tile keeps 255. Since the
-  stamp passes run per type (plains, hills, mountains), a 255 tile is one no terrain stamp pass
-  claims.
+  stamp passes run per type (plains, hills, mountains) and each requires its whole tile window to
+  match, a 255 cell also excludes the window that holds it: a bare cell leaves up to sixteen
+  plains tiles unstamped.
 - The group is done when its position list is empty, and the pass repeats for every
   biome group. `GenerateBaseStamps` (IL=167) then runs three parallel tasks:
 
@@ -373,6 +374,50 @@ count/radius/strength, biome mask cutoff), pulls a matching `RawStamp`
 color stamp to `biomeLayer`. Nothing touches the height map yet; stamps are
 deferred draw commands. Finally `DrawBiomeRadStampsToMaps` runs two tasks that
 rasterize `biomeLayer` -> `biomeDest` and `radiationLayer` -> `radDest`.
+
+The two methods behind those sentences are now read in full (IL=283 and IL=144), and their
+details are what a stamp pass has to reproduce.
+
+**The tile walk (`GenerateTerrainFromTiles`, IL=283).** `tileStep` is `tileSize / 256`, so a plains
+pass covers 4x4 tile cells per stamp tile, hills 2x2 and mountains 1. A tile is skipped unless
+**every** cell of its `tileStep x tileStep` window holds the requested type, which is where a 255
+cell costs a whole window rather than itself. For a tile that matches:
+
+- The biome is read at the window's top-left cell; an unset (255) biome is read as forest.
+- Mountains in a **wasteland** biome are demoted: the cell is set to plains and the tile is skipped,
+  so the mountains pass leaves the wasteland alone and the map records plains there.
+- `centreX = x * 256 + tileSize / 2` and `centreY = y * 256 + tileSize / 2`, the tile's centre in
+  blocks; `scale = properties.scale * tileStep` and `clusterRadius *= tileStep`.
+- `TryGetStamp` takes the combo name and the bare terrain name: it tries `{biome}_{terrain}` and
+  falls back to `{terrain}`, and a false result **breaks** the cluster loop, so a missing stamp ends
+  the cluster rather than skipping one member. The combo's biome part is the enum member name, which
+  is `forest`, `burntForest`, `desert`, `snow`, `wasteland`; `rwgmixer.xml` only ships
+  `forest_mountains` and `desert_mountains`, so every other tile falls back to the generic
+  `plains`/`hills`/`mountains` stamps.
+- The first stamp sits on the centre with `alpha = clusterStrength` and `additive = false`; every
+  later stamp is offset by `RandomOnUnitCircle() * clusterRadius` and drawn with
+  `alpha = clusterStrength * 0.45` and `additive = true`. The offset radius is 0 for the first stamp
+  and `clusterRadius` afterwards, which is why the first is centred.
+- Each stamp is constructed as `(rawStamp, TranslationData(centre + round(offset), scale.x, scale.y),
+  Color32(0,0,0,0), 0.1, false, rawStamp.name)`: a zero custom colour, a 0.1 alpha cutoff, and the
+  raw stamp's name carried for the log.
+- When the properties set `use_biome_mask`, a second stamp of the same raw stamp and translation goes
+  to `biomeLayer` with the biome's colour and `biome_mask_min` as its cutoff.
+
+Each pass logs `GenerateTerrainFromTiles {terrain}, start at {seconds}, r={Rand.PeekSample():x}`, an
+RNG state probe: two runs that agree on that value have drawn the same number of samples, which is
+the check a reimplementation can use before comparing the stamps themselves.
+
+**The properties (`GetTerrainProperties`, IL=144).** Defaults are `scale = (1, 1)`,
+`clusters = (3, 85, 1)`, `use_biome_mask = false`, `biome_mask_min = 0.1`. Every property is read
+from the `{biome}_{terrain}` group first and from the bare `{terrain}` group second, so a world sets
+a default per terrain type and overrides it per biome and terrain:
+
+- `scale` parses a `Vector2` and is then **halved** (`scale *= 0.5`), so the configured range is
+  twice the drawn size.
+- `clusters` parses a `Vector3`: `count = int(x)`, `radius = int(256 * y)`, `strength = z`. The
+  radius is therefore written in 256-block units.
+- `use_biome_mask` parses a bool and `biome_mask_min` a float.
 
 ### 3.3 Street tiles, towns, districts
 

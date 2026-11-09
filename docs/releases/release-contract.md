@@ -93,8 +93,13 @@ new number.
   the zero-sum substitution, the weight-gated top-up fall-through, a plains count that is
   never decremented, the unconditional four-hill charge, and the chain's unset-cell test
   along `directions4way`. A hill budget that lands on one leaves its tile at 255, so the map is
-  not guaranteed full and no terrain stamp pass claims that tile.
-**33 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+  not guaranteed full and a stamp pass skips every window that holds the cell.
+- `GenerateTerrainFromTiles` (IL=283) and `GetTerrainProperties` (IL=144) are pinned: the tile
+  window must match the type in every cell, mountains are demoted to plains in a wasteland, the
+  first stamp of a cluster is centred and the rest are offset additively at 0.45 strength, the
+  biome-mask stamp goes to the biome layer, properties fall back from `{biome}_{terrain}` to
+  `{terrain}`, scale is halved, and clusters are `count, radius in 256-block units, strength`.
+**34 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
