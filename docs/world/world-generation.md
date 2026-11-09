@@ -322,20 +322,33 @@ tile-helper `worldCoordsToTileCoords` (IL=41) is the 512x512 tiled-map fold:
 
 `GenerateTerrainTiles` (IL=385) assigns each tile a `TerrainType`
 (plains=0/hills=1/mountains=2) using the Plains/Hills/Mountains ratio into
-`terrainTypeMap`. The assignment is pinned in full. It groups the
-biome map's tiles by `BiomeType` first, then for each group:
+`terrainTypeMap`, a `DataMap<TerrainType>` over the biome map's grid
+(`WorldSize / 256`) initialised to 255. The assignment is pinned in full. It groups the
+biome map's tiles by `BiomeType` first (five `TileGroup`s in biome order, positions added
+x-major), then for each group:
 
-- `plains = floor(Plains / sum * positions)`, `hills` and `mountains` the same, and a
-  random top-up loop adds one to a type whose weight is above zero until the three
-  counts sum to the group's position count.
+- `plains = floor(Plains / sum * positions)`, `hills` and `mountains` the same, where
+  `sum = Plains + Hills + Mountains`; a zero sum is replaced by `Plains = 1`, `sum = 1`, so
+  an all-zero mix assigns plains everywhere. A random top-up loop
+  `while (positions > plains + hills + mountains)` draws `Range(3)` and increments that type
+  only when its **weight** is above zero, falling through to the next index (0 then 1 then
+  2) otherwise; a draw of 2 with `Mountains == 0` increments nothing and the loop draws
+  again. `plains` is never decremented: plains is the fallback for every position the hill
+  and mountain budgets do not spend.
 - A position is taken at random, removed from the list, and its cell read: a cell whose
   `terrainTypeMap` is already set (not 255) is skipped.
-- With hills left, a run of two or more writes a **2x2 block** of hills at the position
-  aligned down to even coordinates (`x & -2`, `y & -2`), then subtracts four from the
-  hill count; a lone hill cell writes nothing.
-- Otherwise, with mountains left it writes one mountain, and with probability 0.8 steps
-  to a random 4-way neighbouring position that is still in the group's list and writes
-  that next (the mountain chain); a failed step ends the chain.
+- With hills left, two or more hills write a **2x2 block** of hills at the position aligned
+  down to even coordinates (`x & -2`, `y & -2`), all four cells written even when an
+  earlier block claimed them; the hill count then drops by four **unconditionally**, so a
+  lone hill writes nothing and drives the count negative. A budget therefore buys
+  `floor((hills + 2) / 4)` blocks when the group has the positions for them.
+- Otherwise, with mountains left it drops the count by one and writes one mountain; while
+  mountains remain and `Rand.Float() < 0.8` it draws a direction `Range(4)`, then steps
+  `dir = (dir + 1) & 3` up to four times, taking the first neighbour along
+  `directions4way` (`up (0,1)`, `right (1,0)`, `down (0,-1)`, `left (-1,0)`) that is still
+  in the group's list **and** whose terrain cell is unset. That neighbour becomes the next
+  position processed, so the chain walks the group's remaining positions and a set cell
+  ends it.
 - With neither left it writes a plain.
 - The group is done when its position list is empty, and the pass repeats for every
   biome group. `GenerateBaseStamps` (IL=167) then runs three parallel tasks:
