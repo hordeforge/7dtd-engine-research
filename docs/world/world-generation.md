@@ -686,10 +686,17 @@ Grade: verified from the IL dumps.
 `generateTerrainFeature(name, selection, isWater)` runs for `lake` and `river`
 (water features) and `canyon` / `crater` (terrain features). `GetCount` maps the
 `Few/Default/Many` selection through rwgmixer properties to a count; each
-feature picks a stamp variant, a random position/rotation/scale (rivers get a
-dedicated branch that lays a path of water stamps and avoids `mountain` terrain
-tiles), appends to `terrainLayer` / `lowerLayer` (terrain) or `waterLayer`
-(water), and records a `waterRects` entry for water features.
+feature picks a stamp variant, a random position/rotation/scale, appends to
+`lowerLayer` (and to `waterLayer` when it is a water feature), and records a
+`waterRects` entry for water features.
+
+The method is now read in full (IL=652), and two earlier summaries were wrong about it. There is
+**no** river-specific branch: a river is placed exactly like a lake, one stamp at a street tile's
+centre, and the only river-specific code is the "Could not find stamp" log when the stamp lookup
+fails. What reads as "avoids mountain tiles" is the shared overlap test: a water feature whose stamp
+name contains `mountain` is dropped when its area overlaps a mountains stamp in `terrainLayer`, and
+the attempt is retried with `i--`. A river's long, thin stamp is what makes a chain of them read as a
+river, not a path walker.
 
 Then two tasks rasterize everything:
 
