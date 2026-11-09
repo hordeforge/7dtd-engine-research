@@ -685,6 +685,36 @@ Then two tasks rasterize everything:
 After both complete, `ClearWaterUnderTerrain` iterates `waterRects` and clears
 (Burst) water cells whose terrain rises above the water surface.
 
+**`generateTerrainFeature` (IL=652) in full, for lakes and dry features.** The method reads
+`{name}s.scale` from the world properties (the plural group, `lakes`), so the draw is
+`scale = RandomRange(min, max) * 1.4`; the rotation is `RandomRange(0, 360)`, and the count comes from
+`GetCount({name}s, selection, null)`. Every attempt then draws one stamp variant
+(`TryGetStamp(name)`; a miss logs `Could not find stamp {0}` for a river and is otherwise silent),
+takes the stamp's rotated bounding box from its four rotated corners, and collects the street tiles
+inside that box. The candidate list is **shuffled**: the key is a draw from a second stream seeded
+`Seed + selection.GetHashCode() + 2`, while the scale and rotation stream is seeded
+`Seed + selection.GetHashCode() + 1`.
+
+A tile is a candidate only when it is unclaimed or inside a **wilderness** district (a tile with a
+township and a district whose name is not `wilderness` is rejected), its terrain type is not
+mountains, it holds no feature yet, and `GetNeighborCount() > 3`. The first candidate is taken, and
+every street tile its rectangle covers gets `HasFeature`. A water feature's stamp that contains
+`mountain` in its name is dropped when its area overlaps an existing mountains stamp in
+`terrainLayer`, and the attempt is retried (`i--`).
+
+Layers, by kind:
+
+- **Water feature** (`lake`): the stamp goes to `lowerLayer`, and a second stamp of the same raw
+  stamp and transform goes to `waterLayer` with `Color32(0, 0, WaterHeight, 255)`, an alpha cutoff of
+  `0.1` and `isWater` set. The first lowers the ground, the second marks where water survives.
+- **Dry feature** (`canyon`, `crater`): the stamp goes to `lowerLayer`, and unless its area overlaps a
+  `waterLayer` stamp or a `waterRects` entry it *also* gets a `waterLayer` stamp at the same transform
+  with a cutoff of `0.05`. That stamp's own blue channel is zero for the shipped canyon and crater
+  stamps, so it reserves the ground rather than filling it.
+
+`waterRects` is only read here; whatever writes it is elsewhere. The river branch's path laying is
+the one piece of this method still unread.
+
 ### 3.5 POI placement: wilderness, highways, prefabs
 
 - `POISmoother.SmoothStreetTiles` flattens terrain under town street tiles.
