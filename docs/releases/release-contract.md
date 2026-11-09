@@ -87,7 +87,10 @@ new number.
   middle entry jittered and pulled in), growth runs quota passes of
   `1 + int(fraction * 4)` steps per entry, then fill passes for every non-forest biome, and
   every remaining tile becomes forest.
-**30 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+- The terrain-type tile assignment is pinned: per biome group, ratio counts with a random
+  top-up, hills as even-aligned 2x2 blocks, mountains chaining to a 4-way neighbour with
+  probability 0.8, and plains as single cells.
+**31 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
