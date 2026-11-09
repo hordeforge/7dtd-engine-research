@@ -350,6 +350,10 @@ x-major), then for each group:
   position processed, so the chain walks the group's remaining positions and a set cell
   ends it.
 - With neither left it writes a plain.
+- The map is not guaranteed full: a group whose hill budget lands on exactly one spends that
+  position while the unconditional charge takes the count to -3, and the tile keeps 255. Since the
+  stamp passes run per type (plains, hills, mountains), a 255 tile is one no terrain stamp pass
+  claims.
 - The group is done when its position list is empty, and the pass repeats for every
   biome group. `GenerateBaseStamps` (IL=167) then runs three parallel tasks:
 
