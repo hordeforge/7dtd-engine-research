@@ -193,6 +193,19 @@ order, left, right, up, down, and returns the first neighbour that is neither 25
 Wasteland is therefore never inherited from a neighbour, which keeps a wasteland
 region from growing across its edge.
 
+The grower's placement is a spiral from the biome's centre. `FindBiomeEmptyAndSet(b,
+edge)` (IL=377) computes `max = WorldSize/256 - 1 - edge`, jitters the centre by
+`Rand.Range(-2, 3)` on each axis (`Range(int, int)` with an exclusive upper bound, so
+-2..2), then for `radius` 1..`max` walks that square's perimeter in a fixed order: the
+cells `x - i, y - radius` and `x + i, y - radius` (top row), then `x - i, y + radius`
+and `x + i, y + radius` (bottom row), then `x - radius, y - i` and `x - radius, y + i`
+(left column), then the same two with `x + radius` (right column), `i` running from 0
+to the radius, each candidate bounded by the radius's clamped `[minX, maxX]` and
+`[minY, maxY]` window. The first candidate whose `biomeMap` value is 255 (unset) and
+which has a cardinal neighbour of the same type is set to the biome and the method
+returns true; a square with no such cell widens the radius, and the walk gives up after
+`max`.
+
 **RE gap:** the runtime humidity/temperature grids feeding `GetHumidityAt` /
 `GetTemperatureAt` (IL sizes pinned, 808) - the 6-axis climate
 generation that maps (temp, moisture) to a biome per the biomes.xml
