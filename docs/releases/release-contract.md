@@ -70,8 +70,8 @@ new number.
 - The RWG biome tile counts are pinned from `CalcBiomeTileBiomeData` (IL=162): the five
   `*BiomeWeight` values summed and multiplied by the pass count, one block of five
   `BiomeTypeData` entries per pass with `fraction = weight / total` and `tileCount = totalTiles`,
-  each block sorted by fraction ascending, then one tile added round-robin until the counts reach
-  `totalTiles`.
+  each block sorted by fraction ascending, every entry starting at `totalTiles` (the round-robin
+  correction after the sum does not run with the caller's arguments).
 - The biome neighbour rules are pinned: `HasBiomeNeighbor` (IL=71) is a four-cardinal test, and
   `GetBiomeFromNeighbors` (IL=91) reads left, right, up, down in that order and returns the first
   neighbour that is neither unset (255) nor wasteland (4), else 255. Wasteland is never inherited.
@@ -81,7 +81,7 @@ new number.
   set.
 - `GenerateTerrain` (IL=128) sets `BiomeSize = WorldSize / 8` and takes the border water
   mask from `Rand.Instance.Int() & 15`.
-**27 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+**28 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 

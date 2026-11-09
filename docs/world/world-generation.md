@@ -180,11 +180,14 @@ entries in `BiomeType` order (0 forest, 1 burntForest, 2 desert, 3 snow,
 4 wasteland), where `fraction = weight / total` and `tileCount = totalTiles`,
 orders that pass's five by `fraction` **ascending**, appends them to the result
 and clears the pass list. The result therefore holds `5 * multiple` entries, one
-block of five per pass, each block sorted by share. Finally it sums every
-entry's `TileCount` and adds one to entries in list order, wrapping, until the
-sum equals `totalTiles`; entries whose `fraction` is below the smallest get no
-tile. The list is what the region-growing pass consumes, so the later a biome
-sits in a pass, the more tiles it starts with.
+block of five per pass, each block sorted by share, and every entry starts with
+`TileCount = totalTiles`. What follows is a round-robin that increments entries
+while a counter is below `totalTiles`, but the counter starts at the sum of the
+entries' counts (`5 * totalTiles`), so with the caller's arguments that loop does
+not run. The seed placement that follows in `GenerateBiomeTiles` is what decrements
+these counts as it places a biome's centres, so the counts are quotas for that
+placement, not a final tile share. The weights therefore steer placement through
+`fraction`, and the list order is block by block, each block ascending by share.
 
 The neighbour rules the region grower reads are pinned too. `HasBiomeNeighbor(x, y,
 type)` (IL=71) is true when any of the four cardinal neighbours inside the tile grid
