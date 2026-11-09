@@ -351,10 +351,9 @@ x-major), then for each group:
   ends it.
 - With neither left it writes a plain.
 - The map is not guaranteed full: a group whose hill budget lands on exactly one spends that
-  position while the unconditional charge takes the count to -3, and the tile keeps 255. Since the
-  stamp passes run per type (plains, hills, mountains) and each requires its whole tile window to
-  match, a 255 cell also excludes the window that holds it: a bare cell leaves up to sixteen
-  plains tiles unstamped.
+  position while the unconditional charge takes the count to -3, and the tile keeps 255. A 255 cell
+  is not a match for any type, but it does not exclude its neighbours: a pass fires on a window that
+  holds any cell of its type, so only the bare cell itself goes unstamped.
 - The group is done when its position list is empty, and the pass repeats for every
   biome group. `GenerateBaseStamps` (IL=167) then runs three parallel tasks:
 
@@ -379,9 +378,12 @@ The two methods behind those sentences are now read in full (IL=283 and IL=144),
 details are what a stamp pass has to reproduce.
 
 **The tile walk (`GenerateTerrainFromTiles`, IL=283).** `tileStep` is `tileSize / 256`, so a plains
-pass covers 4x4 tile cells per stamp tile, hills 2x2 and mountains 1. A tile is skipped unless
-**every** cell of its `tileStep x tileStep` window holds the requested type, which is where a 255
-cell costs a whole window rather than itself. For a tile that matches:
+pass covers 4x4 tile cells per stamp tile, hills 2x2 and mountains 1. The window scan starts its flag
+at true and **clears it on the first cell that holds the requested type**, which stops the scan and
+processes the tile: **one** cell of the type fires a tile, and a bare (255) cell costs nothing. (An
+earlier revision of this note read the flag as "every cell must match". The IL is the other way round,
+and the difference is the whole surface: about a third of a 6144-block map is drawn under the wrong
+reading and more than nine tenths under this one.) For such a tile:
 
 - The biome is read at the window's top-left cell; an unset (255) biome is read as forest.
 - Mountains in a **wasteland** biome are demoted: the cell is set to plains and the tile is skipped,

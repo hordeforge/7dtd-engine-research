@@ -111,7 +111,10 @@ new number.
   times 1.4, a random rotation, the shuffled street-tile candidates (wilderness or unclaimed, not
   mountains, feature-free, more than three neighbours), the water feature's lower-layer plus water
   stamp, and the dry feature's reserving stamp. The river path is still unread.
-**37 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+- The terrain tile walk's condition is corrected: the window flag is cleared on the **first** cell of
+  the requested type, so one cell fires a tile, and the earlier "every cell must match" reading is
+  recorded as wrong with what it costs (a third of a 6144-block map drawn instead of nine tenths).
+**38 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
