@@ -169,6 +169,22 @@ regions are grown with edge preference and neighbor checks
 world edges become water border. `BiomeType`: forest=0, burntForest=1, desert=2,
 snow=3, wasteland=4, waterDebug=6.
 
+`CalcBiomeTileBiomeData(int totalTiles, int multiple)` (IL=162) is pinned and
+plain arithmetic. It sums the five integer weights
+(`ForestBiomeWeight`, `BurntForestBiomeWeight`, `DesertBiomeWeight`,
+`SnowBiomeWeight`, `WastelandBiomeWeight`; the settings' 13/18/22/23/24), then
+multiplies the sum by `multiple` to get `total = sum * multiple`. For each of
+`multiple` passes it builds five `BiomeTypeData(type, fraction, tileCount)`
+entries in `BiomeType` order (0 forest, 1 burntForest, 2 desert, 3 snow,
+4 wasteland), where `fraction = weight / total` and `tileCount = totalTiles`,
+orders that pass's five by `fraction` **ascending**, appends them to the result
+and clears the pass list. The result therefore holds `5 * multiple` entries, one
+block of five per pass, each block sorted by share. Finally it sums every
+entry's `TileCount` and adds one to entries in list order, wrapping, until the
+sum equals `totalTiles`; entries whose `fraction` is below the smallest get no
+tile. The list is what the region-growing pass consumes, so the later a biome
+sits in a pass, the more tiles it starts with.
+
 **RE gap:** the runtime humidity/temperature grids feeding `GetHumidityAt` /
 `GetTemperatureAt` (IL sizes pinned, 808) - the 6-axis climate
 generation that maps (temp, moisture) to a biome per the biomes.xml
