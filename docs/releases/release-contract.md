@@ -75,6 +75,10 @@ new number.
 - The biome neighbour rules are pinned: `HasBiomeNeighbor` (IL=71) is a four-cardinal test, and
   `GetBiomeFromNeighbors` (IL=91) reads left, right, up, down in that order and returns the first
   neighbour that is neither unset (255) nor wasteland (4), else 255. Wasteland is never inherited.
+- The region grower's placement is pinned from `FindBiomeEmptyAndSet` (IL=377): a centre jittered
+  by -2..2 on each axis, then a square perimeter walk by increasing radius, top row, bottom row,
+  left column and right column, and the first unset cell with a same-type cardinal neighbour is
+  set.
 **26 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
