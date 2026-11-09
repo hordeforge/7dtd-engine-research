@@ -377,6 +377,20 @@ rasterize `biomeLayer` -> `biomeDest` and `radiationLayer` -> `radDest`.
 The two methods behind those sentences are now read in full (IL=283 and IL=144), and their
 details are what a stamp pass has to reproduce.
 
+**The base elevation (`GenerateBaseStamps`, IL=167).** Before any stamp draws, the method writes
+`35` into **every** cell of `data.HeightMap`. That 35 is the world's base: the layers are deltas on
+it, the water level is 30, and a lake is a stamp that pulls its ground below the water line. A
+reimplementation that starts its height map at zero puts every column the stamps did not reach in a
+thirty-block pit, and its lakes then flood ground that stock would leave dry. The same method then
+sets its border stamps' size range to `(0.6, 0.85)` and starts three tasks:
+
+- **terrainBorderTask** (IL=437): a `BorderWaterMask` of `15` skips it entirely. Otherwise, per edge,
+  a clear mask bit places a land border stamp inside a 75-block strip at that edge, with the along-edge
+  position stepping by the tile size and a random offset under 75, and a set bit takes the wet-edge
+  branch. The per-edge stamp names and the wet branch's placement are still unread.
+- **radTask** (IL=1): empty, as recorded above.
+- **biomeTask** (IL=173): the `filler_biome` colour pass into `biomeDest`, described in the stamps doc.
+
 **The tile walk (`GenerateTerrainFromTiles`, IL=283).** `tileStep` is `tileSize / 256`, so a plains
 pass covers 4x4 tile cells per stamp tile, hills 2x2 and mountains 1. The window scan starts its flag
 at true and **clears it on the first cell that holds the requested type**, which stops the scan and
