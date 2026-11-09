@@ -117,7 +117,9 @@ new number.
 - `GenerateBaseStamps`'s base elevation is pinned: it writes `35` into every height cell before any
   stamp draws, so the world is a plain at 35 with stamps as deltas and the water level 30 below it.
   The border task's mask gate and 75-block strip are pinned with it; its wet branch is still unread.
-**39 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+- `generateTerrainFeature` is pinned as read in full: there is no river-specific branch (a river is a
+  water feature placed like a lake), and two earlier summaries of it are corrected.
+**40 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
