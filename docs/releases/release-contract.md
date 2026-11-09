@@ -105,7 +105,9 @@ new number.
   `StampGroup` shapes, the bilinear `CalcRotatedValue` sampler, the height/watershed rasterizers
   (additive vs lerp, the `1e-05` floor, the 0.1 cutoff), `AdjustHeights`'s floor of 2, the binary
   water finalize at 30, and the `(height - 1) * 257` saved `u16` height map.
-**35 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+- `biomeLayout`'s single writer is pinned: the client's new-world screen, so a dedicated server
+  generates `CenterForest` and the other four layouts are client choices.
+**36 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
