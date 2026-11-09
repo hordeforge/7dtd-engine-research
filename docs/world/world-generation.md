@@ -322,7 +322,23 @@ tile-helper `worldCoordsToTileCoords` (IL=41) is the 512x512 tiled-map fold:
 
 `GenerateTerrainTiles` (IL=385) assigns each tile a `TerrainType`
 (plains=0/hills=1/mountains=2) using the Plains/Hills/Mountains ratio into
-`terrainTypeMap`. `GenerateBaseStamps` (IL=167) then runs three parallel tasks:
+`terrainTypeMap`. The assignment is pinned in full. It groups the
+biome map's tiles by `BiomeType` first, then for each group:
+
+- `plains = floor(Plains / sum * positions)`, `hills` and `mountains` the same, and a
+  random top-up loop adds one to a type whose weight is above zero until the three
+  counts sum to the group's position count.
+- A position is taken at random, removed from the list, and its cell read: a cell whose
+  `terrainTypeMap` is already set (not 255) is skipped.
+- With hills left, a run of two or more writes a **2x2 block** of hills at the position
+  aligned down to even coordinates (`x & -2`, `y & -2`), then subtracts four from the
+  hill count; a lone hill cell writes nothing.
+- Otherwise, with mountains left it writes one mountain, and with probability 0.8 steps
+  to a random 4-way neighbouring position that is still in the group's list and writes
+  that next (the mountain chain); a failed step ends the chain.
+- With neither left it writes a plain.
+- The group is done when its position list is empty, and the pass repeats for every
+  biome group. `GenerateBaseStamps` (IL=167) then runs three parallel tasks:
 
 - **terrainBorderTask:** draws `<biome>_land_border` / `land_border` /
   `water_border` stamps around the map edge (water edges per `BorderWaterMask`).
