@@ -210,6 +210,37 @@ which has a cardinal neighbour of the same type is set to the biome and the meth
 returns true; a square with no such cell widens the radius, and the walk gives up after
 `max`.
 
+The seed and growth rules after the counts are pinned end to end.
+`biomeMap` is a `DataMap(grid, 255)` with `grid = WorldSize / 256`, and
+`multiple` is 2 for `Circle2` (layout 3) and 1 otherwise. The seeds differ by
+layout:
+
+- **Line (4)** is documented above.
+- **Ring (0..3)**: `spread = grid * 0.4` and a float centre `(grid/2, grid/2)`;
+  `angle = Rand.Angle()`, `step = 360 / last / multiple`, negated when
+  `Rand.Float() < 0.5`, where `last = count - 1`, for `Circle` (2)
+  `last = count`, and for `Circle2` (3) `special = count / 2` and
+  `last = special`. Per pass, per entry: `CenterForest` (0) puts its forest and
+  `CenterWasteland` (1) its wasteland at the centre; `Circle2`'s entry at
+  `special` first takes `angle += Rand.Range(70, 200)` and `spread *= 0.5`;
+  every other entry sits at `centre + (cos, sin)(angle * pi/180) * spread` and
+  `angle += step`. Each seed spends one quota and sets its tile. After a pass
+  the ring centre moves by `(+3, +2)`, and the passes repeat `multiple` times.
+
+Growth, from the same method's tail:
+
+- **Quota passes.** Repeat while a whole pass places at least one tile: for each
+  entry with a quota left, take up to `1 + int(fraction * 4)` steps of
+  `FindBiomeEmptyAndSet(entry, edge)`, with `edge = 1 + WorldSize / 2048` for
+  the layout's centre biome and 0 for the rest. A step that returns false ends
+  that entry's turn, and each success spends a quota and one unset internal
+  tile. With the default weights `int(fraction * 4)` is 0, so the budget is one
+  step per entry per pass.
+- **Fill passes.** Then repeat full passes of `FindBiomeEmptyAndSet(entry, 0)`
+  for every entry whose type is not forest (0) until a pass places nothing.
+- **Forest fallback.** Every tile still 255 becomes forest
+  (`biomeMap.Replace(255, 0)`).
+
 **RE gap:** the runtime humidity/temperature grids feeding `GetHumidityAt` /
 `GetTemperatureAt` (IL sizes pinned, 808) - the 6-axis climate
 generation that maps (temp, moisture) to a biome per the biomes.xml
