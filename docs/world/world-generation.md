@@ -419,6 +419,12 @@ a default per terrain type and overrides it per biome and terrain:
   radius is therefore written in 256-block units.
 - `use_biome_mask` parses a bool and `biome_mask_min` a float.
 
+**Which layout a world gets.** `biomeLayout` has exactly one writer in the assembly:
+`XUiC_WorldGenerationWindow/<GenerateCo>d__152` at IL_0148 copies the new-world screen's selection
+into the builder. A dedicated server never runs that screen, so its map is the field's default,
+`CenterForest` (0), and the other four layouts are a client's choice. Everything the port generates
+server-side therefore starts from layout 0.
+
 ### 3.3 Street tiles, towns, districts
 
 `InitStreetTiles` builds the `StreetTileMap` grid (width = WorldSize/**150**);
