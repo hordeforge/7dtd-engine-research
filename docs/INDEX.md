@@ -170,6 +170,7 @@ World generation, chunk lifecycle, terrain, persistence and the asset formats be
 |---|---|
 | [world-chunks.md](world/world-chunks.md) | Gen, load/send, SetBlock, chunk flags |
 | [world-generation.md](world/world-generation.md) | RWG world create pipeline: WorldBuilder stages, threading, outputs |
+| [rwg-stamps.md](world/rwg-stamps.md) | RWG stamp `.raw` format, `LoadStamp` channels and smoothing, `DrawStamp`/`DrawWaterStamp`/`DrawBiomeStamp` rasterizers, height/water destination values |
 | [chunk-providers.md](world/chunk-providers.md) | ChunkProvider* (dedicated = GenerateWorldFromRaw) + decoration layer |
 | [terrain-height.md](world/terrain-height.md) | WorldConstants, height APIs, expand pin |
 | [hot-patch-height.md](world/hot-patch-height.md) | Whether the `ChunkBlockYDim` 256 -> 32768 expand can be hot-patched at runtime |

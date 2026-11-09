@@ -99,7 +99,13 @@ new number.
   first stamp of a cluster is centred and the rest are offset additively at 0.45 strength, the
   biome-mask stamp goes to the biome layer, properties fall back from `{biome}_{terrain}` to
   `{terrain}`, scale is halved, and clusters are `count, radius in 256-block units, strength`.
-**34 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+- The RWG stamp pipeline is pinned from a cross-build read (V3.3.0 b18 client, awaiting a V3.4.0
+  b10 pass) in `docs/world/rwg-stamps.md`: the headerless 6-byte-per-pixel `.raw` stamp
+  (`u16` height / alpha / water, little endian), the per-name alpha box smoothing, the `Stamp` and
+  `StampGroup` shapes, the bilinear `CalcRotatedValue` sampler, the height/watershed rasterizers
+  (additive vs lerp, the `1e-05` floor, the 0.1 cutoff), `AdjustHeights`'s floor of 2, the binary
+  water finalize at 30, and the `(height - 1) * 257` saved `u16` height map.
+**35 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
