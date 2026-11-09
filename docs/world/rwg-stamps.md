@@ -171,7 +171,11 @@ computes `Area` as the bounding box of the four rotated corners of a
 corner rotation (`getRotatedPoint`) calls `Math.Cos/Sin` on the raw rotation
 **without** converting degrees to radians, unlike the rasterizer (1.7), and the
 `Rect` size is `min - max` (negative). `Area` is not read by any rasterizer in
-this build; it is appended to `worldBuilder.waterRects` for water stamps.
+this build. A stamp built with `isWater` **appends its `Area` to
+`worldBuilder.waterRects`** (IL_0244), creating that list on first use, so the list holds every water
+stamp's box, not only a feature's. Its only reader is `generateTerrainFeature`'s dry-feature branch,
+which is where the citation in 1.12 comes from: a canyon or crater reserves its ground with a water
+stamp only where no water stamp and no recorded rect already lies.
 
 ### 1.7 The height rasterizer (`DrawStamp$BurstManaged`)
 

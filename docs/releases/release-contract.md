@@ -119,7 +119,9 @@ new number.
   The border task's mask gate and 75-block strip are pinned with it; its wet branch is still unread.
 - `generateTerrainFeature` is pinned as read in full: there is no river-specific branch (a river is a
   water feature placed like a lake), and two earlier summaries of it are corrected.
-**40 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
+- `Stamp::.ctor` is pinned as the writer of `waterRects`: every stamp built with `isWater` appends its
+  `Area`, and the only reader is the dry-feature overlap test.
+**41 commits after `v3.4.0` (2026-11-05) as of 2026-11-09.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
