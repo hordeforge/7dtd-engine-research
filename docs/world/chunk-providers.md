@@ -780,6 +780,22 @@ deco) also exist as lightweight records visible far beyond loaded chunks.
   on `RandomFloat() <= prob * 2` plus the `checkResourceOffsetY` ore-noise
   gate at `terrainHeight + 1 + offsetY`, and the block is placed with
   `randomRotateMax` rotation.
+  **The seeding is bounded by attempts, not by placements.** The loop is
+  `for (attempt = 0; attempt < 1000; ++attempt)` (`IL_0257`-`IL_025E`,
+  `ldc.i4 1000`; `IL_024B`-`IL_024F` bumps the attempt counter at the end of
+  every iteration whatever happened), and nothing stops it on a placed count:
+  the returned integer is the placed tally, and `isDecorated` is set after the
+  loop (`IL_0263`). So a 128x128 deco chunk is seeded by **1000 random cells**
+  that each pass the occupancy and 5x5 spacing gates; the spacing gate is what
+  turns 1000 attempts into a sparse field, because a placed decoration blocks
+  the whole 5x5 around it. The walk from the end matters for the species mix:
+  the entry that wins an attempt is the *last* one whose gate passes, so the
+  list's tail owns most of the placements (in the desert's main subbiome the
+  tail is `treeDeadPineLeaf` .05 and `treeDesertShrub` .05, ahead of the six
+  cactus rows at .04 each). A per-column probability model with the list read
+  from the front is a different density and a different mix: on the desert
+  subbiome it places six cactus variants on about a fifth of the columns,
+  where stock's seeding leaves the desert open.
   `GetDecoOccupiedAt(x, z)` (IL=87) is the query that drives the on-demand
   decorate: disabled -> 0, missing/out-of-bounds chunk -> 8, and an
   undecorated `DecoChunk` is decorated lazily under a lock
