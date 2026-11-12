@@ -89,10 +89,17 @@ value does not appear in the first 200,000 draws of Mono's `Random(289122618)`
 `Random(-395245407)` (the world hash `map_info.xml` records). So either the
 game's Mono computes another string hash, or `Rand` is re-seeded between `Init`
 and the stage, or the stage's log comes from another `GameRandom` instance
-(`StreetTile` re-seeds one too). The next read is the game's own
-`String.GetHashCode` and every `GameRandom.SetSeed` between the two points; a
-consumer should not assume `name.GetHashCode() + size` reproduces a live run
-until that is settled.
+(`StreetTile` re-seeds one too).
+
+The same run's `r=5da70253` and `r=357b8652` are the biome stage's later samples,
+so the stage does draw from one stream; what is not reproducible is its start. The
+hash is not the obvious one either: `h = h * 31 + c` over `"123"` gives 48690, not
+the 289116474 a host Mono reports, so Mono's `mono_string_hash` is the unrolled
+variant and the value has to come from the runtime the game ships. The server
+copy holds `MonoBleedingEdge` as libraries only (no `mono` binary), so the
+practical readings are the shipped `libmonobdwgc`'s symbol or the Mono source for
+its version; a consumer should not assume `name.GetHashCode() + size` reproduces a
+live run until one of those is read.
 
 ```mermaid
 flowchart TB
