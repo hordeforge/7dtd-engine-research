@@ -498,9 +498,11 @@ same wave pair, plus an alpha floor, a chunk clip mask, and the world's own size
 | `_WorldDim` | Vector | 6144, 6144, 0, 0 |
 
 What this says about the waterline: **neither surface shader has an opacity or thickness
-parameter.** The transparency is `_MainTex`'s alpha, so the fade near a shore comes from the
-texture and the mesh's UVs, and `_MinAlpha` is the only scalar gate, on the distant variant
-alone. A depth-based opacity ramp is a stand-in for this, not a reproduction of it.
+parameter.** The property names make the alpha of `_MainTex` the transparency, and `_MinAlpha`
+the only scalar gate, on the distant variant alone. Whether the shoreline fade is that alpha on
+the mesh's UVs, or the compiled pass comparing depths, is **not measured here**: the parsed form
+carries the property list, not the pass bodies. A depth-based opacity ramp is a stand-in either
+way, but calling the alpha the mechanism would be an inference rather than a reading.
 
 `7DTD/7DTD_Liquid` is also in the bundle (ShaderForge) but **no managed assembly references
 it**: `strings -el` over every DLL in `Managed/` finds neither `7DTD_Liquid` nor
@@ -559,9 +561,9 @@ entry reads:
 
 Those two texture path ids are the extracted `T_ta_water.png` and `T_ta_water_n.png`: the same
 1024 and 512 bakes the block-texture chain already names. `T_ta_water.png` is dark teal in RGB
-(means 11, 24, 23 of 255) with a varying alpha (0 to 253, mean about 246), which is the sheet
-the surface samples: the shader has no tint parameter, so the image is the colour and the alpha
-is the transparency.
+(means 11, 24, 23 of 255) with a varying alpha (0 to 253, mean about 246). With no tint
+parameter on the shader, the image supplies the surface's colour; how much of the waterline is
+its alpha and how much sits in the compiled pass is not measured (see §4.10).
 
 The block texture slot `223` that `<block name="water">` states is **not** the surface image:
 stock's `TXT_ta_water` maps it to a 1x1 UV at 0,0 with a flat colour (0.457, 0.457, 0.336),
@@ -647,6 +649,7 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-11-13 (limits):** The alpha-as-waterline reading is marked as an inference, not a measurement: the parsed form carries properties, not pass bodies.
 - **2026-11-13 (description):** §4.11 reads the water mesh description from `meshdescriptions_assets_all.bundle`: no `BaseMaterial`, `PrimaryShader` and `DistantShader` asset GUIDs, `TextureAtlasClass` `TextureAtlasBlocks` with `CreateTextureAtlas` 0, and `TexDiffuse`/`TexNormal` path ids that are the extracted `T_ta_water.png` (1024, dark teal with a varying alpha) and `T_ta_water_n.png` (512). Block texture slot `223` is a 1x1 flat-colour stand-in, not the surface image.
 - **2026-11-13 (binding):** The surface has no material asset. `MeshDescription.Init` builds `materials[0]` from the description's `BaseMaterial` or `new Material(PrimaryShader)` and binds `_MainTex` to its `TextureAtlas.diffuseTexture`; `SetWaterQuality` then swaps the shader. The next pass starts from `MeshDescriptionCollection`, not from Materials.
 - **2026-11-13 (correction):** §4.10's first pass named `7DTD/7DTD_Liquid` as the voxel surface. It is not: `MeshDescription::SetWaterQuality()` swaps the water section material to `Game/Water Surface`, or `Game/Water Distant Surface` with `_MinAlpha` 0 at quality 0, and both names are in the shipped 3.4.0 `Assembly-CSharp.dll` while no managed assembly references `7DTD_Liquid` or `_ThicknessColor`. Neither surface shader has an opacity parameter: `_MainTex`'s alpha is the transparency, so the port's depth fade is a stand-in rather than a reproduction.
