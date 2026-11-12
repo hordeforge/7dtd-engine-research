@@ -121,7 +121,7 @@ new number.
   water feature placed like a lake), and two earlier summaries of it are corrected.
 - `Stamp::.ctor` is pinned as the writer of `waterRects`: every stamp built with `isWater` appends its
   `Area`, and the only reader is the dry-feature overlap test.
-**50 commits after `v3.4.0` (2026-11-05) as of 2026-11-13.** The build retarget this
+**51 commits after `v3.4.0` (2026-11-05) as of 2026-11-13.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
