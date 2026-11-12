@@ -54,6 +54,24 @@ byte-exact via `save_roundtrip_check.py --shipped`), `map_info.xml`,
 after boot (4096; the world then generates chunks on demand).
 `Rand.PeekSample()` so a run's determinism is checkable in the log.
 
+**The generator underneath `Rand` is .NET's `System.Random`.** `Rand` is a thin
+singleton over `GameRandom`: `Rand..ctor()` calls
+`GameRandomManager.CreateGameRandom()`, `Rand.SetSeed` forwards to
+`GameRandom.SetSeed`, and every draw forwards to the corresponding member.
+`GameRandom` (`il/full-v3.1.0/_global/GameRandom.il.txt`) carries
+`MBIG = 2147483647`, `MSEED = 161803398`, `MZ = 0`, `inext`/`inextp` and
+`Int32[] SeedArray` with a 56-element array (`..ctor` allocates `56`), and
+`InternalSetSeed` (IL=118) is the framework's own Knuth subtractive generator:
+`Math.Abs(seed)`, `MSEED - seed`, the `161803398` stride, `55` steps and the
+`-2147483648`/`2147483647` clamps. `get_RandomDouble`, `RandomRange(Int32, Int32)`
+and the rest are the framework's sample arithmetic on top of it.
+
+That matters because the framework's **seeded** `Random(seed)` algorithm is stable
+and documented, so the world's draws are reproducible outside Unity: a port that
+implements it and seeds it with `WorldSeedName.GetHashCode() + WorldSize` gets the
+same integers, floats and ranges stock gets, stage by stage. A port on its own
+generator reproduces the shares and the structure but not the placement.
+
 ```mermaid
 flowchart TB
   ST[MainMenuMono.Start] --> SDS[startDedicatedServer coroutine]
@@ -1957,6 +1975,7 @@ order (row 0 = +Z).
 
 ## Changelog
 
+- **2026-11-13 (generator):** `Rand` wraps `GameRandom`, which is .NET's `System.Random` (MBIG 2147483647, MSEED 161803398, a 56-entry `SeedArray`, `InternalSetSeed` IL=118). The seeded framework algorithm is stable, so a port can reproduce the world's draws exactly by implementing it; a port on its own generator matches the shares and structure but not the per-tile placement, which is what a 55-percent tile agreement with equal biome shares looked like.
 - **2026-11-13 (correction):** `BiomeTypeData`'s ctor computes `TileCount = FloorToInt(percent * totalTiles)` with a floor of 1 for a positive share, and the round-robin after the sort hands out the remainder; the earlier reading that every entry starts with `TileCount = totalTiles` and that the round-robin cannot run was wrong. A port that stored the total per entry generated an almost flat biome map (16.8/20.8/20.8/20.7/20.8 percent against the weights' 13/18/22/23/24), which is what exposed the misreading.
 - **2026-08-11:** World-gen IL re-verified: GetWorldPath IL=7, GenerateTask IL=203, GenerateBiomeTiles IL=436, GetBiomeCount IL=9, GetBiomeMap IL=3, GetTotalBluffsCount IL=31, GetBiome IL=5/12, ParseWeather IL=211, AddDecoPrefab/AddBluff/addSubBiome IL=5, AddReplacement IL=6, AddLayer IL=12, GetBiomeColor IL=4, LocalizedBiomeName IL=8, BiomeLayer ctor IL=18 / AddResource IL=34, GetBiomeAt IL=57/8, GetHumidityAt/GetTemperatureAt IL=2, GetRadiationAt IL=41, GetTopmostBlockValue IL=116 (exact).
 - **2026-08-10:** WorldBuilder IL sizes re-verified: GenerateTask IL=203, GenerateBiomeTiles IL=436 (exact).
