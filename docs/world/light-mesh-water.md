@@ -448,6 +448,63 @@ water-collection harvest.
 | Native Burst/job safety details | Unity Jobs black box below managed schedule calls |
 | `WaterSplashCubes` particle content | client VFX |
 
+### 4.10 Client surface shaders (measured 2026-11-13)
+
+Stock's rendered water surface is not drawn by `Mwater` (that is the gameplay material:
+`liquid true`, `collidable false`, `lightopacity 3`, `movement_factor 0.9`). The surface
+is the client's own, and the two shaders it draws through are in the shipped
+`shaders_assets_all.bundle`. Read them with `unityz`, which reconstructs a Shader
+object's ShaderLab properties from `m_ParsedForm`:
+
+```bash
+unityz extract "$GAME/Data/Addressables/Standalone/shaders_assets_all.bundle" --class 48 --outdir work/shaders
+```
+
+**`7DTD/7DTD_Liquid`** (ShaderForge, `RenderType Transparent`, `QUEUE Transparent+1`) is
+the voxel-liquid surface: refraction, a specular colour, and a thickness-based fade.
+
+| Property | Type | Default |
+|---|---|---|
+| `_Color` | Color | 1, 1, 1, 1 |
+| `_Normal`, `_Refraction`, `_DisplacementMap` | 2D | `bump` / `white` / `white` |
+| `_Gloss` | Range | 0 |
+| `_Specular` | Color | 0.5, 0.5, 0.5, 1 |
+| `_Opacity` | Range | 0 |
+| `_RefractionPower` | Range | 0 |
+| `_ThicknessColor` | Color | 0.5, 0.5, 0.5, 1 |
+| `_ThicknessWidth` | Range | 0.5 |
+| `_ThicknessStrength` | Float | 1 |
+| `_Displacement` | Range | 0 |
+| `_RippleSpeed` | Float | 0.3 |
+| `_LiquidMovement` | Float | 1 |
+| `_RefractionMotion` | Float | 0.1 |
+| `_Cutoff` | Range | 0.5 |
+
+**`Game/Water Surface`** (`RenderType Transparent`, `QUEUE Transparent-11`,
+`PreviewType Plane`) is the plane variant: a scrolling `_MainTex` whose **alpha** is the
+transparency, a bump map and two wave layers.
+
+| Property | Type | Default |
+|---|---|---|
+| `_MainTex` | 2D | `white` (RGB colour, A transparency) |
+| `_BumpMap` | 2D | `bump` |
+| `_WaveScale` | Float | 1 |
+| `_Specular` | Float | 0.15 |
+| `_Smoothness` | Float | 1.2 |
+| `_SpeedA` / `_SpeedB` | Float | 0.3 / 0.65 |
+| `_ScaleA` / `_ScaleB` | Float | 0.02 / 0.06 |
+| `_Foam` | Float | 50 |
+
+The thickness group is the stock mechanism for the waterline: colour is a function of
+the thickness of water behind the surface (`_ThicknessColor` at `_ThicknessWidth`), not a
+constant opacity. Its *values* are not in the container tree: no Material object in the
+18 `Standalone` bundles names either shader (`--class 21`, checked), so stock either sets
+them on a runtime-created material or builds one outside the extraction glob. `_Opacity`
+defaults to 0 and `_Color` to white, which is not a visible blue pool, so the numbers that
+matter are set somewhere this pass did not reach. That is a managed-IL question
+(`UnityEngine.Material.SetColor`/`SetFloat` against `Shader.Find("7DTD/7DTD_Liquid")`),
+not a container one.
+
 ---
 
 ## 5. Decoration
@@ -522,6 +579,7 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-11-13:** Client water surface shaders measured (§4.10): `7DTD/7DTD_Liquid` (voxel surface, thickness colour at `_ThicknessWidth`, refraction and specular; `QUEUE Transparent+1`) and `Game/Water Surface` (plane, `_MainTex` alpha, two wave layers; `QUEUE Transparent-11`), read from `shaders_assets_all.bundle` with `unityz extract --class 48`. No Material in the 18 `Standalone` bundles names either shader, so the instance values are runtime-set and remain open.
 - **2026-08-11:** Water IL re-verified: ChunkCluster.SetWater IL=34, WaterValue HasMass IL=5 / SetMass IL=8 / get_RawData IL=4 / FromRawData IL=8 / Write/Read IL=5, WaterUtils GetVoxelKey2D IL=8 / GetVoxelKey IL=10 / IsVoxelOutsideChunk IL=15 / IsChunkSafeToUpdate IL=16 / TryOpenChunkForUpdate IL=33, World.IsWater IL=31/9/5, Chunk.SetWaterRaw IL=55 / SetWater IL=13 / ResetWaterSimHandle IL=4 / IsWater IL=9, World.GetWaterAt IL=53, getPoiForColor IL=10, AddPoiMapElement IL=13 (exact).
 - **2026-08-11:** Water sim IL re-verified: WaterSimulationNative.Update IL=229 / InitializeChunk IL=51, WaterDataHandle.InitializeFromChunk IL=154, WaterSimulationCalcFlows ProcessFlowBelow IL=105 / ProcessOverfull IL=85 / ProcessFlowSide IL=168, ApplyChanges IL=254, Chunk.SetWaterSimUpdate IL=75 (exact).
 - **2026-08-11:** Light-query IL re-verified: LightManager.CreateServer IL=8, World.GetLightBrightness IL=32, GetSunAndBlockColors IL=41, GetBlockLightValue IL=34, Chunk.GetLightBrightness IL=10, GetLightValue IL=30, GetLight IL=28, ChunkCluster.GetLight IL=21, SetLight IL=56, ResetLights IL=6, IsOpenSkyAbove IL=23/9, IsWaterInBounds IL=74, IsNeighbourChunksLit/Decorated IL=26, BlockLight.IsLightOn IL=7 / SetLightState IL=15 (exact).
