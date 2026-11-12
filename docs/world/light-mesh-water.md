@@ -535,11 +535,43 @@ shader by water quality. So the surface's texture is the water mesh description'
 shader is that description's `PrimaryShader`, not a `Material` object anywhere in the
 container tree.
 
-Open: which `MeshDescriptionCollection` asset describes the water section, and which
-`TextureAtlas` class and `PrimaryShader` it names. That asset is loaded through the
-addressables loader, so the next pass starts from `MeshDescriptionCollection` rather than from
-Materials. `resources.assets` holds 270 Materials with 276 Shaders of its own and none is a
-surface; `water` in the `textures_assets_textures` bundle stays a candidate, not a finding.
+### 4.11 The water mesh description (measured 2026-11-13)
+
+`WorldStaticData` loads the mesh descriptions as an addressable prefab, group
+`BlockTextureAtlases`, key `prefabMeshDescriptionCollection.prefab`. The prefab is in
+`meshdescriptions_assets_all.bundle`, and its `MeshDescriptionCollection` holds six
+descriptions: `opaque`, `water`, `transparent`, `grass`, `decals` and `terrain`. The water
+entry reads:
+
+| Field | Value |
+|---|---|
+| `Name` / `Tag` | `water` / `B_Mesh` |
+| `bCastShadows` / `bReceiveShadows` | 0 / 1 |
+| `ColliderLayerName` | `water` |
+| `PrimaryShader` | `387259677ff1bad48ba7a2966a48dfa4` |
+| `DistantShader` | `6972fb7af7f4183418e744f5d4b327d1` |
+| `SecondaryShader` | empty |
+| `BaseMaterial` | null (the material is built from `PrimaryShader`) |
+| `TextureAtlasClass` | `TextureAtlasBlocks`, with `CreateTextureAtlas` 0 |
+| `TexDiffuse` | path `573307663027559416`, a 1024x1024 texture |
+| `TexNormal` | path `5680168891773597108`, a 512x512 texture |
+| `BlendMode` | -1 (unset) |
+
+Those two texture path ids are the extracted `T_ta_water.png` and `T_ta_water_n.png`: the same
+1024 and 512 bakes the block-texture chain already names. `T_ta_water.png` is dark teal in RGB
+(means 11, 24, 23 of 255) with a varying alpha (0 to 253, mean about 246), which is the sheet
+the surface samples: the shader has no tint parameter, so the image is the colour and the alpha
+is the transparency.
+
+The block texture slot `223` that `<block name="water">` states is **not** the surface image:
+stock's `TXT_ta_water` maps it to a 1x1 UV at 0,0 with a flat colour (0.457, 0.457, 0.336),
+`blockw`/`blockh` 4. It is the block atlas's stand-in for the block's face, and the liquid
+surface is drawn from the description's own texture instead.
+
+Open: the two `AssetReference` GUIDs are not resolved here. The Addressables catalog that maps
+them is not in `Data/Addressables`, so the mapping to `Game/Water Surface` and
+`Game/Water Distant Surface` is inferred from `SetWaterQuality`, which is the only writer of
+those two names.
 
 ---
 
@@ -615,6 +647,7 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-11-13 (description):** §4.11 reads the water mesh description from `meshdescriptions_assets_all.bundle`: no `BaseMaterial`, `PrimaryShader` and `DistantShader` asset GUIDs, `TextureAtlasClass` `TextureAtlasBlocks` with `CreateTextureAtlas` 0, and `TexDiffuse`/`TexNormal` path ids that are the extracted `T_ta_water.png` (1024, dark teal with a varying alpha) and `T_ta_water_n.png` (512). Block texture slot `223` is a 1x1 flat-colour stand-in, not the surface image.
 - **2026-11-13 (binding):** The surface has no material asset. `MeshDescription.Init` builds `materials[0]` from the description's `BaseMaterial` or `new Material(PrimaryShader)` and binds `_MainTex` to its `TextureAtlas.diffuseTexture`; `SetWaterQuality` then swaps the shader. The next pass starts from `MeshDescriptionCollection`, not from Materials.
 - **2026-11-13 (correction):** §4.10's first pass named `7DTD/7DTD_Liquid` as the voxel surface. It is not: `MeshDescription::SetWaterQuality()` swaps the water section material to `Game/Water Surface`, or `Game/Water Distant Surface` with `_MinAlpha` 0 at quality 0, and both names are in the shipped 3.4.0 `Assembly-CSharp.dll` while no managed assembly references `7DTD_Liquid` or `_ThicknessColor`. Neither surface shader has an opacity parameter: `_MainTex`'s alpha is the transparency, so the port's depth fade is a stand-in rather than a reproduction.
 - **2026-11-13:** Client water surface shaders measured (§4.10): `7DTD/7DTD_Liquid` (ShaderForge, thickness colour at `_ThicknessWidth`, refraction and specular; `QUEUE Transparent+1`), `Game/Water Surface` (plane, `_MainTex` alpha, two wave layers; `QUEUE Transparent-11`) and `Game/Water Distant Surface` (`_MinAlpha`, `_ClipChunks`, `_WorldDim`; `QUEUE Transparent-12`), read from `shaders_assets_all.bundle` with `unityz extract --class 48`. No Material in the 18 `Standalone` bundles names a surface shader, so the texture binding remains open.

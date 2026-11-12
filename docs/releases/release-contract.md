@@ -121,7 +121,7 @@ new number.
   water feature placed like a lake), and two earlier summaries of it are corrected.
 - `Stamp::.ctor` is pinned as the writer of `waterRects`: every stamp built with `isWater` appends its
   `Area`, and the only reader is the dry-feature overlap test.
-**45 commits after `v3.4.0` (2026-11-05) as of 2026-11-13.** The build retarget this
+**46 commits after `v3.4.0` (2026-11-05) as of 2026-11-13.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -135,8 +135,10 @@ section described is published under the tag and in
   `shaders_assets_all.bundle` with `unityz extract --class 48`. There is no surface
   material asset: `MeshDescription.Init` builds it from the description's `BaseMaterial`
   or its `PrimaryShader`, and binds `_MainTex` to that description's texture-atlas
-  diffuse image, so the open item is the `MeshDescriptionCollection` asset and the
-  atlas it names.
+  diffuse image. The water description itself is read (§4.11): `TexDiffuse`
+  `573307663027559416` and `TexNormal` `5680168891773597108`, which are the extracted
+  `T_ta_water.png` (1024) and `T_ta_water_n.png` (512), with block slot `223` a 1x1
+  flat-colour stand-in rather than the surface.
 
 - The tag history row for `v3.4.0`, the corpus pin in this file's header and the
   reset of this section land after the cut, so the release notes stay the record
