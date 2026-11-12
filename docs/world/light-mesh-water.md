@@ -524,11 +524,22 @@ because it looked like the answer and is not.
 | `_RefractionMotion` | Float | 0.1 |
 | `_Cutoff` | Range | 0.5 |
 
-Open: the water material's own asset and its `_MainTex` binding are not named in the dumps
-read. No Material object in the 18 `Standalone` bundles names either surface shader
-(`--class 21`, checked), and `SetWaterQuality` mutates a material that already exists, so
-the texture is bound somewhere this pass did not reach. `water` is a texture name in the
-`textures_assets_textures` bundle: a candidate, not a finding.
+There is no surface **material asset**, which is why the search for one found nothing. The
+material is built at runtime in `MeshDescription.Init`'s state machine
+(`MeshDescription__Init_d__56`): `materials[0]` is the description's own `BaseMaterial` when it
+carries one, otherwise `new Material(LoadAsset<Shader>(PrimaryShader))`, and `_MainTex` is
+bound to that description's `TextureAtlas.diffuseTexture` with `_BumpMap` to its
+`normalTexture` (the `_idx == 5` branch skips the bind when the atlas texture is not a
+`Texture2D`, which is the texture-array path). `SetWaterQuality` then swaps that material's
+shader by water quality. So the surface's texture is the water mesh description's atlas and its
+shader is that description's `PrimaryShader`, not a `Material` object anywhere in the
+container tree.
+
+Open: which `MeshDescriptionCollection` asset describes the water section, and which
+`TextureAtlas` class and `PrimaryShader` it names. That asset is loaded through the
+addressables loader, so the next pass starts from `MeshDescriptionCollection` rather than from
+Materials. `resources.assets` holds 270 Materials with 276 Shaders of its own and none is a
+surface; `water` in the `textures_assets_textures` bundle stays a candidate, not a finding.
 
 ---
 
@@ -604,6 +615,7 @@ else **1000** ticks.
 
 ## Changelog
 
+- **2026-11-13 (binding):** The surface has no material asset. `MeshDescription.Init` builds `materials[0]` from the description's `BaseMaterial` or `new Material(PrimaryShader)` and binds `_MainTex` to its `TextureAtlas.diffuseTexture`; `SetWaterQuality` then swaps the shader. The next pass starts from `MeshDescriptionCollection`, not from Materials.
 - **2026-11-13 (correction):** §4.10's first pass named `7DTD/7DTD_Liquid` as the voxel surface. It is not: `MeshDescription::SetWaterQuality()` swaps the water section material to `Game/Water Surface`, or `Game/Water Distant Surface` with `_MinAlpha` 0 at quality 0, and both names are in the shipped 3.4.0 `Assembly-CSharp.dll` while no managed assembly references `7DTD_Liquid` or `_ThicknessColor`. Neither surface shader has an opacity parameter: `_MainTex`'s alpha is the transparency, so the port's depth fade is a stand-in rather than a reproduction.
 - **2026-11-13:** Client water surface shaders measured (§4.10): `7DTD/7DTD_Liquid` (ShaderForge, thickness colour at `_ThicknessWidth`, refraction and specular; `QUEUE Transparent+1`), `Game/Water Surface` (plane, `_MainTex` alpha, two wave layers; `QUEUE Transparent-11`) and `Game/Water Distant Surface` (`_MinAlpha`, `_ClipChunks`, `_WorldDim`; `QUEUE Transparent-12`), read from `shaders_assets_all.bundle` with `unityz extract --class 48`. No Material in the 18 `Standalone` bundles names a surface shader, so the texture binding remains open.
 - **2026-08-11:** Water IL re-verified: ChunkCluster.SetWater IL=34, WaterValue HasMass IL=5 / SetMass IL=8 / get_RawData IL=4 / FromRawData IL=8 / Write/Read IL=5, WaterUtils GetVoxelKey2D IL=8 / GetVoxelKey IL=10 / IsVoxelOutsideChunk IL=15 / IsChunkSafeToUpdate IL=16 / TryOpenChunkForUpdate IL=33, World.IsWater IL=31/9/5, Chunk.SetWaterRaw IL=55 / SetWater IL=13 / ResetWaterSimHandle IL=4 / IsWater IL=9, World.GetWaterAt IL=53, getPoiForColor IL=10, AddPoiMapElement IL=13 (exact).
