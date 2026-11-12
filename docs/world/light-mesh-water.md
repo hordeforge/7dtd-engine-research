@@ -451,17 +451,61 @@ water-collection harvest.
 ### 4.10 Client surface shaders (measured 2026-11-13)
 
 Stock's rendered water surface is not drawn by `Mwater` (that is the gameplay material:
-`liquid true`, `collidable false`, `lightopacity 3`, `movement_factor 0.9`). The surface
-is the client's own, and the two shaders it draws through are in the shipped
-`shaders_assets_all.bundle`. Read them with `unityz`, which reconstructs a Shader
-object's ShaderLab properties from `m_ParsedForm`:
+`liquid true`, `collidable false`, `lightopacity 3`, `movement_factor 0.9`). The client
+picks the surface shader at runtime, in `MeshDescription::SetWaterQuality()` (IL=40 in the
+v3.1.0 dump): it reads `GamePrefs` 7 (water quality) and sets the shader on
+`meshes[1].materials[0]`, the water section's own material:
+
+* quality 0 to `Game/Water Distant Surface`, then `_MinAlpha` 0;
+* every other quality to `Game/Water Surface`.
+
+Both names are in the **shipped 3.4.0** `Assembly-CSharp.dll`, one user string each, so the
+mechanism is the current build's. Read the shaders with `unityz`, which reconstructs a
+Shader object's ShaderLab properties from `m_ParsedForm`:
 
 ```bash
 unityz extract "$GAME/Data/Addressables/Standalone/shaders_assets_all.bundle" --class 48 --outdir work/shaders
 ```
 
-**`7DTD/7DTD_Liquid`** (ShaderForge, `RenderType Transparent`, `QUEUE Transparent+1`) is
-the voxel-liquid surface: refraction, a specular colour, and a thickness-based fade.
+**`Game/Water Surface`** (`RenderType Transparent`, `QUEUE Transparent-11`,
+`PreviewType Plane`) is the surface at normal water quality: a scrolling `_MainTex` whose
+**alpha** is the transparency, a bump map and two wave layers.
+
+| Property | Type | Default |
+|---|---|---|
+| `_MainTex` | 2D | `white` (RGB colour, A transparency) |
+| `_BumpMap` | 2D | `bump` |
+| `_WaveScale` | Float | 1 |
+| `_Specular` | Float | 0.15 |
+| `_Smoothness` | Float | 1.2 |
+| `_SpeedA` / `_SpeedB` | Float | 0.3 / 0.65 |
+| `_ScaleA` / `_ScaleB` | Float | 0.02 / 0.06 |
+| `_Foam` | Float | 50 |
+
+**`Game/Water Distant Surface`** (`QUEUE Transparent-12`) is the low-quality variant: the
+same wave pair, plus an alpha floor, a chunk clip mask, and the world's own size.
+
+| Property | Type | Default |
+|---|---|---|
+| `_MainTex` | 2D | `white` (RGB colour, A transparency) |
+| `_BumpMap` | 2D | `bump` |
+| `_Specular` | Float | 0.15 |
+| `_Smoothness` | Float | 1.2 |
+| `_SpeedA` / `_SpeedB` | Float | 0.3 / 0.65 |
+| `_ScaleA` / `_ScaleB` | Float | 0.02 / 0.06 |
+| `_MinAlpha` | Float | 1 (`0` written by `SetWaterQuality` at quality 0) |
+| `_ClipChunks` | 2D | `black` |
+| `_WorldDim` | Vector | 6144, 6144, 0, 0 |
+
+What this says about the waterline: **neither surface shader has an opacity or thickness
+parameter.** The transparency is `_MainTex`'s alpha, so the fade near a shore comes from the
+texture and the mesh's UVs, and `_MinAlpha` is the only scalar gate, on the distant variant
+alone. A depth-based opacity ramp is a stand-in for this, not a reproduction of it.
+
+`7DTD/7DTD_Liquid` is also in the bundle (ShaderForge) but **no managed assembly references
+it**: `strings -el` over every DLL in `Managed/` finds neither `7DTD_Liquid` nor
+`_ThicknessColor`. It is not the surface path. Its thickness group is recorded below only
+because it looked like the answer and is not.
 
 | Property | Type | Default |
 |---|---|---|
@@ -480,30 +524,11 @@ the voxel-liquid surface: refraction, a specular colour, and a thickness-based f
 | `_RefractionMotion` | Float | 0.1 |
 | `_Cutoff` | Range | 0.5 |
 
-**`Game/Water Surface`** (`RenderType Transparent`, `QUEUE Transparent-11`,
-`PreviewType Plane`) is the plane variant: a scrolling `_MainTex` whose **alpha** is the
-transparency, a bump map and two wave layers.
-
-| Property | Type | Default |
-|---|---|---|
-| `_MainTex` | 2D | `white` (RGB colour, A transparency) |
-| `_BumpMap` | 2D | `bump` |
-| `_WaveScale` | Float | 1 |
-| `_Specular` | Float | 0.15 |
-| `_Smoothness` | Float | 1.2 |
-| `_SpeedA` / `_SpeedB` | Float | 0.3 / 0.65 |
-| `_ScaleA` / `_ScaleB` | Float | 0.02 / 0.06 |
-| `_Foam` | Float | 50 |
-
-The thickness group is the stock mechanism for the waterline: colour is a function of
-the thickness of water behind the surface (`_ThicknessColor` at `_ThicknessWidth`), not a
-constant opacity. Its *values* are not in the container tree: no Material object in the
-18 `Standalone` bundles names either shader (`--class 21`, checked), so stock either sets
-them on a runtime-created material or builds one outside the extraction glob. `_Opacity`
-defaults to 0 and `_Color` to white, which is not a visible blue pool, so the numbers that
-matter are set somewhere this pass did not reach. That is a managed-IL question
-(`UnityEngine.Material.SetColor`/`SetFloat` against `Shader.Find("7DTD/7DTD_Liquid")`),
-not a container one.
+Open: the water material's own asset and its `_MainTex` binding are not named in the dumps
+read. No Material object in the 18 `Standalone` bundles names either surface shader
+(`--class 21`, checked), and `SetWaterQuality` mutates a material that already exists, so
+the texture is bound somewhere this pass did not reach. `water` is a texture name in the
+`textures_assets_textures` bundle: a candidate, not a finding.
 
 ---
 
@@ -579,7 +604,8 @@ else **1000** ticks.
 
 ## Changelog
 
-- **2026-11-13:** Client water surface shaders measured (§4.10): `7DTD/7DTD_Liquid` (voxel surface, thickness colour at `_ThicknessWidth`, refraction and specular; `QUEUE Transparent+1`) and `Game/Water Surface` (plane, `_MainTex` alpha, two wave layers; `QUEUE Transparent-11`), read from `shaders_assets_all.bundle` with `unityz extract --class 48`. No Material in the 18 `Standalone` bundles names either shader, so the instance values are runtime-set and remain open.
+- **2026-11-13 (correction):** §4.10's first pass named `7DTD/7DTD_Liquid` as the voxel surface. It is not: `MeshDescription::SetWaterQuality()` swaps the water section material to `Game/Water Surface`, or `Game/Water Distant Surface` with `_MinAlpha` 0 at quality 0, and both names are in the shipped 3.4.0 `Assembly-CSharp.dll` while no managed assembly references `7DTD_Liquid` or `_ThicknessColor`. Neither surface shader has an opacity parameter: `_MainTex`'s alpha is the transparency, so the port's depth fade is a stand-in rather than a reproduction.
+- **2026-11-13:** Client water surface shaders measured (§4.10): `7DTD/7DTD_Liquid` (ShaderForge, thickness colour at `_ThicknessWidth`, refraction and specular; `QUEUE Transparent+1`), `Game/Water Surface` (plane, `_MainTex` alpha, two wave layers; `QUEUE Transparent-11`) and `Game/Water Distant Surface` (`_MinAlpha`, `_ClipChunks`, `_WorldDim`; `QUEUE Transparent-12`), read from `shaders_assets_all.bundle` with `unityz extract --class 48`. No Material in the 18 `Standalone` bundles names a surface shader, so the texture binding remains open.
 - **2026-08-11:** Water IL re-verified: ChunkCluster.SetWater IL=34, WaterValue HasMass IL=5 / SetMass IL=8 / get_RawData IL=4 / FromRawData IL=8 / Write/Read IL=5, WaterUtils GetVoxelKey2D IL=8 / GetVoxelKey IL=10 / IsVoxelOutsideChunk IL=15 / IsChunkSafeToUpdate IL=16 / TryOpenChunkForUpdate IL=33, World.IsWater IL=31/9/5, Chunk.SetWaterRaw IL=55 / SetWater IL=13 / ResetWaterSimHandle IL=4 / IsWater IL=9, World.GetWaterAt IL=53, getPoiForColor IL=10, AddPoiMapElement IL=13 (exact).
 - **2026-08-11:** Water sim IL re-verified: WaterSimulationNative.Update IL=229 / InitializeChunk IL=51, WaterDataHandle.InitializeFromChunk IL=154, WaterSimulationCalcFlows ProcessFlowBelow IL=105 / ProcessOverfull IL=85 / ProcessFlowSide IL=168, ApplyChanges IL=254, Chunk.SetWaterSimUpdate IL=75 (exact).
 - **2026-08-11:** Light-query IL re-verified: LightManager.CreateServer IL=8, World.GetLightBrightness IL=32, GetSunAndBlockColors IL=41, GetBlockLightValue IL=34, Chunk.GetLightBrightness IL=10, GetLightValue IL=30, GetLight IL=28, ChunkCluster.GetLight IL=21, SetLight IL=56, ResetLights IL=6, IsOpenSkyAbove IL=23/9, IsWaterInBounds IL=74, IsNeighbourChunksLit/Decorated IL=26, BlockLight.IsLightOn IL=7 / SetLightState IL=15 (exact).

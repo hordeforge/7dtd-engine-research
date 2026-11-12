@@ -121,18 +121,19 @@ new number.
   water feature placed like a lake), and two earlier summaries of it are corrected.
 - `Stamp::.ctor` is pinned as the writer of `waterRects`: every stamp built with `isWater` appends its
   `Area`, and the only reader is the dry-feature overlap test.
-**43 commits after `v3.4.0` (2026-11-05) as of 2026-11-13.** The build retarget this
+**44 commits after `v3.4.0` (2026-11-05) as of 2026-11-13.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
 - The client water surface shaders are measured
-  ([`light-mesh-water.md`](../world/light-mesh-water.md) §4.10): `7DTD/7DTD_Liquid`
-  (voxel surface: refraction, specular, and a thickness colour at `_ThicknessWidth`;
-  `QUEUE Transparent+1`) and `Game/Water Surface` (plane: `_MainTex` alpha and two
-  scrolling wave layers; `QUEUE Transparent-11`), read from
-  `shaders_assets_all.bundle` with `unityz extract --class 48`. No Material in the 18
-  `Standalone` bundles names either shader, so the instance values are runtime-set and
-  stay open as an IL question.
+  ([`light-mesh-water.md`](../world/light-mesh-water.md) §4.10): `MeshDescription::SetWaterQuality`
+  swaps the water section material to `Game/Water Surface` (two scrolling wave layers
+  whose `_MainTex` alpha is the transparency; `QUEUE Transparent-11`) or, at water quality
+  0, `Game/Water Distant Surface` with `_MinAlpha` 0 (plus `_ClipChunks` and
+  `_WorldDim`; `QUEUE Transparent-12`). Neither has an opacity parameter, and
+  `7DTD/7DTD_Liquid` is in the bundle but referenced by no managed assembly. Read from
+  `shaders_assets_all.bundle` with `unityz extract --class 48`. The texture binding
+  remains open: no Material in the 18 `Standalone` bundles names a surface shader.
 
 - The tag history row for `v3.4.0`, the corpus pin in this file's header and the
   reset of this section land after the cut, so the release notes stay the record
