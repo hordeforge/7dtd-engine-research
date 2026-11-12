@@ -92,7 +92,14 @@ and the stage, or the stage's log comes from another `GameRandom` instance
 (`StreetTile` re-seeds one too).
 
 The same run's `r=5da70253` and `r=357b8652` are the biome stage's later samples,
-so the stage does draw from one stream; what is not reproducible is its start. The
+so the stage does draw from one stream; what is not reproducible is its start.
+
+The instance is not the explanation either: `GameRandomManager.CreateGameRandom()`
+allocates from a memory pool and seeds with the manager's `baseSeed`, and
+`Rand.SetSeed` immediately re-seeds that same object through `GameRandom.SetSeed`
+(IL=4, straight to `InternalSetSeed`), so the world's seed does reach the
+generator `Init` uses. Two candidates are left: the string hash, and a re-seed
+between `Init` and the stage. The
 hash is not the obvious one either: `h = h * 31 + c` over `"123"` gives 48690, not
 the 289116474 a host Mono reports, so Mono's `mono_string_hash` is the unrolled
 variant and the value has to come from the runtime the game ships. The server
