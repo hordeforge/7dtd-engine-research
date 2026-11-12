@@ -181,17 +181,24 @@ plain arithmetic. It sums the five integer weights
 multiplies the sum by `multiple` to get `total = sum * multiple`. For each of
 `multiple` passes it builds five `BiomeTypeData(type, fraction, tileCount)`
 entries in `BiomeType` order (0 forest, 1 burntForest, 2 desert, 3 snow,
-4 wasteland), where `fraction = weight / total` and `tileCount = totalTiles`,
-orders that pass's five by `fraction` **ascending**, appends them to the result
-and clears the pass list. The result therefore holds `5 * multiple` entries, one
-block of five per pass, each block sorted by share, and every entry starts with
-`TileCount = totalTiles`. What follows is a round-robin that increments entries
-while a counter is below `totalTiles`, but the counter starts at the sum of the
-entries' counts (`5 * totalTiles`), so with the caller's arguments that loop does
-not run. The seed placement that follows in `GenerateBiomeTiles` is what decrements
-these counts as it places a biome's centres, so the counts are quotas for that
-placement, not a final tile share. The weights therefore steer placement through
-`fraction`, and the list order is block by block, each block ascending by share.
+4 wasteland), where `fraction = weight / total` and the third argument is
+`totalTiles`, orders that pass's five by `fraction` **ascending**, appends them to
+the result and clears the pass list. The result therefore holds `5 * multiple`
+entries, one block of five per pass, each block sorted by share.
+
+`BiomeTypeData..ctor(BiomeType, Single _percent, Int32 _totalTiles)`
+(`WorldBuilder_BiomeTypeData.il.txt`, IL=26) is where the quota is computed and
+not stored as the total: it keeps `Percent = _percent` and sets
+`TileCount = FloorToInt(_percent * _totalTiles)`, then raises a positive share's
+zero to **1**. So an entry's `TileCount` is its share of the map, not the whole
+map, and a type whose share floors to nothing still gets one tile. After the
+passes are appended, `CalcBiomeTileBiomeData` sums those counts and runs a
+round-robin from the list's first entry while the sum is below `totalTiles`,
+handing out the floors' remainder; the quotas therefore sum to the map exactly.
+The seed placement that follows in `GenerateBiomeTiles` decrements these counts as
+it places a biome's centres, so the counts are quotas for that placement and the
+region grower spends them. The weights steer the map's **shares** through
+`fraction` and its order block by block, ascending by share.
 
 The neighbour rules the region grower reads are pinned too. `HasBiomeNeighbor(x, y,
 type)` (IL=71) is true when any of the four cardinal neighbours inside the tile grid
@@ -1950,6 +1957,7 @@ order (row 0 = +Z).
 
 ## Changelog
 
+- **2026-11-13 (correction):** `BiomeTypeData`'s ctor computes `TileCount = FloorToInt(percent * totalTiles)` with a floor of 1 for a positive share, and the round-robin after the sort hands out the remainder; the earlier reading that every entry starts with `TileCount = totalTiles` and that the round-robin cannot run was wrong. A port that stored the total per entry generated an almost flat biome map (16.8/20.8/20.8/20.7/20.8 percent against the weights' 13/18/22/23/24), which is what exposed the misreading.
 - **2026-08-11:** World-gen IL re-verified: GetWorldPath IL=7, GenerateTask IL=203, GenerateBiomeTiles IL=436, GetBiomeCount IL=9, GetBiomeMap IL=3, GetTotalBluffsCount IL=31, GetBiome IL=5/12, ParseWeather IL=211, AddDecoPrefab/AddBluff/addSubBiome IL=5, AddReplacement IL=6, AddLayer IL=12, GetBiomeColor IL=4, LocalizedBiomeName IL=8, BiomeLayer ctor IL=18 / AddResource IL=34, GetBiomeAt IL=57/8, GetHumidityAt/GetTemperatureAt IL=2, GetRadiationAt IL=41, GetTopmostBlockValue IL=116 (exact).
 - **2026-08-10:** WorldBuilder IL sizes re-verified: GenerateTask IL=203, GenerateBiomeTiles IL=436 (exact).
 - **2026-08-08:** Prefab.Cells<T> dead sparse cell grid (0 external refs).
