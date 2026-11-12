@@ -72,6 +72,28 @@ implements it and seeds it with `WorldSeedName.GetHashCode() + WorldSize` gets t
 same integers, floats and ranges stock gets, stage by stage. A port on its own
 generator reproduces the shares and the structure but not the placement.
 
+Two details a consumer needs:
+
+* `Rand.PeekSample()` is `GameRandom.PeekSample` (IL=50), which computes
+  `InternalSample`'s arithmetic and **does not store the result or move the
+  indices**: it is the sample the next draw would return, not one already spent.
+  A stage log's `r={x}` is therefore the generator's next value at that moment.
+* `WorldBuilder.Init` sets `Seed = WorldSeedName.GetHashCode() + WorldSize`
+  (`<Init>d__84`, IL_0161-0182) and calls `Rand.SetSeed(Seed)`; `Rand.SetSeed`
+  forwards to `GameRandom.SetSeed`, which is `InternalSetSeed`.
+
+**What is not yet reconciled (measured 2026-11-13).** A live RWG run at seed name
+`123`, size 6144, logs `generateBiomeTiles start at 0.238, r=1b30312d`, and that
+value does not appear in the first 200,000 draws of Mono's `Random(289122618)`
+(`"123".GetHashCode()` 289116474 + 6144), of `Random(289116474)`, or of
+`Random(-395245407)` (the world hash `map_info.xml` records). So either the
+game's Mono computes another string hash, or `Rand` is re-seeded between `Init`
+and the stage, or the stage's log comes from another `GameRandom` instance
+(`StreetTile` re-seeds one too). The next read is the game's own
+`String.GetHashCode` and every `GameRandom.SetSeed` between the two points; a
+consumer should not assume `name.GetHashCode() + size` reproduces a live run
+until that is settled.
+
 ```mermaid
 flowchart TB
   ST[MainMenuMono.Start] --> SDS[startDedicatedServer coroutine]
@@ -1975,6 +1997,7 @@ order (row 0 = +Z).
 
 ## Changelog
 
+- **2026-11-13 (seed, unverified):** `WorldBuilder.Init` sets `Seed = WorldSeedName.GetHashCode() + WorldSize` and calls `Rand.SetSeed` (IL-cited), and `Rand.PeekSample` computes the next sample without advancing. A live run's first stage sample is not in the first 200,000 draws of the name-hash seeds under Mono, so the derivation is not reconciled yet; the page records the three candidates and the next read instead of asserting one.
 - **2026-11-13 (generator):** `Rand` wraps `GameRandom`, which is .NET's `System.Random` (MBIG 2147483647, MSEED 161803398, a 56-entry `SeedArray`, `InternalSetSeed` IL=118). The seeded framework algorithm is stable, so a port can reproduce the world's draws exactly by implementing it; a port on its own generator matches the shares and structure but not the per-tile placement, which is what a 55-percent tile agreement with equal biome shares looked like.
 - **2026-11-13 (correction):** `BiomeTypeData`'s ctor computes `TileCount = FloorToInt(percent * totalTiles)` with a floor of 1 for a positive share, and the round-robin after the sort hands out the remainder; the earlier reading that every entry starts with `TileCount = totalTiles` and that the round-robin cannot run was wrong. A port that stored the total per entry generated an almost flat biome map (16.8/20.8/20.8/20.7/20.8 percent against the weights' 13/18/22/23/24), which is what exposed the misreading.
 - **2026-08-11:** World-gen IL re-verified: GetWorldPath IL=7, GenerateTask IL=203, GenerateBiomeTiles IL=436, GetBiomeCount IL=9, GetBiomeMap IL=3, GetTotalBluffsCount IL=31, GetBiome IL=5/12, ParseWeather IL=211, AddDecoPrefab/AddBluff/addSubBiome IL=5, AddReplacement IL=6, AddLayer IL=12, GetBiomeColor IL=4, LocalizedBiomeName IL=8, BiomeLayer ctor IL=18 / AddResource IL=34, GetBiomeAt IL=57/8, GetHumidityAt/GetTemperatureAt IL=2, GetRadiationAt IL=41, GetTopmostBlockValue IL=116 (exact).
