@@ -121,7 +121,7 @@ new number.
   water feature placed like a lake), and two earlier summaries of it are corrected.
 - `Stamp::.ctor` is pinned as the writer of `waterRects`: every stamp built with `isWater` appends its
   `Area`, and the only reader is the dry-feature overlap test.
-**44 commits after `v3.4.0` (2026-11-05) as of 2026-11-13.** The build retarget this
+**45 commits after `v3.4.0` (2026-11-05) as of 2026-11-13.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -132,8 +132,11 @@ section described is published under the tag and in
   0, `Game/Water Distant Surface` with `_MinAlpha` 0 (plus `_ClipChunks` and
   `_WorldDim`; `QUEUE Transparent-12`). Neither has an opacity parameter, and
   `7DTD/7DTD_Liquid` is in the bundle but referenced by no managed assembly. Read from
-  `shaders_assets_all.bundle` with `unityz extract --class 48`. The texture binding
-  remains open: no Material in the 18 `Standalone` bundles names a surface shader.
+  `shaders_assets_all.bundle` with `unityz extract --class 48`. There is no surface
+  material asset: `MeshDescription.Init` builds it from the description's `BaseMaterial`
+  or its `PrimaryShader`, and binds `_MainTex` to that description's texture-atlas
+  diffuse image, so the open item is the `MeshDescriptionCollection` asset and the
+  atlas it names.
 
 - The tag history row for `v3.4.0`, the corpus pin in this file's header and the
   reset of this section land after the cut, so the release notes stay the record
