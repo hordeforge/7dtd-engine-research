@@ -358,10 +358,37 @@ the match is case-insensitive over the whole list. A recipe with several groups
 appears under each of them, and the challenge, quest and tracked recipes are the
 three exceptions that bypass the filter entirely.
 
+**The selection is not drawn.** A cell's pressed state goes to `XUiC_CategoryEntry::set_Selected`
+(IL=9), which stores the flag and calls `XUiV_Button::set_Selected` (IL=13); that method swaps the
+button to its `selectedSpriteName` and `selectedSpriteColor` (`updateCurrentSprite` IL=54,
+IL_0008..IL_0030). `XUiV_Button::.ctor` initialises all four sprite colours to `Color.white` and
+all four sprite names to `String.Empty`, and `get_SelectedSpriteName` falls back to
+`defaultSpriteName` when the selected name is empty (IL=11). The category cell in
+`XUi_InGame/templates.xml` states neither a selected sprite nor a selected colour and no `style`,
+so in this build selecting a category changes no pixel: the category is told to the player by the
+list's own content and by the header below.
+
+**The header follows the category.** `XUiC_CraftingListInfo` is the craft list's controller: its
+`Init` (IL=55) resolves `windowicon` into `icoCategoryIcon`, `windowname` into `lblName` and
+`unlockedcount` into `lblUnlockedCount` (the label is commented out in this build's `windows.xml`),
+`HandleCategoryChanged` (IL=9) stores the entry's `CategoryDisplayName` and `SpriteName`, and
+`Update` (IL=43) writes `lblName.Text = categoryName`,
+`icoCategoryIcon.SpriteName = spriteName` and `lblUnlockedCount.Text = "{0}/{1}"` from
+`CraftingManager.GetUnlockedRecipeCount()` and `GetLockedRecipeCount()`. So the header's own static
+label (`text_key="xuiBasics"`) and its `Craft_Icon_Basics` sprite are replaced at the first category
+change, which is why the icon the file names is absent from the shipped bundles and the screen
+still has one.
+
+**A category change clears the search box.** `XUiC_RecipeList::SetCategory` (IL=22) sets
+`txtInput.Text` to the empty string before it stores the new category, then re-reads the recipe
+data, marks the controller dirty and sets `resortRecipes` and `pageChanged`. A query typed under
+one category therefore never filters the next one, and the page returns to the first.
+
 Evidence: `XUiC_CategoryList` (31 methods, IL=126 for the workstation setup) and
-`XUiM_Recipes::FilterRecipesByCategory` (IL=91), dumped with `tools/src/DumpMethod`
-from the V3.4.0 b10 player `Assembly-CSharp.dll`; the dumps are regenerable and
-git-ignored per rule 2.
+`XUiM_Recipes::FilterRecipesByCategory` (IL=91), plus `XUiC_CategoryEntry` (17 methods),
+`XUiC_CraftingListInfo` (9), and `XUiV_Button`'s selected-state methods, dumped with
+`tools/src/DumpMethod` from the V3.4.0 b10 player `Assembly-CSharp.dll`; the dumps are
+regenerable and git-ignored per rule 2.
 
 ---
 
@@ -387,6 +414,11 @@ git-ignored per rule 2.
 
 ## Changelog
 
+- **2026-11-15:** The selected category draws nothing (all four button colours default to white
+  and the selected sprite falls back to the default, `XUiV_Button::.ctor` IL=47,
+  `updateCurrentSprite` IL=54); the header's `windowname` and `windowicon` follow the
+  category (`XUiC_CraftingListInfo` IL=55/9/43); a category change clears the search box
+  (`XUiC_RecipeList::SetCategory` IL=22).
 - **2026-11-15:** The craft list's categories pinned: the cell list is
   `UIDisplayInfoManager.GetCraftingCategoryDisplayList(<workstation>)`
   (`XUiC_CategoryList::SetupCategoriesByWorkstation` IL=126, `"skills"` special-cased),
