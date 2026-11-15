@@ -322,6 +322,49 @@ raises the `LootProb` of that magazine until the skill reaches 100.
 
 ---
 
+## 4. The craft list's categories (client UI)
+
+The crafting screen's category cells and the filter behind them are two separate
+mechanisms, and a reimplementation that draws the cells without the filter shows
+every recipe under every category.
+
+**Where the cells come from.** `XUiC_CategoryList::SetupCategoriesByWorkstation`
+(IL=126) reads `UIDisplayInfoManager.Current.GetCraftingCategoryDisplayList(<workstation>)`
+at IL_00BE..IL_00C4, then fills one `XUiC_CategoryEntry` per
+`CraftingCategoryDisplayEntry` from its `Name`, `Icon` and `DisplayName` fields
+(IL_00E7..IL_0111). The argument is the **workstation kind**, and
+`ui_display.xml` keys its lists by it (`<crafting_category_list display_type="forge">`).
+The one string that is not a workstation is `"skills"`: at IL_0018..IL_0023 it takes
+a different branch that walks `Progression.ProgressionClasses`, keeps the classes
+whose `IsAttribute` is true, skips `attcrafting` unless
+`XUiM_Recipes.CraftingProgression` is set, and uses each class's `Name` and `Icon`.
+
+**How a recipe obtains its category.** `XUiM_Recipes::FilterRecipesByCategory`
+(IL=91) is the whole rule, one pass over the list:
+
+| Step | IL | Effect |
+|---|---|---|
+| `recipe.isChallenge` | IL_0017 | kept, whatever the category |
+| `recipe.isQuest` | IL_002B | kept |
+| `recipe.IsTracked` | IL_003C | kept |
+| `ItemClass::GetForId(recipe.itemValueType)` | IL_0052 | the output item; null drops the recipe |
+| item `IsBlock()` ? `Block.list[id].GroupNames` : `ItemClass.Groups` | IL_005C..IL_007E | the candidate names; null drops the recipe |
+| `Extensions::EqualsCaseInsensitive(group, category)` | IL_0090..IL_009B | kept on the first match |
+
+So a recipe's craft-list category is **not stored on the recipe**: it is the output
+item's own group list (`items.xml`'s `Group` property, split on commas, which is the
+`ItemClass.Groups` array; a block output uses the block's `GroupNames` instead), and
+the match is case-insensitive over the whole list. A recipe with several groups
+appears under each of them, and the challenge, quest and tracked recipes are the
+three exceptions that bypass the filter entirely.
+
+Evidence: `XUiC_CategoryList` (31 methods, IL=126 for the workstation setup) and
+`XUiM_Recipes::FilterRecipesByCategory` (IL=91), dumped with `tools/src/DumpMethod`
+from the V3.4.0 b10 player `Assembly-CSharp.dll`; the dumps are regenerable and
+git-ignored per rule 2.
+
+---
+
 ## 4. Dedicated relevance and residuals
 
 - **Split authority (see header):** `CanCraft` and the backpack craft queue run on
@@ -344,6 +387,12 @@ raises the `LootProb` of that magazine until the skill reaches 100.
 
 ## Changelog
 
+- **2026-11-15:** The craft list's categories pinned: the cell list is
+  `UIDisplayInfoManager.GetCraftingCategoryDisplayList(<workstation>)`
+  (`XUiC_CategoryList::SetupCategoriesByWorkstation` IL=126, `"skills"` special-cased),
+  and a recipe's category is its output item's group list matched case-insensitively
+  (`XUiM_Recipes::FilterRecipesByCategory` IL=91), with challenge, quest and tracked
+  recipes bypassing the filter (§4).
 - **2026-11-01:** `CraftingTime` (passive 90) pinned: `GetRecipeCraftTime`
   (IL=29) scales `recipe.craftingTime` at the recipe's own tags and clamps at zero (§2).
 - **2026-08-11:** cMaxLoadTimePerFrameMillis pinned 50 ms (Constants cctor IL).
