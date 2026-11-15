@@ -267,18 +267,34 @@ Concrete rewards: `RewardExp`, `RewardItem`, `RewardLootItem`, `RewardTreasureIt
 `RewardRecipe`, `RewardSkill`, `RewardSkillPoints`, `RewardLevel`, `RewardQuest`
 (chain: `IsChainQuest` unlocks the next quest), `RewardShowMessageWindow`.
 
-**Reward parsing (verified 2026-08-22 against the shipped quests.xml):**
+**Reward parsing (verified 2026-08-22 against the shipped quests.xml; the
+`LootItem` semantics re-verified 2026-11-16 against `RewardLootItem`):**
 `RewardLootItem` entries use a **loot-group id** in the `id` attribute
-(`groupQuestWeapons`, `groupChallengeRewardSkillMagazinesAll`, ...) with
-`value` = pick count and `ischosen`/`isfixed` selecting the entries
-(`ischosen="true"` = prob-weighted picks; `isfixed="true"` = the first
-`value` entries deterministically). `RewardQuest` entries carry the chained
-quest id in `id`; the turn-in grants it to the player's journal.
+(`groupQuestWeapons`, `groupChallengeRewardSkillMagazinesAll`, ...). The id may
+be a comma-separated list (`tier1_test_turnin` writes
+`id="groupQuestFood,groupQuestAmmo,groupQuestSchematics"`): `SetupItem`
+splits it on `,` and, with more than one name, rolls one group from the list at
+random; a single id is the one-name case. `value` is **not** a pick count.
+`SetupReward` parses it into `LootGameStage` and hands it to
+`LootContainer.GetRewardItem(id, gameStage)` as the roll's game stage, and
+`GiveReward` adds the one stack that roll returned: three `value="1"` rows of
+one group are three rewards of one stack each, not three stacks of one row.
+`SetupItem` rolls up to ten times so the new stack's item type differs from
+every other `RewardLootItem` of the quest, and `SetupReward` fills
+`Description` from the same cached stack `GiveReward` pays, so the row a player
+reads is the item they receive. `ischosen="true"` marks a reward the player
+picks from; `isfixed="true"` keeps it out of that pool and out of the shuffle
+`Quest.SetupRewards` applies to the chosen ones, so it holds its place in the
+list. `RewardQuest` entries carry the chained quest id in `id`; the turn-in
+grants it to the player's journal.
 
 **Reward leaves (all IL-verified):** `BaseReward.GetRewardText()` (IL=2)
 returns "" and `SetupGlobalRewardSettings()` (IL=1) is a no-op (the subclass
 hooks); `RewardItem.GetRewardText()` (IL=14) is
 `"{count} x {itemClass.GetLocalizedItemName()}"`;
+`RewardLootItem.GetRewardText()` (IL=28) is the rolled stack's localized item
+name, and `"{name} ({count})"` only when the item has no quality and the stack
+holds more than one;
 `RewardSkillPoints.GetRewardText()` (IL=7) is
 `"{Description} {ValueText}"`. The `ID` / `Description` / `Icon` /
 `IconAtlas` / `Optional` / `HiddenReward` / `ReceiveStage` / `RewardIndex` /
