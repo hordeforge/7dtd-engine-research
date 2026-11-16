@@ -121,10 +121,13 @@ new number.
   water feature placed like a lake), and two earlier summaries of it are corrected.
 - `Stamp::.ctor` is pinned as the writer of `waterRects`: every stamp built with `isWater` appends its
   `Area`, and the only reader is the dry-feature overlap test.
-**54 commits after `v3.4.0` (2026-11-05) as of 2026-11-15.** The build retarget this
+**55 commits after `v3.4.0` (2026-11-05) as of 2026-11-16.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
+- The map's waypoint popups are pinned: `OnSetWaypoint` writes
+  `EntityPlayer.markerPosition` (the quick marker is one block, saved in `PlayerDataFile`), and
+  `XUiC_MapSubPopupList`'s static array is the 20 icons the save row's sub-popup offers, in order.
 - The client water surface shaders are measured
   ([`light-mesh-water.md`](../world/light-mesh-water.md) §4.10): `MeshDescription::SetWaterQuality`
   swaps the water section material to `Game/Water Surface` (two scrolling wave layers

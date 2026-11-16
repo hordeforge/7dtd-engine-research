@@ -281,6 +281,25 @@ of **saved-only** waypoints (`IsSaved` filter), then `Waypoint.Write` each;
 IL=28) or by `navObject` ref (`GetWaypointForNavObject` IL=28, used by
 `PlayerDataFile.ToggleWaypointHiddenStatus`).
 
+**The map's waypoint popups (`XUiC_MapArea`):** a left click on the map runs
+`Update`'s cursor path and shows `mapAreaSetWaypoint`, whose two rows are
+`MapPopupEntry` records. The first row is `OnSetWaypoint` (IL=16): it clears
+`navMarkerHidden`, writes the clicked block into `EntityPlayer.markerPosition`
+and calls `closeAllPopups`; the quick marker is therefore one block per player,
+not a `Waypoint`, and `PlayerDataFile` carries it (`markerPosition`,
+`markerHidden`). The second row shows `mapAreaChooseWaypoint`, whose
+`map_popup_sub_line` cells are the 20 icons of `XUiC_MapSubPopupList`'s static
+array (`.cctor` IL=84), in this order: `ui_game_symbol_map_cave`,
+`_cabin`, `_campsite`, `_city`, `_fortress`, `_civil`, `_house`, `_town`,
+`_trader`, `ui_game_symbol_x`, `_book`, `_coin`, `_safe`, `_treasure`,
+`_radial_number_1` through `_radial_number_5`, `ui_game_symbol_check`. The pressed
+name lands in `currentWaypointIconChosen` (`OnWaypointEntryChosen` IL=4), and the
+row after it is `mapAreaEnterWaypointName`: `OnWaypointCreated` (IL=115) builds
+the `Waypoint` at `nextMarkerMousePosition`, sets `pos` and `icon` from that
+field, and the name from the text field. `closeAllPopups` (IL=31) hides all four
+popups (`mapAreaSetWaypoint`, `mapAreaChooseWaypoint`,
+`mapAreaEnterWaypointName`, `mapTrackingPopup`) and clears the cursor selection.
+
 **Auto waypoints (vehicles/drones/animals):** `UpdateEntityVehicleWayPoint`
 (IL=85) and `UpdateEntityDroneWayPoint` (IL=85) require `LocalPlayerIsOwner`,
 then refresh the matching waypoint's pos (`Remove` + `navObject.TrackedPosition`
