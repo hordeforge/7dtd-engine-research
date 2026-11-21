@@ -121,7 +121,13 @@ new number.
   water feature placed like a lake), and two earlier summaries of it are corrected.
 - `Stamp::.ctor` is pinned as the writer of `waterRects`: every stamp built with `isWater` appends its
   `Area`, and the only reader is the dry-feature overlap test.
-**55 commits after `v3.4.0` (2026-11-05) as of 2026-11-16.** The build retarget this
+- The RWG border pass is pinned from `WorldBuilder/<>c__DisplayClass142_0::<GenerateBaseStamps>b__0`:
+  four dry edges walked in index order with a `Range(0, 75)` offset on both coordinates and an
+  along-edge step of the tile size, the wet branch drawing `water_border` 40 blocks inward for a set
+  `BorderWaterMask` bit, the stamp name `{biome}_land_border` falling back to `land_border` with the
+  biome read at `x / 1024` (a 1024 block lookup, not the map's own 256 block grid), and
+  `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`.
+**56 commits after `v3.4.0` (2026-11-05) as of 2026-11-22.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
