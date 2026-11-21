@@ -126,8 +126,10 @@ new number.
   along-edge step of the tile size, the wet branch drawing `water_border` 40 blocks inward for a set
   `BorderWaterMask` bit, the stamp name `{biome}_land_border` falling back to `land_border` with the
   biome read at `x / 1024` (a 1024 block lookup, not the map's own 256 block grid), and
-  `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`.
-**56 commits after `v3.4.0` (2026-11-05) as of 2026-11-22.** The build retarget this
+  `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`, both drawn **before** the biome and
+  stamp lookups; the wet branch draws **outside** the world (`WorldSize + 40`, `-40`) rather than
+  inward, and every range is half-open.
+**57 commits after `v3.4.0` (2026-11-05) as of 2026-11-22.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 

@@ -454,8 +454,11 @@ sets its border stamps' size range to `(0.6, 0.85)` and starts three tasks:
   `Range(0, 75)` for both coordinates, and the four dry placements are `x, y =` (`along + R`, `R`),
   (`along + R`, `WorldSize - R`), (`R`, `along + R`) and (`WorldSize - R`, `along + R`) for mask bits
   1, 2, 4 and 8 respectively. A set bit leaves `x = -9999` for the dry pass and is drawn by the wet
-  pass afterwards at the same edge with a 40-block inward offset and its own random reach
-  (`water_border`). The stamp name is `{biome}_land_border` falling back to `land_border`, where the
+  pass afterwards **outside** the world: edge 0 draws at `y = WorldSize + 40`, edge 2 at `x = -40`,
+  edge 3 at `x = WorldSize + 40`, and each of those coordinates carries a `Rand.Range(0)` term which
+  is 0, so the offset is fixed rather than random. Two more order facts matter to a reimplementation:
+  `scale` and `rotation` are drawn **before** the biome lookup and the stamp lookup, not after, and
+  every range here is stock's half-open one (`Range(0, 75)` is 0..74). The stamp name is `{biome}_land_border` falling back to `land_border`, where the
   biome is read from `biomeMap` at `(clamp(x / 1024), clamp(y / 1024))` against `WorldSize / 1024 - 1`
   - a **1024 block** lookup, not the 256 block grid the map itself is stored on - and the stamp is
   built at `scale = Range(0.6, 0.85)` and `rotation = Rand.Angle()` with a zero colour, the 0.1
