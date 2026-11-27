@@ -502,16 +502,36 @@ target throws with the view's own hierarchy in the message.
 
 Each setter (`set_AnchorLeft`/`set_AnchorRight`/`set_AnchorTop`/`set_AnchorBottom`, IL=12) stores
 the string and calls `SetDirty`; `parseAnchors` then parses all four and marks the view anchored
-left-and-right or top-and-bottom when both sides of an axis carry a target. The edge arithmetic
-itself belongs to the bundled NGUI `UIRect` the view wraps, and `UIRect` is not in this corpus's
-dumps, so how `relative` and `absolute` combine with `pos`/`width`/`height` on a partially
-anchored axis is **not decoded** here. What the XML states can be quoted and the target rules
-above can be relied on; the resulting rectangle cannot.
+left-and-right or top-and-bottom when both sides of an axis carry a target.
+
+The edge arithmetic is `UIWidget.OnAnchor` (IL=516), in the shipped `NGUI.dll` (not in
+`Assembly-CSharp.dll`, so not in the historical dumps; regenerate with
+`DumpMethod.exe <install>/7DaysToDie_Data/Managed/NGUI.dll UIWidget ""`). Each edge is computed in
+the parent's local space, y up:
+
+```text
+left   = leftAnchor   ? Lerp(target.left,   target.right, rel) + abs : localPos.x - pivot.x * width
+right  = rightAnchor  ? Lerp(target.left,   target.right, rel) + abs : left + width
+bottom = bottomAnchor ? Lerp(target.bottom, target.top,   rel) + abs : localPos.y - pivot.y * height
+top    = topAnchor    ? Lerp(target.bottom, target.top,   rel) + abs : bottom + height
+```
+
+The target's sides come from `UIRect.GetSides` (IL=54), whose four corners are indexed 0 bottom
+left, 1 top left, 2 bottom right, 3 top right; x interpolates corners 0 to 2 and y interpolates
+corner 3 to 1, so `relative` 0 is the target's left/bottom edge and 1 its right/top edge. The
+widget then places itself at `(Lerp(left, right, pivot.x), Lerp(bottom, top, pivot.y))` relative to
+its parent, rounds it, and takes `width = FloorToInt(right - left + 0.5)` and
+`height = FloorToInt(top - bottom + 0.5)`. So an axis with both sides anchored takes its size from
+the span and ignores `width`/`height`, and an axis with one side anchored keeps its declared size
+and attaches that edge; an axis with none is the plain `pos`/`pivot`/size placement. Note the
+space: `absolute` and `pivot` are in the same y-up parent coordinates as the target's sides, so a
+consumer working in screen coordinates (y down) flips both the interpolation and the offset sign.
 
 Grids and tables are their own widget types (`XUiV_Grid` with `SetRepeatContentTemplateParams`
 and `OnGridSizeChanged`, `XUiV_Table`), and `parseAnchors` subscribes to a grid's size change so
-a view anchored to a grid follows a reflow. The cell layout inside `UIGrid`/`UITable` is again
-NGUI and not dumped.
+a view anchored to a grid follows a reflow. The cell layout inside `UIGrid`/`UITable` is not
+covered here. `UIWidget.OnAnchor` also clamps the result to the widget's `minWidth`/`minHeight`
+and applies `keepAspectRatio` after the edges are computed.
 
 ## Infrastructure / utility / DTOs (366)
 
