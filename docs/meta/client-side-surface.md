@@ -487,6 +487,32 @@ The XUi / NGUI windowing framework: windows, widgets, bindings, and the data-bin
 | `XUiView_WidgetBased` | XUiView | refreshBoxCollider, anchorsParsed, InitView |
 | `XUiWindowGroup` | GUIWindow | OnOpen, Init, OnClose |
 
+### Layout attributes and anchors (verified from IL)
+
+An XUi view is positioned by its XML attributes, and the four anchor strings are resolved by
+`XUiView.parseAnchors` (IL=81), which calls `ParseAnchorString` (IL=204) once per side. The evidence
+is the `XUiView` dump under `il/full-v3.1.0`, the corpus's latest dump of the client assembly;
+V3.4.0 has not been re-dumped for this type. The grammar
+is `<target>,<relative>,<absolute>`: a target name, a float `relative`, and an int `absolute`. The
+target is the parent transform for `#parent`, the `UICamera` transform for `#cam`, a named
+`XUi` anchor for `#<Side>` (`BottomLeft`, `Left`, `TopLeft`, `Top`, `TopRight`, `Right`,
+`BottomRight`, `Bottom`, `Center`), and otherwise a view found with
+`XUiUtils.FindHierarchyClosestView`, which searches the controller hierarchy by name. A missing
+target throws with the view's own hierarchy in the message.
+
+Each setter (`set_AnchorLeft`/`set_AnchorRight`/`set_AnchorTop`/`set_AnchorBottom`, IL=12) stores
+the string and calls `SetDirty`; `parseAnchors` then parses all four and marks the view anchored
+left-and-right or top-and-bottom when both sides of an axis carry a target. The edge arithmetic
+itself belongs to the bundled NGUI `UIRect` the view wraps, and `UIRect` is not in this corpus's
+dumps, so how `relative` and `absolute` combine with `pos`/`width`/`height` on a partially
+anchored axis is **not decoded** here. What the XML states can be quoted and the target rules
+above can be relied on; the resulting rectangle cannot.
+
+Grids and tables are their own widget types (`XUiV_Grid` with `SetRepeatContentTemplateParams`
+and `OnGridSizeChanged`, `XUiV_Table`), and `parseAnchors` subscribes to a grid's size change so
+a view anchored to a grid follows a reflow. The cell layout inside `UIGrid`/`UITable` is again
+NGUI and not dumped.
+
 ## Infrastructure / utility / DTOs (366)
 
 Generic infrastructure, collections, DTOs, and delegates used across the game (client and server sides). Reachable from the dedicated boot graph through shared helpers.
