@@ -557,6 +557,38 @@ Two consequences a consumer has to keep:
 `XUi.GetAnchor` resolves the anchor name to a transform created by the XUi root; a missing anchor
 logs `Specified window anchor "<name>" not found for window "<id>"` and throws.
 
+### A table places its cells (verified from the decompiled NGUI)
+
+`UITable.RepositionVariableSize` is the only placement a table's children get, because
+`XUiV_Table.UiRect` returns `null`. From the decompiled `NGUI.dll`:
+
+* cells are filled row-major into `columns` columns (`columns` defaults to 1);
+* a column's width is the union of its cells' bounds and a row's height the union of its cells',
+  where a cell's bounds are measured from the cell's own transform (its authored `pos` moved by
+  its pivot), not from where a sibling pass may have left it;
+* each cell is placed from a running offset: `x = num - cellMinX - Lerp(0, cellWidth - columnWidth,
+  cellAlignment.x) + padding.x`, and the next cell advances `num` by the column width plus twice
+  the padding; a full row resets `num` and advances the y offset by the row height plus twice the
+  padding;
+* when the table's own `pivot` is not `TopLeft` the whole block is shifted by
+  `(-width * pivot.x, ...)` in the same pivot space, so a `Top` pivot centres the block on the
+  table's transform.
+
+`XUiV_Table` maps the XML to `UITable`: `cols` to `Columns` (default 1), `padding` to `Padding`,
+`hideInactive` to `HideInactive` (default true), `cell_alignment` to `CellAlignment`, and `pivot`
+to `UITable.pivot`, which is the block's pivot rather than a widget pivot.
+
+### The tab selector pairs buttons with tabs at runtime
+
+`XUiC_TabSelector.Init` (IL=105) pairs its `tabButtons` with its `Tabs` array by index and warns
+when one list is longer, and `XUiC_TabSelectorButton` exposes the binding values the button's
+labels read: `TabSelected` (`tab_selected`), `TabName` (`tab_name`), `TabNameLocalized`
+(`tab_name_localized`, from the tab's `TabHeaderText`), `TabSprite` (`tab_sprite`) and
+`TabHighlight` (`tab_highlight`). `UpdateVisibilityState` sets the button view's visibility from
+`Tab.TabVisible`, and `UpdateSelectionState` forwards the selection to the button and refreshes the
+bindings. The button does **not** resize its cell: the cell is the XML's rectangle, and the label
+inside it is the one that overflows (`overflow="resizefreely"`, `overflow_width`).
+
 ## Infrastructure / utility / DTOs (366)
 
 Generic infrastructure, collections, DTOs, and delegates used across the game (client and server sides). Reachable from the dedicated boot graph through shared helpers.
