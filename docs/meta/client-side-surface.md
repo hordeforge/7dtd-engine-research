@@ -533,6 +533,30 @@ a view anchored to a grid follows a reflow. The cell layout inside `UIGrid`/`UIT
 covered here. `UIWidget.OnAnchor` also clamps the result to the widget's `minWidth`/`minHeight`
 and applies `keepAspectRatio` after the edges are computed.
 
+### A window is a scene-anchored node, not a widget (verified from IL)
+
+`XUiV_Window.get_UiRect()` returns `null`, so a window is the second view type with no widget
+rectangle (a table is the first). Its placement is `setRootNode` (IL=89): when the window states an
+`anchor`, the transform is re-parented under `XUi.GetAnchor(<anchor>)`; otherwise, when a
+`StackPanel` exists, under that panel's transform. The window's own `pos` then becomes its
+`localPosition` in that parent, so its children's coordinates start at the scene anchor point (or
+the docked panel's origin), not at a window rectangle. A window also sets layer 12 on the object,
+which is the UI layer the scene anchors live on.
+
+Two consequences a consumer has to keep:
+
+* an `anchor` value is a *screen point* (`Top`, `Bottom`, `Left`, `Right`, the four corners,
+  `Center`), and the window's content is authored relative to it. `optionsVideoSimplified` states
+  `anchor="Top"` with a `content rect pos="-900"`, which is half its 1,800-unit width to the left
+  of the screen's centre;
+* `panel="Right"` (and the other panel names) dock the window instead, so that window's children
+  are authored from the panel's own corner. `windowOutput` is `anchor="Top" panel="Right"`, and
+  its children at `pos` 0..203 are written for the panel, which is why its frame looks like a
+  top-left window despite the anchor.
+
+`XUi.GetAnchor` resolves the anchor name to a transform created by the XUi root; a missing anchor
+logs `Specified window anchor "<name>" not found for window "<id>"` and throws.
+
 ## Infrastructure / utility / DTOs (366)
 
 Generic infrastructure, collections, DTOs, and delegates used across the game (client and server sides). Reachable from the dedicated boot graph through shared helpers.
