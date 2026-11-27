@@ -129,7 +129,7 @@ new number.
   `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`, both drawn **before** the biome and
   stamp lookups; the wet branch draws **outside** the world (`WorldSize + 40`, `-40`) rather than
   inward, and every range is half-open.
-**61 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
+**62 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
