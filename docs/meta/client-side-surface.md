@@ -557,6 +557,39 @@ Two consequences a consumer has to keep:
 `XUi.GetAnchor` resolves the anchor name to a transform created by the XUi root; a missing anchor
 logs `Specified window anchor "<name>" not found for window "<id>"` and throws.
 
+### The UI root's canvas is 1080 units tall (probed from the shipped scene)
+
+The catalogue's pixel values are game units on a reference canvas, and the root component that fixes
+that canvas is in the shipped level rather than in the assembly. `level0` of
+`7DaysToDie_Data/data.unity3d` holds a GameObject named `UI Root (2D)` at path id 4, and the
+MonoBehaviour whose `m_GameObject` points at it (path id 21, class 114, 68 bytes) carries the values
+below. Probed with `unityz extract <install>/7DaysToDie_Data/data.unity3d/level0 --raw --class 114`,
+which writes each object's bytes; the fields are read by offset because the file carries no Mono type
+trees (`unityz` reports "this file has no type trees (Mono build)"), so the *values* are verified and
+the field *names* are inferred from NGUI's `UIRoot` layout:
+
+| offset | value | reading (inferred) |
+|---|---|---|
+| `0x18` | 1 | `scalingStyle`, which is `FixedSize` under NGUI's `PixelPerfect, FixedSize, Fit, Fill` order |
+| `0x1C` | 1280 | an extent; its role is not established (see the limit below) |
+| `0x20` | **1080** | `manualHeight` |
+| `0x24` | 320 | `minimumHeight`, NGUI's own default |
+| `0x28` | 1536 | `maximumHeight`, NGUI's own default |
+| `0x2C` | 0 | `adjustment` or equivalent float |
+| `0x30` | 1 | a flag; `fitWidth` under the same layout |
+
+`320` and `1536` are NGUI's stock `UIRoot` defaults, which is what makes the neighbouring `1080`
+read as `manualHeight` rather than as a coincidence: the pair is only ambiguous if those two are not
+the defaults, and they are. The consequence for a consumer is a scale, not a table: under
+`FixedSize` the root maps 1080 units onto the frame's height, so a layout authored in these units is
+multiplied by `frameHeight / 1080` and the canvas's width follows the frame's aspect (1920 units at
+16:9, 2560 at 21:9).
+
+The limit, and it is the reason `1280` is not read as the canvas width: `optionsVideoSimplified` is
+1,800 units wide and `menuBackground` 1,050, and an 1,800-unit page does not fit a 1,280-unit canvas.
+So either the second value means something other than width, or the root's width is not the manual
+extent at all. A consumer that needs the width should take it from the aspect, not from the `1280`.
+
 ### A table places its cells (verified from the decompiled NGUI)
 
 `UITable.RepositionVariableSize` is the only placement a table's children get, because
