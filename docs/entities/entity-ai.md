@@ -2795,6 +2795,15 @@ Else: xz `*= 0.91`; `motion.y -= Gravity*0.025` then `*= 0.91`.
 | no | yes | **134** | `cPlayerSpeedModifierRunning` |
 | no | no | **133** | `cPlayerSpeedModifierWalking` |
 
+**The speed modifier constants (IL-verified 2026-11-28).** `Constants..cctor`
+loads three multipliers on the entity's base move speed: running **1.6**
+(`IL_02A7`-`IL_02AC`), walking **0.8** (`IL_02B1`-`IL_02B6`) and crouching
+**0.4** (`IL_02BB`-`IL_02C0`). So a crouched player moves at half the walking
+speed before passives, and `CrouchSpeed`'s `perc_add` rows scale that 0.4.
+`GetPassiveEffectSpeedModifier` then multiplies the resulting pair by the
+sandbox statics (`WalkSpeedModifier`, `RunSpeedModifier`, `CrouchSpeedModifier`,
+`CrouchRunSpeedModifier`), each 1 in `.cctor`.
+
 **`ccEntityCollision` (IL=12):** `canCCMove=true`;
 `ccEntityCollisionStart(vel)`; if not delayed `ccEntityCollisionResults`.
 Start scales ySize by 0.4 physics constant; applies `motionMultiplier` when

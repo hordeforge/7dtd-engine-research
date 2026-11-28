@@ -67,6 +67,10 @@ new number.
   `Prefab` applies the conversion to a cell's rotation while stamping. A shape whose
   `SymmetryType` is 0 does not mirror at all, so a prefab pairing one shape at two rotations
   across a mirror axis is not a mirrored pair.
+- The player speed modifiers are pinned from `Constants..cctor`
+  (`docs/entities/entity-ai.md`): running 1.6, walking 0.8 and crouching 0.4 on the
+  entity's base speed, so a crouched player moves at half the walking speed before
+  passives and `CrouchSpeed`'s rows scale that 0.4.
 - The RWG biome tile counts are pinned from `CalcBiomeTileBiomeData` (IL=162): the five
   `*BiomeWeight` values summed and multiplied by the pass count, one block of five
   `BiomeTypeData` entries per pass with `fraction = weight / total` and `tileCount = totalTiles`,
@@ -129,7 +133,7 @@ new number.
   `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`, both drawn **before** the biome and
   stamp lookups; the wet branch draws **outside** the world (`WorldSize + 40`, `-40`) rather than
   inward, and every range is half-open.
-**62 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
+**63 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
