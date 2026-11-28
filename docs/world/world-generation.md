@@ -91,6 +91,23 @@ game's Mono computes another string hash, or `Rand` is re-seeded between `Init`
 and the stage, or the stage's log comes from another `GameRandom` instance
 (`StreetTile` re-seeds one too).
 
+**2026-11-28: the first two candidates are settled, one by measurement and one by a
+longer search.** Mono is on the development host, so both halves were run rather than
+argued. `mcs` and `mono` compiling `"123".GetHashCode()` on Mono print **289116474**,
+which is the value this page already used, so "the game's Mono computes another string
+hash" is ruled out for a plain seed name: the managed hash is the one the game runs. And
+the search was extended from 200,000 to **200,000,000 draws** of `Random(289122618)`
+(a transcription of the .NET subtractive generator, checked against `new Random(123)`
+giving 2114319875, 1949518561, 1596751841, 1742987178, 1586516133), with **no hit** for
+`1b30312d`. Eight plausible seed names had the same treatment and none hit in 2,000,000
+draws each: `123`, `123-6144`, `1236144`, `123.6144`, `genesis7`, `RWG`, `12345`,
+`7DTD`, and the bare hashes 289116474, 508134743, -1712053213 and the recorded world hash
+-395245407. So `r=1b30312d` is not an early value of any stream seeded by the name hash
+plus the size: either `Rand` is re-seeded between `Init` and the stage, or the stage's log
+comes from another `GameRandom` instance. The search harness is a five-line C# program
+whose loop was self-checked by finding a known sample at its own index (the fifth value,
+`236a771e`, is at draw 4), so the negative is a measurement and not a broken loop.
+
 The same run's `r=5da70253` and `r=357b8652` are the biome stage's later samples,
 so the stage does draw from one stream; what is not reproducible is its start.
 
