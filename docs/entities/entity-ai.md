@@ -2531,7 +2531,13 @@ jumpSwimDurationTicks`:
   (`scale / max(1, s)`)
 
 **`IsWalkTypeACrawl` (IL=7):** `walkType >= 20` (true for crawler **21** and any
-walk type at or above 20).
+walk type at or above 20). **It changes a pose, not a speed.** The whole dump has
+two call sites: `EntityAlive.ConditionalTriggerSleeperWakeUp` picks the sleeper
+pose from it (`IL_0032`), and `EModelBase` picks the get-up clip
+(`CrawlerGetUpChest` instead of `GetUpChest`/`GetUpBack`, `IL_0295`). No speed
+path consults it: a crawler's movement is the entity's own move speed through
+`GetPassiveEffectSpeedModifier`, so the slow look of a crawl is the animation,
+not a smaller number.
 
 **`EndJump` (IL=21):** `jumpState=0`, `jumpIsMoving=false`; local avatar
 `StartAnimationJump(mode1)` (land).
