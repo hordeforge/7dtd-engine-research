@@ -136,10 +136,15 @@ new number.
   `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`, both drawn **before** the biome and
   stamp lookups; the wet branch draws **outside** the world (`WorldSize + 40`, `-40`) rather than
   inward, and every range is half-open.
-**64 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
+**65 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
+- The UI root's canvas is 1080 units tall (`docs/meta/client-side-surface.md`, "The UI root's canvas
+  is 1080 units tall"): the `UI Root (2D)` component in `level0` carries 1080 beside 320 and 1536,
+  NGUI's stock `UIRoot` minimum and maximum, so a layout in catalogue units scales by
+  `frameHeight / 1080`. The second extent the record carries (1280) is deliberately not read as a
+  canvas width: an 1,800-unit page would not fit it.
 - The map's waypoint popups are pinned: `OnSetWaypoint` writes
   `EntityPlayer.markerPosition` (the quick marker is one block, saved in `PlayerDataFile`), and
   `XUiC_MapSubPopupList`'s static array is the 20 icons the save row's sub-popup offers, in order.
