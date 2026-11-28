@@ -135,6 +135,15 @@ Live IL order (V3.2.0 b9):
      `LegCrippleScale > 0`: `p = fraction * LegCrippleScale`; if p ≥ 0.05 and
      corresponding leg flag not set (4096 left / 8192 right), rand < p sets
      `CrippleLegs`.
+   - **The roll's units and the cripple gate (IL-verified 2026-11-28).**
+     `CheckDismember` compares `GameRandom.RandomFloat()` with the chance and
+     dismembers on `rand <= chance` (`IL_0040`-`IL_004C`), and `RandomFloat()`
+     is 0..1, so the chance is a fraction: an item row states `.05` or `1`,
+     not 5 or 100, and the `sourceChance >= 100` branch (`IL_009F`-`IL_00B3`)
+     is a fixed certain value rather than a unit conversion. The crippling roll
+     is skipped when `BodyDamage.ShouldBeCrawler` is already set **or** this
+     hit's `DamageResponse.TurnIntoCrawler` is set (`IL_00A0`-`IL_00B6`), so a
+     body that lost a leg on an earlier hit is not crippled again.
 
 **`GetTotalPhysicalArmorRating` (IL=47):** tags = `coreDamageResist` OR
 attacking item tags; passive **41** on wearer then passive **163** on attacker
@@ -595,6 +604,11 @@ Leaf types on the edges of the damage flow above:
 
 ## Changelog
 
+- **2026-11-28:** The dismember roll's units and its leg gate are pinned from
+  the dumped `EntityAlive` IL: `RandomFloat()` is 0..1, so `GetDismemberChance`
+  returns a fraction and `sourceChance >= 100` is a certain value, not a
+  conversion; and the crippling roll is skipped when `ShouldBeCrawler` is
+  already set or the hit itself sets `TurnIntoCrawler`.
 - **2026-11-02:** Two damage consumers named from the decompiled source
   (ILSpy 10.1.1.8388, shipped V3.3.0 assembly): `ItemAction.GetDismemberChance`
   builds its source chance from the held item with the hit part as a tag
