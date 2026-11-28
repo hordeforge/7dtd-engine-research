@@ -136,7 +136,7 @@ new number.
   `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`, both drawn **before** the biome and
   stamp lookups; the wet branch draws **outside** the world (`WorldSize + 40`, `-40`) rather than
   inward, and every range is half-open.
-**65 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
+**66 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -145,6 +145,11 @@ section described is published under the tag and in
   NGUI's stock `UIRoot` minimum and maximum, so a layout in catalogue units scales by
   `frameHeight / 1080`. The second extent the record carries (1280) is deliberately not read as a
   canvas width: an 1,800-unit page would not fit it.
+- The RWG seed derivation's candidates are narrowed by measurement
+  (`docs/world/world-generation.md`, "2026-11-28: the first two candidates are settled"):
+  Mono's managed `"123".GetHashCode()` is 289116474 on this host, so the hash is the managed one,
+  and `1b30312d` is absent from 200,000,000 draws of the hash-derived seed and from eight other
+  plausible names and sizes, so a re-seed or another `GameRandom` instance is what remains.
 - The map's waypoint popups are pinned: `OnSetWaypoint` writes
   `EntityPlayer.markerPosition` (the quick marker is one block, saved in `PlayerDataFile`), and
   `XUiC_MapSubPopupList`'s static array is the 20 icons the save row's sub-popup offers, in order.
