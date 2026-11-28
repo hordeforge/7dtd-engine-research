@@ -791,6 +791,34 @@ item's tags raise it (`perkFlurryOfPerception` adds up to 25 percent).
 on the action data's `attackTime`, and calls `SetAttackFinished` once
 `Time.time - lastUseTime > attackTime + 0.1`.
 
+**`ItemActionRanged` damage falloff (V3.4.0 read).** `GetExecuteActionTarget`
+(IL=215) computes a per-shot `damageFalloffPercent` from passive **10**. The
+enum's field order puts `DamageFalloffRange` at index 10 (after `MagazineSize`),
+and the item info's `lblAttributeFalloffRange` line in `GetItemValueActionInfo`
+reads the same index, which is what identifies it:
+
+- `distance` is `sqrt(hit.distanceSq)` of the resolved hit;
+- `range` is `EffectManager.GetValue(DamageFalloffRange = 10, itemValue, ...)`,
+  in the metres `MaxRange` uses;
+- `damageFalloffPercent` starts at **1** and is set only when
+  `hit.distanceSq > range * range`, to
+  `1 - (distanceSq - range²) / (maxRange² - range²)`, where `maxRange` is the
+  raycast distance the same method hands `Voxel.Raycast` (the gun's `MaxRange`).
+
+So a hit inside `range` takes full damage and the damage falls **linearly** to
+zero at `maxRange`, which is also where the ray stops. Both values live on
+`ItemActionDataRanged` (`distance`, `damageFalloffPercent`); **the multiplication
+itself is not decoded**: the field is written there and read by no dumped method,
+so the formula is verified and the application site is not.
+
+Data shape: the pistol (`gunHandgunT1Pistol`) states `MaxRange base_set 50` and
+`DamageFalloffRange base_set 17`, plus a `perc_add -.2,.2` spread across tiers 1
+to 6, so the full-damage range is 17 m pulled down or up by 20 percent. Modifiers
+carry their own rows: `modGunBarrelExtender` adds `.2` to both
+`DamageFalloffRange` and `MaxRange`, and other barrel-side mods take them down
+(`-.2`, `-.15`), which is how a mod moves the full-damage range. `ui_display.xml`
+shows the stat under `statDamageFalloffRange` for the gun perks.
+
 **`ItemActionRanged` reload is animation-driven (V3.3.0 re-read).** No item
 field states a reload time. `requestReload` (IL=12) only sets
 `isReloadRequested`; the work runs in a Unity Animator state.

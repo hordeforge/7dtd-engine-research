@@ -54,6 +54,11 @@ new number.
 
 ## Unreleased
 
+- `ItemActionRanged`'s damage falloff is measured: `GetExecuteActionTarget` sets the action data's
+  `damageFalloffPercent` to 1 inside `DamageFalloffRange` (passive 10) and, past it, to
+  `1 - (distanceSq - range²) / (maxRange² - range²)`, so damage falls linearly to zero at `MaxRange`.
+  The multiplication site itself is not in the dumped IL, and the pistol's own numbers are pinned
+  (`MaxRange` 50, `DamageFalloffRange` 17, `perc_add` by tier) in `docs/gameplay/items.md` 4.2.
 - The `SymType_*` children a shape model carries are corrected: they are empty 39-byte marker
   GameObjects that declare `SymmetryType`, not meshes at other rotation indices, and
   `getVisualMesh` indexes the `LOD*` parts rather than anything symmetry-derived.
@@ -136,7 +141,7 @@ new number.
   `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`, both drawn **before** the biome and
   stamp lookups; the wet branch draws **outside** the world (`WorldSize + 40`, `-40`) rather than
   inward, and every range is half-open.
-**68 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
+**70 commits after `v3.4.0` (2026-11-05) as of 2026-11-29.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
