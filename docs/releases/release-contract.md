@@ -136,7 +136,7 @@ new number.
   `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`, both drawn **before** the biome and
   stamp lookups; the wet branch draws **outside** the world (`WorldSize + 40`, `-40`) rather than
   inward, and every range is half-open.
-**67 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
+**68 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -154,6 +154,10 @@ section described is published under the tag and in
   takes a pooled `GameRandom` seeded by `GameRandomManager.get_Instance` from
   `Stopwatch.GetTimestamp()`, so an instance created before `WorldBuilder.Init`'s `SetSeed` runs on
   a clock, and `Rand.Cleanup` (called by `WorldBuilder.Cleanup`) nulls it again.
+- A catalogue label's `font_face` is an NGUI font looked up by name, not a table key
+  (`docs/meta/client-side-surface.md`, "A font face is an NGUI font looked up by name"):
+  `NGuiHUDText.OnEnable` walks `Resources.FindObjectsOfTypeAll<NGUIFont>()` for an object named
+  `ReferenceFont`, and the three shipped faces plus `AGENCYB.ttf` are all extractable.
 - The map's waypoint popups are pinned: `OnSetWaypoint` writes
   `EntityPlayer.markerPosition` (the quick marker is one block, saved in `PlayerDataFile`), and
   `XUiC_MapSubPopupList`'s static array is the 20 icons the save row's sub-popup offers, in order.

@@ -557,6 +557,22 @@ Two consequences a consumer has to keep:
 `XUi.GetAnchor` resolves the anchor name to a transform created by the XUi root; a missing anchor
 logs `Specified window anchor "<name>" not found for window "<id>"` and throws.
 
+### A font face is an NGUI font looked up by name (verified from IL)
+
+The catalogue's `font_face` attribute does not index a font table. `NGuiHUDText.OnEnable` (IL=41)
+calls `Resources.FindObjectsOfTypeAll<NGUIFont>()`, walks the results and takes the first whose
+`Object.get_name()` equals `ReferenceFont` case-insensitively; the XUi styles and templates state that
+name on most labels (`XUi_Common/styles.xml`, `templates.xml`). So a face is an **`NGUIFont`
+component** found by object name among loaded objects, and `NGUIFont` is NGUI's own font wrapper (see
+the out-of-scope surface list), which means the mapping from `ReferenceFont` to the Unity `Font` it
+wraps is inside that component rather than in any shipped XML.
+
+The shipped fonts are three, all extractable: `LiberationSans.ttf` (also in its own
+`fonts_assets_all.bundle`), `NotoSansCJKjp-Medium.otf` and `opinionproextracondensed-bold.otf`, plus
+`AGENCYB.ttf` embedded in several entity bundles. Which of them `ReferenceFont` wraps is not
+established: no object in the extraction carries that name, so it is set on a component the walk
+reaches at runtime.
+
 ### The UI root's canvas is 1080 units tall (probed from the shipped scene)
 
 The catalogue's pixel values are game units on a reference canvas, and the root component that fixes
