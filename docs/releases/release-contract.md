@@ -136,7 +136,7 @@ new number.
   `scale = Range(0.6, 0.85)` with `rotation = Rand.Angle()`, both drawn **before** the biome and
   stamp lookups; the wet branch draws **outside** the world (`WorldSize + 40`, `-40`) rather than
   inward, and every range is half-open.
-**66 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
+**67 commits after `v3.4.0` (2026-11-05) as of 2026-11-28.** The build retarget this
 section described is published under the tag and in
 [`release-v3.4.0.md`](release-v3.4.0.md); what follows is post-cut bookkeeping.
 
@@ -150,6 +150,10 @@ section described is published under the tag and in
   Mono's managed `"123".GetHashCode()` is 289116474 on this host, so the hash is the managed one,
   and `1b30312d` is absent from 200,000,000 draws of the hash-derived seed and from eight other
   plausible names and sizes, so a re-seed or another `GameRandom` instance is what remains.
+- The RWG stage value is explained rather than chased (`docs/world/world-generation.md`): `Rand..ctor`
+  takes a pooled `GameRandom` seeded by `GameRandomManager.get_Instance` from
+  `Stopwatch.GetTimestamp()`, so an instance created before `WorldBuilder.Init`'s `SetSeed` runs on
+  a clock, and `Rand.Cleanup` (called by `WorldBuilder.Cleanup`) nulls it again.
 - The map's waypoint popups are pinned: `OnSetWaypoint` writes
   `EntityPlayer.markerPosition` (the quick marker is one block, saved in `PlayerDataFile`), and
   `XUiC_MapSubPopupList`'s static array is the 20 icons the save row's sub-popup offers, in order.

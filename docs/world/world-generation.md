@@ -104,7 +104,31 @@ draws each: `123`, `123-6144`, `1236144`, `123.6144`, `genesis7`, `RWG`, `12345`
 `7DTD`, and the bare hashes 289116474, 508134743, -1712053213 and the recorded world hash
 -395245407. So `r=1b30312d` is not an early value of any stream seeded by the name hash
 plus the size: either `Rand` is re-seeded between `Init` and the stage, or the stage's log
-comes from another `GameRandom` instance. The search harness is a five-line C# program
+comes from another `GameRandom` instance.
+
+**And the last candidate is now read out of the IL, and it explains the number.** `Rand` is a
+singleton over a pooled `GameRandom`: `Rand..ctor` (IL=7) calls
+`GameRandomManager.CreateGameRandom()`, and `GameRandomManager.get_Instance` (IL=13) seeds the
+manager with `Stopwatch.GetTimestamp()` converted to an `Int32` the first time it is touched. So a
+`Rand` instance created before `WorldBuilder.Init` reaches it runs on a **wall-clock seed**, not the
+world's; `Init`'s `Rand.SetSeed(hash + size)` only fixes the stream of an instance that already
+exists when `Init` runs. `Rand.Cleanup` (IL=7) frees the pooled generator and nulls the singleton, and
+`WorldBuilder.Cleanup` calls it, so any build that begins after a cleanup creates a new time-seeded
+instance. The stage's own log line is `Rand::get_Instance().PeekSample()` (IL: `generateBiomeTiles
+start at {0}, r={1:x}`), and one draw is spent immediately before it (`BorderWaterMask =
+Rand.Int() & 15`), which is why the second sample of the name-hash stream
+(`1513770465` = `5a3a4de1`) is not the logged value either.
+
+The consequence is that `r=` is **run-specific whenever the instance was created before the seed
+reached it**, which is the only explanation left once the stream is verified: the generator's
+`InternalSetSeed` (IL=118, `abs` with `Int32.MinValue` mapped to `MaxValue`, `mj = 161803398 - seed`,
+the `(21*i)%55` scramble and five mixing passes) and `InternalSample` (IL=61) are .NET's own, so the
+stream the search walked is the stream stock runs.
+
+So the derivation should not be settled from a `r=` value at all. The reproducible question is the
+map: the biome tile map and the height field that the same seed produces. Two runs at the same seed
+name would also show directly whether `r=` repeats (if it does, the instance was seeded; if it does
+not, this explanation is confirmed). The search harness is a five-line C# program
 whose loop was self-checked by finding a known sample at its own index (the fifth value,
 `236a771e`, is at draw 4), so the negative is a measurement and not a broken loop.
 
